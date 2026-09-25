@@ -74,11 +74,10 @@ public class Round11Tests
 
         Assert.Equal(1, pile.MineCount);
         Assert.False(pile.TitledAsMine);
-        // ...and the Mine is disclosed where it always was, with rule 6's
-        // clause beside it: the title switch is not what carries the timing.
+        // ...and the Mine is disclosed where it always was. (Its timing is
+        // the Mine tip's since the text pass of 2026-09-25.)
         var face = Row(pile, "smartDescriptionMines");
         Assert.Contains("including [blue]{Mines}[/blue]", face);
-        Assert.Contains("goes off just before this enemy's hit", face);
     }
 
     [Fact]

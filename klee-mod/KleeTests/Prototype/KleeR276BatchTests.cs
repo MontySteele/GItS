@@ -79,7 +79,7 @@ public class KleeR276BatchTests
         Assert.Equal(TargetType.AnyEnemy, card.TargetType);
         Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.StartsWith(
-            "Your [gold]Bombs[/gold] on this enemy become a [gold]Mine[/gold]. Draw ",
+            "Your [gold]Bombs[/gold] on the enemy become [gold]Mines[/gold]. Draw ",
             Face(card));
         Assert.Contains(Il.Calls(Il.Method("ProtoKoHairTrigger", "OnUpgrade")),
                         c => c.Contains("UpgradeValueBy"));

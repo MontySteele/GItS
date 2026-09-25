@@ -408,7 +408,7 @@ public sealed class CrossExaminationPower : PowerModel, ILocalizationProvider
         ("description",
             "Your first [gold]Elemental Reaction[/gold] each turn applies "
           + "{Amount} [gold]Vulnerable[/gold] and {Amount} [gold]Weak[/gold] "
-          + "to its target. The [gold]Vulnerable[/gold] moves that hit."),
+          + "to its target before the hit lands."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -41,14 +41,14 @@ public sealed class ProtoKoTheBigOne : CustomCardModel, IElementalCard, ISetOffC
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, false), this);
+        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, false), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_the_big_one");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Big One"),
-        ("description", "[gold]Set off[/gold] for quadruple damage."),
+        ("description", "[gold]Set off[/gold]. Your [gold]Bombs[/gold] deal quadruple damage."),
     };
 
     // EB-261, the Set-off gate: a card whose whole body is a

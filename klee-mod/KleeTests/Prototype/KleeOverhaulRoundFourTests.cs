@@ -60,47 +60,21 @@ public class KleeOverhaulRoundFourTests
     {
         // The seat's own words: "reads like a debug string". The old face put
         // the two counts in brackets after the total, including a `0 of them
-        // Mines` on a pile with no Mine in it.
+        // Mines` on a pile with no Mine in it. TEXT PASS 2026-09-25: at most
+        // three short sentences, and on a plain two-charge pile with no Spark
+        // relic behind it, exactly two.
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30).Creature;
         var pile = ProtoBombs.Place(enemy, klee.Creature,
             new ProtoBombs.Charge(4), new ProtoBombs.Charge(6));
 
+        Assert.EndsWith(".smartDescription", LocKey(pile));
         var face = Row(pile, "smartDescription");
-
         Assert.DoesNotContain("(", face);
         Assert.DoesNotContain("of them", face);
-        // `EB-514` PUT THE HIT COUNT BACK IN THE HEADLINE and kept it prose:
-        // the total is a SUM over the charges, so a two-charge stack printed
-        // one number where the board makes two hits and two Sparks, and the
-        // r18 seat budgeted one of each off this sentence. Still no bracket
-        // and still no "of them" -- the clause is a clause.
-        // `EB-536` CUT THE CLAUSE OFF THE SINGLE-CHARGE FACE and spelled the
-        // Sparks out: "in 1 hit for as many Sparks" on a pile of one is saying
-        // nothing -- the total IS the hit -- and the r19 lane-2 seat called
-        // the sentence "never comprehensible". This pile holds TWO, so the
-        // clause is here and its plural is fixed.
-        Assert.Contains("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
-                        + "Pyro damage, in [blue]{Count}[/blue] "
-                        + "hits, making [blue]{Count}[/blue] [gold]Sparks[/gold].",
-                        face);
-        // `EB-289`: read off the CHARGE LIST, not `{Amount}` -- see the test
-        // below and `ProtoBombPower.Bombs` for why the stack amount could not
-        // be it. `EB-450` swapped the count for the charges themselves, which
-        // says the same number and adds the order the aura clause is about.
-        // `EB-450` put the ORDER in the label, and the label is what
-        // this pin reads.
-        Assert.Contains(" Bomb sizes here, oldest first: [blue]{Charges}[/blue], ",
-                        face);
-        // `EB-361`: rule 1's growth is a CLAUSE on that count now, and rule 3
-        // ends the face -- four sentences is the ceiling and the jump was the
-        // fifth fact three round-10 seats needed and could not read anywhere.
-        // `EB-574` reworded the jump sentence: it is printed on the badge of
-        // the body the pile is about to kill, which is exactly where "a kill
-        // moves them to a survivor" reads as a promise about THESE charges.
-        Assert.EndsWith(" growing each turn. None goes off by itself."
-                        + " If the enemy dies with them on, they move "
-                        + "to a survivor.", face);
+        Assert.Equal("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
+                   + "[gold]Pyro[/gold] damage. Bombs here, oldest first: "
+                   + "[blue]{Charges}[/blue].", face);
     }
 
     [Fact]
@@ -117,91 +91,48 @@ public class KleeOverhaulRoundFourTests
         Assert.Equal(0, pile.MineCount);
         Assert.DoesNotContain("{Mines}", Row(pile, "smartDescription"));
         Assert.Contains("{Mines}", Row(pile, "smartDescriptionMines"));
-        // `EB-536`: and the same on the single-charge half of the grid, which
-        // is the face THIS pile actually selects.
-        Assert.DoesNotContain("{Mines}", Row(pile, "smartDescriptionOne"));
-        Assert.Contains("{Mines}", Row(pile, "smartDescriptionOneMines"));
     }
 
     // ---- EB-287 / EB-343: every modifier named, and only while true ------
 
     [Fact]
-    public void The_total_names_vulnerable_exactly_when_it_is_moving_it()
+    public void The_face_names_no_vulnerable_the_number_already_folds()
     {
-        // The r3 Codex seat: "The Bomb display showed Bomb 17 but said Set off
-        // would deal 12 total, which I inferred was the Weak-adjusted amount
-        // but had to reason through." The face says it now, and says it only
-        // while it is true -- the key is chosen off the same state
-        // `PredictedSetOffDamage` reads.
-        //
-        // `EB-343` (R248) moved WHOSE modifier that is. Klee's Weak no longer
-        // reaches a Bomb at all, so the term the sentence has to name is the
-        // ENEMY's Vulnerable -- which this same face used to fold in silently,
-        // which is the other half of what R248 calls a defect.
+        // `EB-343` (R248) folds the ENEMY's Vulnerable into the printed
+        // total. TEXT PASS 2026-09-25: the number already includes it, so the
+        // face no longer spends words naming it -- the number moves and the
+        // face does not.
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30);
         var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
             new ProtoBombs.Charge(8), new ProtoBombs.Charge(9));
 
         Assert.EndsWith(".smartDescription", LocKey(pile));
-        Assert.DoesNotContain("after [gold]Vulnerable[/gold]",
-                              Row(pile, "smartDescription"));
         Assert.Equal(17, pile.PredictedSetOffDamage());
 
         enemy.WithPower<VulnerablePower>(1);
 
         Assert.Equal(25, pile.PredictedSetOffDamage());   // 12 + 13, per charge
-        Assert.EndsWith(".smartDescriptionVulnerable", LocKey(pile));
-        // `EB-514`: the hit-count clause follows the modifier clause, so the
-        // sentence still ends on the terms the number went through.
-        Assert.Contains("[blue]{Size}[/blue] Pyro damage after "
-                        + "[gold]Vulnerable[/gold], in [blue]{Count}[/blue] ",
-                        Row(pile, "smartDescriptionVulnerable"));
+        Assert.EndsWith(".smartDescription", LocKey(pile));
+        Assert.DoesNotContain("Vulnerable", Row(pile, "smartDescription"));
     }
 
     [Fact]
-    public void The_cap_is_named_too_and_by_the_power_that_set_it()
+    public void A_capped_pile_selects_the_plain_face_and_folds_the_cap()
     {
-        // `EB-343`'s other half. A cap folded into the printed number in
-        // silence is the same defect as a silent Vulnerable, and the pinned
-        // build has two powers that can set one -- so the sentence names
-        // whichever of them the number actually went through.
+        // `EB-343`'s cap is still in the NUMBER (`PredictedSetOffDamage`);
+        // since the text pass of 2026-09-25 the face no longer names it.
         var klee = Seat.Klee();
         var hardToKill = Seat.Klee(30).WithPower<HardToKillPower>(3);
         var capped = ProtoBombs.Place(hardToKill.Creature, klee.Creature,
             new ProtoBombs.Charge(9));
-
-        // `EB-536`: a pile of ONE selects the `One` half of the grid, so the
-        // key carries both axes -- the cap that moved the number, and the fact
-        // that there is one charge behind it.
-        Assert.EndsWith(".smartDescriptionOneHardToKill", LocKey(capped));
-        Assert.Contains("capped by [gold]Hard To Kill[/gold]",
-                        Row(capped, "smartDescriptionOneHardToKill"));
+        Assert.EndsWith(".smartDescription", LocKey(capped));
 
         var intangible = Seat.Klee(30).WithPower<IntangiblePower>(1);
         var ghost = ProtoBombs.Place(intangible.Creature, klee.Creature,
             new ProtoBombs.Charge(9));
-
-        Assert.EndsWith(".smartDescriptionOneIntangible", LocKey(ghost));
-        Assert.Contains("capped by [gold]Intangible[/gold]",
-                        Row(ghost, "smartDescriptionOneIntangible"));
-
-        // Both terms at once read as ONE sentence, in pipeline order.
-        var both = Seat.Klee(30).WithPower<VulnerablePower>(1)
-                                .WithPower<HardToKillPower>(3);
-        var pile = ProtoBombs.Place(both.Creature, klee.Creature,
-            new ProtoBombs.Charge(9));
-
-        // A ONE-charge pile, so the `One` half of the grid and no hit
-        // clause: the two modifier terms still read as one sentence in
-        // pipeline order, which is what this pin is about.
-        Assert.EndsWith(".smartDescriptionOneVulnerableHardToKill",
-                        LocKey(pile));
-        Assert.Contains("Pyro damage after [gold]Vulnerable[/gold], capped by "
-                        + "[gold]Hard To Kill[/gold].",
-                        Row(pile, "smartDescriptionOneVulnerableHardToKill"));
-        Assert.DoesNotContain(
-            "{Count}", Row(pile, "smartDescriptionOneVulnerableHardToKill"));
+        Assert.EndsWith(".smartDescription", LocKey(ghost));
+        Assert.DoesNotContain("capped", Row(ghost, "smartDescription"));
     }
 
     [Fact]
@@ -210,81 +141,54 @@ public class KleeOverhaulRoundFourTests
         // A key with no row behind it falls back to the STATIC description
         // (`PowerModel.HasSmartDescription` is a `LocString.Exists` probe), so
         // a missing row is a silently blank face rather than a crash. Every
-        // combination the selector can produce must therefore be present --
-        // which is why `EB-343` GENERATES the grid off the same table the
-        // selector reads instead of listing it by hand.
+        // combination the selector can produce must therefore be present.
+        // TEXT PASS 2026-09-25: four axes -- Sparks given, a Mine in the pile,
+        // a rider (`EB-573`) and the amplifying reaction (`EB-721`).
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30).WithPower<VulnerablePower>(1);
         var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
             new ProtoBombs.Charge(4, IsMine: true), new ProtoBombs.Charge(6));
 
-        Assert.EndsWith(".smartDescriptionMinesVulnerable", LocKey(pile));
+        Assert.EndsWith(".smartDescriptionMines", LocKey(pile));
 
         var rows = pile.Localization!.Select(r => r.Item1).ToList();
-        var caps = new[] { "", "HardToKill", "Intangible", "Capped" };
-        // `EB-536` ADDED THE THIRD AXIS: whether the pile holds one charge or
-        // several, because the hit clause is a fact about a STACK and reads as
-        // noise on a single Bomb.
-        // `EB-573` ADDED THE FOURTH: whether any charge here carries a rider
-        // (Jumpy Dumpty's Mine-on-ALL). It survives a merge and it grows in
-        // bulk, and until this row no surface said so.
-        // `EB-721` ADDED THE FIFTH: which amplifying reaction the leading
-        // charge will cause. `EB-559` folded it into the printed total and
-        // named it nowhere, so `Bomb 18` stood beside `sizes, oldest first:
-        // 12` and the two disagreed (Klee r25 lane 2, (c) 2). Two reactions
-        // and no others, because `ReactionTable.AmplifierMultiplier` answers
-        // above 1 only for Pyro over Hydro and Pyro over Cryo.
         var reactions = new[] { "", "Vaporize", "Melt" };
-        foreach (var single in new[] { "", "One" })
+        foreach (var sparks in new[] { "", "Sparks" })
         {
             foreach (var mines in new[] { "", "Mines" })
             {
                 foreach (var rider in new[] { "", "Rider" })
                 {
-                    foreach (var vulnerable in new[] { "", "Vulnerable" })
+                    foreach (var reaction in reactions)
                     {
-                        foreach (var cap in caps)
-                        {
-                            foreach (var reaction in reactions)
-                            {
-                                Assert.Contains(
-                                    "smartDescription" + single + mines + rider
-                                    + vulnerable + cap + reaction, rows);
-                            }
-                        }
+                        Assert.Contains(
+                            "smartDescription" + sparks + mines + rider
+                            + reaction, rows);
                     }
                 }
             }
         }
-        // And no more than the grid: five axes, nothing hand-added beside
-        // them.
-        Assert.Equal(2 * 2 * 2 * 2 * caps.Length * reactions.Length,
+        // And no more than the grid.
+        Assert.Equal(2 * 2 * 2 * reactions.Length,
                      rows.Count(r => r.StartsWith("smartDescription")));
 
-        // `EB-721`'s clause is the plain row plus its own words, and it leads
-        // because it leads in the pipeline: the amplifier rides the first
-        // charge, then Vulnerable multiplies, then a cap clamps.
+        // Each clause is the plain row plus its own words -- the mutation
+        // guard across the grid.
         Assert.Equal(
             Row(pile, "smartDescriptionMines"),
             Row(pile, "smartDescriptionMinesVaporize")
                 .Replace(" with [gold]Vaporize[/gold]", string.Empty));
         Assert.Equal(
-            Row(pile, "smartDescriptionMines"),
-            Row(pile, "smartDescriptionMinesVulnerableMelt")
-                .Replace(" with [gold]Melt[/gold], after "
-                         + "[gold]Vulnerable[/gold]", string.Empty));
-
-        // Each modified row is the plain row with exactly its own clause in
-        // it -- the mutation guard across the whole grid.
-        Assert.Equal(
             Row(pile, "smartDescription"),
-            Row(pile, "smartDescriptionVulnerable")
-                .Replace(" after [gold]Vulnerable[/gold]", string.Empty));
+            Row(pile, "smartDescriptionSparksMelt")
+                .Replace(" with [gold]Melt[/gold] and gives [blue]{Sparks}"
+                         + "[/blue] [gold]Spark{Sparks:plural:|s}[/gold]",
+                         string.Empty));
         Assert.Equal(
-            Row(pile, "smartDescriptionMines"),
-            Row(pile, "smartDescriptionMinesVulnerableHardToKill")
-                .Replace(" after [gold]Vulnerable[/gold], capped by "
-                         + "[gold]Hard To Kill[/gold]", string.Empty));
+            Row(pile, "smartDescription")
+            + " One drops [gold]Mine[/gold] [blue]{Payload}[/blue] on ALL "
+            + "enemies when it goes off.",
+            Row(pile, "smartDescriptionRider"));
     }
 
     [Fact]
@@ -331,30 +235,12 @@ public class KleeOverhaulRoundFourTests
     [Fact]
     public void The_bomb_keyword_tip_says_a_second_bomb_joins_the_first()
     {
-        // `EB-287`'s claim, on the tip that carries it now. The r3 Opus seat
-        // called the stacking "the single most important interaction in the
-        // deck and I only found it by gambling a card on it", so the arm has
-        // to print it. R248 added a fourth rule to the Bomb tip and [USER]
-        // held it to the 135-character ceiling (PR #340), which compressed
-        // "Bombs on one enemy go off together when Set off" to "all at once";
-        // `EB-361` added rule 3's jump to the same 135 characters, and the
-        // clause that paid for it was that one. It is not lost -- `ForSetOff`
-        // states the rule in full and always has ("Every Bomb on the target
-        // goes off first, one at a time"), and the badge counts the pile
-        // ("Bombs here: N"), so the claim is pinned where it is printed.
-        var bomb = string.Concat(Il.Strings(
-            typeof(ArmKeywordTips).GetMethod("ForBomb", HeadlessGame.All)!));
+        // `EB-287`'s claim -- a pile goes off together -- is `ForSetOff`'s
+        // subject: "Every Bomb on the enemy goes off, oldest first".
         var setOff = string.Concat(Il.Strings(
             typeof(ArmKeywordTips).GetMethod("ForSetOff", HeadlessGame.All)!));
-
-        Assert.DoesNotContain("all at once", bomb);
-        // `EB-432` rewrote that sentence and kept the claim: the SUBJECT is
-        // now "the target's Bombs", all of them, and the order they go off in
-        // is printed beside it.
-        // `EB-755` (R276): "in the order placed", which no two Bombs placed
-        // in one turn can tie on.
-        Assert.Contains("The target's [gold]Bombs[/gold] go off first, "
-                        + "in the order placed", setOff);
+        Assert.Contains("Every [gold]Bomb[/gold] on the enemy goes off, "
+                        + "oldest first.", setOff);
     }
 
     [Fact]

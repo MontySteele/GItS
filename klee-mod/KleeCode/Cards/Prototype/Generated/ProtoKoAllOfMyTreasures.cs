@@ -45,7 +45,7 @@ public sealed class ProtoKoAllOfMyTreasures : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "All of My Treasures!"),
-        ("description", "Place a [gold]Bomb[/gold] on the enemy equal to your largest [gold]Bomb[/gold]."),
+        ("description", "Place a [gold]Bomb[/gold] the size of your largest [gold]Bomb[/gold] on the enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -217,18 +217,21 @@ public class Round15Tests
     [Fact]
     public void The_mine_badge_says_when_the_growth_it_is_about_happens()
     {
+        // `EB-471`: WHEN the growth happens, because a Mine goes off on the
+        // enemy's turn and the seat could not tell which side of the tick that
+        // is. TEXT PASS 2026-09-25: the growth left the badge, and the Bomb
+        // tip -- which prints beside every Mine -- says it: "Grows N at the
+        // start of your turn."
         var mines = (string)typeof(ProtoBombPower)
-            .GetField("BombsWithMines", All)!.GetValue(null)!;
+            .GetField("MinesClause", All)!.GetValue(null)!;
         var plain = (string)typeof(ProtoBombPower)
             .GetField("Bombs", All)!.GetValue(null)!;
+        Assert.DoesNotContain("growing", mines);
+        Assert.DoesNotContain("growing", plain);
 
-        // `EB-573` took the FULL STOP off both, because a pile carrying a
-        // rider ends the same sentence with `RiderClause` instead. The clause
-        // this row is about is otherwise untouched.
-        Assert.EndsWith("growing at your turn's start", mines);
-        // The no-Mine face is untouched: it has no room and no Mine to be
-        // about. `KleeOverhaulRoundFourTests` pins its wording.
-        Assert.EndsWith("growing each turn", plain);
+        var tip = string.Concat(Il.Strings(typeof(ArmKeywordTips)
+            .GetMethod("ForBomb", All)!));
+        Assert.Contains(" at the start of your turn.", tip);
     }
 
     [Fact]

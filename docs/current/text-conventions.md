@@ -124,11 +124,11 @@ its TARGET is what a rewrite aims below.
 
 **The prototype gate:** `proto_mc_durin_binary_form` (a two-mode Power must
 print both modes on the reward screen; the base has no static modal card); the
-prototype Bomb badge's static `description` and its two Mine smart faces (a
-live total, a live count, a Mine count and rule 6, which fires on the enemy's
-turn when no card is in front of the player; the plain and Weak faces meet the
-ceiling). `TamakushiCasket` left the list with `EB-346`: its own two rules
-were always under the ceiling and the shared slot sentence is gone.
+ten prototype Bomb-badge faces that carry the rider sentence (`EB-573`, 126 to
+164 rendered; since the text pass of 2026-09-25 every other Bomb face, and the
+Bomb, Set off and Mine keyword tips, meet the ceiling); and the Kokomi Plan
+rows the lint names. `TamakushiCasket` left the list with `EB-346`: its own
+two rules were always under the ceiling and the shared slot sentence is gone.
 
 **The shipped report:** both faces of the shipped Bomb badge, `BombPower`'s
 static `description` and its `smartDescription`, which carry all three of the

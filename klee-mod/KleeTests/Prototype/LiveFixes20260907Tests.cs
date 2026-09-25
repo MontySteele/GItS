@@ -152,7 +152,7 @@ public class LiveFixes20260907Tests
         Assert.NotEmpty(listing);
         foreach (var (_, face) in listing)
         {
-            Assert.Contains("Bomb sizes here, oldest first:", face);
+            Assert.Contains("Bombs here, oldest first:", face);
         }
     }
 

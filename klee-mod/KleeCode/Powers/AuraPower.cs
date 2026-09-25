@@ -48,16 +48,18 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", $"{Element} Aura"),
+        // Text pass 2026-09-25: the same-element refresh is still the rule
+        // (`ResolveLifecycle` below) and is no longer printed; it cost both
+        // faces their ceiling and carried an "a Electro" grammar slip.
         ("description",
-            $"{Element} clings to this enemy. A hit of a different element consumes "
-          + "the aura and triggers an [gold]Elemental Reaction[/gold]; "
-          + $"a {Element} hit refreshes its duration."),
+            $"{Element} clings to this enemy. A hit of another element "
+          + "triggers an [gold]Elemental Reaction[/gold]."),
         // Smart (in-combat) tooltip adds the live duration; {Amount} is the
         // turns remaining, same var the badge shows.
         ("smartDescription",
             $"{Element} clings to this enemy for {{Amount}} more turn{{Amount:plural:|s}}. "
-          + "A hit of a different element consumes the aura and triggers an "
-          + $"[gold]Elemental Reaction[/gold]; a {Element} hit refreshes its duration."),
+          + "A hit of another element triggers an "
+          + "[gold]Elemental Reaction[/gold]."),
     };
 
     // ARTIFACT COEXISTENCE ([USER] ruling 2026-08-23; LAW "Combat --

@@ -48,7 +48,7 @@ public sealed class ProtoKoRapidFire : CustomCardModel, IElementalCard, ISetOffC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rapid Fire"),
-        ("description", "4 times: [gold]Set off[/gold] a random enemy and deal {Damage:diff()} damage to it."),
+        ("description", "[gold]Set off[/gold] a random enemy and deal {Damage:diff()} damage to it, 4 times."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

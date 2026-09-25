@@ -41,7 +41,7 @@ public sealed class FloridCadenza : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Florid Cadenza"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. {IfUpgraded:show:Draw 2 cards.|If you have at least 12 [gold]Fanfare[/gold]: draw 2 cards.}"),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. {IfUpgraded:show:Draw 2 cards.|If you have at least 12 [gold]Fanfare[/gold], draw 2 cards.}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

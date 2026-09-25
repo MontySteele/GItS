@@ -41,7 +41,7 @@ public sealed class Showstopper : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Showstopper"),
-        ("description", "Deal {Damage:diff()} damage. If it kills: gain 6 [gold]Encore[/gold] and draw 2 cards."),
+        ("description", "Deal {Damage:diff()} damage. If it kills, gain 6 [gold]Encore[/gold] and draw 2 cards."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

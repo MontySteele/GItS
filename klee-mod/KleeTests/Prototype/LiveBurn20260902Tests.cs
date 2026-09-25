@@ -123,77 +123,18 @@ public class LiveBurn20260902Tests
     [Fact]
     public void The_mine_tip_says_its_number_is_not_the_printed_one()
     {
-        // The r4 Opus seat left a Gremlin Merc at 3 HP under a "Mine 3" as a
-        // free kill; the Mine dealt 2 and the enemy survived and hit him. The
-        // Bomb badge had learned to name Weak at `EB-287`; the Mine, which
-        // fires on the ENEMY's turn with no badge in front of the player, had
-        // not.
-        //
-        // `EB-343` (R248) changed WHICH modifier that sentence names, not that
-        // it names one: Klee's Weak no longer reaches a Bomb, so the tip names
-        // what does -- and still sends the reader to the badge for the live
-        // number, which is the half the seat actually needed.
-        //
-        // `EB-373` NARROWED IT TO WHAT THE CODE FOLDS. A Mine is a Bomb, and
-        // `FoldedMods` reads the target's Vulnerable and its damage cap and
-        // nothing else, so "the enemy's debuffs move it" was promising a Slow
-        // or a Flutter would. Same words as the Bomb tip, so a reader cannot
-        // hold the two against each other.
+        // `EB-291` / `EB-343`: Klee's Weak never reaches a Bomb or a Mine, so
+        // no Klee-side modifier may be named on the word. The live number is
+        // the badge's. TEXT PASS 2026-09-25: the Mine tip is one sentence --
+        // when else it goes off -- and the folded terms left it with the Bomb
+        // tip's edge cases.
         var body = string.Concat(Il.Strings(
             typeof(ArmKeywordTips)
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
-        // `EB-436` spent "Read the badge:" on the hit clause; the terms it
-        // introduced are still named, which is what R248 asked for.
-        // `EB-400` moved the clause's opener onto Block and left the two
-        // folded terms where they were.
-        Assert.Contains("[gold]Block[/gold] stops it. Only ", body);
-        Assert.Contains("[gold]Vulnerable[/gold] and the HP cap move it.",
-                        body);
+        Assert.EndsWith("A [gold]Bomb[/gold] that also goes off just before its "
+                     + "enemy attacks.", body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
-
-        // AND IT IS MEASURED NOW. The sentence used to carry a semicolon,
-        // and `tools/lint_text_conventions.py` read these bodies out of the
-        // source with a regex that stopped at one -- so this whole tip sat
-        // outside the census in both of its wordings and was never held to
-        // the tip ceiling. The regex was fixed in that change and the prose
-        // ban rode along with it as a belt. The 2026-09-08 trim spends two
-        // semicolons on purpose, so the belt is GONE and the census is the
-        // guard on its own: `tier0/tests/test_arm_keyword_tips.py`'s rule-3
-        // test reads `MineKey` out of `ltc.tip_rows()` and goes red if the
-        // pattern ever drops it again.
-    }
-
-    [Fact]
-    public void The_bomb_tip_says_whose_burden_a_bomb_is()
-    {
-        // `EB-343`'s card-side half. The badge shows the NUMBER; only the
-        // keyword tip can say whose number it is, and this is the one rule in
-        // the deck that runs opposite to every other damage source she has --
-        // so it is printed where the word is met rather than inferred from a
-        // total that did not move.
-        //
-        // AND IT FITS THE CEILING ([USER], PR #340): the clause is one half of
-        // one sentence, and the three sentences together are 135 of the 135
-        // that the base game's longest mechanic tip measures. The rewrite is
-        // why this word takes no named exception in
-        // `tools/lint_text_conventions.py` while the badge's modified faces do.
-        //
-        // "Its hit takes" BECAME "It takes" AT `EB-361`, which is the spelling
-        // the static badge face already used ("It takes the enemy's debuffs,
-        // not your Strength or Weak") -- five of the characters rule 3's
-        // sentence needed, taken from a word the rule does not need.
-        var body = string.Concat(Il.Strings(
-            typeof(ArmKeywordTips)
-                .GetMethod("ForBomb", HeadlessGame.All)!));
-
-        // `EB-373`: the same clause, narrowed to the two terms the fold reads.
-        // `EB-555` then defined the second of them where it stands.
-        // `EB-400`: and Block, which the sentence used to leave out.
-        // TRIMMED 2026-09-08: the negative went, both folded terms stayed.
-        Assert.Contains("[gold]Block[/gold] stops it. Only "
-                      + "[gold]Vulnerable[/gold] and the HP cap move it.",
-                        body);
     }
 
     // ---- EB-293: the Plan keyword covers the plan-only case ---------------

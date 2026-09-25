@@ -48,7 +48,7 @@ public sealed class ProtoKoFishFry : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fish Fry"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies, and {ExtraDamage:diff()} more to each enemy with a [gold]Bomb[/gold]."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. Enemies with a [gold]Bomb[/gold] take {ExtraDamage:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

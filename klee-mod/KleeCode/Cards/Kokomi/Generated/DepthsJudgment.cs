@@ -55,7 +55,7 @@ public sealed class DepthsJudgment : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sango Isshin"),
-        ("description", "Deal {Damage:diff()} damage. If 8 or more cards are [gold]Exhausted[/gold]: gain 8 [gold]Block[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. If 8 or more cards are [gold]Exhausted[/gold], gain 8 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

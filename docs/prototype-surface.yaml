@@ -148,14 +148,14 @@
 - {id: proto_ko_careful_arrangement, name: "Careful Arrangement", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold], a [gold]Mine[/gold] if any of them was. It grows by 5.",
+   description: "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by 5, and is a [gold]Mine[/gold] if any of them were.",
    upgrade: {grow: +3},
    effects: [{op: merge_bombs, target: enemy, growth: 5}]}
 
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 12 damage. Then deal damage equal to what the [gold]Bombs[/gold] dealt.",
+   description: "[gold]Set off[/gold]. Deal 12 damage, then damage equal to what your [gold]Bombs[/gold] dealt.",
    upgrade: {damage: +4},
    effects: [{op: set_off, target: enemy, damage: 12},
              {op: damage_set_off_total, target: enemy}]}
@@ -163,7 +163,7 @@
 - {id: proto_ko_the_big_one, name: "The Big One", character: klee,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold] for quadruple damage.",
+   description: "[gold]Set off[/gold]. Your [gold]Bombs[/gold] deal quadruple damage.",
    upgrade: {cost: -1},
    effects: [{op: multiply_set_off, multiplier: 4},
              {op: set_off, target: enemy}]}
@@ -227,7 +227,7 @@
 - {id: proto_ko_rapid_fire, name: "Rapid Fire", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "4 times: [gold]Set off[/gold] a random enemy and deal 3 damage to it.",
+   description: "[gold]Set off[/gold] a random enemy and deal 3 damage to it, 4 times.",
    effects: [{op: set_off, target: random_enemy, damage: 3, times: 4}]}
 
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
@@ -332,7 +332,7 @@
 - {id: proto_ko_careful_now, name: "Careful Now", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, retain: true,
-   description: "Gain [gold]Block[/gold] equal to your largest [gold]Bomb[/gold] when played, up to 10.",
+   description: "Gain [gold]Block[/gold] equal to your largest [gold]Bomb[/gold], up to 10.",
    upgrade: {cap: +3},
    effects: [{op: block_largest_bomb, cap: 10}]}
 
@@ -356,7 +356,7 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    upgrade: {bomb_size: +2},
-   description: "Place a [gold]Bomb[/gold] 5. If you played a [gold]Companion[/gold] card this turn, place it on ALL enemies instead.",
+   description: "Place a [gold]Bomb[/gold] 5 on the enemy, or on ALL enemies if you played a [gold]Companion[/gold] card this turn.",
    effects: [{op: plant_bomb, target: enemy, size: 5,
               wide_if: companion_played_this_turn}]}
 
@@ -405,7 +405,7 @@
 - {id: proto_ko_all_of_my_treasures, name: "All of My Treasures! (proto)", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Place a [gold]Bomb[/gold] on the enemy equal to your largest [gold]Bomb[/gold].",
+   description: "Place a [gold]Bomb[/gold] the size of your largest [gold]Bomb[/gold] on the enemy.",
    effects: [{op: plant_bomb_copy_largest, target: enemy}]}
 
 - {id: proto_ko_fish_blasting, name: "Fish Blasting (proto)", character: klee,
@@ -449,7 +449,7 @@
 - {id: proto_ko_vermillion_pact, name: "Vermillion Pact (proto)", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], the Attack that set it off triggers one too.",
+   description: "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], the Attack that [gold]Set it off[/gold] triggers one too.",
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: ko_vermillion_pact, amount: 1, target: self}]}
 
@@ -476,7 +476,7 @@
 - {id: proto_ko_return_to_sender, name: "Return to Sender", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 8 [gold]Block[/gold]. This turn, damage this [gold]Block[/gold] absorbs is placed on the attacker as a [gold]Bomb[/gold].",
+   description: "Gain 8 [gold]Block[/gold]. This turn, damage that [gold]Block[/gold] absorbs becomes a [gold]Bomb[/gold] on the attacker.",
    upgrade: {block: +3, power_amount: +3},
    effects: [{op: block, amount: 8},
              {op: apply_power, power: ko_return_to_sender, amount: 8,
@@ -524,7 +524,7 @@
 - {id: proto_ko_hair_trigger, name: "Hair Trigger", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Your [gold]Bombs[/gold] on this enemy become a [gold]Mine[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "Your [gold]Bombs[/gold] on the enemy become [gold]Mines[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    upgrade: {draw: 1},
    effects: [{op: mine_bombs, target: enemy}, {op: draw, amount: 1}]}
 
@@ -545,7 +545,7 @@
 - {id: proto_ko_big_bounce, name: "Big Bounce", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 5 damage. Explosion damage past the enemy's HP is dealt to a random other enemy.",
+   description: "[gold]Set off[/gold]. Deal 5 damage. Explosion damage past the enemy's HP hits a random other enemy.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 5, overflow: bounce}]}
 
@@ -598,7 +598,7 @@
 - {id: proto_ko_team_effort, name: "Team Effort", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 6 damage. If you played a [gold]Companion[/gold] card this turn, [gold]Set off[/gold] ALL enemies instead.",
+   description: "[gold]Set off[/gold] the enemy, or ALL enemies if you played a [gold]Companion[/gold] card this turn. Deal 6 damage.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 6,
               wide_if: companion_played_this_turn}]}
@@ -606,7 +606,7 @@
 - {id: proto_ko_fish_fry, name: "Fish Fry", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal 7 damage to ALL enemies, and 5 more to each enemy with a [gold]Bomb[/gold].",
+   description: "Deal 7 damage to ALL enemies. Enemies with a [gold]Bomb[/gold] take 5 additional damage.",
    upgrade: {damage: +3, bonus_vs_bombed: +2},
    effects: [{op: damage, amount: 7, target: all_enemies, bonus_vs_bombed: 5}]}
 
@@ -620,7 +620,7 @@
 - {id: proto_ko_sit_tight, name: "Sit Tight", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, retain: true,
-   description: "Gain 5 [gold]Block[/gold]. At the end of this turn, if no [gold]Bomb[/gold] of yours went off this turn, gain 4 [gold]Block[/gold].",
+   description: "Gain 5 [gold]Block[/gold]. At the end of your turn, gain 4 [gold]Block[/gold] if none of your [gold]Bombs[/gold] went off.",
    upgrade: {block: +2, power_amount: +1},
    effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 5},
@@ -661,7 +661,7 @@
 - {id: proto_ko_wait_for_it, name: "Wait For It...", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, retain: true,
-   description: "This turn, the next time one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], draw 2 cards and gain 1 [gold]Energy[/gold].",
+   description: "The next time a [gold]Bomb[/gold] triggers an [gold]Elemental Reaction[/gold] this turn, draw 2 cards and gain 1 [gold]Energy[/gold].",
    upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: ko_wait_for_it, amount: 2, target: self}]}
 
@@ -690,7 +690,7 @@
 - {id: proto_ko_patience_klee, name: "Patience, Klee!", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the end of your turn, if you played no [gold]Set off[/gold] card this turn, your largest [gold]Bomb[/gold] grows by 4.",
+   description: "At the end of your turn, if you played no [gold]Set off[/gold] card, your largest [gold]Bomb[/gold] grows by 4.",
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_patience, amount: 4, target: self}]}
 
@@ -732,7 +732,7 @@
 - {id: proto_ko_windblume_fireworks, name: "Windblume Fireworks", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold] ALL enemies. Deal 10 damage to ALL enemies. Place a [gold]Bomb[/gold] 6 on ALL enemies.",
+   description: "[gold]Set off[/gold] ALL enemies, deal 10 damage to them, and place a [gold]Bomb[/gold] 6 on each.",
    upgrade: {damage: +4, bomb_size: +2},
    effects: [{op: set_off, target: all_enemies},
              {op: damage, amount: 10, target: all_enemies},

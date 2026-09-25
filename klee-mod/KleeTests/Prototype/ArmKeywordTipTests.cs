@@ -142,86 +142,29 @@ public class ArmKeywordTipTests
     [Fact]
     public void The_set_off_tip_states_the_order_the_explosions_land_in()
     {
-        // [USER], on the dev build: "Set Off has no tooltip text." The ORDER
-        // clause is the half a player cannot infer from watching -- the
-        // explosions resolve BEFORE the rest of the card.
+        // [USER], on the dev build: "Set Off has no tooltip text." Text pass
+        // 2026-09-25: two short sentences. The order inside the pile
+        // (`EB-432`, oldest first) and the aim of a random Set off (`EB-516`)
+        // stay; the Block, when-hit and aura clauses left as edge cases.
         var printed = Printed("ForSetOff");
-
-        // `EB-432` traded "one at a time" for the order it leaves out: an
-        // order that names a first and a rest IS one at a time, and the pile
-        // resolves in placement order with the aura going to the oldest.
-        // `EB-755` (R276): "in the order placed" says which of two Bombs
-        // placed in one turn goes first, which "oldest first" did not.
-        Assert.Contains("in the order placed", printed);
-        Assert.Contains("go off first", printed);
-        Assert.Contains("the first takes the aura", printed);
+        Assert.EndsWith("Every [gold]Bomb[/gold] on the enemy goes off, oldest "
+                   + "first. A random Set off picks an enemy with Bombs.",
+                     printed);
     }
 
     [Fact]
     public void The_bomb_tip_says_the_arm_s_rule_and_not_the_shipped_one()
     {
         // The shipped `BombPower` detonates at the start of your turn and
-        // early on unblocked damage; the arm's never goes off by itself. Two
-        // words, one spelling -- and this is the tip that would be read as the
-        // other one if the two were ever merged.
+        // early on unblocked damage; the arm's goes off when Set off. Text
+        // pass 2026-09-25: three short sentences -- what it deals, how it
+        // grows (rule 1's rate) and the jump (rule 3, `EB-361`).
         var printed = Printed("ForBomb");
-
-        // `EB-343` rewrote the word rather than adding to it. It gained a
-        // fourth rule and the four sentences it had would have put it 60
-        // characters over a ceiling that is the base game's own longest
-        // mechanic tip, on the one word a seat reads every turn ([USER], PR
-        // #340). All four rules survive the compression, which is what these
-        // read back: rule 1's rate, rule 7 ("only when"), R248's burden and,
-        // since `EB-361`, rule 3's jump -- a Bomb whose enemy dies moves to a
-        // survivor, which three round-10 seats met with no wording anywhere.
-        // Rule 2's "all at once" is what those 33 characters cost, and the
-        // `Set off` tip two tests up states it in full.
-        //
-        // `EB-536` ADDED THE MINE TO RULE 7's CLAUSE. "Goes off only when Set
-        // off" was printed directly ABOVE the Mine tip, which says a Mine also
-        // goes off before its enemy's hit, so two surfaces of one screen
-        // contradicted each other and the r19 lane-2 seat read them that way.
-        // The tip goes over its ceiling for it and `BombKey` is carried in
-        // `tools/lint_text_conventions.py` by name with that reason.
-        Assert.Contains("A charge on an enemy: grows ", printed);
-        //
-        // TRIMMED 2026-09-08 ([USER]'s run 2, an E default: "a lot of
-        // unnecessary tooltip text that could be trimmed"). Every rule read
-        // back here is still on the word; what left is the prose around them.
-        Assert.Contains(" a turn, and goes off when [gold]Set off[/gold] "
-                      + "or as a [gold]Mine[/gold]", printed);
-        // `EB-287` (the live look of 2026-09-16): THE MERGE. It was stated on
-        // the enemy BADGE of a pile that already exists and nowhere a reader
-        // who has not built one could meet it -- and it is the rule every
-        // Bomb plan turns on. A CLAUSE and not a sentence, because the tip is
-        // at the base game's four-sentence cap and a fifth would displace one
-        // of the ruled findings read back below.
-        Assert.Contains("; a second Bomb stacks beside the first, and a Mine among them goes off alone. ", printed);
-        // `EB-373` REWROTE THE FOURTH RULE'S CLAUSE. The fold is `FoldedMods`
-        // and it reads two things off the target -- Vulnerable, and whichever
-        // power sets the lowest damage cap -- so "takes the enemy's debuffs"
-        // promised a Slow or a Flutter would move a Bomb, and the r9 seat
-        // priced two fights on it. The reason those miss is what the clause
-        // leads with now: a Bomb's hit is not an Attack. `EB-361`'s jump rule
-        // shares the 135 characters with it: "their" and "to a survivor" paid.
-        // `EB-555` DEFINED THE CAP inside that clause, because the word was
-        // printed on two tips of one screen and defined on neither.
-        // `EB-400` NAMED BLOCK in the same clause: the list read as the only
-        // two things that touch the hit, and Block was outside it.
-        // The 2026-09-08 trim dropped the "Not an Attack" negative, which
-        // two seats misread anyway, and says "the HP cap" where the clause
-        // used to spend a phrase on whose HP it is.
-        Assert.Contains("[gold]Block[/gold] stops it. Only "
-                      + "[gold]Vulnerable[/gold] and the HP cap move it.",
-                        printed);
-        Assert.DoesNotContain("Not an Attack", printed);
-        // `EB-574` SPELT RULE 3 OUT. "Kills move it on" read as a promise
-        // about the charge doing the killing: the r21 lane-1 seat set off
-        // Mine 11, killed Toadpole B and saw nothing arrive on A. Same words
-        // here, on the Mine tip and on the badge, so no two can be read
-        // against each other.
-        Assert.Contains("If the enemy dies with it on, it moves to a "
-                      + "survivor.", printed);
+        Assert.Contains("Deals its size in [gold]Pyro[/gold] damage when "
+                      + "[gold]Set off[/gold]. Grows ", printed);
+        Assert.Contains(" at the start of your turn. If its enemy dies, it "
+                      + "jumps to another.", printed);
+        Assert.DoesNotContain("survivor", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a
         // literal anywhere in this method -- the two halves of the sentence are

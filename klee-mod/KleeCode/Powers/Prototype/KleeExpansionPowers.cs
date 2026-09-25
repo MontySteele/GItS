@@ -166,10 +166,10 @@ public sealed class WaitForItPower
     {
         ("title", "Wait For It..."),
         ("description",
-            "This turn, the next time one of your [gold]Bombs[/gold] triggers "
-          + "an [gold]Elemental Reaction[/gold], draw [blue]{Amount}[/blue] "
-          + "cards and gain [blue]" + ReactionEnergy + "[/blue] "
-          + "[gold]Energy[/gold]."),
+            "The next time a [gold]Bomb[/gold] triggers an "
+          + "[gold]Elemental Reaction[/gold] this turn, draw "
+          + "[blue]{Amount}[/blue] cards and gain [blue]" + ReactionEnergy
+          + "[/blue] [gold]Energy[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -272,7 +272,7 @@ public sealed class PatienceKleePower : PowerModel, ILocalizationProvider
         ("title", "Patience, Klee!"),
         ("description",
             "At the end of your turn, if you played no [gold]Set off[/gold] "
-          + "card this turn, your largest [gold]Bomb[/gold] grows by "
+          + "card, your largest [gold]Bomb[/gold] grows by "
           + "[blue]{Amount}[/blue]."),
     };
 
@@ -338,8 +338,9 @@ public sealed class SitTightPower : PowerModel, ILocalizationProvider
     {
         ("title", "Sit Tight"),
         ("description",
-            "At the end of this turn, if no [gold]Bomb[/gold] of yours went "
-          + "off this turn, gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
+            "At the end of your turn, gain [blue]{Amount}[/blue] "
+          + "[gold]Block[/gold] if none of your [gold]Bombs[/gold] went "
+          + "off."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -514,7 +515,7 @@ public sealed class SecondSurprisePower
         ("title", "Second Surprise"),
         ("description",
             "Whenever one of your [gold]Mines[/gold] goes off, place a "
-          + "[gold]Bomb[/gold] half its size on that enemy."),
+          + "[gold]Bomb[/gold] half its size, rounded down, on that enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;

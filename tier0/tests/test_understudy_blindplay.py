@@ -6577,7 +6577,7 @@ def test_an_arm_keyword_prints_one_definition_per_screen():
     assert "## Words on this screen" in page
     assert page.count("- **Set off** ") == 1
     assert page.count("- **Bomb** ") == 1
-    assert "go off first" in page
+    assert "goes off, oldest first" in page
 
 
 def test_a_keyword_no_face_on_the_screen_prints_is_never_defined():
@@ -6653,10 +6653,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # TRIMMED 2026-09-08 ([USER]'s run 2, an E default): the "Not an
         # Attack" negative, "the enemy's HP loss" and the starter line left
         # the word; every rule the anchors below hold is still on it.
-        "Bomb": ["A charge on an enemy", "and goes off when",
-                 " or as a ", " stops it. Only ",
-                 " and the HP cap move it",
-                 "If the enemy dies with it on, it moves to a survivor"],
+        # TEXT PASS 2026-09-25: the three Klee words, rewritten short. The
+        # anchors are the prose either side of the golded spans and the
+        # interpolated growth.
+        "Bomb": ["Deals its size in ", " damage when ",
+                 " at the start of your turn. If its enemy dies, it jumps to "],
         # `EB-432`: the pile's own order, and which charge meets the aura.
         # `EB-490` renamed the class and not the claim: "Attack trigger" read
         # as something on the player's own side of the board, beside a Block
@@ -6664,16 +6665,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-516` added the aim, on the word rather than on the two rows
         # that roll: they print only "a random enemy".
         # `EB-755` (R276): "in the order placed", which no two Bombs tie on.
-        "Set off": ["go off first, in the order placed, ",
-                    "each a Pyro hit. ", " stops them, no when-hit power ",
-                    "fires, the first takes the aura. A random one picks a ",
-                    "enemy first."],
+        "Set off": [" on the enemy goes off, oldest first. ",
+                    "A random Set off picks an enemy with Bombs."],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         # `EB-436`: the hit is in the sentence now. Trimmed 2026-09-08 with
         # the Bomb row, and its last two sentences are the Bomb's word for
         # word, so the anchors above hold them for both.
-        "Mine": ["that also goes off just before its enemy's ",
-                 "hit, and the hit still lands unless the Mine kills. "],
+        "Mine": [" that also goes off just before its enemy ", "attacks."],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -7269,12 +7267,12 @@ def test_the_reactions_are_defined_wherever_the_screen_shows_an_element():
     # `EB-345`: Overloaded's row dropped the word "splash" with the rest of
     # the preamble -- "damage to ALL enemies" is what splash meant -- and the
     # numbers it exists for are both still here.
-    assert "6 damage to ALL enemies and 1 Weak" in page
-    assert "Shatters for 6 damage" in page
+    assert "6 damage to ALL enemies and applies 1 Weak" in page
+    assert "Shatters for 6 unblockable damage" in page
     # `EB-366`: the boss substitution is NOT on this page. The recorded combat
     # is a `monster` room, and the clause is a rule about a boss room -- see
     # the two tests below.
-    assert "Bosses cannot be Frozen" not in page
+    assert "Bosses can't be Frozen" not in page
     # AN AURA IS ONE HALF OF A PAIR, and `EB-428` is why that is now the
     # sentence: the combination is priced from the board's side just as often,
     # so a Cryo aura standing under a Pyro card reaches Melt -- and reaches
@@ -7305,11 +7303,11 @@ def test_the_boss_substitution_prints_in_a_boss_room():
     boss = elemental_hand_state(elements=("Hydro", "Cryo"))
     boss["state_type"] = "boss"
 
-    assert "Bosses cannot be Frozen" not in blindplay.observe(elite)
-    assert "Shatters for 6 damage" in blindplay.observe(elite)
+    assert "Bosses can't be Frozen" not in blindplay.observe(elite)
+    assert "Shatters for 6 unblockable damage" in blindplay.observe(elite)
 
     page = blindplay.observe(boss)
-    assert "Bosses cannot be Frozen" in page
+    assert "Bosses can't be Frozen" in page
     # The half that decides WHICH body in front of you freezes, and the half
     # the C# preview was missing when this row was filed.
     assert "A Minion beside the boss still Freezes." in page
@@ -7513,9 +7511,10 @@ def test_an_anemo_card_over_a_standing_aura_reaches_swirl():
     assert "NO REACTION IS REACHABLE" not in geo
     # `EB-613` (R263 sec.5 item 1) turned the row round: a Geo hit is a COST
     # to a reaction deck, so the price leads and the Block follows it.
-    assert (f"- **Crystallize** — Geo on any aura: "
-            f"{blindplay.CRYSTALLIZE_BLOCK} Block, and the aura is consumed "
-            f"-- nothing is left to react with.") in geo
+    # Text pass 2026-09-25: two short sentences, each with its verb.
+    assert (f"- **Crystallize** — Geo on any aura: gain "
+            f"{blindplay.CRYSTALLIZE_BLOCK} Block. The aura is "
+            f"consumed.") in geo
 
 
 def test_a_trigger_element_with_no_aura_out_is_told_which_half_is_missing():
@@ -7599,8 +7598,8 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
     anchors = {
         "Melt": ["his hit deals 1.75x damage and consumes the aura"],
         "Vaporize": ["his hit deals 1.5x damage and consumes the aura"],
-        "Overloaded": [" damage to ALL enemies and ",
-                       " on the reacted enemy"],
+        "Overloaded": [" damage to ALL enemies and applies ",
+                       " to the reacted enemy"],
         # `EB-472` put the order clause on this row, in the C# and here in
         # one commit, so the anchor holds both halves of the sentence.
         "Superconduct": ["reacted enemy gains ",
@@ -7608,20 +7607,20 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         # `EB-665` put the DEBUFF'S NAME on this row, in the C# and here in one
         # commit: the body prints `Poison 4` and the preview said only "loses
         # 4 HP", so the anchor holds the name as well as the tick.
-        "Electro-Charged": ["reacted enemy gains ", "Poison",
-                            ", losing that much HP at the start of its turn, "
-                            "1 less each turn"],
+        # Text pass 2026-09-25: the preview stops at the name, and Poison's
+        # own tip rides beside it in game. The page has no Poison row, so its
+        # copy keeps the tick clause (`blindplay_notes`, the row's comment).
+        "Electro-Charged": ["reacted enemy gains ", "Poison"],
         # `EB-517` put the WINDOW on this row, in the C# and here in one
         # commit, so the anchor holds the clause that says when it closes.
-        "Frozen": ["ts next action deals half damage, and until it acts the "
-                   "first Attack to hit it Shatters for "],
+        "Frozen": ["ts next action deals 50% less damage. Until it acts, the "
+                   "next Attack on it Shatters for "],
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
         "Swirl": ["aura is consumed and copied onto ALL enemies"],
         # `EB-613`: the price leads. Both copies moved in one commit, which
         # is what this pin is for.
-        "Crystallize": [", and the aura is consumed -- nothing is left "
-                        "to react with."],
+        "Crystallize": [". The aura is consumed."],
     }
     assert set(anchors) | {"Elemental Reaction"} \
         == set(blindplay.REACTION_KEYWORDS)
@@ -7632,9 +7631,9 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
     # `EB-366`: the boss substitution left the Frozen ROW and became a clause
     # the room decides. It is still the C#'s own sentence and still held in
     # step from this side -- only where it prints has moved.
-    assert "Bosses cannot be Frozen" in src
-    assert "Bosses cannot be Frozen" in blindplay.FROZEN_BOSS_CLAUSE
-    assert "Bosses cannot be Frozen" not in blindplay.REACTION_KEYWORDS["Frozen"]
+    assert "bosses can't be Frozen" in src
+    assert "Bosses can't be Frozen" in blindplay.FROZEN_BOSS_CLAUSE
+    assert "Bosses can't be Frozen" not in blindplay.REACTION_KEYWORDS["Frozen"]
     # The interpolated constants, read off the table the C# interpolates from.
     table = (REPO / "klee-mod" / "KleeCode" / "Elements"
              / "ReactionTable.cs").read_text(encoding="utf-8")
@@ -7866,17 +7865,20 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     fact that growth is PER BOMB lives on the badge in game and the seat page
     has no badge.
     """
+    # TEXT PASS 2026-09-25: the tip now reads "Grows 4 at the start of your
+    # turn." with the Bomb as its subject, which says per Bomb without the
+    # glossary's old extra "each"; the number is still the whole point.
     page = blindplay.observe(keyword_hand_state(["Set off. Place a Bomb 4."],
                                                 "Klee"))
-    assert (f"- **Bomb** — A charge on an enemy: each grows "
-            f"{blindplay.BOMB_GROWTH} a turn,") in page
+    assert (f"- **Bomb** — Deals its size in Pyro damage when Set off. "
+            f"Grows {blindplay.BOMB_GROWTH} at the start of your turn.") in page
     # LIVE FIRST: where the screen's own tip carries the number, that number is
     # what the glossary prints -- the fallback is for a screen that prints the
     # WORD with no tip on it, which is an enemy's badge and a reward row.
     live_tip = blindplay.observe(elemental_hand_state(
-        bomb_tip="A charge on an enemy: grows 9 a turn, and goes off when "
-                 "Set off.", character="Klee"))
-    assert "each grows 9 a turn" in live_tip
+        bomb_tip="Deals its size in Pyro damage when Set off. Grows 9 at "
+                 "the start of your turn.", character="Klee"))
+    assert "Grows 9 at the start of your turn" in live_tip
 
 
 def _shattering_pressure_reward_state() -> dict:
@@ -9812,10 +9814,10 @@ def test_the_badge_owns_both_names_and_chooses_between_them_live():
     assert "MineTitleKey" in body
     assert ("public bool TitledAsMine => MineCount > 0 "
             "&& MineCount == _charges.Count;") in power
-    # Rule 6's sentence rides the face and is NOT what the title switches on:
-    # a mixed pile keeps `Bomb` and still prints the timing clause.
-    assert "MineClause" in power
-    assert "goes off before this enemy's hit" in power
+    # The Mine count rides the face and is NOT what the title switches on: a
+    # mixed pile keeps `Bomb` and still says how many of it are Mines. (The
+    # Mine's timing is the Mine tip's since the text pass of 2026-09-25.)
+    assert "MinesClause" in power
 
 
 # --- `EB-496`: THE NUMBER THAT RE-COUNTED BECAUSE THE MEMORY WAS A PROCESS ---

@@ -500,9 +500,9 @@ public class KleeR276ExpansionTests
         Assert.DoesNotContain("KleeOverhaulLedger.get_SetOffThisTurn", play);
         Assert.Contains("PowerCmd.Apply", play);
         Assert.Equal(
-            "Gain {Block:diff()} [gold]Block[/gold]. At the end of this turn, "
-          + "if no [gold]Bomb[/gold] of yours went off this turn, gain "
-          + "{PowerAmount:diff()} [gold]Block[/gold].",
+            "Gain {Block:diff()} [gold]Block[/gold]. At the end of your turn, "
+          + "gain {PowerAmount:diff()} [gold]Block[/gold] if none of your "
+          + "[gold]Bombs[/gold] went off.",
             Face(card));
     }
 

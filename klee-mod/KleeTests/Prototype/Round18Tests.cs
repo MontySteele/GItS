@@ -309,44 +309,30 @@ public class Round18Tests
     [Fact]
     public void A_stacks_headline_names_its_hit_count_and_its_sparks()
     {
-        // REAL as a row read, which is how every badge face is pinned here.
         // The seat's complaint was about the FIRST sentence: the total is a
         // sum over the charges, so `deals 7` read as one hit and one Spark on
-        // a pile that was two of each.
-        var pile = ProtoBombs.Place(Seat.Klee(60).Creature,
-                                    Seat.Klee().Creature,
-                                    new ProtoBombs.Charge(4),
-                                    new ProtoBombs.Charge(3));
+        // a pile that was two of each (`EB-514`). TEXT PASS 2026-09-25: the
+        // headline says what the Set off GIVES in Sparks (`EB-666`: never
+        // "for N", which reads as a price), and the list beside it says how
+        // many charges there are.
+        var pile = ProtoBombs.Place(
+            Seat.Klee(60).Creature,
+            Seat.Klee().WithRelic<global::KleeMod.Relics.PoundingSurprise>()
+                .Creature,
+            new ProtoBombs.Charge(4), new ProtoBombs.Charge(3));
         var rows = pile.Localization!;
 
-        // `EB-536` REWORDED THE CLAUSE AND NARROWED WHERE IT PRINTS. "For as
-        // many Sparks" was "never comprehensible" (r19 lane 2), so the Spark
-        // count is the number again; and the clause is a fact about a STACK,
-        // so it lives on the many-charge half of the grid only. This pile
-        // holds two, which is the reading the row was filed on.
-        foreach (var key in new[] { "smartDescription", "smartDescriptionMines" })
+        // (That the selector reaches these rows under the arm is
+        // `BombBadgeHalvesTests`' pin, in the collection that owns the switch.)
+        foreach (var key in new[] { "smartDescriptionSparks",
+                                    "smartDescriptionSparksMines" })
         {
             var face = rows.First(r => r.Item1 == key).Item2;
-            // `EB-666` (r24): "for N Sparks" read as a PRICE, so the clause
-            // says "making" and the direction is printed rather than inferred.
-            Assert.Contains("Pyro damage, in [blue]{Count}[/blue] hits, making "
-                            + "[blue]{Count}[/blue] [gold]Sparks[/gold].",
+            Assert.Contains("[gold]Pyro[/gold] damage and gives [blue]{Sparks}"
+                            + "[/blue] [gold]Spark{Sparks:plural:|s}[/gold].",
                             face);
-            // The queue stays where `EB-450` put it: the sizes are a different
-            // fact from the count, and the headline is where the plan is made.
             Assert.Contains(
-                "Bomb sizes here, oldest first: [blue]{Charges}[/blue]", face);
-        }
-
-        // AND THE SINGLE-CHARGE FACE SAYS NOTHING ABOUT HITS, which is the
-        // half `EB-536` added: there the total IS the hit.
-        foreach (var key in new[] { "smartDescriptionOne",
-                                    "smartDescriptionOneMines" })
-        {
-            var face = rows.First(r => r.Item1 == key).Item2;
-            Assert.DoesNotContain("{Count}", face);
-            Assert.Contains(
-                "Bomb sizes here, oldest first: [blue]{Charges}[/blue]", face);
+                "Bombs here, oldest first: [blue]{Charges}[/blue]", face);
         }
     }
 

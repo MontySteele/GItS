@@ -37,7 +37,7 @@ public sealed class HoldTheLine : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hold the Line"),
-        ("description", "Spend 2 [gold]Sparks[/gold]. Gain {Block:diff()} [gold]Block[/gold]. If an enemy intends to attack: gain {IfUpgraded:show:9|6} [gold]Block[/gold]."),
+        ("description", "Spend 2 [gold]Sparks[/gold]. Gain {Block:diff()} [gold]Block[/gold]. If an enemy intends to attack, gain {IfUpgraded:show:9|6} [gold]Block[/gold]."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,

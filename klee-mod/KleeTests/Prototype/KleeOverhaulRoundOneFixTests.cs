@@ -72,8 +72,9 @@ public class KleeOverhaulRoundOneFixTests
     [Fact]
     public void A_stack_holding_a_mine_prints_rule_sixs_sentence()
     {
-        // The whole of EB-260: the clause the tooltip always carried, on the
-        // face the wire actually prints, and only while it is true.
+        // `EB-260`: the face the wire prints says there is a Mine in the pile,
+        // and only while it is true. Since the text pass of 2026-09-25 the
+        // Mine's timing is the Mine tip's, and the face carries the count.
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30).Creature;
         var pile = ProtoBombs.Place(enemy, klee.Creature,
@@ -83,31 +84,16 @@ public class KleeOverhaulRoundOneFixTests
         Assert.EndsWith(".smartDescriptionMines", LocKey(pile));
 
         var face = Row(pile, "smartDescriptionMines");
-        Assert.Contains("[gold]Mine[/gold] also goes off just before this "
-                        + "enemy's hit, and the hit still lands unless the "
-                        + "Mine kills.", face);
+        Assert.Contains(", including [blue]{Mines}[/blue] "
+                        + "[gold]Mine{Mines:plural:|s}[/gold].", face);
     }
 
     [Fact]
     public void The_mine_face_is_the_plain_face_plus_the_count_and_that_clause()
     {
         // The mutation guard on both rows at once: they may not drift into two
-        // descriptions of the same power. `EB-287` moved the Mine COUNT out of
-        // the old parenthetical and into the sentence that counts the Bombs,
-        // and the text-conventions pass made the Mine sentence REPLACE "none
-        // goes off by itself" rather than follow it (a pile holding a Mine
-        // does answer the enemy's attack, which is `EB-260`'s whole point) --
-        // so the mined row differs in a named set of places, and this says
-        // which by substituting them back and demanding what is left be the
-        // plain row, character for character.
-        //
-        // `EB-471` MADE IT THREE. The Mine face says WHEN the growth it names
-        // happens, because a Mine goes off on the enemy's turn and the seat
-        // could not tell which side of the tick that is; the plain face is at
-        // 125 of its 125-character ceiling and has no Mine to be about, so it
-        // keeps the shorter clause. That is a difference this guard has to
-        // NAME rather than one it may hide -- which is what listing it here
-        // does.
+        // descriptions of the same power. Since the text pass of 2026-09-25
+        // the mined row differs in exactly one place, the Mine count.
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30).Creature;
         var pile = ProtoBombs.Place(enemy, klee.Creature,
@@ -117,18 +103,11 @@ public class KleeOverhaulRoundOneFixTests
         Assert.Equal(
             Row(pile, "smartDescription"),
             mined.Replace(", including [blue]{Mines}[/blue] "
-                          + "[gold]Mine{Mines:plural:|s}[/gold]", string.Empty)
-                 .Replace("growing at your turn's start.", "growing each turn.")
-                 .Replace(" A [gold]Mine[/gold] also goes off just before "
-                          + "this enemy's hit, and the hit still lands unless "
-                          + "the Mine kills.",
-                          " None goes off by itself."));
-        // And the static tooltip carries the identical sentence -- one clause,
-        // two surfaces, which is what stopped them disagreeing in the first
-        // place.
-        Assert.EndsWith(
-            "[gold]Mine[/gold] also goes off just before this enemy's hit, "
-            + "and the hit still lands unless the Mine kills.",
+                          + "[gold]Mine{Mines:plural:|s}[/gold]", string.Empty));
+        // And the static face is the short canonical copy, with no pile.
+        Assert.Equal(
+            "Klee's Bombs. They deal their size in [gold]Pyro[/gold] damage "
+            + "when [gold]Set off[/gold] and grow at the start of her turn.",
             Row(pile, "description"));
     }
 
@@ -142,10 +121,7 @@ public class KleeOverhaulRoundOneFixTests
 
         Assert.EndsWith(".smartDescriptionMines", LocKey(pile));
         pile.TakeMines();
-        // `EB-536`: one charge is left, so the face that follows the pile is
-        // the SINGLE-charge one -- which is the third axis working, and the
-        // whole point of this pin one axis wider.
-        Assert.EndsWith(".smartDescriptionOne", LocKey(pile));
+        Assert.EndsWith(".smartDescription", LocKey(pile));
     }
 
     // ---- EB-265: the number the set-off will actually deal ---------------

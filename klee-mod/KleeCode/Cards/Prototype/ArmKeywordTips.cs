@@ -161,230 +161,37 @@ public static class ArmKeywordTips
     // slice one prints them (`review/active/klee-overhaul-slice-1-2026-09-01.md`
     // sec.2, "Keywords with tooltips: Bomb, Set off, Spark, Mine").
 
-    /// <summary>Rule 1. Deliberately NOT the badge's paragraph: the badge
-    /// speaks about one enemy's live pile, this speaks about the word.
+    /// <summary>
+    /// Rule 1, the word a player reads on nearly every card.
     ///
-    /// THE SECOND SENTENCE IS <c>EB-287</c>. The r3 Opus seat called the
-    /// stacking "the single most important interaction in the deck and I only
-    /// found it by gambling a card on it", because nothing printed said what
-    /// happens when a second Bomb lands where one already is. It says what is
-    /// TRUE and stops there: the charges share one pile and one badge total
-    /// and one <i>Set off</i> pops all of them, but they stay separate charges
-    /// and each grows on its own -- fusing them into a single charge is
-    /// Careful Arrangement's whole card, and a tip claiming the kit did it for
-    /// free would print that card as a blank.
-    ///
-    /// THE LAST CLAUSE IS `EB-343` (R248), and it is the one thing a player
-    /// cannot get from the badge: the badge shows the number, this says whose
-    /// number it is. A Bomb is the ENEMY'S burden -- what the target is wearing
-    /// moves it and Klee's own Strength and Weak do not, which is the opposite
-    /// of what every other damage source in her deck does. A rule that runs
-    /// backwards to the rest of the game cannot be inferred from a total that
-    /// did not change, so it is printed where the word is met.
-    ///
-    /// IT IS THREE SENTENCES AND IT FITS, which is the point of the rewrite
-    /// ([USER], PR #340, the same call as the Plan tip in #335). The four rules
-    /// used to be four sentences and 195 characters, over a ceiling that is the
-    /// base game's own longest mechanic tip -- and a seat reads this word every
-    /// turn. The compression is in the grammar, not in the content: rule 1's
-    /// rate, rule 7 and R248's burden are all still here, and the growth rate
-    /// is still interpolated so a repricing cannot leave the sentence lying
-    /// (`EB-89`).
-    ///
-    /// `EB-574` SPELT RULE 3 OUT. "Kills move it on" was read as a promise
-    /// about the charge that does the killing -- the r21 lane-1 seat set off
-    /// Mine 11, killed Toadpole B, watched nothing arrive on A and filed the
-    /// screen as contradicting itself. The rule is about the BODY, not the
-    /// charge: a charge that goes off is spent, and what travels is one still
-    /// sitting on an enemy that dies to something else. The sentence now says
-    /// which of the two it means, in the same words on both tips and the badge.
-    ///
-    /// THE LAST SENTENCE IS RULE 3, AND IT IS `EB-361`. A Bomb whose enemy dies
-    /// moves to a survivor at its size, and that rule was on no card, no badge
-    /// and no tip: three round-10 seats met it as a surprise, one of them
-    /// reading a `Bomb 36 / Bombs here: 3` on a Wriggler it had planted 11 on
-    /// and filing it as something the screen contradicted. It is stated as the
-    /// jump code does it (`ProtoBombPower.JumpCharges`): every charge moves,
-    /// Mines included, to a random LIVING enemy, so the word is "a survivor"
-    /// rather than "the next enemy".
-    ///
-    /// WHAT ITS 33 CHARACTERS COST, said plainly because the ceiling is the
-    /// reason: rule 2's "all at once" is gone from this tip and lives on the
-    /// `Set off` tip, which states it in full ("Every Bomb on the target goes
-    /// off first, one at a time"), and "Its hit takes" became "It takes", the
-    /// spelling the static badge face already uses.
-    ///
-    /// `EB-373` REWROTE THE LAST CLAUSE, WHICH WAS TOO GENEROUS BY HALF.
-    /// "Takes the enemy's debuffs" is not what the code does: the fold is
-    /// <c>FoldedMods</c> in <see cref="KleeMod.Powers.ProtoBombPower"/> and it
-    /// reads exactly two things off the target -- its <c>VulnerablePower</c>,
-    /// and whichever power sets the lowest damage cap. Every other debuff the
-    /// enemy is wearing is left out, and the r9 seat priced two fights off the
-    /// sentence as it stood: a Slow 50 enemy took 48 from a pile printing 46
-    /// (act 1), and a Flutter 5 enemy took the full 27 from a 27 Bomb while a
-    /// printed 8 Attack landed 4 (act 2). Both of those debuffs say "from
-    /// Attacks" on their own faces, and the reason they miss a Bomb is the rule
-    /// this clause now leads with: a Bomb's hit is not an Attack.
-    ///
-    /// "ONLY" IS THE LOAD-BEARING WORD, and it is also what makes the sentence
-    /// fit. Naming the two terms that DO apply and nothing else says, in one
-    /// clause, that no Attack-conditional debuff of the enemy's and no modifier
-    /// of Klee's reaches the number -- which is three claims in the room two
-    /// used to take. The static badge face beside it (`ProtoBombPower`'s
-    /// `description`) spells both halves out for the reader who wants them, the
-    /// same split <c>MineClause</c> already has.
-    ///
-    /// `EB-557` (R261) ADDED THE STARTER LINE. Jumpy Dumpty is Innate under
-    /// the arm and Ka-pow! is not, so the opening hand always holds a placer
-    /// and never necessarily the detonator -- and the keyword rail's own
-    /// `Innate` banner says that about ONE CARD, on the card, to a player who
-    /// is holding it. The fact a reader of this word needs is about the DECK:
-    /// the first thing you can always do is plant. It is the last sentence
-    /// because it is the only one that is not about the charge itself.
-    ///
-    /// `EB-555` DEFINED THE CAP, IN THE CLAUSE THAT ALREADY USED IT. "Only
-    /// Vulnerable and a cap move it" printed on two tips of one screen and the
-    /// word was defined on neither: "no screen I saw ever explained what a cap
-    /// is. I verified the Vulnerable half; the other half is a term with no
-    /// definition anywhere in the text I was shown" (Klee r20 lane 1, (c) 2).
-    ///
-    /// A DEFINING PHRASE AND NOT A SENTENCE, because the fact is small and a
-    /// sentence of its own would spend thirty characters saying what six say
-    /// inside the clause: a cap is a limit on the HP the ENEMY can lose, which
-    /// is exactly what <c>ProtoBombPower.FoldedMods</c> reads -- whichever
-    /// power on the target returns the lowest <c>ModifyDamageCap</c>. Naming
-    /// whose HP it is also disposes of the reading the clause could not rule
-    /// out before, that a cap might be something of Klee's.
-    ///
-    /// THE MINE TIP'S COPY IS LEFT ALONE at 133 of 135. It prints directly
-    /// under this one, a Mine IS a Bomb, and the term is defined on the screen
-    /// either way -- which is the acceptance condition: one definition per
-    /// PAGE, rather than one per clause.
+    /// TEXT PASS 2026-09-25 (the owner: "the existing text is often very
+    /// verbose and unintuitive"). Three short sentences: what a Bomb deals,
+    /// how it grows, and the jump. The edge cases the old tip carried --
+    /// Block stops it, only Vulnerable and the HP cap move it, a second Bomb
+    /// stacks beside the first -- are dropped on purpose: they are learned by
+    /// playing, and the live number is on the badge. The growth is still
+    /// interpolated from its Law constant (`EB-89`). The history of the old
+    /// wording is in git.
     /// </summary>
     public static IEnumerable<IHoverTip> ForBomb(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
-            "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
-          + " a turn, and goes off when [gold]Set off[/gold] or as a "
-          + "[gold]Mine[/gold]"
-          // `EB-287`, FOUND FAILING BY THE LIVE LOOK OF 2026-09-16. Merging
-          // is stated on the enemy BADGE ("Bomb 9 ... sizes, oldest first:
-          // 5 / 4") and nowhere on the WORD -- so the one reader the keyword
-          // exists for, the one who has not built a pile yet, is never told
-          // that a second placer ADDS to the charge instead of starting a
-          // second one beside it. That is the rule the whole plan turns on
-          // and it is five words.
-          //
-          // A CLAUSE AND NOT A SENTENCE, because the tip is at the base
-          // game's four-sentence cap and a fifth sentence would push it over
-          // (`lint_text_conventions`, MAX_SENTENCES). It rides the clause it
-          // belongs to -- what a charge IS and how it behaves on the body --
-          // rather than displacing one of the three ruled findings below.
-          + "; a second Bomb stacks beside the first, and a Mine among them goes off alone. "
-          // `EB-400`: BLOCK, NAMED. "Not an Attack: only Vulnerable and a
-          // cap move it" is a true sentence that reads as a false one -- a
-          // list of the only two things that touch the hit, with Block
-          // outside it -- and the r10 seat priced a Set off as unblockable
-          // and was wrong: 12 into 20 HP behind Block 5 left 13. The
-          // explosion passes `ignoreBlock: false`, so Block absorbs it like
-          // anything else, and the `Set off` tip has said so since `EB-443`
-          // in these same three words. The exclusion the sentence is really
-          // about is the ATTACK-keyed debuff, and it still says that.
-          + "[gold]Block[/gold] stops it. Only "
-          + "[gold]Vulnerable[/gold] and the HP cap move it. "
-          + "If the enemy dies with it on, it moves to a survivor.");
+            "Deals its size in [gold]Pyro[/gold] damage when "
+          + "[gold]Set off[/gold]. Grows " + KleeOverhaulLaw.BombGrowth
+          + " at the start of your turn. If its enemy dies, it jumps to "
+          + "another.");
 
     /// <summary>
-    /// Rule 2, and the one [USER] named ("Set Off has no tooltip text"). The
-    /// ORDER clause is the load-bearing half: the explosions land BEFORE the
-    /// rest of the card, which is what makes a cooked pile worth more than the
-    /// Attack printed beside it.
-    ///
-    /// `EB-432` NAMED THE OTHER ORDER, the one INSIDE the pile.
-    /// <see cref="KleeMod.Powers.ProtoBombPower.SetOff"/> walks the taken
-    /// charges in the order
-    /// <see cref="KleeMod.Powers.ProtoBombPower.AddCharge"/> appended them --
-    /// the list's own comment is "Charges in placement order" -- and the FIRST
-    /// one through the funnel is the one that meets the enemy's aura, because
-    /// every reaction consumes it (<c>ReactionEffects</c>, `consumedAura`).
-    /// The r11 run-2 seat priced its best turn of the run off that rule and
-    /// could only get it by arithmetic: "22 = 8 (the Bomb 5, Melted to 8.75 to
-    /// 8) + 8 + 6. Bombs go off in placement order, and the first one is the
-    /// one that eats the Melt -- a rule nothing printed, that I could only
-    /// infer from the arithmetic."
-    ///
-    /// "OLDEST FIRST" REPLACES "ONE AT A TIME" AND LOSES NOTHING. An order
-    /// that names a first and a rest is one at a time by construction, and the
-    /// separateness the old phrase carried -- three charges, three hits, three
-    /// Sparks -- is what "each a Pyro hit" says. `EB-287`'s claim that a pile
-    /// goes off TOGETHER is still here and is now the subject of the sentence:
-    /// "the target's Bombs", all of them.
-    ///
-    /// "THE FIRST TAKES THE AURA" AND NOT "ONLY THE FIRST REACTS", which would
-    /// be false on a board this build really has: a Swirl re-applies the aura
-    /// it consumed to every living enemy, the target included
-    /// (<c>ReactionEffects</c>, the `Swirl` arm), so a charge behind a Swirl
-    /// meets a fresh aura and reacts again. What is true on every board is the
-    /// sentence the player is deciding on: the aura in front of them is spent
-    /// on the OLDEST charge.
-    ///
-    /// `EB-443` ADDED THE TWO FACTS THE OLD NEGATIVE LEFT TO INFERENCE. "Not
-    /// an Attack" is on the Bomb tip and it answers a question a player did
-    /// not ask: the r12 run-2 seat ran the experiment and drew the wrong
-    /// conclusion from it -- "Set off ignores enemy Block, and no card says
-    /// so. Two 11-point bombs both landed at full value into Skittish 6...
-    /// 'not an Attack' plainly did not stop it from HITTING (Skittish did not
-    /// fire), and a rule this load-bearing against a whole class of enemy
-    /// should not be an inference from a negative." Both halves are read off
-    /// the one call the explosion makes:
-    /// <see cref="ElementalHit.DealWithoutDealerMods"/> passes
-    /// <c>ignoreBlock: false</c>, so Block absorbs it like anything else, and
-    /// it reaches <c>CreatureCmd.Damage</c> as <c>ValueProp.Unpowered</c> with
-    /// <c>dealer: null</c>, so nothing an enemy keys on being hit by an Attack
-    /// can fire. The seat was right about the Block it saw and wrong about the
-    /// rule: there was no Block, because Skittish never fired.
-    ///
-    /// "FOR ITS SIZE" IS WHAT PAID FOR THEM, and it is the trade the Mine tip
-    /// already makes for the same reason. A keyword tip is read in HAND, where
-    /// there is no pile to quote, so an arithmetic claim here is one this
-    /// surface cannot get right; the number a Set off will deal is on the
-    /// badge, live, and that is `EB-343`'s own split between the two. "Each a
-    /// Pyro hit" keeps what the tip can say -- separate hits, so separate
-    /// reactions and separate Sparks. 132 of 135 rendered, no exception taken.
-    ///
-    /// `EB-490` NAMED THE CLASS INSTEAD OF THE TRIGGER, and the two clauses
-    /// `EB-443` landed are why it had to. "Block stops them" and "no Attack
-    /// trigger fires" point OPPOSITE WAYS to a reader who does not already
-    /// know that Skittish is an on-hit power: the first says a Bomb interacts
-    /// with what the enemy has, the second says a Bomb sets nothing off, and
-    /// "Attack trigger" reads as something on the player's side of the board.
-    /// The r16 Klee seat planned two turns around a tax it was not paying and
-    /// got the rule by autopsy -- a 26-HP Gardener dying to 30 points of Bomb
-    /// with its "first time hit each turn, gains 6 Block" never firing, which
-    /// is most of why Klee beats that elite.
-    ///
-    /// THE RULE DOES NOT MOVE AND THE CLAIM DOES NOT WIDEN. It is the same
-    /// fact read off the same call: the explosion reaches
-    /// <c>CreatureCmd.Damage</c> as <c>ValueProp.Unpowered</c> with
-    /// <c>dealer: null</c> (<see cref="ElementalHit.DealWithoutDealerMods"/>),
-    /// so a power keyed on being HIT has neither an attacker nor a powered hit
-    /// to answer. "When-hit power" is what a player calls the thing on the
-    /// enemy's status bar; "Attack trigger" is what the code calls it. Same
-    /// length to the character, so the ceiling reading above stands unchanged.
+    /// Rule 2, the word [USER] named ("Set Off has no tooltip text"). The
+    /// order inside the pile (`EB-432`, oldest first) and the aim of a random
+    /// Set off (`EB-516`) stay; the text pass of 2026-09-25 dropped the Block,
+    /// when-hit and aura clauses as edge cases a player learns by playing.
     /// </summary>
     public static IEnumerable<IHoverTip> ForSetOff(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SetOffKey,
-            // `EB-516`: the AIM clause. A random Set off draws from the
-            // enemies already carrying one of hers, and the two rows that do
-            // it (Tinder Toss, Rapid Fire) print "a random enemy" and cannot
-            // say where it lands -- so the rule lives on the word, which is the
-            // one surface both rows carry. Over the tip ceiling and excepted
-            // by name in `tools/lint_text_conventions.py`.
-            "The target's [gold]Bombs[/gold] go off first, in the order placed, "
-          + "each a Pyro hit. [gold]Block[/gold] stops them, no when-hit power "
-          + "fires, the first takes the aura. A random one picks a Bombed "
-          + "enemy first.");
+            "Every [gold]Bomb[/gold] on the enemy goes off, oldest first. "
+          + "A random Set off picks an enemy with Bombs.");
 
     /// <summary>Rule 4. The gain rate is read from
     /// <see cref="KleeOverhaulLaw.SparkPerExplosion"/>, which is also
@@ -425,106 +232,16 @@ public static class ArmKeywordTips
     }
 
     /// <summary>
-    /// Rule 6, and its SECOND sentence is `EB-291`.
-    ///
-    /// The Bomb badge learned to say "after [gold]Weak[/gold]" at `EB-287`.
-    /// The Mine, which fires on its own during the ENEMY's turn and so is
-    /// never in front of a player at the moment it matters, said nothing at
-    /// all. The r4 Opus seat left a Gremlin Merc at 3 HP under a "Mine 3" as a
-    /// deliberate free kill, the Mine dealt 2, and the enemy survived and hit
-    /// him: "The Mine has no equivalent... no number, no Weak note."
-    ///
-    /// It states the RULE rather than a number, because a keyword tip is read
-    /// in hand where there is no pile to quote: a Mine IS a Bomb, so it is the
-    /// same Pyro hit for its own size and the same modifiers move it. The live
-    /// arithmetic stays where it can be right -- on the badge.
-    ///
-    /// THE SECOND SENTENCE NAMES THE ENEMY NOW (`EB-343`, R248). It used to say
-    /// "[gold]Weak[/gold] shrinks it like any Bomb", which was true of the old
-    /// rule and is false of this one -- Weak on Klee no longer reaches a Bomb
-    /// at all. What survives is the half the r4 seat actually needed: a Mine's
-    /// number is on the badge, and it is not the printed size when the enemy
-    /// carries a modifier.
-    ///
-    /// AND THE SEMICOLON WENT WITH IT, which is not a style note.
-    /// `tools/lint_text_conventions.py` reads these bodies out of the SOURCE
-    /// with a regex that stops at a semicolon, so the one this sentence
-    /// carried had kept the whole Mine tip out of the census -- it was never
-    /// measured against the tip ceiling in either wording. The regex is fixed
-    /// in the same change; this sentence is a comma now and the tip is 134 of
-    /// 135.
-    ///
-    /// `EB-373` NARROWED THE SECOND SENTENCE HERE TOO, because a Mine IS a
-    /// Bomb and the fold that moves one moves the other: `FoldedMods` reads
-    /// the target's Vulnerable and its damage cap and nothing else. "The
-    /// enemy's debuffs move it" promised a Slow or a Flutter would, and the
-    /// number on the badge said otherwise in two of the r9 fights. Same rule,
-    /// same words as the Bomb tip, so the two cannot be read against each
-    /// other.
+    /// Rule 6. A Mine IS a Bomb, so the one thing this word adds is when else
+    /// it goes off. The text pass of 2026-09-25 dropped "the hit still lands
+    /// unless the Mine kills" and the Bomb tip's edge cases; the Bomb tip
+    /// prints beside this one on every face that says Mine.
     /// </summary>
-    /// `EB-436` SAID WHAT THE OLD SENTENCE LEFT OUT, and the old sentence was
-    /// true the whole time: "goes off when its enemy attacks you, before the
-    /// hit lands" says WHEN and says nothing at all about the hit. The r12
-    /// act-1 seat read mitigation into it and played a turn on that read --
-    /// three Mines left armed against an elite, five went off, "every hit
-    /// landed in full, 36 to 18 HP". A Mine blunts nothing: the only thing a
-    /// Mine can do to the attack is stop it happening, by killing the
-    /// attacker, and that is `EB-336`'s rule (`Preempted`) -- a Mine whose
-    /// explosion kills the attacker costs Klee no HP, and nothing short of a
-    /// kill costs the attacker anything.
-    ///
-    /// "READ THE BADGE:" IS WHAT PAID FOR IT. The clause it introduced is
-    /// still here word for word and still names both terms, so `EB-343`'s
-    /// rule survives whole; what went is the pointer, which a player standing
-    /// in front of the badge does not need and a player in hand cannot use.
-    /// 133 of 135 rendered, no exception taken -- until `EB-574`.
-    ///
-    /// `EB-574` PUT RULE 3 ON THIS TIP TOO, and this is the surface the row was
-    /// filed on: the seat met "a kill moves them to a survivor" on the badge of
-    /// the body its Mine was about to kill and read it as a promise about that
-    /// Mine. A Mine kills more often than a plain Bomb does, so the tip that
-    /// says the hit still lands is exactly where the other reading has to be
-    /// closed. Same sentence as `ForBomb` and as the badge, word for word --
-    /// the badge says it of a pile, so its copy is the same claim in the
-    /// plural -- so no two of the three can be read against each other;
-    /// `MineKey` is carried in `tools/lint_text_conventions.py` by name for
-    /// the room.
-    ///
-    /// TRIMMED 2026-09-08 ([USER]'s run 2, an E default: "a lot of
-    /// unnecessary tooltip text that could be trimmed"), and the badge was
-    /// trimmed with it in the same commit so the three surfaces still agree
-    /// word for word. Every rule above is still printed: "just before"
-    /// carries the order the subordinate clause used to spend a phrase on,
-    /// "The hit still lands." is `EB-436`'s finding in four words, and the
-    /// last two sentences are `ForBomb`'s exactly. Full stops and not
-    /// semicolons, which is text-conventions rule 14.
-    ///
-    /// AND FOUR SENTENCES, WHICH IS THE OTHER CEILING. `MAX_SENTENCES` is 4
-    /// -- the base game's longest card -- and it takes NO exception, unlike
-    /// the length; so "the hit still lands" rides the trigger sentence on a
-    /// comma rather than standing alone, which is where the fifth sentence
-    /// would have been. The two facts `EB-436` asked for are both still
-    /// printed and neither is a subordinate clause any more.
-    ///
-    /// AND THE EXCEPTION CAME BACK 2026-09-08. The trim above dropped
-    /// `EB-436`'s other half -- the hit lands in full UNLESS THE MINE KILLS,
-    /// which is `EB-336`'s `Preempted` -- and left a flat "the hit still
-    /// lands". Klee r25 lane 1 (c) 1 read that as a promise the attack comes
-    /// even when the Mine kills and gambled 9 HP on the other reading; the
-    /// Mine killed twice and no hit landed. The four words are back on the
-    /// same clause, so the sentence count is unchanged and the length rides
-    /// the `MineKey` exception it already had.
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
-            "A [gold]Bomb[/gold] that also goes off just before its enemy's "
-          + "hit, and the hit still lands unless the Mine kills. "
-          // `EB-400`, the same three words on the same clause: a Mine IS a
-          // Bomb, so a tip that lists what moves the hit and leaves Block out
-          // reads as Block immunity here for the same reason.
-          + "[gold]Block[/gold] stops it. Only "
-          + "[gold]Vulnerable[/gold] and the HP cap move it. "
-          + "If the enemy dies with it on, it moves to a survivor.");
+            "A [gold]Bomb[/gold] that also goes off just before its enemy "
+          + "attacks.");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.
@@ -882,7 +599,7 @@ public static class ArmKeywordTips
     ///
     /// THE CARD SAYS IT AND THE BADGE COUNTS IT. This sentence is the RULE, on
     /// the card that does the merging, where a player decides whether to
-    /// merge; <c>ProtoBombPower.RiderClause</c> is the live number, on the pile
+    /// merge; <c>ProtoBombPower.RiderSentence</c> is the live number, on the pile
     /// the rule produced. Neither is enough alone -- the rule is unreadable off
     /// a number and the number is unreachable before the play.
     ///

@@ -491,72 +491,42 @@ def test_a_set_off_row_on_a_bare_board_says_so():
     assert "ArmKeywordTips.ForEmptyField(" in match and ", this, true)" in match
 
 
-def test_the_merge_clause_is_on_the_tip_and_the_page():
-    """`EB-287`, the glossary half (proofs-9 lane 0, A2, 2026-09-16).
+def test_the_klee_tips_and_the_page_say_the_same_three_rules():
+    """TEXT PASS 2026-09-25 (the owner: "the existing text is often very
+    verbose and unintuitive"). The Bomb, Set off and Mine tips were rewritten
+    short, and the blind page's rows follow them word for word -- the tip is a
+    C# literal and the row a Python string, so the agreement is asserted here,
+    the only place that sees both files.
 
-    THE DEFECT. `ForBomb` carried "; a second Bomb joins the first." and the
-    blind page's own `Bomb` glossary row did not -- and the two print on ONE
-    screen, the tip on the card rail and the row twenty lines below it. So the
-    reader the keyword exists for, the one who has not built a pile yet, met
-    one surface saying a second placer joins the charge and another that never
-    mentioned it. The row's acceptance names both surfaces.
-
-    A PIN AND NOT A SHARED CONSTANT, and the reason is structural: the tip is a
-    C# literal compiled into the mod, the glossary row is a Python string in a
-    process that reads the WIRE and never loads the assembly -- and that
-    renders pages on builds carrying no klee mod at all. Nothing can be read by
-    both at run time, so the agreement is asserted here, at the only place that
-    sees both files. That is `test_rule_three_...`'s shape, one surface out.
-
-    Seen to FAIL on the live look: `Bomb 9` on the badge, the merge on the tip,
-    and the glossary row silent about it.
+    The edge cases the old tips carried (Block stops it, only Vulnerable and
+    the HP cap move it, a second Bomb stacks beside the first, the hit still
+    lands unless the Mine kills) are gone from both, on purpose.
     """
     import sys
     sys.path.insert(0, str(REPO))
     from tools import lint_text_conventions as ltc
     from understudy import blindplay_notes
-
-    clause = "; a second Bomb stacks beside the first, and a Mine among them goes off alone. "
     tips = {row.ident: ltc.render(row.raw) for row in ltc.tip_rows()}
-    assert clause in tips["BombKey"]
-    # The same words in the same place on the page: the clause hangs off what
-    # a charge IS, and `Block stops it.` still follows it.
-    page = blindplay_notes.ARM_KEYWORDS["Bomb"]
-    assert clause in page
-    assert page.index(clause) < page.index("Block stops it.")
-    # The clause carries no `[gold]` span, so the two readings are identical
-    # character for character rather than one being the other's paraphrase.
-    assert "[gold]" not in clause
-
-
-def test_rule_three_says_which_kill_it_means_on_all_three_surfaces():
-    """`EB-574`. The sentence is about the BODY, not the charge.
-
-    "Kills move it on" (Bomb tip) and "a kill moves them to a survivor" (the
-    badge) both read as a promise about the charge that does the killing, and
-    the badge prints its copy on the body the pile is about to kill -- which is
-    exactly where that reading is invited. The r21 lane-1 seat set off Mine 11,
-    killed Toadpole B, saw nothing arrive on A and filed the screen as
-    contradicting itself.
-
-    Seen to FAIL: the Mine tip carried no jump clause at all, so the surface a
-    Mine reader stands in front of said nothing about the rule.
-    """
-    import sys
-    sys.path.insert(0, str(REPO))
-    from tools import lint_text_conventions as ltc
-    tips = {row.ident: ltc.render(row.raw) for row in ltc.tip_rows()}
-    sentence = "If the enemy dies with it on, it moves to a survivor."
-    assert sentence in tips["BombKey"]
-    assert sentence in tips["MineKey"]
-    # The badge speaks of a PILE, so the same claim in the plural.
-    badge = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-             / "ProtoBombPower.cs").read_text(encoding="utf-8")
-    assert (' " If the enemy dies with them on, they move to a '
-            'survivor.";') in badge
-    # And the old wording is gone from every one of the three.
-    assert "Kills move it on" not in tips["BombKey"]
-    assert '" A kill moves them to a survivor.";' not in badge
+    page = blindplay_notes.ARM_KEYWORDS
+    growth = ltc.render("{BombGrowth}")
+    assert tips["BombKey"] == (
+        "Deals its size in Pyro damage when Set off. Grows " + growth
+        + " at the start of your turn. If its enemy dies, it jumps to "
+        "another.")
+    assert page["Bomb"] == tips["BombKey"].replace(
+        "Grows " + growth, "Grows {growth}")
+    assert tips["SetOffKey"] == ("Every Bomb on the enemy goes off, oldest "
+                                 "first. A random Set off picks an enemy "
+                                 "with Bombs.")
+    assert page["Set off"] == tips["SetOffKey"]
+    assert tips["MineKey"] == ("A Bomb that also goes off just before its "
+                               "enemy attacks.")
+    assert page["Mine"] == tips["MineKey"]
+    for gone in ("stacks beside the first", "Block stops it",
+                 "the HP cap move it", "unless the Mine kills",
+                 "moves to a survivor"):
+        assert gone not in tips["BombKey"] + tips["MineKey"], gone
+        assert gone not in page["Bomb"] + page["Mine"], gone
 
 
 def test_the_ruled_sentences_are_the_ones_that_ship():
@@ -567,80 +537,18 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Klee, klee-overhaul-slice-1-2026-09-01.md sec.2 rules 1/2/4/6,
             # in the shape docs/current/text-conventions.md sets (one clause
             # per sentence, under the keyword-tip ceiling).
-            #
-            # `EB-343` (R248) gave the Bomb a FOURTH rule -- a Bomb takes the
-            # enemy's debuffs and none of Klee's -- and the word was REWRITTEN
-            # rather than extended ([USER], PR #340): four sentences carrying
-            # four rules would have run 60 characters over the tip ceiling, and
-            # the ceiling is the base game's own longest mechanic tip on the one
-            # word a seat reads every turn. All four rules are still here in
-            # two sentences, and the tip takes no length exception.
-            #
-            # `EB-373` REWROTE THE LAST CLAUSE. The fold is `FoldedMods` and
-            # it reads two things off the target -- Vulnerable and whichever
-            # power sets the lowest damage cap -- so "takes the enemy's
-            # debuffs" was a promise the code does not keep; a Bomb's hit is
-            # not an Attack, which is what the clause leads with now.
-            # `EB-361` ADDED A FIFTH RULE in the same 135 characters: a Bomb
-            # whose enemy dies moves to a survivor at its size, which three
-            # round-10 seats met as a stack they could not account for. Rule
-            # 2's "all at once" (the `Set off` clauses state it in full),
-            # "their" and "to a survivor" paid for it: 133 rendered.
-            "A charge on an enemy: grows ",
-            # `EB-536`: the Mine joins the sentence, because the Mine tip
-            # printed under it says a Mine also goes off before its enemy's
-            # hit and the two contradicted each other on one screen.
-            " a turn, and goes off when [gold]Set off[/gold] or as a ",
-            # `EB-287` (the live look of 2026-09-16): the MERGE, which was
-            # stated on the enemy badge of a pile that already exists and
-            # nowhere a reader who has not built one could meet it. A CLAUSE
-            # and not a sentence, because the tip is at the base game's
-            # four-sentence cap and a fifth would displace a ruled finding.
-            "[gold]Mine[/gold]",
-            "; a second Bomb stacks beside the first, and a Mine among them goes off alone. ",
-            # `EB-555` defined the cap inside the clause that names it.
-            # `EB-400`: Block, named in the clause that read as a list of
-            # the only two things that touch the hit.
-            "[gold]Block[/gold] stops it. Only ",
-            "[gold]Vulnerable[/gold] and the HP cap move it. ",
-            # `EB-574` SPELT RULE 3 OUT, in the same words on both tips and
-            # the badge: "kills move it on" read as a promise about the charge
-            # doing the killing, and the r21 lane-1 seat set off Mine 11,
-            # killed Toadpole B and saw nothing arrive on A.
-            "If the enemy dies with it on, it moves to a survivor.",
-            # `EB-432` named the order INSIDE the pile: `SetOff` walks the
-            # charges in placement order and the first one meets the aura,
-            # because a reaction consumes it. "Oldest first" carries "one at a
-            # time" -- an order that names a first and a rest is one at a time
-            # -- and `EB-287`'s "together" claim is now the subject.
-            # `EB-443` added Block and the Attack trigger, and "for its
-            # size" paid for them: a tip is read in hand where there is no
-            # pile to quote, so the live number stays on the badge.
-            # `EB-490` RENAMED THE CLASS AND NOT THE CLAIM, in the same
-            # fourteen characters: "Attack trigger" reads as something on the
-            # player's own side of the board, and the r16 seat read it that
-            # way beside a Block clause pointing the other direction.
-            # `EB-755` (R276): "in the order placed" says which of two Bombs
-            # placed in one turn goes first, which "oldest first" did not.
-            "The target's [gold]Bombs[/gold] go off first, in the order placed, ",
-            # `EB-516` ADDED THE AIM, and it is on the WORD because the two
-            # rows that roll (Tinder Toss, Rapid Fire) print only "a random
-            # enemy" and cannot say where it lands.
-            "each a Pyro hit. [gold]Block[/gold] stops them, no when-hit power ",
-            "fires, the first takes the aura. A random one picks a Bombed ",
-            "enemy first.",
+            # TEXT PASS 2026-09-25: the three Klee words, rewritten short.
+            # The growth is still interpolated (`EB-89`).
+            "Deals its size in [gold]Pyro[/gold] damage when ",
+            "[gold]Set off[/gold]. Grows ",
+            " at the start of your turn. If its enemy dies, it jumps to ",
+            "Every [gold]Bomb[/gold] on the enemy goes off, oldest first. ",
+            "A random Set off picks an enemy with Bombs.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",
             "Gone after combat.",
-            # `EB-436`: the clause said WHEN and nothing about the attack,
-            # and a seat read mitigation into it. A Mine blunts nothing; the
-            # only thing it can do to the hit is stop it happening.
-            "that also goes off just before its enemy's ",
-            "hit, and the hit still lands unless the Mine kills. ",
-            # The Mine's last two sentences are `ForBomb`'s WORD FOR WORD
-            # after the 2026-09-08 trim -- `EB-373`'s two terms, `EB-400`'s
-            # Block and `EB-574`'s rule 3 -- so they are pinned once above
-            # and a Mine reader and a Bomb reader cannot be told two things.
+            "A [gold]Bomb[/gold] that also goes off just before its enemy ",
+            "attacks.",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.
@@ -1014,7 +922,10 @@ DEFINED_BY_A_CARD_TIP = {
 # assertion, which compares whole names.
 CONJUGATIONS = {"Exhausted": "Exhaust",
                 # The co-op set: "their next Attack Sets off your Bombs".
-                "Sets off": "Set off"}
+                "Sets off": "Set off",
+                # Vermillion Pact, text pass 2026-09-25: "the Attack that Set
+                # it off".
+                "Set it off": "Set off"}
 
 
 def _word_owner(word: str) -> str:

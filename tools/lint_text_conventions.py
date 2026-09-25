@@ -81,51 +81,6 @@ EXCEPTIONS = {
         "a two-mode Power must print both modes on the reward screen, where "
         "the choose-a-card screen's mode faces are not yet visible; the base "
         "game has no static modal card to measure against"),
-    "ProtoBombPower.description": (
-        "the Bomb badge's static face carries rules 1, 2 and 6 in one "
-        "paragraph because a canonical copy has no live pile to quote; every "
-        "in-combat smart face is excepted below for its own reasons"),
-    "SetOffKey": (
-        "`EB-516` added the AIM to a tip already at 132 of 135. A random Set "
-        "off draws from the enemies carrying one of hers, and Tinder Toss and "
-        "Rapid Fire both print only 'a random enemy', so the word is the one "
-        "surface either row carries. The tip now states seven ruled facts -- "
-        "the order against the card's own hit, oldest first, the element, "
-        "what stops them, what does not fire, where the aura goes and where a "
-        "random one lands (EB-432, EB-490, EB-516) -- and none of them is "
-        "droppable to make room"),
-    "BombKey": (
-        "`EB-536` added the Mine to a tip at 133 of 135. The tip said a Bomb "
-        "'goes off only when Set off' and the Mine tip printed DIRECTLY BELOW "
-        "it says a Mine also goes off before its enemy's hit, so two surfaces "
-        "on one screen contradicted each other (Klee r19 lane 2). Every other "
-        "clause is a ruled finding -- the growth rate, the class of the hit "
-        "and which terms move it, and the jump to a survivor (EB-373, EB-443, "
-        "EB-361) -- and none is droppable to make room. `EB-557` (R261) added "
-        "the STARTER LINE on top of that: Jumpy Dumpty is Innate under the arm "
-        "and Ka-pow! is not, so the opening hand always holds a placer and "
-        "never necessarily the detonator. The keyword rail states that about "
-        "one CARD, on the card; what a reader of the WORD needs is the fact "
-        "about the DECK, which no other surface carries. `EB-287` (the live "
-        "look of 2026-09-16) added the MERGE in five words: merging was "
-        "stated on the enemy BADGE of a pile that already exists and nowhere "
-        "a reader who has not built one could meet it, and it is the rule "
-        "every Bomb plan turns on"),
-    "MineKey": (
-        "`EB-574` put rule 3 on this tip, at 133 of 135. The jump sentence "
-        "was printed on the BADGE of the body the pile was about to kill and "
-        "on the Bomb tip as 'kills move it on', and both read as a promise "
-        "about the charge doing the killing: the r21 lane-1 seat set off Mine "
-        "11, killed Toadpole B, saw nothing arrive on A and filed the screen "
-        "as contradicting itself. A Mine kills more often than a plain Bomb "
-        "does, so the tip that says the hit still lands is where the other "
-        "reading has to be closed, and it is closed in the same words on all "
-        "three surfaces. Every other clause is a ruled finding -- when it "
-        "goes off, what the hit does to the attack, and which two terms move "
-        "it (EB-436, EB-373) -- and none is droppable to make room. The "
-        "2026-09-08 trim ([USER]'s run 2, an E default) took the prose "
-        "around those findings off this tip and off the badge together, and "
-        "every one of them is still on the word"),
     "ProtoBakeKuragePower.descriptionCapped": (
         "`EB-653` (Kokomi r24). The cap lane's face, and it exists only under "
         "`GITS_KOKOMI_PLAN_CAP` -- a default build prints the row above it, "
@@ -157,54 +112,26 @@ EXCEPTIONS = {
     # two rules were always under the ceiling.
 }
 
-#: THE BOMB BADGE'S GRID (`EB-343`, R248). The badge is the one surface in the
-#: mod that prints LIVE ARITHMETIC, and R248 requires it to name every one of
-#: the target's modifiers folded into the total it shows -- a Vulnerable folded
-#: in silently is the defect the row was raised on. Naming them costs
-#: characters, and the Mine axis multiplies whatever the modifier axis costs.
-#:
-#: THE PLAIN FACE JOINED THE GRID AT `EB-514`. It was the one row here that
-#: met the ceiling (125 of 125, no headroom at all), and the hit count is the
-#: clause that took it over: a stack's total is a SUM over the charges, so
-#: `deals 7` read as one hit and one Spark where the board made two of each,
-#: and the r18 seat planned a turn against it. Written as the grid rather than
-#: sixteen typed keys so it cannot fall out of step with
-#: `ProtoBombPower.Localization`, which builds its rows from the same two axes;
-#: the rot check still runs per key.
-_BOMB_FACE_REASON = (
-    "the Bomb badge is the arm's one live-arithmetic surface, and R248 "
-    "requires it to name every modifier folded into the number it prints "
-    "(EB-343); the Mine axis is EB-260's, rule 6 firing on the enemy's turn "
-    "when no card is in front of the player; and EB-514 puts the HIT COUNT in "
-    "the headline, because the total is a sum over the charges and a stack "
-    "printed one number where the board makes several hits and several Sparks; "
-    "and `EB-536` (widened, Klee r20) labelled the list as SIZES, because "
-    "'Bombs here: 3, including 1 Mine' reads as a count and is a value -- the "
-    "natural-lane seat misread it 'for a fight and a half' and got it only "
-    "when a two-charge pile printed numbers the count reading could not "
-    "explain; and `EB-573` names the RIDER the merge keeps, because a Bomb 21 "
-    "that was Jumpy's Bomb 8 two merges ago still dropped Mine 3 on ALL and "
-    "no surface said so (Klee r21 lane 1); and `EB-450`'s other half names "
-    "the list's ORDER in its label, because the `Set off` tip says the "
-    "charges go off oldest first and the list that replaced the count did "
-    "not say it was in that order -- on a Cryo body, which charge Melts was "
-    "a fact the r13 seat carried in its head for a whole fight")
-#: THE WHOLE GRID IS EXCEPTED SINCE `EB-536`. The plain single-charge face --
-#: one charge, no Mine, no modifier the total passes through -- was the one row
-#: here that met its ceiling exactly (125 of 125, no headroom at all) and was
-#: carved out for it, on the rule that an exception nobody needs is an
-#: exception nobody reads. The six characters that name the list as sizes took
-#: it over, so the carve-out went rather than the label: the SIZES reading is
-#: what the row is about, and a face that prints the ambiguous label to stay
-#: under a ceiling is the defect wearing a lint's clothes.
+#: THE BOMB BADGE'S GRID, rebuilt by the text pass of 2026-09-25 to at most
+#: three short sentences: what a Set off pays, the pile, and the rider. Every
+#: face fits the power ceiling EXCEPT ten that carry the rider sentence (126
+#: to 164 rendered; the plain and Melt rider rows fit at 112 and 122),
+#: and those are excepted by name here -- ONE reason for all of them, and only
+#: the rows over 125 are listed (rot semantics would fail the rest).
+_BOMB_RIDER_REASON = (
+    "the Bomb badge's rider sentence (`EB-573`: a merge keeps Jumpy Dumpty's "
+    "Mine-on-ALL and no other surface says so) rides a face that already "
+    "names the total, the Sparks and the pile; the text pass of 2026-09-25 "
+    "kept it as a third sentence and took this one exception for it")
 EXCEPTIONS.update({
-    "ProtoBombPower.smartDescription"
-    + single + mines + rider + vulnerable + cap: _BOMB_FACE_REASON
-    for single in ("", "One")
-    for mines in ("", "Mines")
-    for rider in ("", "Rider")
-    for vulnerable in ("", "Vulnerable")
-    for cap in ("", "HardToKill", "Intangible", "Capped")
+    "ProtoBombPower.smartDescription" + sparks + mines + "Rider" + reaction:
+        _BOMB_RIDER_REASON
+    for sparks, mines, reaction in (
+        ("Sparks", "Mines", ""), ("Sparks", "Mines", "Vaporize"),
+        ("Sparks", "Mines", "Melt"), ("Sparks", "", "Vaporize"),
+        ("Sparks", "", "Melt"), ("", "Mines", "Vaporize"),
+        ("", "Mines", "Melt"), ("Sparks", "", ""), ("", "Mines", ""),
+        ("", "", "Vaporize"))
 })
 
 # --- the shipped exceptions: id -> reason. Same rot semantics. -----------
@@ -676,67 +603,35 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
                 continue
             rows.append(Row(surface, f"{cls}.{key}", text, where))
         if path.name == "ProtoBombPower.cs":
-            # `EB-343` widened the second axis. The badge's face used to be two
-            # by two -- a Mine in the pile, and Klee's Weak in the total -- and
-            # R248 took Klee out of a Bomb entirely and made every one of the
-            # TARGET's terms say its own name, so the grid is now the Mine axis
-            # by Vulnerable by the four cap spellings. Rebuilt from the same
+            # THE LIVE GRID (text pass 2026-09-25), rebuilt from the same
             # constants `ProtoBombPower.Face` composes, because this lint reads
-            # SOURCE and cannot run `LocManager`.
-            caps = (("", ""),
-                    ("HardToKill", consts["HardToKillClause"]),
-                    ("Intangible", consts["IntangibleClause"]),
-                    ("Capped", consts["UnnamedCapClause"]))
-            # `EB-536` ADDED THE THIRD AXIS: a pile of ONE prints no hit
-            # clause, because there the total IS the hit and the sentence was
-            # "never comprehensible" on it.
-            # `EB-573` ADDED THE FOURTH AXIS: whether any charge here carries
-            # a rider (Jumpy Dumpty's Mine-on-ALL), which survives a merge and
-            # grows in bulk. The full stop moved off `Bombs` and
-            # `BombsWithMines` in the same edit, so exactly one of the two
-            # spellings prints it and the clause is a CLAUSE rather than a
-            # fifth sentence.
-            for single in (False, True):
+            # SOURCE and cannot run `LocManager`. Four axes: whether a Set off
+            # here gives Sparks, whether a Mine is in the pile, whether a rider
+            # is, and which amplifying reaction the leading charge will cause.
+            reactions = (("", ""), ("Vaporize", consts["VaporizeClause"]),
+                         ("Melt", consts["MeltClause"]))
+            for sparks in (False, True):
                 for mines in (False, True):
                     for rider in (False, True):
-                        for vulnerable in (False, True):
-                            for cap_key, cap_text in caps:
-                                clause = (consts["VulnerableClause"]
-                                          if vulnerable else "")
-                                if cap_text:
-                                    clause += (("," + cap_text) if vulnerable
-                                               else cap_text)
-                                face = ("[gold]Set off[/gold] here deals "
-                                        # `EB-514`: the hit count rides the
-                                        # total, because the total is a SUM
-                                        # over the charges and a stack printed
-                                        # one number where the board makes
-                                        # several hits.
-                                        + consts["PyroTotal"] + clause
-                                        + ("" if single else consts["HitCount"])
-                                        + "."
-                                        + (consts["BombsWithMines"] if mines
-                                           else consts["Bombs"])
-                                        + (consts["RiderClause"] if rider
-                                           else "")
-                                        + "."
-                                        + (consts["MineClause"] if mines
-                                           else consts["NoSelfSentence"])
-                                        # `EB-361`: rule 3 prints on every
-                                        # face, and the growth sentence became
-                                        # a clause on `Bombs` in the same edit
-                                        # -- four sentences is the ceiling and
-                                        # the jump is a fifth fact.
-                                        + consts["JumpSentence"])
-                                rows.append(Row(
-                                    "power",
-                                    "ProtoBombPower.smartDescription"
-                                    + ("One" if single else "")
-                                    + ("Mines" if mines else "")
-                                    + ("Rider" if rider else "")
-                                    + ("Vulnerable" if vulnerable else "")
-                                    + cap_key,
-                                    face, where))
+                        for r_key, r_text in reactions:
+                            face = ("[gold]Set off[/gold] here deals "
+                                    + consts["PyroTotal"] + r_text
+                                    + (consts["SparksClause"] if sparks
+                                       else "")
+                                    + "." + consts["Bombs"]
+                                    + (consts["MinesClause"] if mines
+                                       else "")
+                                    + "."
+                                    + (consts["RiderSentence"] if rider
+                                       else ""))
+                            rows.append(Row(
+                                "power",
+                                "ProtoBombPower.smartDescription"
+                                + ("Sparks" if sparks else "")
+                                + ("Mines" if mines else "")
+                                + ("Rider" if rider else "")
+                                + r_key,
+                                face, where))
     return rows
 
 

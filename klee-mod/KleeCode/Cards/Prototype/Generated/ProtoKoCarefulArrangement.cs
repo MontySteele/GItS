@@ -42,7 +42,7 @@ public sealed class ProtoKoCarefulArrangement : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Careful Arrangement"),
-        ("description", "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold], a [gold]Mine[/gold] if any of them was. It grows by {Grow:diff()}."),
+        ("description", "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by {Grow:diff()}, and is a [gold]Mine[/gold] if any of them were."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -35,14 +35,14 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoVermillionPact : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_vermillion_pact");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Vermillion Pact"),
-        ("description", "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], the Attack that set it off triggers one too."),
+        ("description", "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], the Attack that [gold]Set it off[/gold] triggers one too."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

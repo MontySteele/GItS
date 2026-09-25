@@ -62,36 +62,6 @@ public class LiveLooks8bTests
         }
     }
 
-    // ==================================================================
-    // `EB-287` -- the Bomb KEYWORD carries the merge
-    // ==================================================================
-
-    [Fact]
-    public void The_bomb_tip_says_a_second_bomb_joins_the_first()
-    {
-        // THE FIND. Merging IS stated on the enemy BADGE -- "Bomb 9 ... sizes,
-        // oldest first: 5 / 4" -- and the row records the KEYWORD as carrying
-        // it. The keyword did not: "A charge on an enemy: grows 6 a turn, and
-        // goes off when Set off or as a Mine. Block stops it. Only Vulnerable
-        // and the HP cap move it. If the enemy dies with it on, it moves to a
-        // survivor." The one reader the word exists for -- the one who has not
-        // built a pile yet -- was never told a second placer ADDS.
-        var tip = Source(Path.Combine("klee-mod", "KleeCode", "Cards",
-                                      "Prototype", "ArmKeywordTips.cs"));
-        Assert.Contains("a second Bomb stacks beside the first", tip);
-    }
-
-    [Fact]
-    public void The_merge_clause_rides_the_first_sentence()
-    {
-        // A CLAUSE AND NOT A SENTENCE: the tip is at the base game's
-        // four-sentence cap (`lint_text_conventions.MAX_SENTENCES`), so a
-        // fifth sentence would either break the lint or displace one of the
-        // three ruled findings below it. It rides the clause it belongs to.
-        var tip = Source(Path.Combine("klee-mod", "KleeCode", "Cards",
-                                      "Prototype", "ArmKeywordTips.cs"));
-        Assert.Contains("\"; a second Bomb stacks beside the first, and a Mine among them goes off alone. \"", tip);
-    }
 
     // ==================================================================
     // `EB-670` -- the headline folds the carried-out condition

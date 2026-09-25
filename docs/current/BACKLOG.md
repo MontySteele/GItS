@@ -20,7 +20,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-808` a create-mode Muster never stamps its recruit's discount (`KokomiConscript.cs` `NoteMusterRecruit` is in the sacrifice branch only); stamp both branches.
 - `EB-807` `Unknown RelicModel ID: RELIC.KLEEMOD-TAMANOOYAS_CASKET` once per boot: widen the retired-id alias register from cards to relics and arm-gated ids.
 - `EB-805` a mode card's option title prints the sheet literal while the body folds the board (two numbers for one option); the title carries no number or folds through the same vars.
-- `EB-801` eight shipped power faces are over the 125-char ceiling (`AuraPower`, `BurstMeterPower`, `EncoreMeterPower`, `FanfareMeterPower`, `FurinaBurstMeterPower`, `SalonMemberPower` x2); a text pass (design work, main session) until `lint_text_conventions --shipped` names none.
+- `EB-801` six shipped power faces are over the 125-char ceiling (`BurstMeterPower`, `EncoreMeterPower`, `FanfareMeterPower`, `FurinaBurstMeterPower`, `SalonMemberPower` x2); a text pass (design work, main session) until `lint_text_conventions --shipped` names none.
 - `EB-798` `ProtoKkBreakwater` is offered Nimble but Nimble pays it nothing (its only Block is the Plan's); planned-only Block is not `GainsBlock`, in both engines and `lint_enchant_parity`.
 - `EB-677` Glam's Replay on a timed card (Kyouka) runs it 4 turns at +4, not 2 at +8, and no face says which; needs an emitter change that gives the rule a tip surface, plus a taste call on which rows carry it.
 - `EB-65` the four Furina power badges draw shrunk card portraits; they want badge-kind icons like Klee's (art bill, rank 1 applied).
@@ -33,6 +33,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `prune_witch_hunt`'s only upgrade (`kit_spark` +1) does nothing under the Klee arm, because Companion plays pay no Spark.
 - A co-op partner cannot see Klee's Spark count: the overhead gauge left in #658, the strip badge is hidden, and the energy-area counter is local only.
 - The Big One's x4 stays armed when its Set off finds no Bomb, so a later Mine on the enemy turn can spend it.
+- Dodoco Tales does nothing beyond Pounding Surprise under the Klee arm (its opening-Spark half is gated off); it needs an arm body.
 - The Smith preview for a Spark-price upgrade (Sparkling Burst, Once More!, Boom Badge, Blazing Delight) says it "changes nothing this face prints".
 
 ## Harness, bridge and tools

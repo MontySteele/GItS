@@ -52,7 +52,7 @@ public sealed class ManyWatersMelody : CustomCardModel, ICharacterCard, ISkillTa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Melody of Many Waters"),
-        ("description", FurinaBurstRider.Face("Gain {IfUpgraded:show:5|4} [gold]Encore[/gold]. If you have a [gold]Salon Member[/gold]: gain 5 [gold]Block[/gold].", "Gain {IfUpgraded:show:5|4} [gold]Encore[/gold]. If you have a [gold]Salon Member[/gold]: gain 5 [gold]Block[/gold]. [gold]Burst[/gold] +5.")),
+        ("description", FurinaBurstRider.Face("Gain {IfUpgraded:show:5|4} [gold]Encore[/gold]. If you have a [gold]Salon Member[/gold], gain 5 [gold]Block[/gold].", "Gain {IfUpgraded:show:5|4} [gold]Encore[/gold]. If you have a [gold]Salon Member[/gold], gain 5 [gold]Block[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

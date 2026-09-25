@@ -45,7 +45,7 @@ public sealed class WatersEmbrace : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Water's Embrace"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have a [gold]Salon Member[/gold]: gain 5 [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have a [gold]Salon Member[/gold], gain 5 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

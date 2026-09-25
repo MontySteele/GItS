@@ -755,7 +755,10 @@ ARM_KEYWORDS = (
     # Klee's four (klee-overhaul-slice-1-2026-09-01.md sec.2: "Keywords with
     # tooltips: Bomb, Set off, Spark, Mine").
     ArmKeyword("Bomb", ("Bomb", "Bombs"), "ArmKeywordTips.ForBomb"),
-    ArmKeyword("Set off", ("Set off", "Sets off"),
+    # "Set it off" is the SPLIT form of the same word (Vermillion Pact, text
+    # pass 2026-09-25: "the Attack that Set it off"), golded as one span so the
+    # tip still attaches.
+    ArmKeyword("Set off", ("Set off", "Sets off", "Set it off"),
                "ArmKeywordTips.ForSetOff"),
     ArmKeyword("Spark", ("Spark", "Sparks"), "ArmKeywordTips.ForSpark"),
     ArmKeyword("Mine", ("Mine", "Mines"), "ArmKeywordTips.ForMine"),
@@ -3182,7 +3185,11 @@ APPLY_POWERS = {
         # card ceiling; it is the same per-dealer window it always was.
         "Your first [gold]Elemental Reaction[/gold] each turn applies "
         "{X} [gold]Vulnerable[/gold] and {X} [gold]Weak[/gold] to its "
-        "target. The [gold]Vulnerable[/gold] moves that hit."),
+        # Text pass 2026-09-25: "The Vulnerable moves that hit" said the
+        # ruled order in a sentence seats could not parse; "before the hit
+        # lands" says the same order in the Superconduct preview's plainer
+        # shape. No rule moved.
+        "target before the hit lands."),
     "encore_spend_draw": ("EncoreSpendDrawPower", None,
         "The first time you spend [gold]Encore[/gold] each turn, draw "
         "{X} card{XS}."),
@@ -12212,6 +12219,14 @@ def build_description(card: dict, *,
                     # promised an addition the number had already made.
                     folded.append("{ExtraDamage:diff()} if the target has an "
                                   "elemental aura")
+                elif eff["target"] == "all_enemies":
+                    # Text pass 2026-09-25: the house spelling of a bonus is
+                    # "N additional damage" (text-conventions rule 8), and an
+                    # ALL-enemies hit names the enemies it means rather than
+                    # "the enemy". Crashing Waves is the one row on this path.
+                    parts.append(
+                        f"Enemies with an aura take "
+                        f"{int(eff['bonus_vs_aura'])} additional damage.")
                 else:
                     parts.append(
                         f"+{int(eff['bonus_vs_aura'])} damage if the enemy "
@@ -12772,7 +12787,9 @@ def build_description(card: dict, *,
                              + pred_txt[0].lower() + pred_txt[1:] + ".")
                 continue
             if any(e.get("op") == "repeat_this" for e in then):
-                parts.append(f"{pred_txt}: play this card again.")
+                # Text pass 2026-09-25: text-conventions rule 7, "If X, Y.
+                # Otherwise, Z." -- a comma after the condition, never a colon.
+                parts.append(f"{pred_txt}, play this card again.")
             else:
                 els = eff.get("else", [])
                 if not then and els:
@@ -12788,15 +12805,15 @@ def build_description(card: dict, *,
                             "entry -- write the negated face text rather than "
                             "letting the generator guess")
                     parts.append(
-                        f"{neg}: "
+                        f"{neg}, "
                         + _branch_text(card, els, in_then=False,
                                        predicate=eff["if"]))
                     continue
                 then_txt = _branch_text(card, then, in_then=True,
                                         predicate=eff["if"])
-                clause = f"{pred_txt}: {then_txt}"
+                clause = f"{pred_txt}, {then_txt}"
                 if els:
-                    clause += (" Otherwise: "
+                    clause += (" Otherwise, "
                                + _branch_text(card, els, in_then=False,
                                               predicate=eff["if"]))
                 if condition_upgrade(card):

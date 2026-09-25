@@ -41,7 +41,7 @@ public sealed class DramaticEntrance : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dramatic Entrance"),
-        ("description", "Deal {Damage:diff()} damage. If you have at least 12 [gold]Fanfare[/gold]: deal 7 damage to ALL enemies."),
+        ("description", "Deal {Damage:diff()} damage. If you have at least 12 [gold]Fanfare[/gold], deal 7 damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

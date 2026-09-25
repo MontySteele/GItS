@@ -41,7 +41,7 @@ public sealed class CrashingWaves : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crashing Waves"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. +5 damage if the enemy has an elemental aura."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. Enemies with an aura take 5 additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

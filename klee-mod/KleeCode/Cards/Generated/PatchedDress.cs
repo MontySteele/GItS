@@ -37,7 +37,7 @@ public sealed class PatchedDress : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Patched Dress"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have [gold]Spark[/gold]: gain 3 [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have [gold]Spark[/gold], gain 3 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

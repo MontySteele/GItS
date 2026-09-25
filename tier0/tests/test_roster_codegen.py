@@ -1017,7 +1017,7 @@ def test_unconverted_riders_keep_their_sentence_on_the_face():
     # line (AoE aura riders stay per-target, see the L-B pass-2 guard).
     furina_by_id = {card["id"]: card for card in _furina_cards()}
     waves = gen.emit(furina_by_id["crashing_waves"], gen.FURINA_PROFILE)
-    assert "damage if the enemy has an elemental aura." in waves
+    assert "Enemies with an aura take 5 additional damage." in waves
     assert "FurinaRiderTips" not in waves
 
     klee_by_id = {
@@ -1413,7 +1413,7 @@ def test_conditional_block_moves_both_of_hold_the_lines_halves():
     assert ("await CreatureCmd.GainBlock(Owner.Creature, "
             "new BlockVar((IsUpgraded ? 9m : 6m), ValueProp.Move), "
             "cardPlay);") in source
-    assert ("If an enemy intends to attack: gain {IfUpgraded:show:9|6} "
+    assert ("If an enemy intends to attack, gain {IfUpgraded:show:9|6} "
             "[gold]Block[/gold].") in source
 
     # And the shape this row existed to remove is gone.
@@ -1428,7 +1428,7 @@ def test_conditional_damage_moves_take_it_from_the_tops_branch_only():
 
     assert ("await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, "
             "(IsUpgraded ? 14m : 10m)))") in source
-    assert ("If you moved the [gold]Spotlight[/gold] this turn: deal "
+    assert ("If you moved the [gold]Spotlight[/gold] this turn, deal "
             "{IfUpgraded:show:14|10} damage.") in source
 
     assert "new BlockVar(5m, ValueProp.Move)" in source
