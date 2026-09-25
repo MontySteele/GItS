@@ -121,12 +121,14 @@ public class KokomiPoolPassTwoTests
         // to the front, so the object -- damage -- is on the card before the
         // energy is spent, and a Plan that deals none has nothing to double.
         //
-        // THE 2026-09-25 TEXT PASS reworded it to "Your next Plan deals
-        // double damage." -- the object is still DAMAGE, named on the card,
-        // and "carried out with this one" (the census's undefined-jargon
-        // example) is gone.
+        // THE 2026-09-25 TEXT PASS reworded it to "The Plan after this one
+        // deals double damage." -- the object is still DAMAGE, named on the
+        // card; "carried out with this one" (the census's undefined-jargon
+        // example) is gone; and "after this one" keeps `EB-645`'s window
+        // where "your next Plan" would have read as the next one WRITTEN.
         var face = Face(new ProtoKkOpeningGambit());
-        Assert.EndsWith("Your next Plan deals double damage.", face);
+        Assert.EndsWith("The Plan after this one deals double damage.", face);
+        Assert.DoesNotContain("next Plan", face);
         Assert.DoesNotContain("carried out with this one", face);
     }
 
@@ -555,13 +557,15 @@ public class KokomiPoolPassTwoTests
         // `test_the_three_rider_faces_print_the_window_the_rider_lives_in`.
         //
         // THE 2026-09-25 TEXT PASS retired "carried out with this one", the
-        // census's example of undefined jargon: "your next Plan" and "after
-        // this one" name the same window in plain words.
+        // census's example of undefined jargon. "The Plan after this one"
+        // names the same window in plain words on all three rider faces --
+        // "your next Plan" was ambiguous between the next carried out and the
+        // next written (`EB-687`, `EB-645`).
         Assert.Equal(
-            "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Your "
-          + "next Plan is carried out twice.",
+            "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: The "
+          + "Plan after this one is carried out twice.",
             Face(new ProtoKkSecondWave()));
-        Assert.EndsWith("Your next Plan deals double damage.",
+        Assert.EndsWith("The Plan after this one deals double damage.",
                         Face(new ProtoKkOpeningGambit()));
         // R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a
         // window on the drain again, and "after this one" is the position

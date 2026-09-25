@@ -273,8 +273,9 @@ public class ArmKeywordTipTests
                              as string ?? string.Empty, string.Empty),
             @"\[/?[a-z]+\]", string.Empty);
         Assert.Equal(
-            "Play the card on the Bake-Kurage to save this for the start of "
-          + "your next turn instead. Plans go off in the order you made them.",
+            "Play the card on the Bake-Kurage and this happens at the start "
+          + "of your next turn. Plans are carried out in the order you made "
+          + "them.",
             rendered);
         // The base game's own longest mechanic tip is CHANNELING, 134.
         Assert.True(rendered.Length <= 135, rendered.Length.ToString());

@@ -1487,8 +1487,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # of the ones a board needs -- `PLAN_AIM_NOTE`, `PLAN_BLOCK_NOTE`,
     # `PLAN_COUNT_NOTE`, `PLAN_WRITTEN_NUMBER_NOTE` -- because the panel has
     # no ceiling; the history of each clause is in git.
-    "Plan": ("Play the card on the Bake-Kurage to save this for the start of "
-             "your next turn instead. Plans go off in the order you made "
+    "Plan": ("Play the card on the Bake-Kurage and this happens at the start "
+             "of your next turn. Plans are carried out in the order you made "
              "them."),
     # `EB-643` (R265). THE POOL PASS'S ONE NEW WORD, and it is a rule about
     # WHEN and nothing else: everything else about a Dusk Plan is a Plan, and

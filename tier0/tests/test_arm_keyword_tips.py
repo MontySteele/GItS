@@ -650,9 +650,9 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # unintuitive"): 292 rendered characters of seat edge cases came
             # off it, and the panel keeps the long forms. Spec and census:
             # review/records/text-pass-2026-09-25/.
-            "Play the card on the [gold]Bake-Kurage[/gold] to save this for ",
-            "the start of your next turn instead. Plans go off in the order ",
-            "you made them.",
+            "Play the card on the [gold]Bake-Kurage[/gold] and this happens ",
+            "at the start of your next turn. Plans are carried out in the ",
+            "order you made them.",
             "heal N HP, never above the HP you entered ",
             # Furina, THE STAGE (`EB-723`; the brief's sec.12 names the
             # seven words and sec.3 states each rule). The reframe's four --
@@ -1150,8 +1150,9 @@ def test_a_word_excused_by_a_card_tip_really_carries_that_tip(word):
 # note is pinned where it is built (`test_understudy_blindplay.py`).
 # Spec and census: review/records/text-pass-2026-09-25/.
 
-PLAN_TIP = ("Play the card on the Bake-Kurage to save this for the start of "
-            "your next turn instead. Plans go off in the order you made them.")
+PLAN_TIP = ("Play the card on the Bake-Kurage and this happens at the start "
+            "of your next turn. Plans are carried out in the order you made "
+            "them.")
 
 
 def test_the_plan_tip_is_the_rewrite_on_the_page():
@@ -1172,7 +1173,8 @@ def test_the_retired_clauses_left_the_word_and_the_panel_keeps_the_board_facts()
     a seat still needs are where the panel prints them."""
     body = blindplay.ARM_KEYWORDS["Plan"]
     for gone in ("non-Minion", "folds as you write it", "when-hit",
-                 "any number wait", "still standing", "Dusk"):
+                 "any number wait", "still standing", "Dusk", "instead",
+                 "go off"):
         assert gone not in body, gone
     assert "never a Minion" in blindplay.PLAN_AIM_NOTE
     assert "still standing in" in blindplay.PLAN_BLOCK_NOTE

@@ -212,13 +212,13 @@ public class LiveBurn20260902Tests
             typeof(ArmKeywordTips)
                 .GetMethod("ForPlan", HeadlessGame.All)!));
 
-        // THE 2026-09-25 TEXT PASS brought "instead" back, in a sentence
-        // that says what the card is played INSTEAD of: "Play the card on the
-        // Bake-Kurage to save this for the start of your next turn instead."
-        // A plan-only row still leads its own face with "Play on the
+        // THE 2026-09-25 TEXT PASS kept "instead" off: "Play the card on the
+        // Bake-Kurage and this happens at the start of your next turn." A
+        // plan-only row still leads its own face with "Play on the
         // Bake-Kurage." (the codegen's `_plan_only_line`). What this pin is
         // about is unchanged -- the tip says WHERE a Plan card goes, which is
         // the whole of `EB-293`.
+        Assert.DoesNotContain("instead", body);
         Assert.Contains("Play the card on the [gold]Bake-Kurage[/gold]", body);
     }
 

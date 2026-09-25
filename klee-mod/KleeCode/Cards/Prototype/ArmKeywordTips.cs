@@ -684,13 +684,18 @@ public static class ArmKeywordTips
     /// clause is in git. The Dusk timing is stated only on
     /// <see cref="ForDusk"/>. Spec and census:
     /// `review/records/text-pass-2026-09-25/`.
+    ///
+    /// NO "INSTEAD", on the coordinator's follow-up: a Plan-only row has no
+    /// normal play to be instead of (the r2 seat's finding, `EB-293`), and
+    /// "carried out" is the kit's own verb for a Plan where "goes off" is the
+    /// Bomb's.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "Play the card on the [gold]Bake-Kurage[/gold] to save this for "
-          + "the start of your next turn instead. Plans go off in the order "
-          + "you made them.");
+            "Play the card on the [gold]Bake-Kurage[/gold] and this happens "
+          + "at the start of your next turn. Plans are carried out in the "
+          + "order you made them.");
 
     /// <summary>
     /// `EB-643` (R265), THE POOL PASS'S ONE NEW WORD, and it is a rule about

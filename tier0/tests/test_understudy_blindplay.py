@@ -6691,10 +6691,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Vulnerable at the morning.
         # THE 2026-09-25 TEXT PASS: two short sentences, the word's whole
         # text now; the long forms are the panel's own notes.
-        "Plan": [" to save this for ",
-                 "the start of your next turn instead. Plans go off in the "
-                 "order ",
-                 "you made them."],
+        "Plan": [" and this happens ",
+                 "at the start of your next turn. Plans are carried out in "
+                 "the ",
+                 "order you made them."],
         # `EB-643` (R265). The pool pass's one new word, and a rule about WHEN
         # alone: everything else about a Dusk Plan is a Plan and the row above
         # says all of it. The sentence straddles two `[gold]` spans on the mod
