@@ -73,6 +73,14 @@ public sealed class ThunderousApplausePower : PowerModel, ILocalizationProvider
 /// all of it. The Amount is the PERCENTAGE, 50 or 100, so copies add
 /// (<see cref="FurinaStage.AbsorbHit"/>). It does nothing when the lead IS
 /// the back performer.
+///
+/// 2026-09-25 (opus-furina-l2b, (c) 1): AND THE BADGE SAYS SO. A lone lead is
+/// also the back, and upgraded the refund is all of it, so a lone lead would
+/// be immortal -- the rule stands and the face owes the sentence. The seat
+/// banked on a refund with the Usher alone and watched nothing happen, while
+/// Raise and Spend treated that same Usher as the back. "the lead" and "the
+/// back one" rather than the card face's longer nouns, to hold the badge
+/// under the 125-character power ceiling.
 /// </summary>
 public sealed class RaptAudiencePower : PowerModel, ILocalizationProvider
 {
@@ -80,9 +88,9 @@ public sealed class RaptAudiencePower : PowerModel, ILocalizationProvider
     {
         ("title", "A Rapt Audience"),
         ("description",
-            "Whenever an enemy hits the lead performer, [gold]Raise[/gold] "
+            "Whenever an enemy hits the lead, [gold]Raise[/gold] "
           + "[blue]{Amount}[/blue]% of the [gold]Fanfare[/gold] it lost, "
-          + "rounded up, on the back performer."),
+          + "rounded up, on the back one. Needs 2 or more performers."),
     };
 
     public override PowerType Type => PowerType.Buff;

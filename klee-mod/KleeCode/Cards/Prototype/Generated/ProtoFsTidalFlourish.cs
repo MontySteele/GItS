@@ -134,9 +134,14 @@ public sealed class ProtoFsTidalFlourishModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Deal 5 damage to ALL enemies"),
+        ("title", "Deal damage to ALL enemies"),
         ("description", "Deal {PlainDamage:diff()} damage to ALL enemies"),
     };
+
+    public ProtoFsTidalFlourishModeA()
+        : base(CardType.Attack)
+    {
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -168,9 +173,14 @@ public sealed class ProtoFsTidalFlourishModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 2: deal 9 instead"),
+        ("title", "Spend 2"),
         ("description", "[gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead"),
     };
+
+    public ProtoFsTidalFlourishModeB()
+        : base(CardType.Attack)
+    {
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

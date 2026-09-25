@@ -124,9 +124,14 @@ public sealed class ProtoFsInterpositionModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Gain 5 Block"),
+        ("title", "Gain Block"),
         ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]"),
     };
+
+    public ProtoFsInterpositionModeA()
+        : base(CardType.Skill)
+    {
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -158,9 +163,14 @@ public sealed class ProtoFsInterpositionModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 2: gain 10 instead"),
+        ("title", "Spend 2"),
         ("description", "[gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead"),
     };
+
+    public ProtoFsInterpositionModeB()
+        : base(CardType.Skill)
+    {
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

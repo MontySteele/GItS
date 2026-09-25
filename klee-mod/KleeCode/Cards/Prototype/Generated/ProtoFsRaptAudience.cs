@@ -45,7 +45,7 @@ public sealed class ProtoFsRaptAudience : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "A Rapt Audience"),
-        ("description", "Whenever an enemy hits the [gold]lead performer[/gold], [gold]Raise[/gold] {IfUpgraded:show:the|half the} [gold]Fanfare[/gold] it lost{IfUpgraded:show:|, rounded up,} on the [gold]back performer[/gold]."),
+        ("description", "Whenever an enemy hits the [gold]lead performer[/gold], [gold]Raise[/gold] {IfUpgraded:show:the|half the} [gold]Fanfare[/gold] it lost{IfUpgraded:show:|, rounded up,} on the [gold]back performer[/gold]. Needs 2 or more performers."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

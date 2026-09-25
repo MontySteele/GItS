@@ -30,7 +30,8 @@ from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _reward_option, _shop_options,
                                         deck_elements, relic_faces,
                                         remember_deck, run_change, stage_arm)
-from understudy.blindplay_notes import (REWARD_ALTERNATIVE_RELICS,
+from understudy.blindplay_notes import (MODE_CHOOSER_PROMPT,
+                                        REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
                                        _fold, _hand, _int, _player, _potions,
@@ -323,6 +324,12 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # holds means different things on a transform screen than on the
         # other four, and a pick that is already made may not be re-taken.
         obs["select_kind"] = _text(blob.get("screen_type"))
+        # 2026-09-25 (opus-furina-l2b, (c) 2): the bridge hardwires "Choose a
+        # card." on the one-press chooser, and a MODE chooser is not choosing
+        # a card -- it is the card just played asking which way to resolve.
+        # Said in the heading, where a reader looks first.
+        if obs["offers"] and all(o.get("mode_face") for o in obs["offers"]):
+            obs["prompt"] = MODE_CHOOSER_PROMPT
         obs["preview_showing"] = bool(blob.get("preview_showing"))
         # `EB-342`. THE SMITH'S SILENT OMISSIONS. The grid holds the cards the
         # game will upgrade and nothing says what happened to the rest; the

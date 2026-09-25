@@ -88,7 +88,9 @@ def test_the_description_keeps_its_markup():
     text = (GENERATED / "Prototype" / "Generated"
             / "ProtoFsCurtainRise.cs").read_text(encoding="utf-8")
     mode_b = text[text.index("class ProtoFsCurtainRiseModeB"):]
-    assert '("title", "Spend 3: deal 13 instead"),' in mode_b
+    # 2026-09-25 (opus-furina-l2b): titled by its PRICE, with no number the
+    # board folds -- see `test_furina_seat_fixes_2026_09_25`.
+    assert '("title", "Spend 3"),' in mode_b
     assert '("description", "[gold]Spend[/gold] 3: deal ' in mode_b
 
 

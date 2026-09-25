@@ -136,9 +136,14 @@ public sealed class ProtoFsQuickCueModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Deal 3 damage"),
+        ("title", "Deal damage"),
         ("description", "Deal {PlainDamage:diff()} damage"),
     };
+
+    public ProtoFsQuickCueModeA()
+        : base(CardType.Attack)
+    {
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -170,9 +175,14 @@ public sealed class ProtoFsQuickCueModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 2: deal 8 instead"),
+        ("title", "Spend 2"),
         ("description", "[gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead"),
     };
+
+    public ProtoFsQuickCueModeB()
+        : base(CardType.Attack)
+    {
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -198,6 +198,12 @@ def _follow_the_override(keywords: list[dict[str, str]]
     return out
 
 
+#: A generated mode face's id: `<parent>_MODE_A`, `_MODE_B`, ... -- the class
+#: `gen_klee_cards.modal_option_class` names `<Parent>ModeA`, which ModelDb
+#: spells in upper snake case.
+_MODE_FACE_ID = re.compile(r"_MODE_[A-Z]$", re.I)
+
+
 def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
     """One card as the game prints it. Field by field, never spread.
 
@@ -262,6 +268,13 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
             entry.get("id"), _text(entry.get("description")),
             bool(entry.get("is_upgraded") or entry.get("upgraded"))),
         "kind": _text(entry.get("type")),
+        # 2026-09-25 (opus-furina-l2b, (c) 2): a MODE of a card being played,
+        # on its chooser. Read off the id on the tool side, like the printed
+        # cost above, and only the flag crosses. The render prints no cost and
+        # no type for it: the parent's cost was paid when the card was played,
+        # and the wire's "0, Skill" is the option card's placeholder, not the
+        # play's.
+        "mode_face": bool(_MODE_FACE_ID.search(_text(entry.get("id")))),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
         # The card's element indicator, as a word. `""` on every face that
@@ -1248,7 +1261,7 @@ _FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
                                  "numbered": set(), "names": {},
                                  "handles": {}, "elements": set(),
                                  "round": None, "hp": {}, "reborn": {},
-                                 "replaced": {}, "kills": {}}
+                                 "replaced": {}, "kills": {}, "shown": {}}
 #: Whether this process has read the lane's store yet. The load is lazy and
 #: happens once: a fresh `observe` pays one file read, and a long-lived
 #: `Session` pays it on its first fight and never again.
@@ -1283,7 +1296,7 @@ def _load_fight() -> None:
     # from a store written before that row -- absent being the same answer an
     # unread body gives, so an older store simply mints no replacement.
     for key in ("ordinals", "names", "handles", "hp", "reborn", "replaced",
-                "kills"):
+                "kills", "shown"):
         value = held.get(key)
         if isinstance(value, dict):
             _FIGHT_MEMORY[key] = dict(value)
@@ -1311,6 +1324,7 @@ def _save_fight() -> None:
            "reborn": dict(_FIGHT_MEMORY["reborn"]),
            "replaced": dict(_FIGHT_MEMORY["replaced"]),
            "kills": dict(_FIGHT_MEMORY["kills"]),
+           "shown": dict(_FIGHT_MEMORY["shown"]),
            "numbered": sorted(_FIGHT_MEMORY["numbered"]),
            "elements": sorted(_FIGHT_MEMORY["elements"]),
            "round": _FIGHT_MEMORY["round"]}
@@ -1334,6 +1348,7 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["reborn"] = {}
     _FIGHT_MEMORY["replaced"] = {}
     _FIGHT_MEMORY["kills"] = {}
+    _FIGHT_MEMORY["shown"] = {}
     _FIGHT_LOADED[0] = True
     try:
         _fight_store().unlink()
@@ -1387,6 +1402,10 @@ def remembered_enemy_name(combat_id: Any, title: str) -> str:
     name = _FIGHT_MEMORY["names"].get(key)
     if not name:
         return title
+    # 2026-09-25: what the enemy list PRINTED for it on the last screen it
+    # stood on -- numbered only where that screen printed its name twice.
+    if _FIGHT_MEMORY["shown"].get(key):
+        return _FIGHT_MEMORY["shown"][key]
     if _fold(name) in _FIGHT_MEMORY["numbered"] and key in _FIGHT_MEMORY["ordinals"]:
         return f"{name} ({_FIGHT_MEMORY['ordinals'][key]})"
     return name
@@ -1672,10 +1691,34 @@ def _enemy_names(enemies: list[dict[str, Any]],
         if seen_hp.get(key) != hp:
             seen_hp[key] = hp
             fresh = True
+    # 2026-09-25 (opus-furina-l2b, (c) 5). A NUMBER ONLY WHERE THIS SCREEN
+    # PRINTS THE NAME TWICE. A lone Gas Bomb printed as "Gas Bomb (2)": Living
+    # Fog had summoned one earlier, it died and left the feed, and the name
+    # stayed in `numbered` for the fight -- so the second bomb wore the index
+    # of a body the screen no longer showed. The seat brief and the prompt
+    # both promise the opposite ("a name that appears only once is never
+    # numbered"). The ORDINAL is still minted once and kept for the fight, so
+    # two survivors of three keep `(2)` and `(3)` rather than renumbering
+    # under the reader (`EB-271`); only the suffix waits for a second copy on
+    # the same screen. A stale `(2)` still resolves to the one body left
+    # (`blindplay_grammar._match`'s one-copy rule).
+    on_screen: dict[str, int] = {}
+    for n in names:
+        on_screen[_fold(n)] = on_screen.get(_fold(n), 0) + 1
+    printed = [f"{n} ({ordinals[k]})"
+               if _fold(n) in numbered and k in ordinals
+               and on_screen.get(_fold(n), 0) > 1
+               else n for k, n in zip(keys, names)]
+    # `EB-427`'s receipts name a body that has LEFT the board by what this
+    # page called it while it stood, so the name each body printed as is kept.
+    shown: dict[str, str] = _FIGHT_MEMORY["shown"]
+    for key, name in zip(keys, printed):
+        if shown.get(key) != name:
+            shown[key] = name
+            fresh = True
     if fresh or reborn:
         _save_fight()
-    return [f"{n} ({ordinals[k]})" if _fold(n) in numbered and k in ordinals
-            else n for k, n in zip(keys, names)]
+    return printed
 
 
 def _enemy_handles(enemies: list[dict[str, Any]]) -> list[str]:

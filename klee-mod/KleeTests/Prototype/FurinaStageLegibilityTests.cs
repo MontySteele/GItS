@@ -285,10 +285,20 @@ public class FurinaStageLegibilityTests
     public void The_stage_badge_is_the_ruled_text()
     {
         Assert.Equal(
-            "Performers act at the end of your turn. Attacks hit your "
-          + "[gold]Block[/gold], then the lead performer's "
+            "Up to 3 performers act at the end of your turn. Attacks hit "
+          + "your [gold]Block[/gold], then the lead performer's "
           + "[gold]Fanfare[/gold], then you.",
             Badge<StageSummaryPower>("description"));
+    }
+
+    /// <summary>2026-09-25 (opus-furina-l2b, (c) 3): the seat count on the
+    /// badge is the law's, so a change to the stage's size moves the
+    /// sentence with it.</summary>
+    [Fact]
+    public void The_stage_badge_names_the_seat_count_from_the_law()
+    {
+        Assert.StartsWith($"Up to {FurinaStageLaw.Seats} performers ",
+                          Badge<StageSummaryPower>("description"));
     }
 
     // ---- the badges change no number --------------------------------------

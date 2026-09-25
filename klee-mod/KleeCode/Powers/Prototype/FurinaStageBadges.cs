@@ -232,8 +232,13 @@ public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "The Stage"),
+        // 2026-09-25 (opus-furina-l2b, (c) 3): THE SEAT COUNT. Neither this
+        // badge nor the Summon tip's full-stage clause said how many seats
+        // there are, and the seat "never dared a third summon". The number is
+        // the law's, interpolated.
         ("description",
-            "Performers act at the end of your turn. Attacks hit your "
+            "Up to " + FurinaStageLaw.Seats + " performers act at the end of "
+          + "your turn. Attacks hit your "
           + "[gold]Block[/gold], then the lead performer's "
           + "[gold]Fanfare[/gold], then you."),
     };
