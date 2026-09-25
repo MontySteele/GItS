@@ -720,10 +720,10 @@ public static class FurinaStage
         // Applause's Raise between the bows now summons onto the stage this
         // card emptied -- and a return that ROTATED would push that performer
         // off. The sim's `bow_and_return` has always read the clause this way.
-        foreach (var who in company)
-        {
-            if (!ledger.IsFull) ledger.Summon(who);
-        }
+        // And never a second copy (2026-09-25): Usher's Bow summons a random
+        // performer onto that same empty stage, and one it picked is already
+        // back (`FurinaStageLedger.ReturnCompany`).
+        ledger.ReturnCompany(company);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }

@@ -897,6 +897,30 @@ public sealed class FurinaStageLedger
         return total;
     }
 
+    /// <summary>
+    /// <i>Let the People Rejoice</i>'s "then return with 1", after the bows:
+    /// each member of the company, in seat order, takes the back-most EMPTY
+    /// seat at <see cref="FurinaStageLaw.SummonFanfare"/>. A member finds no
+    /// seat when the stage is full, and does not come back a SECOND time when
+    /// it is already standing (2026-09-25: Usher's Bow, or a Thunderous
+    /// Applause Raise, summons a random performer onto the stage the card
+    /// emptied, and the one it picks may be a member of the company). So the
+    /// stage never holds two of the same performer after the card. Returns
+    /// how many came back.
+    /// </summary>
+    public int ReturnCompany(IEnumerable<StagePerformer> company)
+    {
+        var back = 0;
+        foreach (var who in company)
+        {
+            if (IsFull) break;
+            if (SeatOf(who) != null) continue;
+            Summon(who);
+            back++;
+        }
+        return back;
+    }
+
     /// <summary>Who <see cref="CollectAll"/> left waiting, taken once. Empty
     /// at every moment no card is mid-Rejoice.</summary>
     public IReadOnlyList<StagePerformer> TakePendingCurtainCall()

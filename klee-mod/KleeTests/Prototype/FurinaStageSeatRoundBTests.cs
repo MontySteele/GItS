@@ -93,6 +93,43 @@ public class FurinaStageSeatRoundBTests
         Assert.Equal(7, stage.Lead!.Fanfare);
     }
 
+    // ---- 1b. Let the People Rejoice never leaves two of one performer -------
+
+    [Theory]
+    [InlineData(StagePerformer.Usher)]
+    [InlineData(StagePerformer.Chevalmarin)]
+    [InlineData(StagePerformer.Crabaletta)]
+    public void The_rares_return_never_brings_back_one_already_standing(
+        StagePerformer picked)
+    {
+        using var _ = new Arm();
+        var (_, stage) = Stage((StagePerformer.Usher, 5),
+                               (StagePerformer.Chevalmarin, 2),
+                               (StagePerformer.Crabaletta, 2));
+        stage.CollectAll();
+        var company = stage.TakePendingCurtainCall();
+        // Usher's Bow on the stage the card emptied: a random arrival at 4.
+        stage.SummonOnEmpty(picked, FurinaStageLaw.BowUsherFanfare);
+
+        Assert.Equal(2, stage.ReturnCompany(company));
+
+        var standing = stage.Seats.Select(s => s.Who).ToList();
+        Assert.Equal(standing.Count, standing.Distinct().Count());
+        Assert.Equal(FurinaStageLaw.Seats, standing.Count);
+        Assert.Equal(picked, standing[0]);
+        Assert.Equal(FurinaStageLaw.BowUsherFanfare, stage.Seats[0].Fanfare);
+        Assert.All(stage.Seats.Skip(1),
+                   s => Assert.Equal(FurinaStageLaw.SummonFanfare, s.Fanfare));
+    }
+
+    [Fact]
+    public void The_curtain_call_returns_through_the_one_guarded_door()
+    {
+        var calls = Il.Calls(Il.Method("FurinaStage", "CurtainCall"));
+        Assert.Contains("FurinaStageLedger.ReturnCompany", calls);
+        Assert.DoesNotContain("FurinaStageLedger.Summon", calls);
+    }
+
     // ---- 2. The Weak off-by-one ----------------------------------------------
 
     [Fact]

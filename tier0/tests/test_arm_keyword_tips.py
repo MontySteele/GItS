@@ -406,10 +406,9 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     "KLEEMOD-ARM_PLAN_TWICE",
                     # (`Encore` was the sixth until R276's hygiene: no card
                     # attached its tip, so the body and its key left.)
-                    # A Stage round-three defect: WHICH BAR a reader's number
-                    # is. Since the text pass only the Rare carries it: the
-                    # other readers' faces name the seat outright.
-                    "KLEEMOD-ARM_STAGE_READER",
+                    # (`KLEEMOD-ARM_STAGE_READER`, which bar a Stage
+                    # reader's number is, left on 2026-09-25 with its last
+                    # row: Let the People Rejoice deals twice its Fanfare.)
                     # 2026-09-25: what a summon does and what each performer
                     # does. Faces print these words UNGOLDED ("Summon
                     # Usher"), so they attach off the `stage_summon` op
@@ -1180,22 +1179,11 @@ def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
 # "Deal damage equal to your [gold]Block[/gold].{InCombat:\n(Deals
 # {CalculatedDamage:diff()} damage)|}" -- the game hands every description an
 # `InCombat` flag -- so each reader now prints its RULE in words and its live
-# number on a line of its own only in combat. The hover tip stays, as the
-# one-line statement of which seat the number is read off, without the
-# off-board disclaimer it carried while the face printed 0.
-
-#: Each reader, the bar its number is, and the sentence it owes. THE TEXT
-#: PASS (2026-09-25) deleted the tip "wherever the face now names the
-#: performer": Ousia Surge, Pneuma Refrain and Final Bow print "your back
-#: performer's" / "your front performer's", and only the Rare -- "all your
-#: performers' Fanfare" -- keeps its sentence.
-#: 2026-09-25 (the afternoon seat round): NONE. Let the People Rejoice was the
-#: last row whose number IS a bar; it now deals twice the Fanfare it spends,
-#: so the reader sentence ("The number is every performer's Fanfare added up
-#: and spent") would be false on it, and `stage_reader_source` drops it the
-#: way it drops Bravura's "3 per point". Its face says "twice your
-#: performers' Fanfare" in words.
-STAGE_READERS: dict[str, tuple[str, str]] = {}
+# number on a line of its own only in combat. The hover tip that said which
+# seat the number is read off is gone: the text pass (2026-09-25) deleted it
+# wherever the face names the performer, and the afternoon seat round the
+# same day deleted the last one, the Rare's, whose face now reads "twice your
+# performers' Fanfare".
 
 #: The three readers whose face names the seat, and so carry no reader tip.
 STAGE_READERS_NAMED_ON_THE_FACE = {
@@ -1205,28 +1193,6 @@ STAGE_READERS_NAMED_ON_THE_FACE = {
 }
 
 
-def test_the_four_readers_are_the_rows_whose_number_is_a_bar():
-    """DERIVED FROM THE MULTIPLIER, never a list of ids.
-
-    `stage_reader_source` reads the C# expression `EB-747` already picked for
-    the row's `amount_formula`, so a fifth reader carries the sentence the day
-    its row exists and a row that stops reading a bar loses it the same day.
-
-    Seen to FAIL before the rider: no row on the surface attached one.
-    """
-    rows = {row["id"]: row for row in proto._rows()}
-    found = {rid: gen.stage_reader_source(row)
-             for rid, row in rows.items()
-             if gen.stage_reader_source(row)}
-    assert found == {rid: src for rid, (src, _) in STAGE_READERS.items()}
-
-
-def test_every_reader_carries_the_rule_its_number_obeys():
-    """The attach is committed, with the right one of the four sentences."""
-    for source, cls in STAGE_READERS.values():
-        src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
-        assert ("ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, "
-                f"ArmKeywordTips.StageReader.{source})") in src
 
 
 def test_the_rare_at_twice_the_fanfare_carries_no_reader_tip():
@@ -1251,40 +1217,16 @@ def test_a_reader_whose_face_names_the_seat_carries_no_reader_tip(rid):
             or "[gold]front performer[/gold]" in row["description"])
 
 
-def test_the_readers_tip_states_each_rule():
-    """The rule, on every screen. The off-board disclaimer ("the number above
-    reads 0") left with R276: the faces print the rule outside combat now, so
-    the sentence would be false everywhere."""
+def test_the_readers_tip_is_gone():
+    """2026-09-25: the Stage readers' rider left with its last row. Let the
+    People Rejoice deals twice its Fanfare, so the one-bar sentence would be
+    false on it, and its face states the rate in words."""
     tips = TIPS_CS.read_text(encoding="utf-8")
-    assert 'const string ReaderKey = "KLEEMOD-ARM_STAGE_READER";' in tips
-    # The one rule left (the text pass deleted the three whose face names
-    # the seat), and none of the three it deleted.
-    assert ("The number is every performer's [gold]Fanfare[/gold] added up and"
-            in tips)
-    assert "The number is the [gold]lead performer[/gold]'s " not in tips
-    assert "The number is the [gold]back performer[/gold]'s " not in tips
-    assert "no stage outside combat" not in tips
-    assert "return With(inherited, ReaderKey, rule);" in tips
-    # The title row is registered, or the tip renders with a raw loc key.
-    assert 'ArmKeywordTips.ReaderKey + ".title"' in MOD_CS.read_text(
-        encoding="utf-8")
-
-
-def test_the_readers_rules_are_measured():
-    """The census sees the one rule left (four before the text pass).
-
-    A `With(...)` call whose body is a named const reaches
-    `lint_text_conventions.tip_rows` as an empty string -- the silence
-    `EB-343` was filed on -- so the rule is parsed out by name.
-    """
-    sys.path.insert(0, str(REPO / "tools"))
-    import lint_text_conventions as lint       # noqa: E402
-
-    rows = {row.ident: row.raw for row in lint.tip_rows()
-            if row.ident.startswith("ReaderKey.")}
-    assert len(rows) == 1
-    for ident, raw in rows.items():
-        assert len(lint.render(raw)) <= lint.CEILING["tip"], ident
+    for gone in ("ReaderKey", "KLEEMOD-ARM_STAGE_READER", "ForStageReader",
+                 "ReaderSpendAllRule", "added up and"):
+        assert gone not in tips, gone
+    assert "ReaderKey" not in MOD_CS.read_text(encoding="utf-8")
+    assert not hasattr(gen, "stage_reader_source")
 
 
 # ---------------------------------------------------------------------------

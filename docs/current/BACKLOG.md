@@ -12,6 +12,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Kits and display (the mod)
 
+- Shipped Furina's Encore buffer (FurinaResources.AbsorbDamage) rounds a fractional HP loss up; the engine truncates (found 2026-09-25).
 - Beetle Juice's Shrink on an enemy prints "While is alive, you deal 30% less damage": the name is blank and it speaks in the player's voice (Klee seat, 2026-09-23).
 - Rosaria's Melt on Klee's board printed "Deal 15" from a written 9, which no printed multiplier explains; show the reaction's factor on the face.
 - Klee: dead engine code for the cut cards (Explosives Workshop, Catalytic Converter, Kindling) still compiles; delete it with its tests.

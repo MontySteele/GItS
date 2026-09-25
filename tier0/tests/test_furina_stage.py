@@ -547,17 +547,54 @@ def test_final_bow_takes_the_back_performer_and_leaves_the_shield(arm):
 
 def test_the_rare_spends_the_whole_stage_bows_and_returns_it_at_one(arm):
     st = _state(enemies=[_enemy(hp=60)])
+    st.rng = _Picks("crabaletta")
     st.player.stage = [["usher", 5], ["chevalmarin", 3], ["crabaletta", 2]]
     assert FS.collect_all(st) == 10
     assert st.player.stage == []
     FS.bow_and_return(st)
     # The bows land on the stage the card emptied, so Usher's 4 Fanfare is a
-    # random performer arriving holding it; the returns then fill the two
-    # seats left, in order, and Crabaletta finds none (2026-09-25).
-    assert st.player.stage[0][1] == FS.BOW_USHER_FANFARE
-    assert st.player.stage[1:] == [["usher", 1], ["chevalmarin", 1]]
+    # random performer arriving holding it -- Crabaletta here, who is then
+    # already back and does not return twice; the other two fill the empty
+    # seats in order (2026-09-25).
+    assert st.player.stage == [["crabaletta", FS.BOW_USHER_FANFARE],
+                               ["usher", 1], ["chevalmarin", 1]]
     assert st.player.block == 0
     assert st.enemies[0].hp == 60 - FS.BOW_CRABALETTA_DAMAGE
+
+
+class _Picks(random.Random):
+    """An rng whose `choice` over the three performers returns `pick`."""
+
+    def __init__(self, pick):
+        super().__init__(0)
+        self.pick = pick
+
+    def choice(self, seq):
+        return self.pick if self.pick in seq else super().choice(seq)
+
+
+@pytest.mark.parametrize("pick", FS.PERFORMERS)
+@pytest.mark.parametrize("applause", [False, True])
+def test_the_rare_never_leaves_two_of_one_performer(arm, pick, applause):
+    """2026-09-25: Usher's Bow summons a random performer onto the stage the
+    card emptied. Whoever it picks is already back, so that member of the
+    company does not return a second time; the others take the empty seats.
+    Every pick, with and without Thunderous Applause."""
+    st = _state(enemies=[_enemy(hp=200)])
+    st.rng = _Picks(pick)
+    st.player.draw_pile = [_card(cid=str(i)) for i in range(5)]
+    if applause:
+        effects.resolve_card(st, _card(type="power", effects=[
+            {"op": "apply_power", "power": FS.THUNDEROUS_APPLAUSE,
+             "amount": 2, "target": "self"}]))
+    st.player.stage = [["usher", 5], ["chevalmarin", 2], ["crabaletta", 2]]
+    FS.collect_all(st)
+    FS.bow_and_return(st)
+    members = [m for m, _f in st.player.stage]
+    assert len(members) == len(set(members)) == FS.SEATS
+    assert members[0] == pick
+    assert members[1:] == [m for m in ("usher", "chevalmarin", "crabaletta")
+                           if m != pick][:2]
 
 
 def test_the_rare_without_usher_returns_everyone(arm):

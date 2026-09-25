@@ -441,7 +441,7 @@ act resolves twice, and each further copy adds one more act. Thunderous
 Applause gives its Fanfare after the bowing performer has left, so on an
 empty stage it summons a random performer holding the amount (round four), and the
 draw still happens. Let the People Rejoice's performers return to empty seats
-only, so one that finds none (an applause summon or Usher's Bow took it) does not return. A Rapt Audience does nothing while one
+only, so one that finds none (an applause summon or Usher's Bow took it) does not return, and one that summon already brought back does not return a second time: the stage never holds two of the same performer after the card. A Rapt Audience does nothing while one
 performer is both front and back. Arkhe Alignment's "double" multiplies the
 act's printed number (Usher 6 Block, Chevalmarin 4 to every enemy, Crabaletta
 10). One question a turn however many copies are in play: copies add (two

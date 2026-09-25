@@ -773,8 +773,15 @@ def bow_and_return(state) -> None:
         _after_bow(state, member, may_return=False)
     seats = _seats(p)
     for member in company:
-        if len(seats) < SEATS:
-            seats.append([member, SUMMON_FANFARE])
+        # To an EMPTY seat only, and never a second copy (2026-09-25): Usher's
+        # Bow, or a Thunderous Applause Raise, summons a random performer onto
+        # the stage the card emptied, and the one it picks may be a member of
+        # the company, already back. `FurinaStageLedger.ReturnCompany`'s twin.
+        if len(seats) >= SEATS:
+            break
+        if any(m == member for m, _f in seats):
+            continue
+        seats.append([member, SUMMON_FANFARE])
     state.emit("stage_encore_return", company=[m for m, _f in seats],
                fanfare=SUMMON_FANFARE)
 

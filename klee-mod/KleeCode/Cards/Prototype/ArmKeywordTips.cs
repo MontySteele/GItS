@@ -149,16 +149,6 @@ public static class ArmKeywordTips
     // "completely undiscoverable except by accident".
     public const string MergeRidersKey = "KLEEMOD-ARM_MERGE_RIDERS";
 
-    // A STAGE ROUND-THREE DEFECT. THE SIXTH KEY HERE THAT TITLES NO KEYWORD,
-    // and it is the second one whose sentence changes with the screen. The
-    // four Stage READERS multiply a live bar, so off a board they print a
-    // literal 0 -- "Deal 0 damage to ALL enemies" on the Rare at Neow, "Deal 0
-    // damage" on `Ousia Surge` at a reward -- and two round-three seats turned
-    // the Rare down on it. The description cannot say otherwise: a face is a
-    // loc string injected once at boot. So the rule is a rider, beside
-    // `EmptyFieldKey` and for its reason.
-    public const string ReaderKey = "KLEEMOD-ARM_STAGE_READER";
-
     // ----------------------------------------------------------- Klee ------
     //
     // The four sentences are the ruled brief's sec.3 rules 1, 2, 4 and 6, as
@@ -950,49 +940,4 @@ public static class ArmKeywordTips
           + " [gold]Hydro[/gold] damage to a random enemy. [gold]Bow[/gold]: "
           + "deal " + FurinaStageLaw.BowCrabalettaDamage
           + " [gold]Hydro[/gold] damage to a random enemy.");
-
-    /// <summary>
-    /// WHICH BAR A READER'S NUMBER IS. Once one value per reader; since the
-    /// text pass (2026-09-25) ONE. [USER]'s pass deletes the reader tip
-    /// "wherever the face now names the performer": <i>Ousia Surge</i> and
-    /// <i>Final Bow</i> print "your back performer's", <i>Pneuma Refrain</i>
-    /// "your front performer's", so a tip saying which bar the number is would
-    /// restate the face. <i>Let the People Rejoice</i> names no one seat --
-    /// "all your performers' Fanfare" -- and keeps its sentence.
-    ///
-    /// DERIVED AND NEVER DECLARED. `gen_klee_cards.stage_reader_source` reads
-    /// the value off the multiplier `EB-747` already picked for the row's
-    /// `amount_formula`.
-    /// </summary>
-    public enum StageReader
-    {
-        /// <summary>`SpentOrTotalFanfare` -- the Rare.</summary>
-        SpendAll,
-    }
-
-    // The rule, as a `const string` rather than an inline literal, because
-    // `tools/lint_text_conventions.tip_rows` reads THIS file for its census
-    // and a body built by a method reaches it as an empty string -- the
-    // silence `EB-343` was filed on. The lint parses it by name and measures
-    // it against the ceiling.
-    private const string ReaderSpendAllRule =
-        "The number is every performer's [gold]Fanfare[/gold] added up and "
-      + "spent.";
-
-    /// <summary>
-    /// WHICH BAR THIS READER'S NUMBER IS, as a hover tip.
-    ///
-    /// Round three found the readers printing a literal 0 off the board
-    /// ("Deal 0 damage to ALL enemies" on the Rare at Neow). The FACES now
-    /// carry the base game's own answer -- Body Slam's shape: the rule in
-    /// words, and the live number on a line of its own only in combat
-    /// (`{InCombat:...|}`) -- so no screen prints a misleading 0 any more,
-    /// and this tip stays as the one-line statement of what is read.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForStageReader(
-        IEnumerable<IHoverTip> inherited, CardModel card, StageReader source)
-    {
-        var rule = ReaderSpendAllRule;
-        return With(inherited, ReaderKey, rule);
-    }
 }
