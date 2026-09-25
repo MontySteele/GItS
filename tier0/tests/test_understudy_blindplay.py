@@ -6746,9 +6746,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Bow": ["A performer that leaves the stage acts one last time on "
                 "its way "],
         "front performer": ["Takes hits first. Regains "],
-        # `EB-744` and round four: the back is reached last. Draft 3: the
-        # fade, whose threshold is interpolated on the mod side.
-        "back performer": ["Gains and Spends ", ". Hits reach it last. At ",
+        # Draft 3: the fade, whose threshold is interpolated on the mod
+        # side. The guest round: hits never reach the back (rule 6).
+        "back performer": ["Gains and Spends ", ". Hits never reach it. At ",
                            "the end of your turn, it loses half its Fanfare "
                            "above "],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is

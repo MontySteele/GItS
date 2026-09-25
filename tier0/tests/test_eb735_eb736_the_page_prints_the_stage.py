@@ -536,8 +536,9 @@ def test_the_back_performer_row_says_where_hits_go():
     safe", so the row says plainly where hits go."""
     page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                  hand=[_card("Gain Block equal to the back performer's bar.")])
-    # The text pass (2026-09-25): the back performer tip's own words.
-    assert "Hits reach it last." in page
+    # The guest round (2026-09-25): rule 6 never runs a hit past the front.
+    assert "Hits never reach it." in page
+    assert "Hits reach it last." not in page
     assert "no single attack reaches it" not in page
     assert "nothing hits it" not in page
 

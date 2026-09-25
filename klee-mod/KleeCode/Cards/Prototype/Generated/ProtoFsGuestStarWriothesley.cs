@@ -45,7 +45,7 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Wriothesley"),
-        ("description", "Wriothesley joins the stage with {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Wriothesley joins the stage at the front with {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "wriothesley", DynamicVars["GuestFanfare"].IntValue);
+        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "wriothesley", DynamicVars["GuestFanfare"].IntValue, atFront: true);
     }
 
     protected override void OnUpgrade()

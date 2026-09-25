@@ -518,6 +518,38 @@ def recast_front(state, newcomer: str | None = None,
                seats=len(seats), rotated=True, via="recast")
 
 
+def recast_back(state, newcomer: str, arrival: int) -> None:
+    """A FRONT-SEAT GUEST ON A FULL STAGE (the guest seat round, 2026-09-25)
+    -- `FurinaStage.RecastFromBack`'s twin. `recast_front` with the leaver at
+    the other end: the BACK performer Bows (a real Bow, its readers too, but
+    no Five-Century return) and leaves, and the newcomer arrives at the FRONT
+    holding `arrival` plus the leaver's remaining Fanfare. Bow, readers,
+    arrival. It does not act on arrival (`EB-738`)."""
+    p = state.player
+    if not active(p):
+        return
+    seats = _seats(p)
+    if len(seats) < SEATS:
+        return
+    index = len(seats) - 1
+    pair = seats.pop(index)
+    leaver, kept = pair
+    _unrest(p, pair)
+    exit_ = _exit(p, leaver, index, held=kept)
+    state.emit("stage_leave", member=leaver, bowed=True, reason="recast",
+               fanfare=kept)
+    _bow(state, leaver, exit_)
+    _after_bow(state, leaver, may_return=False)
+    if len(seats) >= SEATS:
+        book_loss(state, LOSS_LEFT, kept)
+        return
+    book_gain(state, GAIN_GUEST if newcomer in GUESTS else GAIN_SUMMON,
+              int(arrival))
+    seats.insert(0, [newcomer, kept + int(arrival)])
+    state.emit("stage_summon", member=newcomer, fanfare=kept + int(arrival),
+               seats=len(seats), rotated=True, via="recast", seat="front")
+
+
 def rotate(state) -> None:
     """Scene Change (sec.12): the FRONT performer moves to the back seat, bar
     and all. A pure reorder -- no bow, no act, nothing lost (sec.5.2:
@@ -1344,7 +1376,7 @@ def _holds(player, pair) -> bool:
     return any(s is pair for s in stage(player))
 
 
-def guest_star(state, member: str, amount: int) -> None:
+def guest_star(state, member: str, amount: int, front: bool = False) -> None:
     """A GUEST STAR CARD: "<Name> joins the stage with N Fanfare."
 
       * already on stage (one of each; [USER]: "only one Neuvillette allowed -
@@ -1357,6 +1389,11 @@ def guest_star(state, member: str, amount: int) -> None:
         and the guest arrives at the back holding the front's Fanfare, like
         any summon (`recast_front`);
       * otherwise the back-most empty seat, holding N.
+
+    `front` (the guest seat round, 2026-09-25; Wriothesley's card): he joins
+    in the FRONT seat and the others shift back one, and on a full stage the
+    recast's leaver is the BACK performer (`recast_back`). A repeat copy is
+    unchanged.
 
     It does not act on arrival (`EB-738`). C# twin: `FurinaStage.GuestStar`.
     """
@@ -1386,12 +1423,19 @@ def guest_star(state, member: str, amount: int) -> None:
             book_loss(state, LOSS_LEFT, pair[1])
         return
     if len(seats) >= SEATS:
-        recast_front(state, member, int(amount))
+        if front:
+            recast_back(state, member, int(amount))
+        else:
+            recast_front(state, member, int(amount))
         return
     book_gain(state, GAIN_GUEST, int(amount))
-    seats.append([member, int(amount)])
+    if front:
+        seats.insert(0, [member, int(amount)])
+    else:
+        seats.append([member, int(amount)])
     state.emit("stage_summon", member=member, fanfare=int(amount),
-               seats=len(seats), rotated=False, via="guest")
+               seats=len(seats), rotated=False, via="guest",
+               seat="front" if front else "back")
 
 
 def _pay(state, pair, amount: int, actor: str, owed: list) -> None:

@@ -854,8 +854,9 @@ public static class ArmKeywordTips
 
     /// <summary>
     /// Brief sec.3 rules 5, 6 and 8, from the other end. The back seat is the
-    /// BANK (R276): a Raise fills it, a Spend draws from it, and hits reach
-    /// it only once every seat ahead of it is empty.
+    /// BANK (R276): a Raise fills it and a Spend draws from it. Rule 6: the
+    /// front absorbs and the rest reaches Furina, so a hit never runs on to
+    /// the middle or back seat.
     /// </summary>
     public static IEnumerable<IHoverTip> ForBackPerformer(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -870,7 +871,10 @@ public static class ArmKeywordTips
             // The text pass (2026-09-25): the empty-stage summon the
             // retired Raise tip carried is the Fanfare tip's now.
             // Draft 3 (2026-09-25): rule 12, the fade, on the seat it hits.
-            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last. At "
+            // THE GUEST ROUND (2026-09-25, 0.2.3794): "Hits reach it last"
+            // was false -- rule 6 never runs a hit on past the front -- and
+            // the Opus seat lost Wriothesley's plan to it.
+            "Gains and Spends [gold]Fanfare[/gold]. Hits never reach it. At "
           + "the end of your turn, it loses half its Fanfare above "
           + FurinaStageLaw.FadeThreshold + ".");
 

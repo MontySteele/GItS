@@ -790,6 +790,9 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             "fanfare": _int(row.get("fanfare")),
             "entity_id": (None if row.get("entity_id") is None
                           else _text(row.get("entity_id"))),
+            # The guest seat round (2026-09-25): the seat's own key, which a
+            # log row carries too. None on an older build.
+            "key": _seat_key(row.get("seat_key")),
         })
     log = []
     for row in (raw.get("log") or []):
@@ -801,6 +804,9 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             "member": member,
             "name": STAGE_SHORT_NAMES.get(member, _text(row.get("name"))),
             "seat": _int(row.get("seat")),
+            # The guest seat round (2026-09-25): which seat object the beat
+            # happened in. None where it stood in none, or on an older build.
+            "key": _seat_key(row.get("seat_key")),
             "fanfare": _int(row.get("fanfare")),
             "moved": _int(row.get("moved")),
             "why": STAGE_LEAVE_REASONS.get(_text(row.get("reason")),
@@ -837,6 +843,15 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
     return {"seats": seats, "log": log,
             "act_block": None if act_block is None else _int(act_block),
             "forecast": _stage_forecast(raw.get("forecast"))}
+
+
+def _seat_key(raw: Any) -> int | None:
+    """A seat's key off the wire (`StageSeat.Key`), or None where the wire
+    sends none (an older build) or -1 (a beat that stands in no seat)."""
+    if raw is None:
+        return None
+    key = _int(raw, -1)
+    return key if key >= 0 else None
 
 
 def _stage_forecast(raw: Any) -> dict[str, Any] | None:
@@ -1858,8 +1873,14 @@ def _option_faces(entry: Any, skip: str = "") -> list[dict[str, str]]:
         name = _text(tip.get("name"))
         if name and _fold(name) not in seen:
             seen.add(_fold(name))
+            # THE GUEST SEAT ROUND (2026-09-25). A CARD TIP'S COST. The Wood
+            # Carvings event named Toric Toughness with its rules and no cost,
+            # and the seat learned it costs 2 when it drew it. The bridge
+            # sends `cost` on a card tip (`BuildHoverTips`) and on nothing
+            # else, so a keyword row is untouched.
             out.append({"name": name,
-                        "text": _text(tip.get("description"))})
+                        "text": _text(tip.get("description")),
+                        "cost": _text(tip.get("cost"))})
     return out
 
 

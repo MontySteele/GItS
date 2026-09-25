@@ -1232,7 +1232,9 @@ public class KokomiOverhaulRuleTests
         // Vulnerable lands once, and lands in phase 2 where it belongs
         // instead of after the cap. The second expression is gone;
         // `HitOrderPinTests` is the pair table saying what it was costing.
-        Assert.Contains("HitOrder.BodyForPreview", calls);
+        // (The guest seat round: through `FoldedPreview.Body`, which is
+        // `HitOrder.BodyForPreview` everywhere but a Furina Stage board.)
+        Assert.Contains("FoldedPreview.Body", calls);
         Assert.DoesNotContain("SimDamagePipeline.TargetMods", calls);
     }
 

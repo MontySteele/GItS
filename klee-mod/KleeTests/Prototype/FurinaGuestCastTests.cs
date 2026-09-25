@@ -161,6 +161,109 @@ public class FurinaGuestCastTests
         Assert.Contains("FurinaStageLedger.GuestArrives", calls);
     }
 
+    // ---- the guest seat round (2026-09-25): Wriothesley joins at the front ---
+
+    [Fact]
+    public void Wriothesley_played_onto_two_performers_stands_in_front_and_takes_the_next_hit()
+    {
+        using var _ = new Arm();
+        var (seat, stage) = Stage(("usher", 3), ("crabaletta", 4));
+        Assert.True(stage.GuestArrives(StagePerformer.Wriothesley, 8,
+                                       atFront: true));
+        Assert.Equal(new[] { StagePerformer.Wriothesley, StagePerformer.Usher,
+                             StagePerformer.Crabaletta },
+                     stage.Seats.Select(s => s.Who).ToArray());
+        Assert.Equal(new[] { 8, 3, 4 }, Bars(stage));
+        var arrive = stage.Beats[^1];
+        Assert.Equal(("arrive", 0), (arrive.Event, arrive.Seat));
+
+        // The forecast reads the stage the card left: past Usher's 3 Block
+        // the next hit is his, and none of it reaches her.
+        var forecast = FurinaStage.Forecast(seat.Creature, new[] { 9 });
+        Assert.Equal(StagePerformer.Wriothesley, forecast.Seats[0].Who);
+        Assert.Equal(9 - FurinaStageLaw.ActUsherBlock, forecast.FrontTakes);
+        Assert.Equal(0, forecast.ReachesFurina);
+
+        // And the hit, dealt: his bar takes it and his reading counts it.
+        var hit = stage.Absorb(5);
+        Assert.Equal(5, hit.Absorbed);
+        Assert.Equal(new[] { 3, 3, 4 }, Bars(stage));
+        Assert.Equal(5, stage.Seats[0].LostSinceAct);
+    }
+
+    [Fact]
+    public void A_second_ushers_arrival_names_his_own_seat_on_the_wire()
+    {
+        // The guest seat round (2026-09-25): the log said a summoned Usher
+        // "stands in the front seat" while the stage showed him at the back.
+        // The arrival beat carries the key of the seat he took.
+        using var _ = new Arm();
+        var (seat, stage) = Stage(("usher", 3));
+        stage.Summon(StagePerformer.Usher);
+        var wire = FurinaStageLedger.Snapshot(seat.Player);
+        var seats = ((List<object?>)wire["seats"]!)
+            .Cast<Dictionary<string, object?>>().ToList();
+        var arrive = ((List<object?>)wire["log"]!)
+            .Cast<Dictionary<string, object?>>()
+            .Single(r => (string?)r["event"] == "arrive");
+        Assert.Equal(2, seats.Count);
+        Assert.NotEqual(seats[0]["seat_key"], seats[1]["seat_key"]);
+        Assert.Equal(seats[1]["seat_key"], arrive["seat_key"]);
+        Assert.Equal(1, arrive["seat"]);
+    }
+
+    [Fact]
+    public void A_front_guest_on_a_full_stage_recasts_the_back()
+    {
+        using var _ = new Arm();
+        var (_, stage) = Stage(("usher", 5), ("chevalmarin", 2),
+                               ("crabaletta", 4));
+        var leaver = stage.BowFromBack()!;
+        Assert.Equal(StagePerformer.Crabaletta, leaver.Who);
+        Assert.Equal(4, leaver.Fanfare);
+        Assert.True(stage.ArriveAtFront(StagePerformer.Wriothesley,
+                                        leaver.Fanfare + 8));
+        Assert.Equal(new[] { StagePerformer.Wriothesley, StagePerformer.Usher,
+                             StagePerformer.Chevalmarin },
+                     stage.Seats.Select(s => s.Who).ToArray());
+        Assert.Equal(new[] { 12, 5, 2 }, Bars(stage));
+        // The card's verb: a front guest on a full stage takes that door.
+        var calls = Il.Calls(Il.Method("FurinaStage", "GuestStar"));
+        Assert.Contains("FurinaStage.RecastFromBack", calls);
+        var recast = Il.Calls(Il.Method("FurinaStage", "RecastFromBack"));
+        Assert.Contains("FurinaStageLedger.BowFromBack", recast);
+        Assert.Contains("FurinaStage.Bow", recast);
+        Assert.Contains("FurinaStageLedger.ArriveAtFront", recast);
+    }
+
+    [Fact]
+    public void Wriothesleys_card_puts_him_at_the_front()
+    {
+        var face = new global::KleeMod.Cards.Prototype.Generated
+            .ProtoFsGuestStarWriothesley().Localization!
+            .Single(l => l.Item1 == "description").Item2;
+        Assert.StartsWith("Wriothesley joins the stage at the front with ",
+                          face);
+        // The generated play passes the front seat (codegen's `seat: front`).
+        var src = RepoFile(Path.Combine("KleeCode", "Cards", "Prototype",
+            "Generated", "ProtoFsGuestStarWriothesley.cs"));
+        Assert.Contains("\"wriothesley\", DynamicVars[\"GuestFanfare\"]"
+                        + ".IntValue, atFront: true);", src);
+    }
+
+    private static string RepoFile(string relativePath,
+                                   [CallerFilePath] string here = "")
+    {
+        var dir = Path.GetDirectoryName(here);
+        while (dir != null)
+        {
+            var candidate = Path.Combine(dir, relativePath);
+            if (File.Exists(candidate)) return File.ReadAllText(candidate);
+            dir = Path.GetDirectoryName(dir);
+        }
+        throw new FileNotFoundException(relativePath);
+    }
+
     [Fact]
     public void A_second_copy_bows_the_guest_and_returns_it_with_the_n_added()
     {

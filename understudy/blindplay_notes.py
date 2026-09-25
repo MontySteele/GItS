@@ -1466,9 +1466,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # opus-furina-l2b seat's (c) 3).
     "front performer": ("Takes hits first. Regains 1 Fanfare at the start of "
                         "your turn. " + STAGE_ACTS),
-    # `EB-744` and round four: the back is reached LAST, per attack.
-    # Draft 3 (2026-09-25): rule 12, the fade.
-    "back performer": ("Gains and Spends Fanfare. Hits reach it last. At the "
+    # `EB-744` and round four. Draft 3 (2026-09-25): rule 12, the fade.
+    # The guest round (2026-09-25): "Hits reach it last" was false. Rule 6:
+    # the front absorbs and the rest reaches Furina, never a seat behind.
+    "back performer": ("Gains and Spends Fanfare. Hits never reach it. At the "
                        "end of your turn, it loses half its Fanfare above 5. "
                        + STAGE_ACTS),
     # R276 batch two: Arkhe Alignment's two halves, in
@@ -1905,7 +1906,10 @@ _ARM_KEYWORD_RE = {
     # face, and each guest by its name -- but never a shipped Companion's
     # dashed title ("Neuvillette — O Tears, I Shall Repay"), which is that
     # Companion and not the guest.
-    "Guest Star": re.compile(r"\bGuest Star\b|\bjoins the stage with\b"),
+    # The guest seat round (2026-09-25): Wriothesley's face joins "at the
+    # front".
+    "Guest Star": re.compile(
+        r"\bGuest Star\b|\bjoins the stage (?:at the front )?with\b"),
     "Neuvillette": re.compile(r"\bNeuvillette\b(?!\s*[—–-])"),
     "Clorinde": re.compile(r"\bClorinde\b(?!\s*[—–-])"),
     "Navia": re.compile(r"\bNavia\b(?!\s*[—–-])"),
@@ -2393,6 +2397,44 @@ _REACTION_WORD_RE: dict[str, "re.Pattern[str]"] = {
 #: define it (2026-09-25 evening, `keyword_notes`).
 _UMBRELLA_WORD_RE = re.compile(r"\bElemental Reactions?\b")
 
+# THE GUEST SEAT ROUND (2026-09-25, 0.2.3794). THE ELEMENT WORDS AND `aura`,
+# WHICH NO ROW DEFINED. The Opus seat met "Cryo damage" on Wriothesley's tip
+# and "Swirl a random enemy with an aura" on Lynette's, on a reward screen and
+# in a fight, and no screen said what either word was. An element was defined
+# only by a card's own `Applies X` keyword row, which a Guest Star never
+# carries -- its guest's act deals the element, the card applies none -- and
+# `aura` by the combat page's `AURA_NOTE`, which prints only beside an aura on
+# a body. The sentences are the mod's own `Applies X` tips (`KleeMod.cs`'s
+# `keywordFallback`), restated about the element rather than about a card.
+ELEMENT_KEYWORDS: dict[str, str] = {
+    **{element: (f"An element. A {element} hit on an enemy with no aura "
+                 f"leaves a {element} aura for {AURA_DURATION_TURNS} turns; "
+                 "on another aura it triggers an Elemental Reaction.")
+       for element in ("Pyro", "Hydro", "Electro", "Cryo")},
+    "Anemo": ("An element. An Anemo hit never leaves an aura; on an enemy "
+              "wearing one it triggers an Elemental Reaction (Swirl)."),
+    "Geo": ("An element. A Geo hit never leaves an aura; on an enemy "
+            "wearing one it triggers an Elemental Reaction (Crystallize)."),
+    "aura": ("The element left on an enemy by an elemental hit. A hit of a "
+             "different element consumes it and triggers an Elemental "
+             "Reaction."),
+}
+
+#: Matched the way `_ARM_KEYWORD_RE` matches, case-sensitive: the game
+#: capitalises an element wherever it prints one, and prints `aura` lower
+#: case in prose ("with an aura") and capitalised in a badge ("Pyro Aura").
+_ELEMENT_WORD_RE: dict[str, "re.Pattern[str]"] = {
+    **{element: re.compile(rf"\b{element}\b")
+       for element in ELEMENT_KEYWORDS if element != "aura"},
+    "aura": re.compile(r"\b[Aa]uras?\b"),
+}
+
+#: The card keyword that already defines an element on the face that
+#: carries it (`Applies Cryo`). Where the screen prints it, the element's row
+#: would say the same thing a second time.
+_APPLIES_KEYWORD_RE = re.compile(
+    r"\bApplies (Pyro|Hydro|Electro|Cryo|Anemo|Geo)\b")
+
 # `EB-547`. A SALON MEMBER IS AN ELEMENT SOURCE, and the census could not see
 # one.
 #
@@ -2548,18 +2590,34 @@ def _bomb_hay(word: str, hay: str, obs: dict[str, Any]) -> str:
     return hay
 
 
-def _body_strings(blob: Any):
-    """Every printed string of an observation that is a RULE, not a title."""
+#: Observation keys whose values are NEVER printed: `deck_elements` is the
+#: element census's memory of the run (`EB-707`), a list of element names no
+#: page line shows. An element row is owed to a word a reader can see.
+_UNPRINTED_KEYS = frozenset({"deck_elements"})
+
+
+def _element_hay(obs: dict[str, Any], printed: str) -> str:
+    """The haystack an element word is matched against: what the screen and
+    its glossary print, minus the `Applies X` keyword names (each defined on
+    its own card) and the unprinted census."""
+    hay = "\n".join(list(_body_strings(obs, _UNPRINTED_KEYS))
+                    + ([printed] if printed else []))
+    return _APPLIES_KEYWORD_RE.sub(" ", hay)
+
+
+def _body_strings(blob: Any, skip: frozenset[str] = frozenset()):
+    """Every printed string of an observation that is a RULE, not a title.
+    `skip` names further keys to leave out (`_element_hay`)."""
     if isinstance(blob, str):
         yield blob
     elif isinstance(blob, dict):
         for key, value in blob.items():
-            if key in _TITLE_KEYS:
+            if key in _TITLE_KEYS or key in skip:
                 continue
-            yield from _body_strings(value)
+            yield from _body_strings(value, skip)
     elif isinstance(blob, list):
         for value in blob:
-            yield from _body_strings(value)
+            yield from _body_strings(value, skip)
 
 
 def _elements_on_screen(obs: dict[str, Any]) -> bool:
@@ -2742,7 +2800,38 @@ def _wire_keyword_rows(blob: Any) -> list[dict[str, str]]:
 
 
 def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
-    """The words this screen prints, each with one definition.
+    """The words this screen prints, each with one definition -- and the
+    words THOSE definitions print, until nothing new is raised.
+
+    THE GUEST SEAT ROUND (2026-09-25, 0.2.3794). A glossary row is printed on
+    the page, so a word inside one is printed on the page too, and it was
+    never matched: the haystack was the screen's own values. Lynette's row
+    says "Swirl a random enemy with an aura" and Wriothesley's says "Cryo
+    damage", and on a screen that named the guest only on the stage line,
+    neither word was defined. So the rows' own texts join the haystack and
+    the tables are asked again, to a fixed point (a row can only raise rows
+    the tables hold, so it ends).
+
+    ONE SENTENCE IS LEFT OUT: `STAGE_ACTS`, on the two seat rows, which says
+    each of the trio's acts itself -- matching it would print the three
+    performers' rows beside a sentence that already defines them, on every
+    screen that names a seat (a named summon's reward prints its own
+    performer's row and no other, `test_furina_stage_legibility_page`).
+    """
+    rows = _keyword_rows(obs)
+    for _ in range(len(_ARM_KEYWORD_RE) + len(ELEMENT_KEYWORDS) + 8):
+        printed = "\n".join(r["text"].replace(STAGE_ACTS, " ") for r in rows)
+        more = _keyword_rows(obs, printed)
+        if [r["name"] for r in more] == [r["name"] for r in rows]:
+            return more
+        rows = more
+    return rows
+
+
+def _keyword_rows(obs: dict[str, Any],
+                  printed: str = "") -> list[dict[str, str]]:
+    """The words this screen prints, each with one definition. `printed` is
+    the text of the glossary rows already on the page (`keyword_notes`).
 
     ONCE PER SCREEN and in the arms' own order, however many faces printed the
     word -- a definition repeated under every card in a hand is a page a reader
@@ -2780,7 +2869,8 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     # word this row was filed for is a meter's name, and a screen that prints
     # `Encore: 4` prints the word.
     meters = ((obs.get("combat") or {}).get("you") or {}).get("meters") or {}
-    hay = "\n".join(list(_body_strings(obs)) + list(meters))
+    hay = "\n".join(list(_body_strings(obs)) + list(meters)
+                    + ([printed] if printed else []))
     growth = _BOMB_GROWTH_RE.search(hay)
     # `EB-460`: ONE OF THESE ROWS IS ARM-CONDITIONAL. The stage half of
     # `Companion` is Furina's rule, so it rides a Furina run and nothing else;
@@ -2907,6 +2997,21 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
             and _UMBRELLA_WORD_RE.search(hay)):
         rows.append({"name": "Elemental Reaction",
                      "text": REACTION_UNREACHABLE_ROW})
+    # THE GUEST SEAT ROUND (2026-09-25): an element, and `aura`, wherever
+    # they are printed -- unless the screen already defines them: an element
+    # by a card's own `Applies X` row, `aura` by the combat page's
+    # `AURA_NOTE`, which prints beside any aura on a body.
+    named = {row["name"] for row in rows}
+    applied = set(_APPLIES_KEYWORD_RE.findall(hay))
+    aura_noted = _aura_on_board(obs)
+    element_hay = _element_hay(obs, printed)
+    for word, pattern in _ELEMENT_WORD_RE.items():
+        if word in named or word in applied:
+            continue
+        if word == "aura" and aura_noted:
+            continue
+        if pattern.search(element_hay):
+            rows.append({"name": word, "text": ELEMENT_KEYWORDS[word]})
     seen = {row["name"] for row in rows}
     for row in _wire_keyword_rows(obs):
         if row["name"] in seen:

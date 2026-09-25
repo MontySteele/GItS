@@ -2237,8 +2237,11 @@
    authored_by: [claude],
    replaces: deep_breath,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Wriothesley joins the stage with 8 [gold]Fanfare[/gold].",
-   effects: [{op: stage_guest, member: wriothesley, amount: 8}]}
+   # The guest seat round (2026-09-25, 0.2.3794): "he joins at the back,
+   # where hits never reach him, so his act lands nothing." He is the guest
+   # who wants the front, so his card puts him there; the others shift back.
+   description: "Wriothesley joins the stage at the front with 8 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: wriothesley, amount: 8, seat: front}]}
 
 - {id: proto_fs_guest_star_sigewinne, name: "Guest Star: Sigewinne", character: furina,
    upgrade: {stage_guest: +2},

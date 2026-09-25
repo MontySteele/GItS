@@ -112,14 +112,49 @@ public sealed class FrontFoldedDamageVar : CalculatedDamageVar
         // `EB-598`: THE AIMED BODY WHERE THE GAME NAMED ONE, the front enemy
         // where it did not. `EB-328`: and handed to the game's own var as the
         // target, ONCE, rather than folded on top of its answer -- see the
-        // note above and `HitOrder`.
+        // note above and `HitOrder`. The guest seat round: on a Furina Stage
+        // board, the base game's own convention (`FoldedPreview.Body`).
         base.UpdateCardPreview(
             card, previewMode,
-            HitOrder.BodyForPreview(
-                card, previewMode, target,
-                KokomiPlan.FrontEnemy(card.Owner?.Creature)),
+            FoldedPreview.Body(
+                FurinaStage.LiveFor(card.Owner?.Creature), card, previewMode,
+                target, KokomiPlan.FrontEnemy(card.Owner?.Creature)),
             runGlobalHooks);
     }
+}
+
+/// <summary>
+/// THE GUEST SEAT ROUND (2026-09-25, 0.2.3794): WHICH BODY A FOLDED FACE
+/// PREVIEWS AGAINST, one rule for both folding vars.
+///
+/// THE FIND. Under Shrink and Vulnerable, Soloist's Solicitation and Curtain
+/// Rise printed numbers folded two ways on the same turn: Soloist 6 beside
+/// Curtain Rise 10 / 19 after a Vulnerable, and Soloist 4 beside Curtain
+/// Rise 7 / 13 under Shrink (7 x 0.7 x 1.5, the two cancelling). Soloist is
+/// a shipped card on the game's own <c>DamageVar</c>, which in a hand is
+/// handed NO target and so folds only the dealer's side (Weak, Shrink,
+/// Strength); Curtain Rise is a <c>proto_</c> row on
+/// <see cref="FoldedDamageVar"/>, which substituted the FRONT ENEMY
+/// (`EB-598`) and so folded that body's Vulnerable too.
+///
+/// THE RULE. On a Furina Stage board every face previews the base game's
+/// way: the body the game named (the aimed one while a card is dragged), and
+/// none in a hand. Everywhere else `EB-598`'s front enemy stands -- the
+/// Kokomi and Klee arms' faces, whose rulings chose it, are untouched.
+/// </summary>
+public static class FoldedPreview
+{
+    /// <summary>The body a folded face previews against: the game's
+    /// <paramref name="target"/> where the Stage is live
+    /// (<paramref name="stageLive"/>), else
+    /// <see cref="HitOrder.BodyForPreview"/> with <paramref name="front"/>.
+    /// </summary>
+    public static Creature? Body(bool stageLive, CardModel card,
+                                 CardPreviewMode previewMode,
+                                 Creature? target, Creature? front) =>
+        stageLive
+            ? target
+            : HitOrder.BodyForPreview(card, previewMode, target, front);
 }
 
 /// <summary>
@@ -176,9 +211,11 @@ public sealed class FoldedDamageVar : DamageVar
         // this branch prints the OTHER half of one conditional face, so the
         // two halves have to fold under one rule or the sentence argues with
         // itself again.
-        var body = HitOrder.BodyForPreview(
-            card, previewMode, target,
-            KokomiPlan.FrontEnemy(card.Owner?.Creature));
+        // The guest seat round: on a Furina Stage board, the base game's own
+        // convention (`FoldedPreview.Body`).
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(card.Owner?.Creature), card, previewMode,
+            target, KokomiPlan.FrontEnemy(card.Owner?.Creature));
         base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
         if (card.Owner?.Creature == null) return;
         // `EB-388` / `EB-498`: AND THE SPOTLIGHT, WHICH IS NOT A HOOK. The
