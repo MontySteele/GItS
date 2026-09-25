@@ -75,6 +75,10 @@ public static class ArmKeywordTips
     public const string DuskKey = "KLEEMOD-ARM_DUSK";
     public const string CasketKey = "KLEEMOD-ARM_CASKET";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
+    // 2026-09-25 (the afternoon Klee seats): `Companion` is printed golded on
+    // Klee's readers and on the Kokomi and Furina arms' faces, and nothing on
+    // screen said what one is.
+    public const string CompanionKey = "KLEEMOD-ARM_COMPANION";
     // THE FURINA STAGE'S SEVEN (`EB-723`, R269). The brief's sec.12 names
     // them: "Spend, Fanfare (the bar), Raise, Bow, the lead, the back
     // performer, Rotate". `Fanfare` collides with the reframe's word by
@@ -654,6 +658,22 @@ public static class ArmKeywordTips
         With(inherited, SwirlKey,
             "The enemy's aura is consumed and copied onto ALL enemies. No "
           + "aura, no effect.");
+
+    /// <summary>
+    /// 2026-09-25, the afternoon Klee seat round. The Opus seat: "Companion is
+    /// never defined on screen, yet three offered cards trigger on it"
+    /// (Witches' Circle, Come Back and Play!, Friendship Bracelet). The word is
+    /// golded on every face that prints it, so the tip attaches off the
+    /// printed word like every row in this class. The example is a real
+    /// Companion in the pool, and its title's dash is the card's own name
+    /// (the one quoted title `tools/lint_text_conventions.py` allows). The
+    /// seat page's `Companion` row opens with the same sentence.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForCompanion(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, CompanionKey,
+            "A card titled with a character's name, a dash, then its own, "
+          + "like Amber — Explosive Puppet.");
 
     // ---------------------------------------------------- Furina ----------
     //

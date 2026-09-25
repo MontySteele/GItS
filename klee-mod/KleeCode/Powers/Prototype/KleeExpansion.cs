@@ -190,6 +190,10 @@ public static class KleeExpansion
     /// rule 1's growth -- and the ledger's per-turn latch makes the second call
     /// a no-op, so the order is this method's and not the broadcast's. Sim
     /// twin: <c>klee_overhaul._turn_start_expansion</c>, same order.
+    ///
+    /// SPARKS 'N' SPLASH GOES FIRST (2026-09-25): its echo reads the Bombs
+    /// the growth just grew, before anything new is placed, and it is the
+    /// third Power that calls in here.
     /// </summary>
     public static async Task RunTurnStartPlacements(
         PlayerChoiceContext choiceContext, Player player)
@@ -197,6 +201,8 @@ public static class KleeExpansion
         var klee = player.Creature;
         if (klee == null) return;
         if (!KleeOverhaulLedger.For(klee).TakeTurnStartPlacements()) return;
+        var echoes = klee.Powers.OfType<BombEchoPower>().Sum(p => p.Amount);
+        if (echoes > 0) await BombEchoPower.Fire(choiceContext, klee, echoes);
         foreach (var secretBase in klee.Powers.OfType<SecretBasePower>().ToList())
         {
             if (ProtoBombPower.AnyPlacedBy(klee)) break;

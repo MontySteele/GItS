@@ -231,6 +231,14 @@ FRONT_ENEMY = re.compile(r"\bfront enemy\b")
 FRONT_ENEMY_ALLOWED = {"proto_kk_the_generals_banner", "GeneralsBannerPower.description",
                        "PlanKey"}
 
+#: A CARD TITLE QUOTED AS AN EXAMPLE, dash and all (2026-09-25). The Companion
+#: tip's whole rule is the shape of a Companion's title -- "a character's name,
+#: a dash, then its own" -- and its example is a real card, printed as the game
+#: prints it. The title is struck out of the text before the spellings run, so
+#: any OTHER dash in the tip still fails; and an entry whose title is no longer
+#: in its string fails too (rot), so the list can only shrink.
+QUOTED_TITLES = {"CompanionKey": "Amber — Explosive Puppet"}
+
 TAG = re.compile(r"\[/?[a-z_]+\]")
 LIT = re.compile(r'"((?:[^"\\]|\\.)*)"')
 
@@ -722,10 +730,17 @@ def findings_for(rows: list[Row], exceptions: dict[str, str], gate: bool = True,
         for clause in add_clauses(row.raw):
             if len(clause) > ADD_CLAUSE_CEILING:
                 out.append(f"{tag}: upgrade clause {len(clause)} > {ADD_CLAUSE_CEILING}: {clause}")
+        spelled = text
+        quoted = QUOTED_TITLES.get(row.ident)
+        if quoted is not None:
+            if quoted not in text:
+                out.append(f"QUOTED-TITLE ROT: {tag} no longer quotes "
+                           f"{quoted!r}")
+            spelled = text.replace(quoted, "the title")
         for name, rx, instead in SPELLINGS:
             if name in skip_spellings:
                 continue
-            if rx.search(text):
+            if rx.search(spelled):
                 out.append(f"{tag}: {name}: {instead}: {text}")
         holes_blanked = re.sub(r"\{[^{}]*\}", "6", row.raw)
         for name, rx, instead in RAW_SPELLINGS:

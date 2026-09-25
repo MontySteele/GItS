@@ -368,10 +368,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <summary>Total size on this pile: what a Set off will deal here.</summary>
     public int TotalSize => _charges.Sum(c => c.Size);
 
-    /// <summary>The single largest charge on this pile -- what Sparks 'n'
-    /// Splash's echo pays here (R250). `TotalSize`'s twin: the raw SUM every
-    /// other rule inside the arm is priced in (growth, jumps, Sorry Jean's
-    /// Block, a Set off) survives beside it untouched.</summary>
+    /// <summary>The single largest charge on this pile. `TotalSize`'s twin:
+    /// the raw SUM every other rule inside the arm is priced in (growth,
+    /// jumps, Sorry Jean's Block, a Set off) survives beside it
+    /// untouched.</summary>
     public int LargestSize => _charges.Count == 0 ? 0 : _charges.Max(c => c.Size);
 
     /// <summary>How many of this pile's charges are Mines -- the fuse mark.</summary>
@@ -1314,8 +1314,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // size -- Klee's Strength and Weak are hers and never travelled to a
         // charge sitting on an enemy -- and everything the funnel does after
         // that is the target's: the aura, the reaction, the Vulnerable and the
-        // per-hit cap. It is the ONE caller of this entry point; the echo two
-        // files over is a card's own damage and keeps hers.
+        // per-hit cap. Sparks 'n' Splash's echo takes the same door
+        // (2026-09-25): it pays a Bomb's size on a Bomb's terms.
         // R276 (Big Bounce): what stood between this hit and the kill, read
         // BEFORE the hit spends it. Only a caller that passes `overflow` reads
         // it, and every other Set off is byte-identical.
@@ -1524,6 +1524,14 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// start of Klee's turn (before growth, so a jumped Bomb grows on its new
     /// enemy this turn), at the end of every Set off, and after a Mine fires.
     /// A jump is therefore always observed before the player's next decision.
+    ///
+    /// THE EMPTIED PILE LEAVES THE BODY TOO (2026-09-25). A corpse whose
+    /// powers the game KEEPS -- an Illusion (<c>IllusionPower</c>: "Illusions
+    /// keep their buffs after dying", and this power is a Buff) stays in the
+    /// combat and revives -- used to keep the pile this sweep had emptied, and
+    /// the revived Eye with Teeth printed "Bomb 0" over a Bomb that was not
+    /// there. So every claimed pile still on its body is removed, charged or
+    /// not; an empty one jumps nothing (<see cref="Register.Claimed"/>).
     /// </summary>
     public static async Task SweepJumps(
         PlayerChoiceContext choiceContext, ICombatState? combatState)
@@ -1531,7 +1539,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         if (combatState == null) return;
         foreach (var pile in Register.Claim(combatState))
         {
-            if (pile.Applier == null) continue;
+            if (pile.StillOnBody) await PowerCmd.Remove(pile.Pile);
+            if (pile.Applier == null || pile.Charges.Count == 0) continue;
             await JumpCharges(choiceContext, pile.Owner, pile.Charges,
                               pile.Applier, cardSource: null);
         }
@@ -1820,21 +1829,11 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
 
     /// <summary>
     /// What this placer's charges on <paramref name="enemy"/> add up to, RAW.
-    /// Sparks 'n' Splash's echo reads it ("damage equal to the Bombs on it")
-    /// and hands it to the same <c>ElementalHit.Deal</c> an explosion hands a
-    /// charge's size to, and the raw sum is what enters that pipeline in both
-    /// cases.
-    ///
-    /// THE ECHO KEEPS KLEE'S OWN TERMS AND AN EXPLOSION NO LONGER DOES
-    /// (<c>EB-343</c>), which is not an inconsistency: the echo is the CARD's
-    /// damage, sized off the pile, dealt by Klee at the end of her turn -- the
-    /// pile is read and not spent, no Bomb goes off, no Spark is paid and
-    /// neither of rule 7's counters moves. R248 is a rule about Bombs going
-    /// off. What the echo shares with an explosion is the element and the
-    /// reaction, not the dealer.
+    /// (Sparks 'n' Splash read it until R250; since 2026-09-25 the echo reads
+    /// <see cref="LargestBombFor"/>.)
     ///
     /// PURE, and R205-scoped like every other read here: another Klee's pile
-    /// is not hers to echo.
+    /// is not hers to read.
     /// </summary>
     public static int TotalPlacedBy(Creature? enemy, Creature? applier)
     {
@@ -1848,14 +1847,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// This placer's SINGLE LARGEST charge on <paramref name="enemy"/>, RAW --
-    /// what Sparks 'n' Splash's echo pays here since <c>R250</c>
-    /// (<c>klee-overhaul-round-8-2026-09-04.md</c> sec.6 pick 1 default (1)),
-    /// replacing <see cref="TotalPlacedBy"/> at that one call site. Round 8's
-    /// seats found the sum made banking always right and every Set off card
-    /// "deletes my engine"; the largest charge keeps hold-or-cash a decision
-    /// after the Power lands, and a Set off (<c>SetOff</c>) still cashes the
-    /// whole pile.
+    /// This placer's SINGLE LARGEST charge on <paramref name="enemy"/>, RAW.
+    /// Sparks 'n' Splash's per-enemy read from R250 until 2026-09-25, when the
+    /// echo moved to the board-wide <see cref="LargestBombFor"/>; Careful Now
+    /// and its sibling still read it.
     ///
     /// <see cref="TotalPlacedBy"/> survives unchanged and unremoved: growth,
     /// jumps and Sorry Jean's Block are still priced in the raw SUM, and a
@@ -2357,9 +2352,12 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             if (!_piles.Contains(pile)) _piles.Add(pile);
         }
 
-        /// <summary>Piles whose enemy is dead or gone AND that still carry
-        /// charges: what a jump owes. Emptied as it is claimed, so a second
-        /// sweep in the same beat finds nothing.</summary>
+        /// <summary>Piles whose enemy is dead or gone: what a jump owes, and
+        /// the pile the sweep then takes off the body. An already-empty pile is
+        /// claimed too (2026-09-25), with no charges, so it is removed rather
+        /// than left to badge "Bomb 0" on a body the game keeps. Emptied as it
+        /// is claimed, so a second sweep in the same beat finds
+        /// nothing.</summary>
         public static List<Claimed> Claim(ICombatState combatState)
         {
             Rebase(combatState);
@@ -2371,10 +2369,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                             && combatState.HittableEnemies.Contains(owner);
                 if (alive) continue;
                 _piles.Remove(pile);
-                if (pile.TakeAll() is { } charges)
-                {
-                    owed.Add(new Claimed(owner, pile.Applier, charges));
-                }
+                var charges = pile.TakeAll() ?? new List<ProtoCharge>();
+                owed.Add(new Claimed(owner, pile.Applier, charges, pile));
             }
             return owed;
         }
@@ -2389,9 +2385,18 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             Preempted.Clear();
         }
 
-        /// <summary>Charges taken off a pile whose enemy is gone.</summary>
+        /// <summary>Charges taken off a pile whose enemy is gone, and the
+        /// pile itself.</summary>
         public readonly record struct Claimed(
-            Creature Owner, Creature? Applier, IReadOnlyList<ProtoCharge> Charges);
+            Creature Owner, Creature? Applier, IReadOnlyList<ProtoCharge> Charges,
+            ProtoBombPower Pile)
+        {
+            /// <summary>Is the emptied pile still attached to its body? True
+            /// on a corpse the game keeps (an Illusion); false once the game
+            /// has stripped the corpse's powers. PURE.</summary>
+            public bool StillOnBody =>
+                Owner != null && Owner.Powers.Contains(Pile);
+        }
     }
 }
 

@@ -210,50 +210,45 @@ public sealed class MineFragsPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Sparks 'n' Splash: "At the end of your turn, deal Pyro damage to a random
-/// enemy equal to its largest Bomb."
+/// Sparks 'n' Splash: "At the start of your turn, your largest Bomb deals its
+/// size in Pyro damage without going off."
 ///
-/// R250 (2026-09-04), replacing the SUM this row paid before: round 8's seats
-/// found that once the echo lands the sum makes banking always right and
-/// every Set off card "deletes my engine" -- the largest single charge keeps
-/// hold-or-cash a decision after the Power lands, since a Set off still
-/// cashes the WHOLE pile (<c>ProtoBombPower.SetOff</c>) and a reaction
-/// still multiplies whichever one hit is dealt.
+/// RE-TIMED 2026-09-25 (the afternoon seat round, both seats). At the END of
+/// the turn it fired after Klee had already set her Bombs off, so it hit for
+/// nothing, and the Opus seat named it its never-again. At the START of the
+/// turn, after rule 1's growth, the Bombs it reads are the ones she is about
+/// to decide over. The history before this (the R250 largest-not-sum move,
+/// [USER]'s 2026-09-02 "take damage equal to the Bomb on them" design, the
+/// auto-detonation it replaced) is in git.
 ///
-/// Before that, [USER]'s OWN DESIGN, 2026-09-02: "I think auto-detonation on
-/// Sparks n' Splash completely bricks the growth build. How about instead 'a
-/// random enemy takes damage equal to the amount of Bomb on them'?" The row
-/// printed an automatic Set off before this -- first at the end of the turn,
-/// then at the start of it -- and either way the Rare that the growth deck
-/// most wants was the one card that cashed its pile without being asked.
+/// WHICH BOMB: her single largest charge on the living board, the FIRST one
+/// found on a tie -- <see cref="ProtoBombPower.LargestBombFor"/>, which is the
+/// one reading of "your largest Bomb" All of My Treasures!, Split Charge and
+/// Stoke the Fuse share. It hits the enemy the Bomb is on.
 ///
-/// IT READS THE PILE AND DOES NOT SPEND IT, which is the whole card. Nothing
-/// is taken, so:
-///   * the Bombs stay and keep growing -- the echo pays again next turn, and
-///     bigger;
-///   * NO SPARK, because rule 4 pays one per EXPLOSION and nothing exploded;
-///   * no Mine answers, no explosion bus, no per-turn counters move. This is
-///     not a Set off, and rule 2's "only a card that says Set off" is
-///     untouched by it.
+/// IT READS THE PILE AND DOES NOT SPEND IT. The Bomb stays where it is and
+/// keeps growing, and nothing goes off, so: no Spark (rule 4 pays per
+/// explosion), no Mine answers, no explosion bus, no "whenever a Bomb goes
+/// off" reader, and neither of rule 7's counters moves.
 ///
-/// PYRO THROUGH <c>ElementalHit.Deal</c>, the same funnel an explosion and any
-/// of Klee's own hits use, so the echo reacts with an aura exactly as they do
-/// and carries her Strength the same way. It is NOT an Attack: no card is
-/// being played, so nothing that keys off attacks sees it.
+/// THE BOMB'S OWN DAMAGE TERMS (<see cref="ElementalHit.DealWithoutDealerMods"/>,
+/// the door <c>Explode</c> uses): Pyro, the target's Vulnerable and HP cap,
+/// the aura and the reaction -- and not Klee's Strength or Weak, because the
+/// number it pays is a Bomb's size. Not an Attack: no card is being played.
 ///
-/// A RANDOM BOMBED ENEMY, unlike the auto-detonation it replaces: an echo of
-/// nothing is not a printed effect, so the roll is over the enemies that
-/// actually hold one of her charges, and a board with none does nothing at
-/// all.
+/// WHEN: <c>AfterPlayerTurnStart</c>, strictly after the growth at
+/// <c>BeforeSideTurnStart</c>, and through the arm's ONE turn-start sequencer
+/// (<see cref="KleeExpansion.RunTurnStartPlacements"/>), which runs the echo
+/// FIRST and only then Klee's Secret Base and Dodoco -- so it reads the board
+/// as the growth left it, whatever order the broadcast visits the powers in.
 ///
-/// EACH COPY IS ITS OWN HIT (<c>EB-358</c>, default applied): a second Sparks
-/// 'n' Splash used to badge <c>Amount</c> 2 (this power's own
-/// <see cref="StackType"/> is <c>Counter</c>, one stack per copy played) and
-/// pay the pile ONCE. The badge and the payout now read the same number: the
-/// loop below runs <see cref="PowerModel.Amount"/> times, one per stack, each
-/// iteration rolling its OWN random target -- so two copies can land on the
-/// same enemy twice or on two different ones -- and paying that target's
-/// largest Bomb, independently of every other iteration.
+/// EACH COPY IS ITS OWN HIT (`EB-358`): the sequencer loops
+/// <see cref="PowerModel.Amount"/> times, re-reading the largest Bomb each
+/// time, so a first hit that kills sends that enemy's Bombs jumping (the
+/// death sweep) before the second copy looks.
+///
+/// Sim twin: <c>klee_overhaul.bomb_echo</c>, called first in
+/// <c>_turn_start_expansion</c>.
 /// </summary>
 public sealed class BombEchoPower : PowerModel, ILocalizationProvider
 {
@@ -261,44 +256,35 @@ public sealed class BombEchoPower : PowerModel, ILocalizationProvider
     {
         ("title", "Sparks 'n' Splash"),
         ("description",
-            "At the end of your turn, deal [gold]Pyro[/gold] damage to a "
-          + "random enemy equal to its largest [gold]Bomb[/gold]."),
+            "At the start of your turn, your largest [gold]Bomb[/gold] deals "
+          + "its size in [gold]Pyro[/gold] damage without going off."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task BeforeSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
     {
-        if (side != CombatSide.Player) return;
-        if (Owner?.CombatState == null) return;
+        if (Owner == null || player.Creature != Owner) return;
+        await KleeExpansion.RunTurnStartPlacements(choiceContext, player);
+    }
 
-        for (var copy = 0; copy < Amount; copy++)
+    /// <summary>
+    /// The echo itself, <paramref name="copies"/> hits. Called by the
+    /// sequencer, never by the broadcast. An explicit loop with ONE damage
+    /// call site, read fresh each pass (`EB-358`).
+    /// </summary>
+    internal static async Task Fire(
+        PlayerChoiceContext choiceContext, Creature klee, int copies)
+    {
+        for (var copy = 0; copy < copies; copy++)
         {
-            // An explicit walk rather than a `Where` lambda: the candidate
-            // rule is the card's own printed one ("a random enemy ... equal
-            // to its largest Bomb" -- so, an enemy that has some), and a
-            // closure would hide it from the IL pin that reads this method.
-            // Rolled FRESH per copy (EB-358): each hit is its own random
-            // enemy, not one roll shared by every stack.
-            var candidates = new List<Creature>();
-            foreach (var enemy in Owner.CombatState.HittableEnemies)
-            {
-                if (enemy.IsDead) continue;
-                if (!ProtoBombPower.HoldsChargeFrom(enemy, Owner)) continue;
-                candidates.Add(enemy);
-            }
-            if (candidates.Count == 0) break;
-            var target = Owner.CombatState.RunState.Rng.CombatTargets
-                .NextItem(candidates);
-            if (target == null) continue;
-
-            var size = ProtoBombPower.LargestPlacedBy(target, Owner);
-            if (size <= 0) continue;
-            await ElementalHit.Deal(
-                choiceContext, target, Element.Pyro, size, Owner);
+            var (target, size) = ProtoBombPower.LargestBombFor(klee);
+            if (target == null || size <= 0) return;
+            await ElementalHit.DealWithoutDealerMods(
+                choiceContext, target, Element.Pyro, size, klee);
+            await ProtoBombPower.SweepJumps(choiceContext, klee.CombatState);
         }
     }
 }

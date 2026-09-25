@@ -42,7 +42,7 @@ public sealed class ProtoKoSparksNSplash : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sparks 'n' Splash"),
-        ("description", "At the end of your turn, deal [gold]Pyro[/gold] damage to a random enemy equal to its largest [gold]Bomb[/gold]."),
+        ("description", "At the start of your turn, your largest [gold]Bomb[/gold] deals its size in [gold]Pyro[/gold] damage without going off."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

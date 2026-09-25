@@ -284,12 +284,10 @@ public sealed class PatienceKleePower : PowerModel, ILocalizationProvider
         ledger.SetOffCardsThisTurn == 0;
 
     /// <summary>
-    /// <c>AfterSideTurnEnd</c> and not <c>BeforeSideTurnEnd</c>, and the
-    /// difference is the ORDER: Sparks 'n' Splash's echo reads the largest
-    /// Bomb at <c>BeforeSideTurnEnd</c>, and two co-tenants of one broadcast
-    /// have no guaranteed order -- so the growth lands strictly after the echo
-    /// has paid, on both engines (<c>klee_overhaul.turn_end</c>). Still the
-    /// end of HER turn: the side ending is the player's.
+    /// <c>AfterSideTurnEnd</c>, the end of HER turn: the side ending is the
+    /// player's. (It was placed here to land after Sparks 'n' Splash's echo,
+    /// which left the end of the turn on 2026-09-25; the sim runs it at the
+    /// same point, <c>klee_overhaul.turn_end</c>.)
     /// </summary>
     public override Task AfterSideTurnEnd(
         PlayerChoiceContext choiceContext, CombatSide side,

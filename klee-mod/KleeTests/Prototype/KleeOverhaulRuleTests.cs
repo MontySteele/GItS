@@ -701,14 +701,14 @@ public class KleeOverhaulRuleTests
         // The whole of what makes it playable in a growth deck: nothing is
         // taken, so no Spark is minted (rule 4 pays per EXPLOSION), no Mine
         // answers, rule 7's counters do not move, and rule 2 -- "only a card
-        // that says Set off" -- is untouched.
-        var hook = typeof(BombEchoPower)
-            .GetMethod("BeforeSideTurnEnd", HeadlessGame.All)!;
-        var calls = Il.Calls(hook);
+        // that says Set off" -- is untouched. Since 2026-09-25 the hit is on
+        // a Bomb's own terms (the explosion's dealer-free door).
+        var fire = typeof(BombEchoPower)
+            .GetMethod("Fire", HeadlessGame.All)!;
+        var calls = Il.Calls(fire);
 
-        Assert.Contains("ProtoBombPower.HoldsChargeFrom", calls);
-        Assert.Contains("ProtoBombPower.LargestPlacedBy", calls);
-        Assert.Contains("ElementalHit.Deal", calls);
+        Assert.Contains("ProtoBombPower.LargestBombFor", calls);
+        Assert.Contains("ElementalHit.DealWithoutDealerMods", calls);
 
         Assert.DoesNotContain("ProtoBombPower.SetOff", calls);
         Assert.DoesNotContain("ProtoBombPower.TakeAll", calls);
@@ -721,21 +721,15 @@ public class KleeOverhaulRuleTests
     [Fact]
     public void A_second_copy_is_its_own_hit_not_a_doubled_constant()
     {
-        // `EB-358`, default applied: a second Sparks 'n' Splash used to badge
-        // `Amount` 2 (this power's own `StackType` is `Counter`, one stack
-        // per copy played) and pay the pile ONCE. Now the end-of-turn hook
-        // loops `Amount` times -- ONE `ElementalHit.Deal` call SITE, run
-        // `Amount` times, not two unrolled call sites (which would double the
-        // damage at compile time regardless of how many copies are live, and
-        // could not roll two independent targets).
-        var hook = typeof(BombEchoPower)
-            .GetMethod("BeforeSideTurnEnd", HeadlessGame.All)!;
-        var calls = Il.Calls(hook);
+        // `EB-358`: the echo loops once per copy -- ONE damage call SITE,
+        // run `copies` times, and the largest Bomb re-read on each pass
+        // rather than hoisted out of the loop.
+        var fire = typeof(BombEchoPower)
+            .GetMethod("Fire", HeadlessGame.All)!;
+        var calls = Il.Calls(fire);
 
-        Assert.Single(calls, c => c == "ElementalHit.Deal");
-        // The candidate roll is likewise ONE site, read fresh each pass of
-        // the loop -- not hoisted out and reused for every copy.
-        Assert.Single(calls, c => c.Contains("NextItem"));
+        Assert.Single(calls, c => c == "ElementalHit.DealWithoutDealerMods");
+        Assert.Single(calls, c => c == "ProtoBombPower.LargestBombFor");
     }
 
     // ---- helpers ---------------------------------------------------------

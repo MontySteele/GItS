@@ -554,6 +554,11 @@ public static class KleeMod
                     [Cards.KleeCardTooltips.OverriddenElementKey + ".title"] =
                         "Element overridden",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
+                    // 2026-09-25: the word Klee's readers and the other arms'
+                    // Companion cards print. Same raw-key hazard as every row
+                    // here.
+                    [Cards.ArmKeywordTips.CompanionKey + ".title"] =
+                        "Companion",
                     // The Furina reframe's four title rows went
                     // with its keywords (`EB-723`); see
                     // `ArmKeywordTips`'s Furina section. Encore's title

@@ -1209,13 +1209,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Arlecchino's Bond of Life counts it (`klee_overhaul.sit_tight_turn_end`).
     klee_overhaul.sit_tight_turn_end(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
-    # QUARANTINED (C.KLEE_OVERHAUL). The OVERHAUL's Sparks 'n' Splash -- "at
-    # the end of your turn, deal Pyro damage to a random enemy equal to its
-    # largest Bomb" (R250) -- beside the shipped card of the same name and at
-    # the same site, which is `BombEchoPower.BeforeSideTurnEnd`'s twin. It
-    # READS the pile and does not spend it, so rule 7 is untouched: nothing
-    # goes off, no Spark is minted and the arm's ledger never moves. A second
-    # copy is its own hit (EB-358): the loop runs once per stack.
+    # QUARANTINED (C.KLEE_OVERHAUL). The overhaul's end of turn: Alice's
+    # window closes, Patience, Klee! grows and the one-turn windows close.
+    # Its Sparks 'n' Splash left this site on 2026-09-25 for the start of the
+    # turn (`klee_overhaul.bomb_echo`, via `turn_start_late`).
     klee_overhaul.turn_end(state)
     # QUARANTINED (C.KOKOMI_OVERHAUL). DUSK (`EB-643`, R265): "the Bake-Kurage
     # carries this Plan out at the end of this turn, before enemies act."

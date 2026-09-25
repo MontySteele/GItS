@@ -436,7 +436,13 @@ public class ArmKeywordTipTests
         // `ForRotate` retired with their words, and `ForLeadPerformer` is
         // `ForFrontPerformer` -- "lead performer" became "front performer"
         // everywhere.
-        Assert.Equal(28, attaches.Count);
+        //
+        // TWENTY-NINE with the afternoon Klee seats (2026-09-25): `Companion`,
+        // golded on Klee's readers and the other arms' faces and defined
+        // nowhere on screen ("Companion is never defined on screen, yet three
+        // offered cards trigger on it").
+        Assert.Equal(29, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForCompanion");
         Assert.Contains(attaches, m => m.Name == "ForSummon");
         Assert.Contains(attaches, m => m.Name == "ForUsher");
         Assert.Contains(attaches, m => m.Name == "ForChevalmarin");

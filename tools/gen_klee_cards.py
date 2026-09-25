@@ -806,6 +806,12 @@ ARM_KEYWORDS = (
     # a VERB by ten Universals; the eight reaction PREVIEWS are board-aware and
     # say nothing over an aura-less board.
     ArmKeyword("Swirl", ("Swirl", "Swirls"), "ArmKeywordTips.ForSwirl"),
+    # 2026-09-25 (the afternoon Klee seats): `Companion`, golded on Klee's
+    # readers (Witches' Circle, Coven Errand, Playdate ...) and on the Kokomi
+    # and Furina arms' faces, and defined nowhere on screen. The retired
+    # Hexerei row above left the word untipped. NO PLURAL: every face prints
+    # "[gold]Companion[/gold] card" or "each [gold]Companion[/gold]".
+    ArmKeyword("Companion", ("Companion",), "ArmKeywordTips.ForCompanion"),
     # THE FURINA REFRAME'S FOUR ARE GONE (`EB-723`, R269). `Deploy`, `Evoke`,
     # `Drain` and `Encore` left this table with the eleven `proto_fr_` rows
     # that printed them: draft 6's precedent one character over ("a table row
@@ -2649,8 +2655,8 @@ APPLY_POWERS = {
         "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
     "ko_bomb_echo": ("BombEchoPower", None,
-        "At the end of your turn, deal [gold]Pyro[/gold] damage to a random "
-        "enemy equal to the [gold]Bombs[/gold] on it."),
+        "At the start of your turn, your largest [gold]Bomb[/gold] deals its "
+        "size in [gold]Pyro[/gold] damage without going off."),
     "ko_bomb_reaction_spark": ("BombReactionSparkPower", None,
         "Whenever one of your [gold]Bombs[/gold] triggers an "
         "[gold]Elemental Reaction[/gold], gain {X} extra [gold]Spark[/gold]."),

@@ -1152,7 +1152,8 @@ def test_bottomless_bag_draws_two_and_three_upgraded(overhaul):
 
     state = _pass_two_state()
     card = loader.get_card("proto_ko_bottomless_bag")
-    state.player.sparks = 2
+    # 2026-09-25 afternoon seats: the price is 1 Spark (it was 2).
+    state.player.sparks = 1
     state.player.draw_pile = fodder(5)
     state.player.hand = [card]
     play_card(state, card)
@@ -1161,7 +1162,7 @@ def test_bottomless_bag_draws_two_and_three_upgraded(overhaul):
 
     state2 = _pass_two_state()
     up = loader.get_card("proto_ko_bottomless_bag+")
-    state2.player.sparks = 2
+    state2.player.sparks = 1
     state2.player.draw_pile = fodder(5)
     state2.player.hand = [up]
     play_card(state2, up)

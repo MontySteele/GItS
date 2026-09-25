@@ -1060,9 +1060,9 @@ def test_eb749_a_mine_answering_an_attack_is_not_a_set_off_card(overhaul):
 
 
 def test_eb749_sparks_n_splash_is_not_a_set_off_card(overhaul):
-    """R271 sec.5.1's SECOND stated interaction: the Rare's end-of-turn hit is
-    a POWER's, not a card the player played, so a turn on which only it fired
-    is still paid next turn. That pairing is the brief's "watch it rise"."""
+    """R271 sec.5.1's SECOND stated interaction: the Rare's hit is a POWER's,
+    not a card the player played, so it never switches Grounded off. Since
+    2026-09-25 it fires at the start of the turn, beside Grounded."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.player.powers[klee_overhaul.GROUNDED] = 6
@@ -1070,14 +1070,12 @@ def test_eb749_sparks_n_splash_is_not_a_set_off_card(overhaul):
     klee_overhaul.roll_to(state, 1)
     klee_overhaul.place(state, enemy, 7)
 
-    klee_overhaul.turn_end(state)
-
-    assert enemy.hp < 200, "the echo really did fire"
-    assert state.ko_set_off_cards_this_turn == 0, "and it was no card"
-
     state.player.block = 0
     klee_overhaul.roll_to(state, 2)
     klee_overhaul.turn_start_late(state)
+
+    assert enemy.hp < 200, "the echo really did fire"
+    assert state.ko_set_off_cards_this_turn == 0, "and it was no card"
     assert state.player.block == 6, "Splash did not switch Grounded off"
 
 
@@ -1587,96 +1585,148 @@ def test_countdown_still_draws_on_a_bomb_less_board(overhaul):
     assert enemy.hp == 200
 
 
-def test_sparks_n_splash_echoes_the_pile_without_spending_it(overhaul):
-    """`BombEchoPower`, R250 (2026-09-04): "at the end of your turn, deal
-    Pyro damage to a random enemy equal to its LARGEST Bomb" -- the largest
-    single charge, not the sum ([USER]'s own 2026-09-02 design predates R250,
-    which replaced the sum it paid at first).
+def _echo_turn(state):
+    """One start of Klee's turn as the engine runs it: rule 1's growth, then
+    the `AfterPlayerTurnStart` beat the echo rides."""
+    klee_overhaul.turn_start(state)
+    klee_overhaul.turn_start_late(state)
 
-    IT READS THE PILE AND DOES NOT SPEND IT, which is the whole card and the
-    whole of why rule 7 survives it. The row printed an automatic Set off
-    before this, and the Rare the growth deck most wants was the one card that
-    cashed its pile without being asked ("auto-detonation on Sparks n' Splash
-    completely bricks the growth build")."""
+
+def test_sparks_n_splash_fires_after_growth_and_leaves_the_bomb(overhaul):
+    """2026-09-25 (the afternoon seats: at the end of the turn it fired after
+    Klee had set her Bombs off, so it hit for nothing). "At the start of your
+    turn, your largest Bomb deals its size in Pyro damage without going off."
+
+    A Bomb 4 placed last turn has grown to 8 by the time the echo reads it, so
+    it hits for 8 -- and the Bomb is still there, still 8."""
+    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 4, "the worked example assumes 4"
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
+    state.turn = 2
     state.player.powers[klee_overhaul.BOMB_ECHO] = 1
     klee_overhaul.place(state, enemy, 4)
-    klee_overhaul.place(state, enemy, 3)
 
-    klee_overhaul.turn_end(state)
+    _echo_turn(state)
 
-    assert sizes(enemy) == [4, 3], "the Bombs stay and keep growing"
-    assert enemy.hp == 196, "the echo dealt the LARGEST charge (4), not 4+3"
-    # NOTHING EXPLODED, so rule 4 mints nothing and neither of rule 7's
-    # counters moves -- the ledger is not touched at all.
-    assert state.player.sparks == 0
-    assert (state.ko_set_off_this_turn, state.ko_reacted_this_turn) == (0, 0)
-    assert counts(state)["ko_explosion"] == 0
-    # It pays AGAIN next turn, and bigger, because the pile grew: the largest
-    # charge is now 4 + growth.
-    klee_overhaul.turn_start(state)
-    klee_overhaul.turn_end(state)
-    assert enemy.hp == 196 - (4 + C.KLEE_OVERHAUL_BOMB_GROWTH)
+    assert enemy.hp == 200 - 8, "the grown Bomb (4 + 4) paid"
+    assert sizes(enemy) == [8], "the Bomb stays where it is"
 
 
-def test_sparks_n_splash_pays_per_copy_its_own_random_target(overhaul):
-    """`EB-358`, default applied: a second Sparks 'n' Splash badges 2 (the
-    power's stack count) and used to pay the pile ONCE. Now each copy is its
-    OWN end-of-turn hit, each paying its own random target's largest Bomb --
-    on a one-enemy board that means two hits landing on the same enemy."""
+def test_sparks_n_splash_is_not_an_explosion(overhaul):
+    """IT READS THE PILE AND DOES NOT SPEND IT: no Spark (rule 4 pays per
+    explosion), no explosion event, rule 7's counters untouched, no "whenever
+    a Bomb goes off" reader, and a Mine stays a Mine."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
+    state.turn = 2
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 1
+    state.player.powers[klee_overhaul.CHAINED_REACTIONS] = 3
+    klee_overhaul.place(state, enemy, 6, is_mine=True)
+    sparks = state.player.sparks
+
+    _echo_turn(state)
+
+    assert enemy.hp == 200 - 10
+    assert state.player.sparks == sparks
+    assert counts(state)["ko_explosion"] == 0
+    assert (state.ko_set_off_this_turn, state.ko_reacted_this_turn) == (0, 0)
+    assert sizes(enemy) == [10], "no Chained Reactions Bomb: nothing went off"
+    assert klee_overhaul.mine_count(enemy) == 1
+
+
+def test_sparks_n_splash_hits_the_largest_bomb_on_the_board(overhaul):
+    """Her single largest Bomb across ALL enemies, on the enemy it is on --
+    not a random enemy. Ties: the first found (`largest_charge`, the one
+    reading every "your largest Bomb" card shares)."""
+    small, big = make_enemy(hp=200, name="small"), make_enemy(hp=200,
+                                                              name="big")
+    state = klee_state([small, big])
+    state.turn = 2
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 1
+    klee_overhaul.place(state, small, 5)
+    klee_overhaul.place(state, big, 3)
+    klee_overhaul.place(state, big, 9)
+
+    _echo_turn(state)
+
+    assert small.hp == 200
+    assert big.hp == 200 - 13, "the 9, grown to 13"
+
+    tie_a, tie_b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([tie_a, tie_b])
+    state.turn = 2
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 1
+    klee_overhaul.place(state, tie_a, 6)
+    klee_overhaul.place(state, tie_b, 6)
+    _echo_turn(state)
+    assert (tie_a.hp, tie_b.hp) == (190, 200)
+
+
+def test_sparks_n_splash_with_no_bomb_does_nothing(overhaul):
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.turn = 2
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 2
+
+    _echo_turn(state)
+
+    assert enemy.hp == 200
+    assert counts(state)["ko_bomb_echo"] == 0
+
+
+def test_sparks_n_splash_two_copies_are_two_hits(overhaul):
+    """`EB-358`: each copy is its own hit, the largest Bomb re-read each
+    time."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.turn = 2
     state.player.powers[klee_overhaul.BOMB_ECHO] = 2
     klee_overhaul.place(state, enemy, 5)
     klee_overhaul.place(state, enemy, 3)
 
-    klee_overhaul.turn_end(state)
+    _echo_turn(state)
 
-    assert sizes(enemy) == [5, 3], "still not spent, by either copy"
-    assert enemy.hp == 200 - 2 * 5, "two hits, each the largest Bomb (5)"
-    assert counts(state)["ko_bomb_echo"] == 2, "the badge's count is the hits"
+    assert counts(state)["ko_bomb_echo"] == 2
+    assert enemy.hp == 200 - 2 * 9, "two hits, each the grown 5"
+    assert sizes(enemy) == [9, 7], "still not spent, by either copy"
 
 
-def test_the_echo_rolls_only_over_bombed_enemies(overhaul):
-    """"A random enemy ... equal to the Bombs on it" -- so the roll is over the
-    enemies that actually hold one, and a board with none does nothing at all.
-    The auto-detonation it replaces rolled over EVERY enemy."""
-    bare, loaded = make_enemy(hp=200, name="bare"), make_enemy(hp=200,
-                                                              name="loaded")
-    state = klee_state([bare, loaded])
+def test_sparks_n_splash_reads_the_board_before_dodoco_places(overhaul):
+    """FIRST in the turn-start sequencer: it reads the Bombs the growth grew,
+    before Klee's Secret Base or Dodoco place anything."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.turn = 2
     state.player.powers[klee_overhaul.BOMB_ECHO] = 1
+    state.player.powers[klee_overhaul.DODOCO] = 20
 
-    klee_overhaul.turn_end(state)
-    assert counts(state)["ko_bomb_echo"] == 0
+    _echo_turn(state)
 
-    klee_overhaul.place(state, loaded, 6)
-    for _ in range(8):
-        klee_overhaul.turn_end(state)
-    assert bare.hp == 200, "an unbombed enemy is never rolled"
-    assert loaded.hp == 200 - 8 * 6
+    assert enemy.hp == 200, "Dodoco's Mine landed after the echo looked"
+    assert sizes(enemy) == [20]
 
 
-def test_the_echo_is_pyro_and_is_not_an_attack(overhaul):
-    """`ElementalHit.Deal`, the same funnel an explosion takes: the echo reacts
-    with an aura and carries her Strength, and no card is being played so
-    nothing that keys off Attacks sees it. A THIRD source name, because the
-    echo is not an explosion and a log that conflated them could not answer
-    "how many Bombs went off"."""
+def test_sparks_n_splash_takes_a_bombs_damage_terms(overhaul):
+    """Pyro through the explosion's door (`powered=False`): the aura and the
+    target's Vulnerable apply, Klee's Strength does not -- "the usual damage
+    modifiers apply as they do to a Bomb's own damage". Not an Attack, so
+    Skittish does not fire, and a source name of its own."""
     enemy = make_enemy(hp=200)
     enemy.skittish = 5
+    enemy.powers["vulnerable"] = 2
     state = klee_state([enemy])
+    state.turn = 2
     state.player.powers[klee_overhaul.BOMB_ECHO] = 1
-    state.player.powers["strength"] = 2
-    klee_overhaul.place(state, enemy, 6)
+    state.player.powers["strength"] = 3
+    klee_overhaul.place(state, enemy, 4)
 
-    klee_overhaul.turn_end(state)
+    _echo_turn(state)
 
     hit = next(e for e in state.log if e["event"] == "damage")
     assert hit["source"] == klee_overhaul.ECHO_SOURCE
     assert klee_overhaul.ECHO_SOURCE not in ("attack",
                                              klee_overhaul.EXPLOSION_SOURCE)
-    assert hit["amount"] == 8, "Strength rode it"
+    assert hit["amount"] == 12, "8 x 1.5 Vulnerable, and no Strength"
     assert enemy.aura == "pyro"
     assert enemy.block == 0, "Skittish is an Attack-card rule and did not fire"
 

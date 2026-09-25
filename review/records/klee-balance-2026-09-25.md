@@ -75,3 +75,17 @@ The pool has 24 Commons, 36 Uncommons and 18 Rares.
 - Whether Sparks now run short more often than they sit idle.
 - Whether the cheaper sinks (Blast Shield, Once More!, Sparkling Burst) get
   bought, and whether Spark Knight becomes the automatic Rare.
+
+## Follow-up, 2026-09-25 afternoon (two blind seats, Codex and Opus, on 0.2.3766)
+
+- **The loop reads.** Both seats found the real decision on their own: set off now or
+  let the Bombs grow a turn, timed against the enemy's intent.
+- **Sparks still sit idle.** The Opus seat ended fights holding 2, 2, 4, 6 and 4 Sparks,
+  and judged every Spark card it was offered weaker than a card that places Bombs. The
+  Codex seat held Bottomless Bag dead at 1 Spark. Today's price cuts did not change the
+  draft. Changed here: Bottomless Bag 2 Sparks → 1. The rest goes to [USER] as a pick.
+- **Sparks 'n' Splash** fired after the Bombs were gone. It now fires at the start of
+  the turn, after growth, and leaves the Bomb in place (upgrade: cost 1).
+- **Favonius Escort** was the Codex seat's never-again (it spends a Bomb the deck wants
+  for damage). One seat; watched, not changed.
+- **Jumpy Dumpty** opened every Codex fight. It is a starter card; not changed.

@@ -144,8 +144,11 @@ internal static class ElementalHit
     /// graph, so deleting it fails a pin instead of quietly restoring the old
     /// rule.
     ///
-    /// ONE CALLER, <c>ProtoBombPower.Explode</c>. Everything else in the mod
-    /// goes through <see cref="Deal"/> and keeps the dealer's terms.
+    /// TWO CALLERS, <c>ProtoBombPower.Explode</c> and, since 2026-09-25,
+    /// Sparks 'n' Splash's echo (<c>BombEchoPower.Fire</c>), which pays a
+    /// Bomb's size on a Bomb's terms without setting it off. Everything else
+    /// in the mod goes through <see cref="Deal"/> and keeps the dealer's
+    /// terms.
     ///
     /// THE KOKOMI ARM PASSES <c>powered: false</c> DIRECTLY and does not need a
     /// door, which is not an inconsistency: a Plan's hit is reachable from the

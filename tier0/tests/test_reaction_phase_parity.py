@@ -878,6 +878,24 @@ CO_TENANCY_LEDGER = {
             "through the same sequencer as SecretBasePower above and AFTER "
             "its check, so the one resource they share has one order. It "
             "reads nothing else of this broadcast's",
+        ("Powers/Prototype/KleeOverhaulPowers.cs", "BombEchoPower"):
+            "QUARANTINED (the Klee overhaul; moved here from "
+            "BeforeSideTurnEnd on 2026-09-25). Sparks 'n' Splash: her "
+            "largest Bomb deals its size in Pyro to the enemy it is on, "
+            "without going off. THE ORDERING QUESTION, answered: it READS "
+            "the charge lists, which rule 1 grew at the strictly earlier "
+            "BeforeSideTurnStart, and the only co-tenants that WRITE a "
+            "charge list here are SecretBasePower and DodocoPower -- so it "
+            "runs through their sequencer, "
+            "KleeExpansion.RunTurnStartPlacements, FIRST, reading the board "
+            "as the growth left it however the broadcast orders the three "
+            "(the sim's klee_overhaul._turn_start_expansion order). What it "
+            "WRITES is one Pyro hit on a Bomb's own terms. The residual is "
+            "the one the companion tenants below already carry: "
+            "StellarisOmenPower's Vulnerable and HeraldOfFrostPower's Cryo "
+            "can land before or after it (the sim runs those earlier, in "
+            "effects.player_turn_start_triggers), and SurpriseDispatchPower "
+            "draws from the same rng",
         ("Powers/Prototype/KleeExpansionPowers.cs", "AlicesDetonatorBasePower"):
             "QUARANTINED (the Klee overhaul, R276). Alice's Detonator adds a "
             "Ka-pow! (upgraded on the Plus twin) to the hand per stack. THE "
@@ -1121,30 +1139,13 @@ CO_TENANCY_LEDGER = {
             "`KleeMod`'s concat, deliberately, so an act cannot move a number "
             "the shipped end-of-turn docket has already drawn. NO SIM TWIN "
             "ORDERS IT: the arm is C# FIRST and tier0 has no stage",
-        ("Powers/Prototype/KleeOverhaulPowers.cs", "BombEchoPower"):
-            "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, and it is "
-            "[USER]'s own 2026-09-02 design: one random BOMBED enemy takes "
-            "Pyro damage equal to the Bombs on it. IT READS THE PILE AND DOES "
-            "NOT SPEND IT -- no charge is taken, so no Spark is minted, no "
-            "Mine answers and neither of rule 7's counters moves; the arm's "
-            "ledger is not touched at all, which is what makes it a co-tenant "
-            "with nothing to order against. THE ORDERING QUESTION, answered: "
-            "what it READS is a charge list, and the only writers of a charge "
-            "list are card plays and the turn-start growth, both outside this "
-            "broadcast; what it WRITES is one Pyro hit, and the co-tenant "
-            "that also deals damage here is TurnEndSequencer's volleys, which "
-            "belong to the SHIPPED kit and cannot be in a deck this power is "
-            "in (the overhaul arm's pool holds neither). If one ever could, "
-            "the interaction is a dead enemy dropping out of this power's own "
-            "candidate list, which it re-reads",
         ("Powers/Prototype/KleeExpansionPowers.cs", "SitTightPower"):
             "QUARANTINED (the Klee overhaul, R276). Sit Tight's delayed "
             "Block: 4 per copy if rule 7's first counter is still 0, then the "
             "power removes itself. THE ORDERING QUESTION, answered: what it "
             "READS is the arm's explosion ledger, and nothing in this "
-            "broadcast sets a charge off -- the echo above reads the pile and "
-            "does not spend it, and the sequencer's volleys and the Furina "
-            "and Kokomi tenants never touch Klee's charges. What it WRITES is "
+            "broadcast sets a charge off -- the sequencer's volleys and the "
+            "Furina and Kokomi tenants never touch Klee's charges. What it WRITES is "
             "Block, and the one co-tenant that reads Block is the "
             "sequencer's Bond of Life (Arlecchino, draftable beside the "
             "arm). A POWER tenant runs ahead of the model-driven sequencer, "
@@ -1161,9 +1162,8 @@ CO_TENANCY_LEDGER = {
             "of that queue are card PLAYS and the morning drain, both outside "
             "this broadcast. What it PAYS is Block, a Weak and (through a "
             "carry-out) a Hydro hit; the co-tenants here that also move those "
-            "are the echo above, whose damage belongs to an arm whose pool "
-            "cannot be in a Kokomi deck, and the sequencer's volleys, which "
-            "belong to the SHIPPED Klee kit for the same reason. The two "
+            "are the sequencer's volleys, which belong to the SHIPPED "
+            "Klee kit and cannot be in a Kokomi deck. The two "
             "kit-grant checks and the pending-draw flush read a meter and a "
             "draw debt, neither of which a Plan touches. The sim runs it at "
             "the same site (`combat._player_turn`, `kokomi_plan.resolve_dusk` "
@@ -1222,11 +1222,11 @@ CO_TENANCY_LEDGER = {
         ("Powers/Prototype/KleeExpansionPowers.cs", "PatienceKleePower"):
             "QUARANTINED (the Klee overhaul, R276). Patience, Klee!'s growth "
             "of the largest Bomb on a turn with no Set off card. THE "
-            "ORDERING QUESTION, answered: it is HERE rather than at "
-            "BeforeSideTurnEnd precisely because BombEchoPower reads the "
-            "largest Bomb there, so the growth lands strictly after the echo "
-            "pays -- the sim's order in klee_overhaul.turn_end. No co-tenant "
-            "of this broadcast reads or writes a charge",
+            "ORDERING QUESTION, answered: no co-tenant of this broadcast "
+            "reads or writes a charge (Sparks 'n' Splash, which read the "
+            "largest Bomb at BeforeSideTurnEnd, moved to the start of the "
+            "turn on 2026-09-25) -- the sim's order in "
+            "klee_overhaul.turn_end",
         ("Powers/Prototype/KokomiOverhaulPowers.cs",
          "NextCompanionDiscountPower"):
             "QUARANTINED (the Kokomi overhaul, draft 6). Rally's grant, "
