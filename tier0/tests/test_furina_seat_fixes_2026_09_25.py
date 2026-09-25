@@ -233,7 +233,18 @@ def test_a_hit_that_empties_the_lead_says_it_leaves_once():
                  _beat("leave", "usher", "Usher", 0, 3, reason="hit"))
     assert lines == [
         "  - **Sludge Spinner** hit **Usher** for 3: 3 → 0, and it leaves "
-        "the stage: emptied by a hit, so no Bow."]
+        "the stage: emptied by a hit, so it takes a Bow."]
+
+
+def test_a_hit_that_empties_the_lead_then_prints_its_bow():
+    """Rule 7, 2026-09-25: the Bow the mod files at the flush after the hit
+    prints on its own line, as the Spend exit's does."""
+    lines = _log(_beat("hit", "usher", "Usher", 0, 3, target="Sludge Spinner"),
+                 _beat("leave", "usher", "Usher", 0, 3, reason="hit"),
+                 _beat("bow", "usher", "Usher", 0, 4))
+    assert lines[0].endswith("emptied by a hit, so it takes a Bow.")
+    assert len(lines) == 2
+    assert lines[1].startswith("  - **Usher** took a Bow")
 
 
 def test_a_rapt_audience_refund_follows_the_hit_it_answers():

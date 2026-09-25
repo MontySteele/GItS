@@ -10,7 +10,8 @@ ONE run so a round packet can quote them together instead of assembling them:
 
   1. Spend fires, split by the paying (back) bar AT THE MOMENT OF SPEND (1-2, 3-5,
      6 and up) and by whether the target died.
-  2. Performers lost by a hit, by a bow, and by rotation.
+  2. Performers lost by a hit, by a Spend, and by a full-stage summon (all
+     three bow since 2026-09-25, rule 7), and by rotation.
   3. Turns with one, two and three performers on stage.
   4. Fanfare absorbed on the lead against what would have reached Furina --
      the Refill-as-prevention price the LAW clause R269 added asks for.
@@ -157,8 +158,9 @@ def report(states, label, out=sys.stdout):
     rotated = sum(1 for _st, _r in _rows(states, "stage_rotate_out"))
     print("2. Performers lost:", file=out)
     print(f"     by a hit:      {lost['hit']}", file=out)
-    print(f"     by a bow:      {lost['spend'] + lost['spend_all'] + lost['final_bow']}",
+    print(f"     by a Spend:    {lost['spend'] + lost['spend_all'] + lost['final_bow']}",
           file=out)
+    print(f"     by a summon:   {lost['recast']}", file=out)
     print(f"     by rotation:   {rotated}", file=out)
 
     # 3. Turns with one, two and three performers.

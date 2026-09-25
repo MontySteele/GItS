@@ -1441,30 +1441,31 @@ ARM_KEYWORDS: dict[str, str] = {
     # table is for. `Spend` carries "fires in full even if the bar is short",
     # because a rider that pays one point for the full number is the entire
     # Expend deck (brief sec.4). `Fanfare` carries the damage ORDER, because
-    # that is the reason a bar matters at all. `Bow` is stated against its
-    # opposite -- a Spend earns one and a hit does not -- because that
-    # difference IS turn one's wager (sec.7, line B against line C).
+    # that is the reason a bar matters at all. `Bow` says what triggers one:
+    # since 2026-09-25 (rule 7) every performer at 0 Fanfare bows, whatever
+    # emptied it.
     # `EB-746`: the word names a MODE now, not a rider. The page adds the
     # sentence the 135-character tip has no room for, which is what the
     # choose-a-card screen shows a player and a blind seat has to be told: a
     # Spend the back performer cannot pay is not offered.
-    # R276 picks 1 and 2: the BACK performer pays, in full or not at all, and
-    # a performer the Spend empties exactly takes its Bow.
+    # R276 picks 1 and 2: the BACK performer pays, in full or not at all. The
+    # "it Bows" clause left with rule 7's 2026-09-25 change: the Bow row
+    # covers every way of reaching 0.
     # THE TEXT PASS (2026-09-25, review/records/furina-text-pass-2026-09-25.md):
     # the glossary follows the tooltips word for word. The Spend row's old
     # page-only sentence ("not offered at all") is the tip's own clause now.
     "Spend": ("Pay Fanfare from your back performer. Offered only if it can "
-              "pay in full. If that empties it exactly, it Bows."),
+              "pay in full."),
     # The follow-up: the empty-stage summon rides the Fanfare row, which
     # every Fanfare-giving face prints.
     "Fanfare": ("A performer's health. Hits take your Block, then the front "
                 "performer's, then you. Gained on an empty stage, it summons "
                 "a performer."),
-    # `EB-744`. The CONTRAST that turn one's wager is (sec.7, line B against
-    # line C): a Spend earns a Bow and a hit does not. The text pass points at
-    # each performer's own row for what its Bow does.
-    "Bow": ("A performer's parting effect, shown on each performer. Spending "
-            "its last Fanfare triggers it; losing it to a hit doesn't."),
+    # `EB-744`, and rule 7 as changed 2026-09-25: a performer at 0 Fanfare
+    # Bows whatever emptied it -- a Spend, a hit or a full-stage summon. The
+    # text pass points at each performer's own row for what its Bow does.
+    "Bow": ("A performer's parting effect, shown on each performer. It "
+            "triggers when the performer's Fanfare runs out."),
     # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. The acts go on BOTH seat rows
     # because a seat may meet either word alone -- the page's one addendum to
     # the tip, `STAGE_ACTS`, which also carries the seat count (the

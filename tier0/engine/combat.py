@@ -1574,6 +1574,11 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             refpowers.on_damage_received(state, state.player,
                                          unblocked=dmg - blocked, dealer=enemy,
                                          powered_attack=True)
+            # QUARANTINED (`furina_stage.FURINA_STAGE`). RULE 7, 2026-09-25:
+            # a lead this hit emptied takes its Bow NOW -- after the hit is
+            # dealt and before the next hit of the intent, the mod's
+            # `AfterDamageReceived` flush. Nothing when the hit killed her.
+            furina_stage.settle_hit(state)
             if not state.player.alive:
                 # Fairy in a Bottle (dead branch on the battery: potions
                 # empty). Passive revive at the lethal hit; if it saves the

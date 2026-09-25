@@ -139,8 +139,10 @@ public class FurinaStageRuleTests
         Assert.True(stage.IsEmpty);
         Assert.Equal(StagePerformer.Usher, result.Exit!.Value.Who);
         Assert.Equal(StageDeparture.Struck, result.Exit!.Value.Cause);
-        // Rule 7, first clause: death by a hit earns no bow.
-        Assert.False(result.Exit!.Value.Bows);
+        // Rule 7 (2026-09-25): a performer at 0 Fanfare bows, whatever
+        // emptied it. The hit's Bow is owed, paid at the flush after the hit.
+        Assert.True(result.Exit!.Value.Bows);
+        Assert.Single(stage.TakePendingHitBows());
         Assert.Equal(seat.Creature.MaxHp, seat.Creature.CurrentHp);
     }
 

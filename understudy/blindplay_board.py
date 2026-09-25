@@ -662,17 +662,16 @@ STAGE_SHORT_NAMES = {
 }
 
 
-#: Why a performer left, in the words rules 7 and 9 use. A bow is earned by
-#: Spend and by nothing else, so the reason is not decoration: it is the
-#: difference between turn one's line B and line C (brief sec.7), which is the
-#: wager round one asked its seats to name.
+#: Why a performer left, in the words rules 7 and 9 use. Since 2026-09-25
+#: (rule 7) every performer at 0 Fanfare bows, whatever emptied it; only a
+#: rotation, which leaves the bar intact, does not.
 #:
 #: TRANSLATED HERE AND NOT IN THE RENDER, which is `qa_packet.assert_blind`'s
 #: rule rather than a preference: the wire spells a departure `final_bow`, and
 #: a snake_case token reaching a blind packet is an ID, refused by name. The
 #: observation carries the SENTENCE, so nothing downstream holds the token.
 STAGE_LEAVE_REASONS = {
-    "hit": "emptied by a hit, so no Bow",
+    "hit": "emptied by a hit, so it takes a Bow",
     "spend": "emptied by a Spend, so it takes a Bow",
     "rotated": "rotated off the front to make room, so no Bow",
     "final_bow": "took its Bow and left",
@@ -724,9 +723,8 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
       log -- what the stage has done since she last ended a turn, in order.
         Each row is an `event` (`arrive`, `act`, `bow`, `leave`, `rotate`), the
         performer, the seat it happened in, the bar afterwards, what the board
-        `moved`, and for a departure the `reason` it left by -- which is the
-        whole of rules 7 and 9, since a bow is earned by Spend and by nothing
-        else.
+        `moved`, and for a departure the `reason` it left by (rules 7 and 9:
+        every departure at 0 Fanfare bows, a rotation does not).
 
     THE NUMBER ON A LOG ROW IS WHAT THE BOARD DID, measured by the mod across
     the beat, and never the clause's own printed figure (`EB-511`'s lesson one

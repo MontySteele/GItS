@@ -596,7 +596,8 @@ public static class FurinaStage
     /// performer -- half rounded up, or all of it upgraded
     /// (<see cref="RaptAudiencePower"/>'s Amount is the percentage).
     /// Synchronous, for <see cref="FurinaStageLedger.Absorb"/>'s reason; the
-    /// bars reach the bodies at the flush that follows every hit.
+    /// bars reach the bodies, and a lead this hit emptied takes its Bow, at
+    /// the flush that follows every hit (<see cref="Flush"/>).
     /// </summary>
     public static int AbsorbHit(Creature target, int incoming,
                                 Creature? dealer)
@@ -858,9 +859,11 @@ public static class FurinaStage
         (int)owner.Powers.OfType<FullHousePower>().Sum(p => p.Amount);
 
     /// <summary>
-    /// Rule 9, the curtain call: performed ONCE by a performer emptied by a
-    /// Spend. It takes the EXIT rather than the performer so the two ways of
-    /// leaving cannot be confused at a call site --
+    /// Rule 9, the curtain call: performed ONCE by a performer that reached 0
+    /// Fanfare, whatever emptied it -- a Spend, a hit (paid at
+    /// <see cref="Flush"/>, after the hit), or a summon on a full stage. It
+    /// takes the EXIT rather than the performer so a rotation cannot be
+    /// mistaken for a departure at a call site --
     /// <see cref="StageExit.Bows"/> is the ledger's own read of rule 7, and a
     /// departure that earned no bow returns here without paying.
     /// </summary>
@@ -979,15 +982,50 @@ public static class FurinaStage
             each));
     }
 
-    /// <summary>Rule 6's flush: the ledger moved synchronously inside
+    /// <summary>
+    /// Rule 6's flush: the ledger moved synchronously inside
     /// <c>ModifyHpLostBeforeOsty</c> because the engine wanted a number back,
-    /// and this is where the bodies catch up. Nothing is paid out -- a
-    /// performer emptied by a hit takes no bow (rule 7).</summary>
-    public static async Task Flush(Creature? owner)
+    /// and this is where the bodies catch up.
+    ///
+    /// AND WHERE A HIT'S BOW IS PAID (rule 7, 2026-09-25: "Stage members bow
+    /// out when they are destroyed or replaced, not just when you deliberately
+    /// spend them down to 0"). The engine calls <c>AfterDamageReceived</c>
+    /// once per hit, inside <c>CreatureCmd.Damage</c>, after that hit's HP
+    /// loss and before <c>AttackCommand</c> deals the next hit. So the bow
+    /// lands BETWEEN the hits of a multi-hit attack: it cannot soften the hit
+    /// that emptied the performer, and Usher's Block meets the next one.
+    /// The bow is the same <see cref="Bow"/> a Spend takes, readers and A
+    /// Five-Century Act's return included.
+    ///
+    /// NO BOW FOR A DEAD FURINA OR A FINISHED COMBAT. The engine skips
+    /// <c>AfterDamageReceived</c> for a target the hit killed, so a hit that
+    /// killed Furina never reaches here for her; the check below also covers
+    /// a flush reached through a Guest of Honor ally, and the hit that ended
+    /// the fight. What is owed is dropped rather than kept for later.
+    /// </summary>
+    public static async Task Flush(PlayerChoiceContext choiceContext,
+                                   Creature? owner)
     {
+        if (owner != null && LiveFor(owner))
+        {
+            var owed = FurinaStageLedger.For(owner).TakePendingHitBows();
+            if (!owner.IsDead && !CombatOver())
+            {
+                foreach (var exit in owed)
+                {
+                    if (owner.IsDead || CombatOver()) break;
+                    await Bow(choiceContext, owner, exit);
+                }
+            }
+        }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }
+
+    /// <summary>The engine's own "skip this effect" test: combat is over, or
+    /// ending because every primary enemy or every player is down.</summary>
+    private static bool CombatOver() =>
+        MegaCrit.Sts2.Core.Combat.CombatManager.Instance.IsOverOrEnding;
 
     private static IEnumerable<Creature> Enemies(Creature owner) =>
         owner.CombatState?.HittableEnemies.ToList()
