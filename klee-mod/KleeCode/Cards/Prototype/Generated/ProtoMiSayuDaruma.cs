@@ -56,7 +56,7 @@ public sealed class ProtoMiSayuDaruma : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sayu — Muji-Muji Daruma"),
-        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 6 damage to a random enemy if you are above 70% HP, otherwise gain 6 [gold]Block[/gold]."),
+        ("description", "For {PowerAmount:diff()} turns, at the end of your turn: above 70% HP, deal 6 damage to a random enemy; otherwise, gain 6 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

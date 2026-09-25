@@ -3970,14 +3970,13 @@ def test_the_panel_says_where_a_plan_lands_in_two_sentences():
     assert lines.index(blindplay.PLAN_AIM_NOTE) + 1 ==         lines.index(blindplay.PLAN_HYDRO_NOTE)
 
 
-def test_the_plan_keywords_aim_clause_stays_the_pointer():
-    """The row keeps the tip's clause: the panel is where the rule is stated
-    and the keyword is where a reader meets the word, so the two must not
-    diverge and the keyword must not be emptied into the panel."""
+def test_the_plan_keyword_leaves_the_aim_rule_to_the_panel():
+    """Since the 2026-09-25 text pass the word says what a Plan is and in what
+    order Plans happen, and nothing about where one lands: that rule is the
+    panel's `PLAN_AIM_NOTE`, which has no ceiling."""
     plan = blindplay.ARM_KEYWORDS["Plan"]
-    assert "front non-Minion, or ALL, Minions too" in plan
-    assert ("Your Strength folds as you write it; the enemy's Vulnerable "
-            "counts next turn.") in plan
+    assert "non-Minion" not in plan
+    assert "never a Minion" in blindplay.PLAN_AIM_NOTE
 
 
 def test_a_board_with_no_jellyfish_is_told_no_aim_rule():
@@ -5283,28 +5282,17 @@ def test_an_older_bridge_prints_the_form_and_no_waiting_line():
     assert "the jellyfish waits" not in page
 
 
-def test_the_plan_word_says_when_each_side_of_the_line_is_read():
-    """`EB-599`, and it is what `EB-579`'s class name became.
-
-    THE FIND (Kokomi r22 lane 2). *Kurage's Oath* printed "Plan: Deal 10"
-    under the target's Vulnerable and the morning carried out 7 once that
-    Vulnerable had expired -- "the committed number moving is the sharpest
-    contradiction in the kit" -- while her Strength moved the own line and not
-    the Plan line. Two lines, two rules, neither written down.
-
-    THE RULE IS ABOUT WHEN, WHICH IS WHY A CLASS NAME COULD NOT CARRY IT. Her
-    Strength is folded when the Plan is WRITTEN (`kokomi_plan.hers`), because
-    that is the number the player commits the turn on; the target's Vulnerable
-    is read at the MORNING, against whatever the body wears then, which is
-    exactly the thing today's line cannot know. `Weak` is off the sentence
-    still: `powered=False` at the carry-out answers for every other term of
-    hers at once.
-    """
+def test_the_plan_word_left_the_modifier_rule_to_the_panel():
+    """`EB-599`'s rule is unchanged -- her Strength folds when the Plan is
+    WRITTEN, the target's Vulnerable is read at carry-out -- and since the
+    2026-09-25 text pass the WORD no longer states it ("the existing text is
+    often very verbose and unintuitive"). What a board needs of it is on the
+    panel: a Plan carries the numbers you wrote."""
     plan = blindplay.ARM_KEYWORDS["Plan"]
 
-    assert "Your Strength folds as you write it" in plan
-    assert "the enemy's Vulnerable counts next turn" in plan
+    assert "folds as you write it" not in plan
     assert "Weak" not in plan
+    assert "carries the numbers you wrote" in blindplay.PLAN_WRITTEN_NUMBER_NOTE
 
 
 def test_a_feed_with_no_pet_target_field_plays_the_card_as_it_always_did():
@@ -6701,13 +6689,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-599`: and the modifier clause became a clause about WHEN each
         # side is read -- her Strength at writing time, the target's
         # Vulnerable at the morning.
-        "Plan": [", paid now; any number wait, in ",
-                 "order, and the badge is their count. Next turn: front ",
-                 " too, into ",
-                 " still standing. ",
-                 " folds as you write it; the ",
-                 " counts next turn. A ",
-                 "carry-out is not a hit: no when-hit power fires."],
+        # THE 2026-09-25 TEXT PASS: two short sentences, the word's whole
+        # text now; the long forms are the panel's own notes.
+        "Plan": [" to save this for ",
+                 "the start of your next turn instead. Plans go off in the "
+                 "order ",
+                 "you made them."],
         # `EB-643` (R265). The pool pass's one new word, and a rule about WHEN
         # alone: everything else about a Dusk Plan is a Plan and the row above
         # says all of it. The sentence straddles two `[gold]` spans on the mod
@@ -9510,8 +9497,14 @@ def test_the_banner_face_and_the_dexterity_gloss_agree_on_one_page():
     exception now, so the two can be read on one screen.
 
     `EB-415` dropped the take-back's own NUMBER from the face, because the
-    banner hands back what it granted and the upgraded face grants 3. The
-    exception clause is what this page needs and it is still here.
+    banner hands back what it granted and the upgraded face grants 3.
+
+    THE 2026-09-25 TEXT PASS took the clause off the FACE: "for 2 turns" is
+    the base game's own duration idiom (`PANIC_BUTTON`, `STABLE_SERUM`) and
+    the temporary stat it prints is the base's "Gain N Dexterity this turn"
+    shape (`ANTICIPATE`) stretched over two turns. The take-back is stated
+    on the `General's War Banner` badge (`WarBannerPower`), which is on the
+    player while the Dexterity is.
     """
     import yaml
     row = next(r for r in yaml.safe_load(
@@ -9522,8 +9515,11 @@ def test_the_banner_face_and_the_dexterity_gloss_agree_on_one_page():
     card["name"] = "Gorou - General's War Banner (proto)"
     card["description"] = row["description"]
     page = blindplay.render(blindplay.observation(state))
-    assert "then the banner takes it back" in page
+    assert "Gain 2 Dexterity for 2 turns." in page
     assert "does not decay" in page          # the base rule, still printed
+    badge = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+             / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
+    assert "takes it back." in badge[badge.index("class WarBannerPower"):]
 
 
 # --------------------- EB-404: a keyword in a TITLE defines nothing --------
@@ -10979,9 +10975,8 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
 #: without the cap clause `KokomiPlan.CapSentence` appends. The uncapped half
 #: is `ProtoBakeKuragePower.Localization` verbatim; the capped half is what a
 #: build launched with `GITS_KOKOMI_PLAN_CAP=2` prints.
-PET_FACE = ("Enemies cannot target it, all combat. Holds any number of "
-            "Plans; each carries out next turn, or at this turn's end if "
-            "Dusk.")
+PET_FACE = ("Enemies can't target it. It holds your Plans until your next "
+            "turn.")
 PET_FACE_CAPPED = (PET_FACE
                    + " Carries out at most 2 at the start of your turn;"
                      " the rest wait in order.")

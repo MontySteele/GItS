@@ -53,7 +53,7 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — General's War Banner"),
-        ("description", "Gain {PowerAmount:diff()} [gold]Dexterity[/gold] for 2 turns, then the banner takes it back."),
+        ("description", "Gain {PowerAmount:diff()} [gold]Dexterity[/gold] for 2 turns."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

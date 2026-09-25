@@ -807,11 +807,16 @@ public sealed class SesshouSakuraPower : PowerModel, ILocalizationProvider
     {
         ("title", "Sesshou Sakura"),
         ("description",
-            "At the end of your turn, each [gold]Sakura[/gold] deals "
+            // THE 2026-09-25 TEXT PASS. "Plus 3 after the first" read as a
+            // bonus that might stack Sakura by Sakura; `FireVolley` below
+            // pays the first one the base and every later one base PLUS the
+            // bonus, flat, so the face prints that second number outright.
+            "At the end of your turn, your [blue]{Amount}[/blue] "
+          + "[gold]Sakura[/gold] each deal "
           + $"[blue]{CompanionOverhaulLaw.SakuraDamage}[/blue] [gold]Electro[/gold] "
-          + "damage to a random enemy, plus "
-          + $"[blue]{CompanionOverhaulLaw.SakuraBonus}[/blue] "
-          + "after the first. [blue]{Amount}[/blue] out."),
+          + "damage to a random enemy, or "
+          + $"[blue]{CompanionOverhaulLaw.SakuraDamage + CompanionOverhaulLaw.SakuraBonus}[/blue] "
+          + "after the first."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -930,8 +935,9 @@ public sealed class SoumetsuPower : PowerModel, ILocalizationProvider
             "At the end of your turn, deal "
           + $"[blue]{CompanionOverhaulLaw.SoumetsuDamage}[/blue] [gold]Cryo[/gold] "
           + "damage to ALL enemies. [blue]{Amount}[/blue] "
-          + "{Amount:plural:turn|turns} left; on the last, "
-          + $"[blue]{CompanionOverhaulLaw.SoumetsuFinale}[/blue] more."),
+          + "{Amount:plural:turn|turns} left. The last deals "
+          + $"[blue]{CompanionOverhaulLaw.SoumetsuFinale}[/blue] additional "
+          + "damage."),
     };
 
     public override PowerType Type => PowerType.Buff;

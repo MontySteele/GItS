@@ -2750,7 +2750,7 @@ APPLY_POWERS = {
         "Whenever one of your [gold]Bombs[/gold] goes off this turn, gain {X} "
         "Block."),
     "mc_cold_blooded": ("ColdBloodedPower", None,
-        "Next turn, Grounded pays even if you played a Set off card."),
+        "Next turn, Grounded triggers even if you played a Set off card."),
     "mc_lions_fang": ("LionsFangPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block and draw 1 card."),
@@ -12589,11 +12589,22 @@ def build_description(card: dict, *,
             # own preview row has said "consumed and copied onto ALL enemies"
             # since it was written, and so does `ArmKeywordTips.ForSwirl`; the
             # VERB on the face was the one surface that did not.
+            #
+            # THE 2026-09-25 TEXT PASS took the single-target clause back to
+            # the verb with the base game's target ("the enemy"), the
+            # spelling `docs/current/text-conventions.md` fixes and every
+            # prototype companion face already prints. The rule -- the aura
+            # consumed and copied onto ALL enemies -- is the reaction's own
+            # sentence, on the Swirl preview that rides the card whenever an
+            # aura is out to Swirl. Spec: review/records/text-pass-2026-09-25/.
             tgt = eff.get("target", "enemy")
-            parts.append(
-                "[gold]Swirl[/gold] ALL enemies' auras."
-                if tgt == "all_enemies"
-                else "[gold]Swirl[/gold] an enemy's aura onto ALL enemies.")
+            if tgt == "all_enemies":
+                parts.append("[gold]Swirl[/gold] ALL enemies' auras.")
+            elif tgt == "enemy":
+                parts.append("[gold]Swirl[/gold] the enemy.")
+            else:
+                parts.append(
+                    "[gold]Swirl[/gold] an enemy's aura onto ALL enemies.")
 
         elif op == "refresh_all_auras":
             parts.append("Refresh ALL elemental auras.")

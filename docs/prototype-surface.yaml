@@ -1048,7 +1048,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: cryo,
    cost: 1, type: skill, exhaust: true,
-   description: "Place a [gold]Lightfall Sword[/gold] on the enemy. After 2 turns it deals 8 damage, plus 5 for each Attack you played meanwhile.",
+   description: "Place a [gold]Lightfall Sword[/gold]. In 2 turns it deals 8 damage, and 5 additional damage for each Attack you play before then.",
    effects: [{op: apply_power, power: mc_lightfall_sword, amount: 2, target: enemy}]}
 
 - {id: proto_mc_mika_starfrost_swirl, name: "Mika — Starfrost Swirl", character: klee,
@@ -1093,7 +1093,7 @@
    cost: 1, type: attack,
    personal_pool: [klee],
    replaces: proto_mc_kaeya_frostgnaw,
-   description: "Deal 8 damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] pays even if you played a [gold]Set off[/gold] card.",
+   description: "Deal 8 damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] triggers even if you played a [gold]Set off[/gold] card.",
    upgrade: {damage: 3},
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: apply_power, power: mc_cold_blooded, amount: 1, target: self}]}
@@ -1149,7 +1149,7 @@
    cost: 1, type: attack, rarity: common,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].",
+   description: "Deal {PlainDamage:diff()} damage, or {BranchDamage:diff()} if a [gold]Plan[/gold] was carried out this turn. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].",
    effects: [{op: conditional, if: plan_carried_out_this_turn,
               then: [{op: damage, amount: 10, target: enemy}],
               else: [{op: damage, amount: 5, target: enemy}]}],
@@ -1176,7 +1176,7 @@
 - {id: proto_kk_read_the_field, name: "Read the Field", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Look at the top {Scry:diff()} cards of your draw pile; put one into your hand and the rest on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   description: "Look at the top {Scry:diff()} cards of your draw pile. Put 1 into your hand and the rest on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
    effects: [{op: scry_take, amount: 3}],
    plan: [{op: block, amount: 10}],
    # 4 seen / Plan 12: both halves move, one number each.
@@ -1273,7 +1273,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # R276 pick 1: RE-AIMED off Plan volume onto the intent, read at carry-out
    # (next turn's intents are up by then). `amount` is the flat bonus.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain [gold]Block[/gold] equal to the damage the enemy intends to deal{IfUpgraded:show:, plus 3|}.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain [gold]Block[/gold] equal to the damage the enemy intends next turn{IfUpgraded:show:, plus 3|}.",
    effects: [{op: block, amount: 4}],
    plan: [{op: block_front_intent, amount: 0}],
    # now 6; Plan +3.
@@ -1345,7 +1345,7 @@
 - {id: proto_kk_chain_of_command, name: "Chain of Command", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Deal 3 damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Deal 6 damage for each [gold]Companion[/gold] you played last turn.",
+   description: "Deal 3 damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Deal 6 damage for each Companion you play this turn.",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 0, per: 3, count: companions_played_this_turn}}],
    plan: [{op: damage_per_companion_last_turn, amount: 6, target: front_enemy}],
@@ -1404,7 +1404,7 @@
 - {id: proto_kk_moons_reflection, name: "Moon's Reflection", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Exhaust. Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, the [gold]Bake-Kurage[/gold] carries out its [gold]Plan[/gold] line, or plays it if it has none.",
+   description: "Exhaust. Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, carry out its [gold]Plan[/gold], or play it if it has none.",
    effects: [{op: plan_from_exhaust}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {cost: -1}}
@@ -1441,7 +1441,7 @@
    cost: 2, type: attack, rarity: common,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Deal {Damage:diff()} damage to ALL enemies, and {ExtraDamage:diff()} more to each enemy with a debuff. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 1 card.",
+   description: "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 1 card.",
    effects: [{op: damage, amount: 9, target: all_enemies, bonus_vs_debuff: 4}],
    plan: [{op: energy, amount: 1}, {op: draw, amount: 1}],
    # 12 / 6 more; the Plan line does not upgrade.
@@ -1473,7 +1473,7 @@
    cost: 0, type: attack, rarity: common,
    # R276 pick 1: RE-AIMED off Plan volume onto her debuff layer. No Plan
    # line. A "debuff" is a distinct debuff on the enemy, not a stack.
-   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each debuff on the enemy.",
+   description: "Deal {CalculationBase:diff()} damage. Deals {ExtraDamage:diff()} additional damage for each debuff on the enemy.",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 3, per: 3,
                                count: debuffs_on_target}}],
@@ -1485,8 +1485,8 @@
    cost: 1, type: skill, rarity: common,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   # "Since you wrote this": the entry records her HP when it is written.
-   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 9 damage. If you lost no HP since you wrote this, deal 14 instead.",
+   # "Since playing this": the entry records her HP when it is written.
+   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 9 damage, or 14 if you lost no HP since playing this.",
    effects: [{op: block, amount: 6}],
    plan: [{op: damage_if_unhurt, amount: 9, unhurt_amount: 14,
            target: front_enemy}],
@@ -1502,7 +1502,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # `EB-687`: THE CLAUSE NAMES WHAT IT DOUBLES, so a Plan that deals none is
    # visibly unchanged. The finding and the ceiling: the provenance note.
-   description: "Deal 5 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. Doubles the damage of the next [gold]Plan[/gold] carried out with this one.",
+   description: "Deal 5 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. Your next Plan deals double damage.",
    effects: [{op: damage, amount: 5, target: enemy}],
    # THE RIDER IS THE SECOND CLAUSE and it aims at nothing: "the next Plan" is
    # the entry carried out immediately after this one in the same drain.
@@ -1514,7 +1514,7 @@
 - {id: proto_kk_second_wave, name: "Second Wave", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The next [gold]Plan[/gold] carried out with this one is carried out twice.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Your next Plan is carried out twice.",
    effects: [{op: block, amount: 4}],
    # A FLAG AND NOT A COUNT: under Nereid's Ascension the entry this reaches
    # is carried out THREE times (`CarryOutTimes + 1`) and not four, which is
@@ -1525,7 +1525,7 @@
 - {id: proto_kk_scout_ahead, name: "Scout Ahead", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each later [gold]Plan[/gold] carried out with this one.",
+   description: "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each Plan after this one.",
    effects: [{op: draw, amount: 1}],
    # R267 PICK 3: THE POSITION CLAUSE IS BACK. Pass four's whole-morning count
    # removed the ordering decision; the card counts the carry-outs that FOLLOW
@@ -1553,7 +1553,7 @@
    # POOL PASS FIVE (`EB-685`): THE COUNT IS THE QUEUE AT DUSK -- the Plans
    # written this turn and still waiting -- never this entry itself. Pass
    # four read the morning, which a Plan written today cannot be in.
-   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] is holding.",
+   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], and 3 more for each Plan waiting.",
    effects: [],
    plan: [{op: block, amount: 5},
           {op: block_per_plan_held, amount: 3}],
@@ -1583,7 +1583,7 @@
    # `EB-403`: the take-back clause is `WarBannerPower`'s own. `EB-415`: it
    # hands back WHAT IT GRANTED, so the clause names no second number.
    # Provenance: docs/notes/prototype-surface-provenance.md.
-   description: "Gain 2 [gold]Dexterity[/gold] for 2 turns, then the banner takes it back.",
+   description: "Gain 2 [gold]Dexterity[/gold] for 2 turns.",
    effects: [{op: apply_power, power: dexterity, amount: 2, target: self},
              {op: apply_power, power: mi_war_banner, amount: 2, target: self}]}
 
@@ -1605,14 +1605,14 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 1, type: skill, exhaust: true,
-   description: "For 2 turns, at the end of your turn deal 6 damage to a random enemy if you are above 70% HP, otherwise gain 6 [gold]Block[/gold].",
+   description: "For 2 turns, at the end of your turn: above 70% HP, deal 6 damage to a random enemy; otherwise, gain 6 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_daruma, amount: 2, target: self}]}
 
 - {id: proto_mi_sayu_naptime, name: "Sayu — Naptime (proto)", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: anemo,
    cost: 0, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. Next turn, draw 2 cards if you play no Attacks this turn.",
+   description: "Gain 4 [gold]Block[/gold]. If you play no Attacks this turn, draw 2 cards next turn.",
    effects: [{op: block, amount: 4},
              {op: apply_power, power: mi_naptime, amount: 2, target: self}]}
 
@@ -1699,7 +1699,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: electro,
    cost: 1, type: skill,
-   description: "Place a [gold]Sakura[/gold], up to 3. At the end of your turn each deals 4 [gold]Electro[/gold] damage to a random enemy, plus 3 after the first.",
+   description: "Place a [gold]Sakura[/gold], up to 3. At the end of your turn, each deals 4 [gold]Electro[/gold] damage to a random enemy, or 7 after the first.",
    effects: [{op: apply_power, power: mi_sesshou_sakura, amount: 1, target: self}]}
 
 - {id: proto_mi_yoimiya_aurous_blaze, name: "Yoimiya — Aurous Blaze", character: klee,
@@ -1716,7 +1716,7 @@
    # `EB-698`: which turn pays 8 and which pays 16, said the same way on both
    # surfaces. Neither number moved. Provenance:
    # docs/notes/prototype-surface-provenance.md.
-   description: "At the end of each of your next 2 turns, deal 8 [gold]Cryo[/gold] damage to ALL enemies. On the last of them, deal 16 more.",
+   description: "At the end of each of your next 2 turns, deal 8 [gold]Cryo[/gold] damage to ALL enemies. The last one deals 16 additional damage.",
    effects: [{op: apply_power, power: mi_soumetsu, amount: 2, target: self}]}
 
 - {id: proto_mi_ayato_kyouka, name: "Kamisato Ayato — Kyouka", character: klee,
@@ -1732,7 +1732,7 @@
    cost: 1, type: attack,
    # `EB-696`: the LIVE total, Well Laid's shape, and the count's window said
    # out loud. The finding: the provenance note.
-   description: "Deal {CalculatedDamage:diff()} damage. Counts 4 for each [gold]Swirl[/gold] made before it this turn.",
+   description: "Deal {CalculatedDamage:diff()} damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.",
    effects: [{op: damage, target: enemy, applies_element: true,
               amount_formula: {base: 6, per: 4, count: swirls_this_turn}}]}
 

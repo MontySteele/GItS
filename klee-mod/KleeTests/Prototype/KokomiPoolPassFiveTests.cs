@@ -67,10 +67,8 @@ public class KokomiPoolPassFiveTests
         Assert.Equal(KokomiPlan.Kind.BlockPerPlanHeld,
                      card.PlanClauses[1].Kind);
         Assert.Equal(3, card.PlanClauses[1].Amount);
-        Assert.EndsWith(
-            "plus 3 for each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] "
-            + "is holding.",
-            Face(card));
+        // The 2026-09-25 text pass: the Bake-Kurage is not named twice.
+        Assert.EndsWith("and 3 more for each Plan waiting.", Face(card));
     }
 
     [Fact]

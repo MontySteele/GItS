@@ -116,8 +116,8 @@ def test_the_shipped_bomb_keeps_its_own_definition_and_the_arm_stands_down():
 # ------------------------------------------- EB-372: Grounded travels too --
 #
 # THE FINDING. `Grounded` is a Power card of Klee's, and Kaeya's Cold-Blooded
-# Strike is written against it by name -- "Next turn, Grounded pays even if
-# you played a Set off card"
+# Strike is written against it by name -- "Next turn, Grounded triggers even
+# if you played a Set off card"
 # as on the field" (`EB-576`) -- as is the buff that card leaves behind.
 # A seat that drafted Kaeya and never drafted Grounded met the word on a card
 # face with nothing on the screen saying what it is, and read it as noise in
@@ -135,7 +135,7 @@ def test_the_grounded_word_owes_its_definition_wherever_it_is_printed():
     # meeting Kaeya without Klee's kit needs the second sentence exactly as
     # much as the first.
     assert gen.arm_keyword_tip_calls(
-        "Next turn, [gold]Grounded[/gold] pays even if you played a "
+        "Next turn, [gold]Grounded[/gold] triggers even if you played a "
         "[gold]Set off[/gold] card.") == ["ArmKeywordTips.ForSetOff",
                                           "ArmKeywordTips.ForGrounded"]
     # The bare word in prose is not the keyword, the rule every row here is
@@ -152,7 +152,7 @@ def test_kaeyas_face_carries_the_grounded_tip_in_the_shipped_generation():
     """
     card = (PROTOTYPE_DIR / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
         encoding="utf-8")
-    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+    assert ("Next turn, [gold]Grounded[/gold] triggers even if you played a "
             "[gold]Set off[/gold] card.") in card
     assert "ArmKeywordTips.ForGrounded(" in card
 
@@ -166,7 +166,7 @@ def test_the_buff_kaeyas_card_leaves_behind_carries_it_too():
     body = power[head:power.index("class LionsFangPower")]
     # The face's literal is split across two lines by the concatenation, so
     # the clause is asserted the way the source spells it.
-    assert "Next turn, [gold]Grounded[/gold] pays even if you played a "         in body
+    assert "Next turn, [gold]Grounded[/gold] triggers even if you played a "         in body
     assert "ArmKeywordTips.ForGrounded(base.ExtraHoverTips)" in body
 
 
@@ -645,43 +645,14 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.
             #
-            # `EB-329` REWROTE THE AIM CLAUSE. "On the front enemy" was the
-            # whole of it and it was false for every Plan that says ALL --
-            # including the starter Kurage's Oath -- so the clause now defers
-            # to the face, which was right all along. "First thing" and
-            # "raises it" paid for the room: 144 characters with them, 132
-            # without, against a ceiling of 135 and no exception taken.
-            #
-            # `R250` (round-5 sec.6 pick 1) ADDED "NEVER A MINION": two
-            # formations put a decoy on the leftmost slot on purpose, and the
-            # sixth clause compressed "lands next turn on" to "next turn:" to
-            # stay under the same 135-character ceiling.
-            #
-            # `EB-380` SPLIT THAT CLAUSE, because the rule is not flat: an ALL
-            # Plan walks every living body, decoys included, and the round-9
-            # act-1 seat watched one land on `Eye With Teeth` while this
-            # sentence said it could not. And `Strength` joined the modifier
-            # clause -- naming Vulnerable and Weak and stopping read as a
-            # complete list, and the carry-out is an UNPOWERED hit. 135
-            # characters rendered, at the ceiling: "the front enemy" and "or
-            # ALL if it says so" paid for both facts.
-            "On the [gold]Bake-Kurage[/gold], paid now; any number wait, in ",
-            "order, and the badge is their count. Next turn: front ",
-            "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too, into ",
-            "[gold]Block[/gold] still standing. ",
-            # `EB-599` REVERSED WHICH SIDE THE CLAUSE NAMES. The Plan line
-            # folds HER Strength at writing time and nothing of the target's,
-            # because a Plan resolves next morning against whatever the body
-            # wears then -- and the r22 lane-2 seat paid for a "Plan: Deal 10"
-            # that arrived as 7 once that Vulnerable had expired. The clause
-            # says WHEN each side is read, which is what the old two-item
-            # enumeration could not carry.
-            "Your [gold]Strength[/gold] folds as you write it; the ",
-            # `EB-623` retired "morning" from every printed surface.
-            "enemy's [gold]Vulnerable[/gold] counts next turn. A ",
-            # `EB-538`: the class a carry-out belongs to, in `ForSetOff`'s
-            # own words -- the same rule at the same call one kit over.
-            "carry-out is not a hit: no when-hit power fires.",
+            # THE 2026-09-25 TEXT PASS rewrote the Plan word to two short
+            # sentences ("the existing text is often very verbose and
+            # unintuitive"): 292 rendered characters of seat edge cases came
+            # off it, and the panel keeps the long forms. Spec and census:
+            # review/records/text-pass-2026-09-25/.
+            "Play the card on the [gold]Bake-Kurage[/gold] to save this for ",
+            "the start of your next turn instead. Plans go off in the order ",
+            "you made them.",
             "heal N HP, never above the HP you entered ",
             # Furina, THE STAGE (`EB-723`; the brief's sec.12 names the
             # seven words and sec.3 states each rule). The reframe's four --
@@ -1169,149 +1140,56 @@ def test_a_word_excused_by_a_card_tip_really_carries_that_tip(word):
     assert carriers, (word, attach)
 
 
-# ------------------ `EB-380`: the Plan tip states the rule it has ----------
+# ------------- the 2026-09-25 text pass: the Plan tip is two sentences ------
+#
+# The word carried six seats' edge cases in 292 rendered characters against
+# the 135 tip ceiling, under a named lint exception. The owner's ask ("the
+# existing text is often very verbose and unintuitive") took them off the
+# word: it says what a Plan is and in what order Plans happen. The facts a
+# board needs stay on the blind-play panel, which has no ceiling, and each
+# note is pinned where it is built (`test_understudy_blindplay.py`).
+# Spec and census: review/records/text-pass-2026-09-25/.
+
+PLAN_TIP = ("Play the card on the Bake-Kurage to save this for the start of "
+            "your next turn instead. Plans go off in the order you made them.")
 
 
-def test_the_plan_tip_matches_the_two_aims_the_resolution_has():
-    """`KokomiPlan.FrontTarget` skips a Minion; `Aim.AllEnemies` walks every
-    living body, decoys included. The tip said "never a Minion" flat, and the
-    r9 act-1 seat watched an `Exposed Flank+` Plan land on `Eye With Teeth`
-    (run 2, act 1, (c) 4).
+def test_the_plan_tip_is_the_rewrite_on_the_page():
+    assert blindplay.ARM_KEYWORDS["Plan"] == PLAN_TIP
 
-    Driven against the RESOLUTION rather than restated: both branches are read
-    out of `KokomiPlan.cs` here, so a tip that stops matching the code goes red
-    from this side too.
 
-    THE TIP STILL NAMES TWO AND THERE ARE THREE (`EB-492`, Flank's
-    `EnemiesIntendingAttack`), and that is deliberate rather than a gap. The
-    tip is AT its 135-character ceiling and states the DEFAULT -- where a
-    planned hit lands when the line does not say -- while the third aim is a
-    clause the one card that uses it prints in full on its own face ("to each
-    enemy that intends to attack"). A tip that tried to carry it would have to
-    drop the modifier clause the r9 seat needed.
-    """
+def test_the_plan_tip_is_under_the_ceiling_and_carries_no_exception():
+    """The overage is gone, so the lint's named exception is too -- and the
+    lint's rot rule would fail the build if it were left behind."""
+    from tools import lint_text_conventions as lint
+
+    assert len(PLAN_TIP) <= lint.CEILING["tip"]
+    assert "PlanKey" not in lint.EXCEPTIONS
+
+
+def test_the_retired_clauses_left_the_word_and_the_panel_keeps_the_board_facts():
+    """What left the tip is gone from BOTH copies of it, and the board facts
+    a seat still needs are where the panel prints them."""
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    for gone in ("non-Minion", "folds as you write it", "when-hit",
+                 "any number wait", "still standing", "Dusk"):
+        assert gone not in body, gone
+    assert "never a Minion" in blindplay.PLAN_AIM_NOTE
+    assert "still standing in" in blindplay.PLAN_BLOCK_NOTE
+    assert "holds any number of Plans" in blindplay.PLAN_COUNT_NOTE
+    assert "not a limit" in blindplay.PLAN_COUNT_NOTE
+
+
+def test_the_panels_aim_note_still_matches_the_two_aims_the_resolution_has():
+    """The aim rule left the word and stayed on the panel, so the panel's
+    sentence is what is held against the code now: a single-target Plan
+    skips a Minion and an ALL Plan walks every living body."""
     plan = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
             / "KokomiPlan.cs").read_text(encoding="utf-8")
     assert "hittable.FirstOrDefault(IsNotMinion)" in plan
     assert "if (plan.Aim == Aim.AllEnemies)" in plan
-    assert "if (plan.Aim == Aim.EnemiesIntendingAttack)" in plan
-    body = blindplay.ARM_KEYWORDS["Plan"]
-    assert "front non-Minion" in body
-    assert "or ALL, Minions too" in body
-    assert "never a Minion" not in body
-
-
-def test_the_plan_tip_says_when_each_side_of_the_line_is_read():
-    """`EB-599`, and it is what `EB-380`'s clause became.
-
-    The carry-out is still an UNPOWERED `ElementalHit` at the morning, so
-    nothing of hers is read THERE -- and since the r22 default her Strength is
-    folded into the number when the Plan is WRITTEN, which is the moment the
-    player commits the turn. The target's Vulnerable is the other way round:
-    it is read at the morning, against whatever the body wears then, which is
-    why the line cannot preview it. The seat paid for a "Plan: Deal 10" that
-    arrived as 7 once that Vulnerable had expired (r22 lane 2)."""
-    plan = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-            / "KokomiPlan.cs").read_text(encoding="utf-8")
-    assert "UNPOWERED -- no Strength, no Weak" in plan
-    body = blindplay.ARM_KEYWORDS["Plan"]
-    assert ("Your Strength folds as you write it; the enemy's Vulnerable "
-            "counts next turn.") in body
-    assert "morning" not in body
-
-
-def test_the_plan_tip_names_the_class_a_carry_out_is_in():
-    """`EB-538`. Skittish gave no Block to a body hit by two carry-outs and 6
-    Block to a plain Strike on the same enemy in the same fight (r19 lane 2),
-    and the seat could not tell "a defect or a large undocumented advantage of
-    planning into blockers". It is Klee's Set off rule one kit over, at the
-    same call, so it is Set off's own sentence."""
-    body = blindplay.ARM_KEYWORDS["Plan"]
-    assert "A carry-out is not a hit: no when-hit power fires." in body
-    assert "no when-hit power fires" in blindplay.ARM_KEYWORDS["Set off"]
-
-
-def test_the_plan_tip_is_over_the_keyword_ceiling_and_the_lint_carries_it():
-    """`EB-538` TOOK IT OVER, deliberately and by name.
-
-    135 is the base game's own longest mechanic tip and this word is read on
-    every battle screen of every run, so the overage is a cost rather than an
-    oversight: the tip sat at exactly 135 and every clause on it is a seat's
-    finding (`EB-329`, R250, `EB-380`, and now this one). Nothing was droppable
-    to make room, so `tools/lint_text_conventions.py` carries `PlanKey` in
-    `EXCEPTIONS` with that reason -- the bargain `SetOffKey` already makes --
-    and this pin is what stops the overage from growing quietly.
-
-    `EB-579` MADE IT SHORTER, which is the direction this pin exists to allow.
-    "your Weak and Strength do not" reads as a complete enumeration, and the
-    r21 lane-2 seat had to TEST Shrink ("your Attacks deal 30% less") to learn
-    it does not bite a carry-out either. Naming the CLASS -- "no damage term
-    of yours does" -- covers every debuff and buff on that side of the board
-    and costs one character less than the two-item list did.
-
-    `EB-599` PUT 31 CHARACTERS BACK, and they buy a rule the class name could
-    not state. The rule itself moved: the Plan line folds HER Strength at
-    writing time and nothing of the target's, so a clause about WHICH terms
-    count had to become a clause about WHEN each side is read. A seat that
-    commits a turn on a number needs to know which half of it can still move.
-
-    `EB-623` TOOK FIVE BACK, for free: "counts at the morning" became "counts
-    next turn", which is the same fact in the base game's own timing words and
-    retires a word no printed surface teaches. The overage stands.
-
-    `EB-330` / `EB-563` / `EB-411` TOOK 81 MORE, in one rewrite, and the
-    exception's reason names all six findings now. The three facts were on the
-    blind-play panel and nowhere in the game: how many Plans wait (any number,
-    in order), what the badge's number IS (their count, not a cap), and where a
-    carry-out lands (the Block the enemy is still standing in from its own
-    turn). `EB-330`'s next action asked for "a clause must go"; every clause on
-    this word is a seat that read the board wrong without it, so the overage
-    went up instead and this pin is what keeps it honest.
-    """
-    from tools import lint_text_conventions as lint
-
-    body = blindplay.ARM_KEYWORDS["Plan"]
-    assert len(body) == 292
-    assert "PlanKey" in lint.EXCEPTIONS
-    assert "EB-538" in lint.EXCEPTIONS["PlanKey"]
-    for row in ("EB-330", "EB-563", "EB-411"):
-        assert row in lint.EXCEPTIONS["PlanKey"]
-
-
-def test_the_plan_tip_says_any_number_wait_and_the_badge_is_their_count():
-    """`EB-563` and `EB-330`, which are one sentence and were filed as two.
-
-    THE FIND. Three r4c seats read the `Plan` badge's number as a CAPACITY --
-    the tip printed "Carries out N Plans" and nothing said N was a tally -- and
-    the r20 lane-2 seat wrote one Plan at a time for four fights before trying
-    two. `KokomiPlan` caps nothing on an unconfigured build.
-
-    THE PANEL HAS SAID IT SINCE `EB-648` (`PLAN_COUNT_NOTE`) and the word did
-    not, which is the gap both rows are: a seat reading a card in hand never
-    reaches the panel's Bake-Kurage section. Twinned here and on the pet's own
-    badge (`ProtoBakeKuragePower`), whose acceptance sentence is the box's.
-    """
-    body = blindplay.ARM_KEYWORDS["Plan"]
-    assert "any number wait, in order, and the badge is their count" in body
-    page = blindplay.PLAN_COUNT_NOTE
-    assert "holds any number of Plans" in page
-    assert "not a limit" in page
-
-
-def test_the_plan_tip_says_a_carry_out_lands_in_standing_block():
-    """`EB-411`. A Plating 8 Sewer Clam ate a whole Plan and no screen in the
-    game said it would (Kokomi r10 run 2 (c) 4).
-
-    THE RULE, in the turn-start order's own words: the morning resolves before
-    the player has played a card, and an enemy's Block falls at ITS turn start
-    -- so whatever it raised on its own turn is still standing, and there is no
-    move that strips it first. The panel half is `PLAN_BLOCK_NOTE`
-    (`EB-411`'s built half, 2026-09-07); this is the twin on the word, which is
-    what the row's "Next action: the tip clause" owed.
-    """
-    body = blindplay.ARM_KEYWORDS["Plan"]
-    assert "into Block still standing" in body
-    assert "still standing in" in blindplay.PLAN_BLOCK_NOTE
+    assert "never a Minion" in blindplay.PLAN_AIM_NOTE
+    assert "Minions included" in blindplay.PLAN_AIM_NOTE
 
 
 def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():

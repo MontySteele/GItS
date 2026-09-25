@@ -257,89 +257,33 @@ public class ArmKeywordTipTests
     }
 
     [Fact]
-    public void The_plan_word_states_both_aims_and_all_three_modifiers()
+    public void The_plan_word_is_two_short_sentences_under_the_ceiling()
     {
-        // `EB-380`. "Never a Minion" was flat and the rule is not:
-        // `KokomiPlan.FrontTarget` skips a Minion for a SINGLE-TARGET Plan,
-        // and `Aim.AllEnemies` walks every living body, decoys included -- the
-        // r9 act-1 seat watched an `Exposed Flank+` Plan land on `Eye With
-        // Teeth` while this sentence said it could not. And the modifier
-        // clause named two of three: the carry-out is an UNPOWERED
-        // `ElementalHit`, so her Strength does not ride it either, and the
-        // same seat priced `Kurage's Oath+` at Plan 10 under Vajra expecting
-        // it would.
+        // THE 2026-09-25 TEXT PASS ("the existing text is often very verbose
+        // and unintuitive"). The tip carried six seats' edge cases in 292
+        // rendered characters under a named lint exception; it now says what
+        // a Plan is and in what order Plans happen, and the board facts are
+        // the blind-play panel's (`PLAN_AIM_NOTE`, `PLAN_BLOCK_NOTE`,
+        // `PLAN_COUNT_NOTE`, `PLAN_WRITTEN_NUMBER_NOTE`). `Printed`
+        // concatenates every literal in the method, so the loc KEY comes off
+        // before the markup does.
         var body = Printed("ForPlan");
-        Assert.Contains("front non-", body);
-        Assert.Contains("Minion", body);
-        Assert.Contains("or ALL", body);
-        Assert.Contains("Vulnerable", body);
-        // `EB-599` REVERSED THE MODIFIER CLAUSE, because the rule moved: the
-        // line folds HER Strength when the Plan is written and nothing of the
-        // target's, since a Plan resolves next morning against whatever the
-        // body wears then. The r22 lane-2 seat paid for a "Plan: Deal 10"
-        // that arrived as 7 once that Vulnerable had expired. `Weak` stays
-        // off the sentence -- `powered: false` at the carry-out answers for
-        // every other term of hers at once.
-        Assert.Contains("folds as you write it", body);
-        // `EB-623`: "morning" is retired from every printed surface.
-        Assert.Contains("counts next turn", body);
-        Assert.DoesNotContain("morning", body);
-        Assert.DoesNotContain("Weak", body);
-        Assert.DoesNotContain("never a Minion", body);
-
-        // The ceiling is the base game's own longest mechanic tip (CHANNELING,
-        // 134), and this word is read on every battle screen of every run.
-        // `Printed` concatenates every literal in the method, so the loc KEY
-        // comes off before the markup does.
-        // `EB-538` TOOK IT OVER, deliberately: the tip sat at exactly 135 and
-        // gained the class a carry-out belongs to, which is `SetOffKey`'s own
-        // sentence at the same call one kit over. Every clause here is a
-        // seat's finding and none was droppable, so `PlanKey` is carried in
-        // `tools/lint_text_conventions.py` by name. The length is pinned so
-        // the overage cannot grow quietly.
         var rendered = System.Text.RegularExpressions.Regex.Replace(
             body.Replace(Tips.GetField("PlanKey")!.GetRawConstantValue()
                              as string ?? string.Empty, string.Empty),
             @"\[/?[a-z]+\]", string.Empty);
-        // `EB-599` PUT 31 BACK for a rule a class name cannot state: the line
-        // folds her Strength at writing time and nothing of the target's, so
-        // the clause is about WHEN each side is read.
-        // `EB-623` TOOK FIVE OFF for free: "counts at the morning" became
-        // "counts next turn", the same fact in the base game's timing words.
-        // `EB-330` / `EB-563` / `EB-411` TOOK 81 MORE in one rewrite: how
-        // many Plans wait and what the badge's number is, and where a
-        // carry-out lands. All three were on the blind-play panel and nowhere
-        // in the game.
-        Assert.Equal(292, rendered.Length);
-        Assert.Contains("A carry-out is not a hit: no when-hit power fires.",
-                        body);
-    }
-
-    [Fact]
-    public void The_plan_word_says_any_number_wait_and_the_badge_is_their_count()
-    {
-        // `EB-563` and `EB-330`, one sentence filed as two. Three r4c seats
-        // read the `Plan` badge's number as a CAPACITY, and the r20 lane-2
-        // seat wrote ONE Plan at a time for four fights before trying two.
-        // `KokomiPlan` caps nothing on an unconfigured build. The panel has
-        // said so since `EB-648` (`blindplay_notes.PLAN_COUNT_NOTE`); a seat
-        // reading a card in hand never reaches the panel, which is the gap.
-        var body = Printed("ForPlan");
-        Assert.Contains("any number wait, in ", body);
-        Assert.Contains("order, and the badge is their count", body);
-    }
-
-    [Fact]
-    public void The_plan_word_says_a_carry_out_lands_in_standing_block()
-    {
-        // `EB-411`. A Plating 8 Sewer Clam ate a whole Plan and no screen in
-        // the game said it would (Kokomi r10 run 2 (c) 4). The morning
-        // resolves before the player has played a card and an enemy's Block
-        // falls at ITS turn start, so whatever it raised on its own turn is
-        // still standing and no move strips it first. Panel twin:
-        // `blindplay_notes.PLAN_BLOCK_NOTE`.
-        var body = Printed("ForPlan");
-        Assert.Contains("still standing", body);
+        Assert.Equal(
+            "Play the card on the Bake-Kurage to save this for the start of "
+          + "your next turn instead. Plans go off in the order you made them.",
+            rendered);
+        // The base game's own longest mechanic tip is CHANNELING, 134.
+        Assert.True(rendered.Length <= 135, rendered.Length.ToString());
+        foreach (var gone in new[] { "non-", "folds as you write it",
+                                     "when-hit", "any number wait",
+                                     "still standing", "Dusk" })
+        {
+            Assert.DoesNotContain(gone, body);
+        }
     }
 
     [Fact]

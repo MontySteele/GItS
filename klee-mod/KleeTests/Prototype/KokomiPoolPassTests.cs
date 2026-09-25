@@ -263,8 +263,9 @@ public class KokomiPoolPassTests
     {
         Assert.False(typeof(IPlannedCard)
                          .IsAssignableFrom(typeof(ProtoKkWellLaid)));
-        Assert.Equal("Deal {CalculationBase:diff()} damage, plus "
-                   + "{ExtraDamage:diff()} for each debuff on the enemy.",
+        Assert.Equal("Deal {CalculationBase:diff()} damage. Deals "
+                   + "{ExtraDamage:diff()} additional damage for each debuff "
+                   + "on the enemy.",
                      Face(new ProtoKkWellLaid()));
     }
 

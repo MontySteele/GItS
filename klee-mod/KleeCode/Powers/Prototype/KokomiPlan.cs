@@ -1114,8 +1114,8 @@ public static class KokomiPlan
     /// <summary>The prompt text. Merged into the `cards` table by
     /// <c>KleeMod.InjectLocStrings</c>, which is its only source.</summary>
     public const string ReflectionPromptText =
-        "Choose a card. The Bake-Kurage carries out its Plan line, or the "
-      + "card if it has none.";
+        "Choose a card. Next turn its Plan is carried out, or it's played if "
+      + "it has none.";
 
     private static LocString ReflectionPrompt =>
         new LocString("cards", ReflectionPromptKey);
@@ -3276,25 +3276,14 @@ public sealed class PendingPlansPower : PowerModel, ILocalizationProvider
     {
         ("title", "Plan"),
         ("description",
-            // `EB-680`: AND WHICH TURN'S END. A Dusk Plan lands at the end
-            // of the turn it is written on (R265), and this badge counted it
-            // into "the start of your next turn" with the rest -- the second
-            // of the three timings one Dusk Plan printed at once. 115 of 125.
+            // THE 2026-09-25 TEXT PASS: the count and the order, nothing else.
+            // The Dusk timing is the `Dusk` tip's alone, and "later debuffs do
+            // not change what you wrote" is the panel's
+            // (`blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`). Spec:
+            // `review/records/text-pass-2026-09-25/kokomi-rewrite.md`.
             "Carries out [blue]{Amount}[/blue] "
-          + "[gold]Plan{Amount:plural:|s}[/gold] in order next turn; a "
-          + "[gold]Dusk[/gold] Plan at this turn's end. "
-          // `EB-647` (round 23). THE NUMBER IS FIXED WHEN THE PLAN IS
-          // WRITTEN. Three r23 lanes met it from the wrong side: under Shrink
-          // the hand reprinted `Kurage's Oath` as 2 and the jellyfish carried
-          // it out for 7, which is `Hers` working exactly as ruled -- her
-          // Strength and her enchantment fold at WRITING time and nothing
-          // that lands on her afterwards follows. Nothing printed it. It goes
-          // on THIS badge rather than the `Plan` keyword tip, which is at its
-          // 135-character ceiling (`ArmKeywordTips.ForPlan`), and rather than
-          // `ProtoBakeKuragePower`'s description, which stands at 122 of the
-          // power surface's 125. Page twin:
-          // `blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`.
-          + "Later debuffs do not change what you wrote."
+          + "[gold]Plan{Amount:plural:|s}[/gold] at the start of your next "
+          + "turn, in order."
           // `EB-653` (round 24). AND THE CAP, WHERE IT BINDS. Empty on an
           // unconfigured build, which is every build but a cap lane's; the
           // sentence is `KokomiPlan.CapSentence`'s, spelled once for both

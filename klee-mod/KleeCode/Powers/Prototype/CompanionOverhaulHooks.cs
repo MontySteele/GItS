@@ -1252,11 +1252,12 @@ public sealed class LightfallSwordPower : PowerModel, ILocalizationProvider
     {
         ("title", "Lightfall Sword"),
         ("description",
-            "Counts its owner's Attacks. When it falls, deals "
-          + $"[blue]{CompanionOverhaulLaw.LightfallBase}[/blue] damage plus "
-          + $"[blue]{CompanionOverhaulLaw.LightfallPerAttack}[/blue] per "
-          + "Attack counted. Falls in [blue]{Amount}[/blue] "
-          + "{Amount:plural:turn|turns}."),
+            // THE 2026-09-25 TEXT PASS: "Counts" meant a tally here and a
+            // rate on Heizou's card, so the badge says what the tally buys.
+            "Falls in [blue]{Amount}[/blue] {Amount:plural:turn|turns} for "
+          + $"[blue]{CompanionOverhaulLaw.LightfallBase}[/blue] damage, plus "
+          + $"[blue]{CompanionOverhaulLaw.LightfallPerAttack}[/blue] "
+          + "additional damage for each Attack you play first."),
     };
 
     public override PowerType Type => PowerType.Debuff;

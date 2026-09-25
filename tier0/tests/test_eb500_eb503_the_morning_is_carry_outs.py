@@ -167,8 +167,10 @@ def test_well_laid_ignores_the_morning():
 
 def test_well_laids_face_prints_its_rule():
     face = _face("proto_kk_well_laid")
-    assert face == ("Deal {CalculationBase:diff()} damage, plus "
-                    "{ExtraDamage:diff()} for each debuff on the enemy.")
+    # THE 2026-09-25 TEXT PASS: rule 8's "N additional damage" template.
+    assert face == ("Deal {CalculationBase:diff()} damage. Deals "
+                    "{ExtraDamage:diff()} additional damage for each debuff "
+                    "on the enemy.")
     assert "Plan" not in face
 
 

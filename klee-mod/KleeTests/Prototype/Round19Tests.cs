@@ -61,52 +61,20 @@ public class Round19Tests
     private static string PlanTip() => Printed(typeof(ArmKeywordTips), "ForPlan");
 
     [Fact]
-    public void The_plan_tip_says_a_carry_out_is_not_a_hit()
+    public void The_plan_tip_left_the_clause_and_the_rule_stands()
     {
-        // SET OFF'S OWN SENTENCE, word for word, because it is the same rule
-        // at the same call: "when-hit power" is what a player calls the thing
-        // on the enemy's status bar, which is `EB-490`'s finding and the
-        // wording it bought.
-        Assert.Contains("A carry-out is not a hit: no when-hit power fires.",
-                        PlanTip());
+        // THE 2026-09-25 TEXT PASS took this clause off the Plan word with
+        // the other five seats' edge cases ("the existing text is often very
+        // verbose and unintuitive"): the tip was 292 rendered characters
+        // against a 135 ceiling. The RULE did not move -- the pin below still
+        // reads it off the carry-out's call -- and Set off keeps its own
+        // sentence, where the word is a Bomb's.
+        Assert.DoesNotContain("when-hit", PlanTip());
         Assert.Contains("no when-hit power fires",
                         Printed(typeof(ArmKeywordTips), "ForSetOff"));
-    }
-
-    [Fact]
-    public void The_clause_cost_the_tip_its_ceiling_and_the_lint_carries_it()
-    {
-        // Stated rather than left implicit: the tip was at 135 of 135 before
-        // this clause and every clause on it is a seat's finding, so the
-        // overage is deliberate and `tools/lint_text_conventions.py` carries
-        // `PlanKey` by name with that reason -- the bargain `SetOffKey` makes.
-        //
-        // `EB-579` MADE IT ONE SHORTER, which is the direction this pin exists
-        // to allow: "your Weak and Strength do not" reads as a complete
-        // enumeration, and the r21 lane-2 seat had to TEST Shrink to learn it
-        // does not bite a carry-out either. The class covers every term on
-        // that side of the board and costs less than the two-item list.
-        //
-        // `EB-599` PUT 31 CHARACTERS BACK, and they buy a rule a class name
-        // cannot state: the line folds HER Strength at writing time and
-        // nothing of the target's, so the clause is about WHEN each side is
-        // read. A seat committing a turn on a number needs to know which half
-        // of it can still move.
-        //
-        // `EB-623` TOOK FIVE OFF for free: "counts at the morning" became
-        // "counts next turn", the same fact in the base game's timing words.
-        //
-        // `EB-330` / `EB-563` / `EB-411` PUT 81 MORE ON, in one rewrite: how
-        // many Plans wait and what the badge's number is, and where a
-        // carry-out lands. All three were on the blind-play panel and nowhere
-        // in the game, and `EB-330`'s "a clause must go" is answered the other
-        // way round -- every clause on this word is a seat that read the board
-        // wrong without it.
         var rendered = PlanTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(292, rendered.Length);
-        Assert.EndsWith("A carry-out is not a hit: no when-hit power fires.",
-                        rendered);
+        Assert.True(rendered.Length <= 135, rendered.Length.ToString());
     }
 
     [Fact]
@@ -324,7 +292,9 @@ public class Round19Tests
 
         var face = string.Join(" ", Il.Strings(
             Il.Method("ProtoKkFeignedRetreat", "get_Localization")));
-        Assert.Contains("If you lost no HP since you wrote this", face);
+        // THE 2026-09-25 TEXT PASS: "Deal 9 damage, or 14 if you lost no HP
+        // since playing this." -- one sentence, the same stamp.
+        Assert.Contains("if you lost no HP since playing this", face);
     }
 
     [Fact]
@@ -562,8 +532,9 @@ public class Round19Tests
             "Cards/Prototype/Generated/ProtoKkWellLaid.cs");
 
         Assert.Contains(
-            "(\"description\", \"Deal {CalculationBase:diff()} damage, plus "
-          + "{ExtraDamage:diff()} for each debuff on the enemy.\")",
+            "(\"description\", \"Deal {CalculationBase:diff()} damage. Deals "
+          + "{ExtraDamage:diff()} additional damage for each debuff on the "
+          + "enemy.\")",
             card);
         Assert.Contains("new CalculationBaseVar(3m)", card);
         Assert.Contains("new ExtraDamageVar(3m)", card);

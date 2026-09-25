@@ -198,8 +198,9 @@ public class Round17Tests
         // prints its rule and both of its numbers.
         var face = Face(new ProtoKkWellLaid());
 
-        Assert.Equal("Deal {CalculationBase:diff()} damage, plus "
-                   + "{ExtraDamage:diff()} for each debuff on the enemy.",
+        Assert.Equal("Deal {CalculationBase:diff()} damage. Deals "
+                   + "{ExtraDamage:diff()} additional damage for each debuff "
+                   + "on the enemy.",
                      face);
         Assert.DoesNotContain("Plan", face);
     }

@@ -1479,52 +1479,17 @@ ARM_KEYWORDS: dict[str, str] = {
              "hit still lands unless the Mine kills. Block stops it. Only "
              "Vulnerable and the HP cap move it. If the enemy dies with it "
              "on, it moves to a survivor."),
-    # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
-    # WRONG, and it was reprinted on every battle screen of every run: a
-    # starter, Kurage's Oath, deals its Plan to ALL enemies, and the round-5
-    # act-1 seat watched one Plan take two Toadpoles and then four Phantasmal
-    # Gardeners while this line said "the front enemy" and nothing else. The
-    # card face was right the whole time; the word now defers to it.
-    # `R250` (round-5 sec.6 pick 1) ADDED "NEVER A MINION": The Kin's
-    # Followers and Queen's Torch Head Amalgam put a decoy on the leftmost
-    # slot on purpose, and every single-target Plan landed on it.
-    # `EB-380` FIXED THAT CLAUSE AND ADDED STRENGTH TO THE OTHER ONE. "Never a
-    # Minion" is true of a SINGLE-TARGET Plan only -- an ALL Plan walks every
-    # living body, decoys included, and the round-9 act-1 seat watched an
-    # `Exposed Flank+` Plan land on `Eye With Teeth` while this line said it
-    # could not. And the modifier clause named Vulnerable and Weak and stopped,
-    # which reads as a complete list: the same seat priced `Kurage's Oath+`
-    # face 4 under Vajra at Plan 10 expecting her Strength to ride it. It does
-    # not -- the carry-out goes through `ElementalHit` UNPOWERED -- so the
-    # clause names all three and says whose each one is.
-    # `EB-538` ADDED THE CLASS A CARRY-OUT BELONGS TO, and it is the Set off
-    # row's own sentence one kit over. Skittish gave no Block to a body hit by
-    # Oath's and Ambush's carry-outs and 6 Block to a plain Strike on the same
-    # enemy in the same fight (Kokomi r19 lane 2): a carry-out goes out through
-    # `ElementalHit.Deal` as an unpowered hit with no dealer, so nothing keyed
-    # on being hit can answer it. Same sentence as `ArmKeywordTips.ForPlan`.
-    # `EB-599` REVERSED WHICH SIDE THE MODIFIER CLAUSE NAMES, because the rule
-    # moved: the Plan line folds HER Strength at writing time and nothing of
-    # the target's, since a Plan resolves next morning against whatever the
-    # body wears then. The r22 lane-2 seat paid for a "Plan: Deal 10" that
-    # arrived as 7 once the Vulnerable it was folding had expired -- "the
-    # committed number moving is the sharpest contradiction in the kit". The
-    # clause now says WHEN each side is read.
-    # `EB-330` / `EB-563` / `EB-411` PUT THREE OF THIS PANEL'S OWN FACTS ON
-    # THE WORD, in one rewrite, and this row is the twin: that any number of
-    # Plans wait in order and the badge is their COUNT (`PLAN_COUNT_NOTE`,
-    # which three r4c seats needed and the r20 lane-2 seat wrote one Plan at a
-    # time for four fights without), and that a carry-out lands in the Block
-    # the enemy is still standing in from its own turn (`PLAN_BLOCK_NOTE`, the
-    # Plating 8 Sewer Clam that ate a whole Plan). The panel keeps the long
-    # form of both, because the panel has no ceiling; this row is
-    # `ArmKeywordTips.ForPlan` word for word, as every row here is.
-    "Plan": ("On the Bake-Kurage, paid now; any number wait, in order, and "
-             "the badge is their count. Next turn: front non-Minion, or "
-             "ALL, Minions too, into Block still standing. Your Strength "
-             "folds as you write it; the "
-             "enemy's Vulnerable counts next turn. A carry-out is not a "
-             "hit: no when-hit power fires."),
+    # THE 2026-09-25 TEXT PASS rewrote the word to two short sentences, in
+    # step with `ArmKeywordTips.ForPlan` word for word: the old row carried
+    # six seats' edge cases (the aim and its Minion exception, Strength
+    # folding, Vulnerable timing, "a carry-out is not a hit", standing Block,
+    # the badge as a count) in 292 characters. The panel keeps the long form
+    # of the ones a board needs -- `PLAN_AIM_NOTE`, `PLAN_BLOCK_NOTE`,
+    # `PLAN_COUNT_NOTE`, `PLAN_WRITTEN_NUMBER_NOTE` -- because the panel has
+    # no ceiling; the history of each clause is in git.
+    "Plan": ("Play the card on the Bake-Kurage to save this for the start of "
+             "your next turn instead. Plans go off in the order you made "
+             "them."),
     # `EB-643` (R265). THE POOL PASS'S ONE NEW WORD, and it is a rule about
     # WHEN and nothing else: everything else about a Dusk Plan is a Plan, and
     # the row above says all of it. What a reader cannot get from anywhere else

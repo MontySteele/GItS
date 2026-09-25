@@ -15,8 +15,9 @@ namespace KleeMod.Tests.Prototype;
 /// the other's rule.
 ///
 /// KAEYA'S HALF IS BUILT (`EB-576`, re-worded by `EB-749`): Cold-Blooded
-/// Strike and the buff it leaves behind both print "Next turn, Grounded pays
-/// even if you played a Set off card", which is what the force-pay does
+/// Strike and the buff it leaves behind both print "Next turn, Grounded
+/// triggers even if you played a Set off card" (the 2026-09-25 text pass
+/// made it "triggers"), which is what the force-pay does
 /// against the condition R271 sec.5.1 gave Grounded. Its words are pinned here
 /// beside the other half's, and BOTH superseded clauses are pinned absent --
 /// each was true of an engine this one no longer is.
@@ -60,7 +61,7 @@ public class GroundedFacesTests
     {
         var face = Face(new ProtoMcKaeyaColdBloodedStrike());
 
-        Assert.Contains("Next turn, [gold]Grounded[/gold] pays even if you "
+        Assert.Contains("Next turn, [gold]Grounded[/gold] triggers even if you "
                       + "played a [gold]Set off[/gold] card.", face);
         Assert.DoesNotContain("counts nothing as having gone off", face);
         Assert.DoesNotContain("counts a Bomb as on the field", face);
@@ -71,7 +72,7 @@ public class GroundedFacesTests
     {
         var face = Row<ColdBloodedPower>("description");
 
-        Assert.Contains("Next turn, [gold]Grounded[/gold] pays even if you "
+        Assert.Contains("Next turn, [gold]Grounded[/gold] triggers even if you "
                       + "played a [gold]Set off[/gold] card.", face);
         Assert.DoesNotContain("counts nothing as having gone off", face);
         Assert.DoesNotContain("counts a Bomb as on the field", face);

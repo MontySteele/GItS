@@ -414,7 +414,8 @@ public sealed class FrontRowSeatPower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Kaeya, Cold-Blooded Strike: "Deal 8 damage. Apply Cryo. Next turn,
-/// Grounded pays even if you played a Set off card."
+/// Grounded triggers even if you played a Set off card." ("pays" became
+/// "triggers" in the 2026-09-25 text pass, on the card and this buff both.)
 ///
 /// THE FACE NAMES THE RULE THE ENGINE HAS, and it has been rewritten twice for
 /// that reason without the effect moving once. The blind is read as an OR
@@ -449,7 +450,7 @@ public sealed class ColdBloodedPower : PowerModel, ILocalizationProvider
     {
         ("title", "Cold-Blooded"),
         ("description",
-            "Next turn, [gold]Grounded[/gold] pays even if you played a "
+            "Next turn, [gold]Grounded[/gold] triggers even if you played a "
           + "[gold]Set off[/gold] card."),
     };
 
