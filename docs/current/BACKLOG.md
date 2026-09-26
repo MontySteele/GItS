@@ -15,7 +15,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Shipped Furina's Encore buffer (FurinaResources.AbsorbDamage) rounds a fractional HP loss up; the engine truncates (found 2026-09-25).
 - Beetle Juice's Shrink on an enemy prints "While is alive, you deal 30% less damage": the name is blank and it speaks in the player's voice (Klee seat, 2026-09-23).
 - Rosaria's Melt on Klee's board printed "Deal 15" from a written 9, which no printed multiplier explains; show the reaction's factor on the face.
-- Klee: dead engine code for the cut cards (Explosives Workshop, Catalytic Converter, Kindling) still compiles; delete it with its tests.
 - Kokomi: engine pieces the halves rewrite left unused (`NextAttackDamage` with `NextAttackDamagePower`, which Battle Plan stopped using at R276 and no row applies, per the 2026-09-25 text pass; `BlockPerPlanThisMorning`, `plans_carried_out_this_morning`, the morning-damage tip); delete them in C# and the sim.
 - `EB-809` `KurageMemory.PriceText` prints bare `free` at price 0; print the derivation (`cost 0 x 3`) like every other price.
 - `EB-808` a create-mode Muster never stamps its recruit's discount (`KokomiConscript.cs` `NoteMusterRecruit` is in the sacrifice branch only); stamp both branches.
@@ -31,11 +30,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
-- `prune_witch_hunt`'s only upgrade (`kit_spark` +1) does nothing under the Klee arm, because Companion plays pay no Spark.
-- A co-op partner cannot see Klee's Spark count: the overhead gauge left in #658, the strip badge is hidden, and the energy-area counter is local only.
 - The Big One's x4 stays armed when its Set off finds no Bomb, so a later Mine on the enemy turn can spend it.
 - Dodoco Tales does nothing beyond Pounding Surprise under the Klee arm (its opening-Spark half is gated off); it needs an arm body.
-- The Smith preview for a Spark-price upgrade (Sparkling Burst, Once More!, Boom Badge, Blazing Delight) says it "changes nothing this face prints".
 
 ## Harness, bridge and tools
 

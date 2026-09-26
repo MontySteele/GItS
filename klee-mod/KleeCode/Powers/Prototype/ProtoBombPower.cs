@@ -829,29 +829,18 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// Rule 1's growth NUMBER for one Klee, right now. PURE, and it is one
-    /// function because the two modifiers compose in one printed way:
-    /// Explosives Workshop ADDS <see cref="KleeOverhaulLaw.WorkshopGrowth"/>
-    /// per stack ("your Bombs grow by 1 more"), Alice's Recipe MULTIPLIES what
-    /// is left by <see cref="KleeOverhaulLaw.AliceMultiplier"/> ("your Bombs
-    /// grow twice each turn").
-    ///
-    /// ADD-THEN-MULTIPLY, and it is the only reading that leaves both faces
-    /// true: "twice" is twice the growth the turn would otherwise have had,
-    /// Workshop's +1 included, so one Workshop and the Recipe is
-    /// (3 + 1) x 2 = 8. The other order would make the Rare read "twice the
-    /// base and the Workshop once", which neither card says. The brief's own
-    /// gloss on Alice is still "Breaks rule 1".
+    /// Rule 1's growth NUMBER for one Klee, right now. PURE: the base
+    /// <see cref="KleeOverhaulLaw.BombGrowth"/>, MULTIPLIED by
+    /// <see cref="KleeOverhaulLaw.AliceMultiplier"/> while Alice's Recipe is up
+    /// ("your Bombs grow twice each turn"). The brief's own gloss on Alice is
+    /// "Breaks rule 1".
     /// </summary>
     public static int GrowthFor(Creature? klee)
     {
         if (klee == null) return KleeOverhaulLaw.BombGrowth;
-        var workshop = klee.Powers.OfType<ExplosivesWorkshopGrowthPower>()
-            .Sum(p => p.Amount) * KleeOverhaulLaw.WorkshopGrowth;
-        var growth = KleeOverhaulLaw.BombGrowth + workshop;
         return klee.Powers.OfType<AlicesRecipePower>().Any()
-            ? growth * KleeOverhaulLaw.AliceMultiplier
-            : growth;
+            ? KleeOverhaulLaw.BombGrowth * KleeOverhaulLaw.AliceMultiplier
+            : KleeOverhaulLaw.BombGrowth;
     }
 
     // ---- rule 1: growth at the start of Klee's turn ---------------------
@@ -2167,7 +2156,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     ///
     /// The walk <see cref="RemoveLargestForBlock"/> makes one charge at a time
     /// and <see cref="GrowLargestPerSpark"/> makes one pile at a time, named
-    /// once so All of My Treasures!, Split Charge and Kindling's floor cannot
+    /// once so All of My Treasures! and Split Charge cannot
     /// disagree about which Bomb "your largest Bomb" is. THE TIE-BREAK IS THE
     /// FIRST ONE FOUND -- living enemies in order, each pile in place order --
     /// which is Sorry, Jean...'s rule and the only one a player can plan
@@ -2224,51 +2213,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         if (size <= 0) return;
         await Place(choiceContext, target, size, isMine: false,
                     payloadMineAll: 0, applier, cardSource);
-    }
-
-    /// <summary>
-    /// Kindling (the pool pass, `EB-491`): "Each Bomb on an enemy with an aura
-    /// other than Pyro grows by <paramref name="amount"/>. If there is none,
-    /// your largest Bomb grows by <paramref name="floor"/>."
-    ///
-    /// THE FLOOR IS WHAT MAKES IT A REACT ROW WITH A LOSING LINE RATHER THAN A
-    /// DEAD CARD. Catalytic Converter is dead in a mono-Pyro deck by its own
-    /// printed admission (R244 pick 2's shape); this one still buys 2 growth
-    /// when no applier went first, and buys 4 per Bomb on every foreign aura
-    /// when one did.
-    ///
-    /// "AN AURA OTHER THAN PYRO" IS THE ENEMY'S CARRIED AURA and no aura does not
-    /// count -- <see cref="SetOffAll"/>'s <c>nonPyroAuraOnly</c> filter, read
-    /// the same way for the same reason (Flame Dance and this row must not
-    /// disagree about which enemies are "off-element"). The board is read as it
-    /// stands; nothing here consumes an aura, so no order matters inside it.
-    ///
-    /// AN ENEMY WITH THE AURA AND NO BOMB IS NOT A MATCH: the face counts
-    /// BOMBS, not enemies, so a board of aura'd but Bomb-less enemies takes the
-    /// floor. Sim twin: <c>klee_overhaul.grow_bombs_off_aura</c>.
-    /// </summary>
-    public static void GrowOffAura(Creature applier, int amount, int floor)
-    {
-        if (applier.CombatState == null) return;
-
-        var grew = false;
-        foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
-        {
-            if (enemy.IsDead) continue;
-            var aura = AuraCmd.Find(enemy);
-            if (aura == null || aura.Element == Element.Pyro) continue;
-            if (!HoldsChargeFrom(enemy, applier)) continue;
-            GrowOn(enemy, applier, amount);
-            grew = true;
-        }
-        if (grew || floor <= 0) return;
-
-        var pile = LargestCharge(applier).Pile;
-        // The board's largest charge is by construction its own pile's largest,
-        // and both walks break a tie the same way (first found, place order) --
-        // so this is `LargestCharge`'s index, reached through the pure mutation
-        // that already owns it.
-        pile?.GrowLargestChargeBy(floor);
     }
 
     /// <summary>
@@ -2401,8 +2345,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// The explosion event bus (rule 4's carrier, and Chained Reactions' and
-/// Catalytic Converter's). Once PER EXPLOSION, so a three-Bomb Set off is three
+/// The explosion event bus (rule 4's carrier, and Chained Reactions'). Once
+/// PER EXPLOSION, so a three-Bomb Set off is three
 /// events -- which is what makes "1 Spark per explosion" a rule about
 /// explosions rather than about cards.
 ///

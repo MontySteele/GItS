@@ -1,5 +1,6 @@
 using HarmonyLib;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Combat;
@@ -30,7 +31,9 @@ namespace KleeMod.Vfx;
 ///      arm's scope predicate still live here.
 ///   2. <b>The badge.</b> <see cref="HidesBadge"/> plus the Harmony prefix at
 ///      the bottom of this file keep <c>SparkPower</c> out of the status strip
-///      while the arm is live.
+///      while the arm is live -- on HER OWN screen, where the counter stands
+///      in for it. A co-op partner still sees the badge on her creature
+///      (2026-09-26), because the counter is the local seat's.
 ///
 /// WHY THE BADGE IS SUPPRESSED AT THE CONTAINER AND NOT AT THE MODEL. The game
 /// has a designed way to hide a power: <c>PowerModel.IsVisibleInternal</c>
@@ -146,11 +149,17 @@ public static class SparkGauge
 
     /// <summary>
     /// Is this the power whose badge the arm suppresses? Exactly
-    /// <c>SparkPower</c>, exactly while the arm is live, and asked of the
-    /// power's own owner rather than of the local seat -- in co-op a Klee
-    /// under the arm hides her bank badge on either screen. (Since the overhead
-    /// gauge went, a partner's screen shows no Spark count for her at all: the
-    /// energy-area counter is the local seat's.)
+    /// <c>SparkPower</c>, exactly while the arm is live, and only on the screen
+    /// of the seat that OWNS it -- the one screen where the energy-area counter
+    /// (<see cref="SparkCounter"/>, local seat only) shows the same bank.
+    ///
+    /// CO-OP, 2026-09-26. When the overhead gauge went (the 2026-09-24
+    /// playtest), a partner's screen was left with no Spark count for Klee at
+    /// all: this used to hide the badge on every screen, and the counter is
+    /// drawn only for the local seat. So the badge is hidden exactly where the
+    /// counter is drawn -- <c>LocalContext.IsMe</c>, the counter's own gate --
+    /// and a partner sees her bank as the base game shows any creature's
+    /// counter: the power icon and its number in her power row.
     ///
     /// Nothing else Klee carries is touched. Bombs, the reaction badges and
     /// True Spark Knight keep their status-strip badges: they are STATUSES, and
@@ -164,7 +173,7 @@ public static class SparkGauge
         }
 
         Creature? owner = OwnerOf(power);
-        return owner != null && AppliesTo(owner);
+        return owner != null && AppliesTo(owner) && LocalContext.IsMe(owner);
     }
 
     /// <summary>

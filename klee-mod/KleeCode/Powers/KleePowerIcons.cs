@@ -49,22 +49,16 @@ internal static class KleePowerIcons
         // which is also the "reuse the existing badge rendering" the slice's
         // sec.5 asks for in as many words.
         ProtoBombPower => KleePck.Path("klee/powers/bomb.png"),
-        ExplosivesWorkshopGrowthPower =>
-            KleePck.Path("klee/powers/bomb_damage_up.png"),
         AlicesRecipePower =>
             KleePck.Path("klee/powers/bomb_damage_up.png"),
         ChainedReactionsPower =>
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         BombEchoPower =>
             KleePck.Path("klee/powers/sparks_n_splash.png"),
-        BombReactionSparkPower =>
-            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         // THE POOL PASS's Rare (`EB-491`), on the block above's terms
-        // verbatim: it borrows the icon of the arm power whose job it takes
-        // over one step along. Catalytic Converter pays a SPARK when a Bomb
-        // reacts and the Pact pays a second REACTION off the same trigger, so
-        // the two read one board and the badge says so. Its own illustration
-        // stays owed until the slice is accepted.
+        // verbatim: it borrows the shipped reaction-payout badge, since the
+        // Pact pays a second REACTION off a Bomb's reaction. Its own
+        // illustration stays owed until the slice is accepted.
         VermillionPactPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         GroundedPower => KleePck.Path("klee/powers/spark_per_turn.png"),

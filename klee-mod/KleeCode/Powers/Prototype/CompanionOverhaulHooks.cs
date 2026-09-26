@@ -954,8 +954,7 @@ public sealed class FavonianFavorPower : PowerModel, ILocalizationProvider
 /// The power stores nothing and hooks nothing: the multiplier is computed in
 /// ONE place (<see cref="CompanionOverhaulReactions.DamageMultiplier"/>) and
 /// spent at the two sites a reaction deals damage, so this power's whole job is
-/// to be present and countable -- the same argument
-/// <see cref="ExplosivesWorkshopGrowthPower"/> makes for growth.
+/// to be present and countable.
 /// </summary>
 public sealed class BinaryFormWhitePower : PowerModel, ILocalizationProvider
 {
