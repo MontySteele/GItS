@@ -2744,6 +2744,11 @@ public static partial class McpMod
         state["preview_showing"] = false;
         state["can_confirm"] = false;
         state["can_cancel"] = state["can_skip"];
+        // GItS LOCAL EDIT (wave-3 Furina lane 3 seat b, 2026-09-26): whether
+        // the pick is already taken, so the read rides out the frame before
+        // the game takes the screen down (`gits/GitsChooserAnswered.cs`).
+        if (GitsChooserAnswered(screen) is bool answered)
+            state["answered"] = answered;
 
         return state;
     }

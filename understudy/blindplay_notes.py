@@ -1579,8 +1579,11 @@ ARM_KEYWORDS: dict[str, str] = {
                     "damage to ALL enemies."),
     "Clorinde": ("End of your turn: take 1 Fanfare from each other performer "
                  "to deal 8 Electro damage to a random enemy."),
+    # The 2026-09-26 seat round (the designer's ruling): an emptied Navia
+    # Bows for the Fanfare she had before whatever emptied her.
     "Navia": ("End of your turn: deal Geo damage equal to her Fanfare to a "
-              "random enemy."),
+              "random enemy. Her Bow uses what she had before she was "
+              "emptied."),
     "Chevreuse": "End of your turn: Spend 2 to gain 1 Energy next turn.",
     "Wriothesley": ("End of your turn: deal Cryo damage to a random enemy "
                     "equal to twice the Fanfare he lost to hits since his "

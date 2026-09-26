@@ -67,6 +67,7 @@ On the Defect comparison [USER] drew (Lightning, Frost, Glass, Dark, Plasma), ea
 | **Lynette** (Anemo) | Support | 8 | Deal 3 [gold]Anemo[/gold] damage to a random enemy, one with an aura if any. | free | none: a reaction enabler |
 
 - **Navia's fade tension.** Her damage grows with her bar, and behind the front the fade caps her near 5. So she wants to be the shield, or to be fed every turn.
+- **Navia's Bow (2026-09-26 seat round).** The seat: "Navia's bow is always worth nothing when she dies to a hit or a Spend." Ruled: her Bow deals damage equal to the Fanfare she had before whatever emptied her: the hit that took her down, the Spend, a payment, or Let the People Rejoice. Wriothesley's rule 6 is the precedent. Her tip adds: "Her Bow uses what she had before she was emptied."
 - **Wriothesley and Sigewinne answer the Necrobinder problem as a pair.** GPT: "Wriothesley makes taking a hit productive … Sigewinne moves existing Fanfare into the shield." Wriothesley is Uncommon so ordinary drafts meet him, rather than Rare as in draft 1.
 - **Lynette** is [USER]'s example of a guest who "arrives with extra Fanfare on deck". Her act is Anemo damage, so on an aura it Swirls and on none it is plain damage.
   (2026-09-25 night: after the granted-guest round, both seats never played her; the act now always lands.)
