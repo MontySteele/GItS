@@ -784,6 +784,10 @@ UNMIRRORED: dict[str, str] = {
         "hiding it.",
     "TurnEndPreviewBridge.SlotSpacing":
         "presentation: docket slot pitch in pixels.",
+    "FurinaStageCueNodes.HeadGap":
+        "presentation: the pixels between a performer's hitbox and the "
+        "bottom of its cue card (2026-09-26, the Furina cues). Geometry; the "
+        "sim draws nothing.",
     "TurnEndPreviewBridge.SpriteScaleMax":
         "presentation: the largest scale a docket entity is drawn at. A "
         "rendering ratio; the sim has no sprites.",

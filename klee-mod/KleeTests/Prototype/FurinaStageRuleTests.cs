@@ -752,16 +752,16 @@ public class FurinaStageRuleTests
     }
 
     [Fact]
-    public void The_strip_draws_for_her_alone_and_only_on_the_arm()
+    public void The_cues_draw_for_her_alone_and_only_on_the_arm()
     {
         using (new Arm())
         {
-            Assert.True(Vfx.FurinaStageStrip.AppliesTo(Seat.Furina().Creature));
-            Assert.False(Vfx.FurinaStageStrip.AppliesTo(Seat.Klee().Creature));
+            Assert.True(Vfx.FurinaStageCues.AppliesTo(Seat.Furina().Creature));
+            Assert.False(Vfx.FurinaStageCues.AppliesTo(Seat.Klee().Creature));
         }
         using (new Arm(on: false))
         {
-            Assert.False(Vfx.FurinaStageStrip.AppliesTo(Seat.Furina().Creature));
+            Assert.False(Vfx.FurinaStageCues.AppliesTo(Seat.Furina().Creature));
         }
     }
 }

@@ -411,7 +411,7 @@ public sealed class LynetteBadgePower : StagePerformerBadge,
 /// A NEW POWER AND NOT A REUSE, because the arm has no Furina-side power that
 /// is always on: Salon Solitaire is a relic, and the batch-two powers are
 /// cards' powers a run may never draft. It sits in the power row under her
-/// health bar; the damage-order strip (<c>FurinaStageStrip</c>) is a gauge on
+/// health bar; the damage-order strip (<c>FurinaStageStrip</c>) was a gauge on
 /// the second row ABOVE her, so the two do not meet.
 /// </summary>
 public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
