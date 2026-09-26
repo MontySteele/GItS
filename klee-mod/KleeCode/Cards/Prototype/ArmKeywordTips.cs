@@ -122,6 +122,9 @@ public static class ArmKeywordTips
     public const string SigewinneKey = "KLEEMOD-ARM_STAGE_SIGEWINNE";
     public const string CharlotteKey = "KLEEMOD-ARM_STAGE_CHARLOTTE";
     public const string LynetteKey = "KLEEMOD-ARM_STAGE_LYNETTE";
+    // THE SUPPORTING POOL (2026-09-26): two more guests.
+    public const string LyneyKey = "KLEEMOD-ARM_STAGE_LYNEY";
+    public const string EscoffierKey = "KLEEMOD-ARM_STAGE_ESCOFFIER";
 
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
@@ -1024,4 +1027,28 @@ public static class ArmKeywordTips
             "End of your turn: deal " + FurinaStageLaw.ActLynetteDamage
           + " [gold]Anemo[/gold] damage to a random enemy, one with an aura "
           + "if any.");
+
+    // THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
+    // 2026-09-26.md): two more guests, on the same terms -- the same
+    // sentence as each one's badge, numerals from `FurinaStageLaw`.
+
+    /// <summary>Lyney rotates the stage by himself.</summary>
+    public static IEnumerable<IHoverTip> ForLyney(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, LyneyKey,
+            "End of your turn: pay " + FurinaStageLaw.ActLyneyPrice
+          + " of his Fanfare to deal " + FurinaStageLaw.ActLyneyDamage
+          + " [gold]Pyro[/gold] damage to a random enemy, then swap your "
+          + "front and back performers.");
+
+    /// <summary>Escoffier feeds the cast instead of hitting one enemy.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForEscoffier(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, EscoffierKey,
+            "End of your turn: pay " + FurinaStageLaw.ActEscoffierPrice
+          + " of her Fanfare to give each other performer "
+          + FurinaStageLaw.ActEscoffierGift + " and deal "
+          + FurinaStageLaw.ActEscoffierDamage
+          + " [gold]Cryo[/gold] damage to ALL enemies.");
 }

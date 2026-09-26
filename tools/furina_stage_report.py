@@ -139,6 +139,38 @@ SWIRL = STARTER_KIT + [
     "proto_fs_standing_ovation", "proto_fs_standing_ovation",
 ]
 
+#: THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
+#: 2026-09-26.md): one deck per family the batch leans on, so the report
+#: exercises every new rule at least once. A smoke, not balance evidence.
+ROTATION = STARTER_KIT + [
+    "proto_fs_plot_twist", "proto_fs_revolving_stage",
+    "proto_fs_stage_whisper", "proto_fs_guest_star_lyney",
+    "proto_fs_oratrices_verdict", "proto_fs_mademoiselle_crabaletta",
+    "proto_fs_gentilhomme_usher",
+]
+BANK = STARTER_KIT + [
+    "proto_fs_season_tickets", "proto_fs_cheered_on", "proto_fs_cheered_on",
+    "proto_fs_held_applause", "proto_fs_echoing_hall",
+    "proto_fs_eternal_applause", "proto_fs_guest_star_escoffier",
+    "proto_fs_star_billing",
+]
+BOWS = STARTER_KIT + [
+    "proto_fs_intermission", "proto_fs_da_capo", "proto_fs_da_capo",
+    "proto_fs_grand_finale", "proto_fs_gala_premiere",
+    "proto_fs_bring_the_house_down", "proto_fs_counterclaim",
+    "proto_fs_spirited_aria", "proto_fs_thunderous_applause",
+]
+HYDRO = STARTER_KIT + [
+    "proto_fs_bubble_aria", "proto_fs_bubble_aria", "proto_fs_groundswell",
+    "proto_fs_tide_of_applause", "proto_fs_grand_deluge",
+    "proto_fs_regina_of_all_waters", "proto_fs_guest_star_lyney",
+]
+SOLO = STARTER_KIT + [
+    "proto_fs_solo_verse", "proto_fs_solo_verse", "proto_fs_soliloquy",
+    "proto_fs_one_woman_show", "proto_fs_dual_nature", "proto_fs_final_bow",
+    "proto_fs_intermission",
+]
+
 ARMS = (("natural", None), ("preserve", PRESERVE), ("expend", EXPEND),
         ("guest star", STAR), ("guest tank", TANK),
         ("3 crabalettas", THREE_CRABS),
@@ -147,7 +179,10 @@ ARMS = (("natural", None), ("preserve", PRESERVE), ("expend", EXPEND),
         ("3 guests (supports)", THREE_SUPPORTS),
         ("3 guests (supports) + full house", THREE_SUPPORTS_FULL_HOUSE),
         ("3 guests (stars) + full house", THREE_STARS_FULL_HOUSE),
-        ("guest swirl", SWIRL))
+        ("guest swirl", SWIRL),
+        # THE SUPPORTING POOL (2026-09-26).
+        ("pool: rotation", ROTATION), ("pool: bank", BANK),
+        ("pool: bows", BOWS), ("pool: hydro", HYDRO), ("pool: solo", SOLO))
 
 #: The buckets sec.13 names, in its own order.
 BARS = ((1, 2, "1-2"), (3, 5, "3-5"), (6, 10 ** 9, "6+"))

@@ -85,7 +85,9 @@ public class FurinaStageRoundTwoTests
                              "public static void SceneChange(");
 
         Assert.DoesNotContain("Perform(", summon);
-        Assert.Contains("ledger.Summon(who);", summon);
+        // THE SUPPORTING POOL (2026-09-26): the arrival is the face's own
+        // number where it prints one (Gala Premiere's 3), rule 3's 1 else.
+        Assert.Contains("ledger.Summon(who, fanfare);", summon);
         Assert.Contains("EndOfTurnActs", source);
     }
 

@@ -244,10 +244,12 @@ public class PoolCellCoverageTests
             //
             // THE SUPPORTING POOL'S SOLD OUT (2026-09-26) filled Rare/Power:
             // a third Rare Power beside Arkhe Alignment and A Five-Century Act.
-            "furina-stage" => new[]
-            {
-                "Rare/Attack",
-            },
+            // THE SUPPORTING POOL (2026-09-26) filled the last two: three Rare
+            // Attacks (Bring the House Down, Grand Deluge beside Let the
+            // People Rejoice) and four Rare Powers (Eternal Applause, Regina
+            // of All Waters, One-Woman Show beside Arkhe Alignment and A
+            // Five-Century Act). No cell is short.
+            "furina-stage" => System.Array.Empty<string>(),
             _ => throw new InvalidOperationException(arm),
         }).OrderBy(n => n, StringComparer.Ordinal).ToList();
 

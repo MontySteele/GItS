@@ -228,6 +228,11 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         # handle on it (`enemy.aura` was cleared before this call), which is
         # exactly what Varka's "of the swirled element" needs.
         _mc_reaction(state, enemy, name, aura)
+        # QUARANTINED (`furina_stage.FURINA_STAGE`). THE SUPPORTING POOL's
+        # Tide of Applause (2026-09-26) rides the same site: "whenever you
+        # trigger an Elemental Reaction, your back performer gains 2".
+        from tier0.engine import furina_stage            # late: cycle
+        furina_stage.note_reaction(state)
         # Courtroom Drama (Curtain Call B, R85): the FIRST reaction each
         # turn puts its target on the stand -- Vulnerable + Weak per stack.
         # Gated on the existing reactions_this_turn counter (== 1 is the

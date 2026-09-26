@@ -156,6 +156,12 @@ public abstract class StagePerformerBadge : PowerModel
             case StagePerformer.Lynette:
                 await Apply<LynetteBadgePower>(context, pet);
                 break;
+            case StagePerformer.Lyney:
+                await Apply<LyneyBadgePower>(context, pet);
+                break;
+            case StagePerformer.Escoffier:
+                await Apply<EscoffierBadgePower>(context, pet);
+                break;
             default:
                 await Apply<UsherBadgePower>(context, pet);
                 break;
@@ -399,6 +405,58 @@ public sealed class LynetteBadgePower : StagePerformerBadge,
         ("smartDescription",
             "End of your turn: deal {Act} [gold]Anemo[/gold] damage to a "
           + "random enemy, one with an aura if any."),
+    };
+}
+
+// ---- THE SUPPORTING POOL (2026-09-26) ------------------------------------
+//
+// The two new guests' badges, each the same sentence as that guest's tip
+// (`ArmKeywordTips.ForLyney` / `ForEscoffier`), numerals from
+// `FurinaStageLaw`. The damage number is live under Ousia (`{Act}`).
+
+public sealed class LyneyBadgePower : StagePerformerBadge,
+                                      ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Lyney;
+
+    protected override int BaseAct => FurinaStageLaw.ActLyneyDamage;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description",
+            "End of your turn: pay " + FurinaStageLaw.ActLyneyPrice
+          + " of his Fanfare to deal " + FurinaStageLaw.ActLyneyDamage
+          + " [gold]Pyro[/gold] damage to a random enemy, then swap your "
+          + "front and back performers."),
+        ("smartDescription",
+            "End of your turn: pay " + FurinaStageLaw.ActLyneyPrice
+          + " of his Fanfare to deal {Act} [gold]Pyro[/gold] damage to a "
+          + "random enemy, then swap your front and back performers."),
+    };
+}
+
+public sealed class EscoffierBadgePower : StagePerformerBadge,
+                                          ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Escoffier;
+
+    protected override int BaseAct => FurinaStageLaw.ActEscoffierDamage;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description",
+            "End of your turn: pay " + FurinaStageLaw.ActEscoffierPrice
+          + " of her Fanfare to give each other performer "
+          + FurinaStageLaw.ActEscoffierGift + " and deal "
+          + FurinaStageLaw.ActEscoffierDamage
+          + " [gold]Cryo[/gold] damage to ALL enemies."),
+        ("smartDescription",
+            "End of your turn: pay " + FurinaStageLaw.ActEscoffierPrice
+          + " of her Fanfare to give each other performer "
+          + FurinaStageLaw.ActEscoffierGift + " and deal {Act} "
+          + "[gold]Cryo[/gold] damage to ALL enemies."),
     };
 }
 

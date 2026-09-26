@@ -181,8 +181,9 @@ def test_the_one_press_note_says_everything_else_is_refused():
 # ---------------------------------------------------------------------------
 
 def test_the_glossary_says_up_to_three_perform():
-    assert STAGE_ACTS.startswith("Up to 3 performers act at the end of your "
-                                 "turn")
+    # THE SUPPORTING POOL (2026-09-26): 4 with Sold Out.
+    assert STAGE_ACTS.startswith("Up to 3 performers, or 4 with Sold Out, "
+                                 "act at the end of your turn")
     assert ARM_KEYWORDS["front performer"].endswith(STAGE_ACTS)
     assert ARM_KEYWORDS["back performer"].endswith(STAGE_ACTS)
 

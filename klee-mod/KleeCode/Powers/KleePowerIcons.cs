@@ -306,6 +306,29 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/guest_charlotte.png"),
         LynetteBadgePower =>
             KleePck.Path("furina/powers/guest_lynette.png"),
+        // THE SUPPORTING POOL (2026-09-26): the two new guests' faces, from
+        // the same art pass, and the batch's nine powers borrowing the
+        // shipped Furina sigil nearest their job, on the terms every borrow
+        // above takes.
+        LyneyBadgePower => KleePck.Path("furina/powers/guest_lyney.png"),
+        EscoffierBadgePower =>
+            KleePck.Path("furina/powers/guest_escoffier.png"),
+        RevolvingStagePower =>
+            KleePck.Path("furina/powers/stage_lights.png"),
+        SeasonTicketsPower => KleePck.Path("furina/powers/top_billing.png"),
+        StarBillingPower =>
+            KleePck.Path("furina/powers/supporting_cast.png"),
+        EchoingHallPower =>
+            KleePck.Path("furina/powers/ovation_trickle.png"),
+        EternalApplausePower =>
+            KleePck.Path("furina/powers/rising_ovation.png"),
+        TideOfApplausePower =>
+            KleePck.Path("furina/powers/courtroom_drama.png"),
+        ReginaOfAllWatersPower =>
+            KleePck.Path("furina/powers/limelight.png"),
+        SoliloquyPower => KleePck.Path("furina/powers/leading_role.png"),
+        OneWomanShowPower =>
+            KleePck.Path("furina/powers/star_of_the_show.png"),
         StageSummaryPower => KleePck.Path("furina/powers/center_stage.png"),
         // THE CO-OP SET (review/records/coop-set-2026-09-25.md): five powers,
         // each borrowing the shipped sigil nearest its job on the terms every

@@ -1331,7 +1331,10 @@ def _summon_row(hay: str) -> str:
 #: third summon because nothing printed how many seats there are.
 #: Draft 3 (2026-09-25): no act applies Hydro, so the act list is plain
 #: damage.
-STAGE_ACTS = ("Up to 3 performers act at the end of your turn, from any "
+#: THE SUPPORTING POOL (2026-09-26): Sold Out opens a fourth seat, and the
+#: seat count says so. No parentheses (text-conventions rule 14).
+STAGE_ACTS = ("Up to 3 performers, or 4 with Sold Out, act at the end of "
+              "your turn, from any "
               "seat: Usher gives you 3 Block, Chevalmarin deals 2 to every "
               "enemy, Crabaletta deals 5 damage to a random enemy.")
 
@@ -1535,6 +1538,12 @@ ARM_KEYWORDS: dict[str, str] = {
     # 2026-09-25 night (the granted-guest seat round): the act always lands.
     "Lynette": ("End of your turn: deal 3 Anemo damage to a random enemy, "
                 "one with an aura if any."),
+    # THE SUPPORTING POOL (2026-09-26): two more guests,
+    # `ArmKeywordTips.ForLyney` / `ForEscoffier` word for word.
+    "Lyney": ("End of your turn: pay 2 of his Fanfare to deal 6 Pyro damage "
+              "to a random enemy, then swap your front and back performers."),
+    "Escoffier": ("End of your turn: pay 3 of her Fanfare to give each other "
+                  "performer 2 and deal 3 Cryo damage to ALL enemies."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -1702,7 +1711,9 @@ _STAGE_ONLY_KEYWORDS = frozenset({
     # THE GUEST CAST (2026-09-25): a shipped Fontaine Companion shares a
     # guest's name, and off the arm its face means that Companion.
     "Guest Star", "Neuvillette", "Clorinde", "Navia", "Chevreuse",
-    "Wriothesley", "Sigewinne", "Charlotte", "Lynette"})
+    "Wriothesley", "Sigewinne", "Charlotte", "Lynette",
+    # THE SUPPORTING POOL (2026-09-26).
+    "Lyney", "Escoffier"})
 
 # `EB-728`. AND THE ROW THE SHIPPED KIT STILL OWNS.
 #
@@ -1802,6 +1813,9 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Sigewinne": "furina",
     "Charlotte": "furina",
     "Lynette": "furina",
+    # THE SUPPORTING POOL (2026-09-26).
+    "Lyney": "furina",
+    "Escoffier": "furina",
 }
 
 

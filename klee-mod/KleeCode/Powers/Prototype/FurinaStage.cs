@@ -150,6 +150,8 @@ public static partial class FurinaStage
         "sigewinne" => StagePerformer.Sigewinne,
         "charlotte" => StagePerformer.Charlotte,
         "lynette" => StagePerformer.Lynette,
+        "lyney" => StagePerformer.Lyney,
+        "escoffier" => StagePerformer.Escoffier,
         _ => StagePerformer.Usher,
     };
 
@@ -336,8 +338,13 @@ public static partial class FurinaStage
     /// stage when it fires, so a performer summoned during the turn is
     /// standing there once. It stays awaited because the bodies are.</para>
     /// </summary>
+    /// <remarks>THE SUPPORTING POOL (2026-09-26): <paramref name="fanfare"/> is
+    /// the arrival a face prints (<i>Gala Premiere</i>: "with 3 Fanfare
+    /// each"); rule 3's 1 otherwise. On a full stage it is the recast's own
+    /// arrival, added to the leaver's, exactly as a Guest Star's is.</remarks>
     public static async Task Summon(PlayerChoiceContext choiceContext,
-                                    Creature? owner, string member)
+                                    Creature? owner, string member,
+                                    int fanfare = FurinaStageLaw.SummonFanfare)
     {
         if (!LiveFor(owner)) return;
         var ledger = FurinaStageLedger.For(owner!);
@@ -346,13 +353,13 @@ public static partial class FurinaStage
         if (ledger.IsFull)
         {
             await RecastFromFront(choiceContext, owner!,
-                                  random ? null : Parse(member));
+                                  random ? null : Parse(member), fanfare);
             return;
         }
         var who = random ? RollAny(owner!) : Parse(member);
         if (random) NoteSummoned(who);
 
-        ledger.Summon(who);
+        ledger.Summon(who, fanfare);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageCues.Refresh(owner);
     }
@@ -647,6 +654,13 @@ public static partial class FurinaStage
         // shows HP loss (the fade's number, below, is the same pop). The body
         // is still standing: a lead this hit emptied leaves at the flush.
         Vfx.FurinaStageLossPop.Show(lead, result.Absorbed);
+        // THE SUPPORTING POOL (2026-09-26), Counterclaim: an enemy's hit
+        // reached the front performer's bar since the end of her last turn --
+        // the notion of a hit A Rapt Audience pays on, below.
+        if (result.Absorbed > 0 && dealer is { IsEnemy: true })
+        {
+            ledger.FrontHitSinceLastTurn = true;
+        }
         if (!twoOrMore || result.Absorbed <= 0
             || dealer is not { IsEnemy: true })
         {
@@ -984,6 +998,9 @@ public static partial class FurinaStage
     {
         if (!LiveFor(owner)) return;
         var ledger = FurinaStageLedger.For(owner!);
+        // THE SUPPORTING POOL (2026-09-26), Counterclaim reads hits "since
+        // your last turn": the window opens here, at the end of her turn.
+        ledger.FrontHitSinceLastTurn = false;
         // R276 batch two, FULL HOUSE: with every seat filled (three, or four
         // under Sold Out: `IsFull` reads the capacity) each performer acts
         // once more per copy (its Amount), every repeat resolving in full
@@ -1005,6 +1022,8 @@ public static partial class FurinaStage
         await FurinaStagePets.Sync(owner);
         ledger.EndRest();
         ledger.ResetActMultipliers();
+        // Oratrice's Verdict lasts "this turn": the sweep was its last use.
+        ledger.VerdictTarget = null;
         // Rule 12 (draft 3, 2026-09-25): THE APPLAUSE FADES, after the acts.
         FadeAndShow(owner!);
         Vfx.FurinaStageCues.Refresh(owner);
@@ -1025,7 +1044,13 @@ public static partial class FurinaStage
         var ledger = FurinaStageLedger.For(owner);
         var before = ledger.Seats.Select(seat => (Seat: seat, Bar: seat.Fanfare))
             .ToList();
-        if (ledger.Fade() <= 0) return System.Array.Empty<(StageSeat, int)>();
+        // THE SUPPORTING POOL (2026-09-26): Eternal Applause's line and
+        // Echoing Hall's echo; Held Applause's skip is the ledger's own flag.
+        var (threshold, echo) = FadeRules(owner);
+        if (ledger.Fade(threshold, echo) <= 0)
+        {
+            return System.Array.Empty<(StageSeat, int)>();
+        }
         FurinaStagePets.SyncBars(owner);
         var faded = before
             .Where(b => b.Seat.Fanfare < b.Bar)
@@ -1099,6 +1124,9 @@ public static partial class FurinaStage
                                  bool mayReturn = true)
     {
         if (!exit.Bows || !LiveFor(owner)) return;
+        // THE SUPPORTING POOL (2026-09-26), Da Capo: every Bow this combat,
+        // all causes, the Grand Finale's included.
+        FurinaStageLedger.For(owner).BowsThisCombat++;
         await Act(choiceContext, owner, exit.Who,
                   FurinaStageLedger.BowEvent, null, exit);
         await AfterBow(choiceContext, owner, exit.Who, mayReturn);
@@ -1263,8 +1291,28 @@ public static partial class FurinaStage
     {
         var targets = Enemies(owner).ToList();
         if (targets.Count == 0) return null;
-        var rng = owner.Player?.RunState.Rng.CombatTargets;
-        return rng == null ? targets[0] : rng.NextItem(targets);
+        return ActTarget(owner, targets);
+    }
+
+    /// <summary>
+    /// WHO AN ACT THAT "HITS A RANDOM ENEMY" HITS (THE SUPPORTING POOL,
+    /// 2026-09-26): <i>Oratrice's Verdict</i>'s enemy while it stands --
+    /// this turn, and only if it is alive and in <paramref name="pool"/> --
+    /// else a random one of <paramref name="pool"/>. Every random pick an act
+    /// or a Bow makes comes through here (Crabaletta, the guests, Lynette's
+    /// aura pool). Sim twin: <c>furina_stage._act_target</c>.
+    /// </summary>
+    public static Creature? ActTarget(Creature owner,
+                                        IReadOnlyList<Creature> pool)
+    {
+        if (pool.Count == 0) return null;
+        var verdict = FurinaStageLedger.For(owner).VerdictTarget;
+        if (verdict is { IsAlive: true } && pool.Contains(verdict))
+        {
+            return verdict;
+        }
+        var rng = owner.Player?.RunState?.Rng?.CombatTargets;
+        return rng == null ? pool[0] : rng.NextItem(pool);
     }
 }
 
@@ -1297,4 +1345,10 @@ public enum StagePerformer
     Sigewinne,
     Charlotte,
     Lynette,
+
+    // THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
+    // 2026-09-26.md): two more guests, each with a job the eight lack. Lyney
+    // rotates the stage; Escoffier feeds the cast.
+    Lyney,
+    Escoffier,
 }

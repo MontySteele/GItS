@@ -394,6 +394,11 @@ internal static class ReactionEffects
             // `reactions._react` at the site that already counts.
             await CompanionOverhaulReactions.Note(
                 choiceContext, reaction, target, dealer, consumedAura);
+            // QUARANTINED (the Furina Stage arm). THE SUPPORTING POOL's Tide
+            // of Applause (2026-09-26) reads the same broadcast: "whenever
+            // you trigger an Elemental Reaction, your back performer gains
+            // 2". One early return on every seat that is not a live Stage.
+            await Powers.FurinaStage.OnReaction(choiceContext, dealer);
 #endif
         }
 

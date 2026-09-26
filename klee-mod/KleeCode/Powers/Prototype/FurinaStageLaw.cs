@@ -123,6 +123,26 @@ public static class FurinaStageLaw
     /// the act now always lands).</summary>
     public const int ActLynetteDamage = 3;
 
+    // THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
+    // 2026-09-26.md): two more guests. Each mirrors the `furina_stage.ACT_*`
+    // of the same name.
+
+    /// <summary>Lyney pays this much of his own Fanfare...</summary>
+    public const int ActLyneyPrice = 2;
+
+    /// <summary>...to deal this much Pyro damage to a random enemy, then
+    /// swap the front and back performers.</summary>
+    public const int ActLyneyDamage = 6;
+
+    /// <summary>Escoffier pays this much of her own Fanfare...</summary>
+    public const int ActEscoffierPrice = 3;
+
+    /// <summary>...to give each other performer this much...</summary>
+    public const int ActEscoffierGift = 2;
+
+    /// <summary>...and deal this much Cryo damage to ALL enemies.</summary>
+    public const int ActEscoffierDamage = 3;
+
     /// <summary>
     /// RULE 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of
     /// Furina's turn, after the acts, each performer BEHIND THE FRONT loses
@@ -133,6 +153,14 @@ public static class FurinaStageLaw
     public const int FadeThreshold = 5;
 
     /// <summary>
+    /// THE SUPPORTING POOL (2026-09-26), <i>Eternal Applause</i>: "Your
+    /// performers fade only above 10 Fanfare, not 5." A Rare that bends rule
+    /// 12 rather than removing it; copies do not stack further. Mirrors
+    /// <c>furina_stage.ETERNAL_FADE_THRESHOLD</c>.
+    /// </summary>
+    public const int EternalFadeThreshold = 10;
+
+    /// <summary>
     /// Rule 12's arithmetic, ONE function so the threshold and the halving
     /// are tuned in one place: half of the Fanfare above
     /// <see cref="FadeThreshold"/>, rounded down. 5 -> 0, 6 -> 0, 7 -> 1,
@@ -140,6 +168,10 @@ public static class FurinaStageLaw
     /// so it never empties a performer. Mirrors
     /// <c>furina_stage.fade_loss</c>.
     /// </summary>
-    public static int FadeLoss(int fanfare) =>
-        fanfare <= FadeThreshold ? 0 : (fanfare - FadeThreshold) / 2;
+    public static int FadeLoss(int fanfare) => FadeLoss(fanfare, FadeThreshold);
+
+    /// <summary>The same arithmetic above another line: <i>Eternal
+    /// Applause</i>'s 10 (2026-09-26).</summary>
+    public static int FadeLoss(int fanfare, int threshold) =>
+        fanfare <= threshold ? 0 : (fanfare - threshold) / 2;
 }

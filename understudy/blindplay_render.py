@@ -1573,7 +1573,20 @@ STAGE_ACT_EFFECTS = {
     # 2026-09-25 night: her act deals 3 Anemo damage (a Swirl where the body
     # wore an aura; the reaction prints under "What reacted").
     "lynette": "{n} Anemo to {who}",
+    # THE SUPPORTING POOL (2026-09-26). Lyney's swap and Escoffier's gifts
+    # are their own lines (`reorder`, `STAGE_RAISE_LINE`).
+    "lyney": "{n} Pyro to {who}",
+    "escoffier": "{each} Cryo to every enemy",
 }
+
+#: THE SUPPORTING POOL (2026-09-26): a reorder of several seats at once
+#: (Plot Twist, Lyney's swap), and Fanfare moved between two bars (Stage
+#: Whisper).
+STAGE_REORDER_LINE = ("  - The performers changed seats: {who} now stands in "
+                      "front, bar and all. Nobody left and nobody took a "
+                      "Bow.")
+STAGE_MOVE_LINE = ("  - **{who}** passed {n} Fanfare to the front "
+                   "performer: {before} → {after}.")
 
 #: Chevalmarin's act where no single per-enemy figure exists.
 STAGE_ACT_SPREAD = "{n} in total, split across the enemies"
@@ -1600,7 +1613,7 @@ STAGE_PAY_LINE = ("  - **{by}** took {n} of **{who}**'s Fanfare: {before} "
 #: ... and an act that could not pay did nothing.
 STAGE_UNPAID_LINE = "  - **{who}** could not pay."
 #: Whose Fanfare, on a payer's own line.
-STAGE_HIS = frozenset({"Usher", "Neuvillette", "Wriothesley"})
+STAGE_HIS = frozenset({"Usher", "Neuvillette", "Wriothesley", "Lyney"})
 
 #: RULE 7 OF THE GUEST CAST (2026-09-25): THE FORECAST, off the mod's own.
 STAGE_FORECAST_LINE = "- At the end of your turn: {rows}."
@@ -2015,6 +2028,16 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(f"  - {who} moved from the front seat to the back, "
                        "bar and all. Nobody left and nobody took a "
                        "Bow.")
+        elif row["event"] == "reorder":
+            # THE SUPPORTING POOL (2026-09-26): Plot Twist and Lyney's swap
+            # move several performers at once; the stage line shows where.
+            out.append(STAGE_REORDER_LINE.format(who=who))
+        elif row["event"] == "move":
+            # Stage Whisper: Fanfare from the back performer to the front
+            # one; the front's gain is the raise line after it.
+            out.append(STAGE_MOVE_LINE.format(
+                who=row["name"], n=row["moved"],
+                before=row["fanfare"] + row["moved"], after=row["fanfare"]))
         elif row["event"] == "fade":
             out.append(STAGE_FADE_LINE.format(
                 who=row["name"], before=row["fanfare"] + row["moved"],

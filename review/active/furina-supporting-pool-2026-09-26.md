@@ -24,7 +24,7 @@ The rarity target is Klee's shape at 78 (24 / 36 / 18). Most of the batch's weig
 | Revolving Stage | U | 1 Power | At the start of your turn, your back performer moves to the front. (upg cost 0) |
 | Oratrice's Verdict † | U | 0 Skill | This turn, your performers' acts that hit a random enemy hit this enemy instead. Draw 1 card. (upg draw 2) |
 | Guest Star: Lyney † | R | 1 Skill | Lyney joins the stage with 5 Fanfare. Act: pay 2 of his Fanfare to deal 6 Pyro damage to a random enemy and swap your front and back performers. (upg +2 Fanfare) |
-| Stage Whisper † | C | 0 Skill | Move 3 of your back performer's Fanfare to your front performer. (upg 5) |
+| Stage Whisper † | C | 0 Skill | Move up to 3 of your back performer's Fanfare to your front performer. It keeps at least 1. (upg 5) (2026-09-26: so it never Bows the back: a 0-cost Bow would loop with Thunderous Applause and A Five-Century Act.) |
 
 **2. Feeding.** Net gains of Fanfare, sized under Rising Applause's 5 for 1 Energy unless they cost a card slot every turn.
 
@@ -50,7 +50,7 @@ The rarity target is Klee's shape at 78 (24 / 36 / 18). Most of the batch's weig
 | Spirited Aria | C | 1 Attack | Deal 8 damage. Spend 2: also draw 2 cards. (upg 11) |
 | Intermission † | U | 1 Skill | Your back performer Bows and leaves. Draw 1 card for every 3 Fanfare it had. (upg every 2) |
 | Counterclaim † | U | 1 Attack | Deal 7 damage. If an enemy hit your front performer since your last turn, deal 7 more. (upg 9 and 9) |
-| Showstopper † | R | 2 Attack | Spend all of your front performer's Fanfare. Deal 2 damage per point to ALL enemies. (upg 3) |
+| Bring the House Down † | R | 2 Attack | Spend all of your front performer's Fanfare. Deal 2 damage per point to ALL enemies. (upg 3) (renamed 2026-09-26: title clash; was Showstopper) |
 
 **5. Bows and encores.** With rule 4 a repeated act pays again, so these are tempo choices; the Bow deck gets its payoff here.
 
@@ -65,7 +65,7 @@ The rarity target is Klee's shape at 78 (24 / 36 / 18). Most of the batch's weig
 | Card | R | Cost | Text |
 |---|---|---|---|
 | Bubble Aria | C | 1 Attack | Deal 4 damage twice. Apply Hydro. (upg 5) |
-| Undertow † | U | 1 Attack | Deal 9 damage. If the enemy has an aura, your front performer gains 3 Fanfare. (upg 12) |
+| Groundswell † | U | 1 Attack | Deal 9 damage. If the enemy has an aura, your front performer gains 3 Fanfare. (upg 12) (renamed 2026-09-26: title clash; was Undertow) |
 | Tide of Applause | U | 1 Power | Whenever you trigger an Elemental Reaction, your back performer gains 2 Fanfare. (upg 3) |
 | Grand Deluge † | R | 2 Attack | Deal 10 damage to ALL enemies and apply Hydro. If this triggers an Elemental Reaction, each performer gains 2 Fanfare. (upg 14) |
 | Regina of All Waters † | R | 2 Power | At the start of your turn, apply Hydro to ALL enemies. (upg cost 1) |
@@ -75,7 +75,7 @@ The rarity target is Klee's shape at 78 (24 / 36 / 18). Most of the batch's weig
 | Card | R | Cost | Path | Text |
 |---|---|---|---|---|
 | Solo Verse | C | 1 Attack | the Solo | Deal 6 damage. If no one is on stage, deal 12 instead. (upg 8 / 16) |
-| Soliloquy | U | 1 Power | the Solo | While no one is on stage, your Attacks deal 3 more damage. (upg 4) |
+| Soliloquy | U | 1 Power | the Solo | While no one is on stage, your Attacks deal 3 additional damage. (upg 4) (2026-09-26: "additional", text-conventions rule 8) |
 | One-Woman Show | R | 2 Power | the Solo | At the start of your turn, if no one is on stage, gain 1 Energy and draw 1 card. (upg cost 1) |
 | Dual Nature | U | 1 Skill | Arkhe | Choose Ousia or Pneuma for this turn. Draw 1 card. (upg cost 0) |
 | Sold Out | R | 2 Power | the Stage | Your stage has a fourth seat. (upg cost 1) |

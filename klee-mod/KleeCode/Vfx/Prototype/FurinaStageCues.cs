@@ -195,8 +195,10 @@ public static class FurinaStageCues
         {
             return cue.Who switch
             {
-                StagePerformer.Neuvillette =>
+                StagePerformer.Neuvillette or StagePerformer.Lyney =>
                     $"Cannot pay {cue.Price} of his Fanfare: does nothing.",
+                StagePerformer.Escoffier =>
+                    $"Cannot pay {cue.Price} of her Fanfare: does nothing.",
                 StagePerformer.Chevreuse =>
                     $"Your back performer cannot pay {cue.Price}: "
                     + "does nothing.",
@@ -219,7 +221,8 @@ public static class FurinaStageCues
         }
         else if (cue.Price > 0)
         {
-            var whose = cue.Who == StagePerformer.Neuvillette ? "his" : "her";
+            var whose = cue.Who is StagePerformer.Neuvillette
+                or StagePerformer.Lyney ? "his" : "her";
             lines.Add($"Pays {cue.Price} of {whose} Fanfare: "
                       + $"{row.Now} → {row.After}.");
         }

@@ -668,6 +668,9 @@ STAGE_SHORT_NAMES = {
     "sigewinne": "Sigewinne",
     "charlotte": "Charlotte",
     "lynette": "Lynette",
+    # THE SUPPORTING POOL (2026-09-26).
+    "lyney": "Lyney",
+    "escoffier": "Escoffier",
 }
 
 

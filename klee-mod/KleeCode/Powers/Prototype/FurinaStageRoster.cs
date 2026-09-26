@@ -153,6 +153,37 @@ public static class FurinaStageRoster
                         && card is not FurinaGen.StandingRoomOnly
                         && card is not FurinaGen.Limelight
                         && card is not FurinaGen.TakeItFromTheTop
+                        // THE SUPPORTING POOL (2026-09-26): its twenty-seven
+                        // `replaces:`, each already dropped by the text
+                        // filter too. (Solo Verse replaces nothing: the arm
+                        // appends it, `furina_stage.POOL_ADDS`.)
+                        && card is not FurinaGen.SharedBilling
+                        && card is not FurinaGen.EbbAndFlow
+                        && card is not FurinaGen.DinnerService
+                        && card is not FurinaGen.MacaronBreak
+                        && card is not FurinaGen.CastingCall
+                        && card is not FurinaGen.GrandSalon
+                        && card is not FurinaGen.CurtainCue
+                        && card is not FurinaGen.TopBilling
+                        && card is not FurinaGen.SupportingCast
+                        && card is not FurinaGen.DirectorsCut
+                        && card is not FurinaGen.PitOrchestra
+                        && card is not FurinaGen.TempoChange
+                        && card is not FurinaGen.PoisedRiposte
+                        && card is not FurinaGen.FloridCadenza
+                        && card is not FurinaGen.WatersEmbrace
+                        && card is not FurinaGen.LeadingRole
+                        && card is not FurinaGen.HeartsSwelling
+                        && card is not FurinaGen.CurtainUp
+                        && card is not FurinaGen.RainOfRoses
+                        && card is not FurinaGen.TheFinalVerdict
+                        && card is not FurinaGen.RapturousApplause
+                        && card is not FurinaGen.Showstopper
+                        && card is not FurinaGen.FloodOfEmotion
+                        && card is not FurinaGen.GrandGala
+                        && card is not FurinaGen.HighTide
+                        && card is not FurinaGen.TheSeaIsMyStage
+                        && card is not FurinaGen.StarOfTheShow
                         // THE SUPPORTING POOL'S SOLD OUT (2026-09-26): its
                         // `replaces:`, dropped by the text filter too.
                         && card is not FurinaGen.UnheardConfession)
@@ -203,6 +234,39 @@ public static class FurinaStageRoster
                 ModelDb.Card<ProtoFsGuestStarSigewinne>(),
                 ModelDb.Card<ProtoFsGuestStarCharlotte>(),
                 ModelDb.Card<ProtoFsGuestStarLynette>(),
+                // THE SUPPORTING POOL (2026-09-26,
+                // review/active/furina-supporting-pool-2026-09-26.md): 28 of
+                // its 29, in the paper's family order. Commons (six).
+                ModelDb.Card<ProtoFsPlotTwist>(),
+                ModelDb.Card<ProtoFsStageWhisper>(),
+                ModelDb.Card<ProtoFsCheeredOn>(),
+                ModelDb.Card<ProtoFsSpiritedAria>(),
+                ModelDb.Card<ProtoFsBubbleAria>(),
+                ModelDb.Card<ProtoFsSoloVerse>(),
+                // Uncommons (thirteen).
+                ModelDb.Card<ProtoFsRevolvingStage>(),
+                ModelDb.Card<ProtoFsOratricesVerdict>(),
+                ModelDb.Card<ProtoFsSeasonTickets>(),
+                ModelDb.Card<ProtoFsStarBilling>(),
+                ModelDb.Card<ProtoFsHeldApplause>(),
+                ModelDb.Card<ProtoFsEchoingHall>(),
+                ModelDb.Card<ProtoFsIntermission>(),
+                ModelDb.Card<ProtoFsCounterclaim>(),
+                ModelDb.Card<ProtoFsDaCapo>(),
+                ModelDb.Card<ProtoFsGroundswell>(),
+                ModelDb.Card<ProtoFsTideOfApplause>(),
+                ModelDb.Card<ProtoFsSoliloquy>(),
+                ModelDb.Card<ProtoFsDualNature>(),
+                // Rares (nine).
+                ModelDb.Card<ProtoFsGuestStarLyney>(),
+                ModelDb.Card<ProtoFsGuestStarEscoffier>(),
+                ModelDb.Card<ProtoFsEternalApplause>(),
+                ModelDb.Card<ProtoFsBringTheHouseDown>(),
+                ModelDb.Card<ProtoFsGrandFinale>(),
+                ModelDb.Card<ProtoFsGalaPremiere>(),
+                ModelDb.Card<ProtoFsGrandDeluge>(),
+                ModelDb.Card<ProtoFsReginaOfAllWaters>(),
+                ModelDb.Card<ProtoFsOneWomanShow>(),
                 // THE SUPPORTING POOL (2026-09-26). Rare (one): the fourth
                 // seat.
                 ModelDb.Card<ProtoFsSoldOut>(),

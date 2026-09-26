@@ -438,7 +438,12 @@ public class ArmKeywordTipTests
         //
         // THIRTY-SEVEN with the Guest Cast (2026-09-25): `ForGuestStar` and
         // the eight guests' tips, attached off a row's `stage_guest` op.
-        Assert.Equal(37, attaches.Count);
+        //
+        // THIRTY-NINE with the supporting pool (2026-09-26): `ForLyney` and
+        // `ForEscoffier`, the same way.
+        Assert.Equal(39, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForLyney");
+        Assert.Contains(attaches, m => m.Name == "ForEscoffier");
         Assert.Contains(attaches, m => m.Name == "ForGuestStar");
         Assert.Contains(attaches, m => m.Name == "ForNeuvillette");
         Assert.Contains(attaches, m => m.Name == "ForLynette");

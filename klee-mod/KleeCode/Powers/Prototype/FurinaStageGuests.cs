@@ -50,6 +50,8 @@ public static partial class FurinaStage
     {
         "neuvillette", "clorinde", "navia", "chevreuse", "wriothesley",
         "sigewinne", "charlotte", "lynette",
+        // THE SUPPORTING POOL (2026-09-26).
+        "lyney", "escoffier",
     };
 
     /// <summary>Is this performer a guest? Every performer after the trio in
@@ -107,7 +109,6 @@ public static partial class FurinaStage
             {
                 await RecastFromFront(choiceContext, owner!, who, fanfare);
             }
-            return;
         }
         else
         {
@@ -115,6 +116,9 @@ public static partial class FurinaStage
         }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageCues.Refresh(owner);
+        // THE SUPPORTING POOL (2026-09-26), Star Billing: after the arrival,
+        // whichever of the three ways it came (a second copy's included).
+        await StarBilling(choiceContext, owner!);
     }
 
     /// <summary>
@@ -189,6 +193,33 @@ public static partial class FurinaStage
                     choiceContext, owner, Element.Electro,
                     FurinaStageLaw.ActClorindeDamage * dmg);
                 break;
+            case StagePerformer.Lyney:
+                // THE SUPPORTING POOL (2026-09-26): 6 Pyro damage to a random
+                // enemy, THEN the front and back performers swap -- whichever
+                // seat he stands in (on a Bow, on the stage he left).
+                (hit, shot) = await HitRandom(
+                    choiceContext, owner, Element.Pyro,
+                    FurinaStageLaw.ActLyneyDamage * dmg);
+                if (stage.SwapEnds()) FurinaStagePlacement.Reflow(owner);
+                break;
+            case StagePerformer.Escoffier:
+            {
+                // Her gift to each other performer was the Fanfare half
+                // (`FurinaStageLedger.ActFanfare`); the board half is 3 Cryo
+                // damage to ALL enemies.
+                var targets = Enemies(owner).ToList();
+                var dealt = new List<int>(targets.Count);
+                foreach (var enemy in targets)
+                {
+                    dealt.Add(await ElementalHit.Deal(
+                        choiceContext, enemy, Element.Cryo,
+                        FurinaStageLaw.ActEscoffierDamage * dmg, owner,
+                        powered: false));
+                }
+                each = Even(dealt);
+                struck = targets.Count;
+                break;
+            }
             case StagePerformer.Navia:
             {
                 var bar = seat?.Fanfare ?? exit?.Held ?? 0;
@@ -229,8 +260,9 @@ public static partial class FurinaStage
                 var pool = wearing.Count > 0 ? wearing : targets;
                 if (pool.Count > 0)
                 {
-                    var rng = owner.Player?.RunState.Rng.CombatTargets;
-                    var target = rng == null ? pool[0] : rng.NextItem(pool);
+                    // THE SUPPORTING POOL (2026-09-26): Oratrice's Verdict's
+                    // enemy, where it is in the pool.
+                    var target = ActTarget(owner, pool);
                     if (target != null)
                     {
                         hit = target;
@@ -352,7 +384,8 @@ public static partial class FurinaStage
         var sweepEnd = clone.Beats.Count;
         clone.EndRest();
         clone.ResetActMultipliers();
-        clone.Fade();
+        var (threshold, echo) = FadeRules(owner);
+        clone.Fade(threshold, echo);
         var faded = TallyBeats(clone.Beats, sweepEnd, clone.Beats.Count,
                                FurinaStageLedger.FadeEvent);
 
@@ -605,6 +638,9 @@ public static partial class FurinaStage
                     PaidSince(who, mark));
             }
             if (seat != null) seat.LostSinceAct = 0;
+            // THE SUPPORTING POOL (2026-09-26): Lyney's swap is a seat move,
+            // and the fade and the hits after it read the seats.
+            if (who == StagePerformer.Lyney) _stage.SwapEnds();
             foreach (var gone in owed) Bow(gone);
         }
 
@@ -833,6 +869,13 @@ public static partial class FurinaStage
                     return Line(FurinaStageLaw.ActLynetteDamage, "Anemo",
                                 _aura ? StageForecastAct.RandomAura
                                       : StageForecastAct.Random);
+                // THE SUPPORTING POOL (2026-09-26).
+                case StagePerformer.Lyney:
+                    return Line(FurinaStageLaw.ActLyneyDamage, "Pyro",
+                                StageForecastAct.Random);
+                case StagePerformer.Escoffier:
+                    return Line(FurinaStageLaw.ActEscoffierDamage, "Cryo",
+                                StageForecastAct.All);
                 default:
                     return null;
             }
@@ -909,7 +952,9 @@ public readonly record struct StageForecastCue(
 
     /// <summary>Does this performer's cue carry a price?</summary>
     public static bool Priced(StagePerformer who) =>
-        who is StagePerformer.Neuvillette or StagePerformer.Chevreuse;
+        who is StagePerformer.Neuvillette or StagePerformer.Chevreuse
+            // THE SUPPORTING POOL (2026-09-26): each pays of their own.
+            or StagePerformer.Lyney or StagePerformer.Escoffier;
 
     /// <summary>The printed price of a priced act, for the cue of one that
     /// cannot pay; 0 for every other performer.</summary>
@@ -917,6 +962,8 @@ public readonly record struct StageForecastCue(
     {
         StagePerformer.Neuvillette => FurinaStageLaw.ActNeuvillettePrice,
         StagePerformer.Chevreuse => FurinaStageLaw.ActChevreusePrice,
+        StagePerformer.Lyney => FurinaStageLaw.ActLyneyPrice,
+        StagePerformer.Escoffier => FurinaStageLaw.ActEscoffierPrice,
         _ => 0,
     };
 }

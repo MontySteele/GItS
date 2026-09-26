@@ -912,6 +912,13 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "stage_guest"),
                              "amount", val)
+        elif key in ("stage_whisper", "stage_intermission"):
+            # THE SUPPORTING POOL (2026-09-26): Stage Whisper's "up to 3"
+            # (+2) and Intermission's "for every 3" (-1), each the first
+            # top-level op of its name -- codegen's `STAGE_AMOUNT_VARS` binds
+            # the same one.
+            ok = _bump_first((fx for fx in top if fx.get("op") == key),
+                             "amount", val)
         elif key == "stage_raise":
             # R276 batch two (Hold Your Places, Gala Dinner): a Stage Raise's
             # printed N, the first top-level `stage_raise` -- codegen's

@@ -128,6 +128,10 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
         StagePerformer.Sigewinne => KleePck.Path("furina/model/guest_sigewinne.tscn"),
         StagePerformer.Charlotte => KleePck.Path("furina/model/guest_charlotte.tscn"),
         StagePerformer.Lynette => KleePck.Path("furina/model/guest_lynette.tscn"),
+        // THE SUPPORTING POOL (2026-09-26): the two new guests, from the same
+        // art pass.
+        StagePerformer.Lyney => KleePck.Path("furina/model/guest_lyney.tscn"),
+        StagePerformer.Escoffier => KleePck.Path("furina/model/guest_escoffier.tscn"),
         // A performer added later without a scene falls through to the base
         // game's Osty rig (CustomVisualPath, below).
         _ => null,
@@ -243,6 +247,24 @@ public sealed class CharlotteMonster : StagePerformerMonster
 public sealed class LynetteMonster : StagePerformerMonster
 {
     public override StagePerformer Performer => StagePerformer.Lynette;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+// ---- THE SUPPORTING POOL (2026-09-26): two more guests.
+
+public sealed class LyneyMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Lyney;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class EscoffierMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Escoffier;
 
     public override string DisplayName =>
         FurinaStageLedger.DisplayName(Performer);
@@ -391,6 +413,10 @@ public static class FurinaStagePets
                     await PlayerCmd.AddPet<SigewinneMonster>(player),
                 StagePerformer.Charlotte =>
                     await PlayerCmd.AddPet<CharlotteMonster>(player),
+                StagePerformer.Lyney =>
+                    await PlayerCmd.AddPet<LyneyMonster>(player),
+                StagePerformer.Escoffier =>
+                    await PlayerCmd.AddPet<EscoffierMonster>(player),
                 _ => await PlayerCmd.AddPet<LynetteMonster>(player),
             };
             // 2026-09-25: the body SAYS WHAT IT DOES. Hovering a creature
@@ -440,6 +466,8 @@ public static class FurinaStagePets
         StagePerformer.Wriothesley => typeof(WriothesleyMonster),
         StagePerformer.Sigewinne => typeof(SigewinneMonster),
         StagePerformer.Charlotte => typeof(CharlotteMonster),
+        StagePerformer.Lyney => typeof(LyneyMonster),
+        StagePerformer.Escoffier => typeof(EscoffierMonster),
         _ => typeof(LynetteMonster),
     };
 

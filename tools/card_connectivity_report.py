@@ -482,6 +482,16 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "stage_spend_back_all": [_hook("private", "stage", "use")],
     # THE GUEST CAST (2026-09-25): a Guest Star fields a performer, a write.
     "stage_guest": [_hook("private", "stage", "write")],
+    # THE SUPPORTING POOL (2026-09-26). The reorders, the move, the held fade
+    # and the Verdict write the board; the cash-outs and the Bows use it.
+    "stage_reverse": [_hook("private", "stage", "write")],
+    "stage_whisper": [_hook("private", "stage", "write")],
+    "stage_hold_fade": [_hook("private", "stage", "write")],
+    "stage_verdict": [_hook("private", "stage", "write")],
+    "stage_dual_nature": [_hook("private", "stage", "write")],
+    "stage_intermission": [_hook("private", "stage", "use")],
+    "stage_spend_front_all": [_hook("private", "stage", "use")],
+    "stage_grand_finale": [_hook("private", "stage", "use")],
     # THE CO-OP SET: Share the Spotlight takes the back bar away, a use.
     "stage_share_spotlight": [_hook("private", "stage", "use")],
     "salon_bow": [_hook("private", "salon", "use")],

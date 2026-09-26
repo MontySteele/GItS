@@ -2458,6 +2458,11 @@ FURINA_STAGE_OPS = ("stage_summon", "stage_raise", "stage_scene_change",
                     "stage_spend_back_all",
                     # THE GUEST CAST (2026-09-25).
                     "stage_guest",
+                    # THE SUPPORTING POOL (2026-09-26).
+                    "stage_reverse", "stage_whisper", "stage_hold_fade",
+                    "stage_intermission", "stage_spend_front_all",
+                    "stage_grand_finale", "stage_verdict",
+                    "stage_dual_nature",
                     # THE CO-OP SET.
                     "stage_share_spotlight")
 
@@ -2626,6 +2631,15 @@ STATIC_OP_PRICING: dict[str, str] = {
     "stage_perform_all": _STAGE_ZERO,
     "stage_spend_back_all": _STAGE_ZERO,
     "stage_guest": _STAGE_ZERO,
+    # THE SUPPORTING POOL (2026-09-26).
+    "stage_reverse": _STAGE_ZERO,
+    "stage_whisper": _STAGE_ZERO,
+    "stage_hold_fade": _STAGE_ZERO,
+    "stage_intermission": _STAGE_ZERO,
+    "stage_spend_front_all": _STAGE_ZERO,
+    "stage_grand_finale": _STAGE_ZERO,
+    "stage_verdict": _STAGE_ZERO,
+    "stage_dual_nature": _STAGE_ZERO,
     "stage_share_spotlight": _STAGE_ZERO,
     # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
     "block_half_damage": "ZERO: the amount is half of what the card's own "

@@ -126,6 +126,13 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
                     "between rarity tiers")
             c = proto
         pool.setdefault(c.rarity, []).append(c)
+    # QUARANTINED, the same seam's other half (`loader.pool_additions`): rows
+    # an arm offers WITHOUT replacing a shipped one, filed at their OWN
+    # rarity. `()` on every flag-off tree, so this loop is empty there.
+    for extra in loader.pool_additions(character_id):
+        c = loader.peek_card(extra)
+        if c.rarity in C.RARITY_ODDS:
+            pool.setdefault(c.rarity, []).append(c)
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
 
 

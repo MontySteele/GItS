@@ -171,6 +171,9 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     # R276 batch two: its opposite, the empty-stage answers' question --
     # the same pure current-state read.
     "stage_empty",
+    # THE SUPPORTING POOL (2026-09-26), Counterclaim: a flag the enemies'
+    # hits set and her turn's end clears, read as it stands.
+    "stage_front_hit",
     "spotlight_moved_this_turn",
     # `EB-711` (QUARANTINED, `C.KOKOMI_OVERHAUL`). "If the Bake-Kurage is
     # holding a Plan" -- `len(state.kk_plan_queue) > 0`, a pure current-state
@@ -867,6 +870,12 @@ def _stage_offence(state: CombatState, card: Card) -> float:
                 total += float(furina_stage.ACT_CLORINDE_DAMAGE)
             elif member == "navia" and isinstance(amount, int):
                 total += float(amount)
+            # THE SUPPORTING POOL (2026-09-26): the two new guests, the same
+            # way -- Lyney's hit on one enemy, Escoffier's on ALL.
+            elif member == "lyney":
+                total += float(furina_stage.ACT_LYNEY_DAMAGE)
+            elif member == "escoffier":
+                total += float(furina_stage.ACT_ESCOFFIER_DAMAGE * live)
     return total
 
 

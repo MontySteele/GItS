@@ -6814,6 +6814,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Lynette": ["End of your turn: deal ",
                     " damage to a random enemy, one with an aura ",
                     "if any."],
+        # THE SUPPORTING POOL (2026-09-26): two more guests.
+        "Lyney": ["End of your turn: pay ", " of his Fanfare to deal ",
+                  " damage to a random enemy, then swap your ",
+                  "front and back performers."],
+        "Escoffier": ["End of your turn: pay ",
+                      " of her Fanfare to give each other performer ",
+                      " damage to ALL enemies."],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces

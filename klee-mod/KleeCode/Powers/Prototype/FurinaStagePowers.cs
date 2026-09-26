@@ -213,6 +213,31 @@ public sealed class ArkheAlignmentPower : PowerModel, ILocalizationProvider
     /// <summary>The choice's effect, separate from the screen so a headless
     /// pin can ask it. With <paramref name="copies"/> in play the chosen half
     /// is x(1 + copies); Pneuma's lead regains 2 per copy.</summary>
+    /// <summary>
+    /// THE SUPPORTING POOL's <i>Dual Nature</i> (2026-09-26): "Choose Ousia
+    /// or Pneuma for this turn", once. The chosen half is AT LEAST x2 -- it
+    /// does not stack on an Arkhe Alignment that already chose the same half
+    /// this turn (the larger multiple stands) -- and Pneuma's front
+    /// performer regains 2 either way. Sim twin:
+    /// <c>furina_stage.dual_nature</c>.
+    /// </summary>
+    public static void ChooseForTurn(
+        MegaCrit.Sts2.Core.Entities.Creatures.Creature owner, bool pneuma)
+    {
+        var ledger = FurinaStageLedger.For(owner);
+        if (pneuma)
+        {
+            ledger.ActBlockMultiplier = System.Math.Max(
+                ledger.ActBlockMultiplier, 2);
+            FurinaStage.RegainLead(owner, PneumaLeadRegain);
+        }
+        else
+        {
+            ledger.ActDamageMultiplier = System.Math.Max(
+                ledger.ActDamageMultiplier, 2);
+        }
+    }
+
     public static void Choose(MegaCrit.Sts2.Core.Entities.Creatures.Creature owner,
                               bool pneuma, int copies = 1)
     {
