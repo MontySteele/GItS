@@ -1,4 +1,4 @@
-"""Cut the eight Guest Stars' stage bodies from their Wish renders.
+"""Cut the eight Guest Stars' stage bodies.
 
 The Guest Cast (2026-09-25, review/active/furina-guest-batch-2026-09-25.md)
 put eight Fontaine characters on Furina's stage as performers. Until this tool
@@ -15,19 +15,30 @@ and the git-tracked scenes:
 
     klee-mod/pck-src/furina/model/guest_<name>.tscn
 
-from art/raw/Character_<Name>_Full_Wish.png -- each guest's own transparent
-full-body Wish render, the file the `proto_fs_guest_star_<name>` r2 candidate
-rows in art/SOURCES.tsv were fetched from. The render's own alpha is the
-matte: no polygon, no keying. The trio's tool (tools/cut_salon_members.py)
-stays as it is; one producer per out-path.
+The trio's tool (tools/cut_salon_members.py) stays as it is; one producer per
+out-path.
+
+TWO SOURCES, chosen per guest in SOURCES below.
+
+  game  art/raw/Character_<Name>_Game.png, the wiki's in-game model render:
+        the figure alone, no splash FX, standing on the character-screen
+        backdrop (a starry nebula, OPAQUE -- the file has no alpha). Keyed by
+        art_process.matte(), the same matte `cut` plan rows use on the Archive
+        enemy captures, with GAME_CUT's knobs. The render stands the figure
+        on a mirror floor, so the matte keeps the shoes' REFLECTION (it is
+        figure-coloured, not backdrop); the work image is cut at the guest's
+        SOLE ROW, read off the render at 3x, so the feet are the ground line.
+  wish  art/raw/Character_<Name>_Full_Wish.png, the transparent Wish render,
+        its own alpha as the matte. It carries the splash FX, so the figure
+        stands inside an effects cloud. The fallback for a guest whose `game`
+        cut failed the 3x check (holes in the figure, backdrop or stars left,
+        a blue halo on the edges); the reason is on its SOURCES line.
 
 HEIGHT. The guests are people standing beside Furina, so they are sized off
 HER body, not off the trio's 144 px creatures: Furina's combat scene
 (klee-mod/pck-src/furina/model/combat.tscn) is 280 px tall (Bounds offset_top
--280, body layer 280 px), and a guest is 80% of that, 224 px. The WHOLE alpha
-bounding box is scaled to that height, so a render whose splash FX reach above
-the head or below the feet (every Wish render carries some) shows a smaller
-figure inside a 224 px sprite. Nothing is cropped off: no knees, no props.
+-280, body layer 280 px), and a guest is 80% of that, 224 px. The whole alpha
+bounding box is scaled to that height; nothing is cropped off the figure.
 
 EDGES. Resampled in PREMULTIPLIED alpha, so a transparent pixel's colour
 cannot bleed into its neighbours as a fringe, then every pixel under
@@ -57,6 +68,9 @@ import numpy as np
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+import art_process  # noqa: E402
+
 RAW_REL = Path("art") / "raw"
 OUT_REL = Path("ImageGen") / "images" / "furina" / "salon"
 SCENE_DIR = ROOT / "klee-mod" / "pck-src" / "furina" / "model"
@@ -75,6 +89,51 @@ GUESTS = {
     "lynette": "Lynette",
 }
 
+# The matte for a `game` render, in art_process's `cut` spec grammar.
+# Tolerance 100, not the Archive rows' default 30: at 30 and 45 the nebula's
+# bright horizon band survives across the frame's full width, and at 60 a
+# floor shadow survives beside Navia; 100 clears both with no hole in the
+# pale areas (Sigewinne's hair and stockings, Neuvillette's hair, Chevreuse's
+# boots). rekey=1 as on the Archive rows. The chroma gate stays at its
+# default: raising it to 30 holes Sigewinne's bows, and 60 takes Navia's hat.
+GAME_CUT = "cut@100;rekey=1"
+
+# art_process.matte() solves at CUT_WORK_MAX on the long edge; the renders are
+# portrait, so the work image is this many rows tall and the sole rows below
+# are rows of it.
+WORK_H = art_process.CUT_WORK_MAX
+
+# Per guest: ("game", sole row) or ("wish", None). The sole row is the lowest
+# row of the lower shoe, read at 3x off the keyed work image; everything below
+# it is the mirror floor's reflection.
+#
+# Every guest was keyed from its `game` render and read at 3x (2026-09-25).
+# Two passed. Six failed and stay on the Wish cut, each for the reason given.
+# A STAGGERED stance fails for a reason no knob reaches: one sole row cannot
+# clear the reflection under the RAISED foot without a hand-drawn region, and
+# a hand matte is the thing this tool does not do. The halo is the render's
+# own bloom off pale cloth against the nebula, which no tolerance keys and a
+# raised chroma gate only buys by eating the figure (see GAME_CUT).
+SOURCES: dict[str, tuple[str, int | None]] = {
+    # Staggered stance (left sole ~851, right ~875): reflection under the
+    # raised foot.
+    "neuvillette": ("wish", None),
+    "clorinde": ("game", 872),
+    "navia": ("game", 873),
+    # Blue-lilac halo along both white stockings.
+    "chevreuse": ("wish", None),
+    # Staggered stance (left sole ~853, right ~875): reflection under the
+    # raised boot.
+    "wriothesley": ("wish", None),
+    # Lavender halo around the white stockings and socks.
+    "sigewinne": ("wish", None),
+    # Lavender bloom down the length of both legs; staggered stance too.
+    "charlotte": ("wish", None),
+    # Staggered stance (left sole ~852, right ~872): reflection under the
+    # raised boot, and a magenta speck beside it.
+    "lynette": ("wish", None),
+}
+
 # Furina's body height in creature space (combat.tscn Bounds, -280..0). Read
 # back from the scene on every run so the 80% cannot drift from her.
 FURINA_BODY_H = 280
@@ -89,7 +148,9 @@ ALPHA_FLOOR = 8    # alpha below this is cleared after the resize
 
 
 def source_path(art_root: Path, name: str) -> Path:
-    return art_root / RAW_REL / f"Character_{GUESTS[name]}_Full_Wish.png"
+    kind = SOURCES[name][0]
+    stem = "Game" if kind == "game" else "Full_Wish"
+    return art_root / RAW_REL / f"Character_{GUESTS[name]}_{stem}.png"
 
 
 def furina_body_height() -> int:
@@ -115,6 +176,7 @@ def _resize_premultiplied(rgba: np.ndarray, size: tuple[int, int]) -> np.ndarray
 
 
 def cut_one(src: Image.Image) -> Image.Image:
+    """Crop an RGBA figure to its alpha box and scale it to TARGET_H."""
     rgba = np.asarray(src.convert("RGBA")).astype(np.float64)
     mask = Image.fromarray(((rgba[..., 3] >= BBOX_ALPHA) * 255).astype(np.uint8))
     box = mask.getbbox()
@@ -130,20 +192,35 @@ def cut_one(src: Image.Image) -> Image.Image:
     return Image.fromarray(np.rint(out).astype(np.uint8), "RGBA")
 
 
+def key_game(src: Image.Image, sole: int) -> Image.Image:
+    """Key a `game` render with art_process.matte() and cut it at the sole."""
+    work = art_process.matte(src.convert("RGBA"), GAME_CUT)
+    if work.height != WORK_H:
+        raise SystemExit(f"game render keyed to {work.size}; the sole rows "
+                         f"assume a portrait render {WORK_H} rows tall")
+    return work.crop((0, 0, work.width, sole + 1))
+
+
+def body(art_root: Path, name: str) -> Image.Image:
+    src = source_path(art_root, name)
+    if not src.exists():
+        raise SystemExit(f"source missing: {src}")
+    kind, sole = SOURCES[name]
+    img = Image.open(src)
+    return cut_one(key_game(img, sole) if kind == "game" else img)
+
+
 def build_art(art_root: Path, out_dir: Path) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     meta = {}
     for name in GUESTS:
-        src = source_path(art_root, name)
-        if not src.exists():
-            raise SystemExit(f"source missing: {src}")
-        sprite = cut_one(Image.open(src))
+        sprite = body(art_root, name)
         path = out_dir / f"guest_{name}.png"
         sprite.save(path)
         meta[name] = {"file": path.name, "w": sprite.width, "h": sprite.height}
         fill = (np.asarray(sprite)[..., 3] > 128).mean()
-        print(f"  {name:12s} {sprite.width:3d}x{sprite.height:3d}  "
-              f"fill {fill * 100:.0f}%")
+        print(f"  {name:12s} {SOURCES[name][0]:4s} {sprite.width:3d}x"
+              f"{sprite.height:3d}  fill {fill * 100:.0f}%")
     (out_dir / "guests.json").write_text(
         json.dumps({"target_h": TARGET_H, "guests": meta}, indent=2),
         encoding="utf-8")

@@ -48,9 +48,10 @@ namespace KleeMod.Powers;
 /// ONE PRODUCER PER OUT-PATH (art_lint L11) is why the art is reused where it
 /// stands rather than copied to a second path. The eight guests' scenes
 /// (<c>guest_*.tscn</c>) are the same scene re-proportioned: people, not
-/// creatures, cut from each guest's own Wish render at 224 px (80% of
-/// Furina's 280) by <c>tools/cut_guest_bodies.py</c>, which writes the scenes
-/// from one template.
+/// creatures, cut at 224 px (80% of Furina's 280) from each guest's in-game
+/// model render where it keys cleanly and from the Wish render otherwise, by
+/// <c>tools/cut_guest_bodies.py</c>, which writes the scenes from one
+/// template.
 ///
 /// THEY STAND, WHERE THE JELLYFISH FLOATS, and that is the one number that is
 /// theirs rather than inherited. A <c>Sprite2D</c> centres on its origin, so a
@@ -111,9 +112,10 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
         StagePerformer.Chevalmarin => KleePck.Path("furina/model/chevalmarin.tscn"),
         StagePerformer.Crabaletta => KleePck.Path("furina/model/crabaletta.tscn"),
         StagePerformer.Usher => KleePck.Path("furina/model/usher.tscn"),
-        // THE GUEST CAST (2026-09-25): each guest's body is cut from their
-        // own Wish render by tools/cut_guest_bodies.py, which also writes
-        // these eight scenes from one template (224 px, 80% of Furina).
+        // THE GUEST CAST (2026-09-25): each guest's body is cut by
+        // tools/cut_guest_bodies.py (in-game render or Wish render, per
+        // guest), which also writes these eight scenes from one template
+        // (224 px, 80% of Furina).
         StagePerformer.Neuvillette => KleePck.Path("furina/model/guest_neuvillette.tscn"),
         StagePerformer.Clorinde => KleePck.Path("furina/model/guest_clorinde.tscn"),
         StagePerformer.Navia => KleePck.Path("furina/model/guest_navia.tscn"),

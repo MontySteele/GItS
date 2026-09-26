@@ -68,6 +68,28 @@ def test_the_guest_height_is_eighty_percent_of_furina():
     assert tool.TARGET_H == round(tool.GUEST_SHARE * tool.FURINA_BODY_H)
 
 
+def test_every_guest_names_one_source_and_the_ledger_agrees():
+    """A `game` guest is keyed through art_process's own `cut` grammar and
+    cut at a sole row inside the work frame; a `wish` guest carries no sole.
+    art/SOURCES.tsv names the render each sprite was actually cut from."""
+    assert set(tool.SOURCES) == set(tool.GUESTS)
+    tol, *_rest, rekey = tool.art_process._cut_spec(tool.GAME_CUT)
+    assert (tol, rekey) == (100, 1)
+    rows = dict(line.split("\t")[:2] for line in (ROOT / "art" / "SOURCES.tsv")
+                .read_text(encoding="utf-8").splitlines() if "\t" in line)
+    for name, (kind, sole) in tool.SOURCES.items():
+        assert kind in ("game", "wish"), name
+        if kind == "game":
+            assert isinstance(sole, int) and 0 < sole < tool.WORK_H, name
+        else:
+            assert sole is None, name
+        stem = "Game" if kind == "game" else "Full_Wish"
+        url = rows[f"ImageGen/images/furina/salon/guest_{name}.png"]
+        assert f"/Character_{tool.GUESTS[name]}_{stem}.png/" in url, (name, url)
+        assert tool.source_path(ROOT, name).name == (
+            f"Character_{tool.GUESTS[name]}_{stem}.png")
+
+
 @pytest.mark.parametrize("name", list(tool.GUESTS))
 def test_each_guest_scene_is_the_tools_template(name):
     """The committed scene is exactly what the tool writes for a sprite of
