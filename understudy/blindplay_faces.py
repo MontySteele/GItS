@@ -1586,6 +1586,17 @@ def _reborn_keys(enemies: list[dict[str, Any]], base: list[str],
     row takes deliberately: the failure it costs is a spare letter on a body
     the reader can still see, and the failure it removes is two creatures
     sharing one handle, which is a mis-aimed card.
+
+    2026-09-26: AND A HEAL IS NO LONGER READ AS ONE. The Klee act-2 lane-4
+    seat beat Knowledge Demon, whose Ponder heals it 30, and the page
+    relabelled the boss `[B]` and then `[C]` -- "This is a NEW body. It took
+    the place of [A], which is dead" -- while its HP and every Bomb on it
+    carried over. A body that rose from a LIVE reading short of its maximum is
+    the same body healing. A replacement arrives one of two ways, and both are
+    still read: at its full HP (Fogmog's Eye, 6/6), or after its key was
+    missing from a board or read at 0 (Decimillipede's Reattach revives at 25
+    of 44 once the dead segment has left the feed) -- which is why a body that
+    leaves the board is remembered at 0 (`_enemy_names`).
     """
     out: list[str] = []
     changed = False
@@ -1595,7 +1606,9 @@ def _reborn_keys(enemies: list[dict[str, Any]], base: list[str],
         top = _int(entry.get("max_hp", entry.get("hp")))
         was = seen_hp.get(now)
         sentinel = max(hp, top, was or 0) >= _PHASE_FLIP_FLOOR
-        if was is not None and hp > was and not sentinel:
+        fresh_body = was == 0 or hp >= top
+        if (was is not None and hp > was and not sentinel
+                and fresh_body):
             gen = _FIGHT_MEMORY["reborn"].get(key, 0) + 1
             _FIGHT_MEMORY["reborn"][key] = gen
             retired = now
@@ -1717,6 +1730,16 @@ def _enemy_names(enemies: list[dict[str, Any]],
         hp = _int(entry.get("hp"))
         if seen_hp.get(key) != hp:
             seen_hp[key] = hp
+            fresh = True
+    # 2026-09-26: A BODY THAT LEFT THE BOARD IS REMEMBERED AT 0. The feed
+    # drops a dead body, so without this a segment that died and came back
+    # (Decimillipede's Reattach, 25 of 44) would be read against its last LIVE
+    # reading and look like a heal -- and `_reborn_keys` no longer takes a
+    # heal for a new body.
+    on_board = set(keys)
+    for key in list(seen_hp):
+        if key not in on_board and seen_hp[key] != 0:
+            seen_hp[key] = 0
             fresh = True
     # 2026-09-25 (opus-furina-l2b, (c) 5). A NUMBER ONLY WHERE THIS SCREEN
     # PRINTS THE NAME TWICE. A lone Gas Bomb printed as "Gas Bomb (2)": Living

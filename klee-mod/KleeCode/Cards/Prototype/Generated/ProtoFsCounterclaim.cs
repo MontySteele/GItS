@@ -52,7 +52,7 @@ public sealed class ProtoFsCounterclaim : CustomCardModel, ICharacterCard
         new List<DynamicVar>
         {
             new DamageVar(7m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 7m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 7m, ValueProp.Move, followsHit: true)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

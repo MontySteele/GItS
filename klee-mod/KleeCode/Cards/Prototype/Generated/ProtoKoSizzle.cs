@@ -55,7 +55,7 @@ public sealed class ProtoKoSizzle : CustomCardModel, IElementalCard, ISetOffCard
         new List<DynamicVar>
         {
             new DamageVar(6m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 6m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 6m, ValueProp.Move, followsHit: true)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

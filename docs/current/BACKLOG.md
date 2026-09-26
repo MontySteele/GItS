@@ -12,6 +12,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Kits and display (the mod)
 
+- Once More! spends its Sparks and returns nothing, with no message, when the last Set off card has been shuffled back into the draw pile (the spend is by design, `KleeOverhaulLedger.ReturnLastSetOff`); the miss prints nowhere a seat can read (Klee full run lane 1, 2026-09-26).
+- Big Badda Boom's "what your Bombs dealt" counts Block the Bombs removed in C# (`ElementalHit.Deal` returns the pre-Block hit) but HP only in the sim (`deal_damage_to_enemy` returns `hp_dmg`); the two engines disagree whenever the target has Block (found 2026-09-26).
 - Shipped Furina's Encore buffer (FurinaResources.AbsorbDamage) rounds a fractional HP loss up; the engine truncates (found 2026-09-25).
 - Beetle Juice's Shrink on an enemy prints "While is alive, you deal 30% less damage": the name is blank and it speaks in the player's voice (Klee seat, 2026-09-23).
 - Rosaria's Melt on Klee's board printed "Deal 15" from a written 9, which no printed multiplier explains; show the reaction's factor on the face.

@@ -188,15 +188,33 @@ public static class FoldedPreview
 /// </summary>
 public sealed class FoldedDamageVar : DamageVar
 {
-    public FoldedDamageVar(string name, decimal damage, ValueProp props)
+    /// <summary>
+    /// The Klee later-act seats (2026-09-26, act-3 lane 3): this leg lands
+    /// AFTER the card's own elemental hit on the same body -- the one-armed
+    /// "deal N additional damage" shape -- so the aura it would react with is
+    /// gone by then. Sizzle+ printed "18 additional" (7 x 1.5 Vulnerable x 1.75
+    /// Melt) and landed 10. True previews inside
+    /// <see cref="AuraPower.PreviewWithoutReaction"/>: the body's Vulnerable
+    /// and Klee's Strength still fold, the reaction does not. Emitted by the
+    /// generator (`branch_follows_own_hit`) and false everywhere else.
+    /// </summary>
+    public bool FollowsHit { get; }
+
+    public FoldedDamageVar(string name, decimal damage, ValueProp props,
+                           bool followsHit = false)
         : base(name, damage, props)
     {
+        FollowsHit = followsHit;
     }
 
     public override void UpdateCardPreview(
         CardModel card, CardPreviewMode previewMode, Creature? target,
         bool runGlobalHooks)
     {
+        // Closed on every return below, the early one included.
+        using var reaction = FollowsHit
+            ? AuraPower.PreviewWithoutReaction()
+            : null;
         // Off a card that is not in play the game runs no hooks, and neither
         // does this: a shop shelf and a deck view print the sheet's numbers,
         // which is the screen `EB-484` was filed from and the screen this

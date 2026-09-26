@@ -88,6 +88,48 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     protected static Element ElementOf(CardModel? cardSource, Creature? dealer) =>
         AuraCmd.ElementOfPlay(cardSource, dealer);
 
+    /// <summary>How many <see cref="PreviewWithoutReaction"/> scopes are open
+    /// on this thread. Zero everywhere but inside one preview.</summary>
+    [System.ThreadStatic]
+    private static int _previewWithoutReaction;
+
+    /// <summary>True while a <see cref="PreviewWithoutReaction"/> scope is
+    /// open on this thread. For the pins.</summary>
+    public static bool ReactionFoldSuppressed => _previewWithoutReaction > 0;
+
+    /// <summary>
+    /// A PREVIEW OF A HIT THAT CANNOT MEET THIS AURA (the Klee later-act seats,
+    /// 2026-09-26, act-3 lane 3). Sizzle+ printed "deal 18 additional damage"
+    /// into a Cryo-wearing, Vulnerable enemy and the extra hit landed 10: the
+    /// face folded Melt (7 x 1.5 x 1.75 = 18) into a hit that lands AFTER the
+    /// card's own Pyro Set off and Pyro hit on the same body, which have always
+    /// consumed or replaced the aura by then. A one-armed "additional" leg is
+    /// that shape by construction, so its var (<c>FoldedDamageVar</c> with
+    /// <c>followsHit</c>) previews inside this scope and the reaction term is
+    /// 1 for the span of that one read.
+    ///
+    /// PREVIEW ONLY and pure: it moves a counter the play never reads, and a
+    /// play in the middle of a preview does not exist. Every shipped caller is
+    /// byte-identical, because nothing outside the prototype var opens it.
+    /// </summary>
+    public static System.IDisposable PreviewWithoutReaction()
+    {
+        _previewWithoutReaction++;
+        return new ReactionScope();
+    }
+
+    private sealed class ReactionScope : System.IDisposable
+    {
+        private bool _closed;
+
+        public void Dispose()
+        {
+            if (_closed) return;
+            _closed = true;
+            _previewWithoutReaction--;
+        }
+    }
+
     /// <summary>
     /// The multiplicative phase of the triggering hit. Vaporize/Melt multiply
     /// the hit that triggers them, so they must land here -- after Strength
@@ -143,11 +185,15 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     ///
     /// This runs in preview/tooltip paths too, so it MUST stay pure -- no aura
     /// consumption, no side effects. Consumption happens in AfterDamageReceived.
+    ///
+    /// <see cref="PreviewWithoutReaction"/> switches the whole term off for the
+    /// span of one PREVIEW, and nothing else ever opens it.
     /// </summary>
     public override decimal ModifyDamageMultiplicative(
         Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource, CardPlay? cardPlay)
     {
         if (target != base.Owner) return 1m;
+        if (ReactionFoldSuppressed) return 1m;
         if (!props.IsPoweredAttack()) return 1m;
 
         var trigger = ElementOf(cardSource, dealer);

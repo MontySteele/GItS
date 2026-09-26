@@ -3765,6 +3765,32 @@ def _aims_at_chosen_enemy(eff: dict) -> bool:
     return (eff.get("op") == "apply_power"
             and eff.get("power") in ENEMY_APPLY_POWERS)
 
+
+def wide_only_target(card: dict) -> dict | None:
+    """The row's one aiming effect, where it is a `plant_bomb` that WIDENS to
+    ALL enemies under a predicate -- or None.
+
+    THE FIND (the Klee later-act seats, 2026-09-26, act-2 lanes 1 and 4).
+    Coven Errand -- "Place a Bomb 5 on the enemy, or on ALL enemies if you
+    played a Companion card this turn" -- demanded a target in the ALL case,
+    where its play reads none (`PlaceOnAll`). The base game's own answer to a
+    card whose aim depends on the board is a live `TargetType` (the Shiv under
+    `FanOfKnivesPower`), so such a row declares AnyEnemy and answers
+    AllEnemies while its predicate holds.
+
+    ONLY WHERE NOTHING ELSE ON THE FACE AIMS: Team Effort widens its Set off
+    too, but its hit still lands on the aimed enemy, so it keeps its target.
+    """
+    aiming = [e for e in _effects_everywhere(card) if _aims_at_chosen_enemy(e)]
+    if len(aiming) != 1:
+        return None
+    eff = aiming[0]
+    if eff.get("op") != "plant_bomb" or not eff.get("wide_if"):
+        return None
+    if not any(top is eff for top in card.get("effects") or []):
+        return None
+    return eff
+
 # A card-level field can alter playability or lifecycle without appearing in
 # effects. Treating unknown fields as harmless metadata is therefore unsafe:
 # that is how an Encore/Fanfare cost could otherwise disappear while the body
@@ -6992,6 +7018,14 @@ def build_vars(card: dict) -> list[str]:
                     out.append(
                         f'new {headline}("{name}", {amount}m, '
                         '"BranchDamage", ValueProp.Move)')
+                elif (cls == "FoldedDamageVar" and name == "BranchDamage"
+                      and branch_follows_own_hit(card, eff)):
+                    # 2026-09-26 (Sizzle+ printed 18, landed 10): the leg
+                    # lands after the card's own hit on the same body, so its
+                    # face folds no reaction. See `branch_follows_own_hit`.
+                    out.append(
+                        f'new {cls}("{name}", {amount}m, ValueProp.Move, '
+                        'followsHit: true)')
                 else:
                     out.append(
                         f'new {cls}("{name}", {amount}m, ValueProp.Move)')
@@ -8032,6 +8066,42 @@ BRANCH_UNNUMBERED_OPS = frozenset({"apply_aura"})
 #: Spend mode: "deal 8 and draw 2 cards"). The damage var is still the one
 #: damage number; the draw's number is the draw's.
 BRANCH_BESIDE_DAMAGE_OPS = frozenset({"draw"})
+
+
+def branch_follows_own_hit(card: dict, eff: dict) -> bool:
+    """Is this conditional's one-armed damage leg a FOLLOW-UP hit -- one the
+    card lands after its own aimed hit on the same body?
+
+    THE FIND (the Klee later-act seats, 2026-09-26, act-3 lane 3). Sizzle+
+    printed "If a Bomb triggered an Elemental Reaction this turn, deal 18
+    additional damage" against a Cryo-wearing, Vulnerable enemy and the extra
+    hit landed 10. `FoldedDamageVar` previews against the front body, whose
+    Cryo aura `AuraPower` folds as Melt (7 x 1.5 x 1.75 = 18) -- but by the
+    time an "additional" leg lands, the card's own Set off and hit have
+    already consumed or replaced that aura, so the leg never reacts.
+
+    TRUE ONLY FOR THAT SHAPE: a one-armed conditional (no `else`) whose then
+    arm deals aimed damage, on a row whose TOP-LEVEL effects put an aimed hit
+    (`damage`, or a `set_off` that deals damage) on the enemy BEFORE it.
+    Sizzle and Shinobu -- Thundergrust are the two rows today. The emitted var
+    previews inside `AuraPower.PreviewWithoutReaction`; the hit itself is
+    untouched.
+    """
+    if eff.get("op") != "conditional" or eff.get("else"):
+        return False
+    then = [c for c in (eff.get("then") or []) if c.get("op") == "damage"]
+    if len(then) != 1 or then[0].get("target") != "enemy":
+        return False
+    for prior in card.get("effects") or []:
+        if prior is eff:
+            return False
+        if prior.get("target") != "enemy":
+            continue
+        if prior.get("op") == "damage":
+            return True
+        if prior.get("op") == "set_off" and prior.get("damage"):
+            return True
+    return False
 
 
 def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
@@ -10213,17 +10283,32 @@ def build_body(
                 # predicate decides how many bodies it lands on and nothing
                 # else. Both arms read the same `{size}` expression, so the
                 # upgraded number cannot reach one arm and miss the other.
-                _target_guard(lines, ctx)
+                #
+                # 2026-09-26: where this is the face's ONLY aim, the card's
+                # TargetType answers AllEnemies while the predicate holds
+                # (`wide_only_target`), so the wide arm is handed no target
+                # and the guard moves into the arm that reads one.
+                wide_only = wide_only_target(card) is eff
+                if not wide_only:
+                    _target_guard(lines, ctx)
                 lines.append(f"if ({predicate_cs(eff['wide_if'])})")
                 lines.append(
                     "    await ProtoBombPower.PlaceOnAll(choiceContext, "
                     f"Owner.Creature, {size}, isMine: {mine}, "
                     f"payloadMineAll: {payload}, cardSource: this);")
                 lines.append("else")
+                if wide_only:
+                    ctx["thrown"] = True
+                    lines.append("{")
+                    lines.append(
+                        '    ArgumentNullException.ThrowIfNull('
+                        'cardPlay.Target, "cardPlay.Target");')
                 lines.append(
                     "    await ProtoBombPower.Place(choiceContext, "
                     f"cardPlay.Target, {size}, isMine: {mine}, "
                     f"payloadMineAll: {payload}, Owner.Creature, this);")
+                if wide_only:
+                    lines.append("}")
             elif eff["target"] == "enemy":
                 _target_guard(lines, ctx)
                 lines.append(
@@ -15063,6 +15148,24 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "\n\n    protected override HashSet<CardTag> CanonicalTags => "
         f"new() {{ CardTag.{tag} }};"
         if tag else "")
+    # 2026-09-26 (Coven Errand demanded a target in its ALL case): a row whose
+    # one aim widens under a predicate answers AllEnemies while it holds --
+    # the base game's own live-TargetType shape (the Shiv under Fan of
+    # Knives). `wide_only_target` says which rows; the body moves its guard
+    # into the arm that reads a target.
+    wide_aim = wide_only_target(card)
+    wide_target_member = ""
+    if wide_aim is not None and target_type == TARGET_CS["enemy"]:
+        wide_pred = predicate_cs(wide_aim["wide_if"])
+        wide_target_member = (
+            "\n\n    /// <summary>The ALL arm aims at nobody, so while its"
+            " predicate holds\n    /// the card asks for no target (the"
+            " 2026-09-26 seat round).</summary>\n"
+            "    public override TargetType TargetType =>\n"
+            "        IsMutable && Owner?.Creature != null\n"
+            f"        && {wide_pred}\n"
+            "            ? TargetType.AllEnemies\n"
+            "            : base.TargetType;")
     # EB-118 §4.5, the Spark cost line. Sparks are a PowerModel and not a
     # CustomResource, so BaseLib's SetCanonicalCost rail below cannot carry
     # this price: the gate is CardModel.IsPlayable, the extension point the
@@ -15384,7 +15487,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{wide_target_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
