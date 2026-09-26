@@ -82,7 +82,8 @@ READ_LISTS: dict[str, tuple[str, ...]] = {
 #: Lane label -> bridge port, mirrored from `understudy/instances.py`. Read
 #: rather than imported: importing `instances` pulls `soak` in behind it and
 #: this tool must run in a checkout with no game and no local.props.
-LANE_PORTS = {"lane0": 15526, "lane1": 15527, "lane2": 15528}
+LANE_PORTS = {"lane0": 15526, "lane1": 15527, "lane2": 15528,
+              "lane3": 15529, "lane4": 15530}
 
 
 def _git(args: list[str], cwd: Path = REPO) -> subprocess.CompletedProcess:
