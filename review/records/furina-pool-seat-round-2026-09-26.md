@@ -18,6 +18,26 @@ Caveat: the seats are Opus, and Claude authored the kit (R217 C). [USER] asked f
 | Act 3, Bows | Dressed Bow engine | Died on act 3 floor 13, at an elite reached on 6 HP |
 | Act 3, shield | Dressed shield with Sold Out and Full House | Died on act 3 floor 4 to Devoted Sculptor. My deck had no damage |
 
+## The third wave (0.2.3868+proto, after the fixes)
+
+Four more full runs from Neow, on the build with Hydro riding the hit, Lyney and Stage Whisper reworked, and #698's fixes. None won; every one reached act 2 or 3.
+
+| Seat | Plan | End |
+|---|---|---|
+| Lane 3 | A tanking front with attacks, then bank and Bravura; guests Chevreuse, Sigewinne, Wriothesley | Cleared act 1 cleanly; lost the act-2 boss to its Sandpit clock (98/321 left) |
+| Lane 4 | Keep three performers acting (Arkhe Alignment, Double Casting, Ensemble Piece, Let the People Rejoice, Full House) | Beat both earlier bosses; died to Test Subject's second form, a multi-hit growing from 10×3 to 10×6 |
+| Lane 2 | Fill the stage, then two Full Houses ("act three times"), Gala Premiere, Dual Nature | 19 fights won, both bosses beaten; stalled in act 3 on a bridge defect (the Kifuda enchant screen, BACKLOG) |
+| Lane 3 (second) | (running at the time of writing) | |
+
+- **What the third wave adds:**
+  - The reworked Stage Whisper was a MOST WANTED turn ("Whisper and Pneuma piled 16 Fanfare on the front Usher").
+  - Two Full Houses stack into a third act, and won an act-2 boss.
+  - Full House was NEVER AGAIN for a seat that never held a full stage.
+  - Clorinde was NEVER AGAIN: her drain empties the 1-Fanfare performers a summon deck makes.
+  - Take the Stage was NEVER AGAIN for a fourth seat.
+- **Defence against escalating multi-hits** is the gap every late death shares: the kit has almost no plain Block that scales. It is watched as the intended weakness, like Klee's.
+- **Caveat:** the seats shared one scratchpad, and one Klee seat's commands crossed lanes. See the Klee record. Every seat now keeps its own folder.
+
 ## What played well
 
 - **Every plan has a real turn.** Each seat named a MOST WANTED turn built on a different mechanic:

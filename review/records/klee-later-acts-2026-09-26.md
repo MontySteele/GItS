@@ -17,6 +17,20 @@ Caveat: the seats are Opus and the kit's author is Claude. The seat rule (R217 C
 | Act 3, lane 2 | dressed Spray | 6/6 act-3 fights won; lost Aeonglass on turn 7 (172/512) |
 | Act 3, lane 3 | dressed React + Mines | Died act 3 floor 8 (took potions over +31 max HP at the Ancient) |
 
+## The third wave (0.2.3868+proto, after the fixes)
+
+Three more full runs from Neow. A fourth was void: its commands crossed lanes. See the caveat below.
+
+| Seat | Plan | End |
+|---|---|---|
+| Wave 3, lane 1 | Sparks pay for cards (Dig In, Bottomless Bag, Blazing Delight) | Died to the act-1 boss, Ceremonial Beast (66/252 left) |
+| Wave 3, lane 2 | Stacked Bombs, a retained Ka-pow!, Blast Shield on Sparks; Spark Knight and Chained Reactions in act 2 | **Won**: beat Aeonglass at 13 HP |
+| Wave 3, lane 1 (second) | Many small Bombs into Sparks into Spark Knight; the Blast Shield and Party Poppers loop | Beat The Kin and Kaiser Crab; died to Test Subject's second form |
+
+In total: five whole runs, two wins, two deaths at the act-3 boss or an elite, one death at the act-1 boss.
+
+**Caveat on every parallel round today:** the seats shared one scratchpad. On lane 2 a wrapper script with the same name drove the wrong lane (its seat stopped and reported "another driver"). Earlier seats also wrote same-named wrappers, so any earlier record may carry a stray command. Each seat now gets its own folder and names its lane on every command, and the seat brief says so (#701).
+
 ## What played well
 
 - **Cook and Spray both scale into act 3.** Planned two-turn setups hit 100 to 166 in one turn; bombs held three turns grew 58 to 203 and killed an act-2 boss. Every seat named a turn it wanted to repeat, and every one was a setup paying off.
@@ -28,7 +42,7 @@ Caveat: the seats are Opus and the kit's author is Claude. The seat rule (R217 C
 1. **Defence runs out in act 3.** Both deaths in real runs came from a single big hit with no Block in hand. The full-run Cook seat said: "the drafts offered almost no block after act 1".
 2. **Sparks pile up with nothing to spend them on.** Four seats ended fights holding 6 to 20 unspent. Pounding Surprise pays a Spark per Bomb, and only a few cards cost them.
 3. **The React loop never came online.** One full run saw "NO REACTION IS REACHABLE" all game and won anyway. The React seat held Vermillion Pact and Aftershock for four fights and never cast them. They need a non-Pyro aura, which only a Companion card supplies, and Klee's own Pyro attacks overwrite it.
-4. **Cards named NEVER AGAIN:** Favonius Escort (deletes the deck's own bomb), Boom Badge (2 Sparks for a doubling that was never big), Vermillion Pact, Alice's Recipe (a Set-off-every-turn deck never lets a Bomb live), Playdate, Where Did I Put It?+. Patience, Klee! was drawn about five times and never played.
+4. **Cards named NEVER AGAIN:** One More Charge (its 20 threshold never landed), Careful Now (reads the largest Bomb, which is small or just spent), Run Away!, Favonius Escort (deletes the deck's own bomb), Boom Badge (2 Sparks for a doubling that was never big), Vermillion Pact, Alice's Recipe (a Set-off-every-turn deck never lets a Bomb live), Playdate, Where Did I Put It?+. Patience, Klee! was drawn about five times and never played.
 
 ## Defects, fixed (#697, merged; reaches the game at the next deploy)
 
