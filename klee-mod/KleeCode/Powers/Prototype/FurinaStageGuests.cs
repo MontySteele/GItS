@@ -396,10 +396,9 @@ public static partial class FurinaStage
             // A Rapt Audience, as `AbsorbHit` pays it.
             if (twoOrMore && result.Absorbed > 0)
             {
-                foreach (var pct in rapt)
+                foreach (var amount in rapt)
                 {
-                    clone.Raise((int)System.Math.Ceiling(
-                        result.Absorbed * pct / 100m));
+                    clone.Raise(amount);
                 }
             }
             run.Block = 0;

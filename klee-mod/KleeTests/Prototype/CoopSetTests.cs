@@ -401,14 +401,14 @@ public class CoopSetTests
         using var _ = new StageArm();
         var (furina, stage) = Stage((StagePerformer.Usher, 9),
                                     (StagePerformer.Crabaletta, 1));
-        furina.WithPower<RaptAudiencePower>(50);
+        furina.WithPower<RaptAudiencePower>(2);
         var ally = Seat.Klee();
         var guest = Guest(ally, furina);
 
         Assert.Equal(0m, guest.ModifyHpLostBeforeOsty(
             ally.Creature, 4m, Attack, Enemy(), null));
         Assert.Equal(5, stage.Lead!.Fanfare);
-        Assert.Equal(3, stage.Back!.Fanfare);    // 1 + half of 4
+        Assert.Equal(3, stage.Back!.Fanfare);    // 1 + a fixed 2
     }
 
     [Fact]

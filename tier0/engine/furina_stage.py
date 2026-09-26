@@ -1085,12 +1085,14 @@ def absorb(state, incoming: int) -> int:
         exit_["caught"] = caught
         if caught > 0:
             state.emit("stage_bow_caught", member=member, amount=caught)
-    # R276 batch two, A RAPT AUDIENCE: the percentage of what the lead lost,
-    # rounded up, on the back performer -- and nothing when the lead was also
-    # the back performer. Every caller here is an enemy's hit.
-    pct = int(p.powers.get(RAPT_AUDIENCE, 0))
-    if pct and two_or_more and eaten > 0:
-        raise_fanfare(state, -(-eaten * pct // 100), source=GAIN_POWER)
+    # R276 batch two, A RAPT AUDIENCE: a fixed Raise on the back performer
+    # per hit that took Fanfare off the lead, copies adding (2026-09-26
+    # balance review: 2, 3 upgraded; it was a share of what the lead lost) --
+    # and nothing when the lead was also the back performer. Every caller
+    # here is an enemy's hit.
+    rapt = int(p.powers.get(RAPT_AUDIENCE, 0))
+    if rapt and two_or_more and eaten > 0:
+        raise_fanfare(state, rapt, source=GAIN_POWER)
     # What the lead ate. What its Bow Block caught of the rest waits for the
     # caller (`take_caught`), which takes it off the hit before her HP.
     setattr(state, _HIT_CAUGHT, caught)
@@ -1200,8 +1202,12 @@ def perform(state, member: str, *, bow: bool = False, pair=None,
                                                  else "furina_stage/act"))
 
 
-def perform_lead(state) -> None:
-    """*Bis!* (sec.12): the lead performer performs its act now."""
+def perform_lead(state, times: int = 1) -> None:
+    """*Bis!* (sec.12): the lead performer acts `times` times now (twice since
+    the 2026-09-26 balance review). Each act resolves in full before the next
+    and a guest's act pays each time; a lead that left after an act (it paid
+    its last Fanfare) does not act again, and the next performer does not
+    inherit the repeat. C# twin: `FurinaStage.PerformLead`."""
     p = state.player
     if not active(p):
         return
@@ -1209,7 +1215,12 @@ def perform_lead(state) -> None:
     if pair is None or is_resting(p, pair):
         state.emit("stage_act_whiffed")
         return
-    perform(state, pair[0], pair=pair)
+    for _ in range(times):
+        if state.over or not p.alive:
+            break
+        if not _holds(p, pair):
+            break
+        perform(state, pair[0], pair=pair)
 
 
 def end_of_turn_acts(state) -> None:

@@ -1986,28 +1986,28 @@
    register: salon, cost: 2, type: attack, rarity: uncommon,
    description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead.",
    effects: [{op: choose_one, modes: [
-              {label: "Deal 10 damage",
-               effects: [{op: damage, amount: 10, target: enemy}]},
-              {label: "[gold]Spend[/gold] 5: deal 20 instead",
+              {label: "Deal 12 damage",
+               effects: [{op: damage, amount: 12, target: enemy}]},
+              {label: "[gold]Spend[/gold] 5: deal 24 instead",
                effects: [{op: stage_spend, amount: 5},
-                         {op: damage, amount: 20, target: enemy}]}]}]}
+                         {op: damage, amount: 24, target: enemy}]}]}]}
 
 - {id: proto_fs_ousia_surge, name: "Ousia Surge", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {formula_base: +4},
    authored_by: [claude],
    replaces: crescendo,
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal damage equal to your [gold]back performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal damage equal to your [gold]back performer[/gold]'s [gold]Fanfare[/gold]{IfUpgraded:show:, plus 4|}.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage,
               amount_formula: {base: 0, per: 1, count: stage_back_fanfare},
               target: enemy}]}
 
 - {id: proto_fs_pneuma_refrain, name: "Pneuma Refrain", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {formula_base: +4},
    authored_by: [claude],
    replaces: many_waters_melody,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain [gold]Block[/gold] equal to your [gold]front performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   description: "Gain [gold]Block[/gold] equal to your [gold]front performer[/gold]'s [gold]Fanfare[/gold]{IfUpgraded:show:, plus 4|}.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: block,
               amount_formula: {base: 0, per: 1, count: stage_lead_fanfare}}]}
 
@@ -2016,8 +2016,8 @@
    authored_by: [claude],
    replaces: change_the_bill,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Your [gold]front performer[/gold] acts now.",
-   effects: [{op: stage_perform_lead}]}
+   description: "Your [gold]front performer[/gold] acts twice.",
+   effects: [{op: stage_perform_lead, amount: 2}]}
 
 - {id: proto_fs_final_bow, name: "Final Bow", character: furina,
    upgrade: {remove: exhaust},
@@ -2135,7 +2135,7 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    replaces: full_ensemble,
-   register: salon, cost: 1, type: skill, rarity: uncommon,
+   register: salon, cost: 2, type: skill, rarity: uncommon,
    description: "All your performers act now.",
    effects: [{op: stage_perform_all}]}
 
@@ -2154,7 +2154,7 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    replaces: fortissimo_guard,
-   register: salon, cost: 2, type: power, rarity: uncommon,
+   register: salon, cost: 3, type: power, rarity: uncommon,
    description: "If all three seats are filled at the end of your turn, your performers act twice.",
    effects: [{op: apply_power, power: fs_full_house, amount: 1, target: self}]}
 
@@ -2168,12 +2168,12 @@
               target: self}]}
 
 - {id: proto_fs_rapt_audience, name: "A Rapt Audience", character: furina,
-   upgrade: {power_amount: +50},
+   upgrade: {power_amount: +1},
    authored_by: [claude],
    replaces: crowd_work,
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever an enemy hits your [gold]front performer[/gold], your [gold]back performer[/gold] gains {IfUpgraded:show:the|half the} [gold]Fanfare[/gold] lost. Needs 2 performers.",
-   effects: [{op: apply_power, power: fs_rapt_audience, amount: 50,
+   description: "Whenever an enemy hits your [gold]front performer[/gold], your [gold]back performer[/gold] gains 2 [gold]Fanfare[/gold]. Needs 2 performers.",
+   effects: [{op: apply_power, power: fs_rapt_audience, amount: 2,
               target: self}]}
 
 # --- the Rares (two) ---

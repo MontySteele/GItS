@@ -45,7 +45,7 @@ public sealed class ProtoFsBis : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bis!"),
-        ("description", "Your [gold]front performer[/gold] acts now."),
+        ("description", "Your [gold]front performer[/gold] acts twice."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoFsBis : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.PerformLead(choiceContext, Owner.Creature);
+        await FurinaStage.PerformLead(choiceContext, Owner.Creature, 2);
     }
 
     protected override void OnUpgrade()

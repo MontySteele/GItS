@@ -68,19 +68,19 @@ public sealed class ThunderousApplausePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// <i>A Rapt Audience</i>: "Whenever an enemy hits the lead performer, Raise
-/// half the Fanfare it lost (rounded up) on the back performer"; upgraded,
-/// all of it. The Amount is the PERCENTAGE, 50 or 100, so copies add
-/// (<see cref="FurinaStage.AbsorbHit"/>). It does nothing when the lead IS
-/// the back performer.
+/// <i>A Rapt Audience</i>: "Whenever an enemy hits your front performer,
+/// your back performer gains 2 Fanfare" (3 upgraded). The Amount is that
+/// FIXED number, so copies add (<see cref="FurinaStage.AbsorbHit"/>). A hit
+/// counts when it takes Fanfare off the front; a hit its Block fully absorbs
+/// does not. It does nothing when the lead IS the back performer.
 ///
-/// 2026-09-25 (opus-furina-l2b, (c) 1): AND THE BADGE SAYS SO. A lone lead is
-/// also the back, and upgraded the refund is all of it, so a lone lead would
-/// be immortal -- the rule stands and the face owes the sentence. The seat
-/// banked on a refund with the Usher alone and watched nothing happen, while
-/// Raise and Spend treated that same Usher as the back. "the lead" and "the
-/// back one" rather than the card face's longer nouns, to hold the badge
-/// under the 125-character power ceiling.
+/// 2026-09-26 balance review: it was a share of what the front lost (half,
+/// all upgraded), which made copies a Fanfare printer that scaled with the
+/// bank. A fixed amount per hit scales with the number of hits instead.
+///
+/// 2026-09-25 (opus-furina-l2b, (c) 1): the badge says it needs two
+/// performers. The seat banked on a refund with the Usher alone and watched
+/// nothing happen, while Raise and Spend treated that same Usher as the back.
 /// </summary>
 public sealed class RaptAudiencePower : PowerModel, ILocalizationProvider
 {
@@ -88,11 +88,9 @@ public sealed class RaptAudiencePower : PowerModel, ILocalizationProvider
     {
         ("title", "A Rapt Audience"),
         ("description",
-            // Under the 125-character power ceiling at 100%: "of Fanfare
-            // lost" rather than the card's "of the Fanfare lost".
             "Whenever an enemy hits your front performer, your back "
-          + "performer gains [blue]{Amount}[/blue]% of "
-          + "[gold]Fanfare[/gold] lost, rounded up. Needs 2 performers."),
+          + "performer gains [blue]{Amount}[/blue] "
+          + "[gold]Fanfare[/gold]. Needs 2 performers."),
     };
 
     public override PowerType Type => PowerType.Buff;

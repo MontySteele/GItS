@@ -45,7 +45,7 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pneuma Refrain"),
-        ("description", "Gain [gold]Block[/gold] equal to your [gold]front performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "Gain [gold]Block[/gold] equal to your [gold]front performer[/gold]'s [gold]Fanfare[/gold]{IfUpgraded:show:, plus 4|}.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -70,6 +70,6 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars.CalculationBase.UpgradeValueBy(4m);
     }
 }

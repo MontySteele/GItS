@@ -1126,8 +1126,11 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # `base` pays on turn one and stops. Both are legitimate; which one
             # a card takes is a ruling, and before this key the tooling made
             # that ruling by having only one option.
-            hit = next((fx for fx in everywhere
-                        if fx.get("op") == "damage"
+            # A BLOCK formula takes the key too, when the card has no damage
+            # formula (2026-09-26 balance review: Pneuma Refrain's +4 Block is
+            # its base term). The C# side is the same CalculationBase slot.
+            hit = next((fx for op in ("damage", "block") for fx in everywhere
+                        if fx.get("op") == op
                         and isinstance(fx.get("amount_formula"), dict)
                         and isinstance(fx["amount_formula"].get("base"), int)),
                        None)

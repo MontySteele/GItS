@@ -643,20 +643,20 @@
       "cost": -1
     },
     "proto_fs_ousia_surge": {
-      "cost": -1
+      "formula_base": 4
     },
     "proto_fs_people_of_fontaine": {
       "power_amount": 1
     },
     "proto_fs_pneuma_refrain": {
-      "cost": -1
+      "formula_base": 4
     },
     "proto_fs_quick_cue": {
       "conditional_damage": 1,
       "conditional_then_damage": 1
     },
     "proto_fs_rapt_audience": {
-      "power_amount": 50
+      "power_amount": 1
     },
     "proto_fs_salon_debut": {
       "cost": -1
