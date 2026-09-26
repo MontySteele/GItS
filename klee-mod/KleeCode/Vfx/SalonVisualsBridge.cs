@@ -175,15 +175,14 @@ public static class SalonVisualsBridge
     public static void Setup(NCombatRoom combatRoom, Player player)
     {
         var creature = player.Creature;
+        DiscardDisplay(player);
         // Non-Furina players never spawn the stage (mirrors the reference
-        // bridge's is-not-Hexaghost check).
-        if (creature == null || player.Character is not IFurinaCharacter)
+        // bridge's is-not-Hexaghost check), and neither does a Furina under
+        // the Stage arm (see AppliesTo).
+        if (creature == null || !AppliesTo(creature))
         {
             return;
         }
-
-        DiscardDisplay(player);
-
 
         var display = TrackedDisplayBridge.Spawn(
             combatRoom, ScenePathRelative, ref _warnedMissingScene,
@@ -207,12 +206,10 @@ public static class SalonVisualsBridge
     public static void Refresh(Creature? creature)
     {
         var player = creature?.Player;
-        if (creature == null || player == null
-            || player.Character is not IFurinaCharacter)
+        if (creature == null || player == null || !AppliesTo(creature))
         {
             return;
         }
-
 
         var display = GetDisplay(player);
         if (display == null)
@@ -231,6 +228,29 @@ public static class SalonVisualsBridge
 
         RefreshDisplay(display, creature, animate: true);
     }
+
+    /// <summary>
+    /// Does this creature get the Salon stage at all? Furina, and not under
+    /// the Stage arm.
+    ///
+    /// THE FIND ([USER], a full Furina run on 0.2.3820+proto): "We still have
+    /// some Stage elements from the previous builds that crowd out the UI,
+    /// such as the unused boxes to her left." Those boxes are this display:
+    /// three ghost member slots and an Encore ribbon reading 0, low and to her
+    /// left. The reframe arm used to stand it down here (`EB-627`), and when
+    /// `EB-726` took the reframe out that guard went with it, so the shipped
+    /// stage came back under the Stage arm -- which has no Salon members and
+    /// no Encore (`EB-745`, brief sec.2) and draws its own performers as pets.
+    ///
+    /// The gate is <see cref="FurinaResources.StageRetiresTheShippedMeters"/>
+    /// rather than a second copy of the arm read, so "what the Stage retires"
+    /// stays one question. False-free in a release build: without the
+    /// quarantine that question answers false and every Furina gets the stage
+    /// exactly as it ships.
+    /// </summary>
+    public static bool AppliesTo(Creature? creature) =>
+        creature?.Player?.Character is IFurinaCharacter
+        && !FurinaResources.StageRetiresTheShippedMeters(creature);
 
     public static void DiscardDisplay(Player player)
     {

@@ -185,9 +185,15 @@ public class FurinaStageDraft3Tests
         var sweep = Il.CallSequence(Il.Method("FurinaStage", "EndOfTurnActs"))
             .ToList();
         var lastAct = sweep.LastIndexOf("FurinaStage.Perform");
-        var fade = sweep.IndexOf("FurinaStageLedger.Fade");
+        // 2026-09-26: the sweep fades through FurinaStage.FadeAndShow, which
+        // is the ledger's fade, then the bars, then the loss numbers.
+        var fade = sweep.IndexOf("FurinaStage.FadeAndShow");
         Assert.True(lastAct >= 0 && fade > lastAct, string.Join(", ", sweep));
-        Assert.Contains("FurinaStagePets.SyncBars", sweep.Skip(fade));
+        var shown = Il.CallSequence(Il.Method("FurinaStage", "FadeAndShow"))
+            .ToList();
+        var ledgerFade = shown.IndexOf("FurinaStageLedger.Fade");
+        Assert.True(ledgerFade >= 0, string.Join(", ", shown));
+        Assert.Contains("FurinaStagePets.SyncBars", shown.Skip(ledgerFade));
     }
 
     // ---- 4. Hydro comes from cards ------------------------------------------
