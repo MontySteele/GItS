@@ -135,8 +135,9 @@ def test_the_sample_contract_is_well_formed():
     # (`teyvat/motion/bespoke/<body>.tres`). The last sixteen are the Furina
     # stage's eight GUEST bodies (tools/cut_guest_bodies.py): a committed
     # scene each and the Tier F sprite it draws, the same shape as the trio's
-    # six above.
-    assert len(parsed.resources) == 422
+    # six above. The last four are the supporting pool's two guests, Lyney and
+    # Escoffier, in the same shape.
+    assert len(parsed.resources) == 426
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -246,6 +247,6 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # the motion pass's shared AnimationLibraries, +24 for pass two (eighteen
     # cut layers over six bespoke boss bodies, and their six per-body
     # libraries), +16 for the stage's eight guest bodies (a scene and a
-    # sprite each).
-    assert report.checked["contract_resources"] == 422
+    # sprite each), +4 for the supporting pool's two guests.
+    assert report.checked["contract_resources"] == 426
     assert report.checked["package_files"] == 3
