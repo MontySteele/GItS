@@ -1,8 +1,10 @@
-"""Cut the eight Guest Stars' stage bodies.
+"""Cut the Guest Stars' stage bodies.
 
 The Guest Cast (2026-09-25, review/active/furina-guest-batch-2026-09-25.md)
-put eight Fontaine characters on Furina's stage as performers. Until this tool
-each one wore the base game's Osty rig. This gives them what the Salon trio
+put eight Fontaine characters on Furina's stage as performers, and the
+supporting pool (2026-09-26, review/active/furina-supporting-pool-2026-09-26.md)
+added Lyney and Escoffier for ten. Until this tool each one wore the base
+game's Osty rig. This gives them what the Salon trio
 has: a pre-scaled sprite and a scene with the trio's four animations.
 
 Produces the gitignored art (Tier F, private builds only):
@@ -80,8 +82,9 @@ OUT_REL = Path("ImageGen") / "images" / "furina" / "salon"
 SCENE_DIR = ROOT / "klee-mod" / "pck-src" / "furina" / "model"
 FURINA_SCENE = SCENE_DIR / "combat.tscn"
 
-# The eight guests in StagePerformer order (FurinaStage.cs). The key is the
-# file stem; the value is the wiki name in the render's file name.
+# The guests in StagePerformer order (FurinaStage.cs): the Guest Cast's eight,
+# then the supporting pool's two. The key is the file stem; the value is the
+# wiki name in the render's file name.
 GUESTS = {
     "neuvillette": "Neuvillette",
     "clorinde": "Clorinde",
@@ -91,6 +94,8 @@ GUESTS = {
     "sigewinne": "Sigewinne",
     "charlotte": "Charlotte",
     "lynette": "Lynette",
+    "lyney": "Lyney",
+    "escoffier": "Escoffier",
 }
 
 # The matte for a `game` render, in art_process's `cut` spec grammar.
@@ -126,9 +131,20 @@ SOURCES: dict[str, tuple[str, int | None]] = {
     # rather than removing it. Accepted: invisible at in-game size.
     "charlotte": ("game", 872),
     "lynette": ("game", 872),
+    # The supporting pool's two (2026-09-26), same knobs, no per-guest
+    # exception. Escoffier's polearm hangs tip-down between her legs and the
+    # mirror floor draws its reflected tip in the 30 rows above the sole row.
+    # drop_reflections() reads it as a third foot run and clears 1045 of its
+    # 1088 px; keep_islands() takes the last 43. The leg beside it keeps every
+    # pixel (measured 2026-09-26).
+    # Lyney keeps a two-pixel nebula sparkle on the toe of his right boot:
+    # it touches the boot, so it is not an island. Accepted like Charlotte's
+    # haze; it does not show at in-game size.
+    "lyney": ("game", 874),
+    "escoffier": ("game", 873),
 }
 
-# ---- the three passes after the matte, ONE parameter set for all eight ----
+# ---- the three passes after the matte, ONE parameter set for every guest ----
 #
 # REFLECTION UNDER A RAISED FOOT. A staggered stance puts one sole above the
 # sole row, and the mirror floor's image of that foot fills the rows between.

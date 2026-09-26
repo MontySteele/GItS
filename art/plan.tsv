@@ -2033,6 +2033,84 @@ power_furina_guest_wriothesley	ImageGen/images/furina/powers/guest_wriothesley.p
 power_furina_guest_sigewinne	ImageGen/images/furina/powers/guest_sigewinne.png	256	256	contain	center	auto	1	png	Sigewinne Icon.png		icon
 power_furina_guest_charlotte	ImageGen/images/furina/powers/guest_charlotte.png	256	256	contain	center	auto	1	png	Charlotte Icon.png		icon
 power_furina_guest_lynette	ImageGen/images/furina/powers/guest_lynette.png	256	256	contain	center	auto	1	png	Lynette Icon.png		icon
+# ---------- Furina supporting pool 2026-09-26: 29 cards, two guest badges ----------
+# review/active/furina-supporting-pool-2026-09-26.md. Every card source below is
+# new to the plan: no shipped or prototype Furina row wears any of these titles.
+# The two guests follow the Guest Cast block above: own Wish splash, whole, with
+# the full-wish art and the character card behind it. Blank source_group keeps
+# strict L1 inside the prototype partition.
+# -- 1. Arranging the stage --
+# proto_fs_plot_twist <- NEW: the Lyney trial's reveal drawn as a diagram -- the trapdoor and the water, arrows showing the trick
+proto_fs_plot_twist	ImageGen/images/cards/furina/proto_fs_plot_twist.png	500	380	cover	center	shortlist	1	png	Lies Cast Shadows Under Gathered Lights Computer Graphic.png		splash
+# proto_fs_revolving_stage <- NEW: the Opera Epiclese stage, curtain up and empty, before the next turn
+proto_fs_revolving_stage	ImageGen/images/cards/furina/proto_fs_revolving_stage.png	500	380	cover	x0.45	shortlist	1	png	Archon Quest Lies Cast Shadows Under Gathered Lights.png		splash
+# proto_fs_oratrices_verdict <- NEW: the Oratrice Mecanique d'Analyse Cardinale itself, scales lit
+proto_fs_oratrices_verdict	ImageGen/images/cards/furina/proto_fs_oratrices_verdict.png	500	380	cover	y0.42	shortlist	1	png	Oratrice Mecanique d'Analyse Cardinale.png		splash
+# proto_fs_guest_star_lyney <- NEW: Lyney's own Wish splash: the guest who joins the stage
+proto_fs_guest_star_lyney	ImageGen/images/cards/furina/proto_fs_guest_star_lyney.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Lyney Wish.png		splash
+proto_fs_guest_star_lyney	ImageGen/images/cards/furina/proto_fs_guest_star_lyney.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Lyney Full Wish.png		splash
+proto_fs_guest_star_lyney	ImageGen/images/cards/furina/proto_fs_guest_star_lyney.png	500	380	cover	y0.16	shortlist	3	png	Lyney Character Card.png		tcg
+# proto_fs_stage_whisper <- NEW: Furina leaning in close, one eye in shadow -- a word meant for one listener
+proto_fs_stage_whisper	ImageGen/images/cards/furina/proto_fs_stage_whisper.png	500	380	cover	x0.55	shortlist	1	png	Apocalypse Verification Solution 2.png		splash
+# -- 2. Feeding --
+# proto_fs_cheered_on <- NEW: Furina in the middle of a cheering crowd at the fair, drinks raised
+proto_fs_cheered_on	ImageGen/images/cards/furina/proto_fs_cheered_on.png	500	380	cover	x0.62,y0.50@1.25	shortlist	1	png	3rd Anniversary JP Twitter Artwork 2.jpg		splash
+# proto_fs_season_tickets <- NEW: a pair of concert tickets -- a seat booked for every night
+proto_fs_season_tickets	ImageGen/images/cards/furina/proto_fs_season_tickets.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Upstream Variations Tickets.png		item
+# proto_fs_guest_star_escoffier <- NEW: Escoffier's own Wish splash: the guest who joins the stage
+proto_fs_guest_star_escoffier	ImageGen/images/cards/furina/proto_fs_guest_star_escoffier.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Escoffier Wish.png		splash
+proto_fs_guest_star_escoffier	ImageGen/images/cards/furina/proto_fs_guest_star_escoffier.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Escoffier Full Wish.png		splash
+proto_fs_guest_star_escoffier	ImageGen/images/cards/furina/proto_fs_guest_star_escoffier.png	500	380	cover	y0.16	shortlist	3	png	Escoffier Character Card.png		tcg
+# proto_fs_star_billing <- NEW: Furina hoisting a trophy -- top of the bill
+proto_fs_star_billing	ImageGen/images/cards/furina/proto_fs_star_billing.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 51 Furina 1.png		sticker
+# -- 3. Bending the fade --
+# proto_fs_held_applause <- NEW: the rehearsal stage under one spotlight, the house waiting on the last note
+proto_fs_held_applause	ImageGen/images/cards/furina/proto_fs_held_applause.png	500	380	cover	x0.50	shortlist	1	png	This Life, Just Like a Light Trickle of Song Still 2 Lumine.png		splash
+# proto_fs_echoing_hall <- NEW: the Fontinalia hall under Furina's own portrait, stars hung from the vault
+proto_fs_echoing_hall	ImageGen/images/cards/furina/proto_fs_echoing_hall.png	500	380	cover	center	shortlist	1	png	Fontinalia Festival.png		splash
+# proto_fs_eternal_applause <- NEW: the fifth-anniversary party, Furina with an armful of flowers -- the applause that keeps coming
+proto_fs_eternal_applause	ImageGen/images/cards/furina/proto_fs_eternal_applause.png	500	380	cover	x0.33,y0.50@1.5	shortlist	1	png	Version Luna I Wallpaper 3.png		splash
+# -- 4. Cashing out --
+# proto_fs_spirited_aria <- NEW: Furina mid-song, arm flung wide (the left of her voice-cast card, its text cropped off)
+proto_fs_spirited_aria	ImageGen/images/cards/furina/proto_fs_spirited_aria.png	500	380	cover	x0.22,y0.45@1.5	shortlist	1	png	Furina VA Announcement.png		splash
+# proto_fs_intermission <- NEW: Furina off the stage for a rest in the grass, her Salon crabs round her
+proto_fs_intermission	ImageGen/images/cards/furina/proto_fs_intermission.png	500	380	cover	x0.55,y0.55@1.15	shortlist	1	png	VIP Ace Detective 3.png		splash
+# proto_fs_counterclaim <- NEW: the Cycle of Refutation, the trial's evidence turned back on the accuser
+proto_fs_counterclaim	ImageGen/images/cards/furina/proto_fs_counterclaim.png	500	380	cover	center	shortlist	1	png	Lies Cast Shadows Under Gathered Lights Cycle of Refutation 2.png		splash
+# proto_fs_bring_the_house_down <- NEW: Furina flung back in a whirl of water and fish -- the whole house at once
+proto_fs_bring_the_house_down	ImageGen/images/cards/furina/proto_fs_bring_the_house_down.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 3.png		splash
+# -- 5. Bows and encores --
+# proto_fs_da_capo <- NEW: Furina directing the rehearsal -- again, from the top
+proto_fs_da_capo	ImageGen/images/cards/furina/proto_fs_da_capo.png	500	380	cover	x0.42	shortlist	1	png	This Life, Just Like a Light Trickle of Song Still 3 Aether.png		splash
+# proto_fs_grand_finale <- NEW: the whole company on stage under the confetti, the last bow
+proto_fs_grand_finale	ImageGen/images/cards/furina/proto_fs_grand_finale.png	500	380	cover	center	shortlist	1	png	The Two Musketeers' Triumph Quest Still 1 Aether.png		splash
+# proto_fs_gala_premiere <- NEW: Furina with two of her Salon, the curtain about to rise
+proto_fs_gala_premiere	ImageGen/images/cards/furina/proto_fs_gala_premiere.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2025 - Shorts.png		splash
+# -- 6. Hydro and reactions --
+# proto_fs_bubble_aria <- NEW: Furina singing in a ring of bubbles
+proto_fs_bubble_aria	ImageGen/images/cards/furina/proto_fs_bubble_aria.png	500	380	cover	x0.36	shortlist	1	png	App Store Event Character Wallpaper Furina Version 4.2.png		splash
+# proto_fs_groundswell <- NEW: Fontaine's waves rising in a wall
+proto_fs_groundswell	ImageGen/images/cards/furina/proto_fs_groundswell.png	500	380	cover	x0.30	shortlist	1	png	Namecard Background Fontaine Judgment.png		splash
+# proto_fs_tide_of_applause <- NEW: the Primordial Sea, the tide that answers every reaction
+proto_fs_tide_of_applause	ImageGen/images/cards/furina/proto_fs_tide_of_applause.png	500	380	cover	x0.40	shortlist	1	png	Primordial Sea.png		splash
+# proto_fs_grand_deluge <- NEW: the Archon Quest's turning point, the sea torn open into a vortex
+proto_fs_grand_deluge	ImageGen/images/cards/furina/proto_fs_grand_deluge.png	500	380	cover	x0.45	shortlist	1	png	Archon Quest Turning Point.png		splash
+# proto_fs_regina_of_all_waters <- NEW: Focalors in the flooded Opera Epiclese, the Hydro Archon herself
+proto_fs_regina_of_all_waters	ImageGen/images/cards/furina/proto_fs_regina_of_all_waters.png	500	380	cover	x0.58	shortlist	1	png	Masquerade of the Guilty Travel Log Preview.png		splash
+# -- 7. Furina's side paths --
+# proto_fs_solo_verse <- NEW: Furina alone mid-performance, one arm flung out
+proto_fs_solo_verse	ImageGen/images/cards/furina/proto_fs_solo_verse.png	500	380	cover	x0.45	shortlist	1	png	App Store Event Character Wallpaper Furina Version 5.4.png		splash
+# proto_fs_soliloquy <- NEW: Furina humming to herself, eyes shut -- a song with no audience
+proto_fs_soliloquy	ImageGen/images/cards/furina/proto_fs_soliloquy.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Starlight Reverie Avatar Furina.png		sticker
+# proto_fs_one_woman_show <- NEW: Furina alone, mid-scene, a burning letter held high (the right of her Japanese voice-cast card, its text cropped off)
+proto_fs_one_woman_show	ImageGen/images/cards/furina/proto_fs_one_woman_show.png	500	380	cover	x0.645,y0.34@1.5	shortlist	1	png	Furina VA Announcement JP.png		splash
+# proto_fs_dual_nature <- NEW: Focalors, the other half of Furina, standing in the Opera Epiclese
+proto_fs_dual_nature	ImageGen/images/cards/furina/proto_fs_dual_nature.png	500	380	cover	y0.25	shortlist	1	png	NPC Focalors.png		splash
+# proto_fs_sold_out <- NEW: the whole cast crowding the stage before the curtain -- not a seat to spare
+proto_fs_sold_out	ImageGen/images/cards/furina/proto_fs_sold_out.png	500	380	cover	center	shortlist	1	png	Those We Have Kept Quest Still Lumine.png		splash
+# The two new guests' badges wear their own faces, as the eight above do.
+power_furina_guest_lyney	ImageGen/images/furina/powers/guest_lyney.png	256	256	contain	center	auto	1	png	Lyney Icon.png		icon
+power_furina_guest_escoffier	ImageGen/images/furina/powers/guest_escoffier.png	256	256	contain	center	auto	1	png	Escoffier Icon.png		icon
 # ---------- Co-op set 2026-09-25: the nine multiplayer-only cards ----------
 # Each card reaches another player, so each face shows the character WITH
 # someone: Klee with Jean, Albedo and her friends, Furina with
