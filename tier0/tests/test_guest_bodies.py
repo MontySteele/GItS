@@ -58,8 +58,14 @@ def test_every_performer_has_its_own_literal_scene():
     assert len(set(scenes.values())) == len(scenes), "two performers share a scene"
     for who, path in scenes.items():
         assert (ROOT / "klee-mod" / "pck-src" / path).is_file(), (who, path)
-    for name in tool.GUESTS:
-        assert scenes[tool.GUESTS[name]] == f"furina/model/guest_{name}.tscn"
+    # A guest the tool cuts before the card build adds its StagePerformer
+    # (the supporting pool's art and cards land in parallel PRs) has its scene
+    # on disk and no literal yet; once the enum names it, the set equality
+    # above forces the literal and this pins its path.
+    for name, who in tool.GUESTS.items():
+        assert (MODEL / f"guest_{name}.tscn").is_file(), name
+        if who in scenes:
+            assert scenes[who] == f"furina/model/guest_{name}.tscn"
     assert 'GetScenePath("creature_visuals/osty")' in PETS, "fallback kept"
 
 
