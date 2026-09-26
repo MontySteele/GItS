@@ -1003,7 +1003,8 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, NaviaKey,
             "End of your turn: deal [gold]Geo[/gold] damage equal to her "
-          + "Fanfare to a random enemy.");
+          + "Fanfare to a random enemy. Her [gold]Bow[/gold] uses what she "
+          + "had before she was emptied.");
 
     public static IEnumerable<IHoverTip> ForChevreuse(
         IEnumerable<IHoverTip> inherited, CardModel card) =>

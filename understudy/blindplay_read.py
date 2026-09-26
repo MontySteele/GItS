@@ -335,7 +335,27 @@ def transient(state: dict[str, Any]) -> str:
     if (str(state.get("state_type")) in COMBAT_SCREENS
             and _blob(state, "battle").get("is_play_phase") is False):
         return "the game has not handed the turn back to the player yet"
+    if _chooser_answered(state):
+        return "the pick is made and the chooser is closing"
     return ""
+
+
+def _chooser_answered(state: dict[str, Any]) -> bool:
+    """2026-09-26 (wave-3 Furina lane 3, seat b): A CHOOSE-A-CARD SCREEN THAT
+    HAS ALREADY TAKEN ITS PICK.
+
+    "Arkhe Alignment's chooser appeared twice at the start of several turns,
+    with only one Arkhe played." The lane's own game log has exactly one
+    `chose cards [KLEEMOD-ARKHE_OUSIA_OPTION]` per turn, so the game asked
+    once. The 0.111.0 `NChooseACardSelectionScreen` sets `_screenComplete` on
+    the pick and leaves the overlay stack a continuation later
+    (`CardsSelected`), so a read in between drew the answered chooser as a
+    fresh one, and the seat answered it again. The bridge now says so
+    (`card_select.answered`, `vendor/STS2_MCP/gits/GitsChooserAnswered.cs`)
+    and the read rides the frame out. Checked for an explicit True: an older
+    bridge that does not send the key draws the screen, as before."""
+    return (str(state.get("state_type")) == "card_select"
+            and _blob(state, "card_select").get("answered") is True)
 
 
 def _combat_torn_down(state: dict[str, Any]) -> bool:

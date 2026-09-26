@@ -318,7 +318,8 @@ public class FurinaGuestCastTests
                          owed);
         var exit = Assert.Single(owed);
         Assert.Equal(StagePerformer.Neuvillette, exit.Who);
-        Assert.Equal(0, exit.Held);
+        // 2026-09-26: an emptied payer's Bow reads the bar it had (Navia).
+        Assert.Equal(3, exit.Held);
         Assert.Equal(new[] { StagePerformer.Usher },
                      stage.Seats.Select(s => s.Who).ToArray());
         // The act's order: pay, the effect, then the Bows owed.

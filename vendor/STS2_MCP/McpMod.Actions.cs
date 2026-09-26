@@ -797,6 +797,11 @@ public static partial class McpMod
         }
         else if (overlay is NChooseACardSelectionScreen chooseScreen)
         {
+            // GItS LOCAL EDIT (wave-3 Furina lane 3 seat b, 2026-09-26): a
+            // chooser that has taken its pick is closing, and a second press
+            // would complete it twice (`gits/GitsChooserAnswered.cs`).
+            if (GitsChooserAnswered(chooseScreen) == true)
+                return Error("This choice is already made and the screen is closing - read the state again");
             var holders = FindAllSortedByPosition<NGridCardHolder>(chooseScreen);
             if (index < 0 || index >= holders.Count)
                 return Error($"Card index {index} out of range ({holders.Count} cards available)");
@@ -804,6 +809,10 @@ public static partial class McpMod
             var holder = holders[index];
             string cardName = SafeGetText(() => holder.CardModel?.Title) ?? "unknown";
             holder.EmitSignal(NCardHolder.SignalName.Pressed, holder);
+            // The screen drops a press in its first 350 ms with no word
+            // (`SelectHolder`); say so rather than "ok".
+            if (GitsChooserAnswered(chooseScreen) == false)
+                return Error("The screen was still opening and did not take the pick - nothing was chosen, choose again");
 
             return new Dictionary<string, object?>
             {
