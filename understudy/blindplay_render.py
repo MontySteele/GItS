@@ -2241,8 +2241,9 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             # move several performers at once; the stage line shows where.
             out.append(STAGE_REORDER_LINE.format(who=who))
         elif row["event"] == "move":
-            # Stage Whisper: Fanfare from the back performer to the front
-            # one; the front's gain is the raise line after it.
+            # Stage Whisper: Fanfare from each other performer to the front
+            # one (one line per giver); the front's gain is the raise line
+            # after them.
             out.append(STAGE_MOVE_LINE.format(
                 who=row["name"], n=row["moved"],
                 before=row["fanfare"] + row["moved"], after=row["fanfare"]))

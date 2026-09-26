@@ -41,7 +41,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this);
+        ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_quick_cue");
 
@@ -67,7 +67,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 3m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 8m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 8m, ValueProp.Move, carries: Element.Hydro)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -104,12 +104,14 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
         else
         {
             await FurinaStage.Spend(choiceContext, Owner.Creature, 2);
-            await DamageCmd.Attack((IsUpgraded ? 10m : 8m))
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
-                .Execute(choiceContext);
-            await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Hydro, Owner.Creature);
+            using (HitElement.Carry(this, Element.Hydro))
+            {
+                await DamageCmd.Attack((IsUpgraded ? 10m : 8m))
+                    .FromCard(this, cardPlay)
+                    .Targeting(cardPlay.Target)
+                    .WithHitFx("vfx/vfx_attack_slash")
+                    .Execute(choiceContext);
+            }
         }
     }
 
@@ -153,7 +155,7 @@ public sealed class ProtoFsQuickCueModeA : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 3m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 8m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 8m, ValueProp.Move, carries: Element.Hydro)
         };
 
     protected override void OnUpgrade()
@@ -192,7 +194,7 @@ public sealed class ProtoFsQuickCueModeB : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 3m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 8m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 8m, ValueProp.Move, carries: Element.Hydro)
         };
 
     protected override void OnUpgrade()

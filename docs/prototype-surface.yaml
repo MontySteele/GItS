@@ -1942,6 +1942,8 @@
    effects: [{op: stage_raise, amount: 3},
              {op: draw, amount: 1}]}
 
+# 2026-09-26 seat round: the Hydro rides the hit (`applies_element: true`),
+# so a reaction multiplies it. Same on Quick Cue, Bubble Aria, Grand Deluge.
 - {id: proto_fs_tidal_flourish, name: "Tidal Flourish", character: furina,
    upgrade: {conditional_damage: +3},
    authored_by: [claude],
@@ -1953,8 +1955,7 @@
                effects: [{op: damage, amount: 5, target: all_enemies}]},
               {label: "[gold]Spend[/gold] 2: deal 9 and apply [gold]Hydro[/gold] to ALL instead",
                effects: [{op: stage_spend, amount: 2},
-                         {op: damage, amount: 9, target: all_enemies},
-                         {op: apply_aura, element: hydro, target: all_enemies}]}]}]}
+                         {op: damage, amount: 9, target: all_enemies, applies_element: true}]}]}]}
 
 - {id: proto_fs_interposition, name: "Interposition", character: furina,
    upgrade: {conditional_block: +3},
@@ -2100,8 +2101,7 @@
                effects: [{op: damage, amount: 3, target: enemy}]},
               {label: "[gold]Spend[/gold] 2: deal 8 and apply [gold]Hydro[/gold] instead",
                effects: [{op: stage_spend, amount: 2},
-                         {op: damage, amount: 8, target: enemy},
-                         {op: apply_aura, element: hydro, target: enemy}]}]}]}
+                         {op: damage, amount: 8, target: enemy, applies_element: true}]}]}]}
 
 - {id: proto_fs_step_forward, name: "Step Forward", character: furina,
    upgrade: {block: +2},
@@ -2313,16 +2313,16 @@
    description: "Lyney joins the stage with 5 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: lyney, amount: 5}]}
 
-# The sweep's face: it never empties the back, so it never Bows it (a 0-cost
-# Bow would loop with Thunderous Applause and A Five-Century Act).
+# 2026-09-26 seat round, second rework: it gathers the whole stage into the
+# shield and never empties anyone, so no one Bows (the loop stays closed).
+# Why: docs/notes/prototype-surface-provenance.md.
 - {id: proto_fs_stage_whisper, name: "Stage Whisper", character: furina,
-   upgrade: {stage_whisper: 2},
+   upgrade: {cost: -1},
    authored_by: [claude],
    replaces: ebb_and_flow,
-   register: salon, cost: 0, type: skill, rarity: common,
-   # 2026-09-26 seat round (the designer's ruling): "Draw 1 card."
-   description: "Move up to 3 of your [gold]back performer[/gold]'s [gold]Fanfare[/gold] to your [gold]front performer[/gold]. It keeps at least 1. Draw 1 card.",
-   effects: [{op: stage_whisper, amount: 3}, {op: draw, amount: 1}]}
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Your other performers give all but 1 of their [gold]Fanfare[/gold] to your [gold]front performer[/gold]. Draw 1 card.",
+   effects: [{op: stage_whisper}, {op: draw, amount: 1}]}
 
 # --- 2. Feeding ---
 
@@ -2472,14 +2472,15 @@
 
 # --- 6. Hydro and reactions ---
 
+# `element_hits: 1`: only the FIRST hit carries Hydro (2026-09-26 seat round).
 - {id: proto_fs_bubble_aria, name: "Bubble Aria", character: furina,
    upgrade: {damage: 1},
    authored_by: [claude],
    replaces: casting_call,
    register: salon, cost: 1, type: attack, rarity: common,
    description: "Deal 4 damage twice. Apply [gold]Hydro[/gold].",
-   effects: [{op: damage, amount: 4, target: enemy, times: 2},
-             {op: apply_aura, element: hydro, target: enemy}]}
+   effects: [{op: damage, amount: 4, target: enemy, times: 2,
+              applies_element: true, element_hits: 1}]}
 
 # (renamed 2026-09-26: title clash) Undertow on the paper; Kokomi's arm prints
 # an Undertow of its own.
@@ -2508,8 +2509,7 @@
    replaces: high_tide,
    register: salon, cost: 2, type: attack, rarity: rare,
    description: "Deal 10 damage to ALL enemies and apply [gold]Hydro[/gold]. If this triggers an [gold]Elemental Reaction[/gold], each performer gains 2 [gold]Fanfare[/gold].",
-   effects: [{op: damage, amount: 10, target: all_enemies},
-             {op: apply_aura, element: hydro, target: all_enemies},
+   effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true},
              {op: conditional, if: reaction_triggered_by_this,
               then: [{op: stage_raise, amount: 2, seat: all}]}]}
 

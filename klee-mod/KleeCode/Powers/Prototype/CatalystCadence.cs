@@ -83,6 +83,10 @@ public static class CatalystCadence
     /// </summary>
     public static Element PrintedElement(CardModel? cardSource, Creature? dealer)
     {
+        // The Furina seat round (2026-09-26): a row whose element rides ONE of
+        // its hits rather than the whole card. See `HitElement`.
+        var carried = HitElement.For(cardSource);
+        if (carried != Element.None) return carried;
         if (cardSource is IElementalCard elemental) return elemental.Element;
         if (cardSource is ICompanionCard) return Element.None;
         if (cardSource is null) return Element.None;

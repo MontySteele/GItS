@@ -41,7 +41,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this);
+        ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_tidal_flourish");
 
@@ -104,15 +104,14 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
         else
         {
             await FurinaStage.Spend(choiceContext, Owner.Creature, 2);
-            await DamageCmd.Attack((IsUpgraded ? 12m : 9m))
-                .FromCard(this, cardPlay)
-                .TargetingAllOpponents(CombatState!)
-                .WithHitFx("vfx/vfx_attack_slash")
-                .SpawningHitVfxOnEachCreature()
-                .Execute(choiceContext);
-            foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
+            using (HitElement.Carry(this, Element.Hydro))
             {
-                await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Hydro, Owner.Creature);
+                await DamageCmd.Attack((IsUpgraded ? 12m : 9m))
+                    .FromCard(this, cardPlay)
+                    .TargetingAllOpponents(CombatState!)
+                    .WithHitFx("vfx/vfx_attack_slash")
+                    .SpawningHitVfxOnEachCreature()
+                    .Execute(choiceContext);
             }
         }
     }

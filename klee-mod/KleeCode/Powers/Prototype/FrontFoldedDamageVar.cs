@@ -1,3 +1,4 @@
+using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
@@ -200,11 +201,23 @@ public sealed class FoldedDamageVar : DamageVar
     /// </summary>
     public bool FollowsHit { get; }
 
+    /// <summary>
+    /// The Furina seat round (2026-09-26): the element THIS leg's hit carries
+    /// when the card as a whole carries none -- Quick Cue's and Tidal
+    /// Flourish's Spend modes. The preview reads inside
+    /// <see cref="HitElement.Carry"/>, the scope the emitted play opens round
+    /// the hit, so the face folds the reaction the hit will cause.
+    /// <see cref="Element.None"/> everywhere else.
+    /// </summary>
+    public Element Carries { get; }
+
     public FoldedDamageVar(string name, decimal damage, ValueProp props,
-                           bool followsHit = false)
+                           bool followsHit = false,
+                           Element carries = Element.None)
         : base(name, damage, props)
     {
         FollowsHit = followsHit;
+        Carries = carries;
     }
 
     public override void UpdateCardPreview(
@@ -214,6 +227,9 @@ public sealed class FoldedDamageVar : DamageVar
         // Closed on every return below, the early one included.
         using var reaction = FollowsHit
             ? AuraPower.PreviewWithoutReaction()
+            : null;
+        using var carried = Carries != Element.None
+            ? HitElement.Carry(card, Carries)
             : null;
         // Off a card that is not in play the game runs no hooks, and neither
         // does this: a shop shelf and a deck view print the sheet's numbers,

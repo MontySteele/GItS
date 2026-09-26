@@ -209,9 +209,58 @@ class CharacterProfile:
                     if effect.get("op") == "damage"
                     and "applies_element" in effect]
         if any(value for value in declared):
-            return True
+            # The Furina seat round (2026-09-26): unless the declaration is
+            # about SOME of the card's hits and not all of them, in which
+            # case each declared hit carries the element on its own
+            # (`carried_hits`) and the card as a whole carries none.
+            return not self.carried_hits(card)
         if declared and not any(declared):
             return False
+        return self._cadence_applies_element(card)
+
+    def carried_hits(self, card: dict) -> list[dict]:
+        """The damage clauses whose element rides THAT HIT ALONE.
+
+        THE FIND (the Furina seat round of 2026-09-26, act 2 lane 2). Quick
+        Cue's Spend mode dealt 8 and THEN applied Hydro, so into a Pyro aura
+        the Vaporize fired on the application and multiplied nothing. The
+        ruling puts the Hydro on the hit (`applies_element: true`, the Klee
+        rows' mechanism) -- but `IElementalCard` is one answer for the whole
+        card, and Quick Cue's plain mode also deals damage and must stay a
+        plain hit. The sim has always answered per effect
+        (`effects._element_for`); this is the list of hits the mod has to
+        answer per effect too, each through `HitElement.Carry` round its own
+        `DamageCmd`.
+
+        NON-EMPTY ONLY FOR A CHARACTER ROW that declares `applies_element:
+        true` on a hit while some other hit of the card does not carry the
+        element (declared false, or silent under a cadence that says no), or
+        whose declared hit limits the element to its first hits
+        (`element_hits`, Bubble Aria). A row whose every hit carries the
+        element keeps the card-level interface, which is every row that
+        declared one before this: nothing already emitted moves.
+        """
+        if is_companion(card):
+            return []
+        hits = [effect for effect in _effects_everywhere(card)
+                if effect.get("op") == "damage"
+                and effect.get("target") != "self"]
+        carried = [effect for effect in hits
+                   if effect.get("applies_element") is True]
+        if not carried:
+            return []
+        if any(effect.get("element_hits") for effect in carried):
+            return carried
+        silent = [effect for effect in hits
+                  if "applies_element" not in effect]
+        if any(effect.get("applies_element") is False for effect in hits):
+            return carried
+        if silent and not self._cadence_applies_element(card):
+            return carried
+        return []
+
+    def _cadence_applies_element(self, card: dict) -> bool:
+        """The cadence's own answer, with no row declaration consulted."""
         if self.cadence == "catalyst_attack":
             return card.get("type") == "attack"
         if self.cadence == CATALYST_EVERY_CARD:
@@ -1014,7 +1063,10 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
     from a gem that overclaims to a sentence that is true.
     """
     elements: list[str] = []
-    if elemental:
+    # A CARRIED HIT is the card's own element on one of its hits (the Furina
+    # seat round, 2026-09-26, `CharacterProfile.carried_hits`), so it leads
+    # exactly where a card-level element would.
+    if elemental or profile.carried_hits(card):
         source_element = (
             card["element"] if is_companion(card) else profile.native_element
         )
@@ -1974,6 +2026,12 @@ BRANCH_FIELDS = {
     # thing: it tells the emitter this card is elemental. The alternative --
     # leaving it out -- silently drops the element from a modal companion,
     # which is a different card rather than a blocked one.
+    #
+    # A CHARACTER row's mode body is the one place the flag says more (the
+    # Furina seat round, 2026-09-26): when the card's other hits do not carry
+    # the element, the declared hit carries it alone, through
+    # `HitElement.Carry` round its own `DamageCmd` (`carried_hits`,
+    # `_emit_damage`). Quick Cue's and Tidal Flourish's Spend modes.
     "damage": {"op", "amount", "target", "applies_element"},
     "block": {"op", "amount"},
     "draw": {"op", "amount"},
@@ -3632,10 +3690,9 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                          # THE GUEST CAST (2026-09-25): what a Guest Star
                          # arrives with.
                          "stage_guest",
-                         # THE SUPPORTING POOL (2026-09-26): Stage Whisper's
-                         # "up to 3" and Intermission's "for every 3"
-                         # (`STAGE_AMOUNT_VARS`).
-                         "stage_whisper", "stage_intermission",
+                         # THE SUPPORTING POOL (2026-09-26): Intermission's
+                         # "for every 3" (`STAGE_AMOUNT_VARS`).
+                         "stage_intermission",
                          # R252, and the same argument one row on: Careful Now
                          # prints a CEILING and no payout ("Block equal to
                          # your largest Bomb, up to 10"), so the cap is the
@@ -5692,13 +5749,13 @@ STAGE_STMT_OPS = {
     "stage_dual_nature",
 }
 
-#: THE SUPPORTING POOL (2026-09-26): the two stage ops whose `amount` an
-#: upgrade moves, each through a var named for what the face prints -- Stage
-#: Whisper's "up to 3" and Intermission's "for every 3". The upgrade key is the
-#: op's own name, bound to the first top-level op of it (tier0's
-#: `_bump_first`, `upgrades.apply_upgrade`).
+#: THE SUPPORTING POOL (2026-09-26): the stage op whose `amount` an upgrade
+#: moves, through a var named for what the face prints -- Intermission's "for
+#: every 3". The upgrade key is the op's own name, bound to the first
+#: top-level op of it (tier0's `_bump_first`, `upgrades.apply_upgrade`).
+#: Stage Whisper's "up to 3" left with its second rework the same day: it
+#: gathers everything but 1 and prints no number.
 STAGE_AMOUNT_VARS = {
-    "stage_whisper": "Whisper",
     "stage_intermission": "Every",
 }
 
@@ -5740,8 +5797,9 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
     if op == "stage_reverse":
         return "FurinaStage.Reverse(Owner.Creature);"
     if op == "stage_whisper":
-        n = amount if amount is not None else str(int(eff.get("amount", 1)))
-        return f"FurinaStage.Whisper(Owner.Creature, {n});"
+        # 2026-09-26 seat round, second rework: every other performer gives
+        # all but 1 to the front. No number.
+        return "FurinaStage.Whisper(Owner.Creature);"
     if op == "stage_hold_fade":
         return "FurinaStage.HoldFade(Owner.Creature);"
     if op == "stage_intermission":
@@ -6984,9 +7042,19 @@ def build_vars(card: dict) -> list[str]:
             # same two vars are declared here that a two-armed conditional
             # declares below -- in print order, else-arm first, which for a
             # modal is mode 0. `folded_branch_damage` reads both shapes.
+            #
+            # The Furina seat round (2026-09-26): a mode whose hit CARRIES the
+            # element previews inside the same `HitElement` scope its play
+            # opens, so the face folds the reaction that hit will cause.
+            carries = mode_hit_carries(card, eff)
             for name, amount, _delta, cls in folded_branch_damage(card, eff):
-                out.append(
-                    f'new {cls}("{name}", {amount}m, ValueProp.Move)')
+                if cls == "FoldedDamageVar" and carries.get(name):
+                    out.append(
+                        f'new {cls}("{name}", {amount}m, ValueProp.Move, '
+                        f'carries: {carries[name]})')
+                else:
+                    out.append(
+                        f'new {cls}("{name}", {amount}m, ValueProp.Move)')
         elif op == "conditional":
             # Branch amounts are literals unless a ruled delta targets them:
             # conditional_bonus -> then-first damage (ExtraDamage), draw ->
@@ -7369,9 +7437,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "stage_raise": any(e["op"] == "stage_raise" for e in effects),
         # THE GUEST CAST (2026-09-25): the first top-level `stage_guest`.
         "stage_guest": any(e["op"] == "stage_guest" for e in effects),
-        # THE SUPPORTING POOL (2026-09-26): the first top-level op of each
+        # THE SUPPORTING POOL (2026-09-26): the first top-level op of its
         # name (`STAGE_AMOUNT_VARS`).
-        "stage_whisper": any(e["op"] == "stage_whisper" for e in effects),
         "stage_intermission": any(e["op"] == "stage_intermission"
                                   for e in effects),
         # `EB-478`. Binds to the op that OWES the draw, the same one-owner rule
@@ -8068,6 +8135,28 @@ BRANCH_UNNUMBERED_OPS = frozenset({"apply_aura"})
 BRANCH_BESIDE_DAMAGE_OPS = frozenset({"draw"})
 
 
+def mode_hit_carries(card: dict, eff: dict) -> dict[str, str]:
+    """`{var token: C# element}` for each mode of a two-mode `choose_one`
+    whose hit CARRIES the character's element (the Furina seat round,
+    2026-09-26): mode 0 prints into `PlainDamage` and mode 1 into
+    `BranchDamage`, `folded_branch_damage`'s order. Empty for anything else,
+    and for a companion, whose element is the card's (`carried_hits`).
+    """
+    if eff.get("op") != "choose_one" or is_companion(card):
+        return {}
+    profile = PROFILES.get(card.get("character"))
+    modes = eff.get("modes") or []
+    if profile is None or len(modes) != 2:
+        return {}
+    out: dict[str, str] = {}
+    for name, mode in zip(("PlainDamage", "BranchDamage"), modes):
+        if any(clause.get("op") == "damage"
+               and clause.get("applies_element") is True
+               for clause in mode.get("effects") or []):
+            out[name] = ELEMENT_CS[profile.native_element]
+    return out
+
+
 def branch_follows_own_hit(card: dict, eff: dict) -> bool:
     """Is this conditional's one-armed damage leg a FOLLOW-UP hit -- one the
     card lands after its own aimed hit on the same body?
@@ -8460,7 +8549,54 @@ def _target_guard(lines: list[str], ctx: dict) -> None:
 def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
                  amount_expr: str) -> None:
     """The one attack-damage builder -- top level, conditional branches and
-    the repeat tail all route here so the targeting idiom cannot drift."""
+    the repeat tail all route here so the targeting idiom cannot drift.
+
+    A CARRIED HIT (the Furina seat round, 2026-09-26) is the same call inside
+    `HitElement.Carry`, which makes that one `DamageCmd` carry the character's
+    element while the card as a whole carries none (`carried_hits`). A row
+    that limits the element to its first hits (`element_hits`, Bubble Aria's
+    "the FIRST hit carries Hydro") splits into the carried hits and then the
+    plain rest, both at the same printed number -- the sim's per-hit twin is
+    `effects._op_damage`.
+    """
+    profile = ctx.get("profile")
+    if profile is None or not any(
+            hit is eff for hit in profile.carried_hits(card)):
+        _emit_damage_call(card, eff, lines, ctx, amount_expr)
+        return
+    element_cs = ELEMENT_CS[profile.native_element]
+    carried, rest = eff, None
+    limit = eff.get("element_hits")
+    if limit:
+        times = eff.get("times", 1)
+        if (not isinstance(times, int) or eff is times_var_effect(card)
+                or not isinstance(limit, int) or not 0 < limit < times):
+            raise SystemExit(
+                f"gen_klee_cards: {card['id']}: `element_hits: {limit}` needs "
+                "a printed hit count above it (`times: N`, no times delta) -- "
+                "it names how many of the hits carry the element.")
+        carried = {k: v for k, v in eff.items() if k != "element_hits"}
+        carried["times"] = limit
+        rest = {k: v for k, v in eff.items()
+                if k not in ("element_hits", "applies_element")}
+        rest["times"] = times - limit
+    if eff["target"] == "enemy":
+        # Outside the scope, so a later statement reading the target is
+        # visibly after the guard.
+        _target_guard(lines, ctx)
+    inner: list[str] = []
+    _emit_damage_call(card, carried, inner, ctx, amount_expr)
+    lines.append(
+        f"using (HitElement.Carry(this, {element_cs}))\n        {{\n            "
+        + "\n            ".join(s.replace("\n", "\n    ") for s in inner)
+        + "\n        }")
+    if rest is not None:
+        _emit_damage_call(card, rest, lines, ctx, amount_expr)
+
+
+def _emit_damage_call(card: dict, eff: dict, lines: list[str], ctx: dict,
+                      amount_expr: str) -> None:
+    """`_emit_damage`'s one `DamageCmd` statement."""
     times = eff.get("times", 1)
     target = eff["target"]
 
@@ -8850,7 +8986,7 @@ def stage_raise_amount(card: dict, eff: dict) -> str | None:
 
 
 def stage_amount_upgrade(card: dict, op: str) -> int:
-    """`stage_whisper: +N` / `stage_intermission: -N` (2026-09-26)."""
+    """`stage_intermission: -N` (2026-09-26)."""
     return int(upgrade_plan(card)[0].get(op, 0))
 
 
@@ -9622,7 +9758,7 @@ def build_body(
 ) -> list[str]:
     """OnPlay statements. Every call here has a verified base-game call site."""
     lines = []
-    ctx = {"thrown": False}
+    ctx = {"thrown": False, "profile": profile}
     spotlight_capable = is_companion(card) or profile is FURINA_PROFILE
     salon_deploy_present = any(
         effect.get("op") == "apply_power"
@@ -13476,7 +13612,6 @@ def build_upgrade(card: dict) -> list[str]:
                # THE GUEST CAST (2026-09-25), a Guest Star's arrival Fanfare.
                "stage_guest": "stage_guest",
                # THE SUPPORTING POOL (2026-09-26).
-               "stage_whisper": "stage_whisper",
                "stage_intermission": "stage_intermission",
                # R252, Careful Now's ceiling.
                "block_largest_bomb": "cap",
@@ -13491,7 +13626,6 @@ def build_upgrade(card: dict) -> list[str]:
                "mend": 'DynamicVars["Mend"]',
                "stage_raise": 'DynamicVars["RaiseAmount"]',
                "stage_guest": 'DynamicVars["GuestFanfare"]',
-               "stage_whisper": 'DynamicVars["Whisper"]',
                "stage_intermission": 'DynamicVars["Every"]',
                "block_largest_bomb": 'DynamicVars["BombCap"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
@@ -14014,8 +14148,14 @@ def emit(
     # DERIVED HERE, NEVER REMEMBERED ON THE CARD, which is the `ArmKeywordTips`
     # bargain one attach over: the sheet knows which op puts the element on the
     # board and the C# tooltip cannot.
-    applies_without_hit = not elemental
-    preview_element_cs = element_cs if elemental else None
+    #
+    # A CARRIED HIT (the Furina seat round, 2026-09-26) is the first shape on
+    # one of the card's hits: its element rides that hit, so there IS a hit
+    # for the reaction to multiply (`carried_hits`).
+    carries_hits = bool(profile.carried_hits(card))
+    applies_without_hit = not elemental and not carries_hits
+    preview_element_cs = (element_cs if elemental or carries_hits
+                          else None)
     if preview_element_cs is None:
         # Furina Stage draft 3 (2026-09-25): EVERYWHERE, since an aura may
         # now sit in a mode body ("Spend 2: deal 8 and apply Hydro"), and the

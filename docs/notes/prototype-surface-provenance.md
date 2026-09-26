@@ -3205,6 +3205,31 @@ the face names its seat itself; it is no "Spend N" mode (lane 1). The words
 on the face are unchanged. Star Billing's face names Guest Star, so it now
 carries that tip (`gen_klee_cards.stage_guest_tip_calls`; lanes 1 and 3).
 
+**Stage Whisper, second rework (2026-09-26 seat round).** A second seat named
+it NEVER AGAIN: "the back performer is nearly always at 1-2 Fanfare after
+fading and Spends, so it moves nothing". The designer's new face: cost 1
+(upgrade cost 0), "Your other performers give all but 1 of their Fanfare to
+your front performer. Draw 1 card." It gathers the whole stage into the
+shield. Each performer behind the front gives `Fanfare - 1`, so it never
+empties anyone and no one Bows, which keeps the loop with Thunderous Applause
+and A Five-Century Act closed; with one performer it only draws. The op keeps
+its name and loses its `amount`, and the `stage_whisper` upgrade key is
+retired.
+
+**The Hydro rides the hit (2026-09-26 seat round, act 2 lane 2).** Quick
+Cue's Spend mode hit a Pyro body, Vaporize was listed and the 8 landed at face
+value: the row dealt a plain hit and then applied Hydro, so the reaction fired
+on the application. Tidal Flourish's and Quick Cue's Spend modes, Bubble Aria
+and Grand Deluge now put `applies_element: true` on the hit (Klee's
+mechanism) and drop the `apply_aura`. Grand Deluge's one hit is its whole
+damage, so it takes the card-level `IElementalCard`. Quick Cue and Tidal
+Flourish also hit in their plain modes, which stay plain, so the mod carries
+the element on the one `DamageCmd` (`HitElement.Carry`, read first by
+`CatalystCadence.PrintedElement`); the sim has always answered per effect.
+Bubble Aria's `element_hits: 1` carries it on the FIRST hit only, so a Pyro
+body is Vaporized by hit one and hit two lands plain, the end state the old
+"then apply Hydro" gave. The faces are unchanged.
+
 ## Pool pass two: six Spark sinks on Regent's ladder (`EB-732`, R270, 2026-09-08)
 
 R270 ruled the round-25 pick at option 1: Spark is a currency, its income
