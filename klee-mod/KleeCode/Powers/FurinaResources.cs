@@ -1293,7 +1293,7 @@ public sealed class FurinaResourceHooks : AbstractModel
         // and the part of the hit that reached HER after it.
         await FurinaStage.Flush(choiceContext, target);
         FurinaStage.NoteHitOnFurina(target, result, dealer);
-        Vfx.FurinaStageStrip.Refresh(target);
+        Vfx.FurinaStageCues.Refresh(target);
 #endif
         await FurinaResources.SyncMeters(
             choiceContext, target, cardSource);
