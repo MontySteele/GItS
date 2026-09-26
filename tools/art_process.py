@@ -859,32 +859,48 @@ def _flood(mask, seeds):
     return seen
 
 
-def cut(img, w, h, spec):
-    """Matte an opaque Archive capture, trim to the figure, then fit w*h.
+def matte(img, spec, dropped=None):
+    """The matte half of `cut()`, on its own: shrink to CUT_WORK_MAX, key the
+    backdrop (`_backdrop_alpha`, with the `cut` spec's knobs), feather, and
+    return the WORK-size RGBA with that alpha. No trim, no fit.
 
-    The three steps are deliberately the three existing ones: the matte above,
-    `cover_autocrop`'s content trim (via `_alpha_box`, so faint FX at the
-    figure's edge are kept rather than clipped), and then `cover()` or
-    `contain()` -- the same fitters every other mode uses, with the row's own
-    focus. Nothing about framing is re-decided here.
+    Split out so a tool that frames its own output
+    (tools/cut_guest_bodies.py, the Furina stage's guest bodies) keys an
+    Archive-style capture through exactly this code rather than a copy of it.
+    `dropped` collects the figure pass's removed components, as in `cut()`.
     """
-    tolerance, fit, focus, pocket_frac, chroma, figure, split, rekey = \
+    tolerance, _fit, _focus, pocket_frac, chroma, figure, split, rekey = \
         _cut_spec(spec)
     work = img
     scale = CUT_WORK_MAX / max(img.width, img.height)
     if scale < 1:
         work = img.resize((max(1, round(img.width * scale)),
                            max(1, round(img.height * scale))), Image.LANCZOS)
-    dropped = []
-    matte = _backdrop_alpha(work, tolerance, pocket_frac, chroma, figure,
+    alpha = _backdrop_alpha(work, tolerance, pocket_frac, chroma, figure,
                             dropped, split, rekey)
+    if alpha is not None:
+        if CUT_FEATHER:
+            alpha = alpha.filter(ImageFilter.GaussianBlur(CUT_FEATHER))
+        work = work.copy()
+        work.putalpha(alpha)
+    return work
+
+
+def cut(img, w, h, spec):
+    """Matte an opaque Archive capture, trim to the figure, then fit w*h.
+
+    The three steps are deliberately the three existing ones: the matte above
+    (`matte()`), `cover_autocrop`'s content trim (via `_alpha_box`, so faint
+    FX at the figure's edge are kept rather than clipped), and then `cover()`
+    or `contain()` -- the same fitters every other mode uses, with the row's
+    own focus. Nothing about framing is re-decided here.
+    """
+    tolerance, fit, focus, _pocket, _chroma, figure, _split, _rekey = \
+        _cut_spec(spec)
+    dropped = []
+    work = matte(img, spec, dropped)
     for d in dropped:
         flags.append(f"figure={figure} dropped a component: {d}")
-    if matte is not None:
-        if CUT_FEATHER:
-            matte = matte.filter(ImageFilter.GaussianBlur(CUT_FEATHER))
-        work = work.copy()
-        work.putalpha(matte)
 
     box = _alpha_box(work, INCLUDE_THRESH)
     if box is None:

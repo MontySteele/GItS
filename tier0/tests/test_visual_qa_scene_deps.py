@@ -142,11 +142,13 @@ def test_combat_scenes_carry_the_four_router_states():
         for states, _ in scene.state_machines().values():
             trees += 1
             assert set(scene_deps.CREATURE_STATES) <= states, path
-    assert trees == 129, (
+    assert trees == 137, (
         "klee's and furina's combat scenes drive a state machine, and so do "
         "the Bake-Kurage pet's (kokomi/model/bake_kurage.tscn) and the Furina "
         "stage's three performers (furina/model/{usher,chevalmarin,"
-        "crabaletta}.tscn, `EB-725`) -- six -- plus the 123 dressed Teyvat "
+        "crabaletta}.tscn, `EB-725`) -- six -- plus the stage's eight guest "
+        "bodies (furina/model/guest_*.tscn, tools/cut_guest_bodies.py), "
+        "plus the 123 dressed Teyvat "
         "creature scenes, which since the motion pass each carry the SAME "
         "state machine over one of five shared motion libraries "
         "(tools/gen_teyvat_creature_scenes.py). One router, one four-state "

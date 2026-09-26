@@ -132,8 +132,11 @@ def test_the_sample_contract_is_well_formed():
     # contracts exactly as a `.tscn` does. The last twenty-four are motion
     # pass TWO: eighteen cut layers over six bespoke boss bodies (two or three
     # each) and the six per-body libraries that move them
-    # (`teyvat/motion/bespoke/<body>.tres`).
-    assert len(parsed.resources) == 406
+    # (`teyvat/motion/bespoke/<body>.tres`). The last sixteen are the Furina
+    # stage's eight GUEST bodies (tools/cut_guest_bodies.py): a committed
+    # scene each and the Tier F sprite it draws, the same shape as the trio's
+    # six above.
+    assert len(parsed.resources) == 422
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -242,6 +245,7 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # the count's reason above the first assertion), +5 for
     # the motion pass's shared AnimationLibraries, +24 for pass two (eighteen
     # cut layers over six bespoke boss bodies, and their six per-body
-    # libraries).
-    assert report.checked["contract_resources"] == 406
+    # libraries), +16 for the stage's eight guest bodies (a scene and a
+    # sprite each).
+    assert report.checked["contract_resources"] == 422
     assert report.checked["package_files"] == 3

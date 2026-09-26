@@ -102,6 +102,11 @@ public class FurinaGuestCastTests
     [Fact]
     public void Every_guest_has_a_body_a_badge_and_a_short_name()
     {
+        // Each guest's scene is a LITERAL pack path (the deploy's S12 check
+        // reads literals). Read off the IL: calling the method would reach
+        // Godot's ResourceLoader, which has no engine under test.
+        var scenes = Il.Strings(typeof(StagePerformerMonster)
+            .GetMethod("ModVisualsPathFor", HeadlessGame.All)!);
         foreach (var name in FurinaStage.Guests)
         {
             var who = P(name);
@@ -110,11 +115,7 @@ public class FurinaGuestCastTests
                 .Invoke(null, new object[] { who })!;
             Assert.Equal(name, model.Name.Replace("Monster", "")
                                    .ToLowerInvariant());
-            // No scene yet: the Osty fallback, and no pack literal the
-            // deploy's S12 check would refuse.
-            Assert.Null(typeof(StagePerformerMonster)
-                .GetMethod("ModVisualsPathFor", HeadlessGame.All)!
-                .Invoke(null, new object[] { who }));
+            Assert.Contains($"furina/model/guest_{name}.tscn", scenes);
             Assert.Equal(FurinaStageLedger.DisplayName(who),
                          Vfx.FurinaStageStrip.NameOf(who));
         }
