@@ -57,9 +57,15 @@ public static partial class McpMod
             var manual = GitsMember(type, prefs, "RequireManualConfirmation");
             var max = GitsMember(type, prefs, "MaxSelect");
             if (max is int picks) state["picks_needed"] = picks;
-            // Only the screen whose click handler completes on its own: the
+            // Only the screens whose click handler completes on its own: the
             // other grids keep a preview-and-confirm whatever the prefs say.
-            if (screen.GetType().Name == "NSimpleCardSelectScreen"
+            // 2026-09-26 (control seat, Defect): the combat pile picker
+            // (Hologram, from the discard pile) runs the same
+            // `CheckIfSelectionComplete` (0.111.0 decompile), and the page
+            // told the seat to `confirm` after a `choose` that had closed it.
+            var name = screen.GetType().Name;
+            if ((name == "NSimpleCardSelectScreen"
+                 || name == "NCombatPileCardSelectScreen")
                 && manual is bool needsConfirm)
             {
                 state["closes_on_last_pick"] = !needsConfirm;

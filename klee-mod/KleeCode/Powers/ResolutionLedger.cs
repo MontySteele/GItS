@@ -98,6 +98,13 @@ public static class ResolutionLedger
     public readonly record struct Hit(string Target, int Amount, int Blocked,
                                       string CombatId, bool Killed = false);
 
+    /// <summary>A power the card put on an enemy, and by how much
+    /// (2026-09-26, the Silent control seat: "Poison applied is never shown
+    /// in 'what it did'"). `Amount` is the change the game reports to
+    /// `AfterPowerAmountChanged`, signed, so a strip reads as one.</summary>
+    public readonly record struct PowerApplied(string Target, string Power,
+                                               int Amount, string CombatId);
+
     /// <summary>One resolved card.
     ///
     /// `AutoPlayed` is `CardPlay.IsAutoPlay`. `Carried` is
@@ -108,6 +115,10 @@ public static class ResolutionLedger
     public sealed record Resolved(string CardId, string Card, bool AutoPlayed)
     {
         public List<Hit> Hits { get; } = new();
+
+        /// <summary>The powers this card put on enemies, in order
+        /// (<see cref="NotePower(string, string, int, string)"/>).</summary>
+        public List<PowerApplied> Applied { get; } = new();
 
         /// <summary>Who a random summon inside this card rolled, in order:
         /// the member id and its printed name (<see cref="NoteSummon"/>).
@@ -302,6 +313,35 @@ public static class ResolutionLedger
         _open.Summoned.Add((member, name ?? string.Empty));
     }
 
+    /// <summary>
+    /// "This power changed on this enemy, inside the card that is resolving."
+    /// ENEMIES ONLY, and the caller checks it: what a card puts on the player
+    /// is on the player's own status block. Dropped where no play is open,
+    /// <see cref="NoteHit"/>'s rule and its reason: an enemy buffing itself
+    /// on its own turn is not a card resolving.
+    /// </summary>
+    public static void NotePower(Creature? target, string power, int amount)
+    {
+        if (target == null) return;
+        NotePower(Named(target), power, amount,
+                  Safe(() => target.CombatId.ToString()));
+    }
+
+    /// <summary>The same note, taking the facts rather than the game object,
+    /// <see cref="OpenPlay(string, string, bool)"/>'s bargain and its
+    /// reason.</summary>
+    public static void NotePower(string target, string power, int amount,
+                                 string combatId)
+    {
+        if (_open == null || amount == 0 || string.IsNullOrEmpty(power)) return;
+        if (_open.Applied.Count >= MaxHits)
+        {
+            _open.Overflowed = true;
+            return;
+        }
+        _open.Applied.Add(new PowerApplied(target, power, amount, combatId));
+    }
+
     /// <summary>"That card has finished." Closes the row.</summary>
     public static void ClosePlay() => _open = null;
 
@@ -352,6 +392,14 @@ public static class ResolutionLedger
                     ["blocked"] = hit.Blocked,
                     ["combat_id"] = hit.CombatId,
                     ["killed"] = hit.Killed,
+                }),
+            ["applied"] = row.Applied.ConvertAll(a =>
+                new Dictionary<string, object?>
+                {
+                    ["target"] = a.Target,
+                    ["power"] = a.Power,
+                    ["amount"] = a.Amount,
+                    ["combat_id"] = a.CombatId,
                 }),
             ["summoned"] = row.Summoned.ConvertAll(s =>
                 new Dictionary<string, object?>

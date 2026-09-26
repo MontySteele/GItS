@@ -398,6 +398,10 @@ SETTLE_DELAY_S = 0.5
 # observation would buy a blind seat nothing but a timeout.
 BOARD_SETTLE_TRIES = 6
 
+# 2026-09-26 (control seats). How many times an event room drawn with no
+# options is re-asked before it is drawn as it stands (`settle_event`).
+EVENT_SETTLE_TRIES = 6
+
 # EB-1. A REGISTER, NOT A HEURISTIC, and a deliberate SECOND COPY of
 # `soak.HAZARD_EVENTS`. Importing soak here would pull `policy_v1` and through
 # it every tier0 sheet loader into the design-blind module, which is the one

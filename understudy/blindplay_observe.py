@@ -13,7 +13,7 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         _event_option, _event_options,
-                                        _map_ahead, _map_boss,
+                                        _map_ahead, _map_boss, _map_paths,
                                         _map_options, _omitted_from_upgrade,
                                         _omitted_from_removal,
                                         is_removal_screen,
@@ -264,7 +264,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["nodes"] = _map_options(state)
         # `EB-298`: the floors ahead and the boss, both already on the feed.
         obs["ahead"] = _map_ahead(state)
+        # 2026-09-26: and the links between them, where the feed has them.
+        obs["paths"] = _map_paths(state)
         obs["boss"] = _map_boss(state)
+        # 2026-09-26 (control seat, Necrobinder): "The map page never shows
+        # HP." A route is chosen on it.
+        if _player(state).get("hp") is not None:
+            obs["hp"] = _int(_player(state).get("hp"))
+            obs["max_hp"] = _int(_player(state).get("max_hp"))
         # `EB-447`: the two facts a run is planned on, on the one screen every
         # room is entered from. The gold is on the map's own feed
         # (`BuildPlayerState` sends it outside combat too) and was printed on
@@ -430,6 +437,18 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
                 # face still adds its keyword.
                 face["upgraded_keywords"] = list(
                     qa_packet.upgrade_keywords(raw.get("id")))
+                # 2026-09-26 (control seats, Silent and Ironclad): where no
+                # sheet answers, the GAME's own upgraded face off the bridge
+                # (`GitsAddUpgradePreview`), which every base card has.
+                game_face = _text(raw.get("upgraded_description"))
+                if not built and game_face:
+                    face["upgraded_face"] = game_face
+                    face["upgraded_note"] = ""
+                    up_cost = _text(raw.get("upgraded_cost"))
+                    if (not face["upgraded_cost"] and up_cost
+                            and up_cost != _text(raw.get("cost"))):
+                        face["upgraded_cost"] = qa_packet.cost_label(
+                            dict(face, cost=up_cost))
         picked = [_card_face(c) for c in _preview_cards(state, st)]
         # How many results the transform screen has NOT chosen yet, and
         # whether its preview came through in a shape this page can read at
@@ -618,6 +637,15 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["potion_offered"] = any(
             _fold(r.get("type")) == "potion"
             for r in _reward_items(state) if isinstance(r, dict))
+        # 2026-09-26 (control seat, Ironclad): under Sozu the page printed
+        # "Took: Power Potion" and nothing arrived. The relic that bars
+        # potions, by its own printed sentence, beside the offer.
+        if obs["potion_offered"]:
+            obs["potion_barred"] = next(
+                (r["name"] for r in relic_faces(state)
+                 if "obtain potions" in r["text"].lower()
+                 and ("no longer" in r["text"].lower()
+                      or "cannot" in r["text"].lower())), "")
         # `EB-702`: the CARD rows, named, so the page can say where their skip
         # lives. A reward screen's card row is an offer and not the offer's own
         # page; the sentence under the list is the same one `_skip`'s refusal

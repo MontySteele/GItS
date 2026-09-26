@@ -10968,8 +10968,9 @@ def test_tainted_prints_what_it_does_not_the_cards_reminder():
     line's, from the wire."""
     page = blindplay.observe(keyword_hand_state(["Gain 2 Tainted when played."]))
     assert "- **Tainted** — " in page
-    assert "additional damage from Attacks" in page
-    assert "per hit of a multi-hit intent" in page
+    # 2026-09-26: per HIT, and through the enemies' turn (`TaintedPower`).
+    assert "each Attack hit on you deals N more damage" in page
+    assert "lasts through the enemies' next turn" in page
 
 
 def test_electro_charged_names_the_poison_stack_and_its_tick():

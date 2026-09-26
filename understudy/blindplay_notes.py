@@ -81,12 +81,39 @@ POWER_NOTE = ("*A power's number is what the game's data feed reports for it. "
 # THE CONSEQUENCE IS HALF THE POINT. "Before the enemies act" is only a fact
 # about ordering until it is said what the ordering buys, which is that a body
 # killed at the end of your turn never takes the intent printed above it.
+#
+# 2026-09-26 (control seat, Ironclad): THE EXAMPLES ARE THE BOARD'S. The note
+# named "a performer's act, a Dusk Plan" on an Ironclad board, two words from
+# kits the seat was not playing. A kit's example is named only where its block
+# is on the board (`blindplay_render._turn_order_note`).
 TURN_ORDER_NOTE = (
     "*The end of your turn is a step of its own, and it comes BEFORE the "
-    "enemies act: everything that fires at the end of your turn -- a power's "
-    "end-of-turn trigger, a performer's act, a Dusk Plan -- resolves first, "
+    "enemies act: everything that fires at the end of your turn -- "
+    "{examples} -- resolves first, "
     "and only then do the bodies above take their intents. So an enemy killed "
     "by one of those never takes the intent this page printed for it.*")
+TURN_ORDER_POWER = "a power's end-of-turn trigger"
+TURN_ORDER_PERFORMER = "a performer's act"
+TURN_ORDER_DUSK = "a Dusk Plan"
+TURN_ORDER_ORB = "an orb's passive"
+
+#: 2026-09-26 (control seat, Defect): "The Thieving Hopper's stolen card is
+#: never named." On the Swipe row, the card it holds.
+STOLEN_CARD_CLAUSE = " It holds your **{card}**."
+#: 2026-09-26 (control seat, Silent, Kaiser Crab): "The page never says which
+#: way I face." On Surrounded, the bodies whose attacks now land from behind.
+BEHIND_CLAUSE = " Behind you now: {names}."
+NOTHING_BEHIND_CLAUSE = " No enemy is behind you now."
+
+#: 2026-09-26 (control seat, Ironclad): "Sozu: the tool said 'Took: Power
+#: Potion' and nothing arrived." Said beside the offer, before the claim.
+POTION_BARRED_NOTE = ("*You hold **{relic}**, which stops you obtaining "
+                      "potions: claiming a potion here gives you nothing.*")
+
+#: 2026-09-26 (control seat, Defect): "rightmost" was never tied to channel
+#: order and the seat read Dualcast wrong twice. Orb 1 is the oldest.
+ORB_ORDER_NOTE = ("  - Orb 1, the oldest, is your rightmost orb: it evokes "
+                  "next, and channelling into full slots evokes it first.")
 
 METER_NOTE = ("the game's data feed carries this meter's amount only: no "
               "maximum, and no rule for how it is spent")
@@ -517,8 +544,8 @@ ONE_USE_DISCOUNT_NOTE = (
 # different: a price goes back UP on the rest of the hand and a rider simply is
 # not on them.
 ONE_USE_RIDER_NOTE = (
-    "*{power} pays for ONE card: its own words are \"the next {kind} you "
-    "play\". Every {kind} above is showing it folded in because the game "
+    "*{power} pays for ONE card: its own words are \"{words}\". Every "
+    "{kind} above is showing it folded in because the game "
     "previews each row as if it were the next one played -- only the first "
     "one you actually play gets it, and the rest do what their printed "
     "numbers say without it.*")
@@ -781,6 +808,10 @@ ONE_PRESS_CHOOSER_KIND = "choose"
 #: sends `closes_on_last_pick` and `picks_needed`
 #: (`vendor/STS2_MCP/gits/GitsSelectPrefs.cs`).
 SIMPLE_SELECT_KIND = "simple_select"
+#: 2026-09-26 (control seat, Defect: Hologram+). The combat pile picker closes
+#: on its last pick the same way; the wire names it by its class name.
+SELF_CLOSING_KINDS = frozenset({SIMPLE_SELECT_KIND,
+                                "ncombatpilecardselectscreen"})
 CHOOSER_CLOSES_NOTE = (
     "*Each `choose` picks one card. This chooser closes by itself once you "
     "have picked {n}: that last pick is taken at once, with no `confirm` "
@@ -817,7 +848,7 @@ def chooser_note(select_kind: str | None,
         return CHOOSER_ONE_CHOICE_NOTE
     if closes_on_last_pick is True:
         return _closes_note(picks_needed)
-    if kind == SIMPLE_SELECT_KIND and closes_on_last_pick is None:
+    if kind in SELF_CLOSING_KINDS and closes_on_last_pick is None:
         return CHOOSER_MAYBE_CLOSES_NOTE
     return CHOOSER_CONFIRM_NOTE
 
@@ -1301,6 +1332,12 @@ BUFF_INTENT_CLAUSE = ("this part strengthens the enemy's own side rather than "
 # (`EB-333`), and a map option is one floor up -- which is not a guess: it is
 # the same reading `_map_ahead` numbers its whole lookahead from. Absent from
 # a feed that sends no floor, rather than a `0` this page cannot stand behind.
+#: 2026-09-26 (control seats, Defect and Necrobinder): the links onward from
+#: every floor, so a forced corridor shows before the seat is in it.
+MAP_PATHS_HEAD = ("Every room you can still reach, floor by floor. Rooms are "
+                  "lettered left to right on their floor, and \"to\" names "
+                  "the rooms each one leads to on the next. On the first "
+                  "floor, A is path 1, B is path 2, and so on.")
 MAP_FLOOR_LINE = ("You are on floor {here}{act}; the rooms above are floor "
                   "{next}. This is the run's own floor number -- the one the "
                   "run-over page counts in, not a grid coordinate.")
@@ -2093,10 +2130,13 @@ GAME_KEYWORDS: dict[str, str] = {
     # ("Gain 2 Tainted when played") and never what Tainted DOES; two seats
     # spent a card to read their own status line for it. The rule is that
     # status line's, verbatim from the wire (Kokomi r4d act 2, Klee r8 run 2).
-    "Tainted": ("A debuff on YOU: take N additional damage from Attacks this "
-                "turn, N being the stack, and per hit of a multi-hit intent. "
-                "A card that says Gain 2 Tainted puts 2 on you when played; "
-                "it wears off at the end of your turn."),
+    # 2026-09-26 (control seats, Ironclad, Silent, Necrobinder): "wears off
+    # at the end of your turn" was false. `TaintedPower` removes itself at
+    # the end of the ENEMY turn, so it raises the attacks that follow yours.
+    "Tainted": ("A debuff on YOU: each Attack hit on you deals N more "
+                "damage, N being the stack. It lasts through the enemies' "
+                "next turn and wears off when that turn ends. A card that "
+                "says Gain 2 Tainted puts 2 on you when played."),
 }
 
 _GAME_KEYWORD_RE = {
@@ -3301,6 +3341,10 @@ RESOLUTION_HIT_ROW = "  {n}. **{target}** -- {amount}"
 RESOLUTION_HIT_BLOCKED = " (and {blocked} onto Block)"
 RESOLUTION_HIT_ALL_BLOCKED = "  {n}. **{target}** -- all {blocked} onto Block"
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
+#: 2026-09-26 (the Silent control seat): "Poison applied is never shown in
+#: 'what it did'." A power the card put on an enemy, or took off one.
+RESOLUTION_APPLIED = "  Put **{power} {n}** on **{target}**."
+RESOLUTION_REMOVED = "  Took **{power} {n}** off **{target}**."
 #: 2026-09-25 (opus-furina-l2b, (c) 4). The same line on a board with a
 #: stage, where "nothing countable" was false under every Raise: what a card
 #: did to a performer's bar is filed on the stage log, and this says where.
