@@ -71,6 +71,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoFsSalonDebut>(),
             ModelDb.Card<ProtoFsSceneChange>(),
             ModelDb.Card<ProtoFsShareTheSpotlight>(),
+            ModelDb.Card<ProtoFsSoldOut>(),
             ModelDb.Card<ProtoFsStandingOvation>(),
             ModelDb.Card<ProtoFsStepForward>(),
             ModelDb.Card<ProtoFsSurintendanteChevalmarin>(),

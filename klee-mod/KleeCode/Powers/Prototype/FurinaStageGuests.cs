@@ -131,9 +131,12 @@ public static partial class FurinaStage
     {
         var ledger = FurinaStageLedger.For(owner);
         if (ledger.BowFromBack() is not { } leaver) return;
+        // The seat it left is the back one of a full stage: with it gone,
+        // the count standing IS that seat's index (2 on three seats, 3 under
+        // Sold Out), read rather than assumed.
         await Bow(choiceContext, owner,
                   new StageExit(leaver.Who, StageDeparture.Spent,
-                                leaver.Fanfare, FurinaStageLaw.Seats - 1,
+                                leaver.Fanfare, ledger.Seats.Count,
                                 leaver.LostSinceAct),
                   mayReturn: false);
         ledger.ArriveAtFront(who, leaver.Fanfare + arrival);

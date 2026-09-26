@@ -36,6 +36,13 @@ public static class FurinaStageLaw
     /// <summary>Front, middle, back. Mirrors <c>furina_stage.SEATS</c>.</summary>
     public const int Seats = 3;
 
+    /// <summary><i>Sold Out</i> (the supporting pool, 2026-09-26): "Your
+    /// stage has a fourth seat." Front, two middles, back, for the rest of the
+    /// combat; a second copy adds nothing. What
+    /// <see cref="FurinaStageLedger.Capacity"/> reads while the power is on
+    /// her. Mirrors <c>furina_stage.SOLD_OUT_SEATS</c>.</summary>
+    public const int SoldOutSeats = 4;
+
     /// <summary>What the starting relic Salon Solitaire puts Usher on stage
     /// with, at combat start (sec.3 rule 2). Mirrors
     /// <c>furina_stage.OPENING_FANFARE</c>.</summary>

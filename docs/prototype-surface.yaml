@@ -2155,7 +2155,7 @@
    authored_by: [claude],
    replaces: fortissimo_guard,
    register: salon, cost: 3, type: power, rarity: uncommon,
-   description: "If all three seats are filled at the end of your turn, your performers act twice.",
+   description: "If every seat is filled at the end of your turn, your performers act twice.",
    effects: [{op: apply_power, power: fs_full_house, amount: 1, target: self}]}
 
 - {id: proto_fs_thunderous_applause, name: "Thunderous Applause", character: furina,
@@ -2268,6 +2268,18 @@
    # damage to a random enemy, one with an aura if any.
    description: "Lynette joins the stage with 8 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: lynette, amount: 8}]}
+
+# FURINA, THE STAGE -- SOLD OUT (2026-09-26), family 7 of
+# review/active/furina-supporting-pool-2026-09-26.md: the fourth seat.
+# Provenance: prototype-surface-provenance.md.
+
+- {id: proto_fs_sold_out, name: "Sold Out", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   replaces: unheard_confession,
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "Your stage has a fourth seat.",
+   effects: [{op: apply_power, power: fs_sold_out, amount: 1, target: self}]}
 
 # --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,
 # outside every pool count. Why each row reads as it does:

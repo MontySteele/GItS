@@ -241,9 +241,12 @@ public class PoolCellCoverageTests
             //
             // THE GUEST CAST (2026-09-25) filled Rare/Skill: three Rare Guest
             // Stars (Neuvillette, Clorinde, Navia).
+            //
+            // THE SUPPORTING POOL'S SOLD OUT (2026-09-26) filled Rare/Power:
+            // a third Rare Power beside Arkhe Alignment and A Five-Century Act.
             "furina-stage" => new[]
             {
-                "Rare/Attack", "Rare/Power",
+                "Rare/Attack",
             },
             _ => throw new InvalidOperationException(arm),
         }).OrderBy(n => n, StringComparer.Ordinal).ToList();

@@ -984,9 +984,10 @@ public static partial class FurinaStage
     {
         if (!LiveFor(owner)) return;
         var ledger = FurinaStageLedger.For(owner!);
-        // R276 batch two, FULL HOUSE: with all three seats filled each
-        // performer acts once more per copy (its Amount), every repeat
-        // resolving in full before the next performer's.
+        // R276 batch two, FULL HOUSE: with every seat filled (three, or four
+        // under Sold Out: `IsFull` reads the capacity) each performer acts
+        // once more per copy (its Amount), every repeat resolving in full
+        // before the next performer's.
         var times = 1 + (ledger.IsFull ? FullHouseActs(owner!) : 0);
         foreach (var seat in Of(owner).ToList())
         {
@@ -1057,6 +1058,19 @@ public static partial class FurinaStage
     /// <summary>Full House's extra acts: the sum of its stacks.</summary>
     private static int FullHouseActs(Creature owner) =>
         (int)owner.Powers.OfType<FullHousePower>().Sum(p => p.Amount);
+
+    /// <summary>
+    /// <i>Sold Out</i> (the supporting pool, 2026-09-26): how many seats her
+    /// stage has. <see cref="FurinaStageLaw.SoldOutSeats"/> with the power on
+    /// her, however many copies (a second is a dead Power), and
+    /// <see cref="FurinaStageLaw.Seats"/> otherwise. The ledger reads it at
+    /// <see cref="FurinaStageLedger.For"/>. Sim twin:
+    /// <c>furina_stage.capacity</c>.
+    /// </summary>
+    public static int CapacityOf(Creature? owner) =>
+        owner != null && owner.Powers.OfType<SoldOutPower>().Any()
+            ? FurinaStageLaw.SoldOutSeats
+            : FurinaStageLaw.Seats;
 
     /// <summary>
     /// Rule 9, the curtain call: performed ONCE by a performer that reached 0

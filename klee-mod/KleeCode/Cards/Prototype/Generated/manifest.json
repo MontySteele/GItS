@@ -41,6 +41,7 @@
     "proto_fs_salon_debut",
     "proto_fs_scene_change",
     "proto_fs_share_the_spotlight",
+    "proto_fs_sold_out",
     "proto_fs_standing_ovation",
     "proto_fs_step_forward",
     "proto_fs_surintendante_chevalmarin",
@@ -297,6 +298,7 @@
     "proto_fs_salon_debut": "furina",
     "proto_fs_scene_change": "furina",
     "proto_fs_share_the_spotlight": "furina",
+    "proto_fs_sold_out": "furina",
     "proto_fs_standing_ovation": "furina",
     "proto_fs_step_forward": "furina",
     "proto_fs_surintendante_chevalmarin": "furina",
@@ -668,6 +670,9 @@
       }
     },
     "proto_fs_share_the_spotlight": {
+      "cost": -1
+    },
+    "proto_fs_sold_out": {
       "cost": -1
     },
     "proto_fs_standing_ovation": {

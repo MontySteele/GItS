@@ -6268,7 +6268,7 @@ def _op_stage_summon(state: CombatState, fx: dict, card: Card) -> None:
     if not furina_stage.active(p):
         return
     named = fx.get("member", "random")
-    if len(furina_stage.stage(p)) >= furina_stage.SEATS:
+    if len(furina_stage.stage(p)) >= furina_stage.capacity(p):
         furina_stage.recast_front(state,
                                   None if named == "random" else named)
         return

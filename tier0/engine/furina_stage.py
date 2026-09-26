@@ -54,6 +54,7 @@ FURINA_STAGE = False
 # disclosed here, applied, never queued.
 # ----------------------------------------------------------------------
 SEATS = 3                    # rule 1: front, middle, back.
+SOLD_OUT_SEATS = 4           # Sold Out (2026-09-26): front, two middles, back.
 OPENING_MEMBER = "usher"     # sec.10 default 1 (E): FIXED, for legibility.
 OPENING_FANFARE = 3          # rule 2, from the relic.
 SUMMON_FANFARE = 1           # rule 3: a newcomer arrives at 1.
@@ -131,6 +132,9 @@ THUNDEROUS_APPLAUSE = "fs_thunderous_applause"
 RAPT_AUDIENCE = "fs_rapt_audience"
 FIVE_CENTURY_ACT = "fs_five_century_act"
 ARKHE_ALIGNMENT = "fs_arkhe_alignment"
+#: The supporting pool's Sold Out (2026-09-26, family 7): "Your stage has a
+#: fourth seat." Its C# twin is `SoldOutPower`; `capacity` reads it.
+SOLD_OUT = "fs_sold_out"
 #: Arkhe Alignment's Pneuma half: what the lead regains. C# twin:
 #: `ArkheAlignmentPower.PneumaLeadRegain`.
 PNEUMA_LEAD_REGAIN = 2
@@ -240,6 +244,9 @@ POOL_SUBS: dict[str, str] = {
     "standing_room_only": "proto_fs_guest_star_sigewinne",
     "limelight": "proto_fs_guest_star_charlotte",
     "take_it_from_the_top": "proto_fs_guest_star_lynette",
+    # --- THE SUPPORTING POOL (2026-09-26): Sold Out, a Rare Power, for a
+    # same-rarity shipped Power the EB-736 filter drops. ---
+    "unheard_confession": "proto_fs_sold_out",          # 2 Power for 2 Power
 }
 
 
@@ -292,6 +299,18 @@ def total_fanfare(player) -> int:
 
 def count(player) -> int:
     return len(stage(player))
+
+
+def capacity(player) -> int:
+    """How many seats her stage has: `SEATS`, or `SOLD_OUT_SEATS` with *Sold
+    Out* on her (the supporting pool, 2026-09-26), for the rest of the combat
+    however many copies. Every rule that meets a full stage asks this -- the
+    summon's recast, Wriothesley's front-join, the returns and Full House --
+    so a full stage is four under the power. C# twin:
+    `FurinaStage.CapacityOf` / `FurinaStageLedger.Capacity`."""
+    if active(player) and (getattr(player, "powers", None) or {}).get(SOLD_OUT, 0):
+        return SOLD_OUT_SEATS
+    return SEATS
 
 
 def _seats(player) -> list:
@@ -457,7 +476,7 @@ def summon(state, member: str) -> None:
         # verb one arm over refuses an unknown member and so does this one.
         raise ValueError(f"unknown performer {member!r}")
     seats = _seats(p)
-    if len(seats) < SEATS:
+    if len(seats) < capacity(p):
         book_gain(state, GAIN_SUMMON, SUMMON_FANFARE)
         seats.append([member, SUMMON_FANFARE])
         state.emit("stage_summon", member=member, fanfare=SUMMON_FANFARE,
@@ -495,7 +514,7 @@ def recast_front(state, newcomer: str | None = None,
     if not active(p):
         return
     seats = _seats(p)
-    if len(seats) < SEATS:
+    if len(seats) < capacity(p):
         return
     member = newcomer or state.rng.choice(PERFORMERS)
     pair = seats.pop(0)
@@ -506,7 +525,7 @@ def recast_front(state, newcomer: str | None = None,
                fanfare=kept)
     _bow(state, leaver, exit_)
     _after_bow(state, leaver, may_return=False)
-    if len(seats) >= SEATS:
+    if len(seats) >= capacity(p):
         # No seat to come back to: the bar walks off with the performer.
         # The ledger booked nothing when it left the front, so it books the
         # loss here, where the bar is finally gone.
@@ -532,7 +551,7 @@ def recast_back(state, newcomer: str, arrival: int) -> None:
     if not active(p):
         return
     seats = _seats(p)
-    if len(seats) < SEATS:
+    if len(seats) < capacity(p):
         return
     index = len(seats) - 1
     pair = seats.pop(index)
@@ -543,7 +562,7 @@ def recast_back(state, newcomer: str, arrival: int) -> None:
                fanfare=kept)
     _bow(state, leaver, exit_)
     _after_bow(state, leaver, may_return=False)
-    if len(seats) >= SEATS:
+    if len(seats) >= capacity(p):
         book_loss(state, LOSS_LEFT, kept)
         return
     book_gain(state, GAIN_GUEST if newcomer in GUESTS else GAIN_SUMMON,
@@ -682,7 +701,7 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
         state.draw(copies)
         raise_fanfare(state, raise_total, source=GAIN_BOW)
     if (may_return and p.powers.get(FIVE_CENTURY_ACT, 0)
-            and len(_seats(p)) < SEATS):
+            and len(_seats(p)) < capacity(p)):
         book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
         pair = [member, SUMMON_FANFARE]
         _seats(p).append(pair)
@@ -1012,7 +1031,7 @@ def bow_and_return(state) -> None:
         # another of its name onto the stage the card emptied; one of each
         # GUEST, so a guest already back does not return twice.
         # `FurinaStageLedger.ReturnCompany`'s twin.
-        if len(seats) >= SEATS:
+        if len(seats) >= capacity(p):
             break
         if member in GUESTS and any(m == member for m, _f in seats):
             continue
@@ -1237,10 +1256,10 @@ def end_of_turn_acts(state) -> None:
     pairs = list(stage(p))
     company = [m for m, _f in pairs]
     if company:
-        # R276 batch two, FULL HOUSE: with all three seats filled each
-        # performer acts once more per copy.
+        # R276 batch two, FULL HOUSE: with every seat filled (three, or four
+        # under Sold Out) each performer acts once more per copy.
         times = 1 + (int(p.powers.get(FULL_HOUSE, 0))
-                     if len(company) >= SEATS else 0)
+                     if len(company) >= capacity(p) else 0)
         state.emit("stage_acts", company=list(company), times=times)
         for pair in pairs:
             if is_resting(p, pair):
@@ -1467,7 +1486,7 @@ def guest_star(state, member: str, amount: int, front: bool = False) -> None:
                    fanfare=pair[1])
         _bow(state, member, exit_)
         _after_bow(state, member, may_return=False)
-        if len(seats) < SEATS:
+        if len(seats) < capacity(p):
             book_gain(state, GAIN_GUEST, int(amount))
             pair[1] += int(amount)
             seats.insert(min(index, len(seats)), pair)
@@ -1476,7 +1495,7 @@ def guest_star(state, member: str, amount: int, front: bool = False) -> None:
         else:
             book_loss(state, LOSS_LEFT, pair[1])
         return
-    if len(seats) >= SEATS:
+    if len(seats) >= capacity(p):
         if front:
             recast_back(state, member, int(amount))
         else:
