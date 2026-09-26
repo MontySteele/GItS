@@ -511,7 +511,7 @@ public static partial class FurinaStage
         Creature owner) =>
         Enemies(owner)
             .Select(e => new StageForecastEnemy(
-                e.Monster?.Title.ToString() ?? e.Name ?? "",
+                e.Monster?.Title.GetFormattedText() ?? e.Name ?? "",
                 AuraCmd.Find(e) != null))
             .ToList();
 
