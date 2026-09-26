@@ -305,7 +305,9 @@ def report(states, label, out=sys.stdout, per_fight=False):
                                  for _st, row in _rows(states, "stage_census"))
     turns = sum(census.values())
     print(f"3. Turns by cast size ({turns} turns sampled):", file=out)
-    for n in range(furina_stage.SEATS + 1):
+    # Up to four under Sold Out (2026-09-26): the rows run to the largest
+    # cast sampled, and never fewer than the three seats.
+    for n in range(max([furina_stage.SEATS, *census]) + 1):
         share = f"{100 * census[n] / turns:.0f}%" if turns else "--"
         print(f"     {n} performer(s): {census[n]:5d}  ({share})", file=out)
 

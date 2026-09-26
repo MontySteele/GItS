@@ -314,7 +314,8 @@ public readonly record struct StageBeat(
 
 
 /// <summary>
-/// THE STAGE ITSELF: three seats, front first, and every rule in brief sec.3
+/// THE STAGE ITSELF: three seats (four under Sold Out, <see cref="Capacity"/>),
+/// front first, and every rule in brief sec.3
 /// that is arithmetic rather than an engine command.
 ///
 /// WHY THE RULES LIVE HERE AND NOT ON THE PET. The performers ARE pets and
@@ -365,7 +366,7 @@ public sealed class FurinaStageLedger
         }
         if (!_byFurina.TryGetValue(furina, out var ledger))
         {
-            ledger = new FurinaStageLedger();
+            ledger = new FurinaStageLedger { _furina = furina };
             _byFurina[furina] = ledger;
         }
         return ledger;
@@ -481,7 +482,30 @@ public sealed class FurinaStageLedger
 
     public bool IsEmpty => _seats.Count == 0;
 
-    public bool IsFull => _seats.Count >= FurinaStageLaw.Seats;
+    /// <summary>
+    /// HOW MANY SEATS THE STAGE HAS: <see cref="FurinaStageLaw.Seats"/>, or
+    /// <see cref="FurinaStageLaw.SoldOutSeats"/> while <i>Sold Out</i> is on
+    /// her (the supporting pool, 2026-09-26). Everything that asks whether the
+    /// stage is full asks this, so rule 3's recast, Wriothesley's front-join,
+    /// Full House and the returns all meet a full stage at four with it.
+    ///
+    /// READ LIVE OFF HER POWERS (<see cref="FurinaStage.CapacityOf"/>), not
+    /// stored when the power lands: whatever put Sold Out on her -- the card,
+    /// a scenario grant, a pin -- the next question asked of this stage sees
+    /// it, with no second writer to keep in step. The forecast's clone has no
+    /// Furina and carries the number it was copied with.
+    /// </summary>
+    public int Capacity => _fixedCapacity ?? FurinaStage.CapacityOf(_furina);
+
+    /// <summary>The Furina this stage is hers; null on a forecast clone.
+    /// </summary>
+    private Creature? _furina;
+
+    /// <summary>A forecast clone's capacity, copied from the real stage.
+    /// </summary>
+    private int? _fixedCapacity;
+
+    public bool IsFull => _seats.Count >= Capacity;
 
     /// <summary>Every performer on stage, front to back. What the acts walk
     /// (rule 10, "from any seat") and what the strip draws.</summary>
@@ -858,6 +882,7 @@ public sealed class FurinaStageLedger
     {
         var copy = new FurinaStageLedger();
         foreach (var seat in _seats) copy._seats.Add(seat.CloneForForecast());
+        copy._fixedCapacity = Capacity;
         copy.ActDamageMultiplier = ActDamageMultiplier;
         copy.ActBlockMultiplier = ActBlockMultiplier;
         return copy;

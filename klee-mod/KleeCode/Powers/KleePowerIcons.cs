@@ -276,6 +276,9 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/unheard_confession.png"),
         ArkheAlignmentPower =>
             KleePck.Path("furina/powers/star_of_the_show.png"),
+        // The supporting pool's Sold Out (2026-09-26), on the same terms: a
+        // shipped stage sigil, and not Full House's, so the two read apart.
+        SoldOutPower => KleePck.Path("furina/powers/stage_lights.png"),
         // 2026-09-25: the Stage's four badges -- each performer's own, and
         // The Stage on Furina -- borrow the shipped Salon sigils on the same
         // terms: the member's for a member, Center Stage's for the board.

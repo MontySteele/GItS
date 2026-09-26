@@ -430,6 +430,14 @@ public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
             "Up to " + FurinaStageLaw.Seats + " performers. At the end of "
           + "your turn, those behind the front lose half their Fanfare "
           + "above " + FurinaStageLaw.FadeThreshold + "."),
+        // SOLD OUT (the supporting pool, 2026-09-26): in combat the count is
+        // her stage's own, so the badge says 4 once the fourth seat is open.
+        // The static line above is the canonical face a copy with no owner
+        // shows, as on the performers' badges.
+        ("smartDescription",
+            "Up to {Seats} performers. At the end of your turn, those behind "
+          + "the front lose half their Fanfare above "
+          + FurinaStageLaw.FadeThreshold + "."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -438,4 +446,37 @@ public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Single;
 
     public override bool ShouldPlayVfx => false;
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[] { new SeatsVar() };
+
+    /// <summary>Her stage's seat count now: <see cref="FurinaStageLaw.Seats"/>
+    /// wherever there is no live stage to ask.</summary>
+    internal int LiveSeats()
+    {
+        // A canonical copy has no owner, and `Owner` asserts mutability.
+        if (!IsMutable) return FurinaStageLaw.Seats;
+        var furina = Owner;
+        return FurinaStage.LiveFor(furina)
+            ? FurinaStageLedger.For(furina!).Capacity
+            : FurinaStageLaw.Seats;
+    }
+
+    /// <summary><c>{Seats}</c>, read at format time -- the performers'
+    /// <c>ActVar</c> shape, so a Sold Out played mid-turn is on the badge the
+    /// next time it is drawn.</summary>
+    private sealed class SeatsVar : DynamicVar
+    {
+        public SeatsVar() : base("Seats", FurinaStageLaw.Seats)
+        {
+        }
+
+        private int Live =>
+            (_owner as StageSummaryPower)?.LiveSeats() ?? (int)BaseValue;
+
+        protected override decimal GetBaseValueForIConvertible() => Live;
+
+        public override string ToString() =>
+            Live.ToString(CultureInfo.InvariantCulture);
+    }
 }
