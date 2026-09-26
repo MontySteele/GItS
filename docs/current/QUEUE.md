@@ -19,7 +19,7 @@ their defaults (R276, the last R number); nothing from them is open here.
   Vermillion Pact and Aftershock to Uncommon.
 - **Furina supporting-pool round, pick 1**
   (`review/records/furina-pool-seat-round-2026-09-26.md`): Take the Stage, a
-  starter. (a, default) keep it; (b) on a full stage it summons nobody and
+  starter (NEVER AGAIN for five of eleven seats). (a, default) keep it; (b) on a full stage it summons nobody and
   draws 1 instead.
 
 ## Eyes-on looks (materials ready; no build waits on them)

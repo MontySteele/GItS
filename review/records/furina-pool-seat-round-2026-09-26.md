@@ -27,14 +27,16 @@ Four more full runs from Neow, on the build with Hydro riding the hit, Lyney and
 | Lane 3 | A tanking front with attacks, then bank and Bravura; guests Chevreuse, Sigewinne, Wriothesley | Cleared act 1 cleanly; lost the act-2 boss to its Sandpit clock (98/321 left) |
 | Lane 4 | Keep three performers acting (Arkhe Alignment, Double Casting, Ensemble Piece, Let the People Rejoice, Full House) | Beat both earlier bosses; died to Test Subject's second form, a multi-hit growing from 10×3 to 10×6 |
 | Lane 2 | Fill the stage, then two Full Houses ("act three times"), Gala Premiere, Dual Nature | 19 fights won, both bosses beaten; stalled in act 3 on a bridge defect (the Kifuda enchant screen, BACKLOG) |
-| Lane 3 (second) | (running at the time of writing) | |
+| Lane 3 (second) | Fill the stage and feed Navia at the back; Neuvillette with Shinobu; Arkhe's Ousia and Bis! on a lone Navia | 27 of 28 fights won, including all 5 elites, Soul Fysh and Knowledge Demon; died in Test Subject's third phase at 6 HP, with Wounds clogging the draw |
 
 - **What the third wave adds:**
   - The reworked Stage Whisper was a MOST WANTED turn ("Whisper and Pneuma piled 16 Fanfare on the front Usher").
   - Two Full Houses stack into a third act, and won an act-2 boss.
   - Full House was NEVER AGAIN for a seat that never held a full stage.
   - Clorinde was NEVER AGAIN: her drain empties the 1-Fanfare performers a summon deck makes.
-  - Take the Stage was NEVER AGAIN for a fourth seat.
+  - Take the Stage was NEVER AGAIN for a fourth and a fifth seat.
+  - Navia's Bow dealt 0 whenever a hit or a Spend emptied her. Her Bow now reads the Fanfare she had before (a designer ruling, the last fix PR).
+  - Enemies that tax Skills (Infested Prism, Test Subject's first phase) hit Furina hard, because most of her cards are Skills.
 - **Defence against escalating multi-hits** is the gap every late death shares: the kit has almost no plain Block that scales. It is watched as the intended weakness, like Klee's.
 - **Caveat:** the seats shared one scratchpad, and one Klee seat's commands crossed lanes. See the Klee record. Every seat now keeps its own folder.
 
@@ -81,6 +83,6 @@ Four more full runs from Neow, on the build with Hydro riding the hit, Lyney and
 
 ## Pick for [USER]
 
-1. **Take the Stage** (starter; "Summon a random performer"). Three seats named it NEVER AGAIN: it Bows your front performer on a full stage, and it breaks the Solo path.
+1. **Take the Stage** (starter; "Summon a random performer"). Five of eleven seats named it NEVER AGAIN: it Bows your front performer on a full stage, and it breaks the Solo path.
    - **(a, default)** Keep it. Starter cards stay bad, and removal and transforms are the answer.
    - **(b)** On a full stage it summons nobody and draws 1 card instead. That is a starter change, which only [USER] can make.
