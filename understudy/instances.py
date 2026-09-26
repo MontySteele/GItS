@@ -215,6 +215,8 @@ LANES: dict[str, tuple[int, Path | None]] = {
     "lane0": (DEFAULT_PORT, None),
     "lane1": (DEFAULT_PORT + 1, LANE_ROOT / "lane1"),
     "lane2": (DEFAULT_PORT + 2, LANE_ROOT / "lane2"),
+    "lane3": (DEFAULT_PORT + 3, LANE_ROOT / "lane3"),
+    "lane4": (DEFAULT_PORT + 4, LANE_ROOT / "lane4"),
 }
 
 
@@ -263,7 +265,7 @@ def label_for(value: object) -> str:
     if label not in LANES:
         raise ValueError(
             f"{value!r} is not a lane; known lanes: "
-            f"{', '.join(sorted(LANES))} (or the bare number, 0 / 1)")
+            f"{', '.join(sorted(LANES))} (or the bare number)")
     return label
 
 
