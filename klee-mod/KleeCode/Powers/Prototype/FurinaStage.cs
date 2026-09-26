@@ -640,7 +640,8 @@ public static partial class FurinaStage
     /// is false for a hit on another player (Guest of Honor): her Bow Block
     /// is hers, and cannot catch their hit.</remarks>
     public static int AbsorbHit(Creature target, int incoming,
-                                Creature? dealer, bool bowCatches = true)
+                                Creature? dealer, bool bowCatches = true,
+                                string source = "")
     {
         var ledger = FurinaStageLedger.For(target);
         var twoOrMore = ledger.Seats.Count >= 2;
@@ -649,7 +650,8 @@ public static partial class FurinaStage
         // combat id, the pair `NoteBeat` files for the body an act lands on.
         var result = ledger.Absorb(
             incoming, dealer?.Monster?.Title.ToString() ?? "",
-            dealer?.CombatId.ToString() ?? "", bowCatches);
+            dealer?.CombatId.ToString() ?? "", bowCatches,
+            dealer == null ? source : "");
         // What the hit took off the lead, shown on the lead as the base game
         // shows HP loss (the fade's number, below, is the same pop). The body
         // is still standing: a lead this hit emptied leaves at the flush.

@@ -905,7 +905,10 @@ public static class ArmKeywordTips
             "This turn, your performers' acts give double [gold]Block[/gold], "
           + "and your front performer gains "
           + Powers.ArkheAlignmentPower.PneumaLeadRegain
-          + " [gold]Fanfare[/gold].");
+          // 2026-09-26 (wave-3 Furina lane 4): the gain is a regain, not a
+          // Raise, so on an empty stage nobody is summoned (brief rule 5),
+          // which the Fanfare tip's empty-stage clause led a seat to expect.
+          + " [gold]Fanfare[/gold]. It summons nobody.");
 
     /// <summary>
     /// 2026-09-25. WHAT A SUMMON DOES, on every card that summons. ONE

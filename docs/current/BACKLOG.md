@@ -12,6 +12,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Kits and display (the mod)
 
+- Seat page: a companion's end-of-turn hit (Kaeya, Oz) names its body only when it reacts; a plain hit is on no wire, because `ResolutionLedger` files card plays and a power's damage is not one (wave-3 Klee lane 2b, 2026-09-26).
+- Furina Stage: a hit from a debuff on her (Knowledge Demon's Disintegration) reaches the stage log as "damage no enemy dealt"; `ModifyHpLostBeforeOsty` hands no power source, so only a card in hand (Burn, Wither) is named (wave-3 Furina lane 4, 2026-09-26).
 - Furina Stage: Soliloquy's bonus is missing from the preview of a Spend that empties the stage (Bravura "(Deals 7 damage)" hit for 14); the preview would have to know the Spend takes the last seat and that no Bow reader (Thunderous Applause's summon, A Five-Century Act's return) refills it (Solo seat, 2026-09-26).
 - Furina Stage: the end-of-turn forecast ("you take N") folds nothing the acts will cause on the enemy side -- a Frozen or Superconduct from an act, a stun from stripped Block (Tunneler's Burrowed) -- so it overstates; it needs the acts' reactions predicted per body (lane 2, 2026-09-26).
 - Once More! spends its Sparks and returns nothing, with no message, when the last Set off card has been shuffled back into the draw pile (the spend is by design, `KleeOverhaulLedger.ReturnLastSetOff`); the miss prints nowhere a seat can read (Klee full run lane 1, 2026-09-26).

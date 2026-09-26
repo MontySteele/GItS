@@ -728,11 +728,28 @@ public sealed class FurinaStageLedger
         return ExitOf(payer, StageDeparture.Spent, index, held: 0);
     }
 
-    /// <summary>An act that could not pay, filed so the page can say so.
+    /// <summary>Why an act could not pay, on its <see cref="UnpaidEvent"/>
+    /// beat's <c>Reason</c>: its own bar is short of the price.</summary>
+    public const string UnpaidOwn = "own";
+
+    /// <summary>... the back performer's bar is short (Chevreuse).</summary>
+    public const string UnpaidBack = "back";
+
+    /// <summary>... nobody else stands to take Fanfare from (Clorinde).
     /// </summary>
-    public void NoteUnpaid(StageSeat actor) =>
+    public const string UnpaidAlone = "alone";
+
+    /// <summary>An act that could not pay, filed so the page can say so --
+    /// and WHY (2026-09-26, wave-3 Furina lane 3: "Chevreuse could not pay"
+    /// twice with no reason, because her Spend 2 pays from the back performer
+    /// and the seat read it as her own). <paramref name="why"/> is one of
+    /// <see cref="UnpaidOwn"/>, <see cref="UnpaidBack"/> and
+    /// <see cref="UnpaidAlone"/>; the beat's <c>Moved</c> carries the price
+    /// the act could not meet (0 where the reason is not a shortfall).
+    /// </summary>
+    public void NoteUnpaid(StageSeat actor, string why, int price = 0) =>
         Note(new StageBeat(UnpaidEvent, actor.Who, IndexOf(actor),
-                           actor.Fanfare, 0, ""));
+                           actor.Fanfare, price, why));
 
     /// <summary>
     /// A GUEST STAR ARRIVES at the back-most empty seat holding
@@ -846,7 +863,7 @@ public sealed class FurinaStageLedger
                 {
                     if (seat!.Fanfare < price)
                     {
-                        NoteUnpaid(seat);
+                        NoteUnpaid(seat, UnpaidOwn, price);
                         return false;
                     }
                     Add(exits, Pay(seat, price, who));
@@ -866,7 +883,8 @@ public sealed class FurinaStageLedger
                 if (bow) return true;
                 if (seat!.Fanfare < FurinaStageLaw.ActNeuvillettePrice)
                 {
-                    NoteUnpaid(seat);
+                    NoteUnpaid(seat, UnpaidOwn,
+                               FurinaStageLaw.ActNeuvillettePrice);
                     return false;
                 }
                 Add(exits, Pay(seat, FurinaStageLaw.ActNeuvillettePrice, who));
@@ -878,7 +896,7 @@ public sealed class FurinaStageLedger
                     .ToList();
                 if (others.Count == 0)
                 {
-                    NoteUnpaid(seat!);
+                    NoteUnpaid(seat!, UnpaidAlone);
                     return false;
                 }
                 foreach (var other in others)
@@ -892,7 +910,8 @@ public sealed class FurinaStageLedger
                 if (Back is not { } bank
                     || bank.Fanfare < FurinaStageLaw.ActChevreusePrice)
                 {
-                    NoteUnpaid(seat!);
+                    NoteUnpaid(seat!, UnpaidBack,
+                               FurinaStageLaw.ActChevreusePrice);
                     return false;
                 }
                 Add(exits, Pay(bank, FurinaStageLaw.ActChevreusePrice, who));
@@ -1148,7 +1167,8 @@ public sealed class FurinaStageLedger
     /// hit.
     /// </remarks>
     public StageAbsorb Absorb(int incoming, string dealer = "",
-                              string dealerId = "", bool bowCatches = true)
+                              string dealerId = "", bool bowCatches = true,
+                              string source = "")
     {
         if (incoming <= 0 || Lead is not { } lead)
         {
@@ -1169,8 +1189,11 @@ public sealed class FurinaStageLedger
         // pair the act beats use for the body they hit.
         if (absorbed > 0)
         {
+            // 2026-09-26 (wave-3 Furina lane 4): and where no enemy dealt
+            // it, the card that did (a Burn or a Wither in her hand), as
+            // the beat's Source.
             Note(new StageBeat("hit", lead.Who, 0, lead.Fanfare, absorbed, "",
-                               dealer, dealerId));
+                               dealer, dealerId, Source: source));
         }
         if (lead.Fanfare > 0) return new StageAbsorb(absorbed, reached, null);
 
@@ -1644,6 +1667,10 @@ public sealed class FurinaStageLedger
         SpentThisPlay = _spendStack.Count == 0 ? 0 : enclosing;
     }
 
+    /// <summary>The departure reason <see cref="CollectAll"/> files: the
+    /// card emptied them, not a Spend.</summary>
+    public const string RejoiceReason = "rejoice";
+
     /// <summary>
     /// <i>Let the People Rejoice</i>, first clause: "Spend all Fanfare on
     /// stage." Empties every bar and REMEMBERS who was standing, because the
@@ -1663,7 +1690,10 @@ public sealed class FurinaStageLedger
             Drain(seat, bar);
             _pendingCurtainExits.Add(
                 ExitOf(seat, StageDeparture.Spent, i, held: 0));
-            Note(new StageBeat("leave", seat.Who, -1, 0, bar, "spend"));
+            // 2026-09-26 (wave-3 Furina lane 4): the card empties them, and
+            // its face says no Spend -- the log said "emptied by a Spend".
+            Note(new StageBeat("leave", seat.Who, -1, 0, bar,
+                               RejoiceReason));
         }
         _seats.Clear();
         SpentThisPlay = total;

@@ -4268,9 +4268,12 @@ def test_a_turn_with_no_reaction_says_so_rather_than_going_quiet():
 def test_a_reaction_with_no_source_still_prints():
     """A bomb going off on nobody's turn has neither card nor dealer. The row
     drops the clause rather than inventing a source."""
+    # 2026-09-26 (wave 3): no combat id, because a row that carries one is
+    # now named by the page's own name for that body -- and this recorded
+    # board's combat id 1 is a Nibbit.
     page = blindplay.observe(reacted_state(
         {"reaction": "Overloaded", "source": "", "target": "Corpse Slug",
-         "combat_id": "1"}))
+         "combat_id": ""}))
     assert "- **Overloaded** on **Corpse Slug**." in page
     assert "off ." not in page
 

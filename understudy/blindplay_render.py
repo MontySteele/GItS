@@ -33,6 +33,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         CHOOSER_CONFIRM_NOTE,
                                         CHOOSER_ONE_CHOICE_NOTE,
+                                        CHOOSER_MAYBE_CLOSES_NOTE,
+                                        CLOSES_NOTE_HEAD,
                                         ONE_PRESS_CHOOSER_KIND,
                                         chooser_note,
                                         DEFEND_INTENT_CLAUSE,
@@ -1702,8 +1704,10 @@ STAGE_PAY_SELF_LINE = ("  - **{who}** paid {n} of {their} Fanfare: {before} "
                        "→ {after}.")
 STAGE_PAY_LINE = ("  - **{by}** took {n} of **{who}**'s Fanfare: {before} "
                   "→ {after}.")
-#: ... and an act that could not pay did nothing.
+#: ... and an act that could not pay did nothing. 2026-09-26 (wave-3 Furina
+#: lane 3): and says why, where the wire does (`STAGE_UNPAID_REASONS`).
 STAGE_UNPAID_LINE = "  - **{who}** could not pay."
+STAGE_UNPAID_WHY_LINE = "  - **{who}** could not pay: {why}."
 #: Whose Fanfare, on a payer's own line.
 STAGE_HIS = frozenset({"Usher", "Neuvillette", "Wriothesley", "Lyney"})
 
@@ -1819,6 +1823,42 @@ def _frozen_clause(row: dict[str, Any], obs: dict[str, Any],
     if row.get("carried") and not any(wears(b, "frozen") for b in bodies):
         return REACTION_FROZEN_THAWED_CLAUSE
     return ""
+
+
+#: 2026-09-26 (wave-3 Furina lane 4). THE CHOOSER THAT OPENS OVER THE BOARD.
+#: Arkhe Alignment asks "Ousia or Pneuma" at the start of every turn, after
+#: the draw (`AfterPlayerTurnStart` follows the hand draw, 0.111.0
+#: `CombatManager.SetupPlayerTurn`) -- but the page printed only the two
+#: options, so the seat chose blind every turn and guessed wrong twice. The
+#: bridge now sends the fight under a chooser that opened mid-fight
+#: (`McpMod.StateBuilder.cs`, the overlay branch), and the page prints it here,
+#: short: what a choice about this turn is made against.
+BOARD_BEHIND_HEADING = "## The fight behind this chooser"
+
+
+def _render_board_behind(c: dict[str, Any]) -> list[str]:
+    """The fight under a mid-fight chooser: you, your hand, the stage and each
+    enemy's HP and intent."""
+    you = c["you"]
+    out = ["", BOARD_BEHIND_HEADING, "",
+           f"- HP {you['hp']}/{you['max_hp']} · Block {you['block']} · "
+           f"Energy {you['energy']}/{you['max_energy']}"]
+    hand = [card["title"] for card in c.get("hand") or []]
+    out.append("- Your hand: " + (", ".join(hand) if hand
+                                  else "(your hand is empty)"))
+    if c.get("stage") is not None:
+        out += _render_stage(c["stage"], you)
+    for e in c.get("enemies") or []:
+        line = f"- **{e['name']}**"
+        if e.get("phase_flip"):
+            line += f" — {PHASE_FLIP_LINE}"
+        else:
+            line += f" — HP {e['hp']}/{e['max_hp']}"
+        if e["block"]:
+            line += f", Block {e['block']}"
+        out.append(line)
+        out += _render_intents(e["intents"])
+    return out
 
 
 def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
@@ -2068,6 +2108,10 @@ STAGE_HIT_LEAVES = (", and it leaves the stage: emptied by a hit, so it "
 STAGE_HIT_UNNAMED_LINE = ("  - **{who}** took {n} damage no enemy dealt, such "
                           "as a Burn or Wither in your hand: {before} → "
                           "{after}")
+#: 2026-09-26 (wave-3 Furina lane 4): and where the mod knows the card that
+#: dealt it (the wire's `source`), that card by name.
+STAGE_HIT_SOURCE_LINE = ("  - **{who}** took {n} damage from {src}: {before} "
+                         "→ {after}")
 #: 2026-09-25 (the afternoon seat round): THE PART OF A HIT THAT REACHED HER.
 #: The log listed hits on performers and never on Furina, and both seats
 #: misjudged how much of an attack got through. The mod files what her HP
@@ -2081,8 +2125,12 @@ def _stage_hit_line(row: dict[str, Any], log: list[dict[str, Any]],
                     at: int) -> tuple[str, bool]:
     """The hit beat's line, and whether the NEXT row is the departure it
     caused (and is therefore folded into this one)."""
-    line = (STAGE_HIT_LINE if row["target"] else STAGE_HIT_UNNAMED_LINE).format(
+    template = (STAGE_HIT_LINE if row["target"]
+                else STAGE_HIT_SOURCE_LINE if row.get("source")
+                else STAGE_HIT_UNNAMED_LINE)
+    line = template.format(
         dealer=f"**{row['target']}**", who=row["name"], n=row["moved"],
+        src=row.get("source") or "",
         before=row["fanfare"] + row["moved"], after=row["fanfare"])
     nxt = log[at + 1] if at + 1 < len(log) else None
     left = (row["fanfare"] <= 0 and nxt is not None
@@ -2152,8 +2200,12 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
                 n=row["moved"], who=row["name"], src=source,
                 before=row["fanfare"] - row["moved"], after=row["fanfare"]))
         elif row["event"] == "regain":
-            out.append(STAGE_REGAIN_LINE.format(
-                n=row["moved"], who=row["name"],
+            # 2026-09-26 (wave-3 Furina lane 4): Pneuma's +2 is a regain
+            # too, and read "as the front performer" -- the turn-start
+            # regain's words. The mod names the source now.
+            out.append((STAGE_RAISE_FROM_LINE if source
+                        else STAGE_REGAIN_LINE).format(
+                n=row["moved"], who=row["name"], src=source,
                 before=row["fanfare"] - row["moved"], after=row["fanfare"]))
         elif row["event"] == "spend":
             out.append(STAGE_SPEND_LINE.format(
@@ -2171,7 +2223,11 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
                     by=row["by"], who=row["name"], n=row["moved"],
                     before=before, after=row["fanfare"]))
         elif row["event"] == "unpaid":
-            out.append(STAGE_UNPAID_LINE.format(who=row["name"]))
+            why = (row.get("why") or "").format(
+                n=row["moved"],
+                self="he" if row["name"] in STAGE_HIS else "she")
+            out.append(STAGE_UNPAID_WHY_LINE.format(who=row["name"], why=why)
+                       if why else STAGE_UNPAID_LINE.format(who=row["name"]))
         elif row["event"] == "hit":
             line, left = _stage_hit_line(row, log, at)
             out.append(line)
@@ -2951,15 +3007,25 @@ def render(obs: dict[str, Any]) -> str:
             # `choose` closes the mode chooser and resolves the mode (proofs-9
             # lane 1 sec.9), so the two-command sentence was false on it and
             # the `confirm` it told a seat to say cost a refusal every time.
-            note = chooser_note(obs.get("select_kind"))
+            note = chooser_note(obs.get("select_kind"),
+                                obs.get("closes_on_last_pick"),
+                                obs.get("picks_needed"))
             out += ["", note]
             # And the button's own state, on the screens that HAVE one. The
             # mode chooser has none -- `BuildChooseCardState` hardwires
             # `can_confirm: false` -- so "Confirm is not available" there reads
             # as a button a reader is waiting for rather than one that is not
             # on the screen at all, which is the misread the note just closed.
-            if note is not CHOOSER_ONE_CHOICE_NOTE:
+            # 2026-09-26: and the closes-on-its-last-pick chooser prints the
+            # line only where a confirm is really live (a pick of "up to").
+            if note is not CHOOSER_ONE_CHOICE_NOTE \
+                    and not (note.startswith(CLOSES_NOTE_HEAD)
+                             and not obs["can_confirm"]):
                 out += ["", f"Confirm is {'available' if obs['can_confirm'] else 'not available'}."]
+            # 2026-09-26 (wave-3 Furina lane 4): the fight behind a chooser
+            # that opened mid-fight, where the bridge sends it.
+            if obs.get("board"):
+                out += _render_board_behind(obs["board"])
         # `EB-314`: over an open preview `skip` does not leave the screen --
         # it cancels the pick and puts the grid back (`ExecuteCancelSelection`
         # presses the preview's own Cancel), so the page says which one it is.
@@ -3189,7 +3255,9 @@ def assert_chooser_note(obs: dict[str, Any], text: str) -> None:
     branch that wrote it.
     """
     if "confirm" in (obs.get("commands") or []) \
-            and CHOOSER_CONFIRM_NOTE not in text:
+            and CHOOSER_CONFIRM_NOTE not in text \
+            and CHOOSER_MAYBE_CLOSES_NOTE not in text \
+            and CLOSES_NOTE_HEAD not in text:
         raise BlindPlayError(
             "this page offers `confirm` and does not say that a pick here is "
             "two commands, so a reader would learn it from a refusal: "

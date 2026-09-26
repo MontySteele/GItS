@@ -990,9 +990,14 @@ _BASE_GAME_BASICS: dict[str, tuple[re.Pattern[str], int]] = {
 }
 
 
+#: A page's numbering of a repeated title (`Defend (2)`), which is not part of
+#: the game's name for it.
+_REPEAT_NUMBER_RE = re.compile(r"\s*\(\d+\)$")
+
+
 def _base_game_basic_face(title: Any, printed: str) -> str:
     """The upgraded face of a base-game Strike or Defend, or `""`."""
-    key = str(title or "").strip().lower()
+    key = _REPEAT_NUMBER_RE.sub("", str(title or "").strip()).lower()
     if key not in _BASE_GAME_BASICS:
         return ""
     pattern, delta = _BASE_GAME_BASICS[key]
@@ -1002,6 +1007,78 @@ def _base_game_basic_face(title: Any, printed: str) -> str:
         return ""
     value = int(m.group(1)) + delta
     return face[:m.start(1)] + str(value) + face[m.end(1):]
+
+
+_IN_COMBAT_OPEN = "{InCombat:"
+
+
+def _split_in_combat(template: str) -> tuple[str, list[str]]:
+    """`(the template as printed OUT of combat, the in-combat arms it drops)`.
+
+    2026-09-26 (wave-3 Furina lane 3). Bravura's upgrade preview read "not
+    shown -- the face on this screen is not the sentence this card was
+    written with". Its template ends `{InCombat:\n(Deals
+    {CalculatedDamage:diff()} damage)|}`: a SmartFormat choice whose first arm
+    prints in combat and whose second (empty) arm prints everywhere else, and
+    whose first arm holds a hole of its own -- so `_PIECE_RE` read it as
+    literal text around a hole and matched nothing on a Smith, where the game
+    prints the second arm. Every `{InCombat:...}` card (Bravura, Da Capo,
+    Ensemble Piece, Bring the House Down, ...) failed the same way.
+
+    Brace-matched, because the first arm nests. The out-of-combat arm is kept
+    in place; each in-combat arm is returned so the caller can strike its
+    rendering off a face printed in combat (an upgrade chooser opened by a
+    card mid-fight), where its number is `base + extra * multiplier` and not
+    one this page can move by a delta.
+    """
+    arms: list[str] = []
+    out: list[str] = []
+    at = 0
+    while True:
+        start = template.find(_IN_COMBAT_OPEN, at)
+        if start < 0:
+            out.append(template[at:])
+            return "".join(out), arms
+        depth, i, bar = 1, start + len(_IN_COMBAT_OPEN), -1
+        while i < len(template) and depth:
+            ch = template[i]
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+            elif ch == "|" and depth == 1 and bar < 0:
+                bar = i
+            i += 1
+        if depth:                       # unbalanced: leave it as it was
+            out.append(template[at:])
+            return "".join(out), arms
+        body_end = i - 1
+        first_end = bar if bar >= 0 else body_end
+        arms.append(template[start + len(_IN_COMBAT_OPEN):first_end])
+        out.append(template[at:start])
+        out.append(template[bar + 1:body_end] if bar >= 0 else "")
+        at = i
+
+
+def _strike_in_combat(face: str, arms: list[str]) -> str:
+    """`face` with the rendering of each in-combat arm removed (once)."""
+    for arm in arms:
+        # The C# literal's `\n` reaches this module as two characters; the
+        # game prints a line break, which a feed may carry as any space.
+        lines = re.split(r"\\n|\n", arm)
+        parts = []
+        for line in lines:
+            pattern, at = [], 0
+            for m in _HOLE_RE.finditer(line):
+                pattern.append(re.escape(line[at:m.start()]))
+                pattern.append(r"-?\d+")
+                at = m.end()
+            pattern.append(re.escape(line[at:]))
+            parts.append("".join(pattern))
+        body = r"\s*".join(p for p in parts if p)
+        if body:
+            face = re.sub(r"\s*" + body, "", face, count=1)
+    return face.strip()
 
 
 def upgrade_preview(card_id: Any, printed: str,
@@ -1030,6 +1107,7 @@ def upgrade_preview(card_id: Any, printed: str,
     if reason:
         return "", reason
     deltas = dict(holes)
+    template, in_combat = _split_in_combat(template)
 
     # The template as a PATTERN over the printed face: literal text escaped,
     # every hole a group. A numeric hole reads the number the screen is
@@ -1071,7 +1149,7 @@ def upgrade_preview(card_id: Any, printed: str,
     # Pyro.", "Retain."), so the template is the middle of the printed face
     # rather than the whole of it. A template whose literal text this build
     # has since reworded simply does not match, and the row prints nothing.
-    face = strip_markup(printed).strip()
+    face = _strike_in_combat(strip_markup(printed).strip(), in_combat)
     hit = re.search("".join(pattern), face)
     if hit is None:
         return "", NO_PREVIEW_UNMATCHED
