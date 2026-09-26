@@ -690,6 +690,22 @@ _DECK_PILES = ("hand", "draw_pile", "discard_pile", "exhaust_pile")
 _ELEMENT_WORD_RE = re.compile(r"\b(Pyro|Hydro|Electro|Cryo|Anemo|Geo)\b")
 
 
+#: 2026-09-25 night (the granted-guest seat round): the guests whose act deals
+#: elemental damage, by name, and the element it deals. A Guest Star card's
+#: face says only "<Name> joins the stage with N Fanfare", so its element is
+#: read off its TITLE. Chevreuse, Sigewinne and Charlotte apply none and are
+#: absent on purpose. `blindplay_notes.guest_elements` reads the same map.
+GUEST_STAR_ELEMENTS: dict[str, str] = {
+    "Neuvillette": "Hydro",
+    "Clorinde": "Electro",
+    "Navia": "Geo",
+    "Wriothesley": "Cryo",
+    "Lynette": "Anemo",
+}
+_GUEST_STAR_RE = re.compile(
+    r"\bGuest Star: (" + "|".join(GUEST_STAR_ELEMENTS) + r")\b")
+
+
 def _entry_elements(entry: dict[str, Any]) -> set[str]:
     """The elements one card or power entry can supply, off its own face."""
     found: set[str] = set()
@@ -700,6 +716,9 @@ def _entry_elements(entry: dict[str, Any]) -> set[str]:
         found.add(element)
     for key in ("description", "name", "title"):
         found.update(_ELEMENT_WORD_RE.findall(_text(entry.get(key))))
+        # A Guest Star card in a pile supplies its guest's element.
+        for name in _GUEST_STAR_RE.findall(_text(entry.get(key))):
+            found.add(GUEST_STAR_ELEMENTS[name])
     return found
 
 

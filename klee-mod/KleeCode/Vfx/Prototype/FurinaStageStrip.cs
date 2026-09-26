@@ -148,12 +148,45 @@ public static class FurinaStageStrip
             .Concat(forecast.Arrivals
                 .Select(r => $"{NameOf(r.Who)} back at {r.After}"));
         yield return "End: " + string.Join("  ", rows);
+        // 2026-09-25 night (the granted-guest seat round): what the acts
+        // deal, and in all where every act lands on one body or on ALL.
+        if (forecast.Acts.Count > 0)
+        {
+            yield return "Acts: " + string.Join("  ",
+                forecast.Acts.Select(ActLine));
+            if (forecast.ActTotal >= 0)
+            {
+                yield return $"Acts in all: {forecast.ActTotal} to "
+                             + TargetWord(forecast.ActTotalTarget);
+            }
+        }
         if (forecast.IntentKnown)
         {
-            yield return $"Hits: front {forecast.FrontTakes}, you "
-                         + $"{forecast.ReachesFurina}";
+            // Hit by hit, performer by performer: the next one steps up when
+            // the front empties and Bows.
+            var takes = forecast.Takers
+                .Select(t => $"{NameOf(t.Who)} {t.Takes}"
+                             + (t.Leaves ? " (leaves)" : ""))
+                .Concat(new[] { $"you {forecast.ReachesFurina}" });
+            yield return "Hits: " + string.Join(", ", takes);
         }
     }
+
+    /// <summary>One act of the forecast: "Crabaletta 5 to a random enemy",
+    /// "Neuvillette 8 Hydro to ALL".</summary>
+    private static string ActLine(StageForecastAct act) =>
+        $"{NameOf(act.Who)}{(act.Bow ? " Bow" : "")} {act.Amount}"
+        + (act.Element.Length > 0 ? " " + act.Element : "")
+        + " to " + TargetWord(act.Target);
+
+    /// <summary>A forecast target in the base game's words.</summary>
+    internal static string TargetWord(string target) => target switch
+    {
+        StageForecastAct.All => "ALL",
+        StageForecastAct.Random => "a random enemy",
+        StageForecastAct.RandomAura => "a random enemy with an aura",
+        _ => target,
+    };
 
     /// <summary>Her Block, the FIRST term of the damage order and the engine's
     /// own number.</summary>

@@ -627,8 +627,13 @@ public static partial class FurinaStage
     /// bars reach the bodies, and a lead this hit emptied takes its Bow, at
     /// the flush that follows every hit (<see cref="Flush"/>).
     /// </summary>
+    /// <remarks>2026-09-25 night: a lead this hit empties Bows before the
+    /// rest of the hit reaches her, so the Block of that Bow is spent on it
+    /// here (<see cref="FurinaStageLedger.Absorb"/>). <paramref name="bowCatches"/>
+    /// is false for a hit on another player (Guest of Honor): her Bow Block
+    /// is hers, and cannot catch their hit.</remarks>
     public static int AbsorbHit(Creature target, int incoming,
-                                Creature? dealer)
+                                Creature? dealer, bool bowCatches = true)
     {
         var ledger = FurinaStageLedger.For(target);
         var twoOrMore = ledger.Seats.Count >= 2;
@@ -636,7 +641,7 @@ public static partial class FurinaStage
         // combat id, the pair `NoteBeat` files for the body an act lands on.
         var result = ledger.Absorb(
             incoming, dealer?.Monster?.Title.ToString() ?? "",
-            dealer?.CombatId.ToString() ?? "");
+            dealer?.CombatId.ToString() ?? "", bowCatches);
         if (!twoOrMore || result.Absorbed <= 0
             || dealer is not { IsEnemy: true })
         {
@@ -850,13 +855,22 @@ public static partial class FurinaStage
         var blk = stage.ActBlockMultiplier;
         var each = -1;
         var struck = -1;
+        var shot = HitShot.None;
+        // 2026-09-25 night: a hit's Bow whose Block the rest of that hit
+        // already spent (`StageExit.Caught`) gains only what is left of it.
+        var caught = exit?.Caught ?? 0;
         switch (who)
         {
             case StagePerformer.Usher:
-                await CreatureCmd.GainBlock(
-                    owner, FurinaStageLaw.ActUsherBlock * blk,
-                    ValueProp.Unpowered, null, fast: true);
+            {
+                var block = FurinaStageLaw.ActUsherBlock * blk - caught;
+                if (block > 0)
+                {
+                    await CreatureCmd.GainBlock(
+                        owner, block, ValueProp.Unpowered, null, fast: true);
+                }
                 break;
+            }
             case StagePerformer.Chevalmarin:
                 // Round four: what EACH enemy was dealt, so the page prints
                 // "2 damage to each of 4 enemies" and not the total of four
@@ -887,17 +901,42 @@ public static partial class FurinaStage
                     // what it killed -- the retired reframe's rule one arm
                     // over, and the reason the mod sends a title at all.
                     hit = target;
-                    await ElementalHit.DealUnelemented(
+                    shot = HitShot.Before(target);
+                    shot = shot.Dealt(await ElementalHit.DealUnelemented(
                         choiceContext, target,
                         FurinaStageLaw.ActCrabalettaDamage * dmg, owner,
-                        powered: false);
+                        powered: false));
                 }
                 break;
         }
         // Rule 6 of the Guest Cast: every act resets the performer's loss
         // count (only Wriothesley reads it).
         if (seat != null) seat.LostSinceAct = 0;
-        NoteBeat(owner, beat, who, before, hit, each, struck, seat);
+        NoteBeat(owner, beat, who, before, hit, each, struck, seat, shot,
+                 caught);
+    }
+
+    /// <summary>
+    /// 2026-09-25 night (the granted-guest seat round): ONE BODY'S HIT, as
+    /// the page prints it. "Wriothesley acted: 1 Cryo to Wriggler" was his
+    /// 14 into a body with 1 HP left: the beat filed what the HP lost. This
+    /// carries the hit as dealt (after the target's modifiers, before its
+    /// Block), the body's HP before it, and what its Block took.
+    /// </summary>
+    internal readonly record struct HitShot(int Hit, int HpBefore,
+                                            int BlockBefore)
+    {
+        public static readonly HitShot None = new(-1, -1, -1);
+
+        public static HitShot Before(Creature target) =>
+            new(-1, target.CurrentHp, target.Block);
+
+        public HitShot Dealt(int dealt) => this with { Hit = dealt };
+
+        /// <summary>What of the hit the body's Block took.</summary>
+        public int Blocked =>
+            Hit < 0 ? -1 : System.Math.Min(System.Math.Max(0, BlockBefore),
+                                           Hit);
     }
 
     /// <summary>2026-09-25 evening: the one figure every enemy was dealt, or
@@ -966,15 +1005,17 @@ public static partial class FurinaStage
     /// multiple, once plus Full House's extra acts on a full stage. The seat
     /// page prints it as "after the acts" (the wire's `act_block`).
     /// </summary>
+    /// <remarks>2026-09-25 night (the granted-guest seat round): ONE BLOCK
+    /// NUMBER. This counted 3 per Usher standing, while the forecast's attack
+    /// line ran the sweep, in which a guest's payment can empty an Usher and
+    /// his Bow gives 3 more ("after the acts: Block 3" beside "after the
+    /// acts' Block of 6" on one screen). It is now the forecast's own Block
+    /// after the acts, less the Block she holds.</remarks>
     public static int ForecastActBlock(Creature? owner)
     {
         if (!LiveFor(owner)) return 0;
-        var ledger = FurinaStageLedger.For(owner!);
-        var times = 1 + (ledger.IsFull ? FullHouseActs(owner!) : 0);
-        var ushers = ledger.Seats.Count(
-            s => s.Who == StagePerformer.Usher && !s.Resting);
-        return ushers * FurinaStageLaw.ActUsherBlock
-               * ledger.ActBlockMultiplier * times;
+        var forecast = Forecast(owner!, null);
+        return forecast.BlockAfterActs - (int)owner!.Block;
     }
 
     /// <summary>Full House's extra acts: the sum of its stacks.</summary>
@@ -1072,11 +1113,15 @@ public static partial class FurinaStage
                                  StagePerformer who,
                                  (int Block, int EnemyHp) before,
                                  Creature? hit = null, int each = -1,
-                                 int struck = -1, StageSeat? acting = null)
+                                 int struck = -1, StageSeat? acting = null,
+                                 HitShot? shot = null, int caught = 0)
     {
         var after = Ledger(owner);
+        // A hit's Bow whose Block the rest of that hit already spent: the
+        // Block it GAVE is what she gained now plus what it caught.
         var moved = (after.Block - before.Block)
-                    + (before.EnemyHp - after.EnemyHp);
+                    + (before.EnemyHp - after.EnemyHp) + caught;
+        var one = shot ?? HitShot.None;
         var ledger = FurinaStageLedger.For(owner);
         // The seat that acted, where the caller knows it (two Ushers are two
         // seats since the trio can be cloned); else the first of that name.
@@ -1094,7 +1139,9 @@ public static partial class FurinaStage
             // which is off the next board entirely.
             hit?.Monster?.Title.ToString() ?? "",
             hit?.CombatId.ToString() ?? "",
-            each, Struck: struck));
+            each, Struck: struck,
+            Dealt: one.Hit, TargetHp: one.Hit < 0 ? -1 : one.HpBefore,
+            Blocked: one.Blocked, Caught: caught));
     }
 
     private static int IndexOfSeat(FurinaStageLedger ledger, StageSeat seat)
@@ -1116,9 +1163,12 @@ public static partial class FurinaStage
     /// spend them down to 0"). The engine calls <c>AfterDamageReceived</c>
     /// once per hit, inside <c>CreatureCmd.Damage</c>, after that hit's HP
     /// loss and before <c>AttackCommand</c> deals the next hit. So the bow
-    /// lands BETWEEN the hits of a multi-hit attack, on the enemy's turn: it
-    /// cannot soften the hit that emptied the performer, and the performer
-    /// Usher's Fanfare lands on meets the next one. [USER], 2026-09-25
+    /// lands BETWEEN the hits of a multi-hit attack, on the enemy's turn.
+    /// Since 2026-09-25 night the Block of that Bow has already met the rest
+    /// of the hit that emptied the performer ("a performer emptied by a hit
+    /// Bows before the rest of that hit reaches you";
+    /// <see cref="StageExit.Caught"/>), and what is left of it meets the next
+    /// hit. [USER], 2026-09-25
     /// evening, overruling the start-of-turn wait #676 built: "I think it
     /// would be better to have the performer bow immediately (during the
     /// opponent's turn) instead of at the start of your turn."

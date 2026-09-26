@@ -64,11 +64,12 @@ On the Defect comparison [USER] drew (Lightning, Frost, Glass, Dark, Plasma), ea
 | **Wriothesley** (Cryo) | Support | 8 | Deal [gold]Cryo[/gold] damage to a random enemy equal to twice the Fanfare he lost since his last act. | nothing; he wants the front | none: retaliation |
 | **Sigewinne** (Hydro) | Support | 8 | Give 3 of her Fanfare to the performer behind her, or to your front performer if she is at the back. | herself | Frost, for the shield |
 | **Charlotte** (Cryo) | Support | 4 | Each other performer gains 1 Fanfare. | free | Frost, spread thin |
-| **Lynette** (Anemo) | Support | 8 | Swirl a random enemy: its aura spreads to ALL enemies. | free | none: a reaction enabler |
+| **Lynette** (Anemo) | Support | 8 | Deal 3 [gold]Anemo[/gold] damage to a random enemy, one with an aura if any. | free | none: a reaction enabler |
 
 - **Navia's fade tension.** Her damage grows with her bar, and behind the front the fade caps her near 5. So she wants to be the shield, or to be fed every turn.
 - **Wriothesley and Sigewinne answer the Necrobinder problem as a pair.** GPT: "Wriothesley makes taking a hit productive … Sigewinne moves existing Fanfare into the shield." Wriothesley is Uncommon so ordinary drafts meet him, rather than Rare as in draft 1.
-- **Lynette** is [USER]'s example of a guest who "arrives with extra Fanfare on deck".
+- **Lynette** is [USER]'s example of a guest who "arrives with extra Fanfare on deck". Her act is Anemo damage, so on an aura it Swirls and on none it is plain damage.
+  (2026-09-25 night: after the granted-guest round, both seats never played her; the act now always lands.)
 
 ## The supporting pool: where the depth lives
 

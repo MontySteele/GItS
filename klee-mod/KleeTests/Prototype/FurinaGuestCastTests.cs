@@ -424,7 +424,9 @@ public class FurinaGuestCastTests
     {
         var act = Il.Calls(Il.Method("FurinaStage", "GuestAct"));
         Assert.Contains("ElementalHit.Deal", act);
-        Assert.Contains("ElementalHit.ApplyOnly", act);
+        // 2026-09-25 night: Lynette's act DEALS Anemo damage now (a Swirl
+        // through `Deal`'s own reaction step), so nothing applies only.
+        Assert.DoesNotContain("ElementalHit.ApplyOnly", act);
         Assert.DoesNotContain("ElementalHit.DealUnelemented", act);
     }
 

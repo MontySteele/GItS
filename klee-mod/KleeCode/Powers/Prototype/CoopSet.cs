@@ -406,7 +406,9 @@ public sealed class GuestOfHonorPower : PowerModel, ILocalizationProvider
         // Fanfare either.
         if (ProtoBombPower.Preempted.Covers(target, dealer)) return 0m;
         var incoming = (int)System.Math.Ceiling(amount);
-        return FurinaStage.AbsorbHit(furina, incoming, dealer);
+        // The ally's hit: Furina's own Bow Block cannot catch it.
+        return FurinaStage.AbsorbHit(furina, incoming, dealer,
+                                     bowCatches: false);
     }
 
     public override async Task AfterDamageReceived(
