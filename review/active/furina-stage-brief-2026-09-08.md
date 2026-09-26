@@ -68,8 +68,10 @@ performers with their own bars, and Fanfare is that bar.**
    newcomer takes the back seat and adds its Fanfare: its own arrival
    Fanfare (1, or a Guest Star's N) plus the lead's remaining Fanfare
    (2026-09-25, so a guest cast onto a front at 1 does not arrive unable to
-   pay). The Summon tip: "On a full stage, the front one Bows and leaves,
-   and the newcomer adds its Fanfare." The Bow is a real one (its effect and every Bow reader fire, Thunderous
+   pay). The Summon tip: "On a full stage, the front one Bows and leaves
+   its Fanfare to the newcomer." (2026-09-25 night; it read "and the
+   newcomer adds its Fanfare", which a seat only understood from the log.)
+   The Bow is a real one (its effect and every Bow reader fire, Thunderous
    Applause included), in the order bow, readers, arrival; A Five-Century
    Act does not also return it. This replaced the rotation that retired the
    front WITHOUT a bow, which a first-time co-op player met as a summon that
@@ -107,8 +109,11 @@ performers with their own bars, and Fanfare is that bar.**
    her Block, up to its bar; the rest reaches Furina. It never runs on to
    the middle or back seat. A big single hit rips through the lead and lands on
    her; a flurry can kill the lead and leave her untouched; each is
-   answered differently and the intent shows which is coming.
-7. **A performer at 0 Fanfare takes a Bow and leaves,** whatever emptied it: a Spend, a hit, or a summon on a full stage (2026-09-25; [USER]: "Stage members bow out when they are destroyed or replaced, not just when you deliberately spend them down to 0"). A hit's Bow comes right after the hit that caused it, on the enemy's turn, between that enemy's hits: it never softens the hit that caused it, and Usher's Bow Block meets the next one. (2026-09-25 evening, [USER], overruling the start-of-turn wait the draft-3 seat round had prompted: "I think it would be better to have the performer bow immediately (during the opponent's turn) instead of at the start of your turn.")
+   answered differently and the intent shows which is coming. A performer
+   emptied by a hit Bows before the rest of that hit reaches you
+   (2026-09-25 night, the granted-guest seat round: Usher's Bow Block had
+   landed after the overflow, so it never protected anything).
+7. **A performer at 0 Fanfare takes a Bow and leaves,** whatever emptied it: a Spend, a hit, or a summon on a full stage (2026-09-25; [USER]: "Stage members bow out when they are destroyed or replaced, not just when you deliberately spend them down to 0"). A hit's Bow comes inside the hit that caused it, on the enemy's turn: the performer leaves, Bows, and only then does the rest of that hit reach Furina (her Block first, so Usher's Bow Block catches it; rule 6), and whatever that Block leaves meets the next hit. (2026-09-25 evening, [USER], overruling the start-of-turn wait the draft-3 seat round had prompted: "I think it would be better to have the performer bow immediately (during the opponent's turn) instead of at the start of your turn.")
 8. **Spend N** is a choice on her cards, made when the card is played:
    "Deal 7" or "Spend 3: deal 13 instead" (round two, `EB-746`: both engines
    had fired the rider whenever a lead stood, and four seats asked for the

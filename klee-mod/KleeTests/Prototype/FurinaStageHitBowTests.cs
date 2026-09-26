@@ -94,12 +94,17 @@ public class FurinaStageHitBowTests
 
         var result = stage.Absorb(10);
 
-        // The overflow reaches her in full: the Bow is not in this number.
+        // 2026-09-25 night (the granted-guest seat round): he Bows before the
+        // rest of the hit reaches her, so his 3 Block takes 3 of the 7 past
+        // his bar: 10 - 3 - 3 = 4 reaches her.
         Assert.Equal(3, result.Absorbed);
-        Assert.Equal(7, result.ReachedFurina);
+        Assert.Equal(3, result.Caught);
+        Assert.Equal(4, result.ReachedFurina);
         Assert.True(stage.IsEmpty);
         var owed = stage.TakePendingHitBows();
         var exit = Assert.Single(owed);
+        // The Bow, paid at the flush, gains only what is left: nothing.
+        Assert.Equal(3, exit.Caught);
         Assert.Equal(StagePerformer.Usher, exit.Who);
         Assert.Equal(StageDeparture.Struck, exit.Cause);
         Assert.True(exit.Bows);

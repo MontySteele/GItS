@@ -190,13 +190,16 @@ public class FurinaStageSeatRoundBTests
     }
 
     [Fact]
-    public void The_beat_is_filed_after_the_hit_and_before_its_bow()
+    public void The_beat_is_filed_after_the_bow_that_caught_part_of_the_hit()
     {
+        // 2026-09-25 night (the granted-guest seat round): a performer a hit
+        // empties Bows before the rest of that hit reaches her, so the log
+        // reads the hit, the departure, the Bow, then what reached her.
         var received = Il.CallSequence(Il.Method("FurinaResourceHooks",
                                                  "AfterDamageReceived"))
             .ToList();
         var note = received.IndexOf("FurinaStage.NoteHitOnFurina");
         var flush = received.IndexOf("FurinaStage.Flush");
-        Assert.True(note >= 0 && flush > note, string.Join(", ", received));
+        Assert.True(flush >= 0 && note > flush, string.Join(", ", received));
     }
 }

@@ -2264,6 +2264,8 @@
    authored_by: [claude],
    replaces: take_it_from_the_top,
    register: salon, cost: 1, type: skill, rarity: uncommon,
+   # 2026-09-25 night: her act (tip and badge) now always lands, 3 Anemo
+   # damage to a random enemy, one with an aura if any.
    description: "Lynette joins the stage with 8 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: lynette, amount: 8}]}
 

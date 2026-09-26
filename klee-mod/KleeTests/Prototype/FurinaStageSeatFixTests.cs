@@ -142,7 +142,8 @@ public class FurinaStageSeatFixTests
 
         var result = stage.Absorb(8, "Sludge Spinner", "1");
 
-        Assert.Equal(5, result.ReachedFurina);
+        // 8 - 3 on his bar - 3 his Bow Block caught (2026-09-25 night).
+        Assert.Equal(2, result.ReachedFurina);
         Assert.Equal(new[] { "hit", "leave" },
                      stage.Beats.Select(b => b.Event).ToArray());
         Assert.Equal(0, stage.Beats[0].Fanfare);

@@ -333,19 +333,47 @@ def test_a_hit_bows_after_the_hit_is_dealt(arm):
     assert st.player.block == FS.ACT_USHER_BLOCK
 
 
-def test_a_hit_that_empties_a_lone_usher_lands_in_full_then_he_bows(arm):
-    """The overflow reaches her first, and the Bow comes after it: a 10 into a
-    lone Usher at 3 costs her 7 HP, then his Bow -- his act once more (draft
-    3, 2026-09-25) -- gives her 3 Block, which helps only against later
-    hits."""
+def test_a_hit_that_empties_a_lone_usher_bows_before_the_rest_reaches_her(arm):
+    """2026-09-25 night (the granted-guest seat round): "a performer emptied
+    by a hit Bows before the rest of that hit reaches you". Usher at 3, a
+    single 10, no Block: he takes 3 and leaves, his Bow's 3 Block takes 3 of
+    the rest, and she takes 10 - 3 - 3 = 4. Lane 2 twice (and seven times
+    before) watched his Bow Block land after the overflow had reached her."""
     player = _furina(hp=78, max_hp=78)
     player.stage = [["usher", 3]]
     st = _state(player=player, enemies=[
         _enemy(hp=44, intents=[{"kind": "attack", "amount": 10}])])
     combat._enemy_turn(st, st.enemies[0])
-    assert player.hp == 78 - 7
-    assert player.block == FS.ACT_USHER_BLOCK
+    assert player.hp == 78 - 4
+    assert player.block == 0                  # all of it caught the hit
     assert player.stage == []
+    caught = [e for e in st.log if e["event"] == "stage_bow_caught"]
+    assert [e["amount"] for e in caught] == [FS.ACT_USHER_BLOCK]
+
+
+def test_a_bow_block_the_hit_does_not_use_up_meets_the_next_hit(arm):
+    """The multi-hit case: 2 hits of 5 into Usher at 3, Crabaletta at 4 behind
+    him, no Block. Hit one: Usher takes 3 and leaves, his Bow's Block takes the
+    other 2 and 1 of it is left. Hit two: that 1, then Crabaletta takes 4 and
+    leaves (her Bow is damage), and nothing reaches Furina."""
+    player = _furina(hp=78, max_hp=78)
+    player.stage = [["usher", 3], ["crabaletta", 4]]
+    st = _state(player=player, enemies=[
+        _enemy(hp=44, intents=[{"kind": "attack", "amount": 5, "times": 2}])])
+    combat._enemy_turn(st, st.enemies[0])
+    assert player.hp == 78
+    assert player.block == 0
+    assert player.stage == []
+    assert st.enemies[0].hp == 44 - FS.ACT_CRABALETTA_DAMAGE
+
+
+def test_a_pneuma_turn_bow_catches_its_doubled_block(arm):
+    """The Bow's Block is the act's own number, so a doubled act catches
+    double -- read off `bow_block`, the ledger's `BowBlock` twin."""
+    player = _furina()
+    player.stage_act_block_mult = 2
+    assert FS.bow_block(player, "usher") == 2 * FS.ACT_USHER_BLOCK
+    assert FS.bow_block(player, "crabaletta") == 0
 
 
 def test_a_hit_bow_on_the_enemys_turn_gives_ushers_block_then(arm):

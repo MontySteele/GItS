@@ -47,6 +47,30 @@ public class ReactionLogTests
     }
 
     [Fact]
+    public void A_new_combat_carries_no_reaction_from_the_last_one()
+    {
+        // 2026-09-25 night (the granted-guest seat round): "What reacted" on
+        // fight 3 turn 1 still listed fight 2's Electro-Charged. Fight 2 ended
+        // inside the end-of-turn acts, after the turn-end mark and before any
+        // enemy turn end, so the next combat's opening CARRIED the row.
+        ReactionLog.MarkTurnStart();
+        var seat = Seat.Kokomi();
+        ReactionLog.MarkPlayerTurnEnd();
+        ReactionLog.Note(Reaction.ElectroCharged, seat.Creature, seat.Creature,
+                         null);
+
+        // The opening: drop everything, then open the turn's window.
+        ReactionLog.ResetFight();
+        ReactionLog.MarkTurnStart();
+
+        Assert.Empty(ReactionLog.Snapshot());
+        var open = Il.Calls(Il.Method("KleeElementalHooks",
+                                      "BeforeCombatStart"));
+        Assert.Contains("ReactionLog.ResetFight", open);
+        Assert.Contains("RelicAnswerLog.ResetFight", open);
+    }
+
+    [Fact]
     public void Two_reactions_in_one_beat_are_two_rows_in_order()
     {
         // The r27 beat itself: Thundergrust's Electro onto a Hydro aura, then

@@ -163,6 +163,7 @@ public static partial class FurinaStage
         Creature? hit = null;
         var each = -1;
         var struck = -1;
+        var shot = HitShot.None;
         switch (who)
         {
             case StagePerformer.Neuvillette:
@@ -181,16 +182,17 @@ public static partial class FurinaStage
                 break;
             }
             case StagePerformer.Clorinde:
-                hit = await HitRandom(choiceContext, owner, Element.Electro,
-                                      FurinaStageLaw.ActClorindeDamage * dmg);
+                (hit, shot) = await HitRandom(
+                    choiceContext, owner, Element.Electro,
+                    FurinaStageLaw.ActClorindeDamage * dmg);
                 break;
             case StagePerformer.Navia:
             {
                 var bar = seat?.Fanfare ?? exit?.Held ?? 0;
                 if (bar > 0)
                 {
-                    hit = await HitRandom(choiceContext, owner, Element.Geo,
-                                          bar * dmg);
+                    (hit, shot) = await HitRandom(
+                        choiceContext, owner, Element.Geo, bar * dmg);
                 }
                 break;
             }
@@ -204,7 +206,7 @@ public static partial class FurinaStage
                 var lost = seat?.LostSinceAct ?? exit?.Lost ?? 0;
                 if (lost > 0)
                 {
-                    hit = await HitRandom(
+                    (hit, shot) = await HitRandom(
                         choiceContext, owner, Element.Cryo,
                         FurinaStageLaw.ActWriothesleyRate * lost * dmg);
                 }
@@ -212,18 +214,28 @@ public static partial class FurinaStage
             }
             case StagePerformer.Lynette:
             {
-                var wearing = Enemies(owner)
+                // 2026-09-25 night (the granted-guest seat round; both seats
+                // never played her: "nothing reliably leaves an aura for her
+                // Swirl"): "deal 3 Anemo damage to a random enemy, one with an
+                // aura if any". The act always lands. Anemo damage on an aura
+                // Swirls through `ElementalHit.Deal`'s own reaction step; on
+                // none, Anemo never sticks, so it is plain damage.
+                var targets = Enemies(owner).ToList();
+                var wearing = targets
                     .Where(e => AuraCmd.Find(e) != null).ToList();
-                if (wearing.Count > 0)
+                var pool = wearing.Count > 0 ? wearing : targets;
+                if (pool.Count > 0)
                 {
                     var rng = owner.Player?.RunState.Rng.CombatTargets;
-                    var target = rng == null ? wearing[0]
-                                             : rng.NextItem(wearing);
+                    var target = rng == null ? pool[0] : rng.NextItem(pool);
                     if (target != null)
                     {
                         hit = target;
-                        await ElementalHit.ApplyOnly(
-                            choiceContext, target, Element.Anemo, owner);
+                        shot = HitShot.Before(target);
+                        shot = shot.Dealt(await ElementalHit.Deal(
+                            choiceContext, target, Element.Anemo,
+                            FurinaStageLaw.ActLynetteDamage * dmg, owner,
+                            powered: false));
                     }
                 }
                 break;
@@ -233,19 +245,24 @@ public static partial class FurinaStage
         // Rule 6: every act resets the reading, so a repeat reads 0.
         if (seat != null) seat.LostSinceAct = 0;
         FurinaStagePets.SyncBars(owner);
-        NoteBeat(owner, beat, who, before, hit, each, struck, seat);
+        NoteBeat(owner, beat, who, before, hit, each, struck, seat, shot);
     }
 
     /// <summary>One elemental hit on a random living enemy, unpowered (an act
-    /// carries no Strength, `EB-495` D3). The body it picked, or null.</summary>
-    private static async Task<Creature?> HitRandom(
+    /// carries no Strength, `EB-495` D3). The body it picked, or null, and
+    /// the hit as dealt with the body's HP and Block before it.</summary>
+    private static async Task<(Creature?, HitShot)> HitRandom(
         PlayerChoiceContext choiceContext, Creature owner, Element element,
         int amount)
     {
-        if (amount <= 0 || RandomEnemy(owner) is not { } target) return null;
-        await ElementalHit.Deal(choiceContext, target, element, amount, owner,
-                                powered: false);
-        return target;
+        if (amount <= 0 || RandomEnemy(owner) is not { } target)
+        {
+            return (null, HitShot.None);
+        }
+        var shot = HitShot.Before(target);
+        shot = shot.Dealt(await ElementalHit.Deal(
+            choiceContext, target, element, amount, owner, powered: false));
+        return (target, shot);
     }
 
     /// <summary>The Bows a payment earned, after the act's effect, oldest
@@ -291,9 +308,12 @@ public static partial class FurinaStage
     /// <summary>
     /// The forecast against a given list of hits (per hit, after the
     /// attacker's own modifiers): what the headless pins script.
+    /// <paramref name="enemies"/> is the hittable enemies the acts can land
+    /// on, by name and whether each wears an aura; null reads the combat's.
     /// </summary>
     public static StageForecast Forecast(Creature owner,
-                                         IReadOnlyList<int>? hits)
+                                         IReadOnlyList<int>? hits,
+                                         IReadOnlyList<StageForecastEnemy>? enemies = null)
     {
         var real = FurinaStageLedger.For(owner);
         var clone = real.CloneForForecast();
@@ -302,9 +322,14 @@ public static partial class FurinaStage
         var applause = owner.Powers.OfType<ThunderousApplausePower>()
             .Select(p => (int)p.Amount).ToList();
         var returns = owner.Powers.OfType<FiveCenturyActPower>().Any();
-        var run = new ForecastRun(clone, applause, returns);
+        var foes = enemies ?? ForecastEnemies(owner);
+        var run = new ForecastRun(clone, applause, returns,
+                                  foes.Any(e => e.Aura));
 
-        // The sweep, in the sweep's order (`EndOfTurnActs`).
+        // The sweep, in the sweep's order (`EndOfTurnActs`). What the acts
+        // DEAL is recorded here and only here: a Bow on the enemy's turn is
+        // not the end of this turn.
+        run.Sweep = true;
         var times = 1 + (clone.IsFull ? FullHouseActs(owner) : 0);
         foreach (var seat in seats)
         {
@@ -315,6 +340,7 @@ public static partial class FurinaStage
                 run.Act(seat.Who, seat, null);
             }
         }
+        run.Sweep = false;
         clone.EndRest();
         clone.ResetActMultipliers();
         clone.Fade();
@@ -331,13 +357,17 @@ public static partial class FurinaStage
             .ToList();
 
         // The enemy's turn: her Block after the acts, then each hit in turn
-        // on her Block, the front performer's bar, then her (rule 6). A hit's
-        // Bow is paid right after the hit (rule 7), so a front Usher emptied
-        // by one gives his Block to the next.
+        // on her Block, the front performer's bar, then her (rule 6). HIT BY
+        // HIT (2026-09-25 night, the granted-guest seat round: "the split
+        // ignored the next performer"): a front a hit empties Bows before the
+        // rest of that hit reaches her -- the ledger's own `Absorb` spends
+        // Usher's Bow Block on it -- and the next performer steps up and
+        // takes the later hits. Each performer's share is its own row.
         var block = (int)owner.Block + run.Block;
         var afterActs = block;
         var front = 0;
         var furina = 0;
+        var takers = new List<(StageSeat Seat, int Takes, bool Leaves)>();
         var rapt = owner.Powers.OfType<RaptAudiencePower>()
             .Select(p => (int)p.Amount).ToList();
         foreach (var hit in hits ?? System.Array.Empty<int>())
@@ -345,31 +375,79 @@ public static partial class FurinaStage
             var through = System.Math.Max(0, hit - block);
             block = System.Math.Max(0, block - hit);
             if (through <= 0) continue;
-            if (clone.Lead is not { } lead)
-            {
-                furina += through;
-                continue;
-            }
+            var lead = clone.Lead;
             var twoOrMore = clone.Seats.Count >= 2;
-            var taken = System.Math.Min(through, lead.Fanfare);
-            front += taken;
-            furina += through - taken;
-            var exit = clone.Absorb(taken);
+            var result = clone.Absorb(through);
+            front += result.Absorbed;
+            furina += result.ReachedFurina;
+            if (lead != null && result.Absorbed > 0)
+            {
+                var at = takers.FindIndex(t => ReferenceEquals(t.Seat, lead));
+                if (at < 0)
+                {
+                    takers.Add((lead, result.Absorbed, result.Exit != null));
+                }
+                else
+                {
+                    takers[at] = (lead, takers[at].Takes + result.Absorbed,
+                                  result.Exit != null);
+                }
+            }
             // A Rapt Audience, as `AbsorbHit` pays it.
-            if (twoOrMore && taken > 0)
+            if (twoOrMore && result.Absorbed > 0)
             {
                 foreach (var pct in rapt)
                 {
-                    clone.Raise((int)System.Math.Ceiling(taken * pct / 100m));
+                    clone.Raise((int)System.Math.Ceiling(
+                        result.Absorbed * pct / 100m));
                 }
             }
             run.Block = 0;
-            if (exit.Exit is { } gone) run.Bow(gone);
+            if (result.Exit is { } gone) run.Bow(gone);
             block += run.Block;
         }
-        return new StageForecast(rows, arrivals, afterActs, hits != null,
-                                 front, furina, run.Unknown);
+
+        // What the acts deal in all, where every act lands on the same one
+        // body (a board of one) or on ALL of them.
+        var total = -1;
+        var totalTarget = "";
+        if (run.Acts.Count > 0)
+        {
+            if (foes.Count == 1)
+            {
+                total = run.Acts.Sum(a => a.Amount);
+                totalTarget = foes[0].Name;
+            }
+            else if (run.Acts.All(a => a.Target == StageForecastAct.All))
+            {
+                total = run.Acts.Sum(a => a.Amount);
+                totalTarget = StageForecastAct.All;
+            }
+        }
+        return new StageForecast(
+            rows, arrivals, afterActs, hits != null, front, furina,
+            run.Unknown)
+        {
+            Acts = run.Acts,
+            ActTotal = total,
+            ActTotalTarget = totalTarget,
+            Takers = takers
+                .Select(t => new StageForecastTake(t.Seat.Who, t.Takes,
+                                                   t.Leaves))
+                .ToList(),
+        };
     }
+
+    /// <summary>The combat's hittable enemies, by printed name and whether
+    /// each wears an aura, for the forecast's act lines. Empty where there is
+    /// no combat.</summary>
+    private static IReadOnlyList<StageForecastEnemy> ForecastEnemies(
+        Creature owner) =>
+        Enemies(owner)
+            .Select(e => new StageForecastEnemy(
+                e.Monster?.Title.ToString() ?? e.Name ?? "",
+                AuraCmd.Find(e) != null))
+            .ToList();
 
     /// <summary>
     /// The posted attacks, one entry per hit, each the number the game's own
@@ -406,20 +484,23 @@ public static partial class FurinaStage
     }
 
     /// <summary>The forecast's replay of acts and Bows on the clone: the
-    /// ledger's own Fanfare moves, Usher's Block, and each Bow's readers.
+    /// ledger's own Fanfare moves, Usher's Block, each Bow's readers, and --
+    /// during the sweep -- what each act deals and to whom.
     /// </summary>
     private sealed class ForecastRun
     {
         private readonly FurinaStageLedger _stage;
         private readonly List<int> _applause;
         private readonly bool _returns;
+        private readonly bool _aura;
 
         internal ForecastRun(FurinaStageLedger stage, List<int> applause,
-                             bool returns)
+                             bool returns, bool aura)
         {
             _stage = stage;
             _applause = applause;
             _returns = returns;
+            _aura = aura;
         }
 
         /// <summary>Block the replayed acts gave her.</summary>
@@ -430,17 +511,76 @@ public static partial class FurinaStage
         /// </summary>
         internal bool Unknown;
 
+        /// <summary>True while the end-of-turn sweep is replayed: only then
+        /// is an act's damage a line of the forecast.</summary>
+        internal bool Sweep;
+
+        /// <summary>What the sweep's acts and Bows deal, in order.</summary>
+        internal readonly List<StageForecastAct> Acts = new();
+
         internal void Act(StagePerformer who, StageSeat? seat, StageExit? exit)
         {
             var owed = new List<StageExit>();
+            // An act that cannot pay does nothing, and has no damage line.
             if (!_stage.ActFanfare(who, seat, exit, owed)) return;
             if (who == StagePerformer.Usher)
             {
-                Block += FurinaStageLaw.ActUsherBlock
-                         * _stage.ActBlockMultiplier;
+                Block += System.Math.Max(0,
+                    FurinaStageLaw.ActUsherBlock * _stage.ActBlockMultiplier
+                    - (exit?.Caught ?? 0));
             }
+            if (Sweep && Damage(who, seat, exit) is { } line) Acts.Add(line);
             if (seat != null) seat.LostSinceAct = 0;
             foreach (var gone in owed) Bow(gone);
+        }
+
+        /// <summary>One act's damage as its tip prints it, at this turn's
+        /// Ousia multiple, or null for an act that deals none. Read before
+        /// the act resets Wriothesley's reading, as the act itself does.
+        /// </summary>
+        private StageForecastAct? Damage(StagePerformer who, StageSeat? seat,
+                                         StageExit? exit)
+        {
+            var dmg = _stage.ActDamageMultiplier;
+            var bow = seat == null;
+            StageForecastAct Line(int amount, string element, string target) =>
+                new(who, amount * dmg, element, target, bow);
+            switch (who)
+            {
+                case StagePerformer.Chevalmarin:
+                    return Line(FurinaStageLaw.ActChevalmarinDamage, "",
+                                StageForecastAct.All);
+                case StagePerformer.Crabaletta:
+                    return Line(FurinaStageLaw.ActCrabalettaDamage, "",
+                                StageForecastAct.Random);
+                case StagePerformer.Neuvillette:
+                    return Line(FurinaStageLaw.ActNeuvilletteDamage, "Hydro",
+                                StageForecastAct.All);
+                case StagePerformer.Clorinde:
+                    return Line(FurinaStageLaw.ActClorindeDamage, "Electro",
+                                StageForecastAct.Random);
+                case StagePerformer.Navia:
+                {
+                    var bar = seat?.Fanfare ?? exit?.Held ?? 0;
+                    return bar > 0
+                        ? Line(bar, "Geo", StageForecastAct.Random)
+                        : null;
+                }
+                case StagePerformer.Wriothesley:
+                {
+                    var lost = seat?.LostSinceAct ?? exit?.Lost ?? 0;
+                    return lost > 0
+                        ? Line(FurinaStageLaw.ActWriothesleyRate * lost, "Cryo",
+                               StageForecastAct.Random)
+                        : null;
+                }
+                case StagePerformer.Lynette:
+                    return Line(FurinaStageLaw.ActLynetteDamage, "Anemo",
+                                _aura ? StageForecastAct.RandomAura
+                                      : StageForecastAct.Random);
+                default:
+                    return null;
+            }
         }
 
         internal void Bow(StageExit exit)
@@ -466,16 +606,60 @@ public readonly record struct StageForecastSeat(
     StagePerformer Who, int Now, int After, bool Leaves);
 
 /// <summary>
+/// 2026-09-25 night (the granted-guest seat round): ONE ACT'S DAMAGE in the
+/// end-of-turn forecast. Lane 2 left a Beetle on 1 HP because the forecast
+/// printed Block and Fanfare and never what the acts deal. The act's own
+/// number at this turn's Ousia multiple, before the target's modifiers;
+/// <see cref="Element"/> is empty for the trio's plain damage;
+/// <see cref="Target"/> is <see cref="All"/>, <see cref="Random"/> or
+/// <see cref="RandomAura"/> (Lynette's "one with an aura if any", where one
+/// wears an aura). <see cref="Bow"/> marks a performer's Bow inside the sweep
+/// (a guest whose payment emptied it).
+/// </summary>
+public readonly record struct StageForecastAct(
+    StagePerformer Who, int Amount, string Element, string Target, bool Bow)
+{
+    public const string All = "all";
+    public const string Random = "random";
+    public const string RandomAura = "random_aura";
+}
+
+/// <summary>One performer's share of the posted attacks, walked hit by hit:
+/// what it takes, and whether it leaves (and Bows).</summary>
+public readonly record struct StageForecastTake(
+    StagePerformer Who, int Takes, bool Leaves);
+
+/// <summary>A body the acts can land on: its printed name, and whether it
+/// wears an aura.</summary>
+public readonly record struct StageForecastEnemy(string Name, bool Aura);
+
+/// <summary>
 /// RULE 7's whole forecast. <see cref="Seats"/> is the stage as it stands, in
 /// seat order; <see cref="Arrivals"/> is anyone a Bow brings back before the
 /// turn ends (A Five-Century Act). <see cref="BlockAfterActs"/> is her Block
 /// once the acts have given theirs. <see cref="FrontTakes"/> and
 /// <see cref="ReachesFurina"/> are the posted attacks' split, known only
-/// where <see cref="IntentKnown"/>. <see cref="Unknown"/> says a Bow reader
+/// where <see cref="IntentKnown"/>, and <see cref="Takers"/> is the same
+/// split performer by performer. <see cref="Unknown"/> says a Bow reader
 /// will summon a random performer the forecast cannot name.
+/// <see cref="Acts"/> is what the sweep's acts deal; <see cref="ActTotal"/>
+/// their sum where every act lands on one body or on ALL (-1 otherwise), and
+/// <see cref="ActTotalTarget"/> that body's name or
+/// <see cref="StageForecastAct.All"/>.
 /// </summary>
 public sealed record StageForecast(
     IReadOnlyList<StageForecastSeat> Seats,
     IReadOnlyList<StageForecastSeat> Arrivals,
     int BlockAfterActs, bool IntentKnown, int FrontTakes, int ReachesFurina,
-    bool Unknown);
+    bool Unknown)
+{
+    public IReadOnlyList<StageForecastAct> Acts { get; init; } =
+        System.Array.Empty<StageForecastAct>();
+
+    public int ActTotal { get; init; } = -1;
+
+    public string ActTotalTarget { get; init; } = "";
+
+    public IReadOnlyList<StageForecastTake> Takers { get; init; } =
+        System.Array.Empty<StageForecastTake>();
+}

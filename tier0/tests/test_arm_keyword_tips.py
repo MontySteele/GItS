@@ -1312,8 +1312,11 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             "FurinaStageLaw.SummonFanfare",
             # One sentence since the trio can be cloned (2026-09-25).
             '" [gold]Fanfare[/gold]. On a full "',
-            '"stage, the front one [gold]Bow[/gold]s and leaves, and the "',
-            '"newcomer adds its Fanfare.");',
+            # 2026-09-25 night (the granted-guest seat round): "leaves its
+            # Fanfare to the newcomer" -- lane 2 only understood "adds its
+            # Fanfare" from the log.
+            '"stage, the front one [gold]Bow[/gold]s and leaves its Fanfare "',
+            '"to the newcomer.");',
             # Draft 3 (2026-09-25): one sentence each -- no Bow clause (a
             # Bow is the act once more) and no Hydro (no act applies it).
             '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
@@ -1344,15 +1347,21 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     rows = blindplay.ARM_KEYWORDS
     assert rows["Summon"] == (
         "A performer joins at the back with 1 Fanfare. On a full stage, the "
-        "front one Bows and leaves, and the newcomer adds its Fanfare.")
+        "front one Bows and leaves its Fanfare to the newcomer.")
     assert rows["Gentilhomme Usher"] == "End of your turn: gain 3 Block."
     assert rows["Surintendante Chevalmarin"] == (
         "End of your turn: deal 2 damage to ALL enemies.")
     assert rows["Mademoiselle Crabaletta"] == (
         "End of your turn: deal 5 damage to a random enemy.")
+    from understudy import blindplay_notes
+    # The tip's words, then the page's own sentence (2026-09-25 night): the
+    # tip plus it would be past the 135 ceiling, so only the page carries it.
     assert rows["Bow"] == (
         "A performer that leaves the stage acts one last time on its way "
-        "out, without paying.")
+        "out, without paying. " + blindplay_notes.STAGE_BOW_ON_HIT)
+    assert blindplay_notes.STAGE_BOW_ON_HIT == (
+        "A performer emptied by a hit Bows before the rest of that hit "
+        "reaches you.")
 
 
 # ---------------------------------------------------------------------------

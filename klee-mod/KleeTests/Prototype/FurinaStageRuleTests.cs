@@ -131,14 +131,17 @@ public class FurinaStageRuleTests
     public void A_big_hit_rips_through_the_lead_and_lands_on_her()
     {
         using var _ = new Arm();
-        var (seat, stage) = Stage((StagePerformer.Usher, 3));
+        // A Crabaletta lead since 2026-09-25 night: an Usher's Bow Block now
+        // meets the rest of the hit that empties him before it reaches her
+        // (`FurinaStageHitBowTests`), and this pin is about the lead's bar.
+        var (seat, stage) = Stage((StagePerformer.Crabaletta, 3));
 
         var result = stage.Absorb(12 - 6);
 
         Assert.Equal(3, result.Absorbed);
         Assert.Equal(3, result.ReachedFurina);
         Assert.True(stage.IsEmpty);
-        Assert.Equal(StagePerformer.Usher, result.Exit!.Value.Who);
+        Assert.Equal(StagePerformer.Crabaletta, result.Exit!.Value.Who);
         Assert.Equal(StageDeparture.Struck, result.Exit!.Value.Cause);
         // Rule 7 (2026-09-25): a performer at 0 Fanfare bows, whatever
         // emptied it. The hit's Bow is owed, paid at the flush after the hit.
@@ -183,8 +186,10 @@ public class FurinaStageRuleTests
     public void Absorption_never_runs_on_to_the_middle_seat()
     {
         using var _ = new Arm();
+        // A Crabaletta lead: her Bow gives no Block, so the whole remainder
+        // is hers to show (an Usher's Bow Block would catch 3 of it).
         var (_, stage) = Stage(
-            (StagePerformer.Usher, 2),
+            (StagePerformer.Crabaletta, 2),
             (StagePerformer.Chevalmarin, 9),
             (StagePerformer.Crabaletta, 9));
 

@@ -277,6 +277,12 @@ public sealed class KleeElementalHooks : AbstractModel
     /// </summary>
     public override Task BeforeCombatStart()
     {
+        // 2026-09-25 night: no reaction or relic answer carries across a
+        // fight boundary. A fight that ended inside the end-of-turn acts left
+        // the turn-end mark standing, and the opening below then CARRIED the
+        // last fight's rows into this one's first turn.
+        ReactionLog.ResetFight();
+        RelicAnswerLog.ResetFight();
         ReactionEffects.MarkTurnStart();
         // And the Grass Ring's window: turn one counts from the start of
         // combat, never from the last fight's final turn.

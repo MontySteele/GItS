@@ -111,6 +111,11 @@ public static class FurinaStageLaw
     /// <summary>Charlotte: each other performer gains this much.</summary>
     public const int ActCharlotteGift = 1;
 
+    /// <summary>Lynette deals this much Anemo damage to a random enemy, one
+    /// with an aura if any (2026-09-25 night, the granted-guest seat round:
+    /// the act now always lands).</summary>
+    public const int ActLynetteDamage = 3;
+
     /// <summary>
     /// RULE 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of
     /// Furina's turn, after the acts, each performer BEHIND THE FRONT loses

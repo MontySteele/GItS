@@ -18,8 +18,9 @@ public enum StageDeparture
     /// ([USER]: "Stage members bow out when they are destroyed or replaced,
     /// not just when you deliberately spend them down to 0"). The bow is paid
     /// right after the hit is dealt, on the enemy's turn too
-    /// (<see cref="FurinaStageLedger.TakePendingHitBows"/>), so it never
-    /// softens the hit that caused it.</summary>
+    /// (<see cref="FurinaStageLedger.TakePendingHitBows"/>). Since 2026-09-25
+    /// night its Block meets the rest of that same hit before it reaches
+    /// Furina (<see cref="StageExit.Caught"/>).</summary>
     Struck,
 
     /// <summary>Emptied by Spend, Final Bow, Let the People Rejoice or a
@@ -66,6 +67,17 @@ public readonly struct StageExit
 
     /// <summary>The Fanfare it lost since its last act.</summary>
     public int Lost { get; }
+
+    /// <summary>
+    /// 2026-09-25 night (the granted-guest seat round): THE BLOCK THIS BOW HAS
+    /// ALREADY SPENT inside the hit that emptied the performer. "A performer
+    /// emptied by a hit Bows before the rest of that hit reaches you": the
+    /// engine hands the stage a hit whose Block is already spent, so the Bow's
+    /// own Block (Usher's act) is spent on the rest of that hit there
+    /// (<see cref="FurinaStageLedger.Absorb"/>), and the Bow, paid a hook
+    /// later, gains only what is left of it. 0 on every other exit.
+    /// </summary>
+    public int Caught { get; init; }
 }
 
 /// <summary>What a Spend did. <see cref="Fired"/> is the rider's own question
@@ -92,18 +104,26 @@ public readonly struct StageSpend
 /// <summary>What one attack's post-Block remainder did to the stage.</summary>
 public readonly struct StageAbsorb
 {
-    public StageAbsorb(int absorbed, int reachedFurina, StageExit? exit)
+    public StageAbsorb(int absorbed, int reachedFurina, StageExit? exit,
+                       int caught = 0)
     {
         Absorbed = absorbed;
         ReachedFurina = reachedFurina;
         Exit = exit;
+        Caught = caught;
     }
 
     public int Absorbed { get; }
 
+    /// <summary>What reaches Furina's HP: the rest of the hit past the lead's
+    /// bar, less what the emptied lead's Bow <see cref="Caught"/>.</summary>
     public int ReachedFurina { get; }
 
     public StageExit? Exit { get; }
+
+    /// <summary>What of the rest of this hit the emptied lead's Bow Block
+    /// took before it reached her (<see cref="StageExit.Caught"/>).</summary>
+    public int Caught { get; }
 }
 
 /// <summary>What a summon did: who arrived, and who rotated off to make room.
@@ -269,10 +289,28 @@ public sealed class StageSeat
 /// <see cref="FurinaStageLedger.Note"/> where the beat's seat index names a
 /// live seat of this performer; -1 otherwise (a departure, her own hit).
 /// </param>
+/// <param name="Dealt">2026-09-25 night (the granted-guest seat round): on an
+/// act or Bow that hits ONE body, the damage the hit carried as dealt, after
+/// the target's own modifiers and before its Block -- not what its HP lost.
+/// "Wriothesley acted: 1 Cryo to Wriggler" was a 14 into a body with 1 HP
+/// left. -1 on every other beat.</param>
+/// <param name="TargetHp">The same body's HP BEFORE the hit, so the page can
+/// say "which had 1 HP left". -1 where <paramref name="Dealt"/> is.</param>
+/// <param name="Blocked">What of <paramref name="Dealt"/> the body's Block
+/// took. -1 where <paramref name="Dealt"/> is.</param>
+/// <param name="Caught">On a Bow paid for a hit that emptied the performer:
+/// the Block of that Bow the rest of the hit already spent before it reached
+/// Furina (<see cref="StageExit.Caught"/>). 0 on every other beat.</param>
+/// <param name="Standing">How many performers stood once the beat was filed,
+/// so an arrival names the seat it TOOK (seat and count at that moment), not
+/// the seat the performer stands in when the page is drawn. Filled by
+/// <see cref="FurinaStageLedger.Note"/>.</param>
 public readonly record struct StageBeat(
     string Event, StagePerformer Who, int Seat, int Fanfare, int Moved,
     string Reason, string Target = "", string TargetId = "", int Each = -1,
-    int Hp = -1, int Struck = -1, string By = "", int SeatKey = -1);
+    int Hp = -1, int Struck = -1, string By = "", int SeatKey = -1,
+    int Dealt = -1, int TargetHp = -1, int Blocked = -1, int Caught = 0,
+    int Standing = -1);
 
 
 /// <summary>
@@ -375,6 +413,12 @@ public sealed class FurinaStageLedger
         {
             beat = beat with { SeatKey = _seats[beat.Seat].Key };
         }
+        // The granted-guest seat round (2026-09-25 night): the count at the
+        // moment of the beat, so an arrival names the seat it took then. The
+        // page named the seat the performer stood in when it was DRAWN, and a
+        // Navia who joined at the back and was pushed to the middle by
+        // Wriothesley "joined ... and stands in the middle seat".
+        if (beat.Standing < 0) beat = beat with { Standing = _seats.Count };
         _beats.Add(beat);
     }
 
@@ -967,8 +1011,22 @@ public sealed class FurinaStageLedger
     /// flushed a hook later, in <c>AfterDamageReceived</c>, exactly as
     /// <c>FlushFanfareDeltaBlock</c> already defers the shipped kit's Block.
     /// </summary>
+    /// <remarks>
+    /// THE BOW LANDS INSIDE THE HIT (2026-09-25 night, the granted-guest seat
+    /// round; brief rules 6 and 7): "a performer emptied by a hit Bows before
+    /// the rest of that hit reaches you". Usher's Bow Block was paid after
+    /// the overflow had already reached her, so it never protected anything
+    /// (lane 2 twice, seven times in earlier rounds). The Bow is still paid
+    /// at the flush -- it is awaited work and this method is synchronous --
+    /// but the Block it gives is known here (<see cref="BowBlock"/>), so the
+    /// rest of the hit is spent on it first, <see cref="StageExit.Caught"/>
+    /// records how much, and the Bow gains only the remainder.
+    /// <paramref name="bowCatches"/> is false where the hit is not on Furina
+    /// (Guest of Honor's ally): her Bow Block cannot catch another player's
+    /// hit.
+    /// </remarks>
     public StageAbsorb Absorb(int incoming, string dealer = "",
-                              string dealerId = "")
+                              string dealerId = "", bool bowCatches = true)
     {
         if (incoming <= 0 || Lead is not { } lead)
         {
@@ -997,9 +1055,22 @@ public sealed class FurinaStageLedger
         _seats.RemoveAt(0);
         Note(new StageBeat("leave", lead.Who, -1, 0, absorbed, "hit"));
         var exit = ExitOf(lead, StageDeparture.Struck, 0, held: 0);
+        var caught = bowCatches && reached > 0
+            ? System.Math.Min(reached, BowBlock(lead.Who))
+            : 0;
+        reached -= caught;
+        exit = exit with { Caught = caught };
         _pendingHitBows.Add(exit);
-        return new StageAbsorb(absorbed, reached, exit);
+        return new StageAbsorb(absorbed, reached, exit, caught);
     }
+
+    /// <summary>The Block a performer's Bow gives Furina: Usher's act at this
+    /// turn's Pneuma multiple, and 0 for every other performer (no guest's
+    /// act gives Block). What <see cref="Absorb"/> lets a Bow catch.</summary>
+    public int BowBlock(StagePerformer who) =>
+        who == StagePerformer.Usher
+            ? FurinaStageLaw.ActUsherBlock * ActBlockMultiplier
+            : 0;
 
     private readonly List<StageExit> _pendingHitBows = new();
 
@@ -1474,10 +1545,31 @@ public sealed class FurinaStageLedger
         }
         var ledger = For(creature);
         snapshot["live"] = true;
+        // THE GUEST CAST's rule 7: the end of this turn, forecast ONCE
+        // (`FurinaStage.Forecast`), and every number below that is about the
+        // end of the turn read off it.
+        StageForecast? forecast;
+        try
+        {
+            forecast = FurinaStage.Forecast(creature);
+        }
+        catch (System.Exception)
+        {
+            // A preview must never take the wire down.
+            forecast = null;
+        }
         // R276 batch two: the Block the end-of-turn acts will give, with this
         // turn's Arkhe multiple and Full House's extra acts in it -- the page's
         // "after the acts" line reads this rather than assuming 3 per Usher.
-        snapshot["act_block"] = FurinaStage.ForecastActBlock(creature);
+        // 2026-09-25 night (the granted-guest seat round): OFF THE SAME
+        // FORECAST. The header said "after the acts: Block 3" while the
+        // attack line on the same screen said "after the acts' Block of 6":
+        // this field counted 3 per Usher standing, and the forecast ran the
+        // sweep, in which Clorinde's tax emptied Usher and his Bow gave 3
+        // more. One computation now feeds both.
+        snapshot["act_block"] = forecast != null
+            ? forecast.BlockAfterActs - (int)creature.Block
+            : FurinaStage.ForecastActBlock(creature);
         snapshot["seats"] = ledger.Seats
             .Select((seat, index) => (object?)new Dictionary<string, object?>
             {
@@ -1529,29 +1621,29 @@ public sealed class FurinaStageLedger
                 // guest's act pays, and a guest's display name is its name).
                 ["by"] = beat.By,
                 ["by_member"] = beat.By.ToLowerInvariant(),
+                // 2026-09-25 night (the granted-guest seat round): a
+                // one-body act's hit as DEALT, the body's HP before it and
+                // what its Block took; a hit's Bow's caught Block; and the
+                // count standing when the beat was filed. -1 (0 for caught)
+                // where the beat has none (see `StageBeat`).
+                ["dealt"] = beat.Dealt,
+                ["target_hp"] = beat.TargetHp,
+                ["blocked"] = beat.Blocked,
+                ["caught"] = beat.Caught,
+                ["standing"] = beat.Standing,
             })
             .ToList();
         // THE GUEST CAST's rule 7: the end of this turn, forecast
         // (`FurinaStage.Forecast`), for the page to print as the strip does.
-        snapshot["forecast"] = ForecastSnapshot(creature);
+        snapshot["forecast"] = ForecastSnapshot(forecast);
         return snapshot;
     }
 
-    /// <summary>The forecast as primitives, or null where it cannot be read.
-    /// A preview must never take the wire down, so a read that throws is
-    /// reported as absent.</summary>
+    /// <summary>The forecast as primitives, or null where it could not be
+    /// read.</summary>
     private static Dictionary<string, object?>? ForecastSnapshot(
-        Creature creature)
+        StageForecast? forecast)
     {
-        StageForecast? forecast;
-        try
-        {
-            forecast = FurinaStage.Forecast(creature);
-        }
-        catch (System.Exception)
-        {
-            return null;
-        }
         if (forecast == null) return null;
         List<object?> Rows(IEnumerable<StageForecastSeat> rows) => rows
             .Select(row => (object?)new Dictionary<string, object?>
@@ -1572,6 +1664,32 @@ public sealed class FurinaStageLedger
             ["front_takes"] = forecast.FrontTakes,
             ["reaches_furina"] = forecast.ReachesFurina,
             ["unknown"] = forecast.Unknown,
+            // 2026-09-25 night (the granted-guest seat round): what each act
+            // of the sweep deals and to whom, the total where every act lands
+            // on one body or on ALL, and the attacks' split walked hit by hit,
+            // performer by performer.
+            ["acts"] = forecast.Acts
+                .Select(act => (object?)new Dictionary<string, object?>
+                {
+                    ["member"] = FurinaStage.Name(act.Who),
+                    ["name"] = DisplayName(act.Who),
+                    ["amount"] = act.Amount,
+                    ["element"] = act.Element,
+                    ["target"] = act.Target,
+                    ["bow"] = act.Bow,
+                })
+                .ToList(),
+            ["act_total"] = forecast.ActTotal,
+            ["act_total_target"] = forecast.ActTotalTarget,
+            ["takers"] = forecast.Takers
+                .Select(take => (object?)new Dictionary<string, object?>
+                {
+                    ["member"] = FurinaStage.Name(take.Who),
+                    ["name"] = DisplayName(take.Who),
+                    ["takes"] = take.Takes,
+                    ["leaves"] = take.Leaves,
+                })
+                .ToList(),
         };
     }
 

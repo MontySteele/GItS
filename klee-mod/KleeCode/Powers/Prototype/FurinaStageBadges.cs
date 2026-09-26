@@ -384,17 +384,21 @@ public sealed class LynetteBadgePower : StagePerformerBadge,
 {
     public override StagePerformer Performer => StagePerformer.Lynette;
 
-    protected override int BaseAct => 0;
+    // 2026-09-25 night (the granted-guest seat round): the act always lands.
+    // Both seats never played her: "nothing reliably leaves an aura for her
+    // Swirl". Anemo damage on an aura Swirls; on none it is plain damage.
+    protected override int BaseAct => FurinaStageLaw.ActLynetteDamage;
 
     public List<(string, string)>? Localization => new()
     {
         ("title", FurinaStageLedger.DisplayName(Performer)),
         ("description",
-            "End of your turn: [gold]Swirl[/gold] a random enemy with an "
-          + "aura."),
+            "End of your turn: deal " + FurinaStageLaw.ActLynetteDamage
+          + " [gold]Anemo[/gold] damage to a random enemy, one with an aura "
+          + "if any."),
         ("smartDescription",
-            "End of your turn: [gold]Swirl[/gold] a random enemy with an "
-          + "aura."),
+            "End of your turn: deal {Act} [gold]Anemo[/gold] damage to a "
+          + "random enemy, one with an aura if any."),
     };
 }
 

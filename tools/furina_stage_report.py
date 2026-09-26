@@ -130,6 +130,14 @@ THREE_STARS_FULL_HOUSE = STARTER_KIT + [
     "proto_fs_standing_ovation", "proto_fs_standing_ovation",
 ]
 THREE_SUPPORTS_FULL_HOUSE = THREE_SUPPORTS + ["proto_fs_full_house"]
+#: 2026-09-25 night (the granted-guest seat round): Lynette, whose act now
+#: always lands (3 Anemo damage, a Swirl where it finds an aura), beside the
+#: guest whose Hydro gives her an aura to find. Both seats never played her;
+#: no deck above held her.
+SWIRL = STARTER_KIT + [
+    "proto_fs_guest_star_lynette", "proto_fs_guest_star_neuvillette",
+    "proto_fs_standing_ovation", "proto_fs_standing_ovation",
+]
 
 ARMS = (("natural", None), ("preserve", PRESERVE), ("expend", EXPEND),
         ("guest star", STAR), ("guest tank", TANK),
@@ -138,7 +146,8 @@ ARMS = (("natural", None), ("preserve", PRESERVE), ("expend", EXPEND),
         ("3 ushers", THREE_USHERS),
         ("3 guests (supports)", THREE_SUPPORTS),
         ("3 guests (supports) + full house", THREE_SUPPORTS_FULL_HOUSE),
-        ("3 guests (stars) + full house", THREE_STARS_FULL_HOUSE))
+        ("3 guests (stars) + full house", THREE_STARS_FULL_HOUSE),
+        ("guest swirl", SWIRL))
 
 #: The buckets sec.13 names, in its own order.
 BARS = ((1, 2, "1-2"), (3, 5, "3-5"), (6, 10 ** 9, "6+"))
@@ -343,7 +352,9 @@ def guest_cast(states, out=sys.stdout) -> dict:
     unpaid = collections.Counter()
     turns_on = collections.Counter()
     paid = collections.Counter()
+    act_damage = collections.Counter()
     for st in states:
+        act_damage.update(_guest_act_damage(st))
         led = st.stage_ledger or furina_stage.ledger(st)
         unpaid.update(led.get("unpaid", {}))
         turns_on.update(led.get("guest_turns", {}))
@@ -362,16 +373,34 @@ def guest_cast(states, out=sys.stdout) -> dict:
           f"dealt per turn {sum(dealt) / max(1, sum(turns)):.1f}", file=out)
     print(f"     Full House fired on {fired} of {sum(turns)} turns "
           f"({100 * fired / max(1, sum(turns)):.0f}%)", file=out)
-    seen = sorted(set(unpaid) | set(turns_on) | set(paid))
+    seen = sorted(set(unpaid) | set(turns_on) | set(paid) | set(act_damage))
     if not seen:
         print("     no guest took the stage", file=out)
     for guest in seen:
         print(f"     {guest:<12} turns on stage {turns_on[guest]:5d}  "
-              f"acts unpaid {unpaid[guest]:4d}  Fanfare paid {paid[guest]:5d}",
+              f"acts unpaid {unpaid[guest]:4d}  Fanfare paid {paid[guest]:5d}"
+              f"  act damage {act_damage[guest]:5d}",
               file=out)
     return {"to_her": sum(to_her) / n, "dealt": sum(dealt) / n,
             "turns": sum(turns) / n, "fh_fired": fired,
             "fh_turns": sum(turns)}
+
+
+def _guest_act_damage(st) -> collections.Counter:
+    """2026-09-25 night: what each guest's acts and Bows took off the
+    enemies' HP this fight. A stage damage event names its source
+    (`furina_stage/act` or `/bow`) and not the performer, so it is credited
+    to the `stage_act` or `stage_bow` beat just before it."""
+    dealt: collections.Counter = collections.Counter()
+    actor = None
+    for row in st.log:
+        event = row.get("event")
+        if event in ("stage_act", "stage_bow"):
+            actor = row.get("member")
+        elif (event == "damage" and actor in furina_stage.GUESTS
+              and str(row.get("source", "")).startswith("furina_stage/")):
+            dealt[actor] += int(row.get("amount", 0))
+    return dealt
 
 
 def main(argv=None) -> int:
