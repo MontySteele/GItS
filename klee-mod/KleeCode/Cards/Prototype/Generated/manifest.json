@@ -814,7 +814,7 @@
       "conditional_damage": 3
     },
     "proto_fs_stage_whisper": {
-      "stage_whisper": 2
+      "cost": -1
     },
     "proto_fs_standing_ovation": {
       "cost": -1

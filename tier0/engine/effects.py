@@ -1726,7 +1726,19 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     if widen and state.player.powers.get(widen, 0):
         target = "all_enemies"
 
-    for _ in range(times):
+    # The Furina seat round (2026-09-26): `element_hits: N` -- only the FIRST N
+    # hits carry the element the row declares (Bubble Aria: "the first hit
+    # carries Hydro"). The rest are asked again with the declaration off, so a
+    # rider still wins over them exactly as it does over any plain hit. The
+    # codegen twin is `gen_klee_cards._emit_damage`: the carried hits inside
+    # `HitElement.Carry`, then the rest at the same printed number.
+    element_hits = fx.get("element_hits")
+    rest_element = (_element_for(state, {**fx, "applies_element": False}, card)
+                    if element_hits else None)
+
+    for hit_index in range(times):
+        if element_hits and hit_index == element_hits:
+            element = rest_element
         # R210 Q2 -- the same binding INSIDE one op. `AttackCommand.Execute`
         # re-filters its target list by `IsAlive` on every hit and
         # `break`s the moment it is empty, so hits 2..N of a multi-hit attack
@@ -6414,8 +6426,9 @@ def _op_stage_reverse(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_whisper(state: CombatState, fx: dict, card: Card) -> None:
-    """*Stage Whisper*: move up to N of the back's Fanfare to the front."""
-    furina_stage.whisper(state, _amount(state, fx.get("amount", 1)))
+    """*Stage Whisper*: every other performer gives all but 1 of its Fanfare
+    to the front (2026-09-26 seat round, second rework)."""
+    furina_stage.whisper(state)
 
 
 def _op_stage_hold_fade(state: CombatState, fx: dict, card: Card) -> None:

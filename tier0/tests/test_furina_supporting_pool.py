@@ -83,7 +83,7 @@ def _row_card(rid, upgraded=False):
 def _apply_delta(card, key, delta):
     """The few upgrade keys these pins read, bound as `upgrades` binds them."""
     top = card.effects
-    if key in ("stage_whisper", "stage_intermission", "stage_guest"):
+    if key in ("stage_intermission", "stage_guest"):
         next(fx for fx in top if fx.get("op") == key)["amount"] += delta
     elif key == "power_amount":
         next(fx for fx in top if fx.get("op") == "apply_power")["amount"] += delta
@@ -112,7 +112,7 @@ TABLE = {
     "revolving_stage": ("Revolving Stage", "uncommon", 1, "power"),
     "oratrices_verdict": ("Oratrice's Verdict", "uncommon", 0, "skill"),
     "guest_star_lyney": ("Guest Star: Lyney", "rare", 1, "skill"),
-    "stage_whisper": ("Stage Whisper", "common", 0, "skill"),
+    "stage_whisper": ("Stage Whisper", "common", 1, "skill"),
     "cheered_on": ("Cheered On", "common", 1, "attack"),
     "season_tickets": ("Season Tickets", "uncommon", 1, "power"),
     "guest_star_escoffier": ("Guest Star: Escoffier", "rare", 2, "skill"),
@@ -291,38 +291,44 @@ def test_grand_finales_bow_takes_lyney_to_the_front(arm):
     assert [m for m, _f in st.player.stage] == ["lyney", "usher"]
 
 
-def test_stage_whisper_moves_up_to_three_and_the_back_keeps_one(arm):
-    st = _state([["usher", 2], ["crabaletta", 7]])
+def test_stage_whisper_gathers_all_but_one_from_every_other_performer(arm):
+    """2026-09-26 seat round, second rework: "Your other performers give all
+    but 1 of their Fanfare to your front performer." A seat named the old
+    face NEVER AGAIN: "the back performer is nearly always at 1-2 Fanfare
+    after fading and Spends, so it moves nothing"."""
+    st = _state([["usher", 2], ["chevalmarin", 4], ["crabaletta", 7]])
     effects.resolve_card(st, _row_card("proto_fs_stage_whisper"))
-    assert st.player.stage == [["usher", 5], ["crabaletta", 4]]
-    st = _state([["usher", 2], ["crabaletta", 3]])
+    assert st.player.stage == [["usher", 2 + 3 + 6], ["chevalmarin", 1],
+                               ["crabaletta", 1]]
+    # Two performers: the back gives all but 1, however much it holds.
+    st = _state([["usher", 2], ["crabaletta", 12]])
     effects.resolve_card(st, _row_card("proto_fs_stage_whisper"))
-    assert st.player.stage == [["usher", 4], ["crabaletta", 1]]
-    # It never empties the back, so it never Bows it.
-    st = _state([["usher", 2], ["crabaletta", 1]])
+    assert st.player.stage == [["usher", 13], ["crabaletta", 1]]
+    # It never empties anyone, so no one Bows.
+    st = _state([["usher", 2], ["chevalmarin", 1], ["crabaletta", 1]])
     effects.resolve_card(st, _row_card("proto_fs_stage_whisper"))
-    assert st.player.stage == [["usher", 2], ["crabaletta", 1]]
+    assert st.player.stage == [["usher", 2], ["chevalmarin", 1],
+                               ["crabaletta", 1]]
     assert not _events(st, "stage_bow")
-    # One performer: nothing.
+    assert _events(st, "stage_whisper_whiffed")
+    # One performer: nothing moves.
     st = _state([["usher", 6]])
     effects.resolve_card(st, _row_card("proto_fs_stage_whisper"))
     assert st.player.stage == [["usher", 6]]
-    # Upgraded: up to 5.
-    st = _state([["usher", 2], ["crabaletta", 9]])
-    effects.resolve_card(st, _row_card("proto_fs_stage_whisper", True))
-    assert st.player.stage == [["usher", 7], ["crabaletta", 4]]
 
 
-def test_stage_whisper_draws_a_card(arm):
-    """The seat round's ruling (2026-09-26): "Draw 1 card." -- and it still
-    never empties the back, so the 0-cost loop stays closed."""
+def test_stage_whisper_costs_one_upgrades_to_zero_and_draws_a_card(arm):
+    """It still draws 1 (the first seat round's ruling), and with one
+    performer that is all it does."""
+    assert _row_card("proto_fs_stage_whisper").cost == 1
+    assert _row_card("proto_fs_stage_whisper", True).cost == 0
     st = _state([["usher", 2], ["crabaletta", 7]], deck=3)
     effects.resolve_card(st, _row_card("proto_fs_stage_whisper"))
-    assert st.player.stage == [["usher", 5], ["crabaletta", 4]]
+    assert st.player.stage == [["usher", 8], ["crabaletta", 1]]
     assert len(st.player.hand) == 1
-    st = _state([["usher", 2], ["crabaletta", 1]], deck=3)
+    st = _state([["usher", 6]], deck=3)
     effects.resolve_card(st, _row_card("proto_fs_stage_whisper", True))
-    assert st.player.stage == [["usher", 2], ["crabaletta", 1]]
+    assert st.player.stage == [["usher", 6]]
     assert len(st.player.hand) == 1
     assert not _events(st, "stage_bow")
 
@@ -529,6 +535,7 @@ def test_gala_premiere_summons_the_trio_at_three_each(arm):
 
 def test_bubble_aria_hits_twice_and_applies_hydro(arm):
     st = _state([["usher", 3]])
+    st.player.element = "hydro"         # the character sheet's; her first hit
     effects.resolve_card(st, _row_card("proto_fs_bubble_aria"))
     assert st.enemies[0].hp == 500 - 8
     assert st.enemies[0].aura == "hydro"
@@ -555,10 +562,12 @@ def test_tide_of_applause_raises_the_back_per_reaction(arm):
 def test_grand_deluge_gives_each_performer_two_once_on_a_reaction(arm):
     a, b = _enemy(name="a", aura="pyro"), _enemy(name="b", aura="pyro")
     st = _state([["usher", 3], ["crabaletta", 1]], enemies=[a, b])
+    st.player.element = "hydro"         # the character sheet's; the hit's
     effects.resolve_card(st, _row_card("proto_fs_grand_deluge"))
     # Two reactions, one gift: each performer +2 once.
     assert st.player.stage == [["usher", 5], ["crabaletta", 3]]
     st = _state([["usher", 3], ["crabaletta", 1]])
+    st.player.element = "hydro"
     effects.resolve_card(st, _row_card("proto_fs_grand_deluge"))
     assert st.player.stage == [["usher", 3], ["crabaletta", 1]]
     assert st.enemies[0].aura == "hydro"

@@ -201,15 +201,18 @@ public class FurinaStageDraft3Tests
     [Theory]
     [InlineData("ProtoFsTidalFlourish")]
     [InlineData("ProtoFsQuickCue")]
-    public void The_spend_modes_apply_hydro_after_their_damage(string card)
+    public void The_spend_modes_hit_carries_hydro(string card)
     {
+        // The seat round of 2026-09-26 moved the Hydro ONTO the Spend mode's
+        // hit (it used to be applied after it, so a reaction multiplied
+        // nothing). `FurinaHydroHitsTests` runs the multiplier; this pins that
+        // the scope opens after the Spend and before the mode's attack.
         var play = Il.CallSequence(Il.Method(card, "OnPlay")).ToList();
-        var aura = play.IndexOf("ElementalHit.ApplyOnly");
-        Assert.True(aura >= 0, string.Join(", ", play));
-        Assert.Equal(1, play.Count(c => c == "ElementalHit.ApplyOnly"));
-        // After the Spend mode's hit: the last Attack before it.
-        Assert.True(play.Take(aura).Contains("AttackCommand.Execute"),
-                    string.Join(", ", play));
+        var spend = play.IndexOf("FurinaStage.Spend");
+        var carry = play.IndexOf("HitElement.Carry");
+        Assert.True(spend >= 0 && carry > spend, string.Join(", ", play));
+        Assert.Equal(1, play.Count(c => c == "HitElement.Carry"));
+        Assert.Contains("AttackCommand.Execute", play.Skip(carry));
     }
 
     [Fact]

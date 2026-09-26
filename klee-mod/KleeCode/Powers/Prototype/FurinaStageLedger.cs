@@ -1543,25 +1543,33 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>
-    /// <i>Stage Whisper</i>: move up to <paramref name="amount"/> of the back
-    /// performer's Fanfare to the front performer, min(amount, back - 1). It
-    /// never empties the back, so it never Bows it (a 0-cost Bow would loop
-    /// with Thunderous Applause and A Five-Century Act). With one performer
-    /// it does nothing. Returns what moved.
+    /// <i>Stage Whisper</i> (2026-09-26 seat round, second rework): "Your
+    /// other performers give all but 1 of their Fanfare to your front
+    /// performer." Each performer behind the front gives <c>Fanfare - 1</c>,
+    /// in seat order, so it never empties anyone and never Bows anyone (a Bow
+    /// here would loop with Thunderous Applause and A Five-Century Act). With
+    /// one performer it does nothing. Returns what moved in all. Sim twin:
+    /// <c>furina_stage.whisper</c>.
     /// </summary>
-    public int Whisper(int amount)
+    public int Whisper()
     {
         if (_seats.Count < 2) return 0;
-        var back = _seats[^1];
         var front = _seats[0];
-        var moved = System.Math.Max(0, System.Math.Min(amount, back.Fanfare - 1));
-        if (moved <= 0) return 0;
-        Drain(back, moved);
-        Note(new StageBeat(MoveEvent, back.Who, _seats.Count - 1, back.Fanfare,
-                           moved, ""));
-        front.Fanfare += moved;
-        NoteRaise(front, moved);
-        return moved;
+        var total = 0;
+        for (var i = 1; i < _seats.Count; i++)
+        {
+            var giver = _seats[i];
+            var moved = System.Math.Max(0, giver.Fanfare - 1);
+            if (moved <= 0) continue;
+            Drain(giver, moved);
+            Note(new StageBeat(MoveEvent, giver.Who, i, giver.Fanfare, moved,
+                               ""));
+            total += moved;
+        }
+        if (total <= 0) return 0;
+        front.Fanfare += total;
+        NoteRaise(front, total);
+        return total;
     }
 
     /// <summary>

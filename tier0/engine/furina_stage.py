@@ -1956,13 +1956,14 @@ def reverse(state) -> None:
     state.emit("stage_reorder", company=[m for m, _f in seats], by="reverse")
 
 
-def whisper(state, amount: int) -> int:
-    """*Stage Whisper*: "Move up to 3 of your back performer's Fanfare to your
-    front performer. It keeps at least 1." min(amount, back - 1), so it never
-    empties the back and never Bows it (a 0-cost Bow would loop with
+def whisper(state) -> int:
+    """*Stage Whisper* (2026-09-26 seat round, second rework): "Your other
+    performers give all but 1 of their Fanfare to your front performer." Each
+    performer behind the front gives `fanfare - 1`, in seat order, so it
+    never empties anyone and never Bows anyone (a Bow here would loop with
     Thunderous Applause and A Five-Century Act). With one performer it does
-    nothing. A move between bars books nothing. Returns what moved. C# twin:
-    `FurinaStageLedger.Whisper`."""
+    nothing. A move between bars books nothing. Returns what moved in all.
+    C# twin: `FurinaStageLedger.Whisper`."""
     p = state.player
     if not active(p):
         return 0
@@ -1970,16 +1971,20 @@ def whisper(state, amount: int) -> int:
     if len(seats) < 2:
         state.emit("stage_whisper_whiffed")
         return 0
-    back_pair, front = seats[-1], seats[0]
-    moved = max(0, min(int(amount), int(back_pair[1]) - 1))
-    if moved <= 0:
+    front = seats[0]
+    total = 0
+    for pair in seats[1:]:
+        moved = max(0, int(pair[1]) - 1)
+        if moved <= 0:
+            continue
+        pair[1] -= moved
+        front[1] += moved
+        total += moved
+        state.emit("stage_whisper", member=pair[0], to=front[0],
+                   amount=moved, fanfare=pair[1], front=front[1])
+    if total <= 0:
         state.emit("stage_whisper_whiffed")
-        return 0
-    back_pair[1] -= moved
-    front[1] += moved
-    state.emit("stage_whisper", member=back_pair[0], to=front[0],
-               amount=moved, fanfare=back_pair[1], front=front[1])
-    return moved
+    return total
 
 
 def hold_fade(state) -> None:

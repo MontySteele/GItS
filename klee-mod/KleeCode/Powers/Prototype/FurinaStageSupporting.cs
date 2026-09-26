@@ -98,13 +98,13 @@ public static partial class FurinaStage
         Vfx.FurinaStageCues.Refresh(owner);
     }
 
-    /// <summary><i>Stage Whisper</i>: move up to <paramref name="amount"/> of
-    /// the back performer's Fanfare to the front performer; the back keeps at
-    /// least 1. Sim twin: <c>furina_stage.whisper</c>.</summary>
-    public static int Whisper(Creature? owner, int amount)
+    /// <summary><i>Stage Whisper</i> (2026-09-26 seat round, second rework):
+    /// every other performer gives all but 1 of its Fanfare to the front
+    /// performer. Sim twin: <c>furina_stage.whisper</c>.</summary>
+    public static int Whisper(Creature? owner)
     {
         if (!LiveFor(owner)) return 0;
-        var moved = FurinaStageLedger.For(owner!).Whisper(amount);
+        var moved = FurinaStageLedger.For(owner!).Whisper();
         if (moved > 0)
         {
             FurinaStagePets.SyncBars(owner);

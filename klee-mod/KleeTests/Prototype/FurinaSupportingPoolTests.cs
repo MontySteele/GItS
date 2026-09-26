@@ -205,27 +205,34 @@ public class FurinaSupportingPoolTests
     }
 
     [Fact]
-    public void Stage_whisper_moves_up_to_n_and_the_back_keeps_one()
+    public void Stage_whisper_gathers_all_but_one_from_every_other_performer()
     {
+        // 2026-09-26 seat round, second rework: "Your other performers give
+        // all but 1 of their Fanfare to your front performer."
         using var _ = new Arm();
-        var (_, stage) = Stage(("usher", 2), ("crabaletta", 7));
-        Assert.Equal(3, stage.Whisper(3));
-        Assert.Equal(new[] { 5, 4 }, Bars(stage));
+        var (_, stage) = Stage(("usher", 2), ("chevalmarin", 4),
+                               ("crabaletta", 7));
+        Assert.Equal(9, stage.Whisper());
+        Assert.Equal(new[] { 11, 1, 1 }, Bars(stage));
 
-        var (_, thin) = Stage(("usher", 2), ("crabaletta", 3));
-        Assert.Equal(2, thin.Whisper(3));
-        Assert.Equal(new[] { 4, 1 }, Bars(thin));
+        var (_, pair) = Stage(("usher", 2), ("crabaletta", 12));
+        Assert.Equal(11, pair.Whisper());
+        Assert.Equal(new[] { 13, 1 }, Bars(pair));
 
-        // Never empties the back, so never Bows it.
-        var (_, one) = Stage(("usher", 2), ("crabaletta", 1));
-        Assert.Equal(0, one.Whisper(3));
-        Assert.Equal(new[] { 2, 1 }, Bars(one));
+        // Never empties anyone, so no one Bows.
+        var (_, thin) = Stage(("usher", 2), ("chevalmarin", 1),
+                              ("crabaletta", 1));
+        Assert.Equal(0, thin.Whisper());
+        Assert.Equal(new[] { 2, 1, 1 }, Bars(thin));
 
         var (_, alone) = Stage(("usher", 6));
-        Assert.Equal(0, alone.Whisper(3));
+        Assert.Equal(0, alone.Whisper());
+        Assert.Equal(new[] { 6 }, Bars(alone));
 
+        // Cost 1, upgraded 0; no number on the face.
         var card = new ProtoFsStageWhisper();
-        Assert.Equal(3, card.DynamicVars["Whisper"].IntValue);
+        Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.False(card.DynamicVars.TryGetValue("Whisper", out var whisper));
     }
 
     // ---- 2. feeding -----------------------------------------------------------

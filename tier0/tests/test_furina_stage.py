@@ -1689,32 +1689,35 @@ def _play_mode(st, card, index, monkeypatch):
 def test_tidal_flourish_applies_hydro_to_all_in_its_spend_mode(arm,
                                                                monkeypatch):
     card = _row("proto_fs_tidal_flourish")
-    base = _state(enemies=[_enemy(hp=60), _enemy(hp=60, name="paper2")])
+    base = _state(player=_furina(element="hydro"),
+                  enemies=[_enemy(hp=60), _enemy(hp=60, name="paper2")])
     _play_mode(base, card, 0, monkeypatch)
     assert all(e.aura is None for e in base.enemies)
-    spent = _state(enemies=[_enemy(hp=60), _enemy(hp=60, name="paper2")])
+    spent = _state(player=_furina(element="hydro"),
+                   enemies=[_enemy(hp=60), _enemy(hp=60, name="paper2")])
     spent.player.stage = [["usher", 5]]
     _play_mode(spent, card, 1, monkeypatch)
     assert all(e.hp == 60 - 9 for e in spent.enemies)
     assert all(e.aura == "hydro" for e in spent.enemies)
 
 
-def test_quick_cue_applies_hydro_after_the_damage_in_its_spend_mode(
-        arm, monkeypatch):
+def test_quick_cue_spend_mode_is_a_hydro_hit(arm, monkeypatch):
+    """2026-09-26 seat round: the Hydro rides the Spend mode's hit (it used to
+    be applied after it). `test_furina_hydro_hits` runs the reactions."""
     card = _row("proto_fs_quick_cue")
-    spent = _state(enemies=[_enemy(hp=60)])
+    spent = _state(player=_furina(element="hydro"), enemies=[_enemy(hp=60)])
     spent.player.stage = [["usher", 5]]
     _play_mode(spent, card, 1, monkeypatch)
     assert spent.enemies[0].hp == 60 - 8
     assert spent.enemies[0].aura == "hydro"
-    # AFTER the damage: into an Electro aura the 8 lands plain, then the
-    # Hydro reacts with what is there.
-    primed = _state(enemies=[_enemy(hp=60)])
+    # Into an Electro aura the hit itself reacts with what is there.
+    primed = _state(player=_furina(element="hydro"), enemies=[_enemy(hp=60)])
     primed.enemies[0].aura = "electro"
     primed.player.stage = [["usher", 5]]
     _play_mode(primed, card, 1, monkeypatch)
     assert primed.enemies[0].aura != "electro"
-    base = _state(enemies=[_enemy(hp=60)])
+    # The plain mode is a plain hit.
+    base = _state(player=_furina(element="hydro"), enemies=[_enemy(hp=60)])
     _play_mode(base, card, 0, monkeypatch)
     assert base.enemies[0].aura is None
 

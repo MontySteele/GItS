@@ -32,8 +32,11 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsGrandDeluge : CustomCardModel, ICharacterCard
+public sealed class ProtoFsGrandDeluge : CustomCardModel, IElementalCard, ICharacterCard
 {
+    /// <summary>Sheet `applies_element: true` on this row's own damage: it applies Hydro whatever the cadence says.</summary>
+    public Element Element => Element.Hydro;
+
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
@@ -41,7 +44,7 @@ public sealed class ProtoFsGrandDeluge : CustomCardModel, ICharacterCard
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this);
+        ArmKeywordTips.ForFanfare(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_grand_deluge");
 
@@ -73,10 +76,6 @@ public sealed class ProtoFsGrandDeluge : CustomCardModel, ICharacterCard
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
-        {
-            await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Hydro, Owner.Creature);
-        }
         if (ReactionEffects.TotalResolved > reactionsAtStart)
         {
             await FurinaStage.RaiseAll(Owner.Creature, 2);
