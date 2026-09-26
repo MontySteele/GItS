@@ -1942,7 +1942,21 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
             and (_text(row.get("title")) or _label(row.get("name")))]
     for power, row in zip(out, rows):
         kind = _text(row.get("type"))
+        # 2026-09-26 (control seats, Silent and Necrobinder): Tender's
+        # "Strength -1 (buff)". A counter below zero is the game's debuff
+        # (`PowerModel.GetTypeForAmount`); the bridge now sends that type, and
+        # this reads an older bridge's static `Buff` the same way.
+        if power["stacks"] < 0 and kind.lower() == "buff":
+            kind = "Debuff"
         power["kind"] = "aura" if _is_aura(power["name"]) else kind
+        # 2026-09-26 (control seats, Defect and Silent): the card a Thieving
+        # Hopper's Swipe holds, and on Surrounded the bodies behind you (combat
+        # ids, named by `_combat`). Absent on an older bridge.
+        stolen = _text(row.get("stolen_card"))
+        if stolen:
+            power["stolen_card"] = stolen
+        if isinstance(row.get("behind"), list):
+            power["behind_ids"] = [_text(i) for i in row["behind"]]
         # 2026-09-25 (the Furina seat round): "The Stage 1 (buff) prints a
         # number I never saw change". The game draws a number on the icon only
         # for a `Counter` power; a `Single` one shows none, and the wire's
@@ -1961,6 +1975,10 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
             for k in (row.get("keywords") or [])
             if isinstance(k, dict) and _text(k.get("name"))
             and not _is_mod_source_tip(k)]
+        # An older bridge: Swipe's only tip is the stolen card's own face.
+        if ("stolen_card" not in power and power["keywords"]
+                and "stolen card" in power["text"].lower()):
+            power["stolen_card"] = power["keywords"][0]["name"]
     return out
 
 

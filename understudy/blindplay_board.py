@@ -494,6 +494,53 @@ def _potion_slots(state: dict[str, Any]) -> int:
     return _int(_player(state).get("max_potion_slots"), 0)
 
 
+def _orbs(p: dict[str, Any]) -> dict[str, Any] | None:
+    """The player's orbs, OLDEST FIRST, or `None` on a board with no slots.
+
+    2026-09-26 (control seat, Defect): "Orbs are invisible. There is no list,
+    count or order." The wire has always sent them (`BuildPlayerState`'s
+    `orbs`, `orb_slots`), in `OrbQueue.Orbs` order: a channel appends, and
+    `OrbCmd.EvokeNext` evokes `Orbs.First()` -- so the first row is the oldest,
+    the one the game calls rightmost, and the one a channel into full slots
+    evokes. `passive` and `evoke` are the wire's Focus-folded figures.
+    """
+    slots = p.get("orb_slots")
+    if slots is None:
+        return None
+    rows = [{"name": _text(o.get("name")),
+             "passive": _int(o.get("passive_val")),
+             "evoke": _int(o.get("evoke_val")),
+             "text": _text(o.get("description"))}
+            for o in (p.get("orbs") or []) if isinstance(o, dict)]
+    return {"slots": _int(slots), "list": [r for r in rows if r["name"]]}
+
+
+def _allies(p: dict[str, Any], plan_pet: str | None) -> list[dict[str, Any]]:
+    """The pets no kit block prints -- Osty -- with HP, Block and powers.
+
+    2026-09-26 (control seat, Necrobinder): "Osty's HP is never shown in
+    combat"; the seat read it off Unleash's number. The wire's `pets` rows
+    carry it (`BuildPetsState`). A stage performer is printed by the stage
+    block and the Bake-Kurage by the Plan block, so both are left to those.
+    """
+    out = []
+    for row in p.get("pets") or []:
+        if not isinstance(row, dict):
+            continue
+        if row.get("stage_member") is not None:
+            continue
+        if plan_pet is not None and _text(row.get("entity_id")) == plan_pet:
+            continue
+        name = _text(row.get("name"))
+        if not name:
+            continue
+        out.append({"name": name, "hp": _int(row.get("hp")),
+                    "max_hp": _int(row.get("max_hp")),
+                    "block": _int(row.get("block")),
+                    "powers": _powers(row)})
+    return out
+
+
 def _combat(state: dict[str, Any]) -> dict[str, Any]:
     p = _player(state)
     resources = p.get("resources")
@@ -537,6 +584,8 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             # The HUD carries the relic row through every screen of the run;
             # the page did not, and `KLEESPARK-BT1` paid for it.
             "relics": relic_faces(state),
+            # 2026-09-26 (control seat, Defect): the orbs, oldest first.
+            "orbs": _orbs(p),
         },
         "round": _int(battle.get("round")),
         "hand": _number_faces([_card_face(c) for c in _hand(state)], "title"),
@@ -583,6 +632,15 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # `EB-671`: and which of them is the FRONT. Read after the list is built,
     # off the rows the page is about to print.
     mark_front(combat["enemies"])
+    # 2026-09-26 (control seat, Silent): Surrounded's bodies behind you, by
+    # the enemy list's own names. The ids stop here.
+    by_id = {_text(raw.get("combat_id")): face["name"]
+             for raw, face in zip(_enemies(state), combat["enemies"])
+             if _text(raw.get("combat_id"))}
+    for power in combat["you"]["powers"]:
+        ids = power.pop("behind_ids", None)
+        if ids is not None:
+            power["behind"] = [by_id[i] for i in ids if i in by_id]
     # `EB-271`: the refusal that named nothing, given the board it is about.
     for face in combat["hand"]:
         face["unplayable_note"] = _hook_note(face, combat["you"]["powers"])
@@ -646,6 +704,11 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # the body a performer hit by combat id and THE PAGE OWNS THE NAMES.
         name_stage_targets(stage, _enemies(state), combat["enemies"])
         combat["stage"] = stage
+    # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
+    # prints, with its HP.
+    allies = _allies(p, (plans or {}).get("pet_entity_id"))
+    if allies:
+        combat["pets"] = allies
     return combat
 
 
@@ -1195,7 +1258,17 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                                           _text(s.get("name")))
                     for s in (row.get("summoned") or [])
                     if isinstance(s, dict)]
+        # 2026-09-26 (the Silent control seat): the powers the card put on
+        # enemies, in order. Absent on an older mod, and then nothing prints.
+        applied = [{"target": _text(a.get("target")),
+                    "power": _text(a.get("power")),
+                    "amount": _int(a.get("amount")),
+                    "combat_id": _text(a.get("combat_id"))}
+                   for a in (row.get("applied") or [])
+                   if isinstance(a, dict) and _text(a.get("power"))
+                   and _int(a.get("amount"))]
         out.append({"card": card,
+                    "applied": applied,
                     "auto_played": bool(row.get("auto_played")),
                     "carried": bool(row.get("carried")),
                     "overflowed": bool(row.get("overflowed")),
@@ -1219,7 +1292,7 @@ def name_resolution_rows(rows: list[dict[str, Any]],
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
     for row in rows:
-        for hit in row["hits"]:
+        for hit in row["hits"] + row.get("applied", []):
             if not hit["combat_id"]:
                 continue
             hit["target"] = (by_id.get(hit["combat_id"])
@@ -1829,6 +1902,54 @@ def _map_ahead(state: dict[str, Any]) -> list[dict[str, Any]]:
     return [{"floors_ahead": (row - here_row) * step,
              "kinds": [k for _, k in sorted(floors[row])]}
             for row in sorted(floors, key=lambda r: (r - here_row) * step)]
+
+
+def _map_paths(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """Every room still reachable, floor by floor, with its links onward.
+
+    2026-09-26 (control seats, Defect and Necrobinder): the page listed every
+    room on each floor ahead but the links only out of the next floor, so a
+    forced corridor with no rest site could not be seen until the seat was in
+    it. `nodes[].children` is the whole DAG. Rooms are lettered left to right
+    among the REACHABLE rooms of their floor; `to` names the next floor's
+    letters. `[]` where the feed carries no links past the next floor, and
+    the render then prints the older all-rooms list.
+    """
+    nodes = {(_int(n.get("col"), -1), _int(n.get("row"), -1)): n
+             for n in _listing(state, "map.nodes", "nodes")
+             if isinstance(n, dict)}
+    start = [(_int(o.get("col"), -1), _int(o.get("row"), -1))
+             for o in _map_nodes(state) if isinstance(o, dict)]
+    start = [k for k in start if k in nodes]
+    if not start or not any(nodes[k].get("children") for k in start):
+        return []
+
+    def links(key: tuple[int, int]) -> list[tuple[int, int]]:
+        out = []
+        for child in nodes[key].get("children") or []:
+            if isinstance(child, (list, tuple)) and len(child) == 2:
+                ref = (_int(child[0], -1), _int(child[1], -1))
+                if ref in nodes:
+                    out.append(ref)
+        return out
+
+    floors: list[list[tuple[int, int]]] = []
+    seen: set[tuple[int, int]] = set()
+    layer = sorted(set(start))
+    while layer:
+        floors.append(layer)
+        seen.update(layer)
+        layer = sorted({c for k in layer for c in links(k)} - seen)
+    out = []
+    for depth, layer in enumerate(floors):
+        after = floors[depth + 1] if depth + 1 < len(floors) else []
+        letter = {k: chr(ord("A") + i) for i, k in enumerate(after)}
+        out.append({"floors_ahead": depth + 1, "rooms": [
+            {"letter": chr(ord("A") + i),
+             "kind": _label(nodes[k].get("type")),
+             "to": [letter[c] for c in links(k) if c in letter]}
+            for i, k in enumerate(layer)]})
+    return out
 
 
 def _map_boss(state: dict[str, Any]) -> str:

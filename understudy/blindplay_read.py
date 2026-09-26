@@ -15,7 +15,8 @@ from typing import Any
 
 from understudy import bridge, qa_packet
 from understudy.blindplay_shape import (BOARD_SETTLE_TRIES, COMBAT_SCREENS,
-                                        SETTLE_DELAY_S, SETTLE_TRIES)
+                                        EVENT_SETTLE_TRIES, SETTLE_DELAY_S,
+                                        SETTLE_TRIES)
 
 
 # ------------------------------------------------------------ small reads --
@@ -403,6 +404,33 @@ def settle(state: dict[str, Any], wire: Any = bridge,
     """
     for _ in range(tries):
         if not transient(state):
+            return settle_event(state, wire, delay=delay)
+        time.sleep(delay)
+        state = wire.get_state()
+    return state
+
+
+def _event_without_options(state: dict[str, Any]) -> bool:
+    """An event or Ancient room drawn before its buttons (2026-09-26).
+
+    Three control seats met it: "the first observe of an event or Ancient
+    room showed an empty option list; a second observe loaded it." An Ancient
+    still in its dialogue has no buttons by design, and is not this."""
+    if str(state.get("state_type")) != "event":
+        return False
+    blob = _blob(state, "event")
+    return (not blob.get("options") and blob.get("in_dialogue") is not True)
+
+
+def settle_event(state: dict[str, Any], wire: Any = bridge,
+                 tries: int = EVENT_SETTLE_TRIES,
+                 delay: float = SETTLE_DELAY_S) -> dict[str, Any]:
+    """Re-ask, briefly, an event room whose options have not appeared yet.
+
+    SHORT AND NEVER RAISING, `settle_board`'s rule: a room that really has no
+    options is drawn after a few reads, as before."""
+    for _ in range(tries):
+        if not _event_without_options(state):
             return state
         time.sleep(delay)
         state = wire.get_state()

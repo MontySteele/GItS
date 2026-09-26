@@ -1300,6 +1300,32 @@ public sealed class PlayTelemetryHooks : AbstractModel
     }
 
     /// <summary>
+    /// 2026-09-26 (the Silent control seat): "Poison applied is never shown
+    /// in 'what it did'." A power the resolving card put on an enemy -- Poison,
+    /// Weak, Vulnerable -- filed under that card. Enemies only; the ledger
+    /// drops it where no play is open.
+    /// </summary>
+    public override Task AfterPowerAmountChanged(PlayerChoiceContext choiceContext,
+        PowerModel power, decimal amount, Creature? applier, CardModel? cardSource)
+    {
+        try
+        {
+            var owner = power?.Owner;
+            if (owner is { IsEnemy: true })
+            {
+                ResolutionLedger.NotePower(owner,
+                    power!.Title.GetFormattedText() ?? "", (int)amount);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] resolution ledger power: "
+                   + $"{e.GetType().Name}: {e.Message}");
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
     /// THE KILLING HIT, which the hook above never hears: `CreatureCmd.Damage`
     /// skips `AfterDamageReceived` for a creature the hit killed. A Strike
     /// that killed its target therefore filed nothing, and the blind page said

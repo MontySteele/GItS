@@ -305,7 +305,7 @@ public class ResolutionLedgerTests
 
         var row = ResolutionLedger.Snapshot()[0];
         Assert.Equal(new[] { "card_id", "card", "auto_played", "carried",
-                             "overflowed", "hits", "summoned" },
+                             "overflowed", "hits", "applied", "summoned" },
                      new List<string>(row.Keys).ToArray());
 
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
@@ -332,6 +332,38 @@ public class ResolutionLedgerTests
         var only = Assert.Single(summoned);
         Assert.Equal("crabaletta", only["member"]);
         Assert.Equal("Mademoiselle Crabaletta", only["name"]);
+    }
+
+    /// <summary>2026-09-26 (the Silent control seat): "Poison applied is
+    /// never shown in 'what it did'." A power put on an enemy inside a play
+    /// is filed on that card's row; outside a play, and a zero, are not.
+    /// </summary>
+    [Fact]
+    public void A_power_put_on_an_enemy_inside_a_play_is_filed()
+    {
+        Fresh();
+        ResolutionLedger.NotePower("Nibbit", "Poison", 6, "3");  // no play
+        ResolutionLedger.OpenPlay("deadly_poison", "Deadly Poison", false);
+        ResolutionLedger.NotePower("Nibbit", "Poison", 6, "3");
+        ResolutionLedger.NotePower("Nibbit", "Weak", 0, "3");
+        ResolutionLedger.ClosePlay();
+
+        var row = ResolutionLedger.Snapshot()[0];
+        var applied = (List<Dictionary<string, object?>>)row["applied"]!;
+        var only = Assert.Single(applied);
+        Assert.Equal("Nibbit", only["target"]);
+        Assert.Equal("Poison", only["power"]);
+        Assert.Equal(6, only["amount"]);
+        Assert.Equal("3", only["combat_id"]);
+    }
+
+    [Fact]
+    public void A_power_change_reaches_the_ledger()
+    {
+        var calls = Il.Calls(
+            Il.Method("PlayTelemetryHooks", "AfterPowerAmountChanged"));
+
+        Assert.Contains("ResolutionLedger.NotePower", calls);
     }
 
     /// <summary>PRESENT AND EMPTY ON A TURN NOTHING RESOLVED, which is a fact
