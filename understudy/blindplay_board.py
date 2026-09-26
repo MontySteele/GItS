@@ -867,6 +867,20 @@ def _seat_key(raw: Any) -> int | None:
     return key if key >= 0 else None
 
 
+#: The wire's forecast target KINDS, in the words the page prints. Translated
+#: here, when the observation is built, because the blindness check reads the
+#: finished observation: a raw kind such as `random_aura` (Lynette's act,
+#: 2026-09-25) is a snake_case token and refused every command on the lane
+#: (the supporting-pool seat round, 2026-09-26). An enemy's name passes as is.
+STAGE_TARGET_WORDS = {"all": "ALL", "random": "a random enemy",
+                      "random_aura": "a random enemy with an aura"}
+
+
+def _stage_target(value: Any) -> str:
+    text = _text(value)
+    return STAGE_TARGET_WORDS.get(text, text)
+
+
 def _stage_forecast(raw: Any) -> dict[str, Any] | None:
     """RULE 7 OF THE GUEST CAST (2026-09-25): the mod's forecast of the end of
     this turn -- each performer's bar after the acts, their payments and the
@@ -902,7 +916,7 @@ def _stage_forecast(raw: Any) -> dict[str, Any] | None:
                                                    _text(row.get("name"))),
                      "amount": _int(row.get("amount")),
                      "element": _text(row.get("element")),
-                     "target": _text(row.get("target")),
+                     "target": _stage_target(row.get("target")),
                      "bow": bool(row.get("bow"))})
     takers = []
     for row in (raw.get("takers") or []):
@@ -922,7 +936,7 @@ def _stage_forecast(raw: Any) -> dict[str, Any] | None:
             "reaches_furina": _int(raw.get("reaches_furina")),
             "unknown": bool(raw.get("unknown")),
             "acts": acts, "act_total": total,
-            "act_total_target": _text(raw.get("act_total_target")),
+            "act_total_target": _stage_target(raw.get("act_total_target")),
             # None on a build that sends no split, and the page then prints
             # the older one-number line.
             "takers": takers if "takers" in raw else None}
