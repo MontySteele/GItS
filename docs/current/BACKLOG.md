@@ -30,7 +30,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
-- A co-op partner cannot see Klee's Spark count: the overhead gauge left in #658, the strip badge is hidden, and the energy-area counter is local only.
 - The Big One's x4 stays armed when its Set off finds no Bomb, so a later Mine on the enemy turn can spend it.
 - Dodoco Tales does nothing beyond Pounding Surprise under the Klee arm (its opening-Spark half is gated off); it needs an arm body.
 
