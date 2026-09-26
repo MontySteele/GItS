@@ -524,7 +524,8 @@ def test_the_seat_rows_say_what_a_performers_act_is():
     for word in ("front performer", "back performer"):
         page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                      hand=[_card(f"Deal damage equal to the {word}'s bar.")])
-        assert "Up to 3 performers act at the end of your turn" in page
+        assert ("Up to 3 performers, or 4 with Sold Out, act at the end "
+                "of your turn") in page
         # Draft 3 (2026-09-25): plain damage, no Hydro.
         assert "Crabaletta deals 5 damage to a random enemy" in page
 

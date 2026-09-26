@@ -1331,7 +1331,10 @@ def _summon_row(hay: str) -> str:
 #: third summon because nothing printed how many seats there are.
 #: Draft 3 (2026-09-25): no act applies Hydro, so the act list is plain
 #: damage.
-STAGE_ACTS = ("Up to 3 performers act at the end of your turn, from any "
+#: THE SUPPORTING POOL (2026-09-26): Sold Out opens a fourth seat, and the
+#: seat count says so. No parentheses (text-conventions rule 14).
+STAGE_ACTS = ("Up to 3 performers, or 4 with Sold Out, act at the end of "
+              "your turn, from any "
               "seat: Usher gives you 3 Block, Chevalmarin deals 2 to every "
               "enemy, Crabaletta deals 5 damage to a random enemy.")
 

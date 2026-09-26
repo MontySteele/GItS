@@ -1302,7 +1302,7 @@ public static partial class FurinaStage
     /// or a Bow makes comes through here (Crabaletta, the guests, Lynette's
     /// aura pool). Sim twin: <c>furina_stage._act_target</c>.
     /// </summary>
-    internal static Creature? ActTarget(Creature owner,
+    public static Creature? ActTarget(Creature owner,
                                         IReadOnlyList<Creature> pool)
     {
         if (pool.Count == 0) return null;
@@ -1311,7 +1311,7 @@ public static partial class FurinaStage
         {
             return verdict;
         }
-        var rng = owner.Player?.RunState.Rng.CombatTargets;
+        var rng = owner.Player?.RunState?.Rng?.CombatTargets;
         return rng == null ? pool[0] : rng.NextItem(pool);
     }
 }
