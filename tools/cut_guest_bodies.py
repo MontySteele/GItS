@@ -111,8 +111,9 @@ WORK_H = art_process.CUT_WORK_MAX
 # row of the lower shoe, read at 3x off the keyed work image; everything below
 # it is the mirror floor's reflection.
 #
-# Judged at 2x in-game size (2026-09-25), all eight cut from `game` through
-# the passes below. Seven read clean.
+# All eight ship from `game` (2026-09-25): "a matching cast is worth more
+# than" Charlotte's residual edge haze, which does not show at in-game size.
+# `wish` stays as the fallback kind for a future guest.
 SOURCES: dict[str, tuple[str, int | None]] = {
     "neuvillette": ("game", 875),
     "clorinde": ("game", 872),
@@ -120,10 +121,10 @@ SOURCES: dict[str, tuple[str, int | None]] = {
     "chevreuse": ("game", 873),
     "wriothesley": ("game", 875),
     "sigewinne": ("game", 870),
-    # Her `game` cut (sole 872) keeps a grey-lilac haze down the outside of
-    # both legs at 2x: the render's bloom there is opaque and 20 px wide, so
-    # despill turns it grey rather than removing it.
-    "charlotte": ("wish", None),
+    # A grey-lilac haze stays down the outside of both legs at 2x: the
+    # render's bloom there is opaque and 20 px wide, so despill greys it
+    # rather than removing it. Accepted: invisible at in-game size.
+    "charlotte": ("game", 872),
     "lynette": ("game", 872),
 }
 
