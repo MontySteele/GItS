@@ -1523,12 +1523,20 @@ public sealed class FurinaStageLedger
         return true;
     }
 
-    /// <summary>Lyney's act: the front and back performers change places.
-    /// With one performer nothing moves.</summary>
-    public bool SwapEnds()
+    /// <summary>
+    /// Lyney's act (the 2026-09-26 seat round, ruled by the designer): "If
+    /// he is not in front, he swaps places with your front performer." Once
+    /// he stands in front his act moves nobody -- the full-run seat's NEVER
+    /// AGAIN was his old front-and-back swap "undoing the front I had built".
+    /// False (and nothing moves) where <paramref name="lyney"/> is the front
+    /// or is not on the stage.
+    /// </summary>
+    public bool SwapToFront(StageSeat? lyney)
     {
-        if (_seats.Count < 2) return false;
-        (_seats[0], _seats[^1]) = (_seats[^1], _seats[0]);
+        if (lyney == null) return false;
+        var at = IndexOf(lyney);
+        if (at <= 0) return false;
+        (_seats[0], _seats[at]) = (_seats[at], _seats[0]);
         Note(new StageBeat(ReorderEvent, _seats[0].Who, 0, _seats[0].Fanfare,
                            0, ""));
         return true;
@@ -1912,6 +1920,9 @@ public sealed class FurinaStageLedger
             ["intent_known"] = forecast.IntentKnown,
             ["front_takes"] = forecast.FrontTakes,
             ["reaches_furina"] = forecast.ReachesFurina,
+            // 2026-09-26: what of that came from cards in her hand (Burn,
+            // Wither, ...), so the page can say so.
+            ["hand_damage"] = forecast.HandDamage,
             ["unknown"] = forecast.Unknown,
             // 2026-09-25 night (the granted-guest seat round): what each act
             // of the sweep deals and to whom, the total where every act lands

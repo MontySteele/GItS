@@ -6817,8 +6817,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                     "if any."],
         # THE SUPPORTING POOL (2026-09-26): two more guests.
         "Lyney": ["End of your turn: pay ", " of his Fanfare to deal ",
-                  " damage to a random enemy, then swap your ",
-                  "front and back performers."],
+                  " damage to a random enemy. If not in front, ",
+                  "he swaps with the front."],
         "Escoffier": ["End of your turn: pay ",
                       " of her Fanfare to give each other performer ",
                       " damage to ALL enemies."],

@@ -43,6 +43,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Seat page: the Tainted per-hit note still gives two readings for a multi-hit, the same double count the Weak note had before #650.
 - Seat page: Pocket Match's play log listed 3 and left out its own 5 damage.
 - Seat page: a Companion summon's ticks (Kamisato Ayaka's Soumetsu) print only inside Kokomi's Plan block (`summon_hits`); a Furina or Klee page shows them nowhere, and the stage's "acts will deal" preview leaves them out (Furina lane 2, 2026-09-26).
+- Seat page: The Trial's first page printed only "Proceed", and `proceed` was then refused against its Accept / Reject options -- the page read the event mid-transition (Furina Solo seat, 2026-09-26).
+- Furina Stage: the sim's `furina_stage.forecast` (tests only) does not count the cards in her hand that hurt her as her turn ends; the mod's forecast does since 2026-09-26 (`FurinaStage.HandTurnEndHits`).
 - Soak: `soak_screens._escape` answers the Crystal Sphere with `crystal_sphere_proceed`, which the game refuses while divinations are owed; spend them first as the seat page's `reveal` does (`blindplay_shape.sphere_reveal_action`).
 - Seat page: no screen prints the run seed or the ascension.
 - `EB-802` `understudy/twolane_frames.py` may carry the PrintWindow clip `frames.py` fixed; route it through the same capture, and make a frame-reading row refuse `complete: false`.

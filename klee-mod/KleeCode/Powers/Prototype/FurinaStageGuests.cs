@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -195,12 +196,17 @@ public static partial class FurinaStage
                 break;
             case StagePerformer.Lyney:
                 // THE SUPPORTING POOL (2026-09-26): 6 Pyro damage to a random
-                // enemy, THEN the front and back performers swap -- whichever
-                // seat he stands in (on a Bow, on the stage he left).
+                // enemy, THEN -- the seat round's ruling, same day -- if he is
+                // not in front he swaps places with the front performer. A
+                // Bow follows the same rule: one that leaves the stage moves
+                // nobody, and Grand Finale's stay-Bow reads the seat he keeps.
                 (hit, shot) = await HitRandom(
                     choiceContext, owner, Element.Pyro,
                     FurinaStageLaw.ActLyneyDamage * dmg);
-                if (stage.SwapEnds()) FurinaStagePlacement.Reflow(owner);
+                if (stage.SwapToFront(seat ?? exit?.Stayer))
+                {
+                    FurinaStagePlacement.Reflow(owner);
+                }
                 break;
             case StagePerformer.Escoffier:
             {
@@ -349,7 +355,8 @@ public static partial class FurinaStage
     public static StageForecast Forecast(Creature owner,
                                          IReadOnlyList<int>? hits,
                                          IReadOnlyList<StageForecastEnemy>? enemies = null,
-                                         int? bufferStacks = null)
+                                         int? bufferStacks = null,
+                                         IReadOnlyList<HandHit>? handHits = null)
     {
         var real = FurinaStageLedger.For(owner);
         var clone = real.CloneForForecast();
@@ -425,8 +432,38 @@ public static partial class FurinaStage
         // stack stops one hit's HP loss -- what reaches her once her Block and
         // the front performer have taken theirs.
         var buffer = bufferStacks ?? BufferStacks(owner);
-        foreach (var hit in hits ?? System.Array.Empty<int>())
+        // 2026-09-26 (the full-run seat, Aeonglass): "The projection said
+        // 'you take 13'. I ended the turn at HP 15 and the next screen was
+        // game over." The cards in HER HAND that hurt her as the turn ends --
+        // Burn, Wither, Decay, Toxic, Infection deal blockable damage; Bad
+        // Luck, Beckon and Regret take HP -- resolve after the acts and
+        // before the enemies (`CombatManager.DoTurnEnd`, after the
+        // `BeforeSideTurnEnd` the acts ride), so they meet her Block after
+        // the acts and the front performer first. A forecast that is too low
+        // is the one that kills.
+        var hand = handHits ?? HandTurnEndHits(owner);
+        var handDamage = 0;
+        var incoming = hand
+            .Select(h => (Amount: h.Amount, Blockable: h.Blockable,
+                          Enemy: false))
+            .Concat((hits ?? System.Array.Empty<int>())
+                .Select(h => (Amount: h, Blockable: true, Enemy: true)))
+            .ToList();
+        foreach (var (hit, blockable, enemy) in incoming)
         {
+            if (!blockable)
+            {
+                // HP loss: past her Block and the stage (rule 6 absorbs
+                // blockable damage only), and a Buffer stops it whole.
+                if (hit <= 0) continue;
+                if (buffer > 0) buffer--;
+                else
+                {
+                    furina += hit;
+                    handDamage += hit;
+                }
+                continue;
+            }
             var through = System.Math.Max(0, hit - block);
             block = System.Math.Max(0, block - hit);
             if (through <= 0) continue;
@@ -441,6 +478,7 @@ public static partial class FurinaStage
             else
             {
                 furina += result.ReachedFurina;
+                if (!enemy) handDamage += result.ReachedFurina;
             }
             if (lead != null && result.Absorbed > 0)
             {
@@ -455,8 +493,8 @@ public static partial class FurinaStage
                                   result.Exit != null);
                 }
             }
-            // A Rapt Audience, as `AbsorbHit` pays it.
-            if (twoOrMore && result.Absorbed > 0)
+            // A Rapt Audience, as `AbsorbHit` pays it: an ENEMY's hit.
+            if (enemy && twoOrMore && result.Absorbed > 0)
             {
                 foreach (var amount in rapt)
                 {
@@ -497,6 +535,7 @@ public static partial class FurinaStage
                                                    t.Leaves, t.Seat.Key))
                 .ToList(),
             Cues = cues,
+            HandDamage = handDamage,
         };
     }
 
@@ -534,6 +573,50 @@ public static partial class FurinaStage
     /// </summary>
     private static int BufferStacks(Creature owner) =>
         (int)owner.Powers.OfType<BufferPower>().Sum(p => p.Amount);
+
+    /// <summary>
+    /// The cards in her hand that hurt her as her turn ends, in hand order.
+    /// Read off the game's own shape rather than a list of names (decompiled
+    /// 2026-09-26): a card with <c>HasTurnEndInHandEffect</c> whose
+    /// <c>OnTurnEndInHand</c> deals its <c>Damage</c> var to its owner is
+    /// blockable damage (Burn, Wither, Decay, Toxic, Infection: all
+    /// <c>Unpowered | Move</c>), one that deals its <c>HpLoss</c> var is HP
+    /// loss (Bad Luck, Beckon), and <see cref="Regret"/> loses 1 HP per card
+    /// in hand. The number is the card's own, before any modifier on her.
+    /// </summary>
+    public static IReadOnlyList<HandHit> HandTurnEndHits(Creature owner)
+    {
+        var hits = new List<HandHit>();
+        if (owner.Player is not { } player) return hits;
+        var cards = CardPile.Get(PileType.Hand, player)?.Cards;
+        if (cards == null) return hits;
+        foreach (var card in cards)
+        {
+            if (HandHitOf(card, cards.Count) is { } hit) hits.Add(hit);
+        }
+        return hits;
+    }
+
+    /// <summary>One card's share of <see cref="HandTurnEndHits"/>, or null
+    /// where it does not hurt her as her turn ends.</summary>
+    public static HandHit? HandHitOf(
+        MegaCrit.Sts2.Core.Models.CardModel card, int handCount)
+    {
+        if (!card.HasTurnEndInHandEffect) return null;
+        if (card.DynamicVars.TryGetValue("Damage", out var damage))
+        {
+            return new HandHit((int)damage.BaseValue, true);
+        }
+        if (card.DynamicVars.TryGetValue("HpLoss", out var loss))
+        {
+            return new HandHit((int)loss.BaseValue, false);
+        }
+        if (card is MegaCrit.Sts2.Core.Models.Cards.Regret)
+        {
+            return new HandHit(handCount, false);
+        }
+        return null;
+    }
 
     /// <summary>
     /// The posted attacks, one entry per hit, each the number the game's own
@@ -659,8 +742,12 @@ public static partial class FurinaStage
             }
             if (seat != null) seat.LostSinceAct = 0;
             // THE SUPPORTING POOL (2026-09-26): Lyney's swap is a seat move,
-            // and the fade and the hits after it read the seats.
-            if (who == StagePerformer.Lyney) _stage.SwapEnds();
+            // and the fade and the hits after it read the seats. The seat
+            // round's ruling: to the front if he is not there, else nothing.
+            if (who == StagePerformer.Lyney)
+            {
+                _stage.SwapToFront(seat ?? exit?.Stayer);
+            }
             foreach (var gone in owed) Bow(gone);
         }
 
@@ -1051,4 +1138,14 @@ public sealed record StageForecast(
     /// in seat order (<see cref="StageForecastCue"/>).</summary>
     public IReadOnlyList<StageForecastCue> Cues { get; init; } =
         System.Array.Empty<StageForecastCue>();
+
+    /// <summary>2026-09-26: what of <see cref="ReachesFurina"/> came from
+    /// cards in her hand that hurt her as the turn ends (Burn, Wither, ...),
+    /// so the page can say so beside "the attacks shown".</summary>
+    public int HandDamage { get; init; }
 }
+
+/// <summary>One card in her hand that hurts her as her turn ends: its
+/// amount, and whether it is blockable damage (Burn) or HP loss (Beckon).
+/// </summary>
+public readonly record struct HandHit(int Amount, bool Blockable);

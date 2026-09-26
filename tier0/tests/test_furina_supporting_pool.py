@@ -240,7 +240,9 @@ def test_a_dead_verdict_target_falls_back_to_random(arm):
     assert live.hp == 50 - FS.ACT_CRABALETTA_DAMAGE
 
 
-def test_lyney_pays_two_hits_pyro_and_swaps_the_front_and_back(arm):
+def test_lyney_pays_two_hits_pyro_and_swaps_with_the_front(arm):
+    """The seat round's ruling (2026-09-26): "If he is not in front, he
+    swaps places with your front performer." """
     enemy = _enemy()
     st = _state([["usher", 3], ["chevalmarin", 2], ["lyney", 5]],
                 enemies=[enemy])
@@ -249,6 +251,16 @@ def test_lyney_pays_two_hits_pyro_and_swaps_the_front_and_back(arm):
                                ["usher", 3]]
     assert enemy.hp == 500 - FS.ACT_LYNEY_DAMAGE
     assert enemy.aura == "pyro"
+    # From the middle seat: he and the front change places; the back stays.
+    st = _state([["usher", 3], ["lyney", 5], ["crabaletta", 4]])
+    FS.perform(st, "lyney", pair=st.player.stage[1])
+    assert st.player.stage == [["lyney", 3], ["usher", 3], ["crabaletta", 4]]
+    # In front he stays, and his act moves nobody (the full-run seat: his old
+    # swap "kept undoing the front I had built").
+    st = _state([["lyney", 5], ["chevalmarin", 2], ["usher", 3]])
+    FS.perform(st, "lyney", pair=st.player.stage[0])
+    assert st.player.stage == [["lyney", 3], ["chevalmarin", 2],
+                               ["usher", 3]]
     # One performer: nothing to swap.
     st = _state([["lyney", 5]])
     FS.perform(st, "lyney", pair=st.player.stage[0])
@@ -262,13 +274,21 @@ def test_lyney_pays_two_hits_pyro_and_swaps_the_front_and_back(arm):
     assert _events(st, "stage_unpaid")
 
 
-def test_lyneys_bow_is_free_and_swaps_the_stage_he_left(arm):
+def test_lyneys_bow_is_free_and_a_bow_that_leaves_moves_nobody(arm):
     st = _state([["usher", 3], ["chevalmarin", 2], ["lyney", 2]])
     FS.perform(st, "lyney", pair=st.player.stage[2])
-    # He paid his last 2: the act swapped (Lyney to the front, then he
-    # left), then his free Bow hit and swapped the stage he left.
+    # He paid his last 2 and left the stage: neither the act nor his free
+    # Bow finds him on it, so nobody moves.
     assert [m for m, _f in st.player.stage] == ["usher", "chevalmarin"]
     assert st.enemies[0].hp == 500 - 2 * FS.ACT_LYNEY_DAMAGE
+
+
+def test_grand_finales_bow_takes_lyney_to_the_front(arm):
+    """His Bow follows the act's rule, and Grand Finale's Bow keeps him on
+    the stage, so from the back he takes the front."""
+    st = _state([["usher", 3], ["lyney", 4]])
+    FS.grand_finale(st)
+    assert [m for m, _f in st.player.stage] == ["lyney", "usher"]
 
 
 def test_stage_whisper_moves_up_to_three_and_the_back_keeps_one(arm):
@@ -291,6 +311,20 @@ def test_stage_whisper_moves_up_to_three_and_the_back_keeps_one(arm):
     st = _state([["usher", 2], ["crabaletta", 9]])
     effects.resolve_card(st, _row_card("proto_fs_stage_whisper", True))
     assert st.player.stage == [["usher", 7], ["crabaletta", 4]]
+
+
+def test_stage_whisper_draws_a_card(arm):
+    """The seat round's ruling (2026-09-26): "Draw 1 card." -- and it still
+    never empties the back, so the 0-cost loop stays closed."""
+    st = _state([["usher", 2], ["crabaletta", 7]], deck=3)
+    effects.resolve_card(st, _row_card("proto_fs_stage_whisper"))
+    assert st.player.stage == [["usher", 5], ["crabaletta", 4]]
+    assert len(st.player.hand) == 1
+    st = _state([["usher", 2], ["crabaletta", 1]], deck=3)
+    effects.resolve_card(st, _row_card("proto_fs_stage_whisper", True))
+    assert st.player.stage == [["usher", 2], ["crabaletta", 1]]
+    assert len(st.player.hand) == 1
+    assert not _events(st, "stage_bow")
 
 
 # ---------------------------------------------------------------------------

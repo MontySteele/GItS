@@ -268,4 +268,121 @@ public class FurinaSeatDefects20260926Tests
         // Furina, which the one Buffer stops.
         Assert.Equal(0, forecast.ReachesFurina);
     }
+
+    // ---- 22. The cards in her hand that hurt her as her turn ends --------
+
+    /// <summary>The full-run seat died on "you take 13" at 15 HP. The cards
+    /// in her hand that hurt her at the turn's end resolve after the acts and
+    /// before the enemies, through her Block and the front performer.</summary>
+    [Fact]
+    public void The_forecast_counts_burns_and_withers_in_her_hand()
+    {
+        using var _ = new Arm();
+        var (seat, _) = Stage();
+        var hand = new[] { new HandHit(2, true), new HandHit(3, true) };
+        var forecast = FurinaStage.Forecast(seat.Creature, new[] { 10 }, null,
+                                            bufferStacks: 0, handHits: hand);
+        Assert.Equal(15, forecast.ReachesFurina);
+        Assert.Equal(5, forecast.HandDamage);
+    }
+
+    [Fact]
+    public void A_burn_meets_the_acts_block_and_the_front_performer_first()
+    {
+        using var _ = new Arm();
+        var (seat, _) = Stage(("usher", 5));
+        // Usher's act: 3 Block. The Burn's 2 is Blocked, the Wither's 3 takes
+        // the last 1 and puts 2 on Usher (5 -> 3); the 10 then empties him
+        // (3) and his Bow's 3 Block meets the rest: 4 reaches her.
+        var forecast = FurinaStage.Forecast(
+            seat.Creature, new[] { 10 }, null, bufferStacks: 0,
+            handHits: new[] { new HandHit(2, true), new HandHit(3, true) });
+        Assert.Equal(4, forecast.ReachesFurina);
+        Assert.Equal(0, forecast.HandDamage);
+    }
+
+    [Fact]
+    public void Hp_loss_in_hand_goes_past_block_and_stage()
+    {
+        using var _ = new Arm();
+        var (seat, _) = Stage(("usher", 5));
+        var forecast = FurinaStage.Forecast(
+            seat.Creature, new int[0], null, bufferStacks: 0,
+            handHits: new[] { new HandHit(6, false) });
+        Assert.Equal(6, forecast.ReachesFurina);
+        Assert.Equal(6, forecast.HandDamage);
+    }
+
+    [Theory]
+    [InlineData(typeof(MegaCrit.Sts2.Core.Models.Cards.Burn), 2, true)]
+    [InlineData(typeof(MegaCrit.Sts2.Core.Models.Cards.Wither), 3, true)]
+    [InlineData(typeof(MegaCrit.Sts2.Core.Models.Cards.Beckon), 6, false)]
+    public void Each_hurting_card_reads_its_own_number(Type card, int amount,
+                                                       bool blockable)
+    {
+        var model = (MegaCrit.Sts2.Core.Models.CardModel)
+            Activator.CreateInstance(card, true)!;
+        Assert.Equal(new HandHit(amount, blockable),
+                     FurinaStage.HandHitOf(model, 5));
+    }
+
+    [Fact]
+    public void The_live_forecast_reads_her_hand()
+    {
+        var forecast = typeof(FurinaStage)
+            .GetMethods(System.Reflection.BindingFlags.Public
+                        | System.Reflection.BindingFlags.Static)
+            .Single(m => m.Name == "Forecast"
+                         && m.GetParameters().Length == 5);
+        Assert.Contains("FurinaStage.HandTurnEndHits", Il.Calls(forecast));
+    }
+
+    [Fact]
+    public void The_wire_carries_the_hand_damage()
+    {
+        Assert.Contains("hand_damage",
+                        Il.Strings(Il.Method("FurinaStageLedger",
+                                             "ForecastSnapshot")));
+    }
+
+    // ---- 23. A Five-Century Act re-projects the forecast ---------------
+
+    [Fact]
+    public void A_five_century_act_changes_the_forecast_where_a_bow_returns()
+    {
+        using var _ = new Arm();
+        var (seat, _) = Stage(("crabaletta", 2));
+        var without = FurinaStage.Forecast(seat.Creature, new[] { 5, 5 }, null,
+                                           bufferStacks: 0,
+                                           handHits: new HandHit[0]);
+        seat.WithPower<FiveCenturyActPower>(1);
+        var with = FurinaStage.Forecast(seat.Creature, new[] { 5, 5 }, null,
+                                        bufferStacks: 0,
+                                        handHits: new HandHit[0]);
+        // She returns at 1 after the first hit's Bow and takes 1 of the next.
+        Assert.Equal(without.ReachesFurina - 1, with.ReachesFurina);
+    }
+
+    // ---- 29 and 30. The designer's two card changes ----------------------
+
+    [Fact]
+    public void Lyney_in_front_stays_there_in_the_forecast()
+    {
+        using var _ = new Arm();
+        var (seat, stage) = Stage(("usher", 3));
+        stage.GuestArrives(StagePerformer.Lyney, 5, atFront: true);
+        var forecast = FurinaStage.Forecast(seat.Creature, new[] { 4 }, null,
+                                            bufferStacks: 0,
+                                            handHits: new HandHit[0]);
+        // He paid 2 (5 -> 3) and stays in front: the hit lands on him.
+        Assert.Equal(StagePerformer.Lyney, Assert.Single(forecast.Takers).Who);
+    }
+
+    [Fact]
+    public void Stage_whisper_draws_a_card()
+    {
+        var calls = Il.Calls(Il.Method("ProtoFsStageWhisper", "OnPlay"));
+        Assert.Contains("FurinaStage.Whisper", calls);
+        Assert.Contains("CardPileCmd.Draw", calls);
+    }
 }

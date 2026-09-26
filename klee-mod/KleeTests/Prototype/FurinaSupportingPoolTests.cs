@@ -178,10 +178,19 @@ public class FurinaSupportingPoolTests
         Assert.True(stage.ActFanfare(StagePerformer.Lyney, stage.Seats[2],
                                      null, owed));
         Assert.Equal(new[] { 3, 2, 3 }, Bars(stage));
-        // The swap is the ledger's own move, after the hit.
-        Assert.True(stage.SwapEnds());
+        // The swap is the ledger's own move, after the hit: the seat
+        // round's ruling (2026-09-26), to the front if he is not there.
+        Assert.True(stage.SwapToFront(stage.Seats[2]));
         Assert.Equal(new[] { StagePerformer.Lyney, StagePerformer.Chevalmarin,
                              StagePerformer.Usher }, Cast(stage));
+        // In front he stays, and nobody moves.
+        Assert.False(stage.SwapToFront(stage.Seats[0]));
+        Assert.Equal(StagePerformer.Lyney, stage.Lead!.Who);
+        // From the middle, he and the front change places.
+        var (_, middle) = Stage(("usher", 3), ("lyney", 5), ("crabaletta", 4));
+        Assert.True(middle.SwapToFront(middle.Seats[1]));
+        Assert.Equal(new[] { StagePerformer.Lyney, StagePerformer.Usher,
+                             StagePerformer.Crabaletta }, Cast(middle));
 
         var (_, poor) = Stage(("usher", 3), ("lyney", 1));
         Assert.False(poor.ActFanfare(StagePerformer.Lyney, poor.Seats[1],
@@ -189,10 +198,10 @@ public class FurinaSupportingPoolTests
         Assert.Equal(new[] { 3, 1 }, Bars(poor));
 
         var (_, alone) = Stage(("lyney", 5));
-        Assert.False(alone.SwapEnds());
+        Assert.False(alone.SwapToFront(alone.Seats[0]));
 
         var act = Il.Calls(Il.Method("FurinaStage", "GuestAct"));
-        Assert.Contains("FurinaStageLedger.SwapEnds", act);
+        Assert.Contains("FurinaStageLedger.SwapToFront", act);
     }
 
     [Fact]

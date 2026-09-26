@@ -941,6 +941,9 @@ def _stage_forecast(raw: Any) -> dict[str, Any] | None:
             "intent_known": bool(raw.get("intent_known")),
             "front_takes": _int(raw.get("front_takes")),
             "reaches_furina": _int(raw.get("reaches_furina")),
+            # 2026-09-26: what of that the cards in her hand deal as her turn
+            # ends (Burn, Wither, ...). 0 on an older build.
+            "hand_damage": _int(raw.get("hand_damage")),
             "unknown": bool(raw.get("unknown")),
             "acts": acts, "act_total": total,
             "act_total_target": _stage_target(raw.get("act_total_target")),

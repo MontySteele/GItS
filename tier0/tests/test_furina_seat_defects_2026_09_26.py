@@ -383,3 +383,94 @@ def test_a_hit_no_enemy_dealt_says_so():
         _beat("hit", "usher", "Usher", 0, 1, 2)]})
     assert lines == ["  - **Usher** took 2 damage no enemy dealt, such as a "
                      "Burn or Wither in your hand: 3 → 1."]
+
+
+# ---- 22. The forecast counts the cards in her hand ------------------------
+
+def test_the_intent_line_says_what_came_from_her_hand():
+    """The full-run seat died on "you take 13" at 15 HP; the mod's forecast
+    now counts Burns and Withers in hand, and the page says how much."""
+    from understudy.blindplay_render import _render_stage_forecast
+    forecast = {"seats": [{"name": "Usher", "now": 3, "after": 3,
+                           "leaves": False}],
+                "arrivals": [], "block": 3, "intent_known": True,
+                "front_takes": 0, "reaches_furina": 16, "hand_damage": 3,
+                "unknown": False, "acts": [], "act_total": None,
+                "act_total_target": "", "takers": []}
+    line = _render_stage_forecast(forecast)[-1]
+    assert line.endswith("you take 16, 3 of it from cards in your hand as "
+                         "your turn ends (Burn, Wither and the like).")
+    forecast["hand_damage"] = 0
+    assert _render_stage_forecast(forecast)[-1].endswith("you take 16.")
+
+
+def test_the_wire_hand_damage_crosses_to_the_observation():
+    from understudy.blindplay_board import _stage_forecast
+    assert _stage_forecast({"hand_damage": 5})["hand_damage"] == 5
+    assert _stage_forecast({})["hand_damage"] == 0
+
+
+# ---- 24. Wriothesley's face says who makes room ---------------------------
+
+def test_wriothesleys_face_says_the_back_one_makes_room():
+    import yaml
+    from tier0.content import loader
+    rows = yaml.safe_load((loader.DOCS_DIR / "prototype-surface.yaml")
+                          .read_text(encoding="utf-8"))
+    face = next(r for r in rows
+                if r["id"] == "proto_fs_guest_star_wriothesley")["description"]
+    assert "On a full stage, the back one [gold]Bow[/gold]s" in face
+
+
+# ---- 25. An every-N-cards counter ----------------------------------------
+
+def test_withering_presence_says_its_count_carries_over():
+    from understudy.blindplay_render import _render_power
+    line = _render_power({"name": "Withering Presence", "stacks": 1,
+                          "kind": "buff",
+                          "text": "Every 6 cards you play, add a Wither to "
+                                  "your hand."}, "- ")
+    assert line.endswith("The number is the cards left before the next one, "
+                         "and it carries over from turn to turn.")
+    other = _render_power({"name": "Strength", "stacks": 3, "kind": "buff",
+                           "text": "Increases attack damage by 3."}, "- ")
+    assert "carries over" not in other
+
+
+# ---- 27. Numbered potions --------------------------------------------------
+
+def test_a_numbered_potion_resolves_like_a_numbered_card():
+    """The Solo seat: `use potion "Vulnerable Potion (1)"` was refused with
+    two on the belt, and the bare name worked."""
+    state = {"state_type": "monster",
+             "battle": {"round": 1, "enemies": [
+                 {"name": "Nibbit", "hp": 20, "max_hp": 20, "block": 0,
+                  "entity_id": "7", "combat_id": 1, "status": [],
+                  "intents": []}]},
+             "player": {"hp": 30, "max_hp": 60, "block": 0, "energy": 3,
+                        "hand": [], "relics": [], "status": [],
+                        "potions": [
+                            {"name": "Vulnerable Potion", "slot": 0,
+                             "target_type": "AnyEnemy"},
+                            {"name": "Vulnerable Potion", "slot": 2,
+                             "target_type": "AnyEnemy"}]}}
+    blindplay_faces.forget_fight()
+    try:
+        second = blindplay.act(state,
+                               'use potion "Vulnerable Potion (2)" on "Nibbit"')
+        assert not second["refusal"], second["refusal"]
+        assert second["post"]["slot"] == 2
+        bare = blindplay.act(state, 'use potion "Vulnerable Potion" on "Nibbit"')
+        assert not bare["refusal"] and bare["post"]["slot"] == 0
+        dropped = blindplay.act(state, 'drop potion "Vulnerable Potion (1)"')
+        assert not dropped["refusal"] and dropped["post"]["slot"] == 0
+    finally:
+        blindplay_faces.forget_fight()
+
+
+# ---- 29. Lyney, in the glossary --------------------------------------------
+
+def test_lyneys_row_is_the_new_act():
+    assert ARM_KEYWORDS["Lyney"] == (
+        "End of your turn: pay 2 of his Fanfare to deal 6 Pyro damage to a "
+        "random enemy. If not in front, he swaps with the front.")

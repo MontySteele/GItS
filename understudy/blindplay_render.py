@@ -785,8 +785,31 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     if kind:
         line += f" ({kind})"
     if power["text"]:
-        line += f" — {power['text']}{_slow_clause(power)}"
+        line += (f" — {power['text']}{_slow_clause(power)}"
+                 f"{_every_n_cards_clause(power)}")
     return line
+
+
+#: 2026-09-26 (the Furina full run on lane 1, Aeonglass): "Withering
+#: Presence: 'Every 6 cards you play, add a Wither'. On T1 I held back to 5
+#: cards to dodge it. The counter carries across turns ... nothing on screen
+#: says so." The badge is `WitheringPresencePower.DisplayAmount`, its
+#: `CardsLeft` var (decompiled): the cards left before the next one, which
+#: only a card play moves. Read off the power's own sentence, never its name.
+_EVERY_N_CARDS = re.compile(r"\bevery (\d+) cards you play\b", re.IGNORECASE)
+_EVERY_N_CARDS_CLAUSE = (" The number is the cards left before the next one, "
+                         "and it carries over from turn to turn.")
+
+
+def _every_n_cards_clause(power: dict[str, Any]) -> str:
+    """The count an "every N cards you play" power keeps, or ''."""
+    text = str(power.get("text") or "")
+    found = _EVERY_N_CARDS.search(text)
+    stacks = power.get("stacks")
+    if (not found or not isinstance(stacks, int) or isinstance(stacks, bool)
+            or not 0 < stacks <= int(found.group(1))):
+        return ""
+    return _EVERY_N_CARDS_CLAUSE
 
 
 # `EB-349`. The three sentences the page reads a rule out of, each the printed
@@ -1700,6 +1723,11 @@ STAGE_INTENT_TAKE = "**{who}** takes {n}{leaves}"
 STAGE_INTENT_LEAVES = " and leaves (its Bow lands before the rest of that hit)"
 STAGE_INTENT_THEN = ", then "
 STAGE_INTENT_NO_PERFORMER = "no performer is hit"
+#: 2026-09-26 (the full-run seat died on "you take 13" at 15 HP; the lane-3
+#: seat met "you take 0" with four Burns in hand): the forecast now counts the
+#: cards in her hand that hurt her as the turn ends, and says how much.
+STAGE_INTENT_HAND = (", {n} of it from cards in your hand as your turn ends "
+                     "(Burn, Wither and the like).")
 #: ... and what the acts will deal.
 STAGE_ACTS_HEADING = "- What the acts will deal at the end of your turn:"
 STAGE_ACT_FORECAST_LINE = "  - **{who}**: {n}{element} to {target}"
@@ -1867,11 +1895,17 @@ def _render_stage_forecast(forecast: dict[str, Any] | None) -> list[str]:
     out += _render_stage_acts(forecast)
     if forecast["intent_known"]:
         if forecast.get("takers") is None:
-            out.append(STAGE_INTENT_LINE.format(
+            line = STAGE_INTENT_LINE.format(
                 block=forecast["block"], front=forecast["front_takes"],
-                you=forecast["reaches_furina"]))
+                you=forecast["reaches_furina"])
         else:
-            out.append(_stage_intent_line(forecast))
+            line = _stage_intent_line(forecast)
+        # 2026-09-26 (the full run's last turn): the cards in her hand that
+        # hurt her as the turn ends are in that number, and the line says so.
+        if forecast.get("hand_damage"):
+            line = (line.rstrip(".")
+                    + STAGE_INTENT_HAND.format(n=forecast["hand_damage"]))
+        out.append(line)
     return out
 
 

@@ -1553,8 +1553,10 @@ ARM_KEYWORDS: dict[str, str] = {
                 "one with an aura if any."),
     # THE SUPPORTING POOL (2026-09-26): two more guests,
     # `ArmKeywordTips.ForLyney` / `ForEscoffier` word for word.
+    # The seat round (2026-09-26, the designer's ruling): to the front if he
+    # is not there, and once there his act moves nobody.
     "Lyney": ("End of your turn: pay 2 of his Fanfare to deal 6 Pyro damage "
-              "to a random enemy, then swap your front and back performers."),
+              "to a random enemy. If not in front, he swaps with the front."),
     "Escoffier": ("End of your turn: pay 3 of her Fanfare to give each other "
                   "performer 2 and deal 3 Cryo damage to ALL enemies."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina

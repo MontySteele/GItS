@@ -817,7 +817,12 @@ def _use_potion(state: dict[str, Any], cmd: Command) -> Resolution:
     potions = _potions(state)
     if not potions:
         return _refuse("you are not carrying any potions")
-    idx, why = _match(potions, cmd.name, key=lambda p: _text(p.get("name")))
+    # 2026-09-26 (the Furina Solo seat): `use potion "Vulnerable Potion (1)"`
+    # was refused with two on the belt, and the bare name worked. Potions
+    # take the numbered handle cards take (`EB-177`), and two of one potion
+    # are interchangeable, as two copies of one card are.
+    idx, why = _match(potions, cmd.name, key=lambda p: _text(p.get("name")),
+                      face=lambda p: _text(p.get("name")), number=True)
     if idx < 0:
         return _refuse(why)
     entry = potions[idx]
@@ -878,7 +883,8 @@ def _drop_potion(state: dict[str, Any], cmd: Command) -> Resolution:
         idx = cmd.ordinal - 1
     else:
         idx, why = _match(potions, cmd.name,
-                          key=lambda p: _text(p.get("name")))
+                          key=lambda p: _text(p.get("name")),
+                          face=lambda p: _text(p.get("name")), number=True)
         if idx < 0:
             return _refuse(why)
     entry = potions[idx]

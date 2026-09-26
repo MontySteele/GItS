@@ -121,8 +121,13 @@ def test_the_eight_rows_are_the_build_tables():
         assert row["register"] == "salon"
         # The guest seat round (2026-09-25): Wriothesley joins at the front.
         where = " at the front" if member in FRONT else ""
+        # The supporting-pool seat round (2026-09-26): a front-seat guest's
+        # face says who makes room on a full stage (the rule was unchanged).
+        room = (" On a full stage, the back one [gold]Bow[/gold]s and leaves "
+                "him its [gold]Fanfare[/gold]." if member in FRONT else "")
         assert row["description"] == (
-            f"{name} joins the stage{where} with {n} [gold]Fanfare[/gold].")
+            f"{name} joins the stage{where} with {n} [gold]Fanfare[/gold]."
+            + room)
         effect = {"op": "stage_guest", "member": member, "amount": n}
         if member in FRONT:
             effect["seat"] = "front"

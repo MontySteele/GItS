@@ -1038,14 +1038,16 @@ public static class ArmKeywordTips
     // 2026-09-26.md): two more guests, on the same terms -- the same
     // sentence as each one's badge, numerals from `FurinaStageLaw`.
 
-    /// <summary>Lyney rotates the stage by himself.</summary>
+    /// <summary>Lyney takes the front by himself (the 2026-09-26 seat
+    /// round's ruling: once in front he stays, and his act moves nobody).
+    /// </summary>
     public static IEnumerable<IHoverTip> ForLyney(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, LyneyKey,
             "End of your turn: pay " + FurinaStageLaw.ActLyneyPrice
           + " of his Fanfare to deal " + FurinaStageLaw.ActLyneyDamage
-          + " [gold]Pyro[/gold] damage to a random enemy, then swap your "
-          + "front and back performers.");
+          + " [gold]Pyro[/gold] damage to a random enemy. If not in front, "
+          + "he swaps with the front.");
 
     /// <summary>Escoffier feeds the cast instead of hitting one enemy.
     /// </summary>
