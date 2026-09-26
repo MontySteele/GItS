@@ -135,3 +135,50 @@ def test_the_cut_keeps_the_whole_alpha_box_and_leaves_no_fringe():
     # visible pixel, so red stays near the figure's own 40 (48 measured). A
     # straight per-channel resample of the same crop reaches 248.
     assert edge[:, 0].max() < 80
+
+
+# ---- the passes after the matte, on synthetic work images ----------------
+
+def _stance(raised: bool) -> Image.Image:
+    """Two detailed 'shoes' on a 120-row frame whose last row is the sole;
+    with `raised`, the left shoe ends 25 rows up and a flat 'reflection'
+    fills the rows below it, as the mirror floor draws one."""
+    h, w = 120, 100
+    a = np.zeros((h, w, 4), np.uint8)
+    rng = np.random.default_rng(7)
+    for x0, bottom in ((10, 94 if raised else 119), (60, 119)):
+        shoe = rng.integers(0, 255, (60, 30, 3))
+        a[bottom - 59:bottom + 1, x0:x0 + 30, :3] = shoe
+        a[bottom - 59:bottom + 1, x0:x0 + 30, 3] = 255
+        if bottom < h - 1:                       # the flat reflection
+            a[bottom + 1:, x0 - 3:x0 + 33, :3] = 60
+            a[bottom + 1:, x0 - 3:x0 + 33, 3] = 255
+    return Image.fromarray(a, "RGBA")
+
+
+def test_a_raised_foots_reflection_is_dropped_and_a_planted_foot_kept():
+    out = np.asarray(tool.drop_reflections(_stance(raised=True)))[..., 3]
+    assert out[96:, 7:43].max() == 0, "reflection under the raised foot kept"
+    assert out[40:95, 10:40].min() == 255, "the raised shoe itself was cut"
+    assert out[60:, 60:90].min() == 255, "the planted shoe was cut"
+    kept = np.asarray(tool.drop_reflections(_stance(raised=False)))[..., 3]
+    assert (kept == np.asarray(_stance(raised=False))[..., 3]).all()
+
+
+def test_small_islands_go_and_the_figure_stays():
+    a = np.zeros((100, 100, 4), np.uint8)
+    a[10:90, 30:70] = (200, 150, 120, 255)
+    a[5:7, 5:7] = (255, 0, 255, 255)             # a two-by-two speck
+    out = np.asarray(tool.keep_islands(Image.fromarray(a, "RGBA")))[..., 3]
+    assert out[5:7, 5:7].max() == 0
+    assert out[10:90, 30:70].min() == 255
+
+
+def test_despill_neutralises_a_lilac_edge_but_not_saturated_blue_cloth():
+    a = np.zeros((60, 60, 4), np.uint8)
+    a[:, 10:50] = (40, 90, 200, 255)             # saturated blue coat
+    a[:, 10:12] = (230, 225, 250, 255)           # lilac-cast white edge
+    out = np.asarray(tool.despill(Image.fromarray(a, "RGBA"))).astype(int)
+    edge, coat = out[30, 10], out[30, 30]
+    assert edge[2] <= max(edge[0], edge[1]) + tool.SPILL_ALLOW
+    assert tuple(coat[:3]) == (40, 90, 200), "blue cloth greyed"

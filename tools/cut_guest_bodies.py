@@ -28,10 +28,14 @@ TWO SOURCES, chosen per guest in SOURCES below.
         on a mirror floor, so the matte keeps the shoes' REFLECTION (it is
         figure-coloured, not backdrop); the work image is cut at the guest's
         SOLE ROW, read off the render at 3x, so the feet are the ground line.
+        Three automatic passes follow, one parameter set for every guest:
+        drop_reflections() (the reflection under a RAISED foot, which the
+        sole row cannot reach), keep_islands() (stray specks) and despill()
+        (the nebula's blue-lilac cast on edges and pale cloth).
   wish  art/raw/Character_<Name>_Full_Wish.png, the transparent Wish render,
         its own alpha as the matte. It carries the splash FX, so the figure
         stands inside an effects cloud. The fallback for a guest whose `game`
-        cut failed the 3x check (holes in the figure, backdrop or stars left,
+        cut failed the 2x check (holes in the figure, backdrop or stars left,
         a blue halo on the edges); the reason is on its SOURCES line.
 
 HEIGHT. The guests are people standing beside Furina, so they are sized off
@@ -107,32 +111,62 @@ WORK_H = art_process.CUT_WORK_MAX
 # row of the lower shoe, read at 3x off the keyed work image; everything below
 # it is the mirror floor's reflection.
 #
-# Every guest was keyed from its `game` render and read at 3x (2026-09-25).
-# Two passed. Six failed and stay on the Wish cut, each for the reason given.
-# A STAGGERED stance fails for a reason no knob reaches: one sole row cannot
-# clear the reflection under the RAISED foot without a hand-drawn region, and
-# a hand matte is the thing this tool does not do. The halo is the render's
-# own bloom off pale cloth against the nebula, which no tolerance keys and a
-# raised chroma gate only buys by eating the figure (see GAME_CUT).
+# Judged at 2x in-game size (2026-09-25), all eight cut from `game` through
+# the passes below. Seven read clean.
 SOURCES: dict[str, tuple[str, int | None]] = {
-    # Staggered stance (left sole ~851, right ~875): reflection under the
-    # raised foot.
-    "neuvillette": ("wish", None),
+    "neuvillette": ("game", 875),
     "clorinde": ("game", 872),
     "navia": ("game", 873),
-    # Blue-lilac halo along both white stockings.
-    "chevreuse": ("wish", None),
-    # Staggered stance (left sole ~853, right ~875): reflection under the
-    # raised boot.
-    "wriothesley": ("wish", None),
-    # Lavender halo around the white stockings and socks.
-    "sigewinne": ("wish", None),
-    # Lavender bloom down the length of both legs; staggered stance too.
+    "chevreuse": ("game", 873),
+    "wriothesley": ("game", 875),
+    "sigewinne": ("game", 870),
+    # Her `game` cut (sole 872) keeps a grey-lilac haze down the outside of
+    # both legs at 2x: the render's bloom there is opaque and 20 px wide, so
+    # despill turns it grey rather than removing it.
     "charlotte": ("wish", None),
-    # Staggered stance (left sole ~852, right ~872): reflection under the
-    # raised boot, and a magenta speck beside it.
-    "lynette": ("wish", None),
+    "lynette": ("game", 872),
 }
+
+# ---- the three passes after the matte, ONE parameter set for all eight ----
+#
+# REFLECTION UNDER A RAISED FOOT. A staggered stance puts one sole above the
+# sole row, and the mirror floor's image of that foot fills the rows between.
+# The reflection is BLURRED where the shoe is not: per foot (an x-run of
+# opaque pixels at the sole row), the mean luminance gradient per row, over a
+# REFL_WIN-row window, stays under REFL_FLAT all the way up from the sole to
+# where the real shoe begins. A run of at least REFL_MIN_ROWS such rows is
+# dropped, across the foot's columns widened by REFL_MARGIN (the reflection
+# is wider than the sole) but never into the other foot's columns. Measured
+# on the eight: raised feet flat for 16-30 rows, every planted foot 0-5.
+OPAQUE = 128
+REFL_FLAT = 12
+REFL_WIN = 5
+REFL_MIN_ROWS = 10
+REFL_SKIP = 2        # the sole cut's own feathered rows
+REFL_MARGIN = 10
+FOOT_ROWS = 3        # rows above the sole that define a foot's x-run
+FOOT_GAP = 3         # columns of gap that still join one run
+
+# ISLANDS. Anything under ISLAND_FRAC of the largest piece goes (Lynette's
+# magenta speck, stray stars); a kept piece keeps a 2 px feathered fringe.
+ISLAND_FRAC = 0.01
+
+# DESPILL. The nebula tints what it touches blue-lilac. B is clamped to
+# max(R, G) + SPILL_ALLOW and a magenta cast (min(R, B) over G) is pulled the
+# same way, on three sets of pixels: every pixel within SPILL_EDGE of the
+# silhouette; bright, pale pixels (white stockings, rim light) within
+# SPILL_BRIGHT_BAND; and LOW-SATURATION pixels within SPILL_WIDE (Charlotte's
+# leg glow, 20 px wide). Saturated cloth -- Neuvillette's coat (sat 0.56-0.83),
+# Sigewinne's jacket, Lynette's bow -- is outside every set but the 3 px edge.
+# The bright set is banded, not "anywhere": unbanded, it moved 644 px of
+# Sigewinne's pale-blue HAIR toward grey and changed nothing else.
+SPILL_ALLOW = 12
+SPILL_EDGE = 3
+SPILL_BRIGHT_BAND = 8
+SPILL_BRIGHT_LUM = 150
+SPILL_BRIGHT_SAT = 0.25
+SPILL_WIDE = 24
+SPILL_WIDE_SAT = 0.45
 
 # Furina's body height in creature space (combat.tscn Bounds, -280..0). Read
 # back from the scene on every run so the 80% cannot drift from her.
@@ -192,13 +226,100 @@ def cut_one(src: Image.Image) -> Image.Image:
     return Image.fromarray(np.rint(out).astype(np.uint8), "RGBA")
 
 
+def foot_runs(alpha: np.ndarray, sole: int) -> list[tuple[int, int]]:
+    """x-runs of opaque pixels in the FOOT_ROWS rows ending at the sole."""
+    band = (alpha[sole - FOOT_ROWS + 1:sole + 1] >= OPAQUE).any(0)
+    runs: list[tuple[int, int]] = []
+    for x in np.nonzero(band)[0].tolist():
+        if runs and x - runs[-1][1] <= FOOT_GAP:
+            runs[-1] = (runs[-1][0], x)
+        else:
+            runs.append((x, x))
+    return runs
+
+
+def _row_detail(a: np.ndarray, x0: int, x1: int) -> np.ndarray:
+    """Mean luminance gradient of the opaque pixels in each row, x0..x1."""
+    lum = a[..., :3].mean(-1)
+    grad = (np.abs(np.diff(lum, axis=1, append=lum[:, -1:]))
+            + np.abs(np.diff(lum, axis=0, append=lum[-1:])))
+    grad, solid = grad[:, x0:x1 + 1], a[:, x0:x1 + 1, 3] >= OPAQUE
+    n = solid.sum(1)
+    return np.where(n > 0, (grad * solid).sum(1) / np.maximum(n, 1), 0.0)
+
+
+def drop_reflections(work: Image.Image) -> Image.Image:
+    """Clear the flat, blurred reflection under a raised foot (see REFL_*)."""
+    a = np.asarray(work).astype(np.float64).copy()
+    sole = a.shape[0] - 1
+    runs = foot_runs(a[..., 3], sole)
+    for i, (x0, x1) in enumerate(runs):
+        raw = _row_detail(a, x0, x1)
+        detail = np.convolve(raw, np.ones(REFL_WIN) / REFL_WIN, mode="same")
+        y = sole - REFL_SKIP
+        while y > 0 and detail[y] < REFL_FLAT:
+            y -= 1
+        if sole - REFL_SKIP - y < REFL_MIN_ROWS:
+            continue                       # a planted foot: nothing below it
+        # The window lags the shoe's edge by up to half its width; step up
+        # through rows that are flat on their own, to the shoe's last row.
+        while y > 0 and raw[y] < REFL_FLAT:
+            y -= 1
+        lo = max(x0 - REFL_MARGIN, runs[i - 1][1] + 1 if i else 0)
+        hi = min(x1 + REFL_MARGIN,
+                 runs[i + 1][0] - 1 if i + 1 < len(runs) else a.shape[1] - 1)
+        a[y + 1:, lo:hi + 1, 3] = 0
+    return Image.fromarray(a.astype(np.uint8), "RGBA")
+
+
+def keep_islands(work: Image.Image) -> Image.Image:
+    """Keep the largest piece and any piece over ISLAND_FRAC of it."""
+    a = np.asarray(work).copy()
+    pieces = art_process._components(a[..., 3] >= BBOX_ALPHA)
+    if not pieces:
+        return work
+    floor = ISLAND_FRAC * int(pieces[0].sum())
+    keep = np.zeros(a.shape[:2], bool)
+    for i, piece in enumerate(pieces):
+        if i == 0 or piece.sum() >= floor:
+            keep |= piece
+    a[~art_process._dilate(keep, 2), 3] = 0
+    return Image.fromarray(a, "RGBA")
+
+
+def despill(work: Image.Image) -> Image.Image:
+    """Pull the nebula's blue-lilac cast toward neutral (see SPILL_*)."""
+    a = np.asarray(work).astype(np.float64).copy()
+    r, g, b, al = a[..., 0], a[..., 1], a[..., 2], a[..., 3]
+    solid = al >= OPAQUE
+
+    def near(k: int) -> np.ndarray:
+        return (al > 0) & ~art_process._erode(solid, k)
+
+    hi, lo = a[..., :3].max(-1), a[..., :3].min(-1)
+    lum = a[..., :3].mean(-1)
+    sat = (hi - lo) / np.maximum(hi, 1)
+    m = near(SPILL_EDGE)
+    m |= (near(SPILL_BRIGHT_BAND) & (lum >= SPILL_BRIGHT_LUM)
+          & (sat <= SPILL_BRIGHT_SAT))
+    m |= near(SPILL_WIDE) & (sat <= SPILL_WIDE_SAT)
+    b2 = np.where(m, np.minimum(b, np.maximum(r, g) + SPILL_ALLOW), b)
+    magenta = np.minimum(r, b2) - g
+    pull = np.where(m & (magenta > SPILL_ALLOW), magenta - SPILL_ALLOW, 0.0)
+    a[..., 0] = r - pull
+    a[..., 2] = b2 - pull
+    return Image.fromarray(np.clip(np.rint(a), 0, 255).astype(np.uint8), "RGBA")
+
+
 def key_game(src: Image.Image, sole: int) -> Image.Image:
-    """Key a `game` render with art_process.matte() and cut it at the sole."""
+    """Key a `game` render with art_process.matte(), cut it at the sole, and
+    run the three passes."""
     work = art_process.matte(src.convert("RGBA"), GAME_CUT)
     if work.height != WORK_H:
         raise SystemExit(f"game render keyed to {work.size}; the sole rows "
                          f"assume a portrait render {WORK_H} rows tall")
-    return work.crop((0, 0, work.width, sole + 1))
+    work = work.crop((0, 0, work.width, sole + 1))
+    return despill(keep_islands(drop_reflections(work)))
 
 
 def body(art_root: Path, name: str) -> Image.Image:
