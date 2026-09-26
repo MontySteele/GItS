@@ -21,6 +21,7 @@ from understudy.blindplay_faces import (_card_face, _card_title,
                                         remembered_deck,
                                         remembered_enemy_name)
 from understudy.blindplay_read import (_blob, _enemies, _fold, _hand, _int,
+                                       _is_mod_source_tip,
                                        _label, _listing, _player, _potions,
                                        _screen, _text)
 from understudy.blindplay_shape import SELECT_SCREENS
@@ -596,6 +597,11 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # reacted, which is a fact and not a hole.
     reactions = reaction_log(p)
     if reactions is not None:
+        # 2026-09-26 (wave-3 Klee lane 2b): by the page's own numbered name.
+        # Kaeya's end-of-turn Cryo reacted on "Corpse Slug" with three slugs
+        # on the board, and the seat could not tell which body it hit. The row
+        # carries the body's combat id, as the relic answers' do.
+        name_answer_rows(reactions, _enemies(state), combat["enemies"])
         combat["reactions"] = reactions
     # `EB-695`: and what a relic answered with on the played-card path, which
     # the Plan carry-out's rider clause cannot reach. Absent on a build with
@@ -699,8 +705,23 @@ STAGE_LEAVE_REASONS = {
     "paid": "paid its last Fanfare, so it takes a Bow",
     "repeat": ("took its Bow for a second Guest Star, and comes back to the "
                "same seat with the new Fanfare added"),
+    # 2026-09-26 (wave-3 Furina lane 4): Let the People Rejoice empties
+    # every performer, and its face says no Spend.
+    "rejoice": "emptied by Let the People Rejoice, so it takes a Bow",
 }
 STAGE_LEFT_UNSAID = "left the stage"
+
+#: 2026-09-26 (wave-3 Furina lane 3). WHY AN ACT COULD NOT PAY, off the
+#: `unpaid` beat's `reason` (`FurinaStageLedger.UnpaidOwn` / `UnpaidBack` /
+#: `UnpaidAlone`), with `{n}` the price it could not meet (the beat's
+#: `moved`). The log printed "Chevreuse could not pay" twice and nothing
+#: else, and the seat could not tell that her Spend 2 pays from the BACK
+#: performer, not from her. `{self}` is the payer's pronoun.
+STAGE_UNPAID_REASONS = {
+    "own": "{self} has less than {n} Fanfare",
+    "back": "the back performer has less than {n} Fanfare",
+    "alone": "no other performer is on stage to take Fanfare from",
+}
 
 
 #: The wire's name for a stage-log beat -> the observation's. The same rule
@@ -815,8 +836,8 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             "key": _seat_key(row.get("seat_key")),
             "fanfare": _int(row.get("fanfare")),
             "moved": _int(row.get("moved")),
-            "why": STAGE_LEAVE_REASONS.get(_text(row.get("reason")),
-                                           STAGE_LEFT_UNSAID),
+            "why": _stage_why(stage_event(row.get("event")),
+                              _text(row.get("reason"))),
             # `EB-743`: the body a Crabaletta act or bow picked. Empty on
             # every beat that names none, and renamed to the page's own
             # numbered name by `name_stage_targets` below.
@@ -863,6 +884,15 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
     return {"seats": seats, "log": log,
             "act_block": None if act_block is None else _int(act_block),
             "forecast": _stage_forecast(raw.get("forecast"))}
+
+
+def _stage_why(event: str, reason: str) -> str:
+    """A log row's `why`: a departure's reason, or an unpaid act's
+    (`STAGE_UNPAID_REASONS`, "" where the wire sends none -- an older
+    build)."""
+    if event == "unpaid":
+        return STAGE_UNPAID_REASONS.get(reason, "")
+    return STAGE_LEAVE_REASONS.get(reason, STAGE_LEFT_UNSAID)
 
 
 def _seat_key(raw: Any) -> int | None:
@@ -1936,7 +1966,7 @@ def _option_faces(entry: Any, skip: str = "") -> list[dict[str, str]]:
             seen.add(_fold(name))
             out.append({"name": name, "text": _text(entry.get(text_key))})
     for tip in entry.get("keywords") or []:
-        if not isinstance(tip, dict):
+        if not isinstance(tip, dict) or _is_mod_source_tip(tip):
             continue
         name = _text(tip.get("name"))
         if name and _fold(name) not in seen:

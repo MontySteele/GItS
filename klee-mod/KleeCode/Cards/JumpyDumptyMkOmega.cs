@@ -46,7 +46,22 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkill
     /// <summary>Family trait: all Klee attacks apply Pyro.</summary>
     public Element Element => Element.Pyro;
 
+    /// <summary>
+    /// 2026-09-26 (wave-3 Klee lane 2b): under the arm Klee has no Burst
+    /// meter, and the <c>Elemental Skill</c> keyword's whole text is "Playing
+    /// this card grants 5 Burst Energy" -- a word the arm retired, printed on
+    /// the Ancient and explained nowhere. Under the arm the card carries
+    /// Applies Pyro alone. DISPLAY ONLY: <see cref="ISkillTagCard"/> still
+    /// rides the class, and the shipped Burst income already refuses to pay
+    /// it under the arm. A runtime read, <see cref="FurinaBurstRider"/>'s
+    /// bargain: the flag's default is the compile switch, and a headless pin
+    /// can read both sides.
+    /// </summary>
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
+#if PROTOTYPE_CARDS
+        KleeOverhaul.Enabled
+            ? new[] { KleeKeywords.AppliesPyro } :
+#endif
         new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>

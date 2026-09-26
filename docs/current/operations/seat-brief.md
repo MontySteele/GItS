@@ -55,6 +55,11 @@ file in the scratchpad, piping an `observe` through `sed` to re-read one block.
 You may use the Write tool once, for your record. **Every such call is declared**
 in the record's last section.
 
+When several seats run at once they share one scratchpad. Keep every scratch
+file in a folder named for your lane, and put `GITS_LANE=<LANE>` on every
+command you run, even through a wrapper script: a shared wrapper once drove
+another seat's lane.
+
 If you hit a screen the tool refuses to drive (`TOOL-BLOCKED: <state_type>`),
 say so in the record and stop; do not go looking for another way through.
 **Unless the page prints a command under *What you can say*** — a blocked

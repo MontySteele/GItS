@@ -422,6 +422,17 @@ public static partial class McpMod
         {
             result["state_type"] = "card_select";
             result["card_select"] = BuildChooseCardState(chooseCardScreen, runState);
+            // GItS LOCAL EDIT (wave-3 Furina lane 4, 2026-09-26). THE FIGHT
+            // BEHIND A MID-FIGHT CHOOSER. Arkhe Alignment asks its question at
+            // the start of every turn, after the draw, and the page printed
+            // the two options and nothing else, so the seat chose blind every
+            // turn. Additive: the same `battle` a combat screen carries, sent
+            // only while a fight is in progress under this overlay.
+            if (currentRoom is CombatRoom chooserCombat
+                && CombatManager.Instance.IsInProgress)
+            {
+                result["battle"] = BuildBattleState(runState, chooserCombat);
+            }
         }
         else if (topOverlay is NChooseABundleSelectionScreen bundleScreen)
         {
@@ -2532,6 +2543,9 @@ public static partial class McpMod
             NDeckEnchantSelectScreen => "enchant",
             _ => screen.GetType().Name
         };
+        // GItS LOCAL EDIT (wave-3 seat round, 2026-09-26): whether the last
+        // pick closes this screen by itself (gits/GitsSelectPrefs.cs).
+        GitsAddSelectPrefs(screen, state);
 
         // Player summary
         // Prompt text from UI label

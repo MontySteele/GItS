@@ -632,13 +632,41 @@ def _pet_target(state: dict[str, Any], name: str) -> str | None:
     return plans["pet_entity_id"] if idx == 0 else None
 
 
+#: The base game's hand limit (`CardPile.MaxCardsInHand`, 0.111.0).
+MAX_HAND = 10
+
+#: 2026-09-26 (wave-3 Klee lane 2b). THE PICK THAT WENT TO THE DISCARD PILE.
+#: An Attack Potion's pick, Fish Fry, "vanished" with ten cards in hand, and
+#: `play "Fish Fry"` answered only "nothing here is called 'Fish Fry'". The
+#: base game sends a card that would join a full hand to the discard pile
+#: instead (`CardPileCmd`, `isFullHandAdd`, 0.111.0 decompile), and the wire
+#: carries the discard pile, so the refusal says where it went.
+FULL_HAND_DISCARD_CLAUSE = (
+    ". {name} is in your discard pile: a card that would join a hand of "
+    f"{MAX_HAND} cards goes to your discard pile instead")
+
+
+def _full_hand_clause(state: dict[str, Any], name: str,
+                      hand: list[dict[str, Any]]) -> str:
+    """Where a named card not in hand went, if a full hand sent it to the
+    discard pile. `""` otherwise."""
+    if len(hand) < MAX_HAND:
+        return ""
+    want = _fold(_split_qualifier(name)[0])
+    for entry in _player(state).get("discard_pile") or []:
+        if isinstance(entry, dict) and want \
+                and _fold(_card_title(entry)) == want:
+            return FULL_HAND_DISCARD_CLAUSE.format(name=_card_title(entry))
+    return ""
+
+
 def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     hand = _hand(state)
     titles = _numbered_titles(hand)
     idx, why = _match(hand, cmd.name, key=_card_title, face=_card_face_key,
                       number=True)
     if idx < 0:
-        return _refuse(why)
+        return _refuse(why + _full_hand_clause(state, cmd.name, hand))
     entry = hand[idx]
     aim = str(entry.get("target_type") or "").lower()
     if entry.get("can_play") is False:

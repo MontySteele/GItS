@@ -336,6 +336,22 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # holds means different things on a transform screen than on the
         # other four, and a pick that is already made may not be re-taken.
         obs["select_kind"] = _text(blob.get("screen_type"))
+        # 2026-09-26 (wave-3): whether the last pick closes this screen by
+        # itself, and after how many (`chooser_note`). None where the bridge
+        # does not say.
+        closes = blob.get("closes_on_last_pick")
+        obs["closes_on_last_pick"] = (closes if isinstance(closes, bool)
+                                      else None)
+        obs["picks_needed"] = (_int(blob.get("picks_needed"))
+                               if blob.get("picks_needed") is not None
+                               else None)
+        # 2026-09-26 (wave-3 Furina lane 4): the fight behind a chooser that
+        # opened mid-fight (Arkhe Alignment's turn-start question), where the
+        # bridge sends it. Absent on every other chooser and on an older
+        # bridge, and the page then prints the chooser alone, as before.
+        battle = _blob(state, "battle")
+        if battle.get("enemies") and st == "card_select":
+            obs["board"] = _combat(state)
         # 2026-09-25 (opus-furina-l2b, (c) 2): the bridge hardwires "Choose a
         # card." on the one-press chooser, and a MODE chooser is not choosing
         # a card -- it is the card just played asking which way to resolve.
@@ -392,9 +408,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             for face, raw in zip(obs["offers"], _screen_cards(state)):
                 if face.get("upgraded"):
                     continue
+                # 2026-09-26 (wave-3 Klee lane 2b): the GAME's title, not the
+                # face's -- `_number_faces` has already made two Defends
+                # `Defend (1)` and `Defend (2)`, and the base-game basics
+                # table is keyed on the printed name, so every Defend on a
+                # Smith with two of them read "no written face".
                 built, why = qa_packet.upgrade_preview(
                     raw.get("id"), face.get("text") or "",
-                    title=face.get("title") or raw.get("name"))
+                    title=_text(raw.get("name")) or face.get("title"))
                 face["upgraded_face"] = built
                 face["upgraded_note"] = why
                 # And the upgraded copy's COST SLOT, where the upgrade moves a

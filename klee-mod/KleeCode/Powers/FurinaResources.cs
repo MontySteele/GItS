@@ -1346,7 +1346,13 @@ public sealed class FurinaResourceHooks : AbstractModel
         if (FurinaStage.LiveFor(target))
         {
             var incoming = FurinaStage.HpLossThroughBlock(amount);
-            return FurinaStage.AbsorbHit(target, incoming, dealer);
+            // 2026-09-26 (wave-3 Furina lane 4): the card behind a hit no
+            // enemy dealt (a Burn in hand), for the stage log.
+            string source;
+            try { source = cardSource?.Title ?? ""; }
+            catch (System.Exception) { source = ""; }
+            return FurinaStage.AbsorbHit(target, incoming, dealer,
+                                         source: source);
         }
 #endif
         return FurinaResources.AbsorbDamage(target, amount);
