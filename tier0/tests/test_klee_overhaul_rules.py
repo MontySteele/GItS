@@ -1209,8 +1209,13 @@ def test_big_badda_boom_hits_again_for_what_the_bombs_dealt(overhaul):
     hits = [e for e in state.log
             if e["event"] == "damage" and e["source"] == "attack"]
     assert len(hits) == 2, "the printed 12, then the banked total"
-    assert hits[1]["base"] == dealt
     assert dealt > 17, "Vulnerable moved what the charges landed for"
+    # 2026-09-26 (the Klee later-act seats): the echo is a card attack, so the
+    # pipeline applies the enemy's Vulnerable to it -- ONCE. It is handed the
+    # total with each explosion's Vulnerable taken back out, and what it LANDS
+    # is what the Bombs dealt. It used to be handed `dealt` and land 1.5x it.
+    assert hits[1]["base"] == pytest.approx(dealt / 1.5, abs=1e-5)
+    assert hits[1]["amount"] == dealt
 
 
 def test_the_multiplier_is_armed_by_the_card_and_spent_by_its_set_off(overhaul):
@@ -2775,3 +2780,35 @@ def test_eb512_stoke_the_fuse_leaves_the_counter_at_zero(overhaul):
 
     assert sizes(enemy) == [14]
     assert state.player.sparks == 0
+
+
+def test_big_badda_boom_on_a_body_without_vulnerable_hits_for_what_landed(overhaul):
+    """The other half of the 2026-09-26 echo fix: a body that is not
+    Vulnerable paid no Vulnerable, so the echo is handed exactly what the
+    Bombs landed, as before."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 8)
+    klee_overhaul.place(state, enemy, 9)
+
+    effects.resolve_card(state, load("proto_ko_big_badda_boom"))
+
+    dealt = sum(e["amount"] for e in state.log
+                if e["event"] == "damage" and e["source"] == "set_off")
+    hits = [e for e in state.log
+            if e["event"] == "damage" and e["source"] == "attack"]
+    assert dealt == 17
+    assert hits[1]["base"] == dealt
+    assert hits[1]["amount"] == dealt
+
+
+def test_the_echo_base_never_loses_a_point_the_bombs_dealt():
+    """`EchoBase`'s twin, and its rounding: the base times the Vulnerable,
+    truncated, is the number the explosion dealt, for every size a pile
+    reaches -- alone and summed."""
+    for dealt in range(1, 401):
+        base = klee_overhaul.echo_base(dealt, vulnerable_paid=True)
+        assert int(base * C.VULNERABLE_TAKEN_MULT) == dealt
+        assert klee_overhaul.echo_base(dealt, vulnerable_paid=False) == dealt
+    total = sum(klee_overhaul.echo_base(d, True) for d in range(1, 61))
+    assert int(total * C.VULNERABLE_TAKEN_MULT) == sum(range(1, 61))

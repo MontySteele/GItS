@@ -11833,7 +11833,8 @@ def test_a_bomb_badge_whose_two_numbers_disagree_says_which_is_which():
     Seen to FAIL: the two numbers stood in one sentence with nothing said.
     """
     page = blindplay.observe(_bomb_board(6, "4", aura="Hydro"))
-    assert "Bomb 6" in page
+    # 2026-09-26: the header labels the 6 as what a Set off deals.
+    assert "Bomb: deals 6 (sizes 4)" in page
     assert "Bomb sizes here: 4" in page
     assert blindplay.BOMB_FORECAST_NOTE.format(n=6, total=4).rstrip("*") in page
     assert blindplay.BOMB_REACTION_CLAUSE.format(
@@ -12559,12 +12560,14 @@ def test_a_bomb_header_that_folds_a_reaction_says_which_one():
     Seen to FAIL: the header printed `Bomb 18` beside `oldest first: 12`.
     """
     page = blindplay.observe(bomb_pile_state())
-    assert "Bomb 18, with Vaporize (buff)" in page
+    # 2026-09-26: the header now says the number is what a Set off DEALS and
+    # names the size beside it (`_bomb_header`); the reaction stays named.
+    assert "Bomb: deals 18 with Vaporize (sizes 12) (buff)" in page
     assert "Set off here deals 18 Pyro damage with Vaporize." in page
 
     melted = blindplay.observe(
         bomb_pile_state(27, " with Melt, after Vulnerable"))
-    assert "Bomb 27, with Melt (buff)" in melted
+    assert "Bomb: deals 27 with Melt (sizes 12) (buff)" in melted
 
 
 def test_a_bomb_header_with_nothing_folded_in_reads_as_it_always_did():
@@ -12575,7 +12578,8 @@ def test_a_bomb_header_with_nothing_folded_in_reads_as_it_always_did():
     # And a cap or a Vulnerable alone is not a reaction.
     capped = blindplay.observe(
         bomb_pile_state(9, " after Vulnerable, capped by Intangible"))
-    assert "Bomb 9 (buff)" in capped
+    assert "Bomb: deals 9 (sizes 12) (buff)" in capped
+    assert "with Vaporize" not in capped
 
 
 # ---- EB-676, the bridge half: the note comes off when the feed says settled --
@@ -12734,3 +12738,152 @@ def test_the_reader_fixture_is_the_mods_own_sentence():
     assert "The number is the lead performer's Fanfare." not in plain
     assert "The number is the back performer's Fanfare" not in plain
     assert "no stage outside combat" not in plain
+
+
+# --- The Klee later-act seats, 2026-09-26 -----------------------------------
+
+
+def _live_bomb_state(header: int, sizes: str, clause: str = "") -> dict:
+    """An enemy wearing a Bomb pile spelled the way `ProtoBombPower.Face`
+    spells it SINCE the text pass of 2026-09-25: `Bombs here, oldest first:`
+    -- not the `Bomb sizes here` every older fixture in this file carries."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "KLEEMOD-PROTO_BOMB", "name": "Bomb", "amount": header,
+         "type": "Buff",
+         "description": (f"Set off here deals {header} Pyro damage{clause}. "
+                         f"Bombs here, oldest first: {sizes}.")}]
+    return state
+
+
+def test_a_bomb_header_that_is_not_the_pile_size_says_it_is_what_a_set_off_deals():
+    """THE FIND (act-2 lanes 1 and 4, act-3 lane 2, the lane-2 full run):
+    "`Bomb 19` ... `Bombs here, oldest first: 13` -- the headline includes
+    Vulnerable, and nothing on the line says so." The badge's number is what a
+    Set off DEALS (`EB-270`); the list is the sizes.
+
+    Seen to FAIL: the header printed `Bomb 19 (buff)` over a 13, and the
+    `EB-605` note was silent because its pattern still demanded `Bomb sizes
+    here`, a clause the live face stopped printing on 2026-09-25.
+    """
+    page = blindplay.observe(_live_bomb_state(19, "13"))
+    assert "Bomb: deals 19 (sizes 13) (buff)" in page
+    assert blindplay.BOMB_FORECAST_NOTE.format(n=19, total=13).rstrip("*") \
+        in page
+    # Hard To Kill clamps a pile of three to 9 a hit: the same label.
+    capped = blindplay.observe(_live_bomb_state(9, "1st 8 / 2nd 4 / 3rd 3"))
+    assert "Bomb: deals 9 (sizes 15) (buff)" in capped
+    # A reaction folded in is named in the same clause.
+    melt = blindplay.observe(_live_bomb_state(21, "12", " with Melt"))
+    assert "Bomb: deals 21 with Melt (sizes 12) (buff)" in melt
+
+
+def test_a_bomb_header_whose_number_is_its_size_reads_as_it_always_did():
+    page = blindplay.observe(_live_bomb_state(12, "12"))
+    assert "Bomb 12 (buff)" in page
+    assert "deals 12 (sizes" not in page
+
+
+def _sloth_state(played: int) -> dict:
+    """Knowledge Demon's Sloth as the wire sends it: `SlothPower.DisplayAmount`
+    is `_cardsPlayedThisTurn` (decompiled), the cards already PLAYED."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["status"] = [
+        {"id": "SLOTH_POWER", "name": "Sloth", "amount": played,
+         "type": "Debuff",
+         "description": "You cannot play more than 3 cards each turn."}]
+    return state
+
+
+def test_a_per_turn_cap_on_cards_played_counts_what_was_played():
+    """The Klee full run on lane 1: "The status line read `Sloth 3 of 3 left
+    this turn` after I had played three; the counter reads backwards."
+
+    Seen to FAIL: `Sloth 3 of 3 left this turn`.
+    """
+    page = blindplay.observe(_sloth_state(3))
+    assert "Sloth 3 of 3 played this turn (debuff)" in page
+    assert "left this turn" not in page
+    assert "Sloth 0 of 3 played this turn" in blindplay.observe(_sloth_state(0))
+    # Hardened Shell still counts DOWN, and still says so.
+    assert "Hardened Shell 12 of 20 left this turn" \
+        in blindplay.observe(hardened_shell_state())
+
+
+def _demon_board(hp: int, round_: int, alive: bool = True) -> dict:
+    """Knowledge Demon, a single-body boss whose Ponder heals it 30 (dossier
+    `docs/current/dossiers/enemies/knowledge-demon.md`, section 3)."""
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_
+    state["battle"]["enemies"] = [
+        {"entity_id": "demon", "combat_id": 1, "name": "Knowledge Demon",
+         "hp": hp, "max_hp": 379, "block": 0, "status": [],
+         "intents": [{"type": "Attack", "label": "17"}]}] if alive else []
+    return state
+
+
+def test_a_boss_that_heals_keeps_its_letter():
+    """The act-2 lane-4 seat: "Knowledge Demon relabelled `[B] -- NEW body ...
+    took the place of [A], which is dead` (and later `[C]`), while the same HP
+    track and all my Bombs carried over." Ponder's heal took it 301 -> 307.
+
+    Seen to FAIL: `[B]` and the replacement sentence.
+    """
+    blindplay.observe(_demon_board(379, round_=1))
+    _new_process()
+    blindplay.observe(_demon_board(301, round_=4))
+    _new_process()
+    page = blindplay.observe(_demon_board(307, round_=5))
+    assert "- **Knowledge Demon** [A] — HP 307/379" in page
+    assert "took the place of" not in page
+
+
+def _segment_board(segment_hp: int | None, round_: int) -> dict:
+    """Decimillipede: a segment that dies leaves the feed, and Reattach
+    revives it at 25 of 44 on the same combat id (the lane-4 elite)."""
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_
+    other = {"entity_id": "seg3", "combat_id": 3, "name": "Decimillipede",
+             "hp": 38, "max_hp": 42, "block": 0, "status": [],
+             "intents": [{"type": "Attack", "label": "7"}]}
+    bodies = [other]
+    if segment_hp is not None:
+        bodies.insert(0, {"entity_id": "seg1", "combat_id": 1,
+                          "name": "Decimillipede", "hp": segment_hp,
+                          "max_hp": 44, "block": 0, "status": [],
+                          "intents": [{"type": "Attack", "label": "7"}]})
+    state["battle"]["enemies"] = bodies
+    return state
+
+
+def test_a_body_that_left_the_board_and_came_back_below_full_is_still_new():
+    """The other half of the heal rule: a revive short of full HP is a new
+    body when its key was missing from a board in between -- the dead segment
+    leaves the feed, and it is remembered at 0."""
+    blindplay.observe(_segment_board(44, round_=1))
+    _new_process()
+    blindplay.observe(_segment_board(19, round_=2))
+    _new_process()
+    blindplay.observe(_segment_board(None, round_=3))
+    _new_process()
+    page = blindplay.observe(_segment_board(25, round_=4))
+    assert "It took the place of [A], which is dead" in page
+    assert "HP 25/44" in page
+
+
+def test_a_special_card_reward_names_the_card_it_gives_back():
+    """The Klee full run on lane 1: "The reward `Take your stolen card back`
+    printed as `Claiming reward: [an internal id]`. I never learned what was
+    taken." `BuildRewardsState` now merges the `SpecialCardReward`'s card in
+    under the shop's `card_` keys, and the row prints it."""
+    state = {"state_type": "rewards",
+             "rewards": {"can_proceed": True, "items": [
+                 {"index": 0, "type": "special_card",
+                  "description": "Take your stolen card back.",
+                  "card_id": "KLEEMOD-PROTO_KO_KAPOW", "card_name": "Ka-pow!",
+                  "card_description": "Set off. Deal 4 damage. Retain."}]}}
+    page = blindplay.observe(state)
+    assert "Ka-pow!" in page
+    assert "Set off. Deal 4 damage. Retain." in page
+    assert blindplay.act(state, 'choose "Ka-pow!"')["ok"]

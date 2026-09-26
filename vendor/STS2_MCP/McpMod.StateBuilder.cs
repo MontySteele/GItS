@@ -2426,6 +2426,22 @@ public static partial class McpMod
                 item["relic_name"] = SafeGetText(() => relicReward.Relic.Title);
                 item["relic_description"] = SafeGetText(() => relicReward.Relic.DynamicDescription);
             }
+            // GItS LOCAL EDIT (2026-09-26, the Klee full run on lane 1). A
+            // SPECIAL CARD REWARD NAMED NO CARD. Thieving Hopper's "take your
+            // stolen card back" is a `SpecialCardReward`, whose description is
+            // the encounter's custom sentence and need not carry `{Card}`, so
+            // the seat never learned which card had been taken -- and the
+            // claim answered with the bare type word (`Actions.cs`). The card
+            // is the reward's private `_card` (decompiled); read it the way
+            // the shop reads its shelf, under the same `card_` keys.
+            else if (reward is SpecialCardReward specialReward
+                     && SpecialRewardCard(specialReward) is { } specialCard)
+            {
+                var cardInfo = BuildCardInfo(specialCard);
+                item["card_id"] = cardInfo["id"];
+                item["card_name"] = cardInfo["name"];
+                item["card_description"] = cardInfo["description"];
+            }
 
             items.Add(item);
             index++;
@@ -3032,6 +3048,24 @@ public static partial class McpMod
         state["can_proceed"] = treasureUI.ProceedButton?.IsEnabled ?? false;
 
         return state;
+    }
+
+    /// <summary>GItS LOCAL EDIT (2026-09-26): the card a
+    /// <see cref="SpecialCardReward"/> hands over, off its private
+    /// <c>_card</c> field, or null where the field is gone.</summary>
+    internal static CardModel? SpecialRewardCard(SpecialCardReward reward)
+    {
+        try
+        {
+            return typeof(SpecialCardReward)
+                .GetField("_card", System.Reflection.BindingFlags.NonPublic
+                                   | System.Reflection.BindingFlags.Instance)
+                ?.GetValue(reward) as CardModel;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static string GetRewardTypeName(Reward reward) => reward switch

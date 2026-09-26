@@ -56,6 +56,7 @@ QUOTABLE (R215 B): this is a rule made runnable, not a number about a game.
 from __future__ import annotations
 
 import contextlib
+import math
 from typing import Iterator, Optional, Sequence
 
 from tier0 import constants as C
@@ -345,19 +346,33 @@ def roll_to(state: CombatState, round_: int) -> None:
     state.ko_companion_this_turn = 0
     state.ko_aftershock_spent = False
     state.ko_damage_set_off_this_play = 0
+    state.ko_set_off_echo_base_this_play = 0.0
     state.ko_set_off_multiplier = 1
     state.ko_round = round_
 
 
 def note_explosion(state: CombatState, reacted: bool,
-                   damage_dealt: int) -> None:
+                   damage_dealt: int, vulnerable_paid: bool = False) -> None:
     """One explosion landed. `NoteExplosion`'s twin, and THE ONE write site for
     both counters and the play memory, so the three can never disagree about
     what an explosion is."""
     state.ko_set_off_this_turn += 1
     state.ko_damage_set_off_this_play += int(damage_dealt)
+    state.ko_set_off_echo_base_this_play += echo_base(int(damage_dealt),
+                                                      vulnerable_paid)
     if reacted:
         state.ko_reacted_this_turn += 1
+
+
+def echo_base(damage_dealt: int, vulnerable_paid: bool) -> float:
+    """One explosion's share of Big Badda Boom's echo: what it dealt, with the
+    target's Vulnerable taken back out where it paid one. `EchoBase`'s twin,
+    ROUNDED UP at the sixth place for its reason: `dealt / 1.5` repeats and
+    the pipeline truncates the product."""
+    if not vulnerable_paid:
+        return float(damage_dealt)
+    raw = damage_dealt / C.VULNERABLE_TAKEN_MULT
+    return math.ceil(raw * 1_000_000 - 1e-6) / 1_000_000
 
 
 def begin_play(state: CombatState, card: Card) -> None:
@@ -376,6 +391,7 @@ def begin_play(state: CombatState, card: Card) -> None:
         return
     if any(fx.get("op") == "damage_set_off_total" for fx in card.effects):
         state.ko_damage_set_off_this_play = 0
+        state.ko_set_off_echo_base_this_play = 0.0
 
 
 def arm_multiplier(state: CombatState, multiplier: int) -> None:
@@ -562,9 +578,16 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # `VermillionPactPower.AuraToRestore`.
     pact_aura = _pact_aura_to_restore(state, enemy, card)
     was_alive = enemy.alive
+    # THE VULNERABLE THIS HIT PAID (2026-09-26, Big Badda Boom's echo), read
+    # on both sides of the hit -- a Superconduct lays it inside -- and before
+    # Explosive Frags below lays one it did not pay. C# twin: `HasVulnerable`
+    # around `DealWithoutDealerMods` in `ProtoBombPower.Explode`.
+    vulnerable_before = enemy.powers.get("vulnerable", 0) > 0
     dealt = effects.deal_damage_to_enemy(state, enemy, size, element=element,
                                          source=EXPLOSION_SOURCE,
                                          powered=False)
+    vulnerable_paid = (vulnerable_before
+                       or enemy.powers.get("vulnerable", 0) > 0)
     reacted = state.reactions_this_turn > before
     # R276 (Big Bounce): the swing past the kill, after the target's own terms.
     # This engine lets HP go below zero by exactly the overkill, so that is the
@@ -586,7 +609,7 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # `dealt` is the number the hit LANDED for, straight off the funnel that
     # computed it (`EB-270`): Big Badda Boom's face says "the damage the Bombs
     # dealt", and under the target's Vulnerable that is not `size`.
-    note_explosion(state, reacted, int(dealt))
+    note_explosion(state, reacted, int(dealt), vulnerable_paid)
     # QUARANTINED (C.COMPANION_OVERHAUL). The stand-in seam's two this-turn
     # watchers (Diona's Bomb, Noelle's Mine), here rather than on
     # `_notify_explosion` below because that bus carries no Mine flag and

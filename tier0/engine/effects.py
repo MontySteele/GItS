@@ -29,6 +29,12 @@ def _amount(state: CombatState, val) -> int:
     """Resolve a literal or formula amount (X-cost cards)."""
     if isinstance(val, int):
         return val
+    if isinstance(val, float):
+        # Big Badda Boom's echo base (2026-09-26): a total with each
+        # explosion's Vulnerable taken back out, which is fractional by
+        # construction; the pipeline truncates once, at the end, as it
+        # does for every other term.
+        return val
     if val == "X":
         return state.current_x
     if isinstance(val, str) and val.startswith("X_plus_"):
@@ -5981,7 +5987,11 @@ def _op_damage_set_off_total(state: CombatState, fx: dict,
     """
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
-    total = state.ko_damage_set_off_this_play
+    # 2026-09-26: the ECHO BASE, not the landed total -- this is a card
+    # attack and the pipeline below applies the target's Vulnerable to it, so
+    # handing it a number that had already paid one paid it twice. C# twin:
+    # `KleeOverhaulLedger.SetOffEchoBaseThisPlay`.
+    total = state.ko_set_off_echo_base_this_play
     if total <= 0:
         return
     _op_damage(state, {"op": "damage", "amount": total,

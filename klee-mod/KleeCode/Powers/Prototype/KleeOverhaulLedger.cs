@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Logging;
+using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
@@ -175,6 +176,24 @@ public sealed class KleeOverhaulLedger
     /// promises.</summary>
     public int DamageSetOffThisPlay { get; private set; }
 
+    /// <summary>
+    /// What Big Badda Boom's second clause HITS FOR before the target's own
+    /// terms: <see cref="DamageSetOffThisPlay"/> with each explosion's
+    /// Vulnerable taken back out (the Klee later-act seats, 2026-09-26, the
+    /// lane-2 full run). The clause is a card Attack, so the game's pipeline
+    /// applies the target's Vulnerable to it -- and it was being handed a
+    /// number that had already paid it, so a Vulnerable enemy paid it twice
+    /// (the Terror Eel's "12, 7, 18, 28": the Bombs landed 19 and the echo 28).
+    /// Now the Vulnerable is paid ONCE, by the echo, and the number the echo
+    /// lands equals what the Bombs dealt. Block the Bombs removed still counts,
+    /// as it always did.
+    ///
+    /// ROUNDED UP at the sixth place: <c>dealt / 1.5</c> repeats, and the
+    /// game truncates the product, so a sum that fell a hair short of an
+    /// integer would lose a point the Bombs really dealt.
+    /// </summary>
+    public decimal SetOffEchoBaseThisPlay { get; private set; }
+
     private int _setOffMultiplier = 1;
     private int _round = -1;
 
@@ -182,11 +201,23 @@ public sealed class KleeOverhaulLedger
     /// the number <c>ElementalHit.Deal</c> returned, never the charge's size.
     /// THE ONE write site for both counters and the play memory, so the three
     /// can never disagree about what an explosion is.</summary>
-    public void NoteExplosion(bool reacted, int damageDealt)
+    public void NoteExplosion(bool reacted, int damageDealt,
+                              bool vulnerablePaid = false)
     {
         SetOffThisTurn++;
         DamageSetOffThisPlay += damageDealt;
+        SetOffEchoBaseThisPlay += EchoBase(damageDealt, vulnerablePaid);
         if (reacted) ReactedThisTurn++;
+    }
+
+    /// <summary>One explosion's share of <see cref="SetOffEchoBaseThisPlay"/>:
+    /// what it dealt, with the target's Vulnerable taken back out where it
+    /// paid one. PURE, and the arithmetic the pins read.</summary>
+    public static decimal EchoBase(int damageDealt, bool vulnerablePaid)
+    {
+        if (!vulnerablePaid) return damageDealt;
+        var raw = damageDealt / ReactionConstants.VulnerableTakenMult;
+        return decimal.Ceiling(raw * 1_000_000m) / 1_000_000m;
     }
 
     /// <summary>A card that counts as a Companion was played (R244, R276).
@@ -228,7 +259,11 @@ public sealed class KleeOverhaulLedger
 
     /// <summary>A card play begins: the play-scoped size memory starts empty.
     /// Emitted at the top of the body of any card that reads it.</summary>
-    public void BeginPlay() => DamageSetOffThisPlay = 0;
+    public void BeginPlay()
+    {
+        DamageSetOffThisPlay = 0;
+        SetOffEchoBaseThisPlay = 0m;
+    }
 
     /// <summary>The Big One arms this with the row's own number; the next Set
     /// off spends it. An int rather than the flag it replaced: R243's card
@@ -344,6 +379,7 @@ public sealed class KleeOverhaulLedger
         _aftershockSpent = false;
         _turnStartPlacementsDone = false;
         DamageSetOffThisPlay = 0;
+        SetOffEchoBaseThisPlay = 0m;
         _setOffMultiplier = 1;
         _round = round;
     }

@@ -1164,15 +1164,36 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// which is exactly why the number is remembered rather than recomputed.
     /// `EB-270`: the ledger banks what each explosion LANDED for, so this is
     /// the card's printed promise and not the raw charge sum it used to be.
+    ///
+    /// THE TARGET'S VULNERABLE IS PAID ONCE (the Klee later-act seats,
+    /// 2026-09-26). This hit is a card Attack, so the game applies the
+    /// target's Vulnerable to it -- and it used to be handed the LANDED total,
+    /// which had already paid it: "12, 7, 18, 28" on a Vulnerable Terror Eel
+    /// is Bombs that landed 19 and an echo of 19 x 1.5. It now hits for
+    /// <see cref="KleeOverhaulLedger.SetOffEchoBaseThisPlay"/>, the same total
+    /// with each explosion's Vulnerable taken back out, so what lands is what
+    /// the Bombs dealt. Block the Bombs removed still counts toward it.
+    /// Sim twin: `effects._op_damage_set_off_total`.
     /// </summary>
     public static async Task DealSetOffTotal(
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
         CardModel cardSource, CardPlay cardPlay)
     {
         if (target == null) return;
-        var total = KleeOverhaulLedger.For(applier).DamageSetOffThisPlay;
+        var total = KleeOverhaulLedger.For(applier).SetOffEchoBaseThisPlay;
         await DealCardDamage(choiceContext, target, total, cardSource, cardPlay);
     }
+
+    /// <summary>Is <paramref name="target"/> Vulnerable right now? The same
+    /// read <c>SimDamagePipeline.TargetMods</c> multiplies on.</summary>
+    private static bool HasVulnerable(Creature target) =>
+        (target.Powers.OfType<VulnerablePower>().FirstOrDefault()?.Amount ?? 0) > 0;
+
+    /// <summary>Is <paramref name="target"/> a body a charge cannot land on:
+    /// dead, or already torn out of the combat? <see cref="Place"/>'s test
+    /// for handing the charge to <see cref="JumpCharges"/> instead.</summary>
+    public static bool LandsOnNobody(Creature target) =>
+        target.IsDead || target.CombatState == null;
 
     /// <summary>Ammo Scavenging: "Draw a card for each of your Bombs that went
     /// off this turn." Rule 7's first counter, spent.</summary>
@@ -1309,8 +1330,16 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // BEFORE the hit spends it. Only a caller that passes `overflow` reads
         // it, and every other Set off is byte-identical.
         var standingBefore = target.CurrentHp + target.Block;
+        // THE VULNERABLE THIS HIT PAID (2026-09-26, Big Badda Boom's echo):
+        // the funnel's `TargetMods` multiplies by the target's Vulnerable as
+        // it stands when the hit resolves -- before it, or applied by this
+        // hit's own reaction (a Superconduct). Read on both sides of the hit,
+        // and before Explosive Frags below lays a Vulnerable this hit did NOT
+        // pay, so the ledger can take exactly this share back out.
+        var vulnerableBefore = HasVulnerable(target);
         var dealt = await ElementalHit.DealWithoutDealerMods(
             choiceContext, target, element, size, applier);
+        var vulnerablePaid = vulnerableBefore || HasVulnerable(target);
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
         // THE OVERFLOW IS THE HIT PAST THE KILL, after the target's own terms
         // (Vulnerable is already in `dealt`), so the bounce carries it without
@@ -1320,7 +1349,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             overflow.Add(dealt - standingBefore);
         }
 
-        ledger.NoteExplosion(reacted, dealt);
+        ledger.NoteExplosion(reacted, dealt, vulnerablePaid);
         // `EB-450`, the log half. The badge printed 7 and 12 landed, with the
         // reaction named nowhere, because a Mine fires on the ENEMY's turn
         // where no card is in front of the player to price it. The reaction is
@@ -1724,6 +1753,21 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         {
             bomb.AddCharge(new ProtoCharge(size, isMine, payloadMineAll));
             Register.Note(bomb);
+        }
+        else if (LandsOnNobody(target))
+        {
+            // RULE 3 FOR A CHARGE THAT NEVER LANDED (the Klee full run on
+            // lane 1, 2026-09-26). "Bang Bang!+ killed the Egg. The `Place a
+            // Bomb 6` part never showed up on the board." The card's own hit
+            // killed its target, the game had torn the body out of the combat
+            // (`PowerCmd.Apply` answers null when `CanReceivePowers` is false,
+            // decompiled), and the charge was dropped with the warning below.
+            // The keyword says "If its enemy dies, it jumps to another" -- and
+            // the sim already lands it on the corpse and sweeps it onward
+            // (`klee_overhaul.place`, then `sweep_jumps`) -- so it jumps.
+            await JumpCharges(choiceContext, target,
+                              new[] { new ProtoCharge(size, isMine, payloadMineAll) },
+                              applier, cardSource);
         }
         else
         {

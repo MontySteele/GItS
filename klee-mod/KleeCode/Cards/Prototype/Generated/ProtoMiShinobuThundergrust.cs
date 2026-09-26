@@ -68,7 +68,7 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
             new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
-            new FoldedDamageVar("BranchDamage", 5m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 5m, ValueProp.Move, followsHit: true)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

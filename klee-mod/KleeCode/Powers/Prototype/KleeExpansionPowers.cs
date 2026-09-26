@@ -339,6 +339,9 @@ public sealed class SitTightPower : PowerModel, ILocalizationProvider
             "At the end of your turn, gain [blue]{Amount}[/blue] "
           + "[gold]Block[/gold] if none of your [gold]Bombs[/gold] went "
           + "off."),
+        (SpentKey,
+            "A [gold]Bomb[/gold] of yours went off this turn, so this gives "
+          + "no [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -347,6 +350,32 @@ public sealed class SitTightPower : PowerModel, ILocalizationProvider
     /// <summary>Does the held turn pay? PURE, off the ledger.</summary>
     public static bool Pays(KleeOverhaulLedger ledger) =>
         ledger.SetOffThisTurn == 0;
+
+    /// <summary>The loc suffix of the face a turn that can no longer pay
+    /// shows.</summary>
+    public const string SpentKey = "smartDescriptionSpent";
+
+    /// <summary>The face's key for a turn that has (or has not) seen one of
+    /// her Bombs go off. PURE, and the branch the pins read.</summary>
+    public static string FaceKey(string entry, bool pays) =>
+        pays ? entry + ".smartDescription" : entry + "." + SpentKey;
+
+    /// <summary>
+    /// THE FACE SAYS WHEN THE TURN CAN NO LONGER PAY (the Klee act-2 lane-1
+    /// seat, 2026-09-26): "It did not pay its 4, because a bomb had gone off.
+    /// That is exactly what it prints, but its status line still read `Sit
+    /// Tight 4` all turn." The power stays until the end of the turn, when it
+    /// is asked and removed as before; what changes is its face, the
+    /// <c>ProtoBombPower</c> shape -- a live key the base game's
+    /// <c>SmartDescription</c> resolves on every read of the tooltip. A turn
+    /// that can still pay asks for a `smartDescription` row that does not
+    /// exist, so it shows the plain one exactly as before. <c>IsMutable</c>
+    /// first: a canonical copy's <c>Owner</c> asserts.
+    /// </summary>
+    protected override string SmartDescriptionLocKey =>
+        FaceKey(Id.Entry,
+                !IsMutable || Owner == null
+                || Pays(KleeOverhaulLedger.For(Owner)));
 
     public override async Task BeforeSideTurnEnd(
         PlayerChoiceContext choiceContext, CombatSide side,

@@ -548,8 +548,17 @@ _PER_TURN_CAP = re.compile(
     r"more than (\d+)\s+\S+ (?:each|per|every|a|in a single|in one) turn",
     re.IGNORECASE)
 
+#: THE ALLOWANCE THAT COUNTS UP (the Klee full run on lane 1, 2026-09-26).
+#: Sloth prints "You cannot play more than 3 cards each turn", and its badge is
+#: `SlothPower.DisplayAmount`, which is `_cardsPlayedThisTurn` (decompiled) --
+#: the cards already PLAYED, starting at 0. Hardened Shell's number is what is
+#: LEFT. Both sentences match `_PER_TURN_CAP`, so the page printed "Sloth 3 of
+#: 3 left this turn" after the third card, backwards. The verb is the tell: a
+#: cap on what you PLAY is counted as you play.
+_PLAYED_CAP = re.compile(r"\bplay more than \d+", re.IGNORECASE)
 
-def _turn_allowance(power: dict[str, Any]) -> int | None:
+
+def _turn_allowance(power: dict[str, Any]) -> tuple[int, str] | None:
     """The cap a power's number is COUNTING DOWN AGAINST, or None. `EB-467`.
 
     THE DEFECT. "Hardened Shell 12 — Skulking Colony cannot lose more than 20
@@ -567,15 +576,22 @@ def _turn_allowance(power: dict[str, Any]) -> int | None:
     has climbed past the sentence's number is not counting down against it --
     that is a different power wearing a similar sentence -- and gets the line
     it always had.
+
+    RETURNS THE CAP AND WHICH WAY THE NUMBER RUNS: `"left"` for an allowance
+    that counts down (Hardened Shell), `"played"` for one that counts the cards
+    already played (Sloth, `_PLAYED_CAP`).
     """
-    found = _PER_TURN_CAP.search(str(power.get("text") or ""))
+    text = str(power.get("text") or "")
+    found = _PER_TURN_CAP.search(text)
     if not found:
         return None
     cap = int(found.group(1))
     stacks = power.get("stacks")
     if not isinstance(stacks, int) or isinstance(stacks, bool):
         return None
-    return cap if 0 <= stacks <= cap else None
+    if not 0 <= stacks <= cap:
+        return None
+    return cap, ("played" if _PLAYED_CAP.search(text) else "left")
 
 
 # `EB-525`. THE STEP THE SENTENCE DOES NOT SAY IT LEAVES OUT.
@@ -679,6 +695,41 @@ def _folded_reaction(power: dict[str, Any]) -> str:
     return f", with {found.group(1).title()}" if found else ""
 
 
+def _bomb_header(power: dict[str, Any]) -> str:
+    """A Bomb badge's header where its number is not the size of the pile.
+
+    THE FIND (the Klee later-act seats, 2026-09-26: act-2 lanes 1 and 4, act-3
+    lane 2, and the lane-2 full run). "`Bomb 19` ... `Bombs here, oldest
+    first: 13` -- the headline includes Vulnerable, and nothing on the line
+    says so"; the same under Hard To Kill (`Bomb 9` over a 15) and on a Mine
+    pile. The badge's number is `ProtoBombPower.DisplayAmount`, what a Set off
+    DEALS into this body (`EB-270`); the list beside it is the SIZES. `EB-721`
+    labelled one term folded into it (the reaction) and left the target's
+    Vulnerable and cap unnamed.
+
+    THE LABEL, NOT A NEW NUMBER. Both figures are the game's and both stay:
+    the header says the badge's figure is what a Set off deals and names the
+    pile's size beside it. Only where the two differ -- a pile whose number IS
+    its size reads exactly as it always did.
+
+    `''` where the sentence carries no forecast or no sizes, which is every
+    power that is not a Bomb pile.
+    """
+    text = str(power.get("text") or "")
+    stacks = power.get("stacks")
+    if not isinstance(stacks, int) or isinstance(stacks, bool):
+        return ""
+    sizes = _BOMB_SIZES.search(text)
+    if not _BOMB_FORECAST.search(text) or not sizes:
+        return ""
+    charges = _bomb_charge_sizes(sizes.group(1))
+    if not charges or sum(charges) == stacks:
+        return ""
+    reaction = _FOLDED_REACTION.search(text)
+    folded = f" with {reaction.group(1).title()}" if reaction else ""
+    return f"{power['name']}: deals {stacks}{folded} (sizes {sum(charges)})"
+
+
 def _spark_sources_line(combat: dict[str, Any]) -> str:
     """`EB-610`'s sub-line, in one place because two rows now print it.
 
@@ -709,12 +760,19 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
 
     `EB-721`: and where the number has an amplifying reaction folded into it
     that the raw figures beside it do not, the header says which.
+
+    2026-09-26: and where a Bomb badge's number is what a Set off deals rather
+    than the pile's size, the header says so and names the size
+    (`_bomb_header`); a per-turn cap that counts cards PLAYED says "played".
     """
     cap = _turn_allowance(power)
     placed = _placed_charge(power)
+    bomb = _bomb_header(power)
     if cap is not None:
-        line = f"{indent}{power['name']} {power['stacks']} of {cap} left " \
-               f"this turn"
+        line = f"{indent}{power['name']} {power['stacks']} of {cap[0]} " \
+               f"{cap[1]} this turn"
+    elif bomb:
+        line = f"{indent}{bomb}"
     elif placed:
         line = f"{indent}{power['name']}: {placed} {power['stacks']}"
     elif power.get("numbered") is False:
@@ -905,7 +963,17 @@ _BOMB_FORECAST = re.compile(
 # row on, so the class can no longer be digits and slashes; it runs to the
 # clause's own comma instead, which is what kept `including {Mines} Mines` and
 # `growing each turn` out of the numbers before and still does.
-_BOMB_SIZES = re.compile(r"bomb sizes here[^:.]*:\s*([^,.]+)", re.I)
+#
+# AND THE TEXT PASS OF 2026-09-25 RENAMED THE CLAUSE, the `EB-755` drift once
+# more: `ProtoBombPower.Bombs` now reads `Bombs here, oldest first: ...`, so
+# the pattern demanding `bomb sizes here` matched nothing on the live badge and
+# the note below went silent while its fixtures -- still spelling the old
+# clause -- passed. Four seats on 2026-09-26 then read `Bomb 19` over a `13`
+# with nothing between them. Both spellings are matched -- the new one only
+# with its `oldest first` qualifier, because a still older face printed
+# `Bombs here: {Count}`, a COUNT of charges and not their sizes.
+_BOMB_SIZES = re.compile(
+    r"(?:bomb sizes here[^:.]*|bombs here, oldest first):\s*([^,.]+)", re.I)
 
 # One charge per `/`-separated item, and the size is the LAST number in it:
 # `1st 12` is the twelfth-size charge in first position, not a charge of 1 and

@@ -563,6 +563,10 @@ public static partial class McpMod
             rewardDesc = $"potion ({SafeGetText(() => p.Potion?.Title)})";
         else if (reward is CardReward)
             rewardDesc = "card (opens card selection)";
+        // GItS LOCAL EDIT (2026-09-26): a special card reward answered
+        // "special_card", the type word; name the card it adds.
+        else if (reward is SpecialCardReward s && SpecialRewardCard(s) is { } sc)
+            rewardDesc = $"card ({SafeGetText(() => sc.Title)})";
 
         button.ForceClick();
 

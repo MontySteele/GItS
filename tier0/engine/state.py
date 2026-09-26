@@ -1536,6 +1536,11 @@ class CombatState:
     # this play began actually LANDED for, post-Strength, post-Weak,
     # post-reaction, post-Vulnerable (`EB-270`) -- never the charge sizes.
     ko_damage_set_off_this_play: int = 0
+    # What Big Badda Boom's second clause HITS FOR before the target's own
+    # terms: the total above with each explosion's Vulnerable taken back out,
+    # so the echo -- a card attack, which the pipeline hands the target's
+    # Vulnerable -- pays it once (2026-09-26). `SetOffEchoBaseThisPlay`'s twin.
+    ko_set_off_echo_base_this_play: float = 0.0
     ko_set_off_multiplier: int = 1          # The Big One arms N, a Set off spends it
     # QUARANTINED (`C.KLEE_OVERHAUL`, R244, R276). Coven Errand's read: how
     # many cards that count as Companion cards have been played this turn. A

@@ -101,7 +101,10 @@ def test_shinobus_face_prints_the_branch_as_a_var():
     src = _source("ProtoMiShinobuThundergrust")
     assert "{CalculatedDamage:diff()}" in src
     assert "{BranchDamage:diff()}" in src
-    assert 'new FoldedDamageVar("BranchDamage", 5m, ValueProp.Move)' in src
+    # 2026-09-26: an "additional" leg lands after the card's own hit, so its
+    # face folds no reaction (`gen_klee_cards.branch_follows_own_hit`).
+    assert ('new FoldedDamageVar("BranchDamage", 5m, ValueProp.Move, '
+            'followsHit: true)') in src
     # THE HIT IS UNTOUCHED, which is what makes this a display fix and not a
     # rules change: the play still deals `PrintedDamage(this, 5m)`, and the var
     # is printed and nothing else.
