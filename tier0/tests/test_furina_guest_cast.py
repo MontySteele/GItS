@@ -566,7 +566,8 @@ def test_the_glossary_has_the_guest_star_and_every_guest_word_for_word():
         "it Bow, then return with the new Fanfare added.")
     assert ARM_KEYWORDS["Bow"] == (
         "A performer that leaves the stage acts one last time on its way "
-        "out, without paying.")
+        "out, without paying. A performer emptied by a hit Bows before the "
+        "rest of that hit reaches you.")
     assert ARM_KEYWORDS["Neuvillette"] == (
         "End of your turn: pay 3 of his Fanfare to deal 8 Hydro damage to "
         "ALL enemies.")

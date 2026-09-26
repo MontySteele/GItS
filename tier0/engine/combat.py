@@ -1524,6 +1524,9 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # way round because the brief's order names Block and then the
             # cast, with nothing between them.
             absorbed = furina_stage.absorb(state, dmg - blocked)
+            # 2026-09-25 night: a lead this hit emptied Bows before the rest
+            # of the hit reaches her, so its Bow Block takes that rest first.
+            absorbed += furina_stage.take_caught(state)
             # Kokomi's prevention ward (kickoff §2.4): after Block, before
             # anything reaches HP — the first unblocked hit each round is
             # prevented up to the ward's stacks, priced as one random

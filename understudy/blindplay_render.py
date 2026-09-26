@@ -1565,7 +1565,9 @@ STAGE_ACT_EFFECTS = {
     "chevreuse": "Furina gains 1 Energy next turn",
     "sigewinne": "her gift is the line above",
     "charlotte": "each other performer gains 1 Fanfare, as above",
-    "lynette": "a Swirl on {who}",
+    # 2026-09-25 night: her act deals 3 Anemo damage (a Swirl where the body
+    # wore an aura; the reaction prints under "What reacted").
+    "lynette": "{n} Anemo to {who}",
 }
 
 #: Chevalmarin's act where no single per-enemy figure exists.
@@ -1603,6 +1605,21 @@ STAGE_FORECAST_UNKNOWN = (" A Bow will also summon a random performer this "
                           "forecast cannot name.")
 STAGE_INTENT_LINE = ("- The attacks shown, after the acts' Block of {block}: "
                      "your front performer takes {front}, you take {you}.")
+#: 2026-09-25 night (the granted-guest seat round): the same split, walked
+#: hit by hit, performer by performer.
+STAGE_INTENT_SPLIT_LINE = ("- The attacks shown, after the acts' Block of "
+                           "{block}: {split}; you take {you}.")
+STAGE_INTENT_TAKE = "**{who}** takes {n}{leaves}"
+STAGE_INTENT_LEAVES = " and leaves (its Bow lands before the rest of that hit)"
+STAGE_INTENT_THEN = ", then "
+STAGE_INTENT_NO_PERFORMER = "no performer is hit"
+#: ... and what the acts will deal.
+STAGE_ACTS_HEADING = "- What the acts will deal at the end of your turn:"
+STAGE_ACT_FORECAST_LINE = "  - **{who}**: {n}{element} to {target}"
+STAGE_ACT_FORECAST_BOW = "'s Bow"
+STAGE_ACT_TOTAL_LINE = "  - In all: {n} to {target}"
+STAGE_FORECAST_TARGETS = {"all": "ALL", "random": "a random enemy",
+                          "random_aura": "a random enemy with an aura"}
 
 #: The bows, rule 9. Since draft 3 (2026-09-25) a Bow IS the performer's act
 #: once more, so the bow lines are the act lines, measured the same way.
@@ -1611,6 +1628,15 @@ STAGE_BOW_EFFECTS = dict(STAGE_ACT_EFFECTS)
 #: Draft 3 (2026-09-25), rule 12: one line per performer the fade took
 #: Fanfare from, after the acts.
 STAGE_FADE_LINE = "  - The applause fades: **{who}** {before} → {after}."
+
+#: 2026-09-25 night (the granted-guest seat round): a one-body act prints the
+#: hit as dealt; these say what the body's Block took of it, and the HP the
+#: body had where the hit was bigger. The Block clause is the base-game hit
+#: line's word (`RESOLUTION_HIT_BLOCKED`) with the share said as a share.
+STAGE_ACT_ONTO_BLOCK = " ({n} of it onto Block)"
+STAGE_ACT_HP_LEFT = ", which had {hp} HP left"
+#: ... and a hit's Bow whose Block met the rest of that hit first.
+STAGE_BOW_CAUGHT = ", {n} of it spent on the rest of the hit that emptied it"
 
 #: What an act says when the board moved nothing -- a Chevalmarin sweep into a
 #: dead board, a Crabaletta hit a Block ate whole. Saying "0" would be a claim
@@ -1663,6 +1689,13 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     # Alignment's multiple and Full House's extra acts move it -- and the flat
     # per-Usher sum only on a build that does not send one.
     after = stage.get("act_block")
+    # 2026-09-25 night (the granted-guest seat round): ONE BLOCK NUMBER. The
+    # header said "after the acts: Block 3" while the attack line on the same
+    # screen said "after the acts' Block of 6"; where the mod sends its
+    # forecast, both lines read that forecast's Block.
+    forecast = stage.get("forecast")
+    if forecast and (forecast.get("seats") or forecast.get("arrivals")):
+        after = forecast["block"] - you["block"]
     if after is None:
         after = sum(STAGE_ACT_BLOCK.get(row["member"], 0) for row in seats)
     if after:
@@ -1701,11 +1734,62 @@ def _render_stage_forecast(forecast: dict[str, Any] | None) -> list[str]:
     if forecast.get("unknown"):
         line += STAGE_FORECAST_UNKNOWN
     out = [line]
+    out += _render_stage_acts(forecast)
     if forecast["intent_known"]:
-        out.append(STAGE_INTENT_LINE.format(
-            block=forecast["block"], front=forecast["front_takes"],
-            you=forecast["reaches_furina"]))
+        if forecast.get("takers") is None:
+            out.append(STAGE_INTENT_LINE.format(
+                block=forecast["block"], front=forecast["front_takes"],
+                you=forecast["reaches_furina"]))
+        else:
+            out.append(_stage_intent_line(forecast))
     return out
+
+
+def _stage_intent_line(forecast: dict[str, Any]) -> str:
+    """The posted attacks' split, HIT BY HIT (2026-09-25 night, the
+    granted-guest seat round). Lane 1: "front takes 2, you take 1" never said
+    the next performer would be hit once the front emptied. Each performer
+    the hits reach is named with what it takes, in order, and whether it
+    leaves -- its Bow lands before the rest of that hit reaches her."""
+    parts = [STAGE_INTENT_TAKE.format(
+                 who=row["name"], n=row["takes"],
+                 leaves=STAGE_INTENT_LEAVES if row["leaves"] else "")
+             for row in forecast["takers"]]
+    split = (STAGE_INTENT_THEN.join(parts) if parts
+             else STAGE_INTENT_NO_PERFORMER)
+    return STAGE_INTENT_SPLIT_LINE.format(
+        block=forecast["block"], split=split, you=forecast["reaches_furina"])
+
+
+def _render_stage_acts(forecast: dict[str, Any]) -> list[str]:
+    """WHAT THE ACTS WILL DEAL (2026-09-25 night, the granted-guest seat
+    round). Lane 2 left a Shrinker Beetle on 1 HP: "the stage block prints the
+    end-of-turn Fanfare changes and the Block the acts will give, but not the
+    damage the acts will deal to enemies." One line per act, as the mod's
+    forecast sends it, and the total where every act lands on the same one
+    enemy or on ALL. The acts' own numbers, before the target's Block,
+    Vulnerable or a reaction."""
+    acts = forecast.get("acts") or []
+    if not acts:
+        return []
+    out = [STAGE_ACTS_HEADING]
+    for act in acts:
+        out.append(STAGE_ACT_FORECAST_LINE.format(
+            who=act["name"] + (STAGE_ACT_FORECAST_BOW if act["bow"] else ""),
+            n=act["amount"],
+            element=(" " + act["element"]) if act["element"] else "",
+            target=_stage_target_words(act["target"])))
+    if forecast.get("act_total") is not None:
+        out.append(STAGE_ACT_TOTAL_LINE.format(
+            n=forecast["act_total"],
+            target=_stage_target_words(forecast["act_total_target"])))
+    return out
+
+
+def _stage_target_words(target: str) -> str:
+    """A forecast target in the base game's words; an enemy's own name
+    otherwise."""
+    return STAGE_FORECAST_TARGETS.get(target, target)
 
 
 def _stage_effect(row: dict[str, Any], table: dict[str, str]) -> str:
@@ -1732,10 +1816,31 @@ def _stage_effect(row: dict[str, Any], table: dict[str, str]) -> str:
             return STAGE_NOTHING_LANDED
         if each is None or each <= 0:
             text = STAGE_ACT_SPREAD
+    who = row["target"] or STAGE_UNNAMED_TARGET
+    if "{n}" in text and "{who}" in text and row.get("dealt") is not None:
+        # 2026-09-25 night (the granted-guest seat round): THE HIT, NOT THE
+        # HP IT TOOK. "Wriothesley acted: 1 Cryo to Wriggler" was his 14
+        # into a body with 1 HP left. The act's damage as dealt, what the
+        # body's Block took of it, and the HP it had where that was less.
+        dealt = row["dealt"]
+        if dealt <= 0:
+            return STAGE_NOTHING_LANDED
+        line = text.format(n=dealt, each=row.get("each"), who=who)
+        blocked = row.get("blocked") or 0
+        if blocked > 0:
+            line += STAGE_ACT_ONTO_BLOCK.format(n=blocked)
+        hp = row.get("target_hp")
+        if hp is not None and dealt - blocked > hp:
+            line += STAGE_ACT_HP_LEFT.format(hp=hp)
+        return line
     if "{n}" in text and not row["moved"]:
         return STAGE_NOTHING_LANDED
-    return text.format(n=row["moved"], each=row.get("each"),
-                       who=row["target"] or STAGE_UNNAMED_TARGET)
+    line = text.format(n=row["moved"], each=row.get("each"), who=who)
+    # 2026-09-25 night: a hit's Bow whose Block the rest of that hit spent
+    # before it reached her.
+    if row.get("caught"):
+        line += STAGE_BOW_CAUGHT.format(n=row["caught"])
+    return line
 
 
 def _stage_sweep(row: dict[str, Any]) -> str:
@@ -1879,6 +1984,17 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
                 n=row["moved"], before=row["hp"] + row["moved"],
                 after=row["hp"]))
         elif row["event"] == "arrive":
+            # 2026-09-25 night (the granted-guest seat round): THE SEAT IT
+            # TOOK, from the beat. "Navia joined the stage ... and stands in
+            # the middle seat" when she joined at the back and Wriothesley
+            # pushed her later: #680 keyed WHICH performer, and still named
+            # the seat it stood in when the page was drawn. The mod now files
+            # the count standing at the moment; an older build falls back.
+            if row.get("standing") is not None and row["seat"] >= 0:
+                took = stage_seat_name(row["seat"], row["standing"])
+                out.append(f"  - {who} joined the stage at {row['fanfare']} "
+                           f"Fanfare, in the {took} seat.")
+                continue
             out.append(f"  - {who} joined the stage at {row['fanfare']} "
                        "Fanfare"
                        + (f", and stands in{where}." if where else "."))

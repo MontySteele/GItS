@@ -911,10 +911,12 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForSummon(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SummonKey,
+            // 2026-09-25 night (the granted-guest seat round): lane 2 only
+            // understood "adds its Fanfare" from the log.
             "A performer joins at the back with "
           + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. On a full "
-          + "stage, the front one [gold]Bow[/gold]s and leaves, and the "
-          + "newcomer adds its Fanfare.");
+          + "stage, the front one [gold]Bow[/gold]s and leaves its Fanfare "
+          + "to the newcomer.");
 
     /// <summary>
     /// 2026-09-25. GENTILHOMME USHER'S ACT, on every card that names him and
@@ -1017,6 +1019,9 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForLynette(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, LynetteKey,
-            "End of your turn: [gold]Swirl[/gold] a random enemy with an "
-          + "aura.");
+            // 2026-09-25 night (the granted-guest seat round): the act always
+            // lands, and Swirls where it finds an aura.
+            "End of your turn: deal " + FurinaStageLaw.ActLynetteDamage
+          + " [gold]Anemo[/gold] damage to a random enemy, one with an aura "
+          + "if any.");
 }

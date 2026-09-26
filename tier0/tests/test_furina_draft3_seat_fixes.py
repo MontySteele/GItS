@@ -106,7 +106,8 @@ def test_the_bow_row_is_the_plain_exit():
     # The Guest Cast (2026-09-25): and a guest's Bow does not pay.
     assert ARM_KEYWORDS["Bow"] == (
         "A performer that leaves the stage acts one last time on its way "
-        "out, without paying.")
+        "out, without paying. A performer emptied by a hit Bows before the "
+        "rest of that hit reaches you.")
 
 
 # ---------------------------------------------------------------------------

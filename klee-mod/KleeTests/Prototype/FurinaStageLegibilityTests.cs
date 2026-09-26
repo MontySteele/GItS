@@ -228,9 +228,10 @@ public class FurinaStageLegibilityTests
         // stage the way a random one does and the tip says it once.
         var body = Printed("ForSummon");
         Assert.Contains("A performer joins at the back with ", body);
+        // 2026-09-25 night (the granted-guest seat round), word for word.
         Assert.Contains(" [gold]Fanfare[/gold]. On a full stage, the front "
-                      + "one [gold]Bow[/gold]s and leaves, and the newcomer "
-                      + "adds its Fanfare.", body);
+                      + "one [gold]Bow[/gold]s and leaves its Fanfare to the "
+                      + "newcomer.", body);
         Assert.DoesNotContain("the lead", body);
         var parameters = typeof(ArmKeywordTips).GetMethod("ForSummon")!
             .GetParameters();

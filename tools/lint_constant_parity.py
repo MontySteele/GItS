@@ -363,6 +363,7 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ActChevreuseEnergy": _stage("ACT_CHEVREUSE_ENERGY"),
     "FurinaStageLaw.ActWriothesleyRate": _stage("ACT_WRIOTHESLEY_RATE"),
     "FurinaStageLaw.ActSigewinneGift": _stage("ACT_SIGEWINNE_GIFT"),
+    "FurinaStageLaw.ActLynetteDamage": _stage("ACT_LYNETTE_DAMAGE"),
     "FurinaStageLaw.ActCharlotteGift": _stage("ACT_CHARLOTTE_GIFT"),
     # R276 batch two: Arkhe Alignment's Pneuma half.
     "ArkheAlignmentPower.PneumaLeadRegain": _stage("PNEUMA_LEAD_REGAIN"),

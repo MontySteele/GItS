@@ -1276,11 +1276,13 @@ public sealed class FurinaResourceHooks : AbstractModel
         // and the strip redraws -- and it fires per damage instance, so the
         // board is settled before the NEXT hit of the same flurry. A lead that
         // hit emptied takes its Bow here, after the hit is dealt and before
-        // the next one (rule 7, 2026-09-25). The part of the hit that
-        // reached HER is filed on the stage log first, so the log reads the
-        // hit, the departure, what reached her, then the Bow.
-        FurinaStage.NoteHitOnFurina(target, result, dealer);
+        // the next one (rule 7, 2026-09-25). Since 2026-09-25 night the
+        // Bow's Block has already met the rest of that hit (the ledger spent
+        // it inside the damage modifier), so the log reads the hit, the
+        // departure, the Bow, then what reached her: the Bow is filed first
+        // and the part of the hit that reached HER after it.
         await FurinaStage.Flush(choiceContext, target);
+        FurinaStage.NoteHitOnFurina(target, result, dealer);
         Vfx.FurinaStageStrip.Refresh(target);
 #endif
         await FurinaResources.SyncMeters(

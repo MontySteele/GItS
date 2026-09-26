@@ -82,6 +82,15 @@ public static class RelicAnswerLog
         _playerTurnEnd = -1;
     }
 
+    /// <summary>Drop everything, the carry included. Called when a combat
+    /// opens: <see cref="ReactionLog.ResetFight"/>'s reason, one log over.
+    /// </summary>
+    public static void ResetFight()
+    {
+        Rows.Clear();
+        _playerTurnEnd = -1;
+    }
+
     /// <summary>
     /// "This relic answered, for this much, on this body."
     ///

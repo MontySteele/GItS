@@ -146,6 +146,23 @@ public static class ReactionLog
     }
 
     /// <summary>
+    /// DROP EVERYTHING, THE CARRY INCLUDED, when a combat opens (2026-09-25
+    /// night, the granted-guest seat round). "What reacted" on fight 3 turn 1
+    /// still listed "Electro-Charged on Corpse Slug ... (since you ended your
+    /// last turn)" from fight 2: that fight ended inside the end-of-turn acts,
+    /// after <see cref="MarkPlayerTurnEnd"/> and before any enemy turn end, so
+    /// the mark was still standing when the next combat's opening called
+    /// <see cref="MarkTurnStart"/> -- which carried the row across the fight
+    /// boundary. A row from another fight is about no board on the screen.
+    /// `ResolutionLedger.ResetFight`'s rule, one log over.
+    /// </summary>
+    public static void ResetFight()
+    {
+        Rows.Clear();
+        _playerTurnEnd = -1;
+    }
+
+    /// <summary>
     /// `EB-697`. THE SOURCE A HIT CANNOT NAME FOR ITSELF.
     ///
     /// THE FIND (Kokomi r30 lane 1 (c)). A Vaporize row named the

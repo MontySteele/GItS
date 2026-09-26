@@ -15,7 +15,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from understudy.blindplay_faces import remember_elements
+from understudy.blindplay_faces import (GUEST_STAR_ELEMENTS, _GUEST_STAR_RE,
+                                        remember_elements)
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         CASKET_STRIKE,
@@ -1334,6 +1335,16 @@ STAGE_ACTS = ("Up to 3 performers act at the end of your turn, from any "
               "seat: Usher gives you 3 Block, Chevalmarin deals 2 to every "
               "enemy, Crabaletta deals 5 damage to a random enemy.")
 
+#: 2026-09-25 night (the granted-guest seat round): WHERE INSIDE A HIT THE
+#: BOW LANDS. Usher's Bow Block was paid after the hit's overflow had reached
+#: her (lane 2 twice, seven times before), and the rule changed: a performer a
+#: hit empties Bows before the rest of that hit reaches her. The game's Bow
+#: tip cannot carry the sentence -- the tip plus it is 159 rendered
+#: characters against the 135 ceiling -- so the page's Bow row carries it
+#: after the tip's own words, as brief rules 6 and 7 do.
+STAGE_BOW_ON_HIT = ("A performer emptied by a hit Bows before the rest of "
+                    "that hit reaches you.")
+
 ARM_KEYWORDS: dict[str, str] = {
     # TEXT PASS 2026-09-25, in step with `ArmKeywordTips.ForBomb` and
     # `ForSetOff`: the tips were rewritten short ("the existing text is often
@@ -1459,7 +1470,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # THE GUEST CAST (2026-09-25): a guest's act may pay, and its Bow does
     # not -- stated once, here, for every performer.
     "Bow": ("A performer that leaves the stage acts one last time on its "
-            "way out, without paying."),
+            "way out, without paying. " + STAGE_BOW_ON_HIT),
     # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. The acts go on BOTH seat rows
     # because a seat may meet either word alone -- the page's one addendum to
     # the tip, `STAGE_ACTS`, which also carries the seat count (the
@@ -1487,9 +1498,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # the performer rows are also each body's badge in game
     # (`StagePerformerBadge`). One Summon row since the trio can be cloned
     # (2026-09-25): named and random summons meet a full stage the same way.
+    # 2026-09-25 night (the granted-guest seat round): lane 2 only understood
+    # "adds its Fanfare" from the log.
     "Summon": ("A performer joins at the back with 1 Fanfare. On a full "
-               "stage, the front one Bows and leaves, and the newcomer adds "
-               "its Fanfare."),
+               "stage, the front one Bows and leaves its Fanfare to the "
+               "newcomer."),
     # Draft 3 (2026-09-25): no Bow clause (a Bow is the act once more) and
     # no Hydro (no act applies it).
     "Gentilhomme Usher": "End of your turn: gain 3 Block.",
@@ -1519,7 +1532,9 @@ ARM_KEYWORDS: dict[str, str] = {
                   "behind her, or to your front performer if she is at the "
                   "back."),
     "Charlotte": "End of your turn: each other performer gains 1 Fanfare.",
-    "Lynette": "End of your turn: Swirl a random enemy with an aura.",
+    # 2026-09-25 night (the granted-guest seat round): the act always lands.
+    "Lynette": ("End of your turn: deal 3 Anemo damage to a random enemy, "
+                "one with an aura if any."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -2472,6 +2487,47 @@ _SALON_MEMBER_RE = {
     name: re.compile(rf"\b{name}\b") for name in SALON_MEMBER_ELEMENTS
 }
 
+# 2026-09-25 night (the granted-guest seat round). A GUEST IS AN ELEMENT
+# SOURCE, and the census could not see one either -- `EB-547`'s defect one
+# batch over. "NO REACTION IS REACHABLE HERE: Electro is the only element this
+# screen can supply" printed with Guest Star: Neuvillette (8 Hydro to ALL
+# enemies) in hand against an Electro aura: the card's face says only "joins
+# the stage with 6 Fanfare", and its element is on the performer's tip.
+#
+# THE GUESTS WHOSE ACT DEALS ELEMENTAL DAMAGE, and only those: Chevreuse
+# (Pyro), Sigewinne (Hydro) and Charlotte (Cryo) wear an element and apply
+# none -- their acts give Energy or Fanfare -- so a screen holding only them
+# really reaches nothing. Matched on a Guest Star card's title (hand, draw
+# pile, a reward) and on a guest standing on the stage; the map is
+# `blindplay_faces.GUEST_STAR_ELEMENTS`, which the deck census reads too.
+def guest_elements(obs: dict[str, Any]) -> set[str]:
+    """The elements the guests on this screen supply: a Guest Star card
+    anywhere it prints (its TITLE is the handle, so this walks titles too),
+    and a guest standing on the Stage."""
+    found: set[str] = set()
+
+    def walk(blob: Any) -> None:
+        if isinstance(blob, dict):
+            for value in blob.values():
+                walk(value)
+        elif isinstance(blob, list):
+            for value in blob:
+                walk(value)
+        elif isinstance(blob, str):
+            for name in _GUEST_STAR_RE.findall(blob):
+                found.add(GUEST_STAR_ELEMENTS[name])
+
+    walk(obs)
+    combat = obs.get("combat")
+    stage = combat.get("stage") if isinstance(combat, dict) else None
+    for seat in (stage or {}).get("seats") or []:
+        if isinstance(seat, dict):
+            element = GUEST_STAR_ELEMENTS.get(str(seat.get("name") or ""))
+            if element:
+                found.add(element)
+    return found
+
+
 _ELEMENTS = ("Pyro", "Hydro", "Electro", "Cryo")
 #: The trigger elements, in reach on the same three sources as the four above:
 #: `EB-454` put both words in `_ELEMENT_KEYWORD`, so a face carries them.
@@ -2702,6 +2758,8 @@ def _reachable_elements(obs: dict[str, Any]) -> set[str]:
                     found.add(SALON_MEMBER_ELEMENTS[name])
 
     walk(obs)
+    # 2026-09-25 night: and every guest's element, on a card or on stage.
+    found |= guest_elements(obs)
     # AND EVERY ELEMENT THIS FIGHT HAS ALREADY SHOWN. A screen is one turn and
     # a deck is a fight; see `_FIGHT_MEMORY`'s header for why the union is the
     # honest reading rather than the generous one.
@@ -2828,9 +2886,39 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
         printed = "\n".join(r["text"].replace(STAGE_ACTS, " ") for r in rows)
         more = _keyword_rows(obs, printed)
         if [r["name"] for r in more] == [r["name"] for r in rows]:
-            return more
+            return _performer_rider(obs, more)
         rows = more
-    return rows
+    return _performer_rider(obs, rows)
+
+
+#: 2026-09-25 night (the granted-guest seat round). A PERFORMER'S ACT IS NOT
+#: FURINA'S ATTACK, like a Defect orb: her Strength, Weak and Shrink leave it
+#: alone (`EB-495` D3, both engines). Lane 2 read Shrink's "every hit it
+#: lands" as covering her performers and could not tell whether the 5s that
+#: stayed 5 were the rule or a bug. Seat page only -- no in-game text moves.
+STAGE_PERFORMER_RIDER = " Your performers' acts are not changed."
+
+#: The glossary rows that rider rides on.
+_PERFORMER_RIDER_WORDS = frozenset({"Weak", "Shrink", "Strength"})
+
+
+def _stage_has_performers(obs: dict[str, Any]) -> bool:
+    """Does this screen's Stage block show anyone standing?"""
+    combat = obs.get("combat")
+    stage = combat.get("stage") if isinstance(combat, dict) else None
+    return isinstance(stage, dict) and bool(stage.get("seats"))
+
+
+def _performer_rider(obs: dict[str, Any],
+                     rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """`STAGE_PERFORMER_RIDER` on the Weak, Shrink and Strength rows, where
+    they are glossed while Furina has performers on stage."""
+    if not _stage_has_performers(obs):
+        return rows
+    return [({**row, "text": row["text"] + STAGE_PERFORMER_RIDER}
+             if row["name"] in _PERFORMER_RIDER_WORDS
+             and not row["text"].endswith(STAGE_PERFORMER_RIDER) else row)
+            for row in rows]
 
 
 def _keyword_rows(obs: dict[str, Any],

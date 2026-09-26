@@ -102,11 +102,14 @@ ACT_CHEVREUSE_ENERGY = 1      # ... for Energy next turn.
 ACT_WRIOTHESLEY_RATE = 2      # Cryo damage per Fanfare lost since his act.
 ACT_SIGEWINNE_GIFT = 3        # to the performer behind her.
 ACT_CHARLOTTE_GIFT = 1        # to each other performer.
+ACT_LYNETTE_DAMAGE = 3        # Anemo damage to a random enemy, one with an
+#                               aura if any (2026-09-25 night: the act always
+#                               lands, and Swirls where it finds an aura).
 
 #: The elements the guests' damage acts carry (the Guest Cast's LAW
 #: amendment: a guest on Furina's stage may carry its element).
 GUEST_ELEMENTS = {"neuvillette": "hydro", "clorinde": "electro",
-                  "navia": "geo", "wriothesley": "cryo"}
+                  "navia": "geo", "wriothesley": "cryo", "lynette": "anemo"}
 
 # Rule 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of Furina's
 # turn, after the acts, each performer BEHIND THE FRONT loses half of its
@@ -1070,15 +1073,52 @@ def absorb(state, incoming: int) -> int:
     pair[1] = bar - eaten
     state.emit("stage_absorb", member=member, amount=eaten,
                incoming=int(incoming), fanfare=pair[1])
+    caught = 0
     if pair[1] <= 0:
-        _leave(state, 0, bowed=True, reason="hit", pay_now=False)
+        exit_ = _leave(state, 0, bowed=True, reason="hit", pay_now=False)
+        # 2026-09-25 night (the granted-guest seat round): "a performer
+        # emptied by a hit Bows before the rest of that hit reaches you".
+        # The Bow is still paid by `settle_hit`, but its Block (Usher's act)
+        # meets the rest of THIS hit first, and the Bow then gives only what
+        # is left of it. `FurinaStageLedger.Absorb`'s twin.
+        caught = min(int(incoming) - eaten, bow_block(p, member))
+        exit_["caught"] = caught
+        if caught > 0:
+            state.emit("stage_bow_caught", member=member, amount=caught)
     # R276 batch two, A RAPT AUDIENCE: the percentage of what the lead lost,
     # rounded up, on the back performer -- and nothing when the lead was also
     # the back performer. Every caller here is an enemy's hit.
     pct = int(p.powers.get(RAPT_AUDIENCE, 0))
     if pct and two_or_more and eaten > 0:
         raise_fanfare(state, -(-eaten * pct // 100), source=GAIN_POWER)
+    # What the lead ate. What its Bow Block caught of the rest waits for the
+    # caller (`take_caught`), which takes it off the hit before her HP.
+    setattr(state, _HIT_CAUGHT, caught)
     return eaten
+
+
+#: What the last `absorb`'s emptied lead's Bow Block caught of the rest of
+#: that hit, for the hit loop to take off before her HP. On the STATE, as
+#: `_HIT_BOWS` is.
+_HIT_CAUGHT = "_stage_hit_caught"
+
+
+def take_caught(state) -> int:
+    """What the Bow Block of a lead the last hit emptied caught of the rest
+    of that hit (2026-09-25 night), taken once. `combat._enemy_action`
+    subtracts it from the hit after `absorb` and before her HP."""
+    caught = int(getattr(state, _HIT_CAUGHT, 0) or 0)
+    setattr(state, _HIT_CAUGHT, 0)
+    return caught
+
+
+def bow_block(player, member: str) -> int:
+    """The Block a performer's Bow gives her: Usher's act at this turn's
+    Pneuma multiple, 0 for everyone else (no guest's act gives Block). C#
+    twin: `FurinaStageLedger.BowBlock`."""
+    if member != "usher":
+        return 0
+    return ACT_USHER_BLOCK * int(player.stage_act_block_mult)
 
 
 # ----------------------------------------------------------------------
@@ -1137,7 +1177,10 @@ def perform(state, member: str, *, bow: bool = False, pair=None,
     dmg = int(p.stage_act_damage_mult)
     blk = int(p.stage_act_block_mult)
     if member == "usher":
-        p.block += ACT_USHER_BLOCK * blk
+        # A hit's Bow whose Block the rest of that hit already spent
+        # (`absorb`, 2026-09-25 night) gives only what is left of it.
+        caught = int((exit_ or {}).get("caught", 0)) if bow else 0
+        p.block += max(0, ACT_USHER_BLOCK * blk - caught)
     elif member == "chevalmarin":
         for enemy in list(state.living_enemies):
             effects.deal_damage_to_enemy(state, enemy,
@@ -1567,10 +1610,17 @@ def _guest_act(state, member: str, *, pair, exit_) -> None:
     elif member == "chevreuse":
         p.stage_energy_next = int(p.stage_energy_next) + ACT_CHEVREUSE_ENERGY
     elif member == "lynette":
+        # 2026-09-25 night (the granted-guest seat round; both seats never
+        # played her): "deal 3 Anemo damage to a random enemy, one with an
+        # aura if any". Always lands; on an aura the Anemo damage Swirls
+        # through the ordinary pipeline, on none it is plain damage.
         wearing = [e for e in state.living_enemies if e.aura]
-        if wearing:
-            reactions.resolve_hit(state, state.rng.choice(wearing), "anemo",
-                                  0, "stage_act")
+        pool = wearing or list(state.living_enemies)
+        if pool:
+            effects.deal_damage_to_enemy(state, state.rng.choice(pool),
+                                         ACT_LYNETTE_DAMAGE * dmg,
+                                         element=element, powered=False,
+                                         source=source)
     # Rule 6: every act resets the reading, so a repeat reads 0.
     if pair is not None:
         p.stage_lost[member] = 0
@@ -1597,7 +1647,12 @@ def forecast(state) -> dict:
     now = [[m, f] for m, f in stage(p)]
     ghost = copy.deepcopy(state)
     ghost.log = []
+    enemy_hp = sum(max(0, e.hp) for e in ghost.enemies)
     end_of_turn_acts(ghost)
+    # 2026-09-25 night: what the acts actually took off the enemies' HP --
+    # the number the mod's forecast act lines add up to on a board with no
+    # Block, Vulnerable or reaction on it.
+    acts_dealt = enemy_hp - sum(max(0, e.hp) for e in ghost.enemies)
     after = [[m, f] for m, f in stage(ghost.player)]
     block = int(ghost.player.block)
     hp = int(ghost.player.hp)
@@ -1607,6 +1662,18 @@ def forecast(state) -> dict:
         combat._enemy_turn(ghost, enemy)
     front = sum(e.get("amount", 0) for e in ghost.log
                 if e.get("event") == "stage_absorb")
+    # Hit by hit, performer by performer, in the order they took them.
+    takers: list = []
+    for e in ghost.log:
+        if e.get("event") != "stage_absorb" or not e.get("amount"):
+            continue
+        leaves = int(e.get("fanfare", 0)) <= 0
+        if takers and takers[-1][0] == e["member"] and not takers[-1][2]:
+            takers[-1] = [e["member"], takers[-1][1] + int(e["amount"]),
+                          leaves]
+        else:
+            takers.append([e["member"], int(e["amount"]), leaves])
     return {"now": now, "after": after, "block_after_acts": block,
             "front_takes": int(front),
-            "reaches_furina": max(0, hp - int(ghost.player.hp))}
+            "reaches_furina": max(0, hp - int(ghost.player.hp)),
+            "acts_dealt": int(acts_dealt), "takers": takers}

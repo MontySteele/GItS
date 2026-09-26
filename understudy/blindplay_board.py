@@ -822,6 +822,16 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # or an older build), and the page then prints the total as a
             # total.
             "each": _each(row.get("each")),
+            # 2026-09-25 night (the granted-guest seat round): a one-body
+            # act's hit as DEALT (not the HP it took), the body's HP before
+            # it and what its Block took; a hit's Bow's Block that the rest
+            # of that hit already spent; and how many performers stood when
+            # the beat was filed. None (0 for caught) on an older build.
+            "dealt": _each(row.get("dealt")),
+            "target_hp": _each(row.get("target_hp")),
+            "blocked": _each(row.get("blocked")),
+            "caught": _int(row.get("caught")),
+            "standing": _each(row.get("standing")),
             # 2026-09-25 evening: how many enemies that act struck. None on
             # every other beat and on an older build.
             "struck": _each(row.get("struck")),
@@ -876,12 +886,43 @@ def _stage_forecast(raw: Any) -> dict[str, Any] | None:
                         "leaves": bool(row.get("leaves"))})
         return out
 
+    # 2026-09-25 night (the granted-guest seat round): what each act of the
+    # sweep deals and to whom, their total where every act lands on one body
+    # or on ALL (None otherwise), and the attacks' split performer by
+    # performer. Empty on an older build.
+    acts = []
+    for row in (raw.get("acts") or []):
+        if not isinstance(row, dict):
+            continue
+        member = _text(row.get("member"))
+        acts.append({"name": STAGE_SHORT_NAMES.get(member,
+                                                   _text(row.get("name"))),
+                     "amount": _int(row.get("amount")),
+                     "element": _text(row.get("element")),
+                     "target": _text(row.get("target")),
+                     "bow": bool(row.get("bow"))})
+    takers = []
+    for row in (raw.get("takers") or []):
+        if not isinstance(row, dict):
+            continue
+        member = _text(row.get("member"))
+        takers.append({"name": STAGE_SHORT_NAMES.get(member,
+                                                     _text(row.get("name"))),
+                       "takes": _int(row.get("takes")),
+                       "leaves": bool(row.get("leaves"))})
+    total = raw.get("act_total")
+    total = None if total is None or _int(total, -1) < 0 else _int(total)
     return {"seats": rows("seats"), "arrivals": rows("arrivals"),
             "block": _int(raw.get("block_after_acts")),
             "intent_known": bool(raw.get("intent_known")),
             "front_takes": _int(raw.get("front_takes")),
             "reaches_furina": _int(raw.get("reaches_furina")),
-            "unknown": bool(raw.get("unknown"))}
+            "unknown": bool(raw.get("unknown")),
+            "acts": acts, "act_total": total,
+            "act_total_target": _text(raw.get("act_total_target")),
+            # None on a build that sends no split, and the page then prints
+            # the older one-number line.
+            "takers": takers if "takers" in raw else None}
 
 
 def name_stage_targets(stage: dict[str, Any], wire: list[dict[str, Any]],

@@ -6765,7 +6765,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # One sentence since the trio can be cloned (2026-09-25).
         "Summon": ["A performer joins at the back with ",
                    "stage, the front one ",
-                   "newcomer adds its Fanfare."],
+                   "to the newcomer."],
         # Draft 3 (2026-09-25): one sentence each, no Hydro, no Bow clause.
         "Gentilhomme Usher": ["End of your turn: gain "],
         "Surintendante Chevalmarin": ["End of your turn: deal ",
@@ -6810,8 +6810,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                       " of her Fanfare to the performer behind her, or to "
                       "your front ", "performer if she is at the back."],
         "Charlotte": ["End of your turn: each other performer gains "],
-        "Lynette": ["End of your turn: ", " a random enemy with an ",
-                    "aura."],
+        # 2026-09-25 night (the granted-guest seat round): the act lands.
+        "Lynette": ["End of your turn: deal ",
+                    " damage to a random enemy, one with an aura ",
+                    "if any."],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces
