@@ -119,6 +119,11 @@ def grant_charged_kit(state: CombatState) -> None:
     p = state.player
     if not p.burst_max or p.burst_energy < p.burst_max:
         return
+    # The Stage never grants the kit card: its Burst is retired
+    # (`resources.gain_burst`). Asked here as well, as the mod's
+    # `FurinaKitGrant.GrantIfCharged` asks it, because a grant is a rule.
+    if resources.stage_retires_the_shipped_meters(p):
+        return
     for kit in p.kit_cards:
         if any(c.id == kit.id for c in p.hand):
             continue
