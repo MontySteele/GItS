@@ -2269,12 +2269,9 @@
    description: "Lynette joins the stage with 8 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: lynette, amount: 8}]}
 
-# FURINA, THE STAGE -- THE SUPPORTING POOL (2026-09-26). Twenty-eight rows of
-# review/active/furina-supporting-pool-2026-09-26.md, as swept: every row but
-# Sold Out, which is built beside them. Each `replaces:` a same-rarity shipped
-# row the EB-736 filter already drops, except Solo Verse, which the arm
-# appends (the sheet has one Common too few). Provenance:
-# docs/notes/prototype-surface-provenance.md.
+# FURINA, THE STAGE -- THE SUPPORTING POOL (2026-09-26): 28 rows of
+# review/active/furina-supporting-pool-2026-09-26.md (Sold Out is below). Why
+# each replaces what it does: docs/notes/prototype-surface-provenance.md.
 
 # --- 1. Arranging the stage ---
 
@@ -2542,7 +2539,7 @@
    authored_by: [claude],
    replaces: hearts_swelling,
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "While no one is on stage, your Attacks deal 3 more damage.",
+   description: "While no one is on stage, your Attacks deal 3 additional damage.",
    effects: [{op: apply_power, power: fs_soliloquy, amount: 3,
               target: self}]}
 

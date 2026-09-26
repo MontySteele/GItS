@@ -870,6 +870,12 @@ def _stage_offence(state: CombatState, card: Card) -> float:
                 total += float(furina_stage.ACT_CLORINDE_DAMAGE)
             elif member == "navia" and isinstance(amount, int):
                 total += float(amount)
+            # THE SUPPORTING POOL (2026-09-26): the two new guests, the same
+            # way -- Lyney's hit on one enemy, Escoffier's on ALL.
+            elif member == "lyney":
+                total += float(furina_stage.ACT_LYNEY_DAMAGE)
+            elif member == "escoffier":
+                total += float(furina_stage.ACT_ESCOFFIER_DAMAGE * live)
     return total
 
 

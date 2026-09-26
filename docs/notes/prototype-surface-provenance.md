@@ -3131,6 +3131,73 @@ other three Rare Powers the paper adds (Eternal Applause, One-Woman Show,
 Regina of All Waters) have three dropped shipped Rare Powers left to replace:
 `the_sea_is_my_stage`, `star_of_the_show` and `rapturous_applause`, all cost 1.
 
+## Furina, the Stage — the supporting pool, 28 rows (2026-09-26)
+
+The other 28 cards of `review/active/furina-supporting-pool-2026-09-26.md`
+(ruled that day with all four defaults, swept before the build). The faces are
+the paper's tables as swept, with the build's own wording where a lint or a
+title forced it: **Showstopper** is *Bring the House Down* and **Undertow** is
+*Groundswell* (title clashes with Furina's shipped `showstopper` and Kokomi's
+arm Undertow); **Stage Whisper** reads "Move up to 3 ... It keeps at least 1",
+so it never empties, and never Bows, the back (a 0-cost Bow would loop with
+Thunderous Applause and A Five-Century Act); **Soliloquy** says "3 additional
+damage", text-conventions rule 8. The two Guest Stars follow the Guest Cast's
+frame: the face says what arrives, the act lives on the performer's tip and
+badge.
+
+**Which shipped row each replaces** is a D default on the earlier batches'
+terms (the same rarity always, the type and cost where one was free), each a
+row the `EB-736` text filter already drops. Commons: Plot Twist for
+`shared_billing`, Stage Whisper for `ebb_and_flow`, Cheered On for
+`dinner_service`, Spirited Aria for `macaron_break`, Bubble Aria for
+`casting_call`. Uncommons: Revolving Stage for `grand_salon`, Oratrice's
+Verdict for `curtain_cue`, Season Tickets for `top_billing`, Star Billing for
+`supporting_cast`, Held Applause for `directors_cut`, Echoing Hall for
+`pit_orchestra`, Intermission for `tempo_change`, Counterclaim for
+`poised_riposte`, Da Capo for `florid_cadenza`, Groundswell for
+`waters_embrace`, Tide of Applause for `leading_role`, Soliloquy for
+`hearts_swelling`, Dual Nature for `curtain_up`. Rares: Lyney for
+`rain_of_roses`, Escoffier for `the_final_verdict`, Eternal Applause for
+`rapturous_applause`, Bring the House Down for `showstopper`, Grand Finale for
+`flood_of_emotion`, Gala Premiere for `grand_gala`, Grand Deluge for
+`high_tide`, Regina of All Waters for `the_sea_is_my_stage`, One-Woman Show for
+`star_of_the_show`. `overflowing_hospitality` is the one dropped Uncommon left.
+
+**Solo Verse replaces nothing.** Her sheet has only five Commons the filter
+drops that no batch had replaced, and this batch has six. Replacing a Common
+the arm still offers would take a card out of the pool and miss the paper's
+49 + 29 = 78, so the arm APPENDS it: the mod's offer was always an append
+(`FurinaStageRoster.SwapOfferedRows`), and the sim gains the one seam it
+lacked, `furina_stage.POOL_ADDS`, read by `loader.pool_additions` beside
+`pool_substitutions` and filed at its own rarity by
+`tier05.rewards.character_pool`. Empty with the flag off.
+
+**New machinery, both engines**: eight ops (`stage_reverse`,
+`stage_whisper`, `stage_hold_fade`, `stage_intermission`,
+`stage_spend_front_all`, `stage_grand_finale`, `stage_verdict`,
+`stage_dual_nature`); `stage_summon`'s `fanfare:` (Gala Premiere's 3, and on a
+full stage the recast's own arrival); `stage_raise` inside a branch
+(Groundswell, Grand Deluge); the `stage_front_hit` predicate (Counterclaim) and
+the `stage_bows` count (Da Capo); upgrade keys `stage_whisper` and
+`stage_intermission`; two guests (Lyney, Escoffier) on the Guest Cast's
+machinery; and nine powers, each a switch its rule asks about
+(`FurinaStageSupporting.cs`, sim twin in `furina_stage.py`).
+
+**The build's readings of the paper**, each a literal reading flagged in the
+build PR rather than a design choice: Revolving Stage runs AFTER rule 4's
+regen, so the regen goes to the old lead; the turn-start order is One-Woman
+Show (on the stage the turn found), Revolving Stage, Season Tickets, Regina.
+Oratrice's Verdict lasts until the end-of-turn sweep and reaches every random
+pick an act or a Bow makes, Lynette's aura pool included. Echoing Hall is a
+move (copies do not echo twice); Eternal Applause's copies do not stack
+further; Revolving Stage moves the back forward once per copy. Grand Finale's
+Bow is taken in place: a gift "to each other performer" or "behind her" skips
+the giver, and Wriothesley's count resets. Dual Nature does not stack on an
+Arkhe Alignment that chose the same half this turn (the larger multiple
+stands). Star Billing draws on a Guest Star card's arrival only, a second
+copy's recast included, not on A Five-Century Act's return. Soliloquy is read
+per hit in the mod and once per play in the sim.
+
 ## Pool pass two: six Spark sinks on Regent's ladder (`EB-732`, R270, 2026-09-08)
 
 R270 ruled the round-25 pick at option 1: Spark is a currency, its income

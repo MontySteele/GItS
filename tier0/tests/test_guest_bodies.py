@@ -53,7 +53,8 @@ def test_every_performer_has_its_own_literal_scene():
     cannot find)."""
     scenes = _scene_map()
     performers = _performers()
-    assert len(performers) == 11, performers
+    # The supporting pool (2026-09-26): Lyney and Escoffier make thirteen.
+    assert len(performers) == 13, performers
     assert set(scenes) == set(performers), set(performers) ^ set(scenes)
     assert len(set(scenes.values())) == len(scenes), "two performers share a scene"
     for who, path in scenes.items():

@@ -526,5 +526,20 @@ public class FurinaSupportingPoolTests
         {
             Assert.Contains(name, offered);
         }
+        // The paper's count: 49 before the batch, 49 + 28 = 77, and 78 with
+        // Sold Out -- the draftable one-player rows: the basics, the Ancient
+        // and the co-op tier aside.
+        var pool = ArmPools.Offerable("furina-stage")
+            .Where(c => c.Rarity != MegaCrit.Sts2.Core.Entities.Cards
+                                        .CardRarity.Ancient)
+            .Where(c => c.Rarity != MegaCrit.Sts2.Core.Entities.Cards
+                                        .CardRarity.Basic)
+            .Where(c => !MultiplayerOnly(c))
+            .ToList();
+        Assert.Equal(78, pool.Count);
     }
+
+    private static bool MultiplayerOnly(MegaCrit.Sts2.Core.Models.CardModel card) =>
+        card.GetType().Name is "ProtoFsGuestOfHonor" or "ProtoFsShareTheSpotlight"
+            or "ProtoFsPeopleOfFontaine";
 }

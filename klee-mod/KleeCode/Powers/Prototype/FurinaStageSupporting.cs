@@ -452,7 +452,7 @@ public sealed class SoliloquyPower : PowerModel, ILocalizationProvider
         ("title", "Soliloquy"),
         ("description",
             "While no one is on stage, your Attacks deal "
-          + "[blue]{Amount}[/blue] more damage."),
+          + "[blue]{Amount}[/blue] additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;

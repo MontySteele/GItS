@@ -2840,7 +2840,7 @@ APPLY_POWERS = {
         "At the start of your turn, apply [gold]Hydro[/gold] to ALL "
         "enemies."),
     "fs_soliloquy": ("SoliloquyPower", None,
-        "While no one is on stage, your Attacks deal {X} more damage."),
+        "While no one is on stage, your Attacks deal {X} additional damage."),
     "fs_one_woman_show": ("OneWomanShowPower", None,
         "At the start of your turn, if no one is on stage, gain 1 "
         "[gold]Energy[/gold] and draw 1 card."),

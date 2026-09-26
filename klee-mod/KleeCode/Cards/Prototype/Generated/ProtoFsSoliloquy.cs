@@ -41,7 +41,7 @@ public sealed class ProtoFsSoliloquy : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Soliloquy"),
-        ("description", "While no one is on stage, your Attacks deal {PowerAmount:diff()} more damage."),
+        ("description", "While no one is on stage, your Attacks deal {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
