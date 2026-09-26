@@ -6751,12 +6751,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "front performer": ["Takes hits first. Regains "],
         # Draft 3: the fade, whose threshold is interpolated on the mod
         # side. The guest round: hits never reach the back (rule 6).
-        # 2026-09-26: a lone performer is the front (the Solo seat).
+        # 2026-09-26: a lone performer is both seats, and never fades.
         "back performer": ["Gains and Spends ",
                            "the end of your turn, it loses half its Fanfare "
                            "above ",
-                           ". A lone performer is the front ",
-                           "instead."],
+                           ". A lone performer is both, and ",
+                           "never fades."],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
         # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the
         # anchors are the prose either side of it.

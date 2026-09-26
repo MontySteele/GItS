@@ -153,7 +153,8 @@ public class FurinaStageUiCleanupTests
     {
         using var _ = new Arm();
         using var pops = new Pops();
-        // A lone performer is the front; bars at or under 5 never fade.
+        // A lone performer is both seats and never fades; bars at or under 5
+        // never fade either.
         var lone = Staged((StagePerformer.Crabaletta, 25));
         Assert.Empty(FurinaStage.FadeAndShow(lone.Creature));
         var low = Staged((StagePerformer.Usher, 9),

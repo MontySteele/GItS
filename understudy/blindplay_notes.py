@@ -1532,10 +1532,12 @@ ARM_KEYWORDS: dict[str, str] = {
     # a lone performer is both seats, so it is hit then.
     # The supporting-pool seat round (2026-09-26, the Solo seat): which seat
     # wins when one performer holds both -- the front, which is hit and does
-    # not fade (rule 12). `ArmKeywordTips.ForBackPerformer`'s words.
+    # not fade (rule 12). A later seat (2026-09-26) saw Spend offered from a
+    # lone performer: it is BOTH seats (rule 5), hit, paying Spends, and never
+    # fading. `ArmKeywordTips.ForBackPerformer`'s words.
     "back performer": ("Gains and Spends Fanfare. At the end of your turn, it "
                        "loses half its Fanfare above 5. A lone performer is "
-                       "the front instead. "
+                       "both, and never fades. "
                        + STAGE_ACTS),
     # R276 batch two: Arkhe Alignment's two halves, in
     # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
