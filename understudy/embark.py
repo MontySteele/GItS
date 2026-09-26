@@ -364,6 +364,7 @@ def grant_arms(arms: list[str]) -> list[dict[str, Any]]:
 
 def embark(character: str, *, hold: bool = False,
            chosen_seed: str | None = None,
+           chosen_ascension: int | None = None,
            arms: list[str] | None = None,
            instance: Any = None,
            lane: object = None,
@@ -389,6 +390,12 @@ def embark(character: str, *, hold: bool = False,
     launch that fails half way still leaves the cap the operator asked for
     rather than the previous round's spent count. `0` clears the budget, which
     is every round before this row.
+
+    `chosen_ascension` is posted beside the seed (character picked, confirm
+    not fired) through `bridge.set_ascension`; `None` leaves the character's
+    saved PreferredAscension, as every embark before the flag did. The run's
+    read-back `ascension` must equal it or the embark fails
+    `ascension_not_honoured`.
     """
     who = option_id(character)
     wanted = list(arms or [])
@@ -412,6 +419,8 @@ def embark(character: str, *, hold: bool = False,
         "character_requested": who,
         "hold": hold,
         "arms_requested": wanted,
+        **({"ascension_requested": chosen_ascension}
+           if chosen_ascension is not None else {}),
         # `EB-456`. The cap, in the run's own manifest: a round is only
         # comparable to another inside it, and a caveat that lives in the
         # coordinator's shell history is a caveat the reader does not have.
@@ -436,7 +445,8 @@ def embark(character: str, *, hold: bool = False,
 
     session.setup()
     driver = soak.RunDriver(session, 1, stamp, character=who,
-                            chosen_seed=chosen_seed, max_fights=0)
+                            chosen_seed=chosen_seed, max_fights=0,
+                            chosen_ascension=chosen_ascension)
     try:
         state = driver._to_main_menu()
         state = driver._embark(state)
@@ -468,6 +478,14 @@ def embark(character: str, *, hold: bool = False,
         "ascension": int(((state.get("run") or {}).get("ascension")) or 0),
         "run_log": str(driver.log),
     })
+    if (chosen_ascension is not None
+            and sidecar["ascension"] != chosen_ascension):
+        # The lobby said yes and the run says otherwise. Written first, so the
+        # record shows the mismatch; then the same refusal as the lobby check.
+        _write_sidecar(stamp, sidecar)
+        raise EmbarkError(f"ascension_not_honoured: asked for ascension "
+                          f"{chosen_ascension}, the run reads back "
+                          f"{sidecar['ascension']}")
 
     # EB-188. AFTER the run exists, because `pile: "deck"` is a RunState
     # acquisition and there is no deck to add to before that -- it is the
@@ -624,6 +642,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--seed", default=None,
                     help="embark on a CHOSEN seed instead of one the game "
                          "rolls; the read-back still decides what is recorded")
+    ap.add_argument("--ascension", type=int, default=None, metavar="N",
+                    help="embark at ascension N instead of the character's "
+                         "saved last-used level, so a CONTROL run can match a "
+                         "mod run. Set on the select screen after the pick "
+                         "(it also becomes that profile's saved level, as a "
+                         "click would); refused above the character's max")
     ap.add_argument("--teardown", action="store_true",
                     help="revert an earlier embark: seed, speed, process, "
                          "steam_appid.txt, in that order. The shared bridge "
@@ -666,6 +690,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         instance, install_bridge = soak.lane_setup(args.lane)
         blob = embark(args.character, hold=args.hold, chosen_seed=args.seed,
+                      chosen_ascension=args.ascension,
                       arms=args.arms, instance=instance, lane=args.lane,
                       max_actions=args.max_actions,
                       install_bridge=install_bridge)

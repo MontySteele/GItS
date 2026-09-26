@@ -279,6 +279,11 @@ class Navigation:
                                "before_on_char_select":
                                    before.get("on_char_select"),
                                "before_lobby_seed": before.get("lobby_seed")})
+                if pick is not None and self.chosen_ascension is not None:
+                    # The seed's moment, for the game's reason: picking a
+                    # character resets the level to its PreferredAscension,
+                    # and the confirm reads the lobby's level.
+                    self._choose_ascension(state)
                 if pick is None:
                     if picks < 3 and self.character.lower() in [o.lower()
                                                                 for o in opts]:
@@ -315,6 +320,36 @@ class Navigation:
             state = self.post(state, {"action": "menu_select", "option": pick},
                               mechanical=True)
         raise Defect("embark_loop", "could not embark in 30 menu actions", state)
+
+    def _choose_ascension(self, state: dict[str, Any]) -> None:
+        """POST the chosen ascension and check the lobby took it.
+
+        `vendor/STS2_MCP/gits/GitsAscension.cs` sets it through the screen's
+        own ascension panel and answers with `lobby_ascension`, the value the
+        embark reads. A refusal (a level above the character's maximum) or a
+        read-back that differs is `ascension_not_honoured`: the run would
+        start at a level nobody asked for and be labelled with the request.
+        """
+        wanted = int(self.chosen_ascension)
+        try:
+            before = _wire().get_ascension()
+        except _wire().BridgeError as exc:
+            before = {"error": str(exc)}
+        report = _wire().set_ascension(wanted)
+        got = report.get("lobby_ascension")
+        self.emit({"record": "ascension_chosen",
+                   "requested": wanted,
+                   "ascension": got,
+                   "route": report.get("route"),
+                   "status": report.get("status"),
+                   "message": report.get("message") or report.get("error"),
+                   "max": report.get("max"),
+                   "before_ascension": before.get("lobby_ascension")})
+        if report.get("status") != "ok" or got != wanted:
+            raise Defect(
+                "ascension_not_honoured",
+                f"asked for ascension {wanted}, the lobby reads {got!r} "
+                f"({report.get('error') or report.get('message')})", state)
 
     def _settle_transient(self, state: dict[str, Any],
                           tries: int = 60,

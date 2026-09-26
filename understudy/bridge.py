@@ -32,6 +32,7 @@ SINGLEPLAYER = f"{BASE}/api/v1/singleplayer"
 COMPENDIUM = f"{BASE}/api/v1/compendium"
 SPEED = f"{BASE}/api/v1/gits/speed"
 SEED = f"{BASE}/api/v1/gits/seed"
+ASCENSION = f"{BASE}/api/v1/gits/ascension"
 GIVE_CARD = f"{BASE}/api/v1/gits/give_card"
 DEBUG_STATE = f"{BASE}/api/v1/gits/debug_state"
 METER_LEDGER = f"{BASE}/api/v1/gits/meter_ledger"
@@ -386,6 +387,26 @@ def clear_seed() -> dict:
 
 def get_seed() -> dict:
     return _request(SEED)
+
+
+# ------------------------------------------------------ chosen ascension ----
+#
+# `POST /api/v1/gits/ascension` (vendor/STS2_MCP/gits/GitsAscension.cs) sets
+# the level through the character-select screen's own ascension panel, the
+# path an arrow click takes, and answers with `lobby_ascension`: the value the
+# embark reads. Posted at the seed's moment -- character picked, confirm not
+# fired -- because picking a character resets the level to that character's
+# saved PreferredAscension. A level above the panel's maximum is refused
+# (`status: "error"`).
+
+
+def set_ascension(n: int) -> dict:
+    """Choose the ascension of the NEXT run. Returns the endpoint's report."""
+    return _request(ASCENSION, {"ascension": int(n)})
+
+
+def get_ascension() -> dict:
+    return _request(ASCENSION)
 
 
 # ------------------------------------------------------ dev card grants ----
