@@ -41,6 +41,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Harness, bridge and tools
 
+- Bridge: the enchant chooser (relic Kifuda, 'Choose 3 cards to Enchant') never closes; `confirm_selection` appends the picks again (3→6→9→12), and cancel is refused — a seat stalls in the shop (seat round 2026-09-26, wave3-furina-lane2).
 - The Opus-seat path embarks with no action cap (`embark --max-actions` defaults to 0), so a hand-driven seat ran 279 actions; make `seat.py --opus-brief` print or run the embark with `--max-actions 120`.
 - Seat page: the Tainted per-hit note still gives two readings for a multi-hit, the same double count the Weak note had before #650.
 - Seat page: Pocket Match's play log listed 3 and left out its own 5 damage.

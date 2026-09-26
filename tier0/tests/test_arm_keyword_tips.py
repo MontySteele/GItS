@@ -635,8 +635,9 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Draft 3: rule 12, the fade, on the back performer.
             "Gains and Spends [gold]Fanfare[/gold]. At ",
             "the end of your turn, it loses half its Fanfare above ",
-            # 2026-09-26: which seat wins when one performer holds both.
-            ". A lone performer is the front ",
+            # 2026-09-26: a lone performer is both seats, and never fades.
+            ". A lone performer is both, and ",
+            "never fades.\");",
             "FurinaStageLaw.FadeThreshold",
     ):
         assert clause in tips, clause

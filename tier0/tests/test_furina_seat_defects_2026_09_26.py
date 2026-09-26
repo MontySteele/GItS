@@ -204,12 +204,14 @@ def test_bring_the_house_down_is_not_glossed_as_a_back_performer_spend():
     assert "Spend" in names
 
 
-def test_the_back_performer_row_says_a_lone_performer_is_the_front():
+def test_the_back_performer_row_says_a_lone_performer_is_both():
     """The Solo seat: "A lone Usher counts as both the front and the back
-    performer, and the fade never touched it." Rule 12 exempts the front."""
+    performer, and the fade never touched it." Rule 12 exempts the front.
+    A later seat saw Spend offered from a lone performer: it is both seats
+    (rule 5), so "the front instead" was wrong."""
     assert ARM_KEYWORDS["back performer"].startswith(
         "Gains and Spends Fanfare. At the end of your turn, it loses half its "
-        "Fanfare above 5. A lone performer is the front instead.")
+        "Fanfare above 5. A lone performer is both, and never fades.")
 
 
 # ---- 7. The Crystal Sphere --------------------------------------------------

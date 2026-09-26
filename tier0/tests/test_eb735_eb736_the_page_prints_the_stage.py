@@ -538,8 +538,9 @@ def test_the_back_performer_row_says_where_hits_go():
     page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                  hand=[_card("Gain Block equal to the back performer's bar.")])
     # The guest round (2026-09-25): rule 6 never runs a hit past the front.
-    # 2026-09-26: said as the seat a lone performer takes -- the front.
-    assert "A lone performer is the front instead." in page
+    # 2026-09-26: a lone performer is both seats, and never fades.
+    assert "A lone performer is both, and never fades." in page
+    assert "the front instead" not in page
     assert "Hits reach it last." not in page
     assert "no single attack reaches it" not in page
     assert "nothing hits it" not in page
