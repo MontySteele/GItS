@@ -11,7 +11,7 @@ frozen in [`workstreams.md`](workstreams.md).
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
-**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3820+proto`**
+**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3874+proto`**
 (2026-09-26). Arms: `-p:PrototypeCards=true` (the three prototype kits),
 `-p:FurinaStage=true` (the Stage), `-p:TeyvatFrame=true` (the frame); every
 arm ships OFF in a release package. **Last release package: `0.2.1357`**
@@ -23,7 +23,7 @@ arm ships OFF in a release package. **Last release package: `0.2.1357`**
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 39 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | about 50 (37 Stage cards) |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 (66 Stage cards) |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
@@ -35,7 +35,10 @@ be. Starter basics are never changed.
   The pool is 78; two seat rounds read it; [USER]'s co-op run (A0, 2026-09-24)
   was "very fun ... the loop basically works"; the whole-pool balance review
   shipped (`review/records/klee-balance-2026-09-25.md`), and idle-vs-short Sparks
-  is ruled "watch". Next: one solo run by [USER] on the current build; fun
+  is ruled "watch". Seat rounds in acts 2 and 3 (2026-09-26, Opus seats at
+  [USER]'s request): five whole runs, two wins, fixes in #697 and #701;
+  `review/records/klee-later-acts-2026-09-26.md`, one pick open (the React
+  loop's aura supply). Next: one solo run by [USER] on the current build; fun
   through act 3 moves her to Balance.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
@@ -53,9 +56,13 @@ be. Starter basics are never changed.
   [USER]'s first solo Stage run beat A2 (2026-09-26): "the core concept is
   sound". The balance review that followed is
   `review/records/furina-balance-2026-09-26.md` (the front stays exempt from the
-  fade; the turn predictor becomes cues on the performers). Next: the old Salon
-  UI gated off, the cues built, then the supporting-pool paper that grows the
-  pool toward 78.
+  fade; the turn predictor becomes cues on the performers). The supporting
+  pool (`review/active/furina-supporting-pool-2026-09-26.md`, ruled at the
+  defaults and swept) brought the pool to 78 (#692, #693, #694). Eleven Opus
+  seats read it (2026-09-26): a Solo win from act 2, three whole runs dying at
+  the act-3 boss, fixes in #696, #698, #699, #701, #702 and #703, Lyney and Stage Whisper
+  reworked; `review/records/furina-pool-seat-round-2026-09-26.md`, one pick
+  open (Take the Stage, a starter). Next: [USER]'s run on the 78-card pool.
 
 All three prototypes start with no companion card. Whether each starts with
 one comes back after the kits, with the reaction display (`EB-410`) and the
