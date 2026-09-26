@@ -179,6 +179,22 @@ def _text(value: Any) -> str:
     return _despritify(qa_packet._text(qa_packet.strip_markup(value)))
 
 
+#: 2026-09-26 (wave-3 Furina lane 3; Kokomi r32 lane 2 before it). BaseLib's
+#: mod-source tip. BaseLib hangs a tip titled `WhatMod` on a modded thing's
+#: hover tips, whose text is the mod's id (`BASELIB-MOD_SOURCE.title` in
+#: BaseLib.pck), and the bridge flattens it into `keywords` like any other.
+#: The Orobas event printed Touch of Orobas's relic with "WhatMod: KleeMod"
+#: under it -- a tooling label, and it names "Klee" on a Furina or Kokomi run.
+#: No rule is in it, so no page line reads it.
+MOD_SOURCE_TIP = "WhatMod"
+
+
+def _is_mod_source_tip(tip: Any) -> bool:
+    """Is this wire tip BaseLib's mod-source label (`MOD_SOURCE_TIP`)?"""
+    return (isinstance(tip, dict)
+            and _text(tip.get("name")) == MOD_SOURCE_TIP)
+
+
 def _int(value: Any, default: int = 0) -> int:
     return qa_packet._int(value, default)
 

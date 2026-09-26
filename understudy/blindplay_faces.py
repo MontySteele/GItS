@@ -21,7 +21,8 @@ from pathlib import Path
 from typing import Any
 
 from understudy import qa_packet
-from understudy.blindplay_read import (_blob, _entity_id, _fold, _int, _label,
+from understudy.blindplay_read import (_blob, _entity_id, _fold, _int,
+                                       _is_mod_source_tip, _label,
                                        _listing, _number_names, _relics,
                                        _screen, _text)
 from understudy.blindplay_shape import HAZARD_EVENT_TITLES, HAZARD_EVENTS
@@ -214,7 +215,8 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
     """
     kws = []
     for k in entry.get("keywords") or []:
-        if isinstance(k, dict) and _text(k.get("name")):
+        if isinstance(k, dict) and _text(k.get("name")) \
+                and not _is_mod_source_tip(k):
             kws.append({"name": _text(k.get("name")),
                         "text": _text(k.get("description"))})
     # `EB-389`: and where an override row names the aura that will LAND, the
@@ -1957,7 +1959,8 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
         power["keywords"] = [
             {"name": _text(k.get("name")), "text": _text(k.get("description"))}
             for k in (row.get("keywords") or [])
-            if isinstance(k, dict) and _text(k.get("name"))]
+            if isinstance(k, dict) and _text(k.get("name"))
+            and not _is_mod_source_tip(k)]
     return out
 
 

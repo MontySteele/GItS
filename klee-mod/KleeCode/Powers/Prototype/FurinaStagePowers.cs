@@ -137,8 +137,8 @@ public sealed class FiveCenturyActPower : PowerModel, ILocalizationProvider
     {
         ("title", "A Five-Century Act"),
         ("description",
-            "Whenever a performer [gold]Bow[/gold]s, it returns at the back "
-          + "with 1 [gold]Fanfare[/gold]."),
+            "Whenever a performer [gold]Bow[/gold]s and leaves, it returns "
+          + "at the back with 1 [gold]Fanfare[/gold] if a seat is free."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -168,6 +168,11 @@ public sealed class ArkheAlignmentPower : PowerModel, ILocalizationProvider
 {
     /// <summary>What the Pneuma half gives the lead.</summary>
     public const int PneumaLeadRegain = 2;
+
+    /// <summary>2026-09-26 (wave-3 Furina lane 4): the name the stage log
+    /// files Pneuma's regain under, so it does not read as the front
+    /// performer's turn-start regain.</summary>
+    public const string PneumaTitle = "Pneuma";
 
     public List<(string, string)>? Localization => new()
     {
@@ -229,7 +234,10 @@ public sealed class ArkheAlignmentPower : PowerModel, ILocalizationProvider
         {
             ledger.ActBlockMultiplier = System.Math.Max(
                 ledger.ActBlockMultiplier, 2);
-            FurinaStage.RegainLead(owner, PneumaLeadRegain);
+            using (ledger.CausedBy(PneumaTitle))
+            {
+                FurinaStage.RegainLead(owner, PneumaLeadRegain);
+            }
         }
         else
         {
@@ -246,7 +254,10 @@ public sealed class ArkheAlignmentPower : PowerModel, ILocalizationProvider
         if (pneuma)
         {
             ledger.ActBlockMultiplier = 1 + copies;
-            FurinaStage.RegainLead(owner, PneumaLeadRegain * copies);
+            using (ledger.CausedBy(PneumaTitle))
+            {
+                FurinaStage.RegainLead(owner, PneumaLeadRegain * copies);
+            }
         }
         else
         {

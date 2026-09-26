@@ -449,7 +449,7 @@ values; names are provisional. Upgrades in brackets.
 | card | cost | type | text |
 |---|---|---|---|
 | Arkhe Alignment | 2 | Power | At the start of your turn, choose Ousia or Pneuma. (The Ousia and Pneuma tips carry the two modes: acts deal double damage; or acts give double Block and your front performer gains 2 Fanfare.) [cost 1] |
-| A Five-Century Act | 2 | Power | Whenever a performer Bows, it returns at the back with 1 Fanfare. [cost 1] |
+| A Five-Century Act | 2 | Power | Whenever a performer Bows and leaves, it returns at the back with 1 Fanfare if a seat is free. [cost 1] (2026-09-26 seat round: two seats expected a performer that Bowed to make room on a full stage to return; the rule stays, since there is no free seat, and the face now says so.) |
 
 How the edges resolve: Improvised Number and Between Acts check the stage
 when played. Step Forward moves the back performer to the front and shifts

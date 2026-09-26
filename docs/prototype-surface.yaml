@@ -2192,7 +2192,7 @@
    authored_by: [claude],
    replaces: prima_donna,
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "Whenever a performer [gold]Bow[/gold]s, it returns at the back with 1 [gold]Fanfare[/gold].",
+   description: "Whenever a performer [gold]Bow[/gold]s and leaves, it returns at the back with 1 [gold]Fanfare[/gold] if a seat is free.",
    effects: [{op: apply_power, power: fs_five_century_act, amount: 1,
               target: self}]}
 

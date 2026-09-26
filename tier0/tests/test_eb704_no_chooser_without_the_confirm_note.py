@@ -56,11 +56,14 @@ def potion_chooser_state() -> dict:
     opens, which is the screen `EB-674` was filed from (`confirm` was refused
     as a verb, then worked once a card was armed). `can_confirm` is false here
     because nothing is picked yet, not because the screen has no button.
-    `EB-779` corrected this fixture off `screen_type: "choose"`."""
+    `EB-779` corrected this fixture off `screen_type: "choose"`.
+    2026-09-26 (wave 3): the bridge now says whether the last pick closes a
+    `simple_select` by itself; this one does not (`confirm` worked)."""
     return {"state_type": "card_select",
             "player": {"character": "klee", "potions": [], "relics": [],
                        "max_potion_slots": 3},
             "card_select": {"screen_type": "simple_select",
+                            "closes_on_last_pick": False,
                             "prompt": "Choose a card to make free.",
                             "can_skip": False, "can_cancel": False,
                             "preview_showing": False, "can_confirm": False,

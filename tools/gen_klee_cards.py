@@ -2870,8 +2870,8 @@ APPLY_POWERS = {
         "Whenever an enemy hits your front performer, your back performer "
         "gains {X} [gold]Fanfare[/gold]. Needs 2 performers."),
     "fs_five_century_act": ("FiveCenturyActPower", None,
-        "Whenever a performer [gold]Bow[/gold]s, it returns at the back with "
-        "1 [gold]Fanfare[/gold]."),
+        "Whenever a performer [gold]Bow[/gold]s and leaves, it returns at "
+        "the back with 1 [gold]Fanfare[/gold] if a seat is free."),
     "fs_arkhe_alignment": ("ArkheAlignmentPower", None,
         "At the start of your turn, choose [gold]Ousia[/gold] or "
         "[gold]Pneuma[/gold]."),

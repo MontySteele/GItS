@@ -771,8 +771,39 @@ MODE_CHOOSER_PROMPT = ("The card you just played asks which way to resolve. "
 #: writes it for `NChooseACardSelectionScreen` and nothing else.
 ONE_PRESS_CHOOSER_KIND = "choose"
 
+#: 2026-09-26 (wave-3 Furina lane 3, Klee lane 2b). THE EVENT CARD PICKER
+#: CLOSES ON ITS LAST PICK. Brain Leech and Room Full of Cheese open
+#: `NSimpleCardSelectScreen` (the wire's `simple_select`), and with its prefs'
+#: `RequireManualConfirmation` off the pick that reaches the count completes
+#: the selection and removes the screen (0.111.0 decompile,
+#: `CheckIfSelectionComplete`). The page told both seats to say `confirm`
+#: after `choose`, and the `confirm` was refused, twice each. The bridge now
+#: sends `closes_on_last_pick` and `picks_needed`
+#: (`vendor/STS2_MCP/gits/GitsSelectPrefs.cs`).
+SIMPLE_SELECT_KIND = "simple_select"
+CHOOSER_CLOSES_NOTE = (
+    "*Each `choose` picks one card. This chooser closes by itself once you "
+    "have picked {n}: that last pick is taken at once, with no `confirm` "
+    "after it.*")
+#: The note's fixed opening, for the render's and the pin's checks.
+CLOSES_NOTE_HEAD = CHOOSER_CLOSES_NOTE.split("{n}")[0]
+#: The same screen on a bridge that does not say (an older build): both ways
+#: out, so a refusal is not the only teacher.
+CHOOSER_MAYBE_CLOSES_NOTE = (
+    "*Each `choose` picks one card. On this chooser the pick that completes "
+    "the count may close it at once; if it is still open after that, say "
+    "`confirm`.*")
 
-def chooser_note(select_kind: str | None) -> str:
+
+def _closes_note(picks: int | None) -> str:
+    n = picks if picks and picks > 0 else 1
+    return CHOOSER_CLOSES_NOTE.format(
+        n=f"{n} card" if n == 1 else f"{n} cards")
+
+
+def chooser_note(select_kind: str | None,
+                 closes_on_last_pick: bool | None = None,
+                 picks_needed: int | None = None) -> str:
     """The chooser sentence that is TRUE of this screen (`EB-779`).
 
     One argument, the wire's own `screen_type`, because that is the only field
@@ -781,8 +812,13 @@ def chooser_note(select_kind: str | None) -> str:
     a split on the button's state would print the wrong sentence on the screen
     the row was filed against.
     """
-    if str(select_kind or "").strip().lower() == ONE_PRESS_CHOOSER_KIND:
+    kind = str(select_kind or "").strip().lower()
+    if kind == ONE_PRESS_CHOOSER_KIND:
         return CHOOSER_ONE_CHOICE_NOTE
+    if closes_on_last_pick is True:
+        return _closes_note(picks_needed)
+    if kind == SIMPLE_SELECT_KIND and closes_on_last_pick is None:
+        return CHOOSER_MAYBE_CLOSES_NOTE
     return CHOOSER_CONFIRM_NOTE
 
 # `EB-681`. EVERY REACTION IN A BEAT, BY NAME, IN ORDER.
@@ -1504,8 +1540,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # R276 batch two: Arkhe Alignment's two halves, in
     # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
     "Ousia": "This turn, your performers' acts deal double damage.",
+    # 2026-09-26 (wave-3 Furina lane 4): "It summons nobody." The Fanfare
+    # row says Fanfare gained on an empty stage summons, and Pneuma's +2 is a
+    # regain that does not (brief rule 5); the seat read the two together.
     "Pneuma": ("This turn, your performers' acts give double Block, and your "
-               "front performer gains 2 Fanfare."),
+               "front performer gains 2 Fanfare. It summons nobody."),
     # 2026-09-25. WHAT A SUMMON DOES, AND WHAT EACH PERFORMER DOES. A
     # first-time co-op player "found it very hard to understand what was
     # going on from the tooltips, such as what each summoned actor actually
@@ -2684,6 +2723,32 @@ def _bomb_hay(word: str, hay: str, obs: dict[str, Any]) -> str:
     return hay
 
 
+#: 2026-09-26 (wave-3 Klee lane 2b). THE LISTS WHOSE ROWS ARE NAMED THINGS.
+#: The glossary defined `Ringing` (an enemy debuff) on a shop screen because
+#: the relic `Ringing Triangle` was on a shelf. `_TITLE_KEYS` keeps a CARD's
+#: title out of the haystack; a shelf, an option, a held relic or a potion is
+#: named under `name`, which a power's badge also uses and must keep. So the
+#: base game's words are matched with these rows' names struck out: a word
+#: inside an item's name is not the keyword.
+_NAMED_ROW_KEYS = ("items", "options", "held_relics", "potions_held", "belt",
+                   "alternative_relics")
+
+
+def _item_names(obs: dict[str, Any]) -> set[str]:
+    """The printed names of the shelves, options, relics and potions on this
+    screen (`_NAMED_ROW_KEYS`)."""
+    names: set[str] = set()
+    for key in _NAMED_ROW_KEYS:
+        rows = obs.get(key)
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if isinstance(row, dict) and isinstance(row.get("name"), str) \
+                    and row["name"].strip():
+                names.add(row["name"])
+    return names
+
+
 #: Observation keys whose values are NEVER printed: `deck_elements` is the
 #: element census's memory of the run (`EB-707`), a list of element names no
 #: page line shows. An element row is owed to a word a reader can see.
@@ -3056,9 +3121,14 @@ def _keyword_rows(obs: dict[str, Any],
     for row in rows:
         if row["name"] == "Summon" and _arm_owns("Summon", who):
             row["text"] = _summon_row(hay)
+    # 2026-09-26: the base game's words, off a haystack with the names of
+    # the shelves, options, relics and potions struck (`_NAMED_ROW_KEYS`).
+    names = _item_names(obs)
+    base_hay = "\n".join([s for s in _body_strings(obs) if s not in names]
+                         + list(meters) + ([printed] if printed else []))
     rows += [{"name": word, "text": GAME_KEYWORDS[word]}
              for word, pattern in _GAME_KEYWORD_RE.items()
-             if pattern.search(hay)]
+             if pattern.search(base_hay)]
     if _elements_on_screen(obs):
         # `EB-428`: the umbrella row always, the six only where the screen can
         # supply both of a pair. The umbrella is not a reaction -- it is the
@@ -3157,7 +3227,7 @@ def _keyword_rows(obs: dict[str, Any],
         rows.append(row)
     # `EB-377`, last: a base word the screen NAMES and nothing above defined.
     for word, pattern in _BASE_KEYWORD_RE.items():
-        if word not in seen and pattern.search(hay):
+        if word not in seen and pattern.search(base_hay):
             seen.add(word)
             rows.append({"name": word, "text": BASE_KEYWORDS[word]})
     return rows
