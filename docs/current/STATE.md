@@ -11,8 +11,8 @@ frozen in [`workstreams.md`](workstreams.md).
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
-**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3684+proto`**
-(2026-09-18). Arms: `-p:PrototypeCards=true` (the three prototype kits),
+**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3820+proto`**
+(2026-09-26). Arms: `-p:PrototypeCards=true` (the three prototype kits),
 `-p:FurinaStage=true` (the Stage), `-p:TeyvatFrame=true` (the frame); every
 arm ships OFF in a release package. **Last release package: `0.2.1357`**
 (2026-08-29).
@@ -21,9 +21,9 @@ arm ships OFF in a release package. **Last release package: `0.2.1357`**
 
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
-| `klee` | Klee | 62 | Mondstadt | Pyro | Prototype | 49, to 48, then grows to 78 |
+| `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 39 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 26 (14 Stage cards) |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | about 50 (37 Stage cards) |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
@@ -31,15 +31,12 @@ be. Starter basics are never changed.
 
 ## The three kits (Paper, then Prototype, then Balance; `operations/stage-gate.md`)
 
-- **Klee: the kit works; finish it.** Brief
-  `review/active/klee-brief-2026-09-01.md`. Next build: Tripwire, Explosive
-  Frags, Where Did I Put It? and Big Bounce together; cut Long Fuse,
-  Explosives Workshop, Sugar Rush, Kindling and Catalytic Converter; Hexerei
-  becomes "Companion" (any companion card gives a Spark, and the three readers
-  read any companion play); Sparks and the opening bank of 1 stay; the brief,
-  relic and Ancient residue fixed. Then the pool grows toward 78. Done: two
-  seats, then one full run by [USER] on a pool at or near 78; fun through act
-  3 moves her to Balance.
+- **Klee: at the finish line.** Brief `review/active/klee-brief-2026-09-01.md`.
+  The pool is 78; two seat rounds read it; [USER]'s co-op run (A0, 2026-09-24)
+  was "very fun ... the loop basically works"; the whole-pool balance review
+  shipped (`review/records/klee-balance-2026-09-25.md`), and idle-vs-short Sparks
+  is ruled "watch". Next: one solo run by [USER] on the current build; fun
+  through act 3 moves her to Balance.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start
@@ -49,14 +46,16 @@ be. Starter basics are never changed.
   every damaging card of hers applies Hydro (Skills too; basics unchanged).
   Pool stays 39 for this pass. Then two seats, then [USER] plays (a central
   rule changed).
-- **Furina: the Stage, to playtest level.** Brief
-  `review/active/furina-stage-brief-2026-09-08.md`. Next build: Spend needs
-  the full price and a bow comes only from an exact emptying; Spend and the
-  readers take from the back performer (the bank), the lead is the shield;
-  about ten Stage cards (two or three Powers, two empty-stage answers, a
-  Pneuma/Ousia Rare); her starter matches the brief (no companion cards);
-  Ancient, drain-code and display residue fixed. Then two seats, then
-  [USER]'s first Stage run.
+- **Furina: the Stage, first run cleared.** Brief
+  `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
+  `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any
+  exit, the fade, recasts add), eight Guest Stars with art and stage bodies.
+  [USER]'s first solo Stage run beat A2 (2026-09-26): "the core concept is
+  sound". The balance review that followed is
+  `review/records/furina-balance-2026-09-26.md` (the front stays exempt from the
+  fade; the turn predictor becomes cues on the performers). Next: the old Salon
+  UI gated off, the cues built, then the supporting-pool paper that grows the
+  pool toward 78.
 
 All three prototypes start with no companion card. Whether each starts with
 one comes back after the kits, with the reaction display (`EB-410`) and the
