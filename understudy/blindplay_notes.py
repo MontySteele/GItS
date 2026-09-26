@@ -833,6 +833,16 @@ REACTION_CARRIED_CLAUSE = " *(since you ended your last turn)*"
 REACTION_CARRIED_ONLY = ("- Nothing has reacted yet this turn. These landed "
                          "after you ended your last turn:")
 
+# 2026-09-26 (the Furina supporting-pool seat round, lane 4). A FROZEN ROW
+# THAT READ AS A PROMISE THE BOARD DID NOT KEEP: "Frozen" on the Sculptor
+# after Wriothesley's Bow on the enemies' turn, "but the next Attack got no
+# Shatter bonus and its intent was not halved". Frozen ends as the enemies'
+# turn ends (`FrozenPower.AfterSideTurnEnd`), so a freeze from the enemies'
+# own turn is gone before her next card. A carried Frozen row whose body no
+# longer wears Frozen says so.
+REACTION_FROZEN_THAWED_CLAUSE = (" Frozen ends when the enemies' turn ends, "
+                                 "so it has already worn off.")
+
 # `EB-695`. WHAT A RELIC ANSWERED WITH, ON THE PATH THAT HAD NO RECEIPT.
 #
 # THE FIND (Kokomi r30 lane 2, debrief 1). The Tamakushi Casket answers a
@@ -1484,9 +1494,12 @@ ARM_KEYWORDS: dict[str, str] = {
     # The guest round (2026-09-25): "Hits reach it last" was false. Rule 6:
     # the front absorbs and the rest reaches Furina, never a seat behind;
     # a lone performer is both seats, so it is hit then.
-    "back performer": ("Gains and Spends Fanfare. Hits reach it only when it "
-                       "stands alone. At the end of your turn, it loses half "
-                       "its Fanfare above 5. "
+    # The supporting-pool seat round (2026-09-26, the Solo seat): which seat
+    # wins when one performer holds both -- the front, which is hit and does
+    # not fade (rule 12). `ArmKeywordTips.ForBackPerformer`'s words.
+    "back performer": ("Gains and Spends Fanfare. At the end of your turn, it "
+                       "loses half its Fanfare above 5. A lone performer is "
+                       "the front instead. "
                        + STAGE_ACTS),
     # R276 batch two: Arkhe Alignment's two halves, in
     # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
@@ -1540,8 +1553,10 @@ ARM_KEYWORDS: dict[str, str] = {
                 "one with an aura if any."),
     # THE SUPPORTING POOL (2026-09-26): two more guests,
     # `ArmKeywordTips.ForLyney` / `ForEscoffier` word for word.
+    # The seat round (2026-09-26, the designer's ruling): to the front if he
+    # is not there, and once there his act moves nobody.
     "Lyney": ("End of your turn: pay 2 of his Fanfare to deal 6 Pyro damage "
-              "to a random enemy, then swap your front and back performers."),
+              "to a random enemy. If not in front, he swaps with the front."),
     "Escoffier": ("End of your turn: pay 3 of her Fanfare to give each other "
                   "performer 2 and deal 3 Cryo damage to ALL enemies."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
@@ -1915,7 +1930,11 @@ _ARM_KEYWORD_RE = {
     # word boundary and matched nothing at all.
     # THE TEXT PASS (2026-09-25) retired `Raise` and `Rotate`, renamed the
     # lead the FRONT performer, and prints `Bow` as a verb ("it Bows").
-    "Spend": re.compile(r"\bSpends?\b"),
+    # 2026-09-26 (the supporting-pool seat round, lane 1): NOT Bring the
+    # House Down's "Spend all of your front performer's Fanfare", which names
+    # its own seat. The row says the back performer pays, and the mod no
+    # longer hangs the Spend tip on that face either.
+    "Spend": re.compile(r"\bSpends?\b(?! all of your front performer)"),
     "Fanfare": re.compile(r"\bFanfare\b"),
     "Bow": re.compile(r"\bBows?\b"),
     "front performer": re.compile(r"\bfront performer\b"),
@@ -2800,7 +2819,8 @@ def _aura_on_board(obs: dict[str, Any]) -> bool:
     return walk(obs)
 
 
-def _no_reaction_clause(reach: set[str], aura: bool = False) -> str:
+def _no_reaction_clause(reach: set[str], aura: bool = False,
+                        board_shown: bool = True) -> str:
     """`EB-428`'s "otherwise one line", and it says WHY rather than only that.
 
     A reader told "no reaction is reachable" and nothing else cannot act on
@@ -2828,8 +2848,15 @@ def _no_reaction_clause(reach: set[str], aura: bool = False) -> str:
     elif not pairs:
         reasons.append("this screen supplies no element at all")
     if spread and not aura:
+        # 2026-09-26 (the Furina supporting-pool seat round, lane 3): on a
+        # screen that shows no enemies (Liquid Memories' picker, over a
+        # Mecha Knight wearing Hydro 1) the page cannot see an aura, and "no
+        # enemy is wearing one" was a claim about a board it was not shown.
         reasons.append(f"{' and '.join(spread)} reacts with any aura already "
-                       f"standing, and no enemy is wearing one")
+                       + ("standing, and no enemy is wearing one"
+                          if board_shown else
+                          "standing on an enemy, and this screen does not "
+                          "show the enemies"))
     return " NO REACTION IS REACHABLE HERE: " + "; ".join(reasons) + "." + tail
 
 
@@ -3067,7 +3094,10 @@ def _keyword_rows(obs: dict[str, Any],
         rows.append({"name": "Elemental Reaction",
                      "text": REACTION_KEYWORDS["Elemental Reaction"] if live
                      else (REACTION_UNREACHABLE_ROW
-                           + _no_reaction_clause(reach, aura))})
+                           + _no_reaction_clause(
+                               reach, aura,
+                               bool((obs.get("combat") or {}).get(
+                                   "enemies"))))})
         # A word an arm row already defined is not defined twice: `Swirl` is
         # printed as a verb by ten Universals and carries an `ARM_KEYWORDS` row
         # of its own, which is this row's sentence.

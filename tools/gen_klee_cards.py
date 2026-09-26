@@ -8872,6 +8872,10 @@ def stage_guest_var_effect(card: dict) -> dict | None:
                  if fx.get("op") == "stage_guest"), None)
 
 
+#: The keyword a face may name without placing a guest (Star Billing).
+GUEST_STAR_WORD = re.compile(r"\bGuest Star\b")
+
+
 def stage_guest_tip_calls(card: dict) -> list[str]:
     """THE GUEST CAST (2026-09-25). The Guest Star tip and the guest's own
     tip a row owes, off its `stage_guest` op -- `stage_summon_tip_calls`'
@@ -8881,6 +8885,13 @@ def stage_guest_tip_calls(card: dict) -> list[str]:
     guests = [str(fx.get("member")) for fx in iter_effects(
         card.get("effects") or []) if fx.get("op") == "stage_guest"]
     if not guests:
+        # 2026-09-26 (the supporting-pool seat round, lanes 1 and 3): a face
+        # that NAMES the keyword owes its tip too. Star Billing ("Whenever a
+        # Guest Star joins the stage, draw 2 cards") carried no tip at all,
+        # and "Guest Star" stood undefined on its reward screen until a
+        # Guest Star card was offered twelve floors later.
+        if GUEST_STAR_WORD.search(str(card.get("description") or "")):
+            return ["ArmKeywordTips.ForGuestStar"]
         return []
     calls = ["ArmKeywordTips.ForGuestStar"]
     for member in dict.fromkeys(guests):

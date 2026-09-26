@@ -58,6 +58,8 @@ public sealed class FurinaStageHooks : AbstractModel
         PlayerChoiceContext choiceContext, Player player)
     {
         await FurinaStage.InstallBadge(player.Creature);
+        // 2026-09-26: a returnee from the enemies' turn performs in hers.
+        FurinaStage.BeginTurn(player.Creature);
         await FurinaStage.RegenLead(player.Creature);
         // THE SUPPORTING POOL (2026-09-26): its turn-start powers, AFTER the
         // regen, so the lead's 1 went to the performer that led last turn

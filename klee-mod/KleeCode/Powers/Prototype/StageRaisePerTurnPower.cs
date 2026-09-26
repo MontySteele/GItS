@@ -43,8 +43,14 @@ public sealed class StageRaisePerTurnPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Player player)
     {
         if (Owner == null || player?.Creature != Owner) return;
+        if (!FurinaStage.LiveFor(Owner)) return;
         // Round four: on an empty stage this Raise summons a random performer
-        // holding the amount, as every Raise does.
-        await FurinaStage.Raise(Owner, (int)Amount);
+        // holding the amount, as every Raise does. 2026-09-26: the log names
+        // the card behind it.
+        using (FurinaStageLedger.For(Owner)
+                   .CausedBy(FurinaStage.AllTheWorldsAStageTitle))
+        {
+            await FurinaStage.Raise(Owner, (int)Amount);
+        }
     }
 }

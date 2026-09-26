@@ -37,8 +37,11 @@ from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
                                        _fold, _hand, _int, _player, _potions,
                                        _relics, _screen, _text)
 from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
-                                        SELECT_SCREENS, UNDRIVEN_AFTER_EVENT,
-                                        UNDRIVEN_EXITS, UNDRIVEN_SCREENS)
+                                        SELECT_SCREENS, SPHERE_REVEAL,
+                                        SPHERE_REVEAL_HOW,
+                                        UNDRIVEN_AFTER_EVENT,
+                                        UNDRIVEN_EXITS, UNDRIVEN_SCREENS,
+                                        sphere_owes)
 from understudy.teyvat_ids import resolve_event_id
 
 
@@ -199,7 +202,16 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # and the one verb that leaves it is offered, because a run alive at
         # 53/77 ended on this screen for want of something to type.
         exit_ = UNDRIVEN_EXITS.get(st)
-        if exit_:
+        sphere = _blob(state, "crystal_sphere")
+        if st == "crystal_sphere" and sphere_owes(sphere):
+            # 2026-09-26: the divinations first -- the game refuses `leave`
+            # until they are spent (`blindplay_shape.SPHERE_REVEAL`).
+            left = (_text(sphere.get("divinations_left_text"))
+                    or "some are left")
+            obs["blocked"] = (f"{obs['blocked']}. "
+                              + SPHERE_REVEAL_HOW.format(left=left))
+            obs["commands"] = [SPHERE_REVEAL]
+        elif exit_:
             obs["blocked"] = f"{obs['blocked']}. {exit_['how']}"
             obs["commands"] = [exit_["command"]]
     elif st in COMBAT_SCREENS and _combat_torn_down(state):

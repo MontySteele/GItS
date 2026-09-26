@@ -6748,11 +6748,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "front performer": ["Takes hits first. Regains "],
         # Draft 3: the fade, whose threshold is interpolated on the mod
         # side. The guest round: hits never reach the back (rule 6).
+        # 2026-09-26: a lone performer is the front (the Solo seat).
         "back performer": ["Gains and Spends ",
-                           ". Hits reach it only when ",
-                           "it stands alone. At ",
                            "the end of your turn, it loses half its Fanfare "
-                           "above "],
+                           "above ",
+                           ". A lone performer is the front ",
+                           "instead."],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
         # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the
         # anchors are the prose either side of it.
@@ -6816,8 +6817,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                     "if any."],
         # THE SUPPORTING POOL (2026-09-26): two more guests.
         "Lyney": ["End of your turn: pay ", " of his Fanfare to deal ",
-                  " damage to a random enemy, then swap your ",
-                  "front and back performers."],
+                  " damage to a random enemy. If not in front, ",
+                  "he swaps with the front."],
         "Escoffier": ["End of your turn: pay ",
                       " of her Fanfare to give each other performer ",
                       " damage to ALL enemies."],
@@ -8647,8 +8648,11 @@ def test_the_cost_line_says_whether_it_is_the_upgrade_or_the_turn():
     Seen to FAIL: both cards printed the same sentence, word for word.
     """
     page = blindplay.observe(discounted_hand_state())
+    # 2026-09-26: no claim about how long the upgrade lasts -- Bellows'
+    # upgrades last one combat, and the feed does not say which kind it is.
     assert ("The cost printed on this card is 3; it is showing 2 here, "
-            "because this copy is upgraded — that is permanent.") in page
+            "because this copy is upgraded.") in page
+    assert "that is permanent" not in page
     assert ("The cost printed on this card is 1; it is showing 0 here. This "
             "copy is not upgraded, so the cut is this turn's board and not "
             "the card") in page

@@ -1082,6 +1082,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # because a stage that regenerated before it existed would pay turn one a
     # point the brief spends a paragraph refusing it ("the first hand sees 3").
     furina_stage.open_combat(state)
+    # 2026-09-26: a returnee from the enemies' turn performs in hers.
+    furina_stage.turn_start_rest(state)
     furina_stage.turn_start_regen(state)
     # R276 batch two: Arkhe Alignment's choice, after the regen it may add to.
     furina_stage.turn_start_powers(state)

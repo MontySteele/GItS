@@ -427,12 +427,12 @@ public sealed class LyneyBadgePower : StagePerformerBadge,
         ("description",
             "End of your turn: pay " + FurinaStageLaw.ActLyneyPrice
           + " of his Fanfare to deal " + FurinaStageLaw.ActLyneyDamage
-          + " [gold]Pyro[/gold] damage to a random enemy, then swap your "
-          + "front and back performers."),
+          + " [gold]Pyro[/gold] damage to a random enemy. If not in front, "
+          + "he swaps with the front."),
         ("smartDescription",
             "End of your turn: pay " + FurinaStageLaw.ActLyneyPrice
           + " of his Fanfare to deal {Act} [gold]Pyro[/gold] damage to a "
-          + "random enemy, then swap your front and back performers."),
+          + "random enemy. If not in front, he swaps with the front."),
     };
 }
 

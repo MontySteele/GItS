@@ -111,7 +111,8 @@ ACT_LYNETTE_DAMAGE = 3        # Anemo damage to a random enemy, one with an
 #                               lands, and Swirls where it finds an aura).
 # THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
 # 2026-09-26.md). Lyney pays 2 of his own for 6 Pyro damage to a random enemy,
-# then swaps the front and back performers; Escoffier pays 3 of her own to give
+# then, if he is not in front, swaps with the front performer (the seat round,
+# 2026-09-26); Escoffier pays 3 of her own to give
 # each other performer 2 and deal 3 Cryo damage to ALL enemies.
 ACT_LYNEY_PRICE = 2
 ACT_LYNEY_DAMAGE = 6
@@ -823,6 +824,19 @@ def _bow(state, member: str, exit_: dict | None = None) -> None:
 # ----------------------------------------------------------------------
 # The bar: regen, Raise, Spend, and the damage order.
 # ----------------------------------------------------------------------
+def turn_start_rest(state) -> None:
+    """The start of her turn ends any rest left from the enemies' turn (the
+    supporting-pool seat round, 2026-09-26). A Five-Century Act's returnee
+    "re-enters without acting THAT turn": one that Bowed to a hit on the
+    enemies' turn came back in their turn and performs at the end of hers.
+    Called before the regen, so a return during her own turn still rests.
+    C# twin: `FurinaStage.BeginTurn`."""
+    p = state.player
+    if not active(p):
+        return
+    p.stage_resting.clear()
+
+
 def turn_start_regen(state) -> None:
     """Rule 4. The LEAD regains 1 at the start of Furina's turn, from her
     SECOND turn on (sec.3 rule 2: "the first hand sees 3"). Only the lead.
@@ -1831,9 +1845,12 @@ def _guest_act(state, member: str, *, pair, exit_) -> None:
                                          element=element, powered=False,
                                          source=source)
     if member == "lyney":
-        # "... then swap your front and back performers" -- after the hit,
-        # whichever seat he stands in (a Bow: on the stage he left).
-        swap_ends(state)
+        # The seat round (2026-09-26, the designer's ruling): after the hit,
+        # "if he is not in front, he swaps places with your front
+        # performer". A Bow follows the same rule: one that left the stage
+        # moves nobody; Grand Finale's stay-Bow reads the seat he keeps.
+        swap_to_front(state, pair if pair is not None
+                      else (exit_ or {}).get("stayer"))
     # Rule 6: every act resets the reading, so a repeat reads 0.
     if pair is not None:
         p.stage_lost[member] = 0
@@ -1908,15 +1925,19 @@ def _act_target(state, pool):
     return state.rng.choice(pool)
 
 
-def swap_ends(state) -> None:
-    """Lyney's act: the front and back performers change places. With one
-    performer nothing moves. C# twin: `FurinaStageLedger.SwapEnds`."""
+def swap_to_front(state, lyney) -> bool:
+    """Lyney's act (the 2026-09-26 seat round, the designer's ruling): "If
+    he is not in front, he swaps places with your front performer." In front
+    -- or off the stage -- nothing moves. BY IDENTITY: `lyney` is his seat's
+    pair. C# twin: `FurinaStageLedger.SwapToFront`."""
     p = state.player
     seats = _seats(p)
-    if len(seats) < 2:
-        return
-    seats[0], seats[-1] = seats[-1], seats[0]
+    at = next((i for i, s in enumerate(seats) if s is lyney), -1)
+    if at <= 0:
+        return False
+    seats[0], seats[at] = seats[at], seats[0]
     state.emit("stage_reorder", company=[m for m, _f in seats], by="swap")
+    return True
 
 
 def reverse(state) -> None:

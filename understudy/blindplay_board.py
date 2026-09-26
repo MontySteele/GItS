@@ -796,6 +796,9 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # The guest seat round (2026-09-25): the seat's own key, which a
             # log row carries too. None on an older build.
             "key": _seat_key(row.get("seat_key")),
+            # 2026-09-26: back from its Bow through A Five-Century Act this
+            # turn, so it sits out this turn's acts. False on an older build.
+            "resting": row.get("resting") is True,
         })
     log = []
     for row in (raw.get("log") or []):
@@ -847,6 +850,10 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # the Fanfare (the page's short name). Empty elsewhere.
             "by": STAGE_SHORT_NAMES.get(_text(row.get("by_member")),
                                         _text(row.get("by"))),
+            # 2026-09-26 (the supporting-pool seat round): the power behind a
+            # move no card made -- a card title, printed as the card prints
+            # it. Empty elsewhere and on an older build.
+            "source": _text(row.get("source")),
         })
     # R276 batch two: the mod's forecast of the end-of-turn acts' Block, with
     # Arkhe Alignment's multiple and Full House's extra acts folded in. None
@@ -934,6 +941,9 @@ def _stage_forecast(raw: Any) -> dict[str, Any] | None:
             "intent_known": bool(raw.get("intent_known")),
             "front_takes": _int(raw.get("front_takes")),
             "reaches_furina": _int(raw.get("reaches_furina")),
+            # 2026-09-26: what of that the cards in her hand deal as her turn
+            # ends (Burn, Wither, ...). 0 on an older build.
+            "hand_damage": _int(raw.get("hand_damage")),
             "unknown": bool(raw.get("unknown")),
             "acts": acts, "act_total": total,
             "act_total_target": _stage_target(raw.get("act_total_target")),

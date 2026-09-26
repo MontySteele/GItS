@@ -38,14 +38,14 @@ public sealed class ProtoFsBringTheHouseDown : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bring_the_house_down");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bring the House Down"),
-        ("description", "[gold]Spend[/gold] all of your [gold]front performer[/gold]'s [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage per point to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Spend all of your [gold]front performer[/gold]'s [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage per point to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -45,13 +45,14 @@ public sealed class ProtoFsStageWhisper : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stage Whisper"),
-        ("description", "Move up to {Whisper:diff()} of your [gold]back performer[/gold]'s [gold]Fanfare[/gold] to your [gold]front performer[/gold]. It keeps at least 1."),
+        ("description", "Move up to {Whisper:diff()} of your [gold]back performer[/gold]'s [gold]Fanfare[/gold] to your [gold]front performer[/gold]. It keeps at least 1. Draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Whisper", 3m)
+            new DynamicVar("Whisper", 3m),
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,6 +65,7 @@ public sealed class ProtoFsStageWhisper : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         FurinaStage.Whisper(Owner.Creature, DynamicVars["Whisper"].IntValue);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()

@@ -3198,6 +3198,13 @@ stands). Star Billing draws on a Guest Star card's arrival only, a second
 copy's recast included, not on A Five-Century Act's return. Soliloquy is read
 per hit in the mod and once per play in the sim.
 
+**The seat round's text fixes (2026-09-26, 0.2.3859+proto).** Bring the House
+Down's "Spend" is no longer golded: the golded word hung the Spend tip ("Pay
+Fanfare from your back performer") on the one card that spends the FRONT, and
+the face names its seat itself; it is no "Spend N" mode (lane 1). The words
+on the face are unchanged. Star Billing's face names Guest Star, so it now
+carries that tip (`gen_klee_cards.stage_guest_tip_calls`; lanes 1 and 3).
+
 ## Pool pass two: six Spark sinks on Regent's ladder (`EB-732`, R270, 2026-09-08)
 
 R270 ruled the round-25 pick at option 1: Spark is a currency, its income

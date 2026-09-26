@@ -237,6 +237,13 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         # is read here, on the tool side, and only the number crosses.
         "printed_cost": qa_packet.printed_cost_index().get(
             qa_packet.card_key(entry.get("id"))),
+        # 2026-09-26 (the Furina supporting-pool seat round): what the
+        # UPGRADE moves the energy cost by, 0 where it leaves it alone. The
+        # page said "because this copy is upgraded -- that is permanent" of a
+        # Spirited Aria+ that Mummified Hand had made free this turn, and of
+        # copies Bellows upgraded for one combat; the cost line now asks the
+        # upgrade what it actually moved (`qa_packet.cost_note`).
+        "upgrade_cost_delta": qa_packet.upgraded_energy_delta(entry.get("id")),
         # `EB-286`. THE SPARK HALF OF THE PRICE. `cost` above is the ENERGY
         # cost and it is 0 on every Spark-priced card, so a hand line built
         # from it alone printed `Bang Bang!` at `cost 0` while the board
@@ -1620,6 +1627,37 @@ def _reborn_keys(enemies: list[dict[str, Any]], base: list[str],
     return out, changed
 
 
+def _clashing_keys(base: list[str], live: list[str],
+                   ident: list[tuple[str, int]]) -> tuple[list[str], bool]:
+    """Mid-fight, a known id whose body no longer matches (2026-09-26).
+
+    Another NAME in the id is a new body and takes a new key, retiring the
+    old one's letter -- `_reborn_keys`' move, so the page says which letter it
+    replaced. The SAME name at another maximum HP is the same body whose
+    maximum moved, and its roster row is updated in place.
+    """
+    roster: dict[str, tuple[str, int]] = _FIGHT_MEMORY["roster"]
+    out: list[str] = []
+    changed = False
+    for key, now, who in zip(base, live, ident):
+        was = roster.get(now)
+        if was is None or was == who:
+            out.append(now)
+            continue
+        changed = True
+        if was[0] == who[0]:
+            roster[now] = who
+            out.append(now)
+            continue
+        gen = _FIGHT_MEMORY["reborn"].get(key, 0) + 1
+        _FIGHT_MEMORY["reborn"][key] = gen
+        fresh = f"{key}~{gen}"
+        _FIGHT_MEMORY["replaced"][fresh] = _FIGHT_MEMORY["handles"].get(
+            now, "")
+        out.append(fresh)
+    return out, changed
+
+
 def enemy_replacements(enemies: list[dict[str, Any]]) -> list[str]:
     """Per body, the letter the body it REPLACED retired with, or `""`.
 
@@ -1687,7 +1725,14 @@ def _enemy_names(enemies: list[dict[str, Any]],
     shared = any(roster.get(k) == i for k, i in zip(keys, ident))
     clash = any(k in roster and roster[k] != i for k, i in zip(keys, ident))
     reborn = False
-    if clash or (not shared and _is_a_new_fight(round_)):
+    # 2026-09-26 (the Furina supporting-pool seat round, lane 2): A CLASH IS
+    # A NEW FIGHT ONLY WHERE THE ROUND SAYS ONE BEGAN. The Ovicopter went from
+    # [A] to [C] when its eggs hatched: an id the fight had lettered came back
+    # under another name, and any clash used to wipe the fight's memory and
+    # re-letter every body on the board. Mid-fight, a body under a new name in
+    # a known id is a NEW body (`_clashing_keys`) and every other body keeps
+    # its letter; the same name at a new maximum HP is the same body.
+    if (clash or not shared) and _is_a_new_fight(round_):
         forget_fight()
         # `EB-672`: the generations went with the memory, so the board is read
         # under its bare ids again. `_reborn_keys` is skipped rather than run
@@ -1696,7 +1741,10 @@ def _enemy_names(enemies: list[dict[str, Any]],
         # otherwise read every full-HP opening body as a replacement.
         keys = list(base)
     else:
-        keys, reborn = _reborn_keys(enemies, base, keys)
+        if clash:
+            keys, reborn = _clashing_keys(base, keys, ident)
+        keys, reborn_hp = _reborn_keys(enemies, base, keys)
+        reborn = reborn or reborn_hp
     roster = _FIGHT_MEMORY["roster"]
     ordinals: dict[str, int] = _FIGHT_MEMORY["ordinals"]
     numbered: set[str] = _FIGHT_MEMORY["numbered"]

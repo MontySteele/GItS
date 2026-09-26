@@ -260,7 +260,9 @@ def test_a_rapt_audience_refund_follows_the_hit_it_answers():
 
 def test_a_hit_with_no_dealer_is_still_a_line():
     lines = _log(_beat("hit", "usher", "Usher", 1, 2))
-    assert lines == ["  - **Usher** was hit for 2: 3 → 1."]
+    # 2026-09-26: and it says no enemy dealt it (a status in hand did).
+    assert lines == ["  - **Usher** took 2 damage no enemy dealt, such as a "
+                     "Burn or Wither in your hand: 3 → 1."]
 
 
 def test_a_raise_card_on_a_stage_board_points_at_the_log():

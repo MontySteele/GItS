@@ -130,8 +130,9 @@ public static class FurinaStageLaw
     /// <summary>Lyney pays this much of his own Fanfare...</summary>
     public const int ActLyneyPrice = 2;
 
-    /// <summary>...to deal this much Pyro damage to a random enemy, then
-    /// swap the front and back performers.</summary>
+    /// <summary>...to deal this much Pyro damage to a random enemy; then,
+    /// if he is not in front, he swaps with the front performer (the
+    /// 2026-09-26 seat round).</summary>
     public const int ActLyneyDamage = 6;
 
     /// <summary>Escoffier pays this much of her own Fanfare...</summary>

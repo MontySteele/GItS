@@ -31,7 +31,8 @@ from understudy.blindplay_read import (_blob, _enemies, _entity_id, _fold,
                                        _hand, _int, _number_names, _player,
                                        _potions, _screen, _text)
 from understudy.blindplay_shape import (BlindPlayError, COMBAT_SCREENS,
-                                        SELECT_SCREENS, UNDRIVEN_EXITS)
+                                        SELECT_SCREENS, SPHERE_REVEAL,
+                                        UNDRIVEN_EXITS, sphere_reveal_action)
 
 
 
@@ -47,7 +48,10 @@ VERBS = ("play", "end turn", "choose", "skip", "go", "buy", "rest",
          # `EB-396`. `leave` is NOT a synonym for `proceed`: it is the exit
          # from a screen this tool does not drive, and it is the only verb
          # that resolves while `observation` reports the screen blocked.
-         "proceed", "leave")
+         "proceed", "leave",
+         # 2026-09-26: the Crystal Sphere's one divination, which the game
+         # makes the run spend before `leave` is honoured.
+         "reveal")
 
 
 @dataclass
@@ -813,7 +817,12 @@ def _use_potion(state: dict[str, Any], cmd: Command) -> Resolution:
     potions = _potions(state)
     if not potions:
         return _refuse("you are not carrying any potions")
-    idx, why = _match(potions, cmd.name, key=lambda p: _text(p.get("name")))
+    # 2026-09-26 (the Furina Solo seat): `use potion "Vulnerable Potion (1)"`
+    # was refused with two on the belt, and the bare name worked. Potions
+    # take the numbered handle cards take (`EB-177`), and two of one potion
+    # are interchangeable, as two copies of one card are.
+    idx, why = _match(potions, cmd.name, key=lambda p: _text(p.get("name")),
+                      face=lambda p: _text(p.get("name")), number=True)
     if idx < 0:
         return _refuse(why)
     entry = potions[idx]
@@ -874,7 +883,8 @@ def _drop_potion(state: dict[str, Any], cmd: Command) -> Resolution:
         idx = cmd.ordinal - 1
     else:
         idx, why = _match(potions, cmd.name,
-                          key=lambda p: _text(p.get("name")))
+                          key=lambda p: _text(p.get("name")),
+                          face=lambda p: _text(p.get("name")), number=True)
         if idx < 0:
             return _refuse(why)
     entry = potions[idx]
@@ -1250,6 +1260,21 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
         # a run can walk away from, and the r10 seat that could not was left
         # standing on it with the run alive at 53/77.
         exit_ = UNDRIVEN_EXITS.get(st)
+        # 2026-09-26: the Crystal Sphere's divinations are spent one `reveal`
+        # at a time, and `leave` waits until the game will honour it -- it
+        # refused five in a row while three divinations were owed.
+        if st == "crystal_sphere" and cmd.verb in (SPHERE_REVEAL, "leave"):
+            reveal = sphere_reveal_action(_blob(state, "crystal_sphere"))
+            if cmd.verb == SPHERE_REVEAL and reveal is not None:
+                return _with_forms(
+                    Resolution(True, SPHERE_REVEAL, reveal, {}),
+                    obs).as_dict()
+            if cmd.verb == "leave" and reveal is not None:
+                return _with_forms(
+                    _refuse("the sphere still owes its divinations and the "
+                            "game will not let the run go on yet; say "
+                            "`reveal` to spend the next one"),
+                    obs).as_dict()
         if cmd.verb == "leave" and exit_:
             return _with_forms(
                 Resolution(True, "leave", dict(exit_["action"]), {}),
@@ -1261,7 +1286,10 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
             _refuse(f"this screen is not being driven: {obs['blocked']}"),
             obs).as_dict()
 
-    if cmd.verb == "leave":
+    if cmd.verb == SPHERE_REVEAL:
+        res = _refuse("there is nothing to reveal here; `reveal` is the "
+                      "Crystal Sphere's verb")
+    elif cmd.verb == "leave":
         # `EB-396`, the other half. Off an undriven screen the word has no
         # meaning this page can honour, and the honest answer names the verb
         # that does -- `proceed` walks the screens with a way onward, and its

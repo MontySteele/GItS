@@ -23,8 +23,8 @@ The rarity target is Klee's shape at 78 (24 / 36 / 18). Most of the batch's weig
 | Plot Twist | C | 1 Skill | Reverse the order of your performers. Gain 6 Block. (upg 9) |
 | Revolving Stage | U | 1 Power | At the start of your turn, your back performer moves to the front. (upg cost 0) |
 | Oratrice's Verdict † | U | 0 Skill | This turn, your performers' acts that hit a random enemy hit this enemy instead. Draw 1 card. (upg draw 2) |
-| Guest Star: Lyney † | R | 1 Skill | Lyney joins the stage with 5 Fanfare. Act: pay 2 of his Fanfare to deal 6 Pyro damage to a random enemy and swap your front and back performers. (upg +2 Fanfare) |
-| Stage Whisper † | C | 0 Skill | Move up to 3 of your back performer's Fanfare to your front performer. It keeps at least 1. (upg 5) (2026-09-26: so it never Bows the back: a 0-cost Bow would loop with Thunderous Applause and A Five-Century Act.) |
+| Guest Star: Lyney † | R | 1 Skill | Lyney joins the stage with 5 Fanfare. Act: pay 2 of his Fanfare: deal 6 Pyro damage to a random enemy. If he is not in front, he swaps places with your front performer. (upg +2 Fanfare) (2026-09-26 seat round: it swapped the front and back performers, which "kept undoing the front I had built"; once in front he now stays, and his act and his free Bow move nobody.) |
+| Stage Whisper † | C | 0 Skill | Move up to 3 of your back performer's Fanfare to your front performer. It keeps at least 1. Draw 1 card. (upg 5) (2026-09-26: so it never Bows the back: a 0-cost Bow would loop with Thunderous Applause and A Five-Century Act.) (2026-09-26 seat round: "Draw 1 card" added; a seat passed it three times, "moving Fanfare forward never beat spending it or pumping it".) |
 
 **2. Feeding.** Net gains of Fanfare, sized under Rising Applause's 5 for 1 Energy unless they cost a card slot every turn.
 
@@ -103,7 +103,7 @@ The rarity target is Klee's shape at 78 (24 / 36 / 18). Most of the batch's weig
 - **Grand Deluge** gave each performer 2 per reaction. With three soaked enemies and a full stage, that was 18 Fanfare. It now gives 2 each, once, if any reaction triggers.
 - **Grand Finale** at 2 Energy was a worse Tutti! unless you had Bow readers. At 1 (upg 0) it is the Bow deck's once-a-fight burst.
 - **Oratrice's Verdict** was blank in any one-enemy fight. It now draws 1.
-- **Lyney's** swap read "swap with your front performer", which means nothing when he is the front. It now swaps the front and back performers, whichever seat he is in.
+- **Lyney's** swap read "swap with your front performer", which means nothing when he is the front. It now swaps the front and back performers, whichever seat he is in. (2026-09-26 seat round: reversed in part. The front-and-back swap kept undoing the front a player had built, so he now swaps with the front only when he is not in it, and in front he stays.)
 - **Undertow** fed the back, like Cheered On. It now feeds the front, so the Common feeds the bank and the Uncommon feeds the shield.
 - **Intermission** would have been a 0-cost loop with two Thunderous Applause and A Five-Century Act (each Bow draws, the performer returns). It costs 1.
 
