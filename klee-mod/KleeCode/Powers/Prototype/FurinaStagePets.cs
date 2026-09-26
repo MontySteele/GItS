@@ -46,7 +46,11 @@ namespace KleeMod.Powers;
 /// the Salon strip's own member sprites
 /// (<c>res://furina/salon/member_*.png</c>), which the pack already carries:
 /// ONE PRODUCER PER OUT-PATH (art_lint L11) is why the art is reused where it
-/// stands rather than copied to a second path.
+/// stands rather than copied to a second path. The eight guests' scenes
+/// (<c>guest_*.tscn</c>) are the same scene re-proportioned: people, not
+/// creatures, cut from each guest's own Wish render at 224 px (80% of
+/// Furina's 280) by <c>tools/cut_guest_bodies.py</c>, which writes the scenes
+/// from one template.
 ///
 /// THEY STAND, WHERE THE JELLYFISH FLOATS, and that is the one number that is
 /// theirs rather than inherited. A <c>Sprite2D</c> centres on its origin, so a
@@ -100,17 +104,26 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
     /// path without first building a model to ask.</summary>
     internal static string? ModVisualsPathFor(StagePerformer who) => who switch
     {
-        // Three LITERAL paths, not one interpolated one: the deploy's S12
-        // check reads every `KleePck.Path("...")` literal and refuses a
-        // reference it cannot find in the staged pack, and an interpolated
-        // path is a reference it cannot read at all.
+        // One LITERAL path per performer, not one interpolated one: the
+        // deploy's S12 check reads every `KleePck.Path("...")` literal and
+        // refuses a reference it cannot find in the staged pack, and an
+        // interpolated path is a reference it cannot read at all.
         StagePerformer.Chevalmarin => KleePck.Path("furina/model/chevalmarin.tscn"),
         StagePerformer.Crabaletta => KleePck.Path("furina/model/crabaletta.tscn"),
         StagePerformer.Usher => KleePck.Path("furina/model/usher.tscn"),
-        // THE GUEST CAST (2026-09-25) has no scenes yet: a guest wears the
-        // base game's Osty rig until the art pass authors one. No literal is
-        // named here for a scene the pack does not carry (the deploy's S12
-        // check refuses one).
+        // THE GUEST CAST (2026-09-25): each guest's body is cut from their
+        // own Wish render by tools/cut_guest_bodies.py, which also writes
+        // these eight scenes from one template (224 px, 80% of Furina).
+        StagePerformer.Neuvillette => KleePck.Path("furina/model/guest_neuvillette.tscn"),
+        StagePerformer.Clorinde => KleePck.Path("furina/model/guest_clorinde.tscn"),
+        StagePerformer.Navia => KleePck.Path("furina/model/guest_navia.tscn"),
+        StagePerformer.Chevreuse => KleePck.Path("furina/model/guest_chevreuse.tscn"),
+        StagePerformer.Wriothesley => KleePck.Path("furina/model/guest_wriothesley.tscn"),
+        StagePerformer.Sigewinne => KleePck.Path("furina/model/guest_sigewinne.tscn"),
+        StagePerformer.Charlotte => KleePck.Path("furina/model/guest_charlotte.tscn"),
+        StagePerformer.Lynette => KleePck.Path("furina/model/guest_lynette.tscn"),
+        // A performer added later without a scene falls through to the base
+        // game's Osty rig (CustomVisualPath, below).
         _ => null,
     };
 
@@ -429,7 +442,7 @@ public static class FurinaStagePets
     /// automatic pass cannot cover an INJECTED model, and why the Osty
     /// fallback must NOT be registered -- is written out on
     /// <c>BakeKuragePet.EnsureVisualsConverted</c>; this is the same door for
-    /// three more scenes.</summary>
+    /// the eleven performer scenes.</summary>
     private static void EnsureVisualsConverted(StagePerformer who)
     {
         if (_visualsRegistered.Contains(who)) return;
