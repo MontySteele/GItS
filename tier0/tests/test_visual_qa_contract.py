@@ -245,6 +245,7 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # the count's reason above the first assertion), +5 for
     # the motion pass's shared AnimationLibraries, +24 for pass two (eighteen
     # cut layers over six bespoke boss bodies, and their six per-body
-    # libraries).
-    assert report.checked["contract_resources"] == 406
+    # libraries), +16 for the stage's eight guest bodies (a scene and a
+    # sprite each).
+    assert report.checked["contract_resources"] == 422
     assert report.checked["package_files"] == 3
