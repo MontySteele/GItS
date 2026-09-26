@@ -242,6 +242,8 @@ public class PoolCellCoverageTests
             // THE GUEST CAST (2026-09-25) filled Rare/Skill: three Rare Guest
             // Stars (Neuvillette, Clorinde, Navia).
             //
+            // THE SUPPORTING POOL'S SOLD OUT (2026-09-26) filled Rare/Power:
+            // a third Rare Power beside Arkhe Alignment and A Five-Century Act.
             // THE SUPPORTING POOL (2026-09-26) filled the last two: three Rare
             // Attacks (Bring the House Down, Grand Deluge beside Let the
             // People Rejoice) and four Rare Powers (Eternal Applause, Regina

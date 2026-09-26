@@ -344,6 +344,9 @@ MIRRORED: dict[str, object] = {
     # reads them for its keyword tips, so a pair that drifted would print a
     # retired number under a card the seat is grading.
     "FurinaStageLaw.Seats": _stage("SEATS"),
+    # The supporting pool's Sold Out (2026-09-26): the seat count with the
+    # fourth seat open.
+    "FurinaStageLaw.SoldOutSeats": _stage("SOLD_OUT_SEATS"),
     "FurinaStageLaw.OpeningFanfare": _stage("OPENING_FANFARE"),
     "FurinaStageLaw.SummonFanfare": _stage("SUMMON_FANFARE"),
     "FurinaStageLaw.LeadRegen": _stage("LEAD_REGEN"),

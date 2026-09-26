@@ -6283,7 +6283,7 @@ def _op_stage_summon(state: CombatState, fx: dict, card: Card) -> None:
     # arrival ("with 3 Fanfare each"); rule 3's 1 otherwise. On a full stage
     # it is the recast's own arrival, added to the leaver's (rule 3).
     fanfare = int(fx.get("fanfare", furina_stage.SUMMON_FANFARE))
-    if len(furina_stage.stage(p)) >= furina_stage.SEATS:
+    if len(furina_stage.stage(p)) >= furina_stage.capacity(p):
         furina_stage.recast_front(state,
                                   None if named == "random" else named,
                                   arrival=fanfare)

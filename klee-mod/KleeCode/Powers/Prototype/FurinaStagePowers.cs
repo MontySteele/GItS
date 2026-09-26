@@ -11,7 +11,8 @@ using MegaCrit.Sts2.Core.Models;
 namespace KleeMod.Powers;
 
 // ======================================================================
-// FURINA, THE STAGE -- BATCH TWO'S FIVE POWERS (R276 pick 3).
+// FURINA, THE STAGE -- BATCH TWO'S FIVE POWERS (R276 pick 3), AND THE
+// SUPPORTING POOL'S SOLD OUT (2026-09-26).
 //
 // QUARANTINED: this folder is Compile Remove'd from a release build, so the
 // only rows that may name one of these are `proto_fs_` rows on the prototype
@@ -22,9 +23,12 @@ namespace KleeMod.Powers;
 // ======================================================================
 
 /// <summary>
-/// <i>Full House</i>: "At the end of your turn, if all three seats are filled,
-/// your performers act twice." Counter: each copy adds one more act
-/// (<see cref="FurinaStage.EndOfTurnActs"/> reads the sum).
+/// <i>Full House</i>: "If every seat is filled at the end of your turn, your
+/// performers act twice." Counter: each copy adds one more act
+/// (<see cref="FurinaStage.EndOfTurnActs"/> reads the sum). EVERY SEAT, not
+/// "all three" (the supporting pool, 2026-09-26): under <i>Sold Out</i> it
+/// needs four, because the check is <see cref="FurinaStageLedger.IsFull"/>,
+/// which reads the stage's capacity.
 /// </summary>
 public sealed class FullHousePower : PowerModel, ILocalizationProvider
 {
@@ -32,9 +36,32 @@ public sealed class FullHousePower : PowerModel, ILocalizationProvider
     {
         ("title", "Full House"),
         ("description",
-            "If all " + FurinaStageLaw.Seats + " seats are filled at the end "
-          + "of your turn, your performers act [blue]{Amount}[/blue] more "
-          + "{Amount:plural:time|times}."),
+            "If every seat is filled at the end of your turn, your performers "
+          + "act [blue]{Amount}[/blue] more {Amount:plural:time|times}."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary>
+/// <i>Sold Out</i> (the supporting pool, 2026-09-26, family 7): "Your stage
+/// has a fourth seat." The switch <see cref="FurinaStage.CapacityOf"/> asks:
+/// with it on her the stage holds <see cref="FurinaStageLaw.SoldOutSeats"/>
+/// for the rest of the combat -- front, two middles, back. Nothing in this
+/// class moves a seat; every rule that meets a full stage asks
+/// <see cref="FurinaStageLedger.IsFull"/>, which reads the capacity. A second
+/// copy adds nothing (one copy is the whole rule, as with
+/// <see cref="FiveCenturyActPower"/>), so the amount is a count of copies and
+/// nothing reads it.
+/// </summary>
+public sealed class SoldOutPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Sold Out"),
+        ("description", "Your stage has a fourth seat."),
     };
 
     public override PowerType Type => PowerType.Buff;

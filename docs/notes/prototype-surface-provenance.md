@@ -3097,6 +3097,40 @@ for `limelight`, Lynette for `take_it_from_the_top`.
 payments and gifts, `FurinaStage.GuestAct` / `_guest_act` for the board), the
 per-guest loss count Wriothesley reads, and the end-of-turn forecast.
 
+## Furina, the Stage — Sold Out, the fourth seat (2026-09-26)
+
+`proto_fs_sold_out`, family 7 of `review/active/furina-supporting-pool-2026-09-26.md`
+(ruled that day, all four defaults; pick 2 (a) keeps both rule-bending Rares). A
+Rare Power, cost 2 (1 upgraded): "Your stage has a fourth seat." Built ahead of
+the other 28 because it bends rule 1, and every rule that meets a full stage had
+to learn to count. The face is the paper's, word for word; a second copy is a
+dead Power, and the face does not say so: the paper's face is kept as
+written.
+
+**What it means**, as the build spec read the brief's sec.3: the stage holds
+four for the rest of the combat -- front, two middles, back. "Back performer"
+is still the back-most and "front" the lead, so Raise, Spend and the damage
+order need nothing. Both middles fade (rule 12 already fades everyone behind
+the front). Rule 3's recast meets a full stage at four, not three, and
+Wriothesley's front-join on a full four-stage Bows the back performer. **Full
+House**'s face moves with it, from "If all three seats are filled" to "If every
+seat is filled", so with Sold Out it needs four.
+
+**How it is built**: one number, `FurinaStageLaw.SoldOutSeats` / `furina_stage.
+SOLD_OUT_SEATS` (4, parity-mirrored), and one reader per engine:
+`FurinaStageLedger.Capacity` (read live off her powers through
+`FurinaStage.CapacityOf`; the forecast's clone carries a copy) and
+`furina_stage.capacity`. Every `IsFull` and `len(seats) vs SEATS` reads it. The
+power is `SoldOutPower` / `fs_sold_out`; The Stage badge's in-combat line reads
+the live count.
+
+**Which shipped row it replaces** is a D default on the Guest Cast's terms: a
+same-rarity shipped Power the `EB-736` text filter already drops, and the only
+one left at the same cost: `unheard_confession` (2 Power for 2 Power). The
+other three Rare Powers the paper adds (Eternal Applause, One-Woman Show,
+Regina of All Waters) have three dropped shipped Rare Powers left to replace:
+`the_sea_is_my_stage`, `star_of_the_show` and `rapturous_applause`, all cost 1.
+
 ## Pool pass two: six Spark sinks on Regent's ladder (`EB-732`, R270, 2026-09-08)
 
 R270 ruled the round-25 pick at option 1: Spark is a currency, its income

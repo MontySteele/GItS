@@ -2803,8 +2803,8 @@ APPLY_POWERS = {
     # compiled only under `-p:PrototypeCards=true`; the rules they switch on
     # live in `FurinaStage`. Every row states its own face (`EB-215`).
     "fs_full_house": ("FullHousePower", None,
-        "If all three seats are filled at the end of your turn, your "
-        "performers act {X} more time."),
+        "If every seat is filled at the end of your turn, your performers "
+        "act {X} more time."),
     "fs_thunderous_applause": ("ThunderousApplausePower", None,
         "Whenever a performer [gold]Bow[/gold]s, draw 1 card and your back "
         "performer gains {X} [gold]Fanfare[/gold]."),
@@ -2844,6 +2844,8 @@ APPLY_POWERS = {
     "fs_one_woman_show": ("OneWomanShowPower", None,
         "At the start of your turn, if no one is on stage, gain 1 "
         "[gold]Energy[/gold] and draw 1 card."),
+    # The supporting pool's Sold Out (2026-09-26): the fourth seat.
+    "fs_sold_out": ("SoldOutPower", None, "Your stage has a fourth seat."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The

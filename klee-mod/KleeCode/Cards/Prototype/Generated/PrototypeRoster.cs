@@ -93,6 +93,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoFsSceneChange>(),
             ModelDb.Card<ProtoFsSeasonTickets>(),
             ModelDb.Card<ProtoFsShareTheSpotlight>(),
+            ModelDb.Card<ProtoFsSoldOut>(),
             ModelDb.Card<ProtoFsSoliloquy>(),
             ModelDb.Card<ProtoFsSoloVerse>(),
             ModelDb.Card<ProtoFsSpiritedAria>(),

@@ -183,7 +183,10 @@ public static class FurinaStageRoster
                         && card is not FurinaGen.GrandGala
                         && card is not FurinaGen.HighTide
                         && card is not FurinaGen.TheSeaIsMyStage
-                        && card is not FurinaGen.StarOfTheShow)
+                        && card is not FurinaGen.StarOfTheShow
+                        // THE SUPPORTING POOL'S SOLD OUT (2026-09-26): its
+                        // `replaces:`, dropped by the text filter too.
+                        && card is not FurinaGen.UnheardConfession)
             .Concat(new CardModel[]
             {
                 // Commons (eight).
@@ -264,6 +267,9 @@ public static class FurinaStageRoster
                 ModelDb.Card<ProtoFsGrandDeluge>(),
                 ModelDb.Card<ProtoFsReginaOfAllWaters>(),
                 ModelDb.Card<ProtoFsOneWomanShow>(),
+                // THE SUPPORTING POOL (2026-09-26). Rare (one): the fourth
+                // seat.
+                ModelDb.Card<ProtoFsSoldOut>(),
             })
             .Concat(MultiplayerRows());
     }
