@@ -44,6 +44,11 @@ python -m understudy.blindplay session --max-actions 40 --max-wall-s 5400
 python -m understudy.embark --teardown --lane 1              # put it all back
 ```
 
+`embark --ascension N` starts the run at ascension N instead of the character's
+saved last-used level, so a base-game control run can match a mod run (set on
+the select screen after the pick; the sidecar records `ascension_requested`
+beside the read-back `ascension`, and a mismatch fails the embark).
+
 Environment:
 
 | variable | what it does |

@@ -286,6 +286,11 @@ public static partial class McpMod
             {
                 HandleGitsSeed(request, response);
             }
+            // GItS LOCAL EDIT - the chosen-ascension sibling of /gits/seed.
+            else if (path == "/api/v1/gits/ascension")
+            {
+                HandleGitsAscension(request, response);
+            }
             else if (path == "/api/v1/gits/give_card")
             {
                 HandleGitsGiveCard(request, response);

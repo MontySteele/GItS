@@ -68,6 +68,10 @@ class RunDriver(Navigation):
     # default on every construction path, so nothing can read a character name
     # off a driver that never embarked.
     character_actual: str | None = None
+    # CHOSEN ASCENSION, a class attribute for the same reason: `None` (the
+    # character's saved PreferredAscension, as always) on every construction
+    # path, including the tests' `__new__` drivers.
+    chosen_ascension: int | None = None
 
     def __init__(self, session: Session, run_index: int, stamp: str,
                  character: str = DEFAULT_CHARACTER,
@@ -76,7 +80,8 @@ class RunDriver(Navigation):
                  max_fights: int | None = None,
                  hazard_guard: bool = True,
                  p2_capture: bool = False,
-                 policy: Any = None):
+                 policy: Any = None,
+                 chosen_ascension: int | None = None):
         self.session = session
         self.run_index = run_index
         self.character = character
@@ -94,6 +99,9 @@ class RunDriver(Navigation):
         # record. A string is a CHOSEN seed, and the run verifies the choice
         # took rather than trusting the endpoint's answer.
         self.chosen_seed = chosen_seed
+        # An int is a CHOSEN ascension, posted beside the seed and verified
+        # against the lobby's read-back; `None` leaves the game's own level.
+        self.chosen_ascension = chosen_ascension
         # P1.5: stop cleanly after N closed fights. `None` is a full run.
         self.max_fights = max_fights
         # R99/4b. `None` is baseline -- the arm the R98 validation ran, and the
