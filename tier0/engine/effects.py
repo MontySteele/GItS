@@ -1766,6 +1766,10 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
         return
     raw = (_calc_amount(state, fx["amount_formula"], card)
            if "amount_formula" in fx else fx["amount"])
+    if C.KLEE_OVERHAUL and "arm_amount" in fx:
+        # The upgrades sheet's `arm_block` key: under the Klee arm the upgraded
+        # Personal Companion's Block is the arm's number.
+        raw = fx["arm_amount"]
     # Same rider grammar damage already carries (F-B1): a defensive card may
     # scale on the meter too. Applied BEFORE the Salon multiplier and before
     # Spotlight, exactly where damage applies its own -- a rider that landed

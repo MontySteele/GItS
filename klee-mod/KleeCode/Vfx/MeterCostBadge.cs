@@ -321,9 +321,18 @@ internal static class MeterCostBadge
         // to be short against, and the base game reddens a cost in hand only for
         // exactly that reason (UpdateStarCostColor's `pileType == PileType.Hand`
         // arm).
+        //
+        // An upgrade that moved the Spark price is GREEN on the Smith's
+        // preview, first, exactly as NCard.UpdateStarCostColor puts
+        // `WasStarCostJustUpgraded` ahead of the hand's colours.
         Color text = ColorFor(price.Meter);
         Color outline = StsColors.defaultStarCostOutline;
-        if (pileType == PileType.Hand && !MeterCost.Affordable(card, price))
+        if (price.Meter == Meter.Sparks && SparkCost.PriceJustUpgraded(card))
+        {
+            text = StsColors.green;
+            outline = StsColors.energyGreenOutline;
+        }
+        else if (pileType == PileType.Hand && !MeterCost.Affordable(card, price))
         {
             text = StsColors.red;
             outline = StsColors.unplayableEnergyCostOutline;

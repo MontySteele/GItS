@@ -3464,6 +3464,14 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # reach `no_upgrade_path`: the campfire choice is real
                        # and paid, it simply is not paid by this file's output.
                        "kit_spark",
+                       # A Personal Companion's upgrade UNDER THE KLEE ARM,
+                       # where `kit_spark` pays nothing (a Companion play mints
+                       # no Spark there). The branch Block it binds to takes a
+                       # real BlockVar so the Smith shows the change through
+                       # `{Block:diff()}`, and OnUpgrade bumps it only while
+                       # `KleeOverhaul.Enabled` -- off the arm the card
+                       # upgrades exactly as `kit_spark` says.
+                       "arm_block",
                        # `EB-478`, R257. Tide Chart's FLAT half -- "draw 1
                        # more", on top of the one per Plan carried out.
                        # Emitted as the same play-time `IsUpgraded` read
@@ -6964,6 +6972,11 @@ def build_vars(card: dict) -> list[str]:
             'new CalculatedVar("Encore").WithMultiplier(static (card, _) => '
             f'SalonMemberPower.ReplacementDelta(card, {deploys}, '
             'SalonConstants.ReplacementNumericMultiplier))')
+    # The arm's Block upgrade (`arm_block`): the branch Block it moves takes a
+    # real var so the face renders `{Block:diff()}` and the Smith shows it.
+    arm_block = arm_block_effect(card) if arm_block_upgrade(card) else None
+    if arm_block is not None:
+        out.append(f'new BlockVar({int(arm_block["amount"])}m, ValueProp.Move)')
     # DynamicVarSet's constructor throws on a duplicate name, and it runs
     # inside CardFactory.CreateForReward -- a collision is a reward-screen
     # softlock on whatever run happens to roll the card. Fail the GENERATOR
@@ -7239,6 +7252,10 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # the same condition (upgrades.apply), so neither engine can drift into
         # accepting it quietly.
         "kit_spark": bool(card.get("personal_pool")),
+        # The arm's Block upgrade binds to the one branch Block the card
+        # prints (`arm_block_effect`); a card with a top-level Block already
+        # has a var and says so through `block`.
+        "arm_block": arm_block_effect(card) is not None,
         # Structural `add` upgrades are validated by VALUE below, not here:
         # which shapes are expressible depends on the added op and on what the
         # base card already declares, so the whole key is owned by the loop.
@@ -7813,6 +7830,32 @@ def _conditional_delta_reason(card: dict, key: str,
             return (f"delta key '{key}: {deltas[key]}' reaches inside a "
                     "repeat-conditional (no swap site)")
     return None
+
+
+def arm_block_effect(card: dict) -> dict | None:
+    """The ONE Block an `arm_block` delta binds to: the first literal Block
+    inside a top-level conditional's branches, on a card that prints no
+    top-level Block (that one already owns the Block var). None otherwise."""
+    effects = card.get("effects", [])
+    if any(e.get("op") == "block" for e in effects):
+        return None
+    for e in effects:
+        if e.get("op") != "conditional":
+            continue
+        for x in list(e.get("then", [])) + list(e.get("else", [])):
+            if x.get("op") == "block" and isinstance(x.get("amount"), int):
+                return x
+    return None
+
+
+def arm_block_upgrade(card: dict) -> int:
+    """Ruled `arm_block: +N`, or 0. Gated in upgrade_plan like every key."""
+    return int(upgrade_plan(card)[0].get("arm_block", 0))
+
+
+def _is_arm_block(card: dict, eff: dict) -> bool:
+    """Is this branch Block the one an `arm_block` delta moves?"""
+    return bool(arm_block_upgrade(card)) and eff is arm_block_effect(card)
 
 
 def conditional_block_upgrade(card: dict) -> int:
@@ -8909,7 +8952,8 @@ def _emit_branch_op(
             amount = f"SpotlightSystem.PrintedDamage(this, {amount})"
         _emit_damage(card, eff, lines, ctx, amount)
     elif op == "block":
-        amount = _branch_amount(card, eff, "conditional_block")
+        amount = ("DynamicVars.Block.BaseValue" if _is_arm_block(card, eff)
+                  else _branch_amount(card, eff, "conditional_block"))
         if spotlight_capable:
             amount = f"SpotlightSystem.PrintedBlock(this, {amount})"
         lines.append(
@@ -11261,9 +11305,10 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
                     f'deal {_branch_amount_text(card, e, "conditional_damage")}'
                     f" damage{tgt}")
         elif op == "block":
-            bits.append(
-                f'gain {_branch_amount_text(card, e, "conditional_block")} '
-                "[gold]Block[/gold]")
+            amount_text = ("{Block:diff()}" if _is_arm_block(card, e)
+                           else _branch_amount_text(card, e,
+                                                    "conditional_block"))
+            bits.append(f"gain {amount_text} [gold]Block[/gold]")
         elif op == "draw":
             if branch_draw_upgrade(card):
                 then_var, else_var = branch_draw_vars(card)
@@ -13460,6 +13505,20 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             "// carrying the Spark number, upgraded or not. tier0 twin: "
             "upgrades.apply key 'kit_spark'.")
+    if "arm_block" in deltas:
+        # Under the Klee arm a Companion play pays no Spark, so `kit_spark`
+        # buys nothing there; the arm's upgrade is the branch Block instead.
+        # Read at UPGRADE time off the runtime switch every arm seam reads, so
+        # the Smith preview (which runs OnUpgrade on a copy) shows it green.
+        done.add("arm_block")
+        lines.append("#if PROTOTYPE_CARDS")
+        lines.append(
+            "// arm_block: under the Klee arm the upgrade is the Block. tier0 "
+            "twin: upgrades.apply key 'arm_block'.")
+        lines.append(
+            "if (KleeOverhaul.Enabled) DynamicVars.Block.UpgradeValueBy("
+            f"{int(deltas['arm_block'])}m);")
+        lines.append("#endif")
     if "tide_draw" in deltas:
         # `EB-478`, R257. `encore`'s shape: the flat half is read at play time
         # off IsUpgraded (`_tide_draw_flat_expr`), because the face states the

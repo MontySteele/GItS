@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 
@@ -22,8 +23,8 @@ public interface ISparkPricedCard
 {
     /// <summary>
     /// The card's PRINTED Spark price -- the sum of its top-level
-    /// <c>spend_spark</c> amounts, a literal, never moved by an upgrade (a card
-    /// that pays less on upgrade is a repricing, and repricing is [USER]'s).
+    /// <c>spend_spark</c> amounts: a literal, or <c>(IsUpgraded ? up : base)</c>
+    /// on a row whose ruled upgrade cuts it (`spark_price`, `EB-491`).
     /// </summary>
     int PrintedSparkPrice { get; }
 }
@@ -101,6 +102,26 @@ public static class SparkCost
     /// </summary>
     public static bool PricesWholeBank(CardModel card) =>
         card is ISparkXPricedCard;
+
+    /// <summary>
+    /// Is this the Smith's UPGRADE PREVIEW of a card whose upgrade moved its
+    /// printed Spark price (Sparkling Burst, Once More!, Boom Badge, Blazing
+    /// Delight)? The badge paints the number green when it is, which is the
+    /// base game's own rule for a cost an upgrade moved: <c>NCard</c> greens
+    /// the energy label on <c>EnergyCost.WasJustUpgraded</c> and the star label
+    /// on <c>WasStarCostJustUpgraded</c>, and both are true only on the preview
+    /// copy (the real upgrade finalizes them away).
+    ///
+    /// THE PREVIEW IS THE COPY THE GAME MARKED, and the price it moved from is
+    /// its CANONICAL instance's -- the unupgraded card <c>ModelDb</c> holds,
+    /// which is what the copy was cloned from.
+    /// </summary>
+    public static bool PriceJustUpgraded(CardModel card) =>
+        card.UpgradePreviewType.IsPreview()
+        && card is ISparkPricedCard priced
+        && card.CanonicalInstance is ISparkPricedCard canonical
+        && !ReferenceEquals(canonical, card)
+        && priced.PrintedSparkPrice != canonical.PrintedSparkPrice;
 
     /// <summary>
     /// The card's owning creature, or null when there is not one to read.

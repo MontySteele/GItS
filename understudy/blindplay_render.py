@@ -181,7 +181,12 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
                    "printing now; this is the card's own written face, off "
                    "its sheet -- the difference is the board's.)")
     if c.get("upgraded_face"):
-        out.append(f"    Upgraded: {c['upgraded_face']}")
+        # The upgraded copy's cost slot, in the head line's own words, where
+        # the upgrade moves a Spark price ("cost 2 Sparks" above, "cost 1
+        # Spark" here) -- the one change such an upgrade makes.
+        cost = (f"cost {c['upgraded_cost']} — "
+                if c.get("upgraded_cost") else "")
+        out.append(f"    Upgraded: {cost}{c['upgraded_face']}")
     elif c.get("upgraded_note") and not c.get("upgraded_keywords"):
         out.append(f"    Upgraded: not shown -- {c['upgraded_note']}.")
     # `EB-551`: THE KEYWORD DELTAS, BESIDE THE NUMBER DELTAS. "Aria+ showed

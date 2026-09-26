@@ -173,7 +173,9 @@ def test_the_upgrade_sheet_and_the_kit_constant_are_one_number():
     cheap witness and that raise is the load-bearing one.
     """
     row = upgrades._upgrade_index()["prune_witch_hunt"]
-    assert row == {"kit_spark": C.KLEE_COMPANION_SPARK_UPGRADED_BONUS}
+    # `arm_block` is the Klee arm's upgrade, where the kit pays no Spark.
+    assert row == {"kit_spark": C.KLEE_COMPANION_SPARK_UPGRADED_BONUS,
+                   "arm_block": 3}
     assert upgrades.has_upgrade("prune_witch_hunt"), \
         "her campfire choice is real -- it is paid by the kit, not by her face"
 
@@ -222,3 +224,33 @@ def test_the_kit_trigger_is_the_only_spark_source_prune_touches():
              or e["event"] == "klee_companion_spark"]
     assert kinds.count("klee_companion_spark") == 1
     assert effects.klee_companion_spark.__module__.endswith("effects")
+
+
+@pytest.mark.parametrize("arm, block", [(False, 5), (True, 8)])
+def test_prunes_upgrade_under_the_klee_arm_is_the_block(monkeypatch, arm,
+                                                        block):
+    """Under the Klee arm a Companion play mints no Spark, so `kit_spark` buys
+    nothing there; the upgrades sheet's `arm_block: +3` makes the upgraded
+    card's Block 5 -> 8 instead. Off the arm the upgrade is unchanged: Block 5
+    and the kit's +1 Spark. C# twin: `KleeUpgradePreviewTests`."""
+    monkeypatch.setattr(C, "KLEE_OVERHAUL", arm)
+    card = loader.get_card("prune_witch_hunt" + upgrades.SUFFIX)
+    state = _klee_state(with_aura=False)
+    state.player.hand = [card]
+
+    play_card(state, card)
+
+    assert state.player.block == block
+    assert state.player.sparks == (0 if arm else FACE_PARITY[(True, False)])
+
+
+def test_the_base_prune_blocks_five_under_the_arm_too(monkeypatch):
+    """`arm_block` is the UPGRADE's: the base card's Block is 5 either way."""
+    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
+    card = loader.get_card("prune_witch_hunt")
+    state = _klee_state(with_aura=False)
+    state.player.hand = [card]
+
+    play_card(state, card)
+
+    assert state.player.block == 5

@@ -10861,6 +10861,43 @@ def test_a_smith_row_prints_one_upgrade_line_and_not_two():
         "KLEEMOD-PROTO_KO_ALICES_INTRODUCTION_MAGIC") == ("Retain",)
 
 
+
+#: The four rows whose upgrade cuts the Spark price and nothing else:
+#: (wire id, title, energy cost on the wire, face, the upgraded cost slot).
+_SPARK_PRICE_UPGRADES = [
+    ("KLEEMOD-PROTO_KO_SPARKLING_BURST", "Sparkling Burst", "0",
+     "Gain 1 Energy. If a Bomb went off this turn, gain 1 more.", "1 Spark"),
+    ("KLEEMOD-PROTO_KO_ONCE_MORE", "Once More!", "0",
+     "Return the last Set off card you played this combat to your hand.",
+     "1 Spark"),
+    ("KLEEMOD-PROTO_KO_BOOM_BADGE", "Boom Badge", "0",
+     "The next time you Set off this turn, your Bombs deal double damage.",
+     "1 Spark"),
+    ("KLEEMOD-PROTO_KO_BLAZING_DELIGHT", "Blazing Delight", "2",
+     "At the start of your turn, gain 1 Energy and draw 1 card.",
+     "2 and 2 Sparks"),
+]
+
+
+@pytest.mark.parametrize("card_id, title, energy, face, upgraded_cost",
+                         _SPARK_PRICE_UPGRADES)
+def test_the_smith_prints_a_spark_price_the_upgrade_cuts(
+        card_id, title, energy, face, upgraded_cost):
+    """The Klee seat (2026-09-25) read "Sparkling Burst upgrade 'changes
+    nothing this face prints'": true of the sentence, and it hid the one thing
+    the upgrade does, which is cut the Spark price. The Smith now prints the
+    upgraded copy's cost slot in the head line's own words, in front of the
+    unchanged face. Seen to FAIL: the page printed the no-number note."""
+    smith = live("upgrade-fresh")
+    smith = json.loads(json.dumps(smith.get("state", smith)))
+    smith["card_select"]["cards"].append(
+        {"id": card_id, "name": title, "cost": energy, "type": "Skill",
+         "description": face})
+    page = blindplay.observe(smith)
+    assert f"    Upgraded: cost {upgraded_cost} — {face}" in page
+    assert qa_packet.NO_PREVIEW_NO_NUMBER not in page
+
+
 # --- The offline sitting's page rows -----------------------------------------
 
 def test_tainted_prints_what_it_does_not_the_cards_reminder():

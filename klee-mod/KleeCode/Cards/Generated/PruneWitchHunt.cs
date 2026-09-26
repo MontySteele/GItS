@@ -33,10 +33,6 @@ namespace KleeMod.Cards.Generated;
 
 public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
 {
-    /// <summary>Block arrives from a conditional row, so this card declares no
-    /// BlockVar and BaseLib's auto-detect cannot see it (EB-84).</summary>
-    public override bool GainsBlock => true;
-
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
@@ -56,13 +52,13 @@ public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Prune — Little Witch's Hunt"),
-        ("description", "[gold]Swirl[/gold] the enemy. If it did not trigger an [gold]Elemental Reaction[/gold], gain 5 [gold]Block[/gold]."),
+        ("description", "[gold]Swirl[/gold] the enemy. If it did not trigger an [gold]Elemental Reaction[/gold], gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new BlockVar(5m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -80,7 +76,7 @@ public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Anemo, Owner.Creature);
         if (!(ReactionEffects.TotalResolved > reactionsAtStart))
         {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, 5m), ValueProp.Move), cardPlay);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
         }
     }
 
@@ -89,5 +85,9 @@ public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
         // kit_spark: expressed at play time as an IsUpgraded read by the owning character's kit
         // (KleeElementalHooks / KleeCompanionSpark) -- LAW:145 forbids the Companion card itself from
         // carrying the Spark number, upgraded or not. tier0 twin: upgrades.apply key 'kit_spark'.
+        #if PROTOTYPE_CARDS
+        // arm_block: under the Klee arm the upgrade is the Block. tier0 twin: upgrades.apply key 'arm_block'.
+        if (KleeOverhaul.Enabled) DynamicVars.Block.UpgradeValueBy(3m);
+        #endif
     }
 }

@@ -1230,6 +1230,25 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                     "KLEE_COMPANION_SPARK_UPGRADED_BONUS "
                     f"{C.KLEE_COMPANION_SPARK_UPGRADED_BONUS:+d}; the sheet and "
                     "the kit are two writings of one number")
+        elif key == "arm_block":
+            # A Personal Companion's upgrade UNDER THE KLEE ARM, where
+            # `kit_spark` pays nothing (a Companion play mints no Spark there).
+            # The card's one branch Block carries the arm's upgraded amount in
+            # `arm_amount`, and `_op_block` reads it only while
+            # `C.KLEE_OVERHAUL` is on -- so off the arm the upgraded card is
+            # exactly what `kit_spark` makes it. C# twin: OnUpgrade bumps the
+            # Block var under `KleeOverhaul.Enabled`
+            # (`gen_klee_cards.arm_block_effect`, the same binding).
+            hit = None
+            if not any(fx.get("op") == "block" for fx in top):
+                hit = next((x for fx in top if fx.get("op") == "conditional"
+                            for x in (list(fx.get("then") or [])
+                                      + list(fx.get("else") or []))
+                            if x.get("op") == "block"
+                            and isinstance(x.get("amount"), int)), None)
+            ok = hit is not None
+            if hit is not None:
+                hit["arm_amount"] = hit["amount"] + val
         elif key == "discard":
             # R36 grammar: moves the chosen-discard count on Crackle's op.
             #

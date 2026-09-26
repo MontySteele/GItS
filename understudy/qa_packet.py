@@ -498,6 +498,60 @@ def spends_all_sparks(card_id: Any, repo: Path | None = None) -> bool:
     return card_key(card_id) in _spend_all_spark_index_cached(root)
 
 
+#: A Spark price the upgrade MOVES: `PrintedSparkPrice => (IsUpgraded ? up :
+#: base)`, the second of `_SPARK_PRICE_RE`'s two shapes, read for BOTH numbers.
+_SPARK_PRICE_SWAP_RE = re.compile(
+    r"PrintedSparkPrice\s*=>\s*\(IsUpgraded\s*\?\s*(\d+)\s*:\s*(\d+)\s*\)")
+
+
+@lru_cache(maxsize=4)
+def _upgraded_spark_index_cached(repo: Path) -> tuple[tuple[str, int], ...]:
+    """`{card id: the Spark price once upgraded}`, for the rows whose upgrade
+    moves it (Sparkling Burst, Once More!, Boom Badge, Blazing Delight)."""
+    index: dict[str, int] = {}
+    root = repo / "klee-mod"
+    if not root.is_dir():
+        return ()
+    for path in sorted(root.glob(_CARD_SOURCE_GLOB)):
+        try:
+            src = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        swap = _SPARK_PRICE_SWAP_RE.search(src)
+        if swap is None or swap.group(1) == swap.group(2):
+            continue
+        key = _class_key(src)
+        if key:
+            index.setdefault(key, int(swap.group(1)))
+    return tuple(sorted(index.items()))
+
+
+def upgraded_spark_price(card_id: Any,
+                         repo: Path | None = None) -> int | None:
+    """The Spark price this card charges once upgraded, or `None` where the
+    upgrade does not move it."""
+    root = repo if repo is not None else Path(__file__).resolve().parents[1]
+    return dict(_upgraded_spark_index_cached(root)).get(card_key(card_id))
+
+
+def upgraded_cost_label(card: dict[str, Any], card_id: Any,
+                        repo: Path | None = None) -> str:
+    """THE SMITH'S COST SLOT FOR THE UPGRADED COPY, or `""` where the upgrade
+    leaves the price alone.
+
+    THE FIND (Klee seat, 2026-09-25). Sparkling Burst's upgrade cuts its Spark
+    price 2 to 1, and the Smith said "its upgrade changes nothing this face
+    prints": true of the sentence, and it hid the one thing the upgrade does.
+    The price sits in the cost slot, so the upgraded copy's cost slot is what
+    the preview prints -- through `cost_label`, the same words the card's own
+    head line uses, so "cost 2 Sparks" above reads "cost 1 Spark" below.
+    """
+    up = upgraded_spark_price(card_id, repo)
+    if up is None:
+        return ""
+    return cost_label({**card, "printed_spark": up})
+
+
 def printed_spark_index(repo: Path | None = None) -> dict[str, int]:
     """`{card id: the Spark price printed on the face}` (`EB-282`).
 
@@ -885,6 +939,13 @@ def upgrade_preview(card_id: Any, printed: str,
         basic = _base_game_basic_face(title, printed)
         return (basic, "") if basic else ("", NO_PREVIEW_TEMPLATE)
     template, holes, reason, _keywords = row
+    if reason == NO_PREVIEW_NO_NUMBER \
+            and upgraded_spark_price(card_id, root) is not None:
+        # The upgrade moves the SPARK PRICE and nothing in the sentence: the
+        # upgraded face is this one, and the caller prints the new price in
+        # front of it (`upgraded_cost_label`), the way the head line prints
+        # the current one.
+        return strip_markup(printed).strip(), ""
     if reason:
         return "", reason
     deltas = dict(holes)
