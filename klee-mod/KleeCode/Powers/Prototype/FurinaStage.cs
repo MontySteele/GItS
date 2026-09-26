@@ -637,11 +637,16 @@ public static partial class FurinaStage
     {
         var ledger = FurinaStageLedger.For(target);
         var twoOrMore = ledger.Seats.Count >= 2;
+        var lead = ledger.Lead;
         // 2026-09-25: WHO hit the lead, for the log's hit beat -- title and
         // combat id, the pair `NoteBeat` files for the body an act lands on.
         var result = ledger.Absorb(
             incoming, dealer?.Monster?.Title.ToString() ?? "",
             dealer?.CombatId.ToString() ?? "", bowCatches);
+        // What the hit took off the lead, shown on the lead as the base game
+        // shows HP loss (the fade's number, below, is the same pop). The body
+        // is still standing: a lead this hit emptied leaves at the flush.
+        Vfx.FurinaStageLossPop.Show(lead, result.Absorbed);
         if (!twoOrMore || result.Absorbed <= 0
             || dealer is not { IsEnemy: true })
         {
@@ -994,8 +999,33 @@ public static partial class FurinaStage
         ledger.EndRest();
         ledger.ResetActMultipliers();
         // Rule 12 (draft 3, 2026-09-25): THE APPLAUSE FADES, after the acts.
-        if (ledger.Fade() > 0) FurinaStagePets.SyncBars(owner);
+        FadeAndShow(owner!);
         Vfx.FurinaStageStrip.Refresh(owner);
+    }
+
+    /// <summary>
+    /// Rule 12, SEEN. The ledger's <see cref="FurinaStageLedger.Fade"/>, then
+    /// the bars onto the bodies, then ONE loss number per performer that faded
+    /// (<see cref="Vfx.FurinaStageLossPop"/>), in seat order. [USER], on
+    /// 0.2.3820+proto: "I didn't notice any Fanfare decaying" -- the bar was
+    /// the only trace. No rule moves here; the loss is measured across the
+    /// ledger's own call. Returns each fading performer and what it lost.
+    /// </summary>
+    public static IReadOnlyList<(StageSeat Seat, int Loss)> FadeAndShow(
+        Creature owner)
+    {
+        if (!LiveFor(owner)) return System.Array.Empty<(StageSeat, int)>();
+        var ledger = FurinaStageLedger.For(owner);
+        var before = ledger.Seats.Select(seat => (Seat: seat, Bar: seat.Fanfare))
+            .ToList();
+        if (ledger.Fade() <= 0) return System.Array.Empty<(StageSeat, int)>();
+        FurinaStagePets.SyncBars(owner);
+        var faded = before
+            .Where(b => b.Seat.Fanfare < b.Bar)
+            .Select(b => (b.Seat, b.Bar - b.Seat.Fanfare))
+            .ToList();
+        foreach (var (seat, loss) in faded) Vfx.FurinaStageLossPop.Show(seat, loss);
+        return faded;
     }
 
     /// <summary>
