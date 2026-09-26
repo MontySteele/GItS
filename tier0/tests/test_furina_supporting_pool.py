@@ -175,8 +175,15 @@ def test_every_row_but_solo_verse_replaces_a_row_the_filter_drops(arm):
 def test_the_additions_reach_the_offer_and_the_flag_off_pool_does_not(arm):
     from tier05 import rewards
     assert loader.pool_additions("furina") == ("proto_fs_solo_verse",)
-    pool = rewards.character_pool("furina")
-    assert "proto_fs_solo_verse" in [c.id for c in pool["common"]]
+    # `character_pool` is lru-cached: a flag-off pool another test on this
+    # worker built would answer here, and this test's arm-on pool would
+    # answer the next one. Clear on both sides.
+    rewards.character_pool.cache_clear()
+    try:
+        pool = rewards.character_pool("furina")
+        assert "proto_fs_solo_verse" in [c.id for c in pool["common"]]
+    finally:
+        rewards.character_pool.cache_clear()
 
 
 def test_with_the_flag_off_there_are_no_additions():
