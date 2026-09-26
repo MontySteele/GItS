@@ -35,18 +35,12 @@ His run, from his game log: 550 card plays. The most-played Stage cards were Ste
 ## Left alone, and watched
 
 - **Thunderous Applause** (draw 1 and +2 Fanfare per Bow) with **A Five-Century Act** (every Bow returns at the back). Together they are the Bow engine, and he played the pair a lot. It is a Rare, so it bends rather than being removed, and the fade now governs its Fanfare.
-- **Repeat Guest Star copies:** the 8-Fanfare guests (Lynette, Sigewinne, Wriothesley) give 8 Fanfare, a free act and a body for 1 Energy. That is more than Rising Applause's 5. He played Lynette 20 times. If the fade change (pick 1) doesn't rein it in, the repeat copy is the next lever.
+- **Repeat Guest Star copies:** the 8-Fanfare guests (Lynette, Sigewinne, Wriothesley) give 8 Fanfare, a free act and a body for 1 Energy. That is more than Rising Applause's 5. He played Lynette 20 times. With the front exempt from the fade (pick 1c), the repeat copy is the lever if Fanfare still runs away.
 - **Gala Dinner** (+3 to each performer). It is spread across the seats, and two of them fade.
 - **Let the People Rejoice.** The Rapt Audience fix and the fade take away its absurd case, so its number stays.
 - **Starter cards** (Take the Stage, Curtain Rise, Rising Applause) are never changed.
 
-## Picks for [USER]
+## Ruled, 2026-09-26
 
-1. **The fade and the front seat.**
-   - **(a, default)** The front fades too, but only above 10. The seats behind it keep the line at 5. The shield can hold twice what the bank does, but not without limit, and a lone performer uses the front's line. The front tip gains "At the end of your turn, it loses half its Fanfare above 10."
-   - **(b)** One line of 5 for every seat, front included.
-   - **(c)** The front stays exempt; the Rapt Audience fix alone.
-2. **The turn predictor.**
-   - **(a, default) Cues on the performers.** Each performer shows its act over its head the way an enemy shows its intent: an icon and a number, such as a sword 5, a shield 3, a wave 2 for ALL, or a coin for a payment. Fade and incoming hits show as chips on its bar. The text box goes. StS2 players already read intents at a glance.
-   - **(b) A playbill.** The box stays, restyled as a theatre programme: a billing line per performer ("Crabaletta … 5 to a random enemy"), the fade as "the applause fades", and the damage split as "the critics". Same information, more flavour, still text.
-   - **(c)** Both: cues on the performers, and a one-line playbill for the damage split only.
+1. **The fade and the front seat: (c).** The front stays exempt, so the Rapt Audience fix goes in alone. In [USER]'s words: "Let's go with c) to allow for the front minion to continue building Fanfare." Rule 12 is unchanged.
+2. **The turn predictor: (a).** Cues on the performers: each performer shows its act over its head the way an enemy shows its intent, and the fade and incoming hits show as chips on its bar. The text box goes. [USER]: "a) sounds good". This will be built after the UI cleanup lands.
