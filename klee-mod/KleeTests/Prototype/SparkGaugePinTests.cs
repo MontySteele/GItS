@@ -5,6 +5,7 @@ using System.Reflection;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using KleeMod.Vfx;
+using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
@@ -120,15 +121,39 @@ public class SparkGaugePinTests
 
     // --- whose badge is suppressed ---------------------------------------
 
+    /// <summary>Run <paramref name="body"/> as the seat whose NetId is
+    /// <paramref name="me"/> -- `LocalContext.NetId`, the one static the
+    /// game's own "is this my screen" reads -- and put it back.</summary>
+    private static void AsLocalSeat(ulong me, Action body)
+    {
+        var was = LocalContext.NetId;
+        try
+        {
+            LocalContext.NetId = me;
+            body();
+        }
+        finally
+        {
+            LocalContext.NetId = was;
+        }
+    }
+
+    private static Seat WithNetId(Seat seat, ulong netId)
+    {
+        Seat.Set(seat.Player, "NetId", netId);
+        return seat;
+    }
+
     [Fact]
     public void The_arm_hides_the_spark_badge_and_leaves_every_other_badge_alone()
     {
-        var klee = Seat.Klee().WithPower<SparkPower>(2)
-                              .WithPower<SparkThresholdDownPower>(1)
-                              .WithPower<BombPower>(3);
+        var klee = WithNetId(Seat.Klee(), 1UL)
+            .WithPower<SparkPower>(2)
+            .WithPower<SparkThresholdDownPower>(1)
+            .WithPower<BombPower>(3);
         var spark = klee.Creature.Powers.OfType<SparkPower>().Single();
 
-        WithArm(true, () =>
+        WithArm(true, () => AsLocalSeat(1UL, () =>
         {
             Assert.True(SparkGauge.HidesBadge(spark));
 
@@ -138,24 +163,45 @@ public class SparkGaugePinTests
             {
                 Assert.False(SparkGauge.HidesBadge(other));
             }
-        });
+        }));
 
         // THE MUTATION GUARD, and the acceptance condition again: off the arm
         // the very same power on the very same seat keeps its badge.
-        WithArm(false, () => Assert.False(SparkGauge.HidesBadge(spark)));
+        WithArm(false, () => AsLocalSeat(1UL,
+            () => Assert.False(SparkGauge.HidesBadge(spark))));
     }
 
     [Fact]
     public void A_second_seats_spark_badge_is_judged_by_its_own_owner()
     {
         // Co-op. `HidesBadge` asks the POWER's owner, so a Spark counter on a
-        // creature that is not a Klee is not this arm's business -- and a Klee's
-        // is hidden on both screens, because the gauge replacing it is drawn on
-        // her creature and both seats see it.
-        var furina = Seat.Furina().WithPower<SparkPower>(3);
+        // creature that is not a Klee is not this arm's business.
+        var furina = WithNetId(Seat.Furina(), 1UL).WithPower<SparkPower>(3);
         var stray = furina.Creature.Powers.OfType<SparkPower>().Single();
 
-        WithArm(true, () => Assert.False(SparkGauge.HidesBadge(stray)));
+        WithArm(true, () => AsLocalSeat(1UL,
+            () => Assert.False(SparkGauge.HidesBadge(stray))));
+    }
+
+    [Fact]
+    public void A_coop_partner_sees_klees_spark_badge_on_her_creature()
+    {
+        // CO-OP, 2026-09-26: "a co-op partner cannot see Klee's Spark count".
+        // The energy-area counter is drawn for the LOCAL seat only, and the
+        // overhead gauge is gone, so the badge is hidden only on Klee's own
+        // screen -- where the counter shows the same bank -- and a partner sees
+        // it in her power row. Two seats, two screens, one power.
+        var klee = WithNetId(Seat.Klee(), 1UL).WithPower<SparkPower>(4);
+        var spark = klee.Creature.Powers.OfType<SparkPower>().Single();
+
+        WithArm(true, () =>
+        {
+            // Klee's own screen: the counter draws the bank, the badge hides.
+            AsLocalSeat(1UL, () => Assert.True(SparkGauge.HidesBadge(spark)));
+            // Her partner's screen (seat 2): the badge shows, with its count.
+            AsLocalSeat(2UL, () => Assert.False(SparkGauge.HidesBadge(spark)));
+        });
+        Assert.Equal(4, spark.Amount);
     }
 
     [Fact]

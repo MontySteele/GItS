@@ -18,39 +18,11 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// Explosives Workshop: "At the start of your turn, your Bombs grow by 1 more."
-///
-/// The power stores nothing and does nothing on a hook. Growth is ONE number
-/// and it is computed in ONE place (<c>ProtoBombPower.GrowthFor</c>), so this
-/// power's whole job is to be present and countable -- which is what keeps a
-/// Bomb armed before the Workshop and one armed after it growing at the same
-/// rate, the identical argument the shipped <c>bomb_damage_up</c> makes for
-/// having one bomb-damage stat.
-/// </summary>
-public sealed class ExplosivesWorkshopGrowthPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Explosives Workshop"),
-        ("description",
-            "At the start of your turn, your [gold]Bombs[/gold] grow by "
-          + "[blue]{Amount}[/blue] more."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary>
 /// Alice's Recipe: "Your Bombs grow twice each turn." The brief's own gloss is
 /// "Breaks rule 1", and it breaks it by MULTIPLYING the turn's growth rather
 /// than adding to it -- see <c>ProtoBombPower.GrowthFor</c>, which is the one
 /// place the two modifiers compose.
 ///
-/// THE ROW USED TO READ "grow by 4 instead of 3" (balance pass 2026-09-02).
-/// That made a Rare strictly weaker than the Uncommon beside it: a second
-/// Explosives Workshop reaches 5 and a second Recipe still read 4. Doubling is
-/// the Rare; the Workshop stays the stacking +1, and one of each is 8.
 /// </summary>
 public sealed class AlicesRecipePower : PowerModel, ILocalizationProvider
 {
@@ -286,44 +258,6 @@ public sealed class BombEchoPower : PowerModel, ILocalizationProvider
                 choiceContext, target, Element.Pyro, size, klee);
             await ProtoBombPower.SweepJumps(choiceContext, klee.CombatState);
         }
-    }
-}
-
-/// <summary>
-/// Catalytic Converter: "Whenever a Bomb reacts, gain 1 extra Spark." The card
-/// that makes React feed Spray.
-///
-/// EXTRA, on top of the explosion's own Spark, and only when the explosion
-/// REACTED -- which is a fact only the bus carries, because by the time a
-/// listener could look, the aura it consumed is gone.
-///
-/// A SEPARATE POWER FROM THE SHIPPED <c>ReactionBonusSparkEnergyPower</c> of
-/// the same name, deliberately: the shipped one pays on EVERY reaction and also
-/// grants Burst Energy, and this one pays only on a BOMB's reaction and grants
-/// only the Spark. Re-using it would have re-priced the card without saying so.
-/// </summary>
-public sealed class BombReactionSparkPower
-    : PowerModel, ILocalizationProvider, IProtoExplosionListener
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Catalytic Converter"),
-        ("description",
-            "Whenever one of your [gold]Bombs[/gold] triggers an "
-          + "[gold]Elemental Reaction[/gold], gain [blue]{Amount}[/blue] "
-          + "additional [gold]Spark[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public async Task OnBombExploded(
-        PlayerChoiceContext choiceContext, Creature applier, Creature target,
-        int size, bool reacted)
-    {
-        if (applier != Owner || !reacted) return;
-        await SparkPower.Gain(choiceContext, Owner, Amount, cardSource: null,
-                              source: "power:catalytic_converter/bomb_reaction");
     }
 }
 

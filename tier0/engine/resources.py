@@ -583,10 +583,13 @@ def gain_burst(state: CombatState, n: int, source: str) -> None:
     "reactions in particular do not feed it". The mod's twin is the same one
     line inside `KokomiResources.GainBurst`.
 
-    FURINA'S THIRD GUARD LEFT WITH THE REFRAME (`EB-726`). Her Burst
-    retirement is the STAGE's now, and the Stage never grants the meter at all
-    (`stage_retires_the_shipped_meters`), so there is nothing left to guard at
-    this funnel.
+    FURINA'S GUARD IS THE STAGE'S (2026-09-26). The reframe's guard left with
+    the reframe (`EB-726`) and nothing replaced it, so under the Stage
+    reactions fed her shipped meter again -- in the mod AND here -- and a full
+    run on 0.2.3820+proto was granted and played the shipped Let the People
+    Rejoice at 70. The Stage retires Burst with Encore and Fanfare, so the
+    guard is `stage_retires_the_shipped_meters`, asked at this funnel as the
+    mod asks it in `FurinaResources.GainBurst`.
 
     R14: diagnostic. Nothing reads these events to make a decision.
     """
@@ -597,6 +600,8 @@ def gain_burst(state: CombatState, n: int, source: str) -> None:
         return
     from tier0.engine import kokomi_plan           # late import (cycle)
     if kokomi_plan.live(state):
+        return
+    if stage_retires_the_shipped_meters(state.player):
         return
     p = state.player
     p.burst_energy += n

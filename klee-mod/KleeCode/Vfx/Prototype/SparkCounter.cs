@@ -31,7 +31,8 @@ namespace KleeMod.Vfx;
 /// THIS IS NOW THE BANK'S ONE DISPLAY. The 2026-09-24 playtest deleted the
 /// overhead gauge ([USER]: "Klee also still has a spark counter over her head,
 /// which is redundant with the main UI gauge"); the status-strip badge stays
-/// suppressed (<see cref="SparkGauge"/>).
+/// suppressed on her own screen (<see cref="SparkGauge"/>); a co-op partner
+/// sees it on her creature.
 ///
 /// WHAT THE BASE GAME ACTUALLY DOES, read off the pinned v0.111.0 assembly
 /// (`docs/current/research/regent-stars-economy.md` §5.2, and the type itself

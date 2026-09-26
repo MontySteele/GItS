@@ -258,7 +258,6 @@ MIRRORED: dict[str, object] = {
     # are placeholders and not claims -- but they are the placeholders both
     # sides have to agree on.
     "KleeOverhaulLaw.BombGrowth": C.KLEE_OVERHAUL_BOMB_GROWTH,
-    "KleeOverhaulLaw.WorkshopGrowth": C.KLEE_OVERHAUL_WORKSHOP_GROWTH,
     "KleeOverhaulLaw.AliceMultiplier": C.KLEE_OVERHAUL_ALICE_MULTIPLIER,
     "KleeOverhaulLaw.SparkPerExplosion": C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION,
     # SIX now: R242 pick 1 gave rule 4 a second number, the opening bank, and
@@ -525,18 +524,20 @@ UNMIRRORED: dict[str, str] = {
     # this gate exists to refuse -- and the MIRRORED table above carries the
     # pairs.
     # The placement pass's two, which are a different kind of number entirely:
-    # they are the BASE GAME's own offsets, lifted out of
-    # `NCombatRoom.AddCreature`'s pet layout (`owner.X - 20`, `owner.Y + 10`)
-    # so the arm's seat-ordered re-flow puts a body exactly where the engine's
-    # own layout would have. The sim draws nothing.
-    "FurinaStagePlacement.OwnerXOffset":
-        "A SCENE OFFSET, not balance: the base game's own pet placement "
-        "constant, lifted from `NCombatRoom.AddCreature` so the stage's "
-        "seat-ordered re-flow lands a performer where the engine's own layout "
-        "would have. The sim has no scene tree.",
+    # scene offsets. The Y is the BASE GAME's own, lifted out of
+    # `NCombatRoom.AddCreature`'s pet layout (`owner.Y + 10`); the X is no
+    # longer the engine's `owner.X - 20`, which stood the back performer on
+    # Furina's legs (2026-09-26 smoke), but a floor gap measured out from her
+    # hitbox edge, Osty's reference point. The sim draws nothing.
+    "FurinaStagePlacement.Gap":
+        "A SCENE OFFSET, not balance: the floor between Furina's hitbox edge "
+        "and the first performer, and between every two performers, so the "
+        "line stands clear of her the way Osty stands clear of the "
+        "Necrobinder. The sim has no scene tree.",
     "FurinaStagePlacement.OwnerYOffset":
-        "A SCENE OFFSET, not balance: the second half of the base game's own "
-        "pet placement constant, lifted for the reason directly above.",
+        "A SCENE OFFSET, not balance: the base game's own pet placement "
+        "constant, lifted from `NCombatRoom.AddCreature` (`owner.Y + 10`) so "
+        "a performer stands on the line the engine's own layout would give it.",
     "MeterLedger.MaxRows":
         "`EB-216`. INSTRUMENT, not balance: how many per-play ledger rows the "
         "mod keeps before dropping the oldest. It touches no game number, no "
@@ -785,6 +786,10 @@ UNMIRRORED: dict[str, str] = {
         "hiding it.",
     "TurnEndPreviewBridge.SlotSpacing":
         "presentation: docket slot pitch in pixels.",
+    "FurinaStageCueNodes.HeadGap":
+        "presentation: the pixels between a performer's hitbox and the "
+        "bottom of its cue card (2026-09-26, the Furina cues). Geometry; the "
+        "sim draws nothing.",
     "TurnEndPreviewBridge.SpriteScaleMax":
         "presentation: the largest scale a docket entity is drawn at. A "
         "rendering ratio; the sim has no sprites.",

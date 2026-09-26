@@ -216,47 +216,13 @@ def test_rule1_growth_is_the_constant_by_default(overhaul):
     assert klee_overhaul.growth_for(klee_state()) == C.KLEE_OVERHAUL_BOMB_GROWTH
 
 
-def test_rule1_the_workshop_adds_one_more_per_stack(overhaul):
-    """`Rule1_the_workshop_adds_one_more_per_stack`."""
-    state = klee_state()
-    state.player.powers[klee_overhaul.BOMB_GROWTH_UP] = 1
-    assert klee_overhaul.growth_for(state) == (
-        C.KLEE_OVERHAUL_BOMB_GROWTH + C.KLEE_OVERHAUL_WORKSHOP_GROWTH)
-
-    state.player.powers[klee_overhaul.BOMB_GROWTH_UP] = 3
-    assert klee_overhaul.growth_for(state) == (
-        C.KLEE_OVERHAUL_BOMB_GROWTH + 3 * C.KLEE_OVERHAUL_WORKSHOP_GROWTH)
-
-
-def test_rule1_alices_recipe_doubles_the_workshops_growth_too(overhaul):
-    """`Rule1_alices_recipe_multiplies_the_whole_growth` -- the 2026-09-02
-    balance pass, which turned the Rare from "grow by 4 instead of 3" (a
-    strictly weaker Explosives Workshop: a second Workshop reached 5 and a
-    second Recipe still read 4) into "your Bombs grow twice each turn".
-
-    ADD-THEN-MULTIPLY is the composition, and `GrowthFor` is where it lives:
-    "twice" is twice the growth the turn would otherwise have had, the
-    Workshop's +1 included. The other order would make the Rare read "twice the
-    base and the Workshop once", which neither card says."""
+def test_rule1_alices_recipe_doubles_the_growth(overhaul):
+    """`Rule1_alices_recipe_doubles_the_turns_growth` -- the 2026-09-02
+    balance pass: "your Bombs grow twice each turn"."""
     state = klee_state()
     state.player.powers[klee_overhaul.ALICES_RECIPE] = 1
     assert klee_overhaul.growth_for(state) == (
         C.KLEE_OVERHAUL_BOMB_GROWTH * C.KLEE_OVERHAUL_ALICE_MULTIPLIER)
-
-    state.player.powers[klee_overhaul.BOMB_GROWTH_UP] = 1
-    assert klee_overhaul.growth_for(state) == (
-        (C.KLEE_OVERHAUL_BOMB_GROWTH + C.KLEE_OVERHAUL_WORKSHOP_GROWTH)
-        * C.KLEE_OVERHAUL_ALICE_MULTIPLIER)
-
-    # THE WORKED EXAMPLE, at today's constants and stated as an arithmetic
-    # identity rather than as two bare literals: growth 4 gives Recipe alone 8
-    # and Recipe-plus-one-Workshop 10. If the constants move the identity
-    # follows them, which is what the whole rule-1 placeholder note asks for.
-    assert (C.KLEE_OVERHAUL_BOMB_GROWTH, C.KLEE_OVERHAUL_ALICE_MULTIPLIER,
-            C.KLEE_OVERHAUL_WORKSHOP_GROWTH) == (4, 2, 1)
-    assert klee_overhaul.growth_for(state) == 10
-    state.player.powers.pop(klee_overhaul.BOMB_GROWTH_UP)
-    assert klee_overhaul.growth_for(state) == 8
 
 
 def test_rule1_the_turn_start_hook_grows_and_does_not_detonate(overhaul):
@@ -547,26 +513,6 @@ def test_rule4_no_slice_row_mints_a_spark(overhaul):
     for card in rows:
         assert not any(fx.get("op") == "gain_spark" for fx in card.effects), \
             card.id
-
-
-def test_rule4_catalytic_converter_pays_only_on_a_reaction(overhaul):
-    """"Whenever a Bomb REACTS, gain 1 extra Spark." EXTRA, on top of the
-    explosion's own, and only when the explosion reacted -- which is a fact
-    only the bus carries, because by the time a listener could look the aura it
-    consumed is gone."""
-    wet, dry = make_enemy(hp=200, name="wet"), make_enemy(hp=200, name="dry")
-    wet.aura = "hydro"
-    state = klee_state([wet, dry])
-    state.player.powers[klee_overhaul.BOMB_REACTION_SPARK] = 1
-    klee_overhaul.place(state, wet, 5)
-    klee_overhaul.place(state, dry, 5)
-
-    klee_overhaul.set_off(state, dry)
-    assert state.player.sparks == 1        # the explosion's own, and no more
-
-    klee_overhaul.set_off(state, wet)
-    assert state.player.sparks == 3        # one for the pop, one for the react
-    assert state.ko_reacted_this_turn == 1
 
 
 def test_rule4_the_upgraded_relics_opening_windfall_is_off(overhaul):
@@ -2438,7 +2384,7 @@ def test_treasures_on_a_bomb_less_board_does_nothing(overhaul):
     assert sizes(enemy) == []
 
 
-# --- Kindling: an aura-keyed grow with a floor -----------------------------
+# --- Split Charge: the largest Bomb in two halves ---------------------------
 
 def test_split_charge_halves_the_largest_bomb(overhaul):
     """"Split your largest Bomb into two halves on random enemies." On a

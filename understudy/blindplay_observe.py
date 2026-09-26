@@ -385,6 +385,10 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
                     title=face.get("title") or raw.get("name"))
                 face["upgraded_face"] = built
                 face["upgraded_note"] = why
+                # And the upgraded copy's COST SLOT, where the upgrade moves a
+                # Spark price -- a change no sentence on the face prints.
+                face["upgraded_cost"] = qa_packet.upgraded_cost_label(
+                    face, raw.get("id"))
                 # `EB-551`: AND THE KEYWORDS, which are a different question
                 # from the face and were the half the r13 seat lost -- "Aria+
                 # showed only the number change and not Innate, the most

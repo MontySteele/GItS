@@ -284,7 +284,7 @@ public static partial class FurinaStage
             return;
         }
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.CurtainUp(owner);
     }
 
     /// <summary>
@@ -354,7 +354,7 @@ public static partial class FurinaStage
 
         ledger.Summon(who);
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary>
@@ -415,7 +415,7 @@ public static partial class FurinaStage
             ledger.ArriveAtBack(who, leaver.Fanfare + arrival);
         }
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary><i>Scene Change</i>: the front performer moves to the back
@@ -426,7 +426,7 @@ public static partial class FurinaStage
         if (!LiveFor(owner)) return;
         FurinaStageLedger.For(owner!).SceneChange();
         FurinaStagePlacement.Reflow(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary>
@@ -468,7 +468,7 @@ public static partial class FurinaStage
         if (ledger.SummonOnEmpty(who, amount) == null) return false;
         NoteSummoned(who);
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
         return true;
     }
 
@@ -483,7 +483,7 @@ public static partial class FurinaStage
         if (raised > 0)
         {
             FurinaStagePets.SyncBars(owner);
-            Vfx.FurinaStageStrip.Refresh(owner);
+            Vfx.FurinaStageCues.Refresh(owner);
         }
         return raised;
     }
@@ -499,7 +499,7 @@ public static partial class FurinaStage
         if (raised > 0)
         {
             FurinaStagePets.SyncBars(owner);
-            Vfx.FurinaStageStrip.Refresh(owner);
+            Vfx.FurinaStageCues.Refresh(owner);
         }
         return raised;
     }
@@ -515,7 +515,7 @@ public static partial class FurinaStage
         if (raised > 0)
         {
             FurinaStagePets.SyncBars(owner);
-            Vfx.FurinaStageStrip.Refresh(owner);
+            Vfx.FurinaStageCues.Refresh(owner);
         }
         return raised;
     }
@@ -531,7 +531,7 @@ public static partial class FurinaStage
         if (raised > 0)
         {
             FurinaStagePets.SyncBars(owner);
-            Vfx.FurinaStageStrip.Refresh(owner);
+            Vfx.FurinaStageCues.Refresh(owner);
         }
         return raised;
     }
@@ -543,7 +543,7 @@ public static partial class FurinaStage
         if (!LiveFor(owner)) return;
         FurinaStageLedger.For(owner!).StepForward();
         FurinaStagePlacement.Reflow(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary>
@@ -560,7 +560,7 @@ public static partial class FurinaStage
         if (!result.Fired) return 0;
         if (result.Exit is { } exit) await Bow(choiceContext, owner!, exit);
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
         return result.Paid;
     }
 
@@ -594,7 +594,7 @@ public static partial class FurinaStage
         }
         if (result.Exit is { } exit) await Bow(choiceContext, owner!, exit);
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
         return result.Paid;
     }
 
@@ -613,7 +613,7 @@ public static partial class FurinaStage
             await Perform(choiceContext, owner, seat);
         }
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary>
@@ -637,11 +637,16 @@ public static partial class FurinaStage
     {
         var ledger = FurinaStageLedger.For(target);
         var twoOrMore = ledger.Seats.Count >= 2;
+        var lead = ledger.Lead;
         // 2026-09-25: WHO hit the lead, for the log's hit beat -- title and
         // combat id, the pair `NoteBeat` files for the body an act lands on.
         var result = ledger.Absorb(
             incoming, dealer?.Monster?.Title.ToString() ?? "",
             dealer?.CombatId.ToString() ?? "", bowCatches);
+        // What the hit took off the lead, shown on the lead as the base game
+        // shows HP loss (the fade's number, below, is the same pop). The body
+        // is still standing: a lead this hit emptied leaves at the flush.
+        Vfx.FurinaStageLossPop.Show(lead, result.Absorbed);
         if (!twoOrMore || result.Absorbed <= 0
             || dealer is not { IsEnemy: true })
         {
@@ -709,7 +714,7 @@ public static partial class FurinaStage
         if (!result.Fired) return 0;
         if (result.Exit is { } exit) await Bow(choiceContext, owner!, exit);
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
         return result.Paid;
     }
 
@@ -723,7 +728,7 @@ public static partial class FurinaStage
         if (!LiveFor(owner)) return 0;
         var total = FurinaStageLedger.For(owner!).CollectAll();
         FurinaStagePlacement.Reflow(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
         return total;
     }
 
@@ -754,7 +759,7 @@ public static partial class FurinaStage
         // return twice (`FurinaStageLedger.ReturnCompany`).
         ledger.ReturnCompany(company);
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary><i>Final Bow</i>: the back performer takes a bow and leaves
@@ -770,7 +775,7 @@ public static partial class FurinaStage
         if (exit == null) return 0;
         await Bow(choiceContext, owner!, exit.Value);
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
         return bar;
     }
 
@@ -784,7 +789,7 @@ public static partial class FurinaStage
         var turn = owner!.Player?.PlayerCombatState?.TurnNumber ?? 0;
         if (FurinaStageLedger.For(owner).Regen(turn) <= 0) return;
         FurinaStagePets.SyncBars(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary>Rule 10: one performer's flat act, from any seat, reading no
@@ -830,7 +835,7 @@ public static partial class FurinaStage
         if (!FurinaStageLedger.For(owner).ActFanfare(
                 who, bowing ? null : seat, exit, owed))
         {
-            Vfx.FurinaStageStrip.Refresh(owner);
+            Vfx.FurinaStageCues.Refresh(owner);
             return;
         }
         if (IsGuest(who))
@@ -1000,8 +1005,33 @@ public static partial class FurinaStage
         ledger.EndRest();
         ledger.ResetActMultipliers();
         // Rule 12 (draft 3, 2026-09-25): THE APPLAUSE FADES, after the acts.
-        if (ledger.Fade() > 0) FurinaStagePets.SyncBars(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        FadeAndShow(owner!);
+        Vfx.FurinaStageCues.Refresh(owner);
+    }
+
+    /// <summary>
+    /// Rule 12, SEEN. The ledger's <see cref="FurinaStageLedger.Fade"/>, then
+    /// the bars onto the bodies, then ONE loss number per performer that faded
+    /// (<see cref="Vfx.FurinaStageLossPop"/>), in seat order. [USER], on
+    /// 0.2.3820+proto: "I didn't notice any Fanfare decaying" -- the bar was
+    /// the only trace. No rule moves here; the loss is measured across the
+    /// ledger's own call. Returns each fading performer and what it lost.
+    /// </summary>
+    public static IReadOnlyList<(StageSeat Seat, int Loss)> FadeAndShow(
+        Creature owner)
+    {
+        if (!LiveFor(owner)) return System.Array.Empty<(StageSeat, int)>();
+        var ledger = FurinaStageLedger.For(owner);
+        var before = ledger.Seats.Select(seat => (Seat: seat, Bar: seat.Fanfare))
+            .ToList();
+        if (ledger.Fade() <= 0) return System.Array.Empty<(StageSeat, int)>();
+        FurinaStagePets.SyncBars(owner);
+        var faded = before
+            .Where(b => b.Seat.Fanfare < b.Bar)
+            .Select(b => (b.Seat, b.Bar - b.Seat.Fanfare))
+            .ToList();
+        foreach (var (seat, loss) in faded) Vfx.FurinaStageLossPop.Show(seat, loss);
+        return faded;
     }
 
     /// <summary>
@@ -1094,7 +1124,7 @@ public static partial class FurinaStage
             && FurinaStageLedger.For(owner).ReturnToBack(who))
         {
             await FurinaStagePets.Sync(owner);
-            Vfx.FurinaStageStrip.Refresh(owner);
+            Vfx.FurinaStageCues.Refresh(owner);
         }
     }
 
@@ -1203,7 +1233,7 @@ public static partial class FurinaStage
             }
         }
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary>The engine's own "skip this effect" test: combat is over, or

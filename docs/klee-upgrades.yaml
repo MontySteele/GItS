@@ -118,7 +118,7 @@ bennett_passion:           {buff: +2}              # next attack +4->+6
 bennett_fantastic_voyage:  {buff: +1}              # Strength 3->4; Exhaust stays
 kaeya_frostgnaw:           {damage: +2}
 diona_icy_paws:            {block: +2}
-prune_witch_hunt:          {kit_spark: +1}
+prune_witch_hunt:          {kit_spark: +1, arm_block: +3}  # off the arm +1 Spark; under it (no Companion Spark) Block 5->8
 albedo_solar_isotoma:      {duration: +1}          # 3->4 turns
 durin_witchs_flame:        {power_amount: +2}       # consumed-Pyro damage 6->8; Burst rider stays 3/aura
 nicole_celestial_gift:     {cost: -1}   # 2 -> 1. RATIFIED 2026-07-26 with the redesign.

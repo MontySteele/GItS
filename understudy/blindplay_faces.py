@@ -249,9 +249,13 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         # (`BuildCardState`, the GItS local edit) and a reward or shop row
         # never does. `None` where neither answers, and an absent price
         # prints nothing.
+        # AN UPGRADED COPY CHARGES ITS UPGRADED PRICE (2026-09-26): the index
+        # is keyed on the class and reads the base branch, so Sparkling
+        # Burst+ in hand printed the 2 Sparks the unupgraded card charges.
         "printed_spark": (
-            qa_packet.printed_spark_index().get(
-                qa_packet.card_key(entry.get("id")))
+            qa_packet.spark_price_for(
+                entry.get("id"),
+                bool(entry.get("is_upgraded") or entry.get("upgraded")))
             or (_int(entry.get("spark_price"))
                 if entry.get("spark_price") is not None else None)),
         # `EB-445`: whether that price is the whole bank.
@@ -441,7 +445,8 @@ def _named_option(entry: Any) -> dict[str, Any]:
         if _text(entry.get(key)):
             energy = _text(entry.get(key))
             break
-    spark = (qa_packet.printed_spark_index().get(qa_packet.card_key(card_id))
+    # An upgraded shelf card prints its `+`, and charges its upgraded price.
+    spark = (qa_packet.spark_price_for(card_id, name.rstrip().endswith("+"))
              if card_id is not None else None)
     cost = qa_packet.cost_label({"cost": energy, "printed_spark": spark,
                                  "spark_all": qa_packet.spends_all_sparks(card_id)})

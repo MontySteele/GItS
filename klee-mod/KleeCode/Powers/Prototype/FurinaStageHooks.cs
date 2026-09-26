@@ -59,7 +59,8 @@ public sealed class FurinaStageHooks : AbstractModel
     {
         await FurinaStage.InstallBadge(player.Creature);
         await FurinaStage.RegenLead(player.Creature);
-        Vfx.FurinaStageStrip.Refresh(player.Creature);
+        // 2026-09-26: the cues go up for the turn they forecast.
+        Vfx.FurinaStageCues.CurtainUp(player.Creature);
     }
 
     /// <summary>
@@ -87,8 +88,11 @@ public sealed class FurinaStageHooks : AbstractModel
             // immediately BEFORE the sweep, so the log the next screen carries
             // opens with the sweep it is about.
             FurinaStageLedger.For(creature).ClearBeats();
+            // 2026-09-26: the cues forecast "the end of this turn", and it is
+            // here: they come down as the acts begin, the way an enemy's
+            // intent clears as it acts, and stay down until her next turn.
+            Vfx.FurinaStageCues.CurtainDown(creature);
             await FurinaStage.EndOfTurnActs(choiceContext, creature);
-            Vfx.FurinaStageStrip.Refresh(creature);
         }
     }
 
@@ -130,7 +134,7 @@ public sealed class FurinaStageHooks : AbstractModel
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         FurinaStage.EndPlay(cardPlay.Card?.Owner?.Creature);
-        Vfx.FurinaStageStrip.Refresh(cardPlay.Card?.Owner?.Creature);
+        Vfx.FurinaStageCues.Refresh(cardPlay.Card?.Owner?.Creature);
         return Task.CompletedTask;
     }
 

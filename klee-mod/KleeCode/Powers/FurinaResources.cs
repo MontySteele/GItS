@@ -798,9 +798,19 @@ public static class FurinaResources
     /// guarded, exactly as Kokomi's is not: it is a refusal rather than an
     /// income, and with nothing feeding the meter it is inert under the arm.
     /// </summary>
+    /// <remarks>
+    /// THE STAGE IS THE ARM THAT RETIRES IT (2026-09-26). The guard above was
+    /// the reframe's (<c>FurinaReframe.BurstRetiredFor</c>) and `EB-726`
+    /// dropped it with the reframe, so under the Stage reactions fed the
+    /// shipped meter again: a full run on 0.2.3820+proto lit the Burst counter
+    /// beside her energy orb and, at 70, granted and played the shipped
+    /// <i>Let the People Rejoice</i> (godot.log). Sim twin:
+    /// <c>resources.gain_burst</c>.
+    /// </remarks>
     public static void GainBurst(Creature creature, int amount)
     {
         if (amount <= 0 || !IsFurina(creature)) return;
+        if (StageRetiresTheShippedMeters(creature)) return;
         BurstResourceFor(creature)?.ModifyAmount(amount);
     }
 
@@ -1283,7 +1293,7 @@ public sealed class FurinaResourceHooks : AbstractModel
         // and the part of the hit that reached HER after it.
         await FurinaStage.Flush(choiceContext, target);
         FurinaStage.NoteHitOnFurina(target, result, dealer);
-        Vfx.FurinaStageStrip.Refresh(target);
+        Vfx.FurinaStageCues.Refresh(target);
 #endif
         await FurinaResources.SyncMeters(
             choiceContext, target, cardSource);
@@ -1447,6 +1457,10 @@ public static class FurinaKitGrant
         PlayerChoiceContext choiceContext, Player? owner)
     {
         if (owner?.Character is not IFurinaCharacter) return;
+        // The Stage never grants the kit card: its Burst is retired
+        // (`GainBurst`). Written here as well, as the reframe wrote it before
+        // `EB-726`, because a grant is a rule and not a consequence.
+        if (FurinaResources.StageRetiresTheShippedMeters(owner.Creature)) return;
         var playerCombatState = owner.PlayerCombatState;
         var combatState = owner.Creature.CombatState;
         if (playerCombatState == null || combatState == null) return;

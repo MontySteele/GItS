@@ -76,9 +76,8 @@ from tier0.engine.state import Card, CombatState, Enemy, KleeCharge
 #: `block_largest_bomb` is R252's (Careful Now, the defence shelf): it READS the
 #: pile and spends nothing, which is what separates it from
 #: `remove_bomb_for_block` beside it.
-#: THE POOL PASS's three (`EB-491`) join them: `plant_bomb_copy_largest` (All
-#: of My Treasures!), `grow_bombs_off_aura` (Kindling) and `split_largest_bomb`
-#: (Split Charge). `grow_largest_bomb` (Stoke the Fuse) is here too and was
+#: THE POOL PASS's two (`EB-491`) join them: `plant_bomb_copy_largest` (All
+#: of My Treasures!) and `split_largest_bomb` (Split Charge). `grow_largest_bomb` (Stoke the Fuse) is here too and was
 #: not: it went live in both engines with the round-11 pass and never reached
 #: this tuple, so the parity test that walks it never asked about it.
 OVERHAUL_OPS = frozenset((
@@ -87,7 +86,7 @@ OVERHAUL_OPS = frozenset((
     "damage_set_off_total",
     "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
     "mine_bombs",
-    "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb",
+    "plant_bomb_copy_largest", "split_largest_bomb",
     #: POOL PASS TWO's two (`EB-732`), and both are about a CARD rather than a
     #: charge -- which is why they are the arm's first two verbs that touch no
     #: Bomb since `companion_mark_hand`. `return_to_hand` (Blast Shield) routes
@@ -108,11 +107,9 @@ OVERHAUL_OPS = frozenset((
 #: each site so the sheet's `power:` values and the readers cannot drift. Every
 #: one is applied by an ordinary `apply_power` op off a card row, and every one
 #: names its C# class in `tools/gen_klee_cards.POWER_CS`.
-BOMB_GROWTH_UP = "ko_bomb_growth_up"          # Explosives Workshop: +1 growth
-ALICES_RECIPE = "ko_alices_recipe"            # growth 4 INSTEAD of 3
+ALICES_RECIPE = "ko_alices_recipe"            # growth doubled
 CHAINED_REACTIONS = "ko_chained_reactions"    # re-Bomb per explosion
 BOMB_ECHO = "ko_bomb_echo"                    # Sparks 'n' Splash's echo
-BOMB_REACTION_SPARK = "ko_bomb_reaction_spark"   # Catalytic Converter
 GROUNDED = "ko_grounded"                      # Block for the quiet turn
 #: R244's Uncommon Power, the second reader: "Whenever you play a Companion
 #: card, place a Bomb N on a random enemy." (Hexerei until R276.) Stacks are the Bomb SIZE,
@@ -204,32 +201,16 @@ def live(state: CombatState) -> bool:
 def growth_for(state: CombatState) -> int:
     """Rule 1's growth NUMBER for this Klee, right now. `GrowthFor`'s twin.
 
-    ONE function, because the two modifiers compose in one printed way:
-    Explosives Workshop ADDS `C.KLEE_OVERHAUL_WORKSHOP_GROWTH` per stack ("your
-    Bombs grow by 1 more"), Alice's Recipe MULTIPLIES what is left by
-    `C.KLEE_OVERHAUL_ALICE_MULTIPLIER` ("your Bombs grow twice each turn").
-
-    ADD-THEN-MULTIPLY, and it is the only reading that leaves both faces true:
-    "twice" is twice the growth the turn would otherwise have had, the
-    Workshop's +1 included. At today's constants the Recipe alone grows 4 x 2 =
-    8 and the Recipe with one Workshop grows (4 + 1) x 2 = 10. The other order
-    would make the Rare read "twice the base and the Workshop once", which
-    neither card says.
-
-    A MULTIPLIER SINCE THE 2026-09-02 BALANCE PASS, replacing an earlier "grow
-    by 4 instead of 3": the replacement reading made the Rare a strictly weaker
-    Explosives Workshop, because a second Workshop reached 5 and a second
-    Recipe still read 4.
+    The base `C.KLEE_OVERHAUL_BOMB_GROWTH`, MULTIPLIED by
+    `C.KLEE_OVERHAUL_ALICE_MULTIPLIER` while Alice's Recipe is up ("your Bombs
+    grow twice each turn").
 
     EVERY NUMBER IS READ, NEVER HARDCODED. Rule 1's growth is a placeholder the
     brief says is not a claim, and it has already moved once (3 to 4) inside
     this branch's own lifetime.
     """
-    powers_ = state.player.powers
-    growth = (int(C.KLEE_OVERHAUL_BOMB_GROWTH)
-              + powers_.get(BOMB_GROWTH_UP, 0)
-              * int(C.KLEE_OVERHAUL_WORKSHOP_GROWTH))
-    if powers_.get(ALICES_RECIPE, 0):
+    growth = int(C.KLEE_OVERHAUL_BOMB_GROWTH)
+    if state.player.powers.get(ALICES_RECIPE, 0):
         growth *= int(C.KLEE_OVERHAUL_ALICE_MULTIPLIER)
     return growth
 
@@ -630,9 +611,9 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
 def _notify_explosion(state: CombatState, enemy: Enemy, size: int,
                       reacted: bool) -> None:
     """The explosion bus, once PER EXPLOSION. `NotifyExplosionListeners`' twin,
-    and the same shape for the same reason: rule 4's Spark, Chained Reactions
-    and Catalytic Converter are all subscribers, so a three-Bomb Set off pays
-    each of them three times.
+    and the same shape for the same reason: rule 4's Spark and Chained
+    Reactions are both subscribers, so a three-Bomb Set off pays each of them
+    three times.
 
     `reacted` is the half the React loop is built on -- whether THIS explosion
     consumed an off-element aura, which no listener could work out after the
@@ -648,14 +629,6 @@ def _notify_explosion(state: CombatState, enemy: Enemy, size: int,
     if SPARK_RELIC_HOOK in p.relic_hooks:
         effects.gain_sparks(state, int(C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION),
                             source="relic:pounding_surprise/explosion")
-
-    # Catalytic Converter: EXTRA, on top of the explosion's own Spark, and only
-    # when the explosion REACTED.
-    n = p.powers.get(BOMB_REACTION_SPARK, 0)
-    if n and reacted:
-        state.emit("ko_catalytic_converter", amount=n)
-        effects.gain_sparks(
-            state, n, source="power:catalytic_converter/bomb_reaction")
 
     # Chained Reactions: "Whenever one of your Bombs goes off, place a Bomb N
     # on a random enemy." Through the same `place` every other source uses, so
@@ -1493,7 +1466,7 @@ def grow_largest_per_spark(state: CombatState, per_spark: int) -> int:
 
 
 # ---------------------------------------------------------------------------
-# THE POOL PASS'S THREE VERBS -- `EB-491`
+# THE POOL PASS'S VERBS -- `EB-491`
 # ---------------------------------------------------------------------------
 
 
@@ -1502,8 +1475,8 @@ def largest_charge(state: CombatState) -> tuple[Optional[Enemy], int, int]:
     board, as `(enemy, index, size)`. `ProtoBombPower.LargestCharge`'s twin.
 
     The walk `remove_largest_for_block` and `grow_largest_per_spark` each make
-    inline, named once so All of My Treasures!, Split Charge and Kindling's
-    floor cannot disagree about which Bomb "your largest Bomb" is. THE
+    inline, named once so All of My Treasures! and Split Charge cannot
+    disagree about which Bomb "your largest Bomb" is. THE
     TIE-BREAK IS THE FIRST ONE FOUND -- living enemies in order, each pile in
     place order -- which is Sorry, Jean...'s rule and the only one a player can
     plan around.
@@ -1543,48 +1516,6 @@ def place_copy_of_largest(state: CombatState,
     state.emit("ko_bomb_copied", target=enemy.name, size=size)
     place(state, enemy, size)
     return size
-
-
-def grow_bombs_off_aura(state: CombatState, amount: int, floor: int) -> int:
-    """Kindling: "Each Bomb on an enemy with an aura other than Pyro grows by
-    `amount`. If there is none, your largest Bomb grows by `floor`." Returns
-    the total growth applied. `ProtoBombPower.GrowOffAura`'s twin.
-
-    THE FLOOR IS WHAT MAKES IT A REACT ROW WITH A LOSING LINE RATHER THAN A
-    DEAD CARD. It still buys `floor` growth when no applier went first, and
-    `amount` per Bomb on every foreign aura when one did.
-
-    "AN AURA OTHER THAN PYRO" IS THE ENEMY'S CARRIED AURA, and NO AURA DOES NOT
-    COUNT
-    -- `_op_set_off`'s `non_pyro` filter (Flame Dance), read the same way for
-    the same reason: the two rows must not disagree about which enemies are
-    off-element.
-
-    AN ENEMY WITH THE AURA AND NO BOMB IS NOT A MATCH. The face counts BOMBS,
-    so a board of aura'd but Bomb-less enemies takes the floor.
-    """
-    if not live(state):
-        return 0
-    amount, floor = int(amount), int(floor)
-    grown = 0
-    for enemy in list(state.living_enemies):
-        if enemy.aura is None or enemy.aura == "pyro":
-            continue
-        if not enemy.ko_charges:
-            continue
-        grow_pile(enemy, amount)
-        grown += amount * len(enemy.ko_charges)
-        state.emit("ko_kindling", target=enemy.name, amount=amount,
-                   aura=enemy.aura, charges=len(enemy.ko_charges))
-    if grown or floor <= 0:
-        return grown
-    enemy, index, _ = largest_charge(state)
-    if enemy is None:
-        return 0
-    enemy.ko_charges[index].size += floor
-    state.emit("ko_kindling_floor", target=enemy.name, amount=floor,
-               size=enemy.ko_charges[index].size)
-    return floor
 
 
 def split_largest(state: CombatState, growth: int) -> int:

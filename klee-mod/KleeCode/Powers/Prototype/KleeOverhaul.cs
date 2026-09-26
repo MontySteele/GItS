@@ -72,21 +72,10 @@ public static class KleeOverhaulLaw
     /// Mirrors <c>C.KLEE_OVERHAUL_BOMB_GROWTH</c>.</summary>
     public const int BombGrowth = 4;
 
-    /// <summary>Explosives Workshop: this much growth on top, per stack.
-    /// Mirrors <c>C.KLEE_OVERHAUL_WORKSHOP_GROWTH</c>.</summary>
-    public const int WorkshopGrowth = 1;
-
     /// <summary>
     /// Alice's Recipe: growth is MULTIPLIED by this while the power is up --
     /// "your Bombs grow twice each turn". Mirrors
     /// <c>C.KLEE_OVERHAUL_ALICE_MULTIPLIER</c>.
-    ///
-    /// A MULTIPLIER RATHER THAN A REPLACEMENT since the 2026-09-02 balance
-    /// pass. The row used to read "grow by 4 instead of 3", which made the
-    /// Rare a strictly weaker Explosives Workshop: a second Workshop reaches
-    /// 5 and a second Recipe still read 4. Doubling is the Rare, the Workshop
-    /// stays the stacking +1, and the composition is
-    /// <see cref="ProtoBombPower.GrowthFor"/>'s one line.
     /// </summary>
     public const int AliceMultiplier = 2;
 

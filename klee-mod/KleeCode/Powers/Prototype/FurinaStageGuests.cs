@@ -114,7 +114,7 @@ public static partial class FurinaStage
             ledger.GuestArrives(who, fanfare, atFront);
         }
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary>
@@ -138,7 +138,7 @@ public static partial class FurinaStage
                   mayReturn: false);
         ledger.ArriveAtFront(who, leaver.Fanfare + arrival);
         await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
+        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary>
@@ -324,7 +324,7 @@ public static partial class FurinaStage
         var returns = owner.Powers.OfType<FiveCenturyActPower>().Any();
         var foes = enemies ?? ForecastEnemies(owner);
         var run = new ForecastRun(clone, applause, returns,
-                                  foes.Any(e => e.Aura));
+                                  foes.Any(e => e.Aura), seats);
 
         // The sweep, in the sweep's order (`EndOfTurnActs`). What the acts
         // DEAL is recorded here and only here: a Bow on the enemy's turn is
@@ -341,20 +341,33 @@ public static partial class FurinaStage
             }
         }
         run.Sweep = false;
+        // 2026-09-26 (the cues): what the acts' payments and taxes took off
+        // each bar, and then what the fade took, read off the clone's own
+        // beats -- the ledger's `pay` and `fade` moves, filed by seat key.
+        var paid = TallyBeats(clone.Beats, 0, clone.Beats.Count,
+                              FurinaStageLedger.PayEvent);
+        var sweepEnd = clone.Beats.Count;
         clone.EndRest();
         clone.ResetActMultipliers();
         clone.Fade();
+        var faded = TallyBeats(clone.Beats, sweepEnd, clone.Beats.Count,
+                               FurinaStageLedger.FadeEvent);
 
         var rows = new List<StageForecastSeat>();
         for (var i = 0; i < seats.Count; i++)
         {
             var stays = clone.Holds(seats[i]);
+            var key = seats[i].Key;
             rows.Add(new StageForecastSeat(
-                seats[i].Who, now[i], stays ? seats[i].Fanfare : 0, !stays));
+                seats[i].Who, now[i], stays ? seats[i].Fanfare : 0, !stays,
+                key, paid.GetValueOrDefault(key),
+                faded.GetValueOrDefault(key)));
         }
         var arrivals = clone.Seats.Where(s => !seats.Contains(s))
-            .Select(s => new StageForecastSeat(s.Who, 0, s.Fanfare, false))
+            .Select(s => new StageForecastSeat(s.Who, 0, s.Fanfare, false,
+                                               s.Key))
             .ToList();
+        var cues = run.Cues(rows);
 
         // The enemy's turn: her Block after the acts, then each hit in turn
         // on her Block, the front performer's bar, then her (rule 6). HIT BY
@@ -432,9 +445,27 @@ public static partial class FurinaStage
             ActTotalTarget = totalTarget,
             Takers = takers
                 .Select(t => new StageForecastTake(t.Seat.Who, t.Takes,
-                                                   t.Leaves))
+                                                   t.Leaves, t.Seat.Key))
                 .ToList(),
+            Cues = cues,
         };
+    }
+
+    /// <summary>What beats of <paramref name="kind"/> in
+    /// <c>[from, to)</c> moved, summed per seat key. A beat whose seat the
+    /// ledger could not name (key -1) is left out.</summary>
+    private static Dictionary<int, int> TallyBeats(
+        IReadOnlyList<StageBeat> beats, int from, int to, string kind)
+    {
+        var sums = new Dictionary<int, int>();
+        for (var i = from; i < to; i++)
+        {
+            var beat = beats[i];
+            if (beat.Event != kind || beat.SeatKey < 0) continue;
+            sums[beat.SeatKey] = sums.GetValueOrDefault(beat.SeatKey)
+                                 + beat.Moved;
+        }
+        return sums;
     }
 
     /// <summary>The combat's hittable enemies, by printed name and whether
@@ -493,14 +524,36 @@ public static partial class FurinaStage
         private readonly bool _returns;
         private readonly bool _aura;
 
+        /// <summary>The stage as the sweep found it, front first: the seats
+        /// a cue is drawn over.</summary>
+        private readonly IReadOnlyList<StageSeat> _company;
+
+        /// <summary>Per seat, what its acts in the sweep did (the cues).
+        /// </summary>
+        private readonly Dictionary<StageSeat, CueTally> _tally =
+            new(ReferenceEqualityComparer.Instance);
+
+        /// <summary>Seats whose sweep Bow has been put down to them.</summary>
+        private readonly HashSet<StageSeat> _bowed =
+            new(ReferenceEqualityComparer.Instance);
+
         internal ForecastRun(FurinaStageLedger stage, List<int> applause,
-                             bool returns, bool aura)
+                             bool returns, bool aura,
+                             IReadOnlyList<StageSeat> company)
         {
             _stage = stage;
             _applause = applause;
             _returns = returns;
             _aura = aura;
+            _company = company;
+            // Read now: the sweep's end clears it (`EndRest`) before the
+            // cues are made.
+            _resting = new HashSet<StageSeat>(
+                company.Where(s => s.Resting), ReferenceEqualityComparer.Instance);
         }
+
+        /// <summary>The seats resting through this sweep.</summary>
+        private readonly HashSet<StageSeat> _resting;
 
         /// <summary>Block the replayed acts gave her.</summary>
         internal int Block;
@@ -520,17 +573,217 @@ public static partial class FurinaStage
         internal void Act(StagePerformer who, StageSeat? seat, StageExit? exit)
         {
             var owed = new List<StageExit>();
+            var mark = _stage.Beats.Count;
+            // 2026-09-26 (the cues): the seat this act is drawn over -- the
+            // actor, or, for a Bow the sweep's own payment earned, the seat
+            // it has just left. Only the sweep's acts are cues.
+            var over = !Sweep ? null
+                : seat ?? (exit is { } left ? BowedFrom(left) : null);
             // An act that cannot pay does nothing, and has no damage line.
-            if (!_stage.ActFanfare(who, seat, exit, owed)) return;
+            if (!_stage.ActFanfare(who, seat, exit, owed))
+            {
+                if (over != null) Tally(over, who).Refused(this, seat, exit);
+                return;
+            }
+            var block = 0;
             if (who == StagePerformer.Usher)
             {
-                Block += System.Math.Max(0,
+                block = System.Math.Max(0,
                     FurinaStageLaw.ActUsherBlock * _stage.ActBlockMultiplier
                     - (exit?.Caught ?? 0));
+                Block += block;
             }
-            if (Sweep && Damage(who, seat, exit) is { } line) Acts.Add(line);
+            var line = Sweep ? Damage(who, seat, exit) : null;
+            if (line is { } dealt) Acts.Add(dealt);
+            if (over != null)
+            {
+                Tally(over, who).Performed(
+                    Effect(who, block, line, mark), line,
+                    PaidSince(who, mark));
+            }
             if (seat != null) seat.LostSinceAct = 0;
             foreach (var gone in owed) Bow(gone);
+        }
+
+        // ---- THE CUES (2026-09-26, the Furina balance review, pick 2a) ----
+        //
+        // [USER]: "each performer shows its act over its head the way an
+        // enemy shows its intent". Every number a cue prints is recorded
+        // here, off the same replay that makes the rest of the forecast: the
+        // act's damage line, Usher's Block as the forecast adds it, a gift
+        // or a payment as the ledger's own beat files it.
+
+        /// <summary>What one act did, as its cue prints it: the Block, the
+        /// damage, the Energy, or the Fanfare a gift moved.</summary>
+        private int Effect(StagePerformer who, int block,
+                           StageForecastAct? line, int mark)
+        {
+            switch (StageForecastCue.KindOf(who))
+            {
+                case StageCueKind.Block:
+                    return block;
+                case StageCueKind.Energy:
+                    return FurinaStageLaw.ActChevreuseEnergy;
+                case StageCueKind.Gift:
+                {
+                    // Sigewinne's gift is the whole raise she made; Charlotte's
+                    // is what EACH other performer gained.
+                    var raises = BeatsSince(mark, "raise").ToList();
+                    if (raises.Count == 0) return 0;
+                    return who == StagePerformer.Charlotte
+                        ? raises[0].Moved
+                        : raises.Sum(b => b.Moved);
+                }
+                default:
+                    return line?.Amount ?? 0;
+            }
+        }
+
+        /// <summary>The price the performer's cue carries: what this act's
+        /// payment took, for the two guests whose act is PRICED (Neuvillette
+        /// pays his own, Chevreuse spends the back performer's). Clorinde's
+        /// tax and Sigewinne's gift are Fanfare too, but their cue does not
+        /// carry them: the tax shows on the bars it takes from, and the gift
+        /// IS her number.</summary>
+        private int PaidSince(StagePerformer who, int mark) =>
+            StageForecastCue.Priced(who)
+                ? BeatsSince(mark, FurinaStageLedger.PayEvent).Sum(b => b.Moved)
+                : 0;
+
+        private IEnumerable<StageBeat> BeatsSince(int mark, string kind)
+        {
+            for (var i = mark; i < _stage.Beats.Count; i++)
+            {
+                if (_stage.Beats[i].Event == kind) yield return _stage.Beats[i];
+            }
+        }
+
+        /// <summary>The seat a sweep Bow is drawn over: the first seat of
+        /// that performer the sweep found and the stage no longer holds, and
+        /// only once.</summary>
+        private StageSeat? BowedFrom(StageExit exit)
+        {
+            foreach (var seat in _company)
+            {
+                if (seat.Who != exit.Who || _stage.Holds(seat)
+                    || _bowed.Contains(seat))
+                {
+                    continue;
+                }
+                _bowed.Add(seat);
+                return seat;
+            }
+            return null;
+        }
+
+        private CueTally Tally(StageSeat seat, StagePerformer who)
+        {
+            if (!_tally.TryGetValue(seat, out var tally))
+            {
+                tally = new CueTally(who);
+                _tally[seat] = tally;
+            }
+            return tally;
+        }
+
+        /// <summary>The cues, one per seat the sweep found, in seat order.
+        /// </summary>
+        internal IReadOnlyList<StageForecastCue> Cues(
+            IReadOnlyList<StageForecastSeat> rows)
+        {
+            var cues = new List<StageForecastCue>(_company.Count);
+            for (var i = 0; i < _company.Count; i++)
+            {
+                var seat = _company[i];
+                var leaves = i < rows.Count && rows[i].Leaves;
+                if (_resting.Contains(seat))
+                {
+                    // A Five-Century Act's returnee sits this sweep out.
+                    cues.Add(new StageForecastCue(
+                        seat.Who, seat.Key, StageForecastCue.KindOf(seat.Who),
+                        -1, "", "", 0, 0, false, true, leaves));
+                    continue;
+                }
+                var tally = _tally.GetValueOrDefault(seat)
+                            ?? new CueTally(seat.Who);
+                cues.Add(tally.Cue(seat, leaves));
+            }
+            return cues;
+        }
+
+        /// <summary>One seat's acts in the sweep.</summary>
+        private sealed class CueTally
+        {
+            private readonly StagePerformer _who;
+            private readonly List<int> _amounts = new();
+            private string _element = "";
+            private string _target = "";
+            private int _price;
+            private bool _refused;
+            private int _wouldBe = -1;
+            private int _wouldPay;
+
+            internal CueTally(StagePerformer who) => _who = who;
+
+            /// <summary>An act that paid, and what it did.</summary>
+            internal void Performed(int amount, StageForecastAct? line,
+                                    int paid)
+            {
+                _amounts.Add(amount);
+                if (line is { } act)
+                {
+                    _element = act.Element;
+                    _target = act.Target;
+                }
+                if (_price == 0) _price = paid;
+            }
+
+            /// <summary>An act that could not pay (rule 4): nothing
+            /// happened, and the cue shows what it would have done, greyed.
+            /// </summary>
+            internal void Refused(ForecastRun run, StageSeat? seat,
+                                  StageExit? exit)
+            {
+                _refused = true;
+                if (_wouldBe >= 0) return;
+                var line = run.Damage(_who, seat, exit);
+                _wouldBe = StageForecastCue.KindOf(_who) switch
+                {
+                    StageCueKind.Energy => FurinaStageLaw.ActChevreuseEnergy,
+                    _ => line?.Amount ?? 0,
+                };
+                if (line is { } act)
+                {
+                    _element = act.Element;
+                    _target = act.Target;
+                }
+                _wouldPay = StageForecastCue.PriceOf(_who);
+            }
+
+            internal StageForecastCue Cue(StageSeat seat, bool leaves)
+            {
+                var kind = StageForecastCue.KindOf(_who);
+                var landed = _amounts.Where(a => a > 0).ToList();
+                if (landed.Count > 0)
+                {
+                    // Every act alike: its number and the count. Acts that
+                    // differ (a gift that ran short, then a free Bow): their
+                    // sum, once.
+                    var alike = landed.All(a => a == landed[0]);
+                    return new StageForecastCue(
+                        _who, seat.Key, kind,
+                        alike ? landed[0] : landed.Sum(), _element, _target,
+                        alike ? landed.Count : 1, _price, false, false,
+                        leaves);
+                }
+                // Nothing landed: it could not pay, or its act came to 0
+                // (Wriothesley on a turn nothing hit him).
+                var unpaid = _refused && _amounts.Count == 0;
+                return new StageForecastCue(
+                    _who, seat.Key, kind, unpaid ? _wouldBe : 0, _element,
+                    _target, 0, unpaid ? _wouldPay : _price, unpaid, false,
+                    leaves);
+            }
         }
 
         /// <summary>One act's damage as its tip prints it, at this turn's
@@ -600,9 +853,70 @@ public static partial class FurinaStage
 }
 
 /// <summary>One performer's line of the forecast: its bar now and after the
-/// turn's end, and whether it leaves.</summary>
+/// turn's end, and whether it leaves. Since 2026-09-26 (the cues) also the
+/// seat's <see cref="StageSeat.Key"/>, what the acts' payments and taxes take
+/// off it (<paramref name="Paid"/>, the ledger's `pay` beats) and what the
+/// fade then takes (<paramref name="Faded"/>, its `fade` beats).</summary>
 public readonly record struct StageForecastSeat(
-    StagePerformer Who, int Now, int After, bool Leaves);
+    StagePerformer Who, int Now, int After, bool Leaves, int Key = -1,
+    int Paid = 0, int Faded = 0);
+
+/// <summary>What a performer's act is, as its cue draws it.</summary>
+public enum StageCueKind
+{
+    /// <summary>Usher: Block for Furina.</summary>
+    Block,
+
+    /// <summary>Every damage act, one target, random or ALL.</summary>
+    Damage,
+
+    /// <summary>Chevreuse: Energy next turn.</summary>
+    Energy,
+
+    /// <summary>Sigewinne and Charlotte: Fanfare for other performers.</summary>
+    Gift,
+}
+
+/// <summary>
+/// 2026-09-26 (the Furina balance review, pick 2a): ONE PERFORMER'S CUE, what
+/// it will do at the end of this turn, read off the forecast's own replay.
+/// <see cref="Amount"/> is one act's number (-1 for a resting returnee, which
+/// does not act); <see cref="Times"/> how many acts land (Full House, or a
+/// payment that empties it and earns its Bow), 0 where none does --
+/// <see cref="Unpaid"/> (rule 4: it cannot pay, and <see cref="Amount"/> and
+/// <see cref="Price"/> are what it would have done) or an act that comes to 0
+/// (Wriothesley on a turn nothing hit him). <see cref="Price"/> is what a
+/// priced act pays (Neuvillette, Chevreuse). <see cref="Element"/> and
+/// <see cref="Target"/> are its damage line's.
+/// </summary>
+public readonly record struct StageForecastCue(
+    StagePerformer Who, int Key, StageCueKind Kind, int Amount,
+    string Element, string Target, int Times, int Price, bool Unpaid,
+    bool Resting, bool Leaves)
+{
+    /// <summary>The kind of act a performer has.</summary>
+    public static StageCueKind KindOf(StagePerformer who) => who switch
+    {
+        StagePerformer.Usher => StageCueKind.Block,
+        StagePerformer.Chevreuse => StageCueKind.Energy,
+        StagePerformer.Sigewinne or StagePerformer.Charlotte =>
+            StageCueKind.Gift,
+        _ => StageCueKind.Damage,
+    };
+
+    /// <summary>Does this performer's cue carry a price?</summary>
+    public static bool Priced(StagePerformer who) =>
+        who is StagePerformer.Neuvillette or StagePerformer.Chevreuse;
+
+    /// <summary>The printed price of a priced act, for the cue of one that
+    /// cannot pay; 0 for every other performer.</summary>
+    public static int PriceOf(StagePerformer who) => who switch
+    {
+        StagePerformer.Neuvillette => FurinaStageLaw.ActNeuvillettePrice,
+        StagePerformer.Chevreuse => FurinaStageLaw.ActChevreusePrice,
+        _ => 0,
+    };
+}
 
 /// <summary>
 /// 2026-09-25 night (the granted-guest seat round): ONE ACT'S DAMAGE in the
@@ -624,9 +938,10 @@ public readonly record struct StageForecastAct(
 }
 
 /// <summary>One performer's share of the posted attacks, walked hit by hit:
-/// what it takes, and whether it leaves (and Bows).</summary>
+/// what it takes, and whether it leaves (and Bows). <paramref name="Key"/> is
+/// its seat's (2026-09-26, the bar chips: two Ushers are two bars).</summary>
 public readonly record struct StageForecastTake(
-    StagePerformer Who, int Takes, bool Leaves);
+    StagePerformer Who, int Takes, bool Leaves, int Key = -1);
 
 /// <summary>A body the acts can land on: its printed name, and whether it
 /// wears an aura.</summary>
@@ -661,4 +976,9 @@ public sealed record StageForecast(
 
     public IReadOnlyList<StageForecastTake> Takers { get; init; } =
         System.Array.Empty<StageForecastTake>();
+
+    /// <summary>2026-09-26: one cue per performer on the stage as it stands,
+    /// in seat order (<see cref="StageForecastCue"/>).</summary>
+    public IReadOnlyList<StageForecastCue> Cues { get; init; } =
+        System.Array.Empty<StageForecastCue>();
 }
