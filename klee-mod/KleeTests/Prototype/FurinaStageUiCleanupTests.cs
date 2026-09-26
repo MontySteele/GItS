@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BaseLib.Abstracts;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using KleeMod.Tests.Harness;
 using KleeMod.Vfx;
 using Xunit;
@@ -199,6 +201,66 @@ public class FurinaStageUiCleanupTests
         FurinaStage.AbsorbHit(seat.Creature, 10, dealer: null);
 
         Assert.Equal(new[] { (StagePerformer.Crabaletta, 3) }, pops.Seen.ToArray());
+    }
+
+    // ==================================================================
+    // 3. The Stage retires the shipped Burst (EB-726 dropped the guards).
+    // ==================================================================
+
+    /// <summary>A reaction's Burst credit lands in <c>GainBurst</c>
+    /// (<c>ReactionEffects.Resolve</c>, pinned below); the reaction itself is
+    /// a live path outside the headless boundary, so the funnel's decision is
+    /// what is asked, as Kokomi's `EB-327` pin asks it.</summary>
+    [Fact]
+    public void A_reaction_pays_no_burst_under_the_stage()
+    {
+        using var _ = new Arm();
+        var furina = Seat.Furina().WithCombatState().Creature;
+        FurinaResources.GainBurst(furina, FurinaResourceConstants.BurstPerReaction);
+        Assert.Equal(0, FurinaResources.Burst(furina));
+    }
+
+    [Fact]
+    public void With_the_arm_off_a_reaction_pays_burst_as_it_ships()
+    {
+        using var _ = new Arm(on: false);
+        var furina = Seat.Furina().WithCombatState().Creature;
+        FurinaResources.GainBurst(furina, FurinaResourceConstants.BurstPerReaction);
+        Assert.Equal(FurinaResourceConstants.BurstPerReaction,
+                     FurinaResources.Burst(furina));
+    }
+
+    [Fact]
+    public void The_reaction_credit_still_goes_through_the_guarded_funnel()
+    {
+        Assert.Contains("FurinaResources.GainBurst",
+                        Il.Calls(Il.Method("ReactionEffects", "Resolve")));
+    }
+
+    /// <summary>
+    /// The shipped <i>Let the People Rejoice</i> is never granted under the
+    /// arm, even from a meter already at its max (a save, or any write
+    /// outside the funnel). The grant asks the arm before it reads the meter
+    /// or touches the hand, so a full meter returns without creating a card.
+    /// </summary>
+    [Fact]
+    public void The_kit_card_is_never_granted_under_the_stage()
+    {
+        using var _ = new Arm();
+        var seat = Seat.Furina().WithCombatState();
+        CustomResources<FurinaBurstResource>
+            .Get(seat.Player.PlayerCombatState!).Amount =
+            FurinaResourceConstants.BurstMax;
+
+        var grant = FurinaKitGrant.GrantIfCharged(
+            new ThrowingPlayerChoiceContext(), seat.Player);
+        Assert.True(grant.IsCompletedSuccessfully);
+
+        var calls = Il.CallSequence(Il.Method("FurinaKitGrant", "GrantIfCharged"))
+            .ToList();
+        var gate = calls.IndexOf("FurinaResources.StageRetiresTheShippedMeters");
+        var hand = calls.IndexOf("CardPile.Get");
+        Assert.True(gate >= 0 && hand > gate, string.Join(", ", calls));
     }
 
     [Fact]
