@@ -17,8 +17,8 @@ namespace KleeMod.Powers;
 /// The slice's build list asks for exactly this: "Two counters, both per turn:
 /// Bombs that went off; Bombs that reacted. Grounded reads last turn's first
 /// counter." Three cards read the first (Run Away!, Ammo Scavenging, and
-/// Grounded shifted by a turn) and three read the second (Sizzle, Perfect
-/// Timing, Catalytic Converter).
+/// Grounded shifted by a turn) and two read the second (Sizzle and Perfect
+/// Timing).
 ///
 /// A THIRD COUNTER JOINED THEM AT R244 and it is the same kind of fact:
 /// <see cref="CompanionPlayedThisTurn"/>, which Coven Errand reads (a Hexerei

@@ -738,9 +738,9 @@ KLEE_OVERHAUL_OPS = frozenset((
     "damage_set_off_total",
     "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
     "mine_bombs",
-    # THE POOL PASS's three (`EB-491`): All of My Treasures!, Kindling and
-    # Split Charge. Same pricing decision as the eleven above.
-    "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb",
+    # THE POOL PASS's two (`EB-491`): All of My Treasures! and Split Charge.
+    # Same pricing decision as the eleven above.
+    "plant_bomb_copy_largest", "split_largest_bomb",
     # POOL PASS TWO's two (`EB-732`): Blast Shield's `return_to_hand` and Once
     # More!'s `return_last_set_off`. Same pricing decision as the fourteen
     # above -- both are the arm's, and neither resolves off it.
@@ -2514,8 +2514,7 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "grow_largest_bomb", "damage_set_off_total",
                   "multiply_set_off", "draw_per_set_off",
                   "companion_mark_hand", "mine_bombs",
-                  "plant_bomb_copy_largest", "grow_bombs_off_aura",
-                  "split_largest_bomb",
+                  "plant_bomb_copy_largest", "split_largest_bomb",
                   "return_to_hand", "return_last_set_off",
                   "grow_largest", "multiply_largest_bomb",
                   "fetch_from_discard", "add_random_companion",

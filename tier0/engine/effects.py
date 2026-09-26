@@ -5889,16 +5889,6 @@ def _op_plant_bomb_copy_largest(state: CombatState, fx: dict,
     klee_overhaul.place_copy_of_largest(state, dest[0] if dest else None)
 
 
-def _op_grow_bombs_off_aura(state: CombatState, fx: dict, card: Card) -> None:
-    """Kindling (`EB-491`). ONE call with BOTH printed numbers, so the aura
-    clause and its floor cannot be reached by two different paths: the rule
-    that decides which of them applies is the arm's."""
-    if not klee_overhaul.live(state):
-        _op_klee_overhaul_off(state, fx, card)        # always raises
-    klee_overhaul.grow_bombs_off_aura(state, int(fx["amount"]),
-                                      int(fx["floor"]))
-
-
 def _op_split_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
     """Split Charge (`EB-491`). ONE call; the halving is the arm's arithmetic
     and `growth` is what the upgrade adds to each half."""
@@ -6475,7 +6465,6 @@ OPS = {
     # above: one call each into `klee_overhaul`, and a raise with the flag off
     # or on a seat that is not Klee.
     "plant_bomb_copy_largest": _op_plant_bomb_copy_largest,
-    "grow_bombs_off_aura": _op_grow_bombs_off_aura,
     "split_largest_bomb": _op_split_largest_bomb,
     "remove_bomb_for_block": _op_remove_bomb_for_block,
     # R252's verb, the defence shelf's own (Careful Now). Beside Sorry, Jean...

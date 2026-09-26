@@ -21,15 +21,13 @@ namespace KleeMod.Tests.Prototype;
 /// hand cost that RISES while the card waits (built for Long Fuse; deleted at
 /// R276 with the row), a Bomb COPIED at the size of the largest one on the
 /// board (All of My Treasures!), a grow keyed to the enemy's AURA with a
-/// floor under it (Kindling; the card was cut at R276 and the engine verb is
-/// still pinned below), a Bomb SPLIT into two
+/// floor under it (Kindling; cut at R276 with its engine verb), a Bomb SPLIT
+/// into two
 /// halves on random enemies (Split Charge), and the VERMILLION PACT, which
 /// hands back the aura an explosion consumed so the Attack behind it reacts
 /// too. The other five rows are new spellings of shapes the arm already had.
 ///
-/// WHAT IS REAL HERE AND WHAT IS STRUCTURAL. Kindling is real --
-/// <see cref="ProtoBombPower.GrowOffAura"/> against real piles and real auras
-/// on a real <c>CombatState</c>, including both ways it pays the floor. What
+/// WHAT IS REAL HERE AND WHAT IS STRUCTURAL. What
 /// needs <c>PowerCmd</c> (a placement, a removal, an aura application) or a
 /// card PLAY is pinned off the compiled method and says so. The end-to-end
 /// arithmetic is the sim twin's:
@@ -42,108 +40,6 @@ namespace KleeMod.Tests.Prototype;
 public class PoolPassThreeTests
 {
     private const BindingFlags All = HeadlessGame.All;
-
-    // ---- Kindling: the aura-keyed grow, real ------------------------------
-
-    [Fact]
-    public void Kindling_grows_every_bomb_on_a_foreign_aura()
-    {
-        // REAL. "Each Bomb on an enemy with an aura other than Pyro grows by
-        // 4" --
-        // EVERY charge on EVERY such enemy, which is `GrowOn`'s spread over
-        // Flame Dance's filter. Twin:
-        // `test_kindling_grows_every_bomb_on_a_foreign_aura`.
-        var klee = Seat.Klee();
-        var a = Seat.Klee(200).WithPower<HydroAuraPower>(2).Creature;
-        var b = Seat.Klee(200).WithPower<CryoAuraPower>(2).Creature;
-        ProtoBombs.Board(klee.Creature, a, b);
-
-        var pileA = ProtoBombs.Place(a, klee.Creature,
-                                     new ProtoBombs.Charge(6),
-                                     new ProtoBombs.Charge(2));
-        var pileB = ProtoBombs.Place(b, klee.Creature, new ProtoBombs.Charge(5));
-
-        ProtoBombPower.GrowOffAura(klee.Creature, amount: 4, floor: 2);
-
-        Assert.Equal(new[] { 10, 6 }, pileA.Charges.Select(c => c.Size));
-        Assert.Equal(new[] { 9 }, pileB.Charges.Select(c => c.Size));
-    }
-
-    [Fact]
-    public void Kindling_skips_pyro_and_aura_less_enemies_and_takes_the_floor()
-    {
-        // REAL, and both halves of the filter at once: "not Pyro" is the
-        // enemy's CARRIED aura and NO aura does not count, so with a Pyro'd
-        // enemy and a bare one there is no match at all and the floor pays the
-        // largest charge instead. Twin:
-        // `test_kindling_skips_pyro_and_aura_less_enemies`.
-        var klee = Seat.Klee();
-        var pyro = Seat.Klee(200).WithPower<PyroAuraPower>(2).Creature;
-        var bare = Seat.Klee(200).Creature;
-        ProtoBombs.Board(klee.Creature, pyro, bare);
-
-        var lit = ProtoBombs.Place(pyro, klee.Creature, new ProtoBombs.Charge(6));
-        var dark = ProtoBombs.Place(bare, klee.Creature,
-                                    new ProtoBombs.Charge(9));
-
-        ProtoBombPower.GrowOffAura(klee.Creature, amount: 4, floor: 2);
-
-        Assert.Equal(new[] { 6 }, lit.Charges.Select(c => c.Size));
-        Assert.Equal(new[] { 11 }, dark.Charges.Select(c => c.Size));
-    }
-
-    [Fact]
-    public void Kindlings_floor_pays_one_charge_board_wide()
-    {
-        // The floor is ONE charge and it is the largest anywhere -- Stoke the
-        // Fuse's scope, not Chain Fuse's spread. Twin:
-        // `test_kindling_floor_pays_the_largest_charge_only`.
-        var klee = Seat.Klee();
-        var a = Seat.Klee(200).Creature;
-        var b = Seat.Klee(200).Creature;
-        ProtoBombs.Board(klee.Creature, a, b);
-
-        var pileA = ProtoBombs.Place(a, klee.Creature,
-                                     new ProtoBombs.Charge(4),
-                                     new ProtoBombs.Charge(11));
-        var pileB = ProtoBombs.Place(b, klee.Creature, new ProtoBombs.Charge(7));
-
-        ProtoBombPower.GrowOffAura(klee.Creature, amount: 4, floor: 2);
-
-        Assert.Equal(new[] { 4, 13 }, pileA.Charges.Select(c => c.Size));
-        Assert.Equal(new[] { 7 }, pileB.Charges.Select(c => c.Size));
-    }
-
-    [Fact]
-    public void Kindling_counts_bombs_and_not_enemies()
-    {
-        // An aura'd enemy holding NO Bomb is not a match: the face counts
-        // Bombs, so the board takes the floor. Twin:
-        // `test_kindling_takes_the_floor_when_the_aura_holds_no_bomb`.
-        var klee = Seat.Klee();
-        var aura = Seat.Klee(200).WithPower<ElectroAuraPower>(2).Creature;
-        var bombed = Seat.Klee(200).Creature;
-        ProtoBombs.Board(klee.Creature, aura, bombed);
-
-        var pile = ProtoBombs.Place(bombed, klee.Creature,
-                                    new ProtoBombs.Charge(8));
-
-        ProtoBombPower.GrowOffAura(klee.Creature, amount: 4, floor: 2);
-
-        Assert.Equal(new[] { 10 }, pile.Charges.Select(c => c.Size));
-    }
-
-    [Fact]
-    public void Kindling_on_an_empty_board_does_nothing()
-    {
-        // No Bomb anywhere is no growth anywhere: the floor has nothing to
-        // land on and the call is a walk that writes nothing.
-        var klee = Seat.Klee();
-        var enemy = Seat.Klee(200).WithPower<HydroAuraPower>(2).Creature;
-        ProtoBombs.Board(klee.Creature, enemy);
-
-        ProtoBombPower.GrowOffAura(klee.Creature, amount: 4, floor: 2);
-    }
 
     // ---- All of My Treasures!: the copy -----------------------------------
 

@@ -155,23 +155,19 @@ def _proto_hit(effects: list[dict]) -> dict | None:
 
 def _proto_grow(effects: list[dict]) -> dict | None:
     """The one effect a prototype `grow` delta binds to: the first printed
-    grow amount, whichever of the four overhaul ops prints it.
+    grow amount, whichever of the three overhaul ops prints it.
 
     `grow_largest_bomb`'s number is a RATE ("grows by 3 per Spark spent") and
     it takes the same key anyway, because the key names what the smith moves
     and what the face prints -- one printed grow number per row, and no row
-    carries two of these ops. `grow_bombs_off_aura` is the FOURTH (`EB-491`,
-    Kindling) and it takes the key for its per-Bomb `amount` only: its floor
-    is a second printed number and rides `grow_floor` below."""
+    carries two of these ops."""
     return next((fx for fx in effects
                  if (fx.get("op") == "grow_bombs"
                      and isinstance(fx.get("amount"), int))
                  or (fx.get("op") == "merge_bombs"
                      and isinstance(fx.get("growth"), int))
                  or (fx.get("op") == "grow_largest_bomb"
-                     and isinstance(fx.get("per_spark"), int))
-                 or (fx.get("op") == "grow_bombs_off_aura"
-                     and isinstance(fx.get("amount"), int))), None)
+                     and isinstance(fx.get("per_spark"), int))), None)
 
 
 def _proto_power(effects: list[dict]) -> dict | None:
@@ -873,10 +869,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                 ok = _bump_first((fx for fx in top
                                   if fx.get("op") == "grow_largest_bomb"),
                                  "per_spark", val)
-            if not ok:
-                ok = _bump_first((fx for fx in top
-                                  if fx.get("op") == "grow_bombs_off_aura"),
-                                 "amount", val)
             # R276: One More Charge's flat growth, and Spinning Sparkler's
             # per-hit rider -- the codegen's `grow_var_effect` order.
             if not ok:
@@ -887,23 +879,12 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                 ok = _bump_first((fx for fx in top
                                   if fx.get("op") == "damage"),
                                  "grow_on_hit", val)
-        elif key == "grow_floor":
-            # `EB-491` (Kindling). Its SECOND printed number: what the largest
-            # Bomb grows by when no enemy carries an off-element aura. A key of
-            # its own and not a second `grow`, because one row prints both and
-            # a single key could only ever move one of them -- the one-owner
-            # rule every key here keeps, read from the other side. The C# emits
-            # it as a play-time `IsUpgraded` literal, because the face already
-            # states the swap itself.
-            ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "grow_bombs_off_aura"),
-                             "floor", val)
         elif key == "split_grow":
             # `EB-491` (Split Charge). What each half gains, 0 on the base card
             # and bought by the upgrade -- so the base face prints no figure
             # for it and the `+` face states the clause in its own
-            # `{IfUpgraded:show:...}` hole. Its own key for `grow_floor`'s
-            # reason: it names one op's one field.
+            # `{IfUpgraded:show:...}` hole. Its own key because one row can print
+            # both a grow and this, and a key names one op's one field.
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "split_largest_bomb"),
                              "growth", val)

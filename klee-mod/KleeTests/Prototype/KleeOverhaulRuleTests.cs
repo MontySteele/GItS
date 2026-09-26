@@ -132,36 +132,12 @@ public class KleeOverhaulRuleTests
     }
 
     [Fact]
-    public void Rule1_the_workshop_adds_one_more_per_stack()
+    public void Rule1_alices_recipe_doubles_the_turns_growth()
     {
-        var klee = Seat.Klee().WithPower<ExplosivesWorkshopGrowthPower>(1);
-        Assert.Equal(KleeOverhaulLaw.BombGrowth + KleeOverhaulLaw.WorkshopGrowth,
-                     GrowthFor(klee.Creature));
-
-        var stacked = Seat.Klee().WithPower<ExplosivesWorkshopGrowthPower>(3);
-        Assert.Equal(
-            KleeOverhaulLaw.BombGrowth + 3 * KleeOverhaulLaw.WorkshopGrowth,
-            GrowthFor(stacked.Creature));
-    }
-
-    [Fact]
-    public void Rule1_alices_recipe_doubles_the_turns_growth_workshop_included()
-    {
-        // "Your Bombs grow TWICE each turn" (balance pass 2026-09-02) --
-        // multiply, and multiply what the Workshop already added, which is the
-        // only reading that leaves both printed faces true. The row used to
-        // read "grow by 4 instead of 3", a Rare a second Workshop beat.
+        // "Your Bombs grow TWICE each turn" (balance pass 2026-09-02).
         var alice = Seat.Klee().WithPower<AlicesRecipePower>(1);
         Assert.Equal(KleeOverhaulLaw.BombGrowth * KleeOverhaulLaw.AliceMultiplier,
                      GrowthFor(alice.Creature));
-
-        var both = Seat.Klee()
-            .WithPower<AlicesRecipePower>(1)
-            .WithPower<ExplosivesWorkshopGrowthPower>(1);
-        Assert.Equal(
-            (KleeOverhaulLaw.BombGrowth + KleeOverhaulLaw.WorkshopGrowth)
-                * KleeOverhaulLaw.AliceMultiplier,
-            GrowthFor(both.Creature));
     }
 
     [Fact]

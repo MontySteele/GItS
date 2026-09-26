@@ -374,10 +374,8 @@ def test_the_numbers_are_the_briefs_placeholders():
     # FOUR: the round-5 packet raised it from 3 to 5 and [USER] read 5 back
     # down on the same day ("growth 5 is likely too much").
     assert C.KLEE_OVERHAUL_BOMB_GROWTH == 4
-    assert C.KLEE_OVERHAUL_WORKSHOP_GROWTH == 1
     # A MULTIPLIER since the 2026-09-02 balance pass: Alice's Recipe doubles
-    # the turn's growth ("your Bombs grow twice each turn") instead of
-    # replacing the base 3 with a 4 a second Explosives Workshop beat.
+    # the turn's growth ("your Bombs grow twice each turn").
     assert C.KLEE_OVERHAUL_ALICE_MULTIPLIER == 2
     assert C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION == 1
     # FIVE since R242 pick 1: rule 4's opening bank. [USER]: "Regent starts
