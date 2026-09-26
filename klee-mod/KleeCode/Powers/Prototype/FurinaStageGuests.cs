@@ -348,7 +348,8 @@ public static partial class FurinaStage
     /// </summary>
     public static StageForecast Forecast(Creature owner,
                                          IReadOnlyList<int>? hits,
-                                         IReadOnlyList<StageForecastEnemy>? enemies = null)
+                                         IReadOnlyList<StageForecastEnemy>? enemies = null,
+                                         int? bufferStacks = null)
     {
         var real = FurinaStageLedger.For(owner);
         var clone = real.CloneForForecast();
@@ -419,6 +420,11 @@ public static partial class FurinaStage
         var takers = new List<(StageSeat Seat, int Takes, bool Leaves)>();
         var rapt = owner.Powers.OfType<RaptAudiencePower>()
             .Select(p => (int)p.Amount).ToList();
+        // 2026-09-26 (the supporting-pool seat round, lane 2): BUFFER. "The
+        // Buffer ate the 30. The preview still said 'you take 21'." Each
+        // stack stops one hit's HP loss -- what reaches her once her Block and
+        // the front performer have taken theirs.
+        var buffer = bufferStacks ?? BufferStacks(owner);
         foreach (var hit in hits ?? System.Array.Empty<int>())
         {
             var through = System.Math.Max(0, hit - block);
@@ -428,7 +434,14 @@ public static partial class FurinaStage
             var twoOrMore = clone.Seats.Count >= 2;
             var result = clone.Absorb(through);
             front += result.Absorbed;
-            furina += result.ReachedFurina;
+            if (result.ReachedFurina > 0 && buffer > 0)
+            {
+                buffer--;
+            }
+            else
+            {
+                furina += result.ReachedFurina;
+            }
             if (lead != null && result.Absorbed > 0)
             {
                 var at = takers.FindIndex(t => ReferenceEquals(t.Seat, lead));
@@ -514,6 +527,13 @@ public static partial class FurinaStage
                 e.Monster?.Title.GetFormattedText() ?? e.Name ?? "",
                 AuraCmd.Find(e) != null))
             .ToList();
+
+    /// <summary>Her Buffer stacks: each stops the next HP loss whole. The
+    /// base game's <c>BufferPower</c> acts on HP loss, after her Block and
+    /// the front performer's bar (the stage absorbs before HP is lost).
+    /// </summary>
+    private static int BufferStacks(Creature owner) =>
+        (int)owner.Powers.OfType<BufferPower>().Sum(p => p.Amount);
 
     /// <summary>
     /// The posted attacks, one entry per hit, each the number the game's own

@@ -796,6 +796,9 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # The guest seat round (2026-09-25): the seat's own key, which a
             # log row carries too. None on an older build.
             "key": _seat_key(row.get("seat_key")),
+            # 2026-09-26: back from its Bow through A Five-Century Act this
+            # turn, so it sits out this turn's acts. False on an older build.
+            "resting": row.get("resting") is True,
         })
     log = []
     for row in (raw.get("log") or []):
@@ -847,6 +850,10 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # the Fanfare (the page's short name). Empty elsewhere.
             "by": STAGE_SHORT_NAMES.get(_text(row.get("by_member")),
                                         _text(row.get("by"))),
+            # 2026-09-26 (the supporting-pool seat round): the power behind a
+            # move no card made -- a card title, printed as the card prints
+            # it. Empty elsewhere and on an older build.
+            "source": _text(row.get("source")),
         })
     # R276 batch two: the mod's forecast of the end-of-turn acts' Block, with
     # Arkhe Alignment's multiple and Full House's extra acts folded in. None

@@ -2426,13 +2426,14 @@
               then: [{op: damage, amount: 7, target: enemy}]}]}
 
 # (renamed 2026-09-26: title clash) Showstopper on the paper; the shipped
-# Furina sheet prints a Showstopper of its own.
+# Furina sheet prints a Showstopper of its own. "Spend" is not golded: see
+# the provenance note (2026-09-26 seat round).
 - {id: proto_fs_bring_the_house_down, name: "Bring the House Down", character: furina,
    upgrade: {formula_per: 1},
    authored_by: [claude],
    replaces: showstopper,
    register: salon, cost: 2, type: attack, rarity: rare,
-   description: "[gold]Spend[/gold] all of your [gold]front performer[/gold]'s [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage per point to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Spend all of your [gold]front performer[/gold]'s [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage per point to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_front_all},
              {op: damage,
               amount_formula: {base: 0, per: 2, count: stage_spent},

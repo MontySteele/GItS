@@ -43,6 +43,15 @@ namespace KleeMod.Powers;
 /// </summary>
 public static partial class FurinaStage
 {
+    /// <summary>2026-09-26 (the supporting-pool seat round): the powers that
+    /// move the stage with no card played, by the title their card prints,
+    /// for the log's <see cref="StageBeat.Source"/>. Lane 4 met an Usher
+    /// joining at turn start with no cause named.</summary>
+    public const string AllTheWorldsAStageTitle = "All the World's a Stage";
+    public const string SeasonTicketsTitle = "Season Tickets";
+    public const string RevolvingStageTitle = "Revolving Stage";
+    public const string ThunderousApplauseTitle = "Thunderous Applause";
+
     /// <summary>
     /// Rule 12's line and Echoing Hall's echo for this owner, from the powers
     /// in play: the line is 10 with <see cref="EternalApplausePower"/> (any
@@ -285,10 +294,20 @@ public static partial class FurinaStage
         }
         var turns = (int)furina.Powers.OfType<RevolvingStagePower>()
             .Sum(p => p.Amount);
-        for (var i = 0; i < turns; i++) StepForward(furina);
+        var ledger = FurinaStageLedger.For(furina);
+        using (ledger.CausedBy(RevolvingStageTitle))
+        {
+            for (var i = 0; i < turns; i++) StepForward(furina);
+        }
         var tickets = (int)furina.Powers.OfType<SeasonTicketsPower>()
             .Sum(p => p.Amount);
-        if (tickets > 0) await Raise(furina, tickets);
+        if (tickets > 0)
+        {
+            using (ledger.CausedBy(SeasonTicketsTitle))
+            {
+                await Raise(furina, tickets);
+            }
+        }
         if (furina.Powers.OfType<ReginaOfAllWatersPower>().Any())
         {
             foreach (var enemy in Enemies(furina).ToList())

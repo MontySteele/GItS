@@ -823,6 +823,19 @@ def _bow(state, member: str, exit_: dict | None = None) -> None:
 # ----------------------------------------------------------------------
 # The bar: regen, Raise, Spend, and the damage order.
 # ----------------------------------------------------------------------
+def turn_start_rest(state) -> None:
+    """The start of her turn ends any rest left from the enemies' turn (the
+    supporting-pool seat round, 2026-09-26). A Five-Century Act's returnee
+    "re-enters without acting THAT turn": one that Bowed to a hit on the
+    enemies' turn came back in their turn and performs at the end of hers.
+    Called before the regen, so a return during her own turn still rests.
+    C# twin: `FurinaStage.BeginTurn`."""
+    p = state.player
+    if not active(p):
+        return
+    p.stage_resting.clear()
+
+
 def turn_start_regen(state) -> None:
     """Rule 4. The LEAD regains 1 at the start of Furina's turn, from her
     SECOND turn on (sec.3 rule 2: "the first hand sees 3"). Only the lead.

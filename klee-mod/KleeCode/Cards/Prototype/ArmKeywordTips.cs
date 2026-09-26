@@ -878,10 +878,16 @@ public static class ArmKeywordTips
             // was false -- rule 6 never runs a hit on past the front -- and
             // the Opus seat lost Wriothesley's plan to it. A lone performer
             // is both the front and the back, so it is hit then.
-            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it only when "
-          + "it stands alone. At "
+            // THE SUPPORTING-POOL SEAT ROUND (2026-09-26, the Solo seat): "a
+            // lone Usher counts as both the front and the back performer, and
+            // the fade never touched it" -- rule 12 exempts the front, and
+            // the tips gave both seats without saying which wins. One
+            // sentence says it, and says where hits go with it: a lone
+            // performer is the front, which is hit and does not fade.
+            "Gains and Spends [gold]Fanfare[/gold]. At "
           + "the end of your turn, it loses half its Fanfare above "
-          + FurinaStageLaw.FadeThreshold + ".");
+          + FurinaStageLaw.FadeThreshold + ". A lone performer is the front "
+          + "instead.");
 
     /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
     /// choice a player makes at the start of each turn.</summary>

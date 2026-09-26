@@ -633,9 +633,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             " [gold]Fanfare[/gold] at the start of your turn.",
             # Round four's empty-stage summon is the Fanfare tip's (above).
             # Draft 3: rule 12, the fade, on the back performer.
-            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it only when ",
-            "it stands alone. At ",
+            "Gains and Spends [gold]Fanfare[/gold]. At ",
             "the end of your turn, it loses half its Fanfare above ",
+            # 2026-09-26: which seat wins when one performer holds both.
+            ". A lone performer is the front ",
             "FurinaStageLaw.FadeThreshold",
     ):
         assert clause in tips, clause

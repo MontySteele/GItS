@@ -1457,12 +1457,33 @@ def cost_note(card: dict[str, Any]) -> str:
     if _discounted(card):
         opening = (f"The cost printed on this card is {card['printed_cost']}; "
                    f"it is showing {_text(card['cost'])} here")
-        parts.append(
-            f"{opening}, because this copy is upgraded — that is permanent."
-            if card.get("upgraded") else
-            f"{opening}. This copy is not upgraded, so the cut is this turn's "
-            f"board and not the card: it is what this card costs now, not "
-            f"what it costs.")
+        # 2026-09-26 (the Furina supporting-pool seat round): AN UPGRADE
+        # EXPLAINS ONLY WHAT IT MOVES. Spirited Aria+ under Mummified Hand
+        # read "because this copy is upgraded -- that is permanent", and its
+        # upgrade moves damage, not cost; Bellows' copies read "permanent"
+        # and were upgraded for one combat. So the upgrade is named only
+        # where its own cost cut reaches the number shown, and nothing here
+        # says how long an upgrade lasts: the feed does not say.
+        delta = card.get("upgrade_cost_delta") or 0
+        upgraded_cost = card["printed_cost"] + (delta if isinstance(
+            delta, int) else 0)
+        shown = int(_text(card["cost"]))
+        if card.get("upgraded") and shown >= upgraded_cost:
+            parts.append(f"{opening}, because this copy is upgraded.")
+        elif card.get("upgraded"):
+            parts.append(
+                f"{opening}. "
+                + (f"Its upgrade only brings it to {upgraded_cost}, so the "
+                   "rest of the cut"
+                   if upgraded_cost < card["printed_cost"]
+                   else "Its upgrade does not change its cost, so the cut")
+                + " is this turn's board and not the card: it is what this "
+                "card costs now, not what it costs.")
+        else:
+            parts.append(
+                f"{opening}. This copy is not upgraded, so the cut is this "
+                f"turn's board and not the card: it is what this card costs "
+                f"now, not what it costs.")
     spark = spark_discount_note(card)
     if spark:
         parts.append(spark)

@@ -315,12 +315,19 @@ public sealed class StageSeat
 /// so an arrival names the seat it TOOK (seat and count at that moment), not
 /// the seat the performer stands in when the page is drawn. Filled by
 /// <see cref="FurinaStageLedger.Note"/>.</param>
+/// <param name="Source">2026-09-26 (the supporting-pool seat round): the
+/// power that moved the stage with no card played -- "All the World's a
+/// Stage", "Season Tickets", "Revolving Stage", "Thunderous Applause" --
+/// stamped by <see cref="FurinaStageLedger.Note"/> while
+/// <see cref="FurinaStageLedger.CausedBy"/> is open. Lane 4: "an Usher joined
+/// the stage at turn start with no card named as the cause". Empty
+/// otherwise.</param>
 public readonly record struct StageBeat(
     string Event, StagePerformer Who, int Seat, int Fanfare, int Moved,
     string Reason, string Target = "", string TargetId = "", int Each = -1,
     int Hp = -1, int Struck = -1, string By = "", int SeatKey = -1,
     int Dealt = -1, int TargetHp = -1, int Blocked = -1, int Caught = 0,
-    int Standing = -1);
+    int Standing = -1, string Source = "");
 
 
 /// <summary>
@@ -430,7 +437,38 @@ public sealed class FurinaStageLedger
         // Navia who joined at the back and was pushed to the middle by
         // Wriothesley "joined ... and stands in the middle seat".
         if (beat.Standing < 0) beat = beat with { Standing = _seats.Count };
+        // 2026-09-26: the power behind a move no card made.
+        if (beat.Source.Length == 0 && Cause.Length > 0)
+        {
+            beat = beat with { Source = Cause };
+        }
         _beats.Add(beat);
+    }
+
+    /// <summary>The power whose effect is resolving now, stamped on every
+    /// beat filed meanwhile (<see cref="StageBeat.Source"/>). Empty while a
+    /// card's play or an act resolves: those name themselves.</summary>
+    public string Cause { get; private set; } = "";
+
+    /// <summary>Open a <see cref="Cause"/> for the power named
+    /// <paramref name="title"/>; disposing the scope restores the one it
+    /// replaced.</summary>
+    public System.IDisposable CausedBy(string title) =>
+        new CauseScope(this, title);
+
+    private sealed class CauseScope : System.IDisposable
+    {
+        private readonly FurinaStageLedger _ledger;
+        private readonly string _was;
+
+        internal CauseScope(FurinaStageLedger ledger, string title)
+        {
+            _ledger = ledger;
+            _was = ledger.Cause;
+            ledger.Cause = title ?? "";
+        }
+
+        public void Dispose() => _ledger.Cause = _was;
     }
 
     /// <summary>The turn boundary, and the only one this log has.</summary>
@@ -1788,6 +1826,11 @@ public sealed class FurinaStageLedger
                 // list on the same wire name one creature rather than two
                 // things that happen to agree.
                 ["entity_id"] = seat.Pet?.CombatId.ToString(),
+                // 2026-09-26 (the supporting-pool seat round): back from its
+                // Bow through A Five-Century Act this turn, so it sits out
+                // this turn's acts. Lane 3: "No printed rule explains when a
+                // performer skips its act."
+                ["resting"] = seat.Resting,
             })
             .ToList();
         snapshot["log"] = ledger.Beats
@@ -1835,6 +1878,8 @@ public sealed class FurinaStageLedger
                 ["blocked"] = beat.Blocked,
                 ["caught"] = beat.Caught,
                 ["standing"] = beat.Standing,
+                // 2026-09-26: the power behind a move no card made, or "".
+                ["source"] = beat.Source,
             })
             .ToList();
         // THE GUEST CAST's rule 7: the end of this turn, forecast

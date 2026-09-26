@@ -76,6 +76,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         GRID_INCOMPLETE_NOTE,
                                         DECK_IS_THE_RUNS_OWN,
                                         REACTION_CARRIED_CLAUSE,
+                                        REACTION_FROZEN_THAWED_CLAUSE,
                                         REACTION_CARRIED_ONLY, REACTION_ROW,
                                         REACTION_ROW_NO_SOURCE,
                                         RELIC_ANSWER_ROW,
@@ -1704,6 +1705,10 @@ STAGE_ACTS_HEADING = "- What the acts will deal at the end of your turn:"
 STAGE_ACT_FORECAST_LINE = "  - **{who}**: {n}{element} to {target}"
 STAGE_ACT_FORECAST_BOW = "'s Bow"
 STAGE_ACT_TOTAL_LINE = "  - In all: {n} to {target}"
+#: ... and a run of identical acts (Full House's repeats, or twins) is one
+#: line with its count (2026-09-26).
+STAGE_ACT_TWICE = ", twice"
+STAGE_ACT_TIMES = ", {n} times"
 STAGE_FORECAST_TARGETS = {"all": "ALL", "random": "a random enemy",
                           "random_aura": "a random enemy with an aura"}
 
@@ -1750,6 +1755,43 @@ STAGE_UNNAMED_TARGET = "an enemy"
 #: mod's forecast with Arkhe Alignment and Full House in it.
 STAGE_ACT_BLOCK = {"usher": 3}
 
+#: 2026-09-26 (the supporting-pool seat round, lane 3): "Ushers that had come
+#: back through A Five-Century Act at 1 Fanfare sometimes did not act at end of
+#: turn ... No printed rule explains when a performer skips its act." A
+#: performer back from its Bow this turn sits out this turn's acts (the Stage
+#: brief sec.12), and the stage line now says which one.
+STAGE_RESTING = " (back from its Bow, so it does not act this turn)"
+
+
+def _frozen_clause(row: dict[str, Any], obs: dict[str, Any],
+                   combat: dict[str, Any]) -> str:
+    """What a Frozen receipt needs beside it (2026-09-26), or `""`.
+
+    A carried row whose body stands on this board without Frozen has worn
+    off (`REACTION_FROZEN_THAWED_CLAUSE`). Not on a boss that is not a Minion:
+    a boss is never Frozen (the glossary's `FROZEN_BOSS_CLAUSE`), so there is
+    nothing to wear off. A body this board cannot find gets no clause:
+    silence, never a guess."""
+    if row.get("reaction") != "Frozen":
+        return ""
+    target = str(row.get("target") or "").strip().casefold()
+    bodies = [e for e in (combat.get("enemies") or [])
+              if str(e.get("name") or "").strip().casefold() == target]
+    if not bodies:
+        return ""
+
+    def wears(body: dict[str, Any], name: str) -> bool:
+        return any(str(p.get("name") or "").strip().casefold() == name
+                   for p in (body.get("powers") or [])
+                   if isinstance(p, dict))
+
+    if obs.get("state_type") == "boss" and not any(
+            wears(b, "minion") for b in bodies):
+        return ""
+    if row.get("carried") and not any(wears(b, "frozen") for b in bodies):
+        return REACTION_FROZEN_THAWED_CLAUSE
+    return ""
+
 
 def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     """The stage, in DAMAGE ORDER, on one line, plus the reserve on the next.
@@ -1787,7 +1829,8 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     if after:
         head.append(f"after the acts: Block {you['block'] + after}")
     if lead is not None:
-        head.append(f"front: {lead['name']} {lead['fanfare']}")
+        head.append(f"front: {lead['name']} {lead['fanfare']}"
+                    + (STAGE_RESTING if lead.get("resting") else ""))
     head.append(f"Furina {you['hp']}/{you['max_hp']}")
     out = ["- " + " · ".join(head)]
     # The seats nothing reaches, named the way rule 5 names them -- and with
@@ -1795,6 +1838,7 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     # performer a Raise would then be sent to.
     reserve = [f"{stage_seat_name(i, len(seats))}: {row['name']} "
                f"{row['fanfare']}"
+               + (STAGE_RESTING if row.get("resting") else "")
                for i, row in enumerate(seats) if i > 0]
     if reserve:
         out.append("- " + " · ".join(reserve))
@@ -1859,12 +1903,25 @@ def _render_stage_acts(forecast: dict[str, Any]) -> list[str]:
     if not acts:
         return []
     out = [STAGE_ACTS_HEADING]
+    # 2026-09-26 (the supporting-pool seat round, lane 1): Full House's
+    # repeat printed the same line twice in a row and was read as one act.
+    # A run of identical acts is ONE line with its count.
+    lines: list[str] = []
     for act in acts:
-        out.append(STAGE_ACT_FORECAST_LINE.format(
+        lines.append(STAGE_ACT_FORECAST_LINE.format(
             who=act["name"] + (STAGE_ACT_FORECAST_BOW if act["bow"] else ""),
             n=act["amount"],
             element=(" " + act["element"]) if act["element"] else "",
             target=_stage_target_words(act["target"])))
+    at = 0
+    while at < len(lines):
+        run = 1
+        while at + run < len(lines) and lines[at + run] == lines[at]:
+            run += 1
+        out.append(lines[at] + (STAGE_ACT_TIMES.format(n=run)
+                                if run > 2 else
+                                STAGE_ACT_TWICE if run == 2 else ""))
+        at += run
     if forecast.get("act_total") is not None:
         out.append(STAGE_ACT_TOTAL_LINE.format(
             n=forecast["act_total"],
@@ -1954,6 +2011,12 @@ def _stage_sweep(row: dict[str, Any]) -> str:
 #: The text pass (2026-09-25): "Raise N on X: a → b" became "X gains N
 #: Fanfare: a → b", and "lead" became "front".
 STAGE_RAISE_LINE = "  - **{who}** gains {n} Fanfare: {before} → {after}."
+#: 2026-09-26 (the supporting-pool seat round, lane 4): "an Usher joined the
+#: stage at turn start with no card named as the cause". A move no card made
+#: names the power behind it (the wire's `source`, a card title).
+STAGE_RAISE_FROM_LINE = ("  - **{who}** gains {n} Fanfare from {src}: "
+                         "{before} → {after}.")
+STAGE_SOURCE_CLAUSE = ", from {src}"
 STAGE_REGAIN_LINE = ("  - **{who}** regained {n} Fanfare as the front "
                      "performer: "
                      "{before} → {after}.")
@@ -1963,7 +2026,14 @@ STAGE_HIT_LINE = "  - {dealer} hit **{who}** for {n}: {before} → {after}"
 STAGE_HIT_LEAVES = (", and it leaves the stage: emptied by a hit, so it "
                     "takes a Bow")
 #: A hit whose dealer the mod could not name (no enemy behind it).
-STAGE_HIT_UNNAMED_LINE = "  - **{who}** was hit for {n}: {before} → {after}"
+#: 2026-09-26 (the supporting-pool seat round): "Wither dealt no visible
+#: damage on two turns, then clearly did on a third." A status in hand deals
+#: its end-of-turn damage through her Block and then the front performer
+#: (rule 6 has no dealer test), and this line was the only trace of it --
+#: with no word of where it came from.
+STAGE_HIT_UNNAMED_LINE = ("  - **{who}** took {n} damage no enemy dealt, such "
+                          "as a Burn or Wither in your hand: {before} → "
+                          "{after}")
 #: 2026-09-25 (the afternoon seat round): THE PART OF A HIT THAT REACHED HER.
 #: The log listed hits on performers and never on Furina, and both seats
 #: misjudged how much of an attack got through. The mod files what her HP
@@ -2021,6 +2091,15 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
         for i, seat_row in enumerate(seats)
         if seat_row.get("key") is not None}
     log = stage["log"]
+    # 2026-09-26 (the supporting-pool seat round, lane 1): "one 'Usher acted'
+    # with two Ushers on stage", and Full House's second act "not printed
+    # though its damage landed". Every act WAS a line, but two acts of one
+    # kind printed the same words twice in a row, which a reader (or a filter
+    # that drops repeated lines) takes for one. So a seat's second act says
+    # "acted again", and where twins stand, each act names its seat.
+    twins = {name for name in (r["name"] for r in seats)
+             if sum(1 for r in seats if r["name"] == name) > 1}
+    last_act_key: int | None = None
     folded = -1
     for at, row in enumerate(log):
         if at == folded:
@@ -2031,9 +2110,12 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
         else:
             seat = where_now.get(row["name"], "")
         where = f" the {seat} seat" if seat else ""
+        # 2026-09-26 (lane 4): the power behind a move no card made.
+        source = row.get("source") or ""
         if row["event"] == "raise":
-            out.append(STAGE_RAISE_LINE.format(
-                n=row["moved"], who=row["name"],
+            out.append((STAGE_RAISE_FROM_LINE if source
+                        else STAGE_RAISE_LINE).format(
+                n=row["moved"], who=row["name"], src=source,
                 before=row["fanfare"] - row["moved"], after=row["fanfare"]))
         elif row["event"] == "regain":
             out.append(STAGE_REGAIN_LINE.format(
@@ -2076,16 +2158,23 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             # pushed her later: #680 keyed WHICH performer, and still named
             # the seat it stood in when the page was drawn. The mod now files
             # the count standing at the moment; an older build falls back.
+            cause = STAGE_SOURCE_CLAUSE.format(src=source) if source else ""
             if row.get("standing") is not None and row["seat"] >= 0:
                 took = stage_seat_name(row["seat"], row["standing"])
                 out.append(f"  - {who} joined the stage at {row['fanfare']} "
-                           f"Fanfare, in the {took} seat.")
+                           f"Fanfare, in the {took} seat{cause}.")
                 continue
             out.append(f"  - {who} joined the stage at {row['fanfare']} "
                        "Fanfare"
-                       + (f", and stands in{where}." if where else "."))
+                       + (f", and stands in{where}" if where else "")
+                       + f"{cause}.")
         elif row["event"] == "act":
-            out.append(f"  - {who} acted: "
+            key = row.get("key")
+            again = key is not None and key == last_act_key
+            last_act_key = key
+            label = (f"{who} ({seat} seat)"
+                     if not again and seat and row["name"] in twins else who)
+            out.append(f"  - {label} {'acted again' if again else 'acted'}: "
                        f"{_stage_effect(row, STAGE_ACT_EFFECTS)}.")
         elif row["event"] == "bow":
             out.append(f"  - {who} took a Bow: "
@@ -2093,9 +2182,26 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
         elif row["event"] == "leave":
             out.append(f"  - {who} left the stage: {row['why']}.")
         elif row["event"] == "rotate":
-            out.append(f"  - {who} moved from the front seat to the back, "
-                       "bar and all. Nobody left and nobody took a "
-                       "Bow.")
+            # 2026-09-26 (the supporting-pool seat round, lane 3): Revolving
+            # Stage's log said "Usher moved from the front seat to the back"
+            # while the stage line showed him in front. The mod files one
+            # `rotate` beat for two moves -- Scene Change (front to back,
+            # filed at the back seat) and Step Forward / Revolving Stage
+            # (back to front, filed at seat 0) -- so the direction is read off
+            # the seat the beat names.
+            by = f" ({source})" if source else ""
+            standing = row.get("standing")
+            if row["seat"] == 0 and standing == 1:
+                out.append(f"  - {who} is the only performer, so nothing "
+                           f"moved{by}.")
+            elif row["seat"] == 0:
+                out.append(f"  - {who} moved from the back seat to the "
+                           f"front{by}, bar and all. Nobody left and nobody "
+                           "took a Bow.")
+            else:
+                out.append(f"  - {who} moved from the front seat to the "
+                           f"back{by}, bar and all. Nobody left and nobody "
+                           "took a Bow.")
         elif row["event"] == "reorder":
             # THE SUPPORTING POOL (2026-09-26): Plot Twist and Lyney's swap
             # move several performers at once; the stage line shows where.
@@ -2470,6 +2576,7 @@ def render(obs: dict[str, Any]) -> str:
                         else REACTION_ROW_NO_SOURCE).format(**row)
                 if row.get("carried"):
                     line = line.rstrip(".") + "." + REACTION_CARRIED_CLAUSE
+                line += _frozen_clause(row, obs, c)
                 out.append(line)
             if not rows:
                 out.append(NO_REACTION_THIS_TURN)

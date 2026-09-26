@@ -793,6 +793,23 @@ public static partial class FurinaStage
         return bar;
     }
 
+    /// <summary>
+    /// The start of her turn ENDS ANY REST LEFT FROM THE ENEMIES' TURN (the
+    /// supporting-pool seat round, 2026-09-26). A Five-Century Act's returnee
+    /// "re-enters without acting THAT turn" -- the turn it came back in. One
+    /// that Bowed to a hit on the enemies' turn came back in THEIR turn, so it
+    /// performs at the end of hers; its rest used to last until her sweep had
+    /// passed it by, and an Usher back from a hit sat out her whole next turn
+    /// (lane 3: "sometimes did not act ... and other times did"). Called first
+    /// at her turn start, so a return during her own turn still rests. Sim
+    /// twin: <c>furina_stage.turn_start_rest</c>.
+    /// </summary>
+    public static void BeginTurn(Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        FurinaStageLedger.For(owner!).EndRest();
+    }
+
     /// <summary>Rule 4's move. The TURN TEST is inside, on the seat's own
     /// <c>PlayerCombatState.TurnNumber</c> -- per player, so a co-op partner's
     /// turn cannot pay hers, and an extra first turn cannot pay twice.
@@ -1159,8 +1176,13 @@ public static partial class FurinaStage
                 await CardPileCmd.Draw(choiceContext, 1m, player);
             }
             // Round four: on the empty stage a bow can leave, this Raise
-            // summons a random performer holding the amount.
-            await Raise(owner, (int)applause.Amount);
+            // summons a random performer holding the amount. 2026-09-26: the
+            // log names the card behind it.
+            using (FurinaStageLedger.For(owner)
+                       .CausedBy(ThunderousApplauseTitle))
+            {
+                await Raise(owner, (int)applause.Amount);
+            }
         }
         if (mayReturn && owner.Powers.OfType<FiveCenturyActPower>().Any()
             && FurinaStageLedger.For(owner).ReturnToBack(who))

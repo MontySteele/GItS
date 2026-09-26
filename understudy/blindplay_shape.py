@@ -303,6 +303,59 @@ UNDRIVEN_EXITS: dict[str, dict[str, Any]] = {
     },
 }
 
+# ------------- 2026-09-26: the Crystal Sphere's divinations, one verb each --
+#
+# THE STALL (the Furina supporting-pool seat round, lanes 1 and 2). After
+# paying for *Uncover Future* the page printed `TOOL-BLOCKED: crystal_sphere`
+# and one verb, `leave`; `leave` posted `crystal_sphere_proceed` and the game
+# answered "Crystal Sphere proceed button is not enabled", five times in a
+# row, because the minigame still owed its divinations (`can_proceed: False`,
+# "3 Divinations remain"). The game lets nobody leave before they are spent.
+#
+# So while divinations remain the page offers `reveal`: it spends one on the
+# FIRST hidden cell in the feed's own order (top row first) with the tool the
+# game has selected -- selecting one first where none is, which is the whole
+# of that `reveal`. The cell is chosen by position alone: nothing about what a
+# cell hides crosses to the page, so the seat is choosing to spend, not
+# choosing what to find. `leave` is offered once the game lets the run go on.
+SPHERE_REVEAL = "reveal"
+SPHERE_REVEAL_HOW = ("the sphere still owes its divinations ({left}), and "
+                     "the game will not let the run go on until they are "
+                     "spent. Say `reveal` to spend one on the next hidden "
+                     "cell; `leave` is offered once they are gone")
+
+
+def sphere_owes(blob: dict[str, Any]) -> bool:
+    """Does the Crystal Sphere still refuse to let the run go on, with a
+    hidden cell left to spend a divination on? False on a feed that sends
+    no `can_proceed` (an older bridge), which keeps `leave` as it was."""
+    if not isinstance(blob, dict) or "can_proceed" not in blob:
+        return False
+    return (blob.get("can_proceed") is not True
+            and bool(blob.get("clickable_cells")))
+
+
+def sphere_reveal_action(blob: dict[str, Any]) -> dict[str, Any] | None:
+    """The one post `reveal` makes, or None where there is nothing to reveal:
+    select a tool where none is selected (the big one where the game offers
+    it), else click the first hidden cell with the tool selected."""
+    if not sphere_owes(blob):
+        return None
+    tool = str(blob.get("tool") or "none")
+    if tool not in ("big", "small"):
+        pick = ("big" if blob.get("can_use_big_tool")
+                else "small" if blob.get("can_use_small_tool") else "")
+        if pick:
+            return {"action": "crystal_sphere_set_tool", "tool": pick}
+    cell = next((c for c in blob.get("clickable_cells") or []
+                 if isinstance(c, dict)
+                 and c.get("x") is not None and c.get("y") is not None),
+                None)
+    if cell is None:
+        return None
+    return {"action": "crystal_sphere_click_cell",
+            "x": int(cell["x"]), "y": int(cell["y"])}
+
 # ------------------- EB-396: and the warning BEFORE the choice is taken -----
 #
 # The exit above is the repair; this is the half that stops the seat needing
@@ -322,9 +375,11 @@ UNDRIVEN_EXITS: dict[str, dict[str, Any]] = {
 UNDRIVEN_AFTER_EVENT: dict[str, str] = {
     "CRYSTAL_SPHERE": "both of this event's options open a minigame this tool "
                       "cannot play -- a grid of cells clicked one at a time. "
-                      "You will be able to say `leave` on that screen and "
-                      "carry on with the run, but what you spend here is "
-                      "spent and the divinations are forfeit",
+                      "On that screen you can say `reveal` to spend each "
+                      "divination on the next hidden cell, and then `leave` "
+                      "to carry on with the run; what you spend here is "
+                      "spent, and the cells are not chosen for what they "
+                      "hide",
 }
 
 # How long the driver rides out a TRANSITION before calling it a screen.
