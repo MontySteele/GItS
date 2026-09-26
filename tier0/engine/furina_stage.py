@@ -92,7 +92,10 @@ ACT_CRABALETTA_DAMAGE = 5    # to a random enemy.
 # acts' numbers are these, mirrored by `FurinaStageLaw`. C# twin:
 # `Powers/Prototype/FurinaStageGuests.cs`.
 GUESTS = ("neuvillette", "clorinde", "navia", "chevreuse", "wriothesley",
-          "sigewinne", "charlotte", "lynette")
+          "sigewinne", "charlotte", "lynette",
+          # THE SUPPORTING POOL (2026-09-26): two more guests, each with a job
+          # the eight lack. Lyney rotates the stage; Escoffier feeds the cast.
+          "lyney", "escoffier")
 ACT_NEUVILLETTE_PRICE = 3     # of his own Fanfare ...
 ACT_NEUVILLETTE_DAMAGE = 8    # ... for Hydro damage to ALL enemies.
 ACT_CLORINDE_TAX = 1          # from each other performer ...
@@ -105,17 +108,31 @@ ACT_CHARLOTTE_GIFT = 1        # to each other performer.
 ACT_LYNETTE_DAMAGE = 3        # Anemo damage to a random enemy, one with an
 #                               aura if any (2026-09-25 night: the act always
 #                               lands, and Swirls where it finds an aura).
+# THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
+# 2026-09-26.md). Lyney pays 2 of his own for 6 Pyro damage to a random enemy,
+# then swaps the front and back performers; Escoffier pays 3 of her own to give
+# each other performer 2 and deal 3 Cryo damage to ALL enemies.
+ACT_LYNEY_PRICE = 2
+ACT_LYNEY_DAMAGE = 6
+ACT_ESCOFFIER_PRICE = 3
+ACT_ESCOFFIER_GIFT = 2
+ACT_ESCOFFIER_DAMAGE = 3
 
 #: The elements the guests' damage acts carry (the Guest Cast's LAW
 #: amendment: a guest on Furina's stage may carry its element).
 GUEST_ELEMENTS = {"neuvillette": "hydro", "clorinde": "electro",
-                  "navia": "geo", "wriothesley": "cryo", "lynette": "anemo"}
+                  "navia": "geo", "wriothesley": "cryo", "lynette": "anemo",
+                  "lyney": "pyro", "escoffier": "cryo"}
 
 # Rule 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of Furina's
 # turn, after the acts, each performer BEHIND THE FRONT loses half of its
 # Fanfare above this, rounded down (`fade_loss`). The front never fades. The
 # threshold is the knob seat rounds tune.
 FADE_THRESHOLD = 5
+#: THE SUPPORTING POOL (2026-09-26), *Eternal Applause*: "Your performers fade
+#: only above 10 Fanfare, not 5." A Rare that bends rule 12 rather than
+#: removing it; copies do not stack further.
+ETERNAL_FADE_THRESHOLD = 10
 
 #: Where a Raise lands. Rule 5: the BACK-MOST performer, which is the lead when
 #: it is alone. Written out as words so a row and a face say the same thing.
@@ -134,6 +151,19 @@ ARKHE_ALIGNMENT = "fs_arkhe_alignment"
 #: Arkhe Alignment's Pneuma half: what the lead regains. C# twin:
 #: `ArkheAlignmentPower.PneumaLeadRegain`.
 PNEUMA_LEAD_REGAIN = 2
+
+# THE SUPPORTING POOL's powers (2026-09-26). Their C# twins are in
+# `Powers/Prototype/FurinaStagePowers.cs`; each is a switch the rule it bends
+# asks about.
+REVOLVING_STAGE = "fs_revolving_stage"      # turn start: back to the front
+SEASON_TICKETS = "fs_season_tickets"        # turn start: the back gains N
+STAR_BILLING = "fs_star_billing"            # a Guest Star joins: draw N
+ECHOING_HALL = "fs_echoing_hall"            # the fade's loss goes to the front
+ETERNAL_APPLAUSE = "fs_eternal_applause"    # the fade starts above 10
+TIDE_OF_APPLAUSE = "fs_tide_of_applause"    # a reaction: the back gains N
+REGINA = "fs_regina_of_all_waters"          # turn start: Hydro on ALL
+SOLILOQUY = "fs_soliloquy"                  # empty stage: Attacks +N a hit
+ONE_WOMAN_SHOW = "fs_one_woman_show"        # empty stage at turn start: +E, +1
 
 
 # ----------------------------------------------------------------------
@@ -240,7 +270,55 @@ POOL_SUBS: dict[str, str] = {
     "standing_room_only": "proto_fs_guest_star_sigewinne",
     "limelight": "proto_fs_guest_star_charlotte",
     "take_it_from_the_top": "proto_fs_guest_star_lynette",
+    # --- THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-
+    # pool-2026-09-26.md): 28 of its 29 (Sold Out is built beside it). Each
+    # replaces a same-rarity shipped row the game's EB-736 filter already
+    # drops. Commons (five; the sixth, Solo Verse, is `POOL_ADDS`'s). ---
+    "shared_billing": "proto_fs_plot_twist",
+    "ebb_and_flow": "proto_fs_stage_whisper",
+    "dinner_service": "proto_fs_cheered_on",
+    "macaron_break": "proto_fs_spirited_aria",
+    "casting_call": "proto_fs_bubble_aria",
+    # --- Uncommons (thirteen) ---
+    "grand_salon": "proto_fs_revolving_stage",
+    "curtain_cue": "proto_fs_oratrices_verdict",
+    "top_billing": "proto_fs_season_tickets",
+    "supporting_cast": "proto_fs_star_billing",
+    "directors_cut": "proto_fs_held_applause",
+    "pit_orchestra": "proto_fs_echoing_hall",
+    "tempo_change": "proto_fs_intermission",
+    "poised_riposte": "proto_fs_counterclaim",
+    "florid_cadenza": "proto_fs_da_capo",
+    "waters_embrace": "proto_fs_groundswell",
+    "leading_role": "proto_fs_tide_of_applause",
+    "hearts_swelling": "proto_fs_soliloquy",
+    "curtain_up": "proto_fs_dual_nature",
+    # --- Rares (nine) ---
+    "rain_of_roses": "proto_fs_guest_star_lyney",
+    "the_final_verdict": "proto_fs_guest_star_escoffier",
+    "rapturous_applause": "proto_fs_eternal_applause",
+    "showstopper": "proto_fs_bring_the_house_down",
+    "flood_of_emotion": "proto_fs_grand_finale",
+    "grand_gala": "proto_fs_gala_premiere",
+    "high_tide": "proto_fs_grand_deluge",
+    "the_sea_is_my_stage": "proto_fs_regina_of_all_waters",
+    "star_of_the_show": "proto_fs_one_woman_show",
 }
+
+
+# ----------------------------------------------------------------------
+# THE POOL'S ADDITIONS (2026-09-26). Rows the arm OFFERS WITHOUT REPLACING a
+# shipped row, read by `loader.pool_additions` under `FURINA_STAGE` and
+# nowhere else. The supporting pool has six Commons and her sheet has only
+# five Commons the EB-736 filter drops that no earlier batch replaced, so the
+# sixth is appended at its own rarity rather than displacing a shipped Common
+# the arm still offers. The mod's offer is an append anyway
+# (`FurinaStageRoster.SwapOfferedRows`), so this is the sim catching up with
+# it, not a new rule.
+# ----------------------------------------------------------------------
+POOL_ADDS: tuple[str, ...] = (
+    "proto_fs_solo_verse",
+)
 
 
 # ----------------------------------------------------------------------
@@ -430,7 +508,7 @@ def open_combat(state) -> None:
     state.emit("stage_open", member=OPENING_MEMBER, fanfare=OPENING_FANFARE)
 
 
-def summon(state, member: str) -> None:
+def summon(state, member: str, fanfare: int = SUMMON_FANFARE) -> None:
     """Rule 3. A summon fills the BACK-MOST EMPTY seat with that performer at
     1. On a FULL stage it rotates the cast: the front performer leaves without
     a bow, the other two step forward, and the newcomer takes the back seat
@@ -458,9 +536,11 @@ def summon(state, member: str) -> None:
         raise ValueError(f"unknown performer {member!r}")
     seats = _seats(p)
     if len(seats) < SEATS:
-        book_gain(state, GAIN_SUMMON, SUMMON_FANFARE)
-        seats.append([member, SUMMON_FANFARE])
-        state.emit("stage_summon", member=member, fanfare=SUMMON_FANFARE,
+        # `fanfare` is the arrival: rule 3's 1, or a face's own number (THE
+        # SUPPORTING POOL's Gala Premiere summons the trio at 3 each).
+        book_gain(state, GAIN_SUMMON, int(fanfare))
+        seats.append([member, int(fanfare)])
+        state.emit("stage_summon", member=member, fanfare=int(fanfare),
                    seats=len(seats), rotated=False)
     else:
         leaver, carried = seats.pop(0)
@@ -604,16 +684,25 @@ def _leave(state, index: int, *, bowed: bool, reason: str,
     return exit_
 
 
-def _exit(player, member: str, index: int, held: int) -> dict:
+def _exit(player, member: str, index: int, held: int,
+          stayer=None) -> dict:
     """What a Bow reads, taken as the performer leaves (the Guest Cast,
     2026-09-25): the Fanfare it still HELD (Navia; 0 at 0 Fanfare and for a
     cash-out), the seat it stood in (Sigewinne gives to the one behind), and
     what it LOST since its last act (Wriothesley, the hit that took him down
     included). A guest's loss count leaves the stage with it. C# twin:
     `StageExit`."""
-    lost = int(player.stage_lost.pop(member, 0)) if member in GUESTS else 0
+    if stayer is not None:
+        # THE SUPPORTING POOL's Grand Finale (2026-09-26): a Bow WITHOUT
+        # LEAVING. The performer keeps its seat, so its loss count stays with
+        # it (the Bow resets it, as every act does) and the Bow reads the seat
+        # it still stands in (`stayer`, the live pair).
+        lost = int(player.stage_lost.get(member, 0)) if member in GUESTS else 0
+    else:
+        lost = (int(player.stage_lost.pop(member, 0)) if member in GUESTS
+                else 0)
     return {"member": member, "held": int(held), "former": int(index),
-            "lost": lost}
+            "lost": lost, "stayer": stayer}
 
 
 def _lose(player, member: str, amount: int) -> None:
@@ -706,6 +795,9 @@ def _bow(state, member: str, exit_: dict | None = None) -> None:
     `FurinaStage.Bow`.
     """
     state.emit("stage_bow", member=member)
+    # THE SUPPORTING POOL's Da Capo (2026-09-26): every Bow this combat, all
+    # causes, the Grand Finale's included.
+    state.player.stage_bows = int(state.player.stage_bows) + 1
     perform(state, member, bow=True, exit_=exit_)
 
 
@@ -1068,6 +1160,11 @@ def absorb(state, incoming: int) -> int:
     member, bar = pair
     two_or_more = count(p) >= 2
     eaten = min(int(incoming), bar)
+    if eaten > 0:
+        # THE SUPPORTING POOL's Counterclaim (2026-09-26): an enemy's hit
+        # reached the front performer's bar since the end of her last turn --
+        # A Rapt Audience's notion of a hit. Cleared when her turn ends.
+        p.stage_front_hit = True
     book_loss(state, LOSS_HIT, eaten)
     _lose(p, member, eaten)
     pair[1] = bar - eaten
@@ -1193,7 +1290,7 @@ def perform(state, member: str, *, bow: bool = False, pair=None,
                                                  else "furina_stage/act"))
     elif member == "crabaletta":
         if state.living_enemies:
-            enemy = state.rng.choice(state.living_enemies)
+            enemy = _act_target(state, state.living_enemies)
             effects.deal_damage_to_enemy(state, enemy,
                                          ACT_CRABALETTA_DAMAGE * dmg,
                                          element=None,
@@ -1234,6 +1331,9 @@ def end_of_turn_acts(state) -> None:
     p = state.player
     if not active(p):
         return
+    # THE SUPPORTING POOL's Counterclaim reads hits "since your last turn":
+    # the window opens here, at the end of her turn.
+    p.stage_front_hit = False
     pairs = list(stage(p))
     company = [m for m, _f in pairs]
     if company:
@@ -1256,15 +1356,26 @@ def end_of_turn_acts(state) -> None:
     p.stage_resting.clear()
     p.stage_act_damage_mult = 1
     p.stage_act_block_mult = 1
+    # Oratrice's Verdict lasts "this turn": the sweep was its last use.
+    p.stage_verdict = None
     fade(state)
 
 
-def fade_loss(fanfare: int) -> int:
+def fade_loss(fanfare: int, threshold: int = FADE_THRESHOLD) -> int:
     """Rule 12's arithmetic: half of the Fanfare above `FADE_THRESHOLD`,
     rounded down. 5 -> 0, 6 -> 0, 7 -> 1, 9 -> 2, 15 -> 5, 25 -> 10. ONE
     function, so the threshold (and the halving) is tuned in one place. C#
-    twin: `FurinaStageLaw.FadeLoss`."""
-    return max(0, int(fanfare) - FADE_THRESHOLD) // 2
+    twin: `FurinaStageLaw.FadeLoss`. `threshold` is *Eternal Applause*'s
+    (2026-09-26): with it in play the fade starts above 10."""
+    return max(0, int(fanfare) - int(threshold)) // 2
+
+
+def fade_threshold(player) -> int:
+    """Rule 12's line this turn: 5, or 10 with *Eternal Applause* in play
+    (any number of copies). C# twin: `FurinaStage.FadeThresholdFor`."""
+    if player.powers.get(ETERNAL_APPLAUSE, 0):
+        return ETERNAL_FADE_THRESHOLD
+    return FADE_THRESHOLD
 
 
 def fade(state) -> None:
@@ -1279,15 +1390,30 @@ def fade(state) -> None:
     p = state.player
     if not active(p):
         return
-    for pair in stage(p)[1:]:
-        loss = fade_loss(pair[1])
+    # THE SUPPORTING POOL (2026-09-26). *Held Applause*: no fade at the end
+    # of this turn, taken once. *Eternal Applause*: the line is 10. *Echoing
+    # Hall*: what the fade takes goes to the front performer (a move, so a
+    # second copy moves nothing more).
+    held = bool(p.stage_hold_fade)
+    p.stage_hold_fade = False
+    threshold = fade_threshold(p)
+    echoed = 0
+    for pair in ([] if held else stage(p)[1:]):
+        loss = fade_loss(pair[1], threshold)
         if loss <= 0:
             continue
         before = pair[1]
         book_loss(state, LOSS_FADED, loss)
         pair[1] = before - loss
+        echoed += loss
         state.emit("stage_fade", member=pair[0], amount=loss,
                    before=before, fanfare=pair[1])
+    if echoed and p.powers.get(ECHOING_HALL, 0) and stage(p):
+        front = stage(p)[0]
+        book_gain(state, GAIN_POWER, echoed)
+        front[1] += echoed
+        state.emit("stage_raise", member=front[0], amount=echoed,
+                   seat=SEAT_LEAD, fanfare=front[1], by="echoing_hall")
     # THE LEDGER'S SAMPLE (a): the back performer's bar at the end of her
     # turn, after the fade, and 0 on an empty stage -- a distribution that
     # omits its zeros is not a distribution.
@@ -1384,6 +1510,7 @@ def turn_start_powers(state) -> None:
         p.energy += int(p.stage_energy_next)
         state.emit("stage_energy", amount=int(p.stage_energy_next))
         p.stage_energy_next = 0
+    supporting_pool_turn_start(state)
     copies = int(p.powers.get(ARKHE_ALIGNMENT, 0))
     if copies <= 0:
         return
@@ -1450,12 +1577,26 @@ def guest_star(state, member: str, amount: int, front: bool = False) -> None:
     unchanged.
 
     It does not act on arrival (`EB-738`). C# twin: `FurinaStage.GuestStar`.
+
+    THE SUPPORTING POOL's *Star Billing* (2026-09-26): "Whenever a Guest Star
+    joins the stage, draw 2 cards" -- after the arrival, whichever way it
+    arrived (a second copy's recast included).
     """
     p = state.player
     if not active(p):
         return
     if member not in GUESTS:
         raise ValueError(f"unknown guest {member!r}")
+    _guest_joins(state, member, amount, front)
+    billing = int(p.powers.get(STAR_BILLING, 0))
+    if billing > 0 and not state.over:
+        state.draw(billing)
+        state.emit("stage_star_billing", member=member, drew=billing)
+
+
+def _guest_joins(state, member: str, amount: int, front: bool) -> None:
+    """`guest_star`'s arrival, whichever of its three ways."""
+    p = state.player
     seats = _seats(p)
     for index, pair in enumerate(seats):
         if pair[0] != member:
@@ -1534,6 +1675,26 @@ def guest_fanfare(state, member: str, pair, exit_, owed: list) -> bool:
     p = state.player
     seats = _seats(p)
     bow = pair is None
+    # THE SUPPORTING POOL's Grand Finale (2026-09-26): a Bow WITHOUT LEAVING
+    # is free like any Bow, but the performer is still in its seat, so a gift
+    # that goes to "each other performer" or "the one behind her" must not
+    # find her. `self_` is that seat, or the acting one.
+    self_ = pair if pair is not None else (exit_ or {}).get("stayer")
+    if member in ("lyney", "escoffier"):
+        # Lyney pays 2 and Escoffier 3, each of their own (Neuvillette's
+        # shape); a Bow is free. Escoffier's gift is the Fanfare half of her
+        # act, and lands in full on a Bow.
+        price = (ACT_LYNEY_PRICE if member == "lyney"
+                 else ACT_ESCOFFIER_PRICE)
+        if not bow:
+            if pair[1] < price:
+                _unpaid(state, member)
+                return False
+            _pay(state, pair, price, member, owed)
+        if member == "escoffier":
+            for other in [s for s in _seats(p) if s is not self_]:
+                _gain(state, other, ACT_ESCOFFIER_GIFT, member)
+        return True
     if member == "neuvillette":
         if bow:
             return True
@@ -1562,6 +1723,14 @@ def guest_fanfare(state, member: str, pair, exit_, owed: list) -> bool:
         _pay(state, bank, ACT_CHEVREUSE_PRICE, member, owed)
         return True
     if member == "sigewinne":
+        if bow and self_ is not None:
+            # The Grand Finale's Bow in place: the gift goes where her act
+            # would send it, free.
+            at = next((i for i, s in enumerate(seats) if s is self_), -1)
+            if at >= 0 and len(seats) > 1:
+                to = seats[at + 1] if at + 1 < len(seats) else seats[0]
+                _gain(state, to, ACT_SIGEWINNE_GIFT, member)
+            return True
         if bow:
             index = (exit_ or {}).get("former", -1)
             if seats and index >= 0:
@@ -1578,7 +1747,7 @@ def guest_fanfare(state, member: str, pair, exit_, owed: list) -> bool:
         _gain(state, to, gift, member)
         return True
     if member == "charlotte":
-        for other in [s for s in seats if s is not pair]:
+        for other in [s for s in seats if s is not self_]:
             _gain(state, other, ACT_CHARLOTTE_GIFT, member)
         return True
     return True
@@ -1604,9 +1773,19 @@ def _guest_act(state, member: str, *, pair, exit_) -> None:
                                          ACT_NEUVILLETTE_DAMAGE * dmg,
                                          element=element, powered=False,
                                          source=source)
-    elif member in ("clorinde", "navia", "wriothesley"):
+    elif member == "escoffier":
+        # THE SUPPORTING POOL (2026-09-26): her gift was the Fanfare half;
+        # the board half is 3 Cryo damage to ALL enemies.
+        for enemy in list(state.living_enemies):
+            effects.deal_damage_to_enemy(state, enemy,
+                                         ACT_ESCOFFIER_DAMAGE * dmg,
+                                         element=element, powered=False,
+                                         source=source)
+    elif member in ("clorinde", "navia", "wriothesley", "lyney"):
         if member == "clorinde":
             amount = ACT_CLORINDE_DAMAGE
+        elif member == "lyney":
+            amount = ACT_LYNEY_DAMAGE
         elif member == "navia":
             amount = pair[1] if pair is not None else (exit_ or {}).get("held", 0)
         else:
@@ -1614,7 +1793,7 @@ def _guest_act(state, member: str, *, pair, exit_) -> None:
                     else int((exit_ or {}).get("lost", 0)))
             amount = ACT_WRIOTHESLEY_RATE * lost
         if amount > 0 and state.living_enemies:
-            enemy = state.rng.choice(state.living_enemies)
+            enemy = _act_target(state, state.living_enemies)
             effects.deal_damage_to_enemy(state, enemy, amount * dmg,
                                          element=element, powered=False,
                                          source=source)
@@ -1628,10 +1807,14 @@ def _guest_act(state, member: str, *, pair, exit_) -> None:
         wearing = [e for e in state.living_enemies if e.aura]
         pool = wearing or list(state.living_enemies)
         if pool:
-            effects.deal_damage_to_enemy(state, state.rng.choice(pool),
+            effects.deal_damage_to_enemy(state, _act_target(state, pool),
                                          ACT_LYNETTE_DAMAGE * dmg,
                                          element=element, powered=False,
                                          source=source)
+    if member == "lyney":
+        # "... then swap your front and back performers" -- after the hit,
+        # whichever seat he stands in (a Bow: on the stage he left).
+        swap_ends(state)
     # Rule 6: every act resets the reading, so a repeat reads 0.
     if pair is not None:
         p.stage_lost[member] = 0
@@ -1688,3 +1871,235 @@ def forecast(state) -> dict:
             "front_takes": int(front),
             "reaches_furina": max(0, hp - int(ghost.player.hp)),
             "acts_dealt": int(acts_dealt), "takers": takers}
+
+
+# ----------------------------------------------------------------------
+# THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
+# 2026-09-26.md). C# twin: `FurinaStageSupporting.cs` and the ledger's
+# moves. Every verb is inert with the flag off.
+# ----------------------------------------------------------------------
+def _act_target(state, pool):
+    """Who an act that "hits a random enemy" hits: *Oratrice's Verdict*'s
+    enemy while it stands (this turn), else a random one of `pool`. C#
+    twin: `FurinaStage.ActTarget`."""
+    verdict = getattr(state.player, "stage_verdict", None)
+    if (verdict is not None and getattr(verdict, "alive", False)
+            and verdict in state.living_enemies):
+        return verdict
+    return state.rng.choice(pool)
+
+
+def swap_ends(state) -> None:
+    """Lyney's act: the front and back performers change places. With one
+    performer nothing moves. C# twin: `FurinaStageLedger.SwapEnds`."""
+    p = state.player
+    seats = _seats(p)
+    if len(seats) < 2:
+        return
+    seats[0], seats[-1] = seats[-1], seats[0]
+    state.emit("stage_reorder", company=[m for m, _f in seats], by="swap")
+
+
+def reverse(state) -> None:
+    """*Plot Twist*: "Reverse the order of your performers." Three
+    performers: the front and back change places; two: they swap. A pure
+    reorder -- nothing Bows, nothing is lost. C# twin:
+    `FurinaStageLedger.Reverse`."""
+    p = state.player
+    if not active(p):
+        return
+    seats = _seats(p)
+    if len(seats) < 2:
+        state.emit("stage_reorder_whiffed")
+        return
+    seats.reverse()
+    state.emit("stage_reorder", company=[m for m, _f in seats], by="reverse")
+
+
+def whisper(state, amount: int) -> int:
+    """*Stage Whisper*: "Move up to 3 of your back performer's Fanfare to your
+    front performer. It keeps at least 1." min(amount, back - 1), so it never
+    empties the back and never Bows it (a 0-cost Bow would loop with
+    Thunderous Applause and A Five-Century Act). With one performer it does
+    nothing. A move between bars books nothing. Returns what moved. C# twin:
+    `FurinaStageLedger.Whisper`."""
+    p = state.player
+    if not active(p):
+        return 0
+    seats = _seats(p)
+    if len(seats) < 2:
+        state.emit("stage_whisper_whiffed")
+        return 0
+    back_pair, front = seats[-1], seats[0]
+    moved = max(0, min(int(amount), int(back_pair[1]) - 1))
+    if moved <= 0:
+        state.emit("stage_whisper_whiffed")
+        return 0
+    back_pair[1] -= moved
+    front[1] += moved
+    state.emit("stage_whisper", member=back_pair[0], to=front[0],
+               amount=moved, fanfare=back_pair[1], front=front[1])
+    return moved
+
+
+def hold_fade(state) -> None:
+    """*Held Applause*: "At the end of this turn, your performers do not
+    fade." A flag `fade` takes once."""
+    p = state.player
+    if not active(p):
+        return
+    p.stage_hold_fade = True
+    state.emit("stage_hold_fade")
+
+
+def intermission(state, every: int) -> int:
+    """*Intermission*: "Your back performer Bows and leaves. Draw 1 card for
+    every 3 Fanfare it had." A real Bow (its act, the Bow readers, A
+    Five-Century Act's return) and a CASH-OUT like Final Bow's, so the Bow
+    holds nothing; then draw floor(F / every), F its Fanfare before the Bow.
+    Returns F. C# twin: `FurinaStage.Intermission`."""
+    p = state.player
+    if not active(p):
+        return 0
+    pair = back(p)
+    if pair is None:
+        state.emit("stage_intermission_whiffed")
+        return 0
+    bar = int(pair[1])
+    _leave(state, len(_seats(p)) - 1, bowed=True, reason="intermission")
+    cards = bar // max(1, int(every))
+    if cards > 0 and not state.over:
+        state.draw(cards)
+    state.emit("stage_intermission", fanfare=bar, drew=cards)
+    return bar
+
+
+def spend_all_of_front(state) -> int:
+    """*Bring the House Down*: spend ALL of the FRONT performer's Fanfare --
+    the first card that cashes the shield. The emptied front Bows (rule 7).
+    0 on an empty stage. C# twin: `FurinaStage.SpendAllOfFront`."""
+    p = state.player
+    if not active(p):
+        return 0
+    pair = lead(p)
+    if pair is None:
+        state.emit("stage_spend_whiffed", amount="all_of_front")
+        return 0
+    member, bar = pair
+    book_paid(state, bar)
+    pair[1] = 0
+    state.emit("stage_spend", member=member, asked=bar, paid=bar,
+               bar_at_spend=bar, fanfare=0, turn=state.turn,
+               enemies_alive=len(state.living_enemies), seat=SEAT_LEAD)
+    _leave(state, 0, bowed=True, reason="spend")
+    return bar
+
+
+def grand_finale(state) -> None:
+    """*Grand Finale*: "All your performers Bow without leaving." Front
+    first, each Bow a real one -- its act (free), then every Bow reader
+    (Thunderous Applause) -- but the performer keeps its seat and its
+    Fanfare, so A Five-Century Act has nobody to return. Every Bow counts
+    for Da Capo, and resets the performer's loss count like any act. C#
+    twin: `FurinaStage.GrandFinale`."""
+    p = state.player
+    if not active(p):
+        return
+    for pair in list(stage(p)):
+        if state.over or not p.alive:
+            break
+        if not _holds(p, pair):
+            continue
+        index = next(i for i, s in enumerate(_seats(p)) if s is pair)
+        exit_ = _exit(p, pair[0], index, held=pair[1], stayer=pair)
+        _bow(state, pair[0], exit_)
+        _after_bow(state, pair[0], may_return=False)
+        if pair[0] in GUESTS:
+            p.stage_lost[pair[0]] = 0
+
+
+def set_verdict(state) -> None:
+    """*Oratrice's Verdict*: "This turn, your performers' acts that hit a
+    random enemy hit this enemy instead." The card's own target, until the
+    end-of-turn sweep has passed (`end_of_turn_acts` clears it). C# twin:
+    `FurinaStageLedger.VerdictTarget`."""
+    p = state.player
+    if not active(p):
+        return
+    p.stage_verdict = state.card_aim
+    state.emit("stage_verdict",
+               target=getattr(state.card_aim, "name", None))
+
+
+def dual_nature(state) -> None:
+    """*Dual Nature*: "Choose Ousia or Pneuma for this turn." Arkhe
+    Alignment's choice, once, for this turn only: the chosen half's multiple
+    becomes at least x2 (it does not stack on an Arkhe Alignment that chose
+    the same half), and Pneuma's front performer regains 2. The pilot's pick
+    is Arkhe Alignment's (`arkhe_choice`). C# twin:
+    `ArkheAlignmentPower.ChooseForTurn`."""
+    p = state.player
+    if not active(p):
+        return
+    choice = arkhe_choice(state)
+    if choice == "pneuma":
+        p.stage_act_block_mult = max(int(p.stage_act_block_mult), 2)
+        raise_fanfare(state, PNEUMA_LEAD_REGAIN, SEAT_LEAD,
+                      summon_on_empty=False, source=GAIN_POWER)
+    else:
+        p.stage_act_damage_mult = max(int(p.stage_act_damage_mult), 2)
+    state.emit("stage_dual_nature", choice=choice)
+
+
+def note_reaction(state) -> None:
+    """*Tide of Applause*: "Whenever you trigger an Elemental Reaction, your
+    back performer gains 2 Fanfare." Called from `reactions._react`, the one
+    site this engine counts a reaction (C# twin: `FurinaStage.OnReaction`,
+    from `ReactionEffects.Resolve`). A Raise, so on an empty stage it
+    summons (rule 5)."""
+    p = state.player
+    if not active(p):
+        return
+    n = int(p.powers.get(TIDE_OF_APPLAUSE, 0))
+    if n > 0:
+        raise_fanfare(state, n, source=GAIN_POWER)
+
+
+def regina_hydro(state) -> None:
+    """*Regina of All Waters*: "At the start of your turn, apply Hydro to ALL
+    enemies." Through the ordinary aura pipeline, so reactions trigger as any
+    application does. Copies apply once: a second Hydro changes nothing."""
+    from tier0.engine import reactions                 # late: the cycle
+    for enemy in list(state.living_enemies):
+        reactions.resolve_hit(state, enemy, "hydro", 0,
+                              "furina_stage/regina")
+
+
+def supporting_pool_turn_start(state) -> None:
+    """The supporting pool's turn-start powers, AFTER rule 4's regen (so the
+    lead's 1 went to the performer that led last turn) and before Arkhe
+    Alignment's choice. C# twin: `FurinaStage.TurnStartPowers`.
+
+      1. *One-Woman Show* first, while the stage is as the turn found it: if
+         no one is on stage, gain 1 Energy and draw 1 card, per copy. (Asked
+         before Season Tickets, whose Raise on an empty stage summons.)
+      2. *Revolving Stage*: the back performer moves to the front, once per
+         copy.
+      3. *Season Tickets*: the back performer gains N (summons on empty).
+      4. *Regina of All Waters*: Hydro on ALL enemies.
+    """
+    p = state.player
+    if not active(p):
+        return
+    show = int(p.powers.get(ONE_WOMAN_SHOW, 0))
+    if show > 0 and not stage(p):
+        p.energy += show
+        state.draw(show)
+        state.emit("stage_one_woman_show", energy=show, drew=show)
+    for _ in range(int(p.powers.get(REVOLVING_STAGE, 0))):
+        step_forward(state)
+    tickets = int(p.powers.get(SEASON_TICKETS, 0))
+    if tickets > 0:
+        raise_fanfare(state, tickets, source=GAIN_POWER)
+    if p.powers.get(REGINA, 0):
+        regina_hydro(state)

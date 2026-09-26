@@ -79,8 +79,12 @@ def _rows():
     rows = yaml.safe_load(
         (loader.DOCS_DIR / "prototype-surface.yaml").read_text(
             encoding="utf-8"))
+    # The Guest Cast's eight; THE SUPPORTING POOL's two (2026-09-26) are
+    # pinned in `test_furina_supporting_pool.py`.
     return {r["id"]: r for r in rows
-            if r["id"].startswith("proto_fs_guest_star_")}
+            if r["id"].startswith("proto_fs_guest_star_")
+            and r["id"] not in ("proto_fs_guest_star_lyney",
+                                "proto_fs_guest_star_escoffier")}
 
 
 # ---------------------------------------------------------------------------
@@ -129,7 +133,8 @@ def test_the_eight_rows_are_the_build_tables():
 def test_the_guests_join_the_arms_pool_in_the_sim():
     named = set(FS.POOL_SUBS.values())
     assert {f"proto_fs_guest_star_{m}" for m in TABLE} <= named
-    assert set(FS.GUESTS) == set(TABLE)
+    # THE SUPPORTING POOL (2026-09-26) added Lyney and Escoffier.
+    assert set(FS.GUESTS) == set(TABLE) | {"lyney", "escoffier"}
 
 
 # ---------------------------------------------------------------------------

@@ -171,6 +171,9 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     # R276 batch two: its opposite, the empty-stage answers' question --
     # the same pure current-state read.
     "stage_empty",
+    # THE SUPPORTING POOL (2026-09-26), Counterclaim: a flag the enemies'
+    # hits set and her turn's end clears, read as it stands.
+    "stage_front_hit",
     "spotlight_moved_this_turn",
     # `EB-711` (QUARANTINED, `C.KOKOMI_OVERHAUL`). "If the Bake-Kurage is
     # holding a Plan" -- `len(state.kk_plan_queue) > 0`, a pure current-state

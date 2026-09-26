@@ -435,6 +435,9 @@ def _runtime_count(state: CombatState, token: str,
         return furina_stage.back_fanfare(p)
     if token == "stage_count":
         return furina_stage.count(p)
+    # THE SUPPORTING POOL (2026-09-26), Da Capo: every Bow this combat.
+    if token == "stage_bows":
+        return int(p.stage_bows) if furina_stage.active(p) else 0
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -3925,6 +3928,9 @@ PREDICATE_NAMES = frozenset({
     # R276 batch two: the empty-stage answers (Improvised Number, Between
     # Acts) ask the opposite question.
     "stage_empty",
+    # THE SUPPORTING POOL (2026-09-26), Counterclaim: did an enemy's hit reach
+    # the front performer's bar since the end of her last turn?
+    "stage_front_hit",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -4019,6 +4025,8 @@ RUNTIME_COUNT_NAMES = frozenset({
     "stage_back_fanfare",
     # R276 batch two, Ensemble Piece: how many performers are on stage.
     "stage_count",
+    # THE SUPPORTING POOL (2026-09-26), Da Capo: every Bow this combat.
+    "stage_bows",
     "exhaust_pile",
     "player_block",
     "attacks_in_hand",
@@ -4328,6 +4336,9 @@ def _predicate(state: CombatState, name: str) -> bool:
     if name == "stage_empty":
         return furina_stage.active(state.player) \
             and not furina_stage.can_spend(state.player)
+    if name == "stage_front_hit":
+        return furina_stage.active(state.player) \
+            and bool(state.player.stage_front_hit)
     if name == "spotlight_set":
         return state.player.spotlight is not None
     if name == "spotlight_moved_this_turn":
@@ -6268,13 +6279,18 @@ def _op_stage_summon(state: CombatState, fx: dict, card: Card) -> None:
     if not furina_stage.active(p):
         return
     named = fx.get("member", "random")
+    # THE SUPPORTING POOL's Gala Premiere (2026-09-26): a face may print the
+    # arrival ("with 3 Fanfare each"); rule 3's 1 otherwise. On a full stage
+    # it is the recast's own arrival, added to the leaver's (rule 3).
+    fanfare = int(fx.get("fanfare", furina_stage.SUMMON_FANFARE))
     if len(furina_stage.stage(p)) >= furina_stage.SEATS:
         furina_stage.recast_front(state,
-                                  None if named == "random" else named)
+                                  None if named == "random" else named,
+                                  arrival=fanfare)
         return
     if named == "random":
         named = state.rng.choice(furina_stage.PERFORMERS)
-    furina_stage.summon(state, named)
+    furina_stage.summon(state, named, fanfare)
 
 
 def _op_stage_guest(state: CombatState, fx: dict, card: Card) -> None:
@@ -6379,6 +6395,52 @@ def _op_stage_spend_back_all(state: CombatState, fx: dict,
     the damage after it reads what was spent as `stage_spent`."""
     state.stage_spent_this_card = furina_stage.spend_all_of_back(state)
 
+
+# THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
+# 2026-09-26.md). Each unpacks its row and delegates to `furina_stage`.
+def _op_stage_reverse(state: CombatState, fx: dict, card: Card) -> None:
+    """*Plot Twist*: reverse the order of the performers."""
+    furina_stage.reverse(state)
+
+
+def _op_stage_whisper(state: CombatState, fx: dict, card: Card) -> None:
+    """*Stage Whisper*: move up to N of the back's Fanfare to the front."""
+    furina_stage.whisper(state, _amount(state, fx.get("amount", 1)))
+
+
+def _op_stage_hold_fade(state: CombatState, fx: dict, card: Card) -> None:
+    """*Held Applause*: no fade at the end of this turn."""
+    furina_stage.hold_fade(state)
+
+
+def _op_stage_intermission(state: CombatState, fx: dict, card: Card) -> None:
+    """*Intermission*: the back Bows and leaves; draw 1 per `amount` of its
+    Fanfare. `amount` is the divisor the face prints ("for every 3")."""
+    furina_stage.intermission(state, _amount(state, fx.get("amount", 3)))
+
+
+def _op_stage_spend_front_all(state: CombatState, fx: dict,
+                              card: Card) -> None:
+    """*Bring the House Down*: spend all of the FRONT performer's Fanfare;
+    the damage after it reads what was spent as `stage_spent`."""
+    state.stage_spent_this_card = furina_stage.spend_all_of_front(state)
+
+
+def _op_stage_grand_finale(state: CombatState, fx: dict, card: Card) -> None:
+    """*Grand Finale*: every performer Bows without leaving."""
+    furina_stage.grand_finale(state)
+
+
+def _op_stage_verdict(state: CombatState, fx: dict, card: Card) -> None:
+    """*Oratrice's Verdict*: this turn, the acts' random hits find the card's
+    own target."""
+    furina_stage.set_verdict(state)
+
+
+def _op_stage_dual_nature(state: CombatState, fx: dict, card: Card) -> None:
+    """*Dual Nature*: Ousia or Pneuma, for this turn."""
+    furina_stage.dual_nature(state)
+
 OPS = {
     "damage": _op_damage,
     "block": _op_block,
@@ -6419,6 +6481,15 @@ OPS = {
     "stage_step_forward": _op_stage_step_forward,
     "stage_perform_all": _op_stage_perform_all,
     "stage_spend_back_all": _op_stage_spend_back_all,
+    # THE SUPPORTING POOL (2026-09-26).
+    "stage_reverse": _op_stage_reverse,
+    "stage_whisper": _op_stage_whisper,
+    "stage_hold_fade": _op_stage_hold_fade,
+    "stage_intermission": _op_stage_intermission,
+    "stage_spend_front_all": _op_stage_spend_front_all,
+    "stage_grand_finale": _op_stage_grand_finale,
+    "stage_verdict": _op_stage_verdict,
+    "stage_dual_nature": _op_stage_dual_nature,
     # THE CO-OP SET (`engine/coop.py`): Share the Spotlight's verb.
     "stage_share_spotlight": _op_stage_share_spotlight,
     "gain_fanfare_floor": _op_gain_fanfare_floor,
@@ -6870,6 +6941,13 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
             bonus += C.MI_KYOUKA_BONUS
     if cost == 0:
         bonus += p.powers.get("zero_cost_attacks_up", 0)
+    # THE SUPPORTING POOL's *Soliloquy* (QUARANTINED, 2026-09-26): "While no
+    # one is on stage, your Attacks deal 3 more damage." Flat, like Strength,
+    # so every hit of a multi-hit Attack carries it. Read at the play's start
+    # (this sum is the card's snapshot); the mod reads the stage per hit, and
+    # the two agree unless a card empties or fills the stage between its hits.
+    if furina_stage.active(p) and not furina_stage.stage(p):
+        bonus += p.powers.get(furina_stage.SOLILOQUY, 0)
     # Rapturous Applause: attacks +N per 10 Fanfare ("stacks grant flat
     # power bonuses", kickoff §4). Reads the pool, spends nothing.
     n = p.powers.get("fanfare_attack_per10", 0)

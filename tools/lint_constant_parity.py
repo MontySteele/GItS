@@ -364,6 +364,14 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ActSigewinneGift": _stage("ACT_SIGEWINNE_GIFT"),
     "FurinaStageLaw.ActLynetteDamage": _stage("ACT_LYNETTE_DAMAGE"),
     "FurinaStageLaw.ActCharlotteGift": _stage("ACT_CHARLOTTE_GIFT"),
+    # THE SUPPORTING POOL (2026-09-26): the two new guests' acts, and
+    # Eternal Applause's fade line.
+    "FurinaStageLaw.ActLyneyPrice": _stage("ACT_LYNEY_PRICE"),
+    "FurinaStageLaw.ActLyneyDamage": _stage("ACT_LYNEY_DAMAGE"),
+    "FurinaStageLaw.ActEscoffierPrice": _stage("ACT_ESCOFFIER_PRICE"),
+    "FurinaStageLaw.ActEscoffierGift": _stage("ACT_ESCOFFIER_GIFT"),
+    "FurinaStageLaw.ActEscoffierDamage": _stage("ACT_ESCOFFIER_DAMAGE"),
+    "FurinaStageLaw.EternalFadeThreshold": _stage("ETERNAL_FADE_THRESHOLD"),
     # R276 batch two: Arkhe Alignment's Pneuma half.
     "ArkheAlignmentPower.PneumaLeadRegain": _stage("PNEUMA_LEAD_REGAIN"),
     # Rally prints "costs 1 less" but the op carries no amount (it is one

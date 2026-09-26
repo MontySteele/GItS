@@ -388,6 +388,11 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # R276 batch two: three more single calls.
                   "stage_step_forward", "stage_perform_all",
                   "stage_spend_back_all",
+                  # THE SUPPORTING POOL (2026-09-26): eight more, each one
+                  # call into `FurinaStage` with no locals.
+                  "stage_reverse", "stage_whisper", "stage_hold_fade",
+                  "stage_intermission", "stage_spend_front_all",
+                  "stage_grand_finale", "stage_verdict", "stage_dual_nature",
                   # THE CO-OP SET (`COOP_ALLY_OPS`): Share the Spotlight, one
                   # call into `FurinaStage.ShareTheSpotlight`.
                   "stage_share_spotlight",
@@ -1492,6 +1497,9 @@ PREDICATES_CS = {
     # R276 batch two: the empty-stage answers (Improvised Number, Between
     # Acts) ask the opposite question, at play time.
     "stage_empty": "!FurinaStage.Occupied(Owner.Creature)",
+    # THE SUPPORTING POOL (2026-09-26), Counterclaim: an enemy's hit reached
+    # the front performer's bar since the end of her last turn.
+    "stage_front_hit": "FurinaStage.FrontHitSinceLastTurn(Owner.Creature)",
     "spotlight_moved_this_turn":
         "SpotlightSystem.MovedThisTurn(Owner.Creature)",
     # Curtain Call ("Take a Bow"). Both read through CurtainCallHooks rather
@@ -1588,6 +1596,9 @@ PREDICATE_TEXT = {
     # "Spend N: <the big number> instead" and no generic clause can say that.
     "stage_occupied": "If a performer is on stage",
     "stage_empty": "If the stage is empty",
+    "stage_front_hit":
+        "If an enemy hit your [gold]front performer[/gold] since your last "
+        "turn",
     "spotlight_moved_this_turn":
         "If you moved the [gold]Spotlight[/gold] this turn",
     "enemy_intends_attack": "If an enemy intends to attack",
@@ -1903,6 +1914,10 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # R276 batch two: Improvised Number's "If the stage is empty,
               # summon a random performer" -- one awaited call, no locals.
               "stage_summon",
+              # THE SUPPORTING POOL (2026-09-26): Groundswell's "your front
+              # performer gains 3" and Grand Deluge's "each performer gains
+              # 2", both behind a condition -- one awaited call, no locals.
+              "stage_raise",
               # Furina Stage draft 3 (2026-09-25): Tidal Flourish and Quick
               # Cue's Spend modes "deal N and apply Hydro". Emitted by the
               # top-level arm's own `_aura_lines`, whose one local sits inside
@@ -1995,6 +2010,8 @@ BRANCH_FIELDS = {
     # any face could print.
     "stage_spend": {"op", "amount"},
     "stage_summon": {"op", "member"},
+    # THE SUPPORTING POOL (2026-09-26). The top-level key set.
+    "stage_raise": {"op", "amount", "seat"},
     "apply_aura": {"op", "element", "target"},
 }
 
@@ -2083,6 +2100,14 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
         # member, a closed set checked here as at the top level.
         if eff.get("member", "random") not in FURINA_STAGE_MEMBERS:
             return f"branch stage_summon member {eff.get('member')!r}"
+        return None
+    if eff["op"] == "stage_raise":
+        # THE SUPPORTING POOL (2026-09-26). A literal N on a named seat, the
+        # top-level verb table's closed set.
+        if str(eff.get("seat", "back")) not in STAGE_RAISE_VERBS:
+            return f"branch stage_raise seat {eff.get('seat')!r}"
+        if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
+            return "branch stage_raise amount must be a positive literal int"
         return None
     if not isinstance(eff.get("amount", eff.get("bomb_damage")), int):
         return f"branch {eff['op']} amount must be a literal int"
@@ -2792,6 +2817,33 @@ APPLY_POWERS = {
     "fs_arkhe_alignment": ("ArkheAlignmentPower", None,
         "At the start of your turn, choose [gold]Ousia[/gold] or "
         "[gold]Pneuma[/gold]."),
+    # THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
+    # 2026-09-26.md). Same file, same terms: each is a switch the rule it
+    # bends asks about, and every row states its own face.
+    "fs_revolving_stage": ("RevolvingStagePower", None,
+        "At the start of your turn, your back performer moves to the "
+        "front."),
+    "fs_season_tickets": ("SeasonTicketsPower", None,
+        "At the start of your turn, your back performer gains {X} "
+        "[gold]Fanfare[/gold]."),
+    "fs_star_billing": ("StarBillingPower", None,
+        "Whenever a Guest Star joins the stage, draw {X} cards."),
+    "fs_echoing_hall": ("EchoingHallPower", None,
+        "Whenever a performer fades, your front performer gains the "
+        "[gold]Fanfare[/gold] lost."),
+    "fs_eternal_applause": ("EternalApplausePower", None,
+        "Your performers fade only above 10 [gold]Fanfare[/gold], not 5."),
+    "fs_tide_of_applause": ("TideOfApplausePower", None,
+        "Whenever you trigger an [gold]Elemental Reaction[/gold], your back "
+        "performer gains {X} [gold]Fanfare[/gold]."),
+    "fs_regina_of_all_waters": ("ReginaOfAllWatersPower", None,
+        "At the start of your turn, apply [gold]Hydro[/gold] to ALL "
+        "enemies."),
+    "fs_soliloquy": ("SoliloquyPower", None,
+        "While no one is on stage, your Attacks deal {X} more damage."),
+    "fs_one_woman_show": ("OneWomanShowPower", None,
+        "At the start of your turn, if no one is on stage, gain 1 "
+        "[gold]Energy[/gold] and draw 1 card."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The
@@ -3578,6 +3630,10 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                          # THE GUEST CAST (2026-09-25): what a Guest Star
                          # arrives with.
                          "stage_guest",
+                         # THE SUPPORTING POOL (2026-09-26): Stage Whisper's
+                         # "up to 3" and Intermission's "for every 3"
+                         # (`STAGE_AMOUNT_VARS`).
+                         "stage_whisper", "stage_intermission",
                          # R252, and the same argument one row on: Careful Now
                          # prints a CEILING and no payout ("Block equal to
                          # your largest Bomb, up to 10"), so the cap is the
@@ -3682,7 +3738,11 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # aims for a reason nothing else here does -- it does not hit the
               # body, it points the QUEUE at it. It still dereferences
               # `cardPlay.Target`, which is the whole test this tuple applies.
-              "redirect_queued_plans")
+              "redirect_queued_plans",
+              # THE SUPPORTING POOL (2026-09-26), Oratrice's Verdict: it hits
+              # nobody, it points this turn's random acts at the body the
+              # player picked -- which is `cardPlay.Target`.
+              "stage_verdict")
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
@@ -5563,7 +5623,9 @@ FURINA_STAGE_MEMBERS = ("usher", "chevalmarin", "crabaletta", "random")
 #: name, as `FurinaStage.Guests` spells them. A closed set, for the reason
 #: above.
 FURINA_STAGE_GUESTS = ("neuvillette", "clorinde", "navia", "chevreuse",
-                       "wriothesley", "sigewinne", "charlotte", "lynette")
+                       "wriothesley", "sigewinne", "charlotte", "lynette",
+                       # THE SUPPORTING POOL (2026-09-26).
+                       "lyney", "escoffier")
 
 
 def _stage_summon_stmt(eff: dict) -> str:
@@ -5571,8 +5633,11 @@ def _stage_summon_stmt(eff: dict) -> str:
     default (*Salon Début*, *Understudy*); a NAMED member always summons,
     since the trio can be cloned (2026-09-25)."""
     member = eff.get("member", "random")
+    # THE SUPPORTING POOL (2026-09-26), Gala Premiere: "with 3 Fanfare each".
+    fanfare = eff.get("fanfare")
+    extra = f", {int(fanfare)}" if fanfare is not None else ""
     return ("await FurinaStage.Summon(choiceContext, Owner.Creature, "
-            f'"{member}");')
+            f'"{member}"{extra});')
 
 
 #: THE STAGE's eight statement ops, each a single call into `FurinaStage` with
@@ -5593,6 +5658,20 @@ STAGE_STMT_OPS = {
     "stage_step_forward", "stage_perform_all", "stage_spend_back_all",
     # THE GUEST CAST (2026-09-25).
     "stage_guest",
+    # THE SUPPORTING POOL (2026-09-26).
+    "stage_reverse", "stage_whisper", "stage_hold_fade", "stage_intermission",
+    "stage_spend_front_all", "stage_grand_finale", "stage_verdict",
+    "stage_dual_nature",
+}
+
+#: THE SUPPORTING POOL (2026-09-26): the two stage ops whose `amount` an
+#: upgrade moves, each through a var named for what the face prints -- Stage
+#: Whisper's "up to 3" and Intermission's "for every 3". The upgrade key is the
+#: op's own name, bound to the first top-level op of it (tier0's
+#: `_bump_first`, `upgrades.apply_upgrade`).
+STAGE_AMOUNT_VARS = {
+    "stage_whisper": "Whisper",
+    "stage_intermission": "Every",
 }
 
 #: `stage_raise`'s `seat:` -> the C# verb. The back performer is the rule-5
@@ -5629,6 +5708,27 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
         return f"await {verb}(Owner.Creature, {n});"
     if op == "stage_step_forward":
         return "FurinaStage.StepForward(Owner.Creature);"
+    # THE SUPPORTING POOL (2026-09-26).
+    if op == "stage_reverse":
+        return "FurinaStage.Reverse(Owner.Creature);"
+    if op == "stage_whisper":
+        n = amount if amount is not None else str(int(eff.get("amount", 1)))
+        return f"FurinaStage.Whisper(Owner.Creature, {n});"
+    if op == "stage_hold_fade":
+        return "FurinaStage.HoldFade(Owner.Creature);"
+    if op == "stage_intermission":
+        n = amount if amount is not None else str(int(eff.get("amount", 3)))
+        return (f"await FurinaStage.Intermission(choiceContext, "
+                f"Owner.Creature, {n});")
+    if op == "stage_spend_front_all":
+        return ("await FurinaStage.SpendAllOfFront(choiceContext, "
+                "Owner.Creature);")
+    if op == "stage_grand_finale":
+        return "await FurinaStage.GrandFinale(choiceContext, Owner.Creature);"
+    if op == "stage_verdict":
+        return "FurinaStage.SetVerdict(Owner.Creature, cardPlay.Target);"
+    if op == "stage_dual_nature":
+        return "await FurinaStage.DualNature(choiceContext, Owner);"
     if op == "stage_perform_all":
         return "await FurinaStage.PerformAll(choiceContext, Owner.Creature);"
     if op == "stage_spend_back_all":
@@ -5667,6 +5767,8 @@ STAGE_COUNT_CS = {
     "stage_back_fanfare": "static (card, _) => FurinaStage.BackFanfare(card)",
     # R276 batch two, Ensemble Piece: how many performers are on stage.
     "stage_count": "static (card, _) => FurinaStage.Count(card)",
+    # THE SUPPORTING POOL (2026-09-26), Da Capo: every Bow this combat.
+    "stage_bows": "static (card, _) => FurinaStage.Bows(card)",
 }
 
 
@@ -5687,7 +5789,8 @@ def _stage_spender_before(card: dict, eff: dict) -> str | None:
         if other is eff:
             return None
         if other.get("op") in {"stage_spend", "stage_spend_all",
-                               "stage_final_bow", "stage_spend_back_all"}:
+                               "stage_final_bow", "stage_spend_back_all",
+                               "stage_spend_front_all"}:
             return str(other["op"])
     return None
 
@@ -5714,6 +5817,10 @@ def stage_spent_cs(card: dict, eff: dict) -> str:
         return "static (card, _) => FurinaStage.SpentOrBackFanfare(card)"
     if spender == "stage_spend_all":
         return "static (card, _) => FurinaStage.SpentOrTotalFanfare(card)"
+    if spender == "stage_spend_front_all":
+        # THE SUPPORTING POOL (2026-09-26), Bring the House Down: the front
+        # performer's whole bar.
+        return "static (card, _) => FurinaStage.SpentOrLeadFanfare(card)"
     return STAGE_COUNT_CS["stage_spent"]
 
 
@@ -6708,6 +6815,11 @@ def build_vars(card: dict) -> list[str]:
             # Raise idiom -- a var only when the upgrade has to render.
             out.append(
                 f'new DynamicVar("GuestFanfare", {int(eff["amount"])}m)')
+        elif (op in STAGE_AMOUNT_VARS and stage_amount_upgrade(card, op)
+              and eff is stage_amount_var_effect(card, op)):
+            # THE SUPPORTING POOL (2026-09-26): the Raise idiom again.
+            out.append(f'new DynamicVar("{STAGE_AMOUNT_VARS[op]}", '
+                       f'{int(eff["amount"])}m)')
         elif (op == "stage_raise" and stage_raise_upgrade(card)
               and eff is stage_raise_var_effect(card)):
             # R276 batch two, the Mend idiom: a var ONLY when the upgrade has
@@ -7221,6 +7333,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "stage_raise": any(e["op"] == "stage_raise" for e in effects),
         # THE GUEST CAST (2026-09-25): the first top-level `stage_guest`.
         "stage_guest": any(e["op"] == "stage_guest" for e in effects),
+        # THE SUPPORTING POOL (2026-09-26): the first top-level op of each
+        # name (`STAGE_AMOUNT_VARS`).
+        "stage_whisper": any(e["op"] == "stage_whisper" for e in effects),
+        "stage_intermission": any(e["op"] == "stage_intermission"
+                                  for e in effects),
         # `EB-478`. Binds to the op that OWES the draw, the same one-owner rule
         # every key here keeps; tier0 bumps that op's `amount` and nothing else.
         "tide_draw": any(e["op"] == "draw_after_plans" for e in effects),
@@ -7908,6 +8025,12 @@ BRANCH_PRICE_OPS = frozenset({"stage_spend"})
 #: keyword. Ignored by the one-number test exactly as a price is.
 BRANCH_UNNUMBERED_OPS = frozenset({"apply_aura"})
 
+#: THE SUPPORTING POOL (2026-09-26). A clause a branch may carry beside its
+#: DAMAGE number that prints a number of a different kind (Spirited Aria's
+#: Spend mode: "deal 8 and draw 2 cards"). The damage var is still the one
+#: damage number; the draw's number is the draw's.
+BRANCH_BESIDE_DAMAGE_OPS = frozenset({"draw"})
+
 
 def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
                                                               str]]:
@@ -7986,7 +8109,14 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
         clause = printed[0]
         if not isinstance(clause.get("amount"), int):
             return None
-        if any(c.get("op") not in BRANCH_PRICE_OPS | BRANCH_UNNUMBERED_OPS
+        # THE SUPPORTING POOL (2026-09-26), Spirited Aria: "Spend 2: also
+        # draw 2 cards" -- a Spend mode that deals the SAME damage and adds a
+        # draw. The draw prints its own number on the mode's label, not in
+        # the damage var's place, so the damage is still the one damage
+        # number the branch prints.
+        beside = BRANCH_PRICE_OPS | BRANCH_UNNUMBERED_OPS | (
+            BRANCH_BESIDE_DAMAGE_OPS if op == "damage" else frozenset())
+        if any(c.get("op") not in beside
                for c in branch if c is not clause):
             return None
         return clause
@@ -8640,7 +8770,22 @@ def stage_raise_amount(card: dict, eff: dict) -> str | None:
     if (eff.get("op") == "stage_guest" and stage_guest_upgrade(card)
             and eff is stage_guest_var_effect(card)):
         return 'DynamicVars["GuestFanfare"].IntValue'
+    op = eff.get("op")
+    if (op in STAGE_AMOUNT_VARS and stage_amount_upgrade(card, op)
+            and eff is stage_amount_var_effect(card, op)):
+        return f'DynamicVars["{STAGE_AMOUNT_VARS[op]}"].IntValue'
     return None
+
+
+def stage_amount_upgrade(card: dict, op: str) -> int:
+    """`stage_whisper: +N` / `stage_intermission: -N` (2026-09-26)."""
+    return int(upgrade_plan(card)[0].get(op, 0))
+
+
+def stage_amount_var_effect(card: dict, op: str) -> dict | None:
+    """The ONE top-level `op` its delta binds to, tier0's `_bump_first`."""
+    return next((fx for fx in card.get("effects", [])
+                 if fx.get("op") == op), None)
 
 
 def stage_guest_upgrade(card: dict) -> int:
@@ -11630,6 +11775,10 @@ def _authored_face_numbers(card: dict):
             owns = eff is stage_raise_var_effect(card)
             yield ("stage_raise", "RaiseAmount", eff["amount"]) if owns \
                 else (None, None, eff["amount"])
+        elif op in STAGE_AMOUNT_VARS and isinstance(eff.get("amount"), int):
+            owns = eff is stage_amount_var_effect(card, op)
+            yield (op, STAGE_AMOUNT_VARS[op], eff["amount"]) if owns \
+                else (None, None, eff["amount"])
         elif op == "energy" and isinstance(eff.get("amount"), int):
             # An `energy: +N` delta binds to the FIRST energy op (tier0's
             # `energy` branch), whose amount the emitter already reads back
@@ -13228,6 +13377,9 @@ def build_upgrade(card: dict) -> list[str]:
                "stage_raise": "stage_raise",
                # THE GUEST CAST (2026-09-25), a Guest Star's arrival Fanfare.
                "stage_guest": "stage_guest",
+               # THE SUPPORTING POOL (2026-09-26).
+               "stage_whisper": "stage_whisper",
+               "stage_intermission": "stage_intermission",
                # R252, Careful Now's ceiling.
                "block_largest_bomb": "cap",
                # `EB-679`, Read the Field's look count.
@@ -13241,6 +13393,8 @@ def build_upgrade(card: dict) -> list[str]:
                "mend": 'DynamicVars["Mend"]',
                "stage_raise": 'DynamicVars["RaiseAmount"]',
                "stage_guest": 'DynamicVars["GuestFanfare"]',
+               "stage_whisper": 'DynamicVars["Whisper"]',
+               "stage_intermission": 'DynamicVars["Every"]',
                "block_largest_bomb": 'DynamicVars["BombCap"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
                "buff_next_attack": 'DynamicVars["PowerAmount"]',

@@ -875,6 +875,14 @@ class Player(Fighter):
     # Chevreuse act owes the next turn.
     stage_lost: dict = field(default_factory=dict)
     stage_energy_next: int = 0
+    # THE SUPPORTING POOL (2026-09-26, QUARANTINED with the stage): Oratrice's
+    # Verdict's enemy this turn; Held Applause's skipped fade; whether an
+    # enemy's hit reached the front performer since her last turn
+    # (Counterclaim); and every Bow this combat (Da Capo).
+    stage_verdict: Optional[object] = None
+    stage_hold_fade: bool = False
+    stage_front_hit: bool = False
+    stage_bows: int = 0
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
                                   # designation re-aims, never stacks. The

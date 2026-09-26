@@ -290,6 +290,9 @@ SIM_CALL_SITES = {
     ('furina_stage.py', 4): ('source', 'False', 'element'),
     # 2026-09-25 night: Lynette's act deals 3 Anemo damage.
     ('furina_stage.py', 5): ('source', 'False', 'element'),
+    # THE SUPPORTING POOL (2026-09-26): Escoffier's 3 Cryo to ALL (Lyney's
+    # Pyro hit shares the random-enemy door).
+    ('furina_stage.py', 6): ('source', 'False', 'element'),
     ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
     # Sparks 'n' Splash, since 2026-09-25 on a Bomb's own terms (the
     # explosion's unpowered door), at the start of the turn.
@@ -423,14 +426,16 @@ def test_the_stage_refuses_the_dealers_terms_in_both_engines():
     `test_eb495_d3_a_performance_carries_no_strength.py`."""
     assert _cs("Powers/Prototype/FurinaStage.cs").count("powered: false") == 2
     # THE GUEST CAST (2026-09-25): two more sites, the same refusal, and
-    # a third since Lynette's act deals damage (2026-09-25 night).
+    # a third since Lynette's act deals damage (2026-09-25 night), and a
+    # fourth for Escoffier's (THE SUPPORTING POOL, 2026-09-26; Lyney's hit
+    # shares Clorinde's `HitRandom`).
     assert _cs("Powers/Prototype/FurinaStageGuests.cs").count(
-        "powered: false") == 3
+        "powered: false") == 4
 
     stage = [flags for (name, _i), flags in sorted(_sim_call_sites().items())
              if name == "furina_stage.py"]
-    assert len(stage) == 5, stage
-    assert [powered for _s, powered, _e in stage] == ["False"] * 5
+    assert len(stage) == 6, stage
+    assert [powered for _s, powered, _e in stage] == ["False"] * 6
 
 
 def test_no_trio_act_carries_an_element_in_either_engine():
@@ -452,15 +457,16 @@ def test_no_trio_act_carries_an_element_in_either_engine():
     assert "ElementalHit.Deal(" not in cs
     guests = _cs("Powers/Prototype/FurinaStageGuests.cs")
     assert "ElementalHit.DealUnelemented(" not in guests
-    # Neuvillette and HitRandom, and Lynette's since 2026-09-25 night.
-    assert guests.count("ElementalHit.Deal(") == 3
+    # Neuvillette and HitRandom, and Lynette's since 2026-09-25 night, and
+    # Escoffier's since the supporting pool (2026-09-26).
+    assert guests.count("ElementalHit.Deal(") == 4
 
     sites = _sim_call_sites()
     stage = [flags for (name, _i), flags in sorted(sites.items())
              if name == "furina_stage.py"]
-    assert len(stage) == 5, stage
+    assert len(stage) == 6, stage
     assert [element for _s, _p, element in stage] == [
-        "None", "None", "element", "element", "element"]
+        "None", "None", "element", "element", "element", "element"]
 
 
 def test_the_one_door_is_unpowered_with_no_dealer_and_no_card_source():

@@ -1433,6 +1433,25 @@ def declared_starter_substitutions() -> dict[str, str]:
     return subs
 
 
+def _pool_additions(spec: dict) -> tuple[str, ...]:
+    """Prototype rows an arm OFFERS WITHOUT REPLACING a shipped row, by
+    character spec -- `_pool_substitutions`' sibling at the same door and on
+    the same flags. Only the Furina Stage has any (`furina_stage.POOL_ADDS`,
+    2026-09-26: the supporting pool has one more Common than her sheet has
+    free Commons). `()` on every flag-off tree.
+    """
+    if (spec.get("id") == furina_stage.CHARACTER
+            and furina_stage.FURINA_STAGE):
+        return tuple(furina_stage.POOL_ADDS)
+    return ()
+
+
+def pool_additions(character_id: str) -> tuple[str, ...]:
+    """`_pool_additions` by character id, `pool_substitutions`' twin."""
+    spec = _character_index().get(character_id)
+    return _pool_additions(spec) if spec else ()
+
+
 def pool_substitutions(character_id: str) -> dict[str, str]:
     """`_pool_substitutions` by character id -- the tier 0.5 door, the way
     `starting_deck` is the door onto `_starter_ids`."""
@@ -1627,6 +1646,10 @@ def _substituted_card_index() -> dict[str, Card]:
     targets = {proto
                for spec in _character_index().values()
                for proto in _pool_substitutions(spec).values()}
+    # The additions are offered too, so they resolve by id the same way.
+    targets |= {proto
+                for spec in _character_index().values()
+                for proto in _pool_additions(spec)}
     targets |= {cid
                 for spec in _character_index().values()
                 for cid in _starter_ids(spec)

@@ -46,6 +46,8 @@ public static class FurinaStageStrip
         [StagePerformer.Sigewinne] = "Sigewinne",
         [StagePerformer.Charlotte] = "Charlotte",
         [StagePerformer.Lynette] = "Lynette",
+        [StagePerformer.Lyney] = "Lyney",
+        [StagePerformer.Escoffier] = "Escoffier",
     };
 
     public static string NameOf(StagePerformer who) =>

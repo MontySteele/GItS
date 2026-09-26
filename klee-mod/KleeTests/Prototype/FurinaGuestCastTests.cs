@@ -83,7 +83,9 @@ public class FurinaGuestCastTests
     [Fact]
     public void The_eight_guests_parse_and_are_guests_and_the_trio_are_not()
     {
-        Assert.Equal(8, FurinaStage.Guests.Length);
+        // Eight, and two more with the supporting pool (2026-09-26): Lyney
+        // and Escoffier.
+        Assert.Equal(10, FurinaStage.Guests.Length);
         foreach (var name in FurinaStage.Guests)
         {
             var who = P(name);

@@ -706,6 +706,9 @@ GUEST_STAR_ELEMENTS: dict[str, str] = {
     "Navia": "Geo",
     "Wriothesley": "Cryo",
     "Lynette": "Anemo",
+    # THE SUPPORTING POOL (2026-09-26).
+    "Lyney": "Pyro",
+    "Escoffier": "Cryo",
 }
 _GUEST_STAR_RE = re.compile(
     r"\bGuest Star: (" + "|".join(GUEST_STAR_ELEMENTS) + r")\b")

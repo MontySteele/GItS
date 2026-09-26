@@ -78,6 +78,16 @@ public readonly struct StageExit
     /// later, gains only what is left of it. 0 on every other exit.
     /// </summary>
     public int Caught { get; init; }
+
+    /// <summary>
+    /// THE SUPPORTING POOL (2026-09-26), <i>Grand Finale</i>: "All your
+    /// performers Bow without leaving." The seat a Bow is taken IN, for a
+    /// performer that keeps it; null on every exit that leaves. A gift that
+    /// goes to "each other performer" or "the one behind her" must not find
+    /// the performer still standing there (<see
+    /// cref="FurinaStageLedger.ActFanfare"/>).
+    /// </summary>
+    public StageSeat? Stayer { get; init; }
 }
 
 /// <summary>What a Spend did. <see cref="Fired"/> is the rider's own question
@@ -504,14 +514,17 @@ public sealed class FurinaStageLedger
     /// exactly once. Pinned rather than commented, because "the rule needs no
     /// code" and "the rule is missing" look identical.
     /// </summary>
-    public StageSummon Summon(StagePerformer who)
+    public StageSummon Summon(StagePerformer who,
+                              int fanfare = FurinaStageLaw.SummonFanfare)
     {
         if (!IsFull)
         {
-            _seats.Add(new StageSeat(who, FurinaStageLaw.SummonFanfare));
-            Note(new StageBeat("arrive", who, _seats.Count - 1,
-                               FurinaStageLaw.SummonFanfare, 0, ""));
-            return new StageSummon(who, FurinaStageLaw.SummonFanfare, null);
+            // THE SUPPORTING POOL (2026-09-26): a face may print the arrival
+            // (Gala Premiere's 3); rule 3's 1 otherwise.
+            var at = fanfare > 0 ? fanfare : FurinaStageLaw.SummonFanfare;
+            _seats.Add(new StageSeat(who, at));
+            Note(new StageBeat("arrive", who, _seats.Count - 1, at, 0, ""));
+            return new StageSummon(who, at, null);
         }
 
         var leaver = _seats[0];
@@ -752,8 +765,41 @@ public sealed class FurinaStageLedger
                            List<StageExit> exits)
     {
         var bow = seat == null;
+        // THE SUPPORTING POOL (2026-09-26), Grand Finale: a Bow WITHOUT
+        // LEAVING is free like any Bow, but the performer still stands in its
+        // seat, so a gift to "each other performer" skips it.
+        var self = seat ?? exit?.Stayer;
         switch (who)
         {
+            case StagePerformer.Lyney:
+            case StagePerformer.Escoffier:
+            {
+                // Each pays of their own, Neuvillette's shape; a Bow is
+                // free. Escoffier's gift to each other performer is the
+                // Fanfare half of her act, and lands in full on a Bow.
+                var price = who == StagePerformer.Lyney
+                    ? FurinaStageLaw.ActLyneyPrice
+                    : FurinaStageLaw.ActEscoffierPrice;
+                if (!bow)
+                {
+                    if (seat!.Fanfare < price)
+                    {
+                        NoteUnpaid(seat);
+                        return false;
+                    }
+                    Add(exits, Pay(seat, price, who));
+                }
+                if (who == StagePerformer.Escoffier)
+                {
+                    foreach (var other in _seats
+                                 .Where(s => !ReferenceEquals(s, self))
+                                 .ToList())
+                    {
+                        Gain(other, FurinaStageLaw.ActEscoffierGift);
+                    }
+                }
+                return true;
+            }
             case StagePerformer.Neuvillette:
                 if (bow) return true;
                 if (seat!.Fanfare < FurinaStageLaw.ActNeuvillettePrice)
@@ -790,6 +836,16 @@ public sealed class FurinaStageLedger
                 Add(exits, Pay(bank, FurinaStageLaw.ActChevreusePrice, who));
                 return true;
             case StagePerformer.Sigewinne:
+                if (bow && self != null)
+                {
+                    // The Grand Finale's Bow in place: the gift goes where
+                    // her act would send it, free.
+                    if (Behind(IndexOf(self) + 1, self) is { } to)
+                    {
+                        Gain(to, FurinaStageLaw.ActSigewinneGift);
+                    }
+                    return true;
+                }
                 if (bow)
                 {
                     // Free: the performer behind her gains the whole gift.
@@ -810,7 +866,7 @@ public sealed class FurinaStageLedger
                 }
             case StagePerformer.Charlotte:
                 foreach (var other in _seats
-                             .Where(s => !ReferenceEquals(s, seat)).ToList())
+                             .Where(s => !ReferenceEquals(s, self)).ToList())
                 {
                     Gain(other, FurinaStageLaw.ActCharlotteGift);
                 }
@@ -860,6 +916,9 @@ public sealed class FurinaStageLedger
         foreach (var seat in _seats) copy._seats.Add(seat.CloneForForecast());
         copy.ActDamageMultiplier = ActDamageMultiplier;
         copy.ActBlockMultiplier = ActBlockMultiplier;
+        // THE SUPPORTING POOL (2026-09-26): Held Applause's skip is part of
+        // "the end of this turn".
+        copy.FadeHeld = FadeHeld;
         return copy;
     }
 
@@ -1322,19 +1381,135 @@ public sealed class FurinaStageLedger
     /// prints "The applause fades: Chevalmarin 9 → 7". Returns the total lost.
     /// Sim twin: <c>furina_stage.fade</c>.
     /// </summary>
-    public int Fade()
+    public int Fade() => Fade(FurinaStageLaw.FadeThreshold, echo: false);
+
+    /// <summary>
+    /// Rule 12 as THE SUPPORTING POOL bends it (2026-09-26):
+    /// <paramref name="threshold"/> is the line (<i>Eternal Applause</i>'s
+    /// 10), <paramref name="echo"/> sends what the fade took to the front
+    /// performer (<i>Echoing Hall</i>, a move, so copies move nothing more),
+    /// and <see cref="FadeHeld"/> (<i>Held Applause</i>) skips it once.
+    /// Returns what the fade took. Sim twin: <c>furina_stage.fade</c>.
+    /// </summary>
+    public int Fade(int threshold, bool echo)
     {
+        if (FadeHeld)
+        {
+            FadeHeld = false;
+            return 0;
+        }
         var total = 0;
         for (var i = 1; i < _seats.Count; i++)
         {
             var seat = _seats[i];
-            var loss = FurinaStageLaw.FadeLoss(seat.Fanfare);
+            var loss = FurinaStageLaw.FadeLoss(seat.Fanfare, threshold);
             if (loss <= 0) continue;
             Drain(seat, loss);
             total += loss;
             Note(new StageBeat(FadeEvent, seat.Who, i, seat.Fanfare, loss, ""));
         }
+        if (echo && total > 0 && Lead is { } front)
+        {
+            front.Fanfare += total;
+            NoteRaise(front, total);
+        }
         return total;
+    }
+
+    // ---- THE SUPPORTING POOL (2026-09-26) ------------------------------
+    //
+    // review/active/furina-supporting-pool-2026-09-26.md. Every move below is
+    // synchronous arithmetic on the seats, so the forecast can run it too.
+
+    /// <summary><i>Held Applause</i>: no fade at the end of this turn. Taken
+    /// by the next <see cref="Fade(int, bool)"/>.</summary>
+    public bool FadeHeld { get; set; }
+
+    /// <summary><i>Counterclaim</i>'s question: did an enemy's hit reach the
+    /// front performer's bar since the end of her last turn? Set by
+    /// <c>FurinaStage.AbsorbHit</c>, cleared as her turn ends.</summary>
+    public bool FrontHitSinceLastTurn { get; set; }
+
+    /// <summary><i>Da Capo</i>'s count: every Bow this combat, all causes.
+    /// Per combat because the ledger is.</summary>
+    public int BowsThisCombat { get; set; }
+
+    /// <summary><i>Oratrice's Verdict</i>'s enemy, for this turn: an act that
+    /// hits a random enemy hits this one while it lives. Cleared after the
+    /// end-of-turn sweep.</summary>
+    public Creature? VerdictTarget { get; set; }
+
+    /// <summary>The event name of a pure reorder of several seats (Plot
+    /// Twist, Lyney's swap).</summary>
+    public const string ReorderEvent = "reorder";
+
+    /// <summary>The event name of Fanfare moved from one bar to another
+    /// (Stage Whisper).</summary>
+    public const string MoveEvent = "move";
+
+    /// <summary><i>Plot Twist</i>: "Reverse the order of your performers."
+    /// Three performers: the front and back change places; two: they swap.
+    /// A pure reorder: nothing Bows and nothing is lost. False with fewer
+    /// than two.</summary>
+    public bool Reverse()
+    {
+        if (_seats.Count < 2) return false;
+        _seats.Reverse();
+        Note(new StageBeat(ReorderEvent, _seats[0].Who, 0, _seats[0].Fanfare,
+                           0, ""));
+        return true;
+    }
+
+    /// <summary>Lyney's act: the front and back performers change places.
+    /// With one performer nothing moves.</summary>
+    public bool SwapEnds()
+    {
+        if (_seats.Count < 2) return false;
+        (_seats[0], _seats[^1]) = (_seats[^1], _seats[0]);
+        Note(new StageBeat(ReorderEvent, _seats[0].Who, 0, _seats[0].Fanfare,
+                           0, ""));
+        return true;
+    }
+
+    /// <summary>
+    /// <i>Stage Whisper</i>: move up to <paramref name="amount"/> of the back
+    /// performer's Fanfare to the front performer, min(amount, back - 1). It
+    /// never empties the back, so it never Bows it (a 0-cost Bow would loop
+    /// with Thunderous Applause and A Five-Century Act). With one performer
+    /// it does nothing. Returns what moved.
+    /// </summary>
+    public int Whisper(int amount)
+    {
+        if (_seats.Count < 2) return 0;
+        var back = _seats[^1];
+        var front = _seats[0];
+        var moved = System.Math.Max(0, System.Math.Min(amount, back.Fanfare - 1));
+        if (moved <= 0) return 0;
+        Drain(back, moved);
+        Note(new StageBeat(MoveEvent, back.Who, _seats.Count - 1, back.Fanfare,
+                           moved, ""));
+        front.Fanfare += moved;
+        NoteRaise(front, moved);
+        return moved;
+    }
+
+    /// <summary>
+    /// <i>Bring the House Down</i>: spend ALL of the FRONT performer's
+    /// Fanfare -- the first card that cashes the shield. The bar is emptied
+    /// exactly, so the performer leaves with a Bow (rule 7). Nothing on an
+    /// empty stage.
+    /// </summary>
+    public StageSpend SpendAllOfFront()
+    {
+        if (Lead is not { } lead) return new StageSpend(false, 0, null);
+        var paid = lead.Fanfare;
+        Drain(lead, paid);
+        SpentThisPlay = paid;
+        NoteSpend(lead, paid);
+        _seats.RemoveAt(0);
+        Note(new StageBeat("leave", lead.Who, -1, 0, paid, "spend"));
+        return new StageSpend(
+            true, paid, ExitOf(lead, StageDeparture.Spent, 0, held: 0));
     }
 
     // ---- the per-play spend record -----------------------------------
@@ -1495,6 +1670,10 @@ public sealed class FurinaStageLedger
     public void Clear()
     {
         ResetActMultipliers();
+        FadeHeld = false;
+        FrontHitSinceLastTurn = false;
+        BowsThisCombat = 0;
+        VerdictTarget = null;
         _seats.Clear();
         _pendingCurtainCall.Clear();
         _pendingCurtainExits.Clear();

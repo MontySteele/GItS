@@ -426,7 +426,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     "KLEEMOD-ARM_STAGE_WRIOTHESLEY",
                     "KLEEMOD-ARM_STAGE_SIGEWINNE",
                     "KLEEMOD-ARM_STAGE_CHARLOTTE",
-                    "KLEEMOD-ARM_STAGE_LYNETTE"}
+                    "KLEEMOD-ARM_STAGE_LYNETTE",
+                    # THE SUPPORTING POOL (2026-09-26): two more guests.
+                    "KLEEMOD-ARM_STAGE_LYNEY",
+                    "KLEEMOD-ARM_STAGE_ESCOFFIER"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -1264,6 +1267,8 @@ STAGE_SUMMONERS = {
     "proto_fs_gentilhomme_usher": ("Usher",),
     "proto_fs_surintendante_chevalmarin": ("Chevalmarin",),
     "proto_fs_mademoiselle_crabaletta": ("Crabaletta",),
+    # THE SUPPORTING POOL (2026-09-26): Gala Premiere names all three.
+    "proto_fs_gala_premiere": ("Usher", "Chevalmarin", "Crabaletta"),
 }
 
 

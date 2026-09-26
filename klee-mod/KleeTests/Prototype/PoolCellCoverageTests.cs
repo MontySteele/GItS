@@ -241,10 +241,13 @@ public class PoolCellCoverageTests
             //
             // THE GUEST CAST (2026-09-25) filled Rare/Skill: three Rare Guest
             // Stars (Neuvillette, Clorinde, Navia).
-            "furina-stage" => new[]
-            {
-                "Rare/Attack", "Rare/Power",
-            },
+            //
+            // THE SUPPORTING POOL (2026-09-26) filled the last two: three Rare
+            // Attacks (Bring the House Down, Grand Deluge beside Let the
+            // People Rejoice) and four Rare Powers (Eternal Applause, Regina
+            // of All Waters, One-Woman Show beside Arkhe Alignment and A
+            // Five-Century Act). No cell is short.
+            "furina-stage" => System.Array.Empty<string>(),
             _ => throw new InvalidOperationException(arm),
         }).OrderBy(n => n, StringComparer.Ordinal).ToList();
 

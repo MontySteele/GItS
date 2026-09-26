@@ -626,6 +626,13 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.LynetteKey + ".title"] =
                         Powers.FurinaStageLedger.DisplayName(
                             Powers.StagePerformer.Lynette),
+                    // THE SUPPORTING POOL (2026-09-26): two more guests.
+                    [Cards.ArmKeywordTips.LyneyKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Lyney),
+                    [Cards.ArmKeywordTips.EscoffierKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Escoffier),
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in

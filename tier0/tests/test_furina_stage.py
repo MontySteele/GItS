@@ -972,8 +972,9 @@ def test_the_pool_seam_swaps_its_rows_at_the_same_rarity(arm):
     that flips a module constant cannot reach behind it. What is being asked
     here is a question about two committed files anyway."""
     subs = loader.pool_substitutions("furina")
-    # batch one, R276's batch two, and the Guest Cast (2026-09-25)
-    assert len(subs) == 14 + 15 + 8
+    # batch one, R276's batch two, the Guest Cast (2026-09-25) and the
+    # supporting pool's 27 that replace a row (2026-09-26)
+    assert len(subs) == 14 + 15 + 8 + 27
     rarity = {r["id"]: r["rarity"] for r in _sheet_rows("furina-cards.yaml")}
     rarity.update({r["id"]: r["rarity"] for r in _proto_rows()})
     for shipped, proto in subs.items():
@@ -991,10 +992,14 @@ def test_every_stage_row_is_named_by_one_of_the_two_maps():
     on_sheet = {r["id"]: r.get("replaces") for r in _proto_rows()
                 if not r.get("multiplayer")}
     named = {**FS.POOL_SUBS, **FS.STARTER_SUBS}
-    assert set(named.values()) == set(on_sheet)
-    assert {p: s for s, p in named.items()} == on_sheet
-    # batch one, R276's batch two, and the Guest Cast (2026-09-25)
-    assert len(on_sheet) == 17 + 15 + 8
+    # THE SUPPORTING POOL (2026-09-26): the arm's ADDITIONS replace nothing.
+    assert set(named.values()) | set(FS.POOL_ADDS) == set(on_sheet)
+    assert {p: s for s, p in named.items()} == {
+        k: v for k, v in on_sheet.items() if k not in FS.POOL_ADDS}
+    assert all(on_sheet[k] is None for k in FS.POOL_ADDS)
+    # batch one, R276's batch two, the Guest Cast (2026-09-25) and the
+    # supporting pool's 28 (2026-09-26)
+    assert len(on_sheet) == 17 + 15 + 8 + 28
     # THE CO-OP SET's three are the MULTIPLAYER TIER: offered only in co-op,
     # outside the pool, replacing no shipped row -- so neither map names
     # them, and the tier's own mirror does.
