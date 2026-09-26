@@ -102,9 +102,9 @@ def test_the_bow_and_power_doors_book_where_they_raise(arm):
     p.stage_power_copies[FS.THUNDEROUS_APPLAUSE] = 1
     FS.raise_fanfare(st, 4)                 # chev 5
     FS.spend(st, 5)                         # chev bows; applause Raises 2
-    # A Rapt Audience: a power's Raise off what the lead lost.
+    # A Rapt Audience: a power's fixed Raise per hit on the lead.
     FS.summon(st, "crabaletta")
-    p.powers[FS.RAPT_AUDIENCE] = 50
+    p.powers[FS.RAPT_AUDIENCE] = 1
     FS.absorb(st, 2)
     led = st.stage_ledger
     assert led["gained"]["bow"] == 2

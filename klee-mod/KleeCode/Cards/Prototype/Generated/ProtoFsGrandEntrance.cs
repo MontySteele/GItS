@@ -55,7 +55,7 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 10 damage", "[gold]Spend[/gold] 5: deal 20 instead" };
+        new[] { "Deal 12 damage", "[gold]Spend[/gold] 5: deal 24 instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { true, true };
@@ -63,8 +63,8 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedDamageVar("PlainDamage", 10m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 20m, ValueProp.Move)
+            new FoldedDamageVar("PlainDamage", 12m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 24m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -88,11 +88,11 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
                                 "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 10 damage", "[gold]Spend[/gold] 5: deal 20 instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 12 damage", "[gold]Spend[/gold] 5: deal 24 instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 14m : 10m))
+            await DamageCmd.Attack((IsUpgraded ? 16m : 12m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
@@ -101,7 +101,7 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
         else
         {
             await FurinaStage.Spend(choiceContext, Owner.Creature, 5);
-            await DamageCmd.Attack((IsUpgraded ? 24m : 20m))
+            await DamageCmd.Attack((IsUpgraded ? 28m : 24m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
@@ -145,8 +145,8 @@ public sealed class ProtoFsGrandEntranceModeA : ModalOptionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedDamageVar("PlainDamage", 10m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 20m, ValueProp.Move)
+            new FoldedDamageVar("PlainDamage", 12m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 24m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
@@ -184,8 +184,8 @@ public sealed class ProtoFsGrandEntranceModeB : ModalOptionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedDamageVar("PlainDamage", 10m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 20m, ValueProp.Move)
+            new FoldedDamageVar("PlainDamage", 12m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 24m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()

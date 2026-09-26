@@ -396,10 +396,10 @@ Names are provisional.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Grand Entrance | 2 | Attack | Deal 10 damage. Spend 5: deal 20 instead. |
-| Ousia Surge | 1 | Attack | Deal damage equal to your back performer's Fanfare. (R276: was the front's.) |
-| Pneuma Refrain | 1 | Skill | Gain Block equal to your front performer's Fanfare. (R276: was the back's.) |
-| Bis! | 1 | Skill | Your front performer acts now. |
+| Grand Entrance | 2 | Attack | Deal 12 damage. Spend 5: deal 24 instead. [16 / 28] (2026-09-26 balance review: was 10 / 20.) |
+| Ousia Surge | 1 | Attack | Deal damage equal to your back performer's Fanfare. (R276: was the front's.) [plus 4] (2026-09-26 balance review: the upgrade was cost 0.) |
+| Pneuma Refrain | 1 | Skill | Gain Block equal to your front performer's Fanfare. (R276: was the back's.) [plus 4] (2026-09-26 balance review: the upgrade was cost 0.) |
+| Bis! | 1 | Skill | Your front performer acts twice. [cost 0] (2026-09-26 balance review: was "acts now". A lead that leaves after the first act does not act again.) |
 | Final Bow | 1 | Skill | Your back performer Bows and leaves. Gain Block equal to its Fanfare. Exhaust. (R276: was the front.) |
 
 **Rare (one)**
@@ -438,11 +438,11 @@ values; names are provisional. Upgrades in brackets.
 |---|---|---|---|
 | Gala Dinner | 1 | Skill | Each performer gains 3 Fanfare. [gains 4] |
 | Double Casting | 1 | Skill | Summon 2 random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
-| Tutti! | 1 | Skill | All your performers act now. [cost 0] (Round four: was 2, 1 upgraded.) |
+| Tutti! | 2 | Skill | All your performers act now. [cost 1] (Round four: was 2, 1 upgraded; round four's 1 and 0 undone in the 2026-09-26 balance review.) |
 | Bravura | 1 | Attack | Spend all of your back performer's Fanfare. Deal 3 damage per point. [4 per point] |
-| Full House | 2 | Power | If all three seats are filled at the end of your turn, your performers act twice. [cost 1] |
+| Full House | 3 | Power | If all three seats are filled at the end of your turn, your performers act twice. [cost 2] (2026-09-26 balance review: was 2, 1 upgraded.) |
 | Thunderous Applause | 1 | Power | Whenever a performer Bows, draw 1 card and your back performer gains 2 Fanfare. [gains 3] |
-| A Rapt Audience | 1 | Power | Whenever an enemy hits your front performer, your back performer gains half the Fanfare lost. Needs 2 performers. [gains the Fanfare lost] (The face drops "rounded up"; the rule still rounds up.) |
+| A Rapt Audience | 1 | Power | Whenever an enemy hits your front performer, your back performer gains 2 Fanfare. Needs 2 performers. [gains 3] (2026-09-26 balance review: was half the Fanfare lost, all of it upgraded. Copies add; a hit its Block fully absorbs does not count.) |
 
 **Rares (two)**
 

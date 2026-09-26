@@ -346,6 +346,25 @@ def test_full_house_makes_each_act_pay_again(arm):
     assert bows == ["neuvillette"]
 
 
+def test_bis_makes_a_guest_pay_twice_and_stops_when_it_leaves(arm):
+    """2026-09-26 balance review, Bis! acts twice: a guest's act pays each
+    time; a guest that paid its last Fanfare on the first act has left, so
+    the second act does not happen and the performer behind does not take
+    it."""
+    rich = _state([["neuvillette", 6], ["usher", 3]],
+                  enemies=[_enemy(hp=100)])
+    FS.perform_lead(rich, 2)
+    assert rich.stage_ledger["paid_other"] == {"neuvillette": 6}
+    assert rich.enemies[0].hp == 100 - 3 * 8           # two acts and a Bow
+    assert [m for m, _f in rich.player.stage] == ["usher"]
+    poor = _state([["neuvillette", 3], ["usher", 3]],
+                  enemies=[_enemy(hp=100)])
+    FS.perform_lead(poor, 2)
+    assert poor.enemies[0].hp == 100 - 2 * 8           # one act and a Bow
+    assert poor.player.block == 0                      # Usher never acted
+    assert [m for m, _f in poor.player.stage] == ["usher"]
+
+
 # ---------------------------------------------------------------------------
 # 5-6. THE FREE BOW, AND WRIOTHESLEY'S READING.
 # ---------------------------------------------------------------------------
