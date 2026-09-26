@@ -6308,9 +6308,10 @@ def _op_stage_scene_change(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_perform_lead(state: CombatState, fx: dict, card: Card) -> None:
-    """*Bis!* (sec.12): the lead performer performs its act now."""
-    for _ in range(_amount(state, fx.get("amount", 1))):
-        furina_stage.perform_lead(state)
+    """*Bis!* (sec.12): the lead performer acts `amount` times now (the
+    same seat each time: a lead that leaves after an act takes the rest of
+    the repeats with it)."""
+    furina_stage.perform_lead(state, _amount(state, fx.get("amount", 1)))
 
 
 def _op_stage_spend(state: CombatState, fx: dict, card: Card) -> None:

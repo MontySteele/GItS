@@ -168,7 +168,7 @@ public class FurinaStageSeatFixTests
         using var _ = new Arm();
         var (seat, stage) = Stage(
             (StagePerformer.Usher, 9), (StagePerformer.Crabaletta, 1));
-        seat.WithPower<RaptAudiencePower>(50);
+        seat.WithPower<RaptAudiencePower>(2);
 
         // No enemy behind this hit, so no refund -- but the hit is a beat.
         FurinaStage.AbsorbHit(seat.Creature, 5, dealer: null);
@@ -209,9 +209,9 @@ public class FurinaStageSeatFixTests
     [Fact]
     public void A_rapt_audience_still_refuses_a_lone_lead()
     {
-        // A lone lead is also the back; upgraded the refund is 100%, so a
-        // refund here would make a lone lead immortal. The rule stands and
-        // the FACE says "Needs 2 or more performers."
+        // A lone lead is also the back, so a refund here would bank on the
+        // performer the hit just emptied. The rule stands and the FACE says
+        // "Needs 2 performers."
         var src = Il.Calls(Il.Method("FurinaStage", "AbsorbHit"));
         Assert.Contains("FurinaStageLedger.get_Seats", src);
     }

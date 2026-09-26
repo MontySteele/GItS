@@ -2796,8 +2796,7 @@ APPLY_POWERS = {
         "performer gains {X} [gold]Fanfare[/gold]."),
     "fs_rapt_audience": ("RaptAudiencePower", None,
         "Whenever an enemy hits your front performer, your back performer "
-        "gains {X}% of the [gold]Fanfare[/gold] lost, rounded up. Needs 2 "
-        "performers."),
+        "gains {X} [gold]Fanfare[/gold]. Needs 2 performers."),
     "fs_five_century_act": ("FiveCenturyActPower", None,
         "Whenever a performer [gold]Bow[/gold]s, it returns at the back with "
         "1 [gold]Fanfare[/gold]."),
@@ -5655,7 +5654,12 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
     if op == "stage_scene_change":
         return "FurinaStage.SceneChange(Owner.Creature);"
     if op == "stage_perform_lead":
-        return "await FurinaStage.PerformLead(choiceContext, Owner.Creature);"
+        # Bis! (2026-09-26 balance review): `amount` is how many times the
+        # lead acts; 1 is the old face and prints no argument.
+        times = int(eff.get("amount", 1))
+        extra = f", {times}" if times != 1 else ""
+        return ("await FurinaStage.PerformLead(choiceContext, "
+                f"Owner.Creature{extra});")
     if op == "stage_spend":
         return ("await FurinaStage.Spend(choiceContext, Owner.Creature, "
                 f"{int(eff.get('amount', 1))});")

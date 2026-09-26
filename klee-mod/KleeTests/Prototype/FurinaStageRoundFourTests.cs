@@ -18,7 +18,8 @@ namespace KleeMod.Tests.Prototype;
 ///     performer) and the Raise powers (the Ancient's turn-start Raise,
 ///     Thunderous Applause). Arkhe Alignment's Pneuma prints "the lead
 ///     REGAINS" and does not summon.
-///   * Tutti! costs 1, 0 upgraded.
+///   * Tutti! costs 1, 0 upgraded (back to 2 and 1 in the 2026-09-26
+///     balance review).
 ///   * Chevalmarin's act files the per-enemy figure, so the page prints "2 to
 ///     every enemy" and not the four hits' total.
 ///   * The Ousia and Pneuma tips ride Arkhe Alignment's power too.
@@ -207,12 +208,14 @@ public class FurinaStageRoundFourTests
     // ---- Tutti! -----------------------------------------------------------
 
     [Fact]
-    public void Tutti_costs_one_and_zero_upgraded()
+    public void Tutti_costs_two_and_one_upgraded()
     {
+        // 2026-09-26 balance review: at 1 (0 upgraded) it beat every other
+        // card that makes a performer act.
         var src = RepoFile(Path.Combine(
             "klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
             "ProtoFsTutti.cs"));
-        Assert.Contains("base(1, CardType.Skill", src);
+        Assert.Contains("base(2, CardType.Skill", src);
         Assert.Contains("EnergyCost.UpgradeBy(-1)", src);
     }
 

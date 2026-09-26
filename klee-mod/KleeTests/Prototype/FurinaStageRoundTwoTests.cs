@@ -130,7 +130,7 @@ public class FurinaStageRoundTwoTests
 
     [Theory]
     [InlineData("ProtoFsCurtainRise", "FoldedDamageVar", 7, 13, 3)]
-    [InlineData("ProtoFsGrandEntrance", "FoldedDamageVar", 10, 20, 4)]
+    [InlineData("ProtoFsGrandEntrance", "FoldedDamageVar", 12, 24, 4)]
     [InlineData("ProtoFsTidalFlourish", "DamageVar", 5, 9, 3)]
     public void A_spend_riders_two_damage_numbers_are_vars_and_not_literals(
         string type, string varClass, int plain, int branch, int delta)

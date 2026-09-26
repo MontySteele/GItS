@@ -809,8 +809,10 @@ def _stage_defence(state: CombatState, card: Card) -> float:
                 total += furina_stage.ACT_USHER_BLOCK / 3
         elif op == "stage_perform_lead":
             lead = furina_stage.lead(state.player)
+            times = fx.get("amount", 1)
+            times = times if isinstance(times, int) else 1
             if lead is not None and lead[0] == "usher":
-                total += furina_stage.ACT_USHER_BLOCK
+                total += furina_stage.ACT_USHER_BLOCK * times
         elif op == "stage_guest":
             # THE GUEST CAST (2026-09-25): a body holding its arrival
             # Fanfare, priced as a Raise is -- in full where it will stand in
@@ -850,7 +852,9 @@ def _stage_offence(state: CombatState, card: Card) -> float:
             total += per.get(member, mean)
         elif op == "stage_perform_lead":
             lead = furina_stage.lead(state.player)
-            total += per.get(lead[0], 0.0) if lead else 0.0
+            times = fx.get("amount", 1)
+            times = times if isinstance(times, int) else 1
+            total += per.get(lead[0], 0.0) * times if lead else 0.0
         elif op == "stage_guest":
             # THE GUEST CAST (2026-09-25): the guest's first act, at the end
             # of this turn, off its printed numbers. The supports' acts are

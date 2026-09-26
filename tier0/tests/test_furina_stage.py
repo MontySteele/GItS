@@ -1331,17 +1331,43 @@ def test_a_five_century_act_does_not_double_the_rares_return(arm):
     assert st.player.stage == [["usher", 1], ["crabaletta", 1]]
 
 
-def test_a_rapt_audience_banks_half_of_what_the_lead_lost(arm):
+def test_a_rapt_audience_banks_a_fixed_amount_per_hit(arm):
+    """2026-09-26 balance review: the back gains the power's Amount (2, 3
+    upgraded) per enemy hit that takes Fanfare off the front, whatever the
+    hit's size; copies add. It was a share of what the front lost."""
     st = _state()
-    st.player.powers[FS.RAPT_AUDIENCE] = 50
+    st.player.powers[FS.RAPT_AUDIENCE] = 2
     st.player.stage = [["usher", 9], ["crabaletta", 1]]
     FS.absorb(st, 5)
-    assert st.player.stage == [["usher", 4], ["crabaletta", 4]]   # 1 + ceil(2.5)
+    assert st.player.stage == [["usher", 4], ["crabaletta", 3]]   # 1 + 2
+    FS.absorb(st, 1)
+    assert st.player.stage == [["usher", 3], ["crabaletta", 5]]   # size-blind
+    two = _state()
+    two.player.powers[FS.RAPT_AUDIENCE] = 4                       # 2 copies
+    two.player.stage = [["usher", 9], ["crabaletta", 1]]
+    FS.absorb(two, 5)
+    assert two.player.stage == [["usher", 4], ["crabaletta", 5]]
     alone = _state()
-    alone.player.powers[FS.RAPT_AUDIENCE] = 50
+    alone.player.powers[FS.RAPT_AUDIENCE] = 2
     alone.player.stage = [["usher", 9]]
     FS.absorb(alone, 5)
     assert alone.player.stage == [["usher", 4]]
+
+
+def test_bis_acts_twice(arm):
+    """2026-09-26 balance review: Bis! is "Your front performer acts twice."
+    Only the front acts; the seat behind it does not. The guest half (a lead
+    that leaves after its first act takes the second with it) is pinned in
+    `test_furina_guest_cast.py`."""
+    st = _state()
+    st.player.stage = [["usher", 3], ["crabaletta", 2]]
+    effects.resolve_card(st, _card(effects=[
+        {"op": "stage_perform_lead", "amount": 2}]))
+    assert st.player.block == 2 * FS.ACT_USHER_BLOCK
+    assert st.enemies[0].hp == 99                  # Crabaletta never acted
+    row = {r["id"]: r for r in _proto_rows()}["proto_fs_bis"]
+    assert row["effects"] == [{"op": "stage_perform_lead", "amount": 2}]
+    assert row["cost"] == 1 and row["upgrade"] == {"cost": -1}
 
 
 def test_arkhe_alignment_doubles_one_half_of_the_acts(arm):
@@ -1418,11 +1444,39 @@ def test_arkhe_asks_once_and_copies_add(arm):
     assert st.player.block == 3 * FS.ACT_USHER_BLOCK
 
 
-def test_tutti_costs_one_and_zero_upgraded():
-    """ROUND FOUR: Tutti! costs 1, and 0 upgraded (was 2 and 1)."""
+def test_tutti_costs_two_and_one_upgraded():
+    """2026-09-26 balance review: Tutti! costs 2, and 1 upgraded (round four
+    had cut it to 1 and 0; at that price it beat every other card that makes
+    a performer act)."""
     row = {r["id"]: r for r in _proto_rows()}["proto_fs_tutti"]
-    assert row["cost"] == 1
+    assert row["cost"] == 2
     assert row["upgrade"] == {"cost": -1}
+
+
+def test_the_balance_review_numbers_2026_09_26(arm, monkeypatch):
+    """Full House 3 (2 upgraded); Grand Entrance 12 / Spend 5 for 24; Ousia
+    Surge and Pneuma Refrain upgrade by +4 on the formula's base, not by
+    cost; A Rapt Audience applies 2, 3 upgraded."""
+    import copy
+    from tier0.content import upgrades
+    rows = {r["id"]: r for r in _proto_rows()}
+    assert rows["proto_fs_full_house"]["cost"] == 3
+    assert rows["proto_fs_full_house"]["upgrade"] == {"cost": -1}
+    modes = rows["proto_fs_grand_entrance"]["effects"][0]["modes"]
+    assert modes[0]["effects"][0]["amount"] == 12
+    assert modes[1]["effects"][1]["amount"] == 24
+    rapt = rows["proto_fs_rapt_audience"]
+    assert rapt["effects"][0]["amount"] == 2
+    assert rapt["upgrade"] == {"power_amount": 1}
+    monkeypatch.setattr(upgrades, "_upgrade_index", lambda: {
+        cid: dict(rows[cid]["upgrade"])
+        for cid in ("proto_fs_ousia_surge", "proto_fs_pneuma_refrain")})
+    for cid, op in (("proto_fs_ousia_surge", "damage"),
+                    ("proto_fs_pneuma_refrain", "block")):
+        card = upgrades.apply_upgrade(copy.deepcopy(loader.get_card(cid)))
+        assert card.cost == 1
+        assert card.effects[0]["op"] == op
+        assert card.effects[0]["amount_formula"]["base"] == 4
 
 
 # ---------------------------------------------------------------------------

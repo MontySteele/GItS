@@ -620,9 +620,9 @@ public static partial class FurinaStage
     /// Rule 6's middle term with <i>A Rapt Audience</i> on it (R276 batch
     /// two). The ledger absorbs as it always has; then, if an ENEMY's hit
     /// took Fanfare off a lead that was not also the back performer, each
-    /// Rapt Audience Raises its share of what the lead lost on the back
-    /// performer -- half rounded up, or all of it upgraded
-    /// (<see cref="RaptAudiencePower"/>'s Amount is the percentage).
+    /// Rapt Audience Raises its Amount on the back performer: a fixed 2 (3
+    /// upgraded) per hit, copies adding (2026-09-26 balance review; it was a
+    /// share of what the lead lost, which scaled with the bank).
     /// Synchronous, for <see cref="FurinaStageLedger.Absorb"/>'s reason; the
     /// bars reach the bodies, and a lead this hit emptied takes its Bow, at
     /// the flush that follows every hit (<see cref="Flush"/>).
@@ -655,9 +655,7 @@ public static partial class FurinaStage
         foreach (var rapt in target.Powers.OfType<RaptAudiencePower>()
                      .ToList())
         {
-            var raise = (int)System.Math.Ceiling(
-                result.Absorbed * rapt.Amount / 100m);
-            ledger.Raise(raise);
+            ledger.Raise((int)rapt.Amount);
         }
         return result.ReachedFurina;
     }
@@ -958,14 +956,22 @@ public static partial class FurinaStage
         return dealt[0];
     }
 
-    /// <summary><i>Bis!</i>: the lead performer performs its act now.
-    /// </summary>
+    /// <summary><i>Bis!</i>: the lead performer acts <paramref name="times"/>
+    /// times now (twice since the 2026-09-26 balance review). Each act
+    /// resolves in full before the next, and a guest's act pays each time
+    /// (rule 4); a lead that left after an act (it paid its last Fanfare)
+    /// does not act again -- <see cref="Perform"/> asks the ledger whether
+    /// the seat still holds it, and the next performer does not inherit the
+    /// repeat.</summary>
     public static async Task PerformLead(PlayerChoiceContext choiceContext,
-                                         Creature? owner)
+                                         Creature? owner, int times = 1)
     {
         // A resting returnee does not act this turn (R276 batch two).
-        if (Lead(owner) is { Resting: false } lead)
+        if (Lead(owner) is not { Resting: false } lead) return;
+        for (var i = 0; i < times; i++)
         {
+            if (owner!.IsDead) return;
+            if (!FurinaStageLedger.For(owner).Holds(lead)) return;
             await Perform(choiceContext, owner, lead);
         }
     }

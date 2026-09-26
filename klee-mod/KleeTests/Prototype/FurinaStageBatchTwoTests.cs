@@ -4,6 +4,7 @@ using System.Reflection;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
@@ -340,12 +341,72 @@ public class FurinaStageBatchTwoTests
         using var _ = new Arm();
         var (seat, stage) = Stage(
             (StagePerformer.Usher, 9), (StagePerformer.Crabaletta, 1));
-        seat.WithPower<RaptAudiencePower>(50);
+        seat.WithPower<RaptAudiencePower>(2);
 
         var reached = FurinaStage.AbsorbHit(seat.Creature, 5, dealer: null);
 
         Assert.Equal(0, reached);
         Assert.Equal(4, stage.Lead!.Fanfare);
         Assert.Equal(1, stage.Back!.Fanfare);
+    }
+
+    // ---- 2026-09-26 balance review -----------------------------------------
+
+    [Theory]
+    [InlineData(5, 2, 3)]      // one copy: 1 + 2, whatever the hit's size
+    [InlineData(1, 2, 3)]
+    [InlineData(5, 4, 5)]      // two copies add: 1 + 4
+    [InlineData(5, 3, 4)]      // upgraded: 1 + 3
+    public void A_rapt_audience_raises_a_fixed_amount_per_enemy_hit(
+        int hit, int amount, int back)
+    {
+        using var _ = new Arm();
+        var (seat, stage) = Stage(
+            (StagePerformer.Usher, 9), (StagePerformer.Crabaletta, 1));
+        seat.WithPower<RaptAudiencePower>(amount);
+
+        FurinaStage.AbsorbHit(seat.Creature, hit, EnemyBody());
+
+        Assert.Equal(9 - hit, stage.Lead!.Fanfare);
+        Assert.Equal(back, stage.Back!.Fanfare);
+    }
+
+    [Fact]
+    public void A_rapt_audience_row_is_two_and_three_upgraded()
+    {
+        var card = new ProtoFsRaptAudience();
+        Assert.Equal(2, card.DynamicVars["PowerAmount"].IntValue);
+        var face = card.Localization!.Single(l => l.Item1 == "description")
+            .Item2;
+        Assert.Contains("gains {PowerAmount:diff()} [gold]Fanfare[/gold]",
+                        face);
+        Assert.Contains("Needs 2 performers.", face);
+        var upgrade = Il.Calls(Il.Method("ProtoFsRaptAudience", "OnUpgrade"));
+        Assert.Contains("DynamicVar.UpgradeValueBy", upgrade);
+    }
+
+    [Fact]
+    public void Bis_acts_twice_and_a_lead_that_left_does_not_act_again()
+    {
+        // Bis! is "Your front performer acts twice": the card hands the verb
+        // 2, and the verb asks the ledger before each act whether the seat
+        // still holds the lead (a guest that paid its last Fanfare has left).
+        var bis = Il.Calls(Il.Method("ProtoFsBis", "OnPlay"));
+        Assert.Contains("FurinaStage.PerformLead", bis);
+        var verb = Il.Calls(Il.Method("FurinaStage", "PerformLead"));
+        Assert.Contains("FurinaStageLedger.Holds", verb);
+        Assert.Contains("FurinaStage.Perform", verb);
+        var face = new ProtoFsBis().Localization!
+            .Single(l => l.Item1 == "description").Item2;
+        Assert.Equal("Your [gold]front performer[/gold] acts twice.", face);
+    }
+
+    /// <summary>A creature on the ENEMY side (CoopSetTests' helper): the
+    /// Rapt Audience asks <c>IsEnemy</c> of the dealer.</summary>
+    private static Creature EnemyBody()
+    {
+        var body = Seat.Klee(40).Creature;
+        Seat.Force(body, "Side", MegaCrit.Sts2.Core.Combat.CombatSide.Enemy);
+        return body;
     }
 }
