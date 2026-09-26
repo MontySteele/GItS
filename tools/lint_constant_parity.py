@@ -524,18 +524,20 @@ UNMIRRORED: dict[str, str] = {
     # this gate exists to refuse -- and the MIRRORED table above carries the
     # pairs.
     # The placement pass's two, which are a different kind of number entirely:
-    # they are the BASE GAME's own offsets, lifted out of
-    # `NCombatRoom.AddCreature`'s pet layout (`owner.X - 20`, `owner.Y + 10`)
-    # so the arm's seat-ordered re-flow puts a body exactly where the engine's
-    # own layout would have. The sim draws nothing.
-    "FurinaStagePlacement.OwnerXOffset":
-        "A SCENE OFFSET, not balance: the base game's own pet placement "
-        "constant, lifted from `NCombatRoom.AddCreature` so the stage's "
-        "seat-ordered re-flow lands a performer where the engine's own layout "
-        "would have. The sim has no scene tree.",
+    # scene offsets. The Y is the BASE GAME's own, lifted out of
+    # `NCombatRoom.AddCreature`'s pet layout (`owner.Y + 10`); the X is no
+    # longer the engine's `owner.X - 20`, which stood the back performer on
+    # Furina's legs (2026-09-26 smoke), but a floor gap measured out from her
+    # hitbox edge, Osty's reference point. The sim draws nothing.
+    "FurinaStagePlacement.Gap":
+        "A SCENE OFFSET, not balance: the floor between Furina's hitbox edge "
+        "and the first performer, and between every two performers, so the "
+        "line stands clear of her the way Osty stands clear of the "
+        "Necrobinder. The sim has no scene tree.",
     "FurinaStagePlacement.OwnerYOffset":
-        "A SCENE OFFSET, not balance: the second half of the base game's own "
-        "pet placement constant, lifted for the reason directly above.",
+        "A SCENE OFFSET, not balance: the base game's own pet placement "
+        "constant, lifted from `NCombatRoom.AddCreature` (`owner.Y + 10`) so "
+        "a performer stands on the line the engine's own layout would give it.",
     "MeterLedger.MaxRows":
         "`EB-216`. INSTRUMENT, not balance: how many per-play ledger rows the "
         "mod keeps before dropping the oldest. It touches no game number, no "

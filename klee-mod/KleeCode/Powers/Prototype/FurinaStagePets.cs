@@ -33,7 +33,11 @@ namespace KleeMod.Powers;
 /// The Bake-Kurage is <c>CustomPetModel(visibleHp: false)</c> on a 9999 pool
 /// because it must not die; a performer's bar IS its Fanfare (rule 1), so the
 /// flag is true and <c>BaseLib.CustomPetModel.IsHealthBarVisible</c> returns
-/// it. HP must be at least 1 for a live creature, so the ledger never writes a
+/// it. THE FLAG ALONE DOES NOT SHOW IT: <c>NCombatRoom.AddCreature</c> hides
+/// every non-Osty pet's bar on each add, and
+/// <see cref="FurinaStagePlacement.ShowBars"/> (a postfix on that add) puts
+/// it back -- the 2026-09-26 smoke found no performer had ever shown one.
+/// HP must be at least 1 for a live creature, so the ledger never writes a
 /// 0: a performer at 0 has LEFT, and <see cref="FurinaStagePets"/> removes the
 /// body in the same reconcile.
 ///
@@ -61,8 +65,8 @@ namespace KleeMod.Powers;
 /// third of the jellyfish's and the sway a half, for the same reason.
 ///
 /// <c>Bounds</c> IS THE PLACEMENT DIAL and is cut to each sprite's real width
-/// (121 / 129 / 120): <c>NCombatRoom</c> spaces a player's pets by the OWNER's
-/// box and then offsets each by its OWN half-width, so a box wider than the
+/// (121 / 129 / 120): <see cref="FurinaStagePlacement"/> packs the line out
+/// from Furina's hitbox edge by each body's OWN box, so a box wider than the
 /// art would space the line by a margin nobody can see.
 ///
 /// THE FALLBACK IS STILL OSTY and stays, on the jellyfish's own terms:
