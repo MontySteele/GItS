@@ -1,13 +1,13 @@
 # Furina balance review, 2026-09-26
 
-**Why this review:** [USER]'s first solo Stage run, on 0.2.3820+proto, beat Ascension 2 ("Aeonglass was a decent struggle"). His verdict was "Overall I think the core concept is sound". His notes, in his words:
+**Why this review:** [USER]'s first solo Stage run, on 0.2.3820+proto, beat Ascension 2 ("Aeonglass was a decent struggle"). Their verdict was "Overall I think the core concept is sound". Their notes, in their words:
 
 - "some of her powers probably create absurd levels of Fanfare under the right conditions, such as stacking multiple copies of A Rapt Audience, and I didn't notice any Fanfare decaying"
 - "Some cards definitely need a balance review, such as Tutti! against the other 'performer acts now' cards I saw"
 - "unused boxes to her left" crowd the UI. That is a separate cleanup PR.
 - "The overhead turn predictor is a decent start, but we should think of how to rework the element to be less mechanical and more flavorful" (pick 2)
 
-His run, from his game log: 550 card plays. The most-played Stage cards were Step Forward (33), Rising Applause (33), Curtain Rise (33, Spend mode most of the time), Tidal Flourish (25), Let the People Rejoice (23), Lynette (20), Full House (18) and Thunderous Applause (17). He played A Rapt Audience 7 times.
+Their run, from their game log: 550 card plays. The most-played Stage cards were Step Forward (33), Rising Applause (33), Curtain Rise (33, Spend mode most of the time), Tidal Flourish (25), Let the People Rejoice (23), Lynette (20), Full House (18) and Thunderous Applause (17). They played A Rapt Audience 7 times.
 
 ## Yardsticks
 
@@ -18,7 +18,7 @@ His run, from his game log: 550 card plays. The most-played Stage cards were Ste
 ## Why the Fanfare ran away
 
 - **A Rapt Audience scales with copies.** Each copy adds half the Fanfare the front loses (all of it when upgraded). Two upgraded copies turn every hit on the front into twice its size in Fanfare at the back: a printer, not a conversion.
-- **The fade has an exit.** Rule 12 fades only the seats behind the front. Step Forward (0 cost, played 33 times) moves the bank to the front, where it never fades and regenerates. Rapt Audience's gains also arrive on the enemy's turn, after that turn's fade. So a big bank never met the fade. That is why he "didn't notice any Fanfare decaying". The fade also has no animation in game; the cleanup PR adds one.
+- **The fade has an exit.** Rule 12 fades only the seats behind the front. Step Forward (0 cost, played 33 times) moves the bank to the front, where it never fades and regenerates. Rapt Audience's gains also arrive on the enemy's turn, after that turn's fade. So a big bank never met the fade. That is why they "didn't notice any Fanfare decaying". The fade also has no animation in game; the cleanup PR adds one.
 
 ## Changes (Claude ships these; prototype rows only)
 
@@ -34,8 +34,8 @@ His run, from his game log: 550 card plays. The most-played Stage cards were Ste
 
 ## Left alone, and watched
 
-- **Thunderous Applause** (draw 1 and +2 Fanfare per Bow) with **A Five-Century Act** (every Bow returns at the back). Together they are the Bow engine, and he played the pair a lot. It is a Rare, so it bends rather than being removed, and the fade now governs its Fanfare.
-- **Repeat Guest Star copies:** the 8-Fanfare guests (Lynette, Sigewinne, Wriothesley) give 8 Fanfare, a free act and a body for 1 Energy. That is more than Rising Applause's 5. He played Lynette 20 times. With the front exempt from the fade (pick 1c), the repeat copy is the lever if Fanfare still runs away.
+- **Thunderous Applause** (draw 1 and +2 Fanfare per Bow) with **A Five-Century Act** (every Bow returns at the back). Together they are the Bow engine, and they played the pair a lot. It is a Rare, so it bends rather than being removed, and the fade now governs its Fanfare.
+- **Repeat Guest Star copies:** the 8-Fanfare guests (Lynette, Sigewinne, Wriothesley) give 8 Fanfare, a free act and a body for 1 Energy. That is more than Rising Applause's 5. They played Lynette 20 times. With the front exempt from the fade (pick 1c), the repeat copy is the lever if Fanfare still runs away.
 - **Gala Dinner** (+3 to each performer). It is spread across the seats, and two of them fade.
 - **Let the People Rejoice.** The Rapt Audience fix and the fade take away its absurd case, so its number stays.
 - **Starter cards** (Take the Stage, Curtain Rise, Rising Applause) are never changed.
