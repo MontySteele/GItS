@@ -445,10 +445,18 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
                     face["upgraded_face"] = game_face
                     face["upgraded_note"] = ""
                     up_cost = _text(raw.get("upgraded_cost"))
-                    if (not face["upgraded_cost"] and up_cost
-                            and up_cost != _text(raw.get("cost"))):
+                    # 2026-09-26 (control seat, Regent): and the upgraded
+                    # STAR cost; an absent key (an older bridge) is the
+                    # unupgraded one.
+                    up_star = (_text(raw.get("upgraded_star_cost"))
+                               if "upgraded_star_cost" in raw
+                               else face.get("star_cost") or "")
+                    moved = ((up_cost and up_cost != _text(raw.get("cost")))
+                             or up_star != (face.get("star_cost") or ""))
+                    if not face["upgraded_cost"] and moved:
                         face["upgraded_cost"] = qa_packet.cost_label(
-                            dict(face, cost=up_cost))
+                            dict(face, cost=up_cost or face.get("cost"),
+                                 star_cost=up_star))
         picked = [_card_face(c) for c in _preview_cards(state, st)]
         # How many results the transform screen has NOT chosen yet, and
         # whether its preview came through in a shape this page can read at

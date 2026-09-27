@@ -224,7 +224,9 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
         # cannot say different things about one refusal; a reason the wire
         # spells as a sentence still comes through in the game's own words.
         out.append("    CANNOT BE PLAYED: "
-                   + (qa_packet.unplayable_reason(c["unplayable_reason"])
+                   + (qa_packet.unplayable_reason(
+                       c["unplayable_reason"], c.get("stars_have"),
+                       c.get("star_cost"))
                       or "the game gives no reason"))
         # `EB-271`: and the clause that stops the vague one being vague, on
         # its own line under it, because it is this page's sentence and not
@@ -1923,13 +1925,33 @@ def _frozen_clause(row: dict[str, Any], obs: dict[str, Any],
 BOARD_BEHIND_HEADING = "## The fight behind this chooser"
 
 
+def _stars_line(you: dict[str, Any]) -> list[str]:
+    """The Regent's star total, beside energy (2026-09-26, control seat).
+
+    Printed wherever the wire sends `stars`, which is wherever the game's own
+    counter shows. Star Next Turn keeps its own row among the powers below.
+    """
+    if you.get("stars") is None:
+        return []
+    return [f"- Stars {you['stars']}"]
+
+
+def _status_clause(counts: Any) -> str:
+    """` (5 Dazed)` for a pile holding Status cards, `""` otherwise."""
+    if not counts:
+        return ""
+    return " (" + ", ".join(f"{n} {name}" for name, n in counts) + ")"
+
+
 def _render_board_behind(c: dict[str, Any]) -> list[str]:
     """The fight under a mid-fight chooser: you, your hand, the stage and each
     enemy's HP and intent."""
     you = c["you"]
     out = ["", BOARD_BEHIND_HEADING, "",
            f"- HP {you['hp']}/{you['max_hp']} · Block {you['block']} · "
-           f"Energy {you['energy']}/{you['max_energy']}"]
+           f"Energy {you['energy']}/{you['max_energy']}"
+           + (f" · Stars {you['stars']}" if you.get("stars") is not None
+              else "")]
     hand = [card["title"] for card in c.get("hand") or []]
     out.append("- Your hand: " + (", ".join(hand) if hand
                                   else "(your hand is empty)"))
@@ -2498,6 +2520,7 @@ def render(obs: dict[str, Any]) -> str:
                 f"- HP {you['hp']}/{you['max_hp']}",
                 f"- Block {you['block']}",
                 f"- Energy {you['energy']}/{you['max_energy']}"]
+        out += _stars_line(you)
         defined = {row["name"] for row in (obs.get("keywords") or [])}
         spark_named = False
         for name, amount in sorted(you["meters"].items()):
@@ -2589,8 +2612,11 @@ def render(obs: dict[str, Any]) -> str:
                     and _fold(pw.get("name")) == "spark"):
                 out.append("    - " + _spark_sources_line(c))
                 spark_named = True
-        out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "
-                   f"{c['piles']['discard']} discarded, "
+        status = c.get("pile_status") or {}
+        out.append(f"- Piles: {c['piles']['draw']} in the draw pile"
+                   f"{_status_clause(status.get('draw'))}, "
+                   f"{c['piles']['discard']} discarded"
+                   f"{_status_clause(status.get('discard'))}, "
                    f"{c['piles']['exhaust']} exhausted")
         out += _orb_lines(you.get("orbs"))
         out += _ally_lines(c.get("pets") or [])

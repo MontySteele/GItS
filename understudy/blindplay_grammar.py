@@ -672,8 +672,11 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     if entry.get("can_play") is False:
         # `EB-264`: the same translation the page uses, so a refusal and the
         # card's own line cannot disagree about why.
+        # 2026-09-26 (control seat, Regent): with the star total and the
+        # card's star cost, so a star refusal says both numbers.
         reason = qa_packet.unplayable_reason(
-            entry.get("unplayable_reason_text") or entry.get("unplayable_reason"))
+            entry.get("unplayable_reason_text") or entry.get("unplayable_reason"),
+            _int(_player(state).get("stars")), entry.get("star_cost"))
         return _refuse(f"{titles[idx]!r} cannot be played right now"
                        + (f": {reason}" if reason else ""))
     post: dict[str, Any] = {"action": "play_card", "card_index": idx}
