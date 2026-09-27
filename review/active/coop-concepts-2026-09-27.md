@@ -4,9 +4,18 @@
 character-specific multiplayer concepts, like Furina sharing Fanfare or Klee
 providing DEF shred or energy restoration analogs as they do in Genshin."
 
-**Stage:** Paper. This proposes a direction and six cards (two per character)
-for [USER] to rule on taste. Nothing is built until the picks are ruled. The
-first two-seat co-op round tests the six co-op cards that already exist.
+**Stage:** Paper, ruled. The four cards below are to be built, and the first
+two-seat co-op round tests the co-op cards.
+
+**Ruled 2026-09-27, all four picks at their defaults.** [USER]: "Sparks for
+Everyone may be too strong (in a deck that's actively trying to farm sparks
+anyway, this reads 'give all other players +1 energy per turn') but might also
+be fine at 2 cost. Otherwise it sounds good. I'm fine with these defaults.
+Likewise I think giving Kokomi a Rare + Exhaust co-op heal is also fine."
+
+So Sparks for Everyone keeps cost 2 at every level. Its upgrade is Innate, not
+cost −1, and the co-op seat round watches it for strength. Kokomi's pair,
+including a Rare ally heal that Exhausts, is designed in her review pass.
 
 ## What the base game does
 
@@ -67,7 +76,7 @@ Numbers are first drafts, priced against the base cards named beside them.
 | Furina | Raise a Toast | 1 | Skill | Uncommon | Another player gains temporary Strength equal to your front performer's Fanfare, up to 6. | Coordinate (5 for 1) |
 | Furina | The Crowd Roars | 2 | Power | Rare | Whenever another player loses HP, your front performer gains 1 Fanfare. | People of Fontaine (1 per ally Attack) |
 | Klee | Shrapnel | 1 | Skill | Uncommon | Place a Mine 4. While an enemy holds your Mine, other players' Attacks deal 50% more damage to it. | Flanking (x2 for allies, cost 2) |
-| Klee | Sparks for Everyone | 2 | Power | Rare | The first time each turn one of your Bombs goes off, each other player gains 1 energy. | Believe In You (2 energy once), Energy Surge |
+| Klee | Sparks for Everyone | 2 | Power | Rare | The first time each turn one of your Bombs goes off, each other player gains 1 energy. (Upgrade: Innate.) | Believe In You (2 energy once), Energy Surge |
 
 Notes:
 
