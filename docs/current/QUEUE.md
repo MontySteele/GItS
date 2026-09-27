@@ -11,6 +11,14 @@ line leaves this file. Closed picks are in git
 All fifteen picks of the 2026-09-23 design and process review were ruled at
 their defaults (R276, the last R number); nothing from them is open here.
 
+## Co-op concepts, 2026-09-27
+
+`review/active/coop-concepts-2026-09-27.md`, picks 1 to 4:
+(1) direction: each character's co-op cards take its Genshin team role and
+grow to five (default); (2) Furina's pair, Raise a Toast and The Crowd Roars
+(default: both); (3) Klee's pair, Shrapnel and Sparks for Everyone (default:
+both); (4) Kokomi's pair waits for her review pass (default).
+
 ## Eyes-on looks (materials ready; no build waits on them)
 
 - **Curtain Call faces:** approve or veto the twelve faces and the A0 smoke by
