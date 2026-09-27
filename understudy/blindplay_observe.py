@@ -27,14 +27,16 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         upgrade_deck_floor)
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
-                                        _reward_option, _shop_options,
+                                        _reward_option, _shop_items,
+                                        _shop_options,
                                         deck_elements, relic_faces,
                                         remember_deck, run_change, stage_arm)
 from understudy.blindplay_notes import (MODE_CHOOSER_PROMPT,
                                         REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
-                                       _fold, _hand, _int, _player, _potions,
+                                       _fold, _hand, _int,
+                                       _is_mod_source_tip, _player, _potions,
                                        _relics, _screen, _text)
 from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
                                         SELECT_SCREENS, SPHERE_REVEAL,
@@ -141,6 +143,38 @@ def _show_relics(state: dict[str, Any], obs: dict[str, Any]) -> None:
     held = relic_faces(state)
     if held:
         obs["held_relics"] = held
+
+
+def _offer_words(state: dict[str, Any], st: str) -> list[dict[str, str]]:
+    """The words a relic or potion on this screen defines, off its own tips.
+
+    2026-09-26 (control seats, Silent and Ironclad): Vigor (Akabeko), Regen,
+    Thorns (Bronze Scales), Royally Approved (Royal Stamp) and Buffer (Lucky
+    Tonic) were defined only once they stood on the board in a fight. The
+    game hangs each word's tip on the relic or potion that prints it, and the
+    wire sends those tips (`keywords`) on the shop shelf, the reward rows, the
+    relic choosers and the belt. A card's tips already print under the card.
+    """
+    raw: list[Any] = []
+    if st in ("shop", "fake_merchant"):
+        raw += [i for i in _shop_items(state)
+                if _fold(i.get("category")) in ("relic", "potion")]
+    elif st == "rewards":
+        raw += [r for r in _reward_items(state) if isinstance(r, dict)
+                and _fold(r.get("type")) in ("relic", "potion")]
+    elif st in ("treasure", "relic_select"):
+        raw += [r for r in _relic_options(state) if isinstance(r, dict)]
+    raw += [p for p in _potions(state) if isinstance(p, dict)]
+    out: list[dict[str, str]] = []
+    for entry in raw:
+        for tip in entry.get("keywords") or []:
+            if not isinstance(tip, dict) or _is_mod_source_tip(tip):
+                continue
+            name = _text(tip.get("name"))
+            text = _text(tip.get("description") or tip.get("text"))
+            if name and text:
+                out.append({"name": name, "text": text})
+    return out
 
 
 def observation(state: dict[str, Any]) -> dict[str, Any]:
@@ -788,6 +822,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     # gets the rule, and a reader added tomorrow gets it for free. After the
     # sprite pass, so a word inside a rewritten icon tag is read as it prints.
     obs["keywords"] = keyword_notes(obs)
+    # 2026-09-26: and the words an offered relic or potion prints, defined
+    # where it is offered rather than once it is on the board.
+    if not obs["blocked"]:
+        named = {row["name"] for row in obs["keywords"]}
+        for row in _offer_words(state, st):
+            if row["name"] not in named:
+                named.add(row["name"])
+                obs["keywords"].append(row)
 
     # The wire's own screen name is the ONE token exempted from the snake_case
     # rule, and only because a refusal has to be able to name what it refused.

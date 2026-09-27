@@ -368,7 +368,9 @@ def test_a_base_game_sprite_tag_renders_instead_of_refusing():
     # defect; brackets on this page mean "unresolved" everywhere else, so the
     # one token that WAS resolved is the one that reads as broken. The subject
     # is a word in the sentence now.
-    assert "gain Energy." in page
+    # 2026-09-26 (control seat, Silent): and ONE pip is a count of one --
+    # "Tactician printed 'Gain Energy' with no number".
+    assert "gain 1 Energy." in page
     assert "[Energy]" not in page
     assert "silent" not in page and ".png" not in page
 
@@ -1515,7 +1517,7 @@ def test_the_line_after_a_claim_prints_the_icon_and_not_the_file():
     answer = blindplay._result_line(
         {"status": "ok", "message": "Venerable Tea Set: gain "
                                     "[ironclad_energy_icon.png]"})
-    assert answer == "ok Venerable Tea Set: gain Energy"
+    assert answer == "ok Venerable Tea Set: gain 1 Energy"
 
 
 def test_a_relic_face_folds_the_icon_wherever_it_is_printed():
@@ -3417,7 +3419,7 @@ def test_a_live_face_prints_the_energy_pip_as_a_word_and_not_a_token():
     Seen to FAIL: with the bracketed render restored, both halves go.
     """
     page = blindplay.observe(live("enchant-fresh"))
-    assert "draw 2 additional cards and gain Energy." in page
+    assert "draw 2 additional cards and gain 1 Energy." in page
     assert "[Energy]" not in page
 
 
@@ -6243,22 +6245,21 @@ def test_an_enemy_keeps_its_number_when_a_body_leaves():
     assert again["post"]["target"] == "SEA_SLUG_0"
 
 
-def test_a_pair_that_becomes_one_prints_bare_and_the_old_handle_still_works():
-    """Down to a single survivor the number is WITHDRAWN, and the handle the
-    tester was using still resolves.
+def test_a_pair_that_becomes_one_keeps_its_number_and_both_handles_work():
+    """Down to a single survivor the number STAYS, and the bare name also
+    resolves.
 
-    2026-09-25 (opus-furina-l2b, (c) 5) reversed this pin. It used to keep
-    `Sea Slug (2)` on a lone survivor, which is how a lone Gas Bomb printed as
-    `Gas Bomb (2)` after its twin died -- against the seat brief and the
-    prompt, which both promise "a name that appears only once is never
-    numbered". The stale-number retry keeps the old handle good: with one copy
-    left, `(2)` can only mean that one.
+    2026-09-25 (opus-furina-l2b, (c) 5) withdrew the number here, and
+    2026-09-26 (the Ironclad control seat) put it back: "Nibbit (2)" went bare
+    when Nibbit (1) died, and the hit log called it "Nibbit" even on lines
+    where the first was alive. A body keeps the number it was shown with;
+    the lone Gas Bomb, never shown beside a twin, is still bare
+    (`test_a_lone_summon_after_its_twin_died_is_not_numbered`).
     """
     blindplay.forget_fight()
     blindplay.observe(slug_fight([1, 2]))
     page = blindplay.observe(slug_fight([2]))
-    assert "Sea Slug (2)" not in page and "Sea Slug (1)" not in page
-    assert "Sea Slug" in page
+    assert "Sea Slug (2)" in page and "Sea Slug (1)" not in page
     res = blindplay.act(slug_fight([2]),
                         'play "Pearl Barrage" on "Sea Slug (2)"')
     assert res["ok"], res["refusal"]
@@ -6289,7 +6290,7 @@ def test_two_survivors_of_three_keep_their_numbers():
     page = blindplay.observe(slug_fight([2, 3]))
     assert "Sea Slug (2)" in page and "Sea Slug (3)" in page
     page = blindplay.observe(slug_fight([3]))
-    assert "Sea Slug (3)" not in page and "Sea Slug" in page
+    assert "Sea Slug (3)" in page                    # 2026-09-26: it stays
 
 
 def test_a_summoned_enemy_takes_the_next_number():
@@ -9127,8 +9128,11 @@ def test_the_wires_own_sentence_wins_over_the_page_copy():
     is the whole reason `Weak` looked fine while `Vulnerable` did not."""
     state = json.loads(json.dumps(combat_state()))
     state["player"]["hand"] = []
+    # A tip on ANOTHER power: the bridge never sends a power's own tip, and
+    # a tip named after the power it hangs on is the card that made it
+    # (2026-09-26, Piercing Wail), which the glossary leaves out.
     state["battle"]["enemies"][0]["status"] = [
-        {"id": "WEAK", "name": "Weak", "amount": 2, "type": "Debuff",
+        {"id": "SHACKLES", "name": "Shackles", "amount": 2, "type": "Debuff",
          "description": "Deals less damage.", "keywords": [
              {"name": "Weak", "description": "THE GAME'S OWN SENTENCE."}]}]
     page = blindplay.observe(state)
@@ -9900,7 +9904,7 @@ def _new_process() -> None:
                                 "numbered": set(), "names": {},
                                 "handles": {}, "elements": set(),
                                 "round": None, "hp": {}, "reborn": {},
-                                "replaced": {}})
+                                "replaced": {}, "revived": {}})
     faces._FIGHT_LOADED[0] = False
 
 
@@ -10134,46 +10138,54 @@ def _fogmog_board(hp: int, round_: int) -> dict:
     return state
 
 
-def test_a_body_whose_hp_rose_mints_a_new_letter_and_says_it_was_replaced():
-    """`EB-672`. THE SUMMON THAT CAME BACK AS THE BODY THE SEAT HAD KILLED.
+def test_an_eye_seen_dead_and_back_keeps_its_letter_and_says_it_revived():
+    """`EB-672`, and the 2026-09-26 correction to it.
 
     Kokomi r26 lane 1, fight 7: "Fogmog summoned a replacement Eye as B, at
-    6/6, with the same intent, on the screen right after I killed B. I spent an
-    act testing whether my own Flank had whiffed. Nothing distinguished a
-    replaced body from a survived one."
-
-    `EB-541`'s minting rule was already right; it never fired, because from the
-    combat id's point of view nothing had been summoned. HP going up is the one
-    signal the wire carries.
-
-    Seen to FAIL: the replacement printed as [B] with no line under it.
+    6/6, with the same intent, on the screen right after I killed B. Nothing
+    distinguished a replaced body from a survived one." `EB-672` minted a new
+    letter and a "NEW body" line. The control seats (Ironclad, Silent) met
+    the same Eye and read "NEW body" against its own Illusion text, which
+    says it revives: the game keeps the one creature in the fight and heals
+    it (`IllusionPower`). Same id, same name: the same body, revived.
     """
+    blindplay.observe(_fogmog_board(6, round_=1))
+    _new_process()
+    dead = _fogmog_board(6, round_=2)
+    dead["battle"]["enemies"] = dead["battle"]["enemies"][:1]
+    blindplay.observe(dead)
+    _new_process()
+    page = blindplay.observe(_fogmog_board(6, round_=3))
+    assert "- **Eye with Teeth** [B] — HP 6/6" in page
+    assert "[B] died and the game revived it" in page
+    assert "took the place of" not in page and "[C]" not in page
+
+
+def test_the_revived_line_survives_into_the_next_process():
+    """The seats read one screen per process, so the line comes off the
+    lane's store and not off this interpreter."""
+    blindplay.observe(_fogmog_board(6, round_=1))
+    _new_process()
+    dead = _fogmog_board(6, round_=2)
+    dead["battle"]["enemies"] = dead["battle"]["enemies"][:1]
+    blindplay.observe(dead)
+    _new_process()
+    blindplay.observe(_fogmog_board(6, round_=3))
+    _new_process()
+    page = blindplay.observe(_fogmog_board(4, round_=4))
+    assert "- **Eye with Teeth** [B] — HP 4/6" in page
+    assert "[B] died and the game revived it" in page
+
+
+def test_a_body_that_heals_while_alive_says_nothing():
+    """A rise from a LIVE reading is a heal, never a death: no line."""
     blindplay.observe(_fogmog_board(6, round_=1))
     _new_process()
     blindplay.observe(_fogmog_board(2, round_=2))
     _new_process()
     page = blindplay.observe(_fogmog_board(6, round_=3))
-    # The LETTER says the dead one and the replacement are two creatures.
-    # The name carries no number: 2026-09-25 (opus-furina-l2b, (c) 5), a name
-    # printed once on the screen is never numbered -- this is the lone
-    # `Gas Bomb (2)` the seat read, one enemy over.
-    assert "- **Eye with Teeth** [C] — HP 6/6" in page
-    assert "It took the place of [B], which is dead" in page
-    assert "Teeth** [B]" not in page and "Teeth (2)" not in page
-
-
-def test_the_replacement_line_survives_into_the_next_process():
-    """The seats read one screen per process, so the letter and the sentence
-    have to come off the lane's store and not off this interpreter."""
-    blindplay.observe(_fogmog_board(6, round_=1))
-    _new_process()
-    blindplay.observe(_fogmog_board(2, round_=2))
-    _new_process()
-    blindplay.observe(_fogmog_board(6, round_=3))
-    _new_process()
-    page = blindplay.observe(_fogmog_board(4, round_=4))
-    assert "- **Eye with Teeth** [C] — HP 4/6" in page
-    assert "It took the place of [B]" in page
+    assert "- **Eye with Teeth** [B] — HP 6/6" in page
+    assert "revived" not in page and "took the place of" not in page
 
 
 def test_a_body_that_only_loses_hp_keeps_its_letter():
@@ -11513,30 +11525,27 @@ def test_a_one_use_rider_that_is_not_a_price_says_it_pays_for_one_card():
     assert "pays for ONE card" not in blindplay.observe(wide)
 
 
-def test_the_last_copy_of_a_pair_prints_bare_and_keeps_its_handles():
-    """`EB-427`, the two-copy case, under the 2026-09-25 rule (opus-furina-l2b,
-    (c) 5): a name that appears once on the screen is never numbered, which
-    is what the seat brief and the prompt promise. The pin used to keep
-    `Nibbit (2)` on the lone survivor; that is how a lone `Gas Bomb (2)`
-    reached a seat. What the old rule protected -- the handle the seat had
-    been aiming with -- still resolves, through `EB-271`'s stale-number rule,
-    and the receipt names the body the way the page now prints it."""
+def test_the_last_copy_of_a_pair_keeps_its_number_and_its_handles():
+    """`EB-427`, the two-copy case. The 2026-09-25 rule (opus-furina-l2b,
+    (c) 5) printed the lone survivor bare; the 2026-09-26 Ironclad control
+    seat met that as a rename -- "Nibbit (2)" became "Nibbit" in the hit log
+    on lines where Nibbit (1) was still alive. A body keeps the number it was
+    shown with, and both old handles still resolve."""
     blindplay.forget_fight()
     state = two_body_state(morning_of())
     first = blindplay.render(blindplay.observation(state))
     assert "**Nibbit (1)**" in first and "**Nibbit (2)**" in first
-    # The FIRST body dies and leaves the feed; the survivor prints bare.
+    # The FIRST body dies and leaves the feed; the survivor keeps its number.
     alone = copy.deepcopy(state)
     alone["battle"]["enemies"] = [alone["battle"]["enemies"][1]]
     after = blindplay.render(blindplay.observation(alone))
-    assert "**Nibbit (2)**" not in after and "**Nibbit (1)**" not in after
-    assert "**Nibbit**" in after
-    # Both old handles still land on the one body left, and the receipt says
-    # which body that was in the page's own words.
+    assert "**Nibbit (2)**" in after and "**Nibbit (1)**" not in after
+    # Its own handle and the bare name land on the one body left, and the
+    # receipt says which body that was in the page's own words.
     aimed = blindplay.act(alone, 'play "Pearl Barrage" on "Nibbit (2)"')
-    assert aimed["ok"] and aimed["printed"]["target"] == "Nibbit"
-    stale = blindplay.act(alone, 'play "Pearl Barrage" on "Nibbit (1)"')
-    assert stale["ok"] and stale["printed"]["target"] == "Nibbit"
+    assert aimed["ok"] and aimed["printed"]["target"] == "Nibbit (2)"
+    bare = blindplay.act(alone, 'play "Pearl Barrage" on "Nibbit"')
+    assert bare["ok"] and bare["printed"]["target"] == "Nibbit (2)"
 
 
 def test_the_map_deck_holds_neither_the_dazed_nor_the_played_power():
@@ -12865,10 +12874,14 @@ def _segment_board(segment_hp: int | None, round_: int) -> dict:
     return state
 
 
-def test_a_body_that_left_the_board_and_came_back_below_full_is_still_new():
-    """The other half of the heal rule: a revive short of full HP is a new
-    body when its key was missing from a board in between -- the dead segment
-    leaves the feed, and it is remembered at 0."""
+def test_a_segment_that_left_the_board_and_came_back_revived():
+    """The dead segment leaves the feed, is remembered at 0, and Reattach
+    brings the same creature back on its own id at 25 of 44.
+
+    2026-09-26 (control seat, Ironclad): this used to print "This is a NEW
+    body. It took the place of [A]" under a new letter [D]. Same id and same
+    name is the same creature, so it keeps [A] and the page says it
+    revived."""
     blindplay.observe(_segment_board(44, round_=1))
     _new_process()
     blindplay.observe(_segment_board(19, round_=2))
@@ -12876,8 +12889,9 @@ def test_a_body_that_left_the_board_and_came_back_below_full_is_still_new():
     blindplay.observe(_segment_board(None, round_=3))
     _new_process()
     page = blindplay.observe(_segment_board(25, round_=4))
-    assert "It took the place of [A], which is dead" in page
-    assert "HP 25/44" in page
+    assert "took the place of" not in page
+    assert "[A] died and the game revived it" in page
+    assert "**Decimillipede (1)** [A] — FRONT — HP 25/44" in page
 
 
 def test_a_special_card_reward_names_the_card_it_gives_back():

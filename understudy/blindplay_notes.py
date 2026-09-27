@@ -976,6 +976,12 @@ ENEMY_REPLACED_LINE = (
     "    - This is a NEW body. It took the place of [{was}], which is dead; "
     "it is not the same creature and it carries none of [{was}]'s damage.")
 
+#: 2026-09-26 (control seats, Ironclad and Silent): the same creature back
+#: from the dead -- the game revived it under its own id -- keeps its letter.
+ENEMY_REVIVED_LINE = (
+    "    - [{handle}] died and the game revived it: the same body, back at "
+    "the HP above.")
+
 # `EB-294`. AN AURA IS NOT A BUFF, AND THE FEED SAYS BUFF. `AuraPower.Type` is
 # `PowerType.Buff` so that Artifact does not eat an elemental application
 # ([USER] 2026-08-23), which is a rule about Artifact and reads on a page as a
@@ -2212,10 +2218,15 @@ BASE_KEYWORDS: dict[str, str] = {
     # not price it. It counts -- `IsPoweredAttack()` is a property of the HIT
     # and a monster's move carries it, and `combat` runs every enemy hit
     # through `powers.modify_damage_taken(state.player, ...)`.
+    #
+    # 2026-09-26 (control seats, Defect and Silent): "orb hits were not
+    # boosted; I had to test it". An orb deals `ValueProp.Unpowered`
+    # (`LightningOrb`, `DarkOrb`), which `IsPoweredAttack()` refuses, so the
+    # page says so. Appended, so the C# twin's anchors still hold.
     "Vulnerable": (
         f"An attack or card hit on it deals {VULNERABLE_TAKEN_PCT}% more, a "
         f"Skill's too. A potion's does not. One stack falls off at the end "
-        f"of each of its turns."),
+        f"of each of its turns. Orb damage is not boosted."),
     # `EB-469`. THE GAME'S OWN STATUS LINE SAYS "Attacks deal 25% less damage
     # for 1 turn", and the Kokomi r15 seat read "Attacks" as the CARD TYPE --
     # "the status line told me skills were safe and the card told me they were
@@ -2999,10 +3010,19 @@ def _wire_keyword_rows(blob: Any) -> list[dict[str, str]]:
                 for power in value:
                     if not isinstance(power, dict):
                         continue
+                    # 2026-09-26 (control seats, Silent and Defect): the tip
+                    # a power hangs on ITSELF is the card that made it, and it
+                    # is the unupgraded card (`TemporaryStrengthPower`'s
+                    # `FromCard(OriginModel)`, `ModelDb.Card<T>()`): Piercing
+                    # Wail+ read "lose 6" beside its 8, and Hotfix+ read
+                    # "Exhaust". The power's own row already says what it
+                    # does, with its real number.
+                    own = _fold(power.get("name"))
                     for k in power.get("keywords") or []:
                         if isinstance(k, dict) \
                                 and str(k.get("name") or "").strip() \
-                                and str(k.get("text") or "").strip():
+                                and str(k.get("text") or "").strip() \
+                                and _fold(k.get("name")) != own:
                             out.append({"name": str(k["name"]).strip(),
                                         "text": str(k["text"]).strip()})
             else:

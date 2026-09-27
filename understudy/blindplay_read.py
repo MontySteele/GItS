@@ -127,6 +127,15 @@ def _spaced(text: str) -> str:
         rendered = _icon_run(m.group(0))
         if not rendered:
             return rendered
+        # 2026-09-26 (control seat, Silent): "Tactician, Sidestep, Automation
+        # and Cure All printed 'Gain Energy' with no number." The game draws
+        # ONE pip for 1 Energy (`EnergyIconsFormatter`: 1 to 3 pips, else the
+        # number then a pip), so a lone pip is a count of one and says so. A
+        # pip that follows a number ("costs 0", "an additional 4") is that
+        # number's unit and stays a bare word.
+        if (rendered in _ICON_SUBJECTS.values()
+                and not text[:m.start()].rstrip()[-1:].isdigit()):
+            rendered = "1 " + rendered
         before = text[m.start() - 1] if m.start() else ""
         after = text[m.end()] if m.end() < len(text) else ""
         if rendered[0].isalnum() and before.isalnum():
