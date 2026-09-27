@@ -5,8 +5,18 @@ look into character-specific ones for Klee and Furina, and consider them for
 Kokomi later once the character identity solidifies and the card pool is
 handled. Co-op relics and potions can be a later item entirely."
 
-**Stage:** Paper. Nothing is built until the picks are ruled. The numbers are
-first drafts.
+**Stage:** Paper, ruled; to be built. The numbers are first drafts.
+
+**Ruled 2026-09-27: all four picks at their defaults, with the two Rare potions
+raised.** [USER]: "I mostly like 711 and the defaults - the Rare potions look a
+bit undertuned to me relative to the effects. In Klee's case, a Set Off card
+already pops all mines on a boss, so the potion just reads 'get one free Set
+Off' as a Rare. In Furina's case, the numeric value of 'each performer performs
+twice at the end of the turn' sounds a bit low - perhaps it should instead read
+'each performer performs twice right now'."
+
+So Jumpy Juice doubles every Bomb, which no card does, and Encore Elixir acts
+now, twice. Both faces are changed in the tables below.
 
 ## What they have today
 
@@ -67,7 +77,7 @@ React (a companion's aura). Her weakness is Block on demand.
 |---|---|---|
 | Common | Bottled Sparks | Gain 3 Sparks. |
 | Uncommon | Blasting Powder | Every Bomb on every enemy grows 6. |
-| Rare | Jumpy Juice | Set off every Bomb on every enemy. |
+| Rare | Jumpy Juice | Double every Bomb on every enemy. |
 
 **Ancient (Dodoco Tales), repaired:** "Whenever a Bomb goes off, gain 1 Spark.
 The first time each turn, gain 2 instead." That is one extra Spark a turn, all
@@ -78,8 +88,10 @@ Notes:
 - **Alice's Teapot** answers the React supply problem from the seat rounds
   without changing rule 5, which you kept. It is a Rare discovery rather than a
   default.
-- **Jumpy Juice** is the one thing in her kit that fires Bombs without a Set off
-  card. A Rare potion is the right size for breaking rule 7 once.
+- **Jumpy Juice** doubles every Bomb on every enemy. No card does that; the
+  nearest is Alice's Recipe, which doubles growth. It is a Cook payoff that
+  still needs her Set off card, so rule 7 stands. (It set every Bomb off
+  before [USER]'s ruling, which read as one free Set off.)
 
 ## Furina
 
@@ -108,7 +120,7 @@ empty stage.
 |---|---|---|
 | Common | Bottled Applause | Your back performer gains 6 Fanfare. On an empty stage, a random performer arrives holding it. |
 | Uncommon | Curtain Water | Each of your performers gains 4 Fanfare. |
-| Rare | Encore Elixir | At the end of this turn, each performer acts twice. |
+| Rare | Encore Elixir | Each of your performers acts twice, now. |
 
 **Ancient (The Curtain Never Falls), rebuilt for the Stage:** "Start each
 combat with Usher at 3 Fanfare. Your front performer regains 2 Fanfare at the
