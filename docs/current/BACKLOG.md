@@ -31,7 +31,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-677` Glam's Replay on a timed card (Kyouka) runs it 4 turns at +4, not 2 at +8, and no face says which; needs an emitter change that gives the rule a tip surface, plus a taste call on which rows carry it.
 - `EB-65` the four Furina power badges draw shrunk card portraits; they want badge-kind icons like Klee's (art bill, rank 1 applied).
 - `EB-803` `proto_mc_kaeya_frostgnaw` wears Cold-Blooded Strike's named art (swap the two Kaeya picks); confirm `klee/relics/dodoco_tales.png` is packed on the next pck build.
-- `EB-53` end-of-turn docket: capture the co-op half (`C6`) and isolate the electro (Oz) leg; needs a two-seat runtime.
+- `EB-53` end-of-turn docket: capture the co-op half (`C6`) and isolate the electro (Oz) leg. The two-seat runtime now exists (`embark --coop`, `operations/understudy-seats.md`); what remains is running the capture on it, and the Oz leg.
 - `EB-296` / `EB-300` controller: a live walk that the Kokomi pet is targetable by D-pad and mouse, and that the hand is reachable after a custom-target card.
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).

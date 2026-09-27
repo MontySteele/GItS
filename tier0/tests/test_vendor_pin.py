@@ -91,8 +91,12 @@ def test_our_additions_live_apart_from_upstreams_source():
     # route: a patch would have to re-implement the method to reach the three
     # lines. The per-mode reading it now consults is a gits/ addition
     # (`GitsModalTargeting.cs`) and this file only asks it the question.
+    # The co-op seats (2026-09-27) added a SIXTH: three additive reads inside
+    # `BuildMultiplayerGameState` / `BuildAllPlayersState` (the run's end, the
+    # fight behind a chooser, a player's combat id), each a dictionary entry
+    # in the middle of a private builder, with nothing to route around.
     assert modified == ["McpMod.Actions.cs", "McpMod.Compendium.cs",
-                        "McpMod.cs", "McpMod.StateBuilder.cs",
-                        "McpMod.Wiki.cs"], (
+                        "McpMod.cs", "McpMod.MultiplayerState.cs",
+                        "McpMod.StateBuilder.cs", "McpMod.Wiki.cs"], (
         f"upstream files we have edited changed: {modified}. Update PROVENANCE.md's "
         f"'What we changed' table and this assertion together, deliberately.")

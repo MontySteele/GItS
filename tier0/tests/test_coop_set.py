@@ -1,6 +1,9 @@
 """THE CO-OP SET in the one-seat sim (review/records/coop-set-2026-09-25.md).
 
-Nine multiplayer-only cards, three per overhaul arm. Tier 0 seats ONE player
+Nine multiplayer-only cards, three per overhaul arm, and the second batch's
+four (review/active/coop-concepts-2026-09-27.md: Raise a Toast and The Crowd
+Roars for Furina, Shrapnel and Sparks for Everyone for Klee). Tier 0 seats ONE
+player
 (`tier0/engine/coop.py`), so the co-op rules themselves are tested in C#
 (`klee-mod/KleeTests/Prototype/CoopSetTests.cs`). What is pinned here is the
 sim's half of the contract:
@@ -52,19 +55,26 @@ def arms(monkeypatch):
 
 # ---- the rows ---------------------------------------------------------------
 
-def test_the_nine_load_and_are_the_three_tiers():
-    assert len(TIERS) == 9
+def test_the_thirteen_load_and_are_the_three_tiers():
+    assert len(TIERS) == 13
     assert loader.multiplayer_ids() == frozenset(TIERS)
     ids = {c.id for c in loader.prototype_cards()}
     assert set(TIERS) <= ids
 
 
-def test_two_uncommons_and_one_rare_per_character():
-    for tier in (C.KLEE_OVERHAUL_MULTIPLAYER_IDS,
-                 C.FURINA_STAGE_MULTIPLAYER_IDS,
-                 C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS):
-        assert sorted(_row(cid).rarity for cid in tier) == [
-            "rare", "uncommon", "uncommon"]
+def test_the_rarities_per_character():
+    """Two Uncommons and a Rare each in the first set; the second batch adds
+    an Uncommon and a Rare to Klee and to Furina, and Kokomi's pair waits for
+    her review (pick 4)."""
+    expected = {
+        C.KLEE_OVERHAUL_MULTIPLAYER_IDS:
+            ["rare", "rare", "uncommon", "uncommon", "uncommon"],
+        C.FURINA_STAGE_MULTIPLAYER_IDS:
+            ["rare", "rare", "uncommon", "uncommon", "uncommon"],
+        C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS: ["rare", "uncommon", "uncommon"],
+    }
+    for tier, rarities in expected.items():
+        assert sorted(_row(cid).rarity for cid in tier) == rarities
 
 
 def test_the_multiplayer_tier_is_outside_every_pool_count():
@@ -209,25 +219,67 @@ def test_share_the_spotlight_moves_no_bar(arms):
     assert st.player.block == 0
 
 
-def test_the_three_powers_apply_and_never_fire(arms):
+def test_the_five_powers_apply_and_never_fire(arms):
     """Each sits on its owner and watches OTHER players; a one-seat fight
     never gives one anything to hear."""
     for cid, power in (("proto_ko_knights_of_favonius", "ko_knights_of_favonius"),
                        ("proto_fs_people_of_fontaine", "fs_people_of_fontaine"),
-                       ("proto_kk_sangonomiyas_counsel", "kk_sangonomiyas_counsel")):
+                       ("proto_kk_sangonomiyas_counsel", "kk_sangonomiyas_counsel"),
+                       ("proto_ko_sparks_for_everyone", "ko_sparks_for_everyone"),
+                       ("proto_fs_the_crowd_roars", "fs_the_crowd_roars")):
         st = make_state()
         effects.resolve_card(st, _row(cid))
         assert st.player.powers.get(power), cid
 
 
-def test_every_op_the_nine_print_is_registered():
+# ---- the second batch ---------------------------------------------------------
+
+def test_raise_a_toast_gives_no_one_strength_and_moves_no_bar(arms):
+    from tier0.engine import furina_stage as FS
+    st = make_state()
+    st.player.character_id = "furina"
+    st.in_player_turn = True
+    FS.open_combat(st)
+    stage = [list(s) for s in FS.stage(st.player)]
+    effects.resolve_card(st, _row("proto_fs_raise_a_toast"))
+    assert [list(s) for s in FS.stage(st.player)] == stage
+    assert not st.player.powers.get("strength")
+    assert any(e["event"] == "coop_no_other_player"
+               and e["op"] == "stage_toast" for e in st.log)
+
+
+def test_shrapnel_places_its_mine_and_the_shred_has_no_one_to_serve(arms):
+    """Klee's own half resolves: the Mine lands. The shred sits on the enemy
+    and is read by nothing, because only ANOTHER player's Attack takes it."""
+    from tier0.engine import klee_overhaul
+    st = _klee()
+    effects.resolve_card(st, _row("proto_ko_shrapnel"))
+    enemy = st.enemies[0]
+    assert klee_overhaul.mine_count(enemy) == 1
+    assert klee_overhaul.largest_size(enemy) == 4
+    assert enemy.powers.get("ko_shrapnel") == 1
+
+
+def test_the_second_batch_upgrades_are_the_ruled_ones():
+    """The ruled deltas, on the rows. The sim never deals a multiplayer row,
+    so no rest site of its can smith one and the delta is read here rather
+    than applied; the C# pins apply it (`CoopSetTwoTests`). The `cap` key
+    binds Raise a Toast's ceiling in both engines (`gen.CAP_VAR`)."""
+    assert _row("proto_fs_raise_a_toast").upgrade == {"cap": 2}       # 6 -> 8
+    assert _row("proto_ko_shrapnel").upgrade == {"bomb_size": 3}     # 4 -> 7
+    assert _row("proto_fs_the_crowd_roars").upgrade == {"cost": -1}  # 2 -> 1
+    assert _row("proto_ko_sparks_for_everyone").upgrade == {"innate": True}
+    assert gen.CAP_VAR["stage_toast"] == "ToastCap"
+
+
+def test_every_op_the_thirteen_print_is_registered():
     for cid in TIERS:
         row = _row(cid)
         for fx in list(row.effects) + list(row.plan or []):
             assert fx["op"] in effects.OPS, (cid, fx["op"])
 
 
-def test_the_sheet_marks_all_nine_and_nothing_else():
+def test_the_sheet_marks_all_thirteen_and_nothing_else():
     raw = yaml.safe_load(
         (Path(loader.PROTOTYPE_SHEET)).read_text(encoding="utf-8"))
     marked = [d["id"] for d in raw if d.get("multiplayer")]

@@ -2140,6 +2140,20 @@ proto_kk_joint_orders	ImageGen/images/cards/kokomi/proto_kk_joint_orders.png	500
 proto_kk_coordinated_strike	ImageGen/images/cards/kokomi/proto_kk_coordinated_strike.png	500	380	cover	center	shortlist	1	png	Bilibili 12M Followers.jpg		splash	kokomi_pool
 # proto_kk_sangonomiyas_counsel <- NEW: Gorou and two Watatsumi soldiers gathered round Kokomi, listening
 proto_kk_sangonomiyas_counsel	ImageGen/images/cards/kokomi/proto_kk_sangonomiyas_counsel.png	500	380	cover	y0.52	shortlist	1	png	Sangonomiya Kokomi Birthday 2023 - Shorts.png		splash	kokomi_pool
+# ---------- Co-op set, second batch 2026-09-27 (review/active/coop-concepts-2026-09-27.md) ----------
+# Four new fetches worn by no other row, each with two or more characters:
+# Furina at a party and on Charlotte's front page, Klee with a Knight and
+# with her Mondstadt friends. Blank source_group keeps strict L1.
+# -- Furina --
+# proto_fs_raise_a_toast <- NEW: Furina, Navia and Escoffier at a balloon-and-confetti party, Wriothesley lifting his cup in the foreground -- a toast for a friend
+proto_fs_raise_a_toast	ImageGen/images/cards/furina/proto_fs_raise_a_toast.png	500	380	cover	x0.82,y0.56@1.9	shortlist	1	png	Version 5.6 Wallpaper 3.png		splash	
+# proto_fs_the_crowd_roars <- NEW: Charlotte racing through the Court of Fontaine with the Steambird's front page, Furina's portrait on it and the doves scattering -- all Fontaine talking at once
+proto_fs_the_crowd_roars	ImageGen/images/cards/furina/proto_fs_the_crowd_roars.png	500	380	cover	y0.55	shortlist	1	png	Charlotte Birthday 2025 - Shorts.jpg		splash	
+# -- Klee --
+# proto_ko_shrapnel <- NEW: Klee and Eula, a Knight of Favonius, sharing a picnic -- Klee softens them up, the Knight hits harder
+proto_ko_shrapnel	ImageGen/images/cards/klee/proto_ko_shrapnel.png	500	380	cover	x0.52,y0.57@1.08	shortlist	1	png	Eula Birthday 2023 - Shorts.jpg		splash	
+# proto_ko_sparks_for_everyone <- NEW: Klee reaching out with gifts round the Christmas tree, Diona and her Mondstadt friends under the sparkling stars -- something for everyone
+proto_ko_sparks_for_everyone	ImageGen/images/cards/klee/proto_ko_sparks_for_everyone.png	500	380	cover	x0.72,y0.40@1.1	shortlist	1	png	Christmas 2022.jpg		splash	
 # ---------- EB-776: the Stage arm's opening relic ----------
 # Salon Solitaire draws nothing because nothing was ever planned for
 # res://furina/relics/salon_solitaire.png (EB-776, PR #584: the C# wiring and

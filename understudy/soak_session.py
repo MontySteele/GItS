@@ -234,12 +234,20 @@ class Session:
     # caller (and the give-up message) can tell "bridge unreachable" from
     # "root ok, state endpoint hung". Empty until a boot has been watched.
     last_boot_read: str = ""
+    # CO-OP (2026-09-27). The game's own command-line arguments, appended to
+    # the launch. EMPTY BY DEFAULT, and an empty tuple launches exactly the
+    # `[exe]` every session before co-op launched: `--fastmp host_standard`
+    # and `--fastmp join --clientId N` are the only callers
+    # (`understudy/embark_coop.py`), and nothing single-player passes any.
+    extra_args: tuple[str, ...] = ()
 
     def __init__(self, stamp: str, do_setup: bool = True,
                  intent: str | None = None,
                  instance: "instances.Instance | None" = None,
-                 install_bridge: bool = True):
+                 install_bridge: bool = True,
+                 extra_args: tuple[str, ...] | list[str] = ()):
         self.stamp = stamp
+        self.extra_args = tuple(str(a) for a in extra_args)
         self.do_setup = do_setup
         # Passed to the launched game so the mod's own hook labels its
         # records with the same declaration the bot feed is stamping.
@@ -459,7 +467,8 @@ class Session:
         # whatever archetype a person last declared for their own session.
         # Do not "simplify" this to a conditional set.
         env["GITS_TELEMETRY_INTENT"] = self.intent or ""
-        self.proc = subprocess.Popen([str(exe)], cwd=str(self.dir),
+        self.proc = subprocess.Popen([str(exe), *self.extra_args],
+                                     cwd=str(self.dir),
                                      env=env,
                                      stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL)
@@ -469,6 +478,10 @@ class Session:
         # for it to verify -- which is exactly how a REVERTED marker came to
         # be written over a running game.
         self._launch_entry["pid"] = self.proc.pid
+        # CO-OP: the arguments, on the row, only where there are any -- a
+        # single-player ledger row keeps exactly the keys it always had.
+        if self.extra_args:
+            self._launch_entry["args"] = list(self.extra_args)
         self.ledger.flush()
 
     def wait_for_menu(self, timeout: float = MENU_TIMEOUT_S) -> dict:

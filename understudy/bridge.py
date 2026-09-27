@@ -194,12 +194,103 @@ def health() -> dict:
     return _request(BASE + "/")
 
 
+# ---------------------------------------------------------------- co-op ----
+#
+# A CO-OP RUN IS SERVED ON ANOTHER ROUTE, AND THE BRIDGE SAYS SO. Once a
+# multiplayer run is in progress `/api/v1/singleplayer` answers 409 with one
+# fixed sentence ("Multiplayer run is active. Use /api/v1/multiplayer
+# instead.", `vendor/STS2_MCP/McpMod.cs`, `HandleRequest`), and the
+# multiplayer route answers the mirror sentence once the run is over. Those
+# two refusals are the whole detection: no sidecar, no flag, nothing the
+# operator can forget to set. Before the run starts (the lobby) and after it
+# ends (the main menu) the singleplayer route serves, and so does this.
+#
+# THE SINGLE-PLAYER PATH IS ONE REQUEST, AS IT ALWAYS WAS. `get_state` and
+# `post` ask the singleplayer route first and return its answer untouched
+# unless that answer IS the 409 body -- a dict whose only key is `error` and
+# whose sentence names the other route. A refused POST did nothing (the guard
+# runs before the action is read), so re-sending it to the other route is not
+# a second action. A lane found in a co-op run is remembered for this process
+# so its next call goes straight to the multiplayer route; the blind commands
+# are one process per call, and pay the one extra request each.
+MULTIPLAYER = f"{BASE}/api/v1/multiplayer"
+_USE_MULTIPLAYER = "Use /api/v1/multiplayer"
+_USE_SINGLEPLAYER = "Use /api/v1/singleplayer"
+_coop_bases: set[str] = set()
+
+#: The overlay the multiplayer builder falls back to for a finished run on a
+#: bridge older than its `game_over` branch.
+GAME_OVER_OVERLAY = "NGameOverScreen"
+
+
+def _redirected(answer: object, mark: str) -> bool:
+    """Is `answer` the route guard's 409, pointing at the other route?"""
+    return (isinstance(answer, dict) and set(answer) == {"error"}
+            and mark in str(answer.get("error") or ""))
+
+
+def in_coop() -> bool:
+    """Has this lane been answered by the multiplayer route in this process?"""
+    return current_base() in _coop_bases
+
+
+def coop_state(state: dict) -> dict:
+    """A multiplayer state in the singleplayer state's shape, where they differ.
+
+    THE ONE PLACE THE TWO SHAPES ARE RECONCILED. Both builders send the same
+    screen blocks under the same keys (`battle`, `map`, `event`, `player`,
+    `run`); the multiplayer one adds `players`, `game_mode` and the vote
+    blocks, which the page reads where they are. The one screen it does not
+    name is the run's end: an older multiplayer builder has no `game_over`
+    branch, so the game-over screen reaches the wire as the generic `overlay`
+    with its class name. It is renamed here to the singleplayer shape, with a
+    `result` only where the wire can support one (every player dead is a
+    defeat; anything else is left unsaid rather than guessed).
+    """
+    if not isinstance(state, dict):
+        return state
+    overlay = state.get("overlay")
+    if (state.get("state_type") == "overlay" and isinstance(overlay, dict)
+            and overlay.get("screen_type") == GAME_OVER_OVERLAY):
+        state = {k: v for k, v in state.items() if k != "overlay"}
+        players = [p for p in state.get("players") or []
+                   if isinstance(p, dict)]
+        dead = bool(players) and all(p.get("is_alive") is False
+                                     for p in players)
+        state["state_type"] = "game_over"
+        state["game_over"] = {"message": "Run ended.",
+                              "options": ["main_menu"],
+                              **({"result": "defeat"} if dead else {})}
+    return state
+
+
 def get_state() -> dict:
-    return _request(SINGLEPLAYER)
+    base = current_base()
+    if base in _coop_bases:
+        state = _request(MULTIPLAYER)
+        if not _redirected(state, _USE_SINGLEPLAYER):
+            return coop_state(state)
+        _coop_bases.discard(base)
+    state = _request(SINGLEPLAYER)
+    if _redirected(state, _USE_MULTIPLAYER):
+        _coop_bases.add(base)
+        return coop_state(_request(MULTIPLAYER))
+    return state
 
 
 def post(action: str, **params) -> dict:
-    return _request(SINGLEPLAYER, {"action": action, **params})
+    base = current_base()
+    body = {"action": action, **params}
+    if base in _coop_bases:
+        answer = _request(MULTIPLAYER, body)
+        if not _redirected(answer, _USE_SINGLEPLAYER):
+            return answer
+        _coop_bases.discard(base)
+    answer = _request(SINGLEPLAYER, body)
+    if _redirected(answer, _USE_MULTIPLAYER):
+        _coop_bases.add(base)
+        return _request(MULTIPLAYER, body)
+    return answer
 
 
 def compendium() -> dict:

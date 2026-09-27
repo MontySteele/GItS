@@ -68,6 +68,55 @@ from the reversibility ledger on disk and walks its undo steps (newest
 embark first, or `--stamp` by name); it picks that lane's newest sidecar and
 refuses another lane's.
 
+### Running a co-op round (two seats, one run)
+
+Two blind seats share ONE co-op run, each driving one player through the same
+`blindplay observe` / `act` page:
+
+```sh
+python -m understudy.embark --coop --lanes 2,3 \
+    --characters KLEEMOD-KLEE,KLEEMOD-FURINA --ascension 0    # host first
+python tools/seat.py --opus-brief --lane 2 --character KLEEMOD-KLEE --coop
+python tools/seat.py --opus-brief --lane 3 --character KLEEMOD-FURINA --coop
+# seat A: GITS_LANE=2 python -m understudy.blindplay observe / act "..."
+# seat B: GITS_LANE=3 python -m understudy.blindplay observe / act "..."
+python -m understudy.embark --teardown --coop --lanes 2,3     # client first
+```
+
+- **The transport is the game's own `--fastmp`**: ENet on localhost instead of
+  Steam lobbies, so two lanes on one Steam account can play together. The
+  host launches with `--fastmp host_standard` (straight to the multiplayer
+  character select) and the client with `--fastmp join --clientId 1000`; the
+  embark waits for the host's lobby before launching the client, whose join
+  gives up after 10 s. Both pick, the host alone takes `--ascension` (the
+  lobby otherwise uses the host's saved level) and `--seed` if given, both
+  confirm, and the embark waits until both bridges serve the run.
+- **One pair per machine.** The host binds UDP 33771, fixed in the game; the
+  embark refuses while the port is taken.
+- **Never resume a fastmp save.** `--fastmp load` looks the save up under the
+  Steam id while the save names its players 1 and 1000; every co-op embark
+  starts a fresh run.
+- **Epochs do not block it.** `--fastmp` navigates past the main menu, so a
+  lane whose menu is blocked by unrevealed epochs still embarks (lanes 2 and 3
+  held two each on 2026-09-27).
+- **What is written:** one sidecar per lane (`embark-<stamp>-laneN.json`, with
+  a `coop` block; the lane readers and a single-lane `--teardown --lane N`
+  read it as usual) and `coop-<stamp>.json` with both lanes, the seed (read
+  off the host's `current_run_mp.save`) and both ascension read-backs.
+  `--keep-bridge` launches without refreshing `mods\STS2_MCP` (use it from a
+  worktree carrying a bridge edit).
+- **The page.** Once the run is up, `/api/v1/singleplayer` answers 409 and
+  `bridge` follows it to `/api/v1/multiplayer`. The page adds *The other
+  player* (HP, Block, whether their turn is ended, their pets) and *Choices so
+  far* (map, shared event and chest votes). After `end turn`, or a vote the
+  partner has not matched, the page opens with **WAITING** and offers `wait`
+  (`act "wait"`, 60 s by default, `wait 120`, at most 300), which returns as
+  soon as the other player moves anything on the wire. A waiting page does not
+  count toward `session`'s stall stop. A card aimed at another player (the
+  base game's ally target) is played `on "<their character>"`.
+- **A co-op run is not a run of record**, for the lane reason and because
+  nothing single-player is comparable to it.
+
 ### Blindness rules
 
 - **Read no repo file.** A seat sees only what the bridge prints: `observe`

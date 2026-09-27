@@ -445,6 +445,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # THE CO-OP SET (`COOP_ALLY_OPS`): Share the Spotlight, one
                   # call into `FurinaStage.ShareTheSpotlight`.
                   "stage_share_spotlight",
+                  # THE CO-OP SET, SECOND BATCH (coop-concepts-2026-09-27):
+                  # Raise a Toast, one call into `FurinaStage.RaiseAToast`.
+                  "stage_toast",
                   "generate_guest_star",
                   "copy_spotlighted_in_hand",
                   "heal",
@@ -2925,6 +2928,19 @@ APPLY_POWERS = {
     "kk_sangonomiyas_counsel": ("SangonomiyasCounselPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold], each other player gains {X} [gold]Block[/gold]."),
+    # THE CO-OP SET, SECOND BATCH (review/active/coop-concepts-2026-09-27.md).
+    # Same file, same terms. `ko_shrapnel` goes on the ENEMY the Mine went on
+    # (`ENEMY_APPLY_POWERS`), placed by Klee; the other two sit on the card's
+    # owner and watch the other players.
+    "ko_shrapnel": ("ShrapnelPower", None,
+        "While this enemy holds Klee's [gold]Mine[/gold], other players' "
+        "Attacks deal 50% more damage to it."),
+    "ko_sparks_for_everyone": ("SparksForEveryonePower", None,
+        "The first time each turn one of your [gold]Bombs[/gold] goes off, "
+        "each other player gains {X} [gold]Energy[/gold]."),
+    "fs_the_crowd_roars": ("TheCrowdRoarsPower", None,
+        "Whenever another player loses HP, your [gold]front performer[/gold] "
+        "gains {X} [gold]Fanfare[/gold]."),
     "mc_tectonic_tide": ("TectonicTidePower", None,
         "Whenever an [gold]Elemental Reaction[/gold] happens, deal {X} damage "
         "to that enemy."),
@@ -3341,7 +3357,10 @@ APPLY_POWERS = {
 # `TargetType.AnyEnemy` through the same seam.
 ENEMY_APPLY_POWERS = {"weak", "vulnerable",
                       "mc_melody_loop", "mc_lightfall_sword",
-                      "mi_aurous_blaze"}
+                      "mi_aurous_blaze",
+                      # THE CO-OP SET, SECOND BATCH: Shrapnel's shred, on the
+                      # enemy its Mine went on.
+                      "ko_shrapnel"}
 
 # Sheet fields apply_power may carry. Anything else encodes a mechanic this
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
@@ -3751,7 +3770,10 @@ TARGET_CS = {
 # prints it (`KleeMod.Powers.CoopSet.OtherPlayers`). The ops that may aim at
 # an ally, and nothing else may:
 COOP_ALLY_OPS = frozenset(("apply_power", "block", "block_largest_bomb",
-                           "stage_share_spotlight"))
+                           "stage_share_spotlight",
+                           # The second batch (review/active/
+                           # coop-concepts-2026-09-27.md): Raise a Toast.
+                           "stage_toast"))
 #: The powers a card may place ON another player. Each is placed by the card's
 #: owner (`applier: Owner.Creature`) and reads its applier back: Pass the
 #: Match sets off the APPLIER's Bombs, Guest of Honor spends the APPLIER's lead.
@@ -4350,6 +4372,18 @@ def blocked_reason(
             if eff.get("target") != "ally":
                 return ("stage_share_spotlight gives to another player -- "
                         "its target is 'ally'")
+        if op == "stage_toast":
+            # THE CO-OP SET, SECOND BATCH (Raise a Toast): another player
+            # gains temporary Strength equal to the front performer's
+            # Fanfare, up to the CAP -- the one number the face prints, so the
+            # one number an upgrade moves (`CAP_VAR`).
+            unknown = set(eff) - {"op", "cap", "target"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "ally":
+                return "stage_toast gives to another player -- its target is 'ally'"
+            if not isinstance(eff.get("cap"), int) or eff["cap"] <= 0:
+                return "stage_toast cap must be a positive literal int"
         if op == "block" and eff.get("target", "self") != "self":
             # Joint Orders' now-line: "Another player gains 6 Block." The
             # plain printed number and nothing else -- no rider, formula or
@@ -6886,13 +6920,13 @@ def build_vars(card: dict) -> list[str]:
         elif op in GROW_FIELD and grow_upgrade(card) \
                 and eff is grow_var_effect(card):
             out.append(f'new DynamicVar("Grow", {grow_literal(eff)}m)')
-        elif op == "block_largest_bomb" and cap_upgrade(card) \
+        elif op in CAP_VAR and cap_upgrade(card) \
                 and eff is cap_var_effect(card):
             # R252. The Sparks idiom again: a var ONLY when the upgrade has to
             # render. A PLAIN DynamicVar and never a BlockVar -- the cap is a
             # ceiling on a payout, not the payout, so no Dexterity may reach
             # it at print time (`EB-230`'s reading, one op over).
-            out.append(f'new DynamicVar("BombCap", {int(eff["cap"])}m)')
+            out.append(f'new DynamicVar("{CAP_VAR[op]}", {int(eff["cap"])}m)')
         elif op == "mend" and mend_upgrade(card):
             out.append(f'new DynamicVar("Mend", {int(eff["amount"])}m)')
         elif (op == "stage_guest" and stage_guest_upgrade(card)
@@ -7430,7 +7464,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                            for e in effects),
         # R252. Binds to the op that PRINTS the ceiling, the same one-owner
         # rule every key above it keeps.
-        "cap": any(e["op"] == "block_largest_bomb" for e in effects),
+        "cap": any(e["op"] in CAP_VAR for e in effects),
         "mend": any(e["op"] == "mend" for e in effects),
         # R276 batch two. Binds to the first top-level `stage_raise`, the
         # one-owner rule; tier0 bumps that op's `amount`.
@@ -9035,6 +9069,13 @@ def stage_guest_tip_calls(card: dict) -> list[str]:
     return calls
 
 
+#: The ops whose one printed number is a CEILING, and the var that prints it:
+#: R252's Careful Now (and the co-op set's Hide Here!), and the second co-op
+#: batch's Raise a Toast ("... equal to your front performer's Fanfare, up to
+#: 6"). One `cap` delta key for both, bound to the first top-level op here.
+CAP_VAR = {"block_largest_bomb": "BombCap", "stage_toast": "ToastCap"}
+
+
 def cap_upgrade(card: dict) -> int:
     """`cap: +N` -- Careful Now's printed ceiling (R252). The card's only
     number: its payout is read off the board, so the cap is what the face
@@ -9043,10 +9084,10 @@ def cap_upgrade(card: dict) -> int:
 
 
 def cap_var_effect(card: dict) -> dict | None:
-    """The ONE `block_largest_bomb` a `cap` delta binds to: the first
+    """The ONE capped op (`CAP_VAR`) a `cap` delta binds to: the first
     top-level one, mirroring tier0's `_bump_first`."""
     return next((fx for fx in card.get("effects", [])
-                 if fx.get("op") == "block_largest_bomb"), None)
+                 if fx.get("op") in CAP_VAR), None)
 
 
 def _var_or_literal(active: int, var: str, literal) -> str:
@@ -10154,6 +10195,18 @@ def build_body(
             lines.append(
                 "await FurinaStage.ShareTheSpotlight(choiceContext, "
                 "Owner.Creature, cardPlay.Target, cardPlay);")
+
+        elif op == "stage_toast":
+            # THE CO-OP SET, SECOND BATCH (Raise a Toast): the front
+            # performer's Fanfare, read and not spent, capped, to the aimed
+            # player as temporary Strength. One call; an empty stage gives 0.
+            _target_guard(lines, ctx)
+            cap = _var_or_literal(
+                cap_upgrade(card) and eff is cap_var_effect(card),
+                CAP_VAR[op], eff["cap"])
+            lines.append(
+                "await FurinaStage.RaiseAToast(choiceContext, "
+                f"Owner.Creature, cardPlay.Target, {cap}, this);")
 
         elif op == "salon_rotate":
             # EB-118 §5.5. A reorder and nothing else: no tick, no Encore, no
@@ -11989,11 +12042,11 @@ def _authored_face_numbers(card: dict):
                 owns = eff is grow_var_effect(card)
                 yield ("grow", "Grow", literal) if owns \
                     else (None, None, literal)
-        elif op == "block_largest_bomb" and isinstance(eff.get("cap"), int):
+        elif op in CAP_VAR and isinstance(eff.get("cap"), int):
             # R252. The card's ONE printed number is its ceiling, so the token
             # goes on the cap -- "up to {BombCap:diff()}".
             owns = eff is cap_var_effect(card)
-            yield ("cap", "BombCap", int(eff["cap"])) if owns \
+            yield ("cap", CAP_VAR[op], int(eff["cap"])) if owns \
                 else (None, None, int(eff["cap"]))
         elif op in POWER_UPGRADE_OPS and isinstance(eff.get("amount"), int):
             owns = eff is power_upgrade_effect(card)
@@ -13615,6 +13668,8 @@ def build_upgrade(card: dict) -> list[str]:
                "stage_intermission": "stage_intermission",
                # R252, Careful Now's ceiling.
                "block_largest_bomb": "cap",
+               # The second co-op batch, Raise a Toast's ceiling.
+               "stage_toast": "cap",
                # `EB-679`, Read the Field's look count.
                "scry_take": "scry",
                "exhaust_from": "exhaust"}
@@ -13628,6 +13683,7 @@ def build_upgrade(card: dict) -> list[str]:
                "stage_guest": 'DynamicVars["GuestFanfare"]',
                "stage_intermission": 'DynamicVars["Every"]',
                "block_largest_bomb": 'DynamicVars["BombCap"]',
+               "stage_toast": 'DynamicVars["ToastCap"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
                "buff_next_attack": 'DynamicVars["PowerAmount"]',
                "heal": 'DynamicVars["Heal"]',

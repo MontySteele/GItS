@@ -56,6 +56,7 @@
     "proto_fs_plot_twist",
     "proto_fs_pneuma_refrain",
     "proto_fs_quick_cue",
+    "proto_fs_raise_a_toast",
     "proto_fs_rapt_audience",
     "proto_fs_regina_of_all_waters",
     "proto_fs_revolving_stage",
@@ -72,6 +73,7 @@
     "proto_fs_star_billing",
     "proto_fs_step_forward",
     "proto_fs_surintendante_chevalmarin",
+    "proto_fs_the_crowd_roars",
     "proto_fs_thunderous_applause",
     "proto_fs_tidal_flourish",
     "proto_fs_tide_of_applause",
@@ -188,11 +190,13 @@
     "proto_ko_run_away",
     "proto_ko_second_surprise",
     "proto_ko_secret_base",
+    "proto_ko_shrapnel",
     "proto_ko_sit_tight",
     "proto_ko_sizzle",
     "proto_ko_sorry_jean",
     "proto_ko_spark_knight",
     "proto_ko_sparkling_burst",
+    "proto_ko_sparks_for_everyone",
     "proto_ko_sparks_n_splash",
     "proto_ko_spinning_sparkler",
     "proto_ko_split_charge",
@@ -341,6 +345,7 @@
     "proto_fs_plot_twist": "furina",
     "proto_fs_pneuma_refrain": "furina",
     "proto_fs_quick_cue": "furina",
+    "proto_fs_raise_a_toast": "furina",
     "proto_fs_rapt_audience": "furina",
     "proto_fs_regina_of_all_waters": "furina",
     "proto_fs_revolving_stage": "furina",
@@ -357,6 +362,7 @@
     "proto_fs_star_billing": "furina",
     "proto_fs_step_forward": "furina",
     "proto_fs_surintendante_chevalmarin": "furina",
+    "proto_fs_the_crowd_roars": "furina",
     "proto_fs_thunderous_applause": "furina",
     "proto_fs_tidal_flourish": "furina",
     "proto_fs_tide_of_applause": "furina",
@@ -473,11 +479,13 @@
     "proto_ko_run_away": "klee",
     "proto_ko_second_surprise": "klee",
     "proto_ko_secret_base": "klee",
+    "proto_ko_shrapnel": "klee",
     "proto_ko_sit_tight": "klee",
     "proto_ko_sizzle": "klee",
     "proto_ko_sorry_jean": "klee",
     "proto_ko_spark_knight": "klee",
     "proto_ko_sparkling_burst": "klee",
+    "proto_ko_sparks_for_everyone": "klee",
     "proto_ko_sparks_n_splash": "klee",
     "proto_ko_spinning_sparkler": "klee",
     "proto_ko_split_charge": "klee",
@@ -776,6 +784,9 @@
       "conditional_damage": 1,
       "conditional_then_damage": 1
     },
+    "proto_fs_raise_a_toast": {
+      "cap": 2
+    },
     "proto_fs_rapt_audience": {
       "power_amount": 1
     },
@@ -826,6 +837,9 @@
       "block": 2
     },
     "proto_fs_surintendante_chevalmarin": {
+      "cost": -1
+    },
+    "proto_fs_the_crowd_roars": {
       "cost": -1
     },
     "proto_fs_thunderous_applause": {
@@ -1201,6 +1215,9 @@
     "proto_ko_secret_base": {
       "power_amount": 2
     },
+    "proto_ko_shrapnel": {
+      "bomb_size": 3
+    },
     "proto_ko_sit_tight": {
       "block": 2,
       "power_amount": 1
@@ -1216,6 +1233,9 @@
     },
     "proto_ko_sparkling_burst": {
       "spark_price": -1
+    },
+    "proto_ko_sparks_for_everyone": {
+      "innate": true
     },
     "proto_ko_sparks_n_splash": {
       "cost": -1
