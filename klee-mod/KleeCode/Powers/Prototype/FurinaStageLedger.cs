@@ -34,8 +34,8 @@ public enum StageDeparture
 /// <remarks>
 /// THE GUEST CAST (2026-09-25) gave a Bow three things to read, because a
 /// guest's Bow is its act and three of the acts read something:
-/// <see cref="Held"/>, the Fanfare it still held as it bowed (Navia's damage;
-/// 0 for any exit at 0 Fanfare, and for a cash-out, which spends the bar);
+/// <see cref="Held"/>, the Fanfare it held as it bowed (Navia's damage; for an
+/// exit at 0 Fanfare, the bar it had before whatever emptied it);
 /// <see cref="FormerSeat"/>, the seat it stood in (Sigewinne gives to the
 /// performer behind it); and <see cref="Lost"/>, the Fanfare it lost since
 /// its last act (Wriothesley's reading, the hit that took him down
@@ -59,7 +59,15 @@ public readonly struct StageExit
 
     public bool Bows => Cause != StageDeparture.Rotated;
 
-    /// <summary>The Fanfare the performer still held as it bowed.</summary>
+    /// <summary>
+    /// The Fanfare the performer held as it bowed. For a performer EMPTIED
+    /// -- by a hit, a Spend, a payment, a cash-out or Let the People Rejoice
+    /// -- the bar it had before whatever emptied it (the 2026-09-26 seat
+    /// round, the designer's ruling: "Navia's bow is always worth nothing
+    /// when she dies to a hit or a Spend"; Wriothesley's rule 6, "His Bow on
+    /// a hit reads the hit that took him down", is the precedent for a Bow
+    /// reading the moment it began). Navia's Bow is the only reader.
+    /// </summary>
     public int Held { get; }
 
     /// <summary>The seat it stood in, front = 0, or -1 where unknown.</summary>
@@ -719,13 +727,14 @@ public sealed class FurinaStageLedger
     {
         if (amount <= 0) return null;
         var index = IndexOf(payer);
+        var before = payer.Fanfare;
         Drain(payer, amount);
         Note(new StageBeat(PayEvent, payer.Who, index, payer.Fanfare, amount,
                            "", By: DisplayName(by)));
         if (payer.Fanfare > 0 || index < 0) return null;
         _seats.RemoveAt(index);
         Note(new StageBeat("leave", payer.Who, -1, 0, amount, "paid"));
-        return ExitOf(payer, StageDeparture.Spent, index, held: 0);
+        return ExitOf(payer, StageDeparture.Spent, index, held: before);
     }
 
     /// <summary>Why an act could not pay, on its <see cref="UnpaidEvent"/>
@@ -1115,7 +1124,7 @@ public sealed class FurinaStageLedger
         _seats.RemoveAt(index);
         Note(new StageBeat("leave", back.Who, -1, 0, amount, "spend"));
         return new StageSpend(
-            true, amount, ExitOf(back, StageDeparture.Spent, index, held: 0));
+            true, amount, ExitOf(back, StageDeparture.Spent, index, held: amount));
     }
 
     /// <summary>R276 pick 1: can the back performer pay N IN FULL? The one
@@ -1199,7 +1208,7 @@ public sealed class FurinaStageLedger
 
         _seats.RemoveAt(0);
         Note(new StageBeat("leave", lead.Who, -1, 0, absorbed, "hit"));
-        var exit = ExitOf(lead, StageDeparture.Struck, 0, held: 0);
+        var exit = ExitOf(lead, StageDeparture.Struck, 0, held: absorbed);
         var caught = bowCatches && reached > 0
             ? System.Math.Min(reached, BowBlock(lead.Who))
             : 0;
@@ -1395,7 +1404,7 @@ public sealed class FurinaStageLedger
         _seats.RemoveAt(index);
         Note(new StageBeat("leave", back.Who, -1, 0, paid, "spend"));
         return new StageSpend(
-            true, paid, ExitOf(back, StageDeparture.Spent, index, held: 0));
+            true, paid, ExitOf(back, StageDeparture.Spent, index, held: paid));
     }
 
     /// <summary>
@@ -1611,7 +1620,7 @@ public sealed class FurinaStageLedger
         _seats.RemoveAt(0);
         Note(new StageBeat("leave", lead.Who, -1, 0, paid, "spend"));
         return new StageSpend(
-            true, paid, ExitOf(lead, StageDeparture.Spent, 0, held: 0));
+            true, paid, ExitOf(lead, StageDeparture.Spent, 0, held: paid));
     }
 
     // ---- the per-play spend record -----------------------------------
@@ -1689,7 +1698,7 @@ public sealed class FurinaStageLedger
             var bar = seat.Fanfare;
             Drain(seat, bar);
             _pendingCurtainExits.Add(
-                ExitOf(seat, StageDeparture.Spent, i, held: 0));
+                ExitOf(seat, StageDeparture.Spent, i, held: bar));
             // 2026-09-26 (wave-3 Furina lane 4): the card empties them, and
             // its face says no Spend -- the log said "emptied by a Spend".
             Note(new StageBeat("leave", seat.Who, -1, 0, bar,
@@ -1765,12 +1774,13 @@ public sealed class FurinaStageLedger
         bar = back.Fanfare;
         var index = _seats.Count - 1;
         // A CASH-OUT (the brief's sec.4, "three ways out"): the card is paid
-        // for the whole bar, so the bar is lost and the Bow holds nothing.
+        // for the whole bar, so the bar is lost. The Bow still reads the bar
+        // it had (Navia, the 2026-09-26 seat round; see `StageExit.Held`).
         Drain(back, bar);
         _seats.RemoveAt(index);
         SpentThisPlay = bar;
         Note(new StageBeat("leave", back.Who, -1, 0, bar, "final_bow"));
-        return ExitOf(back, StageDeparture.Spent, index, held: 0);
+        return ExitOf(back, StageDeparture.Spent, index, held: bar);
     }
 
     /// <summary>Test and teardown seam: the stage is empty at the end of a

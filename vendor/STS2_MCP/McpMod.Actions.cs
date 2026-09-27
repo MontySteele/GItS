@@ -266,6 +266,7 @@ public static partial class McpMod
             return Error($"Potion '{SafeGetText(() => potion.Title)}' is already queued for use");
         if (potion.Owner.Creature.IsDead)
             return Error("Cannot use potion - player creature is dead");
+        GitsCloseShelfForFoulPotion(player, potion);
         if (!potion.PassesCustomUsabilityCheck)
             return Error($"Potion '{SafeGetText(() => potion.Title)}' cannot be used right now");
 
@@ -323,6 +324,39 @@ public static partial class McpMod
             ["status"] = "ok",
             ["message"] = $"Using potion '{SafeGetText(() => potion.Title)}' from slot {slot}{targetMsg}"
         };
+    }
+
+    /// <summary>
+    /// GItS LOCAL EDIT (2026-09-26, the Ironclad control seat). FOUL POTION AT
+    /// THE MERCHANT. Out of a fight the potion "can be thrown at the Merchant
+    /// for 100 Gold", and the game allows it only while the merchant's shelf
+    /// is CLOSED (<c>FoulPotion.GetFoulPotionMerchantTarget</c> wants
+    /// <c>!inventory.IsOpen</c>) -- the player throws it at the merchant
+    /// himself, not at the shelf. This bridge opens the shelf on every state
+    /// read (<c>BuildState</c>'s shop branch), so the throw was never usable.
+    /// Close it first, the way the shelf's own back button does; the next
+    /// state read opens it again. The throw itself is the game's
+    /// (<c>FoulPotion.OnUse</c>: gold, dialogue).
+    /// </summary>
+    private static void GitsCloseShelfForFoulPotion(Player player, MegaCrit.Sts2.Core.Models.PotionModel potion)
+    {
+        if (potion is not MegaCrit.Sts2.Core.Models.Potions.FoulPotion
+            || CombatManager.Instance.IsInProgress)
+            return;
+        try
+        {
+            NMerchantInventory? shelf = null;
+            var room = player.RunState.CurrentRoom;
+            if (room is MerchantRoom)
+                shelf = NMerchantRoom.Instance?.Inventory;
+            else if (room is EventRoom eventRoom
+                     && eventRoom.CanonicalEvent is FakeMerchant
+                     && eventRoom.LocalMutableEvent?.Node is NFakeMerchant fake)
+                shelf = fake.Inventory;
+            if (shelf != null && shelf.IsOpen)
+                shelf.Call(NMerchantInventory.MethodName.Close);
+        }
+        catch { /* the shelf stays as it was, and the game's own check answers */ }
     }
 
     private static Dictionary<string, object?> ExecuteDiscardPotion(Player player, Dictionary<string, JsonElement> data)
@@ -797,6 +831,11 @@ public static partial class McpMod
         }
         else if (overlay is NChooseACardSelectionScreen chooseScreen)
         {
+            // GItS LOCAL EDIT (wave-3 Furina lane 3 seat b, 2026-09-26): a
+            // chooser that has taken its pick is closing, and a second press
+            // would complete it twice (`gits/GitsChooserAnswered.cs`).
+            if (GitsChooserAnswered(chooseScreen) == true)
+                return Error("This choice is already made and the screen is closing - read the state again");
             var holders = FindAllSortedByPosition<NGridCardHolder>(chooseScreen);
             if (index < 0 || index >= holders.Count)
                 return Error($"Card index {index} out of range ({holders.Count} cards available)");
@@ -804,6 +843,10 @@ public static partial class McpMod
             var holder = holders[index];
             string cardName = SafeGetText(() => holder.CardModel?.Title) ?? "unknown";
             holder.EmitSignal(NCardHolder.SignalName.Pressed, holder);
+            // The screen drops a press in its first 350 ms with no word
+            // (`SelectHolder`); say so rather than "ok".
+            if (GitsChooserAnswered(chooseScreen) == false)
+                return Error("The screen was still opening and did not take the pick - nothing was chosen, choose again");
 
             return new Dictionary<string, object?>
             {

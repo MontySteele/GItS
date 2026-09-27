@@ -479,7 +479,7 @@ _HARNESS_SIDE = {"no_embark_path", "no_embark", "embark_loop", "menu_loop",
                  "unexpected_start_state", "bridge_unreachable", "no_action",
                  "seed_not_honoured", "state_type_missing",
                  "character_not_offered", "character_mismatch",
-                 "character_unverified"}
+                 "character_unverified", "ascension_not_honoured"}
 
 
 def main(argv: list[str] | None = None) -> int:

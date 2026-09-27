@@ -39,7 +39,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         chooser_note,
                                         DEFEND_INTENT_CLAUSE,
                                         ENEMY_HANDLE_NOTE,
-                                        ENEMY_REPLACED_LINE,
+                                        ENEMY_REPLACED_LINE, ENEMY_REVIVED_LINE,
                                         ENEMY_SIZE_NOTE,
                                         EVENT_NO_DECLINE_NOTE,
                                         FRONT_ENEMY_NOTE,
@@ -97,7 +97,16 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         SPARK_OPENING_RULE,
                                         SPARK_SOURCES_LINE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE,
-                                        TURN_ORDER_NOTE,
+                                        BEHIND_CLAUSE, MAP_PATHS_HEAD,
+                                        NOTHING_BEHIND_CLAUSE, ORB_ORDER_NOTE,
+                                        POTION_BARRED_NOTE,
+                                        RESOLUTION_APPLIED,
+                                        RESOLUTION_REMOVED,
+                                        STOLEN_CARD_CLAUSE,
+                                        TURN_ORDER_DUSK, TURN_ORDER_NOTE,
+                                        TURN_ORDER_ORB,
+                                        TURN_ORDER_PERFORMER,
+                                        TURN_ORDER_POWER,
                                         UNBLOCKED_RAISER_CLAUSE,
                                         UNBLOCKED_RAISE_CLAUSE)
 from understudy.blindplay_observe import observation
@@ -215,7 +224,9 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
         # cannot say different things about one refusal; a reason the wire
         # spells as a sentence still comes through in the game's own words.
         out.append("    CANNOT BE PLAYED: "
-                   + (qa_packet.unplayable_reason(c["unplayable_reason"])
+                   + (qa_packet.unplayable_reason(
+                       c["unplayable_reason"], c.get("stars_have"),
+                       c.get("star_cost"))
                       or "the game gives no reason"))
         # `EB-271`: and the clause that stops the vague one being vague, on
         # its own line under it, because it is this page's sentence and not
@@ -747,6 +758,28 @@ def _spark_sources_line(combat: dict[str, Any]) -> str:
                           for s in combat["spark_sources"]))
 
 
+#: 2026-09-26 (control seat, Ironclad): "the hand printed 'Deal 3 damage
+#: twice'; it folded my own Shrink in but not the target's Vulnerable, and the
+#: hits landed 5 and 5." A card's face is worked out with no target
+#: (`SafeGetCardDescription`), so no power on an enemy is in it, and the wire
+#: carries no per-target figure. Said on the enemy's Vulnerable line.
+PREVIEW_LEAVES_OUT_CLAUSE = (" The damage printed on your cards does not "
+                             "count this; it is added when a hit lands here.")
+
+
+def _preview_leaves_out(power: dict[str, Any],
+                        hand: list[dict[str, Any]]) -> str:
+    """The clause on an enemy's Vulnerable row, while a hand is shown."""
+    if not hand or _fold(power.get("name")) != "vulnerable":
+        return ""
+    return PREVIEW_LEAVES_OUT_CLAUSE
+
+
+#: 2026-09-26 (control seat, Silent): "Tea of Discourtesy kept saying 'next
+#: combat' after it had fired." Beside the name, where the game greys it out.
+RELIC_USED_UP = " (used up: it has done its job and does nothing more)"
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text.
 
@@ -789,6 +822,13 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     if power["text"]:
         line += (f" — {power['text']}{_slow_clause(power)}"
                  f"{_every_n_cards_clause(power)}")
+    # 2026-09-26 (control seats): what the power holds and never prints.
+    if power.get("stolen_card"):
+        line += STOLEN_CARD_CLAUSE.format(card=power["stolen_card"])
+    if "behind" in power:
+        line += (BEHIND_CLAUSE.format(names=_and_list(
+                     [f"**{n}**" for n in power["behind"]]))
+                 if power["behind"] else NOTHING_BEHIND_CLAUSE)
     return line
 
 
@@ -835,7 +875,14 @@ _ONE_USE_DISCOUNT = re.compile(r"the next (\w+) you play costs", re.I)
 # `EB-669`. The same sentence with any other consequence -- Battle Plan's "the
 # next Attack you play face-up this turn deals 4 additional damage". Asked
 # SECOND, so a price keeps the note written for a price.
-_ONE_USE_RIDER = re.compile(r"the next (\w+) you play\b", re.I)
+# 2026-09-26 (control seat, Necrobinder): and Vigor's "Your next Attack
+# deals 8 additional damage" (Akabeko), which every Attack in hand previews.
+_ONE_USE_RIDER = re.compile(
+    r"the next (\w+) you play\b|\byour next (\w+) deals\b", re.I)
+#: 2026-09-26 (control seat, Necrobinder): Pen Nib's "Every 10th Attack you
+#: play deals double damage", a relic's one-card rider.
+_EVERY_NTH_PLAY = re.compile(
+    r"\bevery (\d+)(?:st|nd|rd|th) (\w+) you play[^.]*", re.I)
 # `EB-433`. A relic that answers a debuff with an elemental hit, which is what
 # makes the panel's "leaves no aura" clause false for a debuff Plan. The
 # Tamakushi Casket's own sentence, with the element left open: the clause is
@@ -1099,7 +1146,22 @@ def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
         found = _ONE_USE_RIDER.search(text)
         if found:
             return ["", ONE_USE_RIDER_NOTE.format(
-                power=f"**{power['name']}**", kind=found.group(1))]
+                power=f"**{power['name']}**",
+                kind=found.group(1) or found.group(2),
+                words=found.group(0)[:1].lower() + found.group(0)[1:])]
+    # 2026-09-26 (control seat, Necrobinder): Pen Nib at 9 doubled the number
+    # on every Attack in hand, and only the next one played gets it
+    # (`PenNib.ModifyDamageMultiplicative` doubles any Attack not yet played
+    # while `AttacksPlayed == 9`). A relic whose counter is one short of its
+    # own "every Nth" gets the same ONE-card note.
+    for relic in you.get("relics") or []:
+        found = _EVERY_NTH_PLAY.search(str(relic.get("text") or ""))
+        counter = str(relic.get("counter") or "").strip()
+        if (found and counter.isdigit()
+                and int(counter) == int(found.group(1)) - 1):
+            return ["", ONE_USE_RIDER_NOTE.format(
+                power=f"**{relic['name']}**", kind=found.group(2),
+                words=found.group(0)[:1].lower() + found.group(0)[1:])]
     return []
 
 
@@ -1335,7 +1397,8 @@ def _resolution_lines(rows: list[dict[str, Any]],
             out.append(RESOLUTION_SUMMONED.format(names=_and_list(
                 [f"**{name}**" for name in row["summoned"]])))
         killed = row.get("killed") or []
-        if not row["hits"] and not killed:
+        applied = row.get("applied") or []
+        if not row["hits"] and not killed and not applied:
             # 2026-09-25 (opus-furina-l2b): on a board with a stage, a card
             # that hit nothing may still have moved a bar, and the stage log
             # above now files every Raise -- so the line points there rather
@@ -1359,6 +1422,12 @@ def _resolution_lines(rows: list[dict[str, Any]],
             if hit["blocked"] > 0:
                 line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
             out.append(line)
+        # 2026-09-26 (the Silent control seat): the powers it put on enemies.
+        for a in applied:
+            out.append((RESOLUTION_APPLIED if a["amount"] > 0
+                        else RESOLUTION_REMOVED).format(
+                power=a["power"], n=abs(a["amount"]),
+                target=a["target"] or "an enemy"))
         # And a kill the ledger did not file, read off the board: after the
         # numbered hits, because no place in their order is known.
         if killed:
@@ -1510,10 +1579,69 @@ def _end_of_turn_on_board(c: dict[str, Any]) -> bool:
         powers += e["powers"]
     if any(_END_OF_TURN.search(p.get("text") or "") for p in powers):
         return True
+    if _orb_end_of_turn(c):
+        return True
     if c.get("stage") is not None:
         return True
     plans = c.get("plans") or {}
     return any(_is_dusk(e) for e in (plans.get("queue") or []))
+
+
+def _orb_lines(orbs: dict[str, Any] | None) -> list[str]:
+    """The orbs in slot order, oldest first, and which one evokes next.
+
+    2026-09-26 (control seat, Defect): no orb was printed anywhere, and the
+    seat misread "your rightmost Orb" twice. The oldest orb is the rightmost
+    one (`OrbCmd.EvokeNext` takes `Orbs.First()`), so the page says so.
+    """
+    if not orbs:
+        return []
+    rows = orbs["list"]
+    out = [f"- Orbs: {len(rows)} of {orbs['slots']} slots filled"
+           + (", oldest first:" if rows else ".")]
+    for n, o in enumerate(rows, start=1):
+        # The orb's own sentence carries both figures, Focus folded in;
+        # the bare numbers stand in only where the wire sent no sentence.
+        out.append(f"  {n}. **{o['name']}** — " + (
+            o["text"] or f"passive {o['passive']}, evoke {o['evoke']}"))
+    if rows:
+        out.append(ORB_ORDER_NOTE)
+    return out
+
+
+def _ally_lines(pets: list[dict[str, Any]]) -> list[str]:
+    """Each pet no kit block prints (Osty), with HP, Block and powers."""
+    out = []
+    for pet in pets:
+        out.append(f"- Your ally **{pet['name']}**: HP {pet['hp']}/"
+                   f"{pet['max_hp']}"
+                   + (f", Block {pet['block']}" if pet["block"] else ""))
+        out += [_render_power(pw, "    - ") for pw in pet["powers"]]
+    return out
+
+
+def _orb_end_of_turn(c: dict[str, Any]) -> bool:
+    """Does an orb on this board fire at the end of your turn?"""
+    orbs = c["you"].get("orbs") or {}
+    return any(_END_OF_TURN.search(o.get("text") or "")
+               for o in orbs.get("list") or [])
+
+
+def _turn_order_note(c: dict[str, Any]) -> str:
+    """`TURN_ORDER_NOTE` with only this board's examples (2026-09-26).
+
+    A kit's word is named only where that kit's block is on the board: the
+    Ironclad control seat read "a performer's act, a Dusk Plan" on its own
+    board and met two words it could not look up.
+    """
+    examples = [TURN_ORDER_POWER]
+    if _orb_end_of_turn(c):
+        examples.append(TURN_ORDER_ORB)
+    if c.get("stage") is not None:
+        examples.append(TURN_ORDER_PERFORMER)
+    if c.get("plans"):
+        examples.append(TURN_ORDER_DUSK)
+    return TURN_ORDER_NOTE.format(examples=", ".join(examples))
 
 
 #: `EB-708`. The size the game draws into a printed name -- `Twig Slime (M)`,
@@ -1836,13 +1964,33 @@ def _frozen_clause(row: dict[str, Any], obs: dict[str, Any],
 BOARD_BEHIND_HEADING = "## The fight behind this chooser"
 
 
+def _stars_line(you: dict[str, Any]) -> list[str]:
+    """The Regent's star total, beside energy (2026-09-26, control seat).
+
+    Printed wherever the wire sends `stars`, which is wherever the game's own
+    counter shows. Star Next Turn keeps its own row among the powers below.
+    """
+    if you.get("stars") is None:
+        return []
+    return [f"- Stars {you['stars']}"]
+
+
+def _status_clause(counts: Any) -> str:
+    """` (5 Dazed)` for a pile holding Status cards, `""` otherwise."""
+    if not counts:
+        return ""
+    return " (" + ", ".join(f"{n} {name}" for name, n in counts) + ")"
+
+
 def _render_board_behind(c: dict[str, Any]) -> list[str]:
     """The fight under a mid-fight chooser: you, your hand, the stage and each
     enemy's HP and intent."""
     you = c["you"]
     out = ["", BOARD_BEHIND_HEADING, "",
            f"- HP {you['hp']}/{you['max_hp']} · Block {you['block']} · "
-           f"Energy {you['energy']}/{you['max_energy']}"]
+           f"Energy {you['energy']}/{you['max_energy']}"
+           + (f" · Stars {you['stars']}" if you.get("stars") is not None
+              else "")]
     hand = [card["title"] for card in c.get("hand") or []]
     out.append("- Your hand: " + (", ".join(hand) if hand
                                   else "(your hand is empty)"))
@@ -2342,6 +2490,9 @@ def _render_run_change(change: dict[str, Any]) -> list[str]:
     all four at once. Anything else prints the HP line alone, and only where
     the ROOM changed: HP moving between round one and round two of a fight is
     the fight, and the combat page has already printed the blow that did it.
+
+    2026-09-26: and gold, the deck's own cards and a belt potion the game
+    used by itself, wherever they moved (`_deck_move_lines`).
     """
     if not change:
         return []
@@ -2359,15 +2510,28 @@ def _render_run_change(change: dict[str, Any]) -> list[str]:
         if change.get("deck"):
             out.append(f"- Cards in the deck {change['deck'][0]} → "
                        f"{change['deck'][1]}")
+        out += _deck_move_lines(change)
         out += ["", ACT_CHANGE_NOTE]
         return out
+    rows: list[str] = []
     if change.get("hp") and change.get("room_changed"):
         was, now = change["hp"]
         moved = ("down" if now < was else "up") + f" {abs(now - was)}"
-        out += ["", "## Since the screen before this one", "",
-                f"- HP {was} → {now}"
-                + (f" (of {change['max_hp']})" if change.get("max_hp") else "")
-                + f", {moved}"]
+        rows.append(f"- HP {was} → {now}"
+                    + (f" (of {change['max_hp']})" if change.get("max_hp")
+                       else "")
+                    + f", {moved}")
+    # 2026-09-26 (control seat, Defect): "Treasure chest gold was never
+    # itemized (55 -> 101)." Gold is said wherever it moved.
+    if change.get("gold"):
+        was, now = change["gold"]
+        rows.append(f"- Gold {was} → {now}, "
+                    + ("down" if now < was else "up") + f" {abs(now - was)}")
+    rows += _deck_move_lines(change)
+    if not rows:
+        return out
+    out += ["", "## Since the screen before this one", ""] + rows
+    if change.get("hp") and change.get("room_changed"):
         # `EB-676`, THE BRIDGE HALF. The note above says a figure read the
         # instant a fight ends may not have settled yet. The bridge now ANSWERS
         # that question -- `player.hp_settled`, true only when no action is
@@ -2379,6 +2543,24 @@ def _render_run_change(change: dict[str, Any]) -> list[str]:
         # of an unpatched bridge reads exactly as it did.
         if not change.get("hp_settled"):
             out += ["", HP_SETTLE_NOTE]
+    return out
+
+
+def _deck_move_lines(change: dict[str, Any]) -> list[str]:
+    """2026-09-26 (control seats, all four): a transform, an event's random
+    upgrade or downgrade, and a curse reached the deck with nothing said.
+    The run's own deck, read before and after, names what moved."""
+    out = [f"- In your deck, **{was}** became **{now}**."
+           for was, now in change.get("deck_became") or []]
+    out += [f"- Joined your deck: **{title}**" + (f" — {text}" if text else "")
+            for title, text in change.get("deck_gained") or []]
+    if change.get("deck_lost"):
+        out.append("- Left your deck: " + ", ".join(
+            f"**{title}**" for title in change["deck_lost"]))
+    # And Fairy in a Bottle firing (control seat, Defect): nothing said it had.
+    out += [f"- **{name}** left your belt. You never use it yourself: the "
+            f"game uses it when its text comes true." for name in
+            change.get("potions_fired") or []]
     return out
 
 
@@ -2411,6 +2593,7 @@ def render(obs: dict[str, Any]) -> str:
                 f"- HP {you['hp']}/{you['max_hp']}",
                 f"- Block {you['block']}",
                 f"- Energy {you['energy']}/{you['max_energy']}"]
+        out += _stars_line(you)
         defined = {row["name"] for row in (obs.get("keywords") or [])}
         spark_named = False
         for name, amount in sorted(you["meters"].items()):
@@ -2502,9 +2685,14 @@ def render(obs: dict[str, Any]) -> str:
                     and _fold(pw.get("name")) == "spark"):
                 out.append("    - " + _spark_sources_line(c))
                 spark_named = True
-        out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "
-                   f"{c['piles']['discard']} discarded, "
+        status = c.get("pile_status") or {}
+        out.append(f"- Piles: {c['piles']['draw']} in the draw pile"
+                   f"{_status_clause(status.get('draw'))}, "
+                   f"{c['piles']['discard']} discarded"
+                   f"{_status_clause(status.get('discard'))}, "
                    f"{c['piles']['exhaust']} exhausted")
+        out += _orb_lines(you.get("orbs"))
+        out += _ally_lines(c.get("pets") or [])
         # `EB-238`. IN THE HEADER, with HP and Energy, because that is where
         # the game keeps it: the relic row sits along the top of every screen
         # of a run, and a reader who is shown it only when one is OFFERED has
@@ -2513,6 +2701,7 @@ def render(obs: dict[str, Any]) -> str:
             out += ["", "## Your relics", ""] + [
                 f"- **{r['name']}**"
                 + (f" ({r['counter']})" if r.get("counter") else "")
+                + (RELIC_USED_UP if r.get("used_up") else "")
                 + (f" — {r['text']}" if r["text"] else "")
                 for r in you["relics"]]
             # `EB-349`: and where one of them has already taken this turn, the
@@ -2835,6 +3024,9 @@ def render(obs: dict[str, Any]) -> str:
             # aiming by letter meets the question.
             if e.get("replaced"):
                 out.append(ENEMY_REPLACED_LINE.format(was=e["replaced"]))
+            elif e.get("revived"):
+                out.append(ENEMY_REVIVED_LINE.format(
+                    handle=e.get("handle") or e["name"]))
             out += _render_intents(e["intents"])
             # `EB-706`: and where a multiplier stands that the game's own label
             # sometimes folds and sometimes does not, both numbers -- under the
@@ -2842,7 +3034,8 @@ def render(obs: dict[str, Any]) -> str:
             # body's figure.
             out += _intent_fold_lines(e, you)
             for pw in e["powers"]:
-                out.append(_render_power(pw, "    "))
+                out.append(_render_power(pw, "    ")
+                           + _preview_leaves_out(pw, c["hand"]))
                 # `EB-605`: and where a Bomb badge's headline and its list of
                 # charge sizes are two different numbers, which is which.
                 out += _bomb_forecast_note(pw, e["powers"], "    ")
@@ -2885,7 +3078,7 @@ def render(obs: dict[str, Any]) -> str:
         # sentences about the powers the screen has just printed, and once per
         # screen however many of them carry the trigger.
         if _end_of_turn_on_board(c):
-            out += ["", TURN_ORDER_NOTE]
+            out += ["", _turn_order_note(c)]
         if any(p.get("kind") == "aura"
                for p in you["powers"] + [x for e in c["enemies"]
                                          for x in e["powers"]]):
@@ -2901,9 +3094,22 @@ def render(obs: dict[str, Any]) -> str:
                 here=obs["floor"],
                 act=f" of act {obs['act']}" if obs.get("act") else "",
                 next=obs["floor"] + 1), ""]
+        if obs.get("hp") is not None:
+            out += [f"- HP {obs['hp']}/{obs['max_hp']}", ""]
         out += ["Where you can go next:", ""] + _render_options(obs["nodes"])
+        # 2026-09-26: every route, where the feed carries the links. It
+        # replaces the all-rooms list below, which cannot show a dead end.
+        if obs.get("paths"):
+            out += ["", MAP_PATHS_HEAD, ""]
+            out += [f"- {f['floors_ahead']} floor"
+                    f"{'' if f['floors_ahead'] == 1 else 's'} ahead: "
+                    + "; ".join(f"{r['letter']} {r['kind']}"
+                                + (f" (to {', '.join(r['to'])})"
+                                   if r["to"] else "")
+                                for r in f["rooms"])
+                    for f in obs["paths"]]
         # `EB-298`: the rest of the act, which was on the feed all along.
-        if obs.get("ahead"):
+        elif obs.get("ahead"):
             out += ["", "The floors ahead of you, nearest first — every room "
                         "on each, in the order they are drawn:", ""]
             out += [f"- {f['floors_ahead']} floor"
@@ -3154,10 +3360,12 @@ def render(obs: dict[str, Any]) -> str:
                       "is on THAT screen. `skip` typed here has no card reward "
                       "open to skip, and `proceed` leaves the whole reward "
                       "screen.*"]
+        if obs.get("potion_barred"):
+            out += ["", POTION_BARRED_NOTE.format(relic=obs["potion_barred"])]
         # `EB-341`: said on the screen where the claim is made, and only where
         # a potion is actually on offer -- a run with a free slot reads
         # exactly as it always did.
-        if obs.get("potion_offered") and obs.get("potion_slots") \
+        elif obs.get("potion_offered") and obs.get("potion_slots") \
                 and obs["potions_held"] >= obs["potion_slots"]:
             # `EB-356`: and the way out, on the same line. The bridge drinks
             # a non-combat potion here (`ExecuteUsePotion` refuses only the
@@ -3199,6 +3407,7 @@ def render(obs: dict[str, Any]) -> str:
         out += ["", "## Your relics", ""] + [
             f"- **{r['name']}**"
             + (f" ({r['counter']})" if r.get("counter") else "")
+            + (RELIC_USED_UP if r.get("used_up") else "")
             + (f" — {r['text']}" if r["text"] else "")
             for r in obs["held_relics"]]
 

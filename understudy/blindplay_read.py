@@ -15,7 +15,8 @@ from typing import Any
 
 from understudy import bridge, qa_packet
 from understudy.blindplay_shape import (BOARD_SETTLE_TRIES, COMBAT_SCREENS,
-                                        SETTLE_DELAY_S, SETTLE_TRIES)
+                                        EVENT_SETTLE_TRIES, SETTLE_DELAY_S,
+                                        SETTLE_TRIES)
 
 
 # ------------------------------------------------------------ small reads --
@@ -126,6 +127,15 @@ def _spaced(text: str) -> str:
         rendered = _icon_run(m.group(0))
         if not rendered:
             return rendered
+        # 2026-09-26 (control seat, Silent): "Tactician, Sidestep, Automation
+        # and Cure All printed 'Gain Energy' with no number." The game draws
+        # ONE pip for 1 Energy (`EnergyIconsFormatter`: 1 to 3 pips, else the
+        # number then a pip), so a lone pip is a count of one and says so. A
+        # pip that follows a number ("costs 0", "an additional 4") is that
+        # number's unit and stays a bare word.
+        if (rendered in _ICON_SUBJECTS.values()
+                and not text[:m.start()].rstrip()[-1:].isdigit()):
+            rendered = "1 " + rendered
         before = text[m.start() - 1] if m.start() else ""
         after = text[m.end()] if m.end() < len(text) else ""
         if rendered[0].isalnum() and before.isalnum():
@@ -335,7 +345,27 @@ def transient(state: dict[str, Any]) -> str:
     if (str(state.get("state_type")) in COMBAT_SCREENS
             and _blob(state, "battle").get("is_play_phase") is False):
         return "the game has not handed the turn back to the player yet"
+    if _chooser_answered(state):
+        return "the pick is made and the chooser is closing"
     return ""
+
+
+def _chooser_answered(state: dict[str, Any]) -> bool:
+    """2026-09-26 (wave-3 Furina lane 3, seat b): A CHOOSE-A-CARD SCREEN THAT
+    HAS ALREADY TAKEN ITS PICK.
+
+    "Arkhe Alignment's chooser appeared twice at the start of several turns,
+    with only one Arkhe played." The lane's own game log has exactly one
+    `chose cards [KLEEMOD-ARKHE_OUSIA_OPTION]` per turn, so the game asked
+    once. The 0.111.0 `NChooseACardSelectionScreen` sets `_screenComplete` on
+    the pick and leaves the overlay stack a continuation later
+    (`CardsSelected`), so a read in between drew the answered chooser as a
+    fresh one, and the seat answered it again. The bridge now says so
+    (`card_select.answered`, `vendor/STS2_MCP/gits/GitsChooserAnswered.cs`)
+    and the read rides the frame out. Checked for an explicit True: an older
+    bridge that does not send the key draws the screen, as before."""
+    return (str(state.get("state_type")) == "card_select"
+            and _blob(state, "card_select").get("answered") is True)
 
 
 def _combat_torn_down(state: dict[str, Any]) -> bool:
@@ -383,6 +413,33 @@ def settle(state: dict[str, Any], wire: Any = bridge,
     """
     for _ in range(tries):
         if not transient(state):
+            return settle_event(state, wire, delay=delay)
+        time.sleep(delay)
+        state = wire.get_state()
+    return state
+
+
+def _event_without_options(state: dict[str, Any]) -> bool:
+    """An event or Ancient room drawn before its buttons (2026-09-26).
+
+    Three control seats met it: "the first observe of an event or Ancient
+    room showed an empty option list; a second observe loaded it." An Ancient
+    still in its dialogue has no buttons by design, and is not this."""
+    if str(state.get("state_type")) != "event":
+        return False
+    blob = _blob(state, "event")
+    return (not blob.get("options") and blob.get("in_dialogue") is not True)
+
+
+def settle_event(state: dict[str, Any], wire: Any = bridge,
+                 tries: int = EVENT_SETTLE_TRIES,
+                 delay: float = SETTLE_DELAY_S) -> dict[str, Any]:
+    """Re-ask, briefly, an event room whose options have not appeared yet.
+
+    SHORT AND NEVER RAISING, `settle_board`'s rule: a room that really has no
+    options is drawn after a few reads, as before."""
+    for _ in range(tries):
+        if not _event_without_options(state):
             return state
         time.sleep(delay)
         state = wire.get_state()

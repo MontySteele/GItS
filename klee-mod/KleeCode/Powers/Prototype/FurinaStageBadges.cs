@@ -294,10 +294,12 @@ public sealed class NaviaBadgePower : StagePerformerBadge, ILocalizationProvider
         ("title", FurinaStageLedger.DisplayName(Performer)),
         ("description",
             "End of your turn: deal [gold]Geo[/gold] damage equal to her "
-          + "Fanfare to a random enemy."),
+          + "Fanfare to a random enemy. Her [gold]Bow[/gold] uses what she "
+          + "had before she was emptied."),
         ("smartDescription",
             "End of your turn: deal [gold]Geo[/gold] damage equal to her "
-          + "Fanfare to a random enemy."),
+          + "Fanfare to a random enemy. Her [gold]Bow[/gold] uses what she "
+          + "had before she was emptied."),
     };
 }
 

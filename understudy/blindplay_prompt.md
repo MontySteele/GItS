@@ -34,8 +34,9 @@ double quotes exactly as the screen prints it:
 **When two things on one screen print the same name,** the screen numbers
 them in the order it prints them — `Water's Edge (1)` and `Water's Edge (2)`,
 `Slug (1)` and `Slug (2)` — and you name the one you want with its number. A
-name that appears only once is never numbered: say it exactly as printed. A
-card the screen marks `(upgraded)` can also be named that way, and
+name that appears only once is not numbered, except an enemy that was
+numbered earlier in the fight, which keeps its number: say it exactly as
+printed. A card the screen marks `(upgraded)` can also be named that way, and
 `(not upgraded)` names the other copy.
 
 Every screen lists the commands it accepts under **What you can say**. A

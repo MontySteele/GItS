@@ -673,7 +673,8 @@ def rotate(state) -> None:
 
 
 def _leave(state, index: int, *, bowed: bool, reason: str,
-           pay_now: bool = True, owed: list | None = None) -> dict:
+           pay_now: bool = True, owed: list | None = None,
+           held: int = 0) -> dict:
     """A performer leaves the stage. ONE implementation, every caller (a hit
     that empties the bar, a Spend that does, Final Bow, a guest's payment),
     so "a performer at 0 Fanfare bows" (rule 7, 2026-09-25) cannot drift
@@ -682,14 +683,19 @@ def _leave(state, index: int, *, bowed: bool, reason: str,
     `pay_now=False` is the hit's: the bow is owed, and `settle_hit` pays it
     once the hit has been dealt -- `FurinaStage.Flush`'s twin. `owed` is a
     guest act's: the Bow is appended there and paid after the act's effect
-    (rule 4). Returns the exit, which is what the Bow reads (`_exit`)."""
+    (rule 4). Returns the exit, which is what the Bow reads (`_exit`).
+
+    `held` is the bar the performer had BEFORE whatever emptied it (the
+    2026-09-26 seat round, the designer's ruling: "Navia's bow is always
+    worth nothing when she dies to a hit or a Spend"), which Navia's Bow
+    deals. Every caller that empties a bar passes it."""
     p = state.player
     seats = _seats(p)
     book_loss(state, LOSS_LEFT, seats[index][1])   # Final Bow's bar; else 0
     pair = seats.pop(index)
     member, remaining = pair
     _unrest(p, pair)
-    exit_ = _exit(p, member, index, held=0)
+    exit_ = _exit(p, member, index, held=held)
     state.emit("stage_leave", member=member, bowed=bowed, reason=reason,
                fanfare=remaining)
     if bowed and owed is not None:
@@ -707,10 +713,11 @@ def _leave(state, index: int, *, bowed: bool, reason: str,
 def _exit(player, member: str, index: int, held: int,
           stayer=None) -> dict:
     """What a Bow reads, taken as the performer leaves (the Guest Cast,
-    2026-09-25): the Fanfare it still HELD (Navia; 0 at 0 Fanfare and for a
-    cash-out), the seat it stood in (Sigewinne gives to the one behind), and
+    2026-09-25): the Fanfare it HELD (Navia), the seat it stood in (Sigewinne gives to the one behind), and
     what it LOST since its last act (Wriothesley, the hit that took him down
-    included). A guest's loss count leaves the stage with it. C# twin:
+    included). A guest's loss count leaves the stage with it. For a performer
+    EMPTIED -- a hit, a Spend, a payment, a cash-out, Let the People Rejoice --
+    `held` is the bar it had before whatever emptied it (2026-09-26). C# twin:
     `StageExit`."""
     if stayer is not None:
         # THE SUPPORTING POOL's Grand Finale (2026-09-26): a Bow WITHOUT
@@ -1067,7 +1074,8 @@ def spend(state, amount: int) -> int:
                bar_at_spend=bar, fanfare=pair[1], turn=state.turn,
                enemies_alive=len(state.living_enemies))
     if pair[1] <= 0:
-        _leave(state, len(_seats(p)) - 1, bowed=True, reason="spend")
+        _leave(state, len(_seats(p)) - 1, bowed=True, reason="spend",
+               held=bar)
     return paid
 
 
@@ -1099,7 +1107,8 @@ def collect_all(state) -> int:
     company = [m for m, _f in seats]
     total = sum(f for _m, f in seats)
     book_paid(state, total)
-    exits = [_exit(p, member, i, held=0) for i, (member, _f) in
+    # 2026-09-26: each Bow reads the bar the card took (Navia).
+    exits = [_exit(p, member, i, held=f) for i, (member, f) in
              enumerate(seats)]
     seats.clear()
     setattr(state, _PENDING, exits)
@@ -1164,9 +1173,10 @@ def final_bow(state) -> int:
         state.emit("stage_final_bow_whiffed")
         return 0
     bar = pair[1]
-    # A CASH-OUT: the card is paid for the whole bar, so the Bow holds
-    # nothing (`_leave` passes held=0).
-    _leave(state, len(_seats(p)) - 1, bowed=True, reason="final_bow")
+    # A CASH-OUT: the card is paid for the whole bar. The Bow still reads
+    # the bar it had (Navia, 2026-09-26).
+    _leave(state, len(_seats(p)) - 1, bowed=True, reason="final_bow",
+           held=bar)
     return bar
 
 
@@ -1205,7 +1215,8 @@ def absorb(state, incoming: int) -> int:
                incoming=int(incoming), fanfare=pair[1])
     caught = 0
     if pair[1] <= 0:
-        exit_ = _leave(state, 0, bowed=True, reason="hit", pay_now=False)
+        exit_ = _leave(state, 0, bowed=True, reason="hit", pay_now=False,
+                       held=bar)
         # 2026-09-25 night (the granted-guest seat round): "a performer
         # emptied by a hit Bows before the rest of that hit reaches you".
         # The Bow is still paid by `settle_hit`, but its Block (Usher's act)
@@ -1500,7 +1511,7 @@ def spend_all_of_back(state) -> int:
     state.emit("stage_spend", member=member, asked=bar, paid=bar,
                bar_at_spend=bar, fanfare=0, turn=state.turn,
                enemies_alive=len(state.living_enemies))
-    _leave(state, len(_seats(p)) - 1, bowed=True, reason="spend")
+    _leave(state, len(_seats(p)) - 1, bowed=True, reason="spend", held=bar)
     return bar
 
 
@@ -1680,7 +1691,8 @@ def _pay(state, pair, amount: int, actor: str, owed: list) -> None:
                before=before, fanfare=pair[1])
     if pair[1] <= 0:
         index = next(i for i, s in enumerate(_seats(p)) if s is pair)
-        _leave(state, index, bowed=True, reason="paid", owed=owed)
+        _leave(state, index, bowed=True, reason="paid", owed=owed,
+               held=before)
 
 
 def _gain(state, pair, amount: int, actor: str) -> None:
@@ -2000,8 +2012,8 @@ def hold_fade(state) -> None:
 def intermission(state, every: int) -> int:
     """*Intermission*: "Your back performer Bows and leaves. Draw 1 card for
     every 3 Fanfare it had." A real Bow (its act, the Bow readers, A
-    Five-Century Act's return) and a CASH-OUT like Final Bow's, so the Bow
-    holds nothing; then draw floor(F / every), F its Fanfare before the Bow.
+    Five-Century Act's return) and a CASH-OUT like Final Bow's (the Bow reads
+    the bar it had, 2026-09-26); then draw floor(F / every), F its Fanfare before the Bow.
     Returns F. C# twin: `FurinaStage.Intermission`."""
     p = state.player
     if not active(p):
@@ -2011,7 +2023,8 @@ def intermission(state, every: int) -> int:
         state.emit("stage_intermission_whiffed")
         return 0
     bar = int(pair[1])
-    _leave(state, len(_seats(p)) - 1, bowed=True, reason="intermission")
+    _leave(state, len(_seats(p)) - 1, bowed=True, reason="intermission",
+           held=bar)
     cards = bar // max(1, int(every))
     if cards > 0 and not state.over:
         state.draw(cards)
@@ -2036,7 +2049,7 @@ def spend_all_of_front(state) -> int:
     state.emit("stage_spend", member=member, asked=bar, paid=bar,
                bar_at_spend=bar, fanfare=0, turn=state.turn,
                enemies_alive=len(state.living_enemies), seat=SEAT_LEAD)
-    _leave(state, 0, bowed=True, reason="spend")
+    _leave(state, 0, bowed=True, reason="spend", held=bar)
     return bar
 
 

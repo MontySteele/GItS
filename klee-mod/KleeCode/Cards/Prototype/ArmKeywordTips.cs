@@ -884,10 +884,15 @@ public static class ArmKeywordTips
             // the tips gave both seats without saying which wins. One
             // sentence says it, and says where hits go with it: a lone
             // performer is the front, which is hit and does not fade.
+            // A LATER SEAT (2026-09-26): "the front instead" was wrong -- a
+            // seat saw Spend offered from a lone performer. It is BOTH seats
+            // (brief rule 5: with one performer, the back is the lead): it is
+            // hit, it pays Spends, and it never fades (rule 12 exempts the
+            // front). The sentence says both.
             "Gains and Spends [gold]Fanfare[/gold]. At "
           + "the end of your turn, it loses half its Fanfare above "
-          + FurinaStageLaw.FadeThreshold + ". A lone performer is the front "
-          + "instead.");
+          + FurinaStageLaw.FadeThreshold + ". A lone performer is both, and "
+          + "never fades.");
 
     /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
     /// choice a player makes at the start of each turn.</summary>
@@ -998,7 +1003,8 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, NaviaKey,
             "End of your turn: deal [gold]Geo[/gold] damage equal to her "
-          + "Fanfare to a random enemy.");
+          + "Fanfare to a random enemy. Her [gold]Bow[/gold] uses what she "
+          + "had before she was emptied.");
 
     public static IEnumerable<IHoverTip> ForChevreuse(
         IEnumerable<IHoverTip> inherited, CardModel card) =>

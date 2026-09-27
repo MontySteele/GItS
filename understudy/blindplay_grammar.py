@@ -139,6 +139,18 @@ def parse_command(text: str) -> Command:
         ordinal = int(m.group(1))
         if ordinal < 1:
             raise BlindPlayError("the potions on your belt are counted from 1")
+    # 2026-09-26 (control seats, Ironclad and Silent): `use potion 1` was
+    # refused with "no name given" while `drop potion 1` worked. The same
+    # number, with an optional `on "<enemy>"` after it; the quoted name that
+    # follows is then the target, so it moves to the target's place.
+    if verb == "use potion":
+        m = re.fullmatch(r"use (?:the )?potion\s+#?(\d+)(?:\s+on)?", head)
+        if m is not None:
+            ordinal = int(m.group(1))
+            if ordinal < 1:
+                raise BlindPlayError(
+                    "the potions on your belt are counted from 1")
+            names = ["", *names]
     return Command(verb=verb, names=names, raw=raw, ordinal=ordinal)
 
 
@@ -457,7 +469,12 @@ SELF_TARGETS = frozenset({"self", "anyally", "anyplayer"})
 # it. The set is CLOSED and holds the game's own enum names only: a custom
 # single-target type renders as a bare number on the wire (`EB-216`), matches
 # nothing here, and keeps the fall-through that lets a Plan card be aimed.
-UNAIMED_TARGETS = frozenset({"none", "allenemies"}) | SELF_TARGETS
+#: 2026-09-26: the one target that is not a creature. `TargetType.cs` says it
+#: is "currently only used by FoulPotion to target the merchant"; the game
+#: aims it, so nothing is sent.
+MERCHANT_TARGETS = frozenset({"targetednocreature"})
+UNAIMED_TARGETS = (frozenset({"none", "allenemies"}) | SELF_TARGETS
+                   | MERCHANT_TARGETS)
 
 
 def _aims_at_an_enemy(entry: dict[str, Any]) -> bool:
@@ -672,8 +689,11 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     if entry.get("can_play") is False:
         # `EB-264`: the same translation the page uses, so a refusal and the
         # card's own line cannot disagree about why.
+        # 2026-09-26 (control seat, Regent): with the star total and the
+        # card's star cost, so a star refusal says both numbers.
         reason = qa_packet.unplayable_reason(
-            entry.get("unplayable_reason_text") or entry.get("unplayable_reason"))
+            entry.get("unplayable_reason_text") or entry.get("unplayable_reason"),
+            _int(_player(state).get("stars")), entry.get("star_cost"))
         return _refuse(f"{titles[idx]!r} cannot be played right now"
                        + (f": {reason}" if reason else ""))
     post: dict[str, Any] = {"action": "play_card", "card_index": idx}
@@ -849,10 +869,18 @@ def _use_potion(state: dict[str, Any], cmd: Command) -> Resolution:
     # was refused with two on the belt, and the bare name worked. Potions
     # take the numbered handle cards take (`EB-177`), and two of one potion
     # are interchangeable, as two copies of one card are.
-    idx, why = _match(potions, cmd.name, key=lambda p: _text(p.get("name")),
-                      face=lambda p: _text(p.get("name")), number=True)
-    if idx < 0:
-        return _refuse(why)
+    if cmd.ordinal:
+        if cmd.ordinal > len(potions):
+            return _refuse(
+                f"you are carrying {len(potions)} potion(s), so there is no "
+                f"number {cmd.ordinal} on your belt")
+        idx = cmd.ordinal - 1
+    else:
+        idx, why = _match(potions, cmd.name,
+                          key=lambda p: _text(p.get("name")),
+                          face=lambda p: _text(p.get("name")), number=True)
+        if idx < 0:
+            return _refuse(why)
     entry = potions[idx]
     slot = entry.get("slot")
     post: dict[str, Any] = {"action": "use_potion",
@@ -861,6 +889,18 @@ def _use_potion(state: dict[str, Any], cmd: Command) -> Resolution:
     aim = str(entry.get("target_type") or "").strip().lower()
     if aim in SELF_TARGETS:
         printed["target"] = "yourself"
+        return Resolution(True, "use potion", post, printed)
+    # 2026-09-26 (control seat, Ironclad): Foul Potion "can be thrown at the
+    # Merchant", and in the shop the page asked which enemy. Out of a fight
+    # the game aims it at the Merchant itself (`FoulPotion.TargetType` is
+    # `TargetedNoCreature`, which takes no target), so it is used bare; an
+    # `on "Merchant"` is the same throw.
+    if aim in MERCHANT_TARGETS:
+        if cmd.target and "merchant" not in _fold(cmd.target):
+            return _refuse(f"{printed['potion']} is thrown at the Merchant "
+                           f"here, not at {cmd.target}",
+                           f'use potion "{printed["potion"]}"')
+        printed["target"] = "the Merchant"
         return Resolution(True, "use potion", post, printed)
     if _potion_aims_at_an_enemy(entry) or cmd.target:
         eid, why = _resolve_enemy(state, cmd.target)

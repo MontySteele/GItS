@@ -13,7 +13,7 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         _event_option, _event_options,
-                                        _map_ahead, _map_boss,
+                                        _map_ahead, _map_boss, _map_paths,
                                         _map_options, _omitted_from_upgrade,
                                         _omitted_from_removal,
                                         is_removal_screen,
@@ -27,14 +27,16 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         upgrade_deck_floor)
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
-                                        _reward_option, _shop_options,
+                                        _reward_option, _shop_items,
+                                        _shop_options,
                                         deck_elements, relic_faces,
                                         remember_deck, run_change, stage_arm)
 from understudy.blindplay_notes import (MODE_CHOOSER_PROMPT,
                                         REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
-                                       _fold, _hand, _int, _player, _potions,
+                                       _fold, _hand, _int,
+                                       _is_mod_source_tip, _player, _potions,
                                        _relics, _screen, _text)
 from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
                                         SELECT_SCREENS, SPHERE_REVEAL,
@@ -141,6 +143,38 @@ def _show_relics(state: dict[str, Any], obs: dict[str, Any]) -> None:
     held = relic_faces(state)
     if held:
         obs["held_relics"] = held
+
+
+def _offer_words(state: dict[str, Any], st: str) -> list[dict[str, str]]:
+    """The words a relic or potion on this screen defines, off its own tips.
+
+    2026-09-26 (control seats, Silent and Ironclad): Vigor (Akabeko), Regen,
+    Thorns (Bronze Scales), Royally Approved (Royal Stamp) and Buffer (Lucky
+    Tonic) were defined only once they stood on the board in a fight. The
+    game hangs each word's tip on the relic or potion that prints it, and the
+    wire sends those tips (`keywords`) on the shop shelf, the reward rows, the
+    relic choosers and the belt. A card's tips already print under the card.
+    """
+    raw: list[Any] = []
+    if st in ("shop", "fake_merchant"):
+        raw += [i for i in _shop_items(state)
+                if _fold(i.get("category")) in ("relic", "potion")]
+    elif st == "rewards":
+        raw += [r for r in _reward_items(state) if isinstance(r, dict)
+                and _fold(r.get("type")) in ("relic", "potion")]
+    elif st in ("treasure", "relic_select"):
+        raw += [r for r in _relic_options(state) if isinstance(r, dict)]
+    raw += [p for p in _potions(state) if isinstance(p, dict)]
+    out: list[dict[str, str]] = []
+    for entry in raw:
+        for tip in entry.get("keywords") or []:
+            if not isinstance(tip, dict) or _is_mod_source_tip(tip):
+                continue
+            name = _text(tip.get("name"))
+            text = _text(tip.get("description") or tip.get("text"))
+            if name and text:
+                out.append({"name": name, "text": text})
+    return out
 
 
 def observation(state: dict[str, Any]) -> dict[str, Any]:
@@ -264,7 +298,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["nodes"] = _map_options(state)
         # `EB-298`: the floors ahead and the boss, both already on the feed.
         obs["ahead"] = _map_ahead(state)
+        # 2026-09-26: and the links between them, where the feed has them.
+        obs["paths"] = _map_paths(state)
         obs["boss"] = _map_boss(state)
+        # 2026-09-26 (control seat, Necrobinder): "The map page never shows
+        # HP." A route is chosen on it.
+        if _player(state).get("hp") is not None:
+            obs["hp"] = _int(_player(state).get("hp"))
+            obs["max_hp"] = _int(_player(state).get("max_hp"))
         # `EB-447`: the two facts a run is planned on, on the one screen every
         # room is entered from. The gold is on the map's own feed
         # (`BuildPlayerState` sends it outside combat too) and was printed on
@@ -430,6 +471,26 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
                 # face still adds its keyword.
                 face["upgraded_keywords"] = list(
                     qa_packet.upgrade_keywords(raw.get("id")))
+                # 2026-09-26 (control seats, Silent and Ironclad): where no
+                # sheet answers, the GAME's own upgraded face off the bridge
+                # (`GitsAddUpgradePreview`), which every base card has.
+                game_face = _text(raw.get("upgraded_description"))
+                if not built and game_face:
+                    face["upgraded_face"] = game_face
+                    face["upgraded_note"] = ""
+                    up_cost = _text(raw.get("upgraded_cost"))
+                    # 2026-09-26 (control seat, Regent): and the upgraded
+                    # STAR cost; an absent key (an older bridge) is the
+                    # unupgraded one.
+                    up_star = (_text(raw.get("upgraded_star_cost"))
+                               if "upgraded_star_cost" in raw
+                               else face.get("star_cost") or "")
+                    moved = ((up_cost and up_cost != _text(raw.get("cost")))
+                             or up_star != (face.get("star_cost") or ""))
+                    if not face["upgraded_cost"] and moved:
+                        face["upgraded_cost"] = qa_packet.cost_label(
+                            dict(face, cost=up_cost or face.get("cost"),
+                                 star_cost=up_star))
         picked = [_card_face(c) for c in _preview_cards(state, st)]
         # How many results the transform screen has NOT chosen yet, and
         # whether its preview came through in a shape this page can read at
@@ -618,6 +679,15 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["potion_offered"] = any(
             _fold(r.get("type")) == "potion"
             for r in _reward_items(state) if isinstance(r, dict))
+        # 2026-09-26 (control seat, Ironclad): under Sozu the page printed
+        # "Took: Power Potion" and nothing arrived. The relic that bars
+        # potions, by its own printed sentence, beside the offer.
+        if obs["potion_offered"]:
+            obs["potion_barred"] = next(
+                (r["name"] for r in relic_faces(state)
+                 if "obtain potions" in r["text"].lower()
+                 and ("no longer" in r["text"].lower()
+                      or "cannot" in r["text"].lower())), "")
         # `EB-702`: the CARD rows, named, so the page can say where their skip
         # lives. A reward screen's card row is an offer and not the offer's own
         # page; the sentence under the list is the same one `_skip`'s refusal
@@ -752,6 +822,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     # gets the rule, and a reader added tomorrow gets it for free. After the
     # sprite pass, so a word inside a rewritten icon tag is read as it prints.
     obs["keywords"] = keyword_notes(obs)
+    # 2026-09-26: and the words an offered relic or potion prints, defined
+    # where it is offered rather than once it is on the board.
+    if not obs["blocked"]:
+        named = {row["name"] for row in obs["keywords"]}
+        for row in _offer_words(state, st):
+            if row["name"] not in named:
+                named.add(row["name"])
+                obs["keywords"].append(row)
 
     # The wire's own screen name is the ONE token exempted from the snake_case
     # rule, and only because a refusal has to be able to name what it refused.

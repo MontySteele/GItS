@@ -1471,6 +1471,11 @@ public static partial class McpMod
                 ["name"] = SafeGetText(() => relic.Title),
                 ["description"] = SafeGetText(() => relic.DynamicDescription),
                 ["counter"] = relic.ShowCounter ? relic.DisplayAmount : null,
+                // GItS LOCAL EDIT (2026-09-26, control seat Silent): Tea of
+                // Discourtesy still read "the next combat" after it had fired.
+                // The game greys a spent relic out (`RelicModel.IsUsedUp`);
+                // its text does not change.
+                ["used_up"] = relic.IsUsedUp,
                 ["keywords"] = BuildHoverTips(relic.HoverTipsExcludingRelic)
             });
         }
@@ -2416,6 +2421,10 @@ public static partial class McpMod
                 item["potion_id"] = potionReward.Potion.Id.Entry;
                 item["potion_name"] = SafeGetText(() => potionReward.Potion.Title);
                 item["potion_description"] = SafeGetText(() => potionReward.Potion.DynamicDescription);
+                // GItS LOCAL EDIT (2026-09-26, control seat Silent): the words
+                // the offer prints ("5 Regen"), defined where it is offered,
+                // as the shop shelf already sends them.
+                item["keywords"] = BuildHoverTips(potionReward.Potion.ExtraHoverTips);
             }
             // GItS LOCAL EDIT (`EB-716`, the relic half). A RELIC REWARD SENT
             // ITS NAME AND NOTHING ELSE. `Reward.Description` for a
@@ -2436,6 +2445,9 @@ public static partial class McpMod
                 item["relic_id"] = relicReward.Relic.Id.Entry;
                 item["relic_name"] = SafeGetText(() => relicReward.Relic.Title);
                 item["relic_description"] = SafeGetText(() => relicReward.Relic.DynamicDescription);
+                // GItS LOCAL EDIT (2026-09-26, control seats): and its words
+                // ("8 Vigor"), as the potion above and the shop shelf send.
+                item["keywords"] = BuildHoverTips(relicReward.Relic.HoverTipsExcludingRelic);
             }
             // GItS LOCAL EDIT (2026-09-26, the Klee full run on lane 1). A
             // SPECIAL CARD REWARD NAMED NO CARD. Thieving Hopper's "take your
@@ -2525,6 +2537,30 @@ public static partial class McpMod
         return state;
     }
 
+    /// <summary>
+    /// GItS LOCAL EDIT (2026-09-26, control seats: Silent's Yummy Cookie,
+    /// Ironclad's Smith). THE GAME'S OWN UPGRADED FACE on the upgrade grid.
+    /// The page could render an upgrade only for the mod's cards and the
+    /// base game's basics, so every other base card read "Upgraded: not
+    /// shown". The preview is an upgraded clone (`SafeBuildUpgradedCardPreview`,
+    /// the wiki's own route); the deck card is untouched.
+    /// </summary>
+    private static void GitsAddUpgradePreview(NCardGridSelectionScreen screen,
+                                              CardModel card,
+                                              Dictionary<string, object?> info)
+    {
+        if (screen is not NDeckUpgradeSelectScreen) return;
+        var preview = SafeBuildUpgradedCardPreview(card);
+        if (preview == null) return;
+        info["upgraded_description"] = SafeGetCardDescription(preview, PileType.None);
+        try { info["upgraded_cost"] = GetCostDisplay(preview); }
+        catch { /* a cost the clone will not give is a key left absent */ }
+        // The Regent's star half (control seat, 2026-09-26): null where the
+        // card has no star cost, as `star_cost` is.
+        try { info["upgraded_star_cost"] = GetStarCostDisplay(preview); }
+        catch { /* as above */ }
+    }
+
     private static Dictionary<string, object?> BuildCardSelectState(NCardGridSelectionScreen screen, RunState runState)
     {
         var state = new Dictionary<string, object?>();
@@ -2596,6 +2632,7 @@ public static partial class McpMod
                 var cardInfo = BuildCardInfo(card);
                 cardInfo["index"] = index;
                 cardInfo["selected"] = selected != null && selected.Contains(card);
+                GitsAddUpgradePreview(screen, card, cardInfo);
                 // Whether a holder is standing on this row right now. Not a
                 // reader's business on the page, and it is the one fact that
                 // says which half of the old feed a row came from.
@@ -2614,6 +2651,7 @@ public static partial class McpMod
                 var cardInfo = BuildCardInfo(card);
                 cardInfo["index"] = index;
                 cardInfo["selected"] = selected != null && selected.Contains(card);
+                GitsAddUpgradePreview(screen, card, cardInfo);
                 cards.Add(cardInfo);
                 index++;
             }
@@ -2744,6 +2782,11 @@ public static partial class McpMod
         state["preview_showing"] = false;
         state["can_confirm"] = false;
         state["can_cancel"] = state["can_skip"];
+        // GItS LOCAL EDIT (wave-3 Furina lane 3 seat b, 2026-09-26): whether
+        // the pick is already taken, so the read rides out the frame before
+        // the game takes the screen down (`gits/GitsChooserAnswered.cs`).
+        if (GitsChooserAnswered(screen) is bool answered)
+            state["answered"] = answered;
 
         return state;
     }
@@ -3123,7 +3166,7 @@ public static partial class McpMod
                 }
                 resolvedDesc ??= SafeGetText(() => power.SmartDescription);
 
-                powers.Add(new Dictionary<string, object?>
+                var row = new Dictionary<string, object?>
                 {
                     ["id"] = power.Id.Entry,
                     ["name"] = SafeGetText(() => power.Title),
@@ -3136,14 +3179,54 @@ public static partial class McpMod
                     // printed "The Stage 1" off it. The page hides the number
                     // where this says `Single`.
                     ["stack"] = power.StackType.ToString(),
-                    ["type"] = power.Type.ToString(),
+                    // GItS LOCAL EDIT (2026-09-26, control seats): the type
+                    // FOR THIS AMOUNT, the game's own `TypeForCurrentAmount`.
+                    // `Type` is the power's static kind, so Tender's
+                    // Strength -1 reached the page as "(buff)".
+                    ["type"] = power.TypeForCurrentAmount.ToString(),
                     ["description"] = resolvedDesc,
                     ["keywords"] = BuildHoverTips(extraTips)
-                });
+                };
+                GitsAddPowerFacts(power, row);
+                powers.Add(row);
             }
             catch { /* skip this power - game engine state may be inconsistent */ }
         }
         return powers;
+    }
+
+    /// <summary>
+    /// GItS LOCAL EDIT (2026-09-26, the base-game control seats). Two facts a
+    /// power holds and never prints: the card a Thieving Hopper's Swipe took
+    /// (`stolen_card`, its printed title), and, on the player's Surrounded,
+    /// the combat ids of the enemies now BEHIND the player (`behind`): with
+    /// the player facing right, a body wearing Back Attack Left hits from
+    /// behind, and the other way round (`SurroundedPower`, 0.111.0).
+    /// </summary>
+    private static void GitsAddPowerFacts(PowerModel power,
+                                          Dictionary<string, object?> row)
+    {
+        try
+        {
+            if (power is MegaCrit.Sts2.Core.Models.Powers.SwipePower swipe
+                && swipe.StolenCard != null)
+            {
+                row["stolen_card"] = SafeGetText(() => swipe.StolenCard.Title);
+            }
+            if (power is MegaCrit.Sts2.Core.Models.Powers.SurroundedPower sur
+                && power.Owner?.CombatState != null)
+            {
+                bool facingRight = sur.Facing
+                    == MegaCrit.Sts2.Core.Models.Powers.SurroundedPower.Direction.Right;
+                row["behind"] = power.Owner.CombatState.Enemies
+                    .Where(e => e.IsAlive && (facingRight
+                        ? e.HasPower<MegaCrit.Sts2.Core.Models.Powers.BackAttackLeftPower>()
+                        : e.HasPower<MegaCrit.Sts2.Core.Models.Powers.BackAttackRightPower>()))
+                    .Select(e => e.CombatId.ToString())
+                    .ToList();
+            }
+        }
+        catch { /* a fact the power will not give is a key left absent */ }
     }
 
     private static List<Dictionary<string, object?>> BuildPetsState(Player player)

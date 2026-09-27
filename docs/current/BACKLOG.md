@@ -41,6 +41,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Harness, bridge and tools
 
+- Bridge: the enchant chooser (relic Kifuda, 'Choose 3 cards to Enchant') never closes; `confirm_selection` appends the picks again (3→6→9→12), and cancel is refused — a seat stalls in the shop (seat round 2026-09-26, wave3-furina-lane2).
 - The Opus-seat path embarks with no action cap (`embark --max-actions` defaults to 0), so a hand-driven seat ran 279 actions; make `seat.py --opus-brief` print or run the embark with `--max-actions 120`.
 - Seat page: the Tainted per-hit note still gives two readings for a multi-hit, the same double count the Weak note had before #650.
 - Seat page: Pocket Match's play log listed 3 and left out its own 5 damage.
@@ -49,6 +50,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Furina Stage: the sim's `furina_stage.forecast` (tests only) does not count the cards in her hand that hurt her as her turn ends; the mod's forecast does since 2026-09-26 (`FurinaStage.HandTurnEndHits`).
 - Soak: `soak_screens._escape` answers the Crystal Sphere with `crystal_sphere_proceed`, which the game refuses while divinations are owed; spend them first as the seat page's `reveal` does (`blindplay_shape.sphere_reveal_action`).
 - Seat page: no screen prints the run seed or the ascension.
+- Seat page: a dead Decimillipede segment waiting to Reattach is not on the wire (`BuildBattleState` sends only living enemies), so no page shows its revive countdown; send the body and its countdown (control seats, Ironclad and Necrobinder, 2026-09-26).
+- Seat page: orb passives and evokes at the start and end of a turn are narrated nowhere (a Frost evoked by a Lightning Rod channel read as unexplained Block); `ResolutionLedger` files card plays only (control seat, Defect, 2026-09-26).
 - `EB-802` `understudy/twolane_frames.py` may carry the PrintWindow clip `frames.py` fixed; route it through the same capture, and make a frame-reading row refuse `complete: false`.
 - `EB-799` `vendor/STS2_MCP/STS2_MCP.csproj` ignores `klee-mod/local.props`, so a bare `dotnet build` of the bridge fails in a worktree; read `local.props` (until then pass `-p:STS2GameDir=...`).
 - `EB-800` the five arm test properties disagree on `The_arm_ships_off` (four `Skip`, `FurinaStage` an `#if`); pick one convention and say which in `operations/prototype.md`.

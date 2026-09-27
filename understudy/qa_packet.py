@@ -1395,7 +1395,7 @@ UNPLAYABLE_REASONS: dict[str, str] = {
 _ENUM_TOKEN = re.compile(r"^[A-Za-z][A-Za-z0-9]*$")
 
 
-def unplayable_reason(raw: Any) -> str:
+def unplayable_reason(raw: Any, stars: Any = None, star_cost: Any = None) -> str:
     """The game's refusal in words a player can read (`EB-264`).
 
     A `[Flags]` enum prints as `A, B`, so each part is read on its own.
@@ -1421,7 +1421,14 @@ def unplayable_reason(raw: Any) -> str:
     if not all(_ENUM_TOKEN.match(p) for p in parts):
         return text
     out: list[str] = []
+    need = _text(star_cost)
     for part in parts:
+        # 2026-09-26 (control seat, Regent): the star refusal says how many
+        # you have and how many the card needs, where the board says both.
+        if (part.lower() == "starcosttoohigh" and isinstance(stars, int)
+                and need.isdigit()):
+            out.append(STAR_SHORT.format(have=stars, need=need))
+            continue
         known = UNPLAYABLE_REASONS.get(part.lower())
         if known is not None:
             if known:
@@ -1454,8 +1461,14 @@ def cost_label(card: dict[str, Any]) -> str:
     """
     shown = _text(card.get("cost")) or "-"
     price = card.get("printed_spark")
+    # 2026-09-26 (control seat, Regent): the STAR half of the slot, the
+    # game's own display value (`GetStarCostDisplay`). The page printed
+    # Falling Star as "cost 0" and the seat learned its 2 Stars by refusal.
+    stars = star_label(card.get("star_cost"))
     if not isinstance(price, int) or price <= 0:
-        return shown
+        if not stars:
+            return shown
+        return stars if shown in ("0", "-") else f"{shown} and {stars}"
     if card.get("spark_all"):
         # `EB-445`: the price is the bank, and the gate is what it takes to
         # be playable at all.
@@ -1463,6 +1476,19 @@ def cost_label(card: dict[str, Any]) -> str:
     else:
         sparks = f"{price} Spark" if price == 1 else f"{price} Sparks"
     return sparks if shown in ("0", "-") else f"{shown} and {sparks}"
+
+
+def star_label(raw: Any) -> str:
+    """A card's star cost as the cost slot says it: `2 Stars`, `1 Star`,
+    `X Stars`. `""` where the wire sent none (a card with no star cost)."""
+    shown = _text(raw)
+    if not shown:
+        return ""
+    return f"{shown} Star" if shown == "1" else f"{shown} Stars"
+
+
+#: The star refusal with both numbers, where the board gives them.
+STAR_SHORT = "not enough Stars (have {have}, need {need})"
 
 
 def _spark_price(card: dict[str, Any]) -> int:

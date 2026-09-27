@@ -56,6 +56,10 @@ def relic_faces(state: dict[str, Any]) -> list[dict[str, str]]:
         counter = r.get("counter")
         if counter is not None:
             row["counter"] = _text(counter)
+        # 2026-09-26 (control seat, Silent): a spent relic, which the game
+        # greys out and whose text still reads as if it will fire.
+        if r.get("used_up") is True:
+            row["used_up"] = True
         out.append(row)
     return out
 
@@ -269,6 +273,12 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
                 if entry.get("spark_price") is not None else None)),
         # `EB-445`: whether that price is the whole bank.
         "spark_all": qa_packet.spends_all_sparks(entry.get("id")),
+        # 2026-09-26 (control seat, Regent): the STAR cost, the game's own
+        # display value off `BuildCardInfo`. `""` where the card has none.
+        "star_cost": _text(entry.get("star_cost")),
+        # The star total a refusal is measured against; `_combat` fills it
+        # on a hand card, and it stays `None` everywhere else.
+        "stars_have": None,
         # `EB-700`. THE FACE THIS CARD IS WRITTEN WITH, where the board has
         # moved it. The wire carries the RESOLVED sentence and nothing else --
         # "Slack Water read Deal 3 under Weak and Deal 4 later, so a seat
@@ -458,7 +468,9 @@ def _named_option(entry: Any) -> dict[str, Any]:
     spark = (qa_packet.spark_price_for(card_id, name.rstrip().endswith("+"))
              if card_id is not None else None)
     cost = qa_packet.cost_label({"cost": energy, "printed_spark": spark,
-                                 "spark_all": qa_packet.spends_all_sparks(card_id)})
+                                 "spark_all": qa_packet.spends_all_sparks(card_id),
+                                 # The Regent's star half (`BuildShopState`).
+                                 "star_cost": entry.get("card_star_cost")})
     # `EB-262`, the other half, AND IT IS NOT OURS TO FIX. A card shelf's
     # name, text and cost all live behind `entry.CreationResult?.Card`, and
     # `MerchantCardEntry.IsStocked` IS `CreationResult != null` -- so the
@@ -1131,7 +1143,7 @@ def _run_snapshot(state: dict[str, Any]) -> dict[str, Any]:
     player = _blob(state, "player")
     run = _blob(state, "run")
     deck = sum(len(player.get(pile) or []) for pile in _DECK_PILES)
-    return {"hp": _int(player.get("hp")) if player.get("hp") is not None
+    snap = {"hp": _int(player.get("hp")) if player.get("hp") is not None
             else None,
             "hp_settled": _settled(player),
             "max_hp": _int(player.get("max_hp"))
@@ -1143,15 +1155,97 @@ def _run_snapshot(state: dict[str, Any]) -> dict[str, Any]:
             else None,
             "deck": deck or None,
             "screen": _screen(state)}
+    # 2026-09-26 (control seats): the run's own deck by title and face, and
+    # the belt, so a change between two screens can be NAMED -- a transform,
+    # an event's random upgrade, a curse, a potion the game used by itself.
+    master = player.get("master_deck")
+    if isinstance(master, list):
+        snap["deck_cards"] = [[_text(c.get("name")), _text(c.get("description"))]
+                              for c in master
+                              if isinstance(c, dict) and _text(c.get("name"))]
+    if isinstance(player.get("potions"), list):
+        snap["potions"] = [[_text(p.get("name")),
+                            p.get("can_use_in_combat") is not False]
+                           for p in player["potions"]
+                           if isinstance(p, dict) and _text(p.get("name"))]
+    return snap
 
 
 def _run_key(state: dict[str, Any]) -> str:
     """What makes this screen THIS screen: the room, the place and the turn."""
     run, battle = _blob(state, "run"), _blob(state, "battle")
+    player = _blob(state, "player")
+    # 2026-09-26: AND WHAT IT HOLDS. An event that upgrades a random card, or
+    # a chest that pays gold, changes the run without changing the room, and
+    # a ledger that rolled on the room alone printed neither.
+    master = player.get("master_deck")
+    held = "/".join(sorted(_text(c.get("name")) for c in master
+                           if isinstance(c, dict)))         if isinstance(master, list) else ""
     return "|".join(str(x) for x in (
-        _fold(_blob(state, "player").get("character")), _screen(state),
+        _fold(player.get("character")), _screen(state),
         _int(run.get("act")), _int(run.get("floor")),
-        _int(battle.get("round"))))
+        _int(battle.get("round")), _int(player.get("gold")),
+        len(_potions_of(player)), held))
+
+
+def _potions_of(player: dict[str, Any]) -> list[Any]:
+    held = player.get("potions")
+    return held if isinstance(held, list) else []
+
+
+def _deck_moves(was: Any, now: Any) -> dict[str, Any]:
+    """The cards that left and joined the deck between two reads, by name.
+
+    An upgrade (or Reflections' downgrade) is one card becoming another of
+    the same title with or without its `+`, and is said as that. `{}` where
+    either read has no deck on it or nothing moved.
+    """
+    if not isinstance(was, list) or not isinstance(now, list):
+        return {}
+    before = [row[0] for row in was]
+    after = [row[0] for row in now]
+    texts = {row[0]: row[1] for row in now}
+    lost = list(before)
+    for title in after:
+        if title in lost:
+            lost.remove(title)
+    gained = list(after)
+    for title in before:
+        if title in gained:
+            gained.remove(title)
+    became: list[list[str]] = []
+    for title in list(lost):
+        match = next((g for g in gained
+                      if g.rstrip("+") == title.rstrip("+") and g != title),
+                     None)
+        if match is not None:
+            lost.remove(title)
+            gained.remove(match)
+            became.append([title, match])
+    out: dict[str, Any] = {}
+    if became:
+        out["deck_became"] = became
+    if gained:
+        out["deck_gained"] = [[g, texts.get(g, "")] for g in gained]
+    if lost:
+        out["deck_lost"] = lost
+    return out
+
+
+def _self_used_potions(was: Any, now: Any) -> list[str]:
+    """Potions gone from the belt that only the game can use (Fairy in a
+    Bottle): the wire says a potion can be used in combat unless its use is
+    automatic."""
+    if not isinstance(was, list) or not isinstance(now, list):
+        return []
+    left = [row[0] for row in now]
+    gone: list[str] = []
+    for name, usable in was:
+        if name in left:
+            left.remove(name)
+        elif not usable:
+            gone.append(name)
+    return gone
 
 
 def run_change(state: dict[str, Any]) -> dict[str, Any]:
@@ -1183,6 +1277,11 @@ def run_change(state: dict[str, Any]) -> dict[str, Any]:
             was, now = before.get(field_), here.get(field_)
             if was is not None and now is not None and was != now:
                 change[field_] = [was, now]
+        change.update(_deck_moves(before.get("deck_cards"),
+                                  here.get("deck_cards")))
+        gone = _self_used_potions(before.get("potions"), here.get("potions"))
+        if gone:
+            change["potions_fired"] = gone
         if change:
             change["max_hp"] = here.get("max_hp")
             # WHETHER THE ROOM CHANGED, as a boolean and never as the previous
@@ -1297,7 +1396,8 @@ _FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
                                  "numbered": set(), "names": {},
                                  "handles": {}, "elements": set(),
                                  "round": None, "hp": {}, "reborn": {},
-                                 "replaced": {}, "kills": {}, "shown": {}}
+                                 "replaced": {}, "kills": {}, "shown": {},
+                                 "revived": {}}
 #: Whether this process has read the lane's store yet. The load is lazy and
 #: happens once: a fresh `observe` pays one file read, and a long-lived
 #: `Session` pays it on its first fight and never again.
@@ -1332,7 +1432,7 @@ def _load_fight() -> None:
     # from a store written before that row -- absent being the same answer an
     # unread body gives, so an older store simply mints no replacement.
     for key in ("ordinals", "names", "handles", "hp", "reborn", "replaced",
-                "kills", "shown"):
+                "kills", "shown", "revived"):
         value = held.get(key)
         if isinstance(value, dict):
             _FIGHT_MEMORY[key] = dict(value)
@@ -1359,6 +1459,7 @@ def _save_fight() -> None:
            "hp": dict(_FIGHT_MEMORY["hp"]),
            "reborn": dict(_FIGHT_MEMORY["reborn"]),
            "replaced": dict(_FIGHT_MEMORY["replaced"]),
+           "revived": dict(_FIGHT_MEMORY["revived"]),
            "kills": dict(_FIGHT_MEMORY["kills"]),
            "shown": dict(_FIGHT_MEMORY["shown"]),
            "numbered": sorted(_FIGHT_MEMORY["numbered"]),
@@ -1383,6 +1484,7 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["hp"] = {}
     _FIGHT_MEMORY["reborn"] = {}
     _FIGHT_MEMORY["replaced"] = {}
+    _FIGHT_MEMORY["revived"] = {}
     _FIGHT_MEMORY["kills"] = {}
     _FIGHT_MEMORY["shown"] = {}
     _FIGHT_LOADED[0] = True
@@ -1572,7 +1674,11 @@ _PHASE_FLIP_FLOOR = 100_000_000
 
 def _reborn_keys(enemies: list[dict[str, Any]], base: list[str],
                  live: list[str]) -> tuple[list[str], bool]:
-    """A body whose HP ROSE is a NEW body, and takes a new key (`EB-672`).
+    """A body back from 0 under its own id and name REVIVED (2026-09-26).
+
+    Until 2026-09-26 this minted a NEW key -- a new letter and the "NEW body"
+    line -- and the history below is why it looked for one. The comment in
+    the loop says why a return under the same id is the same creature.
 
     Kokomi r26 lane 1, fight 7: Fogmog's Eye with Teeth died and Fogmog summoned
     a replacement on the very next screen -- same name, same intent, same
@@ -1615,18 +1721,28 @@ def _reborn_keys(enemies: list[dict[str, Any]], base: list[str],
         top = _int(entry.get("max_hp", entry.get("hp")))
         was = seen_hp.get(now)
         sentinel = max(hp, top, was or 0) >= _PHASE_FLIP_FLOOR
-        fresh_body = was == 0 or hp >= top
-        if (was is not None and hp > was and not sentinel
-                and fresh_body):
-            gen = _FIGHT_MEMORY["reborn"].get(key, 0) + 1
-            _FIGHT_MEMORY["reborn"][key] = gen
-            retired = now
-            now = f"{key}~{gen}"
-            _FIGHT_MEMORY["replaced"][now] = _FIGHT_MEMORY["handles"].get(
-                retired, "")
+        # 2026-09-26 (control seats, Ironclad and Silent): AND IT WAS THE SAME
+        # CREATURE. Eye with Teeth ("Illusion") and a Decimillipede segment
+        # ("Reattach") come back as the one `Creature` they were -- the game
+        # keeps it in the fight (`IllusionPower`,
+        # `ShouldCreatureBeRemovedFromCombatAfterDeath`) and heals it
+        # (`ReattachPower.DoReattach`) -- and a combat id is never handed out
+        # twice in one fight (`CombatState.AttachCreature`). A body of ANOTHER
+        # name in the id is still a new one (`_clashing_keys`, which ran
+        # first). So a dead body back under its own id and name REVIVED: it
+        # keeps its letter and number, and the page says so.
+        if was == 0 and hp > 0 and not sentinel:
+            _FIGHT_MEMORY["revived"][now] = (
+                _FIGHT_MEMORY["revived"].get(now, 0) + 1)
             changed = True
         out.append(now)
     return out, changed
+
+
+def enemy_revivals(enemies: list[dict[str, Any]]) -> list[bool]:
+    """Per body, whether this fight has seen it die and come back."""
+    return [bool(_FIGHT_MEMORY["revived"].get(k))
+            for k in [_live(b) for b in _base_keys(enemies)]]
 
 
 def _clashing_keys(base: list[str], live: list[str],
@@ -1802,16 +1918,24 @@ def _enemy_names(enemies: list[dict[str, Any]],
     # under the reader (`EB-271`); only the suffix waits for a second copy on
     # the same screen. A stale `(2)` still resolves to the one body left
     # (`blindplay_grammar._match`'s one-copy rule).
+    #
+    # 2026-09-26 (control seat, Ironclad): AND A NUMBER ONCE PRINTED STAYS.
+    # "Nibbit (2)" went bare the moment Nibbit (1) died, and the hit log,
+    # which names by the board, called it "Nibbit" even on lines where the
+    # first was still alive. So a body keeps the number it has been shown
+    # with for the whole fight; the rule above still holds for a body that
+    # was never shown beside a twin (the lone Gas Bomb).
+    shown: dict[str, str] = _FIGHT_MEMORY["shown"]
     on_screen: dict[str, int] = {}
     for n in names:
         on_screen[_fold(n)] = on_screen.get(_fold(n), 0) + 1
     printed = [f"{n} ({ordinals[k]})"
                if _fold(n) in numbered and k in ordinals
-               and on_screen.get(_fold(n), 0) > 1
+               and (on_screen.get(_fold(n), 0) > 1
+                    or shown.get(k) == f"{n} ({ordinals[k]})")
                else n for k, n in zip(keys, names)]
     # `EB-427`'s receipts name a body that has LEFT the board by what this
     # page called it while it stood, so the name each body printed as is kept.
-    shown: dict[str, str] = _FIGHT_MEMORY["shown"]
     for key, name in zip(keys, printed):
         if shown.get(key) != name:
             shown[key] = name
@@ -1942,7 +2066,21 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
             and (_text(row.get("title")) or _label(row.get("name")))]
     for power, row in zip(out, rows):
         kind = _text(row.get("type"))
+        # 2026-09-26 (control seats, Silent and Necrobinder): Tender's
+        # "Strength -1 (buff)". A counter below zero is the game's debuff
+        # (`PowerModel.GetTypeForAmount`); the bridge now sends that type, and
+        # this reads an older bridge's static `Buff` the same way.
+        if power["stacks"] < 0 and kind.lower() == "buff":
+            kind = "Debuff"
         power["kind"] = "aura" if _is_aura(power["name"]) else kind
+        # 2026-09-26 (control seats, Defect and Silent): the card a Thieving
+        # Hopper's Swipe holds, and on Surrounded the bodies behind you (combat
+        # ids, named by `_combat`). Absent on an older bridge.
+        stolen = _text(row.get("stolen_card"))
+        if stolen:
+            power["stolen_card"] = stolen
+        if isinstance(row.get("behind"), list):
+            power["behind_ids"] = [_text(i) for i in row["behind"]]
         # 2026-09-25 (the Furina seat round): "The Stage 1 (buff) prints a
         # number I never saw change". The game draws a number on the icon only
         # for a `Counter` power; a `Single` one shows none, and the wire's
@@ -1961,6 +2099,10 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
             for k in (row.get("keywords") or [])
             if isinstance(k, dict) and _text(k.get("name"))
             and not _is_mod_source_tip(k)]
+        # An older bridge: Swipe's only tip is the stolen card's own face.
+        if ("stolen_card" not in power and power["keywords"]
+                and "stolen card" in power["text"].lower()):
+            power["stolen_card"] = power["keywords"][0]["name"]
     return out
 
 
