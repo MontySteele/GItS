@@ -16,7 +16,8 @@ from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _number_faces, _powers,
-                                        enemy_replacements, relic_faces,
+                                        enemy_replacements, enemy_revivals,
+                                        relic_faces,
                                         remember_deck, remember_kills,
                                         remembered_deck,
                                         remembered_enemy_name)
@@ -641,15 +642,18 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                      # with, or `""`. A summon holding a dead body's combat id
                      # is a new creature and the page says which one it is not.
                      "replaced": replaced,
+                     # 2026-09-26: a dead body the game brought back.
+                     "revived": revived,
                      "powers": _powers(e)}
-                    for e, name, handle, replaced in zip(
+                    for e, name, handle, replaced, revived in zip(
                         _enemies(state),
                         # `EB-541`: with the round, which is what tells a body
                         # replaced mid-fight from the first board of the next
                         # fight -- the two share nothing with the memory alike.
                         _enemy_names(_enemies(state), _int(battle.get("round"))),
                         _enemy_handles(_enemies(state)),
-                        enemy_replacements(_enemies(state)))],
+                        enemy_replacements(_enemies(state)),
+                        enemy_revivals(_enemies(state)))],
     }
     # `EB-671`: and which of them is the FRONT. Read after the list is built,
     # off the rows the page is about to print.

@@ -408,7 +408,13 @@ def cmd_act(args) -> int:
     post = dict(res["post"] or {})
     action = post.pop("action")
     try:
-        result = bridge.post(action, **post)
+        # 2026-09-26 (control seats, all four): a rest or an upgrade typed
+        # the moment the room was entered came back "Rest site room is not
+        # open" and did nothing until a retry. The session has ridden that
+        # out since the r3 seat; this door, which every seat uses, now does
+        # the same, bounded by the settle budget.
+        result = post_when_the_room_is_open(
+            bridge, action, post, tries=SETTLE_TRIES, delay=SETTLE_DELAY_S)
     except _BRIDGE_ERROR as exc:
         # Not charged: nobody knows whether the wire saw it.
         print(act_unanswered(exc))

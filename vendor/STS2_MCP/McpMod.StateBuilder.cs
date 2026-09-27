@@ -1471,6 +1471,11 @@ public static partial class McpMod
                 ["name"] = SafeGetText(() => relic.Title),
                 ["description"] = SafeGetText(() => relic.DynamicDescription),
                 ["counter"] = relic.ShowCounter ? relic.DisplayAmount : null,
+                // GItS LOCAL EDIT (2026-09-26, control seat Silent): Tea of
+                // Discourtesy still read "the next combat" after it had fired.
+                // The game greys a spent relic out (`RelicModel.IsUsedUp`);
+                // its text does not change.
+                ["used_up"] = relic.IsUsedUp,
                 ["keywords"] = BuildHoverTips(relic.HoverTipsExcludingRelic)
             });
         }
@@ -2416,6 +2421,10 @@ public static partial class McpMod
                 item["potion_id"] = potionReward.Potion.Id.Entry;
                 item["potion_name"] = SafeGetText(() => potionReward.Potion.Title);
                 item["potion_description"] = SafeGetText(() => potionReward.Potion.DynamicDescription);
+                // GItS LOCAL EDIT (2026-09-26, control seat Silent): the words
+                // the offer prints ("5 Regen"), defined where it is offered,
+                // as the shop shelf already sends them.
+                item["keywords"] = BuildHoverTips(potionReward.Potion.ExtraHoverTips);
             }
             // GItS LOCAL EDIT (`EB-716`, the relic half). A RELIC REWARD SENT
             // ITS NAME AND NOTHING ELSE. `Reward.Description` for a
@@ -2436,6 +2445,9 @@ public static partial class McpMod
                 item["relic_id"] = relicReward.Relic.Id.Entry;
                 item["relic_name"] = SafeGetText(() => relicReward.Relic.Title);
                 item["relic_description"] = SafeGetText(() => relicReward.Relic.DynamicDescription);
+                // GItS LOCAL EDIT (2026-09-26, control seats): and its words
+                // ("8 Vigor"), as the potion above and the shop shelf send.
+                item["keywords"] = BuildHoverTips(relicReward.Relic.HoverTipsExcludingRelic);
             }
             // GItS LOCAL EDIT (2026-09-26, the Klee full run on lane 1). A
             // SPECIAL CARD REWARD NAMED NO CARD. Thieving Hopper's "take your

@@ -39,7 +39,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         chooser_note,
                                         DEFEND_INTENT_CLAUSE,
                                         ENEMY_HANDLE_NOTE,
-                                        ENEMY_REPLACED_LINE,
+                                        ENEMY_REPLACED_LINE, ENEMY_REVIVED_LINE,
                                         ENEMY_SIZE_NOTE,
                                         EVENT_NO_DECLINE_NOTE,
                                         FRONT_ENEMY_NOTE,
@@ -758,6 +758,28 @@ def _spark_sources_line(combat: dict[str, Any]) -> str:
                           for s in combat["spark_sources"]))
 
 
+#: 2026-09-26 (control seat, Ironclad): "the hand printed 'Deal 3 damage
+#: twice'; it folded my own Shrink in but not the target's Vulnerable, and the
+#: hits landed 5 and 5." A card's face is worked out with no target
+#: (`SafeGetCardDescription`), so no power on an enemy is in it, and the wire
+#: carries no per-target figure. Said on the enemy's Vulnerable line.
+PREVIEW_LEAVES_OUT_CLAUSE = (" The damage printed on your cards does not "
+                             "count this; it is added when a hit lands here.")
+
+
+def _preview_leaves_out(power: dict[str, Any],
+                        hand: list[dict[str, Any]]) -> str:
+    """The clause on an enemy's Vulnerable row, while a hand is shown."""
+    if not hand or _fold(power.get("name")) != "vulnerable":
+        return ""
+    return PREVIEW_LEAVES_OUT_CLAUSE
+
+
+#: 2026-09-26 (control seat, Silent): "Tea of Discourtesy kept saying 'next
+#: combat' after it had fired." Beside the name, where the game greys it out.
+RELIC_USED_UP = " (used up: it has done its job and does nothing more)"
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text.
 
@@ -857,6 +879,10 @@ _ONE_USE_DISCOUNT = re.compile(r"the next (\w+) you play costs", re.I)
 # deals 8 additional damage" (Akabeko), which every Attack in hand previews.
 _ONE_USE_RIDER = re.compile(
     r"the next (\w+) you play\b|\byour next (\w+) deals\b", re.I)
+#: 2026-09-26 (control seat, Necrobinder): Pen Nib's "Every 10th Attack you
+#: play deals double damage", a relic's one-card rider.
+_EVERY_NTH_PLAY = re.compile(
+    r"\bevery (\d+)(?:st|nd|rd|th) (\w+) you play[^.]*", re.I)
 # `EB-433`. A relic that answers a debuff with an elemental hit, which is what
 # makes the panel's "leaves no aura" clause false for a debuff Plan. The
 # Tamakushi Casket's own sentence, with the element left open: the clause is
@@ -1122,6 +1148,19 @@ def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
             return ["", ONE_USE_RIDER_NOTE.format(
                 power=f"**{power['name']}**",
                 kind=found.group(1) or found.group(2),
+                words=found.group(0)[:1].lower() + found.group(0)[1:])]
+    # 2026-09-26 (control seat, Necrobinder): Pen Nib at 9 doubled the number
+    # on every Attack in hand, and only the next one played gets it
+    # (`PenNib.ModifyDamageMultiplicative` doubles any Attack not yet played
+    # while `AttacksPlayed == 9`). A relic whose counter is one short of its
+    # own "every Nth" gets the same ONE-card note.
+    for relic in you.get("relics") or []:
+        found = _EVERY_NTH_PLAY.search(str(relic.get("text") or ""))
+        counter = str(relic.get("counter") or "").strip()
+        if (found and counter.isdigit()
+                and int(counter) == int(found.group(1)) - 1):
+            return ["", ONE_USE_RIDER_NOTE.format(
+                power=f"**{relic['name']}**", kind=found.group(2),
                 words=found.group(0)[:1].lower() + found.group(0)[1:])]
     return []
 
@@ -2451,6 +2490,9 @@ def _render_run_change(change: dict[str, Any]) -> list[str]:
     all four at once. Anything else prints the HP line alone, and only where
     the ROOM changed: HP moving between round one and round two of a fight is
     the fight, and the combat page has already printed the blow that did it.
+
+    2026-09-26: and gold, the deck's own cards and a belt potion the game
+    used by itself, wherever they moved (`_deck_move_lines`).
     """
     if not change:
         return []
@@ -2468,15 +2510,28 @@ def _render_run_change(change: dict[str, Any]) -> list[str]:
         if change.get("deck"):
             out.append(f"- Cards in the deck {change['deck'][0]} → "
                        f"{change['deck'][1]}")
+        out += _deck_move_lines(change)
         out += ["", ACT_CHANGE_NOTE]
         return out
+    rows: list[str] = []
     if change.get("hp") and change.get("room_changed"):
         was, now = change["hp"]
         moved = ("down" if now < was else "up") + f" {abs(now - was)}"
-        out += ["", "## Since the screen before this one", "",
-                f"- HP {was} → {now}"
-                + (f" (of {change['max_hp']})" if change.get("max_hp") else "")
-                + f", {moved}"]
+        rows.append(f"- HP {was} → {now}"
+                    + (f" (of {change['max_hp']})" if change.get("max_hp")
+                       else "")
+                    + f", {moved}")
+    # 2026-09-26 (control seat, Defect): "Treasure chest gold was never
+    # itemized (55 -> 101)." Gold is said wherever it moved.
+    if change.get("gold"):
+        was, now = change["gold"]
+        rows.append(f"- Gold {was} → {now}, "
+                    + ("down" if now < was else "up") + f" {abs(now - was)}")
+    rows += _deck_move_lines(change)
+    if not rows:
+        return out
+    out += ["", "## Since the screen before this one", ""] + rows
+    if change.get("hp") and change.get("room_changed"):
         # `EB-676`, THE BRIDGE HALF. The note above says a figure read the
         # instant a fight ends may not have settled yet. The bridge now ANSWERS
         # that question -- `player.hp_settled`, true only when no action is
@@ -2488,6 +2543,24 @@ def _render_run_change(change: dict[str, Any]) -> list[str]:
         # of an unpatched bridge reads exactly as it did.
         if not change.get("hp_settled"):
             out += ["", HP_SETTLE_NOTE]
+    return out
+
+
+def _deck_move_lines(change: dict[str, Any]) -> list[str]:
+    """2026-09-26 (control seats, all four): a transform, an event's random
+    upgrade or downgrade, and a curse reached the deck with nothing said.
+    The run's own deck, read before and after, names what moved."""
+    out = [f"- In your deck, **{was}** became **{now}**."
+           for was, now in change.get("deck_became") or []]
+    out += [f"- Joined your deck: **{title}**" + (f" — {text}" if text else "")
+            for title, text in change.get("deck_gained") or []]
+    if change.get("deck_lost"):
+        out.append("- Left your deck: " + ", ".join(
+            f"**{title}**" for title in change["deck_lost"]))
+    # And Fairy in a Bottle firing (control seat, Defect): nothing said it had.
+    out += [f"- **{name}** left your belt. You never use it yourself: the "
+            f"game uses it when its text comes true." for name in
+            change.get("potions_fired") or []]
     return out
 
 
@@ -2628,6 +2701,7 @@ def render(obs: dict[str, Any]) -> str:
             out += ["", "## Your relics", ""] + [
                 f"- **{r['name']}**"
                 + (f" ({r['counter']})" if r.get("counter") else "")
+                + (RELIC_USED_UP if r.get("used_up") else "")
                 + (f" — {r['text']}" if r["text"] else "")
                 for r in you["relics"]]
             # `EB-349`: and where one of them has already taken this turn, the
@@ -2950,6 +3024,9 @@ def render(obs: dict[str, Any]) -> str:
             # aiming by letter meets the question.
             if e.get("replaced"):
                 out.append(ENEMY_REPLACED_LINE.format(was=e["replaced"]))
+            elif e.get("revived"):
+                out.append(ENEMY_REVIVED_LINE.format(
+                    handle=e.get("handle") or e["name"]))
             out += _render_intents(e["intents"])
             # `EB-706`: and where a multiplier stands that the game's own label
             # sometimes folds and sometimes does not, both numbers -- under the
@@ -2957,7 +3034,8 @@ def render(obs: dict[str, Any]) -> str:
             # body's figure.
             out += _intent_fold_lines(e, you)
             for pw in e["powers"]:
-                out.append(_render_power(pw, "    "))
+                out.append(_render_power(pw, "    ")
+                           + _preview_leaves_out(pw, c["hand"]))
                 # `EB-605`: and where a Bomb badge's headline and its list of
                 # charge sizes are two different numbers, which is which.
                 out += _bomb_forecast_note(pw, e["powers"], "    ")
@@ -3329,6 +3407,7 @@ def render(obs: dict[str, Any]) -> str:
         out += ["", "## Your relics", ""] + [
             f"- **{r['name']}**"
             + (f" ({r['counter']})" if r.get("counter") else "")
+            + (RELIC_USED_UP if r.get("used_up") else "")
             + (f" — {r['text']}" if r["text"] else "")
             for r in obs["held_relics"]]
 
