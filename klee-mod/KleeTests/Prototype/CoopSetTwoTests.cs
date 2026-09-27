@@ -480,6 +480,7 @@ public class CoopSetTwoTests
             var enemy = Enemy();
             Table(new[] { klee.Creature }, enemy);
             var sparks = Power<SparksForEveryonePower>(klee.Creature, klee.Creature, 1);
+            klee.Creature.CombatState!.CurrentSide = CombatSide.Player;
             await sparks.OnBombExploded(null!, klee.Creature, enemy, 4, false);
             Assert.True(KleeOverhaulLedger.For(klee.Creature).TakeSparksForEveryone());
 
@@ -493,6 +494,51 @@ public class CoopSetTwoTests
         }
         finally
         {
+            KleeOverhaulLedger.ResetAll();
+        }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task An_enemy_turn_mine_gives_no_energy_and_leaves_the_turns_trigger()
+    {
+        // DESIGNER RULING (2026-09-27): only a Bomb that goes off on the
+        // players' turn counts. A Mine answering an attack on the enemies'
+        // turn grants nothing and does not use up the once-per-turn trigger;
+        // the next explosion on the players' turn still grants it.
+        KleeOverhaulLedger.ResetAll();
+        // The base game's own non-interactive seam: with it on, the energy
+        // grant's sound cue is skipped, so the REAL PlayerCmd.GainEnergy runs
+        // headless and the ally's energy can be read back.
+        var quiet = MegaCrit.Sts2.Core.Helpers.NonInteractiveMode.AutoSlayerCheck;
+        MegaCrit.Sts2.Core.Helpers.NonInteractiveMode.AutoSlayerCheck = () => true;
+        try
+        {
+            var klee = Seat.Klee().WithCombatState();
+            var ally = Seat.Furina().WithCombatState();
+            var enemy = Enemy();
+            var combat = Table(new[] { klee.Creature, ally.Creature }, enemy);
+            var sparks = Power<SparksForEveryonePower>(klee.Creature, klee.Creature, 1);
+            var energy = ally.Player.PlayerCombatState!.Energy;
+
+            // The enemies' turn: her Mine answers an attack.
+            combat.CurrentSide = CombatSide.Enemy;
+            Assert.False(SparksForEveryonePower.Counts(klee.Creature, klee.Creature));
+            await sparks.OnBombExploded(null!, klee.Creature, enemy, 4, false);
+            Assert.Equal(energy, ally.Player.PlayerCombatState!.Energy);
+
+            // The next players' turn, same round (the round rolls at the
+            // player turn, so this is the harder case): the first explosion
+            // still grants the energy, and the second does not.
+            combat.CurrentSide = CombatSide.Player;
+            Assert.True(SparksForEveryonePower.Counts(klee.Creature, klee.Creature));
+            await sparks.OnBombExploded(null!, klee.Creature, enemy, 4, false);
+            Assert.Equal(energy + 1, ally.Player.PlayerCombatState!.Energy);
+            await sparks.OnBombExploded(null!, klee.Creature, enemy, 4, false);
+            Assert.Equal(energy + 1, ally.Player.PlayerCombatState!.Energy);
+        }
+        finally
+        {
+            MegaCrit.Sts2.Core.Helpers.NonInteractiveMode.AutoSlayerCheck = quiet;
             KleeOverhaulLedger.ResetAll();
         }
     }

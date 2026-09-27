@@ -18,11 +18,13 @@ cost −1, and the co-op seat round watches it for strength. Kokomi's pair,
 including a Rare ally heal that Exhausts, is designed in her review pass.
 
 **Built 2026-09-27** (branch `coop-cards-2`): the four cards below, as printed,
-multiplayer only and outside the 78/39 counts. How each reads in code, and the
-two readings the table did not state (one Shrapnel shred per Klee however many
-are played; a Mine that goes off on the enemy's turn uses that turn's Sparks
-for Everyone), are in `docs/notes/prototype-surface-provenance.md`, "The
-second batch".
+multiplayer only and outside the 78/39 counts. Two readings the table did not
+state, ruled by the designer the same day: one Shrapnel shred per Klee however
+many are played (accepted as built), and Sparks for Everyone counts only a Bomb
+that goes off on the players' turn, so a Mine answering an attack on the
+enemies' turn gives nothing and does not use up the turn's trigger. How each
+reads in code is in `docs/notes/prototype-surface-provenance.md`, "The second
+batch".
 
 ## What the base game does
 

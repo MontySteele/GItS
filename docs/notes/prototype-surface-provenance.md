@@ -3599,7 +3599,7 @@ Booby Trap call), then `ShrapnelPower` on the same enemy, placed by Klee.
 attack, on this enemy, whose dealer is not the applier) plus a live
 `ProtoBombPower.HoldsMineFrom(enemy, Klee)`, at x1.5. Single, instanced per
 applier: one shred per Klee however many Shrapnels, where Flanking stacks
-(this reading is disclosed, not ruled). When one of her Mines goes off and she
+(accepted as designed, 2026-09-27). When one of her Mines goes off and she
 holds none on that enemy after it, `ShrapnelPower.AfterMineWentOff` (called
 from the Mine branch of `ProtoBombPower.Explode`) removes the badge. An ally's
 Attack under Pass the Match or Knights of Favonius sets the Mine off at
@@ -3611,7 +3611,9 @@ Flanking, so Artifact refuses it.
 counts however it went off, a Mine answering an attack included. Once per turn
 on the ledger's latch (`KleeOverhaulLedger.TakeSparksForEveryone`, Aftershock's
 shape, rolled on the round), each other living player gains the stack (1) in
-energy through `PlayerCmd.GainEnergy` (Believe In You). A Mine that goes off on
-the enemy's turn spends that round's latch and its energy is gone by the next
-player turn, which is the face read literally. With nobody else alive the latch
-is not spent. The upgrade is Innate; the cost stays 2.
+energy through `PlayerCmd.GainEnergy` (Believe In You). Only a Bomb that goes
+off on the players' turn counts (designer ruling, 2026-09-27): a Mine answering
+an attack on the enemies' turn gives nothing and does not use up the turn's
+trigger, so the next explosion on the players' turn still pays
+(`SparksForEveryonePower.Counts`, asked before the latch). With nobody else
+alive the latch is not spent either. The upgrade is Innate; the cost stays 2.

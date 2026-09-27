@@ -620,6 +620,11 @@ public sealed class ShrapnelPower : PowerModel, ILocalizationProvider
 /// Pass the Match or Knights of Favonius, or a Mine answering an attack (a
 /// Mine is a Bomb).
 ///
+/// ONLY ON THE PLAYERS' TURN (designer ruling, 2026-09-27): a Bomb that goes
+/// off while the enemies act -- a Mine answering an attack -- gives nothing
+/// and does NOT use up the turn's trigger, so the next explosion on the
+/// players' turn still pays (<see cref="Counts"/>).
+///
 /// ONCE PER TURN, on the ledger's latch
 /// (<see cref="KleeOverhaulLedger.TakeSparksForEveryone"/>, Aftershock's
 /// shape), and only for HER Bombs. "Each other player" is
@@ -642,11 +647,18 @@ public sealed class SparksForEveryonePower
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
+    /// <summary>Does this explosion count? PURE: one of HER Bombs, on the
+    /// players' turn. Asked before the latch, so an explosion that does not
+    /// count never spends it.</summary>
+    public static bool Counts(Creature? owner, Creature? applier) =>
+        owner != null && applier == owner
+        && owner.CombatState?.CurrentSide == CombatSide.Player;
+
     public async Task OnBombExploded(
         PlayerChoiceContext choiceContext, Creature applier, Creature target,
         int size, bool reacted)
     {
-        if (Owner == null || applier != Owner || Amount <= 0) return;
+        if (Owner == null || Amount <= 0 || !Counts(Owner, applier)) return;
         var others = CoopSet.OtherPlayers(Owner);
         if (others.Count == 0) return;
         if (!KleeOverhaulLedger.For(Owner).TakeSparksForEveryone()) return;
