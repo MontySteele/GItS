@@ -12,6 +12,10 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Kits and display (the mod)
 
+- Co-op seat page: the "What you played this turn" log lists the partner's cards as your own; players are named "Test Host"/"Test Client 1"; the reaction glossary ignores the partner's element; a contested chest pick is not announced; `wait` after a finished fight reports nothing while the reward is up; a play at an enemy the partner just killed is silently retargeted (co-op round, 2026-09-27).
+- Seat page: the play log prints "Put Bomb 1" where the badge shows the placed size, and the Weak gloss says it cuts a Bomb's damage (it does not: a Bomb carries the target's modifiers only) (co-op round, 2026-09-27).
+- Co-op rest site: Mend on the partner did not end the rest action, so Smith was still offered (co-op round, 2026-09-27).
+- Co-op dev grant: `give_card` is refused in multiplayer because the pile add bypasses the action-queue synchronizer; a synced grant would let a co-op seat round be dressed with named co-op cards.
 - Seat page: a companion's end-of-turn hit (Kaeya, Oz) names its body only when it reacts; a plain hit is on no wire, because `ResolutionLedger` files card plays and a power's damage is not one (wave-3 Klee lane 2b, 2026-09-26).
 - Furina Stage: a hit from a debuff on her (Knowledge Demon's Disintegration) reaches the stage log as "damage no enemy dealt"; `ModifyHpLostBeforeOsty` hands no power source, so only a card in hand (Burn, Wither) is named (wave-3 Furina lane 4, 2026-09-26).
 - Furina Stage: Soliloquy's bonus is missing from the preview of a Spend that empties the stage (Bravura "(Deals 7 damage)" hit for 14); the preview would have to know the Spend takes the last seat and that no Bow reader (Thunderous Applause's summon, A Five-Century Act's return) refills it (Solo seat, 2026-09-26).
