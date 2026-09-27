@@ -281,7 +281,10 @@ public static partial class FurinaStage
     {
         if (!LiveFor(owner)) return;
         await InstallBadge(owner);
-        if (FurinaStageLedger.For(owner!).OpenWith(StagePerformer.Usher) == null)
+        // OPERA GLASSES: the opening Usher's number is the relic's 5.
+        if (FurinaStageLedger.For(owner!).OpenWith(
+                StagePerformer.Usher, Relics.OperaGlasses.OpeningFor(owner))
+            == null)
         {
             return;
         }
@@ -645,14 +648,21 @@ public static partial class FurinaStage
     /// sweep's is. A Five-Century Act's returnee "re-enters without acting
     /// that turn", so a resting performer sits this out too.</summary>
     public static async Task PerformAll(PlayerChoiceContext choiceContext,
-                                        Creature? owner)
+                                        Creature? owner, int times = 1)
     {
         if (!LiveFor(owner)) return;
         foreach (var seat in Of(owner).ToList())
         {
-            if (owner!.IsDead) return;
             if (seat.Resting) continue;
-            await Perform(choiceContext, owner, seat);
+            // ENCORE ELIXIR's twice: each repeat resolves in full before the
+            // next performer's, as Full House's do; a performer that paid its
+            // last Fanfare has left and does not act again.
+            for (var i = 0; i < times; i++)
+            {
+                if (owner!.IsDead) return;
+                if (!FurinaStageLedger.For(owner).Holds(seat)) break;
+                await Perform(choiceContext, owner, seat);
+            }
         }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageCues.Refresh(owner);
@@ -763,7 +773,9 @@ public static partial class FurinaStage
         if (!LiveFor(owner)) return 0;
         var result = FurinaStageLedger.For(owner!).Spend(amount);
         if (!result.Fired) return 0;
-        if (result.Exit is { } exit) await Bow(choiceContext, owner!, exit);
+        // One exit, or -- under Palais Ledger -- every performer the pooled
+        // payment emptied, back to front.
+        foreach (var exit in result.Exits) await Bow(choiceContext, owner!, exit);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageCues.Refresh(owner);
         return result.Paid;
@@ -855,7 +867,14 @@ public static partial class FurinaStage
     {
         if (!LiveFor(owner)) return;
         var turn = owner!.Player?.PlayerCombatState?.TurnNumber ?? 0;
-        if (FurinaStageLedger.For(owner).Regen(turn) <= 0) return;
+        var ledger = FurinaStageLedger.For(owner);
+        // THE CURTAIN NEVER FALLS, rebuilt for the Stage: "Your front
+        // performer regains 2 Fanfare at the start of your turn instead of 1,
+        // from your first turn." Rule 4's one number, upgraded.
+        var regained = Relics.CurtainNeverFalls.OnStage(owner)
+            ? ledger.Regen(turn, Relics.CurtainNeverFalls.LeadRegen, firstTurn: 1)
+            : ledger.Regen(turn);
+        if (regained <= 0) return;
         FurinaStagePets.SyncBars(owner);
         Vfx.FurinaStageCues.Refresh(owner);
     }
@@ -1180,9 +1199,25 @@ public static partial class FurinaStage
         if (!exit.Bows || !LiveFor(owner)) return;
         // THE SUPPORTING POOL (2026-09-26), Da Capo: every Bow this combat,
         // all causes, the Grand Finale's included.
-        FurinaStageLedger.For(owner).BowsThisCombat++;
-        await Act(choiceContext, owner, exit.Who,
-                  FurinaStageLedger.BowEvent, null, exit);
+        var ledger = FurinaStageLedger.For(owner);
+        ledger.BowsThisCombat++;
+        // CURTAIN CALL BOUQUET: the Bow's act resolves twice. The Block a
+        // hit's Bow already caught (`StageExit.Caught`, sized by the ledger's
+        // `BowBlock`, which counts both acts) comes off the first act first.
+        var acts = ledger.BowActs;
+        var perAct = FurinaStageLaw.ActUsherBlock * ledger.ActBlockMultiplier;
+        var uncaught = exit.Caught;
+        for (var i = 0; i < acts; i++)
+        {
+            if (i > 0 && owner.IsDead) break;
+            var caught = acts == 1 ? uncaught : System.Math.Min(uncaught, perAct);
+            uncaught -= caught;
+            await Act(choiceContext, owner, exit.Who,
+                      FurinaStageLedger.BowEvent, null,
+                      exit with { Caught = caught });
+        }
+        // STAGEHAND'S GLOVES: 3 Block a Bow, after its act.
+        await Relics.StagehandsGloves.AfterBow(owner);
         await AfterBow(choiceContext, owner, exit.Who, mayReturn);
     }
 

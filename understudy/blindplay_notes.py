@@ -3057,9 +3057,54 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
         printed = "\n".join(r["text"].replace(STAGE_ACTS, " ") for r in rows)
         more = _keyword_rows(obs, printed)
         if [r["name"] for r in more] == [r["name"] for r in rows]:
-            return _performer_rider(obs, more)
+            return _relic_riders(obs, _performer_rider(obs, more))
         rows = more
-    return _performer_rider(obs, rows)
+    return _relic_riders(obs, _performer_rider(obs, rows))
+
+
+#: 2026-09-27, Klee's and Furina's own relics
+#: (`review/active/relics-potions-klee-furina-2026-09-27.md`). Four of
+#: Furina's bend a rule a glossary row states outright -- the Spend's payer,
+#: the fade, the front performer's regain, the Bow's one act -- so while the
+#: run HOLDS one, that row says so in one clause and the page never prints a
+#: rule the run is not playing. Keyed by row, then by the relic's printed
+#: title; the sentence is the relic's own rule, shortened.
+RELIC_KEYWORD_RIDERS: dict[str, dict[str, str]] = {
+    "Spend": {"Palais Ledger":
+              " With Palais Ledger, the performers in front of it pay what it "
+              "can't, back to front."},
+    "back performer": {"Grand Theater Program":
+                       " With Grand Theater Program, no performer fades."},
+    "front performer": {"The Curtain Never Falls":
+                        " With The Curtain Never Falls, it regains 2, from "
+                        "your first turn."},
+    "Bow": {"Curtain Call Bouquet":
+            " With Curtain Call Bouquet, it acts twice."},
+}
+
+
+def _held_relic_names(obs: dict[str, Any]) -> set[str]:
+    """The printed names of the relics this screen shows the run holding:
+    the combat header's row, or the belt row every other screen prints."""
+    you = ((obs.get("combat") or {}).get("you") or {})
+    rows = list(you.get("relics") or []) + list(obs.get("held_relics") or [])
+    return {str(r.get("name") or "") for r in rows if isinstance(r, dict)}
+
+
+def _relic_riders(obs: dict[str, Any],
+                  rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """`RELIC_KEYWORD_RIDERS` on the rows a held relic bends."""
+    held = _held_relic_names(obs)
+    if not held:
+        return rows
+    out = []
+    for row in rows:
+        text = row["text"]
+        for relic, rider in RELIC_KEYWORD_RIDERS.get(row["name"], {}).items():
+            if relic in held and not text.endswith(rider):
+                text += rider
+        out.append({**row, "text": text} if text != row["text"] else row)
+    return out
 
 
 #: 2026-09-25 night (the granted-guest seat round). A PERFORMER'S ACT IS NOT

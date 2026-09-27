@@ -179,6 +179,38 @@ internal static class ElementalHit
     /// because a call site is what the headless suite can pin. Defaulted true,
     /// so Spark Knight is byte-identical.
     /// </summary>
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// QUARANTINED (the Klee arm's Alice's Teapot): a hit that reacts as if
+    /// the target held <paramref name="assumedAura"/>, and touches the aura it
+    /// really holds not at all -- nothing real is consumed, refreshed or
+    /// applied. The reaction still resolves through the one site every
+    /// reaction passes (<see cref="ReactionEffects.Resolve"/>), so the
+    /// amplifier, the Burst credit and every listener see an ordinary
+    /// reaction. With no reaction between the two elements it is
+    /// <see cref="DealWithoutDealerMods"/> unchanged.
+    /// </summary>
+    public static async Task<int> DealAsIfAura(
+        PlayerChoiceContext choiceContext, Creature target, Element element,
+        Element assumedAura, decimal baseDamage, Creature? applier)
+    {
+        var reaction = ReactionTable.Lookup(assumedAura, element);
+        if (reaction == Reaction.None)
+        {
+            return await DealWithoutDealerMods(
+                choiceContext, target, element, baseDamage, applier);
+        }
+        var dealt = baseDamage * ReactionTable.AmplifierMultiplier(reaction, applier);
+        await ReactionEffects.Resolve(
+            choiceContext, reaction, target, applier, null, assumedAura);
+        var landed = (int)SimDamagePipeline.TargetMods(target, dealt);
+        await CreatureCmd.Damage(
+            choiceContext, target, landed, ValueProp.Unpowered,
+            dealer: null, cardSource: null, cardPlay: null);
+        return landed;
+    }
+#endif
+
     public static async Task<int> DealUnelemented(
         PlayerChoiceContext choiceContext, Creature target,
         decimal baseDamage, Creature? applier, bool powered = true)

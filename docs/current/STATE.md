@@ -64,6 +64,15 @@ be. Starter basics are never changed.
   reworked; `review/records/furina-pool-seat-round-2026-09-26.md`, one pick
   open (Take the Stage, a starter). Next: [USER]'s run on the 78-card pool.
 
+**Klee's and Furina's own relics and potions** (paper
+`review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults
+with the two Rare potions raised) are built behind their arms: seven relics and
+three potions each, the Silent borrow gone under the arm, Dodoco Tales repaired
+and The Curtain Never Falls rebuilt for the Stage (Salon Solitaire's Orobas
+upgrade now). Arm off, both pools are as they shipped; Kokomi keeps the Silent
+borrow until her review pass. Next: a seat round with the relics given at
+embark.
+
 All three prototypes start with no companion card. Whether each starts with
 one comes back after the kits, with the reaction display (`EB-410`) and the
 companion slot as a real draft choice.

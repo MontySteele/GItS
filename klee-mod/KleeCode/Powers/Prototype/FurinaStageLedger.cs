@@ -108,7 +108,22 @@ public readonly struct StageSpend
         Fired = fired;
         Paid = paid;
         Exit = exit;
+        Exits = exit is { } one ? new[] { one } : System.Array.Empty<StageExit>();
     }
+
+    /// <summary>A Spend Palais Ledger pooled: every performer it emptied,
+    /// back to front, in the order they Bow.</summary>
+    public StageSpend(int paid, IReadOnlyList<StageExit> exits)
+    {
+        Fired = true;
+        Paid = paid;
+        Exit = exits.Count > 0 ? exits[0] : null;
+        Exits = exits;
+    }
+
+    /// <summary>Every performer this Spend emptied; <see cref="Exit"/> is
+    /// the first of them.</summary>
+    public IReadOnlyList<StageExit> Exits { get; }
 
     public bool Fired { get; }
 
@@ -1005,6 +1020,7 @@ public sealed class FurinaStageLedger
         var copy = new FurinaStageLedger();
         foreach (var seat in _seats) copy._seats.Add(seat.CloneForForecast());
         copy._fixedCapacity = Capacity;
+        copy._fixedBowActs = BowActs;
         copy.ActDamageMultiplier = ActDamageMultiplier;
         copy.ActBlockMultiplier = ActBlockMultiplier;
         // THE SUPPORTING POOL (2026-09-26): Held Applause's skip is part of
@@ -1110,7 +1126,12 @@ public sealed class FurinaStageLedger
     {
         if (Back is not { } back) return new StageSpend(false, 0, null);
         if (amount <= 0) return new StageSpend(true, 0, null);
-        if (back.Fanfare < amount) return new StageSpend(false, 0, null);
+        if (back.Fanfare < amount)
+        {
+            return SpendPools && TotalFanfare >= amount
+                ? SpendPooled(amount)
+                : new StageSpend(false, 0, null);
+        }
 
         Drain(back, amount);
         // The per-play record, written where the payment happens rather than
@@ -1131,7 +1152,51 @@ public sealed class FurinaStageLedger
     /// question a Spend mode's gate asks, and false on an empty stage.
     /// </summary>
     public bool CanSpend(int amount) =>
-        Back is { } back && back.Fanfare >= amount;
+        Back is { } back
+        && (back.Fanfare >= amount || (SpendPools && TotalFanfare >= amount));
+
+    // ---- PALAIS LEDGER (review/active/relics-potions-klee-furina-2026-09-27.md) ----
+
+    /// <summary>Does a Spend the back performer cannot cover pool across the
+    /// stage? Palais Ledger, held by this ledger's Furina.</summary>
+    public bool SpendPools =>
+        _furina != null
+        && Relics.FurinaStageRelics.Holds<Relics.PalaisLedger>(_furina);
+
+    /// <summary>Every performer's Fanfare, front to back.</summary>
+    public int TotalFanfare => _seats.Sum(seat => seat.Fanfare);
+
+    /// <summary>
+    /// "A Spend your back performer can't cover is paid by the performers in
+    /// front of it, back to front." The back pays all it holds, then the one
+    /// in front of it, and on toward the front until the price is met; every
+    /// performer the payment empties leaves and Bows, in that order. The
+    /// caller has already checked the whole stage covers the price.
+    /// </summary>
+    private StageSpend SpendPooled(int amount)
+    {
+        var owed = amount;
+        var exits = new List<StageExit>();
+        for (var index = _seats.Count - 1; index >= 0 && owed > 0; index--)
+        {
+            var seat = _seats[index];
+            var paid = System.Math.Min(seat.Fanfare, owed);
+            if (paid <= 0) continue;
+            Drain(seat, paid);
+            owed -= paid;
+            NoteSpend(seat, paid);
+            if (seat.Fanfare > 0) continue;
+            _seats.RemoveAt(index);
+            Note(new StageBeat("leave", seat.Who, -1, 0, paid, "spend"));
+            exits.Add(ExitOf(seat, StageDeparture.Spent, index, held: paid));
+        }
+        SpentThisPlay = amount;
+        return new StageSpend(amount, exits);
+    }
+
+    /// <summary>Guest Book's latch: has this combat's first Guest Star
+    /// arrived?</summary>
+    public bool GuestBookSpent { get; set; }
 
     /// <summary>
     /// RULE 6, the middle term of the damage order: Furina's Block, then the
@@ -1223,8 +1288,16 @@ public sealed class FurinaStageLedger
     /// act gives Block). What <see cref="Absorb"/> lets a Bow catch.</summary>
     public int BowBlock(StagePerformer who) =>
         who == StagePerformer.Usher
-            ? FurinaStageLaw.ActUsherBlock * ActBlockMultiplier
+            ? FurinaStageLaw.ActUsherBlock * ActBlockMultiplier * BowActs
             : 0;
+
+    /// <summary>How many times a Bow's act resolves: 2 under Curtain Call
+    /// Bouquet, else 1. Fixed on a forecast clone, which has no Furina to ask.
+    /// </summary>
+    public int BowActs =>
+        _fixedBowActs ?? Relics.CurtainCallBouquet.ActsFor(_furina);
+
+    private int? _fixedBowActs;
 
     private readonly List<StageExit> _pendingHitBows = new();
 
@@ -1272,19 +1345,25 @@ public sealed class FurinaStageLedger
     /// <see cref="FurinaStageLaw.OpeningFanfare"/> (rule 2). A regen on turn
     /// one would make that opening a 4 the relic never printed.
     /// </summary>
-    public int Regen(int turnNumber)
+    // "FROM HER SECOND TURN ON" IS A RULE AND NOT A CONSTANT, which is how
+    // the sim states it too (`furina_stage.turn_start_regen`: `if not
+    // active(p) or state.turn < 2`). There is no `REGEN_FROM_TURN` in
+    // `furina_stage`, so a constant here would be a number this side of the
+    // wire invented -- exactly what `lint_constant_parity` exists to refuse --
+    // and the two engines would state one rule two ways.
+    public int Regen(int turnNumber) =>
+        Regen(turnNumber, FurinaStageLaw.LeadRegen, firstTurn: 2);
+
+    /// <summary>Rule 4 with the Ancient on it: The Curtain Never Falls
+    /// regains <paramref name="amount"/> from <paramref name="firstTurn"/>.
+    /// </summary>
+    public int Regen(int turnNumber, int amount, int firstTurn)
     {
-        // "FROM HER SECOND TURN ON" IS A RULE AND NOT A CONSTANT, which is how
-        // the sim states it too (`furina_stage.turn_start_regen`: `if not
-        // active(p) or state.turn < 2`). There is no `REGEN_FROM_TURN` in
-        // `furina_stage`, so a constant here would be a number this side of
-        // the wire invented -- exactly what `lint_constant_parity` exists to
-        // refuse -- and the two engines would state one rule two ways.
-        if (turnNumber < 2) return 0;
+        if (turnNumber < firstTurn || amount <= 0) return 0;
         if (Lead is not { } lead) return 0;
-        lead.Fanfare += FurinaStageLaw.LeadRegen;
-        NoteRaise(lead, FurinaStageLaw.LeadRegen, "regain");
-        return FurinaStageLaw.LeadRegen;
+        lead.Fanfare += amount;
+        NoteRaise(lead, amount, "regain");
+        return amount;
     }
 
     /// <summary>
@@ -1295,13 +1374,17 @@ public sealed class FurinaStageLedger
     /// sentence true cost one list check between them -- the belt
     /// <c>TamakushiCasket</c> wears for the same reason.
     /// </summary>
-    public StageSeat? OpenWith(StagePerformer who)
+    public StageSeat? OpenWith(StagePerformer who) =>
+        OpenWith(who, FurinaStageLaw.OpeningFanfare);
+
+    /// <summary>The opening at <paramref name="fanfare"/> (Opera Glasses'
+    /// 5).</summary>
+    public StageSeat? OpenWith(StagePerformer who, int fanfare)
     {
         if (!IsEmpty) return null;
-        var seat = new StageSeat(who, FurinaStageLaw.OpeningFanfare);
+        var seat = new StageSeat(who, fanfare);
         _seats.Add(seat);
-        Note(new StageBeat("arrive", who, 0, FurinaStageLaw.OpeningFanfare,
-                           0, ""));
+        Note(new StageBeat("arrive", who, 0, fanfare, 0, ""));
         return seat;
     }
 

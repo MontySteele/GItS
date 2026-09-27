@@ -2163,6 +2163,51 @@ proto_ko_sparks_for_everyone	ImageGen/images/cards/klee/proto_ko_sparks_for_ever
 # picture serves power_furina_salon_member, which is a POWER slot: L1's scope
 # is /cards/ out-paths, so cross-slot reuse is legal by construction.
 relic_salon_solitaire	ImageGen/images/furina/relics/salon_solitaire.png	256	256	contain	center	shortlist	1	png	Talent Salon Solitaire.png		icon	
+# ---------- Klee's and Furina's own relics and potions (review/active/relics-potions-klee-furina-2026-09-27.md) ----------
+# Twenty icons, each a wiki item icon worn by no other row. build_pck.ps1
+# copies every png in ImageGen/images/<character>/relics and /potions (Klee's
+# at ImageGen/images/relics and /potions), so the C# KleePck.Path reads them.
+# Blank source_group keeps strict L1.
+# relic_dodoco_charm <- NEW: a Dodoco toy, the charm that makes every Bomb a little bigger
+relic_dodoco_charm	ImageGen/images/relics/dodoco_charm.png	256	256	contain	center	shortlist	1	png	Item Dodoco's Whirly Gig.png		icon	
+# relic_clover_charm <- NEW: a four-leaf clover, luck when a Mine goes off
+relic_clover_charm	ImageGen/images/relics/clover_charm.png	256	256	contain	center	shortlist	1	png	Item Lucky Dog's Clover.png		icon	
+# relic_fresh_catch <- NEW: a fish fresh out of the water, the Hydro the fight opens with
+relic_fresh_catch	ImageGen/images/relics/fresh_catch.png	256	256	contain	center	shortlist	1	png	Item Fish.png		icon	
+# relic_alices_guidebook <- NEW: Mondstadt's own book of teachings, Alice's notes on cooking one big Bomb
+relic_alices_guidebook	ImageGen/images/relics/alices_guidebook.png	256	256	contain	center	shortlist	1	png	Item Guide to Freedom.png		icon	
+# relic_fireworks_stand <- NEW: Yoimiya's firework, many Bombs from one card
+relic_fireworks_stand	ImageGen/images/relics/fireworks_stand.png	256	256	contain	center	shortlist	1	png	Item Yoimiya Auratus Spark.png		icon	
+# relic_alices_teapot <- NEW: the Serenitea Pot, the Hydro that is not there
+relic_alices_teapot	ImageGen/images/relics/alices_teapot.png	256	256	contain	center	shortlist	1	png	Item Serenitea Pot.png		icon	
+# relic_dodoco_army <- NEW: Dodoco the knight, the army that mines every enemy
+relic_dodoco_army	ImageGen/images/relics/dodoco_army.png	256	256	contain	center	shortlist	1	png	Item Dodoco's Gallant Knight.png		icon	
+# potion_bottled_sparks <- NEW: a Pyro oil in a bottle, Sparks to drink
+potion_bottled_sparks	ImageGen/images/potions/bottled_sparks.png	256	256	contain	center	shortlist	1	png	Item Flaming Essential Oil.png		icon	
+# potion_blasting_powder <- NEW: a fiery flask, every Bomb grows
+potion_blasting_powder	ImageGen/images/potions/blasting_powder.png	256	256	contain	center	shortlist	1	png	Item Heatshield Potion.png		icon	
+# potion_jumpy_juice <- NEW: an experimental brew, every Bomb doubles
+potion_jumpy_juice	ImageGen/images/potions/jumpy_juice.png	256	256	contain	center	shortlist	1	png	Item Experimental Potion.png		icon	
+# relic_opera_glasses <- NEW: a monocle, a better look at the opening
+relic_opera_glasses	ImageGen/images/furina/relics/opera_glasses.png	256	256	contain	center	shortlist	1	png	Item Noble Grace Monocle.png		icon	
+# relic_stagehands_gloves <- NEW: a pair of gloves, the stagehand who catches every Bow
+relic_stagehands_gloves	ImageGen/images/furina/relics/stagehands_gloves.png	256	256	contain	center	shortlist	1	png	Item Rose's Lament Gloves Manekin.png		icon	
+# relic_guest_book <- NEW: a signed book, the first guest's welcome
+relic_guest_book	ImageGen/images/furina/relics/guest_book.png	256	256	contain	center	shortlist	1	png	Item Someone's Diary.png		icon	
+# relic_grand_theater_program <- NEW: a Fontaine film's poster, the applause that never fades
+relic_grand_theater_program	ImageGen/images/furina/relics/grand_theater_program.png	256	256	contain	center	shortlist	1	png	Item Film Poster The Two Musketeers.png		icon	
+# relic_curtain_call_bouquet <- NEW: a Fontaine flower thrown on stage, a Bow taken twice
+relic_curtain_call_bouquet	ImageGen/images/furina/relics/curtain_call_bouquet.png	256	256	contain	center	shortlist	1	png	Item Romaritime Flower.png		icon	
+# relic_palais_ledger <- NEW: a ledger, the whole company paying the bill
+relic_palais_ledger	ImageGen/images/furina/relics/palais_ledger.png	256	256	contain	center	shortlist	1	png	Item Someone's Ledger.png		icon	
+# relic_opening_night <- NEW: tickets for opening night, a second performer on stage
+relic_opening_night	ImageGen/images/furina/relics/opening_night.png	256	256	contain	center	shortlist	1	png	Item Iridescence Tour Tickets.png		icon	
+# potion_bottled_applause <- NEW: a Hydro oil in a bottle, applause for the back performer
+potion_bottled_applause	ImageGen/images/furina/potions/bottled_applause.png	256	256	contain	center	shortlist	1	png	Item Streaming Essential Oil.png		icon	
+# potion_curtain_water <- NEW: a blue potion, Fanfare for everyone on stage
+potion_curtain_water	ImageGen/images/furina/potions/curtain_water.png	256	256	contain	center	shortlist	1	png	Item Candlelit Nightwalk Blue Potion.png		icon	
+# potion_encore_elixir <- NEW: a violet potion, an encore from every performer
+potion_encore_elixir	ImageGen/images/furina/potions/encore_elixir.png	256	256	contain	center	shortlist	1	png	Item Candlelit Nightwalk Violet Potion.png		icon	
 # ---------- TEYVAT STILL PORTRAITS (R272 run frame; the enemy portrait bill) ----------
 # One row per BODY the six ruled faces reskin, from the survey's tables
 # (docs/current/research/teyvat-portrait-sources-2026-09-16.md sec.2). Sources are

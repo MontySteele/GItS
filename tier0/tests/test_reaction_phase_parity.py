@@ -1105,6 +1105,19 @@ CO_TENANCY_LEDGER = {
         ("Relics/UpgradedStarterRelics.cs", "ExplosiveFrags"):
             "turn-1-only opening Spark windfall (the sim's combat_start "
             "site)",
+        ("Relics/KleeArmRelics.cs", "FreshCatch"):
+            "QUARANTINED (the Klee arm's own relics, 2026-09-27). Turn-1-only: "
+            "Hydro on one random enemy. No co-tenant reads an aura at this "
+            "broadcast on turn 1 -- the Klee arm's turn-start Powers are not in "
+            "play before her first card -- and the sim has no counterpart until "
+            "Balance",
+        ("Relics/KleeArmRelics.cs", "DodocoArmy"):
+            "QUARANTINED (the Klee arm's own relics, 2026-09-27). Turn-1-only: "
+            "a Mine 2 on every enemy. Its one board-reading co-tenant, "
+            "KleeExpansion.RunTurnStartPlacements (Klee's Secret Base asks "
+            "'no Bomb of yours'), is carried by Powers that cannot be in play "
+            "before her first card, so turn 1 has no race; the sim has no "
+            "counterpart until Balance",
         ("Powers/TurnEndSequencer.cs", "TurnEndSequencer"):
             "EB-53/N1: redraws the end-of-turn attribution docket, nothing "
             "else. It has NO stake in this broadcast's order because it "

@@ -396,7 +396,34 @@ MIRRORED: dict[str, object] = {
 # legitimate is leaving the question unanswered.
 # --------------------------------------------------------------------------
 
+#: The Klee and Furina arms' own relics and potions, and the two Ancient
+#: repairs (review/active/relics-potions-klee-furina-2026-09-27.md, ruled
+#: 2026-09-27). C# first: the arms are Prototype, the sim is brought up at
+#: Balance, and tier 0.5 models no relic or potion of either arm yet.
+_ARM_ITEMS_REASON = (
+    "THE ARMS' OWN RELICS AND POTIONS (review/active/relics-potions-klee-"
+    "furina-2026-09-27.md). A printed number on a Prototype-stage relic or "
+    "potion of the Klee arm or the Stage, built C# first "
+    "(operations/prototype.md); no sim twin exists until Balance.")
+
 UNMIRRORED: dict[str, str] = {
+    "AlicesGuidebook.Growth": _ARM_ITEMS_REASON,
+    "BlastingPowder.Growth": _ARM_ITEMS_REASON,
+    "BottledApplause.Fanfare": _ARM_ITEMS_REASON,
+    "BottledSparks.Sparks": _ARM_ITEMS_REASON,
+    "CloverCharm.Block": _ARM_ITEMS_REASON,
+    "CurtainCallBouquet.BowActs": _ARM_ITEMS_REASON,
+    "CurtainNeverFalls.LeadRegen": _ARM_ITEMS_REASON,
+    "CurtainWater.Fanfare": _ARM_ITEMS_REASON,
+    "DodocoArmy.MineSize": _ARM_ITEMS_REASON,
+    "DodocoCharm.Bonus": _ARM_ITEMS_REASON,
+    "EncoreElixir.Acts": _ARM_ITEMS_REASON,
+    "ExplosiveFrags.FirstExplosionSparks": _ARM_ITEMS_REASON,
+    "FireworksStand.Energy": _ARM_ITEMS_REASON,
+    "FireworksStand.Threshold": _ARM_ITEMS_REASON,
+    "GuestBook.Bonus": _ARM_ITEMS_REASON,
+    "OperaGlasses.OpeningFanfare": _ARM_ITEMS_REASON,
+    "StagehandsGloves.Block": _ARM_ITEMS_REASON,
     "ShrapnelPower.Shred":
         "THE CO-OP SET, SECOND BATCH (review/active/coop-concepts-2026-09-27.md). "
         "Shrapnel's printed '50% more': the multiplier another player's Attack "

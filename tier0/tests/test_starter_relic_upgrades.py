@@ -37,6 +37,11 @@ STARTERS: dict[str, str] = {
     "PoundingSurprise": "ExplosiveFrags",          # Klee
     "PearlOfWisdomRelic": "PearlOfInsightRelic",   # Kokomi
     "EtherealSpotlightRelic": "CurtainNeverFalls", # Furina (red-pen R2)
+    # The Stage arm's starter (QUARANTINED, FURINA_STAGE). Its curated absence
+    # closed on 2026-09-27: The Curtain Never Falls was rebuilt for the Stage
+    # (review/active/relics-potions-klee-furina-2026-09-27.md, pick 4 at its
+    # default) and is Salon Solitaire's upgrade as it is the Spotlight's.
+    "SalonSolitaire": "CurtainNeverFalls",
 }
 
 # Starters KNOWINGLY without an upgraded form, each with the reason and the
@@ -78,27 +83,6 @@ NO_UPGRADED_FORM: dict[str, str] = {
         "prototype-only (KOKOMI_OVERHAUL); the smith is closed in the "
         "prototype run (slice one sec.7), and an upgraded form would be a "
         "design act. Clears when the slice reaches Balance.",
-    # THE FURINA STAGE ARM'S STARTING RELIC (QUARANTINED, FURINA_STAGE -- the
-    # whole class is `#if PROTOTYPE_CARDS`, so no release build contains it).
-    # A curated absence for the Casket's reason, taken whole: the brief that
-    # rules this arm (review/active/furina-stage-brief-2026-09-08.md) is a
-    # Prototype-stage document with three open picks, an upgraded relic would
-    # be new numbers nobody has ruled, and pointing it at the shipped
-    # `EtherealSpotlightRelic`'s upgraded form would be worse than nothing --
-    # that relic IS the Spotlight the brief's sec.2 retires, so the face would
-    # lie about a rule the arm has turned off.
-    #
-    # WHAT IT COSTS, stated: Touch of Orobas is an act-2 Ancient, and a dev
-    # build on the arm that takes it hands back the no-effect Circlet and
-    # loses the opening stage. The arm's own gate is fight one (the brief's
-    # sec.7) and act-one seat rounds, so no graded round reaches the event.
-    #
-    # THE GATE THAT CLEARS IT: the arm reaching Balance, where the numbers are
-    # ruled and the upgraded starter is authored with everything else.
-    "SalonSolitaire":
-        "prototype-only (FURINA_STAGE); the brief is a Prototype-stage "
-        "document with open picks, and an upgraded form would be a design "
-        "act. Clears when the arm reaches Balance.",
 }
 
 
@@ -226,6 +210,7 @@ RELIC_POOLS = {
     "PoundingSurprise": "KleeRelicPool.cs",
     "PearlOfWisdomRelic": "KokomiRelicPool.cs",
     "EtherealSpotlightRelic": "FurinaRelicPool.cs",
+    "SalonSolitaire": "FurinaRelicPool.cs",
 }
 
 _CODE = _ROOT / "klee-mod" / "KleeCode"

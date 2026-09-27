@@ -247,7 +247,9 @@ function Select-PackablePngs([string]$dir) {
 # Klee's historical art layout predates the roster and stays at ImageGen/images
 # /<surface>. Furina and later characters use ImageGen/images/<character>
 # /<surface>. Both land in character namespaces inside the merged pack.
-foreach ($d in 'ui', 'powers', 'relics', 'model') {
+# 'potions' (2026-09-27): Klee's and Furina's own potions, the arms' three
+# each (review/active/relics-potions-klee-furina-2026-09-27.md).
+foreach ($d in 'ui', 'powers', 'relics', 'potions', 'model') {
     $from = Join-Path $src $d
     if (-not (Test-Path $from)) { Note-Skip "klee\$d" $from; continue }
     $to = Join-Path $work "klee\$d"
@@ -593,7 +595,7 @@ if (-not (Test-Path $kurageSrc)) { Note-Skip 'kokomi\summon' $kurageSrc } else {
 
 foreach ($character in 'furina', 'kokomi') {
     $charSrc = Join-Path $src $character
-    foreach ($d in 'ui', 'powers', 'relics', 'model') {
+    foreach ($d in 'ui', 'powers', 'relics', 'potions', 'model') {
         $from = Join-Path $charSrc $d
         if (-not (Test-Path $from)) { Note-Skip "$character\$d" $from; continue }
         $to = Join-Path $work "$character\$d"
