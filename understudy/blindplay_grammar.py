@@ -26,6 +26,8 @@ from understudy.blindplay_faces import (_card_face, _card_title,
 from understudy.blindplay_notes import (NO_ALTERNATIVE_AT_ALL,
                                         NO_SACRIFICE_HERE, PREVIEW_LOCKED,
                                         SKIPPED_CARD_REWARD)
+from understudy.blindplay_coop import (NO_PARTNER, ally_target, is_coop,
+                                       parse_wait, waiting_refusal)
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import (_blob, _enemies, _entity_id, _fold,
                                        _hand, _int, _number_names, _player,
@@ -698,6 +700,18 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
                        + (f": {reason}" if reason else ""))
     post: dict[str, Any] = {"action": "play_card", "card_index": idx}
     printed = {"card": titles[idx]}
+    # CO-OP (2026-09-27). A card that goes to ANOTHER PLAYER -- the base
+    # game's ally target -- is aimed at that player's creature, named by their
+    # character. `None` outside a co-op run and for every other card, so the
+    # singleplayer path below is untouched.
+    ally = ally_target(state, entry, cmd.target)
+    if ally is not None:
+        handle, name, why = ally
+        if why:
+            return _refuse(why)
+        post["target"] = handle
+        printed["target"] = name
+        return Resolution(True, "play", post, printed)
     # `EB-216`. THE JELLYFISH FIRST, because it is the one target that is not
     # an enemy and the refusal a tester would otherwise get ("there is more
     # than one enemy, so say which") would be about the wrong board.
@@ -1311,6 +1325,17 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
     command and most do not need to, because the screen's own grammar is the
     honest fallback and it is applied here rather than at forty call sites.
     """
+    # CO-OP (2026-09-27): `wait` is read ahead of the grammar, and is not in
+    # `VERBS`, so a singleplayer refusal lists exactly the verbs it always
+    # did. It posts nothing: the caller watches the wire for it.
+    seconds = parse_wait(command)
+    if seconds >= 0:
+        if not is_coop(state):
+            return _with_forms(_refuse(NO_PARTNER),
+                               observation(state)).as_dict()
+        return Resolution(True, "wait", None,
+                          {"seconds": seconds}).as_dict()
+
     try:
         cmd = parse_command(command)
     except BlindPlayError as exc:
@@ -1364,6 +1389,11 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
         # own refusal below names the rest.
         res = _refuse("there is nothing to leave here; `proceed` is what "
                       "walks on from a screen that has a way onward")
+    elif cmd.verb in ("play", "end turn") and waiting_refusal(state,
+                                                              cmd.verb):
+        # CO-OP: this seat's turn is ended (or it is down). The page offers
+        # `wait` alone, and a play typed anyway is told why.
+        res = _refuse(waiting_refusal(state, cmd.verb))
     elif cmd.verb == "play":
         res = (_play(state, cmd) if st in COMBAT_SCREENS
                else _refuse(_not_in_battle(obs)))

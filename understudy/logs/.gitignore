@@ -9,6 +9,10 @@ _*
 # carried into the sealed record instead.
 embark-*.json
 
+# Co-op sidecars (`understudy/embark_coop.py`): the same kind of pointer, one
+# per co-op pair, naming both lanes' sidecars for `--teardown --coop`.
+coop-*.json
+
 # One-off wire probes (`*-probe.jsonl`): a raw dump of `GET
 # /api/v1/singleplayer` either side of a posted action, taken to diagnose one
 # defect and superseded by the fix and its red test. Same rule as the

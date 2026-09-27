@@ -109,6 +109,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         TURN_ORDER_POWER,
                                         UNBLOCKED_RAISER_CLAUSE,
                                         UNBLOCKED_RAISE_CLAUSE)
+from understudy.blindplay_coop import banner as coop_banner
+from understudy.blindplay_coop import render_lines as coop_lines
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold, _text
 from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
@@ -2574,6 +2576,10 @@ def render(obs: dict[str, Any]) -> str:
                          + (f": {obs['result']}" if obs["result"] else ".")]
             if obs.get("summary"):
                 body += ["", "What the run ended with:", ""] + obs["summary"]
+        # CO-OP: the other player's side of the same ending. Absent on every
+        # singleplayer page.
+        if obs.get("coop"):
+            body += coop_lines(obs["coop"])
         # `EB-396`: and where the blocked screen has a way OUT, the page ends
         # on the command that takes it. A blocked page that printed no verb
         # was the whole defect -- the seat had nothing to type and the run
@@ -2585,7 +2591,9 @@ def render(obs: dict[str, Any]) -> str:
         qa_packet.assert_blind(text, allow={st})
         return text
 
-    out: list[str] = []
+    # CO-OP: what the run is waiting on, first, where a reader looks first.
+    # Nothing on a singleplayer page, which has no `coop` key.
+    out: list[str] = coop_banner(obs.get("coop"))
     if obs["screen"] == "combat":
         c = obs["combat"]
         you = c["you"]
@@ -3396,6 +3404,12 @@ def render(obs: dict[str, Any]) -> str:
     # relics and the belt, because it is the thing a seat about to choose a
     # route or plan a block has to know and the one thing no screen printed.
     out += _render_run_change(obs.get("run_change") or {})
+
+    # CO-OP: the other player's HP, Block, turn and pets, and any vote in
+    # progress, under the screen's own body. Singleplayer pages carry no
+    # `coop` key and print nothing here.
+    if obs.get("coop"):
+        out += coop_lines(obs["coop"])
 
     # `EB-473`: the relic row, on a screen that is not a fight, in the
     # combat header's own words and under its own heading. A relic claimed at

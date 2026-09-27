@@ -132,3 +132,18 @@ this order:
 
 Write what you saw, including the parts that made you look stupid. A seat that
 smooths over its own confusion has deleted the finding the round was run for.
+
+## CO-OP (printed only by `tools/seat.py --opus-brief --coop`)
+
+### You share this run with another seat
+
+This is a co-op run. Another blind seat plays the other character on its own
+lane, and you cannot talk to it. The page's **The other player** section shows
+its HP, Block, whether it has ended its turn, and its companions; **Choices so
+far** shows its pick on the map, a shared event or a chest. `end turn` waits
+for both of you: the enemies act only once both players have ended. When a page
+opens with **WAITING**, say `act "wait"`: it holds (60 s, or `wait 120`, at most
+300) until the other player does something, then prints the new page. A
+WAITING page is not a stall and does not count toward the six-screen stop. A
+card that goes to another player is played `on "<their character>"`. Write only
+what you saw: do not guess at the other seat's reasons.
