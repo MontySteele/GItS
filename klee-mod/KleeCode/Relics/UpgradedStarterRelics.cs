@@ -135,6 +135,13 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
     /// <summary>Sparks banked once, at the start of every combat.</summary>
     public const int OpeningSparks = 3;
 
+#if PROTOTYPE_CARDS
+    /// <summary>Under the Klee arm, the first explosion each turn pays this
+    /// many Sparks instead of one (the relics-and-potions paper's repair,
+    /// ruled 2026-09-27).</summary>
+    public const int FirstExplosionSparks = 2;
+#endif
+
     public ExplosiveFrags() : base(autoAdd: false)
     {
     }
@@ -155,14 +162,17 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         ("title", "Dodoco Tales"),
         ("description",
 #if KLEE_OVERHAUL
-            // R276 hygiene: under the arm the opening bank is gated OFF
-            // (`AfterPlayerTurnStart` below), so the face says only what the
-            // relic does there -- the per-explosion Spark, in Pounding
-            // Surprise's own words. A loc row is registered once at boot, so
-            // the switch is the compile constant the deploy line sets, the
-            // same one Pounding Surprise's face reads.
+            // Under the arm the opening bank is gated OFF
+            // (`AfterPlayerTurnStart` below) and the repair of 2026-09-27
+            // (review/active/relics-potions-klee-furina-2026-09-27.md) is the
+            // arm's body: one extra Spark a turn, all of it earned. A loc row
+            // is registered once at boot, so the switch is the compile
+            // constant the deploy line sets, the same one Pounding Surprise's
+            // face reads.
             "Whenever a [gold]Bomb[/gold] goes off, gain [blue]"
-          + Powers.KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]."
+          + Powers.KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]. "
+          + "The first time each turn, gain [blue]" + FirstExplosionSparks
+          + "[/blue] instead."
 #else
             $"Start each combat with [blue]{OpeningSparks}[/blue] "
           + "[gold]Sparks[/gold]. Whenever a [gold]Bomb[/gold] detonates, "
@@ -277,10 +287,18 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
 
         Flash();
         await SparkPower.Gain(
-            choiceContext, Owner.Creature,
-            Powers.KleeOverhaulLaw.SparkPerExplosion,
+            choiceContext, Owner.Creature, SparksFor(applier),
             cardSource: null, source: "relic:explosive_frags/explosion");
     }
+
+    /// <summary>The arm's repair: "Whenever a Bomb goes off, gain 1 Spark.
+    /// The first time each turn, gain 2 instead." The turn is the arm
+    /// ledger's round, so a Mine on the enemies' turn that follows a turn with
+    /// no explosion is that round's first. Spends the latch.</summary>
+    public static int SparksFor(Creature applier) =>
+        Powers.KleeOverhaulLedger.For(applier).TakeDodocoTales()
+            ? FirstExplosionSparks
+            : Powers.KleeOverhaulLaw.SparkPerExplosion;
 #endif
 }
 
@@ -455,6 +473,36 @@ public sealed class CurtainNeverFalls : CustomRelicModel
     {
     }
 
+#if PROTOTYPE_CARDS
+    /// <summary>Under the Stage, the front performer's regain at the start of
+    /// her turn (rule 4's 1, upgraded), from her first turn. The rebuild of
+    /// 2026-09-27 (review/active/relics-potions-klee-furina-2026-09-27.md).
+    /// </summary>
+    public const int LeadRegen = 2;
+
+    /// <summary>Does this Furina, on a live Stage, hold the Curtain? Read by
+    /// <c>FurinaStage.RegenLead</c>.</summary>
+    public static bool OnStage(Creature? furina) =>
+        Powers.FurinaStage.LiveFor(furina)
+        && furina!.Player is { } player
+        && System.Linq.Enumerable.Any(
+            System.Linq.Enumerable.OfType<CurtainNeverFalls>(player.Relics));
+
+    /// <summary>
+    /// REBUILT FOR THE STAGE: "Start each combat with Usher at 3 Fanfare." It
+    /// replaces Salon Solitaire (its upgrade), so it makes the starter's
+    /// sentence true itself, at the starter's own moment and through the same
+    /// idempotent opening. Arm off it does nothing here: the shipped Spotlight
+    /// kit reads it in <c>SpotlightSystem</c>.
+    /// </summary>
+    public override async Task BeforeCombatStart()
+    {
+        var furina = Owner?.Creature;
+        if (!Powers.FurinaStage.LiveFor(furina)) return;
+        await Powers.FurinaStage.OpenCombat(furina);
+    }
+#endif
+
     // Ancient, never Starter -- see ExplosiveFrags for why that matters.
     public override RelicRarity Rarity => RelicRarity.Ancient;
 
@@ -462,9 +510,20 @@ public sealed class CurtainNeverFalls : CustomRelicModel
     {
         ("title", "The Curtain Never Falls"),
         ("description",
+#if FURINA_STAGE
+            // The Stage's face: a loc row is registered once at boot, so the
+            // switch is the compile constant the deploy line sets.
+            "Start each combat with [gold]Usher[/gold] at [blue]"
+          + Powers.FurinaStageLaw.OpeningFanfare + "[/blue] [gold]Fanfare[/gold]. "
+          + "Your [gold]front performer[/gold] regains [blue]" + LeadRegen
+          + "[/blue] [gold]Fanfare[/gold] at the start of your turn instead of "
+          + Powers.FurinaStageLaw.LeadRegen + ", from your first turn."
+#else
             "[gold]Center Stage[/gold] and [gold]Guest Cast[/gold] are always "
           + "active. You always count as having moved the "
-          + "[gold]Spotlight[/gold]."),
+          + "[gold]Spotlight[/gold]."
+#endif
+            ),
     };
 
     protected override string IconBaseName => "snake_ring";
@@ -487,6 +546,13 @@ public sealed class CurtainNeverFalls : CustomRelicModel
         Player player, List<CardCreationResult> cardRewardOptions,
         CardCreationOptions creationOptions)
     {
+#if PROTOTYPE_CARDS
+        // UNDER THE STAGE, NO COMPANION SLOT (designer review of #715,
+        // 2026-09-27): the prototypes start with no companion, and Salon
+        // Solitaire -- the starter this relic upgrades on the arm -- has no
+        // slot, so the upgrade must not add one. Arm off, the shipped slot.
+        if (Powers.FurinaStage.Enabled) return false;
+#endif
         if (creationOptions.Source != CardCreationSource.Encounter
             || player.Character is not Furina)
         {

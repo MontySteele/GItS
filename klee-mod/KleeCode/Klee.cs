@@ -90,10 +90,19 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
     // KleeRelicPool = Silent's borrowed contents + Pounding Surprise. The own
     // pool is REQUIRED, not cosmetic: RelicModel.Pool resolves through
     // AllRelicPools and throws for a relic in no pool, aborting character
-    // select mid-method (finding 27). Real Klee relics (~8) are a C3 item.
+    // select mid-method (finding 27). Her own seven are the Klee arm's
+    // (Relics/KleeArmRelics.cs), offered only under it.
     public override RelicPoolModel RelicPool => ModelDb.RelicPool<KleeRelicPool>();
 
-    public override PotionPoolModel PotionPool => ModelDb.PotionPool<SilentPotionPool>();
+    public override PotionPoolModel PotionPool =>
+#if PROTOTYPE_CARDS
+        // QUARANTINED: under the Klee arm her own three and no Silent borrow
+        // (review/active/relics-potions-klee-furina-2026-09-27.md, pick 1(a)).
+        // Arm off, the pool as it shipped.
+        Powers.KleeOverhaul.Enabled
+            ? ModelDb.PotionPool<Potions.KleePotionPool>() :
+#endif
+        ModelDb.PotionPool<SilentPotionPool>();
 
     /// <remarks>
     /// Printed template: 4x Kaboom, 4x Duck and Cover, 1x Jumpy Dumpty,

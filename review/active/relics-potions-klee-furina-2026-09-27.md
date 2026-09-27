@@ -5,7 +5,8 @@ look into character-specific ones for Klee and Furina, and consider them for
 Kokomi later once the character identity solidifies and the card pool is
 handled. Co-op relics and potions can be a later item entirely."
 
-**Stage:** Paper, ruled; to be built. The numbers are first drafts.
+**Stage:** Paper, ruled; built behind the Klee arm and the Stage (branch
+`relics-potions-build`). The numbers are first drafts.
 
 **Ruled 2026-09-27: all four picks at their defaults, with the two Rare potions
 raised.** [USER]: "I mostly like 711 and the defaults - the Rare potions look a

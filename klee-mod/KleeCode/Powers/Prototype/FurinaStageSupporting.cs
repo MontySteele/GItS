@@ -61,9 +61,13 @@ public static partial class FurinaStage
     /// <c>furina_stage.fade_threshold</c> and <c>furina_stage.fade</c>.
     /// </summary>
     public static (int Threshold, bool Echo) FadeRules(Creature owner) =>
-        (owner.Powers.OfType<EternalApplausePower>().Any()
-             ? FurinaStageLaw.EternalFadeThreshold
-             : FurinaStageLaw.FadeThreshold,
+        // GRAND THEATER PROGRAM: "The applause no longer fades" -- a line no
+        // bar reaches, so the fade takes nothing and echoes nothing.
+        (Relics.FurinaStageRelics.Holds<Relics.GrandTheaterProgram>(owner)
+             ? int.MaxValue
+             : owner.Powers.OfType<EternalApplausePower>().Any()
+                 ? FurinaStageLaw.EternalFadeThreshold
+                 : FurinaStageLaw.FadeThreshold,
          owner.Powers.OfType<EchoingHallPower>().Any());
 
     /// <summary><i>Counterclaim</i>'s predicate, `stage_front_hit`: did an

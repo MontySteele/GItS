@@ -39,7 +39,7 @@ public sealed class KleeRelicPool : RelicPoolModel
         // The borrowed roster MINUS Helical Dart and Snecko Skull (the ruling
         // on QUEUE pick `fanout-picks-2026-09-16 4.3`, at its default). See
         // InheritedSilentRelics for why the two go and why the drop is safe.
-        return InheritedSilentRelics.Curated()
+        var relics = InheritedSilentRelics.Curated()
             .Append(ModelDb.Relic<Relics.PoundingSurprise>())
             // EPOCH 2 / D1 (audit sec.1.2): the upgraded starter was poolless,
             // and RelicModel.Pool throws for a poolless relic -- the crash
@@ -48,5 +48,35 @@ public sealed class KleeRelicPool : RelicPoolModel
             // Ancient rarity keeps it off reward rolls, which take
             // Common/Uncommon/Rare/Shop/Boss only (see the header above).
             .Append(ModelDb.Relic<Relics.ExplosiveFrags>());
+#if PROTOTYPE_CARDS
+        // QUARANTINED: KLEE'S OWN SEVEN (review/active/relics-potions-klee-
+        // furina-2026-09-27.md, pick 1(a)). MEMBERSHIP under the compile flag,
+        // for the Casket's reason (`KokomiRelicPool`): this runs once, before
+        // anything reads the arm, and `RelicModel.Pool` throws for a relic in
+        // no pool. What may be ROLLED is `GetUnlockedRelics` below.
+        relics = relics
+            .Append(ModelDb.Relic<Relics.DodocoCharm>())
+            .Append(ModelDb.Relic<Relics.CloverCharm>())
+            .Append(ModelDb.Relic<Relics.FreshCatch>())
+            .Append(ModelDb.Relic<Relics.AlicesGuidebook>())
+            .Append(ModelDb.Relic<Relics.FireworksStand>())
+            .Append(ModelDb.Relic<Relics.AlicesTeapot>())
+            .Append(ModelDb.Relic<Relics.DodocoArmy>());
+#endif
+        return relics;
     }
+
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// THE OFFER, the one seam the relic grab bag reads
+    /// (<c>RelicGrabBag.Populate</c>). Under the Klee arm her pool is the
+    /// starter, her seven and the Ancient -- the Silent borrow goes. Arm off,
+    /// it is every member but the seven, which is the pool as it shipped.
+    /// </summary>
+    public override IEnumerable<RelicModel> GetUnlockedRelics(
+        MegaCrit.Sts2.Core.Unlocks.UnlockState unlockState) =>
+        Relics.ArmRelicPools.Offer(AllRelics, Powers.KleeOverhaul.Enabled,
+                                   Relics.ArmRelicPools.KleeArmPool,
+                                   Relics.KleeArmRelics.Types);
+#endif
 }

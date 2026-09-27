@@ -37,7 +37,32 @@ public sealed class FurinaRelicPool : RelicPoolModel
         // starter is never rolled as a reward, so pool membership is only
         // what lets Pool resolve.
         relics = relics.Append(ModelDb.Relic<Relics.SalonSolitaire>());
+        // QUARANTINED: FURINA'S OWN SEVEN (review/active/relics-potions-klee-
+        // furina-2026-09-27.md, pick 1(a)); membership only, for the reason
+        // above. What may be rolled is `GetUnlockedRelics` below.
+        relics = relics
+            .Append(ModelDb.Relic<Relics.OperaGlasses>())
+            .Append(ModelDb.Relic<Relics.StagehandsGloves>())
+            .Append(ModelDb.Relic<Relics.GuestBook>())
+            .Append(ModelDb.Relic<Relics.GrandTheaterProgram>())
+            .Append(ModelDb.Relic<Relics.CurtainCallBouquet>())
+            .Append(ModelDb.Relic<Relics.PalaisLedger>())
+            .Append(ModelDb.Relic<Relics.OpeningNight>());
 #endif
         return relics;
     }
+
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// THE OFFER. Under the Stage her pool is Salon Solitaire, her seven and
+    /// The Curtain Never Falls: the Silent borrow goes, and so does the
+    /// Ethereal Spotlight, which nothing on the Stage can use. Arm off, it is
+    /// every member but the seven, which is the pool as it shipped.
+    /// </summary>
+    public override IEnumerable<RelicModel> GetUnlockedRelics(
+        MegaCrit.Sts2.Core.Unlocks.UnlockState unlockState) =>
+        Relics.ArmRelicPools.Offer(AllRelics, Powers.FurinaStage.Enabled,
+                                   Relics.ArmRelicPools.FurinaArmPool,
+                                   Relics.FurinaStageRelics.Types);
+#endif
 }

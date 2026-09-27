@@ -55,6 +55,13 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
         ModelDb.RelicPool<FurinaRelicPool>();
 
     public override PotionPoolModel PotionPool =>
+#if PROTOTYPE_CARDS
+        // QUARANTINED: under the Stage her own three and no Silent borrow
+        // (review/active/relics-potions-klee-furina-2026-09-27.md, pick 1(a)).
+        // Arm off, the pool as it shipped.
+        FurinaStage.Enabled
+            ? ModelDb.PotionPool<Potions.FurinaPotionPool>() :
+#endif
         ModelDb.PotionPool<SilentPotionPool>();
 
     public override IEnumerable<CardModel> StartingDeck

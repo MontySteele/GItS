@@ -295,6 +295,9 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             if (_charges.Count == 0 || !IsMutable) return ReactionKind.None;
             var target = Owner;
             if (target == null) return ReactionKind.None;
+            // ALICE'S TEAPOT: the first Bomb she sets off this turn reacts as
+            // if its enemy had Hydro, whatever it really holds.
+            if (Relics.AlicesTeapot.Pending(Applier)) return ReactionKind.Vaporize;
             return AuraCmd.Find(target)?.Element switch
             {
                 Elements.Element.Hydro => ReactionKind.Vaporize,
@@ -684,6 +687,15 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private decimal PendingReactionMultiplier(Creature target)
     {
+        // ALICE'S TEAPOT, the badge's half of `Explode`'s: while it is unspent
+        // this turn, the first charge through meets a Hydro that is not there
+        // (the hit consumes nothing real, so the real aura is not read).
+        if (Relics.AlicesTeapot.Pending(Applier))
+        {
+            return ReactionTable.AmplifierMultiplier(
+                ReactionTable.Lookup(Elements.Element.Hydro, Elements.Element.Pyro),
+                Applier);
+        }
         var aura = AuraCmd.Find(target);
         if (aura == null || aura.Element == Elements.Element.Pyro) return 1m;
         var reaction = ReactionTable.Lookup(aura.Element,
@@ -1319,6 +1331,12 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // on every board with no Pact, and the whole of what the Rare knows.
         var auraBefore = VermillionPactPower.AuraToRestore(applier, cardSource,
                                                            target);
+        // ALICE'S TEAPOT (the arm's Rare): "The first Bomb you set off each
+        // turn reacts as if its enemy had Hydro." The reaction is resolved
+        // against a Hydro that is not there, so the enemy's real aura -- if it
+        // has one -- is neither consumed nor refreshed. The log names it.
+        var teapot = Relics.AlicesTeapot.TakeFor(applier, element);
+        if (teapot) pending = ReactionTable.Lookup(Element.Hydro, element);
         // `EB-343` / R248: THIS DOOR IS THE WHOLE OF "a Bomb carries the
         // target's modifiers only". The charge enters the funnel at its printed
         // size -- Klee's Strength and Weak are hers and never travelled to a
@@ -1337,8 +1355,11 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // and before Explosive Frags below lays a Vulnerable this hit did NOT
         // pay, so the ledger can take exactly this share back out.
         var vulnerableBefore = HasVulnerable(target);
-        var dealt = await ElementalHit.DealWithoutDealerMods(
-            choiceContext, target, element, size, applier);
+        var dealt = teapot
+            ? await ElementalHit.DealAsIfAura(
+                choiceContext, target, element, Element.Hydro, size, applier)
+            : await ElementalHit.DealWithoutDealerMods(
+                choiceContext, target, element, size, applier);
         var vulnerablePaid = vulnerableBefore || HasVulnerable(target);
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
         // THE OVERFLOW IS THE HIT PAST THE KILL, after the target's own terms
@@ -1383,6 +1404,9 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             // last Mine on this enemy. The charge left the pile before this
             // explosion (take-then-resolve), so the read is already honest.
             await ShrapnelPower.AfterMineWentOff(choiceContext, applier, target);
+            // CLOVER CHARM (the arm's Uncommon): "Whenever one of your Mines
+            // goes off, gain 3 Block." Whatever set it off.
+            await Relics.CloverCharm.AfterMineWentOff(applier);
         }
         // THE COMPANION STAND-INS' two this-turn watchers (QUARANTINED,
         // COMPANION_OVERHAUL): Diona's Bomb and Noelle's Mine. Here rather than
@@ -1522,7 +1546,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             var dest = combat.RunState.Rng.CombatTargets.NextItem(candidates);
             if (dest == null) return;
             await Place(choiceContext, dest, charge.Size, charge.IsMine,
-                        charge.PayloadMineAll, applier, cardSource);
+                        charge.PayloadMineAll, applier, cardSource,
+                        relocated: true);
         }
     }
 
@@ -1748,8 +1773,15 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     public static async Task Place(
         PlayerChoiceContext choiceContext, Creature target, int size,
-        bool isMine, int payloadMineAll, Creature applier, CardModel? cardSource)
+        bool isMine, int payloadMineAll, Creature applier, CardModel? cardSource,
+        bool relocated = false)
     {
+        // DODOCO CHARM (the arm's Common relic, review/active/relics-potions-
+        // klee-furina-2026-09-27.md): "Whenever you place a Bomb, it is 1
+        // bigger." A Mine is a Bomb. A MOVE is not a placement -- a jump, a
+        // merge and a split carry a Bomb that was already placed, so they pass
+        // `relocated` and the Charm is paid once per Bomb, when it arrives.
+        if (!relocated) size += Relics.DodocoCharm.BonusFor(applier);
         var power = await PowerCmd.Apply<ProtoBombPower>(
             choiceContext, target, 1, applier: applier, cardSource: cardSource);
 
@@ -1912,6 +1944,29 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// Chain Fuse: every Bomb on ONE enemy grows by <paramref name="amount"/>.
     /// This placer's piles only, for the same reason Set off reads only hers.
     /// </summary>
+    /// <summary>Jumpy Juice (the arm's Rare potion): "Double every Bomb on
+    /// every enemy." Each of the applier's charges doubles in place; nothing
+    /// goes off.</summary>
+    public static void DoubleOn(Creature? target, Creature applier)
+    {
+        if (target == null) return;
+        foreach (var pile in target.Powers.OfType<ProtoBombPower>().ToList())
+        {
+            if (pile.Applier == applier) pile.DoubleAll();
+        }
+    }
+
+    /// <summary>A pure mutation: every charge on this pile doubles.</summary>
+    public void DoubleAll()
+    {
+        if (_charges.Count == 0) return;
+        for (var i = 0; i < _charges.Count; i++)
+        {
+            _charges[i] = _charges[i] with { Size = _charges[i].Size * 2 };
+        }
+        SyncDisplay();
+    }
+
     public static void GrowOn(Creature? target, Creature applier, int amount)
     {
         if (target == null) return;
@@ -1973,7 +2028,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         }
         if (size == 0) return;
         await Place(choiceContext, dest, size + growth, isMine, payload,
-                    applier, cardSource);
+                    applier, cardSource, relocated: true);
     }
 
     /// <summary>
@@ -2310,7 +2365,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             var dest = combat.RunState.Rng.CombatTargets.NextItem(candidates);
             if (dest == null) return;
             await Place(choiceContext, dest, half + growth, isMine: false,
-                        payloadMineAll: 0, applier, cardSource);
+                        payloadMineAll: 0, applier, cardSource,
+                        relocated: true);
         }
     }
 

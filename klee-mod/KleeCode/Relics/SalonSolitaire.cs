@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Relics;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Relics;
 
 namespace KleeMod.Relics;
@@ -48,6 +49,12 @@ public sealed class SalonSolitaire : CustomRelicModel
     }
 
     public override RelicRarity Rarity => RelicRarity.Starter;
+
+    /// <summary>Touch of Orobas: The Curtain Never Falls, rebuilt for the
+    /// Stage (the relics-and-potions paper, 2026-09-27) -- the Ethereal
+    /// Spotlight's upgrade, now this starter's.</summary>
+    public override RelicModel? GetUpgradeReplacement() =>
+        ModelDb.Relic<CurtainNeverFalls>().ToMutable();
 
     /// <summary>
     /// The opening number is INTERPOLATED from the constant it quotes

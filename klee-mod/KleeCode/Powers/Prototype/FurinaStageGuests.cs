@@ -91,6 +91,8 @@ public static partial class FurinaStage
         if (!LiveFor(owner)) return;
         var who = Parse(member);
         var ledger = FurinaStageLedger.For(owner!);
+        // GUEST BOOK: the combat's first Guest Star arrives with 3 more.
+        fanfare += Relics.GuestBook.TakeBonus(owner!);
         if (ledger.SeatOf(who) is { } seat)
         {
             var index = ledger.IndexOf(seat);

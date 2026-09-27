@@ -255,6 +255,37 @@ public sealed class KleeOverhaulLedger
         return true;
     }
 
+    // ---- the arm's own relics (review/active/relics-potions-klee-furina-2026-09-27.md) ----
+
+    private bool _dodocoTalesSpent;
+
+    /// <summary>Dodoco Tales, repaired for the arm: "The first time each
+    /// turn, gain 2 instead." True the FIRST time it is asked in a turn (a
+    /// round, the ledger's own clock), whatever set the Bomb off.</summary>
+    public bool TakeDodocoTales()
+    {
+        if (_dodocoTalesSpent) return false;
+        _dodocoTalesSpent = true;
+        return true;
+    }
+
+    private bool _teapotSpent;
+
+    /// <summary>Alice's Teapot: "The first Bomb you set off each turn".
+    /// True the FIRST time it is asked in a turn; the caller asks only on
+    /// the players' turn, so a Mine answering an attack never spends it.
+    /// </summary>
+    public bool TakeTeapot()
+    {
+        if (_teapotSpent) return false;
+        _teapotSpent = true;
+        return true;
+    }
+
+    /// <summary>Has the Teapot fired this turn? A read that spends nothing,
+    /// for the badge.</summary>
+    public bool TeapotSpent => _teapotSpent;
+
     private bool _turnStartPlacementsDone;
 
     /// <summary>
@@ -394,6 +425,8 @@ public sealed class KleeOverhaulLedger
         CompanionPlayedThisTurn = 0;
         _aftershockSpent = false;
         _sparksForEveryoneSpent = false;
+        _dodocoTalesSpent = false;
+        _teapotSpent = false;
         _turnStartPlacementsDone = false;
         DamageSetOffThisPlay = 0;
         SetOffEchoBaseThisPlay = 0m;
