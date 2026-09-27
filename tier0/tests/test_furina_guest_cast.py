@@ -591,8 +591,9 @@ def test_the_new_beats_cross_the_blind_packet():
 def test_the_glossary_has_the_guest_star_and_every_guest_word_for_word():
     from understudy.blindplay_notes import ARM_KEYWORDS
     assert ARM_KEYWORDS["Guest Star"] == (
-        "A performer who joins the stage, one of each. A second copy makes "
-        "it Bow, then return with the new Fanfare added.")
+        "A Guest Star card's performer. Unlike Usher, Chevalmarin and "
+        "Crabaletta, one of each: a copy makes it Bow and return with more "
+        "Fanfare.")
     assert ARM_KEYWORDS["Bow"] == (
         "A performer that leaves the stage acts one last time on its way "
         "out, without paying. A performer emptied by a hit Bows before the "

@@ -83,6 +83,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         REACTION_ROW_NO_SOURCE,
                                         RELIC_ANSWER_ROW,
                                         RELIC_ANSWER_ROW_NO_TARGET,
+                                        RELIC_ANSWER_GAIN_ROW,
                                         RELIC_ANSWERS_HEADING,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
@@ -2412,6 +2413,12 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             key = row.get("key")
             again = key is not None and key == last_act_key
             last_act_key = key
+            # Relics smoke seat 2026-09-27: "Chevalmarin (front seat) acted"
+            # was the middle seat WHEN IT ACTED. An act names the seat it
+            # acted from (the beat's seat and count), as an arrival does; a
+            # build that files no count falls back to where it stands now.
+            if row.get("standing") is not None and row["seat"] >= 0:
+                seat = stage_seat_name(row["seat"], row["standing"])
             label = (f"{who} ({seat} seat)"
                      if not again and seat and row["name"] in twins else who)
             out.append(f"  - {label} {'acted again' if again else 'acted'}: "
@@ -2878,7 +2885,8 @@ def render(obs: dict[str, Any]) -> str:
         if c.get("relic_answers"):
             out += ["", RELIC_ANSWERS_HEADING, ""]
             for row in c["relic_answers"]:
-                line = (RELIC_ANSWER_ROW if row["target"]
+                line = (RELIC_ANSWER_GAIN_ROW if row.get("unit")
+                        else RELIC_ANSWER_ROW if row["target"]
                         else RELIC_ANSWER_ROW_NO_TARGET).format(**row)
                 if row.get("carried"):
                     line = line.rstrip(".") + "." + REACTION_CARRIED_CLAUSE

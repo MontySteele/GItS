@@ -271,9 +271,10 @@ public sealed class KleeOverhaulLedger
 
     private bool _teapotSpent;
 
-    /// <summary>Alice's Teapot: "The first Bomb you set off each turn".
-    /// True the FIRST time it is asked in a turn; the caller asks only on
-    /// the players' turn, so a Mine answering an attack never spends it.
+    /// <summary>Alice's Teapot: "The first Bomb that goes off each turn".
+    /// True the FIRST time it is asked in a round (her turn plus the enemy
+    /// turn after it), so a Mine going off on the enemies' turn takes it
+    /// when her turn left it unspent.
     /// </summary>
     public bool TakeTeapot()
     {

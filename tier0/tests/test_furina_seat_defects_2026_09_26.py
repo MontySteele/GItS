@@ -210,8 +210,8 @@ def test_the_back_performer_row_says_a_lone_performer_is_both():
     A later seat saw Spend offered from a lone performer: it is both seats
     (rule 5), so "the front instead" was wrong."""
     assert ARM_KEYWORDS["back performer"].startswith(
-        "Gains and Spends Fanfare. At the end of your turn, it loses half its "
-        "Fanfare above 5. A lone performer is both, and never fades.")
+        "Gains and Spends Fanfare. End of your turn: it fades, losing half "
+        "its Fanfare above 5. A lone performer is both, and never fades.")
 
 
 # ---- 7. The Crystal Sphere --------------------------------------------------

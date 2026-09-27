@@ -44,18 +44,38 @@ public class RelicAnswerLogTests
     }
 
     [Fact]
-    public void The_wire_row_carries_the_five_keys_the_page_reads()
+    public void The_wire_row_carries_the_six_keys_the_page_reads()
     {
         // The key names ARE the contract with
-        // `understudy/blindplay_board.relic_answers`.
+        // `understudy/blindplay_board.relic_answers`. 2026-09-27: `unit`.
         RelicAnswerLog.MarkTurnStart();
         RelicAnswerLog.Note(Casket, 2, Seat.Kokomi().Creature);
 
         var row = RelicAnswerLog.Snapshot().Single();
 
         Assert.Equal(
-            new[] { "source", "amount", "target", "combat_id", "carried" },
+            new[] { "source", "amount", "target", "combat_id", "carried",
+                    "unit" },
             row.Keys.ToArray());
+        Assert.Equal("", row["unit"]);
+    }
+
+    [Fact]
+    public void A_relic_that_gave_block_files_its_unit_and_no_target()
+    {
+        // Relics smoke seat 2026-09-27: Stagehand's Gloves' Block was named
+        // nowhere on the page.
+        RelicAnswerLog.MarkTurnStart();
+        RelicAnswerLog.NoteGain("Stagehand's Gloves", 3, "Block");
+
+        var row = RelicAnswerLog.Snapshot().Single();
+
+        Assert.Equal("Stagehand's Gloves", row["source"]);
+        Assert.Equal(3, row["amount"]);
+        Assert.Equal("", row["target"]);
+        Assert.Equal("Block", row["unit"]);
+        Assert.Contains("RelicAnswerLog.NoteGain",
+                        Il.Calls(Il.Method("StagehandsGloves", "AfterBow")));
     }
 
     [Fact]

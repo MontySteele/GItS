@@ -118,6 +118,8 @@ public sealed class StagehandsGloves : CustomRelicModel
         FurinaStageRelics.Flash<StagehandsGloves>(furina);
         await CreatureCmd.GainBlock(furina, block, ValueProp.Unpowered, null,
                                     fast: true);
+        // Relics smoke seat 2026-09-27: its Block was named nowhere.
+        Powers.RelicAnswerLog.NoteGain("Stagehand's Gloves", block, "Block");
     }
 
     protected override string IconBaseName => "snake_ring";

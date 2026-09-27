@@ -633,8 +633,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             " [gold]Fanfare[/gold] at the start of your turn.",
             # Round four's empty-stage summon is the Fanfare tip's (above).
             # Draft 3: rule 12, the fade, on the back performer.
-            "Gains and Spends [gold]Fanfare[/gold]. At ",
-            "the end of your turn, it loses half its Fanfare above ",
+            "Gains and Spends [gold]Fanfare[/gold]. End ",
+            "of your turn: it fades, losing half its Fanfare above ",
             # 2026-09-26: a lone performer is both seats, and never fades.
             ". A lone performer is both, and ",
             "never fades.\");",

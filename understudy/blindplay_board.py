@@ -1174,7 +1174,8 @@ def relic_answers(player: dict[str, Any]) -> list[dict[str, Any]] | None:
              "amount": _int(r.get("amount")),
              "target": _text(r.get("target")),
              "combat_id": _text(r.get("combat_id")),
-             "carried": bool(r.get("carried"))}
+             "carried": bool(r.get("carried")),
+             "unit": _text(r.get("unit"))}
             for r in rows
             if isinstance(r, dict) and _text(r.get("source"))
             and _int(r.get("amount")) > 0]
@@ -1546,6 +1547,10 @@ def _spark_source_name(source: str, card: str) -> str:
     never seen is a source the page still names.
     """
     tail = (source or "").replace(":", "/").rsplit("/", 1)[-1]
+    # A POTION NAMES ITSELF, never the card its row opened on (relics smoke
+    # seat 2026-09-27: Bottled Sparks' +3 printed as "+3 Jumpy Dumpty").
+    if (source or "").startswith("potion:") and tail:
+        return tail.replace("_", " ").title()
     if card and tail in ("play", ""):
         return card
     named = _SPARK_EVENTS.get(tail)

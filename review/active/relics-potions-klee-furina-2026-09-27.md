@@ -71,7 +71,7 @@ React (a companion's aura). Her weakness is Block on demand.
 | Uncommon | Fresh Catch | At the start of each combat, apply Hydro to a random enemy. | React: one free aura a fight |
 | Rare | Alice's Guidebook | At the start of your turn, your largest Bomb grows 3 more. | Cook |
 | Rare | Fireworks Stand | Whenever one card sets off 3 or more Bombs, gain 1 energy. | Spray |
-| Rare | Alice's Teapot | The first Bomb you set off each turn reacts as if its enemy had Hydro. | React without a companion |
+| Rare | Alice's Teapot | The first Bomb that goes off each turn reacts as if its enemy had Hydro. | React without a companion |
 | Shop | Dodoco Army | At the start of each combat, place a Mine 2 on ALL enemies. | Hallways (the Ninja Scroll slot) |
 
 | Tier | Potion | Effect (draft) |
@@ -129,6 +129,10 @@ start of your turn instead of 1, from your first turn." It upgrades rule 4, as
 the base Ancients upgrade their starter's one number. The name and art stay. It
 no longer shares a relic with the Spotlight kit. Ethereal Spotlight leaves her
 pool under the Stage, where nothing can use it.
+
+## Smoke read, 2026-09-27
+
+Two short seats (act 1, 200 actions) were given all seven relics and three potions at once, so the balance read is inflated: Klee took 5 damage all act, and Furina finished 82/84. Every item did what its text says. Watch items for the Balance stage: Alice's Guidebook and Jumpy Juice (a waited Bomb deleted elites); Palais Ledger with Curtain Call Bouquet and Stagehand's Gloves (emptying 1-Fanfare performers for free Block beat keeping them alive). Guest Book never fired, because no Guest Star was drafted. The Teapot now counts the first Bomb each round, Mines included (a Mine's badge had promised a Vaporize it did not get).
 
 ## The build, after the picks
 

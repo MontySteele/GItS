@@ -498,7 +498,27 @@ public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
             "Up to {Seats} performers. At the end of your turn, those behind "
           + "the front lose half their Fanfare above "
           + FurinaStageLaw.FadeThreshold + "."),
+        // Relics smoke seat 2026-09-27: with Grand Theater Program owned the
+        // line still said performers "lose half above 5". The face a held
+        // Program selects (`SmartDescriptionLocKey`).
+        (NoFadeKey,
+            "Up to {Seats} performers. Your performers do not fade."),
     };
+
+    /// <summary>The loc suffix a held Grand Theater Program selects.</summary>
+    public const string NoFadeKey = "smartDescriptionNoFade";
+
+    /// <summary>The selector: the no-fade face while her Grand Theater
+    /// Program is held, the ruled face otherwise (and on a canonical copy,
+    /// which has no owner to ask).</summary>
+    protected override string SmartDescriptionLocKey =>
+        ShowsNoFade ? Id.Entry + "." + NoFadeKey : base.SmartDescriptionLocKey;
+
+    /// <summary>Does this badge print the no-fade face? Her Grand Theater
+    /// Program held; never on a canonical copy.</summary>
+    public bool ShowsNoFade =>
+        IsMutable && Owner is { } furina
+        && Relics.FurinaStageRelics.Holds<Relics.GrandTheaterProgram>(furina);
 
     public override PowerType Type => PowerType.Buff;
 

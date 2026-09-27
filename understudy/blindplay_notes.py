@@ -934,6 +934,9 @@ REACTION_FROZEN_THAWED_CLAUSE = (" Frozen ends when the enemies' turn ends, "
 RELIC_ANSWERS_HEADING = "## What your relics answered with"
 RELIC_ANSWER_ROW = "- **{source}** {amount} on **{target}**."
 RELIC_ANSWER_ROW_NO_TARGET = "- **{source}** {amount}."
+#: Relics smoke seat 2026-09-27: a relic that GAVE you something (Stagehand's
+#: Gloves' Block), which "the log never names".
+RELIC_ANSWER_GAIN_ROW = "- **{source}** gave you {amount} {unit}."
 
 # `EB-708`. A SIZE IS NOT A STATUS, AND THE PAGE HAD NO LEGEND FOR EITHER.
 #
@@ -1422,6 +1425,11 @@ def _summon_row(hay: str) -> str:
 #: damage.
 #: THE SUPPORTING POOL (2026-09-26): Sold Out opens a fourth seat, and the
 #: seat count says so. No parentheses (text-conventions rule 14).
+#: Relics smoke seat 2026-09-27: the Guest Star row's second sentence. Kept
+#: out of `keyword_notes`' haystack, as `STAGE_ACTS` is, so naming the trio
+#: does not print their three rows beside it.
+GUEST_NOT_TRIO = "Unlike Usher, Chevalmarin and Crabaletta,"
+
 STAGE_ACTS = ("Up to 3 performers, or 4 with Sold Out, act at the end of "
               "your turn, from any "
               "seat: Usher gives you 3 Block, Chevalmarin deals 2 to every "
@@ -1578,9 +1586,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # not fade (rule 12). A later seat (2026-09-26) saw Spend offered from a
     # lone performer: it is BOTH seats (rule 5), hit, paying Spends, and never
     # fading. `ArmKeywordTips.ForBackPerformer`'s words.
-    "back performer": ("Gains and Spends Fanfare. At the end of your turn, it "
-                       "loses half its Fanfare above 5. A lone performer is "
-                       "both, and never fades. "
+    # Relics smoke seat 2026-09-27: "'Fade' is never defined." It is, here,
+    # in one clause, and this row prints wherever the page says the word.
+    "back performer": ("Gains and Spends Fanfare. End of your turn: it "
+                       "fades, losing half its Fanfare above 5. A lone "
+                       "performer is both, and never fades. "
                        + STAGE_ACTS),
     # R276 batch two: Arkhe Alignment's two halves, in
     # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
@@ -1615,9 +1625,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # the guest's badge on its body in game. The act lives here and on the
     # badge, not on the card's face ("<Name> joins the stage with N
     # Fanfare.").
-    "Guest Star": ("A performer who joins the stage, one of each. A second "
-                   "copy makes it Bow, then return with the new Fanfare "
-                   "added."),
+    # Relics smoke seat 2026-09-27: "I never learned what a Guest Star is",
+    # and two Ushers standing read as "one of each" broken. The row names
+    # what IS one, and what is not (`GUEST_NOT_TRIO`, kept out of the
+    # haystack so it does not print the trio's rows).
+    "Guest Star": ("A Guest Star card's performer. " + GUEST_NOT_TRIO
+                   + " one of each: a copy makes it Bow and return with "
+                   "more Fanfare."),
     "Neuvillette": ("End of your turn: pay 3 of his Fanfare to deal 8 Hydro "
                     "damage to ALL enemies."),
     "Clorinde": ("End of your turn: take 1 Fanfare from each other performer "
@@ -2025,7 +2039,9 @@ _ARM_KEYWORD_RE = {
     "Fanfare": re.compile(r"\bFanfare\b"),
     "Bow": re.compile(r"\bBows?\b"),
     "front performer": re.compile(r"\bfront performer\b"),
-    "back performer": re.compile(r"\bback performer\b"),
+    # Relics smoke seat 2026-09-27: the row defines "fade", so it prints
+    # wherever the page uses the word (a card, a relic, the Stage's line).
+    "back performer": re.compile(r"\bback performer\b|\bfad(?:e|es|ed)\b"),
     # R276 batch two: Arkhe Alignment's two halves.
     "Ousia": re.compile(r"\bOusia\b"),
     "Pneuma": re.compile(r"\bPneuma\b"),
@@ -3054,7 +3070,8 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     """
     rows = _keyword_rows(obs)
     for _ in range(len(_ARM_KEYWORD_RE) + len(ELEMENT_KEYWORDS) + 8):
-        printed = "\n".join(r["text"].replace(STAGE_ACTS, " ") for r in rows)
+        printed = "\n".join(r["text"].replace(STAGE_ACTS, " ")
+                            .replace(GUEST_NOT_TRIO, " ") for r in rows)
         more = _keyword_rows(obs, printed)
         if [r["name"] for r in more] == [r["name"] for r in rows]:
             return _relic_riders(obs, _performer_rider(obs, more))

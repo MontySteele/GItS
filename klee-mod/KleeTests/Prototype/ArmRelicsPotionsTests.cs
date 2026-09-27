@@ -354,7 +354,7 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
-    public void Alices_teapot_takes_the_first_bomb_she_sets_off_each_turn_only()
+    public void Alices_teapot_takes_the_first_bomb_that_goes_off_each_round()
     {
         using var arm = new KleeArm();
         var klee = Seat.Klee();
@@ -367,22 +367,28 @@ public class ArmRelicsPotionsTests
         Assert.False(AlicesTeapot.TakeFor(klee.Creature, Element.Pyro));
         Give<AlicesTeapot>(klee);
 
-        // The enemies' turn: a Mine answering an attack is not hers to set
-        // off, and does not spend the turn's Teapot.
-        combat.CurrentSide = CombatSide.Enemy;
-        Assert.False(AlicesTeapot.TakeFor(klee.Creature, Element.Pyro));
-
         // Her turn: the first Bomb, and not the second.
-        combat.CurrentSide = CombatSide.Player;
+        Assert.True(AlicesTeapot.Pending(klee.Creature));
         Assert.True(AlicesTeapot.TakeFor(klee.Creature, Element.Pyro));
         Assert.False(AlicesTeapot.TakeFor(klee.Creature, Element.Pyro));
 
-        // The next turn, again.
+        // The enemy turn after it is the same round (designer ruling
+        // 2026-09-27, as Dodoco Tales reads "each turn"): already spent.
+        combat.CurrentSide = CombatSide.Enemy;
+        Assert.False(AlicesTeapot.Pending(klee.Creature));
+        Assert.False(AlicesTeapot.TakeFor(klee.Creature, Element.Pyro));
+
+        // A round where her turn set nothing off: a Mine going off on the
+        // enemies' turn takes it, so the Mine badge's "with Vaporize" is true.
         combat.RoundNumber = 2;
+        combat.CurrentSide = CombatSide.Enemy;
+        Assert.True(AlicesTeapot.Pending(klee.Creature));
         Assert.True(AlicesTeapot.TakeFor(klee.Creature, Element.Pyro));
+        Assert.False(AlicesTeapot.TakeFor(klee.Creature, Element.Pyro));
 
         // Hydro on Hydro is no reaction: not taken.
         combat.RoundNumber = 3;
+        combat.CurrentSide = CombatSide.Player;
         Assert.False(AlicesTeapot.TakeFor(klee.Creature, Element.Hydro));
     }
 
@@ -428,9 +434,11 @@ public class ArmRelicsPotionsTests
         Assert.Equal(vaporized, pile.PredictedSetOffDamage());
         Assert.Equal("Vaporize", LiveReaction(pile));
 
-        // Not on the enemies' turn (a Mine answering an attack does not take it).
+        // And on the enemies' turn while this round's is unspent (designer
+        // ruling 2026-09-27): a Mine going off there takes it, so its badge's
+        // "with Vaporize" is true.
         combat.CurrentSide = CombatSide.Enemy;
-        Assert.Equal(14, pile.PredictedSetOffDamage());
+        Assert.Equal(vaporized, pile.PredictedSetOffDamage());
 
         // Spent this turn: back to the plain number; the next turn, again.
         combat.CurrentSide = CombatSide.Player;
@@ -580,6 +588,63 @@ public class ArmRelicsPotionsTests
         Assert.Equal(0, stage.Fade(line, echo));
         Assert.Equal(new[] { 9, 12 }, stage.Seats.Select(s => s.Fanfare));
     }
+
+    [Fact]
+    public void The_stage_line_says_performers_do_not_fade_with_the_program()
+    {
+        // Relics smoke seat 2026-09-27: the Stage's line still said "lose
+        // half their Fanfare above 5" with Grand Theater Program owned.
+        using var _ = new StageArm();
+        var seat = Seat.Furina().WithCombatState()
+            .WithPower<StageSummaryPower>(1);
+        Stage(seat, (StagePerformer.Usher, 9));
+        var badge = seat.Creature.Powers.OfType<StageSummaryPower>().Single();
+        Assert.False(badge.ShowsNoFade);
+        Give<GrandTheaterProgram>(seat);
+        Assert.True(badge.ShowsNoFade);
+        var face = badge.Localization!
+            .First(r => r.Item1 == StageSummaryPower.NoFadeKey).Item2;
+        Assert.Contains("do not fade", face);
+        Assert.DoesNotContain("lose half", face);
+    }
+
+    [Fact]
+    public void The_forecast_counts_the_gloves_block_a_bow_will_give()
+    {
+        // Relics smoke seat 2026-09-27: "take 5", and she took 0. Hit one
+        // empties Crabaletta (2), whose Bow pays the Gloves' 3; hit two (5)
+        // meets that Block first.
+        using var _ = new StageArm();
+        var seat = Seat.Furina().WithCombatState();
+        var foes = new[] { new StageForecastEnemy("Beetle", false) };
+        Stage(seat, (StagePerformer.Crabaletta, 2));
+        Assert.Equal(5, FurinaStage.Forecast(seat.Creature, new[] { 2, 5 }, foes)
+                            .ReachesFurina);
+        Give<StagehandsGloves>(seat);
+        Stage(seat, (StagePerformer.Crabaletta, 2));
+        Assert.Equal(2, FurinaStage.Forecast(seat.Creature, new[] { 2, 5 }, foes)
+                            .ReachesFurina);
+    }
+
+    [Fact]
+    public void The_forecast_counts_the_bouquets_second_usher_act()
+    {
+        // The sweep's act gives 3 Block. Hit one (6) spends it, empties
+        // Usher (1), and his Bow's Block catches the other 2. Under the
+        // Bouquet he acts twice: 6 Block, 2 caught, 4 left for hit two (5),
+        // so 1 reaches her. Without it: 3, 2 caught, 1 left, so 4.
+        using var _ = new StageArm();
+        var seat = Seat.Furina().WithCombatState();
+        var foes = new[] { new StageForecastEnemy("Beetle", false) };
+        Stage(seat, (StagePerformer.Usher, 1));
+        var plain = FurinaStage.Forecast(seat.Creature, new[] { 6, 5 }, foes);
+        Give<CurtainCallBouquet>(seat);
+        Stage(seat, (StagePerformer.Usher, 1));
+        var twice = FurinaStage.Forecast(seat.Creature, new[] { 6, 5 }, foes);
+        Assert.Equal(4, plain.ReachesFurina);
+        Assert.Equal(1, twice.ReachesFurina);
+    }
+
 
     [Fact]
     public void Curtain_call_bouquet_makes_a_bow_act_twice_and_its_block_catch_both()
