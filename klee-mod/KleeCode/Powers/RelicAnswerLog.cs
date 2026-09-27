@@ -48,7 +48,7 @@ public static class RelicAnswerLog
     /// after the player ended their turn and no page has printed it.</summary>
     public readonly record struct Answered(
         string Source, int Amount, string Target, string CombatId,
-        bool Carried = false);
+        bool Carried = false, string Unit = "");
 
     private static readonly List<Answered> Rows = new();
 
@@ -111,6 +111,17 @@ public static class RelicAnswerLog
                               Safe(() => target?.CombatId.ToString())));
     }
 
+    /// <summary>Relics smoke seat 2026-09-27: a relic that GAVE something
+    /// rather than struck -- Stagehand's Gloves' Block, which "the log never
+    /// names". <paramref name="unit"/> is the printed word ("Block"); the row
+    /// has no target, since the owner is the one it was given to.</summary>
+    public static void NoteGain(string source, int amount, string unit)
+    {
+        if (string.IsNullOrEmpty(source) || amount <= 0) return;
+        Rows.Add(new Answered(source, amount, string.Empty, string.Empty,
+                              Unit: unit));
+    }
+
     /// <summary>A printed title, or `""`, and never a throw --
     /// `ReactionLog.Named`'s bargain and its reason: a display read is a read
     /// of live game objects that a torn-down combat can leave half standing,
@@ -145,5 +156,6 @@ public static class RelicAnswerLog
             ["target"] = row.Target,
             ["combat_id"] = row.CombatId,
             ["carried"] = row.Carried,
+            ["unit"] = row.Unit,
         });
 }

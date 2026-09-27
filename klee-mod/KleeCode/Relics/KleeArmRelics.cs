@@ -280,11 +280,14 @@ public sealed class FireworksStand : CustomRelicModel, IProtoExplosionListener
         KleePck.Path(KleeArmRelics.Icon("fireworks_stand")) ?? base.BigIconPath;
 }
 
-/// <summary>Rare. "The first Bomb you set off each turn reacts as if its enemy
-/// had Hydro." React without a companion. Taken at
-/// <c>ProtoBombPower.Explode</c>, on the players' turn only (a Mine answering
-/// an attack is not one she set off), once a turn on the arm's ledger; the hit
-/// goes through <c>ElementalHit.DealAsIfAura</c>, which consumes nothing real.
+/// <summary>Rare. "The first Bomb that goes off each turn reacts as if its
+/// enemy had Hydro." React without a companion. Taken at
+/// <c>ProtoBombPower.Explode</c>, once a ROUND on the arm's ledger (her turn
+/// plus the enemy turn after it, as Dodoco Tales reads "each turn"), so a
+/// Mine going off on the enemies' turn takes it when her turn left it
+/// unspent (designer ruling 2026-09-27: the Mine badge's "with Vaporize" is
+/// then true). The hit goes through <c>ElementalHit.DealAsIfAura</c>, which
+/// consumes nothing real.
 /// </summary>
 public sealed class AlicesTeapot : CustomRelicModel
 {
@@ -296,27 +299,26 @@ public sealed class AlicesTeapot : CustomRelicModel
     {
         ("title", "Alice's Teapot"),
         ("description",
-            "The first [gold]Bomb[/gold] you set off each turn reacts as if its "
+            "The first [gold]Bomb[/gold] that goes off each turn reacts as if its "
           + "enemy had [gold]Hydro[/gold]."),
     };
 
     /// <summary>Would the next Bomb <paramref name="applier"/> sets off take
     /// the Teapot? The badge's read, which spends nothing: held, the arm on,
-    /// the players' turn, and this turn's Teapot unspent. <c>TakeFor</c>'s
+    /// and this round's Teapot unspent, on either side's turn. <c>TakeFor</c>'s
     /// gate less the element, which the badge prices as Pyro.</summary>
     public static bool Pending(Creature? applier) =>
         applier != null
         && KleeArmRelics.Held<AlicesTeapot>(applier) > 0
-        && applier.CombatState?.CurrentSide == CombatSide.Player
         && !KleeOverhaulLedger.For(applier).TeapotSpent;
 
     /// <summary>Does THIS explosion take the Teapot? Spends the turn's latch
-    /// when it does. False with no Teapot, on the enemies' turn, and for an
-    /// element Hydro does not react with.</summary>
+    /// when it does. False with no Teapot, once this round's is spent, and
+    /// for an element Hydro does not react with. The enemies' turn counts: a
+    /// Mine going off there takes it if her turn did not.</summary>
     public static bool TakeFor(Creature applier, Element element)
     {
         if (KleeArmRelics.Held<AlicesTeapot>(applier) == 0) return false;
-        if (applier.CombatState?.CurrentSide != CombatSide.Player) return false;
         if (ReactionTable.Lookup(Element.Hydro, element) == Reaction.None)
         {
             return false;

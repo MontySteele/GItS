@@ -369,7 +369,10 @@ public static partial class FurinaStage
         var returns = owner.Powers.OfType<FiveCenturyActPower>().Any();
         var foes = enemies ?? ForecastEnemies(owner);
         var run = new ForecastRun(clone, applause, returns,
-                                  foes.Any(e => e.Aura), seats);
+                                  foes.Any(e => e.Aura), seats)
+        {
+            GlovesBlock = Relics.StagehandsGloves.BlockFor(owner),
+        };
 
         // The sweep, in the sweep's order (`EndOfTurnActs`). What the acts
         // DEAL is recorded here and only here: a Bow on the enemy's turn is
@@ -990,9 +993,29 @@ public static partial class FurinaStage
             }
         }
 
+        /// <summary>Stagehand's Gloves: the Block each Bow pays after its
+        /// act (<c>StagehandsGloves.AfterBow</c>), 0 without the relic.
+        /// Relics smoke seat 2026-09-27: the forecast said "take 5" and the
+        /// Gloves' Block (with the Bouquet's second act) left her taking 0.
+        /// </summary>
+        internal int GlovesBlock;
+
+        /// <summary>A Bow as <c>FurinaStage.Bow</c> pays it: its act once, or
+        /// twice under Curtain Call Bouquet (the Block a hit's Bow already
+        /// caught coming off the first act first), then the Gloves' Block,
+        /// then the Bow readers.</summary>
         internal void Bow(StageExit exit)
         {
-            Act(exit.Who, null, exit);
+            var acts = _stage.BowActs;
+            var perAct = FurinaStageLaw.ActUsherBlock * _stage.ActBlockMultiplier;
+            var uncaught = exit.Caught;
+            for (var i = 0; i < acts; i++)
+            {
+                var caught = acts == 1 ? uncaught : System.Math.Min(uncaught, perAct);
+                uncaught -= caught;
+                Act(exit.Who, null, exit with { Caught = caught });
+            }
+            Block += GlovesBlock;
             foreach (var amount in _applause)
             {
                 if (_stage.IsEmpty)

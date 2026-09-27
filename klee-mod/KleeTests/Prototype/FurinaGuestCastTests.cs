@@ -577,8 +577,9 @@ public class FurinaGuestCastTests
         string Printed(string method) => string.Concat(Il.Strings(
             typeof(ArmKeywordTips).GetMethod(method, HeadlessGame.All)!));
         Assert.Contains(
-            "A performer who joins the stage, one of each. A second copy "
-          + "makes it Bow, then return with the new Fanfare added.",
+            "A Guest Star card's performer. Unlike Usher, Chevalmarin and "
+          + "Crabaletta, one of each: a copy makes it Bow and return with "
+          + "more Fanfare.",
             Printed("ForGuestStar"));
         Assert.Contains("on its way out, without paying.", Printed("ForBow"));
         foreach (var guest in new[] { "Neuvillette", "Clorinde", "Navia",

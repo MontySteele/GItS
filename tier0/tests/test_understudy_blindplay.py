@@ -6754,8 +6754,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # side. The guest round: hits never reach the back (rule 6).
         # 2026-09-26: a lone performer is both seats, and never fades.
         "back performer": ["Gains and Spends ",
-                           "the end of your turn, it loses half its Fanfare "
-                           "above ",
+                           "of your turn: it fades, losing half its "
+                           "Fanfare above ",
                            ". A lone performer is both, and ",
                            "never fades."],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
@@ -6797,9 +6797,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # THE GUEST CAST (2026-09-25): the keyword and the eight guests'
         # tips. Numerals are interpolated on the mod side, so the anchors are
         # the prose around them.
-        "Guest Star": ["A performer who joins the stage, one of each. A "
-                       "second copy ", "makes it Bow, then return with the "
-                       "new Fanfare added."],
+        "Guest Star": ["A Guest Star card's performer. Unlike Usher, "
+                       "Chevalmarin and ", "Crabaletta, one of each: a copy "
+                       "makes it Bow and return with ", "more Fanfare."],
         "Neuvillette": ["End of your turn: pay ", " of his Fanfare to deal ",
                         " damage to ALL enemies."],
         "Clorinde": ["End of your turn: take ",

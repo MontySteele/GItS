@@ -889,8 +889,10 @@ public static class ArmKeywordTips
             // (brief rule 5: with one performer, the back is the lead): it is
             // hit, it pays Spends, and it never fades (rule 12 exempts the
             // front). The sentence says both.
-            "Gains and Spends [gold]Fanfare[/gold]. At "
-          + "the end of your turn, it loses half its Fanfare above "
+            // Relics smoke seat 2026-09-27: "'Fade' is never defined." It
+            // is, here, in one clause.
+            "Gains and Spends [gold]Fanfare[/gold]. End "
+          + "of your turn: it fades, losing half its Fanfare above "
           + FurinaStageLaw.FadeThreshold + ". A lone performer is both, and "
           + "never fades.");
 
@@ -981,8 +983,12 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForGuestStar(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, GuestStarKey,
-            "A performer who joins the stage, one of each. A second copy "
-          + "makes it Bow, then return with the new Fanfare added.");
+            // Relics smoke seat 2026-09-27: "I never learned what a Guest
+            // Star is", and read two Ushers standing as "one of each" broken.
+            // The row names what IS one, and what is not.
+            "A Guest Star card's performer. Unlike Usher, Chevalmarin and "
+          + "Crabaletta, one of each: a copy makes it Bow and return with "
+          + "more Fanfare.");
 
     public static IEnumerable<IHoverTip> ForNeuvillette(
         IEnumerable<IHoverTip> inherited, CardModel card) =>

@@ -89,6 +89,14 @@ def test_a_play_is_named_by_the_card_the_player_played():
         "the engine's vocabulary must not reach the page")
 
 
+def test_a_potion_is_named_by_the_potion_not_the_card_before_it():
+    """Relics smoke seat 2026-09-27: Bottled Sparks' +3 was credited to the
+    card whose row it opened on, "+3 Jumpy Dumpty"."""
+    rows = blindplay_board.spark_sources({"spark_sources": [
+        _gain("potion:bottled_sparks", 3, card="Jumpy Dumpty")]})
+    assert rows == [{"name": "Bottled Sparks", "amount": 3}]
+
+
 def test_a_gain_with_no_card_is_named_by_its_event():
     """The case the seat could not explain at all: a Spark with nothing played
     and no Bomb on the board."""

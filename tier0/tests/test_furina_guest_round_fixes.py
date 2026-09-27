@@ -111,8 +111,8 @@ def test_the_back_performer_row_says_hits_never_reach_it():
     # 2026-09-26: a lone performer is both seats -- hit, paying Spends -- and
     # never fades (rule 12 exempts the front).
     assert ARM_KEYWORDS["back performer"].startswith(
-        "Gains and Spends Fanfare. At the end of your "
-        "turn, it loses half its Fanfare above 5. A lone performer is "
+        "Gains and Spends Fanfare. End of your "
+        "turn: it fades, losing half its Fanfare above 5. A lone performer is "
         "both, and never fades.")
     for row in ARM_KEYWORDS.values():
         assert "reach it last" not in row

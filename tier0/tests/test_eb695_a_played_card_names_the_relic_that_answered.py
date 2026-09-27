@@ -110,7 +110,9 @@ def test_the_body_is_named_the_way_the_enemy_list_names_it():
     assert f"on **{standing[0]['name']}**" in page
 
 
-def test_the_reader_carries_the_five_keys_the_mod_sends():
+def test_the_reader_carries_the_six_keys_the_mod_sends():
+    # 2026-09-27: `unit`, for a relic that GAVE something (Stagehand's
+    # Gloves' Block). Absent on an older build, and read as "".
     rows = blindplay_board.relic_answers({"relic_answers": [_answer()]})
     assert rows and sorted(rows[0]) == sorted(
-        ["source", "amount", "target", "combat_id", "carried"])
+        ["source", "amount", "target", "combat_id", "carried", "unit"])
