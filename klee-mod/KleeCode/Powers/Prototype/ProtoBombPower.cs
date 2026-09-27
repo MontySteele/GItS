@@ -295,6 +295,9 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             if (_charges.Count == 0 || !IsMutable) return ReactionKind.None;
             var target = Owner;
             if (target == null) return ReactionKind.None;
+            // ALICE'S TEAPOT: the first Bomb she sets off this turn reacts as
+            // if its enemy had Hydro, whatever it really holds.
+            if (Relics.AlicesTeapot.Pending(Applier)) return ReactionKind.Vaporize;
             return AuraCmd.Find(target)?.Element switch
             {
                 Elements.Element.Hydro => ReactionKind.Vaporize,
@@ -684,6 +687,15 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private decimal PendingReactionMultiplier(Creature target)
     {
+        // ALICE'S TEAPOT, the badge's half of `Explode`'s: while it is unspent
+        // this turn, the first charge through meets a Hydro that is not there
+        // (the hit consumes nothing real, so the real aura is not read).
+        if (Relics.AlicesTeapot.Pending(Applier))
+        {
+            return ReactionTable.AmplifierMultiplier(
+                ReactionTable.Lookup(Elements.Element.Hydro, Elements.Element.Pyro),
+                Applier);
+        }
         var aura = AuraCmd.Find(target);
         if (aura == null || aura.Element == Elements.Element.Pyro) return 1m;
         var reaction = ReactionTable.Lookup(aura.Element,

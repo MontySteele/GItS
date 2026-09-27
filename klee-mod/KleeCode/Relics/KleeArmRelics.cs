@@ -300,6 +300,16 @@ public sealed class AlicesTeapot : CustomRelicModel
           + "enemy had [gold]Hydro[/gold]."),
     };
 
+    /// <summary>Would the next Bomb <paramref name="applier"/> sets off take
+    /// the Teapot? The badge's read, which spends nothing: held, the arm on,
+    /// the players' turn, and this turn's Teapot unspent. <c>TakeFor</c>'s
+    /// gate less the element, which the badge prices as Pyro.</summary>
+    public static bool Pending(Creature? applier) =>
+        applier != null
+        && KleeArmRelics.Held<AlicesTeapot>(applier) > 0
+        && applier.CombatState?.CurrentSide == CombatSide.Player
+        && !KleeOverhaulLedger.For(applier).TeapotSpent;
+
     /// <summary>Does THIS explosion take the Teapot? Spends the turn's latch
     /// when it does. False with no Teapot, on the enemies' turn, and for an
     /// element Hydro does not react with.</summary>

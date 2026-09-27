@@ -407,6 +407,44 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
+    public void Alices_teapot_folds_its_vaporize_into_the_bomb_badge_until_spent()
+    {
+        using var arm = new KleeArm();
+        var klee = Seat.Klee();
+        var enemy = Enemy();
+        var combat = ProtoBombs.Board(klee.Creature, enemy);
+        combat.RoundNumber = 1;
+        combat.CurrentSide = CombatSide.Player;
+        var pile = ProtoBombs.Place(enemy, klee.Creature, new ProtoBombs.Charge(10),
+                                    new ProtoBombs.Charge(4));
+        Assert.Equal(14, pile.PredictedSetOffDamage());
+        Assert.Equal("None", LiveReaction(pile));
+
+        Give<AlicesTeapot>(klee);
+        Assert.True(AlicesTeapot.Pending(klee.Creature));
+        // The first charge meets the Hydro that is not there; the one behind
+        // it lands on a bare body, as with a real aura (`EB-559`).
+        var vaporized = (int)(10m * ReactionConstants.VaporizeMult) + 4;
+        Assert.Equal(vaporized, pile.PredictedSetOffDamage());
+        Assert.Equal("Vaporize", LiveReaction(pile));
+
+        // Not on the enemies' turn (a Mine answering an attack does not take it).
+        combat.CurrentSide = CombatSide.Enemy;
+        Assert.Equal(14, pile.PredictedSetOffDamage());
+
+        // Spent this turn: back to the plain number; the next turn, again.
+        combat.CurrentSide = CombatSide.Player;
+        Assert.True(AlicesTeapot.TakeFor(klee.Creature, Element.Pyro));
+        Assert.Equal(14, pile.PredictedSetOffDamage());
+        combat.RoundNumber = 2;
+        Assert.Equal(vaporized, pile.PredictedSetOffDamage());
+    }
+
+    private static string LiveReaction(ProtoBombPower pile) =>
+        typeof(ProtoBombPower).GetProperty("LiveReaction", HeadlessGame.All)!
+            .GetValue(pile)!.ToString()!;
+
+    [Fact]
     public void Dodoco_tales_pays_two_for_the_first_explosion_each_turn_and_one_after()
     {
         using var arm = new KleeArm();
@@ -653,6 +691,27 @@ public class ArmRelicsPotionsTests
         // Arm off it is not on stage, and the Spotlight still reads it.
         FurinaStage.Enabled = false;
         Assert.False(CurtainNeverFalls.OnStage(seat.Creature));
+    }
+
+    [Fact]
+    public void The_curtain_never_falls_adds_no_companion_slot_on_the_stage()
+    {
+        // REAL with the Stage on: the relic declines before it reads the
+        // reward at all, and the offer is untouched. Arm off, the shipped
+        // slot (structural: the roll needs a booted game).
+        var curtain = Give<CurtainNeverFalls>(Seat.Furina());
+        var options = new List<CardCreationResult>();
+        using (new StageArm())
+        {
+            Assert.False(curtain.TryModifyCardRewardOptions(
+                curtain.Owner, options, null!));
+            Assert.Empty(options);
+        }
+        var calls = Il.CallSequence(
+            Il.Method("CurtainNeverFalls", "TryModifyCardRewardOptions")).ToList();
+        Assert.True(calls.IndexOf("FurinaStage.get_Enabled")
+                    < calls.IndexOf("CompanionSlot.Roll"));
+        Assert.True(calls.IndexOf("FurinaStage.get_Enabled") >= 0);
     }
 
     [Fact]
