@@ -81,7 +81,9 @@ Four more full runs from Neow, on the build with Hydro riding the hit, Lyney and
 - **Lyney:** "If he is not in front, he swaps places with your front performer." Once in front, he stays.
 - **Stage Whisper:** cost 1 (upgraded 0). "Your other performers give all but 1 of their Fanfare to your front performer. Draw 1 card." It pulls the whole stage into the shield.
 
-## Pick for [USER]
+## Pick for [USER] (ruled)
+
+**Ruled 2026-09-27, (a).** [USER]: "For #700, I'm fine with both defaults. We can keep an eye on this as we go and look at the Take the Stage card more carefully during the balance phase, but it sounds like these might be out of date complaints after our other changes."
 
 1. **Take the Stage** (starter; "Summon a random performer"). Five of eleven seats named it NEVER AGAIN: it Bows your front performer on a full stage, and it breaks the Solo path.
    - **(a, default)** Keep it. Starter cards stay bad, and removal and transforms are the answer.

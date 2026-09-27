@@ -62,7 +62,9 @@ Claude's calls (Prototype stage):
 - **Idle Sparks.** Spark sinks exist at Common (Dig In, Bottomless Bag). The seats that sat on Sparks had not drafted them. Watch it.
 - **The single NEVER AGAIN cards** (Favonius Escort, Boom Badge, Alice's Recipe, Playdate, Where Did I Put It?+) each came from one seat. Watch them.
 
-## Pick for [USER]
+## Pick for [USER] (ruled)
+
+**Ruled 2026-09-27, (a).** [USER]: "For #700, I'm fine with both defaults. We can keep an eye on this as we go and look at the Take the Stage card more carefully during the balance phase, but it sounds like these might be out of date complaints after our other changes."
 
 The new fact, in one line: in acts 2 and 3, three of six seats never set off an Elemental Reaction with Klee's own cards. The React Rares (Vermillion Pact, Aftershock) went unplayed, because every Klee Attack applies Pyro (rule 5) and only a Companion card brings the other element. This is the path [USER] chose in draft 4 ("Off-element bombs arrive through a companion").
 
