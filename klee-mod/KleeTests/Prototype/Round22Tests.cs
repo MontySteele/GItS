@@ -148,8 +148,14 @@ public class Round22Tests
         // The clause the row is about, and the two holes the power fills.
         Assert.Contains("[blue]30%[/blue] less damage with every hit it ",
                         mod);
-        Assert.Contains("{ApplierName}", mod);
         Assert.Contains("[blue]{DamageDecrease}%[/blue]", mod);
+        // 2026-09-26 (control seat, Regent): the applier clause branches the
+        // way the game's own row does, because `ApplierName` is empty when a
+        // player applied it -- "While  is alive" -- and names the wearer then.
+        Assert.Contains("{ApplierName.StringValue:cond:While {} is alive, ",
+                        mod);
+        Assert.Contains("|[gold]{OwnerName}[/gold] deals}", mod);
+        Assert.DoesNotContain("\"While {ApplierName} is alive", mod);
     }
 
     // ==================================================================

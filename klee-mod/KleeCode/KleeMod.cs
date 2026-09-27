@@ -776,14 +776,24 @@ public static class KleeMod
                     // already a percentage) and `ApplierName`, so the two
                     // holes below are the two the power fills; what changed is
                     // the noun the sentence is about.
+                    //
+                    // 2026-09-26 (control seat, Regent): AND THE GAME'S TWO
+                    // BRANCHES. `ApplierName` is filled only when a MONSTER
+                    // applied it (`ShrinkPower.AfterApplied`); the game's own
+                    // row branches on it with `:cond:` and names the wearer
+                    // otherwise, plus the turn count. This row dropped both,
+                    // so Beetle Juice on an enemy read "While  is alive, you
+                    // deal 30% less damage".
                     ["SHRINK_POWER.description"] =
-                        "While its applier lives, the wearer deals "
+                        "The wearer deals "
                       + "[blue]30%[/blue] less damage with every hit it "
-                      + "lands, a Skill's damage too.",
+                      + "lands, a Skill's damage too, until it wears off.",
                     ["SHRINK_POWER.smartDescription"] =
-                        "While {ApplierName} is alive, you deal "
+                        "{ApplierName.StringValue:cond:While {} is alive, "
+                      + "you deal|[gold]{OwnerName}[/gold] deals} "
                       + "[blue]{DamageDecrease}%[/blue] less damage with "
-                      + "every hit you land, a Skill's damage too.",
+                      + "every hit{Amount:cond:==1? next turn|>1? for the "
+                      + "next [blue]{}[/blue] turns|}, a Skill's damage too.",
                 });
 #endif
 

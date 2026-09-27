@@ -2250,7 +2250,7 @@ BASE_KEYWORDS: dict[str, str] = {
     "Shrink": (
         f"The wearer deals {SHRINK_DEALT_PCT}% less damage with every hit it "
         f"lands, a Skill's damage too. It lasts while whoever applied it is "
-        f"alive."),
+        f"alive, or until its number of turns runs out."),
     # The two undecaying stat powers. Named on four prototype faces and on the
     # Plan's own tip, which says Strength does NOT reach a Plan -- a sentence
     # that cannot be read by somebody who does not know what Strength is.

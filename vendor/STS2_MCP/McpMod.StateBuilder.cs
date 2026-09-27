@@ -2543,6 +2543,10 @@ public static partial class McpMod
         info["upgraded_description"] = SafeGetCardDescription(preview, PileType.None);
         try { info["upgraded_cost"] = GetCostDisplay(preview); }
         catch { /* a cost the clone will not give is a key left absent */ }
+        // The Regent's star half (control seat, 2026-09-26): null where the
+        // card has no star cost, as `star_cost` is.
+        try { info["upgraded_star_cost"] = GetStarCostDisplay(preview); }
+        catch { /* as above */ }
     }
 
     private static Dictionary<string, object?> BuildCardSelectState(NCardGridSelectionScreen screen, RunState runState)

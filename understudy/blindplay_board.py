@@ -541,6 +541,17 @@ def _allies(p: dict[str, Any], plan_pet: str | None) -> list[dict[str, Any]]:
     return out
 
 
+def _status_counts(rows: Any) -> list[tuple[str, int]]:
+    """The Status cards in one pile, `[(name, count)]` in first-seen order.
+    `[]` for a pile with none, or a wire that sent no list."""
+    counts: dict[str, int] = {}
+    for row in rows if isinstance(rows, list) else []:
+        if isinstance(row, dict) and _fold(_text(row.get("type"))) == "status":
+            name = _text(row.get("name")) or "Status"
+            counts[name] = counts.get(name, 0) + 1
+    return list(counts.items())
+
+
 def _combat(state: dict[str, Any]) -> dict[str, Any]:
     p = _player(state)
     resources = p.get("resources")
@@ -554,6 +565,11 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             "hp": _int(p.get("hp")), "max_hp": _int(p.get("max_hp")),
             "block": _int(p.get("block")), "energy": _int(p.get("energy")),
             "max_energy": _int(p.get("max_energy")),
+            # 2026-09-26 (control seat, Regent): "the battle screen never
+            # printed my star count". The bridge sends `stars` whenever the
+            # game's own counter shows (`BuildPlayerState`); `None` otherwise.
+            "stars": _int(p.get("stars")) if p.get("stars") is not None
+            else None,
             # NON-ZERO ONLY, for `qa_packet.build`'s reason: the wire reports
             # every meter the mod REGISTERED, so a board with no Spotlight on
             # it would otherwise print "Spotlight Mode: 0" and teach the tester
@@ -596,6 +612,12 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         "piles": {"draw": _int(p.get("draw_pile_count")),
                   "discard": _int(p.get("discard_pile_count")),
                   "exhaust": _int(p.get("exhaust_pile_count"))},
+        # 2026-09-26 (control seats, Regent, Silent, Ironclad): "give you 5
+        # Status cards" and nothing visible arrived. They go to a PILE, not
+        # the hand (Haunted Ship and Chomper: the discard pile; The
+        # Insatiable: three to each), so the pile line names them.
+        "pile_status": {"draw": _status_counts(p.get("draw_pile")),
+                        "discard": _status_counts(p.get("discard_pile"))},
         # `EB-271`: numbered through the fight's memory, not by place in the
         # list the feed happens to be sending this screen.
         "enemies": [{"name": name,
@@ -644,6 +666,10 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # `EB-271`: the refusal that named nothing, given the board it is about.
     for face in combat["hand"]:
         face["unplayable_note"] = _hook_note(face, combat["you"]["powers"])
+        # The star total a star refusal is measured against. An absent key
+        # in a fight is 0: the bridge omits it only when the counter is
+        # hidden, which is a character that does not always show it at 0.
+        face["stars_have"] = combat["you"]["stars"] or 0
     # `EB-186`: the once-per-screen Spark line, built from the printed powers
     # and the printed hand this screen already carries. Empty -- and so
     # printed nowhere -- on every screen where no card is being shown cheaper

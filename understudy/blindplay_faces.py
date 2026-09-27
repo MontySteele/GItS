@@ -269,6 +269,12 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
                 if entry.get("spark_price") is not None else None)),
         # `EB-445`: whether that price is the whole bank.
         "spark_all": qa_packet.spends_all_sparks(entry.get("id")),
+        # 2026-09-26 (control seat, Regent): the STAR cost, the game's own
+        # display value off `BuildCardInfo`. `""` where the card has none.
+        "star_cost": _text(entry.get("star_cost")),
+        # The star total a refusal is measured against; `_combat` fills it
+        # on a hand card, and it stays `None` everywhere else.
+        "stars_have": None,
         # `EB-700`. THE FACE THIS CARD IS WRITTEN WITH, where the board has
         # moved it. The wire carries the RESOLVED sentence and nothing else --
         # "Slack Water read Deal 3 under Weak and Deal 4 later, so a seat
@@ -458,7 +464,9 @@ def _named_option(entry: Any) -> dict[str, Any]:
     spark = (qa_packet.spark_price_for(card_id, name.rstrip().endswith("+"))
              if card_id is not None else None)
     cost = qa_packet.cost_label({"cost": energy, "printed_spark": spark,
-                                 "spark_all": qa_packet.spends_all_sparks(card_id)})
+                                 "spark_all": qa_packet.spends_all_sparks(card_id),
+                                 # The Regent's star half (`BuildShopState`).
+                                 "star_cost": entry.get("card_star_cost")})
     # `EB-262`, the other half, AND IT IS NOT OURS TO FIX. A card shelf's
     # name, text and cost all live behind `entry.CreationResult?.Card`, and
     # `MerchantCardEntry.IsStocked` IS `CreationResult != null` -- so the
