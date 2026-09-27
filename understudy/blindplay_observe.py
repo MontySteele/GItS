@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Any
 
 from understudy import qa_packet
+from understudy.blindplay_coop import WAIT_COMMAND, ally_forms, coop_block
 from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         _event_option, _event_options,
                                         _map_ahead, _map_boss, _map_paths,
@@ -760,6 +761,26 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     change = run_change(state)
     if change:
         obs["run_change"] = change
+
+    # CO-OP (2026-09-27). The other player, any vote, and what the run is
+    # waiting on. `coop_block` answers `None` on every singleplayer state, so
+    # nothing below this line changes a singleplayer page.
+    coop = coop_block(state)
+    if coop is not None:
+        obs["coop"] = coop
+        if not obs["blocked"]:
+            if coop["waiting"] and obs["screen"] == "combat":
+                # The turn is ended (or this seat is down): a card or a
+                # second `end turn` would be refused, so the one verb left is
+                # the one that waits.
+                obs["commands"] = [WAIT_COMMAND]
+            elif coop["waiting"]:
+                # A vote is in: `wait`, or vote again.
+                obs["commands"].insert(0, WAIT_COMMAND)
+            elif obs["screen"] == "combat":
+                # A card that goes to another player names them as its
+                # target, and the page says so beside the enemy form.
+                obs["commands"][1:1] = ally_forms(state)
 
     # ROUND THREE: THE GLOSSARY'S ARM SIGNAL IS A FACT ABOUT THE RUN.
     #

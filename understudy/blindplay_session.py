@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from understudy import authorship, bridge, qa_packet, seat
+from understudy.blindplay_coop import WAIT_POLL_S, wait_for_partner, wait_line
 from understudy.blindplay_grammar import act
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _int, settle, settle_board, _text
@@ -397,6 +398,9 @@ class Session:
         self.wire = wire
         self.settle_tries = settle_tries
         self.settle_delay_s = settle_delay_s
+        # CO-OP: how often `wait` re-reads the wire. An attribute so a test's
+        # scripted wire is not waited on in real seconds.
+        self.wait_poll_s = WAIT_POLL_S
         self.budget = budget or Budget()
         self.session_id = session_id or time.strftime("%Y%m%d-%H%M%S",
                                                       time.gmtime())
@@ -570,7 +574,12 @@ class Session:
                 break
             page = render(obs)
             page_sha = sha256(page)
-            if page_sha == last_page_sha:
+            # CO-OP: a page that says it is waiting for the other player is
+            # not a screen this seat cannot get off -- it is the other seat's
+            # turn -- so it does not count toward the stall stop. The wall
+            # clock still bounds it.
+            waiting = bool((obs.get("coop") or {}).get("waiting"))
+            if page_sha == last_page_sha and not waiting:
                 stalls += 1
                 if stalls >= self.budget.max_stalls:
                     self.stopped = "stalled"
@@ -694,6 +703,18 @@ class Session:
                 continue
 
             self.refusals = 0
+            if res["verb"] == "wait":
+                # CO-OP: nothing is posted and nothing is charged. The wire is
+                # watched until the other player moves it, and the seat is
+                # told how long that took before it reads the new page.
+                latest, waited, moved = wait_for_partner(
+                    self.wire, state, int(res["printed"]["seconds"]),
+                    poll=self.wait_poll_s)
+                feedback = wait_line(waited, moved, latest)
+                self.transcript.write(kind="wait",
+                                      seconds=res["printed"]["seconds"],
+                                      waited_s=round(waited, 1), moved=moved)
+                continue
             # `EB-216`. The board the seat decided on, written down before the
             # POST moves it. Only `play` and `end turn`: a map walk or a shop
             # purchase has no turn, no bank and no intent to count against.

@@ -14,6 +14,7 @@ using MegaCrit.Sts2.Core.Nodes.GodotExtensions;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.Nodes.Screens;
 using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
+using MegaCrit.Sts2.Core.Nodes.Screens.GameOverScreen;
 using MegaCrit.Sts2.Core.Nodes.Screens.Map;
 using MegaCrit.Sts2.Core.Nodes.Screens.Overlays;
 using MegaCrit.Sts2.Core.Nodes.Screens.TreasureRoomRelic;
@@ -92,6 +93,16 @@ public static partial class McpMod
         {
             result["state_type"] = "card_select";
             result["card_select"] = BuildChooseCardState(chooseCardScreen, runState);
+            // GItS LOCAL EDIT (co-op seats, 2026-09-27). THE FIGHT BEHIND A
+            // MID-FIGHT CHOOSER, the singleplayer builder's wave-3 Furina
+            // lane-4 edit carried over: a turn-start chooser (Arkhe Alignment)
+            // printed its options and no board. Additive, and only while a
+            // fight is in progress under this overlay.
+            if (currentRoom is CombatRoom chooserCombat
+                && CombatManager.Instance.IsInProgress)
+            {
+                result["battle"] = BuildMultiplayerBattleState(runState, chooserCombat);
+            }
         }
         else if (topOverlay is NChooseABundleSelectionScreen bundleScreen)
         {
@@ -117,6 +128,22 @@ public static partial class McpMod
         {
             result["state_type"] = "rewards";
             result["rewards"] = BuildRewardsState(rewardsScreen, runState);
+        }
+        // GItS LOCAL EDIT (co-op seats, 2026-09-27). THE RUN'S END, NAMED.
+        // Upstream has no game-over branch here, so a finished co-op run fell
+        // into the generic `overlay` below and a blind seat could not tell a
+        // death from a soft-lock. The singleplayer builder's shape, plus the
+        // one fact the game-over screen itself reads for its banner
+        // (`NGameOverScreen`: `CurrentRoom.IsVictoryRoom`).
+        else if (topOverlay is NGameOverScreen)
+        {
+            result["state_type"] = "game_over";
+            result["game_over"] = new Dictionary<string, object?>
+            {
+                ["message"] = "Run ended.",
+                ["options"] = new List<string> { "main_menu" },
+                ["result"] = (currentRoom?.IsVictoryRoom ?? false) ? "victory" : "defeat"
+            };
         }
         else if (topOverlay is IOverlayScreen
                  && topOverlay is not NRewardsScreen
@@ -429,6 +456,14 @@ public static partial class McpMod
             {
                 entry["block"] = player.Creature.Block;
                 entry["is_ready_to_end_turn"] = CombatManager.Instance.IsPlayerReadyToEndTurn(player);
+                // GItS LOCAL EDIT (co-op seats, 2026-09-27). THE HANDLE A CARD
+                // AIMED AT ANOTHER PLAYER NEEDS. The base game's ally target
+                // (`TargetType.AnyAlly`) takes a player creature, and
+                // `ExecutePlayCard` resolves a numeric target through
+                // `ICombatState.GetCreature` -- the door a pet's `entity_id`
+                // already uses. Without this no card could be sent to a
+                // teammate at all.
+                entry["entity_id"] = player.Creature.CombatId?.ToString();
 
                 // Include pets for teammates (local player's pets are under "player")
                 if (!LocalContext.IsMe(player))

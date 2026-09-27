@@ -116,11 +116,23 @@ def interpreter() -> str:
     return f'"{PurePath(sys.executable).as_posix()}"'
 
 
-def brief_text(lane: int, character: str) -> str:
-    """The brief, with the lane and the interpreter filled in."""
+#: The page's co-op section heading. Everything from it on is printed only
+#: with `--coop`, so a singleplayer seat's brief is the brief it always was.
+COOP_HEADING = "\n## CO-OP"
+
+
+def brief_text(lane: int, character: str, coop: bool = False) -> str:
+    """The brief, with the lane and the interpreter filled in.
+
+    `coop` appends the page's co-op section (its own heading line dropped):
+    a seat sharing a run with another seat is told so, and nobody else is.
+    """
     text = BRIEF.read_text(encoding="utf-8")
     _, _, body = text.partition("## THE BRIEF")
-    body = (body or text).replace("<LANE>", str(lane))
+    body, _, coop_part = (body or text).partition(COOP_HEADING)
+    if coop and coop_part:
+        body = body.rstrip() + "\n\n" + coop_part.split("\n", 1)[1].lstrip()
+    body = body.replace("<LANE>", str(lane))
     py = interpreter()
     body = BARE_PYTHON.sub(lambda _m: py, body)
     return (f"You are the blind seat for **{character}** on lane {lane}.\n"
@@ -147,13 +159,16 @@ def main(argv: list[str]) -> int:
                     help="lane 0 is the owner's own game; this is the door")
     ap.add_argument("--opus-brief", action="store_true",
                     help="print the blindness brief for an Opus seat and exit")
+    ap.add_argument("--coop", action="store_true",
+                    help="with --opus-brief: add the co-op paragraph (the "
+                         "run is shared with another seat; `wait`)")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the three commands and their env, run nothing")
     ap.add_argument("--oneline", action="store_true")
     args = ap.parse_args(argv)
 
     if args.opus_brief:
-        print(brief_text(args.lane, args.character))
+        print(brief_text(args.lane, args.character, coop=args.coop))
         return 0
 
     if args.lane == 0 and not args.allow_lane_0:

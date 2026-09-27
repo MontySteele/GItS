@@ -90,7 +90,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from understudy import authorship, bridge, lanewatch, qa_packet, report, seat
+from understudy import (authorship, blindplay_coop, bridge, lanewatch,
+                       qa_packet, report, seat)
 
 # `klee-mod/local.props` is the machine's one statement of where the game is,
 # and this is a DELIBERATE SECOND COPY of the four lines `soak.game_dir()`
@@ -403,6 +404,8 @@ def cmd_act(args) -> int:
     if not res["ok"]:
         print(f"REFUSED: {_text(res.get('refusal')) or ACT_UNRESOLVED}")
         return 1
+    if res["verb"] == "wait":
+        return _cmd_wait(state, int(res["printed"]["seconds"]), live)
     if not live:
         return 0
     post = dict(res["post"] or {})
@@ -436,6 +439,37 @@ def cmd_act(args) -> int:
     return 0
 
 
+def _cmd_wait(state: dict[str, Any], seconds: int, live: bool) -> int:
+    """CO-OP: `act "wait"` -- hold until the other player moves, then print
+    the page. Posts nothing and is never charged against the action budget:
+    it is not a move in the run, and a budget spent on waiting for a partner
+    would be a budget the partner spent."""
+    if not live:
+        print(f"Would wait up to {seconds}s for the other player; nothing "
+              f"was waited for.")
+        return 0
+    try:
+        latest, waited, moved = blindplay_coop.wait_for_partner(
+            bridge, state, seconds)
+        if moved:
+            latest = settle_board(settle(latest))
+    except _BRIDGE_ERROR as exc:
+        print(act_unanswered(exc))
+        dead = lanewatch.guard()
+        if dead:
+            print(dead)
+            return lanewatch.EXIT_LANE_DEAD
+        return 1
+    print(blindplay_coop.wait_line(waited, moved, latest))
+    print()
+    try:
+        print(observe(latest))
+    except (qa_packet.PacketLeak, BlindPlayError) as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def build_thread(log_dir: Path, backend: str, model: str) -> Any:
     """The tester for one run: the Codex seat, or the local backend.
 
@@ -461,6 +495,22 @@ def build_thread(log_dir: Path, backend: str, model: str) -> Any:
     return CodexThread(log_dir, model=resolved)
 
 
+def _session_seed() -> str:
+    """The run's seed for the sealed record, read the way it always was.
+
+    CO-OP: a co-op run writes `current_run_mp.save`, which the compendium's
+    read does not open, and the client lane writes no save at all -- so the
+    read finds nothing in this lane's tree, or walks on to another tree and is
+    refused as a crossing (`EB-210`). So where the wire says the run is
+    co-op, the seed comes off this lane's embark sidecar, which the co-op
+    embark read off the host's save (`understudy/embark_coop.py`). A
+    singleplayer run reads it exactly as before, crossing refusal and all.
+    """
+    if blindplay_coop.is_coop(bridge.get_state()):
+        return str(lanewatch.sidecar_row().get("run_seed") or "")
+    return bridge.current_seed() or ""
+
+
 def cmd_session(args) -> int:
     session_id = args.session_id or time.strftime("%Y%m%d-%H%M%S",
                                                   time.gmtime())
@@ -476,7 +526,7 @@ def cmd_session(args) -> int:
         return 2
     version, source = build_version()
     game, game_source = game_version()
-    seed = bridge.current_seed() or ""
+    seed = _session_seed()
     budget = Budget(max_actions=args.max_actions,
                     max_wall_s=args.max_wall_s,
                     max_refusals=args.max_refusals,

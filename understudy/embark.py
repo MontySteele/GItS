@@ -22,6 +22,11 @@ nothing torn down. What comes next is a person running
     python -m understudy.embark --character IRONCLAD --lane 1  # base-game CONTROL
     python -m understudy.embark --teardown                     # put it all back
     python -m understudy.embark --teardown --lane 1            # lane 1's only
+    python -m understudy.embark --coop --lanes 2,3         --characters KLEEMOD-KLEE,KLEEMOD-FURINA --ascension 0   # CO-OP
+    python -m understudy.embark --teardown --coop --lanes 2,3
+
+`--coop` is a different embark and lives in `understudy/embark_coop.py`: two
+lanes over the game's own `--fastmp` localhost transport, host first, one run.
 
 `--lane 1` opens the run in a second `SlayTheSpire2.exe` out of the same
 install (port 15527, its own disposable user tree) so an agent's run can play
@@ -678,7 +683,35 @@ def main(argv: list[str] | None = None) -> int:
                          "teardown removes it either. A lane-1 run is NOT a "
                          "run of record. With "
                          "--teardown it names WHICH lane's embark to revert")
+    ap.add_argument("--coop", action="store_true",
+                    help="CO-OP: open ONE run across two lanes, one player "
+                         "each, over the game's --fastmp localhost transport "
+                         "(understudy/embark_coop.py). Needs --lanes and "
+                         "--characters; with --teardown it tears both lanes "
+                         "down, the client first")
+    ap.add_argument("--lanes", default="", metavar="HOST,CLIENT",
+                    help="with --coop: the two lanes, host first (`2,3`)")
+    ap.add_argument("--characters", default="", metavar="HOST,CLIENT",
+                    help="with --coop: each lane's character, host first; "
+                         "one name is both players'")
+    ap.add_argument("--client-id", type=int, default=1000, metavar="N",
+                    help="with --coop: the client's --clientId (default "
+                         "1000; the host is always 1)")
+    ap.add_argument("--keep-bridge", action="store_true",
+                    help="with --coop: write nothing to the shared "
+                         "mods\\STS2_MCP and run the bridge already "
+                         "installed (the host's launch otherwise refreshes it "
+                         "from this checkout when no game holds it)")
     args = ap.parse_args(argv)
+
+    if args.coop:
+        if args.arms or args.hold:
+            print("embark error: --coop takes no --arm and no --hold (a "
+                  "grant refuses multiplayer, and a co-op pair is always "
+                  "launched here)", file=sys.stderr)
+            return 2
+        from understudy import embark_coop
+        return embark_coop.run_cli(args)
 
     try:
         if args.teardown:
