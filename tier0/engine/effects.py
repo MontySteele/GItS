@@ -6411,6 +6411,16 @@ def _op_stage_share_spotlight(state: CombatState, fx: dict,
     coop.no_other_player(state, "stage_share_spotlight", card)
 
 
+def _op_stage_toast(state: CombatState, fx: dict, card: Card) -> None:
+    """*Raise a Toast* (the co-op set, second batch,
+    review/active/coop-concepts-2026-09-27.md): "Another player gains
+    temporary Strength equal to your front performer's Fanfare, up to 6."
+    ANOTHER player is the target; one seat, so nothing happens and no bar
+    moves (the read never spends) -- `engine/coop.py`. The C# is
+    `FurinaStage.RaiseAToast`."""
+    coop.no_other_player(state, "stage_toast", card)
+
+
 def _op_stage_spend_back_all(state: CombatState, fx: dict,
                              card: Card) -> None:
     """*Bravura* (R276 batch two): spend all of the back performer's Fanfare;
@@ -6515,6 +6525,8 @@ OPS = {
     "stage_dual_nature": _op_stage_dual_nature,
     # THE CO-OP SET (`engine/coop.py`): Share the Spotlight's verb.
     "stage_share_spotlight": _op_stage_share_spotlight,
+    # The second batch: Raise a Toast's verb.
+    "stage_toast": _op_stage_toast,
     "gain_fanfare_floor": _op_gain_fanfare_floor,
     "raise_fanfare_cap": _op_raise_fanfare_cap,
     "crash_fanfare": _op_crash_fanfare,

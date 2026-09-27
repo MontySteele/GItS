@@ -605,6 +605,41 @@ public static partial class FurinaStage
         return result.Paid;
     }
 
+    /// <summary>
+    /// THE CO-OP SET, SECOND BATCH, <i>Raise a Toast</i>
+    /// (review/active/coop-concepts-2026-09-27.md): "Another player gains
+    /// temporary Strength equal to your front performer's Fanfare, up to 6."
+    ///
+    /// THE BAR IS READ, NEVER SPENT: nothing on the stage moves, so helping
+    /// an ally costs the stage nothing. The Strength is the base game's
+    /// Coordinate shape, a <c>TemporaryStrengthPower</c> subclass
+    /// (<see cref="RaiseAToastPower"/>) placed by Furina, which takes itself
+    /// and its Strength away at the end of the turn.
+    ///
+    /// AN EMPTY STAGE GIVES 0, and the card is still playable (the design's
+    /// own words): no power is applied for nothing. Returns what was given.
+    /// </summary>
+    public static async Task<int> RaiseAToast(
+        PlayerChoiceContext choiceContext, Creature? owner, Creature? ally,
+        int cap, CardModel? cardSource)
+    {
+        var amount = ToastAmount(owner, cap);
+        if (amount <= 0 || ally is not { IsAlive: true }) return 0;
+        await PowerCmd.Apply<RaiseAToastPower>(
+            choiceContext, ally, amount, applier: owner, cardSource: cardSource);
+        return amount;
+    }
+
+    /// <summary><see cref="RaiseAToast"/>'s number: the front performer's
+    /// Fanfare, capped at <paramref name="cap"/>; 0 on an empty stage or with
+    /// the Stage off. PURE.</summary>
+    public static int ToastAmount(Creature? owner, int cap)
+    {
+        if (!LiveFor(owner) || cap <= 0) return 0;
+        var lead = LeadFanfare(owner);
+        return lead <= 0 ? 0 : System.Math.Min(lead, cap);
+    }
+
     /// <summary>R276 batch two, <i>Tutti!</i>: every performer performs its
     /// act now, front first. The cast is snapshotted, as the end-of-turn
     /// sweep's is. A Five-Century Act's returnee "re-enters without acting

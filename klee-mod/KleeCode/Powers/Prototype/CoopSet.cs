@@ -8,7 +8,9 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -518,5 +520,222 @@ public sealed class SangonomiyasCounselPower
             await CreatureCmd.GainBlock(
                 ally, Amount, ValueProp.Unpowered, null, fast: true);
         }
+    }
+}
+
+// ======================================================================
+// THE CO-OP SET, SECOND BATCH (review/active/coop-concepts-2026-09-27.md;
+// [USER], 2026-09-27, all four picks at their defaults). Each character's
+// Genshin team role: Furina turns her stage into an ally's damage and is
+// charged by the party's HP swings; Klee's Mines shred for her allies and her
+// Bombs give them energy. Same terms as the first nine above: multiplayer
+// only, outside every pool count, quarantined with this folder.
+// ======================================================================
+
+// ---------------------------------------------------------------------------
+// KLEE
+// ---------------------------------------------------------------------------
+
+/// <summary>
+/// <i>Shrapnel</i>: "Place a Mine 4. While an enemy holds your Mine, other
+/// players' Attacks deal 50% more damage to it." ON THE ENEMY the Mine went
+/// on, placed by Klee.
+///
+/// THE BASE GAME'S <c>FlankingPower</c>, WITH ONE MORE CONDITION. Flanking's
+/// three tests, verbatim: the hit is on this power's owner, it is a powered
+/// attack (<c>props.IsPoweredAttack()</c>), and its dealer is not the applier
+/// -- so Klee's own hits, and her Bombs going off, never take it. The fourth is
+/// the face's "while an enemy holds your Mine": the enemy must hold a Mine
+/// Klee placed (<see cref="ProtoBombPower.HoldsMineFrom"/>), read LIVE at the
+/// hit, so the shred ends the moment her last Mine there leaves, whatever
+/// took it. MULTIPLICATIVE, x1.5, where Flanking is x2.
+///
+/// ONE SHRED PER KLEE, NOT PER CARD. The face ties the shred to "your Mine",
+/// and a second Shrapnel on the same enemy adds to the Mine there rather than
+/// making a second shred, so it is <see cref="PowerStackType.Single"/> and
+/// <see cref="PowerInstanceType.InstancedPerApplier"/>: two Klees' Mines are
+/// two shreds, one Klee's two Shrapnels are one. (Flanking is Instanced, and
+/// two of them stack to x4; that is a Flanking rule and not this card's.)
+///
+/// THE BADGE LEAVES WITH THE MINE: when one of her Mines goes off here and
+/// she holds none on this enemy after it, <see cref="AfterMineWentOff"/>
+/// removes the power, so the enemy does not wear a shred that no longer
+/// applies. A Mine set off by an ally's Attack (Pass the Match, Knights of
+/// Favonius) goes off AFTER that Attack's hits resolve
+/// (<see cref="CoopSet.SetOffOn"/> runs at <c>AfterCardPlayed</c>), so that
+/// Attack is still shredded.
+/// </summary>
+public sealed class ShrapnelPower : PowerModel, ILocalizationProvider
+{
+    /// <summary>The printed 50% more.</summary>
+    public const decimal Shred = 1.5m;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Shrapnel"),
+        ("description",
+            "While this enemy holds Klee's [gold]Mine[/gold], other players' "
+          + "Attacks deal 50% more damage to it."),
+    };
+
+    public override PowerType Type => PowerType.Debuff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    public override PowerInstanceType InstanceType =>
+        PowerInstanceType.InstancedPerApplier;
+
+    /// <summary>The multiplier a hit takes. PURE, so a headless pin can ask
+    /// it.</summary>
+    public override decimal ModifyDamageMultiplicative(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (target == null || target != Owner) return 1m;
+        if (!props.IsPoweredAttack()) return 1m;
+        if (Applier is not { } klee || dealer == klee) return 1m;
+        if (!ProtoBombPower.HoldsMineFrom(target, klee)) return 1m;
+        return Shred;
+    }
+
+    /// <summary>One of <paramref name="applier"/>'s Mines just went off on
+    /// <paramref name="target"/>: if she holds no Mine there any more, her
+    /// shred on it is removed.</summary>
+    public static async Task AfterMineWentOff(
+        PlayerChoiceContext choiceContext, Creature applier, Creature target)
+    {
+        if (ProtoBombPower.HoldsMineFrom(target, applier)) return;
+        foreach (var shred in target.Powers.OfType<ShrapnelPower>().ToList())
+        {
+            if (shred.Applier == applier) await PowerCmd.Remove(shred);
+        }
+    }
+}
+
+/// <summary>
+/// <i>Sparks for Everyone</i>: "The first time each turn one of your Bombs
+/// goes off, each other player gains 1 energy." On Klee, on the explosion bus
+/// (<see cref="IProtoExplosionListener"/>) Chained Reactions rides, so every
+/// Bomb counts however it went off: a Set off card, an ally's Attack through
+/// Pass the Match or Knights of Favonius, or a Mine answering an attack (a
+/// Mine is a Bomb).
+///
+/// ONLY ON THE PLAYERS' TURN (designer ruling, 2026-09-27): a Bomb that goes
+/// off while the enemies act -- a Mine answering an attack -- gives nothing
+/// and does NOT use up the turn's trigger, so the next explosion on the
+/// players' turn still pays (<see cref="Counts"/>).
+///
+/// ONCE PER TURN, on the ledger's latch
+/// (<see cref="KleeOverhaulLedger.TakeSparksForEveryone"/>, Aftershock's
+/// shape), and only for HER Bombs. "Each other player" is
+/// <see cref="CoopSet.OtherPlayers"/>, the living players who are not her; the
+/// energy is Believe In You's command, <c>PlayerCmd.GainEnergy</c>. The stack
+/// is the energy, so a second copy gives 2.
+/// </summary>
+public sealed class SparksForEveryonePower
+    : PowerModel, ILocalizationProvider, IProtoExplosionListener
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Sparks for Everyone"),
+        ("description",
+            "The first time each turn one of your [gold]Bombs[/gold] goes off, "
+          + "each other player gains [blue]{Amount}[/blue] [gold]Energy[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>Does this explosion count? PURE: one of HER Bombs, on the
+    /// players' turn. Asked before the latch, so an explosion that does not
+    /// count never spends it.</summary>
+    public static bool Counts(Creature? owner, Creature? applier) =>
+        owner != null && applier == owner
+        && owner.CombatState?.CurrentSide == CombatSide.Player;
+
+    public async Task OnBombExploded(
+        PlayerChoiceContext choiceContext, Creature applier, Creature target,
+        int size, bool reacted)
+    {
+        if (Owner == null || Amount <= 0 || !Counts(Owner, applier)) return;
+        var others = CoopSet.OtherPlayers(Owner);
+        if (others.Count == 0) return;
+        if (!KleeOverhaulLedger.For(Owner).TakeSparksForEveryone()) return;
+        foreach (var ally in others)
+        {
+            if (ally.Player is { } player)
+            {
+                await PlayerCmd.GainEnergy((int)Amount, player);
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// FURINA
+// ---------------------------------------------------------------------------
+
+/// <summary>
+/// <i>Raise a Toast</i>'s temporary Strength, on the ally. The base game's
+/// <c>CoordinatePower</c> exactly: a <c>TemporaryStrengthPower</c> whose
+/// origin is the card, so its title is the card's and it takes itself and its
+/// Strength away at the end of the turn. Applied by
+/// <see cref="FurinaStage.RaiseAToast"/>.
+/// </summary>
+public sealed class RaiseAToastPower : TemporaryStrengthPower
+{
+    public override AbstractModel OriginModel =>
+        ModelDb.Card<ProtoFsRaiseAToast>();
+}
+
+/// <summary>
+/// <i>The Crowd Roars</i>: "Whenever another player loses HP, your front
+/// performer gains 1 Fanfare." On Furina.
+///
+/// ANY HP LOSS, FROM ANY SOURCE, AND ONLY THAT IT HAPPENED: the hook is the
+/// base game's <c>AfterCurrentHpChanged</c>, which every loss reaches (a hit
+/// past Block, an unblockable loss, a kill, a set HP) with a negative delta,
+/// and the amount lost is not read. A hit that Block or Guest of Honor soaked
+/// in full lost no HP and gives nothing; a heal gives nothing. "Another
+/// player" is a PLAYER creature on her side other than her (a pet, the
+/// Bake-Kurage or a performer, is never one).
+///
+/// THE FANFARE GOES TO THE FRONT PERFORMER
+/// (<see cref="FurinaStage.RaiseLead"/>), and on an empty stage a random
+/// performer arrives holding it -- The People of Fontaine's rule
+/// (<see cref="FurinaStage.Raise"/>), because both verbs ask the same
+/// round-four door first. The stack is the Fanfare, so a second copy gives 2.
+/// </summary>
+public sealed class TheCrowdRoarsPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "The Crowd Roars"),
+        ("description",
+            "Whenever another player loses HP, your [gold]front performer[/gold] "
+          + "gains [blue]{Amount}[/blue] [gold]Fanfare[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>Does this HP change pay? PURE: a loss, on a player on
+    /// <paramref name="owner"/>'s side who is not <paramref name="owner"/>.
+    /// </summary>
+    public static bool Pays(Creature? owner, Creature? creature, decimal delta)
+    {
+        if (owner == null || creature == null || delta >= 0m) return false;
+        return creature != owner && creature.IsPlayer
+               && creature.Side == owner.Side;
+    }
+
+    public override async Task AfterCurrentHpChanged(
+        Creature creature, decimal delta)
+    {
+        if (Amount <= 0 || !Pays(Owner, creature, delta)) return;
+        if (!FurinaStage.LiveFor(Owner)) return;
+        await FurinaStage.RaiseLead(Owner, (int)Amount);
     }
 }

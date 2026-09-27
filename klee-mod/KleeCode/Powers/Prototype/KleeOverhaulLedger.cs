@@ -239,6 +239,22 @@ public sealed class KleeOverhaulLedger
         return true;
     }
 
+    private bool _sparksForEveryoneSpent;
+
+    /// <summary>
+    /// THE CO-OP SET, SECOND BATCH, <i>Sparks for Everyone</i>'s
+    /// once-per-turn latch ("The first time each turn one of your Bombs goes
+    /// off"): true the FIRST time it is asked in a turn, false after, reset
+    /// with the turn. Aftershock's latch, and on the ledger for its reason --
+    /// "each turn" is the one boundary every counter here rolls on.
+    /// </summary>
+    public bool TakeSparksForEveryone()
+    {
+        if (_sparksForEveryoneSpent) return false;
+        _sparksForEveryoneSpent = true;
+        return true;
+    }
+
     private bool _turnStartPlacementsDone;
 
     /// <summary>
@@ -377,6 +393,7 @@ public sealed class KleeOverhaulLedger
         ReactedThisTurn = 0;
         CompanionPlayedThisTurn = 0;
         _aftershockSpent = false;
+        _sparksForEveryoneSpent = false;
         _turnStartPlacementsDone = false;
         DamageSetOffThisPlay = 0;
         SetOffEchoBaseThisPlay = 0m;
