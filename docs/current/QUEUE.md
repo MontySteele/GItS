@@ -11,6 +11,14 @@ line leaves this file. Closed picks are in git
 All fifteen picks of the 2026-09-23 design and process review were ruled at
 their defaults (R276, the last R number); nothing from them is open here.
 
+## Klee and Furina relics and potions, 2026-09-27
+
+`review/active/relics-potions-klee-furina-2026-09-27.md`, picks 1 to 4:
+(1) scope: each gets its own 8 relics and 3 potions in the base game's shape,
+replacing the Silent borrow (default); (2) Klee's set as drafted (default);
+(3) Furina's set as drafted (default); (4) the two Ancients repaired as
+drafted (default).
+
 ## Eyes-on looks (materials ready; no build waits on them)
 
 - **Curtain Call faces:** approve or veto the twelve faces and the A0 smoke by
