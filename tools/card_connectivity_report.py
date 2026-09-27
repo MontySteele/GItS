@@ -494,6 +494,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "stage_grand_finale": [_hook("private", "stage", "use")],
     # THE CO-OP SET: Share the Spotlight takes the back bar away, a use.
     "stage_share_spotlight": [_hook("private", "stage", "use")],
+    # The second batch: Raise a Toast READS the front bar and spends nothing.
+    "stage_toast": [_hook("private", "stage", "read")],
     "salon_bow": [_hook("private", "salon", "use")],
     # EB-118 5.5. Rotate is a pure REORDER: it consumes nothing, so it is a
     # write to the private board (which performer the FIFO end offers next)

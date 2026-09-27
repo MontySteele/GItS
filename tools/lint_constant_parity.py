@@ -397,6 +397,12 @@ MIRRORED: dict[str, object] = {
 # --------------------------------------------------------------------------
 
 UNMIRRORED: dict[str, str] = {
+    "ShrapnelPower.Shred":
+        "THE CO-OP SET, SECOND BATCH (review/active/coop-concepts-2026-09-27.md). "
+        "Shrapnel's printed '50% more': the multiplier another player's Attack "
+        "takes on an enemy holding Klee's Mine. Only ANOTHER player's hit can "
+        "take it, and tier 0 seats one player (`tier0/engine/coop.py`), so the "
+        "sim has no hit this number could ever apply to and no counterpart.",
     "PunchOffMirror.MaxHitSparksPerVisit":
         "`EB-769`. AN ALLOCATION BOUND on a decoration, not balance: how many "
         "`NHitSparkVfx` nodes one visit to the Punch-Off may add to the combat "

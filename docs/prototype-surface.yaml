@@ -2603,6 +2603,25 @@
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: ko_knights_of_favonius, amount: 1, target: self}]}
 
+# THE CO-OP SET, SECOND BATCH (review/active/coop-concepts-2026-09-27.md,
+# ruled 2026-09-27, picks 2a and 3a): Klee's Genshin team gifts, DEF shred off
+# her Mines (Shrapnel) and energy for the party (Sparks for Everyone).
+
+- {id: proto_ko_shrapnel, name: "Shrapnel", character: klee,
+   authored_by: [claude], multiplayer: true,
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Place a [gold]Mine[/gold] 4. While an enemy holds your [gold]Mine[/gold], other players' Attacks deal 50% more damage to it.",
+   upgrade: {bomb_size: +3},
+   effects: [{op: plant_bomb, target: enemy, size: 4, mine: true},
+             {op: apply_power, power: ko_shrapnel, amount: 1, target: enemy}]}
+
+- {id: proto_ko_sparks_for_everyone, name: "Sparks for Everyone", character: klee,
+   authored_by: [claude], multiplayer: true,
+   cost: 2, type: power, rarity: rare,
+   description: "The first time each turn one of your [gold]Bombs[/gold] goes off, each other player gains 1 [gold]Energy[/gold].",
+   upgrade: {innate: true},
+   effects: [{op: apply_power, power: ko_sparks_for_everyone, amount: 1, target: self}]}
+
 # --- Furina's Stage (FurinaStageRoster.MultiplayerRows) ---
 
 - {id: proto_fs_guest_of_honor, name: "Guest of Honor", character: furina,
@@ -2625,6 +2644,24 @@
    description: "Whenever another player plays an Attack, your [gold]back performer[/gold] gains 1 [gold]Fanfare[/gold].",
    upgrade: {power_amount: 1},
    effects: [{op: apply_power, power: fs_people_of_fontaine, amount: 1, target: self}]}
+
+# THE CO-OP SET, SECOND BATCH (review/active/coop-concepts-2026-09-27.md,
+# pick 2a): the stage's Fanfare becomes an ally's damage, and the party's HP
+# swings charge the stage. Provenance: "The second batch".
+
+- {id: proto_fs_raise_a_toast, name: "Raise a Toast", character: furina,
+   authored_by: [claude], multiplayer: true,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Another player gains temporary [gold]Strength[/gold] equal to your [gold]front performer[/gold]'s [gold]Fanfare[/gold], up to 6.",
+   upgrade: {cap: 2},
+   effects: [{op: stage_toast, cap: 6, target: ally}]}
+
+- {id: proto_fs_the_crowd_roars, name: "The Crowd Roars", character: furina,
+   authored_by: [claude], multiplayer: true,
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "Whenever another player loses HP, your [gold]front performer[/gold] gains 1 [gold]Fanfare[/gold].",
+   upgrade: {cost: -1},
+   effects: [{op: apply_power, power: fs_the_crowd_roars, amount: 1, target: self}]}
 
 # --- Kokomi (KokomiOverhaulRoster.MultiplayerSlice) ---
 

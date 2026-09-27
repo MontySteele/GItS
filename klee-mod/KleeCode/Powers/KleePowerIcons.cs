@@ -342,6 +342,16 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/standing_ovation.png"),
         SangonomiyasCounselPower =>
             KleePck.Path("kokomi/powers/kurages_oath.png"),
+        // The second batch (review/active/coop-concepts-2026-09-27.md), on
+        // the same borrowing terms: the Mine's shred wears the Bomb's
+        // Vulnerable sigil, the energy gift the reaction-energy one, the
+        // toast a spotlight, the crowd an ovation.
+        ShrapnelPower => KleePck.Path("klee/powers/detonation_vuln.png"),
+        SparksForEveryonePower =>
+            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        RaiseAToastPower => KleePck.Path("furina/powers/limelight.png"),
+        TheCrowdRoarsPower =>
+            KleePck.Path("furina/powers/rising_ovation.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

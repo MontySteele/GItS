@@ -3569,3 +3569,49 @@ every other living player at carry-out.
 **`proto_kk_sangonomiyas_counsel`**: `SangonomiyasCounselPower` on the Plan bus,
 every Plan, `ValueProp.Unpowered` Block to each other player (SneakyPower's
 shape).
+
+### The second batch (2026-09-27)
+
+Design: `review/active/coop-concepts-2026-09-27.md`, "Proposed cards" ([USER],
+2026-09-27, picks 2a and 3a at their defaults). Four more `multiplayer: true`
+rows on the first set's terms, two for Klee and two for Furina; Kokomi's pair
+waits for her review (pick 4). The runtime is the same file, `CoopSet.cs`.
+
+**`proto_fs_raise_a_toast`**: the new op `stage_toast` (`cap`, `target: ally`),
+one call into `FurinaStage.RaiseAToast`: the front performer's Fanfare, read
+and never spent, capped at the printed 6 (8 upgraded), applied to the aimed
+player as `RaiseAToastPower`, a `TemporaryStrengthPower` subclass (the base
+game's Coordinate), which removes itself and its Strength at the end of the
+turn. An empty stage gives 0 and applies nothing; the card stays playable. The
+`cap` upgrade key now binds either capped op (`gen_klee_cards.CAP_VAR`,
+`upgrades.py`'s twin); the var is `ToastCap`.
+
+**`proto_fs_the_crowd_roars`**: `TheCrowdRoarsPower` on Furina, on the base
+game's `AfterCurrentHpChanged`: any negative delta on a player on her side who
+is not her, whatever caused it and whatever its size, runs
+`FurinaStage.RaiseLead` for the stack (1). `RaiseLead` asks the same
+round-four door `Raise` does, so on an empty stage a random performer arrives
+holding it, exactly as The People of Fontaine. Two copies give 2.
+
+**`proto_ko_shrapnel`**: the arm's Mine placer (`plant_bomb`, `mine: true`, the
+Booby Trap call), then `ShrapnelPower` on the same enemy, placed by Klee.
+`ModifyDamageMultiplicative` is `FlankingPower`'s dealer check (a powered
+attack, on this enemy, whose dealer is not the applier) plus a live
+`ProtoBombPower.HoldsMineFrom(enemy, Klee)`, at x1.5. Single, instanced per
+applier: one shred per Klee however many Shrapnels, where Flanking stacks
+(this reading is disclosed, not ruled). When one of her Mines goes off and she
+holds none on that enemy after it, `ShrapnelPower.AfterMineWentOff` (called
+from the Mine branch of `ProtoBombPower.Explode`) removes the badge. An ally's
+Attack under Pass the Match or Knights of Favonius sets the Mine off at
+`AfterCardPlayed`, after its hits, so that Attack is shredded. Debuff, like
+Flanking, so Artifact refuses it.
+
+**`proto_ko_sparks_for_everyone`**: `SparksForEveryonePower` on Klee, an
+`IProtoExplosionListener` (Chained Reactions' bus), so every one of her Bombs
+counts however it went off, a Mine answering an attack included. Once per turn
+on the ledger's latch (`KleeOverhaulLedger.TakeSparksForEveryone`, Aftershock's
+shape, rolled on the round), each other living player gains the stack (1) in
+energy through `PlayerCmd.GainEnergy` (Believe In You). A Mine that goes off on
+the enemy's turn spends that round's latch and its energy is gone by the next
+player turn, which is the face read literally. With nobody else alive the latch
+is not spent. The upgrade is Innate; the cost stays 2.

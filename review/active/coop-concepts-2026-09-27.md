@@ -17,6 +17,13 @@ So Sparks for Everyone keeps cost 2 at every level. Its upgrade is Innate, not
 cost −1, and the co-op seat round watches it for strength. Kokomi's pair,
 including a Rare ally heal that Exhausts, is designed in her review pass.
 
+**Built 2026-09-27** (branch `coop-cards-2`): the four cards below, as printed,
+multiplayer only and outside the 78/39 counts. How each reads in code, and the
+two readings the table did not state (one Shrapnel shred per Klee however many
+are played; a Mine that goes off on the enemy's turn uses that turn's Sparks
+for Everyone), are in `docs/notes/prototype-surface-provenance.md`, "The
+second batch".
+
 ## What the base game does
 
 Every base character has **five** multiplayer-only cards, and the colorless pool

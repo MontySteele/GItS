@@ -289,6 +289,9 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsGuestOfHonor>(),
         ModelDb.Card<ProtoFsShareTheSpotlight>(),
         ModelDb.Card<ProtoFsPeopleOfFontaine>(),
+        // The second batch (review/active/coop-concepts-2026-09-27.md).
+        ModelDb.Card<ProtoFsRaiseAToast>(),
+        ModelDb.Card<ProtoFsTheCrowdRoars>(),
     };
 
     /// <summary>

@@ -231,6 +231,9 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoPassTheMatch>(),
         ModelDb.Card<ProtoKoHideHere>(),
         ModelDb.Card<ProtoKoKnightsOfFavonius>(),
+        // The second batch (review/active/coop-concepts-2026-09-27.md).
+        ModelDb.Card<ProtoKoShrapnel>(),
+        ModelDb.Card<ProtoKoSparksForEveryone>(),
     };
 
     /// <summary>The slice's own rows, without the Ancient tail

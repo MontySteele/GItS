@@ -849,8 +849,12 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # two are different promises:
             # `block` is what the card gains, `cap` is what it will not gain
             # past, and a row could one day print both.
+            # The second co-op batch's Raise a Toast prints a ceiling too
+            # ("temporary Strength equal to your front performer's Fanfare,
+            # up to 6"); `gen_klee_cards.CAP_VAR` is the twin.
             ok = _bump_first(
-                (fx for fx in top if fx.get("op") == "block_largest_bomb"),
+                (fx for fx in top
+                 if fx.get("op") in ("block_largest_bomb", "stage_toast")),
                 "cap", val)
         elif key == "grow":
             # One key, three ops: `grow_bombs.amount`, `merge_bombs.growth`

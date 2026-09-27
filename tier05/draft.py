@@ -2464,7 +2464,9 @@ FURINA_STAGE_OPS = ("stage_summon", "stage_raise", "stage_scene_change",
                     "stage_grand_finale", "stage_verdict",
                     "stage_dual_nature",
                     # THE CO-OP SET.
-                    "stage_share_spotlight")
+                    "stage_share_spotlight",
+                    # THE CO-OP SET, SECOND BATCH.
+                    "stage_toast")
 
 #: Their shared rationale, written once. `STATIC_OP_PRICING` is prose the
 #: parity lint reads as a key set, and eight copies of one sentence would rot
@@ -2641,6 +2643,7 @@ STATIC_OP_PRICING: dict[str, str] = {
     "stage_verdict": _STAGE_ZERO,
     "stage_dual_nature": _STAGE_ZERO,
     "stage_share_spotlight": _STAGE_ZERO,
+    "stage_toast": _STAGE_ZERO,
     # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
     "block_half_damage": "ZERO: the amount is half of what the card's own "
                          "damage line LANDED, which no static pricer can see "

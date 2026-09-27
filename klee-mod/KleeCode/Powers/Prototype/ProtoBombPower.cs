@@ -1379,6 +1379,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         if (charge.IsMine)
         {
             await MineFragsPower.OnMineWentOff(choiceContext, applier, target);
+            // THE CO-OP SET, SECOND BATCH: Shrapnel's shred leaves with her
+            // last Mine on this enemy. The charge left the pile before this
+            // explosion (take-then-resolve), so the read is already honest.
+            await ShrapnelPower.AfterMineWentOff(choiceContext, applier, target);
         }
         // THE COMPANION STAND-INS' two this-turn watchers (QUARANTINED,
         // COMPANION_OVERHAUL): Diona's Bomb and Noelle's Mine. Here rather than

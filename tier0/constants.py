@@ -447,6 +447,9 @@ KLEE_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
     "proto_ko_pass_the_match",
     "proto_ko_hide_here",
     "proto_ko_knights_of_favonius",
+    # The second batch (review/active/coop-concepts-2026-09-27.md, pick 3a).
+    "proto_ko_shrapnel",
+    "proto_ko_sparks_for_everyone",
 )
 
 # =============================================================================
@@ -973,6 +976,9 @@ FURINA_STAGE_MULTIPLAYER_IDS: tuple[str, ...] = (
     "proto_fs_guest_of_honor",
     "proto_fs_share_the_spotlight",
     "proto_fs_people_of_fontaine",
+    # The second batch (review/active/coop-concepts-2026-09-27.md, pick 2a).
+    "proto_fs_raise_a_toast",
+    "proto_fs_the_crowd_roars",
 )
 
 # THE TWO-PLAN CAP -- A LANE RULE BEHIND A RUNTIME TOGGLE, DEFAULT OFF
