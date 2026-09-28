@@ -31,12 +31,19 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 - **Character four, three paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, `varka-paper-kit-2026-09-28.md`, three
-  picks each). They are not read against each other until your step 5 (the
-  element review's §6 order). Zhongli: (1) unpaid Tab becomes Invoice curses,
-  (2) Contracts are an archetype, (3) one Petrify Rare. Nahida: (1)
-  Purification is a Dendro hit, (2) no home nation until a Sumeru sheet
-  exists, (3) Foresight archetype. Varka: (1) four distinct Winds, (2)
-  Knights' Muster in the starter, (3) Grand Master archetype. All defaults.
+  picks each, revised on GPT's audit). They are not read against each other
+  until your step 5 (the element review's §6 order).
+  - **Zhongli:** (1) one exact-amount Invoice per fight, removed only by
+    paying, counted against the credit limit; (2) draftable Contracts that
+    clear the Tab when kept and add Statuses when broken; (3) one Petrify
+    Rare.
+  - **Nahida:** (1) Purification is a Dendro hit, set off by reactions at
+    most once a turn; (2) no home nation until a Sumeru sheet exists; (3)
+    Foresight provisional.
+  - **Varka:** (1) four distinct Winds; (2) Knights' Muster in the starter;
+    (3) Grand Master provisional.
+
+  All defaults.
 
 - **P2 hard-state thresholds** (`p2-hard-state-thresholds-2026-08-13.md`,
   picks 1 to 4): (1, default) adopt the packet's four proposals (more than one
