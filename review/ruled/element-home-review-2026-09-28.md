@@ -126,3 +126,26 @@ block if we don't consume the aura, while also making sure it's useful whether
 you trigger it incidentally ... but not broken if it's your primary element."
 The once-per-aura rule is the answer in §3. On Swirl: "it now requires three
 elements to effectively function". Change A answers that.
+
+## 7. Shared rules the kit papers expose, for the port
+
+GPT's audit of the three paper kits (2026-09-28) listed what the port in step 4
+has to settle, whichever character comes fourth. Seeds, Winds and the Tab stay
+character work and add nothing to the shared system.
+
+1. **Fresh and spent auras must be visible.** Swirl and Crystallize share one
+   budget: a Swirl spends the aura, so a Crystallize after it gets nothing
+   until the aura is refreshed. Spread copies arrive spent, so this reaches
+   across the room. The aura badge shows "spent", and the preview says why a
+   trigger pays nothing.
+2. **Burning and the trigger elements.** The Dendro paper ends Burning when
+   another reaction consumes its aura. Swirl and Crystallize no longer
+   consume, so they do not end Burning: a Swirl or Crystallize on a burning
+   enemy spends the held Pyro, and Burning keeps ticking.
+3. **One reaction event for every listener.** Every reaction reports what
+   fired, on whom, and from what source: a card, a companion, a co-op partner,
+   or an automatic effect such as a Core on its timer. It is shaped so that a
+   later listener (Nahida's Purification, Varka's Winds) needs no new hook.
+4. **Dendro is ported as ruled.** The non-reacting pairs, the Core rules and
+   their previews, tested on the ruled first sources (Kirara, Emilie) without
+   committing to Nahida.
