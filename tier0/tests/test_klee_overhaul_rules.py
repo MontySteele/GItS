@@ -2585,15 +2585,66 @@ def test_bombs_away_hits_and_places_on_every_enemy(overhaul):
 
 
 # --- The Vermillion Pact ---------------------------------------------------
+#
+# Reworked 2026-09-27: "When a Set off makes one of your Bombs react, every
+# other Bomb it sets off reacts with the same aura." It lives for one take of
+# one enemy's pile; the Set off card's own hit gets nothing.
 
 def pact(state):
     """The Rare, standing."""
     state.player.powers[klee_overhaul.VERMILLION_PACT] = 1
 
 
-def test_the_pact_hands_back_the_aura_a_bomb_consumed(overhaul):
-    """The brief's sec.5.3 rule-breaker: the aura the explosion ate is still
-    standing when the Attack behind it lands, so the Attack reacts too."""
+def explosion_damage(state):
+    """Each explosion's landed damage, in order, off the damage log."""
+    return [e["amount"] for e in state.log
+            if e["event"] == "damage"
+            and e.get("source") == klee_overhaul.EXPLOSION_SOURCE]
+
+
+def test_the_pact_makes_every_bomb_in_the_set_off_react(overhaul):
+    """Three Bomb 8s on a Hydro enemy all Vaporize (8 x 1.5 = 12 each), and
+    each is a real reaction: three on the turn counter and three on the Bomb
+    counter. Ka-pow!'s own 4 lands after the take and finds the aura spent."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    enemy.aura = "hydro"
+    pact(state)
+    for _ in range(3):
+        klee_overhaul.place(state, enemy, 8)
+    aimed(state, enemy)
+
+    effects.resolve_card(state, load("proto_ko_kapow"))
+
+    assert explosion_damage(state) == [12, 12, 12]
+    assert state.reactions_this_turn == 3
+    assert state.ko_reacted_this_turn == 3
+    assert counts(state)["ko_vermillion_pact"] == 2
+    # Ka-pow!'s Pyro landed on a bare enemy: it laid an aura, not a reaction.
+    assert enemy.aura == "pyro"
+    assert enemy.hp == 400 - 36 - 4
+
+
+def test_without_the_pact_only_the_first_bomb_reacts(overhaul):
+    """The same board with the Power off: one aura, one reaction, which is the
+    shared rule the Rare breaks."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    enemy.aura = "hydro"
+    for _ in range(3):
+        klee_overhaul.place(state, enemy, 8)
+    aimed(state, enemy)
+
+    effects.resolve_card(state, load("proto_ko_kapow"))
+
+    assert explosion_damage(state) == [12, 8, 8]
+    assert state.reactions_this_turn == 1
+    assert enemy.hp == 400 - 28 - 4
+
+
+def test_the_pact_does_not_hand_the_aura_to_the_set_off_attack(overhaul):
+    """The pre-rework rule is gone: one Bomb reacts, nothing is put back, and
+    the Attack that Set it off hits an aura-less enemy."""
     enemy = make_enemy(hp=400)
     state = klee_state([enemy])
     enemy.aura = "hydro"
@@ -2603,70 +2654,106 @@ def test_the_pact_hands_back_the_aura_a_bomb_consumed(overhaul):
 
     effects.resolve_card(state, load("proto_ko_kapow"))
 
-    assert state.reactions_this_turn == 2
+    assert state.reactions_this_turn == 1
+    assert counts(state)["ko_vermillion_pact"] == 0
+    assert enemy.aura == "pyro"
 
 
-def test_without_the_pact_the_aura_is_spent_by_the_first_hit(overhaul):
-    """The same board with the Power off: one aura, one reaction, which is the
-    shared rule the Rare breaks."""
+def test_the_pact_carries_nothing_to_the_next_set_off(overhaul):
+    """The aura lives only as long as the take: a second Set off later in the
+    turn finds a bare enemy and reacts with nothing."""
     enemy = make_enemy(hp=400)
     state = klee_state([enemy])
     enemy.aura = "hydro"
-    klee_overhaul.place(state, enemy, 6)
+    pact(state)
+    klee_overhaul.place(state, enemy, 8)
+    klee_overhaul.place(state, enemy, 8)
     aimed(state, enemy)
+    effects.resolve_card(state, load("proto_ko_kapow"))
+    assert state.reactions_this_turn == 2
 
+    klee_overhaul.place(state, enemy, 8)
+    klee_overhaul.place(state, enemy, 8)
     effects.resolve_card(state, load("proto_ko_kapow"))
 
-    assert state.reactions_this_turn == 1
+    assert state.reactions_this_turn == 2
+    assert explosion_damage(state)[2:] == [8, 8]
 
 
-def test_the_pact_ignores_a_skills_set_off(overhaul):
-    """"The Attack that Set it off": a Skill has no hit behind the explosion
-    for the aura to feed, so Quick Fuse, Countdown and Fireworks Show trigger
-    nothing."""
+def test_the_pact_treats_each_enemy_of_a_set_off_all_separately(overhaul):
+    """Tinder Toss is one take per enemy: the Hydro enemy's pile Vaporizes
+    twice (8 x 1.5 = 12), the Cryo enemy's pile Melts twice (8 x 1.75 = 14),
+    and neither aura crosses to the other body."""
+    a = make_enemy(hp=400)
+    b = make_enemy(hp=400)
+    state = klee_state([a, b])
+    a.aura, b.aura = "hydro", "cryo"
+    pact(state)
+    state.player.sparks = 3
+    for enemy in (a, b):
+        klee_overhaul.place(state, enemy, 8)
+        klee_overhaul.place(state, enemy, 8)
+
+    effects.resolve_card(state, load("proto_ko_tinder_toss"))
+
+    assert explosion_damage(state) == [12, 12, 14, 14]
+    assert state.reactions_this_turn == 4
+    restored = [(e["target"], e["element"]) for e in state.log
+                if e["event"] == "ko_vermillion_pact"]
+    assert restored == [(a.name, "hydro"), (b.name, "cryo")]
+
+
+def test_the_pact_reads_a_skills_set_off_too(overhaul):
+    """"When a Set off": any card's, so Quick Fuse (a Skill) feeds its whole
+    pile. Two Bomb 6s grown by 3 are two Vaporizes of 9."""
     enemy = make_enemy(hp=400)
     state = klee_state([enemy])
     enemy.aura = "hydro"
     pact(state)
     state.player.sparks = 3
     klee_overhaul.place(state, enemy, 6)
+    klee_overhaul.place(state, enemy, 6)
     aimed(state, enemy)
 
     effects.resolve_card(state, load("proto_ko_quick_fuse"))
 
-    assert state.reactions_this_turn == 1
+    assert state.reactions_this_turn == 2
     assert enemy.aura is None
 
 
-def test_the_pact_ignores_a_mine_answering_an_attack(overhaul):
-    """A Mine carries no card at all, so `card is None` and the Pact declines:
-    rule 6's explosion is not an Attack's."""
+def test_the_pact_ignores_mines_answering_an_attack(overhaul):
+    """A Mine going off on its own when an enemy attacks is not a Set off: two
+    Mines on a Hydro enemy react once."""
     enemy = make_enemy(hp=400)
     state = klee_state([enemy])
     enemy.aura = "hydro"
     pact(state)
     klee_overhaul.place(state, enemy, 6, is_mine=True)
+    klee_overhaul.place(state, enemy, 6, is_mine=True)
 
     klee_overhaul.mines_answer_attack(state, enemy)
 
     assert state.reactions_this_turn == 1
-    assert enemy.aura is None
+    assert counts(state)["ko_vermillion_pact"] == 0
+    # The second Mine found a bare enemy and laid Pyro.
+    assert enemy.aura == "pyro"
 
 
 def test_the_pact_does_nothing_when_the_explosion_did_not_react(overhaul):
-    """`reacted` is the whole gate: a Pyro aura REFRESHES rather than reacts
-    and consumes nothing, so nothing is owed back and the Pact must not top it
-    up."""
+    """A Pyro aura REFRESHES rather than reacts and consumes nothing, so the
+    Pact never fixes an aura and never tops one up."""
     enemy = make_enemy(hp=400)
     state = klee_state([enemy])
     enemy.aura = "pyro"
     pact(state)
+    klee_overhaul.place(state, enemy, 6)
     klee_overhaul.place(state, enemy, 6)
     aimed(state, enemy)
 
     effects.resolve_card(state, load("proto_ko_kapow"))
 
     assert state.reactions_this_turn == 0
+    assert counts(state)["ko_vermillion_pact"] == 0
 
 
 def test_the_pact_is_dead_on_an_aura_less_board(overhaul):
@@ -2676,12 +2763,29 @@ def test_the_pact_is_dead_on_an_aura_less_board(overhaul):
     state = klee_state([enemy])
     pact(state)
     klee_overhaul.place(state, enemy, 6)
+    klee_overhaul.place(state, enemy, 6)
     aimed(state, enemy)
 
     effects.resolve_card(state, load("proto_ko_kapow"))
 
     assert state.reactions_this_turn == 0
     assert counts(state)["ko_vermillion_pact"] == 0
+
+
+def test_a_second_pact_adds_nothing(overhaul):
+    """One copy is enough; two restore exactly what one does."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    enemy.aura = "hydro"
+    state.player.powers[klee_overhaul.VERMILLION_PACT] = 2
+    for _ in range(3):
+        klee_overhaul.place(state, enemy, 8)
+    aimed(state, enemy)
+
+    effects.resolve_card(state, load("proto_ko_kapow"))
+
+    assert explosion_damage(state) == [12, 12, 12]
+    assert counts(state)["ko_vermillion_pact"] == 2
 
 
 # ---------------------------------------------------------------------------

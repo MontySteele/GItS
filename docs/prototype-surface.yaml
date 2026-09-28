@@ -448,10 +448,11 @@
               then: [{op: gain_spark, amount: 1},
                      {op: draw, amount: 1}]}]}
 
+# Reworked 2026-09-27: the aura one Bomb reacts with feeds every other Bomb in the same Set off.
 - {id: proto_ko_vermillion_pact, name: "Vermillion Pact (proto)", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], the Attack that [gold]Set it off[/gold] triggers one too.",
+   description: "When a [gold]Set off[/gold] makes one of your [gold]Bombs[/gold] react, every other [gold]Bomb[/gold] it sets off reacts with the same aura.",
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: ko_vermillion_pact, amount: 1, target: self}]}
 

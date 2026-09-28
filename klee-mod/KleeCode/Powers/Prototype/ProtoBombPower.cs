@@ -1238,6 +1238,17 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// (<see cref="BoomBadgePower.Spend"/>), taken ONCE by the card-facing
     /// entry point and handed to every pile that clause reaches. It MULTIPLIES
     /// The Big One's armed multiplier, so x4 and x2 meet at x8.
+    ///
+    /// THE VERMILLION PACT LIVES IN THIS LOOP (reworked 2026-09-27): "When a
+    /// Set off makes one of your Bombs react, every other Bomb it sets off
+    /// reacts with the same aura." The first charge of this take whose
+    /// explosion reacts and consumes an aura fixes that aura, and before each
+    /// LATER charge of the same take goes off it is put back
+    /// (<see cref="VermillionPactPower.Restore"/>), so that charge reacts with
+    /// it too. It lives only as long as <c>taken</c>: nothing carries to the
+    /// next Set off, the card's own hit after this returns finds the aura
+    /// spent, and a Set off ALL is one take per enemy, each with its own aura.
+    /// Sim twin: the same loop in <c>klee_overhaul.set_off</c>.
     /// </summary>
     public static async Task<int> SetOff(
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
@@ -1262,6 +1273,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
 
         var ledger = KleeOverhaulLedger.For(applier);
         var multiplier = ledger.TakeMultiplier() * badge;
+        var pact = VermillionPactPower.Holds(applier);
+        var pactAura = Element.None;
         var exploded = 0;
 
         for (var i = 0; i < taken.Count; i++)
@@ -1276,8 +1289,15 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                                   applier, cardSource);
                 break;
             }
-            await Explode(choiceContext, target, taken[i], applier, cardSource,
-                          multiplier, overflow);
+            if (pactAura != Element.None)
+            {
+                await VermillionPactPower.Restore(choiceContext, applier, target,
+                                                  pactAura);
+            }
+            var consumed = await Explode(choiceContext, target, taken[i],
+                                         applier, cardSource, multiplier,
+                                         overflow);
+            if (pact && pactAura == Element.None) pactAura = consumed;
             exploded++;
         }
 
@@ -1296,8 +1316,13 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// exactly as one of Klee's Attacks would. The reaction is DETECTED by
     /// diffing <c>ReactionEffects.TotalResolved</c> across the hit, because
     /// that counter is the one place every reaction in the mod passes through.
+    ///
+    /// RETURNS THE AURA THIS EXPLOSION REACTED WITH AND CONSUMED, or
+    /// <c>Element.None</c>: the one fact <see cref="SetOff"/>'s Vermillion
+    /// Pact needs and that nothing can work out afterwards, because the aura
+    /// is gone. Sim twin: <c>klee_overhaul._explode</c>'s return value.
     /// </summary>
-    private static async Task Explode(
+    private static async Task<Element> Explode(
         PlayerChoiceContext choiceContext, Creature target, ProtoCharge charge,
         Creature applier, CardModel? cardSource, int multiplier,
         List<int>? overflow = null)
@@ -1325,12 +1350,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // every other board and with the companion arm off. Sim twin:
         // `companion_coven.bomb_element`, read at `klee_overhaul._explode`.
         var element = await CompanionCovenBombs.ElementFor(choiceContext, applier);
-        // THE VERMILLION PACT'S ONE READ, taken BEFORE the funnel runs because
-        // the funnel is what consumes it: the aura this explosion is about to
-        // eat is the aura the Pact hands back. Null on an aura-less enemy and
-        // on every board with no Pact, and the whole of what the Rare knows.
-        var auraBefore = VermillionPactPower.AuraToRestore(applier, cardSource,
-                                                           target);
+        // THE AURA THIS EXPLOSION MAY CONSUME, read BEFORE the funnel eats it
+        // (the Vermillion Pact's one read). Sim twin: `aura_before` in
+        // `klee_overhaul._explode`.
+        var auraBefore = AuraCmd.Find(target)?.Element ?? Element.None;
         // ALICE'S TEAPOT (the arm's Rare): "The first Bomb you set off each
         // turn reacts as if its enemy had Hydro." The reaction is resolved
         // against a Hydro that is not there, so the enemy's real aura -- if it
@@ -1362,6 +1385,13 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                 choiceContext, target, element, size, applier);
         var vulnerablePaid = vulnerableBefore || HasVulnerable(target);
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
+        // CONSUMED means it reacted AND the aura is gone, read straight after
+        // the hit: an aura still standing (a Pyro refresh, Alice's Teapot's
+        // pretend Hydro) was not spent.
+        var consumed = reacted && auraBefore != Element.None
+                       && AuraCmd.Find(target) == null
+            ? auraBefore
+            : Element.None;
         // THE OVERFLOW IS THE HIT PAST THE KILL, after the target's own terms
         // (Vulnerable is already in `dealt`), so the bounce carries it without
         // applying them a second time. A hit that did not kill has none.
@@ -1384,15 +1414,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
           + (reacted && pending != Elements.Reaction.None
                 ? " (" + pending + ")"
                 : reacted ? " (a reaction)" : string.Empty));
-        // THE VERMILLION PACT (the pool pass, `EB-491`). The Rare's whole rule
-        // is that the aura the explosion CONSUMED is still standing when the
-        // Attack behind it lands, so the Attack reacts too -- re-applied HERE,
-        // between the explosion and `DealCardDamage`, which is the ordering the
-        // face states. It fires only on a reaction the card's own Set off
-        // caused and only for an ATTACK: a Mine answering an intent and a
-        // Skill's Set off carry no hit behind them for the aura to feed.
-        await VermillionPactPower.Restore(choiceContext, applier, target,
-                                          auraBefore, reacted);
         // R276, EXPLOSIVE FRAGS: a Mine that went off leaves Vulnerable on its
         // enemy, AFTER its own hit (the face's order), whatever set it off --
         // the enemy's attack or a card's Set off. Sim twin:
@@ -1465,6 +1486,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // closes its one-shot window here -- none of which the bus carries.
         await KleeExpansion.AfterChargeExploded(
             choiceContext, applier, target, charge, reacted);
+        return consumed;
     }
 
     /// <summary>The body a log line names. `Monster.Title` is what the seat's
