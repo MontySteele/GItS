@@ -37,7 +37,7 @@ namespace KleeMod.Powers;
 /// ONE ENTRY IS ONE PLAN, and that is the unit everything downstream counts in:
 /// the pending badge, the strip on the jellyfish, Change of Plans' "your front
 /// Plan", Nereid's Ascension's "carries out your first Plan twice" and the
-/// whenever-a-Plan-is-carried-out payoffs (Treatise, Song of Pearls). War
+/// whenever-a-Plan-is-carried-out payoffs (<see cref="IKokomiPlanListener"/>). War
 /// Council prints two clauses and is ONE Plan, which is what its face says --
 /// "Deal 4 damage to every enemy AND apply 1 Weak to each" is one sentence.
 ///
@@ -203,6 +203,12 @@ public static class KokomiPlan
         // `others_attack_damage_this_turn`, both inert with one seat.
         AllyDraw,
         OthersAttackDamageThisTurn,
+        // KOKOMI CORE PASS (2026-09-27). Chain of Command: "Next turn, the
+        // first Companion card you play costs 0." <see cref="FirstCardFree"/>
+        // narrowed to Companion cards (<see cref="FirstCompanionFreePower"/>).
+        // Appended last so no earlier ordinal moves. Sim twin:
+        // `kokomi_plan.FIRST_COMPANION_FREE`.
+        FirstCompanionFree,
     }
 
     /// <summary>
@@ -1430,8 +1436,8 @@ public static class KokomiPlan
     /// face a card can tell apart.
     ///
     /// A DUSK CARRY-OUT IS A CARRY-OUT. It goes through
-    /// <see cref="ResolveEntry"/> like every other, so Treatise draws on it,
-    /// Song of Pearls blocks on it and Sango Isshin's condition is met.
+    /// <see cref="ResolveEntry"/> like every other, so the plan bus rings on
+    /// it and Sango Isshin's condition is met.
     ///
     /// IT DOES NOT TOUCH `PlansThisMorning`, and that is the one place the two
     /// drains differ on purpose: Tide Wall, Well Laid and Tide Chart all print
@@ -1815,7 +1821,7 @@ public static class KokomiPlan
         ResolveEntry(choiceContext, kokomi, entry, onPlay: true);
 
     /// <summary>
-    /// ONE PLAN CARRIED OUT, which is the unit Treatise and Song of Pearls are
+    /// ONE PLAN CARRIED OUT, which is the unit the plan-bus payoffs are
     /// priced in: "Whenever the jellyfish carries out a Plan" is once per
     /// ENTRY, and the notify at the bottom is the only place that fires -- so
     /// Change of Plans' early resolution pays them exactly as the morning's
@@ -2227,6 +2233,12 @@ public static class KokomiPlan
                 await KokomiOverhaulKit.FirstCardFree(choiceContext, kokomi);
                 return null;
 
+            case Kind.FirstCompanionFree:
+                // Core pass, CHAIN OF COMMAND. The same switch, Companions only.
+                await KokomiOverhaulKit.FirstCompanionFree(
+                    choiceContext, kokomi);
+                return null;
+
             case Kind.AttackDamageThisTurn:
                 // R276, BATTLE PLAN: "This turn, your Attacks deal N more
                 // damage." The shipped <see cref="AttackUpThisTurnPower"/> is
@@ -2311,8 +2323,7 @@ public static class KokomiPlan
                 // TIDE WALL (`EB-335`). POWERED, exactly as the flat planned
                 // Block above is and for the same reason: rule 3 says her
                 // Dexterity counts, and two Block clauses of one morning
-                // scaling differently is what `SongOfPearlsPower`'s header
-                // refuses. A morning that drained nothing pays nothing, which
+                // scaling differently is what rule 3 refuses. A morning that drained nothing pays nothing, which
                 // is a printed no-op rather than a failure -- Change of Plans
                 // can carry this Plan out on a turn whose own morning was
                 // empty, and zero times three is the honest answer.
@@ -3249,8 +3260,9 @@ public interface IPlannedCard
 }
 
 /// <summary>
-/// Treatise's and Song of Pearls' hook: "Whenever the jellyfish carries out a
-/// Plan, ...".
+/// The plan bus: "Whenever the jellyfish carries out a Plan, ...". Her
+/// Ancient under the arm and the co-op set ride it; Treatise and Song of
+/// Pearls left it in the Kokomi core pass (2026-09-27).
 ///
 /// An interface rather than a type test, the same shape
 /// <c>IProtoExplosionListener</c> takes and for the same reason: a listener

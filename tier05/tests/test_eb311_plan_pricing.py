@@ -246,16 +246,13 @@ def test_a_plan_only_row_is_no_longer_worth_nothing():
 
 
 def test_both_halves_of_a_printed_face_are_counted():
-    """Ambush: a damage line now, a bigger one planned, cost 1. The SUM, not
-    the max -- the argument for crediting the CHOICE is at the call site.
-
-    AMBUSH AND NO LONGER FEINT SINCE `EB-655`: pool pass three made Feint's
-    now-line a `conditional`, which this claim is not about. Ambush is the same
-    shape the row used to have, unchanged."""
+    """Ambush: a debuff now, a hit planned, cost 1. The SUM, not the max --
+    the argument for crediting the CHOICE is at the call site. (Kokomi core
+    pass: the now-line is 2 Vulnerable, priced at STATIC_DEBUFF_VALUE.)"""
     card = _proto("proto_kk_ambush")
-    now = card.effects[0]["amount"]
+    now = card.effects[0]["amount"] * draft.STATIC_DEBUFF_VALUE
     planned = card.plan[0]["amount"]
-    assert card.cost == 1 and planned > now
+    assert card.cost == 1
     assert draft._static_power(card) == now + planned * C.PLAN_DELAY_DISCOUNT
 
 
@@ -264,14 +261,15 @@ def test_chain_of_command_sums_its_now_line_and_its_plan():
     priced through `amount_formula`'s neutral one-unit read, beside the Plan
     line's own `damage_per_companion_last_turn` read -- SUMMED, the same rule
     `test_both_halves_of_a_printed_face_are_counted` pins for Feint's plain
-    damage, now over the `amount_formula` rail too."""
+    damage, now over the `amount_formula` rail too. Kokomi core pass: the
+    Plan is `first_companion_free`, priced as energy (STATIC_ENERGY_VALUE)."""
     card = _proto("proto_kk_chain_of_command")
     now = card.effects[0]
     assert now["op"] == "damage" and "amount_formula" in now
     now_price = now["amount_formula"]["per"]        # one neutral Companion
-    planned = card.plan[0]["amount"]
+    assert card.plan == [{"op": "first_companion_free"}]
     assert draft._static_power(card) == (
-        now_price + planned * C.PLAN_DELAY_DISCOUNT)
+        now_price + draft.STATIC_ENERGY_VALUE * C.PLAN_DELAY_DISCOUNT)
 
 
 def test_a_planned_aoe_line_takes_the_same_aoe_multiple():
@@ -454,13 +452,13 @@ def test_rally_takes_cost_mods_measured_dead_dial():
 
 
 def test_cleansing_wave_credits_the_debuff_it_removes():
-    """Block and one debuff off her now, more Block planned."""
+    """One debuff off her and a card now, Block planned (Kokomi core pass)."""
     card = _proto("proto_kk_cleansing_wave")
-    now_block = card.effects[0]["amount"]
+    draw = next(fx for fx in card.effects if fx["op"] == "draw")["amount"]
     planned_block = card.plan[0]["amount"]
     assert any(fx["op"] == "remove_debuff" for fx in card.effects)
     assert draft._static_power(card) == (
-        now_block + draft.STATIC_DEBUFF_VALUE
+        draft.STATIC_DEBUFF_VALUE + draw * draft.STATIC_DRAW_VALUE
         + planned_block * C.PLAN_DELAY_DISCOUNT) / card.cost
 
 

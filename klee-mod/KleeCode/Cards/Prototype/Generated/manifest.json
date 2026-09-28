@@ -861,7 +861,6 @@
       "draw": 1
     },
     "proto_kk_ambush": {
-      "block": 2,
       "plan_damage": 3
     },
     "proto_kk_battle_plan": {
@@ -872,13 +871,12 @@
       "plan_block": 2
     },
     "proto_kk_chain_of_command": {
-      "plan_damage": 2
+      "formula_per": 1
     },
     "proto_kk_change_of_plans": {
       "remove": "exhaust"
     },
     "proto_kk_cleansing_wave": {
-      "block": 3,
       "plan_block": 3
     },
     "proto_kk_coordinated_strike": {
@@ -895,7 +893,6 @@
       "power_amount": 1
     },
     "proto_kk_feigned_retreat": {
-      "block": 2,
       "plan_damage": 3,
       "plan_unhurt_damage": 4
     },
@@ -934,7 +931,7 @@
       "plan_block": 2
     },
     "proto_kk_ripple": {
-      "plan_block": 3
+      "draw": 1
     },
     "proto_kk_riptide": {
       "damage": 3,
@@ -963,7 +960,7 @@
       }
     },
     "proto_kk_second_wave": {
-      "block": 2
+      "damage": 2
     },
     "proto_kk_shell_guard": {
       "block": 2,
@@ -974,7 +971,7 @@
       "plan_power_amount": 1
     },
     "proto_kk_song_of_pearls": {
-      "power_amount": 1
+      "power_amount": 2
     },
     "proto_kk_stolen_chapter": {
       "draw": 1

@@ -784,6 +784,8 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # branch in `_op_price` on the same terms.
     "first_attack_twice", "first_card_free", "damage_if_unhurt",
     "attack_damage_this_turn", "block_front_intent",
+    # Kokomi core pass: Chain of Command's switch.
+    "first_companion_free",
     # THE CO-OP SET: two plan clauses about ANOTHER player, priced ZERO in
     # `_op_price` -- the one-seat drafter has nobody for them to pay.
     "ally_draw", "others_attack_damage_this_turn"))
@@ -1131,9 +1133,9 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Pincer: one Attack played again -- `replay_next_companion`'s rule,
         # one replay at STATIC_CARD_COPY_VALUE.
         return STATIC_CARD_COPY_VALUE
-    if op == "first_card_free":
-        # Stolen Chapter: energy in another costume, so `cost_mod`'s rule and
-        # its measured dead dial.
+    if op in ("first_card_free", "first_companion_free"):
+        # Stolen Chapter, and Chain of Command's Companion-only twin: energy
+        # in another costume, so `cost_mod`'s rule and its measured dead dial.
         return STATIC_ENERGY_VALUE
     if op == "damage_if_unhurt":
         # Feigned Retreat: priced at the HURT number, the one it deals whatever
@@ -2596,6 +2598,8 @@ STATIC_OP_PRICING: dict[str, str] = {
                           "replay_next_companion's rule",
     "first_card_free": "ZERO: energy in another costume, so cost_mod's rule "
                        "and cost_mod's measured dead dial (STATIC_ENERGY_VALUE)",
+    "first_companion_free": "first_card_free's price: energy in another "
+                            "costume (STATIC_ENERGY_VALUE)",
     "damage_if_unhurt": "its HURT number at face, the hit it deals whatever "
                         "happens -- whether she is hit first is a fight fact",
     "attack_damage_this_turn": "next_attack_damage's price for ONE Attack, at "

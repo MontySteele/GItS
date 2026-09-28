@@ -76,6 +76,8 @@ PLAN_KINDS = frozenset((
     # beside it.
     "first_attack_twice", "first_card_free", "damage_if_unhurt",
     "attack_damage_this_turn", "block_front_intent",
+    # Kokomi core pass: Chain of Command's switch. See `FIRST_COMPANION_FREE`.
+    "first_companion_free",
     # THE CO-OP SET: Joint Orders' "They draw 2 cards" and Coordinated
     # Strike's "each other player's Attacks deal 3 additional damage". Both
     # are about ANOTHER player, and tier 0 seats one (`engine/coop.py`).
@@ -99,6 +101,8 @@ PLAN_AMOUNTLESS_OPS = frozenset((
     # R276. Two switches: "your first Attack" and "the first card" have no
     # size to print.
     "first_attack_twice", "first_card_free",
+    # Kokomi core pass: "the first Companion card", the same kind of switch.
+    "first_companion_free",
 ))
 
 #: The two debuffs a Plan may apply. `KokomiPlan.PLAN_APPLY_POWERS`' twin.
@@ -176,6 +180,8 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            "first_attack_twice", "first_card_free",
                            "damage_if_unhurt", "attack_damage_this_turn",
                            "block_front_intent",
+                           # Kokomi core pass: "next turn" is the carry-out.
+                           "first_companion_free",
                            # THE CO-OP SET: the player is the one captured
                            # when the Plan was written, and "next turn" is the
                            # carry-out turn.
@@ -282,8 +288,13 @@ QUARTER = 4
 #: The player-side powers this arm reads. Named here rather than spelled at
 #: each site so the sheet's `power:` values and the readers cannot drift.
 #: Every one of them is applied by an ordinary `apply_power` op off a card row.
-TREATISE = "kk_treatise"                     # draw N once a turn, on a Plan
-SONG_OF_PEARLS = "kk_song_of_pearls"         # N Block once a turn, on a Plan
+#: Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md). TREATISE
+#: draws N, once a turn, when a card with a Plan line is played NORMALLY (not
+#: written on the Bake-Kurage): `note_face_up_plan_card`. SONG OF PEARLS deals N
+#: Hydro to ALL enemies at the start of her turn when no Plan waits:
+#: `song_of_pearls`. `TreatisePower` / `SongOfPearlsPower` are the twins.
+TREATISE = "kk_treatise"
+SONG_OF_PEARLS = "kk_song_of_pearls"
 #: R276: her Ancient under the arm, "Whenever the Bake-Kurage carries out a
 #: Plan, gain N Block and draw 1 card." EVERY Plan, uncapped -- the card prints
 #: "Whenever" and is the Dusty Tome's single grant. Applied by the second effect
@@ -326,6 +337,12 @@ FIRST_ATTACK_TWICE = "kk_first_attack_twice"
 #: by the first card she pays for (`combat.play_card`) -- a WRITE included,
 #: because a written card is played and paid for. `FirstCardFreePower`.
 FIRST_CARD_FREE = "kk_first_card_free"
+#: Kokomi core pass. CHAIN OF COMMAND's carry-out: "the first Companion card
+#: you play costs 0" -- `FIRST_CARD_FREE` narrowed to Companion cards. Read at
+#: `combat.card_cost`, spent by the first Companion she pays for
+#: (`spend_first_companion_free`), dropped at her turn's end.
+#: `FirstCompanionFreePower` is the twin.
+FIRST_COMPANION_FREE = "kk_first_companion_free"
 #: Shell Guard's window (`EB-335`). THE AMOUNT IS THE BLOCK PER STRIKE, not a
 #: number of turns: "until your next turn, whenever the Tamakushi Casket
 #: strikes, gain 3 Block". `close_shell_guard` is the one place it ends, and
@@ -1314,43 +1331,25 @@ def claim_once_per_turn(state: CombatState, key: str) -> bool:
 
 
 def _note_plan_resolved(state: CombatState) -> None:
-    """The plan bus: Treatise draws and Song of Pearls blocks, ONCE A TURN.
+    """The plan bus: one Plan carried out.
 
-    ONCE A TURN SINCE 2026-09-02, [USER]'s own ruling off live play: "Treatise
-    looks too good (one draw per turn if a Plan fired might be ok; one draw per
-    Plan is too abuseable)", and "Likewise" of Song of Pearls, which is the
-    same card in Block. The cards still ride the PLAN and not the turn -- a
-    morning she planned nothing for pays nothing -- and the turn is only the
-    cap.
+    Treatise and Song of Pearls LEFT this bus in the Kokomi core pass
+    (2026-09-27): Treatise now pays for a face-up play of a Plan card
+    (`note_face_up_plan_card`) and Song of Pearls for an empty queue
+    (`song_of_pearls`). Her Ancient under the arm still rides it.
 
-    ONE PAYMENT PER PLAN, NOT PER CLAUSE, is unchanged underneath that cap:
-    War Council prints two clauses and is one Plan. That is true because of
-    WHERE this is called (the tail of `_resolve_entry`) rather than because of
-    anything here.
+    ONE PAYMENT PER PLAN, NOT PER CLAUSE: War Council prints two clauses and is
+    one Plan. That is true because of WHERE this is called (the tail of
+    `_resolve_entry`) rather than because of anything here.
     """
     p = state.player
     # Sango Isshin's condition, written here because this is the one place a
     # Plan is carried out -- dawn, Change of Plans and Moon all reach it.
     state.kk_plan_carried_out_this_turn = True
-    n = p.powers.get(TREATISE, 0)
-    if n and claim_once_per_turn(state, TREATISE):
-        state.draw(n)
-        state.emit("plan_treatise", amount=n)
-    n = p.powers.get(SONG_OF_PEARLS, 0)
-    if n and claim_once_per_turn(state, SONG_OF_PEARLS):
-        # POWERED, and rule 3 is why: "your Strength and Dexterity count, since
-        # the plans are hers". `SongOfPearlsPower` gains its Block at
-        # `ValueProp.Move` and its header records the same argument -- the
-        # alternative would make Read the Field's planned Block and this card's
-        # Block from the same morning scale differently.
-        amount = powers.modify_block_gained(p, n)
-        p.block += amount
-        state.emit("block", amount=amount)
-        state.emit("plan_song_of_pearls", amount=amount)
     n = p.powers.get(PRINCESS_OF_WATATSUMI, 0)
     if n:
         # Block first, then the card: `PrincessOfWatatsumiPlanPower`'s order.
-        # POWERED for Song of Pearls' reason, one block up.
+        # POWERED (rule 3: her Dexterity counts on what a Plan pays).
         amount = powers.modify_block_gained(p, n)
         p.block += amount
         state.emit("block", amount=amount)
@@ -1491,6 +1490,10 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # One switch; `combat.card_cost` reads it, `combat.play_card` spends it.
         p.powers[FIRST_CARD_FREE] = 1
         state.emit("plan_first_card_free")
+    elif op == "first_companion_free":
+        # Kokomi core pass, CHAIN OF COMMAND: the same switch for Companions.
+        p.powers[FIRST_COMPANION_FREE] = 1
+        state.emit("plan_first_companion_free")
     elif op == "attack_damage_this_turn":
         # R276, BATTLE PLAN: "This turn, your Attacks deal N more damage."
         # The shipped `attack_up_this_turn` window, which is exactly that
@@ -2186,6 +2189,57 @@ def spend_first_card_free(state: CombatState, card: Card) -> None:
         return
     if state.player.powers.pop(FIRST_CARD_FREE, 0):
         state.emit("plan_first_card_free_spent", card=card.id)
+
+
+def spend_first_companion_free(state: CombatState, card: Card) -> None:
+    """CHAIN OF COMMAND's switch (core pass), spent by the first Companion
+    card she pays for this turn. `FirstCompanionFreePower.AfterCardPlayed`."""
+    if not live(state) or not card.is_companion:
+        return
+    if state.player.powers.pop(FIRST_COMPANION_FREE, 0):
+        state.emit("plan_first_companion_free_spent", card=card.id)
+
+
+def song_of_pearls(state: CombatState, quiet: bool) -> None:
+    """SONG OF PEARLS (core pass): "At the start of your turn, if no Plan
+    waits, the Bake-Kurage deals N damage to ALL enemies."
+
+    `quiet` IS THE QUEUE READ JUST BEFORE `resolve_all` -- the caller reads it,
+    because the drain empties the queue. So a morning that carried a Plan out
+    never fires this, and a morning with nothing written does. A Dusk Plan has
+    already been carried out the evening before, so it leaves the queue empty.
+
+    Dealt as a planned hit is (`_hit`): Hydro, unpowered, her Strength folded
+    in (`hers`). Stacks add. `SongOfPearlsPower.Strike` is the twin.
+    """
+    from tier0.engine import effects                # late import: cycle
+
+    if not live(state) or not quiet:
+        return
+    n = int(state.player.powers.get(SONG_OF_PEARLS, 0))
+    if n <= 0 or not state.living_enemies:
+        return
+    amount = hers(state, None, n)
+    state.emit("plan_song_of_pearls", amount=amount)
+    for enemy in list(state.living_enemies):
+        if not enemy.alive:
+            continue
+        effects.deal_damage_to_enemy(state, enemy, amount, element="hydro",
+                                     source="plan", powered=False)
+
+
+def note_face_up_plan_card(state: CombatState, card: Card) -> None:
+    """TREATISE (core pass): "Once per turn, when you play a card with a Plan
+    line normally, draw 1 card." Called by `effects._resolve_card_bound` after
+    a card with a `plan:` line resolves its NOW-line; a write returns before
+    it. `TreatisePower.AfterCardPlayed` is the twin. Copies add cards, still
+    once a turn."""
+    if not live(state) or not card.plan:
+        return
+    n = int(state.player.powers.get(TREATISE, 0))
+    if n and claim_once_per_turn(state, TREATISE):
+        state.draw(n)
+        state.emit("plan_treatise", amount=n, card=card.id)
 
 
 def next_companion_discount(state: CombatState) -> None:

@@ -45,7 +45,7 @@ public sealed class ProtoKkFeignedRetreat : CustomCardModel, ICharacterCard, IPl
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Feigned Retreat"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage, or {PlanUnhurtDamage:diff()} if you lost no HP since playing this."),
+        ("description", "Draw 2 cards. Discard 1 card. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage, or {PlanUnhurtDamage:diff()} if you lost no HP since playing this."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,7 +60,7 @@ public sealed class ProtoKkFeignedRetreat : CustomCardModel, ICharacterCard, IPl
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(6m, ValueProp.Move),
+            new CardsVar(2),
             new DynamicVar("PlanDamage", 9m),
             new DynamicVar("PlanUnhurtDamage", 14m)
         };
@@ -79,12 +79,18 @@ public sealed class ProtoKkFeignedRetreat : CustomCardModel, ICharacterCard, IPl
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        {
+            var picked = (await CardSelectCmd.FromHandForDiscard(
+                choiceContext, Owner,
+                new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1),
+                KitGrant.NotKitCard, this)).ToList();
+            await CardCmd.Discard(choiceContext, picked);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
         DynamicVars["PlanDamage"].UpgradeValueBy(3m);
         DynamicVars["PlanUnhurtDamage"].UpgradeValueBy(4m);
     }

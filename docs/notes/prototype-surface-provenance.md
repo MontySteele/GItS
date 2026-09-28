@@ -3626,3 +3626,36 @@ an attack on the enemies' turn gives nothing and does not use up the turn's
 trigger, so the next explosion on the players' turn still pays
 (`SparksForEveryonePower.Counts`, asked before the latch). With nobody else
 alive the latch is not spent either. The upgrade is Innate; the cost stays 2.
+
+## Kokomi core pass: eight cards (2026-09-27)
+
+Design: `review/active/kokomi-core-pass-2026-09-27.md` (ruled at its defaults).
+No rule changed and her starter is untouched.
+
+**Faces.** Ambush, Cleansing Wave, Ripple, Feigned Retreat and Second Wave
+swap a Block now-half for Vulnerable, a draw, draw-then-discard or 5 damage;
+their Plan halves stand. Feigned Retreat prints the base game's "Draw 2 cards.
+Discard 1 card." (a chosen discard). Second Wave's hit applies Hydro by the
+arm's cadence, as Opening Gambit's does.
+
+**`first_companion_free`** (Chain of Command's Plan): Stolen Chapter's
+`first_card_free` narrowed to Companion cards. `FirstCompanionFreePower` /
+`kokomi_plan.FIRST_COMPANION_FREE`: zero cost at the cost seam, spent by the
+first Companion she pays for, gone at her turn's end. `KokomiPlan.Kind`
+appends it last so no ordinal moves.
+
+**`proto_kk_song_of_pearls`**: the queue is read at her turn start just
+before the morning drain (`ProtoBakeKuragePower.AfterPlayerTurnStart`,
+`combat._player_turn`); if it was empty, `SongOfPearlsPower.Strike` runs after
+the drain and deals the stack to every hittable enemy as a planned hit is
+dealt (Hydro, unpowered, her Strength folded by `Hers`). A morning that carried
+a Plan out never fires it. A Dusk Plan was carried out the evening before, so
+it leaves the next morning's queue empty. Plans held back by the lane cap
+count as waiting.
+
+**`proto_kk_treatise`**: `TreatisePower.AfterCardPlayed` draws the stack, once
+a turn on the ledger latch, when she plays a card with a Plan line and
+`KokomiPlan.PlayedOnPet` says no. The write test comes before the claim, so a
+written card does not spend the turn's draw. An auto-play of a Plan card goes
+to its now-line and counts. Sim: `kokomi_plan.note_face_up_plan_card` at the
+end of `effects._resolve_card_bound`. Both powers left the plan bus.

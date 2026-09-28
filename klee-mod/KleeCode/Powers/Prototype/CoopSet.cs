@@ -487,7 +487,7 @@ public sealed class PeopleOfFontainePower : PowerModel, ILocalizationProvider
 /// <summary>
 /// <i>Sangonomiya's Counsel</i>: "Whenever the Bake-Kurage carries out a
 /// Plan, each other player gains 3 Block." On Kokomi, on the Plan bus
-/// (<see cref="IKokomiPlanListener"/>) Treatise and Song of Pearls ride --
+/// (<see cref="IKokomiPlanListener"/>) her Ancient under the arm rides --
 /// EVERY Plan, not once a turn: the face says "Whenever" and prints no cap.
 ///
 /// UNPOWERED, exactly the printed number: Block a power grants another

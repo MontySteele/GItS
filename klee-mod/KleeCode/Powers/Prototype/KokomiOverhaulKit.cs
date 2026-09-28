@@ -87,6 +87,19 @@ public static class KokomiOverhaulKit
     }
 
     /// <summary>
+    /// CHAIN OF COMMAND's carry-out (Kokomi core pass): "the first Companion
+    /// card you play costs 0." ONE STACK, ALWAYS, Stolen Chapter's reason.
+    /// </summary>
+    public static async Task FirstCompanionFree(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (kokomi!.Powers.OfType<FirstCompanionFreePower>().Any()) return;
+        await PowerCmd.Apply<FirstCompanionFreePower>(
+            choiceContext, kokomi, 1, applier: kokomi, cardSource: null);
+    }
+
+    /// <summary>
     /// TIDE WALL's read (R276): the total damage <paramref name="enemy"/>'s
     /// current intent would deal <paramref name="kokomi"/>, every hit counted
     /// -- the game's own <c>AttackIntent.GetTotalDamage</c>, which is the

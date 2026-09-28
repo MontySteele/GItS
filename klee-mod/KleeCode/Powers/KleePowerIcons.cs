@@ -151,6 +151,7 @@ internal static class KleePowerIcons
         // shipped SHAPE, the block above's rule: a replay, and a free card.
         FirstAttackTwicePower => KleePck.Path("klee/powers/study_buddy.png"),
         FirstCardFreePower => KleePck.Path("klee/powers/friendly_visit.png"),
+        FirstCompanionFreePower => KleePck.Path("klee/powers/friendly_visit.png"),
         TreatisePower => KleePck.Path("klee/powers/spark_per_turn.png"),
         GeneralsBannerPower => KleePck.Path("klee/powers/study_buddy.png"),
         NextCompanionDiscountPower =>

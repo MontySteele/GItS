@@ -306,6 +306,8 @@ SIM_CALL_SITES = {
     ('klee_overhaul.py', 4): ("'spark_knight'", None, 'None'),
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
     ('kokomi_plan.py', 2): ("'casket'", 'False', "'hydro'"),
+    # Kokomi core pass: Song of Pearls' strike, dealt as a planned hit is.
+    ('kokomi_plan.py', 3): ("'plan'", 'False', "'hydro'"),
 }
 
 

@@ -45,7 +45,7 @@ public sealed class ProtoKkRipple : CustomCardModel, ICharacterCard, IPlannedCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ripple"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and {IfUpgraded:show:7|4} [gold]Block[/gold]."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -55,14 +55,12 @@ public sealed class ProtoKkRipple : CustomCardModel, ICharacterCard, IPlannedCar
         new[]
         {
             new KokomiPlan.Planned(KokomiPlan.Kind.Energy, 1, KokomiPlan.Aim.Self),
-            new KokomiPlan.Planned(KokomiPlan.Kind.Block, DynamicVars["PlanBlock"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(2m, ValueProp.Move),
-            new UnsourcedBlockVar("PlanBlock", 4m, ValueProp.Move)
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -79,11 +77,11 @@ public sealed class ProtoKkRipple : CustomCardModel, ICharacterCard, IPlannedCar
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PlanBlock"].UpgradeValueBy(3m);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

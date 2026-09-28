@@ -637,6 +637,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # and disclosed, `remove_debuff`'s argument.
     "first_attack_twice": [_hook("shared", "card_identity", "write")],
     "first_card_free": [_hook("shared", "card_identity", "write")],
+    "first_companion_free": [_hook("shared", "card_identity", "write")],
     "attack_damage_this_turn": [_hook("shared", "card_identity", "write")],
     "damage_if_unhurt": [_hook("shared", "hp_ledger", "read")],
     "block_front_intent": [],

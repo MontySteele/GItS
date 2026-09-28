@@ -2403,6 +2403,9 @@ PLAN_CLAUSE_KINDS = {
     # Block reads the front enemy's intent at carry-out.
     "first_attack_twice": "FirstAttackTwice",
     "first_card_free": "FirstCardFree",
+    # Kokomi core pass, CHAIN OF COMMAND: "Next turn, the first Companion card
+    # you play costs 0." Stolen Chapter's switch, narrowed to Companions.
+    "first_companion_free": "FirstCompanionFree",
     "damage_if_unhurt": "DamageIfUnhurt",
     "attack_damage_this_turn": "AttackDamageThisTurn",
     "block_front_intent": "BlockFrontIntent",
@@ -2425,7 +2428,9 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        # `EB-655`, Battle Plan's rider: the size is the rule's.
                        "next_attack_damage",
                        # R276: two switches, "the first ..." has no size.
-                       "first_attack_twice", "first_card_free"}
+                       "first_attack_twice", "first_card_free",
+                       # Kokomi core pass, Chain of Command's switch.
+                       "first_companion_free"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2470,6 +2475,8 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  # now-line spelling would be a different, unpriced card.
                  "first_attack_twice", "first_card_free", "damage_if_unhurt",
                  "attack_damage_this_turn", "block_front_intent",
+                 # Kokomi core pass, Chain of Command: "next turn".
+                 "first_companion_free",
                  # THE CO-OP SET: both name the carry-out turn, and the first
                  # a player captured at writing.
                  "ally_draw", "others_attack_damage_this_turn"}

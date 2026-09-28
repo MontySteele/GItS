@@ -500,9 +500,11 @@ def test_r276_feigned_retreat_hits_harder_if_she_was_not_hurt(overhaul):
 
 
 def test_r276_feigned_retreats_upgrade_moves_both_numbers(overhaul):
-    """8 Block now; Plan 12, or 18 unhurt."""
+    """Core pass: the now-line is draw 2, discard 1 and does not move; Plan
+    12, or 18 unhurt."""
     up = loader.get_card("proto_kk_feigned_retreat+")
-    assert up.effects == [{"op": "block", "amount": 8}]
+    assert up.effects == [{"op": "draw", "amount": 2},
+                          {"op": "discard", "amount": 1, "select": "chosen"}]
     enemy = make_enemy(hp=200)
     st = kokomi_state(enemies=[enemy])
     kokomi_plan.schedule(st, up)
@@ -1018,79 +1020,146 @@ def test_an_empty_exhaust_pile_is_a_no_op_and_not_a_screen(overhaul):
     assert counts(st)["plan_from_exhaust_empty"] == 1
 
 
-# --- 7. THE PLAN BUS: Treatise and Song of Pearls --------------------------
+# --- 7. THE CORE PASS PAYOFFS: Treatise and Song of Pearls ----------------
+#
+# Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md). Treatise
+# pays for playing a Plan card's now-line; Song of Pearls pays for a morning
+# with nothing written. Neither rides the plan bus any more.
 
-def test_treatise_draws_once_per_plan_and_not_once_per_clause(overhaul):
-    """'When the jellyfish carries out a Plan' is once per ENTRY. War Council
-    prints two clauses and is ONE Plan, which is what its face says -- "Deal 4
-    damage to every enemy AND apply 1 Weak to each" is one sentence."""
-    st = kokomi_state()
+def _deck(st, n=6):
     st.player.draw_pile = [plan_card([], cid=f"proto_kk_f{i}")
-                           for i in range(6)]
+                           for i in range(n)]
+
+
+def test_treatise_draws_on_a_face_up_plan_card_once_a_turn(overhaul):
+    """"Once per turn, when you play a card with a Plan line normally, draw 1
+    card." Two face-up Plan cards in a turn draw one card; the next turn pays
+    again."""
+    enemy = make_enemy(hp=200, intents=ATTACKER)   # intends: not a write
+    st = kokomi_state(enemies=[enemy])
+    _deck(st)
     st.player.powers[kokomi_plan.TREATISE] = 1
-    carry_out(st, [{"op": "energy", "amount": 1},
-                   {"op": "energy", "amount": 1}])
+    card = plan_card([{"op": "energy", "amount": 1}],
+                     effects_=[{"op": "block", "amount": 1}])
+    assert not kokomi_plan.plan_aimed_at_pet(st, card)
+    effects.resolve_card(st, card)
     assert len(st.player.hand) == 1
-
-
-def test_song_of_pearls_blocks_once_per_plan(overhaul):
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 3
-    carry_out(st, [{"op": "energy", "amount": 1},
-                   {"op": "energy", "amount": 1}])
-    assert st.player.block == 3
-
-
-def test_two_plans_in_one_morning_pay_the_bus_once(overhaul):
-    """[USER], live 2026-09-02: "Treatise looks too good (one draw per turn if
-    a Plan fired might be ok; one draw per Plan is too abuseable)", and
-    "Likewise" of Song of Pearls. TWO Plans carried out in one morning, which
-    is the ordinary case the cards were written for, and both pay once."""
-    st = kokomi_state()
-    st.player.draw_pile = [plan_card([], cid=f"proto_kk_f{i}")
-                           for i in range(6)]
-    st.player.powers[kokomi_plan.TREATISE] = 1
-    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 3
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                       cid="proto_kk_a"))
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                       cid="proto_kk_b"))
-    kokomi_plan.resolve_all(st)
-    assert len(st.player.hand) == 1
-    assert st.player.block == 3
-    # And it is a CAP and not a one-shot: the next turn pays again.
+    effects.resolve_card(st, card)
+    assert len(st.player.hand) == 1, "once per turn"
     kokomi_plan.roll_turn(st)
-    st.player.block = 0
-    carry_out(st, [{"op": "energy", "amount": 1}])
+    effects.resolve_card(st, card)
+    assert len(st.player.hand) == 2, "a new turn pays again"
+
+
+def test_treatise_does_not_draw_on_a_written_plan(overhaul):
+    """"Normally" is the now-line target. A card written on the Bake-Kurage
+    draws nothing, and neither does its carry-out."""
+    st = kokomi_state(enemies=[make_enemy(hp=80, intents=BLOCKER)])  # a write
+    _deck(st)
+    st.player.powers[kokomi_plan.TREATISE] = 1
+    card = plan_card([{"op": "energy", "amount": 1}],
+                     effects_=[{"op": "block", "amount": 1}])
+    assert kokomi_plan.plan_aimed_at_pet(st, card)
+    effects.resolve_card(st, card)
+    assert len(st.kk_plan_queue) == 1
+    kokomi_plan.resolve_all(st)
+    assert st.player.hand == []
+    assert counts(st)["plan_treatise"] == 0
+
+
+def test_treatise_ignores_a_card_with_no_plan_line(overhaul):
+    enemy = make_enemy(hp=200, intents=ATTACKER)
+    st = kokomi_state(enemies=[enemy])
+    _deck(st)
+    st.player.powers[kokomi_plan.TREATISE] = 1
+    plain = Card(id="proto_kk_plain", name="p", cost=1, type="skill",
+                 effects=[{"op": "block", "amount": 1}])
+    effects.resolve_card(st, plain)
+    assert st.player.hand == []
+
+
+def test_treatise_copies_add_cards_still_once_a_turn(overhaul):
+    enemy = make_enemy(hp=200, intents=ATTACKER)
+    st = kokomi_state(enemies=[enemy])
+    _deck(st)
+    st.player.powers[kokomi_plan.TREATISE] = 2
+    card = plan_card([{"op": "energy", "amount": 1}],
+                     effects_=[{"op": "block", "amount": 1}])
+    effects.resolve_card(st, card)
+    effects.resolve_card(st, card)
     assert len(st.player.hand) == 2
-    assert st.player.block == 3
 
 
-def test_the_bus_pays_change_of_plans_early_resolution_too(overhaul):
-    """The C#: "the notify at the bottom is the only place that fires", so
-    every door onto a carry-out pays the bus. Since `EB-570` withdrew The Moon
-    Overlooks the Waters, Change of Plans is the mid-turn door that pin is
-    about.
+def _song_turn(st, pilot=None):
+    """One real player turn, so the queue is read where `combat` reads it."""
+    from tier0.engine import combat
 
-    SINCE 2026-09-02 THE TURN IS THE CAP, so what "pays them too" means is
-    that the early resolution is what CLAIMS the turn's payout when it happens
-    first -- the morning that follows it in the same turn adds nothing, and the
-    NEXT turn pays again. The alternative reading, a bus that skipped the early
-    resolution, would make Change of Plans turn Song of Pearls off for a turn.
-    """
+    combat._player_turn(st, pilot or (lambda state: None))
+
+
+def test_song_of_pearls_strikes_all_enemies_when_no_plan_waits(overhaul):
+    """"At the start of your turn, if no Plan waits, the Bake-Kurage deals 4
+    damage to ALL enemies." Hydro, like every hit of hers."""
+    a = make_enemy(hp=80, name="a", intents=BLOCKER)
+    b = make_enemy(hp=80, name="b", intents=BLOCKER)
+    st = kokomi_state(enemies=[a, b])
+    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 4
+    _song_turn(st)
+    assert (a.hp, b.hp) == (76, 76)
+    assert a.aura == "hydro" and b.aura == "hydro"
+    assert counts(st)["plan_song_of_pearls"] == 1
+
+
+def test_song_of_pearls_is_silent_after_a_carry_out(overhaul):
+    """A morning that carried a Plan out does not also fire it: the queue is
+    read just before the drain empties it."""
+    enemy = make_enemy(hp=80, intents=BLOCKER)
+    st = kokomi_state(enemies=[enemy])
+    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 4
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
+    _song_turn(st)
+    assert counts(st)["plan_carried_out"] == 1
+    assert enemy.hp == 80
+    assert counts(st)["plan_song_of_pearls"] == 0
+
+
+def test_song_of_pearls_amount_stacks_and_counts_her_strength(overhaul):
+    """Two copies deal 8; her Strength counts, as on her planned hits."""
+    enemy = make_enemy(hp=80, intents=BLOCKER)
+    st = kokomi_state(enemies=[enemy])
+    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 8
+    _song_turn(st)
+    assert enemy.hp == 72
+    enemy = make_enemy(hp=80, intents=BLOCKER)
+    st = kokomi_state(enemies=[enemy])
+    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 4
+    st.player.powers["strength"] = 2
+    _song_turn(st)
+    assert enemy.hp == 74
+
+
+def test_song_of_pearls_needs_the_quiet_read(overhaul):
+    """The function deals nothing unless the caller says the queue was
+    empty, and nothing with the power absent."""
+    enemy = make_enemy(hp=80)
+    st = kokomi_state(enemies=[enemy])
+    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 4
+    kokomi_plan.song_of_pearls(st, quiet=False)
+    assert enemy.hp == 80
+    st.player.powers.pop(kokomi_plan.SONG_OF_PEARLS)
+    kokomi_plan.song_of_pearls(st, quiet=True)
+    assert enemy.hp == 80
+
+
+def test_the_bus_no_longer_pays_treatise_or_song(overhaul):
+    """A carry-out rings the bus; neither payoff answers it now."""
     st = kokomi_state()
+    _deck(st)
+    st.player.powers[kokomi_plan.TREATISE] = 1
     st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 3
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                       cid="proto_kk_a"))
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                       cid="proto_kk_b"))
-    kokomi_plan.resolve_front(st)               # Change of Plans' door
-    assert st.player.block == 3                 # the early resolution
-    kokomi_plan.resolve_all(st)
-    assert st.player.block == 3                 # the morning's is the cap
-    kokomi_plan.roll_turn(st)
     carry_out(st, [{"op": "energy", "amount": 1}])
-    assert st.player.block == 6                 # a new turn, a new payout
+    assert st.player.hand == []
+    assert st.player.block == 0
 
 
 # --- 7b. THE TEMPO SHELF (round 9 pick 1, default applied 2026-09-04) ------
@@ -1185,19 +1254,20 @@ def test_a_tide_chart_promise_is_paid_once(overhaul):
     assert st.player.hand == []
 
 
-def test_ripple_pays_block_now_and_energy_and_block_on_the_plan(overhaul):
-    """A cheap Plan whose now-line is worth playing (2 Block for 0) and whose
-    Plan pays tempo (1 Energy and 4 Block)."""
+def test_ripple_draws_now_and_pays_energy_on_the_plan(overhaul):
+    """Core pass: "Draw 1 card. Plan: Gain 1 Energy." Two different jobs."""
     card = loader._card_prototype("proto_kk_ripple")
-    st = kokomi_state()
+    enemy = make_enemy(hp=80, intents=ATTACKER)
+    st = kokomi_state(enemies=[enemy])
+    _deck(st)
     st.player.energy = 0
     effects.resolve_card(st, card)
-    assert st.player.block == 2
-    st.player.block = 0
+    assert len(st.player.hand) == 1
+    assert st.player.block == 0
     kokomi_plan.schedule(st, card)
     kokomi_plan.resolve_all(st)
     assert st.player.energy == 1
-    assert st.player.block == 4
+    assert st.player.block == 0
 
 
 # --- 8. THE TAMAKUSHI CASKET ----------------------------------------------
@@ -2514,7 +2584,8 @@ def test_a_dusk_drain_leaves_the_morning_entries_where_they_are(overhaul):
 
 
 def test_a_dusk_carry_out_is_a_carry_out(overhaul):
-    """Treatise draws on it, and the `plan_carried_out` event fires."""
+    """The `plan_carried_out` event fires. Treatise no longer draws on a
+    carry-out (core pass): it pays for a face-up play."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.TREATISE] = 1
     st.player.draw_pile = [Card(id="strike", name="s", cost=1, type="attack",
@@ -2523,7 +2594,7 @@ def test_a_dusk_carry_out_is_a_carry_out(overhaul):
                                        cid="proto_kk_breakwater"))
     kokomi_plan.resolve_dusk(st)
     assert counts(st)["plan_carried_out"] == 1
-    assert counts(st)["plan_treatise"] == 1
+    assert counts(st)["plan_treatise"] == 0
 
 
 def test_a_dusk_carry_out_does_not_touch_the_mornings_depth(overhaul):
@@ -2742,7 +2813,7 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     # the drain, and the entries behind this one in it -- where "your next
     # Plan" read as the next one WRITTEN (`EB-687`, `EB-645`).
     assert faces["proto_kk_second_wave"] == (
-        "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The Plan after this "
+        "Deal 5 damage. [gold]Plan[/gold]: The Plan after this "
         "one is carried out twice.")
     assert faces["proto_kk_opening_gambit"].endswith(
         "The Plan after this one deals double damage.")
@@ -3396,3 +3467,142 @@ def test_r276_tide_wall_blocks_the_front_enemys_intent(overhaul):
     st.player.block = 0
     carry_out(st, up.plan)
     assert st.player.block == 3, "a non-attack intent reads 0, plus 3"
+
+
+# --- the Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md) ---
+
+def _up(cid):
+    return loader.get_card(cid + "+")
+
+
+_VULN2 = {"op": "apply_power", "power": "vulnerable", "amount": 2,
+          "target": "enemy"}
+_DRAW2_DISCARD1 = [{"op": "draw", "amount": 2},
+                   {"op": "discard", "amount": 1, "select": "chosen"}]
+_COC_NOW = {"op": "damage", "target": "enemy",
+            "amount_formula": {"base": 0, "per": 3,
+                               "count": "companions_played_this_turn"}}
+
+
+@pytest.mark.parametrize("cid,now,plan,up_now,up_plan", [
+    ("proto_kk_ambush", [_VULN2],
+     [{"op": "damage", "amount": 12, "target": "front_enemy"}],
+     [_VULN2], [{"op": "damage", "amount": 15, "target": "front_enemy"}]),
+    ("proto_kk_cleansing_wave",
+     [{"op": "remove_debuff"}, {"op": "draw", "amount": 1}],
+     [{"op": "block", "amount": 10}],
+     [{"op": "remove_debuff"}, {"op": "draw", "amount": 1}],
+     [{"op": "block", "amount": 13}]),
+    ("proto_kk_ripple", [{"op": "draw", "amount": 1}],
+     [{"op": "energy", "amount": 1}],
+     [{"op": "draw", "amount": 2}], [{"op": "energy", "amount": 1}]),
+    ("proto_kk_feigned_retreat", _DRAW2_DISCARD1,
+     [{"op": "damage_if_unhurt", "amount": 9, "unhurt_amount": 14,
+       "target": "front_enemy"}],
+     _DRAW2_DISCARD1,
+     [{"op": "damage_if_unhurt", "amount": 12, "unhurt_amount": 18,
+       "target": "front_enemy"}]),
+    ("proto_kk_second_wave", [{"op": "damage", "amount": 5,
+                               "target": "enemy"}],
+     [{"op": "next_plan_extra_carry_out"}],
+     [{"op": "damage", "amount": 7, "target": "enemy"}],
+     [{"op": "next_plan_extra_carry_out"}]),
+    ("proto_kk_chain_of_command", [_COC_NOW],
+     [{"op": "first_companion_free"}],
+     [dict(_COC_NOW, amount_formula=dict(_COC_NOW["amount_formula"], per=4))],
+     [{"op": "first_companion_free"}]),
+])
+def test_core_pass_rows_and_upgrades(overhaul, cid, now, plan, up_now,
+                                     up_plan):
+    row = _row(cid)
+    assert row.effects == now
+    assert row.plan == plan
+    up = _up(cid)
+    assert up.effects == up_now
+    assert up.plan == up_plan
+
+
+@pytest.mark.parametrize("cid,power,amount,up_amount", [
+    ("proto_kk_song_of_pearls", kokomi_plan.SONG_OF_PEARLS, 4, 6),
+    ("proto_kk_treatise", kokomi_plan.TREATISE, 1, 1),
+])
+def test_core_pass_powers_and_upgrades(overhaul, cid, power, amount,
+                                       up_amount):
+    row = _row(cid)
+    assert row.effects == [{"op": "apply_power", "power": power,
+                            "amount": amount, "target": "self"}]
+    up = _up(cid)
+    assert up.effects[0]["amount"] == up_amount
+
+
+def test_core_pass_treatise_upgrade_is_innate(overhaul):
+    assert _row("proto_kk_treatise").upgrade == {"innate": True}
+    assert _up("proto_kk_treatise").innate
+
+
+def test_core_pass_faces(overhaul):
+    faces = _faces()
+    assert faces["proto_kk_ambush"] == (
+        "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 damage.")
+    assert faces["proto_kk_cleansing_wave"] == (
+        "Remove one of your debuffs. Draw 1 card. [gold]Plan[/gold]: Gain 10 "
+        "[gold]Block[/gold].")
+    assert faces["proto_kk_ripple"].startswith("Draw {Cards:diff()} card")
+    assert faces["proto_kk_feigned_retreat"].startswith(
+        "Draw 2 cards. Discard 1 card. [gold]Plan[/gold]: Deal 9 damage")
+    assert faces["proto_kk_chain_of_command"].endswith(
+        "[gold]Plan[/gold]: Next turn, the first Companion card you play "
+        "costs 0.")
+    assert faces["proto_kk_song_of_pearls"] == (
+        "At the start of your turn, if no [gold]Plan[/gold] waits, the "
+        "[gold]Bake-Kurage[/gold] deals {PowerAmount:diff()} damage to ALL "
+        "enemies.")
+    assert faces["proto_kk_treatise"] == (
+        "Once per turn, when you play a card with a [gold]Plan[/gold] line "
+        "normally, draw 1 card.")
+
+
+def test_core_pass_second_waves_hit_applies_hydro(overhaul):
+    """Every damaging card of hers applies Hydro, Skills included."""
+    st = kokomi_state()
+    card = _row("proto_kk_second_wave")
+    assert card.type == "skill"
+    assert effects._element_for(st, card.effects[0], card) == "hydro"
+
+
+def _companion(cid="proto_kk_probe_companion", cost=2):
+    return Card(id=cid, name="c", cost=cost, type="skill",
+                effects=[{"op": "block", "amount": 1}], tags=["companion"])
+
+
+def test_core_pass_chain_of_command_makes_the_first_companion_free(overhaul):
+    """Chain of Command's Plan: "Next turn, the first Companion card you play
+    costs 0." Pure at the cost seam, a non-Companion is untouched, spent by
+    the first Companion paid for, and gone at the end of her turn."""
+    from tier0.engine import combat
+    st = kokomi_state(enemies=[make_enemy(hp=200)])
+    carry_out(st, _row("proto_kk_chain_of_command").plan)
+    assert st.player.powers[kokomi_plan.FIRST_COMPANION_FREE] == 1
+    plain = Card(id="proto_kk_plain", name="p", cost=2, type="skill",
+                 effects=[{"op": "block", "amount": 1}])
+    first, second = _companion(), _companion("proto_kk_probe_companion_2")
+    assert combat.card_cost(st, plain) == 2
+    assert combat.card_cost(st, first) == 0
+    assert combat.card_cost(st, first) == 0, "asking does not spend it"
+    st.player.hand += [plain, first, second]
+    st.player.energy = 5
+    combat.play_card(st, plain)
+    assert st.player.energy == 3, "a non-Companion does not spend it"
+    combat.play_card(st, first)
+    assert st.player.energy == 3
+    assert combat.card_cost(st, second) == 2
+    assert kokomi_plan.FIRST_COMPANION_FREE not in st.player.powers
+
+
+def test_core_pass_chain_of_commands_switch_ends_with_her_turn(overhaul):
+    enemy = make_enemy(hp=200, intents=BLOCKER)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, _row("proto_kk_chain_of_command"))
+    _song_turn(st)
+    assert kokomi_plan.FIRST_COMPANION_FREE not in st.player.powers
+    assert counts(st)["plan_first_companion_free"] == 1

@@ -441,8 +441,8 @@ public static class ArmKeywordTips
     /// "BEFORE ENEMIES ACT" IS THE LOAD-BEARING HALF and it is why the whole
     /// rule fits in one sentence: everything else about a Dusk Plan is a Plan
     /// (it is written by playing the card on the jellyfish, it is one entry in
-    /// one queue, Change of Plans can still hurry it, Treatise still draws on
-    /// it), and the tip beside this one says all of that. What a player cannot
+    /// one queue, Change of Plans can still hurry it, the plan bus still rings
+    /// on it), and the tip beside this one says all of that. What a player cannot
     /// get from anywhere else is that the Block arrives in time for the swing.
     /// </summary>
     public static IEnumerable<IHoverTip> ForDusk(

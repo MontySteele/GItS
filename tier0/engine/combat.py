@@ -409,6 +409,12 @@ def card_cost(state: CombatState, card: Card) -> int:
     if (C.KOKOMI_OVERHAUL
             and state.player.powers.get(kokomi_plan.FIRST_CARD_FREE, 0)):
         cost = 0
+    # Kokomi core pass, CHAIN OF COMMAND's carry-out: the same, for the first
+    # Companion card. `FirstCompanionFreePower` is the C# twin.
+    if (C.KOKOMI_OVERHAUL and card.is_companion
+            and state.player.powers.get(
+                kokomi_plan.FIRST_COMPANION_FREE, 0)):
+        cost = 0
     # QUARANTINED (R276): Playdate's discount on the next Companion card.
     # `PlaydatePower.TryModifyEnergyCostInCombat`'s twin; 0 with the arm off.
     discount = klee_overhaul.playdate_discount(state, card)
@@ -524,6 +530,8 @@ def play_card(state: CombatState, card: Card) -> None:
     if C.KOKOMI_OVERHAUL:
         # R276. Stolen Chapter's switch is spent by the first card paid for.
         kokomi_plan.spend_first_card_free(state, card)
+        # Core pass: Chain of Command's, by the first Companion paid for.
+        kokomi_plan.spend_first_companion_free(state, card)
     if card.encore_cost:
         # Gated playable -- the "Spend N Encore:" cost line, which is a
         # different sink from the spend_encore OP and is kept apart in the
@@ -1108,7 +1116,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # reason: a planned hit can drop a phased boss, and Mend cannot kill her
     # but a reaction the hit causes can move the board under the loop.
     if C.KOKOMI_OVERHAUL:
+        # Core pass, SONG OF PEARLS: "if no Plan waits" is the queue read
+        # here, just before the drain empties it, so a morning that carried a
+        # Plan out does not also fire it. `ProtoBakeKuragePower` reads the
+        # same queue at the same point.
+        quiet = not state.kk_plan_queue
         kokomi_plan.resolve_all(state)
+        kokomi_plan.song_of_pearls(state, quiet)
         # `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning
         # and before anything else reads the hand: the face says "after the
         # Bake-Kurage carries out its Plans, draw 1 card for each", so the
@@ -1350,6 +1364,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # switches say "this turn" and die with it, on the same boundary.
     state.player.powers.pop(kokomi_plan.FIRST_ATTACK_TWICE, None)
     state.player.powers.pop(kokomi_plan.FIRST_CARD_FREE, None)
+    state.player.powers.pop(kokomi_plan.FIRST_COMPANION_FREE, None)
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never

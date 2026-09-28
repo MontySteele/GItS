@@ -51,7 +51,7 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain of Command"),
-        ("description", "Deal 3 damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage for each Companion you play this turn."),
+        ("description", "Deal {ExtraDamage:diff()} damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Next turn, the first Companion card you play costs 0."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,7 +60,7 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, IElementalCard, ICh
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.DamagePerCompanionLastTurn, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.FirstCompanionFree, 0, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -68,8 +68,7 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, IElementalCard, ICh
         {
             new CalculationBaseVar(0m),
             new ExtraDamageVar(3m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).CompanionsPlayedThisTurn),
-            new DynamicVar("PlanDamage", 6m)
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).CompanionsPlayedThisTurn)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -96,6 +95,6 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, IElementalCard, ICh
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PlanDamage"].UpgradeValueBy(2m);
+        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
     }
 }

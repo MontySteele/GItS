@@ -107,7 +107,13 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
     {
         if (Owner == null || player.Creature != Owner) return;
         if (!KokomiOverhaul.LiveFor(Owner)) return;
+        // Kokomi core pass, SONG OF PEARLS: "if no Plan waits" is the queue
+        // read HERE, just before the drain empties it, so a morning that
+        // carried a Plan out does not also fire it. Sim twin: the `quiet`
+        // read in `combat._player_turn`.
+        var quiet = KokomiPlan.PlansHeld(Owner) == 0;
         await KokomiPlan.ResolveAll(choiceContext, Owner);
+        if (quiet) await SongOfPearlsPower.Strike(choiceContext, Owner);
         // `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning:
         // its face is "Next turn, after the Bake-Kurage carries out its Plans,
         // draw 1 card for each", so the count it multiplies is the depth the

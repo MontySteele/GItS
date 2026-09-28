@@ -45,13 +45,13 @@ public sealed class ProtoKkSongOfPearls : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Song of Pearls"),
-        ("description", "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "At the start of your turn, if no [gold]Plan[/gold] waits, the [gold]Bake-Kurage[/gold] deals {PowerAmount:diff()} damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m)
+            new DynamicVar("PowerAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,6 +68,6 @@ public sealed class ProtoKkSongOfPearls : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
     }
 }
