@@ -1,4 +1,4 @@
-Status: OPEN (Paper; picks for [USER])
+Status: RULED 2026-09-27, all four picks at their defaults
 
 # Kokomi: design review, 2026-09-27
 
@@ -16,6 +16,10 @@ Furina playtest results come back positive."
   `docs/prototype-surface.yaml`.
 
 You have not yet played the R276 rewrite. Only the seats have.
+
+**Ruled 2026-09-27: all four picks at their defaults.** [USER]: "Also - agreed
+on Kokomi's defaults." The pass starts with the core (pick 1a), after the
+Klee and Furina fixes from the same day's co-op run.
 
 ## 1. What she is meant to be
 

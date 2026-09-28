@@ -29,12 +29,6 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
-- **Kokomi design review** (`kokomi-design-review-2026-09-27.md`, picks 1 to
-  4): (1, default) the core pass on the 39 cards (Block-only now-halves
-  rewritten, three halves breaches fixed, payoffs re-keyed), then the
-  "plan the reaction" Commander batch, growth to 78, then her relics and
-  potions carrying the healer. Waits on the Klee and Furina playtest.
-
 - **P2 hard-state thresholds** (`p2-hard-state-thresholds-2026-08-13.md`,
   picks 1 to 4): (1, default) adopt the packet's four proposals (more than one
   enemy becomes a modifier, incoming fraction 0.45, lethal reach unchanged, a
