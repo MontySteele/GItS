@@ -307,7 +307,11 @@ def test_a_chooser_over_a_fight_prints_the_fight():
 # ---- 12 and 13. Pneuma, and three log labels ---------------------------------
 
 def test_pneuma_says_it_summons_nobody():
-    assert ARM_KEYWORDS["Pneuma"].endswith("It summons nobody.")
+    # The second text pass (2026-09-28): "regains", as the front
+    # performer's row says, in place of "It summons nobody."
+    assert ARM_KEYWORDS["Pneuma"].endswith(
+        "your front performer regains 2 Fanfare.")
+    assert "It summons nobody." not in ARM_KEYWORDS["Pneuma"]
 
 
 def _row(event, member, name, bar, moved, **kw):

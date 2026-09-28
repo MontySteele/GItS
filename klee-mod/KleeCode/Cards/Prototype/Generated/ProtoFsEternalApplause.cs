@@ -38,7 +38,7 @@ public sealed class ProtoFsEternalApplause : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForFade(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_eternal_applause");
 

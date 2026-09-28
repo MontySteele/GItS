@@ -61,7 +61,7 @@ def test_let_the_people_rejoice_pays_twice_the_fanfare():
         (REPO / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
     row = next(r for r in rows if r["id"] == "proto_fs_let_the_people_rejoice")
     assert row["description"].startswith(
-        "Deal damage to ALL enemies equal to twice your performers' "
+        "Deal damage to ALL enemies equal to twice your performers' total "
         "[gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.")
     assert "(Deals {CalculatedDamage:diff()} damage)" in row["description"]
     damage = next(e for e in row["effects"] if e["op"] == "damage")

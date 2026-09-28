@@ -6743,34 +6743,38 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # lead renamed the FRONT performer, every row in [USER]'s words.
         "Spend": ["Pay Fanfare from your ", ". Offered only ",
                   "if it can pay in full."],
+        # The second text pass (2026-09-28).
         "Fanfare": ["A performer's health. Hits take your ",
-                    "the front performer's, then you. Gained on an empty "
-                    "stage, it "],
+                    "your front performer's, then you. Gaining it on an "
+                    "empty stage ", "summons a performer."],
         # Draft 3 (2026-09-25): the Bow is the performer's act once more.
         "Bow": ["A performer that leaves the stage acts one last time on "
                 "its way "],
         "front performer": ["Takes hits first. Regains "],
-        # Draft 3: the fade, whose threshold is interpolated on the mod
-        # side. The guest round: hits never reach the back (rule 6).
-        # 2026-09-26: a lone performer is both seats, and never fades.
-        "back performer": ["Gains and Spends ",
-                           "of your turn: it fades, losing half its "
-                           "Fanfare above ",
-                           ". A lone performer is both, and ",
-                           "never fades."],
+        # The second text pass (2026-09-28): the last in line, and who
+        # pays a Spend. A lone performer is both seats.
+        "back performer": ["Your last performer in line. ",
+                           " pays from it. ",
+                           "A lone performer is both front and back."],
+        # The second text pass (2026-09-28): the fade's own tip, whose
+        # threshold is interpolated on the mod side.
+        "fade": ["At the end of your turn, each performer behind the front "
+                 "loses ", "half its ", ", rounded down."],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
         # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the
         # anchors are the prose either side of it.
         "Ousia": ["This turn, your performers' acts deal double damage."],
         "Pneuma": ["This turn, your performers' acts give double ",
-                   "and your front performer gains "],
+                   "and your front performer regains "],
         # 2026-09-25: what a summon does and what each performer does. The
         # numerals are interpolated on the mod side, so the anchors are the
         # prose either side of them.
         # One sentence since the trio can be cloned (2026-09-25).
+        # The second text pass (2026-09-28): "first", and "gives".
         "Summon": ["A performer joins at the back with ",
                    "stage, the front one ",
-                   "to the newcomer."],
+                   "s first and gives the ",
+                   "newcomer its Fanfare."],
         # Draft 3 (2026-09-25): one sentence each, no Hydro, no Bow clause.
         "Gentilhomme Usher": ["End of your turn: gain "],
         "Surintendante Chevalmarin": ["End of your turn: deal ",
@@ -6797,9 +6801,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # THE GUEST CAST (2026-09-25): the keyword and the eight guests'
         # tips. Numerals are interpolated on the mod side, so the anchors are
         # the prose around them.
-        "Guest Star": ["A Guest Star card's performer. Unlike Usher, "
-                       "Chevalmarin and ", "Crabaletta, one of each: a copy "
-                       "makes it Bow and return with ", "more Fanfare."],
+        # The second text pass (2026-09-28).
+        "Guest Star": ["You can have one of each on stage. Summoning one "
+                       "already there ", "makes it ",
+                       ", then return with the new ", " added."],
         "Neuvillette": ["End of your turn: pay ", " of his Fanfare to deal ",
                         " damage to ALL enemies."],
         "Clorinde": ["End of your turn: take ",
@@ -6816,15 +6821,17 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                       "your front ", "performer if she is at the back."],
         "Charlotte": ["End of your turn: each other performer gains "],
         # 2026-09-25 night (the granted-guest seat round): the act lands.
+        # The second text pass (2026-09-28): "preferring".
         "Lynette": ["End of your turn: deal ",
-                    " damage to a random enemy, one with an aura ",
-                    "if any."],
+                    " damage to a random enemy, preferring one ",
+                    "with an aura."],
         # THE SUPPORTING POOL (2026-09-26): two more guests.
         "Lyney": ["End of your turn: pay ", " of his Fanfare to deal ",
                   " damage to a random enemy. If not in front, ",
                   "he swaps with the front."],
         "Escoffier": ["End of your turn: pay ",
                       " of her Fanfare to give each other performer ",
+                      " Fanfare and deal ",
                       " damage to ALL enemies."],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
@@ -6842,7 +6849,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
             == set(blindplay.ARM_KEYWORDS))
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
                 "PlanKey", "SpendKey", "FanfareKey", "BowKey",
-                "FrontPerformerKey", "BackPerformerKey",
+                "FrontPerformerKey", "BackPerformerKey", "FadeKey",
                 "SwirlKey", "GroundedKey", "CompanionKey"):
         assert f"public const string {key}" in src
     assert "HexereiKey" not in src

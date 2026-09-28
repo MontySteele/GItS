@@ -2052,7 +2052,7 @@
    replaces: universal_revelry,
    register: salon, cost: 2, type: attack, rarity: rare, exhaust: true,
    art_of: let_the_people_rejoice,
-   description: "Deal damage to ALL enemies equal to twice your performers' [gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal damage to ALL enemies equal to twice your performers' total [gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_all},
              {op: damage,
               amount_formula: {base: 0, per: 2, count: stage_spent},
@@ -2219,7 +2219,7 @@
    authored_by: [claude],
    replaces: reginas_mercy,
    register: salon, cost: 2, type: skill, rarity: rare,
-   description: "Neuvillette joins the stage with 6 [gold]Fanfare[/gold].",
+   description: "Summon Neuvillette with 6 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: neuvillette, amount: 6}]}
 
 - {id: proto_fs_guest_star_clorinde, name: "Guest Star: Clorinde", character: furina,
@@ -2227,7 +2227,7 @@
    authored_by: [claude],
    replaces: thunderous_ovation,
    register: salon, cost: 1, type: skill, rarity: rare,
-   description: "Clorinde joins the stage with 4 [gold]Fanfare[/gold].",
+   description: "Summon Clorinde with 4 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: clorinde, amount: 4}]}
 
 - {id: proto_fs_guest_star_navia, name: "Guest Star: Navia", character: furina,
@@ -2235,7 +2235,7 @@
    authored_by: [claude],
    replaces: encore_performance,
    register: salon, cost: 1, type: skill, rarity: rare,
-   description: "Navia joins the stage with 4 [gold]Fanfare[/gold].",
+   description: "Summon Navia with 4 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: navia, amount: 4}]}
 
 - {id: proto_fs_guest_star_chevreuse, name: "Guest Star: Chevreuse", character: furina,
@@ -2243,7 +2243,7 @@
    authored_by: [claude],
    replaces: audience_participation,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Chevreuse joins the stage with 4 [gold]Fanfare[/gold].",
+   description: "Summon Chevreuse with 4 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: chevreuse, amount: 4}]}
 
 - {id: proto_fs_guest_star_wriothesley, name: "Guest Star: Wriothesley", character: furina,
@@ -2254,7 +2254,7 @@
    # The guest seat round (2026-09-25, 0.2.3794): "he joins at the back,
    # where hits never reach him, so his act lands nothing." He is the guest
    # who wants the front, so his card puts him there; the others shift back.
-   description: "Wriothesley joins the stage at the front with 8 [gold]Fanfare[/gold]. On a full stage, the back one [gold]Bow[/gold]s and leaves him its [gold]Fanfare[/gold].",
+   description: "Summon Wriothesley at the front with 8 [gold]Fanfare[/gold]. On a full stage, the back one [gold]Bow[/gold]s instead and gives him its [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: wriothesley, amount: 8, seat: front}]}
 
 - {id: proto_fs_guest_star_sigewinne, name: "Guest Star: Sigewinne", character: furina,
@@ -2262,7 +2262,7 @@
    authored_by: [claude],
    replaces: standing_room_only,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Sigewinne joins the stage with 8 [gold]Fanfare[/gold].",
+   description: "Summon Sigewinne with 8 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: sigewinne, amount: 8}]}
 
 - {id: proto_fs_guest_star_charlotte, name: "Guest Star: Charlotte", character: furina,
@@ -2270,7 +2270,7 @@
    authored_by: [claude],
    replaces: limelight,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Charlotte joins the stage with 4 [gold]Fanfare[/gold].",
+   description: "Summon Charlotte with 4 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: charlotte, amount: 4}]}
 
 - {id: proto_fs_guest_star_lynette, name: "Guest Star: Lynette", character: furina,
@@ -2280,7 +2280,7 @@
    register: salon, cost: 1, type: skill, rarity: uncommon,
    # 2026-09-25 night: her act (tip and badge) now always lands, 3 Anemo
    # damage to a random enemy, one with an aura if any.
-   description: "Lynette joins the stage with 8 [gold]Fanfare[/gold].",
+   description: "Summon Lynette with 8 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: lynette, amount: 8}]}
 
 # FURINA, THE STAGE -- THE SUPPORTING POOL (2026-09-26): 28 rows of
@@ -2312,7 +2312,7 @@
    authored_by: [claude],
    replaces: curtain_cue,
    register: salon, cost: 0, type: skill, rarity: uncommon,
-   description: "This turn, your performers' acts that hit a random enemy hit this enemy instead. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "This turn, your performers' random hits target this enemy. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: stage_verdict, target: enemy},
              {op: draw, amount: 1}]}
 
@@ -2324,7 +2324,7 @@
    # His act is on his tip and badge (the Guest Cast frame, rule 1): pay 2 of
    # his Fanfare, 6 Pyro damage to a random enemy, then swap the front and
    # back performers.
-   description: "Lyney joins the stage with 5 [gold]Fanfare[/gold].",
+   description: "Summon Lyney with 5 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: lyney, amount: 5}]}
 
 # 2026-09-26 seat round, second rework: it gathers the whole stage into the
@@ -2367,7 +2367,7 @@
    register: salon, cost: 2, type: skill, rarity: rare,
    # Her act is on her tip and badge: pay 3 of her Fanfare to give each other
    # performer 2 and deal 3 Cryo damage to ALL enemies.
-   description: "Escoffier joins the stage with 6 [gold]Fanfare[/gold].",
+   description: "Summon Escoffier with 6 [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: escoffier, amount: 6}]}
 
 - {id: proto_fs_star_billing, name: "Star Billing", character: furina,
@@ -2386,7 +2386,7 @@
    authored_by: [claude],
    replaces: directors_cut,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 7 [gold]Block[/gold]. At the end of this turn, your performers do not fade.",
+   description: "Gain 7 [gold]Block[/gold]. Your performers don't [gold]fade[/gold] this turn.",
    effects: [{op: block, amount: 7},
              {op: stage_hold_fade}]}
 
@@ -2450,7 +2450,7 @@
    authored_by: [claude],
    replaces: showstopper,
    register: salon, cost: 2, type: attack, rarity: rare,
-   description: "Spend all of your [gold]front performer[/gold]'s [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage per point to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Your [gold]front performer[/gold] loses all its [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage to ALL enemies per point lost.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_front_all},
              {op: damage,
               amount_formula: {base: 0, per: 2, count: stage_spent},

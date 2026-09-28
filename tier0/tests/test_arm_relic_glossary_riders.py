@@ -9,7 +9,10 @@ from __future__ import annotations
 
 from understudy import blindplay_notes as notes
 
-FACE = ("Spend 2. Your back performer and your front performer take a Bow.")
+# The second text pass (2026-09-28): the fade has its own row, which
+# Grand Theater Program's rider rides, so the face names it too.
+FACE = ("Spend 2. Your back performer and your front performer take a Bow. "
+        "Nobody fades.")
 
 
 def _rows(held: list[str]) -> dict[str, str]:

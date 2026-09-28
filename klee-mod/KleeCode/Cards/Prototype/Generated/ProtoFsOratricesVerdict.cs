@@ -41,7 +41,7 @@ public sealed class ProtoFsOratricesVerdict : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Oratrice's Verdict"),
-        ("description", "This turn, your performers' acts that hit a random enemy hit this enemy instead. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "This turn, your performers' random hits target this enemy. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -45,7 +45,7 @@ public sealed class ProtoFsBringTheHouseDown : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bring the House Down"),
-        ("description", "Spend all of your [gold]front performer[/gold]'s [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage per point to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Your [gold]front performer[/gold] loses all its [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage to ALL enemies per point lost.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

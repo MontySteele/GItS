@@ -229,9 +229,10 @@ public class FurinaStageLegibilityTests
         var body = Printed("ForSummon");
         Assert.Contains("A performer joins at the back with ", body);
         // 2026-09-25 night (the granted-guest seat round), word for word.
+        // The second text pass (2026-09-28): "first", and "gives".
         Assert.Contains(" [gold]Fanfare[/gold]. On a full stage, the front "
-                      + "one [gold]Bow[/gold]s and leaves its Fanfare to the "
-                      + "newcomer.", body);
+                      + "one [gold]Bow[/gold]s first and gives the "
+                      + "newcomer its Fanfare.", body);
         Assert.DoesNotContain("the lead", body);
         var parameters = typeof(ArmKeywordTips).GetMethod("ForSummon")!
             .GetParameters();
@@ -291,9 +292,10 @@ public class FurinaStageLegibilityTests
     public void The_stage_badge_is_the_ruled_text()
     {
         // Draft 3 (2026-09-25): the seat count and rule 12, the fade.
+        // The second text pass (2026-09-28): who acts, then the fade.
         Assert.Equal(
-            "Up to 3 performers. At the end of your turn, those behind the "
-          + "front lose half their Fanfare above 5.",
+            "Up to 3 performers act at the end of your turn. Then each one "
+          + "behind the front loses half its Fanfare above 5.",
             Badge<StageSummaryPower>("description"));
     }
 
@@ -303,7 +305,9 @@ public class FurinaStageLegibilityTests
     [Fact]
     public void The_stage_badge_names_the_seat_count_from_the_law()
     {
-        Assert.StartsWith($"Up to {FurinaStageLaw.Seats} performers.",
+        // The second text pass (2026-09-28): "... performers act at the end
+        // of your turn."
+        Assert.StartsWith($"Up to {FurinaStageLaw.Seats} performers act ",
                           Badge<StageSummaryPower>("description"));
     }
 

@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,12 +37,15 @@ public sealed class ProtoFsHeldApplause : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForFade(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_held_applause");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Held Applause"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. At the end of this turn, your performers do not fade."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your performers don't [gold]fade[/gold] this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

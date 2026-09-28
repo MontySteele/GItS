@@ -33,7 +33,7 @@ from understudy import blindplay
 from understudy.blindplay_notes import (ARM_KEYWORDS, CHOOSER_ONE_CHOICE_NOTE,
                                         MODE_CHOOSER_PROMPT,
                                         RESOLUTION_NO_HITS,
-                                        RESOLUTION_NO_HITS_STAGE, STAGE_ACTS)
+                                        RESOLUTION_NO_HITS_STAGE)
 from understudy.blindplay_render import _render_stage_log, _resolution_lines
 
 REPO = Path(__file__).resolve().parents[2]
@@ -181,11 +181,17 @@ def test_the_one_press_note_says_everything_else_is_refused():
 # ---------------------------------------------------------------------------
 
 def test_the_glossary_says_up_to_three_perform():
-    # THE SUPPORTING POOL (2026-09-26): 4 with Sold Out.
-    assert STAGE_ACTS.startswith("Up to 3 performers, or 4 with Sold Out, "
-                                 "act at the end of your turn")
-    assert ARM_KEYWORDS["front performer"].endswith(STAGE_ACTS)
-    assert ARM_KEYWORDS["back performer"].endswith(STAGE_ACTS)
+    # THE SUPPORTING POOL (2026-09-26): 4 with Sold Out. The second text pass
+    # (2026-09-28) dropped the act list the page appended to both seat rows;
+    # the seat count is the Stage badge's, which says who acts and when.
+    assert ARM_KEYWORDS["front performer"] == (
+        "Takes hits first. Regains 1 Fanfare at the start of your turn.")
+    assert ARM_KEYWORDS["back performer"] == (
+        "Your last performer in line. Spend pays from it. A lone performer "
+        "is both front and back.")
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+           / "FurinaStageBadges.cs").read_text(encoding="utf-8")
+    assert '"Up to {Seats} performers act at the end of your turn. Then each "' in src
 
 
 def test_the_stage_badge_interpolates_the_law():
@@ -193,8 +199,9 @@ def test_the_stage_badge_interpolates_the_law():
            / "FurinaStageBadges.cs").read_text(encoding="utf-8")
     # Draft 3 (2026-09-25): the badge is the seat count and the fade, both
     # off the law.
-    assert '"Up to " + FurinaStageLaw.Seats + " performers. At the end of "' in src
-    assert '"above " + FurinaStageLaw.FadeThreshold + "."' in src
+    # The second text pass (2026-09-28): who acts, then the fade.
+    assert '"Up to " + FurinaStageLaw.Seats + " performers act at the end of "' in src
+    assert '"Fanfare above " + FurinaStageLaw.FadeThreshold + "."' in src
 
 
 # ---------------------------------------------------------------------------

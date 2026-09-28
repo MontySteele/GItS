@@ -38,14 +38,14 @@ public sealed class ProtoFsGuestStarLynette : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForLynette(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForLynette(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_lynette");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Lynette"),
-        ("description", "Lynette joins the stage with {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Summon Lynette with {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

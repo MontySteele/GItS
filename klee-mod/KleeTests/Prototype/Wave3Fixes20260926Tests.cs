@@ -203,7 +203,10 @@ public class Wave3Fixes20260926Tests
         var printed = string.Concat(Il.Strings(
             typeof(ArmKeywordTips).GetMethod(nameof(ArmKeywordTips.ForPneuma),
                                              HeadlessGame.All)!));
-        Assert.Contains("It summons nobody.", printed);
+        // The second text pass (2026-09-28): "regains", as the front
+        // performer's tip says, in place of "It summons nobody."
+        Assert.Contains("and your front performer regains ", printed);
+        Assert.DoesNotContain("It summons nobody.", printed);
     }
 
     [Fact]

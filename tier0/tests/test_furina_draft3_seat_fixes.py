@@ -103,11 +103,11 @@ def test_nothing_on_the_stage_block_says_a_bow_waits():
 
 
 def test_the_bow_row_is_the_plain_exit():
-    # The Guest Cast (2026-09-25): and a guest's Bow does not pay.
+    # The Guest Cast (2026-09-25): and a guest's Bow does not pay. The
+    # second text pass (2026-09-28) dropped the page's hit-Bow rider.
     assert ARM_KEYWORDS["Bow"] == (
         "A performer that leaves the stage acts one last time on its way "
-        "out, without paying. A performer emptied by a hit Bows before the "
-        "rest of that hit reaches you.")
+        "out, without paying.")
 
 
 # ---------------------------------------------------------------------------

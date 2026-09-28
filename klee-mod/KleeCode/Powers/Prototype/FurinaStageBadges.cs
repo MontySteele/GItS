@@ -294,12 +294,10 @@ public sealed class NaviaBadgePower : StagePerformerBadge, ILocalizationProvider
         ("title", FurinaStageLedger.DisplayName(Performer)),
         ("description",
             "End of your turn: deal [gold]Geo[/gold] damage equal to her "
-          + "Fanfare to a random enemy. Her [gold]Bow[/gold] uses what she "
-          + "had before she was emptied."),
+          + "Fanfare to a random enemy."),
         ("smartDescription",
             "End of your turn: deal [gold]Geo[/gold] damage equal to her "
-          + "Fanfare to a random enemy. Her [gold]Bow[/gold] uses what she "
-          + "had before she was emptied."),
+          + "Fanfare to a random enemy."),
     };
 }
 
@@ -340,14 +338,14 @@ public sealed class WriothesleyBadgePower : StagePerformerBadge,
             "End of your turn: deal " + FurinaStageLaw.ActWriothesleyBase
           + " [gold]Cryo[/gold] damage to a random enemy, plus "
           + FurinaStageLaw.ActWriothesleyRate + " per [gold]Fanfare[/gold] "
-          + "hits took and " + FurinaStageLaw.ActWriothesleyBlockedRate
-          + " per damage [gold]Block[/gold] stopped in front."),
+          + "he lost to hits and " + FurinaStageLaw.ActWriothesleyBlockedRate
+          + " per damage [gold]Block[/gold] saved him."),
         ("smartDescription",
             "End of your turn: deal " + FurinaStageLaw.ActWriothesleyBase
           + " [gold]Cryo[/gold] damage to a random enemy, plus "
           + FurinaStageLaw.ActWriothesleyRate + " per [gold]Fanfare[/gold] "
-          + "hits took and " + FurinaStageLaw.ActWriothesleyBlockedRate
-          + " per damage [gold]Block[/gold] stopped in front."),
+          + "he lost to hits and " + FurinaStageLaw.ActWriothesleyBlockedRate
+          + " per damage [gold]Block[/gold] saved him."),
     };
 }
 
@@ -406,11 +404,11 @@ public sealed class LynetteBadgePower : StagePerformerBadge,
         ("title", FurinaStageLedger.DisplayName(Performer)),
         ("description",
             "End of your turn: deal " + FurinaStageLaw.ActLynetteDamage
-          + " [gold]Anemo[/gold] damage to a random enemy, one with an aura "
-          + "if any."),
+          + " [gold]Anemo[/gold] damage to a random enemy, preferring one "
+          + "with an aura."),
         ("smartDescription",
             "End of your turn: deal {Act} [gold]Anemo[/gold] damage to a "
-          + "random enemy, one with an aura if any."),
+          + "random enemy, preferring one with an aura."),
     };
 }
 
@@ -455,13 +453,13 @@ public sealed class EscoffierBadgePower : StagePerformerBadge,
         ("description",
             "End of your turn: pay " + FurinaStageLaw.ActEscoffierPrice
           + " of her Fanfare to give each other performer "
-          + FurinaStageLaw.ActEscoffierGift + " and deal "
+          + FurinaStageLaw.ActEscoffierGift + " Fanfare and deal "
           + FurinaStageLaw.ActEscoffierDamage
           + " [gold]Cryo[/gold] damage to ALL enemies."),
         ("smartDescription",
             "End of your turn: pay " + FurinaStageLaw.ActEscoffierPrice
           + " of her Fanfare to give each other performer "
-          + FurinaStageLaw.ActEscoffierGift + " and deal {Act} "
+          + FurinaStageLaw.ActEscoffierGift + " Fanfare and deal {Act} "
           + "[gold]Cryo[/gold] damage to ALL enemies."),
     };
 }
@@ -490,17 +488,19 @@ public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
         // Draft 3 (2026-09-25): rule 12, the fade, replaces the damage-order
         // sentence, which the Fanfare tip carries on every card that prints
         // the word.
+        // The second text pass (2026-09-28): when the cast acts, then the
+        // fade, in the fade tip's words.
         ("description",
-            "Up to " + FurinaStageLaw.Seats + " performers. At the end of "
-          + "your turn, those behind the front lose half their Fanfare "
-          + "above " + FurinaStageLaw.FadeThreshold + "."),
+            "Up to " + FurinaStageLaw.Seats + " performers act at the end of "
+          + "your turn. Then each one behind the front loses half its "
+          + "Fanfare above " + FurinaStageLaw.FadeThreshold + "."),
         // SOLD OUT (the supporting pool, 2026-09-26): in combat the count is
         // her stage's own, so the badge says 4 once the fourth seat is open.
         // The static line above is the canonical face a copy with no owner
         // shows, as on the performers' badges.
         ("smartDescription",
-            "Up to {Seats} performers. At the end of your turn, those behind "
-          + "the front lose half their Fanfare above "
+            "Up to {Seats} performers act at the end of your turn. Then each "
+          + "one behind the front loses half its Fanfare above "
           + FurinaStageLaw.FadeThreshold + "."),
         // Relics smoke seat 2026-09-27: with Grand Theater Program owned the
         // line still said performers "lose half above 5". The face a held

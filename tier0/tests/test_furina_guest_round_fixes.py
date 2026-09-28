@@ -100,8 +100,8 @@ WRIOTHESLEY = {
         {"name": "Wriothesley",
          "description": "End of your turn: deal 4 [gold]Cryo[/gold] damage "
                         "to a random enemy, plus 2 per [gold]Fanfare[/gold] "
-                        "hits took and 1 per damage [gold]Block[/gold] "
-                        "stopped in front."}]}
+                        "he lost to hits and 1 per damage "
+                        "[gold]Block[/gold] saved him."}]}
 
 
 # ---------------------------------------------------------------------------
@@ -111,10 +111,11 @@ WRIOTHESLEY = {
 def test_the_back_performer_row_says_hits_never_reach_it():
     # 2026-09-26: a lone performer is both seats -- hit, paying Spends -- and
     # never fades (rule 12 exempts the front).
-    assert ARM_KEYWORDS["back performer"].startswith(
-        "Gains and Spends Fanfare. End of your "
-        "turn: it fades, losing half its Fanfare above 5. A lone performer is "
-        "both, and never fades.")
+    # The second text pass (2026-09-28): the tip's words; the fade has its
+    # own row, and a lone performer is both seats.
+    assert ARM_KEYWORDS["back performer"] == (
+        "Your last performer in line. Spend pays from it. A lone performer "
+        "is both front and back.")
     for row in ARM_KEYWORDS.values():
         assert "reach it last" not in row
 

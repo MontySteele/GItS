@@ -95,6 +95,10 @@ public static class ArmKeywordTips
     public const string BowKey = "KLEEMOD-ARM_STAGE_BOW";
     public const string FrontPerformerKey = "KLEEMOD-ARM_STAGE_FRONT";
     public const string BackPerformerKey = "KLEEMOD-ARM_STAGE_BACK";
+    // The second text pass (2026-09-28, review/records/furina-text-pass-
+    // 2026-09-28.md): the fade, a word four faces already print, gets its
+    // own tip. The back performer's tip no longer carries it.
+    public const string FadeKey = "KLEEMOD-ARM_STAGE_FADE";
     // R276 batch two: Arkhe Alignment's two halves.
     public const string OusiaKey = "KLEEMOD-ARM_STAGE_OUSIA";
     public const string PneumaKey = "KLEEMOD-ARM_STAGE_PNEUMA";
@@ -821,8 +825,9 @@ public static class ArmKeywordTips
             // summon lives here, on the word every Fanfare-giving face
             // prints -- Hold Your Places and Gala Dinner carry no back
             // performer tip. "At 0 it leaves" is dropped on purpose.
+            // The second text pass (2026-09-28): "your front performer's".
             "A performer's health. Hits take your [gold]Block[/gold], then "
-          + "the front performer's, then you. Gained on an empty stage, it "
+          + "your front performer's, then you. Gaining it on an empty stage "
           + "summons a performer.");
 
     /// <summary>
@@ -890,11 +895,25 @@ public static class ArmKeywordTips
             // hit, it pays Spends, and it never fades (rule 12 exempts the
             // front). The sentence says both.
             // Relics smoke seat 2026-09-27: "'Fade' is never defined." It
-            // is, here, in one clause.
-            "Gains and Spends [gold]Fanfare[/gold]. End "
-          + "of your turn: it fades, losing half its Fanfare above "
-          + FurinaStageLaw.FadeThreshold + ". A lone performer is both, and "
-          + "never fades.");
+            // was, here, in one clause -- until the second text pass
+            // (2026-09-28): the fade takes every performer behind the front,
+            // not just the back one, so it has its own tip (`ForFade`).
+            "Your last performer in line. [gold]Spend[/gold] pays from it. "
+          + "A lone performer is both front and back.");
+
+    /// <summary>
+    /// The second text pass (2026-09-28). Brief sec.3 rule 12, THE FADE, on
+    /// the cards that bend it (Held Applause, Echoing Hall, Eternal
+    /// Applause). Every performer behind the front, not just the back one
+    /// (<c>FurinaStageLedger.Fade</c>, the loop from seat 1). The numeral is
+    /// <see cref="FurinaStageLaw.FadeThreshold"/>'s (`EB-89`).
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForFade(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, FadeKey,
+            "At the end of your turn, each performer behind the front loses "
+          + "half its [gold]Fanfare[/gold] above "
+          + FurinaStageLaw.FadeThreshold + ", rounded down.");
 
     /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
     /// choice a player makes at the start of each turn.</summary>
@@ -910,12 +929,13 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PneumaKey,
             "This turn, your performers' acts give double [gold]Block[/gold], "
-          + "and your front performer gains "
+          + "and your front performer regains "
           + Powers.ArkheAlignmentPower.PneumaLeadRegain
           // 2026-09-26 (wave-3 Furina lane 4): the gain is a regain, not a
-          // Raise, so on an empty stage nobody is summoned (brief rule 5),
-          // which the Fanfare tip's empty-stage clause led a seat to expect.
-          + " [gold]Fanfare[/gold]. It summons nobody.");
+          // Raise, so on an empty stage nobody is summoned (brief rule 5).
+          // The second text pass (2026-09-28) says "regains", as the front
+          // performer's tip does, in place of "It summons nobody."
+          + " [gold]Fanfare[/gold].");
 
     /// <summary>
     /// 2026-09-25. WHAT A SUMMON DOES, on every card that summons. ONE
@@ -932,10 +952,13 @@ public static class ArmKeywordTips
         With(inherited, SummonKey,
             // 2026-09-25 night (the granted-guest seat round): lane 2 only
             // understood "adds its Fanfare" from the log.
+            // The second text pass (2026-09-28): the Guest Stars carry this
+            // tip too, so the ordinary full-stage rule is printed where one
+            // is played.
             "A performer joins at the back with "
           + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. On a full "
-          + "stage, the front one [gold]Bow[/gold]s and leaves its Fanfare "
-          + "to the newcomer.");
+          + "stage, the front one [gold]Bow[/gold]s first and gives the "
+          + "newcomer its Fanfare.");
 
     /// <summary>
     /// 2026-09-25. GENTILHOMME USHER'S ACT, on every card that names him and
@@ -986,9 +1009,11 @@ public static class ArmKeywordTips
             // Relics smoke seat 2026-09-27: "I never learned what a Guest
             // Star is", and read two Ushers standing as "one of each" broken.
             // The row names what IS one, and what is not.
-            "A Guest Star card's performer. Unlike Usher, Chevalmarin and "
-          + "Crabaletta, one of each: a copy makes it Bow and return with "
-          + "more Fanfare.");
+            // The second text pass (2026-09-28): what a Guest Star is, the
+            // Summon tip beside it says.
+            "You can have one of each on stage. Summoning one already there "
+          + "makes it [gold]Bow[/gold], then return with the new "
+          + "[gold]Fanfare[/gold] added.");
 
     public static IEnumerable<IHoverTip> ForNeuvillette(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -1009,8 +1034,7 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, NaviaKey,
             "End of your turn: deal [gold]Geo[/gold] damage equal to her "
-          + "Fanfare to a random enemy. Her [gold]Bow[/gold] uses what she "
-          + "had before she was emptied.");
+          + "Fanfare to a random enemy.");
 
     public static IEnumerable<IHoverTip> ForChevreuse(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -1027,8 +1051,8 @@ public static class ArmKeywordTips
             "End of your turn: deal " + FurinaStageLaw.ActWriothesleyBase
           + " [gold]Cryo[/gold] damage to a random enemy, plus "
           + FurinaStageLaw.ActWriothesleyRate + " per [gold]Fanfare[/gold] "
-          + "hits took and " + FurinaStageLaw.ActWriothesleyBlockedRate
-          + " per damage [gold]Block[/gold] stopped in front.");
+          + "he lost to hits and " + FurinaStageLaw.ActWriothesleyBlockedRate
+          + " per damage [gold]Block[/gold] saved him.");
 
     public static IEnumerable<IHoverTip> ForSigewinne(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -1049,8 +1073,8 @@ public static class ArmKeywordTips
             // 2026-09-25 night (the granted-guest seat round): the act always
             // lands, and Swirls where it finds an aura.
             "End of your turn: deal " + FurinaStageLaw.ActLynetteDamage
-          + " [gold]Anemo[/gold] damage to a random enemy, one with an aura "
-          + "if any.");
+          + " [gold]Anemo[/gold] damage to a random enemy, preferring one "
+          + "with an aura.");
 
     // THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
     // 2026-09-26.md): two more guests, on the same terms -- the same
@@ -1074,7 +1098,7 @@ public static class ArmKeywordTips
         With(inherited, EscoffierKey,
             "End of your turn: pay " + FurinaStageLaw.ActEscoffierPrice
           + " of her Fanfare to give each other performer "
-          + FurinaStageLaw.ActEscoffierGift + " and deal "
+          + FurinaStageLaw.ActEscoffierGift + " Fanfare and deal "
           + FurinaStageLaw.ActEscoffierDamage
           + " [gold]Cryo[/gold] damage to ALL enemies.");
 }

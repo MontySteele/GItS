@@ -38,14 +38,14 @@ public sealed class ProtoFsGuestStarEscoffier : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForEscoffier(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForEscoffier(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_escoffier");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Escoffier"),
-        ("description", "Escoffier joins the stage with 6 [gold]Fanfare[/gold]."),
+        ("description", "Summon Escoffier with 6 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
