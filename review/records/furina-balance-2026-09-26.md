@@ -44,3 +44,11 @@ Their run, from their game log: 550 card plays. The most-played Stage cards were
 
 1. **The fade and the front seat: (c).** The front stays exempt, so the Rapt Audience fix goes in alone. In [USER]'s words: "Let's go with c) to allow for the front minion to continue building Fanfare." Rule 12 is unchanged.
 2. **The turn predictor: (a).** Cues on the performers: each performer shows its act over its head the way an enemy shows its intent, and the fade and incoming hits show as chips on its bar. The text box goes. [USER]: "a) sounds good". This will be built after the UI cleanup lands.
+
+## Co-op run, 2026-09-27
+
+[USER]'s co-op run, with a friend on Furina, was a win. Three things came out of it:
+
+- **The Bow engine is now limited.** A Five-Century Act returns only the first Bow each turn, and Echoing Hall moves half the faded Fanfare (#723). Your words: "For the furina Fix items - I like your default,".
+- **Wriothesley was dealing nothing.** He now always attacks (#723).
+- **Damage is on watch.** The friend "wasn't able to find any path to actually do decent damage". The run history shows he passed on Bravura twice, Grand Entrance, Grand Deluge three times and Counterclaim twice, in favour of engine and defence cards. That is mostly drafting. The open question is whether a stacking deck gets enough pull toward spending its Fanfare, since every Common attack deals a flat amount. [USER]: "Leaning towards 'watch it' for now and we can assess if it's still a real problem after further testing". If it recurs, the lever is one Common that turns Fanfare into damage.
