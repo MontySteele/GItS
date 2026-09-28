@@ -144,7 +144,7 @@ PROTO_TAG = "+proto"
 # The count is the ruling's commit on main; a build between an earlier merge
 # and this one is the one case the number cannot tell apart, and there the far
 # side's `unknown card id` still refuses the grant.
-KITS_DEFAULT_SINCE = 3966
+KITS_DEFAULT_SINCE = 3970
 
 
 def carries_prototype_classes(build: str) -> bool:
