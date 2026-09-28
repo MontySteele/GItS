@@ -174,7 +174,7 @@ In-game there is no CLI: `KleeMod.Initialize` is the only entry
   come from a `rule` parameter, so grepping `Fail("R` misses them.
 - **`KleeAssetPathFallback.cs` looks like dead placeholder scaffolding and is
   load-bearing** — renamed from `KleePlaceholderArt` precisely because a name
-  predicting its own deletion invites deletion; 9 asset paths have no other source
+  predicting its own deletion invites deletion; 5 asset paths (the FMOD events) have no other source
   (`KleeAssetPathFallback.cs:11-40`).
 - **`ProgressSaveManager_EpochCheck_Patch` is a CANARY, not the fix.** If its warn
   line appears, BaseLib's `ICustomModel` guard stopped applying; deleting it removes

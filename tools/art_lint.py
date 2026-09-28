@@ -512,6 +512,22 @@ GENERATOR_OWNED = {
     # gen_furina_stills.py/gen_kokomi_stills.py on theirs), so no single
     # plan.tsv row could source it even if one wanted to claim it.
     "ImageGen/images/mod_image.png":                        "gen_mod_image.py",
+    # The co-op treasure room's hands: recolours of the base game's own arms
+    # (Silent -> Klee, Regent -> Furina, Necrobinder -> Kokomi), read out of
+    # SlayTheSpire2.pck. build_pck.ps1 packs them at the engine's
+    # res://images/ui/hands/ path, which CharacterModel derives from the id.
+    "ImageGen/images/hands/multiplayer_hand_kleemod-klee_point.png":      "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-klee_rock.png":       "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-klee_paper.png":      "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-klee_scissors.png":   "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-furina_point.png":    "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-furina_rock.png":     "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-furina_paper.png":    "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-furina_scissors.png": "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-kokomi_point.png":    "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-kokomi_rock.png":     "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-kokomi_paper.png":    "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-kokomi_scissors.png": "gen_multiplayer_hands.py",
 }
 
 
