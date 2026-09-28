@@ -475,10 +475,20 @@ public sealed class CurtainNeverFalls : CustomRelicModel
 
 #if PROTOTYPE_CARDS
     /// <summary>Under the Stage, the front performer's regain at the start of
-    /// her turn (rule 4's 1, upgraded), from her first turn. The rebuild of
-    /// 2026-09-27 (review/active/relics-potions-klee-furina-2026-09-27.md).
+    /// her turn (rule 4's 1, upgraded), from her SECOND turn, the same first
+    /// turn as the shipped rule. The rebuild of 2026-09-27
+    /// (review/active/relics-potions-klee-furina-2026-09-27.md).
     /// </summary>
     public const int LeadRegen = 2;
+
+    /// <summary>Under the Stage, the Fanfare Usher opens the fight with. The
+    /// face prints what the first hand sees (2026-09-28, [USER]: "Usher starts
+    /// at 5 Fanfare ... I presume this is because it gets a tick at the start
+    /// and 2+3 = 5?"). It used to open at the starter's 3 and regain 2 on turn
+    /// one; it now opens at 5 and regains from turn two. Turn one reads 5
+    /// either way. The opening is idempotent, so with Opera Glasses (also 5)
+    /// the pair opens at 5, where it used to reach 7.</summary>
+    public const int OpeningFanfare = 5;
 
     /// <summary>Does this Furina, on a live Stage, hold the Curtain? Read by
     /// <c>FurinaStage.RegenLead</c>.</summary>
@@ -489,7 +499,7 @@ public sealed class CurtainNeverFalls : CustomRelicModel
             System.Linq.Enumerable.OfType<CurtainNeverFalls>(player.Relics));
 
     /// <summary>
-    /// REBUILT FOR THE STAGE: "Start each combat with Usher at 3 Fanfare." It
+    /// REBUILT FOR THE STAGE: "Start each combat with Usher at 5 Fanfare." It
     /// replaces Salon Solitaire (its upgrade), so it makes the starter's
     /// sentence true itself, at the starter's own moment and through the same
     /// idempotent opening. Arm off it does nothing here: the shipped Spotlight
@@ -513,12 +523,13 @@ public sealed class CurtainNeverFalls : CustomRelicModel
 #if FURINA_STAGE
             // The Stage's face: a loc row is registered once at boot, so the
             // switch is the compile constant the deploy line sets.
-            // The second text pass (2026-09-28): shorter, same numbers.
+            // The third text pass (2026-09-28): the face prints the 5 the
+            // first hand sees, and the mechanism opens at it.
             "Start each combat with [gold]Usher[/gold] in front with [blue]"
-          + Powers.FurinaStageLaw.OpeningFanfare + "[/blue] [gold]Fanfare[/gold]. "
+          + OpeningFanfare + "[/blue] [gold]Fanfare[/gold]. "
           + "Your [gold]front performer[/gold] regains [blue]" + LeadRegen
-          + "[/blue] Fanfare each turn, not "
-          + Powers.FurinaStageLaw.LeadRegen + "."
+          + "[/blue] Fanfare each turn, not [blue]"
+          + Powers.FurinaStageLaw.LeadRegen + "[/blue]."
 #else
             "[gold]Center Stage[/gold] and [gold]Guest Cast[/gold] are always "
           + "active. You always count as having moved the "

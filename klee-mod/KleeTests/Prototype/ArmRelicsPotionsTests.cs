@@ -760,7 +760,7 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
-    public void The_curtain_never_falls_regains_two_from_the_first_turn_and_opens_usher()
+    public void The_curtain_never_falls_opens_usher_at_five_and_regains_two_from_the_second_turn()
     {
         using var _ = new StageArm();
         var seat = Seat.Furina().WithCombatState();
@@ -769,8 +769,14 @@ public class ArmRelicsPotionsTests
         Assert.Equal(0, stage.Regen(1));                          // shipped rule 4
         Give<CurtainNeverFalls>(seat);
         Assert.True(CurtainNeverFalls.OnStage(seat.Creature));
-        Assert.Equal(2, stage.Regen(1, CurtainNeverFalls.LeadRegen, firstTurn: 1));
+        // 2026-09-28: the face prints the 5 the first hand sees, so the
+        // relic opens at 5 and its regain starts on turn two like rule 4's.
+        Assert.Equal(5, CurtainNeverFalls.OpeningFanfare);
+        Assert.Equal(0, stage.Regen(1, CurtainNeverFalls.LeadRegen, firstTurn: 2));
+        Assert.Equal(2, stage.Regen(2, CurtainNeverFalls.LeadRegen, firstTurn: 2));
         Assert.Equal(5, stage.Lead!.Fanfare);
+        Assert.Contains("CurtainNeverFalls.OnStage",
+                        Il.Calls(Il.Method("FurinaStage", "OpenCombat")));
 
         var regen = Il.Calls(Il.Method("FurinaStage", "RegenLead"));
         Assert.Contains("CurtainNeverFalls.OnStage", regen);

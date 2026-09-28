@@ -281,9 +281,13 @@ public static partial class FurinaStage
     {
         if (!LiveFor(owner)) return;
         await InstallBadge(owner);
-        // OPERA GLASSES: the opening Usher's number is the relic's 5.
-        if (FurinaStageLedger.For(owner!).OpenWith(
-                StagePerformer.Usher, Relics.OperaGlasses.OpeningFor(owner))
+        // OPERA GLASSES: the opening Usher's number is the relic's 5. THE
+        // CURTAIN NEVER FALLS opens at its own 5 too (2026-09-28); holding
+        // both opens once, at the larger.
+        var opening = Relics.OperaGlasses.OpeningFor(owner);
+        if (Relics.CurtainNeverFalls.OnStage(owner))
+            opening = System.Math.Max(opening, Relics.CurtainNeverFalls.OpeningFanfare);
+        if (FurinaStageLedger.For(owner!).OpenWith(StagePerformer.Usher, opening)
             == null)
         {
             return;
@@ -910,10 +914,11 @@ public static partial class FurinaStage
         var turn = owner!.Player?.PlayerCombatState?.TurnNumber ?? 0;
         var ledger = FurinaStageLedger.For(owner);
         // THE CURTAIN NEVER FALLS, rebuilt for the Stage: "Your front
-        // performer regains 2 Fanfare at the start of your turn instead of 1,
-        // from your first turn." Rule 4's one number, upgraded.
+        // performer regains 2 Fanfare each turn, not 1." Rule 4's one number,
+        // upgraded, from the same second turn (2026-09-28: the relic opens at
+        // the 5 the first hand used to reach through a turn-one regain).
         var regained = Relics.CurtainNeverFalls.OnStage(owner)
-            ? ledger.Regen(turn, Relics.CurtainNeverFalls.LeadRegen, firstTurn: 1)
+            ? ledger.Regen(turn, Relics.CurtainNeverFalls.LeadRegen, firstTurn: 2)
             : ledger.Regen(turn);
         if (regained <= 0) return;
         FurinaStagePets.SyncBars(owner);
