@@ -42,7 +42,7 @@ public sealed class ProtoKoChainedReactions : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chained Reactions"),
-        ("description", "Whenever one of your [gold]Bombs[/gold] goes off, place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
+        ("description", "Whenever one of your [gold]Bombs[/gold] goes off, your other [gold]Bombs[/gold] grow {PowerAmount:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

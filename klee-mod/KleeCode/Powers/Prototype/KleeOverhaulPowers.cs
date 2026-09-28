@@ -37,17 +37,19 @@ public sealed class AlicesRecipePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Chained Reactions: "Whenever one of your Bombs goes off, Bomb 3 on a random
-/// enemy." The Rare that makes the Spray loop never run dry.
+/// Chained Reactions: "Whenever one of your Bombs goes off, your other Bombs
+/// grow 3." The Rare that makes a Spray board feed itself.
 ///
-/// It rides the explosion bus rather than the card, which is what "whenever"
-/// has to mean under rule 2: one Set off on a three-Bomb pile is three
-/// explosions, so it is three new Bombs.
+/// REWORKED 2026-09-27 after [USER]'s co-op run ("very OP"). It used to place a
+/// Bomb 3 per explosion, which replaced every Bomb it popped: the board never
+/// drained, and every Set off paid a Spark per Bomb, run after run. Growing the
+/// Bombs already down creates none, so a board empties as it is fired.
 ///
-/// THE RE-BOMB IS PLACED THROUGH THE SAME <c>Place</c> EVERY OTHER SOURCE USES,
-/// so it registers, it can be set off, and it can jump -- and, being a plain
-/// Bomb rather than a Mine, it cannot answer an attack by itself. Nothing fires
-/// by itself (rule 7): this places, it does not detonate.
+/// It rides the explosion bus rather than the card, so one Set off on a
+/// three-Bomb pile is three growths. A Set off takes its whole pile before any
+/// of it goes off, so the growth lands on Bombs elsewhere, never on the ones
+/// firing with it. Nothing fires by itself (rule 7): this grows, it does not
+/// detonate.
 /// </summary>
 public sealed class ChainedReactionsPower
     : PowerModel, ILocalizationProvider, IProtoExplosionListener
@@ -56,28 +58,26 @@ public sealed class ChainedReactionsPower
     {
         ("title", "Chained Reactions"),
         ("description",
-            "Whenever one of your [gold]Bombs[/gold] goes off, place a "
-          + "[gold]Bomb[/gold] [blue]{Amount}[/blue] on a random enemy."),
+            "Whenever one of your [gold]Bombs[/gold] goes off, your other "
+          + "[gold]Bombs[/gold] grow [blue]{Amount}[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public async Task OnBombExploded(
+    public Task OnBombExploded(
         PlayerChoiceContext choiceContext, Creature applier, Creature target,
         int size, bool reacted)
     {
-        if (applier != Owner) return;                 // co-op: your bombs only
+        if (applier != Owner) return Task.CompletedTask; // co-op: your bombs only
         var combat = applier.CombatState;
-        if (combat == null) return;
+        if (combat == null) return Task.CompletedTask;
 
-        var candidates = combat.HittableEnemies.Where(e => !e.IsDead).ToList();
-        if (candidates.Count == 0) return;
-        var dest = combat.RunState.Rng.CombatTargets.NextItem(candidates);
-        if (dest == null) return;
-
-        await ProtoBombPower.Place(choiceContext, dest, Amount, isMine: false,
-                                   payloadMineAll: 0, applier, cardSource: null);
+        foreach (var enemy in combat.HittableEnemies.Where(e => !e.IsDead).ToList())
+        {
+            ProtoBombPower.GrowOn(enemy, applier, Amount);
+        }
+        return Task.CompletedTask;
     }
 }
 

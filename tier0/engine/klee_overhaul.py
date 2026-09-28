@@ -109,7 +109,7 @@ OVERHAUL_OPS = frozenset((
 #: one is applied by an ordinary `apply_power` op off a card row, and every one
 #: names its C# class in `tools/gen_klee_cards.POWER_CS`.
 ALICES_RECIPE = "ko_alices_recipe"            # growth doubled
-CHAINED_REACTIONS = "ko_chained_reactions"    # re-Bomb per explosion
+CHAINED_REACTIONS = "ko_chained_reactions"    # other Bombs grow per explosion
 BOMB_ECHO = "ko_bomb_echo"                    # Sparks 'n' Splash's echo
 GROUNDED = "ko_grounded"                      # Block for the quiet turn
 #: R244's Uncommon Power, the second reader: "Whenever you play a Companion
@@ -296,8 +296,8 @@ def take_mines(enemy: Enemy) -> list[KleeCharge]:
 def place(state: CombatState, enemy: Enemy, size: int, is_mine: bool = False,
           payload_mine_all: int = 0) -> None:
     """Plant one charge. `Place`'s twin, and the SINGLE entry point for every
-    source: a card's `plant_bomb`, a jump's landing, a payload's Mines and
-    Chained Reactions' re-Bomb all arrive here.
+    source: a card's `plant_bomb`, a jump's landing and a payload's Mines all
+    arrive here.
 
     IT LANDS ON A CORPSE, matching `PowerCmd.Apply`'s only guard
     (`CanReceivePowers`, which does not test `IsDead`) and this engine's own
@@ -653,18 +653,16 @@ def _notify_explosion(state: CombatState, enemy: Enemy, size: int,
         effects.gain_sparks(state, int(C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION),
                             source="relic:pounding_surprise/explosion")
 
-    # Chained Reactions: "Whenever one of your Bombs goes off, place a Bomb N
-    # on a random enemy." Through the same `place` every other source uses, so
-    # it can be set off and it can jump -- and, being a plain Bomb rather than
-    # a Mine, it cannot answer an attack by itself (rule 7: this PLACES, it
-    # does not detonate).
+    # Chained Reactions (reworked 2026-09-27): "Whenever one of your Bombs
+    # goes off, your other Bombs grow N." It creates no Bomb, so a board
+    # empties as it is fired. A Set off takes its pile before any of it goes
+    # off, so the growth lands on Bombs elsewhere. `ChainedReactionsPower`'s
+    # twin.
     n = p.powers.get(CHAINED_REACTIONS, 0)
     if n:
-        living = list(state.living_enemies)
-        if living:
-            dest = state.rng.choice(living)
-            state.emit("ko_chained_reactions", target=dest.name, size=n)
-            place(state, dest, n)
+        state.emit("ko_chained_reactions", size=n)
+        for other in state.living_enemies:
+            grow_pile(other, n)
 
 
 # ---------------------------------------------------------------------------
