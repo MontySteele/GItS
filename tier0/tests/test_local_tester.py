@@ -43,6 +43,11 @@ from understudy import (authorship, bridge, frames, hangwatch, instances,
 import tools.lint_prototype_authorship as auth_lint
 
 REPO = Path(__file__).resolve().parents[2]
+
+# `serve_forever` polls for `shutdown()` every 0.5 s by default, so every stub
+# server cost its test up to half a second of waiting on its own teardown.
+# The poll interval is the stub's, never the code under test's.
+_FAST_SHUTDOWN = {"poll_interval": 0.01}
 QA_DIR = REPO / "review" / "qa"
 FIXTURES = REPO / "understudy" / "turns" / "fixtures"
 
@@ -97,7 +102,8 @@ class _Server(ThreadingHTTPServer):
 @pytest.fixture()
 def server():
     srv = _Server()
-    thread = threading.Thread(target=srv.serve_forever, daemon=True)
+    thread = threading.Thread(target=srv.serve_forever, daemon=True,
+                              kwargs=_FAST_SHUTDOWN)
     thread.start()
     try:
         yield srv
@@ -1509,7 +1515,8 @@ def _lane_bridge(run):
     srv = _LaneServer(("localhost", 0), _LaneCompendium)
     port = srv.server_address[1]
     _LaneCompendium.RUNS[port] = run
-    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    threading.Thread(target=srv.serve_forever, daemon=True,
+                     kwargs=_FAST_SHUTDOWN).start()
     return srv, port
 
 
@@ -2226,7 +2233,8 @@ def test_the_slot_count_reads_llama_servers_two_routes(tmp_path):
 
     srv = _LaneServer(("localhost", 0), _Slots)
     port = srv.server_address[1]
-    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    threading.Thread(target=srv.serve_forever, daemon=True,
+                     kwargs=_FAST_SHUTDOWN).start()
     try:
         c = local_model.Client(base_url=f"http://localhost:{port}/v1")
         assert local_model.slot_count(c) == 2

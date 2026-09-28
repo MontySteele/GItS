@@ -8,6 +8,7 @@ so `staged_turn.parse(blob, path)` still resolves.
 from __future__ import annotations
 
 import yaml
+from understudy import yaml_memo
 from pathlib import Path
 from typing import Any
 
@@ -469,7 +470,7 @@ def _check_halves_agree(turn: StagedTurn) -> None:
 
 def load(path: str | Path) -> StagedTurn:
     p = Path(path)
-    return parse(yaml.safe_load(p.read_text(encoding="utf-8")), path=p)
+    return parse(yaml_memo.safe_load(p.read_text(encoding="utf-8")), path=p)
 
 
 def all_turns(directory: Path | None = None) -> list[Path]:

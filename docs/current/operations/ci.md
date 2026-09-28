@@ -5,10 +5,12 @@ Three jobs, all on `ubuntu-latest`: **(a) `pytest`** — the fresh-clone gate;
 the pre-push hook runs; `operations/lints.md`) plus the deploy gate's static
 rules; **(c)
 `patch-sentinel`** — advisory, `continue-on-error`, never blocks a merge (a
-runner has no game, so it prints `skipped` by design). Set the `repo` check as
-required on `main` in branch protection ([USER]'s to click). **Those three job
-names are load-bearing** — they may be required checks, and a renamed job
-reports nothing and blocks every pull request. Rename nothing here.
+runner has no game, so it prints `skipped` by design). Since 2026-09-28
+`pytest` is a four-shard matrix whose rows read `pytest (1/4)` to
+`pytest (4/4)` (see "Speed pass two" below). `main` has no branch protection
+and no required checks today, which is what made that rename safe; if
+required checks are ever added, require `lints` and the four `pytest (n/4)`
+rows. `lints` and `patch-sentinel` are still named as they were.
 
 ### The deploy gate's static rules run here too (2026-09-02)
 
@@ -73,6 +75,35 @@ job report *nothing* rather than report success, and a required check that
 never reports blocks the pull request forever. That is precisely why the
 docs-only decision lives inside a job that always runs. A `concurrency:` block
 (cancel superseded runs on one branch) is optional and unclaimed.
+
+### Speed pass two, 2026-09-28
+
+The `pytest` job took 8.5–9 minutes, all of it the suite. Two changes; no test
+deleted, skipped or loosened, and no battery size, seed or band moved:
+
+1. **Waste out of the suite.** PyYAML's pure-Python parser was 45% of all test
+   time (387 of 863 s summed over workers), nearly all of it the same sheets
+   parsed over and over. `tier0/content/yaml_memo.py` (and its twin
+   `understudy/yaml_memo.py`, a copy because the blind seat may not import
+   `tier0`) parses each distinct text once with the same parser and returns
+   a deep copy every call; `tier0/tests/test_yaml_memo.py` proves the data is
+   identical on every committed sheet. Also fixed: a test re-parsing the
+   prototype surface once per generated file, a test sleeping out a 10 s
+   relaunch gap an earlier test left behind, and stub HTTP servers that
+   waited 0.5 s on their own shutdown.
+2. **Four shards.** `tools/ci_shards.py` splits the suite by file (a module is
+   never split, for the loadscope reason), balanced by the per-file seconds in
+   `.github/test-durations.json`, heaviest first; each shard still runs
+   `-n auto --dist loadscope`. It fails safe: the file list comes from the
+   disk, so a file with no timing still lands in a shard, and the `lints` job
+   runs `ci_shards.py --of 4 --verify`, which fails unless the four shards
+   together collect exactly the full suite. Refresh the timings with
+   `python tools/ci_shards.py --update-durations <junit.xml>` when the shards
+   drift apart; stale timings cost minutes, never coverage. On a docs-only
+   change shard 1 runs the markdown-reading list and shards 2–4 report green
+   with a notice.
+
+A `concurrency:` block is still [USER]'s call and still not added.
 
 The blind spot, stated plainly: a docs-only pull request does not run the rest
 of pytest. It does not need to — no markdown under those three trees is read

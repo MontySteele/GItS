@@ -36,6 +36,11 @@ from understudy import authorship, local_model, local_seat
 import tools.local_model_sanity as sanity
 
 REPO = Path(__file__).resolve().parents[2]
+
+# `serve_forever` polls for `shutdown()` every 0.5 s by default, so every stub
+# server cost its test up to half a second of waiting on its own teardown.
+# The poll interval is the stub's, never the code under test's.
+_FAST_SHUTDOWN = {"poll_interval": 0.01}
 QA_DIR = REPO / "review" / "qa"
 
 # A real closed turn with both recorded readings. Copied into a tmp dir per
@@ -104,7 +109,8 @@ class _Server(ThreadingHTTPServer):
 @pytest.fixture()
 def server():
     srv = _Server()
-    thread = threading.Thread(target=srv.serve_forever, daemon=True)
+    thread = threading.Thread(target=srv.serve_forever, daemon=True,
+                              kwargs=_FAST_SHUTDOWN)
     thread.start()
     try:
         yield srv

@@ -16,7 +16,8 @@
 # checks even if the PR is just altering markdown files. Is there a way to
 # speed that up?"). Three changes, no new jobs and no renamed ones -- the
 # three job names are load-bearing, they may be required checks in branch
-# protection, and a renamed job blocks every pull request:
+# protection, and a renamed job blocks every pull request (superseded for
+# `pytest` on 2026-09-28, below):
 #   (1) `pytest` runs `-n auto --dist loadscope`, the exact arm
 #       tools/hooks/push_gate.py runs locally. That comment used to say xdist
 #       was "deliberately not in CI's install line"; [USER] overturned it.
@@ -33,6 +34,38 @@
 # decision lives INSIDE a job that always runs and always reports. A
 # `concurrency:` block (cancel superseded runs on the same branch) is a
 # separate, optional change and is [USER]'s to ask for.
+#
+# SPEED PASS TWO 2026-09-28. The `pytest` job had grown to 8.5-9 minutes, all
+# of it the suite itself (checkout, python and pip were under 20 s). Two
+# changes, and test semantics untouched -- every assertion that ran still
+# runs and checks the same thing; no test deleted, skipped or loosened; no
+# battery size, seed or band moved:
+#   (1) waste out of the suite. PyYAML's pure-Python parser was 45% of all
+#       test time (387 of 863 s summed over workers), nearly all of it the
+#       same sheets parsed again and again. tier0/content/yaml_memo.py (and
+#       its twin understudy/yaml_memo.py) parse each distinct text once and
+#       hand every caller a deep copy -- same parser, same data, same errors;
+#       tier0/tests/test_yaml_memo.py proves it on every committed sheet. Plus
+#       a test that re-parsed the prototype surface once per generated file,
+#       a test that slept out a 10 s relaunch gap left by an earlier test,
+#       and stub HTTP servers that waited half a second on their own shutdown.
+#   (2) the job is now a four-shard matrix, `pytest (1/4)` .. `pytest (4/4)`.
+#       tools/ci_shards.py splits by FILE (never inside a module, for the
+#       loadscope reason on the suite step), balanced by the per-file seconds
+#       in .github/test-durations.json; each shard keeps `-n auto --dist
+#       loadscope`. It fails safe: the file list comes from the disk, so an
+#       untimed new file still lands in a shard, and the `lints` job's shard
+#       audit fails CI unless the four shards together collect exactly the
+#       full suite. Refresh the durations with `--update-durations` from a
+#       JUnit report when the balance drifts; a stale file costs minutes,
+#       never coverage.
+# THE JOB NAME CHANGED, on purpose, which the 2026-08-29 note forbade. What
+# made it load-bearing then was branch protection, and on 2026-09-28 `main`
+# has no protection and no required checks, and the repo is public, so
+# standard runners cost nothing and four of them cost nothing more. If a
+# required check is ever added, require the four `pytest (n/4)` rows, not
+# `pytest`. A `concurrency:` block remains [USER]'s call and is still not
+# added.
 
 name: repo
 
@@ -46,8 +79,19 @@ permissions:
 
 jobs:
   # (a) The Track A fresh-clone gate, made permanent.
+  #
+  # FOUR SHARDS since 2026-09-28 (see the header): one runner per quarter of
+  # the suite, split by file by tools/ci_shards.py. `fail-fast: false` so a red
+  # shard does not cancel the other three -- every shard reports its own
+  # result, which is what land_pr reads row by row. The `--of 4` below and in
+  # the `lints` job's audit step must match this list; test_ci_shards pins it.
   pytest:
+    name: pytest (${{ matrix.shard }}/4)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       # fetch-depth: 0 so the changed-path step below has both endpoints of
       # the diff. The suite itself still needs no history.
@@ -105,9 +149,24 @@ jobs:
       # 917e07f: 4451 passed / 46 skipped / 12 xfailed either way, 59.2 s
       # parallel against 281.4 s serial. No test needed isolating, and no
       # `serial` marker was added.
-      - name: full suite (parallel)
+      #
+      # 2026-09-28: each shard runs its own files, heaviest first, with the
+      # same `-n auto --dist loadscope` (4 workers on this runner). A module
+      # is never split across shards, for the loadscope reason above. The
+      # `lints` job proves on every change that the four shards together
+      # collect exactly the full suite. `--no-loadscope-reorder` keeps that
+      # heaviest-first order: by default xdist re-sorts modules by how MANY
+      # tests they hold, which queues the 12-test, ~100-second test_errata
+      # behind the many-test modules. It changes which worker gets a
+      # module and when, nothing about what runs. `--durations=25` is there
+      # so the next speed pass starts from this runner's numbers.
+      - name: full suite, shard ${{ matrix.shard }} of 4 (parallel)
         if: steps.scope.outputs.docs_only != 'true'
-        run: python -m pytest tier0/tests tier05/tests -q -n auto --dist loadscope
+        run: |
+          set -eu
+          files=$(python tools/ci_shards.py --shard ${{ matrix.shard }} --of 4)
+          echo "shard ${{ matrix.shard }}/4 runs $(printf '%s\n' "$files" | wc -l) files"
+          python -m pytest $files -q -n auto --dist loadscope --no-loadscope-reorder --durations=25
 
       # The docs-only arm: every module in tier0/tests + tier05/tests that
       # opens a committed .md file tools/ci_changed_paths.py classifies as a
@@ -131,11 +190,17 @@ jobs:
       #                                 docs/current/atlas/*.md
       # Add a module here the moment a test starts reading one of those trees.
       # The `lints` job below still runs IN FULL on a docs-only change.
+      #
+      # 2026-09-28: shard 1 runs this list, now in parallel too; shards 2-4
+      # have nothing to do on a docs-only change and say so, and still report.
+      - name: docs-only -- nothing for this shard
+        if: steps.scope.outputs.docs_only == 'true' && matrix.shard != 1
+        run: echo "::notice title=docs-only fast path::docs-only change; shard 1 runs the markdown-reading tests, this shard runs nothing."
       - name: docs-only -- the markdown-reading tests only
-        if: steps.scope.outputs.docs_only == 'true'
+        if: steps.scope.outputs.docs_only == 'true' && matrix.shard == 1
         run: |
           echo "::notice title=docs-only fast path::Every changed path is markdown under docs/current, review/, or the repo root. SKIPPING the full tier0+tier05 suite; running only the markdown-reading tests, plus the FULL lints job. The push gate ran the whole fast lane locally before this push."
-          python -m pytest -q \
+          python -m pytest -q -n auto --dist loadscope \
             tier0/tests/test_staged_turn.py \
             tier0/tests/test_reaction_phase_parity.py \
             tier0/tests/test_prototype_surface.py \
@@ -172,6 +237,15 @@ jobs:
       # Runs UNCONDITIONALLY, docs-only change or not.
       - name: run_lints --lane ci
         run: python tools/run_lints.py --lane ci
+      # 2026-09-28. THE SHARD AUDIT. The `pytest` job runs the suite as four
+      # shards; this collects the full suite and each shard (collection only,
+      # no test runs) and fails unless every test id lands in exactly one
+      # shard. So a new test file, a renamed one, or a stale durations file
+      # can make a shard slower but can never make a test not run. Here and
+      # not in the shards because it needs all four lists at once, and it
+      # runs on a docs-only change too.
+      - name: pytest shard audit (the four shards are the whole suite)
+        run: python tools/ci_shards.py --of 4 --verify
       # 2026-09-02. THE DEPLOY GATE'S SOURCE-ONLY RULES, HERE AT LAST.
       #
       # klee-mod/build/validate.ps1 holds rules that read committed text and

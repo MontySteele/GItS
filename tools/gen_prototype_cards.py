@@ -92,6 +92,7 @@ sys.path.insert(0, str(REPO))
 import tools.gen_klee_cards as gen                            # noqa: E402
 from tier0.content.loader import PROTOTYPE_ID_PREFIX          # noqa: E402
 from tier0.content.upgrades import prototype_default_delta    # noqa: E402
+from tier0.content import yaml_memo                          # noqa: E402
 from understudy import authorship                             # noqa: E402
 
 SHEET = REPO / "docs" / "prototype-surface.yaml"
@@ -158,7 +159,7 @@ def _profile_for(character_id: str) -> gen.CharacterProfile:
 def _rows() -> list[dict]:
     if not SHEET.exists():
         return []
-    return yaml.safe_load(SHEET.read_text(encoding="utf-8")) or []
+    return yaml_memo.safe_load(SHEET.read_text(encoding="utf-8")) or []
 
 
 def effective_upgrade(card: dict) -> dict | None:

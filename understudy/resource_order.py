@@ -49,6 +49,8 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import yaml
 
+from understudy import yaml_memo
+
 REPO = Path(__file__).resolve().parents[1]
 
 # Every sheet that can print a face a staged turn may put in a hand. Declared
@@ -122,7 +124,7 @@ class SheetError(RuntimeError):
 # ------------------------------------------------------------- the index --
 
 def _rows(path: Path) -> list[dict[str, Any]]:
-    blob = yaml.safe_load(path.read_text(encoding="utf-8"))
+    blob = yaml_memo.safe_load(path.read_text(encoding="utf-8"))
     if isinstance(blob, dict):
         blob = blob.get("cards") or blob.get("rows") or []
     return [r for r in (blob or []) if isinstance(r, dict)]

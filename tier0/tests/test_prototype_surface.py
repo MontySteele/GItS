@@ -946,13 +946,14 @@ def test_every_kokomi_row_declares_the_target_type_the_slice_states():
     import re
 
     checked = 0
+    # Parsed once, not once per generated file: the loop below only reads it.
+    rows = {r["id"]: r for r in yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []}
     for path in sorted(_GENERATED.glob("*.cs")):
         source = path.read_text(encoding="utf-8")
         ident = re.search(r"Sheet entry: id=(\S+)", source)
         if ident is None:
             continue
-        rows = {r["id"]: r for r in yaml.safe_load(
-            loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []}
         row = rows.get(ident.group(1))
         if row is None or row.get("character") != "kokomi":
             continue

@@ -117,6 +117,7 @@ import yaml
 # module did not already pay.
 from tier0 import constants as C
 from understudy import authorship, bridge, instances, report, soak
+from understudy import yaml_memo
 # `EB-456`: the LANE'S action budget, and this is the one direction the blind
 # wall runs in. `blindplay` may never import this file; this file may read the
 # blind module's bottom seam, which imports nothing from this package at all.
@@ -232,7 +233,7 @@ def shipped_ids() -> set[str]:
         path = resource_order.REPO / rel
         if not path.is_file():
             continue
-        blob = yaml.safe_load(path.read_text(encoding="utf-8"))
+        blob = yaml_memo.safe_load(path.read_text(encoding="utf-8"))
         if isinstance(blob, dict):
             blob = blob.get("cards") or blob.get("rows") or []
         for row in blob or []:

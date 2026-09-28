@@ -19,7 +19,7 @@ import random
 import pytest
 import yaml
 
-from tier0.content import loader
+from tier0.content import loader, yaml_memo
 from tier0.engine import effects, furina_stage, reactions
 from tier0.engine.state import Card, CombatState, Enemy, Player
 
@@ -58,7 +58,7 @@ def _card(effects_, cid="probe", type_="skill"):
 
 
 def _rows():
-    rows = yaml.safe_load(
+    rows = yaml_memo.safe_load(
         (loader.DOCS_DIR / "prototype-surface.yaml").read_text(
             encoding="utf-8"))
     return {r["id"]: r for r in rows}

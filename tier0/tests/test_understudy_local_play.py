@@ -35,6 +35,11 @@ import pytest
 from understudy import blindplay, local_model, local_play
 
 REPO = Path(__file__).resolve().parents[2]
+
+# `serve_forever` polls for `shutdown()` every 0.5 s by default, so every stub
+# server cost its test up to half a second of waiting on its own teardown.
+# The poll interval is the stub's, never the code under test's.
+_FAST_SHUTDOWN = {"poll_interval": 0.01}
 RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
                    / "observed.json")
 
@@ -143,6 +148,7 @@ class _StubEndpoint:
 
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.thread = threading.Thread(target=self.server.serve_forever,
+                                       kwargs=_FAST_SHUTDOWN,
                                        daemon=True)
 
     def __enter__(self) -> "_StubEndpoint":
