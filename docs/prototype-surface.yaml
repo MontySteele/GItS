@@ -230,10 +230,7 @@
    description: "[gold]Set off[/gold] a random enemy and deal 3 damage to it, 4 times.",
    effects: [{op: set_off, target: random_enemy, damage: 3, times: 4}]}
 
-# Reworked 2026-09-27 after [USER]'s co-op run: "Chained Reactions is very
-# OP - can we rework this to be something more balanced?" Placing a Bomb per
-# explosion replaced every Bomb it popped, so the board never drained and each
-# Set off paid a Spark per Bomb. Growing the others creates no Bomb.
+# Reworked 2026-09-27 ([USER]: "very OP"): grows Bombs, places none.
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
