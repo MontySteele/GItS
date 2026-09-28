@@ -125,32 +125,30 @@ public class CompanionOverhaulTests
         typeof(DandelionBreezePower), typeof(SolarIsotomaBloomPower),
     };
 
-    // ---- THE FLAG, OFF --------------------------------------------------
+    // ---- THE FLAG, ON BY DEFAULT ------------------------------------------
 
-    // THE ONE PIN AN ARM PROPERTY MAKES DISHONEST (2026-09-02).
+    // THE CURRENT KITS ARE THE DEFAULT BUILD (2026-09-28). [USER]: "Let's go
+    // ahead and make all 3 current builds the active release builds to avoid
+    // this confusion." `klee-mod/Directory.Build.props` now defaults
+    // `-p:CompanionOverhaul=true`, so a build that names no property -- `dotnet test`,
+    // deploy.ps1, the handoff zip -- has this arm on. This pin says so.
     //
-    // `dotnet test -p:CompanionOverhaul=true` defines `COMPANION_OVERHAUL`, which is what MOVES
-    // `DefaultEnabled` -- the exact value this pin asserts. So under that
-    // property the pin cannot say anything true: green would mean the property
-    // did nothing, and red is the property working. It is skipped there rather
-    // than left to fail, because a red that means "the switch works" trains
-    // everyone to ignore reds.
-    //
-    // ARM PROPERTIES ARE DEPLOY-LINE ONLY. The supported test configurations
-    // are `dotnet test` and `dotnet test -p:PrototypeCards=true`, and this pin
-    // runs in both -- which is where the acceptance condition has to hold.
-    // docs/current/operations/prototype.md carries the rule.
+    // SKIPPED, NOT LEFT TO FAIL, in the one configuration that opts the arm
+    // out (`-p:ShippedKits=true`, the `dotnet-test-shipped` gate, or an
+    // explicit `-p:CompanionOverhaul=false`): there the property has moved the very value
+    // this pin asserts, and a red that means "the opt-out works" teaches
+    // everyone to ignore reds. docs/current/operations/prototype.md carries
+    // the rule.
 #if COMPANION_OVERHAUL
-    [Fact(Skip = "-p:CompanionOverhaul=true moves CompanionOverhaul.DefaultEnabled, which is the value this pin asserts. Arm properties are deploy-line only: see docs/current/operations/prototype.md.")]
-#else
     [Fact]
+#else
+    [Fact(Skip = "This build opts the arm out (-p:ShippedKits=true or -p:CompanionOverhaul=false), which moves CompanionOverhaul.DefaultEnabled, the value this pin asserts. See docs/current/operations/prototype.md.")]
 #endif
-    public void The_arm_ships_off()
+    public void The_arm_ships_on()
     {
-        // The acceptance condition, and everything else here only matters
-        // while it holds. `Enabled` is settable so a pin can exercise both
-        // sides in one build; nothing in the mod ever writes it.
-        Assert.False(CompanionOverhaul.DefaultEnabled);
+        // `Enabled` is settable so a pin can exercise both sides in one
+        // build; nothing in the mod ever writes it.
+        Assert.True(CompanionOverhaul.DefaultEnabled);
         Assert.Equal(CompanionOverhaul.DefaultEnabled, CompanionOverhaul.Enabled);
     }
 

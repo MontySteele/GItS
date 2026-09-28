@@ -29,8 +29,9 @@ and only the second one is worth anything to a reader.
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 291 tests, ~0.6s after build
-dotnet test -p:PrototypeCards=true # 810: the 291 plus Prototype/
+dotnet test                       # the current kits (the default build since 2026-09-28)
+dotnet test -p:ShippedKits=true -p:PrototypeCards=true  # the old kits, arms compiled and off
+dotnet test -p:ShippedKits=true   # the old kits, no Prototype/ at all
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -47,8 +48,10 @@ so nothing here hardcodes a Steam path (spec §0.3).
 
 ### A PUSH gate since 2026-09-02, and still not a deploy gate
 
-`tools/gates.py` runs this project in both lanes (`dotnet test
-klee-mod/KleeTests -p:PrototypeCards=true`), no longer behind `--dotnet`, and
+`tools/gates.py` runs this project in both lanes, twice (`dotnet-test`, the
+default build, which since 2026-09-28 is the current kits, and
+`dotnet-test-shipped`, `-p:ShippedKits=true -p:PrototypeCards=true`), no
+longer behind `--dotnet`, and
 the git `pre-push` hook runs it through that same wrapper. Before that it was in
 no gate anywhere -- optional locally, impossible in CI -- and two pins sat red on
 `main` for days. It cannot be a CI job: the four references above live in a
@@ -129,7 +132,9 @@ either pinned structurally and labelled, or left out.
 
 ## The prototype suite (`Prototype/`, opt-in with the rest)
 
-`Prototype/` is `Compile Remove`d unless `-p:PrototypeCards=true`, the same
+`Prototype/` is `Compile Remove`d unless `PrototypeCards` is true (the default
+since 2026-09-28, `klee-mod/Directory.Build.props`; off under
+`-p:ShippedKits=true`), the same
 switch that compiles the rules it pins (`KleeCode.csproj`). Without the property
 those types do not exist, so a pin against them could not compile either.
 
@@ -152,8 +157,9 @@ those types do not exist, so a pin against them could not compile either.
 | `Round8Tests.cs` | 11 | ROUND EIGHT -- the blind act-2 seat's two unreconcilable numbers (`review/qa/klee-round-8-2026-09-03/opus-act2.md`). `EB-353`: Thoma's Blazing Barrier printed its own `{Left}` template, because `PowerModel.HoverTips` calls `DynamicVars.AddTo` on the SMART branch alone and both Block marks had written the token into the static row -- so the rows are split now, the way `SalonPowers` splits `{Slots}`, and the live var is asked here the way SmartFormat asks it, against a real creature whose Block moves. Its second half: the rider paid once per barrier rather than once per absorption, and `BlockMark.Absorb` (REAL, through reflection -- no `InternalsVisibleTo`) now walks a 3-hit attack firing three times, with the seat's own 7x3 absorbing 12 where it absorbed 9. `EB-354`: NOT A DEFECT, shown rather than asserted -- `TenderPower` hangs its loss off `AfterCardPlayed`, so one card's four hits see one Strength; Rapid Fire's face and its hits both compose `ValueProp.Move` off the same base 3, run for real through the game's own `StrengthPower.ModifyDamageAdditive`. Structural where a live `CombatState` is needed: the two hooks' command sets and the play that hands `BaseValue` (never the preview) to `SetOffRandom`. |
 
 **With the flag: 810 tests, all green** (measured 2026-09-03,
-`dotnet test -p:PrototypeCards=true`). With all four arm switches on, the
-three `The_arm_ships_off` pins fail BY CONSTRUCTION and nothing else does.
+`dotnet test -p:PrototypeCards=true`). Since 2026-09-28 the four kit arms
+are on by default and each arm's pin is `The_arm_ships_on`, skipped in a build
+that opts the arm out.
 
 The red the 2026-09-02 measurement recorded here is closed: `Rule2` pinned
 ELEVEN plan clause kinds and R236's Crystal Collapse had shipped a twelfth,

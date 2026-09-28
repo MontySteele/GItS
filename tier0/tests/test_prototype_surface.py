@@ -636,15 +636,23 @@ def test_distinctness_report_cannot_see_the_prototype_surface():
     assert not any(Path(p).name == "prototype-surface.yaml" for p in cdr.SHEETS)
 
 
-def test_release_build_does_not_compile_the_prototype_classes():
-    """R213 B: 'absent from ... release manifests and ordinary runs'.
+def test_the_release_build_compiles_the_prototype_classes_by_default():
+    """2026-09-28, [USER]: "make all 3 current builds the active release
+    builds". This pin used to say the opposite (R213 B's quarantine: no
+    prototype class in a release build); the ruling moved it.
 
-    The strongest available statement of it: without `PrototypeCards=true` the
-    directory is not compiled, so a shipped mod holds no prototype class and
-    there is no id for any route -- reward, transform or hand-typed -- to
-    resolve. `deploy.ps1` and `validate.ps1` are the release path and never
-    set the property.
+    The release build now compiles the surface because the DEFAULT does:
+    `klee-mod/Directory.Build.props` sets `PrototypeCards` when nothing else
+    has, so `deploy.ps1` and `validate.ps1` still never name the property --
+    the default decides, in one file. The `Compile Remove` stays for the one
+    opt-out, `-p:ShippedKits=true`, which is the old shipped kits whole.
     """
+    props = (REPO / "klee-mod" / "Directory.Build.props").read_text(
+        encoding="utf-8")
+    assert ("<PrototypeCards Condition=\"'$(PrototypeCards)' == ''\">true"
+            "</PrototypeCards>") in props
+    assert "'$(ShippedKits)' != 'true'" in props
+
     csproj = (REPO / "klee-mod" / "KleeCode" / "KleeCode.csproj").read_text(
         encoding="utf-8")
     assert '<Compile Remove="Cards/Prototype/**/*.cs" />' in csproj
@@ -654,7 +662,8 @@ def test_release_build_does_not_compile_the_prototype_classes():
     for script in ("deploy.ps1", "validate.ps1"):
         body = (REPO / "klee-mod" / "build" / script).read_text(
             encoding="utf-8", errors="replace")
-        assert "PrototypeCards" not in body, f"{script} sets the dev flag"
+        assert "-p:PrototypeCards" not in body, (
+            f"{script} names the property; the default decides")
 
     hook = (REPO / "klee-mod" / "KleeCode" / "PrototypeCards.cs").read_text(
         encoding="utf-8")

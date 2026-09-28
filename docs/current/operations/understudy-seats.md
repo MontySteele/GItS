@@ -152,11 +152,13 @@ python -m understudy.embark --teardown --coop --lanes 2,3     # client first
   `revealed` and prints the ids (`instances.reveal_pending_epochs`). Lane 0
   and anything under the real `%APPDATA%` are never written.
 - **One install means one deployed `mods\klee` for every lane.**
-  `deploy_proto.ps1` refuses while ANY `SlayTheSpire2` process is up; tear the
+  `deploy.ps1` and `deploy_proto.ps1` refuse while ANY `SlayTheSpire2`
+  process is up; tear the
   lane down rather than deploying around it. Ask before launching a lane while
   [USER] is playing (lanes take the controller and the GPU).
 - **The bridge (`mods\STS2_MCP`) is shared and no teardown removes it.**
-  `deploy_proto.ps1` installs it as its last step, so the owner's Steam game
+  `tools/deploy_round.py` installs it after `deploy.ps1` (and
+  `deploy_proto.ps1` as its last step), so the owner's Steam game
   carries it on 15526 and an agent's lane takes 15527. A bridge already
   installed with a game running on it is reused, never rewritten. Only
   `deploy_bridge.ps1 -Remove` removes it, by hand.

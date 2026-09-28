@@ -42,14 +42,28 @@ def test_an_unknown_arm_is_refused_against_the_surface():
     assert "prototype-surface.yaml" in str(excinfo.value)
 
 
-def test_a_release_build_is_refused():
-    """The prototype classes are `Compile Remove`d unless PrototypeCards=true,
-    so on a release build there is no id to grant. `deploy_proto.ps1` stamps
-    `+proto` and `deploy.ps1` never does, so the stamp is the whole check."""
+def test_a_release_build_from_before_the_current_kits_is_refused():
+    """Until 2026-09-28 the prototype classes were `Compile Remove`d from a
+    release build, so on one of those there is no id to grant."""
     with pytest.raises(embark.EmbarkError) as excinfo:
         embark.check_arms([ARM], RELEASE)
     assert "+proto" in str(excinfo.value)
-    assert "deploy_proto" in str(excinfo.value)
+    assert "deploy_round" in str(excinfo.value)
+
+
+def test_a_release_build_since_the_current_kits_is_accepted():
+    """2026-09-28, [USER]: "make all 3 current builds the active release
+    builds". From `KITS_DEFAULT_SINCE` on, an unmarked release build compiles
+    the prototype classes, so the grant proceeds without `+proto`."""
+    since = f"0.2.{embark.KITS_DEFAULT_SINCE}"
+    for build in (since, since + "+dirty",
+                  f"0.2.{embark.KITS_DEFAULT_SINCE + 40}"):
+        got = embark.check_arms([ARM], (build, RELEASE[1]))
+        assert got == (build, RELEASE[1])
+    assert not embark.carries_prototype_classes(
+        f"0.2.{embark.KITS_DEFAULT_SINCE - 1}")
+    assert embark.carries_prototype_classes(
+        f"0.2.{embark.KITS_DEFAULT_SINCE - 1}+proto")
 
 
 def test_an_unreadable_build_is_refused_rather_than_assumed():

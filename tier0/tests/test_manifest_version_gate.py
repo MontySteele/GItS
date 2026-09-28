@@ -569,28 +569,33 @@ Write-Output "PLAINISPROTO: $($plain.IsPrototype)"
     assert out["ISPROTO"] == "True" and out["PLAINISPROTO"] == "False"
 
 
-def test_only_the_dev_script_sets_the_prototype_compile_flag():
-    """The quarantine's release-path leg (R213 B), stated over the whole
-    build directory rather than over two named files.
-
-    `tier0/tests/test_prototype_surface.py` pins that deploy.ps1 and
-    validate.ps1 never mention the property. This says the complement: EXACTLY
-    ONE script in the directory does, and it is the dev one. A third script
-    growing the flag would be a second release path nobody audited.
+def test_no_build_script_names_a_kit_arm_property():
+    """2026-09-28, [USER]: "make all 3 current builds the active release
+    builds". The prototype surface and the four kit arms are the DEFAULT
+    build (`klee-mod/Directory.Build.props`), so no script in the directory
+    names one: the release and the dev path build the same kits by
+    construction, and a script growing one of these properties would be a
+    build whose kits differ from the release with nothing on its version to
+    say so. The one dev-only arm, the Teyvat frame, is the dev script's.
     """
+    kit_props = ("PrototypeCards", "KleeOverhaul", "CompanionOverhaul",
+                 "KokomiOverhaul", "FurinaStage=")
     setters = sorted(p.name for p in BUILD.glob("*.ps1")
-                     if "PrototypeCards" in p.read_text(encoding="utf-8"))
-    assert setters == ["deploy_proto.ps1"], setters
+                     if any(f"-p:{k}" in p.read_text(encoding="utf-8")
+                            for k in kit_props))
+    assert setters == [], setters
+    frame = sorted(p.name for p in BUILD.glob("*.ps1")
+                   if "-p:TeyvatFrame" in p.read_text(encoding="utf-8"))
+    assert frame == ["deploy_proto.ps1"], frame
 
 
 def test_the_dev_deploy_runs_the_whole_gate():
-    """A prototype build that skipped gates would prove nothing about the
-    cards it exists to try, so the dev path is the release path plus a flag
-    -- never minus a rule."""
+    """A dev build that skipped gates would prove nothing, so the dev path
+    is the release path plus a dev-only arm -- never minus a rule."""
     src = (BUILD / "deploy_proto.ps1").read_text(encoding="utf-8")
     assert "validate.ps1" in src
     assert "-StaticOnly" not in src
-    assert "-p:PrototypeCards=true" in src
+    assert "-p:TeyvatFrame=true" in src
     assert "version.ps1" in src, "deploy_proto.ps1 does not source version.ps1"
     assert "rev-list" not in src, (
         "deploy_proto.ps1 computes the AUTO version itself instead of asking "

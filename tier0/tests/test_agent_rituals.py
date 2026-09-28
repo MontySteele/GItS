@@ -123,22 +123,24 @@ def test_gates_optional_lanes_are_off_by_default():
         fast, full, serial, dotnet, codegen, only = True, False, False, False, False, set()
 
     names = [g.name for g in gates.gates(Args())]
-    assert names == ["lints", "pytest", "dotnet-test", "dotnet-test-stage"]
+    assert names == ["lints", "pytest", "dotnet-test", "dotnet-test-shipped"]
     Args.dotnet = Args.codegen = True
     assert [g.name for g in gates.gates(Args())] == [
         "lints", "pytest", "codegen-roster", "codegen-prototype",
-        "dotnet-build", "dotnet-test", "dotnet-test-stage"]
+        "dotnet-build", "dotnet-test", "dotnet-test-shipped"]
 
 
-def test_the_csharp_suite_is_in_both_lanes_with_the_prototype_switch():
+def test_the_csharp_suite_is_in_both_lanes_in_the_default_build():
     """The mod's C# suite is a GATE, and it is the LOCAL one.
 
     KleeTests references four assemblies out of a Steam install, so no GitHub
     runner can hold this check -- which is how two pins stayed red on main for
-    days with CI green. It is therefore not optional here, it runs in `--fast`
-    as well as `--full`, and it carries `-p:PrototypeCards=true`: without the
-    property the whole `Prototype/` tree is `Compile Remove`d and the arms
-    every live workstream builds against are pinned by nothing.
+    days with CI green. It is therefore not optional here and it runs in
+    `--fast` as well as `--full`. It names NO property: since 2026-09-28
+    ([USER]: "make all 3 current builds the active release builds") the
+    default build is the current kits, `klee-mod/Directory.Build.props`
+    turning the prototype surface and the four kit arms on, so the plain line
+    is the world every deploy ships.
     """
     gates = _module("gates")
 
@@ -150,7 +152,17 @@ def test_the_csharp_suite_is_in_both_lanes_with_the_prototype_switch():
         picked = [g for g in gates.gates(Args()) if g.name == "dotnet-test"]
         assert len(picked) == 1, f"fast={lane}: the C# suite is not in the lane"
         assert picked[0].optional == ""
-        assert "-p:PrototypeCards=true" in picked[0].argv
+        assert not [a for a in picked[0].argv if a.startswith("-p:")], (
+            picked[0].argv)
+
+    props = (REPO / "klee-mod" / "Directory.Build.props").read_text(
+        encoding="utf-8")
+    for prop in ("PrototypeCards", "KleeOverhaul", "CompanionOverhaul",
+                 "KokomiOverhaul", "FurinaStage"):
+        assert (f"<{prop} Condition=\"'$({prop})' == ''\">true</{prop}>"
+                in props), prop
+    # The dropped frame is NOT defaulted on (STATE.md, "on hold").
+    assert "<TeyvatFrame" not in props
 
     # And it says which gate it is, on its own line, green or red.
     out = ("Passed!  - Failed:     0, Passed:   563, Skipped:     0, "
@@ -160,14 +172,15 @@ def test_the_csharp_suite_is_in_both_lanes_with_the_prototype_switch():
     assert "local-only" in summary
 
 
-def test_the_stage_configuration_is_a_gate_of_its_own():
-    """`EB-781`: the second world the suite has, gated in both lanes.
+def test_the_shipped_kits_configuration_is_a_gate_of_its_own():
+    """The second world the suite has, gated in both lanes.
 
-    `-p:FurinaStage=true` moves `FurinaStage.DefaultEnabled`, which is what
-    `deploy_proto.ps1` passes and therefore what the seats play. Nothing ran
-    the suite that way, so nine shipped Fanfare/Encore pins stood red under
-    `EB-745`'s retirement guard and no gate said so. The second line is what
-    makes that configuration's red arrive on the day it is made.
+    `-p:ShippedKits=true -p:PrototypeCards=true` is the old shipped kits with
+    the arms compiled and OFF: the world the old kits' pins and every arm's
+    flag-off pins are written for. A configuration no gate runs goes red
+    quietly -- `EB-781`, when nine shipped Fanfare/Encore pins stood red under
+    the Stage and no gate said so -- so this line stays until the old kits'
+    code goes.
     """
     gates = _module("gates")
 
@@ -177,24 +190,24 @@ def test_the_stage_configuration_is_a_gate_of_its_own():
     for lane in (True, False):
         Args.fast, Args.full = lane, not lane
         picked = [g for g in gates.gates(Args())
-                  if g.name == "dotnet-test-stage"]
-        assert len(picked) == 1, f"fast={lane}: the stage lane is missing"
+                  if g.name == "dotnet-test-shipped"]
+        assert len(picked) == 1, f"fast={lane}: the shipped lane is missing"
         assert picked[0].optional == ""
+        assert "-p:ShippedKits=true" in picked[0].argv
         assert "-p:PrototypeCards=true" in picked[0].argv
-        assert "-p:FurinaStage=true" in picked[0].argv
 
     # It reads through the same summariser, so its line carries the counts and
     # the local-only mark rather than a bare `ok`.
     out = ("Passed!  - Failed:     0, Passed:  1870, Skipped:     0, "
            "Total:  1870, Duration: 1 s")
-    summary, _ = gates.summarise(gates.Gate("dotnet-test-stage", []), out, 0)
+    summary, _ = gates.summarise(gates.Gate("dotnet-test-shipped", []), out, 0)
     assert summary.startswith("1870 passed, 0 failed, 0 skipped")
     assert "local-only" in summary
 
     # And the pre-push hook asks for BOTH by name, through the same wrapper.
     # `--only` is a set, so naming the first does not carry the second.
     hook = _module("pre_push_gate", TOOLS / "hooks")
-    assert "dotnet-test,dotnet-test-stage" in hook.KLEETESTS
+    assert "dotnet-test,dotnet-test-shipped" in hook.KLEETESTS
 
 
 def test_a_machine_without_the_game_skips_the_csharp_gate_rather_than_passing(
@@ -492,6 +505,33 @@ def test_deploy_round_refuses_from_a_worktree_or_names_the_main_checkout():
     else:
         assert res.returncode == 2
         assert "not the main checkout" in res.stdout
+
+
+def test_deploy_round_with_no_dev_arm_is_the_release_build_plus_the_bridge():
+    """2026-09-28, [USER]: "make all 3 current builds the active release
+    builds". The kit arms are the default build now, so a round that asks for
+    no DEV arm deploys the release (`deploy.ps1`, no `+proto`) and then the
+    bridge a seat needs; only a dev arm goes through `deploy_proto.ps1`."""
+    deploy = _module("deploy_round")
+
+    class Args:
+        pck = False
+        arms: list = []
+
+    scripts = [cmd[-1] for cmd in deploy.plan(Args())
+               if cmd[-1].endswith(".ps1") and "build_pck" not in cmd[-1]]
+    assert scripts == ["klee-mod\\build\\deploy.ps1",
+                       "klee-mod\\build\\deploy_bridge.ps1"], scripts
+
+    Args.arms = ["teyvat"]
+    last = deploy.plan(Args())[-1]
+    assert "klee-mod\\build\\deploy_proto.ps1" in last
+    assert last[-1] == "-TeyvatFrame"
+
+    # The old kit arm names are accepted and dropped: every build has them.
+    assert set(deploy.RELEASE_DEFAULT_ARMS) == {
+        "klee", "companion", "kokomi", "furina-stage"}
+    assert not set(deploy.RELEASE_DEFAULT_ARMS) & set(deploy.ARMS)
 
 
 def test_deploy_round_refuses_an_unknown_arm():

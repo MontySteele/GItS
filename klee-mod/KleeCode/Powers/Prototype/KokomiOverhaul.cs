@@ -87,8 +87,10 @@ namespace KleeMod.Powers;
 public static class KokomiOverhaul
 {
     /// <summary>
-    /// The arm's default: <c>-p:KokomiOverhaul=true</c> turns it on. Mirrors
-    /// <c>C.KOKOMI_OVERHAUL</c>, which ships <c>False</c>.
+    /// The arm's default: <c>-p:KokomiOverhaul=true</c> turns it on, and
+    /// since 2026-09-28 every build that names no property does
+    /// (<c>klee-mod/Directory.Build.props</c>). The sim twin
+    /// <c>C.KOKOMI_OVERHAUL</c> still ships <c>False</c>.
     /// </summary>
     public const bool DefaultEnabled =
 #if KOKOMI_OVERHAUL

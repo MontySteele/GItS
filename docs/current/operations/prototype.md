@@ -1,108 +1,117 @@
-## Prototype surface (`EB-147`) — quarantined, dev-only
+## Prototype surface (`EB-147`) — the current kits, in every build
 
-`docs/prototype-surface.yaml` is ONE staging sheet for cards being TRIED, for
-every character at once (each row names its owner with `character:`, and every
-id starts `proto_`). A separate dev-only generator builds it; the default
-generator run does not touch it.
+`docs/prototype-surface.yaml` is ONE staging sheet for the cards of the current
+kits, for every character at once (each row names its owner with
+`character:`, and every id starts `proto_`). A separate generator builds it;
+the default roster generator run does not touch it.
+
+**THE CURRENT KITS ARE THE RELEASE BUILD (2026-09-28).** [USER]'s ruling, in
+his words: "The current character builds are much more progressed than the old
+prototypes were, even though it's still a work in progress. Let's go ahead and
+make all 3 current builds the active release builds to avoid this confusion."
+Until then the surface and the arms were quarantined out of every release
+build and reached the game only through a `+proto` dev deploy; sessions kept
+reading the old shipped kits as current, and a plain `deploy.ps1` installed
+them. Now `klee-mod/Directory.Build.props` sets five properties whenever the
+build names none of them: `PrototypeCards` (compiles the surface), and the four
+kit arms `KleeOverhaul`, `CompanionOverhaul`, `KokomiOverhaul` and
+`FurinaStage`. So a plain `dotnet build`, `dotnet test`, `deploy.ps1`,
+`validate.ps1` and the `-Package` handoff zip all carry the current kits,
+unmarked. `TeyvatFrame` is not defaulted: the frame is on hold (`STATE.md`).
+Stage 2, later, deletes the old shipped kits' code; until then they build
+under one opt-out:
+
+```sh
+dotnet build klee-mod/KleeCode                               # the current kits
+dotnet build klee-mod/KleeCode -p:ShippedKits=true           # the old kits, whole
+dotnet build klee-mod/KleeCode -p:FurinaStage=false          # one arm off
+```
 
 **C# FIRST, sim at Balance.** A new kit rule is implemented in the C# mod
 (`klee-mod/`) behind the prototype switch and nowhere else, and the Python sim
 (tier0 / tier0.5) is brought up only once the rule survives the Prototype gate.
 The switch is the MSBuild property `PrototypeCards`, which defines the
-`PROTOTYPE_CARDS` compile constant
-(`klee-mod/KleeCode/KleeCode.csproj:30-31`, mirrored for the headless tests at
-`klee-mod/KleeTests/KleeTests.csproj:36-37`), driven by
-`-p:PrototypeCards=true` on the build and by `klee-mod\build\deploy_proto.ps1`.
-The sim's job before Balance is degenerate-loop and dead-card detection off the
-sheet draft, which needs no engine mirror; a two-engine build before the rule
-is settled is a tax on the stage that wants taste, not numbers.
+`PROTOTYPE_CARDS` compile constant (`klee-mod/KleeCode/KleeCode.csproj`,
+mirrored for the headless tests in `klee-mod/KleeTests/KleeTests.csproj`), on
+by default since the ruling. **The tier0 sim still runs the SHIPPED kits:** its
+twins (`C.KLEE_OVERHAUL`, `C.COMPANION_OVERHAUL`, `C.KOKOMI_OVERHAUL`,
+`tier0/engine/furina_stage.FURINA_STAGE`) stay `False`, because the
+calibration bands are measured on the shipped world. The sim's job before
+Balance is degenerate-loop and dead-card detection off the sheet draft, which
+needs no engine mirror; a two-engine build before the rule is settled is a tax
+on the stage that wants taste, not numbers.
 
 ```sh
-.venv/Scripts/python tools/gen_prototype_cards.py           # emit the dev-only C#
-.venv/Scripts/python tools/gen_prototype_cards.py --check   # staleness gate (CI lane)
-dotnet build klee-mod/KleeCode -p:PrototypeCards=true       # the DEV build
+.venv/Scripts/python tools/gen_prototype_cards.py           # emit the C#
+.venv/Scripts/python tools/gen_prototype_cards.py --check   # staleness gate (CI lane, and validate.ps1 S6a)
 ```
 
-**THERE ARE THREE SUPPORTED TEST CONFIGURATIONS** (2026-09-02, third added
-`EB-781` 2026-09-16), and `tools/gates.py` runs the last two on every push:
+**THERE ARE TWO GATED TEST CONFIGURATIONS**, and `tools/gates.py` runs both on
+every push (`dotnet-test`, `dotnet-test-shipped`):
 
 ```sh
-dotnet test klee-mod/KleeTests                              # 790 tests
-dotnet test klee-mod/KleeTests -p:PrototypeCards=true       # 1871 tests
-dotnet test klee-mod/KleeTests -p:PrototypeCards=true -p:FurinaStage=true
-                                                            # 1870 tests
+dotnet test klee-mod/KleeTests                                          # the current kits
+dotnet test klee-mod/KleeTests -p:ShippedKits=true -p:PrototypeCards=true  # the old kits, arms compiled and off
 ```
 
-**THE THIRD ONE IS A GATE BECAUSE IT IS THE WORLD THE DEPLOY RUNS IN**
-(`EB-781`). `-p:FurinaStage=true` moves `FurinaStage.DefaultEnabled`, and
-`deploy_proto.ps1` passes it; nothing ran the suite that way, so nine shipped
-meter pins stood red under it — `EB-745` retires Fanfare and Encore under the
-Stage, and those nine mint one of the two and assert the shipped number. The
-fix is `KleeTests/Harness/ArmScope.cs`: a shipped pin that needs the shipped
-meters opens with `using var _ = ArmScope.ShippedMetersLive();`, which says in
-one line that the seat it is about has no stage, and the pin keeps running in
-both configurations rather than being `#if`'d out of one. The gate line is
-`dotnet-test-stage`; it costs about four more seconds.
+(`-p:ShippedKits=true` alone, no prototype surface at all, still builds and
+passes; it is not gated.) **The second is a gate because a configuration no
+gate runs goes red quietly** (`EB-781`: nine shipped meter pins stood red under
+the Stage for a week). A pin about a shipped rule that the default arms change
+says which world it is about in one line, through
+`KleeTests/Harness/ArmScope.cs`: `ArmScope.ShippedMetersLive()` (no Stage) and
+`ArmScope.ShippedKlee()` (no Klee overhaul). The pin keeps running in both
+configurations rather than being `#if`'d out of one.
 
-**The OTHER arm properties are deploy-line only.**
-`-p:KleeOverhaul=true` and its two siblings belong on a `dotnet build` or a
-`deploy_proto.ps1` line and nowhere else. Each exists to MOVE an arm's
-`DefaultEnabled`, and each arm's suite opens with `The_arm_ships_off`,
-asserting that default is `false` — the acceptance condition the whole
-quarantine rests on. Under the property that pin cannot say anything true:
-green would mean the property did nothing, and red is the property working. So
-it is **skipped there by an `#if`, not left to fail**, because a red that means
-"the switch works" teaches everyone to ignore reds. The pins run, and must be
-green, in every supported configuration that does not move their own arm,
-which is where the condition has to hold.
+**Each arm's suite opens with `The_arm_ships_on`,** asserting its
+`DefaultEnabled` is `true`. In a build that opts the arm out
+(`-p:ShippedKits=true` or `-p:<Arm>=false`) that pin cannot say anything true:
+green would mean the opt-out did nothing, and red is the opt-out working. So it
+is **skipped there by an `#if`, not left to fail**, because a red that means
+"the switch works" teaches everyone to ignore reds.
 
 The arms' rules are exercised in both directions without any property:
 `Enabled` is a settable static, so one build asserts both sides of every
 switch. That is the only reason `KleeTests.csproj` mirrors the arm properties
-at all — a dev running the game's own build line over the tests gets the same
-`DefineConstants` and no "this property means nothing here" surprise — and not
-because any pin needs one.
+at all, and not because any pin needs one.
 
-**Deploying a dev build** — `klee-mod\build\deploy_proto.ps1`, from the
-art-bearing main checkout, game closed. It is `deploy.ps1` plus three things:
-`gen_prototype_cards.py --check` first, `-p:PrototypeCards=true` on the build,
-and a package stamped `MAJOR.AUTO+proto` (`+proto.dirty` when dirty) so a dev
-build is identifiable on sight. It runs the SAME `validate.ps1`, whole;
-`-PrototypeBuild` relaxes exactly one rule — S3 accepts the `+proto` mark,
-which every other path refuses by name. Prototype rows are off-pool, so
-ordinary play is unchanged. **To restore the release build run
-`klee-mod\build\deploy.ps1`**: it overwrites the same `mods\klee`, and the
-absence of `+proto` in the in-game version is the confirmation. No `-Package`
-switch, deliberately — a dev build is never handed to a peer.
+**Deploying.** `tools/deploy_round.py` from the art-bearing main checkout, game
+closed: it rebuilds the pck if stale, runs `klee-mod\build\deploy.ps1` (the
+release build: the current kits, `MAJOR.AUTO`, no mark), then
+`deploy_bridge.ps1`, and reads the result back off disk. The release gate
+checks the surface too: `validate.ps1` S6a runs `gen_prototype_cards.py
+--check` since the ruling.
 
-**WHEN THE DEV BUILD STAYS, AND WHEN THE RELEASE BUILD GOES BACK (`EB-257`).**
-R217 D marks a dev package `+proto` so that *"which build is installed" has an
-answer on screen when both paths write the same `mods\klee` directory* — an
-answer a player has to go and look for, and the rule that sent them looking
-said only *"before any measured run or handoff"*. **A manual playtest is
-neither**, so `bt3-w5-2026-08-30` tore down and deliberately left
-`0.2.1786+proto.dirty` installed; [USER] sat down the next day, played a solo
-run on two prototype arms with no signal, and the triage had to read
-`mods\klee\manifest.json` off disk to learn what had been played. So the rule
-is stated by what the NEXT session is, not by what the last one was:
+**The dev deploy, `klee-mod\build\deploy_proto.ps1`, is now for a build that
+DIFFERS from the release**, and today that is only `-TeyvatFrame` (on hold). It
+refuses without it, because a `+proto` package whose contents equal the
+release is the confusion the ruling removed. It is `deploy.ps1` plus the
+frame, a package stamped `MAJOR.AUTO+proto` (`+proto.dirty` when dirty), a
+codegen check first and the bridge last. It runs the SAME `validate.ps1`,
+whole; `-PrototypeBuild` relaxes exactly one rule, S3 accepting the `+proto`
+mark, which every other path refuses by name. **To restore the release build
+run `tools/deploy_round.py`** (or `deploy.ps1`): the absence of `+proto` in
+the in-game version is the confirmation. No `-Package` switch, deliberately: a
+dev build is never handed to a peer.
 
-- **The dev build stays** only when the arm is the SUBJECT of what happens
-  next — a seat round, a scenario, a soak, or [USER] playing the arm because a
-  rule changed — **and the packet handing the machine over says so in its own
-  "What is installed right now" section, naming the version string**. Both
-  round packets do; that line is the handover, and a dev build left installed
-  without one is a defect in the packet that closed the window.
-- **The release build goes back at teardown** in every other case, and that is
-  the default a window ends on: before a measured run or a registered cell,
-  before any handoff or co-op session, and **before any play the arm is not the
-  subject of** — the case the old wording missed and the one that cost a run.
+**WHEN A DEV BUILD STAYS, AND WHEN THE RELEASE BUILD GOES BACK (`EB-257`).**
+`+proto` exists so that "which build is installed" has an answer on screen when
+both paths write the same `mods\klee` directory (R217 D). The rule is stated by
+what the NEXT session is:
 
-A dev build is identifiable on sight from `+proto`, so a session that finds one
-installed and no packet naming it restores before playing rather than reports
-on it.
-**After every dev deploy, run `python -m understudy.soak --runs 1 --character
-KLEEMOD-KLEE --max-fights 3` and read `fights=3 defects=0` before any
-registered run (R225).**
+- **A dev build stays** only when its dev arm is the SUBJECT of what happens
+  next (a seat round, a scenario, a soak, or [USER] playing it), **and the
+  packet handing the machine over names the version string** in its "What is
+  installed right now" section.
+- **The release build goes back at teardown** in every other case: before a
+  measured run or a registered cell, before any handoff or co-op session, and
+  before any play the dev arm is not the subject of.
+
+A session that finds a `+proto` build installed and no packet naming it
+restores before playing rather than reports on it.
+**After every deploy a round will play on, run `python -m understudy.soak
+--runs 1 --character KLEEMOD-KLEE --max-fights 3` and read `fights=3
+defects=0` before any registered run (R225).**
 
 **A face may be on the ROW too** (`EB-215`). `gen_klee_cards` renders a card's
 text from its BODY, and a Power's per POWER ID, which is what stops a shipped
@@ -120,7 +129,7 @@ codegen — nothing to remember, no per-row field. The table is
 Kokomi: `Mend`, `Plan`; companions:
 `Swirl`), the sentences are `Cards/Prototype/ArmKeywordTips.cs`, and their
 titles are registered under `#if PROTOTYPE_CARDS` in
-`KleeMod.InjectLocStrings` — so a release build carries neither. The tip
+`KleeMod.InjectLocStrings` — so a `-p:ShippedKits=true` build carries neither. The tip
 renders in game under the card and on the blind-play page under the card face,
 because the bridge builds `keywords` from `card.HoverTips`, which is the list
 `ExtraHoverTips` feeds. **Scoped to this sheet on purpose:** on a shipped sheet
@@ -156,27 +165,27 @@ both engines — and `tier0/tests/test_prototype_surface.py` fails on any
 opt-out is checked both ways: one the rule has since caught up with is a
 finding, exactly as a paid `UPGRADE_DEBT` entry is.
 
-**Staging a row** — edit the sheet, regen, dev-build, then grant it by id from
+**Staging a row** — edit the sheet, regen, build, then grant it by id from
 a scenario (`give: {card: KLEEMOD-PROTO_..., pile: hand}`); template and
 preconditions in `understudy/scenarios/eb147-prototype-grant.yaml`. A row the
 emitter cannot express STOPS the run by name: a prototype that cannot be
 printed cannot be tried.
 
-**A dev build also MIGRATES three shipped rows (`EB-218`, R224).** Under the
+**The prototype switch also MIGRATES three shipped rows (`EB-218`, R224).** Under the
 same flag pair — `C.SPARK_ALT_COST_ENABLED` in sim, `-p:PrototypeCards=true`
 in C# — Klee's three hybrid Spark spenders (`powder_charge`, `hold_the_line`,
 `smoke_and_sparks`) are swapped out of the offerable pool for Spark-only twins:
 0 Energy, the same printed Spend 2, same rarity, same body. It rides
-`C.SPARK_ALT_POOL_SUBS` like the other substitutions, so a dev build shows the
-twins and a release build cannot reach them; flag off, the pool is
+`C.SPARK_ALT_POOL_SUBS` like the other substitutions, so a default build shows the
+twins and a `-p:ShippedKits=true` build cannot reach them; flag off, the pool is
 byte-identical to shipped (`tier0/tests/test_eb218_hybrid_migration.py`).
 
-**A dev build can also REPLACE THE COMPANION POOL OF TWO NATIONS.** Third arm,
-third property, same terms as the second:
+**The companion arm REPLACES THE COMPANION POOL OF TWO NATIONS.** Third arm,
+third property, same terms as the second, on by default since 2026-09-28:
 
 ```sh
-dotnet build klee-mod/KleeCode -p:PrototypeCards=true -p:CompanionOverhaul=true
-klee-mod\build\deploy_proto.ps1 -KleeOverhaul -CompanionOverhaul   # both arms
+dotnet build klee-mod/KleeCode                                # on
+dotnet build klee-mod/KleeCode -p:CompanionOverhaul=false     # off
 ```
 
 `-p:CompanionOverhaul=true` defines `COMPANION_OVERHAUL`, which moves
@@ -197,11 +206,12 @@ overhaul this arm is built in BOTH engines**, because it needed almost no new
 op: every Mondstadt row is written in the grammar the sheets already speak, and
 Inazuma adds exactly one verb (`block_half_damage`).
 
-**A dev build can also REPLACE KOKOMI'S WHOLE KIT.** Fourth arm, fourth
-property, same terms as the others:
+**The Kokomi arm REPLACES KOKOMI'S WHOLE KIT.** Fourth arm, fourth
+property, same terms as the others, on by default since 2026-09-28:
 
 ```sh
-dotnet build klee-mod/KleeCode -p:PrototypeCards=true -p:KokomiOverhaul=true
+dotnet build klee-mod/KleeCode                                # on
+dotnet build klee-mod/KleeCode -p:KokomiOverhaul=false        # off
 ```
 
 `-p:KokomiOverhaul=true` defines `KOKOMI_OVERHAUL`, which moves
@@ -294,11 +304,12 @@ commit; rejected rows are deleted outright, with the reasoning in the slice's
 packet under `review/`, never as a commented-out row. **This is never a second
 permanent pool**, and an empty file is the healthy state.
 
-What the quarantine is: without `-p:PrototypeCards=true` the classes are not
-compiled at all, so no release build, no pck and no ordinary run can reach one;
-under the flag they go into each character's OFF-POOL list (in the pool so
-`CardModel.Pool` resolves, out of `GetUnlockedCards` so no reward roll or
-transform can produce one). The rows never enter tier0's card index, so no run
+What is left of the quarantine since 2026-09-28: under `-p:ShippedKits=true`
+the classes are not compiled at all, so that build cannot reach one; in every
+other build (the release included) they go into each character's OFF-POOL list
+(in the pool so `CardModel.Pool` resolves, out of `GetUnlockedCards` so no
+reward roll or transform can produce one), and the four kit arms, on by
+default, put their own rows in the starters and the offerable pools. The rows never enter tier0's card index, so no run
 template, digest or balance report sees them, and the sheet is excluded by name
 from `lint_sheet_stamp` and `card_distinctness_report` — **staging a row bumps
 no stamp**. Still checked: the tier0 schema validators, the codegen,

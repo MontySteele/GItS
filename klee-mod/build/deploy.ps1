@@ -9,6 +9,19 @@
   So we never build in place. We stage a clean package (manifest + dll only)
   and copy exactly that.
 
+  WHAT IT BUILDS, SINCE 2026-09-28: THE CURRENT KITS. [USER]'s ruling, in his
+  words: "The current character builds are much more progressed than the old
+  prototypes were, even though it's still a work in progress. Let's go ahead
+  and make all 3 current builds the active release builds to avoid this
+  confusion." klee-mod/Directory.Build.props turns the prototype surface and
+  the four kit arms (Klee's overhaul, the companion overhaul, Kokomi's
+  overhaul, Furina's Stage) on in every build that names no property, so this
+  script names none and ships them, unmarked, in the local deploy and in the
+  -Package handoff zip alike. The Teyvat frame stays off (on hold); only
+  deploy_proto.ps1 -TeyvatFrame builds it, stamped +proto. A seat round wants
+  the bridge too: tools/deploy_round.py runs this script and then
+  deploy_bridge.ps1.
+
   NOTE: keep this file pure ASCII. Windows PowerShell 5.1 reads .ps1 as ANSI
   unless there's a BOM, so smart quotes / em-dashes / section signs get mangled
   and break the parser.
@@ -77,7 +90,7 @@ $version = Get-PackageVersion `
     -SourceManifest (Join-Path $packageDir 'manifest.json') -RepoRoot $repoRoot
 $stamp = Get-AssemblyStamp -Version $version
 
-Write-Host "Building ($Configuration)..." -ForegroundColor Cyan
+Write-Host "Building ($Configuration): the current kits (Klee overhaul, companion overhaul, Kokomi overhaul, Furina Stage)..." -ForegroundColor Cyan
 & dotnet build $csproj -c $Configuration -v minimal --nologo @($stamp.BuildArgs)
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 

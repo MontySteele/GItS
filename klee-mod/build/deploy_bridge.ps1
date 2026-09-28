@@ -17,8 +17,10 @@
   a one-command undo, not as an afterthought.
 
   PLAYING ALONGSIDE AN AGENT (2026-09-02). The bridge is installed BEFORE the
-  owner launches, with the game closed -- deploy_proto.ps1 now does it as its
-  last step, so every dev deploy leaves the install parallel-ready. The owner's
+  owner launches, with the game closed -- deploy_proto.ps1 does it as its
+  last step, and tools/deploy_round.py runs it after deploy.ps1 (2026-09-28,
+  when the current kits became the release build), so every round leaves the
+  install parallel-ready. The owner's
   Steam-launched game then carries the bridge on the default port 15526
   (lane 0) and an agent's second instance takes 15527 (lane 1, its own APPDATA;
   understudy/instances.py). Once a game is up holding this dll, this script

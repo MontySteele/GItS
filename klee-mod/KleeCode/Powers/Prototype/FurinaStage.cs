@@ -90,8 +90,10 @@ namespace KleeMod.Powers;
 public static partial class FurinaStage
 {
     /// <summary>
-    /// The arm's default: <c>-p:FurinaStage=true</c> turns it on, and a
-    /// release package never passes it.
+    /// The arm's default: <c>-p:FurinaStage=true</c> turns it on, and since
+    /// 2026-09-28 every build that names no property does
+    /// (<c>klee-mod/Directory.Build.props</c>), the release package
+    /// included.
     /// </summary>
     public const bool DefaultEnabled =
 #if FURINA_STAGE

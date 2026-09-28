@@ -73,22 +73,23 @@ public class FurinaStageRuleTests
     }
 
     // ==================================================================
-    // 0. THE ARM SHIPS OFF.
+    // 0. THE ARM SHIPS ON (2026-09-28).
     // ==================================================================
 
-#if !FURINA_STAGE
+#if FURINA_STAGE
     /// <summary>
-    /// The acceptance condition the whole quarantine rests on. SKIPPED by an
-    /// `#if` rather than left to fail under `-p:FurinaStage=true`, which is
-    /// `docs/current/operations/prototype.md`'s standing rule: under the
-    /// property this pin cannot say anything true -- green would mean the
-    /// property did nothing -- and a red that means "the switch works" teaches
-    /// everyone to ignore reds.
+    /// [USER]'s ruling of 2026-09-28: "make all 3 current builds the active
+    /// release builds". `klee-mod/Directory.Build.props` defaults
+    /// `-p:FurinaStage=true`, so every build that names no property carries
+    /// the Stage. SKIPPED by the `#if` in the one configuration that opts the
+    /// arm out (`-p:ShippedKits=true` or `-p:FurinaStage=false`), because
+    /// there the property has moved the value this pin asserts
+    /// (`docs/current/operations/prototype.md`).
     /// </summary>
     [Fact]
-    public void The_arm_ships_off()
+    public void The_arm_ships_on()
     {
-        Assert.False(FurinaStage.DefaultEnabled);
+        Assert.True(FurinaStage.DefaultEnabled);
     }
 #endif
 

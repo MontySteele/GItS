@@ -38,7 +38,7 @@ git show <tag-or-commit>:<path>
 ## Norms
 
 - **A kit moves Paper → Prototype → Balance.** Paper is a brief and sheet
-  drafts, ruled on taste. Prototype is a `+proto` build graded on fun by
+  drafts, ruled on taste. Prototype is a build graded on fun by
   [USER]'s play and by seat rounds. Balance is the shipped sheet.
   **Measurement law (`EXPERIMENTS.md`: pre-registration, blind grading,
   stamps) binds only at Balance.** Procedure and each kit's finish line:

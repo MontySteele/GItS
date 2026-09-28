@@ -42,7 +42,10 @@ param(
     [switch]$RunCsharpTests,
     # The DEV-BUILD version gate, and nothing else. Set ONLY by
     # klee-mod/build/deploy_proto.ps1, which stamps its package with the
-    # +proto build metadata (R214's channel; see version.ps1). Without this
+    # +proto build metadata (R214's channel; see version.ps1). Since
+    # 2026-09-28 the release build carries the current kits by default, so
+    # +proto marks only a build that differs from the release (today, the
+    # Teyvat frame). Without this
     # switch S3 refuses a +proto package BY NAME, which is what keeps the
     # mark from ever riding a release. It changes NO OTHER RULE: the dev
     # deploy runs this whole gate, every S-rule, exactly as the release path
@@ -347,6 +350,20 @@ if (-not (Test-Path $venvPython)) {
     $codegenOut = Invoke-RepoPython $rosterCodegen --check
     if ($LASTEXITCODE -ne 0) {
         Fail 'S6a' "roster codegen is stale:`n    $($codegenOut -join "`n    ")"
+    }
+}
+# THE PROTOTYPE SURFACE, SINCE 2026-09-28 A RELEASE INPUT. [USER]: "make all 3
+# current builds the active release builds". The default build now compiles
+# docs/prototype-surface.yaml's generated C# (klee-mod/Directory.Build.props),
+# so a surface out of step with its generated classes is a stale release,
+# and this is the one place the release path can see it.
+$protoCodegen = Join-Path $repoRoot 'tools\gen_prototype_cards.py'
+if ((Test-Path $venvPython) -and -not (Test-Path $protoCodegen)) {
+    Fail 'S6a' "tools/gen_prototype_cards.py is missing."
+} elseif (Test-Path $venvPython) {
+    $protoOut = Invoke-RepoPython $protoCodegen --check
+    if ($LASTEXITCODE -ne 0) {
+        Fail 'S6a' "prototype codegen is stale:`n    $($protoOut -join "`n    ")"
     }
 }
 

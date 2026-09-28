@@ -69,7 +69,8 @@ Build and deploy. The sequence is the `deploy` skill: pre-deploy checks,
 copies anything. Windows, and only on the art-bearing main checkout.
 `operations/build-deploy.md` has the rest.
 
-Deploy a prototype arm. Prototype rows are quarantined out of every pool and
-ship only on a `+proto` dev build. `operations/prototype.md` has the flag and
-the deletion rule; `understudy/embark.py --arm` is what grants a row into a
+The current kits are the release build (2026-09-28): the prototype surface
+and the four kit arms are on in every build that names no property, and
+`tools/deploy_round.py` is a round's deploy. `operations/prototype.md` has the
+switches, the one opt-out and the deletion rule; `understudy/embark.py --arm` is what grants a row into a
 starting deck once a run is open.

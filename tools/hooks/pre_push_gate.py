@@ -54,12 +54,12 @@ Workshop `BaseLib.dll`, four binaries that live in a Steam install and are not
 ours to publish, so a runner structurally cannot hold this check. Local is the
 only place it can run, and a push is the last moment before the rest of the
 house sees the tree. So this gate runs it, through `tools/gates.py --only
-dotnet-test,dotnet-test-stage` rather than a second `dotnet` command line --
-ONE implementation, two callers, and the properties are decided in one place.
-BOTH configurations since `EB-781`: the second carries `-p:FurinaStage=true`,
-which is what `deploy_proto.ps1` passes and therefore the world the seats
-play, and running only the first is how nine shipped meter pins stood red
-under the arm for a week with every gate green. A machine with no dotnet or no `local.props` gets a SKIP with the
+dotnet-test,dotnet-test-shipped` rather than a second `dotnet` command line
+-- ONE implementation, two callers, and the properties are decided in one
+place. BOTH configurations: the first is the default build, which since
+2026-09-28 is the current kits every deploy ships; the second is the old
+shipped kits (`-p:ShippedKits=true`), and running only one world is how nine
+shipped meter pins stood red under the Stage for a week (`EB-781`). A machine with no dotnet or no `local.props` gets a SKIP with the
 reason, never a silent pass, and its pushes are not blocked by a check it
 cannot run.
 
@@ -94,11 +94,11 @@ FAST_LANE = ["-m", "pytest", "tier0/tests", "tier05/tests", "-q",
 PARALLEL = ["-n", "auto", "--dist", "loadscope"]
 LINTS = ["tools/run_lints.py", "--lane", "ci"]
 #: The mod's C# suite, via the gate wrapper so the flags live in one file.
-#: BOTH configurations since `EB-781` -- the second adds `-p:FurinaStage=true`,
-#: the world `deploy_proto.ps1` runs. A configuration no gate runs is a
+#: BOTH configurations: the default build (the current kits, since
+#: 2026-09-28) and the old shipped kits. A configuration no gate runs is a
 #: configuration that goes red quietly; that is how nine pins stood red under
 #: the arm for a week. About ten seconds more on a push.
-KLEETESTS = ["tools/gates.py", "--only", "dotnet-test,dotnet-test-stage",
+KLEETESTS = ["tools/gates.py", "--only", "dotnet-test,dotnet-test-shipped",
              "--oneline"]
 
 # What a directory must hold before this gate can honestly claim to have

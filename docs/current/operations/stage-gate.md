@@ -8,8 +8,9 @@ written to `review/active/<character>-brief-<date>.md` and read against
 `docs/current/kit-checklist.md`. No build, no flag, no commands. **Exit:** [USER] has read the brief and ruled its picks.
 
 **Prototype, gated by play.** Rows go on `docs/prototype-surface.yaml` and are
-built in **C# first** (next section). Deploy with
-`klee-mod\build\deploy_proto.ps1`, run the three-fight soak, then play.
+built in **C# first** (next section). Deploy with `tools/deploy_round.py`
+(since 2026-09-28 the release build carries the current kits, so no dev
+build is needed), run the three-fight soak, then play.
 **Measurement law does not bind here:** no prediction slate, no countersign, no
 registration, no stamp, no re-baseline, and no number taken off a prototype row
 is quotable (LAW, *Design governance*). The evidence is [USER]'s play at a rule
