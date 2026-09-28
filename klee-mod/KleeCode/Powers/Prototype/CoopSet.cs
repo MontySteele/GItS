@@ -682,9 +682,21 @@ public sealed class SparksForEveryonePower
 /// origin is the card, so its title is the card's and it takes itself and its
 /// Strength away at the end of the turn. Applied by
 /// <see cref="FurinaStage.RaiseAToast"/>.
+///
+/// ITS OWN ROWS, though the base class reads the card's title and the shared
+/// temporary-Strength description: the boot self-check (R8) asks every power
+/// this assembly registers for a title and a description under its own id,
+/// and a missing pair is logged as SELFCHECK FAILED on every boot.
 /// </summary>
-public sealed class RaiseAToastPower : TemporaryStrengthPower
+public sealed class RaiseAToastPower : TemporaryStrengthPower, ILocalizationProvider
 {
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Raise a Toast"),
+        ("description",
+            "Gain [blue]{Amount}[/blue] [gold]Strength[/gold] this turn."),
+    };
+
     public override AbstractModel OriginModel =>
         ModelDb.Card<ProtoFsRaiseAToast>();
 }

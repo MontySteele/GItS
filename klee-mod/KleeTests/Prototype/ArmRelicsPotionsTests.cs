@@ -448,6 +448,32 @@ public class ArmRelicsPotionsTests
         Assert.Equal(vaporized, pile.PredictedSetOffDamage());
     }
 
+    [Fact]
+    public void Alices_teapot_leaves_the_real_aura_for_the_next_bomb()
+    {
+        // The Teapot's pretend Hydro consumes nothing real (`Explode`), so the
+        // charge behind it meets the enemy's real Hydro and Vaporizes too;
+        // with the Vermillion Pact held, that aura is then kept for the rest.
+        using var arm = new KleeArm();
+        var klee = Seat.Klee();
+        var hydro = Seat.Klee(40).WithPower<HydroAuraPower>(2);
+        Seat.Force(hydro.Creature, "Side", CombatSide.Enemy);
+        var combat = ProtoBombs.Board(klee.Creature, hydro.Creature);
+        combat.RoundNumber = 1;
+        combat.CurrentSide = CombatSide.Player;
+        var pile = ProtoBombs.Place(hydro.Creature, klee.Creature,
+            new ProtoBombs.Charge(10), new ProtoBombs.Charge(4),
+            new ProtoBombs.Charge(4));
+        Give<AlicesTeapot>(klee);
+        Assert.True(AlicesTeapot.Pending(klee.Creature));
+
+        int Vap(int size) => (int)(size * ReactionConstants.VaporizeMult);
+        Assert.Equal(Vap(10) + Vap(4) + 4, pile.PredictedSetOffDamage());
+
+        klee.WithPower<VermillionPactPower>(1);
+        Assert.Equal(Vap(10) + Vap(4) + Vap(4), pile.PredictedSetOffDamage());
+    }
+
     private static string LiveReaction(ProtoBombPower pile) =>
         typeof(ProtoBombPower).GetProperty("LiveReaction", HeadlessGame.All)!
             .GetValue(pile)!.ToString()!;
