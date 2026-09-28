@@ -45,7 +45,7 @@ public sealed class ProtoFsStageWhisper : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stage Whisper"),
-        ("description", "Your other performers give all but 1 of their [gold]Fanfare[/gold] to your [gold]front performer[/gold]. Draw 1 card."),
+        ("description", "Your other performers give all but 1 of their [gold]Fanfare[/gold] to your [gold]front performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -69,6 +69,6 @@ public sealed class ProtoFsStageWhisper : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

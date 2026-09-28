@@ -1917,7 +1917,9 @@ hold or hurry a Plan. Every row here is keyed to the Bake-Kurage:
   morning with no Plans. Both engines carry the promise on one new op
   (`draw_after_plans`) and pay it one line after the drain.
 - **Ripple** (Common, 0): a cheap Plan whose now-line is worth playing (2
-  Block for 0) and whose Plan pays tempo (1 Energy and 4 Block).
+  Block for 0) and whose Plan pays tempo (1 Energy and 4 Block). Uncommon
+  since 2026-09-28: its face became "Draw 1 card" in the core pass, and a
+  0-cost self-replacing card falls under LAW's cycling rule (Uncommon+).
 
 TWO OF THE DRAFTED FOUR ARE WITHDRAWN on the R253 charter audit and are not
 on the surface: Held Tide (Uncommon, Retain -- Sango Isshin's condition at
@@ -3223,7 +3225,9 @@ shield. Each performer behind the front gives `Fanfare - 1`, so it never
 empties anyone and no one Bows, which keeps the loop with Thunderous Applause
 and A Five-Century Act closed; with one performer it only draws. The op keeps
 its name and loses its `amount`, and the `stage_whisper` upgrade key is
-retired.
+retired. **The upgrade became draw 2 at cost 1 (2026-09-28):** upgraded at
+cost 0 it was a 0-cost draw-1 Common, which LAW's cycling rule gates to
+Uncommon+ (GPT review 2026-09-28).
 
 **The Hydro rides the hit (2026-09-26 seat round, act 2 lane 2).** Quick
 Cue's Spend mode hit a Pyro body, Vaporize was listed and the 8 landed at face

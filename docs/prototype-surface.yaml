@@ -1435,12 +1435,13 @@
 
 - {id: proto_kk_ripple, name: "Ripple", character: kokomi,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
+   cost: 0, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
    description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold].",
    effects: [{op: draw, amount: 1}],
    plan: [{op: energy, amount: 1}],
+   # Uncommon: a 0-cost draw 1 is a cycling engine (LAW, 2026-09-28).
    # now draw 2; the Plan line does not upgrade.
    upgrade: {draw: 1}}
 
@@ -2330,11 +2331,13 @@
 # shield and never empties anyone, so no one Bows (the loop stays closed).
 # Why: docs/notes/prototype-surface-provenance.md.
 - {id: proto_fs_stage_whisper, name: "Stage Whisper", character: furina,
-   upgrade: {cost: -1},
+   # Upgrade draws 2 at cost 1, not cost 0: a 0-cost draw-1 Common breaks
+   # LAW's cycling rule (GPT review 2026-09-28).
+   upgrade: {draw: 1},
    authored_by: [claude],
    replaces: ebb_and_flow,
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Your other performers give all but 1 of their [gold]Fanfare[/gold] to your [gold]front performer[/gold]. Draw 1 card.",
+   description: "Your other performers give all but 1 of their [gold]Fanfare[/gold] to your [gold]front performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: stage_whisper}, {op: draw, amount: 1}]}
 
 # --- 2. Feeding ---
