@@ -1923,16 +1923,9 @@
    description: "Your [gold]back performer[/gold] gains 5 [gold]Fanfare[/gold].",
    effects: [{op: stage_raise, amount: 5}]}
 
-# --- the Commons (eight) ---
-
-- {id: proto_fs_gentilhomme_usher, name: "Gentilhomme Usher", character: furina,
-   upgrade: {cost: -1},
-   authored_by: [claude],
-   replaces: gentilhomme_usher,
-   register: salon, cost: 1, type: skill, rarity: common,
-   art_of: gentilhomme_usher,
-   description: "Summon Usher.",
-   effects: [{op: stage_summon, member: usher}]}
+# --- the Commons (six) ---
+# 2026-09-28 balance review: Gentilhomme Usher (the card) and Understudy left
+# the pool, 80 -> 78. Provenance: prototype-surface-provenance.md.
 
 - {id: proto_fs_surintendante_chevalmarin, name: "Surintendante Chevalmarin",
    upgrade: {cost: -1},
@@ -1952,14 +1945,6 @@
    art_of: mademoiselle_crabaletta,
    description: "Summon Crabaletta.",
    effects: [{op: stage_summon, member: crabaletta}]}
-
-- {id: proto_fs_understudy, name: "Understudy", character: furina,
-   upgrade: {remove: exhaust},
-   authored_by: [claude],
-   replaces: suffering_for_art,
-   register: salon, cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "Summon a random performer. Exhaust.",
-   effects: [{op: stage_summon, member: random}]}
 
 - {id: proto_fs_warm_reception, name: "Warm Reception", character: furina,
    upgrade: {draw: +1},
@@ -2147,8 +2132,8 @@
    authored_by: [claude],
    replaces: dress_rehearsal,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Each performer gains 3 [gold]Fanfare[/gold].",
-   effects: [{op: stage_raise, amount: 3, seat: all}]}
+   description: "Each performer gains 2 [gold]Fanfare[/gold].",
+   effects: [{op: stage_raise, amount: 2, seat: all}]}
 
 - {id: proto_fs_double_casting, name: "Double Casting", character: furina,
    upgrade: {cost: -1},
@@ -2191,8 +2176,8 @@
    authored_by: [claude],
    replaces: standing_ovation,
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever a performer [gold]Bow[/gold]s, draw 1 card and your [gold]back performer[/gold] gains 2 [gold]Fanfare[/gold].",
-   effects: [{op: apply_power, power: fs_thunderous_applause, amount: 2,
+   description: "Whenever a performer [gold]Bow[/gold]s, draw 1 card and your [gold]back performer[/gold] gains {PowerAmount:diff()} [gold]Fanfare[/gold].",
+   effects: [{op: apply_power, power: fs_thunderous_applause, amount: 1,
               target: self}]}
 
 - {id: proto_fs_rapt_audience, name: "A Rapt Audience", character: furina,
@@ -2268,16 +2253,16 @@
    # The guest seat round (2026-09-25, 0.2.3794): "he joins at the back,
    # where hits never reach him, so his act lands nothing." He is the guest
    # who wants the front, so his card puts him there; the others shift back.
-   description: "Summon Wriothesley at the front with 8 [gold]Fanfare[/gold]. On a full stage, the back one [gold]Bow[/gold]s instead and gives him its [gold]Fanfare[/gold].",
-   effects: [{op: stage_guest, member: wriothesley, amount: 8, seat: front}]}
+   description: "Summon Wriothesley at the front with 5 [gold]Fanfare[/gold]. On a full stage, the back one [gold]Bow[/gold]s instead and gives him its [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: wriothesley, amount: 5, seat: front}]}
 
 - {id: proto_fs_guest_star_sigewinne, name: "Guest Star: Sigewinne", character: furina,
    upgrade: {stage_guest: +2},
    authored_by: [claude],
    replaces: standing_room_only,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Summon Sigewinne with 8 [gold]Fanfare[/gold].",
-   effects: [{op: stage_guest, member: sigewinne, amount: 8}]}
+   description: "Summon Sigewinne with 5 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: sigewinne, amount: 5}]}
 
 - {id: proto_fs_guest_star_charlotte, name: "Guest Star: Charlotte", character: furina,
    upgrade: {stage_guest: +2},
@@ -2294,8 +2279,8 @@
    register: salon, cost: 1, type: skill, rarity: uncommon,
    # 2026-09-25 night: her act (tip and badge) now always lands, 3 Anemo
    # damage to a random enemy, one with an aura if any.
-   description: "Summon Lynette with 8 [gold]Fanfare[/gold].",
-   effects: [{op: stage_guest, member: lynette, amount: 8}]}
+   description: "Summon Lynette with 5 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: lynette, amount: 5}]}
 
 # FURINA, THE STAGE -- THE SUPPORTING POOL (2026-09-26): 28 rows of
 # review/active/furina-supporting-pool-2026-09-26.md (Sold Out is below). Why
@@ -2304,13 +2289,13 @@
 # --- 1. Arranging the stage ---
 
 - {id: proto_fs_plot_twist, name: "Plot Twist", character: furina,
-   upgrade: {block: 3},
+   upgrade: {damage: 3},
    authored_by: [claude],
    replaces: shared_billing,
-   register: salon, cost: 1, type: skill, rarity: common,
-   description: "Reverse the order of your performers. Gain 6 [gold]Block[/gold].",
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "Reverse the order of your performers. Deal 7 damage.",
    effects: [{op: stage_reverse},
-             {op: block, amount: 6}]}
+             {op: damage, amount: 7, target: enemy}]}
 
 - {id: proto_fs_revolving_stage, name: "Revolving Stage", character: furina,
    upgrade: {cost: -1},
@@ -2370,8 +2355,8 @@
    authored_by: [claude],
    replaces: top_billing,
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, your [gold]back performer[/gold] gains 2 [gold]Fanfare[/gold].",
-   effects: [{op: apply_power, power: fs_season_tickets, amount: 2,
+   description: "At the start of your turn, your [gold]back performer[/gold] gains 1 [gold]Fanfare[/gold].",
+   effects: [{op: apply_power, power: fs_season_tickets, amount: 1,
               target: self}]}
 
 - {id: proto_fs_guest_star_escoffier, name: "Guest Star: Escoffier", character: furina,
@@ -2585,11 +2570,11 @@
               target: self}]}
 
 - {id: proto_fs_dual_nature, name: "Dual Nature", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {draw: +1},
    authored_by: [claude],
    replaces: curtain_up,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Choose [gold]Ousia[/gold] or [gold]Pneuma[/gold] for this turn. Draw 1 card.",
+   description: "Choose [gold]Ousia[/gold] or [gold]Pneuma[/gold] for this turn. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: stage_dual_nature},
              {op: draw, amount: 1}]}
 

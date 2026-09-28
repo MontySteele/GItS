@@ -45,7 +45,7 @@ public sealed class ProtoFsDualNature : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dual Nature"),
-        ("description", "Choose [gold]Ousia[/gold] or [gold]Pneuma[/gold] for this turn. Draw 1 card."),
+        ("description", "Choose [gold]Ousia[/gold] or [gold]Pneuma[/gold] for this turn. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -69,6 +69,6 @@ public sealed class ProtoFsDualNature : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

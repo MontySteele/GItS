@@ -26,7 +26,6 @@
     "proto_fs_full_house",
     "proto_fs_gala_dinner",
     "proto_fs_gala_premiere",
-    "proto_fs_gentilhomme_usher",
     "proto_fs_grand_deluge",
     "proto_fs_grand_entrance",
     "proto_fs_grand_finale",
@@ -79,7 +78,6 @@
     "proto_fs_tidal_flourish",
     "proto_fs_tide_of_applause",
     "proto_fs_tutti",
-    "proto_fs_understudy",
     "proto_fs_warm_reception",
     "proto_itto_superlative_superstrength_either",
     "proto_itto_superlative_superstrength_priced",
@@ -316,7 +314,6 @@
     "proto_fs_full_house": "furina",
     "proto_fs_gala_dinner": "furina",
     "proto_fs_gala_premiere": "furina",
-    "proto_fs_gentilhomme_usher": "furina",
     "proto_fs_grand_deluge": "furina",
     "proto_fs_grand_entrance": "furina",
     "proto_fs_grand_finale": "furina",
@@ -369,7 +366,6 @@
     "proto_fs_tidal_flourish": "furina",
     "proto_fs_tide_of_applause": "furina",
     "proto_fs_tutti": "furina",
-    "proto_fs_understudy": "furina",
     "proto_fs_warm_reception": "furina",
     "proto_itto_superlative_superstrength_either": "klee",
     "proto_itto_superlative_superstrength_priced": "klee",
@@ -668,7 +664,7 @@
       "cost": -1
     },
     "proto_fs_dual_nature": {
-      "cost": -1
+      "draw": 1
     },
     "proto_fs_echoing_hall": {
       "cost": -1
@@ -692,9 +688,6 @@
       "stage_raise": 1
     },
     "proto_fs_gala_premiere": {
-      "cost": -1
-    },
-    "proto_fs_gentilhomme_usher": {
       "cost": -1
     },
     "proto_fs_grand_deluge": {
@@ -777,7 +770,7 @@
       "power_amount": 1
     },
     "proto_fs_plot_twist": {
-      "block": 3
+      "damage": 3
     },
     "proto_fs_pneuma_refrain": {
       "formula_base": 4
@@ -859,9 +852,6 @@
     },
     "proto_fs_tutti": {
       "cost": -1
-    },
-    "proto_fs_understudy": {
-      "remove": "exhaust"
     },
     "proto_fs_warm_reception": {
       "draw": 1

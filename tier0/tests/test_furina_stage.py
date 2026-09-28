@@ -1004,8 +1004,10 @@ def test_the_pool_seam_swaps_its_rows_at_the_same_rarity(arm):
     here is a question about two committed files anyway."""
     subs = loader.pool_substitutions("furina")
     # batch one, R276's batch two, the Guest Cast (2026-09-25) and the
-    # supporting pool's 27 that replace a row and Sold Out (2026-09-26)
-    assert len(subs) == 14 + 15 + 8 + 27 + 1
+    # supporting pool's 27 that replace a row and Sold Out (2026-09-26),
+    # less Gentilhomme Usher and Understudy (balance review, 2026-09-28)
+    assert len(subs) == 14 + 15 + 8 + 27 + 1 - 2
+    assert not set(subs) & set(FS.POOL_DROPS)
     rarity = {r["id"]: r["rarity"] for r in _sheet_rows("furina-cards.yaml")}
     rarity.update({r["id"]: r["rarity"] for r in _proto_rows()})
     for shipped, proto in subs.items():
@@ -1030,8 +1032,9 @@ def test_every_stage_row_is_named_by_one_of_the_two_maps():
     assert all(on_sheet[k] is None for k in FS.POOL_ADDS)
     # batch one, R276's batch two, the Guest Cast (2026-09-25), the
     # supporting pool's 28 and Sold Out (2026-09-26), and Regal Bearing
-    # (the starter ruling, 2026-09-28)
-    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1
+    # (the starter ruling, 2026-09-28), less Gentilhomme Usher and
+    # Understudy (the balance review, 2026-09-28)
+    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1 - 2
     # THE CO-OP SET's three are the MULTIPLAYER TIER: offered only in co-op,
     # outside the pool, replacing no shipped row -- so neither map names
     # them, and the tier's own mirror does.

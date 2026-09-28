@@ -108,7 +108,7 @@ def _events(st, name):
 #: id -> (name, rarity, cost, type), the paper's tables as swept, with the two
 #: renames made for title clashes (Showstopper, Undertow).
 TABLE = {
-    "plot_twist": ("Plot Twist", "common", 1, "skill"),
+    "plot_twist": ("Plot Twist", "common", 1, "attack"),
     "revolving_stage": ("Revolving Stage", "uncommon", 1, "power"),
     "oratrices_verdict": ("Oratrice's Verdict", "uncommon", 0, "skill"),
     "guest_star_lyney": ("Guest Star: Lyney", "rare", 1, "skill"),
@@ -193,6 +193,28 @@ def test_with_the_flag_off_there_are_no_additions():
     assert loader.pool_additions("furina") == ()
 
 
+def test_the_two_cut_rows_leave_the_offer_and_their_shipped_rows_stay_out(arm):
+    """2026-09-28 balance review ("agreed on a)"): Gentilhomme Usher (the
+    card) and Understudy left the pool, and the shipped rows they replaced
+    do not come back in their slots."""
+    from tier05 import rewards
+    assert loader.pool_drops("furina") == ("gentilhomme_usher",
+                                           "suffering_for_art")
+    rewards.character_pool.cache_clear()
+    try:
+        offered = {c.id for cs in rewards.character_pool("furina").values()
+                   for c in cs}
+        assert not offered & {"gentilhomme_usher", "suffering_for_art",
+                              "proto_fs_gentilhomme_usher",
+                              "proto_fs_understudy"}
+    finally:
+        rewards.character_pool.cache_clear()
+
+
+def test_with_the_flag_off_there_are_no_drops():
+    assert loader.pool_drops("furina") == ()
+
+
 # ---------------------------------------------------------------------------
 # 1. ARRANGING THE STAGE.
 # ---------------------------------------------------------------------------
@@ -202,7 +224,9 @@ def test_plot_twist_reverses_the_seats(arm):
     effects.resolve_card(st, _row_card("proto_fs_plot_twist"))
     assert st.player.stage == [["crabaletta", 5], ["chevalmarin", 4],
                                ["usher", 3]]
-    assert st.player.block == 6
+    # 2026-09-28 balance review: an Attack now, 7 damage and no Block.
+    assert st.enemies[0].hp == 500 - 7
+    assert st.player.block == 0
     st = _state([["usher", 3], ["crabaletta", 5]])
     effects.resolve_card(st, _row_card("proto_fs_plot_twist"))
     assert st.player.stage == [["crabaletta", 5], ["usher", 3]]

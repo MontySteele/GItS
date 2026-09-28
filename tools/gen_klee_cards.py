@@ -12363,6 +12363,12 @@ def _authored_face_with_tokens(card: dict) -> str:
         plural = var in CARD_COUNT_FACE_VARS
         pattern = (rf"(?<!\d){literal}(?!\d)(?P<noun>\s+cards?\b)?" if plural
                    else rf"(?<!\d){literal}(?!\d)")
+        # 2026-09-28 (Thunderous Applause, 1 Fanfare a Bow): a face that
+        # already PRINTS this var's token placed it itself, so no literal is
+        # swapped for it -- "draw 1 card and ... gains {PowerAmount:diff()}"
+        # would otherwise lose its fixed draw to the power's amount.
+        if var and f"{{{var}:" in card["description"]:
+            continue
         match = _search_outside_placeholder(re.compile(pattern), text, cursor)
         if match is None:
             continue

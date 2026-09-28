@@ -86,6 +86,7 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
     # at once, which is the point of putting the seam at the source instead of
     # at the five mouths.
     subs = loader.pool_substitutions(character_id)
+    drops = set(loader.pool_drops(character_id))
     pool = {}
     for c in index.values():
         # kit_card (v1.9): Bursts are kit, not loot -- never offered. This
@@ -109,6 +110,8 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
         # 2026-07-21: "We NEED to make the sim results reflect the real card
         # pool. If that damages the baseline, so be it."
         if c.character != character_id:
+            continue
+        if c.id in drops:
             continue
         if c.id in subs:
             # SAME RARITY SLOT, SAME WEIGHT: the prototype is filed under the

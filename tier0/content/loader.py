@@ -1446,6 +1446,16 @@ def _pool_additions(spec: dict) -> tuple[str, ...]:
     return ()
 
 
+def pool_drops(character_id: str) -> tuple[str, ...]:
+    """Shipped rows an arm takes OUT of the offer with nothing in their slot
+    (`furina_stage.POOL_DROPS`, the 2026-09-28 balance review), on
+    `_pool_additions`' flags. `()` on every flag-off tree."""
+    if (character_id == furina_stage.CHARACTER
+            and furina_stage.FURINA_STAGE):
+        return tuple(furina_stage.POOL_DROPS)
+    return ()
+
+
 def pool_additions(character_id: str) -> tuple[str, ...]:
     """`_pool_additions` by character id, `pool_substitutions`' twin."""
     spec = _character_index().get(character_id)

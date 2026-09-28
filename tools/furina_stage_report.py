@@ -91,9 +91,10 @@ PRESERVE = STARTER_KIT + [
 
 #: EXPEND: field performers cheaply, spend them at 1 for full riders and bows,
 #: replace them. Pays in cards and Energy, not in Fanfare (brief sec.4).
+#: 2026-09-28: Understudy and Gentilhomme Usher left the pool (balance
+#: review), so they left this deck too.
 EXPEND = STARTER_KIT + [
-    "proto_fs_understudy", "proto_fs_understudy",
-    "proto_fs_gentilhomme_usher", "proto_fs_surintendante_chevalmarin",
+    "proto_fs_surintendante_chevalmarin",
     "proto_fs_mademoiselle_crabaletta", "proto_fs_curtain_rise",
     "proto_fs_tidal_flourish", "proto_fs_grand_entrance",
     "proto_fs_final_bow",
@@ -103,8 +104,8 @@ EXPEND = STARTER_KIT + [
 #: (Neuvillette and Charlotte fed by Refills) and a TANK deck (Wriothesley
 #: and Sigewinne behind Block). Then the balance check [USER] asked for after
 #: the trio could be cloned ("Let's allow for copies and then check the
-#: balance"): three Crabalettas, three Crabalettas with Full House, three
-#: Ushers; and three guests, alone and with Full House, to spot a runaway.
+#: balance"): three Crabalettas, three Crabalettas with Full House (three
+#: Ushers left with the Usher card, 2026-09-28); and three guests, alone and with Full House, to spot a runaway.
 STAR = STARTER_KIT + [
     "proto_fs_guest_star_neuvillette", "proto_fs_guest_star_charlotte",
     "proto_fs_standing_ovation", "proto_fs_standing_ovation",
@@ -119,7 +120,6 @@ TANK = STARTER_KIT + [
 ]
 THREE_CRABS = STARTER_KIT + ["proto_fs_mademoiselle_crabaletta"] * 3
 THREE_CRABS_FULL_HOUSE = THREE_CRABS + ["proto_fs_full_house"]
-THREE_USHERS = STARTER_KIT + ["proto_fs_gentilhomme_usher"] * 3
 THREE_SUPPORTS = STARTER_KIT + [
     "proto_fs_guest_star_charlotte", "proto_fs_guest_star_sigewinne",
     "proto_fs_guest_star_wriothesley", "proto_fs_standing_ovation",
@@ -147,7 +147,6 @@ ROTATION = STARTER_KIT + [
     "proto_fs_plot_twist", "proto_fs_revolving_stage",
     "proto_fs_stage_whisper", "proto_fs_guest_star_lyney",
     "proto_fs_oratrices_verdict", "proto_fs_mademoiselle_crabaletta",
-    "proto_fs_gentilhomme_usher",
 ]
 BANK = STARTER_KIT + [
     "proto_fs_season_tickets", "proto_fs_cheered_on", "proto_fs_cheered_on",
@@ -176,7 +175,6 @@ ARMS = (("natural", None), ("preserve", PRESERVE), ("expend", EXPEND),
         ("guest star", STAR), ("guest tank", TANK),
         ("3 crabalettas", THREE_CRABS),
         ("3 crabalettas + full house", THREE_CRABS_FULL_HOUSE),
-        ("3 ushers", THREE_USHERS),
         ("3 guests (supports)", THREE_SUPPORTS),
         ("3 guests (supports) + full house", THREE_SUPPORTS_FULL_HOUSE),
         ("3 guests (stars) + full house", THREE_STARS_FULL_HOUSE),

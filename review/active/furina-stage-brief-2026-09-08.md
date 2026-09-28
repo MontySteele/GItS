@@ -179,7 +179,9 @@ rule closes it.
 Summon, defend, spend the lead. Wants Block in hand on the big-intent turns
 and a Spend card when the enemy can die. Its cards: the three named
 summons, Curtain Rise and its siblings, Rising Applause and the Refills,
-and Understudy for the Expend line.
+and Understudy for the Expend line. (2026-09-28: Understudy and the
+Gentilhomme Usher card left the pool in the balance pass, §15; Usher the
+performer stays.)
 
 ### 5.2 The Ovation (the payoff plan)
 
@@ -393,14 +395,14 @@ Regal Bearing leave the starter for the Commons below.
 | Curtain Rise | 1 | Attack | Deal 7 damage. Spend 3: deal 13 instead. |
 | Rising Applause | 1 | Skill | Your back performer gains 5 Fanfare. (Was Standing Ovation; renamed under R179 in round one, `EB-739`, since a shipped Power carries that name.) |
 
-**Commons (eight, and two more since 2026-09-28)**
+**Commons (eight, and two more since 2026-09-28; Gentilhomme Usher and Understudy left the pool in the balance pass, §15)**
 
 | card | cost | type | text |
 |---|---|---|---|
-| Gentilhomme Usher | 1 | Skill | Summon Usher. (2026-09-25: the trio can be cloned; the "already on stage" clause is gone.) |
+| ~~Gentilhomme Usher~~ | 1 | Skill | Summon Usher. (2026-09-25: the trio can be cloned; the "already on stage" clause is gone.) (2026-09-28: out of the pool, §15.) |
 | Surintendante Chevalmarin | 1 | Skill | Apply Hydro to ALL enemies. Summon Chevalmarin. (2026-09-25, draft 3: Hydro comes from cards. The same evening: the trio can be cloned.) |
 | Mademoiselle Crabaletta | 1 | Skill | Summon Crabaletta. (2026-09-25: the trio can be cloned.) |
-| Understudy | 0 | Skill | Summon a random performer. Exhaust. (2026-09-25: the face follows the full-stage ruling, rule 3.) |
+| ~~Understudy~~ | 0 | Skill | Summon a random performer. Exhaust. (2026-09-25: the face follows the full-stage ruling, rule 3.) (2026-09-28: out of the pool, §15.) |
 | Warm Reception | 1 | Skill | Your back performer gains 3 Fanfare. Draw 1 card. |
 | Tidal Flourish | 1 | Attack | Deal 5 damage to ALL enemies. Spend 2: deal 9 and apply Hydro to ALL instead. (2026-09-25, draft 3.) |
 | Interposition | 1 | Skill | Gain 5 Block. Spend 2: gain 10 instead. |
@@ -452,12 +454,12 @@ values; names are provisional. Upgrades in brackets.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Gala Dinner | 1 | Skill | Each performer gains 3 Fanfare. [gains 4] |
+| Gala Dinner | 1 | Skill | Each performer gains 2 Fanfare. [gains 3] (2026-09-28 balance pass: was 3, 4 upgraded.) |
 | Double Casting | 1 | Skill | Summon 2 random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Tutti! | 2 | Skill | All your performers act now. [cost 1] (Round four: was 2, 1 upgraded; round four's 1 and 0 undone in the 2026-09-26 balance review.) |
 | Bravura | 1 | Attack | Spend all of your back performer's Fanfare. Deal 3 damage per point. [4 per point] |
 | Full House | 3 | Power | If all three seats are filled at the end of your turn, your performers act twice. [cost 2] (2026-09-26 balance review: was 2, 1 upgraded.) |
-| Thunderous Applause | 1 | Power | Whenever a performer Bows, draw 1 card and your back performer gains 2 Fanfare. [gains 3] |
+| Thunderous Applause | 1 | Power | Whenever a performer Bows, draw 1 card and your back performer gains 1 Fanfare. [gains 2] (2026-09-28 balance pass: was 2, 3 upgraded; the draw is unchanged.) |
 | A Rapt Audience | 1 | Power | Whenever an enemy hits your front performer, your back performer gains 2 Fanfare. Needs 2 performers. [gains 3] (2026-09-26 balance review: was half the Fanfare lost, all of it upgraded. Copies add; a hit its Block fully absorbs does not count.) |
 
 **Rares (two)**
@@ -531,3 +533,29 @@ All of it taken; none of it a redesign.
 - Regen begins on the second turn, so the first hand sees 3; §3 rule 2.
 - The lore table calls Fanfare-as-the-bar an adaptation.
 - Two watch items added to §8: the lone Usher, and the three shields.
+
+## 15. Balance pass one (2026-09-28)
+
+[USER]'s Stage run on 2026-09-28 was "extremely easy" until an act-3 elite.
+The review found Fanfare generation too high, and the spend side fine: "I
+actually think the spend is totally fine; it's the generation that's the
+issue. Let's leave these alone for now." Bravura and every spender are
+unchanged. Ruled, and built on `furina-stage-balance-1`:
+
+1. **Dual Nature**: the upgrade is +1 draw (draw 2) instead of cost -1; it
+   stays 1 cost. "I think a is good".
+2. **Guest Star: Lynette, Sigewinne, Wriothesley**: the guest arrives with 5
+   Fanfare, not 8; the upgrade stays +2 (7). "a) is good for now. This is
+   much more effective block than a Necrobinder deck gives, but the per-card
+   amount is fine; it's more the frequency that's higher."
+3. **Gala Dinner** gives each performer 2 (3 upgraded); **Season Tickets**
+   gives 1 a turn (2 upgraded); **Thunderous Applause** gives 1 Fanfare a Bow
+   (2 upgraded), its draw of 1 a Bow unchanged. "agreed".
+4. **No change to Bravura or any spender** (the quote above).
+5. **Plot Twist** is an Attack: "Reverse the order of your performers. Deal 7
+   damage." (10 upgraded), at one enemy, no Block; cost 1, Common. "a)".
+6. **Understudy and the Gentilhomme Usher card leave the pool**, 80 cards to
+   78. Usher the performer stays. "agreed on a)".
+
+Row provenance: `docs/notes/prototype-surface-provenance.md`, "Furina, the
+Stage — balance pass one".
