@@ -2385,6 +2385,83 @@ public class TeyvatFrameTests : IDisposable
     }
 
     // ---------------------------------------------------------------
+    // `EB-1`, the BASE event: the mirror above only stands in for
+    // `PunchOff` in Liyue, so every other run -- an Ironclad on floor 7,
+    // 2026-09-28 -- still met the unguarded base loop. A prefix on
+    // `PunchOff.PunchEachOther` skips the purely cosmetic loop under
+    // `Instant` and leaves it byte for byte at every other speed.
+    // ---------------------------------------------------------------
+
+    private const string PunchOffGuardPatchType =
+        "KleeMod.Patches.PunchOff_PunchEachOther_InstantGuard_Patch";
+
+    private static bool BaseLoopSkipped(FastModeType mode) =>
+        (bool)StaticMethod(InArm(PunchOffGuardPatchType), "ShouldSkipLoop")
+            .Invoke(null, new object[] { mode })!;
+
+    [Fact]
+    public void EB1_the_base_guard_targets_the_base_events_own_loop()
+    {
+        var patch = InArm(PunchOffGuardPatchType);
+        var attr = patch.GetCustomAttributes(typeof(HarmonyPatch), false)
+                        .Cast<HarmonyPatch>().Single();
+        Assert.Equal(typeof(PunchOff), attr.info.declaringType);
+        Assert.Equal("PunchEachOther", attr.info.methodName);
+
+        // Harmony's own resolution against the installed `sts2.dll`, so a
+        // rename is a red test rather than a patch that arms nothing.
+        var target = AccessTools.Method(typeof(PunchOff), "PunchEachOther");
+        Assert.NotNull(target);
+        Assert.Empty(target!.GetParameters());
+        Assert.Equal(typeof(System.Threading.Tasks.Task), target.ReturnType);
+
+        // A prefix that can hand back the Task itself.
+        var prefix = (MethodInfo)StaticMethod(patch, "Prefix");
+        Assert.Equal(typeof(bool), prefix.ReturnType);
+        Assert.Contains(prefix.GetParameters(),
+                        p => p.Name == "__result"
+                             && p.ParameterType == typeof(System.Threading.Tasks.Task).MakeByRefType());
+    }
+
+    [Fact]
+    public void EB1_the_base_loop_is_skipped_only_under_instant()
+    {
+        Assert.True(BaseLoopSkipped(FastModeType.Instant));
+        Assert.False(BaseLoopSkipped(FastModeType.Normal));
+        Assert.False(BaseLoopSkipped(FastModeType.Fast));
+    }
+
+    [Fact]
+    public void EB1_the_prefix_reads_the_speed_through_the_mirrors_reader_and_its_own_gate()
+    {
+        var calls = Il.CallSequence(StaticMethod(InArm(PunchOffGuardPatchType), "Prefix")).ToList();
+        Assert.Contains(calls, c => c.StartsWith("PunchOffMirror.CurrentFastMode", StringComparison.Ordinal));
+        Assert.Contains(calls, c => c.Contains("ShouldSkipLoop", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void EB1_nothing_waits_on_the_base_loop_so_skipping_it_strands_nothing()
+    {
+        // The skip is safe only while the loop is fire-and-forget and the
+        // cancel and the unsubscribe live outside it. Pinned against the base
+        // event itself, so a game patch that starts awaiting the loop, or
+        // moves the unsubscribe into it, fails here.
+        var start = Il.CallSequence(Method(typeof(PunchOff), "AfterEventStarted")).ToList();
+        Assert.Contains(start, c => c.StartsWith("TaskHelper.RunSafely", StringComparison.Ordinal));
+        Assert.Contains(start, c => c.StartsWith("PunchOff.PunchEachOther", StringComparison.Ordinal));
+
+        foreach (var option in new[] { "Nab", "TakeThem", "Fight", "OnRoomExited" })
+        {
+            var calls = Il.CallSequence(Method(typeof(PunchOff), option)).ToList();
+            Assert.DoesNotContain(calls, c => c.StartsWith("PunchOff.PunchEachOther", StringComparison.Ordinal));
+        }
+
+        var exit = Il.CallSequence(Method(typeof(PunchOff), "OnRoomExited")).ToList();
+        Assert.Contains(exit, c => c.StartsWith("RunManager.remove_RoomExited", StringComparison.Ordinal));
+        Assert.Contains(exit, c => c.StartsWith("CancellationTokenSource.Cancel", StringComparison.Ordinal));
+    }
+
+    // ---------------------------------------------------------------
     // Reflection helpers. Public/protected members are reached by name so a
     // rename is a compile error here rather than a silent skip.
     // ---------------------------------------------------------------

@@ -209,9 +209,10 @@ public abstract class PunchOffMirror : TeyvatEventMirror
     /// The player's animation-pacing setting, or `Normal` when it cannot be
     /// read. NEVER THROWS: this is consulted inside a background loop in a
     /// room the player is standing in, and an exception here would leave the
-    /// constructs frozen mid-swing.
+    /// constructs frozen mid-swing. `internal` because the base event's guard
+    /// (`Patches/PunchOffInstantGuardPatch`) reads the setting the same way.
     /// </summary>
-    private static FastModeType CurrentFastMode()
+    internal static FastModeType CurrentFastMode()
     {
         try
         {
