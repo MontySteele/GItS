@@ -581,6 +581,8 @@ public static class KleeMod
                         "Front performer",
                     [Cards.ArmKeywordTips.BackPerformerKey + ".title"] =
                         "Back performer",
+                    // The second text pass (2026-09-28): the fade's own tip.
+                    [Cards.ArmKeywordTips.FadeKey + ".title"] = "Fade",
                     // R276 batch two: Arkhe Alignment's two halves.
                     [Cards.ArmKeywordTips.OusiaKey + ".title"] = "Ousia",
                     [Cards.ArmKeywordTips.PneumaKey + ".title"] = "Pneuma",

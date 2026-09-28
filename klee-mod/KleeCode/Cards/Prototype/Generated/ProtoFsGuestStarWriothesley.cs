@@ -38,14 +38,14 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForWriothesley(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this), this);
+        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForWriothesley(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_wriothesley");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Wriothesley"),
-        ("description", "Wriothesley joins the stage at the front with {GuestFanfare:diff()} [gold]Fanfare[/gold]. On a full stage, the back one [gold]Bow[/gold]s and leaves him its [gold]Fanfare[/gold]."),
+        ("description", "Summon Wriothesley at the front with {GuestFanfare:diff()} [gold]Fanfare[/gold]. On a full stage, the back one [gold]Bow[/gold]s instead and gives him its [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

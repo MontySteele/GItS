@@ -38,14 +38,14 @@ public sealed class ProtoFsGuestStarNeuvillette : CustomCardModel, ICharacterCar
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForNeuvillette(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForNeuvillette(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_neuvillette");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Neuvillette"),
-        ("description", "Neuvillette joins the stage with 6 [gold]Fanfare[/gold]."),
+        ("description", "Summon Neuvillette with 6 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -907,6 +907,12 @@ ARM_KEYWORDS = (
                "ArmKeywordTips.ForFrontPerformer"),
     ArmKeyword("back performer", ("back performer",),
                "ArmKeywordTips.ForBackPerformer"),
+    # THE SECOND TEXT PASS (2026-09-28, review/records/furina-text-pass-
+    # 2026-09-28.md): the fade, a word four faces print, had no tip of its
+    # own -- the back performer's carried it, and the fade takes every
+    # performer behind the front. Held Applause golds it; the two Powers that
+    # bend it print it ungolded and owe it by their ops (`bends_the_fade`).
+    ArmKeyword("fade", ("fade", "fades"), "ArmKeywordTips.ForFade"),
     # R276 batch two: Arkhe Alignment's two halves, the Genshin Ousia/Pneuma
     # pair. Each names the half of the choice it is.
     ArmKeyword("Ousia", ("Ousia",), "ArmKeywordTips.ForOusia"),
@@ -1183,7 +1189,8 @@ def arm_keywords_printed(description: str) -> list[ArmKeyword]:
 
 def arm_keyword_tip_calls(description: str,
                           includes_bomb_rules: bool = False,
-                          spark_priced: bool = False) -> list[str]:
+                          spark_priced: bool = False,
+                          bends_fade: bool = False) -> list[str]:
     """The tip calls this face owes, in table order.
 
     `includes_bomb_rules` is the ONE exclusion, and it is a real one rather
@@ -1207,11 +1214,19 @@ def arm_keyword_tip_calls(description: str,
     whether or not its sentence survived. Derived from the row's `spend_spark`
     cost op, which is the same declaration `PrintedSparkPrice` and the
     playability gate read.
+
+    `bends_fade` is `spark_priced`'s shape for the second text pass
+    (2026-09-28): a row that bends the fade (`bends_the_fade`) owes the fade
+    tip whether or not its face golds the word.
     """
     printed = arm_keywords_printed(description)
     if spark_priced and not any(k.word == "Spark" for k in printed):
         printed = sorted(
             printed + [k for k in ARM_KEYWORDS if k.word == "Spark"],
+            key=ARM_KEYWORDS.index)
+    if bends_fade and not any(k.word == "fade" for k in printed):
+        printed = sorted(
+            printed + [k for k in ARM_KEYWORDS if k.word == "fade"],
             key=ARM_KEYWORDS.index)
     return [keyword.attach
             for keyword in printed
@@ -1246,6 +1261,20 @@ _STAGE_PERFORMER_TIPS = (
     ("chevalmarin", "ArmKeywordTips.ForChevalmarin"),
     ("crabaletta", "ArmKeywordTips.ForCrabaletta"),
 )
+
+
+#: The second text pass (2026-09-28): the Powers that bend rule 12, the fade.
+FADE_BENDING_POWERS = frozenset({"fs_echoing_hall", "fs_eternal_applause"})
+
+
+def bends_the_fade(card: dict) -> bool:
+    """Does this row bend the fade? Held Applause (`stage_hold_fade`),
+    Echoing Hall and Eternal Applause (their Powers). Derived from the ops,
+    so a row that gains one carries the fade tip the day it exists."""
+    return any(fx.get("op") == "stage_hold_fade"
+               or (fx.get("op") == "apply_power"
+                   and fx.get("power") in FADE_BENDING_POWERS)
+               for fx in iter_effects(card.get("effects") or []))
 
 
 def stage_summon_tip_calls(card: dict) -> list[str]:
@@ -9071,7 +9100,10 @@ def stage_guest_tip_calls(card: dict) -> list[str]:
         if GUEST_STAR_WORD.search(str(card.get("description") or "")):
             return ["ArmKeywordTips.ForGuestStar"]
         return []
-    calls = ["ArmKeywordTips.ForGuestStar"]
+    # The second text pass (2026-09-28): a Guest Star's face says "Summon",
+    # so it carries the Summon tip, ahead of the Guest Star tip -- the
+    # ordinary full-stage rule, printed where a guest is played.
+    calls = ["ArmKeywordTips.ForSummon", "ArmKeywordTips.ForGuestStar"]
     for member in dict.fromkeys(guests):
         calls.append(f"ArmKeywordTips.For{member.capitalize()}")
     return calls
@@ -15252,7 +15284,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc + rider_printed,
                                             includes_bomb_rules,
-                                            spark_priced):
+                                            spark_priced,
+                                            bends_the_fade(card)):
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-377`, and it is last of the last for the reason the block above

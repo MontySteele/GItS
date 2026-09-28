@@ -441,7 +441,11 @@ public class ArmKeywordTipTests
         //
         // THIRTY-NINE with the supporting pool (2026-09-26): `ForLyney` and
         // `ForEscoffier`, the same way.
-        Assert.Equal(39, attaches.Count);
+        //
+        // FORTY with the second Furina text pass (2026-09-28): `ForFade`,
+        // the fade's own tip, which the back performer's used to carry.
+        Assert.Equal(40, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForFade");
         Assert.Contains(attaches, m => m.Name == "ForLyney");
         Assert.Contains(attaches, m => m.Name == "ForEscoffier");
         Assert.Contains(attaches, m => m.Name == "ForGuestStar");

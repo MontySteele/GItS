@@ -44,15 +44,20 @@ def test_a_relic_that_gave_block_is_named_with_what_it_gave():
 # ---- "fade" is defined wherever the page says it ---------------------------
 
 def test_the_fade_is_defined_in_one_clause():
-    assert "it fades, losing half its Fanfare above 5" in (
-        ARM_KEYWORDS["back performer"])
+    # The second text pass (2026-09-28): on a row of its own, for every
+    # performer behind the front.
+    assert ARM_KEYWORDS["fade"] == (
+        "At the end of your turn, each performer behind the front loses half "
+        "its Fanfare above 5, rounded down.")
+    assert "fade" not in ARM_KEYWORDS["back performer"]
 
 
 def test_a_face_that_says_fade_prints_the_row_that_defines_it():
-    assert "back performer" in _names(
-        ("Held Applause", "Gain 6 Block. At the end of this turn, your "
-                          "performers do not fade."))
-    assert "back performer" in _names(
+    # The second text pass (2026-09-28): the fade's own row.
+    assert "fade" in _names(
+        ("Held Applause", "Gain 6 Block. Your performers don't fade this "
+                          "turn."))
+    assert "fade" in _names(
         ("Echoing Hall", "Whenever a performer fades, your front performer "
                          "gains half the Fanfare lost."))
 
@@ -60,9 +65,10 @@ def test_a_face_that_says_fade_prints_the_row_that_defines_it():
 # ---- Guest Book: what a Guest Star is --------------------------------------
 
 def test_the_guest_star_row_says_which_cards_and_not_the_trio():
+    # The second text pass (2026-09-28): the row says one of each; the
+    # Summon row beside it (a Guest Star's face says "Summon") says the rest.
     row = ARM_KEYWORDS["Guest Star"]
-    assert row.startswith("A Guest Star card's performer. Unlike Usher, "
-                          "Chevalmarin and Crabaletta, one of each")
+    assert row.startswith("You can have one of each on stage.")
 
 
 def test_naming_the_trio_does_not_print_their_rows():

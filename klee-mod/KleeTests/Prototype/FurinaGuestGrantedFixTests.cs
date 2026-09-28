@@ -402,9 +402,10 @@ public class FurinaGuestGrantedFixTests
     [Fact]
     public void Lynettes_tip_and_badge_are_the_ruled_sentence()
     {
+        // The second text pass (2026-09-28): "preferring".
         const string ruled = "End of your turn: deal 3 [gold]Anemo[/gold] "
-                             + "damage to a random enemy, one with an aura "
-                             + "if any.";
+                             + "damage to a random enemy, preferring one "
+                             + "with an aura.";
         Assert.Equal(3, FurinaStageLaw.ActLynetteDamage);
         var power = RuntimeHelpers.GetUninitializedObject(
             typeof(LynetteBadgePower));
@@ -413,8 +414,8 @@ public class FurinaGuestGrantedFixTests
         Assert.Equal(ruled, badge.Single(r => r.Item1 == "description").Item2);
         var tips = Il.Strings(typeof(ArmKeywordTips).GetMethod(
             "ForLynette", HeadlessGame.All)!);
-        Assert.Contains(" [gold]Anemo[/gold] damage to a random enemy, one "
-                        + "with an aura if any.", tips);
+        Assert.Contains(" [gold]Anemo[/gold] damage to a random enemy, "
+                        + "preferring one with an aura.", tips);
     }
 
     [Fact]

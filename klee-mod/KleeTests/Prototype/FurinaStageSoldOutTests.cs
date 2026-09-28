@@ -381,7 +381,7 @@ public class FurinaStageSoldOutTests
         var seat = Seat.Furina().WithCombatState()
             .WithPower<StageSummaryPower>(1);
         var badge = seat.Creature.Powers.OfType<StageSummaryPower>().Single();
-        Assert.StartsWith("Up to {Seats} performers.",
+        Assert.StartsWith("Up to {Seats} performers act at the end of your turn.",
                           Loc<StageSummaryPower>("smartDescription"));
         Assert.Equal(3, LiveSeats(badge));
 

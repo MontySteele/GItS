@@ -1401,15 +1401,6 @@ COMPANION_SLOT_SENTENCE = (
 COMPANION_DEFINITION = ("A card titled with a character's name, a dash, then "
                         "its own.")
 
-#: `EB-744`. WHAT AN ACT IS, in one sentence, shared by the two seat rows.
-#:
-#: Rule 10: each performer performs a FLAT act at the end of her turn, from any
-#: seat, and the act does not read the bar. Round two found that the reserve
-#: performs and that nothing printed said so, and that "the three read as three
-#: at the exit and one at the table, because every card speaks in seats and the
-#: acts are not documented". The numerals are `FurinaStageLaw`'s, written out
-#: for `ARM_KEYWORDS`' standing reason: this page has no access to the mod's
-#: constants and a seat needs the number rather than the name of the constant.
 def _summon_row(hay: str) -> str:
     """The Summon row. ONE variant since the trio can be cloned (2026-09-25;
     [USER]: "Let's allow for copies and then check the balance."): named and
@@ -1417,33 +1408,12 @@ def _summon_row(hay: str) -> str:
     return ARM_KEYWORDS["Summon"]
 
 
-#: 2026-09-25 (opus-furina-l2b, (c) 3): the SEAT COUNT, in step with The
-#: Stage badge (`StageSummaryPower`), which now opens "Up to 3 performers act
-#: at the end of your turn" off `FurinaStageLaw.Seats`. The seat never dared a
-#: third summon because nothing printed how many seats there are.
-#: Draft 3 (2026-09-25): no act applies Hydro, so the act list is plain
-#: damage.
-#: THE SUPPORTING POOL (2026-09-26): Sold Out opens a fourth seat, and the
-#: seat count says so. No parentheses (text-conventions rule 14).
-#: Relics smoke seat 2026-09-27: the Guest Star row's second sentence. Kept
-#: out of `keyword_notes`' haystack, as `STAGE_ACTS` is, so naming the trio
-#: does not print their three rows beside it.
-GUEST_NOT_TRIO = "Unlike Usher, Chevalmarin and Crabaletta,"
-
-STAGE_ACTS = ("Up to 3 performers, or 4 with Sold Out, act at the end of "
-              "your turn, from any "
-              "seat: Usher gives you 3 Block, Chevalmarin deals 2 to every "
-              "enemy, Crabaletta deals 5 damage to a random enemy.")
-
-#: 2026-09-25 night (the granted-guest seat round): WHERE INSIDE A HIT THE
-#: BOW LANDS. Usher's Bow Block was paid after the hit's overflow had reached
-#: her (lane 2 twice, seven times before), and the rule changed: a performer a
-#: hit empties Bows before the rest of that hit reaches her. The game's Bow
-#: tip cannot carry the sentence -- the tip plus it is 159 rendered
-#: characters against the 135 ceiling -- so the page's Bow row carries it
-#: after the tip's own words, as brief rules 6 and 7 do.
-STAGE_BOW_ON_HIT = ("A performer emptied by a hit Bows before the rest of "
-                    "that hit reaches you.")
+#: THE SECOND TEXT PASS (2026-09-28, review/records/furina-text-pass-
+#: 2026-09-28.md) dropped the page's three riders on the Stage rows --
+#: `STAGE_ACTS` on the front and back rows, `STAGE_BOW_ON_HIT` on the Bow row
+#: -- and the Guest Star row's `GUEST_NOT_TRIO`: each performer's own row
+#: carries its act, and a hit's Bow is learned in play. Every Stage row now
+#: follows its tip word for word. The history is in git.
 
 ARM_KEYWORDS: dict[str, str] = {
     # TEXT PASS 2026-09-25, in step with `ArmKeywordTips.ForBomb` and
@@ -1558,8 +1528,9 @@ ARM_KEYWORDS: dict[str, str] = {
               "pay in full."),
     # The follow-up: the empty-stage summon rides the Fanfare row, which
     # every Fanfare-giving face prints.
-    "Fanfare": ("A performer's health. Hits take your Block, then the front "
-                "performer's, then you. Gained on an empty stage, it summons "
+    # The second text pass (2026-09-28).
+    "Fanfare": ("A performer's health. Hits take your Block, then your front "
+                "performer's, then you. Gaining it on an empty stage summons "
                 "a performer."),
     # `EB-744`, and rule 7 as changed 2026-09-25: a performer at 0 Fanfare
     # Bows whatever emptied it -- a Spend, a hit or a full-stage summon.
@@ -1570,13 +1541,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # THE GUEST CAST (2026-09-25): a guest's act may pay, and its Bow does
     # not -- stated once, here, for every performer.
     "Bow": ("A performer that leaves the stage acts one last time on its "
-            "way out, without paying. " + STAGE_BOW_ON_HIT),
-    # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. The acts go on BOTH seat rows
-    # because a seat may meet either word alone -- the page's one addendum to
-    # the tip, `STAGE_ACTS`, which also carries the seat count (the
-    # opus-furina-l2b seat's (c) 3).
+            "way out, without paying."),
+    # `EB-744` put the trio's acts on both seat rows; the second text pass
+    # (2026-09-28) took them off: each performer's own row carries its act.
     "front performer": ("Takes hits first. Regains 1 Fanfare at the start of "
-                        "your turn. " + STAGE_ACTS),
+                        "your turn."),
     # `EB-744` and round four. Draft 3 (2026-09-25): rule 12, the fade.
     # The guest round (2026-09-25): "Hits reach it last" was false. Rule 6:
     # the front absorbs and the rest reaches Furina, never a seat behind;
@@ -1588,18 +1557,23 @@ ARM_KEYWORDS: dict[str, str] = {
     # fading. `ArmKeywordTips.ForBackPerformer`'s words.
     # Relics smoke seat 2026-09-27: "'Fade' is never defined." It is, here,
     # in one clause, and this row prints wherever the page says the word.
-    "back performer": ("Gains and Spends Fanfare. End of your turn: it "
-                       "fades, losing half its Fanfare above 5. A lone "
-                       "performer is both, and never fades. "
-                       + STAGE_ACTS),
+    # The second text pass (2026-09-28): the fade has its own row below.
+    "back performer": ("Your last performer in line. Spend pays from it. A "
+                       "lone performer is both front and back."),
+    # The second text pass (2026-09-28): `ArmKeywordTips.ForFade`'s words.
+    # The fade takes every performer behind the front, not just the back one.
+    "fade": ("At the end of your turn, each performer behind the front loses "
+             "half its Fanfare above 5, rounded down."),
     # R276 batch two: Arkhe Alignment's two halves, in
     # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
     "Ousia": "This turn, your performers' acts deal double damage.",
     # 2026-09-26 (wave-3 Furina lane 4): "It summons nobody." The Fanfare
     # row says Fanfare gained on an empty stage summons, and Pneuma's +2 is a
     # regain that does not (brief rule 5); the seat read the two together.
+    # The second text pass (2026-09-28): "regains", as the front performer's
+    # row says, in place of "It summons nobody."
     "Pneuma": ("This turn, your performers' acts give double Block, and your "
-               "front performer gains 2 Fanfare. It summons nobody."),
+               "front performer regains 2 Fanfare."),
     # 2026-09-25. WHAT A SUMMON DOES, AND WHAT EACH PERFORMER DOES. A
     # first-time co-op player "found it very hard to understand what was
     # going on from the tooltips, such as what each summoned actor actually
@@ -1611,8 +1585,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # 2026-09-25 night (the granted-guest seat round): lane 2 only understood
     # "adds its Fanfare" from the log.
     "Summon": ("A performer joins at the back with 1 Fanfare. On a full "
-               "stage, the front one Bows and leaves its Fanfare to the "
-               "newcomer."),
+               "stage, the front one Bows first and gives the newcomer its "
+               "Fanfare."),
     # Draft 3 (2026-09-25): no Bow clause (a Bow is the act once more) and
     # no Hydro (no act applies it).
     "Gentilhomme Usher": "End of your turn: gain 3 Block.",
@@ -1623,15 +1597,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # THE GUEST CAST (2026-09-25): `ArmKeywordTips.ForGuestStar` and the eight
     # guests' tips, word for word with the numerals written out. Each is also
     # the guest's badge on its body in game. The act lives here and on the
-    # badge, not on the card's face ("<Name> joins the stage with N
-    # Fanfare.").
-    # Relics smoke seat 2026-09-27: "I never learned what a Guest Star is",
-    # and two Ushers standing read as "one of each" broken. The row names
-    # what IS one, and what is not (`GUEST_NOT_TRIO`, kept out of the
-    # haystack so it does not print the trio's rows).
-    "Guest Star": ("A Guest Star card's performer. " + GUEST_NOT_TRIO
-                   + " one of each: a copy makes it Bow and return with "
-                   "more Fanfare."),
+    # badge, not on the card's face ("Summon <Name> with N Fanfare.", since
+    # the second text pass, 2026-09-28).
+    "Guest Star": ("You can have one of each on stage. Summoning one already "
+                   "there makes it Bow, then return with the new Fanfare "
+                   "added."),
     "Neuvillette": ("End of your turn: pay 3 of his Fanfare to deal 8 Hydro "
                     "damage to ALL enemies."),
     "Clorinde": ("End of your turn: take 1 Fanfare from each other performer "
@@ -1639,8 +1609,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # The 2026-09-26 seat round (the designer's ruling): an emptied Navia
     # Bows for the Fanfare she had before whatever emptied her.
     "Navia": ("End of your turn: deal Geo damage equal to her Fanfare to a "
-              "random enemy. Her Bow uses what she had before she was "
-              "emptied."),
+              "random enemy."),
     "Chevreuse": "End of your turn: Spend 2 to gain 1 Energy next turn.",
     # 2026-09-27: he always attacks, and reflects her Block too.
     "Wriothesley": ("End of your turn: deal 4 Cryo damage to a random enemy, "
@@ -1652,7 +1621,7 @@ ARM_KEYWORDS: dict[str, str] = {
     "Charlotte": "End of your turn: each other performer gains 1 Fanfare.",
     # 2026-09-25 night (the granted-guest seat round): the act always lands.
     "Lynette": ("End of your turn: deal 3 Anemo damage to a random enemy, "
-                "one with an aura if any."),
+                "preferring one with an aura."),
     # THE SUPPORTING POOL (2026-09-26): two more guests,
     # `ArmKeywordTips.ForLyney` / `ForEscoffier` word for word.
     # The seat round (2026-09-26, the designer's ruling): to the front if he
@@ -1660,7 +1629,8 @@ ARM_KEYWORDS: dict[str, str] = {
     "Lyney": ("End of your turn: pay 2 of his Fanfare to deal 6 Pyro damage "
               "to a random enemy. If not in front, he swaps with the front."),
     "Escoffier": ("End of your turn: pay 3 of her Fanfare to give each other "
-                  "performer 2 and deal 3 Cryo damage to ALL enemies."),
+                  "performer 2 Fanfare and deal 3 Cryo damage to ALL "
+                  "enemies."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -1916,6 +1886,7 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Tamakushi Casket": "kokomi",
     "Spend": "furina", "Fanfare": "furina", "Bow": "furina",
     "front performer": "furina", "back performer": "furina",
+    "fade": "furina",
     "Encore": "furina", "Spotlighted": "furina",
     "Ousia": "furina", "Pneuma": "furina",
     "Summon": "furina", "Gentilhomme Usher": "furina",
@@ -2040,9 +2011,11 @@ _ARM_KEYWORD_RE = {
     "Fanfare": re.compile(r"\bFanfare\b"),
     "Bow": re.compile(r"\bBows?\b"),
     "front performer": re.compile(r"\bfront performer\b"),
-    # Relics smoke seat 2026-09-27: the row defines "fade", so it prints
-    # wherever the page uses the word (a card, a relic, the Stage's line).
-    "back performer": re.compile(r"\bback performer\b|\bfad(?:e|es|ed)\b"),
+    "back performer": re.compile(r"\bback performer\b"),
+    # Relics smoke seat 2026-09-27, moved to its own row by the second text
+    # pass (2026-09-28): the fade prints wherever the page uses the word (a
+    # card, a relic, the Stage's line).
+    "fade": re.compile(r"\bfad(?:e|es|ed)\b"),
     # R276 batch two: Arkhe Alignment's two halves.
     "Ousia": re.compile(r"\bOusia\b"),
     "Pneuma": re.compile(r"\bPneuma\b"),
@@ -2065,8 +2038,11 @@ _ARM_KEYWORD_RE = {
     # Companion and not the guest.
     # The guest seat round (2026-09-25): Wriothesley's face joins "at the
     # front".
+    # The second text pass (2026-09-28): a Guest Star's face says "Summon
+    # <Name> with" / "Summon Wriothesley at the front with".
     "Guest Star": re.compile(
-        r"\bGuest Star\b|\bjoins the stage (?:at the front )?with\b"),
+        r"\bGuest Star\b|\bSummon (?:Neuvillette|Clorinde|Navia|Chevreuse|"
+        r"Wriothesley|Sigewinne|Charlotte|Lynette|Lyney|Escoffier)\b"),
     "Neuvillette": re.compile(r"\bNeuvillette\b(?!\s*[—–-])"),
     "Clorinde": re.compile(r"\bClorinde\b(?!\s*[—–-])"),
     "Navia": re.compile(r"\bNavia\b(?!\s*[—–-])"),
@@ -3063,16 +3039,13 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     the tables are asked again, to a fixed point (a row can only raise rows
     the tables hold, so it ends).
 
-    ONE SENTENCE IS LEFT OUT: `STAGE_ACTS`, on the two seat rows, which says
-    each of the trio's acts itself -- matching it would print the three
-    performers' rows beside a sentence that already defines them, on every
-    screen that names a seat (a named summon's reward prints its own
-    performer's row and no other, `test_furina_stage_legibility_page`).
+    Nothing is left out since the second text pass (2026-09-28) dropped the
+    seat rows' act list: a named summon's reward prints its own performer's
+    row and no other (`test_furina_stage_legibility_page`).
     """
     rows = _keyword_rows(obs)
     for _ in range(len(_ARM_KEYWORD_RE) + len(ELEMENT_KEYWORDS) + 8):
-        printed = "\n".join(r["text"].replace(STAGE_ACTS, " ")
-                            .replace(GUEST_NOT_TRIO, " ") for r in rows)
+        printed = "\n".join(r["text"] for r in rows)
         more = _keyword_rows(obs, printed)
         if [r["name"] for r in more] == [r["name"] for r in rows]:
             return _relic_riders(obs, _performer_rider(obs, more))
@@ -3091,8 +3064,8 @@ RELIC_KEYWORD_RIDERS: dict[str, dict[str, str]] = {
     "Spend": {"Palais Ledger":
               " With Palais Ledger, the performers in front of it pay what it "
               "can't, back to front."},
-    "back performer": {"Grand Theater Program":
-                       " With Grand Theater Program, no performer fades."},
+    "fade": {"Grand Theater Program":
+             " With Grand Theater Program, no performer fades."},
     "front performer": {"The Curtain Never Falls":
                         " With The Curtain Never Falls, it regains 2, from "
                         "your first turn."},

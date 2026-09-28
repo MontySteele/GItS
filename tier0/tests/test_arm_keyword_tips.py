@@ -622,8 +622,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # every Stage tip reworded in [USER]'s words.
             "Pay Fanfare from your [gold]back performer[/gold]. Offered only ",
             "if it can pay in full.\");",
+            # The second text pass (2026-09-28,
+            # review/records/furina-text-pass-2026-09-28.md).
             "A performer's health. Hits take your [gold]Block[/gold], then ",
-            "the front performer's, then you. Gained on an empty stage, it ",
+            "your front performer's, then you. Gaining it on an empty stage ",
             "summons a performer.",
             # Draft 3 (2026-09-25): the Bow is the performer's act once more.
             "A performer that leaves the stage acts one last time on its way ",
@@ -632,13 +634,14 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "Takes hits first. Regains ",
             " [gold]Fanfare[/gold] at the start of your turn.",
             # Round four's empty-stage summon is the Fanfare tip's (above).
-            # Draft 3: rule 12, the fade, on the back performer.
-            "Gains and Spends [gold]Fanfare[/gold]. End ",
-            "of your turn: it fades, losing half its Fanfare above ",
-            # 2026-09-26: a lone performer is both seats, and never fades.
-            ". A lone performer is both, and ",
-            "never fades.\");",
-            "FurinaStageLaw.FadeThreshold",
+            # The second text pass (2026-09-28): the back performer is the
+            # last in line and pays Spends; the fade has its own tip, which
+            # takes every performer behind the front.
+            "Your last performer in line. [gold]Spend[/gold] pays from it. ",
+            "A lone performer is both front and back.\");",
+            "At the end of your turn, each performer behind the front loses ",
+            "half its [gold]Fanfare[/gold] above ",
+            "FurinaStageLaw.FadeThreshold + \", rounded down.\");",
     ):
         assert clause in tips, clause
 
@@ -1223,7 +1226,8 @@ def test_the_rare_at_twice_the_fanfare_carries_no_reader_tip():
         encoding="utf-8")
     assert "ForStageReader" not in src
     row = {r["id"]: r for r in proto._rows()}["proto_fs_let_the_people_rejoice"]
-    assert "twice your performers' [gold]Fanfare[/gold]" in row["description"]
+    assert ("twice your performers' total [gold]Fanfare[/gold]"
+            in row["description"])
 
 
 @pytest.mark.parametrize("rid", sorted(STAGE_READERS_NAMED_ON_THE_FACE))
@@ -1322,8 +1326,9 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             # 2026-09-25 night (the granted-guest seat round): "leaves its
             # Fanfare to the newcomer" -- lane 2 only understood "adds its
             # Fanfare" from the log.
-            '"stage, the front one [gold]Bow[/gold]s and leaves its Fanfare "',
-            '"to the newcomer.");',
+            # The second text pass (2026-09-28): "first", and "gives".
+            '"stage, the front one [gold]Bow[/gold]s first and gives the "',
+            '"newcomer its Fanfare.");',
             # Draft 3 (2026-09-25): one sentence each -- no Bow clause (a
             # Bow is the act once more) and no Hydro (no act applies it).
             '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
@@ -1354,21 +1359,19 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     rows = blindplay.ARM_KEYWORDS
     assert rows["Summon"] == (
         "A performer joins at the back with 1 Fanfare. On a full stage, the "
-        "front one Bows and leaves its Fanfare to the newcomer.")
+        "front one Bows first and gives the newcomer its Fanfare.")
     assert rows["Gentilhomme Usher"] == "End of your turn: gain 3 Block."
     assert rows["Surintendante Chevalmarin"] == (
         "End of your turn: deal 2 damage to ALL enemies.")
     assert rows["Mademoiselle Crabaletta"] == (
         "End of your turn: deal 5 damage to a random enemy.")
     from understudy import blindplay_notes
-    # The tip's words, then the page's own sentence (2026-09-25 night): the
-    # tip plus it would be past the 135 ceiling, so only the page carries it.
+    # The second text pass (2026-09-28): the tip's words and nothing after
+    # them. The page's hit-Bow sentence left: a hit's Bow is learned in play.
     assert rows["Bow"] == (
         "A performer that leaves the stage acts one last time on its way "
-        "out, without paying. " + blindplay_notes.STAGE_BOW_ON_HIT)
-    assert blindplay_notes.STAGE_BOW_ON_HIT == (
-        "A performer emptied by a hit Bows before the rest of that hit "
-        "reaches you.")
+        "out, without paying.")
+    assert not hasattr(blindplay_notes, "STAGE_BOW_ON_HIT")
 
 
 # ---------------------------------------------------------------------------

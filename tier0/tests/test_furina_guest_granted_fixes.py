@@ -355,14 +355,14 @@ def test_the_summon_tip_is_the_ruled_sentence():
     from understudy.blindplay_notes import ARM_KEYWORDS
     assert ARM_KEYWORDS["Summon"] == (
         "A performer joins at the back with 1 Fanfare. On a full stage, the "
-        "front one Bows and leaves its Fanfare to the newcomer.")
+        "front one Bows first and gives the newcomer its Fanfare.")
 
 
 def test_lynettes_row_is_the_ruled_sentence():
     from understudy.blindplay_notes import ARM_KEYWORDS
     assert ARM_KEYWORDS["Lynette"] == (
-        "End of your turn: deal 3 Anemo damage to a random enemy, one with "
-        "an aura if any.")
+        "End of your turn: deal 3 Anemo damage to a random enemy, "
+        "preferring one with an aura.")
 
 
 def test_weak_shrink_and_strength_say_the_performers_acts_are_not_changed():

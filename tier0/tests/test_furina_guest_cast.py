@@ -123,11 +123,11 @@ def test_the_eight_rows_are_the_build_tables():
         where = " at the front" if member in FRONT else ""
         # The supporting-pool seat round (2026-09-26): a front-seat guest's
         # face says who makes room on a full stage (the rule was unchanged).
-        room = (" On a full stage, the back one [gold]Bow[/gold]s and leaves "
-                "him its [gold]Fanfare[/gold]." if member in FRONT else "")
+        # The second text pass (2026-09-28): "Summon", and "instead".
+        room = (" On a full stage, the back one [gold]Bow[/gold]s instead "
+                "and gives him its [gold]Fanfare[/gold]." if member in FRONT else "")
         assert row["description"] == (
-            f"{name} joins the stage{where} with {n} [gold]Fanfare[/gold]."
-            + room)
+            f"Summon {name}{where} with {n} [gold]Fanfare[/gold]." + room)
         effect = {"op": "stage_guest", "member": member, "amount": n}
         if member in FRONT:
             effect["seat"] = "front"
@@ -591,14 +591,13 @@ def test_the_new_beats_cross_the_blind_packet():
 
 def test_the_glossary_has_the_guest_star_and_every_guest_word_for_word():
     from understudy.blindplay_notes import ARM_KEYWORDS
+    # The second text pass (2026-09-28).
     assert ARM_KEYWORDS["Guest Star"] == (
-        "A Guest Star card's performer. Unlike Usher, Chevalmarin and "
-        "Crabaletta, one of each: a copy makes it Bow and return with more "
-        "Fanfare.")
+        "You can have one of each on stage. Summoning one already there "
+        "makes it Bow, then return with the new Fanfare added.")
     assert ARM_KEYWORDS["Bow"] == (
         "A performer that leaves the stage acts one last time on its way "
-        "out, without paying. A performer emptied by a hit Bows before the "
-        "rest of that hit reaches you.")
+        "out, without paying.")
     assert ARM_KEYWORDS["Neuvillette"] == (
         "End of your turn: pay 3 of his Fanfare to deal 8 Hydro damage to "
         "ALL enemies.")

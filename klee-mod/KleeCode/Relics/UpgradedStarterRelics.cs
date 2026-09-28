@@ -513,11 +513,12 @@ public sealed class CurtainNeverFalls : CustomRelicModel
 #if FURINA_STAGE
             // The Stage's face: a loc row is registered once at boot, so the
             // switch is the compile constant the deploy line sets.
-            "Start each combat with [gold]Usher[/gold] at [blue]"
+            // The second text pass (2026-09-28): shorter, same numbers.
+            "Start each combat with [gold]Usher[/gold] in front with [blue]"
           + Powers.FurinaStageLaw.OpeningFanfare + "[/blue] [gold]Fanfare[/gold]. "
           + "Your [gold]front performer[/gold] regains [blue]" + LeadRegen
-          + "[/blue] [gold]Fanfare[/gold] at the start of your turn instead of "
-          + Powers.FurinaStageLaw.LeadRegen + ", from your first turn."
+          + "[/blue] Fanfare each turn, not "
+          + Powers.FurinaStageLaw.LeadRegen + "."
 #else
             "[gold]Center Stage[/gold] and [gold]Guest Cast[/gold] are always "
           + "active. You always count as having moved the "

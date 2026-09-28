@@ -245,8 +245,8 @@ public class FurinaGuestCastTests
         var face = new global::KleeMod.Cards.Prototype.Generated
             .ProtoFsGuestStarWriothesley().Localization!
             .Single(l => l.Item1 == "description").Item2;
-        Assert.StartsWith("Wriothesley joins the stage at the front with ",
-                          face);
+        // The second text pass (2026-09-28): "Summon".
+        Assert.StartsWith("Summon Wriothesley at the front with ", face);
         // The generated play passes the front seat (codegen's `seat: front`).
         var src = RepoFile(Path.Combine("KleeCode", "Cards", "Prototype",
             "Generated", "ProtoFsGuestStarWriothesley.cs"));
@@ -576,10 +576,11 @@ public class FurinaGuestCastTests
     {
         string Printed(string method) => string.Concat(Il.Strings(
             typeof(ArmKeywordTips).GetMethod(method, HeadlessGame.All)!));
+        // The second text pass (2026-09-28).
         Assert.Contains(
-            "A Guest Star card's performer. Unlike Usher, Chevalmarin and "
-          + "Crabaletta, one of each: a copy makes it Bow and return with "
-          + "more Fanfare.",
+            "You can have one of each on stage. Summoning one already there "
+          + "makes it [gold]Bow[/gold], then return with the new "
+          + "[gold]Fanfare[/gold] added.",
             Printed("ForGuestStar"));
         Assert.Contains("on its way out, without paying.", Printed("ForBow"));
         foreach (var guest in new[] { "Neuvillette", "Clorinde", "Navia",

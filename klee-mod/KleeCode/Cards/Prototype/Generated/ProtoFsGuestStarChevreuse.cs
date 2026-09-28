@@ -38,14 +38,14 @@ public sealed class ProtoFsGuestStarChevreuse : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_chevreuse");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Chevreuse"),
-        ("description", "Chevreuse joins the stage with {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Summon Chevreuse with {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -524,10 +524,12 @@ def test_the_seat_rows_say_what_a_performers_act_is():
     for word in ("front performer", "back performer"):
         page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                      hand=[_card(f"Deal damage equal to the {word}'s bar.")])
+        # The second text pass (2026-09-28): the seat rows no longer carry
+        # the trio's act list; each performer's own row says its act.
         assert ("Up to 3 performers, or 4 with Sold Out, act at the end "
-                "of your turn") in page
+                "of your turn") not in page
         # Draft 3 (2026-09-25): plain damage, no Hydro.
-        assert "Crabaletta deals 5 damage to a random enemy" in page
+        assert "End of your turn: deal 5 damage to a random enemy." in page
 
 
 def test_the_back_performer_row_says_where_hits_go():
@@ -538,8 +540,9 @@ def test_the_back_performer_row_says_where_hits_go():
     page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                  hand=[_card("Gain Block equal to the back performer's bar.")])
     # The guest round (2026-09-25): rule 6 never runs a hit past the front.
-    # 2026-09-26: a lone performer is both seats, and never fades.
-    assert "A lone performer is both, and never fades." in page
+    # 2026-09-26: a lone performer is both seats. The second text pass
+    # (2026-09-28) says it in the tip's words; the fade has its own row.
+    assert "A lone performer is both front and back." in page
     assert "the front instead" not in page
     assert "Hits reach it last." not in page
     assert "no single attack reaches it" not in page
