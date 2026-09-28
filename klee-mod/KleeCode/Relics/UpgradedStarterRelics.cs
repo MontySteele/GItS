@@ -546,13 +546,6 @@ public sealed class CurtainNeverFalls : CustomRelicModel
         Player player, List<CardCreationResult> cardRewardOptions,
         CardCreationOptions creationOptions)
     {
-#if PROTOTYPE_CARDS
-        // UNDER THE STAGE, NO COMPANION SLOT (designer review of #715,
-        // 2026-09-27): the prototypes start with no companion, and Salon
-        // Solitaire -- the starter this relic upgrades on the arm -- has no
-        // slot, so the upgrade must not add one. Arm off, the shipped slot.
-        if (Powers.FurinaStage.Enabled) return false;
-#endif
         if (creationOptions.Source != CardCreationSource.Encounter
             || player.Character is not Furina)
         {
