@@ -664,20 +664,55 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // `EB-559`: the first charge through the funnel is the one that meets
         // the aura (`EB-432`, and `_charges` is placement order), so the
         // amplifier rides it and every charge behind it lands into a bare body.
+        //
+        // UNLESS THE PLACER HOLDS THE VERMILLION PACT (2026-09-27 rework):
+        // `SetOff` puts the consumed aura back before every later charge of
+        // the take, so every charge reacts with it and the amplifier rides
+        // them all. A live 0.2.3932 board printed 17 for three Bomb 5s on a
+        // Hydro body with the Pact held; the Set off dealt 7 + 7 + 7.
+        //
+        // ALICE'S TEAPOT's pretend Hydro consumes nothing real, so the charge
+        // behind it still meets the real aura (`Explode`), and it is that
+        // reaction the Pact then keeps.
+        var teapot = TeapotMultiplier();
         var amplifier = PendingReactionMultiplier(target);
-        foreach (var charge in _charges)
+        var pact = Applier != null && VermillionPactPower.Holds(Applier);
+        for (var i = 0; i < _charges.Count; i++)
         {
+            decimal paid;
+            if (i == 0 && teapot is { } asIfHydro)
+            {
+                paid = asIfHydro;
+            }
+            else
+            {
+                paid = amplifier;
+                if (!pact) amplifier = 1m;
+            }
             total += SimDamagePipeline.ResolveOnTarget(
-                target, charge.Size, amplifier);
-            amplifier = 1m;
+                target, _charges[i].Size, paid);
         }
         return total;
     }
 
+    /// <summary>What Alice's Teapot multiplies the first charge by while it is
+    /// unspent this turn, or null. PURE, <see cref="PendingReactionMultiplier"/>'s
+    /// other half.</summary>
+    private decimal? TeapotMultiplier()
+    {
+        // ALICE'S TEAPOT, the badge's half of `Explode`'s: while it is unspent
+        // this turn, the first charge through meets a Hydro that is not there
+        // (the hit consumes nothing real, so the real aura stays for the next).
+        if (!Relics.AlicesTeapot.Pending(Applier)) return null;
+        return ReactionTable.AmplifierMultiplier(
+            ReactionTable.Lookup(Elements.Element.Hydro, Elements.Element.Pyro),
+            Applier);
+    }
+
     /// <summary>
-    /// `EB-559`. What the FIRST explosion's reaction multiplies its charge by,
-    /// or 1 where the target is bare, is already wearing Pyro, or wears an
-    /// element Pyro does not amplify.
+    /// `EB-559`. What the first charge to meet the target's REAL aura is
+    /// multiplied by, or 1 where the target is bare, is already wearing Pyro,
+    /// or wears an element Pyro does not amplify.
     ///
     /// PURE, which is the whole reason it is a method of its own: this is read
     /// on every state poll through <see cref="DisplayAmount"/> and
@@ -687,15 +722,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private decimal PendingReactionMultiplier(Creature target)
     {
-        // ALICE'S TEAPOT, the badge's half of `Explode`'s: while it is unspent
-        // this turn, the first charge through meets a Hydro that is not there
-        // (the hit consumes nothing real, so the real aura is not read).
-        if (Relics.AlicesTeapot.Pending(Applier))
-        {
-            return ReactionTable.AmplifierMultiplier(
-                ReactionTable.Lookup(Elements.Element.Hydro, Elements.Element.Pyro),
-                Applier);
-        }
         var aura = AuraCmd.Find(target);
         if (aura == null || aura.Element == Elements.Element.Pyro) return 1m;
         var reaction = ReactionTable.Lookup(aura.Element,

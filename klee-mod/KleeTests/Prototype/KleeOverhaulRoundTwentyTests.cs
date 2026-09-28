@@ -216,6 +216,63 @@ public class KleeOverhaulRoundTwentyTests
     }
 
     [Fact]
+    public void The_vermillion_pact_prices_every_bomb_in_the_pile_as_reacting()
+    {
+        // The live 0.2.3932 board: three Bomb 5s on a Hydro body with the
+        // Pact held. The badge printed 17 (one Vaporize, two flat) and the
+        // Set off dealt 7 + 7 + 7, because `SetOff` puts the consumed aura
+        // back before every later charge of the take.
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(200).WithPower<HydroAuraPower>(2);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
+            new ProtoBombs.Charge(5), new ProtoBombs.Charge(5),
+            new ProtoBombs.Charge(5));
+        var one = (int)(5 * ReactionConstants.VaporizeMult);
+
+        Assert.Equal(one + 5 + 5, pile.PredictedSetOffDamage());
+
+        klee.WithPower<VermillionPactPower>(1);
+
+        Assert.Equal(21, 3 * one);
+        Assert.Equal(3 * one, pile.PredictedSetOffDamage());
+        Assert.Equal(pile.PredictedSetOffDamage(), pile.DisplayAmount);
+
+        // Melt the same way.
+        var chilled = Seat.Klee(200).WithPower<CryoAuraPower>(2);
+        var melting = ProtoBombs.Place(chilled.Creature, klee.Creature,
+            new ProtoBombs.Charge(10), new ProtoBombs.Charge(4));
+        Assert.Equal((int)(10 * ReactionConstants.MeltMult)
+                     + (int)(4 * ReactionConstants.MeltMult),
+                     melting.PredictedSetOffDamage());
+
+        // Nothing to react with, nothing to keep: a bare body and a Pyro one
+        // read the plain sum with the Pact held.
+        var bare = ProtoBombs.Place(Seat.Klee(200).Creature, klee.Creature,
+            new ProtoBombs.Charge(7), new ProtoBombs.Charge(5));
+        Assert.Equal(12, bare.PredictedSetOffDamage());
+        var burning = Seat.Klee(200).WithPower<PyroAuraPower>(2);
+        var burningPile = ProtoBombs.Place(burning.Creature, klee.Creature,
+            new ProtoBombs.Charge(7), new ProtoBombs.Charge(5));
+        Assert.Equal(12, burningPile.PredictedSetOffDamage());
+    }
+
+    [Fact]
+    public void Another_players_pact_does_not_move_this_pile()
+    {
+        // `SetOff` reads the Pact off the pile's placer (R205: your pile
+        // only), so the badge does too.
+        var klee = Seat.Klee();
+        var other = Seat.Klee().WithPower<VermillionPactPower>(1);
+        var enemy = Seat.Klee(200).WithPower<HydroAuraPower>(2);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
+            new ProtoBombs.Charge(5), new ProtoBombs.Charge(5));
+
+        Assert.True(VermillionPactPower.Holds(other.Creature));
+        Assert.Equal((int)(5 * ReactionConstants.VaporizeMult) + 5,
+                     pile.PredictedSetOffDamage());
+    }
+
+    [Fact]
     public void A_bare_body_and_a_pyro_one_preview_exactly_as_before()
     {
         // The two boards where nothing is pending: no aura at all, and an aura

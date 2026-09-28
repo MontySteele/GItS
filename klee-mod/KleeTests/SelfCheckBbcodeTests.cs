@@ -110,6 +110,39 @@ public class SelfCheckBbcodeTests
         Assert.Empty(hits);
     }
 
+    /// <summary>R8's table half, which a headless run cannot reach: every
+    /// power this assembly ships states its own title and description. Both
+    /// lanes' boots logged SELFCHECK FAILED for `RAISE_A_TOAST_POWER` (the
+    /// co-op Raise a Toast, a <c>TemporaryStrengthPower</c> with no rows)
+    /// on 2026-09-27; this is that check, run before a build ships.</summary>
+    [Fact]
+    public void Every_power_in_this_assembly_states_a_title_and_a_description()
+    {
+        var missing = new List<string>();
+        foreach (var type in Mod.GetTypes()
+                     .Where(t => !t.IsAbstract && !t.ContainsGenericParameters
+                                 && typeof(PowerModel).IsAssignableFrom(t))
+                     .OrderBy(t => t.Name))
+        {
+            if (type.GetConstructor(Type.EmptyTypes) == null) continue;
+            if (Activator.CreateInstance(type) is not ILocalizationProvider provider)
+            {
+                missing.Add(type.Name + " (no Localization)");
+                continue;
+            }
+            var keys = (provider.Localization ?? new List<(string, string)>())
+                .Where(r => !string.IsNullOrWhiteSpace(r.Item2))
+                .Select(r => r.Item1)
+                .ToHashSet();
+            foreach (var suffix in new[] { "title", "description" })
+            {
+                if (!keys.Contains(suffix)) missing.Add(type.Name + "." + suffix);
+            }
+        }
+
+        Assert.Empty(missing);
+    }
+
     [Fact]
     public void The_seven_the_run_reported_are_clean_and_still_say_what_they_said()
     {
