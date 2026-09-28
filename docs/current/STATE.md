@@ -11,10 +11,12 @@ frozen in [`workstreams.md`](workstreams.md).
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
-**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3874+proto`**
-(2026-09-26). Arms: `-p:PrototypeCards=true` (the three prototype kits),
+**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3962+proto`**
+(2026-09-28). Arms: `-p:PrototypeCards=true` (the three prototype kits),
 `-p:FurinaStage=true` (the Stage), `-p:TeyvatFrame=true` (the frame); every
-arm ships OFF in a release package. **Last release package: `0.2.1357`**
+arm ships OFF in a release package. **The dev build is**
+`tools/deploy_round.py --arms klee,companion,kokomi,furina-stage`: **the
+Teyvat frame stays OFF in dev builds too** (on hold, below). **Last release package: `0.2.1357`**
 (2026-08-29).
 
 ## Roster
@@ -82,7 +84,10 @@ companion slot as a real draft choice.
 Built and behind `TeyvatFrame`, OFF in every release package; nothing
 deleted, no further work. Six dressed faces (two nations per act), 122
 dressed events, 149 dressed enemy slots, 27 music slots
-(`operations/act-assets.md`, `operations/media.md`). It comes back only as
+(`operations/act-assets.md`, `operations/media.md`). It is off in every
+build, dev included: [USER] dropped the whole arm because the first draft
+(image, music and enemy art replacement) "wasn't very interesting". A later
+item is to "figure out what we actually want to do with those assets". It comes back only as
 **elemental enemies**: when the three kits are done, a short brief on
 elemental shields goes to [USER] before any build.
 
