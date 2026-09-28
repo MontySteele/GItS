@@ -34,6 +34,7 @@ Nothing here imports `soak` or `bridge` at module scope; `soak` imports
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 from dataclasses import dataclass
@@ -345,3 +346,88 @@ def seed_profile(inst: Instance,
         shutil.copyfile(src, dest)
         written.append(dest)
     return written
+
+
+# ------------------------------------------------ pending epochs ----------
+
+#: The epoch states that park the main menu. The bridge reports these as
+#: `manual_epoch_reveal_required` (`McpMod.StateBuilder.cs`, the main-menu
+#: block reads `EpochState.Obtained` and `ObtainedNoSlot`), and with one of
+#: them pending the menu offers only Settings and Quit, so `embark` has no
+#: path. The save spells them in snake case.
+PENDING_EPOCH_STATES = frozenset({"obtained", "obtained_no_slot"})
+REVEALED_EPOCH_STATE = "revealed"
+PROGRESS_NAME = "progress.save"
+
+
+def _is_real_profile(appdata: Path) -> bool:
+    """True when `appdata` is, or sits inside, the process's own `%APPDATA%`.
+
+    The owner's profile lives there. A lane's tree never does; this is the
+    second lock on the door after `appdata is None`.
+    """
+    real = os.environ.get("APPDATA")
+    if not real:
+        return False
+    try:
+        mine = Path(appdata).resolve()
+        theirs = Path(real).resolve()
+    except OSError:
+        return True
+    return mine == theirs or theirs in mine.parents
+
+
+def reveal_pending_epochs(inst: Instance) -> list[tuple[Path, list[str]]]:
+    """Mark every obtained-but-unrevealed epoch in a LANE's `progress.save`
+    as revealed, so the lane's main menu offers Singleplayer again.
+
+    WHY. A base-game run that unlocks a timeline epoch leaves the menu with
+    only Settings and Quit until someone clicks the reveal, and the bridge
+    refuses to click it from automation (`McpMod.Actions.cs`, "not forcing
+    timeline reveal"). Lanes are disposable, so the lane's own save is edited
+    to the state the one click would leave. Re-seeding from lane 0 is not the
+    fix: lane 0's `progress.save` can be parked on the same reveal
+    (`teyvat-proofs-7`), and then a fresh lane inherits the blocker.
+
+    LANES ONLY. Lane 0 (`appdata is None`) and any tree inside the process's
+    own `%APPDATA%` are refused and return `[]`: the owner's profile is never
+    written. Only the `state` field of pending epochs changes; the rest of the
+    file is written back byte for byte (same key order, indent and line
+    endings). A file that does not parse is left alone.
+
+    Returns `(path, [epoch ids revealed])` for each file it changed.
+    """
+    if inst.appdata is None or _is_real_profile(inst.appdata):
+        return []
+    root = Path(inst.appdata).joinpath(*SETTINGS_RELATIVE)
+    if not root.is_dir():
+        return []
+    changed: list[tuple[Path, list[str]]] = []
+    for path in sorted(root.rglob(PROGRESS_NAME)):
+        if not path.is_file():
+            continue
+        try:
+            raw = path.read_bytes()
+            data = json.loads(raw.decode("utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError):
+            continue
+        epochs = data.get("epochs") if isinstance(data, dict) else None
+        if not isinstance(epochs, list):
+            continue
+        revealed = []
+        for epoch in epochs:
+            if (isinstance(epoch, dict)
+                    and str(epoch.get("state", "")).lower()
+                    in PENDING_EPOCH_STATES):
+                epoch["state"] = REVEALED_EPOCH_STATE
+                revealed.append(str(epoch.get("id", "?")))
+        if not revealed:
+            continue
+        text = json.dumps(data, indent=2, ensure_ascii=False)
+        if b"\r\n" in raw:
+            text = text.replace("\n", "\r\n")
+        tmp = path.with_name(path.name + ".gits-tmp")
+        tmp.write_bytes(text.encode("utf-8"))
+        os.replace(tmp, path)
+        changed.append((path, revealed))
+    return changed

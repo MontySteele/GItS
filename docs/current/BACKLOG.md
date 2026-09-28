@@ -13,7 +13,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 ## Kits and display (the mod)
 
 - Co-op seat page: the "What you played this turn" log lists the partner's cards as your own; players are named "Test Host"/"Test Client 1"; the reaction glossary ignores the partner's element; a contested chest pick is not announced; `wait` after a finished fight reports nothing while the reward is up; a play at an enemy the partner just killed is silently retargeted (co-op round, 2026-09-27).
-- Lanes: a base-game run that unlocks a timeline epoch leaves that lane's main menu with only Settings and Quit (`manual_epoch_reveal_required`), so `embark` fails on it; lanes 1-4 are all blocked now. Give `embark` a lane-only step that reveals the pending epochs through the bridge, or reseeds `progress.save` from a clean template (lanes are disposable), instead of hand-copying saves (2026-09-27).
 - Seat page: the play log prints "Put Bomb 1" where the badge shows the placed size, and the Weak gloss says it cuts a Bomb's damage (it does not: a Bomb carries the target's modifiers only) (co-op round, 2026-09-27).
 - Kokomi text: the Neow bundle's Plan gloss omits "instead of playing it now"; the Casket tip does not say it ignores a debuff from a reaction set off by its own hit (Kokomi core seat, 2026-09-27).
 - Co-op rest site: Mend on the partner did not end the rest action, so Smith was still offered (co-op round, 2026-09-27).

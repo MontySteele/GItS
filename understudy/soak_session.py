@@ -328,6 +328,11 @@ class Session:
         if self.instance is not None:
             for path in instances.seed_profile(self.instance):
                 print(f"lane {self.instance.label}: seeded {path}")
+            # A lane parked on an unrevealed timeline epoch offers only
+            # Settings and Quit; reveal them in the lane's own save.
+            for path, ids in instances.reveal_pending_epochs(self.instance):
+                print(f"lane {self.instance.label}: revealed pending epochs "
+                      f"{', '.join(ids)} in {path}")
         self._steam_appid()
         self._deploy_bridge()
         # EB-763. READ THE BOOT TAX BEFORE THE LAUNCH, not after: the number

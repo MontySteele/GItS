@@ -145,6 +145,12 @@ python -m understudy.embark --teardown --coop --lanes 2,3     # client first
 - **A lane above 0 is never a run of record.** Its profile is disposable
   (seeded once from lane 0's `settings.save`, never read back); if it goes
   wrong, delete `%LOCALAPPDATA%\gits-lanes\laneN`.
+- **Unrevealed epochs are revealed at launch, on lanes only.** A base-game run
+  that unlocks a timeline epoch parks the menu at Settings and Quit
+  (`manual_epoch_reveal_required`). Every lane launch (`embark`, `soak`,
+  `seat`) first sets any `obtained` epoch in the lane's own `progress.save` to
+  `revealed` and prints the ids (`instances.reveal_pending_epochs`). Lane 0
+  and anything under the real `%APPDATA%` are never written.
 - **One install means one deployed `mods\klee` for every lane.**
   `deploy_proto.ps1` refuses while ANY `SlayTheSpire2` process is up; tear the
   lane down rather than deploying around it. Ask before launching a lane while
