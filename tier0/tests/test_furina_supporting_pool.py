@@ -174,7 +174,10 @@ def test_every_row_but_solo_verse_replaces_a_row_the_filter_drops(arm):
 
 def test_the_additions_reach_the_offer_and_the_flag_off_pool_does_not(arm):
     from tier05 import rewards
-    assert loader.pool_additions("furina") == ("proto_fs_solo_verse",)
+    # Solo Verse, then the starter ruling's two Commons (2026-09-28).
+    assert loader.pool_additions("furina") == (
+        "proto_fs_solo_verse", "proto_fs_salon_debut",
+        "proto_fs_regal_bearing")
     # `character_pool` is lru-cached: a flag-off pool another test on this
     # worker built would answer here, and this test's arm-on pool would
     # answer the next one. Clear on both sides.

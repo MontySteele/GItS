@@ -58,6 +58,7 @@
     "proto_fs_quick_cue",
     "proto_fs_raise_a_toast",
     "proto_fs_rapt_audience",
+    "proto_fs_regal_bearing",
     "proto_fs_regina_of_all_waters",
     "proto_fs_revolving_stage",
     "proto_fs_salon_debut",
@@ -347,6 +348,7 @@
     "proto_fs_quick_cue": "furina",
     "proto_fs_raise_a_toast": "furina",
     "proto_fs_rapt_audience": "furina",
+    "proto_fs_regal_bearing": "furina",
     "proto_fs_regina_of_all_waters": "furina",
     "proto_fs_revolving_stage": "furina",
     "proto_fs_salon_debut": "furina",
@@ -788,6 +790,10 @@
       "cap": 2
     },
     "proto_fs_rapt_audience": {
+      "power_amount": 1
+    },
+    "proto_fs_regal_bearing": {
+      "block": 1,
       "power_amount": 1
     },
     "proto_fs_regina_of_all_waters": {

@@ -548,7 +548,8 @@ public class FurinaSupportingPoolTests
         }
         // The paper's count: 49 before the batch, 49 + 28 = 77, and 78 with
         // Sold Out -- the draftable one-player rows: the basics, the Ancient
-        // and the co-op tier aside.
+        // and the co-op tier aside. 80 since the starter ruling (2026-09-28):
+        // Take the Stage and Regal Bearing left the starter as Commons.
         var pool = ArmPools.Offerable("furina-stage")
             .Where(c => c.Rarity != MegaCrit.Sts2.Core.Entities.Cards
                                         .CardRarity.Ancient)
@@ -556,7 +557,7 @@ public class FurinaSupportingPoolTests
                                         .CardRarity.Basic)
             .Where(c => !MultiplayerOnly(c))
             .ToList();
-        Assert.Equal(78, pool.Count);
+        Assert.Equal(80, pool.Count);
     }
 
     private static bool MultiplayerOnly(MegaCrit.Sts2.Core.Models.CardModel card) =>

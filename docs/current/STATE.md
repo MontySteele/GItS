@@ -25,11 +25,13 @@ Teyvat frame stays OFF in dev builds too** (on hold, below). **Last release pack
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 39 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 (66 Stage cards) |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 80 (68 Stage cards) |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
-be. Starter basics are never changed.
+be. Starter basics are never changed without [USER]'s pick; every kit's
+starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
+2026-09-28: "The characters' kits should all use basic Strike and Defend.").
 
 ## The three kits (Paper, then Prototype, then Balance; `operations/stage-gate.md`)
 
@@ -63,8 +65,15 @@ be. Starter basics are never changed.
   defaults and swept) brought the pool to 78 (#692, #693, #694). Eleven Opus
   seats read it (2026-09-26): a Solo win from act 2, three whole runs dying at
   the act-3 boss, fixes in #696, #698, #699, #701, #702 and #703, Lyney and Stage Whisper
-  reworked; `review/records/furina-pool-seat-round-2026-09-26.md`, one pick
-  open (Take the Stage, a starter). Next: [USER]'s run on the 78-card pool.
+  reworked; `review/records/furina-pool-seat-round-2026-09-26.md`. **The
+  Stage starter (2026-09-28):** [USER], "Typically we'd include 4 strikes, 4
+  defends and 2 actually useful cards that teach the character's core
+  mechanics - this seems like an unnecessary power spike." It is now the base
+  Strike x4, Defend x4, Curtain Rise and Rising Applause; Take the Stage
+  ("Summon a random performer with 3 Fanfare. Draw 1 card.", tentative until
+  the balance pass's pool audit) and Regal Bearing (Block 5, Weak 1; upgraded
+  6 and 2) are Commons, so the pool is 80. The shipped sheet and starter do
+  not move. Next: [USER]'s run on the new starter.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

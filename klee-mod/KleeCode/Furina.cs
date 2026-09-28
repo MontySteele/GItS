@@ -70,12 +70,10 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
         {
 #if PROTOTYPE_CARDS
             // QUARANTINED, THE STAGE ARM'S WHOLE STARTER. It replaces the deck
-            // rather than a slot in it, because the arm's starter is a
-            // different SHAPE -- three kit cards where the shipped Furina
-            // carries two (brief sec.7) -- and a slot-for-slot swap cannot
-            // express that. The base game's seven basics are copied unmoved:
-            // a starter change is an A pick, never an E default. See
-            // FurinaStageRoster.StartingDeck.
+            // rather than a slot in it: since 2026-09-28 ([USER]'s ruling) it
+            // is the base game's Strike x4 and Defend x4 and two kit cards,
+            // the shape the other two arms open with. The shipped list below
+            // is unmoved. See FurinaStageRoster.StartingDeck.
             //
             // INLINE AND NOT DELEGATED, which is a pin's requirement rather
             // than a style: the starter pins read the IL CALL SEQUENCE of THIS

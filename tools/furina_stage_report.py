@@ -68,16 +68,17 @@ from tier0.engine import furina_stage
 
 # --- sec.9's two granted decks ---------------------------------------------
 #
-# TEN CARDS EACH BESIDE THE SEVEN BASICS, so the two differ in what they hold
-# and not in how many cards they hold. Both keep the three kit starters, which
-# is what makes them the same character playing two ways rather than two
-# characters.
+# THE ARM'S OWN STARTER, read off `furina_stage.STARTER_IDS` so the report
+# cannot drift from what a run is dealt: since 2026-09-28 that is the base
+# Strike x4 and Defend x4 (BASICS) and the two kit cards (STARTER_KIT). Each
+# granted deck keeps the kit cards, which is what makes them the same
+# character playing two ways rather than two characters.
 
-BASICS = (["soloists_solicitation"] * 3 + ["stage_presence"] * 3
-          + ["regal_bearing"])
+BASICS = [c for c in furina_stage.STARTER_IDS
+          if not c.startswith("proto_fs_")]
 
-STARTER_KIT = ["proto_fs_salon_debut", "proto_fs_curtain_rise",
-               "proto_fs_standing_ovation"]
+STARTER_KIT = [c for c in furina_stage.STARTER_IDS
+               if c.startswith("proto_fs_")]
 
 #: PRESERVE: grow the lead behind Block, Refill the reserve, cash big with the
 #: readers and the Rare (brief sec.4).

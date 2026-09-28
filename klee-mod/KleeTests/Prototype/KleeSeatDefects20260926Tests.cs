@@ -279,17 +279,24 @@ public class KleeSeatDefects20260926Tests
     {
         var klee = KleeOverhaul.Enabled;
         var kokomi = KokomiOverhaul.Enabled;
+        var stage = FurinaStage.Enabled;
         try
         {
             KleeOverhaul.Enabled = false;
             KokomiOverhaul.Enabled = false;
+            FurinaStage.Enabled = false;
             foreach (CharacterModel character in new CharacterModel[]
-                     { new global::KleeMod.Klee(), new global::KleeMod.Kokomi() })
+                     { new global::KleeMod.Klee(), new global::KleeMod.Kokomi(),
+                       new global::KleeMod.Furina() })
             {
                 Assert.False(ArmTransformPool.IsBorrowedBasic(
                     new StrikeIronclad(), character));
                 Assert.False(ArmTransformPool.IsBorrowedBasic(
                     new DefendIronclad(), character));
+                Assert.False(ArmTransformPool.IsBorrowedBasic(
+                    new StrikeSilent(), character));
+                Assert.False(ArmTransformPool.IsBorrowedBasic(
+                    new DefendSilent(), character));
             }
             // A canonical card is never claimed: its Owner asserts.
             Assert.Null(ArmTransformPool.OptionsFor(new StrikeIronclad(), false));
@@ -298,6 +305,7 @@ public class KleeSeatDefects20260926Tests
         {
             KleeOverhaul.Enabled = klee;
             KokomiOverhaul.Enabled = kokomi;
+            FurinaStage.Enabled = stage;
         }
 
         // STRUCTURAL: "borrowed" means the one seam's pair.

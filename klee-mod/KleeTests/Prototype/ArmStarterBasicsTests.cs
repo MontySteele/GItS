@@ -197,6 +197,31 @@ public class ArmStarterBasicsTests
         Assert.Empty(slice.Intersect(shipped));
     }
 
+    [Fact]
+    public void The_stage_arm_names_no_shipped_basic_on_the_starter()
+    {
+        // 2026-09-28, [USER]: "We should really just replace Soloist's
+        // Solicitation and Stage Presence with the basic strike and defend."
+        // The Stage starter holds no shipped Furina row at all: Silent's base
+        // pair and two `proto_fs_` kit cards.
+        var starter = Cards("FurinaStageRoster", "StartingDeck");
+        var shipped = Cards("FurinaCardRoster", "get_All");
+
+        Assert.Equal(10, starter.Count);
+        Assert.NotEmpty(shipped);
+        Assert.Contains("ModelDb.Card<SoloistsSolicitation>", shipped);
+        Assert.Contains("ModelDb.Card<StagePresence>", shipped);
+        Assert.Contains("ModelDb.Card<RegalBearing>", shipped);
+
+        Assert.Empty(starter.Intersect(shipped));
+        Assert.Equal(new[]
+                     {
+                         "ModelDb.Card<ProtoFsCurtainRise>",
+                         "ModelDb.Card<ProtoFsStandingOvation>",
+                     },
+                     starter.Where(c => c.Contains("ProtoFs")).ToArray());
+    }
+
     // ---- the third seam answers with the starter's own pair ---------------
 
     [Fact]
@@ -212,6 +237,7 @@ public class ArmStarterBasicsTests
                  {
                      ("KleeOverhaulRoster", "StrikeIronclad", "DefendIronclad"),
                      ("KokomiOverhaulRoster", "StrikeSilent", "DefendSilent"),
+                     ("FurinaStageRoster", "StrikeSilent", "DefendSilent"),
                  })
         {
             Assert.Equal(new[] { $"ModelDb.Card<{strike}>" },
@@ -238,12 +264,16 @@ public class ArmStarterBasicsTests
         Assert.Contains("KokomiOverhaulRoster.StarterStrike", strike);
         Assert.Contains("KleeOverhaul.get_Enabled", strike);
         Assert.Contains("KokomiOverhaul.get_Enabled", strike);
+        Assert.Contains("FurinaStageRoster.StarterStrike", strike);
+        Assert.Contains("FurinaStage.get_Enabled", strike);
 
         var defend = Il.Calls(Il.Method("ArmStarterBasics", "DefendFor"));
         Assert.Contains("KleeOverhaulRoster.StarterDefend", defend);
         Assert.Contains("KokomiOverhaulRoster.StarterDefend", defend);
         Assert.Contains("KleeOverhaul.get_Enabled", defend);
         Assert.Contains("KokomiOverhaul.get_Enabled", defend);
+        Assert.Contains("FurinaStageRoster.StarterDefend", defend);
+        Assert.Contains("FurinaStage.get_Enabled", defend);
     }
 
     // ---- the patch, against the real game method --------------------------
@@ -445,6 +475,7 @@ public class ArmStarterBasicsTests
         // that decides which Defend the arm uses.
         Assert.DoesNotContain("KleeOverhaulRoster.StarterDefend", calls);
         Assert.DoesNotContain("KokomiOverhaulRoster.StarterDefend", calls);
+        Assert.DoesNotContain("FurinaStageRoster.StarterDefend", calls);
     }
 
     [Fact]
@@ -487,22 +518,28 @@ public class ArmStarterBasicsTests
         // the right answer.
         var klee = KleeOverhaul.Enabled;
         var kokomi = KokomiOverhaul.Enabled;
+        var stage = FurinaStage.Enabled;
         try
         {
             KleeOverhaul.Enabled = false;
             KokomiOverhaul.Enabled = false;
+            FurinaStage.Enabled = false;
 
             foreach (CharacterModel character in new CharacterModel[]
-                     { new global::KleeMod.Klee(), new global::KleeMod.Kokomi() })
+                     { new global::KleeMod.Klee(), new global::KleeMod.Kokomi(),
+                       new global::KleeMod.Furina() })
             {
                 Assert.Null(Answer("StrikeFor", character));
                 Assert.Null(Answer("DefendFor", character));
                 Assert.Null(Answer("DefendTipsFor", character));
             }
 
-            // FURINA IS NEVER CLAIMED, on or off. The reframe arm does not
-            // replace her starter, so her shipped basics are still the honest
-            // answer and the base game already gives it.
+            // FURINA IS CLAIMED ONLY BY HER OWN ARM. Klee's and Kokomi's arms
+            // on, the Stage off: her shipped basics are still the honest
+            // answer and the base game already gives it. (Stage on, the seam
+            // answers `FurinaStageRoster`'s pair -- a `ModelDb` read the
+            // headless host cannot make, so that half is the structural pin
+            // `Both_arms_route_through_the_one_seam`.)
             KleeOverhaul.Enabled = true;
             KokomiOverhaul.Enabled = true;
             var furina = new global::KleeMod.Furina();
@@ -514,6 +551,7 @@ public class ArmStarterBasicsTests
         {
             KleeOverhaul.Enabled = klee;
             KokomiOverhaul.Enabled = kokomi;
+            FurinaStage.Enabled = stage;
         }
     }
 }

@@ -88,6 +88,25 @@ public class BaseBasicsTests
     }
 
     [Fact]
+    public void The_stages_starter_is_four_strikes_four_defends_and_two_of_her_own()
+    {
+        // [USER], 2026-09-28: "Typically we'd include 4 strikes, 4 defends and
+        // 2 actually useful cards that teach the character's core mechanics -
+        // this seems like an unnecessary power spike." and "I agree with
+        // keeping Curtain Raise and Rising Applause."
+        var deck = Cards("FurinaStageRoster", "StartingDeck");
+        Assert.Equal(10, deck.Count);
+        Assert.Equal(4, deck.Count(c => c.Contains("StrikeSilent")));
+        Assert.Equal(4, deck.Count(c => c.Contains("DefendSilent")));
+        Assert.Equal(1, deck.Count(c => c.Contains("ProtoFsCurtainRise")));
+        Assert.Equal(1, deck.Count(c => c.Contains("ProtoFsStandingOvation")));
+        Assert.DoesNotContain(deck, c => c.Contains("SoloistsSolicitation"));
+        Assert.DoesNotContain(deck, c => c.Contains("StagePresence"));
+        Assert.DoesNotContain(deck, c => c.Contains("RegalBearing"));
+        Assert.DoesNotContain(deck, c => c.Contains("SalonDebut"));
+    }
+
+    [Fact]
     public void The_base_pair_is_the_base_stat_line_and_the_base_upgrade()
     {
         // THE ANSWER TO "do the base upgrades and art come for free?", run
@@ -142,6 +161,11 @@ public class BaseBasicsTests
                      Pool<KokomiCardPool>().EnergyColorName);
         Assert.Equal(Pool<SilentCardPool>().CardFrameMaterialPath,
                      Pool<KokomiCardPool>().CardFrameMaterialPath);
+        // The Stage (2026-09-28) deals Silent's pair for the same reason.
+        Assert.Equal(Pool<SilentCardPool>().EnergyColorName,
+                     Pool<FurinaCardPool>().EnergyColorName);
+        Assert.Equal(Pool<SilentCardPool>().CardFrameMaterialPath,
+                     Pool<FurinaCardPool>().CardFrameMaterialPath);
     }
 
     // ---- the two cards of her own -----------------------------------------

@@ -128,9 +128,14 @@ namespace KleeMod.Powers;
 /// `Powers/Prototype/**`, which `KleeCode.csproj` removes without
 /// `-p:PrototypeCards=true`.
 ///
-/// FURINA IS ABSENT ON PURPOSE. The reframe arm does not replace her starter,
-/// so her shipped `SoloistsSolicitation` / `StagePresence` are still the honest
-/// answer and the base game already gives it.
+/// FURINA UNDER THE STAGE ARM IS CLAIMED TOO (2026-09-28). [USER]: "We
+/// should really just replace Soloist's Solicitation and Stage Presence with
+/// the basic strike and defend." Her Stage starter opens with Silent's base
+/// pair (<c>FurinaStageRoster.StarterStrike</c>), and without this seam Large
+/// Capsule would hand a Stage run the shipped Soloist's Solicitation and Stage
+/// Presence -- first in <c>FurinaCardPool.AllCards</c> -- and Fasten's tip would
+/// picture Stage Presence. With <see cref="FurinaStage.Enabled"/> off her
+/// shipped basics are still the honest answer and the base game gives it.
 /// </summary>
 internal static class ArmStarterBasics
 {
@@ -159,6 +164,11 @@ internal static class ArmStarterBasics
             return KokomiOverhaulRoster.StarterStrike();
         }
 
+        if (character is IFurinaCharacter && FurinaStage.Enabled)
+        {
+            return FurinaStageRoster.StarterStrike();
+        }
+
         return null;
     }
 
@@ -173,6 +183,11 @@ internal static class ArmStarterBasics
         if (character is IKokomiCharacter && KokomiOverhaul.Enabled)
         {
             return KokomiOverhaulRoster.StarterDefend();
+        }
+
+        if (character is IFurinaCharacter && FurinaStage.Enabled)
+        {
+            return FurinaStageRoster.StarterDefend();
         }
 
         return null;
