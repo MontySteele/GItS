@@ -1152,6 +1152,71 @@ def test_the_profile_is_seeded_once_and_never_overwritten(tmp_path):
     assert instances.seed_profile(lane0, source_appdata=src) == []
 
 
+def _progress_save(epochs):
+    """A progress.save the way the game writes it: indent 2, CRLF, no BOM."""
+    import json
+    data = {"current_score": 3, "epochs": epochs, "wongo_points": 0}
+    return json.dumps(data, indent=2).replace("\n", "\r\n").encode("utf-8")
+
+
+def test_a_lane_parked_on_an_epoch_reveal_is_unparked(tmp_path, monkeypatch):
+    """A base-game run that unlocks an epoch leaves the lane's menu at
+    Settings and Quit (`manual_epoch_reveal_required`), so `embark` has no
+    path. The lane's own save is set to revealed; nothing else moves."""
+    import json
+    real = tmp_path / "roaming"
+    monkeypatch.setenv("APPDATA", str(real))
+    lane1 = instances.Instance(game_dir=tmp_path / "game", port=15527,
+                               appdata=tmp_path / "lane1", label="lane1")
+    saves = (tmp_path / "lane1" / "SlayTheSpire2" / "steam" / "76561"
+             / "modded" / "profile1" / "saves")
+    saves.mkdir(parents=True)
+    epochs = [
+        {"id": "COLORLESS1_EPOCH", "obtain_date": 1, "state": "revealed"},
+        {"id": "DEFECT2_EPOCH", "obtain_date": 2, "state": "obtained"},
+        {"id": "REGENT3_EPOCH", "obtain_date": 3, "state": "obtained_no_slot"},
+        {"id": "IRONCLAD4_EPOCH", "obtain_date": 0, "state": "not_obtained"},
+    ]
+    (saves / "progress.save").write_bytes(_progress_save(epochs))
+
+    changed = instances.reveal_pending_epochs(lane1)
+    assert changed == [(saves / "progress.save",
+                        ["DEFECT2_EPOCH", "REGENT3_EPOCH"])]
+    after = (saves / "progress.save").read_bytes()
+    want = [dict(e) for e in epochs]
+    want[1]["state"] = want[2]["state"] = "revealed"
+    assert after == _progress_save(want)          # byte-for-byte, CRLF kept
+    assert json.loads(after)["epochs"][3]["state"] == "not_obtained"
+    assert not list(saves.glob("*.gits-tmp"))
+
+    # Idempotent: a clean lane is not rewritten.
+    assert instances.reveal_pending_epochs(lane1) == []
+
+    # A save that does not parse is left alone.
+    (saves / "progress.save").write_bytes(b"{not json")
+    assert instances.reveal_pending_epochs(lane1) == []
+    assert (saves / "progress.save").read_bytes() == b"{not json"
+
+
+def test_the_epoch_reveal_never_touches_the_real_profile(tmp_path, monkeypatch):
+    """Lane 0 is the owner's profile, and so is anything inside %APPDATA%."""
+    real = tmp_path / "roaming"
+    saves = real / "SlayTheSpire2" / "steam" / "76561" / "profile1" / "saves"
+    saves.mkdir(parents=True)
+    parked = _progress_save(
+        [{"id": "IRONCLAD2_EPOCH", "obtain_date": 2, "state": "obtained"}])
+    (saves / "progress.save").write_bytes(parked)
+    monkeypatch.setenv("APPDATA", str(real))
+
+    lane0 = instances.Instance(game_dir=tmp_path / "game", port=15526,
+                               appdata=None, label="lane0")
+    assert instances.reveal_pending_epochs(lane0) == []
+    posing = instances.Instance(game_dir=tmp_path / "game", port=15527,
+                                appdata=real, label="lane1")
+    assert instances.reveal_pending_epochs(posing) == []
+    assert (saves / "progress.save").read_bytes() == parked
+
+
 def test_the_bridge_is_per_thread_and_lane0_is_the_default():
     """A PLAIN GLOBAL WOULD GIVE TWO LANES ONE PORT -- the exact bug this
     build removes, moved from the mod side to ours."""
