@@ -523,10 +523,21 @@ with (R97/5b).
 
 ## Surviving EB-1 (the Punch Off soft-lock)
 
-`EB-1` is root-caused, upstream, and not ours to fix — **this section is its
+`EB-1` is root-caused and upstream, and our mod now guards it under Instant (below) — **this section is its
 durable record.** The BACKLOG row that used to carry it has left HEAD: its
 acceptance was MET on 2026-08-13 and a hazard marker is not open work, so under
 R212 the hazard lives where the people who need it already read.
+
+**The mod now guards the base event too (2026-09-28).** Liyue's
+`PunchOffMirror` has bounded the loop since `EB-769`, but every other run
+still met the base `PunchOff` (an Ironclad hit it on floor 7 on 2026-09-28).
+`klee-mod/KleeCode/Patches/PunchOffInstantGuardPatch.cs` is a Harmony prefix
+on `PunchOff.PunchEachOther` that, under `FastModeType.Instant` only, returns
+a completed task and skips the loop. That is safe because the loop is purely
+decorative and fire-and-forget: no option awaits it, and the cancel and the
+`RoomExited` unsubscribe live outside it. At `Normal` and `Fast` the base loop
+runs unchanged. The legs below stay as the backstop for a build without the
+Klee mod loaded.
 
 `MegaCrit.Sts2.Core.Models.Events.PunchOff.PunchEachOther()` instantiates a
 `PackedScene` whose GPUParticles RID comes back null, and the engine logs
