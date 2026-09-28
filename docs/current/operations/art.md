@@ -12,6 +12,7 @@ python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 .venv/Scripts/python tools/gen_furina_stills.py    # and gen_kokomi_stills.py
 .venv/Scripts/python tools/gen_char_icon_outlines.py [--check]   # all three outline halos
 .venv/Scripts/python tools/gen_mod_image.py [--check]      # Mods-screen badge, EB-161
+.venv/Scripts/python tools/gen_multiplayer_hands.py [--check] [--art-root <checkout>]   # co-op treasure hands, from the game pck
 ```
 
 `cut_combat_layers.py` cuts one illustration into layers behind a hand-digitized

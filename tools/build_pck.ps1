@@ -268,6 +268,22 @@ if (-not (Test-Path $modImageSrc)) { Note-Skip 'klee\mod_image.png' $modImageSrc
     Copy-Item $modImageSrc -Destination (Join-Path $work 'klee\mod_image.png')
 }
 
+# THE MULTIPLAYER HANDS (2026-09-27). The co-op treasure room draws each
+# player's arm from CharacterModel.Arm<Pose>TexturePath, a NON-VIRTUAL getter
+# that derives res://images/ui/hands/multiplayer_hand_<id.entry>_<pose>.png
+# from the model id -- so the files go to that ENGINE path, not to a character
+# namespace, the way the retired map-ground block went to res://images/packed/.
+# The names (multiplayer_hand_kleemod-*) are new, so no base-game file is
+# overridden. Produced by tools/gen_multiplayer_hands.py (GENERATOR_OWNED in
+# art_lint.py) from the base game's own hands; no plan.tsv row.
+$handsSrc = Join-Path $src 'hands'
+if (-not (Test-Path $handsSrc)) { Note-Skip 'hands' $handsSrc } else {
+    $to = Join-Path $work 'images\ui\hands'
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    $files = Select-PackablePngs $handsSrc
+    if ($files) { Copy-Item $files.FullName -Destination $to }
+}
+
 # THE TEYVAT RUN FRAME SPIKE's still portraits (R272, spike item 4.3). One
 # more copy block, which operations/media.md sec.4 says is the smallest
 # extension this script has: there is no manifest to add a row to, only a list
