@@ -1051,8 +1051,8 @@ public static class ArmKeywordTips
             "End of your turn: deal " + FurinaStageLaw.ActWriothesleyBase
           + " [gold]Cryo[/gold] damage to a random enemy, plus "
           + FurinaStageLaw.ActWriothesleyRate + " per [gold]Fanfare[/gold] "
-          + "hits took and " + FurinaStageLaw.ActWriothesleyBlockedRate
-          + " per damage [gold]Block[/gold] stopped in front.");
+          + "he lost to hits and " + FurinaStageLaw.ActWriothesleyBlockedRate
+          + " per damage [gold]Block[/gold] saved him.");
 
     public static IEnumerable<IHoverTip> ForSigewinne(
         IEnumerable<IHoverTip> inherited, CardModel card) =>

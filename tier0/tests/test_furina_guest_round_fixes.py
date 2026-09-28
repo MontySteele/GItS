@@ -100,8 +100,8 @@ WRIOTHESLEY = {
         {"name": "Wriothesley",
          "description": "End of your turn: deal 4 [gold]Cryo[/gold] damage "
                         "to a random enemy, plus 2 per [gold]Fanfare[/gold] "
-                        "hits took and 1 per damage [gold]Block[/gold] "
-                        "stopped in front."}]}
+                        "he lost to hits and 1 per damage "
+                        "[gold]Block[/gold] saved him."}]}
 
 
 # ---------------------------------------------------------------------------

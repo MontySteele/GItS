@@ -53,7 +53,7 @@ against the code it describes.
 | Pneuma | ...your front performer gains 2 Fanfare. It summons nobody. | This turn, your performers' acts give double [gold]Block[/gold], and your front performer regains 2 [gold]Fanfare[/gold]. |
 | Guest Star | A Guest Star card's performer. Unlike Usher, Chevalmarin and Crabaletta, one of each: a copy makes it Bow and return with more Fanfare. | You can have one of each on stage. Summoning one already there makes it [gold]Bow[/gold], then return with the new [gold]Fanfare[/gold] added. |
 | Navia | ...Her Bow uses what she had before she was emptied. | End of your turn: deal [gold]Geo[/gold] damage equal to her Fanfare to a random enemy. |
-| Wriothesley | ...plus 2 per Fanfare hits took and 1 per damage Block stopped in front. | End of your turn: deal 4 [gold]Cryo[/gold] damage to a random enemy, plus 2 per Fanfare he lost to hits and 1 per damage your [gold]Block[/gold] stopped for him. |
+| Wriothesley | ...plus 2 per Fanfare hits took and 1 per damage Block stopped in front. | End of your turn: deal 4 [gold]Cryo[/gold] damage to a random enemy, plus 2 per Fanfare he lost to hits and 1 per damage [gold]Block[/gold] saved him. |
 | Lynette | ...to a random enemy, one with an aura if any. | End of your turn: deal 3 [gold]Anemo[/gold] damage to a random enemy, preferring one with an aura. |
 | Escoffier | ...give each other performer 2 and deal 3 Cryo... | End of your turn: pay 3 of her Fanfare to give each other performer 2 Fanfare and deal 3 [gold]Cryo[/gold] damage to ALL enemies. |
 
@@ -111,3 +111,7 @@ unchanged.
   which his face's "instead" reads against.
 - The fade tip attaches off the row's ops (`gen_klee_cards.bends_the_fade`):
   Held Applause, Echoing Hall and Eternal Applause.
+
+**Wriothesley, after the build.** The spec's sentence was 130 characters against
+the 125-character badge limit. It ships as "...plus 2 per Fanfare he lost to hits
+and 1 per damage Block saved him." (124) on the tip, the badge and the glossary.
