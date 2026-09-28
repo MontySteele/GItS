@@ -154,15 +154,19 @@ jobs:
       # same `-n auto --dist loadscope` (4 workers on this runner). A module
       # is never split across shards, for the loadscope reason above. The
       # `lints` job proves on every change that the four shards together
-      # collect exactly the full suite. `--durations=25` is there so the next
-      # speed pass starts from this runner's numbers, not the dev box's.
+      # collect exactly the full suite. `--no-loadscope-reorder` keeps that
+      # heaviest-first order: by default xdist re-sorts modules by how MANY
+      # tests they hold, which queues the 12-test, ~100-second test_errata
+      # behind the many-test modules. It changes which worker gets a
+      # module and when, nothing about what runs. `--durations=25` is there
+      # so the next speed pass starts from this runner's numbers.
       - name: full suite, shard ${{ matrix.shard }} of 4 (parallel)
         if: steps.scope.outputs.docs_only != 'true'
         run: |
           set -eu
           files=$(python tools/ci_shards.py --shard ${{ matrix.shard }} --of 4)
           echo "shard ${{ matrix.shard }}/4 runs $(printf '%s\n' "$files" | wc -l) files"
-          python -m pytest $files -q -n auto --dist loadscope --durations=25
+          python -m pytest $files -q -n auto --dist loadscope --no-loadscope-reorder --durations=25
 
       # The docs-only arm: every module in tier0/tests + tier05/tests that
       # opens a committed .md file tools/ci_changed_paths.py classifies as a
