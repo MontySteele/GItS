@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Relics;
+using MegaCrit.Sts2.Core.Runs;
 
 namespace KleeMod.Relics;
 
@@ -85,6 +88,32 @@ public sealed class SalonSolitaire : CustomRelicModel
         var furina = Owner?.Creature;
         if (!FurinaStage.LiveFor(furina)) return;
         await FurinaStage.OpenCombat(furina);
+    }
+
+    /// <summary>
+    /// Furina's companion reward slot, carried over from the Ethereal
+    /// Spotlight this relic replaces. The starter relic is where every roster
+    /// character's fourth reward choice lives, and the Stage kept companions
+    /// ("Companion cards stay the shared action pool", brief sec.2). The slot
+    /// was left off when the relic was written, so a Stage Furina drafted no
+    /// companions at all; [USER]'s co-op run caught it (2026-09-27).
+    /// </summary>
+    public override bool TryModifyCardRewardOptions(
+        Player player, List<CardCreationResult> cardRewardOptions,
+        CardCreationOptions creationOptions)
+    {
+        if (creationOptions.Source != CardCreationSource.Encounter
+            || player.Character is not Furina)
+        {
+            return false;
+        }
+        var rarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
+            ? CardRarity.Rare
+            : (CardRarity?)null;
+        var offer = CompanionSlot.Roll(player, rarity);
+        if (offer == null) return false;
+        cardRewardOptions.Add(new CardCreationResult(offer));
+        return true;
     }
 
     /// <summary>

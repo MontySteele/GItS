@@ -759,24 +759,18 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
-    public void The_curtain_never_falls_adds_no_companion_slot_on_the_stage()
+    public void Both_stage_starters_carry_the_companion_slot()
     {
-        // REAL with the Stage on: the relic declines before it reads the
-        // reward at all, and the offer is untouched. Arm off, the shipped
-        // slot (structural: the roll needs a booted game).
-        var curtain = Give<CurtainNeverFalls>(Seat.Furina());
-        var options = new List<CardCreationResult>();
-        using (new StageArm())
+        // 2026-09-27, [USER]'s co-op run: a Stage Furina never saw the fourth
+        // reward choice. Salon Solitaire and its upgrade both roll the slot,
+        // with no Stage gate in front of the roll (structural: the roll needs
+        // a booted game).
+        foreach (var type in new[] { "SalonSolitaire", "CurtainNeverFalls" })
         {
-            Assert.False(curtain.TryModifyCardRewardOptions(
-                curtain.Owner, options, null!));
-            Assert.Empty(options);
+            var calls = Il.Calls(Il.Method(type, "TryModifyCardRewardOptions"));
+            Assert.Contains("CompanionSlot.Roll", calls);
+            Assert.DoesNotContain("FurinaStage.get_Enabled", calls);
         }
-        var calls = Il.CallSequence(
-            Il.Method("CurtainNeverFalls", "TryModifyCardRewardOptions")).ToList();
-        Assert.True(calls.IndexOf("FurinaStage.get_Enabled")
-                    < calls.IndexOf("CompanionSlot.Roll"));
-        Assert.True(calls.IndexOf("FurinaStage.get_Enabled") >= 0);
     }
 
     [Fact]
