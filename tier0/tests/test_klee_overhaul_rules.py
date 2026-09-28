@@ -1682,20 +1682,24 @@ def test_sparks_n_splash_takes_a_bombs_damage_terms(overhaul):
     assert enemy.block == 0, "Skittish is an Attack-card rule and did not fire"
 
 
-def test_chained_reactions_re_bombs_once_per_explosion(overhaul):
-    """"Whenever one of your Bombs goes off, place a Bomb 3 on a random
-    enemy." Once per EXPLOSION, so a three-Bomb Set off is three new Bombs --
-    and each is a plain Bomb, so nothing it places can fire by itself."""
-    enemy = make_enemy(hp=400)
-    state = klee_state([enemy])
+def test_chained_reactions_grows_the_other_bombs_once_per_explosion(overhaul):
+    """"Whenever one of your Bombs goes off, your other Bombs grow 3." Once per
+    EXPLOSION, so a three-Bomb Set off grows every other Bomb by 9. It places
+    nothing, so the pile it fired is left empty (the 2026-09-27 rework: the
+    old re-Bomb refilled the board and paid a Spark per Bomb forever)."""
+    fired, other = make_enemy(hp=400, name="fired"), make_enemy(hp=400,
+                                                                name="other")
+    state = klee_state([fired, other])
     state.player.powers[klee_overhaul.CHAINED_REACTIONS] = 3
     for size in (2, 3, 4):
-        klee_overhaul.place(state, enemy, size)
+        klee_overhaul.place(state, fired, size)
+    klee_overhaul.place(state, other, 5)
 
-    klee_overhaul.set_off(state, enemy)
+    klee_overhaul.set_off(state, fired)
 
-    assert sizes(enemy) == [3, 3, 3]
-    assert klee_overhaul.mine_count(enemy) == 0
+    assert sizes(fired) == [], "nothing is placed: the pile it fired empties"
+    assert sizes(other) == [5 + 3 * 3]
+    assert klee_overhaul.mine_count(other) == 0
 
 
 # ---------------------------------------------------------------------------

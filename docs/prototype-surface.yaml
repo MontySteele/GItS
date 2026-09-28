@@ -230,10 +230,11 @@
    description: "[gold]Set off[/gold] a random enemy and deal 3 damage to it, 4 times.",
    effects: [{op: set_off, target: random_enemy, damage: 3, times: 4}]}
 
+# Reworked 2026-09-27 ([USER]: "very OP"): grows Bombs, places none.
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever one of your [gold]Bombs[/gold] goes off, place a [gold]Bomb[/gold] 3 on a random enemy.",
+   description: "Whenever one of your [gold]Bombs[/gold] goes off, your other [gold]Bombs[/gold] grow 3.",
    effects: [{op: apply_power, power: ko_chained_reactions, amount: 3, target: self}]}
 
 - {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash (proto)", character: klee,
