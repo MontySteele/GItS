@@ -41,7 +41,7 @@ Status: RULED 2026-09-25 evening (picks at the end); build after the draft-3 fix
 4. **Every act pays.** A repeated act (Full House, Tutti!, Bis!) pays again. So Full House makes Neuvillette burn out twice as fast for the same total output, and Tutti! taxes the cast through Clorinde a second time. That is a tempo choice, and it is meant.
 5. **The Bow is free.** A guest's Bow is its act without the payment. For a guest with a Spend mode, the Bow gets the paid version free. The promise "acts one last time" therefore always delivers, and burning a guest out ends in a finale.
    - This settles the replacement order: the leaver's Bow costs nothing, so the newcomer inherits all of the leaver's remaining Fanfare. The Bow happens first, then the arrival.
-6. **A guest that reads something resets it when it acts.** Wriothesley reads the Fanfare he lost since his last act, so a repeated act reads 0 and Full House does not double him. His Bow on a hit reads the hit that took him down.
+6. **A guest that reads something resets it when it acts.** Wriothesley reads the Fanfare he lost since his last act and the damage her Block stopped while he stood in front, so a repeated act reads only his base 4 and Full House does not double his reading. His Bow on a hit reads the hit that took him down.
 7. **You can see the end of the turn before you end it.** In game and on the seat page, the Stage strip shows each performer's bar after the acts, the payments and the fade. The enemy's intent shows how much reaches Furina.
    - Both seat rounds today misjudged the damage that reached her, and guests add two more moving parts.
    - This ships with the batch, not after it. GPT: "A report helps the designer; a visible forecast helps the player."
@@ -61,7 +61,7 @@ On the Defect comparison [USER] drew (Lightning, Frost, Glass, Dark, Plasma), ea
 | **Clorinde** (Electro) | Star | 4 | Take 1 Fanfare from each other performer: deal 8 [gold]Electro[/gold] damage to a random enemy. | the rest of the cast | Lightning, taxed |
 | **Navia** (Geo) | Star | 4 | Deal [gold]Geo[/gold] damage to a random enemy equal to her Fanfare. | nothing; she wants feeding, and behind the front she fades | Dark |
 | **Chevreuse** (Pyro) | Support | 4 | [gold]Spend[/gold] 2: next turn, gain 1 [gold]Energy[/gold]. | the back performer | Plasma |
-| **Wriothesley** (Cryo) | Support | 8 | Deal [gold]Cryo[/gold] damage to a random enemy equal to twice the Fanfare he lost since his last act. | nothing; he wants the front | none: retaliation |
+| **Wriothesley** (Cryo) | Support | 8 | Deal 4 [gold]Cryo[/gold] damage to a random enemy, plus 2 per Fanfare hits took from him and 1 per damage your Block stopped while he was in front, since his last act. (2026-09-27, [USER]: "I think that Wriothesley needs a buff. Perhaps he also reflects the Blocked damage. so 2.") | nothing; he wants the front | none: retaliation |
 | **Sigewinne** (Hydro) | Support | 8 | Give 3 of her Fanfare to the performer behind her, or to your front performer if she is at the back. | herself | Frost, for the shield |
 | **Charlotte** (Cryo) | Support | 4 | Each other performer gains 1 Fanfare. | free | Frost, spread thin |
 | **Lynette** (Anemo) | Support | 8 | Deal 3 [gold]Anemo[/gold] damage to a random enemy, one with an aura if any. | free | none: a reaction enabler |

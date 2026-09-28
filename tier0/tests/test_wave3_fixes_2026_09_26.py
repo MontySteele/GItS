@@ -31,9 +31,10 @@ sys.path.insert(0, str(REPO / "tier0" / "tests"))
 
 from test_understudy_blindplay import combat_state  # noqa: E402
 
-FIVE_CENTURY = ("Whenever a performer [gold]Bow[/gold]s and leaves, it "
-                "returns at the back with 1 [gold]Fanfare[/gold] if a seat is "
-                "free.")
+# 2026-09-27: once a turn.
+FIVE_CENTURY = ("The first time each turn a performer [gold]Bow[/gold]s and "
+                "leaves, it returns at the back with 1 [gold]Fanfare[/gold] "
+                "if a seat is free.")
 
 
 # ---- 1. A Five-Century Act's face --------------------------------------------
@@ -47,12 +48,12 @@ def test_a_five_century_act_says_it_needs_a_free_seat():
     assert row["description"] == FIVE_CENTURY
     power = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
              / "FurinaStagePowers.cs").read_text(encoding="utf-8")
-    assert '"Whenever a performer [gold]Bow[/gold]s and leaves, it returns "' \
-        in power
+    assert ('"The first time each turn a performer [gold]Bow[/gold]s and "'
+            in power)
     brief = (REPO / "review" / "active"
              / "furina-stage-brief-2026-09-08.md").read_text(encoding="utf-8")
-    assert ("Whenever a performer Bows and leaves, it returns at the back "
-            "with 1 Fanfare if a seat is free.") in brief
+    assert ("The first time each turn a performer Bows and leaves, it "
+            "returns at the back with 1 Fanfare if a seat is free.") in brief
     assert "2026-09-26 seat round" in brief
 
 

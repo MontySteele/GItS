@@ -1642,9 +1642,10 @@ ARM_KEYWORDS: dict[str, str] = {
               "random enemy. Her Bow uses what she had before she was "
               "emptied."),
     "Chevreuse": "End of your turn: Spend 2 to gain 1 Energy next turn.",
-    "Wriothesley": ("End of your turn: deal Cryo damage to a random enemy "
-                    "equal to twice the Fanfare he lost to hits since his "
-                    "last act."),
+    # 2026-09-27: he always attacks, and reflects her Block too.
+    "Wriothesley": ("End of your turn: deal 4 Cryo damage to a random enemy, "
+                    "plus 2 per Fanfare hits took and 1 per damage Block "
+                    "stopped in front."),
     "Sigewinne": ("End of your turn: give 3 of her Fanfare to the performer "
                   "behind her, or to your front performer if she is at the "
                   "back."),

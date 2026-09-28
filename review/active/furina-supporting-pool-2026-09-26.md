@@ -40,7 +40,7 @@ The rarity target is Klee's shape at 78 (24 / 36 / 18). Most of the batch's weig
 | Card | R | Cost | Text |
 |---|---|---|---|
 | Held Applause | U | 1 Skill | Gain 7 Block. At the end of this turn, your performers do not fade. (upg 10) |
-| Echoing Hall | U | 1 Power | Whenever a performer fades, your front performer gains the Fanfare lost. (upg cost 0) |
+| Echoing Hall | U | 1 Power | Whenever a performer fades, your front performer gains half the Fanfare lost. (upg cost 0) (2026-09-27: half, rounded down; it was all of it. [USER]: "For the furina Fix items - I like your default.") |
 | Eternal Applause † | R | 1 Power | Your performers fade only above 10 Fanfare, not 5. (upg cost 0) |
 
 **4. Cashing out.** Every seat can be cashed, not only the back, and each cash-out pays in a different currency.

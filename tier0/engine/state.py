@@ -883,6 +883,12 @@ class Player(Fighter):
     stage_hold_fade: bool = False
     stage_front_hit: bool = False
     stage_bows: int = 0
+    # 2026-09-27 (QUARANTINED with the stage): each guest's damage her Block
+    # stopped from enemy hits while it stood in front since its last act
+    # (Wriothesley's second reading), and A Five-Century Act's one return a
+    # turn, used.
+    stage_blocked: dict = field(default_factory=dict)
+    stage_returned: bool = False
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
                                   # designation re-aims, never stacks. The

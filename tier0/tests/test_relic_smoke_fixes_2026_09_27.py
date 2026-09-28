@@ -54,7 +54,7 @@ def test_a_face_that_says_fade_prints_the_row_that_defines_it():
                           "performers do not fade."))
     assert "back performer" in _names(
         ("Echoing Hall", "Whenever a performer fades, your front performer "
-                         "gains the Fanfare lost."))
+                         "gains half the Fanfare lost."))
 
 
 # ---- Guest Book: what a Guest Star is --------------------------------------

@@ -126,10 +126,11 @@ public sealed class RaptAudiencePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// <i>A Five-Century Act</i>: "Whenever a performer takes a Bow, it returns to
-/// the back seat with 1 Fanfare." One copy is the whole rule -- a performer
-/// returns once however many are in play -- so the amount is a count of
-/// copies and nothing reads it (<see cref="FurinaStage.Bow"/>).
+/// <i>A Five-Century Act</i>: "The first time each turn a performer Bows and
+/// leaves, it returns at the back with 1 Fanfare if a seat is free"
+/// (2026-09-27; it was every Bow). One copy is the whole rule -- one return
+/// a turn however many are in play -- so the amount is a count of copies and
+/// nothing reads it (<see cref="FurinaStageLedger.ReturnOnce"/>).
 /// </summary>
 public sealed class FiveCenturyActPower : PowerModel, ILocalizationProvider
 {
@@ -137,8 +138,9 @@ public sealed class FiveCenturyActPower : PowerModel, ILocalizationProvider
     {
         ("title", "A Five-Century Act"),
         ("description",
-            "Whenever a performer [gold]Bow[/gold]s and leaves, it returns "
-          + "at the back with 1 [gold]Fanfare[/gold] if a seat is free."),
+            "The first time each turn a performer [gold]Bow[/gold]s and "
+          + "leaves, it returns at the back with 1 [gold]Fanfare[/gold] if a "
+          + "seat is free."),
     };
 
     public override PowerType Type => PowerType.Buff;

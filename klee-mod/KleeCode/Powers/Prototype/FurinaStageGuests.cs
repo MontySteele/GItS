@@ -144,7 +144,7 @@ public static partial class FurinaStage
         await Bow(choiceContext, owner,
                   new StageExit(leaver.Who, StageDeparture.Spent,
                                 leaver.Fanfare, ledger.Seats.Count,
-                                leaver.LostSinceAct),
+                                leaver.LostSinceAct, leaver.BlockedSinceAct),
                   mayReturn: false);
         ledger.ArriveAtFront(who, leaver.Fanfare + arrival);
         await FurinaStagePets.Sync(owner);
@@ -159,7 +159,7 @@ public static partial class FurinaStage
     /// it, as every act is (`EB-735`).
     ///
     /// ARKHE ALIGNMENT'S OUSIA doubles the DAMAGE number (8 to 16, Navia's
-    /// Fanfare, Wriothesley's twice-lost) and never the payment (rule 4);
+    /// Fanfare, Wriothesley's whole number) and never the payment (rule 4);
     /// Pneuma doubles Block, which no guest gives.
     /// </summary>
     private static async Task GuestAct(PlayerChoiceContext choiceContext,
@@ -245,13 +245,15 @@ public static partial class FurinaStage
                 break;
             case StagePerformer.Wriothesley:
             {
+                // 2026-09-27 ("Wriothesley needs a buff ... he also reflects
+                // the Blocked damage"): he always attacks -- 4, plus 2 per
+                // Fanfare hits took from him, plus 1 per damage her Block
+                // stopped while he stood in front. Ousia doubles the whole.
                 var lost = seat?.LostSinceAct ?? exit?.Lost ?? 0;
-                if (lost > 0)
-                {
-                    (hit, shot) = await HitRandom(
-                        choiceContext, owner, Element.Cryo,
-                        FurinaStageLaw.ActWriothesleyRate * lost * dmg);
-                }
+                var blocked = seat?.BlockedSinceAct ?? exit?.Blocked ?? 0;
+                (hit, shot) = await HitRandom(
+                    choiceContext, owner, Element.Cryo,
+                    FurinaStageLaw.WriothesleyAct(lost, blocked) * dmg);
                 break;
             }
             case StagePerformer.Lynette:
@@ -285,8 +287,12 @@ public static partial class FurinaStage
             }
             // Sigewinne and Charlotte move Fanfare only: the ledger did it.
         }
-        // Rule 6: every act resets the reading, so a repeat reads 0.
-        if (seat != null) seat.LostSinceAct = 0;
+        // Rule 6: every act resets the reading, so a repeat reads the base.
+        if (seat != null)
+        {
+            seat.LostSinceAct = 0;
+            seat.BlockedSinceAct = 0;
+        }
         FurinaStagePets.SyncBars(owner);
         NoteBeat(owner, beat, who, before, hit, each, struck, seat, shot);
     }
@@ -470,6 +476,10 @@ public static partial class FurinaStage
                 continue;
             }
             var through = System.Math.Max(0, hit - block);
+            // 2026-09-27: what her Block stops of an ENEMY's hit goes on the
+            // front performer (Wriothesley's second reading), as `AbsorbHit`
+            // credits it, before the hit reaches the bar.
+            if (enemy) clone.CreditBlocked(System.Math.Min(hit, block));
             block = System.Math.Max(0, block - hit);
             if (through <= 0) continue;
             var lead = clone.Lead;
@@ -745,7 +755,11 @@ public static partial class FurinaStage
                     Effect(who, block, line, mark), line,
                     PaidSince(who, mark));
             }
-            if (seat != null) seat.LostSinceAct = 0;
+            if (seat != null)
+            {
+                seat.LostSinceAct = 0;
+                seat.BlockedSinceAct = 0;
+            }
             // THE SUPPORTING POOL (2026-09-26): Lyney's swap is a seat move,
             // and the fade and the hits after it read the seats. The seat
             // round's ruling: to the front if he is not there, else nothing.
@@ -928,7 +942,7 @@ public static partial class FurinaStage
                         leaves);
                 }
                 // Nothing landed: it could not pay, or its act came to 0
-                // (Wriothesley on a turn nothing hit him).
+                // (Navia at 0; Wriothesley never, since 2026-09-27).
                 var unpaid = _refused && _amounts.Count == 0;
                 return new StageForecastCue(
                     _who, seat.Key, kind, unpaid ? _wouldBe : 0, _element,
@@ -971,11 +985,11 @@ public static partial class FurinaStage
                 }
                 case StagePerformer.Wriothesley:
                 {
+                    // 2026-09-27: he always attacks; never a 0.
                     var lost = seat?.LostSinceAct ?? exit?.Lost ?? 0;
-                    return lost > 0
-                        ? Line(FurinaStageLaw.ActWriothesleyRate * lost, "Cryo",
-                               StageForecastAct.Random)
-                        : null;
+                    var blocked = seat?.BlockedSinceAct ?? exit?.Blocked ?? 0;
+                    return Line(FurinaStageLaw.WriothesleyAct(lost, blocked),
+                                "Cryo", StageForecastAct.Random);
                 }
                 case StagePerformer.Lynette:
                     return Line(FurinaStageLaw.ActLynetteDamage, "Anemo",
@@ -1025,7 +1039,8 @@ public static partial class FurinaStage
                 }
                 _stage.Raise(amount);
             }
-            if (_returns) _stage.ReturnToBack(exit.Who);
+            // 2026-09-27: A Five-Century Act returns once a turn.
+            if (_returns) _stage.ReturnOnce(exit.Who);
         }
     }
 }
@@ -1063,7 +1078,7 @@ public enum StageCueKind
 /// payment that empties it and earns its Bow), 0 where none does --
 /// <see cref="Unpaid"/> (rule 4: it cannot pay, and <see cref="Amount"/> and
 /// <see cref="Price"/> are what it would have done) or an act that comes to 0
-/// (Wriothesley on a turn nothing hit him). <see cref="Price"/> is what a
+/// (a Navia at 0). <see cref="Price"/> is what a
 /// priced act pays (Neuvillette, Chevreuse). <see cref="Element"/> and
 /// <see cref="Target"/> are its damage line's.
 /// </summary>

@@ -207,11 +207,9 @@ public static class FurinaStageCues
                 _ => "Cannot pay: does nothing.",
             };
         }
+        // 2026-09-27: Wriothesley always attacks now, so his cue is never a
+        // greyed 0 and needs no line saying nothing hit him.
         var lines = new List<string>();
-        if (cue.Who == StagePerformer.Wriothesley && cue.Times == 0)
-        {
-            lines.Add("Nothing has hit him since his last act.");
-        }
         if (cue.Price > 0 && cue.Who == StagePerformer.Chevreuse
             && rows.Count > 0 && rows[^1].Key != cue.Key)
         {

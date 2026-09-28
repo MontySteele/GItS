@@ -6808,9 +6808,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Navia": ["End of your turn: deal ", " damage equal to her ",
                   "Fanfare to a random enemy."],
         "Chevreuse": ["End of your turn: ", " to gain ", " next turn."],
-        "Wriothesley": ["End of your turn: deal ", " damage to a random ",
-                        "enemy equal to twice the Fanfare he lost to hits "
-                        "since his ", "last act."],
+        # 2026-09-27: he always attacks, and reflects her Block too.
+        "Wriothesley": ["End of your turn: deal ",
+                        " damage to a random enemy, plus "],
         "Sigewinne": ["End of your turn: give ",
                       " of her Fanfare to the performer behind her, or to "
                       "your front ", "performer if she is at the back."],

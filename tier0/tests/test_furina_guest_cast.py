@@ -191,10 +191,10 @@ def test_wriothesley_joins_at_the_front_and_takes_the_next_hit(arm):
     assert st.player.stage[0] == ["wriothesley", 3]
     assert st.player.stage[1:] == [["usher", 3], ["crabaletta", 4]]
     assert st.player.hp == hp
-    # And his act reads what that hit took: twice 5.
+    # And his act reads what that hit took: 4 plus twice 5 (2026-09-27).
     st.enemies = [_enemy(hp=100)]
     FS.perform(st, "wriothesley")
-    assert st.enemies[0].hp == 100 - 2 * 5
+    assert st.enemies[0].hp == 100 - (4 + 2 * 5)
 
 
 def test_wriothesley_on_a_full_stage_recasts_the_back(arm):
@@ -394,13 +394,14 @@ def test_a_hit_emptying_a_guest_bows_it_right_away_and_free(arm):
     assert st.enemies[0].hp == 100 - FS.ACT_NEUVILLETTE_DAMAGE
 
 
-def test_wriothesley_reads_what_he_lost_and_a_repeat_reads_zero(arm):
+def test_wriothesley_reads_what_he_lost_and_a_repeat_reads_his_base(arm):
+    # 2026-09-27: he always attacks -- 4, plus 2 per Fanfare a hit took.
     st = _state([["wriothesley", 8], ["usher", 3]], enemies=[_enemy(hp=100)])
     FS.absorb(st, 3)                               # he loses 3 to a hit
     FS.perform(st, "wriothesley")
-    assert st.enemies[0].hp == 100 - 2 * 3
-    FS.perform(st, "wriothesley")                  # a repeat reads 0
-    assert st.enemies[0].hp == 100 - 2 * 3
+    assert st.enemies[0].hp == 100 - (4 + 2 * 3)
+    FS.perform(st, "wriothesley")                  # a repeat reads the base
+    assert st.enemies[0].hp == 100 - (4 + 2 * 3) - 4
 
 
 def test_wriothesley_counts_hits_only(arm):
@@ -411,18 +412,18 @@ def test_wriothesley_counts_hits_only(arm):
     FS.spend(st, 2)                                # he is the back: 10 -> 8
     FS.fade(st)                                    # 8 -> 7
     FS.perform(st, "wriothesley")
-    assert st.enemies[0].hp == 100
+    assert st.enemies[0].hp == 100 - 4             # his floor only
     st.player.stage.reverse()                      # he steps to the front
     FS.absorb(st, 2)
     FS.perform(st, "wriothesley")
-    assert st.enemies[0].hp == 100 - 2 * 2
+    assert st.enemies[0].hp == 100 - 4 - (4 + 2 * 2)
 
 
 def test_wriothesleys_bow_on_a_hit_reads_the_hit_that_took_him_down(arm):
     st = _state([["wriothesley", 4], ["usher", 3]], enemies=[_enemy(hp=100)])
     FS.absorb(st, 9)
     FS.settle_hit(st)
-    assert st.enemies[0].hp == 100 - 2 * 4
+    assert st.enemies[0].hp == 100 - (4 + 2 * 4)
 
 
 # ---------------------------------------------------------------------------
