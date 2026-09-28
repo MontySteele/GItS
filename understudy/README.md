@@ -523,7 +523,7 @@ with (R97/5b).
 
 ## Surviving EB-1 (the Punch Off soft-lock)
 
-`EB-1` is root-caused, upstream, and not ours to fix — **this section is its
+`EB-1` is root-caused and upstream, and our mod now guards it under Instant (below) — **this section is its
 durable record.** The BACKLOG row that used to carry it has left HEAD: its
 acceptance was MET on 2026-08-13 and a hazard marker is not open work, so under
 R212 the hazard lives where the people who need it already read.
