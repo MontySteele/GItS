@@ -1319,6 +1319,11 @@ public sealed class FurinaResourceHooks : AbstractModel
         // `KleeOverhaulSweepHooks` zeroes the HP half at this same hook; this
         // keeps the listeners' order from deciding whether a performer pays
         // for a hit that never happened. Pure: three references and a flag.
+        // 2026-09-27: what her Block stopped of this hit, noted a step
+        // earlier (`BeforeDamageReceived` below), taken here for the front
+        // performer (Wriothesley's second reading). A pre-empted hit is owed
+        // nothing, so it drops it.
+        var blocked = FurinaStage.TakeBlocked(target);
         if (ProtoBombPower.Preempted.Covers(target, dealer)
             && props.IsPoweredAttack())
         {
@@ -1352,10 +1357,32 @@ public sealed class FurinaResourceHooks : AbstractModel
             try { source = cardSource?.Title ?? ""; }
             catch (System.Exception) { source = ""; }
             return FurinaStage.AbsorbHit(target, incoming, dealer,
-                                         source: source);
+                                         source: source, blocked: blocked);
         }
 #endif
         return FurinaResources.AbsorbDamage(target, amount);
+    }
+
+    /// <summary>
+    /// QUARANTINED WITH THE STAGE (2026-09-27, Wriothesley: "Perhaps he also
+    /// reflects the Blocked damage"). The one moment the hit and her Block
+    /// are both known before the Block is spent: the engine runs this hook
+    /// after every damage modifier and immediately before
+    /// <c>DamageBlockInternal</c>. What that will stop is noted here and read
+    /// by <see cref="ModifyHpLostBeforeOsty"/> for the same hit. Pure.
+    /// </summary>
+    public override Task BeforeDamageReceived(
+        PlayerChoiceContext choiceContext, Creature target, decimal amount,
+        ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+#if PROTOTYPE_CARDS
+        if (FurinaResources.IsFurina(target))
+        {
+            FurinaStage.NoteIncomingHit(
+                target, amount, (props & ValueProp.Unblockable) != 0);
+        }
+#endif
+        return Task.CompletedTask;
     }
 
     public override Task AfterCurrentHpChanged(Creature creature, decimal delta)

@@ -323,7 +323,8 @@ public class FurinaStageBatchTwoTests
         var after = Il.Calls(Il.Method("FurinaStage", "AfterBow"));
         Assert.Contains("CardPileCmd.Draw", after);
         Assert.Contains("FurinaStage.Raise", after);
-        Assert.Contains("FurinaStageLedger.ReturnToBack", after);
+        // 2026-09-27: once a turn (`ReturnOnce` wraps `ReturnToBack`).
+        Assert.Contains("FurinaStageLedger.ReturnOnce", after);
     }
 
     [Fact]

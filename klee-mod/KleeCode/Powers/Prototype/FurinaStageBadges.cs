@@ -337,13 +337,17 @@ public sealed class WriothesleyBadgePower : StagePerformerBadge,
     {
         ("title", FurinaStageLedger.DisplayName(Performer)),
         ("description",
-            "End of your turn: deal [gold]Cryo[/gold] damage to a random "
-          + "enemy equal to twice the Fanfare he lost to hits since his "
-          + "last act."),
+            "End of your turn: deal " + FurinaStageLaw.ActWriothesleyBase
+          + " [gold]Cryo[/gold] damage to a random enemy, plus "
+          + FurinaStageLaw.ActWriothesleyRate + " per [gold]Fanfare[/gold] "
+          + "hits took and " + FurinaStageLaw.ActWriothesleyBlockedRate
+          + " per damage [gold]Block[/gold] stopped in front."),
         ("smartDescription",
-            "End of your turn: deal [gold]Cryo[/gold] damage to a random "
-          + "enemy equal to twice the Fanfare he lost to hits since his "
-          + "last act."),
+            "End of your turn: deal " + FurinaStageLaw.ActWriothesleyBase
+          + " [gold]Cryo[/gold] damage to a random enemy, plus "
+          + FurinaStageLaw.ActWriothesleyRate + " per [gold]Fanfare[/gold] "
+          + "hits took and " + FurinaStageLaw.ActWriothesleyBlockedRate
+          + " per damage [gold]Block[/gold] stopped in front."),
     };
 }
 

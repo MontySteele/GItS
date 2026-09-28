@@ -1023,9 +1023,12 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForWriothesley(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, WriothesleyKey,
-            "End of your turn: deal [gold]Cryo[/gold] damage to a random "
-          + "enemy equal to twice the Fanfare he lost to hits since his "
-          + "last act.");
+            // 2026-09-27: he always attacks, and reflects her Block too.
+            "End of your turn: deal " + FurinaStageLaw.ActWriothesleyBase
+          + " [gold]Cryo[/gold] damage to a random enemy, plus "
+          + FurinaStageLaw.ActWriothesleyRate + " per [gold]Fanfare[/gold] "
+          + "hits took and " + FurinaStageLaw.ActWriothesleyBlockedRate
+          + " per damage [gold]Block[/gold] stopped in front.");
 
     public static IEnumerable<IHoverTip> ForSigewinne(
         IEnumerable<IHoverTip> inherited, CardModel card) =>

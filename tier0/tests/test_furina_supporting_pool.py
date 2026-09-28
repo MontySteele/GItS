@@ -397,16 +397,18 @@ def test_held_applause_skips_this_turns_fade_only(arm):
     assert st.player.stage[1][1] == 11 - FS.fade_loss(11)
 
 
-def test_echoing_hall_sends_the_fades_loss_to_the_front(arm):
+def test_echoing_hall_sends_half_the_fades_loss_to_the_front(arm):
+    # 2026-09-27: half of the whole loss, rounded down (2 + 3 = 5, so 2).
     st = _state([["usher", 3], ["chevalmarin", 9], ["crabaletta", 11]])
     _power(st, FS.ECHOING_HALL)
     _power(st, FS.ECHOING_HALL)       # a move: a second copy adds nothing
     FS.fade(st)
     lost = FS.fade_loss(9) + FS.fade_loss(11)
-    assert st.player.stage == [["usher", 3 + lost],
+    assert lost == 5
+    assert st.player.stage == [["usher", 3 + lost // 2],
                                ["chevalmarin", 9 - FS.fade_loss(9)],
                                ["crabaletta", 11 - FS.fade_loss(11)]]
-    assert FS.total_fanfare(st.player) == 3 + 9 + 11
+    assert FS.total_fanfare(st.player) == 3 + 9 + 11 - (lost - lost // 2)
 
 
 def test_eternal_applause_moves_the_line_to_ten(arm):

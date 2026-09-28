@@ -363,7 +363,10 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ActClorindeDamage": _stage("ACT_CLORINDE_DAMAGE"),
     "FurinaStageLaw.ActChevreusePrice": _stage("ACT_CHEVREUSE_PRICE"),
     "FurinaStageLaw.ActChevreuseEnergy": _stage("ACT_CHEVREUSE_ENERGY"),
+    "FurinaStageLaw.ActWriothesleyBase": _stage("ACT_WRIOTHESLEY_BASE"),
     "FurinaStageLaw.ActWriothesleyRate": _stage("ACT_WRIOTHESLEY_RATE"),
+    "FurinaStageLaw.ActWriothesleyBlockedRate":
+        _stage("ACT_WRIOTHESLEY_BLOCKED_RATE"),
     "FurinaStageLaw.ActSigewinneGift": _stage("ACT_SIGEWINNE_GIFT"),
     "FurinaStageLaw.ActLynetteDamage": _stage("ACT_LYNETTE_DAMAGE"),
     "FurinaStageLaw.ActCharlotteGift": _stage("ACT_CHARLOTTE_GIFT"),

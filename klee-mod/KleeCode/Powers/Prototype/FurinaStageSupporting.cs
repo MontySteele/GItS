@@ -187,12 +187,13 @@ public static partial class FurinaStage
             if (!ledger.Holds(seat)) continue;
             var exit = new StageExit(seat.Who, StageDeparture.Spent,
                                      seat.Fanfare, ledger.IndexOf(seat),
-                                     seat.LostSinceAct)
+                                     seat.LostSinceAct, seat.BlockedSinceAct)
             {
                 Stayer = seat,
             };
             await Bow(choiceContext, owner, exit, mayReturn: false);
             seat.LostSinceAct = 0;
+            seat.BlockedSinceAct = 0;
         }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageCues.Refresh(owner);
@@ -385,15 +386,16 @@ public sealed class StarBillingPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary><i>Echoing Hall</i>: "Whenever a performer fades, your front
-/// performer gains the Fanfare lost." A MOVE: what the fade took goes to the
-/// front once, so a second copy moves nothing more.</summary>
+/// performer gains half the Fanfare lost" (2026-09-27; it was all of it).
+/// Half the sweep's total, rounded down. A MOVE: it goes to the front once,
+/// so a second copy moves nothing more.</summary>
 public sealed class EchoingHallPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Echoing Hall"),
         ("description",
-            "Whenever a performer fades, your front performer gains the "
+            "Whenever a performer fades, your front performer gains half the "
           + "[gold]Fanfare[/gold] lost."),
     };
 

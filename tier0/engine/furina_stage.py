@@ -103,7 +103,11 @@ ACT_CLORINDE_TAX = 1          # from each other performer ...
 ACT_CLORINDE_DAMAGE = 8       # ... for Electro damage to a random enemy.
 ACT_CHEVREUSE_PRICE = 2       # Spent from the back performer ...
 ACT_CHEVREUSE_ENERGY = 1      # ... for Energy next turn.
-ACT_WRIOTHESLEY_RATE = 2      # Cryo damage per Fanfare lost since his act.
+ACT_WRIOTHESLEY_BASE = 4      # Cryo damage his act always deals (2026-09-27),
+ACT_WRIOTHESLEY_RATE = 2      # plus this per Fanfare hits took since his act,
+ACT_WRIOTHESLEY_BLOCKED_RATE = 1  # plus this per damage her Block stopped
+#                               while he stood in front ("he also reflects
+#                               the Blocked damage").
 ACT_SIGEWINNE_GIFT = 3        # to the performer behind her.
 ACT_CHARLOTTE_GIFT = 1        # to each other performer.
 ACT_LYNETTE_DAMAGE = 3        # Anemo damage to a random enemy, one with an
@@ -725,11 +729,15 @@ def _exit(player, member: str, index: int, held: int,
         # it (the Bow resets it, as every act does) and the Bow reads the seat
         # it still stands in (`stayer`, the live pair).
         lost = int(player.stage_lost.get(member, 0)) if member in GUESTS else 0
+        blocked = (int(player.stage_blocked.get(member, 0))
+                   if member in GUESTS else 0)
     else:
         lost = (int(player.stage_lost.pop(member, 0)) if member in GUESTS
                 else 0)
+        blocked = (int(player.stage_blocked.pop(member, 0))
+                   if member in GUESTS else 0)
     return {"member": member, "held": int(held), "former": int(index),
-            "lost": lost, "stayer": stayer}
+            "lost": lost, "blocked": blocked, "stayer": stayer}
 
 
 def _lose(player, member: str, amount: int) -> None:
@@ -740,6 +748,28 @@ def _lose(player, member: str, amount: int) -> None:
     `FurinaStageLedger.Absorb`."""
     if amount > 0 and member in GUESTS:
         player.stage_lost[member] = int(player.stage_lost.get(member, 0)) + int(amount)
+
+
+def credit_blocked(state, blocked: int) -> None:
+    """2026-09-27, Wriothesley's second reading ("he also reflects the
+    Blocked damage"): what her Block stopped of an ENEMY's hit goes on the
+    FRONT performer, before the hit reaches its bar, so a front the hit
+    empties Bows reading it. Guests only, as `_lose`. C# twin:
+    `FurinaStageLedger.CreditBlocked`."""
+    p = state.player
+    if not active(p) or blocked <= 0:
+        return
+    pair = lead(p)
+    if pair is not None and pair[0] in GUESTS:
+        p.stage_blocked[pair[0]] = (int(p.stage_blocked.get(pair[0], 0))
+                                    + int(blocked))
+
+
+def wriothesley_act(lost: int, blocked: int) -> int:
+    """His act before Ousia (2026-09-27): he always attacks. C# twin:
+    `FurinaStageLaw.WriothesleyAct`."""
+    return (ACT_WRIOTHESLEY_BASE + ACT_WRIOTHESLEY_RATE * int(lost)
+            + ACT_WRIOTHESLEY_BLOCKED_RATE * int(blocked))
 
 
 #: The bows hits have emptied performers into, waiting for `settle_hit`. On
@@ -797,8 +827,13 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
     if copies > 0:
         state.draw(copies)
         raise_fanfare(state, raise_total, source=GAIN_BOW)
+    # 2026-09-27: the first Bow-and-leave each turn only, however many
+    # copies; a return that cannot happen (a full stage) leaves it unused.
+    # C# twin: `FurinaStageLedger.ReturnOnce`.
     if (may_return and p.powers.get(FIVE_CENTURY_ACT, 0)
+            and not p.stage_returned
             and len(_seats(p)) < capacity(p)):
+        p.stage_returned = True
         book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
         pair = [member, SUMMON_FANFARE]
         _seats(p).append(pair)
@@ -842,6 +877,8 @@ def turn_start_rest(state) -> None:
     if not active(p):
         return
     p.stage_resting.clear()
+    # 2026-09-27: A Five-Century Act returns once a turn, from here.
+    p.stage_returned = False
 
 
 def turn_start_regen(state) -> None:
@@ -1452,6 +1489,8 @@ def fade(state) -> None:
         echoed += loss
         state.emit("stage_fade", member=pair[0], amount=loss,
                    before=before, fanfare=pair[1])
+    # 2026-09-27: half of what the fade took, rounded down.
+    echoed //= 2
     if echoed and p.powers.get(ECHOING_HALL, 0) and stage(p):
         front = stage(p)[0]
         book_gain(state, GAIN_POWER, echoed)
@@ -1834,9 +1873,12 @@ def _guest_act(state, member: str, *, pair, exit_) -> None:
         elif member == "navia":
             amount = pair[1] if pair is not None else (exit_ or {}).get("held", 0)
         else:
+            # 2026-09-27: he always attacks.
             lost = (int(p.stage_lost.get(member, 0)) if pair is not None
                     else int((exit_ or {}).get("lost", 0)))
-            amount = ACT_WRIOTHESLEY_RATE * lost
+            blocked = (int(p.stage_blocked.get(member, 0)) if pair is not None
+                       else int((exit_ or {}).get("blocked", 0)))
+            amount = wriothesley_act(lost, blocked)
         if amount > 0 and state.living_enemies:
             enemy = _act_target(state, state.living_enemies)
             effects.deal_damage_to_enemy(state, enemy, amount * dmg,
@@ -1863,9 +1905,10 @@ def _guest_act(state, member: str, *, pair, exit_) -> None:
         # moves nobody; Grand Finale's stay-Bow reads the seat he keeps.
         swap_to_front(state, pair if pair is not None
                       else (exit_ or {}).get("stayer"))
-    # Rule 6: every act resets the reading, so a repeat reads 0.
+    # Rule 6: every act resets the reading, so a repeat reads the base.
     if pair is not None:
         p.stage_lost[member] = 0
+        p.stage_blocked[member] = 0
     for gone in owed:
         if state.over or not p.alive:
             break
@@ -2074,6 +2117,7 @@ def grand_finale(state) -> None:
         _after_bow(state, pair[0], may_return=False)
         if pair[0] in GUESTS:
             p.stage_lost[pair[0]] = 0
+            p.stage_blocked[pair[0]] = 0
 
 
 def set_verdict(state) -> None:

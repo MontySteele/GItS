@@ -45,7 +45,7 @@ public sealed class ProtoFsEchoingHall : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Echoing Hall"),
-        ("description", "Whenever a performer fades, your [gold]front performer[/gold] gains the [gold]Fanfare[/gold] lost."),
+        ("description", "Whenever a performer fades, your [gold]front performer[/gold] gains half the [gold]Fanfare[/gold] lost."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

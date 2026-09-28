@@ -1530,6 +1530,10 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # under it holds no card that grants either -- and is written this
             # way round because the brief's order names Block and then the
             # cast, with nothing between them.
+            # 2026-09-27: what her Block stopped goes on the front performer
+            # first (Wriothesley's second reading), so a front this hit
+            # empties Bows reading it.
+            furina_stage.credit_blocked(state, blocked)
             absorbed = furina_stage.absorb(state, dmg - blocked)
             # 2026-09-25 night: a lead this hit emptied Bows before the rest
             # of the hit reaches her, so its Bow Block takes that rest first.
@@ -1888,6 +1892,8 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.stage_act_damage_mult = 1
     player.stage_act_block_mult = 1
     player.stage_lost = {}
+    player.stage_blocked = {}
+    player.stage_returned = False
     player.stage_energy_next = 0
     player.stage_verdict = None
     player.stage_hold_fade = False

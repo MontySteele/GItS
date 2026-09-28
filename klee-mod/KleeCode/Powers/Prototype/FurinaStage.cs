@@ -414,7 +414,8 @@ public static partial class FurinaStage
         // the newcomer: a recast moves Fanfare, it does not spend it.
         await Bow(choiceContext, owner,
                   new StageExit(leaver.Who, StageDeparture.Spent,
-                                leaver.Fanfare, 0, leaver.LostSinceAct),
+                                leaver.Fanfare, 0, leaver.LostSinceAct,
+                                leaver.BlockedSinceAct),
                   mayReturn: false);
         if (who == leaver.Who)
         {
@@ -686,11 +687,15 @@ public static partial class FurinaStage
     /// is hers, and cannot catch their hit.</remarks>
     public static int AbsorbHit(Creature target, int incoming,
                                 Creature? dealer, bool bowCatches = true,
-                                string source = "")
+                                string source = "", int blocked = 0)
     {
         var ledger = FurinaStageLedger.For(target);
         var twoOrMore = ledger.Seats.Count >= 2;
         var lead = ledger.Lead;
+        // 2026-09-27, Wriothesley's second reading: what her Block stopped of
+        // an ENEMY's hit goes on the front performer before the hit reaches
+        // its bar, so a front this hit empties Bows reading it too.
+        if (dealer is { IsEnemy: true }) ledger.CreditBlocked(blocked);
         // 2026-09-25: WHO hit the lead, for the log's hit beat -- title and
         // combat id, the pair `NoteBeat` files for the body an act lands on.
         var result = ledger.Absorb(
@@ -739,6 +744,39 @@ public static partial class FurinaStage
     /// </summary>
     public static int HpLossThroughBlock(decimal amount) =>
         amount <= 0m ? 0 : (int)System.Math.Floor(amount);
+
+    /// <summary>
+    /// 2026-09-27, Wriothesley's second reading: WHAT HER BLOCK WILL STOP of
+    /// the hit on its way to her, noted at <c>BeforeDamageReceived</c>. The
+    /// engine's order (<c>CreatureCmd.Damage</c>): <c>ModifyDamage</c>, then
+    /// <c>BeforeDamageReceived</c>, then <c>DamageBlockInternal</c>, which
+    /// takes <c>min(Block, hit)</c> (0 for an unblockable hit), then
+    /// <c>ModifyHpLostBeforeOsty</c>, which is handed only the rest. So the
+    /// number is the engine's own formula one step early, truncated as its
+    /// <c>DamageResult.BlockedDamage</c> is; <see cref="TakeBlocked"/> reads
+    /// it at the damage modifier.
+    /// </summary>
+    public static void NoteIncomingHit(Creature target, decimal amount,
+                                       bool unblockable)
+    {
+        if (!LiveFor(target)) return;
+        var stopped = unblockable
+            ? 0m
+            : System.Math.Max(0m, System.Math.Min(amount, (decimal)target.Block));
+        FurinaStageLedger.For(target).IncomingBlocked =
+            (int)System.Math.Floor(stopped);
+    }
+
+    /// <summary>What <see cref="NoteIncomingHit"/> noted for this hit, taken
+    /// once; 0 with nothing noted.</summary>
+    public static int TakeBlocked(Creature target)
+    {
+        if (!LiveFor(target)) return 0;
+        var ledger = FurinaStageLedger.For(target);
+        var blocked = ledger.IncomingBlocked;
+        ledger.IncomingBlocked = 0;
+        return blocked;
+    }
 
     /// <summary>
     /// 2026-09-25: file the part of an enemy's hit that reached Furina's HP on
@@ -856,7 +894,10 @@ public static partial class FurinaStage
     public static void BeginTurn(Creature? owner)
     {
         if (!LiveFor(owner)) return;
-        FurinaStageLedger.For(owner!).EndRest();
+        var ledger = FurinaStageLedger.For(owner!);
+        ledger.EndRest();
+        // 2026-09-27: A Five-Century Act returns once a turn, from here.
+        ledger.ReturnedThisTurn = false;
     }
 
     /// <summary>Rule 4's move. The TURN TEST is inside, on the seat's own
@@ -1000,8 +1041,12 @@ public static partial class FurinaStage
                 break;
         }
         // Rule 6 of the Guest Cast: every act resets the performer's loss
-        // count (only Wriothesley reads it).
-        if (seat != null) seat.LostSinceAct = 0;
+        // count and its blocked count (only Wriothesley reads them).
+        if (seat != null)
+        {
+            seat.LostSinceAct = 0;
+            seat.BlockedSinceAct = 0;
+        }
         NoteBeat(owner, beat, who, before, hit, each, struck, seat, shot,
                  caught);
     }
@@ -1230,8 +1275,9 @@ public static partial class FurinaStage
     ///     stage the Raise summons a random performer holding it).
     ///   * <see cref="FiveCenturyActPower"/>, any number of copies: the
     ///     performer returns to the back-most empty seat at 1 and rests
-    ///     through this turn's acts. Once -- and not at all from <i>Let the
-    ///     People Rejoice</i>, whose own return is the return.
+    ///     through this turn's acts. Once a turn in all (2026-09-27) -- and
+    ///     not at all from <i>Let the People Rejoice</i>, whose own return is
+    ///     the return.
     ///
     /// THE ORDER IS APPLAUSE THEN RETURN, so the applause's Raise lands on the
     /// stage the bow left; a returnee arrives after it at 1.
@@ -1256,8 +1302,10 @@ public static partial class FurinaStage
                 await Raise(owner, (int)applause.Amount);
             }
         }
+        // 2026-09-27: the first Bow-and-leave each turn only, however many
+        // copies (`FurinaStageLedger.ReturnOnce`).
         if (mayReturn && owner.Powers.OfType<FiveCenturyActPower>().Any()
-            && FurinaStageLedger.For(owner).ReturnToBack(who))
+            && FurinaStageLedger.For(owner).ReturnOnce(who))
         {
             await FurinaStagePets.Sync(owner);
             Vfx.FurinaStageCues.Refresh(owner);

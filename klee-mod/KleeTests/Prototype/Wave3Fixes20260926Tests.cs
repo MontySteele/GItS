@@ -68,9 +68,11 @@ public class Wave3Fixes20260926Tests
     [Fact]
     public void A_five_century_act_says_it_returns_only_to_a_free_seat()
     {
+        // 2026-09-27: once a turn.
         const string face =
-            "Whenever a performer [gold]Bow[/gold]s and leaves, it returns at "
-          + "the back with 1 [gold]Fanfare[/gold] if a seat is free.";
+            "The first time each turn a performer [gold]Bow[/gold]s and "
+          + "leaves, it returns at the back with 1 [gold]Fanfare[/gold] if a "
+          + "seat is free.";
         Assert.Equal(face, Description(new ProtoFsFiveCenturyAct().Localization));
         Assert.Equal(face, Description(new FiveCenturyActPower().Localization));
     }

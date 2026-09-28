@@ -2873,8 +2873,9 @@ APPLY_POWERS = {
         "Whenever an enemy hits your front performer, your back performer "
         "gains {X} [gold]Fanfare[/gold]. Needs 2 performers."),
     "fs_five_century_act": ("FiveCenturyActPower", None,
-        "Whenever a performer [gold]Bow[/gold]s and leaves, it returns at "
-        "the back with 1 [gold]Fanfare[/gold] if a seat is free."),
+        "The first time each turn a performer [gold]Bow[/gold]s and leaves, "
+        "it returns at the back with 1 [gold]Fanfare[/gold] if a seat is "
+        "free."),
     "fs_arkhe_alignment": ("ArkheAlignmentPower", None,
         "At the start of your turn, choose [gold]Ousia[/gold] or "
         "[gold]Pneuma[/gold]."),
@@ -2890,7 +2891,7 @@ APPLY_POWERS = {
     "fs_star_billing": ("StarBillingPower", None,
         "Whenever a Guest Star joins the stage, draw {X} cards."),
     "fs_echoing_hall": ("EchoingHallPower", None,
-        "Whenever a performer fades, your front performer gains the "
+        "Whenever a performer fades, your front performer gains half the "
         "[gold]Fanfare[/gold] lost."),
     "fs_eternal_applause": ("EternalApplausePower", None,
         "Your performers fade only above 10 [gold]Fanfare[/gold], not 5."),

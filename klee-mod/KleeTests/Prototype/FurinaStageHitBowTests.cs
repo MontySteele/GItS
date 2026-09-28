@@ -223,7 +223,7 @@ public class FurinaStageHitBowTests
         var after = Il.Calls(Il.Method("FurinaStage", "AfterBow"));
         Assert.Contains("CardPileCmd.Draw", after);
         Assert.Contains("FurinaStage.Raise", after);
-        Assert.Contains("FurinaStageLedger.ReturnToBack", after);
+        Assert.Contains("FurinaStageLedger.ReturnOnce", after);
     }
 
     [Fact]

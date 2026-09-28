@@ -271,32 +271,53 @@ public class FurinaStageCueTests
     }
 
     [Fact]
-    public void Wriothesley_untouched_shows_a_greyed_zero()
+    public void Wriothesley_untouched_shows_his_base_not_a_greyed_zero()
     {
+        // 2026-09-27: he always attacks, so the cue is his real number.
         using var _ = new Arm();
         var (seat, _) = Stage(("usher", 3), ("wriothesley", 10));
         var (forecast, board) = Read(seat);
 
         var cue = board.Cues[1];
         Assert.Equal(StageCueIcon.Attack, cue.Icon);
-        Assert.Equal(0, cue.Number);
-        Assert.True(cue.Greyed);
-        Assert.DoesNotContain(forecast.Acts,
-                              a => a.Who == StagePerformer.Wriothesley);
+        Assert.Equal(FurinaStageLaw.ActWriothesleyBase, cue.Number);
+        Assert.False(cue.Greyed);
+        Assert.Equal("Cryo", cue.Element);
+        Assert.DoesNotContain("Nothing has hit him", cue.Forecast);
+        var act = Assert.Single(forecast.Acts,
+                                a => a.Who == StagePerformer.Wriothesley);
+        Assert.Equal(FurinaStageLaw.ActWriothesleyBase, act.Amount);
     }
 
     [Fact]
-    public void Wriothesley_hit_shows_twice_what_he_lost()
+    public void Wriothesley_hit_shows_his_base_plus_twice_what_he_lost()
     {
         using var _ = new Arm();
         var (seat, stage) = Stage(("wriothesley", 10), ("usher", 3));
         stage.Absorb(4);
         stage.ClearBeats();
         var (forecast, board) = Read(seat);
-        Assert.Equal(FurinaStageLaw.ActWriothesleyRate * 4, board.Cues[0].Number);
+        Assert.Equal(FurinaStageLaw.ActWriothesleyBase
+                     + FurinaStageLaw.ActWriothesleyRate * 4,
+                     board.Cues[0].Number);
         Assert.Equal(forecast.Acts[0].Amount, board.Cues[0].Number);
         Assert.Equal("Cryo", board.Cues[0].Element);
         Assert.False(board.Cues[0].Greyed);
+    }
+
+    [Fact]
+    public void Wriothesleys_cue_adds_what_her_block_stopped_in_front()
+    {
+        using var _ = new Arm();
+        var (seat, stage) = Stage(("wriothesley", 10), ("usher", 3));
+        stage.CreditBlocked(5);
+        stage.Absorb(4);
+        stage.ClearBeats();
+        var (_, board) = Read(seat);
+        Assert.Equal(FurinaStageLaw.ActWriothesleyBase
+                     + FurinaStageLaw.ActWriothesleyRate * 4
+                     + FurinaStageLaw.ActWriothesleyBlockedRate * 5,
+                     board.Cues[0].Number);
     }
 
     [Fact]

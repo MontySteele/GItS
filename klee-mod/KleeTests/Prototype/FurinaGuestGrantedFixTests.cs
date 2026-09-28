@@ -274,8 +274,9 @@ public class FurinaGuestGrantedFixTests
 
         var forecast = FurinaStage.Forecast(seat.Creature, null, OneEnemy);
 
+        // 2026-09-27: 4 + 2 x 7, and Ousia doubles the whole.
         Assert.Equal(
-            new[] { (StagePerformer.Wriothesley, 2 * 7 * 2, "Cryo"),
+            new[] { (StagePerformer.Wriothesley, (4 + 2 * 7) * 2, "Cryo"),
                     (StagePerformer.Navia, 5 * 2, "Geo") },
             forecast.Acts.Select(a => (a.Who, a.Amount, a.Element)).ToArray());
     }

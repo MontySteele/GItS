@@ -306,17 +306,20 @@ public class FurinaSupportingPoolTests
     }
 
     [Fact]
-    public void Echoing_hall_moves_the_fades_loss_to_the_front()
+    public void Echoing_hall_moves_half_the_fades_loss_to_the_front()
     {
+        // 2026-09-27: half of the sweep's whole loss, rounded down (2 + 3 = 5
+        // lost, 2 to the front).
         using var _ = new Arm();
         var (_, stage) = Stage(("usher", 3), ("chevalmarin", 9),
                                ("crabaletta", 11));
         var lost = stage.Fade(FurinaStageLaw.FadeThreshold, echo: true);
         Assert.Equal(FurinaStageLaw.FadeLoss(9) + FurinaStageLaw.FadeLoss(11),
                      lost);
-        Assert.Equal(new[] { 3 + lost, 9 - FurinaStageLaw.FadeLoss(9),
+        Assert.Equal(5, lost);
+        Assert.Equal(new[] { 3 + 2, 9 - FurinaStageLaw.FadeLoss(9),
                              11 - FurinaStageLaw.FadeLoss(11) }, Bars(stage));
-        Assert.Equal(3 + 9 + 11, Bars(stage).Sum());
+        Assert.Equal(3 + 9 + 11 - (lost - lost / 2), Bars(stage).Sum());
     }
 
     [Fact]

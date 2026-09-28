@@ -107,9 +107,25 @@ public static class FurinaStageLaw
     /// <summary>...to gain this much Energy next turn.</summary>
     public const int ActChevreuseEnergy = 1;
 
-    /// <summary>Wriothesley deals Cryo damage this many times the Fanfare he
-    /// lost since his last act.</summary>
+    /// <summary>Wriothesley's act always deals this much Cryo damage...
+    /// (2026-09-27: "I think that Wriothesley needs a buff.")</summary>
+    public const int ActWriothesleyBase = 4;
+
+    /// <summary>...plus this many times the Fanfare enemy hits took from him
+    /// since his last act...</summary>
     public const int ActWriothesleyRate = 2;
+
+    /// <summary>...plus this many times the damage Furina's Block stopped
+    /// from enemy hits while he stood in front ("he also reflects the
+    /// Blocked damage").</summary>
+    public const int ActWriothesleyBlockedRate = 1;
+
+    /// <summary>Wriothesley's act, before Ousia: the base, plus what hits
+    /// took from him, plus what her Block stopped while he was in front.
+    /// </summary>
+    public static int WriothesleyAct(int lost, int blocked) =>
+        ActWriothesleyBase + ActWriothesleyRate * lost
+        + ActWriothesleyBlockedRate * blocked;
 
     /// <summary>Sigewinne gives this much of her Fanfare to the performer
     /// behind her (what she has, if less).</summary>

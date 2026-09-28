@@ -44,13 +44,14 @@ public enum StageDeparture
 public readonly struct StageExit
 {
     public StageExit(StagePerformer who, StageDeparture cause, int held = 0,
-                     int formerSeat = -1, int lost = 0)
+                     int formerSeat = -1, int lost = 0, int blocked = 0)
     {
         Who = who;
         Cause = cause;
         Held = held;
         FormerSeat = formerSeat;
         Lost = lost;
+        Blocked = blocked;
     }
 
     public StagePerformer Who { get; }
@@ -75,6 +76,11 @@ public readonly struct StageExit
 
     /// <summary>The Fanfare it lost since its last act.</summary>
     public int Lost { get; }
+
+    /// <summary>The damage Furina's Block stopped from enemy hits while it
+    /// stood in front, since its last act (Wriothesley's Bow reads it,
+    /// 2026-09-27). <see cref="StageSeat.BlockedSinceAct"/>.</summary>
+    public int Blocked { get; }
 
     /// <summary>
     /// 2026-09-25 night (the granted-guest seat round): THE BLOCK THIS BOW HAS
@@ -243,12 +249,22 @@ public sealed class StageSeat
     /// </summary>
     public int LostSinceAct { get; internal set; }
 
+    /// <summary>
+    /// 2026-09-27 ([USER]: "Perhaps he also reflects the Blocked damage"):
+    /// the damage Furina's Block stopped from ENEMY hits while this performer
+    /// stood in the front seat, since its last act. Wriothesley reads it
+    /// beside <see cref="LostSinceAct"/>, and it resets wherever that does.
+    /// Moved only by <see cref="FurinaStageLedger.CreditBlocked"/>.
+    /// </summary>
+    public int BlockedSinceAct { get; internal set; }
+
     /// <summary>A copy for the end-of-turn forecast (rule 7), which runs the
     /// ledger's own moves on a clone and never touches the real seats.</summary>
     internal StageSeat CloneForForecast() =>
         new(Who, Fanfare)
         {
-            Resting = Resting, LostSinceAct = LostSinceAct, Key = Key,
+            Resting = Resting, LostSinceAct = LostSinceAct,
+            BlockedSinceAct = BlockedSinceAct, Key = Key,
         };
 }
 
@@ -708,7 +724,8 @@ public sealed class FurinaStageLedger
     /// <summary>The exit a departure earns, with what its Bow reads.</summary>
     private static StageExit ExitOf(StageSeat seat, StageDeparture cause,
                                     int formerSeat, int held) =>
-        new(seat.Who, cause, held, formerSeat, seat.LostSinceAct);
+        new(seat.Who, cause, held, formerSeat, seat.LostSinceAct,
+            seat.BlockedSinceAct);
 
     /// <summary>The event name of a payment beat (rule 4, "every act pays").
     /// </summary>
@@ -844,6 +861,7 @@ public sealed class FurinaStageLedger
         if (IsFull) return false;
         seat.Fanfare += added;
         seat.LostSinceAct = 0;
+        seat.BlockedSinceAct = 0;
         seat.Resting = false;
         var at = index < 0 || index > _seats.Count ? _seats.Count : index;
         _seats.Insert(at, seat);
@@ -1026,6 +1044,8 @@ public sealed class FurinaStageLedger
         // THE SUPPORTING POOL (2026-09-26): Held Applause's skip is part of
         // "the end of this turn".
         copy.FadeHeld = FadeHeld;
+        // 2026-09-27: A Five-Century Act's one return a turn.
+        copy.ReturnedThisTurn = ReturnedThisTurn;
         return copy;
     }
 
@@ -1283,6 +1303,24 @@ public sealed class FurinaStageLedger
         return new StageAbsorb(absorbed, reached, exit, caught);
     }
 
+    /// <summary>
+    /// 2026-09-27, Wriothesley's second reading: what Furina's Block stopped
+    /// of an ENEMY's hit goes on the front performer's
+    /// <see cref="StageSeat.BlockedSinceAct"/>. Called before
+    /// <see cref="Absorb"/> for the same hit, so a hit that empties the front
+    /// carries its blocked part on the exit its Bow reads. Nothing on an
+    /// empty stage.
+    /// </summary>
+    public void CreditBlocked(int blocked)
+    {
+        if (blocked > 0 && Lead is { } lead) lead.BlockedSinceAct += blocked;
+    }
+
+    /// <summary>What her Block will stop of the hit on its way to her, noted
+    /// at <c>BeforeDamageReceived</c> and taken once by the damage modifier
+    /// (<c>FurinaStage.NoteIncomingHit</c> / <c>TakeBlocked</c>).</summary>
+    internal int IncomingBlocked { get; set; }
+
     /// <summary>The Block a performer's Bow gives Furina: Usher's act at this
     /// turn's Pneuma multiple, and 0 for every other performer (no guest's
     /// act gives Block). What <see cref="Absorb"/> lets a Bow catch.</summary>
@@ -1509,6 +1547,26 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>
+    /// 2026-09-27, <i>A Five-Century Act</i> once a turn: "The first time
+    /// each turn a performer Bows and leaves, it returns at the back with 1
+    /// Fanfare if a seat is free." One return a turn however many copies;
+    /// used only by a return that happens (a full stage leaves it for the
+    /// next Bow). Cleared at the start of Furina's turn
+    /// (<c>FurinaStage.BeginTurn</c>).
+    /// </summary>
+    public bool ReturnedThisTurn { get; set; }
+
+    /// <summary>A Five-Century Act's return, at most once a turn: false (and
+    /// nothing moves) once this turn's return is used or on a full stage.
+    /// </summary>
+    public bool ReturnOnce(StagePerformer who)
+    {
+        if (ReturnedThisTurn || !ReturnToBack(who)) return false;
+        ReturnedThisTurn = true;
+        return true;
+    }
+
+    /// <summary>
     /// <i>Arkhe Alignment</i>'s two halves: this turn's multipliers on the
     /// performers' act DAMAGE (Ousia) and act BLOCK (Pneuma). 1 is "no
     /// Alignment this turn"; the one choice a turn sets its half to 1 plus
@@ -1564,8 +1622,9 @@ public sealed class FurinaStageLedger
     /// <summary>
     /// Rule 12 as THE SUPPORTING POOL bends it (2026-09-26):
     /// <paramref name="threshold"/> is the line (<i>Eternal Applause</i>'s
-    /// 10), <paramref name="echo"/> sends what the fade took to the front
-    /// performer (<i>Echoing Hall</i>, a move, so copies move nothing more),
+    /// 10), <paramref name="echo"/> sends half of what the fade took, rounded
+    /// down, to the front performer (<i>Echoing Hall</i>, 2026-09-27; a move,
+    /// so copies move nothing more),
     /// and <see cref="FadeHeld"/> (<i>Held Applause</i>) skips it once.
     /// Returns what the fade took. Sim twin: <c>furina_stage.fade</c>.
     /// </summary>
@@ -1586,10 +1645,11 @@ public sealed class FurinaStageLedger
             total += loss;
             Note(new StageBeat(FadeEvent, seat.Who, i, seat.Fanfare, loss, ""));
         }
-        if (echo && total > 0 && Lead is { } front)
+        var echoed = total / 2;
+        if (echo && echoed > 0 && Lead is { } front)
         {
-            front.Fanfare += total;
-            NoteRaise(front, total);
+            front.Fanfare += echoed;
+            NoteRaise(front, echoed);
         }
         return total;
     }
@@ -1874,6 +1934,8 @@ public sealed class FurinaStageLedger
         ResetActMultipliers();
         FadeHeld = false;
         FrontHitSinceLastTurn = false;
+        ReturnedThisTurn = false;
+        IncomingBlocked = 0;
         BowsThisCombat = 0;
         VerdictTarget = null;
         _seats.Clear();
