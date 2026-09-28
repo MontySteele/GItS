@@ -944,17 +944,48 @@ def test_the_rare_deals_what_it_spent_to_every_enemy(arm):
 # THE TWO LOADER SEAMS.
 # ---------------------------------------------------------------------------
 
-def test_the_starter_swaps_three_kit_cards_and_no_basic(arm):
-    """Sec.7's opening ten. The seven basics do not move, and that is a
-    standing rule rather than this arm's discretion."""
+def test_the_starter_is_four_strikes_four_defends_and_two_kit_cards(arm):
+    """[USER], 2026-09-28: "Typically we'd include 4 strikes, 4 defends and 2
+    actually useful cards that teach the character's core mechanics" and "We
+    should really just replace Soloist's Solicitation and Stage Presence with
+    the basic strike and defend." The base pair, Curtain Rise and Rising
+    Applause; none of her shipped basics and no Take the Stage."""
     ids = loader.starting_deck("furina")
-    assert ids.count("soloists_solicitation") == 3
-    assert ids.count("stage_presence") == 3
-    assert ids.count("regal_bearing") == 1
+    assert ids.count("strike") == 4
+    assert ids.count("defend") == 4
     assert sorted(i for i in ids if i.startswith("proto_fs_")) == [
-        "proto_fs_curtain_rise", "proto_fs_salon_debut",
-        "proto_fs_standing_ovation"]
+        "proto_fs_curtain_rise", "proto_fs_standing_ovation"]
+    for gone in ("soloists_solicitation", "stage_presence", "regal_bearing",
+                 "salon_debut", "proto_fs_salon_debut"):
+        assert gone not in ids
     assert len(ids) == 10
+    # The run-start companion roll stands down, as the mod's does: the
+    # starter is replaced whole and names no slot to roll.
+    assert loader.starting_deck("furina", random.Random(7)) == ids
+
+
+def test_take_the_stage_and_regal_bearing_are_offered_as_commons(arm):
+    """2026-09-28: out of the starter, appended to the offer at Common."""
+    adds = loader.pool_additions("furina")
+    assert "proto_fs_salon_debut" in adds
+    assert "proto_fs_regal_bearing" in adds
+    rarity = {r["id"]: r["rarity"] for r in _proto_rows()}
+    assert rarity["proto_fs_salon_debut"] == "common"
+    assert rarity["proto_fs_regal_bearing"] == "common"
+
+
+def test_take_the_stage_summons_a_random_performer_holding_three(arm):
+    """2026-09-28: "Summon a random performer with 3 Fanfare. Draw 1 card."
+    The same `fanfare:` arrival Gala Premiere's named summons use, which the
+    C# twin passes to `FurinaStage.Summon`."""
+    row = {r["id"]: r for r in _proto_rows()}["proto_fs_salon_debut"]
+    st = _state()
+    st.player.stage = []
+    st.player.draw_pile = [_card("a"), _card("b")]
+    effects.resolve_card(st, _card(effects=row["effects"]))
+    [[who, fanfare]] = st.player.stage
+    assert who in FS.PERFORMERS and fanfare == 3
+    assert len(st.player.hand) == 1
 
 
 def test_with_the_flag_off_the_printed_starter_is_dealt():
@@ -991,15 +1022,16 @@ def test_every_stage_row_is_named_by_one_of_the_two_maps():
     surface ever deals."""
     on_sheet = {r["id"]: r.get("replaces") for r in _proto_rows()
                 if not r.get("multiplayer")}
-    named = {**FS.POOL_SUBS, **FS.STARTER_SUBS}
+    named = {**FS.POOL_SUBS, **FS.STARTER_SUBS, **FS.PROMOTED_STARTERS}
     # THE SUPPORTING POOL (2026-09-26): the arm's ADDITIONS replace nothing.
     assert set(named.values()) | set(FS.POOL_ADDS) == set(on_sheet)
     assert {p: s for s, p in named.items()} == {
         k: v for k, v in on_sheet.items() if k not in FS.POOL_ADDS}
     assert all(on_sheet[k] is None for k in FS.POOL_ADDS)
-    # batch one, R276's batch two, the Guest Cast (2026-09-25) and the
-    # supporting pool's 28 and Sold Out (2026-09-26)
-    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1
+    # batch one, R276's batch two, the Guest Cast (2026-09-25), the
+    # supporting pool's 28 and Sold Out (2026-09-26), and Regal Bearing
+    # (the starter ruling, 2026-09-28)
+    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1
     # THE CO-OP SET's three are the MULTIPLAYER TIER: offered only in co-op,
     # outside the pool, replacing no shipped row -- so neither map names
     # them, and the tier's own mirror does.

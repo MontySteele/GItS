@@ -225,6 +225,17 @@ Curtain Rise (Deal 7. Spend 3: deal 13 instead), Rising Applause (Raise 5
 Fanfare on the back performer). Usher is in front at 3 from the relic.
 Nibbit's script here: Butt, Hiss, Slice, Butt.
 
+**The starter changed on 2026-09-28, and the walk-through below predates it.**
+[USER]: "Typically we'd include 4 strikes, 4 defends and 2 actually useful
+cards that teach the character's core mechanics - this seems like an
+unnecessary power spike." "I agree with keeping Curtain Raise and Rising
+Applause." "We should really just replace Soloist's Solicitation and Stage
+Presence with the basic strike and defend." "The characters' kits should all
+use basic Strike and Defend." The Stage now opens with the base game's Strike
+x4 (6 damage) and Defend x4 (Block 5), Curtain Rise and Rising Applause: ten
+cards (`FurinaStageRoster.StartingDeck`, sim `furina_stage.STARTER_IDS`). Take
+the Stage and Regal Bearing left the starter and are offered as Commons (sec.12).
+
 **Turn 1.** Hand: Solicitation, Solicitation, Presence, Curtain Rise,
 Rising Applause. Intent Butt 12.
 
@@ -371,15 +382,18 @@ Every `Spend` pays its full price from the back performer (R276); Fanfare a
 card gives lands on the back performer unless the face names another.
 Names are provisional.
 
-**The starter's kit cards (three, beside the seven untouched basics)**
+**The starter's kit cards (two, beside the base Strike x4 and Defend x4)**
+
+2026-09-28, [USER]'s ruling (sec.7): the base game's Strike and Defend, four
+each, replace Soloist's Solicitation and Stage Presence; Take the Stage and
+Regal Bearing leave the starter for the Commons below.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Take the Stage | 1 | Skill | Summon a random performer. (2026-09-25: the face follows the full-stage ruling, rule 3.) (Was Salon Début; renamed under R179 in round one, `EB-739`, since a shipped card carries that name.) |
 | Curtain Rise | 1 | Attack | Deal 7 damage. Spend 3: deal 13 instead. |
 | Rising Applause | 1 | Skill | Your back performer gains 5 Fanfare. (Was Standing Ovation; renamed under R179 in round one, `EB-739`, since a shipped Power carries that name.) |
 
-**Commons (eight)**
+**Commons (eight, and two more since 2026-09-28)**
 
 | card | cost | type | text |
 |---|---|---|---|
@@ -391,6 +405,8 @@ Names are provisional.
 | Tidal Flourish | 1 | Attack | Deal 5 damage to ALL enemies. Spend 2: deal 9 and apply Hydro to ALL instead. (2026-09-25, draft 3.) |
 | Interposition | 1 | Skill | Gain 5 Block. Spend 2: gain 10 instead. |
 | Scene Change | 0 | Skill | Move your front performer to the back. |
+| Take the Stage | 1 | Skill | Summon a random performer with 3 Fanfare. Draw 1 card. [cost 0] (2026-09-28: out of the starter and a Common with a stronger face. Tentative: [USER], "'Become Common with a stronger effect' is fine as a tentative proposal, and then we can do an audit of the pool as part of the balance pass to see if we still want it." Was "Summon a random performer." at basic; was Salon Début, renamed under R179, `EB-739`.) |
+| Regal Bearing | 1 | Skill | Gain 5 Block. Apply 1 Weak. [6 Block, 2 Weak] (2026-09-28: out of the starter and a Common; [USER]: "5 block, 1 weak" upgraded to "6 block, 2 weak". The shipped basic prints Block 3, Weak 1 and does not move.) |
 
 **Uncommons (five)**
 

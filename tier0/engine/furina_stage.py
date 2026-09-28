@@ -176,22 +176,48 @@ ONE_WOMAN_SHOW = "fs_one_woman_show"        # empty stage at turn start: +E, +1
 
 
 # ----------------------------------------------------------------------
-# THE STARTER SEAM (`EB-723`). `{shipped id: prototype id}`, read by
-# `loader._starter_ids` under `FURINA_STAGE` and nowhere else -- the reframe's
-# slot shape inherited, one card for one card, so the printed ten stays ten and
-# this is a substitution rather than a starter rework.
+# THE STARTER SEAM (`EB-723`, rebuilt 2026-09-28). The arm's starter is a
+# WHOLE replacement now, read by `loader._starter_ids` under `FURINA_STAGE`
+# and nowhere else, on the two overhaul arms' terms.
 #
-# THE SEVEN BASICS ARE UNTOUCHED AND THAT IS A STANDING RULE, not a choice made
-# here: three Soloist's Solicitation, three Stage Presence and Regal Bearing
-# are the base game's basics and stay exactly as printed (brief sec.7 says so
-# in as many words -- "all the base game's basics and untouched"). The three
-# swapped ids are her three KIT starters, which is the whole of what an arm may
-# move.
+# [USER], 2026-09-28: "Typically we'd include 4 strikes, 4 defends and 2
+# actually useful cards that teach the character's core mechanics - this
+# seems like an unnecessary power spike." "We should really just replace
+# Soloist's Solicitation and Stage Presence with the basic strike and
+# defend." "The characters' kits should all use basic Strike and Defend."
+# So: the base game's Strike x4 and Defend x4 (`strike` / `defend`, the ids
+# the Klee and Kokomi overhaul starters use; the mod deals Silent's pair,
+# whose frame her pool borrows) and the two kit cards that teach the Stage,
+# Curtain Rise and Rising Applause. Soloist's Solicitation, Stage Presence,
+# Regal Bearing and Take the Stage are not dealt. The shipped starter
+# (`furina.yaml`) does not move: the shipped kit is dormant and its numbers
+# are [USER]'s.
 # ----------------------------------------------------------------------
+STARTER_IDS: tuple[str, ...] = (
+    "strike", "strike", "strike", "strike",
+    "defend", "defend", "defend", "defend",
+    "proto_fs_curtain_rise",        # Deal 7 / Spend 3: 13
+    "proto_fs_standing_ovation",    # Raise 5 at the back
+)
+
+#: Which shipped KIT card each of the two starter rows took over -- the rows'
+#: own `replaces:`, and what `loader.declared_starter_substitutions` checks
+#: them against. Not read to BUILD the starter any more (`STARTER_IDS` is).
 STARTER_SUBS: dict[str, str] = {
-    "aria_of_recompense": "proto_fs_curtain_rise",     # Deal 7 / Spend 3: 13
-    "salon_debut": "proto_fs_salon_debut",             # the random summon
-    "an_invitation": "proto_fs_standing_ovation",      # Raise 5 at the back
+    "aria_of_recompense": "proto_fs_curtain_rise",
+    "an_invitation": "proto_fs_standing_ovation",
+}
+
+#: 2026-09-28: two shipped STARTER rows whose Stage twins left the starter
+#: and join the offer as Commons -- Take the Stage (tentative: "'Become
+#: Common with a stronger effect' is fine as a tentative proposal, and then
+#: we can do an audit of the pool as part of the balance pass") and Regal
+#: Bearing ("5 block, 1 weak" upgraded to "6 block, 2 weak"). A basic cannot
+#: be swapped for a Common at the same rarity, so these are APPENDED to the
+#: offer (`loader._pool_additions`); the shipped basics were never offerable.
+PROMOTED_STARTERS: dict[str, str] = {
+    "salon_debut": "proto_fs_salon_debut",
+    "regal_bearing": "proto_fs_regal_bearing",
 }
 
 

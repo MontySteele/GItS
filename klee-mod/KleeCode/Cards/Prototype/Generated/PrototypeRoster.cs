@@ -88,6 +88,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoFsQuickCue>(),
             ModelDb.Card<ProtoFsRaiseAToast>(),
             ModelDb.Card<ProtoFsRaptAudience>(),
+            ModelDb.Card<ProtoFsRegalBearing>(),
             ModelDb.Card<ProtoFsReginaOfAllWaters>(),
             ModelDb.Card<ProtoFsRevolvingStage>(),
             ModelDb.Card<ProtoFsSalonDebut>(),

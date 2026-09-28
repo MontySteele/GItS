@@ -1288,29 +1288,17 @@ def _starter_ids(spec: dict) -> list[str]:
     # printed starter is what `SPARK_ALT_COST_ENABLED` now opens with, exactly
     # as a flag-off tree does.
 
-    # FURINA, THE STAGE (`EB-723`, brief sec.7 and sec.12), THREE
-    # substitutions. The brief's opening ten is "three Soloist's
-    # Solicitation, three Stage Presence, Regal Bearing, all the base game's
-    # basics and untouched; plus Salon Début, Curtain Rise, Rising Applause",
-    # so the seven basics stay exactly as printed and the three kit slots take
-    # the arm's own cards.
-    #
-    # THE SEVEN BASICS ARE NEVER TOUCHED, and that is a standing rule rather
-    # than this map's discretion: a starter basic changes only on an A pick,
-    # never on an arm's default. The map is on `furina_stage.STARTER_SUBS`;
-    # the flag is that module's rather than `constants.py`'s, for the reason
-    # its own header gives. The raise is the branch above's raise: a swap with
-    # nothing to replace is a silent no-op nobody would notice until a smoke
-    # ran.
+    # FURINA, THE STAGE (`EB-723`; rebuilt 2026-09-28) takes the starter
+    # WHOLE, on the two overhaul arms' terms. [USER]: "Typically we'd include
+    # 4 strikes, 4 defends and 2 actually useful cards that teach the
+    # character's core mechanics - this seems like an unnecessary power
+    # spike." The ten are `furina_stage.STARTER_IDS`: the base Strike x4 and
+    # Defend x4 and Curtain Rise and Rising Applause. The printed starter
+    # (`furina.yaml`) does not move; the flag is that module's rather than
+    # `constants.py`'s, for the reason its own header gives.
     if (character == furina_stage.CHARACTER
             and furina_stage.FURINA_STAGE):
-        for drop, add in furina_stage.STARTER_SUBS.items():
-            if drop in ids:
-                ids[ids.index(drop)] = add   # ONE copy: `.index` is the first
-            else:
-                raise ValueError(
-                    f"furina stage: {drop!r} is not in the printed starter, "
-                    f"so the {add!r} substitution has nothing to replace")
+        return list(furina_stage.STARTER_IDS)
     return ids
 
 
@@ -1332,7 +1320,12 @@ def starter_replaced_whole(character_id: str) -> bool:
     bug the raise exists to catch.
     """
     return bool((character_id == "klee" and C.KLEE_OVERHAUL)
-                or (character_id == "kokomi" and C.KOKOMI_OVERHAUL))
+                or (character_id == "kokomi" and C.KOKOMI_OVERHAUL)
+                # The Stage (2026-09-28): its ten are the arm's, and the
+                # mod's companion roll stands down under it too
+                # (`KleeStartingCompanionsPatch.ResolveFurina`).
+                or (character_id == furina_stage.CHARACTER
+                    and furina_stage.FURINA_STAGE))
 
 
 def _pool_substitutions(spec: dict) -> dict[str, str]:
@@ -1431,6 +1424,9 @@ def declared_starter_substitutions() -> dict[str, str]:
     subs: dict[str, str] = {
         C.KURAGE_MEMORY_STARTER_DROP: C.KURAGE_MEMORY_STARTER_ADD}
     subs.update(furina_stage.STARTER_SUBS)
+    # 2026-09-28: the Stage's two starter rows that left the starter for the
+    # Commons still name the shipped basic they re-author (`replaces:`).
+    subs.update(furina_stage.PROMOTED_STARTERS)
     return subs
 
 
@@ -1443,7 +1439,10 @@ def _pool_additions(spec: dict) -> tuple[str, ...]:
     """
     if (spec.get("id") == furina_stage.CHARACTER
             and furina_stage.FURINA_STAGE):
-        return tuple(furina_stage.POOL_ADDS)
+        # 2026-09-28: Take the Stage and Regal Bearing, out of the starter
+        # and offered as Commons (`furina_stage.PROMOTED_STARTERS`).
+        return (tuple(furina_stage.POOL_ADDS)
+                + tuple(furina_stage.PROMOTED_STARTERS.values()))
     return ()
 
 

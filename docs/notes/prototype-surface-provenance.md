@@ -3243,6 +3243,41 @@ Bubble Aria's `element_hits: 1` carries it on the FIRST hit only, so a Pyro
 body is Vaporized by hit one and hit two lands plain, the end state the old
 "then apply Hydro" gave. The faces are unchanged.
 
+## Furina, the Stage — the starter ruling (2026-09-28)
+
+[USER]: "Typically we'd include 4 strikes, 4 defends and 2 actually useful
+cards that teach the character's core mechanics - this seems like an
+unnecessary power spike." Then: "I agree with keeping Curtain Raise and Rising
+Applause." "We should really just replace Soloist's Solicitation and Stage
+Presence with the basic strike and defend." And: "The characters' kits should
+all use basic Strike and Defend."
+
+The Stage starter is the base game's Strike x4 and Defend x4 (Silent's pair,
+which `FurinaCardPool`'s borrowed frame matches, as Kokomi's arm does) plus
+**Curtain Rise** and **Rising Applause** (`FurinaStageRoster.StartingDeck`,
+sim `furina_stage.STARTER_IDS`). The base pair has no row on this sheet. Large
+Capsule, Fasten's tip and transforms of the base pair route through
+`ArmStarterBasics` / `ArmTransformPool` under the arm, as for Klee and Kokomi.
+
+- **`proto_fs_salon_debut`** (Take the Stage): basic to **Common**, now
+  offered. "Summon a random performer with 3 Fanfare. Draw 1 card.", cost 1,
+  upgrade cost -1 as before. TENTATIVE: "'Become Common with a stronger
+  effect' is fine as a tentative proposal, and then we can do an audit of the
+  pool as part of the balance pass to see if we still want it." Audited in
+  the balance pass's dedupe. The random summon arrives holding 3 through the
+  same `fanfare:` argument Gala Premiere's named summons use (C#
+  `FurinaStage.Summon`, sim `_op_stage_summon`), on a full stage as the
+  recast's arrival.
+- **`proto_fs_regal_bearing`** (Regal Bearing): new Common, cost 1, Gain 5
+  Block, apply 1 Weak to the target; upgraded 6 Block, 2 Weak. [USER]: "5
+  block, 1 weak" upgraded to "6 block, 2 weak". Wears the shipped portrait
+  (`art_of: regal_bearing`). The shipped basic (Block 3, Weak 1) does not move.
+
+Both `replaces:` a shipped STARTER basic, which is never offered, so a
+same-rarity pool swap cannot express them: they are appended to the offer
+(`furina_stage.PROMOTED_STARTERS`, read by `loader._pool_additions` and
+`declared_starter_substitutions`). The pool goes from 78 to 80.
+
 ## Pool pass two: six Spark sinks on Regent's ladder (`EB-732`, R270, 2026-09-08)
 
 R270 ruled the round-25 pick at option 1: Spark is a currency, its income
