@@ -17,6 +17,7 @@ from tier0 import constants as C
 from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
+from tier0.content import yaml_memo
 from tier0.engine import companion_standins
 from tier0.engine import furina_stage
 from tier0.engine import state as state_mod
@@ -224,7 +225,7 @@ def _load_yaml_dir(sub: str, owners: dict[str, str] | None = None
                    ) -> list[dict]:
     docs = []
     for path in sorted((CONTENT_DIR / sub).glob("*.yaml")):
-        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        data = yaml_memo.safe_load(path.read_text(encoding="utf-8"))
         rows = data if isinstance(data, list) else [data]
         owner = (owners or {}).get(path.name)
         if owner:
@@ -296,7 +297,7 @@ def _external_cards() -> list[dict]:
         path = GAME_REF_DIR / sheet
         if not path.exists():
             continue          # fresh clone: the reference simply is not here
-        docs = yaml.safe_load(path.read_text(encoding="utf-8")) or []
+        docs = yaml_memo.safe_load(path.read_text(encoding="utf-8")) or []
         for d in docs:
             d["character"] = char
         pool_ids = {d["id"] for d in docs}
@@ -306,7 +307,7 @@ def _external_cards() -> list[dict]:
                 raise ValueError(
                     f"{sheet}: missing required local layer {layer_name}; "
                     "rebuild/restore game_ref before loading real_ironclad")
-            layer = yaml.safe_load(layer_path.read_text(encoding="utf-8")) or []
+            layer = yaml_memo.safe_load(layer_path.read_text(encoding="utf-8")) or []
             layer_ids = {d["id"] for d in layer}
             stale = sorted(layer_ids - pool_ids)
             if stale:
@@ -343,7 +344,7 @@ def _card_index() -> dict[str, Card]:
     for sheet in DOCS_CARD_SHEETS:
         path = DOCS_DIR / sheet
         if path.exists():
-            docs = yaml.safe_load(path.read_text(encoding="utf-8"))
+            docs = yaml_memo.safe_load(path.read_text(encoding="utf-8"))
             # R20 (2026-07-20): *-upgrades.yaml sheets are the ONE upgrade
             # convention. Inline `upgrade:` fields are IGNORED by Tier 0,
             # and silently ignoring them risks an inline-only upgrade that
@@ -454,7 +455,7 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
     path = sheet or PROTOTYPE_SHEET
     if not path.exists():
         return []
-    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or []
+    raw = yaml_memo.safe_load(path.read_text(encoding="utf-8")) or []
     shipped = _card_index()
     known_characters = {"klee", "furina", "kokomi"}
     seen: set[str] = set()
@@ -638,7 +639,7 @@ def multiplayer_ids() -> frozenset[str]:
     assumed."""
     if not PROTOTYPE_SHEET.exists():
         return frozenset()
-    raw = yaml.safe_load(PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
+    raw = yaml_memo.safe_load(PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
     return frozenset(d["id"] for d in raw if d.get("multiplayer") is True)
 
 
@@ -1161,7 +1162,7 @@ def _character_index() -> dict[str, dict]:
     # exists() guard is needed; the `char_` prefix keeps this from ever
     # picking up ironclad.json's siblings.
     for path in sorted(GAME_REF_DIR.glob("char_*.yaml")):
-        d = yaml.safe_load(path.read_text(encoding="utf-8"))
+        d = yaml_memo.safe_load(path.read_text(encoding="utf-8"))
         index[d["id"]] = d
     return index
 

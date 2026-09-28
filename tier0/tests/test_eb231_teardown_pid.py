@@ -168,6 +168,12 @@ def test_the_launch_entry_carries_the_pid_on_disk(tmp_path, monkeypatch):
     (tmp_path / soak.GAME_EXE).parent.mkdir(parents=True, exist_ok=True)
     (tmp_path / soak.GAME_EXE).write_text("", encoding="utf-8")
     monkeypatch.setattr(soak.subprocess, "Popen", _Popen)
+    # Order-dependence, not the behaviour under test: a kill in an earlier
+    # test of this module sets the module-global `_last_kill_at`, and
+    # `_launch` then really sleeps out `RELAUNCH_DEAD_GAP_S` (10 s) before
+    # it writes the row. `test_understudy_boot_stall` clears it the same way.
+    from understudy import soak_session
+    monkeypatch.setattr(soak_session, "_last_kill_at", None, raising=False)
 
     s = soak.Session.__new__(soak.Session)
     s.dir = tmp_path

@@ -50,6 +50,8 @@ from typing import Any, Iterable, Mapping
 
 import yaml
 
+from understudy import yaml_memo
+
 REPO = Path(__file__).resolve().parent.parent
 SURFACE = REPO / "docs" / "prototype-surface.yaml"
 TURN_DIR = REPO / "understudy" / "turns"
@@ -117,7 +119,7 @@ def rows_authorship(sheet: Path | None = None) -> dict[str, list[str]]:
     path = sheet or SURFACE
     if not path.exists():
         return {}
-    rows = yaml.safe_load(path.read_text(encoding="utf-8")) or []
+    rows = yaml_memo.safe_load(path.read_text(encoding="utf-8")) or []
     out: dict[str, list[str]] = {}
     for row in rows:
         if not isinstance(row, dict):
@@ -209,7 +211,7 @@ def turn_index(directory: Path | None = None) -> dict[str, list[str]]:
         if "fixtures" in path.relative_to(d).parts:
             continue
         try:
-            blob = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            blob = yaml_memo.safe_load(path.read_text(encoding="utf-8")) or {}
         except yaml.YAMLError:                                # noqa: PERF203
             continue
         if not isinstance(blob, dict):
