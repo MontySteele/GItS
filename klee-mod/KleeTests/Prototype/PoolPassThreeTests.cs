@@ -24,8 +24,8 @@ namespace KleeMod.Tests.Prototype;
 /// floor under it (Kindling; cut at R276 with its engine verb), a Bomb SPLIT
 /// into two
 /// halves on random enemies (Split Charge), and the VERMILLION PACT, which
-/// hands back the aura an explosion consumed so the Attack behind it reacts
-/// too. The other five rows are new spellings of shapes the arm already had.
+/// (since 2026-09-27) makes every Bomb in one Set off react with the aura the
+/// first one consumed. The other five rows are new spellings of shapes the arm already had.
 ///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL. What
 /// needs <c>PowerCmd</c> (a placement, a removal, an aura application) or a
@@ -161,48 +161,86 @@ public class PoolPassThreeTests
     }
 
     // ---- the Vermillion Pact ----------------------------------------------
+    //
+    // Reworked 2026-09-27: "When a Set off makes one of your Bombs react,
+    // every other Bomb it sets off reacts with the same aura." STRUCTURAL: a
+    // real board needs `AuraCmd` and `PowerCmd`, outside the headless boundary.
+    // The arithmetic (three Bomb 8s into Hydro land 12/12/12, a Set off ALL
+    // feeds each enemy its own aura) is the sim twin's, section "THE POOL
+    // PASS" in `tier0/tests/test_klee_overhaul_rules.py`.
 
     [Fact]
-    public void The_pact_reads_the_aura_before_the_hit_and_restores_it_after()
+    public void The_pact_lives_in_the_set_off_loop_and_restores_before_each_charge()
     {
-        // THE ORDERING IS THE RULE. The aura has to be read BEFORE
-        // `ElementalHit` runs, because the hit is what consumes it, and handed
-        // back BEFORE the card's own damage, because that hit is what the
-        // Rare exists to make react. Both are read off `Explode`'s call
-        // sequence, so an edit that moved either would fail here. Twin:
-        // `test_the_pact_hands_back_the_aura_a_bomb_consumed`.
-        var play = Il.CallSequence(Il.Method("ProtoBombPower", "Explode"))
+        // THE ORDERING IS THE RULE. `SetOff` reads the Pact once per take,
+        // and inside the loop the restore comes BEFORE the next charge's
+        // `Explode`, so that charge reacts with the aura the first one ate.
+        // Twin: `test_the_pact_makes_every_bomb_in_the_set_off_react`.
+        var play = Il.CallSequence(Il.Method("ProtoBombPower", "SetOff"))
             .ToList();
-        var read = play.FindIndex(
-            c => c.Contains("VermillionPactPower.AuraToRestore"));
-        var hit = play.FindIndex(c => c.Contains("ElementalHit"));
+        var holds = play.FindIndex(
+            c => c.Contains("VermillionPactPower.Holds"));
         var restore = play.FindIndex(
             c => c.Contains("VermillionPactPower.Restore"));
+        var explode = play.FindIndex(c => c == "ProtoBombPower.Explode");
 
-        Assert.True(read >= 0, "the Pact reads the aura the Bomb will eat");
-        Assert.True(hit >= 0, "the explosion still goes through the funnel");
-        Assert.True(restore >= 0, "the Pact hands it back");
-        Assert.True(read < hit, "read before the funnel consumes it");
-        Assert.True(hit < restore, "handed back after the explosion landed");
+        Assert.True(holds >= 0, "the take reads whether its owner holds the Pact");
+        Assert.True(restore >= 0, "the loop puts the aura back");
+        Assert.True(explode >= 0, "the loop still explodes each charge");
+        Assert.True(holds < restore, "read once, before the loop");
+        Assert.True(restore < explode, "restored before the charge goes off");
     }
 
     [Fact]
-    public void The_pact_is_attacks_only_and_reactions_only()
+    public void Explode_reports_the_aura_it_consumed_and_no_longer_hands_it_back()
     {
-        // "The Attack that Set it off" is the whole scope: a Mine answering an
-        // enemy intent carries no card at all, and a Skill's Set off has no
-        // hit behind it for the aura to feed. And `reacted` is the gate on the
-        // payout -- an explosion into a Pyro aura refreshes rather than
-        // reacts, consumes nothing, and is owed nothing back. Twins:
-        // `test_the_pact_ignores_a_skills_set_off`,
-        // `test_the_pact_ignores_a_mine_answering_an_attack`,
-        // `test_the_pact_does_nothing_when_the_explosion_did_not_react`.
-        var source = Printed("Powers/Prototype/KleeOverhaulPowers.cs");
-        Assert.Contains("cardSource is not { Type: CardType.Attack }", source);
+        // `Explode` returns the aura it reacted with and consumed; the Pact's
+        // old restore (the Attack that Set it off reacts too) is gone from it.
+        // Twins: `test_the_pact_does_not_hand_the_aura_to_the_set_off_attack`,
+        // `test_the_pact_carries_nothing_to_the_next_set_off`.
+        var explode = (MethodInfo)Il.Method("ProtoBombPower", "Explode");
+        Assert.Equal(typeof(System.Threading.Tasks.Task<global::KleeMod.Elements.Element>),
+                     explode.ReturnType);
+        Assert.DoesNotContain(Il.Calls(explode),
+                              c => c.StartsWith("VermillionPactPower."));
+        Assert.Contains(Il.Calls(explode), c => c.Contains("AuraCmd.Find"));
+    }
 
+    [Fact]
+    public void The_pact_reads_the_take_not_the_card_and_skips_mines_and_pocket_match()
+    {
+        // "When a Set off": any card's, Skill or Attack, so the card type is
+        // no longer read. A Mine answering an enemy attack is not a Set off,
+        // and Pocket Match's single charge has no later charge to feed; neither
+        // reaches the Pact. Twins: `test_the_pact_reads_a_skills_set_off_too`,
+        // `test_the_pact_ignores_mines_answering_an_attack`.
+        var source = Printed("Powers/Prototype/KleeOverhaulPowers.cs");
+        Assert.DoesNotContain("cardSource is not { Type: CardType.Attack }",
+                              source);
+        Assert.DoesNotContain(
+            Il.Calls(Il.Method("ProtoBombPower", "BeforeDamageReceived")),
+            c => c.StartsWith("VermillionPactPower."));
+        Assert.DoesNotContain(
+            Il.Calls(Il.Method("ProtoBombPower", "SetOffLargest")),
+            c => c.StartsWith("VermillionPactPower."));
+
+        // The restore refuses a board that already holds an aura, and goes up
+        // through the ordinary front door so the reaction it feeds is real.
         var restore = Il.Calls(Il.Method("VermillionPactPower", "Restore"));
         Assert.Contains(restore, c => c.Contains("AuraCmd.Find"));
         Assert.Contains(restore, c => c.Contains("AuraCmd.Apply"));
+    }
+
+    [Fact]
+    public void The_pact_power_prints_the_card_face()
+    {
+        var power = new VermillionPactPower().Localization!
+            .First(r => r.Item1 == "description").Item2;
+        var card = new ProtoKoVermillionPact().Localization!
+            .First(r => r.Item1 == "description").Item2;
+
+        Assert.Equal(card, power);
+        Assert.Contains("every other [gold]Bomb[/gold] it sets off", card);
     }
 
     [Fact]

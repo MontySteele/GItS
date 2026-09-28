@@ -442,12 +442,19 @@ def set_off(state: CombatState, enemy: Optional[Enemy],
     which R210's bind makes reachable, the aim being one creature for the whole
     play, dead or alive -- moves every charge instead of spending it on a body.
 
-    `card` IS THE CARD THAT SAID "Set off", and it is carried for exactly one
-    reader: the Vermillion Pact (`EB-491`) hands a consumed aura back only when
-    an ATTACK's own Set off caused the reaction, because only an Attack has a
-    hit behind the explosion for the aura to feed. A Mine answering an intent
-    passes None, and every Skill passes a Skill. The C# reads the same fact off
-    `cardSource` at `ProtoBombPower.Explode`.
+    `card` IS THE CARD THAT SAID "Set off", the twin of the C#'s `cardSource`.
+    The sim has no reader of it today; the Vermillion Pact reads the TAKE, not
+    the card, since its 2026-09-27 rework.
+
+    THE VERMILLION PACT LIVES IN THIS LOOP. "When a Set off makes one of your
+    Bombs react, every other Bomb it sets off reacts with the same aura": the
+    first charge of this take whose explosion reacts and consumes an aura fixes
+    that aura, and before each LATER charge of the same take goes off it is
+    put back (`_pact_restore`), so that charge reacts with it too and eats it
+    again. It lives only as long as `taken`: nothing carries to the next Set
+    off, the card's own hit after the loop finds the aura spent, and a Set off
+    ALL is one take per enemy, each with its own aura. C# twin: the same loop
+    in `ProtoBombPower.SetOff`.
 
     `overflow` is R276's (Big Bounce): a list each killing explosion appends
     its damage past the kill to. None everywhere else, which is byte-identical.
@@ -464,12 +471,18 @@ def set_off(state: CombatState, enemy: Optional[Enemy],
     state.emit("ko_set_off", target=enemy.name, charges=len(taken),
                size=sum(c.size for c in taken))
     multiplier = take_multiplier(state) * int(badge)
+    pact = bool(state.player.powers.get(VERMILLION_PACT, 0))
+    pact_aura: Optional[str] = None
     exploded = 0
     for index, charge in enumerate(taken):
         if not enemy.alive:
             jump_charges(state, enemy, taken[index:])
             break
-        _explode(state, enemy, charge, multiplier, card, overflow)
+        if pact_aura:
+            _pact_restore(state, enemy, pact_aura)
+        consumed = _explode(state, enemy, charge, multiplier, overflow)
+        if pact and not pact_aura:
+            pact_aura = consumed
         exploded += 1
         if state.over or not state.player.alive:
             break
@@ -477,57 +490,27 @@ def set_off(state: CombatState, enemy: Optional[Enemy],
     return exploded
 
 
-def _pact_aura_to_restore(state: CombatState, enemy: Enemy,
-                          card: Optional[Card]) -> Optional[str]:
-    """The aura this explosion is ABOUT TO CONSUME, or None. The Vermillion
-    Pact's read (`EB-491`), `VermillionPactPower.AuraToRestore`'s twin.
-
-    READ BEFORE THE HIT, because the hit is what eats it: after
-    `deal_damage_to_enemy` has run there is nothing left to ask, which is the
-    same fact the `reacted` diff exists for.
-
-    ATTACKS ONLY, AND ONLY THE CARD'S OWN SET OFF. `card is None` is a Mine
-    answering an enemy intent, and a Skill's Set off (Quick Fuse, Countdown,
-    Fireworks Show) carries no hit behind the explosion for the aura to feed.
-    "The Attack that Set it off" is exactly this scope.
-    """
-    if card is None or card.type != "attack":
-        return None
-    if not state.player.powers.get(VERMILLION_PACT, 0):
-        return None
-    return enemy.aura
-
-
-def _pact_restore(state: CombatState, enemy: Enemy, aura: Optional[str],
-                  reacted: bool) -> None:
-    """Hand the consumed aura back, if the explosion really did react with it.
-    `VermillionPactPower.Restore`'s twin.
-
-    `reacted` IS THE WHOLE GATE and not a convenience: an explosion into a Pyro
-    aura refreshes rather than reacts and consumes nothing, so nothing is owed
-    -- and re-applying there would be the Pact silently topping up an aura it
-    never spent.
+def _pact_restore(state: CombatState, enemy: Enemy, aura: str) -> None:
+    """Put the Pact's aura back before the next charge of the same take goes
+    off. `VermillionPactPower.Restore`'s twin.
 
     IT REFUSES A BOARD THAT ALREADY HOLDS ONE (one aura per enemy is the
-    invariant both engines keep) and a corpse: a dead enemy takes no hit behind
-    the explosion, so there is no second reaction for the aura to make.
-
-    THE PRICE OF THIS ROAD, stated rather than hidden: the aura really is back,
-    so a THIRD hit in the same play sees it too and the next charge on a
-    multi-Bomb pile reacts as well. That is what the Rare buys, and it is what
-    its face says -- the aura the Bomb ate is still there.
+    invariant both engines keep) and a corpse. The aura goes up through the
+    ordinary front door, so the reaction the next charge makes with it is a
+    real one: it counts for "if a Bomb triggered an Elemental Reaction this
+    turn" and rides the explosion bus's `reacted` like any other.
     """
     from tier0.engine import reactions             # late import: cycle
 
-    if not reacted or not aura or not enemy.alive or enemy.aura:
+    if not enemy.alive or enemy.aura:
         return
     state.emit("ko_vermillion_pact", target=enemy.name, element=aura)
     reactions.apply_aura(state, enemy, aura, source="ko_vermillion_pact")
 
 
 def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
-             multiplier: int, card: Optional[Card] = None,
-             overflow: Optional[list] = None) -> None:
+             multiplier: int,
+             overflow: Optional[list] = None) -> Optional[str]:
     """ONE explosion, which is the unit every other rule is priced in: one Pyro
     hit for the charge's size, one Spark, one payload, one entry in both of
     rule 7's counters. `Explode`'s twin.
@@ -557,6 +540,10 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     the engine passes through, and no turn boundary can fall inside a single
     hit, so the diff is exact. `reactions_this_card` would have been wrong --
     a Mine answering an enemy attack is not inside a card.
+
+    RETURNS THE AURA THIS EXPLOSION REACTED WITH AND CONSUMED, or None: the
+    one fact `set_off`'s Vermillion Pact needs and that nothing can work out
+    afterwards, because the aura is gone. C# twin: `Explode`'s return value.
     """
     from tier0.engine import companion_coven        # late import: cycle
     from tier0.engine import effects                # late import: cycle
@@ -570,13 +557,9 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # element, and it moves it for ONE explosion; `companion_coven.bomb_element`
     # answers "pyro" on every other board and with the companion arm off.
     element = companion_coven.bomb_element(state)
-    # THE VERMILLION PACT'S ONE READ (`EB-491`), taken BEFORE the funnel runs
-    # because the funnel is what consumes it: the aura this explosion is about
-    # to eat is the aura the Pact hands back. None on an aura-less enemy, on
-    # every board with no Pact, on a Mine (no card) and on a Skill's Set off
-    # (no hit behind it for the aura to feed). C# twin:
-    # `VermillionPactPower.AuraToRestore`.
-    pact_aura = _pact_aura_to_restore(state, enemy, card)
+    # THE AURA THIS EXPLOSION MAY CONSUME, read BEFORE the funnel eats it
+    # (the Vermillion Pact's one read). C# twin: `auraBefore` in `Explode`.
+    aura_before = enemy.aura
     was_alive = enemy.alive
     # THE VULNERABLE THIS HIT PAID (2026-09-26, Big Badda Boom's echo), read
     # on both sides of the hit -- a Superconduct lays it inside -- and before
@@ -594,11 +577,10 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # overflow. C# twin: `dealt - (hp + block)` at `ProtoBombPower.Explode`.
     if overflow is not None and was_alive and not enemy.alive and enemy.hp < 0:
         overflow.append(-enemy.hp)
-    # THE PACT, PAID. Before the card's own hit, which is the ordering the face
-    # states -- `_op_set_off` resolves every explosion first and lands the
-    # printed damage after, so an aura handed back here is standing when that
-    # hit arrives. C# twin: `VermillionPactPower.Restore`.
-    _pact_restore(state, enemy, pact_aura, reacted)
+    # CONSUMED means it reacted AND the aura is gone, read straight after the
+    # hit: an aura still standing (a Pyro refresh) was not spent.
+    consumed = aura_before if (reacted and aura_before
+                               and not enemy.aura) else None
     # R276, EXPLOSIVE FRAGS: a Mine that went off leaves Vulnerable on its
     # enemy, AFTER its own hit, whatever set it off. C# twin:
     # `MineFragsPower.OnMineWentOff`.
@@ -629,6 +611,7 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # R276: the charge-aware door, after the bus (`KleeExpansion
     # .AfterChargeExploded`, called at the same place in `Explode`).
     _after_charge_exploded(state, enemy, charge, reacted)
+    return consumed
 
 
 def _notify_explosion(state: CombatState, enemy: Enemy, size: int,
@@ -728,7 +711,7 @@ def set_off_largest(state: CombatState, enemy: Optional[Enemy],
     if not enemy.alive:
         jump_charges(state, enemy, [charge])
     else:
-        _explode(state, enemy, charge, multiplier, card)
+        _explode(state, enemy, charge, multiplier)
         exploded = 1
     sweep_jumps(state)
     return exploded

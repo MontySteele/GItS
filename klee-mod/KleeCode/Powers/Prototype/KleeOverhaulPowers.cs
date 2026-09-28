@@ -420,35 +420,21 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Vermillion Pact (the pool pass, `EB-491`): "Whenever one of your Bombs
-/// triggers an Elemental Reaction, the Attack that set it off triggers one
-/// too." The brief's sec.5.3 rule-breaker, and the third of its three
-/// rule-breaking Rares: the shared "one aura, consumed by the first hit" rule
-/// is broken, for her chain and nowhere else.
+/// Vermillion Pact (the pool pass, `EB-491`; reworked 2026-09-27): "When a Set
+/// off makes one of your Bombs react, every other Bomb it sets off reacts with
+/// the same aura." A rule-breaking Rare: the shared "one aura, consumed by the
+/// first hit" rule is broken for one Set off's pile and nowhere else.
 ///
-/// DEFERRED FROM SLICE ONE, AND ON WHICH OF THE TWO ROADS. The slice packet's
-/// sec.5 named this row as the one that might drop out -- "the one item on this
-/// list that touches shared reaction code" -- and set out the two shapes it
-/// could take: RE-APPLYING the consumed aura between the explosion and the
-/// card's own hit, or threading a "do not consume" flag through
-/// <c>ElementalHit.Deal</c>. This is the FIRST, and the reason is that the
-/// second is a shared-layer change every character's reactions would then have
-/// to be re-read against, while this one is a Klee power writing to a Klee
-/// enemy through the ordinary front door (<see cref="AuraCmd.Apply"/>).
-///
-/// THE PRICE OF THAT ROAD, stated rather than hidden: the aura really is back
-/// on the board, so a THIRD hit in the same play sees it too, and every
-/// on-apply hook fires again for it. On a multi-charge pile that is the card
-/// compounding -- each reacting explosion hands the aura back, so the next
-/// charge reacts as well and the Attack behind them all still finds it
-/// standing. That is what a 2-energy Rare printed as a rule-breaker buys, and
-/// it is the reading the face states: the aura the Bomb ate is still there.
-///
-/// ATTACKS ONLY, AND ONLY A SET OFF THE CARD ITSELF MADE. The trigger is read
-/// off <c>cardSource</c> at <c>ProtoBombPower.Explode</c>: a Mine answering an
-/// enemy intent carries no card at all, and Quick Fuse, Countdown and Fireworks
-/// Show are Skills with no hit behind the explosion for the aura to feed. "The
-/// Attack that Set it off" is exactly the scope of the rule.
+/// THE RULE LIVES IN <see cref="ProtoBombPower.SetOff"/>'s loop, and this class
+/// holds its two halves: <see cref="Holds"/>, read once per take, and
+/// <see cref="Restore"/>, which puts the first consumed aura back before each
+/// later charge of the same take. The aura goes up through the ordinary front
+/// door (<see cref="AuraCmd.Apply"/>), so each restored reaction is a real one
+/// for every counter and listener. Nothing carries past the take, so the Set
+/// off card's own hit finds the aura spent -- the pre-rework "the Attack that
+/// Set it off reacts too" is gone. A Mine answering an intent is not a Set off
+/// and never reaches the loop; Pocket Match's single charge has no later
+/// charge to feed.
 ///
 /// DEAD ALONE, like Witches' Circle beside it (R244 pick 2): a deck with no
 /// applier in it never puts a foreign aura up, and this Power then never fires.
@@ -457,8 +443,7 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
 /// STACKS DO NOTHING. The rule is a fact about the board, not a number, so a
 /// second copy adds no second aura -- the Counter is how the badge counts
 /// copies, exactly as <c>AlicesRecipePower</c>'s is. Sim twin:
-/// <c>klee_overhaul.VERMILLION_PACT</c> and its two reads at
-/// <c>klee_overhaul._explode</c>.
+/// <c>klee_overhaul.VERMILLION_PACT</c>, read in <c>klee_overhaul.set_off</c>.
 /// </summary>
 public sealed class VermillionPactPower : PowerModel, ILocalizationProvider
 {
@@ -466,52 +451,33 @@ public sealed class VermillionPactPower : PowerModel, ILocalizationProvider
     {
         ("title", "Vermillion Pact"),
         ("description",
-            "Whenever one of your [gold]Bombs[/gold] triggers an "
-          + "[gold]Elemental Reaction[/gold], the Attack that "
-          + "[gold]Set it off[/gold] triggers one too."),
+            "When a [gold]Set off[/gold] makes one of your [gold]Bombs[/gold] "
+          + "react, every other [gold]Bomb[/gold] it sets off reacts with the "
+          + "same aura."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>
-    /// The aura this explosion is ABOUT TO CONSUME, or <c>Element.None</c>.
-    ///
-    /// Read BEFORE the hit, because the hit is what eats it: after
-    /// <c>ElementalHit</c> has run there is nothing left to ask, which is the
-    /// same fact <c>IProtoExplosionListener.reacted</c> exists for. PURE -- it
-    /// answers None on every board with no Pact, on a Skill's Set off and on a
-    /// Mine, so the caller pays one interface walk and nothing else.
+    /// Does the Set off's owner hold the Pact? The pile a Set off takes is
+    /// <paramref name="applier"/>'s own (R205), so in co-op only the Pact
+    /// owner's Bombs are ever fed.
     /// </summary>
-    public static Element AuraToRestore(
-        Creature applier, CardModel? cardSource, Creature target)
-    {
-        if (cardSource is not { Type: CardType.Attack }) return Element.None;
-        if (!applier.Powers.OfType<VermillionPactPower>().Any())
-        {
-            return Element.None;
-        }
-        return AuraCmd.Find(target)?.Element ?? Element.None;
-    }
+    public static bool Holds(Creature applier)
+        => applier.Powers.OfType<VermillionPactPower>().Any();
 
     /// <summary>
-    /// Hand the consumed aura back, if the explosion really did react with it.
-    ///
-    /// <paramref name="reacted"/> IS THE WHOLE GATE and not a convenience: an
-    /// explosion into a Pyro aura refreshes rather than reacts and consumes
-    /// nothing, so there is nothing owed back -- and re-applying there would be
-    /// the Pact silently topping up an aura it never spent.
-    ///
-    /// IT REFUSES A BOARD THAT ALREADY HOLDS ONE (the one-aura invariant
-    /// <see cref="AuraCmd.Apply"/>'s own doc states) and a corpse: a dead enemy
-    /// takes no hit behind the explosion, so there is no second reaction for
-    /// the aura to make.
+    /// Put the Pact's aura back before the next charge of the same take goes
+    /// off. IT REFUSES A BOARD THAT ALREADY HOLDS ONE (the one-aura invariant
+    /// <see cref="AuraCmd.Apply"/>'s own doc states) and a corpse. Sim twin:
+    /// <c>klee_overhaul._pact_restore</c>.
     /// </summary>
     public static async Task Restore(
         PlayerChoiceContext choiceContext, Creature applier, Creature target,
-        Element aura, bool reacted)
+        Element aura)
     {
-        if (!reacted || aura == Element.None || target.IsDead) return;
+        if (aura == Element.None || target.IsDead) return;
         if (AuraCmd.Find(target) != null) return;
         await AuraCmd.Apply(choiceContext, target, aura, applier,
                             cardSource: null);

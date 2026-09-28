@@ -2233,6 +2233,15 @@ the second being the one-aura invariant both engines keep. Dead alone, like
 Witches' Circle beside it: a deck with no applier never puts a foreign aura
 up.
 
+REWORKED 2026-09-27 (Klee review; [USER]: "Most of Klee's set off cards are
+pyro and do low damage, so that feels like it would combo poorly with hydro").
+The face is now "When a Set off makes one of your Bombs react, every other Bomb
+it sets off reacts with the same aura." The first aura a charge consumes is put
+back before each later charge of the same take (`ProtoBombPower.SetOff` /
+`klee_overhaul.set_off`), any card's Set off counts, and nothing carries past
+the take: the Set off card's own hit no longer gets the aura back. The scope
+paragraphs above describe the retired rule.
+
 **`proto_ko_split_charge` -- the bridge.**
 Careful Arrangement's opposite, and the arm's one row that carries charge from
 Cook to Spray. The halves are `n // 2` and `n - n // 2`, so an odd Bomb loses
