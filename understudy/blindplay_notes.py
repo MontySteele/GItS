@@ -3067,8 +3067,7 @@ RELIC_KEYWORD_RIDERS: dict[str, dict[str, str]] = {
     "fade": {"Grand Theater Program":
              " With Grand Theater Program, no performer fades."},
     "front performer": {"The Curtain Never Falls":
-                        " With The Curtain Never Falls, it regains 2, from "
-                        "your first turn."},
+                        " With The Curtain Never Falls, it regains 2."},
     "Bow": {"Curtain Call Bouquet":
             " With Curtain Call Bouquet, it acts twice."},
 }

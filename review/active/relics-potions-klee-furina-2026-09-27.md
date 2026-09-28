@@ -124,8 +124,11 @@ empty stage.
 | Rare | Encore Elixir | Each of your performers acts twice, now. |
 
 **Ancient (The Curtain Never Falls), rebuilt for the Stage:** "Start each
-combat with Usher at 3 Fanfare. Your front performer regains 2 Fanfare at the
-start of your turn instead of 1, from your first turn." It upgrades rule 4, as
+combat with Usher in front with 5 Fanfare. Your front performer regains 2
+Fanfare each turn, not 1." (Reworded 2026-09-28: it used to open at 3 and
+regain 2 from turn one, which showed a 5 the face never printed. It now opens
+at 5 and regains from turn two, like the shipped rule. With Opera Glasses the
+pair opens at 5, not 7.) It upgrades rule 4, as
 the base Ancients upgrade their starter's one number. The name and art stay. It
 no longer shares a relic with the Spotlight kit. Ethereal Spotlight leaves her
 pool under the Stage, where nothing can use it.
