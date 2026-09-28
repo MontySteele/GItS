@@ -1874,19 +1874,33 @@
 # faces of review/active/furina-stage-brief-2026-09-08.md sec.12. Which
 # shipped row each replaced, and why: docs/notes/prototype-surface-provenance.md.
 
-# --- the starter's three kit cards (sec.12), `basic` so no offer door can
-# reach them: they arrive through `loader._starter_ids` alone. ---
+# --- THE STARTER (2026-09-28): base Strike x4 + Defend x4 (no row here) and
+# the two `basic` kit rows below. Take the Stage and Regal Bearing are Commons.
+# The ruling, in [USER]'s words: docs/notes/prototype-surface-provenance.md. ---
 
-# `EB-739`'s second pair: renamed off the shipped `Salon Début`, whose title
-# this one printed. An E default under R179 -- the brief calls its names
-# provisional -- and the reasoning is in the provenance note.
+# TENTATIVE (2026-09-28): a Common with a stronger face, audited in the
+# balance pass's dedupe. Was the starter's `basic` (renamed off Salon Début,
+# `EB-739`); both stories are in the provenance note.
 - {id: proto_fs_salon_debut, name: "Take the Stage", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    replaces: salon_debut,
-   register: salon, cost: 1, type: skill, rarity: basic,
-   description: "Summon a random performer.",
-   effects: [{op: stage_summon, member: random}]}
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Summon a random performer with 3 [gold]Fanfare[/gold]. Draw 1 card.",
+   effects: [{op: stage_summon, member: random, fanfare: 3},
+             {op: draw, amount: 1}]}
+
+# 2026-09-28: a Common. [USER]: "5 block, 1 weak" upgraded to "6 block, 2
+# weak". Wears the shipped portrait.
+- {id: proto_fs_regal_bearing, name: "Regal Bearing", character: furina,
+   upgrade: {block: +1, power_amount: +1},
+   authored_by: [claude],
+   replaces: regal_bearing,
+   register: archon, cost: 1, type: skill, rarity: common,
+   art_of: regal_bearing,
+   description: "Gain 5 [gold]Block[/gold]. Apply 1 [gold]Weak[/gold].",
+   effects: [{op: block, amount: 5},
+             {op: apply_power, power: weak, amount: 1, target: enemy}]}
 
 - {id: proto_fs_curtain_rise, name: "Curtain Rise", character: furina,
    upgrade: {conditional_damage: +3},

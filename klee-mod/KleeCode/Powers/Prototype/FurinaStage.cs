@@ -46,8 +46,8 @@ namespace KleeMod.Powers;
 ///
 ///   * <c>Furina.StartingRelics</c> -- Salon Solitaire replaces the Ethereal
 ///     Spotlight (brief sec.3 rule 2).
-///   * <c>Furina.StartingDeck</c> -- the two kit slots become three: Salon
-///     Debut, Curtain Rise, Rising Applause (sec.7's named starter).
+///   * <c>Furina.StartingDeck</c> -- the whole starter (2026-09-28): the
+///     base Strike x4 and Defend x4, Curtain Rise and Rising Applause.
 ///   * <c>FurinaResourceHooks.ModifyHpLostBeforeOsty</c> -- the damage order,
 ///     sec.3 rule 6. The one seam that touches a SHIPPED file's behaviour, and
 ///     it returns the shipped number with the arm off.

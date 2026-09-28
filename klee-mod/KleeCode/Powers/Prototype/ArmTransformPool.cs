@@ -36,6 +36,10 @@ namespace KleeMod.Powers;
 /// every other character and every run with the arms off takes the base
 /// method untouched.
 ///
+/// FURINA'S STAGE BORROWS SILENT'S PAIR (2026-09-28), so a transform of one
+/// of her base Strikes or Defends would have offered Silent's pool; she is
+/// claimed here under that arm the same way.
+///
 /// NOT A <see cref="ArmStarterBasics"/> SWEPT SITE, and that is why this is a
 /// class of its own: that list is the unguarded `First()` lookups that THROW
 /// or answer wrongly when asked for "the Strike"; this one asks which card a
@@ -60,7 +64,8 @@ public static class ArmTransformPool
         var owner = original.Owner;
         if (owner == null) return null;
         var character = owner.Character;
-        if (!(character is IKleeCharacter || character is IKokomiCharacter))
+        if (!(character is IKleeCharacter || character is IKokomiCharacter
+              || character is IFurinaCharacter))
         {
             return null;
         }

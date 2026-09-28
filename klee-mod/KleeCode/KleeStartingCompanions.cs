@@ -75,9 +75,11 @@ internal static class KleeStartingCompanionsPatch
     private static void ResolveFurina(Player player, string seed, int slot)
     {
 #if PROTOTYPE_CARDS
-        // R276 hygiene. UNDER THE STAGE ARM HER STARTER IS THE BRIEF'S TEN,
-        // exactly (`FurinaStageRoster.StartingDeck`): seven basics and three
-        // kit cards. This patch used to run under the arm too and swap a
+        // R276 hygiene. UNDER THE STAGE ARM HER STARTER IS THE ARM'S TEN,
+        // exactly (`FurinaStageRoster.StartingDeck`): since 2026-09-28 the
+        // base Strike x4, Defend x4 and two kit cards, which hold no
+        // Soloist's Solicitation or Stage Presence for this swap to find
+        // anyway. This patch used to run under the arm too and swap a
         // Soloist's Solicitation and a Stage Presence for two Fontaine
         // companions in every Stage run, which the brief never printed --
         // Klee's and Kokomi's arms already start with none, because their
@@ -89,7 +91,7 @@ internal static class KleeStartingCompanionsPatch
         {
             Log.Info($"[{KleeMod.ModId}] Furina's starter Companion slots "
                    + "are not rolled: the Stage arm is on and its starter is "
-                   + "the brief's ten cards.");
+                   + "the arm's ten cards.");
             return;
         }
 #endif

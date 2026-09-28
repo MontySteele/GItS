@@ -5,6 +5,7 @@ using KleeMod.Cards.Furina.Generated;
 using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Models.Relics;
 
 namespace KleeMod.Powers;
@@ -21,8 +22,10 @@ namespace KleeMod.Powers;
 /// rather than intended.
 ///
 /// EVERY ROW IS THE SHEET'S, and both tables below are the sim's own mirrored
-/// pair for pair: <c>furina_stage.STARTER_SUBS</c> and
-/// <c>furina_stage.POOL_SUBS</c>, read C#-side at the seams the reframe's were.
+/// pair for pair: <c>furina_stage.STARTER_IDS</c> and
+/// <c>furina_stage.POOL_SUBS</c> (with <c>POOL_ADDS</c> and
+/// <c>PROMOTED_STARTERS</c> appended), read C#-side at the seams the
+/// reframe's were.
 /// The sheet is the authority for which shipped row each prototype row
 /// replaces (`replaces:` on the row itself); these tables are that authority
 /// in the language the mod's pools speak, which is classes.
@@ -30,43 +33,59 @@ namespace KleeMod.Powers;
 public static class FurinaStageRoster
 {
     /// <summary>
-    /// THE STARTER (brief sec.7's named deck, sec.12's first table): the base
-    /// game's seven basics untouched, and her three kit slots replaced.
+    /// THE STARTER, rebuilt 2026-09-28 on the two overhaul arms' terms: the
+    /// base game's Strike x4 and Defend x4 and two kit cards that teach the
+    /// Stage. [USER]: "Typically we'd include 4 strikes, 4 defends and 2
+    /// actually useful cards that teach the character's core mechanics - this
+    /// seems like an unnecessary power spike." "I agree with keeping Curtain
+    /// Raise and Rising Applause." "We should really just replace Soloist's
+    /// Solicitation and Stage Presence with the basic strike and defend." And
+    /// "The characters' kits should all use basic Strike and Defend."
     ///
-    /// THE BASICS ARE THE SHIPPED SEVEN, and that is a standing rule rather
-    /// than a choice made here: a starter change is an A pick, never an E
-    /// default, and the six/seven passes that moved a character's basics were
-    /// reverted on 2026-09-08 for exactly that. Soloist's Solicitation x3,
-    /// Stage Presence x3 and Regal Bearing, in the shipped order. They ARRIVE
-    /// as printed only since R276's hygiene: the shipped starting-companion
-    /// roll (<c>KleeStartingCompanionsPatch.ResolveFurina</c>) used to swap a
-    /// Solicitation and a Presence for two Fontaine companions in every Stage
-    /// run, and it now stands down under the arm.
+    /// SILENT'S PAIR, for <c>KokomiOverhaulRoster</c>'s reason:
+    /// <c>FurinaCardPool</c> borrows <c>card_frame_green</c> and the
+    /// <c>silent</c> energy colour, so the base pair sits in her hand in her
+    /// own frame, and <c>CardModel.Pool</c> resolves them to Silent's pool
+    /// without a throw. The base Strike applies no element (a base card is
+    /// not an <c>IElementalCard</c>, and [USER] ruled the basics apply
+    /// nothing; <c>CatalystCadence</c> answers None for it).
     ///
-    /// THREE KIT SLOTS FOR THREE, which is why this replaces the deck rather
-    /// than a slot in it: the shipped Furina's three kit cards are <i>Aria of
-    /// Recompense</i>, <i>Salon Début</i> and <i>An Invitation</i>, and the
-    /// arm's are the sheet's three basics -- one summon, one Spend and one
-    /// Raise, the three verbs sec.7's fight-one script needs to have a turn
-    /// one worth arguing about. The pairing is
-    /// <c>furina_stage.STARTER_SUBS</c> row for row.
+    /// WHAT LEFT: Soloist's Solicitation, Stage Presence (both basics, never
+    /// offered), Regal Bearing and Take the Stage -- the last two re-authored
+    /// as Commons and offered by <see cref="SwapOfferedRows"/>. The shipped
+    /// Furina's starter (<c>Furina.StartingDeck</c>'s own list) is unmoved.
+    /// Sim twin: <c>furina_stage.STARTER_IDS</c>. The relic seam names the
+    /// same pair once more (<see cref="StarterStrike"/>).
     /// </summary>
     public static IEnumerable<CardModel> StartingDeck() => new CardModel[]
     {
-        ModelDb.Card<SoloistsSolicitation>(),
-        ModelDb.Card<SoloistsSolicitation>(),
-        ModelDb.Card<SoloistsSolicitation>(),
-        ModelDb.Card<StagePresence>(),
-        ModelDb.Card<StagePresence>(),
-        ModelDb.Card<StagePresence>(),
-        ModelDb.Card<RegalBearing>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<DefendSilent>(),
+        ModelDb.Card<DefendSilent>(),
+        ModelDb.Card<DefendSilent>(),
+        ModelDb.Card<DefendSilent>(),
         // aria_of_recompense -> proto_fs_curtain_rise
         ModelDb.Card<ProtoFsCurtainRise>(),
-        // salon_debut -> proto_fs_salon_debut
-        ModelDb.Card<ProtoFsSalonDebut>(),
         // an_invitation -> proto_fs_standing_ovation
         ModelDb.Card<ProtoFsStandingOvation>(),
     };
+
+    /// <summary>
+    /// THE PAIR ABOVE, NAMED ONCE MORE FOR THE RELIC SEAM (`EB-351`), on
+    /// <c>KleeOverhaulRoster.StarterStrike</c>'s terms: Large Capsule and
+    /// Fasten ask the character for "your Strike", and under the Stage the
+    /// honest answer is the pair the starter opens with, not the shipped
+    /// Soloist's Solicitation / Stage Presence. The seam is
+    /// <see cref="ArmStarterBasics"/>; the correspondence is pinned by
+    /// `ArmStarterBasicsTests.The_relic_pair_is_the_pair_the_starter_opens_with`.
+    /// </summary>
+    internal static CardModel StarterStrike() => ModelDb.Card<StrikeSilent>();
+
+    /// <summary>The Defend half of <see cref="StarterStrike"/>'s pair.</summary>
+    internal static CardModel StarterDefend() => ModelDb.Card<DefendSilent>();
 
     /// <summary>
     /// THE STARTING RELIC: Salon Solitaire replaces the Ethereal Spotlight.
@@ -186,7 +205,13 @@ public static class FurinaStageRoster
                         && card is not FurinaGen.StarOfTheShow
                         // THE SUPPORTING POOL'S SOLD OUT (2026-09-26): its
                         // `replaces:`, dropped by the text filter too.
-                        && card is not FurinaGen.UnheardConfession)
+                        && card is not FurinaGen.UnheardConfession
+                        // THE STARTER RULING (2026-09-28): the two shipped
+                        // basics whose Stage twins are offered as Commons
+                        // below. Basics are never offered, so this only keeps
+                        // the sheet's pairing and this list one table.
+                        && card is not FurinaGen.SalonDebut
+                        && card is not FurinaGen.RegalBearing)
             .Concat(new CardModel[]
             {
                 // Commons (eight).
@@ -270,6 +295,12 @@ public static class FurinaStageRoster
                 // THE SUPPORTING POOL (2026-09-26). Rare (one): the fourth
                 // seat.
                 ModelDb.Card<ProtoFsSoldOut>(),
+                // THE STARTER RULING (2026-09-28): out of the starter, offered
+                // as Commons (two). Sim twin:
+                // `furina_stage.PROMOTED_STARTERS`. Take the Stage is
+                // tentative, audited in the balance pass's dedupe.
+                ModelDb.Card<ProtoFsSalonDebut>(),
+                ModelDb.Card<ProtoFsRegalBearing>(),
             })
             .Concat(MultiplayerRows());
     }
