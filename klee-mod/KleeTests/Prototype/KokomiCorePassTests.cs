@@ -181,7 +181,7 @@ public class KokomiCorePassTests
     public void Ambush_applies_vulnerable_now_and_plans_twelve()
     {
         var card = new ProtoKkAmbush();
-        Assert.Equal("Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: "
+        Assert.Equal("Apply 2 [gold]Vulnerable[/gold].\n[gold]Plan[/gold]: "
                    + "Deal {PlanDamage:diff()} damage.", Face(card));
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal((KokomiPlan.Kind.Damage, 12), (clause.Kind, clause.Amount));

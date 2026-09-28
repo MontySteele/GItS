@@ -53,7 +53,7 @@ public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — Crystal Collapse"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: play a copy of the last other [gold]Companion[/gold] card you played this turn."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: play a copy of the last other [gold]Companion[/gold] card you played this turn."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

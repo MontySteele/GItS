@@ -1123,11 +1123,11 @@
    cost: 1, type: skill, rarity: basic,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 7 damage to ALL enemies.",
-   effects: [{op: block, amount: 4}],
+   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 7 damage to ALL enemies.",
+   effects: [{op: block, amount: 6}],
    plan: [{op: damage, amount: 7, target: all_enemies}],
-   # Plan 10; the now-line does not upgrade.
-   upgrade: {plan_damage: 3}}
+   # 8 Block / Plan 10 to ALL (2026-09-28: the now-line upgrades too).
+   upgrade: {block: 2, plan_damage: 3}}
 
 - {id: proto_kk_slack_water, name: "Slack Water (proto)", character: kokomi,
    authored_by: [claude],

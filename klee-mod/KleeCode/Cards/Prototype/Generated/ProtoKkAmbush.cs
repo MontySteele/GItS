@@ -45,7 +45,7 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ambush"),
-        ("description", "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
+        ("description", "Apply 2 [gold]Vulnerable[/gold].\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
