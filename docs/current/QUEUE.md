@@ -35,7 +35,7 @@ their defaults (R276, the last R number); nothing from them is open here.
   until your step 5 (the element review's §6 order).
   - **Zhongli:** (1) one exact-amount Invoice per fight, removed only by
     paying, counted against the credit limit; (2) draftable Contracts that
-    clear the Tab when kept and add Statuses when broken; (3) one Petrify
+    raise this fight's credit when kept and add Statuses when broken; (3) one Petrify
     Rare.
   - **Nahida:** (1) Purification is a Dendro hit, set off by reactions at
     most once a turn; (2) no home nation until a Sumeru sheet exists; (3)

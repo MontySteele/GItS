@@ -44,6 +44,11 @@ crystallized.
   2. **The first reaction on a seeded enemy each turn**, whoever causes it:
      your cards, a companion, a co-op partner, a Core bursting on its timer.
      Genshin's Tri-Karma has a cooldown; "once a turn" is ours.
+     - **The trigger is Nahida's, and it resets at the start of each player
+       turn.** In co-op the players share that turn, so it is one automatic
+       Purification per Nahida per round, whoever causes the reaction.
+     - **A Core bursting at the end of your turn** uses that turn's trigger
+       if it is still unspent.
 - **The bound is the turn.** Only one reaction-triggered Purification per
   turn, so nothing Purification causes can fire it again that turn: not its
   own Bloom, and not a Core that bursts later. Purify cards are separate and
@@ -90,11 +95,17 @@ home sheet ships". Nahida's nation, Sumeru, has no companion sheet. Pick 2.
    cards that cost a slot and Energy. A Seed by itself never protects you.
    Example: *Foresight (Power, 1): a seeded enemy's attacks deal 1 less per
    Seed on it.*
-   - **The turn it has to produce:** two enemies, a 14-damage attacker and a
-     buffer at 20 HP, you with 2 Seeds to place and a Purify in hand.
-   - **Seeds on the attacker** cut 2 from each of its hits, but the Purify
-     spreads less damage.
-   - **Seeds split** Purify both enemies for 4 each, and you take the full 14.
+   - **The turn it has to produce:** Foresight in play, two unseeded enemies
+     (a 14-damage attacker and a buffer at 20 HP), 2 Seeds to place and a
+     Purify in hand.
+   - **Both Seeds on the attacker:** its hit drops to 12, and Purify deals it
+     4. The buffer takes nothing.
+   - **One Seed each:** the hit drops to 13, and Purify deals 2 to each
+     enemy.
+
+     So the choice is 1 more point of defence and 2 more on the attacker,
+     against 2 on the buffer. (The first draft's figures were wrong; GPT's
+     second audit corrected them.)
    - If that is never a real choice, Foresight is cut for a Core archetype.
 
 **Bridges:** Foresight Seeds are also Purification targets, so defence is also

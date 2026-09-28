@@ -64,14 +64,16 @@ leaves the enemy clean for the next colour.
 
 **A worked solo sequence against a boss,** with the starter plus one drafted
 Knight (Barbara) and one Windbound Execution:
-1. **Turn 1:** Knights' Muster, choosing Amber, paints Pyro. A Strike, Absorbing
-   through the starting relic, takes it off: Pyro Wind. The boss is clean.
+1. **Turn 1:** Knights' Muster, choosing Amber, paints Pyro. A Strike, the
+   turn's first Attack on a fresh aura, Absorbs through the relic: Pyro Wind.
+   The boss is clean.
 2. **Turn 2:** Barbara paints Hydro. Windbound Execution Absorbs it: Hydro
    Wind. Then Ascension now for 18, or hold it for a third Wind at 24.
 
-With the bare starter it is slower: Muster comes back once per shuffle. That
-is the intended weakness. The first round has to read whether it feels
-deliberate or starved.
+With the bare starter the same loop runs through Muster alone: paint and
+Strike on the turns Muster is drawn, one Wind per shuffle. That is the
+intended weakness. The first round has to read whether it feels deliberate or
+starved.
 
 **Against a pack it is a targeting puzzle.** The spread copies land spent on
 the other enemies, so a new Knight aimed at one of them reacts instead of
@@ -107,8 +109,13 @@ colour.
 2. **Gale (the ceiling: payoff for handling complexity).** Many Swirls instead
    of many Winds, and multi-element boards. This is where the element review's
    later candidate lives, **as a card and not a shared rule**: *Converging
-   Winds (Rare, Power): your Swirls react where they land.* The unbounded
-   three-Overload case is then something you draft, pay for, and aim. It also
+   Winds (Rare, Power): your Swirls react where they land.* Rarity makes it
+   earned but does not bound it, so it carries its own rules:
+   - The spread hit is the flat 2, carrying the swirled element.
+   - A reaction it sets off lands on **that enemy only**, so Overload does not
+     splash. The three-Overload case becomes 6 on each Electro-marked enemy,
+     not 18 on every enemy.
+   - A reaction set off by a spread never Swirls again. It also
    reuses the Mondstadt companion **Sturm und Drang** (a Swirl makes your next
    Attack deal +6 of the swirled element). This follows [USER]'s framing:
    make Swirl useful on its own, and make multi-reaction Swirls "an archetype
@@ -134,9 +141,12 @@ Strike ×4, Defend ×4, and two of his own:
 - **Four Winds' Ascension** (2): the payoff, in the starter so it is reached
   from fight one. Exhaust, so the "now or wait" decision is one per fight.
 
-**Starting relic: Boreas's Fang.** Your first Attack each fight Absorbs. It
-teaches the Absorb verb on turn one, so the starter needs no third card of
-his. Windbound Execution (deal 6 Anemo, Absorb) is a Common in the pool.
+**Starting relic: Boreas's Fang.** Each turn, your first Attack that hits a
+fresh aura Absorbs. An Attack on an enemy with no fresh aura does not use it
+up. So the bare starter can collect a Wind every turn it paints one, which
+makes the Absorb verb repeatable from fight one (GPT's second audit: a
+once-per-fight relic capped the bare starter at one Wind). Windbound Execution
+(deal 6 Anemo, Absorb) is a Common in the pool, for a second Absorb in a turn.
 
 The first draft discounted Ascension with its relic but left Ascension out of
 the starter (GPT's audit). Now the payoff is in the deck, and the relic teaches
