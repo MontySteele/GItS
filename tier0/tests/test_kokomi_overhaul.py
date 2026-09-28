@@ -359,10 +359,13 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
 
     A COMMON LEAVING MOVES THE ODDS ON EVERY OTHER COMMON, which is why the
     retirement is visible here as well as in the count -- and pool pass five
-    (`EB-685`) is the third such leaving, Night Watch."""
+    (`EB-685`) is the third such leaving, Night Watch.
+
+    RIPPLE MOVED TO UNCOMMON (2026-09-28): a 0-cost draw-1 replaces itself,
+    and LAW's cycling rule gates that to Uncommon+."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 23, "uncommon": 12, "rare": 4}
+        "common": 22, "uncommon": 13, "rare": 4}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

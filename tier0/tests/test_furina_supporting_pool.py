@@ -87,8 +87,8 @@ def _apply_delta(card, key, delta):
         next(fx for fx in top if fx.get("op") == key)["amount"] += delta
     elif key == "power_amount":
         next(fx for fx in top if fx.get("op") == "apply_power")["amount"] += delta
-    elif key == "damage":
-        next(fx for fx in top if fx.get("op") == "damage")["amount"] += delta
+    elif key in ("damage", "draw"):
+        next(fx for fx in top if fx.get("op") == key)["amount"] += delta
     else:
         raise AssertionError(key)
 
@@ -317,11 +317,12 @@ def test_stage_whisper_gathers_all_but_one_from_every_other_performer(arm):
     assert st.player.stage == [["usher", 6]]
 
 
-def test_stage_whisper_costs_one_upgrades_to_zero_and_draws_a_card(arm):
+def test_stage_whisper_costs_one_and_upgrades_its_draw(arm):
     """It still draws 1 (the first seat round's ruling), and with one
-    performer that is all it does."""
+    performer that is all it does. The upgrade draws 2 at cost 1, not cost 0:
+    a 0-cost draw-1 Common breaks LAW's cycling rule (GPT review 2026-09-28)."""
     assert _row_card("proto_fs_stage_whisper").cost == 1
-    assert _row_card("proto_fs_stage_whisper", True).cost == 0
+    assert _row_card("proto_fs_stage_whisper", True).cost == 1
     st = _state([["usher", 2], ["crabaletta", 7]], deck=3)
     effects.resolve_card(st, _row_card("proto_fs_stage_whisper"))
     assert st.player.stage == [["usher", 8], ["crabaletta", 1]]
@@ -329,7 +330,7 @@ def test_stage_whisper_costs_one_upgrades_to_zero_and_draws_a_card(arm):
     st = _state([["usher", 6]], deck=3)
     effects.resolve_card(st, _row_card("proto_fs_stage_whisper", True))
     assert st.player.stage == [["usher", 6]]
-    assert len(st.player.hand) == 1
+    assert len(st.player.hand) == 2
     assert not _events(st, "stage_bow")
 
 

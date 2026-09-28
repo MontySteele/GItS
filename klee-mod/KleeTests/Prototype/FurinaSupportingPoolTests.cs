@@ -229,9 +229,10 @@ public class FurinaSupportingPoolTests
         Assert.Equal(0, alone.Whisper());
         Assert.Equal(new[] { 6 }, Bars(alone));
 
-        // Cost 1, upgraded 0; no number on the face.
+        // Cost 1 at both levels; the upgrade draws 2 (LAW's cycling rule).
         var card = new ProtoFsStageWhisper();
         Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.Equal(1m, card.DynamicVars.Cards.BaseValue);
         Assert.False(card.DynamicVars.TryGetValue("Whisper", out var whisper));
     }
 
