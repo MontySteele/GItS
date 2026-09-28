@@ -434,8 +434,8 @@ public class KokomiPoolPassTwoTests
     {
         // The dusk entries leave the queue and the others stay, taken before
         // the first clause runs for `ResolveAll`'s reason. It goes through the
-        // SHARED `Drain`, so a dusk carry-out is a carry-out -- Treatise draws
-        // on it and `NotePlanCarriedOut` fires. Twins:
+        // SHARED `Drain`, so a dusk carry-out is a carry-out -- the plan bus
+        // rings on it and `NotePlanCarriedOut` fires. Twins:
         // `test_a_dusk_drain_leaves_the_morning_entries_where_they_are`,
         // `test_a_dusk_carry_out_is_a_carry_out`.
         var calls = Il.Calls(typeof(KokomiPlan)
@@ -562,7 +562,7 @@ public class KokomiPoolPassTwoTests
         // "your next Plan" was ambiguous between the next carried out and the
         // next written (`EB-687`, `EB-645`).
         Assert.Equal(
-            "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: The "
+            "Deal {Damage:diff()} damage. [gold]Plan[/gold]: The "
           + "Plan after this one is carried out twice.",
             Face(new ProtoKkSecondWave()));
         Assert.EndsWith("The Plan after this one deals double damage.",

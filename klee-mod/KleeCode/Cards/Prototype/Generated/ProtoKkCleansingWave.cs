@@ -45,7 +45,7 @@ public sealed class ProtoKkCleansingWave : CustomCardModel, ICharacterCard, IPla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Cleansing Wave"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Remove one of your debuffs. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Remove one of your debuffs. Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,7 +60,7 @@ public sealed class ProtoKkCleansingWave : CustomCardModel, ICharacterCard, IPla
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move),
+            new CardsVar(1),
             new UnsourcedBlockVar("PlanBlock", 10m, ValueProp.Move)
         };
 
@@ -78,13 +78,12 @@ public sealed class ProtoKkCleansingWave : CustomCardModel, ICharacterCard, IPla
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         await KokomiOverhaulKit.RemoveOneDebuff(choiceContext, Owner.Creature);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(3m);
         DynamicVars["PlanBlock"].UpgradeValueBy(3m);
     }
 }

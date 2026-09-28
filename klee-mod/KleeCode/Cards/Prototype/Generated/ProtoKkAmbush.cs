@@ -38,14 +38,14 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCar
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanElement(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanElement(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_ambush");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ambush"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
+        ("description", "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,14 +60,13 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCar
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move),
             new KokomiPlan.PlanDamageVar(12m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkAmbush()
-        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrSelf, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrEnemy, autoAdd: false)
     {
     }
 
@@ -78,12 +77,12 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCar
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, 2, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
         DynamicVars["PlanDamage"].UpgradeValueBy(3m);
     }
 }

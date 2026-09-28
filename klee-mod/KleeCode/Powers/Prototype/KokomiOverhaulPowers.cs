@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
+using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -16,49 +17,39 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// Treatise: "Once per turn, when the Bake-Kurage carries out a Plan, draw 1
-/// card." The card that turns the Tactician's delay into cards.
+/// Treatise (Kokomi core pass, 2026-09-27): "Once per turn, when you play a
+/// card with a Plan line normally, draw 1 card." It pays for the other side of
+/// the Plan choice -- playing the now-line -- where it used to pay for a
+/// carry-out. "Normally" is <see cref="KokomiPlan.PlayedOnPet"/> answering no:
+/// a card written on the Bake-Kurage draws nothing.
 ///
-/// ONCE PER TURN SINCE 2026-09-02, and it is [USER]'s ruling off live play:
-/// "Treatise looks too good (one draw per turn if a Plan fired might be ok;
-/// one draw per Plan is too abuseable)." It used to pay on EVERY Plan carried
-/// out, which a morning holding three Plans turned into three cards, and
-/// Nereid's Ascension doubled again.
-///
-/// STILL ON THE PLAN BUS AND NOT ON THE TURN: the draw is owed only if a Plan
-/// was actually carried out, so a turn she wrote nothing on still pays
-/// nothing. The turn is the CAP, not the trigger.
-///
-/// THE LATCH IS THE LEDGER'S SHARED ONE
-/// (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), for the reason its
-/// own header gives: the bus fires from <c>AfterPlayerTurnStart</c> for the
-/// queue and from inside a card play for The Moon Overlooks the Waters' extra
-/// resolution, and both are the same turn's one draw.
-///
-/// ONE PAYMENT PER PLAN, NOT PER CLAUSE, is unchanged underneath the cap, and
-/// <see cref="KokomiPlan"/>'s resolution loop is what makes that true rather
-/// than a comment here: War Council prints two clauses and is one Plan.
+/// ONCE PER TURN on the ledger's shared latch
+/// (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), claimed before the
+/// draw. Copies stack the amount: two copies draw 2, still once a turn.
+/// Sim twin: <c>kokomi_plan.note_face_up_plan_card</c>.
 /// </summary>
-public sealed class TreatisePower
-    : PowerModel, ILocalizationProvider, IKokomiPlanListener
+public sealed class TreatisePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Treatise"),
         ("description",
-            "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Plan[/gold], draw [blue]{Amount}[/blue] card{Amount:plural:|s}."),
+            "Once per turn, when you play a card with a [gold]Plan[/gold] "
+          + "line normally, draw [blue]{Amount}[/blue] card{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public async Task OnPlanResolved(
-        PlayerChoiceContext choiceContext, Creature kokomi)
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (kokomi != Owner) return;                 // co-op: your plans only
-        var player = Owner?.Player;
+        if (Owner == null || Amount <= 0) return;
+        if (cardPlay.Card.Owner?.Creature != Owner) return;
+        if (cardPlay.Card is not IPlannedCard { PlanClauses.Count: > 0 }) return;
+        if (KokomiPlan.PlayedOnPet(cardPlay)) return;
+        var player = Owner.Player;
         if (player == null) return;
         if (!KokomiOverhaulLedger.ClaimOncePerTurn(Owner, nameof(TreatisePower)))
         {
@@ -69,48 +60,55 @@ public sealed class TreatisePower
 }
 
 /// <summary>
-/// Song of Pearls: "Once per turn, when the Bake-Kurage carries out a Plan,
-/// gain 3 Block." Treatise's defensive twin, on the same bus, priced in the
-/// same unit and capped the same way.
+/// Song of Pearls (Kokomi core pass, 2026-09-27): "At the start of your turn,
+/// if no Plan waits, the Bake-Kurage deals 4 damage to ALL enemies." The
+/// empty-queue payoff: a turn with nothing written pays out the next morning.
 ///
-/// ONCE PER TURN SINCE 2026-09-02, and [USER] ruled it in one word --
-/// "Likewise" -- of Treatise's own verdict: the two cards are the same shape,
-/// so a fix that left one of them paying per Plan would just move the
-/// abusable line onto the other.
+/// IT HOOKS NOTHING ITSELF. <see cref="ProtoBakeKuragePower"/>'s turn-start
+/// hook reads the queue just before <see cref="KokomiPlan.ResolveAll"/> drains
+/// it and calls <see cref="Strike"/> after the drain only if it was empty, so
+/// a morning that carried a Plan out never also fires this. Power hook order
+/// is not guaranteed, which is why the read cannot live on this power.
 ///
-/// THE BLOCK IS POWERED (<c>ValueProp.Move</c>) for the reason a planned Block
-/// is: rule 3 says "your Strength and Dexterity count, since the plans are
-/// hers", and this Block is paid out BY a Plan. The alternative --
-/// <c>Unpowered</c>, the NC-11 power-sourced line -- would make the same
-/// morning's Block from Read the Field and from this card scale differently,
-/// which nothing printed says.
+/// DEALT AS A PLANNED HIT IS: Hydro through <see cref="ElementalHit.Deal"/>,
+/// unpowered, with her Strength folded in by <see cref="KokomiPlan.Hers"/>.
+/// Copies stack the amount. Sim twin: <c>kokomi_plan.song_of_pearls</c>.
 /// </summary>
-public sealed class SongOfPearlsPower
-    : PowerModel, ILocalizationProvider, IKokomiPlanListener
+public sealed class SongOfPearlsPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Song of Pearls"),
         ("description",
-            "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Plan[/gold], gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
+            "At the start of your turn, if no [gold]Plan[/gold] waits, the "
+          + "[gold]Bake-Kurage[/gold] deals [blue]{Amount}[/blue] damage to "
+          + "ALL enemies."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public async Task OnPlanResolved(
-        PlayerChoiceContext choiceContext, Creature kokomi)
+    /// <summary>The strike. The caller has already decided the queue was
+    /// empty; this only reads the power and deals the damage.</summary>
+    public static async Task Strike(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
     {
-        if (kokomi != Owner) return;                 // co-op: your plans only
-        if (Owner == null || Amount <= 0) return;
-        if (!KokomiOverhaulLedger.ClaimOncePerTurn(
-                Owner, nameof(SongOfPearlsPower)))
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var song = kokomi!.Powers.OfType<SongOfPearlsPower>().FirstOrDefault();
+        if (song == null || song.Amount <= 0) return;
+        var combat = kokomi.CombatState;
+        if (combat == null) return;
+        var amount = KokomiPlan.Hers(kokomi, null, song.Amount);
+        if (amount <= 0) return;
+        foreach (var enemy in combat.HittableEnemies.Where(e => !e.IsDead)
+                                    .ToList())
         {
-            return;
+            if (enemy.IsDead) continue;
+            await ElementalHit.Deal(
+                choiceContext, enemy, Element.Hydro, amount, kokomi,
+                powered: false);
         }
-        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
     }
 }
 
@@ -123,11 +121,9 @@ public sealed class SongOfPearlsPower
 /// of <see cref="ChargePerTurnPower"/> while the arm is live for her, and the
 /// shipped behaviour is untouched off the arm.
 ///
-/// EVERY PLAN, NOT ONCE A TURN. Treatise and Song of Pearls are capped at a
-/// turn by [USER]'s 2026-09-02 ruling because they were Uncommons stacking
-/// with each other; this is the one Ancient, the Tome's single grant, and its
-/// printed text says "Whenever". The Block is POWERED for Song of Pearls'
-/// reason (rule 3: her Dexterity counts on what a Plan pays).
+/// EVERY PLAN, NOT ONCE A TURN: this is the one Ancient, the Tome's single
+/// grant, and its printed text says "Whenever". The Block is POWERED (rule 3:
+/// her Dexterity counts on what a Plan pays).
 ///
 /// <see cref="PowerModel.Amount"/> is the Block; the draw is always 1.
 /// Sim twin: <c>kokomi_plan.PRINCESS_OF_WATATSUMI</c>.
@@ -513,6 +509,57 @@ public sealed class FirstCardFreePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
+/// CHAIN OF COMMAND's carry-out (Kokomi core pass): "This turn, the first
+/// Companion card you play costs 0." <see cref="FirstCardFreePower"/>
+/// narrowed to Companion cards, on the cost seam Rally's discount rides. Spent
+/// by the first Companion she pays for (an auto-play pays nothing and does not
+/// spend it); removed at the end of her turn either way. Sim twin:
+/// <c>kokomi_plan.FIRST_COMPANION_FREE</c>.
+/// </summary>
+public sealed class FirstCompanionFreePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Chain of Command"),
+        ("description",
+            "This turn, the first [gold]Companion[/gold] card you play costs 0."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override bool TryModifyEnergyCostInCombat(
+        CardModel card, decimal originalCost, out decimal modifiedCost)
+    {
+        modifiedCost = originalCost;
+        if (card is not ICompanionCard) return false;
+        if (card.Owner?.Creature != Owner) return false;
+        if (originalCost <= 0m) return false;
+        modifiedCost = 0m;
+        return true;
+    }
+
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (cardPlay.Card is not ICompanionCard) return;
+        if (cardPlay.Card.Owner?.Creature != Owner) return;
+        if (cardPlay.IsAutoPlay) return;
+        if (!cardPlay.IsLastInSeries) return;
+        await PowerCmd.Remove(this);
+    }
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
+}
+
+/// <summary>
 /// SHELL GUARD's window (`EB-335`, R246 pick 2): "Until your next turn,
 /// whenever the Tamakushi Casket strikes, gain 3 Block."
 ///
@@ -542,8 +589,7 @@ public sealed class FirstCardFreePower : PowerModel, ILocalizationProvider
 /// the relic away pays nothing here.
 ///
 /// THE BLOCK IS POWERED (<c>ValueProp.Move</c>) for the reason every other
-/// Block in this arm is -- rule 3, and <see cref="SongOfPearlsPower"/>'s
-/// header.
+/// Block in this arm is -- rule 3: her Dexterity counts on what a Plan pays.
 /// </summary>
 public sealed class ShellGuardPower : PowerModel, ILocalizationProvider
 {

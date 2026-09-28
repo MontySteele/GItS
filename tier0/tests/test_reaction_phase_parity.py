@@ -1265,6 +1265,11 @@ CO_TENANCY_LEDGER = {
             "QUARANTINED (the Kokomi overhaul, R276). Stolen Chapter's "
             "carry-out, \"this turn\", on the same boundary. Removes itself "
             "and touches nothing else",
+        ("Powers/Prototype/KokomiOverhaulPowers.cs",
+         "FirstCompanionFreePower"):
+            "QUARANTINED (the Kokomi overhaul, core pass). Chain of Command's "
+            "carry-out, \"this turn\", on the same boundary. Removes itself "
+            "and touches nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
         ("Powers/CompanionPowers.cs", "CompanionCostThisTurnPower"):

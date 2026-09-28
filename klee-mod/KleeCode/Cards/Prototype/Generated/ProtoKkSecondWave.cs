@@ -32,20 +32,26 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkSecondWave : CustomCardModel, ICharacterCard, IPlannedCard
+public sealed class ProtoKkSecondWave : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
 {
+    /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
+    public Element Element => Element.Hydro;
+
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesHydro };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanTwice(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanTwice(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_second_wave");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Second Wave"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: The Plan after this one is carried out twice."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Plan[/gold]: The Plan after this one is carried out twice."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,13 +66,13 @@ public sealed class ProtoKkSecondWave : CustomCardModel, ICharacterCard, IPlanne
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move)
+            new DamageVar(5m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkSecondWave()
-        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrSelf, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrEnemy, autoAdd: false)
     {
     }
 
@@ -77,11 +83,16 @@ public sealed class ProtoKkSecondWave : CustomCardModel, ICharacterCard, IPlanne
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
+        DynamicVars.Damage.UpgradeValueBy(2m);
     }
 }

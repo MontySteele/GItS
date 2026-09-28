@@ -6669,6 +6669,8 @@ OPS = {
     # R276 PICK 1, the halves rewrite: five Plan-only clauses.
     "first_attack_twice": _op_kokomi_plan_only,
     "first_card_free": _op_kokomi_plan_only,
+    # Kokomi core pass: Chain of Command's switch, Stolen Chapter's narrowed.
+    "first_companion_free": _op_kokomi_plan_only,
     "damage_if_unhurt": _op_kokomi_plan_only,
     "attack_damage_this_turn": _op_kokomi_plan_only,
     # THE CO-OP SET's two Plan clauses about another player (`engine/coop.py`).
@@ -6890,6 +6892,10 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # would stop being twins the moment one of them is played.
     if card.enchant_first_play_damage or card.enchant_first_play_effects:
         card.enchant_played_this_combat = True
+    # QUARANTINED (C.KOKOMI_OVERHAUL). Core pass, TREATISE: a card with a Plan
+    # line played NORMALLY -- a write returned above, before any of this.
+    if C.KOKOMI_OVERHAUL:
+        kokomi_plan.note_face_up_plan_card(state, card)
 
 
 def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,

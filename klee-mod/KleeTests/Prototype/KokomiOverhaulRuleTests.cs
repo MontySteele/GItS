@@ -367,6 +367,9 @@ public class KokomiOverhaulRuleTests
         // Joint Orders' `AllyDraw`, the player captured when the Plan is
         // written, and Coordinated Strike's `OthersAttackDamageThisTurn`,
         // Battle Plan's clause mirrored onto every other player.
+        //
+        // TWENTY-SIX WITH THE KOKOMI CORE PASS: Chain of Command's
+        // `FirstCompanionFree`, appended last so no ordinal moves.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
@@ -378,7 +381,7 @@ public class KokomiOverhaulRuleTests
                     "NextAttackDamage", "FirstAttackTwice", "FirstCardFree",
                     "DamageIfUnhurt", "AttackDamageThisTurn",
                     "BlockFrontIntent", "AllyDraw",
-                    "OthersAttackDamageThisTurn" },
+                    "OthersAttackDamageThisTurn", "FirstCompanionFree" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -546,12 +549,11 @@ public class KokomiOverhaulRuleTests
         Assert.DoesNotContain("IKokomiPlanListener.OnPlanResolved",
                               Il.Calls(one));
 
-        Assert.Contains("CardPileCmd.Draw",
-                        Il.Calls(typeof(TreatisePower)
-                            .GetMethod("OnPlanResolved", HeadlessGame.All)!));
-        Assert.Contains("CreatureCmd.GainBlock",
-                        Il.Calls(typeof(SongOfPearlsPower)
-                            .GetMethod("OnPlanResolved", HeadlessGame.All)!));
+        // Kokomi core pass: Treatise and Song of Pearls left the bus.
+        Assert.False(typeof(IKokomiPlanListener)
+            .IsAssignableFrom(typeof(TreatisePower)));
+        Assert.False(typeof(IKokomiPlanListener)
+            .IsAssignableFrom(typeof(SongOfPearlsPower)));
     }
 
     // ---- THE ONCE-PER-TURN CAPS ([USER], live 2026-09-02) ----------------
@@ -570,45 +572,24 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void Treatise_draws_once_a_turn_and_a_second_plan_draws_nothing()
+    public void Treatise_draws_once_a_turn_and_a_second_play_draws_nothing()
     {
-        // [USER], live: "Treatise looks too good (one draw per turn if a Plan
-        // fired might be ok; one draw per Plan is too abuseable)."
+        // Still once a turn (the core pass moved its trigger, not its cap).
         var ledger = RolledLedger();
         Assert.True(ledger.Claim(nameof(TreatisePower)));
         Assert.False(ledger.Claim(nameof(TreatisePower)));
 
-        // A CAP AND NOT A ONE-SHOT: the next morning pays again.
+        // A CAP AND NOT A ONE-SHOT: the next turn pays again.
         ledger.RollTo(4);
         Assert.True(ledger.Claim(nameof(TreatisePower)));
 
-        // And the hook CLAIMS BEFORE IT DRAWS, so the second Plan of a
-        // morning reaches no draw at all rather than drawing and refunding.
+        // And the hook CLAIMS BEFORE IT DRAWS, so the second play of a turn
+        // reaches no draw at all rather than drawing and refunding.
         var hook = typeof(TreatisePower)
-            .GetMethod("OnPlanResolved", HeadlessGame.All)!;
+            .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
         var calls = Il.CallSequence(hook).ToList();
         Assert.True(calls.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn")
                     < calls.IndexOf("CardPileCmd.Draw"));
-        KokomiOverhaulLedger.ResetAll();
-    }
-
-    [Fact]
-    public void Song_of_pearls_blocks_once_a_turn_and_a_second_plan_does_not()
-    {
-        // [USER], live, in one word -- "Likewise" -- of Treatise's verdict:
-        // the two cards are the same shape, so capping one and not the other
-        // would just move the abusable line across.
-        var ledger = RolledLedger();
-        Assert.True(ledger.Claim(nameof(SongOfPearlsPower)));
-        Assert.False(ledger.Claim(nameof(SongOfPearlsPower)));
-        ledger.RollTo(4);
-        Assert.True(ledger.Claim(nameof(SongOfPearlsPower)));
-
-        var hook = typeof(SongOfPearlsPower)
-            .GetMethod("OnPlanResolved", HeadlessGame.All)!;
-        var calls = Il.CallSequence(hook).ToList();
-        Assert.True(calls.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn")
-                    < calls.IndexOf("CreatureCmd.GainBlock"));
         KokomiOverhaulLedger.ResetAll();
     }
 
@@ -702,22 +683,21 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void The_three_caps_are_one_latch_set_and_do_not_shadow_each_other()
+    public void The_caps_are_one_latch_set_and_do_not_shadow_each_other()
     {
-        // ONE helper shared by three powers, keyed by the power's own name --
-        // so a morning that pays Treatise still pays Song of Pearls, and a
-        // Companion played after both still applies its Weak.
+        // ONE helper shared by the capped powers, keyed by the power's own
+        // name -- so a turn that pays Treatise still lets a Companion apply
+        // The General's Banner's Weak. (Song of Pearls left the set in the
+        // core pass: it fires once a turn by construction.)
         var ledger = RolledLedger();
         Assert.True(ledger.Claim(nameof(TreatisePower)));
-        Assert.True(ledger.Claim(nameof(SongOfPearlsPower)));
         Assert.True(ledger.Claim(nameof(GeneralsBannerPower)));
         Assert.False(ledger.Claim(nameof(TreatisePower)));
 
-        // And the turn boundary clears all three at once, which is why they
+        // And the turn boundary clears them at once, which is why they
         // cannot come to disagree about when a turn began.
         ledger.RollTo(4);
         Assert.True(ledger.Claim(nameof(TreatisePower)));
-        Assert.True(ledger.Claim(nameof(SongOfPearlsPower)));
         Assert.True(ledger.Claim(nameof(GeneralsBannerPower)));
         KokomiOverhaulLedger.ResetAll();
     }

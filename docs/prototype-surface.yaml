@@ -1165,13 +1165,13 @@
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
-   # Plan line buys what only a head start can buy.
-   description: "Gain 5 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 12 damage.",
-   effects: [{op: block, amount: 5}],
+   # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
+   # now-half does something on a quiet turn.
+   description: "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 damage.",
+   effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy}],
    plan: [{op: damage, amount: 12, target: front_enemy}],
-   # 7 Block; Plan 15.
-   upgrade: {block: 2, plan_damage: 3}}
+   # Plan 15; the now-line does not upgrade.
+   upgrade: {plan_damage: 3}}
 
 # POOL PASS FOUR (`EB-679`): the now-line is SELECTION and the 5 Block is
 # gone. r26's lane made no decision off the look-and-bury and the Block was a
@@ -1199,16 +1199,20 @@
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card.",
+   # Kokomi core pass: pays for playing a Plan card's now-line, not for a
+   # carry-out. "Normally" = not written on the Bake-Kurage.
+   description: "Once per turn, when you play a card with a [gold]Plan[/gold] line normally, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
-   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {innate: true}}
 
 - {id: proto_kk_song_of_pearls, name: "Song of Pearls (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain 3 [gold]Block[/gold].",
-   effects: [{op: apply_power, power: kk_song_of_pearls, amount: 3, target: self}]}
+   # Kokomi core pass: the empty-queue payoff. Hydro, and her Strength counts,
+   # as her planned hits do.
+   description: "At the start of your turn, if no [gold]Plan[/gold] waits, the [gold]Bake-Kurage[/gold] deals {PowerAmount:diff()} damage to ALL enemies.",
+   effects: [{op: apply_power, power: kk_song_of_pearls, amount: 4, target: self}],
+   upgrade: {power_amount: 2}}
 
 - {id: proto_kk_war_council, name: "War Council", character: kokomi,
    authored_by: [claude],
@@ -1263,10 +1267,13 @@
 - {id: proto_kk_cleansing_wave, name: "Cleansing Wave", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 5 [gold]Block[/gold]. Remove one of your debuffs. [gold]Plan[/gold]: Gain 10 [gold]Block[/gold].",
-   effects: [{op: block, amount: 5},
-             {op: remove_debuff}],
-   plan: [{op: block, amount: 10}]}
+   # Kokomi core pass: two different jobs, not Block at two sizes.
+   description: "Remove one of your debuffs. Draw 1 card. [gold]Plan[/gold]: Gain 10 [gold]Block[/gold].",
+   effects: [{op: remove_debuff},
+             {op: draw, amount: 1}],
+   plan: [{op: block, amount: 10}],
+   # Plan 13; the now-line does not upgrade.
+   upgrade: {plan_block: 3}}
 
 # `EB-335`, R246 pick 2: the kit's own defence in act 2. Both rows wore a
 # neighbour's illustration through `art_of:` until `EB-778` placed their own
@@ -1348,14 +1355,14 @@
 - {id: proto_kk_chain_of_command, name: "Chain of Command", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Deal 3 damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Deal 6 damage for each Companion you play this turn.",
+   # Kokomi core pass: the Plan buys tempo for tomorrow's Companion. Its full
+   # rebuild belongs to the "plan the reaction" batch.
+   description: "Deal {ExtraDamage:diff()} damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Next turn, the first Companion card you play costs 0.",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 0, per: 3, count: companions_played_this_turn}}],
-   plan: [{op: damage_per_companion_last_turn, amount: 6, target: front_enemy}],
-   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
-   # R250 pick 1 (round 4d sec.6): now-line added, the delta stays on the
-   # Plan half; EB-362 fixed "last turn" to the write turn, both engines.
-   upgrade: {plan_damage: 2}}
+   plan: [{op: first_companion_free}],
+   # 4 per Companion; the Plan line does not upgrade.
+   upgrade: {formula_per: 1}}
 
 # --- currencies, tempo, and the one replay (packet sec.4) ---
 
@@ -1429,11 +1436,13 @@
 - {id: proto_kk_ripple, name: "Ripple", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Gain 2 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and {IfUpgraded:show:7|4} [gold]Block[/gold].",
-   upgrade: {plan_block: 3},
-   effects: [{op: block, amount: 2}],
-   plan: [{op: energy, amount: 1},
-          {op: block, amount: 4}]}
+   # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
+   # now-half does something on a quiet turn.
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold].",
+   effects: [{op: draw, amount: 1}],
+   plan: [{op: energy, amount: 1}],
+   # now draw 2; the Plan line does not upgrade.
+   upgrade: {draw: 1}}
 
 # --- POOL PASS ONE (`EB-492`): the offer's Plan density, on the Attacks.
 # Five rows, LAST in the sheet's own order (`lint_arm_pool_parity` compares BY
@@ -1486,15 +1495,15 @@
 - {id: proto_kk_feigned_retreat, name: "Feigned Retreat", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
-   # Plan line buys what only a head start can buy.
+   # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
+   # now-half does something on a quiet turn.
    # "Since playing this": the entry records her HP when it is written.
-   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 9 damage, or 14 if you lost no HP since playing this.",
-   effects: [{op: block, amount: 6}],
+   description: "Draw 2 cards. Discard 1 card. [gold]Plan[/gold]: Deal 9 damage, or 14 if you lost no HP since playing this.",
+   effects: [{op: draw, amount: 2}, {op: discard, amount: 1, select: chosen}],
    plan: [{op: damage_if_unhurt, amount: 9, unhurt_amount: 14,
            target: front_enemy}],
-   # 8 Block; Plan 12 / 18.
-   upgrade: {block: 2, plan_damage: 3, plan_unhurt_damage: 4}}
+   # Plan 12 / 18; the now-line does not upgrade.
+   upgrade: {plan_damage: 3, plan_unhurt_damage: 4}}
 
 # --- POOL PASS TWO (`EB-643`, R265): the QUEUE as something the player
 # operates on. Eight rows, LAST in the sheet's own order. The finding, the
@@ -1517,13 +1526,15 @@
 - {id: proto_kk_second_wave, name: "Second Wave", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The Plan after this one is carried out twice.",
-   effects: [{op: block, amount: 4}],
+   # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
+   # now-half does something on a quiet turn.
+   description: "Deal 5 damage. [gold]Plan[/gold]: The Plan after this one is carried out twice.",
+   effects: [{op: damage, amount: 5, target: enemy}],
    # A FLAG AND NOT A COUNT: under Nereid's Ascension the entry this reaches
    # is carried out THREE times (`CarryOutTimes + 1`) and not four, which is
    # the rule stated at `kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT`.
    plan: [{op: next_plan_extra_carry_out}],
-   upgrade: {block: 2}}
+   upgrade: {damage: 2}}
 
 - {id: proto_kk_scout_ahead, name: "Scout Ahead", character: kokomi,
    authored_by: [claude],
