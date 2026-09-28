@@ -29,11 +29,6 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
-- **Element review** (`element-home-review-2026-09-28.md`, picks 1 to 5):
-  (1, default) Swirl reacts where it lands, plus 2 to every enemy; (2) the
-  aura stays after Crystallize; (3) an Anemo or Geo character starts with one
-  aura-element companion; (4) these land after your Kokomi run, under a flag;
-  (5) character four is Nahida.
 
 - **P2 hard-state thresholds** (`p2-hard-state-thresholds-2026-08-13.md`,
   picks 1 to 4): (1, default) adopt the packet's four proposals (more than one
