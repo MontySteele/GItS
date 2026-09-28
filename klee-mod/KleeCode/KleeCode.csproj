@@ -17,7 +17,7 @@
        `dotnet build -p:PrototypeCards=true` compiles Cards/Prototype/** and
        defines PROTOTYPE_CARDS, which is what makes KleeMod.PrototypeCards
        hand the generated rows to each character's OFF-POOL list. WITHOUT the
-       property the directory is not compiled at all, so a release build
+       property the directory is not compiled at all, so such a build
        contains no prototype class and there is no id for anything to grant.
 
        Compile Remove (rather than a gitignore) because the generated files
@@ -26,7 +26,11 @@
        surface that vanished from the tree would take its own audit trail
        with it.
 
-       build/deploy.ps1 and build/validate.ps1 deliberately never set this. -->
+       build/deploy.ps1 and build/validate.ps1 never name this property.
+       SINCE 2026-09-28 IT IS ON BY DEFAULT, with the four kit arms below:
+       klee-mod/Directory.Build.props sets them when nothing else has ([USER]:
+       "make all 3 current builds the active release builds"), and
+       -p:ShippedKits=true is the one opt-out, the old shipped kits whole. -->
   <PropertyGroup Condition="'$(PrototypeCards)' == 'true'">
     <DefineConstants>$(DefineConstants);PROTOTYPE_CARDS</DefineConstants>
   </PropertyGroup>

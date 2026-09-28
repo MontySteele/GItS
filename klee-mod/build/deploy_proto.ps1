@@ -1,40 +1,38 @@
 <#
-  THE DEV DEPLOY. Build Klee WITH the quarantined prototype surface compiled
-  in, and stage it into the game's mods/ directory.
+  THE DEV DEPLOY. Build Klee as the release build does, PLUS an arm the
+  release must not carry, stamp it +proto, and stage it into the game's mods/
+  directory.
 
-  WHY THIS IS A SECOND SCRIPT AND NOT A SWITCH ON deploy.ps1.
+  WHAT CHANGED ON 2026-09-28. [USER]'s ruling, in his words: "The current
+  character builds are much more progressed than the old prototypes were,
+  even though it's still a work in progress. Let's go ahead and make all 3
+  current builds the active release builds to avoid this confusion." So the
+  DEFAULT build -- klee-mod\build\deploy.ps1, and any build naming no property --
+  now compiles the prototype surface and turns on Klee's overhaul, the
+  companion overhaul, Kokomi's overhaul and Furina's Stage
+  (klee-mod/Directory.Build.props). Those four used to be this script's
+  switches; they are gone from it, because the release already carries them.
 
-  tier0/tests/test_prototype_surface.py asserts that neither deploy.ps1 nor
-  validate.ps1 contains the string "PrototypeCards" -- a bare substring check
-  over the whole file, comments included. That assertion IS the quarantine's
-  release-path leg (R213 B): the release scripts cannot set the flag, cannot
-  be talked into setting it, and cannot describe setting it. A `-Prototype`
-  switch on deploy.ps1 would have to name the property to pass it, so the
-  ruling's own guard forbids the shape. One dev file that the release path
-  never calls is the arrangement that leaves both halves true.
+  WHAT IS LEFT FOR THIS SCRIPT is the one arm the release must not carry:
+  -TeyvatFrame, the run frame [USER] put on hold (docs/current/STATE.md). It
+  REFUSES to run without it: a +proto package whose contents equal the
+  release is the exact confusion the ruling removed. For the ordinary build,
+  seats included, run klee-mod\build\deploy.ps1 (or
+  tools/deploy_round.py, which adds the bridge).
 
   WHAT IS DIFFERENT FROM deploy.ps1, and it is exactly four things:
 
-    1. `-p:PrototypeCards=true` on the build, which compiles
-       Cards/Prototype/** and defines PROTOTYPE_CARDS.
+    1. `-p:TeyvatFrame=true` on the build.
     2. The staged package version carries the +proto build metadata, so a dev
        build is identifiable on sight in the game's own version string.
-    3. `tools/gen_prototype_cards.py --check` runs FIRST. The release gate's
-       S6a runs the ROSTER codegen staleness check, which cannot see this
-       surface -- so without this a dev deploy could ship prototype classes
-       that no longer match the sheet, which is the one way this script could
-       hand a staged turn a card nobody wrote.
+    3. `tools/gen_prototype_cards.py --check` runs FIRST, before anything is
+       built. (validate.ps1's S6a runs it too since the ruling; this is the
+       earlier, cheaper stop.)
     4. It installs the STS2_MCP bridge as its LAST step, so this machine's
-       next launch is parallel-ready (2026-09-02). The reason it belongs here
-       and nowhere near deploy.ps1: mods load at BOOT and this script is the
-       one moment the game is guaranteed closed (it refuses to run otherwise),
-       so it is the only moment the bridge can be put in front of a launch the
-       OWNER makes from Steam. Without it, an agent's second instance can only
-       ever reach a game the harness launched itself. A dev build is never
-       handed to anyone -- that is stated three times below -- so the harness
-       riding along with it reaches nobody a prototype class does not. It is a
-       WARNING and not a failure if it does not take: the klee package is
-       already deployed by then, and the bridge is a harness.
+       next launch is parallel-ready (2026-09-02). Mods load at BOOT and this
+       script is a moment the game is guaranteed closed (it refuses to run
+       otherwise). It is a WARNING and not a failure if it does not take: the
+       klee package is already deployed by then, and the bridge is a harness.
 
   WHAT IS NOT DIFFERENT, deliberately: the gate. validate.ps1 runs whole --
   every S-rule, no rule relaxed and no static-only mode requested. A prototype
@@ -50,29 +48,20 @@
   The three conditions are in klee-mod/build/ci_trust.ps1 and every failure to
   establish one runs the tests.
 
-  A DEV PACKAGE CHANGES NOTHING FOR ORDINARY PLAY. Prototype rows are
-  off-pool: in each character's off-pool list so CardModel.Pool resolves, out
-  of GetUnlockedCards so no reward roll and no card transform can produce one.
-  The only door in is a grant by id through the understudy tooling. So the
-  difference between this package and the release one, for anybody just
-  playing, is that some extra classes exist and are never reachable.
-
   RESTORING THE RELEASE BUILD. There is no --restore switch here and there
   should not be, because there is nothing to restore FROM: this script
   overwrites mods\klee, and so does deploy.ps1. The undo is simply
 
       klee-mod\build\deploy.ps1
 
-  run from the art-bearing main checkout, which rebuilds without the property
-  (the directory is then Compile Remove'd, so the classes are not in the dll
-  at all) and overwrites mods\klee again. Confirm it took by reading the
+  run from the art-bearing main checkout, which rebuilds without the dev arm
+  and overwrites mods\klee again. Confirm it took by reading the
   version in game: a release build has no +proto. Do this before any
   measured run, any handoff, and any co-op session.
 
   NO -Package SWITCH. deploy.ps1 has one; this must not. A handoff zip is a
-  build somebody else runs, and a dev build carrying uncompiled-elsewhere
-  prototype classes is not a thing to hand anyone -- co-op is lockstep and a
-  peer on a release build has no such classes.
+  build somebody else runs, and co-op is lockstep: a peer on the release
+  build has no dev arm.
 
   NOTE: keep this file pure ASCII (validate.ps1 S8 sweeps every .ps1 in the
   repo). Windows PowerShell 5.1 reads .ps1 as ANSI unless there is a BOM.
@@ -90,56 +79,6 @@ param(
     # 399 s of every dev deploy to re-derive a fact GitHub already held; see
     # klee-mod/build/ci_trust.ps1 for the three conditions a skip needs.
     [switch]$FullGate,
-    # THE KLEE OVERHAUL ARM (the ruled brief klee-brief-2026-09-01.md sec.3,
-    # slice one klee-overhaul-slice-1-2026-09-01.md). Adds -p:KleeOverhaul=true
-    # to the build below, which is the ONLY thing that turns the arm on:
-    # without it a dev build compiles the arm's types and never reaches them,
-    # and Klee's starter and pool are the Sparks arm's exactly as before. Sim
-    # twin: C.KLEE_OVERHAUL, which ships False.
-    #
-    # A SWITCH HERE AND NOWHERE ELSE, the same arrangement the prototype
-    # property has: the release scripts must not be able to name it, and this
-    # is the one file the release path never calls.
-    [switch]$KleeOverhaul,
-    # THE MONDSTADT COMPANION OVERHAUL ARM (the approved workshop
-    # companion-workshop-mondstadt-2026-09-01.md sec.3). Adds
-    # -p:CompanionOverhaul=true to the build below, which is the ONLY thing
-    # that turns the arm on: without it a dev build compiles the arm's types
-    # and never reaches them, and the companion reward slot offers the
-    # seventeen shipped Mondstadt rows exactly as before. Sim twin:
-    # C.COMPANION_OVERHAUL, which ships False.
-    #
-    # INDEPENDENT OF -KleeOverhaul, and the two are meant to be passed
-    # together: that arm replaces Klee's starter and pool, this one replaces
-    # Mondstadt's companion pool, and the two sets do not intersect. A dev
-    # build that carries both is the supported dev build.
-    [switch]$CompanionOverhaul,
-    # THE KOKOMI OVERHAUL ARM (the ruled brief kokomi-brief-2026-09-01.md
-    # sec.4, slice one kokomi-overhaul-slice-1-2026-09-01.md). Adds
-    # -p:KokomiOverhaul=true to the build below, which is the ONLY thing that
-    # turns the arm on: without it a dev build compiles the arm's types and
-    # never reaches them, and Kokomi's starter, starting relic and pool are the
-    # shipped ones exactly as before. Sim twin: C.KOKOMI_OVERHAUL, which ships
-    # False.
-    #
-    # INDEPENDENT OF THE OTHER TWO, and all three are meant to be passed
-    # together: the Klee arm replaces Klee's starter and pool, the companion
-    # arm replaces Mondstadt's companion pool, this one replaces Kokomi's
-    # starter, relic and pool, and the three sets do not intersect. A dev build
-    # that carries all three is the supported dev build.
-    [switch]$KokomiOverhaul,
-    # THE FURINA STAGE ARM (the brief
-    # review/active/furina-stage-brief-2026-09-08.md, R269: sec.3 the rules,
-    # sec.12 the seventeen faces). Adds -p:FurinaStage=true to the build
-    # below, which is the ONLY thing that turns the arm on: without it a dev
-    # build compiles the arm's types and never reaches them, and Furina's
-    # starter, her starting relic, her offerable pool and her damage pipeline
-    # are exactly what they ship. Sim twin: tier0/engine/furina_stage.py's
-    # FURINA_STAGE, which ships False.
-    #
-    # IT IS FURINA'S ONLY ARM. The reframe it succeeded left the tree whole
-    # under EB-726 (the brief's sec.2, R269).
-    [switch]$FurinaStage,
     # THE TEYVAT RUN FRAME ARM (R272, the frame packet
     # review/active/teyvat-run-frame-2026-09-14.md sec.4; the spike merged as
     # PR #492). Adds -p:TeyvatFrame=true to the build below, which is the ONLY
@@ -151,10 +90,10 @@ param(
     # C# twin: TeyvatFrame.Enabled, which ships false. There is no sim twin:
     # tier0 has no run frame.
     #
-    # IT IS THE ONE ARM THAT IS NOT A CHARACTER'S, and that is the only way it
-    # differs from the five above. It dresses the RUN -- act names, monster
-    # names, still portraits, music -- and changes no starter, no relic and no
-    # pool, so it is independent of all five and composes with any of them.
+    # IT IS THE ONE ARM THAT IS NOT A CHARACTER'S. It dresses the RUN -- act
+    # names, monster names, still portraits, music -- and changes no starter,
+    # no relic and no pool, so it composes with the four kit arms the default
+    # build carries.
     #
     # OFF ON EVERY CALIBRATION DEPLOY (frame packet sec.5): a dressing's event
     # pool differing in LENGTH from the base zone's would move the UpFront rng
@@ -240,11 +179,13 @@ if ($LASTEXITCODE -ne 0) {
 }
 $genOut | ForEach-Object { Write-Host "  $_" }
 
+# NO DEV ARM, NO DEV BUILD (2026-09-28). The four kit arms are the release
+# default now, so without -TeyvatFrame this package would equal the release
+# one while wearing +proto -- the confusion the ruling removed.
+if (-not $TeyvatFrame) {
+    throw "deploy_proto.ps1 builds only a build that differs from the release, and every kit arm is the release default since 2026-09-28. Pass -TeyvatFrame, or run klee-mod\build\deploy.ps1 (tools/deploy_round.py adds the bridge)."
+}
 $arms = @()
-if ($KleeOverhaul) { $arms += 'the Klee overhaul arm' }
-if ($CompanionOverhaul) { $arms += 'the Mondstadt companion overhaul arm' }
-if ($KokomiOverhaul) { $arms += 'the Kokomi overhaul arm' }
-if ($FurinaStage) { $arms += 'the Furina stage arm' }
 if ($TeyvatFrame) { $arms += 'the Teyvat run frame arm' }
 $armLabel = if ($arms.Count) { ' AND ' + ($arms -join ' AND ') } else { '' }
 
@@ -258,12 +199,8 @@ $version = Get-PackageVersion `
     -Prototype
 $stamp = Get-AssemblyStamp -Version $version
 
-Write-Host "Building ($Configuration) WITH the prototype surface$armLabel..." -ForegroundColor Magenta
-$buildArgs = @('-p:PrototypeCards=true')
-if ($KleeOverhaul) { $buildArgs += '-p:KleeOverhaul=true' }
-if ($CompanionOverhaul) { $buildArgs += '-p:CompanionOverhaul=true' }
-if ($KokomiOverhaul) { $buildArgs += '-p:KokomiOverhaul=true' }
-if ($FurinaStage) { $buildArgs += '-p:FurinaStage=true' }
+Write-Host "Building ($Configuration): the release kits$armLabel..." -ForegroundColor Magenta
+$buildArgs = @()
 if ($TeyvatFrame) { $buildArgs += '-p:TeyvatFrame=true' }
 $buildArgs += $stamp.BuildArgs
 & dotnet build $csproj -c $Configuration -v minimal --nologo @buildArgs
@@ -287,55 +224,10 @@ $sm.version = $version.Version
 Write-Host "Stamped package version $($version.Version)" -ForegroundColor Magenta
 
 Write-Host ""
-Write-Host "*** PROTOTYPE BUILD ***" -ForegroundColor Magenta
-Write-Host "  The quarantined prototype surface is COMPILED IN. Off-pool, so" -ForegroundColor Magenta
-Write-Host "  ordinary play is unchanged and no reward roll can offer one." -ForegroundColor Magenta
-Write-Host "  Reach a row only by id, through the understudy grant tooling." -ForegroundColor Magenta
-Write-Host "  DO NOT hand this build to a co-op partner, and run" -ForegroundColor Magenta
-Write-Host "  klee-mod\build\deploy.ps1 to put the release build back." -ForegroundColor Magenta
-if ($KleeOverhaul) {
-    Write-Host ""
-    Write-Host "*** KLEE OVERHAUL ARM ON ***" -ForegroundColor Magenta
-    Write-Host "  Klee's starter and her WHOLE reward pool are slice one's rows." -ForegroundColor Magenta
-    Write-Host "  Her shipped 79 cards cannot be offered while this build is in." -ForegroundColor Magenta
-    Write-Host "  Bombs never go off by themselves; only a Set off card pops one." -ForegroundColor Magenta
-}
-if ($CompanionOverhaul) {
-    Write-Host ""
-    Write-Host "*** MONDSTADT COMPANION OVERHAUL ARM ON ***" -ForegroundColor Magenta
-    Write-Host "  The companion reward slot offers the workshop's rewritten" -ForegroundColor Magenta
-    Write-Host "  Mondstadt Universals; the 17 shipped Mondstadt rows cannot" -ForegroundColor Magenta
-    Write-Host "  be offered. Inazuma and Fontaine are untouched." -ForegroundColor Magenta
-}
-Write-Host ""
-
-if ($KokomiOverhaul) {
-    Write-Host ""
-    Write-Host "*** KOKOMI OVERHAUL ARM ON ***" -ForegroundColor Magenta
-    Write-Host "  Kokomi's starter, her starting relic and her WHOLE reward" -ForegroundColor Magenta
-    Write-Host "  pool are slice one's rows. Her shipped 76 cards cannot be" -ForegroundColor Magenta
-    Write-Host "  offered while this build is in, and the Pearl of Wisdom is" -ForegroundColor Magenta
-    Write-Host "  replaced by Tamakushi Casket." -ForegroundColor Magenta
-    Write-Host "  The Bake-Kurage is always out and holds Tide; nothing" -ForegroundColor Magenta
-    Write-Host "  Exhausts for Charge and the Burst gate does not fill." -ForegroundColor Magenta
-}
-
-if ($FurinaStage) {
-    Write-Host ""
-    Write-Host "*** FURINA STAGE ARM ON ***" -ForegroundColor Magenta
-    Write-Host "  Three performers stand in front of her as PETS with their" -ForegroundColor Magenta
-    Write-Host "  own visible bars, front/middle/back. Salon Solitaire opens" -ForegroundColor Magenta
-    Write-Host "  every combat with the Usher in front at 3 Fanfare." -ForegroundColor Magenta
-    Write-Host "  DAMAGE ORDER, per attack: her Block, then the LEAD's bar," -ForegroundColor Magenta
-    Write-Host "  then her. It never runs on to the middle seat, so one big" -ForegroundColor Magenta
-    Write-Host "  hit and a flurry are answered differently." -ForegroundColor Magenta
-    Write-Host "  Spend pays the lead and fires IN FULL even when the lead" -ForegroundColor Magenta
-    Write-Host "  cannot afford it; that empties the lead and it Bows." -ForegroundColor Magenta
-    Write-Host "  Her starter is three kit cards and fourteen pool rows are" -ForegroundColor Magenta
-    Write-Host "  swapped one for one. The REST of her pool still prints" -ForegroundColor Magenta
-    Write-Host "  Encore and the shipped Salon, so a run drafts a MIXED sheet" -ForegroundColor Magenta
-    Write-Host "  by construction -- batch one, brief sec.12." -ForegroundColor Magenta
-}
+Write-Host "*** DEV BUILD (+proto) ***" -ForegroundColor Magenta
+Write-Host "  The release kits plus a dev-only arm. DO NOT hand this build" -ForegroundColor Magenta
+Write-Host "  to a co-op partner, and run klee-mod\build\deploy.ps1 to put" -ForegroundColor Magenta
+Write-Host "  the release build back." -ForegroundColor Magenta
 
 if ($TeyvatFrame) {
     Write-Host ""

@@ -649,6 +649,10 @@ public class ArmKeywordTipTests
         // outside the headless boundary (README). What a test CAN do is ask
         // the gate, and watch the gated call hand its inherited stack straight
         // back -- which is the observable half either way.
+        // THE SHIPPED RIDER: the Klee overhaul retires it (`ForCovenSpark`
+        // returns the inherited stack whenever the arm is on), and since
+        // 2026-09-28 the arm is on by default, so this pin names its world.
+        using var _ = ArmScope.ShippedKlee();
         var seat = character switch
         {
             "klee" => Seat.Klee(),

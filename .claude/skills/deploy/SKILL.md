@@ -23,7 +23,9 @@ PowerShell, from the repo root of the **art-bearing main checkout**.
 
 3. **Prove the generated C# still matches the sheets** — a stale generator
    makes the pack disagree with the YAML it was built from:
-   `.venv\Scripts\python tools\gen_roster_cards.py --check`
+   `.venv\Scripts\python tools\gen_roster_cards.py --check` and
+   `.venv\Scripts\python tools\gen_prototype_cards.py --check` (the release
+   build compiles the prototype surface since 2026-09-28; S6a runs both)
 
 4. **Gate the tree before shipping it:**
    `.venv\Scripts\python -m pytest tier0/tests tier05/tests -q -n auto --dist
@@ -45,7 +47,11 @@ PowerShell, from the repo root of the **art-bearing main checkout**.
 
 6. **Deploy. `deploy.ps1` runs `validate.ps1` itself, before it copies
    anything** — the S-gate is not a step you can forget, only one you can skip
-   by not deploying:
+   by not deploying. It ships **the current kits** (Klee's overhaul, the
+   companion overhaul, Kokomi's overhaul, Furina's Stage): since 2026-09-28
+   they are the release build, unmarked ([USER]: "make all 3 current builds
+   the active release builds"). For a seat round, `tools/deploy_round.py`
+   runs this and then installs the bridge:
 
    ```
    klee-mod\build\deploy.ps1

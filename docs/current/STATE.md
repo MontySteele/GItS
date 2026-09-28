@@ -11,13 +11,25 @@ frozen in [`workstreams.md`](workstreams.md).
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
-**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3962+proto`**
-(2026-09-28). Arms: `-p:PrototypeCards=true` (the three prototype kits),
-`-p:FurinaStage=true` (the Stage), `-p:TeyvatFrame=true` (the frame); every
-arm ships OFF in a release package. **The dev build is**
-`tools/deploy_round.py --arms klee,companion,kokomi,furina-stage`: **the
-Teyvat frame stays OFF in dev builds too** (on hold, below). **Last release package: `0.2.1357`**
-(2026-08-29).
+**`MAJOR.AUTO`**. **Installed: `0.2.3962+proto`** (2026-09-28).
+
+**The current kits are the release build** (2026-09-28). [USER]: "The current
+character builds are much more progressed than the old prototypes were, even
+though it's still a work in progress. Let's go ahead and make all 3 current
+builds the active release builds to avoid this confusion."
+`klee-mod/Directory.Build.props` turns the prototype surface and the four kit
+arms (Klee's overhaul, the companion overhaul, Kokomi's overhaul, Furina's
+Stage) on in every build that names no property: a plain `dotnet build`,
+`klee-mod\build\deploy.ps1`, and the `-Package` handoff zip, all unmarked. **The
+round's build is `tools/deploy_round.py`** (`deploy.ps1`, then the bridge).
+The old shipped kits (`Klee.cs`, `Kokomi.cs` and `Furina.cs` starters,
+`docs/*-cards.yaml` pools) are no longer what plays; they build only under
+`-p:ShippedKits=true`, for the C# suite's second gate, until their code is
+deleted. **`+proto` now marks only a build that differs from the release**:
+`deploy_proto.ps1 -TeyvatFrame`, and the Teyvat frame is on hold (below). The
+tier0 sim still runs the shipped kits (its arm flags stay off; calibration
+bands are measured there). **Last release package: `0.2.1357`**
+(2026-08-29), which predates the ruling and carries the old kits.
 
 ## Roster
 
@@ -77,7 +89,8 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults
-with the two Rare potions raised) are built behind their arms: seven relics and
+with the two Rare potions raised) are built behind their arms, which every build
+carries since 2026-09-28: seven relics and
 three potions each, the Silent borrow gone under the arm, Dodoco Tales repaired
 and The Curtain Never Falls rebuilt for the Stage (Salon Solitaire's Orobas
 upgrade now). Arm off, both pools are as they shipped; Kokomi keeps the Silent

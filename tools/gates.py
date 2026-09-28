@@ -21,13 +21,18 @@ reading it is a deliberate second step rather than the default.
     python tools/gates.py --only pytest      # one gate by name
 
 THE ONE GATE THAT CANNOT BE CI's (2026-09-02). `dotnet-test` -- the mod's C#
-suite, `klee-mod/KleeTests` under `-p:PrototypeCards=true` -- runs in BOTH
-lanes and is not behind `--dotnet` any more. Since `EB-781` it is TWO lines,
-`dotnet-test` and `dotnet-test-stage`, because the suite has two worlds: the
-second adds `-p:FurinaStage=true`, which moves `FurinaStage.DefaultEnabled`
-and is what the live `+proto` deploy runs. A configuration no gate runs is a
-configuration that goes red quietly, which is exactly what happened -- nine
-shipped meter pins under `EB-745`'s guard. It was optional here, absent from
+suite, `klee-mod/KleeTests` -- runs in BOTH lanes and is not behind `--dotnet`
+any more. It is TWO lines, because the suite has two worlds. Since 2026-09-28
+([USER]: "make all 3 current builds the active release builds") the DEFAULT
+build is the current kits -- `klee-mod/Directory.Build.props` turns on the
+prototype surface and the four kit arms when no property is named -- so
+`dotnet-test` names no property and runs the world every deploy ships.
+`dotnet-test-shipped` passes `-p:ShippedKits=true -p:PrototypeCards=true`: the
+old shipped kits with the arms compiled but off, where the old kits' pins and
+each arm's flag-off pins run. (Before the ruling the second line was
+`dotnet-test-stage`, `EB-781`: a configuration no gate runs is a configuration
+that goes red quietly, which is how nine shipped meter pins stood red under
+the Stage.) It was optional here, absent from
 `.github/workflows/repo.yml` and absent from the pre-push hook, so it was in no
 gate at all: two pins sat red on main for days and nothing said so. It cannot
 become a CI job, and that is a fact about the assemblies rather than a
@@ -131,24 +136,21 @@ def gates(args) -> list[Gate]:
              optional="codegen"),
         Gate("dotnet-build", ["dotnet", "build", "klee-mod/KleeCode",
                               "-v", "minimal", "--nologo"], optional="dotnet"),
-        # NOT optional, and `-p:PrototypeCards=true` because the 300-odd
-        # Prototype/ pins are `Compile Remove`d without it -- the arm every
-        # live workstream is building against would otherwise be ungated.
+        # NOT optional, and NO property: since 2026-09-28 the default build
+        # IS the current kits (`klee-mod/Directory.Build.props` defaults the
+        # prototype surface and the four kit arms on), so this line runs the
+        # world deploy.ps1 ships and the seats play.
         Gate("dotnet-test", ["dotnet", "test", "klee-mod/KleeTests",
-                             "-p:PrototypeCards=true", "--nologo", "-v", "q"]),
-        # `EB-781`: THE SECOND CONFIGURATION, and the reason it is a gate.
-        # `-p:FurinaStage=true` moves `FurinaStage.DefaultEnabled`, which is
-        # the world the live `+proto` deploy actually runs in. Nothing ran it,
-        # so nine shipped meter pins stood red under it and no gate said so:
-        # `EB-745` retires Fanfare and Encore under the arm, and those nine
-        # mint one of them and assert the shipped number. The pins carry
-        # `ArmScope.ShippedMetersLive()` now; this line is what keeps the
-        # second world from drifting red again. It costs one more compile and
-        # one more run of the suite -- about four seconds each here, because
-        # the two configurations share nothing and each rebuilds.
-        Gate("dotnet-test-stage",
+                             "--nologo", "-v", "q"]),
+        # THE SECOND WORLD: the old shipped kits, arms compiled but OFF. The
+        # old kits' pins and every arm's flag-off pins are written for it,
+        # and a configuration no gate runs goes red quietly (`EB-781`, when
+        # nine shipped meter pins stood red under the Stage for a week). It
+        # goes when the old kits' code does. About four seconds; the two
+        # configurations share nothing and each rebuilds.
+        Gate("dotnet-test-shipped",
              ["dotnet", "test", "klee-mod/KleeTests",
-              "-p:PrototypeCards=true", "-p:FurinaStage=true",
+              "-p:ShippedKits=true", "-p:PrototypeCards=true",
               "--nologo", "-v", "q"]),
     ]
     picked = []

@@ -28,10 +28,10 @@ output so a green `--fast` line cannot stand in for one.
 - `[ok  ] pytest  4940 passed, 47 skipped, 12 xfailed  (59.0s)` — done, move on.
 - A red gate lists the failing test names under it and nothing else. **Open the
   log only for the one you are fixing**: `sed -n '/<test name>/,+40p' <log>`.
-- `dotnet-test` — the mod's C# suite, `klee-mod/KleeTests` with
-  `-p:PrototypeCards=true` — runs in BOTH lanes and is **not** behind
-  `--dotnet`. It is the one gate no GitHub runner can hold (it references four
-  assemblies out of the Steam install), so its line always says `local-only`.
+- `dotnet-test` (the C# suite, default build: the current kits) and
+  `dotnet-test-shipped` (`-p:ShippedKits=true -p:PrototypeCards=true`, the old
+  kits) run in BOTH lanes, not behind `--dotnet`; no runner can hold them (game
+  assemblies), so their lines always say `local-only`.
   `dotnet` gates are skipped with a note when `dotnet` is not on PATH or the
   machine has no `local.props`; a skip is reported as a skip, never as a pass.
 

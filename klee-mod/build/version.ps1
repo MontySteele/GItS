@@ -162,6 +162,13 @@ function Get-PackageVersion {
       "which build is installed right now" is a question with no answer
       anywhere on screen.
 
+      WHAT +proto MEANS SINCE 2026-09-28. [USER]: "make all 3 current builds
+      the active release builds". The release build now carries the current
+      kits (klee-mod/Directory.Build.props), unmarked. +proto marks only a
+      build that DIFFERS from the release -- deploy_proto.ps1 with a dev-only
+      arm, today the Teyvat frame -- so the mark still answers "is this the
+      release?" and no longer means "does this carry the kits?".
+
         plain           0.2.1209
         dirty           0.2.1209+dirty          (R214, byte-unchanged)
         prototype       0.2.1209+proto
@@ -417,13 +424,15 @@ function Test-VersionPolicy {
         $out.Add("staged manifest version '$($Manifest.version)' is not a valid semantic version (R214: MAJOR.AUTO, with +dirty as build metadata). The game's parser leaves an unparseable version null and then refuses any dependent mod declaring a min_version on us.")
     }
 
-    # The +proto token is legal ONLY from the dev deploy path. R213 B's
-    # quarantine is a claim about what a RELEASE package contains, and a
-    # release package carrying a dev mark either was built by the dev script
-    # (so the quarantine claim is false) or was hand-edited (so the stamp is
-    # not evidence of anything). Both are the same finding.
+    # The +proto token is legal ONLY from the dev deploy path. Since
+    # 2026-09-28 ([USER]: "make all 3 current builds the active release
+    # builds") the release carries the current kits unmarked, and +proto
+    # marks only a build that DIFFERS from the release (a dev-only arm, today
+    # the Teyvat frame). A release package carrying the mark either was built
+    # by the dev script (so it is not the release) or was hand-edited (so the
+    # stamp is not evidence of anything). Both are the same finding.
     if (-not $AllowPrototypeMetadata -and $Manifest.version -match '\+proto') {
-        $out.Add("staged manifest version '$($Manifest.version)' carries the +proto build metadata, which only klee-mod/build/deploy_proto.ps1 may stamp. The release path must not ship a package built with the quarantined prototype surface compiled in (R213 B).")
+        $out.Add("staged manifest version '$($Manifest.version)' carries the +proto build metadata, which only klee-mod/build/deploy_proto.ps1 may stamp. The release path must not ship a dev build: +proto marks a build that differs from the release.")
     }
     if ($AllowPrototypeMetadata -and $Manifest.version -notmatch '\+proto') {
         $out.Add("the prototype validate was asked for but the staged manifest version '$($Manifest.version)' carries no +proto mark, so nothing on the package says it is a dev build.")

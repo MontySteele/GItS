@@ -62,5 +62,23 @@ public sealed class ArmScope : IDisposable
 #endif
     }
 
+    /// <summary>
+    /// The Klee seat in this test plays the SHIPPED kit: the Klee overhaul is
+    /// off for the length of the scope. Added 2026-09-28, when the overhaul
+    /// became the default build (`klee-mod/Directory.Build.props`) and a pin
+    /// about a shipped Klee rule could no longer take the old default for
+    /// granted. Restores the previous value on dispose.
+    /// </summary>
+    public static ArmScope ShippedKlee()
+    {
+#if PROTOTYPE_CARDS
+        var was = global::KleeMod.Powers.KleeOverhaul.Enabled;
+        global::KleeMod.Powers.KleeOverhaul.Enabled = false;
+        return new ArmScope(() => global::KleeMod.Powers.KleeOverhaul.Enabled = was);
+#else
+        return new ArmScope(() => { });
+#endif
+    }
+
     public void Dispose() => _restore();
 }

@@ -43,8 +43,11 @@ namespace KleeMod.Powers;
 public static class KleeOverhaul
 {
     /// <summary>
-    /// The arm's default: <c>-p:KleeOverhaul=true</c> turns it on. Mirrors
-    /// <c>C.KLEE_OVERHAUL</c>, which ships <c>False</c>.
+    /// The arm's default: <c>-p:KleeOverhaul=true</c> turns it on, and since
+    /// 2026-09-28 every build that names no property does
+    /// (<c>klee-mod/Directory.Build.props</c>; [USER]: "make all 3 current
+    /// builds the active release builds"). The sim twin <c>C.KLEE_OVERHAUL</c>
+    /// still ships <c>False</c>: the tier0 world is the shipped one.
     /// </summary>
     public const bool DefaultEnabled =
 #if KLEE_OVERHAUL

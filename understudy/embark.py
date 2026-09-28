@@ -62,10 +62,11 @@ itself:
   * A row that is not on `docs/prototype-surface.yaml`. The far side would
     answer `error: unknown card id`; refusing here names the id against the
     surface, which is the question the operator actually got wrong.
-  * A RELEASE build. The prototype classes are `Compile Remove`d unless
-    `PrototypeCards=true`, so the id does not exist in a shipped mod at all.
-    The check is the deployed package's own version stamp: `deploy_proto.ps1`
-    writes `+proto` into it and `deploy.ps1` never does.
+  * A build that PREDATES THE CURRENT KITS. Until 2026-09-28 the prototype
+    classes were `Compile Remove`d from a release build, so the id did not
+    exist in one. Since then the release build compiles them too, so the
+    check is the deployed package's own version stamp: `+proto`, or a commit
+    count at or above `KITS_DEFAULT_SINCE`.
   * A build version that cannot be READ. Not-read is refused rather than
     assumed to be a dev build -- a door that opens when it cannot see is not a
     door.
@@ -135,6 +136,24 @@ LOG_DIR = Path(__file__).resolve().parent / "logs"
 # the staged package version, and the one thing that separates a build holding
 # the prototype classes from a build that never compiled them.
 PROTO_TAG = "+proto"
+
+# 2026-09-28. [USER]: "make all 3 current builds the active release builds".
+# From this commit count on, the RELEASE build (`deploy.ps1`, no `+proto`)
+# compiles the prototype classes too (`klee-mod/Directory.Build.props`), so an
+# unmarked build at or above it carries the ids. Below it, only `+proto` did.
+# The count is the ruling's commit on main; a build between an earlier merge
+# and this one is the one case the number cannot tell apart, and there the far
+# side's `unknown card id` still refuses the grant.
+KITS_DEFAULT_SINCE = 3970
+
+
+def carries_prototype_classes(build: str) -> bool:
+    """True when the deployed build compiled the prototype surface."""
+    if PROTO_TAG in build:
+        return True
+    head = build.split("+", 1)[0].split(".")
+    return (len(head) == 3 and head[2].isdigit()
+            and int(head[2]) >= KITS_DEFAULT_SINCE)
 
 # Which ledger row feeds which of `Session`'s undo steps. Matched on the
 # recorded `change` text because that text is what the ledger persists -- the
@@ -329,13 +348,15 @@ def check_arms(arms: list[str],
             f"the deployed build version could not be read ({source}), so "
             f"whether it carries the prototype surface is unknown. A grant is "
             f"refused on not-read rather than assumed: the row ids do not "
-            f"exist in a release build at all.")
-    if PROTO_TAG not in build:
+            f"exist in a build that predates the current kits.")
+    if not carries_prototype_classes(build):
         raise EmbarkError(
-            f"the deployed build is {build!r} ({source}), which carries no "
-            f"{PROTO_TAG!r}. Prototype classes are compiled out of a release "
-            f"build entirely, so there is no id to grant -- stage a dev build "
-            f"with klee-mod\\build\\deploy_proto.ps1 first.")
+            f"the deployed build is {build!r} ({source}): no {PROTO_TAG!r} "
+            f"and older than build {KITS_DEFAULT_SINCE}, when the current "
+            f"kits became the release build. Its prototype classes were "
+            f"compiled out, so there is no id to grant -- deploy the current "
+            f"build with tools/deploy_round.py (klee-mod\\build\\deploy.ps1 "
+            f"plus the bridge) first.")
     return build, source
 
 
@@ -644,7 +665,9 @@ def main(argv: list[str] | None = None) -> int:
                          "from a roster/companion sheet (KLEESPARK-W3's "
                          "controlled-ratio deck needs both). Repeatable, and "
                          "repeat an id to grant a second copy. A prototype id "
-                         "is refused unless the deployed build is `+proto`")
+                         "is refused unless the deployed build carries the "
+                         "current kits (`+proto`, or any build since the "
+                         "2026-09-28 ruling)")
     ap.add_argument("--seed", default=None,
                     help="embark on a CHOSEN seed instead of one the game "
                          "rolls; the read-back still decides what is recorded")
