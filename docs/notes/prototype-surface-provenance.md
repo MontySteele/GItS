@@ -3042,8 +3042,9 @@ The base number carries its own hole, authored on the row. **This is a codegen
 limitation worth a row of its own:** the emitter should hole every branch a
 whole-card delta moves, and today it holes one.
 
-**The three upgrades that are not numbers.** *Understudy* and *Final Bow* drop
-their Exhaust; *Salon Début*, the three named summons, *Rising Applause*,
+**The three upgrades that are not numbers.** *Final Bow* drops its Exhaust
+(so did *Understudy*, until it left the pool on 2026-09-28); *Salon Début*,
+the named summons (three until *Gentilhomme Usher* left with it), *Rising Applause*,
 *Ousia Surge*, *Pneuma Refrain*, *Bis!* and the Rare take a cost. Neither shows
 in the body, which is why the blind-play Smith preview answers those rows with
 "its upgrade changes nothing this face prints" rather than a rendered face —
@@ -3698,3 +3699,37 @@ a turn on the ledger latch, when she plays a card with a Plan line and
 written card does not spend the turn's draw. An auto-play of a Plan card goes
 to its now-line and counts. Sim: `kokomi_plan.note_face_up_plan_card` at the
 end of `effects._resolve_card_bound`. Both powers left the plan bus.
+
+## Furina, the Stage — balance pass one (2026-09-28)
+
+[USER]'s Stage run on 2026-09-28 was "extremely easy" until an act-3 elite,
+and the review found Fanfare GENERATION too high. The spend side is untouched:
+"I actually think the spend is totally fine; it's the generation that's the
+issue. Let's leave these alone for now." Bravura and every spender keep their
+numbers. Design: `review/active/furina-stage-brief-2026-09-08.md`.
+
+- **Dual Nature** (`proto_fs_dual_nature`): the upgrade is +1 draw (draw 2)
+  instead of cost -1; it stays 1 cost. "I think a is good".
+- **Guest Star: Lynette, Sigewinne, Wriothesley**: arrive with 5 Fanfare, not
+  8; the upgrade stays +2 (7). "a) is good for now. This is much more
+  effective block than a Necrobinder deck gives, but the per-card amount is
+  fine; it's more the frequency that's higher."
+- **Gala Dinner** gives each performer 2 (3 upgraded); **Season Tickets** 1 a
+  turn (2 upgraded); **Thunderous Applause** 1 Fanfare a Bow (2 upgraded),
+  its draw 1 a Bow unchanged. "agreed". The power's Amount is the Fanfare
+  only (`FurinaStage.AfterBow` draws a fixed 1 a copy), so only the Fanfare
+  moved. The face prints `{PowerAmount:diff()}` itself, and
+  `gen_klee_cards._authored_face_with_tokens` now leaves a literal alone when
+  the face already prints that var's token, so the draw's 1 is not taken for
+  the amount.
+- **Plot Twist** is an Attack: "Reverse the order of your performers. Deal 7
+  damage." (10 upgraded), one enemy, no Block; cost 1, Common. "a)".
+- **Two rows left the pool, 80 -> 78**: *Understudy* (`proto_fs_understudy`)
+  and the summon-Usher card *Gentilhomme Usher*
+  (`proto_fs_gentilhomme_usher`). "agreed on a)". Usher the PERFORMER stays.
+  The shipped rows they replaced (`suffering_for_art`, `gentilhomme_usher`)
+  stay out of the offer: the mod's `FurinaStageRoster.SwapOfferedRows` filter
+  still names both, and the sim drops them through the new
+  `furina_stage.POOL_DROPS` (read by `loader.pool_drops`, applied in
+  `tier05.rewards.character_pool`). Both ids are in
+  `docs/retired-card-ids.yaml`, so a save holding one still loads.

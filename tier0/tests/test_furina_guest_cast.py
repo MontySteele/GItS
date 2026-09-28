@@ -97,10 +97,10 @@ TABLE = {
     "clorinde": ("Clorinde", "rare", 1, 4, {"stage_guest": 2}),
     "navia": ("Navia", "rare", 1, 4, {"stage_guest": 2}),
     "chevreuse": ("Chevreuse", "uncommon", 1, 4, {"stage_guest": 2}),
-    "wriothesley": ("Wriothesley", "uncommon", 1, 8, {"stage_guest": 2}),
-    "sigewinne": ("Sigewinne", "uncommon", 1, 8, {"stage_guest": 2}),
+    "wriothesley": ("Wriothesley", "uncommon", 1, 5, {"stage_guest": 2}),
+    "sigewinne": ("Sigewinne", "uncommon", 1, 5, {"stage_guest": 2}),
     "charlotte": ("Charlotte", "uncommon", 1, 4, {"stage_guest": 2}),
-    "lynette": ("Lynette", "uncommon", 1, 8, {"stage_guest": 2}),
+    "lynette": ("Lynette", "uncommon", 1, 5, {"stage_guest": 2}),
 }
 
 
@@ -648,5 +648,5 @@ def test_the_report_prints_the_guest_casts_measures(arm):
     assert set(row) >= {"to_her", "dealt", "turns", "fh_fired"}
     labels = dict(report.ARMS)
     for deck in ("guest star", "guest tank", "3 crabalettas",
-                 "3 crabalettas + full house", "3 ushers"):
+                 "3 crabalettas + full house"):
         assert deck in labels

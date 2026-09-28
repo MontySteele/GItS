@@ -492,7 +492,7 @@ public class FurinaSupportingPoolTests
         var seat = Seat.Furina().WithCombatState().WithPower<SoliloquyPower>(3);
         var power = seat.Creature.Powers.OfType<SoliloquyPower>().Single();
         var attack = new ProtoFsBubbleAria();
-        var skill = new ProtoFsPlotTwist();
+        var skill = new ProtoFsWarmReception();   // Plot Twist was, until 2026-09-28
         var target = EnemyBody();
         Assert.Equal(3m, power.ModifyDamageAdditive(
             target, 4m, ValueProp.Move, seat.Creature, attack, null));
@@ -549,7 +549,9 @@ public class FurinaSupportingPoolTests
         // The paper's count: 49 before the batch, 49 + 28 = 77, and 78 with
         // Sold Out -- the draftable one-player rows: the basics, the Ancient
         // and the co-op tier aside. 80 since the starter ruling (2026-09-28):
-        // Take the Stage and Regal Bearing left the starter as Commons.
+        // Take the Stage and Regal Bearing left the starter as Commons. 78
+        // since the balance review (2026-09-28): Gentilhomme Usher and
+        // Understudy left the pool.
         var pool = ArmPools.Offerable("furina-stage")
             .Where(c => c.Rarity != MegaCrit.Sts2.Core.Entities.Cards
                                         .CardRarity.Ancient)
@@ -557,7 +559,7 @@ public class FurinaSupportingPoolTests
                                         .CardRarity.Basic)
             .Where(c => !MultiplayerOnly(c))
             .ToList();
-        Assert.Equal(80, pool.Count);
+        Assert.Equal(78, pool.Count);
     }
 
     private static bool MultiplayerOnly(MegaCrit.Sts2.Core.Models.CardModel card) =>

@@ -1266,11 +1266,9 @@ def test_the_readers_tip_is_gone():
 #: Every row that summons, and the performer tips it owes, in attach order.
 STAGE_SUMMONERS = {
     "proto_fs_salon_debut": ("Usher", "Chevalmarin", "Crabaletta"),
-    "proto_fs_understudy": ("Usher", "Chevalmarin", "Crabaletta"),
     "proto_fs_double_casting": ("Usher", "Chevalmarin", "Crabaletta"),
     # A summon inside a conditional's branch owes the same tips.
     "proto_fs_improvised_number": ("Usher", "Chevalmarin", "Crabaletta"),
-    "proto_fs_gentilhomme_usher": ("Usher",),
     "proto_fs_surintendante_chevalmarin": ("Chevalmarin",),
     "proto_fs_mademoiselle_crabaletta": ("Crabaletta",),
     # THE SUPPORTING POOL (2026-09-26): Gala Premiere names all three.

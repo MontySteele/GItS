@@ -214,11 +214,12 @@ public static class FurinaStageRoster
                         && card is not FurinaGen.RegalBearing)
             .Concat(new CardModel[]
             {
-                // Commons (eight).
-                ModelDb.Card<ProtoFsGentilhommeUsher>(),
+                // Commons (six). The 2026-09-28 balance review cut
+                // Gentilhomme Usher and Understudy (80 -> 78); their shipped
+                // rows stay filtered above. Sim twin:
+                // `furina_stage.POOL_DROPS`.
                 ModelDb.Card<ProtoFsSurintendanteChevalmarin>(),
                 ModelDb.Card<ProtoFsMademoiselleCrabaletta>(),
-                ModelDb.Card<ProtoFsUnderstudy>(),
                 ModelDb.Card<ProtoFsWarmReception>(),
                 ModelDb.Card<ProtoFsTidalFlourish>(),
                 ModelDb.Card<ProtoFsInterposition>(),

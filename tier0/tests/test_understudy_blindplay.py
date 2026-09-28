@@ -9018,14 +9018,15 @@ def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():
     # `EB-723`: the Stage's Début upgrades its COST, which the body prints
     # nowhere. Since 2026-09-26 a cost the upgrade moves is PRINTED (see
     # `test_the_smith_prints_an_energy_cost_the_upgrade_cuts`), so Début
-    # renders its face and the no-number reason is pinned on Understudy,
-    # whose upgrade drops a keyword the face does not print. The rule the test
+    # renders its face and the no-number reason is pinned on Final Bow
+    # (Understudy until it left the pool, 2026-09-28), whose upgrade drops a
+    # keyword the face does not print. The rule the test
     # is about is unchanged and is the LAST assertion: the reason is a fact
     # about the CARD, never a bare silence.
     built, why = qa_packet.upgrade_preview(*_R12_SMITH[1])
     assert built == _R12_SMITH[1][1] and why == ""
 
-    built, why = qa_packet.upgrade_preview("KLEEMOD-PROTO_FS_UNDERSTUDY", "")
+    built, why = qa_packet.upgrade_preview("KLEEMOD-PROTO_FS_FINAL_BOW", "")
     assert built == ""
     assert why == qa_packet.NO_PREVIEW_NO_NUMBER
     assert "changes nothing this face prints" in why
@@ -9092,13 +9093,15 @@ def test_the_other_three_reasons_are_each_a_fact_about_the_card():
 def test_the_reason_prints_on_the_smith_under_the_face_it_is_about():
     """And it prints where the missing line was, so the two rows read as two
     different facts rather than as one silence. (Understudy since
-    2026-09-26: Salon Début's cost cut now prints as a cost.)"""
+    2026-09-26: Salon Début's cost cut now prints as a cost; Final Bow since
+    2026-09-28, when Understudy left the pool.)"""
     smith = live("upgrade-fresh")
     smith = json.loads(json.dumps(smith.get("state", smith)))
     smith["card_select"]["cards"].append(
-        {"id": "KLEEMOD-PROTO_FS_UNDERSTUDY", "name": "Understudy",
-         "cost": "0", "type": "Skill",
-         "description": "Summon a random performer."})
+        {"id": "KLEEMOD-PROTO_FS_FINAL_BOW", "name": "Final Bow",
+         "cost": "1", "type": "Skill",
+         "description": "Your back performer Bows and leaves. Gain Block "
+                        "equal to its Fanfare."})
     page = blindplay.observe(smith)
 
     assert ("    Upgraded: not shown -- its upgrade changes nothing this "
