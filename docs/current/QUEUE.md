@@ -29,6 +29,7 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
+
 - **P2 hard-state thresholds** (`p2-hard-state-thresholds-2026-08-13.md`,
   picks 1 to 4): (1, default) adopt the packet's four proposals (more than one
   enemy becomes a modifier, incoming fraction 0.45, lethal reach unchanged, a
