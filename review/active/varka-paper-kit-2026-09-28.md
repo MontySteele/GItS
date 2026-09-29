@@ -309,6 +309,115 @@ the fight.
 6. Turns to kill and boss wins beside Klee, Kokomi and Furina, as before.
    Pilot-dependent; they rank nothing.
 
+### 9.8 What the sim showed (revisions 2, 2.1, 2.2; draft #753)
+
+n = 400 per cell; placeholder numbers and a heuristic pilot, so nothing here
+ranks the kit.
+- **The spread fix works.** Knight hits that react instead of painting after
+  an Absorb fell from 64-74% to 1-10%.
+- **Absorb or Swirl depends on the fight.** Swirl-only is the fastest plan
+  against packs and loses bosses (40% on tank_boss, against 89% for the smart
+  pilot); the smart pilot Absorbs about 8% of the time in big packs, half the
+  time on tank_boss, three quarters on punisher.
+- **The best Wind depends on the fight:** Hydro in every pack, Cryo on every
+  boss (it beats the runner-up in 63-97% of paired fights). Pyro has no niche
+  and Electro is last everywhere, at one card or two: Electro needs a
+  different effect, not a bigger number.
+- **Revision two's own fault:** with Winds paying only on a Swirl, the bare
+  starter never Swirled (0.0-0.4 a fight) and its Winds were dead. Revision
+  2.1 made the Fang the fork (Absorb or Swirl) and an Absorb on a held Wind a
+  Swirl; built decks went from 51% to 89% on tank_boss.
+- **The starter sits on a knife edge.** A free Knights' Muster takes punisher
+  from 5% to 99.5% (Ironclad's starter: 54%). The battery cannot place the
+  starter; play has to.
+- **Spent copies react in full**, so Swirl-then-Knight is the biggest damage
+  line (§9.4 line 3: 43, against 28 and 17). The three lines are three plans:
+  damage now, Winds, or the partner's aura. Line 3 is not a trap.
+- **Ascension:** waiting still wins where a boss fight is in doubt. Version B
+  (spend the Winds) only tied A and added rebuilding, so it is dropped.
+  Ascension is a finisher; the first playtest judges whether that is enough.
+
+## 10. Prototype, batch one (2026-09-29)
+
+**Ask ([USER], 2026-09-29):** "You're good to go on building the Varka
+prototype!" Numbers are first-guess placeholders for play. A number in
+brackets is the upgrade.
+
+### 10.1 The rules as built
+
+- **Swirl** (shared rule): an Anemo hit on a fresh aura leaves it spent on
+  that enemy, spreads spent copies to every enemy lacking it (a copy replaces
+  what that enemy wore), deals a flat 2 to every enemy. Spent copies react
+  with a new element as normal.
+- **Absorb** (his cards' keyword): on a fresh aura, takes the aura off that
+  enemy and gives you its Wind. No spread, no flat 2. If you already hold that
+  Wind, the hit **Swirls** instead. With no fresh aura, only the card's
+  damage.
+- **Winds**, for the rest of the fight, each paid on every Swirl you make:
+  - **Pyro Wind:** deal 3 damage to the enemy you Swirled.
+  - **Hydro Wind:** gain 3 Block.
+  - **Cryo Wind:** the enemy you Swirled gains 1 Weak.
+  - **Electro Wind:** your first Swirl each turn gives 1 Energy. (Untested;
+    the sim's draw versions were last everywhere.)
+- **Boreas's Fang** (starting relic), as built: "Once each turn, the first
+  non-Anemo Attack that hits a fresh aura Absorbs it." It reads Absorb's rule,
+  so on a held Wind it Swirls. The choice lives in which card you aim at an
+  aura: a Strike collects, an Anemo Attack Swirls. This drops §9.3's in-hit
+  prompt for the prototype; a prompt comes back only if play asks for it.
+- **Knights** are Varka's personal-pool companions, all Skills.
+
+### 10.2 The starter (Varka, 80 HP, 99 gold)
+
+Strike ×4, Defend ×4 (base game), and:
+- **Knights' Muster** (Skill, 1): Choose a Knight: deal 4 [6] of their element.
+- **Four Winds' Ascension** (Attack, 2): Deal 6 [9] Anemo, plus 6 for each Wind
+  you hold. Exhaust.
+
+### 10.3 The pool, batch one (19 cards)
+
+Common (10):
+- **Windbound Execution** (Attack, 1): Deal 6 [9] Anemo. Absorb.
+- **Squall** (Attack, 1): Deal 4 [5] Anemo twice.
+- **Updraft** (Attack, 1): Deal 8 [11] Anemo.
+- **Gale Sweep** (Attack, 1): Deal 3 [5] Anemo to every enemy that has a fresh
+  aura. (Snapshot when played; each Swirls.)
+- **Wind Wall** (Skill, 1): Gain 7 [10] Block. If you hold a Wind, gain 3 more.
+- **Favonius Drill** (Skill, 1): Gain 6 [9] Block. Choose a Knight: apply
+  their element to an enemy.
+- **Amber: Baron Bunny** (Knight, Skill, 1): Deal 6 [9] Pyro.
+- **Barbara: Let the Show Begin** (Knight, Skill, 1): Apply Hydro to ALL
+  enemies. Gain 3 [5] Block.
+- **Lisa: Violet Arc** (Knight, Skill, 1): Deal 5 [7] Electro. Draw 1.
+- **Kaeya: Frostgnaw** (Knight, Skill, 1): Deal 6 [9] Cryo.
+
+Uncommon (7):
+- **Tempest Charge** (Attack, 1): Deal 8 [11] Anemo. If it Swirls, draw 1.
+- **Favonius Cut** (Attack, 2): Deal 14 [19] Anemo. Absorb.
+- **Grand Master's Order** (Skill, 0): The next Knight you play this turn is
+  played twice. Exhaust. [Retain.]
+- **Knights' Roll Call** (Skill, 1): Add a random Knight to your hand. It costs
+  0 this turn. [Choose the Knight.]
+- **Eye of the Storm** (Skill, 1): Gain 4 [5] Block for each Wind you hold.
+- **Stormward Stance** (Power, 1 [0]): While you hold 2 or more Winds, your
+  Anemo Attacks deal 3 more.
+- **Tailwind Stride** (Skill, 1): Draw 2. If you hold a Wind, draw 1 more.
+  [Cost 0.]
+
+Rare (2):
+- **Converging Winds** (Power, 2 [1]): Your Swirls react where they land
+  (§5's rules: the spread hit is the flat 2 carrying the swirled element; a
+  reaction it sets off lands on that enemy only; a reaction from a spread
+  never Swirls again; the struck enemy's own flat 2 carries no element).
+- **Boreas Unbound** (Power, 2 [1]): Whenever you Absorb, gain 1 Energy.
+
+The Mondstadt universal **Sturm und Drang** is already on the surface and
+supports Gale. Grand Master stays provisional (§5). Pool target 78 comes later.
+
+### 10.4 What the first seat round asks
+
+One question: **is choosing between Absorb and Swirl a decision on the turn,
+or a chore?** Two seats, a one-page record. [USER]'s playtest follows.
+
 ## Picks
 
 1. **Winds.** (1) *Four different flat effects, one per element* [default].
