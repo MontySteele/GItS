@@ -495,6 +495,42 @@ public class VarkaPrototypeTests : IDisposable
                     string.Join(", ", play));
     }
 
+#if VARKA_PROTOTYPE
+    /// <summary>
+    /// The Varka seat of 2026-09-29 saw "Vaporize on Sludge Spinner, off
+    /// Knights' Muster" and no bonus it could see. The bonus is there: a
+    /// Muster hit is a Skill, and the aura's multiplier reads the carried
+    /// element, not the card type. Run for real, both directions of Vaporize.
+    /// </summary>
+    [Fact]
+    public void Vaporize_off_knights_muster_multiplies_its_hit()
+    {
+        var varka = Seat.Varka().Creature;
+        var muster = new ProtoVkKnightsMuster();
+        var hydroBody = Seat.Klee(30).WithPower<HydroAuraPower>(2).Creature;
+        var hydro = hydroBody.Powers.OfType<HydroAuraPower>().Single();
+        var pyroBody = Seat.Klee(30).WithPower<PyroAuraPower>(2).Creature;
+        var pyro = pyroBody.Powers.OfType<PyroAuraPower>().Single();
+        var move = MegaCrit.Sts2.Core.ValueProps.ValueProp.Move;
+        var vaporize = ReactionTable.AmplifierMultiplier(Reaction.Vaporize, varka);
+        Assert.True(vaporize > 1m);
+
+        // Outside the Knight's scope the hit carries nothing.
+        Assert.Equal(1m, hydro.ModifyDamageMultiplicative(
+            hydroBody, 4m, move, varka, muster, null));
+        using (HitElement.Carry(muster, Element.Pyro))       // Amber
+        {
+            Assert.Equal(vaporize, hydro.ModifyDamageMultiplicative(
+                hydroBody, 4m, move, varka, muster, null));
+        }
+        using (HitElement.Carry(muster, Element.Hydro))      // Barbara
+        {
+            Assert.Equal(vaporize, pyro.ModifyDamageMultiplicative(
+                pyroBody, 4m, move, varka, muster, null));
+        }
+    }
+#endif
+
     [Fact]
     public void The_knight_grid_maps_each_face_to_its_element()
     {

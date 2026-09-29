@@ -59,6 +59,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
 - The Big One's x4 stays armed when its Set off finds no Bomb, so a later Mine on the enemy turn can spend it.
+- Feigned Retreat's carry-out does not say which number paid: with Strength folded in at writing, the hurt 9 read as the printed 14 (Flex, Str 5) and a Kokomi seat reported the unhurt hit firing after a 9-HP loss (2026-09-29). Also, "lost no HP" is read as net HP (`KokomiPlan.UnhurtAmount`, sim twin `kokomi_plan` `damage_if_unhurt`), so a Mend between writing and morning reads unhurt.
+- A reaction amplifier's payout is not printed: the seat log reads "Vaporize on X, off Knights' Muster" with no x1.5, and Muster's preview cannot fold it because the Knight is chosen at play (Varka seat, 2026-09-29: Weak 4 -> 3 printed, 4 landed; the multiplier is pinned by `Vaporize_off_knights_muster_multiplies_its_hit`).
 
 ## Harness, bridge and tools
 
@@ -89,6 +91,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Seats share the coordinator's scratchpad, so a seat's notes file can hold an earlier seat's notes; give each seat its own notes path.
 - Two lanes embarked at the same moment: the second lane's game never came up (its port refused every call) until a teardown and re-embark (2026-09-25 round).
 - `scenario run` cannot start on a lane whose profile holds a saved run: the relaunched game resumed the old boss fight and the menu never became ready (lane 1, 1336 run-history files, 447 s wait).
+- Lane 1 embark `20260929-145523` was never reverted (all its ledger rows APPLIED, pid 27116 still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch.
 
 ## Sim and measurement (Balance stage; nothing here runs on a prototype)
 
