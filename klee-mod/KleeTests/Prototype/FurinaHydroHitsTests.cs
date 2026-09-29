@@ -84,7 +84,7 @@ public class FurinaHydroHitsTests
     // ---- the finding, run for real -----------------------------------------
 
     [Fact]
-    public void Vaporize_off_quick_cues_spend_mode_multiplies_its_eight()
+    public void Vaporize_off_quick_cues_spend_mode_multiplies_its_eleven()
     {
         var furina = Seat.Furina().Creature;
         var cue = new ProtoFsQuickCue();
@@ -92,12 +92,12 @@ public class FurinaHydroHitsTests
 
         // The old shape: the hit carried nothing, so nothing multiplied it.
         Assert.Equal(1m, pyro.ModifyDamageMultiplicative(
-            body, 8m, ValueProp.Move, furina, cue, null));
+            body, 11m, ValueProp.Move, furina, cue, null));
 
         using (HitElement.Carry(cue, Element.Hydro))
         {
             var mult = pyro.ModifyDamageMultiplicative(
-                body, 8m, ValueProp.Move, furina, cue, null);
+                body, 11m, ValueProp.Move, furina, cue, null);
             Assert.Equal(ReactionTable.AmplifierMultiplier(
                 Reaction.Vaporize, furina), mult);
             Assert.True(mult > 1m);
@@ -174,7 +174,7 @@ public class FurinaHydroHitsTests
     {
         var source = Generated("ProtoFsQuickCue");
         Assert.Contains(
-            "new FoldedDamageVar(\"BranchDamage\", 8m, ValueProp.Move, carries: Element.Hydro)",
+            "new FoldedDamageVar(\"BranchDamage\", 11m, ValueProp.Move, carries: Element.Hydro)",
             source);
         Assert.Contains(
             "new FoldedDamageVar(\"PlainDamage\", 3m, ValueProp.Move)", source);

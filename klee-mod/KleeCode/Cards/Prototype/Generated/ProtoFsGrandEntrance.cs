@@ -45,7 +45,7 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Entrance"),
-        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 7: deal {BranchDamage:diff()} instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -55,7 +55,7 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 12 damage", "[gold]Spend[/gold] 5: deal 24 instead" };
+        new[] { "Deal 12 damage", "[gold]Spend[/gold] 7: deal 32 instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { true, true };
@@ -64,7 +64,7 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 12m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 24m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 32m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -84,11 +84,11 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
         var modeRules = new ModeRequirement?[]
         {
             null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 5),
+            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 7),
                                 "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 12 damage", "[gold]Spend[/gold] 5: deal 24 instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 12 damage", "[gold]Spend[/gold] 7: deal 32 instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
@@ -100,8 +100,8 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
         }
         else
         {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 5);
-            await DamageCmd.Attack((IsUpgraded ? 28m : 24m))
+            await FurinaStage.Spend(choiceContext, Owner.Creature, 7);
+            await DamageCmd.Attack((IsUpgraded ? 36m : 32m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
@@ -146,7 +146,7 @@ public sealed class ProtoFsGrandEntranceModeA : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 12m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 24m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 32m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
@@ -172,8 +172,8 @@ public sealed class ProtoFsGrandEntranceModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 5"),
-        ("description", "[gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead"),
+        ("title", "Spend 7"),
+        ("description", "[gold]Spend[/gold] 7: deal {BranchDamage:diff()} instead"),
     };
 
     public ProtoFsGrandEntranceModeB()
@@ -185,7 +185,7 @@ public sealed class ProtoFsGrandEntranceModeB : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 12m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 24m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 32m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()

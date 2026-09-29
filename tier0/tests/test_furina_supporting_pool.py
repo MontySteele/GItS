@@ -458,14 +458,15 @@ def test_spirited_arias_spend_mode_also_draws_two(arm):
     modes = card.effects[0]["modes"]
     assert [fx["op"] for fx in modes[1]["effects"]] == [
         "stage_spend", "damage", "draw"]
-    assert modes[1]["effects"][0]["amount"] == 2
+    assert modes[1]["effects"][0]["amount"] == 3
+    assert modes[1]["effects"][1]["amount"] == 11
     assert modes[1]["effects"][2]["amount"] == 2
     st = _state([["usher", 3], ["crabaletta", 5]], deck=5)
     effects.resolve_card(st, card)
     # The arm's pilot spends when the payer survives.
-    assert st.player.stage == [["usher", 3], ["crabaletta", 3]]
+    assert st.player.stage == [["usher", 3], ["crabaletta", 2]]
     assert len(st.player.hand) == 2
-    assert st.enemies[0].hp == 500 - 8
+    assert st.enemies[0].hp == 500 - 11
 
 
 @pytest.mark.parametrize("bar,upgraded,drawn", [

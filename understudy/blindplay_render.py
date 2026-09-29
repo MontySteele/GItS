@@ -172,6 +172,11 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # named source beside a carry-out's figure.
     out = [head, f"    {c['text'] or '(no printed text)'}"
                  + _unblocked_raise_clause(c, raiser)]
+    # 2026-09-28 (the Spend pass): a Spend mode the board cannot pay, under
+    # the face that prints it. The game plays such a card's plain mode without
+    # asking, so this line is the only place the refused mode shows.
+    for line in c.get("spend_unavailable") or []:
+        out.append(f"    {line}")
     # `EB-483`: on the Smith's grid, the face this card would print UPGRADED,
     # under the one it prints now. Absent on every other screen, and absent
     # here for a row this page cannot render without guessing -- see

@@ -157,7 +157,7 @@ public class FurinaStageRoundThreeTests
             "(\"description\", \"Deal {PlainDamage:diff()} damage to ALL "
           + "enemies\")", source);
         Assert.Contains(
-            "(\"description\", \"[gold]Spend[/gold] 2: deal "
+            "(\"description\", \"[gold]Spend[/gold] 3: deal "
           + "{BranchDamage:diff()} and apply [gold]Hydro[/gold] to ALL "
           + "instead\")", source);
         // AND THE VARS THEY NEED, on the option class rather than only on the
@@ -166,7 +166,7 @@ public class FurinaStageRoundThreeTests
                         source);
         Assert.Contains("new DamageVar(\"PlainDamage\", 5m, ValueProp.Move)",
                         source);
-        Assert.Contains("new DamageVar(\"BranchDamage\", 9m, ValueProp.Move)",
+        Assert.Contains("new DamageVar(\"BranchDamage\", 10m, ValueProp.Move)",
                         source);
     }
 
