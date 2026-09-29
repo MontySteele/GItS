@@ -420,6 +420,13 @@ HAZARD_EVENTS = {
                  "unbounded error loop. It is refused, not played.",
 }
 HAZARD_EVENT_TITLES = {"punch off": "PUNCH_OFF"}
+# THE HAZARDS THE MOD ITSELF DEFUSES UNDER INSTANT (2026-09-29). Since #733
+# `PunchOffInstantGuardPatch.cs` skips `PunchOff.PunchEachOther` whenever
+# `PrefsSave.FastMode` is `Instant`, which every embarked seat lane runs at --
+# so on such a lane the room is an ordinary event, and refusing it only killed
+# the run (a Sonnet seat, 2026-09-29). The refusal stays wherever the live
+# FastMode is anything else or cannot be read (`blindplay_faces._hazard`).
+INSTANT_GUARDED_HAZARDS = frozenset({"PUNCH_OFF"})
 
 
 class BlindPlayError(RuntimeError):
