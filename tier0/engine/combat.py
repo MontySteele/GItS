@@ -1081,6 +1081,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Block has to land here because it reads a ledger that was rolled at the
     # top of this function.
     klee_overhaul.turn_start_late(state)
+    # PAPER ARM (`varka_paper.VARKA_PAPER`, off): the Varka Oath rework's
+    # start-of-turn Powers, at the same post-draw site. Dead with it off.
+    from tier0.engine import varka_paper                # late: cycle
+    if varka_paper.VARKA_PAPER:
+        varka_paper.turn_start(state)
 
     # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE STAGE, at the
     # same site and for the same reason as the two lines above: her starting

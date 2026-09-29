@@ -162,6 +162,29 @@ class VarkaState:
     lost: set = field(default_factory=set)        # B: Winds spent by a fire
     recollect: int = 0           # B: a lost Wind Absorbed again
     swirl_log: list = field(default_factory=list)  # (turn, element, card)
+    # --- revision 3, the Oath rework (sec.11; `varka_oath`) ---
+    oath: dict = field(default_factory=lambda: {
+        "pyro": 0, "hydro": 0, "electro": 0, "cryo": 0})
+    current: Optional[str] = None     # the element of the last Knight played
+    payout: bool = True               # pick 1: the Swirl payout
+    apply_oath: bool = True           # pick 2: applying gains Oath
+    fang_done: bool = False
+    asc_created_turn: int = -1
+    oath_log: list = field(default_factory=list)   # (turn, el, n, source)
+    turn_oath: list = field(default_factory=list)  # (turn, cur, oath, all)
+    asc: list = field(default_factory=list)        # dict per cast
+    pay: dict = field(default_factory=lambda: {
+        "pyro_dmg": 0, "hydro_block": 0, "cryo_vuln": 0,
+        "electro_dmg": 0})
+    switches: int = 0
+    knights_played: list = field(default_factory=list)
+    unbound: int = 0
+    unbound_energy: int = 0
+    okn: int = 0
+    okn_block: int = 0
+    okn_rows: list = field(default_factory=list)
+    eye_rows: list = field(default_factory=list)
+    sworn: int = 0
 
 
 def live(state) -> bool:
@@ -198,6 +221,9 @@ def attack_bonus(state, card) -> int:
     vs = vs_of(state)
     if vs is None or card.type != "attack":
         return 0
+    if vs.rev == 3:
+        from tier0.engine import varka_oath            # late: cycle
+        return varka_oath.attack_bonus(state, vs, card)
     bonus = 0
     if vs.rev == 1 and _wind_on(vs, "pyro"):
         bonus += PYRO_WIND_ATTACK_BONUS
@@ -225,6 +251,11 @@ def intercept_hit(state, enemy, element, damage):
     hit is an ABSORB (card or relic), else None and the shared rule runs."""
     vs = vs_of(state)
     if vs is None or vs.landing:
+        return None
+    if vs.rev == 3:
+        # The Oath rework has no Absorb: only count an application.
+        from tier0.engine import varka_oath            # late: cycle
+        varka_oath.on_hit_pre(state, vs, enemy, element)
         return None
     if vs.rev == 2:
         return _intercept_rev2(state, vs, enemy, element, damage)
@@ -353,6 +384,10 @@ def on_swirl(state, enemy, aura) -> None:
     vs = vs_of(state)
     if vs is None:
         return
+    if vs.rev == 3:
+        from tier0.engine import varka_oath            # late: cycle
+        varka_oath.on_swirl(state, vs, enemy, aura)
+        return
     vs.swirls += 1
     vs.swirls_this_card += 1
     vs.swirl_log.append((state.turn, aura, vs.playing.id
@@ -396,9 +431,15 @@ def _on_swirl_rev2(state, vs, enemy) -> None:
         state.emit("block", amount=blk)
     if _wind_on(vs, "electro") and vs.electro_turn != state.turn:
         vs.electro_turn = state.turn
-        n = W2_ELECTRO_DRAW if w2 else R2_ELECTRO_DRAW
-        state.draw(n)
-        vs.wind_value["electro_draws"] += n
+        if vs.winds_set == "B1":
+            # Batch one as built (sec.10.1): the first Swirl each turn
+            # gives 1 Energy. Otherwise the 2.1 Winds.
+            state.player.energy += 1
+            vs.wind_value["electro_draws"] += 1
+        else:
+            n = W2_ELECTRO_DRAW if w2 else R2_ELECTRO_DRAW
+            state.draw(n)
+            vs.wind_value["electro_draws"] += n
     if _wind_on(vs, "cryo") and enemy.alive:
         powers.apply_power(state, enemy, "weak", R2_CRYO_WEAK)
         vs.wind_value["cryo_weak"] += R2_CRYO_WEAK
@@ -459,7 +500,7 @@ def op_varka(state, fx, card) -> None:
         targets = [(e, e.aura) for e in state.living_enemies
                    if e.aura and not e.aura_spent]
         for e, snap in targets:
-            if e.alive and vs.rev == 2 and (e.aura != snap or e.aura_spent):
+            if e.alive and vs.rev >= 2 and (e.aura != snap or e.aura_spent):
                 # sec.9.6: the snapshot stands; an earlier Swirl's spread
                 # in this sweep does not cancel this one.
                 from tier0.engine import reactions    # late: cycle
@@ -486,6 +527,10 @@ def op_varka(state, fx, card) -> None:
             vs.gmo_pending -= 1
             times = 2
         saved_aim = state.card_aim
+        if vs.rev == 3:
+            # sec.11.1: the current element is the last Knight played.
+            from tier0.engine import varka_oath        # late: cycle
+            varka_oath.set_current(state, vs, fx["element"])
         for i in range(times):
             element = fx["element"]
             if element == "choose":
@@ -633,6 +678,15 @@ def build_player(extra: list[str] = (), disabled_winds=frozenset(),
         vs.no_gain = True
     player.varka = vs
     return player
+
+
+def turn_start(state) -> None:
+    """`combat` post-draw turn start: the Oath rework's start-of-turn Powers
+    (Oath of the Knights, Sworn Brotherhood). Nothing for revisions 1-2."""
+    vs = vs_of(state)
+    if vs is not None and vs.rev == 3:
+        from tier0.engine import varka_oath            # late: cycle
+        varka_oath.turn_start(state)
 
 
 def enable() -> None:
