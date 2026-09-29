@@ -174,6 +174,141 @@ Swirl that removes its source aura), the Wind powers, four personal-pool
 Knights, and Converging Winds as a card-scoped switch. He is the character that tests
 the new Swirl hardest.
 
+## 9. Revision two (2026-09-29): Swirl distributes, Absorb collects
+
+**Ask ([USER], 2026-09-29):** "I think you're good to do a round of revision
+and polish on this in parallel to the Furina pass and see how the sims look,
+and then we can prototype that if it seems promising." He wants to playtest
+"to see if the Absorb mechanic is fun or repetitive in its current design."
+
+**What the sim found** (draft #753, n = 400 per cell):
+- Boreas's Fang makes Absorb compulsory, so the plain-Swirl choice (§3 co-op,
+  the Gale deck) does not exist: even Gale Absorbs 6.1 of its 7.0 Swirls.
+- An Absorb still spreads spent copies. In packs, 64-74% of the Knight hits
+  after an Absorb react with those copies instead of painting. Aiming does not
+  fix it.
+- Pyro Wind ("Attacks deal +2", on from about turn 1.5) is worth 179 of 400
+  boss wins. The pilot always took Pyro first, so this shows Pyro is strong,
+  not that choosing a Wind is interesting (GPT's review).
+- Against bosses waiting to fire Ascension wins on average at every count;
+  against packs the choice never comes up.
+
+**GPT's two reviews, adopted:** keep the structure; make Absorb optional;
+show a Wind choice that depends on the encounter, the hand, the enemy's intent
+or the partner's plan; show recognisable turns where waiting to fire
+Ascension is wrong; and add no machinery before the problem is understood.
+
+### 9.1 The two verbs
+
+- **Swirl** is the shared rule, unchanged: an Anemo hit on a fresh aura leaves
+  it spent on that enemy, spreads spent copies to every enemy lacking it (a
+  copy replaces whatever aura that enemy wore), and deals a flat 2 to every
+  enemy.
+- **Absorb** is Varka's own verb, and it is **not a Swirl**. An Absorb on an
+  enemy with a fresh aura takes that aura off the enemy and gives you its
+  element's **Wind** if you do not hold it. It spreads nothing and deals no
+  flat 2. The card's own damage still lands. An Absorb on an enemy with no
+  fresh aura, or with an element whose Wind you hold, does only the card's
+  damage.
+- **The choice per aura:** Absorb it (a new Wind, that enemy clean for your
+  next colour, and nobody else's aura touched), or Swirl it (2 to every enemy
+  and your Winds' effects, but spent copies over every other enemy's aura).
+  Absorb sets up; Swirl pays off.
+
+What Absorb does *not* clean: auras already on the board from earlier Swirls,
+companions or a partner stay where they are. §9.4's sequence starts from that
+board.
+
+### 9.2 Winds: every Wind pays on a Swirl
+
+A Wind is collected by Absorbing and used by Swirling, so after the first few
+Absorbs the deck turns to Swirling. All four trigger on the same event, so
+none is on from turn 1 while the others wait (placeholders):
+- **Pyro Wind:** whenever you Swirl, deal 3 damage to the enemy you hit.
+- **Hydro Wind:** whenever you Swirl, gain 3 Block.
+- **Electro Wind:** your first Swirl each turn draws a card.
+- **Cryo Wind:** whenever you Swirl, the enemy you hit gains 1 Weak.
+
+The order is meant to follow the fight: Pyro against a race or a pack, Hydro
+against a heavy single hitter, Cryo against multi-hit attacks. Which Wind is
+*available* this turn follows the fresh auras on the board: the Knights in
+hand, and the partner's paint.
+
+### 9.3 Boreas's Fang, optional
+
+**Boreas's Fang (starting relic):** "Once each turn, when an Attack hits an
+enemy with a fresh aura, you may Absorb it." The player chooses; the seat page
+and the mod offer it as a choice on that hit. Base Strike is not Anemo, so a
+Strike on a fresh aura either Absorbs through the Fang or lands as a plain
+hit.
+
+### 9.4 Worked sequence: three enemies, a board already in use
+
+Board: enemy A wears **fresh Pyro** (the partner's), B wears **spent Hydro**
+(a copy from last turn's Swirl), C is clean. Varka holds Hydro Wind. Hand:
+Lisa (Electro, Skill), Windbound Execution (6 Anemo, Absorb), Tempest Charge
+(8 Anemo, draw 1 if it Swirls), Strike. 3 Energy.
+
+- **Line 1, take and pay off:** Windbound on A Absorbs Pyro: Pyro Wind, and A
+  is clean. Lisa paints fresh Electro on C. Tempest Charge on C Swirls it: 8,
+  2 to every enemy, Pyro Wind's 3 on C, Hydro Wind's 3 Block, a card. A and B
+  take spent Electro copies. The most this turn, and the partner loses her
+  Pyro.
+- **Line 2, leave the partner's Pyro:** Lisa paints fresh Electro on C.
+  Windbound on C Absorbs it: Electro Wind, C clean. Strike on B. No Swirl, so
+  no spread: A's Pyro is still there for the partner's reaction. Less damage
+  now, a third Wind, and the partner's turn intact.
+- **Line 3, the trap:** Tempest Charge on A first, a plain Swirl of Pyro.
+  Spent Pyro lands on B and C. Lisa on C now Overloads the spent Pyro instead
+  of painting, and nothing fresh is left to Absorb or Swirl this turn.
+
+What a player should read from the page: Absorb first, Swirl last, and never
+Swirl while your next colour still has to land. The sim checks how often line
+1 or line 2 is right, and whether line 3 is avoidable in play.
+
+### 9.5 Ascension: two versions to test
+
+- **A (kept):** Deal 6, plus 6 per Wind you hold. Exhaust. Early firing is
+  right only on a kill or a lethal intent it prevents. The sim counts those
+  turns.
+- **B (candidate; GPT's second review calls it legitimate if waiting still
+  dominates):** Four Winds' Ascension (2): Deal 6, plus 8 per Wind you hold.
+  **You lose those Winds.** No Exhaust. A lost Wind can be Absorbed again.
+  Firing at two Winds twice is meant to compete with firing once at four,
+  against giving up the Swirl effects in between. The risk is that rebuilding
+  every fight turns repetitive.
+
+B replaces A only if A leaves waiting dominant and B makes the choice depend on
+the fight.
+
+### 9.6 Loose ends settled
+
+- **Knights are Skills.** The Fang reads Attacks, so a Knight never Absorbs its
+  own paint.
+- **Gale Sweep** Swirls every enemy that had a fresh aura **when it was
+  played**, in enemy order; a spread from an earlier Swirl in the sweep does
+  not cancel a later one.
+- **Grand Master's Order** repeats the next Knight card; Knights' Muster
+  counts, and the repeat may choose a different Knight.
+- **Barbara** (Apply Hydro to ALL) stays. On a board of spent copies it is the
+  deliberate reaction card, not the painter; the painters are the
+  single-target Knights.
+- **Converging Winds:** the struck enemy's own flat 2 carries no element.
+
+### 9.7 What the sim must show before a prototype
+
+1. Absorb against Swirl: how often a sensible pilot takes each, and whether
+   "Swirl only" or "Absorb whenever possible" is dominated.
+2. Wind choice: single-Wind runs (one Wind held from turn 1) per encounter.
+   It passes if the best Wind differs by encounter and by enemy intent.
+3. Ascension A against B, firing thresholds 1-4, paired by seed: any
+   encounter where early firing wins more than a quarter of pairs.
+4. The Knight hits that react instead of painting, re-measured (target: well
+   under 64-74%).
+5. §9.4's three lines as scenarios, with their outcomes.
+6. Turns to kill and boss wins beside Klee, Kokomi and Furina, as before.
+   Pilot-dependent; they rank nothing.
+
 ## Picks
 
 1. **Winds.** (1) *Four different flat effects, one per element* [default].
