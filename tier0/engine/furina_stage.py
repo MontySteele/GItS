@@ -256,11 +256,9 @@ PROMOTED_STARTERS: dict[str, str] = {
 # the round packet's own "what this round cannot see".
 # ----------------------------------------------------------------------
 POOL_SUBS: dict[str, str] = {
-    # --- Commons (eight) ---
-    "gentilhomme_usher": "proto_fs_gentilhomme_usher",
+    # --- Commons (six; `POOL_DROPS` names the two the balance review cut) ---
     "surintendante_chevalmarin": "proto_fs_surintendante_chevalmarin",
     "mademoiselle_crabaletta": "proto_fs_mademoiselle_crabaletta",
-    "suffering_for_art": "proto_fs_understudy",        # 0 Skill for 0 Skill
     "blocking_notes": "proto_fs_warm_reception",       # 1 Skill for 1 Skill
     "usher_the_waves": "proto_fs_tidal_flourish",      # 1 Attack for 1 Attack
     "stage_lights": "proto_fs_interposition",          # 1 Skill for 1 Skill
@@ -356,6 +354,19 @@ POOL_SUBS: dict[str, str] = {
 # ----------------------------------------------------------------------
 POOL_ADDS: tuple[str, ...] = (
     "proto_fs_solo_verse",
+)
+
+
+# ----------------------------------------------------------------------
+# THE POOL'S DROPS (2026-09-28 balance review, [USER]: "agreed on a)"). Shipped
+# rows the arm takes OUT of the offer with no Stage row in their slot: the
+# two whose Stage twins, Gentilhomme Usher and Understudy, were cut (80 -> 78).
+# Usher the performer stays. Read by `loader.pool_drops` under
+# `FURINA_STAGE`. C# twin: the `SwapOfferedRows` filter still names both.
+# ----------------------------------------------------------------------
+POOL_DROPS: tuple[str, ...] = (
+    "gentilhomme_usher",
+    "suffering_for_art",
 )
 
 

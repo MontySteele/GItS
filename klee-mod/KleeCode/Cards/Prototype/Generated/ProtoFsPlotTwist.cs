@@ -41,30 +41,35 @@ public sealed class ProtoFsPlotTwist : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Plot Twist"),
-        ("description", "Reverse the order of your performers. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Reverse the order of your performers. Deal {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new SpotlightSystem.SpotlitBlockVar(6m)
+            new DamageVar(7m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoFsPlotTwist()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         FurinaStage.Reverse(Owner.Creature);
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(3m);
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

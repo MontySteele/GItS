@@ -87,6 +87,16 @@
       "owner": "furina"
     },
     {
+      "id": "KLEEMOD-PROTO_FS_GENTILHOMME_USHER",
+      "class": "RetiredProtoFsGentilhommeUsher",
+      "owner": "furina"
+    },
+    {
+      "id": "KLEEMOD-PROTO_FS_UNDERSTUDY",
+      "class": "RetiredProtoFsUnderstudy",
+      "owner": "furina"
+    },
+    {
       "id": "KLEEMOD-PROTO_HOLD_THE_LINE_SPARK",
       "class": "RetiredProtoHoldTheLineSpark",
       "owner": "klee"
