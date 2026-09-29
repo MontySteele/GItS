@@ -101,16 +101,19 @@ def _enemies(stage):
 # --- one cell ------------------------------------------------------------------
 
 def run_v2(extra, enc, F, S, policy="smart", threshold=3, asc="A",
-           fixed=None):
+           fixed=None, fork=None, winds="r2", muster=None, smart="v21"):
     from tier0.engine import combat, varka_paper
     from tier0.engine.varka_paper_pilot import VarkaPilot2
-    pilot = VarkaPilot2(policy=policy, threshold=threshold)
+    pilot = VarkaPilot2(policy=policy, threshold=threshold, smart_rule=smart)
+    fork = FORK if fork is None else fork
     rows = []
     for i in range(F):
         carry, rec = None, None
         for stage in _stages(enc):
             player = varka_paper.build_player(extra, rev=2, asc_version=asc,
-                                              fixed_winds=fixed, fork=FORK)
+                                              fixed_winds=fixed, fork=fork,
+                                              winds_set=winds,
+                                              muster_cost=muster)
             if carry is not None:
                 player.hp = carry
             start = player.hp
@@ -198,7 +201,7 @@ def r1(F, S, out):
                     f"{st.mean(ab):.2f}+/-{st.pstdev(ab):.2f} | swirl "
                     f"{st.mean(sw):.2f}+/-{st.pstdev(sw):.2f} | winds "
                     f"{st.mean(wn):.2f} | per fight: Pyro dmg "
-                    f"{3 * wv['pyro_hits']:.1f}, Hydro Block "
+                    f"{wv['pyro_dmg']:.1f}, Hydro Block "
                     f"{wv['hydro_block']:.1f}, Electro cards "
                     f"{wv['electro_draws']:.2f}, Cryo Weak "
                     f"{wv['cryo_weak']:.2f}")
@@ -491,6 +494,105 @@ def r6(F, S, out):
             _set_kit_arms(False)
 
 
+# --- revision 2.2: the tuning grid ------------------------------------------------
+
+GRID = (("2.1 winds", "r2", "S0", None), ("2.1 winds", "r2", "S1", 0),
+        ("W2", "W2", "S0", None), ("W2", "W2", "S1", 0))
+OTHER_STARTERS = ("Ironclad (ref)", "Silent (ref)", "Klee (overhaul)",
+                  "Kokomi (overhaul)", "Furina (Stage)")
+
+
+def _wv_line(rows):
+    wv = {k: st.mean(r["wv"][k] for r in rows) for k in rows[0]["wv"]}
+    return (f"Pyro dmg {wv['pyro_dmg']:.1f}, Hydro Block "
+            f"{wv['hydro_block']:.1f}, Electro cards "
+            f"{wv['electro_draws']:.2f}, Cryo Weak {wv['cryo_weak']:.2f}")
+
+
+def _split(rows):
+    ab = sum(len(r["absorbs"]) for r in rows)
+    sw = sum(r["swirls"] for r in rows)
+    n = len(rows)
+    return (f"Absorbs {ab / n:.2f}, Swirls {sw / n:.2f} per fight "
+            f"({100.0 * ab / max(1, ab + sw):.0f}% Absorbs)")
+
+
+def _flips(early, wait):
+    e = sum(1 for x, y in zip(early, wait) if x["won"] and not y["won"])
+    w = sum(1 for x, y in zip(early, wait) if y["won"] and not x["won"])
+    return e, w
+
+
+def r22(F, S, out):
+    """Revision 2.2 (2.1 + switches): {2.1 winds, W2} x {S0, S1}, Ascension
+    A, policy c with the v22 smart rule; the 2.1 fork on."""
+    out("\n## 2.2 grid: {2.1 winds, W2} x {S0, S1}; fork on; Ascension A; "
+        "policy c with the 2.2 smart rule (Absorb every new Wind unless "
+        "3+ enemies are alive or a Swirl this turn would kill)")
+    for label, winds, sv, mc in GRID:
+        kw = dict(fork=True, winds=winds, muster=mc, smart="v22")
+        out(f"\n### {label} / {sv}")
+        for deck in DECKS:
+            for enc in PACKS + BOSSES:
+                rows = run_v2(DECKS[deck], enc, F, S, **kw)
+                out(f"- {deck[:3]:3s} {enc:9s}: {short(rows)} | "
+                    f"{_split(rows)} | {_wv_line(rows)}")
+            for enc in BOSSES:
+                cells = {th: run_v2(DECKS[deck], enc, F, S, threshold=th,
+                                    **kw) for th in (1, 2, 4)}
+                e1 = _flips(cells[1], cells[4])
+                e2 = _flips(cells[2], cells[4])
+                out(f"    Ascension {deck[:3]} {enc}: win at 1/2/4 "
+                    + " / ".join(f"{100.0 * sum(r['won'] for r in cells[t]) / F:.1f}"
+                                 for t in (1, 2, 4))
+                    + f"; won only early vs only waiting: at 1 {e1[0]} vs "
+                    f"{e1[1]}, at 2 {e2[0]} vs {e2[1]}")
+    out("\n## 2.2 single-Wind runs (C2, S0, fork on, swirl-only pilot, "
+        "Ascension fired when drawn): HP lost (win % where < 100); the "
+        "margin is the paired share where the best beats the runner-up")
+    encs = PACKS + BOSSES + ("multihit", "heavy")
+    for label, winds in (("2.1 winds", "r2"), ("W2", "W2")):
+        out(f"\n### {label}")
+        rank_pos = {w: [] for w in WINDS}
+        for enc in encs:
+            cells = {w: run_v2(DECKS["C2 +4 Knights +Windbound +Tempest"],
+                               enc, F, S, policy="swirl", threshold=0,
+                               fixed=(w,), fork=True, winds=winds)
+                     for w in WINDS}
+            ranked = sorted(WINDS, key=lambda w: (
+                -sum(r["won"] for r in cells[w]),
+                st.mean(r["hp_lost"] for r in cells[w])))
+            for i, w in enumerate(ranked):
+                rank_pos[w].append((enc, i + 1))
+            b, t, l = paired(cells[ranked[0]], cells[ranked[1]])
+            vals = " / ".join(
+                f"{w} {st.mean(r['hp_lost'] for r in cells[w]):.1f}"
+                + (f" ({100.0 * sum(r['won'] for r in cells[w]) / F:.1f}%)"
+                   if sum(r["won"] for r in cells[w]) < F else "")
+                for w in WINDS)
+            out(f"- {enc}: {vals}; BEST {ranked[0]}, 2nd {ranked[1]} "
+                f"(best beats 2nd in {pct(b, F)}, loses {pct(l, F)})")
+        for w in WINDS:
+            out(f"  {w}: ranks " + ", ".join(f"{e} {r}"
+                                              for e, r in rank_pos[w]))
+
+
+def r22_others(F, S, out):
+    out("\n## Other kits' starters on the bosses (same seeds)")
+    _set_kit_arms(True)
+    try:
+        for label, ch, pil in (("Klee (overhaul)", "klee", "demolition"),
+                               ("Kokomi (overhaul)", "kokomi", "priest"),
+                               ("Furina (Stage)", "furina", "salon"),
+                               ("Ironclad (ref)", "ref_ironclad", "generic"),
+                               ("Silent (ref)", "ref_silent", "silent")):
+            for enc in BOSSES:
+                rows = run_other(ch, pil, enc, F, S)
+                out(f"  {label:18s} {enc}: {outcome(rows)}")
+    finally:
+        _set_kit_arms(False)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
         description=__doc__,
@@ -529,6 +631,10 @@ def main(argv=None) -> int:
         r5(out)
     if "6" in args.only:
         r6(F, S, out)
+    if "7" in args.only:
+        r22(F, S, out)
+    if "8" in args.only:
+        r22_others(F, S, out)
     return 0
 
 
