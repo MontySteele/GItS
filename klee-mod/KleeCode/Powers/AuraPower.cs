@@ -60,7 +60,32 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
             $"{Element} clings to this enemy for {{Amount}} more turn{{Amount:plural:|s}}. "
           + "A hit of another element triggers an "
           + "[gold]Elemental Reaction[/gold]."),
+        // THE ELEMENT PORT (sec.7.1): "the aura badge shows 'spent'". The face
+        // `SmartDescriptionLocKey` selects while this aura has paid a trigger.
+        // It names only the triggers a spent aura refuses under the switches
+        // this build carries (`TriggerRules.SpentTriggers`).
+        (SpentKey,
+            $"Spent: {TriggerRules.SpentTriggers()} do nothing to it until "
+          + $"{Element} hits it again. {{Amount}} more turn{{Amount:plural:|s}}."),
     };
+
+    /// <summary>The loc suffix of the spent face.</summary>
+    public const string SpentKey = "smartDescriptionSpent";
+
+    /// <summary>
+    /// THE ELEMENT PORT (<see cref="TriggerRules"/>): this aura has already
+    /// paid an Anemo or Geo reaction, and a switched trigger gets nothing from
+    /// it until a same-element hit refreshes it. False on every new aura.
+    /// Sim twin: <c>Enemy.aura_spent</c>. Written only by the lifecycle sites
+    /// (<see cref="ResolveLifecycle"/>, <c>ElementalHit</c>, the Swirl spread).
+    /// </summary>
+    public bool Spent { get; set; }
+
+    /// <summary>The spent face while <see cref="Spent"/>; the ruled face
+    /// otherwise, and always on a canonical copy (`IsMutable` first, the
+    /// guard every selector in this mod carries).</summary>
+    protected override string SmartDescriptionLocKey =>
+        IsMutable && Spent ? Id.Entry + "." + SpentKey : base.SmartDescriptionLocKey;
 
     // ARTIFACT COEXISTENCE ([USER] ruling 2026-08-23; LAW "Combat --
     // elements & reactions"): elemental application coexists with Artifact
@@ -199,7 +224,9 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         var trigger = ElementOf(cardSource, dealer);
         if (trigger == Element.None) return 1m;
 
-        var reaction = ReactionTable.Lookup(Element, trigger);
+        // Spent-aware (the element port): a switched trigger on a spent aura
+        // forecasts no reaction, so it forecasts no Courtroom Drama either.
+        var reaction = TriggerRules.ReactionFor(this, trigger);
 
         // Dealer-aware: Vermillion Pact's percent boost rides the multiplier
         // (sim _amp_mult). The amp-cap detector lives inside the overload.
@@ -295,26 +322,49 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         var trigger = ElementOf(cardSource, dealer);
         if (trigger == Element.None) return;
 
-        if (trigger == Element)
+        switch (TriggerRules.Outcome(Element, Spent, trigger))
         {
-            // Same element refreshes duration rather than reacting.
-            await PowerCmd.ModifyAmount(
-                choiceContext, this,
-                AuraCmd.Duration(dealer) - Amount,
-                applier: dealer, cardSource: cardSource, silent: true);
-            return;
+            case TriggerRules.HitOutcome.Refresh:
+                // Same element refreshes duration rather than reacting, and
+                // makes a spent aura fresh again (the element port, sec.3).
+                Spent = false;
+                await PowerCmd.ModifyAmount(
+                    choiceContext, this,
+                    AuraCmd.Duration(dealer) - Amount,
+                    applier: dealer, cardSource: cardSource, silent: true);
+                return;
+
+            case TriggerRules.HitOutcome.Spend:
+            {
+                // THE ELEMENT PORT: a switched trigger on a fresh aura reacts
+                // and leaves it standing, spent, its duration untouched. Spent
+                // BEFORE resolving, for the reason the consume below goes
+                // first: the Swirl spread must see this aura as already paid.
+                var reaction = ReactionTable.Lookup(Element, trigger);
+                Spent = true;
+                await ReactionEffects.Resolve(
+                    choiceContext, reaction, target, dealer, cardSource, Element);
+                return;
+            }
+
+            case TriggerRules.HitOutcome.Consume:
+            {
+                var reaction = ReactionTable.Lookup(Element, trigger);
+                // Consume the aura BEFORE resolving effects: Swirl re-applies
+                // this element to other enemies and must not immediately
+                // re-trigger here.
+                var consumedElement = Element;
+                await PowerCmd.Remove(this);
+
+                await ReactionEffects.Resolve(
+                    choiceContext, reaction, target, dealer, cardSource, consumedElement);
+                return;
+            }
+
+            default:
+                // Nothing, or a switched trigger on a spent aura: pays nothing.
+                return;
         }
-
-        var reaction = ReactionTable.Lookup(Element, trigger);
-        if (reaction == Reaction.None) return;
-
-        // Consume the aura BEFORE resolving effects: Swirl re-applies this
-        // element to other enemies and must not immediately re-trigger here.
-        var consumedElement = Element;
-        await PowerCmd.Remove(this);
-
-        await ReactionEffects.Resolve(
-            choiceContext, reaction, target, dealer, cardSource, consumedElement);
     }
 
     /// <summary>

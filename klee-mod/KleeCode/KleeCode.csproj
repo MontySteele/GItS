@@ -149,6 +149,15 @@
 
        IT IS THE ONLY FURINA ARM. The reframe it replaced left the tree whole
        under `EB-726` (brief sec.2, R269). -->
+  <!-- THE ELEMENT PORT's two switches (KleeMod.Elements.TriggerRules),
+       defaulted on by Directory.Build.props. Unlike the arms they compile in
+       every build: they switch the shared reaction layer, not a kit. -->
+  <PropertyGroup Condition="'$(SwirlPays)' == 'true'">
+    <DefineConstants>$(DefineConstants);SWIRL_PAYS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(CrystallizeKeepsAura)' == 'true'">
+    <DefineConstants>$(DefineConstants);CRYSTALLIZE_KEEPS_AURA</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(FurinaStage)' == 'true'">
     <DefineConstants>$(DefineConstants);FURINA_STAGE</DefineConstants>
   </PropertyGroup>

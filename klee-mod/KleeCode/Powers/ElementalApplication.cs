@@ -69,6 +69,9 @@ public sealed class KleeElementalHooks : AbstractModel
     /// </summary>
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
+        // THE ELEMENT PORT sec.7.3: a reaction inside this play is the card's
+        // (`ReactionEvents.SourceKindFor`). Every replay pushes and pops.
+        if (cardPlay.Card is { } playing) ReactionEvents.CardPlayBegins(playing);
         // Sim order (combat.py play_card): the requires-full drain happens
         // FIRST, then the skill-tag bonus. Once per play, never per replay.
         if (cardPlay.IsFirstInSeries)
@@ -127,6 +130,7 @@ public sealed class KleeElementalHooks : AbstractModel
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (cardPlay.Card is { } played) ReactionEvents.CardPlayEnds(played);
         // Same ownerless-play guard as BeforeCardPlayed above.
         var owner = cardPlay.Card?.Owner;
         if (owner?.Creature is not { } creature) return;
@@ -283,6 +287,7 @@ public sealed class KleeElementalHooks : AbstractModel
         // last fight's rows into this one's first turn.
         ReactionLog.ResetFight();
         RelicAnswerLog.ResetFight();
+        ReactionEvents.ResetFight();
         ReactionEffects.MarkTurnStart();
         // And the Grass Ring's window: turn one counts from the start of
         // combat, never from the last fight's final turn.

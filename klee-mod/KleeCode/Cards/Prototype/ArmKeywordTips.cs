@@ -675,8 +675,11 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForSwirl(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SwirlKey,
-            "The enemy's aura is consumed and copied onto ALL enemies. No "
-          + "aura, no effect.");
+            // THE ELEMENT PORT (sec.4 A, 2026-09-28): the preview row's rule,
+            // restated for the verb.
+            "On a fresh aura: copy it onto ALL enemies without it and deal "
+          + Elements.ReactionConstants.SwirlDamage
+          + " damage to ALL enemies. The aura stays, spent. No aura, no effect.");
 
     /// <summary>
     /// 2026-09-25, the afternoon Klee seat round. The Opus seat: "Companion is

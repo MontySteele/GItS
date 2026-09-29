@@ -223,3 +223,15 @@ def make_state(enemies=None, hp=80, seed=0):
 @pytest.fixture
 def state():
     return make_state()
+
+
+@pytest.fixture
+def consume_triggers(monkeypatch):
+    """THE WORLD BEFORE THE ELEMENT PORT: Anemo and Geo CONSUME the aura they
+    act on (`C.SWIRL_PAYS` and `C.CRYSTALLIZE_KEEPS_AURA` off). A pin about
+    that rule names it with this fixture, so it keeps saying one true thing
+    whichever way the sim's defaults point
+    (`review/ruled/element-home-review-2026-09-28.md` §3/§4)."""
+    from tier0 import constants as C
+    monkeypatch.setattr(C, "SWIRL_PAYS", False)
+    monkeypatch.setattr(C, "CRYSTALLIZE_KEEPS_AURA", False)

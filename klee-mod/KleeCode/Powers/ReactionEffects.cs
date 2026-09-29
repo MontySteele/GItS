@@ -366,6 +366,11 @@ internal static class ReactionEffects
             // reacts. See `ReactionLog`.
             ReactionLog.Note(reaction, target, dealer, cardSource);
 
+            // THE ELEMENT PORT sec.7.3: the one reported event every later
+            // listener reads (what fired, on whom, from what kind of source).
+            // The listeners above and below keep their direct calls.
+            ReactionEvents.Raise(reaction, target, dealer, cardSource);
+
             // Courtroom Drama (R85): the FIRST reaction of the turn puts its
             // target on the stand. Counted PER DEALER -- the sim's
             // `reactions_this_turn == 1` in the only configuration it models
@@ -555,6 +560,10 @@ internal static class ReactionEffects
                     applier: dealer, cardSource: cardSource);
                 break;
 
+            case Reaction.Swirl when TriggerRules.SwirlPays:
+                await SwirlPays(choiceContext, target, dealer, cardSource, consumedAura);
+                break;
+
             case Reaction.Swirl:
                 // tier0 _react anemo branch: the consumed aura is applied to
                 // EVERY living enemy -- the original target included (its own
@@ -610,6 +619,54 @@ internal static class ReactionEffects
         {
             Log.Info($"[{KleeMod.ModId}] REACTION {reaction} on {target.Name} " +
                      $"(consumed {consumedAura}).");
+        }
+    }
+
+    /// <summary>
+    /// THE ELEMENT PORT's Swirl (<c>review/ruled/element-home-review-2026-09-28.md</c>
+    /// §4 A; <see cref="TriggerRules.SwirlPays"/>). The struck enemy KEEPS its
+    /// aura -- already marked spent by the lifecycle site that called
+    /// <see cref="Resolve"/>. The spread keeps today's reach (every hittable
+    /// enemy) less the ones already wearing this element ("every enemy that
+    /// lacks it"); a different aura is replaced, as today, and nothing reacts
+    /// where a copy lands (the deferred candidate). Copies arrive SPENT, so
+    /// they cannot be Swirled again. Then a flat
+    /// <see cref="ReactionConstants.SwirlDamage"/> to every enemy: element-less
+    /// and outside the pipeline, the Overload splash's exact call, so it
+    /// reacts with nothing. Sim twin: <c>reactions._react</c>'s anemo branch.
+    /// </summary>
+    private static async Task SwirlPays(
+        PlayerChoiceContext choiceContext, Creature target, Creature? dealer,
+        CardModel? cardSource, Element spread)
+    {
+        var bodies = target.CombatState?.HittableEnemies.ToList();
+        if (bodies == null) return;
+
+        foreach (var e in bodies)
+        {
+            if (ReferenceEquals(e, target)) continue;
+            var existing = AuraCmd.Find(e);
+            if (existing != null)
+            {
+                if (!TriggerRules.SpreadLands(spread, existing.Element)) continue;
+                await PowerCmd.Remove(existing);
+            }
+            await AuraCmd.Apply(choiceContext, e, spread, dealer, cardSource);
+            if (AuraCmd.Find(e) is { } copy) copy.Spent = true;
+        }
+
+        var damage = ReactionConstants.SwirlDamage;
+#if PROTOTYPE_CARDS
+        // Durin's White scales it for the reason it scales Overload's splash:
+        // it is damage a reaction deals. Truncated like the sim's int(...).
+        damage = (int)(damage * CompanionOverhaulReactions.DamageMultiplier(dealer));
+#endif
+        foreach (var e in bodies)
+        {
+            await CreatureCmd.Damage(
+                choiceContext, e, damage,
+                ValueProp.Unblockable | ValueProp.Unpowered,
+                dealer: null, cardSource: null, cardPlay: null);
         }
     }
 }

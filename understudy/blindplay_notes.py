@@ -25,7 +25,7 @@ from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
                                         CRYSTALLIZE_BLOCK, SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT,
-                                        SHRINK_DEALT_PCT,
+                                        SHRINK_DEALT_PCT, SWIRL_DAMAGE,
                                         VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
 
@@ -1234,7 +1234,8 @@ PLAN_PAST_LETHAL_BLOCK = " behind {block} Block"
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
              "`(debuff)`, because it is neither: it is the element left "
              "clinging to a body, and it is what an Elemental Reaction needs "
-             "-- a hit of a different element consumes it and reacts.*")
+             "-- a hit of a different element reacts with it. A spent aura "
+             "gives Anemo and Geo nothing.*")
 
 
 # `EB-461`. THE PAGE PROMISED A NUMBER AND THE ENEMY NEVER DEALT IT.
@@ -1484,8 +1485,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # `Hexerei` -- which R276 pick 2 retired: the Spark and Klee's three
     # readers read any Companion play now, so the word and its row left the
     # page with the tip (`ArmKeywordTips`).
-    "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
-              "aura, no effect."),
+    # The element port (2026-09-28) rewrote it with the C#, in one commit.
+    "Swirl": ("On a fresh aura: copy it onto ALL enemies without it and "
+              f"deal {SWIRL_DAMAGE} damage to ALL enemies. The aura stays, "
+              "spent. No aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
     # is a Power card of Klee's, and Kaeya's Cold-Blooded Strike is written
     # against it by name ("Next turn, Grounded pays even if you played a
@@ -2488,8 +2491,9 @@ REACTION_KEYWORDS: dict[str, str] = {
     # has, and it is entirely undocumented". The clause is the C#'s own, moved
     # in the same commit, so the tooltip and this page cannot say different
     # things about it.
-    "Crystallize": ("Geo on any aura: "
-                    f"gain {CRYSTALLIZE_BLOCK} Block. The aura is consumed."),
+    # The element port (2026-09-28): the aura stays, spent.
+    "Crystallize": ("Geo on a fresh aura: "
+                    f"gain {CRYSTALLIZE_BLOCK} Block. The aura stays, spent."),
 }
 
 # `EB-428`. THE SIX ROWS FILLED 40% OF A SCREEN THAT COULD FIRE NONE OF THEM.
@@ -2581,8 +2585,8 @@ ELEMENT_KEYWORDS: dict[str, str] = {
     "Geo": ("An element. A Geo hit never leaves an aura; on an enemy "
             "wearing one it triggers an Elemental Reaction (Crystallize)."),
     "aura": ("The element left on an enemy by an elemental hit. A hit of a "
-             "different element consumes it and triggers an Elemental "
-             "Reaction."),
+             "different element triggers an Elemental Reaction. Anemo and "
+             "Geo leave it standing, spent."),
 }
 
 #: Matched the way `_ARM_KEYWORD_RE` matches, case-sensitive: the game

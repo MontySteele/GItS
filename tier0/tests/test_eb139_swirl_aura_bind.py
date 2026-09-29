@@ -33,6 +33,8 @@ pass by picking the wrong bearer.
 
 from __future__ import annotations
 
+import pytest
+
 import random
 
 from tier0.content import loader
@@ -64,6 +66,7 @@ def _card(cid, effs, ctype="attack", **kw) -> Card:
 #  aura-bearer
 # ---------------------------------------------------------------------------
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_the_whole_card_binds_to_the_lowest_hp_aura_bearer():
     """THE ROW'S FIRST ACCEPTANCE PIN. Three bodies, and all three answers
     differ: `low` is lowest-HP overall and carries nothing, `mid` is the
@@ -101,6 +104,7 @@ def test_the_swirl_spreads_from_the_body_the_card_bound_to():
     assert low.aura == "pyro", "the Swirl bound to the auraless body"
 
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_a_swirl_inside_a_conditional_arm_still_gates_the_bind():
     """`prune_witch_hunt` puts its Swirl at the top level, but nothing stops a
     future row from putting one inside a branch, and the emitter's own aiming
@@ -181,6 +185,7 @@ def test_forced_random_autoplay_receives_no_corrective_re_aim():
     assert 0 < hit_low < 40, "the autoplay roll was replaced by the aura bind"
 
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_the_autoplay_roll_is_the_same_roll_it_was_before():
     """Stronger than the spread above, and the actual no-change claim: the
     creature a free play picks is `rng.choice(living)` on the SAME single draw
@@ -198,6 +203,7 @@ def test_the_autoplay_roll_is_the_same_roll_it_was_before():
 #  ACCEPTANCE PIN 4 -- `times` follows the bind
 # ---------------------------------------------------------------------------
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_every_hit_of_a_multi_hit_row_lands_on_the_bound_aura_bearer():
     """R210 Q2 under the new bind: `times` re-checks the SAME creature and
     never re-picks, so all four hits go to the aura-bearer rather than
@@ -215,6 +221,7 @@ def test_every_hit_of_a_multi_hit_row_lands_on_the_bound_aura_bearer():
     assert mid.hp == 42 and low.hp == 20
 
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_the_hits_after_the_bound_bearer_dies_fizzle():
     """And the fizzle half, unchanged: `AttackCommand.Execute` breaks on an
     empty refiltered target list. The hits do not walk to the survivor just
@@ -252,6 +259,7 @@ def test_an_aimed_swirl_still_lands_on_the_corpse_it_bound_to():
     assert low.aura == "pyro", "the Swirl fizzled on the corpse it bound to"
 
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_aimed_damage_after_the_bearer_dies_still_fizzles():
     """The other side of the non-uniform rule: a second damage row on the same
     card does NOT walk to the survivor once the bound bearer is dead."""
@@ -315,6 +323,7 @@ def test_a_card_with_no_swirl_ignores_the_auras_on_the_board():
     assert mid.hp == 50 and not mid.powers.get("vulnerable")
 
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_an_all_enemies_swirl_does_not_move_a_cards_aim():
     """`lynette_astonishing_shift` pairs an aimed Swirl with `damage
     target: all_enemies`; the mirror case -- an `all_enemies` SWIRL beside an

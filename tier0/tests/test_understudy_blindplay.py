@@ -6707,8 +6707,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  "at the start of this combat"],
         # `EB-377` ADDED `Swirl` to the page beside `Hexerei`, which R276
         # pick 2 retired with its tip.
-        "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
-                  "No ", "aura, no effect."],
+        "Swirl": ["On a fresh aura: copy it onto ALL enemies without it "
+                  "and deal ",
+                  " damage to ALL enemies. The aura stays, spent. No aura, "
+                  "no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
         # Strike is written against by name, met by a seat holding neither.
         # `EB-516` moved the condition to the board and `EB-749` moved it on
@@ -7572,10 +7574,11 @@ def test_an_anemo_card_over_a_standing_aura_reaches_swirl():
     assert "NO REACTION IS REACHABLE" not in geo
     # `EB-613` (R263 sec.5 item 1) turned the row round: a Geo hit is a COST
     # to a reaction deck, so the price leads and the Block follows it.
-    # Text pass 2026-09-25: two short sentences, each with its verb.
-    assert (f"- **Crystallize** — Geo on any aura: gain "
-            f"{blindplay.CRYSTALLIZE_BLOCK} Block. The aura is "
-            f"consumed.") in geo
+    # Text pass 2026-09-25: two short sentences, each with its verb. The
+    # element port (2026-09-28): the aura stays, spent.
+    assert (f"- **Crystallize** — Geo on a fresh aura: gain "
+            f"{blindplay.CRYSTALLIZE_BLOCK} Block. The aura stays, "
+            f"spent.") in geo
 
 
 def test_a_trigger_element_with_no_aura_out_is_told_which_half_is_missing():
@@ -7678,10 +7681,12 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
                    "next Attack on it Shatters for "],
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
-        "Swirl": ["aura is consumed and copied onto ALL enemies"],
+        # The element port (2026-09-28) moved both, in the C# and here.
+        "Swirl": ["copy it onto ALL enemies without it and deal ",
+                  " damage to ALL enemies. The aura stays, spent."],
         # `EB-613`: the price leads. Both copies moved in one commit, which
         # is what this pin is for.
-        "Crystallize": [". The aura is consumed."],
+        "Crystallize": [". The aura stays, spent."],
     }
     assert set(anchors) | {"Elemental Reaction"} \
         == set(blindplay.REACTION_KEYWORDS)
