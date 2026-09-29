@@ -18,7 +18,7 @@ from tier0.engine import (companion_hexerei, companion_standins, effects,
                           furina_stage, klee_overhaul,
                           kokomi_plan,
                           potions, powers, reactions, refpowers, relics,
-                          resources)
+                          resources, zhongli_tab)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
                                 remove_instance, sync_fanfare_cap_to_max_hp)
 
@@ -1095,6 +1095,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     furina_stage.turn_start_regen(state)
     # R276 batch two: Arkhe Alignment's choice, after the regen it may add to.
     furina_stage.turn_start_powers(state)
+    # EXPLORATION ONLY (`zhongli_tab.ZHONGLI_PAPER`, off): the Zhongli paper
+    # sim's turn start -- Contract terms that close at the next turn, Contract
+    # of Jade's Energy. Returns at once with the flag off.
+    if zhongli_tab.ZHONGLI_PAPER:
+        zhongli_tab.turn_start(state)
 
     # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
     # every Plan she wrote last turn is carried out, in order, HERE.
@@ -1258,6 +1263,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # which is what makes fight one's turn-one line A add Usher's 3 Block to
     # the 9 she already has before Nibbit's Butt lands.
     furina_stage.end_of_turn_acts(state)
+    # EXPLORATION ONLY (`zhongli_tab.ZHONGLI_PAPER`, off): the Stele's end of
+    # turn tick and the Contract terms that close at a turn's end.
+    if zhongli_tab.ZHONGLI_PAPER:
+        zhongli_tab.end_of_turn(state)
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss
     # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,
