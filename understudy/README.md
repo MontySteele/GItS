@@ -539,6 +539,14 @@ decorative and fire-and-forget: no option awaits it, and the cancel and the
 runs unchanged. The legs below stay as the backstop for a build without the
 Klee mod loaded.
 
+**A blind seat plays Punch Off on an Instant game (2026-09-29).** A Sonnet
+seat's run died on the refusal below on an Instant lane, where the guard had
+already made the room safe. `blindplay` now asks `GET /api/v1/gits/speed` when
+a hazard in `blindplay_shape.INSTANT_GUARDED_HAZARDS` is on screen, and plays
+it like any event when the live `fast_mode` is `Instant` (the same
+`PrefsSave.FastMode` the guard reads). Any other speed, or no answer, keeps
+the refusal. The soak's own register is unchanged.
+
 `MegaCrit.Sts2.Core.Models.Events.PunchOff.PunchEachOther()` instantiates a
 `PackedScene` whose GPUParticles RID comes back null, and the engine logs
 `ERROR: Parameter "particles" is null` once per particle-property setter in an
