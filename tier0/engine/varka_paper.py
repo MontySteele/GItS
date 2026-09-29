@@ -1,0 +1,458 @@
+"""VARKA, THE FOUR WINDS -- a PAPER-STAGE sim arm (exploration only).
+
+Source of truth for the rules: `review/active/varka-paper-kit-2026-09-28.md`
+(sec.2-sec.6). Card numbers are the paper's placeholders and are NOT tuned
+here. The measuring tool is `tools/varka_paper_report.py`; nothing here is a
+balance claim and no calibration band reads it.
+
+THE SWITCH. `VARKA_PAPER` is a MODULE constant, off, for the reason
+`furina_stage.FURINA_STAGE` is one: a run of the report moves neither the
+constant census nor the world stamp. With it off, every hook this arm adds to
+the shared engine (`reactions.resolve_hit`, `reactions._react`,
+`effects.flat_attack_bonus`, `effects.bind_card_aim`) is a dead branch, and no
+card, op or character id of Varka's is reachable: the cards are built here, by
+`build_player`, and never enter the loader's card index. The one op the cards
+speak, `varka`, is registered into `effects.OPS` by `enable()` only.
+
+WHAT IS MODELLED (the paper's sec.3 and sec.6, the spec's placeholders):
+  * ABSORB -- a card effect. An Absorb Swirl is a Swirl (spent copies spread
+    to enemies lacking the element, flat 2 to ALL) that then TAKES the aura
+    off the enemy it hit instead of leaving it spent.
+  * WINDS -- the first Absorb of Pyro / Hydro / Electro / Cryo each fight
+    grants that Wind for the fight: Pyro +2 on Attacks; Hydro 2 Block per
+    Swirl; Electro draws 1 on the first Swirl each turn; Cryo 1 Weak to the
+    enemy each Swirl hit.
+  * BOREAS'S FANG (relic) -- each turn, the first hit of an Attack card on a
+    FRESH aura is an Anemo Swirl-with-Absorb of that aura, whatever the card's
+    own element (read here as: element-less or Anemo; see `_fang_can_take`).
+    An Attack that hits no fresh aura does not use it up.
+  * KNIGHTS -- Varka-only companion Skills that paint their element.
+  * CONVERGING WINDS (Rare Power) -- the spread hit is the flat 2 carrying the
+    swirled element; a reaction it sets off lands on that enemy only (an
+    Overload's splash does not leave it); a spread reaction never Swirls.
+
+READINGS TAKEN WHERE THE PAPER IS SILENT (each is flagged in the report):
+  * Knights are SKILLS (companion). If they were Attacks, the Fang would
+    absorb a Knight's own hit on a painted enemy instead of letting it react.
+  * The Fang absorbs on ONE hit per turn -- the first fresh-aura hit of the
+    first qualifying Attack -- even when that Attack hits several enemies.
+  * Grand Master's Order's "next Knight" counts Knights' Muster as a Knight.
+  * Gale Sweep picks its targets when played (every enemy with a fresh aura
+    at that moment) and hits them in board order; a spread from an earlier
+    target can overwrite a later target's different aura before it is hit.
+  * An Absorb grants its Wind AFTER its own Swirl resolves, so the Wind it
+    grants does not pay on the Swirl that granted it.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Optional
+
+VARKA_PAPER = False          # THE SWITCH. Off: every hook is a dead branch.
+
+CHARACTER = "varka"
+HP = 80                      # PLACEHOLDER: the paper names no HP (Ironclad's)
+ELEMENT = "anemo"
+WIND_ELEMENTS = ("pyro", "hydro", "electro", "cryo")
+
+PYRO_WIND_ATTACK_BONUS = 2
+HYDRO_WIND_BLOCK = 2
+ELECTRO_WIND_DRAW = 1
+CRYO_WIND_WEAK = 1
+STORMWARD_BONUS = 3
+STORMWARD_WINDS = 2
+ASCENSION_BASE = 6
+ASCENSION_PER_WIND = 6
+
+KNIGHT_ELEMENT = {"amber": "pyro", "barbara": "hydro", "lisa": "electro",
+                  "kaeya": "cryo"}
+
+
+@dataclass
+class VarkaState:
+    """Per-fight state, hung on the Player (a fresh Player per fight)."""
+    winds: dict = field(default_factory=dict)     # element -> turn gained
+    fang_turn: int = -1          # the turn the Fang was last used
+    electro_turn: int = -1       # the turn the Electro Wind last drew
+    absorb_card: bool = False    # the resolving card prints Absorb
+    playing: object = None       # the card the pilot just handed the engine
+    aim: object = None           # the pilot's aim for that card
+    muster_choice: Optional[str] = None
+    gmo_pending: int = 0
+    swirls_this_card: int = 0
+    stormward: int = 0
+    converging: bool = False
+    landing: bool = False        # inside a Converging spread
+    disabled_winds: frozenset = frozenset()       # ablation (report only)
+    # --- the ledger the report reads ---
+    absorbs: list = field(default_factory=list)   # (turn, element, source)
+    swirls: int = 0
+    knight_hits: list = field(default_factory=list)
+    ascension: list = field(default_factory=list)  # (turn, winds, damage)
+    wind_value: dict = field(default_factory=lambda: {
+        "pyro_hits": 0, "hydro_block": 0, "electro_draws": 0,
+        "cryo_weak": 0})
+    absorbed_this_turn: int = -1  # the turn the last Absorb happened
+    turn_rows: list = field(default_factory=list)
+
+
+def live(state) -> bool:
+    return VARKA_PAPER and getattr(state.player, "varka", None) is not None
+
+
+def vs_of(state) -> Optional[VarkaState]:
+    return getattr(state.player, "varka", None) if VARKA_PAPER else None
+
+
+def held(vs: VarkaState, element: str) -> bool:
+    return element in vs.winds
+
+
+def _wind_on(vs: VarkaState, element: str) -> bool:
+    return element in vs.winds and element not in vs.disabled_winds
+
+
+# --------------------------------------------------------------------------
+#  Hooks the shared engine calls (each behind `VARKA_PAPER`)
+# --------------------------------------------------------------------------
+
+def bound_aim(state):
+    """`effects.bind_card_aim`: the pilot's aim for the card it just chose."""
+    vs = vs_of(state)
+    if vs is None or vs.aim is None:
+        return None
+    aim, vs.aim = vs.aim, None
+    return aim if aim.alive else None
+
+
+def attack_bonus(state, card) -> int:
+    """`effects.flat_attack_bonus`: Pyro Wind and Stormward Stance."""
+    vs = vs_of(state)
+    if vs is None or card.type != "attack":
+        return 0
+    bonus = 0
+    if _wind_on(vs, "pyro"):
+        bonus += PYRO_WIND_ATTACK_BONUS
+    if (vs.stormward and card.element == ELEMENT
+            and len(vs.winds) >= STORMWARD_WINDS):
+        bonus += vs.stormward
+    return bonus
+
+
+def _playing_attack(state, vs) -> bool:
+    card = vs.playing
+    return bool(state.card_aim_bound and card is not None
+                and card.type == "attack")
+
+
+def _fang_can_take(element) -> bool:
+    """The relic's Absorb stands in for an Anemo Swirl. An element-less hit
+    (a base Strike) or an Anemo hit qualifies; a hit that carries an aura
+    element of its own (a Sturm und Drang override) reacts as itself."""
+    return element in (None, "none", ELEMENT)
+
+
+def intercept_hit(state, enemy, element, damage):
+    """`reactions.resolve_hit`, first line. Returns the hit's damage when this
+    hit is an ABSORB (card or relic), else None and the shared rule runs."""
+    vs = vs_of(state)
+    if vs is None or vs.landing:
+        return None
+    if _playing_attack(state, vs) and _wind_on(vs, "pyro"):
+        vs.wind_value["pyro_hits"] += 1      # one +2 per Attack hit
+    if not enemy.aura or enemy.aura_spent:
+        return None
+    if element == enemy.aura:
+        return None
+    source = None
+    if vs.absorb_card and element == ELEMENT and state.card_aim_bound:
+        source = "card"
+    elif (_playing_attack(state, vs) and vs.fang_turn != state.turn
+          and _fang_can_take(element)):
+        source = "fang"
+        vs.fang_turn = state.turn
+    if source is None:
+        return None
+    from tier0.engine import reactions            # late: cycle
+    aura = enemy.aura
+    enemy.aura_spent = True
+    out = reactions._react(state, enemy, trigger=ELEMENT, aura=aura,
+                           damage=damage)
+    # THE ABSORB: the aura leaves the enemy it hit. The spread copies the
+    # Swirl sent out stay where they landed, spent.
+    enemy.aura = None
+    enemy.aura_turns_left = 0
+    enemy.aura_spent = False
+    vs.absorbs.append((state.turn, aura, source))
+    vs.absorbed_this_turn = state.turn
+    state.emit("varka_absorb", element=aura, target=enemy.name, source=source)
+    if aura in WIND_ELEMENTS and aura not in vs.winds:
+        vs.winds[aura] = state.turn
+        state.emit("varka_wind", element=aura, winds=len(vs.winds))
+    return out
+
+
+def converging(state) -> bool:
+    vs = vs_of(state)
+    return bool(vs and vs.converging)
+
+
+def landing_only(state) -> bool:
+    """`reactions._react`'s Overload branch: inside a Converging spread the
+    splash lands on the struck enemy only."""
+    vs = vs_of(state)
+    return bool(vs and vs.landing)
+
+
+def converging_spread(state, struck, aura, flat: int) -> None:
+    """CONVERGING WINDS (paper sec.5.2). Replaces the spread and the flat 2 of
+    a Swirl: the struck enemy takes the flat 2 element-less; every other enemy
+    takes the flat 2 CARRYING the swirled element. A bare enemy gets a spent
+    copy; an enemy already wearing it gets only the 2; an enemy wearing a
+    different aura reacts with it, on that enemy alone, and never Swirls."""
+    from tier0.engine import reactions            # late: cycle
+    vs = vs_of(state)
+    reactions._splash(state, struck, flat)
+    for other in list(state.living_enemies):
+        if other is struck:
+            continue
+        if other.aura == aura:
+            reactions._splash(state, other, flat)
+            continue
+        bare = other.aura is None
+        vs.landing = True
+        try:
+            dmg = reactions.resolve_hit(state, other, aura, flat,
+                                        "converging_spread")
+        finally:
+            vs.landing = False
+        if bare:
+            other.aura_spent = True
+        reactions._splash(state, other, int(dmg))
+
+
+def on_swirl(state, enemy, aura) -> None:
+    """Every Swirl (plain or Absorb): the Winds' per-Swirl effects."""
+    vs = vs_of(state)
+    if vs is None:
+        return
+    vs.swirls += 1
+    vs.swirls_this_card += 1
+    p = state.player
+    if _wind_on(vs, "hydro"):
+        p.block += HYDRO_WIND_BLOCK
+        vs.wind_value["hydro_block"] += HYDRO_WIND_BLOCK
+        state.emit("block", amount=HYDRO_WIND_BLOCK)
+    if _wind_on(vs, "electro") and vs.electro_turn != state.turn:
+        vs.electro_turn = state.turn
+        state.draw(ELECTRO_WIND_DRAW)
+        vs.wind_value["electro_draws"] += ELECTRO_WIND_DRAW
+    if _wind_on(vs, "cryo") and enemy.alive:
+        from tier0.engine import powers           # late: cycle
+        powers.apply_power(state, enemy, "weak", CRYO_WIND_WEAK)
+        vs.wind_value["cryo_weak"] += CRYO_WIND_WEAK
+
+
+# --------------------------------------------------------------------------
+#  The one op: {op: varka, kind: ...}
+# --------------------------------------------------------------------------
+
+def _dmg_fx(amount, target="enemy", times=1):
+    return {"op": "damage", "amount": amount, "target": target,
+            "applies_element": True, "times": times}
+
+
+def _classify(target, element) -> str:
+    if target.aura is None:
+        return "painted"
+    if target.aura == element:
+        return "refreshed"
+    return "reacted_spent" if target.aura_spent else "reacted_fresh"
+
+
+def muster_default(state, vs) -> str:
+    for el in WIND_ELEMENTS:
+        if el not in vs.winds:
+            return el
+    return "pyro"
+
+
+def op_varka(state, fx, card) -> None:
+    from tier0.engine import effects              # late: cycle
+    vs = vs_of(state)
+    kind = fx["kind"]
+    if kind == "absorb_begin":
+        vs.absorb_card = True
+    elif kind == "absorb_end":
+        vs.absorb_card = False
+    elif kind == "count_begin":
+        vs.swirls_this_card = 0
+    elif kind == "draw_if_swirled":
+        if vs.swirls_this_card:
+            state.draw(fx.get("amount", 1))
+    elif kind == "ascension":
+        amount = ASCENSION_BASE + ASCENSION_PER_WIND * len(vs.winds)
+        mark = len(state.log)
+        effects._op_damage(state, _dmg_fx(amount), card)
+        dealt = sum(r.get("amount", 0) for r in state.log[mark:]
+                    if r.get("event") == "damage")
+        vs.ascension.append((state.turn, len(vs.winds), dealt))
+    elif kind == "gale_sweep":
+        targets = [e for e in state.living_enemies
+                   if e.aura and not e.aura_spent]
+        for e in targets:
+            if e.alive:
+                effects.deal_damage_to_enemy(
+                    state, e, fx["amount"] + state.current_attack_bonus,
+                    element=ELEMENT, source="attack")
+    elif kind == "wind_wall":
+        amount = fx["amount"] + (fx["bonus"] if vs.winds else 0)
+        effects._op_block(state, {"op": "block", "amount": amount}, card)
+    elif kind == "gmo":
+        vs.gmo_pending += 1
+    elif kind == "stormward":
+        vs.stormward += STORMWARD_BONUS
+    elif kind == "converging":
+        vs.converging = True
+    elif kind == "knight":
+        times = 1
+        if vs.gmo_pending:
+            vs.gmo_pending -= 1
+            times = 2
+        for _ in range(times):
+            element = fx["element"]
+            if element == "choose":
+                element = vs.muster_choice or muster_default(state, vs)
+            targets = (list(state.living_enemies) if fx.get("all")
+                       else [state.card_aim] if state.card_aim is not None
+                       and state.card_aim.alive else [])
+            after = vs.absorbed_this_turn == state.turn
+            for t in targets:
+                vs.knight_hits.append((state.turn, after, element,
+                                       _classify(t, element), held(vs, element)))
+            saved = card.element
+            card.element = element
+            try:
+                effects._resolve_effects(state, fx["inner"], card)
+            finally:
+                card.element = saved
+        vs.muster_choice = None
+    else:
+        raise ValueError(f"unknown varka kind {kind!r}")
+
+
+# --------------------------------------------------------------------------
+#  Cards (sim-side defs; never in the loader's index)
+# --------------------------------------------------------------------------
+
+def _v(kind, **kw):
+    return {"op": "varka", "kind": kind, **kw}
+
+
+def _card(cid, name, cost, ctype, rarity, effects_, element=ELEMENT,
+          exhaust=False, knight=False):
+    from tier0.engine.state import Card
+    return Card(id=f"varka_{cid}", name=name, cost=cost, type=ctype,
+                rarity=rarity, element=element, effects=effects_,
+                exhaust=exhaust, character=CHARACTER,
+                role_c="applier" if knight else None,
+                tags=["knight"] if knight else [])
+
+
+def _knight(cid, name, element, inner, all_=False, rarity="common"):
+    return _card(cid, name, 1, "skill", rarity,
+                 [_v("knight", element=element, inner=inner, all=all_)],
+                 element=element if element != "choose" else "none",
+                 knight=True)
+
+
+CARD_BUILDERS = {
+    "knights_muster": lambda: _knight(
+        "knights_muster", "Knights' Muster", "choose", [_dmg_fx(4)],
+        rarity="basic"),
+    "four_winds_ascension": lambda: _card(
+        "four_winds_ascension", "Four Winds' Ascension", 2, "attack", "basic",
+        [_v("ascension")], exhaust=True),
+    "windbound_execution": lambda: _card(
+        "windbound_execution", "Windbound Execution", 1, "attack", "common",
+        [_v("absorb_begin"), _dmg_fx(6), _v("absorb_end")]),
+    "squall": lambda: _card("squall", "Squall", 1, "attack", "common",
+                            [_dmg_fx(4, times=2)]),
+    "gale_sweep": lambda: _card("gale_sweep", "Gale Sweep", 1, "attack",
+                                "common", [_v("gale_sweep", amount=3)]),
+    "wind_wall": lambda: _card("wind_wall", "Wind Wall", 1, "skill", "common",
+                               [_v("wind_wall", amount=7, bonus=3)]),
+    "amber": lambda: _knight("amber", "Amber - Baron Bunny", "pyro",
+                             [_dmg_fx(6)]),
+    "barbara": lambda: _knight(
+        "barbara", "Barbara - Let the Show Begin", "hydro",
+        [{"op": "apply_aura", "element": "hydro", "target": "all_enemies"},
+         {"op": "block", "amount": 3}], all_=True),
+    "lisa": lambda: _knight("lisa", "Lisa - Violet Arc", "electro",
+                            [_dmg_fx(5), {"op": "draw", "amount": 1}]),
+    "kaeya": lambda: _knight("kaeya", "Kaeya - Frostgnaw", "cryo",
+                             [_dmg_fx(6)]),
+    "tempest_charge": lambda: _card(
+        "tempest_charge", "Tempest Charge", 1, "attack", "uncommon",
+        [_v("count_begin"), _dmg_fx(8), _v("draw_if_swirled", amount=1)]),
+    "grand_masters_order": lambda: _card(
+        "grand_masters_order", "Grand Master's Order", 0, "skill", "uncommon",
+        [_v("gmo")], exhaust=True),
+    "stormward_stance": lambda: _card(
+        "stormward_stance", "Stormward Stance", 1, "power", "uncommon",
+        [_v("stormward")]),
+    "favonius_cut": lambda: _card(
+        "favonius_cut", "Favonius Cut", 2, "attack", "uncommon",
+        [_v("absorb_begin"), _dmg_fx(14), _v("absorb_end")]),
+    "converging_winds": lambda: _card(
+        "converging_winds", "Converging Winds", 2, "power", "rare",
+        [_v("converging")]),
+}
+
+KNIGHT_IDS = ("varka_knights_muster", "varka_amber", "varka_barbara",
+              "varka_lisa", "varka_kaeya")
+ABSORB_IDS = ("varka_windbound_execution", "varka_favonius_cut")
+
+STARTER = (["strike"] * 4 + ["defend"] * 4
+           + ["knights_muster", "four_winds_ascension"])
+STURM = "proto_mc_varka_sturm_und_drang"
+
+
+def make_card(name: str):
+    if name in CARD_BUILDERS:
+        return CARD_BUILDERS[name]()
+    from tier0.content import loader
+    return loader.get_card(name)
+
+
+def build_player(extra: list[str] = (), disabled_winds=frozenset()):
+    """A fresh Varka for one fight: the starter plus `extra`, the relic's
+    state on the Player. Boreas's Fang has no hook id: it is the arm's rule,
+    read by `intercept_hit` for every Varka."""
+    from tier0.engine.state import Player
+    cards = [make_card(n) for n in list(STARTER) + list(extra)]
+    player = Player(hp=HP, max_hp=HP, draw_pile=cards, element=ELEMENT,
+                    cadence="catalyst", character_id=CHARACTER)
+    player.varka = VarkaState(disabled_winds=frozenset(disabled_winds))
+    return player
+
+
+def enable() -> None:
+    """Turn the arm on for this process: the switch, the op, and the element
+    port's Swirl rule the paper assumes (`C.SWIRL_PAYS`, and
+    `C.CRYSTALLIZE_KEEPS_AURA` beside it, both ruled)."""
+    global VARKA_PAPER
+    from tier0 import constants as C
+    from tier0.engine import effects
+    VARKA_PAPER = True
+    C.SWIRL_PAYS = True
+    C.CRYSTALLIZE_KEEPS_AURA = True
+    effects.OPS["varka"] = op_varka
+
+
+def disable() -> None:
+    global VARKA_PAPER
+    from tier0.engine import effects
+    VARKA_PAPER = False
+    effects.OPS.pop("varka", None)

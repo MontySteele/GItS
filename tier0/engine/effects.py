@@ -16,7 +16,7 @@ from tier0 import constants as C
 from tier0.engine import (companion_coven, companion_hexerei,
                           companion_standins, coop, furina_stage,
                           klee_overhaul, kokomi_plan, powers, reactions,
-                          resources, statuses)
+                          resources, statuses, varka_paper)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, KurageMemory,
                                 grant_sly_autoplay,
@@ -649,6 +649,11 @@ def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     living = state.living_enemies
     if not living:
         return None
+    # PAPER ARM (`varka_paper.VARKA_PAPER`, off): the Varka pilot's own aim.
+    if varka_paper.VARKA_PAPER:
+        aim = varka_paper.bound_aim(state)
+        if aim is not None:
+            return aim
     # PARITY, not fidelity: the base game rolls a RANDOM enemy for
     # TargetType.AnyEnemy on an autoplay, and the variance profile is the whole
     # identity of Havoc/Cascade. Keeping tier0's lowest-HP aim for free plays
@@ -7097,6 +7102,9 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     # knob — repeated-but-bounded payoff, never a spend.
     if p.powers.get("ceremonial_garment", 0) and p.charge:
         bonus += p.charge // C.GARMENT_CHARGE_DIVISOR
+    # PAPER ARM (`varka_paper.VARKA_PAPER`, off): Pyro Wind, Stormward Stance.
+    if varka_paper.VARKA_PAPER:
+        bonus += varka_paper.attack_bonus(state, card)
     return bonus
 
 

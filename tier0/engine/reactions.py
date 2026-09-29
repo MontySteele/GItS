@@ -22,7 +22,7 @@ from __future__ import annotations
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import powers, resources
+from tier0.engine import powers, resources, varka_paper
 from tier0.engine.state import CombatState, Enemy
 
 AURA_ELEMENTS = {"pyro", "hydro", "electro", "cryo"}   # anemo/geo trigger only
@@ -145,6 +145,14 @@ def resolve_hit(state: CombatState, enemy: Enemy, element: Optional[str],
 
     `source` is log-only provenance (track H); see `apply_aura`.
     """
+    # PAPER ARM (`varka_paper.VARKA_PAPER`, off): Varka's Absorb -- a card's
+    # or Boreas's Fang's -- is decided before the shared rule, because the
+    # Fang turns an element-less Strike into an Anemo Swirl. None with the
+    # switch off, so the lines below are reached exactly as before.
+    if varka_paper.VARKA_PAPER:
+        out = varka_paper.intercept_hit(state, enemy, element, damage)
+        if out is not None:
+            return out
     if not element or element == "none":
         return damage
 
@@ -183,7 +191,12 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
 
     if trigger == "anemo":
         name = "swirl"
-        if C.SWIRL_PAYS:
+        if C.SWIRL_PAYS and varka_paper.converging(state):
+            # PAPER ARM: Converging Winds replaces the spread and the flat 2.
+            varka_paper.converging_spread(
+                state, enemy, aura,
+                int(C.SWIRL_DAMAGE * _mc_reaction_mult(state)))
+        elif C.SWIRL_PAYS:
             # §4 A. The struck enemy keeps its aura (spent by `resolve_hit`).
             # The spread keeps today's reach -- every living enemy -- less the
             # ones already wearing this element ("every enemy that lacks
@@ -204,6 +217,8 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         else:
             for other in state.living_enemies:
                 apply_aura(state, other, aura, "swirl_spread")
+        if varka_paper.VARKA_PAPER:
+            varka_paper.on_swirl(state, enemy, aura)    # the Winds
     elif trigger == "geo":
         name = "crystallize"
         state.player.block += C.CRYSTALLIZE_BLOCK
@@ -225,7 +240,10 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         # splash IS damage a reaction deals, so it is scaled by the same
         # factor, at the one site that computes it.
         splash = int(C.OVERLOAD_SPLASH * _mc_reaction_mult(state))
-        for other in state.living_enemies:
+        # PAPER ARM: a Converging Winds landing splashes its enemy only.
+        splashed = ([enemy] if varka_paper.landing_only(state)
+                    else state.living_enemies)
+        for other in splashed:
             _splash(state, other, splash)
         # The explosion staggers the reacted target. This is ordinary Weak,
         # so it uses the shared debuff rules and never multiplies with Klee's

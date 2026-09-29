@@ -309,6 +309,9 @@ SIM_CALL_SITES = {
     # Kokomi core pass: Song of Pearls' strike, dealt as a planned hit is.
     # (The Casket's strike sat between these two until the Casket pass.)
     ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
+    # THE VARKA PAPER ARM (exploration, switch off): Gale Sweep's per-target
+    # Anemo hit, an Attack's hit on the ordinary powered door.
+    ('varka_paper.py', 1): ("'attack'", None, 'ELEMENT'),
 }
 
 
