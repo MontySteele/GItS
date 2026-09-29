@@ -684,7 +684,7 @@ public static class ArmKeywordTips
             // restated for the verb.
             "On a fresh aura: copy it onto ALL enemies without it and deal "
           + Elements.ReactionConstants.SwirlDamage
-          + " damage to ALL enemies. The aura stays, spent. No aura, no effect.");
+          + " damage to ALL enemies. The aura and its copies stay spent.");
 
     /// <summary>
     /// 2026-09-25, the afternoon Klee seat round. The Opus seat: "Companion is

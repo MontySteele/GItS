@@ -337,7 +337,7 @@ public static class KleeMod
                     // aura, spends it, spreads it and deals a flat 2 to all.
                     // The comment sits ABOVE the key, for `gen_keyword_loc.py`.
                     ["KLEEMOD-SWIRL_PREVIEW.description"] =
-                        $"[gold]Anemo[/gold] meets a fresh aura: copy it onto ALL enemies without it and deal [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] damage to ALL enemies. The aura stays, spent.",
+                        $"[gold]Anemo[/gold] meets a fresh aura: copy it onto ALL enemies without it and deal [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] damage to ALL enemies. The aura and its copies stay spent.",
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.title"] = "Reaction preview: Crystallize",
                     // `EB-613` (R263 sec.5 item 1). THE BLOCK IS NOT THE
                     // POINT OF THIS ROW; THE AURA IS. A Geo hit is a COST to
@@ -585,6 +585,10 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.AbsorbKey + ".title"] = "Absorb",
                     [Cards.ArmKeywordTips.WindKey + ".title"] = "Wind",
                     [Cards.ArmKeywordTips.KnightKey + ".title"] = "Knight",
+                    // Seat fixes 2026-09-29: the preview an Absorb grows in
+                    // place of the reaction it prevents.
+                    [Cards.KleeCardTooltips.AbsorbPreviewKey + ".title"] =
+                        "Reaction preview: Absorb",
                     // The Furina reframe's four title rows went
                     // with its keywords (`EB-723`); see
                     // `ArmKeywordTips`'s Furina section. Encore's title

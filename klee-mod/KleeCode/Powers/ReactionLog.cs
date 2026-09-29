@@ -50,9 +50,12 @@ public static class ReactionLog
     /// page has not had a chance to print yet, because it resolved after they
     /// ended their turn. See <see cref="MarkTurnStart"/>.
     /// </summary>
+    /// `Detail` (2026-09-29, the Varka seats) is one short plain sentence a
+    /// beat needs beside its name -- what an Absorb gave, or why a hit
+    /// Swirled -- and empty on every ordinary reaction.
     public readonly record struct Reacted(
         string Reaction, string Source, string Target, string CombatId,
-        bool Carried = false);
+        bool Carried = false, string Detail = "");
 
     private static readonly List<Reacted> Rows = new();
 
@@ -160,7 +163,46 @@ public static class ReactionLog
     {
         Rows.Clear();
         _playerTurnEnd = -1;
+        _nextDetail = null;
     }
+
+    /// <summary>The sentence the NEXT noted reaction carries, or null.
+    /// </summary>
+    private static string? _nextDetail;
+
+    /// <summary>
+    /// 2026-09-29 (the Varka seats): "the next reaction noted says this
+    /// beside its name". Boreas's Fang on a held Wind Swirls instead of
+    /// Absorbing, and the Swirl row is where the reader looks for why. Used
+    /// by the next <see cref="Note"/> and dropped at the next damage event
+    /// (<see cref="ClearDetail"/>), so it cannot stray onto a later beat.
+    /// </summary>
+    public static void DetailNext(string detail) => _nextDetail = detail;
+
+    /// <summary>The damage-event boundary for <see cref="DetailNext"/>,
+    /// called beside <c>ReactionEffects.ClearShatterMark</c>.</summary>
+    public static void ClearDetail() => _nextDetail = null;
+
+    /// <summary>
+    /// 2026-09-29 (the Varka seats): "Absorbs are invisible in the logs." A
+    /// beat that is not a reaction but is read the same way -- an Absorb took
+    /// an aura off this body -- filed as a row under its own printed word,
+    /// with the one sentence that says what it gave.
+    /// </summary>
+    public static void NoteBeat(string beat, string detail, Creature? target,
+                                Creature? dealer, CardModel? cardSource)
+    {
+        if (string.IsNullOrEmpty(beat)) return;
+        Rows.Add(new Reacted(beat, SourceOf(dealer, cardSource),
+                             Named(target),
+                             Safe(() => target?.CombatId.ToString()),
+                             Detail: detail ?? string.Empty));
+    }
+
+    private static string SourceOf(Creature? dealer, CardModel? cardSource) =>
+        _attributed is { Length: > 0 } named ? named
+            : Named(cardSource) is { Length: > 0 } card ? card
+            : Named(dealer);
 
     /// <summary>
     /// `EB-697`. THE SOURCE A HIT CANNOT NAME FOR ITSELF.
@@ -220,13 +262,14 @@ public static class ReactionLog
                             Creature? dealer, CardModel? cardSource)
     {
         if (reaction == Reaction.None) return;
+        var detail = _nextDetail ?? string.Empty;
+        _nextDetail = null;
         Rows.Add(new Reacted(
             PrintedName(reaction),
-            _attributed is { Length: > 0 } named ? named
-                : Named(cardSource) is { Length: > 0 } card ? card
-                : Named(dealer),
+            SourceOf(dealer, cardSource),
             Named(target),
-            Safe(() => target?.CombatId.ToString())));
+            Safe(() => target?.CombatId.ToString()),
+            Detail: detail));
     }
 
     /// <summary>A printed title, or `""`, and never a throw.
@@ -277,5 +320,7 @@ public static class ReactionLog
             // names a window and a row that happened outside it would make the
             // heading the second false thing on the screen.
             ["carried"] = row.Carried,
+            // 2026-09-29: one plain sentence beside the name, or "".
+            ["detail"] = row.Detail,
         });
 }

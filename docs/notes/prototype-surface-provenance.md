@@ -4116,6 +4116,36 @@ Ascension at 1' first." Evidence: both first blind seats died in act 1 (floor
 for Block, and Ascension named "never again": "2 energy Exhaust for damage a
 Strike-plus deals". Brief sec.10.2 carries the same line.
 
+**Seat fixes, 2026-09-29.** Two blind seats' defects; the Fang ruling is the
+main session's ("the Fang reads only an aura that was on the enemy BEFORE the
+hit", after the paper's "a Knight never Absorbs its own paint").
+
+- Absorb and Boreas's Fang no longer take an aura the same card's hit just
+  applied (`AuraPower.PaintedBy`, `VarkaAbsorb.OwnPaint`): an element Attack
+  on a bare enemy leaves its aura fresh and the Fang unused. On an aura that
+  was already there, the Fang still takes the first non-Anemo Attack.
+- The card's reaction preview asks the Absorb decision first: where the Fang
+  (or an Absorb card) will take the aura it shows "Reaction preview: Absorb"
+  instead of Melt/Vaporize, and a held Wind previews as the Swirl it becomes.
+- An Absorb is a row on "What reacted this turn" ("Took the Pyro aura; you
+  gained Pyro Wind.") and a line under its card on "What you played"; a held
+  Wind's Swirl says "You already held Pyro Wind, so it Swirled instead of
+  Absorbing." (`ReactionLog.NoteBeat` / `DetailNext`,
+  `ResolutionLedger.NoteAbsorb`, wire keys `detail` and `absorbed`).
+- The seat page counts Knights' Muster and Knights' Roll Call as supplying
+  Pyro, Hydro, Electro and Cryo, so "NO REACTION IS REACHABLE HERE" no longer
+  prints with one in hand.
+- Words: the `aura` entry adds "A spent aura still reacts with Pyro, Hydro,
+  Electro and Cryo."; the Varka aura line adds "Other elements still react
+  with it."; Swirl's text now ends "The aura and its copies stay spent." (C#
+  tip, preview row and the page, one commit; "No aura, no effect." left the
+  tip to fit the 135 ceiling, since "On a fresh aura" already says it).
+- Checked, not a defect: every reaction (Melt, Vaporize, Frozen, and the
+  rest) is written to "What reacted this turn" by `ReactionEffects.Resolve`.
+  The seats most likely saw only Swirl there because the Fang was Absorbing
+  their element Attacks before they could react; a seat pin
+  (`test_an_absorb_is_named_on_the_reaction_log`) prints a Melt row.
+
 ## Kokomi: the feed pass (2026-09-29)
 
 [USER], 2026-09-29, after an act-1 death: "her cards are weirdly 'expensive'";

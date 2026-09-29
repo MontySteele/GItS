@@ -1436,8 +1436,17 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                    for a in (row.get("applied") or [])
                    if isinstance(a, dict) and _text(a.get("power"))
                    and _int(a.get("amount"))]
+        # 2026-09-29 (the Varka seats): the auras an Absorb or Boreas's Fang
+        # met inside the card. Absent on an older mod, and then nothing prints.
+        absorbed = [{"target": _text(a.get("target")),
+                     "element": _text(a.get("element")),
+                     "swirled": bool(a.get("swirled")),
+                     "combat_id": _text(a.get("combat_id"))}
+                    for a in (row.get("absorbed") or [])
+                    if isinstance(a, dict) and _text(a.get("element"))]
         out.append({"card": card,
                     "applied": applied,
+                    "absorbed": absorbed,
                     "auto_played": bool(row.get("auto_played")),
                     "carried": bool(row.get("carried")),
                     "overflowed": bool(row.get("overflowed")),
@@ -1636,7 +1645,11 @@ def reaction_log(player: dict[str, Any]) -> list[dict[str, str]] | None:
              "source": _text(r.get("source")),
              "target": _text(r.get("target")),
              "combat_id": _text(r.get("combat_id")),
-             "carried": bool(r.get("carried"))}
+             "carried": bool(r.get("carried")),
+             # 2026-09-29 (the Varka seats): one plain sentence beside the
+             # name -- what an Absorb gave, or why a hit Swirled. Absent on
+             # an older mod, and then nothing prints.
+             "detail": _text(r.get("detail"))}
             for r in rows
             if isinstance(r, dict) and _text(r.get("reaction"))]
 
