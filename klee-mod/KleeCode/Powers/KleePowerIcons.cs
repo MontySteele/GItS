@@ -320,10 +320,6 @@ internal static class KleePowerIcons
         SeasonTicketsPower => KleePck.Path("furina/powers/top_billing.png"),
         StarBillingPower =>
             KleePck.Path("furina/powers/supporting_cast.png"),
-        EchoingHallPower =>
-            KleePck.Path("furina/powers/ovation_trickle.png"),
-        EternalApplausePower =>
-            KleePck.Path("furina/powers/rising_ovation.png"),
         TideOfApplausePower =>
             KleePck.Path("furina/powers/courtroom_drama.png"),
         ReginaOfAllWatersPower =>

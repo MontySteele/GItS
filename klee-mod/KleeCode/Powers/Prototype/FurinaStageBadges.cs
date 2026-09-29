@@ -489,24 +489,25 @@ public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
         // sentence, which the Fanfare tip carries on every card that prints
         // the word.
         // The second text pass (2026-09-28): when the cast acts, then the
-        // fade, in the fade tip's words.
+        // fade, in the fade tip's words. The fade pass (2026-09-29): a
+        // quarter of every bar, the front's included.
         ("description",
             "Up to " + FurinaStageLaw.Seats + " performers act at the end of "
-          + "your turn. Then each one behind the front loses half its "
-          + "Fanfare above " + FurinaStageLaw.FadeThreshold + "."),
+          + "your turn. Then each performer loses a quarter of its Fanfare, "
+          + "rounded down."),
         // SOLD OUT (the supporting pool, 2026-09-26): in combat the count is
         // her stage's own, so the badge says 4 once the fourth seat is open.
         // The static line above is the canonical face a copy with no owner
         // shows, as on the performers' badges.
         ("smartDescription",
             "Up to {Seats} performers act at the end of your turn. Then each "
-          + "one behind the front loses half its Fanfare above "
-          + FurinaStageLaw.FadeThreshold + "."),
+          + "performer loses a quarter of its Fanfare, rounded down."),
         // Relics smoke seat 2026-09-27: with Grand Theater Program owned the
         // line still said performers "lose half above 5". The face a held
         // Program selects (`SmartDescriptionLocKey`).
         (NoFadeKey,
-            "Up to {Seats} performers. Your performers do not fade."),
+            "Up to {Seats} performers act at the end of your turn. Your "
+          + "performers do not fade."),
     };
 
     /// <summary>The loc suffix a held Grand Theater Program selects.</summary>

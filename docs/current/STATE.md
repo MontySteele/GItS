@@ -37,7 +37,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 44 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 75 (63 Stage cards) |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 72 (60 Stage cards) |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
@@ -82,8 +82,9 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   exit, the fade, recasts add), eight Guest Stars with art and stage bodies.
   [USER]'s first solo Stage run beat A2 (2026-09-26): "the core concept is
   sound". The balance review that followed is
-  `review/records/furina-balance-2026-09-26.md` (the front stays exempt from the
-  fade; the turn predictor becomes cues on the performers). The supporting
+  `review/records/furina-balance-2026-09-26.md` (the front stayed exempt from
+  the fade until the fade pass below; the turn predictor becomes cues on the
+  performers). The supporting
   pool (`review/active/furina-supporting-pool-2026-09-26.md`, ruled at the
   defaults and swept) brought the pool to 78 (#692, #693, #694). Eleven Opus
   seats read it (2026-09-26): a Solo win from act 2, three whole runs dying at
@@ -101,7 +102,15 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   polishing the existing core systems": Gala Dinner, A Rapt Audience and Scene
   Change cut (pool 78 -> 75); Ensemble Piece, Improvised Number, Ousia Surge,
   Pneuma Refrain, Final Bow, Bring the House Down and Grand Deluge raised;
-  brief §17. Next: [USER]'s run on the new starter.
+  brief §17. **The fade pass (2026-09-29)**, on [USER]'s "make Fanfare deplete
+  faster, but make that depletion more impactful. Keep her Block cards
+  generally weak but her Spend cards strong": rule 12 is now a quarter of
+  every performer's Fanfare, rounded down, the front's included ("What about
+  a percentage fade, say 25%?"); Held Applause, Echoing Hall and Eternal
+  Applause cut (pool 75 -> 72); the Spend modes of Curtain Rise, Tidal
+  Flourish, Quick Cue, Spirited Aria and Grand Entrance, and Bravura's and
+  Bring the House Down's per-point rates, raised; brief §18. Next: [USER]'s
+  run on the new fade.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

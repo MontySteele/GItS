@@ -361,7 +361,8 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ActUsherBlock": _stage("ACT_USHER_BLOCK"),
     "FurinaStageLaw.ActChevalmarinDamage": _stage("ACT_CHEVALMARIN_DAMAGE"),
     "FurinaStageLaw.ActCrabalettaDamage": _stage("ACT_CRABALETTA_DAMAGE"),
-    "FurinaStageLaw.FadeThreshold": _stage("FADE_THRESHOLD"),
+    # THE FADE PASS (2026-09-29): rule 12 is a quarter of every bar.
+    "FurinaStageLaw.FadeDivisor": _stage("FADE_DIVISOR"),
     # THE GUEST CAST (2026-09-25): the eight guests' act numbers. What a guest
     # ARRIVES with is its card's, on its row, and is not mirrored here.
     "FurinaStageLaw.ActNeuvillettePrice": _stage("ACT_NEUVILLETTE_PRICE"),
@@ -377,14 +378,13 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ActSigewinneGift": _stage("ACT_SIGEWINNE_GIFT"),
     "FurinaStageLaw.ActLynetteDamage": _stage("ACT_LYNETTE_DAMAGE"),
     "FurinaStageLaw.ActCharlotteGift": _stage("ACT_CHARLOTTE_GIFT"),
-    # THE SUPPORTING POOL (2026-09-26): the two new guests' acts, and
-    # Eternal Applause's fade line.
+    # THE SUPPORTING POOL (2026-09-26): the two new guests' acts. (Eternal
+    # Applause's fade line left with the card, the 2026-09-29 fade pass.)
     "FurinaStageLaw.ActLyneyPrice": _stage("ACT_LYNEY_PRICE"),
     "FurinaStageLaw.ActLyneyDamage": _stage("ACT_LYNEY_DAMAGE"),
     "FurinaStageLaw.ActEscoffierPrice": _stage("ACT_ESCOFFIER_PRICE"),
     "FurinaStageLaw.ActEscoffierGift": _stage("ACT_ESCOFFIER_GIFT"),
     "FurinaStageLaw.ActEscoffierDamage": _stage("ACT_ESCOFFIER_DAMAGE"),
-    "FurinaStageLaw.EternalFadeThreshold": _stage("ETERNAL_FADE_THRESHOLD"),
     # R276 batch two: Arkhe Alignment's Pneuma half.
     "ArkheAlignmentPower.PneumaLeadRegain": _stage("PNEUMA_LEAD_REGAIN"),
     # Rally prints "costs 1 less" but the op carries no amount (it is one

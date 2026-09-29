@@ -44,22 +44,22 @@ def test_a_relic_that_gave_block_is_named_with_what_it_gave():
 # ---- "fade" is defined wherever the page says it ---------------------------
 
 def test_the_fade_is_defined_in_one_clause():
-    # The second text pass (2026-09-28): on a row of its own, for every
-    # performer behind the front.
+    # The second text pass (2026-09-28): on a row of its own. The fade pass
+    # (2026-09-29): a quarter of every performer's bar, the front's too.
     assert ARM_KEYWORDS["fade"] == (
-        "At the end of your turn, each performer behind the front loses half "
-        "its Fanfare above 5, rounded down.")
+        "At the end of your turn, each performer loses a quarter of its "
+        "Fanfare, rounded down.")
     assert "fade" not in ARM_KEYWORDS["back performer"]
 
 
 def test_a_face_that_says_fade_prints_the_row_that_defines_it():
-    # The second text pass (2026-09-28): the fade's own row.
+    # The second text pass (2026-09-28): the fade's own row. (Held Applause
+    # and Echoing Hall, the faces this used, left with the 2026-09-29 fade
+    # pass; the page's rule is about the word, so any face serves.)
     assert "fade" in _names(
-        ("Held Applause", "Gain 6 Block. Your performers don't fade this "
-                          "turn."))
+        ("Grand Theater Program", "Your performers no longer fade."))
     assert "fade" in _names(
-        ("Echoing Hall", "Whenever a performer fades, your front performer "
-                         "gains half the Fanfare lost."))
+        ("A face", "Whenever a performer fades, draw 1 card."))
 
 
 # ---- Guest Book: what a Guest Star is --------------------------------------

@@ -686,8 +686,10 @@ public class FurinaStageRuleTests
         Assert.Equal(2, FurinaStageLaw.ActChevalmarinDamage);
         Assert.Equal(5, FurinaStageLaw.ActCrabalettaDamage);
         // Draft 3 (2026-09-25): the two bow numbers left (a Bow is the act
-        // once more) and the fade's threshold arrived.
-        Assert.Equal(5, FurinaStageLaw.FadeThreshold);
+        // once more) and the fade's threshold arrived. The fade pass
+        // (2026-09-29): the threshold left for a quarter of every bar, which
+        // the fade's tip and the Stage badge print in words ("a quarter").
+        Assert.Equal(4, FurinaStageLaw.FadeDivisor);
     }
 
     // ==================================================================

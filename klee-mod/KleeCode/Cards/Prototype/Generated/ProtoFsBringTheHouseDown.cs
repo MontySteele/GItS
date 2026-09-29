@@ -52,7 +52,7 @@ public sealed class ProtoFsBringTheHouseDown : CustomCardModel, ICharacterCard
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new ExtraDamageVar(3m),
+            new ExtraDamageVar(4m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrLeadFanfare(card))
         };
 

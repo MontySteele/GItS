@@ -464,42 +464,43 @@ public class FurinaGuestCastTests
 
     /// <summary>The sim's BOARDS, word for word: (stage, Full House copies,
     /// hits, bars after with 0 for one that leaves, Block after the acts,
-    /// what the front takes, what reaches Furina).</summary>
+    /// what the front takes, what reaches Furina). The fade pass (2026-09-29)
+    /// moved every bar of 4 or more: a quarter fades, the front's too.</summary>
     public static IEnumerable<object[]> Boards() => new[]
     {
         B("neuvillette pays", new[] { ("neuvillette", 6), ("usher", 3) }, 0,
           new int[0], new int?[] { 3, 3 }, 3, 0, 0),
         B("tax and gift",
           new[] { ("usher", 3), ("clorinde", 4), ("charlotte", 4) }, 0,
-          new int[0], new int?[] { 3, 5, 3 }, 3, 0, 0),
+          new int[0], new int?[] { 3, 4, 3 }, 3, 0, 0),
         B("the last payment bows",
           new[] { ("neuvillette", 3), ("sigewinne", 8) }, 0, new int[0],
-          new int?[] { null, 8 }, 0, 0, 0),
+          new int?[] { null, 6 }, 0, 0, 0),
         B("a gift wraps to the front",
           new[] { ("usher", 2), ("sigewinne", 8) }, 0, new int[0],
-          new int?[] { 5, 5 }, 3, 0, 0),
+          new int?[] { 4, 4 }, 3, 0, 0),
         B("chevreuse spends herself",
           new[] { ("usher", 3), ("chevreuse", 4) }, 0, new int[0],
           new int?[] { 3, 2 }, 3, 0, 0),
         B("chevreuse cannot pay",
           new[] { ("chevreuse", 4), ("usher", 1) }, 0, new int[0],
-          new int?[] { 4, 1 }, 3, 0, 0),
+          new int?[] { 3, 1 }, 3, 0, 0),
         B("full house pays twice",
           new[] { ("neuvillette", 6), ("usher", 3), ("crabaletta", 4) }, 1,
-          new int[0], new int?[] { null, 3, 4 }, 6, 0, 0),
+          new int[0], new int?[] { null, 3, 3 }, 6, 0, 0),
         // 2026-09-29 (Furina seat, Vantom, run FS3EL3M3NTS4): the preview
         // was read as "8 Hydro to ALL, twice" with a repeat that "could not
         // pay". The forecast pays each repeat on the clone before it counts
         // it: at 5 Neuvillette pays once, keeps 2, and the repeat is refused.
         B("full house, the repeat cannot pay",
           new[] { ("usher", 3), ("crabaletta", 4), ("neuvillette", 5) }, 1,
-          new int[0], new int?[] { 3, 4, 2 }, 6, 0, 0),
+          new int[0], new int?[] { 3, 3, 2 }, 6, 0, 0),
         B("the fade is not a hit",
           new[] { ("usher", 3), ("wriothesley", 10) }, 0, new int[0],
           new int?[] { 3, 8 }, 3, 0, 0),
         B("two hits through the front",
           new[] { ("usher", 3), ("crabaletta", 4) }, 0, new[] { 7, 7 },
-          new int?[] { 3, 4 }, 3, 7, 1),
+          new int?[] { 3, 3 }, 3, 6, 2),
     };
 
     private static object[] B(string name, (string, int)[] stage, int fullHouse,

@@ -58,7 +58,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 3: deal 10 and apply [gold]Hydro[/gold] to ALL instead" };
+        new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 3: deal 13 and apply [gold]Hydro[/gold] to ALL instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -67,7 +67,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
         new List<DynamicVar>
         {
             new DamageVar("PlainDamage", 5m, ValueProp.Move),
-            new DamageVar("BranchDamage", 10m, ValueProp.Move)
+            new DamageVar("BranchDamage", 13m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -91,7 +91,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
                                 "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 3: deal 10 and apply [gold]Hydro[/gold] to ALL instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 3: deal 13 and apply [gold]Hydro[/gold] to ALL instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             await DamageCmd.Attack((IsUpgraded ? 8m : 5m))
@@ -106,7 +106,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
             await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
             using (HitElement.Carry(this, Element.Hydro))
             {
-                await DamageCmd.Attack((IsUpgraded ? 13m : 10m))
+                await DamageCmd.Attack((IsUpgraded ? 16m : 13m))
                     .FromCard(this, cardPlay)
                     .TargetingAllOpponents(CombatState!)
                     .WithHitFx("vfx/vfx_attack_slash")
@@ -153,7 +153,7 @@ public sealed class ProtoFsTidalFlourishModeA : ModalOptionCard
         new List<DynamicVar>
         {
             new DamageVar("PlainDamage", 5m, ValueProp.Move),
-            new DamageVar("BranchDamage", 10m, ValueProp.Move)
+            new DamageVar("BranchDamage", 13m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
@@ -192,7 +192,7 @@ public sealed class ProtoFsTidalFlourishModeB : ModalOptionCard
         new List<DynamicVar>
         {
             new DamageVar("PlainDamage", 5m, ValueProp.Move),
-            new DamageVar("BranchDamage", 10m, ValueProp.Move)
+            new DamageVar("BranchDamage", 13m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()

@@ -130,12 +130,16 @@ public class FurinaStageRoundTwoTests
     // `EB-737`. BOTH NUMBERS OF A SPEND RIDER ARE LIVE.
     // ==================================================================
 
+    // THE FADE PASS (2026-09-29): Curtain Rise 17 (21), Grand Entrance 40
+    // (45), Tidal Flourish 13 (16). Two of the three Spend numbers upgrade by
+    // one more than their plain ones (`conditional_then_damage`).
     [Theory]
-    [InlineData("ProtoFsCurtainRise", "FoldedDamageVar", 7, 13, 3)]
-    [InlineData("ProtoFsGrandEntrance", "FoldedDamageVar", 12, 32, 4)]
-    [InlineData("ProtoFsTidalFlourish", "DamageVar", 5, 10, 3)]
+    [InlineData("ProtoFsCurtainRise", "FoldedDamageVar", 7, 17, 3, 4)]
+    [InlineData("ProtoFsGrandEntrance", "FoldedDamageVar", 12, 40, 4, 5)]
+    [InlineData("ProtoFsTidalFlourish", "DamageVar", 5, 13, 3, 3)]
     public void A_spend_riders_two_damage_numbers_are_vars_and_not_literals(
-        string type, string varClass, int plain, int branch, int delta)
+        string type, string varClass, int plain, int branch, int delta,
+        int branchDelta)
     {
         // AIMED ARMS FOLD THE TARGET TOO AND AREA ARMS DO NOT, which is the
         // reason the class differs: `FoldedDamageVar` adds the aimed body's
@@ -148,7 +152,11 @@ public class FurinaStageRoundTwoTests
 
         Assert.Contains("{PlainDamage:diff()}", source);
         Assert.Contains("{BranchDamage:diff()}", source);
-        Assert.DoesNotContain("{IfUpgraded:show:", source);
+        // Code only: a `conditional_then_damage` row's generated OnUpgrade
+        // comment names the `{IfUpgraded:show:...}` form it does NOT use.
+        var code = string.Join("\n", source.Split('\n')
+            .Where(line => !line.TrimStart().StartsWith("//")));
+        Assert.DoesNotContain("{IfUpgraded:show:", code);
         Assert.Contains(
             $"new {varClass}(\"PlainDamage\", {plain}m, ValueProp.Move)",
             source);
@@ -159,13 +167,15 @@ public class FurinaStageRoundTwoTests
         // play stays the play-time `IsUpgraded` swap, so this row moved no
         // rule and can print no number the card does not deal.
         Assert.Contains($"IsUpgraded ? {plain + delta}m : {plain}m", source);
-        Assert.Contains($"IsUpgraded ? {branch + delta}m : {branch}m", source);
+        Assert.Contains($"IsUpgraded ? {branch + branchDelta}m : {branch}m",
+                        source);
         // And the smith moves the face with the hit, or the two disagree the
         // first time the card is upgraded.
         Assert.Contains(
             $"DynamicVars[\"PlainDamage\"].UpgradeValueBy({delta}m);", source);
         Assert.Contains(
-            $"DynamicVars[\"BranchDamage\"].UpgradeValueBy({delta}m);", source);
+            $"DynamicVars[\"BranchDamage\"].UpgradeValueBy({branchDelta}m);",
+            source);
     }
 
     [Fact]

@@ -1169,10 +1169,8 @@ public static partial class FurinaStage
         var ledger = FurinaStageLedger.For(owner);
         var before = ledger.Seats.Select(seat => (Seat: seat, Bar: seat.Fanfare))
             .ToList();
-        // THE SUPPORTING POOL (2026-09-26): Eternal Applause's line and
-        // Echoing Hall's echo; Held Applause's skip is the ledger's own flag.
-        var (threshold, echo) = FadeRules(owner);
-        if (ledger.Fade(threshold, echo) <= 0)
+        // Grand Theater Program: "Your performers no longer fade."
+        if (!Fades(owner) || ledger.Fade() <= 0)
         {
             return System.Array.Empty<(StageSeat, int)>();
         }

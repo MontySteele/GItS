@@ -117,9 +117,6 @@ TABLE = {
     "season_tickets": ("Season Tickets", "uncommon", 1, "power"),
     "guest_star_escoffier": ("Guest Star: Escoffier", "rare", 2, "skill"),
     "star_billing": ("Star Billing", "uncommon", 1, "power"),
-    "held_applause": ("Held Applause", "uncommon", 1, "skill"),
-    "echoing_hall": ("Echoing Hall", "uncommon", 1, "power"),
-    "eternal_applause": ("Eternal Applause", "rare", 1, "power"),
     "spirited_aria": ("Spirited Aria", "common", 1, "attack"),
     "intermission": ("Intermission", "uncommon", 1, "skill"),
     "counterclaim": ("Counterclaim", "uncommon", 1, "attack"),
@@ -147,10 +144,12 @@ def test_the_twenty_eight_rows_are_the_papers_tables():
             name, rarity, cost, type_), key
         assert row["register"] == "salon"
         assert row["authored_by"] == ["claude"]
-    # 6 Commons, 13 Uncommons, 9 Rares (Sold Out is the tenth Rare).
+    # 6 Commons, 11 Uncommons, 8 Rares (Sold Out is the ninth Rare): the
+    # 2026-09-29 fade pass cut Held Applause, Echoing Hall and Eternal
+    # Applause (were 13 and 9).
     by = [r for _n, r, _c, _t in TABLE.values()]
     assert (by.count("common"), by.count("uncommon"), by.count("rare")) == (
-        6, 13, 9)
+        6, 11, 8)
 
 
 def test_every_row_but_solo_verse_replaces_a_row_the_filter_drops(arm):
@@ -199,11 +198,14 @@ def test_the_two_cut_rows_leave_the_offer_and_their_shipped_rows_stay_out(arm):
     do not come back in their slots."""
     from tier05 import rewards
     # The 2026-09-29 audit pass added three more: Scene Change, Gala Dinner
-    # and A Rapt Audience's shipped rows.
+    # and A Rapt Audience's shipped rows; the fade pass (same day) three
+    # more: Held Applause, Echoing Hall and Eternal Applause's.
     assert loader.pool_drops("furina") == ("gentilhomme_usher",
                                            "suffering_for_art",
                                            "held_breath", "dress_rehearsal",
-                                           "crowd_work")
+                                           "crowd_work", "directors_cut",
+                                           "pit_orchestra",
+                                           "rapturous_applause")
     rewards.character_pool.cache_clear()
     try:
         offered = {c.id for cs in rewards.character_pool("furina").values()
@@ -213,7 +215,11 @@ def test_the_two_cut_rows_leave_the_offer_and_their_shipped_rows_stay_out(arm):
                               "proto_fs_understudy",
                               "held_breath", "dress_rehearsal", "crowd_work",
                               "proto_fs_scene_change", "proto_fs_gala_dinner",
-                              "proto_fs_rapt_audience"}
+                              "proto_fs_rapt_audience", "directors_cut",
+                              "pit_orchestra", "rapturous_applause",
+                              "proto_fs_held_applause",
+                              "proto_fs_echoing_hall",
+                              "proto_fs_eternal_applause"}
     finally:
         rewards.character_pool.cache_clear()
 
@@ -419,41 +425,9 @@ def test_star_billing_draws_whenever_a_guest_star_joins(arm):
 
 
 # ---------------------------------------------------------------------------
-# 3. BENDING THE FADE.
+# 3. BENDING THE FADE: cut by the 2026-09-29 fade pass (Held Applause,
+# Echoing Hall, Eternal Applause). Rule 12 itself is `test_furina_stage`'s.
 # ---------------------------------------------------------------------------
-
-def test_held_applause_skips_this_turns_fade_only(arm):
-    st = _state([["usher", 3], ["crabaletta", 11]])
-    effects.resolve_card(st, _row_card("proto_fs_held_applause"))
-    assert st.player.block == 7
-    FS.fade(st)
-    assert st.player.stage[1][1] == 11
-    FS.fade(st)
-    assert st.player.stage[1][1] == 11 - FS.fade_loss(11)
-
-
-def test_echoing_hall_sends_half_the_fades_loss_to_the_front(arm):
-    # 2026-09-27: half of the whole loss, rounded down (2 + 3 = 5, so 2).
-    st = _state([["usher", 3], ["chevalmarin", 9], ["crabaletta", 11]])
-    _power(st, FS.ECHOING_HALL)
-    _power(st, FS.ECHOING_HALL)       # a move: a second copy adds nothing
-    FS.fade(st)
-    lost = FS.fade_loss(9) + FS.fade_loss(11)
-    assert lost == 5
-    assert st.player.stage == [["usher", 3 + lost // 2],
-                               ["chevalmarin", 9 - FS.fade_loss(9)],
-                               ["crabaletta", 11 - FS.fade_loss(11)]]
-    assert FS.total_fanfare(st.player) == 3 + 9 + 11 - (lost - lost // 2)
-
-
-def test_eternal_applause_moves_the_line_to_ten(arm):
-    assert FS.fade_loss(14, FS.ETERNAL_FADE_THRESHOLD) == 2
-    st = _state([["usher", 3], ["chevalmarin", 9], ["crabaletta", 14]])
-    _power(st, FS.ETERNAL_APPLAUSE)
-    _power(st, FS.ETERNAL_APPLAUSE)   # copies do not stack further
-    FS.fade(st)
-    assert st.player.stage == [["usher", 3], ["chevalmarin", 9],
-                               ["crabaletta", 12]]
 
 
 # ---------------------------------------------------------------------------
@@ -466,14 +440,14 @@ def test_spirited_arias_spend_mode_also_draws_two(arm):
     assert [fx["op"] for fx in modes[1]["effects"]] == [
         "stage_spend", "damage", "draw"]
     assert modes[1]["effects"][0]["amount"] == 3
-    assert modes[1]["effects"][1]["amount"] == 11
+    assert modes[1]["effects"][1]["amount"] == 14      # the fade pass
     assert modes[1]["effects"][2]["amount"] == 2
     st = _state([["usher", 3], ["crabaletta", 5]], deck=5)
     effects.resolve_card(st, card)
     # The arm's pilot spends when the payer survives.
     assert st.player.stage == [["usher", 3], ["crabaletta", 2]]
     assert len(st.player.hand) == 2
-    assert st.enemies[0].hp == 500 - 11
+    assert st.enemies[0].hp == 500 - 14
 
 
 @pytest.mark.parametrize("bar,upgraded,drawn", [
@@ -505,11 +479,11 @@ def test_bring_the_house_down_cashes_the_front_for_all(arm):
     a, b = _enemy(name="a"), _enemy(name="b")
     st = _state([["usher", 6], ["crabaletta", 2]], enemies=[a, b])
     effects.resolve_card(st, _row_card("proto_fs_bring_the_house_down"))
-    # Usher's Bow (3 Block), then 3 per point to ALL (2 until the
-    # 2026-09-29 audit pass).
+    # Usher's Bow (3 Block), then 4 per point to ALL (2 until the
+    # 2026-09-29 audit pass, 3 until the fade pass the same day).
     assert st.player.stage == [["crabaletta", 2]]
     assert st.player.block == FS.ACT_USHER_BLOCK
-    assert (a.hp, b.hp) == (500 - 18, 500 - 18)
+    assert (a.hp, b.hp) == (500 - 24, 500 - 24)
     st = _state([])
     effects.resolve_card(st, _row_card("proto_fs_bring_the_house_down"))
     assert st.enemies[0].hp == 500

@@ -293,67 +293,21 @@ public class FurinaSupportingPoolTests
     }
 
     // ---- 3. bending the fade --------------------------------------------------
+    //
+    // The 2026-09-29 fade pass cut Held Applause, Echoing Hall and Eternal
+    // Applause: rule 12 is a quarter of every bar, with no line to move.
 
     [Fact]
-    public void Held_applause_skips_one_fade()
-    {
-        using var _ = new Arm();
-        var (_, stage) = Stage(("usher", 3), ("crabaletta", 11));
-        stage.FadeHeld = true;
-        Assert.Equal(0, stage.Fade());
-        Assert.Equal(new[] { 3, 11 }, Bars(stage));
-        Assert.False(stage.FadeHeld);
-        Assert.Equal(FurinaStageLaw.FadeLoss(11), stage.Fade());
-    }
-
-    [Fact]
-    public void Echoing_hall_moves_half_the_fades_loss_to_the_front()
-    {
-        // 2026-09-27: half of the sweep's whole loss, rounded down (2 + 3 = 5
-        // lost, 2 to the front).
-        using var _ = new Arm();
-        var (_, stage) = Stage(("usher", 3), ("chevalmarin", 9),
-                               ("crabaletta", 11));
-        var lost = stage.Fade(FurinaStageLaw.FadeThreshold, echo: true);
-        Assert.Equal(FurinaStageLaw.FadeLoss(9) + FurinaStageLaw.FadeLoss(11),
-                     lost);
-        Assert.Equal(5, lost);
-        Assert.Equal(new[] { 3 + 2, 9 - FurinaStageLaw.FadeLoss(9),
-                             11 - FurinaStageLaw.FadeLoss(11) }, Bars(stage));
-        Assert.Equal(3 + 9 + 11 - (lost - lost / 2), Bars(stage).Sum());
-    }
-
-    [Fact]
-    public void Eternal_applause_moves_the_line_to_ten_and_copies_do_not_stack()
-    {
-        using var _ = new Arm();
-        Assert.Equal(2, FurinaStageLaw.FadeLoss(14,
-                                                FurinaStageLaw.EternalFadeThreshold));
-        var seat = Seat.Furina().WithCombatState()
-            .WithPower<EternalApplausePower>(1)
-            .WithPower<EternalApplausePower>(1)
-            .WithPower<EchoingHallPower>(1);
-        var rules = FurinaStage.FadeRules(seat.Creature);
-        Assert.Equal((FurinaStageLaw.EternalFadeThreshold, true), rules);
-        Assert.Equal((FurinaStageLaw.FadeThreshold, false),
-                     FurinaStage.FadeRules(Seat.Furina().Creature));
-    }
-
-    [Fact]
-    public void The_forecast_reads_the_fades_benders_and_lyneys_swap()
+    public void The_forecast_runs_the_fade_and_reads_lyneys_swap()
     {
         using var _ = new Arm();
         var (seat, stage) = Stage(("usher", 3), ("chevalmarin", 9),
                                   ("crabaletta", 11));
-        stage.FadeHeld = true;
-        var held = FurinaStage.Forecast(seat.Creature, null);
-        Assert.Equal(new[] { 3, 9, 11 }, held.Seats.Select(s => s.After));
-        Assert.True(stage.FadeHeld);            // the forecast is pure
-
-        stage.FadeHeld = false;
-        seat.WithPower<EternalApplausePower>(1);
-        var eternal = FurinaStage.Forecast(seat.Creature, null);
-        Assert.Equal(new[] { 3, 9, 11 }, eternal.Seats.Select(s => s.After));
+        var faded = FurinaStage.Forecast(seat.Creature, null);
+        Assert.Equal(new[] { 3, 9 - FurinaStageLaw.FadeLoss(9),
+                             11 - FurinaStageLaw.FadeLoss(11) },
+                     faded.Seats.Select(s => s.After));
+        Assert.Equal(new[] { 3, 9, 11 }, Bars(stage));   // the forecast is pure
 
         var (lyneySeat, _) = Stage(("usher", 3), ("chevalmarin", 2),
                                    ("lyney", 5));
@@ -532,8 +486,7 @@ public class FurinaSupportingPoolTests
                      "ProtoFsOratricesVerdict", "ProtoFsGuestStarLyney",
                      "ProtoFsStageWhisper", "ProtoFsCheeredOn",
                      "ProtoFsSeasonTickets", "ProtoFsGuestStarEscoffier",
-                     "ProtoFsStarBilling", "ProtoFsHeldApplause",
-                     "ProtoFsEchoingHall", "ProtoFsEternalApplause",
+                     "ProtoFsStarBilling",
                      "ProtoFsSpiritedAria", "ProtoFsIntermission",
                      "ProtoFsCounterclaim", "ProtoFsBringTheHouseDown",
                      "ProtoFsDaCapo", "ProtoFsGrandFinale",
@@ -552,7 +505,9 @@ public class FurinaSupportingPoolTests
         // Take the Stage and Regal Bearing left the starter as Commons. 78
         // since the balance review (2026-09-28): Gentilhomme Usher and
         // Understudy left the pool. 75 since the audit pass (2026-09-29):
-        // Scene Change, Gala Dinner and A Rapt Audience left it.
+        // Scene Change, Gala Dinner and A Rapt Audience left it. 72 since the
+        // fade pass (the same day): Held Applause, Echoing Hall and Eternal
+        // Applause left it.
         var pool = ArmPools.Offerable("furina-stage")
             .Where(c => c.Rarity != MegaCrit.Sts2.Core.Entities.Cards
                                         .CardRarity.Ancient)
@@ -560,7 +515,7 @@ public class FurinaSupportingPoolTests
                                         .CardRarity.Basic)
             .Where(c => !MultiplayerOnly(c))
             .ToList();
-        Assert.Equal(75, pool.Count);
+        Assert.Equal(72, pool.Count);
     }
 
     private static bool MultiplayerOnly(MegaCrit.Sts2.Core.Models.CardModel card) =>

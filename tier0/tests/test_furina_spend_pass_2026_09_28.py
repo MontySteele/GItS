@@ -39,25 +39,31 @@ def arm(monkeypatch):
     monkeypatch.setattr(FS, "FURINA_STAGE", True)
 
 
-#: id -> (plain, Spend price, Spend amount, upgrade key, upgrade delta)
+#: id -> (plain, Spend price, Spend amount, upgrade). THE FADE PASS
+#: (2026-09-29) raised every Spend damage number here (Interposition, a Block
+#: card, did not move): Quick Cue 11 -> 14, Spirited Aria 11 -> 14, Tidal
+#: Flourish 10 -> 13, Grand Entrance 32 -> 40; Quick Cue's and Grand
+#: Entrance's Spend numbers upgrade by one more than their plain ones.
 SPEND_PASS = {
-    "proto_fs_quick_cue": (3, 3, 11, "conditional_damage", 1),
-    "proto_fs_spirited_aria": (8, 3, 11, "conditional_damage", 3),
-    "proto_fs_tidal_flourish": (5, 3, 10, "conditional_damage", 3),
-    "proto_fs_interposition": (5, 3, 13, "conditional_block", 3),
-    "proto_fs_grand_entrance": (12, 7, 32, "conditional_damage", 4),
+    "proto_fs_quick_cue": (3, 3, 14, {"conditional_damage": 1,
+                                      "conditional_then_damage": 1}),
+    "proto_fs_spirited_aria": (8, 3, 14, {"conditional_damage": 3}),
+    "proto_fs_tidal_flourish": (5, 3, 13, {"conditional_damage": 3}),
+    "proto_fs_interposition": (5, 3, 13, {"conditional_block": 3}),
+    "proto_fs_grand_entrance": (12, 7, 40, {"conditional_damage": 4,
+                                            "conditional_then_damage": 1}),
 }
 
 
 @pytest.mark.parametrize("cid", sorted(SPEND_PASS))
 def test_the_spend_pass_numbers(arm, cid):
-    plain, price, branch, key, delta = SPEND_PASS[cid]
+    plain, price, branch, upgrade = SPEND_PASS[cid]
     card = loader.get_card(cid)
     modes = card.effects[0]["modes"]
     assert modes[0]["effects"][0]["amount"] == plain
     assert modes[1]["effects"][0] == {"op": "stage_spend", "amount": price}
     assert modes[1]["effects"][1]["amount"] == branch
-    assert card.upgrade == {key: delta}
+    assert card.upgrade == upgrade
     assert f"Spend[/gold] {price}:" in _row(cid)["description"]
 
 

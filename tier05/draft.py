@@ -2473,7 +2473,7 @@ FURINA_STAGE_OPS = ("stage_summon", "stage_raise", "stage_scene_change",
                     # THE GUEST CAST (2026-09-25).
                     "stage_guest",
                     # THE SUPPORTING POOL (2026-09-26).
-                    "stage_reverse", "stage_whisper", "stage_hold_fade",
+                    "stage_reverse", "stage_whisper",
                     "stage_intermission", "stage_spend_front_all",
                     "stage_grand_finale", "stage_verdict",
                     "stage_dual_nature",
@@ -2662,7 +2662,6 @@ STATIC_OP_PRICING: dict[str, str] = {
     # THE SUPPORTING POOL (2026-09-26).
     "stage_reverse": _STAGE_ZERO,
     "stage_whisper": _STAGE_ZERO,
-    "stage_hold_fade": _STAGE_ZERO,
     "stage_intermission": _STAGE_ZERO,
     "stage_spend_front_all": _STAGE_ZERO,
     "stage_grand_finale": _STAGE_ZERO,

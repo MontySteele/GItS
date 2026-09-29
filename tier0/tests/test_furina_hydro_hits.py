@@ -66,20 +66,20 @@ def _play(st, cid, mode=None, monkeypatch=None, upgraded=False):
     effects.resolve_card(st, card)
 
 
-VAPORIZED_11 = int(11 * C.VAPORIZE_MULT)
+VAPORIZED_14 = int(14 * C.VAPORIZE_MULT)
 
 
 # ---------------------------------------------------------------------------
-# THE FINDING: Vaporize off Quick Cue's Spend mode multiplies its 11 (8
-# until the 2026-09-28 Spend pass).
+# THE FINDING: Vaporize off Quick Cue's Spend mode multiplies its 14 (8
+# until the 2026-09-28 Spend pass, 11 until the 2026-09-29 fade pass).
 # ---------------------------------------------------------------------------
 
-def test_vaporize_off_quick_cues_spend_mode_multiplies_its_eleven(
+def test_vaporize_off_quick_cues_spend_mode_multiplies_its_hit(
         arm, monkeypatch):
     st = _state(enemies=[_enemy(aura="pyro")])
     _play(st, "proto_fs_quick_cue", 1, monkeypatch)
-    assert st.enemies[0].hp == 200 - VAPORIZED_11
-    assert VAPORIZED_11 > 11
+    assert st.enemies[0].hp == 200 - VAPORIZED_14
+    assert VAPORIZED_14 > 14
     assert st.enemies[0].aura is None           # consumed by the hit
     reactions = [e for e in st.log if e["event"] == "reaction"]
     assert [r["reaction"] for r in reactions] == ["vaporize"]
@@ -97,9 +97,9 @@ def test_courtroom_dramas_vulnerable_lands_on_the_reacting_hit(
     st = _state(enemies=[_enemy(aura="pyro")], cross_examination=1)
     st.reactions_this_turn = 0
     _play(st, "proto_fs_quick_cue", 1, monkeypatch)
-    # 11 x Vaporize x the Vulnerable Courtroom Drama put on it before it landed.
+    # 14 x Vaporize x the Vulnerable Courtroom Drama put on it before it landed.
     assert st.enemies[0].hp == 200 - int(
-        11 * C.VAPORIZE_MULT * C.VULNERABLE_TAKEN_MULT)
+        14 * C.VAPORIZE_MULT * C.VULNERABLE_TAKEN_MULT)
     assert st.enemies[0].powers.get("vulnerable", 0) >= 1
     assert st.enemies[0].powers.get("weak", 0) >= 1
 
@@ -109,9 +109,9 @@ def test_tidal_flourishs_spend_mode_vaporizes_every_pyro_body(
     st = _state(enemies=[_enemy(aura="pyro"), _enemy(name="b", aura="pyro"),
                          _enemy(name="c")])
     _play(st, "proto_fs_tidal_flourish", 1, monkeypatch)
-    vaporized = int(10 * C.VAPORIZE_MULT)
+    vaporized = int(13 * C.VAPORIZE_MULT)          # 13 since the fade pass
     assert [e.hp for e in st.enemies] == [200 - vaporized, 200 - vaporized,
-                                         200 - 10]
+                                         200 - 13]
     assert [e.aura for e in st.enemies] == [None, None, "hydro"]
 
 

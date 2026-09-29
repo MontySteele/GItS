@@ -113,69 +113,78 @@ public class FurinaStageDraft3Tests
     }
 
     // ---- 3. The applause fades ---------------------------------------------
+    //
+    // THE FADE PASS (2026-09-29). [USER]: "What about a percentage fade, say
+    // 25%? Anything below 4 rounds to losing 0." Every performer, the front
+    // one included, loses a quarter of its bar, rounded down.
 
     [Theory]
+    [InlineData(0, 0)]
     [InlineData(1, 1)]
-    [InlineData(5, 5)]
-    [InlineData(6, 6)]
+    [InlineData(3, 3)]
+    [InlineData(4, 3)]
     [InlineData(7, 6)]
-    [InlineData(9, 7)]
-    [InlineData(15, 10)]
-    [InlineData(25, 15)]
+    [InlineData(8, 6)]
+    [InlineData(11, 9)]
+    [InlineData(12, 9)]
+    [InlineData(20, 15)]
     public void The_fade_table(int before, int after)
     {
         Assert.Equal(after, before - FurinaStageLaw.FadeLoss(before));
     }
 
     [Fact]
-    public void The_middle_and_back_fade_and_the_front_never_does()
+    public void Every_performer_fades_the_front_included()
     {
         using var _ = new Arm();
         var stage = Stage((StagePerformer.Usher, 25),
                           (StagePerformer.Chevalmarin, 9),
                           (StagePerformer.Crabaletta, 15));
 
-        Assert.Equal(2 + 5, stage.Fade());
+        Assert.Equal(6 + 2 + 3, stage.Fade());
 
-        Assert.Equal(new[] { 25, 7, 10 },
+        Assert.Equal(new[] { 19, 7, 12 },
                      stage.Seats.Select(s => s.Fanfare).ToArray());
         var beats = stage.Beats.Where(b => b.Event == FurinaStageLedger.FadeEvent)
             .ToList();
-        Assert.Equal(2, beats.Count);
-        Assert.Equal(StagePerformer.Chevalmarin, beats[0].Who);
-        Assert.Equal(2, beats[0].Moved);
-        Assert.Equal(7, beats[0].Fanfare);
-        Assert.Equal(StagePerformer.Crabaletta, beats[1].Who);
-        Assert.Equal(5, beats[1].Moved);
-        Assert.Equal(10, beats[1].Fanfare);
+        Assert.Equal(3, beats.Count);
+        Assert.Equal(StagePerformer.Usher, beats[0].Who);
+        Assert.Equal(6, beats[0].Moved);
+        Assert.Equal(19, beats[0].Fanfare);
+        Assert.Equal(StagePerformer.Chevalmarin, beats[1].Who);
+        Assert.Equal(2, beats[1].Moved);
+        Assert.Equal(7, beats[1].Fanfare);
+        Assert.Equal(StagePerformer.Crabaletta, beats[2].Who);
+        Assert.Equal(3, beats[2].Moved);
+        Assert.Equal(12, beats[2].Fanfare);
     }
 
     [Fact]
-    public void A_lone_performer_is_the_front_and_does_not_fade()
+    public void A_lone_performer_fades_too()
     {
         using var _ = new Arm();
-        var stage = Stage((StagePerformer.Crabaletta, 25));
-        Assert.Equal(0, stage.Fade());
-        Assert.Equal(25, stage.Lead!.Fanfare);
-        Assert.Empty(stage.Beats);
+        var stage = Stage((StagePerformer.Crabaletta, 20));
+        Assert.Equal(5, stage.Fade());
+        Assert.Equal(15, stage.Lead!.Fanfare);
     }
 
     [Fact]
-    public void The_fade_never_empties_never_goes_below_five_and_never_bows()
+    public void The_fade_never_empties_and_never_bows()
     {
         using var _ = new Arm();
         var stage = Stage((StagePerformer.Usher, 1),
                           (StagePerformer.Chevalmarin, 1),
-                          (StagePerformer.Crabaletta, 6));
+                          (StagePerformer.Crabaletta, 3));
         for (var i = 0; i < 5; i++) Assert.Equal(0, stage.Fade());
-        Assert.Equal(new[] { 1, 1, 6 },
+        Assert.Equal(new[] { 1, 1, 3 },
                      stage.Seats.Select(s => s.Fanfare).ToArray());
         Assert.Empty(stage.TakePendingHitBows());
         Assert.Empty(stage.Beats);
         for (var bar = 0; bar < 40; bar++)
         {
-            Assert.True(bar - FurinaStageLaw.FadeLoss(bar)
-                        >= Math.Min(bar, FurinaStageLaw.FadeThreshold));
+            Assert.Equal(bar / FurinaStageLaw.FadeDivisor,
+                         FurinaStageLaw.FadeLoss(bar));
+            Assert.True(bar - FurinaStageLaw.FadeLoss(bar) >= Math.Min(bar, 1));
         }
     }
 

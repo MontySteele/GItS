@@ -3829,6 +3829,53 @@ others become Vulnerable instead." The page's boss clause is that sentence now,
 on the row in every room (it names the room, so it is true on each) rather
 than appended in a boss room only.
 
+## Furina, the Stage — the fade pass (2026-09-29)
+
+[USER]: "I swear that I have never seen it tick down any of the summons
+in-game before", then "make Fanfare deplete faster, but make that depletion
+more impactful. Keep her Block cards generally weak but her Spend cards
+strong", "What about a percentage fade, say 25%? Anything below 4 rounds to
+losing 0." and "Yes, please proceed!" Designed by the main session; the
+reasons and the sim evidence are in
+`review/active/furina-stage-brief-2026-09-08.md` §18.
+
+**Rule 12.** Every performer, the front one included, loses a quarter of its
+Fanfare, rounded down, at the end of Furina's turn after the acts
+(`FurinaStageLaw.FadeDivisor` = 4, `FadeLoss(f) = f / 4`;
+`furina_stage.FADE_DIVISOR`, `fade_loss`). `FadeThreshold` and
+`EternalFadeThreshold` (and their sim twins) are gone; the constant-parity
+registry mirrors `FadeDivisor`. `FurinaStageLedger.Fade()` loops from seat 0.
+`FurinaStage.FadeRules` is now `FurinaStage.Fades`, a switch Grand Theater
+Program turns off; both the end-of-turn fade and the forecast read it. The
+fade tip (`ArmKeywordTips.ForFade`), the Stage badge and the seat page's
+glossary say "At the end of your turn, each performer loses a quarter of its
+Fanfare, rounded down." No card face prints "fade" now, so the word left the
+codegen keyword table; the tip stays as the sentence the glossary mirrors.
+
+**Cut, 75 -> 72:** `proto_fs_held_applause`, `proto_fs_echoing_hall` and
+`proto_fs_eternal_applause`. Plumbing as for the audit pass's three: the rows
+leave the sheet and `FurinaStageRoster`'s append list; their shipped rows
+(`directors_cut`, `pit_orchestra`, `rapturous_applause`) stay out of the offer
+through the `SwapOfferedRows` filter, and the sim's `POOL_SUBS` loses the
+three pairs while `POOL_DROPS` gains the three shipped ids. The ids are
+tombstoned in `retired-card-ids.yaml` (hidden aliases regenerated), and the
+three portraits are `art_coverage.KNOWN_STALE`. Unlike the audit pass, their
+engine code is deleted: the `stage_hold_fade` op and `FurinaStage.HoldFade`,
+the ledger's `FadeHeld`, `EchoingHallPower` and `EternalApplausePower` (and
+their icons and codegen entries), the sim's `hold_fade`, `fade_threshold`,
+`ECHOING_HALL`, `ETERNAL_APPLAUSE` and `stage_hold_fade`. Nothing else used
+them.
+
+**Numbers.** Curtain Rise's Spend mode 17 (upgrade `conditional_damage: +3,
+conditional_then_damage: +1`, so 10 / 21; was 13, 16). Tidal Flourish 13 to
+ALL (16; was 10, 13). Quick Cue 14 (upgrade `conditional_damage: +1,
+conditional_then_damage: +1`, so 4 / 16; was 11, 12). Spirited Aria 14 and
+draw 2 (17; was 11, 14). Grand Entrance 40 (upgrade `conditional_damage: +4,
+conditional_then_damage: +1`, so 16 / 45; was 32, 36). Bravura `per: 4` (5
+upgraded; was 3, 4). Bring the House Down `per: 4` (5 upgraded; was 3, 4).
+Each plain mode keeps its number and its upgrade. The tier0 sim reads these
+rows, so it moved with them; the C# is regenerated.
+
 ## Kokomi: Kurage's Oath now-line, and Plan lines on their own line (2026-09-28)
 
 **Kurage's Oath** (`proto_kk_kurages_oath`, her starter). [USER]: "The

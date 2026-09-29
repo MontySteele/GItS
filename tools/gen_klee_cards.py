@@ -437,9 +437,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # R276 batch two: three more single calls.
                   "stage_step_forward", "stage_perform_all",
                   "stage_spend_back_all",
-                  # THE SUPPORTING POOL (2026-09-26): eight more, each one
+                  # THE SUPPORTING POOL (2026-09-26): seven more, each one
                   # call into `FurinaStage` with no locals.
-                  "stage_reverse", "stage_whisper", "stage_hold_fade",
+                  "stage_reverse", "stage_whisper",
                   "stage_intermission", "stage_spend_front_all",
                   "stage_grand_finale", "stage_verdict", "stage_dual_nature",
                   # THE CO-OP SET (`COOP_ALLY_OPS`): Share the Spotlight, one
@@ -926,12 +926,13 @@ ARM_KEYWORDS = (
                "ArmKeywordTips.ForFrontPerformer"),
     ArmKeyword("back performer", ("back performer",),
                "ArmKeywordTips.ForBackPerformer"),
-    # THE SECOND TEXT PASS (2026-09-28, review/records/furina-text-pass-
-    # 2026-09-28.md): the fade, a word four faces print, had no tip of its
-    # own -- the back performer's carried it, and the fade takes every
-    # performer behind the front. Held Applause golds it; the two Powers that
-    # bend it print it ungolded and owe it by their ops (`bends_the_fade`).
-    ArmKeyword("fade", ("fade", "fades"), "ArmKeywordTips.ForFade"),
+    # THE SECOND TEXT PASS (2026-09-28) gave the fade a row here. THE FADE
+    # PASS (2026-09-29) cut the three cards that printed the word (Held
+    # Applause, Echoing Hall, Eternal Applause), so the row left under R213
+    # B's rule -- a keyword no face prints is a rule nobody can meet.
+    # `ArmKeywordTips.ForFade` stays as the one statement of the sentence the
+    # seat page's glossary mirrors; a card that prints "fade" again brings
+    # the row back.
     # R276 batch two: Arkhe Alignment's two halves, the Genshin Ousia/Pneuma
     # pair. Each names the half of the choice it is.
     ArmKeyword("Ousia", ("Ousia",), "ArmKeywordTips.ForOusia"),
@@ -1208,8 +1209,7 @@ def arm_keywords_printed(description: str) -> list[ArmKeyword]:
 
 def arm_keyword_tip_calls(description: str,
                           includes_bomb_rules: bool = False,
-                          spark_priced: bool = False,
-                          bends_fade: bool = False) -> list[str]:
+                          spark_priced: bool = False) -> list[str]:
     """The tip calls this face owes, in table order.
 
     `includes_bomb_rules` is the ONE exclusion, and it is a real one rather
@@ -1233,19 +1233,11 @@ def arm_keyword_tip_calls(description: str,
     whether or not its sentence survived. Derived from the row's `spend_spark`
     cost op, which is the same declaration `PrintedSparkPrice` and the
     playability gate read.
-
-    `bends_fade` is `spark_priced`'s shape for the second text pass
-    (2026-09-28): a row that bends the fade (`bends_the_fade`) owes the fade
-    tip whether or not its face golds the word.
     """
     printed = arm_keywords_printed(description)
     if spark_priced and not any(k.word == "Spark" for k in printed):
         printed = sorted(
             printed + [k for k in ARM_KEYWORDS if k.word == "Spark"],
-            key=ARM_KEYWORDS.index)
-    if bends_fade and not any(k.word == "fade" for k in printed):
-        printed = sorted(
-            printed + [k for k in ARM_KEYWORDS if k.word == "fade"],
             key=ARM_KEYWORDS.index)
     return [keyword.attach
             for keyword in printed
@@ -1280,20 +1272,6 @@ _STAGE_PERFORMER_TIPS = (
     ("chevalmarin", "ArmKeywordTips.ForChevalmarin"),
     ("crabaletta", "ArmKeywordTips.ForCrabaletta"),
 )
-
-
-#: The second text pass (2026-09-28): the Powers that bend rule 12, the fade.
-FADE_BENDING_POWERS = frozenset({"fs_echoing_hall", "fs_eternal_applause"})
-
-
-def bends_the_fade(card: dict) -> bool:
-    """Does this row bend the fade? Held Applause (`stage_hold_fade`),
-    Echoing Hall and Eternal Applause (their Powers). Derived from the ops,
-    so a row that gains one carries the fade tip the day it exists."""
-    return any(fx.get("op") == "stage_hold_fade"
-               or (fx.get("op") == "apply_power"
-                   and fx.get("power") in FADE_BENDING_POWERS)
-               for fx in iter_effects(card.get("effects") or []))
 
 
 def stage_summon_tip_calls(card: dict) -> list[str]:
@@ -2953,11 +2931,6 @@ APPLY_POWERS = {
         "[gold]Fanfare[/gold]."),
     "fs_star_billing": ("StarBillingPower", None,
         "Whenever a Guest Star joins the stage, draw {X} cards."),
-    "fs_echoing_hall": ("EchoingHallPower", None,
-        "Whenever a performer fades, your front performer gains half the "
-        "[gold]Fanfare[/gold] lost."),
-    "fs_eternal_applause": ("EternalApplausePower", None,
-        "Your performers fade only above 10 [gold]Fanfare[/gold], not 5."),
     "fs_tide_of_applause": ("TideOfApplausePower", None,
         "Whenever you trigger an [gold]Elemental Reaction[/gold], your back "
         "performer gains {X} [gold]Fanfare[/gold]."),
@@ -5881,7 +5854,7 @@ STAGE_STMT_OPS = {
     # THE GUEST CAST (2026-09-25).
     "stage_guest",
     # THE SUPPORTING POOL (2026-09-26).
-    "stage_reverse", "stage_whisper", "stage_hold_fade", "stage_intermission",
+    "stage_reverse", "stage_whisper", "stage_intermission",
     "stage_spend_front_all", "stage_grand_finale", "stage_verdict",
     "stage_dual_nature",
 }
@@ -5937,8 +5910,6 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
         # 2026-09-26 seat round, second rework: every other performer gives
         # all but 1 to the front. No number.
         return "FurinaStage.Whisper(Owner.Creature);"
-    if op == "stage_hold_fade":
-        return "FurinaStage.HoldFade(Owner.Creature);"
     if op == "stage_intermission":
         n = amount if amount is not None else str(int(eff.get("amount", 3)))
         return (f"await FurinaStage.Intermission(choiceContext, "
@@ -15409,8 +15380,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc + rider_printed,
                                             includes_bomb_rules,
-                                            spark_priced,
-                                            bends_the_fade(card)):
+                                            spark_priced):
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-377`, and it is last of the last for the reason the block above

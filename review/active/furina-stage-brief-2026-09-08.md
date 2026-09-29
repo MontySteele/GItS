@@ -127,7 +127,7 @@ performers with their own bars, and Fanfare is that bar.**
     (§5.2), never in the performer.
 11. **Furina's own bar is touched by nothing in the kit.** No Restore, no
     Spend from it, no reader on it. Her sustain is the cast.
-12. **The applause fades.** At the end of Furina's turn, after the acts, each performer behind the front loses half of its Fanfare above 5, rounded down. The front never fades, and the fade never empties a performer. Why: the bank had no cost to hold, so spending it had no cost either; the fade makes a fat bank a choice (spend it, cash it out, or move it forward where it stops fading and becomes the shield). [USER] ruled out a flat halving ("hard to build up fanfare"); the threshold keeps a Refill of 5 whole and caps a hoard near 10 at one Refill a turn. The 5 is the knob seat rounds tune.
+12. **The applause fades.** At the end of Furina's turn, after the acts, every performer, the front one included, loses a quarter of its Fanfare, rounded down: 0 to 3 lose 0, 4 to 7 lose 1, 8 to 11 lose 2, 12 loses 3, 20 loses 5. A quarter never empties a performer, so the fade never causes a Bow. Why: the bank had no cost to hold, so spending it had no cost either; the fade makes a fat bank a choice (spend it or cash it out). [USER] ruled out a flat halving in draft 3 ("hard to build up fanfare"); the quarter is his ("What about a percentage fade, say 25%? Anything below 4 rounds to losing 0."). The divisor is the knob. (The fade pass, 2026-09-29, §18. Draft 3's rule was half of the Fanfare above 5, behind the front only; in the sim it faded 0 to 2 Fanfare a fight.)
 
 What is not in this batch, by decision: Spend as an Energy-free cost,
 Fontaine Companions that summon a character with its own act (held until
@@ -392,7 +392,7 @@ Regal Bearing leave the starter for the Commons below.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Curtain Rise | 1 | Attack | Deal 7 damage. Spend 3: deal 13 instead. |
+| Curtain Rise | 1 | Attack | Deal 7 damage. Spend 3: deal 17 instead. [10 / 21] (2026-09-29 fade pass, §18: the Spend mode was 13, 16 upgraded.) |
 | Rising Applause | 1 | Skill | Your back performer gains 5 Fanfare. (Was Standing Ovation; renamed under R179 in round one, `EB-739`, since a shipped Power carries that name.) |
 
 **Commons (eight, and two more since 2026-09-28; Gentilhomme Usher and Understudy left the pool in the balance pass, §15)**
@@ -404,7 +404,7 @@ Regal Bearing leave the starter for the Commons below.
 | Mademoiselle Crabaletta | 1 | Skill | Summon Crabaletta. (2026-09-25: the trio can be cloned.) |
 | ~~Understudy~~ | 0 | Skill | Summon a random performer. Exhaust. (2026-09-25: the face follows the full-stage ruling, rule 3.) (2026-09-28: out of the pool, §15.) |
 | Warm Reception | 1 | Skill | Your back performer gains 3 Fanfare. Draw 1 card. |
-| Tidal Flourish | 1 | Attack | Deal 5 damage to ALL enemies. Spend 2: deal 9 and apply Hydro to ALL instead. (2026-09-25, draft 3.) |
+| Tidal Flourish | 1 | Attack | Deal 5 damage to ALL enemies. Spend 2: deal 9 and apply Hydro to ALL instead. (2026-09-25, draft 3.) (2026-09-29 fade pass, §18: Spend 3 for 13 [16]; §16 had made it Spend 3 for 10 [13].) |
 | Interposition | 1 | Skill | Gain 5 Block. Spend 2: gain 10 instead. |
 | ~~Scene Change~~ | 0 | Skill | Move your front performer to the back. (2026-09-29: out of the pool, §17.) |
 | Take the Stage | 1 | Skill | Summon a random performer with 3 Fanfare. Draw 1 card. [cost 0] (2026-09-28: out of the starter and a Common with a stronger face. Tentative: [USER], "'Become Common with a stronger effect' is fine as a tentative proposal, and then we can do an audit of the pool as part of the balance pass to see if we still want it." Was "Summon a random performer." at basic; was Salon Début, renamed under R179, `EB-739`.) |
@@ -414,7 +414,7 @@ Regal Bearing leave the starter for the Commons below.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Grand Entrance | 2 | Attack | Deal 12 damage. Spend 5: deal 24 instead. [16 / 28] (2026-09-26 balance review: was 10 / 20.) |
+| Grand Entrance | 2 | Attack | Deal 12 damage. Spend 5: deal 24 instead. [16 / 28] (2026-09-26 balance review: was 10 / 20.) (2026-09-29 fade pass, §18: Spend 7 for 40 [45]; §16 had made it Spend 7 for 32 [36].) |
 | Ousia Surge | 1 | Attack | Deal 3 damage, plus 1 for each Fanfare on your back performer. [base 6] (2026-09-29 audit pass, §17: was damage equal to the Fanfare, plus 4 upgraded.) (R276: was the front's.) (2026-09-26 balance review: the upgrade was cost 0.) |
 | Pneuma Refrain | 1 | Skill | Gain 3 Block, plus 1 for each Fanfare on your front performer. [base 6] (2026-09-29 audit pass, §17: was Block equal to the Fanfare, plus 4 upgraded.) (R276: was the back's.) (2026-09-26 balance review: the upgrade was cost 0.) |
 | Bis! | 1 | Skill | Your front performer acts twice. [cost 0] (2026-09-26 balance review: was "acts now". A lead that leaves after the first act does not act again.) |
@@ -447,7 +447,7 @@ values; names are provisional. Upgrades in brackets.
 | Between Acts | 1 | Skill | Gain 5 Block. If no one is on stage, draw 2 cards. [8 Block] |
 | Ensemble Piece | 1 | Attack | Deal 5 damage for each performer on stage. [7 each] (2026-09-29 audit pass, §17: was 4, 5 upgraded.) |
 | Hold Your Places | 1 | Skill | Gain 5 Block. Your front performer gains 2 Fanfare. [7 Block, gains 3] |
-| Quick Cue | 0 | Attack | Deal 3 damage. Spend 2: deal 8 and apply Hydro instead. [4 / 10] (2026-09-25, draft 3.) |
+| Quick Cue | 0 | Attack | Deal 3 damage. Spend 2: deal 8 and apply Hydro instead. [4 / 10] (2026-09-25, draft 3.) (2026-09-29 fade pass, §18: Spend 3 for 14 [4 / 16]; §16 had made it Spend 3 for 11 [4 / 12].) |
 | Step Forward | 0 | Skill | Move your back performer to the front. Gain 3 Block. [5 Block] |
 
 **Uncommons (seven)**
@@ -457,7 +457,7 @@ values; names are provisional. Upgrades in brackets.
 | ~~Gala Dinner~~ | 1 | Skill | Each performer gains 2 Fanfare. [gains 3] (2026-09-28 balance pass: was 3, 4 upgraded.) (2026-09-29: out of the pool, §17.) |
 | Double Casting | 1 | Skill | Summon 2 random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Tutti! | 2 | Skill | All your performers act now. [cost 1] (Round four: was 2, 1 upgraded; round four's 1 and 0 undone in the 2026-09-26 balance review.) |
-| Bravura | 1 | Attack | Spend all of your back performer's Fanfare. Deal 5 damage, plus 3 per point. [plus 4 per point] (2026-09-29 Bravura fix, §16: was 3 per point, no base, 4 upgraded.) |
+| Bravura | 1 | Attack | Spend all of your back performer's Fanfare. Deal 5 damage, plus 4 per point. [plus 5 per point] (2026-09-29 fade pass, §18: was plus 3, 4 upgraded.) (2026-09-29 Bravura fix, §16: was 3 per point, no base, 4 upgraded.) |
 | Full House | 3 | Power | If all three seats are filled at the end of your turn, your performers act twice. [cost 2] (2026-09-26 balance review: was 2, 1 upgraded.) |
 | Thunderous Applause | 1 | Power | Whenever a performer Bows, draw 1 card and your back performer gains 1 Fanfare. [gains 2] (2026-09-28 balance pass: was 2, 3 upgraded; the draw is unchanged.) |
 | ~~A Rapt Audience~~ | 1 | Power | Whenever an enemy hits your front performer, your back performer gains 2 Fanfare. Needs 2 performers. [gains 3] (2026-09-26 balance review: was half the Fanfare lost, all of it upgraded. Copies add; a hit its Block fully absorbs does not count.) (2026-09-29: out of the pool, §17.) |
@@ -648,3 +648,51 @@ Neuvillette at 5 pays once. Its cause is still open (`BACKLOG.md`).
 
 Row provenance: `docs/notes/prototype-surface-provenance.md`, "Furina, the
 Stage — the audit pass".
+
+## 18. The fade pass (2026-09-29)
+
+After his first run on the new starter, [USER]: "I swear that I have never
+seen it tick down any of the summons in-game before." Then his direction:
+"make Fanfare deplete faster, but make that depletion more impactful. Keep her
+Block cards generally weak but her Spend cards strong." On the shape: "What
+about a percentage fade, say 25%? Anything below 4 rounds to losing 0." And
+on the whole pass: "Yes, please proceed!" Designed by the main session; built
+on `furina-fade-pass`.
+
+**The evidence.** The main session's sim read (200 fights per deck, the
+`tank_boss` instrument): draft 3's rule 12 (half of the Fanfare above 5,
+behind the front only) fades 0 to 2 Fanfare a fight in every deck, against 16
+to 49 gained, and exactly 0 in the natural starter, bank and solo decks. The
+fade was real on paper and invisible in play.
+
+**The rule (rule 12, rewritten above).** At the end of Furina's turn, after
+the acts, every performer, the front one included, loses a quarter of its
+Fanfare, rounded down: 0 to 3 lose 0, 4 to 7 lose 1, 8 to 11 lose 2, 12 loses
+3, 20 loses 5. A quarter never empties a performer, so the fade never causes a
+Bow. The face, wherever the game or the seat page states the rule: "At the end
+of your turn, each performer loses a quarter of its Fanfare, rounded down."
+Grand Theater Program still turns the fade off.
+
+**Cut (three; the pool is 72, was 75).** Held Applause (skip one fade),
+Echoing Hall (half the fade's loss to the front) and Eternal Applause (fade
+only above 10). Each bent the old line, and the new rule has no line to bend;
+their engine code left with them.
+
+**Spend buffs (base, then upgraded).** Only the Spend mode or the Spend payoff
+moves; the plain mode stays, and every Block card is unchanged.
+
+| card | now | was |
+|---|---|---|
+| Curtain Rise (starter) | Spend 3: deal 17 [21] | 13 [16] |
+| Tidal Flourish (Common) | Spend 3: deal 13 to ALL [16] | 10 [13] |
+| Quick Cue (Common) | Spend 3: deal 14 [16] | 11 [12] |
+| Spirited Aria (Common) | Spend 3: deal 14 and draw 2 [17] | 11 [14] |
+| Grand Entrance (Uncommon) | Spend 7: deal 40 [45] | 32 [36] |
+| Bravura (Uncommon) | 5 damage, plus 4 per point [plus 5] | plus 3 [plus 4] |
+| Bring the House Down (Rare) | 4 to ALL per point [5] | 3 [4] |
+
+Not changed: Interposition, Final Bow, Let the People Rejoice, and every Block
+card. Curtain Rise is a starter card; [USER] approved the pass that moves it.
+
+Row provenance: `docs/notes/prototype-surface-provenance.md`, "Furina, the
+Stage — the fade pass".

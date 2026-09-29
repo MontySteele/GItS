@@ -248,9 +248,10 @@ public class FurinaStageCueTests
         Assert.Equal("Your back performer cannot pay 2: does nothing.",
                      cue.Forecast);
         Assert.True(forecast.Cues[0].Unpaid);
-        // Nothing is paid, by the forecast or by the real end of turn.
+        // Nothing is paid, by the forecast or by the real end of turn (the
+        // fade, since 2026-09-29 a quarter of every bar, takes 1 of her 4).
         Assert.All(board.Bars, b => Assert.Equal(0, b.Paid));
-        Assert.Equal(new[] { 4, 1 }, RealEndOfTurn(stage));
+        Assert.Equal(new[] { 3, 1 }, RealEndOfTurn(stage));
 
         // Neuvillette short of his 3, greyed with his 8.
         var (short2, _) = Stage(("neuvillette", 2), ("usher", 3));
@@ -424,8 +425,9 @@ public class FurinaStageCueTests
                                   ("crabaletta", 15));
         var (forecast, board) = Read(seat);
 
-        // The front never fades; 9 -> 7 and 15 -> 10.
-        Assert.Equal(new[] { 0, 2, 5 },
+        // The fade pass (2026-09-29): a quarter of every bar, the front's
+        // too; 25 -> 19, 9 -> 7 and 15 -> 12.
+        Assert.Equal(new[] { 6, 2, 3 },
                      board.Bars.Select(b => b.Faded).ToArray());
         Assert.Equal(forecast.Seats.Select(r => r.Faded).ToArray(),
                      board.Bars.Select(b => b.Faded).ToArray());

@@ -166,7 +166,8 @@ public class FurinaStageRoundThreeTests
                         source);
         Assert.Contains("new DamageVar(\"PlainDamage\", 5m, ValueProp.Move)",
                         source);
-        Assert.Contains("new DamageVar(\"BranchDamage\", 10m, ValueProp.Move)",
+        // 13 since the fade pass (2026-09-29); 10 before it.
+        Assert.Contains("new DamageVar(\"BranchDamage\", 13m, ValueProp.Move)",
                         source);
     }
 

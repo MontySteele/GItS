@@ -6488,11 +6488,6 @@ def _op_stage_whisper(state: CombatState, fx: dict, card: Card) -> None:
     furina_stage.whisper(state)
 
 
-def _op_stage_hold_fade(state: CombatState, fx: dict, card: Card) -> None:
-    """*Held Applause*: no fade at the end of this turn."""
-    furina_stage.hold_fade(state)
-
-
 def _op_stage_intermission(state: CombatState, fx: dict, card: Card) -> None:
     """*Intermission*: the back Bows and leaves; draw 1 per `amount` of its
     Fanfare. `amount` is the divisor the face prints ("for every 3")."""
@@ -6564,7 +6559,6 @@ OPS = {
     # THE SUPPORTING POOL (2026-09-26).
     "stage_reverse": _op_stage_reverse,
     "stage_whisper": _op_stage_whisper,
-    "stage_hold_fade": _op_stage_hold_fade,
     "stage_intermission": _op_stage_intermission,
     "stage_spend_front_all": _op_stage_spend_front_all,
     "stage_grand_finale": _op_stage_grand_finale,

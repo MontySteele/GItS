@@ -253,7 +253,9 @@ public class PoolCellCoverageTests
             // Attacks (Bring the House Down, Grand Deluge beside Let the
             // People Rejoice) and four Rare Powers (Eternal Applause, Regina
             // of All Waters, One-Woman Show beside Arkhe Alignment and A
-            // Five-Century Act). No cell is short.
+            // Five-Century Act). No cell is short. (The 2026-09-29 fade pass
+            // cut Eternal Applause; Rare/Power still holds four with Sold
+            // Out.)
             "furina-stage" => System.Array.Empty<string>(),
             _ => throw new InvalidOperationException(arm),
         }).OrderBy(n => n, StringComparer.Ordinal).ToList();

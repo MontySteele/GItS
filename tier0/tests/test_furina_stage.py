@@ -1007,8 +1007,9 @@ def test_the_pool_seam_swaps_its_rows_at_the_same_rarity(arm):
     # supporting pool's 27 that replace a row and Sold Out (2026-09-26),
     # less Gentilhomme Usher and Understudy (balance review, 2026-09-28),
     # less Scene Change, Gala Dinner and A Rapt Audience (audit pass,
-    # 2026-09-29)
-    assert len(subs) == 14 + 15 + 8 + 27 + 1 - 2 - 3
+    # 2026-09-29), less Held Applause, Echoing Hall and Eternal Applause
+    # (the fade pass, the same day)
+    assert len(subs) == 14 + 15 + 8 + 27 + 1 - 2 - 3 - 3
     assert not set(subs) & set(FS.POOL_DROPS)
     rarity = {r["id"]: r["rarity"] for r in _sheet_rows("furina-cards.yaml")}
     rarity.update({r["id"]: r["rarity"] for r in _proto_rows()})
@@ -1036,8 +1037,9 @@ def test_every_stage_row_is_named_by_one_of_the_two_maps():
     # supporting pool's 28 and Sold Out (2026-09-26), and Regal Bearing
     # (the starter ruling, 2026-09-28), less Gentilhomme Usher and
     # Understudy (the balance review, 2026-09-28), less Scene Change, Gala
-    # Dinner and A Rapt Audience (the audit pass, 2026-09-29)
-    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1 - 2 - 3
+    # Dinner and A Rapt Audience (the audit pass, 2026-09-29), less Held
+    # Applause, Echoing Hall and Eternal Applause (the fade pass, same day)
+    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1 - 2 - 3 - 3
     # THE CO-OP SET's three are the MULTIPLAYER TIER: offered only in co-op,
     # outside the pool, replacing no shipped row -- so neither map names
     # them, and the tier's own mirror does.
@@ -1077,7 +1079,9 @@ def _open_fight_one():
 def test_fight_one_turn_one_line_a_is_the_briefs_row(arm):
     """Sec.7's line A, the BUILD: Presence, Rising Applause (Usher 3 to 8),
     Solicitation; Usher performs Block 3. Block 9, damage 6, Nibbit at 38,
-    Usher takes the 3 that survives her Block and sits at 5, Furina at 78."""
+    Furina at 78. THE FADE PASS (2026-09-29): the front fades too, a quarter
+    of 8, so Usher ends the turn at 6 and the 3 that survives her Block
+    leaves him at 3 (was 8 and 5)."""
     st = _open_fight_one()
     st.player.block += 6                                   # Stage Presence
     FS.raise_fanfare(st, FS.REFILL_AMOUNT)                 # Rising Applause
@@ -1086,11 +1090,11 @@ def test_fight_one_turn_one_line_a_is_the_briefs_row(arm):
 
     assert st.player.block == 9
     assert st.enemies[0].hp == 38
-    assert FS.lead_fanfare(st.player) == 8
+    assert FS.lead_fanfare(st.player) == 6                 # 8, less 8 // 4
 
     combat._enemy_turn(st, st.enemies[0])                # Butt 12
     assert st.player.block == 0
-    assert FS.stage(st.player) == [["usher", 5]]
+    assert FS.stage(st.player) == [["usher", 3]]
     assert st.player.hp == 78
 
 
@@ -1166,6 +1170,9 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     and Curtain Rise spends 3 of it for 13. Every other number is the brief's
     own; what this pins is that an engine playing the brief's plays reaches
     the brief's board, not that the plays are good (sec.13).
+
+    THE FADE PASS (2026-09-29): every bar loses a quarter at each turn's end,
+    the front's included. The script's plays are the same; its bars moved.
     """
     st = _open_fight_one()
 
@@ -1176,13 +1183,13 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     FS.end_of_turn_acts(st)
     combat._enemy_turn(st, st.enemies[0])                # Butt 12
     assert st.enemies[0].hp == 38
-    assert FS.stage(st.player) == [["usher", 5]]
+    assert FS.stage(st.player) == [["usher", 3]]
 
     # --- turn 2: Salon Début fields Crabaletta, Solicitation, Regal Bearing --
     st.turn = 2
     st.player.block = 0
-    FS.turn_start_regen(st)                                # Usher 5 -> 6
-    assert FS.lead_fanfare(st.player) == 6
+    FS.turn_start_regen(st)                                # Usher 3 -> 4
+    assert FS.lead_fanfare(st.player) == 4
     st.player.block += 3                                   # Regal Bearing
     # `EB-738`: she arrives at 1 and does NOT act on arrival, so the board is
     # sec.7's own -- "Solicitation 6 (38 to 32) ... Performances: Usher Block 3
@@ -1199,7 +1206,7 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     # --- turn 3, the REFILL line ---------------------------------------
     st.turn = 3
     st.player.block = 0
-    FS.turn_start_regen(st)                                # Usher 6 -> 7
+    FS.turn_start_regen(st)                                # Usher 3 -> 4
     st.player.block += 6                                   # Stage Presence
     # R276: the Spend is the BACK performer's, and Crabaletta at 1 cannot pay
     # 3 -- the mode is not offered, whatever the Usher holds.
@@ -1211,9 +1218,12 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     FS.end_of_turn_acts(st)                                # Usher 3, Crab 5
     assert st.player.block == 9
     # 27, less 13, less Crabaletta's 5: sec.7's Refill line, "With
-    # Crabaletta's 5, Nibbit is at 9".
+    # Crabaletta's 5, Nibbit is at 9". (`_curtain_rise` is the brief's
+    # literal card, at sec.7's 13; the sheet's row deals 17 since the fade
+    # pass.)
     assert st.enemies[0].hp == 9
-    assert FS.stage(st.player) == [["usher", 7], ["crabaletta", 3]]
+    # The fade: Usher 4 -> 3, Crabaletta 3 keeps all 3.
+    assert FS.stage(st.player) == [["usher", 3], ["crabaletta", 3]]
 
 
 def test_the_turn_census_is_emitted_even_at_zero(arm):
@@ -1432,7 +1442,8 @@ def test_arkhe_alignment_doubles_one_half_of_the_acts(arm):
 
 
 def test_the_batch_two_upgrades_bind(arm, monkeypatch):
-    """Quick Cue's two numbers move by one each (3/11 to 4/12 since the
+    """Quick Cue's plain number moves by one and its Spend number by two
+    (3/14 to 4/16 since the 2026-09-29 fade pass; 3/11 to 4/12 after the
     2026-09-28 Spend pass; 3/8 to 4/10 before it), and a
     Stage Raise's printed N moves by its own key. Applied through the one
     applier both engines' deltas meet in, off the rows' own `upgrade:` blocks
@@ -1448,7 +1459,7 @@ def test_the_batch_two_upgrades_bind(arm, monkeypatch):
         copy.deepcopy(loader.get_card("proto_fs_quick_cue")))
     modes = cue.effects[0]["modes"]
     assert modes[0]["effects"][0]["amount"] == 4
-    assert modes[1]["effects"][1]["amount"] == 12
+    assert modes[1]["effects"][1]["amount"] == 16
     hold = upgrades.apply_upgrade(
         copy.deepcopy(loader.get_card("proto_fs_hold_your_places")))
     assert hold.effects == [{"op": "block", "amount": 7},
@@ -1498,8 +1509,9 @@ def test_tutti_costs_two_and_one_upgraded():
 
 
 def test_the_balance_review_numbers_2026_09_26(arm, monkeypatch):
-    """Full House 3 (2 upgraded); Grand Entrance 12 / Spend 7 for 32 (Spend
-    5 for 24 until the 2026-09-28 Spend pass); Ousia
+    """Full House 3 (2 upgraded); Grand Entrance 12 / Spend 7 for 40 (32
+    until the 2026-09-29 fade pass; Spend 5 for 24 until the 2026-09-28
+    Spend pass); Ousia
     Surge and Pneuma Refrain upgrade on the formula's base, not by cost
     (since the 2026-09-29 audit pass: base 3, 6 upgraded). A Rapt Audience
     left the pool with the same pass."""
@@ -1511,7 +1523,7 @@ def test_the_balance_review_numbers_2026_09_26(arm, monkeypatch):
     modes = rows["proto_fs_grand_entrance"]["effects"][0]["modes"]
     assert modes[0]["effects"][0]["amount"] == 12
     assert modes[1]["effects"][0]["amount"] == 7
-    assert modes[1]["effects"][1]["amount"] == 32
+    assert modes[1]["effects"][1]["amount"] == 40
     monkeypatch.setattr(upgrades, "_upgrade_index", lambda: {
         cid: dict(rows[cid]["upgrade"])
         for cid in ("proto_fs_ousia_surge", "proto_fs_pneuma_refrain")})
@@ -1670,39 +1682,46 @@ def test_no_act_applies_hydro_or_reacts(arm, member):
     assert primed.enemies[0].aura == "electro"
 
 
-@pytest.mark.parametrize("before,after", [(1, 1), (5, 5), (6, 6), (7, 6),
-                                          (9, 7), (15, 10), (25, 15)])
+# THE FADE PASS (2026-09-29). [USER]: "What about a percentage fade, say
+# 25%? Anything below 4 rounds to losing 0." Every performer, the front one
+# included, loses a quarter of its bar, rounded down.
+@pytest.mark.parametrize("before,after", [(0, 0), (1, 1), (3, 3), (4, 3),
+                                          (7, 6), (8, 6), (11, 9), (12, 9),
+                                          (20, 15)])
 def test_the_fade_table(before, after):
     assert before - FS.fade_loss(before) == after
 
 
-def test_the_fade_takes_the_middle_and_back_never_the_front(arm):
+def test_the_fade_takes_every_performer_the_front_included(arm):
     st = _state(enemies=[_enemy(hp=200)])
     st.player.stage = [["usher", 25], ["chevalmarin", 9], ["crabaletta", 15]]
     FS.end_of_turn_acts(st)
-    assert st.player.stage == [["usher", 25], ["chevalmarin", 7],
-                               ["crabaletta", 10]]
+    assert st.player.stage == [["usher", 19], ["chevalmarin", 7],
+                               ["crabaletta", 12]]
     fades = [(e["member"], e["before"], e["fanfare"]) for e in st.log
              if e["event"] == "stage_fade"]
-    assert fades == [("chevalmarin", 9, 7), ("crabaletta", 15, 10)]
+    assert fades == [("usher", 25, 19), ("chevalmarin", 9, 7),
+                     ("crabaletta", 15, 12)]
 
 
-def test_a_lone_performer_is_the_front_and_does_not_fade(arm):
+def test_a_lone_performer_fades_too(arm):
     st = _state()
-    st.player.stage = [["crabaletta", 25]]
+    st.player.stage = [["crabaletta", 20]]
     FS.end_of_turn_acts(st)
-    assert st.player.stage == [["crabaletta", 25]]
+    assert st.player.stage == [["crabaletta", 15]]
 
 
-def test_the_fade_never_empties_never_goes_below_the_threshold_never_bows(arm):
+def test_the_fade_never_empties_and_never_bows(arm):
+    """Bars under 4 lose nothing; a quarter never takes a whole bar."""
     st = _state(enemies=[_enemy(hp=200)])
-    st.player.stage = [["usher", 1], ["chevalmarin", 1], ["crabaletta", 6]]
+    st.player.stage = [["usher", 1], ["chevalmarin", 1], ["crabaletta", 3]]
     for _ in range(5):
         FS.end_of_turn_acts(st)
-    assert [f for _m, f in st.player.stage] == [1, 1, 6]
+    assert [f for _m, f in st.player.stage] == [1, 1, 3]
     assert not [e for e in st.log if e["event"] in ("stage_bow", "stage_fade")]
     for bar in range(0, 40):
-        assert bar - FS.fade_loss(bar) >= min(bar, FS.FADE_THRESHOLD)
+        assert FS.fade_loss(bar) == bar // FS.FADE_DIVISOR
+        assert bar - FS.fade_loss(bar) >= min(bar, 1)
 
 
 def test_the_fade_runs_after_the_acts(arm):
@@ -1736,7 +1755,7 @@ def test_tidal_flourish_applies_hydro_to_all_in_its_spend_mode(arm,
                    enemies=[_enemy(hp=60), _enemy(hp=60, name="paper2")])
     spent.player.stage = [["usher", 5]]
     _play_mode(spent, card, 1, monkeypatch)
-    assert all(e.hp == 60 - 10 for e in spent.enemies)
+    assert all(e.hp == 60 - 13 for e in spent.enemies)     # the fade pass
     assert all(e.aura == "hydro" for e in spent.enemies)
 
 
@@ -1747,7 +1766,7 @@ def test_quick_cue_spend_mode_is_a_hydro_hit(arm, monkeypatch):
     spent = _state(player=_furina(element="hydro"), enemies=[_enemy(hp=60)])
     spent.player.stage = [["usher", 5]]
     _play_mode(spent, card, 1, monkeypatch)
-    assert spent.enemies[0].hp == 60 - 11
+    assert spent.enemies[0].hp == 60 - 14                  # the fade pass
     assert spent.enemies[0].aura == "hydro"
     # Into an Electro aura the hit itself reacts with what is there.
     primed = _state(player=_furina(element="hydro"), enemies=[_enemy(hp=60)])

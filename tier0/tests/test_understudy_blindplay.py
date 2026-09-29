@@ -6791,10 +6791,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "back performer": ["Your last performer in line. ",
                            " pays from it. ",
                            "A lone performer is both front and back."],
-        # The second text pass (2026-09-28): the fade's own tip, whose
-        # threshold is interpolated on the mod side.
-        "fade": ["At the end of your turn, each performer behind the front "
-                 "loses ", "half its ", ", rounded down."],
+        # The second text pass (2026-09-28): the fade's own tip. The fade
+        # pass (2026-09-29): a quarter, the front's bar included.
+        "fade": ["At the end of your turn, each performer loses a quarter "
+                 "of its ", ", rounded down."],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
         # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the
         # anchors are the prose either side of it.
@@ -9020,7 +9020,7 @@ _R12_SMITH = (
     # one -- two modes, both printing their own number, both folded.
     # The text pass (2026-09-25) dropped "Choose one:" from the face.
     ("KLEEMOD-PROTO_FS_CURTAIN_RISE",
-     "Deal 7 damage. Spend 3: deal 13 instead."),
+     "Deal 7 damage. Spend 3: deal 17 instead."),
     ("KLEEMOD-PROTO_FS_SALON_DEBUT",
      "Summon a random performer who is not on stage."),
     ("KLEEMOD-AN_INVITATION",
@@ -9043,7 +9043,7 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
     """Three of the four, and no arithmetic in any of them: the pattern reads
     the UNUPGRADED arm off the printed face and the render writes the other."""
     assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
-        "Deal 10 damage. Spend 3: deal 16 instead.")
+        "Deal 10 damage. Spend 3: deal 21 instead.")
     assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
         "Add 1 random Common Companion card to your hand, free this turn.")
     # AN EMPTY UNUPGRADED ARM TAKES THE SPACE IN FRONT OF IT WITH IT: the game

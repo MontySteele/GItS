@@ -608,10 +608,12 @@ public class ArmRelicsPotionsTests
         using var _ = new StageArm();
         var seat = Seat.Furina().WithCombatState();
         var stage = Stage(seat, (StagePerformer.Usher, 9), (StagePerformer.Crabaletta, 12));
-        Assert.Equal(FurinaStageLaw.FadeThreshold, FurinaStage.FadeRules(seat.Creature).Threshold);
+        Assert.True(FurinaStage.Fades(seat.Creature));
         Give<GrandTheaterProgram>(seat);
-        var (line, echo) = FurinaStage.FadeRules(seat.Creature);
-        Assert.Equal(0, stage.Fade(line, echo));
+        // The fade pass (2026-09-29): the fade-benders are gone and the
+        // relic is the one switch left.
+        Assert.False(FurinaStage.Fades(seat.Creature));
+        Assert.Empty(FurinaStage.FadeAndShow(seat.Creature));
         Assert.Equal(new[] { 9, 12 }, stage.Seats.Select(s => s.Fanfare));
     }
 
@@ -632,6 +634,7 @@ public class ArmRelicsPotionsTests
             .First(r => r.Item1 == StageSummaryPower.NoFadeKey).Item2;
         Assert.Contains("do not fade", face);
         Assert.DoesNotContain("lose half", face);
+        Assert.DoesNotContain("a quarter", face);
     }
 
     [Fact]

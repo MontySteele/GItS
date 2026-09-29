@@ -55,7 +55,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 8 damage", "[gold]Spend[/gold] 3: deal 11 and draw 2 cards instead" };
+        new[] { "Deal 8 damage", "[gold]Spend[/gold] 3: deal 14 and draw 2 cards instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { true, true };
@@ -64,7 +64,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 8m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 14m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -88,7 +88,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
                                 "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 8 damage", "[gold]Spend[/gold] 3: deal 11 and draw 2 cards instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 8 damage", "[gold]Spend[/gold] 3: deal 14 and draw 2 cards instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
@@ -101,7 +101,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
         else
         {
             await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
-            await DamageCmd.Attack((IsUpgraded ? 14m : 11m))
+            await DamageCmd.Attack((IsUpgraded ? 17m : 14m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
@@ -147,7 +147,7 @@ public sealed class ProtoFsSpiritedAriaModeA : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 8m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 14m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
@@ -186,7 +186,7 @@ public sealed class ProtoFsSpiritedAriaModeB : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 8m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 14m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()

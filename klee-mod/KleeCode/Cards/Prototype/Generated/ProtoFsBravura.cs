@@ -52,7 +52,7 @@ public sealed class ProtoFsBravura : CustomCardModel, ICharacterCard
         new List<DynamicVar>
         {
             new CalculationBaseVar(5m),
-            new ExtraDamageVar(3m),
+            new ExtraDamageVar(4m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrBackFanfare(card))
         };
 

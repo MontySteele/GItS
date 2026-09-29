@@ -31,9 +31,10 @@ namespace KleeMod.Powers;
 ///
 ///   * the seat moves -- Plot Twist, Lyney's swap, Stage Whisper, Revolving
 ///     Stage -- are ledger methods, so the end-of-turn forecast runs them;
-///   * the fade's three benders (Held Applause, Echoing Hall, Eternal
-///     Applause) are <see cref="FadeRules"/> and
-///     <see cref="FurinaStageLedger.Fade(int, bool)"/>;
+///   * whether the fade runs at all (Grand Theater Program turns it off) is
+///     <see cref="Fades"/>; the fade itself is
+///     <see cref="FurinaStageLedger.Fade"/> (the 2026-09-29 fade pass cut the
+///     three cards that bent it);
 ///   * Oratrice's Verdict is <see cref="ActTarget"/>, which every act's
 ///     random pick goes through;
 ///   * the turn-start powers are <see cref="TurnStartPowers"/>, called by
@@ -53,22 +54,15 @@ public static partial class FurinaStage
     public const string ThunderousApplauseTitle = "Thunderous Applause";
 
     /// <summary>
-    /// Rule 12's line and Echoing Hall's echo for this owner, from the powers
-    /// in play: the line is 10 with <see cref="EternalApplausePower"/> (any
-    /// number of copies) and 5 without; the echo is on with any
-    /// <see cref="EchoingHallPower"/>. The end-of-turn fade and the forecast
-    /// both read it, so the two cannot disagree. Sim twin:
-    /// <c>furina_stage.fade_threshold</c> and <c>furina_stage.fade</c>.
+    /// Does rule 12 run for this owner? Always, unless she holds
+    /// <see cref="Relics.GrandTheaterProgram"/> ("Your performers no longer
+    /// fade."). The end-of-turn fade and the forecast both read it, so the
+    /// two cannot disagree. The 2026-09-29 fade pass cut the three cards that
+    /// bent the fade (Held Applause, Echoing Hall, Eternal Applause); the
+    /// relic is the one switch left. The sim does not model the arm's relics.
     /// </summary>
-    public static (int Threshold, bool Echo) FadeRules(Creature owner) =>
-        // GRAND THEATER PROGRAM: "The applause no longer fades" -- a line no
-        // bar reaches, so the fade takes nothing and echoes nothing.
-        (Relics.FurinaStageRelics.Holds<Relics.GrandTheaterProgram>(owner)
-             ? int.MaxValue
-             : owner.Powers.OfType<EternalApplausePower>().Any()
-                 ? FurinaStageLaw.EternalFadeThreshold
-                 : FurinaStageLaw.FadeThreshold,
-         owner.Powers.OfType<EchoingHallPower>().Any());
+    public static bool Fades(Creature owner) =>
+        !Relics.FurinaStageRelics.Holds<Relics.GrandTheaterProgram>(owner);
 
     /// <summary><i>Counterclaim</i>'s predicate, `stage_front_hit`: did an
     /// enemy's hit reach the front performer's bar since the end of her last
@@ -115,15 +109,6 @@ public static partial class FurinaStage
             Vfx.FurinaStageCues.Refresh(owner);
         }
         return moved;
-    }
-
-    /// <summary><i>Held Applause</i>: at the end of this turn, the performers
-    /// do not fade. Sim twin: <c>furina_stage.hold_fade</c>.</summary>
-    public static void HoldFade(Creature? owner)
-    {
-        if (!LiveFor(owner)) return;
-        FurinaStageLedger.For(owner!).FadeHeld = true;
-        Vfx.FurinaStageCues.Refresh(owner);
     }
 
     /// <summary>
@@ -378,44 +363,6 @@ public sealed class StarBillingPower : PowerModel, ILocalizationProvider
         ("description",
             "Whenever a Guest Star joins the stage, draw "
           + "[blue]{Amount}[/blue] {Amount:plural:card|cards}."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary><i>Echoing Hall</i>: "Whenever a performer fades, your front
-/// performer gains half the Fanfare lost" (2026-09-27; it was all of it).
-/// Half the sweep's total, rounded down. A MOVE: it goes to the front once,
-/// so a second copy moves nothing more.</summary>
-public sealed class EchoingHallPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Echoing Hall"),
-        ("description",
-            "Whenever a performer fades, your front performer gains half the "
-          + "[gold]Fanfare[/gold] lost."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary><i>Eternal Applause</i>: "Your performers fade only above 10
-/// Fanfare, not 5." Rule 12's line, bent; copies do not stack further.
-/// </summary>
-public sealed class EternalApplausePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Eternal Applause"),
-        ("description",
-            "Your performers fade only above "
-          + FurinaStageLaw.EternalFadeThreshold + " [gold]Fanfare[/gold], "
-          + "not " + FurinaStageLaw.FadeThreshold + "."),
     };
 
     public override PowerType Type => PowerType.Buff;

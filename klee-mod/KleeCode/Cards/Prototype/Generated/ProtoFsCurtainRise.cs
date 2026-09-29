@@ -55,7 +55,7 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 7 damage", "[gold]Spend[/gold] 3: deal 13 instead" };
+        new[] { "Deal 7 damage", "[gold]Spend[/gold] 3: deal 17 instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { true, true };
@@ -64,7 +64,7 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 17m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -88,7 +88,7 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
                                 "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 7 damage", "[gold]Spend[/gold] 3: deal 13 instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 7 damage", "[gold]Spend[/gold] 3: deal 17 instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
@@ -101,7 +101,7 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
         else
         {
             await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
-            await DamageCmd.Attack((IsUpgraded ? 16m : 13m))
+            await DamageCmd.Attack((IsUpgraded ? 21m : 17m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
@@ -111,9 +111,12 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
 
     protected override void OnUpgrade()
     {
+        // conditional_then_damage: the then-branch amount swaps on an IsUpgraded read at play time;
+        // the FACE prints it live (`EB-657`, the folded pair below) where the row has one,
+        // and swaps via {IfUpgraded:show:...|...} where it does not.
         // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
     }
 }
 
@@ -146,13 +149,13 @@ public sealed class ProtoFsCurtainRiseModeA : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 17m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
     {
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
     }
 }
 
@@ -185,12 +188,12 @@ public sealed class ProtoFsCurtainRiseModeB : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 17m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
     {
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
     }
 }

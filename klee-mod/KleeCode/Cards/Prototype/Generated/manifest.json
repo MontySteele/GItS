@@ -18,9 +18,7 @@
     "proto_fs_da_capo",
     "proto_fs_double_casting",
     "proto_fs_dual_nature",
-    "proto_fs_echoing_hall",
     "proto_fs_ensemble_piece",
-    "proto_fs_eternal_applause",
     "proto_fs_final_bow",
     "proto_fs_five_century_act",
     "proto_fs_full_house",
@@ -40,7 +38,6 @@
     "proto_fs_guest_star_neuvillette",
     "proto_fs_guest_star_sigewinne",
     "proto_fs_guest_star_wriothesley",
-    "proto_fs_held_applause",
     "proto_fs_hold_your_places",
     "proto_fs_improvised_number",
     "proto_fs_intermission",
@@ -308,9 +305,7 @@
     "proto_fs_da_capo": "furina",
     "proto_fs_double_casting": "furina",
     "proto_fs_dual_nature": "furina",
-    "proto_fs_echoing_hall": "furina",
     "proto_fs_ensemble_piece": "furina",
-    "proto_fs_eternal_applause": "furina",
     "proto_fs_final_bow": "furina",
     "proto_fs_five_century_act": "furina",
     "proto_fs_full_house": "furina",
@@ -330,7 +325,6 @@
     "proto_fs_guest_star_neuvillette": "furina",
     "proto_fs_guest_star_sigewinne": "furina",
     "proto_fs_guest_star_wriothesley": "furina",
-    "proto_fs_held_applause": "furina",
     "proto_fs_hold_your_places": "furina",
     "proto_fs_improvised_number": "furina",
     "proto_fs_intermission": "furina",
@@ -658,7 +652,8 @@
       "conditional_then_damage": 2
     },
     "proto_fs_curtain_rise": {
-      "conditional_damage": 3
+      "conditional_damage": 3,
+      "conditional_then_damage": 1
     },
     "proto_fs_da_capo": {
       "formula_base": 3,
@@ -670,14 +665,8 @@
     "proto_fs_dual_nature": {
       "draw": 1
     },
-    "proto_fs_echoing_hall": {
-      "cost": -1
-    },
     "proto_fs_ensemble_piece": {
       "formula_per": 2
-    },
-    "proto_fs_eternal_applause": {
-      "cost": -1
     },
     "proto_fs_final_bow": {
       "remove": "exhaust"
@@ -695,7 +684,8 @@
       "damage": 4
     },
     "proto_fs_grand_entrance": {
-      "conditional_damage": 4
+      "conditional_damage": 4,
+      "conditional_then_damage": 1
     },
     "proto_fs_grand_finale": {
       "cost": -1
@@ -736,9 +726,6 @@
     "proto_fs_guest_star_wriothesley": {
       "stage_guest": 2
     },
-    "proto_fs_held_applause": {
-      "block": 3
-    },
     "proto_fs_hold_your_places": {
       "block": 2,
       "stage_raise": 1
@@ -777,7 +764,8 @@
       "formula_base": 3
     },
     "proto_fs_quick_cue": {
-      "conditional_damage": 1
+      "conditional_damage": 1,
+      "conditional_then_damage": 1
     },
     "proto_fs_raise_a_toast": {
       "cap": 2

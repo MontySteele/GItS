@@ -148,10 +148,12 @@ ROTATION = STARTER_KIT + [
     "proto_fs_stage_whisper", "proto_fs_guest_star_lyney",
     "proto_fs_oratrices_verdict", "proto_fs_mademoiselle_crabaletta",
 ]
+#: 2026-09-29: the fade pass cut Held Applause, Echoing Hall and Eternal
+#: Applause; a Refill, a Rising Applause and Bravura hold their three slots.
 BANK = STARTER_KIT + [
     "proto_fs_season_tickets", "proto_fs_cheered_on", "proto_fs_cheered_on",
-    "proto_fs_held_applause", "proto_fs_echoing_hall",
-    "proto_fs_eternal_applause", "proto_fs_guest_star_escoffier",
+    "proto_fs_warm_reception", "proto_fs_standing_ovation",
+    "proto_fs_bravura", "proto_fs_guest_star_escoffier",
     "proto_fs_star_billing",
 ]
 BOWS = STARTER_KIT + [

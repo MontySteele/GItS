@@ -914,17 +914,16 @@ public static class ArmKeywordTips
 
     /// <summary>
     /// The second text pass (2026-09-28). Brief sec.3 rule 12, THE FADE, on
-    /// the cards that bend it (Held Applause, Echoing Hall, Eternal
-    /// Applause). Every performer behind the front, not just the back one
-    /// (<c>FurinaStageLedger.Fade</c>, the loop from seat 1). The numeral is
-    /// <see cref="FurinaStageLaw.FadeThreshold"/>'s (`EB-89`).
+    /// any face that prints the word. THE FADE PASS (2026-09-29): every
+    /// performer, the front one included, loses a quarter
+    /// (<see cref="FurinaStageLaw.FadeDivisor"/>) of its Fanfare, rounded
+    /// down (<c>FurinaStageLedger.Fade</c>, the loop from seat 0).
     /// </summary>
     public static IEnumerable<IHoverTip> ForFade(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, FadeKey,
-            "At the end of your turn, each performer behind the front loses "
-          + "half its [gold]Fanfare[/gold] above "
-          + FurinaStageLaw.FadeThreshold + ", rounded down.");
+            "At the end of your turn, each performer loses a quarter of its "
+          + "[gold]Fanfare[/gold], rounded down.");
 
     /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
     /// choice a player makes at the start of each turn.</summary>
