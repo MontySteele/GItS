@@ -44,7 +44,7 @@ public sealed class ProtoKkDeepCurrent : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_deep_current");
 
@@ -57,7 +57,7 @@ public sealed class ProtoKkDeepCurrent : CustomCardModel, IElementalCard, IChara
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move)
+            new DamageVar(7m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -79,6 +79,6 @@ public sealed class ProtoKkDeepCurrent : CustomCardModel, IElementalCard, IChara
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.Damage.UpgradeValueBy(2m);
     }
 }

@@ -44,14 +44,14 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this), this);
+        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_feint");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Feint"),
-        ("description", "Deal {PlainDamage:diff()} damage, or {BranchDamage:diff()} if a [gold]Plan[/gold] was carried out this turn.\n[gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold]."),
+        ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn.\n[gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -66,8 +66,9 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new PlanCarriedDamageVar("PlainDamage", 5m, "BranchDamage", ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 10m, ValueProp.Move),
+            new CalculationBaseVar(4m),
+            new ExtraDamageVar(3m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).PlansCarriedOutThisTurn),
             new DynamicVar("PlanPowerAmount", 1m)
         };
 
@@ -85,34 +86,17 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        if (KokomiOverhaulLedger.For(Owner.Creature).PlanCarriedOutThisTurn)
-        {
-            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 13m : 10m))
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
-                .Execute(choiceContext);
-        }
-        else
-        {
-            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 7m : 5m))
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
-                .Execute(choiceContext);
-        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        // conditional_then_damage: the then-branch amount swaps on an IsUpgraded read at play time;
-        // the FACE prints it live (`EB-657`, the folded pair below) where the row has one,
-        // and swaps via {IfUpgraded:show:...|...} where it does not.
-        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
-        DynamicVars["PlainDamage"].UpgradeValueBy(2m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
         DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

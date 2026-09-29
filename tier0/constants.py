@@ -821,7 +821,15 @@ KOKOMI_OVERHAUL = False
 # on its row. The relic's strike is the exception: it is a rule the Tamakushi
 # Casket carries, printed on the relic and on no card, so it is named here for
 # `tools/lint_constant_parity.py` to compare the C# mirror BY VALUE.
-KOKOMI_OVERHAUL_CASKET_STRIKE = 2   # Hydro, per debuff she applies to an enemy
+# THE CASKET PASS (2026-09-28) REPLACED THE STRIKE. The relic used to answer
+# every debuff she applied with a 2 Hydro hit (`KOKOMI_OVERHAUL_CASKET_STRIKE`,
+# retired); it now COUNTS the Plans the Bake-Kurage carries out, and Open the
+# Casket turns the count into Strength. [USER]: "1 strength per point seems
+# fine; we can adjust down if we need to." Mirrored BY VALUE against
+# `KokomiOverhaulLaw` by `tools/lint_constant_parity.py`.
+KOKOMI_OVERHAUL_CASKET_PER_PLAN = 1            # added per carried-out Plan
+KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT = 1  # Open the Casket's rate
+KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD = 2      # Moon Signal: "2 or more Plans"
 KOKOMI_OVERHAUL_RALLY_DISCOUNT = 1  # Rally: the next Companion costs this less
 # `EB-668` (`EB-655` reopened). Battle Plan's carry-out: "the next Attack you
 # play face-up this turn deals 4 additional damage." A RULE'S number and not a
@@ -862,8 +870,8 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_kk_slack_water",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). THIRTY-FOUR rows since The
-# Moon Overlooks the Waters was withdrawn (`EB-570`), in the packet's own order
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). FORTY-SIX rows since the
+# Casket pass (2026-09-28: six cut, thirteen added), in the packet's own order
 # -- the Tactician, the
 # Priestess, the Commander, then the currencies, the one replay, the tempo
 # shelf and the pool pass. `EB-335` filed R246 pick 2's defensive pair with the
@@ -883,8 +891,9 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # the price off waiting -- and the doctrine audit returned
 # REQUIRES_MODIFICATION on both smaller shapes (a half now-copy, and a
 # one-turn Exhaust Skill). The row and its pins left the surface under R213
-# B's deletion rule, exactly as Rolling Tide's did (`EB-552`), and the pool is
-# thirty-four.
+# B's deletion rule, exactly as Rolling Tide's did (`EB-552`). The Casket
+# pass (2026-09-28) cut Tide Chart, Cleansing Wave, Ripple, Well Laid,
+# Sea-Salt Prayer and Salt Line and appended thirteen rows: forty-six.
 KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # The Tactician -- Plans, and the cards that pay per Plan (8)
     "proto_kk_feint",
@@ -895,11 +904,9 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_song_of_pearls",
     "proto_kk_war_council",
     "proto_kk_nereids_ascension",
-    # The Priestess -- Block through the jellyfish, Mend at Rare (9)
-    "proto_kk_sea_salt_prayer",
+    # The Priestess -- Block through the jellyfish, Mend at Rare (7)
     "proto_kk_deep_current",
     "proto_kk_coral_bulwark",
-    "proto_kk_cleansing_wave",
     "proto_kk_tide_wall",
     "proto_kk_shell_guard",
     "proto_kk_the_clouds_like_waves",
@@ -910,21 +917,14 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_vanguard",
     "proto_kk_the_generals_banner",
     "proto_kk_chain_of_command",
-    # Currencies, tempo, and the one replay (6)
+    # Currencies, tempo, and the one replay (5)
     "proto_kk_stolen_chapter",
     "proto_kk_change_of_plans",
     "proto_kk_undertow",
-    "proto_kk_salt_line",
     "proto_kk_battle_plan",
     "proto_kk_moons_reflection",
-    # THE TEMPO SHELF (round 9 pick 1 at its default, 2026-09-04). Two rows
-    # keyed to the Bake-Kurage that let a Plan be held or hurried -- the arm's
-    # empty shelf, which round 9 read as thirty rows at a flat cost with no
-    # energy gain and nothing that Retains. LAST, in the sheet's own order,
-    # because `tools/lint_arm_pool_parity.py` compares this tuple to
-    # `KokomiOverhaulRoster.Slice()` and to the sheet BY ORDER.
-    "proto_kk_tide_chart",
-    "proto_kk_ripple",
+    # THE TEMPO SHELF (round 9 pick 1, 2026-09-04) was Tide Chart and Ripple;
+    # the Casket pass (2026-09-28) cut both.
     # POOL PASS ONE (`EB-492`, review/records/kokomi-pool-pass-2026-09-05.md):
     # Plan density in the OFFER rather than in the starter -- three Attacks
     # with a Plan line, the morning's payoff on a Common Attack, and a Skill
@@ -933,7 +933,6 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_riptide",
     "proto_kk_pincer",
     "proto_kk_flank",
-    "proto_kk_well_laid",
     "proto_kk_feigned_retreat",
     # POOL PASS TWO (`EB-643`, R265): the answer to "the Plan plays itself".
     # Seven rows that make the QUEUE something the player operates on rather
@@ -962,6 +961,23 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_scout_ahead",
     "proto_kk_second_thoughts",
     "proto_kk_breakwater",
+    # THE CASKET PASS (2026-09-28). The Tamakushi Casket counts the Plans the
+    # Bake-Kurage carries out, and Open the Casket (a relic token, in no pool)
+    # turns the count into Strength. Thirteen rows, LAST in the sheet's own
+    # order: seven Commons, five Uncommons, one Rare.
+    "proto_kk_massed_volley",
+    "proto_kk_signal_arrow",
+    "proto_kk_surging_shoal",
+    "proto_kk_pearl_diver",
+    "proto_kk_press_the_advantage",
+    "proto_kk_shell_of_sanctuary",
+    "proto_kk_driftglass",
+    "proto_kk_what_the_tokoyo_returns",
+    "proto_kk_depths_judgment",
+    "proto_kk_tideturn",
+    "proto_kk_moon_signal",
+    "proto_kk_pearl_current",
+    "proto_kk_what_the_tokoyo_took",
 )
 
 # THE CO-OP SET's Kokomi and Furina tiers, on `KLEE_OVERHAUL_MULTIPLAYER_IDS`'s

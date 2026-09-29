@@ -58,13 +58,14 @@ BOMB_GROWTH = 4
 #: reason and held in step from the test side.
 SHATTER_DAMAGE = 6
 
-#: `EB-625`. What one Tamakushi Casket strike deals --
-#: `KokomiOverhaulLaw.CasketStrike` in the mod and
-#: `C.KOKOMI_OVERHAUL_CASKET_STRIKE` in the sim. Mirrored here for
-#: `BOMB_GROWTH`'s reason (this module may not reach `tier0`) and held in step
-#: from the test side against both, so a retune cannot leave the page's Casket
-#: glossary quoting a retired number while the mod's hover tip moves.
-CASKET_STRIKE = 2
+#: `EB-625`, rewritten by the Casket pass (2026-09-28). What one carried-out
+#: Plan adds to the Tamakushi Casket -- `KokomiOverhaulLaw.CasketPerPlan` in
+#: the mod and `C.KOKOMI_OVERHAUL_CASKET_PER_PLAN` in the sim. Mirrored here
+#: for `BOMB_GROWTH`'s reason (this module may not reach `tier0`) and held in
+#: step from the test side against both, so a retune cannot leave the page's
+#: Casket glossary quoting a retired number while the mod's hover tip moves.
+#: (It was the retired debuff strike's 2 until the pass.)
+CASKET_PER_PLAN = 1
 
 #: `EB-560`. THE SPARK A KLEE COMBAT OPENS WITH, `KleeOverhaulLaw.OpeningSpark`
 #: in the mod and `C.KLEE_OVERHAUL_OPENING_SPARK` in the sim, mirrored here for

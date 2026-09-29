@@ -45,51 +45,35 @@ public class KokomiPoolPassThreeTests
     // ======================================================================
 
     [Fact]
-    public void Feints_now_line_is_a_carry_out_conditional_and_not_a_flat_hit()
+    public void Feints_now_line_reads_the_carry_out_count_and_not_the_flag()
     {
-        // Sango Isshin's shape at Common: the branch reads the ledger's
-        // `PlanCarriedOutThisTurn`, which is the same question the Rare asks,
-        // so "a Plan was carried out this turn" has one definition in the arm.
-        // Twin: `test_feint_pays_the_planned_number_after_a_carry_out`.
-        Assert.Contains(Il.Calls(Il.Method("ProtoKkFeint", "OnPlay")),
-                        c => c.Contains("PlanCarriedOutThisTurn"));
+        // The Casket pass re-keyed it off the yes/no onto the count: one
+        // definition, the ledger's `PlansCarriedOutThisTurn`, the same count
+        // Sango Isshin reads. Twin: `test_feint_pays_three_per_carry_out`.
+        var source = Source("ProtoKkFeint");
+        Assert.Contains("PlansCarriedOutThisTurn", source);
+        Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKkFeint", "OnPlay")),
+                              c => c.Contains("PlanCarriedOutThisTurn"));
     }
 
     [Fact]
-    public void Feint_prints_five_and_ten_and_upgrades_them_by_two_and_three()
+    public void Feint_prints_four_plus_three_per_carry_out_and_upgrades_the_base()
     {
-        // THE TWO PRINTED NUMBERS UPGRADE BY DIFFERENT AMOUNTS, which is the
-        // whole reason `conditional_then_damage` exists: `conditional_damage`
-        // moves both branches by 2 and the then-branch takes 1 more.
-        //
-        // `EB-657`: THEY ARE PRINTED LIVE. The face used to carry the two
-        // `{IfUpgraded:show:}` literals, so it folded neither Shrink nor
-        // Vulnerable while the Strike beside it did -- 5 printed, 7 dealt. The
-        // numbers are a `FoldedDamageVar` each now (`EB-624`'s pair, one card
-        // over), carrying the same 5 and 10 and each taking its own delta.
+        // THE CASKET PASS (2026-09-28): "Deal 4 damage, plus 3 for each Plan
+        // carried out this turn. Plan: Apply 1 Vulnerable." Upgraded: base 6,
+        // Plan 2 Vulnerable. Both printed numbers are live vars (`EB-657`),
+        // and the in-combat line prints the total.
         var face = Face(new ProtoKkFeint());
-        Assert.Contains("{PlainDamage:diff()}", face);
-        Assert.Contains("{BranchDamage:diff()}", face);
+        Assert.Contains("{CalculationBase:diff()}", face);
+        Assert.Contains("{ExtraDamage:diff()}", face);
+        Assert.Contains("{CalculatedDamage:diff()}", face);
         Assert.DoesNotContain("{IfUpgraded:show:", face);
         var source = Source("ProtoKkFeint");
-        // `EB-670` (the live look of 2026-09-16) MOVED THE HEADLINE'S CLASS
-        // and nothing else: on a morning a Plan HAD carried out, the else-arm
-        // number was the first number a reader met and was not the number the
-        // card would deal. `PlanCarriedDamageVar` reads the same ledger flag
-        // the emitted `OnPlay` reads and, where it is set, folds against the
-        // SIBLING var's base -- which is why `BranchDamage` below is still
-        // declared and still takes its own delta. Both printed numbers stay
-        // on the face and both stay live.
-        Assert.Contains("new PlanCarriedDamageVar(\"PlainDamage\", 5m, "
-                      + "\"BranchDamage\", ValueProp.Move)", source);
-        Assert.Contains("new FoldedDamageVar(\"BranchDamage\", 10m, ValueProp.Move)",
+        Assert.Contains("new CalculationBaseVar(4m)", source);
+        Assert.Contains("new ExtraDamageVar(3m)", source);
+        Assert.Contains("DynamicVars.CalculationBase.UpgradeValueBy(2m);", source);
+        Assert.Contains("DynamicVars[\"PlanPowerAmount\"].UpgradeValueBy(1m);",
                         source);
-        Assert.Contains("DynamicVars[\"PlainDamage\"].UpgradeValueBy(2m);", source);
-        Assert.Contains("DynamicVars[\"BranchDamage\"].UpgradeValueBy(3m);", source);
-        // THE HIT IS UNTOUCHED and stays the play-time literal swap, so the
-        // printed pair can print no number the card does not deal.
-        Assert.Contains("(IsUpgraded ? 7m : 5m)", source);
-        Assert.Contains("(IsUpgraded ? 13m : 10m)", source);
     }
 
     [Fact]
@@ -189,24 +173,26 @@ public class KokomiPoolPassThreeTests
     }
 
     [Fact]
-    public void Riptide_prints_nine_and_four_and_upgrades_by_three_and_two()
+    public void Riptide_prints_eleven_and_three_and_upgrades_by_three_and_one()
     {
+        // THE CASKET PASS (2026-09-28): 11 to ALL, debuffed enemies take 3
+        // more (14 / 4 upgraded); the Plan is 2 Energy and a card.
         var card = new ProtoKkRiptide();
         Assert.Equal(2, card.EnergyCost.Canonical);
         Assert.Equal(CardRarity.Common, card.Rarity);
         var face = Face(card);
         Assert.Contains("{Damage:diff()}", face);
         Assert.Contains("{ExtraDamage:diff()}", face);
+        Assert.Contains("Gain 2 [gold]Energy[/gold] and draw 1 card.", face);
         var source = Source("ProtoKkRiptide");
-        Assert.Contains("new DamageVar(9m", source);
-        Assert.Contains("new ExtraDamageVar(4m)", source);
+        Assert.Contains("new DamageVar(11m", source);
+        Assert.Contains("new ExtraDamageVar(3m)", source);
         Assert.Contains("DynamicVars.Damage.UpgradeValueBy(3m)", source);
-        Assert.Contains("DynamicVars.ExtraDamage.UpgradeValueBy(2m)", source);
-        // R276 pick 1: the Plan line is Energy and a card, not a bigger hit.
+        Assert.Contains("DynamicVars.ExtraDamage.UpgradeValueBy(1m)", source);
         var clauses = card.PlanClauses;
         Assert.Equal(2, clauses.Count);
         Assert.Equal(KokomiPlan.Kind.Energy, clauses[0].Kind);
-        Assert.Equal(1, clauses[0].Amount);
+        Assert.Equal(2, clauses[0].Amount);
         Assert.Equal(KokomiPlan.Kind.Draw, clauses[1].Kind);
         Assert.Equal(1, clauses[1].Amount);
     }

@@ -128,53 +128,12 @@ def test_the_depth_is_read_once_at_the_drain():
     assert body.index("kk_plans_this_morning") < body.index("_drain")
 
 
-# ---- R276: what Well Laid pays now ----------------------------------------
-#
-# R276 pick 1 RE-AIMED Well Laid off Plan volume: "Deal 3 damage, plus 3 for
-# each debuff on the enemy." The morning count above still stands for the
-# rules that read it (Tide Chart); the card no longer does.
-
-def _well_laid_damage(state) -> int:
-    row = _row("proto_kk_well_laid")
-    before = state.enemies[0].hp
-    from tier0.engine import effects
-    effects.resolve_card(state, row)
-    return before - state.enemies[0].hp
-
-
-def test_well_laid_pays_its_floor_on_a_clean_enemy():
-    state = _state()
-    assert _well_laid_damage(state) == 3
-
-
-def test_well_laid_pays_three_per_distinct_debuff():
-    state = _state()
-    state.enemies[0].powers["weak"] = 3          # one debuff, three stacks
-    assert _well_laid_damage(state) == 3 + 3
-    state = _state()
-    state.enemies[0].powers["weak"] = 1
-    state.enemies[0].powers["vulnerable"] = 1
-    # Vulnerable multiplies the hit as it always does: (3 + 6) * 1.5.
-    assert _well_laid_damage(state) == int((3 + 6) * C.VULNERABLE_TAKEN_MULT)
-
-
-def test_well_laid_ignores_the_morning():
-    state = _state()
-    _write(state, [{"op": "draw", "amount": 1}])
-    kokomi_plan.resolve_all(state)
-    assert _well_laid_damage(state) == 3
-
-
-def test_well_laids_face_prints_its_rule():
-    face = _face("proto_kk_well_laid")
-    # THE 2026-09-25 TEXT PASS: rule 8's "N additional damage" template.
-    assert face == ("Deal {CalculationBase:diff()} damage. Deals "
-                    "{ExtraDamage:diff()} additional damage for each debuff "
-                    "on the enemy.")
-    assert "Plan" not in face
+# Well Laid's four pins left with the row (the Casket pass, 2026-09-28).
 
 
 # ---- EB-503: Tide Chart --------------------------------------------------
+# The card was cut by the Casket pass (2026-09-28); its promise-and-payment
+# machinery stays registered, and these pins drive it directly.
 
 def _tide_chart_paid(state):
     return [row for row in state.log if row["event"] == "tide_chart_paid"]

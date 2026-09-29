@@ -347,35 +347,41 @@ def test_the_surface_is_actually_being_censused():
     assert loader.prototype_cards(), "no prototype rows loaded at all"
     printed = _prototype_predicates()
     assert printed, "no prototype row prints a conditional -- suspicious"
-    assert "plan_carried_out_this_turn" in printed, sorted(printed)
+    # Feint printed `plan_carried_out_this_turn` until the Casket pass
+    # (2026-09-28) re-keyed it onto the count; Press the Advantage prints
+    # `plan_held`, the arm's conditional today.
+    assert "plan_held" in printed, sorted(printed)
 
 
-def test_feints_carry_out_branch_is_scored_and_not_priced_at_zero():
-    """`EB-712`'s named row, both ways round. Feint prints 5 and 10 and the
-    difference IS the card; untaught, the pilot read the 10 as nothing and the
-    row as a 5-damage Attack.
+def test_press_the_advantages_waiting_branch_is_scored_and_not_priced_at_zero():
+    """`EB-712`'s rule on the arm's conditional row, both ways round. Press the
+    Advantage prints 6 and 10 and the difference IS the card; untaught, the
+    pilot would read the 10 as nothing. (Feint was the named row until the
+    Casket pass, 2026-09-28, took it off the yes/no.)
 
     Seen to FAIL before the predicate was taught: both states scored 0.0,
     because a `continue` on an unknown predicate yields NEITHER branch.
     """
-    card = next(c for c in loader.prototype_cards() if c.id == "proto_kk_feint")
+    card = next(c for c in loader.prototype_cards()
+                if c.id == "proto_kk_press_the_advantage")
 
     quiet = make_state(enemies=[make_enemy(hp=60)])
-    quiet.kk_plan_carried_out_this_turn = False
-    assert policy._expected_damage(quiet, card) == 5.0
+    quiet.kk_plan_queue = []
+    assert policy._expected_damage(quiet, card) == 6.0
 
-    carried = make_state(enemies=[make_enemy(hp=60)])
-    carried.kk_plan_carried_out_this_turn = True
-    assert policy._expected_damage(carried, card) == 10.0
+    waiting = make_state(enemies=[make_enemy(hp=60)])
+    waiting.kk_plan_queue = [object()]
+    assert policy._expected_damage(waiting, card) == 10.0
 
 
 def test_the_prototype_predicate_read_is_the_engine_s_own(monkeypatch):
     """One rule, asked from both sides. The pilot delegates to
     `effects._predicate` rather than keeping a second copy, so the branch it
     scores and the branch that resolves cannot drift."""
-    card = next(c for c in loader.prototype_cards() if c.id == "proto_kk_feint")
+    card = next(c for c in loader.prototype_cards()
+                if c.id == "proto_kk_press_the_advantage")
     state = make_state(enemies=[make_enemy(hp=60)])
-    state.kk_plan_carried_out_this_turn = True
+    state.kk_plan_queue = [object()]
 
     asked = []
     real = effects._predicate
@@ -383,7 +389,7 @@ def test_the_prototype_predicate_read_is_the_engine_s_own(monkeypatch):
                         lambda st, nm, *a, **k: (asked.append(nm),
                                                  real(st, nm, *a, **k))[1])
     list(policy._active_effects(state, card.effects, card))
-    assert "plan_carried_out_this_turn" in asked
+    assert "plan_held" in asked
 
 
 def test_the_reference_pools_print_only_the_three_blind_names():

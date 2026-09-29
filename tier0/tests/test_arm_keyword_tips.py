@@ -675,11 +675,14 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     assert "FurinaStageLaw.FadeThreshold" in tips
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
     # structural and the Mend rule's bound is her entry HP, not a constant.
-    # The arm's one number lives on the relic, whose face interpolates it
-    # (`KokomiOverhaulLaw.CasketStrike`, TamakushiCasket.cs).
+    # The relic's number -- what a carried-out Plan adds to the Casket since
+    # the Casket pass (2026-09-28) -- is interpolated on the relic's face and
+    # on the Casket's tip (`KokomiOverhaulLaw.CasketPerPlan`).
     casket = (REPO / "klee-mod" / "KleeCode" / "Relics"
               / "TamakushiCasket.cs").read_text(encoding="utf-8")
-    assert "KokomiOverhaulLaw.CasketStrike" in casket
+    assert "KokomiOverhaulLaw.CasketPerPlan" in casket
+    assert "KokomiOverhaulLaw.CasketPerPlan" in tips
+    assert "KokomiOverhaulLaw.CasketStrike" not in casket + tips
 
 
 def test_the_tips_are_quarantined_out_of_a_release_build():
@@ -975,7 +978,10 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 "Sets off": "Set off",
                 # Vermillion Pact, text pass 2026-09-25: "the Attack that Set
                 # it off".
-                "Set it off": "Set off"}
+                "Set it off": "Set off",
+                # The Casket pass (2026-09-28): the relic's short name, one
+                # row and one tip with its full name.
+                "Casket": "Tamakushi Casket"}
 
 
 def _word_owner(word: str) -> str:

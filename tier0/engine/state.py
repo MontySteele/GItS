@@ -1503,6 +1503,18 @@ class CombatState:
     # `KokomiPlan._tideCharts`'s twin.
     kk_tide_chart_per: int = 0
     kk_tide_chart_flat: int = 0
+    # QUARANTINED (C.KOKOMI_OVERHAUL), THE CASKET PASS (2026-09-28). How many
+    # Plans the Bake-Kurage carried out THIS TURN -- Feint's and Sango
+    # Isshin's count -- written at the one place a Plan is carried out
+    # (`kokomi_plan._note_plan_resolved`, once per carry-out, so a doubled one
+    # counts twice) and cleared by `kokomi_plan.roll_turn`.
+    # `KokomiOverhaulLedger.PlansCarriedOutThisTurn`'s twin.
+    kk_plans_carried_out_this_turn: int = 0
+    # And THE TAMAKUSHI CASKET'S COUNT, per fight (a `CombatState` is one
+    # fight): +1 per carry-out while she holds the relic, moved by Pearl Diver,
+    # Moon Signal and What the Tokoyo Took, emptied by Open the Casket. The
+    # turn roll never touches it. `KokomiOverhaulLedger.CasketCount`'s twin.
+    kk_casket: int = 0
     # QUARANTINED (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
     # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
     # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s

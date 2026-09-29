@@ -193,31 +193,6 @@ public class KokomiCorePassTests
     }
 
     [Fact]
-    public void Cleansing_wave_cleanses_and_draws_now_and_plans_block()
-    {
-        var card = new ProtoKkCleansingWave();
-        Assert.Equal(1m, card.DynamicVars.Cards.BaseValue);
-        Assert.Equal(10m, card.DynamicVars["PlanBlock"].BaseValue);
-        var up = Upgraded<ProtoKkCleansingWave>();
-        Assert.Equal(1m, up.DynamicVars.Cards.BaseValue);
-        Assert.Equal(13m, up.DynamicVars["PlanBlock"].BaseValue);
-        var play = Play("ProtoKkCleansingWave");
-        Assert.Contains(play, c => c.Contains("KokomiOverhaulKit.RemoveOneDebuff"));
-        Assert.Contains(play, c => c.Contains("CardPileCmd.Draw"));
-        Assert.DoesNotContain(play, c => c.Contains("GainBlock"));
-    }
-
-    [Fact]
-    public void Ripple_draws_now_and_plans_one_energy()
-    {
-        var card = new ProtoKkRipple();
-        Assert.Equal(1m, card.DynamicVars.Cards.BaseValue);
-        Assert.Equal(2m, Upgraded<ProtoKkRipple>().DynamicVars.Cards.BaseValue);
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.Energy, 1), (clause.Kind, clause.Amount));
-    }
-
-    [Fact]
     public void Feigned_retreat_draws_two_discards_one_and_upgrades_its_plan()
     {
         var card = new ProtoKkFeignedRetreat();
@@ -232,12 +207,14 @@ public class KokomiCorePassTests
     }
 
     [Fact]
-    public void Second_wave_deals_five_hydro_now_and_seven_upgraded()
+    public void Second_wave_deals_seven_hydro_now_and_nine_upgraded()
     {
+        // The Casket pass (2026-09-28): Uncommon, and 7 now (5 before).
         var card = new ProtoKkSecondWave();
         Assert.Equal(CardType.Skill, card.Type);
-        Assert.Equal(5m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(7m, Upgraded<ProtoKkSecondWave>()
+        Assert.Equal(CardRarity.Uncommon, card.Rarity);
+        Assert.Equal(7m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(9m, Upgraded<ProtoKkSecondWave>()
             .DynamicVars.Damage.BaseValue);
         var elemental = Assert.IsAssignableFrom<IElementalCard>(card);
         Assert.Equal(Element.Hydro, elemental.Element);

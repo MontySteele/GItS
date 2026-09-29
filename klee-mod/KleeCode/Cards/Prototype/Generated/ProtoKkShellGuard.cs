@@ -45,14 +45,15 @@ public sealed class ProtoKkShellGuard : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shell Guard"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Until your next turn, whenever the [gold]Tamakushi Casket[/gold] strikes, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move),
-            new DynamicVar("PowerAmount", 3m)
+            new CalculationBaseVar(5m),
+            new CalculationExtraVar(1m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).CasketCount)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,13 +65,11 @@ public sealed class ProtoKkShellGuard : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await PowerCmd.Apply<ShellGuardPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

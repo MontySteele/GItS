@@ -86,3 +86,9 @@ retired:
   - {id: KLEEMOD-PROTO_PEARL_BARRAGE_TURN, owner: klee, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_FS_GENTILHOMME_USHER, owner: furina, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_FS_UNDERSTUDY, owner: furina, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_CLEANSING_WAVE, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_RIPPLE, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_SALT_LINE, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_SEA_SALT_PRAYER, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_TIDE_CHART, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_WELL_LAID, owner: kokomi, left: "left the prototype codegen"}

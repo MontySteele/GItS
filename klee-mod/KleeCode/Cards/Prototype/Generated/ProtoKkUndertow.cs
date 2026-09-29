@@ -44,7 +44,7 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_undertow");
 

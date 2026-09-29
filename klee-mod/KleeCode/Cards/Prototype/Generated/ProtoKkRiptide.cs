@@ -44,14 +44,14 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
+        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_riptide");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage.\n[gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 1 card."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage.\n[gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1 card."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,15 +60,15 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Energy, 1, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Energy, 2, KokomiPlan.Aim.Self),
             new KokomiPlan.Planned(KokomiPlan.Kind.Draw, 1, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(9m, ValueProp.Move),
-            new ExtraDamageVar(4m)
+            new DamageVar(11m, ValueProp.Move),
+            new ExtraDamageVar(3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -98,6 +98,6 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(3m);
-        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
+        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
     }
 }

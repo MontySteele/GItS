@@ -112,6 +112,11 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_CLEANSING_WAVE",
+      "class": "RetiredProtoKkCleansingWave",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_CONTINGENCY",
       "class": "RetiredProtoKkContingency",
       "owner": "kokomi"
@@ -162,8 +167,23 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_RIPPLE",
+      "class": "RetiredProtoKkRipple",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_RISING_TIDE",
       "class": "RetiredProtoKkRisingTide",
+      "owner": "kokomi"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KK_SALT_LINE",
+      "class": "RetiredProtoKkSaltLine",
+      "owner": "kokomi"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KK_SEA_SALT_PRAYER",
+      "class": "RetiredProtoKkSeaSaltPrayer",
       "owner": "kokomi"
     },
     {
@@ -187,8 +207,18 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_TIDE_CHART",
+      "class": "RetiredProtoKkTideChart",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_WATERS_EDGE",
       "class": "RetiredProtoKkWatersEdge",
+      "owner": "kokomi"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KK_WELL_LAID",
+      "class": "RetiredProtoKkWellLaid",
       "owner": "kokomi"
     },
     {

@@ -1,69 +1,61 @@
 #if PROTOTYPE_CARDS
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
-using KleeMod.Elements;
+using KleeMod.Cards;
+using KleeMod.Cards.Prototype;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
-using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.Powers;
-using MegaCrit.Sts2.Core.Models.Relics;
 using MegaCrit.Sts2.Core.Runs;
 
 namespace KleeMod.Relics;
 
 /// <summary>
-/// TAMAKUSHI CASKET -- the Kokomi overhaul's starting relic (ruled brief draft
-/// 6 sec.4 pick 3; slice draft 6 sec.3).
+/// TAMAKUSHI CASKET -- the Kokomi overhaul's starting relic.
 ///
-/// "The Bake-Kurage is out from the start of every combat. Whenever you apply a
-/// debuff to an enemy, it strikes that enemy for 2 Hydro damage."
+/// THE CASKET PASS (2026-09-28) REWROTE IT. It used to answer every debuff she
+/// applied with a 2 Hydro hit (`CasketStrike`); that trigger is gone. It now
+/// COUNTS: each Plan the Bake-Kurage carries out adds 1 to the Casket, and the
+/// Open the Casket token it deals into her opening hand turns the count into
+/// Strength. [USER], 2026-09-28, on why this and not a Vigor-style relic:
+/// Vigor "devolves into 'solve for lethal, press the I Win button'"; the
+/// design is "an artifact that grants / tracks an alternative energy that
+/// builds by 1 for every Plan played, and adds one 0-cost Retain / Exhaust card
+/// that converts that energy into Strength." Counting is "when it's carried
+/// out"; "the casket keeps counting" after it is opened; and no card SPENDS
+/// the count: "We don't need this to be the equivalent to Regent's stars or
+/// Klee's sparks. This should feel like a distinct effect."
 ///
-/// IT REPLACES TAMANOOYA'S CASKET, which is a rename and a rewrite in one: the
-/// old spelling was wrong (the Watatsumi treasure is the Tamakushi), and the
-/// old body was the pulse -- "at the end of each turn you did not Surge it
-/// Mends you 2, up to 8 per combat" -- which the ruled brief's sec.6 cuts along
-/// with the Surge it was priced against. It also replaces the Pearl of Wisdom
-/// under the arm, because the Pearl IS the exhaust-for-Charge funnel the brief
-/// retires; a run holding it would print a rule the arm has turned off.
+/// THE COUNT LIVES ON THE ARM'S LEDGER, NOT ON THIS INSTANCE
+/// (<see cref="KokomiOverhaulLedger.CasketCount"/>): per combat by
+/// construction (a new combat's ledger starts at 0), readable by a card's
+/// calculated var with no relic lookup, and one number for every reader --
+/// the cards, the counter below and the blind page. This relic is where the
+/// carry-out ADDS (<see cref="NoteCarriedOut"/>) and where the count is SHOWN.
 ///
-/// IT IS LIVE FROM TURN ONE, which is the whole argument for pick 3's default:
-/// Slack Water applies Weak on the first turn of the first fight, so the
-/// jellyfish strikes before the player has read anything. The pool's status
-/// lines feed it on purpose (slice sec.4) -- Slack Water, Exposed Flank, War
-/// Council, Vanguard, Sea-Salt Prayer, Rally and the Banner all make it strike
-/// -- and so do REACTIONS, since Superconduct, Overloaded and Frozen each apply
-/// a debuff.
+/// THE COUNTER ON THE ICON, the base game's idiom (`Kunai`, `Pen Nib`):
+/// <see cref="ShowCounter"/> in combat and <see cref="DisplayAmount"/> the
+/// count, redrawn by <see cref="Refresh"/> whenever anything moves it. The
+/// bridge carries a relic's counter as `counter` whenever the icon draws one
+/// (`McpMod.StateBuilder`), so the blind page prints "Tamakushi Casket (N)"
+/// with no new wire field.
 ///
-/// THE JELLYFISH IS THE DEALER, and that is a reading rather than a detail: the
-/// slice says "it strikes that enemy for 2", so the applier handed to the
-/// shared elemental pipeline is the PET. A pet carries no Strength, so the 2 is
-/// a flat 2 -- which is what makes this the relic's number and not a scaling
-/// engine attached to every debuff she applies. (Draft 6 gives her Strength
-/// back; routing this through her would have quietly made the Casket the best
-/// Strength payoff in the pool.) The hit is otherwise REAL: Block, Vulnerable,
-/// the aura and the reaction all apply, because it goes through the same
-/// <see cref="ElementalHit"/> funnel every other non-attack hit in this mod
-/// does.
+/// THE WHOLE FILE IS QUARANTINED, for the reason it always was:
+/// <c>tools/lint_unique_names.py</c> reads relic names out of
+/// <c>klee-mod/KleeCode/Relics/*.cs</c>, so it sits here under
+/// <c>#if PROTOTYPE_CARDS</c> rather than under <c>Powers/Prototype/</c>.
 ///
-/// THE WHOLE FILE IS QUARANTINED. It sits in <c>Relics/</c> rather than under
-/// <c>Powers/Prototype/</c>, which the csproj Compile-Removes, for one reason:
-/// <c>tools/lint_unique_names.py</c> reads relic display names out of
-/// <c>klee-mod/KleeCode/Relics/*.cs</c> and nowhere else, and R69 put relic
-/// names in the same namespace as card names. A prototype relic hidden from
-/// that lint could mint a name a shipped card already owns. So the QUARANTINE
-/// is the <c>#if PROTOTYPE_CARDS</c> wrapping the entire file, and the name
-/// still reaches the lint, because the lint reads text.
-///
-/// IT KEEPS THE COMPANION REWARD SLOT. That hook is not a pulse rule and not a
-/// Charge rule, and the slice's Commander loop draws its whole army from that
-/// very slot; dropping it would delete one of the three loops the slice exists
-/// to test. Same reasoning, one arm over, as <c>PoundingSurprise</c>'s.
+/// IT KEEPS THE COMPANION REWARD SLOT, which is not a Charge rule and which the
+/// Commander loop draws its whole army from.
 /// </summary>
 public sealed class TamakushiCasket : CustomRelicModel
 {
@@ -74,194 +66,105 @@ public sealed class TamakushiCasket : CustomRelicModel
     public override RelicRarity Rarity => RelicRarity.Starter;
 
     /// <summary>
-    /// `EB-293`. "STRIKES THAT ENEMY FOR 2 HYDRO DAMAGE" READ AS A FIXED 2 and
-    /// is not one. The ping is a real hit through the shared pipeline, so the
-    /// Vulnerable a card applied a moment earlier amplifies the ping that same
-    /// card's next debuff causes: Vanguard's two debuffs paid 6, not 4, and the
-    /// r2 Opus seat priced the card off the text and was "wrong by 50%".
-    ///
-    /// "A Hydro hit for 2" is the mod's own idiom for a printed BASE (the Bomb
-    /// badge's "{Size} Pyro damage" is the same distinction one arm over), and
-    /// it is the honest short form: the number is what the hit starts at, and
-    /// every modifier on the board moves it from there.
-    ///
-    /// `EB-348`: AND THE FACE NOW SAYS IT IS A HIT. "Deals N Hydro damage"
-    /// reads as a number arriving, and the Kokomi r4d seat priced it that way
-    /// in all three acts: act 1 finding 6, act 2 finding 5, and act 3 finding
-    /// 2, where a Casket ping Vaporized the player's OWN standing Pyro aura for
-    /// 2 x 1.5 x 1.5 and Red Mask's combat-start Weak fired the relic on all
-    /// three enemies at once. Every one of those is the same fact -- the ping
-    /// goes out through <see cref="ElementalHit"/> like every other non-attack
-    /// hit in this mod, so it REACTS, it takes the target's Vulnerable, and it
-    /// leaves Hydro behind for the next hit to react with.
-    ///
-    /// TWO SENTENCES, SPLIT ACROSS THE TWO SURFACES, because the relic row is
-    /// at 119 of the 120-character relic ceiling and the whole rule does not
-    /// fit on it. The FACE says the ping is a real hit and names its element
-    /// and its base; <see cref="ArmKeywordTips.ForCasket"/>, which is what a
-    /// card naming the relic raises, spells out what "real" buys. Both are
-    /// read off the same constant, so a repricing cannot leave either lying.
+    /// The face, inside the 120-character relic ceiling -- which is why the
+    /// ruled "Each Plan the Bake-Kurage carries out" prints as "Each Plan it
+    /// carries out" (127 characters otherwise). The two keyword tips
+    /// (<see cref="ArmKeywordTips.ForCasket"/>,
+    /// <see cref="ArmKeywordTips.ForOpenTheCasket"/>) carry the rest.
     /// </summary>
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tamakushi Casket"),
         ("description",
-            "Start each combat with the [gold]Bake-Kurage[/gold]. Each debuff "
-          + "you apply lands a real [blue]"
-          + KokomiOverhaulLaw.CasketStrike + "[/blue] [gold]Hydro[/gold] hit "
-          + "on that enemy."),
+            "Start each combat with the [gold]Bake-Kurage[/gold] and "
+          + "[gold]Open the Casket[/gold] in hand. Each [gold]Plan[/gold] it "
+          + "carries out adds " + KokomiOverhaulLaw.CasketPerPlan
+          + " to the Casket."),
     };
 
+    /// <summary>The token's card, on the relic's own hover -- the base game's
+    /// shape for a relic that deals a card (`RadiantPearl`).</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        HoverTipFactory.FromCardWithCardHoverTips<OpenTheCasket>();
+
     /// <summary>
-    /// The relic's first sentence, made true by the relic itself.
-    ///
-    /// REDUNDANT WITH THE KIT'S OWN INSTALL, deliberately.
+    /// The count on the icon, in combat only (Kunai's rule): out of combat
+    /// there is no count to show.
+    /// </summary>
+    public override bool ShowCounter =>
+        Owner?.Creature?.CombatState != null
+        && KokomiOverhaul.LiveFor(Owner.Creature);
+
+    public override int DisplayAmount =>
+        Owner?.Creature is { CombatState: not null } kokomi
+            ? KokomiOverhaulLedger.For(kokomi).CasketCount
+            : 0;
+
+    /// <summary>
+    /// The relic's first clause, made true by the relic itself.
     /// <c>KokomiRules.InstallAll</c> already summons the jellyfish from the
-    /// same hook because rule 1 is a KIT rule and holds whether or not she is
-    /// still carrying this -- but the relic prints the sentence, so the relic
-    /// makes it true too. Both calls are idempotent
-    /// (<see cref="BakeKuragePet.Summon"/> returns early if the pet is out), so
-    /// the belt costs one lookup.
+    /// same hook because rule 1 is a KIT rule; both calls are idempotent.
     /// </summary>
     public override async Task BeforeCombatStart()
     {
         if (!KokomiOverhaul.LiveFor(Owner?.Creature)) return;
         await BakeKuragePet.Summon(Owner);
+        Refresh(Owner!.Creature);
     }
 
     /// <summary>
-    /// The strike. <c>AfterPowerAmountChanged</c> is the hook because it is the
-    /// one the game raises on BOTH <c>PowerCmd</c> paths and fans to every
-    /// model in the combat, so nothing that puts a debuff on an enemy can slip
-    /// past it -- a card, a Plan, a companion or a reaction.
-    ///
-    /// WHAT COUNTS AS APPLYING A DEBUFF IS NOT DECIDED HERE.
-    /// <see cref="KokomiOverhaulKit.IsHerDebuffOnEnemy"/> is the one predicate,
-    /// shared with The Clouds Like Waves Rippling, so the relic and the card
-    /// cannot come to disagree about the event they both answer.
-    ///
-    /// THE LATCH IS NOT PARANOIA: a Hydro strike into a Cryo aura Freezes, and
-    /// Frozen is a debuff she applied to an enemy. Without
-    /// <see cref="KokomiOverhaulKit.Answer"/> the relic would answer its own
-    /// answer until the stack ran out.
+    /// "... and Open the Casket in hand": dealt before the first hand draw,
+    /// the site and the command `RadiantPearl` uses for its Luminesce, so the
+    /// token is in hand beside the opening draw rather than instead of a card
+    /// of it.
     /// </summary>
-    public override async Task AfterPowerAmountChanged(
-        PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
-        Creature? applier, CardModel? cardSource)
+    public override async Task BeforeHandDraw(
+        Player player, PlayerChoiceContext choiceContext,
+        ICombatState combatState)
     {
-        var kokomi = Owner?.Creature;
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (!KokomiOverhaulKit.IsHerDebuffOnEnemy(power, amount, applier, kokomi))
-        {
-            return;
-        }
-        var target = power.Owner;
-        if (target == null) return;
-        await KokomiOverhaulKit.Answer(async () =>
-        {
-            Flash();
-            await Strike(choiceContext, kokomi!, target);
-        });
+        if (player != Owner) return;
+        if (!KokomiOverhaul.LiveFor(Owner?.Creature)) return;
+        if (Owner!.PlayerCombatState?.TurnNumber != 1) return;
+        var token = Owner.Creature.CombatState!.CreateCard<OpenTheCasket>(Owner);
+        await CardPileCmd.AddGeneratedCardsToCombat(
+            new List<CardModel> { token }, PileType.Hand, Owner);
     }
 
     /// <summary>
-    /// The relic's own name, for the line the jellyfish says when it strikes.
-    ///
-    /// A SECOND SPELLING OF THE TITLE ABOVE, and deliberately not a shared
-    /// constant: `tools/lint_unique_names.py` reads relic names out of the
-    /// literal inside the <c>("title", "...")</c> tuple and nowhere else (R69
-    /// put relic names in the same namespace as card names), so the tuple
-    /// keeps its literal rather than an interpolation the lint cannot read.
-    /// `KurageBeatTests` pins the two together, so a rename that edits one is
-    /// a red test rather than a bubble naming a relic nobody carries.
+    /// "Each Plan the Bake-Kurage carries out adds 1 to the Casket."
+    /// Called by <c>KokomiPlan.ResolveEntry</c> -- the one place a Plan is
+    /// carried out -- once per CARRY-OUT, so a Plan carried out twice (Second
+    /// Wave, Nereid's Ascension) adds twice, and morning, Dusk and Change of
+    /// Plans all count. A Kokomi not holding the relic adds nothing: it is the
+    /// relic's sentence. Sim twin: <c>kokomi_plan.note_casket_carry_out</c>.
+    /// </summary>
+    public static void NoteCarriedOut(Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (kokomi!.Player?.GetRelic<TamakushiCasket>() == null) return;
+        KokomiOverhaulLedger.For(kokomi).AddToCasket(
+            KokomiOverhaulLaw.CasketPerPlan);
+        Refresh(kokomi);
+    }
+
+    /// <summary>Redraw the counter after anything moved the count.</summary>
+    public static void Refresh(Creature? kokomi)
+    {
+        var relic = kokomi?.Player?.GetRelic<TamakushiCasket>();
+        relic?.InvokeDisplayAmountChanged();
+    }
+
+    /// <summary>
+    /// The relic's own name, for any line that names it. A second spelling of
+    /// the title above on purpose: `tools/lint_unique_names.py` reads the
+    /// literal inside the <c>("title", "...")</c> tuple.
+    /// `KurageBeatTests` pins the two together.
     /// </summary>
     internal const string SourceName = "Tamakushi Casket";
 
-    /// <summary>The jellyfish's hit, in one place so a pin and the relic read
-    /// the same arithmetic. The pet is the dealer; with no pet on the board she
-    /// is, which is the honest degradation rather than a silent no-op.
-    ///
-    /// `EB-316`: THE HIT NOW HAS A BEAT IN FRONT OF IT. The arithmetic below is
-    /// untouched and always was correct -- what was wrong is that it landed in
-    /// the same frame as the card that caused it, so <c>CreatureCmd.Damage</c>'s
-    /// damage number arrived on top of the card's own and the pair read as ONE
-    /// bigger hit. [USER] "had to remind myself why"; the round-3 seat saw "no
-    /// line, no announcement". So the jellyfish LUNGES first (its scene's
-    /// attack state, through the shared animation router) and SAYS the relic's
-    /// name, and only then does the strike go out -- which puts its number on
-    /// its own frame, beside a bubble naming what caused it.
-    /// <c>KleeMod.Vfx.KurageBeat</c> holds the three engine commands.
-    ///
-    /// THE ANNOUNCEMENT IS ON THE PET, NOT THE ENEMY, and that is a reading:
-    /// the row asks for the SOURCE to be named, and the source is the
-    /// jellyfish acting off the relic. A label on the enemy would name the
-    /// creature that was hit.</summary>
-    public static async Task Strike(
-        PlayerChoiceContext choiceContext, Creature kokomi, Creature target)
-    {
-        if (target.IsDead) return;
-        var pet = BakeKuragePet.Of(kokomi);
-        var dealer = pet ?? kokomi;
-        await Vfx.KurageBeat.Act(pet);
-        Vfx.KurageBeat.Say(dealer, Vfx.KurageBeat.Line(SourceName, null));
-        // `EB-697`. AND THE REACTION LOG IS TOLD WHOSE HIT THIS IS. The
-        // dealer above is the PET on purpose -- the lunge, the bubble and the
-        // damage number all belong on the jellyfish -- but the SOURCE of a
-        // reaction this ping sets off is the relic, and `ReactionLog`'s
-        // card-then-dealer resolution has no card here to prefer. The r30
-        // lane-1 seat read "Bake-Kurage" against a Vaporize in a fight with no
-        // Plan written in it and could not tell where the hit came from. The
-        // scope covers exactly this hit and restores what it found.
-        int dealt;
-        using (ReactionLog.Attribute(SourceName))
-        {
-            dealt = await ElementalHit.Deal(
-                choiceContext, target, Element.Hydro,
-                KokomiOverhaulLaw.CasketStrike, dealer);
-        }
-        // `EB-453`. THE STRIKE NAMES ITSELF TO THE PLAN IT LANDED INSIDE.
-        // `KokomiPlan.MovedOn` is MEASURED across the whole beat, so a Plan
-        // that applies a debuff shows this hit inside its total and could not
-        // say where it came from: the r13 seat read `War Council, 7 (the 7 is
-        // damage)` beside a body that had lost 9. The DELIVERED number is
-        // reported rather than the printed one, because Vulnerable moves it
-        // and the page is trying to account for a total. Outside a Plan the
-        // call does nothing, which is why it is unconditional.
-        //
-        // `EB-518`. AND THE BODY IT STRUCK, because three entries reading
-        // "Tamakushi Casket 2" cannot be divided among three enemies. The r18
-        // seat predicted 5 + 2 on each of three bodies, read 1 / 9 / 7, and
-        // concluded a FOURTH strike was missing from the list -- when what had
-        // happened is that two of the three landed on the same body:
-        // `ElementalHit.Deal` resolves the reaction BEFORE the hit lands, so
-        // the Plan's own Hydro froze that body and this relic answered the
-        // Frozen as well as the Weak the same Plan applied.
-        //
-        // `EB-695`. AND THE OTHER HALF OF THE SAME SENTENCE, on the path the
-        // clause above cannot reach. `NoteRider` files against the Plan being
-        // resolved right now and drops the row where no Plan is running --
-        // which is a card PLAYED FROM HAND, and that is where the r30 lane-2
-        // seat met this strike with nothing naming it: "the seat subtracted it
-        // from HP on every such play". So where the rider was not filed, the
-        // strike goes in the per-turn relic-answer log the page prints. The
-        // return value is what keeps it from being named twice on one screen.
-        if (!KokomiPlan.NoteRider(SourceName, dealt, target))
-        {
-            RelicAnswerLog.Note(SourceName, (int)dealt, target);
-        }
-        // `EB-335`. SHELL GUARD reads the STRIKE and not the debuff that caused
-        // it, which is what keeps it separable from The Clouds Like Waves
-        // Rippling (that card pays per debuff APPLIED). Hung here, at the one
-        // place the jellyfish strikes, so the card's own text -- "whenever the
-        // Tamakushi Casket strikes" -- has exactly one implementation. AFTER
-        // the hit, so a strike that ends the fight has already happened.
-        await ShellGuardPower.Pay(choiceContext, kokomi);
-    }
-
     /// <summary>
     /// Her fourth companion reward option, kept from the Pearl of Wisdom
-    /// unchanged -- see this class's header for why it is not gated off with
-    /// the rest of the shipped kit.
+    /// unchanged -- see this class's header for why.
     /// </summary>
     public override bool TryModifyCardRewardOptions(
         Player player, List<CardCreationResult> cardRewardOptions,
@@ -284,8 +187,7 @@ public sealed class TamakushiCasket : CustomRelicModel
 
     /// <summary>
     /// FALLBACK ICON, borrowed from the relic whose slot this takes. Art is
-    /// commissioned when a slice is ACCEPTED, not before -- the same rule the
-    /// Klee overhaul's power icons follow.
+    /// commissioned when a slice is ACCEPTED, not before.
     /// </summary>
     protected override string IconBaseName => "snake_ring";
 

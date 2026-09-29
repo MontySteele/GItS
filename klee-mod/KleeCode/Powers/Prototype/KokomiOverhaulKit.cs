@@ -1,18 +1,21 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.MonsterMoves.Intents;
 
 namespace KleeMod.Powers;
 
 /// <summary>
-/// The verbs that belong to no rule -- Rally's discount, Cleansing Wave's
-/// cleanse -- and the ONE definition of "she applied a debuff to an enemy",
-/// which two different things read.
+/// The verbs that belong to no rule -- Rally's discount, the cleanse, the
+/// Casket's verbs -- and the ONE definition of "she applied a debuff to an
+/// enemy", which The Clouds Like Waves Rippling reads (the relic read it
+/// too, until the Casket pass retired its strike).
 ///
 /// Kept out of <see cref="KokomiRules"/> because that file is the RULES and
 /// these are cards, with one exception: <see cref="IsHerDebuffOnEnemy"/> is a
@@ -149,6 +152,77 @@ public static class KokomiOverhaulKit
         await PowerCmd.Remove(debuff);
     }
 
+    // ---- THE CASKET PASS (2026-09-28) ----------------------------------
+    //
+    // The Tamakushi Casket's count and the four verbs that touch it. The count
+    // is <see cref="KokomiOverhaulLedger.CasketCount"/>; the relic adds 1 per
+    // carry-out (<see cref="Relics.TamakushiCasket.NoteCarriedOut"/>). Every
+    // verb below redraws the relic's counter. Sim twins: the `casket` block
+    // in `tier0/engine/kokomi_plan.py`.
+
+    /// <summary>
+    /// "The Casket gains N" -- Pearl Diver's Plan and Moon Signal. Unlike the
+    /// relic's own +1 it asks for no relic: the card says the Casket gains,
+    /// and the count is the arm's.
+    /// </summary>
+    public static void GainCasket(Creature? kokomi, int amount)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi) || amount <= 0) return;
+        KokomiOverhaulLedger.For(kokomi!).AddToCasket(amount);
+        Relics.TamakushiCasket.Refresh(kokomi);
+    }
+
+    /// <summary>What the Tokoyo Took: "Double the Casket's count." A Task
+    /// so the emitted <c>OnPlay</c> awaits it like every other verb.</summary>
+    public static Task DoubleCasket(Creature? kokomi)
+    {
+        if (KokomiOverhaul.LiveFor(kokomi))
+        {
+            KokomiOverhaulLedger.For(kokomi!).DoubleCasket();
+            Relics.TamakushiCasket.Refresh(kokomi);
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Open the Casket: "Gain Strength equal to the Casket's count, then empty
+    /// it." At <see cref="KokomiOverhaulLaw.CasketStrengthPerPoint"/> per
+    /// point. An empty Casket grants nothing (and applies no zero-stack
+    /// power). The relic keeps counting from 0.
+    /// </summary>
+    public static async Task OpenCasket(
+        PlayerChoiceContext choiceContext, Creature? kokomi,
+        CardModel? cardSource)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var points = KokomiOverhaulLedger.For(kokomi!).EmptyCasket();
+        Relics.TamakushiCasket.Refresh(kokomi);
+        var strength = points * KokomiOverhaulLaw.CasketStrengthPerPoint;
+        if (strength <= 0) return;
+        await PowerCmd.Apply<StrengthPower>(
+            choiceContext, kokomi!, strength, applier: kokomi,
+            cardSource: cardSource);
+    }
+
+    /// <summary>
+    /// What the Tokoyo Returns: "Put Open the Casket from your Exhaust Pile
+    /// into your Hand." The FIRST one there; none there, nothing happens.
+    /// <c>CardPileCmd.Add</c> to the hand is the door Second Thoughts' return
+    /// takes (<see cref="KokomiPlan.CancelLast"/>).
+    /// </summary>
+    public static async Task FetchOpenCasket(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var player = kokomi!.Player;
+        if (player == null) return;
+        var exhaust = CardPile.Get(PileType.Exhaust, player);
+        var token = exhaust?.Cards.OfType<Cards.Prototype.OpenTheCasket>()
+            .FirstOrDefault();
+        if (token == null) return;
+        await CardPileCmd.Add(token, PileType.Hand, CardPilePosition.Top);
+    }
+
     /// <summary>
     /// Undertow's "if the enemy has a debuff". The definition is the ENGINE'S
     /// OWN -- <c>PowerType.Debuff</c> -- rather than a list of names this file
@@ -170,36 +244,9 @@ public static class KokomiOverhaulKit
             ? 0
             : creature.Powers.Count(p => p.Type == PowerType.Debuff);
 
-    /// <summary>
-    /// Re-entrancy latch for <see cref="IsHerDebuffOnEnemy"/>'s consumers.
-    ///
-    /// IT IS NOT PARANOIA. The Casket's answer to a debuff is a HYDRO hit, and
-    /// a Hydro hit can meet a Cryo aura and Freeze -- and Frozen is a debuff,
-    /// applied by her, to an enemy. Without this the relic would answer its own
-    /// answer until the stack ran out. The latch is a plain static because the
-    /// whole event is synchronous within one hook broadcast and the mod is
-    /// single-threaded; it is cleared in a `finally` so a throw inside a strike
-    /// cannot leave the relic permanently deaf.
-    /// </summary>
-    private static bool _answering;
-
-    /// <summary>Is the arm's debuff answer allowed to fire right now?</summary>
-    public static bool Answering => _answering;
-
-    /// <summary>Run <paramref name="answer"/> with the latch held.</summary>
-    public static async Task Answer(System.Func<Task> answer)
-    {
-        if (_answering) return;
-        _answering = true;
-        try
-        {
-            await answer();
-        }
-        finally
-        {
-            _answering = false;
-        }
-    }
+    // The re-entrancy latch the Casket's debuff strike needed (a Hydro
+    // strike into a Cryo aura Freezes, and Frozen is a debuff she applied)
+    // left with the strike in the Casket pass (2026-09-28).
 
     /// <summary>
     /// "SHE APPLIED A DEBUFF TO AN ENEMY", once, for everything that reads it.

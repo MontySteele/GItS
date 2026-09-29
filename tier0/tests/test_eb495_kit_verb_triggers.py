@@ -72,7 +72,8 @@ KIT_SOURCES = (
     "bomb_echo",            # V8  Sparks 'n' Splash echo
     "spark_knight",         # V8b R276's Spark Knight, a Power's element-less hit
     "plan",                 # V9  Kokomi planned hit
-    "casket",               # V11 Tamakushi Casket strike
+    # V11, the Tamakushi Casket's strike (`source="casket"`), was retired by
+    # the Casket pass (2026-09-28): the relic counts Plans now.
     "salon",                # V12 Salon performance
     "salon_final_bow",      # V13 Salon bow / Evoke
     "furina_stage/act",     # V14 Stage act
@@ -305,9 +306,9 @@ SIM_CALL_SITES = {
     # 2026-09-23, so it cannot spend an aura a companion laid down.
     ('klee_overhaul.py', 4): ("'spark_knight'", None, 'None'),
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
-    ('kokomi_plan.py', 2): ("'casket'", 'False', "'hydro'"),
     # Kokomi core pass: Song of Pearls' strike, dealt as a planned hit is.
-    ('kokomi_plan.py', 3): ("'plan'", 'False', "'hydro'"),
+    # (The Casket's strike sat between these two until the Casket pass.)
+    ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
 }
 
 
@@ -381,8 +382,6 @@ CS_VERB_DOORS = {
          "ElementalHit.DealWithoutDealerMods", None),
     "V9 planned hit":
         ("Powers/Prototype/KokomiPlan.cs", "ElementalHit.Deal", "powered: false"),
-    "V11 Casket strike":
-        ("Relics/TamakushiCasket.cs", "ElementalHit.Deal", None),
     "V12 Salon performance":
         ("Powers/SalonPowers.cs", "ElementalHit.Deal", "powered: false"),
     # Draft 3 (2026-09-25): no act carries an element, so the element-less

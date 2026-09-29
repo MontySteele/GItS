@@ -209,6 +209,12 @@ public static class KokomiPlan
         // Appended last so no earlier ordinal moves. Sim twin:
         // `kokomi_plan.FIRST_COMPANION_FREE`.
         FirstCompanionFree,
+        // THE CASKET PASS (2026-09-28). Pearl Diver: "Plan: The Casket gains
+        // 2." The Tamakushi Casket's count
+        // (<see cref="KokomiOverhaulLedger.CasketCount"/>) goes up by the
+        // clause's amount at carry-out. Appended last. Sim twin:
+        // `kokomi_plan.CASKET_GAIN`.
+        CasketGain,
     }
 
     /// <summary>
@@ -378,7 +384,7 @@ public static class KokomiPlan
     /// SO THE RIDER NAMES ITSELF. Nothing is re-derived and nothing is
     /// subtracted: a source that lands inside the window says what it is and
     /// what it dealt, at the one line that already knows both
-    /// (<c>TamakushiCasket.Strike</c>), and the page prints the delivered
+    /// (the Tamakushi Casket's strike, retired 2026-09-28), and the page prints the delivered
     /// total with that name beside it. A future rider that says nothing here
     /// leaves the page exactly as it was.
     ///
@@ -1959,6 +1965,11 @@ public static class KokomiPlan
         // resolution both pass through, and both are the card's printed
         // "carried out a Plan this turn".
         KokomiOverhaulLedger.For(kokomi).NotePlanCarriedOut();
+        // THE CASKET PASS (2026-09-28): "Each Plan the Bake-Kurage carries
+        // out adds 1 to the Casket." HERE, beside Sango Isshin's fact and for
+        // its reason: this is the one place a Plan is carried out, once per
+        // carry-out, so a doubled carry-out adds twice.
+        Relics.TamakushiCasket.NoteCarriedOut(kokomi);
 
         foreach (var power in kokomi.Powers.ToList())
         {
@@ -2239,6 +2250,12 @@ public static class KokomiPlan
                     choiceContext, kokomi);
                 return null;
 
+            case Kind.CasketGain:
+                // THE CASKET PASS, PEARL DIVER: the Casket gains the amount.
+                // The number on the beat is the gain.
+                KokomiOverhaulKit.GainCasket(kokomi, plan.Amount);
+                return plan.Amount;
+
             case Kind.AttackDamageThisTurn:
                 // R276, BATTLE PLAN: "This turn, your Attacks deal N more
                 // damage." The shipped <see cref="AttackUpThisTurnPower"/> is
@@ -2437,6 +2454,8 @@ public static class KokomiPlan
         // the LATER carry-outs, where it rides those beats by name
         // (<see cref="NoteRider"/>).
         Kind.DrawPerPlanThisTurn => "cards drawn",
+        // THE CASKET PASS (2026-09-28): Pearl Diver's figure is Casket points.
+        Kind.CasketGain => "Casket points",
         _ => null,
     };
 

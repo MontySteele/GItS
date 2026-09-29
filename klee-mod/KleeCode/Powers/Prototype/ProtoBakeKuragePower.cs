@@ -111,7 +111,13 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         // read HERE, just before the drain empties it, so a morning that
         // carried a Plan out does not also fire it. Sim twin: the `quiet`
         // read in `combat._player_turn`.
-        var quiet = KokomiPlan.PlansHeld(Owner) == 0;
+        var waiting = KokomiPlan.PlansHeld(Owner);
+        var quiet = waiting == 0;
+        // THE CASKET PASS (2026-09-28), MOON SIGNAL: "if 2 or more Plans are
+        // waiting" is the same pre-drain read, so a queue the morning is about
+        // to empty still counts. Sim twin: `kokomi_plan.moon_signal`, called
+        // from `combat._player_turn` beside the `quiet` read.
+        MoonSignalPower.Signal(Owner, waiting);
         await KokomiPlan.ResolveAll(choiceContext, Owner);
         if (quiet) await SongOfPearlsPower.Strike(choiceContext, Owner);
         // `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning:
@@ -123,15 +129,6 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         // `kokomi_plan.pay_tide_charts`, called from `combat._player_turn` at
         // exactly this point.
         await KokomiPlan.PayPromisedDraws(choiceContext, Owner);
-        // `EB-335`. SHELL GUARD'S WINDOW CLOSES HERE, one line after the
-        // morning rather than on the ledger's turn-start roll: R246 pick 2 says
-        // "the morning's Plans that apply Weak strike it too, so the Block is
-        // there before the enemy swings", so the Plans of this very turn are
-        // inside the window and everything after them is outside it.
-        // Unconditional, because the drain above returns early on an empty
-        // queue. Sim twin: `kokomi_plan.close_shell_guard`, called from
-        // `combat._player_turn` at exactly this point.
-        await ShellGuardPower.Close(Owner);
     }
 
     /// <summary>

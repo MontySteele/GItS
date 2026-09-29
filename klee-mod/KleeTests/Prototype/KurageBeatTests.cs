@@ -100,20 +100,16 @@ public class KurageBeatTests
     // ---- THE CASKET (`EB-316`), structural --------------------------------
 
     [Fact]
-    public void The_casket_lunges_and_names_itself_before_the_hit_lands()
+    public void The_casket_strikes_nothing_since_the_casket_pass()
     {
-        var calls = Il.CallSequence(Il.Method("TamakushiCasket", "Strike"));
-        var act = First(calls, "KurageBeat.Act");
-        var say = First(calls, "KurageBeat.Say");
-        var deal = First(calls, "ElementalHit.Deal");
-        Assert.True(act >= 0, "the jellyfish does not animate");
-        Assert.True(say >= 0, "nothing names the source on screen");
-        Assert.True(deal >= 0, "the strike is gone");
-        // THE WHOLE ROW IS THIS INEQUALITY. Both surfaces come BEFORE the hit,
-        // which is what puts the hit's own damage number on its own frame
-        // rather than inside the card's.
-        Assert.True(act < deal, "the lunge must come before the strike");
-        Assert.True(say < deal, "the line must come before the strike");
+        // THE CASKET PASS (2026-09-28) retired the debuff strike `EB-316`
+        // gave a beat: the relic counts carried-out Plans now. No strike
+        // method, and no debuff hook for one to hang off.
+        var casket = Mod.GetTypes().Single(t => t.Name == "TamakushiCasket");
+        Assert.Null(casket.GetMethod("Strike", HeadlessGame.All));
+        Assert.Null(casket.GetMethod("AfterPowerAmountChanged",
+                                     HeadlessGame.All
+                                     | System.Reflection.BindingFlags.DeclaredOnly));
     }
 
     [Fact]
@@ -128,23 +124,6 @@ public class KurageBeatTests
             .GetRawConstantValue();
         Assert.Contains(
             source, Il.Strings(Il.Method("TamakushiCasket", "get_Localization")));
-        Assert.Contains("KurageBeat.Line",
-                        Il.Calls(Il.Method("TamakushiCasket", "Strike")));
-    }
-
-    [Fact]
-    public void The_casket_names_itself_to_the_reaction_log_too()
-    {
-        // `EB-697`. The bubble over the pet already said "Tamakushi Casket"
-        // (the pin above); the REACTION the ping set off said "Bake-Kurage",
-        // because `ReactionLog` resolves a source as card-then-dealer and this
-        // hit has no card while its dealer is the pet on purpose. The r30
-        // lane-1 seat read a Vaporize credited to the jellyfish in a fight
-        // with no Plan written in it. The scope wraps the hit; the same
-        // constant names both surfaces.
-        var calls = Il.Calls(Il.Method("TamakushiCasket", "Strike"));
-
-        Assert.Contains("ReactionLog.Attribute", calls);
     }
 
     // ---- THE MORNING (`EB-317`), structural -------------------------------

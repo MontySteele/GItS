@@ -44,53 +44,37 @@ def _sheet_row(card_id: str) -> dict:
 # `EB-657`. FEINT'S TWO PRINTED NUMBERS ARE LIVE
 # ---------------------------------------------------------------------------
 
-def test_feints_face_prints_both_branches_as_folded_vars():
-    row = _sheet_row("proto_kk_feint")
-    face = row["description"]
-    # `EB-660` added the third sentence: the Plan line this row could always
-    # write and never printed. The two folded branch vars are unchanged.
-    # THE 2026-09-25 TEXT PASS folded the branch into one sentence ("Deal X,
-    # or Y if ..."); both folded vars are still printed.
-    assert face == ("Deal {PlainDamage:diff()} damage, or "
-                    "{BranchDamage:diff()} if a [gold]Plan[/gold] was carried "
-                    "out this turn. [gold]Plan[/gold]: Apply 1 "
-                    "[gold]Vulnerable[/gold].")
-    # The static swap the seat read is gone from this row entirely.
-    assert "{IfUpgraded:show:" not in face
-
+def test_feint_left_the_pair_for_a_count():
+    """THE CASKET PASS (2026-09-28) re-keyed Feint off the yes/no ("or 10 if a
+    Plan was carried out") onto the COUNT ("plus 3 for each Plan carried out
+    this turn"), so it prints a calculated var and no folded pair. The pair's
+    live-print rule is `EB-657`'s and it is held on the row that prints the
+    two-armed shape today, Press the Advantage, below."""
+    face = _sheet_row("proto_kk_feint")["description"]
+    assert "{CalculationBase:diff()}" in face
+    assert "{PlainDamage:diff()}" not in face
     src = (GENERATED / "ProtoKkFeint.cs").read_text(encoding="utf-8")
-    # R276 pick 1: the Plan's Vulnerable upgrades (1 -> 2), so the generated
-    # face carries its token where the sheet prints the literal.
-    # 2026-09-28: the emitted face starts its Plan clause on its own line.
-    assert face.replace("Apply 1 ", "Apply {PlanPowerAmount:diff()} ").replace(
-        " [gold]Plan[/gold]: ", "\\n[gold]Plan[/gold]: ") in src
-    # `EB-670` (the live look of 2026-09-16) MOVED THE HEADLINE'S CLASS and
-    # nothing else: on a morning a Plan HAD carried out, the else-arm number
-    # was the first number a reader met and was not the number the card would
-    # deal. `PlanCarriedDamageVar` reads the same ledger flag the emitted
-    # `OnPlay` reads and, where it is set, folds against the SIBLING var's
-    # base -- which is why `BranchDamage` is still declared here, still on its
-    # own upgrade key. Both printed numbers stay on the face and both stay
-    # live; the fold itself is still `FoldedDamageVar`'s, delegated.
-    assert ('new PlanCarriedDamageVar("PlainDamage", 5m, "BranchDamage", '
-            'ValueProp.Move)') in src
-    assert 'new FoldedDamageVar("BranchDamage", 10m, ValueProp.Move)' in src
+    assert "PlanCarriedDamageVar" not in src
 
 
 def test_each_arm_takes_its_own_delta():
-    """5 -> 7 and 10 -> 13, which is what `conditional_then_damage` exists for.
-    A single delta on both printed vars would split the face from the hit on
-    the first forge, and it would only show on an upgraded copy."""
-    src = (GENERATED / "ProtoKkFeint.cs").read_text(encoding="utf-8")
+    """6 -> 8 and 10 -> 13 on Press the Advantage, which is what
+    `conditional_then_damage` exists for. A single delta on both printed vars
+    would split the face from the hit on the first forge."""
+    src = (GENERATED / "ProtoKkPressTheAdvantage.cs").read_text(
+        encoding="utf-8")
+    assert 'new FoldedDamageVar("PlainDamage", 6m, ValueProp.Move)' in src
+    assert 'new FoldedDamageVar("BranchDamage", 10m, ValueProp.Move)' in src
     assert 'DynamicVars["PlainDamage"].UpgradeValueBy(2m);' in src
     assert 'DynamicVars["BranchDamage"].UpgradeValueBy(3m);' in src
 
 
 def test_the_hit_is_untouched_and_still_swaps_at_play_time():
     """The vars are PRINTED and nothing else (`FoldedDamageVar`'s own rule), so
-    this pass can print no number the card does not deal."""
-    src = (GENERATED / "ProtoKkFeint.cs").read_text(encoding="utf-8")
-    assert "(IsUpgraded ? 7m : 5m)" in src
+    no number is printed the card does not deal."""
+    src = (GENERATED / "ProtoKkPressTheAdvantage.cs").read_text(
+        encoding="utf-8")
+    assert "(IsUpgraded ? 8m : 6m)" in src
     assert "(IsUpgraded ? 13m : 10m)" in src
     assert src.count("DamageCmd.Attack") == 2
 
@@ -110,7 +94,7 @@ def test_the_pair_is_a_shape_and_not_a_card_special_case():
     `DamageCmd.Attack` the clause above it uses, so it has the same right to
     print the same terms -- and one number is still a number that can be
     wrong."""
-    feint = _sheet_row("proto_kk_feint")
+    feint = _sheet_row("proto_kk_press_the_advantage")
     both = feint["effects"][0]
     # `EB-737` widened the shape to the Stage's Spend riders and gave every
     # row a var CLASS, so the tuple is four wide; an aimed pair still folds

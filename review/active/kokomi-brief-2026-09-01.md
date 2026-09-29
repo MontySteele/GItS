@@ -59,6 +59,15 @@ the Bake-Kurage carries it out at the start of her next turn.
    the last Plan's card and cost). No cap on the queue: R266 retired the
    two-Plan cap as a rule; a free turn is priced by the faces, not by a
    throughput limit.
+7. **The Casket counts (2026-09-28).** Her relic, the Tamakushi Casket,
+   gains 1 each time the Bake-Kurage carries out a Plan -- in the morning,
+   at Dusk or hurried by Change of Plans, and a Plan carried out twice adds
+   twice. The count is per combat and starts at 0. Open the Casket (a 0-cost
+   Retain, Exhaust token the relic puts in her opening hand) turns the count
+   into Strength, 1 per point, and empties it; the Casket keeps counting.
+   Cards may read or add to the count; none spends it. [USER]: "We don't
+   need this to be the equivalent to Regent's stars or Klee's sparks. This
+   should feel like a distinct effect."
 
 Two printed keywords: Plan and Dusk. Mend appears only on Rare Exhaust
 cards, as the healing law already has it (`LAW.md`, card-sheet rules).
@@ -116,13 +125,23 @@ next turn, after the swing it was written against, and that delay is the
 point (R267 pick 1). Its numbers are the R243 audit's (Weak 1 now, Weak 1
 to ALL written; upgrade 7 damage and 2 Weak written).
 
-Relic, **Tamakushi Casket**: the Bake-Kurage is out from the start of every
-combat, and whenever you apply a debuff to an enemy, it strikes that enemy
-for 2 Hydro damage.
+Relic, **Tamakushi Casket** (the Casket pass, 2026-09-28): "Start each
+combat with the Bake-Kurage and Open the Casket in hand. Each Plan it
+carries out adds 1 to the Casket." Open the Casket: "Gain Strength equal to
+the Casket's count, then empty it." (0, Retain, Exhaust.) [USER], choosing
+this Forge-style relic over a Vigor-style one, because Vigor "devolves into
+'solve for lethal, press the I Win button'": "an artifact that grants /
+tracks an alternative energy that builds by 1 for every Plan played, and
+adds one 0-cost Retain / Exhaust card that converts that energy into
+Strength. We could build other archetypes in, including some that read or
+modify the gauge." Counting is "when it's carried out"; "1 strength per
+point seems fine; we can adjust down if we need to"; "the casket keeps
+counting." The relic's old debuff strike (2 Hydro per debuff she applied)
+is gone. It keeps the companion reward slot.
 
 Fight one, turn one: three energy, Strike twice, Defend, Kurage's Oath,
-Slack Water; the enemy intends 8. Slack Water on the enemy: 4, Weak, and
-the jellyfish's 2, the relic's lesson. Defend, 5 Block against a Weakened
+Slack Water, and Open the Casket held for later; the enemy intends 8.
+Slack Water on the enemy: 4 and Weak. Defend, 5 Block against a Weakened
 6. Kurage's Oath on the jellyfish, or 6 more Block now. Turn two opens
 with the jellyfish hitting every enemy for 7 once you have drawn. Slack
 Water and the Oath were the decisions: blunt this turn's hit now, or Weak
@@ -131,9 +150,9 @@ on everyone and 7 to everyone at dawn. That is the whole kit, on turn one.
 ## 5. The payoff moment
 
 The morning the Plans land. The pool pays for it twice over: cards that
-trigger when the jellyfish carries out a Plan (Treatise draws, Song of
-Pearls blocks, Feint and Sango Isshin hit harder on a carry-out turn), and
-her Burst, **Nereid's Ascension** (Rare Power, 2): the jellyfish carries
+read the carry-outs (Feint and Sango Isshin pay per Plan carried out this
+turn since the Casket pass; the Casket itself counts every one, and Open
+the Casket turns the count into Strength), and her Burst, **Nereid's Ascension** (Rare Power, 2): the jellyfish carries
 out your **first** Plan each turn twice (pass three; "every Plan twice"
 paid for writing more, which is the shape the pool passes undo). It is the
 one Rare that bends rule 3's "once, in order," and it makes the order of
@@ -153,6 +172,26 @@ the queue the decision.
 - **The replay, demoted.** One Uncommon or Rare, Moon's Reflection:
   Exhaust; choose a card in your Exhaust pile; next turn the jellyfish
   carries out its Plan line. Good design space, never the chassis.
+- **The Casket (2026-09-28).** Cards that read or add to the count: Pearl
+  Diver (Plan: the Casket gains 2), Moon Signal (the Casket gains 1 when 2 or
+  more Plans wait at the start of her turn), Driftglass and Depths' Judgment
+  (damage off the count), What the Tokoyo Took (double it) and What the
+  Tokoyo Returns (Open the Casket back from the Exhaust Pile). Shell Guard
+  reads it for Block (5, plus 1 per point), re-aimed by the main session
+  when the pass left its strike clause dead.
+
+THE POOL (the Casket pass, 2026-09-28): 46 offered cards, 24 Common, 17
+Uncommon, 5 Rare, plus the three co-op cards
+(`KokomiOverhaulRoster.Slice()`, `C.KOKOMI_OVERHAUL_POOL_IDS`). Cut: Tide
+Chart, Cleansing Wave, Ripple, Well Laid, Sea-Salt Prayer, Salt Line.
+Added: Massed Volley, Signal Arrow, Surging Shoal, Pearl Diver, Press the
+Advantage, Shell of Sanctuary, Driftglass (Common); What the Tokoyo
+Returns, Depths' Judgment, Tideturn, Moon Signal, Pearl Current (Uncommon);
+What the Tokoyo Took (Rare). Second Wave moved to Uncommon. On the Commons,
+[USER]: "Let's avoid having too many attack / block spam cards ... they
+shouldn't just be 10 copies of 'do x damage, or plan y'"; "5 to 7 damage per
+1 energy is roughly the going rate on AoE commons". Numbers and faces:
+`docs/notes/prototype-surface-provenance.md`, "the Casket pass".
 
 Rares take constellation names (C1 to C6 are all unused but Sango Isshin
 and The Clouds Like Waves). Cut and not coming back: Tide, Surge, Exert,
@@ -190,11 +229,15 @@ R267 (`review/records/kokomi-pass-four-audit-2026-09-08.md`, `-five-`).
 ## 9. Applied defaults (D/E/F, disclosed, yours to veto)
 
 Planned Attacks hit the front enemy or the aimed one. Slack Water's status
-is Weak, the defensive one. The relic's 2 is a number play moves. Tamakushi
-Casket replaces the misspelled Tamanooya's.
+is Weak, the defensive one. The Casket's 1 per Plan and 1 Strength per point
+are numbers play moves. Tamakushi Casket replaces the misspelled
+Tamanooya's.
 
 ## 10. Picks
 
 None open on this page. Picks 1 to 3 of draft 6 (a card becomes a Plan by
 being played on the pet; the pet is untouchable; the relic strikes on a
-debuff) were ruled R241 at their defaults and are the rules above.
+debuff) were ruled R241 at their defaults; the third was replaced by the
+Casket pass (2026-09-28), rule 7 above.
+
+**Shell Guard, re-aimed (a main-session fix, 2026-09-28, not a [USER] ruling).** The Casket pass retired the strike Shell Guard's second clause paid on ("whenever the Tamakushi Casket strikes, gain 3 Block"), which left the clause dead. The card is now the Casket's defensive reader: "Gain 5 Block, plus 1 for each point in the Casket." Uncommon Skill, cost 1; upgraded base 8 (+1 per point unchanged); the in-combat Block preview Pneuma Refrain and the damage readers print. `ShellGuardPower` and its window (the dead `Pay` path and `Close`) are removed from both engines. It keeps its portrait.

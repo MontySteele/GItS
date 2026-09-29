@@ -788,7 +788,10 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "first_companion_free",
     # THE CO-OP SET: two plan clauses about ANOTHER player, priced ZERO in
     # `_op_price` -- the one-seat drafter has nobody for them to pay.
-    "ally_draw", "others_attack_damage_this_turn"))
+    "ally_draw", "others_attack_damage_this_turn",
+    # THE CASKET PASS (2026-09-28): the four verbs on the Tamakushi Casket's
+    # count, each with its own branch in `_op_price` on this set's terms.
+    "casket_gain", "casket_double", "fetch_open_casket", "open_casket"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -1149,6 +1152,15 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     if op in ("ally_draw", "others_attack_damage_this_turn"):
         # THE CO-OP SET: paid to ANOTHER player, and tier 0.5 seats one. A
         # multiplayer-only row is never offered to this drafter anyway.
+        return 0.0
+    if op in ("casket_gain", "casket_double", "fetch_open_casket",
+              "open_casket"):
+        # THE CASKET PASS (2026-09-28). ZERO, and a refusal that says why:
+        # every one of the four is worth Strength a LATER Open the Casket
+        # grants, off a count the whole deck fills -- a quantity about the
+        # drafted deck and the fight, not about this card, which is the
+        # reading `next_plan_double_damage` makes. The card's printed draw or
+        # damage, where it has one, is priced by its own clause.
         return 0.0
     if op == "block_front_intent":
         # Tide Wall: the flat bonus only. The intent is a board fact an offer
@@ -2607,6 +2619,16 @@ STATIC_OP_PRICING: dict[str, str] = {
                                "an offer screen cannot read",
     "block_front_intent": "its flat bonus only; ZERO for the intent part, a "
                           "board fact an offer screen cannot read",
+    # --- the Casket pass (2026-09-28, QUARANTINED) ---
+    "casket_gain": "ZERO: Casket points are Strength a later Open the Casket "
+                   "grants, off a count the whole deck fills -- a deck and "
+                   "fight fact, not this card's",
+    "casket_double": "ZERO, casket_gain's reason: doubling a count the offer "
+                     "screen cannot see",
+    "fetch_open_casket": "ZERO, casket_gain's reason: a second opening of a "
+                         "count the offer screen cannot see",
+    "open_casket": "ZERO: the relic's token, in no pool and never offered; "
+                   "what it grants is the Casket's count at play",
     # --- the co-op set (review/records/coop-set-2026-09-25.md) ---
     "ally_draw": "ZERO: cards drawn by ANOTHER player, and tier 0.5 seats "
                  "one; a multiplayer-only row is never offered here",

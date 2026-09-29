@@ -3794,3 +3794,114 @@ before. 27 faces moved; Change of Plans' "Cancel your last
 [gold]Plan[/gold]: ..." is a sentence about a Plan and does not break. The
 blind-seat bridge folds whitespace (`qa_packet._text`), so seats still read
 one line per face. Pinned by `tier0/tests/test_plan_line_on_its_own_line.py`.
+
+## Kokomi: the Casket pass (2026-09-28)
+
+Designed in the main session and ruled by [USER] on 2026-09-28; recorded in
+the brief (`review/active/kokomi-brief-2026-09-01.md`, sec. 4 and 10).
+
+**The relic, Tamakushi Casket.** Forge-style over Vigor-style, because Vigor
+"devolves into 'solve for lethal, press the I Win button'". The design: "an
+artifact that grants / tracks an alternative energy that builds by 1 for every
+Plan played, and adds one 0-cost Retain / Exhaust card that converts that
+energy into Strength. We could build other archetypes in, including some that
+read or modify the gauge." Counting: "when it's carried out". Rate: "1
+strength per point seems fine; we can adjust down if we need to." "the casket
+keeps counting." No card spends the gauge: "We don't need this to be the
+equivalent to Regent's stars or Klee's sparks. This should feel like a
+distinct effect."
+
+- Face: "Start each combat with the Bake-Kurage and Open the Casket in hand.
+  Each Plan it carries out adds 1 to the Casket." The ruled wording says "the
+  Bake-Kurage" twice; "it" is the one change, because the ruled sentence is
+  127 characters against the 120 relic ceiling (`lint_text_conventions`).
+- The old debuff strike (2 Hydro per debuff she applied, `CasketStrike`) is
+  REMOVED from both engines, with its constant and its V11 kit-verb row. The
+  companion reward slot stays.
+- The count is per combat and starts at 0. It lives on the arm's ledger
+  (`KokomiOverhaulLedger.CasketCount`, sim `CombatState.kk_casket`) so a card's
+  calculated var reads it with no relic lookup. The relic adds
+  `KokomiOverhaulLaw.CasketPerPlan` once per CARRY-OUT from
+  `KokomiPlan.ResolveEntry` (sim `kokomi_plan._note_plan_resolved`), so the
+  morning, Dusk and Change of Plans all count, and a Plan carried out twice
+  (Second Wave, Nereid's Ascension) adds twice. A Kokomi not holding the relic
+  adds nothing on a carry-out; the cards that say "the Casket gains" add
+  either way.
+- SHOWN AS THE RELIC'S COUNTER, the base game's idiom (`Kunai`, `Pen Nib`):
+  `ShowCounter` in combat, `DisplayAmount` the count. The bridge already sends
+  a relic's counter (`McpMod.StateBuilder`: `counter = ShowCounter ?
+  DisplayAmount : null`) and the blind page prints "Tamakushi Casket (N)", so
+  the seats read it with no new wire field.
+
+**Open the Casket.** Skill, 0, Retain, Exhaust, in no pool: "Gain Strength
+equal to the Casket's count, then empty it." A hand-written token
+(`Cards/Prototype/OpenTheCasket.cs`, off-pool in `KokomiOffPoolCards`), not a
+sheet row: the surface has no token rarity, and a `proto_kk_` row outside the
+pool is a finding for `lint_arm_pool_parity`. Furina's Ethereal Spotlight is
+the same shape. The relic deals it before the first hand draw
+(`BeforeHandDraw` on turn one, `RadiantPearl`'s site). Sim twin:
+`kokomi_plan.open_the_casket_card`, dealt on turn one by
+`kokomi_plan.deal_open_the_casket` (after the opening draw, the sim's
+combat-start site; it moves no card of the opening hand). No upgrade.
+
+**Re-keyed payoffs.** Feint: "Deal 4 damage, plus 3 for each Plan carried out
+this turn. Plan: Apply 1 Vulnerable." (base 6 upgraded, Plan Vulnerable 2).
+Sango Isshin: "Deal 6 damage to ALL enemies for each Plan carried out this
+turn." (8 upgraded). Both read the new per-turn count
+(`KokomiOverhaulLedger.PlansCarriedOutThisTurn`, sim
+`kk_plans_carried_out_this_turn`), written once per carry-out. Treatise and
+Song of Pearls are unchanged.
+
+**Numbers.** Second Wave Common -> Uncommon, now-damage 5 -> 7. Pincer 3x2 ->
+4x2 (5x2 upgraded). Opening Gambit 5 -> 7. Deep Current 6 -> 7 to ALL, and an
+upgrade of +2 (9). Riptide 11 to ALL, debuffed enemies take 3 more; upgraded
++3 and +1 (14 / 4), the existing upgrade shape with the rider's delta scaled
+down with the rider; the Plan is "Gain 2 Energy and draw 1 card."
+
+**Cut from the offer:** Tide Chart, Cleansing Wave, Ripple, Well Laid,
+Sea-Salt Prayer, Salt Line (proto). Rows deleted, ids tombstoned in
+`docs/retired-card-ids.yaml`, retired aliases generated. Their ops stay
+registered (`draw_after_plans`, `remove_debuff`, the `debuffs_on_target`
+count) with no row spelling them.
+
+**Thirteen rows**, last in the sheet's order. On the Commons, [USER]: "Let's
+avoid having too many attack / block spam cards ... they shouldn't just be 10
+copies of 'do x damage, or plan y'". Numbers "agreed". AoE: "5 to 7 damage per
+1 energy is roughly the going rate on AoE commons". Each wears the portrait of
+the shipped Kokomi card whose id it borrows (`art_of:`).
+
+- Commons: Massed Volley (3x3; 4x3), Signal Arrow (7, Plan 3 to ALL twice; 10
+  / 4 twice), Surging Shoal (2 energy, 14, Plan 22; 18 / 28), Pearl Diver
+  (draw 1, Plan the Casket gains 2; draw 2), Press the Advantage (6, or 10 if
+  a Plan is waiting; 8 / 13 -- "waiting" is the queue, the `plan_held`
+  predicate), Shell of Sanctuary (draw 1, Dusk Plan 9 Block; 12), Driftglass
+  (5 plus 1 per point in the Casket; base 7).
+- Uncommons: What the Tokoyo Returns (1, Exhaust: the first Open the Casket in
+  the Exhaust Pile goes to hand, none there nothing happens; cost 0), Depths'
+  Judgment (2, damage = 3 x the Casket's count, with the in-combat preview; 4
+  x), Tideturn (4 per Plan waiting; 5), Moon Signal (Power 1; cost 0), Pearl
+  Current (2x4, Plan 2 to ALL x3; 3s).
+- Rare: What the Tokoyo Took (2, Exhaust, double the Casket's count; cost 1).
+
+**Moon Signal's timing.** "If 2 or more Plans are waiting" is read BEFORE the
+morning's Plans are carried out, or it could never be true after a drain empties
+the queue. `ProtoBakeKuragePower.AfterPlayerTurnStart` takes the queue depth
+beside Song of Pearls' read and hands it to `MoonSignalPower.Signal` before
+`KokomiPlan.ResolveAll`; the sim calls `kokomi_plan.moon_signal` at the same
+point in `combat._player_turn`. The threshold is
+`KokomiOverhaulLaw.MoonSignalThreshold`, mirrored by value.
+
+**Hygiene.** The retired Garment tip (`KokomiRiderTips.ForGarmentAttack`) no
+longer attaches to an arm row (`gen_klee_cards`, `proto_` ids skip it). Stale
+pool counts (34, 39) read 46. The "Tamakushi Casket" keyword row now also
+answers the short name "Casket", and "Open the Casket" has a tip of its own;
+both are glossary rows on the blind page. The reaction glossary's clause
+admitting "one relic's line" that applies an element went with the strike.
+
+**Shell Guard, re-aimed (a main-session fix, 2026-09-28, not a [USER] ruling).** The Casket pass retired the strike Shell Guard's second clause paid on ("whenever the Tamakushi Casket strikes, gain 3 Block"), which left the clause dead. The card is now the Casket's defensive reader: "Gain 5 Block, plus 1 for each point in the Casket." Uncommon Skill, cost 1; upgraded base 8 (+1 per point unchanged); the in-combat Block preview Pneuma Refrain and the damage readers print. `ShellGuardPower` and its window (the dead `Pay` path and `Close`) are removed from both engines. It keeps its portrait.
+In the C#, the Casket count rides the block rail's calculated var
+(`gen_klee_cards.stage_count_block_rider` now also takes the Casket counts);
+the sim reads `casket_count` through `effects._runtime_count`.
+
+**Pool:** 46 offered (24 Common, 17 Uncommon, 5 Rare) plus the three co-op
+cards.

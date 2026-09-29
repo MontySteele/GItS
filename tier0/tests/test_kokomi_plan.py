@@ -111,7 +111,10 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # Slack Water's Plan line, already counted, moved to Dusk.
     # TWENTY-SEVEN with the co-op set (review/records/coop-set-2026-09-25.md):
     # Joint Orders and Coordinated Strike, the multiplayer tier's two Plans.
-    assert len(planned) == 27
+    # THIRTY with the Casket pass (2026-09-28): Cleansing Wave and Ripple cut,
+    # and Signal Arrow, Surging Shoal, Pearl Diver, Shell of Sanctuary and
+    # Pearl Current added.
+    assert len(planned) == 30
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -313,7 +316,7 @@ def test_a_skills_now_line_applies_hydro_and_reacts(overhaul):
     enemy = make_enemy(hp=40)
     st = kokomi_state(enemies=[enemy])
     effects.resolve_card(st, loader.get_card("proto_kk_opening_gambit"))
-    assert enemy.hp == 40 - 5
+    assert enemy.hp == 40 - 7                     # 7 since the Casket pass
     assert enemy.aura == "hydro"
 
     charged = make_enemy(hp=40)
@@ -360,55 +363,25 @@ def test_war_councils_face_and_its_hit_agree_about_the_aura(overhaul):
     assert "KleeKeywords.AppliesHydro" not in face
 
 
-def test_the_caskets_strike_leaves_a_hydro_aura(overhaul):
-    """`EB-562`. THE QUESTION: does the Tamakushi Casket's Hydro hit leave an
-    aura? The reaction glossary's sources clause (`EB-544`) says a relic
-    applies no element unless its own face says so, and the Casket's face does
-    not say so; the round-18 seat watched it re-lay Hydro inside a beat, and
-    the r20 seat called this "the single fact I most wanted and never got".
-
-    THE ANSWER IS YES, and it always was: `casket_strike` goes through
-    `deal_damage_to_enemy` with `element="hydro"`, the same funnel every other
-    non-attack hit here uses, and the C# twin goes through `ElementalHit.Deal`.
-    So the strike lays Hydro on a bare body and REACTS with whatever else is
-    standing. What was missing was a surface saying so. `EB-348` put it on the
-    relic's own face and on the card-side tip ("it reacts, takes its
-    Vulnerable, and re-arms Hydro") while this row was open; what was still
-    missing is the GLOSSARY, whose sources clause (`EB-544`) sends a reader to
-    the relic's face for exactly this and says a relic applies no element.
-    """
+def test_the_casket_strikes_nothing_since_the_casket_pass(overhaul):
+    """THE CASKET PASS (2026-09-28) retired the debuff strike `EB-562` asked
+    about: the relic COUNTS carried-out Plans now. A debuff she applies with
+    the relic held moves no HP and lays no aura, and the page's glossary no
+    longer admits a relic that applies an element."""
     bare = make_enemy(hp=40)
-    st = kokomi_state(enemies=[bare])
-    kokomi_plan.casket_strike(st, bare)
-    assert bare.hp == 40 - C.KOKOMI_OVERHAUL_CASKET_STRIKE
-    assert bare.aura == "hydro"
+    st = casket_state(enemies=[bare])
+    powers.apply_power(st, bare, "weak", 1, applier=st.player)
+    assert bare.hp == 40
+    assert bare.aura is None or bare.aura == "none" or not bare.aura
+    assert counts(st).get("casket_strike", 0) == 0
+    assert not hasattr(kokomi_plan, "casket_strike")
 
-    # AND IT REACTS rather than laying Hydro where another aura stands, which
-    # is the other half of "a real Hydro hit".
-    chilled = make_enemy(hp=40)
-    chilled.aura = "cryo"
-    chilled.aura_turns_left = 3
-    st2 = kokomi_state(enemies=[chilled])
-    kokomi_plan.casket_strike(st2, chilled)
-    assert chilled.aura != "cryo", "the Cryo aura was consumed"
-
-    # And the surfaces carry the sentence, so the engine and the words cannot
-    # drift apart again. The relic tip and its page twin say "re-arms Hydro"
-    # (`EB-348`); the glossary's sources clause now admits the exception.
     from understudy import blindplay_notes
-    assert "re-arms Hydro" in (
+    assert "re-arms Hydro" not in (
         blindplay_notes.ARM_KEYWORDS["Tamakushi Casket"])
     gloss = blindplay_notes.REACTION_KEYWORDS["Elemental Reaction"]
-    assert "one relic's line does" in gloss
-    # Not BY NAME on that row: `EB-329` keeps it general, because it prints
-    # for a Klee who holds no Casket. The relic is named on its own row.
+    assert "one relic's line does" not in gloss
     assert "Casket" not in gloss
-    import pathlib
-    repo = pathlib.Path(__file__).resolve().parents[2]
-    tips = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
-            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
-    assert "and re-arms " in tips
-
 
 def test_eb714_a_second_plan_re_aims_at_the_next_living_body(overhaul):
     """`EB-714`. THE ACCEPTANCE: no Plan lands on a corpse.
@@ -548,16 +521,17 @@ def test_skittish_does_not_fire_on_a_carry_out(overhaul):
 
 def test_a_plan_caused_debuff_is_still_hers(overhaul):
     """`EB-334`, the half the flag deliberately does NOT move: the applier
-    stays her, so the Tamakushi Casket answers a debuff a Plan applies. If the
-    fix had swapped the applier to the pet this would read 40."""
+    stays her. The Tamakushi Casket used to be the witness; since the Casket
+    pass (2026-09-28) it strikes nothing, so The Clouds Like Waves Rippling --
+    the other reader of the same event -- is. If the applier were the pet, no
+    Block would land."""
     enemy = make_enemy(hp=40)
     st = kokomi_state(enemies=[enemy])
-    st.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
+    st.player.powers[kokomi_plan.CLOUDS_LIKE_WAVES] = 2
     carry_out(st, [{"op": "apply_power", "power": "weak", "amount": 1,
                     "target": "front_enemy"}])
     assert enemy.powers.get("weak") == 1
-    assert enemy.hp == 40 - C.KOKOMI_OVERHAUL_CASKET_STRIKE
-
+    assert st.player.block == 2
 
 # --- `EB-335`: the kit's own defence in act 2 (R246 pick 2) ---------------
 
@@ -631,71 +605,27 @@ def test_tide_wall_is_plan_only(overhaul):
         effects.resolve_card(st, card)
 
 
-def test_shell_guard_blocks_on_every_casket_strike(overhaul):
-    """SHELL GUARD. "Until your next turn, whenever the Tamakushi Casket
-    strikes, gain 3 Block." The seats watched the Casket strike five and six
-    times a turn off the deck's own status lines."""
-    enemy = make_enemy(hp=60)
-    st = kokomi_state(enemies=[enemy])
-    st.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
-    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
-    for _ in range(3):
-        powers.apply_power(st, enemy, "weak", 1, applier=st.player)
-    assert st.player.block == 9
-
-
-def test_shell_guard_pays_nothing_without_the_casket(overhaul):
-    """The card names the RELIC, which is what keeps it separable from The
-    Clouds Like Waves Rippling one row over: that card pays per debuff
-    APPLIED, this pays per Casket STRIKE."""
-    enemy = make_enemy(hp=60)
-    st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
-    powers.apply_power(st, enemy, "weak", 1, applier=st.player)
-    assert st.player.block == 0
-
-
-def test_shell_guards_window_covers_the_morning_and_then_closes(overhaul):
-    """"UNTIL YOUR NEXT TURN" INCLUDES THAT TURN'S MORNING, R246 pick 2's own
-    sentence: "the morning's Plans that apply Weak strike it too, so the Block
-    is there before the enemy swings". So the window is closed one step AFTER
-    the drain, and everything after that is outside it."""
-    enemy = make_enemy(hp=60)
-    st = kokomi_state(enemies=[enemy])
-    st.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
-    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
-
-    # The morning's own Weak Plan strikes the Casket inside the window.
-    kokomi_plan.roll_turn(st)
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": "apply_power", "power": "weak", "amount": 1,
-          "target": "front_enemy"}]))
-    kokomi_plan.resolve_all(st)
-    assert st.player.block == 3
-
-    # And then it is gone: a debuff applied later in the same turn pays
-    # nothing.
-    kokomi_plan.close_shell_guard(st)
-    assert kokomi_plan.SHELL_GUARD not in st.player.powers
-    powers.apply_power(st, enemy, "vulnerable", 1, applier=st.player)
-    assert st.player.block == 3
-
-
-def test_the_shell_guard_window_closes_on_a_morning_with_no_plans(overhaul):
-    """The close is UNCONDITIONAL inside the arm's turn-start block, because
-    `resolve_all` returns early on an empty queue -- a window that only closed
-    on mornings with Plans in them would outlive its printed text."""
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
-    kokomi_plan.resolve_all(st)               # nothing due
-    kokomi_plan.close_shell_guard(st)
-    assert kokomi_plan.SHELL_GUARD not in st.player.powers
+def test_shell_guard_is_the_caskets_defensive_reader(overhaul):
+    """SHELL GUARD, re-aimed (main session, 2026-09-28) after the Casket pass
+    retired the strike it paid on: "Gain 5 Block, plus 1 for each point in
+    the Casket." Block through the ordinary funnel (Dexterity and Frail
+    count)."""
+    st = kokomi_state(enemies=[make_enemy(hp=60)])
+    effects.resolve_card(st, loader.get_card("proto_kk_shell_guard"))
+    assert st.player.block == 5
+    st2 = kokomi_state(enemies=[make_enemy(hp=60)])
+    st2.kk_casket = 4
+    effects.resolve_card(st2, loader.get_card("proto_kk_shell_guard"))
+    assert st2.player.block == 9
+    assert not hasattr(kokomi_plan, "SHELL_GUARD")
+    assert not hasattr(kokomi_plan, "close_shell_guard")
 
 
 def test_both_defensive_rows_load_and_smith(overhaul):
     """The two rows themselves, off the sheet. Tide Wall since R276 pick 1:
     4 Block now, Plan Block equal to the intent, upgrading to 6 and intent + 3.
-    Shell Guard: R246's 5/3, upgrading to 7/4."""
+    Shell Guard since its re-aim (2026-09-28): 5 plus 1 per Casket point,
+    base 8 upgraded."""
     from tier0.content import upgrades
 
     wall = loader.get_card("proto_kk_tide_wall")
@@ -708,10 +638,13 @@ def test_both_defensive_rows_load_and_smith(overhaul):
 
     guard = loader.get_card("proto_kk_shell_guard")
     assert guard.rarity == "uncommon" and guard.cost == 1
+    assert guard.type == "skill"
     assert guard.plan == []
-    assert [e["amount"] for e in guard.effects] == [5, 3]
+    assert guard.effects == [{"op": "block", "amount_formula": {
+        "base": 5, "per": 1, "count": "casket_count"}}]
     up = upgrades.apply_upgrade(guard)
-    assert [e["amount"] for e in up.effects] == [7, 4]
+    assert up.effects[0]["amount_formula"] == {
+        "base": 8, "per": 1, "count": "casket_count"}
 
 
 def test_damage_quarter_max_hp_rounds_down(overhaul):
@@ -724,26 +657,23 @@ def test_damage_quarter_max_hp_rounds_down(overhaul):
     assert enemy.hp == 40
 
 
-def test_sango_isshin_pays_the_quarter_only_after_a_plan_was_carried_out(overhaul):
-    """[USER], live 2026-09-02: "It's fine if Rares are strong (see: Knife
-    Trap), but this requires absolutely 0 setup or combo - it's just 'press
-    button, delete act 1'." So the quarter is now the PAYOFF of a morning she
-    planned for, and the card's floor is a plain 8 to one enemy."""
+def test_sango_isshin_pays_six_to_all_per_plan_carried_out(overhaul):
+    """THE CASKET PASS (2026-09-28): "Deal 6 damage to ALL enemies for each
+    Plan carried out this turn." A turn with none carried out deals nothing;
+    two carry-outs deal 12 to each."""
     a, b = make_enemy(hp=60, name="a"), make_enemy(hp=60, name="b")
     st = kokomi_state(enemies=[a, b], hp=80)
     card = loader.get_card("proto_kk_sango_isshin")
 
-    # No Plan carried out this turn: the floor, aimed, and only at one enemy.
-    assert st.kk_plan_carried_out_this_turn is False
+    assert st.kk_plans_carried_out_this_turn == 0
     effects.resolve_card(st, card)
-    assert (a.hp, b.hp) == (52, 60)
+    assert (a.hp, b.hp) == (60, 60)
 
-    # A Plan carried out this morning turns it into the wall.
     carry_out(st, [{"op": "draw", "amount": 1}])
-    assert st.kk_plan_carried_out_this_turn is True
+    carry_out(st, [{"op": "draw", "amount": 1}])
+    assert st.kk_plans_carried_out_this_turn == 2
     effects.resolve_card(st, card)
-    assert (a.hp, b.hp) == (32, 40)          # 20 apiece at 80 Max HP
-
+    assert (a.hp, b.hp) == (48, 48)
 
 def test_the_condition_is_written_wherever_a_plan_is_carried_out(overhaul):
     """"Carried out" is one event with two doors -- the morning queue and
@@ -939,7 +869,8 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     # queue. The count the row was filed against was 34, and what it
     # pins is the withdrawal, not the size -- so it moves with the
     # pool and the absence does not.
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 39
+    # FORTY-SIX since the Casket pass (2026-09-28).
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 46
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
@@ -1187,143 +1118,12 @@ def test_plans_held_is_the_queue_and_not_the_morning(overhaul):
     assert effects._runtime_count(st, "plans_held") == 0     # held, none
 
 
-def _tide_chart_morning(st, plans, card):
-    """Play `card` this turn, bank `plans` Plans, and take the next turn's
-    start in `combat._player_turn`'s order: the roll, the morning, the
-    payment. Returns the hand the morning left."""
-    for i in range(plans):
-        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                           cid=f"proto_kk_p{i}"))
-    effects.resolve_card(st, card)
-    assert st.player.hand == []                 # THE PLAY DRAWS NOTHING
-    kokomi_plan.roll_turn(st)
-    kokomi_plan.resolve_all(st)
-    kokomi_plan.pay_tide_charts(st)
-    return st.player.hand
-
-
-def _tide_chart_state():
-    st = kokomi_state()
-    st.player.draw_pile = [plan_card([], cid=f"proto_kk_f{i}")
-                           for i in range(6)]
-    return st
-
-
-def test_tide_chart_pays_the_morning_after_for_what_was_carried_out(overhaul):
-    """`EB-478`, R257: "Next turn, after the Bake-Kurage carries out its
-    Plans, draw 1 card for each." The play writes a promise and draws nothing;
-    the morning after pays for the Plans that were actually carried out.
-
-    THE OLD ROW READ THE QUEUE AT PLAY TIME and drew zero on three plays out
-    of four (Kokomi r15), because a seat plays its cheap cards before it
-    writes its Plans -- which is what this test now writes in the order that
-    used to pay nothing. `KokomiPlan.PromiseDraw` / `PayPromisedDraws`."""
-    card = loader._card_prototype("proto_kk_tide_chart")
-    assert len(_tide_chart_morning(_tide_chart_state(), 2, card)) == 2
-    # NONE CARRIED OUT DRAWS NOTHING: the base row is worth exactly the Plans
-    # the jellyfish had, and an empty morning had none.
-    assert _tide_chart_morning(_tide_chart_state(), 0, card) == []
-
-
-def test_tide_chart_upgraded_adds_one_flat_card(overhaul):
-    """"Draw 1 more": one card on top of the one per Plan carried out, which
-    is the ONLY reading that leaves the upgraded row live on an empty morning.
-    tier0 bumps the op's `amount` (`upgrades.apply_upgrade`'s `tide_draw`);
-    the C# reads the same half off `IsUpgraded` in `PromiseDraw`."""
-    from tier0.content import upgrades
-
-    up = upgrades.apply_upgrade(loader.get_card("proto_kk_tide_chart"))
-    assert up.effects == [{"op": "draw_after_plans", "amount": 1, "per": 1}]
-    assert len(_tide_chart_morning(_tide_chart_state(), 2, up)) == 3
-    assert len(_tide_chart_morning(_tide_chart_state(), 0, up)) == 1
-
-
-def test_a_tide_chart_promise_is_paid_once(overhaul):
-    """The promise is cleared BY the payment, so a second morning with no new
-    Tide Chart draws nothing -- `pay_tide_charts` clears before it draws, and
-    `PayPromisedDraws` removes the entry before its `CardPileCmd.Draw`."""
-    st = _tide_chart_state()
-    card = loader._card_prototype("proto_kk_tide_chart")
-    assert len(_tide_chart_morning(st, 2, card)) == 2
-    st.player.hand.clear()
-    kokomi_plan.roll_turn(st)
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                       cid="proto_kk_q"))
-    kokomi_plan.resolve_all(st)
-    kokomi_plan.pay_tide_charts(st)
-    assert st.player.hand == []
-
-
-def test_ripple_draws_now_and_pays_energy_on_the_plan(overhaul):
-    """Core pass: "Draw 1 card. Plan: Gain 1 Energy." Two different jobs."""
-    card = loader._card_prototype("proto_kk_ripple")
-    enemy = make_enemy(hp=80, intents=ATTACKER)
-    st = kokomi_state(enemies=[enemy])
-    _deck(st)
-    st.player.energy = 0
-    effects.resolve_card(st, card)
-    assert len(st.player.hand) == 1
-    assert st.player.block == 0
-    kokomi_plan.schedule(st, card)
-    kokomi_plan.resolve_all(st)
-    assert st.player.energy == 1
-    assert st.player.block == 0
-
-
 # --- 8. THE TAMAKUSHI CASKET ----------------------------------------------
 
 def casket_state(**kw):
     st = kokomi_state(**kw)
     st.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
     return st
-
-
-def test_the_casket_strikes_on_a_debuff_she_applies(overhaul):
-    enemy = make_enemy(hp=40)
-    st = casket_state(enemies=[enemy])
-    powers.apply_power(st, enemy, "weak", 1, applier=st.player)
-    assert enemy.hp == 40 - C.KOKOMI_OVERHAUL_CASKET_STRIKE
-    assert counts(st)["casket_strike"] == 1
-
-
-def test_the_casket_strike_is_the_pets_and_carries_no_strength(overhaul):
-    """A READING the C# records: "the slice says 'it strikes that enemy for
-    2', so the applier handed to the shared elemental pipeline is the PET. A
-    pet carries no Strength, so the 2 is a flat 2" -- which is what keeps this
-    the relic's number instead of the best Strength payoff in her pool, now
-    that draft 6 gives her Strength back."""
-    enemy = make_enemy(hp=40)
-    st = casket_state(enemies=[enemy])
-    st.player.powers["strength"] = 5
-    powers.apply_power(st, enemy, "weak", 1, applier=st.player)
-    assert enemy.hp == 40 - C.KOKOMI_OVERHAUL_CASKET_STRIKE
-
-
-def test_the_casket_strike_is_otherwise_a_real_hit(overhaul):
-    """The C#: "Block, Vulnerable, the aura and the reaction all apply, because it goes
-    through the same ElementalHit funnel every other non-attack hit in this mod
-    does." Block first, then Vulnerable, then the aura."""
-    enemy = make_enemy(hp=40)
-    enemy.block = 1
-    st = casket_state(enemies=[enemy])
-    powers.apply_power(st, enemy, "vulnerable", 1, applier=st.player)
-    assert enemy.block == 0
-    assert enemy.aura == "hydro"
-    # 2 Hydro, amplified by the Vulnerable that provoked it, minus 1 Block.
-    assert enemy.hp < 40
-
-
-def test_the_casket_does_not_answer_its_own_answer(overhaul):
-    """THE LATCH IS NOT PARANOIA (the C#'s own words): the answer is a Hydro
-    hit, a Hydro hit into a Cryo aura Freezes, and in a boss room Frozen is
-    Vulnerable -- a debuff she applied to an enemy. Without the latch the relic
-    would answer its own answer until the stack ran out."""
-    enemy = make_enemy(hp=60, is_boss=True)
-    enemy.aura = "cryo"
-    enemy.aura_turns_left = 3
-    st = casket_state(enemies=[enemy])
-    powers.apply_power(st, enemy, "weak", 1, applier=st.player)
-    assert counts(st)["casket_strike"] == 1
 
 
 def test_the_casket_ignores_a_debuff_that_is_not_hers(overhaul):
@@ -1344,19 +1144,19 @@ def test_a_debuff_ticking_down_is_not_one_being_applied(overhaul):
     assert enemy.hp == 40
 
 
-def test_a_frozen_reaction_feeds_the_casket(overhaul):
-    """Frozen is a POWER in the mod and a FIELD here, so it is the one debuff
-    application that does not reach `powers.apply_power`. The C# names it as a
-    feeder, so `reactions.resolve_hit` raises the event by hand."""
+def test_a_frozen_reaction_is_still_a_debuff_she_applied(overhaul):
+    """Frozen is a POWER in the mod and a FIELD here, so `reactions.resolve_hit`
+    raises the debuff event by hand. It fed the Casket's strike until the
+    Casket pass (2026-09-28); it still counts as a debuff on the enemy, and
+    the relic answers it with nothing."""
     from tier0.engine import reactions
     enemy = make_enemy(hp=40)
     enemy.aura = "cryo"
     enemy.aura_turns_left = 3
     st = casket_state(enemies=[enemy])
     reactions.resolve_hit(st, enemy, "hydro", 0, "probe")
-    assert counts(st)["casket_strike"] == 1
+    assert counts(st).get("casket_strike", 0) == 0
     assert kokomi_plan.has_debuff(enemy) is True
-
 
 def test_the_clouds_like_waves_pays_per_application_not_per_stack(overhaul):
     """The C#: "War Council's 'apply 1 Weak to each' over three enemies is three
@@ -1546,7 +1346,9 @@ def test_planned_block_and_energy_survive_the_turn_setup(overhaul):
     This is that claim made falsifiable: a Plan written on turn N leaves Block
     and Energy standing when the pilot gets to decide on turn N+1.
     """
-    ids = ["proto_kk_read_the_field"] * 4 + ["proto_kk_ripple"] * 4
+    # Riptide since the Casket pass (2026-09-28) cut Ripple: its Plan line is
+    # 2 Energy and a card.
+    ids = ["proto_kk_read_the_field"] * 4 + ["proto_kk_riptide"] * 4
     player = loader.build_player_from_ids("kokomi", ids)
     seen = {}
 
@@ -1560,7 +1362,7 @@ def test_planned_block_and_energy_survive_the_turn_setup(overhaul):
     run_fight(player, [make_enemy(hp=400, intents=BLOCKER)], pilot, seed=3)
     # Turn 2 opens with BOTH: the Block turn 1's Read the Field Plans wrote
     # (8 apiece, past a block clear that would have zeroed it) and the Energy
-    # its Ripple Plans wrote (1 apiece, past an energy reset that would
+    # its Riptide Plans wrote (2 apiece, past an energy reset that would
     # have overwritten it). Under the pre-draw hook the slice's prose asks for,
     # both of these read exactly the turn's own defaults.
     block, energy = seen[2]
@@ -1613,7 +1415,10 @@ def test_every_row_in_her_pool_resolves(overhaul):
         # a draw-reading row looks at is built from `strike`.
         state.player.draw_pile = [loader.get_card("strike")
                                   for _ in range(5)]
-        state.player.exhaust_pile = [loader.get_card("proto_kk_salt_line")]
+        # Salt Line until the Casket pass cut it; any card will do, and
+        # Open the Casket gives What the Tokoyo Returns one to fetch.
+        state.player.exhaust_pile = [loader.get_card("proto_kk_ambush"),
+                                     kokomi_plan.open_the_casket_card()]
         state.kk_plan_queue = []
         kokomi_plan.schedule(state, loader.get_card("proto_kk_ambush"))
         state.card_aim = state.enemies[0]
@@ -2641,7 +2446,8 @@ def test_the_sheets_one_dusk_row_is_the_only_one(overhaul):
     `plan_dusk:` is still a fact about a row's Plan LINE and
     `loader._validate_plan_dusk` still asks only that there be one."""
     dusk = [c.id for c in loader.prototype_cards() if c.plan_dusk]
-    assert dusk == ["proto_kk_breakwater"]
+    # The Casket pass (2026-09-28) added a second: Shell of Sanctuary.
+    assert dusk == ["proto_kk_breakwater", "proto_kk_shell_of_sanctuary"]
 
 
 def _row(cid):
@@ -2813,7 +2619,7 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     # the drain, and the entries behind this one in it -- where "your next
     # Plan" read as the next one WRITTEN (`EB-687`, `EB-645`).
     assert faces["proto_kk_second_wave"] == (
-        "Deal 5 damage. [gold]Plan[/gold]: The Plan after this "
+        "Deal 7 damage. [gold]Plan[/gold]: The Plan after this "
         "one is carried out twice.")
     assert faces["proto_kk_opening_gambit"].endswith(
         "The Plan after this one deals double damage.")
@@ -2929,46 +2735,45 @@ def test_the_new_clauses_are_plan_only_from_a_body(overhaul):
 # docs/notes/prototype-surface-provenance.md, "Kokomi pool pass three".
 # =============================================================================
 
-def test_feint_pays_the_planned_number_after_a_carry_out(overhaul):
-    """Sango Isshin's shape at Common. The branch reads the same
-    `plan_carried_out_this_turn` predicate the Rare's condition does, so "a
-    Plan was carried out this turn" has one definition in the arm.
-    `ProtoKkFeint.OnPlay` is the twin. R276 pick 1: the Plan line applies
-    Vulnerable rather than repeating the hit."""
+def test_feint_pays_three_per_carry_out(overhaul):
+    """THE CASKET PASS (2026-09-28): "Deal 4 damage, plus 3 for each Plan
+    carried out this turn. Plan: Apply 1 Vulnerable." The count is the one
+    Sango Isshin reads, so "carried out this turn" has one definition."""
     row = _row("proto_kk_feint")
-    branch = row.effects[0]
-    assert branch["op"] == "conditional"
-    assert branch["if"] == "plan_carried_out_this_turn"
-    assert branch["then"] == [{"op": "damage", "amount": 10,
-                               "target": "enemy"}]
-    assert branch["else"] == [{"op": "damage", "amount": 5, "target": "enemy"}]
+    assert row.effects == [{"op": "damage", "target": "enemy",
+                            "amount_formula": {
+                                "base": 4, "per": 3,
+                                "count": "plans_carried_out_this_turn"}}]
     assert row.plan == [{"op": "apply_power", "power": "vulnerable",
                          "amount": 1, "target": "front_enemy"}]
+    enemy = make_enemy(hp=100)
+    st = kokomi_state(enemies=[enemy])
+    effects.resolve_card(st, row)
+    assert 100 - enemy.hp == 4
+    carry_out(st, [{"op": "draw", "amount": 1}])
+    carry_out(st, [{"op": "draw", "amount": 1}])
+    before = enemy.hp
+    effects.resolve_card(st, row)
+    assert before - enemy.hp == 4 + 3 * 2
 
-
-def test_feints_two_printed_numbers_upgrade_by_different_amounts(overhaul):
-    """5 -> 7 and 10 -> 13, which is what `conditional_then_damage` exists for:
-    `conditional_damage` moves both branches and the then-branch takes one
-    more; the Plan's Vulnerable goes 1 -> 2. Read off the SMITHED card."""
+def test_feints_upgrade_moves_the_base_and_the_plans_vulnerable(overhaul):
+    """Base 4 -> 6, 3 per carry-out unchanged, the Plan's Vulnerable 1 -> 2.
+    Read off the SMITHED card."""
     from tier0.content import upgrades
 
     row = _row("proto_kk_feint")
-    assert row.upgrade == {"conditional_damage": 2,
-                           "conditional_then_damage": 1,
-                           "plan_power_amount": 1}
+    assert row.upgrade == {"formula_base": 2, "plan_power_amount": 1}
     up = upgrades.apply_upgrade(_row("proto_kk_feint"))
-    branch = up.effects[0]
-    assert branch["then"][0]["amount"] == 13
-    assert branch["else"][0]["amount"] == 7
+    assert up.effects[0]["amount_formula"]["base"] == 6
+    assert up.effects[0]["amount_formula"]["per"] == 3
     assert up.plan[0]["amount"] == 2
-
 
 def test_feints_face_prints_the_plan_line_it_can_write(overhaul):
     """`EB-660`: the face prints its Plan line. Since R276 pick 1 the line is
     a debuff ready before the enemy's next swing, not the hit made bigger."""
     faces = _faces()
-    assert faces["proto_kk_feint"].endswith(
-        "[gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].")
+    assert "[gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold]." in \
+        faces["proto_kk_feint"]
 
 
 def test_read_the_field_bottoms_the_costliest_of_the_top_two(overhaul):
@@ -3088,22 +2893,23 @@ def test_riptide_adds_its_rider_per_debuffed_body(overhaul):
     sick.powers["weak"] = 1
     st = kokomi_state(enemies=[clean, sick])
     row = _row("proto_kk_riptide")
-    assert row.effects[0]["bonus_vs_debuff"] == 4
+    # 11 and 3 more since the Casket pass (2026-09-28).
+    assert row.effects[0]["bonus_vs_debuff"] == 3
     effects.resolve_card(st, row)
-    assert 200 - clean.hp == 9
-    assert 200 - sick.hp == 13
+    assert 200 - clean.hp == 11
+    assert 200 - sick.hp == 14
 
 
 def test_riptides_base_and_rider_upgrade_by_different_amounts(overhaul):
-    """12 / 6 more: the `damage` key moves the base it rides on and
-    `bonus_vs_debuff` moves the rider's own number. The Plan line (R276 pick
-    1: 1 Energy and a card) does not upgrade."""
+    """14 / 4 more (the Casket pass, 2026-09-28): the `damage` key moves the
+    base it rides on and `bonus_vs_debuff` moves the rider's own number. The
+    Plan line (2 Energy and a card) does not upgrade."""
     from tier0.content import upgrades
 
     up = upgrades.apply_upgrade(_row("proto_kk_riptide"))
-    assert up.effects[0]["amount"] == 12
-    assert up.effects[0]["bonus_vs_debuff"] == 6
-    assert up.plan == [{"op": "energy", "amount": 1},
+    assert up.effects[0]["amount"] == 14
+    assert up.effects[0]["bonus_vs_debuff"] == 4
+    assert up.plan == [{"op": "energy", "amount": 2},
                        {"op": "draw", "amount": 1}]
 
 
@@ -3488,24 +3294,16 @@ _COC_NOW = {"op": "damage", "target": "enemy",
     ("proto_kk_ambush", [_VULN2],
      [{"op": "damage", "amount": 12, "target": "front_enemy"}],
      [_VULN2], [{"op": "damage", "amount": 15, "target": "front_enemy"}]),
-    ("proto_kk_cleansing_wave",
-     [{"op": "remove_debuff"}, {"op": "draw", "amount": 1}],
-     [{"op": "block", "amount": 10}],
-     [{"op": "remove_debuff"}, {"op": "draw", "amount": 1}],
-     [{"op": "block", "amount": 13}]),
-    ("proto_kk_ripple", [{"op": "draw", "amount": 1}],
-     [{"op": "energy", "amount": 1}],
-     [{"op": "draw", "amount": 2}], [{"op": "energy", "amount": 1}]),
     ("proto_kk_feigned_retreat", _DRAW2_DISCARD1,
      [{"op": "damage_if_unhurt", "amount": 9, "unhurt_amount": 14,
        "target": "front_enemy"}],
      _DRAW2_DISCARD1,
      [{"op": "damage_if_unhurt", "amount": 12, "unhurt_amount": 18,
        "target": "front_enemy"}]),
-    ("proto_kk_second_wave", [{"op": "damage", "amount": 5,
+    ("proto_kk_second_wave", [{"op": "damage", "amount": 7,
                                "target": "enemy"}],
      [{"op": "next_plan_extra_carry_out"}],
-     [{"op": "damage", "amount": 7, "target": "enemy"}],
+     [{"op": "damage", "amount": 9, "target": "enemy"}],
      [{"op": "next_plan_extra_carry_out"}]),
     ("proto_kk_chain_of_command", [_COC_NOW],
      [{"op": "first_companion_free"}],
@@ -3544,10 +3342,6 @@ def test_core_pass_faces(overhaul):
     faces = _faces()
     assert faces["proto_kk_ambush"] == (
         "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 damage.")
-    assert faces["proto_kk_cleansing_wave"] == (
-        "Remove one of your debuffs. Draw 1 card. [gold]Plan[/gold]: Gain 10 "
-        "[gold]Block[/gold].")
-    assert faces["proto_kk_ripple"].startswith("Draw {Cards:diff()} card")
     assert faces["proto_kk_feigned_retreat"].startswith(
         "Draw 2 cards. Discard 1 card. [gold]Plan[/gold]: Deal 9 damage")
     assert faces["proto_kk_chain_of_command"].endswith(

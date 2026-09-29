@@ -19,7 +19,7 @@ from understudy.blindplay_faces import (GUEST_STAR_ELEMENTS, _GUEST_STAR_RE,
                                         remember_elements)
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
-                                        CASKET_STRIKE,
+                                        CASKET_PER_PLAN,
                                         CRYSTALLIZE_BLOCK, OPENING_SPARK,
                                         SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
@@ -1415,6 +1415,12 @@ def _summon_row(hay: str) -> str:
 #: carries its act, and a hit's Bow is learned in play. Every Stage row now
 #: follows its tip word for word. The history is in git.
 
+#: THE CASKET PASS (2026-09-28). The Tamakushi Casket's tip, markup folded
+#: out, with the per-Plan number off the mirrored constant.
+CASKET_ROW = (f"Your relic. Each Plan the Bake-Kurage carries out adds "
+              f"{CASKET_PER_PLAN}. Open the Casket turns the count into "
+              f"Strength.")
+
 ARM_KEYWORDS: dict[str, str] = {
     # TEXT PASS 2026-09-25, in step with `ArmKeywordTips.ForBomb` and
     # `ForSetOff`: the tips were rewritten short ("the existing text is often
@@ -1465,9 +1471,15 @@ ARM_KEYWORDS: dict[str, str] = {
     # The ping goes out through the same `ElementalHit` funnel every other
     # non-attack hit in this mod does, so it reacts, it takes the target's
     # Vulnerable, and it leaves Hydro behind.
-    "Tamakushi Casket": (
-        f"Your relic. Each debuff you apply is a {CASKET_STRIKE} Hydro hit on "
-        f"that enemy: it reacts, takes its Vulnerable, and re-arms Hydro."),
+    #
+    # THE CASKET PASS (2026-09-28) REWROTE THE ROW with the relic: the strike
+    # is retired and the relic COUNTS carried-out Plans. The row answers the
+    # SHORT name too ("the Casket gains 2") -- see its pattern -- and
+    # `Open the Casket` is the relic's token. Both follow
+    # `ArmKeywordTips.ForCasket` / `ForOpenTheCasket` word for word.
+    "Tamakushi Casket": CASKET_ROW,
+    "Open the Casket": ("0-cost, Retain, Exhaust. Gain Strength equal to the "
+                        "Casket's count, then empty it."),
     # `EB-377` ADDED `Swirl`, printed as a VERB by ten Universals, beside
     # `Hexerei` -- which R276 pick 2 retired: the Spark and Klee's three
     # readers read any Companion play now, so the word and its row left the
@@ -1884,6 +1896,8 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Bomb": "klee", "Set off": "klee", "Spark": "klee", "Mine": "klee",
     "Plan": "kokomi", "Dusk": "kokomi", "Mend": "kokomi",
     "Tamakushi Casket": "kokomi",
+    # THE CASKET PASS (2026-09-28).
+    "Open the Casket": "kokomi",
     "Spend": "furina", "Fanfare": "furina", "Bow": "furina",
     "front performer": "furina", "back performer": "furina",
     "fade": "furina",
@@ -1975,6 +1989,13 @@ _ARM_KEYWORD_RE = {
     # that print it and on the strip line a queued Dusk entry draws.
     "Dusk": re.compile(r"\bDusk\b"),
     "Mend": re.compile(r"\bMends?\b"),
+    # THE CASKET PASS (2026-09-28). The relic by either name (the count is
+    # printed by its short one, "the Casket gains 2", though not inside the
+    # token's name, which has a row of its own), and the token. NO PLURALS:
+    # there is one of each.
+    "Tamakushi Casket": re.compile(
+        r"\bTamakushi Casket\b|(?<!Open the )\bCasket\b"),
+    "Open the Casket": re.compile(r"\bOpen the Casket\b"),
     # `EB-377`'s `Swirl` is printed as a verb, so it conjugates the way
     # `Mend` does. (Its sibling `Hexerei` was retired by R276 pick 2.)
     "Swirl": re.compile(r"\bSwirls?\b"),
@@ -2398,10 +2419,13 @@ REACTION_KEYWORDS: dict[str, str] = {
         #
         # NOT BY NAME HERE, for `EB-329`'s reason on this same row: it prints
         # for a Klee who holds no Casket, and what is general is the shape.
+        #
+        # THE CASKET PASS (2026-09-28) RETIRED THE EXCEPTION: the Tamakushi
+        # Casket counts Plans now and strikes nothing, so the clause that
+        # admitted "one relic's line" went with the strike.
         "An element comes from a CARD that prints one and from nothing else: "
         "a potion, a relic or an enemy applies none unless its own face or its "
-        "own glossary line says so -- and one relic's line does, because its "
-        "strike is a real elemental hit and leaves the aura to prove it."),
+        "own glossary line says so."),
     # `EB-345` (R249) retuned the six preview rows in `KleeMod.cs` -- each one
     # now leads with the pair that reacts instead of a 60-character preamble
     # about what the CARD supplies, and Electro-Charged says what the dot

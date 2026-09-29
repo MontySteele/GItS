@@ -39,6 +39,14 @@ namespace KleeMod.Powers;
 ///   * <see cref="PlansThisMorning"/> -- Tide Wall's multiplier (`EB-335`):
 ///     how many Plans this morning's drain held, written once by
 ///     <c>KokomiPlan.ResolveAll</c> before the first clause runs.
+///   * <see cref="PlansCarriedOutThisTurn"/> -- Feint's and Sango Isshin's
+///     count (the Casket pass, 2026-09-28): every carry-out this turn, a
+///     doubled one twice.
+///
+/// PER COMBAT, AGAIN (the Casket pass, 2026-09-28)
+///   * <see cref="CasketCount"/> -- the Tamakushi Casket's count: +1 per Plan
+///     carried out, moved by Pearl Diver, Moon Signal and What the Tokoyo
+///     Took, emptied by Open the Casket. Never rolled by the turn.
 ///
 /// PER PLAYER, keyed the way <c>KleeOverhaulLedger</c> is keyed and for the
 /// same reason (R205): in co-op the other seat's turn is not hers.
@@ -141,6 +149,46 @@ public sealed class KokomiOverhaulLedger
     /// </summary>
     public int PlansThisMorning { get; private set; }
 
+    /// <summary>
+    /// THE CASKET PASS (2026-09-28). How many Plans the Bake-Kurage has carried
+    /// out THIS TURN -- Feint's "plus 3 for each Plan carried out this turn"
+    /// and Sango Isshin's "6 damage to ALL enemies for each". Counted up by
+    /// <see cref="NotePlanCarriedOut"/>, which runs once per CARRY-OUT, so a
+    /// Plan carried out twice (Second Wave, Nereid's Ascension) counts twice,
+    /// and Change of Plans' early one counts too. Sim twin:
+    /// <c>CombatState.kk_plans_carried_out_this_turn</c>.
+    /// </summary>
+    public int PlansCarriedOutThisTurn { get; private set; }
+
+    /// <summary>
+    /// THE TAMAKUSHI CASKET'S COUNT (the Casket pass, 2026-09-28). Per combat:
+    /// a new combat's ledger starts at 0, and the turn roll never touches it.
+    /// "Each Plan the Bake-Kurage carries out adds 1 to the Casket" is
+    /// <see cref="Relics.TamakushiCasket.NoteCarriedOut"/>; Open the Casket
+    /// turns it into Strength and empties it, and it keeps counting from 0.
+    /// Sim twin: <c>CombatState.kk_casket</c>.
+    /// </summary>
+    public int CasketCount { get; private set; }
+
+    /// <summary>Add <paramref name="amount"/> to the Casket (a negative or
+    /// zero amount is refused, so nothing here can take the count down).</summary>
+    public void AddToCasket(int amount)
+    {
+        if (amount > 0) CasketCount += amount;
+    }
+
+    /// <summary>What the Tokoyo Took: "Double the Casket's count."</summary>
+    public void DoubleCasket() => CasketCount *= 2;
+
+    /// <summary>Open the Casket: the count goes to 0 and is returned, so the
+    /// caller grants exactly what was emptied.</summary>
+    public int EmptyCasket()
+    {
+        var was = CasketCount;
+        CasketCount = 0;
+        return was;
+    }
+
     private int _round = -1;
 
     /// <summary>
@@ -198,9 +246,14 @@ public sealed class KokomiOverhaulLedger
         return For(kokomi).Claim(key);
     }
 
-    /// <summary>One Plan carried out. Sango Isshin's condition, and nothing
-    /// else, so a second Plan in the same turn changes nothing.</summary>
-    public void NotePlanCarriedOut() => PlanCarriedOutThisTurn = true;
+    /// <summary>One Plan carried out: the per-turn fact and, since the
+    /// Casket pass, the per-turn count Feint and Sango Isshin read.</summary>
+    public void NotePlanCarriedOut()
+    {
+        PlanCarriedOutThisTurn = true;
+        // THE CASKET PASS (2026-09-28): the count as well as the fact.
+        PlansCarriedOutThisTurn++;
+    }
 
     /// <summary>The morning opens with <paramref name="plans"/> Plans due.
     /// Written by <c>KokomiPlan.ResolveAll</c> and by nothing else.</summary>
@@ -230,6 +283,7 @@ public sealed class KokomiOverhaulLedger
         CompanionsPlayedThisTurn = 0;
         _claimed.Clear();
         PlanCarriedOutThisTurn = false;
+        PlansCarriedOutThisTurn = 0;
         // `EB-335`. Cleared rather than handed over, and cleared HERE rather
         // than at the drain: `For` rolls on read, so the first ask of a new
         // round zeroes this before `ResolveAll` writes the new morning's depth

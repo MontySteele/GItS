@@ -125,6 +125,24 @@ KNOWN_STALE = {
         "re-authored. It is NOT coverage for anything and must never be "
         "counted as such."
     ),
+    "proto_kk_tide_chart": (
+        "The Kokomi Casket pass (2026-09-28) CUT this row from her pool (six rows cut, thirteen added; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_cleansing_wave": (
+        "The Kokomi Casket pass (2026-09-28) CUT this row from her pool (six rows cut, thirteen added; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_ripple": (
+        "The Kokomi Casket pass (2026-09-28) CUT this row from her pool (six rows cut, thirteen added; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_well_laid": (
+        "The Kokomi Casket pass (2026-09-28) CUT this row from her pool (six rows cut, thirteen added; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_sea_salt_prayer": (
+        "The Kokomi Casket pass (2026-09-28) CUT this row from her pool (six rows cut, thirteen added; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_salt_line": (
+        "The Kokomi Casket pass (2026-09-28) CUT this row from her pool (six rows cut, thirteen added; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_the_moon_overlooks_the_waters": (
         "EB-570 (2026-09-05) WITHDREW The Moon Overlooks the Waters from the "
         "Kokomi arm: the doctrine audit returned REQUIRES_MODIFICATION on C1 "

@@ -628,6 +628,15 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Converging Tide stamps an aim onto entries already written: the queue's
     # DEPTH does not move and what it will do does, which is a write.
     "redirect_queued_plans": [_hook("private", "kurage", "write")],
+    # THE CASKET PASS (2026-09-28). The Tamakushi Casket's count is a
+    # private channel of hers, filled by the jellyfish's carry-outs, so it is
+    # filed on the `kurage` channel: Pearl Diver's gain and What the Tokoyo
+    # Took's doubling WRITE it, Open the Casket spends it (a write), and What
+    # the Tokoyo Returns reads the exhaust pile.
+    "casket_gain": [_hook("private", "kurage", "write")],
+    "casket_double": [_hook("private", "kurage", "write")],
+    "open_casket": [_hook("private", "kurage", "write")],
+    "fetch_open_casket": [_hook("shared", "exhaust_pile", "use")],
     # R276 PICK 1, the halves rewrite. Pincer's replay and Stolen Chapter's
     # free card change what the next play IS, which is where `cost_mod` and
     # `next_attack_damage` are filed; Battle Plan's per-Attack bonus is filed

@@ -43,7 +43,7 @@ namespace KleeMod.Powers;
 /// is that the 26 rows are her only reward pool for the prototype run; R246
 /// pick 2 added the two defensive rows `EB-335` builds, making it 28, and
 /// round 9 pick 1's tempo shelf added two more, making it 30, and the pool
-/// passes since have made it 39.
+/// passes since have made it 39, and the Casket pass (2026-09-28) 46.
 ///
 /// THE OVERHAUL WINS WHERE IT MEETS THE KURAGE'S MEMORY. A dev build compiles
 /// this arm AND that one, and both want her starter. They are alternatives, not
@@ -119,13 +119,13 @@ internal static class KokomiOverhaulRoster
     internal static CardModel StarterDefend() => ModelDb.Card<DefendSilent>();
 
     /// <summary>
-    /// Kokomi's WHOLE offerable pool under the arm: the slice's 30 rows and
+    /// Kokomi's WHOLE offerable pool under the arm: the slice's 46 rows and
     /// nothing else.
     ///
     /// LISTED BY TYPE, not filtered by id prefix. A prefix match would be a
     /// second, softer definition of "which rows are the slice" living next to
     /// the sheet's own, and it would fail silently the day a row is renamed.
-    /// These are the same 30 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
+    /// These are the same 46 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
@@ -155,9 +155,10 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkSangonomiyasCounsel>(),
     };
 
-    /// <summary>The slice's own 34 rows, without the Ancient tail
-    /// <see cref="OfferablePool"/> adds. THIRTY-FOUR since The Moon Overlooks
-    /// the Waters was withdrawn (`EB-570`).</summary>
+    /// <summary>The slice's own 46 rows, without the Ancient tail
+    /// <see cref="OfferablePool"/> adds. FORTY-SIX since the Casket pass
+    /// (2026-09-28): six cut, thirteen added. The Open the Casket token is in
+    /// no pool; the relic deals it (<see cref="Relics.TamakushiCasket"/>).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
         // The Tactician -- Plans, and the cards that pay per Plan (8)
@@ -169,11 +170,9 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkSongOfPearls>(),
         ModelDb.Card<ProtoKkWarCouncil>(),
         ModelDb.Card<ProtoKkNereidsAscension>(),
-        // The Priestess -- Block through the jellyfish, Mend at Rare (9)
-        ModelDb.Card<ProtoKkSeaSaltPrayer>(),
+        // The Priestess -- Block through the jellyfish, Mend at Rare (7)
         ModelDb.Card<ProtoKkDeepCurrent>(),
         ModelDb.Card<ProtoKkCoralBulwark>(),
-        ModelDb.Card<ProtoKkCleansingWave>(),
         // `EB-335`, R246 pick 2: the kit's own defence in act 2.
         ModelDb.Card<ProtoKkTideWall>(),
         ModelDb.Card<ProtoKkShellGuard>(),
@@ -185,23 +184,14 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkVanguard>(),
         ModelDb.Card<ProtoKkTheGeneralsBanner>(),
         ModelDb.Card<ProtoKkChainOfCommand>(),
-        // Currencies, tempo, and the one replay (6)
+        // Currencies, tempo, and the one replay (5)
         ModelDb.Card<ProtoKkStolenChapter>(),
         ModelDb.Card<ProtoKkChangeOfPlans>(),
         ModelDb.Card<ProtoKkUndertow>(),
-        ModelDb.Card<ProtoKkSaltLine>(),
         ModelDb.Card<ProtoKkBattlePlan>(),
         ModelDb.Card<ProtoKkMoonsReflection>(),
-        // THE TEMPO SHELF (round 9 pick 1 at its default, 2026-09-04): the
-        // two rows that let a Plan be held or hurried. Held Tide and Tidal
-        // Rhythm, the drafted other two, were withdrawn on the R253 charter
-        // audit and are not built. LAST, in the sheet's
-        // own order, because `tools/lint_arm_pool_parity.py` compares this
-        // list to the sheet and to `C.KOKOMI_OVERHAUL_POOL_IDS` BY ORDER --
-        // the gate that exists because R252's defence shelf shipped
-        // unofferable when a `Slice()` was forgotten.
-        ModelDb.Card<ProtoKkTideChart>(),
-        ModelDb.Card<ProtoKkRipple>(),
+        // THE TEMPO SHELF (round 9 pick 1, 2026-09-04) was Tide Chart and
+        // Ripple; the Casket pass (2026-09-28) cut both.
         // POOL PASS ONE (`EB-492`,
         // `review/active/kokomi-pool-pass-2026-09-05.md`): Plan density in the
         // OFFER rather than in the starter. Three Attacks with a Plan line,
@@ -211,7 +201,6 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkRiptide>(),
         ModelDb.Card<ProtoKkPincer>(),
         ModelDb.Card<ProtoKkFlank>(),
-        ModelDb.Card<ProtoKkWellLaid>(),
         ModelDb.Card<ProtoKkFeignedRetreat>(),
         // POOL PASS TWO (`EB-643`, R265): the QUEUE as something the player
         // operates on rather than something that empties on a timer. Two
@@ -237,6 +226,22 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkScoutAhead>(),
         ModelDb.Card<ProtoKkSecondThoughts>(),
         ModelDb.Card<ProtoKkBreakwater>(),
+        // THE CASKET PASS (2026-09-28): the Tamakushi Casket counts the Plans
+        // the Bake-Kurage carries out. Thirteen rows, LAST in the sheet's own
+        // order, for the ordering reason the shelf above states.
+        ModelDb.Card<ProtoKkMassedVolley>(),
+        ModelDb.Card<ProtoKkSignalArrow>(),
+        ModelDb.Card<ProtoKkSurgingShoal>(),
+        ModelDb.Card<ProtoKkPearlDiver>(),
+        ModelDb.Card<ProtoKkPressTheAdvantage>(),
+        ModelDb.Card<ProtoKkShellOfSanctuary>(),
+        ModelDb.Card<ProtoKkDriftglass>(),
+        ModelDb.Card<ProtoKkWhatTheTokoyoReturns>(),
+        ModelDb.Card<ProtoKkDepthsJudgment>(),
+        ModelDb.Card<ProtoKkTideturn>(),
+        ModelDb.Card<ProtoKkMoonSignal>(),
+        ModelDb.Card<ProtoKkPearlCurrent>(),
+        ModelDb.Card<ProtoKkWhatTheTokoyoTook>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

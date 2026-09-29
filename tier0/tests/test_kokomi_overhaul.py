@@ -197,7 +197,7 @@ def test_the_starter_is_the_canonical_ten():
         assert gone not in staged
 
 
-def test_the_pool_is_all_thirty_of_the_slices_rows():
+def test_the_pool_is_all_forty_six_of_the_slices_rows():
     """Slice draft 6 sec.4, whole. Pinned rather than described because it is
     the slice's own scope statement.
 
@@ -235,15 +235,32 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
     THIRTY-NINE SINCE POOL PASS FIVE (`EB-685`), which retired Night Watch: it
     lost every draft comparison in r27, and Slack Water's Plan half moved to
     Dusk in the same pass -- the multi-body Weak before the swing is the job
-    Night Watch had been rebuilt for one pass earlier."""
+    Night Watch had been rebuilt for one pass earlier.
+
+    FORTY-SIX SINCE THE CASKET PASS (2026-09-28): Tide Chart, Cleansing Wave,
+    Ripple, Well Laid, Sea-Salt Prayer and Salt Line cut, and thirteen rows
+    added last in the sheet's order. [USER]: "Let's avoid having too many
+    attack / block spam cards ... they shouldn't just be 10 copies of 'do x
+    damage, or plan y'"."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 39
-    assert len(set(ids)) == 39
+    assert len(ids) == 46
+    assert len(set(ids)) == 46
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
-    assert {"proto_kk_tide_chart", "proto_kk_ripple"} <= set(ids)
     assert {"proto_kk_riptide", "proto_kk_pincer", "proto_kk_flank",
-            "proto_kk_well_laid", "proto_kk_feigned_retreat"} <= set(ids)
+            "proto_kk_feigned_retreat"} <= set(ids)
+    cut = {"proto_kk_tide_chart", "proto_kk_cleansing_wave", "proto_kk_ripple",
+           "proto_kk_well_laid", "proto_kk_sea_salt_prayer",
+           "proto_kk_salt_line"}
+    assert not cut & set(ids)
+    assert ids[-13:] == (
+        "proto_kk_massed_volley", "proto_kk_signal_arrow",
+        "proto_kk_surging_shoal", "proto_kk_pearl_diver",
+        "proto_kk_press_the_advantage", "proto_kk_shell_of_sanctuary",
+        "proto_kk_driftglass", "proto_kk_what_the_tokoyo_returns",
+        "proto_kk_depths_judgment", "proto_kk_tideturn",
+        "proto_kk_moon_signal", "proto_kk_pearl_current",
+        "proto_kk_what_the_tokoyo_took")
     assert "proto_kk_held_tide" not in ids
     assert "proto_kk_tidal_rhythm" not in ids
     assert {"proto_kk_opening_gambit", "proto_kk_second_wave",
@@ -259,13 +276,18 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
 
 
-def test_the_arm_carries_exactly_three_rule_numbers():
+def test_the_arm_carries_exactly_five_rule_numbers():
     """Draft 6's rules are STRUCTURAL -- where a card lands and when -- so
-    almost every figure is a card's and stays on its row. Three are not: the
-    relic's strike, Rally's discount and (since `EB-655`) Battle Plan's, each
-    printed on a face with no `amount` field behind it. They are named so
-    `lint_constant_parity` can compare the C# mirrors BY VALUE."""
-    assert C.KOKOMI_OVERHAUL_CASKET_STRIKE == 2
+    almost every figure is a card's and stays on its row. Five are not, each
+    printed with no `amount` field behind it: Rally's discount, Battle Plan's
+    bonus (since `EB-655`), and since the Casket pass (2026-09-28) the
+    relic's per-Plan count, Open the Casket's Strength rate and Moon Signal's
+    threshold -- which replaced the relic's retired debuff strike. They are
+    named so `lint_constant_parity` can compare the C# mirrors BY VALUE."""
+    assert C.KOKOMI_OVERHAUL_CASKET_PER_PLAN == 1
+    assert C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT == 1
+    assert C.KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD == 2
+    assert not hasattr(C, "KOKOMI_OVERHAUL_CASKET_STRIKE")
     assert C.KOKOMI_OVERHAUL_RALLY_DISCOUNT == 1
     assert C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS == 4
     named = {n for n in dir(C) if n.startswith("KOKOMI_OVERHAUL")}
@@ -274,7 +296,9 @@ def test_the_arm_carries_exactly_three_rule_numbers():
     assert named == {"KOKOMI_OVERHAUL", "KOKOMI_OVERHAUL_POOL_IDS",
                      "KOKOMI_OVERHAUL_STARTER_IDS",
                      "KOKOMI_OVERHAUL_MULTIPLAYER_IDS",
-                     "KOKOMI_OVERHAUL_CASKET_STRIKE",
+                     "KOKOMI_OVERHAUL_CASKET_PER_PLAN",
+                     "KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT",
+                     "KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD",
                      "KOKOMI_OVERHAUL_RALLY_DISCOUNT",
                      "KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS"}
 
@@ -362,10 +386,15 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     (`EB-685`) is the third such leaving, Night Watch.
 
     RIPPLE MOVED TO UNCOMMON (2026-09-28): a 0-cost draw-1 replaces itself,
-    and LAW's cycling rule gates that to Uncommon+."""
+    and LAW's cycling rule gates that to Uncommon+.
+
+    THE CASKET PASS (2026-09-28): four Commons cut (Tide Chart, Well Laid,
+    Sea-Salt Prayer, Salt Line), two Uncommons cut (Cleansing Wave, Ripple),
+    Second Wave moved Common to Uncommon, and seven Commons, five Uncommons
+    and one Rare added: 24 / 17 / 5."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 22, "uncommon": 13, "rare": 4}
+        "common": 24, "uncommon": 17, "rare": 5}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

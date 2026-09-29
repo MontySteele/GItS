@@ -499,24 +499,7 @@ public class Round19Tests
     // the card at the enemy's debuffs, a count the board shows, so the face
     // prints the rule and both numbers and the morning rider is off the card.
     // (`KokomiRiderTips.MorningDamageBody` stays, attached to no row today.)
-
-    [Fact]
-    public void Well_laid_prints_its_rule_and_reads_the_targets_debuffs()
-    {
-        var card = Source(
-            "Cards/Prototype/Generated/ProtoKkWellLaid.cs");
-
-        Assert.Contains(
-            "(\"description\", \"Deal {CalculationBase:diff()} damage. Deals "
-          + "{ExtraDamage:diff()} additional damage for each debuff on the "
-          + "enemy.\")",
-            card);
-        Assert.Contains("new CalculationBaseVar(3m)", card);
-        Assert.Contains("new ExtraDamageVar(3m)", card);
-        Assert.Contains("KokomiOverhaulKit.DebuffCount(target)", card);
-        Assert.DoesNotContain("PlansThisMorning", card);
-        Assert.DoesNotContain("ForMorningDamageRider", card);
-    }
+    // The Casket pass (2026-09-28) cut Well Laid; its face pin left with it.
 
     [Fact]
     public void EB539_off_the_board_the_rule_stands_without_a_count()

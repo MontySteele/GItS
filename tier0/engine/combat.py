@@ -1121,6 +1121,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         # Plan out does not also fire it. `ProtoBakeKuragePower` reads the
         # same queue at the same point.
         quiet = not state.kk_plan_queue
+        # THE CASKET PASS (2026-09-28). The relic's token lands on turn one,
+        # and MOON SIGNAL reads "2 or more Plans waiting" off the same
+        # pre-drain queue Song of Pearls reads -- after the drain it could
+        # never be true. `ProtoBakeKuragePower.AfterPlayerTurnStart` and
+        # `TamakushiCasket.BeforeHandDraw` are the twins.
+        kokomi_plan.deal_open_the_casket(state)
+        kokomi_plan.moon_signal(state, len(state.kk_plan_queue))
         kokomi_plan.resolve_all(state)
         kokomi_plan.song_of_pearls(state, quiet)
         # `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning
@@ -1130,13 +1137,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         # `ProtoBakeKuragePower.AfterPlayerTurnStart` calls
         # `KokomiPlan.PayPromisedDraws` at exactly this point.
         kokomi_plan.pay_tide_charts(state)
-        # `EB-335`. SHELL GUARD'S WINDOW CLOSES AFTER THE MORNING, not on the
-        # `roll_turn` line above: R246 pick 2 says the morning's Plans strike
-        # the Casket inside the window, so the card's Block arrives before the
-        # enemy's next swing. `kokomi_plan.close_shell_guard`'s header carries
-        # the whole argument; it is called unconditionally because the drain
-        # above returns early on an empty queue.
-        kokomi_plan.close_shell_guard(state)
         _settle_phases(state)
         _revive_player_if_needed(state)
         if not p.alive or state.over:

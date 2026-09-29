@@ -74,6 +74,9 @@ public static class ArmKeywordTips
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
     public const string DuskKey = "KLEEMOD-ARM_DUSK";
     public const string CasketKey = "KLEEMOD-ARM_CASKET";
+    // THE CASKET PASS (2026-09-28): the relic's token, named by What the
+    // Tokoyo Returns.
+    public const string OpenTheCasketKey = "KLEEMOD-ARM_OPEN_THE_CASKET";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
     // 2026-09-25 (the afternoon Klee seats): `Companion` is printed golded on
     // Klee's readers and on the Kokomi and Furina arms' faces, and nothing on
@@ -530,33 +533,36 @@ public static class ArmKeywordTips
           + "the fight with.");
 
     /// <summary>
-    /// `EB-625`. WHAT THE CASKET IS, on every face that names it.
+    /// `EB-625`. WHAT THE CASKET IS, on every face that names it -- by its
+    /// full name (Shell Guard) or, since the Casket pass (2026-09-28), by the
+    /// short one ("the Casket gains 2", "for each point in the Casket").
     ///
-    /// THE FIND ([USER]'s Kokomi act-1 run, 2026-09-07). `Shell Guard` reads
-    /// "whenever the [gold]Tamakushi Casket[/gold] strikes" and nothing on
-    /// screen says what the Casket is or what makes it strike -- so the card's
-    /// whole payout hangs off a proper noun the player has met only as a relic
-    /// name. It is `Grounded` and `Oz` one kit over: a face written against a
-    /// thing it cannot itself introduce.
-    ///
-    /// THE RELIC'S OWN SENTENCE, WORD FOR WORD, because the relic already
-    /// prints the rule and two spellings of one rule is how a player learns
-    /// there are two rules. The number is read off
-    /// <see cref="KokomiOverhaulLaw.CasketStrike"/> -- the same constant the
-    /// relic's face interpolates and <see cref="TamakushiCasket.Strike"/>
-    /// deals -- so a retune cannot leave this quoting a retired number.
-    ///
-    /// AND IT SAYS "your relic" FIRST, which is the half the relic's own face
-    /// cannot say: a player reading Shell Guard in a shop has to know where to
-    /// look for the thing before the rule means anything.
+    /// THE CASKET PASS REWROTE THE SENTENCE with the relic: it used to be the
+    /// debuff strike, and the relic now COUNTS the Plans the Bake-Kurage
+    /// carries out. "Your relic" first, which is the half the relic's own face
+    /// cannot say; then what fills it and what empties it. The per-Plan number
+    /// is read off <see cref="KokomiOverhaulLaw.CasketPerPlan"/>, the constant
+    /// the relic adds.
     /// </summary>
     public static IEnumerable<IHoverTip> ForCasket(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, CasketKey,
-            "Your relic. Each debuff you apply is a "
-          + KokomiOverhaulLaw.CasketStrike + " [gold]Hydro[/gold] hit on that "
-          + "enemy: it reacts, takes its [gold]Vulnerable[/gold], and re-arms "
-          + "[gold]Hydro[/gold].");
+            "Your relic. Each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] "
+          + "carries out adds " + KokomiOverhaulLaw.CasketPerPlan + ". "
+          + "[gold]Open the Casket[/gold] turns the count into "
+          + "[gold]Strength[/gold].");
+
+    /// <summary>
+    /// THE CASKET PASS (2026-09-28). The token the Tamakushi Casket deals into
+    /// her opening hand, on the face that names it (What the Tokoyo Returns).
+    /// Its own card text, restated, because the card is in no pool and a
+    /// player may meet the name before the card.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForOpenTheCasket(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, OpenTheCasketKey,
+            "0-cost, Retain, Exhaust. Gain [gold]Strength[/gold] equal to the "
+          + "Casket's count, then empty it.");
 
     /// <summary>
     /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.

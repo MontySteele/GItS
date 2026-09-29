@@ -136,6 +136,12 @@ public static class KokomiOffPoolCards
         // must not see it or a reward roll could offer a card nobody ruled.
         // See KleeMod.PrototypeCards.
         cards.AddRange(PrototypeCards.For("kokomi"));
+#if PROTOTYPE_CARDS
+        // THE CASKET PASS (2026-09-28): the Tamakushi Casket's hand-written
+        // token, dealt by the relic and in no pool -- Furina's Ethereal
+        // Spotlight's footing.
+        cards.Add(ModelDb.Card<Cards.Prototype.OpenTheCasket>());
+#endif
         return cards;
     }
 }
