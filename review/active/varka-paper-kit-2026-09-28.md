@@ -423,14 +423,146 @@ supports Gale. Grand Master stays provisional (§5). Pool target 78 comes later.
 
 One question: **is choosing between Absorb and Swirl a decision on the turn,
 or a chore?** Two seats, a one-page record. [USER]'s playtest follows.
+Answered in `review/records/varka-round-1-2026-09-29.md`: a decision once one
+Wind is held, a chore before it. §11 replaces the Winds, Absorb and Muster.
+
+## 11. The Oath rework (2026-09-29): one element at a time
+
+**Why.** The defence census (starters, relics and pools of all nine
+characters, 2026-09-29) found Varka the only character with no defence beyond
+Defend. Talking it through, [USER] set the direction instead of a Block patch:
+"I am envisioning that Varka only gets the benefits of one element at a time,
+not all four." "He should charge up his ascension by applying and swirling
+elements, and he can switch elements based on who he's drafted to meet the
+needs of each fight." "Muster sounds too useful for this concept, honestly...
+elements should be something you draft into." The shape follows his Genshin
+kit: in Stormward Charge one blade hits Anemo and the other a teammate's
+element, one element at a time; Four Winds' Ascension is a recharging special;
+Swirls stack **Azure Fang's Oath** (max 4) to power it.
+
+Stage: back to Paper. Numbers are placeholders for the sim. A number in
+brackets is the upgrade.
+
+### 11.1 The rules
+
+- **Oath, one count per element.** Varka has a Pyro, Hydro, Electro and Cryo
+  Oath. He gains 1 Oath of an element each time he applies it to an enemy
+  and each time he Swirls an aura of it. A count only goes up, unless a card
+  says otherwise, and every count resets at the end of the fight (Forge's
+  rule). [USER]: "you can run multiple elements if you want, but then
+  figuring out how to juggle them becomes a problem."
+- **His current element** is the element of the last Knight he played. The
+  seat page and his status bar show it with its Oath count. Before his first
+  Knight he has none.
+- **Cards read only the current element's Oath.** An Oath reader can be
+  strong because it pays for focus: Oath banked in other elements is dead
+  weight until he switches back.
+- **Swirl** is the shared rule (a fresh aura stays on, spent; spent copies
+  spread; a flat 2 to every enemy). A Swirl he makes also pays his current
+  element's effect, one element at a time: **Pyro** 3 damage to the enemy
+  Swirled; **Hydro** 3 Block; **Cryo** 1 Weak on the enemy Swirled;
+  **Electro** 1 Energy on the first Swirl each turn.
+- **Absorb and the four Winds are gone.**
+
+### 11.2 Boreas's Fang and Four Winds' Ascension
+
+- **Boreas's Fang** (starting relic): "The first time each combat you gain
+  Oath, add Four Winds' Ascension to your hand." Regent's Forge is the model:
+  "Adds Sovereign Blade to their hand if they haven't forged this combat."
+- **Four Winds' Ascension** (Attack, 1, created in combat, never in the deck):
+  "Deal 6 Anemo damage. Then deal 3 damage for each Oath of your current
+  element, as that element." Played, it goes to the discard pile and comes
+  back only when he draws it. The Anemo hit Swirls a fresh aura first; the
+  elemental hit then applies the current element (1 more Oath) or reacts with
+  a spent aura. It gains nothing from Oath of other elements.
+- **The upgraded Fang** (the starter relic upgrade every kit has) creates
+  Ascension upgraded: 9 Anemo, 4 per Oath.
+
+### 11.3 The starter (80 HP, 99 gold)
+
+Strike ×4, Defend ×4 (base game), and:
+- **One starting Knight, chosen at random each run** from four starter-only
+  cards. Like Survivor or Bodyguard, a starter can be better than a Common;
+  each shows what its element does for him. Their names are their Genshin
+  Bursts, so none clashes with the pool Knights (named for Skills):
+  - **Amber: Fiery Rain** (Skill, 1): Deal 9 [12] Pyro. *(pool Amber: 6)*
+  - **Barbara: Shining Miracle** (Skill, 1): Apply Hydro to ALL enemies.
+    Gain 7 [10] Block. *(pool Barbara: 3 Block)*
+  - **Lisa: Lightning Rose** (Skill, 1): Deal 6 [8] Electro. Draw 2.
+  - **Kaeya: Glacial Waltz** (Skill, 1): Deal 6 [8] Cryo. Apply 1 [2] Weak.
+- **Windbound Execution** (Attack, 1): Deal 4 [6] Anemo to ALL enemies. His
+  Genshin Skill, the starter's Swirl card. It leaves the pool.
+
+Knights' Muster and the Ascension-in-the-deck leave the starter.
+
+**Turn one, worked.** Barbara: Shining Miracle paints both slimes Hydro (Hydro
+Oath 2; the Fang adds Ascension) and gives 7 Block. Windbound Execution
+Swirls both (Hydro Oath 4; each Swirl pays Hydro, 3 Block, so 13 Block in
+all). The third energy plays Ascension: 6 Anemo, which finds only spent
+auras, plus 12 Hydro, which refreshes the aura (Hydro Oath 5). That is a
+strong first turn; the sim's first check is whether it is too strong.
+
+### 11.4 The pool, re-aimed (batch one, 19 cards)
+
+- **Kept as written:** Squall, Updraft, Gale Sweep, Tempest Charge, the four
+  pool Knights, Grand Master's Order, Knights' Roll Call, Converging Winds.
+- **Moved:** Windbound Execution to the starter.
+- **Re-aimed off the Winds:**
+  - **Favonius Drill** (Skill, 1, C): Gain 6 [9] Block. Apply your current
+    element to an enemy. (It no longer chooses a Knight: that was Muster's
+    job.)
+  - **Wind Wall** (Skill, 1, C): Gain 7 [10] Block. If you have a current
+    element, gain 3 more.
+  - **Tailwind Stride** (Skill, 1, U): Draw 2. If you have a current element,
+    draw 1 more.
+  - **Favonius Cut** (Attack, 2, U): Deal 14 [19] Anemo. (Absorb gone.)
+  - **Eye of the Storm** (Skill, 1, U), an Oath reader: Gain 2 [3] Block for
+    each Oath of your current element.
+  - **Stormward Stance** (Power, 1 [0], U), an Oath reader: While your
+    current element has 4 or more Oath, your Anemo Attacks deal 3 more.
+  - **Boreas Unbound** (Power, 2 [1], R): Whenever your current element
+    changes, gain 1 Energy. The switching payoff.
+
+### 11.5 The first expansion: defence and juggling
+
+The census's plan ([USER], 2026-09-29: "layer some defense in his first deck
+expansion"), plus [USER]'s Oath movers:
+- **Oath of the Knights** (Power, 1, U): At the start of your turn, gain Block
+  equal to your current element's Oath. His defensive Power; strong in focus,
+  nothing while juggling.
+- **Wall of Gales** (Skill, 2, R): Gain 16 [22] Block. Swirl every fresh
+  aura. The save-a-turn card.
+- **Headwind** (Skill, 1, C): Apply 2 [3] Weak. If your current element is
+  Cryo, apply it to ALL enemies. The Weak card.
+- **Rally to the Banner** (Skill, 1, U): Move all your Oath to your current
+  element. Exhaust.
+- **Four Winds' Accord** (Skill, 1, R): Split your total Oath evenly among the
+  four elements, rounding down, then gain 1 of each. Exhaust.
+- **Sworn Brotherhood** (Power, 2 [1], R): At the start of your turn, gain 1
+  Oath of every element.
+
+Pool after the rework and expansion: 24 (10 / 9 / 5).
+
+### 11.6 What the sim must show before a prototype
+
+1. **Ascension's curve.** Oath per turn, and Ascension's damage the turns it
+   is drawn, from turn 1 to turn 12, by starting Knight; focused on one
+   element against juggling two. A boss fight must not run away: flag any
+   deck where Ascension alone passes 60 per cast by turn 8.
+2. **The starting Knights are even.** Win rate and act-1 HP loss by starting
+   Knight; no element more than ten points behind the others.
+3. **Oath readers pay for focus.** Eye of the Storm and Oath of the Knights
+   against Defend, focused and juggling.
+4. **Defence.** Act-1 elite HP loss against run 3 of round one (the best).
 
 ## Picks
 
-1. **Winds.** (1) *Four different flat effects, one per element* [default].
-   (2) One generic stack per distinct element (simpler, less flavour).
-2. **His first colour.** (1) *Knights' Muster in the starter* [default].
-   (2) An optional run-start offer of one Knight (`LAW.md`'s R160 route).
-   (3) No starter source; the Knights come through the draft.
+1. **The Swirl payout.** (1) *Keep one flat effect per element, paid by the
+   current element only* [default]. (2) Cut it; Oath and its readers carry
+   the element alone (simpler, less to learn).
+2. **What gains Oath.** (1) *Applying an element and Swirling an aura of it,
+   1 each* [default]. (2) Swirling only (closer to Genshin's A4; slower,
+   and the Knights charge nothing by themselves).
 3. **Grand Master.** (1) *Provisional third archetype, until it shows a
    distinct turn* [default]. (2) Drop it now; a third archetype comes from his
    Hexerei homework instead.
