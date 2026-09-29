@@ -746,6 +746,13 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # `EB-333`: the run's last state, off the same feed, so the one-line
         # page says what the run ended WITH and not only where.
         obs["summary"] = _run_summary(state)
+        # 2026-09-28 (Kokomi seat): a run that beat The Architect printed
+        # "HP 0/78" and no word of a win. The bridge now sends `result` off
+        # the room the run ended in (`IsVictoryRoom`); on a won run the HP
+        # figure is the ending's, not the last fight's, so it is left off.
+        if obs["result"].lower() == "victory":
+            obs["summary"] = [line for line in obs["summary"]
+                              if not line.startswith("- HP ")]
     elif st == "menu":
         obs["screen"] = "menu"
         obs["blocked"] = ("this is a menu, not a play screen. Start the run "

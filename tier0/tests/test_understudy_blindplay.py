@@ -6703,8 +6703,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # side, so the anchors are the halves that are whole.
         "Dusk": [": the ", " carries this ",
                  " out at the end of this turn, before enemies "],
-        "Mend": [": heal N HP, never above the HP you entered",
-                 "the fight with"],
+        "Mend": [": heal N HP, but never above the HP you had",
+                 "at the start of this combat"],
         # `EB-377` ADDED `Swirl` to the page beside `Hexerei`, which R276
         # pick 2 retired with its tip.
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
@@ -11064,7 +11064,7 @@ def test_a_won_or_lost_run_says_what_it_ended_with():
                        "relics": [{"name": "Pounding Surprise"}],
                        "potions": [{"name": "Fire Potion", "slot": 0}]}
     page = blindplay.observe(state)
-    assert "The run ended on floor 17: Defeat" in page
+    assert "The run ended on floor 17. You LOST the run." in page
     assert "What the run ended with:" in page
     assert "- Act 1" in page and "- HP 0/62" in page and "- 231 gold" in page
     assert "- Relics: Pounding Surprise" in page

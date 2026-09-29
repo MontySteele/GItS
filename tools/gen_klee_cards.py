@@ -3040,7 +3040,8 @@ APPLY_POWERS = {
     # reads only whether it is worn.
     "kk_nereids_ascension": ("NereidsAscensionPower", None,
         "At the start of your turn, the [gold]Bake-Kurage[/gold] "
-        "carries out your first [gold]Plan[/gold] twice."),
+        "carries out your first [gold]Plan[/gold] twice."
+        " Your first [gold]Dusk[/gold] [gold]Plan[/gold] is doubled too."),
     "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
         "Whenever you apply a debuff to an enemy, gain {X} Block."),
     "kk_generals_banner": ("GeneralsBannerPower", None,

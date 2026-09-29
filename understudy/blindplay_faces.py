@@ -55,7 +55,11 @@ def relic_faces(state: dict[str, Any]) -> list[dict[str, str]]:
         row = {"name": name, "text": _text(r.get("description"))}
         counter = r.get("counter")
         if counter is not None:
-            row["counter"] = _text(counter)
+            # 2026-09-28 (Kokomi seat): a count of 0 is a count the icon
+            # draws, and `_text(0)` folded it to "" -- so the Tamakushi
+            # Casket's line printed nothing until the first Plan landed.
+            row["counter"] = (str(counter) if isinstance(counter, int)
+                              else _text(counter))
         # 2026-09-26 (control seat, Silent): a spent relic, which the game
         # greys out and whose text still reads as if it will fire.
         if r.get("used_up") is True:

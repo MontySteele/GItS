@@ -110,7 +110,7 @@ its TARGET is what a rewrite aims below.
 | `[gold]Mine[/gold]` | "Place a [gold]Mine[/gold] 4 on ALL enemies." | a Mine is a Bomb; "goes off when its enemy attacks you" |
 | `[gold]Spark[/gold]` / `[gold]Sparks[/gold]` | the price sits in the cost slot; the body does not restate it; "gain 1 [gold]Spark[/gold]" | "Some cards cost Sparks instead of Energy." |
 | `[gold]Plan[/gold]` | the line: "[gold]Plan[/gold]: Deal 9 damage." A plan-only row leads with "Play on the [gold]Bake-Kurage[/gold]." (codegen) | the Bake-Kurage "carries out" a Plan; a Plan "hits the front enemy" unless it says ALL |
-| `[gold]Mend[/gold] N` | "[gold]Mend[/gold] 10." | "heal N HP, never above the HP you entered the fight with" |
+| `[gold]Mend[/gold] N` | "[gold]Mend[/gold] 10." | "heal N HP, but never above the HP you had at the start of this combat" |
 | `[gold]Bake-Kurage[/gold]` | the pet's name, always; "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card." | never "the jellyfish" |
 | `[gold]Swirl[/gold]` | a verb with the base's targets: "[gold]Swirl[/gold] the enemy." "[gold]Swirl[/gold] ALL enemies." "Deal 8 damage to a random enemy and [gold]Swirl[/gold] it." | "Whenever a [gold]Swirl[/gold] happens" |
 | `[gold]Elemental Reaction[/gold]` | the shipped spelling of the noun, kept: "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn" | "reaction" lowercase is never printed |

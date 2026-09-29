@@ -635,7 +635,8 @@ public sealed class NereidsAscensionPower : PowerModel, ILocalizationProvider
         ("title", "Nereid's Ascension"),
         ("description",
             "At the start of your turn, the [gold]Bake-Kurage[/gold] "
-          + "carries out your first [gold]Plan[/gold] twice."),
+          + "carries out your first [gold]Plan[/gold] twice."
+          + " Your first [gold]Dusk[/gold] [gold]Plan[/gold] is doubled too."),
     };
 
     public override PowerType Type => PowerType.Buff;
