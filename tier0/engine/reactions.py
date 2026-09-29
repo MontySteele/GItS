@@ -4,6 +4,12 @@ Rules:
 - One aura per enemy. Same-element hit refreshes duration; different-element
   hit consumes the aura and triggers the reaction table.
 - Anemo and Geo never leave auras; they only trigger (design doc §2.1).
+- THE ELEMENT PORT (`C.SWIRL_PAYS`, `C.CRYSTALLIZE_KEEPS_AURA`; ruled in
+  `review/ruled/element-home-review-2026-09-28.md` §3/§4/§6). With a switch
+  on, its trigger element no longer consumes: a hit on a FRESH aura reacts
+  and leaves the aura standing, SPENT; a hit on a spent aura does nothing
+  extra. A same-element hit refreshes the duration AND makes it fresh; every
+  other element reacts with a spent aura exactly as with a fresh one.
 - IRON RULE: amplifiers (Vaporize/Melt) multiply ONE hit and consume the
   aura. They must never persist. tests/test_reactions.py asserts this.
 
@@ -20,6 +26,26 @@ from tier0.engine import powers, resources
 from tier0.engine.state import CombatState, Enemy
 
 AURA_ELEMENTS = {"pyro", "hydro", "electro", "cryo"}   # anemo/geo trigger only
+
+
+def trigger_keeps_aura(trigger: Optional[str]) -> bool:
+    """Does this trigger element SPEND the aura rather than consume it?
+
+    The one question both switches answer, asked by `resolve_hit` and by any
+    reader that forecasts a reaction. Only a trigger element can say yes, and
+    only while its own switch is on (§6 pick 4.4: each change tested alone).
+    C# twin: `TriggerRules.TriggerKeepsAura`.
+    """
+    return ((trigger == "anemo" and C.SWIRL_PAYS)
+            or (trigger == "geo" and C.CRYSTALLIZE_KEEPS_AURA))
+
+
+def trigger_pays(enemy: Enemy, trigger: Optional[str]) -> bool:
+    """Would a `trigger` hit on this enemy's aura react? False only for a
+    switched trigger on a SPENT aura -- the "pays nothing" case the preview
+    has to explain. Pure. C# twin: `TriggerRules.Outcome`."""
+    return not (enemy.aura and trigger_keeps_aura(trigger)
+                and enemy.aura_spent)
 
 _AMPLIFY = {
     frozenset(("pyro", "hydro")): ("vaporize", None),   # mult read at call time
@@ -62,6 +88,7 @@ def apply_aura(state: CombatState, enemy: Enemy, element: str,
         return
     enemy.aura = element
     enemy.aura_turns_left = aura_duration(state)
+    enemy.aura_spent = False                 # every new aura arrives fresh
     state.emit("aura_applied", element=element, target=enemy.name,
                source=source)
 
@@ -127,11 +154,24 @@ def resolve_hit(state: CombatState, enemy: Enemy, element: Optional[str],
         return damage
     if aura == element:
         enemy.aura_turns_left = aura_duration(state)    # refresh
+        enemy.aura_spent = False                        # ... and make fresh
         return damage
+
+    # THE ELEMENT PORT: a switched trigger SPENDS the aura instead of
+    # consuming it. On a fresh aura it reacts and the aura stands, spent, its
+    # duration untouched; on a spent one it pays nothing and changes nothing.
+    if trigger_keeps_aura(element):
+        if enemy.aura_spent:
+            state.emit("trigger_spent", trigger=element, aura=aura,
+                       target=enemy.name)
+            return damage
+        enemy.aura_spent = True
+        return _react(state, enemy, trigger=element, aura=aura, damage=damage)
 
     # Different element on an existing aura: consume + react.
     enemy.aura = None
     enemy.aura_turns_left = 0
+    enemy.aura_spent = False
     return _react(state, enemy, trigger=element, aura=aura, damage=damage)
 
 
@@ -143,8 +183,27 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
 
     if trigger == "anemo":
         name = "swirl"
-        for other in state.living_enemies:
-            apply_aura(state, other, aura, "swirl_spread")
+        if C.SWIRL_PAYS:
+            # §4 A. The struck enemy keeps its aura (spent by `resolve_hit`).
+            # The spread keeps today's reach -- every living enemy -- less the
+            # ones already wearing this element ("every enemy that lacks
+            # it"); a different aura is replaced, as today, and nothing
+            # reacts where a copy lands (the deferred candidate). Copies
+            # arrive SPENT, so they cannot be Swirled again.
+            for other in state.living_enemies:
+                if other is enemy or other.aura == aura:
+                    continue
+                apply_aura(state, other, aura, "swirl_spread")
+                other.aura_spent = True
+            # The flat 2: element-less and outside the pipeline, exactly
+            # Overload's splash, so it reacts with nothing. Durin's White
+            # scales it for the reason it scales the splash.
+            swirl_dmg = int(C.SWIRL_DAMAGE * _mc_reaction_mult(state))
+            for other in state.living_enemies:
+                _splash(state, other, swirl_dmg)
+        else:
+            for other in state.living_enemies:
+                apply_aura(state, other, aura, "swirl_spread")
     elif trigger == "geo":
         name = "crystallize"
         state.player.block += C.CRYSTALLIZE_BLOCK
@@ -253,6 +312,9 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
                 state, C.CATALYTIC_BURST_PER_REACTION * bonus, "catalytic")
         state.emit("reaction", reaction=name, trigger=trigger, aura=aura,
                    target=enemy.name,
+                   # THE ONE REACTION EVENT (§7.3): what fired, on whom, and
+                   # from what kind of source. See `reaction_source_kind`.
+                   source_kind=reaction_source_kind(state),
                    # PROVISIONAL when an amplifier fired: the multipliers that
                    # scale the amplified hit have not run yet, so
                    # effects.deal_damage_to_enemy settles this key through
@@ -262,6 +324,24 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
                    # realized uplift for that caller by construction.
                    amp_delta=(out - damage) if out != damage else 0)
     return out
+
+
+def reaction_source_kind(state: CombatState) -> str:
+    """WHAT KIND OF SOURCE caused the reaction resolving now (element port
+    §7.3): `card`, `companion` (a Companion card's play) or `automatic`
+    (anything with no card resolving -- a Bomb at turn start, a power's
+    turn-end volley, a performer, a relic). Every listener reads the one
+    `reaction` event rather than growing a hook of its own.
+
+    A card is "resolving" exactly while `effects.resolve_card` holds its aim
+    bound, so a Set off inside a card's play is the card's, in both engines
+    (C# twin: `ReactionEvents.SourceKindFor`). There is no `partner` value
+    here because tier 0 seats one player; in the mod a partner is the event's
+    dealer seen from a listener that is not it (`ReactionEvent.IsPartnerOf`).
+    """
+    if not state.card_aim_bound:
+        return "automatic"
+    return "companion" if state.current_card_companion else "card"
 
 
 def _mc_reaction_mult(state: CombatState) -> float:

@@ -714,6 +714,7 @@ def test_musou_reads_the_companions_you_played(overhaul):
 # THE NEW NINE
 # ---------------------------------------------------------------------------
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_kazuha_hits_the_board_and_swirls_each_aura(overhaul):
     """"Swirl each" is the ANEMO the Attack applies to each body, not a second
     op: a `swirl` op after the damage would re-apply Anemo to a body the hit

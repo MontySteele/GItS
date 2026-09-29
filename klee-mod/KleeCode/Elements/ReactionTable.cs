@@ -44,6 +44,10 @@ public static class ReactionConstants
     public const int ElectroChargedDot = 4;      // ELECTROCHARGED_DOT
     public const int ElectroChargedDotTurns = 2; // ELECTROCHARGED_DOT_TURNS
     public const int CrystallizeBlock = 4;       // CRYSTALLIZE_BLOCK
+    /// <summary>SWIRL_DAMAGE. The element port's §4 A: a Swirl on a fresh aura
+    /// deals this flat to every enemy, element-less and outside the pipeline,
+    /// exactly Overload's splash (<see cref="TriggerRules.SwirlPays"/>).</summary>
+    public const int SwirlDamage = 2;            // SWIRL_DAMAGE
 
     // Frozen v2 (principles v1.5 section 2.2 errata): no skip/stun at base.
     public const decimal FrozenDamageMult = 0.5m; // FROZEN_DAMAGE_MULT

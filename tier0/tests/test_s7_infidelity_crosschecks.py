@@ -39,6 +39,8 @@ THE FIVE, WITH THEIR C# COUNTERPARTS
 
 import random
 
+import pytest
+
 from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import effects, powers, reactions, relics
@@ -64,6 +66,7 @@ from tier0.tests.conftest import make_enemy, make_state
 # sim's aura_duration(state).
 # ---------------------------------------------------------------------------
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_swirl_returns_the_consumed_aura_to_the_enemy_it_was_taken_from():
     """Anemo into a Pyro aura consumes it and immediately gives it back at
     FULL duration. Parity pin: reactions.py:96-99/108-111 vs

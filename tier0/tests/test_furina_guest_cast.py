@@ -340,7 +340,7 @@ def test_lynette_swirls_an_enemy_with_an_aura_and_nothing_without_one(arm):
     assert [e.aura for e in st.enemies] == [None, None]
     st.enemies[0].aura = "pyro"
     FS.perform(st, "lynette")
-    # Swirl: the aura is consumed and copied onto ALL enemies.
+    # Swirl: the aura is copied onto ALL enemies.
     assert st.enemies[1].aura == "pyro"
 
 

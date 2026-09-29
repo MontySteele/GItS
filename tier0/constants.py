@@ -50,7 +50,26 @@ SUPERCONDUCT_VULN = 2         # Vulnerable stacks applied
 ELECTROCHARGED_DOT = 4        # DoT amount
 ELECTROCHARGED_DOT_TURNS = 2
 CRYSTALLIZE_BLOCK = 4         # player Block gained
-FROZEN_BOSS_VULN = 2          # bosses consume Frozen for Vulnerable 2
+# THE ELEMENT PORT, PHASE ONE (`review/ruled/element-home-review-2026-09-28.md`
+# §3, §4, ruled §6: "That makes sense"). Two switches, one per change, so each
+# is tested alone (§6 pick 4.4). With either on, the trigger element it names
+# no longer consumes the aura it acts on: a hit on a FRESH aura reacts and
+# leaves the aura standing, SPENT; a hit on a spent aura does nothing extra
+# until a same-element hit refreshes it. The shared fresh/spent rule rides
+# with whichever switch is on. Off is today's consume-and-react, exactly.
+#   SWIRL_PAYS             -- §4 A: keep the aura, spread SPENT copies to every
+#                             enemy lacking it, SWIRL_DAMAGE to every enemy.
+#   CRYSTALLIZE_KEEPS_AURA -- §4 B: the 4 Block, and the aura stays (spent).
+# THE C# TWINS are `KleeMod.Elements.TriggerRules.SwirlPays` /
+# `.CrystallizeKeepsAura`, defaulted from `-p:SwirlPays` /
+# `-p:CrystallizeKeepsAura` (on in every build that names neither). The sim
+# defaults are OFF, the arm convention (`operations/prototype.md`): the
+# calibration bands are measured on the shipped world, and both sides of each
+# switch are pinned here by flipping it (`tier0/tests/test_element_port.py`).
+SWIRL_PAYS = False
+CRYSTALLIZE_KEEPS_AURA = False
+SWIRL_DAMAGE = 2              # §4 A: flat, element-less, to ALL enemies
+FROZEN_BOSS_VULN = 2         # bosses consume Frozen for Vulnerable 2
                               # (round-3 ruling; STANDS through the v1.5
                               # errata — the freeze-team control identity)
 # Frozen v2 (principles v1.5 §2.2 errata): no skip/stun at base. The

@@ -180,6 +180,25 @@ in C# — Klee's three hybrid Spark spenders (`powder_charge`, `hold_the_line`,
 twins and a `-p:ShippedKits=true` build cannot reach them; flag off, the pool is
 byte-identical to shipped (`tier0/tests/test_eb218_hybrid_migration.py`).
 
+**THE ELEMENT PORT'S TWO SWITCHES (2026-09-28)** are not arms: they switch
+the shared reaction layer every kit reacts through
+(`review/ruled/element-home-review-2026-09-28.md` §3, §4). `SwirlPays` and
+`CrystallizeKeepsAura` are MSBuild properties defaulted on beside the arms in
+`Directory.Build.props`, defining `SWIRL_PAYS` / `CRYSTALLIZE_KEEPS_AURA`,
+which move `KleeMod.Elements.TriggerRules.SwirlPays` /
+`.CrystallizeKeepsAura` (settable, compiled in every build). One off:
+
+```sh
+dotnet build klee-mod/KleeCode -p:SwirlPays=false
+dotnet build klee-mod/KleeCode -p:CrystallizeKeepsAura=false
+```
+
+`-p:ShippedKits=true` turns both off. The sim twins `C.SWIRL_PAYS` and
+`C.CRYSTALLIZE_KEEPS_AURA` ship `False` for the arms' reason and are pinned
+both ways by flipping them (`tier0/tests/test_element_port.py`; the C# pins
+are `klee-mod/KleeTests/ElementPortTests.cs`). A sim pin about the old
+consume rule names that world with the `consume_triggers` fixture.
+
 **The companion arm REPLACES THE COMPANION POOL OF TWO NATIONS.** Third arm,
 third property, same terms as the second, on by default since 2026-09-28:
 

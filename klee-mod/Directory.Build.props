@@ -67,6 +67,13 @@
     <CompanionOverhaul Condition="'$(CompanionOverhaul)' == ''">true</CompanionOverhaul>
     <KokomiOverhaul Condition="'$(KokomiOverhaul)' == ''">true</KokomiOverhaul>
     <FurinaStage Condition="'$(FurinaStage)' == ''">true</FurinaStage>
+    <!-- THE ELEMENT PORT, PHASE ONE (review/ruled/element-home-review-2026-09-28.md
+         sec.3/4, ruled sec.6): two switches, one per change, so each is
+         tested alone (sec.6 pick 4.4). On in every build that names neither;
+         -p:SwirlPays=false or -p:CrystallizeKeepsAura=false turns one off,
+         -p:ShippedKits=true both. KleeMod.Elements.TriggerRules. -->
+    <SwirlPays Condition="'$(SwirlPays)' == ''">true</SwirlPays>
+    <CrystallizeKeepsAura Condition="'$(CrystallizeKeepsAura)' == ''">true</CrystallizeKeepsAura>
   </PropertyGroup>
 
   <!-- EB-172 / R218 C — BUILD AGAINST THE PINNED ASSEMBLIES INSTEAD OF THE
