@@ -198,15 +198,22 @@ def test_the_two_cut_rows_leave_the_offer_and_their_shipped_rows_stay_out(arm):
     card) and Understudy left the pool, and the shipped rows they replaced
     do not come back in their slots."""
     from tier05 import rewards
+    # The 2026-09-29 audit pass added three more: Scene Change, Gala Dinner
+    # and A Rapt Audience's shipped rows.
     assert loader.pool_drops("furina") == ("gentilhomme_usher",
-                                           "suffering_for_art")
+                                           "suffering_for_art",
+                                           "held_breath", "dress_rehearsal",
+                                           "crowd_work")
     rewards.character_pool.cache_clear()
     try:
         offered = {c.id for cs in rewards.character_pool("furina").values()
                    for c in cs}
         assert not offered & {"gentilhomme_usher", "suffering_for_art",
                               "proto_fs_gentilhomme_usher",
-                              "proto_fs_understudy"}
+                              "proto_fs_understudy",
+                              "held_breath", "dress_rehearsal", "crowd_work",
+                              "proto_fs_scene_change", "proto_fs_gala_dinner",
+                              "proto_fs_rapt_audience"}
     finally:
         rewards.character_pool.cache_clear()
 
@@ -498,10 +505,11 @@ def test_bring_the_house_down_cashes_the_front_for_all(arm):
     a, b = _enemy(name="a"), _enemy(name="b")
     st = _state([["usher", 6], ["crabaletta", 2]], enemies=[a, b])
     effects.resolve_card(st, _row_card("proto_fs_bring_the_house_down"))
-    # Usher's Bow (3 Block), then 2 per point to ALL.
+    # Usher's Bow (3 Block), then 3 per point to ALL (2 until the
+    # 2026-09-29 audit pass).
     assert st.player.stage == [["crabaletta", 2]]
     assert st.player.block == FS.ACT_USHER_BLOCK
-    assert (a.hp, b.hp) == (500 - 12, 500 - 12)
+    assert (a.hp, b.hp) == (500 - 18, 500 - 18)
     st = _state([])
     effects.resolve_card(st, _row_card("proto_fs_bring_the_house_down"))
     assert st.enemies[0].hp == 500

@@ -28,7 +28,7 @@
   "KLEEMOD-ELECTRO_CHARGED_PREVIEW.title": "Reaction preview: Electro-Charged",
   "KLEEMOD-ELECTRO_CHARGED_PREVIEW.description": "[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy gains [blue]4[/blue] [gold]Poison[/gold].",
   "KLEEMOD-FROZEN_PREVIEW.title": "Reaction preview: Frozen",
-  "KLEEMOD-FROZEN_PREVIEW.description": "[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less damage. Until it acts, the next Attack on it Shatters for [blue]6[/blue] unblockable damage.",
+  "KLEEMOD-FROZEN_PREVIEW.description": "[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less damage. Until it acts, the next Attack on it Shatters for [blue]6[/blue] unblockable damage. In a boss fight, only minions can be Frozen; the others become [gold]Vulnerable[/gold] instead.",
   "KLEEMOD-FROZEN_BOSS_PREVIEW.title": "Reaction preview: Frozen (Boss)",
   "KLEEMOD-FROZEN_BOSS_PREVIEW.description": "[gold]Hydro[/gold] meets [gold]Cryo[/gold]: bosses can't be Frozen, so it gains [blue]2[/blue] [gold]Vulnerable[/gold] instead.",
   "KLEEMOD-SWIRL_PREVIEW.title": "Reaction preview: Swirl",

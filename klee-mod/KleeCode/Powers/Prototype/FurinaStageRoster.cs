@@ -214,16 +214,15 @@ public static class FurinaStageRoster
                         && card is not FurinaGen.RegalBearing)
             .Concat(new CardModel[]
             {
-                // Commons (six). The 2026-09-28 balance review cut
-                // Gentilhomme Usher and Understudy (80 -> 78); their shipped
-                // rows stay filtered above. Sim twin:
-                // `furina_stage.POOL_DROPS`.
+                // Commons (five). The 2026-09-28 balance review cut
+                // Gentilhomme Usher and Understudy (80 -> 78), and the
+                // 2026-09-29 audit pass Scene Change; their shipped rows stay
+                // filtered above. Sim twin: `furina_stage.POOL_DROPS`.
                 ModelDb.Card<ProtoFsSurintendanteChevalmarin>(),
                 ModelDb.Card<ProtoFsMademoiselleCrabaletta>(),
                 ModelDb.Card<ProtoFsWarmReception>(),
                 ModelDb.Card<ProtoFsTidalFlourish>(),
                 ModelDb.Card<ProtoFsInterposition>(),
-                ModelDb.Card<ProtoFsSceneChange>(),
                 // Uncommons (five).
                 ModelDb.Card<ProtoFsGrandEntrance>(),
                 ModelDb.Card<ProtoFsOusiaSurge>(),
@@ -239,14 +238,13 @@ public static class FurinaStageRoster
                 ModelDb.Card<ProtoFsHoldYourPlaces>(),
                 ModelDb.Card<ProtoFsQuickCue>(),
                 ModelDb.Card<ProtoFsStepForward>(),
-                // Uncommons (seven).
-                ModelDb.Card<ProtoFsGalaDinner>(),
+                // Uncommons (five; the 2026-09-29 audit pass cut Gala Dinner
+                // and A Rapt Audience).
                 ModelDb.Card<ProtoFsDoubleCasting>(),
                 ModelDb.Card<ProtoFsTutti>(),
                 ModelDb.Card<ProtoFsBravura>(),
                 ModelDb.Card<ProtoFsFullHouse>(),
                 ModelDb.Card<ProtoFsThunderousApplause>(),
-                ModelDb.Card<ProtoFsRaptAudience>(),
                 // Rares (two).
                 ModelDb.Card<ProtoFsArkheAlignment>(),
                 ModelDb.Card<ProtoFsFiveCenturyAct>(),

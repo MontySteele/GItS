@@ -406,7 +406,7 @@ Regal Bearing leave the starter for the Commons below.
 | Warm Reception | 1 | Skill | Your back performer gains 3 Fanfare. Draw 1 card. |
 | Tidal Flourish | 1 | Attack | Deal 5 damage to ALL enemies. Spend 2: deal 9 and apply Hydro to ALL instead. (2026-09-25, draft 3.) |
 | Interposition | 1 | Skill | Gain 5 Block. Spend 2: gain 10 instead. |
-| Scene Change | 0 | Skill | Move your front performer to the back. |
+| ~~Scene Change~~ | 0 | Skill | Move your front performer to the back. (2026-09-29: out of the pool, §17.) |
 | Take the Stage | 1 | Skill | Summon a random performer with 3 Fanfare. Draw 1 card. [cost 0] (2026-09-28: out of the starter and a Common with a stronger face. Tentative: [USER], "'Become Common with a stronger effect' is fine as a tentative proposal, and then we can do an audit of the pool as part of the balance pass to see if we still want it." Was "Summon a random performer." at basic; was Salon Début, renamed under R179, `EB-739`.) |
 | Regal Bearing | 1 | Skill | Gain 5 Block. Apply 1 Weak. [6 Block, 2 Weak] (2026-09-28: out of the starter and a Common; [USER]: "5 block, 1 weak" upgraded to "6 block, 2 weak". The shipped basic prints Block 3, Weak 1 and does not move.) |
 
@@ -415,10 +415,10 @@ Regal Bearing leave the starter for the Commons below.
 | card | cost | type | text |
 |---|---|---|---|
 | Grand Entrance | 2 | Attack | Deal 12 damage. Spend 5: deal 24 instead. [16 / 28] (2026-09-26 balance review: was 10 / 20.) |
-| Ousia Surge | 1 | Attack | Deal damage equal to your back performer's Fanfare. (R276: was the front's.) [plus 4] (2026-09-26 balance review: the upgrade was cost 0.) |
-| Pneuma Refrain | 1 | Skill | Gain Block equal to your front performer's Fanfare. (R276: was the back's.) [plus 4] (2026-09-26 balance review: the upgrade was cost 0.) |
+| Ousia Surge | 1 | Attack | Deal 3 damage, plus 1 for each Fanfare on your back performer. [base 6] (2026-09-29 audit pass, §17: was damage equal to the Fanfare, plus 4 upgraded.) (R276: was the front's.) (2026-09-26 balance review: the upgrade was cost 0.) |
+| Pneuma Refrain | 1 | Skill | Gain 3 Block, plus 1 for each Fanfare on your front performer. [base 6] (2026-09-29 audit pass, §17: was Block equal to the Fanfare, plus 4 upgraded.) (R276: was the back's.) (2026-09-26 balance review: the upgrade was cost 0.) |
 | Bis! | 1 | Skill | Your front performer acts twice. [cost 0] (2026-09-26 balance review: was "acts now". A lead that leaves after the first act does not act again.) |
-| Final Bow | 1 | Skill | Your back performer Bows and leaves. Gain Block equal to its Fanfare. Exhaust. (R276: was the front.) |
+| Final Bow | 1 | Skill | Your back performer Bows and leaves. Gain Block equal to twice its Fanfare. Exhaust. [no Exhaust] (2026-09-29 audit pass, §17: was equal to its Fanfare.) (R276: was the front.) |
 
 **Rare (one)**
 
@@ -443,9 +443,9 @@ values; names are provisional. Upgrades in brackets.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Improvised Number | 1 | Attack | Deal 6 damage. If no one is on stage, Summon a random performer. [Deal 9] |
+| Improvised Number | 1 | Attack | Deal 8 damage. If no one is on stage, Summon a random performer. [Deal 11] (2026-09-29 audit pass, §17: was 6, 9 upgraded.) |
 | Between Acts | 1 | Skill | Gain 5 Block. If no one is on stage, draw 2 cards. [8 Block] |
-| Ensemble Piece | 1 | Attack | Deal 4 damage for each performer on stage. [5 each] |
+| Ensemble Piece | 1 | Attack | Deal 5 damage for each performer on stage. [7 each] (2026-09-29 audit pass, §17: was 4, 5 upgraded.) |
 | Hold Your Places | 1 | Skill | Gain 5 Block. Your front performer gains 2 Fanfare. [7 Block, gains 3] |
 | Quick Cue | 0 | Attack | Deal 3 damage. Spend 2: deal 8 and apply Hydro instead. [4 / 10] (2026-09-25, draft 3.) |
 | Step Forward | 0 | Skill | Move your back performer to the front. Gain 3 Block. [5 Block] |
@@ -454,13 +454,13 @@ values; names are provisional. Upgrades in brackets.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Gala Dinner | 1 | Skill | Each performer gains 2 Fanfare. [gains 3] (2026-09-28 balance pass: was 3, 4 upgraded.) |
+| ~~Gala Dinner~~ | 1 | Skill | Each performer gains 2 Fanfare. [gains 3] (2026-09-28 balance pass: was 3, 4 upgraded.) (2026-09-29: out of the pool, §17.) |
 | Double Casting | 1 | Skill | Summon 2 random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Tutti! | 2 | Skill | All your performers act now. [cost 1] (Round four: was 2, 1 upgraded; round four's 1 and 0 undone in the 2026-09-26 balance review.) |
 | Bravura | 1 | Attack | Spend all of your back performer's Fanfare. Deal 5 damage, plus 3 per point. [plus 4 per point] (2026-09-29 Bravura fix, §16: was 3 per point, no base, 4 upgraded.) |
 | Full House | 3 | Power | If all three seats are filled at the end of your turn, your performers act twice. [cost 2] (2026-09-26 balance review: was 2, 1 upgraded.) |
 | Thunderous Applause | 1 | Power | Whenever a performer Bows, draw 1 card and your back performer gains 1 Fanfare. [gains 2] (2026-09-28 balance pass: was 2, 3 upgraded; the draw is unchanged.) |
-| A Rapt Audience | 1 | Power | Whenever an enemy hits your front performer, your back performer gains 2 Fanfare. Needs 2 performers. [gains 3] (2026-09-26 balance review: was half the Fanfare lost, all of it upgraded. Copies add; a hit its Block fully absorbs does not count.) |
+| ~~A Rapt Audience~~ | 1 | Power | Whenever an enemy hits your front performer, your back performer gains 2 Fanfare. Needs 2 performers. [gains 3] (2026-09-26 balance review: was half the Fanfare lost, all of it upgraded. Copies add; a hit its Block fully absorbs does not count.) (2026-09-29: out of the pool, §17.) |
 
 **Rares (two)**
 
@@ -599,3 +599,52 @@ almost always 1". Under the same direction ("upping both the spend and output
 of her cards") it gains a base: "Spend all of your back performer's Fanfare.
 Deal 5 damage, plus 3 per point." Upgraded, plus 4 per point; the base stays 5.
 At 1 Fanfare it deals 8 (was 3); at 4 it deals 17 (was 12).
+
+## 17. The audit pass (2026-09-29)
+
+[USER] asked for "a dedupe / audit / balance pass on Furina, aimed at
+polishing the existing core systems", with three standing notes from his
+2026-09-28 run: "too many cards give very high amounts of Fanfare", "stage
+rotation spam", and "damage is missing from the Commons". The evidence is a
+factual packet read off the sheet and the twelve seat records (seven on the
+current build, four older, one empty): §4 counts which cards the seats named,
+§5 prices every Attack and Block card per Energy. Designed by the main
+session; built on `furina-audit-pass`.
+
+**Cut (three; the pool is 75, was 78).**
+
+| card | why | evidence |
+|---|---|---|
+| Gala Dinner (Uncommon) | a generation card, and generation is the excess | named by none of the 12 records (packet §4b) |
+| A Rapt Audience (Uncommon) | a generation Power | named by none of the 12 records (packet §4b) |
+| Scene Change (Common) | a third rotation Common beside Plot Twist and Step Forward, with Revolving Stage above them | "stage rotation spam" ([USER]); 4 mentions, none a pick, passed over at a draft ("Wriothesley over Scene Change", fs-run3 act 1) |
+
+**Numbers (base, then upgraded).**
+
+| card | now | was | evidence |
+|---|---|---|---|
+| Ensemble Piece (Common) | 5 per performer [7] | 4 [5] | NEVER AGAIN: "it was a 0-cost 9 damage that did nothing a Strike wouldn't" (fs-run3 act 3) |
+| Improvised Number (Common) | 8 [11] | 6 [9] | "damage is missing from the Commons" ([USER]); 6 per Energy, lowest single-target Common (packet §5) |
+| Ousia Surge (Uncommon) | 3 plus 1 per back Fanfare [base 6] | 0 plus 1 [base 4] | 1, 3 or 5 damage at 1, 3 or 5 Fanfare (packet §5); "Ousia/Pneuma type cards never came up" (fs-run2 act 1) |
+| Pneuma Refrain (Uncommon) | 3 Block plus 1 per front Fanfare [base 6] | 0 plus 1 [base 4] | 1, 3 or 5 Block at 1, 3 or 5 Fanfare (packet §5); "only OK" (fs-run act 1) |
+| Final Bow (Uncommon) | Block equal to twice the Fanfare; the upgrade still removes Exhaust | once the Fanfare | 5 Fanfare gave 5 Block, worse than a Defend; passed over on all four draft screens that offered it, one on the old build (packet §4d) |
+| Bring the House Down (Rare, 2) | 3 to ALL per point [4] | 2 [3] | 1, 3 or 5 per Energy at 1, 3 or 5 Fanfare (packet §5); 3 mentions, never in a deck |
+| Grand Deluge (Rare, 2) | 12 to ALL [16] | 10 [14] | 5 per Energy at Rare (packet §5), against [USER]'s "5 to 7 damage per 1 energy is roughly the going rate on AoE commons" (Kokomi Casket pass) |
+
+The faces: Ousia Surge "Deal 3 damage, plus 1 for each Fanfare on your back
+performer."; Pneuma Refrain "Gain 3 Block, plus 1 for each Fanfare on your
+front performer."; Final Bow "Your back performer Bows and leaves. Gain Block
+equal to twice its Fanfare." Each keeps its in-combat number.
+
+**Two fixes.** In a boss fight only minions can be Frozen and every other
+creature takes Vulnerable instead (LAW §Combat); a seat saw "Frozen" on Vantom
+and was hit for 26 (fs-run3 act 1). The Frozen preview and the seat page's
+Frozen row now say "In a boss fight, only minions can be Frozen; the others
+become Vulnerable instead." The doubled end-of-turn preview (the same record:
+Neuvillette "8 Hydro to ALL, twice", the second act "could not pay") was not
+the forecast skipping a payment: both engines' forecasts pay each Full House
+repeat on the copy before counting it, now pinned on a board where
+Neuvillette at 5 pays once. Its cause is still open (`BACKLOG.md`).
+
+Row provenance: `docs/notes/prototype-surface-provenance.md`, "Furina, the
+Stage — the audit pass".

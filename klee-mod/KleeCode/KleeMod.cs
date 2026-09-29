@@ -320,7 +320,7 @@ public static class KleeMod
                         $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] [gold]Poison[/gold].",
                     ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less damage. Until it acts, the next Attack on it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] unblockable damage.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less damage. Until it acts, the next Attack on it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] unblockable damage. In a boss fight, only minions can be Frozen; the others become [gold]Vulnerable[/gold] instead.",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
                         $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: bosses can't be Frozen, so it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",

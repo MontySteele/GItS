@@ -57,7 +57,7 @@ public sealed class ProtoFsGrandDeluge : CustomCardModel, IElementalCard, IChara
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(10m, ValueProp.Move)
+            new DamageVar(12m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
