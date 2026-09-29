@@ -16,7 +16,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Cards.Prototype;
 
 /// <summary>
-/// KNIGHTS' MUSTER -- Varka's starter Knight (sec.10.2: "Skill, 1: Choose a
+/// KNIGHTS' MUSTER -- Varka's starter Knight (sec.10.2: "Skill, 0: Choose a
 /// Knight: deal 4 [6] of their element"; sec.4: "a companion card").
 ///
 /// HAND-WRITTEN, NOT A SHEET ROW, because its hit's element is CHOSEN at
@@ -65,7 +65,7 @@ public sealed class ProtoVkKnightsMuster : CustomCardModel, ICompanionCard
         new List<DynamicVar> { new DamageVar(Damage, ValueProp.Move) };
 
     public ProtoVkKnightsMuster()
-        : base(1, CardType.Skill, CardRarity.Basic, TargetType.AnyEnemy,
+        : base(0, CardType.Skill, CardRarity.Basic, TargetType.AnyEnemy,
                autoAdd: false)
     {
     }

@@ -369,9 +369,15 @@ brackets is the upgrade.
 ### 10.2 The starter (Varka, 80 HP, 99 gold)
 
 Strike ×4, Defend ×4 (base game), and:
-- **Knights' Muster** (Skill, 1): Choose a Knight: deal 4 [6] of their element.
-- **Four Winds' Ascension** (Attack, 2): Deal 6 [9] Anemo, plus 6 for each Wind
+- **Knights' Muster** (Skill, 0): Choose a Knight: deal 4 [6] of their element.
+- **Four Winds' Ascension** (Attack, 1): Deal 6 [9] Anemo, plus 6 for each Wind
   you hold. Exhaust.
+
+Costs moved 2026-09-29 (Muster 1 to 0, Ascension 2 to 1). [USER]: "I'm
+thinking we try 'Muster at 0 and Ascension at 1' first." Both first blind
+seats died in act 1 (floor 8 elite; floor 7 Punch Construct), a 1-cost Muster
+leaving too little energy for Block, and a seat named Ascension "never again":
+"2 energy Exhaust for damage a Strike-plus deals".
 
 ### 10.3 The pool, batch one (19 cards)
 
