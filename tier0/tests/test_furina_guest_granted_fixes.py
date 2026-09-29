@@ -100,6 +100,7 @@ def test_the_beetle_board_the_acts_deal_12(arm):
 # 5. Lynette's act always lands.
 # ---------------------------------------------------------------------------
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_lynettes_act_deals_3_anemo_to_a_body_with_an_aura(arm):
     bare = _enemy(hp=40, name="bare")
     wearing = _enemy(hp=40, name="wearing")

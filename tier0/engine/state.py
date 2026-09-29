@@ -923,6 +923,11 @@ class Enemy(Fighter):
     intent_index: int = 0
     aura: Optional[str] = None
     aura_turns_left: int = 0
+    # THE ELEMENT PORT (`C.SWIRL_PAYS` / `C.CRYSTALLIZE_KEEPS_AURA`): the aura
+    # has already paid a trigger (Anemo or Geo) and pays none again until a
+    # same-element hit refreshes it. Meaningful only while `aura` is set;
+    # `reactions.apply_aura` clears it, so every new aura arrives fresh.
+    aura_spent: bool = False
     bombs: list[Bomb] = field(default_factory=list)
     # QUARANTINED (C.KLEE_OVERHAUL): THE OVERHAUL'S PILE, in placement order.
     # `ProtoBombPower._charges`' twin, and a SEPARATE list from `bombs` above

@@ -119,6 +119,7 @@ MIRRORED: dict[str, object] = {
     "ReactionConstants.ElectroChargedDot": C.ELECTROCHARGED_DOT,
     "ReactionConstants.ElectroChargedDotTurns": C.ELECTROCHARGED_DOT_TURNS,
     "ReactionConstants.CrystallizeBlock": C.CRYSTALLIZE_BLOCK,
+    "ReactionConstants.SwirlDamage": C.SWIRL_DAMAGE,     # the element port, sec.4 A
     "ReactionConstants.ShatterDamage": C.SHATTER_DAMAGE,
     "ReactionConstants.FrozenBossVuln": C.FROZEN_BOSS_VULN,
     "ReactionKitConstants.CatalyticBurstPerReaction":

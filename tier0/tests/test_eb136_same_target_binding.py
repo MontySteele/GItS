@@ -45,6 +45,8 @@ passed under both engines would be pinning nothing.
 
 from __future__ import annotations
 
+import pytest
+
 from tier0.engine import effects
 from tier0.engine.combat import _settle_phases
 from tier0.engine.state import Bomb, Card
@@ -581,6 +583,7 @@ def test_a_corpses_powers_never_tick_and_never_act():
 #  What R210 left open, and where R211 answered it
 # ---------------------------------------------------------------------------
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_swirl_aim_question_is_answered_at_the_bind():
     """THE FLIP. This was a strict xfail for the life of `C18` -- the one
     question R210 declined to guess at -- and R211 (`EB-139`, `C20`) answered

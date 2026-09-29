@@ -104,6 +104,20 @@ upgrade now). Arm off, both pools are as they shipped; Kokomi keeps the Silent
 borrow until her review pass. Next: a seat round with the relics given at
 embark.
 
+**The element port, phase one (2026-09-28)** (`review/ruled/element-home-review-2026-09-28.md`
+§3, §4, §7.1, §7.3; [USER]: "That makes sense"). Anemo and Geo no longer
+consume the aura they act on: a hit on a fresh aura reacts and leaves it
+standing, spent; a hit on a spent aura pays nothing until the aura's own
+element refreshes it. Swirl keeps the aura, spreads spent copies to every
+enemy lacking it and deals a flat 2 to every enemy; Crystallize gives its 4
+Block and keeps the aura. The badge and the reaction preview say when an aura
+is spent, and every reaction reports one event (reaction, target, dealer,
+source kind). Two switches, on in every build: `-p:SwirlPays=false` and
+`-p:CrystallizeKeepsAura=false` (`klee-mod/KleeCode/Elements/TriggerRules.cs`);
+the sim twins `C.SWIRL_PAYS` / `C.CRYSTALLIZE_KEEPS_AURA` stay off, like the
+arms. Next: agent retests with each switch alone (§6 pick 4.4), then phase
+two (Burning and Dendro, `BACKLOG.md`).
+
 All three prototypes start with no companion card. Whether each starts with
 one comes back after the kits, with the reaction display (`EB-410`) and the
 companion slot as a real draft choice.

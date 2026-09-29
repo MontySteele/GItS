@@ -18,6 +18,8 @@ with the counters in place. The engine gains two emit-only things -- an
 
 from __future__ import annotations
 
+import pytest
+
 from tier0.engine import effects, reactions
 from tier0.engine.state import Card
 from tier0.harness import metrics
@@ -96,6 +98,7 @@ def test_an_aura_op_that_lands_nothing_still_counts_as_an_op():
     assert stats.aura_applications == 0
 
 
+@pytest.mark.usefixtures("consume_triggers")
 def test_swirl_spread_is_attributed_to_swirl_and_not_to_the_hit():
     """Swirl copies the consumed aura across the board. Those copies are the
     reaction's doing, not the triggering card's element. The resolver spreads

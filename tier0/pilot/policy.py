@@ -15,7 +15,7 @@ from typing import Optional
 
 from tier0 import constants as C
 from tier0.engine import (effects, furina_stage, klee_overhaul, powers,
-                          resources)
+                          reactions, resources)
 from tier0.engine.combat import (card_cost, card_playable, spark_cost,
                                  spark_price, spark_threshold)
 from tier0.engine.state import Card, CombatState
@@ -1023,7 +1023,10 @@ def _reaction_value(state: CombatState, card: Card) -> float:
         if not elem or elem == "none":
             continue
         capable = True
-        reactable = [e for e in living if e.aura and e.aura != elem]
+        # A switched trigger on a SPENT aura pays nothing (the element port);
+        # with both switches off `trigger_pays` is always true.
+        reactable = [e for e in living if e.aura and e.aura != elem
+                     and reactions.trigger_pays(e, elem)]
         target = fx.get("target", "enemy")
 
         # `front_enemy` (QUARANTINED, C.KOKOMI_OVERHAUL) is a SINGLE-target

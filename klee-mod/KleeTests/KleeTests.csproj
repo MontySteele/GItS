@@ -74,6 +74,15 @@
        is settable, so one build asserts both sides of the switch, including
        the flag-off acceptance condition: that her starter deck, her starting
        relic and her damage pipeline are the shipped ones, unchanged. -->
+  <!-- THE ELEMENT PORT's two switches (KleeMod.Elements.TriggerRules),
+       defaulted on by Directory.Build.props. Unlike the arms they compile in
+       every build: they switch the shared reaction layer, not a kit. -->
+  <PropertyGroup Condition="'$(SwirlPays)' == 'true'">
+    <DefineConstants>$(DefineConstants);SWIRL_PAYS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(CrystallizeKeepsAura)' == 'true'">
+    <DefineConstants>$(DefineConstants);CRYSTALLIZE_KEEPS_AURA</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(FurinaStage)' == 'true'">
     <DefineConstants>$(DefineConstants);FURINA_STAGE</DefineConstants>
   </PropertyGroup>
