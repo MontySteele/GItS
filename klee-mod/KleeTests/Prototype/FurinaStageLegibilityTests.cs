@@ -293,9 +293,10 @@ public class FurinaStageLegibilityTests
     {
         // Draft 3 (2026-09-25): the seat count and rule 12, the fade.
         // The second text pass (2026-09-28): who acts, then the fade.
+        // The fade pass (2026-09-29): a quarter of every performer's bar.
         Assert.Equal(
-            "Up to 3 performers act at the end of your turn. Then each one "
-          + "behind the front loses half its Fanfare above 5.",
+            "Up to 3 performers act at the end of your turn. Then each "
+          + "performer loses a quarter of its Fanfare, rounded down.",
             Badge<StageSummaryPower>("description"));
     }
 

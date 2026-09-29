@@ -102,7 +102,7 @@ def test_the_wire_contract_keeps_the_sheets_spelling():
     text = (GENERATED / "Prototype" / "Generated"
             / "ProtoFsCurtainRise.cs").read_text(encoding="utf-8")
     labels = text[text.index("IReadOnlyList<string> ModeLabels"):]
-    assert "[gold]Spend[/gold] 3: deal 13 instead" in labels[:400]
+    assert "[gold]Spend[/gold] 3: deal 17 instead" in labels[:400]
 
 
 def test_the_stripper_is_the_pages_own():

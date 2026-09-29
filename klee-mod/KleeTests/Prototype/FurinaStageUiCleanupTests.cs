@@ -128,7 +128,7 @@ public class FurinaStageUiCleanupTests
     // ==================================================================
 
     [Fact]
-    public void Each_fading_performer_pops_what_it_lost_and_the_front_pops_nothing()
+    public void Each_fading_performer_pops_what_it_lost_the_front_included()
     {
         using var _ = new Arm();
         using var pops = new Pops();
@@ -138,12 +138,14 @@ public class FurinaStageUiCleanupTests
 
         var faded = FurinaStage.FadeAndShow(seat.Creature);
 
-        // The ledger's own table: 9 -> 7 and 15 -> 10; the front never fades.
+        // The ledger's own table since the fade pass (2026-09-29): a quarter
+        // of every bar, the front's too; 25 -> 19, 9 -> 7 and 15 -> 12.
         Assert.Equal(
-            new[] { (StagePerformer.Chevalmarin, 2), (StagePerformer.Crabaletta, 5) },
+            new[] { (StagePerformer.Usher, 6), (StagePerformer.Chevalmarin, 2),
+                    (StagePerformer.Crabaletta, 3) },
             pops.Seen.ToArray());
-        Assert.Equal(new[] { 2, 5 }, faded.Select(f => f.Loss).ToArray());
-        Assert.Equal(new[] { 25, 7, 10 },
+        Assert.Equal(new[] { 6, 2, 3 }, faded.Select(f => f.Loss).ToArray());
+        Assert.Equal(new[] { 19, 7, 12 },
                      FurinaStageLedger.For(seat.Creature).Seats
                          .Select(s => s.Fanfare).ToArray());
     }
@@ -153,12 +155,12 @@ public class FurinaStageUiCleanupTests
     {
         using var _ = new Arm();
         using var pops = new Pops();
-        // A lone performer is both seats and never fades; bars at or under 5
-        // never fade either.
-        var lone = Staged((StagePerformer.Crabaletta, 25));
+        // The fade pass (2026-09-29): bars under 4 lose nothing (a quarter
+        // rounds down to 0), a lone performer's included.
+        var lone = Staged((StagePerformer.Crabaletta, 3));
         Assert.Empty(FurinaStage.FadeAndShow(lone.Creature));
-        var low = Staged((StagePerformer.Usher, 9),
-                         (StagePerformer.Chevalmarin, 5),
+        var low = Staged((StagePerformer.Usher, 3),
+                         (StagePerformer.Chevalmarin, 3),
                          (StagePerformer.Crabaletta, 1));
         Assert.Empty(FurinaStage.FadeAndShow(low.Creature));
         Assert.Empty(pops.Seen);

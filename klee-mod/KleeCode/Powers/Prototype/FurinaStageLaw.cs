@@ -161,34 +161,21 @@ public static class FurinaStageLaw
     public const int ActEscoffierDamage = 3;
 
     /// <summary>
-    /// RULE 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of
-    /// Furina's turn, after the acts, each performer BEHIND THE FRONT loses
-    /// half of its Fanfare above this, rounded down (<see cref="FadeLoss"/>).
-    /// The front never fades. The knob seat rounds tune. Mirrors
-    /// <c>furina_stage.FADE_THRESHOLD</c>.
+    /// RULE 12, THE APPLAUSE FADES. THE FADE PASS (2026-09-29; [USER]: "What
+    /// about a percentage fade, say 25%? Anything below 4 rounds to losing
+    /// 0."): at the end of Furina's turn, after the acts, EVERY performer, the
+    /// front one included, loses its Fanfare divided by this, rounded down
+    /// (<see cref="FadeLoss"/>). Was half of the Fanfare above 5, behind the
+    /// front only (draft 3). Mirrors <c>furina_stage.FADE_DIVISOR</c>.
     /// </summary>
-    public const int FadeThreshold = 5;
+    public const int FadeDivisor = 4;
 
     /// <summary>
-    /// THE SUPPORTING POOL (2026-09-26), <i>Eternal Applause</i>: "Your
-    /// performers fade only above 10 Fanfare, not 5." A Rare that bends rule
-    /// 12 rather than removing it; copies do not stack further. Mirrors
-    /// <c>furina_stage.ETERNAL_FADE_THRESHOLD</c>.
+    /// Rule 12's arithmetic, ONE function so the divisor is tuned in one
+    /// place: a quarter of the Fanfare, rounded down. 0-3 -> 0, 4-7 -> 1,
+    /// 8-11 -> 2, 12 -> 3, 20 -> 5. It never takes a whole bar, so it never
+    /// empties a performer. Mirrors <c>furina_stage.fade_loss</c>.
     /// </summary>
-    public const int EternalFadeThreshold = 10;
-
-    /// <summary>
-    /// Rule 12's arithmetic, ONE function so the threshold and the halving
-    /// are tuned in one place: half of the Fanfare above
-    /// <see cref="FadeThreshold"/>, rounded down. 5 -> 0, 6 -> 0, 7 -> 1,
-    /// 9 -> 2, 15 -> 5, 25 -> 10. It never takes a bar below the threshold,
-    /// so it never empties a performer. Mirrors
-    /// <c>furina_stage.fade_loss</c>.
-    /// </summary>
-    public static int FadeLoss(int fanfare) => FadeLoss(fanfare, FadeThreshold);
-
-    /// <summary>The same arithmetic above another line: <i>Eternal
-    /// Applause</i>'s 10 (2026-09-26).</summary>
-    public static int FadeLoss(int fanfare, int threshold) =>
-        fanfare <= threshold ? 0 : (fanfare - threshold) / 2;
+    public static int FadeLoss(int fanfare) =>
+        fanfare <= 0 ? 0 : fanfare / FadeDivisor;
 }

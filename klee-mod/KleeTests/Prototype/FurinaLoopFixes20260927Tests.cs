@@ -17,7 +17,8 @@ namespace KleeMod.Tests.Prototype;
 ///
 ///   1. A Five-Century Act returns a performer once a turn, however many
 ///      copies; the latch clears at the start of her turn.
-///   2. Echoing Hall moves HALF the fade's loss to the front, rounded down.
+///   2. Echoing Hall moved HALF the fade's loss to the front, rounded down.
+///      (The 2026-09-29 fade pass cut the card; its pins left with it.)
 ///   3. Wriothesley always attacks: 4, plus 2 per Fanfare hits took from him,
 ///      plus 1 per damage her Block stopped while he stood in front.
 ///
@@ -161,43 +162,6 @@ public class FurinaLoopFixes20260927Tests
         Assert.DoesNotContain("FurinaStageLedger.ReturnToBack", after);
         var begin = Il.Calls(Il.Method("FurinaStage", "BeginTurn"));
         Assert.Contains("FurinaStageLedger.set_ReturnedThisTurn", begin);
-    }
-
-    // ==================================================================
-    // 2. Echoing Hall, half.
-    // ==================================================================
-
-    [Fact]
-    public void Echoing_hall_gives_the_front_half_the_loss_rounded_down()
-    {
-        using var _ = new Arm();
-        // One faded point: half of 1 is 0, and the front gains nothing.
-        var (_, one) = Stage((StagePerformer.Usher, 3),
-                             (StagePerformer.Crabaletta, 8));
-        Assert.Equal(1, one.Fade(FurinaStageLaw.FadeThreshold, echo: true));
-        Assert.Equal(new[] { 3, 7 }, one.Seats.Select(s => s.Fanfare));
-
-        // 3 + 2 = 5 faded: 2 to the front.
-        var (_, two) = Stage((StagePerformer.Usher, 3),
-                             (StagePerformer.Crabaletta, 11),
-                             (StagePerformer.Chevalmarin, 9));
-        Assert.Equal(5, two.Fade(FurinaStageLaw.FadeThreshold, echo: true));
-        Assert.Equal(3 + 2, two.Seats[0].Fanfare);
-    }
-
-    [Fact]
-    public void The_forecast_shows_echoing_halls_half_and_copies_add_nothing()
-    {
-        using var _ = new Arm();
-        var seat = Seat.Furina().WithCombatState()
-            .WithPower<EchoingHallPower>(1)
-            .WithPower<EchoingHallPower>(1);
-        Stage(seat, (StagePerformer.Usher, 3), (StagePerformer.Chevalmarin, 9),
-              (StagePerformer.Crabaletta, 11));
-
-        var forecast = FurinaStage.Forecast(seat.Creature, null);
-
-        Assert.Equal(3 + 2, forecast.Seats[0].After);
     }
 
     // ==================================================================

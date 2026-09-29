@@ -130,15 +130,12 @@ GUEST_ELEMENTS = {"neuvillette": "hydro", "clorinde": "electro",
                   "navia": "geo", "wriothesley": "cryo", "lynette": "anemo",
                   "lyney": "pyro", "escoffier": "cryo"}
 
-# Rule 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of Furina's
-# turn, after the acts, each performer BEHIND THE FRONT loses half of its
-# Fanfare above this, rounded down (`fade_loss`). The front never fades. The
-# threshold is the knob seat rounds tune.
-FADE_THRESHOLD = 5
-#: THE SUPPORTING POOL (2026-09-26), *Eternal Applause*: "Your performers fade
-#: only above 10 Fanfare, not 5." A Rare that bends rule 12 rather than
-#: removing it; copies do not stack further.
-ETERNAL_FADE_THRESHOLD = 10
+# Rule 12, THE APPLAUSE FADES. THE FADE PASS (2026-09-29, [USER]: "What
+# about a percentage fade, say 25%? Anything below 4 rounds to losing 0."):
+# at the end of Furina's turn, after the acts, EVERY performer, the front one
+# included, loses its Fanfare divided by this, rounded down (`fade_loss`).
+# Was half of the Fanfare above 5, behind the front only (draft 3).
+FADE_DIVISOR = 4
 
 #: Where a Raise lands. Rule 5: the BACK-MOST performer, which is the lead when
 #: it is alone. Written out as words so a row and a face say the same thing.
@@ -167,8 +164,6 @@ PNEUMA_LEAD_REGAIN = 2
 REVOLVING_STAGE = "fs_revolving_stage"      # turn start: back to the front
 SEASON_TICKETS = "fs_season_tickets"        # turn start: the back gains N
 STAR_BILLING = "fs_star_billing"            # a Guest Star joins: draw N
-ECHOING_HALL = "fs_echoing_hall"            # the fade's loss goes to the front
-ETERNAL_APPLAUSE = "fs_eternal_applause"    # the fade starts above 10
 TIDE_OF_APPLAUSE = "fs_tide_of_applause"    # a reaction: the back gains N
 REGINA = "fs_regina_of_all_waters"          # turn start: Hydro on ALL
 SOLILOQUY = "fs_soliloquy"                  # empty stage: Attacks +N a hit
@@ -310,13 +305,11 @@ POOL_SUBS: dict[str, str] = {
     "dinner_service": "proto_fs_cheered_on",
     "macaron_break": "proto_fs_spirited_aria",
     "casting_call": "proto_fs_bubble_aria",
-    # --- Uncommons (thirteen) ---
+    # --- Uncommons (eleven; the 2026-09-29 fade pass cut two) ---
     "grand_salon": "proto_fs_revolving_stage",
     "curtain_cue": "proto_fs_oratrices_verdict",
     "top_billing": "proto_fs_season_tickets",
     "supporting_cast": "proto_fs_star_billing",
-    "directors_cut": "proto_fs_held_applause",
-    "pit_orchestra": "proto_fs_echoing_hall",
     "tempo_change": "proto_fs_intermission",
     "poised_riposte": "proto_fs_counterclaim",
     "florid_cadenza": "proto_fs_da_capo",
@@ -324,10 +317,9 @@ POOL_SUBS: dict[str, str] = {
     "leading_role": "proto_fs_tide_of_applause",
     "hearts_swelling": "proto_fs_soliloquy",
     "curtain_up": "proto_fs_dual_nature",
-    # --- Rares (nine) ---
+    # --- Rares (eight; the fade pass cut Eternal Applause) ---
     "rain_of_roses": "proto_fs_guest_star_lyney",
     "the_final_verdict": "proto_fs_guest_star_escoffier",
-    "rapturous_applause": "proto_fs_eternal_applause",
     "showstopper": "proto_fs_bring_the_house_down",
     "flood_of_emotion": "proto_fs_grand_finale",
     "grand_gala": "proto_fs_gala_premiere",
@@ -372,6 +364,12 @@ POOL_DROPS: tuple[str, ...] = (
     "held_breath",
     "dress_rehearsal",
     "crowd_work",
+    # THE FADE PASS (2026-09-29): Held Applause, Echoing Hall and Eternal
+    # Applause left the pool (75 -> 72); the new rule 12 has no line for them
+    # to bend. C# twin: the `SwapOfferedRows` filter names their shipped rows.
+    "directors_cut",
+    "pit_orchestra",
+    "rapturous_applause",
 )
 
 
@@ -1484,61 +1482,34 @@ def end_of_turn_acts(state) -> None:
     fade(state)
 
 
-def fade_loss(fanfare: int, threshold: int = FADE_THRESHOLD) -> int:
-    """Rule 12's arithmetic: half of the Fanfare above `FADE_THRESHOLD`,
-    rounded down. 5 -> 0, 6 -> 0, 7 -> 1, 9 -> 2, 15 -> 5, 25 -> 10. ONE
-    function, so the threshold (and the halving) is tuned in one place. C#
-    twin: `FurinaStageLaw.FadeLoss`. `threshold` is *Eternal Applause*'s
-    (2026-09-26): with it in play the fade starts above 10."""
-    return max(0, int(fanfare) - int(threshold)) // 2
-
-
-def fade_threshold(player) -> int:
-    """Rule 12's line this turn: 5, or 10 with *Eternal Applause* in play
-    (any number of copies). C# twin: `FurinaStage.FadeThresholdFor`."""
-    if player.powers.get(ETERNAL_APPLAUSE, 0):
-        return ETERNAL_FADE_THRESHOLD
-    return FADE_THRESHOLD
+def fade_loss(fanfare: int) -> int:
+    """Rule 12's arithmetic: a quarter of the Fanfare, rounded down. 0-3 ->
+    0, 4-7 -> 1, 8-11 -> 2, 12 -> 3, 20 -> 5. ONE function, so the divisor
+    is tuned in one place. It never takes a whole bar, so it never empties a
+    performer. C# twin: `FurinaStageLaw.FadeLoss`."""
+    return max(0, int(fanfare)) // FADE_DIVISOR
 
 
 def fade(state) -> None:
-    """RULE 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of
-    Furina's turn, AFTER the acts, each performer behind the front (the middle
-    and back seats) loses `fade_loss` of its bar. The front never fades, so a
-    lone performer never does. The loss is half of what stands ABOVE the
-    threshold, so it never takes a bar below the threshold, never empties a
-    performer and never causes a Bow. [USER] ruled out a flat halving
-    ("taking away half from the back means it's hard to build up fanfare").
-    C# twin: `FurinaStageLedger.Fade`."""
+    """RULE 12, THE APPLAUSE FADES. THE FADE PASS (2026-09-29): at the end of
+    Furina's turn, AFTER the acts, EVERY performer, the front one included,
+    loses `fade_loss` of its bar: a quarter, rounded down. [USER]: "make
+    Fanfare deplete faster, but make that depletion more impactful" and
+    "What about a percentage fade, say 25%? Anything below 4 rounds to losing
+    0." A quarter never takes a whole bar, so the fade never empties a
+    performer and never causes a Bow. C# twin: `FurinaStageLedger.Fade`."""
     p = state.player
     if not active(p):
         return
-    # THE SUPPORTING POOL (2026-09-26). *Held Applause*: no fade at the end
-    # of this turn, taken once. *Eternal Applause*: the line is 10. *Echoing
-    # Hall*: what the fade takes goes to the front performer (a move, so a
-    # second copy moves nothing more).
-    held = bool(p.stage_hold_fade)
-    p.stage_hold_fade = False
-    threshold = fade_threshold(p)
-    echoed = 0
-    for pair in ([] if held else stage(p)[1:]):
-        loss = fade_loss(pair[1], threshold)
+    for pair in stage(p):
+        loss = fade_loss(pair[1])
         if loss <= 0:
             continue
         before = pair[1]
         book_loss(state, LOSS_FADED, loss)
         pair[1] = before - loss
-        echoed += loss
         state.emit("stage_fade", member=pair[0], amount=loss,
                    before=before, fanfare=pair[1])
-    # 2026-09-27: half of what the fade took, rounded down.
-    echoed //= 2
-    if echoed and p.powers.get(ECHOING_HALL, 0) and stage(p):
-        front = stage(p)[0]
-        book_gain(state, GAIN_POWER, echoed)
-        front[1] += echoed
-        state.emit("stage_raise", member=front[0], amount=echoed,
-                   seat=SEAT_LEAD, fanfare=front[1], by="echoing_hall")
     # THE LEDGER'S SAMPLE (a): the back performer's bar at the end of her
     # turn, after the fade, and 0 on an empty stage -- a distribution that
     # omits its zeros is not a distribution.
@@ -2082,16 +2053,6 @@ def whisper(state) -> int:
     if total <= 0:
         state.emit("stage_whisper_whiffed")
     return total
-
-
-def hold_fade(state) -> None:
-    """*Held Applause*: "At the end of this turn, your performers do not
-    fade." A flag `fade` takes once."""
-    p = state.player
-    if not active(p):
-        return
-    p.stage_hold_fade = True
-    state.emit("stage_hold_fade")
 
 
 def intermission(state, every: int) -> int:

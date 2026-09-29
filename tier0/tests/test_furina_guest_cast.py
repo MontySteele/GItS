@@ -410,7 +410,7 @@ def test_wriothesley_counts_hits_only(arm):
     st = _state([["usher", 3], ["wriothesley", 10]],
                 enemies=[_enemy(hp=100)])
     FS.spend(st, 2)                                # he is the back: 10 -> 8
-    FS.fade(st)                                    # 8 -> 7
+    FS.fade(st)                                    # 8 -> 6
     FS.perform(st, "wriothesley")
     assert st.enemies[0].hp == 100 - 4             # his floor only
     st.player.stage.reverse()                      # he steps to the front
@@ -433,35 +433,37 @@ def test_wriothesleys_bow_on_a_hit_reads_the_hit_that_took_him_down(arm):
 # the expected end of turn: each seat's bar after (None where it leaves), the
 # Block after the acts, what the front performers take and what reaches
 # Furina. `FurinaGuestCastTests.cs` carries the same table for the mod's
-# forecast, so the two engines are pinned to one set of numbers.
+# forecast, so the two engines are pinned to one set of numbers. THE FADE
+# PASS (2026-09-29): every bar after the acts loses a quarter, rounded down,
+# the front's included, so every bar of 4 or more moved.
 # ---------------------------------------------------------------------------
 
 BOARDS = [
     ("neuvillette pays", [["neuvillette", 6], ["usher", 3]], 0, [],
      [3, 3], 3, 0, 0),
     ("tax and gift", [["usher", 3], ["clorinde", 4], ["charlotte", 4]], 0,
-     [], [3, 5, 3], 3, 0, 0),
+     [], [3, 4, 3], 3, 0, 0),
     ("the last payment bows",
-     [["neuvillette", 3], ["sigewinne", 8]], 0, [], [None, 8], 0, 0, 0),
+     [["neuvillette", 3], ["sigewinne", 8]], 0, [], [None, 6], 0, 0, 0),
     ("a gift wraps to the front", [["usher", 2], ["sigewinne", 8]], 0, [],
-     [5, 5], 3, 0, 0),
+     [4, 4], 3, 0, 0),
     ("chevreuse spends herself", [["usher", 3], ["chevreuse", 4]], 0, [],
      [3, 2], 3, 0, 0),
     ("chevreuse cannot pay", [["chevreuse", 4], ["usher", 1]], 0, [],
-     [4, 1], 3, 0, 0),
+     [3, 1], 3, 0, 0),
     ("full house pays twice",
      [["neuvillette", 6], ["usher", 3], ["crabaletta", 4]], 1, [],
-     [None, 3, 4], 6, 0, 0),
+     [None, 3, 3], 6, 0, 0),
     # 2026-09-29 (Furina seat, Vantom): a Full House repeat that cannot pay
     # is refused in the forecast as at the turn's end -- Neuvillette at 5
     # pays once and keeps 2.
     ("full house, the repeat cannot pay",
      [["usher", 3], ["crabaletta", 4], ["neuvillette", 5]], 1, [],
-     [3, 4, 2], 6, 0, 0),
+     [3, 3, 2], 6, 0, 0),
     ("the fade is not a hit", [["usher", 3], ["wriothesley", 10]], 0, [],
      [3, 8], 3, 0, 0),
     ("two hits through the front",
-     [["usher", 3], ["crabaletta", 4]], 0, [7, 7], [3, 4], 3, 7, 1),
+     [["usher", 3], ["crabaletta", 4]], 0, [7, 7], [3, 3], 3, 6, 2),
 ]
 
 

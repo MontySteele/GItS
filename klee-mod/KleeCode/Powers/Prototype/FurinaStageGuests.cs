@@ -403,8 +403,7 @@ public static partial class FurinaStage
         var sweepEnd = clone.Beats.Count;
         clone.EndRest();
         clone.ResetActMultipliers();
-        var (threshold, echo) = FadeRules(owner);
-        clone.Fade(threshold, echo);
+        if (Fades(owner)) clone.Fade();
         var faded = TallyBeats(clone.Beats, sweepEnd, clone.Beats.Count,
                                FurinaStageLedger.FadeEvent);
 

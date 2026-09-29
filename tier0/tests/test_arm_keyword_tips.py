@@ -429,7 +429,12 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     "KLEEMOD-ARM_STAGE_LYNETTE",
                     # THE SUPPORTING POOL (2026-09-26): two more guests.
                     "KLEEMOD-ARM_STAGE_LYNEY",
-                    "KLEEMOD-ARM_STAGE_ESCOFFIER"}
+                    "KLEEMOD-ARM_STAGE_ESCOFFIER",
+                    # THE FADE PASS (2026-09-29): no card face prints "fade"
+                    # since its three cards were cut, so the fade's tip left
+                    # the keyword table; the key stays as the sentence the
+                    # seat page's glossary mirrors.
+                    "KLEEMOD-ARM_STAGE_FADE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -635,13 +640,12 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             " [gold]Fanfare[/gold] at the start of your turn.",
             # Round four's empty-stage summon is the Fanfare tip's (above).
             # The second text pass (2026-09-28): the back performer is the
-            # last in line and pays Spends; the fade has its own tip, which
-            # takes every performer behind the front.
+            # last in line and pays Spends; the fade has its own tip. The
+            # fade pass (2026-09-29): a quarter of every performer's bar.
             "Your last performer in line. [gold]Spend[/gold] pays from it. ",
             "A lone performer is both front and back.\");",
-            "At the end of your turn, each performer behind the front loses ",
-            "half its [gold]Fanfare[/gold] above ",
-            "FurinaStageLaw.FadeThreshold + \", rounded down.\");",
+            "At the end of your turn, each performer loses a quarter of its ",
+            "[gold]Fanfare[/gold], rounded down.\");",
     ):
         assert clause in tips, clause
 
@@ -665,14 +669,16 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert "KleeOverhaulLaw.BombGrowth" in tips
     assert "KleeOverhaulLaw.SparkPerExplosion" in tips
-    # THE STAGE's front and back sentences carry the lead's regen and the
-    # fade's threshold (draft 3, 2026-09-25, which also retired the two bow
-    # numbers: a Bow is the act once more). Both are prototype SEEDS (R215
-    # B), which makes a retune likelier here than anywhere else on this list.
+    # THE STAGE's front sentence carries the lead's regen (draft 3,
+    # 2026-09-25, also retired the two bow numbers: a Bow is the act once
+    # more). The fade pass (2026-09-29) retired the fade's threshold: the
+    # sentence says "a quarter", which `FurinaStageLaw.FadeDivisor` is, and
+    # the C# suite pins the two together.
     assert "FurinaStageLaw.BowUsherFanfare" not in tips
     assert "FurinaStageLaw.BowCrabalettaDamage" not in tips
     assert "FurinaStageLaw.LeadRegen" in tips
-    assert "FurinaStageLaw.FadeThreshold" in tips
+    assert "FurinaStageLaw.FadeThreshold" not in tips
+    assert "FadeDivisor" in tips
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
     # structural and the Mend rule's bound is her entry HP, not a constant.
     # The relic's number -- what a carried-out Plan adds to the Casket since

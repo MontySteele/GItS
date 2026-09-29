@@ -194,11 +194,13 @@ def test_full_house_needs_four_under_sold_out(arm):
 # The fade reaches both middles.
 # ---------------------------------------------------------------------------
 
-def test_both_middles_and_the_back_fade_and_the_front_does_not(arm):
+def test_all_four_seats_fade(arm):
+    """The fade pass (2026-09-29): every seat, the front's included, loses a
+    quarter, rounded down (was: both middles and the back, not the front)."""
     st = _state([["usher", 9], ["chevalmarin", 9], ["crabaletta", 11],
                  ["usher", 7]])
     FS.fade(st)
-    assert [f for _m, f in st.player.stage] == [9, 7, 8, 6]
+    assert [f for _m, f in st.player.stage] == [7, 7, 9, 6]
 
 
 # ---------------------------------------------------------------------------

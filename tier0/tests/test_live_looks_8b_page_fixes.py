@@ -142,8 +142,8 @@ def test_defect_one_the_words_themselves_survive_the_fold():
 
 # ------------------------------------------ defect 2, the bridge's modes ---
 
-SPEND_AS_THE_PAGE_PRINTS_IT = "Spend 3: deal 13 instead"
-SPEND_AS_THE_BRIDGE_HOLDS_IT = "[gold]Spend[/gold] 3: deal 13 instead"
+SPEND_AS_THE_PAGE_PRINTS_IT = "Spend 3: deal 17 instead"
+SPEND_AS_THE_BRIDGE_HOLDS_IT = "[gold]Spend[/gold] 3: deal 17 instead"
 
 
 def test_defect_two_a_mode_named_off_the_page_posts_the_bridge_s_spelling():

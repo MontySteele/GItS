@@ -1041,9 +1041,6 @@ public sealed class FurinaStageLedger
         copy._fixedBowActs = BowActs;
         copy.ActDamageMultiplier = ActDamageMultiplier;
         copy.ActBlockMultiplier = ActBlockMultiplier;
-        // THE SUPPORTING POOL (2026-09-26): Held Applause's skip is part of
-        // "the end of this turn".
-        copy.FadeHeld = FadeHeld;
         // 2026-09-27: A Five-Century Act's one return a turn.
         copy.ReturnedThisTurn = ReturnedThisTurn;
         return copy;
@@ -1602,54 +1599,32 @@ public sealed class FurinaStageLedger
     public const string FadeEvent = "fade";
 
     /// <summary>
-    /// RULE 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of
-    /// Furina's turn, AFTER the acts, each performer behind the front (the
-    /// middle and back seats) loses <see cref="FurinaStageLaw.FadeLoss"/> of
-    /// its bar: half of its Fanfare above
-    /// <see cref="FurinaStageLaw.FadeThreshold"/>, rounded down. The front
-    /// never fades, so a lone performer never does; the loss never takes a
-    /// bar below the threshold, so it never empties a performer and never
-    /// causes a Bow. [USER] ruled out a flat halving ("taking away half from
-    /// the back means it's hard to build up fanfare").
+    /// RULE 12, THE APPLAUSE FADES. THE FADE PASS (2026-09-29): at the end of
+    /// Furina's turn, AFTER the acts, EVERY performer, the front one
+    /// included, loses <see cref="FurinaStageLaw.FadeLoss"/> of its bar: a
+    /// quarter, rounded down. [USER]: "make Fanfare deplete faster, but make
+    /// that depletion more impactful" and "What about a percentage fade, say
+    /// 25%? Anything below 4 rounds to losing 0." A quarter never takes a
+    /// whole bar, so the fade never empties a performer and never causes a
+    /// Bow. (Draft 3's rule was half of the Fanfare above 5, behind the front
+    /// only; it faded 0 to 2 Fanfare a fight.)
     ///
     /// One beat per performer that lost Fanfare, carrying the loss
     /// (<see cref="StageBeat.Moved"/>) and the bar after it, so the seat page
     /// prints "The applause fades: Chevalmarin 9 → 7". Returns the total lost.
     /// Sim twin: <c>furina_stage.fade</c>.
     /// </summary>
-    public int Fade() => Fade(FurinaStageLaw.FadeThreshold, echo: false);
-
-    /// <summary>
-    /// Rule 12 as THE SUPPORTING POOL bends it (2026-09-26):
-    /// <paramref name="threshold"/> is the line (<i>Eternal Applause</i>'s
-    /// 10), <paramref name="echo"/> sends half of what the fade took, rounded
-    /// down, to the front performer (<i>Echoing Hall</i>, 2026-09-27; a move,
-    /// so copies move nothing more),
-    /// and <see cref="FadeHeld"/> (<i>Held Applause</i>) skips it once.
-    /// Returns what the fade took. Sim twin: <c>furina_stage.fade</c>.
-    /// </summary>
-    public int Fade(int threshold, bool echo)
+    public int Fade()
     {
-        if (FadeHeld)
-        {
-            FadeHeld = false;
-            return 0;
-        }
         var total = 0;
-        for (var i = 1; i < _seats.Count; i++)
+        for (var i = 0; i < _seats.Count; i++)
         {
             var seat = _seats[i];
-            var loss = FurinaStageLaw.FadeLoss(seat.Fanfare, threshold);
+            var loss = FurinaStageLaw.FadeLoss(seat.Fanfare);
             if (loss <= 0) continue;
             Drain(seat, loss);
             total += loss;
             Note(new StageBeat(FadeEvent, seat.Who, i, seat.Fanfare, loss, ""));
-        }
-        var echoed = total / 2;
-        if (echo && echoed > 0 && Lead is { } front)
-        {
-            front.Fanfare += echoed;
-            NoteRaise(front, echoed);
         }
         return total;
     }
@@ -1658,10 +1633,6 @@ public sealed class FurinaStageLedger
     //
     // review/active/furina-supporting-pool-2026-09-26.md. Every move below is
     // synchronous arithmetic on the seats, so the forecast can run it too.
-
-    /// <summary><i>Held Applause</i>: no fade at the end of this turn. Taken
-    /// by the next <see cref="Fade(int, bool)"/>.</summary>
-    public bool FadeHeld { get; set; }
 
     /// <summary><i>Counterclaim</i>'s question: did an enemy's hit reach the
     /// front performer's bar since the end of her last turn? Set by
@@ -1932,7 +1903,6 @@ public sealed class FurinaStageLedger
     public void Clear()
     {
         ResetActMultipliers();
-        FadeHeld = false;
         FrontHitSinceLastTurn = false;
         ReturnedThisTurn = false;
         IncomingBlocked = 0;

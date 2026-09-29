@@ -167,7 +167,7 @@ public sealed class GuestBook : CustomRelicModel
 }
 
 /// <summary>Rare. "The applause no longer fades." Rule 12 off, at
-/// <see cref="FurinaStage.FadeRules"/>, which the end-of-turn fade and the
+/// <see cref="FurinaStage.Fades"/>, which the end-of-turn fade and the
 /// forecast both read.</summary>
 public sealed class GrandTheaterProgram : CustomRelicModel
 {

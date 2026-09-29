@@ -87,6 +87,16 @@
       "owner": "furina"
     },
     {
+      "id": "KLEEMOD-PROTO_FS_ECHOING_HALL",
+      "class": "RetiredProtoFsEchoingHall",
+      "owner": "furina"
+    },
+    {
+      "id": "KLEEMOD-PROTO_FS_ETERNAL_APPLAUSE",
+      "class": "RetiredProtoFsEternalApplause",
+      "owner": "furina"
+    },
+    {
       "id": "KLEEMOD-PROTO_FS_GALA_DINNER",
       "class": "RetiredProtoFsGalaDinner",
       "owner": "furina"
@@ -94,6 +104,11 @@
     {
       "id": "KLEEMOD-PROTO_FS_GENTILHOMME_USHER",
       "class": "RetiredProtoFsGentilhommeUsher",
+      "owner": "furina"
+    },
+    {
+      "id": "KLEEMOD-PROTO_FS_HELD_APPLAUSE",
+      "class": "RetiredProtoFsHeldApplause",
       "owner": "furina"
     },
     {

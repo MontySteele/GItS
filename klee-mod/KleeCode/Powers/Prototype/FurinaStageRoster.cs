@@ -267,13 +267,13 @@ public static class FurinaStageRoster
                 ModelDb.Card<ProtoFsSpiritedAria>(),
                 ModelDb.Card<ProtoFsBubbleAria>(),
                 ModelDb.Card<ProtoFsSoloVerse>(),
-                // Uncommons (thirteen).
+                // Uncommons (eleven; the 2026-09-29 fade pass cut Held
+                // Applause and Echoing Hall, whose shipped rows stay filtered
+                // above).
                 ModelDb.Card<ProtoFsRevolvingStage>(),
                 ModelDb.Card<ProtoFsOratricesVerdict>(),
                 ModelDb.Card<ProtoFsSeasonTickets>(),
                 ModelDb.Card<ProtoFsStarBilling>(),
-                ModelDb.Card<ProtoFsHeldApplause>(),
-                ModelDb.Card<ProtoFsEchoingHall>(),
                 ModelDb.Card<ProtoFsIntermission>(),
                 ModelDb.Card<ProtoFsCounterclaim>(),
                 ModelDb.Card<ProtoFsDaCapo>(),
@@ -281,10 +281,9 @@ public static class FurinaStageRoster
                 ModelDb.Card<ProtoFsTideOfApplause>(),
                 ModelDb.Card<ProtoFsSoliloquy>(),
                 ModelDb.Card<ProtoFsDualNature>(),
-                // Rares (nine).
+                // Rares (eight; the fade pass cut Eternal Applause).
                 ModelDb.Card<ProtoFsGuestStarLyney>(),
                 ModelDb.Card<ProtoFsGuestStarEscoffier>(),
-                ModelDb.Card<ProtoFsEternalApplause>(),
                 ModelDb.Card<ProtoFsBringTheHouseDown>(),
                 ModelDb.Card<ProtoFsGrandFinale>(),
                 ModelDb.Card<ProtoFsGalaPremiere>(),

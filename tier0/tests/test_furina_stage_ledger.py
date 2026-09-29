@@ -61,8 +61,8 @@ def test_a_scripted_fight_adds_up_door_by_door(arm):
     FS.turn_start_regen(st)                 # usher 4             regen +1
     assert FS.spend(st, 3) == 3             # crab 8              spent  3
     assert FS.absorb(st, 2) == 2            # usher 2             hit    2
-    FS.end_of_turn_acts(st)                 # crab 8 -> 7         faded  1
-    assert FS.final_bow(st) == 7            # crab leaves with 7  left   7
+    FS.end_of_turn_acts(st)                 # crab 8 -> 6         faded  2
+    assert FS.final_bow(st) == 6            # crab leaves with 6  left   6
     assert FS.absorb(st, 5) == 2            # usher emptied       hit    2
     FS.settle_hit(st)                       # his bow: Block, no Fanfare
     assert FS.stage(st.player) == [["chevalmarin", 1]]
@@ -84,10 +84,10 @@ def test_a_scripted_fight_adds_up_door_by_door(arm):
         "gift": 0}
     assert led["spent"] == 7
     assert led["paid_other"] == {"guest": 2}
-    assert led["left"] == 7
-    assert led["faded"] == 1
+    assert led["left"] == 6
+    assert led["faded"] == 2                # a quarter of 8 (the fade pass)
     assert led["hit"] == 4
-    assert led["back_at_turn_end"] == [7]
+    assert led["back_at_turn_end"] == [6]
     assert FS.total_fanfare(st.player) == 4
     assert _balances(st)
 

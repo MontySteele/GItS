@@ -134,6 +134,15 @@ KNOWN_STALE = {
     "proto_fs_rapt_audience": (
         "The Furina audit pass (2026-09-29) CUT this row from her pool (three rows cut, 78 -> 75; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a furina/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_fs_held_applause": (
+        "The Furina fade pass (2026-09-29) CUT this row from her pool (three rows cut, 75 -> 72; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a furina/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_echoing_hall": (
+        "The Furina fade pass (2026-09-29) CUT this row from her pool (three rows cut, 75 -> 72; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a furina/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_eternal_applause": (
+        "The Furina fade pass (2026-09-29) CUT this row from her pool (three rows cut, 75 -> 72; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a furina/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_scout_ahead": (
         "The Kokomi cleanup pass (2026-09-29) CUT this row from her pool (two rows cut; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),

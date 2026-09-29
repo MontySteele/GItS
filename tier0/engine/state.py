@@ -876,11 +876,10 @@ class Player(Fighter):
     stage_lost: dict = field(default_factory=dict)
     stage_energy_next: int = 0
     # THE SUPPORTING POOL (2026-09-26, QUARANTINED with the stage): Oratrice's
-    # Verdict's enemy this turn; Held Applause's skipped fade; whether an
-    # enemy's hit reached the front performer since her last turn
-    # (Counterclaim); and every Bow this combat (Da Capo).
+    # Verdict's enemy this turn; whether an enemy's hit reached the front
+    # performer since her last turn (Counterclaim); and every Bow this combat
+    # (Da Capo). (Held Applause's skipped fade left with the card, 2026-09-29.)
     stage_verdict: Optional[object] = None
-    stage_hold_fade: bool = False
     stage_front_hit: bool = False
     stage_bows: int = 0
     # 2026-09-27 (QUARANTINED with the stage): each guest's damage her Block

@@ -187,7 +187,9 @@ def test_the_stage_badge_interpolates_the_law():
     # off the law.
     # The second text pass (2026-09-28): who acts, then the fade.
     assert '"Up to " + FurinaStageLaw.Seats + " performers act at the end of "' in src
-    assert '"Fanfare above " + FurinaStageLaw.FadeThreshold + "."' in src
+    # The fade pass (2026-09-29): a quarter of every bar, in words; the C#
+    # suite pins `FurinaStageLaw.FadeDivisor` to the quarter.
+    assert '"your turn. Then each performer loses a quarter of its Fanfare, "' in src
 
 
 # ---------------------------------------------------------------------------

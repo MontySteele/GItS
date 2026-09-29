@@ -5,7 +5,8 @@ Wriothesley needs a buff. Perhaps he also reflects the Blocked damage. so 2."
 
   1. A Five-Century Act returns a performer once a turn, however many copies;
      the latch clears at the start of her turn.
-  2. Echoing Hall moves HALF the fade's loss to the front, rounded down.
+  2. Echoing Hall moved HALF the fade's loss to the front, rounded down.
+     (The 2026-09-29 fade pass cut the card; its pin left with it.)
   3. Wriothesley always attacks: 4, plus 2 per Fanfare hits took from him,
      plus 1 per damage her Block stopped while he stood in front.
 
@@ -62,15 +63,6 @@ def test_a_five_century_act_returns_once_a_turn_and_clears_at_her_turn(arm):
     FS.absorb(st, 9)                               # a new turn: it returns
     FS.settle_hit(st)
     assert [m for m, _f in st.player.stage] == ["usher", "chevalmarin"]
-
-
-# ---- 2. Echoing Hall, half -------------------------------------------------
-
-def test_echoing_hall_rounds_half_down(arm):
-    st = _state([["usher", 3], ["crabaletta", 8]])
-    st.player.powers[FS.ECHOING_HALL] = 1
-    FS.fade(st)                                    # 1 faded: half is 0
-    assert st.player.stage == [["usher", 3], ["crabaletta", 7]]
 
 
 # ---- 3. Wriothesley always attacks -----------------------------------------

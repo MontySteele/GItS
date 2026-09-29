@@ -298,16 +298,17 @@ public class FurinaStageSoldOutTests
     // ---- the fade reaches both middles --------------------------------------
 
     [Fact]
-    public void Both_middle_seats_and_the_back_fade_and_the_front_does_not()
+    public void All_four_seats_fade()
     {
         using var _ = new Arm();
         var (_, stage) = Stage(true,
             (StagePerformer.Usher, 9), (StagePerformer.Chevalmarin, 9),
             (StagePerformer.Crabaletta, 11), (StagePerformer.Usher, 7));
 
-        // Half of each bar above 5, rounded down: 9 -> 7, 11 -> 8, 7 -> 6.
-        Assert.Equal(2 + 3 + 1, stage.Fade());
-        Assert.Equal(new[] { 9, 7, 8, 6 }, Bars(stage));
+        // The fade pass (2026-09-29): a quarter of each bar, rounded down,
+        // the front's included: 9 -> 7, 9 -> 7, 11 -> 9, 7 -> 6.
+        Assert.Equal(2 + 2 + 2 + 1, stage.Fade());
+        Assert.Equal(new[] { 7, 7, 9, 6 }, Bars(stage));
     }
 
     // ---- the line: four bodies, the same gap --------------------------------

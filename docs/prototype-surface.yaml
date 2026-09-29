@@ -1957,8 +1957,9 @@
    effects: [{op: block, amount: 5},
              {op: apply_power, power: weak, amount: 1, target: enemy}]}
 
+# Fade pass (2026-09-29): Spend 17 (21), was 13 (16).
 - {id: proto_fs_curtain_rise, name: "Curtain Rise", character: furina,
-   upgrade: {conditional_damage: +3},
+   upgrade: {conditional_damage: +3, conditional_then_damage: +1},
    authored_by: [claude],
    replaces: aria_of_recompense,
    register: salon, cost: 1, type: attack, rarity: basic,
@@ -1966,9 +1967,9 @@
    effects: [{op: choose_one, modes: [
               {label: "Deal 7 damage",
                effects: [{op: damage, amount: 7, target: enemy}]},
-              {label: "[gold]Spend[/gold] 3: deal 13 instead",
+              {label: "[gold]Spend[/gold] 3: deal 17 instead",
                effects: [{op: stage_spend, amount: 3},
-                         {op: damage, amount: 13, target: enemy}]}]}]}
+                         {op: damage, amount: 17, target: enemy}]}]}]}
 
 - {id: proto_fs_standing_ovation, name: "Rising Applause", character: furina,
    upgrade: {cost: -1},
@@ -2012,6 +2013,7 @@
 
 # 2026-09-26 seat round: the Hydro rides the hit (`applies_element: true`),
 # so a reaction multiplies it. Same on Quick Cue, Bubble Aria, Grand Deluge.
+# Fade pass (2026-09-29): Spend 13 to ALL (16), was 10 (13).
 - {id: proto_fs_tidal_flourish, name: "Tidal Flourish", character: furina,
    upgrade: {conditional_damage: +3},
    authored_by: [claude],
@@ -2021,9 +2023,9 @@
    effects: [{op: choose_one, modes: [
               {label: "Deal 5 damage to ALL enemies",
                effects: [{op: damage, amount: 5, target: all_enemies}]},
-              {label: "[gold]Spend[/gold] 3: deal 10 and apply [gold]Hydro[/gold] to ALL instead",
+              {label: "[gold]Spend[/gold] 3: deal 13 and apply [gold]Hydro[/gold] to ALL instead",
                effects: [{op: stage_spend, amount: 3},
-                         {op: damage, amount: 10,target: all_enemies, applies_element: true}]}]}]}
+                         {op: damage, amount: 13,target: all_enemies, applies_element: true}]}]}]}
 
 - {id: proto_fs_interposition, name: "Interposition", character: furina,
    upgrade: {conditional_block: +3},
@@ -2043,8 +2045,9 @@
 
 # --- the Uncommons (five) ---
 
+# Fade pass (2026-09-29): Spend 40 (45), was 32 (36).
 - {id: proto_fs_grand_entrance, name: "Grand Entrance", character: furina,
-   upgrade: {conditional_damage: +4},
+   upgrade: {conditional_damage: +4, conditional_then_damage: +1},
    authored_by: [claude],
    replaces: torrential_turn,
    register: salon, cost: 2, type: attack, rarity: uncommon,
@@ -2052,9 +2055,9 @@
    effects: [{op: choose_one, modes: [
               {label: "Deal 12 damage",
                effects: [{op: damage, amount: 12, target: enemy}]},
-              {label: "[gold]Spend[/gold] 7: deal 32 instead",
+              {label: "[gold]Spend[/gold] 7: deal 40 instead",
                effects: [{op: stage_spend, amount: 7},
-                         {op: damage, amount: 32, target: enemy}]}]}]}
+                         {op: damage, amount: 40, target: enemy}]}]}]}
 
 # Audit pass (2026-09-29): a base of 3 (6 upgraded), was 0 (4 upgraded).
 - {id: proto_fs_ousia_surge, name: "Ousia Surge", character: furina,
@@ -2158,8 +2161,9 @@
    effects: [{op: block, amount: 5},
              {op: stage_raise, amount: 2, seat: lead}]}
 
+# Fade pass (2026-09-29): Spend 14 (16), was 11 (12).
 - {id: proto_fs_quick_cue, name: "Quick Cue", character: furina,
-   upgrade: {conditional_damage: +1},
+   upgrade: {conditional_damage: +1, conditional_then_damage: +1},
    authored_by: [claude],
    replaces: applause_line,
    register: salon, cost: 0, type: attack, rarity: common,
@@ -2167,9 +2171,9 @@
    effects: [{op: choose_one, modes: [
               {label: "Deal 3 damage",
                effects: [{op: damage, amount: 3, target: enemy}]},
-              {label: "[gold]Spend[/gold] 3: deal 11 and apply [gold]Hydro[/gold] instead",
+              {label: "[gold]Spend[/gold] 3: deal 14 and apply [gold]Hydro[/gold] instead",
                effects: [{op: stage_spend, amount: 3},
-                         {op: damage, amount: 11,target: enemy, applies_element: true}]}]}]}
+                         {op: damage, amount: 14,target: enemy, applies_element: true}]}]}]}
 
 - {id: proto_fs_step_forward, name: "Step Forward", character: furina,
    upgrade: {block: +2},
@@ -2202,6 +2206,7 @@
    description: "All your performers act now.",
    effects: [{op: stage_perform_all}]}
 
+# Fade pass (2026-09-29): 4 per point (5), was 3 (4).
 - {id: proto_fs_bravura, name: "Bravura", character: furina,
    upgrade: {formula_per: +1},
    authored_by: [claude],
@@ -2210,7 +2215,7 @@
    description: "[gold]Spend[/gold] all of your [gold]back performer[/gold]'s [gold]Fanfare[/gold]. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_back_all},
              {op: damage,
-              amount_formula: {base: 5, per: 3, count: stage_spent},
+              amount_formula: {base: 5, per: 4, count: stage_spent},
               target: enemy}]}
 
 - {id: proto_fs_full_house, name: "Full House", character: furina,
@@ -2424,35 +2429,12 @@
 
 # --- 3. Bending the fade ---
 
-- {id: proto_fs_held_applause, name: "Held Applause", character: furina,
-   upgrade: {block: 3},
-   authored_by: [claude],
-   replaces: directors_cut,
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 7 [gold]Block[/gold]. Your performers don't [gold]fade[/gold] this turn.",
-   effects: [{op: block, amount: 7},
-             {op: stage_hold_fade}]}
-
-- {id: proto_fs_echoing_hall, name: "Echoing Hall", character: furina,
-   upgrade: {cost: -1},
-   authored_by: [claude],
-   replaces: pit_orchestra,
-   register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever a performer fades, your [gold]front performer[/gold] gains half the [gold]Fanfare[/gold] lost.",
-   effects: [{op: apply_power, power: fs_echoing_hall, amount: 1,
-              target: self}]}
-
-- {id: proto_fs_eternal_applause, name: "Eternal Applause", character: furina,
-   upgrade: {cost: -1},
-   authored_by: [claude],
-   replaces: rapturous_applause,
-   register: salon, cost: 1, type: power, rarity: rare,
-   description: "Your performers fade only above 10 [gold]Fanfare[/gold], not 5.",
-   effects: [{op: apply_power, power: fs_eternal_applause, amount: 1,
-              target: self}]}
+# Held Applause, Echoing Hall and Eternal Applause were cut by the fade
+# pass (2026-09-29): the new rule 12 has no line to move. Provenance note.
 
 # --- 4. Cashing out ---
 
+# Fade pass (2026-09-29): Spend 14 (17), was 11 (14); the draw is unchanged.
 - {id: proto_fs_spirited_aria, name: "Spirited Aria", character: furina,
    upgrade: {conditional_damage: 3},
    authored_by: [claude],
@@ -2462,9 +2444,9 @@
    effects: [{op: choose_one, modes: [
               {label: "Deal 8 damage",
                effects: [{op: damage, amount: 8, target: enemy}]},
-              {label: "[gold]Spend[/gold] 3: deal 11 and draw 2 cards instead",
+              {label: "[gold]Spend[/gold] 3: deal 14 and draw 2 cards instead",
                effects: [{op: stage_spend, amount: 3},
-                         {op: damage, amount: 11, target: enemy},
+                         {op: damage, amount: 14, target: enemy},
                          {op: draw, amount: 2}]}]}]}
 
 - {id: proto_fs_intermission, name: "Intermission", character: furina,
@@ -2487,7 +2469,7 @@
 
 # (renamed 2026-09-26: title clash) Showstopper on the paper. "Spend" is not
 # golded (provenance, 2026-09-26 seat round). Audit pass (2026-09-29): 3 to
-# ALL per point (4 upgraded), was 2 (3).
+# ALL per point (4 upgraded), was 2 (3). Fade pass (same day): 4 (5).
 - {id: proto_fs_bring_the_house_down, name: "Bring the House Down", character: furina,
    upgrade: {formula_per: 1},
    authored_by: [claude],
@@ -2496,7 +2478,7 @@
    description: "Your [gold]front performer[/gold] loses all its [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage to ALL enemies per point lost.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_front_all},
              {op: damage,
-              amount_formula: {base: 0, per: 3, count: stage_spent},
+              amount_formula: {base: 0, per: 4, count: stage_spent},
               target: all_enemies}]}
 
 # --- 5. Bows and encores ---
