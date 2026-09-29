@@ -87,6 +87,13 @@
     <DefineConstants>$(DefineConstants);FURINA_STAGE</DefineConstants>
   </PropertyGroup>
 
+  <!-- Varka, mirrored here on the terms above: his character class and
+       pools compile only with the property, so the pins that name them sit
+       under the same #if. -->
+  <PropertyGroup Condition="'$(VarkaPrototype)' == 'true'">
+    <DefineConstants>$(DefineConstants);VARKA_PROTOTYPE</DefineConstants>
+  </PropertyGroup>
+
   <!-- The Teyvat run frame arm, mirrored here on exactly the terms above and
        for the same reason. Its pins do not need the property:
        `TeyvatFrame.Enabled` is settable, so one build asserts both sides of

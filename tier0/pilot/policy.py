@@ -304,6 +304,13 @@ BLIND_PREDICATES = frozenset({
     # candidate for a future `P` window; it is not a defect, so it is not
     # backlog.
     "self_has_power_tracking",
+    # VARKA (prototype batch one). Wind Wall's and Tailwind Stride's "If you
+    # hold a Wind" and Tempest Charge's "If it Swirls". C# first: tier 0 has
+    # no Wind and no Varka seat, `effects._predicate` refuses both by name,
+    # and no `proto_vk_` row can reach this pilot -- so blind moves no
+    # measured number, and scoring them is the sim twin's job at Balance.
+    "holds_wind",
+    "swirled_by_this",
 })
 BLIND_PREDICATE_PREFIXES: tuple[str, ...] = ()
 

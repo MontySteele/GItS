@@ -2729,3 +2729,172 @@
    description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], each other player gains 3 [gold]Block[/gold].",
    upgrade: {power_amount: 1},
    effects: [{op: apply_power, power: kk_sangonomiyas_counsel, amount: 3, target: self}]}
+
+# VARKA, prototype batch one (review/active/varka-paper-kit-2026-09-28.md
+# sec.10): his starter payoff and his whole pool, sec.10's placeholder numbers.
+# Per-row reasoning: docs/notes/prototype-surface-provenance.md, Varka.
+
+# --- the starter's payoff (sec.10.2) ---
+
+- {id: proto_vk_four_winds_ascension, name: "Four Winds' Ascension", character: varka,
+   authored_by: [claude],
+   # `dusty_tome`: no Ancient card yet, so Darv's Tome hands him this one.
+   cost: 2, type: attack, rarity: basic, exhaust: true, tags: [dusty_tome],
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Wind[/gold] you hold.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 6, per: 6, count: winds_held}}],
+   upgrade: {formula_base: 3}}
+
+# --- Common (sec.10.3): six of his own and the four Knights ---
+
+- {id: proto_vk_windbound_execution, name: "Windbound Execution", character: varka,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common, tags: [absorb],
+   description: "Deal {Damage:diff()} damage. [gold]Absorb[/gold].",
+   effects: [{op: damage, amount: 6, target: enemy}],
+   upgrade: {damage: 3}}
+
+- {id: proto_vk_squall, name: "Squall", character: varka,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal {Damage:diff()} damage twice.",
+   effects: [{op: damage, amount: 4, target: enemy, times: 2}],
+   upgrade: {damage: 1}}
+
+- {id: proto_vk_updraft, name: "Updraft", character: varka,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal {Damage:diff()} damage.",
+   effects: [{op: damage, amount: 8, target: enemy}],
+   upgrade: {damage: 3}}
+
+- {id: proto_vk_gale_sweep, name: "Gale Sweep", character: varka,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal {Damage:diff()} damage to each enemy with a fresh aura. Each hit [gold]Swirls[/gold].",
+   effects: [{op: damage, amount: 3, target: all_enemies, only_if: fresh_aura}],
+   upgrade: {damage: 2}}
+
+- {id: proto_vk_wind_wall, name: "Wind Wall", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. If you hold a [gold]Wind[/gold], gain {BranchBlock:diff()} more.",
+   effects: [{op: block, amount: 7},
+             {op: conditional, if: holds_wind,
+              then: [{op: block, amount: 3}]}],
+   upgrade: {block: 3}}
+
+- {id: proto_vk_favonius_drill, name: "Favonius Drill", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Choose a [gold]Knight[/gold]: apply their element to the enemy.",
+   # Four Knights exceed the choose-a-card screen's three: `knight_aura`'s grid.
+   effects: [{op: block, amount: 6},
+             {op: knight_aura, target: enemy}],
+   upgrade: {block: 3}}
+
+- {id: proto_vk_amber_baron_bunny, name: "Amber: Baron Bunny", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: pyro,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Deal {CalculatedDamage:diff()} damage.",
+   effects: [{op: damage, amount: 6, target: enemy, applies_element: true}],
+   upgrade: {damage: 3}}
+
+- {id: proto_vk_barbara_show_begin, name: "Barbara: Let the Show Begin", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {CalculatedBlock:diff()} [gold]Block[/gold].",
+   effects: [{op: apply_aura, element: hydro, target: all_enemies},
+             {op: block, amount: 3}],
+   upgrade: {block: 2}}
+
+- {id: proto_vk_lisa_violet_arc, name: "Lisa: Violet Arc", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Deal {CalculatedDamage:diff()} damage. Draw 1 card.",
+   effects: [{op: damage, amount: 5, target: enemy, applies_element: true},
+             {op: draw, amount: 1}],
+   upgrade: {damage: 2}}
+
+- {id: proto_vk_kaeya_frostgnaw, name: "Kaeya: Frostgnaw", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Deal {CalculatedDamage:diff()} damage.",
+   effects: [{op: damage, amount: 6, target: enemy, applies_element: true}],
+   upgrade: {damage: 3}}
+
+# --- Uncommon (sec.10.3) ---
+
+- {id: proto_vk_tempest_charge, name: "Tempest Charge", character: varka,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], draw 1 card.",
+   effects: [{op: damage, amount: 8, target: enemy},
+             {op: conditional, if: swirled_by_this,
+              then: [{op: draw, amount: 1}]}],
+   upgrade: {damage: 3}}
+
+- {id: proto_vk_favonius_cut, name: "Favonius Cut", character: varka,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: uncommon, tags: [absorb],
+   description: "Deal {Damage:diff()} damage. [gold]Absorb[/gold].",
+   effects: [{op: damage, amount: 14, target: enemy}],
+   upgrade: {damage: 5}}
+
+- {id: proto_vk_grand_masters_order, name: "Grand Master's Order", character: varka,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   description: "The next [gold]Knight[/gold] you play this turn is played twice.",
+   effects: [{op: apply_power, power: vk_grand_masters_order, amount: 1, target: self}],
+   upgrade: {retain: true}}
+
+- {id: proto_vk_knights_roll_call, name: "Knights' Roll Call", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Add {IfUpgraded:show:a Knight you choose|a random [gold]Knight[/gold]} to your hand. It costs 0 this turn.",
+   effects: [{op: add_knight}],
+   upgrade: {choose_knight: true}}
+
+- {id: proto_vk_eye_of_the_storm, name: "Eye of the Storm", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain {CalculationExtra:diff()} [gold]Block[/gold] for each [gold]Wind[/gold] you hold.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 0, per: 4, count: winds_held}}],
+   upgrade: {formula_per: 1}}
+
+- {id: proto_vk_stormward_stance, name: "Stormward Stance", character: varka,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "While you hold 2 or more [gold]Winds[/gold], your [gold]Anemo[/gold] Attacks deal 3 additional damage.",
+   effects: [{op: apply_power, power: vk_stormward_stance, amount: 3, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_tailwind_stride, name: "Tailwind Stride", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Draw 2 cards. If you hold a [gold]Wind[/gold], draw 1 more.",
+   effects: [{op: draw, amount: 2},
+             {op: conditional, if: holds_wind,
+              then: [{op: draw, amount: 1}]}],
+   upgrade: {cost: -1}}
+
+# --- Rare (sec.10.3) ---
+
+- {id: proto_vk_converging_winds, name: "Converging Winds", character: varka,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Your [gold]Swirls[/gold] react where they land. An [gold]Elemental Reaction[/gold] a spread sets off hits only that enemy.",
+   effects: [{op: apply_power, power: vk_converging_winds, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_boreas_unbound, name: "Boreas Unbound", character: varka,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever you [gold]Absorb[/gold], gain 1 [gold]Energy[/gold].",
+   effects: [{op: apply_power, power: vk_boreas_unbound, amount: 1, target: self}],
+   upgrade: {cost: -1}}

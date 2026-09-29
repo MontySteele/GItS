@@ -751,6 +751,12 @@ KLEE_OVERHAUL_OPS = frozenset((
     "grow_largest", "multiply_largest_bomb", "fetch_from_discard",
     "add_random_companion", "grant_kapow_each_turn"))
 
+#: VARKA's two verbs (prototype batch one, review/active/varka-paper-kit-
+#: 2026-09-28.md sec.10): Favonius Drill's `knight_aura` and Knights' Roll
+#: Call's `add_knight`. C# first, registered in tier0 and refused there, so
+#: they take the Klee arm's one pricing decision: ZERO, see `_op_price`.
+VARKA_OPS = frozenset(("knight_aura", "add_knight"))
+
 #: The Kokomi overhaul's verbs (DRAFT 6, QUARANTINED behind
 #: `C.KOKOMI_OVERHAUL`). A second set beside the one above rather than a merged
 #: one, because the two arms are independent and a merged set would make either
@@ -948,6 +954,14 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         return STATIC_SALON_ROTATE_VALUE
     if op == "spotlight_designate":
         return STATIC_SPOTLIGHT_DESIGNATE_VALUE
+
+    # -- VARKA, prototype batch one (C# first) -----------------------------
+    if op in VARKA_OPS:
+        # ZERO, the Klee arm's deliberate zero below and for its reason: tier0
+        # registers both verbs and refuses to resolve them, no pool can offer a
+        # `proto_vk_` row to this drafter, and every drafted number in the
+        # world is byte-identical with and without this branch.
+        return 0.0
 
     # -- the Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) --------
     if op in KLEE_OVERHAUL_OPS:
@@ -2540,6 +2554,11 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "grow_largest", "multiply_largest_bomb",
                   "fetch_from_discard", "add_random_companion",
                   "grant_kapow_each_turn")},
+    # --- VARKA, prototype batch one (C# first) ---
+    **{op: "ZERO: VARKA is C# FIRST and tier0 refuses to resolve his verbs, "
+            "so there is no sim behaviour to price (paper kit sec.10; "
+            "prototype surface only -- no drafted number moves)"
+       for op in ("knight_aura", "add_knight")},
     # --- the Kokomi overhaul, draft 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ----
     # EB-311: the blanket ZERO these eight rows used to share is gone. One
     # rationale apiece now, each derived from a dial already in this table, and

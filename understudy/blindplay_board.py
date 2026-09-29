@@ -763,12 +763,69 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         for face in combat["hand"]:
             face["spend_unavailable"] = spend_unavailable(
                 face["text"], stage, combat["you"]["relics"])
+    # VARKA (prototype batch one): the Winds he holds, whether Boreas's Fang
+    # has taken this turn's hit, and each enemy's aura FRESH or SPENT -- the
+    # three facts every one of his Absorb-or-Swirl choices turns on.
+    winds = varka_winds(p, combat)
+    if winds is not None:
+        combat["winds"] = winds
     # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
     # prints, with its HP.
     allies = _allies(p, (plans or {}).get("pet_entity_id"))
     if allies:
         combat["pets"] = allies
     return combat
+
+
+#: VARKA (prototype batch one, review/active/varka-paper-kit-2026-09-28.md
+#: sec.10). The four elements a Wind comes from, in the order his Wind badges
+#: pay on a Swirl (`VarkaWinds.Order`), and the one relic whose once-a-turn
+#: latch the page reads off its icon's counter (1 ready, 0 used).
+VARKA_WIND_ELEMENTS = ("Cryo", "Pyro", "Hydro", "Electro")
+VARKA_FANG = "Boreas's Fang"
+_WIND_NAME = re.compile(r"^(Pyro|Hydro|Electro|Cryo) Wind$")
+_AURA_BADGE = re.compile(r"^(Pyro|Hydro|Electro|Cryo) Aura$")
+
+
+def varka_winds(player: dict[str, Any],
+                combat: dict[str, Any]) -> dict[str, Any] | None:
+    """VARKA's block: `{held, missing, fang, auras}`, or None on a board that
+    is not his (no Wind, no Fang, and a wire that does not name him).
+
+    `held` and `missing` are Wind elements in `VARKA_WIND_ELEMENTS` order;
+    `fang` is "ready", "used", or None with no Fang; `auras` is one row per
+    enemy in the page's own order -- `{name, element, state}`, `state` being
+    "fresh" or "spent" and `element` None for a body with no aura. SPENT is
+    read off the badge's own sentence (`AuraPower`'s spent face opens
+    "Spent:"), never guessed from a board.
+    """
+    you = combat["you"]
+    held = {m.group(1) for m in (_WIND_NAME.match(pw["name"])
+                                 for pw in you["powers"]) if m}
+    fang = next((r for r in you["relics"] if r["name"] == VARKA_FANG), None)
+    his = _fold(_text(player.get("character"))) == "varka"
+    if not (his or held or fang is not None):
+        return None
+    auras = []
+    for enemy in combat["enemies"]:
+        row: dict[str, Any] = {"name": enemy["name"], "element": None,
+                               "state": None}
+        for pw in enemy["powers"]:
+            m = _AURA_BADGE.match(pw["name"])
+            if m:
+                row["element"] = m.group(1)
+                row["state"] = ("spent" if pw["text"].startswith("Spent")
+                                else "fresh")
+                break
+        auras.append(row)
+    fang_state = None
+    if fang is not None:
+        counter = fang.get("counter")
+        fang_state = ("used" if counter == "0"
+                      else "ready" if counter == "1" else None)
+    return {"held": [el for el in VARKA_WIND_ELEMENTS if el in held],
+            "missing": [el for el in VARKA_WIND_ELEMENTS if el not in held],
+            "fang": fang_state, "auras": auras}
 
 
 #: The seats, in damage order, under the words the brief and the tips use.

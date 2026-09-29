@@ -1458,6 +1458,16 @@ ARM_KEYWORDS: dict[str, str] = {
              "turn, before enemies act."),
     "Mend": ("Mend N: heal N HP, but never above the HP you had at the "
              "start of this combat."),
+    # VARKA (prototype batch one), in step with `ArmKeywordTips.ForAbsorb`,
+    # `ForWind` and `ForKnight` word for word, markup folded out and the
+    # Wind numbers written out (`VarkaLaw`).
+    "Absorb": ("On a fresh aura, take it off the enemy and gain its Wind. If "
+               "you already hold that Wind, Swirl it instead."),
+    "Wind": ("Kept all fight. Each Swirl you make pays each Wind you hold: "
+             "Pyro 3 damage, Hydro 3 Block, Cryo 1 Weak, Electro 1 Energy "
+             "once a turn."),
+    "Knight": ("Amber, Barbara, Lisa or Kaeya: his own Companion cards. "
+               "Knights' Muster counts as one."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read
@@ -1906,6 +1916,8 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "fade": "furina",
     "Encore": "furina", "Spotlighted": "furina",
     "Ousia": "furina", "Pneuma": "furina",
+    # VARKA (prototype batch one): his three words are his alone.
+    "Absorb": "varka", "Wind": "varka", "Knight": "varka",
     "Summon": "furina", "Gentilhomme Usher": "furina",
     "Surintendante Chevalmarin": "furina", "Mademoiselle Crabaletta": "furina",
     # THE GUEST CAST (2026-09-25).
@@ -2002,6 +2014,13 @@ _ARM_KEYWORD_RE = {
     # `EB-377`'s `Swirl` is printed as a verb, so it conjugates the way
     # `Mend` does. (Its sibling `Hexerei` was retired by R276 pick 2.)
     "Swirl": re.compile(r"\bSwirls?\b"),
+    # VARKA (prototype batch one). `Absorb` is a verb and conjugates the way
+    # `Swirl` does; `Wind` is printed singular and plural ("a Wind", "2 or
+    # more Winds"), and CASE-SENSITIVE keeps it off ordinary "wind" in prose;
+    # `Knight` likewise ("a Knight", "Knights' Muster").
+    "Absorb": re.compile(r"\bAbsorbs?\b"),
+    "Wind": re.compile(r"\bWinds?\b"),
+    "Knight": re.compile(r"\bKnights?\b"),
     # `EB-372`. NO PLURAL: the word names one Power. It fires on Kaeya's face,
     # on the Cold-Blooded buff it leaves behind, and on the Power card itself
     # wherever one is printed -- which is every screen a reader can meet the

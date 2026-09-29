@@ -350,6 +350,19 @@ internal static class KleePowerIcons
         RaiseAToastPower => KleePck.Path("furina/powers/limelight.png"),
         TheCrowdRoarsPower =>
             KleePck.Path("furina/powers/rising_ovation.png"),
+        // VARKA (prototype batch one): his four Winds and three card powers
+        // on the varka-art pass's own files. Grand Master's Order borrows
+        // Study Buddy's, the replay it narrows to Knights.
+        PyroWindPower => KleePck.Path("varka/powers/pyro_wind.png"),
+        HydroWindPower => KleePck.Path("varka/powers/hydro_wind.png"),
+        CryoWindPower => KleePck.Path("varka/powers/cryo_wind.png"),
+        ElectroWindPower => KleePck.Path("varka/powers/electro_wind.png"),
+        StormwardStancePower =>
+            KleePck.Path("varka/powers/stormward_stance.png"),
+        ConvergingWindsPower =>
+            KleePck.Path("varka/powers/converging_winds.png"),
+        BoreasUnboundPower => KleePck.Path("varka/powers/boreas_unbound.png"),
+        GrandMastersOrderPower => KleePck.Path("klee/powers/study_buddy.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

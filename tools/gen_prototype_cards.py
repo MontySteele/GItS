@@ -143,7 +143,7 @@ def _profile_for(character_id: str) -> gen.CharacterProfile:
     `cadence` is the owner's too, EXCEPT where `ARM_CADENCE` names the arm's
     own rule (R276: Kokomi's arm elements her damaging Skills as well).
     """
-    owner = gen.PROFILES[character_id]
+    owner = gen.PROTOTYPE_OWNERS[character_id]
     return replace(
         owner,
         cadence=ARM_CADENCE.get(character_id, owner.cadence),
@@ -432,10 +432,11 @@ def plan() -> gen.ProfilePlan:
                 f"{PROTOTYPE_ID_PREFIX!r} (tier0 loader enforces the same "
                 "rule; a bare id collides with a shipped class name).")
         character = card.get("character")
-        if character not in gen.PROFILES:
+        if character not in gen.PROTOTYPE_OWNERS:
             raise SystemExit(
                 f"gen_prototype_cards: {card_id}: `character:` must name a "
-                f"roster character {sorted(gen.PROFILES)}, got {character!r}.")
+                f"roster character {sorted(gen.PROTOTYPE_OWNERS)}, got "
+                f"{character!r}.")
         profile = _profile_for(character)
         # EB-213, and it happens BEFORE `blocked_reason`: R20 blocks a card
         # carrying an inline `upgrade:` key, because on a shipped sheet that
@@ -542,7 +543,7 @@ def _roster_source(owners: dict[str, str],
     fields: list[str] = []
     builders: list[str] = []
     arms: list[str] = []
-    for character in sorted(gen.PROFILES):
+    for character in sorted(gen.PROTOTYPE_OWNERS):
         ids = sorted(cid for cid, owner in owners.items() if owner == character)
         classes = [gen.pascal(cid) for cid in ids]
         for cid in ids:
