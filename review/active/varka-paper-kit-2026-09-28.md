@@ -46,9 +46,15 @@ swears more of that element to his blade.
   seat page and his status bar show it with its Oath. Before his first Knight
   he has none.
 - **Oath, one count per element** (Pyro, Hydro, Electro, Cryo). He gains 1
-  Oath of an element each time he applies it to an enemy and each time he
-  Swirls an aura of it, whoever laid the aura. A count only goes up, unless
-  a card says otherwise, and all four reset at the end of the fight.
+  Oath of an element:
+  - for each direct application of it to an enemy by his cards (a Knight,
+    Favonius Drill, Ascension's elemental hit), **including one that reacts**
+    instead of leaving an aura; a multi-hit card counts each hit;
+  - for each Swirl he makes of an aura of it, whoever laid the aura.
+
+  The spent copies a Swirl spreads are not applications, and nor are
+  reactions set off by Converging Winds' spread hits. A count only goes up,
+  unless a card says otherwise, and all four reset at the end of the fight.
 - **Cards read only the current element's Oath.** Oath banked in the other
   elements waits until he switches back. Running two elements is allowed;
   juggling them is the cost.
@@ -159,12 +165,19 @@ target 78 comes after the prototype.
 2. **Switch.** Change element to the fight's need: Hydro for a big hitter,
    Cryo's Vulnerable for a burst turn, Electro against a crowd. Boreas Unbound
    pays for each switch; Four Winds' Accord and Sworn Brotherhood keep every
-   count alive. Weakness: every reader is smaller.
+   count alive. Weakness: every reader is smaller. **Open (pick 2):** a
+   mid-fight switch currently pays three costs at once: the readers drop to
+   the new element's small count, Ascension's elemental hit reacts with the
+   old element's aura and leaves nothing fresh to Swirl, and the new element
+   needs an application before the loop restarts. Moving from 12 Pyro Oath to
+   2 Hydro Oath gains 3 Block per Swirl but drops Oath of the Knights from 12
+   Block to 2 and Ascension by 30. As written, switching to the defensive
+   element can leave him less safe (external review, 2026-09-29).
 3. **Gale.** Many Swirls on many auras: Gale Sweep, Wall of Gales, Tempest
    Charge, Converging Winds. Oath grows fastest here, in whatever elements the
    board offers.
 4. **Grand Master** (provisional): Knight repeats and Knight generation; kept
-   only if it shows a distinct turn (pick 2).
+   only if it shows a distinct turn (pick 3).
 
 **In co-op** a partner's auras are Swirl fuel. Swirling them gains Oath of
 their element but does not change his current element, so a Klee partner
@@ -175,8 +188,10 @@ feeds Pyro Oath whether or not he is on Pyro.
 - **Nothing to Swirl, nothing to charge.** Enemies carry no auras of their own
   yet, so his Oath comes from his Knights and his partner. A draw without a
   Knight is a plain Anemo turn.
-- **The wrong element.** A Focus deck whose element does not answer the fight
-  (Pyro against a big hitter) has no Hydro Block to fall back on.
+- **Focus is only as safe as its readers.** A focused Pyro deck with Eye of
+  the Storm or Oath of the Knights turns its big count into Block, so the
+  wrong element is not by itself a defensive hole; a Pyro deck without
+  readers is.
 - **Before the first Oath** Ascension is not in hand.
 
 ## 9. What it costs to build
@@ -190,22 +205,40 @@ comes first (sec.10).
 
 ## 10. What the sim must show before a prototype
 
-1. **Ascension's curve.** Oath per turn, and Ascension's damage per cast on
+1. **Stay or switch, from the same state.** Mid-fight (turn 4 or 5, a
+   realistic Pyro count, a Hydro Knight in hand, a big attack coming): keep
+   Pyro against play the Hydro Knight, over the next three turns. Damage,
+   Block, HP lost, and whether a fresh aura is left for the next Anemo hit.
+   With ordinary drafted support, then with the movers and Boreas Unbound.
+   One pair each for Cryo (Vulnerable before a burst turn) and Electro
+   (against a pack).
+2. **Ascension's curve.** Oath per turn, and Ascension's damage per cast on
    turns 1 to 12, by starting Knight, focused and juggling. Flag any deck
-   where Ascension alone passes 60 per cast by turn 8. Check the turn-one
-   burst above.
-2. **The starting Knights are even.** Win rate and act-1 HP loss by starting
-   Knight; no element more than ten points behind the others.
-3. **Readers pay for focus.** Eye of the Storm and Oath of the Knights against
-   Defend, focused and juggling.
-4. **Defence.** Act-1 elite HP loss against run 3 of round one, the best
-   batch-one run.
+   where Ascension alone passes 60 per cast by turn 8, with the setup that
+   produced it and what the deck gave up. Check the turn-one burst above.
+3. **The starting Knights are even, bosses and packs apart.** Win rate and
+   act-1 HP loss by starting Knight, single-enemy fights and packs of three
+   or more reported separately (Barbara paints every enemy, so she may lead
+   in packs by structure, not by her printed Block).
+4. **Readers pay for focus.** Eye of the Storm and Oath of the Knights against
+   Defend, focused and juggling; act-1 elite HP loss across the design's own
+   options, and against base Silent and Ironclad.
 
 ## Picks
 
 1. **What gains Oath.** (1) *Applying an element and Swirling an aura of it,
-   1 each* [default]. (2) Swirling only (closer to Genshin; slower, and a
-   Knight charges nothing by itself).
-2. **Grand Master.** (1) *Provisional fourth archetype, kept only if it shows
-   a distinct turn* [default]. (2) Drop it now; a later archetype can come
-   from his Hexerei homework instead.
+   1 each, as defined in sec.3* [default; the external review agrees].
+   (2) Swirling only (closer to Genshin; slower, and a Knight charges nothing
+   by itself).
+2. **What a switch is for.** (1) *The switch the kit rewards is the choice of
+   element at the start of each fight, from a roster of drafted Knights; a
+   mid-fight switch stays a costly juggle ([USER]: "figuring out how to juggle
+   them becomes a problem"), made viable by the movers. The sim's first check
+   must find it sometimes right with them* [default]. (2) Make a mid-fight
+   switch pay by itself: when the current element changes, the new element
+   gains Oath equal to half the old one's (no count goes down). (3) Leave it
+   open until the sim's first check.
+3. **Grand Master.** (1) *Keep Grand Master's Order and Knights' Roll Call as
+   support cards and drop "Grand Master" as an archetype; it can earn the
+   name later with a distinct turn* [default; the external review's
+   recommendation]. (2) Keep it as a provisional fourth archetype.
