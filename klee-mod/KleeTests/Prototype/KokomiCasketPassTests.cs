@@ -189,13 +189,14 @@ public class KokomiCasketPassTests : IDisposable
     // ---- C. the re-keyed payoffs ------------------------------------------
 
     [Fact]
-    public void Feint_is_four_plus_three_per_carry_out_and_plans_vulnerable()
+    public void Feint_is_six_plus_three_per_carry_out_and_plans_vulnerable()
     {
+        // The cleanup pass (2026-09-29): a base of 6, upgraded 9.
         var card = new ProtoKkFeint();
-        Assert.Equal(4m, Var(card, "CalculationBase"));
+        Assert.Equal(6m, Var(card, "CalculationBase"));
         Assert.Equal(3m, Var(card, "ExtraDamage"));
         var up = Upgraded<ProtoKkFeint>();
-        Assert.Equal(6m, Var(up, "CalculationBase"));
+        Assert.Equal(9m, Var(up, "CalculationBase"));
         Assert.Equal(3m, Var(up, "ExtraDamage"));
         Assert.Equal((KokomiPlan.Kind.ApplyVulnerable, 1),
                      (card.PlanClauses.Single().Kind, card.PlanClauses.Single().Amount));
@@ -269,12 +270,13 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal((KokomiPlan.Kind.CasketGain, 2),
                      (diver.PlanClauses.Single().Kind, diver.PlanClauses.Single().Amount));
 
+        // The cleanup pass (2026-09-29): 7 / 11, upgraded 9 / 14.
         var press = new ProtoKkPressTheAdvantage();
-        Assert.Equal(6m, Var(press, "PlainDamage"));
-        Assert.Equal(10m, Var(press, "BranchDamage"));
+        Assert.Equal(7m, Var(press, "PlainDamage"));
+        Assert.Equal(11m, Var(press, "BranchDamage"));
         var pressUp = Upgraded<ProtoKkPressTheAdvantage>();
-        Assert.Equal(8m, Var(pressUp, "PlainDamage"));
-        Assert.Equal(13m, Var(pressUp, "BranchDamage"));
+        Assert.Equal(9m, Var(pressUp, "PlainDamage"));
+        Assert.Equal(14m, Var(pressUp, "BranchDamage"));
         Assert.Contains(Il.Calls(Il.Method("ProtoKkPressTheAdvantage", "OnPlay")),
                         c => c.Contains("KokomiPlan.PlansHeld"));
 
@@ -286,10 +288,11 @@ public class KokomiCasketPassTests : IDisposable
                         c => c.Contains("KokomiPlan.Schedule"));
         Assert.Contains("[gold]Dusk[/gold] [gold]Plan[/gold]", Face(shell));
 
+        // The cleanup pass (2026-09-29): a base of 6, upgraded 8.
         var glass = new ProtoKkDriftglass();
-        Assert.Equal(5m, Var(glass, "CalculationBase"));
+        Assert.Equal(6m, Var(glass, "CalculationBase"));
         Assert.Equal(1m, Var(glass, "ExtraDamage"));
-        Assert.Equal(7m, Var(Upgraded<ProtoKkDriftglass>(), "CalculationBase"));
+        Assert.Equal(8m, Var(Upgraded<ProtoKkDriftglass>(), "CalculationBase"));
 
         // Commons never increase deck size (LAW): none of the seven creates a card.
         foreach (var type in new[] { "ProtoKkMassedVolley", "ProtoKkSignalArrow",
@@ -382,10 +385,11 @@ public class KokomiCasketPassTests : IDisposable
     public void Shell_guard_is_five_block_plus_one_per_point_in_the_casket()
     {
         // Re-aimed by the main session (2026-09-28) after the Casket pass
-        // left its strike clause dead: Uncommon Skill, cost 1, base 8
-        // upgraded, the in-combat Block preview like Pneuma Refrain's.
+        // left its strike clause dead: Skill, cost 1, base 8 upgraded, the
+        // in-combat Block preview like Pneuma Refrain's. A Common since the
+        // cleanup pass (2026-09-29).
         var card = new ProtoKkShellGuard();
-        Assert.Equal((CardType.Skill, CardRarity.Uncommon, 1),
+        Assert.Equal((CardType.Skill, CardRarity.Common, 1),
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
         Assert.Equal(5m, Var(card, "CalculationBase"));
         Assert.Equal(1m, Var(card, "CalculationExtra"));
@@ -405,13 +409,35 @@ public class KokomiCasketPassTests : IDisposable
                             .SelectMany(Il.Calls)));
     }
 
+    [Fact]
+    public void Tide_wall_plans_a_flat_six_plus_the_intent()
+    {
+        // The cleanup pass (2026-09-29): the Plan read 0 on buff turns ("it
+        // gave 0 Block twice on Empower turns"), so it gains a flat 6 (9
+        // upgraded) on top of the intent, still read at carry-out. Sim twin:
+        // `test_r276_tide_wall_blocks_the_front_enemys_intent`.
+        var card = new ProtoKkTideWall();
+        Assert.Equal(CardRarity.Uncommon, card.Rarity);
+        var clause = Assert.Single(card.PlanClauses);
+        Assert.Equal((KokomiPlan.Kind.BlockFrontIntent, 6),
+                     (clause.Kind, clause.Amount));
+        Assert.Equal(9, Upgraded<ProtoKkTideWall>().PlanClauses.Single().Amount);
+        Assert.Equal(4m, card.DynamicVars.Block.BaseValue);
+        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].\n[gold]Plan[/gold]: "
+                   + "Gain {PlanBlock:diff()} [gold]Block[/gold], plus the "
+                   + "damage the enemy intends.",
+                     Face(card));
+    }
+
     // ---- F. the offer -----------------------------------------------------
 
     [Fact]
-    public void The_offer_is_forty_six_rows_with_the_thirteen_and_without_the_six()
+    public void The_offer_is_forty_four_rows_with_the_thirteen_and_without_the_six()
     {
+        // Forty-six after the Casket pass; the cleanup pass (2026-09-29) cut
+        // Scout Ahead and Song of Pearls.
         var slice = Seq("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(46, slice.Count(c => c.StartsWith("ModelDb.Card")));
+        Assert.Equal(44, slice.Count(c => c.StartsWith("ModelDb.Card")));
         foreach (var row in new[] { "ProtoKkMassedVolley", "ProtoKkSignalArrow",
                                     "ProtoKkSurgingShoal", "ProtoKkPearlDiver",
                                     "ProtoKkPressTheAdvantage",

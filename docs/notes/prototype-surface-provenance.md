@@ -3966,3 +3966,35 @@ the sim reads `casket_count` through `effects._runtime_count`.
 
 **Pool:** 46 offered (24 Common, 17 Uncommon, 5 Rare) plus the three co-op
 cards.
+
+## Kokomi: the cleanup pass (2026-09-29)
+
+[USER], 2026-09-29: "a review and cleanup pass on Kokomi's current prototype
+to handle the known problems". Designed in the main session; the design and
+its evidence are in the brief (`review/active/kokomi-brief-2026-09-01.md`,
+sec. 6, "The cleanup pass"). The evidence is the four Sonnet seat records of
+2026-09-28: both runs died to an act-2 boss short of Block, and the hands
+clogged with low-impact cantrips.
+
+- `proto_kk_scout_ahead`, `proto_kk_song_of_pearls`: cut. Tombstoned in
+  `docs/retired-card-ids.yaml` (retired aliases generated), kept as known-stale
+  portraits in `tools/art_coverage.py`, out of `KokomiOverhaulRoster.Slice()`
+  and `C.KOKOMI_OVERHAUL_POOL_IDS`. Scout Ahead: NEVER AGAIN in two records, one
+  on the older build ("draw plan never mattered and cost a slot"). Song of Pearls fires by itself
+  and "never seemed worth a slot". Their engine pieces (`SongOfPearlsPower` /
+  `kokomi_plan.song_of_pearls`, `DrawPerPlanAfter` / `draw_per_plan_after`)
+  stay registered with nothing spelling them, as Tide Chart's did.
+- `proto_kk_shell_guard`: Uncommon to Common; numbers unchanged.
+- `proto_kk_tide_wall`: the Plan clause `block_front_intent` takes `amount: 6`
+  (it was 0; the upgrade's `plan_block: 3` makes 9). Both engines already add
+  the amount to the intent read at carry-out. Face: "Gain 6 Block, plus the
+  damage the enemy intends." "The front enemy" in the designed wording fails
+  the text lint (a Plan line names no target; the tip carries the rule), so
+  the face says "the enemy". A seat: "it gave 0 Block twice on Empower turns".
+- `proto_kk_feint`: formula base 4 to 6, upgrade `formula_base` 2 to 3 (9).
+- `proto_kk_press_the_advantage`: 6 / 10 to 7 / 11; the upgrade deltas are
+  unchanged, so 9 / 14.
+- `proto_kk_driftglass`: formula base 5 to 6; upgraded 8.
+
+**Pool:** 44 offered (24 Common, 15 Uncommon, 5 Rare) plus the three co-op
+cards.

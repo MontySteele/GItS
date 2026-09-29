@@ -114,7 +114,8 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # THIRTY with the Casket pass (2026-09-28): Cleansing Wave and Ripple cut,
     # and Signal Arrow, Surging Shoal, Pearl Diver, Shell of Sanctuary and
     # Pearl Current added.
-    assert len(planned) == 30
+    # TWENTY-NINE with the cleanup pass (2026-09-29): Scout Ahead cut.
+    assert len(planned) == 29
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -622,22 +623,22 @@ def test_shell_guard_is_the_caskets_defensive_reader(overhaul):
 
 
 def test_both_defensive_rows_load_and_smith(overhaul):
-    """The two rows themselves, off the sheet. Tide Wall since R276 pick 1:
-    4 Block now, Plan Block equal to the intent, upgrading to 6 and intent + 3.
-    Shell Guard since its re-aim (2026-09-28): 5 plus 1 per Casket point,
-    base 8 upgraded."""
+    """The two rows themselves, off the sheet. Tide Wall since the cleanup
+    pass (2026-09-29): 4 Block now, Plan 6 Block plus the intent, upgrading to
+    6 and 9 plus the intent. Shell Guard since its re-aim (2026-09-28): 5 plus
+    1 per Casket point, base 8 upgraded; a Common since the cleanup pass."""
     from tier0.content import upgrades
 
     wall = loader.get_card("proto_kk_tide_wall")
     assert wall.rarity == "uncommon" and wall.cost == 1
     assert wall.effects == [{"op": "block", "amount": 4}]
-    assert wall.plan == [{"op": "block_front_intent", "amount": 0}]
+    assert wall.plan == [{"op": "block_front_intent", "amount": 6}]
     up = upgrades.apply_upgrade(wall)
     assert up.effects[0]["amount"] == 6
-    assert up.plan[0]["amount"] == 3
+    assert up.plan[0]["amount"] == 9
 
     guard = loader.get_card("proto_kk_shell_guard")
-    assert guard.rarity == "uncommon" and guard.cost == 1
+    assert guard.rarity == "common" and guard.cost == 1
     assert guard.type == "skill"
     assert guard.plan == []
     assert guard.effects == [{"op": "block", "amount_formula": {
@@ -869,8 +870,9 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     # queue. The count the row was filed against was 34, and what it
     # pins is the withdrawal, not the size -- so it moves with the
     # pool and the absence does not.
-    # FORTY-SIX since the Casket pass (2026-09-28).
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 46
+    # FORTY-SIX since the Casket pass (2026-09-28); FORTY-FOUR since the
+    # cleanup pass (2026-09-29).
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 44
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
@@ -2623,10 +2625,7 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
         "one is carried out twice.")
     assert faces["proto_kk_opening_gambit"].endswith(
         "The Plan after this one deals double damage.")
-    # R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a window
-    # on the drain again, and "after this one" is the position rule printed.
-    assert faces["proto_kk_scout_ahead"].endswith(
-        "Draw 1 card for each Plan after this one.")
+    # Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).
     for face in faces.values():
         assert "carried out with this one" not in face
 
@@ -2738,33 +2737,34 @@ def test_the_new_clauses_are_plan_only_from_a_body(overhaul):
 def test_feint_pays_three_per_carry_out(overhaul):
     """THE CASKET PASS (2026-09-28): "Deal 4 damage, plus 3 for each Plan
     carried out this turn. Plan: Apply 1 Vulnerable." The count is the one
-    Sango Isshin reads, so "carried out this turn" has one definition."""
+    Sango Isshin reads, so "carried out this turn" has one definition. A base
+    of 6 since the cleanup pass (2026-09-29)."""
     row = _row("proto_kk_feint")
     assert row.effects == [{"op": "damage", "target": "enemy",
                             "amount_formula": {
-                                "base": 4, "per": 3,
+                                "base": 6, "per": 3,
                                 "count": "plans_carried_out_this_turn"}}]
     assert row.plan == [{"op": "apply_power", "power": "vulnerable",
                          "amount": 1, "target": "front_enemy"}]
     enemy = make_enemy(hp=100)
     st = kokomi_state(enemies=[enemy])
     effects.resolve_card(st, row)
-    assert 100 - enemy.hp == 4
+    assert 100 - enemy.hp == 6
     carry_out(st, [{"op": "draw", "amount": 1}])
     carry_out(st, [{"op": "draw", "amount": 1}])
     before = enemy.hp
     effects.resolve_card(st, row)
-    assert before - enemy.hp == 4 + 3 * 2
+    assert before - enemy.hp == 6 + 3 * 2
 
 def test_feints_upgrade_moves_the_base_and_the_plans_vulnerable(overhaul):
-    """Base 4 -> 6, 3 per carry-out unchanged, the Plan's Vulnerable 1 -> 2.
-    Read off the SMITHED card."""
+    """Base 6 -> 9 (the cleanup pass, 2026-09-29), 3 per carry-out
+    unchanged, the Plan's Vulnerable 1 -> 2. Read off the SMITHED card."""
     from tier0.content import upgrades
 
     row = _row("proto_kk_feint")
-    assert row.upgrade == {"formula_base": 2, "plan_power_amount": 1}
+    assert row.upgrade == {"formula_base": 3, "plan_power_amount": 1}
     up = upgrades.apply_upgrade(_row("proto_kk_feint"))
-    assert up.effects[0]["amount_formula"]["base"] == 6
+    assert up.effects[0]["amount_formula"]["base"] == 9
     assert up.effects[0]["amount_formula"]["per"] == 3
     assert up.plan[0]["amount"] == 2
 
@@ -3255,9 +3255,10 @@ def test_r276_battle_plan_raises_every_attack_this_turn(overhaul):
 
 
 def test_r276_tide_wall_blocks_the_front_enemys_intent(overhaul):
-    """Tide Wall's Plan: Block equal to the damage the front enemy intends to
-    deal -- every hit of a multi-hit intent -- plus the upgrade's 3. A
-    non-attack intent is 0."""
+    """Tide Wall's Plan: 6 Block (9 upgraded) plus the damage the front enemy
+    intends to deal -- every hit of a multi-hit intent. A non-attack intent
+    adds 0, so an Empower turn still pays the flat 6 (the cleanup pass,
+    2026-09-29)."""
     front = make_enemy(hp=40, intents=[{"kind": "attack", "amount": 6,
                                         "times": 2}])
     behind = make_enemy(hp=40, intents=[{"kind": "attack", "amount": 20}])
@@ -3265,14 +3266,19 @@ def test_r276_tide_wall_blocks_the_front_enemys_intent(overhaul):
     st.player.block = 0
     assert kokomi_plan.front_intent_damage(st) == 12
     carry_out(st, _arm_card("proto_kk_tide_wall").plan)
-    assert st.player.block == 12
+    assert st.player.block == 6 + 12
+
+    st = kokomi_state(enemies=[make_enemy(hp=40, intents=BLOCKER)])
+    st.player.block = 0
+    carry_out(st, _arm_card("proto_kk_tide_wall").plan)
+    assert st.player.block == 6, "a non-attack intent reads 0, plus 6"
 
     from tier0.content import upgrades
     up = upgrades.apply_upgrade(_arm_card("proto_kk_tide_wall"))
     st = kokomi_state(enemies=[make_enemy(hp=40, intents=BLOCKER)])
     st.player.block = 0
     carry_out(st, up.plan)
-    assert st.player.block == 3, "a non-attack intent reads 0, plus 3"
+    assert st.player.block == 9, "a non-attack intent reads 0, plus 9"
 
 
 # --- the Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md) ---
@@ -3321,7 +3327,8 @@ def test_core_pass_rows_and_upgrades(overhaul, cid, now, plan, up_now,
 
 
 @pytest.mark.parametrize("cid,power,amount,up_amount", [
-    ("proto_kk_song_of_pearls", kokomi_plan.SONG_OF_PEARLS, 4, 6),
+    # Song of Pearls was cut in the cleanup pass (2026-09-29); its power stays
+    # registered and is pinned directly above.
     ("proto_kk_treatise", kokomi_plan.TREATISE, 1, 1),
 ])
 def test_core_pass_powers_and_upgrades(overhaul, cid, power, amount,
@@ -3347,10 +3354,6 @@ def test_core_pass_faces(overhaul):
     assert faces["proto_kk_chain_of_command"].endswith(
         "[gold]Plan[/gold]: Next turn, the first Companion card you play "
         "costs 0.")
-    assert faces["proto_kk_song_of_pearls"] == (
-        "At the start of your turn, if no [gold]Plan[/gold] waits, the "
-        "[gold]Bake-Kurage[/gold] deals {PowerAmount:diff()} damage to ALL "
-        "enemies.")
     assert faces["proto_kk_treatise"] == (
         "Once per turn, when you play a card with a [gold]Plan[/gold] line "
         "normally, draw 1 card.")

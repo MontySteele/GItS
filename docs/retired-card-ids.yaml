@@ -95,3 +95,5 @@ retired:
   - {id: KLEEMOD-PROTO_FS_GALA_DINNER, owner: furina, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_FS_RAPT_AUDIENCE, owner: furina, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_FS_SCENE_CHANGE, owner: furina, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_SCOUT_AHEAD, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_SONG_OF_PEARLS, owner: kokomi, left: "left the prototype codegen"}

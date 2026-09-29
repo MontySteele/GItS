@@ -36,7 +36,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
-| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 46 |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 44 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 75 (63 Stage cards) |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -71,7 +71,11 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   turn, six rows cut, thirteen added: the pool is 46 (plus three co-op).
   Shell Guard, whose strike clause the pass left dead, was re-aimed by the
   main session to "Gain 5 Block, plus 1 for each point in the Casket".
-  Record: `docs/notes/prototype-surface-provenance.md`.
+  Record: `docs/notes/prototype-surface-provenance.md`. **The cleanup pass
+  (2026-09-29):** both Sonnet runs died to act-2 bosses short of Block, so
+  Shell Guard is a Common and Tide Wall's Plan gains a flat 6 under the
+  intent; Scout Ahead and Song of Pearls are cut; Feint, Press the Advantage
+  and Driftglass hit harder. The pool is 44 (24 / 15 / 5). Brief §6.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any

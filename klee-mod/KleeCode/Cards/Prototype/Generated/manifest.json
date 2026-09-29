@@ -108,14 +108,12 @@
     "proto_kk_riptide",
     "proto_kk_sango_isshin",
     "proto_kk_sangonomiyas_counsel",
-    "proto_kk_scout_ahead",
     "proto_kk_second_thoughts",
     "proto_kk_second_wave",
     "proto_kk_shell_guard",
     "proto_kk_shell_of_sanctuary",
     "proto_kk_signal_arrow",
     "proto_kk_slack_water",
-    "proto_kk_song_of_pearls",
     "proto_kk_stolen_chapter",
     "proto_kk_surging_shoal",
     "proto_kk_the_clouds_like_waves",
@@ -400,14 +398,12 @@
     "proto_kk_riptide": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sangonomiyas_counsel": "kokomi",
-    "proto_kk_scout_ahead": "kokomi",
     "proto_kk_second_thoughts": "kokomi",
     "proto_kk_second_wave": "kokomi",
     "proto_kk_shell_guard": "kokomi",
     "proto_kk_shell_of_sanctuary": "kokomi",
     "proto_kk_signal_arrow": "kokomi",
     "proto_kk_slack_water": "kokomi",
-    "proto_kk_song_of_pearls": "kokomi",
     "proto_kk_stolen_chapter": "kokomi",
     "proto_kk_surging_shoal": "kokomi",
     "proto_kk_the_clouds_like_waves": "kokomi",
@@ -891,7 +887,7 @@
       "plan_unhurt_damage": 4
     },
     "proto_kk_feint": {
-      "formula_base": 2,
+      "formula_base": 3,
       "plan_power_amount": 1
     },
     "proto_kk_flank": {
@@ -952,9 +948,6 @@
     "proto_kk_sangonomiyas_counsel": {
       "power_amount": 1
     },
-    "proto_kk_scout_ahead": {
-      "cost": -1
-    },
     "proto_kk_second_thoughts": {
       "add": {
         "op": "draw",
@@ -977,9 +970,6 @@
     "proto_kk_slack_water": {
       "damage": 3,
       "plan_power_amount": 1
-    },
-    "proto_kk_song_of_pearls": {
-      "power_amount": 2
     },
     "proto_kk_stolen_chapter": {
       "draw": 1

@@ -75,11 +75,12 @@ public class LiveLooks8bTests
         // Feint off the yes/no onto the COUNT ("Deal 4 damage, plus 3 for each
         // Plan carried out this turn"), so the headline is the calculated
         // var over that count -- the preview reads the same ledger the hit
-        // does, which is the property `EB-670` asked for.
+        // does, which is the property `EB-670` asked for. A base of 6 since
+        // the cleanup pass (2026-09-29).
         var card = Source(Path.Combine(
             "klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
             "ProtoKkFeint.cs"));
-        Assert.Contains("new CalculationBaseVar(4m)", card);
+        Assert.Contains("new CalculationBaseVar(6m)", card);
         Assert.Contains("new ExtraDamageVar(3m)", card);
         Assert.Contains("new FrontFoldedDamageVar(ValueProp.Move)", card);
         Assert.Contains("DamageCmd.Attack(DynamicVars.CalculatedDamage)", card);

@@ -1150,15 +1150,16 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # THE CASKET PASS (2026-09-28): re-keyed from "a Plan was carried out"
-   # (a yes/no nearly always true) to the COUNT of carry-outs this turn.
+   # THE CASKET PASS (2026-09-28): keyed to the COUNT of carry-outs this turn.
+   # THE CLEANUP PASS (2026-09-29): base 4 -> 6 (upgraded 9), for the
+   # zero-floor problem Sango Isshin had. Provenance note.
    description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 4, per: 3,
+              amount_formula: {base: 6, per: 3,
                                count: plans_carried_out_this_turn}}],
    plan: [{op: apply_power, power: vulnerable, amount: 1, target: front_enemy}],
-   # 6, plus 3 each / Plan 2 Vulnerable.
-   upgrade: {formula_base: 2, plan_power_amount: 1}}
+   # 9, plus 3 each / Plan 2 Vulnerable.
+   upgrade: {formula_base: 3, plan_power_amount: 1}}
 
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
@@ -1202,15 +1203,6 @@
    description: "Once per turn, when you play a card with a [gold]Plan[/gold] line normally, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
    upgrade: {innate: true}}
-
-- {id: proto_kk_song_of_pearls, name: "Song of Pearls (proto)", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   # Kokomi core pass: the empty-queue payoff. Hydro, and her Strength counts,
-   # as her planned hits do.
-   description: "At the start of your turn, if no [gold]Plan[/gold] waits, the [gold]Bake-Kurage[/gold] deals {PowerAmount:diff()} damage to ALL enemies.",
-   effects: [{op: apply_power, power: kk_song_of_pearls, amount: 4, target: self}],
-   upgrade: {power_amount: 2}}
 
 - {id: proto_kk_war_council, name: "War Council", character: kokomi,
    authored_by: [claude],
@@ -1263,17 +1255,20 @@
 - {id: proto_kk_tide_wall, name: "Tide Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # R276 pick 1: RE-AIMED off Plan volume onto the intent, read at carry-out
-   # (next turn's intents are up by then). `amount` is the flat bonus.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain [gold]Block[/gold] equal to the damage the enemy intends next turn{IfUpgraded:show:, plus 3|}.",
+   # R276 pick 1: the intent, read at carry-out. THE CLEANUP PASS
+   # (2026-09-29): `amount` is a flat 6 under it, because the Plan "gave 0
+   # Block twice on Empower turns" (a seat). Provenance note.
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the damage the enemy intends.",
    effects: [{op: block, amount: 4}],
-   plan: [{op: block_front_intent, amount: 0}],
-   # now 6; Plan +3.
+   plan: [{op: block_front_intent, amount: 6}],
+   # now 6; Plan 9 plus the intent.
    upgrade: {block: 2, plan_block: 3}}
 
 - {id: proto_kk_shell_guard, name: "Shell Guard", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
+   # THE CLEANUP PASS (2026-09-29): Uncommon -> Common, numbers unchanged. The
+   # kit's only Casket-reading Block goes where the deck is short of Block.
+   cost: 1, type: skill, rarity: common,
    # Re-aimed after the Casket pass retired the strike it paid on (main
    # session, 2026-09-28): the Casket's defensive reader.
    description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
@@ -1487,17 +1482,6 @@
    plan: [{op: next_plan_extra_carry_out}],
    upgrade: {damage: 2}}
 
-- {id: proto_kk_scout_ahead, name: "Scout Ahead", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each Plan after this one.",
-   effects: [{op: draw, amount: 1}],
-   # R267 PICK 3: THE POSITION CLAUSE IS BACK. Pass four's whole-morning count
-   # removed the ordering decision; the card counts the carry-outs that FOLLOW
-   # it in the same drain again -- first of three draws 2, last draws 0.
-   plan: [{op: draw_per_plan_after, amount: 1}],
-   upgrade: {cost: -1}}
-
 - {id: proto_kk_second_thoughts, name: "Second Thoughts", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common, exhaust: true,
@@ -1571,10 +1555,11 @@
    authored_by: [claude], art_of: press_the_advantage,
    cost: 1, type: attack, rarity: common,
    description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] is waiting, deal {BranchDamage:diff()} instead.",
+   # THE CLEANUP PASS (2026-09-29): 6 / 10 -> 7 / 11.
    effects: [{op: conditional, if: plan_held,
-              then: [{op: damage, amount: 10, target: enemy}],
-              else: [{op: damage, amount: 6, target: enemy}]}],
-   # 8 / 13. `conditional_damage` moves both branches and
+              then: [{op: damage, amount: 11, target: enemy}],
+              else: [{op: damage, amount: 7, target: enemy}]}],
+   # 9 / 14. `conditional_damage` moves both branches and
    # `conditional_then_damage` the waiting branch alone.
    upgrade: {conditional_damage: 2, conditional_then_damage: 1}}
 
@@ -1592,9 +1577,10 @@
    authored_by: [claude], art_of: driftglass,
    cost: 1, type: attack, rarity: common,
    description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # THE CLEANUP PASS (2026-09-29): base 5 -> 6.
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 5, per: 1, count: casket_count}}],
-   # 7, plus 1 each.
+              amount_formula: {base: 6, per: 1, count: casket_count}}],
+   # 8, plus 1 each.
    upgrade: {formula_base: 2}}
 
 - {id: proto_kk_what_the_tokoyo_returns, name: "What the Tokoyo Returns", character: kokomi,

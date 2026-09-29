@@ -934,9 +934,10 @@ public class KokomiOverhaulRuleTests
         // to Dusk, which is the multi-body Weak Night Watch had been rebuilt
         // for one pass earlier. FORTY-SIX since the Casket pass (2026-09-28):
         // Tide Chart, Cleansing Wave, Ripple, Well Laid, Sea-Salt Prayer and
-        // Salt Line cut, thirteen rows added.
+        // Salt Line cut, thirteen rows added. FORTY-FOUR since the cleanup
+        // pass (2026-09-29) cut Scout Ahead and Song of Pearls.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(46, Il.CallSequence(slice)
+        Assert.Equal(44, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

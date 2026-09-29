@@ -57,8 +57,8 @@ public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedDamageVar("PlainDamage", 6m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 10m, ValueProp.Move)
+            new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -73,7 +73,7 @@ public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, 
         if (KokomiPlan.PlansHeld(Owner.Creature) > 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 13m : 10m))
+            await DamageCmd.Attack((IsUpgraded ? 14m : 11m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
@@ -82,7 +82,7 @@ public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, 
         else
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 8m : 6m))
+            await DamageCmd.Attack((IsUpgraded ? 9m : 7m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
