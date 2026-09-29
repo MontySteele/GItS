@@ -151,7 +151,8 @@ on everyone and 7 to everyone at dawn. That is the whole kit, on turn one.
 
 The morning the Plans land. The pool pays for it twice over: cards that
 read the carry-outs (Feint and Sango Isshin pay per Plan carried out this
-turn since the Casket pass; the Casket itself counts every one, and Open
+turn since the Casket pass, Sango Isshin 8 to ALL plus 6 per Plan since
+2026-09-29, when a seat found it dealt 0 on a turn with no Plans; the Casket itself counts every one, and Open
 the Casket turns the count into Strength), and her Burst, **Nereid's Ascension** (Rare Power, 2): the jellyfish carries
 out your **first** Plan each turn twice (pass three; "every Plan twice"
 paid for writing more, which is the shape the pool passes undo). It is the

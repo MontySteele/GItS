@@ -172,14 +172,15 @@ def test_feint_is_four_plus_three_per_carry_out(overhaul):
     assert up.plan[0]["amount"] == 2
 
 
-def test_sango_isshin_is_six_to_all_per_carry_out(overhaul):
+def test_sango_isshin_is_eight_plus_six_to_all_per_carry_out(overhaul):
+    # 2026-09-29: a base of 8; 10 plus 8 per Plan upgraded.
     a, b = make_enemy(hp=100, name="a"), make_enemy(hp=100, name="b")
     st = kokomi_state(enemies=[a, b])
     carry_out(st, [{"op": "energy", "amount": 1}])
     effects.resolve_card(st, _row("proto_kk_sango_isshin"))
-    assert (a.hp, b.hp) == (94, 94)
-    assert _up("proto_kk_sango_isshin").effects[0]["amount_formula"]["per"] \
-        == 8
+    assert (a.hp, b.hp) == (86, 86)
+    assert _up("proto_kk_sango_isshin").effects[0]["amount_formula"] == {
+        "base": 10, "per": 8, "count": "plans_carried_out_this_turn"}
 
 
 # --- D, E. the numbers --------------------------------------------------------

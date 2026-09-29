@@ -964,6 +964,7 @@
       "bonus_vs_debuff": 1
     },
     "proto_kk_sango_isshin": {
+      "formula_base": 2,
       "formula_per": 2
     },
     "proto_kk_sangonomiyas_counsel": {

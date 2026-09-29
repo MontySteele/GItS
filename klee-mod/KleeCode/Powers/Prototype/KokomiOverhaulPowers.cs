@@ -623,6 +623,11 @@ public sealed class MoonSignalPower : PowerModel, ILocalizationProvider
 /// second copy doubles nothing further; "your first Plan twice" is what the
 /// face says, and twice is twice.
 ///
+/// THE BADGE SHOWS NO COUNT (2026-09-29). It was <c>Counter</c>, so a second
+/// copy wore a "2" that promised a stack the rule never pays. It is
+/// <see cref="PowerStackType.Single"/> now, the repo's shape for a power that
+/// does not stack; the rule reads only whether it is worn, so nothing moves.
+///
 /// THE BRIEF'S RULE 3 IS THE ONE THIS BREAKS. "Every Plan is carried out once,
 /// in order" is the arm's law and this Rare is the card the brief allows to
 /// break it (brief sec.5); it breaks the ONCE and leaves the ORDER alone --
@@ -641,5 +646,5 @@ public sealed class NereidsAscensionPower : PowerModel, ILocalizationProvider
 
     public override PowerType Type => PowerType.Buff;
 
-    public override PowerStackType StackType => PowerStackType.Counter;
+    public override PowerStackType StackType => PowerStackType.Single;
 }

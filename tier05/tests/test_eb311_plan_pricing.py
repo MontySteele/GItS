@@ -334,8 +334,8 @@ def test_the_max_hp_fraction_reads_the_character_sheet():
     `tier0/content/characters/kokomi.yaml`, the same key `build_player`
     seats her with -- not a constant invented here.
 
-    SANGO ISSHIN LEFT THE OP (the Casket pass, 2026-09-28): it deals 6 to ALL
-    per Plan carried out this turn now, priced at the neutral single count
+    SANGO ISSHIN LEFT THE OP (the Casket pass, 2026-09-28): it deals 8 to ALL,
+    plus 6 per Plan carried out this turn, now (the base since 2026-09-29), priced at the neutral single count
     every live count here takes. The op stays registered and priced, which
     the rename test below holds.
     """

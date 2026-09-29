@@ -1302,12 +1302,14 @@
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
    # THE CASKET PASS (2026-09-28): per carry-out this turn, to ALL.
-   description: "Deal {ExtraDamage:diff()} damage to ALL enemies for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # 2026-09-29: gains a base of 8. A seat (Kokomi run KK2EL3M3NTS9) named it
+   # NEVER AGAIN because it dealt 0 on turn 1 and after any turn with no Plans.
+   description: "Deal {CalculationBase:diff()} damage to ALL enemies, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies,
-              amount_formula: {base: 0, per: 6,
+              amount_formula: {base: 8, per: 6,
                                count: plans_carried_out_this_turn}}],
-   # 8 per Plan.
-   upgrade: {formula_per: 2}}
+   # 10, plus 8 per Plan.
+   upgrade: {formula_base: 2, formula_per: 2}}
 
 # --- the Commander: Gorou, go (packet sec.4) ---
 
