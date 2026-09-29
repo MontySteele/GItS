@@ -36,7 +36,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
-| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 44 |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 48 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 72 (60 Stage cards) |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (batch one) | 19 |
 
@@ -77,6 +77,11 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Shell Guard is a Common and Tide Wall's Plan gains a flat 6 under the
   intent; Scout Ahead and Song of Pearls are cut; Feint, Press the Advantage
   and Driftglass hit harder. The pool is 44 (24 / 15 / 5). Brief §6.
+  **The feed pass (2026-09-29)**, on [USER]'s act-1 death ("her cards are
+  weirdly 'expensive'"; "some Plan cards need to go to 0 cost"): five 0-cost
+  Plan-only Commons (Bubble Ward, Nip, Jellyfish Drift, Current Read, Brine
+  Sting), eight now-and-Plan Commons moved to Uncommon, Coral Bulwark a plain
+  8 Block, Exposed Flank cut. The pool is 48 (20 / 23 / 5). Brief §6.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any

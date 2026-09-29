@@ -935,9 +935,10 @@ public class KokomiOverhaulRuleTests
         // for one pass earlier. FORTY-SIX since the Casket pass (2026-09-28):
         // Tide Chart, Cleansing Wave, Ripple, Well Laid, Sea-Salt Prayer and
         // Salt Line cut, thirteen rows added. FORTY-FOUR since the cleanup
-        // pass (2026-09-29) cut Scout Ahead and Song of Pearls.
+        // pass (2026-09-29) cut Scout Ahead and Song of Pearls. FORTY-EIGHT
+        // since the feed pass (2026-09-29): Exposed Flank cut, five added.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(44, Il.CallSequence(slice)
+        Assert.Equal(48, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

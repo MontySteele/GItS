@@ -1163,7 +1163,9 @@
 
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
+   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
+   # card that does a thing now AND writes a Plan sits at a higher rarity.
+   cost: 1, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
    description: "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 damage.",
@@ -1177,23 +1179,17 @@
 # dead slot beside a Dusk Plan; taking a card is the half the seats valued.
 - {id: proto_kk_read_the_field, name: "Read the Field", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
+   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
+   # card that does a thing now AND writes a Plan sits at a higher rarity.
+   cost: 1, type: skill, rarity: uncommon,
    description: "Look at the top {Scry:diff()} cards of your draw pile. Put 1 into your hand and the rest on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
    effects: [{op: scry_take, amount: 3}],
    plan: [{op: block, amount: 10}],
    # 4 seen / Plan 12: both halves move, one number each.
    upgrade: {scry: 1, plan_block: 2}}
 
-- {id: proto_kk_exposed_flank, name: "Exposed Flank", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
-   # Plan line buys what only a head start can buy.
-   description: "Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Vulnerable[/gold] to ALL enemies.",
-   effects: [{op: apply_power, power: weak, amount: 2, target: enemy}],
-   plan: [{op: apply_power, power: vulnerable, amount: 2, target: all_enemies}],
-   # now 3 Weak; the Plan line does not upgrade.
-   upgrade: {power_amount: 1}}
+# EXPOSED FLANK IS CUT (THE FEED PASS, 2026-09-29): a now-and-Plan Common.
+# Tombstoned in docs/retired-card-ids.yaml; provenance note, "the feed pass".
 
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
@@ -1241,13 +1237,11 @@
 - {id: proto_kk_coral_bulwark, name: "Coral Bulwark", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
-   # Plan line buys what only a head start can buy.
-   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Weak[/gold].",
-   effects: [{op: block, amount: 7}],
-   plan: [{op: apply_power, power: weak, amount: 2, target: front_enemy}],
-   # 10 Block; Plan 3 Weak.
-   upgrade: {block: 3, plan_power_amount: 1}}
+   # THE FEED PASS (2026-09-29): the Plan line is gone and the Block is 8 (11
+   # upgraded). The Common Block card blocks; the Plan feed is the 0-cost rows.
+   description: "Gain 8 [gold]Block[/gold].",
+   effects: [{op: block, amount: 8}],
+   upgrade: {block: 3}}
 
 # `EB-335`, R246 pick 2: the kit's own defence in act 2. Both rows wore a
 # neighbour's illustration through `art_of:` until `EB-778` placed their own
@@ -1351,7 +1345,9 @@
 
 - {id: proto_kk_stolen_chapter, name: "Stolen Chapter (proto)", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
+   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
+   # card that does a thing now AND writes a Plan sits at a higher rarity.
+   cost: 1, type: skill, rarity: uncommon,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
    description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Next turn, the first card you play costs 0.",
@@ -1405,7 +1401,9 @@
 
 - {id: proto_kk_riptide, name: "Riptide", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: common,
+   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
+   # card that does a thing now AND writes a Plan sits at a higher rarity.
+   cost: 2, type: attack, rarity: uncommon,
    # THE CASKET PASS (2026-09-28): 11 to ALL, 3 more on a debuffed enemy;
    # the Plan is 2 Energy and a card.
    description: "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1 card.",
@@ -1416,7 +1414,9 @@
 
 - {id: proto_kk_pincer, name: "Pincer", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
+   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
+   # card that does a thing now AND writes a Plan sits at a higher rarity.
+   cost: 1, type: attack, rarity: uncommon,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
    description: "Deal 4 damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
@@ -1438,7 +1438,9 @@
 
 - {id: proto_kk_feigned_retreat, name: "Feigned Retreat", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
+   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
+   # card that does a thing now AND writes a Plan sits at a higher rarity.
+   cost: 1, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
    # "Since playing this": the entry records her HP when it is written.
@@ -1526,7 +1528,9 @@
 
 - {id: proto_kk_signal_arrow, name: "Signal Arrow", character: kokomi,
    authored_by: [claude], art_of: signal_arrow,
-   cost: 1, type: attack, rarity: common,
+   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
+   # card that does a thing now AND writes a Plan sits at a higher rarity.
+   cost: 1, type: attack, rarity: uncommon,
    description: "Deal 7 damage. [gold]Plan[/gold]: Deal 3 damage to ALL enemies twice.",
    effects: [{op: damage, amount: 7, target: enemy}],
    plan: [{op: damage, amount: 3, target: all_enemies, times: 2}],
@@ -1535,7 +1539,9 @@
 
 - {id: proto_kk_surging_shoal, name: "Surging Shoal", character: kokomi,
    authored_by: [claude], art_of: surging_shoal,
-   cost: 2, type: attack, rarity: common,
+   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
+   # card that does a thing now AND writes a Plan sits at a higher rarity.
+   cost: 2, type: attack, rarity: uncommon,
    description: "Deal 14 damage. [gold]Plan[/gold]: Deal 22 damage.",
    effects: [{op: damage, amount: 14, target: enemy}],
    plan: [{op: damage, amount: 22, target: front_enemy}],
@@ -1633,6 +1639,57 @@
    description: "Double the [gold]Casket[/gold]'s count.",
    effects: [{op: casket_double}],
    upgrade: {cost: -1}}
+
+# --- THE FEED PASS (2026-09-29): five 0-cost Plan-only Commons, the cheap feed
+# for the Plan queue. LAST in the sheet's order (`lint_arm_pool_parity` compares
+# BY ORDER). Provenance note, "the feed pass". ---
+
+- {id: proto_kk_bubble_ward, name: "Bubble Ward", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "[gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   effects: [],
+   plan: [{op: block, amount: 4}],
+   # Plan 6.
+   upgrade: {plan_block: 2}}
+
+- {id: proto_kk_nip, name: "Nip", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "[gold]Plan[/gold]: Deal 5 damage.",
+   effects: [],
+   plan: [{op: damage, amount: 5, target: front_enemy}],
+   # Plan 7.
+   upgrade: {plan_damage: 2}}
+
+- {id: proto_kk_jellyfish_drift, name: "Jellyfish Drift", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "[gold]Plan[/gold]: Deal 2 damage to ALL enemies.",
+   effects: [],
+   plan: [{op: damage, amount: 2, target: all_enemies}],
+   # Plan 3 to ALL.
+   upgrade: {plan_damage: 1}}
+
+- {id: proto_kk_current_read, name: "Current Read", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   # The upgrade ADDS the Block clause. No upgrade key adds a Plan clause, so
+   # the clause is written at 0 and printed only once upgraded.
+   description: "[gold]Plan[/gold]: Draw 1 card.{IfUpgraded:show: Gain 2 [gold]Block[/gold].|}",
+   effects: [],
+   plan: [{op: draw, amount: 1}, {op: block, amount: 0}],
+   # Plan: draw 1, gain 2 Block.
+   upgrade: {plan_block: 2}}
+
+- {id: proto_kk_brine_sting, name: "Brine Sting", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "[gold]Plan[/gold]: Apply 1 [gold]Weak[/gold].",
+   effects: [],
+   plan: [{op: apply_power, power: weak, amount: 1, target: front_enemy}],
+   # Plan 2 Weak.
+   upgrade: {plan_power_amount: 1}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.

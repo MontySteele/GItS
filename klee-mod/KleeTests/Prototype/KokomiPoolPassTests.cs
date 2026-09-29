@@ -105,7 +105,8 @@ public class KokomiPoolPassTests
         var card = new ProtoKkRiptide();
         Assert.Equal(2, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Attack, card.Type);
-        Assert.Equal(CardRarity.Common, card.Rarity);
+        // Uncommon since the feed pass (2026-09-29).
+        Assert.Equal(CardRarity.Uncommon, card.Rarity);
 
         var clauses = card.PlanClauses;
         Assert.Equal(2, clauses.Count);

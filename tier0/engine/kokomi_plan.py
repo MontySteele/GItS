@@ -137,8 +137,12 @@ UNHURT_FIELD = "unhurt_amount"
 HP_AT_WRITE = "hp_at_write"
 
 #: R276. The clauses whose `amount` may be zero: Tide Wall's is a flat bonus on
-#: top of the front enemy's intent, and the base card prints none.
-PLAN_ZERO_AMOUNT_OPS = frozenset(("block_front_intent",))
+#: top of the front enemy's intent, and the base card prints none. THE FEED
+#: PASS (2026-09-29) adds the flat `block`: Current Read's upgrade ADDS "Gain 2
+#: Block" to its Plan, and no key adds a Plan clause, so the clause is written
+#: at 0 and a 0 flat Block is carried out as nothing (Dexterity does not feed a
+#: clause the face does not print).
+PLAN_ZERO_AMOUNT_OPS = frozenset(("block_front_intent", "block"))
 
 #: The clauses a `times:` may repeat: the FLAT hit, and nothing else
 #: (`EB-492`, Pincer's "Plan: Deal 3 damage three times"). The two scaled
@@ -1403,6 +1407,10 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # printed Block goes through -- Frail bites it and Dexterity feeds it.
         # Draft 2's planned Block was `Unpowered`; draft 6 states the opposite
         # rule in the brief itself.
+        if amount <= 0:
+            # THE FEED PASS: an unprinted 0 clause (Current Read, unupgraded)
+            # is nothing, not a Dexterity-sized Block. `PLAN_ZERO_AMOUNT_OPS`.
+            return
         gained = powers.modify_block_gained(p, amount)
         p.block += gained
         state.emit("block", amount=gained)

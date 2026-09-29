@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -32,58 +31,39 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkCoralBulwark : CustomCardModel, ICharacterCard, IPlannedCard
+public sealed class ProtoKkCoralBulwark : CustomCardModel, ICharacterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_coral_bulwark");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coral Bulwark"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold].\n[gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]."),
     };
-
-    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
-    /// was written. Carried out by the Bake-Kurage at the start of her next
-    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
-    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
-        new[]
-        {
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.FrontEnemy),
-        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(7m, ValueProp.Move),
-            new DynamicVar("PlanPowerAmount", 2m)
+            new BlockVar(8m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkCoralBulwark()
-        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrSelf, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
-            return;
-        }
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.Block.UpgradeValueBy(3m);
-        DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }
