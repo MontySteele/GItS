@@ -157,6 +157,13 @@ public static class CompanionPool
             Klee => "klee",
             Furina => "furina",
             Kokomi => "kokomi",
+#if PROTOTYPE_CARDS
+            // VARKA (prototype batch one): a roster character, so the reward
+            // clamp, the companion shop and his Knights' personal pool all
+            // know him. Matched on the identity interface, which compiles
+            // with the surface; the class itself needs -p:VarkaPrototype.
+            Powers.IVarkaCharacter => Powers.VarkaPrototype.CharacterId,
+#endif
             _ => null,
         };
 
@@ -167,6 +174,9 @@ public static class CompanionPool
             Klee => "mondstadt",
             Furina => "fontaine",
             Kokomi => "inazuma",
+#if PROTOTYPE_CARDS
+            Powers.IVarkaCharacter => "mondstadt",
+#endif
             _ => null,
         };
 }

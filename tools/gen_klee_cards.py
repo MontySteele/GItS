@@ -360,6 +360,34 @@ PROFILES = {
     KOKOMI_PROFILE.character_id: KOKOMI_PROFILE,
 }
 
+#: VARKA, THE FOURTH CHARACTER (review/active/varka-paper-kit-2026-09-28.md
+#: sec.10, prototype batch one). A PROTOTYPE-ONLY owner: he has no shipped
+#: sheet, so he is not in `PROFILES` (whose `all` is the default roster run)
+#: and only `gen_prototype_cards` reaches him, through `PROTOTYPE_OWNERS`.
+#: His sheet/out-dir fields are the surface's, because the surface is the only
+#: place his cards live; `_profile_for` overrides them anyway. CATALYST: every
+#: Attack of his carries Anemo, the Swirl trigger; his Knights are companion
+#: rows and carry their own element. The base game's Strike and Defend apply
+#: nothing, as in every other kit.
+VARKA_PROFILE = CharacterProfile(
+    character_id="varka",
+    sheet=REPO / "docs" / "prototype-surface.yaml",
+    out_dir=REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated",
+    manifest=(REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+              / "Generated" / "manifest.json"),
+    namespace="KleeMod.Cards.Prototype.Generated",
+    native_element="anemo",
+    cadence="catalyst_attack",
+    generator_script="tools/gen_prototype_cards.py",
+    art_loader="RosterArt",
+    emit_character_identity=True,
+)
+
+#: Every character a PROTOTYPE row may name: the shipped roster plus the
+#: prototype-only owners above. `gen_prototype_cards` reads this and nothing
+#: else reads it.
+PROTOTYPE_OWNERS = {**PROFILES, VARKA_PROFILE.character_id: VARKA_PROFILE}
+
 # Ops this generator can express with verified Cmd APIs. Anything else blocks
 # the card. Keep this set honest -- widening it without a verified call site is
 # how we ship silently-wrong cards.
@@ -581,6 +609,14 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # What the Tokoyo Took doubles the count. One verified call
                   # site each on `KokomiOverhaulKit`.
                   "fetch_open_casket", "casket_double",
+                  # VARKA (QUARANTINED, prototype batch one). Two verbs, each
+                  # one awaited call into `VarkaRules`
+                  # (Powers/Prototype/VarkaRules.cs): Favonius Drill's "choose
+                  # a Knight: apply their element to the enemy" and Knights'
+                  # Roll Call's "add a Knight to your hand, free this turn".
+                  # The choice is a GRID, because four Knights do not fit the
+                  # choose-a-card screen (`MAX_MODES`).
+                  "knight_aura", "add_knight",
                   # PLAN-ONLY verbs: legal inside a row's `plan:` list and
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
@@ -937,6 +973,14 @@ ARM_KEYWORDS = (
     # pair. Each names the half of the choice it is.
     ArmKeyword("Ousia", ("Ousia",), "ArmKeywordTips.ForOusia"),
     ArmKeyword("Pneuma", ("Pneuma",), "ArmKeywordTips.ForPneuma"),
+    # VARKA'S THREE (prototype batch one, review/active/varka-paper-kit-
+    # 2026-09-28.md sec.10.1). `Absorb` is his cards' verb, `Wind` what it
+    # collects (one tip names all four, because a face says "a Wind" and not
+    # which), and `Knight` his four personal Companions. `Swirl` is already
+    # the companion arm's row above and is the same shared rule.
+    ArmKeyword("Absorb", ("Absorb", "Absorbs"), "ArmKeywordTips.ForAbsorb"),
+    ArmKeyword("Wind", ("Wind", "Winds"), "ArmKeywordTips.ForWind"),
+    ArmKeyword("Knight", ("Knight", "Knights"), "ArmKeywordTips.ForKnight"),
 )
 
 
@@ -1662,6 +1706,13 @@ PREDICATES_CS = {
     # in this engine and one in the sim (`effects._predicate`'s `plan_held`,
     # `state.kk_plan_queue`).
     "plan_held": "KokomiPlan.PlansHeld(Owner.Creature) > 0",
+    # VARKA (prototype batch one). Wind Wall's and Tailwind Stride's "If you
+    # hold a Wind" -- a live read of the Winds he has absorbed this fight --
+    # and Tempest Charge's "If it Swirls", a per-PLAY diff of his Swirl count
+    # snapshotted at the top of OnPlay (`swirlsAtStart`, beside
+    # `reactionsAtStart`), so a Swirl earlier in the turn does not count.
+    "holds_wind": "VarkaWinds.HeldCount(Owner.Creature) > 0",
+    "swirled_by_this": "VarkaWinds.SwirlsMadeBy(Owner.Creature) > swirlsAtStart",
 }
 
 # The if-clause each predicate renders on the card.
@@ -1699,6 +1750,8 @@ PREDICATE_TEXT = {
         "this turn",
     "plan_held":
         "If the [gold]Bake-Kurage[/gold] is holding a [gold]Plan[/gold]",
+    "holds_wind": "If you hold a [gold]Wind[/gold]",
+    "swirled_by_this": "If it [gold]Swirls[/gold]",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -2344,6 +2397,12 @@ FETCH_FROM_DISCARD_FIELDS = {"op", "filter"}
 FETCH_FROM_DISCARD_FILTERS = {"set_off", "companion"}
 #: Tag Along and Adventure Club: `amount` random Companion cards, free this turn.
 ADD_RANDOM_COMPANION_FIELDS = {"op", "amount"}
+#: VARKA's two verbs (prototype batch one). `knight_aura` aims at the enemy
+#: the card was played on; `add_knight` aims at nobody, and whether the player
+#: CHOOSES the Knight is the card's upgrade (`choose_knight`), read at play
+#: time off `IsUpgraded` the way Alice's Detonator reads its own.
+KNIGHT_AURA_FIELDS = {"op", "target"}
+ADD_KNIGHT_FIELDS = {"op"}
 #: Alice's Detonator: no field -- the Ka-pow! is the starter's, and whether it
 #: arrives upgraded is the card's own upgrade (`upgraded_grant`).
 GRANT_KAPOW_EACH_TURN_FIELDS = {"op"}
@@ -3255,6 +3314,21 @@ APPLY_POWERS = {
     "cvn_yuegui": ("YueguiPower", None,
         "At the end of your turn, place a [gold]Bomb[/gold] 3 on a random "
         "enemy. Lasts {X} more turn(s)."),
+    # VARKA (QUARANTINED, prototype batch one). Every class lives in
+    # klee-mod/KleeCode/Powers/Prototype/VarkaPowers.cs and is Compile
+    # Remove'd out of a release build, so the only rows that may name one are
+    # `proto_vk_` rows. The {X} templates are here for form; every row carries
+    # its own `description:` (EB-215). No sim twin: Varka is C# first.
+    "vk_grand_masters_order": ("GrandMastersOrderPower", None,
+        "The next [gold]Knight[/gold] you play this turn is played twice."),
+    "vk_stormward_stance": ("StormwardStancePower", None,
+        "While you hold 2 or more [gold]Winds[/gold], your [gold]Anemo[/gold] "
+        "Attacks deal {X} additional damage."),
+    "vk_converging_winds": ("ConvergingWindsPower", None,
+        "Your [gold]Swirls[/gold] react where they land. An [gold]Elemental "
+        "Reaction[/gold] a spread sets off hits only that enemy."),
+    "vk_boreas_unbound": ("BoreasUnboundPower", None,
+        "Whenever you [gold]Absorb[/gold], gain {X} [gold]Energy[/gold]."),
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
@@ -3681,6 +3755,9 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # Detonator's upgraded Ka-pow!, a play-time IsUpgraded
                        # read the face states in its own swap.
                        "bonus_vs_bombed", "upgraded_grant",
+                       # VARKA (Knights' Roll Call+): the same play-time
+                       # IsUpgraded read, one verb over.
+                       "choose_knight",
                        "bonus_per_detonation", "bonus_slope",
                        # Fanfare rework Track C.2 (2026-07-28): the
                        # Hyperbeam's upgrade cuts its PRICE (the floor it
@@ -3859,7 +3936,10 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # THE SUPPORTING POOL (2026-09-26), Oratrice's Verdict: it hits
               # nobody, it points this turn's random acts at the body the
               # player picked -- which is `cardPlay.Target`.
-              "stage_verdict")
+              "stage_verdict",
+              # VARKA's Favonius Drill: the chosen Knight's element lands on
+              # `cardPlay.Target`.
+              "knight_aura")
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
@@ -4498,7 +4578,10 @@ def blocked_reason(
                        if k in eff) > 1:
                     return "damage carries two riders"
                 if rider == "only_if":
-                    if eff["only_if"] != "mined":
+                    allowed = ("fresh_aura"
+                               if str(card.get("id") or "").startswith(
+                                   "proto_vk_") else "mined")
+                    if eff["only_if"] != allowed:
                         return f"damage only_if '{eff['only_if']}'"
                 else:
                     value = eff[rider]
@@ -4687,6 +4770,16 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if eff.get("filter") not in FETCH_FROM_DISCARD_FILTERS:
                 return f"fetch_from_discard filter '{eff.get('filter')}'"
+        if op == "knight_aura":
+            unknown = set(eff) - KNIGHT_AURA_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "enemy":
+                return "knight_aura aims at the chosen enemy (target 'enemy')"
+        if op == "add_knight":
+            unknown = set(eff) - ADD_KNIGHT_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
         if op == "add_random_companion":
             unknown = set(eff) - ADD_RANDOM_COMPANION_FIELDS
             if unknown:
@@ -5651,6 +5744,19 @@ KOKOMI_CASKET_COUNTS = {
 }
 
 
+#: VARKA (prototype batch one): the Winds he holds, a per-combat count that
+#: moves every time he Absorbs. Four Winds' Ascension reads it on the damage
+#: rail and Eye of the Storm on the block rail, the same triple the Casket's
+#: readers take. No sim twin yet: Varka is C# first, sim at Balance.
+VARKA_COUNTS = {
+    "winds_held": "static (card, _) => VarkaWinds.HeldCount("
+                  "card.Owner.Creature)",
+}
+
+#: The per-combat counts either rail may read by name.
+RUNTIME_COUNTS = {**KOKOMI_CASKET_COUNTS, **VARKA_COUNTS}
+
+
 def kokomi_casket_calc_rider(
         card: dict, eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: <KOKOMI_CASKET_COUNTS>}` on a
@@ -5662,7 +5768,7 @@ def kokomi_casket_calc_rider(
     formula = eff.get("amount_formula")
     if not isinstance(formula, dict):
         return None
-    reader = KOKOMI_CASKET_COUNTS.get(formula.get("count"))
+    reader = RUNTIME_COUNTS.get(formula.get("count"))
     if reader is None:
         return None
     return (int(formula.get("base", 0)), int(formula.get("per", 1)), reader)
@@ -6058,9 +6164,9 @@ def stage_count_block_rider(card: dict,
     token = formula.get("count")
     # THE CASKET PASS (2026-09-28): Shell Guard, "Gain 5 Block, plus 1 for
     # each point in the Casket" -- the Casket's count on this same rail.
-    if token in KOKOMI_CASKET_COUNTS:
+    if token in RUNTIME_COUNTS:
         return (int(formula.get("base", 0)), int(formula.get("per", 1)),
-                KOKOMI_CASKET_COUNTS[token])
+                RUNTIME_COUNTS[token])
     if token not in STAGE_COUNT_CS:
         return None
     if token == "stage_spent" and not _stage_spends_before(card, eff):
@@ -7528,6 +7634,10 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # `{IfUpgraded:show:...}` swap.
         "upgraded_grant": any(e["op"] == "grant_kapow_each_turn"
                               for e in effects),
+        # VARKA (Knights' Roll Call+): the player chooses the Knight, read at
+        # play time off `IsUpgraded`; the face carries its own
+        # `{IfUpgraded:show:...}` swap.
+        "choose_knight": any(e["op"] == "add_knight" for e in effects),
         "payload_mine": any(e["op"] == "plant_bomb"
                             and int(e.get("payload_mine_all", 0)) > 0
                             for e in effects),
@@ -9215,10 +9325,19 @@ DAMAGE_RIDERS = ("plant_on_hit", "grow_on_hit", "only_if")
 
 
 def damage_rider(card: dict, eff: dict) -> str | None:
-    """Which prototype rider this `damage` op carries, or None."""
+    """Which prototype rider this `damage` op carries, or None.
+
+    VARKA (prototype batch one) takes ONE of them, `only_if: fresh_aura`
+    (Gale Sweep: "Deal 3 damage to each enemy with a fresh aura. Each hit
+    Swirls."), the all-enemies hit that lands only where a condition holds --
+    `only_if: mined`'s shape, one call into `VarkaRules` instead of
+    `ProtoBombPower`."""
     if eff.get("op") != "damage":
         return None
-    if not str(card.get("id") or "").startswith("proto_ko_"):
+    card_id = str(card.get("id") or "")
+    if card_id.startswith("proto_vk_"):
+        return "only_if" if "only_if" in eff else None
+    if not card_id.startswith("proto_ko_"):
         return None
     for key in DAMAGE_RIDERS:
         if key in eff:
@@ -9941,6 +10060,10 @@ def build_body(
     preds = {e["if"] for e in card["effects"] if e.get("op") == "conditional"}
     if "reaction_triggered_by_this" in preds:
         lines.append("var reactionsAtStart = ReactionEffects.TotalResolved;")
+    if "swirled_by_this" in preds:
+        # VARKA: the same snapshot shape, on his own Swirl count.
+        lines.append(
+            "var swirlsAtStart = VarkaWinds.SwirlsMadeBy(Owner.Creature);")
     if "killed_target" in preds:
         lines.append("var enemiesAtStart = CombatState!.HittableEnemies.ToList();")
     if "target_has_aura" in preds:
@@ -10082,6 +10205,13 @@ def build_body(
                         "await ProtoBombPower.HitAndGrow("
                         "choiceContext, cardPlay.Target, Owner.Creature, "
                         f"this, cardPlay, {dmg}, {hits}, {grow});")
+                elif rider == "only_if" and eff["only_if"] == "fresh_aura":
+                    # VARKA's Gale Sweep: the fresh-aura bodies are taken
+                    # when it is played, and each takes its own hit.
+                    lines.append(
+                        "await VarkaRules.HitFreshAuras("
+                        "choiceContext, Owner.Creature, this, cardPlay, "
+                        f"{dmg});")
                 elif rider == "only_if":
                     lines.append(
                         "await ProtoBombPower.HitMined("
@@ -10764,6 +10894,21 @@ def build_body(
             lines.append(
                 "await KleeExpansion.FetchFromDiscard(choiceContext, Owner, "
                 f"{kind});")
+
+        elif op == "knight_aura":
+            # VARKA's Favonius Drill: choose a Knight on the grid, then apply
+            # that Knight's element to the enemy the card was played on.
+            lines.append(
+                "await VarkaRules.KnightAura(choiceContext, Owner, "
+                "cardPlay.Target!);")
+
+        elif op == "add_knight":
+            # VARKA's Knights' Roll Call: a random Knight, or with the upgrade
+            # (`choose_knight`) one the player picks, into the hand at 0 this
+            # turn.
+            lines.append(
+                "await VarkaRules.AddKnight(choiceContext, Owner, "
+                "IsUpgraded);")
 
         elif op == "add_random_companion":
             # Tag Along and Adventure Club: random Companion cards, free this
@@ -13925,8 +14070,16 @@ def build_upgrade(card: dict) -> list[str]:
         # slot of the CalculatedDamageVar triple: base + per * count), so the
         # upgrade bumps that var and the face re-renders itself.
         done.add("formula_per")
+        # VARKA (Eye of the Storm+) is the first BLOCK row to move its slope,
+        # and on the block rail the middle slot is `CalculationExtra`, the var
+        # the face prints -- bumping ExtraDamage there moved a var no Block
+        # face reads, and the `+` card printed its base number.
+        per_var = ("CalculationExtra"
+                   if any(stage_count_block_rider(card, e) is not None
+                          for e in card.get("effects", []))
+                   else "ExtraDamage")
         lines.append(
-            f'DynamicVars.ExtraDamage.UpgradeValueBy({int(deltas["formula_per"])}m);')
+            f'DynamicVars.{per_var}.UpgradeValueBy({int(deltas["formula_per"])}m);')
     if "formula_base" in deltas:
         # The BASE term lives in CalculationBase (the first slot of the same
         # triple). Same var the plain `damage` delta already targets on a
@@ -13969,6 +14122,12 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("upgraded_grant")
         lines.append("// upgraded_grant: the granted Ka-pow! arrives upgraded, "
                      "read off IsUpgraded when the Power is installed.")
+    if "choose_knight" in deltas:
+        # VARKA (Knights' Roll Call+). The same play-time read: nothing to
+        # bump, and the face's own swap says which Knight arrives.
+        done.add("choose_knight")
+        lines.append("// choose_knight: the player picks the Knight, read off "
+                     "IsUpgraded when the card is played.")
     if "conditional_bonus" in deltas:
         # tier0: bump the then-branch's first damage (the ExtraDamage var;
         # expressibility gated in upgrade_plan/conditional_bonus_upgrade).
@@ -14431,6 +14590,11 @@ def emit(
         if eff["op"] == "redirect_queued_plans":
             target_type = TARGET_CS[eff.get("target", "enemy")]
             break
+        # VARKA's Favonius Drill: the Knight's element lands on the chosen
+        # enemy, so the card aims for the reason `apply_aura` does.
+        if eff["op"] == "knight_aura":
+            target_type = TARGET_CS[eff.get("target", "enemy")]
+            break
         # EB-118: a modal's aiming verb sits inside a mode body, so a card
         # whose only enemy-facing effect is modal would declare TargetType.Self
         # and be unaimable. blocked_reason has already refused modes that
@@ -14565,6 +14729,22 @@ def emit(
     # energy when played (KleeElementalHooks.AfterCardPlayed reads the marker).
     if "skill_tag" in card.get("tags", []):
         interfaces += ", ISkillTagCard"
+    # VARKA (QUARANTINED, prototype batch one). A row tagged `absorb` prints
+    # the Absorb keyword, and `IAbsorbCard` is the MARKER the aura lifecycle
+    # asks: an Attack carrying it takes a fresh aura off the enemy it hits and
+    # gives its Wind (`VarkaAbsorb.Decide`). Declared in Powers/Prototype,
+    # which a release build removes; only `proto_vk_` rows carry the tag.
+    if "absorb" in card.get("tags", []):
+        interfaces += ", IAbsorbCard"
+    # VARKA (prototype batch one) HAS NO ANCIENT CARD, and Darv's Dusty Tome
+    # draws one from the character's pool: an empty draw NREs inside
+    # `Darv.GenerateInitialOptions` and the run softlocks at the act-two
+    # door (`RosterAncientCards`' header). BaseLib's own seam answers it
+    # without a card nobody designed: a pool card marked `ITomeCard` is what
+    # the Tome hands that character instead (`DustyTomePatch`, 0.111.0
+    # BaseLib, read by decompile). A row tagged `dusty_tome` carries the mark.
+    if "dusty_tome" in card.get("tags", []):
+        interfaces += ", ITomeCard"
     # EB-26 D2 option (d). The apply mode is a property of the ROW, and the
     # mod's only per-application channel is the cardSource -- so the card
     # declares the mode and its ceiling, and the power reads it off the card

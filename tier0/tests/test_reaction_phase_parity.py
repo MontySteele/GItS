@@ -492,7 +492,10 @@ MODIFIER_HOOKS = ("ModifyDamageAdditive", "ModifyDamageMultiplicative")
 # with a Cmd receiver mutates the board from a hook the UI calls
 # speculatively. Curated on purpose (the house pattern): adding a name here
 # is a claim that the call is read-only, and it should be checked as one.
-READONLY_CMDS = frozenset({"AuraCmd.Find"})
+# `AuraCmd.ElementOfPlay` is the one element funnel, documented PURE
+# because every caller is reached from a preview path (Varka's Stormward
+# Stance asks it which element an Attack's hit carries).
+READONLY_CMDS = frozenset({"AuraCmd.Find", "AuraCmd.ElementOfPlay"})
 
 _FIELD_WRITE = re.compile(r"\b(_\w+)\s*(?:=(?!=)|\+\+|--|\+=|-=)")
 _CMD_CALL = re.compile(r"\b(\w+Cmd\.\w+)")
@@ -786,6 +789,11 @@ CO_TENANCY_LEDGER = {
             "the broadcast",
     },
     "AfterPlayerTurnStart": {
+        ("Relics/BoreasFang.cs", "BoreasFang"):
+            "QUARANTINED (Varka, prototype batch one). Clears the Fang's "
+            "once-a-turn latch on HIS turn start, and nothing else: the latch "
+            "is read only when one of his Attacks hits an aura, which no "
+            "turn-start tenant does. No sim twin: Varka is C# first",
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
             "QUARANTINED (the Furina stage, FURINA_STAGE). RULE 4: the LEAD "
             "performer regains 1 Fanfare, from her second turn on. THE "
@@ -1213,6 +1221,15 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
+        ("Powers/Prototype/VarkaPowers.cs", "GrandMastersOrderPower"):
+            "QUARANTINED (Varka, prototype batch one). Grand Master's Order's "
+            "'this turn', ReplayNextCompanionPower's boundary exactly. Removes "
+            "itself and touches nothing a co-tenant reads. No sim twin",
+        ("Powers/Prototype/VarkaWinds.cs", "ElectroWindPower"):
+            "QUARANTINED (Varka, prototype batch one). Clears Electro Wind's "
+            "'first Swirl each turn' latch on its holder's own power, which no "
+            "co-tenant reads; a Swirl cannot happen between the two. No sim "
+            "twin",
         ("Powers/Prototype/CoopSet.cs", "PassTheMatchPower"):
             "QUARANTINED (the co-op set). Pass the Match's 'this turn' "
             "expiring at the end of the player turn, Playdate's shape below. "

@@ -51,6 +51,11 @@ internal sealed class Seat
 
     internal static Seat Kokomi(int maxHp = 70) => Build(new global::KleeMod.Kokomi(), maxHp);
 
+#if VARKA_PROTOTYPE
+    /// <summary>A Varka seat (prototype batch one) at his printed 80.</summary>
+    internal static Seat Varka(int maxHp = 80) => Build(new global::KleeMod.Varka(), maxHp);
+#endif
+
     private static Seat Build(CharacterModel character, int maxHp)
     {
         var player = (Player)RuntimeHelpers.GetUninitializedObject(typeof(Player));

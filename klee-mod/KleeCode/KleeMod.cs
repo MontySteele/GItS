@@ -138,7 +138,11 @@ public static class KleeMod
                     // is that a measurement must never desync a co-op table.
                     .Concat(Diagnostics.PlayTelemetryHooks.Subscribe(combatState)));
 
-        Log.Info($"[{ModId}] Klee, Furina and Kokomi registered.");
+        Log.Info($"[{ModId}] Klee, Furina and Kokomi registered"
+#if PROTOTYPE_CARDS && VARKA_PROTOTYPE
+                 + ", and Varka (prototype)"
+#endif
+                 + ".");
     }
 
     /// <summary>English strings for the character and the four starter stubs.</summary>
@@ -219,6 +223,10 @@ public static class KleeMod
                     Powers.KleeExpansion.SetOffPromptText,
                 [Powers.KleeExpansion.CompanionPromptKey] =
                     Powers.KleeExpansion.CompanionPromptText,
+                // VARKA (prototype batch one): the choose-a-Knight grid's
+                // prompt, on the same terms.
+                [Powers.VarkaRules.KnightPromptKey] =
+                    Powers.VarkaRules.KnightPromptText,
 #endif
             });
 
@@ -573,6 +581,10 @@ public static class KleeMod
                     // here.
                     [Cards.ArmKeywordTips.CompanionKey + ".title"] =
                         "Companion",
+                    // VARKA (prototype batch one): his three words.
+                    [Cards.ArmKeywordTips.AbsorbKey + ".title"] = "Absorb",
+                    [Cards.ArmKeywordTips.WindKey + ".title"] = "Wind",
+                    [Cards.ArmKeywordTips.KnightKey + ".title"] = "Knight",
                     // The Furina reframe's four title rows went
                     // with its keywords (`EB-723`); see
                     // `ArmKeywordTips`'s Furina section. Encore's title

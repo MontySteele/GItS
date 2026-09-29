@@ -457,7 +457,9 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         return []
     raw = yaml_memo.safe_load(path.read_text(encoding="utf-8")) or []
     shipped = _card_index()
-    known_characters = {"klee", "furina", "kokomi"}
+    # VARKA (prototype batch one) owns rows here and nowhere else: C# first,
+    # no sim twin until Balance, so his rows are schema-checked and never run.
+    known_characters = {"klee", "furina", "kokomi", "varka"}
     seen: set[str] = set()
     cards: list[Card] = []
     for d in raw:

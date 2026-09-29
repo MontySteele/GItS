@@ -416,7 +416,22 @@ _ARM_ITEMS_REASON = (
     "potion of the Klee arm or the Stage, built C# first "
     "(operations/prototype.md); no sim twin exists until Balance.")
 
+#: VARKA (prototype batch one, review/active/varka-paper-kit-2026-09-28.md
+#: sec.10). Every number his rules print is a first-guess placeholder for
+#: play, built C# first; the sim twin comes at Balance.
+_VARKA_REASON = (
+    "VARKA, prototype batch one (paper kit sec.10): a first-guess placeholder "
+    "for play, built C# first (operations/prototype.md); no sim twin exists "
+    "until Balance.")
+
 UNMIRRORED: dict[str, str] = {
+    "VarkaLaw.PyroWindDamage": _VARKA_REASON,
+    "VarkaLaw.HydroWindBlock": _VARKA_REASON,
+    "VarkaLaw.CryoWindWeak": _VARKA_REASON,
+    "VarkaLaw.ElectroWindEnergy": _VARKA_REASON,
+    "StormwardStancePower.WindsNeeded": _VARKA_REASON,
+    "ProtoVkKnightsMuster.Damage": _VARKA_REASON,
+    "ProtoVkKnightsMuster.UpgradeDamage": _VARKA_REASON,
     "AlicesGuidebook.Growth": _ARM_ITEMS_REASON,
     "BlastingPowder.Growth": _ARM_ITEMS_REASON,
     "BottledApplause.Fanfare": _ARM_ITEMS_REASON,
