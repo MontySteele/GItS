@@ -117,6 +117,14 @@ KNOWN_STALE = {
     # and crop (art/plan.tsv -- aftershock, dodoco, half_a_mountain,
     # party_poppers, patience_klee, spinning_sparkler, tag_along), and the
     # stale files plus proto_pearl_barrage_turn.png were deleted by hand.
+    "proto_fs_understudy": (
+        "Furina Stage balance pass one (2026-09-28, #740) CUT Understudy from "
+        "the pool: Take the Stage, promoted to a Common the same day, does its "
+        "job better. Kept rather than deleted, as the entries below are: a "
+        "painted asset on a furina/ out-path, on disk if a summon Common is "
+        "re-authored. It is NOT coverage for anything and must never be "
+        "counted as such."
+    ),
     "proto_kk_the_moon_overlooks_the_waters": (
         "EB-570 (2026-09-05) WITHDREW The Moon Overlooks the Waters from the "
         "Kokomi arm: the doctrine audit returned REQUIRES_MODIFICATION on C1 "
