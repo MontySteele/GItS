@@ -13551,7 +13551,32 @@ def _face_riders(card: dict, text: str) -> str:
     `EB-293`. Both are live defects from [USER]'s own play of the arm.
     (`EB-392` made it three with the Hexerei family tag; R276 retired the tag.)
     """
-    return _plan_only_line(card, _dedupe_printed_exhaust(card, text))
+    return plan_line_on_its_own_line(
+        _plan_only_line(card, _dedupe_printed_exhaust(card, text)))
+
+
+#: A Plan CLAUSE, not a mention of the word: `[gold]Plan[/gold]:` (or its Dusk
+#: form) opening a sentence, i.e. after `.`/`!`/`?` and the joining space.
+#: "Cancel your last [gold]Plan[/gold]: its card returns" is a sentence ABOUT a
+#: Plan and does not match; a face that opens with its Plan has nothing before
+#: it to break from.
+_PLAN_CLAUSE_BREAK = re.compile(
+    r"(?<=[.!?]) +(?=(?:\[gold\]Dusk\[/gold\] )?\[gold\]Plan\[/gold\]:)")
+
+
+def plan_line_on_its_own_line(text: str) -> str:
+    """Every printed Plan clause starts on a new line.
+
+    2026-09-28, [USER]: "The idea of Plan cards makes sense, but the card text
+    gets harder to read. Can we move all Plan lines to the next line down?"
+    ONE place, on the emitted face and never on the sheet: every face path
+    (authored and rendered, every character and arm) passes through
+    `_face_riders`, so a row written next week gets the break for free, and
+    the sheet keeps one-line prose that the text lints count as before. The
+    game renders a line break in a card description (the `{InCombat:...}`
+    reader rows already print one).
+    """
+    return _PLAN_CLAUSE_BREAK.sub("\n", text)
 
 
 def _dedupe_printed_exhaust(card: dict, text: str) -> str:

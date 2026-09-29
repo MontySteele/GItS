@@ -927,8 +927,11 @@ def test_every_plan_only_row_prints_where_it_is_played():
                  if row.get("plan") and not row.get("effects")]
     assert plan_only, "the arm has no plan-only rows -- this pin is stale"
     for cid in plan_only:
+        # 2026-09-28: the Plan clause that follows opens its own line (the
+        # emitted C# source spells the break `\n`).
         assert faces[cid][1].startswith(
-            "Play on the [gold]Bake-Kurage[/gold]. "), (
+            ("Play on the [gold]Bake-Kurage[/gold]. ",
+             "Play on the [gold]Bake-Kurage[/gold].\\n")), (
             f"{cid} is plan-only and does not print where it is played")
     for cid, (row, face) in faces.items():
         if row.get("plan") and row.get("effects"):

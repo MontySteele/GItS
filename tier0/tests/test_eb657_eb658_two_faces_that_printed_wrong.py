@@ -61,7 +61,9 @@ def test_feints_face_prints_both_branches_as_folded_vars():
     src = (GENERATED / "ProtoKkFeint.cs").read_text(encoding="utf-8")
     # R276 pick 1: the Plan's Vulnerable upgrades (1 -> 2), so the generated
     # face carries its token where the sheet prints the literal.
-    assert face.replace("Apply 1 ", "Apply {PlanPowerAmount:diff()} ") in src
+    # 2026-09-28: the emitted face starts its Plan clause on its own line.
+    assert face.replace("Apply 1 ", "Apply {PlanPowerAmount:diff()} ").replace(
+        " [gold]Plan[/gold]: ", "\\n[gold]Plan[/gold]: ") in src
     # `EB-670` (the live look of 2026-09-16) MOVED THE HEADLINE'S CLASS and
     # nothing else: on a morning a Plan HAD carried out, the else-arm number
     # was the first number a reader met and was not the number the card would

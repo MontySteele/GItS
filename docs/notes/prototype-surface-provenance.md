@@ -3733,3 +3733,24 @@ numbers. Design: `review/active/furina-stage-brief-2026-09-08.md`.
   `furina_stage.POOL_DROPS` (read by `loader.pool_drops`, applied in
   `tier05.rewards.character_pool`). Both ids are in
   `docs/retired-card-ids.yaml`, so a save holding one still loads.
+
+## Kokomi: Kurage's Oath now-line, and Plan lines on their own line (2026-09-28)
+
+**Kurage's Oath** (`proto_kk_kurages_oath`, her starter). [USER]: "The
+non-plan effect is quite bad (worse than a basic defend)" ... "Option 1 is
+fine for now." The now-line goes 4 -> 6 Block and the upgrade moves both
+halves, `{block: 2, plan_damage: 3}`: upgraded, 8 Block / Plan 10 to ALL. The
+Plan stays "Deal 7 damage to ALL enemies." The tier0 sim reads this row, so
+it moved with it.
+
+**Plan lines.** [USER]: "The idea of Plan cards makes sense, but the card
+text gets harder to read. Can we move all Plan lines to the next line down?"
+The break is made once, on the emitted face: `gen_klee_cards._face_riders`
+calls `plan_line_on_its_own_line`, which turns the space before a
+sentence-opening `[gold]Plan[/gold]:` (or `[gold]Dusk[/gold]
+[gold]Plan[/gold]:`) into a line break. Every face path passes through it,
+so the sheet rows keep one-line prose and the text lints count them as
+before. 27 faces moved; Change of Plans' "Cancel your last
+[gold]Plan[/gold]: ..." is a sentence about a Plan and does not break. The
+blind-seat bridge folds whitespace (`qa_packet._text`), so seats still read
+one line per face. Pinned by `tier0/tests/test_plan_line_on_its_own_line.py`.

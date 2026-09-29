@@ -48,7 +48,7 @@ public sealed class ProtoKkVanguard : CustomCardModel, ICharacterCard, IPlannedC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Vanguard"),
-        ("description", "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold]."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. Draw 1 card.\n[gold]Plan[/gold]: Gain 1 [gold]Energy[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

@@ -45,7 +45,7 @@ public sealed class ProtoKkRipple : CustomCardModel, ICharacterCard, IPlannedCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ripple"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold]."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}.\n[gold]Plan[/gold]: Gain 1 [gold]Energy[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

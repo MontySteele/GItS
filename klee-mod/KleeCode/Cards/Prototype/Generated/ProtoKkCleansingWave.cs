@@ -45,7 +45,7 @@ public sealed class ProtoKkCleansingWave : CustomCardModel, ICharacterCard, IPla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Cleansing Wave"),
-        ("description", "Remove one of your debuffs. Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Remove one of your debuffs. Draw 1 card.\n[gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

@@ -562,7 +562,7 @@ public class KokomiPoolPassTwoTests
         // "your next Plan" was ambiguous between the next carried out and the
         // next written (`EB-687`, `EB-645`).
         Assert.Equal(
-            "Deal {Damage:diff()} damage. [gold]Plan[/gold]: The "
+            "Deal {Damage:diff()} damage.\n[gold]Plan[/gold]: The "
           + "Plan after this one is carried out twice.",
             Face(new ProtoKkSecondWave()));
         Assert.EndsWith("The Plan after this one deals double damage.",

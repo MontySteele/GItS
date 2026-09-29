@@ -36,7 +36,10 @@ the Bake-Kurage carries it out at the start of her next turn.
    leaves your hand like any played card, and only a card that says so
    takes it back (Second Thoughts, rule 6). **Her basics are the base
    game's Strike and Defend and carry no Plan line (R242); they are never
-   changed ([USER], 2026-09-08).**
+   changed ([USER], 2026-09-08).** The Plan line prints on its own line,
+   under the now-line ([USER], 2026-09-28: "The idea of Plan cards makes
+   sense, but the card text gets harder to read. Can we move all Plan
+   lines to the next line down?"); the generator breaks it, not the sheet.
 3. **The jellyfish acts by the book.** A planned Attack strikes the front
    enemy (the leftmost one alive); a single-target Plan is aimed when
    written if the engine can carry a second selection (R250). A planned
@@ -96,7 +99,7 @@ touching the basics.
 |---|---|---|---|---|
 | Strike | 1 | Attack | Deal 6. | 4 |
 | Defend | 1 | Skill | Gain 5 Block. | 4 |
-| Kurage's Oath | 1 | Skill | Gain 4 Block. Plan: Deal 7 damage to ALL enemies. | 1 |
+| Kurage's Oath | 1 | Skill | Gain 6 Block. Plan: Deal 7 damage to ALL enemies. | 1 |
 | Slack Water | 1 | Attack | Deal 4 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies. | 1 |
 
 The basics are the base game's Strike and Defend (R242) and apply no
@@ -105,7 +108,10 @@ Skills included (R276 pick 2), which is what a companion's Pyro, Electro or
 Cryo card reacts with. Kurage's Oath gained a now-line under R250 pick 1
 (round 4d), so writing it is a trade rather than the only play; R276 pick 1
 made that line 4 Block, a different job from the Plan's 7 to ALL (the
-halves rule, §3). Its now-line does not upgrade; the Plan goes to 10. Slack Water's Plan is a **morning** Plan: the Weak lands the
+halves rule, §3). 2026-09-28, [USER]: "The non-plan effect is quite bad
+(worse than a basic defend)" ... "Option 1 is fine for now." The now-line
+is 6 Block, and the upgrade moves both halves: 8 Block, Plan 10 to ALL.
+Slack Water's Plan is a **morning** Plan: the Weak lands the
 next turn, after the swing it was written against, and that delay is the
 point (R267 pick 1). Its numbers are the R243 audit's (Weak 1 now, Weak 1
 to ALL written; upgrade 7 damage and 2 Weak written).
@@ -117,7 +123,7 @@ for 2 Hydro damage.
 Fight one, turn one: three energy, Strike twice, Defend, Kurage's Oath,
 Slack Water; the enemy intends 8. Slack Water on the enemy: 4, Weak, and
 the jellyfish's 2, the relic's lesson. Defend, 5 Block against a Weakened
-6. Kurage's Oath on the jellyfish, or 4 more Block now. Turn two opens
+6. Kurage's Oath on the jellyfish, or 6 more Block now. Turn two opens
 with the jellyfish hitting every enemy for 7 once you have drawn. Slack
 Water and the Oath were the decisions: blunt this turn's hit now, or Weak
 on everyone and 7 to everyone at dawn. That is the whole kit, on turn one.
