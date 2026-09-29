@@ -79,6 +79,11 @@ REVISION 2.1 (`build_player(rev=2, fork=True)`), switches on top of two:
     Swirls by the shared rule anyway, so a Fang Swirl there is not spent.
   * AN ABSORB ON A HELD WIND SWIRLS INSTEAD (card or Fang).
   * Ascension A is the headline; B stays runnable.
+
+REVISION 2.2 (tuning, switches on top of 2.1):
+  * `winds_set="W2"`: Pyro Wind deals 3 to ALL enemies on a Swirl; Hydro 4
+    Block per Swirl; Electro's first Swirl each turn draws 2; Cryo as 2.1.
+  * `muster_cost=0` (starter variant S1): Knights' Muster costs 0.
 """
 
 from __future__ import annotations
@@ -109,6 +114,10 @@ R2_ELECTRO_DRAW = 1
 R2_CRYO_WEAK = 1
 ASCENSION_B_PER_WIND = 8
 ABSORB_HELD_SWIRLS = True    # sec.9.1 reading; see the module docstring
+# --- revision 2.2, Winds set W2 ---
+W2_PYRO_SWIRL_DAMAGE_ALL = 3
+W2_HYDRO_BLOCK = 4
+W2_ELECTRO_DRAW = 2
 
 KNIGHT_ELEMENT = {"amber": "pyro", "barbara": "hydro", "lisa": "electro",
                   "kaeya": "cryo"}
@@ -137,7 +146,7 @@ class VarkaState:
     ascension: list = field(default_factory=list)  # (turn, winds, damage)
     wind_value: dict = field(default_factory=lambda: {
         "pyro_hits": 0, "hydro_block": 0, "electro_draws": 0,
-        "cryo_weak": 0})
+        "cryo_weak": 0, "pyro_dmg": 0})
     absorbed_this_turn: int = -1  # the turn the last Absorb happened
     turn_rows: list = field(default_factory=list)
     # --- revision two (sec.9) ---
@@ -146,6 +155,7 @@ class VarkaState:
     no_gain: bool = False        # single-Wind runs: Absorbs grant nothing
     fang_want: object = False    # rev 2: True = Absorb; 2.1: "absorb"/"swirl"
     fork: bool = False           # revision 2.1
+    winds_set: str = "r2"        # revision 2.2: "W2"
     aim2: object = None          # Grand Master's Order: the repeat's target
     muster_choice2: Optional[str] = None
     asc_reason: Optional[str] = None
@@ -369,17 +379,26 @@ def _on_swirl_rev2(state, vs, enemy) -> None:
     """sec.9.2: every Wind pays on a Swirl."""
     from tier0.engine import powers, reactions    # late: cycle
     p = state.player
-    if _wind_on(vs, "pyro") and enemy.alive:
-        reactions._splash(state, enemy, R2_PYRO_SWIRL_DAMAGE)
-        vs.wind_value["pyro_hits"] += 1
+    w2 = vs.winds_set == "W2"
+    if _wind_on(vs, "pyro"):
+        hit = (list(state.living_enemies) if w2
+               else [enemy] if enemy.alive else [])
+        amount = W2_PYRO_SWIRL_DAMAGE_ALL if w2 else R2_PYRO_SWIRL_DAMAGE
+        for e in hit:
+            reactions._splash(state, e, amount)
+            vs.wind_value["pyro_dmg"] += amount
+        if hit:
+            vs.wind_value["pyro_hits"] += 1
     if _wind_on(vs, "hydro"):
-        p.block += R2_HYDRO_BLOCK
-        vs.wind_value["hydro_block"] += R2_HYDRO_BLOCK
-        state.emit("block", amount=R2_HYDRO_BLOCK)
+        blk = W2_HYDRO_BLOCK if w2 else R2_HYDRO_BLOCK
+        p.block += blk
+        vs.wind_value["hydro_block"] += blk
+        state.emit("block", amount=blk)
     if _wind_on(vs, "electro") and vs.electro_turn != state.turn:
         vs.electro_turn = state.turn
-        state.draw(R2_ELECTRO_DRAW)
-        vs.wind_value["electro_draws"] += R2_ELECTRO_DRAW
+        n = W2_ELECTRO_DRAW if w2 else R2_ELECTRO_DRAW
+        state.draw(n)
+        vs.wind_value["electro_draws"] += n
     if _wind_on(vs, "cryo") and enemy.alive:
         powers.apply_power(state, enemy, "weak", R2_CRYO_WEAK)
         vs.wind_value["cryo_weak"] += R2_CRYO_WEAK
@@ -584,16 +603,22 @@ def make_card(name: str):
 
 def build_player(extra: list[str] = (), disabled_winds=frozenset(),
                  rev: int = 1, asc_version: str = "A", fixed_winds=None,
-                 fork: bool = False):
+                 fork: bool = False, winds_set: str = "r2",
+                 muster_cost=None):
     """A fresh Varka for one fight: the starter plus `extra`, the relic's
     state on the Player. Boreas's Fang has no hook id: it is the arm's rule,
     read by `intercept_hit` for every Varka. `rev=2` is sec.9; `asc_version`
     "B" makes Ascension sec.9.5's B (revision two only); `fixed_winds` holds
     those Winds from turn 1 and turns Absorb gains off (single-Wind runs)."""
     from tier0.engine.state import Player
-    if (asc_version != "A" or fork) and rev != 2:
+    if (asc_version != "A" or fork or winds_set != "r2"
+            or muster_cost is not None) and rev != 2:
         raise ValueError("Ascension B and the 2.1 fork are revision two")
     cards = [make_card(n) for n in list(STARTER) + list(extra)]
+    if muster_cost is not None:
+        for c in cards:
+            if c.id == "varka_knights_muster":
+                c.cost = muster_cost
     if asc_version == "B":
         for c in cards:
             if c.id == "varka_four_winds_ascension":
@@ -601,7 +626,8 @@ def build_player(extra: list[str] = (), disabled_winds=frozenset(),
     player = Player(hp=HP, max_hp=HP, draw_pile=cards, element=ELEMENT,
                     cadence="catalyst", character_id=CHARACTER)
     vs = VarkaState(disabled_winds=frozenset(disabled_winds), rev=rev,
-                    asc_version=asc_version, fork=fork)
+                    asc_version=asc_version, fork=fork,
+                    winds_set=winds_set)
     if fixed_winds is not None:
         vs.winds = {el: 0 for el in fixed_winds}
         vs.no_gain = True

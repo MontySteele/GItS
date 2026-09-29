@@ -325,12 +325,20 @@ class VarkaPilot2:
     it ("absorb"); rules 5 and 6 treat any plain Attack as a Swirl card
     while the Fang is unused this turn, and rule 6 Swirls through it
     ("swirl"). Policy b therefore Swirls every fresh aura it can reach.
+    REVISION 2.2 (`smart_rule="v22"`, policy c only): Absorb every new Wind,
+    unless three or more enemies are alive (a pack, where Swirl-only was
+    faster in 2.1) or one Swirl card this turn would kill that enemy
+    (`_swirl_kills`). This replaces 2.1's "fewer than 2 Winds", which capped
+    a deck with one Knight at 2 Winds.
     """
 
-    def __init__(self, policy: str = "smart", threshold: int = 3):
+    def __init__(self, policy: str = "smart", threshold: int = 3,
+                 smart_rule: str = "v21"):
         assert policy in ABSORB_POLICIES, policy
+        assert smart_rule in ("v21", "v22"), smart_rule
         self.policy = policy
         self.threshold = threshold
+        self.smart_rule = smart_rule
 
     # -- helpers ---------------------------------------------------------
     def _play(self, vs, card, aim=None, fang=False, reason=None):
@@ -352,15 +360,43 @@ class VarkaPilot2:
                 return min(pool, key=lambda e: e.hp)
         return min(living, key=lambda e: e.hp)
 
-    def _wants_absorb(self, vs, playable, cost, energy):
+    def _wants_absorb(self, vs, playable, cost, energy, state=None,
+                      target=None):
         if self.policy == "swirl" or vs.no_gain:
             return False
         if self.policy == "absorb":
             return True
+        if self.smart_rule == "v22":
+            # 2.2: always Absorb a new Wind, unless the fight is a pack of
+            # three or more (Swirl-only was faster there in 2.1) or a Swirl
+            # of that aura this turn would kill its enemy.
+            if len(state.living_enemies) >= 3:
+                return False
+            return not self._swirl_kills(state, vs, target, playable, cost,
+                                         energy)
         # smart: a Knight to follow this turn, or early (< 2 Winds)
         knights = [c for c in playable if c.id in V.KNIGHT_IDS]
         follow = any(energy - 1 >= cost[id(c)] for c in knights)
         return follow or len(vs.winds) < 2
+
+    def _swirl_kills(self, state, vs, e, playable, cost, energy):
+        """Would one Swirl card this turn kill `e`? Printed damage, the flat
+        2 and the Pyro Wind's rider; the Fang counts any plain Attack in
+        2.1+."""
+        fang = vs.fork and vs.fang_turn != state.turn
+        rider = 2
+        if "pyro" in vs.winds:
+            rider += (V.W2_PYRO_SWIRL_DAMAGE_ALL if vs.winds_set == "W2"
+                      else V.R2_PYRO_SWIRL_DAMAGE)
+        for c in playable:
+            if c.type != "attack" or cost[id(c)] > energy:
+                continue
+            if _is(c, "four_winds_ascension") or c.id in V.ABSORB_IDS:
+                continue
+            if c.element == V.ELEMENT or fang:
+                if _est_attack(state, vs, c) + rider >= e.hp + e.block:
+                    return True
+        return False
 
     # -- the policy ------------------------------------------------------
     def __call__(self, state):
@@ -441,8 +477,8 @@ class VarkaPilot2:
         # 4. absorb (policy-gated)
         new = ([e for e in fresh if e.aura not in vs.winds]
                if not vs.no_gain else [])
-        if new and self._wants_absorb(vs, playable, cost, energy):
-            tgt = min(new, key=lambda e: e.hp)
+        tgt = min(new, key=lambda e: e.hp) if new else None
+        if new and self._wants_absorb(vs, playable, cost, energy, state, tgt):
             if vs.fang_turn != state.turn:
                 plain = [c for c in attacks
                          if c.id not in V.ABSORB_IDS and not is_asc(c)

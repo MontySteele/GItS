@@ -295,3 +295,36 @@ def test_rev21_an_anemo_attack_swirls_without_spending_the_fang():
     play2(st, "tempest_charge", aim=a, fang="swirl")
     assert st.player.varka.swirls == 1
     assert st.player.varka.fang_turn == -1
+
+
+# --------------------------------------------------------------------------
+#  Revision 2.2: Winds set W2, starter variant S1
+# --------------------------------------------------------------------------
+
+@pytest.mark.usefixtures("arm")
+def test_rev22_w2_winds_pay_on_a_swirl():
+    st = varka2(n=2, hp=60, fork=True, winds_set="W2")
+    a, b = st.enemies
+    vs = st.player.varka
+    vs.winds = {el: 0 for el in V.WIND_ELEMENTS}
+    st.player.draw_pile = [V.make_card("defend") for _ in range(4)]
+    hand = len(st.player.hand)
+    reactions.apply_aura(st, a, "electro")
+    play2(st, "strike", aim=a, fang="swirl")
+    # Pyro 3 to ALL; Hydro 4 Block; Electro draws 2; Cryo 1 Weak on a.
+    assert a.hp == 60 - 6 - 2 - V.W2_PYRO_SWIRL_DAMAGE_ALL
+    assert b.hp == 60 - 2 - V.W2_PYRO_SWIRL_DAMAGE_ALL
+    assert st.player.block == V.W2_HYDRO_BLOCK
+    assert len(st.player.hand) == hand + V.W2_ELECTRO_DRAW
+    assert a.powers.get("weak") == 1
+    assert vs.wind_value["pyro_dmg"] == 2 * V.W2_PYRO_SWIRL_DAMAGE_ALL
+
+
+def test_rev22_s1_muster_costs_zero_and_is_a_revision_two_switch():
+    p = V.build_player(rev=2, fork=True, muster_cost=0)
+    muster = [c for c in p.draw_pile if c.id == "varka_knights_muster"]
+    assert muster and muster[0].cost == 0
+    with pytest.raises(ValueError):
+        V.build_player(muster_cost=0)
+    with pytest.raises(ValueError):
+        V.build_player(winds_set="W2")
