@@ -559,3 +559,35 @@ unchanged. Ruled, and built on `furina-stage-balance-1`:
 
 Row provenance: `docs/notes/prototype-surface-provenance.md`, "Furina, the
 Stage — balance pass one".
+
+## 16. The Spend pass (2026-09-28)
+
+After balance pass one, two Sonnet seats both cleared both A0 bosses
+comfortably. [USER]: "If Furina is still generating too much Fanfare and not
+enough damage, we could solve her problem by upping both the spend and output
+of her cards." So the five fixed-Spend cards cost more Fanfare and pay more.
+Each keeps its upgrade shape.
+
+| card | plain | Spend mode | upgraded |
+|---|---|---|---|
+| Quick Cue (0) | 3 damage | Spend 3: deal 11 and apply Hydro | 4 / 12 |
+| Spirited Aria (1) | 8 damage | Spend 3: deal 11 and draw 2 cards | 11 / 14, draw 2 both |
+| Tidal Flourish (1) | 5 to ALL | Spend 3: deal 10 and apply Hydro to ALL | 8 / 13 |
+| Interposition (1) | 5 Block | Spend 3: gain 13 | 8 / 16 |
+| Grand Entrance (2) | 12 damage | Spend 7: deal 32 | 16 / 36 |
+
+Spirited Aria's face now reads "Deal 8 damage. Spend 3: deal 11 and draw 2
+cards instead." Quick Cue's upgrade is +1 on both numbers (it was +1 and +2).
+Not changed: Curtain Rise (the starter is [USER]'s pick), Bravura, Bring the
+House Down, Let the People Rejoice, and the performers' acts.
+
+**Spend legibility.** Both seats: "Spend 2 wasn't offered on some turns and
+offered on others; I only learned by trying." The game offers a Spend mode
+only when the back performer can pay the whole price, and otherwise plays the
+plain mode without opening the chooser. The blind-seat page now prints the
+refused mode under its hand card, marked "unavailable" with the reason (for
+example "your back performer has 2 Fanfare"). The game's chooser is
+unchanged: it has no greyed-out state to show.
+
+Row provenance: `docs/notes/prototype-surface-provenance.md`, "Furina, the
+Stage — the Spend pass".

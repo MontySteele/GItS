@@ -1962,26 +1962,26 @@
    authored_by: [claude],
    replaces: usher_the_waves,
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {PlainDamage:diff()} damage to ALL enemies. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] to ALL instead.",
+   description: "Deal {PlainDamage:diff()} damage to ALL enemies. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] to ALL instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 5 damage to ALL enemies",
                effects: [{op: damage, amount: 5, target: all_enemies}]},
-              {label: "[gold]Spend[/gold] 2: deal 9 and apply [gold]Hydro[/gold] to ALL instead",
-               effects: [{op: stage_spend, amount: 2},
-                         {op: damage, amount: 9, target: all_enemies, applies_element: true}]}]}]}
+              {label: "[gold]Spend[/gold] 3: deal 10 and apply [gold]Hydro[/gold] to ALL instead",
+               effects: [{op: stage_spend, amount: 3},
+                         {op: damage, amount: 10,target: all_enemies, applies_element: true}]}]}]}
 
 - {id: proto_fs_interposition, name: "Interposition", character: furina,
    upgrade: {conditional_block: +3},
    authored_by: [claude],
    replaces: stage_lights,
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead.",
+   description: "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 3: gain {BranchBlock:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Gain 5 [gold]Block[/gold]",
                effects: [{op: block, amount: 5}]},
-              {label: "[gold]Spend[/gold] 2: gain 10 instead",
-               effects: [{op: stage_spend, amount: 2},
-                         {op: block, amount: 10}]}]}]}
+              {label: "[gold]Spend[/gold] 3: gain 13 instead",
+               effects: [{op: stage_spend, amount: 3},
+                         {op: block, amount: 13}]}]}]}
 
 - {id: proto_fs_scene_change, name: "Scene Change", character: furina,
    upgrade: {add: {op: draw, amount: 1}},
@@ -1998,13 +1998,13 @@
    authored_by: [claude],
    replaces: torrential_turn,
    register: salon, cost: 2, type: attack, rarity: uncommon,
-   description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead.",
+   description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 7: deal {BranchDamage:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 12 damage",
                effects: [{op: damage, amount: 12, target: enemy}]},
-              {label: "[gold]Spend[/gold] 5: deal 24 instead",
-               effects: [{op: stage_spend, amount: 5},
-                         {op: damage, amount: 24, target: enemy}]}]}]}
+              {label: "[gold]Spend[/gold] 7: deal 32 instead",
+               effects: [{op: stage_spend, amount: 7},
+                         {op: damage, amount: 32, target: enemy}]}]}]}
 
 - {id: proto_fs_ousia_surge, name: "Ousia Surge", character: furina,
    upgrade: {formula_base: +4},
@@ -2104,17 +2104,17 @@
              {op: stage_raise, amount: 2, seat: lead}]}
 
 - {id: proto_fs_quick_cue, name: "Quick Cue", character: furina,
-   upgrade: {conditional_damage: +1, conditional_then_damage: +1},
+   upgrade: {conditional_damage: +1},
    authored_by: [claude],
    replaces: applause_line,
    register: salon, cost: 0, type: attack, rarity: common,
-   description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] instead.",
+   description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 3 damage",
                effects: [{op: damage, amount: 3, target: enemy}]},
-              {label: "[gold]Spend[/gold] 2: deal 8 and apply [gold]Hydro[/gold] instead",
-               effects: [{op: stage_spend, amount: 2},
-                         {op: damage, amount: 8, target: enemy, applies_element: true}]}]}]}
+              {label: "[gold]Spend[/gold] 3: deal 11 and apply [gold]Hydro[/gold] instead",
+               effects: [{op: stage_spend, amount: 3},
+                         {op: damage, amount: 11,target: enemy, applies_element: true}]}]}]}
 
 - {id: proto_fs_step_forward, name: "Step Forward", character: furina,
    upgrade: {block: +2},
@@ -2414,13 +2414,13 @@
    authored_by: [claude],
    replaces: macaron_break,
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 2: also draw 2 cards.",
+   description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} and draw 2 cards instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 8 damage",
                effects: [{op: damage, amount: 8, target: enemy}]},
-              {label: "[gold]Spend[/gold] 2: deal 8 and draw 2 cards",
-               effects: [{op: stage_spend, amount: 2},
-                         {op: damage, amount: 8, target: enemy},
+              {label: "[gold]Spend[/gold] 3: deal 11 and draw 2 cards instead",
+               effects: [{op: stage_spend, amount: 3},
+                         {op: damage, amount: 11, target: enemy},
                          {op: draw, amount: 2}]}]}]}
 
 - {id: proto_fs_intermission, name: "Intermission", character: furina,

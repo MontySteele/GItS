@@ -312,6 +312,10 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         # board -- a reward, a shop shelf -- and empty on every card that is
         # not refusing.
         "unplayable_note": "",
+        # 2026-09-28 (the Spend pass): each Spend mode on this face the board
+        # cannot pay, with the reason. Filled by `_combat` where the Stage is
+        # on the board; empty on every other face.
+        "spend_unavailable": [],
         # `EB-181`. THE FIELD THAT DID NOT EXIST. Run B6 held a Sharp *Water's
         # Edge* and reached none of the fields that exist, because a card face
         # on this wire carried `is_upgraded` and nothing at all about an

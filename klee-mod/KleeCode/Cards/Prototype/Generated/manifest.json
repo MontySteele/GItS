@@ -776,8 +776,7 @@
       "formula_base": 4
     },
     "proto_fs_quick_cue": {
-      "conditional_damage": 1,
-      "conditional_then_damage": 1
+      "conditional_damage": 1
     },
     "proto_fs_raise_a_toast": {
       "cap": 2

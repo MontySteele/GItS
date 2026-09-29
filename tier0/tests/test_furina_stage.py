@@ -1429,7 +1429,8 @@ def test_arkhe_alignment_doubles_one_half_of_the_acts(arm):
 
 
 def test_the_batch_two_upgrades_bind(arm, monkeypatch):
-    """Quick Cue's two numbers move by different amounts (3/8 to 4/10), and a
+    """Quick Cue's two numbers move by one each (3/11 to 4/12 since the
+    2026-09-28 Spend pass; 3/8 to 4/10 before it), and a
     Stage Raise's printed N moves by its own key. Applied through the one
     applier both engines' deltas meet in, off the rows' own `upgrade:` blocks
     (the delta index is cached at the flag's value, so it is handed the rows
@@ -1444,7 +1445,7 @@ def test_the_batch_two_upgrades_bind(arm, monkeypatch):
         copy.deepcopy(loader.get_card("proto_fs_quick_cue")))
     modes = cue.effects[0]["modes"]
     assert modes[0]["effects"][0]["amount"] == 4
-    assert modes[1]["effects"][1]["amount"] == 10
+    assert modes[1]["effects"][1]["amount"] == 12
     hold = upgrades.apply_upgrade(
         copy.deepcopy(loader.get_card("proto_fs_hold_your_places")))
     assert hold.effects == [{"op": "block", "amount": 7},
@@ -1494,7 +1495,8 @@ def test_tutti_costs_two_and_one_upgraded():
 
 
 def test_the_balance_review_numbers_2026_09_26(arm, monkeypatch):
-    """Full House 3 (2 upgraded); Grand Entrance 12 / Spend 5 for 24; Ousia
+    """Full House 3 (2 upgraded); Grand Entrance 12 / Spend 7 for 32 (Spend
+    5 for 24 until the 2026-09-28 Spend pass); Ousia
     Surge and Pneuma Refrain upgrade by +4 on the formula's base, not by
     cost; A Rapt Audience applies 2, 3 upgraded."""
     import copy
@@ -1504,7 +1506,8 @@ def test_the_balance_review_numbers_2026_09_26(arm, monkeypatch):
     assert rows["proto_fs_full_house"]["upgrade"] == {"cost": -1}
     modes = rows["proto_fs_grand_entrance"]["effects"][0]["modes"]
     assert modes[0]["effects"][0]["amount"] == 12
-    assert modes[1]["effects"][1]["amount"] == 24
+    assert modes[1]["effects"][0]["amount"] == 7
+    assert modes[1]["effects"][1]["amount"] == 32
     rapt = rows["proto_fs_rapt_audience"]
     assert rapt["effects"][0]["amount"] == 2
     assert rapt["upgrade"] == {"power_amount": 1}
@@ -1732,7 +1735,7 @@ def test_tidal_flourish_applies_hydro_to_all_in_its_spend_mode(arm,
                    enemies=[_enemy(hp=60), _enemy(hp=60, name="paper2")])
     spent.player.stage = [["usher", 5]]
     _play_mode(spent, card, 1, monkeypatch)
-    assert all(e.hp == 60 - 9 for e in spent.enemies)
+    assert all(e.hp == 60 - 10 for e in spent.enemies)
     assert all(e.aura == "hydro" for e in spent.enemies)
 
 
@@ -1743,7 +1746,7 @@ def test_quick_cue_spend_mode_is_a_hydro_hit(arm, monkeypatch):
     spent = _state(player=_furina(element="hydro"), enemies=[_enemy(hp=60)])
     spent.player.stage = [["usher", 5]]
     _play_mode(spent, card, 1, monkeypatch)
-    assert spent.enemies[0].hp == 60 - 8
+    assert spent.enemies[0].hp == 60 - 11
     assert spent.enemies[0].aura == "hydro"
     # Into an Electro aura the hit itself reacts with what is there.
     primed = _state(player=_furina(element="hydro"), enemies=[_enemy(hp=60)])

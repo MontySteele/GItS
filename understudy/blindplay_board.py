@@ -734,6 +734,11 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # the body a performer hit by combat id and THE PAGE OWNS THE NAMES.
         name_stage_targets(stage, _enemies(state), combat["enemies"])
         combat["stage"] = stage
+        # 2026-09-28: a Spend mode the back performer cannot pay is printed
+        # under its card, marked, instead of vanishing (`spend_unavailable`).
+        for face in combat["hand"]:
+            face["spend_unavailable"] = spend_unavailable(
+                face["text"], stage, combat["you"]["relics"])
     # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
     # prints, with its HP.
     allies = _allies(p, (plans or {}).get("pet_entity_id"))
@@ -995,6 +1000,58 @@ def _seat_key(raw: Any) -> int | None:
         return None
     key = _int(raw, -1)
     return key if key >= 0 else None
+
+
+#: 2026-09-28 (the Spend pass). A Spend mode as a hand face prints it:
+#: "Spend 3: deal 11 and apply Hydro instead". The number right after the
+#: word, then a colon, is what tells it from Bring the House Down's "Spend all
+#: of ...", Klee's "Spend all your Sparks" and a meter price such as "Spend 6
+#: Charge:". The clause runs to the sentence's end.
+_SPEND_MODE = re.compile(r"\bSpend (\d+): ([^.\n]*)")
+
+#: The relic whose Spend pools across the stage (`FurinaStageLedger.
+#: SpendPools`), by its printed title.
+POOLED_SPEND_RELIC = "Palais Ledger"
+
+
+def spend_unavailable(text: str, stage: dict[str, Any] | None,
+                      relics: list[dict[str, Any]] | None = None) -> list[str]:
+    """Each Spend mode on this face the board cannot pay, with the reason.
+
+    THE DEFECT, both Sonnet seats after balance pass one (2026-09-28): "Spend
+    2 wasn't offered on some turns and offered on others; I only learned by
+    trying." The game offers a Spend mode only when the back performer can pay
+    its whole price (`FurinaStage.CanSpend`; sim twin
+    `furina_stage.can_pay`), and where it cannot the card plays its plain mode
+    without opening the chooser (`ModalChoice.TakenWithoutAsking`), so the
+    refused mode was never on any screen. The hand now prints it, marked.
+
+    Empty where the face has no Spend mode, where the stage is not in this
+    build, where the bar is not on the wire, and where the mode is payable.
+    """
+    if stage is None:
+        return []
+    seats = stage.get("seats") or []
+    pooled = any(r.get("name") == POOLED_SPEND_RELIC for r in (relics or []))
+    back = seats[-1].get("fanfare") if seats else None
+    total = sum(s.get("fanfare") or 0 for s in seats)
+    out = []
+    for m in _SPEND_MODE.finditer(text or ""):
+        price = int(m.group(1))
+        clause = f"Spend {price}: {m.group(2).strip()}"
+        if not seats:
+            why = "the stage is empty"
+        elif not isinstance(back, int):
+            continue
+        elif back >= price or (pooled and total >= price):
+            continue
+        elif pooled:
+            why = (f"your performers hold {total} Fanfare between them, "
+                   f"and {POOLED_SPEND_RELIC} pays from all of them")
+        else:
+            why = f"your back performer has {back} Fanfare"
+        out.append(f"{clause} — unavailable: {why}")
+    return out
 
 
 #: The wire's forecast target KINDS, in the words the page prints. Translated

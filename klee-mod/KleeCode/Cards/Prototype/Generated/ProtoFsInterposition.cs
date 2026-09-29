@@ -45,7 +45,7 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Interposition"),
-        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead."),
+        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 3: gain {BranchBlock:diff()} instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -55,7 +55,7 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Gain 5 [gold]Block[/gold]", "[gold]Spend[/gold] 2: gain 10 instead" };
+        new[] { "Gain 5 [gold]Block[/gold]", "[gold]Spend[/gold] 3: gain 13 instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -64,7 +64,7 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
         new List<DynamicVar>
         {
             new FoldedBlockVar("PlainBlock", 5m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 10m, ValueProp.Move)
+            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -84,19 +84,19 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
         var modeRules = new ModeRequirement?[]
         {
             null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 2),
+            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 3),
                                 "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 5 [gold]Block[/gold]", "[gold]Spend[/gold] 2: gain 10 instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 5 [gold]Block[/gold]", "[gold]Spend[/gold] 3: gain 13 instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 8m : 5m), ValueProp.Move), cardPlay);
         }
         else
         {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 2);
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 13m : 10m), ValueProp.Move), cardPlay);
+            await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 16m : 13m), ValueProp.Move), cardPlay);
         }
     }
 
@@ -137,7 +137,7 @@ public sealed class ProtoFsInterpositionModeA : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedBlockVar("PlainBlock", 5m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 10m, ValueProp.Move)
+            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
@@ -163,8 +163,8 @@ public sealed class ProtoFsInterpositionModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 2"),
-        ("description", "[gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead"),
+        ("title", "Spend 3"),
+        ("description", "[gold]Spend[/gold] 3: gain {BranchBlock:diff()} instead"),
     };
 
     public ProtoFsInterpositionModeB()
@@ -176,7 +176,7 @@ public sealed class ProtoFsInterpositionModeB : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedBlockVar("PlainBlock", 5m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 10m, ValueProp.Move)
+            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()

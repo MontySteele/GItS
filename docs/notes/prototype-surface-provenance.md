@@ -3734,6 +3734,46 @@ numbers. Design: `review/active/furina-stage-brief-2026-09-08.md`.
   `tier05.rewards.character_pool`). Both ids are in
   `docs/retired-card-ids.yaml`, so a save holding one still loads.
 
+## Furina, the Stage — the Spend pass (2026-09-28)
+
+After balance pass one (#740) two Sonnet seats both cleared both A0 bosses
+comfortably. [USER]: "If Furina is still generating too much Fanfare and not
+enough damage, we could solve her problem by upping both the spend and output
+of her cards." Design: `review/active/furina-stage-brief-2026-09-08.md` §16.
+Each row keeps its upgrade key; base / upgraded:
+
+- **Quick Cue** (`proto_fs_quick_cue`): 3, or Spend 3: deal 11 and apply
+  Hydro (was Spend 2: 8). Upgraded 4 / 12. The upgrade is
+  `{conditional_damage: +1}`; the `conditional_then_damage: +1` that made it
+  4 / 10 is gone, so both numbers move by one.
+- **Spirited Aria** (`proto_fs_spirited_aria`): 8, or Spend 3: deal 11 and
+  draw 2 cards (was Spend 2: 8 and draw 2). Upgraded 11 / 14, draw 2 both.
+  The face now prints the Spend mode's own damage: "Deal 8 damage. Spend 3:
+  deal 11 and draw 2 cards instead."
+- **Tidal Flourish** (`proto_fs_tidal_flourish`): 5 to ALL, or Spend 3: 10
+  to ALL and apply Hydro to ALL (was Spend 2: 9). Upgraded 8 / 13.
+- **Interposition** (`proto_fs_interposition`): 5 Block, or Spend 3: 13
+  (was Spend 2: 10). Upgraded 8 / 16.
+- **Grand Entrance** (`proto_fs_grand_entrance`): 12, or Spend 7: 32 (was
+  Spend 5: 24). Upgraded 16 / 36.
+
+Not changed: Curtain Rise (the starter; [USER]'s pick), Bravura, Bring the
+House Down, Let the People Rejoice, the performers' acts. The tier0 sim reads
+these rows (`furina_stage.spend_mode_amount` takes the price off the mode's
+head op), so it moved with them.
+
+**The blind-seat page prints a Spend mode it cannot pay.** Both seats: "Spend
+2 wasn't offered on some turns and offered on others; I only learned by
+trying." The game offers the mode only when the back performer can pay in
+full (`FurinaStage.CanSpend`; with Palais Ledger, the whole stage), and with
+one mode left it plays it without opening the chooser
+(`ModalChoice.TakenWithoutAsking`). `blindplay_board.spend_unavailable` now
+marks each such mode under its hand card, e.g. "Spend 3: deal 11 and apply
+Hydro instead — unavailable: your back performer has 2 Fanfare" (or "the stage
+is empty"). The game's chooser is unchanged: the 0.111.0 choose-a-card screen
+has no per-option disabled state (`ModalChoice.SelectAffordableMode`'s
+comment). Pinned by `tier0/tests/test_furina_spend_pass_2026_09_28.py`.
+
 ## Kokomi: Kurage's Oath now-line, and Plan lines on their own line (2026-09-28)
 
 **Kurage's Oath** (`proto_kk_kurages_oath`, her starter). [USER]: "The
