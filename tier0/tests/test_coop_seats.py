@@ -263,7 +263,7 @@ def test_the_run_ending_prints_clearly_and_ends_the_session(tmp_path):
                      dict(FURINA, hp=0, is_alive=False)]})
     page = blindplay.observe(over)
     assert page.startswith("TOOL-BLOCKED: game_over")
-    assert "The run ended on floor 7: defeat" in page
+    assert "The run ended on floor 7. You LOST the run." in page
     assert "## The other player" in page and "down (0 HP)" in page
     thread = blindplay.ScriptedThread([])
     s = blindplay.Session(thread, wire=blindplay.ScriptedWire([over]),

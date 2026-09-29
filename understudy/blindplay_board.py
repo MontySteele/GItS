@@ -516,6 +516,29 @@ def _orbs(p: dict[str, Any]) -> dict[str, Any] | None:
     return {"slots": _int(slots), "list": [r for r in rows if r["name"]]}
 
 
+def stage_acts(stage: dict[str, Any], p: dict[str, Any]) -> None:
+    """Each seat's act, in its badge's own words (2026-09-28, Furina seat).
+
+    "Chevreuse's effect is not printed on her card or on the stage panel; I
+    learned it only from the log." A performer's act lives on the badge the
+    mod hangs on its body (`FurinaStageBadges.cs`, titled with the
+    performer's name), and the stage block printed only name and Fanfare.
+    The badge rides on the performer's pet row (`stage_member`), so each seat
+    gains `act`, that badge's text; "" where the wire carries none.
+    """
+    badges: dict[str, str] = {}
+    for row in p.get("pets") or []:
+        if not isinstance(row, dict) or row.get("stage_member") is None:
+            continue
+        name = _text(row.get("name"))
+        for power in _powers(row):
+            if power["text"] and power["name"] == name:
+                badges[_text(row.get("entity_id"))] = power["text"]
+                break
+    for seat in stage["seats"]:
+        seat["act"] = badges.get(seat.get("entity_id") or "", "")
+
+
 def _allies(p: dict[str, Any], plan_pet: str | None) -> list[dict[str, Any]]:
     """The pets no kit block prints -- Osty -- with HP, Block and powers.
 
@@ -733,6 +756,7 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # `EB-743`, and it is `EB-329`'s rule a third arm over: the mod names
         # the body a performer hit by combat id and THE PAGE OWNS THE NAMES.
         name_stage_targets(stage, _enemies(state), combat["enemies"])
+        stage_acts(stage, p)
         combat["stage"] = stage
         # 2026-09-28: a Spend mode the back performer cannot pay is printed
         # under its card, marked, instead of vanishing (`spend_unavailable`).

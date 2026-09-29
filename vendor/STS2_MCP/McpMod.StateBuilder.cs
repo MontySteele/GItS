@@ -470,7 +470,12 @@ public static partial class McpMod
             result["game_over"] = new Dictionary<string, object?>
             {
                 ["message"] = "Run ended.",
-                ["options"] = new List<string> { "main_menu" }
+                ["options"] = new List<string> { "main_menu" },
+                // GItS LOCAL EDIT (Kokomi seat, 2026-09-28). A won run and a
+                // lost one printed the same page. The co-op builder's field
+                // (`McpMod.MultiplayerState.cs`), off the fact the game-over
+                // screen reads for its own banner (`CurrentRoom.IsVictoryRoom`).
+                ["result"] = (currentRoom?.IsVictoryRoom ?? false) ? "victory" : "defeat"
             };
         }
         else if (topOverlay is IOverlayScreen

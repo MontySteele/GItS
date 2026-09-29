@@ -601,7 +601,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "Play the card on the [gold]Bake-Kurage[/gold] and this happens ",
             "at the start of your next turn. Plans are carried out in the ",
             "order you made them.",
-            "heal N HP, never above the HP you entered ",
+            "heal N HP, but never above the HP you had ",
             # Furina, THE STAGE (`EB-723`; the brief's sec.12 names the
             # seven words and sec.3 states each rule). The reframe's four --
             # Deploy, Evoke, Drain, Encore -- left this list with the eleven
@@ -651,8 +651,8 @@ def test_the_mend_tip_carries_the_entry_hp_bound():
     nothing on screen said there was a ceiling; the sentence is
     `KokomiRules.Mend`'s own."""
     tips = TIPS_CS.read_text(encoding="utf-8")
-    assert "never above the HP you entered " in tips
-    assert "the fight with." in tips
+    assert "never above the HP you had " in tips
+    assert "at the start of this combat." in tips
 
     rule = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
             / "ProtoBakeKuragePower.cs").read_text(encoding="utf-8")

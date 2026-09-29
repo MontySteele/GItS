@@ -135,7 +135,7 @@ public class ArmKeywordTipTests
         // THE ROW'S SECOND HALF. The Casket read as broken at full HP because
         // a Mend at the ceiling does nothing and nothing on screen said there
         // was a ceiling. The sentence is `KokomiRules.Mend`'s own.
-        Assert.Contains("never above the HP you entered the fight with",
+        Assert.Contains("never above the HP you had at the start of this combat",
                         Printed("ForMend"));
     }
 

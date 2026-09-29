@@ -1456,8 +1456,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # `ArmKeywordTips.ForDusk`.
     "Dusk": ("Dusk: the Bake-Kurage carries this Plan out at the end of this "
              "turn, before enemies act."),
-    "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
-             "with."),
+    "Mend": ("Mend N: heal N HP, but never above the HP you had at the "
+             "start of this combat."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read

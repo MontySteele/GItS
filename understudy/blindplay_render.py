@@ -1131,6 +1131,27 @@ def _casket_aura_clause(you: dict[str, Any]) -> str:
     return ""
 
 
+#: The Tamakushi Casket's own clause, "... adds 1 to the Casket." Matched on
+#: the relic's words, `_casket_aura_clause`'s discipline, not on its name.
+_CASKET_COUNT_TEXT = re.compile(r"\bto the Casket\b", re.IGNORECASE)
+
+
+def _casket_count_line(you: dict[str, Any]) -> list[str]:
+    """`- Casket: N`, the count on the Tamakushi Casket's icon (2026-09-28).
+
+    The count is the relic's `counter` off the wire (`ShowCounter` /
+    `DisplayAmount`, `TamakushiCasket.cs`), the number the game draws on the
+    icon. Printed beside the Bake-Kurage because that is where a reader
+    deciding when to open the Casket is looking. `[]` with no such relic or
+    no counter on it (out of combat the icon draws none).
+    """
+    for relic in you.get("relics") or []:
+        counter = str(relic.get("counter") or "").strip()
+        if counter and _CASKET_COUNT_TEXT.search(str(relic.get("text") or "")):
+            return [f"- Casket: {counter}"]
+    return []
+
+
 def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
     """A rider the game folds into every row and pays out once.
 
@@ -2068,6 +2089,10 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
         out.append("- " + " · ".join(reserve))
     if not seats:
         out.append(STAGE_EMPTY_LINE)
+    # 2026-09-28 (Furina seat): what each performer's act does, in its
+    # badge's words. Chevreuse's Energy was on no line of the panel.
+    out += [f"- **{row['name']}** — {row['act']}"
+            for row in seats if row.get("act")]
     out += _render_stage_forecast(stage.get("forecast"))
     return out
 
@@ -2578,14 +2603,21 @@ def _deck_move_lines(change: dict[str, Any]) -> list[str]:
     return out
 
 
+#: 2026-09-28 (Kokomi seat): the bridge's `game_over.result`, said in words.
+_RUN_RESULT = {"victory": ". You WON the run.",
+               "defeat": ". You LOST the run."}
+
+
 def render(obs: dict[str, Any]) -> str:
     """The observation as the page the tester is handed. Same content."""
     st = obs["state_type"]
     if obs["blocked"]:
         body = [f"TOOL-BLOCKED: {st}", "", obs["blocked"]]
         if obs["screen"] == "game_over":
+            result = obs["result"]
             body += ["", f"The run ended on floor {obs['floor']}"
-                         + (f": {obs['result']}" if obs["result"] else ".")]
+                         + _RUN_RESULT.get(result.lower(),
+                                           f": {result}" if result else ".")]
             if obs.get("summary"):
                 body += ["", "What the run ended with:", ""] + obs["summary"]
         # CO-OP: the other player's side of the same ending. Absent on every
@@ -2742,6 +2774,10 @@ def render(obs: dict[str, Any]) -> str:
             # else.
             pl = c["plans"]
             out += ["", f"## The {pl['pet_name']}", ""]
+            # 2026-09-28 (Kokomi seat): the Casket's count, where the Plans
+            # that fill it are read. It was only the relic row's "(N)", and a
+            # seat timing Open the Casket read the Plan block and never saw it.
+            out += _casket_count_line(you)
             if pl["pet"]:
                 out.append(f"- The {pl['pet_name']} is on the field for the "
                            "whole fight. Enemies cannot touch it. Play a card "
@@ -2817,8 +2853,14 @@ def render(obs: dict[str, Any]) -> str:
                                   "enemies act" if _is_dusk(e) else "")
                                + past_lethal.get(i - 1, ""))
                 if pl["twice"]:
-                    out.append("- The jellyfish carries out your FIRST Plan "
-                               "twice while Nereid's Ascension lasts.")
+                    # 2026-09-28 (Kokomi seat): with a Dusk Plan in the
+                    # list above, "your FIRST Plan" read as entry 1. The Rare
+                    # doubles the first entry of EACH drain
+                    # (`KokomiPlan.Drain`): the morning's and the Dusk's.
+                    out.append("- Nereid's Ascension: the jellyfish carries "
+                               "out your FIRST Plan twice at the start of "
+                               "your turn, and your first Dusk Plan twice "
+                               "at the end of it.")
             # `EB-329`: which of the two numbers under a Plan is which, once,
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):

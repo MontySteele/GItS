@@ -524,13 +524,15 @@ public static class ArmKeywordTips
     /// nothing on screen said there was a ceiling. The sentence is
     /// <see cref="KokomiRules.Mend"/>'s own ("never above the HP you entered
     /// the fight with"), so the rule and its only explanation are one line
-    /// apart.
+    /// apart. 2026-09-28 (Kokomi seat): "the HP you entered the fight with"
+    /// was read beside Yumemizuki's "HP over 70%" as a Max-HP figure; "the HP
+    /// you had at the start of this combat" names the cap as a moment.
     /// </summary>
     public static IEnumerable<IHoverTip> ForMend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MendKey,
-            "[gold]Mend N[/gold]: heal N HP, never above the HP you entered "
-          + "the fight with.");
+            "[gold]Mend N[/gold]: heal N HP, but never above the HP you had "
+          + "at the start of this combat.");
 
     /// <summary>
     /// `EB-625`. WHAT THE CASKET IS, on every face that names it -- by its
