@@ -1005,8 +1005,10 @@ def test_the_pool_seam_swaps_its_rows_at_the_same_rarity(arm):
     subs = loader.pool_substitutions("furina")
     # batch one, R276's batch two, the Guest Cast (2026-09-25) and the
     # supporting pool's 27 that replace a row and Sold Out (2026-09-26),
-    # less Gentilhomme Usher and Understudy (balance review, 2026-09-28)
-    assert len(subs) == 14 + 15 + 8 + 27 + 1 - 2
+    # less Gentilhomme Usher and Understudy (balance review, 2026-09-28),
+    # less Scene Change, Gala Dinner and A Rapt Audience (audit pass,
+    # 2026-09-29)
+    assert len(subs) == 14 + 15 + 8 + 27 + 1 - 2 - 3
     assert not set(subs) & set(FS.POOL_DROPS)
     rarity = {r["id"]: r["rarity"] for r in _sheet_rows("furina-cards.yaml")}
     rarity.update({r["id"]: r["rarity"] for r in _proto_rows()})
@@ -1033,8 +1035,9 @@ def test_every_stage_row_is_named_by_one_of_the_two_maps():
     # batch one, R276's batch two, the Guest Cast (2026-09-25), the
     # supporting pool's 28 and Sold Out (2026-09-26), and Regal Bearing
     # (the starter ruling, 2026-09-28), less Gentilhomme Usher and
-    # Understudy (the balance review, 2026-09-28)
-    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1 - 2
+    # Understudy (the balance review, 2026-09-28), less Scene Change, Gala
+    # Dinner and A Rapt Audience (the audit pass, 2026-09-29)
+    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1 - 2 - 3
     # THE CO-OP SET's three are the MULTIPLAYER TIER: offered only in co-op,
     # outside the pool, replacing no shipped row -- so neither map names
     # them, and the tier's own mirror does.
@@ -1497,8 +1500,9 @@ def test_tutti_costs_two_and_one_upgraded():
 def test_the_balance_review_numbers_2026_09_26(arm, monkeypatch):
     """Full House 3 (2 upgraded); Grand Entrance 12 / Spend 7 for 32 (Spend
     5 for 24 until the 2026-09-28 Spend pass); Ousia
-    Surge and Pneuma Refrain upgrade by +4 on the formula's base, not by
-    cost; A Rapt Audience applies 2, 3 upgraded."""
+    Surge and Pneuma Refrain upgrade on the formula's base, not by cost
+    (since the 2026-09-29 audit pass: base 3, 6 upgraded). A Rapt Audience
+    left the pool with the same pass."""
     import copy
     from tier0.content import upgrades
     rows = {r["id"]: r for r in _proto_rows()}
@@ -1508,9 +1512,6 @@ def test_the_balance_review_numbers_2026_09_26(arm, monkeypatch):
     assert modes[0]["effects"][0]["amount"] == 12
     assert modes[1]["effects"][0]["amount"] == 7
     assert modes[1]["effects"][1]["amount"] == 32
-    rapt = rows["proto_fs_rapt_audience"]
-    assert rapt["effects"][0]["amount"] == 2
-    assert rapt["upgrade"] == {"power_amount": 1}
     monkeypatch.setattr(upgrades, "_upgrade_index", lambda: {
         cid: dict(rows[cid]["upgrade"])
         for cid in ("proto_fs_ousia_surge", "proto_fs_pneuma_refrain")})
@@ -1519,7 +1520,7 @@ def test_the_balance_review_numbers_2026_09_26(arm, monkeypatch):
         card = upgrades.apply_upgrade(copy.deepcopy(loader.get_card(cid)))
         assert card.cost == 1
         assert card.effects[0]["op"] == op
-        assert card.effects[0]["amount_formula"]["base"] == 4
+        assert card.effects[0]["amount_formula"]["base"] == 6
 
 
 # ---------------------------------------------------------------------------

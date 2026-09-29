@@ -1992,7 +1992,7 @@
    description: "Your [gold]back performer[/gold] gains 5 [gold]Fanfare[/gold].",
    effects: [{op: stage_raise, amount: 5}]}
 
-# --- the Commons (six) ---
+# --- the Commons (five since the 2026-09-29 audit pass) ---
 # 2026-09-28 balance review: Gentilhomme Usher (the card) and Understudy left
 # the pool, 80 -> 78. Provenance: prototype-surface-provenance.md.
 
@@ -2052,13 +2052,8 @@
                effects: [{op: stage_spend, amount: 3},
                          {op: block, amount: 13}]}]}]}
 
-- {id: proto_fs_scene_change, name: "Scene Change", character: furina,
-   upgrade: {add: {op: draw, amount: 1}},
-   authored_by: [claude],
-   replaces: held_breath,
-   register: salon, cost: 0, type: skill, rarity: common,
-   description: "Move your [gold]front performer[/gold] to the back.",
-   effects: [{op: stage_scene_change}]}
+# Scene Change was cut by the audit pass (2026-09-29): a third rotation
+# Common beside Plot Twist and Step Forward. Provenance note, same date.
 
 # --- the Uncommons (five) ---
 
@@ -2075,24 +2070,26 @@
                effects: [{op: stage_spend, amount: 7},
                          {op: damage, amount: 32, target: enemy}]}]}]}
 
+# Audit pass (2026-09-29): a base of 3 (6 upgraded), was 0 (4 upgraded).
 - {id: proto_fs_ousia_surge, name: "Ousia Surge", character: furina,
-   upgrade: {formula_base: +4},
+   upgrade: {formula_base: +3},
    authored_by: [claude],
    replaces: crescendo,
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal damage equal to your [gold]back performer[/gold]'s [gold]Fanfare[/gold]{IfUpgraded:show:, plus 4|}.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Fanfare[/gold] on your [gold]back performer[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage,
-              amount_formula: {base: 0, per: 1, count: stage_back_fanfare},
+              amount_formula: {base: 3, per: 1, count: stage_back_fanfare},
               target: enemy}]}
 
+# Audit pass (2026-09-29): a base of 3 (6 upgraded), was 0 (4 upgraded).
 - {id: proto_fs_pneuma_refrain, name: "Pneuma Refrain", character: furina,
-   upgrade: {formula_base: +4},
+   upgrade: {formula_base: +3},
    authored_by: [claude],
    replaces: many_waters_melody,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain [gold]Block[/gold] equal to your [gold]front performer[/gold]'s [gold]Fanfare[/gold]{IfUpgraded:show:, plus 4|}.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Fanfare[/gold] on your [gold]front performer[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: block,
-              amount_formula: {base: 0, per: 1, count: stage_lead_fanfare}}]}
+              amount_formula: {base: 3, per: 1, count: stage_lead_fanfare}}]}
 
 - {id: proto_fs_bis, name: "Bis!", character: furina,
    upgrade: {cost: -1},
@@ -2102,15 +2099,16 @@
    description: "Your [gold]front performer[/gold] acts twice.",
    effects: [{op: stage_perform_lead, amount: 2}]}
 
+# Audit pass (2026-09-29): Block equal to twice the Fanfare, was once.
 - {id: proto_fs_final_bow, name: "Final Bow", character: furina,
    upgrade: {remove: exhaust},
    authored_by: [claude],
    replaces: take_your_bow,
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Your [gold]back performer[/gold] [gold]Bow[/gold]s and leaves. Gain [gold]Block[/gold] equal to its [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   description: "Your [gold]back performer[/gold] [gold]Bow[/gold]s and leaves. Gain [gold]Block[/gold] equal to twice its [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: stage_final_bow},
              {op: block,
-              amount_formula: {base: 0, per: 1, count: stage_spent}}]}
+              amount_formula: {base: 0, per: 2, count: stage_spent}}]}
 
 # --- the Rare (one) ---
 
@@ -2133,13 +2131,14 @@
 
 # --- the Commons (six) ---
 
+# Audit pass (2026-09-29): 8 damage (11 upgraded), was 6 (9).
 - {id: proto_fs_improvised_number, name: "Improvised Number", character: furina,
    upgrade: {damage: +3},
    authored_by: [claude],
    replaces: breathless,
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal 6 damage. If no one is on stage, Summon a random performer.",
-   effects: [{op: damage, amount: 6, target: enemy},
+   description: "Deal 8 damage. If no one is on stage, Summon a random performer.",
+   effects: [{op: damage, amount: 8, target: enemy},
              {op: conditional, if: stage_empty,
               then: [{op: stage_summon, member: random}]}]}
 
@@ -2153,14 +2152,15 @@
              {op: conditional, if: stage_empty,
               then: [{op: draw, amount: 2}]}]}
 
+# Audit pass (2026-09-29): 5 per performer (7 upgraded), was 4 (5).
 - {id: proto_fs_ensemble_piece, name: "Ensemble Piece", character: furina,
-   upgrade: {formula_per: +1},
+   upgrade: {formula_per: +2},
    authored_by: [claude],
    replaces: house_call,
    register: salon, cost: 1, type: attack, rarity: common,
    description: "Deal {ExtraDamage:diff()} damage for each performer on stage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage,
-              amount_formula: {base: 0, per: 4, count: stage_count},
+              amount_formula: {base: 0, per: 5, count: stage_count},
               target: enemy}]}
 
 - {id: proto_fs_hold_your_places, name: "Hold Your Places", character: furina,
@@ -2194,15 +2194,10 @@
    effects: [{op: stage_step_forward},
              {op: block, amount: 3}]}
 
-# --- the Uncommons (seven) ---
+# --- the Uncommons (five since the 2026-09-29 audit pass) ---
 
-- {id: proto_fs_gala_dinner, name: "Gala Dinner", character: furina,
-   upgrade: {stage_raise: +1},
-   authored_by: [claude],
-   replaces: dress_rehearsal,
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Each performer gains 2 [gold]Fanfare[/gold].",
-   effects: [{op: stage_raise, amount: 2, seat: all}]}
+# Gala Dinner was cut by the audit pass (2026-09-29): a generation card no
+# seat record named. Provenance note, same date.
 
 - {id: proto_fs_double_casting, name: "Double Casting", character: furina,
    upgrade: {cost: -1},
@@ -2249,14 +2244,8 @@
    effects: [{op: apply_power, power: fs_thunderous_applause, amount: 1,
               target: self}]}
 
-- {id: proto_fs_rapt_audience, name: "A Rapt Audience", character: furina,
-   upgrade: {power_amount: +1},
-   authored_by: [claude],
-   replaces: crowd_work,
-   register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever an enemy hits your [gold]front performer[/gold], your [gold]back performer[/gold] gains 2 [gold]Fanfare[/gold]. Needs 2 performers.",
-   effects: [{op: apply_power, power: fs_rapt_audience, amount: 2,
-              target: self}]}
+# A Rapt Audience was cut by the audit pass (2026-09-29): a generation
+# power no seat record named. Provenance note, same date.
 
 # --- the Rares (two) ---
 
@@ -2510,9 +2499,9 @@
              {op: conditional, if: stage_front_hit,
               then: [{op: damage, amount: 7, target: enemy}]}]}
 
-# (renamed 2026-09-26: title clash) Showstopper on the paper; the shipped
-# Furina sheet prints a Showstopper of its own. "Spend" is not golded: see
-# the provenance note (2026-09-26 seat round).
+# (renamed 2026-09-26: title clash) Showstopper on the paper. "Spend" is not
+# golded (provenance, 2026-09-26 seat round). Audit pass (2026-09-29): 3 to
+# ALL per point (4 upgraded), was 2 (3).
 - {id: proto_fs_bring_the_house_down, name: "Bring the House Down", character: furina,
    upgrade: {formula_per: 1},
    authored_by: [claude],
@@ -2521,7 +2510,7 @@
    description: "Your [gold]front performer[/gold] loses all its [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage to ALL enemies per point lost.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_front_all},
              {op: damage,
-              amount_formula: {base: 0, per: 2, count: stage_spent},
+              amount_formula: {base: 0, per: 3, count: stage_spent},
               target: all_enemies}]}
 
 # --- 5. Bows and encores ---
@@ -2587,13 +2576,14 @@
    effects: [{op: apply_power, power: fs_tide_of_applause, amount: 2,
               target: self}]}
 
+# Audit pass (2026-09-29): 12 to ALL (16 upgraded), was 10 (14).
 - {id: proto_fs_grand_deluge, name: "Grand Deluge", character: furina,
    upgrade: {damage: 4},
    authored_by: [claude],
    replaces: high_tide,
    register: salon, cost: 2, type: attack, rarity: rare,
-   description: "Deal 10 damage to ALL enemies and apply [gold]Hydro[/gold]. If this triggers an [gold]Elemental Reaction[/gold], each performer gains 2 [gold]Fanfare[/gold].",
-   effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true},
+   description: "Deal 12 damage to ALL enemies and apply [gold]Hydro[/gold]. If this triggers an [gold]Elemental Reaction[/gold], each performer gains 2 [gold]Fanfare[/gold].",
+   effects: [{op: damage, amount: 12, target: all_enemies, applies_element: true},
              {op: conditional, if: reaction_triggered_by_this,
               then: [{op: stage_raise, amount: 2, seat: all}]}]}
 

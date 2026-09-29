@@ -136,8 +136,9 @@ def test_grand_deluges_hit_is_the_reaction_that_pays_the_performers(arm):
     st = _state(stage=(("usher", 3), ("crabaletta", 1)),
                 enemies=[_enemy(aura="pyro"), _enemy(name="b")])
     _play(st, "proto_fs_grand_deluge")
-    assert [e.hp for e in st.enemies] == [200 - int(10 * C.VAPORIZE_MULT),
-                                         200 - 10]
+    # 12 to ALL since the 2026-09-29 audit pass (was 10).
+    assert [e.hp for e in st.enemies] == [200 - int(12 * C.VAPORIZE_MULT),
+                                         200 - 12]
     assert [e.aura for e in st.enemies] == [None, "hydro"]
     assert st.player.stage == [["usher", 5], ["crabaletta", 3]]
 

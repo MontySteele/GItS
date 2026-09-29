@@ -87,8 +87,23 @@
       "owner": "furina"
     },
     {
+      "id": "KLEEMOD-PROTO_FS_GALA_DINNER",
+      "class": "RetiredProtoFsGalaDinner",
+      "owner": "furina"
+    },
+    {
       "id": "KLEEMOD-PROTO_FS_GENTILHOMME_USHER",
       "class": "RetiredProtoFsGentilhommeUsher",
+      "owner": "furina"
+    },
+    {
+      "id": "KLEEMOD-PROTO_FS_RAPT_AUDIENCE",
+      "class": "RetiredProtoFsRaptAudience",
+      "owner": "furina"
+    },
+    {
+      "id": "KLEEMOD-PROTO_FS_SCENE_CHANGE",
+      "class": "RetiredProtoFsSceneChange",
       "owner": "furina"
     },
     {

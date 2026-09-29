@@ -48,14 +48,14 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Final Bow"),
-        ("description", "Your [gold]back performer[/gold] [gold]Bow[/gold]s and leaves. Gain [gold]Block[/gold] equal to its [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "Your [gold]back performer[/gold] [gold]Bow[/gold]s and leaves. Gain [gold]Block[/gold] equal to twice its [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new CalculationExtraVar(1m),
+            new CalculationExtraVar(2m),
             new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrBackFanfare(card))
         };
 

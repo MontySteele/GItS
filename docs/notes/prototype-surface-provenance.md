@@ -3789,6 +3789,46 @@ direction "upping both the spend and output of her cards" (the Spend pass,
 above, which had left Bravura unchanged). The tier0 sim reads this row, so it
 moved with it. Design: `review/active/furina-stage-brief-2026-09-08.md` §16.
 
+## Furina, the Stage — the audit pass (2026-09-29)
+
+[USER]: "a dedupe / audit / balance pass on Furina, aimed at polishing the
+existing core systems". Designed by the main session off a factual packet
+(the sheet and twelve seat records: which cards the seats named, and damage
+and Block per Energy); the reasons, card by card, are in
+`review/active/furina-stage-brief-2026-09-08.md` §17.
+
+**Cut, 78 -> 75:** `proto_fs_gala_dinner` (no seat record named it),
+`proto_fs_rapt_audience` (the same) and `proto_fs_scene_change` (the third
+rotation Common; [USER]'s "stage rotation spam"). Plumbing as for the
+balance pass's two: the rows leave the sheet and `FurinaStageRoster`'s
+append list; their shipped rows (`dress_rehearsal`, `crowd_work`,
+`held_breath`) stay out of the offer through the `SwapOfferedRows` filter,
+and the sim's `furina_stage.POOL_SUBS` loses the three pairs while
+`POOL_DROPS` gains the three shipped ids. The ids are tombstoned in
+`retired-card-ids.yaml` (hidden aliases), and the three painted portraits are
+`art_coverage.KNOWN_STALE`. The engine verbs stay: `stage_scene_change`,
+`seat: all` (Grand Deluge still raises all) and `RaptAudiencePower` (its
+C# and sim pins still run).
+
+**Numbers.** Ensemble Piece `per: 5`, upgrade `formula_per: +2` (5 per
+performer, 7 upgraded; was 4 and 5). Improvised Number 8 (11; was 6 and 9).
+Ousia Surge `base: 3`, upgrade `formula_base: +3`, face "Deal
+{CalculationBase} damage, plus {ExtraDamage} for each Fanfare on your back
+performer." (base 6 upgraded; was 0 plus the Fanfare, base 4 upgraded, and a
+face with an `IfUpgraded` "plus 4"). Pneuma Refrain the same shape on Block:
+"Gain {CalculationBase} Block, plus {CalculationExtra} for each Fanfare on
+your front performer." Final Bow `per: 2`, "Gain Block equal to twice its
+Fanfare."; the upgrade still removes Exhaust. Bring the House Down `per: 3`
+(4 upgraded; was 2 and 3). Grand Deluge 12 to ALL (16; was 10 and 14). Each
+formula face keeps its in-combat line. The tier0 sim reads these rows, so it
+moved with them; the C# is regenerated.
+
+**Frozen on a boss.** The Frozen preview (`KLEEMOD-FROZEN_PREVIEW`) and the
+seat page's Frozen row end "In a boss fight, only minions can be Frozen; the
+others become Vulnerable instead." The page's boss clause is that sentence now,
+on the row in every room (it names the room, so it is true on each) rather
+than appended in a boss room only.
+
 ## Kokomi: Kurage's Oath now-line, and Plan lines on their own line (2026-09-28)
 
 **Kurage's Oath** (`proto_kk_kurages_oath`, her starter). [USER]: "The

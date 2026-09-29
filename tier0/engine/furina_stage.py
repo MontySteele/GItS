@@ -256,13 +256,13 @@ PROMOTED_STARTERS: dict[str, str] = {
 # the round packet's own "what this round cannot see".
 # ----------------------------------------------------------------------
 POOL_SUBS: dict[str, str] = {
-    # --- Commons (six; `POOL_DROPS` names the two the balance review cut) ---
+    # --- Commons (five; `POOL_DROPS` names the two the balance review cut
+    # and Scene Change, cut by the 2026-09-29 audit pass) ---
     "surintendante_chevalmarin": "proto_fs_surintendante_chevalmarin",
     "mademoiselle_crabaletta": "proto_fs_mademoiselle_crabaletta",
     "blocking_notes": "proto_fs_warm_reception",       # 1 Skill for 1 Skill
     "usher_the_waves": "proto_fs_tidal_flourish",      # 1 Attack for 1 Attack
     "stage_lights": "proto_fs_interposition",          # 1 Skill for 1 Skill
-    "held_breath": "proto_fs_scene_change",            # 1 Skill -> a 0 Skill
     # --- Uncommons (five) ---
     "torrential_turn": "proto_fs_grand_entrance",      # 2 Attack for 2 Attack
     "crescendo": "proto_fs_ousia_surge",               # 1 Attack for 1 Attack
@@ -280,14 +280,12 @@ POOL_SUBS: dict[str, str] = {
     "lasting_impression": "proto_fs_hold_your_places",  # 1 Skill for 1 Skill
     "applause_line": "proto_fs_quick_cue",              # 0 Attack for 0 Attack
     "swelling_overture": "proto_fs_step_forward",       # 1 Skill -> a 0 Skill
-    # --- Uncommons (seven) ---
-    "dress_rehearsal": "proto_fs_gala_dinner",          # 1 Skill for 1 Skill
+    # --- Uncommons (five; the audit pass cut Gala Dinner and A Rapt Audience) ---
     "matinee_performance": "proto_fs_double_casting",   # 1 Skill for 1 Skill
     "full_ensemble": "proto_fs_tutti",                  # 2 Skill -> a 1 Skill
     "dramatic_entrance": "proto_fs_bravura",            # 1 Attack for 1 Attack
     "fortissimo_guard": "proto_fs_full_house",          # 2 Power for 2 Power
     "standing_ovation": "proto_fs_thunderous_applause", # 1 Power for 1 Power
-    "crowd_work": "proto_fs_rapt_audience",             # 1 Power for 1 Power
     # --- Rares (two) ---
     "endless_waltz": "proto_fs_arkhe_alignment",        # 2 Power for 2 Power
     "prima_donna": "proto_fs_five_century_act",         # 2 Power for 2 Power
@@ -367,6 +365,13 @@ POOL_ADDS: tuple[str, ...] = (
 POOL_DROPS: tuple[str, ...] = (
     "gentilhomme_usher",
     "suffering_for_art",
+    # THE AUDIT PASS (2026-09-29, [USER]: "a dedupe / audit / balance pass on
+    # Furina, aimed at polishing the existing core systems"): Scene Change,
+    # Gala Dinner and A Rapt Audience left the pool (78 -> 75). C# twin: the
+    # `SwapOfferedRows` filter names their shipped rows too.
+    "held_breath",
+    "dress_rehearsal",
+    "crowd_work",
 )
 
 

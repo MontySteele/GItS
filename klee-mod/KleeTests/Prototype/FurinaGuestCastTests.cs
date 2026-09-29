@@ -487,6 +487,13 @@ public class FurinaGuestCastTests
         B("full house pays twice",
           new[] { ("neuvillette", 6), ("usher", 3), ("crabaletta", 4) }, 1,
           new int[0], new int?[] { null, 3, 4 }, 6, 0, 0),
+        // 2026-09-29 (Furina seat, Vantom, run FS3EL3M3NTS4): the preview
+        // was read as "8 Hydro to ALL, twice" with a repeat that "could not
+        // pay". The forecast pays each repeat on the clone before it counts
+        // it: at 5 Neuvillette pays once, keeps 2, and the repeat is refused.
+        B("full house, the repeat cannot pay",
+          new[] { ("usher", 3), ("crabaletta", 4), ("neuvillette", 5) }, 1,
+          new int[0], new int?[] { 3, 4, 2 }, 6, 0, 0),
         B("the fade is not a hit",
           new[] { ("usher", 3), ("wriothesley", 10) }, 0, new int[0],
           new int?[] { 3, 8 }, 3, 0, 0),

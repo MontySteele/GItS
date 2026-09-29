@@ -2471,13 +2471,17 @@ REACTION_KEYWORDS: dict[str, str] = {
                         "On its panel that is the "
                         "Poison stack: stacks add, and it ticks before the "
                         "enemy acts."),
-    # `EB-366` SPLIT THE BOSS CLAUSE OFF THIS ROW. See `FROZEN_BOSS_CLAUSE`.
+    # `EB-366` SPLIT THE BOSS CLAUSE OFF THIS ROW; 2026-09-29 PUT ONE SHORT
+    # SENTENCE BACK, qualified by the room so an elite page cannot misread it.
+    # See `FROZEN_BOSS_CLAUSE`.
     # `EB-517` PUT THE WINDOW ON IT, in the C# and here in one commit: the two
     # clauses read as independent riders and are one, because the freeze ticks
     # down at the end of the turn the halved action is taken on.
     "Frozen": ("Hydro on a Cryo aura, or Cryo on a Hydro aura. Its next "
                "action deals 50% less damage. Until it acts, the next Attack "
-               "on it Shatters for 6 unblockable damage."),
+               "on it Shatters for 6 unblockable damage. In a boss fight, "
+               "only minions can be Frozen; the others become Vulnerable "
+               "instead."),
     # `EB-465`'s two, and they are the mod's own preview sentences the way the
     # six above are. `Swirl` is `ARM_KEYWORDS`' row VERBATIM rather than a
     # second copy of it, because ten Universals print the word as a verb and
@@ -2705,9 +2709,14 @@ _AURA_NAME_RE = re.compile(r"^(Pyro|Hydro|Electro|Cryo) Aura$")
 # `RoomType`) -- which is the same fact the mod's predicate reads. The minion
 # half rides with it, because in a boss room it is the half that decides which
 # body in front of you freezes.
-FROZEN_BOSS_CLAUSE = (" Bosses can't be Frozen, so a boss gains 2 "
-                      "Vulnerable instead. A Minion beside the boss still "
-                      "Freezes.")
+#
+# 2026-09-29 (Furina seat, act 1 boss): "'Frozen' on Vantom did not stop its
+# attacks (26 landed the next turn)". The Frozen ROW now says it in one
+# sentence qualified by the room
+# ("In a boss fight, ..."), which is true on every page, and this is that
+# sentence rather than a second, room-appended copy of it.
+FROZEN_BOSS_CLAUSE = (" In a boss fight, only minions can be Frozen; the "
+                      "others become Vulnerable instead.")
 
 # The room the boss substitution applies in, off the wire's `state_type`.
 BOSS_ROOM = "boss"
@@ -3185,10 +3194,10 @@ def _keyword_rows(obs: dict[str, Any],
     A word already defined by an earlier source is not defined twice, and the
     arms' own copies win: they are the sentences held in step with the C#.
 
-    `EB-366`: the reaction rows are room-aware in exactly one place. Frozen's
-    boss substitution is a rule about a BOSS ROOM, so it prints in one and
-    nowhere else -- an elite that is about to freeze must not be read a line
-    saying it cannot.
+    `EB-366`: an elite that is about to freeze must not be read a line
+    saying it cannot. Since 2026-09-29 the Frozen row says the boss rule in
+    one sentence that names the room ("In a boss fight, ..."), so it prints
+    on every page and is true on each.
     """
     # `EB-404`: BODIES AND PRINTED RULES, NEVER TITLES -- see `_body_strings`.
     # `EB-407`: AND THE METER NAMES, which are dict KEYS and so reach no value
@@ -3262,7 +3271,6 @@ def _keyword_rows(obs: dict[str, Any],
         # supply both of a pair. The umbrella is not a reaction -- it is the
         # aura rule, and a mono-element deck needs it most -- so when nothing
         # is reachable it carries the one line saying so instead.
-        boss = str(obs.get("state_type") or "") == BOSS_ROOM
         reach = _reachable_elements(obs)
         live = [word for word in REACTION_KEYWORDS
                 if word in REACTION_ELEMENTS
@@ -3301,8 +3309,7 @@ def _keyword_rows(obs: dict[str, Any],
         # of its own, which is this row's sentence.
         named = {row["name"] for row in rows}
         rows += [{"name": word,
-                  "text": REACTION_KEYWORDS[word]
-                  + (FROZEN_BOSS_CLAUSE if boss and word == "Frozen" else "")}
+                  "text": REACTION_KEYWORDS[word]}
                  for word in live if word not in named]
     # `EB-537`. A WORD A FACE ON THIS SCREEN PRINTS IS DEFINED, REACHABLE OR
     # NOT, and this is the rule the block above needs beside it rather than
