@@ -42,6 +42,34 @@ READINGS TAKEN WHERE THE PAPER IS SILENT (each is flagged in the report):
     target can overwrite a later target's different aura before it is hit.
   * An Absorb grants its Wind AFTER its own Swirl resolves, so the Wind it
     grants does not pay on the Swirl that granted it.
+
+REVISION TWO (paper sec.9, 2026-09-29), a second arm beside revision one,
+chosen per fight by `build_player(rev=2)` (revision one stays the default and
+is unchanged):
+  * ABSORB IS NOT A SWIRL. An Absorb (a card that prints it, or Boreas's Fang
+    when the pilot opts in) on a FRESH aura whose Wind is not held takes the
+    aura off, grants the Wind, spreads nothing and deals no flat 2; the card's
+    own damage lands. On no fresh aura the hit is the shared rule.
+  * READING (sec.9.1: an Absorb on "an element whose Wind you hold, does only
+    the card's damage"): `ABSORB_HELD_SWIRLS` True (default) lets an Anemo
+    Absorb card on a held Wind's fresh aura fall through to the shared rule,
+    i.e. SWIRL it; False is the literal reading (the aura is untouched).
+  * SWIRL is the shared rule, untouched (a spread copy replaces a different
+    aura the other enemy wore).
+  * WINDS all pay on a Swirl: Pyro 3 to the enemy hit (element-less, the flat
+    2's path); Hydro 3 Block; Electro draws 1 on the first Swirl each turn;
+    Cryo 1 Weak to the enemy hit.
+  * BOREAS'S FANG is optional: once each turn the pilot may set `fang_want`
+    on an Attack; its first hit on a fresh aura then Absorbs. Declining does
+    not use the Fang up. Any Attack qualifies (sec.9.3 names no element).
+  * Gale Sweep SNAPSHOTS: each target Swirls the aura it wore when the card
+    was played, even if an earlier Swirl of the sweep spread over it.
+  * Grand Master's Order's repeat may choose a different Knight (Muster) and
+    a different target (`muster_choice2`, `aim2`).
+  * ASCENSION version A (6 + 6/Wind, Exhaust) or B (6 + 8/Wind, lose those
+    Winds, no Exhaust; a lost Wind can be Absorbed again), `asc_version`.
+  * SINGLE-WIND runs (`fixed_winds`): those Winds are held from turn 1 and an
+    Absorb grants nothing (`no_gain`).
 """
 
 from __future__ import annotations
@@ -64,6 +92,14 @@ STORMWARD_BONUS = 3
 STORMWARD_WINDS = 2
 ASCENSION_BASE = 6
 ASCENSION_PER_WIND = 6
+
+# --- revision two (sec.9) placeholders ---
+R2_PYRO_SWIRL_DAMAGE = 3
+R2_HYDRO_BLOCK = 3
+R2_ELECTRO_DRAW = 1
+R2_CRYO_WEAK = 1
+ASCENSION_B_PER_WIND = 8
+ABSORB_HELD_SWIRLS = True    # sec.9.1 reading; see the module docstring
 
 KNIGHT_ELEMENT = {"amber": "pyro", "barbara": "hydro", "lisa": "electro",
                   "kaeya": "cryo"}
@@ -95,6 +131,17 @@ class VarkaState:
         "cryo_weak": 0})
     absorbed_this_turn: int = -1  # the turn the last Absorb happened
     turn_rows: list = field(default_factory=list)
+    # --- revision two (sec.9) ---
+    rev: int = 1
+    asc_version: str = "A"
+    no_gain: bool = False        # single-Wind runs: Absorbs grant nothing
+    fang_want: bool = False      # the pilot opts in to the Fang on this card
+    aim2: object = None          # Grand Master's Order: the repeat's target
+    muster_choice2: Optional[str] = None
+    asc_reason: Optional[str] = None
+    lost: set = field(default_factory=set)        # B: Winds spent by a fire
+    recollect: int = 0           # B: a lost Wind Absorbed again
+    swirl_log: list = field(default_factory=list)  # (turn, element, card)
 
 
 def live(state) -> bool:
@@ -132,7 +179,7 @@ def attack_bonus(state, card) -> int:
     if vs is None or card.type != "attack":
         return 0
     bonus = 0
-    if _wind_on(vs, "pyro"):
+    if vs.rev == 1 and _wind_on(vs, "pyro"):
         bonus += PYRO_WIND_ATTACK_BONUS
     if (vs.stormward and card.element == ELEMENT
             and len(vs.winds) >= STORMWARD_WINDS):
@@ -159,6 +206,8 @@ def intercept_hit(state, enemy, element, damage):
     vs = vs_of(state)
     if vs is None or vs.landing:
         return None
+    if vs.rev == 2:
+        return _intercept_rev2(state, vs, enemy, element, damage)
     if _playing_attack(state, vs) and _wind_on(vs, "pyro"):
         vs.wind_value["pyro_hits"] += 1      # one +2 per Attack hit
     if not enemy.aura or enemy.aura_spent:
@@ -191,6 +240,40 @@ def intercept_hit(state, enemy, element, damage):
         vs.winds[aura] = state.turn
         state.emit("varka_wind", element=aura, winds=len(vs.winds))
     return out
+
+
+def _intercept_rev2(state, vs, enemy, element, damage):
+    """Revision two's Absorb: NOT a Swirl (sec.9.1)."""
+    if not enemy.aura or enemy.aura_spent or enemy.aura not in WIND_ELEMENTS:
+        return None
+    if not _playing_attack(state, vs):
+        return None                               # Knights are Skills
+    aura = enemy.aura
+    is_held = held(vs, aura) and not vs.no_gain
+    source = None
+    if vs.absorb_card and state.card_aim_bound:
+        if is_held:
+            # sec.9.1: "does only the card's damage". Default reading: the
+            # Anemo hit then meets the shared rule (it Swirls).
+            return None if ABSORB_HELD_SWIRLS else damage
+        source = "card"
+    elif vs.fang_want and vs.fang_turn != state.turn and not is_held:
+        source = "fang"
+        vs.fang_turn = state.turn
+    if source is None:
+        return None
+    enemy.aura = None
+    enemy.aura_turns_left = 0
+    enemy.aura_spent = False
+    vs.absorbs.append((state.turn, aura, source))
+    vs.absorbed_this_turn = state.turn
+    state.emit("varka_absorb", element=aura, target=enemy.name, source=source)
+    if not vs.no_gain and aura not in vs.winds:
+        if aura in vs.lost:
+            vs.recollect += 1
+        vs.winds[aura] = state.turn
+        state.emit("varka_wind", element=aura, winds=len(vs.winds))
+    return damage                                 # the card's own damage
 
 
 def converging(state) -> bool:
@@ -239,7 +322,12 @@ def on_swirl(state, enemy, aura) -> None:
         return
     vs.swirls += 1
     vs.swirls_this_card += 1
+    vs.swirl_log.append((state.turn, aura, vs.playing.id
+                         if vs.playing is not None else None))
     p = state.player
+    if vs.rev == 2:
+        _on_swirl_rev2(state, vs, enemy)
+        return
     if _wind_on(vs, "hydro"):
         p.block += HYDRO_WIND_BLOCK
         vs.wind_value["hydro_block"] += HYDRO_WIND_BLOCK
@@ -252,6 +340,26 @@ def on_swirl(state, enemy, aura) -> None:
         from tier0.engine import powers           # late: cycle
         powers.apply_power(state, enemy, "weak", CRYO_WIND_WEAK)
         vs.wind_value["cryo_weak"] += CRYO_WIND_WEAK
+
+
+def _on_swirl_rev2(state, vs, enemy) -> None:
+    """sec.9.2: every Wind pays on a Swirl."""
+    from tier0.engine import powers, reactions    # late: cycle
+    p = state.player
+    if _wind_on(vs, "pyro") and enemy.alive:
+        reactions._splash(state, enemy, R2_PYRO_SWIRL_DAMAGE)
+        vs.wind_value["pyro_hits"] += 1
+    if _wind_on(vs, "hydro"):
+        p.block += R2_HYDRO_BLOCK
+        vs.wind_value["hydro_block"] += R2_HYDRO_BLOCK
+        state.emit("block", amount=R2_HYDRO_BLOCK)
+    if _wind_on(vs, "electro") and vs.electro_turn != state.turn:
+        vs.electro_turn = state.turn
+        state.draw(R2_ELECTRO_DRAW)
+        vs.wind_value["electro_draws"] += R2_ELECTRO_DRAW
+    if _wind_on(vs, "cryo") and enemy.alive:
+        powers.apply_power(state, enemy, "weak", R2_CRYO_WEAK)
+        vs.wind_value["cryo_weak"] += R2_CRYO_WEAK
 
 
 # --------------------------------------------------------------------------
@@ -292,16 +400,31 @@ def op_varka(state, fx, card) -> None:
         if vs.swirls_this_card:
             state.draw(fx.get("amount", 1))
     elif kind == "ascension":
-        amount = ASCENSION_BASE + ASCENSION_PER_WIND * len(vs.winds)
+        per = (ASCENSION_B_PER_WIND if vs.asc_version == "B"
+               else ASCENSION_PER_WIND)
+        n = len(vs.winds)
+        amount = ASCENSION_BASE + per * n
         mark = len(state.log)
         effects._op_damage(state, _dmg_fx(amount), card)
         dealt = sum(r.get("amount", 0) for r in state.log[mark:]
                     if r.get("event") == "damage")
-        vs.ascension.append((state.turn, len(vs.winds), dealt))
+        vs.ascension.append((state.turn, n, dealt) if vs.rev == 1
+                            else (state.turn, n, dealt, vs.asc_reason))
+        if vs.asc_version == "B" and not vs.no_gain:
+            vs.lost |= set(vs.winds)              # "You lose those Winds."
+            vs.winds.clear()
     elif kind == "gale_sweep":
-        targets = [e for e in state.living_enemies
+        targets = [(e, e.aura) for e in state.living_enemies
                    if e.aura and not e.aura_spent]
-        for e in targets:
+        for e, snap in targets:
+            if e.alive and vs.rev == 2 and (e.aura != snap or e.aura_spent):
+                # sec.9.6: the snapshot stands; an earlier Swirl's spread
+                # in this sweep does not cancel this one.
+                from tier0.engine import reactions    # late: cycle
+                e.aura = snap
+                e.aura_spent = False
+                e.aura_turns_left = max(e.aura_turns_left,
+                                        reactions.aura_duration(state))
             if e.alive:
                 effects.deal_damage_to_enemy(
                     state, e, fx["amount"] + state.current_attack_bonus,
@@ -320,10 +443,17 @@ def op_varka(state, fx, card) -> None:
         if vs.gmo_pending:
             vs.gmo_pending -= 1
             times = 2
-        for _ in range(times):
+        saved_aim = state.card_aim
+        for i in range(times):
             element = fx["element"]
             if element == "choose":
-                element = vs.muster_choice or muster_default(state, vs)
+                choice = vs.muster_choice
+                if i == 1 and vs.rev == 2 and vs.muster_choice2:
+                    choice = vs.muster_choice2   # sec.9.6: may differ
+                element = choice or muster_default(state, vs)
+            if (i == 1 and vs.rev == 2 and vs.aim2 is not None
+                    and vs.aim2.alive):
+                state.card_aim = vs.aim2
             targets = (list(state.living_enemies) if fx.get("all")
                        else [state.card_aim] if state.card_aim is not None
                        and state.card_aim.alive else [])
@@ -337,7 +467,10 @@ def op_varka(state, fx, card) -> None:
                 effects._resolve_effects(state, fx["inner"], card)
             finally:
                 card.element = saved
+        state.card_aim = saved_aim
         vs.muster_choice = None
+        vs.muster_choice2 = None
+        vs.aim2 = None
     else:
         raise ValueError(f"unknown varka kind {kind!r}")
 
@@ -426,15 +559,29 @@ def make_card(name: str):
     return loader.get_card(name)
 
 
-def build_player(extra: list[str] = (), disabled_winds=frozenset()):
+def build_player(extra: list[str] = (), disabled_winds=frozenset(),
+                 rev: int = 1, asc_version: str = "A", fixed_winds=None):
     """A fresh Varka for one fight: the starter plus `extra`, the relic's
     state on the Player. Boreas's Fang has no hook id: it is the arm's rule,
-    read by `intercept_hit` for every Varka."""
+    read by `intercept_hit` for every Varka. `rev=2` is sec.9; `asc_version`
+    "B" makes Ascension sec.9.5's B (revision two only); `fixed_winds` holds
+    those Winds from turn 1 and turns Absorb gains off (single-Wind runs)."""
     from tier0.engine.state import Player
+    if asc_version != "A" and rev != 2:
+        raise ValueError("Ascension B is a revision-two card")
     cards = [make_card(n) for n in list(STARTER) + list(extra)]
+    if asc_version == "B":
+        for c in cards:
+            if c.id == "varka_four_winds_ascension":
+                c.exhaust = False
     player = Player(hp=HP, max_hp=HP, draw_pile=cards, element=ELEMENT,
                     cadence="catalyst", character_id=CHARACTER)
-    player.varka = VarkaState(disabled_winds=frozenset(disabled_winds))
+    vs = VarkaState(disabled_winds=frozenset(disabled_winds), rev=rev,
+                    asc_version=asc_version)
+    if fixed_winds is not None:
+        vs.winds = {el: 0 for el in fixed_winds}
+        vs.no_gain = True
+    player.varka = vs
     return player
 
 
