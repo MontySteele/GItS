@@ -32,7 +32,7 @@
   "KLEEMOD-FROZEN_BOSS_PREVIEW.title": "Reaction preview: Frozen (Boss)",
   "KLEEMOD-FROZEN_BOSS_PREVIEW.description": "[gold]Hydro[/gold] meets [gold]Cryo[/gold]: bosses can't be Frozen, so it gains [blue]2[/blue] [gold]Vulnerable[/gold] instead.",
   "KLEEMOD-SWIRL_PREVIEW.title": "Reaction preview: Swirl",
-  "KLEEMOD-SWIRL_PREVIEW.description": "[gold]Anemo[/gold] meets a fresh aura: copy it onto ALL enemies without it and deal [blue]2[/blue] damage to ALL enemies. The aura stays, spent.",
+  "KLEEMOD-SWIRL_PREVIEW.description": "[gold]Anemo[/gold] meets a fresh aura: copy it onto ALL enemies without it and deal [blue]2[/blue] damage to ALL enemies. The aura and its copies stay spent.",
   "KLEEMOD-CRYSTALLIZE_PREVIEW.title": "Reaction preview: Crystallize",
   "KLEEMOD-CRYSTALLIZE_PREVIEW.description": "[gold]Geo[/gold] meets a fresh aura: gain [blue]4[/blue] [gold]Block[/gold]. The aura stays, spent.",
   "KLEEMOD-SWIRL_SPENT_PREVIEW.title": "Reaction preview: Swirl (spent)",

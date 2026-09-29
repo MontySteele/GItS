@@ -305,7 +305,8 @@ public class ResolutionLedgerTests
 
         var row = ResolutionLedger.Snapshot()[0];
         Assert.Equal(new[] { "card_id", "card", "auto_played", "carried",
-                             "overflowed", "hits", "applied", "summoned" },
+                             "overflowed", "hits", "applied", "summoned",
+                             "absorbed" },
                      new List<string>(row.Keys).ToArray());
 
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
@@ -313,6 +314,29 @@ public class ResolutionLedgerTests
                              "killed" },
                      new List<string>(hit.Keys).ToArray());
         Assert.Equal(false, hit["killed"]);
+    }
+
+    /// <summary>2026-09-29 (the Varka seats): an Absorb is filed under the
+    /// card that made it, and nothing outside a play is.</summary>
+    [Fact]
+    public void An_absorb_is_filed_under_its_card()
+    {
+        Fresh();
+        ResolutionLedger.NoteAbsorb("Cultist", "Pyro", false, "1");
+        ResolutionLedger.OpenPlay("strike", "Strike", false);
+        ResolutionLedger.NoteAbsorb("Cultist", "Pyro", false, "1");
+        ResolutionLedger.NoteAbsorb("Louse", "Hydro", true, "2");
+        ResolutionLedger.ClosePlay();
+
+        var rows = ResolutionLedger.Snapshot();
+        Assert.Single(rows);
+        var absorbed = (List<Dictionary<string, object?>>)rows[0]["absorbed"]!;
+        Assert.Equal(2, absorbed.Count);
+        Assert.Equal("Pyro", absorbed[0]["element"]);
+        Assert.Equal(false, absorbed[0]["swirled"]);
+        Assert.Equal(true, absorbed[1]["swirled"]);
+        Assert.Equal(new[] { "target", "element", "swirled", "combat_id" },
+                     new List<string>(absorbed[0].Keys).ToArray());
     }
 
     /// <summary>2026-09-25 evening: a random summon inside a card names who it

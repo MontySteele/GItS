@@ -222,6 +222,64 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
+    public void The_fang_never_takes_an_aura_its_own_attack_just_applied()
+    {
+        // Seat fixes 2026-09-29: Charlotte on a bare enemy left Cryo and the
+        // Fang Absorbed it in the same play. The Fang reads only an aura that
+        // stood before the hit.
+        var seat = Seat.Klee().WithRelic<BoreasFang>();
+        var strike = new StrikeSilent();
+        var painted = Aura<CryoAuraPower>(false);
+        painted.PaintedBy = strike;
+        Assert.True(VarkaAbsorb.OwnPaint(painted, strike));
+        Assert.Equal(AbsorbOutcome.None,
+                     VarkaAbsorb.Decide(painted, seat.Creature, strike));
+        // Another card's hit on that aura: an aura standing before the hit.
+        Assert.Equal(AbsorbOutcome.Absorb, VarkaAbsorb.Decide(
+            painted, seat.Creature, new StrikeSilent()));
+        // Once the play ends the paint is ordinary again.
+        painted.PaintedBy = null;
+        Assert.Equal(AbsorbOutcome.Absorb,
+                     VarkaAbsorb.Decide(painted, seat.Creature, strike));
+
+        // The application site marks the paint and the play's end clears it.
+        Assert.Contains("AuraPower.set_PaintedBy", Il.Calls(
+            Il.Method("KleeElementalHooks", "BeforeDamageReceived")));
+        Assert.Contains("AuraPower.set_PaintedBy", Il.Calls(
+            Il.Method("KleeElementalHooks", "AfterCardPlayed")));
+    }
+
+    [Fact]
+    public void The_preview_shows_the_fangs_absorb_not_the_reaction()
+    {
+        // Seat fixes 2026-09-29: "Charlotte previewed Melt 7; the Fang
+        // Absorbed and the hit landed 4." The card's reaction preview asks
+        // the lifecycle's own decision.
+        Assert.Contains("VarkaAbsorb.Decide",
+                        Il.Calls(Il.Method("KleeCardTooltips", "ForCard")));
+        Assert.Equal(
+            "[gold]Boreas's Fang[/gold] Absorbs the [gold]Pyro[/gold] aura: "
+          + "no reaction, and you gain Pyro [gold]Wind[/gold].",
+            KleeCardTooltips.AbsorbPreviewBody(true, Element.Pyro));
+    }
+
+    [Fact]
+    public void An_absorb_and_a_held_wind_swirl_reach_both_logs()
+    {
+        // Seat fixes 2026-09-29: "Absorbs are invisible in the logs."
+        var take = Il.Calls(Il.Method("VarkaAbsorb", "Take"));
+        Assert.Contains("ReactionLog.NoteBeat", take);
+        Assert.Contains("ResolutionLedger.NoteAbsorb", take);
+        var swirled = Il.Calls(Il.Method("VarkaAbsorb", "NoteSwirlInstead"));
+        Assert.Contains("ReactionLog.DetailNext", swirled);
+        Assert.Contains("ResolutionLedger.NoteAbsorb", swirled);
+        Assert.Contains("VarkaAbsorb.NoteSwirlInstead",
+                        Il.Calls(Il.Method("AuraPower", "ResolveLifecycle")));
+        Assert.Equal("Took the Hydro aura; you gained Hydro Wind.",
+                     VarkaAbsorb.AbsorbDetail(Element.Hydro));
+    }
+
+    [Fact]
     public void The_fang_reads_absorbs_rule_so_a_held_wind_swirls()
     {
         var seat = Seat.Klee().WithRelic<BoreasFang>()

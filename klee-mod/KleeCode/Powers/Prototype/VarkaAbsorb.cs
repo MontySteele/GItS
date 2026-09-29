@@ -82,7 +82,7 @@ namespace KleeMod.Powers
             AuraPower aura, Creature? dealer, CardModel? cardSource)
         {
             if (!VarkaPrototype.Enabled || dealer?.Player == null
-                || cardSource == null)
+                || cardSource == null || OwnPaint(aura, cardSource))
             {
                 return AbsorbOutcome.None;
             }
@@ -91,6 +91,17 @@ namespace KleeMod.Powers
             return Decide(aura.Element, aura.Spent, absorbCard, fang,
                           VarkaWinds.Holds(dealer, aura.Element));
         }
+
+        /// <summary>
+        /// Did this card's own hit put this aura on, earlier in the same play?
+        /// Then it is the card's own paint, and neither Absorb nor the Fang
+        /// takes it: they read only an aura that stood before the hit (seat
+        /// fixes 2026-09-29; the paper's "a Knight never Absorbs its own
+        /// paint"). An element Attack on a bare enemy leaves its aura fresh
+        /// and the Fang unused. PURE.
+        /// </summary>
+        public static bool OwnPaint(AuraPower aura, CardModel? cardSource) =>
+            cardSource != null && ReferenceEquals(aura.PaintedBy, cardSource);
 
         /// <summary>
         /// Would Boreas's Fang take this hit? The dealer holds the relic, it
@@ -147,8 +158,33 @@ namespace KleeMod.Powers
             {
                 await unbound.OnAbsorb(choiceContext);
             }
+            // 2026-09-29 (the Varka seats): the Absorb is on both receipts.
+            ReactionLog.NoteBeat("Absorb", AbsorbDetail(element), target,
+                                 dealer, cardSource);
+            ResolutionLedger.NoteAbsorb(target, element.ToString(), false);
             Log.Info($"[{KleeMod.ModId}] VARKA Absorb: {element} off "
                    + $"{target?.Name}.");
         }
+
+        /// <summary>
+        /// The held-Wind case on both receipts: the Swirl row that follows
+        /// says why it Swirled, and the played card's row names it. Called by
+        /// the lifecycle beside <see cref="NoteFang"/>.
+        /// </summary>
+        internal static void NoteSwirlInstead(AuraPower aura)
+        {
+            ReactionLog.DetailNext(SwirlInsteadDetail(aura.Element));
+            ResolutionLedger.NoteAbsorb(aura.Owner, aura.Element.ToString(),
+                                        true);
+        }
+
+        /// <summary>The Absorb row's sentence. PURE.</summary>
+        public static string AbsorbDetail(Element element) =>
+            $"Took the {element} aura; you gained {element} Wind.";
+
+        /// <summary>The Swirl row's sentence on a held Wind. PURE.</summary>
+        public static string SwirlInsteadDetail(Element element) =>
+            $"You already held {element} Wind, so it Swirled instead of "
+          + "Absorbing.";
     }
 }

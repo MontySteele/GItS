@@ -16,6 +16,8 @@ import re
 from typing import Any
 
 from understudy.blindplay_faces import (GUEST_STAR_ELEMENTS, _GUEST_STAR_RE,
+                                        KNIGHT_CHOOSER_ELEMENTS,
+                                        KNIGHT_CHOOSER_RE,
                                         remember_elements)
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
@@ -1497,8 +1499,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # page with the tip (`ArmKeywordTips`).
     # The element port (2026-09-28) rewrote it with the C#, in one commit.
     "Swirl": ("On a fresh aura: copy it onto ALL enemies without it and "
-              f"deal {SWIRL_DAMAGE} damage to ALL enemies. The aura stays, "
-              "spent. No aura, no effect."),
+              f"deal {SWIRL_DAMAGE} damage to ALL enemies. The aura and its "
+              "copies stay spent."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
     # is a Power card of Klee's, and Kaeya's Cold-Blooded Strike is written
     # against it by name ("Next turn, Grounded pays even if you played a
@@ -2609,7 +2611,8 @@ ELEMENT_KEYWORDS: dict[str, str] = {
             "wearing one it triggers an Elemental Reaction (Crystallize)."),
     "aura": ("The element left on an enemy by an elemental hit. A hit of a "
              "different element triggers an Elemental Reaction. Anemo and "
-             "Geo leave it standing, spent."),
+             "Geo leave it standing, spent. A spent aura still reacts with "
+             "Pyro, Hydro, Electro and Cryo."),
 }
 
 #: Matched the way `_ARM_KEYWORD_RE` matches, case-sensitive: the game
@@ -2680,6 +2683,12 @@ def guest_elements(obs: dict[str, Any]) -> set[str]:
 
     def walk(blob: Any) -> None:
         if isinstance(blob, dict):
+            # 2026-09-29: and a Knight chooser, whose element is picked at
+            # play (`blindplay_faces.KNIGHT_CHOOSER_RE`). On a TITLE only,
+            # because the Knight tip's own sentence names Muster too.
+            for key in ("name", "title"):
+                if KNIGHT_CHOOSER_RE.search(str(blob.get(key) or "")):
+                    found.update(KNIGHT_CHOOSER_ELEMENTS)
             for value in blob.values():
                 walk(value)
         elif isinstance(blob, list):
@@ -3454,6 +3463,12 @@ RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
 #: 'what it did'." A power the card put on an enemy, or took off one.
 RESOLUTION_APPLIED = "  Put **{power} {n}** on **{target}**."
 RESOLUTION_REMOVED = "  Took **{power} {n}** off **{target}**."
+#: 2026-09-29 (the Varka seats): "Absorbs are invisible in the logs."
+RESOLUTION_ABSORBED = ("  Absorbed the **{element}** aura off **{target}**: "
+                       "gained {element} Wind.")
+RESOLUTION_ABSORB_SWIRLED = ("  Swirled the **{element}** aura on "
+                             "**{target}** instead of Absorbing it: you "
+                             "already held {element} Wind.")
 #: 2026-09-25 (opus-furina-l2b, (c) 4). The same line on a board with a
 #: stage, where "nothing countable" was false under every Raise: what a card
 #: did to a performer's bar is filed on the stage log, and this says where.

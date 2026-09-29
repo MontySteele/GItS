@@ -131,6 +131,20 @@ public sealed class KleeElementalHooks : AbstractModel
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (cardPlay.Card is { } played) ReactionEvents.CardPlayEnds(played);
+#if PROTOTYPE_CARDS
+        // VARKA: the play is over, so the auras it painted are ordinary auras
+        // now and the next Attack may Absorb them.
+        if (cardPlay.Card?.CombatState is { } paintedState)
+        {
+            foreach (var enemy in paintedState.HittableEnemies)
+            {
+                if (AuraCmd.Find(enemy) is { PaintedBy: not null } aura)
+                {
+                    aura.PaintedBy = null;
+                }
+            }
+        }
+#endif
         // Same ownerless-play guard as BeforeCardPlayed above.
         var owner = cardPlay.Card?.Owner;
         if (owner?.Creature is not { } creature) return;
@@ -309,6 +323,8 @@ public sealed class KleeElementalHooks : AbstractModel
         // one broadcast it is about. The whole argument is at
         // `ReactionEffects.MarkShattered`.
         ReactionEffects.ClearShatterMark();
+        // And the reaction log's one-beat sentence, on the same boundary.
+        ReactionLog.ClearDetail();
 
         // Same predicate the rest of the stack uses: unpowered damage (bombs,
         // reaction splash, HP costs) is never element-tagged.
@@ -330,6 +346,14 @@ public sealed class KleeElementalHooks : AbstractModel
         if (AuraCmd.Find(target) != null) return;
 
         await AuraCmd.Apply(choiceContext, target, element, dealer, cardSource);
+#if PROTOTYPE_CARDS
+        // VARKA: this aura is this card's own paint for the rest of its play,
+        // so Absorb and Boreas's Fang pass it by (`VarkaAbsorb.OwnPaint`).
+        if (cardSource != null && AuraCmd.Find(target) is { } painted)
+        {
+            painted.PaintedBy = cardSource;
+        }
+#endif
     }
 }
 

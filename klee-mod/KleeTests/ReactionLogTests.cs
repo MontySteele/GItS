@@ -195,9 +195,35 @@ public class ReactionLogTests
         var row = ReactionLog.Snapshot().Single();
 
         Assert.Equal(
-            new[] { "reaction", "source", "target", "combat_id", "carried" },
+            new[] { "reaction", "source", "target", "combat_id", "carried",
+                    "detail" },
             row.Keys.ToArray());
         Assert.Equal(false, row["carried"]);
+        Assert.Equal("", row["detail"]);
+    }
+
+    [Fact]
+    public void A_detail_rides_the_next_reaction_only_and_a_beat_is_a_row()
+    {
+        // 2026-09-29 (the Varka seats): "Absorbs are invisible in the logs".
+        ReactionLog.ResetFight();
+        var kokomi = Seat.Kokomi().Creature;
+        ReactionLog.DetailNext("You already held Pyro Wind.");
+        ReactionLog.Note(Reaction.Swirl, kokomi, null, null);
+        ReactionLog.Note(Reaction.Melt, kokomi, null, null);
+        ReactionLog.NoteBeat("Absorb", "Took the Pyro aura.", kokomi, null,
+                             null);
+        ReactionLog.DetailNext("stray");
+        ReactionLog.ClearDetail();
+        ReactionLog.Note(Reaction.Vaporize, kokomi, null, null);
+
+        var rows = ReactionLog.Snapshot();
+        Assert.Equal(new[] { "Swirl", "Melt", "Absorb", "Vaporize" },
+                     rows.Select(r => (string)r["reaction"]!).ToArray());
+        Assert.Equal(new[] { "You already held Pyro Wind.", "",
+                             "Took the Pyro aura.", "" },
+                     rows.Select(r => (string)r["detail"]!).ToArray());
+        ReactionLog.ResetFight();
     }
 
     [Fact]

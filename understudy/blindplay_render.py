@@ -103,6 +103,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         POTION_BARRED_NOTE,
                                         RESOLUTION_APPLIED,
                                         RESOLUTION_REMOVED,
+                                        RESOLUTION_ABSORBED,
+                                        RESOLUTION_ABSORB_SWIRLED,
                                         STOLEN_CARD_CLAUSE,
                                         TURN_ORDER_DUSK, TURN_ORDER_NOTE,
                                         TURN_ORDER_ORB,
@@ -1427,7 +1429,8 @@ def _resolution_lines(rows: list[dict[str, Any]],
                 [f"**{name}**" for name in row["summoned"]])))
         killed = row.get("killed") or []
         applied = row.get("applied") or []
-        if not row["hits"] and not killed and not applied:
+        absorbed = row.get("absorbed") or []
+        if not row["hits"] and not killed and not applied and not absorbed:
             # 2026-09-25 (opus-furina-l2b): on a board with a stage, a card
             # that hit nothing may still have moved a bar, and the stage log
             # above now files every Raise -- so the line points there rather
@@ -1451,6 +1454,12 @@ def _resolution_lines(rows: list[dict[str, Any]],
             if hit["blocked"] > 0:
                 line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
             out.append(line)
+        # 2026-09-29 (the Varka seats): what an Absorb took, or that it
+        # Swirled instead on a Wind already held.
+        for a in absorbed:
+            out.append((RESOLUTION_ABSORB_SWIRLED if a["swirled"]
+                        else RESOLUTION_ABSORBED).format(
+                element=a["element"], target=a["target"] or "an enemy"))
         # 2026-09-26 (the Silent control seat): the powers it put on enemies.
         for a in applied:
             out.append((RESOLUTION_APPLIED if a["amount"] > 0
@@ -2051,7 +2060,7 @@ FANG_USED_LINE = "- Boreas's Fang: used this turn."
 AURA_FRESH = ("{element}, fresh: an Absorb takes it; an Anemo hit Swirls "
               "it.")
 AURA_SPENT = ("{element}, spent: Absorb and Swirl do nothing to it until "
-              "{element} hits it again.")
+              "{element} hits it again. Other elements still react with it.")
 AURA_NONE = "no aura."
 
 
@@ -2963,6 +2972,8 @@ def render(obs: dict[str, Any]) -> str:
             for row in rows:
                 line = (REACTION_ROW if row["source"]
                         else REACTION_ROW_NO_SOURCE).format(**row)
+                if row.get("detail"):
+                    line += " " + row["detail"]
                 if row.get("carried"):
                     line = line.rstrip(".") + "." + REACTION_CARRIED_CLAUSE
                 line += _frozen_clause(row, obs, c)

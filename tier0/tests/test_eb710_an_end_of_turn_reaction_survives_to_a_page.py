@@ -124,7 +124,8 @@ def test_a_bridge_that_sends_no_carried_key_reads_as_not_carried():
         {"reactions": [{"reaction": "Melt", "source": "Sparks 'n' Splash",
                         "target": "Cultist", "combat_id": "1"}]})
     assert rows == [{"reaction": "Melt", "source": "Sparks 'n' Splash",
-                     "target": "Cultist", "combat_id": "1", "carried": False}]
+                     "target": "Cultist", "combat_id": "1", "carried": False,
+                     "detail": ""}]
 
 
 def test_the_board_reader_carries_the_flag_through():

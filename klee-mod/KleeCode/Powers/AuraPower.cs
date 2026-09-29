@@ -81,6 +81,18 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// </summary>
     public bool Spent { get; set; }
 
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// VARKA (seat fixes 2026-09-29): the card whose hit put this aura on,
+    /// for the rest of that card's play; null otherwise. Absorb and Boreas's
+    /// Fang read only an aura that stood BEFORE the hit, so a Charlotte on a
+    /// bare enemy leaves her Cryo fresh and the Fang unused ("a Knight never
+    /// Absorbs its own paint"). Set by <c>KleeElementalHooks</c> where it
+    /// applies the aura, cleared there when the play ends.
+    /// </summary>
+    public CardModel? PaintedBy { get; set; }
+#endif
+
     /// <summary>The spent face while <see cref="Spent"/>; the ruled face
     /// otherwise, and always on a canonical copy (`IsMutable` first, the
     /// guard every selector in this mod carries).</summary>
@@ -349,6 +361,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
                 return;
             case AbsorbOutcome.SwirlInstead:
                 VarkaAbsorb.NoteFang(dealer, cardSource);
+                VarkaAbsorb.NoteSwirlInstead(this);
                 trigger = Element.Anemo;
                 break;
         }

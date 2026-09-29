@@ -159,3 +159,98 @@ def test_the_page_glossary_defines_his_three_words():
     glossary = page.split("## Words on this screen", 1)[1]
     for word in ("Absorb", "Wind", "Knight"):
         assert f"- **{word}** — " in glossary, word
+
+
+# ---- seat fixes 2026-09-29 ---------------------------------------------------
+
+def _bare_hand(state: dict, *cards: dict) -> dict:
+    """His turn with only `cards` in hand, empty piles and no auras."""
+    p = state["player"]
+    p["hand"] = list(cards)
+    for pile in ("draw_pile", "discard_pile", "exhaust_pile"):
+        p[pile] = []
+    for enemy in state["battle"]["enemies"]:
+        enemy["status"] = []
+    return state
+
+
+def _card(name: str, text: str, kind: str = "Attack") -> dict:
+    return {"id": "KLEEMOD-" + name.upper().replace(" ", "_"), "name": name,
+            "type": kind, "cost": "1", "star_cost": None,
+            "description": text, "rarity": "Basic", "is_upgraded": False,
+            "keywords": [], "index": 0, "target_type": "AnyEnemy",
+            "can_play": True, "unplayable_reason": None}
+
+
+MUSTER = ("Knights' Muster",
+          "Choose a Knight: deal 4 damage of their element.")
+
+
+def test_knights_muster_is_an_element_source():
+    """"NO REACTION IS REACHABLE HERE ... this screen supplies no element"
+    printed with Knights' Muster in hand: its element is chosen at play."""
+    updraft = _card("Updraft", "Deal 5 damage. Applies Anemo.")
+    updraft["keywords"] = [{"name": "Applies Anemo", "description":
+                            "An Anemo hit Swirls an aura."}]
+    control = blindplay.observe(_bare_hand(
+        varka_state(winds=(), auras=(None,)), updraft))
+    assert "supplies no element" in control
+    blindplay.forget_fight()
+    page = blindplay.observe(_bare_hand(
+        varka_state(winds=(), auras=(None,)), updraft,
+        _card(*MUSTER, kind="Skill")))
+    assert "supplies no element" not in page
+
+
+def test_an_absorb_is_named_on_the_reaction_log():
+    state = varka_state()
+    state["player"]["reactions"] = [
+        {"reaction": "Absorb", "source": "Strike", "target": "Hilichurl 1",
+         "combat_id": "100", "carried": False,
+         "detail": "Took the Pyro aura; you gained Pyro Wind."},
+        {"reaction": "Swirl", "source": "Charlotte", "target": "Hilichurl 2",
+         "combat_id": "101", "carried": False,
+         "detail": ("You already held Hydro Wind, so it Swirled instead of "
+                    "Absorbing.")},
+        {"reaction": "Melt", "source": "Amber", "target": "Hilichurl 1",
+         "combat_id": "100", "carried": False},
+    ]
+    page = blindplay.observe(state)
+    assert ("- **Absorb** on **Hilichurl 1**, off Strike. Took the Pyro "
+            "aura; you gained Pyro Wind.") in page
+    assert ("off Charlotte. You already held Hydro Wind, so it Swirled "
+            "instead of Absorbing.") in page
+    # Every reaction the log carries prints, not only Swirl.
+    assert "- **Melt** on **Hilichurl 1**, off Amber." in page
+
+
+def test_an_absorb_is_named_under_the_card_that_made_it():
+    state = varka_state()
+    state["player"]["resolutions"] = [
+        {"card_id": "STRIKE_VARKA", "card": "Strike", "auto_played": False,
+         "carried": False, "overflowed": False,
+         "hits": [{"target": "Hilichurl 1", "amount": 6, "blocked": 0,
+                   "combat_id": "100", "killed": False}],
+         "applied": [], "summoned": [],
+         "absorbed": [{"target": "Hilichurl 1", "element": "Pyro",
+                       "swirled": False, "combat_id": "100"}]},
+        {"card_id": "CHARLOTTE", "card": "Charlotte", "auto_played": False,
+         "carried": False, "overflowed": False, "hits": [], "applied": [],
+         "summoned": [],
+         "absorbed": [{"target": "Hilichurl 2", "element": "Hydro",
+                       "swirled": True, "combat_id": "101"}]},
+    ]
+    page = blindplay.observe(state)
+    assert ("Absorbed the **Pyro** aura off **Hilichurl 1**: gained Pyro "
+            "Wind.") in page
+    assert ("Swirled the **Hydro** aura on **Hilichurl 2** instead of "
+            "Absorbing it: you already held Hydro Wind.") in page
+
+
+def test_the_words_say_a_spent_aura_still_reacts_and_swirl_copies_are_spent():
+    from understudy import blindplay_notes as notes
+    assert ("A spent aura still reacts with Pyro, Hydro, Electro and Cryo."
+            in notes.ELEMENT_KEYWORDS["aura"])
+    assert "The aura and its copies stay spent." in notes.ARM_KEYWORDS["Swirl"]
+    page = blindplay.observe(varka_state())
+    assert "Other elements still react with it." in page
