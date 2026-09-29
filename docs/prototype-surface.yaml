@@ -1150,17 +1150,15 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
-   # Plan line buys what only a head start can buy.
-   description: "Deal {PlainDamage:diff()} damage, or {BranchDamage:diff()} if a [gold]Plan[/gold] was carried out this turn. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].",
-   effects: [{op: conditional, if: plan_carried_out_this_turn,
-              then: [{op: damage, amount: 10, target: enemy}],
-              else: [{op: damage, amount: 5, target: enemy}]}],
+   # THE CASKET PASS (2026-09-28): re-keyed from "a Plan was carried out"
+   # (a yes/no nearly always true) to the COUNT of carry-outs this turn.
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 4, per: 3,
+                               count: plans_carried_out_this_turn}}],
    plan: [{op: apply_power, power: vulnerable, amount: 1, target: front_enemy}],
-   # 7 / 13 / Plan 2 Vulnerable. `conditional_damage` moves both branches
-   # and `conditional_then_damage` the carry-out branch alone.
-   upgrade: {conditional_damage: 2, conditional_then_damage: 1,
-             plan_power_amount: 1}}
+   # 6, plus 3 each / Plan 2 Vulnerable.
+   upgrade: {formula_base: 2, plan_power_amount: 1}}
 
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
@@ -1240,18 +1238,13 @@
 
 # --- the Priestess: Block through the jellyfish, Mend at Rare (packet sec.4) ---
 
-- {id: proto_kk_sea_salt_prayer, name: "Sea-Salt Prayer", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Gain 4 [gold]Block[/gold]. Apply 1 [gold]Weak[/gold].",
-   effects: [{op: block, amount: 4},
-             {op: apply_power, power: weak, amount: 1, target: enemy}]}
-
 - {id: proto_kk_deep_current, name: "Deep Current", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 damage to ALL enemies.",
-   effects: [{op: damage, amount: 6, target: all_enemies}]}
+   # THE CASKET PASS (2026-09-28): 7 to ALL, 9 upgraded.
+   description: "Deal 7 damage to ALL enemies.",
+   upgrade: {damage: 2},
+   effects: [{op: damage, amount: 7, target: all_enemies}]}
 
 - {id: proto_kk_coral_bulwark, name: "Coral Bulwark", character: kokomi,
    authored_by: [claude],
@@ -1263,17 +1256,6 @@
    plan: [{op: apply_power, power: weak, amount: 2, target: front_enemy}],
    # 10 Block; Plan 3 Weak.
    upgrade: {block: 3, plan_power_amount: 1}}
-
-- {id: proto_kk_cleansing_wave, name: "Cleansing Wave", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   # Kokomi core pass: two different jobs, not Block at two sizes.
-   description: "Remove one of your debuffs. Draw 1 card. [gold]Plan[/gold]: Gain 10 [gold]Block[/gold].",
-   effects: [{op: remove_debuff},
-             {op: draw, amount: 1}],
-   plan: [{op: block, amount: 10}],
-   # Plan 13; the now-line does not upgrade.
-   upgrade: {plan_block: 3}}
 
 # `EB-335`, R246 pick 2: the kit's own defence in act 2. Both rows wore a
 # neighbour's illustration through `art_of:` until `EB-778` placed their own
@@ -1318,10 +1300,13 @@
 - {id: proto_kk_sango_isshin, name: "Sango Isshin (proto)", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "Deal 8 damage. If the [gold]Bake-Kurage[/gold] carried out a [gold]Plan[/gold] this turn, deal a quarter of your Max HP to ALL enemies instead.",
-   effects: [{op: conditional, if: plan_carried_out_this_turn,
-              then: [{op: damage_quarter_max_hp, target: all_enemies}],
-              else: [{op: damage, amount: 8, target: enemy}]}]}
+   # THE CASKET PASS (2026-09-28): per carry-out this turn, to ALL.
+   description: "Deal {ExtraDamage:diff()} damage to ALL enemies for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: all_enemies,
+              amount_formula: {base: 0, per: 6,
+                               count: plans_carried_out_this_turn}}],
+   # 8 per Plan.
+   upgrade: {formula_per: 2}}
 
 # --- the Commander: Gorou, go (packet sec.4) ---
 
@@ -1393,12 +1378,6 @@
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {damage: +3}}
 
-- {id: proto_kk_salt_line, name: "Salt Line (proto)", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common, exhaust: true,
-   description: "Exhaust. Gain 8 [gold]Block[/gold].",
-   effects: [{op: block, amount: 8}]}
-
 - {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
@@ -1420,30 +1399,7 @@
    upgrade: {cost: -1}}
 
 # --- the tempo shelf (Kokomi round 9 pick 1, default applied 2026-09-04):
-# two rows keyed to the Bake-Kurage that let a Plan be held or hurried.
-# Per-row reasoning: docs/notes/prototype-surface-provenance.md. ---
-
-- {id: proto_kk_tide_chart, name: "Tide Chart", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   # R257 (Kokomi r15): read at PLAY time this drew zero on three plays out
-   # of four, so it pays a turn later instead. Provenance carries the whole of
-   # it, under this id.
-   description: "Next turn, after the [gold]Bake-Kurage[/gold] carries out its [gold]Plans[/gold], draw 1 card for each{IfUpgraded:show:, plus 1|}.",
-   upgrade: {tide_draw: 1},
-   effects: [{op: draw_after_plans, amount: 0, per: 1}]}
-
-- {id: proto_kk_ripple, name: "Ripple", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
-   # now-half does something on a quiet turn.
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold].",
-   effects: [{op: draw, amount: 1}],
-   plan: [{op: energy, amount: 1}],
-   # Uncommon: a 0-cost draw 1 is a cycling engine (LAW, 2026-09-28).
-   # now draw 2; the Plan line does not upgrade.
-   upgrade: {draw: 1}}
+# Tide Chart and Ripple; both were cut by the Casket pass (2026-09-28). ---
 
 # --- POOL PASS ONE (`EB-492`): the offer's Plan density, on the Attacks.
 # Five rows, LAST in the sheet's own order (`lint_arm_pool_parity` compares BY
@@ -1452,23 +1408,24 @@
 - {id: proto_kk_riptide, name: "Riptide", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: common,
-   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
-   # Plan line buys what only a head start can buy.
-   description: "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 1 card.",
-   effects: [{op: damage, amount: 9, target: all_enemies, bonus_vs_debuff: 4}],
-   plan: [{op: energy, amount: 1}, {op: draw, amount: 1}],
-   # 12 / 6 more; the Plan line does not upgrade.
-   upgrade: {damage: 3, bonus_vs_debuff: 2}}
+   # THE CASKET PASS (2026-09-28): 11 to ALL, 3 more on a debuffed enemy;
+   # the Plan is 2 Energy and a card.
+   description: "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1 card.",
+   effects: [{op: damage, amount: 11, target: all_enemies, bonus_vs_debuff: 3}],
+   plan: [{op: energy, amount: 2}, {op: draw, amount: 1}],
+   # 14 / 4 more; the Plan line does not upgrade.
+   upgrade: {damage: 3, bonus_vs_debuff: 1}}
 
 - {id: proto_kk_pincer, name: "Pincer", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Deal 3 damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
-   effects: [{op: damage, amount: 3, target: enemy, times: 2}],
+   description: "Deal 4 damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
+   effects: [{op: damage, amount: 4, target: enemy, times: 2}],
    plan: [{op: first_attack_twice}],
-   # now 4 twice; the Plan line does not upgrade.
+   # THE CASKET PASS (2026-09-28): 4 twice; upgraded 5 twice. The Plan line
+   # does not upgrade.
    upgrade: {damage: 1}}
 
 - {id: proto_kk_flank, name: "Flank", character: kokomi,
@@ -1480,18 +1437,6 @@
    # WRITTEN -- R250's rule for an aimed Plan, applied to a set.
    plan: [{op: damage, amount: 8, target: enemies_intending_attack}],
    upgrade: {damage: 3, plan_damage: 3}}
-
-- {id: proto_kk_well_laid, name: "Well Laid", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: attack, rarity: common,
-   # R276 pick 1: RE-AIMED off Plan volume onto her debuff layer. No Plan
-   # line. A "debuff" is a distinct debuff on the enemy, not a stack.
-   description: "Deal {CalculationBase:diff()} damage. Deals {ExtraDamage:diff()} additional damage for each debuff on the enemy.",
-   effects: [{op: damage, target: enemy,
-              amount_formula: {base: 3, per: 3,
-                               count: debuffs_on_target}}],
-   # 4, plus 4.
-   upgrade: {formula_base: 1, formula_per: 1}}
 
 - {id: proto_kk_feigned_retreat, name: "Feigned Retreat", character: kokomi,
    authored_by: [claude],
@@ -1515,8 +1460,9 @@
    cost: 1, type: skill, rarity: uncommon,
    # `EB-687`: THE CLAUSE NAMES WHAT IT DOUBLES, so a Plan that deals none is
    # visibly unchanged. The finding and the ceiling: the provenance note.
-   description: "Deal 5 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The Plan after this one deals double damage.",
-   effects: [{op: damage, amount: 5, target: enemy}],
+   description: "Deal 7 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The Plan after this one deals double damage.",
+   # THE CASKET PASS (2026-09-28): 5 -> 7 now.
+   effects: [{op: damage, amount: 7, target: enemy}],
    # THE RIDER IS THE SECOND CLAUSE and it aims at nothing: "the next Plan" is
    # the entry carried out immediately after this one in the same drain.
    # Order and the upgrade's one half: the provenance note.
@@ -1526,11 +1472,12 @@
 
 - {id: proto_kk_second_wave, name: "Second Wave", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
+   # THE CASKET PASS (2026-09-28): Uncommon, and 7 now.
+   cost: 1, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
-   description: "Deal 5 damage. [gold]Plan[/gold]: The Plan after this one is carried out twice.",
-   effects: [{op: damage, amount: 5, target: enemy}],
+   description: "Deal 7 damage. [gold]Plan[/gold]: The Plan after this one is carried out twice.",
+   effects: [{op: damage, amount: 7, target: enemy}],
    # A FLAG AND NOT A COUNT: under Nereid's Ascension the entry this reaches
    # is carried out THREE times (`CarryOutTimes + 1`) and not four, which is
    # the rule stated at `kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT`.
@@ -1578,6 +1525,125 @@
 # NIGHT WATCH IS RETIRED (POOL PASS FIVE, `EB-685`): it lost every draft
 # comparison in r27 and Slack Water's Dusk half is its job. It spelled no op
 # of its own, so nothing stays registered behind it.
+
+# --- THE CASKET PASS (2026-09-28): thirteen rows, LAST in the sheet's order
+# (`lint_arm_pool_parity` compares BY ORDER). Rulings and readings:
+# docs/notes/prototype-surface-provenance.md. ---
+
+- {id: proto_kk_massed_volley, name: "Massed Volley", character: kokomi,
+   authored_by: [claude], art_of: massed_volley,
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 3 damage 3 times.",
+   effects: [{op: damage, amount: 3, target: enemy, times: 3}],
+   upgrade: {damage: 1}}
+
+- {id: proto_kk_signal_arrow, name: "Signal Arrow", character: kokomi,
+   authored_by: [claude], art_of: signal_arrow,
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 7 damage. [gold]Plan[/gold]: Deal 3 damage to ALL enemies twice.",
+   effects: [{op: damage, amount: 7, target: enemy}],
+   plan: [{op: damage, amount: 3, target: all_enemies, times: 2}],
+   # 10 / Plan 4 twice.
+   upgrade: {damage: 3, plan_damage: 1}}
+
+- {id: proto_kk_surging_shoal, name: "Surging Shoal", character: kokomi,
+   authored_by: [claude], art_of: surging_shoal,
+   cost: 2, type: attack, rarity: common,
+   description: "Deal 14 damage. [gold]Plan[/gold]: Deal 22 damage.",
+   effects: [{op: damage, amount: 14, target: enemy}],
+   plan: [{op: damage, amount: 22, target: front_enemy}],
+   # 18 / Plan 28.
+   upgrade: {damage: 4, plan_damage: 6}}
+
+- {id: proto_kk_pearl_diver, name: "Pearl Diver", character: kokomi,
+   authored_by: [claude], art_of: pearl_diver,
+   cost: 1, type: skill, rarity: common,
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: The [gold]Casket[/gold] gains 2.",
+   effects: [{op: draw, amount: 1}],
+   plan: [{op: casket_gain, amount: 2}],
+   # draw 2; the Plan line does not upgrade.
+   upgrade: {draw: 1}}
+
+- {id: proto_kk_press_the_advantage, name: "Press the Advantage", character: kokomi,
+   authored_by: [claude], art_of: press_the_advantage,
+   cost: 1, type: attack, rarity: common,
+   description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] is waiting, deal {BranchDamage:diff()} instead.",
+   effects: [{op: conditional, if: plan_held,
+              then: [{op: damage, amount: 10, target: enemy}],
+              else: [{op: damage, amount: 6, target: enemy}]}],
+   # 8 / 13. `conditional_damage` moves both branches and
+   # `conditional_then_damage` the waiting branch alone.
+   upgrade: {conditional_damage: 2, conditional_then_damage: 1}}
+
+- {id: proto_kk_shell_of_sanctuary, name: "Shell of Sanctuary", character: kokomi,
+   authored_by: [claude], art_of: shell_of_sanctuary,
+   cost: 1, type: skill, rarity: common,
+   description: "Draw 1 card. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   effects: [{op: draw, amount: 1}],
+   plan: [{op: block, amount: 9}],
+   plan_dusk: true,
+   # Plan 12; the now-line does not upgrade.
+   upgrade: {plan_block: 3}}
+
+- {id: proto_kk_driftglass, name: "Driftglass", character: kokomi,
+   authored_by: [claude], art_of: driftglass,
+   cost: 1, type: attack, rarity: common,
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 5, per: 1, count: casket_count}}],
+   # 7, plus 1 each.
+   upgrade: {formula_base: 2}}
+
+- {id: proto_kk_what_the_tokoyo_returns, name: "What the Tokoyo Returns", character: kokomi,
+   authored_by: [claude], art_of: what_the_tokoyo_returns,
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Put [gold]Open the Casket[/gold] from your [gold]Exhaust Pile[/gold] into your hand.",
+   effects: [{op: fetch_open_casket}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_depths_judgment, name: "Depths' Judgment", character: kokomi,
+   authored_by: [claude], art_of: depths_judgment,
+   cost: 2, type: attack, rarity: uncommon,
+   description: "Deal damage equal to {ExtraDamage:diff()} times the [gold]Casket[/gold]'s count.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 0, per: 3, count: casket_count}}],
+   # 4 times.
+   upgrade: {formula_per: 1}}
+
+- {id: proto_kk_tideturn, name: "Tideturn", character: kokomi,
+   authored_by: [claude], art_of: tideturn,
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {ExtraDamage:diff()} damage for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 0, per: 4, count: plans_held}}],
+   # 5 each.
+   upgrade: {formula_per: 1}}
+
+- {id: proto_kk_moon_signal, name: "Moon Signal", character: kokomi,
+   authored_by: [claude], art_of: moon_signal,
+   cost: 1, type: power, rarity: uncommon,
+   # READ BEFORE THE MORNING'S PLANS ARE CARRIED OUT, or a drained queue could
+   # never show two: `ProtoBakeKuragePower.AfterPlayerTurnStart` (sim:
+   # `combat._player_turn`) asks it beside Song of Pearls' read.
+   description: "At the start of your turn, if 2 or more [gold]Plans[/gold] are waiting, the [gold]Casket[/gold] gains 1.",
+   effects: [{op: apply_power, power: kk_moon_signal, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_pearl_current, name: "Pearl Current", character: kokomi,
+   authored_by: [claude], art_of: pearl_current,
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 2 damage 4 times. [gold]Plan[/gold]: Deal 2 damage to ALL enemies 3 times.",
+   effects: [{op: damage, amount: 2, target: enemy, times: 4}],
+   plan: [{op: damage, amount: 2, target: all_enemies, times: 3}],
+   # 3 x4 / Plan 3 x3.
+   upgrade: {damage: 1, plan_damage: 1}}
+
+- {id: proto_kk_what_the_tokoyo_took, name: "What the Tokoyo Took", character: kokomi,
+   authored_by: [claude], art_of: what_the_tokoyo_took,
+   cost: 2, type: skill, rarity: rare, exhaust: true,
+   description: "Double the [gold]Casket[/gold]'s count.",
+   effects: [{op: casket_double}],
+   upgrade: {cost: -1}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.

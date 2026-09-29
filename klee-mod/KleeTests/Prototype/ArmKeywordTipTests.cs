@@ -444,7 +444,12 @@ public class ArmKeywordTipTests
         //
         // FORTY with the second Furina text pass (2026-09-28): `ForFade`,
         // the fade's own tip, which the back performer's used to carry.
-        Assert.Equal(40, attaches.Count);
+        //
+        // FORTY-ONE with the Casket pass (2026-09-28): `ForOpenTheCasket`,
+        // the relic's token, named by What the Tokoyo Returns. (The short
+        // word `Casket` shares `ForCasket` with the relic's full name.)
+        Assert.Equal(41, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForOpenTheCasket");
         Assert.Contains(attaches, m => m.Name == "ForFade");
         Assert.Contains(attaches, m => m.Name == "ForLyney");
         Assert.Contains(attaches, m => m.Name == "ForEscoffier");

@@ -582,11 +582,15 @@ public sealed class FirstCompanionFreePower : PowerModel, ILocalizationProvider
 /// enemy ever swung; a clear on the turn-start ledger roll would have closed it
 /// one line before the morning the packet names.
 ///
-/// IT HOOKS NOTHING. <see cref="TamakushiCasket.Strike"/> asks for it at the
-/// one moment the question can be asked -- the strike itself -- which is what
-/// keeps this card and The Clouds Like Waves Rippling separable: the Clouds pay
-/// per debuff APPLIED, this pays per Casket STRIKE, and a run that has traded
-/// the relic away pays nothing here.
+/// IT HOOKS NOTHING. The Casket's strike asked for it at the one moment the
+/// question could be asked -- the strike itself -- which is what kept this
+/// card and The Clouds Like Waves Rippling separable: the Clouds pay per
+/// debuff APPLIED, this paid per Casket STRIKE.
+///
+/// THE CASKET PASS (2026-09-28) RETIRED THE STRIKE, so NOTHING CALLS
+/// <see cref="Pay"/> any more: the relic counts carried-out Plans instead.
+/// The card was not in the ruling and is left as it stands -- its second
+/// clause no longer fires -- for the main session to rule on.
 ///
 /// THE BLOCK IS POWERED (<c>ValueProp.Move</c>) for the reason every other
 /// Block in this arm is -- rule 3: her Dexterity counts on what a Plan pays.
@@ -606,8 +610,8 @@ public sealed class ShellGuardPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>The strike's payout, on the power that carries the number.
-    /// Called by <see cref="TamakushiCasket.Strike"/> after the hit has gone
-    /// out, so a strike that ends the fight has already happened.</summary>
+    /// Called by the Casket's strike until the Casket pass (2026-09-28)
+    /// retired it; no caller since.</summary>
     public static async Task Pay(
         PlayerChoiceContext choiceContext, Creature? kokomi)
     {
@@ -629,6 +633,50 @@ public sealed class ShellGuardPower : PowerModel, ILocalizationProvider
     }
 }
 
+
+/// <summary>
+/// MOON SIGNAL (the Casket pass, 2026-09-28): "At the start of your turn, if 2
+/// or more Plans are waiting, the Casket gains 1."
+///
+/// "WAITING" IS READ BEFORE THE MORNING'S PLANS ARE CARRIED OUT, or it could
+/// never be true after a drain empties the queue. So this power HOOKS
+/// NOTHING: <see cref="ProtoBakeKuragePower"/>'s turn-start hook calls
+/// <see cref="Signal"/> beside Song of Pearls' read, just before
+/// <see cref="KokomiPlan.ResolveAll"/> -- power hook order is not guaranteed,
+/// which is why the read cannot live here. The Plans it counts are the ones
+/// written last turn and about to land.
+///
+/// The Amount is the gain; copies stack it. The threshold is
+/// <see cref="KokomiOverhaulLaw.MoonSignalThreshold"/>. Sim twin:
+/// <c>kokomi_plan.moon_signal</c>.
+/// </summary>
+public sealed class MoonSignalPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Moon Signal"),
+        ("description",
+            "At the start of your turn, if "
+          + KokomiOverhaulLaw.MoonSignalThreshold + " or more "
+          + "[gold]Plans[/gold] are waiting, the [gold]Casket[/gold] gains "
+          + "[blue]{Amount}[/blue]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>The read and the gain. <paramref name="waiting"/> is the queue
+    /// depth the caller took before the drain.</summary>
+    public static void Signal(Creature? kokomi, int waiting)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var signal = kokomi!.Powers.OfType<MoonSignalPower>().FirstOrDefault();
+        if (signal == null || signal.Amount <= 0) return;
+        if (waiting < KokomiOverhaulLaw.MoonSignalThreshold) return;
+        KokomiOverhaulKit.GainCasket(kokomi, signal.Amount);
+    }
+}
 
 /// <summary>
 /// NEREID'S ASCENSION (Rare Power, 2): "The Bake-Kurage carries out your

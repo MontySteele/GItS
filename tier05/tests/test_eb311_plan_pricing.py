@@ -330,27 +330,23 @@ def test_mend_prices_one_for_one_with_block():
 
 
 def test_the_max_hp_fraction_reads_the_character_sheet():
-    """Sango Isshin, R243: a quarter of her Max HP to ALL enemies if the
-    jellyfish already carried out a Plan this turn, a flat hit otherwise.
+    """The quarter of her Max HP, R243. The 80 is
+    `tier0/content/characters/kokomi.yaml`, the same key `build_player`
+    seats her with -- not a constant invented here.
 
-    The 80 is `tier0/content/characters/kokomi.yaml`, the same key
-    `build_player` seats her with -- not a constant invented here. The row's
-    own shape supplies everything else, including which branch is which, so
-    this survives the next time the sheet moves.
+    SANGO ISSHIN LEFT THE OP (the Casket pass, 2026-09-28): it deals 6 to ALL
+    per Plan carried out this turn now, priced at the neutral single count
+    every live count here takes. The op stays registered and priced, which
+    the rename test below holds.
     """
     quarter = loader._character_index()["kokomi"]["hp"] // kokomi_plan.QUARTER
     assert quarter == 20
     card = _proto("proto_kk_sango_isshin")
-    branch = card.effects[0]
-    assert branch["if"] in draft.STATIC_PROTOTYPE_CONDITIONS
-    hit = branch["then"][0]
-    assert hit["op"] == "damage_quarter_max_hp"
+    hit = card.effects[0]
+    assert hit["op"] == "damage"
     assert hit["target"] == "all_enemies"
-    then_power = quarter * draft.STATIC_AOE_MULT
-    else_power = branch["else"][0]["amount"]
-    assert draft._static_power(card) == (
-        else_power + draft.STATIC_PROTOTYPE_CONDITIONAL_SHARE
-        * (then_power - else_power)) / card.cost
+    assert hit["amount_formula"]["count"] == "plans_carried_out_this_turn"
+    assert draft._static_power(card) > 0
 
 
 def test_the_renamed_max_hp_spelling_prices_the_same():
@@ -449,17 +445,6 @@ def test_rally_takes_cost_mods_measured_dead_dial():
     assert any(fx["op"] == "next_companion_discount" for fx in card.effects)
     assert draft._static_power(card) == (
         weak["amount"] * draft.STATIC_DEBUFF_VALUE / card.cost)
-
-
-def test_cleansing_wave_credits_the_debuff_it_removes():
-    """One debuff off her and a card now, Block planned (Kokomi core pass)."""
-    card = _proto("proto_kk_cleansing_wave")
-    draw = next(fx for fx in card.effects if fx["op"] == "draw")["amount"]
-    planned_block = card.plan[0]["amount"]
-    assert any(fx["op"] == "remove_debuff" for fx in card.effects)
-    assert draft._static_power(card) == (
-        draft.STATIC_DEBUFF_VALUE + draw * draft.STATIC_DRAW_VALUE
-        + planned_block * C.PLAN_DELAY_DISCOUNT) / card.cost
 
 
 def test_the_arm_has_no_unpriced_verb_left():

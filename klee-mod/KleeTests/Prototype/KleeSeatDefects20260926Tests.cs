@@ -57,11 +57,13 @@ public class KleeSeatDefects20260926Tests
             Assert.True(branch.FollowsHit, card.GetType().Name);
         }
 
-        // A two-armed face's branch IS the hit (Feint: "... or 10 instead"),
-        // so it keeps the fold it had.
-        var feint = Assert.IsType<FoldedDamageVar>(
-            Vars(new ProtoKkFeint()).Single(v => v.Name == "BranchDamage"));
-        Assert.False(feint.FollowsHit);
+        // A two-armed face's branch IS the hit (Press the Advantage: "... If
+        // a Plan is waiting, deal 10 instead"; Feint until the Casket pass
+        // re-keyed it, 2026-09-28), so it keeps the fold it had.
+        var press = Assert.IsType<FoldedDamageVar>(
+            Vars(new ProtoKkPressTheAdvantage())
+                .Single(v => v.Name == "BranchDamage"));
+        Assert.False(press.FollowsHit);
     }
 
     [Fact]

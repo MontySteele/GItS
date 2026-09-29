@@ -68,50 +68,41 @@ public class LiveLooks8bTests
     // ==================================================================
 
     [Fact]
-    public void Feints_headline_is_a_condition_reading_var()
+    public void Feints_headline_is_a_count_reading_var()
     {
-        // THE FIND. A Plan was written, the turn ended, the carry-out drew
-        // nothing ("Bake-Kurage: War Council, 5"), and Feint read BEFORE any
-        // play: "Deal 5 damage. If a Plan was carried out this turn, deal 10
-        // damage instead." The headline was 5 on a morning whose hit was the
-        // 10 -- it then killed an 8-HP body.
-        //
-        // A SOURCE PIN, at the headless boundary named in this file's summary:
-        // the defect is which VAR the row declares for its headline, and the
-        // preview call itself needs a combat.
+        // `EB-670`'s find was a headline that printed the floor on a morning
+        // whose hit was the branch. The Casket pass (2026-09-28) re-keyed
+        // Feint off the yes/no onto the COUNT ("Deal 4 damage, plus 3 for each
+        // Plan carried out this turn"), so the headline is the calculated
+        // var over that count -- the preview reads the same ledger the hit
+        // does, which is the property `EB-670` asked for.
         var card = Source(Path.Combine(
             "klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
             "ProtoKkFeint.cs"));
-        Assert.Contains(
-            "new PlanCarriedDamageVar(\"PlainDamage\", 5m, \"BranchDamage\", "
-            + "ValueProp.Move)", card);
-        // And the branch it reads is still declared, still on its own upgrade
-        // key -- the reason the headline reads the SIBLING rather than storing
-        // a second copy of the number.
-        Assert.Contains("new FoldedDamageVar(\"BranchDamage\", 10m", card);
-        Assert.Contains("DynamicVars[\"BranchDamage\"].UpgradeValueBy(3m)",
-                        card);
+        Assert.Contains("new CalculationBaseVar(4m)", card);
+        Assert.Contains("new ExtraDamageVar(3m)", card);
+        Assert.Contains("new FrontFoldedDamageVar(ValueProp.Move)", card);
+        Assert.Contains("DamageCmd.Attack(DynamicVars.CalculatedDamage)", card);
     }
 
     [Fact]
-    public void The_headline_var_reads_the_same_ledger_flag_the_play_reads()
+    public void The_headline_var_reads_the_same_ledger_count_the_play_reads()
     {
-        // The face and the play have to agree, so they ask one object. The
-        // emitted `OnPlay` asks `KokomiOverhaulLedger.For(...)
-        // .PlanCarriedOutThisTurn`; so does the var.
+        // The face and the play ask one object: the calculated var's
+        // multiplier is the ledger's per-turn carry-out count, and the play
+        // deals that var.
         var card = Source(Path.Combine(
             "klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
             "ProtoKkFeint.cs"));
         Assert.Contains(
-            "KokomiOverhaulLedger.For(Owner.Creature).PlanCarriedOutThisTurn",
+            "KokomiOverhaulLedger.For(card.Owner.Creature).PlansCarriedOutThisTurn",
             card);
 
         var var_ = Source(Path.Combine(
             "klee-mod", "KleeCode", "Powers", "Prototype",
             "FrontFoldedDamageVar.cs"));
+        // The condition-folding var stays for any row that prints the yes/no.
         Assert.Contains("class PlanCarriedDamageVar", var_);
-        Assert.Contains("KokomiOverhaulLedger.For(kokomi).PlanCarriedOutThisTurn",
-                        var_);
     }
 
     [Fact]

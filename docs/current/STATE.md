@@ -36,7 +36,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
-| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 39 |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 46 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 80 (68 Stage cards) |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -64,7 +64,13 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   per-Plan payoffs so at least half reward something other than volume, and
   every damaging card of hers applies Hydro (Skills too; basics unchanged).
   Pool stays 39 for this pass. Then two seats, then [USER] plays (a central
-  rule changed).
+  rule changed). **The Casket pass (2026-09-28, ruled):** the Tamakushi
+  Casket counts the Plans the Bake-Kurage carries out and deals Open the
+  Casket (0, Retain, Exhaust: Strength equal to the count, then empty it);
+  its debuff strike is gone. Feint and Sango Isshin pay per carry-out this
+  turn, six rows cut, thirteen added: the pool is 46 (plus three co-op). Shell
+  Guard's "whenever the Casket strikes" no longer fires and waits on a
+  ruling. Record: `docs/notes/prototype-surface-provenance.md`.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any

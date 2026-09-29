@@ -242,13 +242,12 @@ public class Round13Tests
     public void A_rider_names_itself_to_the_plan_it_landed_inside()
     {
         // `MovedOn` is a SUBTRACTION and a subtraction has no sources, so the
-        // rider is the only thing that can say what it was. The Casket's own
-        // strike reports the DELIVERED number, because Vulnerable moves it and
-        // the page is trying to account for a total.
-        var strike = Il.Method("TamakushiCasket", "Strike");
-        var calls = Il.Calls(strike);
+        // rider is the only thing that can say what it was. The Casket's
+        // strike was the first rider and the Casket pass (2026-09-28)
+        // retired it; Scout Ahead's draw, paid inside a later carry-out, is
+        // the one filed today.
+        var calls = Il.Calls(Il.Method("KokomiPlan", "ResolveEntry"));
 
-        Assert.Contains("ElementalHit.Deal", calls);
         Assert.Contains("KokomiPlan.NoteRider", calls);
     }
 
@@ -304,10 +303,6 @@ public class Round13Tests
         Assert.Contains("target", Il.Strings(rider));
         Assert.Contains("combat_id", Il.Strings(rider));
 
-        // And the strike is what fills them: the relic is the one line that
-        // knows both what it is and whom it hit.
-        Assert.Contains("KokomiPlan.NoteRider",
-                        Il.Calls(Il.Method("TamakushiCasket", "Strike")));
     }
 
     [Fact]

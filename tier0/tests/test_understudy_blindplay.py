@@ -6789,9 +6789,18 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-348` widened both copies to the rule the ping actually has:
         # it is a real Hydro HIT, so it reacts, takes the target's Vulnerable
         # and re-arms Hydro. Same fold-out, one clause longer.
+        # THE CASKET PASS (2026-09-28) retired the strike: the relic COUNTS
+        # carried-out Plans, and the per-Plan number is interpolated on both
+        # sides (`KokomiOverhaulLaw.CasketPerPlan`,
+        # `blindplay_shape.CASKET_PER_PLAN`), so the anchors are the prose
+        # either side of it and of the golded spans.
         "Tamakushi Casket": [
-            "Your relic. Each debuff you apply is a ",
-            " hit on that ", "enemy: it reacts, takes its "],
+            "Your relic. Each ", "carries out adds ",
+            " turns the count into "],
+        # And the relic's token, named by What the Tokoyo Returns.
+        "Open the Casket": ["0-cost, Retain, Exhaust. Gain ",
+                            " equal to the ",
+                            "Casket's count, then empty it."],
         # 2026-09-25 (the afternoon Klee seats): `Companion` HAS a tip now,
         # and the page's row opens with its sentence word for word, then
         # keeps the reward-slot sentence the tip does not carry. Until then
@@ -8895,11 +8904,12 @@ def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
     smith["card_select"]["cards"].append(
         {"id": "KLEEMOD-PROTO_KK_DEEP_CURRENT", "name": "Deep Current",
          "cost": "1", "type": "Attack",
-         "description": "Deal 6 damage to ALL enemies."})
+         "description": "Deal 7 damage to ALL enemies."})
     page = blindplay.observe(smith)
 
-    # The card the seat guessed on, both faces, one under the other.
-    assert "    Deal 6 damage to ALL enemies." in page
+    # The card the seat guessed on, both faces, one under the other (7 and 9
+    # since the Casket pass, 2026-09-28; it was 6 to 9 when the seat met it).
+    assert "    Deal 7 damage to ALL enemies." in page
     assert "    Upgraded: Deal 9 damage to ALL enemies." in page
     # And the screen's own rows, including one whose printed face carries the
     # game's appended keyword sentence -- which is why the match is a search

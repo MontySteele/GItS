@@ -575,6 +575,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # that UNWRITE a Plan, which is what the pool pass is for.
                   "cancel_last_plan", "cancel_all_plans_cash",
                   "redirect_queued_plans",
+                  # THE CASKET PASS (2026-09-28): the two now-lines that work
+                  # the Tamakushi Casket's count. What the Tokoyo Returns
+                  # fetches Open the Casket back out of the Exhaust Pile, and
+                  # What the Tokoyo Took doubles the count. One verified call
+                  # site each on `KokomiOverhaulKit`.
+                  "fetch_open_casket", "casket_double",
                   # PLAN-ONLY verbs: legal inside a row's `plan:` list and
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
@@ -595,6 +601,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "draw_per_plan_after", "draw_per_plan_this_turn",
                   "next_plan_double_damage",
                   "next_plan_extra_carry_out",
+                  # THE CASKET PASS (2026-09-28), Pearl Diver's "Plan: The
+                  # Casket gains 2". Plan-only: no row prints it on a now-line.
+                  "casket_gain",
                   # `EB-655` (Battle Plan): the carry-out's rider, plan-only
                   # for the same reason -- a now-line spelling would be a
                   # different, unpriced card.
@@ -858,8 +867,18 @@ ARM_KEYWORDS = (
     # what makes it strike. `Grounded`'s shape and `Oz`'s: the attach travels
     # with the printed word, so a second row naming the relic carries the
     # definition the day it is authored. NO PLURAL: there is one Casket.
-    ArmKeyword("Tamakushi Casket", ("Tamakushi Casket",),
+    #
+    # THE CASKET PASS (2026-09-28). The relic now COUNTS, and five faces read
+    # or move the count by its SHORT name ("the Casket gains 2", "for each
+    # point in the Casket"). The short name is a second TOKEN of this row and
+    # not a row of its own: it is the same thing, so it is the same tip and
+    # the same key.
+    ArmKeyword("Tamakushi Casket", ("Tamakushi Casket", "Casket"),
                "ArmKeywordTips.ForCasket"),
+    # And the token the relic deals into her opening hand, named by What the
+    # Tokoyo Returns, which fetches it back.
+    ArmKeyword("Open the Casket", ("Open the Casket",),
+               "ArmKeywordTips.ForOpenTheCasket"),
     # The companion arm's one. `Swirl` is the shared Anemo reaction printed as
     # a VERB by ten Universals; the eight reaction PREVIEWS are board-aware and
     # say nothing over an aura-less board.
@@ -2381,7 +2400,10 @@ DRAW_AFTER_PLANS_FIELDS = {"op", "per", "amount"}
 #: a `target` and has its own field set below.
 KOKOMI_BARE_OPS = {"next_companion_discount", "remove_debuff",
                    "carry_out_front_plan", "plan_from_exhaust",
-                   "cancel_last_plan", "cancel_all_plans_cash"}
+                   "cancel_last_plan", "cancel_all_plans_cash",
+                   # THE CASKET PASS (2026-09-28): What the Tokoyo Returns and
+                   # What the Tokoyo Took. Neither prints a number.
+                   "fetch_open_casket", "casket_double"}
 
 #: Converging Tide's one field (`EB-643`): the enemy the queue re-aims at, which
 #: is the enemy the card was played on -- the same `target:` spelling every
@@ -2443,6 +2465,8 @@ PLAN_CLAUSE_KINDS = {
     # Attacks deal 3 additional damage" (Battle Plan's clause, mirrored).
     "ally_draw": "AllyDraw",
     "others_attack_damage_this_turn": "OthersAttackDamageThisTurn",
+    # THE CASKET PASS (2026-09-28), Pearl Diver: "Plan: The Casket gains 2."
+    "casket_gain": "CasketGain",
     "apply_power": None,
 }
 
@@ -2508,7 +2532,10 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  "first_companion_free",
                  # THE CO-OP SET: both name the carry-out turn, and the first
                  # a player captured at writing.
-                 "ally_draw", "others_attack_damage_this_turn"}
+                 "ally_draw", "others_attack_damage_this_turn",
+                 # THE CASKET PASS (2026-09-28): Pearl Diver's gain is what the
+                 # carry-out buys; no row prints it on a now-line.
+                 "casket_gain"}
 
 #: R276. Feigned Retreat's second printed number ("deal 14 instead") -- the
 #: hit when she lost no HP since the Plan was written. The twin of
@@ -3023,6 +3050,11 @@ APPLY_POWERS = {
     # the window is "until your next turn" and is closed by
     # `ProtoBakeKuragePower.AfterPlayerTurnStart`, one line after the morning
     # the packet says strikes inside it.
+    # THE CASKET PASS (2026-09-28). Moon Signal: the queue is read BEFORE the
+    # morning drains it (`ProtoBakeKuragePower.AfterPlayerTurnStart`).
+    "kk_moon_signal": ("MoonSignalPower", None,
+        "At the start of your turn, if 2 or more [gold]Plans[/gold] are "
+        "waiting, the [gold]Casket[/gold] gains {X}."),
     "kk_shell_guard": ("ShellGuardPower", None,
         "Until your next turn, whenever the [gold]Tamakushi Casket[/gold] "
         "strikes, gain {X} [gold]Block[/gold]."),
@@ -4357,6 +4389,7 @@ def blocked_reason(
                 and kokomi_companions_this_turn_calc_rider(card, effect) is None
                 and plans_carried_out_morning_rider(card, effect) is None
                 and debuffs_on_target_calc_rider(card, effect) is None
+                and kokomi_casket_calc_rider(card, effect) is None
                 and plans_held_draw_rider(card, effect) is None
                 and swirls_turn_calc_rider(card, effect) is None
                 # QUARANTINED (`EB-723`): the Stage's three counts, on the
@@ -5629,6 +5662,45 @@ def plans_carried_out_morning_rider(
             "card.Owner.Creature).PlansThisMorning")
 
 
+#: THE CASKET PASS (2026-09-28). Three per-turn or per-combat counts the
+#: Kokomi arm's damage rows read, each on the damage rail's
+#: `CalculatedDamageVar` triple:
+#:   * `casket_count` -- Driftglass and Depths' Judgment, the Tamakushi
+#:     Casket's count (`KokomiOverhaulLedger.CasketCount`, per combat);
+#:   * `plans_carried_out_this_turn` -- Feint and Sango Isshin, every
+#:     carry-out this turn, a doubled one twice
+#:     (`KokomiOverhaulLedger.PlansCarriedOutThisTurn`);
+#:   * `plans_held` -- Tideturn, "for each Plan waiting", the queue
+#:     (`KokomiPlan.PlansHeld`, the reader Tide Chart's draw took).
+#: Sim twins: `effects._runtime_count`, the same three tokens.
+KOKOMI_CASKET_COUNTS = {
+    "casket_count": "static (card, _) => KokomiOverhaulLedger.For("
+                    "card.Owner.Creature).CasketCount",
+    "plans_carried_out_this_turn":
+        "static (card, _) => KokomiOverhaulLedger.For("
+        "card.Owner.Creature).PlansCarriedOutThisTurn",
+    "plans_held": "static (card, _) => KokomiPlan.PlansHeld("
+                  "card.Owner.Creature)",
+}
+
+
+def kokomi_casket_calc_rider(
+        card: dict, eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: <KOKOMI_CASKET_COUNTS>}` on a
+    damage op -- the Casket pass's five readers. Same triple and the same
+    damage-only rule as the riders beside it: every count moves inside a
+    fight, so none can be a literal."""
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    reader = KOKOMI_CASKET_COUNTS.get(formula.get("count"))
+    if reader is None:
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)), reader)
+
+
 def debuffs_on_target_calc_rider(
         card: dict, eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: debuffs_on_target}` -- Well Laid
@@ -6703,6 +6775,11 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     debuffs_on_target = debuffs_on_target_calc_rider(card, eff)
     if debuffs_on_target is not None:
         return debuffs_on_target
+    # The Casket pass (2026-09-28): the Casket, the turn's carry-outs, the
+    # queue.
+    casket = kokomi_casket_calc_rider(card, eff)
+    if casket is not None:
+        return casket
     swirls_turn = swirls_turn_calc_rider(card, eff)
     if swirls_turn is not None:
         return swirls_turn
@@ -7593,6 +7670,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or kokomi_companions_this_turn_calc_rider(card, e) is not None
             or plans_carried_out_morning_rider(card, e) is not None
             or debuffs_on_target_calc_rider(card, e) is not None
+            or kokomi_casket_calc_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
             # QUARANTINED (`EB-723`): the Stage's counts join the same two
             # vars on the identical argument -- the rows render through the
@@ -7615,6 +7693,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or kokomi_companions_this_turn_calc_rider(card, e) is not None
             or plans_carried_out_morning_rider(card, e) is not None
             or debuffs_on_target_calc_rider(card, e) is not None
+            or kokomi_casket_calc_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
             # QUARANTINED (`EB-723`): the Stage's counts join the same two
             # vars on the identical argument -- the rows render through the
@@ -10795,6 +10874,19 @@ def build_body(
             lines.append(
                 "await KokomiPlan.ResolveFront("
                 "choiceContext, Owner.Creature);")
+
+        elif op == "fetch_open_casket":
+            # What the Tokoyo Returns (the Casket pass, 2026-09-28). The first
+            # Open the Casket in her Exhaust Pile goes to her hand; none there,
+            # nothing happens.
+            lines.append(
+                "await KokomiOverhaulKit.FetchOpenCasket("
+                "choiceContext, Owner.Creature);")
+
+        elif op == "casket_double":
+            # What the Tokoyo Took (the Casket pass, 2026-09-28).
+            lines.append(
+                "await KokomiOverhaulKit.DoubleCasket(Owner.Creature);")
 
         elif op == "cancel_last_plan":
             # Second Thoughts (`EB-643`). THE NEWEST Plan, where Change of
@@ -15141,7 +15233,10 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "KokomiRiderTips.ForKuragePulse("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-        if card.get("type") == "attack":
+        # THE CASKET PASS (2026-09-28): NOT on an arm row. The Kokomi arm
+        # retired the Garment, so the tip could never show under it.
+        if (card.get("type") == "attack"
+                and not str(card.get("id", "")).startswith("proto_")):
             tips_expr = (
                 "KokomiRiderTips.ForGarmentAttack("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")

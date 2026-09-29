@@ -538,6 +538,9 @@ public static class KleeMod
                     // row here.
                     [Cards.ArmKeywordTips.CasketKey + ".title"] =
                         "Tamakushi Casket",
+                    // THE CASKET PASS (2026-09-28): the token the relic deals.
+                    [Cards.ArmKeywordTips.OpenTheCasketKey + ".title"] =
+                        "Open the Casket",
                     // `EB-378`. The rider, not a keyword: the rows whose Hydro
                     // arrives with the jellyfish's carry-out rather than with
                     // the play.

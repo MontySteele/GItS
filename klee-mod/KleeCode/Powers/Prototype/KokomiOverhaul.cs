@@ -14,7 +14,7 @@ namespace KleeMod.Powers;
 /// <b>Mend</b> heals and never above the HP she entered the fight with. Slice
 /// one (<c>kokomi-overhaul-slice-1-2026-09-01.md</c> draft 6) was the ten-card
 /// starter, 26 pool rows, Tamakushi Casket and the engine list in its sec.5;
-/// the pool passes since have made it 39 rows
+/// the pool passes since have made it 46 rows
 /// (<c>KokomiOverhaulRoster.Slice()</c>).
 ///
 /// DRAFT 2's RULES ARE GONE, NOT OFF. Tide, Surge, Exert, the pulse and its
@@ -45,7 +45,7 @@ namespace KleeMod.Powers;
 ///   * <c>Kokomi.StartingRelics</c> -- Tamakushi Casket instead of the Pearl
 ///     of Wisdom, because the Pearl IS the exhaust funnel this arm retires.
 ///   * <c>KokomiCardPool.FilterThroughEpochs</c> -- her whole offerable pool is
-///     the slice's 39 rows (<see cref="KokomiOverhaulRoster.OfferablePool"/>).
+///     the slice's 46 rows (<see cref="KokomiOverhaulRoster.OfferablePool"/>).
 ///   * <see cref="ArmStarterBasics"/> -- which pair of basics is HERS when a
 ///     base-game effect asks the character rather than reading her deck.
 ///     `EB-351` added it: Large Capsule reads `CardPool.AllCards`, which the
@@ -116,18 +116,34 @@ public static class KokomiOverhaul
 }
 
 /// <summary>
-/// The number the overhaul's RULES carry, and it is ONE. Draft 6's rules are
-/// structural -- where a card lands and when -- so almost every figure is a
-/// CARD's and stays on its row. The relic's strike is the exception: it is a
-/// rule Tamakushi Casket carries, printed on the relic and on no card.
+/// The numbers the overhaul's RULES carry. Draft 6's rules are structural --
+/// where a card lands and when -- so almost every figure is a CARD's and stays
+/// on its row. The relic's are the exception: Tamakushi Casket carries a rule
+/// printed on the relic and on no card.
 ///
-/// MIRRORED BY VALUE from tier0, which is why it is a named constant rather
-/// than a literal at the call site (<c>tools/lint_constant_parity.py</c>).
+/// THE CASKET PASS (2026-09-28) REPLACED THE ONE THAT WAS HERE. The relic's
+/// debuff strike (`CasketStrike`, a 2 Hydro hit per debuff she applied) is
+/// gone; the relic counts the Plans the Bake-Kurage carries out instead, and
+/// Open the Casket turns the count into Strength. [USER]: "an artifact that
+/// grants / tracks an alternative energy that builds by 1 for every Plan
+/// played, and adds one 0-cost Retain / Exhaust card that converts that energy
+/// into Strength." "1 strength per point seems fine; we can adjust down if we
+/// need to."
+///
+/// MIRRORED BY VALUE from tier0, which is why they are named constants rather
+/// than literals at the call site (<c>tools/lint_constant_parity.py</c>).
 /// </summary>
 public static class KokomiOverhaulLaw
 {
-    /// <summary>Tamakushi Casket: the jellyfish's Hydro strike, per debuff she
-    /// applies to an enemy. Mirrors
-    /// <c>C.KOKOMI_OVERHAUL_CASKET_STRIKE</c>.</summary>
-    public const int CasketStrike = 2;
+    /// <summary>What one carried-out Plan adds to the Casket. Mirrors
+    /// <c>C.KOKOMI_OVERHAUL_CASKET_PER_PLAN</c>.</summary>
+    public const int CasketPerPlan = 1;
+
+    /// <summary>Open the Casket's rate: Strength per point in the Casket.
+    /// Mirrors <c>C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT</c>.</summary>
+    public const int CasketStrengthPerPoint = 1;
+
+    /// <summary>Moon Signal's "if 2 or more Plans are waiting". Mirrors
+    /// <c>C.KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD</c>.</summary>
+    public const int MoonSignalThreshold = 2;
 }

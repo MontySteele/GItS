@@ -137,7 +137,8 @@ public class KokomiPoolPassTwoTests
     {
         var card = new ProtoKkSecondWave();
         Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, card.Rarity);
+        // Uncommon since the Casket pass (2026-09-28).
+        Assert.Equal(CardRarity.Uncommon, card.Rarity);
 
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.NextPlanExtraCarryOut, clause.Kind);

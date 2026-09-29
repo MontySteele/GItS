@@ -239,48 +239,9 @@ public class KokomiPoolPassTests
     }
 
     // ======================================================================
-    // 5. WELL LAID -- the morning, read from the damage side
+    // 5. WELL LAID -- cut by the Casket pass (2026-09-28); its pins left
+    //    with the row.
     // ======================================================================
-
-    [Fact]
-    public void Well_laid_is_a_free_attack_with_a_floor_and_a_scaler()
-    {
-        var card = new ProtoKkWellLaid();
-        Assert.Equal(0, card.EnergyCost.Canonical);
-        Assert.Equal(CardType.Attack, card.Type);
-        Assert.Equal(CardRarity.Common, card.Rarity);
-
-        // The `CalculatedDamageVar` TRIPLE (R276 pick 1): the base is what a
-        // clean enemy takes, the extra is the per-debuff term.
-        var vars = Vars(card);
-        Assert.Equal(3m, vars.Single(v => v.Name == "CalculationBase").BaseValue);
-        Assert.Equal(3m, vars.Single(v => v.Name == "ExtraDamage").BaseValue);
-        Assert.Contains(vars, v => v.Name == "CalculatedDamage");
-    }
-
-    [Fact]
-    public void Well_laid_prints_no_plan_line()
-    {
-        Assert.False(typeof(IPlannedCard)
-                         .IsAssignableFrom(typeof(ProtoKkWellLaid)));
-        Assert.Equal("Deal {CalculationBase:diff()} damage. Deals "
-                   + "{ExtraDamage:diff()} additional damage for each debuff "
-                   + "on the enemy.",
-                     Face(new ProtoKkWellLaid()));
-    }
-
-    [Fact]
-    public void Well_laid_counts_distinct_debuffs_on_its_target()
-    {
-        // R276 pick 1 re-aimed it off Plan volume: the count is the target's
-        // debuffs, the same `PowerType.Debuff` read `HasDebuff` makes.
-        var mine = Il.Calls(Il.Method("ProtoKkWellLaid", "get_CanonicalVars"))
-            .Concat(NestedCalls(typeof(ProtoKkWellLaid)))
-            .ToList();
-        Assert.Contains(mine, c => c.Contains("DebuffCount"));
-        Assert.DoesNotContain(mine, c => c.Contains("PlansThisMorning"));
-        Assert.Equal(0, KokomiOverhaulKit.DebuffCount(null));
-    }
 
     // ======================================================================
     // 6. FEIGNED RETREAT -- both halves, only when planned
@@ -395,12 +356,13 @@ public class KokomiPoolPassTests
         // forgot one arm over, which is why the gate exists.
         var slice = Il.CallSequence(
             Il.Method("KokomiOverhaulRoster", "Slice")).ToList();
+        // Four since the Casket pass (2026-09-28) cut Well Laid.
         foreach (var row in new[] { "ProtoKkRiptide", "ProtoKkPincer",
-                                    "ProtoKkFlank", "ProtoKkWellLaid",
-                                    "ProtoKkFeignedRetreat" })
+                                    "ProtoKkFlank", "ProtoKkFeignedRetreat" })
         {
             Assert.Contains(slice, c => c.Contains(row));
         }
+        Assert.DoesNotContain(slice, c => c.Contains("ProtoKkWellLaid"));
 
         var starter = Il.CallSequence(
             Il.Method("KokomiOverhaulRoster", "StartingDeck")).ToList();

@@ -23,6 +23,18 @@ both engines close the window one line AFTER the next morning's drain
 true. "This turn" would print a smaller window than the rule has, which is the
 defect this row exists to end running the other way. The face keeps its words;
 this file pins WHY.
+
+THE CASKET PASS (2026-09-28) REWROTE THE RELIC, and the tip and the page with
+it. [USER]: "an artifact that grants / tracks an alternative energy that
+builds by 1 for every Plan played, and adds one 0-cost Retain / Exhaust card
+that converts that energy into Strength." The debuff strike is retired; the
+Casket COUNTS the Plans the Bake-Kurage carries out. The tip still travels
+with the printed word -- by the relic's full name (Shell Guard) and by its
+short one ("the Casket gains 2") -- and the number it quotes is still read,
+never typed: `KokomiOverhaulLaw.CasketPerPlan` on the mod side,
+`blindplay_shape.CASKET_PER_PLAN` on the page. Shell Guard's own clause
+("whenever the Tamakushi Casket strikes") no longer fires; the card was not
+in the ruling.
 """
 
 from __future__ import annotations
@@ -69,7 +81,10 @@ def test_the_tip_attaches_to_every_face_that_names_the_relic():
 
     entry = next(k for k in gen.ARM_KEYWORDS if k.word == "Tamakushi Casket")
     assert entry.attach == "ArmKeywordTips.ForCasket"
-    assert entry.tokens == ("Tamakushi Casket",)
+    # The Casket pass: the short name is the same word.
+    assert entry.tokens == ("Tamakushi Casket", "Casket")
+    assert "ArmKeywordTips.ForCasket" in gen.arm_keyword_tip_calls(
+        "Draw 1 card. [gold]Plan[/gold]: The [gold]Casket[/gold] gains 2.")
 
     face = ("Gain 5 [gold]Block[/gold]. Until your next turn, whenever the "
             "[gold]Tamakushi Casket[/gold] strikes, gain 3 [gold]Block[/gold].")
@@ -83,66 +98,57 @@ def test_the_tip_attaches_to_every_face_that_names_the_relic():
 
 
 def test_the_number_is_read_and_never_typed():
-    """A retune of the strike must not be able to leave either surface
+    """A retune of the per-Plan count must not be able to leave either surface
     quoting a retired number, which is `EB-89`'s standing rule for this
     table."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     body = tips[tips.index("public static IEnumerable<IHoverTip> ForCasket"):]
     body = body[:body.index(";")]
-    assert "KokomiOverhaulLaw.CasketStrike" in body
-    # The digit itself appears nowhere in the sentence.
-    assert " 2 [gold]Hydro[/gold]" not in body
+    assert "KokomiOverhaulLaw.CasketPerPlan" in body
+    assert "CasketStrike" not in body
 
-    # The page's twin interpolates its own mirror of the same constant.
     notes = (REPO / "understudy"
              / "blindplay_notes.py").read_text(encoding="utf-8")
-    assert "{CASKET_STRIKE} Hydro hit on " in notes
+    assert "{CASKET_PER_PLAN}" in notes
+    assert "CASKET_STRIKE" not in notes
 
 
 def test_both_surfaces_and_both_engines_carry_one_number():
     """`blindplay_shape` may not reach `tier0`, so its copy is held in step
-    from here -- the discipline `BOMB_GROWTH` and `SHATTER_DAMAGE` are already
-    under -- and the C# law is the third copy `lint_constant_parity` pins by
-    value."""
-    assert blindplay_shape.CASKET_STRIKE == C.KOKOMI_OVERHAUL_CASKET_STRIKE
+    from here, and the C# law is the third copy `lint_constant_parity` pins
+    by value."""
+    assert blindplay_shape.CASKET_PER_PLAN == C.KOKOMI_OVERHAUL_CASKET_PER_PLAN
+    assert not hasattr(blindplay_shape, "CASKET_STRIKE")
     law = LAW_CS.read_text(encoding="utf-8")
-    assert (f"public const int CasketStrike = "
-            f"{C.KOKOMI_OVERHAUL_CASKET_STRIKE};") in law
+    assert (f"public const int CasketPerPlan = "
+            f"{C.KOKOMI_OVERHAUL_CASKET_PER_PLAN};") in law
+    assert "public const int CasketStrike" not in law
 
 
-def test_the_relic_says_the_ping_is_a_real_hit_and_the_tip_says_what_that_buys():
-    """`EB-348`. THE RULE IN TWO SENTENCES, ONE PER SURFACE.
-
-    THE FIND (Kokomi r4d, act 1 finding 6, act 2 finding 5, act 3 finding 2).
-    "Deals N Hydro damage" reads as a number arriving. It is a HIT through the
-    same `ElementalHit` funnel every other non-attack hit in this mod uses, so
-    it reacts -- act 3 watched a ping Vaporize the player's own standing Pyro
-    aura for 2 x 1.5 x 1.5 -- it takes the target's Vulnerable, and it re-arms
-    Hydro; Red Mask's combat-start Weak fired it on all three enemies at once.
-
-    SPLIT ACROSS THE SURFACES BECAUSE THE RELIC ROW HAS NO ROOM: it sat at 119
-    of the 120-character relic ceiling. The FACE says the ping is a real hit
-    and names its element and its base; the TIP, which a card naming the relic
-    raises, spells out what "real" buys. The page carries the tip's sentence.
-
-    Seen to FAIL: every surface said "deals N Hydro damage" and stopped.
-    """
+def test_the_relic_and_the_tip_say_the_casket_counts():
+    """The relic's face, the card-side tip and the page all say the one rule:
+    each carried-out Plan adds to the count, and Open the Casket turns it into
+    Strength. The strike's words are gone from all three."""
     relic = RELIC_CS.read_text(encoding="utf-8")
-    assert ('"Start each combat with the [gold]Bake-Kurage[/gold]. Each debuff "'
-            in relic)
-    assert '+ "you apply lands a real [blue]"' in relic
+    assert '"[gold]Open the Casket[/gold] in hand. Each [gold]Plan[/gold] it "' \
+        in relic
+    assert "+ KokomiOverhaulLaw.CasketPerPlan" in relic
+    assert "debuff" not in relic[relic.index('("description",'):
+                                 relic.index("ExtraHoverTips")]
 
     tips = TIPS_CS.read_text(encoding="utf-8")
-    assert '"Your relic. Each debuff you apply is a "' in tips
-    assert "it reacts, takes its [gold]Vulnerable[/gold], and re-arms " in tips
+    assert '"Your relic. Each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] "' \
+        in tips
 
     page = blindplay_notes.ARM_KEYWORDS["Tamakushi Casket"]
     assert page == (
-        f"Your relic. Each debuff you apply is a "
-        f"{C.KOKOMI_OVERHAUL_CASKET_STRIKE} Hydro hit on that enemy: it "
-        f"reacts, takes its Vulnerable, and re-arms Hydro.")
-    # Inside the 135-character mechanic-tip ceiling, so it needs no exception
-    # in `lint_text_conventions`.
+        f"Your relic. Each Plan the Bake-Kurage carries out adds "
+        f"{C.KOKOMI_OVERHAUL_CASKET_PER_PLAN}. Open the Casket turns the count "
+        f"into Strength.")
+    assert blindplay_notes.ARM_KEYWORDS["Open the Casket"] == (
+        "0-cost, Retain, Exhaust. Gain Strength equal to the Casket's count, "
+        "then empty it.")
+    # Inside the 135-character mechanic-tip ceiling.
     assert len(page) <= 135
 
 
@@ -154,6 +160,9 @@ def test_the_tip_has_a_title_and_not_a_raw_key():
     assert '"Tamakushi Casket",' in mod
     assert 'public const string CasketKey = "KLEEMOD-ARM_CASKET";' in \
         TIPS_CS.read_text(encoding="utf-8")
+    # And the token's tip (the Casket pass).
+    assert 'OpenTheCasketKey + ".title"] =' in mod
+    assert '"Open the Casket",' in mod
 
 
 def test_the_window_is_wider_than_this_turn_and_the_face_says_so(overhaul):
@@ -206,27 +215,22 @@ def test_the_window_is_wider_than_this_turn_and_the_face_says_so(overhaul):
         in powers
 
 
-def test_the_debuff_answer_clause_still_fires_on_both_spellings():
-    """`EB-348` rewrote the relic's sentence, and `EB-433`'s panel clause is
-    gated by matching that sentence rather than the relic's name.
-
-    BOTH SPELLINGS, not just the current one. The gate reads a relic a RUN is
-    holding, the old wording is what a save from before the rewrite carries,
-    and a clause that silently stopped printing is exactly the defect `EB-433`
-    was filed on.
+def test_the_debuff_answer_clause_is_silent_on_the_counting_relic():
+    """`EB-433`'s panel clause is gated by matching the relic's sentence
+    rather than its name, so it reads the relic a run holds. The Casket pass
+    (2026-09-28) took the strike off the relic, and the clause -- "its
+    answering strike is itself a Hydro hit" -- must go silent on the new face
+    while still answering the old spellings a relic might carry.
     """
     from understudy import blindplay_render
 
     rx = blindplay_render._DEBUFF_ANSWERING_HIT
-    now = ("Start each combat with the [gold]Bake-Kurage[/gold]. Each debuff "
-           f"you apply lands a real [blue]{C.KOKOMI_OVERHAUL_CASKET_STRIKE}"
-           "[/blue] [gold]Hydro[/gold] hit on that enemy.")
-    before = ("Start each combat with the [gold]Bake-Kurage[/gold]. Whenever "
-              "you apply a debuff to an enemy, it deals [blue]2[/blue] "
-              "[gold]Hydro[/gold] damage to that enemy.")
-    assert rx.search(now)
+    now = ("Start each combat with the [gold]Bake-Kurage[/gold] and "
+           "[gold]Open the Casket[/gold] in hand. Each [gold]Plan[/gold] it "
+           f"carries out adds {C.KOKOMI_OVERHAUL_CASKET_PER_PLAN} to the "
+           "Casket.")
+    before = ("Start each combat with the [gold]Bake-Kurage[/gold]. Each debuff "
+              "you apply lands a real [blue]2[/blue] [gold]Hydro[/gold] hit on "
+              "that enemy.")
+    assert not rx.search(now)
     assert rx.search(before)
-    # And it is still a relic test and not a word test: nothing else on a
-    # relic face answers a debuff with a hit.
-    assert not rx.search("Start each combat with the Bake-Kurage.")
-    assert not rx.search("Gain 6 Block each turn.")

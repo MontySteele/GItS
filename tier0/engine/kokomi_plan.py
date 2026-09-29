@@ -82,6 +82,9 @@ PLAN_KINDS = frozenset((
     # Strike's "each other player's Attacks deal 3 additional damage". Both
     # are about ANOTHER player, and tier 0 seats one (`engine/coop.py`).
     "ally_draw", "others_attack_damage_this_turn",
+    # THE CASKET PASS (2026-09-28): Pearl Diver's "The Casket gains 2". See
+    # `CASKET_GAIN`.
+    "casket_gain",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -185,7 +188,10 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            # THE CO-OP SET: the player is the one captured
                            # when the Plan was written, and "next turn" is the
                            # carry-out turn.
-                           "ally_draw", "others_attack_damage_this_turn"))
+                           "ally_draw", "others_attack_damage_this_turn",
+                           # THE CASKET PASS: Pearl Diver's gain is what the
+                           # carry-out buys; no row prints it on a now-line.
+                           "casket_gain"))
 
 #: Tide Wall's clause (`EB-335`, R246 pick 2): "Gain N Block for each Plan the
 #: Bake-Kurage carries out this morning." PLAN-ONLY by construction -- the
@@ -343,6 +349,18 @@ FIRST_CARD_FREE = "kk_first_card_free"
 #: (`spend_first_companion_free`), dropped at her turn's end.
 #: `FirstCompanionFreePower` is the twin.
 FIRST_COMPANION_FREE = "kk_first_companion_free"
+#: THE CASKET PASS (2026-09-28). The Tamakushi Casket COUNTS: each Plan the
+#: Bake-Kurage carries out adds `C.KOKOMI_OVERHAUL_CASKET_PER_PLAN` while she
+#: holds the relic (`note_casket_carry_out`), and the count is
+#: `state.kk_casket`, per fight. `CASKET_GAIN` is Pearl Diver's plan clause
+#: ("The Casket gains 2"), `MOON_SIGNAL` the Power that adds to it when 2 or
+#: more Plans wait at the start of her turn, and `OPEN_THE_CASKET` the token
+#: the relic deals into her opening hand -- "Gain Strength equal to the
+#: Casket's count, then empty it." Twins: `KokomiOverhaulKit`'s Casket block,
+#: `MoonSignalPower`, `OpenTheCasket`.
+CASKET_GAIN = "casket_gain"
+MOON_SIGNAL = "kk_moon_signal"
+OPEN_THE_CASKET = "kk_open_the_casket"
 #: Shell Guard's window (`EB-335`). THE AMOUNT IS THE BLOCK PER STRIKE, not a
 #: number of turns: "until your next turn, whenever the Tamakushi Casket
 #: strikes, gain 3 Block". `close_shell_guard` is the one place it ends, and
@@ -1346,6 +1364,10 @@ def _note_plan_resolved(state: CombatState) -> None:
     # Sango Isshin's condition, written here because this is the one place a
     # Plan is carried out -- dawn, Change of Plans and Moon all reach it.
     state.kk_plan_carried_out_this_turn = True
+    # THE CASKET PASS (2026-09-28): the count Feint and Sango Isshin read,
+    # and the relic's +1 -- once per CARRY-OUT, so a doubled one counts twice.
+    state.kk_plans_carried_out_this_turn += 1
+    note_casket_carry_out(state)
     n = p.powers.get(PRINCESS_OF_WATATSUMI, 0)
     if n:
         # Block first, then the card: `PrincessOfWatatsumiPlanPower`'s order.
@@ -1503,6 +1525,9 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # `AttackUpThisTurnPower` is the C# twin.
         powers.apply_power(state, p, "attack_up_this_turn", amount)
         state.emit("plan_battle_plan", bonus=amount)
+    elif op == CASKET_GAIN:
+        # THE CASKET PASS, PEARL DIVER: "The Casket gains 2."
+        gain_casket(state, amount)
     elif op in coop.PLAN_OPS:
         # THE CO-OP SET: Joint Orders' ally draws, Coordinated Strike's other
         # players hit harder. Nobody else is at a one-seat table, so the
@@ -1745,6 +1770,9 @@ def roll_turn(state: CombatState) -> None:
     state.companion_plays_last_turn = state.companion_plays_this_turn
     state.kk_once_per_turn.clear()
     state.kk_plan_carried_out_this_turn = False
+    # The Casket pass: the per-turn count of carry-outs. The Casket's own
+    # count is per FIGHT and is not on this line.
+    state.kk_plans_carried_out_this_turn = 0
     # `EB-335`. Tide Wall's morning count, cleared HERE and written a few lines
     # later by `resolve_all` -- which runs after this in `combat._player_turn`,
     # so a morning that drains nothing reads an honest zero rather than
@@ -1800,21 +1828,13 @@ def note_companion_played(state: CombatState, card: Card) -> None:
     powers.apply_power(state, front, "weak", n, applier=state.player)
 
 
-#: Re-entrancy latch for the debuff answer. `KokomiOverhaulKit._answering`'s
-#: twin, and it is not paranoia: the Casket's answer is a HYDRO hit, a Hydro
-#: hit into a Cryo aura Freezes, and a boss-room Freeze applies Vulnerable --
-#: a debuff she applied to an enemy. Without the latch the relic would answer
-#: its own answer until the stack ran out. A plain module global because the
-#: whole event is synchronous and this engine is single-threaded, cleared in a
-#: `finally` so a throw inside a strike cannot leave the relic permanently
-#: deaf. (`state` would be the tidier home; the C# uses a static and the two
-#: are the same object here, since one fight is one call stack.)
-_answering = False
-
-
 def note_debuff_applied(state: CombatState, target, name: str, stacks: int,
                         applier) -> None:
-    """"SHE APPLIED A DEBUFF TO AN ENEMY", once, for both things that read it.
+    """"SHE APPLIED A DEBUFF TO AN ENEMY", once, for the thing that reads it.
+
+    THE CASKET PASS (2026-09-28) TOOK THE RELIC OFF THIS EVENT: the Tamakushi
+    Casket no longer answers a debuff with a Hydro strike. The Clouds Like
+    Waves Rippling is the one reader left.
 
     `KokomiOverhaulKit.IsHerDebuffOnEnemy` is the C#'s one predicate, shared by
     the relic and The Clouds Like Waves Rippling so the two can never come to
@@ -1829,8 +1849,6 @@ def note_debuff_applied(state: CombatState, target, name: str, stacks: int,
     limits are documented there); an ENEMY carrier (her own Weak is not a
     debuff she applied to an enemy); and HER as the applier.
     """
-    global _answering
-
     if not live(state) or stacks <= 0:
         return
     if name not in DEBUFF_APPLICATIONS:
@@ -1847,9 +1865,7 @@ def note_debuff_applied(state: CombatState, target, name: str, stacks: int,
 
     # THE CLOUDS LIKE WAVES RIPPLING, PER APPLICATION AND NOT PER STACK: War
     # Council's "apply 1 Weak to each" over three enemies is three payouts and
-    # one card applying 2 Weak to one enemy is one. It does NOT take the latch
-    # -- the C# power does not either -- so Block gained off a Freeze the
-    # Casket caused is intended rather than an oversight.
+    # one card applying 2 Weak to one enemy is one.
     n = state.player.powers.get(CLOUDS_LIKE_WAVES, 0)
     if n:
         gained = powers.modify_block_gained(state.player, n)
@@ -1857,48 +1873,14 @@ def note_debuff_applied(state: CombatState, target, name: str, stacks: int,
         state.emit("block", amount=gained)
         state.emit("plan_clouds_like_waves", amount=gained, power=name)
 
-    if _answering or "kokomi_overhaul_casket" not in state.player.relic_hooks:
-        return
-    _answering = True
-    try:
-        casket_strike(state, target)
-    finally:
-        _answering = False
-
-
-def casket_strike(state: CombatState, target: Enemy) -> None:
-    """THE TAMAKUSHI CASKET's strike: "Whenever you apply a debuff to an enemy,
-    the Bake-Kurage strikes that enemy for 2 Hydro damage."
-
-    THE JELLYFISH IS THE DEALER, and the C# calls that a reading rather than a
-    detail: the slice says "it strikes that enemy for 2", so the applier handed
-    to the shared elemental pipeline is the PET. A pet carries no Strength, so
-    the 2 is a flat 2 -- which is what keeps this the relic's number instead of
-    the best Strength payoff in her pool, now that draft 6 gives her Strength
-    back. `powered=False` is that sentence in this engine.
-
-    THE HIT IS OTHERWISE REAL: Block applies, Vulnerable applies, the aura
-    lands and its reaction fires, because it is the same funnel every other
-    non-attack hit here goes through.
-
-    THE NUMBER IS `C.KOKOMI_OVERHAUL_CASKET_STRIKE`, mirrored BY VALUE against
-    `KokomiOverhaulLaw.CasketStrike` by `tools/lint_constant_parity.py`.
-    """
-    from tier0.engine import effects                # late import: cycle
-
-    if not target.alive:
-        return
-    state.emit("casket_strike", target=target.name,
-               amount=C.KOKOMI_OVERHAUL_CASKET_STRIKE)
-    effects.deal_damage_to_enemy(
-        state, target, C.KOKOMI_OVERHAUL_CASKET_STRIKE, element="hydro",
-        source="casket", powered=False)
-    _pay_shell_guard(state)
-
 
 def _pay_shell_guard(state: CombatState) -> None:
     """SHELL GUARD (`EB-335`, R246 pick 2): "Until your next turn, whenever the
     Tamakushi Casket strikes, gain N Block."
+
+    NO CALLER SINCE THE CASKET PASS (2026-09-28), which retired the strike it
+    hung off; `ShellGuardPower.Pay` is in the same state. The card was not in
+    the ruling and is left for the main session to rule on.
 
     HUNG OFF THE STRIKE ITSELF and not off the debuff that caused it, which is
     the difference between this card and The Clouds Like Waves Rippling one row
@@ -1941,6 +1923,118 @@ def close_shell_guard(state: CombatState) -> None:
         return
     if state.player.powers.pop(SHELL_GUARD, 0):
         state.emit("plan_shell_guard_closed")
+
+
+# ---------------------------------------------------------------------------
+# THE CASKET (the Casket pass, 2026-09-28) -- `KokomiOverhaulKit`'s Casket
+# block, `TamakushiCasket.NoteCarriedOut`, `MoonSignalPower`, `OpenTheCasket`
+# ---------------------------------------------------------------------------
+
+def _holds_casket(state: CombatState) -> bool:
+    """Does she hold the arm's starting relic? Its hook, read late because
+    `loader` sits above this module."""
+    from tier0.content import loader                # late import: cycle
+    return loader.OVERHAUL_CASKET_HOOK in state.player.relic_hooks
+
+
+def note_casket_carry_out(state: CombatState) -> None:
+    """"Each Plan the Bake-Kurage carries out adds 1 to the Casket." Called
+    from the plan bus once per carry-out; a Kokomi not holding the relic adds
+    nothing, since it is the relic's sentence.
+    `TamakushiCasket.NoteCarriedOut` is the twin."""
+    if not live(state) or not _holds_casket(state):
+        return
+    state.kk_casket += C.KOKOMI_OVERHAUL_CASKET_PER_PLAN
+    state.emit("casket_count", count=state.kk_casket, why="carry_out")
+
+
+def gain_casket(state: CombatState, amount: int) -> None:
+    """"The Casket gains N" -- Pearl Diver's Plan and Moon Signal. No relic
+    is asked: the card says the Casket gains. `KokomiOverhaulKit.GainCasket`
+    is the twin."""
+    if not live(state) or amount <= 0:
+        return
+    state.kk_casket += int(amount)
+    state.emit("casket_count", count=state.kk_casket, why="gain")
+
+
+def double_casket(state: CombatState) -> None:
+    """What the Tokoyo Took: "Double the Casket's count."
+    `KokomiOverhaulKit.DoubleCasket` is the twin."""
+    if not live(state):
+        return
+    state.kk_casket *= 2
+    state.emit("casket_count", count=state.kk_casket, why="double")
+
+
+def open_casket(state: CombatState) -> None:
+    """Open the Casket: "Gain Strength equal to the Casket's count, then empty
+    it." At `C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT` per point; an empty
+    Casket grants nothing. The relic keeps counting from 0.
+    `KokomiOverhaulKit.OpenCasket` is the twin."""
+    if not live(state):
+        return
+    points = state.kk_casket
+    state.kk_casket = 0
+    state.emit("casket_opened", points=points)
+    strength = points * C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT
+    if strength > 0:
+        powers.apply_power(state, state.player, "strength", strength)
+
+
+def fetch_open_casket(state: CombatState) -> None:
+    """What the Tokoyo Returns: "Put Open the Casket from your Exhaust Pile
+    into your Hand." The first one there; none there, nothing happens.
+    `KokomiOverhaulKit.FetchOpenCasket` is the twin."""
+    if not live(state):
+        return
+    p = state.player
+    token = next((c for c in p.exhaust_pile if c.id == OPEN_THE_CASKET), None)
+    if token is None:
+        state.emit("casket_fetch", found=False)
+        return
+    p.exhaust_pile.remove(token)
+    if len(p.hand) >= C.MAX_HAND_SIZE:
+        p.discard_pile.append(token)
+    else:
+        p.hand.append(token)
+    state.emit("casket_fetch", found=True)
+
+
+def moon_signal(state: CombatState, waiting: int) -> None:
+    """MOON SIGNAL: "At the start of your turn, if 2 or more Plans are
+    waiting, the Casket gains 1." `waiting` is the queue read BEFORE the
+    morning drains it -- `combat._player_turn` takes it beside Song of Pearls'
+    `quiet` -- or it could never be true. Copies stack the gain.
+    `MoonSignalPower.Signal` is the twin."""
+    if not live(state):
+        return
+    n = state.player.powers.get(MOON_SIGNAL, 0)
+    if not n or waiting < C.KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD:
+        return
+    gain_casket(state, n)
+
+
+def open_the_casket_card() -> Card:
+    """The token, as this engine's `Card`: Skill, 0, Retain, Exhaust, in no
+    pool. Built here rather than on a sheet for the C#'s reason (the
+    prototype surface has no token rarity); `OpenTheCasket.cs` is the twin."""
+    return Card(id=OPEN_THE_CASKET, name="Open the Casket", cost=0,
+                type="skill", rarity="token", exhaust=True, retain=True,
+                effects=[{"op": "open_casket"}])
+
+
+def deal_open_the_casket(state: CombatState) -> None:
+    """The relic's "... and Open the Casket in hand", on turn one. The C#
+    deals it before the first hand draw (`BeforeHandDraw`, `RadiantPearl`'s
+    site); this engine calls it after the opening draw, which moves no card
+    of that hand -- the token is added beside it, as the C#'s is."""
+    if not live(state) or state.turn != 1 or not _holds_casket(state):
+        return
+    if len(state.player.hand) >= C.MAX_HAND_SIZE:
+        return
+    state.player.hand.append(open_the_casket_card())
+    state.emit("casket_token_dealt")
 
 
 # ---------------------------------------------------------------------------

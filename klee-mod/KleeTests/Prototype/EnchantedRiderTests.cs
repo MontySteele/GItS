@@ -216,10 +216,10 @@ public class EnchantedRiderTests
         // `KokomiPlan.Kind.Block` pays with
         // `GainBlock(kokomi, plan.Amount, ValueProp.Move, null)` -- the same
         // null `CardPlay`, so the same absent card source, so the same face.
-        // Cleansing Wave prints its own Block AND a planned one, which is the
-        // shape that makes the two conventions visible on one screen.
+        // Read the Field prints a planned Block (Cleansing Wave did, until
+        // the Casket pass cut it, 2026-09-28).
         var seat = Seat.Kokomi();
-        var card = Held<ProtoKkCleansingWave>(seat);
+        var card = Held<ProtoKkReadTheField>(seat);
         Enchant<Nimble>(card, NimbleAmount);
 
         var planned = card.DynamicVars["PlanBlock"];

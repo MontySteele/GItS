@@ -191,21 +191,6 @@ public class Round17Tests
     }
 
     [Fact]
-    public void Well_laids_face_reads_as_a_result_and_not_a_promise()
-    {
-        // R276 pick 1 re-aimed Well Laid off the morning onto the enemy's
-        // debuffs, a count the reader can see on the board, so the face
-        // prints its rule and both of its numbers.
-        var face = Face(new ProtoKkWellLaid());
-
-        Assert.Equal("Deal {CalculationBase:diff()} damage. Deals "
-                   + "{ExtraDamage:diff()} additional damage for each debuff "
-                   + "on the enemy.",
-                     face);
-        Assert.DoesNotContain("Plan", face);
-    }
-
-    [Fact]
     public void The_ascensions_face_and_its_power_both_name_the_morning()
     {
         var face = Face(new ProtoKkNereidsAscension());

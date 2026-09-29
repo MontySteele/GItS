@@ -111,7 +111,13 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         // read HERE, just before the drain empties it, so a morning that
         // carried a Plan out does not also fire it. Sim twin: the `quiet`
         // read in `combat._player_turn`.
-        var quiet = KokomiPlan.PlansHeld(Owner) == 0;
+        var waiting = KokomiPlan.PlansHeld(Owner);
+        var quiet = waiting == 0;
+        // THE CASKET PASS (2026-09-28), MOON SIGNAL: "if 2 or more Plans are
+        // waiting" is the same pre-drain read, so a queue the morning is about
+        // to empty still counts. Sim twin: `kokomi_plan.moon_signal`, called
+        // from `combat._player_turn` beside the `quiet` read.
+        MoonSignalPower.Signal(Owner, waiting);
         await KokomiPlan.ResolveAll(choiceContext, Owner);
         if (quiet) await SongOfPearlsPower.Strike(choiceContext, Owner);
         // `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning:

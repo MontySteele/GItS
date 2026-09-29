@@ -368,6 +368,9 @@ public class KokomiOverhaulRuleTests
         //
         // TWENTY-SIX WITH THE KOKOMI CORE PASS: Chain of Command's
         // `FirstCompanionFree`, appended last so no ordinal moves.
+        //
+        // TWENTY-SEVEN WITH THE CASKET PASS (2026-09-28): Pearl Diver's
+        // `CasketGain`, appended last.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
@@ -379,7 +382,8 @@ public class KokomiOverhaulRuleTests
                     "NextAttackDamage", "FirstAttackTwice", "FirstCardFree",
                     "DamageIfUnhurt", "AttackDamageThisTurn",
                     "BlockFrontIntent", "AllyDraw",
-                    "OthersAttackDamageThisTurn", "FirstCompanionFree" },
+                    "OthersAttackDamageThisTurn", "FirstCompanionFree",
+                    "CasketGain" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -661,20 +665,26 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void Sango_isshin_reads_the_flag_and_hits_all_enemies_behind_it()
+    public void Sango_isshin_hits_all_enemies_per_plan_carried_out_this_turn()
     {
-        // The card, as generated: 8 to the aimed enemy is the floor, and the
-        // quarter -- computed by the ONE rule, so the face and the hit cannot
-        // round differently -- is what a planned morning buys. It is an
-        // ordinary aimed Attack now, not a card played on the jellyfish.
-        var play = typeof(ProtoKkSangoIsshin)
-            .GetMethod("OnPlay", HeadlessGame.All)!;
-        var calls = Il.Calls(play);
-        Assert.Contains("KokomiOverhaulLedger.get_PlanCarriedOutThisTurn",
-                        calls);
-        Assert.Contains("KokomiRules.QuarterMaxHpAll", calls);
+        // The Casket pass (2026-09-28): "Deal 6 damage to ALL enemies for
+        // each Plan carried out this turn" (8 upgraded). The count is the
+        // ledger's, one per carry-out; no quarter of Max HP any more.
+        var card = new ProtoKkSangoIsshin();
+        Assert.Equal(0m, card.DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(6m, card.DynamicVars.ExtraDamage.BaseValue);
+        var vars = Il.Calls(Il.Method("ProtoKkSangoIsshin", "get_CanonicalVars"))
+            .Concat(typeof(ProtoKkSangoIsshin)
+                .GetNestedTypes(HeadlessGame.All)
+                .SelectMany(t => t.GetMethods(HeadlessGame.All))
+                .Where(m => m.GetMethodBody() != null)
+                .SelectMany(Il.Calls))
+            .ToList();
+        Assert.Contains(vars, c => c.Contains("get_PlansCarriedOutThisTurn"));
+        var calls = Il.Calls(typeof(ProtoKkSangoIsshin)
+            .GetMethod("OnPlay", HeadlessGame.All)!);
         Assert.Contains("DamageCmd.Attack", calls);
-        // No Plan line left: it is not playable on the pet.
+        Assert.DoesNotContain("KokomiRules.QuarterMaxHpAll", calls);
         Assert.DoesNotContain("KokomiPlan.Schedule", calls);
         Assert.DoesNotContain(typeof(ProtoKkSangoIsshin).GetInterfaces(),
                               i => i.Name == "IPlannedCard");
@@ -769,76 +779,32 @@ public class KokomiOverhaulRuleTests
     // ---- the debuff event, which two things read -------------------------
 
     [Fact]
-    public void The_casket_and_the_clouds_read_one_definition_of_the_event()
+    public void The_clouds_read_the_one_definition_of_the_event()
     {
-        // The relic and the Rare answer the SAME event, so they ask the same
-        // predicate: a second spelling is how the two would eventually
-        // disagree about what applying a debuff was.
-        Assert.Contains("KokomiOverhaulKit.IsHerDebuffOnEnemy",
-                        Il.Calls(typeof(global::KleeMod.Relics.TamakushiCasket)
-                            .GetMethod("AfterPowerAmountChanged",
-                                       HeadlessGame.All)!));
+        // The relic answered the same event until the Casket pass
+        // (2026-09-28) retired its strike; the Rare still asks the one
+        // predicate, and the relic declares no debuff hook at all.
         Assert.Contains("KokomiOverhaulKit.IsHerDebuffOnEnemy",
                         Il.Calls(typeof(CloudsLikeWavesPower)
                             .GetMethod("AfterPowerAmountChanged",
                                        HeadlessGame.All)!));
+        Assert.Null(typeof(global::KleeMod.Relics.TamakushiCasket)
+            .GetMethod("AfterPowerAmountChanged",
+                       HeadlessGame.All
+                       | System.Reflection.BindingFlags.DeclaredOnly));
     }
 
     [Fact]
-    public void The_casket_cannot_answer_its_own_answer()
+    public void The_casket_tip_names_the_count_and_not_a_strike()
     {
-        // NOT PARANOIA: a Hydro strike into a Cryo aura Freezes, and Frozen is
-        // a debuff she applied to an enemy. Without the latch the relic would
-        // answer itself until the stack ran out.
-        Assert.Contains("KokomiOverhaulKit.Answer",
-                        Il.Calls(typeof(global::KleeMod.Relics.TamakushiCasket)
-                            .GetMethod("AfterPowerAmountChanged",
-                                       HeadlessGame.All)!));
-    }
-
-    [Fact]
-    public void The_jellyfish_is_the_dealer_of_the_caskets_strike()
-    {
-        // The reading: the slice says "IT strikes that enemy for 2", so the
-        // applier is the PET -- which carries no Strength, so the 2 is a flat
-        // 2. Routing it through her would have quietly made the Casket the best
-        // Strength payoff in a pool that just got Strength back.
-        var strike = typeof(global::KleeMod.Relics.TamakushiCasket)
-            .GetMethod("Strike", HeadlessGame.All)!;
-        var calls = Il.Calls(strike);
-        Assert.Contains("BakeKuragePet.Of", calls);
-        Assert.Contains("ElementalHit.Deal", calls);
-    }
-
-    [Fact]
-    public void EB562_the_caskets_strike_is_a_real_hydro_hit_and_says_so()
-    {
-        // `EB-562`. THE QUESTION the r20 seat called "the single fact I most
-        // wanted and never got": does the Casket's Hydro hit leave an aura?
-        // The reaction glossary's sources clause (`EB-544`) says a relic
-        // applies no element unless its own face says so, and this relic's
-        // face did not say so -- while the round-18 seat watched it re-lay
-        // Hydro inside a beat.
-        //
-        // THE ANSWER IS YES, AND IT IS STRUCTURAL: the strike goes out through
-        // `ElementalHit.Deal`, the funnel every other non-attack hit in this
-        // mod uses, so it lays Hydro on a bare body and reacts with whatever
-        // else is standing. The sim twin is
-        // `tier0.engine.kokomi_plan.casket_strike`, pinned by
-        // `test_the_caskets_strike_leaves_a_hydro_aura`.
-        var strike = typeof(global::KleeMod.Relics.TamakushiCasket)
-            .GetMethod("Strike", HeadlessGame.All)!;
-        Assert.Contains("ElementalHit.Deal", Il.Calls(strike));
-
-        // AND THE SURFACES SAY IT. `EB-348` put the sentence on the relic's
-        // own face and on the card-side tip while this row was open; this is
-        // that half read back, so the words and the funnel cannot drift apart
-        // again. The glossary's sources clause carries the third statement
-        // (`blindplay_notes.REACTION_KEYWORDS`).
+        // The Casket pass (2026-09-28): the relic COUNTS carried-out Plans,
+        // and the card-side tip says so off the law's own number.
         var tip = string.Concat(Il.Strings(
             typeof(global::KleeMod.Cards.ArmKeywordTips)
                 .GetMethod("ForCasket", HeadlessGame.All)!));
-        Assert.Contains("and re-arms ", tip);
+        Assert.Contains("carries out adds ", tip);
+        Assert.Contains("turns the count into ", tip);
+        Assert.DoesNotContain("re-arms", tip);
     }
 
     // ---- THE MEND RULE ---------------------------------------------------
@@ -933,7 +899,7 @@ public class KokomiOverhaulRuleTests
     // ---- the roster ------------------------------------------------------
 
     [Fact]
-    public void The_starter_is_ten_cards_and_the_pool_is_thirty_nine()
+    public void The_starter_is_ten_cards_and_the_pool_is_forty_six()
     {
         // Read off the IL rather than by building the models, which needs
         // ModelDb: `ModelDb.Card<T>()` throws until the game's pool build has
@@ -965,9 +931,11 @@ public class KokomiOverhaulRuleTests
         // THIRTY-NINE since `EB-685` (pool pass five) retired Night Watch: it
         // lost every draft comparison in r27 and Slack Water's Plan half moved
         // to Dusk, which is the multi-body Weak Night Watch had been rebuilt
-        // for one pass earlier.
+        // for one pass earlier. FORTY-SIX since the Casket pass (2026-09-28):
+        // Tide Chart, Cleansing Wave, Ripple, Well Laid, Sea-Salt Prayer and
+        // Salt Line cut, thirteen rows added.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(39, Il.CallSequence(slice)
+        Assert.Equal(46, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 
@@ -989,8 +957,7 @@ public class KokomiOverhaulRuleTests
         // because a seat plays its cheap cards before it writes its Plans.
         // What still reads it is Change of Plans' unplayable reason, which
         // asks the right question of it -- is there a Plan to hurry.
-        Assert.DoesNotContain("KokomiPlan.PlansHeld",
-            Il.Calls(Il.Method("ProtoKkTideChart", "OnPlay")));
+        // (Tide Chart itself was cut by the Casket pass, 2026-09-28.)
         Assert.Contains("KokomiPlan.PlansHeld", Il.Calls(
             Il.Method("ProtoKkChangeOfPlans", "get_UnplayableReason")));
     }
@@ -1188,7 +1155,9 @@ public class KokomiOverhaulRuleTests
         // STRUCTURAL, and the class's own header says why: the base var
         // reaches `CardModel.CombatState`, so the NUMBER needs a live combat
         // this harness cannot build. What is pinned is the wiring.
-        var calculated = (object)new ProtoKkWellLaid().DynamicVars
+        // Driftglass since the Casket pass (2026-09-28) cut Well Laid: the
+        // same aimed `CalculatedDamageVar` shape.
+        var calculated = (object)new ProtoKkDriftglass().DynamicVars
             .CalculatedDamage;
         Assert.IsType<FrontFoldedDamageVar>(calculated);
         // The game's own var underneath, so nothing about the multiplier, the
@@ -1240,16 +1209,12 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void EB335_shell_guard_reads_the_casket_strike_and_closes_after_the_morning()
+    public void EB335_shell_guards_window_still_closes_after_the_morning()
     {
-        // The card names the RELIC, so the payout hangs off the strike itself
-        // and not off the debuff that caused it -- which is what keeps it
-        // separable from The Clouds Like Waves Rippling.
-        Assert.Contains("ShellGuardPower.Pay",
-                        Il.Calls(Il.Method("TamakushiCasket", "Strike")));
-        // "Until your next turn" INCLUDES that turn's morning: R246 pick 2
-        // says the morning's Plans strike it too, so the window closes one
-        // line after the drain rather than on the turn-start roll.
+        // The Casket pass (2026-09-28) retired the strike Shell Guard paid
+        // on, so `ShellGuardPower.Pay` has no caller -- the card was not in
+        // the ruling and is left for one. The window it opens still closes
+        // one line after the drain.
         var turnStart = Il.CallSequence(
             Il.Method("ProtoBakeKuragePower", "AfterPlayerTurnStart")).ToList();
         var drain = turnStart.FindIndex(c => c.Contains("KokomiPlan.ResolveAll"));

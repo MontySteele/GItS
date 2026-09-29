@@ -44,48 +44,43 @@ public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
+        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_sango_isshin");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sango Isshin"),
-        ("description", "Deal 8 damage. If the [gold]Bake-Kurage[/gold] carried out a [gold]Plan[/gold] this turn, deal a quarter of your Max HP to ALL enemies instead."),
+        ("description", "Deal {ExtraDamage:diff()} damage to ALL enemies for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CalculationBaseVar(0m),
+            new ExtraDamageVar(6m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).PlansCarriedOutThisTurn)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkSangoIsshin()
-        : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy, autoAdd: false)
+        : base(2, CardType.Attack, CardRarity.Rare, TargetType.AllEnemies, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiOverhaulLedger.For(Owner.Creature).PlanCarriedOutThisTurn)
-        {
-            await KokomiRules.QuarterMaxHpAll(choiceContext, Owner.Creature, this, cardPlay);
-        }
-        else
-        {
-            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack(8m)
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
-                .Execute(choiceContext);
-        }
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .TargetingAllOpponents(CombatState!)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .SpawningHitVfxOnEachCreature()
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
     }
 }

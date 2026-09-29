@@ -108,9 +108,10 @@ public class Round15Tests
         Assert.Equal(0.75m, weak.ModifyDamageMultiplicative(
             enemy, 0m, damage.Props, wearer.Creature, null, null));
 
-        // 5 x 0.75 = 3.75, truncated by the printer to 3.
-        Assert.Equal(5m, damage.BaseValue);
-        Assert.Equal(3, new DynamicVar("x", damage.BaseValue * 0.75m).IntValue);
+        // 7 x 0.75 = 5.25, truncated by the printer to 5 (Opening Gambit is
+        // 7 since the Casket pass, 2026-09-28).
+        Assert.Equal(7m, damage.BaseValue);
+        Assert.Equal(5, new DynamicVar("x", damage.BaseValue * 0.75m).IntValue);
     }
 
     // ==================================================================

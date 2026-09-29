@@ -151,17 +151,4 @@ public class RelicAnswerLogTests
             Il.Calls(Il.Method("KleeElementalHooks", "BeforeSideTurnEnd")));
     }
 
-#if PROTOTYPE_CARDS
-    [Fact]
-    public void The_casket_asks_the_plan_first_and_logs_only_if_it_was_not_filed()
-    {
-        // The half that keeps one strike named ONCE. `NoteRider` files against
-        // the Plan being resolved right now and answers whether it did; the
-        // relic writes to this log only on the false branch.
-        var calls = Il.Calls(Il.Method("TamakushiCasket", "Strike"));
-
-        Assert.Contains("KokomiPlan.NoteRider", calls);
-        Assert.Contains("RelicAnswerLog.Note", calls);
-    }
-#endif
 }

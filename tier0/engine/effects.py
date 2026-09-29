@@ -386,6 +386,17 @@ def _runtime_count(state: CombatState, token: str,
         # is the printed difference between "this turn" and "this morning".
         # The C# twin is `KokomiOverhaulLedger.PlansThisMorning`.
         return state.kk_plans_this_morning
+    if token == "plans_carried_out_this_turn":
+        # QUARANTINED USE ONLY (the Casket pass, 2026-09-28) -- Feint and
+        # Sango Isshin, "for each Plan carried out this turn". Every
+        # carry-out this turn, a doubled one twice, written at the plan bus.
+        # The C# twin is `KokomiOverhaulLedger.PlansCarriedOutThisTurn`.
+        return state.kk_plans_carried_out_this_turn
+    if token == "casket_count":
+        # QUARANTINED USE ONLY (the Casket pass) -- Driftglass and Depths'
+        # Judgment, the Tamakushi Casket's count. The C# twin is
+        # `KokomiOverhaulLedger.CasketCount`.
+        return state.kk_casket
     if token == "debuffs_on_target":
         # QUARANTINED USE ONLY (R276) -- Well Laid, "plus 3 for each debuff on
         # the enemy". The AIMED enemy, `_power_amount_formula`'s read: the
@@ -4088,6 +4099,11 @@ RUNTIME_COUNT_NAMES = frozenset({
     # QUARANTINED USE ONLY (R276) -- Well Laid's "for each debuff on the
     # enemy". Same registry reason as the two above.
     "debuffs_on_target",
+    # QUARANTINED USE ONLY (the Casket pass, 2026-09-28) -- Feint's and Sango
+    # Isshin's carry-outs this turn, and Driftglass's and Depths' Judgment's
+    # Casket. Same registry reason as the rows above.
+    "plans_carried_out_this_turn",
+    "casket_count",
     # QUARANTINED USE ONLY (R213 B) -- the drain op's count. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
@@ -6218,6 +6234,31 @@ def _op_damage_quarter_max_hp(state: CombatState, fx: dict,
                              else "card")
 
 
+def _op_fetch_open_casket(state: CombatState, fx: dict, card: Card) -> None:
+    """What the Tokoyo Returns (the Casket pass, 2026-09-28). The first Open
+    the Casket in her Exhaust Pile goes to her hand; see
+    `kokomi_plan.fetch_open_casket`."""
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    kokomi_plan.fetch_open_casket(state)
+
+
+def _op_casket_double(state: CombatState, fx: dict, card: Card) -> None:
+    """What the Tokoyo Took (the Casket pass): "Double the Casket's count"."""
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    kokomi_plan.double_casket(state)
+
+
+def _op_open_casket(state: CombatState, fx: dict, card: Card) -> None:
+    """Open the Casket, the relic's token (the Casket pass): "Gain Strength
+    equal to the Casket's count, then empty it." See
+    `kokomi_plan.open_casket`."""
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    kokomi_plan.open_casket(state)
+
+
 def _op_cancel_last_plan(state: CombatState, fx: dict, card: Card) -> None:
     """Second Thoughts (`EB-643`). The readings -- which end of the queue, the
     pile the card comes back from, and what happens when it is in neither --
@@ -6685,6 +6726,15 @@ OPS = {
     "cancel_last_plan": _op_cancel_last_plan,
     "cancel_all_plans_cash": _op_cancel_all_plans_cash,
     "redirect_queued_plans": _op_redirect_queued_plans,
+    # THE CASKET PASS (2026-09-28). What the Tokoyo Returns and What the
+    # Tokoyo Took work the Tamakushi Casket's count; `open_casket` is the
+    # relic's token (built in `kokomi_plan.open_the_casket_card`, on no
+    # sheet); `casket_gain` is Pearl Diver's plan clause, legal in a `plan:`
+    # list and nowhere else.
+    "fetch_open_casket": _op_fetch_open_casket,
+    "casket_double": _op_casket_double,
+    "open_casket": _op_open_casket,
+    "casket_gain": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

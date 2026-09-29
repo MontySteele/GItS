@@ -84,8 +84,9 @@ public class Round16Tests
         Assert.Equal(1.5m, vulnerable.ModifyDamageMultiplicative(
             wearer.Creature, 0m, damage.Props, attacker.Creature, null, null));
 
-        // 5 x 1.5 = 7.5, and the seat read the whole 1.5x off the body.
-        Assert.Equal(5m, damage.BaseValue);
+        // 7 x 1.5 = 10.5, and the seat read the whole 1.5x off the body
+        // (Opening Gambit is 7 since the Casket pass, 2026-09-28).
+        Assert.Equal(7m, damage.BaseValue);
     }
 
     [Fact]

@@ -332,7 +332,13 @@ MIRRORED: dict[str, object] = {
     # on the relic and on no card -- because its rules are structural and every
     # other figure is a CARD's, on its own row. The six draft 2 declared went
     # with the pulse, the Garment and the Tide.
-    "KokomiOverhaulLaw.CasketStrike": C.KOKOMI_OVERHAUL_CASKET_STRIKE,
+    # THE CASKET PASS (2026-09-28) retired the strike; the relic now counts
+    # carried-out Plans and Open the Casket turns the count into Strength.
+    "KokomiOverhaulLaw.CasketPerPlan": C.KOKOMI_OVERHAUL_CASKET_PER_PLAN,
+    "KokomiOverhaulLaw.CasketStrengthPerPoint":
+        C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT,
+    "KokomiOverhaulLaw.MoonSignalThreshold":
+        C.KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD,
     # THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`; `EB-723` /
     # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
     # same reason -- quarantined is not exempt. These NINE numbers ARE the

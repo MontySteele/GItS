@@ -130,7 +130,7 @@ Every C# call site below is the *shared helper*, not a per-card copy.
 | V8 | Bomb echo (Sparks 'n' Splash; start of turn since 2026-09-25) | `BombEchoPower.Fire` → `ElementalHit.DealWithoutDealerMods` | `klee_overhaul.bomb_echo`, `source="bomb_echo"`, `powered=False` |
 | V9 | Planned hit / Plan carry-out | `KokomiPlan.Hit` → `ElementalHit.Deal(..., powered: false)`, `KokomiPlan.cs:2477` | `kokomi_plan._hit`, `source="plan"`, `powered=False`, `kokomi_plan.py:1494` |
 | V10 | Plan debuff | `KokomiPlan.Debuff<T>` → `PowerCmd.Apply(applier: kokomi, cardSource: null)`, `:2497` | `kokomi_plan._debuff` → `powers.apply_power(applier=player)`, `:1499` |
-| V11 | Tamakushi Casket strike (relic) | `TamakushiCasket.Strike` → `ElementalHit.Deal`, `:190` | `kokomi_plan.casket_strike`, `source="casket"`, `powered=False`, `:1749` |
+| V11 | Tamakushi Casket strike (relic) -- RETIRED by the Casket pass (2026-09-28): the relic counts carried-out Plans and strikes nothing | none | none |
 | V12 | Salon performance (tick / deploy-perform) | `SalonMemberPower.PerformMember` → `ElementalHit.Deal(..., powered: false)`, `SalonPowers.cs:979` | `effects.salon_member_act`, `source="salon"`, `powered=False`, `effects.py:7137` |
 | V13 | Salon bow / Evoke | `SalonMemberPower.Bow` → `ElementalHit.Deal`, `SalonPowers.cs:540` | `effects._salon_bow`, `source="salon_final_bow"`, `effects.py:1941` |
 | V14 | Stage act (performance) | `FurinaStage.Perform` → `ElementalHit.Deal(..., powered: false)`, `FurinaStage.cs:460`, `:474` | `furina_stage.perform`, `source="furina_stage/act"`, `furina_stage.py:669`, `:685` |
@@ -177,7 +177,7 @@ the two mirrors on 2026-09-16.
 | V8 Bomb echo | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V9 planned hit | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V10 Plan debuff | none | none | none | none | none | none | none | debuff |
-| V11 Casket strike | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
+| V11 Casket strike (retired 2026-09-28) | -- | -- | -- | -- | -- | -- | -- | -- |
 | V12 Salon performance | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V13 Salon bow / Evoke | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V14 Stage act | none | none | none | none | damage-only (**D5 repaired**) | none | none (**D3 repaired**) | debuff (**D4 repaired**) |

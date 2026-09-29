@@ -224,7 +224,12 @@ public class PoolCellCoverageTests
             // thinner than Sea Glass's five-card draw -- which no widening can
             // fix (it IS every Rare she has) and which the clamp has always
             // handled by offering four.
-            "kokomi-overhaul" => new[] { "Rare/*", "Rare/Attack", "Rare/Power", "Rare/Skill", "Uncommon/Attack" },
+            //
+            // THE CASKET PASS (2026-09-28) FILLED TWO: What the Tokoyo Took
+            // makes the Rare shelf five deep (Rare/*), and Depths' Judgment,
+            // Tideturn and Pearl Current fill Uncommon/Attack. The Rare cells
+            // by TYPE are still short and seamed.
+            "kokomi-overhaul" => new[] { "Rare/Attack", "Rare/Power", "Rare/Skill" },
 
             // THE SURPRISE OF THIS AUDIT. The Stage substitutes one for one at
             // the same rarity, so on paper it inherits the shipped sheet's

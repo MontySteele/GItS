@@ -20,7 +20,8 @@ namespace KleeMod.Tests.Prototype;
 public class KitVerbBaseTriggerProtoPinTests
 {
     [Theory]
-    // MATRIX V5/V6, V9, V11, V14, V15. Every one of these reaches the elemental
+    // MATRIX V5/V6, V9, V14, V15 (V11, the Tamakushi Casket's strike, was
+    // retired by the Casket pass, 2026-09-28). Every one of these reaches the elemental
     // door and none of them reaches `DamageCmd`, which is the whole of their
     // row: `damage-only` under T5 and `none` under every other trigger.
     [InlineData("ProtoBombPower", "Explode")]   // V5 explosion, and V6's mine
@@ -29,7 +30,6 @@ public class KitVerbBaseTriggerProtoPinTests
     // are the ONE `FurinaStage.Act`, and no act carries an element, so its
     // door is the element-less one.
     [InlineData("FurinaStage", "Act")]          // V14 stage act, V15 stage bow
-    [InlineData("TamakushiCasket", "Strike")]   // V11 casket strike
     public void A_prototype_kit_verb_goes_through_the_elemental_door(
         string type, string method)
     {

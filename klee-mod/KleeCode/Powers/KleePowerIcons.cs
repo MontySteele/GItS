@@ -165,6 +165,10 @@ internal static class KleePowerIcons
         // `EB-335`. Shell Guard is a Block window, so it borrows the shipped
         // Kokomi power that already means "the jellyfish is protecting you".
         ShellGuardPower => KleePck.Path("kokomi/powers/kurages_oath.png"),
+        // THE CASKET PASS (2026-09-28). Moon Signal borrows her Ancient's
+        // sigil, the badge above that counts something waiting to arrive.
+        MoonSignalPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
         // QUARANTINED (the Mondstadt companion overhaul). Every one of these
         // borrows the icon of the SHIPPED companion power whose job it takes
         // over, on the block above's argument verbatim: art is commissioned

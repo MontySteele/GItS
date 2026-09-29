@@ -44,7 +44,7 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
+        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_pincer");
 
@@ -66,7 +66,7 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(3m, ValueProp.Move)
+            new DamageVar(4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
