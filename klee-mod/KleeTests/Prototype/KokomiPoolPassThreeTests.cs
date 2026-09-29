@@ -180,7 +180,8 @@ public class KokomiPoolPassThreeTests
         // more (14 / 4 upgraded); the Plan is 2 Energy and a card.
         var card = new ProtoKkRiptide();
         Assert.Equal(2, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, card.Rarity);
+        // Uncommon since the feed pass (2026-09-29).
+        Assert.Equal(CardRarity.Uncommon, card.Rarity);
         var face = Face(card);
         Assert.Contains("{Damage:diff()}", face);
         Assert.Contains("{ExtraDamage:diff()}", face);

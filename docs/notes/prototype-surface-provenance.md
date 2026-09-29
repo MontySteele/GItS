@@ -4045,3 +4045,78 @@ clogged with low-impact cantrips.
 
 **Pool:** 44 offered (24 Common, 15 Uncommon, 5 Rare) plus the three co-op
 cards.
+
+## Kokomi: the feed pass (2026-09-29)
+
+[USER], 2026-09-29, after an act-1 death: "her cards are weirdly 'expensive'";
+"I spent all of my energy staying alive or tossing debuffs on via plan"; "I
+feel like some Plan cards need to go to 0 cost so there's some way to draft
+lower-impact feed for the Plan mechanism. Let's not make too many 'do a thing
+now AND get a plan going' cards - those should be higher rarity at least."
+Designed in the main session; the quotes and the change table are in the brief
+(`review/active/kokomi-brief-2026-09-01.md`, sec. 6, "The feed pass").
+
+- Five new rows, last in the sheet's order and appended to
+  `KokomiOverhaulRoster.Slice()` and `C.KOKOMI_OVERHAUL_POOL_IDS`:
+  `proto_kk_bubble_ward` (Plan `block` 4, `plan_block: 2`), `proto_kk_nip`
+  (Plan `damage` 5 at `front_enemy`, Ambush's aim, `plan_damage: 2`),
+  `proto_kk_jellyfish_drift` (Plan `damage` 2 at `all_enemies`,
+  `plan_damage: 1`), `proto_kk_current_read` (Plan `draw` 1 then `block` 0,
+  `plan_block: 2`), `proto_kk_brine_sting` (Plan `apply_power weak` 1 at
+  `front_enemy`, Coral Bulwark's old aim, `plan_power_amount: 1`). Each is a
+  cost-0 Common Skill with `effects: []`, Breakwater's shape, so codegen
+  emits `KokomiTargets.PetOnly` and leads the face with "Play on the
+  Bake-Kurage."; none is a Dusk Plan.
+- Current Read's upgrade ADDS "Gain 2 Block". No upgrade key adds a Plan
+  clause, so the clause is written at 0 and the face prints it under
+  `{IfUpgraded:show:...}`. The flat `block` joins `block_front_intent` in
+  `PLAN_ZERO_AMOUNT_OPS` in both engines (`tools/gen_klee_cards.py`,
+  `tier0/engine/kokomi_plan.py`), and a 0 flat Plan Block is carried out as
+  nothing (`KokomiPlan` `Kind.Block`, `kokomi_plan._resolve_clause`): the
+  Block path is powered, so without the guard Dexterity would have turned the
+  unprinted 0 into Block.
+- Common to Uncommon, nothing else moved: `proto_kk_ambush`,
+  `proto_kk_read_the_field`, `proto_kk_stolen_chapter`, `proto_kk_riptide`,
+  `proto_kk_pincer`, `proto_kk_feigned_retreat`, `proto_kk_signal_arrow`,
+  `proto_kk_surging_shoal`.
+- `proto_kk_coral_bulwark`: `block` 7 to 8, the `plan:` line removed, the
+  upgrade is `block: 3` (11). Still Common.
+- `proto_kk_exposed_flank`: cut. Tombstoned in `docs/retired-card-ids.yaml`
+  (retired alias generated), kept as a known-stale portrait in
+  `tools/art_coverage.py`. It spelled no engine piece of its own.
+- Art: five `art/plan.tsv` rows (`kokomi_pool`, splash, shortlist rank 1) on
+  official Kokomi art no other row claims: Birthday 2024 (Bubble Ward), the
+  version 3.0 App Store wallpaper (Nip), Birthday 2026 (Jellyfish Drift),
+  Birthday 2025 (Current Read) and Birthday 2022 (Brine Sting). The teaser
+  wallpaper was Current Read's first pick; its wiki title carries double
+  quotes, which a Windows raw filename cannot hold.
+
+**The sim read (Prototype stage, not a measurement).** Priest pilot, 200
+fights a cell, seeds 1000+, the arm on, the Casket held. The stock pilot never
+plays Open the Casket, so a wrapper opened it the first time the Casket held
+6, or from turn 6 if it held any; the "held" columns never open it and read the
+count at the start of turns 3, 5 and 8. Package = the starter plus Feint,
+Ambush, Coral Bulwark, Shell Guard, Pearl Diver, Press the Advantage,
+Driftglass, Deep Current; feed4 adds Nip, Bubble Ward, Jellyfish Drift,
+Current Read; feed8 adds two of each. The starter is unchanged, so its rows
+match before and after exactly.
+
+| deck | enc | win % before / after | HP lost | turns | Plans/turn | Casket at Open mean / p90 / max | held, turn 8 mean / p90 |
+|---|---|---|---|---|---|---|---|
+| package | tank_boss | 84 / 80 | 66.2 / 67.6 | 15.0 / 15.2 | 0.32 / 0.28 | 2.1/3/5 → 1.9/3/5 | 1.9/3 → 1.7/3 |
+| package | punisher | 78 / 83 | 70.7 / 68.8 | 10.3 / 10.3 | 0 / 0 | never opened | 0 |
+| package | attrition | 100 / 100 | 13.2 / 13.2 | 10.8 / 11.1 | 0.61 / 0.54 | 3.1/5/7 → 2.7/4/6 | 4.1/6 → 3.6/5 |
+| package+feed4 | tank_boss | – / 100 | – / 41.3 | – / 11.0 | – / 1.04 | 5.6 / 7 / 9 | 7.5 / 9 |
+| package+feed4 | punisher | – / 100 | – / 27.9 | – / 7.1 | – / 0.82 | 4.6 / 6 / 6 | 6.3 / 8 |
+| package+feed4 | attrition | – / 100 | – / 11.5 | – / 9.0 | – / 1.20 | 5.9 / 7 / 9 | 8.7 / 11 |
+| package+feed8 | tank_boss | – / 100 | – / 32.8 | – / 9.8 | – / 1.61 | 6.7 / 8 / 10 | 12.0 / 14 |
+| package+feed8 | punisher | – / 100 | – / 21.1 | – / 6.4 | – / 1.41 | 6.7 / 8 / 9 | 11.3 / 13 |
+| package+feed8 | attrition | – / 100 | – / 11.7 | – / 8.0 | – / 1.67 | 6.7 / 8 / 9 | 12.8 / 15 |
+
+No turn-3 kill on tank_boss in any cell. The one runaway flag: a feed8 deck
+that never opens the Casket holds 13 to 15 at the 90th percentile by turn 8.
+The pilot writes no Plan at all against punisher with the package deck, before
+or after, which is the pilot and not the pass.
+
+**Pool:** 48 offered (20 Common, 23 Uncommon, 5 Rare) plus the three co-op
+cards.

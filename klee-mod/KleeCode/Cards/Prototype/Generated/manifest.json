@@ -78,23 +78,27 @@
     "proto_kk_ambush",
     "proto_kk_battle_plan",
     "proto_kk_breakwater",
+    "proto_kk_brine_sting",
+    "proto_kk_bubble_ward",
     "proto_kk_chain_of_command",
     "proto_kk_change_of_plans",
     "proto_kk_coordinated_strike",
     "proto_kk_coral_bulwark",
+    "proto_kk_current_read",
     "proto_kk_deep_current",
     "proto_kk_depths_judgment",
     "proto_kk_driftglass",
-    "proto_kk_exposed_flank",
     "proto_kk_feigned_retreat",
     "proto_kk_feint",
     "proto_kk_flank",
+    "proto_kk_jellyfish_drift",
     "proto_kk_joint_orders",
     "proto_kk_kurages_oath",
     "proto_kk_massed_volley",
     "proto_kk_moon_signal",
     "proto_kk_moons_reflection",
     "proto_kk_nereids_ascension",
+    "proto_kk_nip",
     "proto_kk_opening_gambit",
     "proto_kk_pearl_current",
     "proto_kk_pearl_diver",
@@ -365,23 +369,27 @@
     "proto_kk_ambush": "kokomi",
     "proto_kk_battle_plan": "kokomi",
     "proto_kk_breakwater": "kokomi",
+    "proto_kk_brine_sting": "kokomi",
+    "proto_kk_bubble_ward": "kokomi",
     "proto_kk_chain_of_command": "kokomi",
     "proto_kk_change_of_plans": "kokomi",
     "proto_kk_coordinated_strike": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
+    "proto_kk_current_read": "kokomi",
     "proto_kk_deep_current": "kokomi",
     "proto_kk_depths_judgment": "kokomi",
     "proto_kk_driftglass": "kokomi",
-    "proto_kk_exposed_flank": "kokomi",
     "proto_kk_feigned_retreat": "kokomi",
     "proto_kk_feint": "kokomi",
     "proto_kk_flank": "kokomi",
+    "proto_kk_jellyfish_drift": "kokomi",
     "proto_kk_joint_orders": "kokomi",
     "proto_kk_kurages_oath": "kokomi",
     "proto_kk_massed_volley": "kokomi",
     "proto_kk_moon_signal": "kokomi",
     "proto_kk_moons_reflection": "kokomi",
     "proto_kk_nereids_ascension": "kokomi",
+    "proto_kk_nip": "kokomi",
     "proto_kk_opening_gambit": "kokomi",
     "proto_kk_pearl_current": "kokomi",
     "proto_kk_pearl_diver": "kokomi",
@@ -845,6 +853,12 @@
     "proto_kk_breakwater": {
       "plan_block": 2
     },
+    "proto_kk_brine_sting": {
+      "plan_power_amount": 1
+    },
+    "proto_kk_bubble_ward": {
+      "plan_block": 2
+    },
     "proto_kk_chain_of_command": {
       "formula_per": 1
     },
@@ -855,8 +869,10 @@
       "damage": 3
     },
     "proto_kk_coral_bulwark": {
-      "block": 3,
-      "plan_power_amount": 1
+      "block": 3
+    },
+    "proto_kk_current_read": {
+      "plan_block": 2
     },
     "proto_kk_deep_current": {
       "damage": 2
@@ -866,9 +882,6 @@
     },
     "proto_kk_driftglass": {
       "formula_base": 2
-    },
-    "proto_kk_exposed_flank": {
-      "power_amount": 1
     },
     "proto_kk_feigned_retreat": {
       "plan_damage": 3,
@@ -881,6 +894,9 @@
     "proto_kk_flank": {
       "damage": 3,
       "plan_damage": 3
+    },
+    "proto_kk_jellyfish_drift": {
+      "plan_damage": 1
     },
     "proto_kk_joint_orders": {
       "block": 3
@@ -900,6 +916,9 @@
     },
     "proto_kk_nereids_ascension": {
       "cost": -1
+    },
+    "proto_kk_nip": {
+      "plan_damage": 2
     },
     "proto_kk_opening_gambit": {
       "damage": 2

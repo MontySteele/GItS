@@ -2333,6 +2333,14 @@ public static class KokomiPlan
                 // states the opposite rule in the brief itself, so a planned
                 // Block is `ValueProp.Move` -- the same prop a card's own Block
                 // carries, and the same one Dexterity reads.
+                // THE FEED PASS (2026-09-29): a 0 flat Block is the clause
+                // Current Read's upgrade adds, unprinted on the base face, so
+                // it is nothing -- never a Dexterity-sized Block. The sim's
+                // twin is `kokomi_plan._carry_out`'s `block` branch.
+                if (plan.Amount <= 0)
+                {
+                    return 0;
+                }
                 return (int)await CreatureCmd.GainBlock(
                     kokomi, plan.Amount, ValueProp.Move, null);
 

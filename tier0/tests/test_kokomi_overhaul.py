@@ -244,10 +244,13 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     damage, or plan y'".
 
     FORTY-FOUR SINCE THE CLEANUP PASS (2026-09-29): Scout Ahead and Song of
-    Pearls cut."""
+    Pearls cut.
+
+    FORTY-EIGHT SINCE THE FEED PASS (2026-09-29): Exposed Flank cut, and five
+    0-cost Plan-only Commons added last in the sheet's order."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 44
-    assert len(set(ids)) == 44
+    assert len(ids) == 48
+    assert len(set(ids)) == 48
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
     assert {"proto_kk_riptide", "proto_kk_pincer", "proto_kk_flank",
@@ -255,9 +258,12 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     cut = {"proto_kk_tide_chart", "proto_kk_cleansing_wave", "proto_kk_ripple",
            "proto_kk_well_laid", "proto_kk_sea_salt_prayer",
            "proto_kk_salt_line", "proto_kk_scout_ahead",
-           "proto_kk_song_of_pearls"}
+           "proto_kk_song_of_pearls", "proto_kk_exposed_flank"}
     assert not cut & set(ids)
-    assert ids[-13:] == (
+    assert ids[-5:] == (
+        "proto_kk_bubble_ward", "proto_kk_nip", "proto_kk_jellyfish_drift",
+        "proto_kk_current_read", "proto_kk_brine_sting")
+    assert ids[-18:-5] == (
         "proto_kk_massed_volley", "proto_kk_signal_arrow",
         "proto_kk_surging_shoal", "proto_kk_pearl_diver",
         "proto_kk_press_the_advantage", "proto_kk_shell_of_sanctuary",
@@ -397,10 +403,14 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     and one Rare added: 24 / 17 / 5.
 
     THE CLEANUP PASS (2026-09-29): Scout Ahead (Common) and Song of Pearls
-    (Uncommon) cut, Shell Guard moved Uncommon to Common: 24 / 15 / 5."""
+    (Uncommon) cut, Shell Guard moved Uncommon to Common: 24 / 15 / 5.
+
+    THE FEED PASS (2026-09-29): Exposed Flank (Common) cut, eight now-and-Plan
+    Commons moved to Uncommon, five 0-cost Plan-only Commons added:
+    20 / 23 / 5."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 24, "uncommon": 15, "rare": 5}
+        "common": 20, "uncommon": 23, "rare": 5}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

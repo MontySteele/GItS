@@ -2522,7 +2522,11 @@ PLAN_UNHURT_FIELD = "unhurt_amount"
 
 #: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
 #: on top of a number read off the board, and the base card prints none.
-PLAN_ZERO_AMOUNT_OPS = {"block_front_intent"}
+#: THE FEED PASS (2026-09-29) adds the flat `block`: Current Read's upgrade
+#: adds a Block clause the base face does not print, so it is written at 0 and
+#: `KokomiPlan` carries a 0 flat Block out as nothing. The sim's twin is
+#: `kokomi_plan.PLAN_ZERO_AMOUNT_OPS`.
+PLAN_ZERO_AMOUNT_OPS = {"block_front_intent", "block"}
 
 
 def plan_reason(card: dict) -> str | None:

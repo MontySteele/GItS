@@ -233,12 +233,53 @@ nothing granting them (the Casket pass left Tide Chart's the same way);
 `docs/current/BACKLOG.md` lists them for deletion. Rows and pins:
 `docs/notes/prototype-surface-provenance.md`, "the cleanup pass".
 
+### The feed pass (2026-09-29)
+
+[USER], 2026-09-29, after a run that died in act 1: "Died to act 1. The
+core concept seems interesting, but I feel like her cards are weirdly
+'expensive' in the sense that I can often see how I would get something going
+if I had an extra energy or two but usually end up struggling just to get my
+block for the turn." And: "It was a lot of chip hits over time adding up. I
+spent all of my energy staying alive or tossing debuffs on via plan, so things
+didn't die fast and got to Strength buff themselves." And the direction: "I
+feel like some Plan cards need to go to 0 cost so there's some way to draft
+lower-impact feed for the Plan mechanism. Let's not make too many 'do a thing
+now AND get a plan going' cards - those should be higher rarity at least."
+
+Designed in the main session on that direction. Five 0-cost Commons do
+nothing when played normally and only write a Plan, so a draft can pick up
+cheap feed for the queue. The Commons that do a thing now and also write a
+Plan move to Uncommon. Coral Bulwark becomes the plain Common Block card.
+
+| Card | Change |
+|---|---|
+| Bubble Ward (new) | Common, 0, Skill. Plan: Gain 4 Block (6 upgraded). |
+| Nip (new) | Common, 0, Skill. Plan: Deal 5 damage (7 upgraded). |
+| Jellyfish Drift (new) | Common, 0, Skill. Plan: Deal 2 damage to ALL enemies (3 upgraded). |
+| Current Read (new) | Common, 0, Skill. Plan: Draw 1 card (upgraded: also Gain 2 Block). |
+| Brine Sting (new) | Common, 0, Skill. Plan: Apply 1 Weak (2 upgraded). |
+| Ambush, Read the Field, Stolen Chapter, Riptide, Pincer, Feigned Retreat, Signal Arrow, Surging Shoal | Common to Uncommon, nothing else changed. |
+| Coral Bulwark | "Gain 8 Block." (11 upgraded); the Plan line is gone. Still Common. |
+| Exposed Flank | Cut. |
+
+The five new cards are played on the Bake-Kurage like Breakwater and print
+"Play on the Bake-Kurage." first. Nip's damage and Brine Sting's Weak land on
+the front enemy, like every other Plan hit and debuff. Current Read's upgrade
+adds a clause, which no upgrade key could do, so the Block clause is written
+at 0 and a 0 Plan Block now does nothing in both engines (without that,
+Dexterity would have turned it into Block the face never printed).
+
+The pool is 48: 20 Common, 23 Uncommon, 5 Rare, plus the three co-op cards.
+The starter is unchanged. Rows, art and the sim read:
+`docs/notes/prototype-surface-provenance.md`, "the feed pass".
+
 Rares take constellation names (C1 to C6 are all unused but Sango Isshin
 and The Clouds Like Waves). Cut and not coming back: Tide, Surge, Exert,
 the pulse, Orders, Tactics, Spent, Garment as a keyword, Flawless Strategy,
 the two-Plan cap (R266), Night Watch and Converging Tide (retired on the
 pool passes), The Moon Overlooks the Waters (withdrawn at the door, 2026-09-05),
-Scout Ahead and Song of Pearls (the cleanup pass, 2026-09-29).
+Scout Ahead and Song of Pearls (the cleanup pass, 2026-09-29), Exposed Flank
+(the feed pass, 2026-09-29).
 
 ## 7. What the engine does
 

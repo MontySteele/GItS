@@ -846,9 +846,10 @@ def test_the_four_base_words_the_surface_prints_are_exercised():
 
 
 def test_the_row_the_defect_was_filed_against_carries_the_vulnerable_tip():
-    """`Exposed Flank`, by name, and it keeps its Plan tip: the two words on
-    that face are two definitions and the card owes both."""
-    flank = (PROTOTYPE_DIR / "ProtoKkExposedFlank.cs").read_text(
+    """`Exposed Flank` was the row, and the feed pass (2026-09-29) cut it;
+    Ambush prints the same two words ("Apply 2 Vulnerable. Plan: ...") and
+    keeps its Plan tip: two definitions, and the card owes both."""
+    flank = (PROTOTYPE_DIR / "ProtoKkAmbush.cs").read_text(
         encoding="utf-8")
     assert "[gold]Vulnerable[/gold]" in flank
     assert "BaseKeywordTips.ForVulnerable(" in flank

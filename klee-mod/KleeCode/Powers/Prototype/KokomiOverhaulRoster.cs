@@ -44,7 +44,7 @@ namespace KleeMod.Powers;
 /// pick 2 added the two defensive rows `EB-335` builds, making it 28, and
 /// round 9 pick 1's tempo shelf added two more, making it 30, and the pool
 /// passes since have made it 39, and the Casket pass (2026-09-28) 46, and the
-/// cleanup pass (2026-09-29) 44.
+/// cleanup pass (2026-09-29) 44, and the feed pass (2026-09-29) 48.
 ///
 /// THE OVERHAUL WINS WHERE IT MEETS THE KURAGE'S MEMORY. A dev build compiles
 /// this arm AND that one, and both want her starter. They are alternatives, not
@@ -120,13 +120,13 @@ internal static class KokomiOverhaulRoster
     internal static CardModel StarterDefend() => ModelDb.Card<DefendSilent>();
 
     /// <summary>
-    /// Kokomi's WHOLE offerable pool under the arm: the slice's 44 rows and
+    /// Kokomi's WHOLE offerable pool under the arm: the slice's 48 rows and
     /// nothing else.
     ///
     /// LISTED BY TYPE, not filtered by id prefix. A prefix match would be a
     /// second, softer definition of "which rows are the slice" living next to
     /// the sheet's own, and it would fail silently the day a row is renamed.
-    /// These are the same 44 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
+    /// These are the same 48 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
@@ -156,18 +156,19 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkSangonomiyasCounsel>(),
     };
 
-    /// <summary>The slice's own 44 rows, without the Ancient tail
+    /// <summary>The slice's own 48 rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds. FORTY-SIX since the Casket pass
     /// (2026-09-28): six cut, thirteen added; FORTY-FOUR since the cleanup
-    /// pass (2026-09-29) cut Scout Ahead and Song of Pearls. The Open the Casket token is in
+    /// pass (2026-09-29) cut Scout Ahead and Song of Pearls; FORTY-EIGHT since
+    /// the feed pass (2026-09-29) cut Exposed Flank and added five 0-cost
+    /// Plan-only Commons. The Open the Casket token is in
     /// no pool; the relic deals it (<see cref="Relics.TamakushiCasket"/>).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
-        // The Tactician -- Plans, and the cards that pay per Plan (7)
+        // The Tactician -- Plans, and the cards that pay per Plan (6)
         ModelDb.Card<ProtoKkFeint>(),
         ModelDb.Card<ProtoKkAmbush>(),
         ModelDb.Card<ProtoKkReadTheField>(),
-        ModelDb.Card<ProtoKkExposedFlank>(),
         ModelDb.Card<ProtoKkTreatise>(),
         ModelDb.Card<ProtoKkWarCouncil>(),
         ModelDb.Card<ProtoKkNereidsAscension>(),
@@ -244,6 +245,13 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkMoonSignal>(),
         ModelDb.Card<ProtoKkPearlCurrent>(),
         ModelDb.Card<ProtoKkWhatTheTokoyoTook>(),
+        // THE FEED PASS (2026-09-29): five 0-cost Plan-only Commons, the cheap
+        // feed for the Plan queue. LAST, in the sheet's own order.
+        ModelDb.Card<ProtoKkBubbleWard>(),
+        ModelDb.Card<ProtoKkNip>(),
+        ModelDb.Card<ProtoKkJellyfishDrift>(),
+        ModelDb.Card<ProtoKkCurrentRead>(),
+        ModelDb.Card<ProtoKkBrineSting>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

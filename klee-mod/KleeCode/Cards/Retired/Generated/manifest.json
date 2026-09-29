@@ -172,6 +172,11 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_EXPOSED_FLANK",
+      "class": "RetiredProtoKkExposedFlank",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_HIGH_TIDE",
       "class": "RetiredProtoKkHighTide",
       "owner": "kokomi"

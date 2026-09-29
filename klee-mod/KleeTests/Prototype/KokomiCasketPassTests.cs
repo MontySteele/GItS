@@ -432,12 +432,13 @@ public class KokomiCasketPassTests : IDisposable
     // ---- F. the offer -----------------------------------------------------
 
     [Fact]
-    public void The_offer_is_forty_four_rows_with_the_thirteen_and_without_the_six()
+    public void The_offer_is_forty_eight_rows_with_the_thirteen_and_without_the_six()
     {
         // Forty-six after the Casket pass; the cleanup pass (2026-09-29) cut
-        // Scout Ahead and Song of Pearls.
+        // Scout Ahead and Song of Pearls; the feed pass (2026-09-29) cut
+        // Exposed Flank and added five.
         var slice = Seq("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(44, slice.Count(c => c.StartsWith("ModelDb.Card")));
+        Assert.Equal(48, slice.Count(c => c.StartsWith("ModelDb.Card")));
         foreach (var row in new[] { "ProtoKkMassedVolley", "ProtoKkSignalArrow",
                                     "ProtoKkSurgingShoal", "ProtoKkPearlDiver",
                                     "ProtoKkPressTheAdvantage",

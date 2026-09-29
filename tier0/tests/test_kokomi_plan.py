@@ -115,7 +115,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # and Signal Arrow, Surging Shoal, Pearl Diver, Shell of Sanctuary and
     # Pearl Current added.
     # TWENTY-NINE with the cleanup pass (2026-09-29): Scout Ahead cut.
-    assert len(planned) == 29
+    # THIRTY-TWO with the feed pass (2026-09-29): Exposed Flank cut, Coral
+    # Bulwark's Plan line gone, five Plan-only Commons added.
+    assert len(planned) == 32
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -872,7 +874,7 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     # pool and the absence does not.
     # FORTY-SIX since the Casket pass (2026-09-28); FORTY-FOUR since the
     # cleanup pass (2026-09-29).
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 44
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 48
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids

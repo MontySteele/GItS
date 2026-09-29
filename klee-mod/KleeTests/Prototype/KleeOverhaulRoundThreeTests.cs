@@ -412,8 +412,9 @@ public class KleeOverhaulRoundThreeTests
         // Water's Edge, the row `EB-277` was found on, is GONE (R242): her
         // basics are the base game's Strike and Defend, whose +3 the base game
         // owns. Coral Bulwark carries the Block half of the same pin.
-        // R276 pick 1: Coral Bulwark gains 7, 10 upgraded.
-        AssertUpgradeMoves<ProtoKkCoralBulwark>("Block", 7m, 10m);
+        // R276 pick 1: Coral Bulwark gains 7, 10 upgraded; the feed pass
+        // (2026-09-29): 8, 11 upgraded.
+        AssertUpgradeMoves<ProtoKkCoralBulwark>("Block", 8m, 11m);
         // Ka-pow! carries the `set_off`-hit clause again: round 5 pick 1 moved
         // Retain onto the BASE card, which handed its upgrade back to the
         // default rule. Fwoosh! prints the same clause beside it: aimed and
