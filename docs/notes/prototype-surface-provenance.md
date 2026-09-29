@@ -3774,6 +3774,21 @@ is empty"). The game's chooser is unchanged: the 0.111.0 choose-a-card screen
 has no per-option disabled state (`ModalChoice.SelectAffordableMode`'s
 comment). Pinned by `tier0/tests/test_furina_spend_pass_2026_09_28.py`.
 
+## Furina, the Stage — Bravura gains a base (2026-09-29)
+
+**Bravura** (`proto_fs_bravura`): "Spend all of your back performer's
+Fanfare. Deal 5 damage, plus 3 per point." (plus 4 upgraded; the base stays
+5). Was 3 damage per point with no base, 4 upgraded. The row is
+`amount_formula: {base: 5, per: 3, count: stage_spent}`, upgrade
+`{formula_per: +1}`; the face prints `{CalculationBase}` and `{ExtraDamage}`
+like Da Capo and keeps the in-combat `{CalculatedDamage}` line. Why: the
+Sonnet seats of 2026-09-28 (run FSR3RUN2Q7XB, acts 1 to 3) named it their
+"never again" card: "Bravura -- deals 3 damage per Fanfare of a back
+performer that is almost always 1". A main-session tuning fix under [USER]'s
+direction "upping both the spend and output of her cards" (the Spend pass,
+above, which had left Bravura unchanged). The tier0 sim reads this row, so it
+moved with it. Design: `review/active/furina-stage-brief-2026-09-08.md` §16.
+
 ## Kokomi: Kurage's Oath now-line, and Plan lines on their own line (2026-09-28)
 
 **Kurage's Oath** (`proto_kk_kurages_oath`, her starter). [USER]: "The

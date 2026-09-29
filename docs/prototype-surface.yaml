@@ -2224,10 +2224,10 @@
    authored_by: [claude],
    replaces: dramatic_entrance,
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Spend[/gold] all of your [gold]back performer[/gold]'s [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "[gold]Spend[/gold] all of your [gold]back performer[/gold]'s [gold]Fanfare[/gold]. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_back_all},
              {op: damage,
-              amount_formula: {base: 0, per: 3, count: stage_spent},
+              amount_formula: {base: 5, per: 3, count: stage_spent},
               target: enemy}]}
 
 - {id: proto_fs_full_house, name: "Full House", character: furina,
