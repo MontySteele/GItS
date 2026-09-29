@@ -46,7 +46,10 @@ combat grammar comes with us. (principles §1)
   balance governor. (Whether a particular card's scaling that happens to get
   duplicated is *too strong* is a balance question, not a law.) (principles §2.2)
 - **One aura per enemy (v1), 2 player-turns, refreshed by same-element hit.**
-  Anemo/Geo leave no aura — they only trigger. (principles §2.1)
+  Anemo/Geo leave no aura — they only trigger. A trigger spends the aura
+  rather than consuming it: the aura stays, and a spent aura pays no trigger
+  until a hit of its own element refreshes it. Aura elements react with a
+  spent aura as normal. (principles §2.1; element review, 2026-09-28)
 - **Canonical Frozen is a per-turn-decrementing, per-creature duration counter.**
   Non-boss Frozen = −50% next-action damage + Shatter (first Attack hit only,
   direct HP damage, cannot shatter the freeze it just applied). In boss rooms
@@ -66,8 +69,8 @@ combat grammar comes with us. (principles §1)
 - **Reaction credit — damage attribution and Burst energy — goes to the
   triggering player;** auras live on shared enemies so cross-player reactions
   need no special-casing. (principles §2.5)
-- **Overload splash (to all enemies) and Electro-Charged (stacking DoT) bypass
-  Block and are damage-pipeline-free** (no strength/vulnerable recursion).
+- **Overload splash (to all enemies), Swirl's flat 2 (to all enemies) and
+  Electro-Charged (stacking DoT) bypass Block and are damage-pipeline-free** (no strength/vulnerable recursion).
   **Shatter** is separate: bonus damage on the first Attack hit against a Frozen
   enemy, which removes Frozen — it is not a DoT. (M1; principles §2.2)
 - **Application cadence is a per-character dial** — catalyst-grade (every attack
