@@ -6,7 +6,7 @@ Draft 7, 2026-09-08, under R267. Draft 6 (2026-09-02, approved R241) is
 retrievable from git; this draft changes no ruled direction and adds the
 rules ruled since: the Kurage's Oath now-line (R250), Dusk and the queue as
 a resource (R265), the cap retired (R266), and Slack Water and Scout Ahead
-restored (R267). The ruled direction (R240) is unchanged: Plan is Kokomi's
+restored (R267; Scout Ahead was cut on 2026-09-29). The ruled direction (R240) is unchanged: Plan is Kokomi's
 key idea and goes into the starter deck; reusing Exhausted cards is a payoff
 card, not the chassis; Mend is a thing she can do, not a premise.
 
@@ -163,8 +163,8 @@ the queue the decision.
 
 - **The Tactician.** Plans and the cards that pay per Plan carried out.
   Payoff: the morning. The order riders (Opening Gambit doubles the next
-  Plan, Second Wave repeats it, Scout Ahead draws one per **later** carry-out
-  in the same drain, R267 pick 3) make writing order the puzzle.
+  Plan, Second Wave repeats it) make writing order the puzzle. Scout Ahead,
+  which drew one per later carry-out (R267 pick 3), was cut on 2026-09-29.
 - **The Priestess.** Block through the jellyfish, Dusk for the turn the hit
   is on; Mend only at Rare and Exhaust. A thing she can do.
 - **The Commander.** Gorou and the Inazuma companions (R236); how a
@@ -179,10 +179,10 @@ the queue the decision.
   (damage off the count), What the Tokoyo Took (double it) and What the
   Tokoyo Returns (Open the Casket back from the Exhaust Pile). Shell Guard
   reads it for Block (5, plus 1 per point), re-aimed by the main session
-  when the pass left its strike clause dead.
+  when the pass left its strike clause dead, and a Common since 2026-09-29.
 
-THE POOL (the Casket pass, 2026-09-28): 46 offered cards, 24 Common, 17
-Uncommon, 5 Rare, plus the three co-op cards
+THE POOL (the Casket pass, 2026-09-28; the cleanup pass, 2026-09-29): 44
+offered cards, 24 Common, 15 Uncommon, 5 Rare, plus the three co-op cards
 (`KokomiOverhaulRoster.Slice()`, `C.KOKOMI_OVERHAUL_POOL_IDS`). Cut: Tide
 Chart, Cleansing Wave, Ripple, Well Laid, Sea-Salt Prayer, Salt Line.
 Added: Massed Volley, Signal Arrow, Surging Shoal, Pearl Diver, Press the
@@ -194,11 +194,51 @@ shouldn't just be 10 copies of 'do x damage, or plan y'"; "5 to 7 damage per
 1 energy is roughly the going rate on AoE commons". Numbers and faces:
 `docs/notes/prototype-surface-provenance.md`, "the Casket pass".
 
+### The cleanup pass (2026-09-29)
+
+[USER], 2026-09-29: "a review and cleanup pass on Kokomi's current prototype
+to handle the known problems". Designed in the main session from the four
+Sonnet seat records of 2026-09-28 (two runs, acts 1 and 2 each). Both runs
+died to the act-2 boss short of Block for that turn ("8 HP, 0 Block, no
+energy, and no line existed that survived"; "Block stayed short at the
+boss"), and both act-1 handoffs said the deck lacked Block. Coral Bulwark was
+the only Common that blocked on the play itself. The second finding was
+hands clogged with cantrips that did little.
+
+- **Cut: Scout Ahead.** NEVER AGAIN in two records, one on the older build
+  ("draw plan never mattered and cost a slot"); two records played it as a
+  cantrip that "rarely mattered". [USER] had already named it a duplicate:
+  "Tide Chart vs Scout Ahead are basically the same thing".
+- **Cut: Song of Pearls.** It fires by itself (rule 4, "Nothing happens by
+  itself"), a seat said it "never seemed worth a slot", and its "if no Plan
+  waits" pays for not using the kit.
+- **Shell Guard: Uncommon to Common,** numbers unchanged (5 Block plus 1 per
+  Casket point, 8 upgraded). The kit's only Block that reads the Casket moves
+  to the rarity where the deck needs Block. A seat: "Shell Guard, Shell of
+  Sanctuary+ and Vambrace carried me".
+- **Tide Wall:** the Plan is now "Gain 6 Block, plus the damage the enemy
+  intends" (9 upgraded). It used to be the intent alone, and a seat wrote
+  NEVER AGAIN because "it gave 0 Block twice on Empower turns". The intent is
+  still read at carry-out; the now-half is unchanged (4, 6 upgraded).
+- **Feint:** 6 (9 upgraded) plus 3 per Plan carried out this turn, up from 4
+  (6). A seat said it "never seemed worth a slot"; it had the zero-floor
+  problem Sango Isshin had.
+- **Press the Advantage:** 7, or 11 if a Plan waits (9 / 14 upgraded), up
+  from 6 / 10 (8 / 13).
+- **Driftglass:** 6 plus 1 per Casket point (8 upgraded), up from 5 (7).
+
+The pool is 44: 24 Common, 15 Uncommon, 5 Rare, plus the three co-op cards.
+Song of Pearls' power and Scout Ahead's clause stay in both engines with
+nothing granting them (the Casket pass left Tide Chart's the same way);
+`docs/current/BACKLOG.md` lists them for deletion. Rows and pins:
+`docs/notes/prototype-surface-provenance.md`, "the cleanup pass".
+
 Rares take constellation names (C1 to C6 are all unused but Sango Isshin
 and The Clouds Like Waves). Cut and not coming back: Tide, Surge, Exert,
 the pulse, Orders, Tactics, Spent, Garment as a keyword, Flawless Strategy,
 the two-Plan cap (R266), Night Watch and Converging Tide (retired on the
-pool passes), The Moon Overlooks the Waters (withdrawn at the door, 2026-09-05).
+pool passes), The Moon Overlooks the Waters (withdrawn at the door, 2026-09-05),
+Scout Ahead and Song of Pearls (the cleanup pass, 2026-09-29).
 
 ## 7. What the engine does
 

@@ -92,15 +92,15 @@ public class KokomiCorePassTests
     }
 
     [Fact]
-    public void Song_of_pearls_card_is_four_and_six_upgraded()
+    public void Song_of_pearls_card_is_cut_and_its_power_stays()
     {
-        var card = new ProtoKkSongOfPearls();
-        Assert.Equal(4m, card.DynamicVars["PowerAmount"].BaseValue);
-        Assert.Equal(6m, Upgraded<ProtoKkSongOfPearls>()
-            .DynamicVars["PowerAmount"].BaseValue);
-        Assert.Contains("if no [gold]Plan[/gold] waits", Face(card));
-        Assert.Contains("PowerCmd.Apply<SongOfPearlsPower>",
-                        string.Join(" ", Play("ProtoKkSongOfPearls")));
+        // The cleanup pass (2026-09-29) cut the card; the power stays
+        // registered with nothing granting it, as Tide Chart's pay did.
+        Assert.DoesNotContain(typeof(SongOfPearlsPower).Assembly.GetTypes(),
+                              t => t.Name == "ProtoKkSongOfPearls");
+        Assert.DoesNotContain(
+            Il.CallSequence(Il.Method("KokomiOverhaulRoster", "Slice")),
+            c => c.Contains("SongOfPearls"));
     }
 
     // ---- Treatise: the now-line payoff ------------------------------------

@@ -207,28 +207,9 @@ public class KokomiPoolPassTwoTests
     //    count at R267 pick 3: the carry-outs that FOLLOW it
     // ======================================================================
 
-    [Fact]
-    public void Scout_ahead_draws_one_now_and_per_later_carry_out()
-    {
-        var card = new ProtoKkScoutAhead();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, card.Rarity);
-
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.DrawPerPlanAfter, clause.Kind);
-        Assert.Equal(KokomiPlan.Aim.Self, clause.Aim);
-        // THE AMOUNT IS THE RATE, the shape Tide Wall's clause already has.
-        Assert.Equal(1, clause.Amount);
-    }
-
-    [Fact]
-    public void Scout_aheads_smith_moves_the_cost_and_not_the_rate()
-    {
-        // The rate is the QUEUE's fact and not the card's: an upgrade that
-        // raised it would scale with a deck the offer screen cannot see.
-        var moves = Il.Calls(Il.Method("ProtoKkScoutAhead", "OnUpgrade"));
-        Assert.Contains(moves, c => c.Contains("EnergyCost"));
-    }
+    // The two row pins that stood here left with the card: the cleanup pass
+    // (2026-09-29) cut Scout Ahead. `DrawPerPlanAfter` stays with nothing
+    // spelling it, and the structural pin below still holds the drain.
 
     [Fact]
     public void The_count_is_the_drains_and_is_paid_per_later_carry_out()
@@ -521,17 +502,17 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void All_five_surviving_rows_are_offerable_and_none_is_in_the_starter()
+    public void All_four_surviving_rows_are_offerable_and_none_is_in_the_starter()
     {
         // FIVE SINCE POOL PASS FIVE (`EB-685`): Night Watch is retired,
-        // its Dusk Weak having moved onto Slack Water.
+        // its Dusk Weak having moved onto Slack Water. FOUR SINCE THE CLEANUP
+        // PASS (2026-09-29): Scout Ahead is cut.
         var slice = Il.CallSequence(
             Il.Method("KokomiOverhaulRoster", "Slice")).ToList();
         foreach (var row in new[]
                  {
                      "ProtoKkOpeningGambit", "ProtoKkSecondWave",
-                     "ProtoKkScoutAhead", "ProtoKkSecondThoughts",
-                     "ProtoKkBreakwater",
+                     "ProtoKkSecondThoughts", "ProtoKkBreakwater",
                  })
         {
             Assert.Contains(slice, c => c.Contains(row));
@@ -568,11 +549,7 @@ public class KokomiPoolPassTwoTests
             Face(new ProtoKkSecondWave()));
         Assert.EndsWith("The Plan after this one deals double damage.",
                         Face(new ProtoKkOpeningGambit()));
-        // R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a
-        // window on the drain again, and "after this one" is the position
-        // rule printed.
-        Assert.EndsWith("Draw 1 card for each Plan after this one.",
-                        Face(new ProtoKkScoutAhead()));
+        // Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).
     }
 
     [Fact]

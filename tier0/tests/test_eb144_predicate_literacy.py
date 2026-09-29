@@ -355,8 +355,8 @@ def test_the_surface_is_actually_being_censused():
 
 def test_press_the_advantages_waiting_branch_is_scored_and_not_priced_at_zero():
     """`EB-712`'s rule on the arm's conditional row, both ways round. Press the
-    Advantage prints 6 and 10 and the difference IS the card; untaught, the
-    pilot would read the 10 as nothing. (Feint was the named row until the
+    Advantage prints 7 and 11 (the cleanup pass, 2026-09-29) and the difference
+    IS the card; untaught, the pilot would read the 11 as nothing. (Feint was the named row until the
     Casket pass, 2026-09-28, took it off the yes/no.)
 
     Seen to FAIL before the predicate was taught: both states scored 0.0,
@@ -367,11 +367,11 @@ def test_press_the_advantages_waiting_branch_is_scored_and_not_priced_at_zero():
 
     quiet = make_state(enemies=[make_enemy(hp=60)])
     quiet.kk_plan_queue = []
-    assert policy._expected_damage(quiet, card) == 6.0
+    assert policy._expected_damage(quiet, card) == 7.0
 
     waiting = make_state(enemies=[make_enemy(hp=60)])
     waiting.kk_plan_queue = [object()]
-    assert policy._expected_damage(waiting, card) == 10.0
+    assert policy._expected_damage(waiting, card) == 11.0
 
 
 def test_the_prototype_predicate_read_is_the_engine_s_own(monkeypatch):

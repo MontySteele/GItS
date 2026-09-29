@@ -62,21 +62,8 @@ public class KokomiPoolPassFourTests
     //    pick 3 put back on it
     // ======================================================================
 
-    [Fact]
-    public void Scout_ahead_counts_the_plans_that_follow_it()
-    {
-        // R267 PICK 3 REVERSED THIS PASS'S RECOUNT. Pass four removed an
-        // ordering decision because one seat avoided the 0-payout slot; the
-        // clause is back, and the face says "later" so a seat can read the
-        // rule off it.
-        var card = new ProtoKkScoutAhead();
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.DrawPerPlanAfter, clause.Kind);
-        Assert.Equal(1, clause.Amount);
-        // The 2026-09-25 text pass: "after this one" is the position rule.
-        Assert.EndsWith("Draw 1 card for each Plan after this one.",
-                        Face(card));
-    }
+    // The row pin that stood here left with the card: the cleanup pass
+    // (2026-09-29) cut Scout Ahead. Its clause stays with nothing spelling it.
 
     [Fact]
     public void The_drains_count_is_carry_outs_and_is_paid_as_they_happen()

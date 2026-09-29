@@ -182,6 +182,11 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_SCOUT_AHEAD",
+      "class": "RetiredProtoKkScoutAhead",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_SEA_SALT_PRAYER",
       "class": "RetiredProtoKkSeaSaltPrayer",
       "owner": "kokomi"
@@ -189,6 +194,11 @@
     {
       "id": "KLEEMOD-PROTO_KK_SEA_SPRAY",
       "class": "RetiredProtoKkSeaSpray",
+      "owner": "kokomi"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KK_SONG_OF_PEARLS",
+      "class": "RetiredProtoKkSongOfPearls",
       "owner": "kokomi"
     },
     {
