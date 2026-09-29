@@ -59,6 +59,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
 - The Big One's x4 stays armed when its Set off finds no Bomb, so a later Mine on the enemy turn can spend it.
+- Kokomi text (feed round 2026-09-29): the Tamakushi Casket does not say Open the Casket pays once a fight (it exhausts); cards with a now line and a Plan line (Shell of Sanctuary, Current Read, Kurage's Oath) read as doing both; template them with "or".
 - Feigned Retreat's carry-out does not say which number paid: with Strength folded in at writing, the hurt 9 read as the printed 14 (Flex, Str 5) and a Kokomi seat reported the unhurt hit firing after a 9-HP loss (2026-09-29). Also, "lost no HP" is read as net HP (`KokomiPlan.UnhurtAmount`, sim twin `kokomi_plan` `damage_if_unhurt`), so a Mend between writing and morning reads unhurt.
 - A reaction amplifier's payout is not printed: the seat log reads "Vaporize on X, off Knights' Muster" with no x1.5, and Muster's preview cannot fold it because the Knight is chosen at play (Varka seat, 2026-09-29: Weak 4 -> 3 printed, 4 landed; the multiplier is pinned by `Vaporize_off_knights_muster_multiplies_its_hit`).
 
