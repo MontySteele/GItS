@@ -147,6 +147,35 @@ The largest of the three. The whole Dendro engine (the Core alone is a build
 the size of Mines, in both engines), Seeds, the Purification trigger, and the
 companion question in pick 2.
 
+## 9. Directions after the sim (2026-09-29, not yet a revision)
+
+Draft #752 ran this paper and the Dendro ruling with placeholder numbers.
+- **Seeds saturate.** Permanent Seeds capped at 3 per enemy fill every enemy by
+  turn 3 to 7, and the three placement policies tie on every fight but the
+  mixed pack. Placement, her central decision, expires.
+- **Direction to explore: a limited shared supply of movable Seeds** (GPT's
+  review, adopted). She keeps a persistent network and decides which enemies
+  belong in it. No universal decay, and no Purification that always spends
+  Seeds: either turns her turns into rebuilding the same setup.
+- **Moving has to compete with staying.** Scarcity alone does not make
+  relocation worthwhile. With Purification at a flat amount per Seed, moving
+  Seeds mostly changes who takes the damage, so the decision has to come from
+  what she already has: which enemies can set off the reaction-triggered
+  Purification, which enemy Foresight is protecting her from, kill timing and
+  overkill. Test on mixed packs; identical packs are the sanity check.
+- **The lone boss needs its own decision.** One candidate, provisional: a
+  payoff that spends an enemy's Seeds for an immediate hit, against keeping the
+  network ticking.
+- **Foresight** prevented 19 to 52 damage per boss fight, which is what a
+  per-hit reduction does against multi-hits; it does not yet show a defensive
+  archetype. Per hit or per attack must be stated.
+- **Solo baseline first.** Her solo damage (13 a turn) is placeholder numbers;
+  judge companion dependence only after a reasonable solo baseline exists.
+- **Rules the sim had to guess:** whether a Purify card's own hit spends the
+  turn's trigger, whether a Burning re-light is a reaction, Sages' Mandate
+  against the paper's bound, and Akasha Terminal on a lone enemy (it does
+  nothing).
+
 ## Picks
 
 1. **Purification's element.** (1) *A Dendro hit that paints and can react,

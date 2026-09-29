@@ -153,6 +153,37 @@ Medium. The Tab needs a counter power, a settlement step on the reward screen,
 the Invoice curse and a merchant action, and the sim needs gold in combat.
 Geo needs only the element review's change B. No new element work.
 
+## 9. Directions after the sim (2026-09-29, not yet a revision)
+
+Draft #751 ran this paper with placeholder numbers. Selective borrowing (only
+against elites, bosses or at half HP) cleared act 1 in 19.8% of runs against
+9.2% always and 8.8% never, so the central trade holds in that model. No fight
+made money in the sim; the gold-event and gold-relic audit (Guardrail 3) is
+still owed, so "no farming" is not established. Directions for the next draft,
+from the report and GPT's two reviews:
+- **Payment: everything on the Tab.** Every Mora price goes on the Tab and gold
+  pays it at settlement. Paying from gold first left Dominance and Lithic
+  Ledger dead while he was solvent. The draft must say what the credit limit
+  then means for a rich Zhongli: a cap on borrowing, or a cap on what he may
+  spend in a fight whatever gold he holds.
+- **Discounts.** Bulk Purchase (5 off, stacking per play) plus Gold-Tongued
+  (10 off) takes A Price for Everything from 15 to 0: two cards and an Energy
+  for nothing, every turn. A floor above zero is not enough; one Mora for that
+  card still makes the limit irrelevant. One narrow rule: discounts apply to
+  a card's Mora price once per turn and never reduce a card that makes Energy
+  or draws. The exact wording is the draft's job.
+- **Pegs.** A Price for Everything and Liquidity are priced under the stated
+  20 Mora per Energy; they are most of the measured "free Energy".
+- **Recovery.** Debt costs him gold, clogged draws (Invoices) and credit at
+  once. The draft must show a viable conservative route through appropriate
+  fights for a deck that stops borrowing, without making purchases
+  pointless.
+- **Rules the sim had to guess:** partial payment, "at the limit", Contract of
+  Stone's "this turn", replayed Contracts, Pillar of Contracts as a Power,
+  stacked Steles, Planet Befall copies, and a credit limit pushed below zero.
+  Contract of Earth against a single enemy can only be kept on the killing
+  turn, when its credit is worthless.
+
 ## Picks
 
 1. **The bill.** (1) *One Invoice per fight for the exact amount, removed only
