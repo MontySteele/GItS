@@ -81,7 +81,9 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   weirdly 'expensive'"; "some Plan cards need to go to 0 cost"): five 0-cost
   Plan-only Commons (Bubble Ward, Nip, Jellyfish Drift, Current Read, Brine
   Sting), eight now-and-Plan Commons moved to Uncommon, Coral Bulwark a plain
-  8 Block, Exposed Flank cut. The pool is 48 (20 / 23 / 5). Brief §6.
+  8 Block, Exposed Flank cut. The pool is 48 (20 / 23 / 5). Brief §6. Its
+  seat round (`review/records/kokomi-feed-round-2026-09-29.md`): energy is no
+  longer the wall, Block still is; one seat reached the act-3 boss.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any
@@ -133,8 +135,11 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Winds makes his Swirls react where they land. Pool 19 (10 / 7 / 2), four
   Knights among the Commons. C# first, no sim twin. The seat page prints his
   Winds, the Fang and each aura fresh or spent. Per-row notes:
-  `docs/notes/prototype-surface-provenance.md`, "Varka". Next: the first seat
-  round's one question (sec.10.4), then [USER]'s run.
+  `docs/notes/prototype-surface-provenance.md`, "Varka". Round one
+  (`review/records/varka-round-1-2026-09-29.md`, four seats): Absorb-or-Swirl
+  is a decision once one Wind is held; the Fang Absorbing its own Attack's
+  aura is a bug; Block is short. Next: the fix batch, a Block card batch, then
+  [USER]'s run.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults
