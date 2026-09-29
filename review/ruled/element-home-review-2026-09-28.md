@@ -1,5 +1,5 @@
 Status: RULED 2026-09-28 (§6). Step 4, phase one (§3, §4, §7.1, §7.3) built
-2026-09-28 on branch `element-port`; phase two (§7.2, §7.4) is in `BACKLOG.md`.
+2026-09-28 in PR #745; phase two (§7.2, §7.4) is in `BACKLOG.md`.
 
 # The elements as a home: what a character built on each element wants
 
