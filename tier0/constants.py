@@ -889,8 +889,8 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_kk_slack_water",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). FORTY-SIX rows since the
-# Casket pass (2026-09-28: six cut, thirteen added), in the packet's own order
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). FORTY-FOUR rows since the
+# cleanup pass (2026-09-29: two cut), in the packet's own order
 # -- the Tactician, the
 # Priestess, the Commander, then the currencies, the one replay, the tempo
 # shelf and the pool pass. `EB-335` filed R246 pick 2's defensive pair with the
@@ -912,15 +912,17 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # one-turn Exhaust Skill). The row and its pins left the surface under R213
 # B's deletion rule, exactly as Rolling Tide's did (`EB-552`). The Casket
 # pass (2026-09-28) cut Tide Chart, Cleansing Wave, Ripple, Well Laid,
-# Sea-Salt Prayer and Salt Line and appended thirteen rows: forty-six.
+# Sea-Salt Prayer and Salt Line and appended thirteen rows: forty-six. The
+# cleanup pass (2026-09-29) cut Scout Ahead and Song of Pearls: forty-four.
+# Song of Pearls' power (`kokomi_plan.SONG_OF_PEARLS`) stays registered with
+# nothing granting it.
 KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
-    # The Tactician -- Plans, and the cards that pay per Plan (8)
+    # The Tactician -- Plans, and the cards that pay per Plan (7)
     "proto_kk_feint",
     "proto_kk_ambush",
     "proto_kk_read_the_field",
     "proto_kk_exposed_flank",
     "proto_kk_treatise",
-    "proto_kk_song_of_pearls",
     "proto_kk_war_council",
     "proto_kk_nereids_ascension",
     # The Priestess -- Block through the jellyfish, Mend at Rare (7)
@@ -974,10 +976,11 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # spelling it. FIVE SINCE POOL PASS FIVE (`EB-685`): Night Watch lost
     # every draft comparison in r27 and Slack Water's Plan half moved to Dusk,
     # which is the job Night Watch was rebuilt for one pass earlier. It spelled
-    # no op of its own, so nothing stays registered behind it.
+    # no op of its own, so nothing stays registered behind it. FOUR SINCE THE
+    # CLEANUP PASS (2026-09-29): Scout Ahead was cut, and its
+    # `draw_per_plan_after` op stays registered with nothing spelling it.
     "proto_kk_opening_gambit",
     "proto_kk_second_wave",
-    "proto_kk_scout_ahead",
     "proto_kk_second_thoughts",
     "proto_kk_breakwater",
     # THE CASKET PASS (2026-09-28). The Tamakushi Casket counts the Plans the

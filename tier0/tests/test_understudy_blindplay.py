@@ -68,6 +68,16 @@ def _fresh_fight():
     blindplay.forget_run()
 
 
+@pytest.fixture(autouse=True)
+def _no_live_speed(monkeypatch):
+    """The Punch Off gate reads the live FastMode off the bridge. No test may
+    ask whatever game is on the default port, so every test starts on "the
+    bridge cannot say" -- the refusing side -- and a test that wants Instant
+    says so."""
+    from understudy import blindplay_faces as faces
+    monkeypatch.setattr(faces, "FAST_MODE_READER", lambda: "")
+
+
 def combat_state() -> dict:
     """RECORDED. A real staged Kokomi turn as the bridge returned it."""
     blob = json.loads(RECORDED_COMBAT.read_text(encoding="utf-8"))
@@ -772,15 +782,38 @@ def test_an_ordinary_event_is_not_warned_at():
     assert not any(o.get("note") for o in obs["options"])
 
 
-def test_a_hazard_event_is_tool_blocked():
-    """EB-1. The register, not a heuristic: the screen renders as refused and
-    the driver stops, because there is no safe option to pick."""
-    obs = blindplay.observation(hazard_event_state())
-    assert obs["screen"] == "hazard" and obs["blocked"]
-    assert "TOOL-BLOCKED: event" in blindplay.render(obs)
-    assert blindplay.act(hazard_event_state(), 'choose "Nab it"')["refusal"]
+def test_a_hazard_event_is_tool_blocked(monkeypatch):
+    """EB-1. The register, not a heuristic: off Instant, or when the bridge
+    cannot say what speed it is at, the screen renders as refused and the
+    driver stops."""
+    from understudy import blindplay_faces as faces
+    for mode in ("", "Normal", "Fast"):
+        monkeypatch.setattr(faces, "FAST_MODE_READER", lambda m=mode: m)
+        obs = blindplay.observation(hazard_event_state())
+        assert obs["screen"] == "hazard" and obs["blocked"], mode
+        assert "TOOL-BLOCKED: event" in blindplay.render(obs)
+        assert blindplay.act(hazard_event_state(),
+                             'choose "Nab it"')["refusal"]
     # A NON-hazard event on the same screen type is driven normally.
     assert not blindplay.observation(event_state())["blocked"]
+
+
+def test_punch_off_is_played_on_an_instant_lane(monkeypatch):
+    """2026-09-29. Since #733 the mod skips `PunchOff.PunchEachOther` under
+    `FastModeType.Instant`, which every embarked seat lane runs at, so there
+    the room is an ordinary event: its options are drawn and choosable, read
+    by id or by title."""
+    from understudy import blindplay_faces as faces
+    monkeypatch.setattr(faces, "FAST_MODE_READER", lambda: "Instant")
+    obs = blindplay.observation(hazard_event_state())
+    assert obs["screen"] != "hazard" and not obs["blocked"]
+    page = blindplay.render(obs)
+    assert "TOOL-BLOCKED" not in page and "Nab it" in page
+    assert not blindplay.act(hazard_event_state(),
+                             'choose "Nab it"').get("refusal")
+    by_title = hazard_event_state()
+    by_title["event"]["event_id"] = ""
+    assert not blindplay.observation(by_title)["blocked"]
 
 
 # -------------------------------------------------------------- grammar ----
@@ -7332,10 +7365,11 @@ def test_the_reactions_are_defined_wherever_the_screen_shows_an_element():
     # numbers it exists for are both still here.
     assert "6 damage to ALL enemies and applies 1 Weak" in page
     assert "Shatters for 6 unblockable damage" in page
-    # `EB-366`: the boss substitution is NOT on this page. The recorded combat
-    # is a `monster` room, and the clause is a rule about a boss room -- see
-    # the two tests below.
+    # `EB-366`: no unqualified "Bosses can't be Frozen" here. Since
+    # 2026-09-29 the row carries the boss rule in one sentence that names the
+    # room, which is true on a `monster` page too -- see the test below.
     assert "Bosses can't be Frozen" not in page
+    assert "In a boss fight, only minions can be Frozen" in page
     # AN AURA IS ONE HALF OF A PAIR, and `EB-428` is why that is now the
     # sentence: the combination is priced from the board's side just as often,
     # so a Cryo aura standing under a Pyro card reaches Melt -- and reaches
@@ -7369,11 +7403,14 @@ def test_the_boss_substitution_prints_in_a_boss_room():
     assert "Bosses can't be Frozen" not in blindplay.observe(elite)
     assert "Shatters for 6 unblockable damage" in blindplay.observe(elite)
 
+    # 2026-09-29 (a Furina seat met "Frozen" on Vantom and was hit for 26):
+    # the rule is one sentence on the Frozen row, qualified by the room, so
+    # it is true in the elite room and prints in the boss room too -- once.
+    sentence = ("In a boss fight, only minions can be Frozen; the others "
+                "become Vulnerable instead.")
+    assert sentence in blindplay.observe(elite)
     page = blindplay.observe(boss)
-    assert "Bosses can't be Frozen" in page
-    # The half that decides WHICH body in front of you freezes, and the half
-    # the C# preview was missing when this row was filed.
-    assert "A Minion beside the boss still Freezes." in page
+    assert page.count(sentence) == 1
 
 
 def test_the_consumed_aura_rule_is_stated_plainly():
@@ -7694,12 +7731,13 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         for phrase in phrases:
             assert phrase in src, (word, phrase)
             assert phrase in blindplay.REACTION_KEYWORDS[word], (word, phrase)
-    # `EB-366`: the boss substitution left the Frozen ROW and became a clause
-    # the room decides. It is still the C#'s own sentence and still held in
-    # step from this side -- only where it prints has moved.
+    # `EB-366`, then 2026-09-29: the boss rule is one sentence on the Frozen
+    # row, the C#'s own words (its preview says it with the keyword golded).
     assert "bosses can't be Frozen" in src
-    assert "Bosses can't be Frozen" in blindplay.FROZEN_BOSS_CLAUSE
-    assert "Bosses can't be Frozen" not in blindplay.REACTION_KEYWORDS["Frozen"]
+    assert ("In a boss fight, only minions can be Frozen; the others become "
+            in src)
+    assert (blindplay.FROZEN_BOSS_CLAUSE.strip()
+            in blindplay.REACTION_KEYWORDS["Frozen"])
     # The interpolated constants, read off the table the C# interpolates from.
     table = (REPO / "klee-mod" / "KleeCode" / "Elements"
              / "ReactionTable.cs").read_text(encoding="utf-8")

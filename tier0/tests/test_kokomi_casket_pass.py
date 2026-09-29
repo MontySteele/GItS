@@ -161,14 +161,15 @@ def test_the_token_retains(overhaul):
 
 # --- C. the re-keyed payoffs -------------------------------------------------
 
-def test_feint_is_four_plus_three_per_carry_out(overhaul):
+def test_feint_is_six_plus_three_per_carry_out(overhaul):
+    # The cleanup pass (2026-09-29): a base of 6; 9 plus 3 per Plan upgraded.
     st = kokomi_state(enemies=[make_enemy(hp=100)])
-    assert _hit(st, _row("proto_kk_feint")) == 4
+    assert _hit(st, _row("proto_kk_feint")) == 6
     carry_out(st, [{"op": "energy", "amount": 1}])
-    assert _hit(st, _row("proto_kk_feint")) == 7
+    assert _hit(st, _row("proto_kk_feint")) == 9
     up = _up("proto_kk_feint")
     assert up.effects[0]["amount_formula"] == {
-        "base": 6, "per": 3, "count": "plans_carried_out_this_turn"}
+        "base": 9, "per": 3, "count": "plans_carried_out_this_turn"}
     assert up.plan[0]["amount"] == 2
 
 
@@ -235,14 +236,15 @@ def test_the_commons(overhaul):
     assert diver.plan == [{"op": "casket_gain", "amount": 2}]
     assert _up("proto_kk_pearl_diver").effects == [{"op": "draw", "amount": 2}]
 
+    # The cleanup pass (2026-09-29): 7 / 11, upgraded 9 / 14.
     press = _row("proto_kk_press_the_advantage")
     st = kokomi_state(enemies=[make_enemy(hp=100)])
-    assert _hit(st, press) == 6
+    assert _hit(st, press) == 7
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
-    assert _hit(st, press) == 10
+    assert _hit(st, press) == 11
     press_up = _up("proto_kk_press_the_advantage")
-    assert press_up.effects[0]["else"][0]["amount"] == 8
-    assert press_up.effects[0]["then"][0]["amount"] == 13
+    assert press_up.effects[0]["else"][0]["amount"] == 9
+    assert press_up.effects[0]["then"][0]["amount"] == 14
 
     shell = _row("proto_kk_shell_of_sanctuary")
     assert shell.plan_dusk
@@ -251,12 +253,13 @@ def test_the_commons(overhaul):
     assert _up("proto_kk_shell_of_sanctuary").plan == [
         {"op": "block", "amount": 12}]
 
+    # The cleanup pass (2026-09-29): a base of 6, upgraded 8.
     glass = _row("proto_kk_driftglass")
     st = kokomi_state(enemies=[make_enemy(hp=100)])
-    assert _hit(st, glass) == 5
+    assert _hit(st, glass) == 6
     st.kk_casket = 4
-    assert _hit(st, glass) == 9
-    assert _up("proto_kk_driftglass").effects[0]["amount_formula"]["base"] == 7
+    assert _hit(st, glass) == 10
+    assert _up("proto_kk_driftglass").effects[0]["amount_formula"]["base"] == 8
 
 
 def test_no_common_increases_deck_size(overhaul):
@@ -351,12 +354,14 @@ def test_moon_signal_reads_the_queue_before_the_drain(overhaul):
 
 # --- F. the offer -------------------------------------------------------------
 
-def test_the_offer_is_forty_six(overhaul):
+def test_the_offer_is_forty_four(overhaul):
+    # Forty-six after the Casket pass; the cleanup pass (2026-09-29) cut two.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 46
+    assert len(ids) == 44
     for cut in ("proto_kk_tide_chart", "proto_kk_cleansing_wave",
                 "proto_kk_ripple", "proto_kk_well_laid",
-                "proto_kk_sea_salt_prayer", "proto_kk_salt_line"):
+                "proto_kk_sea_salt_prayer", "proto_kk_salt_line",
+                "proto_kk_scout_ahead", "proto_kk_song_of_pearls"):
         assert cut not in ids
         assert cut not in {c.id for c in loader.prototype_cards()}
     # And the co-op three stay outside the count.

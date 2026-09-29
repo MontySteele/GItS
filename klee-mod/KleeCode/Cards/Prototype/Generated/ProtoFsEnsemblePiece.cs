@@ -48,7 +48,7 @@ public sealed class ProtoFsEnsemblePiece : CustomCardModel, ICharacterCard
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new ExtraDamageVar(4m),
+            new ExtraDamageVar(5m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.Count(card))
         };
 
@@ -71,6 +71,6 @@ public sealed class ProtoFsEnsemblePiece : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
     }
 }

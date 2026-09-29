@@ -174,7 +174,9 @@ file the code has left.
 - **An unknown screen is `TOOL-BLOCKED`, never a heuristic** (`blindplay.py`).
   An unrecognised `state_type`, an `overlay`, the crystal-sphere minigame and a
   registered EB-1 hazard event all render as `TOOL-BLOCKED: <state_type>` and
-  stop the driver. There is no first-button fallback in the file:
+  stop the driver. Punch Off is the exception on an Instant game: the mod's
+  guard defuses it there, so the page asks the live FastMode and plays it
+  (`blindplay_shape.INSTANT_GUARDED_HAZARDS`). There is no first-button fallback in the file:
   `soak._mechanical_action` has one because a soak must keep moving
   (`soak_screens.py`), and a blind tester must not.
   **BLOCKED IS NOT STRANDED where the screen declares an EXIT (`EB-396`).**

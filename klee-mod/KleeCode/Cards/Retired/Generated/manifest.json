@@ -87,8 +87,23 @@
       "owner": "furina"
     },
     {
+      "id": "KLEEMOD-PROTO_FS_GALA_DINNER",
+      "class": "RetiredProtoFsGalaDinner",
+      "owner": "furina"
+    },
+    {
       "id": "KLEEMOD-PROTO_FS_GENTILHOMME_USHER",
       "class": "RetiredProtoFsGentilhommeUsher",
+      "owner": "furina"
+    },
+    {
+      "id": "KLEEMOD-PROTO_FS_RAPT_AUDIENCE",
+      "class": "RetiredProtoFsRaptAudience",
+      "owner": "furina"
+    },
+    {
+      "id": "KLEEMOD-PROTO_FS_SCENE_CHANGE",
+      "class": "RetiredProtoFsSceneChange",
       "owner": "furina"
     },
     {
@@ -182,6 +197,11 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_SCOUT_AHEAD",
+      "class": "RetiredProtoKkScoutAhead",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_SEA_SALT_PRAYER",
       "class": "RetiredProtoKkSeaSaltPrayer",
       "owner": "kokomi"
@@ -189,6 +209,11 @@
     {
       "id": "KLEEMOD-PROTO_KK_SEA_SPRAY",
       "class": "RetiredProtoKkSeaSpray",
+      "owner": "kokomi"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KK_SONG_OF_PEARLS",
+      "class": "RetiredProtoKkSongOfPearls",
       "owner": "kokomi"
     },
     {

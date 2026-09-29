@@ -52,7 +52,7 @@ moves neither the constant census nor the world stamp.
 THE TWO GRANTED DECKS are sec.9's -- "Round one runs the natural starter and
 the two granted decks, Preserve and Expend, on the same seed" -- built by ID
 off the batch-one rows, because a drafted deck cannot be asked to hold a
-particular shape. Preserve is readers, Refills, Scene Change and the Rare;
+particular shape. Preserve is readers, Refills, Step Forward and the Rare;
 Expend is Understudy, the three named summons and the Spend attacks.
 """
 
@@ -81,10 +81,11 @@ STARTER_KIT = [c for c in furina_stage.STARTER_IDS
                if c.startswith("proto_fs_")]
 
 #: PRESERVE: grow the lead behind Block, Refill the reserve, cash big with the
-#: readers and the Rare (brief sec.4).
+#: readers and the Rare (brief sec.4). 2026-09-29: the audit pass cut Scene
+#: Change, so Step Forward is this deck's rotation.
 PRESERVE = STARTER_KIT + [
     "proto_fs_standing_ovation", "proto_fs_warm_reception",
-    "proto_fs_warm_reception", "proto_fs_scene_change",
+    "proto_fs_warm_reception", "proto_fs_step_forward",
     "proto_fs_ousia_surge", "proto_fs_pneuma_refrain",
     "proto_fs_interposition", "proto_fs_let_the_people_rejoice",
 ]
@@ -104,13 +105,12 @@ EXPEND = STARTER_KIT + [
 #: (Neuvillette and Charlotte fed by Refills) and a TANK deck (Wriothesley
 #: and Sigewinne behind Block). Then the balance check [USER] asked for after
 #: the trio could be cloned ("Let's allow for copies and then check the
-#: balance"): three Crabalettas, three Crabalettas with Full House (three
+#: balance"): (Gala Dinner left STAR with the 2026-09-29 audit pass) three Crabalettas, three Crabalettas with Full House (three
 #: Ushers left with the Usher card, 2026-09-28); and three guests, alone and with Full House, to spot a runaway.
 STAR = STARTER_KIT + [
     "proto_fs_guest_star_neuvillette", "proto_fs_guest_star_charlotte",
     "proto_fs_standing_ovation", "proto_fs_standing_ovation",
     "proto_fs_warm_reception", "proto_fs_warm_reception",
-    "proto_fs_gala_dinner",
 ]
 TANK = STARTER_KIT + [
     "proto_fs_guest_star_wriothesley", "proto_fs_guest_star_sigewinne",

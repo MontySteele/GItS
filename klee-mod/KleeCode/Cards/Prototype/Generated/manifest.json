@@ -24,7 +24,6 @@
     "proto_fs_final_bow",
     "proto_fs_five_century_act",
     "proto_fs_full_house",
-    "proto_fs_gala_dinner",
     "proto_fs_gala_premiere",
     "proto_fs_grand_deluge",
     "proto_fs_grand_entrance",
@@ -56,12 +55,10 @@
     "proto_fs_pneuma_refrain",
     "proto_fs_quick_cue",
     "proto_fs_raise_a_toast",
-    "proto_fs_rapt_audience",
     "proto_fs_regal_bearing",
     "proto_fs_regina_of_all_waters",
     "proto_fs_revolving_stage",
     "proto_fs_salon_debut",
-    "proto_fs_scene_change",
     "proto_fs_season_tickets",
     "proto_fs_share_the_spotlight",
     "proto_fs_sold_out",
@@ -111,14 +108,12 @@
     "proto_kk_riptide",
     "proto_kk_sango_isshin",
     "proto_kk_sangonomiyas_counsel",
-    "proto_kk_scout_ahead",
     "proto_kk_second_thoughts",
     "proto_kk_second_wave",
     "proto_kk_shell_guard",
     "proto_kk_shell_of_sanctuary",
     "proto_kk_signal_arrow",
     "proto_kk_slack_water",
-    "proto_kk_song_of_pearls",
     "proto_kk_stolen_chapter",
     "proto_kk_surging_shoal",
     "proto_kk_the_clouds_like_waves",
@@ -319,7 +314,6 @@
     "proto_fs_final_bow": "furina",
     "proto_fs_five_century_act": "furina",
     "proto_fs_full_house": "furina",
-    "proto_fs_gala_dinner": "furina",
     "proto_fs_gala_premiere": "furina",
     "proto_fs_grand_deluge": "furina",
     "proto_fs_grand_entrance": "furina",
@@ -351,12 +345,10 @@
     "proto_fs_pneuma_refrain": "furina",
     "proto_fs_quick_cue": "furina",
     "proto_fs_raise_a_toast": "furina",
-    "proto_fs_rapt_audience": "furina",
     "proto_fs_regal_bearing": "furina",
     "proto_fs_regina_of_all_waters": "furina",
     "proto_fs_revolving_stage": "furina",
     "proto_fs_salon_debut": "furina",
-    "proto_fs_scene_change": "furina",
     "proto_fs_season_tickets": "furina",
     "proto_fs_share_the_spotlight": "furina",
     "proto_fs_sold_out": "furina",
@@ -406,14 +398,12 @@
     "proto_kk_riptide": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sangonomiyas_counsel": "kokomi",
-    "proto_kk_scout_ahead": "kokomi",
     "proto_kk_second_thoughts": "kokomi",
     "proto_kk_second_wave": "kokomi",
     "proto_kk_shell_guard": "kokomi",
     "proto_kk_shell_of_sanctuary": "kokomi",
     "proto_kk_signal_arrow": "kokomi",
     "proto_kk_slack_water": "kokomi",
-    "proto_kk_song_of_pearls": "kokomi",
     "proto_kk_stolen_chapter": "kokomi",
     "proto_kk_surging_shoal": "kokomi",
     "proto_kk_the_clouds_like_waves": "kokomi",
@@ -684,7 +674,7 @@
       "cost": -1
     },
     "proto_fs_ensemble_piece": {
-      "formula_per": 1
+      "formula_per": 2
     },
     "proto_fs_eternal_applause": {
       "cost": -1
@@ -697,9 +687,6 @@
     },
     "proto_fs_full_house": {
       "cost": -1
-    },
-    "proto_fs_gala_dinner": {
-      "stage_raise": 1
     },
     "proto_fs_gala_premiere": {
       "cost": -1
@@ -778,7 +765,7 @@
       "draw": 1
     },
     "proto_fs_ousia_surge": {
-      "formula_base": 4
+      "formula_base": 3
     },
     "proto_fs_people_of_fontaine": {
       "power_amount": 1
@@ -787,16 +774,13 @@
       "damage": 3
     },
     "proto_fs_pneuma_refrain": {
-      "formula_base": 4
+      "formula_base": 3
     },
     "proto_fs_quick_cue": {
       "conditional_damage": 1
     },
     "proto_fs_raise_a_toast": {
       "cap": 2
-    },
-    "proto_fs_rapt_audience": {
-      "power_amount": 1
     },
     "proto_fs_regal_bearing": {
       "block": 1,
@@ -810,12 +794,6 @@
     },
     "proto_fs_salon_debut": {
       "cost": -1
-    },
-    "proto_fs_scene_change": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
     },
     "proto_fs_season_tickets": {
       "power_amount": 1
@@ -909,7 +887,7 @@
       "plan_unhurt_damage": 4
     },
     "proto_kk_feint": {
-      "formula_base": 2,
+      "formula_base": 3,
       "plan_power_amount": 1
     },
     "proto_kk_flank": {
@@ -970,9 +948,6 @@
     "proto_kk_sangonomiyas_counsel": {
       "power_amount": 1
     },
-    "proto_kk_scout_ahead": {
-      "cost": -1
-    },
     "proto_kk_second_thoughts": {
       "add": {
         "op": "draw",
@@ -995,9 +970,6 @@
     "proto_kk_slack_water": {
       "damage": 3,
       "plan_power_amount": 1
-    },
-    "proto_kk_song_of_pearls": {
-      "power_amount": 2
     },
     "proto_kk_stolen_chapter": {
       "draw": 1

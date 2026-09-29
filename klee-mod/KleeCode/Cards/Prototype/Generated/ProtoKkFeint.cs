@@ -66,7 +66,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(4m),
+            new CalculationBaseVar(6m),
             new ExtraDamageVar(3m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).PlansCarriedOutThisTurn),
             new DynamicVar("PlanPowerAmount", 1m)
@@ -96,7 +96,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
         DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

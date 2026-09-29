@@ -45,13 +45,13 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pneuma Refrain"),
-        ("description", "Gain [gold]Block[/gold] equal to your [gold]front performer[/gold]'s [gold]Fanfare[/gold]{IfUpgraded:show:, plus 4|}.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Fanfare[/gold] on your [gold]front performer[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(0m),
+            new CalculationBaseVar(3m),
             new CalculationExtraVar(1m),
             new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.LeadFanfare(card))
         };
@@ -70,6 +70,6 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(4m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

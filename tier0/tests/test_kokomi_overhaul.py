@@ -197,7 +197,7 @@ def test_the_starter_is_the_canonical_ten():
         assert gone not in staged
 
 
-def test_the_pool_is_all_forty_six_of_the_slices_rows():
+def test_the_pool_is_all_forty_four_of_the_slices_rows():
     """Slice draft 6 sec.4, whole. Pinned rather than described because it is
     the slice's own scope statement.
 
@@ -241,17 +241,21 @@ def test_the_pool_is_all_forty_six_of_the_slices_rows():
     Ripple, Well Laid, Sea-Salt Prayer and Salt Line cut, and thirteen rows
     added last in the sheet's order. [USER]: "Let's avoid having too many
     attack / block spam cards ... they shouldn't just be 10 copies of 'do x
-    damage, or plan y'"."""
+    damage, or plan y'".
+
+    FORTY-FOUR SINCE THE CLEANUP PASS (2026-09-29): Scout Ahead and Song of
+    Pearls cut."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 46
-    assert len(set(ids)) == 46
+    assert len(ids) == 44
+    assert len(set(ids)) == 44
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
     assert {"proto_kk_riptide", "proto_kk_pincer", "proto_kk_flank",
             "proto_kk_feigned_retreat"} <= set(ids)
     cut = {"proto_kk_tide_chart", "proto_kk_cleansing_wave", "proto_kk_ripple",
            "proto_kk_well_laid", "proto_kk_sea_salt_prayer",
-           "proto_kk_salt_line"}
+           "proto_kk_salt_line", "proto_kk_scout_ahead",
+           "proto_kk_song_of_pearls"}
     assert not cut & set(ids)
     assert ids[-13:] == (
         "proto_kk_massed_volley", "proto_kk_signal_arrow",
@@ -264,8 +268,7 @@ def test_the_pool_is_all_forty_six_of_the_slices_rows():
     assert "proto_kk_held_tide" not in ids
     assert "proto_kk_tidal_rhythm" not in ids
     assert {"proto_kk_opening_gambit", "proto_kk_second_wave",
-            "proto_kk_scout_ahead", "proto_kk_second_thoughts",
-            "proto_kk_breakwater"} <= set(ids)
+            "proto_kk_second_thoughts", "proto_kk_breakwater"} <= set(ids)
     # `EB-685` (pool pass five): Night Watch lost every draft comparison in
     # r27 and Slack Water's Plan half moved to Dusk, which is its job.
     assert "proto_kk_night_watch" not in ids
@@ -391,10 +394,13 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     THE CASKET PASS (2026-09-28): four Commons cut (Tide Chart, Well Laid,
     Sea-Salt Prayer, Salt Line), two Uncommons cut (Cleansing Wave, Ripple),
     Second Wave moved Common to Uncommon, and seven Commons, five Uncommons
-    and one Rare added: 24 / 17 / 5."""
+    and one Rare added: 24 / 17 / 5.
+
+    THE CLEANUP PASS (2026-09-29): Scout Ahead (Common) and Song of Pearls
+    (Uncommon) cut, Shell Guard moved Uncommon to Common: 24 / 15 / 5."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 24, "uncommon": 17, "rare": 5}
+        "common": 24, "uncommon": 15, "rare": 5}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

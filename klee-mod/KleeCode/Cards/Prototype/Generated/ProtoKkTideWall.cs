@@ -45,7 +45,7 @@ public sealed class ProtoKkTideWall : CustomCardModel, ICharacterCard, IPlannedC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tide Wall"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold].\n[gold]Plan[/gold]: Gain [gold]Block[/gold] equal to the damage the enemy intends next turn{IfUpgraded:show:, plus 3|}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold].\n[gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the damage the enemy intends."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -61,7 +61,7 @@ public sealed class ProtoKkTideWall : CustomCardModel, ICharacterCard, IPlannedC
         new List<DynamicVar>
         {
             new BlockVar(4m, ValueProp.Move),
-            new DynamicVar("PlanBlock", 0m)
+            new DynamicVar("PlanBlock", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

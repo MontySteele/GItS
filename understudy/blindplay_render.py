@@ -1958,7 +1958,7 @@ def _frozen_clause(row: dict[str, Any], obs: dict[str, Any],
 
     A carried row whose body stands on this board without Frozen has worn
     off (`REACTION_FROZEN_THAWED_CLAUSE`). Not on a boss that is not a Minion:
-    a boss is never Frozen (the glossary's `FROZEN_BOSS_CLAUSE`), so there is
+    a boss is never Frozen (the Frozen row's `FROZEN_BOSS_CLAUSE`), so there is
     nothing to wear off. A body this board cannot find gets no clause:
     silence, never a guess."""
     if row.get("reaction") != "Frozen":

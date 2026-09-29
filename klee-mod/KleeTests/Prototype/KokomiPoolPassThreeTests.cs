@@ -57,21 +57,22 @@ public class KokomiPoolPassThreeTests
     }
 
     [Fact]
-    public void Feint_prints_four_plus_three_per_carry_out_and_upgrades_the_base()
+    public void Feint_prints_six_plus_three_per_carry_out_and_upgrades_the_base()
     {
         // THE CASKET PASS (2026-09-28): "Deal 4 damage, plus 3 for each Plan
         // carried out this turn. Plan: Apply 1 Vulnerable." Upgraded: base 6,
         // Plan 2 Vulnerable. Both printed numbers are live vars (`EB-657`),
-        // and the in-combat line prints the total.
+        // and the in-combat line prints the total. The cleanup pass
+        // (2026-09-29) moved the base to 6, upgraded 9.
         var face = Face(new ProtoKkFeint());
         Assert.Contains("{CalculationBase:diff()}", face);
         Assert.Contains("{ExtraDamage:diff()}", face);
         Assert.Contains("{CalculatedDamage:diff()}", face);
         Assert.DoesNotContain("{IfUpgraded:show:", face);
         var source = Source("ProtoKkFeint");
-        Assert.Contains("new CalculationBaseVar(4m)", source);
+        Assert.Contains("new CalculationBaseVar(6m)", source);
         Assert.Contains("new ExtraDamageVar(3m)", source);
-        Assert.Contains("DynamicVars.CalculationBase.UpgradeValueBy(2m);", source);
+        Assert.Contains("DynamicVars.CalculationBase.UpgradeValueBy(3m);", source);
         Assert.Contains("DynamicVars[\"PlanPowerAmount\"].UpgradeValueBy(1m);",
                         source);
     }

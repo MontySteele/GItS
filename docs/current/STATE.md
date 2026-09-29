@@ -36,8 +36,8 @@ bands are measured there). **Last release package: `0.2.1357`**
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
-| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 46 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 80 (68 Stage cards) |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 44 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 75 (63 Stage cards) |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
@@ -71,7 +71,11 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   turn, six rows cut, thirteen added: the pool is 46 (plus three co-op).
   Shell Guard, whose strike clause the pass left dead, was re-aimed by the
   main session to "Gain 5 Block, plus 1 for each point in the Casket".
-  Record: `docs/notes/prototype-surface-provenance.md`.
+  Record: `docs/notes/prototype-surface-provenance.md`. **The cleanup pass
+  (2026-09-29):** both Sonnet runs died to act-2 bosses short of Block, so
+  Shell Guard is a Common and Tide Wall's Plan gains a flat 6 under the
+  intent; Scout Ahead and Song of Pearls are cut; Feint, Press the Advantage
+  and Driftglass hit harder. The pool is 44 (24 / 15 / 5). Brief §6.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any
@@ -91,8 +95,13 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Strike x4, Defend x4, Curtain Rise and Rising Applause; Take the Stage
   ("Summon a random performer with 3 Fanfare. Draw 1 card.", tentative until
   the balance pass's pool audit) and Regal Bearing (Block 5, Weak 1; upgraded
-  6 and 2) are Commons, so the pool is 80. The shipped sheet and starter do
-  not move. Next: [USER]'s run on the new starter.
+  6 and 2) are Commons, so the pool was 80 (78 after balance pass one). The
+  shipped sheet and starter do not move. **The audit pass (2026-09-29)**, on
+  [USER]'s ask for "a dedupe / audit / balance pass on Furina, aimed at
+  polishing the existing core systems": Gala Dinner, A Rapt Audience and Scene
+  Change cut (pool 78 -> 75); Ensemble Piece, Improvised Number, Ousia Surge,
+  Pneuma Refrain, Final Bow, Bring the House Down and Grand Deluge raised;
+  brief §17. Next: [USER]'s run on the new starter.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults
