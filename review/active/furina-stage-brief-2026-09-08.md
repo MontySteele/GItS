@@ -457,7 +457,7 @@ values; names are provisional. Upgrades in brackets.
 | Gala Dinner | 1 | Skill | Each performer gains 2 Fanfare. [gains 3] (2026-09-28 balance pass: was 3, 4 upgraded.) |
 | Double Casting | 1 | Skill | Summon 2 random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Tutti! | 2 | Skill | All your performers act now. [cost 1] (Round four: was 2, 1 upgraded; round four's 1 and 0 undone in the 2026-09-26 balance review.) |
-| Bravura | 1 | Attack | Spend all of your back performer's Fanfare. Deal 3 damage per point. [4 per point] |
+| Bravura | 1 | Attack | Spend all of your back performer's Fanfare. Deal 5 damage, plus 3 per point. [plus 4 per point] (2026-09-29 Bravura fix, §16: was 3 per point, no base, 4 upgraded.) |
 | Full House | 3 | Power | If all three seats are filled at the end of your turn, your performers act twice. [cost 2] (2026-09-26 balance review: was 2, 1 upgraded.) |
 | Thunderous Applause | 1 | Power | Whenever a performer Bows, draw 1 card and your back performer gains 1 Fanfare. [gains 2] (2026-09-28 balance pass: was 2, 3 upgraded; the draw is unchanged.) |
 | A Rapt Audience | 1 | Power | Whenever an enemy hits your front performer, your back performer gains 2 Fanfare. Needs 2 performers. [gains 3] (2026-09-26 balance review: was half the Fanfare lost, all of it upgraded. Copies add; a hit its Block fully absorbs does not count.) |
@@ -472,7 +472,7 @@ values; names are provisional. Upgrades in brackets.
 How the edges resolve: Improvised Number and Between Acts check the stage
 when played. Step Forward moves the back performer to the front and shifts
 the others back one; with one performer it only gives Block. Bravura empties
-the back performer exactly, so it always bows; on an empty stage it deals 0.
+the back performer exactly, so it always bows; on an empty stage it deals its base 5.
 Double Casting with one open seat summons one. Full House: each performer's
 act resolves twice, and each further copy adds one more act. Thunderous
 Applause gives its Fanfare after the bowing performer has left, so on an
@@ -591,3 +591,11 @@ unchanged: it has no greyed-out state to show.
 
 Row provenance: `docs/notes/prototype-surface-provenance.md`, "Furina, the
 Stage — the Spend pass".
+
+**Bravura (2026-09-29).** The Spend pass left Bravura alone. The Sonnet seats
+of 2026-09-28 (run FSR3RUN2Q7XB, acts 1 to 3) named it their "never again"
+card: "Bravura -- deals 3 damage per Fanfare of a back performer that is
+almost always 1". Under the same direction ("upping both the spend and output
+of her cards") it gains a base: "Spend all of your back performer's Fanfare.
+Deal 5 damage, plus 3 per point." Upgraded, plus 4 per point; the base stays 5.
+At 1 Fanfare it deals 8 (was 3); at 4 it deals 17 (was 12).

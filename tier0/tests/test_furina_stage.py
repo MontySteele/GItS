@@ -1255,8 +1255,8 @@ def test_bravura_spends_the_whole_back_bar_and_bows(arm):
     effects.resolve_card(st, _card(type="attack", effects=[
         {"op": "stage_spend_back_all"},
         {"op": "damage", "target": "enemy",
-         "amount_formula": {"base": 0, "per": 3, "count": "stage_spent"}}]))
-    assert st.enemies[0].hp == 99 - 18
+         "amount_formula": {"base": 5, "per": 3, "count": "stage_spent"}}]))
+    assert st.enemies[0].hp == 99 - 23
     assert st.player.stage == [["chevalmarin", 4]]
     assert st.player.block == FS.ACT_USHER_BLOCK
     empty = _state()
