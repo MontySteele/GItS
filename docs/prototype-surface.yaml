@@ -2796,7 +2796,7 @@
 - {id: proto_vk_four_winds_ascension, name: "Four Winds' Ascension", character: varka,
    authored_by: [claude],
    # `dusty_tome`: no Ancient card yet, so Darv's Tome hands him this one.
-   cost: 2, type: attack, rarity: basic, exhaust: true, tags: [dusty_tome],
+   cost: 1, type: attack, rarity: basic, exhaust: true, tags: [dusty_tome],
    description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Wind[/gold] you hold.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 6, per: 6, count: winds_held}}],

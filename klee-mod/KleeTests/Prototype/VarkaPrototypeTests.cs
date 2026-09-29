@@ -334,7 +334,7 @@ public class VarkaPrototypeTests : IDisposable
     public void Ascension_is_six_plus_six_per_wind_and_exhausts()
     {
         var card = new ProtoVkFourWindsAscension();
-        Assert.Equal(2, card.EnergyCost.Canonical);
+        Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Attack, card.Type);
         Assert.Equal(CardRarity.Basic, card.Rarity);
         Assert.Contains(CardKeyword.Exhaust, card.Keywords);
@@ -478,7 +478,7 @@ public class VarkaPrototypeTests : IDisposable
     public void Knights_muster_chooses_a_knight_and_hits_with_their_element()
     {
         var card = new ProtoVkKnightsMuster();
-        Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Skill, card.Type);
         Assert.Equal(CardRarity.Basic, card.Rarity);
         Assert.Equal(TargetType.AnyEnemy, card.TargetType);

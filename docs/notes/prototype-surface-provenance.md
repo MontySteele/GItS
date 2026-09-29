@@ -4108,6 +4108,14 @@ Per row, where the face or the build differs from sec.10.3's words:
 **Pool:** 19 offered (10 Common, 7 Uncommon, 2 Rare), four of them Knights;
 target 78 later.
 
+**Starter costs, 2026-09-29.** `proto_vk_four_winds_ascension` cost 2 to 1
+(damage and Exhaust unchanged), and the hand-written Knights' Muster cost 1
+to 0 (upgrade still 4 to 6). [USER]: "I'm thinking we try 'Muster at 0 and
+Ascension at 1' first." Evidence: both first blind seats died in act 1 (floor
+8 elite; floor 7 Punch Construct), a 1-cost Muster leaving too little energy
+for Block, and Ascension named "never again": "2 energy Exhaust for damage a
+Strike-plus deals". Brief sec.10.2 carries the same line.
+
 ## Kokomi: the feed pass (2026-09-29)
 
 [USER], 2026-09-29, after an act-1 death: "her cards are weirdly 'expensive'";
