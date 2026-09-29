@@ -1274,11 +1274,12 @@
 - {id: proto_kk_shell_guard, name: "Shell Guard", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 5 [gold]Block[/gold]. Until your next turn, whenever the [gold]Tamakushi Casket[/gold] strikes, gain 3 [gold]Block[/gold].",
-   effects: [{op: block, amount: 5},
-             {op: apply_power, power: kk_shell_guard, amount: 3, target: self}],
-   # R246: 5 and 3, upgrading to 7 and 4.
-   upgrade: {block: 2, power_amount: 1}}
+   # Re-aimed after the Casket pass retired the strike it paid on (main
+   # session, 2026-09-28): the Casket's defensive reader.
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 5, per: 1, count: casket_count}}],
+   upgrade: {formula_base: 3}}
 
 - {id: proto_kk_the_clouds_like_waves, name: "The Clouds Like Waves Rippling", character: kokomi,
    authored_by: [claude],

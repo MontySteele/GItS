@@ -89,6 +89,8 @@ def test_the_tip_attaches_to_every_face_that_names_the_relic():
     face = ("Gain 5 [gold]Block[/gold]. Until your next turn, whenever the "
             "[gold]Tamakushi Casket[/gold] strikes, gain 3 [gold]Block[/gold].")
     assert "ArmKeywordTips.ForCasket" in gen.arm_keyword_tip_calls(face)
+    # Shell Guard's own face since its re-aim names the Casket by its short
+    # name, and carries the tip the same way.
     # And a face that does not name it does not carry it.
     assert "ArmKeywordTips.ForCasket" not in gen.arm_keyword_tip_calls(
         "Gain 8 [gold]Block[/gold].")
@@ -165,21 +167,12 @@ def test_the_tip_has_a_title_and_not_a_raw_key():
     assert '"Open the Casket",' in mod
 
 
-def test_the_window_is_wider_than_this_turn_and_the_face_says_so(overhaul):
-    """THE ROW'S OTHER PREMISE, WHICH IS WRONG, and this is the reading that
-    says why.
-
-    The proposal was "This turn, whenever the Tamakushi Casket strikes". The
-    window is not this turn: it deliberately survives into the NEXT turn's
-    morning, because R246 pick 2 puts the Plans that apply Weak inside it --
-    "so the Block is there before the enemy swings". Both engines close it one
-    line after the drain rather than at her turn end or on the turn-start
-    roll, and both say so in their headers. So the face keeps "Until your next
-    turn", and the half that was missing was never the window: it was the
-    relic.
-    """
-    # The row is on the arm's surface at all, which is what makes the rest of
-    # this a live reading rather than an archaeology of a withdrawn card.
+def test_shell_guard_is_the_caskets_defensive_reader(overhaul):
+    """SHELL GUARD, RE-AIMED (main session, 2026-09-28). The Casket pass
+    retired the strike its second clause paid on, which left the clause dead;
+    the fix makes the card read the Casket's count instead: "Gain 5 Block,
+    plus 1 for each point in the Casket." Its window power is gone from both
+    engines, and nothing closes a window any more."""
     assert any(c.id == "proto_kk_shell_guard"
                for c in loader.prototype_cards())
 
@@ -189,30 +182,27 @@ def test_the_window_is_wider_than_this_turn_and_the_face_says_so(overhaul):
     rows = sheet["cards"] if isinstance(sheet, dict) else sheet
     face = next(r for r in rows
                 if r["id"] == "proto_kk_shell_guard")["description"]
-    assert "Until your next turn" in face
-    assert "This turn" not in face
+    assert "for each point in the [gold]Casket[/gold]" in face
+    assert "strikes" not in face
+    assert "{CalculatedBlock:diff()}" in face
 
-    # The sim's window is closed by its own function, and that function is
-    # called from turn start AFTER the drain -- never by `roll_turn`.
+    card = SHELL_GUARD_CS.read_text(encoding="utf-8")
+    assert "new CalculatedBlockVar(ValueProp.Move)" in card
+    assert "get_CasketCount" in card or "CasketCount" in card
+    assert "DynamicVars.CalculationBase.UpgradeValueBy(3m);" in card
+
     src = (REPO / "tier0" / "engine"
            / "kokomi_plan.py").read_text(encoding="utf-8")
-    assert "def close_shell_guard" in src
-    assert "SHELL GUARD'S WINDOW IS NOT ON THIS LINE" in src
-    assert callable(kokomi_plan.close_shell_guard)
-
+    assert "def close_shell_guard" not in src
     combat = (REPO / "tier0" / "engine" / "combat.py").read_text(
         encoding="utf-8")
-    assert combat.index("resolve_all") < combat.index("close_shell_guard")
-
-    # And the C# closes it from the jellyfish's turn-start hook, one line
-    # after the morning, for the sentence's sake.
+    assert "close_shell_guard" not in combat
     pet = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "ProtoBakeKuragePower.cs").read_text(encoding="utf-8")
-    assert "await ShellGuardPower.Close(Owner);" in pet
+    assert "ShellGuardPower" not in pet
     powers = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
               / "KokomiOverhaulPowers.cs").read_text(encoding="utf-8")
-    assert '"Until your next turn, whenever the [gold]Tamakushi Casket[/gold] "' \
-        in powers
+    assert "class ShellGuardPower" not in powers
 
 
 def test_the_debuff_answer_clause_is_silent_on_the_counting_relic():

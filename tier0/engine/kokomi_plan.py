@@ -361,11 +361,6 @@ FIRST_COMPANION_FREE = "kk_first_companion_free"
 CASKET_GAIN = "casket_gain"
 MOON_SIGNAL = "kk_moon_signal"
 OPEN_THE_CASKET = "kk_open_the_casket"
-#: Shell Guard's window (`EB-335`). THE AMOUNT IS THE BLOCK PER STRIKE, not a
-#: number of turns: "until your next turn, whenever the Tamakushi Casket
-#: strikes, gain 3 Block". `close_shell_guard` is the one place it ends, and
-#: its header says which end of the turn that is and why.
-SHELL_GUARD = "kk_shell_guard"
 
 #: What counts as a debuff ON AN ENEMY in this engine, for the Casket and for
 #: Undertow's `target_has_debuff`.
@@ -1763,9 +1758,6 @@ def roll_turn(state: CombatState) -> None:
     so no two can come to disagree about when a turn began --
     `KokomiOverhaulLedger.RollTo` clears the same set.
 
-    SHELL GUARD'S WINDOW IS NOT ON THIS LINE, deliberately: it has to survive
-    the morning it is read in, so it is closed one step later
-    (`close_shell_guard`, whose header carries the argument).
     """
     state.companion_plays_last_turn = state.companion_plays_this_turn
     state.kk_once_per_turn.clear()
@@ -1872,57 +1864,6 @@ def note_debuff_applied(state: CombatState, target, name: str, stacks: int,
         state.player.block += gained
         state.emit("block", amount=gained)
         state.emit("plan_clouds_like_waves", amount=gained, power=name)
-
-
-def _pay_shell_guard(state: CombatState) -> None:
-    """SHELL GUARD (`EB-335`, R246 pick 2): "Until your next turn, whenever the
-    Tamakushi Casket strikes, gain N Block."
-
-    NO CALLER SINCE THE CASKET PASS (2026-09-28), which retired the strike it
-    hung off; `ShellGuardPower.Pay` is in the same state. The card was not in
-    the ruling and is left for the main session to rule on.
-
-    HUNG OFF THE STRIKE ITSELF and not off the debuff that caused it, which is
-    the difference between this card and The Clouds Like Waves Rippling one row
-    over: the Clouds pay per APPLICATION, this pays per STRIKE. They are the
-    same count today, because the relic answers every application it is awake
-    for -- but the relic is what the card names, so a run without the Casket
-    pays nothing here and the two cards stay separable.
-
-    AFTER THE HIT, so a strike that ends the fight has already happened. The
-    Block is POWERED for the reason every other Block in this arm is (rule 3,
-    `SongOfPearlsPower`'s header).
-    """
-    n = state.player.powers.get(SHELL_GUARD, 0)
-    if not n:
-        return
-    gained = powers.modify_block_gained(state.player, n)
-    state.player.block += gained
-    state.emit("block", amount=gained)
-    state.emit("plan_shell_guard", amount=gained)
-
-
-def close_shell_guard(state: CombatState) -> None:
-    """Shell Guard's window closes -- "until your next turn".
-
-    THE END OF HER TURN-START RESOLUTION, and that is a reading with the
-    packet's own sentence behind it: R246 pick 2 says "the morning's Plans that
-    apply Weak strike it too, so the Block is there before the enemy swings"
-    (`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.6). The morning
-    is the first thing that happens on her next turn, so a window closed by
-    `roll_turn` -- which runs BEFORE the drain -- would make that sentence
-    false. It is closed here instead, one line after the Plans are carried out,
-    which is why `combat._player_turn` calls it there rather than beside the
-    other per-turn clears.
-
-    CALLED UNCONDITIONALLY inside the arm's turn-start block, because
-    `resolve_all` returns early on an empty queue and a window that only closed
-    on mornings with Plans in them would outlive its printed text.
-    """
-    if not live(state):
-        return
-    if state.player.powers.pop(SHELL_GUARD, 0):
-        state.emit("plan_shell_guard_closed")
 
 
 # ---------------------------------------------------------------------------

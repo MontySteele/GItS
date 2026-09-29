@@ -1209,33 +1209,21 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void EB335_shell_guards_window_still_closes_after_the_morning()
+    public void EB335_shell_guard_reads_the_casket_and_its_window_is_gone()
     {
-        // The Casket pass (2026-09-28) retired the strike Shell Guard paid
-        // on, so `ShellGuardPower.Pay` has no caller -- the card was not in
-        // the ruling and is left for one. The window it opens still closes
-        // one line after the drain.
-        var turnStart = Il.CallSequence(
-            Il.Method("ProtoBakeKuragePower", "AfterPlayerTurnStart")).ToList();
-        var drain = turnStart.FindIndex(c => c.Contains("KokomiPlan.ResolveAll"));
-        var close = turnStart.FindIndex(c => c.Contains("ShellGuardPower.Close"));
-        Assert.True(drain >= 0, "the morning is gone");
-        Assert.True(close > drain,
-                    "the window closes before the morning it is meant to cover");
-    }
-
-    [Fact]
-    public void EB335_shell_guard_pays_nothing_without_the_card()
-    {
-        // A run that never drew Shell Guard, and a run that traded the Casket
-        // away, both pay nothing -- the guard is the power's presence and its
-        // amount, checked before any command is reached.
-        var bare = Seat.Kokomi();
-        Assert.Empty(bare.Creature.Powers.OfType<ShellGuardPower>());
-        Assert.Null(Record.Exception(
-            () => ShellGuardPower.Pay(null, bare.Creature).Wait()));
-        Assert.Null(Record.Exception(
-            () => ShellGuardPower.Close(bare.Creature).Wait()));
+        // Re-aimed (main session, 2026-09-28) after the Casket pass retired
+        // the strike it paid on: "Gain 5 Block, plus 1 for each point in the
+        // Casket." Its window power left both engines, so the jellyfish's
+        // turn-start hook closes nothing.
+        var card = new ProtoKkShellGuard();
+        Assert.Equal(5m, card.DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(1m, card.DynamicVars["CalculationExtra"].BaseValue);
+        Assert.DoesNotContain(
+            Il.CallSequence(Il.Method("ProtoBakeKuragePower",
+                                      "AfterPlayerTurnStart")),
+            c => c.Contains("ShellGuardPower"));
+        Assert.DoesNotContain(typeof(KokomiOverhaul).Assembly.GetTypes(),
+                              t => t.Name == "ShellGuardPower");
     }
 
     // --- `EB-478`: Tide Chart pays the morning after (R257) ---------------

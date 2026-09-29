@@ -1137,13 +1137,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         # `ProtoBakeKuragePower.AfterPlayerTurnStart` calls
         # `KokomiPlan.PayPromisedDraws` at exactly this point.
         kokomi_plan.pay_tide_charts(state)
-        # `EB-335`. SHELL GUARD'S WINDOW CLOSES AFTER THE MORNING, not on the
-        # `roll_turn` line above: R246 pick 2 says the morning's Plans strike
-        # the Casket inside the window, so the card's Block arrives before the
-        # enemy's next swing. `kokomi_plan.close_shell_guard`'s header carries
-        # the whole argument; it is called unconditionally because the drain
-        # above returns early on an empty queue.
-        kokomi_plan.close_shell_guard(state)
         _settle_phases(state)
         _revive_player_if_needed(state)
         if not p.alive or state.over:

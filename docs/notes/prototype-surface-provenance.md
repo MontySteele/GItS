@@ -3858,10 +3858,10 @@ answers the short name "Casket", and "Open the Casket" has a tip of its own;
 both are glossary rows on the blind page. The reaction glossary's clause
 admitting "one relic's line" that applies an element went with the strike.
 
-**Left for a ruling (not in this pass).** Shell Guard reads "whenever the
-Tamakushi Casket strikes, gain 3 Block". With the strike retired the clause
-never fires; the card is still offered as it stands, and `ShellGuardPower.Pay`
-has no caller.
+**Shell Guard, re-aimed (a main-session fix, 2026-09-28, not a [USER] ruling).** The Casket pass retired the strike Shell Guard's second clause paid on ("whenever the Tamakushi Casket strikes, gain 3 Block"), which left the clause dead. The card is now the Casket's defensive reader: "Gain 5 Block, plus 1 for each point in the Casket." Uncommon Skill, cost 1; upgraded base 8 (+1 per point unchanged); the in-combat Block preview Pneuma Refrain and the damage readers print. `ShellGuardPower` and its window (the dead `Pay` path and `Close`) are removed from both engines. It keeps its portrait.
+In the C#, the Casket count rides the block rail's calculated var
+(`gen_klee_cards.stage_count_block_rider` now also takes the Casket counts);
+the sim reads `casket_count` through `effects._runtime_count`.
 
 **Pool:** 46 offered (24 Common, 17 Uncommon, 5 Rare) plus the three co-op
 cards.

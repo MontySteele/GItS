@@ -373,6 +373,33 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal(2, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
     }
 
+    [Fact]
+    public void Shell_guard_is_five_block_plus_one_per_point_in_the_casket()
+    {
+        // Re-aimed by the main session (2026-09-28) after the Casket pass
+        // left its strike clause dead: Uncommon Skill, cost 1, base 8
+        // upgraded, the in-combat Block preview like Pneuma Refrain's.
+        var card = new ProtoKkShellGuard();
+        Assert.Equal((CardType.Skill, CardRarity.Uncommon, 1),
+                     (card.Type, card.Rarity, card.EnergyCost.Canonical));
+        Assert.Equal(5m, Var(card, "CalculationBase"));
+        Assert.Equal(1m, Var(card, "CalculationExtra"));
+        var up = Upgraded<ProtoKkShellGuard>();
+        Assert.Equal(8m, Var(up, "CalculationBase"));
+        Assert.Equal(1m, Var(up, "CalculationExtra"));
+        Assert.Equal("Gain {CalculationBase:diff()} [gold]Block[/gold], plus "
+                   + "{CalculationExtra:diff()} for each point in the "
+                   + "[gold]Casket[/gold].{InCombat:\n(Gains "
+                   + "{CalculatedBlock:diff()} [gold]Block[/gold])|}",
+                     Face(card));
+        Assert.Contains("CasketCount",
+                        string.Join(" ", typeof(ProtoKkShellGuard)
+                            .GetNestedTypes(HeadlessGame.All)
+                            .SelectMany(t => t.GetMethods(HeadlessGame.All))
+                            .Where(m => m.GetMethodBody() != null)
+                            .SelectMany(Il.Calls)));
+    }
+
     // ---- F. the offer -----------------------------------------------------
 
     [Fact]

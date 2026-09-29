@@ -983,8 +983,7 @@
       "damage": 2
     },
     "proto_kk_shell_guard": {
-      "block": 2,
-      "power_amount": 1
+      "formula_base": 3
     },
     "proto_kk_shell_of_sanctuary": {
       "plan_block": 3

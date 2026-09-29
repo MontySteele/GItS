@@ -162,9 +162,6 @@ internal static class KleePowerIcons
         // clause now says. Art is commissioned when a slice is ACCEPTED.
         NextAttackDamagePower =>
             KleePck.Path("klee/powers/passion_overload.png"),
-        // `EB-335`. Shell Guard is a Block window, so it borrows the shipped
-        // Kokomi power that already means "the jellyfish is protecting you".
-        ShellGuardPower => KleePck.Path("kokomi/powers/kurages_oath.png"),
         // THE CASKET PASS (2026-09-28). Moon Signal borrows her Ancient's
         // sigil, the badge above that counts something waiting to arrive.
         MoonSignalPower => KleePck.Path(

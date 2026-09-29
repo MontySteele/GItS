@@ -176,7 +176,9 @@ the queue the decision.
   Diver (Plan: the Casket gains 2), Moon Signal (the Casket gains 1 when 2 or
   more Plans wait at the start of her turn), Driftglass and Depths' Judgment
   (damage off the count), What the Tokoyo Took (double it) and What the
-  Tokoyo Returns (Open the Casket back from the Exhaust Pile).
+  Tokoyo Returns (Open the Casket back from the Exhaust Pile). Shell Guard
+  reads it for Block (5, plus 1 per point), re-aimed by the main session
+  when the pass left its strike clause dead.
 
 THE POOL (the Casket pass, 2026-09-28): 46 offered cards, 24 Common, 17
 Uncommon, 5 Rare, plus the three co-op cards
@@ -238,6 +240,4 @@ being played on the pet; the pet is untouchable; the relic strikes on a
 debuff) were ruled R241 at their defaults; the third was replaced by the
 Casket pass (2026-09-28), rule 7 above.
 
-Not yet ruled, found while building the Casket pass: Shell Guard's face
-("whenever the Tamakushi Casket strikes, gain 3 Block") names the strike
-the pass removed, so its second clause no longer fires.
+**Shell Guard, re-aimed (a main-session fix, 2026-09-28, not a [USER] ruling).** The Casket pass retired the strike Shell Guard's second clause paid on ("whenever the Tamakushi Casket strikes, gain 3 Block"), which left the clause dead. The card is now the Casket's defensive reader: "Gain 5 Block, plus 1 for each point in the Casket." Uncommon Skill, cost 1; upgraded base 8 (+1 per point unchanged); the in-combat Block preview Pneuma Refrain and the damage readers print. `ShellGuardPower` and its window (the dead `Pay` path and `Close`) are removed from both engines. It keeps its portrait.

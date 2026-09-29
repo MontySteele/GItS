@@ -129,15 +129,6 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         // `kokomi_plan.pay_tide_charts`, called from `combat._player_turn` at
         // exactly this point.
         await KokomiPlan.PayPromisedDraws(choiceContext, Owner);
-        // `EB-335`. SHELL GUARD'S WINDOW CLOSES HERE, one line after the
-        // morning rather than on the ledger's turn-start roll: R246 pick 2 says
-        // "the morning's Plans that apply Weak strike it too, so the Block is
-        // there before the enemy swings", so the Plans of this very turn are
-        // inside the window and everything after them is outside it.
-        // Unconditional, because the drain above returns early on an empty
-        // queue. Sim twin: `kokomi_plan.close_shell_guard`, called from
-        // `combat._player_turn` at exactly this point.
-        await ShellGuardPower.Close(Owner);
     }
 
     /// <summary>

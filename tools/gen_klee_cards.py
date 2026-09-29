@@ -3046,18 +3046,11 @@ APPLY_POWERS = {
     "kk_generals_banner": ("GeneralsBannerPower", None,
         "Once per turn, when you play a [gold]Companion[/gold] card, the front "
         "enemy gains {X} Weak."),
-    # `EB-335`, R246 pick 2. THE AMOUNT IS BLOCK PER STRIKE and not a duration:
-    # the window is "until your next turn" and is closed by
-    # `ProtoBakeKuragePower.AfterPlayerTurnStart`, one line after the morning
-    # the packet says strikes inside it.
     # THE CASKET PASS (2026-09-28). Moon Signal: the queue is read BEFORE the
     # morning drains it (`ProtoBakeKuragePower.AfterPlayerTurnStart`).
     "kk_moon_signal": ("MoonSignalPower", None,
         "At the start of your turn, if 2 or more [gold]Plans[/gold] are "
         "waiting, the [gold]Casket[/gold] gains {X}."),
-    "kk_shell_guard": ("ShellGuardPower", None,
-        "Until your next turn, whenever the [gold]Tamakushi Casket[/gold] "
-        "strikes, gain {X} [gold]Block[/gold]."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -6091,6 +6084,11 @@ def stage_count_block_rider(card: dict,
     if not isinstance(formula, dict):
         return None
     token = formula.get("count")
+    # THE CASKET PASS (2026-09-28): Shell Guard, "Gain 5 Block, plus 1 for
+    # each point in the Casket" -- the Casket's count on this same rail.
+    if token in KOKOMI_CASKET_COUNTS:
+        return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+                KOKOMI_CASKET_COUNTS[token])
     if token not in STAGE_COUNT_CS:
         return None
     if token == "stage_spent" and not _stage_spends_before(card, eff):

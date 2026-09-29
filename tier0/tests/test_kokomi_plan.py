@@ -605,60 +605,27 @@ def test_tide_wall_is_plan_only(overhaul):
         effects.resolve_card(st, card)
 
 
-def test_shell_guard_no_longer_pays_since_the_casket_pass(overhaul):
-    """SHELL GUARD. "Until your next turn, whenever the Tamakushi Casket
-    strikes, gain 3 Block." The Casket pass (2026-09-28) retired the strike,
-    so the clause pays nothing; the card was not in the ruling and is left
-    as it stands for one."""
-    enemy = make_enemy(hp=60)
-    st = casket_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
-    for _ in range(3):
-        powers.apply_power(st, enemy, "weak", 1, applier=st.player)
-    assert st.player.block == 0
-
-def test_shell_guard_pays_nothing_without_the_casket(overhaul):
-    """The card names the RELIC, which is what keeps it separable from The
-    Clouds Like Waves Rippling one row over: that card pays per debuff
-    APPLIED, this pays per Casket STRIKE."""
-    enemy = make_enemy(hp=60)
-    st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
-    powers.apply_power(st, enemy, "weak", 1, applier=st.player)
-    assert st.player.block == 0
-
-
-def test_shell_guards_window_closes_after_the_morning(overhaul):
-    """"UNTIL YOUR NEXT TURN" INCLUDES THAT TURN'S MORNING, R246 pick 2's own
-    sentence, so the window is closed one step AFTER the drain. (What it paid
-    on -- the Casket's strike -- was retired by the Casket pass.)"""
-    enemy = make_enemy(hp=60)
-    st = casket_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
-    kokomi_plan.roll_turn(st)
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": "apply_power", "power": "weak", "amount": 1,
-          "target": "front_enemy"}]))
-    kokomi_plan.resolve_all(st)
-    assert kokomi_plan.SHELL_GUARD in st.player.powers
-    kokomi_plan.close_shell_guard(st)
-    assert kokomi_plan.SHELL_GUARD not in st.player.powers
-
-def test_the_shell_guard_window_closes_on_a_morning_with_no_plans(overhaul):
-    """The close is UNCONDITIONAL inside the arm's turn-start block, because
-    `resolve_all` returns early on an empty queue -- a window that only closed
-    on mornings with Plans in them would outlive its printed text."""
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
-    kokomi_plan.resolve_all(st)               # nothing due
-    kokomi_plan.close_shell_guard(st)
-    assert kokomi_plan.SHELL_GUARD not in st.player.powers
+def test_shell_guard_is_the_caskets_defensive_reader(overhaul):
+    """SHELL GUARD, re-aimed (main session, 2026-09-28) after the Casket pass
+    retired the strike it paid on: "Gain 5 Block, plus 1 for each point in
+    the Casket." Block through the ordinary funnel (Dexterity and Frail
+    count)."""
+    st = kokomi_state(enemies=[make_enemy(hp=60)])
+    effects.resolve_card(st, loader.get_card("proto_kk_shell_guard"))
+    assert st.player.block == 5
+    st2 = kokomi_state(enemies=[make_enemy(hp=60)])
+    st2.kk_casket = 4
+    effects.resolve_card(st2, loader.get_card("proto_kk_shell_guard"))
+    assert st2.player.block == 9
+    assert not hasattr(kokomi_plan, "SHELL_GUARD")
+    assert not hasattr(kokomi_plan, "close_shell_guard")
 
 
 def test_both_defensive_rows_load_and_smith(overhaul):
     """The two rows themselves, off the sheet. Tide Wall since R276 pick 1:
     4 Block now, Plan Block equal to the intent, upgrading to 6 and intent + 3.
-    Shell Guard: R246's 5/3, upgrading to 7/4."""
+    Shell Guard since its re-aim (2026-09-28): 5 plus 1 per Casket point,
+    base 8 upgraded."""
     from tier0.content import upgrades
 
     wall = loader.get_card("proto_kk_tide_wall")
@@ -671,10 +638,13 @@ def test_both_defensive_rows_load_and_smith(overhaul):
 
     guard = loader.get_card("proto_kk_shell_guard")
     assert guard.rarity == "uncommon" and guard.cost == 1
+    assert guard.type == "skill"
     assert guard.plan == []
-    assert [e["amount"] for e in guard.effects] == [5, 3]
+    assert guard.effects == [{"op": "block", "amount_formula": {
+        "base": 5, "per": 1, "count": "casket_count"}}]
     up = upgrades.apply_upgrade(guard)
-    assert [e["amount"] for e in up.effects] == [7, 4]
+    assert up.effects[0]["amount_formula"] == {
+        "base": 8, "per": 1, "count": "casket_count"}
 
 
 def test_damage_quarter_max_hp_rounds_down(overhaul):

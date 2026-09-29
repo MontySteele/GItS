@@ -68,9 +68,10 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Casket counts the Plans the Bake-Kurage carries out and deals Open the
   Casket (0, Retain, Exhaust: Strength equal to the count, then empty it);
   its debuff strike is gone. Feint and Sango Isshin pay per carry-out this
-  turn, six rows cut, thirteen added: the pool is 46 (plus three co-op). Shell
-  Guard's "whenever the Casket strikes" no longer fires and waits on a
-  ruling. Record: `docs/notes/prototype-surface-provenance.md`.
+  turn, six rows cut, thirteen added: the pool is 46 (plus three co-op).
+  Shell Guard, whose strike clause the pass left dead, was re-aimed by the
+  main session to "Gain 5 Block, plus 1 for each point in the Casket".
+  Record: `docs/notes/prototype-surface-provenance.md`.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any
