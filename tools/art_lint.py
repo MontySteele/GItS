@@ -469,6 +469,13 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/ui/selection_splash.png":       "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/char_icon.png":              "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/map_marker.png":             "gen_kokomi_stills.py",
+    # Varka (prototype, 2026-09-29): same six surfaces from his own render.
+    "ImageGen/images/varka/model/combat_model.png":         "gen_varka_stills.py",
+    "ImageGen/images/varka/ui/select_portrait.png":         "gen_varka_stills.py",
+    "ImageGen/images/varka/ui/select_portrait_locked.png":  "gen_varka_stills.py",
+    "ImageGen/images/varka/ui/selection_splash.png":        "gen_varka_stills.py",
+    "ImageGen/images/varka/ui/char_icon.png":               "gen_varka_stills.py",
+    "ImageGen/images/varka/ui/map_marker.png":              "gen_varka_stills.py",
     "ImageGen/images/furina/salon/glyph_damage.png":        "gen_salon_glyphs.py",
     "ImageGen/images/furina/salon/glyph_block.png":         "gen_salon_glyphs.py",
     "ImageGen/images/furina/salon/glyph_support.png":       "gen_salon_glyphs.py",
@@ -492,6 +499,7 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/summon/bake_kurage.png":        "cut_kurage_summon.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
+    "ImageGen/images/varka/ui/transition_wipe.png":         "gen_transition_wipe.py",
     # EB-163: Klee's locked select portrait is DERIVED, like Furina's and
     # Kokomi's above -- but by art_process itself, which desaturates whatever
     # select_portrait.png a plan row produced (the sp_outs loop). Furina's and
@@ -507,6 +515,7 @@ GENERATOR_OWNED = {
     "ImageGen/images/ui/char_icon_outline.png":             "gen_char_icon_outlines.py",
     "ImageGen/images/furina/ui/char_icon_outline.png":      "gen_char_icon_outlines.py",
     "ImageGen/images/kokomi/ui/char_icon_outline.png":      "gen_char_icon_outlines.py",
+    "ImageGen/images/varka/ui/char_icon_outline.png":       "gen_char_icon_outlines.py",
     # EB-161: the Mods screen's res://klee/mod_image.png. A composite of all
     # three characters' select_portrait.png (a plan.tsv row on Klee's side,
     # gen_furina_stills.py/gen_kokomi_stills.py on theirs), so no single

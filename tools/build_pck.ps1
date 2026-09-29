@@ -609,7 +609,7 @@ if (-not (Test-Path $kurageSrc)) { Note-Skip 'kokomi\summon' $kurageSrc } else {
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
-foreach ($character in 'furina', 'kokomi') {
+foreach ($character in 'furina', 'kokomi', 'varka') {
     $charSrc = Join-Path $src $character
     foreach ($d in 'ui', 'powers', 'relics', 'potions', 'model') {
         $from = Join-Path $charSrc $d
