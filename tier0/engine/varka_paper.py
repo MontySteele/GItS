@@ -70,6 +70,15 @@ is unchanged):
     Winds, no Exhaust; a lost Wind can be Absorbed again), `asc_version`.
   * SINGLE-WIND runs (`fixed_winds`): those Winds are held from turn 1 and an
     Absorb grants nothing (`no_gain`).
+
+REVISION 2.1 (`build_player(rev=2, fork=True)`), switches on top of two:
+  * BOREAS'S FANG IS THE FORK: "Once each turn, when an Attack hits an enemy
+    with a fresh aura, you may Absorb it or Swirl it." The pilot sets
+    `fang_want` to "absorb" or "swirl". A Fang Swirl is a full shared-rule
+    Swirl (spread, flat 2, the Winds) even from a Strike. An Anemo Attack
+    Swirls by the shared rule anyway, so a Fang Swirl there is not spent.
+  * AN ABSORB ON A HELD WIND SWIRLS INSTEAD (card or Fang).
+  * Ascension A is the headline; B stays runnable.
 """
 
 from __future__ import annotations
@@ -135,7 +144,8 @@ class VarkaState:
     rev: int = 1
     asc_version: str = "A"
     no_gain: bool = False        # single-Wind runs: Absorbs grant nothing
-    fang_want: bool = False      # the pilot opts in to the Fang on this card
+    fang_want: object = False    # rev 2: True = Absorb; 2.1: "absorb"/"swirl"
+    fork: bool = False           # revision 2.1
     aim2: object = None          # Grand Master's Order: the repeat's target
     muster_choice2: Optional[str] = None
     asc_reason: Optional[str] = None
@@ -255,8 +265,21 @@ def _intercept_rev2(state, vs, enemy, element, damage):
         if is_held:
             # sec.9.1: "does only the card's damage". Default reading: the
             # Anemo hit then meets the shared rule (it Swirls).
-            return None if ABSORB_HELD_SWIRLS else damage
+            return None if (ABSORB_HELD_SWIRLS or vs.fork) else damage
         source = "card"
+    elif vs.fork and vs.fang_want and vs.fang_turn != state.turn:
+        # 2.1: the Fang is the fork; a held Wind's Absorb Swirls instead.
+        swirl = vs.fang_want == "swirl" or is_held
+        if swirl:
+            if element == ELEMENT:
+                return None               # the shared rule Swirls it anyway
+            from tier0.engine import reactions    # late: cycle
+            vs.fang_turn = state.turn
+            enemy.aura_spent = True
+            return reactions._react(state, enemy, trigger=ELEMENT, aura=aura,
+                                    damage=damage)
+        source = "fang"
+        vs.fang_turn = state.turn
     elif vs.fang_want and vs.fang_turn != state.turn and not is_held:
         source = "fang"
         vs.fang_turn = state.turn
@@ -560,15 +583,16 @@ def make_card(name: str):
 
 
 def build_player(extra: list[str] = (), disabled_winds=frozenset(),
-                 rev: int = 1, asc_version: str = "A", fixed_winds=None):
+                 rev: int = 1, asc_version: str = "A", fixed_winds=None,
+                 fork: bool = False):
     """A fresh Varka for one fight: the starter plus `extra`, the relic's
     state on the Player. Boreas's Fang has no hook id: it is the arm's rule,
     read by `intercept_hit` for every Varka. `rev=2` is sec.9; `asc_version`
     "B" makes Ascension sec.9.5's B (revision two only); `fixed_winds` holds
     those Winds from turn 1 and turns Absorb gains off (single-Wind runs)."""
     from tier0.engine.state import Player
-    if asc_version != "A" and rev != 2:
-        raise ValueError("Ascension B is a revision-two card")
+    if (asc_version != "A" or fork) and rev != 2:
+        raise ValueError("Ascension B and the 2.1 fork are revision two")
     cards = [make_card(n) for n in list(STARTER) + list(extra)]
     if asc_version == "B":
         for c in cards:
@@ -577,7 +601,7 @@ def build_player(extra: list[str] = (), disabled_winds=frozenset(),
     player = Player(hp=HP, max_hp=HP, draw_pile=cards, element=ELEMENT,
                     cadence="catalyst", character_id=CHARACTER)
     vs = VarkaState(disabled_winds=frozenset(disabled_winds), rev=rev,
-                    asc_version=asc_version)
+                    asc_version=asc_version, fork=fork)
     if fixed_winds is not None:
         vs.winds = {el: 0 for el in fixed_winds}
         vs.no_gain = True

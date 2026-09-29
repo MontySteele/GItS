@@ -256,3 +256,42 @@ def test_rev2_grand_masters_order_repeat_may_choose_another_knight():
 def test_ascension_b_is_refused_in_revision_one():
     with pytest.raises(ValueError):
         V.build_player(asc_version="B")
+
+
+# --------------------------------------------------------------------------
+#  Revision 2.1: the Fang is the fork (Absorb or Swirl)
+# --------------------------------------------------------------------------
+
+@pytest.mark.usefixtures("arm")
+def test_rev21_fang_swirl_from_a_strike_is_a_full_swirl():
+    st = varka2(n=2, fork=True)
+    a, b = st.enemies
+    st.player.varka.winds = {"hydro": 0}
+    reactions.apply_aura(st, a, "pyro")
+    play2(st, "strike", aim=a, fang="swirl")
+    assert a.aura == "pyro" and a.aura_spent
+    assert b.aura == "pyro" and b.aura_spent               # the spread
+    assert (a.hp, b.hp) == (40 - 6 - 2, 40 - 2)            # the flat 2
+    assert st.player.block == V.R2_HYDRO_BLOCK             # a Wind paid
+    assert st.player.varka.fang_turn == 1
+
+
+@pytest.mark.usefixtures("arm")
+def test_rev21_fang_absorb_on_a_held_wind_swirls_instead():
+    st = varka2(n=1, fork=True)
+    (a,) = st.enemies
+    st.player.varka.winds = {"cryo": 0}
+    reactions.apply_aura(st, a, "cryo")
+    play2(st, "strike", aim=a, fang="absorb")
+    assert a.aura == "cryo" and a.aura_spent
+    assert st.player.varka.swirls == 1 and not st.player.varka.absorbs
+
+
+@pytest.mark.usefixtures("arm")
+def test_rev21_an_anemo_attack_swirls_without_spending_the_fang():
+    st = varka2(n=1, fork=True)
+    (a,) = st.enemies
+    reactions.apply_aura(st, a, "electro")
+    play2(st, "tempest_charge", aim=a, fang="swirl")
+    assert st.player.varka.swirls == 1
+    assert st.player.varka.fang_turn == -1
