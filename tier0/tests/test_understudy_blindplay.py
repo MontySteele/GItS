@@ -68,6 +68,16 @@ def _fresh_fight():
     blindplay.forget_run()
 
 
+@pytest.fixture(autouse=True)
+def _no_live_speed(monkeypatch):
+    """The Punch Off gate reads the live FastMode off the bridge. No test may
+    ask whatever game is on the default port, so every test starts on "the
+    bridge cannot say" -- the refusing side -- and a test that wants Instant
+    says so."""
+    from understudy import blindplay_faces as faces
+    monkeypatch.setattr(faces, "FAST_MODE_READER", lambda: "")
+
+
 def combat_state() -> dict:
     """RECORDED. A real staged Kokomi turn as the bridge returned it."""
     blob = json.loads(RECORDED_COMBAT.read_text(encoding="utf-8"))
@@ -772,15 +782,38 @@ def test_an_ordinary_event_is_not_warned_at():
     assert not any(o.get("note") for o in obs["options"])
 
 
-def test_a_hazard_event_is_tool_blocked():
-    """EB-1. The register, not a heuristic: the screen renders as refused and
-    the driver stops, because there is no safe option to pick."""
-    obs = blindplay.observation(hazard_event_state())
-    assert obs["screen"] == "hazard" and obs["blocked"]
-    assert "TOOL-BLOCKED: event" in blindplay.render(obs)
-    assert blindplay.act(hazard_event_state(), 'choose "Nab it"')["refusal"]
+def test_a_hazard_event_is_tool_blocked(monkeypatch):
+    """EB-1. The register, not a heuristic: off Instant, or when the bridge
+    cannot say what speed it is at, the screen renders as refused and the
+    driver stops."""
+    from understudy import blindplay_faces as faces
+    for mode in ("", "Normal", "Fast"):
+        monkeypatch.setattr(faces, "FAST_MODE_READER", lambda m=mode: m)
+        obs = blindplay.observation(hazard_event_state())
+        assert obs["screen"] == "hazard" and obs["blocked"], mode
+        assert "TOOL-BLOCKED: event" in blindplay.render(obs)
+        assert blindplay.act(hazard_event_state(),
+                             'choose "Nab it"')["refusal"]
     # A NON-hazard event on the same screen type is driven normally.
     assert not blindplay.observation(event_state())["blocked"]
+
+
+def test_punch_off_is_played_on_an_instant_lane(monkeypatch):
+    """2026-09-29. Since #733 the mod skips `PunchOff.PunchEachOther` under
+    `FastModeType.Instant`, which every embarked seat lane runs at, so there
+    the room is an ordinary event: its options are drawn and choosable, read
+    by id or by title."""
+    from understudy import blindplay_faces as faces
+    monkeypatch.setattr(faces, "FAST_MODE_READER", lambda: "Instant")
+    obs = blindplay.observation(hazard_event_state())
+    assert obs["screen"] != "hazard" and not obs["blocked"]
+    page = blindplay.render(obs)
+    assert "TOOL-BLOCKED" not in page and "Nab it" in page
+    assert not blindplay.act(hazard_event_state(),
+                             'choose "Nab it"').get("refusal")
+    by_title = hazard_event_state()
+    by_title["event"]["event_id"] = ""
+    assert not blindplay.observation(by_title)["blocked"]
 
 
 # -------------------------------------------------------------- grammar ----

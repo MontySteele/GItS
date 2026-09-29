@@ -18,14 +18,15 @@ import os
 import re
 from dataclasses import field
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
-from understudy import qa_packet
+from understudy import bridge, qa_packet
 from understudy.blindplay_read import (_blob, _entity_id, _fold, _int,
                                        _is_mod_source_tip, _label,
                                        _listing, _number_names, _relics,
                                        _screen, _text)
-from understudy.blindplay_shape import HAZARD_EVENT_TITLES, HAZARD_EVENTS
+from understudy.blindplay_shape import (HAZARD_EVENT_TITLES, HAZARD_EVENTS,
+                                        INSTANT_GUARDED_HAZARDS)
 
 
 def relic_faces(state: dict[str, Any]) -> list[dict[str, str]]:
@@ -68,6 +69,22 @@ def relic_faces(state: dict[str, Any]) -> list[dict[str, str]]:
     return out
 
 
+def _live_fast_mode() -> str:
+    """The game's live `PrefsSave.FastMode` (`GET /api/v1/gits/speed`), or ""
+    when the bridge cannot say. The SAME field the mod's Punch Off guard reads
+    (`PunchOffMirror.CurrentFastMode`), so this is the gate itself rather than
+    a guess about it -- and it holds on a `--hold` lane, whose embark set no
+    speed and whose sidecar records none."""
+    try:
+        return str(bridge.get_speed().get("fast_mode") or "")
+    except bridge.BridgeError:
+        return ""
+
+
+# Swapped by the tests, so no test asks whatever game is on the default port.
+FAST_MODE_READER: Callable[[], str] = _live_fast_mode
+
+
 def _hazard(state: dict[str, Any]) -> tuple[str, str] | None:
     """`(id, why)` when this event is on the hazard register, else `None`.
 
@@ -75,17 +92,23 @@ def _hazard(state: dict[str, Any]) -> tuple[str, str] | None:
     read-by-id-then-by-name shape `soak._hazard_event` uses, and for the same
     reason: a title is loc data that a wording pass moves, and a screen this
     tool must not drive is worth catching twice.
+
+    A hazard the mod defuses under Instant (`INSTANT_GUARDED_HAZARDS`) is
+    played like any event when the live FastMode is `Instant`; the speed is
+    asked only when such a screen is up, so no other screen pays for it.
     """
     if _screen(state) != "event":
         return None
     ev = _blob(state, "event")
     ident = str(ev.get("event_id") or "").strip().upper()
-    if ident in HAZARD_EVENTS:
-        return ident, HAZARD_EVENTS[ident]
-    by_title = HAZARD_EVENT_TITLES.get(_text(ev.get("event_name")).lower())
-    if by_title:
-        return by_title, HAZARD_EVENTS.get(by_title, "on the hazard register")
-    return None
+    if ident not in HAZARD_EVENTS:
+        ident = HAZARD_EVENT_TITLES.get(
+            _text(ev.get("event_name")).lower(), "")
+    if not ident:
+        return None
+    if ident in INSTANT_GUARDED_HAZARDS and FAST_MODE_READER() == "Instant":
+        return None
+    return ident, HAZARD_EVENTS.get(ident, "on the hazard register")
 
 
 # ------------------------------------------------------- printed fragments --
