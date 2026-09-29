@@ -4045,3 +4045,65 @@ clogged with low-impact cantrips.
 
 **Pool:** 44 offered (24 Common, 15 Uncommon, 5 Rare) plus the three co-op
 cards.
+
+## Varka: prototype batch one (2026-09-29)
+
+[USER], 2026-09-29: "You're good to go on building the Varka prototype!" The
+design is the paper kit's sec.10 (`review/active/varka-paper-kit-2026-09-28.md`,
+with sec.5 and sec.9.1-9.6 for the rules it cites), built C# first; there is no
+sim twin, and `tier0` registers his words and refuses to resolve them
+(`effects.VARKA_OPS`, `VARKA_COUNTS`, `VARKA_PREDICATES`). Twenty rows here
+(`proto_vk_`, owner `varka`): the starter's Four Winds' Ascension and the 19
+pool cards of sec.10.3. Knights' Muster, the rest of the starter, is
+hand-written (`Cards/Prototype/VarkaKnightsMuster.cs`) beside the base game's
+Strike x4 and Defend x4 (Silent's pair, the frame his pool borrows).
+
+What the rows needed that the grammar did not have, each one call into
+`Powers/Prototype/Varka*.cs`:
+
+- `tags: [absorb]` emits `IAbsorbCard` (Windbound Execution, Favonius Cut).
+  The rule is the aura lifecycle's (`VarkaAbsorb.Decide`, asked by
+  `AuraPower.ResolveLifecycle` and its forecast), so the card carries only
+  the mark.
+- `count: winds_held` on the damage and block rails (Ascension, Eye of the
+  Storm), read off `VarkaWinds.HeldCount`.
+- `if: holds_wind` (Wind Wall, Tailwind Stride) and `if: swirled_by_this`
+  (Tempest Charge), the second a per-play diff of his Swirl count like
+  `reaction_triggered_by_this`.
+- `only_if: fresh_aura` on an all-enemies hit (Gale Sweep), `only_if:
+  mined`'s shape: the fresh-aura bodies are taken when it is played, each takes
+  its own hit, and a later body keeps its aura against an earlier Swirl's
+  spread (sec.9.6).
+- `knight_aura` (Favonius Drill) and `add_knight` (Knights' Roll Call; its
+  upgrade `choose_knight` is a play-time `IsUpgraded` read, Alice's
+  Detonator's shape).
+- Four Knights do not fit the choose-a-card screen, which throws on more than
+  three cards, so "choose a Knight" is a grid (`VarkaRules.ChooseKnight`,
+  `CardSelectCmd.FromSimpleGrid`) over four option faces
+  (`VarkaModalOptions`). Favonius Drill's sec.10.3 row is therefore not a
+  `choose_one`.
+- `tags: [dusty_tome]` emits BaseLib's `ITomeCard` (Ascension). He has no
+  Ancient card, and Darv's Dusty Tome softlocks on an empty Ancient draw; the
+  Tome hands him an upgraded Ascension until an Ancient is designed.
+
+Per row, where the face or the build differs from sec.10.3's words:
+
+- `proto_vk_amber_baron_bunny`, `_barbara_show_begin`, `_lisa_violet_arc`,
+  `_kaeya_frostgnaw`: titled as sec.10.3 prints them ("Amber: Baron Bunny"),
+  colon and all. The dash form ("Lisa — Violet Arc") is the Mondstadt
+  Universal of that name, a different card a Varka run can be offered, so the
+  colon keeps the two apart. Companion rows (`star`, `nation`, `element`,
+  `personal_pool: varka`), so their hit carries the Knight's element and
+  Grand Master's Order can find them. Faces print `{CalculatedDamage}` /
+  `{CalculatedBlock}`, the companion rail's var. Barbara keeps "Let the Show
+  Begin" without the shipped row's note sign.
+- `proto_vk_stormward_stance`, `proto_vk_boreas_unbound`: the face prints the
+  literal 3 and 1; the upgrade is a cost cut, so no var moves.
+- `proto_vk_converging_winds`: face "Your Swirls react where they land. An
+  Elemental Reaction a spread sets off hits only that enemy." (the text lint
+  spells the reaction that way).
+- `proto_vk_grand_masters_order`: the upgrade is `retain: true` (sec.10.3's
+  "[Retain.]").
+
+**Pool:** 19 offered (10 Common, 7 Uncommon, 2 Rare), four of them Knights;
+target 78 later.

@@ -2038,6 +2038,48 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
     return out
 
 
+#: VARKA (prototype batch one). The block's heading and its lines, in the
+#: words his tips use (`ArmKeywordTips.ForAbsorb` / `ForWind`).
+WINDS_HEADING = "## Your Winds"
+WINDS_HELD_LINE = "- Winds held: {held} ({n} of 4). Not yet: {missing}."
+WINDS_NONE_LINE = ("- Winds held: none. Absorb a fresh aura to gain its "
+                   "Wind.")
+WINDS_ALL_LINE = "- Winds held: {held} (all 4)."
+FANG_READY_LINE = ("- Boreas's Fang: ready. This turn's first non-Anemo "
+                   "Attack that hits a fresh aura Absorbs it.")
+FANG_USED_LINE = "- Boreas's Fang: used this turn."
+AURA_FRESH = ("{element}, fresh: an Absorb takes it; an Anemo hit Swirls "
+              "it.")
+AURA_SPENT = ("{element}, spent: Absorb and Swirl do nothing to it until "
+              "{element} hits it again.")
+AURA_NONE = "no aura."
+
+
+def _render_winds(winds: dict[str, Any]) -> list[str]:
+    """His block: Winds held, the Fang, and each enemy's aura, one fact a
+    line."""
+    held, missing = winds["held"], winds["missing"]
+    if not held:
+        out = [WINDS_NONE_LINE]
+    elif not missing:
+        out = [WINDS_ALL_LINE.format(held=", ".join(held))]
+    else:
+        out = [WINDS_HELD_LINE.format(held=", ".join(held), n=len(held),
+                                      missing=", ".join(missing))]
+    if winds["fang"] == "ready":
+        out.append(FANG_READY_LINE)
+    elif winds["fang"] == "used":
+        out.append(FANG_USED_LINE)
+    for row in winds["auras"]:
+        if row["element"] is None:
+            clause = AURA_NONE
+        else:
+            template = AURA_SPENT if row["state"] == "spent" else AURA_FRESH
+            clause = template.format(element=row["element"])
+        out.append(f"- **{row['name']}**: {clause}")
+    return out
+
+
 def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     """The stage, in DAMAGE ORDER, on one line, plus the reserve on the next.
 
@@ -2879,6 +2921,11 @@ def render(obs: dict[str, Any]) -> str:
             if c["stage"]["log"]:
                 out.append(STAGE_LOG_HEADING)
                 out += _render_stage_log(c["stage"])
+        # VARKA (prototype batch one): his Winds, his Fang and every aura's
+        # fresh or spent state, above the hand whose Absorb-or-Swirl choices
+        # they decide.
+        if c.get("winds") is not None:
+            out += ["", WINDS_HEADING, ""] + _render_winds(c["winds"])
         # `EB-506`. WHO IS AT THE FRONT, printed as a LIST IN ORDER with the
         # front marked, and refreshed off the live company on every screen.
         #
