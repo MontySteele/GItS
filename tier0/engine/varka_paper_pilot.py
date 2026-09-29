@@ -321,6 +321,10 @@ class VarkaPilot2:
       6. SWIRL: an Anemo Attack on a fresh aura (Gale Sweep first when two or
          more are fresh; Windbound only on a held Wind's aura). Fang declined.
       7. BLOCK up to incoming; 8. ATTACK (best damage per Energy); 9. rest.
+    REVISION 2.1 (`vs.fork`): the Fang is the fork. Rule 4 Absorbs through
+    it ("absorb"); rules 5 and 6 treat any plain Attack as a Swirl card
+    while the Fang is unused this turn, and rule 6 Swirls through it
+    ("swirl"). Policy b therefore Swirls every fresh aura it can reach.
     """
 
     def __init__(self, policy: str = "smart", threshold: int = 3):
@@ -447,7 +451,8 @@ class VarkaPilot2:
                     c = min(plain, key=lambda c: (c.element == V.ELEMENT,
                                                   cost[id(c)],
                                                   -_est_attack(state, vs, c)))
-                    return self._play(vs, c, tgt, fang=True)
+                    return self._play(vs, c, tgt,
+                                      fang="absorb" if vs.fork else True)
             absorbers = [c for c in attacks if c.id in V.ABSORB_IDS]
             if absorbers:
                 return self._play(vs, min(absorbers,
@@ -465,6 +470,12 @@ class VarkaPilot2:
         swirl_cards = [c for c in attacks if not is_asc(c) and (
             _is(c, "gale_sweep") or (c.element == V.ELEMENT
                                      and c.id not in V.ABSORB_IDS))]
+        fang_swirl = vs.fork and vs.fang_turn != state.turn
+        if fang_swirl:
+            # 2.1: any plain Attack can Swirl through the Fang
+            swirl_cards += [c for c in attacks if not is_asc(c)
+                            and c not in swirl_cards
+                            and c.id not in V.ABSORB_IDS]
         paint = []
         for c in knights:
             el = _knight_element(c)
@@ -502,6 +513,12 @@ class VarkaPilot2:
 
         # 6. swirl
         sw = []
+        if fang_swirl and fresh:
+            for c in attacks:
+                if (is_asc(c) or c.id in V.ABSORB_IDS
+                        or _is(c, "gale_sweep") or c.element == V.ELEMENT):
+                    continue
+                sw.append((c, min(fresh, key=lambda e: e.hp)))
         for c in attacks:
             if is_asc(c):
                 continue
@@ -523,7 +540,9 @@ class VarkaPilot2:
                 return self._play(vs, sweep[0][0])
             c, tgt = max(sw, key=lambda t: _est_attack(state, vs, t[0])
                          / max(1, cost[id(t[0])]))
-            return self._play(vs, c, tgt)
+            fang = ("swirl" if fang_swirl and c.element != V.ELEMENT
+                    and c.id not in V.ABSORB_IDS else False)
+            return self._play(vs, c, tgt, fang=fang)
 
         # 7. block
         if need > 0:

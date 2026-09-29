@@ -14,6 +14,10 @@ lists): MIXED3, a three-enemy pack with one multi-hitter, one heavy hitter
 and one debuffer; MULTIHIT and HEAVY, a single boss of each intent profile
 for the Wind-choice question.
 
+`--fork` runs REVISION 2.1 instead (the Fang is the fork: Absorb or Swirl;
+an Absorb on a held Wind Swirls; Ascension A is the headline, so section 3
+drops B).
+
 Paper stage: under R215 B no number here is a balance claim.
 """
 
@@ -40,6 +44,7 @@ DECKS = {
         "gale_sweep"],
 }
 POLICIES = (("a", "absorb"), ("b", "swirl"), ("c", "smart"))
+FORK = False                 # --fork: revision 2.1
 PACKS = ("swarm", "attrition", "mixed3")
 BOSSES = ("tank_boss", "punisher")
 WINDS = ("pyro", "hydro", "electro", "cryo")
@@ -105,7 +110,7 @@ def run_v2(extra, enc, F, S, policy="smart", threshold=3, asc="A",
         carry, rec = None, None
         for stage in _stages(enc):
             player = varka_paper.build_player(extra, rev=2, asc_version=asc,
-                                              fixed_winds=fixed)
+                                              fixed_winds=fixed, fork=FORK)
             if carry is not None:
                 player.hp = carry
             start = player.hp
@@ -187,10 +192,16 @@ def r1(F, S, out):
                 ab = [len(r["absorbs"]) for r in rows]
                 sw = [r["swirls"] for r in rows]
                 wn = [len(r["winds"]) for r in rows]
+                wv = {k: st.mean(r["wv"][k] for r in rows)
+                      for k in rows[0]["wv"]}
                 out(f"- {enc:9s} {tag}: {short(rows)} | abs "
                     f"{st.mean(ab):.2f}+/-{st.pstdev(ab):.2f} | swirl "
                     f"{st.mean(sw):.2f}+/-{st.pstdev(sw):.2f} | winds "
-                    f"{st.mean(wn):.2f}")
+                    f"{st.mean(wn):.2f} | per fight: Pyro dmg "
+                    f"{3 * wv['pyro_hits']:.1f}, Hydro Block "
+                    f"{wv['hydro_block']:.1f}, Electro cards "
+                    f"{wv['electro_draws']:.2f}, Cryo Weak "
+                    f"{wv['cryo_weak']:.2f}")
             a, b, c = (store[(deck, enc, t)] for t in "abc")
             for name, other in (("a", a), ("b", b)):
                 w, t, l = paired(c, other)
@@ -261,7 +272,7 @@ def r3(F, S, out):
         out(f"\n### {deck}")
         for enc in BOSSES + ("attrition", "mixed3", "swarm"):
             out(f"- {enc}")
-            for ver in ("A", "B"):
+            for ver in (("A",) if FORK else ("A", "B")):
                 cells = {th: run_v2(DECKS[deck], enc, F, S, policy="smart",
                                     threshold=th, asc=ver)
                          for th in (1, 2, 3, 4)}
@@ -321,7 +332,7 @@ def _scenario_state(hp=40):
     from tier0.engine.state import CombatState, Enemy
     en = [Enemy(hp=hp, max_hp=hp, name=n,
                 intents=[{"kind": "attack", "amount": 5}]) for n in "ABC"]
-    player = V.build_player(rev=2)
+    player = V.build_player(rev=2, fork=FORK)
     vs = player.varka
     vs.winds = {"hydro": 0}
     state = CombatState(player=player, enemies=en, rng=random.Random(0))
@@ -394,7 +405,8 @@ def r5(out):
     res = []
     for perm in itertools.permutations(names, 3):
         for tg in itertools.product("ABC", repeat=3):
-            for fg in itertools.product((False, True), repeat=3):
+            opts = ((False, "absorb", "swirl") if FORK else (False, True))
+            for fg in itertools.product(opts, repeat=3):
                 if any(f and n not in ("strike", "tempest_charge")
                        for n, f in zip(perm, fg)):
                     continue
@@ -406,7 +418,8 @@ def r5(out):
         f"Fang)")
 
     def desc(line):
-        return " > ".join(f"{n.split('_')[0]}->{t}{'(Fang)' if f else ''}"
+        return " > ".join(f"{n.split('_')[0]}->{t}"
+                          f"{'' if not f else '(Fang)' if f is True else '(Fang ' + f + ')'}"
                           for n, t, f in line)
     top = max(res, key=lambda t: (t[1]["total"], t[1]["block"]))
     out(f"  most damage: {top[1]['total']} dmg, {top[1]['block']} Block, "
@@ -436,7 +449,7 @@ def r5(out):
             front.append((k, line))
     seen = set()
     out("  Pareto front (damage, Winds, Pyro kept, Block):")
-    for k, line in sorted(front, reverse=True):
+    for k, line in sorted(front, key=lambda t: t[0], reverse=True):
         if k in seen:
             continue
         seen.add(k)
@@ -485,6 +498,8 @@ def main(argv=None) -> int:
     ap.add_argument("--fights", type=int, default=400)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--only", default="123456")
+    ap.add_argument("--fork", action="store_true",
+                    help="revision 2.1: the Fang is the fork")
     args = ap.parse_args(argv)
     _enable_world()
     lines = []
@@ -495,7 +510,10 @@ def main(argv=None) -> int:
         sys.stdout.flush()
 
     F, S = args.fights, args.seed
-    out(f"VARKA PAPER SIM, REVISION TWO (exploration; not quotable). "
+    global FORK
+    FORK = args.fork
+    rev = "2.1" if FORK else "TWO"
+    out(f"VARKA PAPER SIM, REVISION {rev} (exploration; not quotable). "
         f"fights/cell {F}, seeds {S}..{S + F - 1}; SWIRL_PAYS and "
         f"CRYSTALLIZE_KEEPS_AURA on; HP 80 (placeholder)")
     store = None
