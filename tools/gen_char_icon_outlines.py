@@ -33,7 +33,7 @@ The dilation runs on the GRAYSCALE alpha (max over a circular neighbourhood),
 not on a binarised mask, which keeps the source's antialiased edge instead of
 manufacturing a hard one.
 
-INPUTS are the three shipped fills. Klee's historical layout is
+INPUTS are the shipped fills (Varka joined 2026-09-29). Klee's historical layout is
 ImageGen/images/ui/; Furina and Kokomi use ImageGen/images/<character>/ui/,
 the same split `build_pck.ps1` and `art_lint.GENERATOR_OWNED` already carry.
 
@@ -44,7 +44,10 @@ registered in `art_lint.GENERATOR_OWNED` so no plan row can claim them.
 
 Deterministic: same fill in, same bytes out.
 
-Usage: .venv/Scripts/python tools/gen_char_icon_outlines.py [--check]
+Usage: .venv/Scripts/python tools/gen_char_icon_outlines.py [--check] [--art-root <checkout>]
+
+--art-root reads and writes under another checkout's ImageGen/ (a worktree
+reaching the main checkout's gitignored art without linking it in).
 """
 import sys
 from pathlib import Path
@@ -68,6 +71,8 @@ ICONS = {
                "ImageGen/images/furina/ui/char_icon_outline.png"),
     "kokomi": ("ImageGen/images/kokomi/ui/char_icon.png",
                "ImageGen/images/kokomi/ui/char_icon_outline.png"),
+    "varka":  ("ImageGen/images/varka/ui/char_icon.png",
+               "ImageGen/images/varka/ui/char_icon_outline.png"),
 }
 
 
@@ -107,10 +112,17 @@ def build_outline(fill_path: Path) -> Image.Image:
 
 def main(argv):
     check = "--check" in argv[1:]
+    base = ROOT
+    if "--art-root" in argv:
+        i = argv.index("--art-root")
+        if i + 1 >= len(argv):
+            print("--art-root needs a value", file=sys.stderr)
+            return 2
+        base = Path(argv[i + 1]).resolve()
     missing, stale = [], []
     for name, (fill_rel, out_rel) in ICONS.items():
-        fill_path = ROOT / fill_rel
-        out_path = ROOT / out_rel
+        fill_path = base / fill_rel
+        out_path = base / out_rel
         if not fill_path.exists():
             # Tier F art is gitignored and absent on a fresh clone / CI runner.
             print(f"SKIPPED: {name} -- no fill at {fill_rel}")

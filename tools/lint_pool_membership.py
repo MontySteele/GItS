@@ -62,6 +62,11 @@ MEMBERSHIP_FILES = [
     # class), so this path never goes missing.
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
     / "PrototypeRoster.cs",
+    # VARKA (prototype batch one): `VarkaCardPool.GenerateAllCards` reads
+    # `VarkaRoster.Members()`, which names his hand-written Knights' Muster
+    # beside his generated rows (his four choose-a-Knight faces ride
+    # `VarkaModalOptions`, which the `*ModalOptions.cs` glob below reads).
+    REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype" / "VarkaRoster.cs",
 ]
 # EB-150: the generated choose-one mode-face rosters, globbed rather than
 # listed. They are per-character and the generator mints one the moment a sheet

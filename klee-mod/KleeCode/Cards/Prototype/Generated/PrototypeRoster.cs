@@ -32,6 +32,7 @@ public static class PrototypeRoster
     private static List<CardModel>? _furina;
     private static List<CardModel>? _klee;
     private static List<CardModel>? _kokomi;
+    private static List<CardModel>? _varka;
 
     private static List<CardModel> BuildFurina() =>
         new()
@@ -359,6 +360,31 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoMusterSubsidyFunnel>(),
         };
 
+    private static List<CardModel> BuildVarka() =>
+        new()
+        {
+            ModelDb.Card<ProtoVkAmberBaronBunny>(),
+            ModelDb.Card<ProtoVkBarbaraShowBegin>(),
+            ModelDb.Card<ProtoVkBoreasUnbound>(),
+            ModelDb.Card<ProtoVkConvergingWinds>(),
+            ModelDb.Card<ProtoVkEyeOfTheStorm>(),
+            ModelDb.Card<ProtoVkFavoniusCut>(),
+            ModelDb.Card<ProtoVkFavoniusDrill>(),
+            ModelDb.Card<ProtoVkFourWindsAscension>(),
+            ModelDb.Card<ProtoVkGaleSweep>(),
+            ModelDb.Card<ProtoVkGrandMastersOrder>(),
+            ModelDb.Card<ProtoVkKaeyaFrostgnaw>(),
+            ModelDb.Card<ProtoVkKnightsRollCall>(),
+            ModelDb.Card<ProtoVkLisaVioletArc>(),
+            ModelDb.Card<ProtoVkSquall>(),
+            ModelDb.Card<ProtoVkStormwardStance>(),
+            ModelDb.Card<ProtoVkTailwindStride>(),
+            ModelDb.Card<ProtoVkTempestCharge>(),
+            ModelDb.Card<ProtoVkUpdraft>(),
+            ModelDb.Card<ProtoVkWindWall>(),
+            ModelDb.Card<ProtoVkWindboundExecution>(),
+        };
+
     /// <summary>Prototype rows owned by one character, or none.</summary>
     public static IReadOnlyList<CardModel> For(string characterId) =>
         characterId switch
@@ -366,6 +392,7 @@ public static class PrototypeRoster
             "furina" => _furina ??= BuildFurina(),
             "klee" => _klee ??= BuildKlee(),
             "kokomi" => _kokomi ??= BuildKokomi(),
+            "varka" => _varka ??= BuildVarka(),
             _ => System.Array.Empty<CardModel>(),
         };
 }

@@ -83,6 +83,13 @@ NO_UPGRADED_FORM: dict[str, str] = {
         "prototype-only (KOKOMI_OVERHAUL); the smith is closed in the "
         "prototype run (slice one sec.7), and an upgraded form would be a "
         "design act. Clears when the slice reaches Balance.",
+    # VARKA's starting relic (prototype batch one, #if PROTOTYPE_CARDS). The
+    # paper kit's sec.10 designs no upgraded Fang, and one would be a design
+    # act; Touch of Orobas hands a Varka run the Circlet until one is ruled.
+    "BoreasFang":
+        "prototype-only (Varka, batch one); sec.10 designs no upgraded form, "
+        "and authoring one is a design act. Clears when his kit reaches "
+        "Balance or a relic pass rules one.",
 }
 
 
@@ -211,6 +218,8 @@ RELIC_POOLS = {
     "PearlOfWisdomRelic": "KokomiRelicPool.cs",
     "EtherealSpotlightRelic": "FurinaRelicPool.cs",
     "SalonSolitaire": "FurinaRelicPool.cs",
+    # VARKA (prototype batch one); curated in NO_UPGRADED_FORM above.
+    "BoreasFang": "VarkaRelicPool.cs",
 }
 
 _CODE = _ROOT / "klee-mod" / "KleeCode"

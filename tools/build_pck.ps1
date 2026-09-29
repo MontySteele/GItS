@@ -609,7 +609,7 @@ if (-not (Test-Path $kurageSrc)) { Note-Skip 'kokomi\summon' $kurageSrc } else {
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
-foreach ($character in 'furina', 'kokomi') {
+foreach ($character in 'furina', 'kokomi', 'varka') {
     $charSrc = Join-Path $src $character
     foreach ($d in 'ui', 'powers', 'relics', 'potions', 'model') {
         $from = Join-Path $charSrc $d
@@ -700,6 +700,36 @@ foreach ($relative in @(
     Copy-KokomiFallback $relative
 }
 
+# Varka (prototype batch one), the same arrangement for the same reason: his
+# Custom*Path overrides return KleePck.Path(...), and a null override is the
+# R9 preload crash. The art pass (varka-art) ships his own files at these
+# paths; a checkout without them ships Klee's at HIS paths instead.
+function Copy-VarkaFallback([string]$relative) {
+    $target = Join-Path (Join-Path $work 'varka') $relative
+    if (Test-Path $target) { return }
+
+    $fallback = Join-Path (Join-Path $work 'klee') $relative
+    if (-not (Test-Path $fallback)) {
+        throw "Neither Varka nor Klee provides required PCK asset: $relative"
+    }
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $target) | Out-Null
+    Copy-Item $fallback -Destination $target
+    Write-Host "Varka fallback: $relative <- Klee" -ForegroundColor DarkYellow
+}
+
+foreach ($relative in @(
+        'ui\select_portrait.png',
+        'ui\select_portrait_locked.png',
+        'ui\char_icon.png',
+        'ui\char_icon_outline.png',
+        'ui\map_marker.png',
+        'ui\selection_splash.png',
+        'ui\select_bg.png',
+        'ui\transition_wipe.png',
+        'model\combat_model.png')) {
+    Copy-VarkaFallback $relative
+}
+
 # Text resources authored here, not in ImageGen: the character-select bg scene
 # (a Control the game instantiates into its AnimatedBg container -- structure
 # mirrors the base game's char_select_bg_ironclad.tscn, minus spine/particles),
@@ -712,6 +742,7 @@ foreach ($relative in @(
 New-Item -ItemType Directory -Force -Path (Join-Path $work 'klee\materials') | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $work 'furina\materials') | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $work 'kokomi\materials') | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $work 'varka\materials') | Out-Null
 
 [IO.File]::WriteAllText((Join-Path $work 'klee\ui\char_select_bg_klee.tscn'), @'
 [gd_scene load_steps=3 format=3]
@@ -998,6 +1029,94 @@ texture = ExtResource("1_tex")
 texture = ExtResource("1_tex")
 '@)
 
+# Varka (prototype batch one): his select backdrop, his top-left icon and his
+# three model paths, the Kokomi shapes exactly -- three DISTINCT model paths
+# for the campfire reason above. The backdrop tint is his Anemo teal, the
+# colour his name, pool and map marker use.
+[IO.File]::WriteAllText((Join-Path $work 'varka\ui\char_select_bg_varka.tscn'), @'
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://varka/ui/selection_splash.png" id="1_art"]
+[ext_resource type="Texture2D" path="res://varka/ui/select_bg.png" id="2_bg"]
+
+[node name="VarkaBg" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -960.0
+offset_top = -540.0
+offset_right = 960.0
+offset_bottom = 540.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(960, 540)
+
+[node name="Backdrop" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+self_modulate = Color(0.36, 0.76, 0.66, 1)
+
+[node name="Splash" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("1_art")
+expand_mode = 1
+stretch_mode = 6
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'varka\ui\character_icon.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://varka/ui/char_icon.png" id="1_tex"]
+
+[node name="VarkaIcon" type="TextureRect"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_minimum_size = Vector2(88, 88)
+texture = ExtResource("1_tex")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'varka\model\combat_visuals.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://varka/model/combat_model.png" id="1_tex"]
+
+[node name="VarkaCombatSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'varka\model\rest_character.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://varka/model/combat_model.png" id="1_tex"]
+
+[node name="VarkaRestSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'varka\model\merchant_character.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://varka/model/combat_model.png" id="1_tex"]
+
+[node name="VarkaMerchantSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
 # THE CUSTOM-KEYWORD LOC ROWS ARE NOT TYPED HERE ANY MORE (2026-09-02).
 #
 # They used to be a heredoc right here, hand-typed, WITH THE NUMERALS AS
@@ -1050,7 +1169,10 @@ if (-not (Test-Path $keywordSrc)) {
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now - the people rejoice, and their Regina takes her bow.",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "Priestess. You spent no blood on my stairs, only paper and patience. Tell me what that bought you.",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Every plan I burned on the way up. Read them, and you will find the last one already written."
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Every plan I burned on the way up. Read them, and you will find the last one already written.",
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. Every wind in your city climbed my Spire behind you. Which of them carried you here?",
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.next": "Respond",
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "All four. A knight never rides alone, and Mondstadt's wind was never mine to keep."
 }
 '@)
 
@@ -1134,6 +1256,34 @@ void fragment() {
 [resource]
 resource_local_to_scene = true
 shader = SubResource("Shader_kokomi")
+shader_parameter/threshold = 0.332
+shader_parameter/transitionTex = ExtResource("1_wipe")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'varka\materials\varka_transition_mat.tres'), @'
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://varka/ui/transition_wipe.png" id="1_wipe"]
+
+[sub_resource type="Shader" id="Shader_varka"]
+code = "shader_type canvas_item;
+
+uniform sampler2D transitionTex;
+uniform float threshold : hint_range(0,1);
+
+void fragment() {
+    float falloff = 1.0 - texture(transitionTex, UV).r;
+
+    // helps with falloff artifacts issues towards the transition extremes
+    float remap  = mix(-0.1, 1.1, threshold);
+    falloff = step(falloff, remap);
+    COLOR.a = falloff;
+}
+"
+
+[resource]
+resource_local_to_scene = true
+shader = SubResource("Shader_varka")
 shader_parameter/threshold = 0.332
 shader_parameter/transitionTex = ExtResource("1_wipe")
 '@)

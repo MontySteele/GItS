@@ -38,6 +38,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 48 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 72 (60 Stage cards) |
+| `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (batch one) | 19 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
@@ -45,7 +46,7 @@ be. Starter basics are never changed without [USER]'s pick; every kit's
 starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
 2026-09-28: "The characters' kits should all use basic Strike and Defend.").
 
-## The three kits (Paper, then Prototype, then Balance; `operations/stage-gate.md`)
+## The kits (Paper, then Prototype, then Balance; `operations/stage-gate.md`)
 
 - **Klee: at the finish line.** Brief `review/active/klee-brief-2026-09-01.md`.
   The pool is 78; two seat rounds read it; [USER]'s co-op run (A0, 2026-09-24)
@@ -116,6 +117,24 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Flourish, Quick Cue, Spirited Aria and Grand Entrance, and Bravura's and
   Bring the House Down's per-point rates, raised; brief §18. Next: [USER]'s
   run on the new fade.
+
+- **Varka: prototype batch one built (2026-09-29).** Paper kit
+  `review/active/varka-paper-kit-2026-09-28.md` sec.10; [USER]: "You're good
+  to go on building the Varka prototype!" A new character behind
+  `-p:VarkaPrototype` (on by default beside the other kits; off, and under
+  `-p:ShippedKits=true`, he is not on the select screen). 80 HP, 99 gold;
+  starter base Strike x4, Defend x4, Knights' Muster (choose a Knight on a
+  grid: 4 of their element) and Four Winds' Ascension; starting relic Boreas's
+  Fang. The rules (`klee-mod/KleeCode/Powers/Prototype/Varka*.cs`): Absorb
+  takes a fresh aura off the enemy and gives its Wind (a held Wind Swirls
+  instead); four Winds pay on every Swirl he makes (Pyro 3 damage, Hydro 3
+  Block, Cryo 1 Weak, Electro 1 Energy on the first Swirl each turn); the Fang
+  Absorbs with the turn's first non-Anemo Attack on a fresh aura; Converging
+  Winds makes his Swirls react where they land. Pool 19 (10 / 7 / 2), four
+  Knights among the Commons. C# first, no sim twin. The seat page prints his
+  Winds, the Fang and each aura fresh or spent. Per-row notes:
+  `docs/notes/prototype-surface-provenance.md`, "Varka". Next: the first seat
+  round's one question (sec.10.4), then [USER]'s run.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

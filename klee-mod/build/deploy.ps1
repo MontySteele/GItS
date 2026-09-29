@@ -159,6 +159,7 @@ $artSrcDirs = @(
     (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\klee'),
     (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\furina'),
     (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\kokomi'),
+    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\varka'),
     (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\companions')
 )
 $artDst = Join-Path $stage 'images\cards'

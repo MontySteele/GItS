@@ -199,6 +199,18 @@ both ways by flipping them (`tier0/tests/test_element_port.py`; the C# pins
 are `klee-mod/KleeTests/ElementPortTests.cs`). A sim pin about the old
 consume rule names that world with the `consume_triggers` fixture.
 
+**VARKA IS A CHARACTER, NOT AN ARM OF ONE** (prototype batch one,
+2026-09-29). `VarkaPrototype` is defaulted on beside the arms in
+`Directory.Build.props` and defines `VARKA_PROTOTYPE`, which does two things:
+it moves `KleeMod.Powers.VarkaPrototype.Enabled` (his rules, in
+`Powers/Prototype/Varka*.cs`, compile with the surface either way, so one
+build pins both sides), and it compiles `Varka.cs`, `VarkaCardPool.cs` and
+`VarkaRelicPool.cs`, which is what puts him on the select screen. Off
+(`-p:VarkaPrototype=false`, or `-p:ShippedKits=true`) there is no Varka at
+all. His rows are `proto_vk_`, owner `varka`, a prototype-only profile
+(`gen_klee_cards.PROTOTYPE_OWNERS`), and tier0 registers their words without
+resolving them.
+
 **The companion arm REPLACES THE COMPANION POOL OF TWO NATIONS.** Third arm,
 third property, same terms as the second, on by default since 2026-09-28:
 

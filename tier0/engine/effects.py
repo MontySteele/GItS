@@ -230,6 +230,25 @@ def exhaust_selection_row(state: CombatState, card: Card) -> dict:
     return row
 
 
+#: VARKA (prototype batch one, review/active/varka-paper-kit-2026-09-28.md
+#: sec.10). C# FIRST, SIM AT BALANCE (`docs/current/operations/prototype.md`):
+#: his rows are schema-checked here and never resolved, so the words they
+#: print are REGISTERED -- the loader's vocabulary check reads these sets --
+#: and resolving one raises by name rather than guessing at a rule this engine
+#: does not have. The C# twins: `VarkaWinds.HeldCount`,
+#: `VarkaWinds.SwirlsMadeBy`, `VarkaRules.KnightAura` / `AddKnight`.
+VARKA_COUNTS = frozenset({"winds_held"})
+VARKA_PREDICATES = frozenset({"holds_wind", "swirled_by_this"})
+VARKA_OPS = frozenset({"knight_aura", "add_knight"})
+
+
+def _varka_c_sharp_only(what: str) -> None:
+    raise NotImplementedError(
+        f"{what} belongs to VARKA's prototype (sec.10): C# first, and the sim "
+        "twin comes at Balance. No `proto_vk_` row resolves in tier 0, so "
+        "reaching this is a defect rather than a degradation.")
+
+
 def _runtime_count(state: CombatState, token: str,
                    current_card: Optional[Card] = None) -> int:
     """A live integer the base-game CalculatedX/CalculatedDamage vars read at
@@ -471,6 +490,8 @@ def _runtime_count(state: CombatState, token: str,
         key = token[len(EXHAUST_SELECTION_PREFIX):]
         if key in counts:
             return counts[key]
+    if token == "winds_held":          # VARKA_COUNTS
+        _varka_c_sharp_only(f"runtime count {token!r}")
     raise ValueError(f"unknown runtime count {token!r}")
 
 
@@ -3966,6 +3987,9 @@ PREDICATE_NAMES = frozenset({
     # THE SUPPORTING POOL (2026-09-26), Counterclaim: did an enemy's hit reach
     # the front performer's bar since the end of her last turn?
     "stage_front_hit",
+    # VARKA: registered, and C# only (`VARKA_PREDICATES`).
+    "holds_wind",
+    "swirled_by_this",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -4114,6 +4138,8 @@ RUNTIME_COUNT_NAMES = frozenset({
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
     "fanfare_drained",
+    # VARKA: registered, and C# only (`VARKA_COUNTS`).
+    "winds_held",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.
@@ -4443,6 +4469,8 @@ def _predicate(state: CombatState, name: str) -> bool:
         # agree is `tier0/tests/test_companion_overhaul_hooks.py`.
         n = int(name.rsplit("_", 1)[1])
         return state.attacks_played_this_turn + 1 == n
+    if name == "holds_wind" or name == "swirled_by_this":   # VARKA_PREDICATES
+        _varka_c_sharp_only(f"predicate {name!r}")
     raise ValueError(f"unknown predicate {name!r}")
 
 
@@ -6516,6 +6544,11 @@ def _op_stage_dual_nature(state: CombatState, fx: dict, card: Card) -> None:
     """*Dual Nature*: Ousia or Pneuma, for this turn."""
     furina_stage.dual_nature(state)
 
+def _op_varka(state: CombatState, fx: dict, card: Card) -> None:
+    """VARKA's two verbs, registered and C# only (`VARKA_OPS`)."""
+    _varka_c_sharp_only(f"op {fx['op']!r} on {card.id!r}")
+
+
 OPS = {
     "damage": _op_damage,
     "block": _op_block,
@@ -6528,6 +6561,9 @@ OPS = {
     "energy": _op_energy,
     "apply_power": _op_apply_power,
     "apply_aura": _op_apply_aura,
+    # VARKA (prototype batch one): Favonius Drill and Knights' Roll Call.
+    "knight_aura": _op_varka,
+    "add_knight": _op_varka,
     "place_bomb": _op_place_bomb,
     "detonate": _op_detonate,
     "move_bombs": _op_move_bombs,

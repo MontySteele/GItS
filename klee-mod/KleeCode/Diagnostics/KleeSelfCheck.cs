@@ -80,6 +80,13 @@ internal static class KleeSelfCheck
                          ModelDb.Character<Klee>(),
                          ModelDb.Character<Furina>(),
                          ModelDb.Character<Kokomi>(),
+#if PROTOTYPE_CARDS && VARKA_PROTOTYPE
+                         // Varka (prototype batch one): the same sweep, so his
+                         // relic pool (R7), his pool's rarities and types (R3),
+                         // his loc (R8) and his Architect lines (R12) are
+                         // checked at boot like everyone's.
+                         ModelDb.Character<Varka>(),
+#endif
                      })
             {
                 CheckCharacterInvariants(character);
@@ -130,7 +137,7 @@ internal static class KleeSelfCheck
         if (Findings.Count == 0)
         {
             Log.Info($"[{KleeMod.ModId}] {Tag} passed "
-                   + $"({RuleCount} rule families across 3 characters "
+                   + $"({RuleCount} rule families across the roster's characters "
                    + "and the assembly's powers).");
             return;
         }
@@ -437,6 +444,17 @@ internal static class KleeSelfCheck
         // ArmStarterBasics, which is the seam that answers it.
         foreach (var tag in new[] { CardTag.Strike, CardTag.Defend })
         {
+#if PROTOTYPE_CARDS
+            // VARKA's pool holds no Basic Strike or Defend at all -- his
+            // starter's base pair is Silent's -- and his answer is the seam
+            // above, `ArmStarterBasics`, which Large Capsule and Fasten are
+            // patched to ask BEFORE their unguarded First().
+            if (character is Powers.IVarkaCharacter
+                && Powers.ArmStarterBasics.StrikeFor(character) != null)
+            {
+                break;
+            }
+#endif
             if (!pool.Any(c => c.Rarity == CardRarity.Basic && c.Tags.Contains(tag)))
             {
                 Fail("R11", $"{character.GetType().Name}: no Basic-rarity card tagged "

@@ -2424,3 +2424,58 @@ act_vignette_natlan	ImageGen/images/teyvat/map/natlan_vignette.png	2035	1440	vig
 act_vignette_inazuma	ImageGen/images/teyvat/map/inazuma_vignette.png	2035	1440	vignette	x0.42	auto	1	png	Inazuma City.png		splash
 act_vignette_fontaine	ImageGen/images/teyvat/map/fontaine_vignette.png	2035	1440	vignette	x0.42	auto	1	png	Court of Fontaine.png		splash
 act_vignette_sumeru	ImageGen/images/teyvat/map/sumeru_vignette.png	2035	1440	vignette	x0.42	auto	1	png	Sumeru City.png		splash
+
+# ---------- Varka prototype (proto_vk_), 2026-09-29 ----------
+# The fourth character's prototype art (review/active/varka-paper-kit-2026-09-28.md
+# sec.10.2-10.3 on branch varka-paper-final). Varka is a released playable
+# character (Anemo claymore, Luna V), so every row below is OFFICIAL wiki art,
+# every title checked with art_hunt.py and the API's imageinfo before it was
+# written. Cards: one distinct source per card, blank source_group (strict L1),
+# and none of them is proto_mc_varka_sturm_und_drang's Character Varka Full
+# Wish, which the prototype partition would read as a twin. The four Knight
+# cards take Amber/Barbara/Lisa/Kaeya art that no other proto row wears (the
+# proto_mc_ Knights already hold Amber Character Card/Wish, Barbara Card,
+# Lisa Character Card/Wish, Kaeya Wish and the two equipment cards).
+# GIF skill previews are NOT used: they are 480x267 (L8) and the wiki CDN
+# returned 503 for their thumbs on 2026-09-29.
+# Shell surfaces other than select_bg are gen_varka_stills.py's (L11), and
+# the outline halo is gen_char_icon_outlines.py's.
+varka_select_bg	ImageGen/images/varka/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Varka Lead Wolf.png		splash
+# Boreas's Fang (starting relic). No 'fang' item exists; the Boreas drops are
+# the closest objects, the Spirit Locket reading most like a tooth or claw.
+relic_boreas_fang	ImageGen/images/varka/relics/boreas_fang.png	256	256	contain	center	shortlist	1	png	Item Spirit Locket of Boreas.png		icon
+relic_boreas_fang	ImageGen/images/varka/relics/boreas_fang.png	256	256	contain	center	shortlist	2	png	Item Tail of Boreas.png		icon
+relic_boreas_fang	ImageGen/images/varka/relics/boreas_fang.png	256	256	contain	center	shortlist	3	png	Lupus Majoris Shape.png		icon
+# Power icons. The four Winds wear the Mondstadt Vision of their element (the
+# Knights' own elements); the three Power cards wear Varka's talent icons.
+# File names are guesses at the C# power ids -- KleePowerIcons.PathFor must
+# point at varka/powers/<name>.png.
+power_varka_pyro_wind	ImageGen/images/varka/powers/pyro_wind.png	256	256	contain	center	shortlist	1	png	Vision Mondstadt Pyro.png		icon
+power_varka_hydro_wind	ImageGen/images/varka/powers/hydro_wind.png	256	256	contain	center	shortlist	1	png	Vision Mondstadt Hydro.png		icon
+power_varka_cryo_wind	ImageGen/images/varka/powers/cryo_wind.png	256	256	contain	center	shortlist	1	png	Vision Mondstadt Cryo.png		icon
+power_varka_electro_wind	ImageGen/images/varka/powers/electro_wind.png	256	256	contain	center	shortlist	1	png	Vision Mondstadt Electro.png		icon
+power_varka_stormward_stance	ImageGen/images/varka/powers/stormward_stance.png	256	256	contain	center	shortlist	1	png	Talent Wind's Vanguard.png		icon
+power_varka_converging_winds	ImageGen/images/varka/powers/converging_winds.png	256	256	contain	center	shortlist	1	png	Talent Northwind Avatar.png		icon
+power_varka_boreas_unbound	ImageGen/images/varka/powers/boreas_unbound.png	256	256	contain	center	shortlist	1	png	Talent Windbound Execution.png		icon
+# Cards: 2 starter signatures + 19 pool cards. Wordmarked sources (Introduction Card, Card 2, Banner) are cropped or pushed in past their printed names.
+proto_vk_knights_muster	ImageGen/images/cards/varka/proto_vk_knights_muster.png	500	380	cover	center	shortlist	1	png	Version Luna V Wallpaper 1.png		splash
+proto_vk_four_winds_ascension	ImageGen/images/cards/varka/proto_vk_four_winds_ascension.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Varka Wish.png		splash
+proto_vk_windbound_execution	ImageGen/images/cards/varka/proto_vk_windbound_execution.png	500	380	cover	center	shortlist	1	png	Version Luna V Wallpaper 2.png		splash
+proto_vk_squall	ImageGen/images/cards/varka/proto_vk_squall.png	500	380	cover	x0.55,y0.35	shortlist	1	png	Varka Profile.png		splash
+proto_vk_updraft	ImageGen/images/cards/varka/proto_vk_updraft.png	500	380	cover	x0.62,y0.50@1.2	shortlist	1	png	Varka Introduction Banner.png		splash
+proto_vk_gale_sweep	ImageGen/images/cards/varka/proto_vk_gale_sweep.png	500	380	cover	x0.30	shortlist	1	png	Varka Introduction Card.png		splash
+proto_vk_wind_wall	ImageGen/images/cards/varka/proto_vk_wind_wall.png	500	380	contain	center	shortlist	1	png	Knights of Favonius Coat of Arms.png		item
+proto_vk_favonius_drill	ImageGen/images/cards/varka/proto_vk_favonius_drill.png	500	380	cover	y0.40	shortlist	1	png	Oath to the North Wind Turnaround.png		splash
+proto_vk_amber_baron_bunny	ImageGen/images/cards/varka/proto_vk_amber_baron_bunny.png	500	380	cover	y0.30	shortlist	1	png	Amber Card.png		splash
+proto_vk_barbara_show_begin	ImageGen/images/cards/varka/proto_vk_barbara_show_begin.png	500	380	cover	y0.40	shortlist	1	png	Character Barbara Full Wish.png		splash
+proto_vk_lisa_violet_arc	ImageGen/images/cards/varka/proto_vk_lisa_violet_arc.png	500	380	cover	y0.30	shortlist	1	png	Lisa Card.png		splash
+proto_vk_kaeya_frostgnaw	ImageGen/images/cards/varka/proto_vk_kaeya_frostgnaw.png	500	380	cover	y0.40	shortlist	1	png	Character Kaeya Full Wish.png		splash
+proto_vk_tempest_charge	ImageGen/images/cards/varka/proto_vk_tempest_charge.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Fated Warrior Quest Still 4.png		splash
+proto_vk_favonius_cut	ImageGen/images/cards/varka/proto_vk_favonius_cut.png	500	380	cover	x0.47,y0.40@1.8	shortlist	1	png	Varka Introduction Card 2.png		splash
+proto_vk_grand_masters_order	ImageGen/images/cards/varka/proto_vk_grand_masters_order.png	500	380	cover	y0.40	shortlist	1	png	Varka Mural.png		splash
+proto_vk_knights_roll_call	ImageGen/images/cards/varka/proto_vk_knights_roll_call.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 48 Varka 1.png		sticker
+proto_vk_eye_of_the_storm	ImageGen/images/cards/varka/proto_vk_eye_of_the_storm.png	500	380	cover	center	shortlist	1	png	Namecard Background Varka Lead Wolf.png		splash
+proto_vk_stormward_stance	ImageGen/images/cards/varka/proto_vk_stormward_stance.png	500	380	cover	y0.30	shortlist	1	png	Varka Portrait.png		splash
+proto_vk_tailwind_stride	ImageGen/images/cards/varka/proto_vk_tailwind_stride.png	500	380	cover_autocrop	contain@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 48 Varka 3.png		sticker
+proto_vk_converging_winds	ImageGen/images/cards/varka/proto_vk_converging_winds.png	500	380	cover	center	shortlist	1	png	Version Luna V Event Calendar Wallpaper.png		splash
+proto_vk_boreas_unbound	ImageGen/images/cards/varka/proto_vk_boreas_unbound.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Fated Warrior Quest Still 3.png		splash

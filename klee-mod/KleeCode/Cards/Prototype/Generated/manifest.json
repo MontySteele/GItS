@@ -294,7 +294,27 @@
     "proto_spark_priced_draw",
     "proto_spark_priced_strike",
     "proto_thoma_crimson_ooyoroi_either",
-    "proto_thoma_crimson_ooyoroi_priced"
+    "proto_thoma_crimson_ooyoroi_priced",
+    "proto_vk_amber_baron_bunny",
+    "proto_vk_barbara_show_begin",
+    "proto_vk_boreas_unbound",
+    "proto_vk_converging_winds",
+    "proto_vk_eye_of_the_storm",
+    "proto_vk_favonius_cut",
+    "proto_vk_favonius_drill",
+    "proto_vk_four_winds_ascension",
+    "proto_vk_gale_sweep",
+    "proto_vk_grand_masters_order",
+    "proto_vk_kaeya_frostgnaw",
+    "proto_vk_knights_roll_call",
+    "proto_vk_lisa_violet_arc",
+    "proto_vk_squall",
+    "proto_vk_stormward_stance",
+    "proto_vk_tailwind_stride",
+    "proto_vk_tempest_charge",
+    "proto_vk_updraft",
+    "proto_vk_wind_wall",
+    "proto_vk_windbound_execution"
   ],
   "owners": {
     "proto_fs_arkhe_alignment": "furina",
@@ -585,7 +605,27 @@
     "proto_spark_priced_draw": "klee",
     "proto_spark_priced_strike": "klee",
     "proto_thoma_crimson_ooyoroi_either": "klee",
-    "proto_thoma_crimson_ooyoroi_priced": "klee"
+    "proto_thoma_crimson_ooyoroi_priced": "klee",
+    "proto_vk_amber_baron_bunny": "varka",
+    "proto_vk_barbara_show_begin": "varka",
+    "proto_vk_boreas_unbound": "varka",
+    "proto_vk_converging_winds": "varka",
+    "proto_vk_eye_of_the_storm": "varka",
+    "proto_vk_favonius_cut": "varka",
+    "proto_vk_favonius_drill": "varka",
+    "proto_vk_four_winds_ascension": "varka",
+    "proto_vk_gale_sweep": "varka",
+    "proto_vk_grand_masters_order": "varka",
+    "proto_vk_kaeya_frostgnaw": "varka",
+    "proto_vk_knights_roll_call": "varka",
+    "proto_vk_lisa_violet_arc": "varka",
+    "proto_vk_squall": "varka",
+    "proto_vk_stormward_stance": "varka",
+    "proto_vk_tailwind_stride": "varka",
+    "proto_vk_tempest_charge": "varka",
+    "proto_vk_updraft": "varka",
+    "proto_vk_wind_wall": "varka",
+    "proto_vk_windbound_execution": "varka"
   },
   "mode_faces": {
     "proto_fs_curtain_rise": [
@@ -1537,6 +1577,66 @@
     },
     "proto_mi_yoimiya_aurous_blaze": {
       "power_amount": 1
+    },
+    "proto_vk_amber_baron_bunny": {
+      "damage": 3
+    },
+    "proto_vk_barbara_show_begin": {
+      "block": 2
+    },
+    "proto_vk_boreas_unbound": {
+      "cost": -1
+    },
+    "proto_vk_converging_winds": {
+      "cost": -1
+    },
+    "proto_vk_eye_of_the_storm": {
+      "formula_per": 1
+    },
+    "proto_vk_favonius_cut": {
+      "damage": 5
+    },
+    "proto_vk_favonius_drill": {
+      "block": 3
+    },
+    "proto_vk_four_winds_ascension": {
+      "formula_base": 3
+    },
+    "proto_vk_gale_sweep": {
+      "damage": 2
+    },
+    "proto_vk_grand_masters_order": {
+      "retain": true
+    },
+    "proto_vk_kaeya_frostgnaw": {
+      "damage": 3
+    },
+    "proto_vk_knights_roll_call": {
+      "choose_knight": true
+    },
+    "proto_vk_lisa_violet_arc": {
+      "damage": 2
+    },
+    "proto_vk_squall": {
+      "damage": 1
+    },
+    "proto_vk_stormward_stance": {
+      "cost": -1
+    },
+    "proto_vk_tailwind_stride": {
+      "cost": -1
+    },
+    "proto_vk_tempest_charge": {
+      "damage": 3
+    },
+    "proto_vk_updraft": {
+      "damage": 3
+    },
+    "proto_vk_wind_wall": {
+      "block": 3
+    },
+    "proto_vk_windbound_execution": {
+      "damage": 3
     }
   },
   "no_upgrade": {}

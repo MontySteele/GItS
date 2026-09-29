@@ -351,7 +351,8 @@ internal static class ReactionEffects
         Creature target,
         Creature? dealer,
         CardModel? cardSource,
-        Element consumedAura)
+        Element consumedAura,
+        bool spreadReaction = false)
     {
         if (reaction != Reaction.None)
         {
@@ -523,6 +524,10 @@ internal static class ReactionEffects
                 // Unblockable | Unpowered with no dealer -- which also keeps
                 // splash from early-detonating bombs or counting as an attack.
                 var splashTargets = target.CombatState?.HittableEnemies.ToList();
+                // VARKA's Converging Winds (sec.5): "a reaction it sets off
+                // lands on that enemy only, so Overload does not splash".
+                // False on every other caller.
+                if (spreadReaction) splashTargets = new List<Creature> { target };
                 var splash = ReactionConstants.OverloadSplash;
 #if PROTOTYPE_CARDS
                 // QUARANTINED. The other half of Durin's White form: the splash
@@ -558,6 +563,11 @@ internal static class ReactionEffects
                 await PowerCmd.Apply<PoisonPower>(
                     choiceContext, target, ReactionConstants.ElectroChargedDot,
                     applier: dealer, cardSource: cardSource);
+                break;
+
+            case Reaction.Swirl when spreadReaction:
+                // "A reaction set off by a spread never Swirls again": a spread
+                // carries an aura element, so this is unreachable -- stated.
                 break;
 
             case Reaction.Swirl when TriggerRules.SwirlPays:
@@ -620,6 +630,17 @@ internal static class ReactionEffects
             Log.Info($"[{KleeMod.ModId}] REACTION {reaction} on {target.Name} " +
                      $"(consumed {consumedAura}).");
         }
+
+#if PROTOTYPE_CARDS
+        // VARKA (QUARANTINED): "Winds ... each paid on every Swirl you make"
+        // (sec.10.1). After the Swirl's own spread and flat 2, so a Pyro
+        // Wind's 3 lands on a body the Swirl has already hit. Every Swirl in
+        // the mod passes this line once; a dealer with no Wind pays nothing.
+        if (reaction == Reaction.Swirl)
+        {
+            await VarkaWinds.OnSwirl(choiceContext, target, dealer);
+        }
+#endif
     }
 
     /// <summary>
@@ -642,27 +663,62 @@ internal static class ReactionEffects
         var bodies = target.CombatState?.HittableEnemies.ToList();
         if (bodies == null) return;
 
+        var damage = ReactionConstants.SwirlDamage;
+#if PROTOTYPE_CARDS
+        // Durin's White scales it for the reason it scales Overload's splash:
+        // it is damage a reaction deals. Truncated like the sim's int(...).
+        damage = (int)(damage * CompanionOverhaulReactions.DamageMultiplier(dealer));
+        // VARKA's Converging Winds: the spread reacts where it lands.
+        var converges = ConvergingWindsPower.Converges(dealer);
+#endif
+        // The bodies whose flat 2 was the spread's own elemental hit.
+        var reacted = new HashSet<Creature>();
+
         foreach (var e in bodies)
         {
             if (ReferenceEquals(e, target)) continue;
+#if PROTOTYPE_CARDS
+            // VARKA's Gale Sweep: a body the sweep has still to hit keeps its
+            // own fresh aura against this Swirl's spread (sec.9.6).
+            if (VarkaRules.SpreadShielded(e)) continue;
+#endif
             var existing = AuraCmd.Find(e);
             if (existing != null)
             {
                 if (!TriggerRules.SpreadLands(spread, existing.Element)) continue;
+#if PROTOTYPE_CARDS
+                // VARKA's Converging Winds (sec.5): "the spread hit is the
+                // flat 2 carrying the swirled element", and a reaction it
+                // sets off "lands on that enemy only". The aura is consumed,
+                // the reaction resolves on this body alone, and an amplifier
+                // multiplies the 2. No copy arrives.
+                var spreadReaction = ConvergingWindsPower.SpreadReaction(
+                    converges, spread, existing.Element);
+                if (spreadReaction != Reaction.None)
+                {
+                    var consumed = existing.Element;
+                    var hit = (int)(damage * ReactionTable.AmplifierMultiplier(
+                        spreadReaction, dealer));
+                    await PowerCmd.Remove(existing);
+                    await Resolve(choiceContext, spreadReaction, e, dealer,
+                                  cardSource, consumed, spreadReaction: true);
+                    await CreatureCmd.Damage(
+                        choiceContext, e, hit,
+                        ValueProp.Unblockable | ValueProp.Unpowered,
+                        dealer: null, cardSource: null, cardPlay: null);
+                    reacted.Add(e);
+                    continue;
+                }
+#endif
                 await PowerCmd.Remove(existing);
             }
             await AuraCmd.Apply(choiceContext, e, spread, dealer, cardSource);
             if (AuraCmd.Find(e) is { } copy) copy.Spent = true;
         }
 
-        var damage = ReactionConstants.SwirlDamage;
-#if PROTOTYPE_CARDS
-        // Durin's White scales it for the reason it scales Overload's splash:
-        // it is damage a reaction deals. Truncated like the sim's int(...).
-        damage = (int)(damage * CompanionOverhaulReactions.DamageMultiplier(dealer));
-#endif
         foreach (var e in bodies)
         {
+            if (reacted.Contains(e)) continue;
             await CreatureCmd.Damage(
                 choiceContext, e, damage,
                 ValueProp.Unblockable | ValueProp.Unpowered,

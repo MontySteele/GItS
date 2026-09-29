@@ -82,6 +82,11 @@ public static class ArmKeywordTips
     // Klee's readers and on the Kokomi and Furina arms' faces, and nothing on
     // screen said what one is.
     public const string CompanionKey = "KLEEMOD-ARM_COMPANION";
+    // VARKA (prototype batch one): his three words. `Swirl` is the shared
+    // rule and already has its row above.
+    public const string AbsorbKey = "KLEEMOD-ARM_VARKA_ABSORB";
+    public const string WindKey = "KLEEMOD-ARM_VARKA_WIND";
+    public const string KnightKey = "KLEEMOD-ARM_VARKA_KNIGHT";
     // THE FURINA STAGE'S SEVEN (`EB-723`, R269). The brief's sec.12 names
     // them: "Spend, Fanfare (the bar), Raise, Bow, the lead, the back
     // performer, Rotate". `Fanfare` collides with the reframe's word by
@@ -694,6 +699,44 @@ public static class ArmKeywordTips
         With(inherited, CompanionKey,
             "A card titled with a character's name, a dash, then its "
           + "own.");
+
+    // ---------------------------------------------------- Varka -----------
+
+    /// <summary>
+    /// VARKA'S VERB (sec.10.1): "on a fresh aura, takes the aura off that
+    /// enemy and gives you its Wind ... If you already hold that Wind, the
+    /// hit Swirls instead." Printed on Windbound Execution, Favonius Cut,
+    /// Boreas Unbound and Boreas's Fang. <paramref name="card"/> may be null
+    /// for the relic's hover.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForAbsorb(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, AbsorbKey,
+            "On a fresh aura, take it off the enemy and gain its Wind. If you "
+          + "already hold that Wind, Swirl it instead.");
+
+    /// <summary>
+    /// WHAT AN ABSORB COLLECTS, all four in one tip because a face says "a
+    /// Wind" and not which. The numbers are <see cref="VarkaLaw"/>'s, the ones
+    /// the Wind badges print.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForWind(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, WindKey,
+            "Kept all fight. Each Swirl you make pays each Wind you hold: Pyro "
+          + VarkaLaw.PyroWindDamage + " damage, Hydro " + VarkaLaw.HydroWindBlock
+          + " [gold]Block[/gold], Cryo " + VarkaLaw.CryoWindWeak
+          + " [gold]Weak[/gold], Electro " + VarkaLaw.ElectroWindEnergy
+          + " [gold]Energy[/gold] once a turn.");
+
+    /// <summary>His four personal Companions (sec.4), named on Favonius
+    /// Drill, Grand Master's Order, Knights' Roll Call and Knights' Muster.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForKnight(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, KnightKey,
+            "Amber, Barbara, Lisa or Kaeya: his own Companion cards. Knights' "
+          + "Muster counts as one.");
 
     // ---------------------------------------------------- Furina ----------
     //

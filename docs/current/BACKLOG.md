@@ -12,6 +12,13 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Kits and display (the mod)
 
+- Varka has no Ancient card: Darv's Dusty Tome hands him an upgraded Four Winds' Ascension through BaseLib's `ITomeCard` (the row's `dusty_tome` tag) until one is designed; delete the tag with it.
+- Varka's Boreas's Fang has no upgraded form, so Touch of Orobas hands him the no-effect Circlet (`NO_UPGRADED_FORM` in `tier0/tests/test_starter_relic_upgrades.py` says so); needs a relic ruling.
+- Varka's relic and potion pools borrow the Silent's (Kokomi's arrangement); his own pass (sec.5's Dandelion Wine, The Untitled Question) is not built.
+- Varka's Knight titles ("Lisa: Violet Arc", "Kaeya: Frostgnaw", "Barbara: Let the Show Begin") share talent names with Mondstadt Universals a Varka run can also be offered ("Lisa — Violet Arc"); the colon is the only difference on screen.
+- Varka's Wind tip sits at 133 of the 135-character tip ceiling; a fifth clause will not fit.
+- Varka's Architect finale lines in `tools/build_pck.ps1` are placeholders for a writing pass, like the other three characters'.
+
 - Furina Stage: the end-of-turn preview listed a trio act twice ("Crabaletta: 10 to a random enemy, twice", fight 4 turn 2 after Double Casting+ gave two Ushers under Ousia; "Chevalmarin 2 to ALL" twice, fight 5 turn 1 after Gala Premiere and a front-seat Wriothesley) while the log shows one act; both on a full stage, which is when `Forecast` and `EndOfTurnActs` add Full House's repeats. Not reproduced: `FurinaStage.Forecast` on both boards, built headless ([Crabaletta, Usher, Usher] and [Wriothesley, Usher, Chevalmarin]), lists one act each, so something live adds the repeat; it needs the `furina_stage.forecast` snapshot and her powers from such a turn (Furina seat, 2026-09-28). A third sighting 2026-09-29 (Furina run FS3EL3M3NTS4, act 1): the preview said Neuvillette "8 Hydro to ALL, twice" and the second act "could not pay" Not a skipped payment: both forecasts pay each Full House repeat on the copy before counting it (pinned 2026-09-29, board "full house, the repeat cannot pay"); the record's bars (Neuvillette 11, then 3 paid each sweep) put him at 5, where the forecast lists one act, so the doubled line came from somewhere else.
 - Reward screen: `proceed` with an unclaimed gold row drops the gold with no warning (two seats, 2026-09-28/29).
 - Element port, phase two (`review/ruled/element-home-review-2026-09-28.md` §7.2, §7.4): Burning, where a Swirl or Crystallize on a burning enemy spends the held Pyro and Burning keeps ticking; and Dendro ported as ruled (the non-reacting pairs, the Core rules and their previews), tested on Kirara and Emilie. Neither engine has Burning or Dendro today.

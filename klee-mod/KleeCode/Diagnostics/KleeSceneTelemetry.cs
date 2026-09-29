@@ -51,6 +51,13 @@ internal static class KleeSceneTelemetry
         "kokomi/model/merchant_character.tscn",
         "kokomi/ui/character_icon.tscn",
         "kokomi/ui/char_select_bg_kokomi.tscn",
+        // Varka (prototype batch one): the build_pck.ps1-authored shapes
+        // Kokomi runs on; he has no rig.
+        "varka/model/combat_visuals.tscn",
+        "varka/model/rest_character.tscn",
+        "varka/model/merchant_character.tscn",
+        "varka/ui/character_icon.tscn",
+        "varka/ui/char_select_bg_varka.tscn",
         "shared/gauge.tscn",
         // EB-53/N1: the end-of-turn attribution docket, shared across seats.
         "shared/turn_end_docket.tscn",

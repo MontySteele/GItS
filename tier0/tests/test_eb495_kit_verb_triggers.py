@@ -519,10 +519,14 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
                 sites.append((path.relative_to(MOD).as_posix(), lineno))
     # The path and the count are the pin; the line number is not (it moved
     # 1315 -> 1386 under an unrelated edit and turned main red on #549).
+    # VARKA's Gale Sweep (prototype batch one): one hit per fresh-aura body,
+    # each from the card itself -- an Anemo Attack's own hit, so it takes
+    # every trigger an Attack takes (`VarkaRules.HitFreshAuras`).
     assert [path for path, _line in sites] == [
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBakeKuragePower.cs",
-        "Powers/Prototype/ProtoBombPower.cs"]
+        "Powers/Prototype/ProtoBombPower.cs",
+        "Powers/Prototype/VarkaRules.cs"]
 
 
 def test_no_kit_verb_hands_the_game_a_card_source_for_its_debuff():
