@@ -309,6 +309,11 @@ SIM_CALL_SITES = {
     # Kokomi core pass: Song of Pearls' strike, dealt as a planned hit is.
     # (The Casket's strike sat between these two until the Casket pass.)
     ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
+    # THE NAHIDA PAPER SIM (exploratory, switched off, 2026-09-29):
+    # Purification, a Dendro hit that takes no Strength. Its source is
+    # `purify_card` / `purify_reaction`, neither a card source, so it wakes
+    # no Skittish; the sim cannot reach it with `NAHIDA_PAPER` off.
+    ('nahida_seeds.py', 1): ('dmg_source', 'False', "'dendro'"),
 }
 
 

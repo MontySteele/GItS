@@ -14,9 +14,9 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import (companion_hexerei, companion_standins, effects,
-                          furina_stage, klee_overhaul,
-                          kokomi_plan,
+from tier0.engine import (companion_hexerei, companion_standins, dendro,
+                          effects, furina_stage, klee_overhaul,
+                          kokomi_plan, nahida_seeds,
                           potions, powers, reactions, refpowers, relics,
                           resources)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
@@ -1041,6 +1041,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
             effects.detonate_bombs(state, enemy)
     _settle_phases(state)
     reactions.tick_auras(state)
+    # EXPLORATORY, SWITCHED OFF (the Nahida paper sim, 2026-09-29): Quicken's
+    # clock and Purification's once-a-turn trigger, both reset at the top of
+    # the player's turn. Each returns at once with its switch off.
+    dendro.turn_start(state)
+    nahida_seeds.turn_start(state)
     powers.on_turn_start(state, p)
     _settle_phases(state)        # aura ticks / DoT can drop a phased boss;
     #                              without a settle before the over-check, a
@@ -1205,6 +1210,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
             break
         seen_states.add(snapshot)
         play_card(state, card)
+        # EXPLORATORY, SWITCHED OFF: a reaction-triggered Purification the
+        # card caused resolves once the card has finished.
+        if nahida_seeds.NAHIDA_PAPER:
+            nahida_seeds.flush(state)
+            _settle_phases(state)
 
     # Kokomi §7 engine_closure detector (report-only, R14: diagnostics,
     # never acceptance targets): a turn that CREATED at least as many cards
@@ -1258,6 +1268,12 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # which is what makes fight one's turn-one line A add Usher's 3 Block to
     # the 9 she already has before Nibbit's Butt lands.
     furina_stage.end_of_turn_acts(state)
+    # EXPLORATORY, SWITCHED OFF (the Nahida paper sim): a Dendro Core made on
+    # an earlier turn bursts now, Burning ticks, and a Purification that a
+    # burst triggered resolves -- on this turn's trigger, if still unspent.
+    dendro.turn_end(state)
+    if nahida_seeds.NAHIDA_PAPER:
+        nahida_seeds.flush(state)
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss
     # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,
@@ -1483,6 +1499,10 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # lands on its owner).
             dmg = powers.modify_damage_taken(state.player, dmg, enemy)
             dmg = int(dmg)
+            # EXPLORATORY, SWITCHED OFF (the Nahida paper sim): Foresight,
+            # "a seeded enemy's attacks deal 1 less per Seed on it".
+            if nahida_seeds.NAHIDA_PAPER:
+                dmg = nahida_seeds.foresight(state, enemy, dmg)
             # QUARANTINED (C.COMPANION_OVERHAUL). The two TRAPS -- Dahlia's
             # Sacramental Shower and Amber's Baron Bunny -- fire HERE, after
             # the hit's number is settled and before Block is spent, which is

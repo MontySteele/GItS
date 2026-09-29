@@ -15,8 +15,8 @@ from typing import Optional, Sequence
 from tier0 import constants as C
 from tier0.engine import (companion_coven, companion_hexerei,
                           companion_standins, coop, furina_stage,
-                          klee_overhaul, kokomi_plan, powers, reactions,
-                          resources, statuses)
+                          klee_overhaul, kokomi_plan, nahida_seeds, powers,
+                          reactions, resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, KurageMemory,
                                 grant_sly_autoplay,
@@ -628,6 +628,13 @@ def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     living = state.living_enemies
     if not living:
         return None
+    # EXPLORATORY, SWITCHED OFF (the Nahida paper sim, 2026-09-29): the
+    # placement policy under test IS the mouse pick, so her pilot names the
+    # aim it wants and the play binds it. None falls through to the rules below.
+    if nahida_seeds.NAHIDA_PAPER:
+        aim = nahida_seeds.take_aim(state, card)
+        if aim is not None:
+            return aim
     # PARITY, not fidelity: the base game rolls a RANDOM enemy for
     # TargetType.AnyEnemy on an autoplay, and the variance profile is the whole
     # identity of Havoc/Cascade. Keeping tier0's lowest-HP aim for free plays

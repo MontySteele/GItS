@@ -22,7 +22,7 @@ from __future__ import annotations
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import powers, resources
+from tier0.engine import dendro, powers, resources
 from tier0.engine.state import CombatState, Enemy
 
 AURA_ELEMENTS = {"pyro", "hydro", "electro", "cryo"}   # anemo/geo trigger only
@@ -147,7 +147,19 @@ def resolve_hit(state: CombatState, enemy: Enemy, element: Optional[str],
     """
     if not element or element == "none":
         return damage
+    # EXPLORATORY, SWITCHED OFF (`dendro.DENDRO_ENGINE`, the Nahida paper sim
+    # 2026-09-29): Dendro's pairs, its Cores and its Quicken rider go through
+    # the separable phase-two module, which hands every other pair back to the
+    # shipped resolver below. With the switch off this line is never true.
+    if dendro.DENDRO_ENGINE:
+        return dendro.resolve_hit(state, enemy, element, damage, source,
+                                  _resolve_classic)
+    return _resolve_classic(state, enemy, element, damage, source)
 
+
+def _resolve_classic(state: CombatState, enemy: Enemy, element: str,
+                     damage: float, source: str = "hit") -> float:
+    """The shipped resolver: every pair the six shipped elements make."""
     aura = enemy.aura
     if aura is None:
         apply_aura(state, enemy, element, source)
@@ -277,53 +289,71 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
                     state, enemy, "frozen", 1, state.player)
 
     if name:
-        state.reactions_this_card += 1
-        state.reactions_this_turn += 1
-        p = state.player
-        # QUARANTINED (C.COMPANION_OVERHAUL). The arm's two reaction readers --
-        # Dahlia's Favonian Favor and Varka's Sturm und Drang -- ride the site
-        # that already counts a reaction, so "a reaction happened" keeps one
-        # definition. `aura` is the CONSUMED element and is the only surviving
-        # handle on it (`enemy.aura` was cleared before this call), which is
-        # exactly what Varka's "of the swirled element" needs.
-        _mc_reaction(state, enemy, name, aura)
-        # QUARANTINED (`furina_stage.FURINA_STAGE`). THE SUPPORTING POOL's
-        # Tide of Applause (2026-09-26) rides the same site: "whenever you
-        # trigger an Elemental Reaction, your back performer gains 2".
-        from tier0.engine import furina_stage            # late: cycle
-        furina_stage.note_reaction(state)
-        # Courtroom Drama (Curtain Call B, R85): the FIRST reaction each
-        # turn puts its target on the stand -- Vulnerable + Weak per stack.
-        # Gated on the existing reactions_this_turn counter (== 1 is the
-        # first), so a silent turn pays nothing and a reaction storm pays
-        # once: activity-triggered, never per-turn, per the sheet header.
-        n = p.powers.get("cross_examination", 0)
-        if n and state.reactions_this_turn == 1:
-            powers.apply_power(state, enemy, "vulnerable", n)
-            powers.apply_power(state, enemy, "weak", n)
-        if p.burst_max:
-            resources.gain_burst(state, C.BURST_PER_REACTION, "reaction")
-        # Catalytic Converter (R120 rename; id catalytic_conversion unchanged):
-        # reactions grant bonus sparks + burst energy.
-        bonus = p.powers.get("reaction_bonus_spark_energy", 0)
-        if bonus:
-            p.sparks += bonus
-            resources.gain_burst(
-                state, C.CATALYTIC_BURST_PER_REACTION * bonus, "catalytic")
-        state.emit("reaction", reaction=name, trigger=trigger, aura=aura,
-                   target=enemy.name,
-                   # THE ONE REACTION EVENT (§7.3): what fired, on whom, and
-                   # from what kind of source. See `reaction_source_kind`.
-                   source_kind=reaction_source_kind(state),
-                   # PROVISIONAL when an amplifier fired: the multipliers that
-                   # scale the amplified hit have not run yet, so
-                   # effects.deal_damage_to_enemy settles this key through
-                   # settle_amp_delta() once the realized damage is known
-                   # (EB-57). A caller that hits resolve_hit directly with no
-                   # downstream chain keeps this raw value, which is the
-                   # realized uplift for that caller by construction.
-                   amp_delta=(out - damage) if out != damage else 0)
+        note_reaction(state, enemy, name, trigger, aura,
+                      amp_delta=(out - damage) if out != damage else 0)
     return out
+
+
+#: EXPLORATORY listeners on the one reaction event (element port sec.7.3):
+#: `fn(state, enemy, name)`, called after the event is emitted. EMPTY in the
+#: shipped world; the Nahida paper sim's switch appends Purification's
+#: trigger and removes it again (`nahida_seeds.enable` / `disable`).
+REACTION_LISTENERS: list = []
+
+
+def note_reaction(state: CombatState, enemy: Enemy, name: str, trigger: str,
+                  aura: str, amp_delta: float = 0) -> None:
+    """Everything that happens BECAUSE a reaction fired, in one place: the
+    counters, the listeners and the one `reaction` event. `_react` is the
+    shipped caller; `dendro` is the other (Bloom, Quicken, Burning, a Core)."""
+    state.reactions_this_card += 1
+    state.reactions_this_turn += 1
+    p = state.player
+    # QUARANTINED (C.COMPANION_OVERHAUL). The arm's two reaction readers --
+    # Dahlia's Favonian Favor and Varka's Sturm und Drang -- ride the site
+    # that already counts a reaction, so "a reaction happened" keeps one
+    # definition. `aura` is the CONSUMED element and is the only surviving
+    # handle on it (`enemy.aura` was cleared before this call), which is
+    # exactly what Varka's "of the swirled element" needs.
+    _mc_reaction(state, enemy, name, aura)
+    # QUARANTINED (`furina_stage.FURINA_STAGE`). THE SUPPORTING POOL's
+    # Tide of Applause (2026-09-26) rides the same site: "whenever you
+    # trigger an Elemental Reaction, your back performer gains 2".
+    from tier0.engine import furina_stage            # late: cycle
+    furina_stage.note_reaction(state)
+    # Courtroom Drama (Curtain Call B, R85): the FIRST reaction each
+    # turn puts its target on the stand -- Vulnerable + Weak per stack.
+    # Gated on the existing reactions_this_turn counter (== 1 is the
+    # first), so a silent turn pays nothing and a reaction storm pays
+    # once: activity-triggered, never per-turn, per the sheet header.
+    n = p.powers.get("cross_examination", 0)
+    if n and state.reactions_this_turn == 1:
+        powers.apply_power(state, enemy, "vulnerable", n)
+        powers.apply_power(state, enemy, "weak", n)
+    if p.burst_max:
+        resources.gain_burst(state, C.BURST_PER_REACTION, "reaction")
+    # Catalytic Converter (R120 rename; id catalytic_conversion unchanged):
+    # reactions grant bonus sparks + burst energy.
+    bonus = p.powers.get("reaction_bonus_spark_energy", 0)
+    if bonus:
+        p.sparks += bonus
+        resources.gain_burst(
+            state, C.CATALYTIC_BURST_PER_REACTION * bonus, "catalytic")
+    state.emit("reaction", reaction=name, trigger=trigger, aura=aura,
+               target=enemy.name,
+               # THE ONE REACTION EVENT (§7.3): what fired, on whom, and
+               # from what kind of source. See `reaction_source_kind`.
+               source_kind=reaction_source_kind(state),
+               # PROVISIONAL when an amplifier fired: the multipliers that
+               # scale the amplified hit have not run yet, so
+               # effects.deal_damage_to_enemy settles this key through
+               # settle_amp_delta() once the realized damage is known
+               # (EB-57). A caller that hits resolve_hit directly with no
+               # downstream chain keeps this raw value, which is the
+               # realized uplift for that caller by construction.
+               amp_delta=amp_delta)
+    for fn in REACTION_LISTENERS:
+        fn(state, enemy, name)
 
 
 def reaction_source_kind(state: CombatState) -> str:
