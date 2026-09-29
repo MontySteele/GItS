@@ -430,7 +430,23 @@ def embark(character: str, *, hold: bool = False,
     # the machine and the request, not about the run, and finding it out after
     # the game is up costs a launch and a teardown for nothing.
     build, build_source = check_arms(wanted) if wanted else ("", "")
-    budget = blindplay_shape.set_budget(max_actions, lane)
+    # A LANE HOLDS ONE GAME. A launch beside a game an earlier embark left up
+    # cannot bind the lane's port, and the wire would read the old run (see
+    # `live_launch_on_lane`). Refused before anything is written.
+    if not hold:
+        label = (instances.label_for(lane) if lane is not None
+                 else instances.DEFAULT_LABEL)
+        stale = live_launch_on_lane(label)
+        if stale is not None:
+            old, pid = stale
+            flag = ("" if label == instances.DEFAULT_LABEL
+                    else f" --lane {label[len('lane'):]}")
+            raise EmbarkError(
+                f"{label} still has a game up from embark {old} (pid {pid}); "
+                f"it was never torn down, and a second game on this lane "
+                f"cannot bind its port. Tear it down first: python -m "
+                f"understudy.embark --teardown{flag} --stamp {old}")
+    budget =blindplay_shape.set_budget(max_actions, lane)
     # `EB-691`. Zeroed BEFORE the launch, beside the budget and for the same
     # reason: a launch that fails half way leaves a watch armed on a lane with
     # no game rather than the last game's cursor.
@@ -582,6 +598,41 @@ def latest_stamp(label: str = "") -> str:
             f"it by hand and run "
             f"`klee-mod\\build\\deploy_bridge.ps1 -Remove`)")
     return found[-1].stem[len("embark-"):]
+
+
+def live_launch_on_lane(label: str) -> tuple[str, int] | None:
+    """An earlier embark on `label` whose game is STILL UP, as (stamp, pid).
+
+    THE FIND (Varka seat, lane 1, 2026-09-29). A run ended on `game_over`,
+    and its embark (`20260929-145523`) was never reverted: the ledger's launch
+    row still read APPLIED and pid 27116 was still alive. The next embark on
+    lane 1 launched a SECOND game, which could not bind the lane's port, so
+    the wire kept answering from the old one -- and the boot watch died on
+    "menu never became ready ... last read: state_type=game_over". Worse,
+    `--teardown --lane 1` then reverted the NEWEST sidecar (the failed
+    launch), never the one holding the port, so the lane could not recover
+    without a stamp named by hand.
+
+    A launch row counts only while APPLIED and while its pid is a live game;
+    an unreadable pid probe is not counted, so a broken `tasklist` cannot
+    block every embark.
+    """
+    for path in sorted(LOG_DIR.glob("embark-*.json"), reverse=True):
+        blob = _sidecar(path)
+        if not blob or blob.get("hold") or sidecar_lane(blob) != label:
+            continue
+        try:
+            rows = json.loads(Path(blob["ledger"]).read_text(encoding="utf-8"))
+        except (KeyError, OSError, ValueError, TypeError):
+            continue
+        for row in rows if isinstance(rows, list) else []:
+            if (str(row.get("change", "")).startswith("Launched `")
+                    and row.get("state") == "APPLIED"
+                    and row.get("pid") is not None):
+                image = soak.pid_image(int(row["pid"]))
+                if image and not image.startswith("<"):
+                    return path.stem[len("embark-"):], int(row["pid"])
+    return None
 
 
 def teardown(stamp: str = "", lane: object = None) -> str:
