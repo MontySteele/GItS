@@ -45,13 +45,13 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ousia Surge"),
-        ("description", "Deal damage equal to your [gold]back performer[/gold]'s [gold]Fanfare[/gold]{IfUpgraded:show:, plus 4|}.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Fanfare[/gold] on your [gold]back performer[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(0m),
+            new CalculationBaseVar(3m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.BackFanfare(card))
         };
@@ -75,6 +75,6 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(4m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

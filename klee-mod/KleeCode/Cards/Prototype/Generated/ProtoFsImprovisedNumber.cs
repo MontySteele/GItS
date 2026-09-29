@@ -51,7 +51,7 @@ public sealed class ProtoFsImprovisedNumber : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move)
+            new DamageVar(8m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

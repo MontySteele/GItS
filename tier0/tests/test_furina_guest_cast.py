@@ -452,6 +452,12 @@ BOARDS = [
     ("full house pays twice",
      [["neuvillette", 6], ["usher", 3], ["crabaletta", 4]], 1, [],
      [None, 3, 4], 6, 0, 0),
+    # 2026-09-29 (Furina seat, Vantom): a Full House repeat that cannot pay
+    # is refused in the forecast as at the turn's end -- Neuvillette at 5
+    # pays once and keeps 2.
+    ("full house, the repeat cannot pay",
+     [["usher", 3], ["crabaletta", 4], ["neuvillette", 5]], 1, [],
+     [3, 4, 2], 6, 0, 0),
     ("the fade is not a hit", [["usher", 3], ["wriothesley", 10]], 0, [],
      [3, 8], 3, 0, 0),
     ("two hits through the front",

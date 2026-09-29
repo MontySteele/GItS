@@ -92,3 +92,6 @@ retired:
   - {id: KLEEMOD-PROTO_KK_SEA_SALT_PRAYER, owner: kokomi, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_KK_TIDE_CHART, owner: kokomi, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_KK_WELL_LAID, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_FS_GALA_DINNER, owner: furina, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_FS_RAPT_AUDIENCE, owner: furina, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_FS_SCENE_CHANGE, owner: furina, left: "left the prototype codegen"}

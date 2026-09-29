@@ -551,7 +551,8 @@ public class FurinaSupportingPoolTests
         // and the co-op tier aside. 80 since the starter ruling (2026-09-28):
         // Take the Stage and Regal Bearing left the starter as Commons. 78
         // since the balance review (2026-09-28): Gentilhomme Usher and
-        // Understudy left the pool.
+        // Understudy left the pool. 75 since the audit pass (2026-09-29):
+        // Scene Change, Gala Dinner and A Rapt Audience left it.
         var pool = ArmPools.Offerable("furina-stage")
             .Where(c => c.Rarity != MegaCrit.Sts2.Core.Entities.Cards
                                         .CardRarity.Ancient)
@@ -559,7 +560,7 @@ public class FurinaSupportingPoolTests
                                         .CardRarity.Basic)
             .Where(c => !MultiplayerOnly(c))
             .ToList();
-        Assert.Equal(78, pool.Count);
+        Assert.Equal(75, pool.Count);
     }
 
     private static bool MultiplayerOnly(MegaCrit.Sts2.Core.Models.CardModel card) =>

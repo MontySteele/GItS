@@ -27,7 +27,6 @@ import re
 from pathlib import Path
 
 import pytest
-import yaml
 
 from understudy import blindplay
 from understudy.blindplay_notes import (ARM_KEYWORDS, CHOOSER_ONE_CHOICE_NOTE,
@@ -51,21 +50,8 @@ def _fresh_fight():
 # 1. A RAPT AUDIENCE SAYS IT NEEDS A SECOND PERFORMER.
 # ---------------------------------------------------------------------------
 
-def _surface_row(row_id: str) -> dict:
-    rows = yaml.safe_load((REPO / "docs" / "prototype-surface.yaml")
-                          .read_text(encoding="utf-8"))
-    return next(r for r in rows if r.get("id") == row_id)
-
-
-def test_a_rapt_audience_face_says_it_needs_two_performers():
-    face = _surface_row("proto_fs_rapt_audience")["description"]
-    # The text pass (2026-09-25) shortened the clause, and kept it.
-    assert face.endswith(" Needs 2 performers.")
-    # The follow-up dropped "rounded up" from both variants.
-    assert "rounded up" not in face
-    emitted = (GENERATED / "ProtoFsRaptAudience.cs").read_text(
-        encoding="utf-8")
-    assert "Needs 2 performers." in emitted
+# The row itself left the pool with the 2026-09-29 audit pass (a generation
+# power no seat record named), so its face pin went with it.
 
 
 # ---------------------------------------------------------------------------

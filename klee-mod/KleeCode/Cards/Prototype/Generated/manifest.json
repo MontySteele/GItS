@@ -24,7 +24,6 @@
     "proto_fs_final_bow",
     "proto_fs_five_century_act",
     "proto_fs_full_house",
-    "proto_fs_gala_dinner",
     "proto_fs_gala_premiere",
     "proto_fs_grand_deluge",
     "proto_fs_grand_entrance",
@@ -56,12 +55,10 @@
     "proto_fs_pneuma_refrain",
     "proto_fs_quick_cue",
     "proto_fs_raise_a_toast",
-    "proto_fs_rapt_audience",
     "proto_fs_regal_bearing",
     "proto_fs_regina_of_all_waters",
     "proto_fs_revolving_stage",
     "proto_fs_salon_debut",
-    "proto_fs_scene_change",
     "proto_fs_season_tickets",
     "proto_fs_share_the_spotlight",
     "proto_fs_sold_out",
@@ -319,7 +316,6 @@
     "proto_fs_final_bow": "furina",
     "proto_fs_five_century_act": "furina",
     "proto_fs_full_house": "furina",
-    "proto_fs_gala_dinner": "furina",
     "proto_fs_gala_premiere": "furina",
     "proto_fs_grand_deluge": "furina",
     "proto_fs_grand_entrance": "furina",
@@ -351,12 +347,10 @@
     "proto_fs_pneuma_refrain": "furina",
     "proto_fs_quick_cue": "furina",
     "proto_fs_raise_a_toast": "furina",
-    "proto_fs_rapt_audience": "furina",
     "proto_fs_regal_bearing": "furina",
     "proto_fs_regina_of_all_waters": "furina",
     "proto_fs_revolving_stage": "furina",
     "proto_fs_salon_debut": "furina",
-    "proto_fs_scene_change": "furina",
     "proto_fs_season_tickets": "furina",
     "proto_fs_share_the_spotlight": "furina",
     "proto_fs_sold_out": "furina",
@@ -684,7 +678,7 @@
       "cost": -1
     },
     "proto_fs_ensemble_piece": {
-      "formula_per": 1
+      "formula_per": 2
     },
     "proto_fs_eternal_applause": {
       "cost": -1
@@ -697,9 +691,6 @@
     },
     "proto_fs_full_house": {
       "cost": -1
-    },
-    "proto_fs_gala_dinner": {
-      "stage_raise": 1
     },
     "proto_fs_gala_premiere": {
       "cost": -1
@@ -778,7 +769,7 @@
       "draw": 1
     },
     "proto_fs_ousia_surge": {
-      "formula_base": 4
+      "formula_base": 3
     },
     "proto_fs_people_of_fontaine": {
       "power_amount": 1
@@ -787,16 +778,13 @@
       "damage": 3
     },
     "proto_fs_pneuma_refrain": {
-      "formula_base": 4
+      "formula_base": 3
     },
     "proto_fs_quick_cue": {
       "conditional_damage": 1
     },
     "proto_fs_raise_a_toast": {
       "cap": 2
-    },
-    "proto_fs_rapt_audience": {
-      "power_amount": 1
     },
     "proto_fs_regal_bearing": {
       "block": 1,
@@ -810,12 +798,6 @@
     },
     "proto_fs_salon_debut": {
       "cost": -1
-    },
-    "proto_fs_scene_change": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
     },
     "proto_fs_season_tickets": {
       "power_amount": 1

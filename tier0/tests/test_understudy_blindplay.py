@@ -7332,10 +7332,11 @@ def test_the_reactions_are_defined_wherever_the_screen_shows_an_element():
     # numbers it exists for are both still here.
     assert "6 damage to ALL enemies and applies 1 Weak" in page
     assert "Shatters for 6 unblockable damage" in page
-    # `EB-366`: the boss substitution is NOT on this page. The recorded combat
-    # is a `monster` room, and the clause is a rule about a boss room -- see
-    # the two tests below.
+    # `EB-366`: no unqualified "Bosses can't be Frozen" here. Since
+    # 2026-09-29 the row carries the boss rule in one sentence that names the
+    # room, which is true on a `monster` page too -- see the test below.
     assert "Bosses can't be Frozen" not in page
+    assert "In a boss fight, only minions can be Frozen" in page
     # AN AURA IS ONE HALF OF A PAIR, and `EB-428` is why that is now the
     # sentence: the combination is priced from the board's side just as often,
     # so a Cryo aura standing under a Pyro card reaches Melt -- and reaches
@@ -7369,11 +7370,14 @@ def test_the_boss_substitution_prints_in_a_boss_room():
     assert "Bosses can't be Frozen" not in blindplay.observe(elite)
     assert "Shatters for 6 unblockable damage" in blindplay.observe(elite)
 
+    # 2026-09-29 (a Furina seat met "Frozen" on Vantom and was hit for 26):
+    # the rule is one sentence on the Frozen row, qualified by the room, so
+    # it is true in the elite room and prints in the boss room too -- once.
+    sentence = ("In a boss fight, only minions can be Frozen; the others "
+                "become Vulnerable instead.")
+    assert sentence in blindplay.observe(elite)
     page = blindplay.observe(boss)
-    assert "Bosses can't be Frozen" in page
-    # The half that decides WHICH body in front of you freezes, and the half
-    # the C# preview was missing when this row was filed.
-    assert "A Minion beside the boss still Freezes." in page
+    assert page.count(sentence) == 1
 
 
 def test_the_consumed_aura_rule_is_stated_plainly():
@@ -7694,12 +7698,13 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         for phrase in phrases:
             assert phrase in src, (word, phrase)
             assert phrase in blindplay.REACTION_KEYWORDS[word], (word, phrase)
-    # `EB-366`: the boss substitution left the Frozen ROW and became a clause
-    # the room decides. It is still the C#'s own sentence and still held in
-    # step from this side -- only where it prints has moved.
+    # `EB-366`, then 2026-09-29: the boss rule is one sentence on the Frozen
+    # row, the C#'s own words (its preview says it with the keyword golded).
     assert "bosses can't be Frozen" in src
-    assert "Bosses can't be Frozen" in blindplay.FROZEN_BOSS_CLAUSE
-    assert "Bosses can't be Frozen" not in blindplay.REACTION_KEYWORDS["Frozen"]
+    assert ("In a boss fight, only minions can be Frozen; the others become "
+            in src)
+    assert (blindplay.FROZEN_BOSS_CLAUSE.strip()
+            in blindplay.REACTION_KEYWORDS["Frozen"])
     # The interpolated constants, read off the table the C# interpolates from.
     table = (REPO / "klee-mod" / "KleeCode" / "Elements"
              / "ReactionTable.cs").read_text(encoding="utf-8")

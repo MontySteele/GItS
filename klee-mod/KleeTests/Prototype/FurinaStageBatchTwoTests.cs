@@ -372,19 +372,8 @@ public class FurinaStageBatchTwoTests
         Assert.Equal(back, stage.Back!.Fanfare);
     }
 
-    [Fact]
-    public void A_rapt_audience_row_is_two_and_three_upgraded()
-    {
-        var card = new ProtoFsRaptAudience();
-        Assert.Equal(2, card.DynamicVars["PowerAmount"].IntValue);
-        var face = card.Localization!.Single(l => l.Item1 == "description")
-            .Item2;
-        Assert.Contains("gains {PowerAmount:diff()} [gold]Fanfare[/gold]",
-                        face);
-        Assert.Contains("Needs 2 performers.", face);
-        var upgrade = Il.Calls(Il.Method("ProtoFsRaptAudience", "OnUpgrade"));
-        Assert.Contains("DynamicVar.UpgradeValueBy", upgrade);
-    }
+    // The A Rapt Audience ROW left the pool with the 2026-09-29 audit pass;
+    // its power and the pins above stay while the power's code does.
 
     [Fact]
     public void Bis_acts_twice_and_a_lead_that_left_does_not_act_again()

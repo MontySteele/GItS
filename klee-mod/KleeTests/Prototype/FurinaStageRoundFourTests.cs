@@ -195,7 +195,7 @@ public class FurinaStageRoundFourTests
         foreach (var card in new[]
                  {
                      "ProtoFsStandingOvation", "ProtoFsWarmReception",
-                     "ProtoFsHoldYourPlaces", "ProtoFsGalaDinner",
+                     "ProtoFsHoldYourPlaces",
                  })
         {
             var src = RepoFile(Path.Combine(
