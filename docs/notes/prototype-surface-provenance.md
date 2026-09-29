@@ -3861,8 +3861,14 @@ combat-start site; it moves no card of the opening hand). No upgrade.
 
 **Re-keyed payoffs.** Feint: "Deal 4 damage, plus 3 for each Plan carried out
 this turn. Plan: Apply 1 Vulnerable." (base 6 upgraded, Plan Vulnerable 2).
-Sango Isshin: "Deal 6 damage to ALL enemies for each Plan carried out this
-turn." (8 upgraded). Both read the new per-turn count
+Sango Isshin: "Deal 8 damage to ALL enemies, plus 6 for each Plan carried out
+this turn." (10 plus 8 upgraded). The base of 8 came 2026-09-29: the Casket
+pass had it at 0 plus 6 per Plan (8 per Plan upgraded), and a Sonnet seat
+(Kokomi run KK2EL3M3NTS9, act 2) named it NEVER AGAIN -- "counts plans carried
+out this turn, which resolve before I can play it" and "Deals 0 damage" most
+turns. A code read found no bug: 0 is correct on turn 1 and after any turn
+without Plans, which made a 2-cost Rare dead on those turns. Main-session
+tuning fix; the upgrade moves base and per by 2 each. Both read the new per-turn count
 (`KokomiOverhaulLedger.PlansCarriedOutThisTurn`, sim
 `kk_plans_carried_out_this_turn`), written once per carry-out. Treatise and
 Song of Pearls are unchanged.

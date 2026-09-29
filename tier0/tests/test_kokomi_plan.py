@@ -658,22 +658,22 @@ def test_damage_quarter_max_hp_rounds_down(overhaul):
 
 
 def test_sango_isshin_pays_six_to_all_per_plan_carried_out(overhaul):
-    """THE CASKET PASS (2026-09-28): "Deal 6 damage to ALL enemies for each
-    Plan carried out this turn." A turn with none carried out deals nothing;
-    two carry-outs deal 12 to each."""
+    """THE CASKET PASS (2026-09-28), with a base since 2026-09-29: "Deal 8
+    damage to ALL enemies, plus 6 for each Plan carried out this turn." A turn
+    with none carried out deals the base 8; two carry-outs deal 20 to each."""
     a, b = make_enemy(hp=60, name="a"), make_enemy(hp=60, name="b")
     st = kokomi_state(enemies=[a, b], hp=80)
     card = loader.get_card("proto_kk_sango_isshin")
 
     assert st.kk_plans_carried_out_this_turn == 0
     effects.resolve_card(st, card)
-    assert (a.hp, b.hp) == (60, 60)
+    assert (a.hp, b.hp) == (52, 52)
 
     carry_out(st, [{"op": "draw", "amount": 1}])
     carry_out(st, [{"op": "draw", "amount": 1}])
     assert st.kk_plans_carried_out_this_turn == 2
     effects.resolve_card(st, card)
-    assert (a.hp, b.hp) == (48, 48)
+    assert (a.hp, b.hp) == (32, 32)
 
 def test_the_condition_is_written_wherever_a_plan_is_carried_out(overhaul):
     """"Carried out" is one event with two doors -- the morning queue and

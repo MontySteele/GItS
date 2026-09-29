@@ -6,6 +6,7 @@ using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
@@ -341,6 +342,11 @@ public class KokomiPoolPassTests
         var times = typeof(KokomiPlan).GetMethod("CarryOutTimes", All)!;
         var twice = Seat.Kokomi().WithPower<NereidsAscensionPower>(2);
         Assert.Equal(2, times.Invoke(null, new object[] { twice.Creature }));
+
+        // 2026-09-29: and the badge says so -- no count, because a second
+        // copy is not a stack.
+        Assert.Equal(PowerStackType.Single,
+                     new NereidsAscensionPower().StackType);
     }
 
     // ======================================================================

@@ -667,11 +667,12 @@ public class KokomiOverhaulRuleTests
     [Fact]
     public void Sango_isshin_hits_all_enemies_per_plan_carried_out_this_turn()
     {
-        // The Casket pass (2026-09-28): "Deal 6 damage to ALL enemies for
-        // each Plan carried out this turn" (8 upgraded). The count is the
-        // ledger's, one per carry-out; no quarter of Max HP any more.
+        // The Casket pass (2026-09-28), with a base since 2026-09-29: "Deal 8
+        // damage to ALL enemies, plus 6 for each Plan carried out this turn"
+        // (10 + 8 upgraded). The count is the ledger's, one per carry-out; no
+        // quarter of Max HP any more.
         var card = new ProtoKkSangoIsshin();
-        Assert.Equal(0m, card.DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(8m, card.DynamicVars.CalculationBase.BaseValue);
         Assert.Equal(6m, card.DynamicVars.ExtraDamage.BaseValue);
         var vars = Il.Calls(Il.Method("ProtoKkSangoIsshin", "get_CanonicalVars"))
             .Concat(typeof(ProtoKkSangoIsshin)

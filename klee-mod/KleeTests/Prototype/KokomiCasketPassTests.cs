@@ -203,12 +203,17 @@ public class KokomiCasketPassTests : IDisposable
     }
 
     [Fact]
-    public void Sango_isshin_is_six_to_all_per_carry_out()
+    public void Sango_isshin_is_eight_plus_six_to_all_per_carry_out()
     {
+        // 2026-09-29: a base of 8, so the Rare is not dead on turn 1 or after
+        // a turn with no Plans. 10, plus 8 per Plan, upgraded.
         var card = new ProtoKkSangoIsshin();
+        var up = Upgraded<ProtoKkSangoIsshin>();
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
+        Assert.Equal(8m, Var(card, "CalculationBase"));
         Assert.Equal(6m, Var(card, "ExtraDamage"));
-        Assert.Equal(8m, Var(Upgraded<ProtoKkSangoIsshin>(), "ExtraDamage"));
+        Assert.Equal(10m, Var(up, "CalculationBase"));
+        Assert.Equal(8m, Var(up, "ExtraDamage"));
     }
 
     // ---- D, E. the numbers ------------------------------------------------
