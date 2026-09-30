@@ -62,6 +62,8 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
         ("description", "Deal {CalculatedDamage:diff()} damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
+    protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {

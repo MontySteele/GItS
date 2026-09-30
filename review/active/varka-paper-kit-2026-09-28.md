@@ -94,8 +94,13 @@ Strike x4, Defend x4 (base game), and:
   cards can be a little better than that. Let's bump it to 8 (11) block +
   painting an element.") Named for Genshin Bursts and passives, so none
   clashes with a pool Knight or a Mondstadt companion:
-  **Amber: Fiery Rain** (Pyro), **Barbara: Melody Loop** (Hydro), **Lisa:
-  Lightning Rose** (Electro), **Kaeya: Glacial Waltz** (Cryo).
+  **Amber: Precise Shot** (Pyro), **Barbara: Glorious Season** (Hydro), **Lisa:
+  Induced Aftershock** (Electro), **Kaeya: Hidden Strength** (Cryo).
+- **Names moved 2026-09-29.** A blind seat met "Kaeya: Frostgnaw" and
+  "Kaeya — Frostgnaw" in one deck, told apart only by punctuation, so the
+  "none clashes" claim above was wrong: the four starter Knights and six pool
+  Knights took new names (ids and numbers unchanged), and
+  `tools/lint_run_name_clashes.py` now refuses a punctuation-only clash.
 - **Windbound Execution** (Attack, 1): Deal 4 [6] Anemo to ALL enemies. His
   Genshin Skill; the starter's Swirl card.
 
@@ -121,15 +126,15 @@ Knights, so a focused deck can be drafted. **New** marks batch two.
 - **Favonius Drill** (Skill, 1): Gain 6 [9] Block. Apply your current element
   to an enemy.
 - **Amber: Baron Bunny** (Knight, 1): Deal 6 [9] Pyro.
-- **Barbara: Let the Show Begin** (Knight, 1): Apply Hydro to ALL enemies.
+- **Barbara: Gleeful Songs** (Knight, 1): Apply Hydro to ALL enemies.
   Gain 3 [5] Block.
-- **Lisa: Violet Arc** (Knight, 1): Apply Electro to an enemy. Gain 4 [5]
+- **Lisa: Infinite Circuit** (Knight, 1): Apply Electro to an enemy. Gain 4 [5]
   Block, plus 3 [4] for each Attack you played this turn. (Picks 2 and 5.)
-- **Kaeya: Frostgnaw** (Knight, 1): Deal 6 [9] Cryo.
-- **New. Razor: Claw and Thunder** (Knight, 1): Deal 7 [10] Electro.
-- **New. Mika: Starfrost Swirl** (Knight, 1): Apply Cryo to an enemy. Gain
+- **Kaeya: Heart of the Abyss** (Knight, 1): Deal 6 [9] Cryo.
+- **New. Razor: Awakening** (Knight, 1): Deal 7 [10] Electro.
+- **New. Mika: Suppressive Barrage** (Knight, 1): Apply Cryo to an enemy. Gain
   6 [9] Block.
-- **New. Jean: Dandelion Breeze** (Skill, 1): Gain 7 [10] Block. Swirl one
+- **New. Jean: Wind Companion** (Skill, 1): Gain 7 [10] Block. Swirl one
   enemy's fresh aura (no damage). His Block that still charges.
 - **New. Knightly Guard** (Skill, 1): Gain 8 [11] Block. If you played a
   Knight this turn, gain 1 Oath of your current element.
@@ -252,8 +257,8 @@ payouts):
    starter deck alone Cryo leads (39.8) and the gap runs the other way, so
    the drafted gap comes from the pool.
 2. **The starts are not within 10 points, and the pool's Block Knights
-   explain the order.** Pool Knights that give Block: Hydro two (Let the
-   Show Begin, Whisper of Water), Cryo one (Starfrost Swirl), Electro none,
+   explain the order.** Pool Knights that give Block: Hydro two (Gleeful
+   Songs, Whisper of Water), Cryo one (Suppressive Barrage), Electro none,
    Pyro none. The act-won order is the same, and Pyro also has the only
    single-target payout. Pick 2 below.
 3. **Switching is right sometimes, as intended.** With Boreas Unbound,
@@ -306,7 +311,7 @@ the build spec; Lisa's floor gets one confirming sim run first.
    Baron Bunny as below; re-sim pending).** [USER]: "I don't want all of this feeling too same-y. What is
    Lisa's card becomes some other scaling block mechanic, like 'gain 4 block
    per attack played this turn'". Default:
-   - **Lisa: Violet Arc** (Knight, 1): "Apply Electro to an enemy. Gain 3 [4]
+   - **Lisa: Infinite Circuit** (Knight, 1): "Apply Electro to an enemy. Gain 3 [4]
      Block for each Attack you played this turn." Lisa's Conductive stacks
      build per hit; it rewards playing her last in an Attack-heavy turn,
      which is the Electro pack deck. 3 rather than 4 so two Attacks (6 [8])

@@ -1110,7 +1110,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "formula_per":
             # A BLOCK formula takes the key too, when the card has no damage
             # formula -- `formula_base`'s rule below, for the same C# slot
-            # (CalculationExtra). VARKA's Lisa: Violet Arc, Eye of the Storm
+            # (CalculationExtra). VARKA's Lisa: Infinite Circuit, Eye of the Storm
             # and Tailwind Guard are the rows that print one. A row that has a
             # damage formula finds it first, exactly as before.
             hit = next((fx for op in ("damage", "block") for fx in everywhere

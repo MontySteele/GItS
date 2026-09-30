@@ -4134,7 +4134,7 @@ RUNTIME_COUNT_NAMES = frozenset({
     # off this set.
     "fanfare_drained",
     # VARKA, THE OATH REWORK (`varka_oath.COUNTS`). `attacks_played_this_turn`
-    # (Lisa: Violet Arc) is the shared counter registered above.
+    # (Lisa: Infinite Circuit) is the shared counter registered above.
     "current_oath",
     "oath_elements",
 })

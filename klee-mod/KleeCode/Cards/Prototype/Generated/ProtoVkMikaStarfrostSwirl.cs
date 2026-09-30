@@ -55,7 +55,7 @@ public sealed class ProtoVkMikaStarfrostSwirl : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Mika: Starfrost Swirl"),
+        ("title", "Mika: Suppressive Barrage"),
         ("description", "Apply [gold]Cryo[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]."),
     };
 

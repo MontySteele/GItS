@@ -55,7 +55,7 @@ public sealed class ProtoVkLisaLightningRose : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Lisa: Lightning Rose"),
+        ("title", "Lisa: Induced Aftershock"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Electro[/gold] to an enemy."),
     };
 

@@ -55,7 +55,7 @@ public sealed class ProtoVkKaeyaGlacialWaltz : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Kaeya: Glacial Waltz"),
+        ("title", "Kaeya: Hidden Strength"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy."),
     };
 

@@ -1093,7 +1093,7 @@
 - {id: proto_mc_kaeya_cold_blooded_strike, name: "Kaeya — Cold-Blooded Strike", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
-   cost: 1, type: attack,
+   cost: 1, type: attack, tags: [strike],
    personal_pool: [klee],
    replaces: proto_mc_kaeya_frostgnaw,
    description: "Deal 8 damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] triggers even if you played a [gold]Set off[/gold] card.",
@@ -1856,7 +1856,7 @@
 - {id: proto_mi_heizou_heartstopper, name: "Shikanoin Heizou — Heartstopper Strike", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
-   cost: 1, type: attack,
+   cost: 1, type: attack, tags: [strike],
    # `EB-696`: the LIVE total, Well Laid's shape, and the count's window said
    # out loud. The finding: the provenance note.
    description: "Deal {CalculatedDamage:diff()} damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.",
@@ -2774,7 +2774,7 @@
 
 - {id: proto_kk_coordinated_strike, name: "Coordinated Strike", character: kokomi,
    authored_by: [claude], multiplayer: true,
-   cost: 1, type: attack, rarity: uncommon,
+   cost: 1, type: attack, rarity: uncommon, tags: [strike],
    description: "Deal 6 damage. [gold]Plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage.",
    upgrade: {damage: 3},
    effects: [{op: damage, amount: 6, target: enemy}],
@@ -2812,7 +2812,7 @@
 
 # The four starter-only Knights: one joins the starter at random each run.
 
-- {id: proto_vk_amber_fiery_rain, name: "Amber: Fiery Rain", character: varka,
+- {id: proto_vk_amber_fiery_rain, name: "Amber: Precise Shot", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: pyro,
    cost: 1, type: skill, personal_pool: varka,
@@ -2821,7 +2821,7 @@
              {op: apply_aura, element: pyro, target: enemy}],
    upgrade: {block: 3}}
 
-- {id: proto_vk_barbara_melody_loop, name: "Barbara: Melody Loop", character: varka,
+- {id: proto_vk_barbara_melody_loop, name: "Barbara: Glorious Season", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
@@ -2830,7 +2830,7 @@
              {op: apply_aura, element: hydro, target: enemy}],
    upgrade: {block: 3}}
 
-- {id: proto_vk_lisa_lightning_rose, name: "Lisa: Lightning Rose", character: varka,
+- {id: proto_vk_lisa_lightning_rose, name: "Lisa: Induced Aftershock", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: electro,
    cost: 1, type: skill, personal_pool: varka,
@@ -2839,7 +2839,7 @@
              {op: apply_aura, element: electro, target: enemy}],
    upgrade: {block: 3}}
 
-- {id: proto_vk_kaeya_glacial_waltz, name: "Kaeya: Glacial Waltz", character: varka,
+- {id: proto_vk_kaeya_glacial_waltz, name: "Kaeya: Hidden Strength", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: cryo,
    cost: 1, type: skill, personal_pool: varka,
@@ -2898,7 +2898,7 @@
              {op: apply_power, power: vk_baron_bunny, amount: 6, target: self}],
    upgrade: {block: 2, power_amount: 2}}
 
-- {id: proto_vk_barbara_show_begin, name: "Barbara: Let the Show Begin", character: varka,
+- {id: proto_vk_barbara_show_begin, name: "Barbara: Gleeful Songs", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
@@ -2907,7 +2907,7 @@
              {op: block, amount: 3}],
    upgrade: {block: 2}}
 
-- {id: proto_vk_lisa_violet_arc, name: "Lisa: Violet Arc", character: varka,
+- {id: proto_vk_lisa_violet_arc, name: "Lisa: Infinite Circuit", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: skill, personal_pool: varka,
@@ -2918,7 +2918,7 @@
               amount_formula: {base: 4, per: 3, count: attacks_played_this_turn}}],
    upgrade: {formula_base: 1, formula_per: 1}}
 
-- {id: proto_vk_kaeya_frostgnaw, name: "Kaeya: Frostgnaw", character: varka,
+- {id: proto_vk_kaeya_frostgnaw, name: "Kaeya: Heart of the Abyss", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: skill, personal_pool: varka,
@@ -2926,7 +2926,7 @@
    effects: [{op: damage, amount: 6, target: enemy, applies_element: true}],
    upgrade: {damage: 3}}
 
-- {id: proto_vk_razor_claw_and_thunder, name: "Razor: Claw and Thunder", character: varka,
+- {id: proto_vk_razor_claw_and_thunder, name: "Razor: Awakening", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: skill, personal_pool: varka,
@@ -2934,7 +2934,7 @@
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true}],
    upgrade: {damage: 3}}
 
-- {id: proto_vk_mika_starfrost_swirl, name: "Mika: Starfrost Swirl", character: varka,
+- {id: proto_vk_mika_starfrost_swirl, name: "Mika: Suppressive Barrage", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: skill, personal_pool: varka,
@@ -2943,7 +2943,7 @@
              {op: block, amount: 6}],
    upgrade: {block: 3}}
 
-- {id: proto_vk_jean_dandelion_breeze, name: "Jean: Dandelion Breeze", character: varka,
+- {id: proto_vk_jean_dandelion_breeze, name: "Jean: Wind Companion", character: varka,
    authored_by: [claude],
    # A Skill, not a Knight: it sets no element.
    cost: 1, type: skill, rarity: common,
@@ -2963,7 +2963,7 @@
 
 - {id: proto_vk_oathsworn_strike, name: "Oathsworn Strike", character: varka,
    authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
+   cost: 1, type: attack, rarity: common, tags: [strike],
    description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy, applies_element: false,
               amount_formula: {base: 6, per: 1, count: current_oath}}],

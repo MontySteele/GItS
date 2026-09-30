@@ -680,7 +680,19 @@ def _validate_basic_tag(card: Card) -> None:
     wearing the tag is the exclusivity defect `EB-543` closed, arriving from
     the sheet instead of from the codegen. `gen_klee_cards.card_level_reason`
     refuses the same two from the other side.
+
+    THE OFFER'S STRIKE IS `tags: [strike]` (2026-09-29): a non-basic row that
+    is a Strike the way Twin Strike is carries CardTag.Strike through that tag
+    (Strike Dummy, Perfected Strike). A prototype BASIC may not, because the
+    starter's answer is `basic_tag:` alone. Prototype rows only: the base-game
+    reference pools (`game_ref/`) tag their own basics and are not this
+    rule's to police.
     """
+    if (card.rarity == "basic" and "strike" in (card.tags or ())
+            and card.id.startswith(PROTOTYPE_ID_PREFIX)):
+        raise ValueError(
+            f"card {card.id!r}: `tags: [strike]` on a basic row -- a basic "
+            "names its tag with `basic_tag:`, the starter's one answer")
     if card.basic_tag is None:
         return
     if card.basic_tag not in ("strike", "defend"):

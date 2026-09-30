@@ -18,7 +18,7 @@ internal static class VarkaRoster
     /// <summary>
     /// The starter (sec.5): "Strike x4, Defend x4 (base game), and: One
     /// starting Knight, at random each run ... Windbound Execution". The deck
-    /// lists Amber: Fiery Rain; Boreas's Fang rolls the run's Knight when the
+    /// lists Amber: Precise Shot; Boreas's Fang rolls the run's Knight when the
     /// run begins (<c>BoreasFang.AfterObtained</c>). The base pair is the
     /// Silent's, because his pool borrows her green frame.
     /// </summary>

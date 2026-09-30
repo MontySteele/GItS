@@ -55,7 +55,7 @@ public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Lisa: Violet Arc"),
+        ("title", "Lisa: Infinite Circuit"),
         ("description", "Apply [gold]Electro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each Attack you played this turn.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 

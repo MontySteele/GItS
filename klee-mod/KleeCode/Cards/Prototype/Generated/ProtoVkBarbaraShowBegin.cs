@@ -55,7 +55,7 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Barbara: Let the Show Begin"),
+        ("title", "Barbara: Gleeful Songs"),
         ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {CalculatedBlock:diff()} [gold]Block[/gold]."),
     };
 

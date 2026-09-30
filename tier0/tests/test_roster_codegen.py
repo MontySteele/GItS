@@ -570,6 +570,23 @@ def test_basics_carry_the_tags_base_game_content_keys_on():
     assert "CanonicalTags => new() { CardTag.Strike };" in jumpy
 
 
+def test_a_non_basic_strike_carries_the_strike_tag():
+    # 2026-09-29, a Varka seat: Strike Dummy paid on Strike and Strike+ and
+    # not on Oathsworn Strike. The base game tags its offered Strikes (Twin
+    # Strike, Perfected Strike); a sheet row says so with `tags: [strike]`.
+    # Read off the COMMITTED C#, which is what ships.
+    cs = (Path(gen.__file__).resolve().parents[1] / "klee-mod" / "KleeCode"
+          / "Cards" / "Prototype" / "Generated" / "ProtoVkOathswornStrike.cs")
+    assert "CanonicalTags => new() { CardTag.Strike };" in cs.read_text(
+        encoding="utf-8")
+
+    # A basic may not take the offer's word: its answer is `basic_tag:`.
+    basic = {"id": "proto_probe_basic", "name": "Probe", "cost": 1,
+             "type": "attack", "rarity": "basic", "tags": ["strike"],
+             "effects": [{"op": "damage", "amount": 6, "target": "enemy"}]}
+    assert "basic_tag" in (gen.card_level_reason(basic) or "")
+
+
 def _companion_rows() -> list[dict]:
     rows = []
     for sheet_path, nation in gen.COMPANION_SHEETS:
