@@ -283,13 +283,21 @@ payouts):
 
 1. **Electro's payout: E-AoE (3 damage to ALL).** Default, from sec.10 item 1.
    E-Draw put Electro 26.6 points behind Hydro.
-2. **Even the starts through the pool's Knights.** Default: give Pyro and
-   Electro one Block Knight each at Common, re-aiming rows rather than adding:
-   Amber: Baron Bunny becomes the decoy, "Gain 6 [9] Block. Apply Pyro to
-   ALL enemies." (the bunny draws the hits, then goes up); Lisa: Violet Arc
-   trades its draw for "Gain 4 [6] Block". Then re-sim; if Pyro still trails
-   by more than 10, its Swirl payout becomes 3 damage to every enemy that
-   Swirl touched.
+2. **Even the starts through the pool's Knights, without making them
+   same-y.** [USER]: "I don't want all of this feeling too same-y. What is
+   Lisa's card becomes some other scaling block mechanic, like 'gain 4 block
+   per attack played this turn'". Default:
+   - **Lisa: Violet Arc** (Knight, 1): "Apply Electro to an enemy. Gain 3 [4]
+     Block for each Attack you played this turn." Lisa's Conductive stacks
+     build per hit; it rewards playing her last in an Attack-heavy turn,
+     which is the Electro pack deck. 3 rather than 4 so two Attacks (6 [8])
+     sits near a Defend+ and three (9 [12]) is the payoff; the sim settles it.
+   - **Amber: Baron Bunny** (Knight, 1): "Gain 6 [8] Block. Next turn, deal
+     6 [8] Pyro to ALL enemies." The decoy takes the hits, then goes up. Not
+     Barbara's "apply to ALL, gain Block" twice over: Block now, AoE Pyro
+     later, which also covers Pyro's single-target Swirl payout.
+   Then re-sim; if Pyro still trails by more than 10, its Swirl payout
+   becomes 3 damage to every enemy that Swirl touched.
 3. **Lift the two weak Focus readers.** Default: Favonian Standard 3 [4] to
    4 [5] Block; Dawn Wind's March 2 to 3 Block per Oath gain.
 4. **Northwind Avatar** at 3 Energy is rarely played. Default: cost 2, damage
