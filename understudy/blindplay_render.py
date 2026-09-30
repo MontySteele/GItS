@@ -42,6 +42,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         ENEMY_REPLACED_LINE, ENEMY_REVIVED_LINE,
                                         ENEMY_SIZE_NOTE,
                                         EVENT_NO_DECLINE_NOTE,
+                                        TREASURE_PROCEED_NOTE,
                                         FRONT_ENEMY_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
@@ -3474,6 +3475,14 @@ def render(obs: dict[str, Any]) -> str:
                       "is on THAT screen. `skip` typed here has no card reward "
                       "open to skip, and `proceed` leaves the whole reward "
                       "screen.*"]
+        # 2026-09-29 (Varka Oath round, lane 2 act 1): a seat read the
+        # chest's relic, typed `proceed` and never had it -- the run save
+        # holds no relic for that floor. `proceed` leaves a chest's relic
+        # behind, as the game's own button does, so the page says so where a
+        # relic is actually waiting.
+        if obs["screen"] == "treasure" and any(
+                i["enabled"] for i in obs["items"]):
+            out += ["", TREASURE_PROCEED_NOTE]
         if obs.get("potion_barred"):
             out += ["", POTION_BARRED_NOTE.format(relic=obs["potion_barred"])]
         # `EB-341`: said on the screen where the claim is made, and only where

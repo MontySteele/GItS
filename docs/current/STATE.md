@@ -142,7 +142,9 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Lisa floor moved to 4 [5] after the R6 sim (#768). Per-row readings:
   `docs/notes/prototype-surface-provenance.md`, "Varka: the Oath rework".
   Batch one's round (`review/records/varka-round-1-2026-09-29.md`) read the
-  old design. Next: a seat round on the Oath build, then [USER] plays.
+  old design. The Oath build's seat round
+  (`review/records/varka-oath-round-2026-09-29.md`): two seats, one won the
+  run, one died in act 2. Next: [USER] plays.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

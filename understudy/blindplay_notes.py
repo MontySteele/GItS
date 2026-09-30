@@ -376,6 +376,14 @@ SKIPPED_CARD_REWARD = (
     "room: it presses the reward screen's alternative button and hands back "
     "the screen the reward came from, and `proceed` is the verb that leaves")
 
+# 2026-09-29 (Varka Oath round, lane 2 act 1). A CHEST'S RELIC IS TAKEN, NOT
+# GIVEN. The seat read Kusarigama in an open chest, typed `proceed`, and the
+# run save shows no relic for that floor: the game's Proceed leaves the relic
+# in the chest. Printed only where a relic is waiting.
+TREASURE_PROCEED_NOTE = (
+    "*The relic stays in the chest until you `choose` it; `proceed` leaves "
+    "it behind.*")
+
 # `EB-393`, the decline half. A ROOM WITH NO WAY OUT BUT THROUGH.
 #
 # The same seat: "and no option to decline... I was forced to add *something*."
@@ -1469,8 +1477,9 @@ ARM_KEYWORDS: dict[str, str] = {
     "current element": ("The element of the last Knight you played. Your "
                         "Swirls pay it: Pyro 3 damage, Hydro 3 Block, Cryo 1 "
                         "Vulnerable, Electro 3 to ALL."),
-    "Knight": ("Varka's own Companion cards. Playing one makes its element "
-               "your current element."),
+    "Knight": ("A Companion titled with a colon, like Lisa: Infinite Circuit. "
+               "Playing one makes its element your current element; others "
+               "do not."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read
