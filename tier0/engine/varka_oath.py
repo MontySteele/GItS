@@ -97,6 +97,13 @@ def gain_oath(state, vs, element, n=1, source="apply") -> None:
         return
     vs.oath[element] = vs.oath.get(element, 0) + n
     vs.oath_log.append((state.turn, element, n, source))
+    if vs.dawn and element == vs.current:
+        # R4 Dawn Wind's March: "Whenever you gain Oath of your current
+        # element, gain 2 Block" -- per gain event, not per point.
+        blk = DAWN_BLOCK * vs.dawn
+        state.player.block += blk
+        vs.dawn_block += blk
+        state.emit("block", amount=blk)
     if not vs.fang_done:
         vs.fang_done = True
         _add_ascension(state, vs)
@@ -112,16 +119,25 @@ def _add_ascension(state, vs) -> None:
     vs.asc_created_turn = state.turn
 
 
-def set_current(state, vs, element) -> None:
+def set_current(state, vs, element, knight=True) -> None:
     if element not in ELEMENTS:
         return
+    if knight and vs.standard and element == vs.current:
+        # R4 Favonian Standard: "Whenever you play a Knight of your current
+        # element" -- read as the element current BEFORE the Knight, i.e. a
+        # Knight that keeps him where he is.
+        blk = STANDARD_BLOCK * vs.standard
+        state.player.block += blk
+        vs.standard_block += blk
+        state.emit("block", amount=blk)
     if element != vs.current:
         vs.switches += 1 if vs.current is not None else 0
         vs.current = element
         if vs.unbound:
             state.player.energy += vs.unbound
             vs.unbound_energy += vs.unbound
-    vs.knights_played.append((state.turn, element))
+    if knight:
+        vs.knights_played.append((state.turn, element))
 
 
 # --------------------------------------------------------------------------
@@ -158,6 +174,7 @@ def on_swirl(state, vs, enemy, aura) -> None:
     from tier0.engine import powers, reactions        # late: cycle
     vs.swirls += 1
     vs.swirls_this_card += 1
+    vs.swirled_ids.add(id(enemy))
     vs.swirl_log.append((state.turn, aura))
     if _once_per_play(state, vs, aura, "swirl"):
         gain_oath(state, vs, aura, 1, "swirl")
@@ -177,6 +194,10 @@ def on_swirl(state, vs, enemy, aura) -> None:
             powers.apply_power(state, enemy, "vulnerable", PAY_CRYO_VULN)
             vs.pay["cryo_vuln"] += PAY_CRYO_VULN
     elif cur == "electro":
+        if vs.electro_draw:
+            state.draw(1)                  # R4 E-Draw: draw 1 per Swirl
+            vs.pay["electro_dmg"] += 1
+            return
         for e in list(state.living_enemies):
             reactions._splash(state, e, vs.pay_electro)
             vs.pay["electro_dmg"] += vs.pay_electro
@@ -294,13 +315,15 @@ def op_oath(state, fx, card) -> None:
         for el in ELEMENTS:
             gain_oath(state, vs, el, 1, "accord")
     elif kind == "roll_call":
-        name = state.rng.choice(("amber", "barbara", "lisa", "kaeya"))
+        name = state.rng.choice(tuple(vs.roll_pool))
         c = make_card(name)
         c.free_this_turn = True
         if len(state.player.hand) < HAND_LIMIT:
             state.player.hand.append(c)
         else:
             state.player.discard_pile.append(c)
+    elif kind in R4_OPS:
+        R4_OPS[kind](state, vs, fx, card)
     else:
         raise ValueError(f"unknown varka_oath kind {kind!r}")
 
@@ -503,7 +526,8 @@ def _block_variant(base: str, block: int, new: str):
 def build_player(deck: list[str], payout: bool = True,
                  apply_oath: bool = True, hp: int | None = None,
                  per_card: bool = False, starter_set: str | None = None,
-                 pay_electro: int = PAY_ELECTRO_ALL):
+                 pay_electro: int = PAY_ELECTRO_ALL,
+                 electro_draw: bool = False, r4: bool = False):
     """A fresh rev-3 Varka for one fight, holding exactly `deck` (card
     names; use `starter(el)` + extras)."""
     from tier0.engine.state import Player
@@ -518,6 +542,9 @@ def build_player(deck: list[str], payout: bool = True,
     vs.apply_oath = apply_oath
     vs.per_card = per_card
     vs.pay_electro = pay_electro
+    vs.electro_draw = electro_draw
+    if r4:
+        vs.roll_pool = R4_KNIGHTS
     player.varka = vs
     return player
 
@@ -532,6 +559,286 @@ def disable() -> None:
     from tier0.engine import effects
     V.disable()
     effects.OPS.pop("varka_oath", None)
+
+
+# ==========================================================================
+#  R4: the paper at HEAD (sec.3-6, batch two). Behind the same arm; built by
+#  `build_player(..., r4=True)` with `starter4(element)` and `POOL4`.
+#
+#  READINGS TAKEN (listed in the report):
+#    * Favonian Standard pays on a Knight whose element was ALREADY current
+#      (see `set_current`); the first Knight of a fight never pays.
+#    * Dawn Wind's March pays 2 Block per Oath GAIN EVENT of the current
+#      element (a Sworn Brotherhood tick, Accord's +1, a Knight, a Swirl).
+#    * Change of Guard: the pilot names the element (`vs.cog_choice`); it
+#      must have Oath (else the card only gives 0 Block). It is not a Knight,
+#      so Favonian Standard and Knightly Guard do not see it; Boreas Unbound
+#      does (the current element changes).
+#    * Jean: Dandelion Breeze is a Skill, not a Knight; it Swirls the aimed
+#      enemy's fresh aura, else the first fresh aura on the board.
+#    * Storm Surge's "5 more" is element-less damage to each enemy its own
+#      hits Swirled.
+#    * Oathsworn Strike and Azure Devour deal element-less damage.
+#    * Northwind Avatar's elemental hit gains Oath like any card's (only
+#      Ascension's own hit is excluded); its Oath is read after the Anemo hit.
+#    * Eula's per-enemy Oath counts enemies wearing Cryo (fresh or spent)
+#      after her hit.
+#    * Unfurled Banner does nothing if Ascension is not in the discard pile.
+# ==========================================================================
+
+DAWN_BLOCK = 2
+STANDARD_BLOCK = 3
+R4_KNIGHTS = ("amber", "barbara", "lisa", "kaeya", "razor", "mika",
+              "diluc", "eula", "barbara_whisper")
+
+
+def _r4_jean(state, vs, fx, card):
+    from tier0.engine import effects, reactions
+    effects._op_block(state, {"op": "block", "amount": fx["block"]}, card)
+    t = state.card_aim
+    if t is None or not t.alive or not (t.aura and not t.aura_spent):
+        t = next((e for e in state.living_enemies
+                  if e.aura and not e.aura_spent), None)
+    if t is not None:
+        reactions.resolve_hit(state, t, V.ELEMENT, 0, "jean")
+
+
+def _r4_knightly_guard(state, vs, fx, card):
+    from tier0.engine import effects
+    effects._op_block(state, {"op": "block", "amount": fx["block"]}, card)
+    if vs.current and any(t == state.turn for t, _ in vs.knights_played):
+        gain_oath(state, vs, vs.current, 1, "guard")
+
+
+def _r4_oathsworn(state, vs, fx, card):
+    from tier0.engine import effects
+    effects._op_damage(state, {"op": "damage", "target": "enemy",
+                               "amount": fx["base"] + current_oath(vs)}, card)
+
+
+def _r4_azure(state, vs, fx, card):
+    from tier0.engine import effects
+    n = current_oath(vs)
+    if n:
+        effects._op_damage(state, {"op": "damage", "target": "enemy",
+                                   "amount": fx["per"] * n}, card)
+
+
+def _r4_block_if_swirled(state, vs, fx, card):
+    from tier0.engine import effects
+    if vs.swirls_this_card:
+        effects._op_block(state, {"op": "block", "amount": fx["amount"]},
+                          card)
+
+
+def _r4_eula_oath(state, vs, fx, card):
+    n = sum(1 for e in state.living_enemies if e.aura == "cryo")
+    if n:
+        gain_oath(state, vs, "cryo", n, "eula")
+
+
+def _r4_standard(state, vs, fx, card):
+    vs.standard += 1
+
+
+def _r4_dawn(state, vs, fx, card):
+    vs.dawn += 1
+
+
+def _r4_change_of_guard(state, vs, fx, card):
+    from tier0.engine import effects
+    el = vs.cog_choice or vs.current
+    vs.cog_choice = None
+    if el not in ELEMENTS or vs.oath.get(el, 0) <= 0:
+        return
+    effects._op_block(state, {"op": "block", "amount": vs.oath[el]}, card)
+    set_current(state, vs, el, knight=False)
+    vs.cog_rows.append((state.turn, el, vs.oath[el]))
+
+
+def _r4_storm_surge(state, vs, fx, card):
+    from tier0.engine import effects
+    vs.swirled_ids = set()
+    effects._op_damage(state, _dmg(fx["amount"], target="all_enemies"), card)
+    for e in list(state.living_enemies):
+        if id(e) in vs.swirled_ids:
+            effects.deal_damage_to_enemy(state, e, fx["more"], element=None,
+                                         source="attack")
+
+
+def _r4_tailwind_guard(state, vs, fx, card):
+    from tier0.engine import effects
+    n = sum(1 for v in vs.oath.values() if v > 0)
+    effects._op_block(state, {"op": "block", "amount": fx["per"] * n}, card)
+    vs.tg_rows.append((state.turn, fx["per"] * n))
+
+
+def _r4_unfurled(state, vs, fx, card):
+    p = state.player
+    asc = next((c for c in p.discard_pile
+                if c.id == "varka_four_winds_ascension"), None)
+    if asc is not None and len(p.hand) < HAND_LIMIT:
+        p.discard_pile.remove(asc)
+        asc.free_this_turn = True
+        p.hand.append(asc)
+
+
+def _r4_northwind(state, vs, fx, card):
+    from tier0.engine import effects
+    target = state.card_aim
+    effects._op_damage(state, _dmg(fx["anemo"]), card)
+    if vs.current and target is not None and target.alive:
+        n = current_oath(vs)
+        saved = card.element
+        card.element = vs.current
+        try:
+            effects._op_damage(state, _dmg(fx["elem"] + fx["per"] * n), card)
+        finally:
+            card.element = saved
+
+
+R4_OPS = {"jean": _r4_jean, "knightly_guard": _r4_knightly_guard,
+          "oathsworn": _r4_oathsworn, "azure": _r4_azure,
+          "block_if_swirled": _r4_block_if_swirled,
+          "eula_oath": _r4_eula_oath, "standard": _r4_standard,
+          "dawn": _r4_dawn, "change_of_guard": _r4_change_of_guard,
+          "storm_surge": _r4_storm_surge,
+          "tailwind_guard": _r4_tailwind_guard, "unfurled": _r4_unfurled,
+          "northwind": _r4_northwind}
+
+
+def _r4_starter_knight(cid, name, element):
+    return lambda: _knight(
+        cid, name, element,
+        [{"op": "block", "amount": 8},
+         {"op": "apply_aura", "element": element, "target": "enemy"}],
+        rarity="basic")
+
+
+def _attack_knight(builder):
+    def build():
+        c = builder()
+        c.type = "attack"
+        c.cost = 2
+        return c
+    return build
+
+
+CARD_BUILDERS.update({
+    # starters (sec.5): "Gain 8 [11] Block. Apply its element to an enemy."
+    "amber_fiery_rain_r4": _r4_starter_knight(
+        "amber_fiery_rain_r4", "Amber: Fiery Rain", "pyro"),
+    "barbara_melody_loop": _r4_starter_knight(
+        "barbara_melody_loop", "Barbara: Melody Loop", "hydro"),
+    "lisa_lightning_rose_r4": _r4_starter_knight(
+        "lisa_lightning_rose_r4", "Lisa: Lightning Rose", "electro"),
+    "kaeya_glacial_waltz_r4": _r4_starter_knight(
+        "kaeya_glacial_waltz_r4", "Kaeya: Glacial Waltz", "cryo"),
+    # Eye of the Storm, now Exhaust
+    "eye_of_the_storm_x": lambda: _card(
+        "eye_of_the_storm_x", "Eye of the Storm", 1, "skill", "uncommon",
+        [_o("eye", per=2)], exhaust=True, element="none"),
+    # batch two, Common
+    "razor": lambda: _knight("razor", "Razor: Claw and Thunder", "electro",
+                             [_dmg(7)]),
+    "mika": lambda: _knight(
+        "mika", "Mika: Starfrost Swirl", "cryo",
+        [{"op": "apply_aura", "element": "cryo", "target": "enemy"},
+         {"op": "block", "amount": 6}]),
+    "jean": lambda: _card("jean", "Jean: Dandelion Breeze", 1, "skill",
+                          "common", [_o("jean", block=7)], element="none"),
+    "knightly_guard": lambda: _card(
+        "knightly_guard", "Knightly Guard", 1, "skill", "common",
+        [_o("knightly_guard", block=8)], element="none"),
+    "oathsworn_strike": lambda: _card(
+        "oathsworn_strike", "Oathsworn Strike", 1, "attack", "common",
+        [_o("oathsworn", base=6)], element="none"),
+    "crosswind": lambda: _card(
+        "crosswind", "Crosswind", 1, "attack", "common",
+        [V._v("count_begin"), _dmg(7), _o("block_if_swirled", amount=4)]),
+    "rising_gale": lambda: _card(
+        "rising_gale", "Rising Gale", 0, "attack", "common",
+        [V._v("count_begin"), _dmg(4),
+         V._v("draw_if_swirled", amount=1)]),
+    # batch two, Uncommon
+    "diluc": _attack_knight(lambda: _knight(
+        "diluc", "Diluc: Searing Onslaught", "pyro", [_dmg(6, times=2)],
+        rarity="uncommon")),
+    "eula": lambda: _cost(_knight(
+        "eula", "Eula: Icetide Vortex", "cryo",
+        [_dmg(10), _o("eula_oath")], rarity="uncommon"), 2),
+    "barbara_whisper": lambda: _knight(
+        "barbara_whisper", "Barbara: Whisper of Water", "hydro",
+        [{"op": "apply_aura", "element": "hydro", "target": "enemy"},
+         {"op": "block", "amount": 4},
+         {"op": "block_next_turn", "amount": 4}], rarity="uncommon"),
+    "favonian_standard": lambda: _card(
+        "favonian_standard", "Favonian Standard", 1, "power", "uncommon",
+        [_o("standard")]),
+    "change_of_guard": lambda: _card(
+        "change_of_guard", "Change of Guard", 1, "skill", "uncommon",
+        [_o("change_of_guard")], exhaust=True, element="none"),
+    "storm_surge": lambda: _card(
+        "storm_surge", "Storm Surge", 2, "attack", "uncommon",
+        [_o("storm_surge", amount=5, more=5)]),
+    "tailwind_guard": lambda: _card(
+        "tailwind_guard", "Tailwind Guard", 1, "skill", "uncommon",
+        [_o("tailwind_guard", per=3)], element="none"),
+    "unfurled_banner": lambda: _card(
+        "unfurled_banner", "Unfurled Banner", 1, "skill", "uncommon",
+        [_o("unfurled")], exhaust=True, element="none"),
+    # batch two, Rare
+    "northwind_avatar": lambda: _card(
+        "northwind_avatar", "Northwind Avatar", 3, "attack", "rare",
+        [_o("northwind", anemo=12, elem=12, per=2)]),
+    "dawn_winds_march": lambda: _card(
+        "dawn_winds_march", "Dawn Wind's March", 2, "power", "rare",
+        [_o("dawn")]),
+    "azure_devour": lambda: _card(
+        "azure_devour", "Azure Devour", 2, "attack", "rare",
+        [_o("azure", per=4)], exhaust=True, element="none"),
+})
+
+
+def _cost(card, cost):
+    card.cost = cost
+    return card
+
+
+STARTER_KNIGHTS4 = {"pyro": "amber_fiery_rain_r4",
+                    "hydro": "barbara_melody_loop",
+                    "electro": "lisa_lightning_rose_r4",
+                    "cryo": "kaeya_glacial_waltz_r4"}
+POOL_KNIGHTS4 = {"pyro": ("amber", "diluc"),
+                 "hydro": ("barbara", "barbara_whisper"),
+                 "electro": ("lisa", "razor"),
+                 "cryo": ("kaeya", "mika", "eula")}
+NEW4 = ("razor", "mika", "jean", "knightly_guard", "oathsworn_strike",
+        "crosswind", "rising_gale", "diluc", "eula", "barbara_whisper",
+        "favonian_standard", "change_of_guard", "storm_surge",
+        "tailwind_guard", "unfurled_banner", "northwind_avatar",
+        "dawn_winds_march", "azure_devour")
+POOL4 = {
+    "common": ["squall", "updraft", "gale_sweep", "wind_wall",
+               "favonius_drill", "amber", "barbara", "lisa", "kaeya",
+               "razor", "mika", "jean", "knightly_guard", "oathsworn_strike",
+               "crosswind", "rising_gale"],
+    "uncommon": ["tempest_charge", "favonius_cut", "grand_masters_order",
+                 "knights_roll_call", "tailwind_stride", "eye_of_the_storm_x",
+                 "stormward_stance", "oath_of_the_knights",
+                 "rally_to_the_banner", "diluc", "eula", "barbara_whisper",
+                 "favonian_standard", "change_of_guard", "storm_surge",
+                 "tailwind_guard", "unfurled_banner"],
+    "rare": ["converging_winds", "boreas_unbound", "wall_of_gales",
+             "four_winds_accord", "sworn_brotherhood", "northwind_avatar",
+             "dawn_winds_march", "azure_devour"],
+}
+
+
+def starter4(element: str) -> list[str]:
+    return (["strike"] * 4 + ["defend"] * 4
+            + ["windbound_execution", STARTER_KNIGHTS4[element]])
+
 
 
 _register_block_variants()

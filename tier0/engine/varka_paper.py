@@ -190,6 +190,17 @@ class VarkaState:
     credited: set = field(default_factory=set)
     asc_elemental: bool = False
     pay_electro: int = 2              # Electro payout to ALL per Swirl
+    # --- R4, the paper at sec.3-6 HEAD (batch two) ---
+    electro_draw: bool = False        # E-Draw: the Electro payout draws 1
+    dawn: int = 0                     # Dawn Wind's March stacks
+    dawn_block: int = 0
+    standard: int = 0                 # Favonian Standard stacks
+    standard_block: int = 0
+    swirled_ids: set = field(default_factory=set)
+    cog_choice: Optional[str] = None  # Change of Guard's element (pilot)
+    roll_pool: tuple = ("amber", "barbara", "lisa", "kaeya")
+    cog_rows: list = field(default_factory=list)
+    tg_rows: list = field(default_factory=list)
 
 
 def live(state) -> bool:

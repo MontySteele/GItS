@@ -140,7 +140,9 @@ def oath_fight(deck, enemies, policy, home, seed, hp=None, variant="R3b"):
             "plays": dict(plays), "swirls": vs.swirls,
             "pay": dict(vs.pay), "switches": vs.switches,
             "oath_end": dict(vs.oath), "current": vs.current,
-            "fang_turn": vs.asc_created_turn}
+            "fang_turn": vs.asc_created_turn,
+            "std_on": vs.standard > 0, "std_block": vs.standard_block,
+            "dawn_on": vs.dawn > 0, "dawn_block": vs.dawn_block}
 
 
 def ref_fight(character, pilot_id, enemies, seed, hp=None):

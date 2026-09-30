@@ -182,3 +182,36 @@ def test_r3b_oath_is_per_card_and_ascension_gains_none():
     play(st, asc, aim=a)
     assert vs.asc[-1]["printed"] == 6 + 3 * 2
     assert vs.oath["hydro"] == 2               # the elemental hit gains none
+
+
+@pytest.mark.usefixtures("arm")
+def test_r4_starter_standard_dawn_and_change_of_guard():
+    # The paper at HEAD (R4): 8-Block starter Knights, Favonian Standard on a
+    # Knight of the current element, Dawn Wind's March on a current-element
+    # Oath gain, Change of Guard a switch paid in Block.
+    st = oath_state(n=1, per_card=True, r4=True)
+    (a,) = st.enemies
+    vs = st.player.varka
+    play(st, "favonian_standard")
+    play(st, "dawn_winds_march")
+    play(st, "amber_fiery_rain_r4", aim=a)      # first Knight: no Standard
+    assert a.aura == "pyro" and vs.oath["pyro"] == 1
+    assert st.player.block == 8 + 2              # 8 + Dawn (Pyro now current)
+    play(st, "amber", aim=a)                     # a Pyro Knight while Pyro
+    assert st.player.block == 10 + 3 + 2         # Standard 3, Dawn 2
+    vs.oath["hydro"] = 3
+    vs.cog_choice = "hydro"
+    play(st, "change_of_guard")
+    assert vs.current == "hydro" and st.player.block == 15 + 3
+
+
+@pytest.mark.usefixtures("arm")
+def test_r4_electro_draw_payout():
+    st = oath_state(n=1, per_card=True, r4=True, electro_draw=True)
+    (a,) = st.enemies
+    st.player.draw_pile = [O.make_card("strike") for _ in range(3)]
+    st.player.varka.current = "electro"
+    reactions.apply_aura(st, a, "pyro")
+    n = len(st.player.hand)
+    play(st, "updraft", aim=a)
+    assert len(st.player.hand) == n + 2      # the draw + the Fang's Ascension

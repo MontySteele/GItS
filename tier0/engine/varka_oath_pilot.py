@@ -97,13 +97,34 @@ class VarkaOathPilot:
             elif fx.get("op") == "varka" and fx["kind"] == "knight":
                 for inner in fx["inner"]:
                     if inner.get("op") == "damage":
-                        total += inner["amount"]
+                        total += inner["amount"] * inner.get("times", 1)
+            elif fx.get("op") == "varka_oath":
+                k, n = fx["kind"], O.current_oath(vs)
+                fr = sum(1 for e in state.living_enemies if _fresh(e))
+                if k == "oathsworn":
+                    total += fx["base"] + n + bonus
+                elif k == "azure":
+                    total += fx["per"] * n
+                elif k == "northwind":
+                    total += fx["anemo"] + fx["elem"] + fx["per"] * n + bonus
+                elif k == "storm_surge":
+                    total += ((fx["amount"] + bonus)
+                              * len(state.living_enemies)
+                              + (fx["more"] + 2) * fr)
         return total
 
     def _block_est(self, state, vs, card) -> int:
         b = _base(card)
-        if b == "eye_of_the_storm":
+        if b in ("eye_of_the_storm", "eye_of_the_storm_x"):
             return 2 * O.current_oath(vs)
+        if b == "knightly_guard":
+            return 8
+        if b == "jean":
+            return 7
+        if b == "tailwind_guard":
+            return 3 * sum(1 for v in vs.oath.values() if v > 0)
+        if b == "change_of_guard":
+            return O.current_oath(vs)
         if b == "wind_wall":
             return 7 + (3 if vs.current else 0)
         if b == "favonius_drill":
@@ -163,6 +184,8 @@ class VarkaOathPilot:
         return min(living, key=lambda e: e.hp)
 
     def _play(self, vs, card, aim=None):
+        if _base(card) == "change_of_guard" and vs.cog_choice is None:
+            vs.cog_choice = vs.current       # as a Block card: stay put
         vs.playing = card
         vs.aim = aim
         return card
@@ -225,6 +248,16 @@ class VarkaOathPilot:
             c = has("four_winds_accord")
             if c is not None and total // 4 + 1 > cur:
                 return self._play(vs, c)
+        # R4 Change of Guard, the juggler's switch without a Knight: to the
+        # element the board needs, when banked Oath is there and no Knight of
+        # it is in hand.
+        c = has("change_of_guard")
+        if c is not None and self.policy == "juggling" and vs.current:
+            top = self._need_order(state, vs, playable, cost)[0]
+            held = any(O.knight_element(k) == top for k in playable)
+            if top != vs.current and vs.oath.get(top, 0) > 0 and not held:
+                vs.cog_choice = top
+                return self._play(vs, c)
 
         # 4. paint
         knights = self._allowed_knights(state, vs, playable, cost)
@@ -243,8 +276,12 @@ class VarkaOathPilot:
 
         # 5. swirl
         if fresh:
+            c = has("jean")
+            if c is not None:
+                return self._play(vs, c, min(fresh, key=lambda e: e.hp))
             if len(fresh) >= 2:
-                for name in ("windbound_execution", "gale_sweep"):
+                for name in ("windbound_execution", "gale_sweep",
+                             "storm_surge"):
                     c = has(name)
                     if c is not None:
                         return self._play(vs, c)
@@ -257,6 +294,13 @@ class VarkaOathPilot:
                 c = max(sw, key=lambda c: self._dmg_est(state, vs, c)
                         / max(1, cost[id(c)]))
                 return self._play(vs, c, min(fresh, key=lambda e: e.hp))
+
+        # 5b. R4 Unfurled Banner: Ascension back from the discard pile
+        c = has("unfurled_banner")
+        if (c is not None and vs.current and O.current_oath(vs) >= 3
+                and any(x.id == "varka_four_winds_ascension"
+                        for x in p.discard_pile)):
+            return self._play(vs, c)
 
         # 6. Ascension
         c = has("four_winds_ascension")
