@@ -43,7 +43,7 @@ public sealed class ProtoKkWhatTheTokoyoTook : CustomCardModel, ICharacterCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForCasket(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("what_the_tokoyo_took");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_what_the_tokoyo_took");
 
     public override List<(string, string)>? Localization => new()
     {

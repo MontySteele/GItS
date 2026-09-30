@@ -46,7 +46,7 @@ public sealed class ProtoKkDepthsJudgment : CustomCardModel, IElementalCard, ICh
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForCasket(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("depths_judgment");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_depths_judgment");
 
     public override List<(string, string)>? Localization => new()
     {

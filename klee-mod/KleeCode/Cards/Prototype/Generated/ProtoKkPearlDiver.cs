@@ -40,7 +40,7 @@ public sealed class ProtoKkPearlDiver : CustomCardModel, ICharacterCard, IPlanne
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForCasket(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("pearl_diver");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_pearl_diver");
 
     public override List<(string, string)>? Localization => new()
     {

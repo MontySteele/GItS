@@ -46,7 +46,7 @@ public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("press_the_advantage");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_press_the_advantage");
 
     public override List<(string, string)>? Localization => new()
     {

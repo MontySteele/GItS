@@ -1520,14 +1520,14 @@
 # docs/notes/prototype-surface-provenance.md. ---
 
 - {id: proto_kk_massed_volley, name: "Massed Volley", character: kokomi,
-   authored_by: [claude], art_of: massed_volley,
+   authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    description: "Deal 3 damage 3 times.",
    effects: [{op: damage, amount: 3, target: enemy, times: 3}],
    upgrade: {damage: 1}}
 
 - {id: proto_kk_signal_arrow, name: "Signal Arrow", character: kokomi,
-   authored_by: [claude], art_of: signal_arrow,
+   authored_by: [claude],
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 1, type: attack, rarity: uncommon,
@@ -1538,7 +1538,7 @@
    upgrade: {damage: 3, plan_damage: 1}}
 
 - {id: proto_kk_surging_shoal, name: "Surging Shoal", character: kokomi,
-   authored_by: [claude], art_of: surging_shoal,
+   authored_by: [claude],
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 2, type: attack, rarity: uncommon,
@@ -1549,7 +1549,7 @@
    upgrade: {damage: 4, plan_damage: 6}}
 
 - {id: proto_kk_pearl_diver, name: "Pearl Diver", character: kokomi,
-   authored_by: [claude], art_of: pearl_diver,
+   authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: The [gold]Casket[/gold] gains 2.",
    effects: [{op: draw, amount: 1}],
@@ -1558,7 +1558,7 @@
    upgrade: {draw: 1}}
 
 - {id: proto_kk_press_the_advantage, name: "Press the Advantage", character: kokomi,
-   authored_by: [claude], art_of: press_the_advantage,
+   authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] is waiting, deal {BranchDamage:diff()} instead.",
    # THE CLEANUP PASS (2026-09-29): 6 / 10 -> 7 / 11.
@@ -1570,7 +1570,7 @@
    upgrade: {conditional_damage: 2, conditional_then_damage: 1}}
 
 - {id: proto_kk_shell_of_sanctuary, name: "Shell of Sanctuary", character: kokomi,
-   authored_by: [claude], art_of: shell_of_sanctuary,
+   authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    description: "Draw 1 card. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
    effects: [{op: draw, amount: 1}],
@@ -1597,7 +1597,7 @@
    upgrade: {cost: -1}}
 
 - {id: proto_kk_depths_judgment, name: "Depths' Judgment", character: kokomi,
-   authored_by: [claude], art_of: depths_judgment,
+   authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
    description: "Deal damage equal to {ExtraDamage:diff()} times the [gold]Casket[/gold]'s count.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
@@ -1615,7 +1615,7 @@
    upgrade: {formula_per: 1}}
 
 - {id: proto_kk_moon_signal, name: "Moon Signal", character: kokomi,
-   authored_by: [claude], art_of: moon_signal,
+   authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    # READ BEFORE THE MORNING'S PLANS ARE CARRIED OUT, or a drained queue could
    # never show two: `ProtoBakeKuragePower.AfterPlayerTurnStart` (sim:
@@ -1625,7 +1625,7 @@
    upgrade: {cost: -1}}
 
 - {id: proto_kk_pearl_current, name: "Pearl Current", character: kokomi,
-   authored_by: [claude], art_of: pearl_current,
+   authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    description: "Deal 2 damage 4 times. [gold]Plan[/gold]: Deal 2 damage to ALL enemies 3 times.",
    effects: [{op: damage, amount: 2, target: enemy, times: 4}],
@@ -1634,7 +1634,7 @@
    upgrade: {damage: 1, plan_damage: 1}}
 
 - {id: proto_kk_what_the_tokoyo_took, name: "What the Tokoyo Took", character: kokomi,
-   authored_by: [claude], art_of: what_the_tokoyo_took,
+   authored_by: [claude],
    cost: 2, type: skill, rarity: rare, exhaust: true,
    description: "Double the [gold]Casket[/gold]'s count.",
    effects: [{op: casket_double}],
