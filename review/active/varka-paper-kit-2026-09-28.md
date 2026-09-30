@@ -234,24 +234,63 @@ starter-only cards, kept out of the pool by the starter-overlap lint), the
 payouts, Absorb and the Winds removed, 41 cards re-aimed or new, and the seat
 page (current element, the four counts). The sim model is draft PR #768.
 
-## 10. What the sim has shown, and must still show
+## 10. What the sim has shown
 
-Shown (draft PR #768, stylised act 1, n = 400 per cell, read the gaps not
-the levels): per-card Oath keeps Ascension in check (two drafted fights in
-3,187 passed 60 per cast by turn 8); the starter gap is Block; a focused
-reader pays about 1.7 times a juggling one; without Boreas Unbound a
-mid-fight switch never pays over three turns.
+Draft PR #768, stylised act 1, n = 400 per cell; read the gaps, not the
+levels. Raw output: the PR body, sec.8.
 
-Still to show, on the 41-card pool with the 8-Block starters:
-1. **Electro:** E-AoE against E-Draw; the four starts within 10 points.
-2. **The Switch cards:** stay against switch from one state, with Change of
-   Guard and Tailwind Guard; a switch should be right sometimes, not always.
-3. **Ascension's curve:** no drafted fight routinely past 60 by turn 8, with
-   the setup that produced any that do.
-4. **Readers:** Eye of the Storm (now Exhaust), Oath of the Knights, Favonian
-   Standard and Dawn Wind's March against Defend, focused and juggling.
+Round one (per-enemy Oath, then R3b): per-card Oath keeps Ascension in
+check; the starter gap is Block; a focused reader pays about 1.7 times a
+juggling one; without Boreas Unbound a mid-fight switch never pays.
+
+Round two (this paper: 41 cards, 8 [11] starter Knights, both Electro
+payouts):
+
+1. **Electro: E-AoE wins.** Act won, drafted, focused pilot: Pyro 26.5,
+   Hydro 48.8, Electro 37.0 with E-AoE (22.2 with E-Draw), Cryo 41.2. On the
+   starter deck alone Cryo leads (39.8) and the gap runs the other way, so
+   the drafted gap comes from the pool.
+2. **The starts are not within 10 points, and the pool's Block Knights
+   explain the order.** Pool Knights that give Block: Hydro two (Let the
+   Show Begin, Whisper of Water), Cryo one (Starfrost Swirl), Electro none,
+   Pyro none. The act-won order is the same, and Pyro also has the only
+   single-target payout. Pick 2 below.
+3. **Switching is right sometimes, as intended.** With Boreas Unbound,
+   switching and switching back beats staying in 55% of paired states for
+   Pyro to Hydro before a 12+ hit, and 66% for Pyro to Electro against 3+
+   enemies. Tailwind Guard alone brings the Hydro switch-back to break-even.
+   Change of Guard helps more as a Block card that pays out the current
+   Oath than as a switch. A Cryo switch never pays.
+4. **Ascension's curve holds.** Casts past 60 by turn 8 in 0 to 2 of about
+   3,000 drafted fights per start; mean cast at turns 7 to 8 is 25 to 29
+   focused. The outliers were Hydro decks carrying Whisper of Water, Favonius
+   Drill and Oath of the Knights, and juggling decks with Rally and Sworn
+   Brotherhood.
+5. **Readers against Defend (5 Block for 1).** Eye of the Storm 8.8 per play;
+   Oath of the Knights 29 Block a fight; Favonian Standard 7.7 a fight (about
+   1.5 Defends for a Power); Dawn Wind's March 14.3 a fight for 2 Energy.
+   Standard and March are the weak two.
+6. **Juggling is weak everywhere** (2 to 9% act won against 26 to 49%). The
+   sim pilot's draft weights for the juggler are crude, so this is a floor,
+   but [USER]'s intent ("think carefully before spreading your deckbuilding
+   thin without a Switch card") wants juggling to cost, not to lose.
+7. **Low play rates among the 18 new cards:** Unfurled Banner 0.45 plays per
+   fight held and Azure Devour 0.36 (both Exhaust, so at most 1, and the
+   pilot holds them), Northwind Avatar 0.56 (3 Energy). No new card looks
+   dominant.
 
 ## Picks
 
-1. **Electro's payout**, after the sim: E-AoE (3 damage to ALL) or E-Draw
-   (draw 1).
+1. **Electro's payout: E-AoE (3 damage to ALL).** Default, from sec.10 item 1.
+   E-Draw put Electro 26.6 points behind Hydro.
+2. **Even the starts through the pool's Knights.** Default: give Pyro and
+   Electro one Block Knight each at Common, re-aiming rows rather than adding:
+   Amber: Baron Bunny becomes the decoy, "Gain 6 [9] Block. Apply Pyro to
+   ALL enemies." (the bunny draws the hits, then goes up); Lisa: Violet Arc
+   trades its draw for "Gain 4 [6] Block". Then re-sim; if Pyro still trails
+   by more than 10, its Swirl payout becomes 3 damage to every enemy that
+   Swirl touched.
+3. **Lift the two weak Focus readers.** Default: Favonian Standard 3 [4] to
+   4 [5] Block; Dawn Wind's March 2 to 3 Block per Oath gain.
+4. **Northwind Avatar** at 3 Energy is rarely played. Default: cost 2, damage
+   10 [14] and 10 [14], plus 2 per Oath.
