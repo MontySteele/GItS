@@ -1056,7 +1056,7 @@
       "plan_damage": 3
     },
     "proto_kk_grand_design": {
-      "power_amount": 1
+      "cost": -1
     },
     "proto_kk_jellyfish_drift": {
       "plan_damage": 1

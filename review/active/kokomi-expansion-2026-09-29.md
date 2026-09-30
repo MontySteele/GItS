@@ -52,13 +52,17 @@ the now-line answers this turn, the Plan buys what a head start buys.
   Energy paid for the Plans waiting.
 - **Lull** (Skill, 1, U): Gain 7 [10] Block. Plan: If it is the only Plan
   carried out this morning, gain 2 Energy.
-- **Undertide Lance** (Attack, 2, U): Deal 8 [11] damage to ALL enemies.
-  Plan: Deal 16 [20] damage, doubled if no other Plan is carried out this
-  morning.
+- **Undertide Lance** (Attack, 2, U): Deal 6 [9] damage to ALL enemies.
+  Plan: Deal 12 [16] damage, doubled if no other Plan is carried out at the
+  start of your turn. (Main session, 2026-09-29: was 8 [11] / 16 [20]; the
+  build sim read it dominant, taken from 83% of the default drafter's offers.)
 - **Measured Breath** (Skill, 1, U): Gain 6 [9] Block. If no Plan is
   waiting, draw 2.
-- **Grand Design** (Power, 1, R): Whenever the Bake-Kurage carries out a Plan
-  that cost 2 or more, the Casket gains 2 more.
+- **Grand Design** (Power, 1 [0], R): Whenever the Bake-Kurage carries out a
+  Plan, the Casket gains 1 more for each Energy paid for it. (Main session,
+  2026-09-29: was "a Plan that cost 2 or more, the Casket gains 2 more"; the
+  build sim failed check 2, Big Plan 45.6% against volume 54.6% of gauntlet
+  fights with it granted.)
 - **The Long Game** (Power, 1 [0], R): At the start of your turn, if exactly
   one Plan is waiting, gain 1 Energy.
 - **Masterstroke** (Attack, 3, R): Retain. Play on the Bake-Kurage. Plan:
@@ -89,8 +93,9 @@ the now-line answers this turn, the Plan buys what a head start buys.
   Slam, at Uncommon where Ironclad has it at Common.)
 - **Evening Watch** (Skill, 1, U): Draw 1. Dusk Plan: Gain 5 [7] Block for
   each enemy intending to attack.
-- **Brace for the Tide** (Skill, 1, U): Exhaust. Dusk Plan: Double your
-  Block.
+- **Brace for the Tide** (Skill, 1 [0], U): Exhaust. Dusk Plan: Double your
+  Block. (Main session, 2026-09-29: the upgrade is cost 0 and keeps Exhaust,
+  as built; the default rule's "Exhaust comes off" would undo guard 2.)
 - **Watatsumi's Grace** (Power, 2, R): At the end of your turn, keep up to
   10 [15] of your Block. **Replaces The Clouds Like Waves Rippling**, the
   defensive Power the Block census asked for; the old card leaves the pool.

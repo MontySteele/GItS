@@ -96,16 +96,16 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   `tools/kokomi_expansion_sim.py`, n = 400 paired, seed 7, stock priest
   pilot): the stylised act 1 is lost at the first elite by every pilot
   (0 to 0.2% act won), so the deck read is the full-deck gauntlet (every
-  act-1 elite and boss and act-2 boss at full HP): Plan volume 58.1% of
-  fights won, Tide Control 52.2, the default drafter 52.5, Dusk Guard
-  49.5, Big Plan 49.1, none more than 10 points behind; every act-2 boss
-  is lost. Big Plan with Grand Design granted trails volume with it (45.6
-  against 54.6). Dusk Guard with Grace and Coral Crash never carries 30
-  Block into the enemy turn (0.1% of turns), but 9.8% of its gauntlet
-  fights pass turn 15 (others about 1%), on too little damage rather than
-  a wall. Flags: Undertide Lance dominant, All Streams Flow to the Sea
-  dead (the pilot never sequences it). Next: [USER] plays; the Brace for
-  the Tide upgrade wants a ruling.
+  act-1 elite and boss and act-2 boss at full HP). After the main
+  session's round (Undertide Lance 6 / 12, Grand Design 1 per Energy paid,
+  Brace+ cost 0 accepted): Plan volume 57.8% of fights won, Tide Control
+  51.5, the default drafter 50.1, Dusk Guard 48.4, Big Plan 47.7 (10.1
+  behind); every act-2 boss is lost. With Grand Design granted Big Plan
+  still trails volume (47.1 against 56.1). Dusk Guard with Grace and Coral
+  Crash never carries 30 Block into the enemy turn (0.1% of turns); 9.8% of
+  its gauntlet fights pass turn 15 (others about 1%), on too little damage
+  rather than a wall. Flag: All Streams Flow to the Sea stays dead (2 plays
+  in 252 fights). Next: [USER] plays.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any

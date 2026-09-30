@@ -3170,8 +3170,9 @@ APPLY_POWERS = {
     # THE EXPANSION, BATCH ONE (2026-09-29). Every class lives in
     # Powers/Prototype/KokomiExpansion.cs; every row states its own face.
     "kk_grand_design": ("GrandDesignPower", None,
-        "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold] "
-        "that cost 2 or more, the [gold]Casket[/gold] gains {X} more."),
+        "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], "
+        "the [gold]Casket[/gold] gains {X} more for each [gold]Energy[/gold] "
+        "paid for it."),
     "kk_the_long_game": ("TheLongGamePower", None,
         "At the start of your turn, if exactly one [gold]Plan[/gold] is "
         "waiting, gain {X} [gold]Energy[/gold]."),

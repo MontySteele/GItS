@@ -66,8 +66,8 @@ public sealed class ProtoKkUndertideLance : CustomCardModel, IElementalCard, ICh
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(16m)
+            new DamageVar(6m, ValueProp.Move),
+            new KokomiPlan.PlanDamageVar(12m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

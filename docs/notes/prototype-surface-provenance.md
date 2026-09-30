@@ -4352,9 +4352,9 @@ wrong).**
   Garment "additional damage" (the text lint's spellings). Tidal Riposte's
   "fully blocked" is plain text (no tip defines a golded "Blocked").
 
-**Upgrades the paper leaves open.** Five rows print no bracketed upgrade.
-Four take the Prototype-stage rule's default, as every unruled row does:
-Grand Design (the Casket gains 3), All Streams (costs 1), Tidal Resonance and
+**Upgrades the paper leaves open.** Five rows printed no bracketed upgrade (Grand Design has since been given cost 0, below).
+The others take the Prototype-stage rule's default, as every unruled row does:
+All Streams (costs 1), Tidal Resonance and
 Coral Crash (each also draws 1). Brace for the Tide's default would have
 removed Exhaust, which paper sec.4 guard 2 rules out ("the multiplier is
 spent"), so it costs 0 instead -- flagged in the build PR for a ruling.
@@ -4384,3 +4384,24 @@ own score) and the default drafter as the baseline.
   plays in 252 fights held -- the harness rule to play it never meets its
   condition, a pilot limit as much as a card one). Tidal Resonance sits at
   0.31 plays per fight, on the line.
+
+**The main session's round (2026-09-29), on the sim above.** Brace for the
+Tide+ at cost 0 keeping Exhaust is accepted as built. Undertide Lance goes to
+6 [9] to ALL, Plan 12 [16] (it read dominant). Grand Design becomes "the
+Casket gains 1 more for each Energy paid for it", cost 1 [0] (an authored
+upgrade; it failed check 2). The harness now plays All Streams when 1+ Plan
+waits and a Plan card costing 1+ is affordable after it, then writes that
+card (the example rule's 2+ needs 4 Energy and never fired), and gives the
+default drafter's zero-priced new rows (the seven Powers, Shoal Call) the
+median default score of the other new cards. Re-run, same command:
+- Gauntlet fights won: Plan volume 57.8%, Tide Control 51.5, the default
+  drafter 50.1, Dusk Guard 48.4, Big Plan 47.7 -- Big Plan now 10.1 behind.
+  The stylised act is still lost at the first elite (0 to 0.2%).
+- Grand Design granted: Big Plan 47.1% against Plan volume 56.1%; the Casket
+  at fight end 3.4 against 4.6. Check 2 still fails.
+- Undertide Lance: still taken from 83% of the default drafter's offers,
+  1.13 plays per fight held; no longer flagged. All Streams: 2 plays in 252
+  fights held -- still dead. It needs a Plan waiting mid-turn (the queue
+  drains each morning) and 3 Energy after that write, which a 3-Energy turn
+  meets only after a 0-cost write.
+

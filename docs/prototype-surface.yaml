@@ -1717,10 +1717,11 @@
 - {id: proto_kk_undertide_lance, name: "Undertide Lance", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal 8 damage to ALL enemies. [gold]Plan[/gold]: Deal 16 damage, doubled if no other [gold]Plan[/gold] is carried out at the start of your turn.",
-   effects: [{op: damage, amount: 8, target: all_enemies}],
-   plan: [{op: damage_if_alone, amount: 16, target: front_enemy}],
-   # 11 to ALL / Plan 20.
+   # Main session, 2026-09-29: 8/16 -> 6/12 (the sim read it dominant).
+   description: "Deal 6 damage to ALL enemies. [gold]Plan[/gold]: Deal 12 damage, doubled if no other [gold]Plan[/gold] is carried out at the start of your turn.",
+   effects: [{op: damage, amount: 6, target: all_enemies}],
+   plan: [{op: damage_if_alone, amount: 12, target: front_enemy}],
+   # 9 to ALL / Plan 16.
    upgrade: {damage: 3, plan_damage: 4}}
 
 - {id: proto_kk_measured_breath, name: "Measured Breath", character: kokomi,
@@ -1735,9 +1736,10 @@
 - {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold] that cost 2 or more, the [gold]Casket[/gold] gains 2 more.",
-   # No upgrade on the paper: the Prototype-stage rule's default stands.
-   effects: [{op: apply_power, power: kk_grand_design, amount: 2, target: self}]}
+   # Main session, 2026-09-29: per Energy paid (the sim failed paper check 2).
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], the [gold]Casket[/gold] gains 1 more for each [gold]Energy[/gold] paid for it.",
+   effects: [{op: apply_power, power: kk_grand_design, amount: 1, target: self}],
+   upgrade: {cost: -1}}
 
 - {id: proto_kk_the_long_game, name: "The Long Game", character: kokomi,
    authored_by: [claude],

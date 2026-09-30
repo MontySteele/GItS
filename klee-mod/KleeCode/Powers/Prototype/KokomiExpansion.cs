@@ -163,10 +163,11 @@ public static class KokomiExpansion
     }
 }
 
-/// <summary>Grand Design: "Whenever the Bake-Kurage carries out a Plan that
-/// cost 2 or more, the Casket gains 2 more." The cost is the Energy paid for
-/// the writing card (<see cref="KokomiPlan.Entry.Paid"/>); per carry-out, so a
-/// doubled one pays twice. Sim twin: <c>kokomi_plan._note_plan_resolved</c>.
+/// <summary>Grand Design: "Whenever the Bake-Kurage carries out a Plan, the
+/// Casket gains 1 more for each Energy paid for it" (main session,
+/// 2026-09-29). The Energy paid for the writing card
+/// (<see cref="KokomiPlan.Entry.Paid"/>); per carry-out, so a doubled one
+/// pays twice. Sim twin: <c>kokomi_plan._note_plan_resolved</c>.
 /// </summary>
 public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
 {
@@ -175,9 +176,9 @@ public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
         ("title", "Grand Design"),
         ("description",
             "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Plan[/gold] that cost "
-          + KokomiOverhaulLaw.GrandDesignMinCost + " or more, the "
-          + "[gold]Casket[/gold] gains [blue]{Amount}[/blue] more."),
+          + "[gold]Plan[/gold], the [gold]Casket[/gold] gains "
+          + "[blue]{Amount}[/blue] more for each [gold]Energy[/gold] paid "
+          + "for it."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -187,10 +188,10 @@ public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
     public static void Note(Creature? kokomi, KokomiPlan.Entry entry)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (entry.Paid < KokomiOverhaulLaw.GrandDesignMinCost) return;
+        if (entry.Paid <= 0) return;
         var design = kokomi!.Powers.OfType<GrandDesignPower>().FirstOrDefault();
         if (design == null || design.Amount <= 0) return;
-        KokomiOverhaulKit.GainCasket(kokomi, (int)design.Amount);
+        KokomiOverhaulKit.GainCasket(kokomi, (int)design.Amount * entry.Paid);
     }
 }
 

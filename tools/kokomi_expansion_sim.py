@@ -29,7 +29,9 @@ from attrition.
 PILOTS (drafters) -- one play pilot, five drafting rules:
   * baseline: the repo's default drafter (`tier05.draft.score_offer`,
     archetype "generic", skip under `C.DRAFT_SKIP_THRESHOLD`) over the whole
-    69-card pool.
+    69-card pool. It prices the seven new Powers and Shoal Call at 0, so the
+    harness gives those eight the median default score of the other new cards
+    (read once against the starter), so their pick rates mean something.
   * the four focused drafters (paper sec.3 grouping, plus the existing parts
     sec.1 names for each deck): a new card of the deck 10 (cap 2; a Power or
     a Rare cap 1), an existing card of the deck 7 (cap 2), anything else (or
@@ -52,8 +54,10 @@ wrapper, an INSTRUMENT SURFACE and not a design claim:
   * Open the Casket when it holds 6, or from turn 6 when it holds any (the
     feed pass's wrapper);
   * her Powers are played first when affordable;
-  * All Streams when 2+ Plans wait and a Plan card costing 1+ is affordable
-    after it; Brace for the Tide when an enemy intends to attack;
+  * All Streams when 1+ Plan waits and a Plan card costing 1+ is affordable
+    after it (2+ needs 4 Energy and never fired), then that card is written
+    on the Bake-Kurage; Brace for the
+    Tide when an enemy intends to attack;
   * a DUSK Plan is written when an enemy intends to attack (the stock rule
     writes a Plan only when none does, which is backwards for Dusk -- applied
     to every pilot, Breakwater and Shell of Sanctuary included);
@@ -103,11 +107,18 @@ OLD = {
 P = "proto_kk_"
 NEW_IDS = [P + c for deck in ("big_plan", "tide", "dusk", "volume")
            for c in NEW[deck]]
+#: The new rows the default drafter prices at 0 (the seven Powers and Shoal
+#: Call): the harness gives them the median of the others (`_nominal`).
+NOMINAL_IDS = frozenset(P + c for c in (
+    "grand_design", "the_long_game", "at_waters_edge", "ceremonial_garment",
+    "watatsumis_grace", "tidal_riposte", "kurage_swarm", "shoal_call"))
 
 
 # --- the process switch and the harness surfaces ------------------------------
 
 _ENABLED = False
+_AFTER_STREAMS: dict = {}
+_FORCE_PET: set = set()
 
 
 def enable():
@@ -143,7 +154,20 @@ def enable():
                        for e in state.living_enemies)
         return orig_aim(state, card)
 
-    kokomi_plan.plan_aimed_at_pet = aim
+    def aim_forced(state, card):
+        if id(card) in _FORCE_PET and card.plan and kokomi_plan.live(state):
+            return True
+        return aim(state, card)
+
+    kokomi_plan.plan_aimed_at_pet = aim_forced
+
+    orig_schedule = kokomi_plan.schedule
+
+    def schedule(state, card, *a, **kw):
+        _FORCE_PET.discard(id(card))
+        return orig_schedule(state, card, *a, **kw)
+
+    kokomi_plan.schedule = schedule
 
     orig_active = policy._active_effects
 
@@ -210,6 +234,14 @@ def make_pilot():
                   and combat.card_cost(state, c) <= p.energy]
         if powers:
             return max(powers, key=lambda c: combat.card_cost(state, c))
+        # All Streams was just played: write the Plan it was played for, on
+        # the Bake-Kurage (the pet aim is forced for this one play).
+        nxt = _AFTER_STREAMS.pop(id(state), None)
+        if (nxt is not None and nxt in hand
+                and state.kk_next_plan_extra is not None
+                and combat.card_cost(state, nxt) <= p.energy):
+            _FORCE_PET.add(id(nxt))
+            return nxt
         attacking = any(kokomi_plan._intends_to_attack(e)
                         for e in state.living_enemies)
         for c in hand:
@@ -217,10 +249,17 @@ def make_pilot():
             if cost > p.energy:
                 continue
             if c.id == P + "all_streams_flow_to_the_sea":
+                # 1+ Plan waiting and a Plan card costing 1+ still
+                # affordable after it. The main session's example asked for
+                # 2+, which needs 4 Energy on her 3 and never fired at n =
+                # 400 (0 plays in 252 fights). The pilot then writes that
+                # card next (`_AFTER_STREAMS`).
                 left = p.energy - cost
-                if len(state.kk_plan_queue) >= 2 and any(
-                        o is not c and o.plan and 1 <= combat.card_cost(
-                            state, o) <= left for o in hand):
+                big = [o for o in hand if o is not c and o.plan
+                       and 1 <= combat.card_cost(state, o) <= left]
+                if state.kk_plan_queue and big:
+                    _AFTER_STREAMS[id(state)] = max(
+                        big, key=lambda o: combat.card_cost(state, o))
                     return c
             if c.id == P + "brace_for_the_tide" and attacking \
                     and not any(e.card_id == c.id
@@ -228,7 +267,7 @@ def make_pilot():
                 return c
         choice = base(state)
         if choice is not None and choice.id == P + "all_streams_flow_to_the_sea":
-            return None if len(state.kk_plan_queue) < 2 else choice
+            return None           # only the harness rule plays it
         return choice
 
     return pilot
@@ -247,8 +286,29 @@ def _offer(rng, kind, pool):
     return out
 
 
+_NOMINAL: dict = {}
+
+
+def _nominal():
+    """The median default-drafter score of the new cards it CAN price (every
+    new row but the seven Powers and Shoal Call, which it prices at 0), read
+    against the starter deck once per process (main session, 2026-09-29)."""
+    if "v" not in _NOMINAL:
+        from tier0.content import loader
+        from tier05 import draft
+        starter = [loader.get_card(c) for c in loader.starting_deck("kokomi")]
+        vals = sorted(draft.score_offer(loader.get_card(c), starter, "generic")
+                      for c in NEW_IDS if c not in NOMINAL_IDS)
+        n = len(vals)
+        _NOMINAL["v"] = (vals[n // 2] if n % 2
+                         else (vals[n // 2 - 1] + vals[n // 2]) / 2)
+    return _NOMINAL["v"]
+
+
 def _baseline(card, deck_cards):
     from tier05 import draft
+    if card.id in NOMINAL_IDS:
+        return _nominal()
     return draft.score_offer(card, deck_cards, "generic")
 
 
@@ -293,6 +353,7 @@ def fight(deck, enemies, seed, hp):
     plays = defaultdict(int)
     writes = defaultdict(int)
     close = []
+    streams = []
     for r in s.log:
         ev = r.get("event")
         if ev == "play":
@@ -301,10 +362,18 @@ def fight(deck, enemies, seed, hp):
             writes[r["card"]] += 1
         elif ev == "turn_close":
             close.append(int(r.get("block", 0)))
+        elif ev == "plan_all_streams":
+            streams.append([int(r.get("cancelled", 0)), 0, None])
+        elif ev == "plan_written" and streams and streams[-1][2] is None:
+            streams[-1][2] = r.get("card")
+        elif (ev == "plan_carried_out" and streams
+              and streams[-1][2] == r.get("card")):
+            streams[-1][1] += 1
     return {"won": bool(s.player.alive) and not s.living_enemies,
             "turns": s.turn, "hp_lost": start - max(0, s.player.hp),
             "hp_end": max(0, s.player.hp), "plays": dict(plays),
             "writes": dict(writes), "close_block": close,
+            "streams": [(c, t) for c, t, _ in streams],
             "casket": s.kk_casket}
 
 
@@ -586,6 +655,7 @@ def sec_cards(out, by, gb):
     out("|---|---|---|---|---|---|")
     from tier0.content import loader
     owner = {P + c: d for d, cs in NEW.items() for c in cs}
+    cancelled = []
     flags = []
     for cid in NEW_IDS:
         cells = {}
@@ -619,6 +689,20 @@ def sec_cards(out, by, gb):
             f"{loader.get_card(cid).rarity} | {bo} / {pct(bp, bo)} | "
             f"{pct(op_, oo)} of {oo} | {ppf:.2f} ({held}) | {flag} |")
     out(f"\nFlagged: {', '.join(flags) or 'none'}.")
+    ast = P + "all_streams_flow_to_the_sea"
+    held = plays = 0
+    for pl in PILOTS:
+        for r in by[pl] + gb[pl]:
+            for f in r["fights"]:
+                if ast in f["deck"]:
+                    held += 1
+                    plays += f["plays"].get(ast, 0)
+                    cancelled.extend(f["streams"])
+    out(f"\nAll Streams Flow to the Sea: played {plays} times in {held} "
+        f"fights held ({(plays / held) if held else 0:.2f} per fight); Plans "
+        f"cancelled per play {m(c for c, _ in cancelled) if cancelled else '-'}; "
+        f"the Plan it multiplied was carried out "
+        f"{m(t for _, t in cancelled) if cancelled else '-'} times on average.")
 
 
 def main(argv=None):

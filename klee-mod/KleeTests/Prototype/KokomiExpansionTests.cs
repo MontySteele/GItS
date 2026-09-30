@@ -133,9 +133,9 @@ public class KokomiExpansionTests : IDisposable
         var lull = Assert.Single(new ProtoKkLull().PlanClauses);
         Assert.Equal((KokomiPlan.Kind.EnergyIfAlone, 2), (lull.Kind, lull.Amount));
         var lance = Assert.Single(new ProtoKkUndertideLance().PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.DamageIfAlone, 16, KokomiPlan.Aim.FrontEnemy),
+        Assert.Equal((KokomiPlan.Kind.DamageIfAlone, 12, KokomiPlan.Aim.FrontEnemy),
                      (lance.Kind, lance.Amount, lance.Aim));
-        Assert.Equal(20, Assert.Single(
+        Assert.Equal(16, Assert.Single(
             Upgraded<ProtoKkUndertideLance>().PlanClauses).Amount);
         // The drain hands its entry count to every carry-out.
         Assert.Contains(Seq("KokomiPlan", "Drain"),
@@ -162,18 +162,19 @@ public class KokomiExpansionTests : IDisposable
                         c => c.Contains("GrandDesignPower.Note"));
         Assert.Contains(Seq("KokomiPlan", "Schedule"),
                         c => c.Contains("KurageSwarmPower.Note"));
-        Assert.Equal(2, KokomiOverhaulLaw.GrandDesignMinCost);
-
+        // 1 more per Energy paid (main session, 2026-09-29).
         KokomiOverhaulLedger.ResetAll();
-        var seat = Seat.Kokomi().WithPower<GrandDesignPower>(2);
-        var big = new KokomiPlan.Entry(null, Array.Empty<KokomiPlan.Planned>(),
-                                       Paid: 2);
-        var small = new KokomiPlan.Entry(null,
-            Array.Empty<KokomiPlan.Planned>(), Paid: 1);
-        GrandDesignPower.Note(seat.Creature, small);
+        var seat = Seat.Kokomi().WithPower<GrandDesignPower>(1);
+        var free = new KokomiPlan.Entry(null,
+            Array.Empty<KokomiPlan.Planned>(), Paid: 0);
+        var three = new KokomiPlan.Entry(null,
+            Array.Empty<KokomiPlan.Planned>(), Paid: 3);
+        GrandDesignPower.Note(seat.Creature, free);
         Assert.Equal(0, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-        GrandDesignPower.Note(seat.Creature, big);
-        Assert.Equal(2, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
+        GrandDesignPower.Note(seat.Creature, three);
+        Assert.Equal(3, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
+        Assert.Contains(Il.Calls(Il.Method("ProtoKkGrandDesign", "OnUpgrade")),
+                        c => c.Contains("UpgradeBy"));
 
         KokomiOverhaulLedger.ResetAll();
         var swarm = Seat.Kokomi().WithPower<KurageSwarmPower>(1);

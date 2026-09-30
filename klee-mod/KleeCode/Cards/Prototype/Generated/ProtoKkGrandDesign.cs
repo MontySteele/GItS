@@ -45,13 +45,13 @@ public sealed class ProtoKkGrandDesign : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Design"),
-        ("description", "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold] that cost {PowerAmount:diff()} or more, the [gold]Casket[/gold] gains 2 more."),
+        ("description", "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], the [gold]Casket[/gold] gains 1 more for each [gold]Energy[/gold] paid for it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 2m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoKkGrandDesign : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<GrandDesignPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<GrandDesignPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

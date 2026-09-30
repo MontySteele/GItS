@@ -351,7 +351,7 @@ PRINCESS_OF_WATATSUMI_DRAW = 1
 #: THE EXPANSION, BATCH ONE (2026-09-29): seven Powers. Twins in
 #: `KokomiExpansion.cs`. The Clouds Like Waves Rippling left the pool (paper
 #: pick 3) and its power left both engines with it.
-GRAND_DESIGN = "kk_grand_design"          # Casket +N per carry-out of a 2+ Plan
+GRAND_DESIGN = "kk_grand_design"          # Casket +N per Energy paid, per carry-out
 LONG_GAME = "kk_the_long_game"            # +N Energy when exactly 1 Plan waits
 AT_WATERS_EDGE = "kk_at_waters_edge"      # Weak N + Vulnerable N per reaction
 CEREMONIAL_GARMENT = "kk_ceremonial_garment"  # +N per debuff, her Attacks
@@ -1438,14 +1438,13 @@ def _note_plan_resolved(state: CombatState,
     # and the relic's +1 -- once per CARRY-OUT, so a doubled one counts twice.
     state.kk_plans_carried_out_this_turn += 1
     note_casket_carry_out(state)
-    # THE EXPANSION, GRAND DESIGN: "Whenever the Bake-Kurage carries out a Plan
-    # that cost 2 or more, the Casket gains 2 more." The cost is the Energy
+    # THE EXPANSION, GRAND DESIGN: "Whenever the Bake-Kurage carries out a
+    # Plan, the Casket gains 1 more for each Energy paid for it." The Energy
     # paid for the card that wrote it; per carry-out, so a doubled one pays
     # twice. `GrandDesignPower.Note` is the twin.
     design = int(p.powers.get(GRAND_DESIGN, 0))
-    if (design and entry is not None
-            and entry.paid >= C.KOKOMI_EXPANSION_GRAND_DESIGN_MIN_COST):
-        gain_casket(state, design)
+    if design and entry is not None and entry.paid > 0:
+        gain_casket(state, design * int(entry.paid))
     n = p.powers.get(PRINCESS_OF_WATATSUMI, 0)
     if n:
         # Block first, then the card: `PrincessOfWatatsumiPlanPower`'s order.

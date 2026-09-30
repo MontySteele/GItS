@@ -849,11 +849,9 @@ KOKOMI_OVERHAUL = False
 KOKOMI_OVERHAUL_CASKET_PER_PLAN = 1            # added per carried-out Plan
 KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT = 1  # Open the Casket's rate
 KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD = 2      # Moon Signal: "2 or more Plans"
-# THE EXPANSION, BATCH ONE (2026-09-29): the two rule numbers two Powers
-# print. Grand Design: "a Plan that cost 2 or more" (the Energy paid for it);
-# The Long Game: "if exactly one Plan is waiting". Mirrored BY VALUE against
+# THE EXPANSION, BATCH ONE (2026-09-29): the rule number The Long Game
+# prints, "if exactly one Plan is waiting". Mirrored BY VALUE against
 # `KokomiOverhaulLaw` by `tools/lint_constant_parity.py`.
-KOKOMI_EXPANSION_GRAND_DESIGN_MIN_COST = 2
 KOKOMI_EXPANSION_LONG_GAME_WAITING = 1
 KOKOMI_OVERHAUL_RALLY_DISCOUNT = 1  # Rally: the next Companion costs this less
 # `EB-668` (`EB-655` reopened). Battle Plan's carry-out: "the next Attack you

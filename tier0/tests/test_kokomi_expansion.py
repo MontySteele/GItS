@@ -160,14 +160,14 @@ def test_undertide_lance_doubles_alone(overhaul):
     st = kokomi_state(enemies=[enemy])
     kokomi_plan.schedule(st, _row("proto_kk_undertide_lance"))
     kokomi_plan.resolve_all(st)
-    assert enemy.hp == 200 - 32
+    assert enemy.hp == 200 - 24
 
     enemy = make_enemy(hp=200)
     st = kokomi_state(enemies=[enemy])
     kokomi_plan.schedule(st, _row("proto_kk_undertide_lance"))
     kokomi_plan.schedule(st, plan_card([{"op": "block", "amount": 1}]))
     kokomi_plan.resolve_all(st)
-    assert enemy.hp == 200 - 16
+    assert enemy.hp == 200 - 12
 
 
 def test_measured_breath_draws_only_on_an_empty_queue(overhaul):
@@ -183,13 +183,16 @@ def test_measured_breath_draws_only_on_an_empty_queue(overhaul):
     assert st.player.block == 6 and len(st.player.hand) == 0
 
 
-def test_grand_design_adds_two_for_a_plan_that_cost_two(overhaul):
+def test_grand_design_adds_one_per_energy_paid(overhaul):
+    """Main session, 2026-09-29: "the Casket gains 1 more for each Energy
+    paid for it"."""
     st = _casket(enemies=[make_enemy(hp=300, intents=QUIET)])
-    st.player.powers[kokomi_plan.GRAND_DESIGN] = 2
+    st.player.powers[kokomi_plan.GRAND_DESIGN] = 1
     _write(st, "proto_kk_surging_shoal")           # 2 paid
     _write(st, "proto_kk_nip")                     # 0 paid
     kokomi_plan.resolve_all(st)
-    assert st.kk_casket == 1 + 2 + 1
+    assert st.kk_casket == (1 + 2) + 1
+    assert _up("proto_kk_grand_design").cost == 0
 
 
 def test_the_long_game_pays_on_exactly_one_waiting(overhaul):
