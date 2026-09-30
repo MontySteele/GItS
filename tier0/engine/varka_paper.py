@@ -189,6 +189,7 @@ class VarkaState:
     per_card: bool = False
     credited: set = field(default_factory=set)
     asc_elemental: bool = False
+    pay_electro: int = 2              # Electro payout to ALL per Swirl
 
 
 def live(state) -> bool:

@@ -178,8 +178,8 @@ def on_swirl(state, vs, enemy, aura) -> None:
             vs.pay["cryo_vuln"] += PAY_CRYO_VULN
     elif cur == "electro":
         for e in list(state.living_enemies):
-            reactions._splash(state, e, PAY_ELECTRO_ALL)
-            vs.pay["electro_dmg"] += PAY_ELECTRO_ALL
+            reactions._splash(state, e, vs.pay_electro)
+            vs.pay["electro_dmg"] += vs.pay_electro
 
 
 def attack_bonus(state, vs, card) -> int:
@@ -347,6 +347,24 @@ CARD_BUILDERS = {
     "four_winds_ascension": lambda: _card(
         "four_winds_ascension", "Four Winds' Ascension", 1, "attack",
         "special", [_o("ascension")]),
+    # --- starter-evenness variants (STARTER_SETS) ---
+    "barbara_shining_miracle_one": lambda: _knight(
+        "barbara_shining_miracle_one", "Barbara: Shining Miracle (one)",
+        "hydro", [{"op": "apply_aura", "element": "hydro",
+                   "target": "enemy"},
+                  {"op": "block", "amount": 7}], rarity="basic"),
+    "amber_fiery_rain_all": lambda: _knight(
+        "amber_fiery_rain_all", "Amber: Fiery Rain (ALL)", "pyro",
+        [_dmg(5, target="all_enemies")], all_=True, rarity="basic"),
+    "lisa_lightning_rose_all": lambda: _knight(
+        "lisa_lightning_rose_all", "Lisa: Lightning Rose (ALL)", "electro",
+        [_dmg(3, target="all_enemies"), {"op": "draw", "amount": 2}],
+        all_=True, rarity="basic"),
+    "kaeya_glacial_waltz_all": lambda: _knight(
+        "kaeya_glacial_waltz_all", "Kaeya: Glacial Waltz (ALL)", "cryo",
+        [_dmg(3, target="all_enemies"),
+         {"op": "apply_power", "power": "vulnerable", "amount": 1,
+          "target": "all_enemies"}], all_=True, rarity="basic"),
     # --- sec.11.4 re-aimed ---
     "favonius_drill": lambda: _card(
         "favonius_drill", "Favonius Drill", 1, "skill", "common",
@@ -432,13 +450,26 @@ def knight_element(card):
     return None
 
 
+# Starter-evenness variants (fourth spec round, 2026-09-29). S1: Barbara:
+# Shining Miracle paints ONE enemy. S2: the other three starter Knights hit
+# ALL enemies (Amber 5, Lisa 3 + draw 2, Kaeya 3 + 1 Vulnerable to ALL).
+STARTER_SETS = {
+    "S1": {"barbara_shining_miracle": "barbara_shining_miracle_one"},
+    "S2": {"amber_fiery_rain": "amber_fiery_rain_all",
+           "lisa_lightning_rose": "lisa_lightning_rose_all",
+           "kaeya_glacial_waltz": "kaeya_glacial_waltz_all"},
+}
+
+
 def build_player(deck: list[str], payout: bool = True,
                  apply_oath: bool = True, hp: int | None = None,
-                 per_card: bool = False):
+                 per_card: bool = False, starter_set: str | None = None,
+                 pay_electro: int = PAY_ELECTRO_ALL):
     """A fresh rev-3 Varka for one fight, holding exactly `deck` (card
     names; use `starter(el)` + extras)."""
     from tier0.engine.state import Player
-    cards = [make_card(n) for n in deck]
+    swap = STARTER_SETS.get(starter_set, {})
+    cards = [make_card(swap.get(n, n)) for n in deck]
     hp = V.HP if hp is None else hp
     player = Player(hp=hp, max_hp=max(hp, V.HP), draw_pile=cards,
                     element=V.ELEMENT, cadence="catalyst",
@@ -447,6 +478,7 @@ def build_player(deck: list[str], payout: bool = True,
     vs.payout = payout
     vs.apply_oath = apply_oath
     vs.per_card = per_card
+    vs.pay_electro = pay_electro
     player.varka = vs
     return player
 

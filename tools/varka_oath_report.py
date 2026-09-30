@@ -59,6 +59,15 @@ VARIANTS = {"R3b": dict(payout=True, apply_oath=True, per_card=True),
             "V1": dict(payout=False, apply_oath=True, per_card=True),
             "V2": dict(payout=True, apply_oath=False, per_card=True)}
 DEF = "R3b"
+# Starter-evenness round (all on R3b; the section `svar` only).
+SVARIANTS = {
+    "S1": dict(VARIANTS[DEF], starter_set="S1"),
+    "S2": dict(VARIANTS[DEF], starter_set="S2"),
+    "S3": dict(VARIANTS[DEF], pay_electro=3),
+    "S4": dict(VARIANTS[DEF], starter_set="S1", pay_electro=3),
+    "S2+S3": dict(VARIANTS[DEF], starter_set="S2", pay_electro=3),
+}
+ALLVAR = dict(VARIANTS, **SVARIANTS)
 TEMPLATE = ["N", "N", "N", "N", "E", "R", "N", "N", "E", "R", "B"]
 
 DUMMIES = {
@@ -110,7 +119,7 @@ def deck_for(kind, home):
 def oath_fight(deck, enemies, policy, home, seed, hp=None, variant="R3b"):
     from tier0.engine import combat, varka_oath as O
     from tier0.engine.varka_oath_pilot import VarkaOathPilot
-    player = O.build_player(deck, hp=hp, **VARIANTS[variant])
+    player = O.build_player(deck, hp=hp, **ALLVAR[variant])
     start = player.hp
     s = combat.run_fight(player, enemies, VarkaOathPilot(policy, home),
                          seed=seed)
@@ -994,6 +1003,76 @@ def sec_branch(out, seeds, seed0, jobs):
     return by
 
 
+def _w_svar_fight(args):
+    enable()
+    v, home, eid, seed = args
+    from tier05 import acts
+    from tier0.engine import varka_oath as O
+    tier, spec = next((t, e) for t, e in _all_specs() if e["id"] == eid)
+    enemies = acts.spawn(spec, random.Random(seed))
+    n = len(enemies)
+    r = oath_fight(O.starter(home), enemies, "focused", home, seed,
+                   variant=v)
+    return {"v": v, "home": home, "tier": tier, "n": n, "won": r["won"],
+            "hp_lost": r["hp_lost"]}
+
+
+def sec_svar(out, seeds, seed0, jobs):
+    names = (DEF,) + tuple(SVARIANTS)
+    out("\n## 6. Starter evenness: S-variants on R3b (focused pilot; n = "
+        f"{seeds} runs per cell, seeds {seed0}..{seed0 + seeds - 1})")
+    out("S1 = Barbara: Shining Miracle paints ONE enemy. S2 = Amber 5 Pyro, "
+        "Lisa 3 Electro + draw 2, Kaeya 3 Cryo + 1 Vulnerable, each to ALL "
+        "(Barbara as printed). S3 = Electro payout 3 to ALL. S4 = S1 + S3. "
+        "S2+S3 is also run.")
+    argl = [(seed0 + i, "focused", h, v, d) for v in names for h in ELEMENTS
+            for d in (True, False) for i in range(seeds)]
+    rows = pmap(_w_run, jobs, argl)
+    by = defaultdict(list)
+    for r, a in zip(rows, argl):
+        by[(a[3], a[1 + 1], a[4])].append(r)
+    fargs = [(v, h, e["id"], seed0 + i) for v in names for h in ELEMENTS
+             for _, e in _all_specs() for i in range(seeds)]
+    frows = pmap(_w_svar_fight, jobs, fargs)
+    fb = defaultdict(list)
+    for r in frows:
+        fb[(r["v"], r["home"], _size(r["n"]))].append(r)
+        if r["tier"] == "E":
+            fb[(r["v"], r["home"], "elite")].append(r)
+    out("\n| variant | start | act won, drafted (±95% CI) | act won, "
+        "starter only | HP lost per drafted fight: 1 enemy / 3+ enemies | "
+        "starter at full HP, HP lost: 1 enemy / 3+ / elites |")
+    out("|---|---|---|---|---|---|")
+    summary = []
+    for v in names:
+        wins = {}
+        for h in ELEMENTS:
+            rs = by[(v, h, True)]
+            n = len(rs)
+            k = sum(r["won"] for r in rs)
+            wins[h] = 100 * k / n
+            so = by[(v, h, False)]
+            ks = sum(r["won"] for r in so)
+            f1 = [f["hp_lost"] for r in rs for f in r["fights"]
+                  if f["n_enemies"] == 1]
+            f3 = [f["hp_lost"] for r in rs for f in r["fights"]
+                  if f["n_enemies"] >= 3]
+            out(f"| {v} | {h} | {pct(k, n)} ±{ci95(k, n):.1f} | "
+                f"{pct(ks, len(so))} | {m(f1)} / {m(f3)} | "
+                f"{m(r['hp_lost'] for r in fb[(v, h, '1 enemy')])} / "
+                f"{m(r['hp_lost'] for r in fb[(v, h, '3+ enemies')])} / "
+                f"{m(r['hp_lost'] for r in fb[(v, h, 'elite')])} |")
+        lead = max(wins, key=wins.get)
+        behind = [h for h in ELEMENTS if wins[lead] - wins[h] > 10]
+        summary.append(
+            f"- {v}: leader {lead} {wins[lead]:.1f}%, spread "
+            f"{max(wins.values()) - min(wins.values()):.1f} points; more "
+            f"than 10 behind the leader: {', '.join(behind) or 'none'}")
+    out("")
+    for s_ in summary:
+        out(s_)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", type=int, default=200)
@@ -1026,6 +1105,8 @@ def main(argv=None):
         sec_starters(out, args.seeds, args.seed, args.jobs)
     if "branch" in only:
         sec_branch(out, args.seeds, args.seed, args.jobs)
+    if "svar" in only:
+        sec_svar(out, args.seeds, args.seed, args.jobs)
     return lines
 
 
