@@ -294,6 +294,10 @@ Round three (pick 2 ruled; E-AoE; PR #768 sec.9):
 
 ## Picks
 
+All five RULED 2026-09-29, [USER]: "I'm good with all of these Varka
+defaults" (pick 2 earlier: "Good on both Varka defaults"). The paper is
+the build spec; Lisa's floor gets one confirming sim run first.
+
 1. **Electro's payout: E-AoE (3 damage to ALL).** Default, from sec.10 item 1.
    E-Draw put Electro 26.6 points behind Hydro.
 2. **Even the starts through the pool's Knights, without making them
