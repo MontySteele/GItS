@@ -73,7 +73,7 @@ public sealed class ProtoKkCurrentRead : CustomCardModel, ICharacterCard, IPlann
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
     }
 
     protected override void OnUpgrade()

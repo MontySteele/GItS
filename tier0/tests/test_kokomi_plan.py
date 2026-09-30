@@ -117,7 +117,10 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # TWENTY-NINE with the cleanup pass (2026-09-29): Scout Ahead cut.
     # THIRTY-TWO with the feed pass (2026-09-29): Exposed Flank cut, Coral
     # Bulwark's Plan line gone, five Plan-only Commons added.
-    assert len(planned) == 32
+    # THIRTY-EIGHT with expansion batch one (2026-09-29): Lull, Undertide
+    # Lance, Masterstroke, Undercurrent Snare, Evening Watch and Brace for the
+    # Tide.
+    assert len(planned) == 38
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -522,20 +525,6 @@ def test_skittish_does_not_fire_on_a_carry_out(overhaul):
     assert enemy.block == 6
 
 
-def test_a_plan_caused_debuff_is_still_hers(overhaul):
-    """`EB-334`, the half the flag deliberately does NOT move: the applier
-    stays her. The Tamakushi Casket used to be the witness; since the Casket
-    pass (2026-09-28) it strikes nothing, so The Clouds Like Waves Rippling --
-    the other reader of the same event -- is. If the applier were the pet, no
-    Block would land."""
-    enemy = make_enemy(hp=40)
-    st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.CLOUDS_LIKE_WAVES] = 2
-    carry_out(st, [{"op": "apply_power", "power": "weak", "amount": 1,
-                    "target": "front_enemy"}])
-    assert enemy.powers.get("weak") == 1
-    assert st.player.block == 2
-
 # --- `EB-335`: the kit's own defence in act 2 (R246 pick 2) ---------------
 
 def test_tide_wall_blocks_per_plan_of_the_whole_morning(overhaul):
@@ -873,8 +862,8 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     # pins is the withdrawal, not the size -- so it moves with the
     # pool and the absence does not.
     # FORTY-SIX since the Casket pass (2026-09-28); FORTY-FOUR since the
-    # cleanup pass (2026-09-29).
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 48
+    # cleanup pass (2026-09-29); SIXTY-NINE since expansion batch one.
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 69
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
@@ -1161,20 +1150,6 @@ def test_a_frozen_reaction_is_still_a_debuff_she_applied(overhaul):
     reactions.resolve_hit(st, enemy, "hydro", 0, "probe")
     assert counts(st).get("casket_strike", 0) == 0
     assert kokomi_plan.has_debuff(enemy) is True
-
-def test_the_clouds_like_waves_pays_per_application_not_per_stack(overhaul):
-    """The C#: "War Council's 'apply 1 Weak to each' over three enemies is three
-    applications and three payouts; one card applying 2 Weak to one enemy is
-    one." It shares the Casket's one predicate and takes no latch, which the
-    C# power does not either."""
-    a, b = make_enemy(name="a"), make_enemy(name="b")
-    st = kokomi_state(enemies=[a, b])
-    st.player.powers[kokomi_plan.CLOUDS_LIKE_WAVES] = 2
-    powers.apply_power(st, a, "weak", 2, applier=st.player)
-    assert st.player.block == 2
-    powers.apply_power(st, b, "weak", 1, applier=st.player)
-    assert st.player.block == 4
-
 
 # --- 9. THE COMPANION HOOKS ------------------------------------------------
 
@@ -2451,7 +2426,9 @@ def test_the_sheets_one_dusk_row_is_the_only_one(overhaul):
     `loader._validate_plan_dusk` still asks only that there be one."""
     dusk = [c.id for c in loader.prototype_cards() if c.plan_dusk]
     # The Casket pass (2026-09-28) added a second: Shell of Sanctuary.
-    assert dusk == ["proto_kk_breakwater", "proto_kk_shell_of_sanctuary"]
+    # Expansion batch one (2026-09-29): Evening Watch, Brace for the Tide.
+    assert dusk == ["proto_kk_breakwater", "proto_kk_shell_of_sanctuary",
+                    "proto_kk_evening_watch", "proto_kk_brace_for_the_tide"]
 
 
 def _row(cid):

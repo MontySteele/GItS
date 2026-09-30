@@ -76,7 +76,7 @@ public sealed class ProtoKkFeignedRetreat : CustomCardModel, ICharacterCard, IPl
     {
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
             return;
         }
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);

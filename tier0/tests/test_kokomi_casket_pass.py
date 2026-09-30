@@ -354,11 +354,12 @@ def test_moon_signal_reads_the_queue_before_the_drain(overhaul):
 
 # --- F. the offer -------------------------------------------------------------
 
-def test_the_offer_is_forty_eight(overhaul):
+def test_the_offer_is_sixty_nine(overhaul):
     # Forty-six after the Casket pass; the cleanup pass (2026-09-29) cut two;
-    # the feed pass (2026-09-29) cut Exposed Flank and added five.
+    # the feed pass (2026-09-29) cut Exposed Flank and added five; expansion
+    # batch one (2026-09-29) cut The Clouds Like Waves and added 22.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 48
+    assert len(ids) == 69
     for cut in ("proto_kk_tide_chart", "proto_kk_cleansing_wave",
                 "proto_kk_ripple", "proto_kk_well_laid",
                 "proto_kk_sea_salt_prayer", "proto_kk_salt_line",

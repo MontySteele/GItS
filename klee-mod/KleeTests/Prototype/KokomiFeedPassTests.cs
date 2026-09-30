@@ -141,10 +141,12 @@ public class KokomiFeedPassTests : IDisposable
         var slice = Il.CallSequence(Il.Method("KokomiOverhaulRoster", "Slice"))
             .Where(c => c.StartsWith("ModelDb.Card", StringComparison.Ordinal))
             .ToList();
-        Assert.Equal(48, slice.Count);
+        // SIXTY-NINE since expansion batch one (2026-09-29), whose 22 rows
+        // follow the five.
+        Assert.Equal(69, slice.Count);
         Assert.Equal(new[] { "ProtoKkBubbleWard", "ProtoKkNip", "ProtoKkJellyfishDrift",
                              "ProtoKkCurrentRead", "ProtoKkBrineSting" },
-                     slice.Skip(43).Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
+                     slice.Skip(42).Take(5).Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
                           .ToArray());
         Assert.DoesNotContain(slice, c => c.Contains("ProtoKkExposedFlank"));
     }

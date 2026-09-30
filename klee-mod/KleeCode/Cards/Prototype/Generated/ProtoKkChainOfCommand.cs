@@ -82,7 +82,7 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, IElementalCard, ICh
     {
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
             return;
         }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");

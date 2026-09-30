@@ -132,8 +132,22 @@ internal static class KleePowerIcons
         // across unrelated effects reads as intentional.
         ProtoBakeKuragePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
         SongOfPearlsPower => KleePck.Path("kokomi/powers/kurages_oath.png"),
-        CloudsLikeWavesPower => KleePck.Path(
+        // THE EXPANSION, BATCH ONE (2026-09-29): Watatsumi's Grace takes the
+        // badge of The Clouds Like Waves Rippling, the defensive Power it
+        // replaces; Ceremonial Garment wears the shipped Garment's own badge;
+        // the others borrow the nearest shipped SHAPE, the block above's rule. Art is commissioned when a slice is ACCEPTED.
+        WatatsumisGracePower => KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
+        TidalRipostePower => KleePck.Path(
+            "kokomi/powers/vigil_of_the_deep.png"),
+        ProtoCeremonialGarmentPower => KleePck.Path(
+            "kokomi/powers/ceremonial_garment.png"),
+        AtWatersEdgePower => KleePck.Path("klee/powers/solar_isotoma.png"),
+        GrandDesignPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
+        KurageSwarmPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
+        TheLongGamePower => KleePck.Path("klee/powers/spark_per_turn.png"),
         NereidsAscensionPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         // The four with no shipped Kokomi power to borrow from -- the Plan

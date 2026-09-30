@@ -245,7 +245,9 @@ def _proto_power(effects: list[dict]) -> dict | None:
 PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     "plan_damage": ("damage", "damage_per_companion_last_turn",
                     # R276, Feigned Retreat's hit when she WAS hurt.
-                    "damage_if_unhurt"),
+                    "damage_if_unhurt",
+                    # THE EXPANSION: Undertide Lance's planned hit.
+                    "damage_if_alone"),
     # `EB-335`. Tide Wall's per-Plan scaler is a BLOCK clause wearing a count,
     # exactly as `damage_per_companion_last_turn` is a damage clause wearing
     # one, so it takes `plan_block`'s key rather than a sixth key of its own --
@@ -256,6 +258,8 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     # offer screen cannot see.
     "plan_block": ("block", "block_per_plan_this_morning",
                    "block_per_plan_held",
+                   # THE EXPANSION: Evening Watch's per-enemy rate.
+                   "block_per_attacking_enemy",
                    # R276, Tide Wall: the flat bonus on top of the intent.
                    "block_front_intent"),
     "plan_mend": ("mend",),
@@ -840,8 +844,12 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # R276 (Alice's Detonator): the granted Ka-pow! arrives upgraded.
             # A flag on the install op, read when the Power is installed --
             # the codegen's play-time `IsUpgraded` read, one engine over.
+            # THE KOKOMI EXPANSION's Shoal Call rides the same key: its
+            # Nips arrive upgraded.
             hit = next((fx for fx in top
-                        if fx.get("op") == "grant_kapow_each_turn"), None)
+                        if fx.get("op") == "grant_kapow_each_turn"
+                        or (fx.get("op") == "kokomi"
+                            and fx.get("kind") == "shoal_call")), None)
             ok = hit is not None and val is True
             if ok:
                 hit["upgraded"] = True
@@ -1332,6 +1340,12 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # "bigger is better".
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "crash_fanfare"),
+                             "amount", val)
+        elif key == "kokomi_amount":
+            # THE KOKOMI EXPANSION: the row's `kokomi` op's printed number
+            # (its C# DynamicVar `KkAmount`).
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "kokomi"),
                              "amount", val)
         elif key in ("varka_per", "varka_base", "varka_amount"):
             # VARKA: one numeric field of the row's `varka` op (its C#

@@ -75,26 +75,38 @@
     "proto_fs_warm_reception",
     "proto_itto_superlative_superstrength_either",
     "proto_itto_superlative_superstrength_priced",
+    "proto_kk_all_streams_flow_to_the_sea",
     "proto_kk_ambush",
+    "proto_kk_at_waters_edge",
     "proto_kk_battle_plan",
+    "proto_kk_brace_for_the_tide",
     "proto_kk_breakwater",
     "proto_kk_brine_sting",
     "proto_kk_bubble_ward",
+    "proto_kk_ceremonial_garment",
     "proto_kk_chain_of_command",
     "proto_kk_change_of_plans",
     "proto_kk_coordinated_strike",
     "proto_kk_coral_bulwark",
+    "proto_kk_coral_crash",
     "proto_kk_current_read",
     "proto_kk_deep_current",
     "proto_kk_depths_judgment",
     "proto_kk_driftglass",
+    "proto_kk_drowning_pressure",
+    "proto_kk_evening_watch",
     "proto_kk_feigned_retreat",
     "proto_kk_feint",
     "proto_kk_flank",
+    "proto_kk_grand_design",
     "proto_kk_jellyfish_drift",
     "proto_kk_joint_orders",
+    "proto_kk_kurage_swarm",
     "proto_kk_kurages_oath",
+    "proto_kk_lull",
     "proto_kk_massed_volley",
+    "proto_kk_masterstroke",
+    "proto_kk_measured_breath",
     "proto_kk_moon_signal",
     "proto_kk_moons_reflection",
     "proto_kk_nereids_ascension",
@@ -107,25 +119,34 @@
     "proto_kk_rally",
     "proto_kk_read_the_field",
     "proto_kk_riptide",
+    "proto_kk_salt_in_the_wound",
     "proto_kk_sango_isshin",
     "proto_kk_sangonomiyas_counsel",
     "proto_kk_second_thoughts",
     "proto_kk_second_wave",
     "proto_kk_shell_guard",
     "proto_kk_shell_of_sanctuary",
+    "proto_kk_shoal_call",
     "proto_kk_signal_arrow",
     "proto_kk_slack_water",
     "proto_kk_stolen_chapter",
+    "proto_kk_suffocating_deep",
     "proto_kk_surging_shoal",
-    "proto_kk_the_clouds_like_waves",
     "proto_kk_the_generals_banner",
+    "proto_kk_the_long_game",
     "proto_kk_the_moon_a_ship",
+    "proto_kk_tidal_resonance",
+    "proto_kk_tidal_riposte",
     "proto_kk_tide_wall",
     "proto_kk_tideturn",
     "proto_kk_treatise",
+    "proto_kk_undercurrent_snare",
+    "proto_kk_undertide_lance",
     "proto_kk_undertow",
     "proto_kk_vanguard",
     "proto_kk_war_council",
+    "proto_kk_watatsumis_grace",
+    "proto_kk_weight_of_the_plan",
     "proto_kk_what_the_tokoyo_returns",
     "proto_kk_what_the_tokoyo_took",
     "proto_ko_adventure_club",
@@ -413,26 +434,38 @@
     "proto_fs_warm_reception": "furina",
     "proto_itto_superlative_superstrength_either": "klee",
     "proto_itto_superlative_superstrength_priced": "klee",
+    "proto_kk_all_streams_flow_to_the_sea": "kokomi",
     "proto_kk_ambush": "kokomi",
+    "proto_kk_at_waters_edge": "kokomi",
     "proto_kk_battle_plan": "kokomi",
+    "proto_kk_brace_for_the_tide": "kokomi",
     "proto_kk_breakwater": "kokomi",
     "proto_kk_brine_sting": "kokomi",
     "proto_kk_bubble_ward": "kokomi",
+    "proto_kk_ceremonial_garment": "kokomi",
     "proto_kk_chain_of_command": "kokomi",
     "proto_kk_change_of_plans": "kokomi",
     "proto_kk_coordinated_strike": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
+    "proto_kk_coral_crash": "kokomi",
     "proto_kk_current_read": "kokomi",
     "proto_kk_deep_current": "kokomi",
     "proto_kk_depths_judgment": "kokomi",
     "proto_kk_driftglass": "kokomi",
+    "proto_kk_drowning_pressure": "kokomi",
+    "proto_kk_evening_watch": "kokomi",
     "proto_kk_feigned_retreat": "kokomi",
     "proto_kk_feint": "kokomi",
     "proto_kk_flank": "kokomi",
+    "proto_kk_grand_design": "kokomi",
     "proto_kk_jellyfish_drift": "kokomi",
     "proto_kk_joint_orders": "kokomi",
+    "proto_kk_kurage_swarm": "kokomi",
     "proto_kk_kurages_oath": "kokomi",
+    "proto_kk_lull": "kokomi",
     "proto_kk_massed_volley": "kokomi",
+    "proto_kk_masterstroke": "kokomi",
+    "proto_kk_measured_breath": "kokomi",
     "proto_kk_moon_signal": "kokomi",
     "proto_kk_moons_reflection": "kokomi",
     "proto_kk_nereids_ascension": "kokomi",
@@ -445,25 +478,34 @@
     "proto_kk_rally": "kokomi",
     "proto_kk_read_the_field": "kokomi",
     "proto_kk_riptide": "kokomi",
+    "proto_kk_salt_in_the_wound": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sangonomiyas_counsel": "kokomi",
     "proto_kk_second_thoughts": "kokomi",
     "proto_kk_second_wave": "kokomi",
     "proto_kk_shell_guard": "kokomi",
     "proto_kk_shell_of_sanctuary": "kokomi",
+    "proto_kk_shoal_call": "kokomi",
     "proto_kk_signal_arrow": "kokomi",
     "proto_kk_slack_water": "kokomi",
     "proto_kk_stolen_chapter": "kokomi",
+    "proto_kk_suffocating_deep": "kokomi",
     "proto_kk_surging_shoal": "kokomi",
-    "proto_kk_the_clouds_like_waves": "kokomi",
     "proto_kk_the_generals_banner": "kokomi",
+    "proto_kk_the_long_game": "kokomi",
     "proto_kk_the_moon_a_ship": "kokomi",
+    "proto_kk_tidal_resonance": "kokomi",
+    "proto_kk_tidal_riposte": "kokomi",
     "proto_kk_tide_wall": "kokomi",
     "proto_kk_tideturn": "kokomi",
     "proto_kk_treatise": "kokomi",
+    "proto_kk_undercurrent_snare": "kokomi",
+    "proto_kk_undertide_lance": "kokomi",
     "proto_kk_undertow": "kokomi",
     "proto_kk_vanguard": "kokomi",
     "proto_kk_war_council": "kokomi",
+    "proto_kk_watatsumis_grace": "kokomi",
+    "proto_kk_weight_of_the_plan": "kokomi",
     "proto_kk_what_the_tokoyo_returns": "kokomi",
     "proto_kk_what_the_tokoyo_took": "kokomi",
     "proto_ko_adventure_club": "klee",
@@ -937,12 +979,21 @@
     "proto_fs_warm_reception": {
       "draw": 1
     },
+    "proto_kk_all_streams_flow_to_the_sea": {
+      "cost": -1
+    },
     "proto_kk_ambush": {
       "plan_damage": 3
+    },
+    "proto_kk_at_waters_edge": {
+      "cost": -1
     },
     "proto_kk_battle_plan": {
       "draw": 1,
       "plan_attack_bonus": 1
+    },
+    "proto_kk_brace_for_the_tide": {
+      "cost": -1
     },
     "proto_kk_breakwater": {
       "plan_block": 2
@@ -952,6 +1003,9 @@
     },
     "proto_kk_bubble_ward": {
       "plan_block": 2
+    },
+    "proto_kk_ceremonial_garment": {
+      "power_amount": 1
     },
     "proto_kk_chain_of_command": {
       "formula_per": 1
@@ -965,6 +1019,12 @@
     "proto_kk_coral_bulwark": {
       "block": 3
     },
+    "proto_kk_coral_crash": {
+      "add": {
+        "op": "draw",
+        "amount": 1
+      }
+    },
     "proto_kk_current_read": {
       "plan_block": 2
     },
@@ -976,6 +1036,12 @@
     },
     "proto_kk_driftglass": {
       "formula_base": 2
+    },
+    "proto_kk_drowning_pressure": {
+      "formula_per": 2
+    },
+    "proto_kk_evening_watch": {
+      "plan_block": 2
     },
     "proto_kk_feigned_retreat": {
       "plan_damage": 3,
@@ -989,18 +1055,33 @@
       "damage": 3,
       "plan_damage": 3
     },
+    "proto_kk_grand_design": {
+      "power_amount": 1
+    },
     "proto_kk_jellyfish_drift": {
       "plan_damage": 1
     },
     "proto_kk_joint_orders": {
       "block": 3
     },
+    "proto_kk_kurage_swarm": {
+      "cost": -1
+    },
     "proto_kk_kurages_oath": {
       "block": 2,
       "plan_damage": 3
     },
+    "proto_kk_lull": {
+      "block": 3
+    },
     "proto_kk_massed_volley": {
       "damage": 1
+    },
+    "proto_kk_masterstroke": {
+      "plan_damage": 10
+    },
+    "proto_kk_measured_breath": {
+      "block": 3
     },
     "proto_kk_moon_signal": {
       "cost": -1
@@ -1042,6 +1123,9 @@
       "damage": 3,
       "bonus_vs_debuff": 1
     },
+    "proto_kk_salt_in_the_wound": {
+      "kokomi_amount": 1
+    },
     "proto_kk_sango_isshin": {
       "formula_base": 2,
       "formula_per": 2
@@ -1064,6 +1148,9 @@
     "proto_kk_shell_of_sanctuary": {
       "plan_block": 3
     },
+    "proto_kk_shoal_call": {
+      "upgraded_grant": true
+    },
     "proto_kk_signal_arrow": {
       "damage": 3,
       "plan_damage": 1
@@ -1075,19 +1162,31 @@
     "proto_kk_stolen_chapter": {
       "draw": 1
     },
+    "proto_kk_suffocating_deep": {
+      "damage": 3
+    },
     "proto_kk_surging_shoal": {
       "damage": 4,
       "plan_damage": 6
     },
-    "proto_kk_the_clouds_like_waves": {
-      "power_amount": 1
-    },
     "proto_kk_the_generals_banner": {
       "innate": true
+    },
+    "proto_kk_the_long_game": {
+      "cost": -1
     },
     "proto_kk_the_moon_a_ship": {
       "block": 4,
       "plan_mend": 2
+    },
+    "proto_kk_tidal_resonance": {
+      "add": {
+        "op": "draw",
+        "amount": 1
+      }
+    },
+    "proto_kk_tidal_riposte": {
+      "power_amount": 2
     },
     "proto_kk_tide_wall": {
       "block": 2,
@@ -1099,6 +1198,13 @@
     "proto_kk_treatise": {
       "innate": true
     },
+    "proto_kk_undercurrent_snare": {
+      "plan_power_amount": 1
+    },
+    "proto_kk_undertide_lance": {
+      "damage": 3,
+      "plan_damage": 4
+    },
     "proto_kk_undertow": {
       "damage": 3
     },
@@ -1107,6 +1213,12 @@
     },
     "proto_kk_war_council": {
       "power_amount": 1
+    },
+    "proto_kk_watatsumis_grace": {
+      "power_amount": 5
+    },
+    "proto_kk_weight_of_the_plan": {
+      "formula_base": 2
     },
     "proto_kk_what_the_tokoyo_returns": {
       "cost": -1

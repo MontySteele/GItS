@@ -215,6 +215,19 @@ public static class KokomiPlan
         // clause's amount at carry-out. Appended last. Sim twin:
         // `kokomi_plan.CASKET_GAIN`.
         CasketGain,
+        // THE EXPANSION, BATCH ONE (2026-09-29). Lull: "If it is the only
+        // Plan carried out this morning, gain 2 Energy." Undertide Lance:
+        // "Deal 16 damage, doubled if no other Plan is carried out this
+        // morning." ALONE means no OTHER entry in the same drain (the same
+        // entry carried out twice is one Plan; a Dusk drain is its own; Change
+        // of Plans is a drain of one). Evening Watch: "Gain 5 Block for each
+        // enemy intending to attack", counted at carry-out. Brace for the
+        // Tide: "Double your Block", unpowered. Appended last. Sim twins:
+        // `kokomi_plan.ENERGY_IF_ALONE` and the three beside it.
+        EnergyIfAlone,
+        DamageIfAlone,
+        BlockPerAttackingEnemy,
+        DoubleBlock,
     }
 
     /// <summary>
@@ -307,9 +320,19 @@ public static class KokomiPlan
     /// front where that body is gone (<see cref="Aimed"/>), which is the
     /// arm's standing rule for a Plan pointed at something it no longer
     /// finds.</param>
+    /// <param name="Paid">THE EXPANSION, BATCH ONE (2026-09-29). The Energy
+    /// actually paid for the card that wrote this Plan -- the play's own
+    /// <c>Resources.EnergySpent</c>, after every reduction; an X card's is
+    /// what it paid. The Big Plan reads the sum over the queue
+    /// (<see cref="EnergyWaiting"/>) and Grand Design reads it per carry-out.
+    /// Sim twin: `PlanEntry.paid`.</param>
+    /// <param name="Extra">All Streams Flow to the Sea's gift: this entry is
+    /// carried out once plus this many more times. Sim twin:
+    /// `PlanEntry.extra`.</param>
     public sealed record Entry(CardModel? Source, IReadOnlyList<Planned> Clauses,
                               string? Label = null, bool Dusk = false,
-                              string? AimOverride = null)
+                              string? AimOverride = null, int Paid = 0,
+                              int Extra = 0)
     {
         /// <summary>What the strip prints for this Plan.
         ///
@@ -717,6 +740,42 @@ public static class KokomiPlan
         Pending(kokomi?.Player).Count;
 
     /// <summary>
+    /// THE EXPANSION, BATCH ONE: "the Energy paid for the Plans waiting"
+    /// (Weight of the Plan) -- the sum of <see cref="Entry.Paid"/> over this
+    /// seat's queue. A 0-cost feeder adds nothing, by construction. Sim twin:
+    /// `kokomi_plan.plan_energy_waiting`.
+    /// </summary>
+    public static int EnergyWaiting(Creature? kokomi) =>
+        Pending(kokomi?.Player).Sum(e => System.Math.Max(0, e.Paid));
+
+    /// <summary>
+    /// ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans; their cards go to
+    /// your discard pile. Your next Plan this turn is carried out once, plus
+    /// once for each Plan cancelled." No cost comes back. A written card is a
+    /// played card, so it already sits in the discard pile (or the exhaust
+    /// pile, for an Exhaust row) and nothing is moved. The gift waits on the
+    /// ledger for the next card written on the Bake-Kurage this turn
+    /// (<see cref="Schedule"/>). Sim twin: `kokomi_plan.all_streams`.
+    /// </summary>
+    public static async Task CancelAllForNext(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var player = kokomi!.Player;
+        if (player == null) return;
+        Rebase(kokomi);
+        var cancelled = 0;
+        if (_queues.TryGetValue(player, out var queue) && queue.Count > 0)
+        {
+            cancelled = queue.Count;
+            queue.Clear();
+            await Sync(choiceContext, kokomi, "rule:plans_cancelled",
+                       cancelled);
+        }
+        KokomiOverhaulLedger.For(kokomi).NextPlanExtra = cancelled;
+    }
+
+    /// <summary>
     /// WHAT TO DRAW ON THE JELLYFISH RIGHT NOW: the morning's remaining Plans
     /// while one is running, and the pending queue every other moment.
     ///
@@ -884,9 +943,12 @@ public static class KokomiPlan
     /// always did. <see cref="ScheduleFromExhaust"/> never passes it: Moon's
     /// Reflection contributes another card's LINE and not its face, and Dusk
     /// is a fact about the face.</param>
+    /// <param name="paid">THE EXPANSION, BATCH ONE: the Energy the play
+    /// paid for the writing card (<c>cardPlay.Resources.EnergySpent</c>),
+    /// kept on the entry as <see cref="Entry.Paid"/>.</param>
     public static async Task Schedule(
         PlayerChoiceContext choiceContext, Creature? kokomi, CardModel? source,
-        IReadOnlyList<Planned> clauses, bool dusk = false)
+        IReadOnlyList<Planned> clauses, bool dusk = false, int paid = 0)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         var player = kokomi!.Player;
@@ -927,7 +989,8 @@ public static class KokomiPlan
         // queued here is the number the face printed.
         for (var i = 0; i < body.Count; i++)
         {
-            if (body[i].Kind == Kind.Damage)
+            if (body[i].Kind == Kind.Damage
+                || body[i].Kind == Kind.DamageIfAlone)
             {
                 body[i] = body[i] with
                 {
@@ -1009,9 +1072,19 @@ public static class KokomiPlan
                 }
             }
         }
-        var entry = new Entry(source, body, label, dusk);
+        // THE EXPANSION, BATCH ONE. All Streams' pending gift is taken by the
+        // first Plan written after it this turn (0 cancelled is still taken:
+        // "once, plus once for each" with none is once).
+        var ledger = KokomiOverhaulLedger.For(kokomi);
+        var extra = ledger.NextPlanExtra ?? 0;
+        ledger.NextPlanExtra = null;
+        var entry = new Entry(source, body, label, dusk,
+                              Paid: System.Math.Max(0, paid), Extra: extra);
         int before = queue.Count;
         queue.Add(entry);
+        // KURAGE SWARM: "Whenever you write a Plan that costs 0, the Casket
+        // gains 1." The cost paid, after reductions.
+        if (entry.Paid == 0) KurageSwarmPower.Note(kokomi);
         await Sync(choiceContext, kokomi,
             SparkPower.SourceOf(source), before);
 
@@ -1377,13 +1450,14 @@ public static class KokomiPlan
             // rule in this arm already takes -- "the next Plan" means "in this
             // drain" -- and it is what lets the Rare pay a one-Plan morning.
             var times = (index == 0 ? CarryOutTimes(kokomi) : 1)
-                      + (extraThis ? 1 : 0);
+                      + (extraThis ? 1 : 0)
+                      + System.Math.Max(0, entry.Extra);
             for (var i = 0; i < times; i++)
             {
                 var (wroteDouble, wroteExtra, armed) = await ResolveEntry(
                     choiceContext, kokomi, entry, doubleDamage: doubleThis,
                     drainPlans: drainPlans, scoutDraw: scoutRate,
-                    scoutSource: scoutSource);
+                    scoutSource: scoutSource, drainEntries: due.Count);
                 // OR'd ACROSS THIS ENTRY'S OWN CARRY-OUTS, for the reason
                 // above: an entry doubled by Nereid's prints its rider twice
                 // and twice said twice is still twice.
@@ -1806,7 +1880,13 @@ public static class KokomiPlan
         await Sync(choiceContext, kokomi, "rule:carried_out_now", before);
         // `EB-329`: Change of Plans is one of the two mid-turn doors, and its
         // card says so in as many words -- "carries out your front Plan NOW".
-        await ResolveNow(choiceContext, kokomi, front);
+        // THE EXPANSION: an All Streams gift rides the entry, so a hurried
+        // Plan is carried out its full number of times too.
+        for (var i = 0; i <= System.Math.Max(0, front.Extra); i++)
+        {
+            if (kokomi.IsDead) return;
+            await ResolveNow(choiceContext, kokomi, front);
+        }
     }
 
     /// <summary>
@@ -1869,7 +1949,8 @@ public static class KokomiPlan
     private static async Task<(bool Double, bool Extra, int Scout)> ResolveEntry(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry,
         bool onPlay = false, bool doubleDamage = false,
-        int drainPlans = 1, int scoutDraw = 0, string? scoutSource = null)
+        int drainPlans = 1, int scoutDraw = 0, string? scoutSource = null,
+        int drainEntries = 1)
     {
         var wroteDouble = false;
         var wroteExtra = false;
@@ -1935,7 +2016,7 @@ public static class KokomiPlan
                 var wanted = AskedFor(kokomi, clause, drainPlans);
                 var produced = await ResolveOne(choiceContext, kokomi, clause,
                                                 entry, doubleDamage,
-                                                drainPlans);
+                                                drainPlans, drainEntries);
                 if (number == null && produced != null)
                 {
                     number = produced;
@@ -1970,6 +2051,9 @@ public static class KokomiPlan
         // its reason: this is the one place a Plan is carried out, once per
         // carry-out, so a doubled carry-out adds twice.
         Relics.TamakushiCasket.NoteCarriedOut(kokomi);
+        // THE EXPANSION, GRAND DESIGN: "Whenever the Bake-Kurage carries out a
+        // Plan that cost 2 or more, the Casket gains 2 more." Per carry-out.
+        GrandDesignPower.Note(kokomi, entry);
 
         foreach (var power in kokomi.Powers.ToList())
         {
@@ -2178,7 +2262,7 @@ public static class KokomiPlan
     private static async Task<int?> ResolveOne(
         PlayerChoiceContext choiceContext, Creature kokomi, Planned plan,
         Entry? entry = null, bool doubleDamage = false,
-        int drainPlans = 1)
+        int drainPlans = 1, int drainEntries = 1)
     {
         var player = kokomi.Player;
         if (player == null) return null;
@@ -2255,6 +2339,34 @@ public static class KokomiPlan
                 // The number on the beat is the gain.
                 KokomiOverhaulKit.GainCasket(kokomi, plan.Amount);
                 return plan.Amount;
+
+            // THE EXPANSION, BATCH ONE (2026-09-29).
+            case Kind.EnergyIfAlone:
+                if (drainEntries > 1) return 0;
+                await PlayerCmd.GainEnergy(plan.Amount, player);
+                return plan.Amount;
+
+            case Kind.DamageIfAlone:
+                return await Hit(choiceContext, kokomi, plan,
+                                 drainEntries > 1 ? plan.Amount
+                                                  : plan.Amount * 2,
+                                 entry, doubleDamage);
+
+            case Kind.BlockPerAttackingEnemy:
+            {
+                var attackers = IntendingAttack(kokomi).Count;
+                if (attackers <= 0) return 0;
+                return (int)await CreatureCmd.GainBlock(
+                    kokomi, plan.Amount * attackers, ValueProp.Move, null);
+            }
+
+            case Kind.DoubleBlock:
+            {
+                var standing = (int)kokomi.Block;
+                if (standing <= 0) return 0;
+                return (int)await CreatureCmd.GainBlock(
+                    kokomi, standing, ValueProp.Unpowered, null);
+            }
 
             case Kind.AttackDamageThisTurn:
                 // R276, BATTLE PLAN: "This turn, your Attacks deal N more
@@ -2446,11 +2558,13 @@ public static class KokomiPlan
         Kind.AllyDraw => "cards drawn",
         Kind.Energy => "Energy",
         Kind.Block or Kind.BlockPerPlanThisMorning
-            or Kind.BlockPerPlanHeld => "Block",
+            or Kind.BlockPerPlanHeld or Kind.BlockPerAttackingEnemy
+            or Kind.DoubleBlock => "Block",
+        Kind.EnergyIfAlone => "Energy",
         Kind.Mend => "HP healed",
         Kind.Damage or Kind.DamageQuarterMaxHp
             or Kind.DamagePerCompanionLastTurn
-            or Kind.DamageIfUnhurt => "damage",
+            or Kind.DamageIfUnhurt or Kind.DamageIfAlone => "damage",
         Kind.BlockFrontIntent => "Block",
         Kind.ApplyWeak => "Weak",
         Kind.ApplyVulnerable => "Vulnerable",
@@ -2507,6 +2621,10 @@ public static class KokomiPlan
         // emptied the dusk entries out, and nothing between here and the
         // `GainBlock` touches the queue.
         Kind.BlockPerPlanHeld => plan.Amount * PlansHeld(kokomi),
+        // THE EXPANSION: Evening Watch's rate times the attackers on screen.
+        Kind.BlockPerAttackingEnemy =>
+            plan.Amount * IntendingAttack(kokomi).Count,
+        Kind.DoubleBlock => (int)kokomi.Block,
         Kind.DamagePerCompanionLastTurn =>
             plan.Amount * KokomiOverhaulLedger.For(kokomi)
                               .CompanionsPlayedLastTurn,

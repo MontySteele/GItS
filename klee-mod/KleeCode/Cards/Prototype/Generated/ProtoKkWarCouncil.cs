@@ -74,7 +74,7 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
     {
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
             return;
         }
         foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())

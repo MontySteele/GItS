@@ -1270,11 +1270,9 @@
               amount_formula: {base: 5, per: 1, count: casket_count}}],
    upgrade: {formula_base: 3}}
 
-- {id: proto_kk_the_clouds_like_waves, name: "The Clouds Like Waves Rippling", character: kokomi,
-   authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   description: "Whenever you apply a debuff to an enemy, gain 2 [gold]Block[/gold].",
-   effects: [{op: apply_power, power: kk_clouds_like_waves, amount: 2, target: self}]}
+# THE CLOUDS LIKE WAVES RIPPLING IS CUT (EXPANSION BATCH ONE, 2026-09-29):
+# Watatsumi's Grace replaces it (paper pick 3). Tombstoned in
+# docs/retired-card-ids.yaml; provenance note, "expansion batch one".
 
 - {id: proto_kk_the_moon_a_ship, name: "The Moon, A Ship O'er the Seas", character: kokomi,
    authored_by: [claude],
@@ -1690,6 +1688,212 @@
    plan: [{op: apply_power, power: weak, amount: 1, target: front_enemy}],
    # Plan 2 Weak.
    upgrade: {plan_power_amount: 1}}
+
+# --- THE EXPANSION, BATCH ONE (2026-09-29, review/active/kokomi-expansion-
+# 2026-09-29.md, ruled): 22 rows, LAST in the sheet's order. Readings and the
+# upgrades the paper leaves open: provenance note, "expansion batch one". ---
+
+# The Big Plan: its cards read the Energy paid for the Plans waiting, which a
+# 0-cost feeder never adds to.
+
+- {id: proto_kk_weight_of_the_plan, name: "Weight of the Plan", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Energy[/gold] paid for the [gold]Plans[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 5, per: 3, count: plan_energy_waiting}}],
+   # 7, plus 3 each.
+   upgrade: {formula_base: 2}}
+
+- {id: proto_kk_lull, name: "Lull", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: If it is the only [gold]Plan[/gold] carried out at the start of your turn, gain 2 [gold]Energy[/gold].",
+   effects: [{op: block, amount: 7}],
+   plan: [{op: energy_if_alone, amount: 2}],
+   # 10 Block; the Plan line does not upgrade.
+   upgrade: {block: 3}}
+
+- {id: proto_kk_undertide_lance, name: "Undertide Lance", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: uncommon,
+   description: "Deal 8 damage to ALL enemies. [gold]Plan[/gold]: Deal 16 damage, doubled if no other [gold]Plan[/gold] is carried out at the start of your turn.",
+   effects: [{op: damage, amount: 8, target: all_enemies}],
+   plan: [{op: damage_if_alone, amount: 16, target: front_enemy}],
+   # 11 to ALL / Plan 20.
+   upgrade: {damage: 3, plan_damage: 4}}
+
+- {id: proto_kk_measured_breath, name: "Measured Breath", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 6 [gold]Block[/gold]. If no [gold]Plan[/gold] is waiting, draw {KkAmount:diff()} card{KkAmount:plural:|s}.",
+   effects: [{op: block, amount: 6},
+             {op: kokomi, kind: draw_if_no_plan, amount: 2}],
+   # 9 Block.
+   upgrade: {block: 3}}
+
+- {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold] that cost 2 or more, the [gold]Casket[/gold] gains 2 more.",
+   # No upgrade on the paper: the Prototype-stage rule's default stands.
+   effects: [{op: apply_power, power: kk_grand_design, amount: 2, target: self}]}
+
+- {id: proto_kk_the_long_game, name: "The Long Game", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   description: "At the start of your turn, if exactly one [gold]Plan[/gold] is waiting, gain 1 [gold]Energy[/gold].",
+   effects: [{op: apply_power, power: kk_the_long_game, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_masterstroke, name: "Masterstroke", character: kokomi,
+   authored_by: [claude],
+   cost: 3, type: attack, rarity: rare, retain: true,
+   description: "[gold]Plan[/gold]: Deal 30 damage.",
+   effects: [],
+   plan: [{op: damage, amount: 30, target: front_enemy}],
+   # Plan 40.
+   upgrade: {plan_damage: 10}}
+
+- {id: proto_kk_all_streams_flow_to_the_sea, name: "All Streams Flow to the Sea", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: rare, exhaust: true,
+   # Her C5. The paper's face is 140 of the 120 ceiling; the cards already
+   # sit in the discard pile, so that clause is the one cut (provenance note).
+   description: "Exhaust. Cancel all your [gold]Plans[/gold]. Your next [gold]Plan[/gold] this turn is carried out once more for each [gold]Plan[/gold] cancelled.",
+   # No upgrade on the paper: the Prototype-stage rule's default stands.
+   effects: [{op: kokomi, kind: all_streams}]}
+
+# Tide Control: Weak and Vulnerable, and the payoffs that read them.
+
+- {id: proto_kk_drowning_pressure, name: "Drowning Pressure", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   # "Each debuff" is each DISTINCT debuff on the enemy; an elemental aura is
+   # a Buff in both engines and does not count.
+   description: "Deal {ExtraDamage:diff()} damage for each debuff on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 0, per: 4, count: debuffs_on_target}}],
+   # 6 each.
+   upgrade: {formula_per: 2}}
+
+- {id: proto_kk_salt_in_the_wound, name: "Salt in the Wound", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Apply 1 [gold]Vulnerable[/gold]. If the enemy has [gold]Weak[/gold], draw {KkAmount:diff()} card{KkAmount:plural:|s}.",
+   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy},
+             {op: kokomi, kind: draw_if_target_weak, amount: 1, target: enemy}],
+   # draw 2.
+   upgrade: {kokomi_amount: 1}}
+
+- {id: proto_kk_undercurrent_snare, name: "Undercurrent Snare", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies.",
+   effects: [{op: apply_power, power: weak, amount: 2, target: enemy}],
+   plan: [{op: apply_power, power: vulnerable, amount: 1, target: all_enemies}],
+   # Plan 2 Vulnerable to ALL; the now-line does not upgrade.
+   upgrade: {plan_power_amount: 1}}
+
+- {id: proto_kk_tidal_resonance, name: "Tidal Resonance", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Draw {KkAmount:diff()} card{KkAmount:plural:|s} for each enemy that already had an element.",
+   # No upgrade on the paper: the Prototype-stage rule's default stands.
+   effects: [{op: kokomi, kind: resonance, amount: 1}]}
+
+- {id: proto_kk_at_waters_edge, name: "At Water's Edge", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   # Her C1. Any reaction on an enemy, whoever caused it.
+   description: "Whenever an [gold]Elemental Reaction[/gold] happens on an enemy, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to it.",
+   effects: [{op: apply_power, power: kk_at_waters_edge, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_ceremonial_garment, name: "Ceremonial Garment", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Your Attacks deal {PowerAmount:diff()} additional damage for each debuff on their target.",
+   effects: [{op: apply_power, power: kk_ceremonial_garment, amount: 1, target: self}],
+   # 2 per debuff.
+   upgrade: {power_amount: 1}}
+
+- {id: proto_kk_suffocating_deep, name: "Suffocating Deep", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare, exhaust: true,
+   description: "Deal 6 damage to ALL enemies. Double each enemy's [gold]Weak[/gold] and [gold]Vulnerable[/gold]. Exhaust.",
+   effects: [{op: damage, amount: 6, target: all_enemies},
+             {op: kokomi, kind: double_weak_vulnerable}],
+   # 9 to ALL.
+   upgrade: {damage: 3}}
+
+# Dusk Guard: Block that is paid off, and guarded (paper sec.4).
+
+- {id: proto_kk_coral_crash, name: "Coral Crash", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal damage equal to your [gold]Block[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # No upgrade on the paper: the Prototype-stage rule's default stands.
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 0, per: 1, count: player_block}}]}
+
+- {id: proto_kk_evening_watch, name: "Evening Watch", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Draw 1 card. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold] for each enemy intending to attack.",
+   effects: [{op: draw, amount: 1}],
+   plan: [{op: block_per_attacking_enemy, amount: 5}],
+   plan_dusk: true,
+   # Plan 7 each; the now-line does not upgrade.
+   upgrade: {plan_block: 2}}
+
+- {id: proto_kk_brace_for_the_tide, name: "Brace for the Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Exhaust. [gold]Dusk[/gold] [gold]Plan[/gold]: Double your [gold]Block[/gold].",
+   # No upgrade on the paper; the rule's default (Exhaust off) would undo
+   # paper sec.4 guard 2, so it costs 0 instead (flagged in the build PR).
+   effects: [],
+   plan: [{op: double_block}],
+   plan_dusk: true,
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_watatsumis_grace, name: "Watatsumi's Grace", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   # Replaces The Clouds Like Waves Rippling (paper pick 3). The base game's
+   # Sturdy Clamp shape: Block above the cap is lost, up to the cap is kept.
+   description: "At the end of your turn, keep up to {PowerAmount:diff()} of your [gold]Block[/gold].",
+   effects: [{op: apply_power, power: kk_watatsumis_grace, amount: 10, target: self}],
+   # keep 15.
+   upgrade: {power_amount: 5}}
+
+- {id: proto_kk_tidal_riposte, name: "Tidal Riposte", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   # "Fully Blocked": a hit Block absorbed whole (0 HP lost because of Block),
+   # once per hit.
+   description: "Whenever an enemy's attack is fully blocked, deal {PowerAmount:diff()} damage to it.",
+   effects: [{op: apply_power, power: kk_tidal_riposte, amount: 5, target: self}],
+   # 7.
+   upgrade: {power_amount: 2}}
+
+# Plan volume: more feed, and a Casket payoff for writing it.
+
+- {id: proto_kk_shoal_call, name: "Shoal Call", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Add {KkAmount:diff()} Nips to your hand.{IfUpgraded:show: They are upgraded.|}",
+   effects: [{op: kokomi, kind: shoal_call, amount: 2}],
+   # The Nips arrive upgraded: a play-time read, the face's own swap.
+   upgrade: {upgraded_grant: true}}
+
+- {id: proto_kk_kurage_swarm, name: "Kurage Swarm", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever you write a [gold]Plan[/gold] that costs 0, the [gold]Casket[/gold] gains 1.",
+   effects: [{op: apply_power, power: kk_kurage_swarm, amount: 1, target: self}],
+   upgrade: {cost: -1}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.

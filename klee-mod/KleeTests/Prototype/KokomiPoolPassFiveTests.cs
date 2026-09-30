@@ -164,7 +164,8 @@ public class KokomiPoolPassFiveTests
         Assert.Contains("KokomiTargets.PetOrEnemy", source);
         // The Dusk row that IS written-only still is, tip and all.
         Assert.Contains("KokomiTargets.PetOnly", Source("ProtoKkBreakwater"));
-        Assert.Contains("this, PlanClauses, dusk: true);",
+        // Expansion batch one (2026-09-29): the paid Energy rides the write.
+        Assert.Contains("this, PlanClauses, dusk: true, paid: ",
                         Source("ProtoKkBreakwater"));
     }
 

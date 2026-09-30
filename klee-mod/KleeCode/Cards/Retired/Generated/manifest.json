@@ -242,6 +242,11 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_THE_CLOUDS_LIKE_WAVES",
+      "class": "RetiredProtoKkTheCloudsLikeWaves",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_THE_MOON_OVERLOOKS_THE_WATERS",
       "class": "RetiredProtoKkTheMoonOverlooksTheWaters",
       "owner": "kokomi"

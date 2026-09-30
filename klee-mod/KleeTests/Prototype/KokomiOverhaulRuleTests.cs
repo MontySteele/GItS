@@ -371,6 +371,11 @@ public class KokomiOverhaulRuleTests
         //
         // TWENTY-SEVEN WITH THE CASKET PASS (2026-09-28): Pearl Diver's
         // `CasketGain`, appended last.
+        //
+        // THIRTY-ONE WITH EXPANSION BATCH ONE (2026-09-29): Lull's
+        // `EnergyIfAlone`, Undertide Lance's `DamageIfAlone`, Evening Watch's
+        // `BlockPerAttackingEnemy` and Brace for the Tide's `DoubleBlock`,
+        // appended last.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
@@ -383,7 +388,8 @@ public class KokomiOverhaulRuleTests
                     "DamageIfUnhurt", "AttackDamageThisTurn",
                     "BlockFrontIntent", "AllyDraw",
                     "OthersAttackDamageThisTurn", "FirstCompanionFree",
-                    "CasketGain" },
+                    "CasketGain", "EnergyIfAlone", "DamageIfAlone",
+                    "BlockPerAttackingEnemy", "DoubleBlock" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -777,18 +783,15 @@ public class KokomiOverhaulRuleTests
         Assert.True(seq.IndexOf("CardPileCmd.Add") < seq.IndexOf("CardCmd.AutoPlay"));
     }
 
-    // ---- the debuff event, which two things read -------------------------
+    // ---- the debuff event left with its last reader ----------------------
 
     [Fact]
-    public void The_clouds_read_the_one_definition_of_the_event()
+    public void The_casket_declares_no_debuff_hook()
     {
-        // The relic answered the same event until the Casket pass
-        // (2026-09-28) retired its strike; the Rare still asks the one
-        // predicate, and the relic declares no debuff hook at all.
-        Assert.Contains("KokomiOverhaulKit.IsHerDebuffOnEnemy",
-                        Il.Calls(typeof(CloudsLikeWavesPower)
-                            .GetMethod("AfterPowerAmountChanged",
-                                       HeadlessGame.All)!));
+        // The relic answered "she applied a debuff" until the Casket pass
+        // (2026-09-28) retired its strike; The Clouds Like Waves Rippling was
+        // the event's last reader and left the pool with expansion batch one
+        // (2026-09-29).
         Assert.Null(typeof(global::KleeMod.Relics.TamakushiCasket)
             .GetMethod("AfterPowerAmountChanged",
                        HeadlessGame.All
@@ -937,8 +940,10 @@ public class KokomiOverhaulRuleTests
         // Salt Line cut, thirteen rows added. FORTY-FOUR since the cleanup
         // pass (2026-09-29) cut Scout Ahead and Song of Pearls. FORTY-EIGHT
         // since the feed pass (2026-09-29): Exposed Flank cut, five added.
+        // SIXTY-NINE since expansion batch one (2026-09-29): The Clouds Like
+        // Waves cut, 22 added.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(48, Il.CallSequence(slice)
+        Assert.Equal(69, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

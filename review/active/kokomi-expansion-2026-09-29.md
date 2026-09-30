@@ -1,7 +1,7 @@
 # Kokomi expansion, batch one: four decks
 
 Paper, 2026-09-29. Main session design. **All four picks RULED 2026-09-29,
-[USER]: "The defaults work here".** Next: the sim (§5), then the build. The kit's rules
+[USER]: "The defaults work here".** Built in both engines (2026-09-29), with the §5 sim run on the built rows; readings and results in `docs/notes/prototype-surface-provenance.md`, "expansion batch one". The kit's rules
 are in `review/active/kokomi-brief-2026-09-01.md` §2; this paper adds cards
 only and changes no rule.
 

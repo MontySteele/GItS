@@ -156,48 +156,6 @@ public sealed class PrincessOfWatatsumiPlanPower
 }
 
 /// <summary>
-/// The Clouds Like Waves Rippling (Rare): "Whenever you apply a debuff to an
-/// enemy, gain 2 Block."
-///
-/// THE SAME EVENT THE CASKET READS, through the same one predicate
-/// (<see cref="KokomiOverhaulKit.IsHerDebuffOnEnemy"/>), so the relic and this
-/// card can never disagree about what applying a debuff was. That matters here
-/// more than anywhere: the pool's status lines feed the relic ON PURPOSE
-/// (slice sec.4), so a player holding both is meant to see two things happen
-/// off one clause.
-///
-/// PER APPLICATION, NOT PER STACK. `War Council`'s "apply 1 Weak to each" over
-/// three enemies is three applications and three payouts; one card applying 2
-/// Weak to one enemy is one.
-/// </summary>
-public sealed class CloudsLikeWavesPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "The Clouds Like Waves Rippling"),
-        ("description",
-            "Whenever you apply a debuff to an enemy, gain [blue]{Amount}[/blue] "
-          + "[gold]Block[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override async Task AfterPowerAmountChanged(
-        PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
-        Creature? applier, CardModel? cardSource)
-    {
-        if (Owner == null || Amount <= 0) return;
-        if (!KokomiOverhaulKit.IsHerDebuffOnEnemy(power, amount, applier, Owner))
-        {
-            return;
-        }
-        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
-    }
-}
-
-/// <summary>
 /// The General's Banner: "Once per turn, when you play a Companion card, apply
 /// 1 Weak to the front enemy."
 ///

@@ -309,6 +309,8 @@ SIM_CALL_SITES = {
     # Kokomi core pass: Song of Pearls' strike, dealt as a planned hit is.
     # (The Casket's strike sat between these two until the Casket pass.)
     ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
+    # Expansion batch one: Tidal Riposte's answer, dealt as a planned hit is.
+    ('kokomi_plan.py', 3): ("'plan'", 'False', "'hydro'"),
     # VARKA, THE OATH REWORK (`varka_oath.VARKA_OATH`, off). The Pyro and
     # Electro Swirl payouts: element-less, unpowered, his card's
     # (`ElementalHit.DealUnelemented(powered: false)`).

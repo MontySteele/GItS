@@ -1002,7 +1002,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # this turn rather than next.
     klee_overhaul.turn_start(state)
     if refpowers.should_clear_block(p):      # Barricade suppresses the clear
-        p.block = 0
+        # QUARANTINED (C.KOKOMI_OVERHAUL). THE EXPANSION's Watatsumi's Grace:
+        # "keep up to N of your Block" -- the clear takes what is above the
+        # cap (the base game's Sturdy Clamp shape). None without the Power.
+        kept = kokomi_plan.grace_keeps(state)
+        p.block = 0 if kept is None else kept
 
     # THE COMPANION LEDGER'S HANDOVER, on the line above the clear rather than
     # in a hook of its own: this turn's count becomes last turn's, in the ONE
@@ -1142,6 +1146,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         # `TamakushiCasket.BeforeHandDraw` are the twins.
         kokomi_plan.deal_open_the_casket(state)
         kokomi_plan.moon_signal(state, len(state.kk_plan_queue))
+        # THE EXPANSION's The Long Game, off the same pre-drain queue.
+        kokomi_plan.long_game(state, len(state.kk_plan_queue))
         kokomi_plan.resolve_all(state)
         kokomi_plan.song_of_pearls(state, quiet)
         # `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning
@@ -1614,6 +1620,11 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             refpowers.on_damage_received(state, state.player,
                                          unblocked=dmg - blocked, dealer=enemy,
                                          powered_attack=True)
+            # QUARANTINED (C.KOKOMI_OVERHAUL). THE EXPANSION's Tidal Riposte:
+            # a hit Block absorbed whole answers back, once per hit.
+            if C.KOKOMI_OVERHAUL:
+                kokomi_plan.tidal_riposte(state, enemy, blocked,
+                                          dmg - blocked)
             # QUARANTINED (`furina_stage.FURINA_STAGE`). RULE 7, 2026-09-25:
             # a lead this hit emptied takes its Bow NOW -- after the hit is
             # dealt and before the next hit of the intent, the mod's

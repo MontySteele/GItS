@@ -273,13 +273,26 @@ The pool is 48: 20 Common, 23 Uncommon, 5 Rare, plus the three co-op cards.
 The starter is unchanged. Rows, art and the sim read:
 `docs/notes/prototype-surface-provenance.md`, "the feed pass".
 
+### Expansion batch one (2026-09-29)
+
+Paper `review/active/kokomi-expansion-2026-09-29.md`, every pick ruled at the
+default ([USER]: "The defaults work here"): four decks (Plan volume, the Big
+Plan reading the Energy paid for the Plans waiting, Tide Control, Dusk Guard),
+22 cards, 12 Uncommon and 10 Rare, and Watatsumi's Grace replaces The Clouds
+Like Waves Rippling. No rule of §2 changes. The pool is 69: 20 Common, 35
+Uncommon, 14 Rare, plus the three co-op cards. Rows, the readings the build
+took and the sim read: `docs/notes/prototype-surface-provenance.md`,
+"expansion batch one".
+
 Rares take constellation names (C1 to C6 are all unused but Sango Isshin
 and The Clouds Like Waves). Cut and not coming back: Tide, Surge, Exert,
 the pulse, Orders, Tactics, Spent, Garment as a keyword, Flawless Strategy,
 the two-Plan cap (R266), Night Watch and Converging Tide (retired on the
 pool passes), The Moon Overlooks the Waters (withdrawn at the door, 2026-09-05),
 Scout Ahead and Song of Pearls (the cleanup pass, 2026-09-29), Exposed Flank
-(the feed pass, 2026-09-29).
+(the feed pass, 2026-09-29), The Clouds Like Waves Rippling (expansion batch
+one, 2026-09-29; Watatsumi's Grace, her C1 At Water's Edge and her C5 All
+Streams Flow to the Sea take constellation slots).
 
 ## 7. What the engine does
 
