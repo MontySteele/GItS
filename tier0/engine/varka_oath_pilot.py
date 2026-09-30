@@ -172,6 +172,14 @@ class VarkaOathPilot:
         order = self._need_order(state, vs, playable, cost)
         rank = {el: i for i, el in enumerate(order)}
         ok = [(c, el) for c, el in knights if el in rank]
+        # R5 Lisa: Violet Arc pays per Attack already played this turn, so
+        # she waits while an affordable Attack could still go before her
+        # and the Energy covers both.
+        atk = [c for c in playable if c.type == "attack"]
+        ok = [(c, el) for c, el in ok
+              if not (_base(c).startswith("lisa_r5") and any(
+                  cost[id(a)] + cost[id(c)] <= state.player.energy
+                  for a in atk))]
         ok.sort(key=lambda t: (rank[t[1]], -self._dmg_est(state, vs, t[0])))
         return ok
 

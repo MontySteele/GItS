@@ -100,7 +100,7 @@ def gain_oath(state, vs, element, n=1, source="apply") -> None:
     if vs.dawn and element == vs.current:
         # R4 Dawn Wind's March: "Whenever you gain Oath of your current
         # element, gain 2 Block" -- per gain event, not per point.
-        blk = DAWN_BLOCK * vs.dawn
+        blk = vs.dawn_amt * vs.dawn
         state.player.block += blk
         vs.dawn_block += blk
         state.emit("block", amount=blk)
@@ -126,7 +126,7 @@ def set_current(state, vs, element, knight=True) -> None:
         # R4 Favonian Standard: "Whenever you play a Knight of your current
         # element" -- read as the element current BEFORE the Knight, i.e. a
         # Knight that keeps him where he is.
-        blk = STANDARD_BLOCK * vs.standard
+        blk = vs.std_amt * vs.standard
         state.player.block += blk
         vs.standard_block += blk
         state.emit("block", amount=blk)
@@ -163,6 +163,8 @@ def on_hit_pre(state, vs, enemy, element) -> None:
         return
     if vs.per_card and vs.asc_elemental:
         return          # R3b: Ascension's elemental hit gains no Oath
+    if vs.no_apply:
+        return          # R5 Baron Bunny's burst credits its Oath itself
     if not _once_per_play(state, vs, element, "apply"):
         return
     # 2026-09-29 second spec update: EVERY direct application counts,
@@ -182,7 +184,14 @@ def on_swirl(state, vs, enemy, aura) -> None:
         return
     cur = vs.current
     if cur == "pyro":
-        if enemy.alive:
+        if vs.pyro_all:
+            # R5 contingency: "3 damage to every enemy that Swirl touched",
+            # read as every living enemy now wearing the Swirled element
+            # (the struck enemy, the spread copies, and any already on it).
+            for e in [e for e in state.living_enemies if e.aura == aura]:
+                reactions._splash(state, e, PAY_PYRO)
+                vs.pay["pyro_dmg"] += PAY_PYRO
+        elif enemy.alive:
             reactions._splash(state, enemy, PAY_PYRO)
             vs.pay["pyro_dmg"] += PAY_PYRO
     elif cur == "hydro":
@@ -215,6 +224,8 @@ def turn_start(state) -> None:
     vs = _vs(state)
     if vs is None:
         return
+    if vs.bunny:
+        _bunny_fire(state, vs)
     for _ in range(vs.sworn):
         for el in ELEMENTS:
             gain_oath(state, vs, el, 1, "sworn")
@@ -316,7 +327,7 @@ def op_oath(state, fx, card) -> None:
             gain_oath(state, vs, el, 1, "accord")
     elif kind == "roll_call":
         name = state.rng.choice(tuple(vs.roll_pool))
-        c = make_card(name)
+        c = make_card(vs.swap.get(name, name))
         c.free_this_turn = True
         if len(state.player.hand) < HAND_LIMIT:
             state.player.hand.append(c)
@@ -527,12 +538,14 @@ def build_player(deck: list[str], payout: bool = True,
                  apply_oath: bool = True, hp: int | None = None,
                  per_card: bool = False, starter_set: str | None = None,
                  pay_electro: int = PAY_ELECTRO_ALL,
-                 electro_draw: bool = False, r4: bool = False):
+                 electro_draw: bool = False, r4: bool = False,
+                 swap: dict | None = None, std_amt: int = 3,
+                 dawn_amt: int = 2, pyro_all: bool = False):
     """A fresh rev-3 Varka for one fight, holding exactly `deck` (card
     names; use `starter(el)` + extras)."""
     from tier0.engine.state import Player
-    swap = STARTER_SETS.get(starter_set, {})
-    cards = [make_card(swap.get(n, n)) for n in deck]
+    swap_all = dict(STARTER_SETS.get(starter_set, {}), **(swap or {}))
+    cards = [make_card(swap_all.get(n, n)) for n in deck]
     hp = V.HP if hp is None else hp
     player = Player(hp=hp, max_hp=max(hp, V.HP), draw_pile=cards,
                     element=V.ELEMENT, cadence="catalyst",
@@ -543,6 +556,8 @@ def build_player(deck: list[str], payout: bool = True,
     vs.per_card = per_card
     vs.pay_electro = pay_electro
     vs.electro_draw = electro_draw
+    vs.swap = dict(swap or {})
+    vs.std_amt, vs.dawn_amt, vs.pyro_all = std_amt, dawn_amt, pyro_all
     if r4:
         vs.roll_pool = R4_KNIGHTS
     player.varka = vs
@@ -838,6 +853,69 @@ POOL4 = {
 def starter4(element: str) -> list[str]:
     return (["strike"] * 4 + ["defend"] * 4
             + ["windbound_execution", STARTER_KNIGHTS4[element]])
+
+
+
+# ==========================================================================
+#  R5: paper sec.10 Picks. Pick 2 (RULED): Lisa: Violet Arc and Amber: Baron
+#  Bunny re-aimed. Picks 3 and 4 run as arms (`std_amt`, `dawn_amt`, the
+#  `northwind_avatar_c` card). Readings:
+#    * Lisa counts `state.attacks_played_this_turn` when she resolves; she is
+#      a Skill, so she never counts herself.
+#    * Baron Bunny's burst fires at the post-draw turn start (before Sworn
+#      Brotherhood and Oath of the Knights), 6 Pyro to each living enemy
+#      through the ordinary damage door (source "card", unpowered by
+#      Strength), and gains exactly 1 Pyro Oath per Bunny played, as a card
+#      application; it does not change the current element.
+# ==========================================================================
+
+
+def _r5_lisa(state, vs, fx, card):
+    from tier0.engine import effects
+    n = state.attacks_played_this_turn
+    blk = fx["per"] * n
+    if blk:
+        effects._op_block(state, {"op": "block", "amount": blk}, card)
+    vs.lisa_rows.append((state.turn, n, blk))
+
+
+def _r5_bunny(state, vs, fx, card):
+    vs.bunny.append(fx["amount"])
+
+
+def _bunny_fire(state, vs):
+    from tier0.engine import effects
+    pending, vs.bunny = vs.bunny, []
+    for amount in pending:
+        vs.no_apply = True
+        try:
+            for e in list(state.living_enemies):
+                effects.deal_damage_to_enemy(state, e, amount, element="pyro",
+                                             source="card", powered=False)
+        finally:
+            vs.no_apply = False
+        gain_oath(state, vs, "pyro", 1, "bunny")
+        vs.bunny_rows.append((state.turn, amount))
+
+
+R4_OPS.update({"lisa_block": _r5_lisa, "bunny": _r5_bunny})
+
+CARD_BUILDERS.update({
+    "lisa_r5": lambda: _knight(
+        "lisa_r5", "Lisa: Violet Arc", "electro",
+        [{"op": "apply_aura", "element": "electro", "target": "enemy"},
+         _o("lisa_block", per=3)]),
+    "lisa_r5_4": lambda: _knight(
+        "lisa_r5_4", "Lisa: Violet Arc (4)", "electro",
+        [{"op": "apply_aura", "element": "electro", "target": "enemy"},
+         _o("lisa_block", per=4)]),
+    "amber_r5": lambda: _knight(
+        "amber_r5", "Amber: Baron Bunny", "pyro",
+        [{"op": "block", "amount": 6}, _o("bunny", amount=6)]),
+    "northwind_avatar_c": lambda: _card(
+        "northwind_avatar_c", "Northwind Avatar", 2, "attack", "rare",
+        [_o("northwind", anemo=10, elem=10, per=2)]),
+})
 
 
 

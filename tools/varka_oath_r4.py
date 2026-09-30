@@ -460,6 +460,119 @@ def main(argv=None):
         sec_newcards(out, by)
     if "branch" in only:
         sec_branch(out, args.seeds, args.seed, args.jobs)
+    if "r5" in only:
+        sec_r5(out, args.seeds, args.seed, args.jobs)
+
+
+
+# ==========================================================================
+#  R5: paper sec.10 Picks (pick 2 ruled; picks 3 and 4 as arms). E-AoE only.
+# ==========================================================================
+
+_R5_SWAP = {"lisa": "lisa_r5", "amber": "amber_r5"}
+_R5_BASE = dict(V4["E-AoE"], swap=_R5_SWAP)
+V5 = {
+    "a": _R5_BASE,
+    "a-Lisa4": dict(_R5_BASE, swap=dict(_R5_SWAP, lisa="lisa_r5_4")),
+    "b": dict(_R5_BASE, std_amt=4, dawn_amt=3),
+    "c": dict(_R5_BASE, swap=dict(_R5_SWAP,
+                                  northwind_avatar="northwind_avatar_c")),
+    "d": dict(_R5_BASE, std_amt=4, dawn_amt=3,
+              swap=dict(_R5_SWAP, northwind_avatar="northwind_avatar_c")),
+    "a-PyroAll": dict(_R5_BASE, pyro_all=True),
+}
+R.ALLVAR.update({f"R5{k}": v for k, v in V5.items()})
+
+
+def sec_r5(out, seeds, seed0, jobs):
+    out(f"\n## R5. Pick 2 ruled (Lisa, Baron Bunny); picks 3 and 4 as arms "
+        f"(E-AoE; n = {seeds} runs per cell, seeds {seed0}.., paired)")
+    out("a = pick 2 baseline; a-Lisa4 = Lisa at 4 per Attack; b = a + "
+        "Favonian Standard 4, Dawn Wind's March 3; c = a + Northwind Avatar "
+        "cost 2, 10/10 + 2 per Oath; d = b + c; a-PyroAll = a + the "
+        "contingency Pyro payout (3 to every enemy wearing the Swirled "
+        "element after the Swirl).")
+    argl = [(seed0 + i, pol, h, f"R5{k}", True) for k in V5
+            for pol in ("focused", "juggling") for h in ELEMENTS
+            for i in range(seeds)]
+    rows = pmap(_w_run4, jobs, argl)
+    by = defaultdict(list)
+    for r in rows:
+        by[(r["variant"][2:], r["policy"], r["home"])].append(r)
+    out("\n| arm | pilot | Pyro | Hydro | Electro | Cryo | spread | >10 "
+        "behind the leader |")
+    out("|---|---|---|---|---|---|---|---|")
+    for k in V5:
+        for pol in ("focused", "juggling"):
+            w = {}
+            cells = []
+            for h in ELEMENTS:
+                rs = by[(k, pol, h)]
+                n, won = len(rs), sum(r["won"] for r in rs)
+                w[h] = 100 * won / n
+                cells.append(f"{w[h]:.1f} ±{ci95(won, n):.1f}")
+            lead = max(w, key=w.get)
+            behind = [h for h in ELEMENTS if w[lead] - w[h] > 10]
+            out(f"| {k} | {pol} | " + " | ".join(cells)
+                + f" | {max(w.values()) - min(w.values()):.1f} | "
+                f"{', '.join(behind) or 'none'} |")
+
+    def rates(k, pol, name, pid):
+        off = pk = plays = held = 0
+        for h in ELEMENTS:
+            for r in by[(k, pol, h)]:
+                for offer, pick in r["offers"]:
+                    if name in offer:
+                        off += 1
+                        pk += pick == name
+                for f in r["fights"]:
+                    c = f["deck"].count(name)
+                    if c:
+                        held += c
+                        plays += f["plays"].get(pid, 0)
+        return (f"{pct(pk, off)} of {off} offers; "
+                f"{(plays / held) if held else 0:.2f} plays per fight held")
+    out("\n**Lisa and Baron Bunny (pick and play rates; arm a unless "
+        "named)**")
+    for pol in ("focused", "juggling"):
+        out(f"- {pol}: Lisa {rates('a', pol, 'lisa', 'varka_lisa_r5')}; "
+            f"Lisa at 4 {rates('a-Lisa4', pol, 'lisa', 'varka_lisa_r5_4')}; "
+            f"Baron Bunny {rates('a', pol, 'amber', 'varka_amber_r5')}")
+    for k, pid in (("a", 3), ("a-Lisa4", 4)):
+        for pol in ("focused", "juggling"):
+            lr = [x for h in ELEMENTS for r in by[(k, pol, h)]
+                  for f in r["fights"] for x in f.get("lisa_rows", [])]
+            out(f"- Lisa Block per play, {pid} per Attack, {pol}: "
+                f"{m(x[2] for x in lr)} (Attacks before her "
+                f"{m(x[1] for x in lr)}; n = {len(lr)})")
+    out("\n**Readers under b (focused; Block per fight the Power was in "
+        "play) against a**")
+    for k in ("a", "b"):
+        std = [f["std_block"] for h in ELEMENTS for r in by[(k, "focused", h)]
+               for f in r["fights"] if f["std_on"]]
+        dawn = [f["dawn_block"] for h in ELEMENTS
+                for r in by[(k, "focused", h)] for f in r["fights"]
+                if f["dawn_on"]]
+        out(f"- {k}: Favonian Standard {m(std)} (n = {len(std)}); Dawn "
+            f"Wind's March {m(dawn)} (n = {len(dawn)})")
+    out("\n**Northwind Avatar** (focused / juggling):")
+    for k, pid in (("a", "varka_northwind_avatar"),
+                   ("c", "varka_northwind_avatar_c")):
+        out(f"- {k}: " + " / ".join(
+            rates(k, pol, "northwind_avatar", pid)
+            for pol in ("focused", "juggling")))
+    out("\n**Ascension: drafted fights with a cast over 60 by turn 8**")
+    for k in V5:
+        cells = []
+        for pol in ("focused", "juggling"):
+            fs = [f for h in ELEMENTS for r in by[(k, pol, h)]
+                  for f in r["fights"]]
+            fl = [f for f in fs if any(a["turn"] <= 8 and a["printed"] > 60
+                                       for a in f["asc"])]
+            mx = max((a["printed"] for f in fs for a in f["asc"]), default=0)
+            cells.append(f"{pol} {len(fl)} of {len(fs)} (max {mx})")
+        out(f"- {k}: " + "; ".join(cells))
+    return by
 
 
 if __name__ == "__main__":

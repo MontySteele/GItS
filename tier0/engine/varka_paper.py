@@ -200,6 +200,15 @@ class VarkaState:
     cog_choice: Optional[str] = None  # Change of Guard's element (pilot)
     roll_pool: tuple = ("amber", "barbara", "lisa", "kaeya")
     cog_rows: list = field(default_factory=list)
+    # --- R5 (paper sec.10 Picks, pick 2 ruled; picks 3-4 as arms) ---
+    swap: dict = field(default_factory=dict)      # pool name -> R5 card
+    std_amt: int = 3                  # Favonian Standard Block
+    dawn_amt: int = 2                 # Dawn Wind's March Block
+    pyro_all: bool = False            # contingency Pyro payout
+    bunny: list = field(default_factory=list)     # pending next-turn Pyro
+    bunny_rows: list = field(default_factory=list)
+    lisa_rows: list = field(default_factory=list)
+    no_apply: bool = False            # a non-card hit that gains no Oath
     tg_rows: list = field(default_factory=list)
 
 

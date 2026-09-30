@@ -315,6 +315,9 @@ SIM_CALL_SITES = {
     # THE VARKA OATH ARM, R4 (exploration, switch off): Storm Surge's "each
     # enemy it Swirls takes 5 more", element-less, on the powered door.
     ('varka_oath.py', 1): ("'attack'", None, 'None'),
+    # R5 Baron Bunny's next-turn burst: 6 Pyro to ALL, a card's hit landing
+    # at turn start, unpowered.
+    ('varka_oath.py', 2): ("'card'", 'False', "'pyro'"),
 }
 
 

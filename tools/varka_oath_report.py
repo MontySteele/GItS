@@ -142,7 +142,8 @@ def oath_fight(deck, enemies, policy, home, seed, hp=None, variant="R3b"):
             "oath_end": dict(vs.oath), "current": vs.current,
             "fang_turn": vs.asc_created_turn,
             "std_on": vs.standard > 0, "std_block": vs.standard_block,
-            "dawn_on": vs.dawn > 0, "dawn_block": vs.dawn_block}
+            "dawn_on": vs.dawn > 0, "dawn_block": vs.dawn_block,
+            "lisa_rows": list(vs.lisa_rows)}
 
 
 def ref_fight(character, pilot_id, enemies, seed, hp=None):

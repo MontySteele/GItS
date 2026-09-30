@@ -215,3 +215,23 @@ def test_r4_electro_draw_payout():
     n = len(st.player.hand)
     play(st, "updraft", aim=a)
     assert len(st.player.hand) == n + 2      # the draw + the Fang's Ascension
+
+
+@pytest.mark.usefixtures("arm")
+def test_r5_lisa_counts_attacks_and_bunny_fires_next_turn():
+    # Paper sec.10 pick 2 (ruled): Lisa 3 Block per Attack played this turn;
+    # Baron Bunny 6 Block now, 6 Pyro to ALL at the next turn start, 1 Oath.
+    st = oath_state(n=2, per_card=True, r4=True)
+    a, b = st.enemies
+    vs = st.player.varka
+    st.attacks_played_this_turn = 2
+    play(st, "lisa_r5", aim=a)
+    assert st.player.block == 6 and vs.oath["electro"] == 1
+    st.player.block = 0
+    play(st, "amber_r5", aim=a)
+    assert st.player.block == 6 and vs.bunny == [6]
+    hp = (a.hp, b.hp)
+    st.turn = 2
+    V.turn_start(st)
+    assert vs.oath["pyro"] == 1 and not vs.bunny
+    assert a.hp < hp[0] and b.hp < hp[1]
