@@ -1642,9 +1642,10 @@ ARM_KEYWORDS: dict[str, str] = {
     "Wriothesley": ("End of your turn: deal 4 Cryo damage to a random enemy, "
                     "plus 2 per Fanfare he lost to hits and 1 per damage "
                     "Block saved him."),
-    "Sigewinne": ("End of your turn: give 3 of her Fanfare to the performer "
-                  "behind her, or to your front performer if she is at the "
-                  "back."),
+    # 2026-09-29: the medic, free.
+    "Sigewinne": ("End of your turn: your front performer regains half the "
+                  "Fanfare hits took from it since her last act, at least "
+                  "2."),
     "Charlotte": "End of your turn: each other performer gains 1 Fanfare.",
     # 2026-09-25 night (the granted-guest seat round): the act always lands.
     "Lynette": ("End of your turn: deal 3 Anemo damage to a random enemy, "

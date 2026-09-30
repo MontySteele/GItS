@@ -413,6 +413,8 @@ public static partial class FurinaStage
         int arrival = FurinaStageLaw.SummonFanfare)
     {
         var ledger = FurinaStageLedger.For(owner);
+        // 2026-09-29: behind a held front (Wriothesley), the seat behind him.
+        var former = ledger.LeaverIndex;
         if (ledger.BowFromFront() is not { } leaver) return;
         var who = named ?? RollAny(owner);
         if (named == null) NoteSummoned(who);
@@ -420,8 +422,11 @@ public static partial class FurinaStage
         // the newcomer: a recast moves Fanfare, it does not spend it.
         await Bow(choiceContext, owner,
                   new StageExit(leaver.Who, StageDeparture.Spent,
-                                leaver.Fanfare, 0, leaver.LostSinceAct,
-                                leaver.BlockedSinceAct),
+                                leaver.Fanfare, former, leaver.LostSinceAct,
+                                leaver.BlockedSinceAct)
+                  {
+                      FrontLost = leaver.FrontLostSinceAct,
+                  },
                   mayReturn: false);
         if (who == leaver.Who)
         {
@@ -1053,6 +1058,7 @@ public static partial class FurinaStage
         {
             seat.LostSinceAct = 0;
             seat.BlockedSinceAct = 0;
+            seat.FrontLostSinceAct = 0;
         }
         NoteBeat(owner, beat, who, before, hit, each, struck, seat, shot,
                  caught);

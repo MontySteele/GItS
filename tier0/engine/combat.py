@@ -1908,6 +1908,7 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.stage_act_block_mult = 1
     player.stage_lost = {}
     player.stage_blocked = {}
+    player.stage_front_lost = {}
     player.stage_returned = False
     player.stage_energy_next = 0
     player.stage_verdict = None

@@ -117,8 +117,11 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   a percentage fade, say 25%?"); Held Applause, Echoing Hall and Eternal
   Applause cut (pool 75 -> 72); the Spend modes of Curtain Rise, Tidal
   Flourish, Quick Cue, Spirited Aria and Grand Entrance, and Bravura's and
-  Bring the House Down's per-point rates, raised; brief §18. Next: [USER]'s
-  run on the new fade.
+  Bring the House Down's per-point rates, raised; brief §18. After [USER]'s
+  run on the new fade ("keeping him in the front was actually hard";
+  Sigewinne "strictly fanfare-negative"), Wriothesley holds the front while
+  on stage and Sigewinne is a free medic who heals the front performer
+  (brief §18, guest paper rule 2 and table).
 
 - **Varka: prototype batch one built (2026-09-29).** Paper kit
   `review/active/varka-paper-kit-2026-09-28.md` sec.10; [USER]: "You're good

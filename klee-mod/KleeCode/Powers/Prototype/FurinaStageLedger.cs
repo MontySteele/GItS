@@ -36,10 +36,11 @@ public enum StageDeparture
 /// guest's Bow is its act and three of the acts read something:
 /// <see cref="Held"/>, the Fanfare it held as it bowed (Navia's damage; for an
 /// exit at 0 Fanfare, the bar it had before whatever emptied it);
-/// <see cref="FormerSeat"/>, the seat it stood in (Sigewinne gives to the
-/// performer behind it); and <see cref="Lost"/>, the Fanfare it lost since
-/// its last act (Wriothesley's reading, the hit that took him down
-/// included).
+/// <see cref="FormerSeat"/>, the seat it stood in; and <see cref="Lost"/>,
+/// the Fanfare it lost since its last act (Wriothesley's reading, the hit
+/// that took him down included). Since 2026-09-29 also
+/// <see cref="FrontLost"/>, what hits took from the front since its last act
+/// (Sigewinne the medic's reading).
 /// </remarks>
 public readonly struct StageExit
 {
@@ -81,6 +82,12 @@ public readonly struct StageExit
     /// stood in front, since its last act (Wriothesley's Bow reads it,
     /// 2026-09-27). <see cref="StageSeat.BlockedSinceAct"/>.</summary>
     public int Blocked { get; }
+
+    /// <summary>2026-09-29, Sigewinne the medic: what enemy hits took from
+    /// the FRONT performer, whoever it was, since its last act
+    /// (<see cref="StageSeat.FrontLostSinceAct"/>). Her Bow reads it.
+    /// </summary>
+    public int FrontLost { get; init; }
 
     /// <summary>
     /// 2026-09-25 night (the granted-guest seat round): THE BLOCK THIS BOW HAS
@@ -258,13 +265,23 @@ public sealed class StageSeat
     /// </summary>
     public int BlockedSinceAct { get; internal set; }
 
+    /// <summary>
+    /// 2026-09-29, Sigewinne the medic: what enemy hits took from the FRONT
+    /// performer, whoever stood there, since this performer's last act.
+    /// Counted on Sigewinne's seat only (herself in front included) by
+    /// <see cref="FurinaStageLedger.Absorb"/>; her act reads it and resets
+    /// it, as <see cref="LostSinceAct"/> is reset.
+    /// </summary>
+    public int FrontLostSinceAct { get; internal set; }
+
     /// <summary>A copy for the end-of-turn forecast (rule 7), which runs the
     /// ledger's own moves on a clone and never touches the real seats.</summary>
     internal StageSeat CloneForForecast() =>
         new(Who, Fanfare)
         {
             Resting = Resting, LostSinceAct = LostSinceAct,
-            BlockedSinceAct = BlockedSinceAct, Key = Key,
+            BlockedSinceAct = BlockedSinceAct,
+            FrontLostSinceAct = FrontLostSinceAct, Key = Key,
         };
 }
 
@@ -623,13 +640,16 @@ public sealed class FurinaStageLedger
             // THE SUPPORTING POOL (2026-09-26): a face may print the arrival
             // (Gala Premiere's 3); rule 3's 1 otherwise.
             var at = fanfare > 0 ? fanfare : FurinaStageLaw.SummonFanfare;
-            _seats.Add(new StageSeat(who, at));
-            Note(new StageBeat("arrive", who, _seats.Count - 1, at, 0, ""));
+            var arrived = new StageSeat(who, at);
+            Place(arrived);
+            Note(new StageBeat("arrive", who, IndexOf(arrived), at, 0, ""));
             return new StageSummon(who, at, null);
         }
 
-        var leaver = _seats[0];
-        _seats.RemoveAt(0);
+        // 2026-09-29: a held front stays; the one behind him makes room.
+        var leaverAt = LeaverIndex;
+        var leaver = _seats[leaverAt];
+        _seats.RemoveAt(leaverAt);
         _seats.Add(new StageSeat(who, leaver.Fanfare));
         // TWO BEATS AND NOT ONE, because a rotation is two things happening to
         // two performers: the front leaves with no bow (rule 3) and the
@@ -663,10 +683,61 @@ public sealed class FurinaStageLedger
     /// </summary>
     public StageSeat? BowFromFront()
     {
-        if (!IsFull || Lead is not { } lead) return null;
-        _seats.RemoveAt(0);
+        if (!IsFull || Lead is null) return null;
+        // 2026-09-29, [USER]: "Can we pin him to the front of the Stage while
+        // he's present?" Wriothesley holds the front, so the performer
+        // directly behind him Bows and makes room instead; the newcomer still
+        // arrives at the back. Sim twin: `furina_stage.recast_front`.
+        var at = LeaverIndex;
+        var lead = _seats[at];
+        _seats.RemoveAt(at);
         Note(new StageBeat("leave", lead.Who, -1, 0, lead.Fanfare, "recast"));
         return lead;
+    }
+
+    /// <summary>The seat a full-stage recast empties: the front, or the one
+    /// behind a held front (2026-09-29). What <see cref="BowFromFront"/>
+    /// removes, and the former seat its Bow reads.</summary>
+    public int LeaverIndex => FrontHeld && _seats.Count > 1 ? 1 : 0;
+
+    // ---- THE HELD FRONT (2026-09-29) ------------------------------------
+    //
+    // [USER], after a solo Furina run: "One issue on Wriothesley is that
+    // keeping him in the front was actually hard. Can we pin him to the front
+    // of the Stage while he's present?" While he is on the stage he holds the
+    // front seat: no move puts another performer there or takes him out of
+    // it, and he leaves only by Bowing. Sim twin: `furina_stage.front_held`.
+
+    /// <summary>The performer who holds the front while on the stage.
+    /// Mirrors <c>furina_stage.FRONT_HOLDER</c>.</summary>
+    public const StagePerformer FrontHolder = StagePerformer.Wriothesley;
+
+    /// <summary>The event name of a seat move the held front refused, so the
+    /// page says "Wriothesley holds the front." rather than nothing.</summary>
+    public const string HeldEvent = "held";
+
+    /// <summary>Is the front held? True while Wriothesley stands in it.
+    /// </summary>
+    public bool FrontHeld => Lead is { } lead && lead.Who == FrontHolder;
+
+    /// <summary>A seat move asks this first: true (and a <see
+    /// cref="HeldEvent"/> beat filed) where the held front refuses it.
+    /// <paramref name="by"/> names the move.</summary>
+    private bool Held(string by)
+    {
+        if (!FrontHeld) return false;
+        Note(new StageBeat(HeldEvent, FrontHolder, 0, _seats[0].Fanfare, 0,
+                           by));
+        return true;
+    }
+
+    /// <summary>An arrival at the back-most empty seat -- except the front
+    /// holder, who arrives in FRONT (a Five-Century return, Let the People
+    /// Rejoice's return), the others shifting back one.</summary>
+    private void Place(StageSeat seat)
+    {
+        if (seat.Who == FrontHolder) _seats.Insert(0, seat);
+        else _seats.Add(seat);
     }
 
     /// <summary>
@@ -725,7 +796,10 @@ public sealed class FurinaStageLedger
     private static StageExit ExitOf(StageSeat seat, StageDeparture cause,
                                     int formerSeat, int held) =>
         new(seat.Who, cause, held, formerSeat, seat.LostSinceAct,
-            seat.BlockedSinceAct);
+            seat.BlockedSinceAct)
+        {
+            FrontLost = seat.FrontLostSinceAct,
+        };
 
     /// <summary>The event name of a payment beat (rule 4, "every act pays").
     /// </summary>
@@ -862,6 +936,7 @@ public sealed class FurinaStageLedger
         seat.Fanfare += added;
         seat.LostSinceAct = 0;
         seat.BlockedSinceAct = 0;
+        seat.FrontLostSinceAct = 0;
         seat.Resting = false;
         var at = index < 0 || index > _seats.Count ? _seats.Count : index;
         _seats.Insert(at, seat);
@@ -959,34 +1034,21 @@ public sealed class FurinaStageLedger
                 Add(exits, Pay(bank, FurinaStageLaw.ActChevreusePrice, who));
                 return true;
             case StagePerformer.Sigewinne:
-                if (bow && self != null)
+            {
+                // 2026-09-29, the medic ([USER]: "she's strictly
+                // fanfare-negative while she's summoned"): FREE, act and Bow
+                // alike. The front performer -- herself, if she stands there
+                // -- regains half of what hits took from the front since her
+                // last act, rounded down, at least 2. A Bow that left reads
+                // its exit and heals whoever is in front once she has gone;
+                // Grand Finale's stay-Bow reads the seat she keeps.
+                var frontLost = self?.FrontLostSinceAct ?? exit?.FrontLost ?? 0;
+                if (Lead is { } front)
                 {
-                    // The Grand Finale's Bow in place: the gift goes where
-                    // her act would send it, free.
-                    if (Behind(IndexOf(self) + 1, self) is { } to)
-                    {
-                        Gain(to, FurinaStageLaw.ActSigewinneGift);
-                    }
-                    return true;
+                    Gain(front, FurinaStageLaw.SigewinneHeal(frontLost));
                 }
-                if (bow)
-                {
-                    // Free: the performer behind her gains the whole gift.
-                    if (Behind(exit?.FormerSeat ?? -1, null) is { } heir)
-                    {
-                        Gain(heir, FurinaStageLaw.ActSigewinneGift);
-                    }
-                    return true;
-                }
-                {
-                    var at = IndexOf(seat!);
-                    if (Behind(at + 1, seat) is not { } to) return true;
-                    var gift = System.Math.Min(
-                        FurinaStageLaw.ActSigewinneGift, seat!.Fanfare);
-                    Add(exits, Pay(seat, gift, who));
-                    Gain(to, gift);
-                    return true;
-                }
+                return true;
+            }
             case StagePerformer.Charlotte:
                 foreach (var other in _seats
                              .Where(s => !ReferenceEquals(s, self)).ToList())
@@ -1002,21 +1064,6 @@ public sealed class FurinaStageLedger
     private static void Add(List<StageExit> exits, StageExit? exit)
     {
         if (exit is { } e) exits.Add(e);
-    }
-
-    /// <summary>
-    /// Sigewinne's "the performer behind her, or your front performer if she
-    /// is at the back": the seat at <paramref name="index"/> -- one past hers
-    /// while she stands, hers once she has left and the others stepped up --
-    /// or the front where that runs off the back. Null on a stage with no one
-    /// else on it.
-    /// </summary>
-    private StageSeat? Behind(int index, StageSeat? self)
-    {
-        var others = _seats.Count - (self != null ? 1 : 0);
-        if (others <= 0 || index < 0) return null;
-        var to = index < _seats.Count ? _seats[index] : _seats[0];
-        return ReferenceEquals(to, self) ? null : to;
     }
 
     /// <summary>A bar going up by a performer's gift, filed as a raise.
@@ -1270,6 +1317,12 @@ public sealed class FurinaStageLedger
         Drain(lead, absorbed);
         // Wriothesley's reading: only what a HIT took counts.
         lead.LostSinceAct += absorbed;
+        // 2026-09-29, Sigewinne the medic's reading: what hits took from
+        // whoever stands in front, counted on her while she is on the stage.
+        if (absorbed > 0 && SeatOf(StagePerformer.Sigewinne) is { } medic)
+        {
+            medic.FrontLostSinceAct += absorbed;
+        }
         var reached = incoming - absorbed;
         // 2026-09-25 (opus-furina-l2b, (c) 4). THE HIT ITSELF IS A BEAT, and
         // not only the departure it may cause. The log filed a `leave` when a
@@ -1458,7 +1511,7 @@ public sealed class FurinaStageLedger
     /// </summary>
     public void SceneChange()
     {
-        if (_seats.Count == 0) return;
+        if (_seats.Count == 0 || Held("scene_change")) return;
         var front = _seats[0];
         _seats.RemoveAt(0);
         _seats.Add(front);
@@ -1475,7 +1528,8 @@ public sealed class FurinaStageLedger
     /// </summary>
     public void StepForward()
     {
-        if (_seats.Count < 2) return;
+        // 2026-09-29: Wriothesley holds the front; nothing moves.
+        if (_seats.Count < 2 || Held("step_forward")) return;
         var back = _seats[^1];
         _seats.RemoveAt(_seats.Count - 1);
         _seats.Insert(0, back);
@@ -1534,11 +1588,13 @@ public sealed class FurinaStageLedger
     public bool ReturnToBack(StagePerformer who)
     {
         if (IsFull) return false;
-        _seats.Add(new StageSeat(who, FurinaStageLaw.SummonFanfare)
+        // 2026-09-29: Wriothesley returns to the front he holds.
+        var seat = new StageSeat(who, FurinaStageLaw.SummonFanfare)
         {
             Resting = true,
-        });
-        Note(new StageBeat("arrive", who, _seats.Count - 1,
+        };
+        Place(seat);
+        Note(new StageBeat("arrive", who, IndexOf(seat),
                            FurinaStageLaw.SummonFanfare, 0, ""));
         return true;
     }
@@ -1662,7 +1718,8 @@ public sealed class FurinaStageLedger
     /// than two.</summary>
     public bool Reverse()
     {
-        if (_seats.Count < 2) return false;
+        // 2026-09-29: Wriothesley holds the front; nothing moves.
+        if (_seats.Count < 2 || Held("reverse")) return false;
         _seats.Reverse();
         Note(new StageBeat(ReorderEvent, _seats[0].Who, 0, _seats[0].Fanfare,
                            0, ""));
@@ -1681,7 +1738,8 @@ public sealed class FurinaStageLedger
     {
         if (lyney == null) return false;
         var at = IndexOf(lyney);
-        if (at <= 0) return false;
+        // 2026-09-29: Wriothesley holds the front; Lyney stays put.
+        if (at <= 0 || Held("swap")) return false;
         (_seats[0], _seats[at]) = (_seats[at], _seats[0]);
         Note(new StageBeat(ReorderEvent, _seats[0].Who, 0, _seats[0].Fanfare,
                            0, ""));

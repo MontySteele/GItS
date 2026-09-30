@@ -120,14 +120,14 @@ def test_the_eight_rows_are_the_build_tables():
             rarity, cost, "skill")
         assert row["register"] == "salon"
         # The guest seat round (2026-09-25): Wriothesley joins at the front.
-        where = " at the front" if member in FRONT else ""
-        # The supporting-pool seat round (2026-09-26): a front-seat guest's
-        # face says who makes room on a full stage (the rule was unchanged).
-        # The second text pass (2026-09-28): "Summon", and "instead".
-        room = (" On a full stage, the back one [gold]Bow[/gold]s instead "
-                "and gives him its [gold]Fanfare[/gold]." if member in FRONT else "")
+        # 2026-09-29, [USER]: "Can we pin him to the front of the Stage while
+        # he's present?" His face says he holds it, and who makes room on a
+        # full stage.
+        room = (" He holds the front while on stage. On a full stage, the "
+                "back one [gold]Bow[/gold]s for him." if member in FRONT
+                else "")
         assert row["description"] == (
-            f"Summon {name}{where} with {n} [gold]Fanfare[/gold]." + room)
+            f"Summon {name} with {n} [gold]Fanfare[/gold]." + room)
         effect = {"op": "stage_guest", "member": member, "amount": n}
         if member in FRONT:
             effect["seat"] = "front"
@@ -309,23 +309,117 @@ def test_chevreuse_spends_two_from_the_back_for_energy_next_turn(arm):
     assert st.player.stage_energy_next == 0
 
 
-def test_sigewinne_gives_behind_her_or_wraps_to_the_front(arm):
-    mid = _state([["usher", 2], ["sigewinne", 8], ["navia", 1]])
-    FS.perform(mid, "sigewinne")
-    assert mid.player.stage == [["usher", 2], ["sigewinne", 5], ["navia", 4]]
-    back = _state([["usher", 2], ["sigewinne", 8]])
-    FS.perform(back, "sigewinne")
-    assert back.player.stage == [["usher", 5], ["sigewinne", 5]]
-    alone = _state([["sigewinne", 8]])
-    FS.perform(alone, "sigewinne")
-    assert alone.player.stage == [["sigewinne", 8]]
+# 2026-09-29, [USER]: "I think Siegwinne needs to be rethought - she's
+# strictly fanfare-negative while she's summoned." Rethought as the medic:
+# FREE, and the front performer regains half the Fanfare hits took from it
+# since her last act, rounded down, at least 2.
 
-
-def test_sigewinne_gives_what_she_has_and_her_bow_gives_the_whole_gift(arm):
-    st = _state([["usher", 2], ["sigewinne", 2]])
+def test_sigewinne_heals_the_front_half_what_hits_took_at_least_two(arm):
+    st = _state([["usher", 10], ["sigewinne", 5]])
+    FS.absorb(st, 7)
+    FS.settle_hit(st)
     FS.perform(st, "sigewinne")
-    # 2 given (all she had), she leaves, and her free Bow gives 3 more.
-    assert st.player.stage == [["usher", 2 + 2 + 3]]
+    # 7 // 2 = 3 back on Usher; she pays nothing.
+    assert st.player.stage == [["usher", 3 + 3], ["sigewinne", 5]]
+    assert not [e for e in st.log if e["event"] == "stage_pay"]
+    # Her act reset the reading: the next act heals the floor, 2.
+    FS.perform(st, "sigewinne")
+    assert st.player.stage == [["usher", 6 + 2], ["sigewinne", 5]]
+
+
+def test_sigewinne_reads_whoever_stood_in_front(arm):
+    st = _state([["crabaletta", 3], ["usher", 10], ["sigewinne", 5]],
+                enemies=[_enemy(hp=500)])
+    FS.absorb(st, 5)                 # Crabaletta eats 3 and Bows
+    FS.settle_hit(st)
+    FS.absorb(st, 4)                 # Usher eats 4
+    FS.settle_hit(st)
+    FS.perform(st, "sigewinne")
+    # (3 + 4) // 2 = 3, to the front now standing.
+    assert st.player.stage == [["usher", 6 + 3], ["sigewinne", 5]]
+
+
+def test_sigewinne_counts_only_while_she_is_on_stage(arm):
+    st = _state([["usher", 10]])
+    FS.absorb(st, 6)
+    FS.settle_hit(st)
+    effects.resolve_card(st, _guest("sigewinne", 5))
+    FS.perform(st, "sigewinne")
+    assert st.player.stage == [["usher", 4 + 2], ["sigewinne", 5]]
+
+
+def test_sigewinne_in_front_heals_herself(arm):
+    st = _state([["sigewinne", 8], ["usher", 2]])
+    FS.absorb(st, 6)
+    FS.perform(st, "sigewinne")
+    assert st.player.stage == [["sigewinne", 2 + 3], ["usher", 2]]
+
+
+def test_sigewinnes_bow_heals_the_new_front_reading_the_hit(arm):
+    st = _state([["sigewinne", 6], ["usher", 2]], enemies=[_enemy(hp=500)])
+    FS.absorb(st, 6)
+    FS.settle_hit(st)
+    # She left; her free Bow heals Usher, now in front, 6 // 2 = 3.
+    assert st.player.stage == [["usher", 2 + 3]]
+
+
+# ---------------------------------------------------------------------------
+# 2026-09-29, [USER]: "One issue on Wriothesley is that keeping him in the
+# front was actually hard. Can we pin him to the front of the Stage while
+# he's present?" He holds the front; he leaves only by Bowing.
+# ---------------------------------------------------------------------------
+
+def _held(st):
+    return [e for e in st.log if e["event"] == "stage_front_held"]
+
+
+def test_no_seat_move_takes_the_front_from_wriothesley(arm):
+    for move in (FS.step_forward, FS.reverse, FS.rotate):
+        st = _state([["wriothesley", 5], ["usher", 3], ["crabaletta", 2]])
+        move(st)
+        assert [m for m, _f in st.player.stage] == [
+            "wriothesley", "usher", "crabaletta"]
+        assert len(_held(st)) == 1
+    # Revolving Stage is Step Forward at turn start.
+    st = _state([["wriothesley", 5], ["usher", 3]])
+    st.player.powers[FS.REVOLVING_STAGE] = 1
+    FS.supporting_pool_turn_start(st)
+    assert [m for m, _f in st.player.stage] == ["wriothesley", "usher"]
+    assert _held(st)
+
+
+def test_lyneys_swap_leaves_wriothesley_in_front(arm):
+    st = _state([["wriothesley", 5], ["lyney", 6]], enemies=[_enemy(hp=100)])
+    FS.perform(st, "lyney")
+    assert [m for m, _f in st.player.stage] == ["wriothesley", "lyney"]
+    assert st.enemies[0].hp == 100 - FS.ACT_LYNEY_DAMAGE
+    assert _held(st)
+
+
+def test_a_recast_behind_wriothesley_bows_the_one_behind_him(arm):
+    st = _state([["wriothesley", 5], ["usher", 3], ["crabaletta", 2]])
+    effects.resolve_card(st, _guest("navia", 4))
+    # Usher Bows (his 3 Block), Navia arrives at the back with 4 + 3.
+    assert st.player.stage == [["wriothesley", 5], ["crabaletta", 2],
+                               ["navia", 7]]
+    assert st.player.block == FS.ACT_USHER_BLOCK
+    st = _state([["wriothesley", 5], ["usher", 3], ["crabaletta", 2]])
+    effects.resolve_card(st, _card([{"op": "stage_summon",
+                                     "member": "chevalmarin"}]))
+    assert st.player.stage == [["wriothesley", 5], ["crabaletta", 2],
+                               ["chevalmarin", 3 + 1]]
+
+
+def test_wriothesley_returns_to_the_front(arm):
+    # A Five-Century Act's return puts him back in the seat he holds.
+    st = _state([["usher", 3], ["wriothesley", 2]], enemies=[_enemy(hp=500)])
+    st.player.powers[FS.FIVE_CENTURY_ACT] = 1
+    FS.spend(st, 2)
+    assert st.player.stage[0][0] == "wriothesley"
+    # A second copy Bows him and returns him to the front, 5 added.
+    st = _state([["wriothesley", 4], ["usher", 3]], enemies=[_enemy(hp=500)])
+    effects.resolve_card(st, _guest_front("wriothesley", 5))
+    assert st.player.stage == [["wriothesley", 9], ["usher", 3]]
 
 
 def test_charlotte_gives_each_other_performer_one(arm):
@@ -443,10 +537,12 @@ BOARDS = [
      [3, 3], 3, 0, 0),
     ("tax and gift", [["usher", 3], ["clorinde", 4], ["charlotte", 4]], 0,
      [], [3, 4, 3], 3, 0, 0),
+    # 2026-09-29: Sigewinne the medic heals the front 2, free; Neuvillette
+    # has left, so she is the front.
     ("the last payment bows",
-     [["neuvillette", 3], ["sigewinne", 8]], 0, [], [None, 6], 0, 0, 0),
-    ("a gift wraps to the front", [["usher", 2], ["sigewinne", 8]], 0, [],
-     [4, 4], 3, 0, 0),
+     [["neuvillette", 3], ["sigewinne", 8]], 0, [], [None, 8], 0, 0, 0),
+    ("the medic heals the front", [["usher", 2], ["sigewinne", 8]], 0, [],
+     [3, 6], 3, 0, 0),
     ("chevreuse spends herself", [["usher", 3], ["chevreuse", 4]], 0, [],
      [3, 2], 3, 0, 0),
     ("chevreuse cannot pay", [["chevreuse", 4], ["usher", 1]], 0, [],
@@ -562,6 +658,28 @@ def test_the_log_prints_each_payment_and_a_failed_one():
     ]
 
 
+def test_the_log_prints_the_medic_and_the_held_front():
+    """2026-09-29: Sigewinne's heal is the raise line above her act, and a
+    seat move the held front refused says so ("Wriothesley holds the
+    front."), with the power behind it where one moved the stage."""
+    from understudy.blindplay_render import _render_stage_log
+    stage = _stage([
+        _row("raise", "usher", "Gentilhomme Usher", fanfare=6, moved=3),
+        _row("act", "sigewinne", "Sigewinne", seat=1),
+        _row("held", "wriothesley", "Wriothesley", reason="step_forward"),
+        _row("held", "wriothesley", "Wriothesley", reason="step_forward",
+             source="Revolving Stage"),
+    ])
+    assert _render_stage_log(stage) == [
+        "  - **Usher** gains 3 Fanfare: 3 → 6.",
+        "  - **Sigewinne** acted: the front performer's regain is the line "
+        "above.",
+        "  - **Wriothesley** holds the front. Nobody changed seats.",
+        "  - **Wriothesley** holds the front (Revolving Stage). Nobody "
+        "changed seats.",
+    ]
+
+
 def test_the_page_prints_the_mods_forecast():
     from understudy.blindplay_render import _render_stage
     forecast = {
@@ -610,8 +728,8 @@ def test_the_glossary_has_the_guest_star_and_every_guest_word_for_word():
         "End of your turn: pay 3 of his Fanfare to deal 8 Hydro damage to "
         "ALL enemies.")
     assert ARM_KEYWORDS["Sigewinne"] == (
-        "End of your turn: give 3 of her Fanfare to the performer behind "
-        "her, or to your front performer if she is at the back.")
+        "End of your turn: your front performer regains half the Fanfare "
+        "hits took from it since her last act, at least 2.")
     for guest in ("Clorinde", "Navia", "Chevreuse", "Wriothesley",
                   "Charlotte", "Lynette"):
         assert ARM_KEYWORDS[guest].startswith("End of your turn: ")

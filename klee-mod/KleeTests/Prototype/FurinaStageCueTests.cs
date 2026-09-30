@@ -329,10 +329,11 @@ public class FurinaStageCueTests
         var (forecast, board) = Read(seat);
         var cue = board.Cues[0];
         Assert.Equal(StageCueIcon.Support, cue.Icon);
-        Assert.Equal(FurinaStageLaw.ActSigewinneGift, cue.Number);
+        // 2026-09-29, the medic: in front, she heals herself the floor.
+        Assert.Equal(FurinaStageLaw.ActSigewinneHealFloor, cue.Number);
         Assert.Equal(0, cue.Price);
-        // Her gift leaves her bar: a gold chip on it.
-        Assert.Equal(FurinaStageLaw.ActSigewinneGift, board.Bars[0].Paid);
+        // Her act is free: nothing leaves her bar.
+        Assert.Equal(0, board.Bars[0].Paid);
         Assert.Equal(forecast.Seats.Select(r => r.After).ToArray(),
                      RealEndOfTurn(stage));
 

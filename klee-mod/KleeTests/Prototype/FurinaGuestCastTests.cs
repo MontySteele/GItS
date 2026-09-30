@@ -245,8 +245,10 @@ public class FurinaGuestCastTests
         var face = new global::KleeMod.Cards.Prototype.Generated
             .ProtoFsGuestStarWriothesley().Localization!
             .Single(l => l.Item1 == "description").Item2;
-        // The second text pass (2026-09-28): "Summon".
-        Assert.StartsWith("Summon Wriothesley at the front with ", face);
+        // The second text pass (2026-09-28): "Summon". 2026-09-29: he holds
+        // the front while on stage, and the face says so.
+        Assert.StartsWith("Summon Wriothesley with ", face);
+        Assert.Contains("He holds the front while on stage.", face);
         // The generated play passes the front seat (codegen's `seat: front`).
         var src = RepoFile(Path.Combine("KleeCode", "Cards", "Prototype",
             "Generated", "ProtoFsGuestStarWriothesley.cs"));
@@ -370,26 +372,149 @@ public class FurinaGuestCastTests
                         Il.Calls(Il.Method("FurinaStage", "GuestAct")));
     }
 
+    // ---- Sigewinne the medic (2026-09-29) ------------------------------
+    //
+    // [USER]: "I think Siegwinne needs to be rethought - she's strictly
+    // fanfare-negative while she's summoned." Her act is FREE: the front
+    // performer regains half the Fanfare hits took from it since her last
+    // act, rounded down, at least 2. The sim's pins are the same boards.
+
     [Fact]
-    public void Sigewinne_gives_behind_her_wraps_to_the_front_and_bows_free()
+    public void Sigewinne_heals_the_front_half_what_hits_took_at_least_two()
     {
         using var _ = new Arm();
         var owed = new List<StageExit>();
-        var (_, mid) = Stage(("usher", 2), ("sigewinne", 8), ("navia", 1));
-        mid.ActFanfare(StagePerformer.Sigewinne, mid.Seats[1], null, owed);
-        Assert.Equal(new[] { 2, 5, 4 }, Bars(mid));
+        var (_, stage) = Stage(("usher", 10), ("sigewinne", 5));
+        var her = stage.Seats[1];
+        stage.Absorb(7);
+        Assert.Equal(7, her.FrontLostSinceAct);
+        Assert.True(stage.ActFanfare(StagePerformer.Sigewinne, her, null,
+                                     owed));
+        Assert.Equal(new[] { 3 + 3, 5 }, Bars(stage));
+        Assert.Empty(owed);
+        Assert.DoesNotContain(stage.Beats,
+                              b => b.Event == FurinaStageLedger.PayEvent);
+        // The act resets her reading (GuestAct and the forecast's replay),
+        // and an act with nothing to read heals the floor.
+        Assert.Contains("StageSeat.set_FrontLostSinceAct",
+                        Il.Calls(Il.Method("FurinaStage", "GuestAct")));
+        var (_, calm) = Stage(("usher", 6), ("sigewinne", 5));
+        calm.ActFanfare(StagePerformer.Sigewinne, calm.Seats[1], null, owed);
+        Assert.Equal(new[] { 6 + 2, 5 }, Bars(calm));
+        Assert.Equal(2, FurinaStageLaw.SigewinneHeal(0));
+        Assert.Equal(2, FurinaStageLaw.SigewinneHeal(5));
+        Assert.Equal(3, FurinaStageLaw.SigewinneHeal(7));
+    }
 
-        var (_, back) = Stage(("usher", 2), ("sigewinne", 8));
-        back.ActFanfare(StagePerformer.Sigewinne, back.Seats[1], null, owed);
-        Assert.Equal(new[] { 5, 5 }, Bars(back));
+    [Fact]
+    public void Sigewinne_reads_whoever_stood_in_front_and_only_while_on_stage()
+    {
+        using var _ = new Arm();
+        var (_, stage) = Stage(("crabaletta", 3), ("usher", 10),
+                               ("sigewinne", 5));
+        stage.Absorb(5);                   // Crabaletta eats 3 and leaves
+        stage.TakePendingHitBows();
+        stage.Absorb(4);                   // Usher eats 4
+        Assert.Equal(7, stage.SeatOf(StagePerformer.Sigewinne)!
+                            .FrontLostSinceAct);
 
-        var (_, poor) = Stage(("usher", 2), ("sigewinne", 2));
-        poor.ActFanfare(StagePerformer.Sigewinne, poor.Seats[1], null, owed);
-        var exit = Assert.Single(owed);
-        Assert.Equal(new[] { 4 }, Bars(poor));
-        // Her Bow is free: the performer behind where she stood gains 3.
-        poor.ActFanfare(StagePerformer.Sigewinne, null, exit, owed);
-        Assert.Equal(new[] { 7 }, Bars(poor));
+        var (_, late) = Stage(("usher", 10));
+        late.Absorb(6);
+        late.GuestArrives(StagePerformer.Sigewinne, 5);
+        Assert.Equal(0, late.SeatOf(StagePerformer.Sigewinne)!
+                           .FrontLostSinceAct);
+    }
+
+    [Fact]
+    public void Sigewinne_in_front_heals_herself_and_her_bow_heals_the_new_front()
+    {
+        using var _ = new Arm();
+        var owed = new List<StageExit>();
+        var (_, self) = Stage(("sigewinne", 8), ("usher", 2));
+        self.Absorb(6);
+        self.ActFanfare(StagePerformer.Sigewinne, self.Seats[0], null, owed);
+        Assert.Equal(new[] { 2 + 3, 2 }, Bars(self));
+
+        var (_, bow) = Stage(("sigewinne", 6), ("usher", 2));
+        var hit = bow.Absorb(6);
+        var exit = hit.Exit!.Value;
+        Assert.Equal(6, exit.FrontLost);
+        // Free: Usher, in front now, regains 6 / 2 = 3.
+        bow.ActFanfare(StagePerformer.Sigewinne, null, exit, owed);
+        Assert.Equal(new[] { 2 + 3 }, Bars(bow));
+    }
+
+    // ---- Wriothesley holds the front (2026-09-29) -----------------------
+    //
+    // [USER]: "One issue on Wriothesley is that keeping him in the front was
+    // actually hard. Can we pin him to the front of the Stage while he's
+    // present?" No seat move takes the front from him; he leaves only by
+    // Bowing.
+
+    [Fact]
+    public void No_seat_move_takes_the_front_from_wriothesley()
+    {
+        using var _ = new Arm();
+        var moves = new System.Action<FurinaStageLedger>[]
+        {
+            s => s.StepForward(),
+            s => s.Reverse(),
+            s => s.SceneChange(),
+            s => s.SwapToFront(s.Seats[1]),
+        };
+        foreach (var move in moves)
+        {
+            var (_, stage) = Stage(("wriothesley", 5), ("usher", 3),
+                                   ("crabaletta", 2));
+            move(stage);
+            Assert.Equal(new[] { StagePerformer.Wriothesley,
+                                 StagePerformer.Usher,
+                                 StagePerformer.Crabaletta },
+                         stage.Company.ToArray());
+            var held = Assert.Single(stage.Beats,
+                                     b => b.Event == FurinaStageLedger.HeldEvent);
+            Assert.Equal(StagePerformer.Wriothesley, held.Who);
+        }
+        // Without him, the moves move.
+        var (_, free) = Stage(("usher", 3), ("crabaletta", 2));
+        free.StepForward();
+        Assert.Equal(StagePerformer.Crabaletta, free.Lead!.Who);
+    }
+
+    [Fact]
+    public void A_recast_behind_wriothesley_bows_the_one_behind_him()
+    {
+        using var _ = new Arm();
+        var (_, stage) = Stage(("wriothesley", 5), ("usher", 3),
+                               ("crabaletta", 2));
+        Assert.Equal(1, stage.LeaverIndex);
+        var leaver = stage.BowFromFront();
+        Assert.Equal(StagePerformer.Usher, leaver!.Who);
+        Assert.True(stage.ArriveAtBack(StagePerformer.Navia, 3 + 4));
+        Assert.Equal(new[] { StagePerformer.Wriothesley,
+                             StagePerformer.Crabaletta,
+                             StagePerformer.Navia },
+                     stage.Company.ToArray());
+        // The ledger's own full-stage summon rotates the one behind him too.
+        var (_, full) = Stage(("wriothesley", 5), ("usher", 3),
+                              ("crabaletta", 2));
+        full.Summon(StagePerformer.Chevalmarin);
+        Assert.Equal(StagePerformer.Wriothesley, full.Lead!.Who);
+        Assert.DoesNotContain(StagePerformer.Usher, full.Company);
+    }
+
+    [Fact]
+    public void Wriothesley_returns_to_the_front()
+    {
+        using var _ = new Arm();
+        // A Five-Century return and Let the People Rejoice's return put him
+        // back in the seat he holds.
+        var (_, stage) = Stage(("usher", 3));
+        Assert.True(stage.ReturnToBack(StagePerformer.Wriothesley));
+        Assert.Equal(StagePerformer.Wriothesley, stage.Lead!.Who);
+        var (_, rejoice) = Stage(("usher", 3));
+        rejoice.ReturnCompany(new[] { StagePerformer.Wriothesley });
+        Assert.Equal(StagePerformer.Wriothesley, rejoice.Lead!.Who);
     }
 
     [Fact]
@@ -443,16 +568,16 @@ public class FurinaGuestCastTests
         // the tank, not a Spend engine"). Spends, payments, taxes, gifts,
         // cash-outs and the fade take Fanfare and do not count.
         using var _ = new Arm();
-        var (_, stage) = Stage(("wriothesley", 10), ("usher", 3));
+        // 2026-09-29: he holds the front now, so he stands alone, the front
+        // and the back performer both.
+        var (_, stage) = Stage(("wriothesley", 10));
         var wrio = stage.Seats[0];
         stage.Absorb(3);
         Assert.Equal(3, wrio.LostSinceAct);
-        stage.StepForward();                       // Usher to the front
         stage.Fade();                              // wrio 7 -> 6: not a hit
         stage.Spend(2);                            // wrio 6 -> 4: not a hit
         Assert.Equal(3, wrio.LostSinceAct);
         // The hit that takes him down is in his Bow's reading.
-        stage.StepForward();
         var hit = stage.Absorb(20);
         Assert.Equal(3 + 4, hit.Exit!.Value.Lost);
         // An act resets it (FurinaStage.Act and the forecast's replay).
@@ -473,12 +598,14 @@ public class FurinaGuestCastTests
         B("tax and gift",
           new[] { ("usher", 3), ("clorinde", 4), ("charlotte", 4) }, 0,
           new int[0], new int?[] { 3, 4, 3 }, 3, 0, 0),
+        // 2026-09-29: Sigewinne the medic heals the front 2, free;
+        // Neuvillette has left, so she is the front.
         B("the last payment bows",
           new[] { ("neuvillette", 3), ("sigewinne", 8) }, 0, new int[0],
-          new int?[] { null, 6 }, 0, 0, 0),
-        B("a gift wraps to the front",
+          new int?[] { null, 8 }, 0, 0, 0),
+        B("the medic heals the front",
           new[] { ("usher", 2), ("sigewinne", 8) }, 0, new int[0],
-          new int?[] { 4, 4 }, 3, 0, 0),
+          new int?[] { 3, 6 }, 3, 0, 0),
         B("chevreuse spends herself",
           new[] { ("usher", 3), ("chevreuse", 4) }, 0, new int[0],
           new int?[] { 3, 2 }, 3, 0, 0),
