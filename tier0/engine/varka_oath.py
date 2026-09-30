@@ -873,7 +873,7 @@ def starter4(element: str) -> list[str]:
 def _r5_lisa(state, vs, fx, card):
     from tier0.engine import effects
     n = state.attacks_played_this_turn
-    blk = fx["per"] * n
+    blk = fx.get("base", 0) + fx["per"] * n
     if blk:
         effects._op_block(state, {"op": "block", "amount": blk}, card)
     vs.lisa_rows.append((state.turn, n, blk))
@@ -909,6 +909,15 @@ CARD_BUILDERS.update({
         "lisa_r5_4", "Lisa: Violet Arc (4)", "electro",
         [{"op": "apply_aura", "element": "electro", "target": "enemy"},
          _o("lisa_block", per=4)]),
+    # R6, pick 5 (Lisa's floor): 3 [4] Block, plus 3 [4] per Attack.
+    "lisa_r6": lambda: _knight(
+        "lisa_r6", "Lisa: Violet Arc", "electro",
+        [{"op": "apply_aura", "element": "electro", "target": "enemy"},
+         _o("lisa_block", base=3, per=3)]),
+    "lisa_r6_4": lambda: _knight(
+        "lisa_r6_4", "Lisa: Violet Arc (4 + 3)", "electro",
+        [{"op": "apply_aura", "element": "electro", "target": "enemy"},
+         _o("lisa_block", base=4, per=3)]),
     "amber_r5": lambda: _knight(
         "amber_r5", "Amber: Baron Bunny", "pyro",
         [{"op": "block", "amount": 6}, _o("bunny", amount=6)]),

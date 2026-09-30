@@ -462,6 +462,8 @@ def main(argv=None):
         sec_branch(out, args.seeds, args.seed, args.jobs)
     if "r5" in only:
         sec_r5(out, args.seeds, args.seed, args.jobs)
+    if "r6" in only:
+        sec_r6(out, args.seeds, args.seed, args.jobs)
 
 
 
@@ -563,6 +565,82 @@ def sec_r5(out, seeds, seed0, jobs):
             for pol in ("focused", "juggling")))
     out("\n**Ascension: drafted fights with a cast over 60 by turn 8**")
     for k in V5:
+        cells = []
+        for pol in ("focused", "juggling"):
+            fs = [f for h in ELEMENTS for r in by[(k, pol, h)]
+                  for f in r["fights"]]
+            fl = [f for f in fs if any(a["turn"] <= 8 and a["printed"] > 60
+                                       for a in f["asc"])]
+            mx = max((a["printed"] for f in fs for a in f["asc"]), default=0)
+            cells.append(f"{pol} {len(fl)} of {len(fs)} (max {mx})")
+        out(f"- {k}: " + "; ".join(cells))
+    return by
+
+
+# ==========================================================================
+#  R6: the ruled build spec (picks 2-5). E-AoE only.
+# ==========================================================================
+
+_R6_SWAP = {"lisa": "lisa_r6", "amber": "amber_r5",
+            "northwind_avatar": "northwind_avatar_c"}
+V6 = {"R6": dict(V4["E-AoE"], swap=_R6_SWAP, std_amt=4, dawn_amt=3),
+      "R6-Lisa4": dict(V4["E-AoE"], swap=dict(_R6_SWAP, lisa="lisa_r6_4"),
+                       std_amt=4, dawn_amt=3)}
+R.ALLVAR.update(V6)
+
+
+def sec_r6(out, seeds, seed0, jobs):
+    out(f"\n## R6. The ruled build spec (E-AoE; n = {seeds} runs per cell, "
+        f"seeds {seed0}.., paired)")
+    out("R6 = picks 2-5: Lisa 3 Block + 3 per Attack, Baron Bunny, Favonian "
+        "Standard 4, Dawn Wind's March 3, Northwind Avatar cost 2 (10/10 + "
+        "2 per Oath). R6-Lisa4 = Lisa 4 + 3 per Attack.")
+    argl = [(seed0 + i, pol, h, k, True) for k in V6
+            for pol in ("focused", "juggling") for h in ELEMENTS
+            for i in range(seeds)]
+    by = defaultdict(list)
+    for r in pmap(_w_run4, jobs, argl):
+        by[(r["variant"], r["policy"], r["home"])].append(r)
+    out("\n| arm | pilot | Pyro | Hydro | Electro | Cryo | spread | >10 "
+        "behind the leader |")
+    out("|---|---|---|---|---|---|---|---|")
+    for k in V6:
+        for pol in ("focused", "juggling"):
+            w, cells = {}, []
+            for h in ELEMENTS:
+                rs = by[(k, pol, h)]
+                n, won = len(rs), sum(r["won"] for r in rs)
+                w[h] = 100 * won / n
+                cells.append(f"{w[h]:.1f} ±{ci95(won, n):.1f}")
+            lead = max(w, key=w.get)
+            behind = [h for h in ELEMENTS if w[lead] - w[h] > 10]
+            out(f"| {k} | {pol} | " + " | ".join(cells)
+                + f" | {max(w.values()) - min(w.values()):.1f} | "
+                f"{', '.join(behind) or 'none'} |")
+    out("\n**Lisa** (Block per play; plays per fight held; share of offers "
+        "taken)")
+    for k, pid in (("R6", "varka_lisa_r6"), ("R6-Lisa4", "varka_lisa_r6_4")):
+        for pol in ("focused", "juggling"):
+            lr, plays, held, off, pk = [], 0, 0, 0, 0
+            for h in ELEMENTS:
+                for r in by[(k, pol, h)]:
+                    for offer, pick in r["offers"]:
+                        if "lisa" in offer:
+                            off += 1
+                            pk += pick == "lisa"
+                    for f in r["fights"]:
+                        lr += f.get("lisa_rows", [])
+                        c = f["deck"].count("lisa")
+                        if c:
+                            held += c
+                            plays += f["plays"].get(pid, 0)
+            out(f"- {k}, {pol}: {m(x[2] for x in lr)} Block per play "
+                f"(Attacks before her {m(x[1] for x in lr)}, n = {len(lr)}, "
+                f"starter Lisa excluded); {(plays / held) if held else 0:.2f}"
+                f" plays per fight held; taken from {pct(pk, off)} of "
+                f"{off} offers")
+    out("\n**Ascension: drafted fights with a cast over 60 by turn 8**")
+    for k in V6:
         cells = []
         for pol in ("focused", "juggling"):
             fs = [f for h in ELEMENTS for r in by[(k, pol, h)]
