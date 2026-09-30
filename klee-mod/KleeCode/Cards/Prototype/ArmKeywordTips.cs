@@ -730,12 +730,16 @@ public static class ArmKeywordTips
 
     /// <summary>His personal Companions (sec.6), named on Knightly Guard,
     /// Grand Master's Order, Knights' Roll Call and Favonian Standard.
+    /// The title shape is the tell (the Oath round, 2026-09-29: a blind seat
+    /// had to infer from play which cards count): Knights are "Name: Card",
+    /// other Companions "Name — Card".
     /// </summary>
     public static IEnumerable<IHoverTip> ForKnight(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, KnightKey,
-            "Varka's own Companion cards. Playing one makes its element your "
-          + "current element.");
+            "A Companion titled with a colon, like Lisa: Infinite Circuit. "
+          + "Playing one makes its element your current element; others do "
+          + "not.");
 
     // ---------------------------------------------------- Furina ----------
     //

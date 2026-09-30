@@ -1275,6 +1275,20 @@ def test_an_opened_chest_prints_its_relic_and_choose_takes_it():
     assert res["post"] == {"action": "claim_treasure_relic", "index": 0}
 
 
+def test_a_chest_says_proceed_leaves_its_relic():
+    """2026-09-29 (Varka Oath round, lane 2 act 1). A seat read Kusarigama
+    in an open chest, typed `proceed`, and the run save holds no relic for
+    that floor. The page says `proceed` leaves the relic behind, and only
+    while a relic is waiting: an emptied chest prints no such line."""
+    page = blindplay.observe(treasure_state())
+    assert blindplay_notes.TREASURE_PROCEED_NOTE in page
+    assert 'choose "<relic>"' in page
+    empty = treasure_state()
+    empty["treasure"]["relics"] = []
+    assert blindplay_notes.TREASURE_PROCEED_NOTE not in blindplay.observe(
+        empty)
+
+
 def test_a_relic_select_screen_reads_the_same_blob():
     """The screen one over had the same hole and is fixed by the same read."""
     page = blindplay.observe(relic_select_state())
@@ -6883,8 +6897,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Oath": ["Gained when your card applies or ",
                  "Kept all fight. Cards read your "],
         "current element": ["The element of the last Knight you played."],
-        "Knight": ["Varka's own Companion cards. Playing one makes its "
-                   "element "],
+        "Knight": ["A Companion titled with a colon, like Lisa: Infinite "
+                   "Circuit. ",
+                   "Playing one makes its element your current element; "
+                   "others do "],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces
