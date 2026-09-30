@@ -59,6 +59,8 @@ public sealed class ProtoKkCoordinatedStrike : CustomCardModel, IElementalCard, 
         ("description", "Deal {Damage:diff()} damage.\n[gold]Plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage."),
     };
 
+    protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
+
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
     /// was written. Carried out by the Bake-Kurage at the start of her next
     /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>

@@ -62,6 +62,8 @@ public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalC
         ("description", "Deal {CalculatedDamage:diff()} damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] triggers even if you played a [gold]Set off[/gold] card."),
     };
 
+    protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {

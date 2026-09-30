@@ -652,11 +652,13 @@ public class Round19Tests
         // that the arm's generated surface carries NEITHER tag -- the shipped
         // basics keep theirs and are not generated here.
         //
-        // THE ONE DECLARED EXCEPTION is an OFFERED Strike (2026-09-29): a
-        // non-basic row with `tags: [strike]` carries CardTag.Strike the way
-        // the base game's Twin Strike does, so Strike Dummy pays on it. It is
-        // listed here by name, so a second one is a decision and not a drift.
-        var declaredStrikes = new HashSet<Type> { typeof(ProtoVkOathswornStrike) };
+        // THE DECLARED EXCEPTION is an OFFERED Strike (2026-09-29): a
+        // non-basic row whose sheet says `tags: [strike]` carries
+        // CardTag.Strike the way the base game's Twin Strike does, so Strike
+        // Dummy pays on it. Read off the sheet, so the rule is the sheet's
+        // word and not a list kept here.
+        var declaredStrikes = SheetDeclaredStrikes();
+        Assert.Contains(nameof(ProtoVkOathswornStrike), declaredStrikes);
         var arm = typeof(ProtoKkSlackWater).Assembly.GetTypes()
             .Where(t => !t.IsAbstract
                      && typeof(CardModel).IsAssignableFrom(t)
@@ -667,7 +669,7 @@ public class Round19Tests
         foreach (var type in arm)
         {
             var card = (CardModel)Activator.CreateInstance(type)!;
-            if (declaredStrikes.Contains(type))
+            if (declaredStrikes.Contains(type.Name))
             {
                 Assert.NotEqual(CardRarity.Basic, card.Rarity);
                 Assert.Contains(CardTag.Strike, card.Tags);
@@ -678,6 +680,38 @@ public class Round19Tests
             }
             Assert.DoesNotContain(CardTag.Defend, card.Tags);
         }
+    }
+
+    /// <summary>The generated class names of every surface row whose `tags:`
+    /// holds `strike`. A row is a flow mapping opening `- {id: ...`; the class
+    /// name is the id in PascalCase, the generator's own rule.</summary>
+    private static HashSet<string> SheetDeclaredStrikes()
+    {
+        var relative = System.IO.Path.Combine("docs", "prototype-surface.yaml");
+        var dir = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
+        string? path = null;
+        while (dir != null && path == null)
+        {
+            var candidate = System.IO.Path.Combine(dir.FullName, relative);
+            if (System.IO.File.Exists(candidate)) path = candidate;
+            dir = dir.Parent;
+        }
+        Assert.True(path != null, "no " + relative + " above " + AppContext.BaseDirectory);
+
+        var names = new HashSet<string>();
+        var rows = System.Text.RegularExpressions.Regex.Split(
+            System.IO.File.ReadAllText(path!), @"^- \{",
+            System.Text.RegularExpressions.RegexOptions.Multiline);
+        foreach (var row in rows)
+        {
+            var id = System.Text.RegularExpressions.Regex.Match(row, @"^id:\s*(\w+)");
+            if (!id.Success) continue;
+            if (!System.Text.RegularExpressions.Regex.IsMatch(
+                    row, @"\btags:\s*\[[^\]]*\bstrike\b")) continue;
+            names.Add(string.Concat(id.Groups[1].Value.Split('_')
+                .Select(p => p.Length == 0 ? p : char.ToUpperInvariant(p[0]) + p.Substring(1))));
+        }
+        return names;
     }
 
     // ==================================================================

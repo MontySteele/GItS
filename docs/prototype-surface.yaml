@@ -1093,7 +1093,7 @@
 - {id: proto_mc_kaeya_cold_blooded_strike, name: "Kaeya — Cold-Blooded Strike", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
-   cost: 1, type: attack,
+   cost: 1, type: attack, tags: [strike],
    personal_pool: [klee],
    replaces: proto_mc_kaeya_frostgnaw,
    description: "Deal 8 damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] triggers even if you played a [gold]Set off[/gold] card.",
@@ -1856,7 +1856,7 @@
 - {id: proto_mi_heizou_heartstopper, name: "Shikanoin Heizou — Heartstopper Strike", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
-   cost: 1, type: attack,
+   cost: 1, type: attack, tags: [strike],
    # `EB-696`: the LIVE total, Well Laid's shape, and the count's window said
    # out loud. The finding: the provenance note.
    description: "Deal {CalculatedDamage:diff()} damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.",
@@ -2774,7 +2774,7 @@
 
 - {id: proto_kk_coordinated_strike, name: "Coordinated Strike", character: kokomi,
    authored_by: [claude], multiplayer: true,
-   cost: 1, type: attack, rarity: uncommon,
+   cost: 1, type: attack, rarity: uncommon, tags: [strike],
    description: "Deal 6 damage. [gold]Plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage.",
    upgrade: {damage: 3},
    effects: [{op: damage, amount: 6, target: enemy}],
