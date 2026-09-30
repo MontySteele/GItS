@@ -38,7 +38,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 48 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 72 (60 Stage cards) |
-| `varka` | Varka | 80 | Mondstadt | Anemo | Paper (Oath rework; batch one built) | 19 built, 23 on paper |
+| `varka` | Varka | 80 | Mondstadt | Anemo | Paper (Oath rework; batch one built) | 19 built, 41 on paper |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
@@ -146,7 +146,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Vulnerable, Electro 2 to ALL); Boreas's Fang adds Four Winds' Ascension to
   his hand at his first Oath, Regent's Forge style; a random starter-only
   Knight and Windbound Execution replace Muster and Ascension in the starter.
-  Pool 23. Next: the sim (paper sec.10), then [USER]'s Paper ruling.
+  Pool 41 on paper. Next: the sim on the 41 (paper sec.10), then the build.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

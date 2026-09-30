@@ -5,6 +5,7 @@ placeholders for the sim; a number in brackets is the upgrade. The first
 design (Absorb, four stacking Winds, Knights' Muster), its sims and the batch
 one prototype are history: `git show 2fb06ed2:review/active/varka-paper-kit-2026-09-28.md`,
 and the seat round that read it is `review/records/varka-round-1-2026-09-29.md`.
+The Oath sims are draft PR #768.
 
 ## 1. Why the rework
 
@@ -25,6 +26,8 @@ Talking it through, [USER] set a new direction instead of a Block patch:
 - On Oath: "Cards that read his Oath count can be quite strong but leave him
   with a deficit in other areas. The count should be going up, not down, over
   time, unless a card specifically does otherwise."
+- On play: "Oath cards are strong, but you need to think carefully before
+  spreading your deckbuilding thin without a Switch card."
 
 **The Genshin source** (KQM's quick guide): in his Skill state one claymore
 hits Anemo and the other a teammate's element, **one element at a time**;
@@ -42,27 +45,28 @@ swears more of that element to his blade.
 - **Swirl** is the shared rule: an Anemo hit on a fresh aura leaves it on
   that enemy, spent; spreads spent copies to every enemy lacking it; deals a
   flat 2 to every enemy. A spent aura still reacts with a new element.
-- **His current element** is the element of the last Knight he played. The
-  seat page and his status bar show it with its Oath. Before his first Knight
-  he has none.
-- **Oath, one count per element** (Pyro, Hydro, Electro, Cryo). He gains 1
-  Oath of an element:
-  - for each direct application of it to an enemy by his cards (a Knight,
-    Favonius Drill, Ascension's elemental hit), **including one that reacts**
-    instead of leaving an aura; a multi-hit card counts each hit;
-  - for each Swirl he makes of an aura of it, whoever laid the aura.
-
-  The spent copies a Swirl spreads are not applications, and nor are
-  reactions set off by Converging Winds' spread hits. A count only goes up,
-  unless a card says otherwise, and all four reset at the end of the fight.
+- **His current element** is the element of the last Knight he played (or a
+  card that says it changes it). The seat page and his status bar show it
+  with its Oath. Before his first Knight he has none.
+- **Oath, one count per element** (Pyro, Hydro, Electro, Cryo), **counted per
+  card, not per enemy**. A card that applies an element gains 1 Oath of it,
+  however many enemies it hits, including an application that reacts
+  instead of leaving an aura. A card that Swirls gains 1 Oath of each element
+  it Swirls, whoever laid the aura. Four Winds' Ascension's own elemental hit
+  gains none. A count only goes up, unless a card says otherwise, and all
+  four reset at the end of the fight. (The sim's first model counted per
+  enemy and let Ascension feed itself; Ascension then ran past 100 in pack
+  fights.)
 - **Cards read only the current element's Oath.** Oath banked in the other
   elements waits until he switches back. Running two elements is allowed;
-  juggling them is the cost.
+  juggling them is the cost, and the Switch cards (sec.7) are what pay for it.
 - **A Swirl he makes pays his current element**, one effect:
   - **Pyro:** 3 damage to the enemy Swirled.
   - **Hydro:** gain 3 Block.
   - **Cryo:** 1 Vulnerable on the enemy Swirled.
-  - **Electro:** 2 damage to ALL enemies.
+  - **Electro:** to be chosen by the sim, [USER]: "Either aoe electro, or draw
+    power, seems fine - we can sim both." E-AoE: 3 damage to ALL enemies.
+    E-Draw: draw 1 card.
 
   [USER], on the first draft's Weak and Energy: "Electro's energy cheating is
   way too good"; "I'm not convinced Varka needs a basic source of Weak".
@@ -75,40 +79,39 @@ swears more of that element to his blade.
 - **Four Winds' Ascension** (Attack, 1; created, never in the deck): "Deal 6
   Anemo damage. Then deal 3 damage for each Oath of your current element, as
   that element." Played, it goes to the discard pile and comes back when he
-  draws it. The Anemo hit Swirls a fresh aura first; the elemental hit then
-  applies the current element (1 more Oath) or reacts with a spent aura.
+  draws it. The Anemo hit Swirls a fresh aura first (1 Oath, as any Swirl);
+  the elemental hit then refreshes the aura or reacts with a spent one, and
+  gains no Oath. Playing it now keeps it circulating; holding it waits for a
+  bigger count.
 - **The upgraded Fang** (every kit's starter relic upgrade) creates it
   upgraded: 9 Anemo, 4 per Oath.
 
 ## 5. The starter (80 HP, 99 gold)
 
 Strike x4, Defend x4 (base game), and:
-- **One starting Knight, at random each run**, from four starter-only cards.
-  Like Survivor or Bodyguard, each is better than a Common and shows what its
-  element does for him. Named for their Genshin Bursts, so none clashes with
-  the pool Knights (named for Skills):
-  - **Amber: Fiery Rain** (Skill, 1): Deal 9 [12] Pyro.
-  - **Barbara: Shining Miracle** (Skill, 1): Apply Hydro to ALL enemies. Gain
-    7 [10] Block.
-  - **Lisa: Lightning Rose** (Skill, 1): Deal 6 [8] Electro. Draw 2.
-  - **Kaeya: Glacial Waltz** (Skill, 1): Deal 6 [8] Cryo. Apply 1 [2]
-    Vulnerable.
+- **One starting Knight, at random each run**, from four starter-only cards,
+  each "Gain 8 [11] Block. Apply its element to an enemy." ([USER]: "Starter
+  cards can be a little better than that. Let's bump it to 8 (11) block +
+  painting an element.") Named for Genshin Bursts and passives, so none
+  clashes with a pool Knight or a Mondstadt companion:
+  **Amber: Fiery Rain** (Pyro), **Barbara: Melody Loop** (Hydro), **Lisa:
+  Lightning Rose** (Electro), **Kaeya: Glacial Waltz** (Cryo).
 - **Windbound Execution** (Attack, 1): Deal 4 [6] Anemo to ALL enemies. His
   Genshin Skill; the starter's Swirl card.
 
-**Turn one, worked (Barbara start, two slimes).** Shining Miracle paints both
-Hydro (Hydro Oath 2; the Fang adds Ascension) and gives 7 Block. Windbound
-Execution Swirls both (Hydro Oath 4; two Hydro payouts, 13 Block in all). The
-third energy plays Ascension: 6 Anemo, which finds only spent auras, plus 12
-Hydro, which refreshes the aura (Hydro Oath 5). That is strong for turn one;
-the sim checks it first.
+**Why equal Block.** The sim traced every starting gap to Block: with Barbara
+alone giving 7, Hydro won 50% of act-1 runs and the others 7 to 16%; with
+her Block removed, all four sat within 10 points; with 5 on each, three of
+four sat within 9 (Electro trailed, hence its payout test). Varka is short
+enough of defence that Block on the starter decides the start.
 
-## 6. The pool (23 cards: 9 / 9 / 5)
+## 6. The pool (41 cards: 16 / 17 / 8)
 
-Knights are Varka's personal-pool companions, all Skills; playing one sets his
-current element.
+Knights are Varka's personal-pool companions, all Skills unless marked;
+playing one sets his current element. Every element has at least two pool
+Knights, so a focused deck can be drafted. **New** marks batch two.
 
-**Common (9)**
+**Common (16)**
 - **Squall** (Attack, 1): Deal 4 [5] Anemo twice.
 - **Updraft** (Attack, 1): Deal 8 [11] Anemo.
 - **Gale Sweep** (Attack, 1): Deal 3 [5] Anemo to every enemy that has a fresh
@@ -122,8 +125,20 @@ current element.
   Gain 3 [5] Block.
 - **Lisa: Violet Arc** (Knight, 1): Deal 5 [7] Electro. Draw 1.
 - **Kaeya: Frostgnaw** (Knight, 1): Deal 6 [9] Cryo.
+- **New. Razor: Claw and Thunder** (Knight, 1): Deal 7 [10] Electro.
+- **New. Mika: Starfrost Swirl** (Knight, 1): Apply Cryo to an enemy. Gain
+  6 [9] Block.
+- **New. Jean: Dandelion Breeze** (Skill, 1): Gain 7 [10] Block. Swirl one
+  enemy's fresh aura (no damage). His Block that still charges.
+- **New. Knightly Guard** (Skill, 1): Gain 8 [11] Block. If you played a
+  Knight this turn, gain 1 Oath of your current element.
+- **New. Oathsworn Strike** (Attack, 1): Deal 6 [9] damage, plus 1 for each
+  Oath of your current element. The Common reader.
+- **New. Crosswind** (Attack, 1): Deal 7 [10] Anemo. If it Swirls, gain 4 [6]
+  Block.
+- **New. Rising Gale** (Attack, 0): Deal 4 [6] Anemo. If it Swirls, draw 1.
 
-**Uncommon (9)**
+**Uncommon (17)**
 - **Tempest Charge** (Attack, 1): Deal 8 [11] Anemo. If it Swirls, draw 1.
 - **Favonius Cut** (Attack, 2): Deal 14 [19] Anemo.
 - **Grand Master's Order** (Skill, 0): The next Knight you play this turn is
@@ -133,112 +148,110 @@ current element.
 - **Tailwind Stride** (Skill, 1): Draw 2. If you have a current element, draw
   1 more. [Cost 0.]
 - **Eye of the Storm** (Skill, 1): Gain 2 [3] Block for each Oath of your
-  current element.
+  current element. **Exhaust** ([USER]: "A simple fix for scaling Block with
+  Hydro Oath is to give that card exhaust").
 - **Stormward Stance** (Power, 1 [0]): While your current element has 4 or
   more Oath, your Anemo Attacks deal 3 more.
 - **Oath of the Knights** (Power, 1): At the start of your turn, gain Block
   equal to your current element's Oath.
 - **Rally to the Banner** (Skill, 1): Move all your Oath to your current
   element. Exhaust.
+- **New. Diluc: Searing Onslaught** (Knight, Attack, 2): Deal 6 [8] Pyro
+  twice.
+- **New. Eula: Icetide Vortex** (Knight, 2): Deal 10 [14] Cryo. Gain 1 Oath of
+  Cryo for each enemy with a Cryo aura.
+- **New. Barbara: Whisper of Water** (Knight, 1): Apply Hydro to an enemy.
+  Gain 4 [6] Block now and 4 [6] next turn.
+- **New. Favonian Standard** (Power, 1): Whenever you play a Knight of your
+  current element, gain 3 [4] Block. Focus's defence.
+- **New. Change of Guard** (Skill, 1): Choose an element you have Oath in; it
+  becomes your current element. Gain Block equal to its Oath. Exhaust. A
+  switch without a Knight, paid in Block.
+- **New. Storm Surge** (Attack, 2): Deal 5 [7] Anemo to ALL enemies. Each
+  enemy it Swirls takes 5 more.
+- **New. Tailwind Guard** (Skill, 1): Gain 3 [4] Block for each element you
+  have Oath in. The juggler's Block.
+- **New. Unfurled Banner** (Skill, 1): Put Four Winds' Ascension from your
+  discard pile into your hand. It costs 0 this turn. Exhaust.
 
-**Rare (5)**
+**Rare (8)**
 - **Converging Winds** (Power, 2 [1]): Your Swirls react where they land (the
   spread hit is the flat 2 carrying the Swirled element; a reaction it sets
   off lands on that enemy only; a reaction from a spread never Swirls again).
 - **Boreas Unbound** (Power, 2 [1]): Whenever your current element changes,
-  gain 1 Energy.
+  gain 1 Energy. The sim's only card that makes a mid-fight switch pay.
 - **Wall of Gales** (Skill, 2): Gain 16 [22] Block. Swirl every fresh aura.
 - **Four Winds' Accord** (Skill, 1): Split your total Oath evenly among the
   four elements, rounding down, then gain 1 of each. Exhaust.
 - **Sworn Brotherhood** (Power, 2 [1]): At the start of your turn, gain 1 Oath
   of every element.
+- **New. Northwind Avatar** (Attack, 3): Deal 12 [16] Anemo, then 12 [16] of
+  your current element, plus 2 for each of its Oath. His Burst.
+- **New. Dawn Wind's March** (Power, 2 [1]): Whenever you gain Oath of your
+  current element, gain 2 Block. Focus's defensive engine.
+- **New. Azure Devour** (Attack, 2): Deal 4 damage for each Oath of your
+  current element. Exhaust. The Focus finisher.
 
 The Mondstadt universal Sturm und Drang already supports many Swirls. Pool
 target 78 comes after the prototype.
 
 ## 7. The archetypes
 
-1. **Focus.** One element all fight: stack its Oath, let Ascension and the
-   readers (Eye of the Storm, Oath of the Knights, Stormward Stance) grow. Rally
-   to the Banner rescues a fight that forced a switch. Weakness: the wrong
-   element for the fight stays wrong.
-2. **Switch.** Change element to the fight's need: Hydro for a big hitter,
-   Cryo's Vulnerable for a burst turn, Electro against a crowd. Boreas Unbound
-   pays for each switch; Four Winds' Accord and Sworn Brotherhood keep every
-   count alive. Weakness: every reader is smaller. **Open (pick 2):** a
-   mid-fight switch currently pays three costs at once: the readers drop to
-   the new element's small count, Ascension's elemental hit reacts with the
-   old element's aura and leaves nothing fresh to Swirl, and the new element
-   needs an application before the loop restarts. Moving from 12 Pyro Oath to
-   2 Hydro Oath gains 3 Block per Swirl but drops Oath of the Knights from 12
-   Block to 2 and Ascension by 30. As written, switching to the defensive
-   element can leave him less safe (external review, 2026-09-29).
-3. **Gale.** Many Swirls on many auras: Gale Sweep, Wall of Gales, Tempest
-   Charge, Converging Winds. Oath grows fastest here, in whatever elements the
-   board offers.
-4. **Grand Master** (provisional): Knight repeats and Knight generation; kept
-   only if it shows a distinct turn (pick 3).
+1. **Focus.** One element all fight: stack its Oath and let Ascension and the
+   readers grow (Oathsworn Strike, Eye of the Storm, Oath of the Knights,
+   Stormward Stance, Favonian Standard, Dawn Wind's March, Azure Devour).
+   Strong, and thin: the wrong element for the fight stays wrong.
+2. **Switch.** The element you open each fight with is the ordinary choice;
+   a mid-fight switch is the costly juggle, and the Switch cards pay for it:
+   Boreas Unbound (Energy), Change of Guard (Block), Tailwind Guard (Block for
+   breadth), Rally to the Banner, Four Winds' Accord and Sworn Brotherhood
+   (Oath). [USER]: "you need to think carefully before spreading your
+   deckbuilding thin without a Switch card."
+3. **Gale.** Many Swirls: Gale Sweep, Storm Surge, Crosswind, Rising Gale,
+   Tempest Charge, Wall of Gales, Converging Winds. Oath grows fastest here,
+   in whatever elements the board offers.
+
+Grand Master's Order and Knights' Roll Call are support cards, not an
+archetype ([USER] agreed 2026-09-29); the name waits for a distinct turn.
 
 **In co-op** a partner's auras are Swirl fuel. Swirling them gains Oath of
-their element but does not change his current element, so a Klee partner
-feeds Pyro Oath whether or not he is on Pyro.
+their element but does not change his current element.
 
 ## 8. Intended weakness
 
 - **Nothing to Swirl, nothing to charge.** Enemies carry no auras of their own
-  yet, so his Oath comes from his Knights and his partner. A draw without a
-  Knight is a plain Anemo turn.
-- **Focus is only as safe as its readers.** A focused Pyro deck with Eye of
-  the Storm or Oath of the Knights turns its big count into Block, so the
-  wrong element is not by itself a defensive hole; a Pyro deck without
-  readers is.
+  yet, so his Oath comes from his Knights and his partner.
+- **Focus is only as safe as its readers.** A focused deck with Oath of the
+  Knights or Favonian Standard turns its count into Block; one without them
+  has only its starter Knight and Wind Wall.
 - **Before the first Oath** Ascension is not in hand.
 
 ## 9. What it costs to build
 
 C#: the four Oath counts and the current element (one power), the created
-Ascension and the Fang's grant, the random starter Knight at run start (and
-its four starter-only cards, kept out of the pool by the starter-overlap
-lint), payouts rewritten, Absorb and the Winds removed, 23 cards re-aimed or
-new, and the seat page (current element, the four counts). The sim model
-comes first (sec.10).
+Ascension and the Fang's grant, the random starter Knight at run start (four
+starter-only cards, kept out of the pool by the starter-overlap lint), the
+payouts, Absorb and the Winds removed, 41 cards re-aimed or new, and the seat
+page (current element, the four counts). The sim model is draft PR #768.
 
-## 10. What the sim must show before a prototype
+## 10. What the sim has shown, and must still show
 
-1. **Stay or switch, from the same state.** Mid-fight (turn 4 or 5, a
-   realistic Pyro count, a Hydro Knight in hand, a big attack coming): keep
-   Pyro against play the Hydro Knight, over the next three turns. Damage,
-   Block, HP lost, and whether a fresh aura is left for the next Anemo hit.
-   With ordinary drafted support, then with the movers and Boreas Unbound.
-   One pair each for Cryo (Vulnerable before a burst turn) and Electro
-   (against a pack).
-2. **Ascension's curve.** Oath per turn, and Ascension's damage per cast on
-   turns 1 to 12, by starting Knight, focused and juggling. Flag any deck
-   where Ascension alone passes 60 per cast by turn 8, with the setup that
-   produced it and what the deck gave up. Check the turn-one burst above.
-3. **The starting Knights are even, bosses and packs apart.** Win rate and
-   act-1 HP loss by starting Knight, single-enemy fights and packs of three
-   or more reported separately (Barbara paints every enemy, so she may lead
-   in packs by structure, not by her printed Block).
-4. **Readers pay for focus.** Eye of the Storm and Oath of the Knights against
-   Defend, focused and juggling; act-1 elite HP loss across the design's own
-   options, and against base Silent and Ironclad.
+Shown (draft PR #768, stylised act 1, n = 400 per cell, read the gaps not
+the levels): per-card Oath keeps Ascension in check (two drafted fights in
+3,187 passed 60 per cast by turn 8); the starter gap is Block; a focused
+reader pays about 1.7 times a juggling one; without Boreas Unbound a
+mid-fight switch never pays over three turns.
+
+Still to show, on the 41-card pool with the 8-Block starters:
+1. **Electro:** E-AoE against E-Draw; the four starts within 10 points.
+2. **The Switch cards:** stay against switch from one state, with Change of
+   Guard and Tailwind Guard; a switch should be right sometimes, not always.
+3. **Ascension's curve:** no drafted fight routinely past 60 by turn 8, with
+   the setup that produced any that do.
+4. **Readers:** Eye of the Storm (now Exhaust), Oath of the Knights, Favonian
+   Standard and Dawn Wind's March against Defend, focused and juggling.
 
 ## Picks
 
-1. **What gains Oath.** (1) *Applying an element and Swirling an aura of it,
-   1 each, as defined in sec.3* [default; the external review agrees].
-   (2) Swirling only (closer to Genshin; slower, and a Knight charges nothing
-   by itself).
-2. **What a switch is for.** (1) *The switch the kit rewards is the choice of
-   element at the start of each fight, from a roster of drafted Knights; a
-   mid-fight switch stays a costly juggle ([USER]: "figuring out how to juggle
-   them becomes a problem"), made viable by the movers. The sim's first check
-   must find it sometimes right with them* [default]. (2) Make a mid-fight
-   switch pay by itself: when the current element changes, the new element
-   gains Oath equal to half the old one's (no count goes down). (3) Leave it
-   open until the sim's first check.
-3. **Grand Master.** (1) *Keep Grand Master's Order and Knights' Roll Call as
-   support cards and drop "Grand Master" as an archetype; it can earn the
-   name later with a distinct turn* [default; the external review's
-   recommendation]. (2) Keep it as a provisional fourth archetype.
+1. **Electro's payout**, after the sim: E-AoE (3 damage to ALL) or E-Draw
+   (draw 1).
