@@ -3977,9 +3977,9 @@ avoid having too many attack / block spam cards ... they shouldn't just be 10
 copies of 'do x damage, or plan y'". Numbers "agreed". AoE: "5 to 7 damage per
 1 energy is roughly the going rate on AoE commons". Each wears the portrait of
 the shipped Kokomi card whose id it borrows (`art_of:`). Kokomi art pass 2
-(2026-09-29) gave nine of them their own art (Massed Volley, Signal Arrow,
-Surging Shoal, Press the Advantage, Shell of Sanctuary, Depths' Judgment, Moon
-Signal, Pearl Current, What the Tokoyo Took; `art/plan.tsv`); the other four
+(2026-09-29) gave ten of them their own art (Massed Volley, Signal Arrow,
+Surging Shoal, Pearl Diver, Press the Advantage, Shell of Sanctuary, Depths' Judgment, Moon
+Signal, Pearl Current, What the Tokoyo Took; `art/plan.tsv`); the other three
 keep the proxy.
 
 - Commons: Massed Volley (3x3; 4x3), Signal Arrow (7, Plan 3 to ALL twice; 10

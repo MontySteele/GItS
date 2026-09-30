@@ -1577,7 +1577,8 @@ proto_mc_durin_binary_form	ImageGen/images/cards/companions/proto_mc_durin_binar
 # overhaul retires, and the line above it names the donor and why it fits.
 # proto_kk_waters_edge	ImageGen/images/cards/kokomi/proto_kk_waters_edge.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
 # proto_kk_coral_guard	ImageGen/images/cards/kokomi/proto_kk_coral_guard.png	500	380	cover	y0.41	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
-proto_kk_kurages_oath	ImageGen/images/cards/kokomi/proto_kk_kurages_oath.png	500	380	cover	y0.24	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+# proto_kk_kurages_oath <- art pass 2: cropped below the GENSHIN IMPACT wordmark, face kept
+proto_kk_kurages_oath	ImageGen/images/cards/kokomi/proto_kk_kurages_oath.png	500	380	cover	y0.32	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
 # proto_kk_exposed_flank <- exposing_current: the shipped card whose whole job is exposing the enemy, one noun over
 proto_kk_exposed_flank	ImageGen/images/cards/kokomi/proto_kk_exposed_flank.png	500	380	cover	y0.58	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
 # proto_kk_treatise <- watch_of_the_shallows: Power donor for a Power card, same rarity, same watchful register
@@ -1728,7 +1729,8 @@ proto_spark_mode_bombs	ImageGen/images/cards/klee/proto_spark_mode_bombs.png	500
 # family, siblings differentiated by CROP (L7). Every focus below is new to the
 # prototype partition -- no two of these rows share a source AND a crop.
 proto_kk_ripple	ImageGen/images/cards/kokomi/proto_kk_ripple.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
-proto_kk_riptide	ImageGen/images/cards/kokomi/proto_kk_riptide.png	500	380	cover	y0.50	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+# proto_kk_riptide <- art pass 2: her face and the fish at her hand, no legs
+proto_kk_riptide	ImageGen/images/cards/kokomi/proto_kk_riptide.png	500	380	cover	x0.48,y0.24@1.4	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
 proto_kk_scout_ahead	ImageGen/images/cards/kokomi/proto_kk_scout_ahead.png	500	380	cover	x0.45	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
 # proto_kk_second_thoughts <- her one unused expression sheet, the sticker treatment salt_line and change_of_plans already use
 proto_kk_second_thoughts	ImageGen/images/cards/kokomi/proto_kk_second_thoughts.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
@@ -2445,7 +2447,7 @@ proto_vk_boreas_unbound	ImageGen/images/cards/varka/proto_vk_boreas_unbound.png	
 # pictures of her feet and legs". The main session assigned one picture per
 # card (Kokomi story and quest stills, wallpapers, Gorou's own art, Watatsumi
 # places); every crop below frames a face or the named subject, never legs or
-# a torso. The nine rows that wore a shipped card's art through `art_of:` now
+# a torso. The ten rows that wore a shipped card's art through `art_of:` now
 # carry their own row. At most two of her cards share one source
 # (art_lint L14).
 # proto_kk_slack_water <- slack water: the still tide
@@ -2512,3 +2514,5 @@ proto_kk_nereids_ascension	ImageGen/images/cards/kokomi/proto_kk_nereids_ascensi
 proto_kk_the_moon_a_ship	ImageGen/images/cards/kokomi/proto_kk_the_moon_a_ship.png	500	380	cover	x0.58,y0.42@1.3	shortlist	1	png	Sangonomiya Kokomi Birthday 2023.png		splash	kokomi_pool
 # proto_kk_what_the_tokoyo_took <- Tokoyo, the other world
 proto_kk_what_the_tokoyo_took	ImageGen/images/cards/kokomi/proto_kk_what_the_tokoyo_took.png	500	380	cover	x0.45	shortlist	1	png	Enkanomiya.png		splash	kokomi_pool
+# proto_kk_pearl_diver <- chibi Kokomi in the shallow water, face in frame
+proto_kk_pearl_diver	ImageGen/images/cards/kokomi/proto_kk_pearl_diver.png	500	380	cover	x0.62,y0.52@1.6	shortlist	1	png	Drifting Luminescence 2022-03-08 - Sangonomiya Kokomi Shorts.png		splash	kokomi_pool

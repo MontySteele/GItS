@@ -1549,7 +1549,7 @@
    upgrade: {damage: 4, plan_damage: 6}}
 
 - {id: proto_kk_pearl_diver, name: "Pearl Diver", character: kokomi,
-   authored_by: [claude], art_of: pearl_diver,
+   authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: The [gold]Casket[/gold] gains 2.",
    effects: [{op: draw, amount: 1}],
