@@ -84,6 +84,12 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   8 Block, Exposed Flank cut. The pool is 48 (20 / 23 / 5). Brief §6. Its
   seat round (`review/records/kokomi-feed-round-2026-09-29.md`): energy is no
   longer the wall, Block still is; one seat reached the act-3 boss.
+  **Expansion batch one (2026-09-29, ruled):** [USER] on the feed-pass
+  build: "I like it!"; card art redone (#770, no leg crops). Paper
+  `review/active/kokomi-expansion-2026-09-29.md`: four decks (Plan volume,
+  the Big Plan reading Energy paid, Tide Control, Dusk Guard), 22 cards (12
+  Uncommon, 10 Rare), Watatsumi's Grace replaces The Clouds Like Waves
+  Rippling; pool to 69. Next: its sim (paper §5), then the build.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any
