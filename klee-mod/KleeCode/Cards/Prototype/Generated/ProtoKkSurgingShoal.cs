@@ -46,7 +46,7 @@ public sealed class ProtoKkSurgingShoal : CustomCardModel, IElementalCard, IChar
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("surging_shoal");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_surging_shoal");
 
     public override List<(string, string)>? Localization => new()
     {

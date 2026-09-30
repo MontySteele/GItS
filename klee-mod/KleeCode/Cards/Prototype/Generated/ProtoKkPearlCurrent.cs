@@ -46,7 +46,7 @@ public sealed class ProtoKkPearlCurrent : CustomCardModel, IElementalCard, IChar
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("pearl_current");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_pearl_current");
 
     public override List<(string, string)>? Localization => new()
     {

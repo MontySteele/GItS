@@ -31,6 +31,14 @@ Rules, each a defect that actually shipped in the first art sprint:
       strong source family and three deliberately different crops, which L1
       read as a violation. The group makes that reuse legal -- but only when
       the crop actually changes, or the two cards are the same picture twice.
+  L14 no source may be the effective pick of more than TWO cards inside one
+      character's card partition (the out-path's directory, e.g.
+      ImageGen/images/cards/kokomi/, split on `is_prototype` like L1). L7
+      lets a source_group reuse one picture at any number of crops, and
+      Kokomi's kit had nine wiki renders on 32 prototype cards that
+      way -- "so many cards are just pictures of her feet and legs" ([USER],
+      2026-09-29), because a tall render cropped seven ways is seven slices
+      of one body. Stickers count. See `source_concentration`.
 
 L1, L7 and L12 all partition on `is_prototype` (see that function). A
 placeholder for a quarantined prototype row deliberately wears a shipped
@@ -337,6 +345,95 @@ PENDING_RED_PEN = {
 }
 
 
+# L14. How many cards in one partition may wear one source.
+SOURCE_CAP = 2
+
+# L14 does not read these directories as ONE character's partition. The
+# companion directory holds every guest character's cards side by side, and
+# its rule is the opposite on purpose: one strong source family per guest,
+# three deliberately different crops (furina-art-pass-requirements.md 9.3),
+# which L7 already polices through `source_group`.
+MULTI_CHARACTER_PARTITIONS = {"ImageGen/images/cards/companions"}
+
+# L14, EXISTING DEBT, measured when the rule landed (2026-09-29). Every entry
+# is the SHIPPED (unprefixed) Kokomi kit, which the prototype overhaul retires
+# and whose art this pass was told not to touch: seven wiki renders, each
+# cropped three to six ways. Keyed (partition dir, is_prototype, title).
+# An entry whose source has come down to two cards or fewer is suppressing
+# nothing and FAILS (`stale_source_concentration`), so the set only shrinks.
+# The prototype Kokomi partition has no entry and must never get one.
+KNOWN_SOURCE_CONCENTRATION = {
+    ("ImageGen/images/cards/kokomi", False, "Character Sangonomiya Kokomi Full Wish.png"),
+    ("ImageGen/images/cards/kokomi", False, "Character Sangonomiya Kokomi Game.png"),
+    ("ImageGen/images/cards/kokomi", False, "Sangonomiya Kokomi Card.png"),
+    ("ImageGen/images/cards/kokomi", False, "Sangonomiya Kokomi Character Card Golden.png"),
+    ("ImageGen/images/cards/kokomi", False, "Sangonomiya Kokomi Character Card Platinum.png"),
+    ("ImageGen/images/cards/kokomi", False, "Sangonomiya Kokomi Character Card Showcase.png"),
+    ("ImageGen/images/cards/kokomi", False, "Sangonomiya Kokomi Character Card.png"),
+    ("ImageGen/images/cards/kokomi", False, "Sangonomiya Kokomi Introduction Card.jpg"),
+    ("ImageGen/images/cards/kokomi", False, "Sangonomiya Kokomi Portrait.png"),
+    ("ImageGen/images/cards/kokomi", False, "Sangonomiya Kokomi Profile.png"),
+    ("ImageGen/images/cards/kokomi", False, "Sangonomiya Kokomi Wish.png"),
+}
+
+
+def _source_claims(effective) -> dict:
+    """(partition dir, is_prototype, title, frame) -> the asset ids wearing it."""
+    claims: dict[tuple, set] = {}
+    for r in effective:
+        part = r["out"].rsplit("/", 1)[0]
+        if part in MULTI_CHARACTER_PARTITIONS:
+            continue
+        key = (part, is_prototype(r["asset_id"]), r["title"], r["frame"])
+        claims.setdefault(key, set()).add(r["asset_id"])
+    return claims
+
+
+def source_concentration(effective) -> list[str]:
+    """L14: at most SOURCE_CAP cards per source inside one character partition.
+
+    L1 forbids two cards sharing a source; `source_group` and L7 relax that to
+    "any number of cards, each at a different crop". Nothing bounded the
+    number, and a tall official render cut seven ways is mostly legs and torso
+    by construction -- the head fits in one crop. So the family licence now
+    stops at two cards per source, per partition.
+    """
+    problems = []
+    for (part, proto, title, frame), ids in sorted(
+            _source_claims(effective).items(), key=lambda kv: str(kv[0])):
+        if len(ids) <= SOURCE_CAP or (part, proto, title) in KNOWN_SOURCE_CONCENTRATION:
+            continue
+        at = f" @{frame}%" if frame is not None else ""
+        problems.append(
+            f"L14 {part}/{'proto' if proto else 'shipped'}: '{title}'{at} is the "
+            f"effective pick of {len(ids)} cards ({', '.join(sorted(ids))}); "
+            f"at most {SOURCE_CAP} cards in one partition may share a source"
+        )
+    return problems
+
+
+def stale_source_concentration(rows) -> list[str]:
+    """L14 rot check: a KNOWN_SOURCE_CONCENTRATION entry that no longer breaks
+    the cap must be deleted. Real plan only -- synthetic rows would make every
+    entry look stale, so `lint()` does not call this; `main()` and the suite do.
+    """
+    effective = [
+        r for r in rows
+        if "/cards/" in r["out"] and (r["pick"] == "auto" or r["rank"] == 1)
+    ]
+    worst: dict[tuple, int] = {}
+    for (part, proto, title, _frame), ids in _source_claims(effective).items():
+        k = (part, proto, title)
+        worst[k] = max(worst.get(k, 0), len(ids))
+    return [
+        f"L14 stale allow-list entry {entry}: {worst.get(entry, 0)} card(s) now "
+        f"wear it, within the cap of {SOURCE_CAP} -- delete it from "
+        "KNOWN_SOURCE_CONCENTRATION"
+        for entry in sorted(KNOWN_SOURCE_CONCENTRATION, key=str)
+        if worst.get(entry, 0) <= SOURCE_CAP
+    ]
+
+
 def lint(rows, *, pixel_check: bool = True) -> list[str]:
     """The plan lint. `rows` are plan rows; the return is problem strings.
 
@@ -432,6 +529,7 @@ def lint(rows, *, pixel_check: bool = True) -> list[str]:
         if r["source"] == "gif" and r["frame"] is None:
             problems.append(f"L5 {r['asset_id']}: gif pick without a frame_pct")
 
+    problems.extend(source_concentration(effective))
     problems.extend(undecodable(effective))
     problems.extend(undersized(effective))
     problems.extend(banned_families(effective))
@@ -1131,6 +1229,7 @@ def main() -> int:
             print("LINT: " + p, file=sys.stderr)
         return 1 if problems else 0
     problems = lint(rows)               # includes L12 since C3
+    problems.extend(stale_source_concentration(rows))
     problems.extend(edge_clipping(rows, art_root=art_root))
     if problems:
         for p in problems:

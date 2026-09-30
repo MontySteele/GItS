@@ -123,7 +123,10 @@ def resolve(titles):
 
 
 def rawname(title: str) -> str:
-    return title.replace("/", "_").replace(" ", "_")
+    # A double quote is legal in a wiki title and illegal in a Windows
+    # filename, so it is dropped: 'Character Teaser - "Sangonomiya Kokomi-
+    # The Ocean's Will" Wallpaper 1.png' is saved without its quotes.
+    return title.replace("/", "_").replace(" ", "_").replace('"', "")
 
 
 def resolve_thumbs(titles, width):

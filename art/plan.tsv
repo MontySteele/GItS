@@ -1578,51 +1578,21 @@ proto_mc_durin_binary_form	ImageGen/images/cards/companions/proto_mc_durin_binar
 # proto_kk_waters_edge	ImageGen/images/cards/kokomi/proto_kk_waters_edge.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
 # proto_kk_coral_guard	ImageGen/images/cards/kokomi/proto_kk_coral_guard.png	500	380	cover	y0.41	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
 proto_kk_kurages_oath	ImageGen/images/cards/kokomi/proto_kk_kurages_oath.png	500	380	cover	y0.24	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
-proto_kk_slack_water	ImageGen/images/cards/kokomi/proto_kk_slack_water.png	500	380	cover	y0.54	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
-# proto_kk_feint <- press_the_advantage: the follow-up blow a feint sets up
-proto_kk_feint	ImageGen/images/cards/kokomi/proto_kk_feint.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
-# proto_kk_ambush <- signal_arrow: the loosed arrow -- damage that arrives after the card is gone
-proto_kk_ambush	ImageGen/images/cards/kokomi/proto_kk_ambush.png	500	380	cover	y0.56	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
-# proto_kk_read_the_field <- read_the_current: the shipped 'Read the ...' card, one noun over
-proto_kk_read_the_field	ImageGen/images/cards/kokomi/proto_kk_read_the_field.png	500	380	cover	y0.44	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
 # proto_kk_exposed_flank <- exposing_current: the shipped card whose whole job is exposing the enemy, one noun over
 proto_kk_exposed_flank	ImageGen/images/cards/kokomi/proto_kk_exposed_flank.png	500	380	cover	y0.58	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
 # proto_kk_treatise <- watch_of_the_shallows: Power donor for a Power card, same rarity, same watchful register
 proto_kk_treatise	ImageGen/images/cards/kokomi/proto_kk_treatise.png	500	380	cover	x0.55	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
 proto_kk_song_of_pearls	ImageGen/images/cards/kokomi/proto_kk_song_of_pearls.png	500	380	cover	x0.33	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
-# proto_kk_war_council <- council_at_bourou: the council itself -- the shipped card of that name
-proto_kk_war_council	ImageGen/images/cards/kokomi/proto_kk_war_council.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
-proto_kk_nereids_ascension	ImageGen/images/cards/kokomi/proto_kk_nereids_ascension.png	500	380	cover	y0.79	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
 # proto_kk_the_moon_overlooks_the_waters <- vigil_of_the_deep: Rare Power donor for a Rare Power; the vigil kept over the fight is the same act as the moon overlooking it
 proto_kk_the_moon_overlooks_the_waters	ImageGen/images/cards/kokomi/proto_kk_the_moon_overlooks_the_waters.png	500	380	cover	x0.53	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
 # proto_kk_sea_salt_prayer <- votive_offering: same type and same rarity -- the offering at the shrine IS the prayer
 proto_kk_sea_salt_prayer	ImageGen/images/cards/kokomi/proto_kk_sea_salt_prayer.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Sangonomiya Kokomi Item.png		item	kokomi_pool
-# proto_kk_deep_current <- pulsing_current: the current that runs through every enemy
-proto_kk_deep_current	ImageGen/images/cards/kokomi/proto_kk_deep_current.png	500	380	cover	y0.34	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
-# proto_kk_coral_bulwark <- jade_bulwark: the shipped Bulwark; the same word and the same job
-proto_kk_coral_bulwark	ImageGen/images/cards/kokomi/proto_kk_coral_bulwark.png	500	380	cover	y0.10	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
 # proto_kk_cleansing_wave <- cleansing_tide: the shipped 'Cleansing ...' card, one noun over, same type
 proto_kk_cleansing_wave	ImageGen/images/cards/kokomi/proto_kk_cleansing_wave.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sango Pearl Wild.png		item	kokomi_pool
-# proto_kk_the_clouds_like_waves <- pearl_current: the Power donor whose drip runs for as long as the fight does
-proto_kk_the_clouds_like_waves	ImageGen/images/cards/kokomi/proto_kk_the_clouds_like_waves.png	500	380	cover	y0.33	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
-# proto_kk_the_moon_a_ship <- prayer_to_the_moon: Rare Skill donor for a Rare Skill, and the moon is the object of both
-proto_kk_the_moon_a_ship	ImageGen/images/cards/kokomi/proto_kk_the_moon_a_ship.png	500	380	cover	x0.40	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
 proto_kk_sango_isshin	ImageGen/images/cards/kokomi/proto_kk_sango_isshin.png	500	380	cover	y0.62	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
-# proto_kk_rally <- mass_mobilization: the shipped 'Rally the Isles'; the same word and the same act
-proto_kk_rally	ImageGen/images/cards/kokomi/proto_kk_rally.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
-# proto_kk_vanguard <- to_the_front: the vanguard IS the troop sent to the front
-proto_kk_vanguard	ImageGen/images/cards/kokomi/proto_kk_vanguard.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
-# proto_kk_the_generals_banner <- raise_the_sashimono: a sashimono is a war banner -- the same object
-proto_kk_the_generals_banner	ImageGen/images/cards/kokomi/proto_kk_the_generals_banner.png	500	380	cover	x0.36	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
-# proto_kk_chain_of_command <- standing_orders: the chain of command IS the standing order passed down the line
-proto_kk_chain_of_command	ImageGen/images/cards/kokomi/proto_kk_chain_of_command.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
-proto_kk_stolen_chapter	ImageGen/images/cards/kokomi/proto_kk_stolen_chapter.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
 # proto_kk_change_of_plans <- wheel_the_ranks: wheeling the ranks mid-fight is changing the plan
 proto_kk_change_of_plans	ImageGen/images/cards/kokomi/proto_kk_change_of_plans.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 3.png		sticker	kokomi_pool
-proto_kk_undertow	ImageGen/images/cards/kokomi/proto_kk_undertow.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
 proto_kk_salt_line	ImageGen/images/cards/kokomi/proto_kk_salt_line.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 2.png		sticker	kokomi_pool
-# proto_kk_battle_plan <- the_gunbai_turns: the war fan that signals the plan a turn before it lands
-proto_kk_battle_plan	ImageGen/images/cards/kokomi/proto_kk_battle_plan.png	500	380	cover	y0.22	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
 # proto_kk_moons_reflection <- moon_signal: the moon on the water is the reflection this card reads
 proto_kk_moons_reflection	ImageGen/images/cards/kokomi/proto_kk_moons_reflection.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 09 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
 # ---------- Inazuma companion overhaul (proto_mi_) ----------
@@ -1757,11 +1727,6 @@ proto_spark_mode_bombs	ImageGen/images/cards/klee/proto_spark_mode_bombs.png	500
 # source_group kokomi_pool, exactly like the block above: one strong source
 # family, siblings differentiated by CROP (L7). Every focus below is new to the
 # prototype partition -- no two of these rows share a source AND a crop.
-proto_kk_breakwater	ImageGen/images/cards/kokomi/proto_kk_breakwater.png	500	380	cover	y0.34	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
-proto_kk_feigned_retreat	ImageGen/images/cards/kokomi/proto_kk_feigned_retreat.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
-proto_kk_flank	ImageGen/images/cards/kokomi/proto_kk_flank.png	500	380	cover	y0.55	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
-proto_kk_opening_gambit	ImageGen/images/cards/kokomi/proto_kk_opening_gambit.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
-proto_kk_pincer	ImageGen/images/cards/kokomi/proto_kk_pincer.png	500	380	cover	y0.60	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
 proto_kk_ripple	ImageGen/images/cards/kokomi/proto_kk_ripple.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
 proto_kk_riptide	ImageGen/images/cards/kokomi/proto_kk_riptide.png	500	380	cover	y0.50	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
 proto_kk_scout_ahead	ImageGen/images/cards/kokomi/proto_kk_scout_ahead.png	500	380	cover	x0.45	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
@@ -1817,10 +1782,6 @@ proto_ko_alices_introduction_magic	ImageGen/images/cards/klee/proto_ko_alices_in
 # Kokomi: the two bulwarks.
 # proto_kk_shell_guard <- the Tamakushi Casket, the summon the card's own text names
 proto_kk_shell_guard	ImageGen/images/cards/kokomi/proto_kk_shell_guard.png	500	380	cover	top	shortlist	1	png	Tamakushi Casket Equipment Card.png		tcg	kokomi_pool
-# proto_kk_tide_wall <- the full Wish art at a LOWER crop than proto_kk_second_wave's
-#   y0.35 and proto_kk_sango_isshin's y0.62. Her own introduction banner was the first pick and lost: 604x268, and
-#   the burnt-in SANGONOMIYA KOKOMI wordmark fills the half a card crop keeps.
-proto_kk_tide_wall	ImageGen/images/cards/kokomi/proto_kk_tide_wall.png	500	380	cover	y0.5@1.4	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
 # Kokomi: the feed pass (2026-09-29), five 0-cost Plan-only Commons, each on a source no other row claims.
 # proto_kk_bubble_ward <- her birthday art in a sea of bubbles: the Block the jellyfish raises
 proto_kk_bubble_ward	ImageGen/images/cards/kokomi/proto_kk_bubble_ward.png	500	380	cover	y0.55	shortlist	1	png	Sangonomiya Kokomi Birthday 2024.png		splash	kokomi_pool
@@ -2479,3 +2440,75 @@ proto_vk_stormward_stance	ImageGen/images/cards/varka/proto_vk_stormward_stance.
 proto_vk_tailwind_stride	ImageGen/images/cards/varka/proto_vk_tailwind_stride.png	500	380	cover_autocrop	contain@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 48 Varka 3.png		sticker
 proto_vk_converging_winds	ImageGen/images/cards/varka/proto_vk_converging_winds.png	500	380	cover	center	shortlist	1	png	Version Luna V Event Calendar Wallpaper.png		splash
 proto_vk_boreas_unbound	ImageGen/images/cards/varka/proto_vk_boreas_unbound.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Fated Warrior Quest Still 3.png		splash
+# ---------- Kokomi art pass 2 (2026-09-29): faces, not legs ----------
+# [USER]: "re-do her art pass for card art, because so many cards are just
+# pictures of her feet and legs". The main session assigned one picture per
+# card (Kokomi story and quest stills, wallpapers, Gorou's own art, Watatsumi
+# places); every crop below frames a face or the named subject, never legs or
+# a torso. The nine rows that wore a shipped card's art through `art_of:` now
+# carry their own row. At most two of her cards share one source
+# (art_lint L14).
+# proto_kk_slack_water <- slack water: the still tide
+proto_kk_slack_water	ImageGen/images/cards/kokomi/proto_kk_slack_water.png	500	380	cover	x0.45	shortlist	1	png	Fishing Point Sangonomiya Shrine Context.png		splash	kokomi_pool
+# proto_kk_feint <- her in battle
+proto_kk_feint	ImageGen/images/cards/kokomi/proto_kk_feint.png	500	380	cover	x0.52,y0.36@1.6	shortlist	1	png	Archon Quest In the Name of the Resistance.png		splash	kokomi_pool
+# proto_kk_deep_current <- the depths
+proto_kk_deep_current	ImageGen/images/cards/kokomi/proto_kk_deep_current.png	500	380	cover	x0.68,y0.42@1.25	shortlist	1	png	Shrine of Depths Watatsumi Island Location Context.png		splash	kokomi_pool
+# proto_kk_coral_bulwark <- a shell as a wall
+proto_kk_coral_bulwark	ImageGen/images/cards/kokomi/proto_kk_coral_bulwark.png	500	380	cover	x0.50,y0.40@1.2	shortlist	1	png	Watatsumi Island Sangonomiya Shrine.png		splash	kokomi_pool
+# proto_kk_rally <- rallying the general
+proto_kk_rally	ImageGen/images/cards/kokomi/proto_kk_rally.png	500	380	cover	x0.43	shortlist	1	png	Character Teaser - "Sangonomiya Kokomi- The Ocean's Will" Wallpaper 2.png		splash	kokomi_pool
+# proto_kk_vanguard <- Gorou out in front
+proto_kk_vanguard	ImageGen/images/cards/kokomi/proto_kk_vanguard.png	500	380	cover	x0.60,y0.45@1.35	shortlist	1	png	Gorou Birthday 2023.png		splash	kokomi_pool
+# proto_kk_undertow <- the pull under the water
+proto_kk_undertow	ImageGen/images/cards/kokomi/proto_kk_undertow.png	500	380	cover	center@1.2	shortlist	1	png	World Quest Orobashi's Legacy Part III.png		splash	kokomi_pool
+# proto_kk_breakwater <- a breakwater
+proto_kk_breakwater	ImageGen/images/cards/kokomi/proto_kk_breakwater.png	500	380	cover	center	shortlist	1	png	World Quest Eye of Watatsumi.png		splash	kokomi_pool
+# proto_kk_massed_volley <- many hits at once
+proto_kk_massed_volley	ImageGen/images/cards/kokomi/proto_kk_massed_volley.png	500	380	cover	x0.18,y0.70@2.0	shortlist	1	png	Version 2.1 Wallpaper 1.png		splash	kokomi_pool
+# proto_kk_press_the_advantage <- Kokomi (left-centre), face in frame
+proto_kk_press_the_advantage	ImageGen/images/cards/kokomi/proto_kk_press_the_advantage.png	500	380	cover	x0.23,y0.62@1.8	shortlist	1	png	Version 3.7 Wallpaper 1.png		splash	kokomi_pool
+# proto_kk_shell_of_sanctuary <- sanctuary
+proto_kk_shell_of_sanctuary	ImageGen/images/cards/kokomi/proto_kk_shell_of_sanctuary.png	500	380	cover	center	shortlist	1	png	Windtrace 2022-12-23 The Pearl of Sango.png		splash	kokomi_pool
+# proto_kk_ambush <- lying in wait
+proto_kk_ambush	ImageGen/images/cards/kokomi/proto_kk_ambush.png	500	380	cover	x0.45,y0.45@1.1	shortlist	1	png	Story Quest Sangonomiya Kokomi A1 Watatsumi Sightseeing.png		splash	kokomi_pool
+# proto_kk_read_the_field <- studying the field
+proto_kk_read_the_field	ImageGen/images/cards/kokomi/proto_kk_read_the_field.png	500	380	cover	x0.52,y0.52@2.6	shortlist	1	png	Story Quest Sangonomiya Kokomi A1 Her Secret.png		splash	kokomi_pool
+# proto_kk_war_council <- the council tent
+proto_kk_war_council	ImageGen/images/cards/kokomi/proto_kk_war_council.png	500	380	cover	x0.59,y0.43@3.0	shortlist	1	png	Story Quest Sangonomiya Kokomi A1 Rumors Abound.png		splash	kokomi_pool
+# proto_kk_the_generals_banner <- the general
+proto_kk_the_generals_banner	ImageGen/images/cards/kokomi/proto_kk_the_generals_banner.png	500	380	cover	x0.42,y0.42@1.25	shortlist	1	png	Gorou Birthday 2025.png		splash	kokomi_pool
+# proto_kk_chain_of_command <- ranks of soldiers
+proto_kk_chain_of_command	ImageGen/images/cards/kokomi/proto_kk_chain_of_command.png	500	380	cover	x0.45,y0.45@1.1	shortlist	1	png	Story Quest Sangonomiya Kokomi A1 New Beginning.png		splash	kokomi_pool
+# proto_kk_stolen_chapter <- sneaking in at the door
+proto_kk_stolen_chapter	ImageGen/images/cards/kokomi/proto_kk_stolen_chapter.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 1.png		sticker	kokomi_pool
+# proto_kk_battle_plan <- the plan
+proto_kk_battle_plan	ImageGen/images/cards/kokomi/proto_kk_battle_plan.png	500	380	cover	x0.25	shortlist	1	png	Sangonomiya Kokomi TPRGT 2023 - Aether.png		splash	kokomi_pool
+# proto_kk_pincer <- two sides
+proto_kk_pincer	ImageGen/images/cards/kokomi/proto_kk_pincer.png	500	380	cover	x0.53,y0.55@1.7	shortlist	1	png	Archon Quest Delusion.png		splash	kokomi_pool
+# proto_kk_flank <- Kokomi (centre), face in frame
+proto_kk_flank	ImageGen/images/cards/kokomi/proto_kk_flank.png	500	380	cover	x0.63,y0.52@2.2	shortlist	1	png	Version 3.8 Wallpaper 1.png		splash	kokomi_pool
+# proto_kk_feigned_retreat <- "Tactical Retreat"
+proto_kk_feigned_retreat	ImageGen/images/cards/kokomi/proto_kk_feigned_retreat.png	500	380	cover	x0.35,y0.45@1.3	shortlist	1	png	Hangout Gorou Act 1 Tactical Retreat Aether.png		splash	kokomi_pool
+# proto_kk_opening_gambit <- the opening
+proto_kk_opening_gambit	ImageGen/images/cards/kokomi/proto_kk_opening_gambit.png	500	380	cover	x0.55,y0.40@1.6	shortlist	1	png	Character Teaser - "Sangonomiya Kokomi- The Ocean's Will" Wallpaper 1.png		splash	kokomi_pool
+# proto_kk_tide_wall <- a wall at the tide
+proto_kk_tide_wall	ImageGen/images/cards/kokomi/proto_kk_tide_wall.png	500	380	cover	x0.45	shortlist	1	png	Watatsumi Island.png		splash	kokomi_pool
+# proto_kk_signal_arrow <- the loosed arrow
+proto_kk_signal_arrow	ImageGen/images/cards/kokomi/proto_kk_signal_arrow.png	500	380	cover	x0.60	shortlist	1	png	Gorou Profile.png		splash	kokomi_pool
+# proto_kk_surging_shoal <- a shoal
+proto_kk_surging_shoal	ImageGen/images/cards/kokomi/proto_kk_surging_shoal.png	500	380	cover	x0.75	shortlist	1	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+# proto_kk_depths_judgment <- judgement from the deep
+proto_kk_depths_judgment	ImageGen/images/cards/kokomi/proto_kk_depths_judgment.png	500	380	cover	y0.36	shortlist	1	png	Orobashi Statue The Narrows Northwest Secret Room.png		splash	kokomi_pool
+# proto_kk_moon_signal <- a signal by moonlight
+proto_kk_moon_signal	ImageGen/images/cards/kokomi/proto_kk_moon_signal.png	500	380	cover	x0.50	shortlist	1	png	Sangonomiya Kokomi TPRGT 2024 - Aether.png		splash	kokomi_pool
+# proto_kk_pearl_current <- a pearl in the current
+proto_kk_pearl_current	ImageGen/images/cards/kokomi/proto_kk_pearl_current.png	500	380	cover	x0.47,y0.35@1.3	shortlist	1	png	World Quest Orobashi's Legacy Part II.png		splash	kokomi_pool
+# proto_kk_the_clouds_like_waves <- clouds like waves
+proto_kk_the_clouds_like_waves	ImageGen/images/cards/kokomi/proto_kk_the_clouds_like_waves.png	500	380	cover	y0.35	shortlist	1	png	World Quest Fin of Watatsumi.png		splash	kokomi_pool
+# proto_kk_nereids_ascension <- her Burst: the strongest picture
+proto_kk_nereids_ascension	ImageGen/images/cards/kokomi/proto_kk_nereids_ascension.png	500	380	cover	x0.60	shortlist	1	png	Calendar Wallpaper February 2025.png		splash	kokomi_pool
+# proto_kk_the_moon_a_ship <- the priestess; the Mend card
+proto_kk_the_moon_a_ship	ImageGen/images/cards/kokomi/proto_kk_the_moon_a_ship.png	500	380	cover	x0.58,y0.42@1.3	shortlist	1	png	Sangonomiya Kokomi Birthday 2023.png		splash	kokomi_pool
+# proto_kk_what_the_tokoyo_took <- Tokoyo, the other world
+proto_kk_what_the_tokoyo_took	ImageGen/images/cards/kokomi/proto_kk_what_the_tokoyo_took.png	500	380	cover	x0.45	shortlist	1	png	Enkanomiya.png		splash	kokomi_pool

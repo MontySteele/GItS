@@ -40,7 +40,7 @@ public sealed class ProtoKkShellOfSanctuary : CustomCardModel, ICharacterCard, I
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForDusk(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("shell_of_sanctuary");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_shell_of_sanctuary");
 
     public override List<(string, string)>? Localization => new()
     {

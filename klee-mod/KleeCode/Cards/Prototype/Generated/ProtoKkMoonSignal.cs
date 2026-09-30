@@ -40,7 +40,7 @@ public sealed class ProtoKkMoonSignal : CustomCardModel, ICharacterCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForCasket(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("moon_signal");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_moon_signal");
 
     public override List<(string, string)>? Localization => new()
     {

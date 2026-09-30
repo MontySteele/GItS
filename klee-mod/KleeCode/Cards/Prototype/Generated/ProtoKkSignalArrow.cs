@@ -46,7 +46,7 @@ public sealed class ProtoKkSignalArrow : CustomCardModel, IElementalCard, IChara
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("signal_arrow");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_signal_arrow");
 
     public override List<(string, string)>? Localization => new()
     {

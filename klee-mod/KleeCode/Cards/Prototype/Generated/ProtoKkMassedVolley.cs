@@ -46,7 +46,7 @@ public sealed class ProtoKkMassedVolley : CustomCardModel, IElementalCard, IChar
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("massed_volley");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_massed_volley");
 
     public override List<(string, string)>? Localization => new()
     {
