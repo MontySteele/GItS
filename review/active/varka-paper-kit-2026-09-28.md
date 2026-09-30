@@ -284,7 +284,8 @@ payouts):
 1. **Electro's payout: E-AoE (3 damage to ALL).** Default, from sec.10 item 1.
    E-Draw put Electro 26.6 points behind Hydro.
 2. **Even the starts through the pool's Knights, without making them
-   same-y.** [USER]: "I don't want all of this feeling too same-y. What is
+   same-y. RULED 2026-09-29, [USER]: "Good on both Varka defaults" (Lisa and
+   Baron Bunny as below; re-sim pending).** [USER]: "I don't want all of this feeling too same-y. What is
    Lisa's card becomes some other scaling block mechanic, like 'gain 4 block
    per attack played this turn'". Default:
    - **Lisa: Violet Arc** (Knight, 1): "Apply Electro to an enemy. Gain 3 [4]
