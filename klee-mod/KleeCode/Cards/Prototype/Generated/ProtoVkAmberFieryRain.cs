@@ -55,7 +55,7 @@ public sealed class ProtoVkAmberFieryRain : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Amber: Fiery Rain"),
+        ("title", "Amber: Precise Shot"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Pyro[/gold] to an enemy."),
     };
 

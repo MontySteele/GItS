@@ -58,7 +58,7 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, IElementalCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Razor: Claw and Thunder"),
+        ("title", "Razor: Awakening"),
         ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage."),
     };
 

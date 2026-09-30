@@ -32,7 +32,7 @@ namespace KleeMod.Relics;
 /// and the one method that makes the card.
 ///
 /// IT ALSO ROLLS HIS STARTER KNIGHT (sec.5: "One starting Knight, at random
-/// each run"). The deck lists Amber: Fiery Rain; <see cref="AfterObtained"/>,
+/// each run"). The deck lists Amber: Precise Shot; <see cref="AfterObtained"/>,
 /// which the game runs for starting relics when a NEW run is made and never
 /// on a load (<c>RunManager.FinalizeStartingRelics</c>), transforms it into
 /// one of the four starter Knights off the player's own seeded

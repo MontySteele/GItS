@@ -4089,6 +4089,10 @@ What the rows needed that the grammar did not have, each one call into
 - `tags: [dusty_tome]` emits BaseLib's `ITomeCard` (Ascension). He has no
   Ancient card, and Darv's Dusty Tome softlocks on an empty Ancient draw; the
   Tome hands him an upgraded Ascension until an Ancient is designed.
+- `tags: [strike]` emits `CardTag.Strike` (Oathsworn Strike, 2026-09-29: a
+  seat saw Strike Dummy pay on Strike and not on it). A non-basic Strike is
+  tagged the way the base game tags Twin Strike; a basic still answers with
+  `basic_tag:` alone.
 
 Per row, where the face or the build differs from sec.10.3's words:
 
@@ -4174,7 +4178,7 @@ Readings taken where the paper is silent:
 
 - A Knight is any Companion row in his personal pool; it sets his current
   element before its own effects resolve, so its application credits the new
-  element. Jean: Dandelion Breeze is a Skill, not a Knight.
+  element. Jean: Wind Companion is a Skill, not a Knight.
 - Credit is per card play: the first application of an element and the first
   Swirl of an element each give 1, separately; a Swirl's spread and a
   Converging Winds spread reaction give nothing; an event outside a play
@@ -4192,7 +4196,7 @@ Readings taken where the paper is silent:
 - Stacked Baron Bunnies go off as one burst of the summed amount.
 - Change of Guard asks on a grid only when he holds Oath in two or more
   elements; with one it takes that one.
-- The starter Knight: the deck lists Amber: Fiery Rain, and Boreas's Fang
+- The starter Knight: the deck lists Amber: Precise Shot, and Boreas's Fang
   transforms it on a new run off the player's Transformations stream.
 - Stormward Stance prints "additional damage", the base game's template.
 - No new art: the new rows take no `art_of` (a proxy must be the same card

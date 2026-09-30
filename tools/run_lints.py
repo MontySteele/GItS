@@ -223,6 +223,10 @@ REGISTRY: tuple[Lint, ...] = (
     # wrong one and a seat spent two rounds on a card whose power that arm
     # cannot fire.
     _ci("prototype-titles",     "tools/lint_prototype_titles.py"),
+    # 2026-09-29, a Varka seat: "Kaeya: Frostgnaw" (his Knight) and "Kaeya --
+    # Frostgnaw" (a companion) in one deck. Both lints above compare exact
+    # strings; this one compares names a player cannot tell apart.
+    _ci("run-name-clashes",     "tools/lint_run_name_clashes.py"),
     _ci("role-tempo-artifacts", "tools/suggest_role_tempo_tags.py", "--check"),
     _ci("role-tempo-coverage",  "tools/lint_role_tempo_coverage.py", "--gate"),
     _ci("roster-registry",      "tools/lint_roster_registry.py"),

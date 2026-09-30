@@ -54,6 +54,8 @@ public sealed class ProtoVkOathswornStrike : CustomCardModel, IElementalCard, IC
         ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
+    protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {

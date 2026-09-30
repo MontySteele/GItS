@@ -651,6 +651,12 @@ public class Round19Tests
         // sheet's escape and no row declares one, so the honest assertion is
         // that the arm's generated surface carries NEITHER tag -- the shipped
         // basics keep theirs and are not generated here.
+        //
+        // THE ONE DECLARED EXCEPTION is an OFFERED Strike (2026-09-29): a
+        // non-basic row with `tags: [strike]` carries CardTag.Strike the way
+        // the base game's Twin Strike does, so Strike Dummy pays on it. It is
+        // listed here by name, so a second one is a decision and not a drift.
+        var declaredStrikes = new HashSet<Type> { typeof(ProtoVkOathswornStrike) };
         var arm = typeof(ProtoKkSlackWater).Assembly.GetTypes()
             .Where(t => !t.IsAbstract
                      && typeof(CardModel).IsAssignableFrom(t)
@@ -661,7 +667,15 @@ public class Round19Tests
         foreach (var type in arm)
         {
             var card = (CardModel)Activator.CreateInstance(type)!;
-            Assert.DoesNotContain(CardTag.Strike, card.Tags);
+            if (declaredStrikes.Contains(type))
+            {
+                Assert.NotEqual(CardRarity.Basic, card.Rarity);
+                Assert.Contains(CardTag.Strike, card.Tags);
+            }
+            else
+            {
+                Assert.DoesNotContain(CardTag.Strike, card.Tags);
+            }
             Assert.DoesNotContain(CardTag.Defend, card.Tags);
         }
     }

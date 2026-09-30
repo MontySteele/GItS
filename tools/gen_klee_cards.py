@@ -4242,6 +4242,12 @@ def card_level_reason(
             return (f"basic_tag on a {card.get('rarity')!r} row -- the tag "
                     "answers \"one of your Strikes\", which is the starter's "
                     "question and not an offer's")
+    # The offer's Strike is `tags: [strike]`; a basic answers with
+    # `basic_tag:` instead. `loader._validate_basic_tag` is the twin.
+    if ("strike" in (card.get("tags") or ())
+            and card.get("rarity") == "basic"):
+        return ("tags: [strike] on a basic row -- a basic names its tag with "
+                "basic_tag:, the starter's one answer (EB-543)")
     # `EB-643`. DUSK SAYS WHEN A PLAN LANDS, so it needs a Plan to be about,
     # and the value is literally `True` -- the `innate:` / `retain:`
     # precedent, where only true is a ruling and `false` would be a second
@@ -5830,7 +5836,7 @@ KOKOMI_CASKET_COUNTS = {
 
 #: VARKA (the Oath rework): his current element's Oath (Oathsworn Strike,
 #: Azure Devour, Eye of the Storm), how many elements he has Oath in
-#: (Tailwind Guard), and the Attacks played this turn (Lisa: Violet Arc, the
+#: (Tailwind Guard), and the Attacks played this turn (Lisa: Infinite Circuit, the
 #: companion arm's counter). Sim twins: `effects._runtime_count`, the same
 #: three tokens (`tier0/engine/varka_oath.py`).
 VARKA_COUNTS = {
@@ -6764,7 +6770,7 @@ def spotlight_block_rider(card: dict, eff: dict) -> int | None:
     cards (the x3 replacement multiplier is still inline)."""
     if not is_companion(card) or eff.get("op") != "block":
         return None
-    # VARKA's Lisa: Violet Arc is a companion Block priced off a count, which
+    # VARKA's Lisa: Infinite Circuit is a companion Block priced off a count, which
     # `block_calc_rider`'s runtime-count arm owns (it has no literal amount).
     if "amount_formula" in eff:
         return None
@@ -15776,6 +15782,17 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tag = "Strike"
         elif any(e.get("op") == "block" for e in card["effects"]):
             tag = "Defend"
+    # A NON-BASIC STRIKE (2026-09-29, a Varka seat: Strike Dummy paid on
+    # Strike and Strike+ and not on Oathsworn Strike). The base game tags its
+    # offered Strikes too -- Twin Strike, Perfected Strike -- and what reads
+    # "a Strike" outside the starter question (Strike Dummy, Perfected
+    # Strike's count) keys on the tag. A row says so with `tags: [strike]`,
+    # which the sim already counts (`strike_cards`), so one sheet word binds
+    # both engines. A BASIC may not use it: the starter's answer is
+    # `basic_tag:` alone (`EB-543`); `card_level_reason` and
+    # `loader._validate_basic_tag` refuse it.
+    if tag is None and "strike" in (card.get("tags") or ()):
+        tag = "Strike"
     tags_member = (
         "\n\n    protected override HashSet<CardTag> CanonicalTags => "
         f"new() {{ CardTag.{tag} }};"

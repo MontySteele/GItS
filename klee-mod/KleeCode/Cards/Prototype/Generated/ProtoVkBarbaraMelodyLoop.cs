@@ -55,7 +55,7 @@ public sealed class ProtoVkBarbaraMelodyLoop : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Barbara: Melody Loop"),
+        ("title", "Barbara: Glorious Season"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to an enemy."),
     };
 

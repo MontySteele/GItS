@@ -58,7 +58,7 @@ public sealed class ProtoVkKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Kaeya: Frostgnaw"),
+        ("title", "Kaeya: Heart of the Abyss"),
         ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage."),
     };
 
