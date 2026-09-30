@@ -312,6 +312,9 @@ SIM_CALL_SITES = {
     # THE VARKA PAPER ARM (exploration, switch off): Gale Sweep's per-target
     # Anemo hit, an Attack's hit on the ordinary powered door.
     ('varka_paper.py', 1): ("'attack'", None, 'ELEMENT'),
+    # THE VARKA OATH ARM, R4 (exploration, switch off): Storm Surge's "each
+    # enemy it Swirls takes 5 more", element-less, on the powered door.
+    ('varka_oath.py', 1): ("'attack'", None, 'None'),
 }
 
 
