@@ -304,12 +304,15 @@ BLIND_PREDICATES = frozenset({
     # candidate for a future `P` window; it is not a defect, so it is not
     # backlog.
     "self_has_power_tracking",
-    # VARKA (prototype batch one). Wind Wall's and Tailwind Stride's "If you
-    # hold a Wind" and Tempest Charge's "If it Swirls". C# first: tier 0 has
-    # no Wind and no Varka seat, `effects._predicate` refuses both by name,
-    # and no `proto_vk_` row can reach this pilot -- so blind moves no
-    # measured number, and scoring them is the sim twin's job at Balance.
-    "holds_wind",
+    # VARKA, THE OATH REWORK (`varka_oath.PREDICATES`): "If you have a
+    # current element", "If you played a Knight this turn", "If it Swirls".
+    # `effects._predicate` answers all three live for a Varka seat (and False
+    # for anyone else), but no `proto_vk_` row can reach this pilot in any
+    # published world -- the switch is off and no run template seats him --
+    # so blind moves no measured number. Scoring them is the pilot's job when
+    # his kit reaches Balance.
+    "has_current_element",
+    "knight_played_this_turn",
     "swirled_by_this",
 })
 BLIND_PREDICATE_PREFIXES: tuple[str, ...] = ()

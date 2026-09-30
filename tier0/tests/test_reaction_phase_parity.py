@@ -789,11 +789,6 @@ CO_TENANCY_LEDGER = {
             "the broadcast",
     },
     "AfterPlayerTurnStart": {
-        ("Relics/BoreasFang.cs", "BoreasFang"):
-            "QUARANTINED (Varka, prototype batch one). Clears the Fang's "
-            "once-a-turn latch on HIS turn start, and nothing else: the latch "
-            "is read only when one of his Attacks hits an aura, which no "
-            "turn-start tenant does. No sim twin: Varka is C# first",
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
             "QUARANTINED (the Furina stage, FURINA_STAGE). RULE 4: the LEAD "
             "performer regains 1 Fanfare, from her second turn on. THE "
@@ -1225,11 +1220,6 @@ CO_TENANCY_LEDGER = {
             "QUARANTINED (Varka, prototype batch one). Grand Master's Order's "
             "'this turn', ReplayNextCompanionPower's boundary exactly. Removes "
             "itself and touches nothing a co-tenant reads. No sim twin",
-        ("Powers/Prototype/VarkaWinds.cs", "ElectroWindPower"):
-            "QUARANTINED (Varka, prototype batch one). Clears Electro Wind's "
-            "'first Swirl each turn' latch on its holder's own power, which no "
-            "co-tenant reads; a Swirl cannot happen between the two. No sim "
-            "twin",
         ("Powers/Prototype/CoopSet.cs", "PassTheMatchPower"):
             "QUARANTINED (the co-op set). Pass the Match's 'this turn' "
             "expiring at the end of the player turn, Playdate's shape below. "

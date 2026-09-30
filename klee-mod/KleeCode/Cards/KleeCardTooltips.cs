@@ -44,16 +44,6 @@ public static class KleeCardTooltips
     /// is <c>Compile Remove</c>d in a release build.</summary>
     public const string OverriddenElementKey = "KLEEMOD-ELEMENT_OVERRIDDEN";
 
-    /// <summary>VARKA (seat fixes 2026-09-29): titles the preview a card
-    /// grows where an Absorb, or Boreas's Fang, will take the aura it aims at
-    /// instead of reacting with it.</summary>
-    public const string AbsorbPreviewKey = "KLEEMOD-ABSORB_PREVIEW";
-
-    /// <summary>The Absorb preview's sentence. PURE.</summary>
-    public static string AbsorbPreviewBody(bool fang, Element aura) =>
-        (fang ? "[gold]Boreas's Fang[/gold] Absorbs" : "This card Absorbs")
-      + $" the [gold]{aura}[/gold] aura: no reaction, and you gain {aura} "
-      + "[gold]Wind[/gold].";
 #endif
 
     /// <summary>
@@ -279,38 +269,12 @@ public static class KleeCardTooltips
 
         var seen = new HashSet<Reaction>();
         var spentShown = false;
-#if PROTOTYPE_CARDS
-        var absorbShown = false;
-        var holder = TipOwner.CreatureOf(card);
-#endif
         var printedTrigger = trigger;
         foreach (var enemy in card.CombatState.HittableEnemies)
         {
             var aura = AuraCmd.Find(enemy);
             if (aura == null) continue;
             trigger = printedTrigger;
-#if PROTOTYPE_CARDS
-            // VARKA (seat fixes 2026-09-29): "Charlotte previewed Melt 7 and
-            // the Fang Absorbed, landing 4". The preview asks the lifecycle's
-            // own decision first: an Absorb previews as an Absorb, and a held
-            // Wind previews as the Swirl it becomes.
-            switch (VarkaAbsorb.Decide(aura, holder, card))
-            {
-                case AbsorbOutcome.Absorb:
-                    if (!absorbShown)
-                    {
-                        absorbShown = true;
-                        yield return new HoverTip(
-                            new LocString(Table, AbsorbPreviewKey + ".title"),
-                            AbsorbPreviewBody(card is not IAbsorbCard,
-                                              aura.Element));
-                    }
-                    continue;
-                case AbsorbOutcome.SwirlInstead:
-                    trigger = Element.Anemo;
-                    break;
-            }
-#endif
 
             // THE ELEMENT PORT (sec.7.1): a switched trigger over a SPENT aura
             // pays nothing, and the preview says why rather than promising the

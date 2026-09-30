@@ -69,14 +69,14 @@ public sealed class ProtoVkTempestCharge : CustomCardModel, IElementalCard, ICha
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var swirlsAtStart = VarkaWinds.SwirlsMadeBy(Owner.Creature);
+        var swirlsAtStart = VarkaOath.SwirlsMadeBy(Owner.Creature);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        if (VarkaWinds.SwirlsMadeBy(Owner.Creature) > swirlsAtStart)
+        if (VarkaOath.SwirlsMadeBy(Owner.Creature) > swirlsAtStart)
         {
             await CardPileCmd.Draw(choiceContext, 1m, Owner);
         }

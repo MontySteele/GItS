@@ -10,10 +10,10 @@ using MegaCrit.Sts2.Core.Unlocks;
 namespace KleeMod;
 
 /// <summary>
-/// Varka's card pool (prototype batch one). Its MEMBERS are every card of his
-/// -- the generated rows, Knights' Muster and the four choose-a-Knight faces
-/// -- so <c>CardModel.Pool</c> resolves; its OFFER is the nineteen-card pool
-/// alone (<see cref="VarkaRoster.Pool"/>). Compiled only with
+/// Varka's card pool (the Oath rework). Its MEMBERS are every card of his
+/// -- the generated rows and Change of Guard's four element faces -- so
+/// <c>CardModel.Pool</c> resolves; its OFFER is the forty-one-card pool alone
+/// (<see cref="VarkaRoster.Pool"/>). Compiled only with
 /// <c>-p:VarkaPrototype=true</c>, beside the character.
 /// </summary>
 public sealed class VarkaCardPool : CardPoolModel
@@ -32,8 +32,8 @@ public sealed class VarkaCardPool : CardPoolModel
 
     public override bool IsColorless => false;
 
-    /// <summary>THE OFFER: the pool, batch one. The one door into reward
-    /// rolls, the shop and transforms (<c>GetUnlockedCards</c>).</summary>
+    /// <summary>THE OFFER: the pool. The one door into reward rolls, the
+    /// shop and transforms (<c>GetUnlockedCards</c>).</summary>
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards) =>
         VarkaRoster.Pool();

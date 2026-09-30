@@ -82,10 +82,10 @@ public static class ArmKeywordTips
     // Klee's readers and on the Kokomi and Furina arms' faces, and nothing on
     // screen said what one is.
     public const string CompanionKey = "KLEEMOD-ARM_COMPANION";
-    // VARKA (prototype batch one): his three words. `Swirl` is the shared
-    // rule and already has its row above.
-    public const string AbsorbKey = "KLEEMOD-ARM_VARKA_ABSORB";
-    public const string WindKey = "KLEEMOD-ARM_VARKA_WIND";
+    // VARKA (the Oath rework): his three words. `Swirl` is the shared rule
+    // and already has its row above.
+    public const string OathKey = "KLEEMOD-ARM_VARKA_OATH";
+    public const string CurrentElementKey = "KLEEMOD-ARM_VARKA_CURRENT_ELEMENT";
     public const string KnightKey = "KLEEMOD-ARM_VARKA_KNIGHT";
     // THE FURINA STAGE'S SEVEN (`EB-723`, R269). The brief's sec.12 names
     // them: "Spend, Fanfare (the bar), Raise, Bow, the lead, the back
@@ -703,40 +703,39 @@ public static class ArmKeywordTips
     // ---------------------------------------------------- Varka -----------
 
     /// <summary>
-    /// VARKA'S VERB (sec.10.1): "on a fresh aura, takes the aura off that
-    /// enemy and gives you its Wind ... If you already hold that Wind, the
-    /// hit Swirls instead." Printed on Windbound Execution, Favonius Cut,
-    /// Boreas Unbound and Boreas's Fang. <paramref name="card"/> may be null
-    /// for the relic's hover.
+    /// WHAT HIS CARDS CHARGE (the Oath rework, sec.3): one count per element,
+    /// gained per card. Printed on every Oath reader and on Boreas's Fang.
+    /// <paramref name="card"/> may be null for the relic's hover.
     /// </summary>
-    public static IEnumerable<IHoverTip> ForAbsorb(
+    public static IEnumerable<IHoverTip> ForOath(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
-        With(inherited, AbsorbKey,
-            "On a fresh aura, take it off the enemy and gain its Wind. If you "
-          + "already hold that Wind, Swirl it instead.");
+        With(inherited, OathKey,
+            "Gained when your card applies or [gold]Swirls[/gold] an element: "
+          + "1 of each, per card. Kept all fight. Cards read your current "
+          + "element's Oath.");
 
     /// <summary>
-    /// WHAT AN ABSORB COLLECTS, all four in one tip because a face says "a
-    /// Wind" and not which. The numbers are <see cref="VarkaLaw"/>'s, the ones
-    /// the Wind badges print.
+    /// THE ONE ELEMENT HIS CARDS READ (sec.3), and what his Swirls pay for
+    /// it. The numbers are <see cref="VarkaLaw"/>'s, the ones his badge
+    /// prints.
     /// </summary>
-    public static IEnumerable<IHoverTip> ForWind(
+    public static IEnumerable<IHoverTip> ForCurrentElement(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
-        With(inherited, WindKey,
-            "Kept all fight. Each Swirl you make pays each Wind you hold: Pyro "
-          + VarkaLaw.PyroWindDamage + " damage, Hydro " + VarkaLaw.HydroWindBlock
-          + " [gold]Block[/gold], Cryo " + VarkaLaw.CryoWindWeak
-          + " [gold]Weak[/gold], Electro " + VarkaLaw.ElectroWindEnergy
-          + " [gold]Energy[/gold] once a turn.");
+        With(inherited, CurrentElementKey,
+            "The element of the last Knight you played. Your "
+          + "Swirls pay it: Pyro " + VarkaLaw.SwirlPyroDamage + " damage, Hydro "
+          + VarkaLaw.SwirlHydroBlock + " [gold]Block[/gold], Cryo "
+          + VarkaLaw.SwirlCryoVulnerable + " [gold]Vulnerable[/gold], Electro "
+          + VarkaLaw.SwirlElectroDamageAll + " to ALL.");
 
-    /// <summary>His four personal Companions (sec.4), named on Favonius
-    /// Drill, Grand Master's Order, Knights' Roll Call and Knights' Muster.
+    /// <summary>His personal Companions (sec.6), named on Knightly Guard,
+    /// Grand Master's Order, Knights' Roll Call and Favonian Standard.
     /// </summary>
     public static IEnumerable<IHoverTip> ForKnight(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, KnightKey,
-            "Amber, Barbara, Lisa or Kaeya: his own Companion cards. Knights' "
-          + "Muster counts as one.");
+            "Varka's own Companion cards. Playing one makes its element your "
+          + "current element.");
 
     // ---------------------------------------------------- Furina ----------
     //

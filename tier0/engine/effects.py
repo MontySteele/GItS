@@ -16,7 +16,7 @@ from tier0 import constants as C
 from tier0.engine import (companion_coven, companion_hexerei,
                           companion_standins, coop, furina_stage,
                           klee_overhaul, kokomi_plan, powers, reactions,
-                          resources, statuses)
+                          resources, statuses, varka_oath)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, KurageMemory,
                                 grant_sly_autoplay,
@@ -228,25 +228,6 @@ def exhaust_selection_row(state: CombatState, card: Card) -> dict:
            "victims": [d["id"] for d in state.exhaust_selection]}
     row.update(exhaust_selection_counts(state.exhaust_selection))
     return row
-
-
-#: VARKA (prototype batch one, review/active/varka-paper-kit-2026-09-28.md
-#: sec.10). C# FIRST, SIM AT BALANCE (`docs/current/operations/prototype.md`):
-#: his rows are schema-checked here and never resolved, so the words they
-#: print are REGISTERED -- the loader's vocabulary check reads these sets --
-#: and resolving one raises by name rather than guessing at a rule this engine
-#: does not have. The C# twins: `VarkaWinds.HeldCount`,
-#: `VarkaWinds.SwirlsMadeBy`, `VarkaRules.KnightAura` / `AddKnight`.
-VARKA_COUNTS = frozenset({"winds_held"})
-VARKA_PREDICATES = frozenset({"holds_wind", "swirled_by_this"})
-VARKA_OPS = frozenset({"knight_aura", "add_knight"})
-
-
-def _varka_c_sharp_only(what: str) -> None:
-    raise NotImplementedError(
-        f"{what} belongs to VARKA's prototype (sec.10): C# first, and the sim "
-        "twin comes at Balance. No `proto_vk_` row resolves in tier 0, so "
-        "reaching this is a defect rather than a degradation.")
 
 
 def _runtime_count(state: CombatState, token: str,
@@ -490,8 +471,11 @@ def _runtime_count(state: CombatState, token: str,
         key = token[len(EXHAUST_SELECTION_PREFIX):]
         if key in counts:
             return counts[key]
-    if token == "winds_held":          # VARKA_COUNTS
-        _varka_c_sharp_only(f"runtime count {token!r}")
+    # VARKA, THE OATH REWORK (`varka_oath.VARKA_OATH`): his current
+    # element's Oath and how many elements he has Oath in. 0 for anyone who
+    # is not Varka and with the switch off, so no shipped read can move.
+    if token == "current_oath" or token == "oath_elements":
+        return varka_oath.count(state, token)
     raise ValueError(f"unknown runtime count {token!r}")
 
 
@@ -1648,6 +1632,14 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         state.player.hp -= fx["amount"]       # HP loss, ignores block AND
         state.emit("self_damage", amount=fx["amount"])   # Encore: a priced
         resources.note_player_hp_loss(state, fx["amount"])  # cost stays paid
+        return
+
+    # VARKA (`varka_oath.VARKA_OATH`): Gale Sweep's `only_if: fresh_aura`,
+    # each fresh-aura enemy hit once through this op aimed at its body. Dead
+    # with the switch off and for anyone who is not Varka.
+    if (varka_oath.VARKA_OATH and fx.get("only_if") == "fresh_aura"
+            and varka_oath.live(state.player)):
+        varka_oath.fresh_aura_sweep(state, fx, card)
         return
 
     # QUARANTINED (R276): the Klee arm's per-hit riders. Each hit comes back
@@ -3987,8 +3979,11 @@ PREDICATE_NAMES = frozenset({
     # THE SUPPORTING POOL (2026-09-26), Counterclaim: did an enemy's hit reach
     # the front performer's bar since the end of her last turn?
     "stage_front_hit",
-    # VARKA: registered, and C# only (`VARKA_PREDICATES`).
-    "holds_wind",
+    # VARKA, THE OATH REWORK (`varka_oath.PREDICATES`): "if you have a
+    # current element", "if you played a Knight this turn", "if it Swirls".
+    # False for anyone who is not Varka and with the switch off.
+    "has_current_element",
+    "knight_played_this_turn",
     "swirled_by_this",
 })
 
@@ -4138,8 +4133,10 @@ RUNTIME_COUNT_NAMES = frozenset({
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
     "fanfare_drained",
-    # VARKA: registered, and C# only (`VARKA_COUNTS`).
-    "winds_held",
+    # VARKA, THE OATH REWORK (`varka_oath.COUNTS`). `attacks_played_this_turn`
+    # (Lisa: Violet Arc) is the shared counter registered above.
+    "current_oath",
+    "oath_elements",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.
@@ -4469,8 +4466,9 @@ def _predicate(state: CombatState, name: str) -> bool:
         # agree is `tier0/tests/test_companion_overhaul_hooks.py`.
         n = int(name.rsplit("_", 1)[1])
         return state.attacks_played_this_turn + 1 == n
-    if name == "holds_wind" or name == "swirled_by_this":   # VARKA_PREDICATES
-        _varka_c_sharp_only(f"predicate {name!r}")
+    if (name == "has_current_element" or name == "knight_played_this_turn"
+            or name == "swirled_by_this"):
+        return varka_oath.predicate(state, name)
     raise ValueError(f"unknown predicate {name!r}")
 
 
@@ -6545,8 +6543,14 @@ def _op_stage_dual_nature(state: CombatState, fx: dict, card: Card) -> None:
     furina_stage.dual_nature(state)
 
 def _op_varka(state: CombatState, fx: dict, card: Card) -> None:
-    """VARKA's two verbs, registered and C# only (`VARKA_OPS`)."""
-    _varka_c_sharp_only(f"op {fx['op']!r} on {card.id!r}")
+    """VARKA's Oath verbs, one `kind` per rule (`varka_oath.op_varka`).
+    Refused by name for anyone who is not Varka, or with the switch off."""
+    varka_oath.op_varka(state, fx, card)
+
+
+def _op_add_knight(state: CombatState, fx: dict, card: Card) -> None:
+    """Knights' Roll Call (`varka_oath.op_add_knight`)."""
+    varka_oath.op_add_knight(state, fx, card)
 
 
 OPS = {
@@ -6561,9 +6565,10 @@ OPS = {
     "energy": _op_energy,
     "apply_power": _op_apply_power,
     "apply_aura": _op_apply_aura,
-    # VARKA (prototype batch one): Favonius Drill and Knights' Roll Call.
-    "knight_aura": _op_varka,
-    "add_knight": _op_varka,
+    # VARKA, THE OATH REWORK (`varka_oath`): his rules' one op, and
+    # Knights' Roll Call.
+    "varka": _op_varka,
+    "add_knight": _op_add_knight,
     "place_bomb": _op_place_bomb,
     "detonate": _op_detonate,
     "move_bombs": _op_move_bombs,
@@ -6823,9 +6828,17 @@ def resolve_card(state: CombatState, card: Card) -> None:
         # Companions would have to be widened the first time one of those is
         # ever played before it is burned.
         state.kurage_play_targets[id(card)] = state.card_aim
+    # VARKA (`varka_oath.VARKA_OATH`): this play's Oath scope opens, and a
+    # Knight sets his current element BEFORE its effects resolve. Both are
+    # dead with the switch off and for anyone who is not Varka.
+    varka = varka_oath.VARKA_OATH and varka_oath.live(state.player)
+    if varka:
+        varka_oath.begin_play(state, card)
     try:
         _resolve_card_bound(state, card)
     finally:
+        if varka:
+            varka_oath.end_play(state)
         state.card_aim = None
         state.card_aim_bound = False
 
@@ -6923,6 +6936,10 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
             KNOB_READS["GARMENT_ATTACK_BLOCK"] = (
                 KNOB_READS.get("GARMENT_ATTACK_BLOCK", 0) + 1)
     state.current_attack_bonus = bonus
+    if varka_oath.VARKA_OATH:
+        # Stormward Stance's part of that bonus, which his elemental
+        # follow-up hits (not Anemo) do not take. Dead with the switch off.
+        varka_oath.note_attack_bonus(state, card)
     state.mc_attack_element_override = companion_overhaul_card_start(state, card)
 
     # THE PLAN AIM (QUARANTINED, C.KOKOMI_OVERHAUL, draft 6). "Played on the
@@ -7097,6 +7114,10 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     # knob — repeated-but-bounded payoff, never a spend.
     if p.powers.get("ceremonial_garment", 0) and p.charge:
         bonus += p.charge // C.GARMENT_CHARGE_DIVISOR
+    # VARKA (`varka_oath.VARKA_OATH`): Stormward Stance, on his Anemo Attacks
+    # while his current element's Oath is at the bar. Dead with it off.
+    if varka_oath.VARKA_OATH:
+        bonus += varka_oath.attack_bonus(state, card)
     return bonus
 
 

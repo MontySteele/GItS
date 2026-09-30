@@ -16,10 +16,10 @@ namespace KleeMod;
 
 /// <summary>
 /// VARKA, Grand Master of the Knights of Favonius -- the fourth character,
-/// prototype batch one (<c>review/active/varka-paper-kit-2026-09-28.md</c>
-/// sec.10). Anemo: his Attacks carry the Swirl trigger; his cards Absorb the
-/// auras his Knights paint; each element absorbed is a Wind that pays on
-/// every Swirl he makes (<see cref="VarkaPrototype"/> states the rules).
+/// the Oath rework (<c>review/active/varka-paper-kit-2026-09-28.md</c>).
+/// Anemo: his Attacks carry the Swirl trigger; his Knights set his current
+/// element, and every aura he lays down or Swirls swears Oath of it to his
+/// blade (<see cref="VarkaPrototype"/> states the rules).
 ///
 /// COMPILED ONLY WITH <c>-p:VarkaPrototype=true</c> (on by default beside the
 /// other current kits), so a <c>-p:ShippedKits=true</c> build has no Varka on
@@ -48,7 +48,7 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
 
     protected override CharacterModel? UnlocksAfterRunAs => null;
 
-    /// <summary>sec.10.2: "Varka, 80 HP, 99 gold".</summary>
+    /// <summary>sec.5: "The starter (80 HP, 99 gold)".</summary>
     public override int StartingHp => 80;
 
     public override int StartingGold => 99;

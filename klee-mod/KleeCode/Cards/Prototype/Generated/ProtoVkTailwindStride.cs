@@ -38,14 +38,14 @@ public sealed class ProtoVkTailwindStride : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForWind(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCurrentElement(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_tailwind_stride");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tailwind Stride"),
-        ("description", "Draw 2 cards. If you hold a [gold]Wind[/gold], draw 1 more."),
+        ("description", "Draw 2 cards. If you have a [gold]current element[/gold], draw 1 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -64,7 +64,7 @@ public sealed class ProtoVkTailwindStride : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        if (VarkaWinds.HeldCount(Owner.Creature) > 0)
+        if (VarkaOath.HasCurrent(Owner.Creature))
         {
             await CardPileCmd.Draw(choiceContext, 1m, Owner);
         }

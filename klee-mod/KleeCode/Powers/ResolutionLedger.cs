@@ -105,14 +105,6 @@ public static class ResolutionLedger
     public readonly record struct PowerApplied(string Target, string Power,
                                                int Amount, string CombatId);
 
-    /// <summary>
-    /// 2026-09-29 (the Varka seats): an Absorb inside this card. The aura's
-    /// element, the body, and whether the Wind was already held so the hit
-    /// Swirled instead of taking it.
-    /// </summary>
-    public readonly record struct Absorbed(string Target, string Element,
-                                           bool Swirled, string CombatId);
-
     /// <summary>One resolved card.
     ///
     /// `AutoPlayed` is `CardPlay.IsAutoPlay`. `Carried` is
@@ -133,10 +125,6 @@ public static class ResolutionLedger
         /// </summary>
         public List<(string Member, string Name)> Summoned { get; } = new();
 
-        /// <summary>The auras an Absorb (or Boreas's Fang) met inside this
-        /// card, in order (<see cref="NoteAbsorb(string, string, bool, string)"/>).
-        /// </summary>
-        public List<Absorbed> Absorbs { get; } = new();
         public bool Carried { get; set; }
         public bool Overflowed { get; set; }
     }
@@ -355,33 +343,6 @@ public static class ResolutionLedger
         _open.Applied.Add(new PowerApplied(target, power, amount, combatId));
     }
 
-    /// <summary>
-    /// "An Absorb met this aura, inside the card that is resolving"
-    /// (2026-09-29, the Varka seats: "Absorbs are invisible in the logs").
-    /// Dropped where no play is open, <see cref="NoteHit"/>'s rule.
-    /// </summary>
-    public static void NoteAbsorb(Creature? target, string element,
-                                  bool swirled)
-    {
-        if (target == null) return;
-        NoteAbsorb(Named(target), element, swirled,
-                   Safe(() => target.CombatId.ToString()));
-    }
-
-    /// <summary>The same note, taking the facts rather than the game object,
-    /// <see cref="OpenPlay(string, string, bool)"/>'s bargain.</summary>
-    public static void NoteAbsorb(string target, string element, bool swirled,
-                                  string combatId)
-    {
-        if (_open == null || string.IsNullOrEmpty(element)) return;
-        if (_open.Absorbs.Count >= MaxHits)
-        {
-            _open.Overflowed = true;
-            return;
-        }
-        _open.Absorbs.Add(new Absorbed(target, element, swirled, combatId));
-    }
-
     /// <summary>"That card has finished." Closes the row.</summary>
     public static void ClosePlay() => _open = null;
 
@@ -446,15 +407,6 @@ public static class ResolutionLedger
                 {
                     ["member"] = s.Member,
                     ["name"] = s.Name,
-                }),
-            // 2026-09-29: what an Absorb took, or that it Swirled instead.
-            ["absorbed"] = row.Absorbs.ConvertAll(a =>
-                new Dictionary<string, object?>
-                {
-                    ["target"] = a.Target,
-                    ["element"] = a.Element,
-                    ["swirled"] = a.Swirled,
-                    ["combat_id"] = a.CombatId,
                 }),
         });
 }

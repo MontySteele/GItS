@@ -6878,14 +6878,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                       " of her Fanfare to give each other performer ",
                       " Fanfare and deal ",
                       " damage to ALL enemies."],
-        # VARKA (prototype batch one): the prose either side of the Wind
-        # tip's interpolated numbers and golded words.
-        "Absorb": ["On a fresh aura, take it off the enemy and gain its Wind. "
-                   "If you ", "already hold that Wind, Swirl it instead."],
-        "Wind": ["Kept all fight. Each Swirl you make pays each Wind you hold: "
-                 "Pyro ", " damage, Hydro ", " once a turn."],
-        "Knight": ["Amber, Barbara, Lisa or Kaeya: his own Companion cards. ",
-                   "Muster counts as one."],
+        # VARKA (the Oath rework): the leading prose of each tip, before
+        # any interpolated word (the C# side may gold the keywords).
+        "Oath": ["Gained when your card applies or ",
+                 "Kept all fight. Cards read your "],
+        "current element": ["The element of the last Knight you played."],
+        "Knight": ["Varka's own Companion cards. Playing one makes its "
+                   "element "],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces

@@ -38,14 +38,14 @@ public sealed class ProtoVkBoreasUnbound : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForAbsorb(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCurrentElement(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_boreas_unbound");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Boreas Unbound"),
-        ("description", "Whenever you [gold]Absorb[/gold], gain 1 [gold]Energy[/gold]."),
+        ("description", "Whenever your [gold]current element[/gold] changes, gain 1 [gold]Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

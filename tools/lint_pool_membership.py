@@ -62,9 +62,8 @@ MEMBERSHIP_FILES = [
     # class), so this path never goes missing.
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
     / "PrototypeRoster.cs",
-    # VARKA (prototype batch one): `VarkaCardPool.GenerateAllCards` reads
-    # `VarkaRoster.Members()`, which names his hand-written Knights' Muster
-    # beside his generated rows (his four choose-a-Knight faces ride
+    # VARKA: `VarkaCardPool.GenerateAllCards` reads `VarkaRoster.Members()`,
+    # his generated rows (Change of Guard's four element faces ride
     # `VarkaModalOptions`, which the `*ModalOptions.cs` glob below reads).
     REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype" / "VarkaRoster.cs",
 ]

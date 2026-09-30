@@ -568,6 +568,14 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
         # and they are still REACHABLE: the hand-off puts one in a deck, and a
         # card in a deck must have a campfire answer like any other.
         reachable |= set(C.COMPANION_STANDIN_IDS)
+    # VARKA's OATH REWORK (`varka_oath.VARKA_OATH`) opens the loader's door
+    # for every `proto_vk_` row -- his starter, his pool and the cards his
+    # rules create -- so each is a row a rest site can offer to smith. Same
+    # discipline as above: off (every shipped tree), nothing is added.
+    from tier0.engine import varka_oath        # late: loader imports us
+    if varka_oath.VARKA_OATH:
+        reachable |= {c.id for c in loader.prototype_cards()
+                      if c.id.startswith(varka_oath.ID_PREFIX)}
     deltas: dict[str, dict] = {}
     for card in loader.prototype_cards():
         if card.id not in reachable:
@@ -1100,8 +1108,13 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               if isinstance(fx.get("bonus_vs_debuff"), int)),
                              "bonus_vs_debuff", val)
         elif key == "formula_per":
-            hit = next((fx for fx in everywhere
-                        if fx.get("op") == "damage"
+            # A BLOCK formula takes the key too, when the card has no damage
+            # formula -- `formula_base`'s rule below, for the same C# slot
+            # (CalculationExtra). VARKA's Lisa: Violet Arc, Eye of the Storm
+            # and Tailwind Guard are the rows that print one. A row that has a
+            # damage formula finds it first, exactly as before.
+            hit = next((fx for op in ("damage", "block") for fx in everywhere
+                        if fx.get("op") == op
                         and isinstance(fx.get("amount_formula"), dict)
                         and isinstance(fx["amount_formula"].get("per"), int)),
                        None)
@@ -1320,6 +1333,23 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "crash_fanfare"),
                              "amount", val)
+        elif key in ("varka_per", "varka_base", "varka_amount"):
+            # VARKA: one numeric field of the row's `varka` op (its C#
+            # DynamicVar `VkPer` / `VkBase` / `VkAmount`).
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "varka"),
+                             key[len("varka_"):], val)
+        elif key == "choose_knight":
+            # VARKA's Knights' Roll Call: upgraded, the player picks the
+            # Knight. Boolean, only True is a ruling.
+            if val is not True:
+                raise ValueError(
+                    f"choose_knight delta on {base_id!r} must be true")
+            hit = next((fx for fx in top if fx.get("op") == "add_knight"),
+                       None)
+            ok = hit is not None
+            if hit:
+                hit["choose"] = True
         elif key == "block_next_turn":
             # The Charlotte-precedent second half. `block` deliberately hits
             # only the first op, so a card whose upgrade moves BOTH halves

@@ -309,6 +309,19 @@ SIM_CALL_SITES = {
     # Kokomi core pass: Song of Pearls' strike, dealt as a planned hit is.
     # (The Casket's strike sat between these two until the Casket pass.)
     ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
+    # VARKA, THE OATH REWORK (`varka_oath.VARKA_OATH`, off). The Pyro and
+    # Electro Swirl payouts: element-less, unpowered, his card's
+    # (`ElementalHit.DealUnelemented(powered: false)`).
+    ('varka_oath.py', 1): ("'card'", 'False', 'None'),
+    ('varka_oath.py', 2): ("'card'", 'False', 'None'),
+    # Baron Bunny's next-turn burst: Pyro to ALL, unpowered.
+    ('varka_oath.py', 3): ("'card'", 'False', "'pyro'"),
+    # Four Winds' Ascension's and Northwind Avatar's elemental follow-up: a
+    # powered hit of the card, carrying his current element.
+    ('varka_oath.py', 4): ('source', None, 'led.current'),
+    # Storm Surge's "each enemy it Swirls takes 5 more": element-less, powered.
+    ('varka_oath.py', 5): ("'attack' if card.type == 'attack' else 'card'",
+                           None, 'None'),
 }
 
 
@@ -521,11 +534,15 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
     # 1315 -> 1386 under an unrelated edit and turned main red on #549).
     # VARKA's Gale Sweep (prototype batch one): one hit per fresh-aura body,
     # each from the card itself -- an Anemo Attack's own hit, so it takes
-    # every trigger an Attack takes (`VarkaRules.HitFreshAuras`).
+    # every trigger an Attack takes (`VarkaRules.HitFreshAuras`). And the Oath
+    # rework's second hit (Four Winds' Ascension, Northwind Avatar): the
+    # card's own hit on its target carrying his current element
+    # (`VarkaCards.CurrentElementHit`), an Attack's hit for the same reason.
     assert [path for path, _line in sites] == [
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBombPower.cs",
+        "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaRules.cs"]
 
 

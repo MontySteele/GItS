@@ -67,11 +67,17 @@ public sealed class KleeElementalHooks : AbstractModel
     /// IsFirstInSeries gate is what reproduces "once per play_card call".
     /// Resource only -- this hook carries no PlayerChoiceContext.
     /// </summary>
-    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    public override async Task BeforeCardPlayed(CardPlay cardPlay)
     {
         // THE ELEMENT PORT sec.7.3: a reaction inside this play is the card's
         // (`ReactionEvents.SourceKindFor`). Every replay pushes and pops.
         if (cardPlay.Card is { } playing) ReactionEvents.CardPlayBegins(playing);
+#if PROTOTYPE_CARDS
+        // VARKA (the Oath rework): the play's Oath scope opens, and a Knight
+        // sets his current element before its effects resolve. Every replay
+        // is a play (Grand Master's Order). Nothing for anyone else.
+        if (cardPlay.Card is { } oathCard) await VarkaOath.BeginPlay(oathCard);
+#endif
         // Sim order (combat.py play_card): the requires-full drain happens
         // FIRST, then the skill-tag bonus. Once per play, never per replay.
         if (cardPlay.IsFirstInSeries)
@@ -112,7 +118,6 @@ public sealed class KleeElementalHooks : AbstractModel
         {
             KleeCompanionSpark.Arm(cardPlay);
         }
-        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -132,18 +137,8 @@ public sealed class KleeElementalHooks : AbstractModel
     {
         if (cardPlay.Card is { } played) ReactionEvents.CardPlayEnds(played);
 #if PROTOTYPE_CARDS
-        // VARKA: the play is over, so the auras it painted are ordinary auras
-        // now and the next Attack may Absorb them.
-        if (cardPlay.Card?.CombatState is { } paintedState)
-        {
-            foreach (var enemy in paintedState.HittableEnemies)
-            {
-                if (AuraCmd.Find(enemy) is { PaintedBy: not null } aura)
-                {
-                    aura.PaintedBy = null;
-                }
-            }
-        }
+        // VARKA (the Oath rework): the play's Oath scope closes.
+        if (cardPlay.Card is { } oathCard) VarkaOath.EndPlay(oathCard);
 #endif
         // Same ownerless-play guard as BeforeCardPlayed above.
         var owner = cardPlay.Card?.Owner;
@@ -173,6 +168,9 @@ public sealed class KleeElementalHooks : AbstractModel
     {
 #if PROTOTYPE_CARDS
         await KleeOverhaulOpening.GrantSpark(choiceContext, player);
+        // VARKA (the Oath rework): Baron Bunny, Sworn Brotherhood, then Oath
+        // of the Knights, after the draw.
+        await VarkaOath.TurnStart(choiceContext, player);
 #endif
         await KitGrant.GrantIfCharged(choiceContext, player);
     }
@@ -341,19 +339,18 @@ public sealed class KleeElementalHooks : AbstractModel
         var element = AuraCmd.ElementOfPlay(cardSource, dealer);
         if (!element.LeavesAura()) return;   // None, and trigger-only Anemo/Geo
 
+#if PROTOTYPE_CARDS
+        // VARKA (the Oath rework, sec.3): a card's hit that applies an
+        // element gains 1 Oath of it -- whether it sticks, refreshes or
+        // reacts -- once per card play.
+        await VarkaOath.NoteApplication(choiceContext, dealer, element);
+#endif
+
         // An existing aura owns this hit (refresh or reaction); one aura per
         // enemy is the invariant.
         if (AuraCmd.Find(target) != null) return;
 
         await AuraCmd.Apply(choiceContext, target, element, dealer, cardSource);
-#if PROTOTYPE_CARDS
-        // VARKA: this aura is this card's own paint for the rest of its play,
-        // so Absorb and Boreas's Fang pass it by (`VarkaAbsorb.OwnPaint`).
-        if (cardSource != null && AuraCmd.Find(target) is { } painted)
-        {
-            painted.PaintedBy = cardSource;
-        }
-#endif
     }
 }
 

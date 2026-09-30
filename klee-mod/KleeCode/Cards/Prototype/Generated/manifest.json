@@ -296,23 +296,50 @@
     "proto_thoma_crimson_ooyoroi_either",
     "proto_thoma_crimson_ooyoroi_priced",
     "proto_vk_amber_baron_bunny",
+    "proto_vk_amber_fiery_rain",
+    "proto_vk_azure_devour",
+    "proto_vk_barbara_melody_loop",
     "proto_vk_barbara_show_begin",
+    "proto_vk_barbara_whisper_of_water",
     "proto_vk_boreas_unbound",
+    "proto_vk_change_of_guard",
     "proto_vk_converging_winds",
+    "proto_vk_crosswind",
+    "proto_vk_dawn_winds_march",
+    "proto_vk_diluc_searing_onslaught",
+    "proto_vk_eula_icetide_vortex",
     "proto_vk_eye_of_the_storm",
+    "proto_vk_favonian_standard",
     "proto_vk_favonius_cut",
     "proto_vk_favonius_drill",
+    "proto_vk_four_winds_accord",
     "proto_vk_four_winds_ascension",
     "proto_vk_gale_sweep",
     "proto_vk_grand_masters_order",
+    "proto_vk_jean_dandelion_breeze",
     "proto_vk_kaeya_frostgnaw",
+    "proto_vk_kaeya_glacial_waltz",
+    "proto_vk_knightly_guard",
     "proto_vk_knights_roll_call",
+    "proto_vk_lisa_lightning_rose",
     "proto_vk_lisa_violet_arc",
+    "proto_vk_mika_starfrost_swirl",
+    "proto_vk_northwind_avatar",
+    "proto_vk_oath_of_the_knights",
+    "proto_vk_oathsworn_strike",
+    "proto_vk_rally_to_the_banner",
+    "proto_vk_razor_claw_and_thunder",
+    "proto_vk_rising_gale",
     "proto_vk_squall",
+    "proto_vk_storm_surge",
     "proto_vk_stormward_stance",
+    "proto_vk_sworn_brotherhood",
+    "proto_vk_tailwind_guard",
     "proto_vk_tailwind_stride",
     "proto_vk_tempest_charge",
+    "proto_vk_unfurled_banner",
     "proto_vk_updraft",
+    "proto_vk_wall_of_gales",
     "proto_vk_wind_wall",
     "proto_vk_windbound_execution"
   ],
@@ -607,23 +634,50 @@
     "proto_thoma_crimson_ooyoroi_either": "klee",
     "proto_thoma_crimson_ooyoroi_priced": "klee",
     "proto_vk_amber_baron_bunny": "varka",
+    "proto_vk_amber_fiery_rain": "varka",
+    "proto_vk_azure_devour": "varka",
+    "proto_vk_barbara_melody_loop": "varka",
     "proto_vk_barbara_show_begin": "varka",
+    "proto_vk_barbara_whisper_of_water": "varka",
     "proto_vk_boreas_unbound": "varka",
+    "proto_vk_change_of_guard": "varka",
     "proto_vk_converging_winds": "varka",
+    "proto_vk_crosswind": "varka",
+    "proto_vk_dawn_winds_march": "varka",
+    "proto_vk_diluc_searing_onslaught": "varka",
+    "proto_vk_eula_icetide_vortex": "varka",
     "proto_vk_eye_of_the_storm": "varka",
+    "proto_vk_favonian_standard": "varka",
     "proto_vk_favonius_cut": "varka",
     "proto_vk_favonius_drill": "varka",
+    "proto_vk_four_winds_accord": "varka",
     "proto_vk_four_winds_ascension": "varka",
     "proto_vk_gale_sweep": "varka",
     "proto_vk_grand_masters_order": "varka",
+    "proto_vk_jean_dandelion_breeze": "varka",
     "proto_vk_kaeya_frostgnaw": "varka",
+    "proto_vk_kaeya_glacial_waltz": "varka",
+    "proto_vk_knightly_guard": "varka",
     "proto_vk_knights_roll_call": "varka",
+    "proto_vk_lisa_lightning_rose": "varka",
     "proto_vk_lisa_violet_arc": "varka",
+    "proto_vk_mika_starfrost_swirl": "varka",
+    "proto_vk_northwind_avatar": "varka",
+    "proto_vk_oath_of_the_knights": "varka",
+    "proto_vk_oathsworn_strike": "varka",
+    "proto_vk_rally_to_the_banner": "varka",
+    "proto_vk_razor_claw_and_thunder": "varka",
+    "proto_vk_rising_gale": "varka",
     "proto_vk_squall": "varka",
+    "proto_vk_storm_surge": "varka",
     "proto_vk_stormward_stance": "varka",
+    "proto_vk_sworn_brotherhood": "varka",
+    "proto_vk_tailwind_guard": "varka",
     "proto_vk_tailwind_stride": "varka",
     "proto_vk_tempest_charge": "varka",
+    "proto_vk_unfurled_banner": "varka",
     "proto_vk_updraft": "varka",
+    "proto_vk_wall_of_gales": "varka",
     "proto_vk_wind_wall": "varka",
     "proto_vk_windbound_execution": "varka"
   },
@@ -1579,10 +1633,21 @@
       "power_amount": 1
     },
     "proto_vk_amber_baron_bunny": {
-      "damage": 3
+      "block": 2,
+      "power_amount": 2
+    },
+    "proto_vk_amber_fiery_rain": {
+      "block": 3
+    },
+    "proto_vk_barbara_melody_loop": {
+      "block": 3
     },
     "proto_vk_barbara_show_begin": {
       "block": 2
+    },
+    "proto_vk_barbara_whisper_of_water": {
+      "block": 2,
+      "block_next_turn": 2
     },
     "proto_vk_boreas_unbound": {
       "cost": -1
@@ -1590,8 +1655,24 @@
     "proto_vk_converging_winds": {
       "cost": -1
     },
+    "proto_vk_crosswind": {
+      "damage": 3,
+      "conditional_block": 2
+    },
+    "proto_vk_dawn_winds_march": {
+      "cost": -1
+    },
+    "proto_vk_diluc_searing_onslaught": {
+      "damage": 2
+    },
+    "proto_vk_eula_icetide_vortex": {
+      "damage": 4
+    },
     "proto_vk_eye_of_the_storm": {
       "formula_per": 1
+    },
+    "proto_vk_favonian_standard": {
+      "power_amount": 1
     },
     "proto_vk_favonius_cut": {
       "damage": 5
@@ -1600,7 +1681,8 @@
       "block": 3
     },
     "proto_vk_four_winds_ascension": {
-      "formula_base": 3
+      "damage": 3,
+      "varka_per": 1
     },
     "proto_vk_gale_sweep": {
       "damage": 2
@@ -1608,20 +1690,58 @@
     "proto_vk_grand_masters_order": {
       "retain": true
     },
+    "proto_vk_jean_dandelion_breeze": {
+      "block": 3
+    },
     "proto_vk_kaeya_frostgnaw": {
       "damage": 3
+    },
+    "proto_vk_kaeya_glacial_waltz": {
+      "block": 3
+    },
+    "proto_vk_knightly_guard": {
+      "block": 3
     },
     "proto_vk_knights_roll_call": {
       "choose_knight": true
     },
+    "proto_vk_lisa_lightning_rose": {
+      "block": 3
+    },
     "proto_vk_lisa_violet_arc": {
+      "formula_base": 1,
+      "formula_per": 1
+    },
+    "proto_vk_mika_starfrost_swirl": {
+      "block": 3
+    },
+    "proto_vk_northwind_avatar": {
+      "damage": 4,
+      "varka_base": 4
+    },
+    "proto_vk_oathsworn_strike": {
+      "formula_base": 3
+    },
+    "proto_vk_razor_claw_and_thunder": {
+      "damage": 3
+    },
+    "proto_vk_rising_gale": {
       "damage": 2
     },
     "proto_vk_squall": {
       "damage": 1
     },
+    "proto_vk_storm_surge": {
+      "damage": 2
+    },
     "proto_vk_stormward_stance": {
       "cost": -1
+    },
+    "proto_vk_sworn_brotherhood": {
+      "cost": -1
+    },
+    "proto_vk_tailwind_guard": {
+      "formula_per": 1
     },
     "proto_vk_tailwind_stride": {
       "cost": -1
@@ -1632,12 +1752,22 @@
     "proto_vk_updraft": {
       "damage": 3
     },
+    "proto_vk_wall_of_gales": {
+      "block": 6
+    },
     "proto_vk_wind_wall": {
       "block": 3
     },
     "proto_vk_windbound_execution": {
-      "damage": 3
+      "damage": 2
     }
   },
-  "no_upgrade": {}
+  "no_upgrade": {
+    "proto_vk_azure_devour": "The paper (sec.6) prints no upgrade for this card.",
+    "proto_vk_change_of_guard": "The paper (sec.6) prints no upgrade for this card.",
+    "proto_vk_four_winds_accord": "The paper (sec.6) prints no upgrade for this card.",
+    "proto_vk_oath_of_the_knights": "The paper (sec.6) prints no upgrade for this card.",
+    "proto_vk_rally_to_the_banner": "The paper (sec.6) prints no upgrade for this card.",
+    "proto_vk_unfurled_banner": "The paper (sec.6) prints no upgrade for this card."
+  }
 }

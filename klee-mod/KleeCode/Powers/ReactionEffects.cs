@@ -632,13 +632,13 @@ internal static class ReactionEffects
         }
 
 #if PROTOTYPE_CARDS
-        // VARKA (QUARANTINED): "Winds ... each paid on every Swirl you make"
-        // (sec.10.1). After the Swirl's own spread and flat 2, so a Pyro
-        // Wind's 3 lands on a body the Swirl has already hit. Every Swirl in
-        // the mod passes this line once; a dealer with no Wind pays nothing.
-        if (reaction == Reaction.Swirl)
+        // VARKA (the Oath rework, sec.3): a Swirl he makes gains 1 Oath of the
+        // Swirled element once per card, then pays his current element's one
+        // effect. After the Swirl's own spread and flat 2. Every Swirl in the
+        // mod passes this line once; anyone but a live Varka pays nothing.
+        if (reaction == Reaction.Swirl && !spreadReaction)
         {
-            await VarkaWinds.OnSwirl(choiceContext, target, dealer);
+            await VarkaOath.OnSwirl(choiceContext, target, dealer, consumedAura);
         }
 #endif
     }

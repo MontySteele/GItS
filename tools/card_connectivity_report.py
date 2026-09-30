@@ -439,10 +439,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "fetch_from_discard": [_hook("shared", "discard_pile", "use"),
                            _hook("shared", "hand_contents", "write")],
     "add_random_companion": [_hook("shared", "hand_contents", "write")],
-    # VARKA (prototype batch one). Favonius Drill's chosen Knight paints the
-    # enemy, which is `apply_aura`'s channel; Knights' Roll Call writes the
-    # hand, `add_random_companion`'s.
-    "knight_aura": [_hook("shared", "aura_reaction", "write")],
+    # VARKA, the Oath rework. His one op paints and Swirls enemies through
+    # the shared reaction layer (`apply_current_element`, the follow-up hits,
+    # `swirl_fresh_auras`), which is `apply_aura`'s channel; Knights' Roll
+    # Call writes the hand, `add_random_companion`'s.
+    "varka": [_hook("shared", "aura_reaction", "write")],
     "add_knight": [_hook("shared", "hand_contents", "write")],
     "grant_kapow_each_turn": [_hook("shared", "hand_contents", "write")],
     "gain_spark": [_hook("private", "sparks", "write")],

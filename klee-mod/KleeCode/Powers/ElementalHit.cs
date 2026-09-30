@@ -95,6 +95,10 @@ internal static class ElementalHit
             ? SimDamagePipeline.DealerMods(applier, baseDamage)
             : baseDamage;
 
+#if PROTOTYPE_CARDS
+        // VARKA (the Oath rework, sec.3): an application of his credits Oath.
+        await VarkaOath.NoteApplication(choiceContext, applier, element);
+#endif
         var aura = AuraCmd.Find(target);
         if (aura == null)
         {
@@ -230,6 +234,10 @@ internal static class ElementalHit
         PlayerChoiceContext choiceContext, Creature target, Element element,
         Creature? applier)
     {
+#if PROTOTYPE_CARDS
+        // VARKA (the Oath rework, sec.3): an application of his credits Oath.
+        await VarkaOath.NoteApplication(choiceContext, applier, element);
+#endif
         var aura = AuraCmd.Find(target);
         if (aura == null)
         {

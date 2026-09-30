@@ -26,38 +26,30 @@ public sealed class VarkaArm
 }
 
 /// <summary>
-/// VARKA, PROTOTYPE BATCH ONE (<c>review/active/varka-paper-kit-2026-09-28.md</c>
-/// sec.10). The rules are pinned the way the element port's are
-/// (<c>ElementPortTests</c>): a hit landing needs a live combat, outside the
-/// headless boundary, so each rule is ONE pure decision read value by value,
-/// on real cards and real seats, and the call graph is pinned to prove the
-/// live sites take that decision rather than their own. What only play can
-/// show -- the Wind payouts landing, the grid choosing -- is in the PR's
-/// in-game checklist.
+/// VARKA, THE OATH REWORK (<c>review/active/varka-paper-kit-2026-09-28.md</c>,
+/// every pick ruled 2026-09-29). The rules are pinned the way the element
+/// port's are (<c>ElementPortTests</c>): a hit landing needs a live combat,
+/// outside the headless boundary, so each rule is a pure decision read value
+/// by value -- the Oath ledger is pure for exactly this -- and the call graph
+/// is pinned to prove the live sites take that decision rather than their
+/// own. The sim twin is <c>tier0/tests/test_varka_oath.py</c>.
 /// </summary>
 [Collection(VarkaArm.Name)]
 public class VarkaPrototypeTests : IDisposable
 {
     private readonly bool _enabled = VarkaPrototype.Enabled;
-    private readonly bool _swirl = TriggerRules.SwirlPays;
 
     public VarkaPrototypeTests()
     {
         HeadlessGame.Arm();
         VarkaPrototype.Enabled = true;
+        VarkaOathLedger.ResetAll();
     }
 
     public void Dispose()
     {
         VarkaPrototype.Enabled = _enabled;
-        TriggerRules.SwirlPays = _swirl;
-    }
-
-    private static T Aura<T>(bool spent) where T : AuraPower
-    {
-        var aura = (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
-        aura.Spent = spent;
-        return aura;
+        VarkaOathLedger.ResetAll();
     }
 
     private static T Upgraded<T>() where T : CardModel, new()
@@ -72,17 +64,13 @@ public class VarkaPrototypeTests : IDisposable
     private static decimal Var(CardModel card, string name) =>
         card.DynamicVars[name].BaseValue;
 
-    private static string Face(CardModel card) =>
-        ((CustomCardModel)card).Localization!
-            .First(r => r.Item1 == "description").Item2;
-
     private static List<string> Cards(string type, string method) =>
         Il.CallSequence(Il.Method(type, method))
             .Where(c => c.StartsWith("ModelDb.Card<", StringComparison.Ordinal))
             .ToList();
 
-    private static BoreasFang Fang(Seat seat) =>
-        seat.Player.Relics.OfType<BoreasFang>().Single();
+    private static VarkaOathLedger FreshLedger() =>
+        VarkaOathLedger.For(Seat.Klee().Creature);
 
     // ---- the arm -----------------------------------------------------------
 
@@ -100,337 +88,409 @@ public class VarkaPrototypeTests : IDisposable
         Assert.True(VarkaPrototype.DefaultEnabled);
     }
 
-    // ---- Absorb: the rule, on primitives -----------------------------------
+    // ---- the Oath ledger (sec.3) ---------------------------------------------
 
-    [Theory]
-    // A fresh aura and an Absorb card: the aura comes off, the Wind is his.
-    [InlineData(Element.Pyro, false, true, false, false, AbsorbOutcome.Absorb)]
-    // He already holds that Wind: the hit Swirls instead.
-    [InlineData(Element.Pyro, false, true, false, true, AbsorbOutcome.SwirlInstead)]
-    // A spent aura is not fresh: only the card's damage.
-    [InlineData(Element.Pyro, true, true, false, false, AbsorbOutcome.None)]
-    // No aura at all: only the card's damage.
-    [InlineData(Element.None, false, true, false, false, AbsorbOutcome.None)]
-    // The Fang reads the same rule on a card that prints no Absorb.
-    [InlineData(Element.Hydro, false, false, true, false, AbsorbOutcome.Absorb)]
-    [InlineData(Element.Cryo, false, false, true, true, AbsorbOutcome.SwirlInstead)]
-    [InlineData(Element.Electro, true, false, true, false, AbsorbOutcome.None)]
-    // Neither an Absorb card nor a ready Fang: the ordinary lifecycle.
-    [InlineData(Element.Hydro, false, false, false, false, AbsorbOutcome.None)]
-    // Anemo and Geo leave no aura, so there is no Wind of theirs.
-    [InlineData(Element.Anemo, false, true, false, false, AbsorbOutcome.None)]
-    [InlineData(Element.Geo, false, true, false, false, AbsorbOutcome.None)]
-    public void Absorb_on_fresh_held_spent_and_bare_auras(
-        Element aura, bool spent, bool absorbCard, bool fangReady,
-        bool holdsWind, AbsorbOutcome expected)
+    [Fact]
+    public void Oath_is_four_counts_and_the_current_element_starts_empty()
     {
-        Assert.Equal(expected,
-            VarkaAbsorb.Decide(aura, spent, absorbCard, fangReady, holdsWind));
+        var ledger = FreshLedger();
+        Assert.Equal(new[] { Element.Pyro, Element.Hydro, Element.Electro,
+                             Element.Cryo }, VarkaOathLedger.Elements);
+        Assert.Equal(Element.None, ledger.Current);
+        Assert.Equal(0, ledger.CurrentOath);
+        Assert.True(ledger.Add(Element.Pyro, 2));
+        Assert.True(ledger.Add(Element.Cryo, 1));
+        // Anemo and Geo keep no Oath.
+        Assert.False(ledger.Add(Element.Anemo, 1));
+        Assert.Equal(2, ledger.ElementsWithOath);
+        Assert.Equal(3, ledger.Total);
+        // Cards read only the current element's.
+        Assert.Equal(0, ledger.CurrentOath);
+        Assert.True(ledger.SetCurrent(Element.Pyro));
+        Assert.Equal(2, ledger.CurrentOath);
+        // The same element again is not a change (Boreas Unbound's question).
+        Assert.False(ledger.SetCurrent(Element.Pyro));
+        Assert.True(ledger.SetCurrent(Element.Cryo));
+        Assert.Equal(1, ledger.CurrentOath);
     }
 
     [Fact]
-    public void With_the_arm_off_nothing_absorbs()
+    public void Oath_is_counted_per_card_not_per_enemy()
     {
-        VarkaPrototype.Enabled = false;
-        Assert.Equal(AbsorbOutcome.None,
-            VarkaAbsorb.Decide(Element.Pyro, false, true, true, false));
-        var seat = Seat.Klee();
-        Assert.Equal(AbsorbOutcome.None, VarkaAbsorb.Decide(
-            Aura<PyroAuraPower>(false), seat.Creature,
-            new ProtoVkWindboundExecution()));
-    }
-
-    // ---- Absorb: real cards, a real seat -------------------------------------
-
-    [Fact]
-    public void Windbound_absorbs_a_fresh_aura_and_swirls_a_held_wind()
-    {
-        var seat = Seat.Klee();
-        var card = new ProtoVkWindboundExecution();
-        Assert.IsAssignableFrom<IAbsorbCard>(card);
-        Assert.Equal(AbsorbOutcome.Absorb, VarkaAbsorb.Decide(
-            Aura<PyroAuraPower>(false), seat.Creature, card));
-        Assert.Equal(AbsorbOutcome.None, VarkaAbsorb.Decide(
-            Aura<PyroAuraPower>(true), seat.Creature, card));
-
-        seat.WithPower<PyroWindPower>(1);
-        Assert.Equal(AbsorbOutcome.SwirlInstead, VarkaAbsorb.Decide(
-            Aura<PyroAuraPower>(false), seat.Creature, card));
-        // Another element's Wind does not stop a Hydro Absorb.
-        Assert.Equal(AbsorbOutcome.Absorb, VarkaAbsorb.Decide(
-            Aura<HydroAuraPower>(false), seat.Creature, card));
+        // sec.3: "A card that applies an element gains 1 Oath of it, however
+        // many enemies it hits ... A card that Swirls gains 1 Oath of each
+        // element it Swirls." Apply and Swirl are separate credits.
+        var ledger = FreshLedger();
+        ledger.OpenScope();
+        Assert.True(ledger.TryCredit(swirl: false, Element.Hydro));
+        Assert.False(ledger.TryCredit(swirl: false, Element.Hydro));
+        Assert.True(ledger.TryCredit(swirl: true, Element.Hydro));
+        Assert.False(ledger.TryCredit(swirl: true, Element.Hydro));
+        Assert.True(ledger.TryCredit(swirl: true, Element.Pyro));
+        ledger.CloseScope();
+        // A new play starts clean.
+        ledger.OpenScope();
+        Assert.True(ledger.TryCredit(swirl: false, Element.Hydro));
+        ledger.CloseScope();
+        // Outside any play each event credits (nothing to dedupe against).
+        Assert.True(ledger.TryCredit(swirl: false, Element.Hydro));
+        Assert.True(ledger.TryCredit(swirl: false, Element.Hydro));
+        Assert.False(ledger.TryCredit(swirl: false, Element.Anemo));
     }
 
     [Fact]
-    public void Favonius_cut_absorbs_and_the_plain_anemo_attacks_do_not()
+    public void Ascensions_elemental_hit_credits_no_application()
     {
-        var seat = Seat.Klee();
-        Assert.IsAssignableFrom<IAbsorbCard>(new ProtoVkFavoniusCut());
-        foreach (var card in new CardModel[]
-                 {
-                     new ProtoVkUpdraft(), new ProtoVkSquall(),
-                     new ProtoVkTempestCharge(), new ProtoVkGaleSweep(),
-                     new ProtoVkFourWindsAscension(),
-                 })
-        {
-            Assert.IsNotAssignableFrom<IAbsorbCard>(card);
-            Assert.Equal(AbsorbOutcome.None, VarkaAbsorb.Decide(
-                Aura<CryoAuraPower>(false), seat.Creature, card));
-        }
+        var ledger = FreshLedger();
+        ledger.OpenScope();
+        ledger.SuppressApply++;
+        Assert.False(ledger.TryCredit(swirl: false, Element.Pyro));
+        // Its Anemo hit's Swirl still counts.
+        Assert.True(ledger.TryCredit(swirl: true, Element.Pyro));
+        ledger.SuppressApply--;
+        Assert.True(ledger.TryCredit(swirl: false, Element.Pyro));
+        ledger.CloseScope();
     }
 
     [Fact]
-    public void The_lifecycle_and_the_multiplier_take_the_one_decision()
+    public void Rally_moves_every_point_and_accord_splits_them()
     {
-        // STRUCTURAL. The aura's two sites, the forecast and the hit, ask the
-        // same pure question, and only the hit carries it out.
-        var lifecycle = Il.Calls(Il.Method("AuraPower", "ResolveLifecycle"));
-        Assert.Contains("VarkaAbsorb.Decide", lifecycle);
-        Assert.Contains("VarkaAbsorb.Take", lifecycle);
-        Assert.Contains("VarkaAbsorb.NoteFang", lifecycle);
-        var forecast = Il.Calls(Il.Method("AuraPower", "ModifyDamageMultiplicative"));
-        Assert.Contains("VarkaAbsorb.Decide", forecast);
-        Assert.DoesNotContain("VarkaAbsorb.Take", forecast);
-        // An Absorb takes the aura off, gives the Wind and pays Boreas
-        // Unbound; nothing in it reacts.
-        var take = Il.Calls(Il.Method("VarkaAbsorb", "Take"));
-        Assert.Contains("PowerCmd.Remove", take);
-        Assert.Contains("VarkaWinds.Gain", take);
-        Assert.Contains("BoreasUnboundPower.OnAbsorb", take);
-        Assert.DoesNotContain("ReactionEffects.Resolve", take);
-    }
-
-    // ---- Boreas's Fang -------------------------------------------------------
-
-    [Fact]
-    public void The_fang_takes_the_first_non_anemo_attack_once_a_turn()
-    {
-        var seat = Seat.Klee().WithRelic<BoreasFang>();
-        var strike = new StrikeSilent();
-
-        Assert.True(VarkaAbsorb.FangTakes(seat.Creature, strike));
-        Assert.Equal(AbsorbOutcome.Absorb, VarkaAbsorb.Decide(
-            Aura<PyroAuraPower>(false), seat.Creature, strike));
-        Assert.Equal(1, Fang(seat).DisplayAmount);
-
-        // Used this turn: the next Attack is only an Attack.
-        Seat.Force(Fang(seat), "UsedThisTurn", true);
-        Assert.False(VarkaAbsorb.FangTakes(seat.Creature, strike));
-        Assert.Equal(AbsorbOutcome.None, VarkaAbsorb.Decide(
-            Aura<PyroAuraPower>(false), seat.Creature, strike));
-        Assert.Equal(0, Fang(seat).DisplayAmount);
+        var ledger = FreshLedger();
+        ledger.Add(Element.Pyro, 3);
+        ledger.Add(Element.Hydro, 2);
+        ledger.Add(Element.Cryo, 4);
+        // No current element: Rally does nothing.
+        ledger.Rally();
+        Assert.Equal(3, ledger.Oath(Element.Pyro));
+        ledger.SetCurrent(Element.Hydro);
+        ledger.Rally();
+        Assert.Equal(9, ledger.Oath(Element.Hydro));
+        Assert.Equal(0, ledger.Oath(Element.Pyro));
+        Assert.Equal(0, ledger.Oath(Element.Cryo));
+        // Accord: 9 / 4 = 2 each, rounding down (the +1s are gains).
+        ledger.Split();
+        Assert.All(VarkaOathLedger.Elements,
+                   e => Assert.Equal(2, ledger.Oath(e)));
     }
 
     [Fact]
-    public void The_fang_never_takes_an_aura_its_own_attack_just_applied()
+    public void Knights_are_counted_per_turn_and_swirled_bodies_per_play()
     {
-        // Seat fixes 2026-09-29: Charlotte on a bare enemy left Cryo and the
-        // Fang Absorbed it in the same play. The Fang reads only an aura that
-        // stood before the hit.
-        var seat = Seat.Klee().WithRelic<BoreasFang>();
-        var strike = new StrikeSilent();
-        var painted = Aura<CryoAuraPower>(false);
-        painted.PaintedBy = strike;
-        Assert.True(VarkaAbsorb.OwnPaint(painted, strike));
-        Assert.Equal(AbsorbOutcome.None,
-                     VarkaAbsorb.Decide(painted, seat.Creature, strike));
-        // Another card's hit on that aura: an aura standing before the hit.
-        Assert.Equal(AbsorbOutcome.Absorb, VarkaAbsorb.Decide(
-            painted, seat.Creature, new StrikeSilent()));
-        // Once the play ends the paint is ordinary again.
-        painted.PaintedBy = null;
-        Assert.Equal(AbsorbOutcome.Absorb,
-                     VarkaAbsorb.Decide(painted, seat.Creature, strike));
-
-        // The application site marks the paint and the play's end clears it.
-        Assert.Contains("AuraPower.set_PaintedBy", Il.Calls(
-            Il.Method("KleeElementalHooks", "BeforeDamageReceived")));
-        Assert.Contains("AuraPower.set_PaintedBy", Il.Calls(
-            Il.Method("KleeElementalHooks", "AfterCardPlayed")));
+        var ledger = FreshLedger();
+        ledger.NoteKnight();
+        ledger.NoteKnight();
+        Assert.Equal(2, ledger.KnightsThisTurn);
+        ledger.RollTo(7);
+        Assert.Equal(0, ledger.KnightsThisTurn);
+        var body = Seat.Klee(30).Creature;
+        ledger.OpenScope();
+        ledger.NoteSwirl(body);
+        Assert.Equal(new[] { body }, ledger.SwirledThisPlay);
+        ledger.CloseScope();
+        ledger.OpenScope();
+        Assert.Empty(ledger.SwirledThisPlay);
+        ledger.CloseScope();
+        Assert.Equal(1, ledger.SwirlsMade);
     }
 
     [Fact]
-    public void The_preview_shows_the_fangs_absorb_not_the_reaction()
+    public void Nobody_but_a_live_varka_has_oath()
     {
-        // Seat fixes 2026-09-29: "Charlotte previewed Melt 7; the Fang
-        // Absorbed and the hit landed 4." The card's reaction preview asks
-        // the lifecycle's own decision.
-        Assert.Contains("VarkaAbsorb.Decide",
-                        Il.Calls(Il.Method("KleeCardTooltips", "ForCard")));
-        Assert.Equal(
-            "[gold]Boreas's Fang[/gold] Absorbs the [gold]Pyro[/gold] aura: "
-          + "no reaction, and you gain Pyro [gold]Wind[/gold].",
-            KleeCardTooltips.AbsorbPreviewBody(true, Element.Pyro));
+        var klee = Seat.Klee().Creature;
+        VarkaOathLedger.For(klee).Add(Element.Pyro, 5);
+        VarkaOathLedger.For(klee).SetCurrent(Element.Pyro);
+        Assert.Equal(0, VarkaOath.CurrentOath(klee));
+        Assert.Equal(Element.None, VarkaOath.Current(klee));
+        Assert.False(VarkaOath.HasCurrent(null));
+    }
+
+    // ---- the Swirl payout (sec.3, pick 1) ------------------------------------
+
+    [Fact]
+    public void The_swirl_payout_numbers_are_the_papers()
+    {
+        Assert.Equal(3, VarkaLaw.SwirlPyroDamage);
+        Assert.Equal(3, VarkaLaw.SwirlHydroBlock);
+        Assert.Equal(1, VarkaLaw.SwirlCryoVulnerable);
+        Assert.Equal(3, VarkaLaw.SwirlElectroDamageAll);
+        Assert.Equal(4, VarkaLaw.StormwardOathNeeded);
+        Assert.Equal("Your Swirls deal 3 damage to that enemy.",
+                     VarkaOath.PayoutSentence(Element.Pyro));
+        Assert.Equal("Your Swirls deal 3 damage to ALL enemies.",
+                     VarkaOath.PayoutSentence(Element.Electro));
+        Assert.Contains("3 [gold]Block[/gold]",
+                        VarkaOath.PayoutSentence(Element.Hydro));
+        Assert.Contains("1 [gold]Vulnerable[/gold]",
+                        VarkaOath.PayoutSentence(Element.Cryo));
     }
 
     [Fact]
-    public void An_absorb_and_a_held_wind_swirl_reach_both_logs()
-    {
-        // Seat fixes 2026-09-29: "Absorbs are invisible in the logs."
-        var take = Il.Calls(Il.Method("VarkaAbsorb", "Take"));
-        Assert.Contains("ReactionLog.NoteBeat", take);
-        Assert.Contains("ResolutionLedger.NoteAbsorb", take);
-        var swirled = Il.Calls(Il.Method("VarkaAbsorb", "NoteSwirlInstead"));
-        Assert.Contains("ReactionLog.DetailNext", swirled);
-        Assert.Contains("ResolutionLedger.NoteAbsorb", swirled);
-        Assert.Contains("VarkaAbsorb.NoteSwirlInstead",
-                        Il.Calls(Il.Method("AuraPower", "ResolveLifecycle")));
-        Assert.Equal("Took the Hydro aura; you gained Hydro Wind.",
-                     VarkaAbsorb.AbsorbDetail(Element.Hydro));
-    }
-
-    [Fact]
-    public void The_fang_reads_absorbs_rule_so_a_held_wind_swirls()
-    {
-        var seat = Seat.Klee().WithRelic<BoreasFang>()
-            .WithPower<HydroWindPower>(1);
-        Assert.Equal(AbsorbOutcome.SwirlInstead, VarkaAbsorb.Decide(
-            Aura<HydroAuraPower>(false), seat.Creature, new StrikeSilent()));
-    }
-
-    [Fact]
-    public void The_fang_passes_by_anemo_attacks_skills_and_a_seat_without_it()
-    {
-        var seat = Seat.Klee().WithRelic<BoreasFang>();
-        // "the first NON-ANEMO Attack": an Anemo Attack Swirls instead.
-        Assert.False(VarkaAbsorb.FangTakes(seat.Creature, new ProtoVkUpdraft()));
-        // Knights are Skills (sec.9.6): a Knight never Absorbs its own paint.
-        Assert.False(VarkaAbsorb.FangTakes(seat.Creature,
-                                           new ProtoVkAmberBaronBunny()));
-        Assert.False(VarkaAbsorb.FangTakes(seat.Creature, new DefendSilent()));
-        // No Fang, no Fang.
-        Assert.False(VarkaAbsorb.FangTakes(Seat.Klee().Creature,
-                                           new StrikeSilent()));
-        Assert.True(VarkaAbsorb.IsFangAttackElement(Element.None));
-        Assert.True(VarkaAbsorb.IsFangAttackElement(Element.Pyro));
-        Assert.False(VarkaAbsorb.IsFangAttackElement(Element.Anemo));
-    }
-
-    [Fact]
-    public void The_fang_clears_each_turn_and_names_absorb_and_wind()
-    {
-        Assert.Contains("BoreasFang.set_UsedThisTurn",
-                        Il.Calls(Il.Method("BoreasFang", "AfterPlayerTurnStart")));
-        Assert.Contains("BoreasFang.set_UsedThisTurn",
-                        Il.Calls(Il.Method("BoreasFang", "BeforeCombatStart")));
-        var tips = Il.Calls(Il.Method("BoreasFang", "get_ExtraHoverTips"));
-        Assert.Contains("ArmKeywordTips.ForAbsorb", tips);
-        Assert.Contains("ArmKeywordTips.ForWind", tips);
-        // His fourth, Companion, reward choice, every starter's.
-        Assert.Contains("CompanionSlot.Roll",
-                        Il.Calls(Il.Method("BoreasFang", "TryModifyCardRewardOptions")));
-    }
-
-    // ---- the Winds -------------------------------------------------------------
-
-    [Fact]
-    public void The_winds_he_holds_are_read_off_his_badges()
-    {
-        var seat = Seat.Klee();
-        Assert.Equal(0, VarkaWinds.HeldCount(seat.Creature));
-        seat.WithPower<ElectroWindPower>(1).WithPower<PyroWindPower>(1);
-        Assert.Equal(2, VarkaWinds.HeldCount(seat.Creature));
-        Assert.True(VarkaWinds.Holds(seat.Creature, Element.Pyro));
-        Assert.False(VarkaWinds.Holds(seat.Creature, Element.Cryo));
-        // In the payout order, not the order they were gained.
-        Assert.Equal(new[] { Element.Pyro, Element.Electro },
-                     VarkaWinds.Held(seat.Creature));
-        Assert.Equal(0, VarkaWinds.HeldCount(null));
-    }
-
-    [Theory]
-    [InlineData(typeof(PyroWindPower), Element.Pyro, "ElementalHit.DealUnelemented")]
-    [InlineData(typeof(HydroWindPower), Element.Hydro, "CreatureCmd.GainBlock")]
-    [InlineData(typeof(CryoWindPower), Element.Cryo, "PowerCmd.Apply")]
-    [InlineData(typeof(ElectroWindPower), Element.Electro, "PlayerCmd.GainEnergy")]
-    public void Each_wind_pays_its_own_kind_on_a_swirl(
-        Type wind, Element element, string pays)
-    {
-        var power = (WindPower)RuntimeHelpers.GetUninitializedObject(wind);
-        Assert.Equal(element, power.Element);
-        Assert.Contains(pays, Il.Calls(Il.Method(wind.Name, "PayOnSwirl")));
-    }
-
-    [Fact]
-    public void The_wind_numbers_are_sec_ten_and_the_badges_print_them()
-    {
-        Assert.Equal(3, VarkaLaw.PyroWindDamage);
-        Assert.Equal(3, VarkaLaw.HydroWindBlock);
-        Assert.Equal(1, VarkaLaw.CryoWindWeak);
-        Assert.Equal(1, VarkaLaw.ElectroWindEnergy);
-        string Badge(Type t) =>
-            ((WindPower)RuntimeHelpers.GetUninitializedObject(t)).Localization!
-                .First(r => r.Item1 == "description").Item2;
-        Assert.Contains("deal [blue]3[/blue] damage to the enemy you hit",
-                        Badge(typeof(PyroWindPower)));
-        Assert.Contains("gain [blue]3[/blue] [gold]Block[/gold]",
-                        Badge(typeof(HydroWindPower)));
-        Assert.Contains("apply [blue]1[/blue] [gold]Weak[/gold]",
-                        Badge(typeof(CryoWindPower)));
-        Assert.Contains("The first time you [gold]Swirl[/gold] each turn",
-                        Badge(typeof(ElectroWindPower)));
-    }
-
-    [Fact]
-    public void Every_swirl_pays_the_winds_from_the_one_reaction_site()
+    public void Every_swirl_pays_his_current_element_from_the_one_reaction_site()
     {
         // STRUCTURAL: `ReactionEffects.Resolve` is the single site every
-        // reaction in the mod passes, and the Winds are paid there once.
-        Assert.Contains("VarkaWinds.OnSwirl",
+        // reaction in the mod passes; the Swirl credits, then pays.
+        Assert.Contains("VarkaOath.OnSwirl",
                         Il.Calls(Il.Method("ReactionEffects", "Resolve")));
-        var onSwirl = Il.Calls(Il.Method("VarkaWinds", "OnSwirl"));
-        Assert.Contains("WindPower.PayOnSwirl", onSwirl);
-        Assert.Contains("VarkaPrototype.get_Enabled", onSwirl);
-        // Electro's once-a-turn latch clears at the end of HIS turn.
-        Assert.Contains("ElectroWindPower.set_PaidThisTurn",
-                        Il.Calls(Il.Method("ElectroWindPower", "AfterSideTurnEnd")));
+        var onSwirl = Il.Calls(Il.Method("VarkaOath", "OnSwirl"));
+        Assert.Contains("VarkaOathLedger.TryCredit", onSwirl);
+        Assert.Contains("VarkaOath.Gain", onSwirl);
+        Assert.Contains("ElementalHit.DealUnelemented", onSwirl);   // Pyro, Electro
+        Assert.Contains("CreatureCmd.GainBlock", onSwirl);          // Hydro
+        Assert.Contains("PowerCmd.Apply", onSwirl);                 // Cryo
     }
 
-    // ---- Four Winds' Ascension ---------------------------------------------
+    // ---- where Oath is credited, and the play bracket ------------------------
 
     [Fact]
-    public void Ascension_is_six_plus_six_per_wind_and_exhausts()
+    public void Applications_credit_at_the_hit_and_at_the_damage_less_doors()
+    {
+        Assert.Contains("VarkaOath.NoteApplication", Il.Calls(
+            Il.Method("KleeElementalHooks", "BeforeDamageReceived")));
+        Assert.Contains("VarkaOath.NoteApplication",
+                        Il.Calls(Il.Method("ElementalHit", "Deal")));
+        Assert.Contains("VarkaOath.NoteApplication",
+                        Il.Calls(Il.Method("ElementalHit", "ApplyOnly")));
+        // A Swirl's spread places its copies without passing the door.
+        Assert.DoesNotContain("VarkaOath.NoteApplication",
+                              Il.Calls(Il.Method("ReactionEffects", "SwirlPays")));
+        var note = Il.Calls(Il.Method("VarkaOath", "NoteApplication"));
+        Assert.Contains("VarkaOathLedger.TryCredit", note);
+        Assert.Contains("VarkaOath.Gain", note);
+    }
+
+    [Fact]
+    public void A_knight_sets_the_current_element_before_its_effects()
+    {
+        Assert.Contains("VarkaOath.BeginPlay", Il.Calls(
+            Il.Method("KleeElementalHooks", "BeforeCardPlayed")));
+        Assert.Contains("VarkaOath.EndPlay", Il.Calls(
+            Il.Method("KleeElementalHooks", "AfterCardPlayed")));
+        var begin = Il.Calls(Il.Method("VarkaOath", "BeginPlay"));
+        Assert.Contains("VarkaOathLedger.OpenScope", begin);
+        Assert.Contains("VarkaOathLedger.NoteKnight", begin);
+        Assert.Contains("VarkaOath.SetCurrent", begin);
+        var set = Il.Calls(Il.Method("VarkaOath", "SetCurrent"));
+        Assert.Contains("BoreasUnboundPower.OnElementChanged", set);  // a change
+        Assert.Contains("CreatureCmd.GainBlock", set);                // Standard
+        Assert.Contains("OathBadge.Sync", set);
+    }
+
+    [Fact]
+    public void A_gain_pays_dawn_winds_march_and_wakes_the_fang()
+    {
+        var gain = Il.Calls(Il.Method("VarkaOath", "Gain"));
+        Assert.Contains("VarkaOathLedger.Add", gain);
+        Assert.Contains("CreatureCmd.GainBlock", gain);          // the March
+        Assert.Contains("BoreasFang.HeldBy", gain);
+        Assert.Contains("BoreasFang.AddAscension", gain);
+        // Regent's Forge: created in combat, added to the hand.
+        Assert.Contains("CardPileCmd.AddGeneratedCardToCombat",
+                        Il.Calls(Il.Method("BoreasFang", "AddAscension")));
+    }
+
+    [Fact]
+    public void His_turn_start_runs_bunny_then_brotherhood_then_the_knights_oath()
+    {
+        Assert.Contains("VarkaOath.TurnStart", Il.Calls(
+            Il.Method("KleeElementalHooks", "AfterPlayerTurnStart")));
+        var turn = Il.CallSequence(Il.Method("VarkaOath", "TurnStart")).ToList();
+        var bunny = turn.IndexOf("VarkaBaronBunnyPower.Fire");
+        var sworn = turn.IndexOf("VarkaOath.Gain");
+        var block = turn.LastIndexOf("CreatureCmd.GainBlock");
+        Assert.True(bunny >= 0 && sworn > bunny && block > sworn,
+                    string.Join(", ", turn));
+        // Bunny's burst is one Oath scope of Pyro hits on every enemy.
+        var fire = Il.Calls(Il.Method("VarkaBaronBunnyPower", "Fire"));
+        Assert.Contains("VarkaOath.Scope", fire);
+        Assert.Contains("ElementalHit.DealWithoutDealerMods", fire);
+    }
+
+    // ---- the badge -----------------------------------------------------------
+
+    [Fact]
+    public void The_badge_is_the_current_elements_oath()
+    {
+        Assert.Equal(typeof(PyroOathPower), OathBadge.Wanted(Element.Pyro, 0));
+        Assert.Equal(typeof(ElectroOathPower), OathBadge.Wanted(Element.Electro, 9));
+        Assert.Equal(typeof(UnswornOathPower), OathBadge.Wanted(Element.None, 2));
+        Assert.Null(OathBadge.Wanted(Element.None, 0));
+        string Row(Type t, string key) =>
+            ((OathBadgePower)RuntimeHelpers.GetUninitializedObject(t))
+                .Localization!.First(r => r.Item1 == key).Item2;
+        Assert.Equal("Hydro Oath", Row(typeof(HydroOathPower), "title"));
+        Assert.Equal("Oath", Row(typeof(UnswornOathPower), "title"));
+        Assert.EndsWith("\nOath: Pyro {PyroOath}, Hydro {HydroOath}, "
+                      + "Electro {ElectroOath}, Cryo {CryoOath}.",
+                        Row(typeof(CryoOathPower), "smartDescription"));
+        Assert.StartsWith("Your [gold]current element[/gold] is Cryo. Your "
+                        + "Swirls apply 1",
+                          Row(typeof(CryoOathPower), "description"));
+    }
+
+    // ---- Four Winds' Ascension and Boreas's Fang (sec.4) ---------------------
+
+    [Fact]
+    public void Ascension_is_six_anemo_then_three_per_oath_and_does_not_exhaust()
     {
         var card = new ProtoVkFourWindsAscension();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Attack, card.Type);
-        Assert.Equal(CardRarity.Basic, card.Rarity);
-        Assert.Contains(CardKeyword.Exhaust, card.Keywords);
-        Assert.Equal(6m, Var(card, "CalculationBase"));
-        Assert.Equal(6m, Var(card, "ExtraDamage"));
-        // sec.10.2: "Deal 6 [9] Anemo, plus 6 for each Wind you hold."
+        Assert.DoesNotContain(CardKeyword.Exhaust, card.Keywords);
+        Assert.Equal(6m, Var(card, "Damage"));
+        Assert.Equal(3m, Var(card, "VkPer"));
+        // The upgraded card's numbers: 9 Anemo, 4 per Oath.
         var up = Upgraded<ProtoVkFourWindsAscension>();
-        Assert.Equal(9m, Var(up, "CalculationBase"));
-        Assert.Equal(6m, Var(up, "ExtraDamage"));
-        // The count it multiplies is the Winds he holds.
-        Assert.Contains("VarkaWinds.HeldCount",
-                        Il.Calls(Il.Method("ProtoVkFourWindsAscension",
-                                           "get_CanonicalVars")));
+        Assert.Equal(9m, Var(up, "Damage"));
+        Assert.Equal(4m, Var(up, "VkPer"));
         Assert.Equal(Element.Anemo, ((IElementalCard)card).Element);
-        // No Ancient card yet: the Tome hands him this one.
+        Assert.Contains("VarkaCards.AscensionHit",
+                        Il.Calls(Il.Method("ProtoVkFourWindsAscension", "OnPlay")));
+        // Its elemental hit carries the current element and credits nothing.
+        var hit = Il.Calls(Il.Method("VarkaCards", "CurrentElementHit"));
+        Assert.Contains("HitElement.Carry", hit);
+        Assert.Contains("VarkaOath.NoApplyCredit", hit);
+        Assert.Equal(15, VarkaCards.CurrentElementDamage(0m, 3m, 5));
+        Assert.Equal(20, VarkaCards.CurrentElementDamage(10m, 2m, 5));
         Assert.IsAssignableFrom<ITomeCard>(card);
     }
 
     [Fact]
-    public void Eye_of_the_storm_is_four_block_per_wind_and_five_upgraded()
+    public void The_fang_rolls_the_starter_knight_on_a_new_run()
     {
-        var card = new ProtoVkEyeOfTheStorm();
-        Assert.Equal(0m, Var(card, "CalculationBase"));
-        Assert.Equal(4m, Var(card, "CalculationExtra"));
-        Assert.Equal(5m, Var(Upgraded<ProtoVkEyeOfTheStorm>(), "CalculationExtra"));
+        var obtained = Il.Calls(Il.Method("BoreasFang", "AfterObtained"));
+        Assert.Contains("PlayerRngSet.get_Transformations", obtained);
+        Assert.Contains("VarkaRules.StarterKnights", obtained);
+        Assert.Contains("CardCmd.Transform", obtained);
+        Assert.Contains("CompanionSlot.Roll",
+                        Il.Calls(Il.Method("BoreasFang", "TryModifyCardRewardOptions")));
     }
 
-    // ---- Converging Winds --------------------------------------------------
+    // ---- the cards' own numbers (the ruled picks) ----------------------------
+
+    [Fact]
+    public void Lisa_is_four_plus_three_per_attack_and_five_plus_four_upgraded()
+    {
+        var lisa = new ProtoVkLisaVioletArc();
+        Assert.Equal(4m, Var(lisa, "CalculationBase"));
+        Assert.Equal(3m, Var(lisa, "CalculationExtra"));
+        var up = Upgraded<ProtoVkLisaVioletArc>();
+        Assert.Equal(5m, Var(up, "CalculationBase"));
+        Assert.Equal(4m, Var(up, "CalculationExtra"));
+        Assert.Contains("ElementalHit.ApplyOnly",
+                        Il.Calls(Il.Method("ProtoVkLisaVioletArc", "OnPlay")));
+    }
+
+    [Fact]
+    public void The_ruled_picks_are_on_the_cards()
+    {
+        var bunny = new ProtoVkAmberBaronBunny();
+        Assert.Equal(6m, Var(bunny, "CalculationBase"));
+        Assert.Equal(6m, Var(bunny, "PowerAmount"));
+        var bunnyUp = Upgraded<ProtoVkAmberBaronBunny>();
+        Assert.Equal(8m, Var(bunnyUp, "CalculationBase"));
+        Assert.Equal(8m, Var(bunnyUp, "PowerAmount"));
+        var standard = new ProtoVkFavonianStandard();
+        Assert.Equal(4m, Var(standard, "PowerAmount"));
+        Assert.Equal(5m, Var(Upgraded<ProtoVkFavonianStandard>(), "PowerAmount"));
+        var avatar = new ProtoVkNorthwindAvatar();
+        Assert.Equal(2, avatar.EnergyCost.Canonical);
+        Assert.Equal(10m, Var(avatar, "Damage"));
+        Assert.Equal(10m, Var(avatar, "VkBase"));
+        Assert.Equal(2m, Var(avatar, "VkPer"));
+        var up = Upgraded<ProtoVkNorthwindAvatar>();
+        Assert.Equal(14m, Var(up, "Damage"));
+        Assert.Equal(14m, Var(up, "VkBase"));
+        Assert.Equal(2m, Var(up, "VkPer"));
+        Assert.Contains(CardKeyword.Exhaust, new ProtoVkEyeOfTheStorm().Keywords);
+    }
+
+    [Fact]
+    public void Each_starter_knight_is_eight_block_and_its_element()
+    {
+        var knights = new (CardModel Card, Element Element)[]
+        {
+            (new ProtoVkAmberFieryRain(), Element.Pyro),
+            (new ProtoVkBarbaraMelodyLoop(), Element.Hydro),
+            (new ProtoVkLisaLightningRose(), Element.Electro),
+            (new ProtoVkKaeyaGlacialWaltz(), Element.Cryo),
+        };
+        foreach (var (card, element) in knights)
+        {
+            Assert.Equal(CardRarity.Basic, card.Rarity);
+            Assert.Equal(8m, Var(card, "CalculationBase"));
+            Assert.Equal(element, VarkaOath.KnightElement(card));
+            Assert.True(VarkaRules.IsStarterKnight(card));
+            Assert.Contains("ElementalHit.ApplyOnly",
+                            Il.Calls(Il.Method(card.GetType().Name, "OnPlay")));
+        }
+        Assert.Equal(11m, Var(Upgraded<ProtoVkKaeyaGlacialWaltz>(), "CalculationBase"));
+        Assert.Equal(knights.Select(k => $"ModelDb.Card<{k.Card.GetType().Name}>"),
+                     Cards("VarkaRules", "StarterKnights"));
+    }
+
+    [Fact]
+    public void The_verbs_are_one_call_each()
+    {
+        Assert.Contains("VarkaCards.ApplyCurrentElement",
+                        Il.Calls(Il.Method("ProtoVkFavoniusDrill", "OnPlay")));
+        Assert.Contains("ElementalHit.ApplyOnly",
+                        Il.Calls(Il.Method("VarkaCards", "ApplyCurrentElement")));
+        Assert.Contains("VarkaOath.Gain",
+                        Il.Calls(Il.Method("VarkaCards", "GainCurrentOath")));
+        Assert.Contains("VarkaOath.KnightsPlayedThisTurn",
+                        Il.Calls(Il.Method("ProtoVkKnightlyGuard", "OnPlay")));
+        Assert.Contains("ElementalHit.DealUnelemented",
+                        Il.Calls(Il.Method("VarkaCards", "SwirledTakeMore")));
+        Assert.Contains("VarkaRules.SwirlFreshAuras",
+                        Il.Calls(Il.Method("VarkaCards", "SwirlFreshAuras")));
+        Assert.Contains("ElementalHit.ApplyOnly",
+                        Il.Calls(Il.Method("VarkaRules", "SwirlFreshAuras")));
+        Assert.Contains("VarkaRules.ChooseElement",
+                        Il.Calls(Il.Method("VarkaCards", "ChangeOfGuard")));
+        Assert.Contains("VarkaOathLedger.Rally",
+                        Il.Calls(Il.Method("VarkaCards", "Rally")));
+        Assert.Contains("VarkaOathLedger.Split",
+                        Il.Calls(Il.Method("VarkaCards", "Accord")));
+        Assert.Contains("CardEnergyCost.SetThisTurn",
+                        Il.Calls(Il.Method("VarkaCards", "UnfurledBanner")));
+        Assert.Contains("VarkaOath.Gain",
+                        Il.Calls(Il.Method("VarkaCards", "OathPerCryoEnemy")));
+    }
+
+    [Fact]
+    public void Change_of_guards_faces_map_to_their_elements()
+    {
+        var faces = new CardModel[]
+        {
+            new ElementOptionPyro(), new ElementOptionHydro(),
+            new ElementOptionElectro(), new ElementOptionCryo(),
+        };
+        Assert.Equal(VarkaOathLedger.Elements,
+                     faces.Select(f => ((ElementOption)f).OptionElement));
+        Assert.Contains("CardSelectCmd.FromSimpleGrid",
+                        Il.Calls(Il.Method("VarkaRules", "ChooseElement")));
+    }
+
+    // ---- the other powers ----------------------------------------------------
 
     [Theory]
-    // Without the power a spread never reacts: the copy replaces, spent.
+    [InlineData(true, true, Element.Anemo, 4, true)]
+    [InlineData(true, true, Element.Anemo, 7, true)]
+    [InlineData(true, true, Element.Anemo, 3, false)]
+    [InlineData(true, true, Element.Pyro, 5, false)]
+    [InlineData(true, false, Element.Anemo, 5, false)]
+    [InlineData(false, true, Element.Anemo, 5, false)]
+    public void Stormward_stance_needs_four_oath_and_an_anemo_attack(
+        bool powered, bool attack, Element hit, int oath, bool expected)
+    {
+        Assert.Equal(expected,
+            StormwardStancePower.Applies(powered, attack, hit, oath));
+    }
+
+    [Theory]
     [InlineData(false, Element.Pyro, Element.Hydro, Reaction.None)]
-    // With it, the spread's flat 2 carries the element into the aura.
     [InlineData(true, Element.Pyro, Element.Hydro, Reaction.Vaporize)]
     [InlineData(true, Element.Electro, Element.Pyro, Reaction.Overload)]
-    [InlineData(true, Element.Cryo, Element.Electro, Reaction.Superconduct)]
-    // A bare enemy takes the spent copy, and one already wearing the element
-    // keeps its own, exactly as without the power.
     [InlineData(true, Element.Pyro, Element.None, Reaction.None)]
     [InlineData(true, Element.Pyro, Element.Pyro, Reaction.None)]
     public void Converging_winds_reacts_where_a_spread_lands(
@@ -438,45 +498,6 @@ public class VarkaPrototypeTests : IDisposable
     {
         Assert.Equal(expected,
             ConvergingWindsPower.SpreadReaction(converges, spread, existing));
-    }
-
-    [Fact]
-    public void A_spread_reaction_lands_on_that_enemy_only_and_never_swirls()
-    {
-        // STRUCTURAL: the Swirl asks the one decision, resolves the reaction
-        // through the one site with the spread flag, and the flag keeps an
-        // Overload off every other enemy and stops a second Swirl.
-        var swirl = Il.Calls(Il.Method("ReactionEffects", "SwirlPays"));
-        Assert.Contains("ConvergingWindsPower.SpreadReaction", swirl);
-        Assert.Contains("ConvergingWindsPower.Converges", swirl);
-        Assert.Contains("ReactionEffects.Resolve", swirl);
-        Assert.Contains("VarkaRules.SpreadShielded", swirl);
-        Assert.NotNull(Il.Method("ReactionEffects", "Resolve")
-            .GetParameters().SingleOrDefault(p => p.Name == "spreadReaction"));
-        // With the arm off no dealer converges.
-        VarkaPrototype.Enabled = false;
-        Assert.False(ConvergingWindsPower.Converges(
-            Seat.Klee().WithPower<ConvergingWindsPower>(1).Creature));
-        VarkaPrototype.Enabled = true;
-        Assert.True(ConvergingWindsPower.Converges(
-            Seat.Klee().WithPower<ConvergingWindsPower>(1).Creature));
-        Assert.False(ConvergingWindsPower.Converges(Seat.Klee().Creature));
-    }
-
-    // ---- the other cards' rules ------------------------------------------
-
-    [Theory]
-    [InlineData(true, true, Element.Anemo, 2, true)]
-    [InlineData(true, true, Element.Anemo, 4, true)]
-    [InlineData(true, true, Element.Anemo, 1, false)]
-    [InlineData(true, true, Element.Pyro, 3, false)]
-    [InlineData(true, false, Element.Anemo, 3, false)]
-    [InlineData(false, true, Element.Anemo, 3, false)]
-    public void Stormward_stance_needs_two_winds_and_an_anemo_attack(
-        bool powered, bool attack, Element hit, int winds, bool expected)
-    {
-        Assert.Equal(expected,
-            StormwardStancePower.Applies(powered, attack, hit, winds));
     }
 
     [Fact]
@@ -491,125 +512,44 @@ public class VarkaPrototypeTests : IDisposable
                      {
                          fresh.Creature, spent.Creature, bare.Creature,
                      }));
-        Assert.False(VarkaRules.SpreadShielded(fresh.Creature));
         Assert.Contains("VarkaRules.HitFreshAuras",
                         Il.Calls(Il.Method("ProtoVkGaleSweep", "OnPlay")));
     }
 
     [Fact]
-    public void Tempest_charge_asks_whether_this_play_swirled()
+    public void The_swirl_readers_diff_his_swirl_count()
     {
-        var calls = Il.CallSequence(Il.Method("ProtoVkTempestCharge", "OnPlay"));
-        Assert.Equal(2, calls.Count(c => c == "VarkaWinds.SwirlsMadeBy"));
-        Assert.Equal(0, VarkaWinds.SwirlsMadeBy(Seat.Klee().Creature));
+        foreach (var type in new[] { "ProtoVkTempestCharge", "ProtoVkCrosswind",
+                                     "ProtoVkRisingGale" })
+        {
+            var calls = Il.CallSequence(Il.Method(type, "OnPlay"));
+            Assert.Equal(2, calls.Count(c => c == "VarkaOath.SwirlsMadeBy"));
+        }
     }
 
     // ---- the Knights -------------------------------------------------------
 
     [Fact]
-    public void The_knights_are_his_personal_companion_skills()
+    public void His_knights_are_his_personal_companions()
     {
-        var knights = new (CardModel Card, Element Element)[]
-        {
-            (new ProtoVkAmberBaronBunny(), Element.Pyro),
-            (new ProtoVkBarbaraShowBegin(), Element.Hydro),
-            (new ProtoVkLisaVioletArc(), Element.Electro),
-            (new ProtoVkKaeyaFrostgnaw(), Element.Cryo),
-        };
-        foreach (var (card, element) in knights)
-        {
-            Assert.True(VarkaRules.IsKnight(card), card.GetType().Name);
-            Assert.Equal(CardType.Skill, card.Type);
-            Assert.Equal(CardRarity.Common, card.Rarity);
-            Assert.Equal(element, ((ICompanionCard)card).CompanionElement);
-            Assert.Equal(VarkaPrototype.CharacterId,
-                         ((ICompanionCard)card).PersonalPool);
-        }
-        Assert.Equal(knights.Select(k => k.Element), VarkaRules.KnightElements);
-        // Knights' Muster is a Knight card too; his own Attacks are not.
-        Assert.True(VarkaRules.IsKnight(new ProtoVkKnightsMuster()));
+        // Read off the call graph: ModelDb holds nothing headless.
+        CardModel Make(string call) => (CardModel)Activator.CreateInstance(
+            typeof(VarkaRules).Assembly.GetTypes().Single(
+                t => t.Name == call.Substring("ModelDb.Card<".Length).TrimEnd('>')))!;
+        var pool = Cards("VarkaRules", "PoolKnights").Select(Make).ToList();
+        var starters = Cards("VarkaRules", "StarterKnights").Select(Make).ToList();
+        Assert.Equal(9, pool.Count);
+        Assert.Equal(4, starters.Count);
+        Assert.All(pool, k => Assert.True(VarkaRules.IsKnight(k)));
+        Assert.All(starters, k => Assert.True(VarkaRules.IsKnight(k)));
+        Assert.DoesNotContain(pool, VarkaRules.IsStarterKnight);
+        Assert.Equal(Element.Pyro, VarkaOath.KnightElement(new ProtoVkDilucSearingOnslaught()));
+        Assert.Equal(CardType.Attack, new ProtoVkDilucSearingOnslaught().Type);
+        Assert.Equal(Element.Cryo, VarkaOath.KnightElement(new ProtoVkEulaIcetideVortex()));
+        // Jean is a Skill that sets no element; his own Attacks are not Knights.
+        Assert.False(VarkaRules.IsKnight(new ProtoVkJeanDandelionBreeze()));
         Assert.False(VarkaRules.IsKnight(new ProtoVkWindboundExecution()));
-        Assert.False(VarkaRules.IsKnight(new ProtoVkFavoniusDrill()));
-    }
-
-    [Fact]
-    public void Knights_muster_chooses_a_knight_and_hits_with_their_element()
-    {
-        var card = new ProtoVkKnightsMuster();
-        Assert.Equal(0, card.EnergyCost.Canonical);
-        Assert.Equal(CardType.Skill, card.Type);
-        Assert.Equal(CardRarity.Basic, card.Rarity);
-        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
-        Assert.Equal(4m, Var(card, "Damage"));
-        Assert.Equal(6m, Var(Upgraded<ProtoVkKnightsMuster>(), "Damage"));
-        Assert.Equal("Choose a [gold]Knight[/gold]: deal {Damage:diff()} damage "
-                   + "of their element.", Face(card));
-        var play = Il.CallSequence(Il.Method("ProtoVkKnightsMuster", "OnPlay"))
-            .ToList();
-        var choose = play.IndexOf("VarkaRules.ChooseKnight");
-        var carry = play.IndexOf("HitElement.Carry");
-        var hit = play.IndexOf("DamageCmd.Attack");
-        Assert.True(choose >= 0 && carry > choose && hit > carry,
-                    string.Join(", ", play));
-    }
-
-#if VARKA_PROTOTYPE
-    /// <summary>
-    /// The Varka seat of 2026-09-29 saw "Vaporize on Sludge Spinner, off
-    /// Knights' Muster" and no bonus it could see. The bonus is there: a
-    /// Muster hit is a Skill, and the aura's multiplier reads the carried
-    /// element, not the card type. Run for real, both directions of Vaporize.
-    /// </summary>
-    [Fact]
-    public void Vaporize_off_knights_muster_multiplies_its_hit()
-    {
-        var varka = Seat.Varka().Creature;
-        var muster = new ProtoVkKnightsMuster();
-        var hydroBody = Seat.Klee(30).WithPower<HydroAuraPower>(2).Creature;
-        var hydro = hydroBody.Powers.OfType<HydroAuraPower>().Single();
-        var pyroBody = Seat.Klee(30).WithPower<PyroAuraPower>(2).Creature;
-        var pyro = pyroBody.Powers.OfType<PyroAuraPower>().Single();
-        var move = MegaCrit.Sts2.Core.ValueProps.ValueProp.Move;
-        var vaporize = ReactionTable.AmplifierMultiplier(Reaction.Vaporize, varka);
-        Assert.True(vaporize > 1m);
-
-        // Outside the Knight's scope the hit carries nothing.
-        Assert.Equal(1m, hydro.ModifyDamageMultiplicative(
-            hydroBody, 4m, move, varka, muster, null));
-        using (HitElement.Carry(muster, Element.Pyro))       // Amber
-        {
-            Assert.Equal(vaporize, hydro.ModifyDamageMultiplicative(
-                hydroBody, 4m, move, varka, muster, null));
-        }
-        using (HitElement.Carry(muster, Element.Hydro))      // Barbara
-        {
-            Assert.Equal(vaporize, pyro.ModifyDamageMultiplicative(
-                pyroBody, 4m, move, varka, muster, null));
-        }
-    }
-#endif
-
-    [Fact]
-    public void The_knight_grid_maps_each_face_to_its_element()
-    {
-        var faces = new CardModel[]
-        {
-            new KnightOptionAmber(), new KnightOptionBarbara(),
-            new KnightOptionLisa(), new KnightOptionKaeya(),
-        };
-        for (var i = 0; i < faces.Length; i++)
-        {
-            Assert.Equal(VarkaRules.KnightElements[i],
-                         VarkaRules.ElementOfOption(faces, faces[i]));
-        }
-        Assert.Equal(Element.None, VarkaRules.ElementOfOption(faces, null));
-        // A GRID, because the choose-a-card screen throws on four cards.
-        Assert.Contains("CardSelectCmd.FromSimpleGrid",
-                        Il.Calls(Il.Method("VarkaRules", "ChooseKnight")));
-        Assert.Contains("VarkaRules.ChooseKnight",
-                        Il.Calls(Il.Method("VarkaRules", "KnightAura")));
-        Assert.Contains("VarkaRules.KnightAura",
-                        Il.Calls(Il.Method("ProtoVkFavoniusDrill", "OnPlay")));
+        Assert.Equal(Element.None, VarkaOath.KnightElement(new ProtoVkFavoniusDrill()));
     }
 
     [Fact]
@@ -618,24 +558,20 @@ public class VarkaPrototypeTests : IDisposable
         Assert.Contains("VarkaRules.IsKnight",
                         Il.Calls(Il.Method("GrandMastersOrderPower",
                                            "ModifyCardPlayCount")));
-        Assert.Contains("PowerCmd.Remove",
-                        Il.Calls(Il.Method("GrandMastersOrderPower",
-                                           "AfterSideTurnEnd")));
         var card = new ProtoVkGrandMastersOrder();
         Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.Contains(CardKeyword.Exhaust, card.Keywords);
-        Assert.DoesNotContain(CardKeyword.Retain, card.Keywords);
         Assert.Contains(CardKeyword.Retain,
                         Upgraded<ProtoVkGrandMastersOrder>().Keywords);
     }
 
     [Fact]
-    public void Roll_call_adds_a_knight_and_chooses_it_upgraded()
+    public void Roll_call_adds_a_pool_knight_and_chooses_it_upgraded()
     {
-        var calls = Il.Calls(Il.Method("ProtoVkKnightsRollCall", "OnPlay"));
-        Assert.Contains("VarkaRules.AddKnight", calls);
-        Assert.Contains("CardModel.get_IsUpgraded", calls);
+        Assert.Contains("VarkaRules.AddKnight",
+                        Il.Calls(Il.Method("ProtoVkKnightsRollCall", "OnPlay")));
         var add = Il.Calls(Il.Method("VarkaRules", "AddKnight"));
+        Assert.Contains("VarkaRules.PoolKnights", add);
         Assert.Contains("CardSelectCmd.FromSimpleGrid", add);
         Assert.Contains("CardEnergyCost.SetThisTurn", add);
     }
@@ -643,14 +579,14 @@ public class VarkaPrototypeTests : IDisposable
     // ---- the starter and the pool ------------------------------------------
 
     [Fact]
-    public void The_starter_is_the_base_pair_the_muster_and_the_ascension()
+    public void The_starter_is_the_base_pair_windbound_and_a_starter_knight()
     {
         var deck = Cards("VarkaRoster", "StartingDeck");
         Assert.Equal(10, deck.Count);
         Assert.Equal(4, deck.Count(c => c == "ModelDb.Card<StrikeSilent>"));
         Assert.Equal(4, deck.Count(c => c == "ModelDb.Card<DefendSilent>"));
-        Assert.Single(deck, c => c == "ModelDb.Card<ProtoVkKnightsMuster>");
-        Assert.Single(deck, c => c == "ModelDb.Card<ProtoVkFourWindsAscension>");
+        Assert.Single(deck, c => c == "ModelDb.Card<ProtoVkWindboundExecution>");
+        Assert.Single(deck, c => c == "ModelDb.Card<ProtoVkAmberFieryRain>");
         Assert.Equal(new[] { "ModelDb.Card<StrikeSilent>" },
                      Cards("VarkaRoster", "StarterStrike"));
         Assert.Equal(new[] { "ModelDb.Card<DefendSilent>" },
@@ -660,25 +596,32 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void The_pool_is_nineteen_cards_ten_seven_and_two()
+    public void The_pool_is_forty_one_cards_sixteen_seventeen_and_eight()
     {
         var pool = Cards("VarkaRoster", "Pool")
             .Select(c => c.Substring("ModelDb.Card<".Length).TrimEnd('>'))
             .ToList();
-        Assert.Equal(19, pool.Count);
-        Assert.Equal(19, pool.Distinct().Count());
+        Assert.Equal(41, pool.Count);
+        Assert.Equal(41, pool.Distinct().Count());
         var types = typeof(VarkaRules).Assembly.GetTypes()
             .Where(t => pool.Contains(t.Name))
             .Select(t => (CardModel)Activator.CreateInstance(t)!)
             .ToList();
-        Assert.Equal(19, types.Count);
-        Assert.Equal(10, types.Count(c => c.Rarity == CardRarity.Common));
-        Assert.Equal(7, types.Count(c => c.Rarity == CardRarity.Uncommon));
-        Assert.Equal(2, types.Count(c => c.Rarity == CardRarity.Rare));
-        Assert.Equal(4, types.Count(VarkaRules.IsKnight));
-        // The starter's two are not offered.
-        Assert.DoesNotContain("ProtoVkKnightsMuster", pool);
-        Assert.DoesNotContain("ProtoVkFourWindsAscension", pool);
+        Assert.Equal(41, types.Count);
+        Assert.Equal(16, types.Count(c => c.Rarity == CardRarity.Common));
+        Assert.Equal(17, types.Count(c => c.Rarity == CardRarity.Uncommon));
+        Assert.Equal(8, types.Count(c => c.Rarity == CardRarity.Rare));
+        Assert.Equal(9, types.Count(VarkaRules.IsKnight));
+        // The starter's and the Fang's cards are not offered.
+        foreach (var starter in new[] { "ProtoVkFourWindsAscension",
+                                        "ProtoVkWindboundExecution",
+                                        "ProtoVkAmberFieryRain",
+                                        "ProtoVkBarbaraMelodyLoop",
+                                        "ProtoVkLisaLightningRose",
+                                        "ProtoVkKaeyaGlacialWaltz" })
+        {
+            Assert.DoesNotContain(starter, pool);
+        }
     }
 
     [Fact]
@@ -705,13 +648,62 @@ public class VarkaPrototypeTests : IDisposable
         var loc = varka.Localization!.ToDictionary(r => r.Item1, r => r.Item2);
         Assert.Equal("Varka", loc["title"]);
         Assert.Equal("he", loc["pronounSubject"]);
-        Assert.Equal("him", loc["pronounObject"]);
-        Assert.Equal("his", loc["possessiveAdjective"]);
         Assert.IsAssignableFrom<IVarkaCharacter>(varka);
         Assert.Contains("VarkaRoster.StartingDeck",
                         Il.Calls(Il.Method("Varka", "get_StartingDeck")));
         Assert.Contains("VarkaRoster.StartingRelics",
                         Il.Calls(Il.Method("Varka", "get_StartingRelics")));
+    }
+
+    [Fact]
+    public void His_oath_reads_through_the_door_on_his_own_seat()
+    {
+        var varka = Seat.Varka().Creature;
+        var ledger = VarkaOathLedger.For(varka);
+        ledger.Add(Element.Hydro, 3);
+        ledger.Add(Element.Pyro, 1);
+        Assert.False(VarkaOath.HasCurrent(varka));
+        Assert.Equal(0, VarkaOath.CurrentOath(varka));
+        Assert.Equal(2, VarkaOath.ElementsWithOath(varka));
+        ledger.SetCurrent(Element.Hydro);
+        Assert.Equal(Element.Hydro, VarkaOath.Current(varka));
+        Assert.Equal(3, VarkaOath.CurrentOath(varka));
+        Assert.Equal(1, VarkaOath.Count(varka, Element.Pyro));
+        // With the arm off he has none.
+        VarkaPrototype.Enabled = false;
+        Assert.Equal(0, VarkaOath.CurrentOath(varka));
+    }
+
+    /// <summary>
+    /// Four Winds' Ascension's and Northwind Avatar's second hit carries his
+    /// current element through <see cref="HitElement.Carry"/>, the scope the
+    /// retired Knights' Muster's hit took; the Varka seat of 2026-09-29 saw a
+    /// carried Vaporize land with no bonus it could see. The bonus is there:
+    /// the aura's multiplier reads the carried element. Run for real, both
+    /// directions of Vaporize.
+    /// </summary>
+    [Fact]
+    public void A_current_element_hit_amplifies_like_any_hit()
+    {
+        var varka = Seat.Varka().Creature;
+        var avatar = new ProtoVkNorthwindAvatar();
+        var hydroBody = Seat.Klee(30).WithPower<HydroAuraPower>(2).Creature;
+        var hydro = hydroBody.Powers.OfType<HydroAuraPower>().Single();
+        var pyroBody = Seat.Klee(30).WithPower<PyroAuraPower>(2).Creature;
+        var pyro = pyroBody.Powers.OfType<PyroAuraPower>().Single();
+        var move = MegaCrit.Sts2.Core.ValueProps.ValueProp.Move;
+        var vaporize = ReactionTable.AmplifierMultiplier(Reaction.Vaporize, varka);
+        Assert.True(vaporize > 1m);
+        using (HitElement.Carry(avatar, Element.Pyro))
+        {
+            Assert.Equal(vaporize, hydro.ModifyDamageMultiplicative(
+                hydroBody, 10m, move, varka, avatar, null));
+        }
+        using (HitElement.Carry(avatar, Element.Hydro))
+        {
+            Assert.Equal(vaporize, pyro.ModifyDamageMultiplicative(
+                pyroBody, 10m, move, varka, avatar, null));
+        }
     }
 
     [Fact]
@@ -725,7 +717,7 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void His_pool_offers_the_nineteen_and_holds_the_rest()
+    public void His_pool_offers_the_forty_one_and_holds_the_rest()
     {
         Assert.Contains("VarkaRoster.Pool",
                         Il.Calls(Il.Method("VarkaCardPool", "FilterThroughEpochs")));

@@ -38,14 +38,14 @@ public sealed class ProtoVkWindWall : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForWind(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCurrentElement(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_wind_wall");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Wind Wall"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you hold a [gold]Wind[/gold], gain {BranchBlock:diff()} more."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have a [gold]current element[/gold], gain {BranchBlock:diff()} more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -65,7 +65,7 @@ public sealed class ProtoVkWindWall : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        if (VarkaWinds.HeldCount(Owner.Creature) > 0)
+        if (VarkaOath.HasCurrent(Owner.Creature))
         {
             await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(3m, ValueProp.Move), cardPlay);
         }

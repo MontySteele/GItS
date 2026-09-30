@@ -38,14 +38,14 @@ public sealed class ProtoVkStormwardStance : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForWind(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_stormward_stance");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stormward Stance"),
-        ("description", "While you hold 2 or more [gold]Winds[/gold], your [gold]Anemo[/gold] Attacks deal 3 additional damage."),
+        ("description", "While your [gold]current element[/gold] has 4 or more [gold]Oath[/gold], your Anemo Attacks deal 3 additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
