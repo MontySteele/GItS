@@ -814,6 +814,12 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
             if not _effects.is_known_predicate(name):
                 raise ValueError(
                     f"card {card_id!r}: unknown predicate {name!r}")
+        if op == "kokomi":
+            # THE KOKOMI EXPANSION's one op: a known kind with exactly the
+            # numeric fields it prints (`kokomi_plan.validate_op`, the
+            # codegen's `KOKOMI_KINDS` check taken here too).
+            from tier0.engine import kokomi_plan as _kp   # late: cycle
+            _kp.validate_op(card_id, fx)
         if op == "varka":
             # VARKA's one op: the kind must be one of his rules and carry
             # exactly the numeric fields that rule prints -- the codegen's

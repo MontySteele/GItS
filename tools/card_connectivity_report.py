@@ -639,6 +639,17 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Took's doubling WRITE it, Open the Casket spends it (a write), and What
     # the Tokoyo Returns reads the exhaust pile.
     "casket_gain": [_hook("private", "kurage", "write")],
+    # THE EXPANSION, BATCH ONE (2026-09-29). Lull and Undertide Lance read the
+    # drain they land in (the queue), Evening Watch's Block and Brace's
+    # doubling are Block the jellyfish writes, and the `kokomi` op's kinds
+    # read or write the queue (All Streams, Measured Breath), the auras
+    # (Tidal Resonance) and the hand (Shoal Call) -- filed on the queue, the
+    # channel every one of them touches or is priced against.
+    "energy_if_alone": [_hook("private", "kurage", "use")],
+    "damage_if_alone": [_hook("private", "kurage", "use")],
+    "block_per_attacking_enemy": [_hook("private", "kurage", "write")],
+    "double_block": [_hook("private", "kurage", "write")],
+    "kokomi": [_hook("private", "kurage", "use")],
     "casket_double": [_hook("private", "kurage", "write")],
     "open_casket": [_hook("private", "kurage", "write")],
     "fetch_open_casket": [_hook("shared", "exhaust_pile", "use")],

@@ -849,6 +849,10 @@ KOKOMI_OVERHAUL = False
 KOKOMI_OVERHAUL_CASKET_PER_PLAN = 1            # added per carried-out Plan
 KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT = 1  # Open the Casket's rate
 KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD = 2      # Moon Signal: "2 or more Plans"
+# THE EXPANSION, BATCH ONE (2026-09-29): the rule number The Long Game
+# prints, "if exactly one Plan is waiting". Mirrored BY VALUE against
+# `KokomiOverhaulLaw` by `tools/lint_constant_parity.py`.
+KOKOMI_EXPANSION_LONG_GAME_WAITING = 1
 KOKOMI_OVERHAUL_RALLY_DISCOUNT = 1  # Rally: the next Companion costs this less
 # `EB-668` (`EB-655` reopened). Battle Plan's carry-out: "the next Attack you
 # play face-up this turn deals 4 additional damage." A RULE'S number and not a
@@ -889,8 +893,37 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_kk_slack_water",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). FORTY-EIGHT rows since the
-# feed pass (2026-09-29: one cut, five added), in the packet's own order
+# THE KOKOMI EXPANSION, BATCH ONE (2026-09-29, review/active/kokomi-expansion-
+# 2026-09-29.md, ruled): four decks, 12 Uncommon and 10 Rare, in the sheet's
+# own order. Watatsumi's Grace replaces The Clouds Like Waves Rippling (pick
+# 3), which left the pool. Appended LAST to `KOKOMI_OVERHAUL_POOL_IDS`.
+KOKOMI_EXPANSION_BATCH_ONE_IDS: tuple[str, ...] = (
+    "proto_kk_weight_of_the_plan",
+    "proto_kk_lull",
+    "proto_kk_undertide_lance",
+    "proto_kk_measured_breath",
+    "proto_kk_grand_design",
+    "proto_kk_the_long_game",
+    "proto_kk_masterstroke",
+    "proto_kk_all_streams_flow_to_the_sea",
+    "proto_kk_drowning_pressure",
+    "proto_kk_salt_in_the_wound",
+    "proto_kk_undercurrent_snare",
+    "proto_kk_tidal_resonance",
+    "proto_kk_at_waters_edge",
+    "proto_kk_ceremonial_garment",
+    "proto_kk_suffocating_deep",
+    "proto_kk_coral_crash",
+    "proto_kk_evening_watch",
+    "proto_kk_brace_for_the_tide",
+    "proto_kk_watatsumis_grace",
+    "proto_kk_tidal_riposte",
+    "proto_kk_shoal_call",
+    "proto_kk_kurage_swarm",
+)
+
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SIXTY-NINE rows since
+# expansion batch one (2026-09-29: one cut, 22 added), in the packet's own order
 # -- the Tactician, the
 # Priestess, the Commander, then the currencies, the one replay, the tempo
 # shelf and the pool pass. `EB-335` filed R246 pick 2's defensive pair with the
@@ -930,7 +963,6 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_coral_bulwark",
     "proto_kk_tide_wall",
     "proto_kk_shell_guard",
-    "proto_kk_the_clouds_like_waves",
     "proto_kk_the_moon_a_ship",
     "proto_kk_sango_isshin",
     # The Commander -- Gorou, go (4)
@@ -1007,6 +1039,10 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_jellyfish_drift",
     "proto_kk_current_read",
     "proto_kk_brine_sting",
+    # THE EXPANSION, BATCH ONE (2026-09-29): the 22 rows of
+    # `KOKOMI_EXPANSION_BATCH_ONE_IDS` above, LAST, in the sheet's own order.
+    # The pool is 69 (20 / 35 / 14).
+    *KOKOMI_EXPANSION_BATCH_ONE_IDS,
 )
 
 # THE CO-OP SET's Kokomi and Furina tiers, on `KLEE_OVERHAUL_MULTIPLAYER_IDS`'s

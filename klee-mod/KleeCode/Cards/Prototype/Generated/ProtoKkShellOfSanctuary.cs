@@ -75,7 +75,7 @@ public sealed class ProtoKkShellOfSanctuary : CustomCardModel, ICharacterCard, I
     {
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, dusk: true);
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, dusk: true, paid: cardPlay.Resources.EnergySpent);
             return;
         }
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);

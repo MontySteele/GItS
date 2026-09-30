@@ -285,19 +285,6 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
             # application, which is what the mod's Counter power already did.
             enemy.frozen += 1
             enemy.frozen_by_companion = state.current_card_companion
-            # QUARANTINED (C.KOKOMI_OVERHAUL). Frozen is a POWER in the mod and
-            # a FIELD here (`Enemy.frozen`, NC-7's stacks-are-turns int), so it
-            # is the one debuff application in this engine that does NOT reach
-            # `powers.apply_power` -- and the arm's debuff answer hangs off
-            # that funnel. The C# names Frozen as a feeder in as many words
-            # ("so do REACTIONS, since Superconduct, Overloaded and Frozen each
-            # apply a debuff"), so the event is raised explicitly here rather
-            # than left as a silent gap. The boss-room branch above needs
-            # nothing: it applies real Vulnerable and goes through the funnel.
-            if C.KOKOMI_OVERHAUL:
-                from tier0.engine import kokomi_plan     # late: cycle
-                kokomi_plan.note_debuff_applied(
-                    state, enemy, "frozen", 1, state.player)
 
     if name:
         state.reactions_this_card += 1
@@ -310,6 +297,13 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         # handle on it (`enemy.aura` was cleared before this call), which is
         # exactly what Varka's "of the swirled element" needs.
         _mc_reaction(state, enemy, name, aura)
+        # QUARANTINED (C.KOKOMI_OVERHAUL). THE EXPANSION's At Water's Edge
+        # (2026-09-29): "Whenever a reaction happens on an enemy, apply 1 Weak
+        # and 1 Vulnerable to it" -- any reaction, whoever caused it, read at
+        # the site that counts one. `KokomiExpansion.OnReaction` is the twin.
+        if C.KOKOMI_OVERHAUL:
+            from tier0.engine import kokomi_plan         # late: cycle
+            kokomi_plan.note_reaction(state, enemy)
         # QUARANTINED (`furina_stage.FURINA_STAGE`). THE SUPPORTING POOL's
         # Tide of Applause (2026-09-26) rides the same site: "whenever you
         # trigger an Elemental Reaction, your back performer gains 2".

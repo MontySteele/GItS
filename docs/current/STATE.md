@@ -36,7 +36,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
-| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 48 |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 69 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 72 (60 Stage cards) |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (Oath rework built) | 41 |
 
@@ -84,6 +84,31 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   8 Block, Exposed Flank cut. The pool is 48 (20 / 23 / 5). Brief §6. Its
   seat round (`review/records/kokomi-feed-round-2026-09-29.md`): energy is no
   longer the wall, Block still is; one seat reached the act-3 boss.
+  **Expansion batch one (2026-09-29, ruled):** [USER] on the feed-pass
+  build: "I like it!"; card art redone (#770, no leg crops). Paper
+  `review/active/kokomi-expansion-2026-09-29.md`: four decks (Plan volume,
+  the Big Plan reading Energy paid, Tide Control, Dusk Guard), 22 cards (12
+  Uncommon, 10 Rare), Watatsumi's Grace replaces The Clouds Like Waves
+  Rippling; pool to 69. **Batch one is built** in both engines (the
+  22 rows, seven Powers, four Plan clauses, the `kokomi` op; readings and
+  the upgrades the paper leaves open in the provenance note, "expansion
+  batch one"); the pool is 69 (20 / 35 / 14). Its sim (paper §5,
+  `tools/kokomi_expansion_sim.py`, n = 400 paired, seed 7, stock priest
+  pilot): the stylised act 1 is lost at the first elite by every pilot
+  (0 to 0.2% act won), so the deck read is the full-deck gauntlet (every
+  act-1 elite and boss and act-2 boss at full HP). After the main
+  session's round (Undertide Lance 6 / 12, Grand Design 1 per Energy paid,
+  Brace+ cost 0 accepted): Plan volume 57.8% of fights won, Tide Control
+  51.5, the default drafter 50.1, Dusk Guard 48.4, Big Plan 47.7 (10.1
+  behind); every act-2 boss is lost. With Grand Design granted Big Plan
+  still trails volume (47.1 against 56.1). Dusk Guard with Grace and Coral
+  Crash never carries 30 Block into the enemy turn (0.1% of turns); 9.8% of
+  its gauntlet fights pass turn 15 (others about 1%), on too little damage
+  rather than a wall. All Streams Flow to the Sea is now cost 1 [0] and
+  regains the Energy paid for the Plans it cancels; still dead in the sim (7
+  plays in 252 fights, each multiplying its Plan to about 4 carry-outs --
+  the stock pilot rarely has 2 Plans waiting and a Plan card left). Next:
+  [USER] plays.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any

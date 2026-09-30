@@ -73,7 +73,7 @@ public sealed class ProtoKkBreakwater : CustomCardModel, ICharacterCard, IPlanne
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, dusk: true);
+        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, dusk: true, paid: cardPlay.Resources.EnergySpent);
     }
 
     protected override void OnUpgrade()

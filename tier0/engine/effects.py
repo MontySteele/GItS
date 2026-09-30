@@ -404,6 +404,11 @@ def _runtime_count(state: CombatState, token: str,
         # debuffs, not stacks -- `kokomi_plan.debuff_count`, the twin of
         # `KokomiOverhaulKit.DebuffCount`.
         return kokomi_plan.debuff_count(_default_target(state))
+    if token == "plan_energy_waiting":
+        # QUARANTINED USE ONLY (the Kokomi expansion, batch one) -- Weight of
+        # the Plan, "plus 3 for each Energy paid for the Plans waiting". The
+        # C# twin is `KokomiPlan.EnergyWaiting`.
+        return kokomi_plan.plan_energy_waiting(state)
     if token == "plans_held":
         # QUARANTINED USE ONLY (Kokomi round 9 pick 1, the tempo shelf) --
         # Tide Chart, "draw 1 card for each Plan the Bake-Kurage holds".
@@ -1794,6 +1799,10 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
             # as a branch.
             if fx.get("bonus_vs_debuff") and kokomi_plan.has_debuff(enemy):
                 hit += fx["bonus_vs_debuff"]
+            # THE KOKOMI EXPANSION's Ceremonial Garment: N more per debuff on
+            # THIS body, her Attacks only. 0 without the Power or the arm.
+            if C.KOKOMI_OVERHAUL:
+                hit += kokomi_plan.garment_bonus(state, card, enemy)
             # Clorinde, Night Vigil: the same per-target aura rider, sourced
             # from a POWER instead of the card. Read before the hit resolves,
             # because resolve_hit consumes the aura it is keyed on -- the
@@ -4129,6 +4138,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # Casket. Same registry reason as the rows above.
     "plans_carried_out_this_turn",
     "casket_count",
+    # QUARANTINED USE ONLY (the Kokomi expansion, batch one) -- Weight of the
+    # Plan's "Energy paid for the Plans waiting". Same registry reason.
+    "plan_energy_waiting",
     # QUARANTINED USE ONLY (R213 B) -- the drain op's count. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
@@ -6542,6 +6554,19 @@ def _op_stage_dual_nature(state: CombatState, fx: dict, card: Card) -> None:
     """*Dual Nature*: Ousia or Pneuma, for this turn."""
     furina_stage.dual_nature(state)
 
+def _op_kokomi(state: CombatState, fx: dict, card: Card) -> None:
+    """THE KOKOMI EXPANSION's now-line verbs, one `kind` per card
+    (`kokomi_plan.kind`). The aimed kind (Salt in the Wound) reads the body
+    the play was aimed at, through `_pick_targets`."""
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    target = None
+    if fx.get("target") == "enemy":
+        picked = _pick_targets(state, "enemy")
+        target = picked[0] if picked else None
+    kokomi_plan.kind(state, fx, card, target)
+
+
 def _op_varka(state: CombatState, fx: dict, card: Card) -> None:
     """VARKA's Oath verbs, one `kind` per rule (`varka_oath.op_varka`).
     Refused by name for anyone who is not Varka, or with the switch off."""
@@ -6568,6 +6593,9 @@ OPS = {
     # VARKA, THE OATH REWORK (`varka_oath`): his rules' one op, and
     # Knights' Roll Call.
     "varka": _op_varka,
+    # THE KOKOMI EXPANSION, BATCH ONE (2026-09-29): the now-line verbs, one
+    # op with a `kind:` (Varka's shape).
+    "kokomi": _op_kokomi,
     "add_knight": _op_add_knight,
     "place_bomb": _op_place_bomb,
     "detonate": _op_detonate,
@@ -6776,6 +6804,12 @@ OPS = {
     "casket_double": _op_casket_double,
     "open_casket": _op_open_casket,
     "casket_gain": _op_kokomi_plan_only,
+    # THE KOKOMI EXPANSION, BATCH ONE: four plan-only clauses (Lull, Undertide
+    # Lance, Evening Watch, Brace for the Tide).
+    "energy_if_alone": _op_kokomi_plan_only,
+    "damage_if_alone": _op_kokomi_plan_only,
+    "block_per_attacking_enemy": _op_kokomi_plan_only,
+    "double_block": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

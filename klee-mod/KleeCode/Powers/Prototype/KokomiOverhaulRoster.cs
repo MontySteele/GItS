@@ -156,12 +156,13 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkSangonomiyasCounsel>(),
     };
 
-    /// <summary>The slice's own 48 rows, without the Ancient tail
+    /// <summary>The slice's own 69 rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds. FORTY-SIX since the Casket pass
     /// (2026-09-28): six cut, thirteen added; FORTY-FOUR since the cleanup
     /// pass (2026-09-29) cut Scout Ahead and Song of Pearls; FORTY-EIGHT since
     /// the feed pass (2026-09-29) cut Exposed Flank and added five 0-cost
-    /// Plan-only Commons. The Open the Casket token is in
+    /// Plan-only Commons; SIXTY-NINE since expansion batch one (2026-09-29)
+    /// added 22 and cut The Clouds Like Waves Rippling. The Open the Casket token is in
     /// no pool; the relic deals it (<see cref="Relics.TamakushiCasket"/>).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
@@ -178,7 +179,6 @@ internal static class KokomiOverhaulRoster
         // `EB-335`, R246 pick 2: the kit's own defence in act 2.
         ModelDb.Card<ProtoKkTideWall>(),
         ModelDb.Card<ProtoKkShellGuard>(),
-        ModelDb.Card<ProtoKkTheCloudsLikeWaves>(),
         ModelDb.Card<ProtoKkTheMoonAShip>(),
         ModelDb.Card<ProtoKkSangoIsshin>(),
         // The Commander -- Gorou, go (4)
@@ -252,6 +252,31 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkJellyfishDrift>(),
         ModelDb.Card<ProtoKkCurrentRead>(),
         ModelDb.Card<ProtoKkBrineSting>(),
+        // THE EXPANSION, BATCH ONE (2026-09-29): four decks, 12 Uncommon and
+        // 10 Rare; Watatsumi's Grace replaces The Clouds Like Waves Rippling.
+        // LAST, in the sheet's own order. The pool is 69.
+        ModelDb.Card<ProtoKkWeightOfThePlan>(),
+        ModelDb.Card<ProtoKkLull>(),
+        ModelDb.Card<ProtoKkUndertideLance>(),
+        ModelDb.Card<ProtoKkMeasuredBreath>(),
+        ModelDb.Card<ProtoKkGrandDesign>(),
+        ModelDb.Card<ProtoKkTheLongGame>(),
+        ModelDb.Card<ProtoKkMasterstroke>(),
+        ModelDb.Card<ProtoKkAllStreamsFlowToTheSea>(),
+        ModelDb.Card<ProtoKkDrowningPressure>(),
+        ModelDb.Card<ProtoKkSaltInTheWound>(),
+        ModelDb.Card<ProtoKkUndercurrentSnare>(),
+        ModelDb.Card<ProtoKkTidalResonance>(),
+        ModelDb.Card<ProtoKkAtWatersEdge>(),
+        ModelDb.Card<ProtoKkCeremonialGarment>(),
+        ModelDb.Card<ProtoKkSuffocatingDeep>(),
+        ModelDb.Card<ProtoKkCoralCrash>(),
+        ModelDb.Card<ProtoKkEveningWatch>(),
+        ModelDb.Card<ProtoKkBraceForTheTide>(),
+        ModelDb.Card<ProtoKkWatatsumisGrace>(),
+        ModelDb.Card<ProtoKkTidalRiposte>(),
+        ModelDb.Card<ProtoKkShoalCall>(),
+        ModelDb.Card<ProtoKkKurageSwarm>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

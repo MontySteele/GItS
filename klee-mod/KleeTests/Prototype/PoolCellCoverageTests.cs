@@ -228,8 +228,10 @@ public class PoolCellCoverageTests
             // THE CASKET PASS (2026-09-28) FILLED TWO: What the Tokoyo Took
             // makes the Rare shelf five deep (Rare/*), and Depths' Judgment,
             // Tideturn and Pearl Current fill Uncommon/Attack. The Rare cells
-            // by TYPE are still short and seamed.
-            "kokomi-overhaul" => new[] { "Rare/Attack", "Rare/Power", "Rare/Skill" },
+            // by TYPE were still short and seamed until EXPANSION BATCH ONE
+            // (2026-09-29) filled all three: ten Rares, three Attacks, five
+            // Powers and two Skills beside the four already there.
+            "kokomi-overhaul" => System.Array.Empty<string>(),
 
             // THE SURPRISE OF THIS AUDIT. The Stage substitutes one for one at
             // the same rarity, so on paper it inherits the shipped sheet's

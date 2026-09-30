@@ -75,7 +75,7 @@ public sealed class ProtoKkTideWall : CustomCardModel, ICharacterCard, IPlannedC
     {
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
             return;
         }
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);

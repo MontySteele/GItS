@@ -1208,6 +1208,15 @@ class PlanEntry:
     label: Optional[str] = None
     dusk: bool = False
     aim_override: Optional["Enemy"] = None
+    # THE EXPANSION, BATCH ONE (2026-09-29). `paid` is the Energy actually
+    # paid for the card that wrote this Plan (after reductions; an X cost
+    # counts what was paid): the Big Plan's axis ("the Energy paid for the
+    # Plans waiting") and Grand Design's "a Plan that cost 2 or more" both
+    # read it. `extra` is All Streams Flow to the Sea's gift to the next Plan
+    # written this turn: carried out once, plus once per Plan it cancelled.
+    # `KokomiPlan.Entry.Paid` / `Extra` are the twins.
+    paid: int = 0
+    extra: int = 0
 
 @dataclass
 class CombatState:
@@ -1523,6 +1532,13 @@ class CombatState:
     # Moon Signal and What the Tokoyo Took, emptied by Open the Casket. The
     # turn roll never touches it. `KokomiOverhaulLedger.CasketCount`'s twin.
     kk_casket: int = 0
+    # THE EXPANSION, BATCH ONE: All Streams Flow to the Sea's pending gift,
+    # "your next Plan this turn is carried out once, plus once for each Plan
+    # cancelled". None while nothing is pending; the count (0 or more) while
+    # it is. Taken by the next card written on the Bake-Kurage this turn
+    # (`kokomi_plan.schedule`), cleared by `kokomi_plan.roll_turn`.
+    # `KokomiOverhaulLedger.NextPlanExtra`'s twin.
+    kk_next_plan_extra: Optional[int] = None
     # QUARANTINED (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
     # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
     # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s

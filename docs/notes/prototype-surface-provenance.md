@@ -4277,3 +4277,148 @@ or after, which is the pilot and not the pass.
 
 **Pool:** 48 offered (20 Common, 23 Uncommon, 5 Rare) plus the three co-op
 cards.
+
+## Kokomi: expansion batch one (2026-09-29)
+
+Paper `review/active/kokomi-expansion-2026-09-29.md`, every pick ruled at
+the default ([USER]: "The defaults work here"). 22 rows, LAST in the sheet's
+order (`C.KOKOMI_EXPANSION_BATCH_ONE_IDS`, `KokomiOverhaulRoster.Slice()`):
+12 Uncommon and 10 Rare. The Clouds Like Waves Rippling is cut
+(tombstoned in `docs/retired-card-ids.yaml`, a known-stale portrait in
+`tools/art_coverage.py`); its power (`CloudsLikeWavesPower`,
+`kk_clouds_like_waves`) and the one event it read ("she applied a debuff to an
+enemy": `KokomiOverhaulKit.IsHerDebuffOnEnemy`, `kokomi_plan.note_debuff_applied`)
+left both engines with it, since nothing else read them. The pool is 69
+(20 / 35 / 14) plus the three co-op cards. No art: the rows have no
+portrait yet.
+
+**Engine pieces, both engines (twins named on each).**
+- A Plan entry records the Energy paid for the card that wrote it
+  (`PlanEntry.paid`, `KokomiPlan.Entry.Paid`, from
+  `cardPlay.Resources.EnergySpent`; the generated `Schedule` call passes it).
+  The runtime count `plan_energy_waiting` (`KokomiPlan.EnergyWaiting`) sums
+  it over the queue.
+- Four plan clauses: `energy_if_alone` (Lull), `damage_if_alone` (Undertide
+  Lance; folds her Strength like any planned hit), `block_per_attacking_enemy`
+  (Evening Watch), `double_block` (Brace for the Tide).
+- One now-line op, `kokomi`, with six kinds (Varka's shape): Measured Breath,
+  Salt in the Wound, Tidal Resonance, Suffocating Deep, All Streams Flow to
+  the Sea, Shoal Call (`KokomiCards` in `Powers/Prototype/KokomiExpansion.cs`).
+- Seven Powers: Grand Design, The Long Game, At Water's Edge, Ceremonial
+  Garment (`ProtoCeremonialGarmentPower`; the shipped kit already has a
+  `CeremonialGarmentPower`), Watatsumi's Grace, Tidal Riposte, Kurage Swarm.
+  Two new mirrored constants: `KokomiOverhaulLaw.GrandDesignMinCost` (2) and
+  `LongGameWaiting` (1).
+
+**Readings where the paper is loose (the build's, for a ruling if any is
+wrong).**
+- *The Energy paid for the Plans waiting*: the sum of the costs actually paid
+  (after reductions) for each Plan in the queue; an X cost counts what was
+  paid. A card made free by Stolen Chapter adds 0.
+- *Only Plan carried out this morning* (Lull, Undertide Lance): no OTHER entry
+  in the same drain. The same entry carried out twice (Nereid's Ascension,
+  Second Wave, All Streams) is still one Plan; Dusk Plans drain on their own
+  and never count against a morning; a Plan hurried by Change of Plans is a
+  drain of one, so it counts as alone.
+- *Debuff* (Drowning Pressure, Ceremonial Garment): each DISTINCT debuff power
+  on the target (Weak 2 is one). Elemental auras are NOT debuffs: both engines
+  model an aura as a Buff (`AuraPower.Type`, `kokomi_plan.ENEMY_DEBUFFS`), so
+  they do not count. Frozen does.
+- *At Water's Edge*: any reaction on an enemy, whoever caused it (every
+  player wearing the Power answers, off the one reaction site).
+- *Tidal Riposte*: a hit of an enemy's attack that Block absorbed whole
+  (Block took some, 0 HP lost), once per hit; 5 Hydro to the attacker,
+  unpowered.
+- *Watatsumi's Grace*: the base game's Sturdy Clamp shape. The Block clear is
+  prevented, then everything above the cap is lost (so 10 kept of 40).
+  Barricade, if also worn, keeps all.
+- *All Streams Flow to the Sea*: cancelled Plans refund nothing and their
+  cards stay where a written card already is (the discard pile, or the
+  exhaust pile for an Exhaust row). "Your next Plan this turn" is the next
+  card written on the Bake-Kurage this turn; its entry is carried out once
+  plus once per Plan cancelled (0 cancelled is still taken). The gift dies at
+  the turn's end. Change of Plans honours it too.
+- *Shoal Call*: the Nips go to the hand, upgraded if Shoal Call is (the
+  `upgraded_grant` key, the face's own swap).
+- *Kurage Swarm*: counts when a Plan is WRITTEN whose paid cost was 0.
+- *Grand Design*: "cost 2 or more" is the Energy paid for the Plan's card, per
+  carry-out (a doubled Plan pays twice). It does not need the relic.
+- *The Long Game*: the queue read before the morning drains it (Moon Signal's
+  read).
+
+**Faces changed from the paper's wording, by house text rules only.**
+- Lull and Undertide Lance print "at the start of your turn" for "this
+  morning" (`EB-623`: no printed surface says "morning").
+- All Streams Flow to the Sea drops "their cards go to your discard pile"
+  (the face was 140 of the 120 ceiling; the cards are already there) and
+  reads "carried out once more for each Plan cancelled".
+- At Water's Edge prints "[gold]Elemental Reaction[/gold]" and Ceremonial
+  Garment "additional damage" (the text lint's spellings). Tidal Riposte's
+  "fully blocked" is plain text (no tip defines a golded "Blocked").
+
+**Upgrades the paper leaves open.** Five rows printed no bracketed upgrade (Grand Design has since been given cost 0, below).
+The others take the Prototype-stage rule's default, as every unruled row does:
+Tidal Resonance and
+Coral Crash (each also draws 1). Brace for the Tide's default would have
+removed Exhaust, which paper sec.4 guard 2 rules out ("the multiplier is
+spent"), so it costs 0 instead -- flagged in the build PR for a ruling.
+
+**The sim read (paper sec.5; Prototype stage, not a measurement).**
+`python -m tools.kokomi_expansion_sim --seeds 400 --seed 7 --jobs 14`, on the
+built rows, modelled on the Varka Oath report: a stylised act 1 (N N N N E R N
+N E R B) and an act-2 boss, paired seeds, the stock `priest` play pilot with a
+harness wrapper (Open the Casket at 6, Powers first, Dusk Plans written into
+an attack, the new clauses valued as their nearest stock op). Drafters: the
+four decks (sec.3 grouping plus the sec.1 parts, then the default drafter's
+own score) and the default drafter as the baseline.
+- Every pilot loses the stylised act at the first elite (act won 0.0 to
+  0.2%; about 15 HP lost per fight), so the deck read is a full-deck gauntlet:
+  the nine picks drafted as if every fight were won, then every act-1 elite,
+  act-1 boss and act-2 boss at full HP. Fights won: Plan volume 58.1%, the
+  default drafter 52.5, Tide Control 52.2, Dusk Guard 49.5, Big Plan 49.1
+  (about ±1.9); none more than 10 points behind Plan volume. Every act-2 boss
+  is lost by every pilot.
+- Grand Design granted: Big Plan 45.6% against Plan volume 54.6% -- the Big
+  Plan deck does not beat volume with the relic and the Rare in hand.
+- Dusk Guard with Grace and Coral Crash granted: 0.1% of turns end with more
+  than 30 Block, and 9.8% of its gauntlet fights pass turn 15 (others about
+  1%), won 40.0%: long on too little damage, not on a wall.
+- Flags: Undertide Lance dominant (the default drafter takes 83% of its
+  offers, 1.57 plays per fight held); All Streams Flow to the Sea dead (0
+  plays in 252 fights held -- the harness rule to play it never meets its
+  condition, a pilot limit as much as a card one). Tidal Resonance sits at
+  0.31 plays per fight, on the line.
+
+**The main session's round (2026-09-29), on the sim above.** Brace for the
+Tide+ at cost 0 keeping Exhaust is accepted as built. Undertide Lance goes to
+6 [9] to ALL, Plan 12 [16] (it read dominant). Grand Design becomes "the
+Casket gains 1 more for each Energy paid for it", cost 1 [0] (an authored
+upgrade; it failed check 2). The harness now plays All Streams when 1+ Plan
+waits and a Plan card costing 1+ is affordable after it, then writes that
+card (the example rule's 2+ needs 4 Energy and never fired), and gives the
+default drafter's zero-priced new rows (the seven Powers, Shoal Call) the
+median default score of the other new cards. Re-run, same command:
+- Gauntlet fights won: Plan volume 57.8%, Tide Control 51.5, the default
+  drafter 50.1, Dusk Guard 48.4, Big Plan 47.7 -- Big Plan now 10.1 behind.
+  The stylised act is still lost at the first elite (0 to 0.2%).
+- Grand Design granted: Big Plan 47.1% against Plan volume 56.1%; the Casket
+  at fight end 3.4 against 4.6. Check 2 still fails.
+- Undertide Lance: still taken from 83% of the default drafter's offers,
+  1.13 plays per fight held; no longer flagged. All Streams: 2 plays in 252
+  fights held -- still dead. It needs a Plan waiting mid-turn (the queue
+  drains each morning) and 3 Energy after that write, which a 3-Energy turn
+  meets only after a 0-cost write.
+
+**All Streams Flow to the Sea, the main session's last change (2026-09-29).**
+Cost 1 [0], "Cancel all your Plans and regain their cost" -- the Energy
+actually paid, Second Thoughts' refund -- "Your next Plan this turn is carried
+out once more for each Plan cancelled." It was dead because a cancelled
+Plan's Energy was lost (2 plays in 252 fights). The harness plays it with 2+
+Plans waiting and a Plan card affordable after the refund, then writes the
+most expensive such card. Re-run: 7 plays in 252 fights held (0.03 per fight,
+still flagged dead); each play cancelled 2 Plans, regained 2 Energy and
+carried its next Plan out 3.9 times on average (Bubble Ward, Feigned Retreat,
+Undercurrent Snare, Feint, Slack Water, Jellyfish Drift). Big Plan's
+gauntlet is unchanged at 47.7%. The limit is the stock pilot, which writes
+its Plans one at a time and rarely holds a Plan card once two wait.
+

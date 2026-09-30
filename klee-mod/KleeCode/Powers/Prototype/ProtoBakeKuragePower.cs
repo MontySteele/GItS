@@ -118,6 +118,9 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         // to empty still counts. Sim twin: `kokomi_plan.moon_signal`, called
         // from `combat._player_turn` beside the `quiet` read.
         MoonSignalPower.Signal(Owner, waiting);
+        // THE EXPANSION, BATCH ONE: The Long Game reads the same pre-drain
+        // queue.
+        await TheLongGamePower.Signal(Owner, waiting);
         await KokomiPlan.ResolveAll(choiceContext, Owner);
         if (quiet) await SongOfPearlsPower.Strike(choiceContext, Owner);
         // `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning:

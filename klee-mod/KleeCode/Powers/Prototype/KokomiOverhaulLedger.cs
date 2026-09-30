@@ -170,6 +170,12 @@ public sealed class KokomiOverhaulLedger
     /// </summary>
     public int CasketCount { get; private set; }
 
+    /// <summary>THE EXPANSION, BATCH ONE: All Streams Flow to the Sea's
+    /// pending gift for the next Plan written this turn (null when none is
+    /// pending). Per turn; <see cref="RollTo"/> clears it. Sim twin:
+    /// `state.kk_next_plan_extra`.</summary>
+    public int? NextPlanExtra { get; set; }
+
     /// <summary>Add <paramref name="amount"/> to the Casket (a negative or
     /// zero amount is refused, so nothing here can take the count down).</summary>
     public void AddToCasket(int amount)
@@ -293,6 +299,7 @@ public sealed class KokomiOverhaulLedger
         // Collapse captures while the Plan is WRITTEN, so what survives the
         // boundary is the card on the entry and never this slot.
         LastCompanionPlayedThisTurn = null;
+        NextPlanExtra = null;
         _round = round;
     }
 }

@@ -350,6 +350,9 @@ MIRRORED: dict[str, object] = {
         C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT,
     "KokomiOverhaulLaw.MoonSignalThreshold":
         C.KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD,
+    # THE EXPANSION, BATCH ONE (2026-09-29): The Long Game's threshold.
+    "KokomiOverhaulLaw.LongGameWaiting":
+        C.KOKOMI_EXPANSION_LONG_GAME_WAITING,
     # THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`; `EB-723` /
     # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
     # same reason -- quarantined is not exempt. These NINE numbers ARE the

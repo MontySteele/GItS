@@ -247,10 +247,13 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     Pearls cut.
 
     FORTY-EIGHT SINCE THE FEED PASS (2026-09-29): Exposed Flank cut, and five
-    0-cost Plan-only Commons added last in the sheet's order."""
+    0-cost Plan-only Commons added last in the sheet's order.
+
+    SIXTY-NINE SINCE EXPANSION BATCH ONE (2026-09-29): 22 rows added last
+    in the sheet's order, The Clouds Like Waves Rippling cut."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 48
-    assert len(set(ids)) == 48
+    assert len(ids) == 69
+    assert len(set(ids)) == 69
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
     assert {"proto_kk_riptide", "proto_kk_pincer", "proto_kk_flank",
@@ -258,8 +261,14 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     cut = {"proto_kk_tide_chart", "proto_kk_cleansing_wave", "proto_kk_ripple",
            "proto_kk_well_laid", "proto_kk_sea_salt_prayer",
            "proto_kk_salt_line", "proto_kk_scout_ahead",
-           "proto_kk_song_of_pearls", "proto_kk_exposed_flank"}
+           "proto_kk_song_of_pearls", "proto_kk_exposed_flank",
+           "proto_kk_the_clouds_like_waves"}
     assert not cut & set(ids)
+    # Expansion batch one (2026-09-29): 22 rows LAST, Watatsumi's Grace
+    # among them in The Clouds Like Waves' place.
+    assert len(C.KOKOMI_EXPANSION_BATCH_ONE_IDS) == 22
+    assert ids[-22:] == C.KOKOMI_EXPANSION_BATCH_ONE_IDS
+    ids = ids[:-22]
     assert ids[-5:] == (
         "proto_kk_bubble_ward", "proto_kk_nip", "proto_kk_jellyfish_drift",
         "proto_kk_current_read", "proto_kk_brine_sting")
@@ -407,10 +416,13 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
 
     THE FEED PASS (2026-09-29): Exposed Flank (Common) cut, eight now-and-Plan
     Commons moved to Uncommon, five 0-cost Plan-only Commons added:
-    20 / 23 / 5."""
+    20 / 23 / 5.
+
+    EXPANSION BATCH ONE (2026-09-29): 12 Uncommon and 10 Rare added, The
+    Clouds Like Waves Rippling (Rare) cut: 20 / 35 / 14."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 20, "uncommon": 23, "rare": 5}
+        "common": 20, "uncommon": 35, "rare": 14}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

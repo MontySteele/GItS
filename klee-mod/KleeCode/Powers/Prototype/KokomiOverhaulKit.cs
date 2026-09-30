@@ -13,14 +13,10 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// The verbs that belong to no rule -- Rally's discount, the cleanse, the
-/// Casket's verbs -- and the ONE definition of "she applied a debuff to an
-/// enemy", which The Clouds Like Waves Rippling reads (the relic read it
-/// too, until the Casket pass retired its strike).
-///
-/// Kept out of <see cref="KokomiRules"/> because that file is the RULES and
-/// these are cards, with one exception: <see cref="IsHerDebuffOnEnemy"/> is a
-/// shared EVENT rather than a card, and it lives here so the relic and The
-/// Clouds Like Waves ask one question instead of two that drift.
+/// Casket's verbs. Kept out of <see cref="KokomiRules"/> because that file is
+/// the RULES and these are cards. The one shared EVENT that used to live here
+/// ("she applied a debuff to an enemy") left with its last reader, The Clouds
+/// Like Waves Rippling (expansion batch one, 2026-09-29).
 /// </summary>
 public static class KokomiOverhaulKit
 {
@@ -247,33 +243,4 @@ public static class KokomiOverhaulKit
     // The re-entrancy latch the Casket's debuff strike needed (a Hydro
     // strike into a Cryo aura Freezes, and Frozen is a debuff she applied)
     // left with the strike in the Casket pass (2026-09-28).
-
-    /// <summary>
-    /// "SHE APPLIED A DEBUFF TO AN ENEMY", once, for everything that reads it.
-    ///
-    /// The hook is <c>AfterPowerAmountChanged</c>, which the game fans to every
-    /// model in the combat and raises on both <c>PowerCmd</c> paths, so nothing
-    /// that puts a debuff on an enemy can slip past -- a card, a Plan, a
-    /// companion or a reaction.
-    ///
-    /// FOUR CLAUSES AND EVERY ONE OF THEM EARNS ITS PLACE:
-    ///   * <c>amount &gt; 0</c> -- a debuff being REMOVED or ticking down is
-    ///     not one being applied;
-    ///   * <c>power.Type == Debuff</c> -- the engine's own classification, so a
-    ///     Buff on an enemy (an aura, which this mod files as a Buff) does not
-    ///     count and the list never needs maintaining;
-    ///   * the carrier is an ENEMY -- her own Weak is not a debuff she applied
-    ///     to an enemy;
-    ///   * the applier is HER -- in co-op the other seat's Weak is not hers,
-    ///     and an enemy debuffing another enemy is nobody's.
-    /// </summary>
-    public static bool IsHerDebuffOnEnemy(
-        PowerModel power, decimal amount, Creature? applier, Creature? kokomi)
-    {
-        if (kokomi == null || amount <= 0m) return false;
-        if (applier != kokomi) return false;
-        if (power.Type != PowerType.Debuff) return false;
-        var carrier = power.Owner;
-        return carrier != null && carrier.IsEnemy && !carrier.IsDead;
-    }
 }

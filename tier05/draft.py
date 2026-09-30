@@ -798,7 +798,11 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "ally_draw", "others_attack_damage_this_turn",
     # THE CASKET PASS (2026-09-28): the four verbs on the Tamakushi Casket's
     # count, each with its own branch in `_op_price` on this set's terms.
-    "casket_gain", "casket_double", "fetch_open_casket", "open_casket"))
+    "casket_gain", "casket_double", "fetch_open_casket", "open_casket",
+    # THE EXPANSION, BATCH ONE (2026-09-29): four plan clauses and the one
+    # now-line op with a `kind:`, each with its own branch in `_op_price`.
+    "energy_if_alone", "damage_if_alone", "block_per_attacking_enemy",
+    "double_block", "kokomi"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -1183,6 +1187,23 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Tide Wall: the flat bonus only. The intent is a board fact an offer
         # screen cannot read, so that part is a deliberate ZERO.
         return _neutral_amount(fx, 0)
+    # THE EXPANSION, BATCH ONE (2026-09-29).
+    if op == "energy_if_alone":
+        # Lull: its Energy at face. Whether it lands alone is a queue fact an
+        # offer screen cannot read.
+        return _neutral_amount(fx, 0) * STATIC_ENERGY_VALUE
+    if op == "damage_if_alone":
+        # Undertide Lance: its printed hit, not the doubling (a queue fact).
+        return _neutral_amount(fx, 0) * aoe
+    if op == "block_per_attacking_enemy":
+        # Evening Watch: its rate for ONE attacker, the neutral estimate.
+        return _neutral_amount(fx, 0)
+    if op in ("double_block", "kokomi"):
+        # ZERO: Brace doubles the Block standing at dusk, and each `kokomi`
+        # kind pays off a board, queue or hand fact (Plans waiting, Weak on
+        # the target, auras standing, stacks to double) an offer screen
+        # cannot read.
+        return 0.0
     if op == "remove_debuff":
         # Cleansing Wave: one debuff off HER. The mirror of putting one onto an
         # enemy, at the same rate -- `STATIC_DEBUFF_VALUE` is what this table
@@ -2651,6 +2672,19 @@ STATIC_OP_PRICING: dict[str, str] = {
                          "count the offer screen cannot see",
     "open_casket": "ZERO: the relic's token, in no pool and never offered; "
                    "what it grants is the Casket's count at play",
+    # --- the Kokomi expansion, batch one (2026-09-29, QUARANTINED) ---
+    "energy_if_alone": "its Energy at face (STATIC_ENERGY_VALUE); whether it "
+                       "lands alone is a queue fact an offer screen cannot "
+                       "read",
+    "damage_if_alone": "its printed hit at face, not the doubling -- a queue "
+                       "fact an offer screen cannot read",
+    "block_per_attacking_enemy": "its rate for ONE attacker, the neutral "
+                                 "single-unit estimate",
+    "double_block": "ZERO: doubles the Block standing at dusk, a board fact "
+                    "an offer screen cannot read",
+    "kokomi": "ZERO: each kind pays off a board, queue or hand fact (Plans "
+              "waiting, Weak on the target, auras, stacks) an offer screen "
+              "cannot read",
     # --- the co-op set (review/records/coop-set-2026-09-25.md) ---
     "ally_draw": "ZERO: cards drawn by ANOTHER player, and tier 0.5 seats "
                  "one; a multiplayer-only row is never offered here",

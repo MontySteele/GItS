@@ -617,6 +617,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # awaited `VarkaCards.<Kind>` call per `kind:`
                   # (`VARKA_KINDS`).
                   "varka", "add_knight",
+                  # THE KOKOMI EXPANSION, BATCH ONE (2026-09-29): her
+                  # now-line verbs, one awaited `KokomiCards.<Kind>` call per
+                  # `kind:` (`KOKOMI_KINDS`), Varka's shape.
+                  "kokomi",
                   # PLAN-ONLY verbs: legal inside a row's `plan:` list and
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
@@ -2448,6 +2452,24 @@ VARKA_KIND_FIELDS = {
 VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit"}
 VARKA_VAR_FIELDS = {"per": "VkPer", "base": "VkBase", "amount": "VkAmount"}
 VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
+#: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
+#: now-line verb, each ONE awaited `KokomiCards.<method>` call
+#: (Powers/Prototype/KokomiExpansion.cs). A kind that prints a number carries
+#: it as `amount`, rendered and upgraded as the card's `KkAmount` var (upgrade
+#: key `kokomi_amount`). Sim twin: `kokomi_plan.KINDS` / `kokomi_plan.kind`.
+KOKOMI_KINDS = {
+    "draw_if_no_plan": "DrawIfNoPlan",
+    "draw_if_target_weak": "DrawIfTargetWeak",
+    "resonance": "Resonance",
+    "double_weak_vulnerable": "DoubleWeakVulnerable",
+    "all_streams": "AllStreams",
+    "shoal_call": "ShoalCall",
+}
+KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "draw_if_target_weak", "resonance",
+                      "shoal_call"}
+#: The kind that aims at the enemy the card was played on.
+KOKOMI_AIMED_KINDS = {"draw_if_target_weak"}
+KOKOMI_FIELDS = {"op", "kind", "target", "amount"}
 #: Alice's Detonator: no field -- the Ka-pow! is the starter's, and whether it
 #: arrives upgraded is the card's own upgrade (`upgraded_grant`).
 GRANT_KAPOW_EACH_TURN_FIELDS = {"op"}
@@ -2549,6 +2571,13 @@ PLAN_CLAUSE_KINDS = {
     "others_attack_damage_this_turn": "OthersAttackDamageThisTurn",
     # THE CASKET PASS (2026-09-28), Pearl Diver: "Plan: The Casket gains 2."
     "casket_gain": "CasketGain",
+    # THE EXPANSION, BATCH ONE (2026-09-29). Lull's and Undertide Lance's "if
+    # no other Plan is carried out this morning", Evening Watch's Block per
+    # enemy intending to attack, Brace for the Tide's doubling.
+    "energy_if_alone": "EnergyIfAlone",
+    "damage_if_alone": "DamageIfAlone",
+    "block_per_attacking_enemy": "BlockPerAttackingEnemy",
+    "double_block": "DoubleBlock",
     "apply_power": None,
 }
 
@@ -2565,7 +2594,9 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        # R276: two switches, "the first ..." has no size.
                        "first_attack_twice", "first_card_free",
                        # Kokomi core pass, Chain of Command's switch.
-                       "first_companion_free"}
+                       "first_companion_free",
+                       # THE EXPANSION: "Double your Block" prints no size.
+                       "double_block"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2588,7 +2619,9 @@ PLAN_AIM_CS = {
 PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
                   "damage_per_companion_last_turn", "apply_power",
                   # R276, Feigned Retreat.
-                  "damage_if_unhurt"}
+                  "damage_if_unhurt",
+                  # THE EXPANSION: Undertide Lance's planned hit.
+                  "damage_if_alone"}
 #: The clauses a `times:` may repeat -- the flat hit, and nothing else
 #: (`EB-492`, Pincer). The twin of `kokomi_plan.PLAN_TIMES_OPS`.
 PLAN_TIMES_OPS = {"damage"}
@@ -2617,7 +2650,10 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  "ally_draw", "others_attack_damage_this_turn",
                  # THE CASKET PASS (2026-09-28): Pearl Diver's gain is what the
                  # carry-out buys; no row prints it on a now-line.
-                 "casket_gain"}
+                 "casket_gain",
+                 # THE EXPANSION: each names a drain ("this morning", Dusk).
+                 "energy_if_alone", "damage_if_alone",
+                 "block_per_attacking_enemy", "double_block"}
 
 #: R276. Feigned Retreat's second printed number ("deal 14 instead") -- the
 #: hit when she lost no HP since the Plan was written. The twin of
@@ -3123,8 +3159,6 @@ APPLY_POWERS = {
         "At the start of your turn, the [gold]Bake-Kurage[/gold] "
         "carries out your first [gold]Plan[/gold] twice."
         " Your first [gold]Dusk[/gold] [gold]Plan[/gold] is doubled too."),
-    "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
-        "Whenever you apply a debuff to an enemy, gain {X} Block."),
     "kk_generals_banner": ("GeneralsBannerPower", None,
         "Once per turn, when you play a [gold]Companion[/gold] card, the front "
         "enemy gains {X} Weak."),
@@ -3133,6 +3167,28 @@ APPLY_POWERS = {
     "kk_moon_signal": ("MoonSignalPower", None,
         "At the start of your turn, if 2 or more [gold]Plans[/gold] are "
         "waiting, the [gold]Casket[/gold] gains {X}."),
+    # THE EXPANSION, BATCH ONE (2026-09-29). Every class lives in
+    # Powers/Prototype/KokomiExpansion.cs; every row states its own face.
+    "kk_grand_design": ("GrandDesignPower", None,
+        "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], "
+        "the [gold]Casket[/gold] gains {X} more for each [gold]Energy[/gold] "
+        "paid for it."),
+    "kk_the_long_game": ("TheLongGamePower", None,
+        "At the start of your turn, if exactly one [gold]Plan[/gold] is "
+        "waiting, gain {X} [gold]Energy[/gold]."),
+    "kk_at_waters_edge": ("AtWatersEdgePower", None,
+        "Whenever an [gold]Elemental Reaction[/gold] happens on an enemy, "
+        "apply {X} Weak and {X} Vulnerable to it."),
+    "kk_ceremonial_garment": ("ProtoCeremonialGarmentPower", None,
+        "Your Attacks deal {X} additional damage for each debuff on their "
+        "target."),
+    "kk_watatsumis_grace": ("WatatsumisGracePower", None,
+        "At the end of your turn, keep up to {X} of your Block."),
+    "kk_tidal_riposte": ("TidalRipostePower", None,
+        "Whenever an enemy's attack is fully Blocked, deal {X} damage to it."),
+    "kk_kurage_swarm": ("KurageSwarmPower", None,
+        "Whenever you write a [gold]Plan[/gold] that costs 0, the "
+        "[gold]Casket[/gold] gains {X}."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -3826,6 +3882,8 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # VARKA (the Oath rework): a `varka` op's own number,
                        # its `Vk<Field>` var.
                        "varka_per", "varka_base", "varka_amount",
+                       # THE KOKOMI EXPANSION: a `kokomi` op's own number.
+                       "kokomi_amount",
                        "bonus_per_detonation", "bonus_slope",
                        # Fanfare rework Track C.2 (2026-07-28): the
                        # Hyperbeam's upgrade cuts its PRICE (the floor it
@@ -4007,7 +4065,10 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               "stage_verdict",
               # VARKA: `apply_current_element` (Favonius Drill) lands on
               # `cardPlay.Target`; `_aims_at_chosen_enemy` asks its target.
-              "varka")
+              "varka",
+              # THE KOKOMI EXPANSION: Salt in the Wound's "if the enemy has
+              # Weak" reads `cardPlay.Target`.
+              "kokomi")
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
@@ -4844,6 +4905,21 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if eff.get("filter") not in FETCH_FROM_DISCARD_FILTERS:
                 return f"fetch_from_discard filter '{eff.get('filter')}'"
+        if op == "kokomi":
+            unknown = set(eff) - KOKOMI_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            kind = eff.get("kind")
+            if kind not in KOKOMI_KINDS:
+                return f"kokomi kind {kind!r}"
+            if (eff.get("target") == "enemy") != (kind in KOKOMI_AIMED_KINDS):
+                return "kokomi: only draw_if_target_weak aims (target 'enemy')"
+            if ("amount" in eff) != (kind in KOKOMI_KIND_AMOUNT):
+                return f"kokomi {kind} amount mismatch"
+            if "amount" in eff and (not isinstance(eff["amount"], int)
+                                    or isinstance(eff["amount"], bool)
+                                    or eff["amount"] <= 0):
+                return "kokomi amount must be a positive literal int"
         if op == "varka":
             unknown = set(eff) - VARKA_FIELDS
             if unknown:
@@ -5831,6 +5907,10 @@ KOKOMI_CASKET_COUNTS = {
         "card.Owner.Creature).PlansCarriedOutThisTurn",
     "plans_held": "static (card, _) => KokomiPlan.PlansHeld("
                   "card.Owner.Creature)",
+    # THE EXPANSION, BATCH ONE (2026-09-29): Weight of the Plan's "the Energy
+    # paid for the Plans waiting" (`KokomiPlan.EnergyWaiting`).
+    "plan_energy_waiting": "static (card, _) => KokomiPlan.EnergyWaiting("
+                           "card.Owner.Creature)",
 }
 
 
@@ -7305,6 +7385,10 @@ def build_vars(card: dict) -> list[str]:
         elif op == "raise_fanfare_cap":
             out.append(
                 f'new DynamicVar("FanfareCap", {int(eff["amount"])}m)')
+        elif op == "kokomi" and "amount" in eff:
+            # THE KOKOMI EXPANSION: the kind's printed number, read back by
+            # `KokomiCards` off the card.
+            out.append(f'new DynamicVar("KkAmount", {int(eff["amount"])}m)')
         elif op == "varka":
             # VARKA (the Oath rework): each printed number is its own var,
             # read back by `VarkaCards` off the card.
@@ -7467,7 +7551,8 @@ def build_vars(card: dict) -> list[str]:
     plan_line = card.get("plan") or []
     for index, (key, var) in sorted(plan_var_effects(card).items()):
         amount = int(plan_line[index]["amount"])
-        if key == "plan_damage" and plan_line[index].get("op") == "damage":
+        if key == "plan_damage" and plan_line[index].get("op") in (
+                "damage", "damage_if_alone"):
             out.append(f'new KokomiPlan.PlanDamageVar({amount}m)')
         # `EB-659`. THE PLAN-HALF BLOCK IS THE SECOND LIVE PLAN NUMBER, and
         # for the mirror image of the damage half's reason: a planned Block is
@@ -7738,7 +7823,13 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # R276 (Alice's Detonator): the granted Ka-pow! arrives upgraded, read
         # at play time off `IsUpgraded` -- no var, and the face carries its own
         # `{IfUpgraded:show:...}` swap.
+        # THE KOKOMI EXPANSION: Shoal Call's Nips arrive upgraded, the same
+        # play-time read.
+        "kokomi_amount": any(e["op"] == "kokomi" and "amount" in e
+                             for e in effects),
         "upgraded_grant": any(e["op"] == "grant_kapow_each_turn"
+                              or (e["op"] == "kokomi"
+                                  and e.get("kind") == "shoal_call")
                               for e in effects),
         # VARKA (Knights' Roll Call+): the player chooses the Knight, read at
         # play time off `IsUpgraded`; the face carries its own
@@ -11010,6 +11101,14 @@ def build_body(
                 "await KleeExpansion.FetchFromDiscard(choiceContext, Owner, "
                 f"{kind});")
 
+        elif op == "kokomi":
+            # THE KOKOMI EXPANSION: one awaited call per kind; the card and the
+            # play ride along so a kind reads its own `KkAmount`, its target
+            # and `IsUpgraded`.
+            method = KOKOMI_KINDS[eff["kind"]]
+            lines.append(
+                f"await KokomiCards.{method}(choiceContext, this, cardPlay);")
+
         elif op == "varka":
             # VARKA (the Oath rework): one awaited call per kind. The card and
             # the play ride along so a kind can read its own `Vk*` vars, its
@@ -14244,6 +14343,10 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("choose_knight")
         lines.append("// choose_knight: the player picks the Knight, read off "
                      "IsUpgraded when the card is played.")
+    if "kokomi_amount" in deltas:
+        done.add("kokomi_amount")
+        lines.append('DynamicVars["KkAmount"].UpgradeValueBy('
+                     f'{int(deltas["kokomi_amount"])}m);')
     for field, var in VARKA_VAR_FIELDS.items():
         key = f"varka_{field}"
         if key in deltas:
@@ -14717,6 +14820,10 @@ def emit(
         if eff["op"] == "varka" and eff.get("target") == "enemy":
             target_type = TARGET_CS["enemy"]
             break
+        # THE KOKOMI EXPANSION's Salt in the Wound reads the chosen enemy.
+        if eff["op"] == "kokomi" and eff.get("target") == "enemy":
+            target_type = TARGET_CS["enemy"]
+            break
         # EB-118: a modal's aiming verb sits inside a mode body, so a card
         # whose only enemy-facing effect is modal would declare TargetType.Self
         # and be unaimable. blocked_reason has already refused modes that
@@ -14770,8 +14877,14 @@ def emit(
         # so every card authored before the field existed emits exactly the
         # call it always did.
         dusk_arg = ", dusk: true" if card.get("plan_dusk") else ""
+        # THE KOKOMI EXPANSION, BATCH ONE (2026-09-29). THE ENERGY PAID RIDES
+        # THE WRITE TOO: the Big Plan reads "the Energy paid for the Plans
+        # waiting" and Grand Design "a Plan that cost 2 or more", both the
+        # cost actually paid after reductions -- which is the play's own
+        # `Resources.EnergySpent` and nothing the card can recompute later.
         schedule = ("await KokomiPlan.Schedule(choiceContext, Owner.Creature, "
-                    f"this, PlanClauses{dusk_arg});")
+                    f"this, PlanClauses{dusk_arg}, "
+                    "paid: cardPlay.Resources.EnergySpent);")
         body = ([schedule] if not card.get("effects") else
                 [f"if (KokomiPlan.PlayedOnPet(cardPlay))",
                  "{",
