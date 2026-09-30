@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkFavoniusCut : CustomCardModel, IElementalCard, ICharacterCard, IAbsorbCard
+public sealed class ProtoVkFavoniusCut : CustomCardModel, IElementalCard, ICharacterCard
 {
     /// <summary>Sheet: all Varka attacks apply Anemo (catalyst-grade cadence).</summary>
     public Element Element => Element.Anemo;
@@ -44,14 +44,14 @@ public sealed class ProtoVkFavoniusCut : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForAbsorb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_favonius_cut");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Favonius Cut"),
-        ("description", "Deal {Damage:diff()} damage. [gold]Absorb[/gold]."),
+        ("description", "Deal {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -103,8 +103,6 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         POTION_BARRED_NOTE,
                                         RESOLUTION_APPLIED,
                                         RESOLUTION_REMOVED,
-                                        RESOLUTION_ABSORBED,
-                                        RESOLUTION_ABSORB_SWIRLED,
                                         STOLEN_CARD_CLAUSE,
                                         TURN_ORDER_DUSK, TURN_ORDER_NOTE,
                                         TURN_ORDER_ORB,
@@ -1429,8 +1427,7 @@ def _resolution_lines(rows: list[dict[str, Any]],
                 [f"**{name}**" for name in row["summoned"]])))
         killed = row.get("killed") or []
         applied = row.get("applied") or []
-        absorbed = row.get("absorbed") or []
-        if not row["hits"] and not killed and not applied and not absorbed:
+        if not row["hits"] and not killed and not applied:
             # 2026-09-25 (opus-furina-l2b): on a board with a stage, a card
             # that hit nothing may still have moved a bar, and the stage log
             # above now files every Raise -- so the line points there rather
@@ -1454,12 +1451,6 @@ def _resolution_lines(rows: list[dict[str, Any]],
             if hit["blocked"] > 0:
                 line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
             out.append(line)
-        # 2026-09-29 (the Varka seats): what an Absorb took, or that it
-        # Swirled instead on a Wind already held.
-        for a in absorbed:
-            out.append((RESOLUTION_ABSORB_SWIRLED if a["swirled"]
-                        else RESOLUTION_ABSORBED).format(
-                element=a["element"], target=a["target"] or "an enemy"))
         # 2026-09-26 (the Silent control seat): the powers it put on enemies.
         for a in applied:
             out.append((RESOLUTION_APPLIED if a["amount"] > 0
@@ -2053,39 +2044,32 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
     return out
 
 
-#: VARKA (prototype batch one). The block's heading and its lines, in the
-#: words his tips use (`ArmKeywordTips.ForAbsorb` / `ForWind`).
-WINDS_HEADING = "## Your Winds"
-WINDS_HELD_LINE = "- Winds held: {held} ({n} of 4). Not yet: {missing}."
-WINDS_NONE_LINE = ("- Winds held: none. Absorb a fresh aura to gain its "
-                   "Wind.")
-WINDS_ALL_LINE = "- Winds held: {held} (all 4)."
-FANG_READY_LINE = ("- Boreas's Fang: ready. This turn's first non-Anemo "
-                   "Attack that hits a fresh aura Absorbs it.")
-FANG_USED_LINE = "- Boreas's Fang: used this turn."
-AURA_FRESH = ("{element}, fresh: an Absorb takes it; an Anemo hit Swirls "
-              "it.")
-AURA_SPENT = ("{element}, spent: Absorb and Swirl do nothing to it until "
+#: VARKA (the Oath rework). The block's heading and its lines, in the words
+#: his tips use (`ArmKeywordTips.ForOath` / `ForCurrentElement`). The payout
+#: sentences are the wire badge's own (`VarkaLaw` numbers).
+OATH_HEADING = "## Your Oath"
+OATH_ELEMENT_LINE = "- Current element: {element}."
+OATH_NO_ELEMENT_LINE = ("- Current element: none. Play a Knight to set it.")
+OATH_COUNTS_LINE = "- Oath: {counts}."
+OATH_PAYOUT_LINE = "- {payout}"
+OATH_NO_PAYOUT_LINE = "- Your Swirls pay nothing until you play a Knight."
+AURA_FRESH = ("{element}, fresh: an Anemo hit Swirls it.")
+AURA_SPENT = ("{element}, spent: Swirl does nothing to it until "
               "{element} hits it again. Other elements still react with it.")
 AURA_NONE = "no aura."
 
 
-def _render_winds(winds: dict[str, Any]) -> list[str]:
-    """His block: Winds held, the Fang, and each enemy's aura, one fact a
-    line."""
-    held, missing = winds["held"], winds["missing"]
-    if not held:
-        out = [WINDS_NONE_LINE]
-    elif not missing:
-        out = [WINDS_ALL_LINE.format(held=", ".join(held))]
-    else:
-        out = [WINDS_HELD_LINE.format(held=", ".join(held), n=len(held),
-                                      missing=", ".join(missing))]
-    if winds["fang"] == "ready":
-        out.append(FANG_READY_LINE)
-    elif winds["fang"] == "used":
-        out.append(FANG_USED_LINE)
-    for row in winds["auras"]:
+def _render_oath(oath: dict[str, Any]) -> list[str]:
+    """His block: current element, the four Oath counts, what a Swirl pays,
+    and each enemy's aura, one fact a line."""
+    element = oath["element"]
+    out = [OATH_ELEMENT_LINE.format(element=element) if element
+           else OATH_NO_ELEMENT_LINE]
+    out.append(OATH_COUNTS_LINE.format(counts=", ".join(
+        f"{el} {oath['counts'][el]}" for el in oath["counts"])))
+    out.append(OATH_PAYOUT_LINE.format(payout=oath["payout"]) if oath["payout"]
+               else OATH_NO_PAYOUT_LINE)
+    for row in oath["auras"]:
         if row["element"] is None:
             clause = AURA_NONE
         else:
@@ -2939,11 +2923,11 @@ def render(obs: dict[str, Any]) -> str:
             if c["stage"]["log"]:
                 out.append(STAGE_LOG_HEADING)
                 out += _render_stage_log(c["stage"])
-        # VARKA (prototype batch one): his Winds, his Fang and every aura's
-        # fresh or spent state, above the hand whose Absorb-or-Swirl choices
-        # they decide.
-        if c.get("winds") is not None:
-            out += ["", WINDS_HEADING, ""] + _render_winds(c["winds"])
+        # VARKA (the Oath rework): his current element, his four Oath counts,
+        # what a Swirl pays now and every aura's fresh or spent state, above
+        # the hand whose Swirl choices they decide.
+        if c.get("oath") is not None:
+            out += ["", OATH_HEADING, ""] + _render_oath(c["oath"])
         # `EB-506`. WHO IS AT THE FRONT, printed as a LIST IN ORDER with the
         # front marked, and refreshed off the live company on every screen.
         #

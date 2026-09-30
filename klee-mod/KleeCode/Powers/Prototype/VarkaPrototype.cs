@@ -13,19 +13,19 @@ public interface IVarkaCharacter
 /// <summary>
 /// VARKA, THE FOURTH CHARACTER: the switch.
 ///
-/// The paper kit <c>review/active/varka-paper-kit-2026-09-28.md</c> sec.10,
-/// "Prototype, batch one"; [USER], 2026-09-29: "You're good to go on building
-/// the Varka prototype!". The rules as built (sec.10.1):
+/// The Oath rework, <c>review/active/varka-paper-kit-2026-09-28.md</c>, every
+/// pick ruled 2026-09-29. The rules as built (sec.3, sec.4):
 ///
 ///   * SWIRL is the shared rule (<c>TriggerRules.SwirlPays</c>), unchanged.
-///   * ABSORB is his cards' keyword (<c>IAbsorbCard</c>): on a fresh aura it
-///     takes the aura off that enemy and gives its Wind; no spread and no
-///     flat 2. Holding that Wind already, the hit Swirls instead. No fresh
-///     aura, only the card's damage (<see cref="VarkaAbsorb"/>).
-///   * WINDS, one per element, for the rest of the fight, each paid on every
-///     Swirl he makes (<see cref="VarkaWinds"/>).
-///   * BOREAS'S FANG, the starting relic: once each turn, the first non-Anemo
-///     Attack that hits a fresh aura Absorbs it (<c>Relics.BoreasFang</c>).
+///   * OATH, one count per element, counted per card
+///     (<see cref="VarkaOathLedger"/>); his CURRENT ELEMENT is the last
+///     Knight's, and his cards read only its Oath (<see cref="VarkaOath"/>).
+///   * A Swirl he makes pays his current element: Pyro 3 damage to the enemy
+///     Swirled, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 damage to ALL
+///     (<see cref="VarkaLaw"/>).
+///   * BOREAS'S FANG adds Four Winds' Ascension to his hand the first time
+///     each combat he gains Oath (<c>Relics.BoreasFang</c>), and at the start
+///     of a run rolls his starter Knight.
 ///   * CONVERGING WINDS, card-scoped: his Swirls react where they land
 ///     (<see cref="ConvergingWindsPower"/>, <c>ReactionEffects.SwirlPays</c>).
 ///
@@ -36,8 +36,8 @@ public interface IVarkaCharacter
 /// switch back to: off, he is simply not on the select screen. The rules
 /// compile either way so one build can pin both sides.
 ///
-/// C# FIRST, SIM AT BALANCE (<c>docs/current/operations/prototype.md</c>):
-/// there is no tier0 twin of any of this yet.
+/// BUILT IN BOTH ENGINES: the sim twin is <c>tier0/engine/varka_oath.py</c>,
+/// behind its own switch (<c>VARKA_OATH</c>, off like the arms').
 /// </summary>
 public static class VarkaPrototype
 {
@@ -70,21 +70,28 @@ public static class VarkaPrototype
 }
 
 /// <summary>
-/// The numbers sec.10 prints, each a first-guess placeholder for play.
-/// The Winds' four payouts live here because the Wind powers and their tips
-/// both quote them; a card's own number lives on its row.
+/// The rule numbers the paper prints (sec.3, pick 1): the Swirl payout of
+/// each current element and Stormward Stance's threshold. The badge, the
+/// current-element tip and the rules all quote them; a card's own numbers
+/// live on its row. Mirrored by value against <c>tier0/engine/varka_oath.py</c>
+/// (<c>tools/lint_constant_parity.py</c>).
 /// </summary>
 public static class VarkaLaw
 {
-    /// <summary>Pyro Wind: damage to the enemy you Swirled.</summary>
-    public const int PyroWindDamage = 3;
+    /// <summary>Pyro current: damage to the enemy he Swirled.</summary>
+    public const int SwirlPyroDamage = 3;
 
-    /// <summary>Hydro Wind: Block per Swirl.</summary>
-    public const int HydroWindBlock = 3;
+    /// <summary>Hydro current: Block per Swirl.</summary>
+    public const int SwirlHydroBlock = 3;
 
-    /// <summary>Cryo Wind: Weak on the enemy you Swirled.</summary>
-    public const int CryoWindWeak = 1;
+    /// <summary>Cryo current: Vulnerable on the enemy he Swirled.</summary>
+    public const int SwirlCryoVulnerable = 1;
 
-    /// <summary>Electro Wind: Energy on the first Swirl each turn.</summary>
-    public const int ElectroWindEnergy = 1;
+    /// <summary>Electro current (pick 1, E-AoE): damage to ALL enemies.
+    /// </summary>
+    public const int SwirlElectroDamageAll = 3;
+
+    /// <summary>Stormward Stance: the current element's Oath it needs.
+    /// </summary>
+    public const int StormwardOathNeeded = 4;
 }

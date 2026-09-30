@@ -609,14 +609,14 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # What the Tokoyo Took doubles the count. One verified call
                   # site each on `KokomiOverhaulKit`.
                   "fetch_open_casket", "casket_double",
-                  # VARKA (QUARANTINED, prototype batch one). Two verbs, each
-                  # one awaited call into `VarkaRules`
-                  # (Powers/Prototype/VarkaRules.cs): Favonius Drill's "choose
-                  # a Knight: apply their element to the enemy" and Knights'
-                  # Roll Call's "add a Knight to your hand, free this turn".
-                  # The choice is a GRID, because four Knights do not fit the
-                  # choose-a-card screen (`MAX_MODES`).
-                  "knight_aura", "add_knight",
+                  # VARKA (the Oath rework, 2026-09-29). Two verbs: Knights'
+                  # Roll Call's "add a Knight to your hand, free this turn"
+                  # (`VarkaRules.AddKnight`; the upgraded pick is a GRID,
+                  # because nine Knights do not fit the choose-a-card screen)
+                  # and `varka`, the one verb every Oath rule speaks, one
+                  # awaited `VarkaCards.<Kind>` call per `kind:`
+                  # (`VARKA_KINDS`).
+                  "varka", "add_knight",
                   # PLAN-ONLY verbs: legal inside a row's `plan:` list and
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
@@ -973,13 +973,15 @@ ARM_KEYWORDS = (
     # pair. Each names the half of the choice it is.
     ArmKeyword("Ousia", ("Ousia",), "ArmKeywordTips.ForOusia"),
     ArmKeyword("Pneuma", ("Pneuma",), "ArmKeywordTips.ForPneuma"),
-    # VARKA'S THREE (prototype batch one, review/active/varka-paper-kit-
-    # 2026-09-28.md sec.10.1). `Absorb` is his cards' verb, `Wind` what it
-    # collects (one tip names all four, because a face says "a Wind" and not
-    # which), and `Knight` his four personal Companions. `Swirl` is already
-    # the companion arm's row above and is the same shared rule.
-    ArmKeyword("Absorb", ("Absorb", "Absorbs"), "ArmKeywordTips.ForAbsorb"),
-    ArmKeyword("Wind", ("Wind", "Winds"), "ArmKeywordTips.ForWind"),
+    # VARKA'S THREE (the Oath rework, review/active/varka-paper-kit-
+    # 2026-09-28.md sec.3). `Oath` is what his cards charge, `current
+    # element` the one element they read (two words, like `front
+    # performer`, so the tip never fires on prose), and `Knight` his
+    # personal Companions. `Swirl` is already the companion arm's row above
+    # and is the same shared rule. Absorb and Wind retired with batch one.
+    ArmKeyword("Oath", ("Oath",), "ArmKeywordTips.ForOath"),
+    ArmKeyword("current element", ("current element",),
+               "ArmKeywordTips.ForCurrentElement"),
     ArmKeyword("Knight", ("Knight", "Knights"), "ArmKeywordTips.ForKnight"),
 )
 
@@ -1706,13 +1708,15 @@ PREDICATES_CS = {
     # in this engine and one in the sim (`effects._predicate`'s `plan_held`,
     # `state.kk_plan_queue`).
     "plan_held": "KokomiPlan.PlansHeld(Owner.Creature) > 0",
-    # VARKA (prototype batch one). Wind Wall's and Tailwind Stride's "If you
-    # hold a Wind" -- a live read of the Winds he has absorbed this fight --
-    # and Tempest Charge's "If it Swirls", a per-PLAY diff of his Swirl count
-    # snapshotted at the top of OnPlay (`swirlsAtStart`, beside
+    # VARKA (the Oath rework). Wind Wall's and Tailwind Stride's "If you
+    # have a current element", Knightly Guard's "If you played a Knight this
+    # turn", and the Swirl readers' "If it Swirls", a per-PLAY diff of his
+    # Swirl count snapshotted at the top of OnPlay (`swirlsAtStart`, beside
     # `reactionsAtStart`), so a Swirl earlier in the turn does not count.
-    "holds_wind": "VarkaWinds.HeldCount(Owner.Creature) > 0",
-    "swirled_by_this": "VarkaWinds.SwirlsMadeBy(Owner.Creature) > swirlsAtStart",
+    "has_current_element": "VarkaOath.HasCurrent(Owner.Creature)",
+    "knight_played_this_turn":
+        "VarkaOath.KnightsPlayedThisTurn(Owner.Creature) > 0",
+    "swirled_by_this": "VarkaOath.SwirlsMadeBy(Owner.Creature) > swirlsAtStart",
 }
 
 # The if-clause each predicate renders on the card.
@@ -1750,7 +1754,9 @@ PREDICATE_TEXT = {
         "this turn",
     "plan_held":
         "If the [gold]Bake-Kurage[/gold] is holding a [gold]Plan[/gold]",
-    "holds_wind": "If you hold a [gold]Wind[/gold]",
+    "has_current_element": "If you have a [gold]current element[/gold]",
+    "knight_played_this_turn":
+        "If you played a [gold]Knight[/gold] this turn",
     "swirled_by_this": "If it [gold]Swirls[/gold]",
 }
 
@@ -2063,6 +2069,10 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # IsPlayable cost line cannot reach, which is exactly the
               # arrangement the slice's `mode` arm is asking about.
               "spend_charge",
+              # VARKA (the Oath rework): Knightly Guard's "If you played a
+              # Knight this turn, gain 1 Oath" -- one awaited `VarkaCards`
+              # call, no locals.
+              "varka",
               # EB-224 (R225): the Spark price, at a MODE HEAD. Until R225 the
               # written clause said a Spark spend must stay at the card's TOP
               # LEVEL; it now reads top level OR the head of a `choose_one`
@@ -2121,6 +2131,8 @@ BRANCH_FIELDS = {
     "gain_encore": {"op", "amount"},
     "spend_encore": {"op", "amount"},
     "spend_charge": {"op", "amount"},
+    # VARKA: a numberless kind only (Knightly Guard's gain_current_oath).
+    "varka": {"op", "kind"},
     "spend_spark": {"op", "amount"},
     # Same key set the top-level `mend` validator enforces, so the two cannot
     # disagree about what a Mend is.
@@ -2234,6 +2246,12 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
             return f"branch apply_aura element {eff.get('element')!r}"
         if eff.get("target", "enemy") not in ("enemy", "all_enemies"):
             return f"branch apply_aura target {eff.get('target')!r}"
+        return None
+    if eff["op"] == "varka":
+        # VARKA (the Oath rework): only a NUMBERLESS kind, whose one call
+        # needs no var (Knightly Guard's gain_current_oath).
+        if eff.get("kind") not in VARKA_KINDS                 or VARKA_KIND_FIELDS.get(eff["kind"])                 or eff["kind"] in VARKA_AIMED_KINDS:
+            return f"branch varka kind {eff.get('kind')!r}"
         return None
     if eff["op"] == "stage_summon":
         # R276 batch two. A summon carries no amount: its argument is the
@@ -2397,12 +2415,39 @@ FETCH_FROM_DISCARD_FIELDS = {"op", "filter"}
 FETCH_FROM_DISCARD_FILTERS = {"set_off", "companion"}
 #: Tag Along and Adventure Club: `amount` random Companion cards, free this turn.
 ADD_RANDOM_COMPANION_FIELDS = {"op", "amount"}
-#: VARKA's two verbs (prototype batch one). `knight_aura` aims at the enemy
-#: the card was played on; `add_knight` aims at nobody, and whether the player
-#: CHOOSES the Knight is the card's upgrade (`choose_knight`), read at play
-#: time off `IsUpgraded` the way Alice's Detonator reads its own.
-KNIGHT_AURA_FIELDS = {"op", "target"}
+#: VARKA's two verbs (the Oath rework). `add_knight` aims at nobody, and
+#: whether the player CHOOSES the Knight is the card's upgrade
+#: (`choose_knight`), read at play time off `IsUpgraded` the way Alice's
+#: Detonator reads its own.
 ADD_KNIGHT_FIELDS = {"op"}
+#: `varka`: one kind per Oath rule, each ONE awaited `VarkaCards.<method>`
+#: call (Powers/Prototype/VarkaOath.cs). The kind names the method; its
+#: numeric fields are the card's DynamicVars `Vk<Field>` (`VARKA_VAR_FIELDS`),
+#: and the upgrade key `varka_<field>` bumps one. `target: enemy` is the only
+#: target any kind takes, and only `apply_current_element` takes it.
+VARKA_KINDS = {
+    "apply_current_element": "ApplyCurrentElement",
+    "gain_current_oath": "GainCurrentOath",
+    "ascension_hit": "AscensionHit",
+    "avatar_hit": "AvatarHit",
+    "swirled_take_more": "SwirledTakeMore",
+    "swirl_fresh_auras": "SwirlFreshAuras",
+    "oath_per_cryo_enemy": "OathPerCryoEnemy",
+    "change_of_guard": "ChangeOfGuard",
+    "rally": "Rally",
+    "accord": "Accord",
+    "unfurled_banner": "UnfurledBanner",
+}
+#: The numeric fields each kind prints, in call order.
+VARKA_KIND_FIELDS = {
+    "ascension_hit": ("per",),
+    "avatar_hit": ("base", "per"),
+    "swirled_take_more": ("amount",),
+}
+#: A kind that aims at the enemy the card was played on.
+VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit"}
+VARKA_VAR_FIELDS = {"per": "VkPer", "base": "VkBase", "amount": "VkAmount"}
+VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: Alice's Detonator: no field -- the Ka-pow! is the starter's, and whether it
 #: arrives upgraded is the card's own upgrade (`upgraded_grant`).
 GRANT_KAPOW_EACH_TURN_FIELDS = {"op"}
@@ -3318,21 +3363,37 @@ APPLY_POWERS = {
     "cvn_yuegui": ("YueguiPower", None,
         "At the end of your turn, place a [gold]Bomb[/gold] 3 on a random "
         "enemy. Lasts {X} more turn(s)."),
-    # VARKA (QUARANTINED, prototype batch one). Every class lives in
+    # VARKA (the Oath rework). Every class lives in
     # klee-mod/KleeCode/Powers/Prototype/VarkaPowers.cs and is Compile
     # Remove'd out of a release build, so the only rows that may name one are
     # `proto_vk_` rows. The {X} templates are here for form; every row carries
-    # its own `description:` (EB-215). No sim twin: Varka is C# first.
+    # its own `description:` (EB-215). Sim twins: tier0/engine/varka_oath.py.
     "vk_grand_masters_order": ("GrandMastersOrderPower", None,
         "The next [gold]Knight[/gold] you play this turn is played twice."),
     "vk_stormward_stance": ("StormwardStancePower", None,
-        "While you hold 2 or more [gold]Winds[/gold], your [gold]Anemo[/gold] "
-        "Attacks deal {X} additional damage."),
+        "While your [gold]current element[/gold] has 4 or more "
+        "[gold]Oath[/gold], your Anemo Attacks deal {X} additional damage."),
     "vk_converging_winds": ("ConvergingWindsPower", None,
         "Your [gold]Swirls[/gold] react where they land. An [gold]Elemental "
         "Reaction[/gold] a spread sets off hits only that enemy."),
     "vk_boreas_unbound": ("BoreasUnboundPower", None,
-        "Whenever you [gold]Absorb[/gold], gain {X} [gold]Energy[/gold]."),
+        "Whenever your [gold]current element[/gold] changes, gain {X} "
+        "[gold]Energy[/gold]."),
+    "vk_oath_of_the_knights": ("OathOfTheKnightsPower", None,
+        "At the start of your turn, gain [gold]Block[/gold] equal to your "
+        "[gold]current element[/gold]'s [gold]Oath[/gold]."),
+    "vk_favonian_standard": ("FavonianStandardPower", None,
+        "Whenever you play a [gold]Knight[/gold] of your [gold]current "
+        "element[/gold], gain {X} [gold]Block[/gold]."),
+    "vk_dawn_winds_march": ("DawnWindsMarchPower", None,
+        "Whenever you gain [gold]Oath[/gold] of your [gold]current "
+        "element[/gold], gain {X} [gold]Block[/gold]."),
+    "vk_sworn_brotherhood": ("SwornBrotherhoodPower", None,
+        "At the start of your turn, gain {X} [gold]Oath[/gold] of every "
+        "element."),
+    "vk_baron_bunny": ("VarkaBaronBunnyPower", None,
+        "At the start of your turn, deal {X} [gold]Pyro[/gold] damage to ALL "
+        "enemies."),
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
@@ -3762,6 +3823,9 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # VARKA (Knights' Roll Call+): the same play-time
                        # IsUpgraded read, one verb over.
                        "choose_knight",
+                       # VARKA (the Oath rework): a `varka` op's own number,
+                       # its `Vk<Field>` var.
+                       "varka_per", "varka_base", "varka_amount",
                        "bonus_per_detonation", "bonus_slope",
                        # Fanfare rework Track C.2 (2026-07-28): the
                        # Hyperbeam's upgrade cuts its PRICE (the floor it
@@ -3941,9 +4005,9 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # nobody, it points this turn's random acts at the body the
               # player picked -- which is `cardPlay.Target`.
               "stage_verdict",
-              # VARKA's Favonius Drill: the chosen Knight's element lands on
-              # `cardPlay.Target`.
-              "knight_aura")
+              # VARKA: `apply_current_element` (Favonius Drill) lands on
+              # `cardPlay.Target`; `_aims_at_chosen_enemy` asks its target.
+              "varka")
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
@@ -4774,12 +4838,28 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if eff.get("filter") not in FETCH_FROM_DISCARD_FILTERS:
                 return f"fetch_from_discard filter '{eff.get('filter')}'"
-        if op == "knight_aura":
-            unknown = set(eff) - KNIGHT_AURA_FIELDS
+        if op == "varka":
+            unknown = set(eff) - VARKA_FIELDS
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
-            if eff.get("target") != "enemy":
-                return "knight_aura aims at the chosen enemy (target 'enemy')"
+            kind = eff.get("kind")
+            if kind not in VARKA_KINDS:
+                return f"varka kind {kind!r}"
+            if "target" in eff and (eff["target"] != "enemy"
+                                    or kind != "apply_current_element"):
+                return "varka: only apply_current_element aims (target 'enemy')"
+            if kind == "apply_current_element" and eff.get("target") != "enemy":
+                return "varka apply_current_element aims (target 'enemy')"
+            wanted = set(VARKA_KIND_FIELDS.get(kind, ()))
+            given = set(eff) & set(VARKA_VAR_FIELDS)
+            if given != wanted:
+                return (f"varka {kind} prints {sorted(wanted)}, "
+                        f"row gives {sorted(given)}")
+            for field in given:
+                value = eff[field]
+                if not isinstance(value, int) or isinstance(value, bool) \
+                        or value < 0:
+                    return f"varka {field} must be a literal int >= 0"
         if op == "add_knight":
             unknown = set(eff) - ADD_KNIGHT_FIELDS
             if unknown:
@@ -5748,13 +5828,19 @@ KOKOMI_CASKET_COUNTS = {
 }
 
 
-#: VARKA (prototype batch one): the Winds he holds, a per-combat count that
-#: moves every time he Absorbs. Four Winds' Ascension reads it on the damage
-#: rail and Eye of the Storm on the block rail, the same triple the Casket's
-#: readers take. No sim twin yet: Varka is C# first, sim at Balance.
+#: VARKA (the Oath rework): his current element's Oath (Oathsworn Strike,
+#: Azure Devour, Eye of the Storm), how many elements he has Oath in
+#: (Tailwind Guard), and the Attacks played this turn (Lisa: Violet Arc, the
+#: companion arm's counter). Sim twins: `effects._runtime_count`, the same
+#: three tokens (`tier0/engine/varka_oath.py`).
 VARKA_COUNTS = {
-    "winds_held": "static (card, _) => VarkaWinds.HeldCount("
-                  "card.Owner.Creature)",
+    "current_oath": "static (card, _) => VarkaOath.CurrentOath("
+                    "card.Owner.Creature)",
+    "oath_elements": "static (card, _) => VarkaOath.ElementsWithOath("
+                     "card.Owner.Creature)",
+    "attacks_played_this_turn":
+        "static (card, _) => CompanionOverhaulLedger.For("
+        "card.Owner.Creature).AttacksPlayedThisTurn",
 }
 
 #: The per-combat counts either rail may read by name.
@@ -6678,6 +6764,10 @@ def spotlight_block_rider(card: dict, eff: dict) -> int | None:
     cards (the x3 replacement multiplier is still inline)."""
     if not is_companion(card) or eff.get("op") != "block":
         return None
+    # VARKA's Lisa: Violet Arc is a companion Block priced off a count, which
+    # `block_calc_rider`'s runtime-count arm owns (it has no literal amount).
+    if "amount_formula" in eff:
+        return None
     if salon_deploy_card(card):
         return None
     effects = card.get("effects", [])
@@ -7209,6 +7299,12 @@ def build_vars(card: dict) -> list[str]:
         elif op == "raise_fanfare_cap":
             out.append(
                 f'new DynamicVar("FanfareCap", {int(eff["amount"])}m)')
+        elif op == "varka":
+            # VARKA (the Oath rework): each printed number is its own var,
+            # read back by `VarkaCards` off the card.
+            for field in VARKA_KIND_FIELDS.get(eff["kind"], ()):
+                out.append(f'new DynamicVar("{VARKA_VAR_FIELDS[field]}", '
+                           f'{int(eff[field])}m)')
         elif op == "crash_fanfare":
             # Always a var: the Hyperbeam's upgrade IS this number (the
             # floor_drop delta), so the upgraded face has to render it.
@@ -7642,6 +7738,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # play time off `IsUpgraded`; the face carries its own
         # `{IfUpgraded:show:...}` swap.
         "choose_knight": any(e["op"] == "add_knight" for e in effects),
+        # VARKA (the Oath rework): each binds to the `varka` op that prints
+        # that field.
+        **{f"varka_{field}": any(e["op"] == "varka" and field in e
+                                 for e in effects)
+           for field in VARKA_VAR_FIELDS},
         "payload_mine": any(e["op"] == "plant_bomb"
                             and int(e.get("payload_mine_all", 0)) > 0
                             for e in effects),
@@ -9607,6 +9708,10 @@ def _emit_branch_op(
         lines.append(
             "await FurinaResources.SpendEncoreOrHp("
             f"choiceContext, Owner.Creature, {int(eff['amount'])}, this);")
+    elif op == "varka":
+        # VARKA (the Oath rework): the top-level arm's one awaited call.
+        lines.append(f"await VarkaCards.{VARKA_KINDS[eff['kind']]}("
+                     "choiceContext, this, cardPlay);")
     elif op == "spend_charge":
         # R213 E1, QUARANTINED. Byte-for-byte the call build_body's top-level
         # arm makes. The GUARD is the point: a mode body has no IsPlayable to
@@ -10067,7 +10172,7 @@ def build_body(
     if "swirled_by_this" in preds:
         # VARKA: the same snapshot shape, on his own Swirl count.
         lines.append(
-            "var swirlsAtStart = VarkaWinds.SwirlsMadeBy(Owner.Creature);")
+            "var swirlsAtStart = VarkaOath.SwirlsMadeBy(Owner.Creature);")
     if "killed_target" in preds:
         lines.append("var enemiesAtStart = CombatState!.HittableEnemies.ToList();")
     if "target_has_aura" in preds:
@@ -10899,12 +11004,13 @@ def build_body(
                 "await KleeExpansion.FetchFromDiscard(choiceContext, Owner, "
                 f"{kind});")
 
-        elif op == "knight_aura":
-            # VARKA's Favonius Drill: choose a Knight on the grid, then apply
-            # that Knight's element to the enemy the card was played on.
+        elif op == "varka":
+            # VARKA (the Oath rework): one awaited call per kind. The card and
+            # the play ride along so a kind can read its own `Vk*` vars, its
+            # target and the play's Oath scope.
+            method = VARKA_KINDS[eff["kind"]]
             lines.append(
-                "await VarkaRules.KnightAura(choiceContext, Owner, "
-                "cardPlay.Target!);")
+                f"await VarkaCards.{method}(choiceContext, this, cardPlay);")
 
         elif op == "add_knight":
             # VARKA's Knights' Roll Call: a random Knight, or with the upgrade
@@ -14132,6 +14238,12 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("choose_knight")
         lines.append("// choose_knight: the player picks the Knight, read off "
                      "IsUpgraded when the card is played.")
+    for field, var in VARKA_VAR_FIELDS.items():
+        key = f"varka_{field}"
+        if key in deltas:
+            done.add(key)
+            lines.append(f'DynamicVars["{var}"].UpgradeValueBy('
+                         f'{int(deltas[key])}m);')
     if "conditional_bonus" in deltas:
         # tier0: bump the then-branch's first damage (the ExtraDamage var;
         # expressibility gated in upgrade_plan/conditional_bonus_upgrade).
@@ -14594,10 +14706,10 @@ def emit(
         if eff["op"] == "redirect_queued_plans":
             target_type = TARGET_CS[eff.get("target", "enemy")]
             break
-        # VARKA's Favonius Drill: the Knight's element lands on the chosen
+        # VARKA's Favonius Drill: the current element lands on the chosen
         # enemy, so the card aims for the reason `apply_aura` does.
-        if eff["op"] == "knight_aura":
-            target_type = TARGET_CS[eff.get("target", "enemy")]
+        if eff["op"] == "varka" and eff.get("target") == "enemy":
+            target_type = TARGET_CS["enemy"]
             break
         # EB-118: a modal's aiming verb sits inside a mode body, so a card
         # whose only enemy-facing effect is modal would declare TargetType.Self
@@ -14733,13 +14845,6 @@ def emit(
     # energy when played (KleeElementalHooks.AfterCardPlayed reads the marker).
     if "skill_tag" in card.get("tags", []):
         interfaces += ", ISkillTagCard"
-    # VARKA (QUARANTINED, prototype batch one). A row tagged `absorb` prints
-    # the Absorb keyword, and `IAbsorbCard` is the MARKER the aura lifecycle
-    # asks: an Attack carrying it takes a fresh aura off the enemy it hits and
-    # gives its Wind (`VarkaAbsorb.Decide`). Declared in Powers/Prototype,
-    # which a release build removes; only `proto_vk_` rows carry the tag.
-    if "absorb" in card.get("tags", []):
-        interfaces += ", IAbsorbCard"
     # VARKA (prototype batch one) HAS NO ANCIENT CARD, and Darv's Dusty Tome
     # draws one from the character's pool: an empty draw NREs inside
     # `Darv.GenerateInitialOptions` and the run softlocks at the act-two

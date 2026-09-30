@@ -223,10 +223,12 @@ public static class KleeMod
                     Powers.KleeExpansion.SetOffPromptText,
                 [Powers.KleeExpansion.CompanionPromptKey] =
                     Powers.KleeExpansion.CompanionPromptText,
-                // VARKA (prototype batch one): the choose-a-Knight grid's
-                // prompt, on the same terms.
+                // VARKA (the Oath rework): Knights' Roll Call+'s grid and
+                // Change of Guard's, on the same terms.
                 [Powers.VarkaRules.KnightPromptKey] =
                     Powers.VarkaRules.KnightPromptText,
+                [Powers.VarkaRules.ElementPromptKey] =
+                    Powers.VarkaRules.ElementPromptText,
 #endif
             });
 
@@ -581,14 +583,11 @@ public static class KleeMod
                     // here.
                     [Cards.ArmKeywordTips.CompanionKey + ".title"] =
                         "Companion",
-                    // VARKA (prototype batch one): his three words.
-                    [Cards.ArmKeywordTips.AbsorbKey + ".title"] = "Absorb",
-                    [Cards.ArmKeywordTips.WindKey + ".title"] = "Wind",
+                    // VARKA (the Oath rework): his three words.
+                    [Cards.ArmKeywordTips.OathKey + ".title"] = "Oath",
+                    [Cards.ArmKeywordTips.CurrentElementKey + ".title"] =
+                        "Current element",
                     [Cards.ArmKeywordTips.KnightKey + ".title"] = "Knight",
-                    // Seat fixes 2026-09-29: the preview an Absorb grows in
-                    // place of the reaction it prevents.
-                    [Cards.KleeCardTooltips.AbsorbPreviewKey + ".title"] =
-                        "Reaction preview: Absorb",
                     // The Furina reframe's four title rows went
                     // with its keywords (`EB-723`); see
                     // `ArmKeywordTips`'s Furina section. Encore's title

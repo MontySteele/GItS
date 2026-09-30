@@ -17,114 +17,80 @@ using MegaCrit.Sts2.Core.Models;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// VARKA'S CARD VERBS, one awaited call each from the generated rows
-/// (<c>gen_klee_cards</c>: <c>knight_aura</c>, <c>add_knight</c> and the
-/// <c>only_if: fresh_aura</c> damage rider) and from the hand-written
-/// Knights' Muster.
+/// VARKA'S KNIGHTS AND HIS TWO GRIDS (the Oath rework, sec.6): what a Knight
+/// is, Knights' Roll Call's add (<c>gen_klee_cards</c>'s <c>add_knight</c>),
+/// Change of Guard's element pick, and the fresh-aura sweeps (Gale Sweep's
+/// <c>only_if: fresh_aura</c> rider and Wall of Gales).
 ///
-/// THE KNIGHTS are his four personal-pool Companions (sec.4, sec.10.1:
-/// "Knights are Varka's personal-pool companions, all Skills"): Amber
-/// (Pyro), Barbara (Hydro), Lisa (Electro) and Kaeya (Cryo). A Knight CARD is
-/// any Companion card whose personal pool is his, which is those four and
-/// Knights' Muster ("a companion card", sec.4); Grand Master's Order repeats
-/// either.
+/// A KNIGHT is any Companion card whose personal pool is his: the nine pool
+/// Knights and the four starter-only ones (sec.5, sec.6). Playing one sets
+/// his current element (<see cref="VarkaOath.BeginPlay"/>); Grand Master's
+/// Order repeats one.
 ///
-/// "CHOOSE A KNIGHT" IS A GRID. Four Knights do not fit the choose-a-card
-/// screen, which throws on more than three cards
-/// (<c>CardSelectCmd.FromChooseACardScreen</c>, 0.111.0 decompile), so the
-/// choice is <c>CardSelectCmd.FromSimpleGrid</c> over four option faces, the
-/// screen Treasure Map's discard pick already opens and the bridge already
-/// answers. Co-op synced by index, as the game syncs every grid.
+/// A CHOICE OF MORE THAN THREE IS A GRID. The choose-a-card screen throws on
+/// more than three cards (<c>CardSelectCmd.FromChooseACardScreen</c>, 0.111.0
+/// decompile), so both picks are <c>CardSelectCmd.FromSimpleGrid</c>, the
+/// screen Treasure Map's discard pick opens and the bridge answers. Co-op
+/// synced by index, as the game syncs every grid.
 /// </summary>
 public static class VarkaRules
 {
     private const string Table = "cards";
 
-    /// <summary>The grid's prompt, keyed on the verb. Merged into the `cards`
-    /// table by <c>KleeMod.InjectLocStrings</c>, its only source.</summary>
+    /// <summary>Knights' Roll Call+'s prompt. Merged into the `cards` table by
+    /// <c>KleeMod.InjectLocStrings</c>, its only source.</summary>
     public const string KnightPromptKey =
         "KLEEMOD-CHOOSE_KNIGHT.selectionScreenPrompt";
 
     public const string KnightPromptText = "Choose a Knight.";
 
-    /// <summary>The four Knights' elements, in the order their option faces
-    /// and cards are listed everywhere.</summary>
-    public static readonly IReadOnlyList<Element> KnightElements = new[]
-    {
-        Element.Pyro, Element.Hydro, Element.Electro, Element.Cryo,
-    };
+    /// <summary>Change of Guard's prompt, on the same terms.</summary>
+    public const string ElementPromptKey =
+        "KLEEMOD-CHOOSE_ELEMENT.selectionScreenPrompt";
+
+    public const string ElementPromptText = "Choose your current element.";
 
     /// <summary>Is this a Knight card: a Companion card in his personal
     /// pool? PURE.</summary>
     public static bool IsKnight(CardModel? card) =>
         card is ICompanionCard { PersonalPool: VarkaPrototype.CharacterId };
 
-    /// <summary>The four Knight cards, canonical, in
-    /// <see cref="KnightElements"/>' order.</summary>
-    public static IReadOnlyList<CardModel> KnightCards() => new CardModel[]
+    /// <summary>The nine POOL Knights Knights' Roll Call draws from (sec.6),
+    /// canonical, in pool order. The starter-only four are not among them.
+    /// </summary>
+    public static IReadOnlyList<CardModel> PoolKnights() => new CardModel[]
     {
         ModelDb.Card<ProtoVkAmberBaronBunny>(),
         ModelDb.Card<ProtoVkBarbaraShowBegin>(),
         ModelDb.Card<ProtoVkLisaVioletArc>(),
         ModelDb.Card<ProtoVkKaeyaFrostgnaw>(),
+        ModelDb.Card<ProtoVkRazorClawAndThunder>(),
+        ModelDb.Card<ProtoVkMikaStarfrostSwirl>(),
+        ModelDb.Card<ProtoVkDilucSearingOnslaught>(),
+        ModelDb.Card<ProtoVkEulaIcetideVortex>(),
+        ModelDb.Card<ProtoVkBarbaraWhisperOfWater>(),
     };
 
-    /// <summary>
-    /// Ask the player which Knight: four option faces on a grid. Returns the
-    /// Knight's element, or <see cref="Element.None"/> when there is no
-    /// board to ask on or nothing came back.
+    /// <summary>The four starter-only Knights, one of which joins each run's
+    /// starter (sec.5), in <see cref="VarkaOathLedger.Elements"/>' order.
     /// </summary>
-    public static async Task<Element> ChooseKnight(
-        PlayerChoiceContext choiceContext, Player? owner)
+    public static IReadOnlyList<CardModel> StarterKnights() => new CardModel[]
     {
-        if (owner?.Creature?.CombatState == null) return Element.None;
-        var options = new List<CardModel>
-        {
-            ModalChoice.CreateOption<KnightOptionAmber>(owner),
-            ModalChoice.CreateOption<KnightOptionBarbara>(owner),
-            ModalChoice.CreateOption<KnightOptionLisa>(owner),
-            ModalChoice.CreateOption<KnightOptionKaeya>(owner),
-        };
-        var picked = (await CardSelectCmd.FromSimpleGrid(
-            choiceContext, options, owner,
-            new CardSelectorPrefs(new LocString(Table, KnightPromptKey), 1)))
-            .FirstOrDefault();
-        return ElementOfOption(options, picked);
-    }
+        ModelDb.Card<ProtoVkAmberFieryRain>(),
+        ModelDb.Card<ProtoVkBarbaraMelodyLoop>(),
+        ModelDb.Card<ProtoVkLisaLightningRose>(),
+        ModelDb.Card<ProtoVkKaeyaGlacialWaltz>(),
+    };
 
-    /// <summary>The element of the option face picked, by position. PURE.
-    /// </summary>
-    public static Element ElementOfOption(
-        IReadOnlyList<CardModel> options, CardModel? picked)
-    {
-        if (picked == null) return Element.None;
-        for (var i = 0; i < options.Count && i < KnightElements.Count; i++)
-        {
-            if (ReferenceEquals(options[i], picked)) return KnightElements[i];
-        }
-        return Element.None;
-    }
-
-    /// <summary>
-    /// Favonius Drill: "Choose a Knight: apply their element to the enemy."
-    /// The element lands through <see cref="ElementalHit.ApplyOnly"/>, the
-    /// door every damage-less application takes, so on a standing aura it
-    /// reacts as any Knight's paint would.
-    /// </summary>
-    public static async Task KnightAura(
-        PlayerChoiceContext choiceContext, Player? owner, Creature target)
-    {
-        var element = await ChooseKnight(choiceContext, owner);
-        if (element == Element.None || !target.IsAlive) return;
-        await ElementalHit.ApplyOnly(
-            choiceContext, target, element, owner!.Creature);
-    }
+    /// <summary>Is this one of the four starter-only Knights? PURE.</summary>
+    public static bool IsStarterKnight(CardModel? card) =>
+        card is ProtoVkAmberFieryRain or ProtoVkBarbaraMelodyLoop
+            or ProtoVkLisaLightningRose or ProtoVkKaeyaGlacialWaltz;
 
     /// <summary>
     /// Knights' Roll Call: "Add a random Knight to your hand. It costs 0 this
     /// turn." Upgraded, the player picks it (<paramref name="choose"/>, the
-    /// card's own <c>IsUpgraded</c>). The pick shows the four Knight cards
-    /// themselves, since the card is what arrives.
+    /// card's own <c>IsUpgraded</c>) on a grid of the Knight cards themselves.
     /// </summary>
     public static async Task AddKnight(
         PlayerChoiceContext choiceContext, Player? owner, bool choose)
@@ -135,7 +101,7 @@ public static class VarkaRules
         CardModel? card;
         if (choose)
         {
-            var options = KnightCards()
+            var options = PoolKnights()
                 .Select(c => combat.CreateCard(c, owner))
                 .Where(c => c != null)
                 .Cast<CardModel>()
@@ -148,7 +114,7 @@ public static class VarkaRules
         else
         {
             var canonical = owner.RunState.Rng.CombatTargets.NextItem(
-                KnightCards().ToList());
+                PoolKnights().ToList());
             card = canonical == null ? null : combat.CreateCard(canonical, owner);
         }
         if (card == null) return;
@@ -156,12 +122,35 @@ public static class VarkaRules
         await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, owner);
     }
 
+    /// <summary>
+    /// Change of Guard's pick: the elements he holds Oath in, as option faces
+    /// on a grid (<see cref="Cards.Prototype.VarkaModalOptions"/>). Returns
+    /// the element, or <see cref="Element.None"/> when nothing came back.
+    /// </summary>
+    public static async Task<Element> ChooseElement(
+        PlayerChoiceContext choiceContext, Player? owner,
+        IReadOnlyList<Element> elements)
+    {
+        if (owner?.Creature?.CombatState == null) return Element.None;
+        var options = elements
+            .Select(e => Cards.Prototype.VarkaModalOptions.FaceFor(e, owner))
+            .Where(c => c != null)
+            .Cast<CardModel>()
+            .ToList();
+        var picked = (await CardSelectCmd.FromSimpleGrid(
+            choiceContext, options, owner,
+            new CardSelectorPrefs(new LocString(Table, ElementPromptKey), 1)))
+            .FirstOrDefault();
+        return picked is Cards.Prototype.ElementOption face
+            ? face.OptionElement : Element.None;
+    }
+
     // ---- Gale Sweep -------------------------------------------------------
 
     /// <summary>The bodies a running Gale Sweep has still to hit. A Swirl's
     /// spread passes them by (<see cref="SpreadShielded"/>), so "a spread
-    /// from an earlier Swirl in the sweep does not cancel a later one"
-    /// (sec.9.6).</summary>
+    /// from an earlier Swirl in the sweep does not cancel a later one".
+    /// </summary>
     private static readonly HashSet<Creature> SweepPending = new();
 
     private static readonly object Gate = new();
@@ -180,8 +169,8 @@ public static class VarkaRules
         enemies.Where(e => AuraCmd.Find(e) is { Spent: false }).ToList();
 
     /// <summary>
-    /// Gale Sweep (sec.10.3; sec.9.6): "Deal 3 Anemo to every enemy that has
-    /// a fresh aura. (Snapshot when played; each Swirls.)" The bodies are
+    /// Gale Sweep (sec.6): "Deal 3 [5] Anemo to every enemy that has a fresh
+    /// aura." (Snapshot when played; each Swirls.) The bodies are
     /// taken when it is played, and each takes its own hit from the card, in
     /// enemy order, so each Anemo hit Swirls its own aura through the shared
     /// rule. While the sweep runs, a body it has not reached yet keeps its
@@ -206,6 +195,36 @@ public static class VarkaRules
                     .Targeting(body)
                     .WithHitFx("vfx/vfx_attack_slash")
                     .Execute(choiceContext);
+            }
+        }
+        finally
+        {
+            lock (Gate) SweepPending.ExceptWith(bodies);
+        }
+    }
+
+    /// <summary>
+    /// Wall of Gales (sec.6): "Swirl every fresh aura." The bodies wearing a
+    /// fresh aura are taken when it is played; each takes its own damage-less
+    /// Anemo hit (<see cref="ElementalHit.ApplyOnly"/>, the shared rule), and
+    /// a body not reached yet keeps its aura against the earlier Swirls'
+    /// spread, as Gale Sweep's do.
+    /// </summary>
+    public static async Task SwirlFreshAuras(
+        PlayerChoiceContext choiceContext, Creature? owner)
+    {
+        var combat = owner?.CombatState;
+        if (combat == null) return;
+        var bodies = FreshAuraBodies(combat.HittableEnemies);
+        lock (Gate) SweepPending.UnionWith(bodies);
+        try
+        {
+            foreach (var body in bodies)
+            {
+                lock (Gate) SweepPending.Remove(body);
+                if (!body.IsAlive) continue;
+                await ElementalHit.ApplyOnly(
+                    choiceContext, body, Element.Anemo, owner);
             }
         }
         finally

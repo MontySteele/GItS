@@ -208,8 +208,13 @@ build pins both sides), and it compiles `Varka.cs`, `VarkaCardPool.cs` and
 `VarkaRelicPool.cs`, which is what puts him on the select screen. Off
 (`-p:VarkaPrototype=false`, or `-p:ShippedKits=true`) there is no Varka at
 all. His rows are `proto_vk_`, owner `varka`, a prototype-only profile
-(`gen_klee_cards.PROTOTYPE_OWNERS`), and tier0 registers their words without
-resolving them.
+(`gen_klee_cards.PROTOTYPE_OWNERS`). **The Oath rework (2026-09-29) is built in
+both engines:** the C# rules are `Powers/Prototype/VarkaOath.cs`, and the sim
+twin is `tier0/engine/varka_oath.py` behind its own switch `VARKA_OATH`, off
+like the arms' twins and flipped by `tier0/tests/test_varka_oath.py`. His
+cards speak one verb, `{op: varka, kind: ...}`, each kind one
+`VarkaCards.<Kind>` call; its numbers are the card's `Vk*` vars and the
+upgrade keys `varka_per` / `varka_base` / `varka_amount` move them.
 
 **The companion arm REPLACES THE COMPANION POOL OF TWO NATIONS.** Third arm,
 third property, same terms as the second, on by default since 2026-09-28:

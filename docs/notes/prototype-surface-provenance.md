@@ -4150,6 +4150,55 @@ hit", after the paper's "a Knight never Absorbs its own paint").
   their element Attacks before they could react; a seat pin
   (`test_an_absorb_is_named_on_the_reaction_log`) prints a Melt row.
 
+## Varka: the Oath rework (2026-09-29)
+
+The paper (`review/active/varka-paper-kit-2026-09-28.md`, every pick ruled
+2026-09-29) replaces batch one's Absorb and Winds with Oath: one count per
+element, counted per card, read only for his current element (the last
+Knight's). Forty-seven rows: Four Winds' Ascension (created by Boreas's Fang,
+never in the deck), Windbound Execution and the four starter-only Knights
+(one per run, rolled by the Fang), and the 41-card pool (16 / 17 / 8). The
+ruled picks are on the rows: E-AoE (3 to ALL), Lisa 4 [5] Block plus 3 [4]
+per Attack played this turn, Baron Bunny 6 [8] Block now and 6 [8] Pyro to
+ALL next turn, Favonian Standard 4 [5], Dawn Wind's March 3, Northwind Avatar
+cost 2 at 10 [14] and 10 [14] plus 2 per Oath. Built in both engines
+(`Powers/Prototype/VarkaOath.cs`, `tier0/engine/varka_oath.py`).
+
+The grammar gained one verb, `{op: varka, kind: ...}` (`gen_klee_cards.VARKA_KINDS`),
+three runtime counts (`current_oath`, `oath_elements`,
+`attacks_played_this_turn`) and two predicates (`has_current_element`,
+`knight_played_this_turn`). Knights' Muster, `knight_aura`, `winds_held`,
+`holds_wind` and the `absorb` tag are gone.
+
+Readings taken where the paper is silent:
+
+- A Knight is any Companion row in his personal pool; it sets his current
+  element before its own effects resolve, so its application credits the new
+  element. Jean: Dandelion Breeze is a Skill, not a Knight.
+- Credit is per card play: the first application of an element and the first
+  Swirl of an element each give 1, separately; a Swirl's spread and a
+  Converging Winds spread reaction give nothing; an event outside a play
+  (Baron Bunny's burst, a Power's hit) credits on its own, and the burst is one
+  scope, so at most 1 Pyro Oath.
+- Favonian Standard pays when the Knight's element was already current (the
+  first Knight of a fight never pays); Boreas Unbound pays on any change,
+  none to an element included, and Change of Guard counts.
+- Dawn Wind's March pays once per gain event of the current element; Rally
+  to the Banner is not a gain.
+- The Swirl payout's damage is element-less and unpowered (the target's
+  Vulnerable counts); Storm Surge's extra 5 and the Ascension and Northwind
+  follow-up hits are the card's, so his Strength counts.
+- Eula counts enemies wearing Cryo, fresh or spent, after her hit, as one gain.
+- Stacked Baron Bunnies go off as one burst of the summed amount.
+- Change of Guard asks on a grid only when he holds Oath in two or more
+  elements; with one it takes that one.
+- The starter Knight: the deck lists Amber: Fiery Rain, and Boreas's Fang
+  transforms it on a new run off the player's Transformations stream.
+- Stormward Stance prints "additional damage", the base game's template.
+- No new art: the new rows take no `art_of` (a proxy must be the same card
+  under another id) and Change of Guard's faces wear the Mondstadt Universals'
+  starter-Knight illustrations.
+
 ## Kokomi: the feed pass (2026-09-29)
 
 [USER], 2026-09-29, after an act-1 death: "her cards are weirdly 'expensive'";

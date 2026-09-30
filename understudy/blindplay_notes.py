@@ -1460,16 +1460,17 @@ ARM_KEYWORDS: dict[str, str] = {
              "turn, before enemies act."),
     "Mend": ("Mend N: heal N HP, but never above the HP you had at the "
              "start of this combat."),
-    # VARKA (prototype batch one), in step with `ArmKeywordTips.ForAbsorb`,
-    # `ForWind` and `ForKnight` word for word, markup folded out and the
-    # Wind numbers written out (`VarkaLaw`).
-    "Absorb": ("On a fresh aura, take it off the enemy and gain its Wind. If "
-               "you already hold that Wind, Swirl it instead."),
-    "Wind": ("Kept all fight. Each Swirl you make pays each Wind you hold: "
-             "Pyro 3 damage, Hydro 3 Block, Cryo 1 Weak, Electro 1 Energy "
-             "once a turn."),
-    "Knight": ("Amber, Barbara, Lisa or Kaeya: his own Companion cards. "
-               "Knights' Muster counts as one."),
+    # VARKA (the Oath rework), in step with `ArmKeywordTips.ForOath`,
+    # `ForCurrentElement` and `ForKnight` word for word, markup folded out
+    # and the payout numbers written out (`VarkaLaw`).
+    "Oath": ("Gained when your card applies or Swirls an element: 1 of "
+             "each, per card. Kept all fight. Cards read your current "
+             "element's Oath."),
+    "current element": ("The element of the last Knight you played. Your "
+                        "Swirls pay it: Pyro 3 damage, Hydro 3 Block, Cryo 1 "
+                        "Vulnerable, Electro 3 to ALL."),
+    "Knight": ("Varka's own Companion cards. Playing one makes its element "
+               "your current element."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read
@@ -1919,8 +1920,8 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "fade": "furina",
     "Encore": "furina", "Spotlighted": "furina",
     "Ousia": "furina", "Pneuma": "furina",
-    # VARKA (prototype batch one): his three words are his alone.
-    "Absorb": "varka", "Wind": "varka", "Knight": "varka",
+    # VARKA (the Oath rework): his three words are his alone.
+    "Oath": "varka", "current element": "varka", "Knight": "varka",
     "Summon": "furina", "Gentilhomme Usher": "furina",
     "Surintendante Chevalmarin": "furina", "Mademoiselle Crabaletta": "furina",
     # THE GUEST CAST (2026-09-25).
@@ -2017,12 +2018,12 @@ _ARM_KEYWORD_RE = {
     # `EB-377`'s `Swirl` is printed as a verb, so it conjugates the way
     # `Mend` does. (Its sibling `Hexerei` was retired by R276 pick 2.)
     "Swirl": re.compile(r"\bSwirls?\b"),
-    # VARKA (prototype batch one). `Absorb` is a verb and conjugates the way
-    # `Swirl` does; `Wind` is printed singular and plural ("a Wind", "2 or
-    # more Winds"), and CASE-SENSITIVE keeps it off ordinary "wind" in prose;
-    # `Knight` likewise ("a Knight", "Knights' Muster").
-    "Absorb": re.compile(r"\bAbsorbs?\b"),
-    "Wind": re.compile(r"\bWinds?\b"),
+    # VARKA (the Oath rework). `Oath` is singular (the badge and the tip
+    # print it so) and CASE-SENSITIVE; `current element` is the two-word
+    # keyword his tips and cards print lowercase; `Knight` prints singular
+    # and plural ("a Knight", "Knights' Roll Call").
+    "Oath": re.compile(r"\bOath\b"),
+    "current element": re.compile(r"\bcurrent element\b"),
     "Knight": re.compile(r"\bKnights?\b"),
     # `EB-372`. NO PLURAL: the word names one Power. It fires on Kaeya's face,
     # on the Cold-Blooded buff it leaves behind, and on the Power card itself
@@ -2686,7 +2687,7 @@ def guest_elements(obs: dict[str, Any]) -> set[str]:
         if isinstance(blob, dict):
             # 2026-09-29: and a Knight chooser, whose element is picked at
             # play (`blindplay_faces.KNIGHT_CHOOSER_RE`). On a TITLE only,
-            # because the Knight tip's own sentence names Muster too.
+            # so a Knight tip's own sentence never counts.
             for key in ("name", "title"):
                 if KNIGHT_CHOOSER_RE.search(str(blob.get(key) or "")):
                     found.update(KNIGHT_CHOOSER_ELEMENTS)
@@ -3464,12 +3465,6 @@ RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
 #: 'what it did'." A power the card put on an enemy, or took off one.
 RESOLUTION_APPLIED = "  Put **{power} {n}** on **{target}**."
 RESOLUTION_REMOVED = "  Took **{power} {n}** off **{target}**."
-#: 2026-09-29 (the Varka seats): "Absorbs are invisible in the logs."
-RESOLUTION_ABSORBED = ("  Absorbed the **{element}** aura off **{target}**: "
-                       "gained {element} Wind.")
-RESOLUTION_ABSORB_SWIRLED = ("  Swirled the **{element}** aura on "
-                             "**{target}** instead of Absorbing it: you "
-                             "already held {element} Wind.")
 #: 2026-09-25 (opus-furina-l2b, (c) 4). The same line on a board with a
 #: stage, where "nothing countable" was false under every Raise: what a card
 #: did to a performer's bar is filed on the stage log, and this says where.

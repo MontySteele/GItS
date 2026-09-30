@@ -54,6 +54,13 @@ RUN_SCOPE_CREATE = re.compile(r"RunState\s*\)?\s*\.\s*CreateCard\b|RunState\.Cre
 # right for. Anything else that reaches combat with a run-scoped card is the
 # 2026-07-26 soft lock again.
 RUN_SCOPE_ALLOWED = {
+    "BoreasFang.cs":
+        "Varka's starter Knight is rolled when a NEW run is made "
+        "(`AfterObtained`, which `RunManager.FinalizeStartingRelics` runs "
+        "before any room): the listed Knight is transformed IN THE DECK, "
+        "run scope's real lifetime, and never enters a combat from here. "
+        "The in-combat card the Fang makes, Four Winds' Ascension, is "
+        "`CombatState.CreateCard` (`AddAscension`)",
     "CompanionSlot.cs":
         "the 4th reward option -- a reward card is picked INTO THE DECK, so "
         "run scope is its real lifetime (CardFactory.CreateForReward ends in "

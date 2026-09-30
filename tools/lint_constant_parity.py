@@ -71,6 +71,16 @@ def _stage(name: str):
     return getattr(_fs, name)
 
 
+def _varka(name: str):
+    """A number out of VARKA's Oath module, `_stage`'s case one character
+    over: the sim keeps his rule numbers in `tier0/engine/varka_oath.py`
+    rather than in `constants.py`, so the prototype moves neither the constant
+    census nor the world stamp, and the C# `VarkaLaw` is mirrored against
+    them where they live."""
+    from tier0.engine import varka_oath as _vo
+    return getattr(_vo, name)
+
+
 # --------------------------------------------------------------------------
 # MIRRORED: C# constant -> the tier0 value it copies.
 #
@@ -396,6 +406,14 @@ MIRRORED: dict[str, object] = {
     # case one card type over, mirrored on the same terms.
     "NextAttackDamagePower.Bonus":
         C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS,
+    # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md,
+    # ruled 2026-09-29): the Swirl payout of each current element, and
+    # Stormward Stance's Oath bar. Sim twins in `tier0/engine/varka_oath.py`.
+    "VarkaLaw.SwirlPyroDamage": _varka("SWIRL_PYRO_DAMAGE"),
+    "VarkaLaw.SwirlHydroBlock": _varka("SWIRL_HYDRO_BLOCK"),
+    "VarkaLaw.SwirlCryoVulnerable": _varka("SWIRL_CRYO_VULNERABLE"),
+    "VarkaLaw.SwirlElectroDamageAll": _varka("SWIRL_ELECTRO_DAMAGE_ALL"),
+    "VarkaLaw.StormwardOathNeeded": _varka("STORMWARD_OATH_NEEDED"),
 }
 
 # --------------------------------------------------------------------------
@@ -416,22 +434,7 @@ _ARM_ITEMS_REASON = (
     "potion of the Klee arm or the Stage, built C# first "
     "(operations/prototype.md); no sim twin exists until Balance.")
 
-#: VARKA (prototype batch one, review/active/varka-paper-kit-2026-09-28.md
-#: sec.10). Every number his rules print is a first-guess placeholder for
-#: play, built C# first; the sim twin comes at Balance.
-_VARKA_REASON = (
-    "VARKA, prototype batch one (paper kit sec.10): a first-guess placeholder "
-    "for play, built C# first (operations/prototype.md); no sim twin exists "
-    "until Balance.")
-
 UNMIRRORED: dict[str, str] = {
-    "VarkaLaw.PyroWindDamage": _VARKA_REASON,
-    "VarkaLaw.HydroWindBlock": _VARKA_REASON,
-    "VarkaLaw.CryoWindWeak": _VARKA_REASON,
-    "VarkaLaw.ElectroWindEnergy": _VARKA_REASON,
-    "StormwardStancePower.WindsNeeded": _VARKA_REASON,
-    "ProtoVkKnightsMuster.Damage": _VARKA_REASON,
-    "ProtoVkKnightsMuster.UpgradeDamage": _VARKA_REASON,
     "AlicesGuidebook.Growth": _ARM_ITEMS_REASON,
     "BlastingPowder.Growth": _ARM_ITEMS_REASON,
     "BottledApplause.Fanfare": _ARM_ITEMS_REASON,

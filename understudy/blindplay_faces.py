@@ -766,12 +766,12 @@ _GUEST_STAR_RE = re.compile(
     r"\bGuest Star: (" + "|".join(GUEST_STAR_ELEMENTS) + r")\b")
 
 #: 2026-09-29 (the Varka seats): "NO REACTION IS REACHABLE HERE ... this
-#: screen supplies no element" printed with Knights' Muster in hand. A Knight
+#: screen supplies no element" printed with a Knight chooser in hand. A Knight
 #: chooser's element is picked at play, so its face names none; it can supply
 #: any of the four Knights' elements (Amber, Barbara, Lisa, Kaeya). Matched on
 #: the TITLE, the guests' reason. Roll Call adds a Knight to the hand.
 KNIGHT_CHOOSER_ELEMENTS = ("Pyro", "Hydro", "Electro", "Cryo")
-KNIGHT_CHOOSER_RE = re.compile(r"\bKnights['\u2019] (?:Muster|Roll Call)\b")
+KNIGHT_CHOOSER_RE = re.compile(r"\bKnights['\u2019] Roll Call\b")
 
 
 def _entry_elements(entry: dict[str, Any]) -> set[str]:
@@ -788,7 +788,7 @@ def _entry_elements(entry: dict[str, Any]) -> set[str]:
         for name in _GUEST_STAR_RE.findall(_text(entry.get(key))):
             found.add(GUEST_STAR_ELEMENTS[name])
         # A Knight chooser in a pile supplies every Knight's element. On
-        # its title only: the Knight tip's own sentence names Muster too.
+        # its title only, so a Knight tip's own sentence never counts.
         if key != "description" and KNIGHT_CHOOSER_RE.search(
                 _text(entry.get(key))):
             found.update(KNIGHT_CHOOSER_ELEMENTS)

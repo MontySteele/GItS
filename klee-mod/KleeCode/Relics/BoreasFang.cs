@@ -1,13 +1,16 @@
 #if PROTOTYPE_CARDS
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
+using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Nodes.CommonUi;
+using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
-using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
@@ -15,17 +18,25 @@ using MegaCrit.Sts2.Core.Runs;
 namespace KleeMod.Relics;
 
 /// <summary>
-/// BOREAS'S FANG -- Varka's starting relic (sec.10.1, as built): "Once each
-/// turn, the first non-Anemo Attack that hits a fresh aura Absorbs it. It
-/// reads Absorb's rule, so on a held Wind it Swirls. The choice lives in which
-/// card you aim at an aura: a Strike collects, an Anemo Attack Swirls. This
-/// drops sec.9.3's in-hit prompt for the prototype; a prompt comes back only
-/// if play asks for it."
+/// BOREAS'S FANG -- Varka's starting relic (the Oath rework, sec.4): "The
+/// first time each combat you gain Oath, add Four Winds' Ascension to your
+/// hand." Regent's Forge is the model: <c>ForgeCmd.Forge</c> "adds Sovereign
+/// Blade to their hand if they haven't forged this combat" -- a card created
+/// in combat (<c>CombatState.CreateCard</c>) and added through
+/// <c>CardPileCmd.AddGeneratedCardToCombat</c>, never in the deck (0.111.0
+/// decompile). Played, Ascension goes to the discard pile and comes back
+/// when he draws it.
 ///
-/// THE RULE IS NOT HERE. The aura lifecycle asks
-/// <see cref="VarkaAbsorb.FangTakes"/> on the hit and marks the relic used
-/// through <see cref="Use"/>; this class holds the once-a-turn latch, shows
-/// it on its icon, and clears it at the start of each of his turns.
+/// THE RULE IS NOT HERE. The first gain is <c>VarkaOath.Gain</c>'s question
+/// (the per-combat latch lives in the Oath ledger); this class is the relic
+/// and the one method that makes the card.
+///
+/// IT ALSO ROLLS HIS STARTER KNIGHT (sec.5: "One starting Knight, at random
+/// each run"). The deck lists Amber: Fiery Rain; <see cref="AfterObtained"/>,
+/// which the game runs for starting relics when a NEW run is made and never
+/// on a load (<c>RunManager.FinalizeStartingRelics</c>), transforms it into
+/// one of the four starter Knights off the player's own seeded
+/// Transformations stream, so every client of a co-op run rolls the same one.
 ///
 /// QUARANTINED by <c>#if PROTOTYPE_CARDS</c> and living in <c>Relics/</c>,
 /// <c>TamakushiCasket</c>'s reason: <c>tools/lint_unique_names.py</c> reads
@@ -43,57 +54,56 @@ public sealed class BoreasFang : CustomRelicModel
     {
         ("title", "Boreas's Fang"),
         ("description",
-            "Once each turn, the first non-[gold]Anemo[/gold] Attack that hits "
-          + "a fresh aura [gold]Absorbs[/gold] it."),
+            "The first time each combat you gain [gold]Oath[/gold], add Four "
+          + "Winds' Ascension to your hand."),
     };
 
-    /// <summary>The two words the face leans on: what an Absorb does, and
-    /// what it collects.</summary>
+    /// <summary>The word the face leans on.</summary>
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForWind(ArmKeywordTips.ForAbsorb(
-            System.Array.Empty<IHoverTip>(), null), null);
+        ArmKeywordTips.ForOath(System.Array.Empty<IHoverTip>(), null);
 
-    /// <summary>Has the Fang taken a hit this turn?</summary>
-    public bool UsedThisTurn { get; private set; }
+    /// <summary>The Fang this player holds, or null. PURE.</summary>
+    public static BoreasFang? HeldBy(Player? player) =>
+        player?.GetRelic<BoreasFang>();
 
-    /// <summary>The Fang took this turn's hit.</summary>
-    public void Use()
+    /// <summary>
+    /// Four Winds' Ascension into his hand, created for this combat, the
+    /// Forge's call. The hand's own limit sends it where the game sends any
+    /// generated card that does not fit.
+    /// </summary>
+    internal async Task AddAscension(Player player)
     {
-        if (UsedThisTurn) return;
-        UsedThisTurn = true;
+        var combat = player.Creature?.CombatState;
+        if (combat == null) return;
+        var card = combat.CreateCard<ProtoVkFourWindsAscension>(player);
+        if (card == null) return;
         Flash();
-        InvokeDisplayAmountChanged();
+        await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, player);
     }
 
-    /// <summary>1 while the Fang is ready this turn, 0 once it has taken its
-    /// hit: the base game's counter idiom (Kunai), in combat only.</summary>
-    public override bool ShowCounter =>
-        Owner?.Creature?.CombatState != null
-        && VarkaPrototype.LiveFor(Owner.Creature);
-
-    public override int DisplayAmount => UsedThisTurn ? 0 : 1;
-
-    public override Task BeforeCombatStart()
+    /// <summary>
+    /// A new run: the starter Knight becomes the run's random one. Only the
+    /// first starter Knight in the deck is rolled, and only while the deck
+    /// still holds the listed one, so a second call (none today) changes
+    /// nothing.
+    /// </summary>
+    public override async Task AfterObtained()
     {
-        UsedThisTurn = false;
-        InvokeDisplayAmountChanged();
-        return Task.CompletedTask;
-    }
-
-    public override Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
-    {
-        if (player != Owner) return Task.CompletedTask;
-        UsedThisTurn = false;
-        InvokeDisplayAmountChanged();
-        return Task.CompletedTask;
+        if (!VarkaPrototype.Enabled || Owner is not { } player) return;
+        var listed = player.Deck.Cards.FirstOrDefault(
+            c => c is ProtoVkAmberFieryRain && c.FloorAddedToDeck <= 1);
+        if (listed == null) return;
+        var pick = player.PlayerRng.Transformations.NextItem(
+            VarkaRules.StarterKnights().ToList());
+        if (pick == null || pick is ProtoVkAmberFieryRain) return;
+        var rolled = player.RunState.CreateCard(pick, player);
+        await CardCmd.Transform(listed, rolled, CardPreviewStyle.None);
     }
 
     /// <summary>
     /// His companion reward slot, the fourth card choice every roster
     /// character's starting relic carries (Salon Solitaire, the Tamakushi
-    /// Casket): the Mondstadt Universals reach him here, which is where the
-    /// paper kit's delete-test looks for them (sec.7).
+    /// Casket): the Mondstadt Universals reach him here.
     /// </summary>
     public override bool TryModifyCardRewardOptions(
         Player player, List<CardCreationResult> cardRewardOptions,

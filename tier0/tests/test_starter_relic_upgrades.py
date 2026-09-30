@@ -83,13 +83,16 @@ NO_UPGRADED_FORM: dict[str, str] = {
         "prototype-only (KOKOMI_OVERHAUL); the smith is closed in the "
         "prototype run (slice one sec.7), and an upgraded form would be a "
         "design act. Clears when the slice reaches Balance.",
-    # VARKA's starting relic (prototype batch one, #if PROTOTYPE_CARDS). The
-    # paper kit's sec.10 designs no upgraded Fang, and one would be a design
-    # act; Touch of Orobas hands a Varka run the Circlet until one is ruled.
+    # VARKA's starting relic (#if PROTOTYPE_CARDS). The Oath rework's paper
+    # (sec.4) now names the upgraded Fang -- it creates Four Winds' Ascension
+    # upgraded -- but it is not built in the Oath build: an upgraded starter
+    # needs its tier-0.5 Orobas row (SIM_ROWS below) as well as the C# relic.
+    # Touch of Orobas hands a Varka run the Circlet until it is.
     "BoreasFang":
-        "prototype-only (Varka, batch one); sec.10 designs no upgraded form, "
-        "and authoring one is a design act. Clears when his kit reaches "
-        "Balance or a relic pass rules one.",
+        "prototype-only (Varka, the Oath rework); paper sec.4 names the "
+        "upgraded Fang (Ascension created upgraded) and it is not built yet: "
+        "it needs the C# relic and a tier05 Orobas row together. Clears in "
+        "the pass that builds both.",
 }
 
 

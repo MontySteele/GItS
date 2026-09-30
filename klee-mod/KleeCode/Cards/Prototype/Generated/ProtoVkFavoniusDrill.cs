@@ -38,14 +38,14 @@ public sealed class ProtoVkFavoniusDrill : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForKnight(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCurrentElement(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_favonius_drill");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Favonius Drill"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Choose a [gold]Knight[/gold]: apply their element to the enemy."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Apply your [gold]current element[/gold] to an enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -64,7 +64,7 @@ public sealed class ProtoVkFavoniusDrill : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await VarkaRules.KnightAura(choiceContext, Owner, cardPlay.Target!);
+        await VarkaCards.ApplyCurrentElement(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

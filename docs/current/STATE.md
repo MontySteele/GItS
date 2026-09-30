@@ -38,7 +38,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 48 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 72 (60 Stage cards) |
-| `varka` | Varka | 80 | Mondstadt | Anemo | Paper (Oath rework; batch one built) | 19 built, 41 on paper |
+| `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (Oath rework built) | 41 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
@@ -123,33 +123,26 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   on stage and Sigewinne is a free medic who heals the front performer
   (brief §18, guest paper rule 2 and table).
 
-- **Varka: prototype batch one built (2026-09-29).** Paper kit
-  `review/active/varka-paper-kit-2026-09-28.md` sec.10; [USER]: "You're good
-  to go on building the Varka prototype!" A new character behind
+- **Varka: the Oath rework is built (Prototype, 2026-09-29).** Paper
+  `review/active/varka-paper-kit-2026-09-28.md`, every pick ruled ([USER]:
+  "I'm good with all of these Varka defaults"). A new character behind
   `-p:VarkaPrototype` (on by default beside the other kits; off, and under
   `-p:ShippedKits=true`, he is not on the select screen). 80 HP, 99 gold;
-  starter base Strike x4, Defend x4, Knights' Muster (choose a Knight on a
-  grid: 4 of their element) and Four Winds' Ascension; starting relic Boreas's
-  Fang. The rules (`klee-mod/KleeCode/Powers/Prototype/Varka*.cs`): Absorb
-  takes a fresh aura off the enemy and gives its Wind (a held Wind Swirls
-  instead); four Winds pay on every Swirl he makes (Pyro 3 damage, Hydro 3
-  Block, Cryo 1 Weak, Electro 1 Energy on the first Swirl each turn); the Fang
-  Absorbs with the turn's first non-Anemo Attack on a fresh aura; Converging
-  Winds makes his Swirls react where they land. Pool 19 (10 / 7 / 2), four
-  Knights among the Commons. C# first, no sim twin. The seat page prints his
-  Winds, the Fang and each aura fresh or spent. Per-row notes:
-  `docs/notes/prototype-surface-provenance.md`, "Varka". Round one
-  (`review/records/varka-round-1-2026-09-29.md`, four seats): Absorb-or-Swirl
-  is a decision once one Wind is held; the Fang Absorbing its own Attack's
-  aura is a bug (fixed, #766); Block is short. **Back to Paper: the Oath
-  rework** (the paper, rewritten 2026-09-29). [USER]: "Varka only gets the
-  benefits of one element at a time, not all four"; "elements should be
-  something you draft into." One Oath count per element, read only for his
-  current element (his last Knight); a Swirl pays that element only (Cryo
-  Vulnerable, Electro 2 to ALL); Boreas's Fang adds Four Winds' Ascension to
-  his hand at his first Oath, Regent's Forge style; a random starter-only
-  Knight and Windbound Execution replace Muster and Ascension in the starter.
-  Pool 41 on paper. Next: the sim on the 41 (paper sec.10), then the build.
+  starter base Strike x4, Defend x4, Windbound Execution and one starter-only
+  Knight rolled per run (8 [11] Block and its element); starting relic
+  Boreas's Fang. The rules (`klee-mod/KleeCode/Powers/Prototype/VarkaOath.cs`,
+  sim twin `tier0/engine/varka_oath.py` behind `VARKA_OATH`): one Oath count
+  per element, counted per card; his current element is his last Knight's and
+  his cards read only its Oath; a Swirl he makes pays that element (Pyro 3
+  damage, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL); the Fang adds
+  Four Winds' Ascension to his hand the first time each combat he gains Oath.
+  His status bar shows the current element's Oath; the seat page prints the
+  current element, all four counts and the Swirl payout. Pool 41 (16 / 17 /
+  8), nine Knights. Absorb, the Winds and Knights' Muster are retired. The
+  Lisa floor moved to 4 [5] after the R6 sim (#768). Per-row readings:
+  `docs/notes/prototype-surface-provenance.md`, "Varka: the Oath rework".
+  Batch one's round (`review/records/varka-round-1-2026-09-29.md`) read the
+  old design. Next: a seat round on the Oath build, then [USER] plays.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

@@ -2787,29 +2787,68 @@
    upgrade: {power_amount: 1},
    effects: [{op: apply_power, power: kk_sangonomiyas_counsel, amount: 3, target: self}]}
 
-# VARKA, prototype batch one (review/active/varka-paper-kit-2026-09-28.md
-# sec.10): his starter payoff and his whole pool, sec.10's placeholder numbers.
-# Per-row reasoning: docs/notes/prototype-surface-provenance.md, Varka.
+# VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md, ruled
+# 2026-09-29). Rules: Powers/Prototype/VarkaOath.cs, tier0/engine/varka_oath.py.
+# Per-row reasoning: docs/notes/prototype-surface-provenance.md, "Varka".
 
-# --- the starter's payoff (sec.10.2) ---
+# --- created by Boreas's Fang (sec.4), and the starter (sec.5) ---
 
 - {id: proto_vk_four_winds_ascension, name: "Four Winds' Ascension", character: varka,
    authored_by: [claude],
-   # `dusty_tome`: no Ancient card yet, so Darv's Tome hands him this one.
-   cost: 1, type: attack, rarity: basic, exhaust: true, tags: [dusty_tome],
-   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Wind[/gold] you hold.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: enemy,
-              amount_formula: {base: 6, per: 6, count: winds_held}}],
-   upgrade: {formula_base: 3}}
-
-# --- Common (sec.10.3): six of his own and the four Knights ---
+   # Created in combat, never in the deck; played, it goes to the discard
+   # pile. `dusty_tome`: no Ancient card yet, so Darv's Tome hands him this.
+   cost: 1, type: attack, rarity: basic, tags: [dusty_tome],
+   description: "Deal {Damage:diff()} damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.",
+   effects: [{op: damage, amount: 6, target: enemy},
+             {op: varka, kind: ascension_hit, per: 3}],
+   upgrade: {damage: 3, varka_per: 1}}
 
 - {id: proto_vk_windbound_execution, name: "Windbound Execution", character: varka,
    authored_by: [claude],
-   cost: 1, type: attack, rarity: common, tags: [absorb],
-   description: "Deal {Damage:diff()} damage. [gold]Absorb[/gold].",
-   effects: [{op: damage, amount: 6, target: enemy}],
-   upgrade: {damage: 3}}
+   cost: 1, type: attack, rarity: basic,
+   description: "Deal {Damage:diff()} damage to ALL enemies.",
+   effects: [{op: damage, amount: 4, target: all_enemies}],
+   upgrade: {damage: 2}}
+
+# The four starter-only Knights: one joins the starter at random each run.
+
+- {id: proto_vk_amber_fiery_rain, name: "Amber: Fiery Rain", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: pyro,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Pyro[/gold] to an enemy.",
+   effects: [{op: block, amount: 8},
+             {op: apply_aura, element: pyro, target: enemy}],
+   upgrade: {block: 3}}
+
+- {id: proto_vk_barbara_melody_loop, name: "Barbara: Melody Loop", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: hydro,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to an enemy.",
+   effects: [{op: block, amount: 8},
+             {op: apply_aura, element: hydro, target: enemy}],
+   upgrade: {block: 3}}
+
+- {id: proto_vk_lisa_lightning_rose, name: "Lisa: Lightning Rose", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: electro,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Electro[/gold] to an enemy.",
+   effects: [{op: block, amount: 8},
+             {op: apply_aura, element: electro, target: enemy}],
+   upgrade: {block: 3}}
+
+- {id: proto_vk_kaeya_glacial_waltz, name: "Kaeya: Glacial Waltz", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: cryo,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy.",
+   effects: [{op: block, amount: 8},
+             {op: apply_aura, element: cryo, target: enemy}],
+   upgrade: {block: 3}}
+
+# --- Common (16) ---
 
 - {id: proto_vk_squall, name: "Squall", character: varka,
    authored_by: [claude],
@@ -2835,28 +2874,29 @@
 - {id: proto_vk_wind_wall, name: "Wind Wall", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. If you hold a [gold]Wind[/gold], gain {BranchBlock:diff()} more.",
+   description: "Gain {Block:diff()} [gold]Block[/gold]. If you have a [gold]current element[/gold], gain {BranchBlock:diff()} more.",
    effects: [{op: block, amount: 7},
-             {op: conditional, if: holds_wind,
+             {op: conditional, if: has_current_element,
               then: [{op: block, amount: 3}]}],
    upgrade: {block: 3}}
 
 - {id: proto_vk_favonius_drill, name: "Favonius Drill", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Choose a [gold]Knight[/gold]: apply their element to the enemy.",
-   # Four Knights exceed the choose-a-card screen's three: `knight_aura`'s grid.
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Apply your [gold]current element[/gold] to an enemy.",
    effects: [{op: block, amount: 6},
-             {op: knight_aura, target: enemy}],
+             {op: varka, kind: apply_current_element, target: enemy}],
    upgrade: {block: 3}}
 
 - {id: proto_vk_amber_baron_bunny, name: "Amber: Baron Bunny", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: pyro,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Deal {CalculatedDamage:diff()} damage.",
-   effects: [{op: damage, amount: 6, target: enemy, applies_element: true}],
-   upgrade: {damage: 3}}
+   # Pick 2 (ruled): Block now, AoE Pyro next turn.
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal {PowerAmount:diff()} [gold]Pyro[/gold] damage to ALL enemies.",
+   effects: [{op: block, amount: 6},
+             {op: apply_power, power: vk_baron_bunny, amount: 6, target: self}],
+   upgrade: {block: 2, power_amount: 2}}
 
 - {id: proto_vk_barbara_show_begin, name: "Barbara: Let the Show Begin", character: varka,
    authored_by: [claude],
@@ -2871,20 +2911,83 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Deal {CalculatedDamage:diff()} damage. Draw 1 card.",
-   effects: [{op: damage, amount: 5, target: enemy, applies_element: true},
-             {op: draw, amount: 1}],
-   upgrade: {damage: 2}}
+   # Picks 2 and 5 (ruled); the floor is 4 [5] after the R6 sim (#768 sec.10).
+   description: "Apply [gold]Electro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each Attack you played this turn.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: apply_aura, element: electro, target: enemy},
+             {op: block,
+              amount_formula: {base: 4, per: 3, count: attacks_played_this_turn}}],
+   upgrade: {formula_base: 1, formula_per: 1}}
 
 - {id: proto_vk_kaeya_frostgnaw, name: "Kaeya: Frostgnaw", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Deal {CalculatedDamage:diff()} damage.",
+   description: "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage.",
    effects: [{op: damage, amount: 6, target: enemy, applies_element: true}],
    upgrade: {damage: 3}}
 
-# --- Uncommon (sec.10.3) ---
+- {id: proto_vk_razor_claw_and_thunder, name: "Razor: Claw and Thunder", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage.",
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true}],
+   upgrade: {damage: 3}}
+
+- {id: proto_vk_mika_starfrost_swirl, name: "Mika: Starfrost Swirl", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Apply [gold]Cryo[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold].",
+   effects: [{op: apply_aura, element: cryo, target: enemy},
+             {op: block, amount: 6}],
+   upgrade: {block: 3}}
+
+- {id: proto_vk_jean_dandelion_breeze, name: "Jean: Dandelion Breeze", character: varka,
+   authored_by: [claude],
+   # A Skill, not a Knight: it sets no element.
+   cost: 1, type: skill, rarity: common,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] an enemy's fresh aura.",
+   effects: [{op: block, amount: 7},
+             {op: swirl, target: enemy}],
+   upgrade: {block: 3}}
+
+- {id: proto_vk_knightly_guard, name: "Knightly Guard", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. If you played a [gold]Knight[/gold] this turn, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold].",
+   effects: [{op: block, amount: 8},
+             {op: conditional, if: knight_played_this_turn,
+              then: [{op: varka, kind: gain_current_oath}]}],
+   upgrade: {block: 3}}
+
+- {id: proto_vk_oathsworn_strike, name: "Oathsworn Strike", character: varka,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy, applies_element: false,
+              amount_formula: {base: 6, per: 1, count: current_oath}}],
+   upgrade: {formula_base: 3}}
+
+- {id: proto_vk_crosswind, name: "Crosswind", character: varka,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], gain {BranchBlock:diff()} [gold]Block[/gold].",
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: conditional, if: swirled_by_this,
+              then: [{op: block, amount: 4}]}],
+   upgrade: {damage: 3, conditional_block: 2}}
+
+- {id: proto_vk_rising_gale, name: "Rising Gale", character: varka,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common,
+   description: "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], draw 1 card.",
+   effects: [{op: damage, amount: 4, target: enemy},
+             {op: conditional, if: swirled_by_this,
+              then: [{op: draw, amount: 1}]}],
+   upgrade: {damage: 2}}
+
+# --- Uncommon (17) ---
 
 - {id: proto_vk_tempest_charge, name: "Tempest Charge", character: varka,
    authored_by: [claude],
@@ -2897,8 +3000,8 @@
 
 - {id: proto_vk_favonius_cut, name: "Favonius Cut", character: varka,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: uncommon, tags: [absorb],
-   description: "Deal {Damage:diff()} damage. [gold]Absorb[/gold].",
+   cost: 2, type: attack, rarity: uncommon,
+   description: "Deal {Damage:diff()} damage.",
    effects: [{op: damage, amount: 14, target: enemy}],
    upgrade: {damage: 5}}
 
@@ -2916,31 +3019,110 @@
    effects: [{op: add_knight}],
    upgrade: {choose_knight: true}}
 
-- {id: proto_vk_eye_of_the_storm, name: "Eye of the Storm", character: varka,
+- {id: proto_vk_tailwind_stride, name: "Tailwind Stride", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain {CalculationExtra:diff()} [gold]Block[/gold] for each [gold]Wind[/gold] you hold.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   description: "Draw 2 cards. If you have a [gold]current element[/gold], draw 1 more.",
+   effects: [{op: draw, amount: 2},
+             {op: conditional, if: has_current_element,
+              then: [{op: draw, amount: 1}]}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_eye_of_the_storm, name: "Eye of the Storm", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Gain {CalculationExtra:diff()} [gold]Block[/gold] for each [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: block,
-              amount_formula: {base: 0, per: 4, count: winds_held}}],
+              amount_formula: {base: 0, per: 2, count: current_oath}}],
    upgrade: {formula_per: 1}}
 
 - {id: proto_vk_stormward_stance, name: "Stormward Stance", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "While you hold 2 or more [gold]Winds[/gold], your [gold]Anemo[/gold] Attacks deal 3 additional damage.",
+   description: "While your [gold]current element[/gold] has 4 or more [gold]Oath[/gold], your Anemo Attacks deal 3 additional damage.",
    effects: [{op: apply_power, power: vk_stormward_stance, amount: 3, target: self}],
    upgrade: {cost: -1}}
 
-- {id: proto_vk_tailwind_stride, name: "Tailwind Stride", character: varka,
+- {id: proto_vk_oath_of_the_knights, name: "Oath of the Knights", character: varka,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "At the start of your turn, gain [gold]Block[/gold] equal to your [gold]current element[/gold]'s [gold]Oath[/gold].",
+   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
+   effects: [{op: apply_power, power: vk_oath_of_the_knights, amount: 1, target: self}]}
+
+- {id: proto_vk_rally_to_the_banner, name: "Rally to the Banner", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Move all your [gold]Oath[/gold] to your [gold]current element[/gold].",
+   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
+   effects: [{op: varka, kind: rally}]}
+
+- {id: proto_vk_diluc_searing_onslaught, name: "Diluc: Searing Onslaught", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: pyro,
+   cost: 2, type: attack, personal_pool: varka,
+   description: "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage twice.",
+   effects: [{op: damage, amount: 6, target: enemy, times: 2, applies_element: true}],
+   upgrade: {damage: 2}}
+
+- {id: proto_vk_eula_icetide_vortex, name: "Eula: Icetide Vortex", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: cryo,
+   cost: 2, type: skill, personal_pool: varka,
+   description: "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain 1 Cryo [gold]Oath[/gold] for each enemy with a Cryo aura.",
+   effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
+             {op: varka, kind: oath_per_cryo_enemy}],
+   upgrade: {damage: 4}}
+
+- {id: proto_vk_barbara_whisper_of_water, name: "Barbara: Whisper of Water", character: varka,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
+   cost: 1, type: skill, personal_pool: varka,
+   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold] now and {BlockNextTurn:diff()} next turn.",
+   effects: [{op: apply_aura, element: hydro, target: enemy},
+             {op: block, amount: 4},
+             {op: block_next_turn, amount: 4}],
+   upgrade: {block: 2, block_next_turn: 2}}
+
+- {id: proto_vk_favonian_standard, name: "Favonian Standard", character: varka,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   # Pick 3 (ruled): 3 [4] raised to 4 [5].
+   description: "Whenever you play a [gold]Knight[/gold] of your [gold]current element[/gold], gain {PowerAmount:diff()} [gold]Block[/gold].",
+   effects: [{op: apply_power, power: vk_favonian_standard, amount: 4, target: self}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_vk_change_of_guard, name: "Change of Guard", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Choose an element you have [gold]Oath[/gold] in. It becomes your [gold]current element[/gold]. Gain [gold]Block[/gold] equal to its Oath.",
+   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
+   effects: [{op: varka, kind: change_of_guard}]}
+
+- {id: proto_vk_storm_surge, name: "Storm Surge", character: varka,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: uncommon,
+   description: "Deal {Damage:diff()} damage to ALL enemies. Each enemy it [gold]Swirls[/gold] takes {VkAmount:diff()} more.",
+   effects: [{op: damage, amount: 5, target: all_enemies},
+             {op: varka, kind: swirled_take_more, amount: 5}],
+   upgrade: {damage: 2}}
+
+- {id: proto_vk_tailwind_guard, name: "Tailwind Guard", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Draw 2 cards. If you hold a [gold]Wind[/gold], draw 1 more.",
-   effects: [{op: draw, amount: 2},
-             {op: conditional, if: holds_wind,
-              then: [{op: draw, amount: 1}]}],
-   upgrade: {cost: -1}}
+   description: "Gain {CalculationExtra:diff()} [gold]Block[/gold] for each element you have [gold]Oath[/gold] in.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 0, per: 3, count: oath_elements}}],
+   upgrade: {formula_per: 1}}
 
-# --- Rare (sec.10.3) ---
+- {id: proto_vk_unfurled_banner, name: "Unfurled Banner", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Put Four Winds' Ascension from your discard pile into your hand. It costs 0 this turn.",
+   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
+   effects: [{op: varka, kind: unfurled_banner}]}
+
+# --- Rare (8) ---
 
 - {id: proto_vk_converging_winds, name: "Converging Winds", character: varka,
    authored_by: [claude],
@@ -2952,6 +3134,53 @@
 - {id: proto_vk_boreas_unbound, name: "Boreas Unbound", character: varka,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "Whenever you [gold]Absorb[/gold], gain 1 [gold]Energy[/gold].",
+   description: "Whenever your [gold]current element[/gold] changes, gain 1 [gold]Energy[/gold].",
    effects: [{op: apply_power, power: vk_boreas_unbound, amount: 1, target: self}],
    upgrade: {cost: -1}}
+
+- {id: proto_vk_wall_of_gales, name: "Wall of Gales", character: varka,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: rare,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] every fresh aura.",
+   effects: [{op: block, amount: 16},
+             {op: varka, kind: swirl_fresh_auras}],
+   upgrade: {block: 6}}
+
+- {id: proto_vk_four_winds_accord, name: "Four Winds' Accord", character: varka,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "Split your total [gold]Oath[/gold] evenly among the four elements, rounding down, then gain 1 of each.",
+   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
+   effects: [{op: varka, kind: accord}]}
+
+- {id: proto_vk_sworn_brotherhood, name: "Sworn Brotherhood", character: varka,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "At the start of your turn, gain 1 [gold]Oath[/gold] of every element.",
+   effects: [{op: apply_power, power: vk_sworn_brotherhood, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_northwind_avatar, name: "Northwind Avatar", character: varka,
+   authored_by: [claude],
+   # Pick 4 (ruled): cost 2, 10 [14] and 10 [14], plus 2 per Oath.
+   cost: 2, type: attack, rarity: rare,
+   description: "Deal {Damage:diff()} damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold], as your [gold]current element[/gold].",
+   effects: [{op: damage, amount: 10, target: enemy},
+             {op: varka, kind: avatar_hit, base: 10, per: 2}],
+   upgrade: {damage: 4, varka_base: 4}}
+
+- {id: proto_vk_dawn_winds_march, name: "Dawn Wind's March", character: varka,
+   authored_by: [claude],
+   # Pick 3 (ruled): 2 raised to 3.
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever you gain [gold]Oath[/gold] of your [gold]current element[/gold], gain 3 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: vk_dawn_winds_march, amount: 3, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_azure_devour, name: "Azure Devour", character: varka,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare, exhaust: true,
+   description: "Deal {ExtraDamage:diff()} damage for each [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
+   effects: [{op: damage, target: enemy, applies_element: false,
+              amount_formula: {base: 0, per: 4, count: current_oath}}]}

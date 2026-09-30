@@ -41,25 +41,24 @@ public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard,
     public string CharacterId => "varka";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Exhaust, KleeKeywords.AppliesAnemo };
+        new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForWind(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
+        ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_four_winds_ascension");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Four Winds' Ascension"),
-        ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Wind[/gold] you hold.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {Damage:diff()} damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(6m),
-            new ExtraDamageVar(6m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => VarkaWinds.HeldCount(card.Owner.Creature))
+            new DamageVar(6m, ValueProp.Move),
+            new DynamicVar("VkPer", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,15 +71,17 @@ public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard,
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+        await VarkaCards.AscensionHit(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars["VkPer"].UpgradeValueBy(1m);
     }
 }

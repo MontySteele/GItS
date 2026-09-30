@@ -763,12 +763,11 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         for face in combat["hand"]:
             face["spend_unavailable"] = spend_unavailable(
                 face["text"], stage, combat["you"]["relics"])
-    # VARKA (prototype batch one): the Winds he holds, whether Boreas's Fang
-    # has taken this turn's hit, and each enemy's aura FRESH or SPENT -- the
-    # three facts every one of his Absorb-or-Swirl choices turns on.
-    winds = varka_winds(p, combat)
-    if winds is not None:
-        combat["winds"] = winds
+    # VARKA (the Oath rework): his current element, the four Oath counts,
+    # what a Swirl pays now, and each enemy's aura FRESH or SPENT.
+    oath = varka_oath(p, combat)
+    if oath is not None:
+        combat["oath"] = oath
     # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
     # prints, with its HP.
     allies = _allies(p, (plans or {}).get("pet_entity_id"))
@@ -777,35 +776,57 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     return combat
 
 
-#: VARKA (prototype batch one, review/active/varka-paper-kit-2026-09-28.md
-#: sec.10). The four elements a Wind comes from, in the order his Wind badges
-#: pay on a Swirl (`VarkaWinds.Order`), and the one relic whose once-a-turn
-#: latch the page reads off its icon's counter (1 ready, 0 used).
-VARKA_WIND_ELEMENTS = ("Cryo", "Pyro", "Hydro", "Electro")
-VARKA_FANG = "Boreas's Fang"
-_WIND_NAME = re.compile(r"^(Pyro|Hydro|Electro|Cryo) Wind$")
+#: VARKA (the Oath rework, review/active/varka-paper-kit-2026-09-28.md). The
+#: four Oath elements in the order the badge sentence lists them, and what a
+#: Swirl he makes pays for each current element (`VarkaLaw` numbers).
+VARKA_OATH_ELEMENTS = ("Pyro", "Hydro", "Electro", "Cryo")
+VARKA_SWIRL_PAYOUT = {
+    "Pyro": "Your Swirls deal 3 damage to that enemy.",
+    "Hydro": "Your Swirls give you 3 Block.",
+    "Cryo": "Your Swirls apply 1 Vulnerable to that enemy.",
+    "Electro": "Your Swirls deal 3 damage to ALL enemies.",
+}
+_OATH_NAME = re.compile(r"^(?:(Pyro|Hydro|Electro|Cryo) )?Oath$")
+_OATH_COUNTS = re.compile(
+    r"Oath: Pyro (\d+), Hydro (\d+), Electro (\d+), Cryo (\d+)\.")
 _AURA_BADGE = re.compile(r"^(Pyro|Hydro|Electro|Cryo) Aura$")
 
 
-def varka_winds(player: dict[str, Any],
-                combat: dict[str, Any]) -> dict[str, Any] | None:
-    """VARKA's block: `{held, missing, fang, auras}`, or None on a board that
-    is not his (no Wind, no Fang, and a wire that does not name him).
+def varka_oath(player: dict[str, Any],
+               combat: dict[str, Any]) -> dict[str, Any] | None:
+    """VARKA's block: `{element, counts, payout, auras}`, or None on a board
+    that is not his (no Oath badge and a wire that does not name him).
 
-    `held` and `missing` are Wind elements in `VARKA_WIND_ELEMENTS` order;
-    `fang` is "ready", "used", or None with no Fang; `auras` is one row per
-    enemy in the page's own order -- `{name, element, state}`, `state` being
-    "fresh" or "spent" and `element` None for a body with no aura. SPENT is
-    read off the badge's own sentence (`AuraPower`'s spent face opens
-    "Spent:"), never guessed from a board.
+    `element` is the badge title's element, None for a badge titled "Oath" or
+    no badge; `counts` is `{element: n}` in `VARKA_OATH_ELEMENTS` order, read
+    off the badge sentence "Oath: Pyro N, Hydro N, Electro N, Cryo N." and,
+    with the sentence missing, the badge amount under the current element;
+    `payout` is the sentence a Swirl pays now, None with no current element;
+    `auras` is one row per enemy in the page's own order -- `{name, element,
+    state}`, `state` being "fresh" or "spent" and `element` None for a body
+    with no aura. SPENT is read off the badge's own sentence (`AuraPower`'s
+    spent face opens "Spent:"), never guessed from a board.
     """
     you = combat["you"]
-    held = {m.group(1) for m in (_WIND_NAME.match(pw["name"])
-                                 for pw in you["powers"]) if m}
-    fang = next((r for r in you["relics"] if r["name"] == VARKA_FANG), None)
+    badge = None
+    for pw in you["powers"]:
+        m = _OATH_NAME.match(pw["name"])
+        if m:
+            badge, element = pw, m.group(1)
+            break
     his = _fold(_text(player.get("character"))) == "varka"
-    if not (his or held or fang is not None):
+    if not (his or badge is not None):
         return None
+    if badge is None:
+        element = None
+    counts = dict.fromkeys(VARKA_OATH_ELEMENTS, 0)
+    if badge is not None:
+        found = _OATH_COUNTS.search(_text(badge.get("text")))
+        if found:
+            counts = {el: int(n) for el, n in
+                      zip(VARKA_OATH_ELEMENTS, found.groups())}
+        elif element:
+            counts[element] = _int(badge.get("stacks"))
     auras = []
     for enemy in combat["enemies"]:
         row: dict[str, Any] = {"name": enemy["name"], "element": None,
@@ -818,14 +839,9 @@ def varka_winds(player: dict[str, Any],
                                 else "fresh")
                 break
         auras.append(row)
-    fang_state = None
-    if fang is not None:
-        counter = fang.get("counter")
-        fang_state = ("used" if counter == "0"
-                      else "ready" if counter == "1" else None)
-    return {"held": [el for el in VARKA_WIND_ELEMENTS if el in held],
-            "missing": [el for el in VARKA_WIND_ELEMENTS if el not in held],
-            "fang": fang_state, "auras": auras}
+    return {"element": element, "counts": counts,
+            "payout": VARKA_SWIRL_PAYOUT.get(element) if element else None,
+            "auras": auras}
 
 
 #: The seats, in damage order, under the words the brief and the tips use.
@@ -1436,17 +1452,8 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                    for a in (row.get("applied") or [])
                    if isinstance(a, dict) and _text(a.get("power"))
                    and _int(a.get("amount"))]
-        # 2026-09-29 (the Varka seats): the auras an Absorb or Boreas's Fang
-        # met inside the card. Absent on an older mod, and then nothing prints.
-        absorbed = [{"target": _text(a.get("target")),
-                     "element": _text(a.get("element")),
-                     "swirled": bool(a.get("swirled")),
-                     "combat_id": _text(a.get("combat_id"))}
-                    for a in (row.get("absorbed") or [])
-                    if isinstance(a, dict) and _text(a.get("element"))]
         out.append({"card": card,
                     "applied": applied,
-                    "absorbed": absorbed,
                     "auto_played": bool(row.get("auto_played")),
                     "carried": bool(row.get("carried")),
                     "overflowed": bool(row.get("overflowed")),
@@ -1647,7 +1654,7 @@ def reaction_log(player: dict[str, Any]) -> list[dict[str, str]] | None:
              "combat_id": _text(r.get("combat_id")),
              "carried": bool(r.get("carried")),
              # 2026-09-29 (the Varka seats): one plain sentence beside the
-             # name -- what an Absorb gave, or why a hit Swirled. Absent on
+             # name -- why a hit Swirled. Absent on
              # an older mod, and then nothing prints.
              "detail": _text(r.get("detail"))}
             for r in rows

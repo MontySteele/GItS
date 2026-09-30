@@ -123,7 +123,8 @@ Knights, so a focused deck can be drafted. **New** marks batch two.
 - **Amber: Baron Bunny** (Knight, 1): Deal 6 [9] Pyro.
 - **Barbara: Let the Show Begin** (Knight, 1): Apply Hydro to ALL enemies.
   Gain 3 [5] Block.
-- **Lisa: Violet Arc** (Knight, 1): Deal 5 [7] Electro. Draw 1.
+- **Lisa: Violet Arc** (Knight, 1): Apply Electro to an enemy. Gain 4 [5]
+  Block, plus 3 [4] for each Attack you played this turn. (Picks 2 and 5.)
 - **Kaeya: Frostgnaw** (Knight, 1): Deal 6 [9] Cryo.
 - **New. Razor: Claw and Thunder** (Knight, 1): Deal 7 [10] Electro.
 - **New. Mika: Starfrost Swirl** (Knight, 1): Apply Cryo to an enemy. Gain
@@ -320,8 +321,10 @@ the build spec; Lisa's floor gets one confirming sim run first.
    4 [5] Block; Dawn Wind's March 2 to 3 Block per Oath gain.
 4. **Northwind Avatar** at 3 Energy is rarely played. Default: cost 2, damage
    10 [14] and 10 [14], plus 2 per Oath.
-5. **Give Lisa a floor.** Default: "Apply Electro to an enemy. Gain 3 [4]
+5. **Give Lisa a floor.** Default: "Apply Electro to an enemy. Gain 4 [5]
    Block, plus 3 [4] for each Attack you played this turn." It keeps the
    per-Attack scaling [USER] asked for and never gives less than a small
    Block (the same fix Sango Isshin and Feint took on Kokomi). Then re-sim
    Electro.
+   The floor moved from 3 [4] to 4 [5] after the R6 sim (#768 sec.10), which
+   put all four starts within 10 points (spread 9.5, against 11.0).

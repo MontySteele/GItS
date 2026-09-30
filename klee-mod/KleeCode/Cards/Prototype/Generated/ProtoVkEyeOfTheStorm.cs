@@ -37,23 +37,26 @@ public sealed class ProtoVkEyeOfTheStorm : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Exhaust };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForWind(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_eye_of_the_storm");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Eye of the Storm"),
-        ("description", "Gain {CalculationExtra:diff()} [gold]Block[/gold] for each [gold]Wind[/gold] you hold.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "Gain {CalculationExtra:diff()} [gold]Block[/gold] for each [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new CalculationExtraVar(4m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => VarkaWinds.HeldCount(card.Owner.Creature))
+            new CalculationExtraVar(2m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => VarkaOath.CurrentOath(card.Owner.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

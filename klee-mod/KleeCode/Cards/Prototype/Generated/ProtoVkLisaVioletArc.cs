@@ -32,11 +32,8 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkLisaVioletArc : CustomCardModel, IElementalCard, ICompanionCard
+public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard
 {
-    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
-    public Element Element => Element.Electro;
-
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
@@ -52,23 +49,22 @@ public sealed class ProtoVkLisaVioletArc : CustomCardModel, IElementalCard, ICom
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false, appliesWithoutHit: true);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_lisa_violet_arc");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lisa: Violet Arc"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Draw 1 card."),
+        ("description", "Apply [gold]Electro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each Attack you played this turn.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(5m),
-            new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
-            new CardsVar(1)
+            new CalculationBaseVar(4m),
+            new CalculationExtraVar(3m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionOverhaulLedger.For(card.Owner.Creature).AttacksPlayedThisTurn)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,16 +77,13 @@ public sealed class ProtoVkLisaVioletArc : CustomCardModel, IElementalCard, ICom
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
-            .Execute(choiceContext);
-        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Electro, Owner.Creature);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(2m);
+        DynamicVars.CalculationExtra.UpgradeValueBy(1m);
+        DynamicVars.CalculationBase.UpgradeValueBy(1m);
     }
 }

@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -32,11 +31,8 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkAmberBaronBunny : CustomCardModel, IElementalCard, ICompanionCard
+public sealed class ProtoVkAmberBaronBunny : CustomCardModel, ICompanionCard
 {
-    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
-    public Element Element => Element.Pyro;
-
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
@@ -48,47 +44,39 @@ public sealed class ProtoVkAmberBaronBunny : CustomCardModel, IElementalCard, IC
 
     public string? Nation => "mondstadt";
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesPyro };
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
-
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_amber_baron_bunny");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Amber: Baron Bunny"),
-        ("description", "Deal {CalculatedDamage:diff()} damage."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal {PowerAmount:diff()} [gold]Pyro[/gold] damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(6m),
-            new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
+            new CalculationExtraVar(1m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new DynamicVar("PowerAmount", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoVkAmberBaronBunny()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
-            .Execute(choiceContext);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
+        await PowerCmd.Apply<VarkaBaronBunnyPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
     }
 }

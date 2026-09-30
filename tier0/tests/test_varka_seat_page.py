@@ -1,12 +1,10 @@
-"""VARKA, PROTOTYPE BATCH ONE: what a blind seat reads on his combat page.
+"""VARKA, THE OATH REWORK: what a blind seat reads on his combat page.
 
-The paper kit's first-round question (review/active/varka-paper-kit-
-2026-09-28.md sec.10.4) is "is choosing between Absorb and Swirl a decision on
-the turn, or a chore?", and every such choice turns on three facts: the Winds
-he holds, whether Boreas's Fang has taken this turn's hit, and whether each
-enemy's aura is FRESH (an Absorb takes it, an Anemo hit Swirls it) or SPENT
-(both do nothing). The page prints the three in one block, off the wire's own
-status rows and relic counter.
+His turn turns on three facts, all read off the wire: his current element
+(the badge title, "Pyro Oath" or plain "Oath" before his first Knight), the
+four Oath counts (the badge sentence "Oath: Pyro N, Hydro N, Electro N,
+Cryo N."), and what a Swirl he makes pays right now. The page prints them in
+one block, with each enemy's aura FRESH or SPENT beneath.
 
 The fixture is the recorded Kokomi combat turn (`combat_state`'s file), re-
 dressed as his: that proves the renderer on a real wire's shape, never the
@@ -31,6 +29,10 @@ FRESH_PYRO = ("Pyro clings to this enemy for 2 more turns. A hit of another "
               "element triggers an Elemental Reaction.")
 SPENT_HYDRO = ("Spent: Anemo and Geo do nothing to it until Hydro hits it "
                "again. 1 more turn.")
+PYRO_OATH_TEXT = ("Your current element is Pyro. Your Swirls deal 3 damage "
+                  "to that enemy. Oath: Pyro 2, Hydro 0, Electro 1, Cryo 0.")
+NO_ELEMENT_TEXT = ("You have no current element yet. "
+                   "Oath: Pyro 0, Hydro 1, Electro 0, Cryo 0.")
 
 
 @pytest.fixture(autouse=True)
@@ -55,20 +57,22 @@ def _status(name: str, text: str, amount: int = 1,
             "description": text, "keywords": []}
 
 
-def varka_state(winds=("Pyro",), fang_counter=1,
+def varka_state(badge=("Pyro Oath", PYRO_OATH_TEXT, 2),
                 auras=((FRESH_PYRO, "Pyro"), (SPENT_HYDRO, "Hydro"), None),
                 character="Varka") -> dict:
-    """The recorded turn, as his: Winds on him, the Fang in his relics, and
-    one enemy per `auras` entry (text, element) or None for a bare body."""
+    """The recorded turn, as his: the Oath badge on him (title, sentence,
+    amount) or none, the Fang in his relics, and one enemy per `auras` entry
+    (text, element) or None for a bare body."""
     state = json.loads(RECORDED_COMBAT.read_text(encoding="utf-8"))["state"]
     p = state["player"]
     p["character"] = character
-    p["status"] = [_status(f"{w} Wind", f"Whenever you Swirl, {w}.")
-                   for w in winds]
+    p["status"] = ([] if badge is None else
+                   [_status(badge[0], badge[1], badge[2], "Counter")])
     p["relics"] = [{"id": "KLEEMOD-BOREAS_FANG", "name": "Boreas's Fang",
-                    "description": "Once each turn, the first non-Anemo "
-                                   "Attack that hits a fresh aura Absorbs it.",
-                    "counter": fang_counter, "keywords": []}]
+                    "description": "The first time you gain Oath each "
+                                   "fight, add Four Winds' Ascension to "
+                                   "your hand.",
+                    "counter": None, "keywords": []}]
     template = state["battle"]["enemies"][0]
     enemies = []
     for i, aura in enumerate(auras):
@@ -85,56 +89,83 @@ def varka_state(winds=("Pyro",), fang_counter=1,
 
 
 def _block(page: str) -> list[str]:
-    assert "## Your Winds" in page, page
-    body = page.split("## Your Winds", 1)[1].strip().split("\n\n")[0]
+    assert "## Your Oath" in page, page
+    body = page.split("## Your Oath", 1)[1].strip().split("\n\n")[0]
     return body.splitlines()
 
 
-def test_the_page_prints_his_winds_his_fang_and_every_auras_state():
+def test_the_page_prints_his_element_his_oath_and_what_a_swirl_pays():
     page = blindplay.observe(varka_state())
     lines = _block(page)
-    assert lines[0] == ("- Winds held: Pyro (1 of 4). Not yet: Cryo, Hydro, "
-                        "Electro.")
-    assert lines[1].startswith("- Boreas's Fang: ready.")
+    assert lines[0] == "- Current element: Pyro."
+    assert lines[1] == "- Oath: Pyro 2, Hydro 0, Electro 1, Cryo 0."
+    assert lines[2] == "- Your Swirls deal 3 damage to that enemy."
     auras = [line for line in lines if line.startswith("- **Hilichurl")]
     assert len(auras) == 3
-    assert "Pyro, fresh: an Absorb takes it; an Anemo hit Swirls it." in auras[0]
-    assert ("Hydro, spent: Absorb and Swirl do nothing to it until Hydro "
-            "hits it again.") in auras[1]
+    assert "Pyro, fresh: an Anemo hit Swirls it." in auras[0]
+    assert ("Hydro, spent: Swirl does nothing to it until Hydro hits it "
+            "again.") in auras[1]
     assert auras[2].endswith("no aura.")
 
 
-def test_a_used_fang_and_no_winds_say_so():
-    page = blindplay.observe(varka_state(winds=(), fang_counter=0))
+def test_a_plain_oath_badge_means_no_current_element_yet():
+    page = blindplay.observe(varka_state(
+        badge=("Oath", NO_ELEMENT_TEXT, 1)))
     lines = _block(page)
-    assert lines[0] == ("- Winds held: none. Absorb a fresh aura to gain its "
-                        "Wind.")
-    assert lines[1] == "- Boreas's Fang: used this turn."
+    assert lines[0] == "- Current element: none. Play a Knight to set it."
+    assert lines[1] == "- Oath: Pyro 0, Hydro 1, Electro 0, Cryo 0."
+    assert lines[2] == "- Your Swirls pay nothing until you play a Knight."
 
 
-def test_all_four_winds_read_in_payout_order():
-    page = blindplay.observe(
-        varka_state(winds=("Electro", "Hydro", "Pyro", "Cryo")))
-    assert _block(page)[0] == ("- Winds held: Cryo, Pyro, Hydro, Electro "
-                               "(all 4).")
+def test_no_badge_still_prints_his_block_with_zero_counts():
+    page = blindplay.observe(varka_state(badge=None))
+    lines = _block(page)
+    assert lines[0].startswith("- Current element: none.")
+    assert lines[1] == "- Oath: Pyro 0, Hydro 0, Electro 0, Cryo 0."
+    assert lines[2].startswith("- Your Swirls pay nothing")
 
 
-def test_another_kit_prints_no_winds_block():
-    state = varka_state(winds=(), character="Kokomi")
+def test_every_current_element_names_its_own_payout():
+    for element, sentence in (
+            ("Pyro", "Your Swirls deal 3 damage to that enemy."),
+            ("Hydro", "Your Swirls give you 3 Block."),
+            ("Cryo", "Your Swirls apply 1 Vulnerable to that enemy."),
+            ("Electro", "Your Swirls deal 3 damage to ALL enemies.")):
+        blindplay.forget_fight()
+        text = (f"Your current element is {element}. {sentence} "
+                "Oath: Pyro 1, Hydro 1, Electro 1, Cryo 1.")
+        page = blindplay.observe(varka_state(
+            badge=(f"{element} Oath", text, 1)))
+        lines = _block(page)
+        assert lines[0] == f"- Current element: {element}."
+        assert lines[2] == f"- {sentence}", element
+
+
+def test_a_missing_sentence_falls_back_to_the_badge_amount():
+    combat = blindplay_board._combat(varka_state(
+        badge=("Cryo Oath", "", 3)))
+    oath = combat["oath"]
+    assert oath["element"] == "Cryo"
+    assert oath["counts"] == {"Pyro": 0, "Hydro": 0, "Electro": 0, "Cryo": 3}
+
+
+def test_another_kit_prints_no_oath_block():
+    state = varka_state(badge=None, character="Kokomi")
     state["player"]["relics"] = []
-    assert "## Your Winds" not in blindplay.observe(state)
+    page = blindplay.observe(state)
+    assert "## Your Oath" not in page
+    assert "oath" not in blindplay_board._combat(state)
 
 
 def test_the_block_is_built_off_the_wires_own_rows():
     """The board half, on its own: SPENT is the badge's own sentence, never a
-    guess, and the Fang's state is its icon's counter."""
-    state = varka_state()
-    combat = blindplay_board._combat(state)
-    winds = combat["winds"]
-    assert winds["held"] == ["Pyro"]
-    assert winds["missing"] == ["Cryo", "Hydro", "Electro"]
-    assert winds["fang"] == "ready"
-    assert [(r["element"], r["state"]) for r in winds["auras"]] == [
+    guess, and the counts are the badge sentence's."""
+    combat = blindplay_board._combat(varka_state())
+    oath = combat["oath"]
+    assert oath["element"] == "Pyro"
+    assert oath["counts"] == {"Pyro": 2, "Hydro": 0, "Electro": 1, "Cryo": 0}
+    assert oath["payout"] == "Your Swirls deal 3 damage to that enemy."
+    assert [(r["element"], r["state"]) for r in oath["auras"]] == [
         ("Pyro", "fresh"), ("Hydro", "spent"), (None, None)]
 
 
@@ -153,12 +184,17 @@ def test_the_page_glossary_defines_his_three_words():
         "name": "Windbound Execution", "type": "Attack", "cost": "1",
         "can_play": True, "index": 0, "target_type": "AnyEnemy",
         "is_upgraded": False, "keywords": [],
-        "description": "Deal 6 damage. Absorb. Each Swirl pays every Wind; "
-                       "a Knight paints."}]
+        "description": "Deal 6 damage. Gain 1 Oath of your current element. "
+                       "A Knight sets it."}]
     page = blindplay.observe(state)
     glossary = page.split("## Words on this screen", 1)[1]
-    for word in ("Absorb", "Wind", "Knight"):
+    for word in ("Oath", "current element", "Knight"):
         assert f"- **{word}** — " in glossary, word
+    assert ("- **Oath** — Gained when your card applies or Swirls an "
+            "element: 1 of each, per card. Kept all fight. Cards read your "
+            "current element's Oath.") in glossary
+    for retired in ("Absorb", "Wind"):
+        assert f"- **{retired}** — " not in glossary, retired
 
 
 # ---- seat fixes 2026-09-29 ---------------------------------------------------
@@ -182,49 +218,27 @@ def _card(name: str, text: str, kind: str = "Attack") -> dict:
             "can_play": True, "unplayable_reason": None}
 
 
-MUSTER = ("Knights' Muster",
-          "Choose a Knight: deal 4 damage of their element.")
+ROLL_CALL = ("Knights' Roll Call", "Add a random Knight to your hand.")
 
 
-def test_knights_muster_is_an_element_source():
+def test_knights_roll_call_is_an_element_source():
     """"NO REACTION IS REACHABLE HERE ... this screen supplies no element"
-    printed with Knights' Muster in hand: its element is chosen at play."""
+    printed with a Knight chooser in hand: its element is chosen at play."""
     updraft = _card("Updraft", "Deal 5 damage. Applies Anemo.")
     updraft["keywords"] = [{"name": "Applies Anemo", "description":
                             "An Anemo hit Swirls an aura."}]
     control = blindplay.observe(_bare_hand(
-        varka_state(winds=(), auras=(None,)), updraft))
+        varka_state(badge=None, auras=(None,)), updraft))
     assert "supplies no element" in control
     blindplay.forget_fight()
     page = blindplay.observe(_bare_hand(
-        varka_state(winds=(), auras=(None,)), updraft,
-        _card(*MUSTER, kind="Skill")))
+        varka_state(badge=None, auras=(None,)), updraft,
+        _card(*ROLL_CALL, kind="Skill")))
     assert "supplies no element" not in page
 
 
-def test_an_absorb_is_named_on_the_reaction_log():
-    state = varka_state()
-    state["player"]["reactions"] = [
-        {"reaction": "Absorb", "source": "Strike", "target": "Hilichurl 1",
-         "combat_id": "100", "carried": False,
-         "detail": "Took the Pyro aura; you gained Pyro Wind."},
-        {"reaction": "Swirl", "source": "Charlotte", "target": "Hilichurl 2",
-         "combat_id": "101", "carried": False,
-         "detail": ("You already held Hydro Wind, so it Swirled instead of "
-                    "Absorbing.")},
-        {"reaction": "Melt", "source": "Amber", "target": "Hilichurl 1",
-         "combat_id": "100", "carried": False},
-    ]
-    page = blindplay.observe(state)
-    assert ("- **Absorb** on **Hilichurl 1**, off Strike. Took the Pyro "
-            "aura; you gained Pyro Wind.") in page
-    assert ("off Charlotte. You already held Hydro Wind, so it Swirled "
-            "instead of Absorbing.") in page
-    # Every reaction the log carries prints, not only Swirl.
-    assert "- **Melt** on **Hilichurl 1**, off Amber." in page
-
-
-def test_an_absorb_is_named_under_the_card_that_made_it():
+def test_the_retired_absorb_receipt_prints_nothing():
+    """The C# side stopped emitting `absorbed` rows; an old one is ignored."""
     state = varka_state()
     state["player"]["resolutions"] = [
         {"card_id": "STRIKE_VARKA", "card": "Strike", "auto_played": False,
@@ -233,18 +247,9 @@ def test_an_absorb_is_named_under_the_card_that_made_it():
                    "combat_id": "100", "killed": False}],
          "applied": [], "summoned": [],
          "absorbed": [{"target": "Hilichurl 1", "element": "Pyro",
-                       "swirled": False, "combat_id": "100"}]},
-        {"card_id": "CHARLOTTE", "card": "Charlotte", "auto_played": False,
-         "carried": False, "overflowed": False, "hits": [], "applied": [],
-         "summoned": [],
-         "absorbed": [{"target": "Hilichurl 2", "element": "Hydro",
-                       "swirled": True, "combat_id": "101"}]},
-    ]
+                       "swirled": False, "combat_id": "100"}]}]
     page = blindplay.observe(state)
-    assert ("Absorbed the **Pyro** aura off **Hilichurl 1**: gained Pyro "
-            "Wind.") in page
-    assert ("Swirled the **Hydro** aura on **Hilichurl 2** instead of "
-            "Absorbing it: you already held Hydro Wind.") in page
+    assert "Absorbed" not in page and "Wind." not in page
 
 
 def test_the_words_say_a_spent_aura_still_reacts_and_swirl_copies_are_spent():

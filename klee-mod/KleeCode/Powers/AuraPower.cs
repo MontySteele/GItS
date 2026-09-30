@@ -81,18 +81,6 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// </summary>
     public bool Spent { get; set; }
 
-#if PROTOTYPE_CARDS
-    /// <summary>
-    /// VARKA (seat fixes 2026-09-29): the card whose hit put this aura on,
-    /// for the rest of that card's play; null otherwise. Absorb and Boreas's
-    /// Fang read only an aura that stood BEFORE the hit, so a Charlotte on a
-    /// bare enemy leaves her Cryo fresh and the Fang unused ("a Knight never
-    /// Absorbs its own paint"). Set by <c>KleeElementalHooks</c> where it
-    /// applies the aura, cleared there when the play ends.
-    /// </summary>
-    public CardModel? PaintedBy { get; set; }
-#endif
-
     /// <summary>The spent face while <see cref="Spent"/>; the ruled face
     /// otherwise, and always on a canonical copy (`IsMutable` first, the
     /// guard every selector in this mod carries).</summary>
@@ -234,20 +222,6 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         if (!props.IsPoweredAttack()) return 1m;
 
         var trigger = ElementOf(cardSource, dealer);
-#if PROTOTYPE_CARDS
-        // VARKA (QUARANTINED): a hit this aura will be ABSORBED from reacts
-        // with nothing, so it forecasts no amplifier; one that Swirls because
-        // the Wind is already held forecasts as the Anemo hit it becomes.
-        // The same pure decision the lifecycle below carries out.
-        switch (VarkaAbsorb.Decide(this, dealer, cardSource))
-        {
-            case AbsorbOutcome.Absorb:
-                return 1m;
-            case AbsorbOutcome.SwirlInstead:
-                trigger = Element.Anemo;
-                break;
-        }
-#endif
         if (trigger == Element.None) return 1m;
 
         // Spent-aware (the element port): a switched trigger on a spent aura
@@ -346,26 +320,6 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         if (!props.IsPoweredAttack()) return;
 
         var trigger = ElementOf(cardSource, dealer);
-#if PROTOTYPE_CARDS
-        // VARKA (QUARANTINED, prototype batch one). ABSORB: an Absorb card, or
-        // Boreas's Fang on the turn's first non-Anemo Attack, meets a FRESH
-        // aura -- it comes off this enemy and he gains its Wind, with no
-        // spread, no flat 2 and no reaction; holding that Wind already, the
-        // hit Swirls instead, whatever element the card carries. Before the
-        // element check, because a base Strike carries none and the Fang
-        // still takes it. With the arm off the decision is always None.
-        switch (VarkaAbsorb.Decide(this, dealer, cardSource))
-        {
-            case AbsorbOutcome.Absorb:
-                await VarkaAbsorb.Take(choiceContext, this, dealer!, cardSource);
-                return;
-            case AbsorbOutcome.SwirlInstead:
-                VarkaAbsorb.NoteFang(dealer, cardSource);
-                VarkaAbsorb.NoteSwirlInstead(this);
-                trigger = Element.Anemo;
-                break;
-        }
-#endif
         if (trigger == Element.None) return;
 
         switch (TriggerRules.Outcome(Element, Spent, trigger))

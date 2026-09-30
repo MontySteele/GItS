@@ -449,12 +449,16 @@ public class ArmKeywordTipTests
         // the relic's token, named by What the Tokoyo Returns. (The short
         // word `Casket` shares `ForCasket` with the relic's full name.)
         //
-        // FORTY-FOUR with Varka's prototype batch one (2026-09-29): `ForAbsorb`,
-        // `ForWind` and `ForKnight`, his three words.
+        // FORTY-FOUR with Varka's prototype batch one (2026-09-29), and still
+        // forty-four with his Oath rework (2026-09-29): `ForOath`,
+        // `ForCurrentElement` and `ForKnight`, his three words (`ForAbsorb`
+        // and `ForWind` retired with the Winds).
         Assert.Equal(44, attaches.Count);
-        Assert.Contains(attaches, m => m.Name == "ForAbsorb");
-        Assert.Contains(attaches, m => m.Name == "ForWind");
+        Assert.Contains(attaches, m => m.Name == "ForOath");
+        Assert.Contains(attaches, m => m.Name == "ForCurrentElement");
         Assert.Contains(attaches, m => m.Name == "ForKnight");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForAbsorb");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForWind");
         Assert.Contains(attaches, m => m.Name == "ForOpenTheCasket");
         Assert.Contains(attaches, m => m.Name == "ForFade");
         Assert.Contains(attaches, m => m.Name == "ForLyney");

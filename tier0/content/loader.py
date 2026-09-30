@@ -21,6 +21,7 @@ from tier0.content import yaml_memo
 from tier0.engine import companion_standins
 from tier0.engine import furina_stage
 from tier0.engine import state as state_mod
+from tier0.engine import varka_oath
 from tier0.engine.state import Card, Enemy, Player, sly_riders
 
 CONTENT_DIR = Path(__file__).parent
@@ -457,8 +458,9 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         return []
     raw = yaml_memo.safe_load(path.read_text(encoding="utf-8")) or []
     shipped = _card_index()
-    # VARKA (prototype batch one) owns rows here and nowhere else: C# first,
-    # no sim twin until Balance, so his rows are schema-checked and never run.
+    # VARKA owns rows here and nowhere else. His rules are
+    # `tier0/engine/varka_oath.py`, behind `varka_oath.VARKA_OATH` (off), so
+    # his rows are schema-checked always and resolve only with the switch on.
     known_characters = {"klee", "furina", "kokomi", "varka"}
     seen: set[str] = set()
     cards: list[Card] = []
@@ -800,6 +802,11 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
             if not _effects.is_known_predicate(name):
                 raise ValueError(
                     f"card {card_id!r}: unknown predicate {name!r}")
+        if op == "varka":
+            # VARKA's one op: the kind must be one of his rules and carry
+            # exactly the numeric fields that rule prints -- the codegen's
+            # `VARKA_KINDS` / `VARKA_KIND_FIELDS` check, taken here too.
+            varka_oath.validate_op(card_id, fx)
         if op == "plant_bomb" and fx.get("wide_if") is not None:
             # R244 (Coven Errand). `wide_if:` is the SECOND door into the
             # predicate vocabulary and takes the same load-time check the
@@ -1069,7 +1076,7 @@ def _card_prototype(card_id: str) -> Card:
         card = upgrades.apply_upgrade(base)
     elif ((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL
            or C.COMPANION_OVERHAUL or C.KOKOMI_OVERHAUL
-           or furina_stage.FURINA_STAGE)
+           or furina_stage.FURINA_STAGE or varka_oath.VARKA_OATH)
             and plain.startswith(PROTOTYPE_ID_PREFIX)):
         # THE ONE DOOR THE SPARK ARM OPENS INTO THE QUARANTINE, and it is
         # exactly as wide as it has to be. `_starter_ids` substitutes two
@@ -1110,6 +1117,11 @@ def _card_prototype(card_id: str) -> Card:
         # table still carries the row, because `upgrades._prototype_deltas`
         # derives campfire reachability from it; this branch is simply reached
         # first.
+        #
+        # AND VARKA'S OATH REWORK (`varka_oath.VARKA_OATH`), same door, no
+        # wider: his starter and every card his rules create
+        # (`varka_oath.build_player`, Boreas's Fang, Knights' Roll Call) are
+        # `proto_vk_` id STRINGS resolved back through here.
         card = _prototype_index()[plain]
     else:
         index = _card_index()

@@ -59,7 +59,7 @@ public sealed class ProtoVkKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaeya: Frostgnaw"),
-        ("description", "Deal {CalculatedDamage:diff()} damage."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
