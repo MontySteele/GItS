@@ -36,13 +36,15 @@ VARIANTS (the paper's picks), per fight on the VarkaState:
   * `apply_oath=False` -- pick 2 option 2: Oath from Swirls only.
 
 READINGS TAKEN WHERE THE PAPER IS SILENT (each flagged in the report):
-  * "APPLIES" = the hit leaves or refreshes an aura of that element on a live
-    enemy (a clean enemy, or one already wearing it, fresh or spent). A hit
-    that REACTS with a different aura applies nothing. sec.11.3's worked turn
-    reads this way (Ascension's Hydro hit on a spent Hydro "refreshes the aura
-    (Hydro Oath 5)").
-  * A Swirl's SPREAD copies (and a Converging Winds landing) are not Varka
-    applying the element: the Swirl's own +1 is the whole credit.
+  * THE OATH EVENT (second spec update, 2026-09-29, over the paper text):
+    +1 for each direct application of the element to a live enemy by
+    Varka's cards (a Knight, Favonius Drill, Ascension's elemental hit),
+    INCLUDING one that reacts instead of leaving an aura; each hit of a
+    multi-hit card counts. +1 for each actual Swirl of an aura of it.
+  * A Swirl's SPREAD copies and a Converging Winds landing (and any
+    reaction it sets off) do NOT count: `varka_paper.intercept_hit` returns
+    before this module is asked while a landing resolves, and a spread copy
+    is placed by `apply_aura`, never through `resolve_hit`.
   * An element-changing Knight counts as a change for Boreas Unbound when
     Varka had no current element yet (none -> Pyro is a change).
   * Oath gained with no current element (Sworn Brotherhood before a Knight)
@@ -124,8 +126,9 @@ def on_hit_pre(state, vs, enemy, element) -> None:
     """Before the shared rule resolves an element hit: an application?"""
     if not vs.apply_oath or element not in ELEMENTS or not enemy.alive:
         return
-    if enemy.aura is None or enemy.aura == element:
-        gain_oath(state, vs, element, 1, "apply")
+    # 2026-09-29 second spec update: EVERY direct application counts,
+    # including one that reacts instead of leaving an aura.
+    gain_oath(state, vs, element, 1, "apply")
 
 
 def on_swirl(state, vs, enemy, aura) -> None:

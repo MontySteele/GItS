@@ -110,6 +110,21 @@ def test_electro_pays_2_to_all_and_cryo_pays_vulnerable():
     assert a.powers.get("vulnerable", 0) == 2
 
 
+@pytest.mark.usefixtures("arm")
+def test_a_reacting_application_still_gains_oath():
+    # Second spec update: every direct application counts, reacting or not;
+    # spread copies do not.
+    st = oath_state(n=2)
+    a, b = st.enemies
+    vs = st.player.varka
+    reactions.apply_aura(st, a, "hydro")
+    play(st, "amber_fiery_rain", aim=a)        # Pyro on Hydro: Vaporize
+    assert a.aura is None and vs.oath["pyro"] == 1
+    play(st, "barbara_shining_miracle")        # paints both: +2 Hydro
+    play(st, "windbound_execution")            # two Swirls: +2 Hydro
+    assert vs.oath["hydro"] == 4               # no credit for spread copies
+
+
 def test_headwind_is_cut_from_the_pool():
     assert sum(len(v) for v in O.POOL.values()) == 23
     assert [len(O.POOL[r]) for r in ("common", "uncommon", "rare")] == [

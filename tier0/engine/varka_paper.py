@@ -431,15 +431,9 @@ def _on_swirl_rev2(state, vs, enemy) -> None:
         state.emit("block", amount=blk)
     if _wind_on(vs, "electro") and vs.electro_turn != state.turn:
         vs.electro_turn = state.turn
-        if vs.winds_set == "B1":
-            # Batch one as built (sec.10.1): the first Swirl each turn
-            # gives 1 Energy. Otherwise the 2.1 Winds.
-            state.player.energy += 1
-            vs.wind_value["electro_draws"] += 1
-        else:
-            n = W2_ELECTRO_DRAW if w2 else R2_ELECTRO_DRAW
-            state.draw(n)
-            vs.wind_value["electro_draws"] += n
+        n = W2_ELECTRO_DRAW if w2 else R2_ELECTRO_DRAW
+        state.draw(n)
+        vs.wind_value["electro_draws"] += n
     if _wind_on(vs, "cryo") and enemy.alive:
         powers.apply_power(state, enemy, "weak", R2_CRYO_WEAK)
         vs.wind_value["cryo_weak"] += R2_CRYO_WEAK
