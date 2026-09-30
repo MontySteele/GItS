@@ -279,6 +279,19 @@ payouts):
    pilot holds them), Northwind Avatar 0.56 (3 Energy). No new card looks
    dominant.
 
+Round three (pick 2 ruled; E-AoE; PR #768 sec.9):
+
+8. **Baron Bunny closes Pyro's gap:** Pyro 44.2 against Hydro 48.8 (was
+   26.5). The contingency Pyro payout is not needed.
+9. **Electro still trails by 15** (33.5), and Lisa at 4 per Attack moves it
+   under a point. On average only 0.7 Attacks come before her, so she gives
+   2.1 Block a play at 3 per Attack: the card has no floor. Pick 5.
+10. **Pick 3's lifts** raise Standard from 7.8 to 10.6 Block a fight and
+    March from 14.7 to 22.6, worth 1 to 2 points per start. **Pick 4's**
+    cost-2 Northwind Avatar doubles its play rate (0.57 to 1.20 per fight
+    held) and barely moves act won: it becomes playable, not stronger.
+11. Ascension outliers: 3 to 5 in about 12,650 focused fights; largest 108.
+
 ## Picks
 
 1. **Electro's payout: E-AoE (3 damage to ALL).** Default, from sec.10 item 1.
@@ -303,3 +316,8 @@ payouts):
    4 [5] Block; Dawn Wind's March 2 to 3 Block per Oath gain.
 4. **Northwind Avatar** at 3 Energy is rarely played. Default: cost 2, damage
    10 [14] and 10 [14], plus 2 per Oath.
+5. **Give Lisa a floor.** Default: "Apply Electro to an enemy. Gain 3 [4]
+   Block, plus 3 [4] for each Attack you played this turn." It keeps the
+   per-Attack scaling [USER] asked for and never gives less than a small
+   Block (the same fix Sango Isshin and Feint took on Kokomi). Then re-sim
+   Electro.
