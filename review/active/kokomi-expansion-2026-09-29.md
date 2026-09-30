@@ -67,9 +67,11 @@ the now-line answers this turn, the Plan buys what a head start buys.
   one Plan is waiting, gain 1 Energy.
 - **Masterstroke** (Attack, 3, R): Retain. Play on the Bake-Kurage. Plan:
   Deal 30 [40] damage.
-- **All Streams Flow to the Sea** (Skill, 2, R; her C5): Exhaust. Cancel all
-  your Plans; their cards go to your discard pile. Your next Plan this turn
-  is carried out once, plus once for each Plan cancelled.
+- **All Streams Flow to the Sea** (Skill, 1 [0], R; her C5): Exhaust. Cancel
+  all your Plans and regain their cost. Your next Plan this turn is carried
+  out once more for each Plan cancelled. (Main session, 2026-09-29: was cost
+  2 with the cancelled Energy lost; the build sim played it 2 times in 252
+  fights.)
 
 **Tide Control (4 Uncommon, 3 Rare)**
 - **Drowning Pressure** (Attack, 1, U): Deal 4 [6] damage for each debuff on

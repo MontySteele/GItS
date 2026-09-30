@@ -4354,7 +4354,7 @@ wrong).**
 
 **Upgrades the paper leaves open.** Five rows printed no bracketed upgrade (Grand Design has since been given cost 0, below).
 The others take the Prototype-stage rule's default, as every unruled row does:
-All Streams (costs 1), Tidal Resonance and
+Tidal Resonance and
 Coral Crash (each also draws 1). Brace for the Tide's default would have
 removed Exhaust, which paper sec.4 guard 2 rules out ("the multiplier is
 spent"), so it costs 0 instead -- flagged in the build PR for a ruling.
@@ -4404,4 +4404,17 @@ median default score of the other new cards. Re-run, same command:
   fights held -- still dead. It needs a Plan waiting mid-turn (the queue
   drains each morning) and 3 Energy after that write, which a 3-Energy turn
   meets only after a 0-cost write.
+
+**All Streams Flow to the Sea, the main session's last change (2026-09-29).**
+Cost 1 [0], "Cancel all your Plans and regain their cost" -- the Energy
+actually paid, Second Thoughts' refund -- "Your next Plan this turn is carried
+out once more for each Plan cancelled." It was dead because a cancelled
+Plan's Energy was lost (2 plays in 252 fights). The harness plays it with 2+
+Plans waiting and a Plan card affordable after the refund, then writes the
+most expensive such card. Re-run: 7 plays in 252 fights held (0.03 per fight,
+still flagged dead); each play cancelled 2 Plans, regained 2 Energy and
+carried its next Plan out 3.9 times on average (Bubble Ward, Feigned Retreat,
+Undercurrent Snare, Feint, Slack Water, Jellyfish Drift). Big Plan's
+gauntlet is unchanged at 47.7%. The limit is the stock pilot, which writes
+its Plans one at a time and rarely holds a Plan card once two wait.
 

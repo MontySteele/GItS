@@ -1759,12 +1759,12 @@
 
 - {id: proto_kk_all_streams_flow_to_the_sea, name: "All Streams Flow to the Sea", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: skill, rarity: rare, exhaust: true,
-   # Her C5. The paper's face is 140 of the 120 ceiling; the cards already
-   # sit in the discard pile, so that clause is the one cut (provenance note).
-   description: "Exhaust. Cancel all your [gold]Plans[/gold]. Your next [gold]Plan[/gold] this turn is carried out once more for each [gold]Plan[/gold] cancelled.",
-   # No upgrade on the paper: the Prototype-stage rule's default stands.
-   effects: [{op: kokomi, kind: all_streams}]}
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   # Her C5. Main session, 2026-09-29: cost 1 [0] and the Energy paid is
+   # regained (the sim played it twice in 252 fights). Provenance note.
+   description: "Exhaust. Cancel all your [gold]Plans[/gold] and regain their cost. Your next [gold]Plan[/gold] this turn is carried out once more for each [gold]Plan[/gold] cancelled.",
+   effects: [{op: kokomi, kind: all_streams}],
+   upgrade: {cost: -1}}
 
 # Tide Control: Weak and Vulnerable, and the payoffs that read them.
 

@@ -54,9 +54,8 @@ wrapper, an INSTRUMENT SURFACE and not a design claim:
   * Open the Casket when it holds 6, or from turn 6 when it holds any (the
     feed pass's wrapper);
   * her Powers are played first when affordable;
-  * All Streams when 1+ Plan waits and a Plan card costing 1+ is affordable
-    after it (2+ needs 4 Energy and never fired), then that card is written
-    on the Bake-Kurage; Brace for the
+  * All Streams when 2+ Plans wait and a Plan card is affordable after the
+    refund, then the most expensive such card is written on the Bake-Kurage; Brace for the
     Tide when an enemy intends to attack;
   * a DUSK Plan is written when an enemy intends to attack (the stock rule
     writes a Plan only when none does, which is backwards for Dusk -- applied
@@ -249,17 +248,16 @@ def make_pilot():
             if cost > p.energy:
                 continue
             if c.id == P + "all_streams_flow_to_the_sea":
-                # 1+ Plan waiting and a Plan card costing 1+ still
-                # affordable after it. The main session's example asked for
-                # 2+, which needs 4 Energy on her 3 and never fired at n =
-                # 400 (0 plays in 252 fights). The pilot then writes that
-                # card next (`_AFTER_STREAMS`).
-                left = p.energy - cost
-                big = [o for o in hand if o is not c and o.plan
-                       and 1 <= combat.card_cost(state, o) <= left]
-                if state.kk_plan_queue and big:
+                # Main session, 2026-09-29: 2+ Plans waiting and a Plan card
+                # affordable after the refund; then write the most
+                # expensive such card (`_AFTER_STREAMS`).
+                left = (p.energy - cost
+                        + sum(e.paid for e in state.kk_plan_queue))
+                fit = [o for o in hand if o is not c and o.plan
+                       and combat.card_cost(state, o) <= left]
+                if len(state.kk_plan_queue) >= 2 and fit:
                     _AFTER_STREAMS[id(state)] = max(
-                        big, key=lambda o: combat.card_cost(state, o))
+                        fit, key=lambda o: combat.card_cost(state, o))
                     return c
             if c.id == P + "brace_for_the_tide" and attacking \
                     and not any(e.card_id == c.id
@@ -354,18 +352,20 @@ def fight(deck, enemies, seed, hp):
     writes = defaultdict(int)
     close = []
     streams = []
+    refunds = []
     for r in s.log:
         ev = r.get("event")
         if ev == "play":
             plays[r["card"]] += 1
         elif ev == "plan_written":
             writes[r["card"]] += 1
+            if streams and streams[-1][2] is None:
+                streams[-1][2] = r.get("card")
         elif ev == "turn_close":
             close.append(int(r.get("block", 0)))
         elif ev == "plan_all_streams":
             streams.append([int(r.get("cancelled", 0)), 0, None])
-        elif ev == "plan_written" and streams and streams[-1][2] is None:
-            streams[-1][2] = r.get("card")
+            refunds.append(int(r.get("refund", 0)))
         elif (ev == "plan_carried_out" and streams
               and streams[-1][2] == r.get("card")):
             streams[-1][1] += 1
@@ -374,6 +374,7 @@ def fight(deck, enemies, seed, hp):
             "hp_end": max(0, s.player.hp), "plays": dict(plays),
             "writes": dict(writes), "close_block": close,
             "streams": [(c, t) for c, t, _ in streams],
+            "refunds": refunds, "stream_cards": [w for _, _, w in streams],
             "casket": s.kk_casket}
 
 
@@ -655,7 +656,7 @@ def sec_cards(out, by, gb):
     out("|---|---|---|---|---|---|")
     from tier0.content import loader
     owner = {P + c: d for d, cs in NEW.items() for c in cs}
-    cancelled = []
+    cancelled, refunds, wrote = [], [], []
     flags = []
     for cid in NEW_IDS:
         cells = {}
@@ -698,11 +699,18 @@ def sec_cards(out, by, gb):
                     held += 1
                     plays += f["plays"].get(ast, 0)
                     cancelled.extend(f["streams"])
+                    refunds.extend(f["refunds"])
+                    wrote.extend(w for w in f["stream_cards"] if w)
     out(f"\nAll Streams Flow to the Sea: played {plays} times in {held} "
         f"fights held ({(plays / held) if held else 0:.2f} per fight); Plans "
         f"cancelled per play {m(c for c, _ in cancelled) if cancelled else '-'}; "
         f"the Plan it multiplied was carried out "
-        f"{m(t for _, t in cancelled) if cancelled else '-'} times on average.")
+        f"{m(t for _, t in cancelled) if cancelled else '-'} times on average; "
+        f"Energy regained per play {m(refunds) if refunds else '-'}; the Plans "
+        f"it multiplied: "
+        + ", ".join(f"{k[len(P):]} {v}" for k, v in sorted(
+            __import__("collections").Counter(wrote).items(),
+            key=lambda kv: -kv[1])[:6]) + ".")
 
 
 def main(argv=None):

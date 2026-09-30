@@ -104,8 +104,11 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   still trails volume (47.1 against 56.1). Dusk Guard with Grace and Coral
   Crash never carries 30 Block into the enemy turn (0.1% of turns); 9.8% of
   its gauntlet fights pass turn 15 (others about 1%), on too little damage
-  rather than a wall. Flag: All Streams Flow to the Sea stays dead (2 plays
-  in 252 fights). Next: [USER] plays.
+  rather than a wall. All Streams Flow to the Sea is now cost 1 [0] and
+  regains the Energy paid for the Plans it cancels; still dead in the sim (7
+  plays in 252 fights, each multiplying its Plan to about 4 carry-outs --
+  the stock pilot rarely has 2 Plans waiting and a Plan card left). Next:
+  [USER] plays.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any

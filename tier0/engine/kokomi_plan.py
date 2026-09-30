@@ -2491,9 +2491,9 @@ def tidal_riposte(state: CombatState, enemy: Enemy, blocked: int,
 
 
 def all_streams(state: CombatState) -> None:
-    """ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans; their cards go to
-    your discard pile. Your next Plan this turn is carried out once, plus once
-    for each Plan cancelled." No cost is refunded. A written card already sits
+    """ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans and regain their
+    cost. Your next Plan this turn is carried out once more for each Plan
+    cancelled." The refund is the Energy actually paid for each Plan. A written card already sits
     in the discard pile (or the exhaust pile, for an Exhaust row), so the
     cancel moves nothing; the gift waits on the state for the next card
     written on the Bake-Kurage this turn (`schedule`).
@@ -2501,9 +2501,15 @@ def all_streams(state: CombatState) -> None:
     if not live(state):
         return
     n = len(state.kk_plan_queue)
+    # Main session, 2026-09-29: "regain their cost" -- the Energy actually
+    # paid for each, Second Thoughts' refund.
+    refund = sum(max(0, int(e.paid)) for e in state.kk_plan_queue)
     state.kk_plan_queue.clear()
+    if refund:
+        state.player.energy += refund
+        state.emit("energy", amount=refund)
     state.kk_next_plan_extra = n
-    state.emit("plan_all_streams", cancelled=n)
+    state.emit("plan_all_streams", cancelled=n, refund=refund)
 
 
 def kind(state: CombatState, fx: dict, card: Card, target) -> None:

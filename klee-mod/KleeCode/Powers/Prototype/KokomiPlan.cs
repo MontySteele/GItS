@@ -749,9 +749,9 @@ public static class KokomiPlan
         Pending(kokomi?.Player).Sum(e => System.Math.Max(0, e.Paid));
 
     /// <summary>
-    /// ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans; their cards go to
-    /// your discard pile. Your next Plan this turn is carried out once, plus
-    /// once for each Plan cancelled." No cost comes back. A written card is a
+    /// ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans and regain their
+    /// cost. Your next Plan this turn is carried out once more for each Plan
+    /// cancelled." The refund is the Energy actually paid for each. A written card is a
     /// played card, so it already sits in the discard pile (or the exhaust
     /// pile, for an Exhaust row) and nothing is moved. The gift waits on the
     /// ledger for the next card written on the Bake-Kurage this turn
@@ -765,13 +765,18 @@ public static class KokomiPlan
         if (player == null) return;
         Rebase(kokomi);
         var cancelled = 0;
+        var refund = 0;
         if (_queues.TryGetValue(player, out var queue) && queue.Count > 0)
         {
             cancelled = queue.Count;
+            // Main session, 2026-09-29: "regain their cost" -- the Energy
+            // actually paid for each (Second Thoughts' refund).
+            refund = queue.Sum(e => System.Math.Max(0, e.Paid));
             queue.Clear();
             await Sync(choiceContext, kokomi, "rule:plans_cancelled",
                        cancelled);
         }
+        if (refund > 0) await PlayerCmd.GainEnergy(refund, player);
         KokomiOverhaulLedger.For(kokomi).NextPlanExtra = cancelled;
     }
 

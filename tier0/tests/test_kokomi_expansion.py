@@ -206,20 +206,24 @@ def test_the_long_game_pays_on_exactly_one_waiting(overhaul):
     assert st.player.energy == 4
 
 
-def test_all_streams_cancels_and_multiplies_the_next_plan(overhaul):
+def test_all_streams_cancels_refunds_and_multiplies_the_next_plan(overhaul):
+    """Main session, 2026-09-29: "Cancel all your Plans and regain their
+    cost." The refund is the Energy actually paid."""
     enemy = make_enemy(hp=300, intents=QUIET)
     st = kokomi_state(enemies=[enemy])
-    _write(st, "proto_kk_nip")
-    _write(st, "proto_kk_nip")
-    _write(st, "proto_kk_all_streams_flow_to_the_sea", energy=2)
+    _write(st, "proto_kk_nip")                     # 0 paid
+    _write(st, "proto_kk_surging_shoal", energy=2)  # 2 paid
+    _write(st, "proto_kk_all_streams_flow_to_the_sea", energy=1)
     assert st.kk_plan_queue == []
-    assert st.player.energy == 0                   # nothing refunded
+    assert st.player.energy == 2                   # the 2 paid comes back
     assert st.kk_next_plan_extra == 2
-    _write(st, "proto_kk_surging_shoal")
+    _write(st, "proto_kk_surging_shoal", energy=2)
     assert st.kk_plan_queue[0].extra == 2
     assert st.kk_next_plan_extra is None
     kokomi_plan.resolve_all(st)
     assert enemy.hp == 300 - 3 * 22                # once, plus once per cancel
+    assert _row("proto_kk_all_streams_flow_to_the_sea").cost == 1
+    assert _up("proto_kk_all_streams_flow_to_the_sea").cost == 0
 
 
 def test_the_all_streams_gift_dies_with_the_turn(overhaul):
