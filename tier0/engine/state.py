@@ -888,6 +888,10 @@ class Player(Fighter):
     # turn, used.
     stage_blocked: dict = field(default_factory=dict)
     stage_returned: bool = False
+    # 2026-09-29 (QUARANTINED with the stage): what enemy hits took from the
+    # FRONT performer, whoever it was, since Sigewinne's last act, counted
+    # while she is on stage (the medic's reading).
+    stage_front_lost: dict = field(default_factory=dict)
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
                                   # designation re-aims, never stacks. The

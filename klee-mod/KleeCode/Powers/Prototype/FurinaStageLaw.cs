@@ -127,9 +127,19 @@ public static class FurinaStageLaw
         ActWriothesleyBase + ActWriothesleyRate * lost
         + ActWriothesleyBlockedRate * blocked;
 
-    /// <summary>Sigewinne gives this much of her Fanfare to the performer
-    /// behind her (what she has, if less).</summary>
-    public const int ActSigewinneGift = 3;
+    /// <summary>Sigewinne the medic (2026-09-29, [USER]: "I think Siegwinne
+    /// needs to be rethought - she's strictly fanfare-negative while she's
+    /// summoned"): her act is free, and the front performer regains half the
+    /// Fanfare hits took from it since her last act, rounded down, at least
+    /// this. Mirrors <c>furina_stage.ACT_SIGEWINNE_HEAL_FLOOR</c>.</summary>
+    public const int ActSigewinneHealFloor = 2;
+
+    /// <summary>Sigewinne's heal: half of <paramref name="frontLost"/>,
+    /// rounded down, at least <see cref="ActSigewinneHealFloor"/>. Mirrors
+    /// <c>furina_stage.sigewinne_heal</c>.</summary>
+    public static int SigewinneHeal(int frontLost) =>
+        System.Math.Max(ActSigewinneHealFloor,
+                        frontLost <= 0 ? 0 : frontLost / 2);
 
     /// <summary>Charlotte: each other performer gains this much.</summary>
     public const int ActCharlotteGift = 1;

@@ -2356,10 +2356,10 @@
    authored_by: [claude],
    replaces: deep_breath,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   # The guest seat round (2026-09-25, 0.2.3794): "he joins at the back,
-   # where hits never reach him, so his act lands nothing." He is the guest
-   # who wants the front, so his card puts him there; the others shift back.
-   description: "Summon Wriothesley at the front with 5 [gold]Fanfare[/gold]. On a full stage, the back one [gold]Bow[/gold]s instead and gives him its [gold]Fanfare[/gold].",
+   # The guest seat round (2026-09-25): "he joins at the back, where hits
+   # never reach him". 2026-09-29, [USER]: "Can we pin him to the front of
+   # the Stage while he's present?" He holds the front while on stage.
+   description: "Summon Wriothesley with 5 [gold]Fanfare[/gold]. He holds the front while on stage. On a full stage, the back one [gold]Bow[/gold]s for him.",
    effects: [{op: stage_guest, member: wriothesley, amount: 5, seat: front}]}
 
 - {id: proto_fs_guest_star_sigewinne, name: "Guest Star: Sigewinne", character: furina,

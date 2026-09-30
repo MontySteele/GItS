@@ -108,7 +108,11 @@ ACT_WRIOTHESLEY_RATE = 2      # plus this per Fanfare hits took since his act,
 ACT_WRIOTHESLEY_BLOCKED_RATE = 1  # plus this per damage her Block stopped
 #                               while he stood in front ("he also reflects
 #                               the Blocked damage").
-ACT_SIGEWINNE_GIFT = 3        # to the performer behind her.
+# 2026-09-29, [USER]: "I think Siegwinne needs to be rethought - she's
+# strictly fanfare-negative while she's summoned." Rethought as the medic:
+# her act is FREE, and the front performer regains half the Fanfare hits
+# took from it since her last act, rounded down, at least this.
+ACT_SIGEWINNE_HEAL_FLOOR = 2
 ACT_CHARLOTTE_GIFT = 1        # to each other performer.
 ACT_LYNETTE_DAMAGE = 3        # Anemo damage to a random enemy, one with an
 #                               aura if any (2026-09-25 night: the act always
@@ -123,6 +127,14 @@ ACT_LYNEY_DAMAGE = 6
 ACT_ESCOFFIER_PRICE = 3
 ACT_ESCOFFIER_GIFT = 2
 ACT_ESCOFFIER_DAMAGE = 3
+
+#: 2026-09-29, [USER]: "One issue on Wriothesley is that keeping him in the
+#: front was actually hard. Can we pin him to the front of the Stage while
+#: he's present?" While he is on the stage he holds the FRONT seat: nothing
+#: moves another performer into it or him out of it, and he leaves only by
+#: Bowing. A NAME, so `lint_constant_parity` does not read it. C# twin:
+#: `FurinaStageLedger.FrontHolder`.
+FRONT_HOLDER = "wriothesley"
 
 #: The elements the guests' damage acts carry (the Guest Cast's LAW
 #: amendment: a guest on Furina's stage may carry its element).
@@ -443,6 +455,34 @@ def _seats(player) -> list:
     return player.stage
 
 
+def front_held(player) -> bool:
+    """Is the front seat HELD (2026-09-29)? True while Wriothesley stands
+    in it: a move that would put another performer there, or take him out
+    of it, does not happen. C# twin: `FurinaStageLedger.FrontHeld`."""
+    seats = stage(player)
+    return bool(seats) and seats[0][0] == FRONT_HOLDER
+
+
+def _held(state, by: str) -> bool:
+    """A seat move asks this first. When the front is held nothing moves,
+    and the log says why ("Wriothesley holds the front."), so the card
+    never silently does nothing."""
+    if not front_held(state.player):
+        return False
+    state.emit("stage_front_held", member=FRONT_HOLDER, by=by)
+    return True
+
+
+def _place(seats: list, pair) -> None:
+    """An arrival at the back-most empty seat, except the front holder, who
+    arrives in FRONT (a Five-Century return, Let the People Rejoice's
+    return): while he is on the stage he holds the front (2026-09-29)."""
+    if pair[0] == FRONT_HOLDER:
+        seats.insert(0, pair)
+    else:
+        seats.append(pair)
+
+
 # ----------------------------------------------------------------------
 # THE FANFARE LEDGER. INSTRUMENT ONLY, the fence `state.spark_ledger` carries
 # one arm over: nothing reads it back to decide anything, and it is not on the
@@ -607,7 +647,8 @@ def summon(state, member: str, fanfare: int = SUMMON_FANFARE) -> None:
         state.emit("stage_summon", member=member, fanfare=int(fanfare),
                    seats=len(seats), rotated=False)
     else:
-        leaver, carried = seats.pop(0)
+        # 2026-09-29: a held front stays; the one behind him makes room.
+        leaver, carried = seats.pop(1 if front_held(p) else 0)
         seats.append([member, carried])
         state.emit("stage_rotate_out", member=leaver, fanfare=carried,
                    arriving=member)
@@ -642,10 +683,14 @@ def recast_front(state, newcomer: str | None = None,
     if len(seats) < capacity(p):
         return
     member = newcomer or state.rng.choice(PERFORMERS)
-    pair = seats.pop(0)
+    # 2026-09-29: Wriothesley holds the front, so the performer directly
+    # behind him Bows and makes room instead; the newcomer still arrives at
+    # the back holding its Fanfare. C# twin: `BowFromFront`.
+    index = 1 if front_held(p) else 0
+    pair = seats.pop(index)
     leaver, kept = pair
     _unrest(p, pair)
-    exit_ = _exit(p, leaver, 0, held=kept)
+    exit_ = _exit(p, leaver, index, held=kept)
     state.emit("stage_leave", member=leaver, bowed=True, reason="recast",
                fanfare=kept)
     _bow(state, leaver, exit_)
@@ -712,6 +757,8 @@ def rotate(state) -> None:
     if not seats:
         state.emit("stage_rotate_whiffed")
         return
+    if _held(state, "scene_change"):
+        return
     seats.append(seats.pop(0))
     state.emit("stage_scene_change", company=[m for m, _f in seats])
 
@@ -757,7 +804,8 @@ def _leave(state, index: int, *, bowed: bool, reason: str,
 def _exit(player, member: str, index: int, held: int,
           stayer=None) -> dict:
     """What a Bow reads, taken as the performer leaves (the Guest Cast,
-    2026-09-25): the Fanfare it HELD (Navia), the seat it stood in (Sigewinne gives to the one behind), and
+    2026-09-25): the Fanfare it HELD (Navia), the seat it stood in, what hits
+    took from the front since its last act (Sigewinne, 2026-09-29), and
     what it LOST since its last act (Wriothesley, the hit that took him down
     included). A guest's loss count leaves the stage with it. For a performer
     EMPTIED -- a hit, a Spend, a payment, a cash-out, Let the People Rejoice --
@@ -771,13 +819,16 @@ def _exit(player, member: str, index: int, held: int,
         lost = int(player.stage_lost.get(member, 0)) if member in GUESTS else 0
         blocked = (int(player.stage_blocked.get(member, 0))
                    if member in GUESTS else 0)
+        front_lost = int(player.stage_front_lost.get(member, 0))
     else:
         lost = (int(player.stage_lost.pop(member, 0)) if member in GUESTS
                 else 0)
         blocked = (int(player.stage_blocked.pop(member, 0))
                    if member in GUESTS else 0)
+        front_lost = int(player.stage_front_lost.pop(member, 0))
     return {"member": member, "held": int(held), "former": int(index),
-            "lost": lost, "blocked": blocked, "stayer": stayer}
+            "lost": lost, "blocked": blocked, "front_lost": front_lost,
+            "stayer": stayer}
 
 
 def _lose(player, member: str, amount: int) -> None:
@@ -788,6 +839,13 @@ def _lose(player, member: str, amount: int) -> None:
     `FurinaStageLedger.Absorb`."""
     if amount > 0 and member in GUESTS:
         player.stage_lost[member] = int(player.stage_lost.get(member, 0)) + int(amount)
+    # 2026-09-29, Sigewinne the medic: what hits took from WHOEVER stood in
+    # front, counted on her while she is on the stage (herself in front
+    # included). Her act reads it and resets it. C# twin:
+    # `StageSeat.FrontLostSinceAct`, moved in `FurinaStageLedger.Absorb`.
+    if amount > 0 and any(m == "sigewinne" for m, _f in stage(player)):
+        player.stage_front_lost["sigewinne"] = (
+            int(player.stage_front_lost.get("sigewinne", 0)) + int(amount))
 
 
 def credit_blocked(state, blocked: int) -> None:
@@ -810,6 +868,13 @@ def wriothesley_act(lost: int, blocked: int) -> int:
     `FurinaStageLaw.WriothesleyAct`."""
     return (ACT_WRIOTHESLEY_BASE + ACT_WRIOTHESLEY_RATE * int(lost)
             + ACT_WRIOTHESLEY_BLOCKED_RATE * int(blocked))
+
+
+def sigewinne_heal(front_lost: int) -> int:
+    """Sigewinne the medic (2026-09-29): half of what hits took from the
+    front since her last act, rounded down, at least
+    `ACT_SIGEWINNE_HEAL_FLOOR`. C# twin: `FurinaStageLaw.SigewinneHeal`."""
+    return max(ACT_SIGEWINNE_HEAL_FLOOR, max(0, int(front_lost)) // 2)
 
 
 #: The bows hits have emptied performers into, waiting for `settle_hit`. On
@@ -876,7 +941,7 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
         p.stage_returned = True
         book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
         pair = [member, SUMMON_FANFARE]
-        _seats(p).append(pair)
+        _place(_seats(p), pair)
         p.stage_resting.append(pair)
         state.emit("stage_return", member=member, fanfare=SUMMON_FANFARE)
 
@@ -1228,7 +1293,7 @@ def bow_and_return(state) -> None:
         if member in GUESTS and any(m == member for m, _f in seats):
             continue
         book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
-        seats.append([member, SUMMON_FANFARE])
+        _place(seats, [member, SUMMON_FANFARE])
     state.emit("stage_encore_return", company=[m for m, _f in seats],
                fanfare=SUMMON_FANFARE)
 
@@ -1530,6 +1595,9 @@ def step_forward(state) -> None:
     if len(seats) < 2:
         state.emit("stage_step_forward_whiffed")
         return
+    # 2026-09-29: Wriothesley holds the front; nothing moves.
+    if _held(state, "step_forward"):
+        return
     seats.insert(0, seats.pop())
     state.emit("stage_step_forward", company=[m for m, _f in seats])
 
@@ -1820,28 +1888,17 @@ def guest_fanfare(state, member: str, pair, exit_, owed: list) -> bool:
         _pay(state, bank, ACT_CHEVREUSE_PRICE, member, owed)
         return True
     if member == "sigewinne":
-        if bow and self_ is not None:
-            # The Grand Finale's Bow in place: the gift goes where her act
-            # would send it, free.
-            at = next((i for i, s in enumerate(seats) if s is self_), -1)
-            if at >= 0 and len(seats) > 1:
-                to = seats[at + 1] if at + 1 < len(seats) else seats[0]
-                _gain(state, to, ACT_SIGEWINNE_GIFT, member)
-            return True
-        if bow:
-            index = (exit_ or {}).get("former", -1)
-            if seats and index >= 0:
-                heir = seats[index] if index < len(seats) else seats[0]
-                _gain(state, heir, ACT_SIGEWINNE_GIFT, member)
-            return True
-        others = [s for s in seats if s is not pair]
-        if not others:
-            return True
-        at = next(i for i, s in enumerate(seats) if s is pair)
-        to = seats[at + 1] if at + 1 < len(seats) else seats[0]
-        gift = min(ACT_SIGEWINNE_GIFT, pair[1])
-        _pay(state, pair, gift, member, owed)
-        _gain(state, to, gift, member)
+        # 2026-09-29, the medic: FREE, act and Bow alike. The front performer
+        # (herself, if she stands there) regains half of what hits took from
+        # the front since her last act, at least 2. A Bow that left reads its
+        # exit and heals whoever is in front once she has gone; Grand
+        # Finale's stay-Bow reads the seat she keeps.
+        if self_ is not None:
+            front_lost = int(p.stage_front_lost.get(member, 0))
+        else:
+            front_lost = int((exit_ or {}).get("front_lost", 0))
+        if seats:
+            _gain(state, seats[0], sigewinne_heal(front_lost), member)
         return True
     if member == "charlotte":
         for other in [s for s in seats if s is not self_]:
@@ -1922,6 +1979,7 @@ def _guest_act(state, member: str, *, pair, exit_) -> None:
     if pair is not None:
         p.stage_lost[member] = 0
         p.stage_blocked[member] = 0
+        p.stage_front_lost[member] = 0
     for gone in owed:
         if state.over or not p.alive:
             break
@@ -2003,6 +2061,9 @@ def swap_to_front(state, lyney) -> bool:
     at = next((i for i, s in enumerate(seats) if s is lyney), -1)
     if at <= 0:
         return False
+    # 2026-09-29: Wriothesley holds the front; Lyney stays where he is.
+    if _held(state, "swap"):
+        return False
     seats[0], seats[at] = seats[at], seats[0]
     state.emit("stage_reorder", company=[m for m, _f in seats], by="swap")
     return True
@@ -2019,6 +2080,9 @@ def reverse(state) -> None:
     seats = _seats(p)
     if len(seats) < 2:
         state.emit("stage_reorder_whiffed")
+        return
+    # 2026-09-29: Wriothesley holds the front; nothing moves.
+    if _held(state, "reverse"):
         return
     seats.reverse()
     state.emit("stage_reorder", company=[m for m, _f in seats], by="reverse")
@@ -2121,6 +2185,7 @@ def grand_finale(state) -> None:
         if pair[0] in GUESTS:
             p.stage_lost[pair[0]] = 0
             p.stage_blocked[pair[0]] = 0
+            p.stage_front_lost[pair[0]] = 0
 
 
 def set_verdict(state) -> None:

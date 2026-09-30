@@ -45,7 +45,7 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Wriothesley"),
-        ("description", "Summon Wriothesley at the front with {GuestFanfare:diff()} [gold]Fanfare[/gold]. On a full stage, the back one [gold]Bow[/gold]s instead and gives him its [gold]Fanfare[/gold]."),
+        ("description", "Summon Wriothesley with {GuestFanfare:diff()} [gold]Fanfare[/gold]. He holds the front while on stage. On a full stage, the back one [gold]Bow[/gold]s for him."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

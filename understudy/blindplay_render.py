@@ -1828,7 +1828,7 @@ STAGE_ACT_EFFECTS = {
     "navia": "{n} Geo to {who}",
     "wriothesley": "{n} Cryo to {who}",
     "chevreuse": "Furina gains 1 Energy next turn",
-    "sigewinne": "her gift is the line above",
+    "sigewinne": "the front performer's regain is the line above",
     "charlotte": "each other performer gains 1 Fanfare, as above",
     # 2026-09-25 night: her act deals 3 Anemo damage (a Swirl where the body
     # wore an aura; the reaction prints under "What reacted").
@@ -1847,6 +1847,12 @@ STAGE_REORDER_LINE = ("  - The performers changed seats: {who} now stands in "
                       "Bow.")
 STAGE_MOVE_LINE = ("  - **{who}** passed {n} Fanfare to the front "
                    "performer: {before} → {after}.")
+#: 2026-09-29, [USER]: "Can we pin him to the front of the Stage while he's
+#: present?" A seat move the held front refused (Step Forward, Revolving
+#: Stage, Plot Twist, Lyney's swap) is a line, so the card never silently
+#: does nothing.
+STAGE_HELD_LINE = ("  - **{who}** holds the front{by}. Nobody changed "
+                   "seats.")
 
 #: Chevalmarin's act where no single per-enemy figure exists.
 STAGE_ACT_SPREAD = "{n} in total, split across the enemies"
@@ -2534,6 +2540,9 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             # THE SUPPORTING POOL (2026-09-26): Plot Twist and Lyney's swap
             # move several performers at once; the stage line shows where.
             out.append(STAGE_REORDER_LINE.format(who=who))
+        elif row["event"] == "held":
+            out.append(STAGE_HELD_LINE.format(
+                who=row["name"], by=f" ({source})" if source else ""))
         elif row["event"] == "move":
             # Stage Whisper: Fanfare from each other performer to the front
             # one (one line per giver); the front's gain is the raise line

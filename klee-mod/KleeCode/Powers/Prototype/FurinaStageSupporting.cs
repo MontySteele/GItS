@@ -175,10 +175,12 @@ public static partial class FurinaStage
                                      seat.LostSinceAct, seat.BlockedSinceAct)
             {
                 Stayer = seat,
+                FrontLost = seat.FrontLostSinceAct,
             };
             await Bow(choiceContext, owner, exit, mayReturn: false);
             seat.LostSinceAct = 0;
             seat.BlockedSinceAct = 0;
+            seat.FrontLostSinceAct = 0;
         }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageCues.Refresh(owner);

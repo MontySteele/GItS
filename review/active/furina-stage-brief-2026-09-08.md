@@ -696,3 +696,14 @@ card. Curtain Rise is a starter card; [USER] approved the pass that moves it.
 
 Row provenance: `docs/notes/prototype-surface-provenance.md`, "Furina, the
 Stage — the fade pass".
+
+**After his run on the fade pass (2026-09-29).** [USER]: "Overall I think
+she's in a better spot... keeping Fanfare fed enough to use them was an actual
+challenge! One issue on Wriothesley is that keeping him in the front was
+actually hard. Can we pin him to the front of the Stage while he's present?
+And I think Siegwinne needs to be rethought - she's strictly fanfare-negative
+while she's summoned." Two changes (guest paper, frame rule 2 and the guest
+table): Wriothesley holds the front while he is on the stage (no seat move
+takes it from him; a full-stage summon Bows the performer behind him
+instead); Sigewinne is the medic, free: "Your front performer regains half
+the Fanfare hits took from it since her last act, at least 2."

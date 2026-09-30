@@ -400,8 +400,8 @@ public class FurinaSupportingPoolTests
             {
                 Stayer = sigewinne,
             }, owed));
-        // At the back, her gift wraps to the front, free.
-        Assert.Equal(new[] { 6, 4, 6 }, Bars(stage));
+        // The medic (2026-09-29): the front regains 2, free.
+        Assert.Equal(new[] { 5, 4, 6 }, Bars(stage));
         Assert.Empty(owed);
 
         var finale = Il.Calls(Il.Method("FurinaStage", "GrandFinale"));

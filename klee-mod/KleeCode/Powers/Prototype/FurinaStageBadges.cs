@@ -360,13 +360,13 @@ public sealed class SigewinneBadgePower : StagePerformerBadge,
     {
         ("title", FurinaStageLedger.DisplayName(Performer)),
         ("description",
-            "End of your turn: give " + FurinaStageLaw.ActSigewinneGift
-          + " of her Fanfare to the performer behind her, or to your front "
-          + "performer if she is at the back."),
+            "End of your turn: your front performer regains half the "
+          + "[gold]Fanfare[/gold] hits took from it since her last act, at "
+          + "least " + FurinaStageLaw.ActSigewinneHealFloor + "."),
         ("smartDescription",
-            "End of your turn: give " + FurinaStageLaw.ActSigewinneGift
-          + " of her Fanfare to the performer behind her, or to your front "
-          + "performer if she is at the back."),
+            "End of your turn: your front performer regains half the "
+          + "[gold]Fanfare[/gold] hits took from it since her last act, at "
+          + "least " + FurinaStageLaw.ActSigewinneHealFloor + "."),
     };
 }
 

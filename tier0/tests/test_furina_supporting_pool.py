@@ -523,9 +523,9 @@ def test_grand_finale_bows_everyone_in_place(arm):
 def test_a_grand_finale_bow_gift_skips_the_giver(arm):
     st = _state([["usher", 2], ["charlotte", 4], ["sigewinne", 5]])
     FS.grand_finale(st)
-    # Charlotte's Bow: each OTHER performer +1; Sigewinne's (at the back):
-    # the front +3, free.
-    assert st.player.stage == [["usher", 2 + 1 + 3], ["charlotte", 4],
+    # Charlotte's Bow: each OTHER performer +1; Sigewinne's (the medic,
+    # 2026-09-29): the front regains 2, free.
+    assert st.player.stage == [["usher", 2 + 1 + 2], ["charlotte", 4],
                                ["sigewinne", 5 + 1]]
 
 

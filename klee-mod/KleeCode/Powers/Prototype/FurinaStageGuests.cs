@@ -144,7 +144,10 @@ public static partial class FurinaStage
         await Bow(choiceContext, owner,
                   new StageExit(leaver.Who, StageDeparture.Spent,
                                 leaver.Fanfare, ledger.Seats.Count,
-                                leaver.LostSinceAct, leaver.BlockedSinceAct),
+                                leaver.LostSinceAct, leaver.BlockedSinceAct)
+                  {
+                      FrontLost = leaver.FrontLostSinceAct,
+                  },
                   mayReturn: false);
         ledger.ArriveAtFront(who, leaver.Fanfare + arrival);
         await FurinaStagePets.Sync(owner);
@@ -292,6 +295,7 @@ public static partial class FurinaStage
         {
             seat.LostSinceAct = 0;
             seat.BlockedSinceAct = 0;
+            seat.FrontLostSinceAct = 0;
         }
         FurinaStagePets.SyncBars(owner);
         NoteBeat(owner, beat, who, before, hit, each, struck, seat, shot);
@@ -758,6 +762,7 @@ public static partial class FurinaStage
             {
                 seat.LostSinceAct = 0;
                 seat.BlockedSinceAct = 0;
+                seat.FrontLostSinceAct = 0;
             }
             // THE SUPPORTING POOL (2026-09-26): Lyney's swap is a seat move,
             // and the fade and the hits after it read the seats. The seat
@@ -790,8 +795,8 @@ public static partial class FurinaStage
                     return FurinaStageLaw.ActChevreuseEnergy;
                 case StageCueKind.Gift:
                 {
-                    // Sigewinne's gift is the whole raise she made; Charlotte's
-                    // is what EACH other performer gained.
+                    // Sigewinne's heal is the whole raise she made (2026-09-29);
+                    // Charlotte's is what EACH other performer gained.
                     var raises = BeatsSince(mark, "raise").ToList();
                     if (raises.Count == 0) return 0;
                     return who == StagePerformer.Charlotte
@@ -806,9 +811,9 @@ public static partial class FurinaStage
         /// <summary>The price the performer's cue carries: what this act's
         /// payment took, for the two guests whose act is PRICED (Neuvillette
         /// pays his own, Chevreuse spends the back performer's). Clorinde's
-        /// tax and Sigewinne's gift are Fanfare too, but their cue does not
-        /// carry them: the tax shows on the bars it takes from, and the gift
-        /// IS her number.</summary>
+        /// tax is Fanfare too, but its cue does not carry it: the tax shows
+        /// on the bars it takes from. Sigewinne's heal (2026-09-29) is free,
+        /// and IS her number.</summary>
         private int PaidSince(StagePerformer who, int mark) =>
             StageForecastCue.Priced(who)
                 ? BeatsSince(mark, FurinaStageLedger.PayEvent).Sum(b => b.Moved)

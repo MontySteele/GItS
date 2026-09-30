@@ -6860,9 +6860,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # 2026-09-27: he always attacks, and reflects her Block too.
         "Wriothesley": ["End of your turn: deal ",
                         " damage to a random enemy, plus "],
-        "Sigewinne": ["End of your turn: give ",
-                      " of her Fanfare to the performer behind her, or to "
-                      "your front ", "performer if she is at the back."],
+        # 2026-09-29: the medic.
+        "Sigewinne": ["End of your turn: your front performer regains half "
+                      "the ", " hits took from it since her last act, at ",
+                      "."],
         "Charlotte": ["End of your turn: each other performer gains "],
         # 2026-09-25 night (the granted-guest seat round): the act lands.
         # The second text pass (2026-09-28): "preferring".
