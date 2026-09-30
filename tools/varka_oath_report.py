@@ -66,6 +66,9 @@ SVARIANTS = {
     "S3": dict(VARIANTS[DEF], pay_electro=3),
     "S4": dict(VARIANTS[DEF], starter_set="S1", pay_electro=3),
     "S2+S3": dict(VARIANTS[DEF], starter_set="S2", pay_electro=3),
+    "S5": dict(VARIANTS[DEF], starter_set="S5"),
+    "S6": dict(VARIANTS[DEF], starter_set="S6"),
+    "S7": dict(VARIANTS[DEF], starter_set="S7"),
 }
 ALLVAR = dict(VARIANTS, **SVARIANTS)
 TEMPLATE = ["N", "N", "N", "N", "E", "R", "N", "N", "E", "R", "B"]
@@ -1024,7 +1027,9 @@ def sec_svar(out, seeds, seed0, jobs):
     out("S1 = Barbara: Shining Miracle paints ONE enemy. S2 = Amber 5 Pyro, "
         "Lisa 3 Electro + draw 2, Kaeya 3 Cryo + 1 Vulnerable, each to ALL "
         "(Barbara as printed). S3 = Electro payout 3 to ALL. S4 = S1 + S3. "
-        "S2+S3 is also run.")
+        "S2+S3 is also run. Block test: S5 = S1 with 0 Block on Shining "
+        "Miracle; S6 = S1 and the other three starter Knights +5 Block; S7 = "
+        "S1 with Barbara at 5 Block and the other three +5 Block.")
     argl = [(seed0 + i, "focused", h, v, d) for v in names for h in ELEMENTS
             for d in (True, False) for i in range(seeds)]
     rows = pmap(_w_run, jobs, argl)

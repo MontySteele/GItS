@@ -437,6 +437,18 @@ def starter(element: str) -> list[str]:
             + ["windbound_execution", STARTER_KNIGHTS[element]])
 
 
+def _register_block_variants():
+    for base, block, new in (
+            ("barbara_shining_miracle_one", 0,
+             "barbara_shining_miracle_one_b0"),
+            ("barbara_shining_miracle_one", 5,
+             "barbara_shining_miracle_one_b5"),
+            ("amber_fiery_rain", 5, "amber_fiery_rain_b5"),
+            ("lisa_lightning_rose", 5, "lisa_lightning_rose_b5"),
+            ("kaeya_glacial_waltz", 5, "kaeya_glacial_waltz_b5")):
+        CARD_BUILDERS[new] = _block_variant(base, block, new)
+
+
 def make_card(name: str):
     if name in CARD_BUILDERS:
         return CARD_BUILDERS[name]()
@@ -458,7 +470,34 @@ STARTER_SETS = {
     "S2": {"amber_fiery_rain": "amber_fiery_rain_all",
            "lisa_lightning_rose": "lisa_lightning_rose_all",
            "kaeya_glacial_waltz": "kaeya_glacial_waltz_all"},
+    # The Block test (fifth round): S5 Barbara one enemy, 0 Block; S6
+    # Barbara one enemy 7 Block and the other three +5 Block; S7 all four
+    # one-target with 5 Block.
+    "S5": {"barbara_shining_miracle": "barbara_shining_miracle_one_b0"},
+    "S6": {"barbara_shining_miracle": "barbara_shining_miracle_one",
+           "amber_fiery_rain": "amber_fiery_rain_b5",
+           "lisa_lightning_rose": "lisa_lightning_rose_b5",
+           "kaeya_glacial_waltz": "kaeya_glacial_waltz_b5"},
+    "S7": {"barbara_shining_miracle": "barbara_shining_miracle_one_b5",
+           "amber_fiery_rain": "amber_fiery_rain_b5",
+           "lisa_lightning_rose": "lisa_lightning_rose_b5",
+           "kaeya_glacial_waltz": "kaeya_glacial_waltz_b5"},
 }
+
+
+def _block_variant(base: str, block: int, new: str):
+    """A starter Knight with its Block set to `block` (added if absent)."""
+    def build():
+        c = make_card(base)
+        c.id = f"varka_{new}"
+        for fx in c.effects:
+            if fx.get("op") == "varka" and fx.get("kind") == "knight":
+                inner = [i for i in fx["inner"] if i.get("op") != "block"]
+                if block:
+                    inner.append({"op": "block", "amount": block})
+                fx["inner"] = inner
+        return c
+    return build
 
 
 def build_player(deck: list[str], payout: bool = True,
@@ -493,3 +532,6 @@ def disable() -> None:
     from tier0.engine import effects
     V.disable()
     effects.OPS.pop("varka_oath", None)
+
+
+_register_block_variants()
