@@ -31,6 +31,12 @@ THE RULES AS MODELLED (sec.11.1-11.2):
     3 per current-element Oath as that element, both hits on one enemy. The
     Oath is read AFTER the Anemo hit (a Swirl it makes counts).
 
+R3b (third spec update, 2026-09-29; `build_player(per_card=True)`, the
+report's default): a card play gains 1 Oath per element it applies, however
+many enemies or hits, and 1 per distinct element it Swirls; the Swirl
+payouts still fire per Swirl. Ascension's elemental hit gains no Oath (it
+still applies, refreshes or reacts). `per_card=False` is R3, the rule above.
+
 VARIANTS (the paper's picks), per fight on the VarkaState:
   * `payout=False`  -- pick 1 option 2: no Swirl payout.
   * `apply_oath=False` -- pick 2 option 2: Oath from Swirls only.
@@ -122,9 +128,26 @@ def set_current(state, vs, element) -> None:
 #  Hooks (called from varka_paper's hooks for a rev-3 Varka)
 # --------------------------------------------------------------------------
 
+def _once_per_play(state, vs, element, source) -> bool:
+    """R3b: True the first time this card play earns `source` Oath of
+    `element`; False after. Always True under R3."""
+    if not vs.per_card:
+        return True
+    key = (state.turn, state.cards_played_this_turn, id(vs.playing),
+           source, element)
+    if key in vs.credited:
+        return False
+    vs.credited.add(key)
+    return True
+
+
 def on_hit_pre(state, vs, enemy, element) -> None:
     """Before the shared rule resolves an element hit: an application?"""
     if not vs.apply_oath or element not in ELEMENTS or not enemy.alive:
+        return
+    if vs.per_card and vs.asc_elemental:
+        return          # R3b: Ascension's elemental hit gains no Oath
+    if not _once_per_play(state, vs, element, "apply"):
         return
     # 2026-09-29 second spec update: EVERY direct application counts,
     # including one that reacts instead of leaving an aura.
@@ -136,7 +159,8 @@ def on_swirl(state, vs, enemy, aura) -> None:
     vs.swirls += 1
     vs.swirls_this_card += 1
     vs.swirl_log.append((state.turn, aura))
-    gain_oath(state, vs, aura, 1, "swirl")
+    if _once_per_play(state, vs, aura, "swirl"):
+        gain_oath(state, vs, aura, 1, "swirl")
     if not vs.payout or vs.current is None:
         return
     cur = vs.current
@@ -212,10 +236,12 @@ def op_oath(state, fx, card) -> None:
         if vs.current and n and target is not None and target.alive:
             saved = card.element
             card.element = vs.current
+            vs.asc_elemental = True
             try:
                 effects._op_damage(state, _dmg(ASC_PER_OATH * n), card)
             finally:
                 card.element = saved
+                vs.asc_elemental = False
             elem_amt = ASC_PER_OATH * n
         vs.asc.append({"turn": state.turn, "element": vs.current,
                        "oath": n, "oath_before": oath_before,
@@ -407,7 +433,8 @@ def knight_element(card):
 
 
 def build_player(deck: list[str], payout: bool = True,
-                 apply_oath: bool = True, hp: int | None = None):
+                 apply_oath: bool = True, hp: int | None = None,
+                 per_card: bool = False):
     """A fresh rev-3 Varka for one fight, holding exactly `deck` (card
     names; use `starter(el)` + extras)."""
     from tier0.engine.state import Player
@@ -419,6 +446,7 @@ def build_player(deck: list[str], payout: bool = True,
     vs = V.VarkaState(rev=3)
     vs.payout = payout
     vs.apply_oath = apply_oath
+    vs.per_card = per_card
     player.varka = vs
     return player
 

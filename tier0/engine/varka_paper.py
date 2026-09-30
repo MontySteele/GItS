@@ -185,6 +185,10 @@ class VarkaState:
     okn_rows: list = field(default_factory=list)
     eye_rows: list = field(default_factory=list)
     sworn: int = 0
+    # --- revision 3b (third spec update): Oath per card play ---
+    per_card: bool = False
+    credited: set = field(default_factory=set)
+    asc_elemental: bool = False
 
 
 def live(state) -> bool:

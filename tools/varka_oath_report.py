@@ -51,9 +51,14 @@ import sys
 from collections import defaultdict
 
 ELEMENTS = ("pyro", "hydro", "electro", "cryo")
-VARIANTS = {"V0": dict(payout=True, apply_oath=True),
-            "V1": dict(payout=False, apply_oath=True),
-            "V2": dict(payout=True, apply_oath=False)}
+# R3b (the default since the 2026-09-29 third update): Oath per card play,
+# Ascension's elemental hit gains none. R3 is the previous default (Oath per
+# application / per Swirl). V1 / V2 are the paper's picks on top of R3b.
+VARIANTS = {"R3b": dict(payout=True, apply_oath=True, per_card=True),
+            "R3": dict(payout=True, apply_oath=True, per_card=False),
+            "V1": dict(payout=False, apply_oath=True, per_card=True),
+            "V2": dict(payout=True, apply_oath=False, per_card=True)}
+DEF = "R3b"
 TEMPLATE = ["N", "N", "N", "N", "E", "R", "N", "N", "E", "R", "B"]
 
 DUMMIES = {
@@ -102,7 +107,7 @@ def deck_for(kind, home):
 
 # --- one fight ---------------------------------------------------------------
 
-def oath_fight(deck, enemies, policy, home, seed, hp=None, variant="V0"):
+def oath_fight(deck, enemies, policy, home, seed, hp=None, variant="R3b"):
     from tier0.engine import combat, varka_oath as O
     from tier0.engine.varka_oath_pilot import VarkaOathPilot
     player = O.build_player(deck, hp=hp, **VARIANTS[variant])
@@ -192,7 +197,7 @@ REFS = {"ref_ironclad": ("ref_ironclad", "generic", 80),
         "ref_silent": ("ref_silent", "silent", 70)}
 
 
-def run_act1(seed, policy, home, variant="V0", draft=True):
+def run_act1(seed, policy, home, variant="R3b", draft=True):
     """One stylised act 1. policy in focused / juggling / ref_*.
     `draft=False` keeps the starter all act (the reference kits always do:
     the calibration rows)."""
@@ -310,8 +315,8 @@ def sec_curve(out, seeds, seed0, jobs):
                           ("F", "focused"), ("J", "juggling"),
                           ("F+", "focused")):
             for dummy in DUMMIES:
-                for v in ("V0", "V1", "V2"):
-                    if v != "V0" and deck not in ("F", "J"):
+                for v in VARIANTS:
+                    if v not in (DEF, "R3") and deck not in ("F", "J"):
                         continue
                     cells.append((deck, home, pol, dummy, v))
     argl = [c[:4] + (seed0 + i, c[4]) for c in cells for i in range(seeds)]
@@ -322,7 +327,7 @@ def sec_curve(out, seeds, seed0, jobs):
             r["variant"])].append(r)
     flags = []
     for dummy in DUMMIES:
-        for v in ("V0", "V1", "V2"):
+        for v in VARIANTS:
             out(f"\n### {dummy}, variant {v}: current-element Oath at the "
                 "start of turn t / mean Ascension damage per cast on turn t "
                 "(printed 6 + 3 x Oath; share of fights casting that turn)")
@@ -371,7 +376,7 @@ def sec_turn1(out, seeds, seed0):
     from tier0.engine import combat, varka_oath as O
     from tier0.engine.varka_oath_pilot import VarkaOathPilot
     from tier05 import acts
-    out("\n## 1b. Turn one with Barbara: Shining Miracle "
+    out("\n## 1b. Turn one with Barbara: Shining Miracle, R3b "
         f"(starter, focused, n = {seeds} per encounter)")
     out("| encounter | Barbara in the opening hand | ...with Windbound too"
         " | turn-1 damage (all fights) | turn-1 Block | turn-1 dmg / Block "
@@ -382,7 +387,7 @@ def sec_turn1(out, seeds, seed0):
         rows = []
         for i in range(seeds):
             enemies = acts.spawn(spec, random.Random(seed0 + i))
-            player = O.build_player(O.starter("hydro"))
+            player = O.build_player(O.starter("hydro"), **VARIANTS[DEF])
             s = combat.run_fight(player, enemies,
                                  VarkaOathPilot("focused", "hydro"),
                                  seed=seed0 + i)
@@ -431,10 +436,10 @@ def sec_runs(out, seeds, seed0, jobs):
                     argl.append((seed0 + i, pol, home, v))
     for i in range(seeds):
         # calibration rows: starters kept all act, no drafting
-        argl.append((seed0 + i, "ref_ironclad", "none", "V0", False))
-        argl.append((seed0 + i, "ref_silent", "none", "V0", False))
+        argl.append((seed0 + i, "ref_ironclad", "none", DEF, False))
+        argl.append((seed0 + i, "ref_silent", "none", DEF, False))
         for home in ELEMENTS:
-            argl.append((seed0 + i, "focused", home, "V0", False))
+            argl.append((seed0 + i, "focused", home, DEF, False))
     rows = pmap(_w_run, jobs, argl)
     by = defaultdict(list)
     for r in rows:
@@ -466,7 +471,7 @@ def sec_runs(out, seeds, seed0, jobs):
                 f"{max(wins) - min(wins):.1f} points | | | | |")
 
     out("\n**Every fight of the drafted runs split by the number of enemies "
-        "at the start (V0; HP lost per fight, fights won, n fights).** "
+        "at the start (R3b; HP lost per fight, fights won, n fights).** "
         "Single-enemy fights are nibbit, mawler, fogmog (it summons), "
         "sewer_clam, byrdonis, bygone_effigy and both bosses; 2 is "
         "slime_group; 3+ is inklets (3) and phantasmal_gardener (4).")
@@ -476,7 +481,7 @@ def sec_runs(out, seeds, seed0, jobs):
         for home in ELEMENTS:
             cells = []
             for sz in SIZES:
-                fs = [f for r in by[("V0", pol, home)] for f in r["fights"]
+                fs = [f for r in by[(DEF, pol, home)] for f in r["fights"]
                       if _size(f["n_enemies"]) == sz]
                 cells.append(f"{m(f['hp_lost'] for f in fs)} HP, "
                              f"{pct(sum(f['won'] for f in fs), len(fs))} "
@@ -510,7 +515,7 @@ def sec_runs(out, seeds, seed0, jobs):
         "t13+ | casts / fight | casts > 60 by t8 (fights) | max |")
     out("|---|---|---|---|---|---|---|---|---|---|---|---|")
     buckets = ((1, 2), (3, 4), (5, 6), (7, 8), (9, 12), (13, 99))
-    for v in ("V0", "V1", "V2"):
+    for v in VARIANTS:
         for pol in ("focused", "juggling"):
             for home in ELEMENTS:
                 rs = by[(v, pol, home)]
@@ -529,13 +534,13 @@ def sec_runs(out, seeds, seed0, jobs):
                     f"| {mx} |")
 
     # What produced the flag, and what those decks carried.
-    out("\n**The fights that tripped the flag (V0, a cast over 60 by turn "
+    out("\n**The fights that tripped the flag (R3b, a cast over 60 by turn "
         "8): the encounter, the enemies at the start, and the drafted deck "
         "against the rest of the same start's fights.**")
     for pol in ("focused", "juggling"):
         for home in ELEMENTS:
             flagged, rest = [], []
-            for r in by[("V0", pol, home)]:
+            for r in by[(DEF, pol, home)]:
                 for f in r["fights"]:
                     hit = any(a["turn"] <= 8 and a["printed"] > 60
                               for a in f["asc"])
@@ -570,9 +575,9 @@ def sec_runs(out, seeds, seed0, jobs):
                 f"fight {m(f['hp_lost'] for f in flagged)} vs "
                 f"{m(f['hp_lost'] for f in rest)}.")
 
-    out("\nDeaths by floor kind (V0): " + "; ".join(
+    out("\nDeaths by floor kind (R3b): " + "; ".join(
         f"{pol}/{home}: " + ", ".join(
-            f"{kd} {sum(1 for r in by[('V0', pol, home)] if not r['won'] and r['fights'][-1]['kind'] == kd)}"
+            f"{kd} {sum(1 for r in by[(DEF, pol, home)] if not r['won'] and r['fights'][-1]['kind'] == kd)}"
             for kd in ("N", "E", "B"))
         for pol in ("focused", "juggling") for home in ELEMENTS))
     return by
@@ -580,7 +585,7 @@ def sec_runs(out, seeds, seed0, jobs):
 
 def sec_readers(out, runs, seeds, seed0, jobs):
     out("\n## 3. Oath readers against Defend: Block per Energy")
-    out("From the act-1 runs (V0), every play of the card; Defend is 5 per "
+    out("From the act-1 runs (R3b), every play of the card; Defend is 5 per "
         "Energy printed. Oath of the Knights: its whole fight's Block for "
         "its 1 Energy (fights where it was played).")
     out("| policy | start | Eye plays | Eye Block per play (p10/p50/p90) |"
@@ -593,7 +598,7 @@ def sec_readers(out, runs, seeds, seed0, jobs):
             homes = ELEMENTS if home == "all" else (home,)
             eyes, okn, oknt = [], [], []
             for h in homes:
-                for r in runs[("V0", pol, h)]:
+                for r in runs[(DEF, pol, h)]:
                     for f in r["fights"]:
                         eyes += [x[1] for x in f["eye"]]
                         if f["okn"]:
@@ -608,7 +613,8 @@ def sec_readers(out, runs, seeds, seed0, jobs):
                 f"{pct(zero, len(eyes))} | {len(okn)} | {m(okn)} | "
                 f"{m(oknt)} |")
     # the granted-deck read, fixed decks on the dummies' siblings: real fights
-    out("\nGranted decks (V0) on the act-1 elites and bosses at full HP, "
+    out("\nGranted decks (R3b, and R3 = the old default) on the act-1 "
+        "elites and bosses at full HP, "
         f"n = {seeds} per deck, start and fight (5 fights). F = focused "
         "build, J = juggling build; 'J / focused' plays the juggling build "
         "without switching (it holds the off-element Knights), which splits "
@@ -616,29 +622,32 @@ def sec_readers(out, runs, seeds, seed0, jobs):
     argl = []
     from tier05 import acts
     specs = acts.pools(0)["elite"] + acts.boss_pool(0)
-    for home in ELEMENTS:
-        for deck, pol in (("F", "focused"), ("F+", "focused"),
-                          ("J", "focused"), ("J", "juggling")):
-            for spec in specs:
-                for i in range(seeds):
-                    argl.append((deck, home, pol, spec["id"], seed0 + i))
+    for v in (DEF, "R3"):
+        for home in ELEMENTS:
+            for deck, pol in (("F", "focused"), ("F+", "focused"),
+                              ("J", "focused"), ("J", "juggling")):
+                for spec in specs:
+                    for i in range(seeds):
+                        argl.append((deck, home, pol, spec["id"], seed0 + i,
+                                     v))
     rows = pmap(_w_granted, jobs, argl)
     by = defaultdict(list)
     for r in rows:
-        by[(r["deck"], r["policy"], r["home"])].append(r)
-        by[(r["deck"], r["policy"], "all")].append(r)
-    out("| deck / policy / start | Eye Block per play | OotK Block per "
-        "fight (per turn up) | Defend | fights won | HP lost | switches "
+        by[(r["variant"], r["deck"], r["policy"], r["home"])].append(r)
+        by[(r["variant"], r["deck"], r["policy"], "all")].append(r)
+    out("| rules / deck / policy / start | Eye Block per play | OotK Block "
+        "per fight (per turn up) | Defend | fights won | HP lost | switches "
         "per fight | Swirls per fight |")
     out("|---|---|---|---|---|---|---|---|")
-    for home in ELEMENTS + ("all",):
+    for v, home in [(v, h) for v in (DEF, "R3") for h in ELEMENTS + ("all",)]:
         for dk, pol in (("F", "focused"), ("F+", "focused"),
                         ("J", "focused"), ("J", "juggling")):
-            rs = by[(dk, pol, home)]
+            rs = by[(v, dk, pol, home)]
             eyes = [x[1] for r in rs for x in r["eye"]]
             okn = [r["okn_block"] for r in rs if r["okn"]]
             oknt = [x[1] for r in rs for x in r["okn_rows"]]
-            out(f"| {dk} / {pol} / {home} | {m(eyes)} (n={len(eyes)}) | "
+            out(f"| {v} / {dk} / {pol} / {home} | {m(eyes)} "
+                f"(n={len(eyes)}) | "
                 f"{m(okn)} ({m(oknt)}) (n={len(okn)}) | 5 | "
                 f"{pct(sum(r['won'] for r in rs), len(rs))} | "
                 f"{msd(r['hp_lost'] for r in rs)} | "
@@ -650,16 +659,19 @@ def sec_readers(out, runs, seeds, seed0, jobs):
 def _w_granted(args):
     from tier05 import acts
     enable()
-    deck, home, pol, eid, seed = args
+    deck, home, pol, eid, seed, v = args
     specs = acts.pools(0)["elite"] + acts.boss_pool(0)
     spec = next(e for e in specs if e["id"] == eid)
     enemies = acts.spawn(spec, random.Random(seed))
-    r = oath_fight(deck_for(deck, home), enemies, pol, home, seed)
-    r.update(deck=deck, home=home, policy=pol, enc=eid)
+    r = oath_fight(deck_for(deck, home), enemies, pol, home, seed,
+                   variant=v)
+    r.update(deck=deck, home=home, policy=pol, enc=eid, variant=v)
     return r
 
 
-STARTER_ARMS = tuple("oath_" + e for e in ELEMENTS) + ("ironclad", "silent")
+STARTER_ARMS = (tuple("oath_" + e for e in ELEMENTS)
+                + tuple("oathR3_" + e for e in ELEMENTS)
+                + ("ironclad", "silent"))
 
 
 def _all_specs():
@@ -677,10 +689,12 @@ def _w_starter(args):
     tier, spec = next((t, e) for t, e in _all_specs() if e["id"] == eid)
     enemies = acts.spawn(spec, random.Random(seed))
     n = len(enemies)
-    if arm.startswith("oath_"):
-        home = arm[5:]
+    if arm.startswith("oath"):
+        v = "R3" if arm.startswith("oathR3_") else DEF
+        home = arm.split("_", 1)[1]
         from tier0.engine import varka_oath as O
-        r = oath_fight(O.starter(home), enemies, "focused", home, seed)
+        r = oath_fight(O.starter(home), enemies, "focused", home, seed,
+                       variant=v)
     elif arm == "ironclad":
         r = ref_fight("ref_ironclad", "generic", enemies, seed)
     else:
@@ -704,7 +718,8 @@ def sec_starters(out, seeds, seed0, jobs):
         if r["tier"] == "E":
             by[(r["arm"], "elite")].append(r)
     out("\n**By enemy count** (win % / HP lost per fight; HP lost counts to "
-        "death). Ironclad starts at 80 HP, Silent at 70.")
+        "death). oath_* = R3b rules, oathR3_* = the old default. Ironclad "
+        "starts at 80 HP, Silent at 70.")
     out("| arm | 1 enemy | 2 enemies | 3+ enemies | act-1 elites (all 3) |")
     out("|---|---|---|---|---|")
     for a in STARTER_ARMS:
@@ -743,6 +758,9 @@ BRANCH_PAIRS = {
 }
 
 
+MOVERS = ("none", "unbound", "rally", "sworn")
+
+
 def branch_deck(to_el, unbound):
     from tier0.engine import varka_oath as O
     return O.starter("pyro") + ["amber", O.POOL_KNIGHTS[to_el],
@@ -759,8 +777,10 @@ class BranchPilot:
     ("switch_back": the next Pyro Knight it plays switches it back).
     The runs are identical up to T: same seed, same decisions."""
 
-    def __init__(self, to_el, mode, lo, hi):
+    def __init__(self, to_el, mode, lo, hi, rally=False):
         from tier0.engine.varka_oath_pilot import VarkaOathPilot
+        self.rally = rally
+        self.rally_done = False
         self.pyro = VarkaOathPilot("focused", "pyro")
         self.after = VarkaOathPilot("focused", to_el)
         self.to_el, self.lo, self.hi = to_el, lo, hi
@@ -802,6 +822,10 @@ class BranchPilot:
                     state):
                 self.T = t
                 self.rows[t]["oath_all"] = dict(vs.oath)
+                if self.rally:
+                    # Rally to the Banner in hand at the branch, every arm
+                    state.player.hand.append(
+                        O.make_card("rally_to_the_banner"))
         self.rows[t]["end_fresh"] = self._fresh(state)
         if (self.T is not None and self.switch and t >= self.T
                 and not (self.back and t > self.T)):
@@ -814,6 +838,16 @@ class BranchPilot:
                 vs.playing = k
                 vs.aim = tgt
                 return k
+            if self.rally and not self.rally_done and t == self.T:
+                self.rally_done = True
+                from tier0.engine.combat import card_playable
+                r = next((c for c in state.player.hand
+                          if c.id == "varka_rally_to_the_banner"
+                          and card_playable(state, c)), None)
+                if r is not None:
+                    vs.playing = r
+                    vs.aim = None
+                    return r
             c = self.after(state)
         else:
             c = self.pyro(state)
@@ -826,16 +860,19 @@ def _w_branch(args):
     from tier0.engine import combat, varka_oath as O
     from tier05 import acts
     enable()
-    to_el, unbound, eid, seed = args
+    to_el, mover, v, eid, seed = args
     encs, lo, hi, _ = BRANCH_PAIRS[to_el]
     tier, spec = next((t, e) for t, e in _all_specs() if e["id"] == eid)
     res = {}
     for mode in ("stay", "switch", "switch_back"):
         enemies = acts.spawn(spec, random.Random(seed))
-        player = O.build_player(branch_deck(to_el, unbound))
-        if unbound:
+        player = O.build_player(branch_deck(to_el, False),
+                                **VARIANTS[v])
+        if mover == "unbound":
             player.varka.unbound = 1     # Boreas Unbound already in play
-        pilot = BranchPilot(to_el, mode, lo, hi)
+        if mover == "sworn":
+            player.varka.sworn = 1       # Sworn Brotherhood already in play
+        pilot = BranchPilot(to_el, mode, lo, hi, rally=mover == "rally")
         s = combat.run_fight(player, enemies, pilot, seed=seed)
         T = pilot.T
         if T is None:
@@ -864,7 +901,8 @@ def _w_branch(args):
             "energy": player.varka.unbound_energy}
     assert res["stay"]["T"] == res["switch"]["T"] == res[
         "switch_back"]["T"]
-    return {"to": to_el, "unbound": unbound, "enc": eid, "seed": seed,
+    return {"to": to_el, "mover": mover, "variant": v, "enc": eid,
+            "seed": seed,
             "stay": res["stay"], "switch": res["switch"],
             "switch_back": res["switch_back"]}
 
@@ -874,7 +912,11 @@ def sec_branch(out, seeds, seed0, jobs):
     out("Deck: the Pyro starter (Amber: Fiery Rain) + Amber: Baron Bunny, "
         "one pool Knight of the new element, Favonius Drill, Tempest "
         "Charge, Wind Wall, Eye of the Storm, Updraft; in the 'Unbound' rows "
-        "Boreas Unbound is in play from turn 1 (not a card in the deck). Both "
+        "Boreas Unbound is in play from turn 1 (not a card in the deck); in "
+        "the 'Sworn' rows Sworn Brotherhood is in play from turn 1; in the "
+        "'Rally' rows a Rally to the Banner is put in hand at the branch in "
+        "every arm, and both SWITCH arms play it right after the new Knight "
+        "(STAY's pilot plays it only if 3+ Oath sits outside Pyro). Both "
         "runs play focused Pyro, identically, up to turn T: the first turn "
         "in the window meeting the condition. On T, STAY keeps Pyro; SWITCH "
         "plays the new Knight first, then either holds the new element (hold) or "
@@ -883,27 +925,29 @@ def sec_branch(out, seeds, seed0, jobs):
         "fresh aura at the start of the next turn (after auras tick): "
         "something for the next Anemo hit to Swirl.")
     argl = []
-    for to_el, (encs, lo, hi, _) in BRANCH_PAIRS.items():
-        for unbound in (False, True):
-            for eid in encs:
-                for i in range(seeds):
-                    argl.append((to_el, unbound, eid, seed0 + i))
+    for v in (DEF, "R3"):
+        for to_el, (encs, lo, hi, _) in BRANCH_PAIRS.items():
+            for mover in MOVERS:
+                for eid in encs:
+                    for i in range(seeds):
+                        argl.append((to_el, mover, v, eid, seed0 + i))
     rows = [r for r in pmap(_w_branch, jobs, argl) if r is not None]
     by = defaultdict(list)
     for r in rows:
-        by[(r["to"], r["unbound"])].append(r)
-        by[(r["to"], r["unbound"], r["enc"])].append(r)
+        by[(r["variant"], r["to"], r["mover"])].append(r)
+        by[(r["variant"], r["to"], r["mover"], r["enc"])].append(r)
     out("\nEach cell is STAY / SWITCH (then hold the new element) / SWITCH "
         "(this turn only, then back to Pyro). 'loses less HP' is the share of paired states where "
         "that SWITCH arm lost less HP than STAY over the three turns.")
-    out("\n| pair | n | T | Pyro Oath at T | damage | Block | HP lost | "
+    out("\n| rules | pair | n | T | Pyro Oath at T | damage | Block | HP lost | "
         "SWITCH loses less HP / more (hold; back) | fresh aura at start "
         "of T+1 | ... T+2 | ... T+3 | fight won |")
-    out("|---|---|---|---|---|---|---|---|---|---|---|---|")
+    out("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     arms = ("stay", "switch", "switch_back")
-    for to_el, (encs, lo, hi, cond) in BRANCH_PAIRS.items():
-        for unbound in (False, True):
-            rs = by[(to_el, unbound)]
+    for v, (to_el, (encs, lo, hi, cond)) in [
+            (v, kv) for v in (DEF, "R3") for kv in BRANCH_PAIRS.items()]:
+        for mover in MOVERS:
+            rs = by[(v, to_el, mover)]
             if not rs:
                 continue
 
@@ -926,17 +970,19 @@ def sec_branch(out, seeds, seed0, jobs):
                 bw.append(f"{pct(better, len(rs))} / {pct(worse, len(rs))}")
             won = " / ".join(pct(sum(r[a]["won"] for r in rs), len(rs))
                              for a in arms)
-            out(f"| Pyro -> {to_el}{' + Unbound' if unbound else ''} | "
+            out(f"| {v} | Pyro -> {to_el}"
+                f"{'' if mover == 'none' else ' + ' + mover} | "
                 f"{len(rs)} | {m(r['stay']['T'] for r in rs)} | "
                 f"{m(r['stay']['oath'] for r in rs)} | {tri('dmg')} | "
                 f"{tri('block')} | {tri('hp_lost')} | {'; '.join(bw)} | "
                 f"{fr(0)} | {fr(1)} | {fr(2)} | {won} |")
         out(f"  (condition for {to_el}: {cond}; window turns {lo}-{hi}; "
             f"encounters {', '.join(encs)})")
-    out("\nBy encounter (no Unbound), STAY / SWITCH-hold / SWITCH-back:")
+    out("\nBy encounter (R3b, no mover), STAY / SWITCH-hold / "
+        "SWITCH-back:")
     for to_el, (encs, *_rest) in BRANCH_PAIRS.items():
         for eid in encs:
-            rs = by[(to_el, False, eid)]
+            rs = by[(DEF, to_el, "none", eid)]
             if not rs:
                 out(f"- {to_el} / {eid}: no branch state reached")
                 continue

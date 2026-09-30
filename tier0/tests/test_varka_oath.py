@@ -163,3 +163,22 @@ def test_movers_and_readers():
     st.player.block = 0
     V.turn_start(st)
     assert vs.oath["pyro"] == 3 and st.player.block == 3
+
+
+@pytest.mark.usefixtures("arm")
+def test_r3b_oath_is_per_card_and_ascension_gains_none():
+    # Third spec update (R3b): 1 Oath per card play per element applied,
+    # 1 per distinct element Swirled; Ascension's elemental hit gains none.
+    st = oath_state(n=3, per_card=True)
+    a, b, c = st.enemies
+    vs = st.player.varka
+    play(st, "barbara_shining_miracle")        # paints three: +1, not +3
+    assert vs.oath["hydro"] == 1
+    play(st, "windbound_execution")            # three Hydro Swirls: +1
+    assert vs.oath["hydro"] == 2
+    assert st.player.block == 7 + 3 * 3        # payouts still per Swirl
+    asc = [k for k in st.player.hand
+           if k.id == "varka_four_winds_ascension"][0]
+    play(st, asc, aim=a)
+    assert vs.asc[-1]["printed"] == 6 + 3 * 2
+    assert vs.oath["hydro"] == 2               # the elemental hit gains none
