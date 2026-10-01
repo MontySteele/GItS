@@ -695,8 +695,8 @@ and `docs/probe-b-fanfare-residual.md` (B3, the Fanfare residual — localized t
 the unrecorded Spotlight selector plus the turn-open sampling seam; **direction
 flips from "tier0 pessimistic" to neutral**).
 
-**`--use-selectors` is OFF by default and must stay that way**: the committed
-`docs/s7-divergences.tsv` was produced from a pre-P1.5 corpus that carries no
+**`--use-selectors` is OFF by default and must stay that way**: the S7
+`docs/s7-divergences.tsv` (retired 2026-10-01; in git history) was produced from a pre-P1.5 corpus that carries no
 selectors, and a default that consulted them would make that artefact
 irreproducible on any log that does.
 

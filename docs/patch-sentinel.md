@@ -1,6 +1,6 @@
 # Patch sentinel
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 `tools/patch_sentinel.py` — built 2026-08-05 (Surplus Dispatch 2, S12).
 
