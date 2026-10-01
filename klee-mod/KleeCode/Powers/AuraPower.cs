@@ -95,9 +95,28 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// </summary>
     private bool _spareTurnStartTick;
 
+    /// <summary>
+    /// THE MORNING WINDOW (Kokomi follow-ups, 2026-10-01): open while a
+    /// morning drain runs (<c>KokomiPlan.ResolveAll</c>), so EVERY aura applied
+    /// or refreshed inside it is spared -- not only a Plan's own hit but a
+    /// card Moon's Reflection replays and Crystal Collapse's free copy, whose
+    /// hits reach the aura through the ordinary card doors. A depth and not a
+    /// flag, so a nested drain cannot close the outer one.
+    /// </summary>
+    internal static int MorningWindow;
+
+    /// <summary>Spare <paramref name="aura"/> if the morning window is open.
+    /// Called by every door that applies or refreshes an aura
+    /// (<see cref="AuraCmd.Apply"/>, <see cref="AuraCmd.Refresh"/> and the
+    /// same-element branch of <see cref="ResolveLifecycle"/>).</summary>
+    internal static void NoteTouched(AuraPower? aura)
+    {
+        if (aura != null && MorningWindow > 0) aura._spareTurnStartTick = true;
+    }
+
     /// <summary>Spare this aura the tick that ends the current turn start.
     /// Called by <c>KokomiPlan.Hit</c> for the aura its morning hit applied or
-    /// refreshed, and by nothing else.</summary>
+    /// refreshed.</summary>
     internal static void SpareThisTurnStartTick(Creature target, Element element)
     {
         if (AuraCmd.Find(target) is { } aura && aura.Element == element)
@@ -382,6 +401,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
                     choiceContext, this,
                     AuraCmd.Duration(dealer) - Amount,
                     applier: dealer, cardSource: cardSource, silent: true);
+                NoteTouched(this);
                 return;
 
             case TriggerRules.HitOutcome.Spend:

@@ -2254,10 +2254,10 @@ def test_second_thoughts_on_an_empty_queue_is_a_printed_no_op(overhaul):
     assert st.player.energy == 0
 
 
-def test_a_moons_reflection_entry_returns_nothing(overhaul):
-    """The Plan is cancelled and no card comes back: what the face promises is
-    the card, and one written off the EXHAUST pile is not in the discard pile
-    to promise."""
+def test_a_moons_reflection_entry_gives_back_moons_reflection(overhaul):
+    """Kokomi follow-ups, 2026-10-01: a cancel is an undo, so the card that
+    was played (Moon's Reflection, Exhaust, in the exhaust pile) comes back
+    with its cost -- and the card it FOUND stays in the exhaust pile."""
     st = kokomi_state()
     st.player.energy = 0
     exhausted = plan_card([hit(9)], cid="proto_kk_exhausted")
@@ -2266,11 +2266,26 @@ def test_a_moons_reflection_entry_returns_nothing(overhaul):
     moon = Card(id="proto_kk_moon", name="probe", cost=1, type="skill",
                 effects=[{"op": "plan_from_exhaust"}])
     kokomi_plan.schedule_from_exhaust(st, moon)
+    st.player.exhaust_pile.append(moon)
     assert len(st.kk_plan_queue) == 1
     kokomi_plan.cancel_last_plan(st)
     assert st.kk_plan_queue == []
-    assert st.player.energy == 0
+    assert st.player.hand == [moon]
+    assert st.player.exhaust_pile == [exhausted]
+    assert st.player.energy == 1
+
+
+def test_a_card_in_no_pile_returns_nothing(overhaul):
+    """The Plan is still cancelled; with no card to give back, no Energy."""
+    st = kokomi_state()
+    st.player.energy = 0
+    written = plan_card([hit(9)], cid="proto_kk_gone")
+    written.cost = 2
+    kokomi_plan.schedule(st, written)
+    kokomi_plan.cancel_last_plan(st)
+    assert st.kk_plan_queue == []
     assert st.player.hand == []
+    assert st.player.energy == 0
 
 
 # --- Ebb Tide -------------------------------------------------------------

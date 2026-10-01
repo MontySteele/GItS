@@ -4615,3 +4615,19 @@ is now "Gain 2 Energy and draw 2 cards", and the upgrade raises the draw to 3
 through the existing `plan_draw` key (the Plan line's first `draw` clause in
 both engines; the codegen emits it as the `PlanCards` var). The now-line's
 upgrade (14, 4 more on a debuffed enemy) and the Plan's 2 Energy do not move.
+
+**Kokomi follow-ups, 2026-10-01.** Two follow-ups from PR #777's co-op fixes.
+(1) A cancel is an undo (main session): a cancelled Plan's card returns to the
+hand, even an Exhaust card; Exhaust applies when the card is played or its Plan
+carried out, not when it is cancelled. Second Thoughts and All Streams Flow to
+the Sea both give back through `KokomiPlan.GiveBack` / `kokomi_plan._give_back`
+(discard, then exhaust, then draw pile); a Moon's Reflection Plan gives back
+Moon's Reflection, never the card it found. All Streams now reads "Cancel all
+your Plans, taking back their cards and cost. Your next Plan this turn is
+carried out once more for each." Loop
+check: no loop, since both cancels Exhaust, so each copy returns cards once;
+All Streams is stronger (a full undo plus its gift). The retired Ebb Tide op
+still returns nothing. (2) A card Moon's Reflection replays at the morning (and
+Crystal Collapse's copy) kept its Hydro a turn short; the morning drain now
+opens `AuraPower.MorningWindow`, which spares every aura applied or refreshed
+inside it. The sim ticks auras before the morning and needs nothing.

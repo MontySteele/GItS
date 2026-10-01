@@ -257,7 +257,7 @@ public class KokomiPoolPassTwoTests
     public void Cancel_last_takes_the_newest_and_pays_the_cards_own_cost()
     {
         // STRUCTURAL: the LAST entry (`List.RemoveAt` at `Count - 1`, where
-        // `ResolveFront` removes at 0), the card out of the DISCARD pile into
+        // `ResolveFront` removes at 0), the card out of its pile (`GiveBack`) into
         // the hand, and the Energy read off `EnergyCost.GetResolved` -- "its
         // cost" means the cost it has now. Twins:
         // `test_second_thoughts_returns_the_card_and_refunds_its_cost`,
@@ -265,7 +265,7 @@ public class KokomiPoolPassTwoTests
         var calls = Il.Calls(typeof(KokomiPlan).GetMethod("CancelLast", All)!)
                       .ToList();
         Assert.Contains(calls, c => c.Contains("List`1.RemoveAt"));
-        Assert.Contains(calls, c => c.Contains("CardPile"));
+        Assert.Contains(calls, c => c.Contains("KokomiPlan.GiveBack"));
         Assert.Contains(calls, c => c.Contains("EnergyCost"));
         Assert.Contains(calls, c => c.Contains("PlayerCmd.GainEnergy"));
     }

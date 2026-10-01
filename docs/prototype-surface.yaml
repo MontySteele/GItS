@@ -1765,7 +1765,7 @@
    cost: 1, type: skill, rarity: rare, exhaust: true,
    # Her C5. Main session, 2026-09-29: cost 1 [0] and the Energy paid is
    # regained (the sim played it twice in 252 fights). Provenance note.
-   description: "Exhaust. Cancel all your [gold]Plans[/gold] and regain their cost. Your next [gold]Plan[/gold] this turn is carried out once more for each [gold]Plan[/gold] cancelled.",
+   description: "Exhaust. Cancel all your [gold]Plans[/gold], taking back their cards and cost. Your next [gold]Plan[/gold] this turn is carried out once more for each.",
    effects: [{op: kokomi, kind: all_streams}],
    upgrade: {cost: -1}}
 
