@@ -84,6 +84,6 @@ public sealed class ProtoVkAzureDevour : CustomCardModel, IElementalCard, IChara
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
     }
 }

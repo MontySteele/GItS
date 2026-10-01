@@ -162,7 +162,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   damage, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL); the Fang adds
   Four Winds' Ascension to his hand the first time each combat he gains Oath.
   His status bar shows the current element's Oath; the seat page prints the
-  current element, all four counts and the Swirl payout. Pool 41 (16 / 17 /
+  current element, all four counts and the Swirl payout. Pool 41 (15 / 18 /
   8), nine Knights. Absorb, the Winds and Knights' Muster are retired. The
   Lisa floor moved to 4 [5] after the R6 sim (#768). Per-row readings:
   `docs/notes/prototype-surface-provenance.md`, "Varka: the Oath rework".

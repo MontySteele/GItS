@@ -3841,6 +3841,11 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # face states the rule in words and prints no figure a
                        # var could keep honest.
                        "tide_draw",
+                       # Varka co-op pass 2026-09-30 (Tailwind Stride): the
+                       # draw INSIDE a conditional's arms only; the card's own
+                       # top-level draw is left alone. Rides the DrawThen /
+                       # DrawElse vars `draw` already gives branch draws.
+                       "conditional_draw",
                        # `EB-491`, the pool pass. `split_grow` is Split
                        # Charge's upgrade-only clause: it is emitted as
                        # `tide_draw`'s play-time `IsUpgraded` read, because the
@@ -7736,6 +7741,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                       for e in effects),
         "block": any(e["op"] == "block" for e in effects),
         "draw": any(e["op"] == "draw" for e in everywhere),
+        "conditional_draw": any(
+            e["op"] == "draw" for e in everywhere
+            if all(e is not t for t in effects)),
         # conditional_bonus: tier0 bumps the then-branch's first damage|block;
         # codegen expresses the damage form (ExtraDamage var). A then-block
         # first would need a second Block var -- structural until needed.
@@ -8848,9 +8856,12 @@ def branch_draw_upgrade(card: dict) -> int:
     branches (eager_to_help, and Compose Herself which also draws at top
     level). tier0 bumps ALL draw ops; the branch draws ride the vars
     `branch_draw_vars` assigns."""
-    delta = int(upgrade_plan(card)[0].get("draw", 0))
+    plan = upgrade_plan(card)[0]
+    delta = int(plan.get("draw", 0))
     if not delta:
-        return 0
+        # `conditional_draw`: the branch draws alone move (tier0 twin:
+        # upgrades.py), so the vars exist exactly as for `draw`.
+        return int(plan.get("conditional_draw", 0))
     branch_draws = [e for e in _effects_everywhere(card)
                     if e.get("op") == "draw"]
     top_draws = [e for e in card["effects"] if e.get("op") == "draw"]
@@ -14435,8 +14446,8 @@ def build_upgrade(card: dict) -> list[str]:
         # already bumped it, so repeating it here would upgrade one number
         # twice (caught on Compose Herself, whose OnUpgrade briefly carried
         # two identical Cards bumps).
-        d = int(deltas["draw"])
-        done.add("draw")
+        d = branch_draw_upgrade(card)
+        done.add("draw" if "draw" in deltas else "conditional_draw")
         for name in dict.fromkeys(branch_draw_vars(card)):
             if not any(f'"{name}"' in decl or f"{name}Var(" in decl
                        for decl in build_vars(card)):

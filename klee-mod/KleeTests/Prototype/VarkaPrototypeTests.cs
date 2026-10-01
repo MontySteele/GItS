@@ -596,7 +596,7 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void The_pool_is_forty_one_cards_sixteen_seventeen_and_eight()
+    public void The_pool_is_forty_one_cards_fifteen_eighteen_and_eight()
     {
         var pool = Cards("VarkaRoster", "Pool")
             .Select(c => c.Substring("ModelDb.Card<".Length).TrimEnd('>'))
@@ -608,8 +608,8 @@ public class VarkaPrototypeTests : IDisposable
             .Select(t => (CardModel)Activator.CreateInstance(t)!)
             .ToList();
         Assert.Equal(41, types.Count);
-        Assert.Equal(16, types.Count(c => c.Rarity == CardRarity.Common));
-        Assert.Equal(17, types.Count(c => c.Rarity == CardRarity.Uncommon));
+        Assert.Equal(15, types.Count(c => c.Rarity == CardRarity.Common));
+        Assert.Equal(18, types.Count(c => c.Rarity == CardRarity.Uncommon));
         Assert.Equal(8, types.Count(c => c.Rarity == CardRarity.Rare));
         Assert.Equal(9, types.Count(VarkaRules.IsKnight));
         // The starter's and the Fang's cards are not offered.

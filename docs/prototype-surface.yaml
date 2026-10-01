@@ -3054,7 +3054,7 @@
              {op: apply_aura, element: cryo, target: enemy}],
    upgrade: {block: 3}}
 
-# --- Common (16) ---
+# --- Common (15) ---
 
 - {id: proto_vk_squall, name: "Squall", character: varka,
    authored_by: [claude],
@@ -3184,16 +3184,16 @@
               then: [{op: block, amount: 4}]}],
    upgrade: {damage: 3, conditional_block: 2}}
 
+# --- Uncommon (18) ---
+
 - {id: proto_vk_rising_gale, name: "Rising Gale", character: varka,
    authored_by: [claude],
-   cost: 0, type: attack, rarity: common,
+   cost: 0, type: attack, rarity: uncommon,
    description: "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], draw 1 card.",
    effects: [{op: damage, amount: 4, target: enemy},
              {op: conditional, if: swirled_by_this,
               then: [{op: draw, amount: 1}]}],
    upgrade: {damage: 2}}
-
-# --- Uncommon (17) ---
 
 - {id: proto_vk_tempest_charge, name: "Tempest Charge", character: varka,
    authored_by: [claude],
@@ -3228,11 +3228,11 @@
 - {id: proto_vk_tailwind_stride, name: "Tailwind Stride", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Draw 2 cards. If you have a [gold]current element[/gold], draw 1 more.",
+   description: "Draw 2 cards. If you have a [gold]current element[/gold], draw {DrawThen:diff()} more.",
    effects: [{op: draw, amount: 2},
              {op: conditional, if: has_current_element,
               then: [{op: draw, amount: 1}]}],
-   upgrade: {cost: -1}}
+   upgrade: {conditional_draw: 1}}
 
 - {id: proto_vk_eye_of_the_storm, name: "Eye of the Storm", character: varka,
    authored_by: [claude],
@@ -3253,15 +3253,15 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    description: "At the start of your turn, gain [gold]Block[/gold] equal to your [gold]current element[/gold]'s [gold]Oath[/gold].",
-   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
-   effects: [{op: apply_power, power: vk_oath_of_the_knights, amount: 1, target: self}]}
+   effects: [{op: apply_power, power: vk_oath_of_the_knights, amount: 1, target: self}],
+   upgrade: {cost: -1}}
 
 - {id: proto_vk_rally_to_the_banner, name: "Rally to the Banner", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
    description: "Move all your [gold]Oath[/gold] to your [gold]current element[/gold].",
-   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
-   effects: [{op: varka, kind: rally}]}
+   effects: [{op: varka, kind: rally}],
+   upgrade: {cost: -1}}
 
 - {id: proto_vk_diluc_searing_onslaught, name: "Diluc: Searing Onslaught", character: varka,
    authored_by: [claude],
@@ -3302,8 +3302,8 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
    description: "Choose an element you have [gold]Oath[/gold] in. It becomes your [gold]current element[/gold]. Gain [gold]Block[/gold] equal to its Oath.",
-   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
-   effects: [{op: varka, kind: change_of_guard}]}
+   effects: [{op: varka, kind: change_of_guard}],
+   upgrade: {cost: -1}}
 
 - {id: proto_vk_storm_surge, name: "Storm Surge", character: varka,
    authored_by: [claude],
@@ -3325,8 +3325,8 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
    description: "Put Four Winds' Ascension from your discard pile into your hand. It costs 0 this turn.",
-   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
-   effects: [{op: varka, kind: unfurled_banner}]}
+   effects: [{op: varka, kind: unfurled_banner}],
+   upgrade: {retain: true}}
 
 # --- Rare (8) ---
 
@@ -3356,8 +3356,8 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
    description: "Split your total [gold]Oath[/gold] evenly among the four elements, rounding down, then gain 1 of each.",
-   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
-   effects: [{op: varka, kind: accord}]}
+   effects: [{op: varka, kind: accord}],
+   upgrade: {cost: -1}}
 
 - {id: proto_vk_sworn_brotherhood, name: "Sworn Brotherhood", character: varka,
    authored_by: [claude],
@@ -3387,6 +3387,6 @@
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare, exhaust: true,
    description: "Deal {ExtraDamage:diff()} damage for each [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   no_upgrade: "The paper (sec.6) prints no upgrade for this card.",
    effects: [{op: damage, target: enemy, applies_element: false,
-              amount_formula: {base: 0, per: 4, count: current_oath}}]}
+              amount_formula: {base: 0, per: 4, count: current_oath}}],
+   upgrade: {formula_per: 1}}
