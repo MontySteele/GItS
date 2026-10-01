@@ -133,9 +133,10 @@ public abstract class VarkaArmRelic : CustomRelicModel
 /// <summary>Common. "At the start of each combat, your starting Knight's
 /// element becomes your current element, with 1 Oath." On his first turn,
 /// after the draw (Fresh Catch's hook), so the Fang's Ascension lands in the
-/// opening hand (the paper: "intended"). The starting Knight is the one
-/// starter-only Knight in his deck, the one the Fang rolled for the run; with
-/// none left in the deck it does nothing.</summary>
+/// opening hand (the paper: "intended"). The starting Knight's element is
+/// the one the Fang rolled for the run (<see cref="VarkaStarterKnight"/>),
+/// kept even after that card is removed or transformed (main session,
+/// 2026-10-01), so it works all run.</summary>
 public sealed class KnightsCommission : VarkaArmRelic
 {
     public const int Oath = 1;
@@ -157,16 +158,21 @@ public sealed class KnightsCommission : VarkaArmRelic
         ArmKeywordTips.ForCurrentElement(
             ArmKeywordTips.ForOath(Array.Empty<IHoverTip>(), null), null);
 
-    /// <summary>The element of the run's starting Knight: the first
-    /// starter-only Knight in the deck, or None. PURE.</summary>
-    public static Element StartingElement(IEnumerable<CardModel> deck) =>
-        VarkaOath.KnightElement(deck.FirstOrDefault(VarkaRules.IsStarterKnight));
+    /// <summary>The element of the run's starting Knight: the one recorded
+    /// when the Fang rolled it. A run begun before the record existed reads
+    /// None there and falls back to the first starter-only Knight in the
+    /// deck. PURE.</summary>
+    public static Element StartingElement(Element recorded, IEnumerable<CardModel> deck) =>
+        recorded != Element.None
+            ? recorded
+            : VarkaOath.KnightElement(deck.FirstOrDefault(VarkaRules.IsStarterKnight));
 
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
         if (!VarkaArmRelics.FirstTurnOf(this, player)) return;
-        var element = StartingElement(player.Deck.Cards);
+        var element = StartingElement(VarkaStarterKnight.Of(player),
+                                      player.Deck.Cards);
         if (element == Element.None) return;
         Flash();
         await VarkaOath.SetCurrent(choiceContext, player.Creature, element,

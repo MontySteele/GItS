@@ -121,18 +121,36 @@ public class VarkaRelicsPotionsTests : IDisposable
     // ==== the relics =========================================================
 
     [Fact]
-    public void Knights_commission_reads_the_runs_starter_knight()
+    public void Knights_commission_reads_the_element_the_run_rolled_all_run()
     {
-        Assert.Equal(Element.Electro, KnightsCommission.StartingElement(new CardModel[]
-        {
-            new StrikeSilent(), new ProtoVkWindboundExecution(),
-            new ProtoVkLisaLightningRose(),
-        }));
-        Assert.Equal(Element.Pyro, KnightsCommission.StartingElement(
-            new CardModel[] { new ProtoVkAmberFieryRain() }));
-        // A pool Knight is not his starting Knight; none left reads None.
-        Assert.Equal(Element.None, KnightsCommission.StartingElement(
+        // Main session, 2026-10-01: the element the Fang rolled, even after
+        // the card is removed or transformed.
+        Assert.Equal(Element.Electro, KnightsCommission.StartingElement(
+            Element.Electro, new CardModel[] { new StrikeSilent() }));
+        Assert.Equal(Element.Electro, KnightsCommission.StartingElement(
+            Element.Electro, Array.Empty<CardModel>()));
+        Assert.Equal(Element.Hydro, KnightsCommission.StartingElement(
+            Element.Hydro, new CardModel[] { new ProtoVkAmberFieryRain() }));
+        // A run begun before the record existed: the starter Knight in the
+        // deck, never a pool Knight.
+        Assert.Equal(Element.Electro, KnightsCommission.StartingElement(Element.None,
+            new CardModel[] { new StrikeSilent(), new ProtoVkLisaLightningRose() }));
+        Assert.Equal(Element.None, KnightsCommission.StartingElement(Element.None,
             new CardModel[] { new ProtoVkKaeyaFrostgnaw(), new StrikeSilent() }));
+
+        // The record: written on the Fang at the roll, read back, carried to
+        // Wolf's Gravestone at Touch of Orobas.
+        var fang = (BoreasFang)RuntimeHelpers.GetUninitializedObject(typeof(BoreasFang));
+        Assert.Equal(Element.None, VarkaStarterKnight.Of(fang));
+        VarkaStarterKnight.Record(fang, Element.Cryo);
+        Assert.Equal(Element.Cryo, VarkaStarterKnight.Of(fang));
+        Assert.Contains("VarkaStarterKnight.Record",
+                        Il.Calls(Il.Method("BoreasFang", "AfterObtained")));
+        var upgrade = Il.CallSequence(Il.Method("BoreasFang", "GetUpgradeReplacement"));
+        Assert.Contains("VarkaStarterKnight.Of", upgrade);
+        Assert.Contains("VarkaStarterKnight.Record", upgrade);
+        Assert.Contains("VarkaStarterKnight.Of",
+                        Il.Calls(Il.Method("KnightsCommission", "AfterPlayerTurnStart")));
         // It sets the element, then gains through the one door (so the Fang
         // answers its 1 Oath on turn one).
         var calls = Il.CallSequence(Il.Method("KnightsCommission", "AfterPlayerTurnStart")).ToList();

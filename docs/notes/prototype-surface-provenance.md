@@ -4652,7 +4652,7 @@ read his pool as before.
 
 | Tier | Relic | As built |
 |---|---|---|
-| Common | Knight's Commission | His first turn, after the draw: the element of the starter-only Knight in his deck (the one Boreas's Fang rolled for the run) becomes current, then 1 Oath of it through `VarkaOath.Gain` (so the Fang answers it). No starter Knight left in the deck: nothing. |
+| Common | Knight's Commission | His first turn, after the draw: the element of the starter Knight the run rolled becomes current, then 1 Oath of it through `VarkaOath.Gain` (so the Fang answers it). The Fang records that element when it rolls the Knight (`Relics/VarkaStarterKnight.cs`, a BaseLib `SavedSpireField` saved with the Fang and copied to Wolf's Gravestone), so it holds all run after the card is removed or transformed (main session, 2026-10-01). A run begun before the record existed falls back to the starter Knight in the deck. |
 | Uncommon | Windblume Garland | 4 Block a copy on every current-element change, paid in `VarkaOath.SetCurrent`; the fight's first element (none to one) is a change, as Boreas Unbound counts it. |
 | Uncommon | Dandelion Seeds | Late in his turn start (after Knight's Commission and his turn-start Powers): with a current element and no enemy wearing an aura (a spent aura counts as one), applies it to a random enemy. No Oath, no switch. |
 | Rare | Banner of the West Wind | On a change, every point of the old element's Oath moves to the new one (`VarkaOathLedger.MoveOath`), before the Garland and Boreas Unbound pay. A move, not a gain. |
