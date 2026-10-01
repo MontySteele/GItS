@@ -90,7 +90,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from understudy import (authorship, blindplay_brief, blindplay_coop, bridge,
+from understudy import (authorship, blindplay_brief, blindplay_coop,
+                       blindplay_shape, bridge,
                        lanewatch, qa_packet, report, seat)
 
 # `klee-mod/local.props` is the machine's one statement of where the game is,
@@ -351,7 +352,13 @@ def cmd_observe(args) -> int:
         return 1
     out = _refusal_stream(args)
     try:
-        print(_page(observe(state), args))
+        # 2026-10-01: `--define "<Word>"` prints that word's definition off
+        # this screen and nothing else; the brief page prints each once.
+        word = getattr(args, "define", "") or ""
+        if word:
+            print(blindplay_brief.define(observe(state), word).rstrip("\n"))
+        else:
+            print(_page(observe(state), args))
     except qa_packet.PacketLeak as exc:
         print(f"REFUSED: {exc}", file=out)
         return 1
@@ -382,8 +389,14 @@ def _refusal_stream(args):
 
 
 def _page(text: str, args) -> str:
-    """The page as printed: whole, or `blindplay_brief.brief` of it."""
-    return blindplay_brief.brief(text) if _brief_on(args) else text
+    """The page as printed: whole, or `blindplay_brief.brief` of it, which
+    keeps a word's definition the first time this lane is shown it."""
+    if not _brief_on(args):
+        return text
+    seen = blindplay_shape.read_words_seen()
+    page = blindplay_brief.brief(text, seen)
+    blindplay_shape.write_words_seen(seen)
+    return page
 
 
 def budget_refusal(count: int, cap: int) -> str:
@@ -780,6 +793,9 @@ def main(argv: list[str] | None = None) -> int:
     o.add_argument("--raw-file", default="",
                    help="a saved wire state instead of the live one")
     o.add_argument("--brief", action="store_true", help=BRIEF_HELP)
+    o.add_argument("--define", default="", metavar="WORD",
+                   help="print only this word's definition from the current "
+                        "screen (the brief page prints each word once)")
     o.set_defaults(func=cmd_observe)
 
     a = sub.add_parser("act", help="resolve one player-language command")

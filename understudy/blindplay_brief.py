@@ -20,6 +20,15 @@ what a line says:
   notes on FRONT, auras, multi-part intents, intent figures and repeated
   names.
 
+2026-10-01, THE WORD NOBODY DEFINED. An Infested Prism elite made every
+Skill "Tainted 2" and a base-game seat on `--brief` never once saw what
+Tainted does: the glossary was cut on every screen, including the first. So
+a definition -- a glossary row or an italic gloss -- is now KEPT the first
+time it prints on a lane, and dropped on every screen after it. The lane's
+seen words live beside its action budget (`blindplay_shape.words_seen_path`)
+and are cleared where the budget is set, at embark. `observe --define
+"<Word>"` prints one definition again.
+
 A gloss or note line that matches `PROTECTED` is KEPT where it stands rather
 than dropped: the line-level trim never removes an intent, a refusal or a
 verb, whatever it is wrapped in.
@@ -44,8 +53,10 @@ from understudy.blindplay_notes import (AURA_NOTE, ENEMY_HANDLE_NOTE,
                                         _INTENT_SOURCE_HEAD)
 from understudy.blindplay_shape import PLAY_GUARDRAIL
 
-#: Sections the brief page drops whole, heading and body.
-DROPPED_SECTIONS = frozenset({"## Words on this screen"})
+#: The glossary section. Its rows are kept the first time each prints on a
+#: lane and dropped after; with no lane memory it is dropped whole.
+WORDS_HEADING = "## Words on this screen"
+DROPPED_SECTIONS = frozenset({WORDS_HEADING})
 
 #: Lines the brief page drops wherever they appear: standing notes that print
 #: the same sentence on every screen, and the empty-section placeholders.
@@ -71,13 +82,20 @@ DROPPED_PREFIXES = ("*The end of your turn is a step of its own",
 #: italics, which may be an instruction) is not a gloss and is kept.
 GLOSS_LINE = re.compile(r"^\s*\*[^*\s][^*]*\* — ")
 
+#: A definition and the word it defines: a glossary row (`- **Word** — ...`,
+#: or a bare `- **Word**` where no rule applies) or an italic gloss.
+_WORDS_ROW = re.compile(r"^- \*\*(?P<word>[^*]+)\*\*(?: — (?P<text>.*))?$")
+_GLOSS_ROW = re.compile(r"^\s*\*(?P<word>[^*\s][^*]*)\* — (?P<text>.*)$")
+
 #: Headings that are never dropped, even when their body is empty.
 KEPT_HEADINGS = frozenset({"## What you can say", "## Your hand",
                            "## The other side", "## The other player"})
 
 #: The line at the foot of a brief page, above the verbs.
-BRIEF_NOTE = ("*Brief page: the word definitions and the standing notes are "
-              "left out. `observe` without --brief prints them.*")
+BRIEF_NOTE = ("*Brief page: the standing notes, and any word definition "
+              "this lane has already printed, are left out. `observe --define "
+              "\"<Word>\"` prints one again; `observe` without --brief "
+              "prints them all.*")
 
 #: A removed line matching this means the trim went wrong; the full page is
 #: returned instead. Intents and what lands on you, the player's own rows,
@@ -89,16 +107,56 @@ PROTECTED = re.compile(
     r"^- `|^# ")
 
 
-def _drop_line(line: str) -> bool:
+def definition(line: str) -> tuple[str, str] | None:
+    """`(word, meaning)` for a glossary row or an italic gloss, else `None`."""
+    hit = _WORDS_ROW.match(line) or _GLOSS_ROW.match(line)
+    if not hit:
+        return None
+    return hit.group("word").strip(), (hit.group("text") or "").strip()
+
+
+def definition_key(word: str, text: str) -> str:
+    """What "already printed" is keyed on: the word and its meaning with the
+    figures blanked. A gloss whose number moves (`*Charge scaling*`: "you
+    hold 8 Charge") is one definition; a row whose WORDS change (the
+    reactions entry, which prints in full once a second element is
+    reachable) is a new one and prints once more."""
+    return word.casefold() + "|" + re.sub(r"\d+", "#", text.casefold())
+
+
+def _drop_line(line: str, fresh=None) -> bool:
+    """Whether the brief page drops this line. `fresh(line)` answers for a
+    definition the lane has not printed yet; without it every gloss goes."""
     if line in DROPPED_LINES:
         return True
     if PROTECTED.search(line):
         return False
-    return line.startswith(DROPPED_PREFIXES) or bool(GLOSS_LINE.match(line))
+    if line.startswith(DROPPED_PREFIXES):
+        return True
+    if GLOSS_LINE.match(line):
+        return not (fresh and fresh(line))
+    return False
 
 
-def _trim(text: str) -> tuple[list[str], list[str]]:
-    """(kept lines, removed lines)."""
+def _trim(text: str, seen: set[str] | None = None
+          ) -> tuple[list[str], list[str]]:
+    """(kept lines, removed lines). With `seen`, a definition whose key is
+    not in it is kept -- once per page -- and its key is added to it."""
+    before = frozenset(seen) if seen is not None else None
+    taken: set[str] = set()
+
+    def fresh(line: str) -> bool:
+        if before is None:
+            return False
+        found = definition(line)
+        if not found:
+            return False
+        key = definition_key(*found)
+        if key in before or key in taken:
+            return False
+        taken.add(key)
+        return True
+
     lines = text.splitlines()
     # Split into a preamble and sections, each section opening on a `## `.
     blocks: list[list[str]] = [[]]
@@ -111,18 +169,27 @@ def _trim(text: str) -> tuple[list[str], list[str]]:
     removed: list[str] = []
     for block in blocks:
         heading = block[0] if block and block[0].startswith("## ") else ""
-        if heading in DROPPED_SECTIONS:
-            removed += [ln for ln in block if ln.strip()]
-            continue
         body = block[1:] if heading else block
-        dropped = [ln for ln in body if _drop_line(ln)]
-        rest = [ln for ln in body if not _drop_line(ln)]
+        if heading in DROPPED_SECTIONS:
+            rows = [ln for ln in body
+                    if ln.strip() and not PROTECTED.search(ln) and fresh(ln)]
+            removed += [ln for ln in body if ln.strip() and ln not in rows]
+            if rows:
+                kept += [heading, ""] + rows + [""]
+            else:
+                removed.append(heading)
+            continue
+        verdict = [(ln, _drop_line(ln, fresh)) for ln in body]
+        dropped = [ln for ln, gone in verdict if gone]
+        rest = [ln for ln, gone in verdict if not gone]
         removed += dropped
         if (heading and heading not in KEPT_HEADINGS and dropped
                 and not any(ln.strip() for ln in rest)):
             removed.append(heading)
             continue
         kept += ([heading] if heading else []) + rest
+    if seen is not None:
+        seen |= taken
     return kept, removed
 
 
@@ -137,10 +204,15 @@ def _collapse_blanks(lines: list[str]) -> list[str]:
     return out
 
 
-def brief(text: str) -> str:
+def brief(text: str, seen: set[str] | None = None) -> str:
     """The brief page for a full page `observe` rendered, or the full page if
-    the trim would have removed anything in `PROTECTED`."""
-    kept, removed = _trim(text)
+    the trim would have removed anything in `PROTECTED`.
+
+    `seen` is the lane's set of definitions already printed (updated in
+    place): those are cut, the rest are kept. `None` cuts every definition.
+    A page returned whole printed every definition, so those count as seen
+    too."""
+    kept, removed = _trim(text, seen)
     if not removed:
         return text
     if any(PROTECTED.search(line) for line in removed):
@@ -151,3 +223,31 @@ def brief(text: str) -> str:
     else:
         kept += ["", BRIEF_NOTE]
     return "\n".join(_collapse_blanks(kept)) + "\n"
+
+
+#: What `observe --define` prints when the screen defines no such word.
+NOT_DEFINED = ("No definition of \"{word}\" on this screen. Words defined "
+               "here: {words}.")
+
+
+def define(text: str, word: str) -> str:
+    """Every definition of `word` a full page prints -- its glossary row and
+    its italic glosses, once each -- or the one line saying there is none."""
+    want = word.strip().strip('"*').strip().casefold()
+    rows: list[str] = []
+    words: list[str] = []
+    for line in text.splitlines():
+        found = definition(line)
+        if not found:
+            continue
+        if found[0] not in words:
+            words.append(found[0])
+        if found[0].casefold() == want:
+            row = (f"- **{found[0]}** — {found[1]}" if found[1]
+                   else f"- **{found[0]}**")
+            if row not in rows:
+                rows.append(row)
+    if rows:
+        return "\n".join(rows) + "\n"
+    return NOT_DEFINED.format(word=word.strip(),
+                              words=", ".join(words) or "none") + "\n"

@@ -204,6 +204,9 @@ def set_budget(cap: int, lane: object = None) -> dict[str, int]:
     """
     row = {"cap": max(0, int(cap or 0)), "count": 0}
     _write_budget(row, lane)
+    # And the words the lane has been shown: a new run's first screen
+    # defines its words again (`blindplay_brief`, 2026-10-01).
+    forget_words_seen(lane)
     return row
 
 
@@ -279,6 +282,38 @@ def pending_refusal(board: str, lane: object = None,
     except (TypeError, ValueError):
         return None
     return row
+
+
+# 2026-10-01. THE WORDS A LANE HAS ALREADY BEEN SHOWN. `observe --brief`
+# keeps a definition the first time it prints on a lane and cuts it after
+# (`blindplay_brief`), so the lane remembers which it has printed. Beside the
+# budget, keyed the same way, and cleared where the budget is set: at embark.
+def words_seen_path(lane: object = None) -> Path:
+    return _BUDGET_STORE_DIR / f"_blindplay-words-lane{lane_tag(lane)}.json"
+
+
+def read_words_seen(lane: object = None) -> set[str]:
+    try:
+        blob = json.loads(words_seen_path(lane).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return set()
+    return {str(k) for k in blob} if isinstance(blob, list) else set()
+
+
+def write_words_seen(words: set[str], lane: object = None) -> None:
+    try:
+        _BUDGET_STORE_DIR.mkdir(parents=True, exist_ok=True)
+        words_seen_path(lane).write_text(json.dumps(sorted(words)),
+                                         encoding="utf-8")
+    except OSError:
+        pass                       # a read-only tree simply repeats its words
+
+
+def forget_words_seen(lane: object = None) -> None:
+    try:
+        words_seen_path(lane).unlink()
+    except OSError:
+        pass
 
 
 def forget_budget(lane: object = None) -> None:
