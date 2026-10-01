@@ -439,8 +439,9 @@ public class KokomiCasketPassTests : IDisposable
         // Scout Ahead and Song of Pearls; the feed pass (2026-09-29) cut
         // Exposed Flank and added five.
         var slice = Seq("KokomiOverhaulRoster", "Slice");
-        // SIXTY-NINE since expansion batch one (2026-09-29).
-        Assert.Equal(69, slice.Count(c => c.StartsWith("ModelDb.Card")));
+        // SIXTY-NINE since expansion batch one (2026-09-29); SEVENTY since
+        // the payoff pass (2026-10-01).
+        Assert.Equal(70, slice.Count(c => c.StartsWith("ModelDb.Card")));
         foreach (var row in new[] { "ProtoKkMassedVolley", "ProtoKkSignalArrow",
                                     "ProtoKkSurgingShoal", "ProtoKkPearlDiver",
                                     "ProtoKkPressTheAdvantage",

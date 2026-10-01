@@ -292,7 +292,22 @@ pool passes), The Moon Overlooks the Waters (withdrawn at the door, 2026-09-05),
 Scout Ahead and Song of Pearls (the cleanup pass, 2026-09-29), Exposed Flank
 (the feed pass, 2026-09-29), The Clouds Like Waves Rippling (expansion batch
 one, 2026-09-29; Watatsumi's Grace, her C1 At Water's Edge and her C5 All
-Streams Flow to the Sea take constellation slots).
+Streams Flow to the Sea take constellation slots), Second Thoughts (the payoff
+pass, 2026-10-01).
+
+### The payoff pass (2026-10-01)
+
+The co-op player's complaint was "no payoff for playing lots of Plans" and
+"short on block". The main session called Second Thoughts "an undo button, and
+an undo is a dead draw" and recommended cutting it alongside a Plan-volume
+payoff that is not damage; [USER]: "Sounds good! Please proceed!" Second
+Thoughts is cut (its cancel stays in the engine with no card spelling it), and
+two Uncommons join: Kurage Canopy (Power, 1: "Whenever the Bake-Kurage carries
+out a Plan, gain 2 Block", 3 upgraded; a doubled carry-out pays twice) and
+Coral Tithe (Skill, 0: "Empty the Casket. Gain 1 Energy and draw 1 card for
+every 3 in it", every 2 upgraded; nothing without a Casket). The pool is 70:
+19 Common, 37 Uncommon, 14 Rare, plus the three co-op cards. Provenance note,
+"Kokomi payoff pass, 2026-10-01".
 
 ## 7. What the engine does
 

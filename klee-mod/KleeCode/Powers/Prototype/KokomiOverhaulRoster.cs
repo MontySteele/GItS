@@ -120,13 +120,13 @@ internal static class KokomiOverhaulRoster
     internal static CardModel StarterDefend() => ModelDb.Card<DefendSilent>();
 
     /// <summary>
-    /// Kokomi's WHOLE offerable pool under the arm: the slice's 48 rows and
+    /// Kokomi's WHOLE offerable pool under the arm: the slice's 70 rows and
     /// nothing else.
     ///
     /// LISTED BY TYPE, not filtered by id prefix. A prefix match would be a
     /// second, softer definition of "which rows are the slice" living next to
     /// the sheet's own, and it would fail silently the day a row is renamed.
-    /// These are the same 48 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
+    /// These are the same 70 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
@@ -156,13 +156,15 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkSangonomiyasCounsel>(),
     };
 
-    /// <summary>The slice's own 69 rows, without the Ancient tail
+    /// <summary>The slice's own 70 rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds. FORTY-SIX since the Casket pass
     /// (2026-09-28): six cut, thirteen added; FORTY-FOUR since the cleanup
     /// pass (2026-09-29) cut Scout Ahead and Song of Pearls; FORTY-EIGHT since
     /// the feed pass (2026-09-29) cut Exposed Flank and added five 0-cost
     /// Plan-only Commons; SIXTY-NINE since expansion batch one (2026-09-29)
-    /// added 22 and cut The Clouds Like Waves Rippling. The Open the Casket token is in
+    /// added 22 and cut The Clouds Like Waves Rippling; SEVENTY since the
+    /// payoff pass (2026-10-01) cut Second Thoughts and added Kurage Canopy
+    /// and Coral Tithe. The Open the Casket token is in
     /// no pool; the relic deals it (<see cref="Relics.TamakushiCasket"/>).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
@@ -225,9 +227,10 @@ internal static class KokomiOverhaulRoster
         // earlier. It spelled no rule of its own, so nothing stays behind it.
         // FOUR SINCE THE CLEANUP PASS (2026-09-29): Scout Ahead was cut, and
         // its <c>DrawPerPlanAfter</c> clause stays with nothing spelling it.
+        // THREE SINCE THE PAYOFF PASS (2026-10-01): Second Thoughts was cut,
+        // and <c>KokomiPlan.CancelLast</c> stays with nothing spelling it.
         ModelDb.Card<ProtoKkOpeningGambit>(),
         ModelDb.Card<ProtoKkSecondWave>(),
-        ModelDb.Card<ProtoKkSecondThoughts>(),
         ModelDb.Card<ProtoKkBreakwater>(),
         // THE CASKET PASS (2026-09-28): the Tamakushi Casket counts the Plans
         // the Bake-Kurage carries out. Thirteen rows, LAST in the sheet's own
@@ -254,7 +257,7 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkBrineSting>(),
         // THE EXPANSION, BATCH ONE (2026-09-29): four decks, 12 Uncommon and
         // 10 Rare; Watatsumi's Grace replaces The Clouds Like Waves Rippling.
-        // LAST, in the sheet's own order. The pool is 69.
+        // LAST, in the sheet's own order.
         ModelDb.Card<ProtoKkWeightOfThePlan>(),
         ModelDb.Card<ProtoKkLull>(),
         ModelDb.Card<ProtoKkUndertideLance>(),
@@ -277,6 +280,10 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkTidalRiposte>(),
         ModelDb.Card<ProtoKkShoalCall>(),
         ModelDb.Card<ProtoKkKurageSwarm>(),
+        // THE PAYOFF PASS (2026-10-01): Plan volume paid in Block and in
+        // Energy and cards. LAST, in the sheet's own order. The pool is 70.
+        ModelDb.Card<ProtoKkKurageCanopy>(),
+        ModelDb.Card<ProtoKkCoralTithe>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

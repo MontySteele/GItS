@@ -232,6 +232,11 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_SECOND_THOUGHTS",
+      "class": "RetiredProtoKkSecondThoughts",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_SONG_OF_PEARLS",
       "class": "RetiredProtoKkSongOfPearls",
       "owner": "kokomi"

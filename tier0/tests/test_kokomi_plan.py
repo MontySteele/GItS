@@ -862,8 +862,9 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     # pins is the withdrawal, not the size -- so it moves with the
     # pool and the absence does not.
     # FORTY-SIX since the Casket pass (2026-09-28); FORTY-FOUR since the
-    # cleanup pass (2026-09-29); SIXTY-NINE since expansion batch one.
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 69
+    # cleanup pass (2026-09-29); SIXTY-NINE since expansion batch one;
+    # SEVENTY since the payoff pass (2026-10-01).
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 70
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids

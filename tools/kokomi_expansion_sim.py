@@ -86,12 +86,12 @@ NEW = {
              "suffocating_deep"],
     "dusk": ["coral_crash", "evening_watch", "brace_for_the_tide",
              "watatsumis_grace", "tidal_riposte"],
-    "volume": ["shoal_call", "kurage_swarm"],
+    "volume": ["shoal_call", "kurage_swarm", "kurage_canopy", "coral_tithe"],
 }
 OLD = {
     "volume": ["bubble_ward", "nip", "jellyfish_drift", "current_read",
                "brine_sting", "feint", "sango_isshin", "tideturn",
-               "change_of_plans", "second_thoughts", "pearl_diver",
+               "change_of_plans", "pearl_diver",
                "moon_signal", "driftglass", "depths_judgment",
                "what_the_tokoyo_took", "what_the_tokoyo_returns",
                "shell_guard"],

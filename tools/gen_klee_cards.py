@@ -2464,9 +2464,11 @@ KOKOMI_KINDS = {
     "double_weak_vulnerable": "DoubleWeakVulnerable",
     "all_streams": "AllStreams",
     "shoal_call": "ShoalCall",
+    # THE PAYOFF PASS (2026-10-01): Coral Tithe; `amount` is the divisor.
+    "coral_tithe": "CoralTithe",
 }
 KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "draw_if_target_weak", "resonance",
-                      "shoal_call"}
+                      "shoal_call", "coral_tithe"}
 #: The kind that aims at the enemy the card was played on.
 KOKOMI_AIMED_KINDS = {"draw_if_target_weak"}
 KOKOMI_FIELDS = {"op", "kind", "target", "amount"}
@@ -3193,6 +3195,11 @@ APPLY_POWERS = {
     "kk_kurage_swarm": ("KurageSwarmPower", None,
         "Whenever you write a [gold]Plan[/gold] that costs 0, the "
         "[gold]Casket[/gold] gains {X}."),
+    # THE PAYOFF PASS (2026-10-01). Kurage Canopy rides the plan bus
+    # (`IKokomiPlanListener`); its class is in KokomiExpansion.cs.
+    "kk_kurage_canopy": ("KurageCanopyPower", None,
+        "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+        "[gold]Plan[/gold], gain {X} Block."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,

@@ -1483,15 +1483,9 @@
    plan: [{op: next_plan_extra_carry_out}],
    upgrade: {damage: 2}}
 
-- {id: proto_kk_second_thoughts, name: "Second Thoughts", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "Cancel your last [gold]Plan[/gold]: its card returns to your hand and you regain its cost.",
-   # THE NEWEST PLAN, where Change of Plans hurries the OLDEST -- the two
-   # tempo cards work opposite ends of one queue. No `plan:` line: a card that
-   # unwrites a Plan cannot also be one.
-   effects: [{op: cancel_last_plan}],
-   upgrade: {add: {op: draw, amount: 1}}}
+# SECOND THOUGHTS IS CUT (the Kokomi payoff pass, 2026-10-01; main session: "an undo
+# button, and an undo is a dead draw"). The `cancel_last_plan` op stays
+# registered with no row spelling it, the way `redirect_queued_plans` did.
 
 # CONVERGING TIDE IS RETIRED (POOL PASS THREE, `EB-655`); the
 # `redirect_queued_plans` op stays registered with no row spelling it, the way
@@ -1900,6 +1894,32 @@
    description: "Whenever you write a [gold]Plan[/gold] that costs 0, the [gold]Casket[/gold] gains 1.",
    effects: [{op: apply_power, power: kk_kurage_swarm, amount: 1, target: self}],
    upgrade: {innate: true}}
+
+# --- THE PAYOFF PASS (2026-10-01, ruled): Second Thoughts is cut; two
+# Uncommons pay for Plan volume in Block, and in Energy and cards. LAST in the
+# sheet's order. Provenance note, "Kokomi payoff pass, 2026-10-01". ---
+
+- {id: proto_kk_kurage_canopy, name: "Kurage Canopy", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   # Per CARRY-OUT: a Plan carried out twice (Second Wave, Nereid's
+   # Ascension, All Streams) pays twice. `KurageCanopyPower` rides the plan
+   # bus beside her Ancient.
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain {PowerAmount:diff()} [gold]Block[/gold].",
+   effects: [{op: apply_power, power: kk_kurage_canopy, amount: 2, target: self}],
+   # 3 Block.
+   upgrade: {power_amount: 1}}
+
+- {id: proto_kk_coral_tithe, name: "Coral Tithe", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   # The count is read and emptied only while she holds a Casket (the
+   # Tamakushi Casket or its Orobas upgrade, the Watatsumi Casket); without
+   # one the card does nothing. Rounds down: 7 at every 3 pays 2.
+   description: "Empty the [gold]Casket[/gold]. Gain 1 [gold]Energy[/gold] and draw 1 card for every {KkAmount:diff()} in it.",
+   effects: [{op: kokomi, kind: coral_tithe, amount: 3}],
+   # For every 2.
+   upgrade: {kokomi_amount: -1}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.

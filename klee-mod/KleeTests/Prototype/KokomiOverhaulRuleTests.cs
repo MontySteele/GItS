@@ -941,9 +941,10 @@ public class KokomiOverhaulRuleTests
         // pass (2026-09-29) cut Scout Ahead and Song of Pearls. FORTY-EIGHT
         // since the feed pass (2026-09-29): Exposed Flank cut, five added.
         // SIXTY-NINE since expansion batch one (2026-09-29): The Clouds Like
-        // Waves cut, 22 added.
+        // Waves cut, 22 added. SEVENTY since the payoff pass (2026-10-01):
+        // Second Thoughts cut, Kurage Canopy and Coral Tithe added.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(69, Il.CallSequence(slice)
+        Assert.Equal(70, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 
