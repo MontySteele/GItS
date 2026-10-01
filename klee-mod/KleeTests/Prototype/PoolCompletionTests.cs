@@ -75,7 +75,8 @@ public class PoolCompletionTests : IDisposable
     public void Her_offer_is_seventy_eight_with_the_eight_last()
     {
         var slice = Cards("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(78, slice.Count);
+        // The status batch (2026-10-01): seven cut ahead, six appended.
+        Assert.Equal(77, slice.Count);
         Assert.Equal(new[]
             {
                 "ProtoKkTidalScreen", "ProtoKkSpringTide", "ProtoKkKurageSchool",
@@ -83,7 +84,7 @@ public class PoolCompletionTests : IDisposable
                 "ProtoKkSeasReproach", "ProtoKkTidalRebuke",
                 "ProtoKkWatatsumiResistance",
             },
-            slice.Skip(70).ToArray());
+            slice.Skip(63).Take(8).ToArray());
         var multiplayer = Cards("KokomiOverhaulRoster", "MultiplayerSlice");
         Assert.Equal(5, multiplayer.Count);
         Assert.Equal(new[] { "ProtoKkTacticalRelay", "ProtoKkKuragesMercy" },

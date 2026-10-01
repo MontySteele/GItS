@@ -262,21 +262,32 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     SEVENTY SINCE THE PAYOFF PASS (2026-10-01): Second Thoughts cut, Kurage
     Canopy and Coral Tithe added last in the sheet's order.
 
-    SEVENTY-EIGHT SINCE POOL COMPLETION (2026-10-01): eight added last."""
+    SEVENTY-EIGHT SINCE POOL COMPLETION (2026-10-01): eight added last.
+
+    SEVENTY-SEVEN SINCE THE STATUS BATCH (2026-10-01): seven cut, six added
+    last; Coral Sanctuary, the paper's Rare, is not built."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 78
-    assert len(set(ids)) == 78
+    assert len(ids) == 77
+    assert len(set(ids)) == 77
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
-    assert {"proto_kk_riptide", "proto_kk_pincer", "proto_kk_flank",
-            "proto_kk_feigned_retreat"} <= set(ids)
+    assert {"proto_kk_riptide", "proto_kk_pincer",
+            "proto_kk_flank"} <= set(ids)
     cut = {"proto_kk_tide_chart", "proto_kk_cleansing_wave", "proto_kk_ripple",
            "proto_kk_well_laid", "proto_kk_sea_salt_prayer",
            "proto_kk_salt_line", "proto_kk_scout_ahead",
            "proto_kk_song_of_pearls", "proto_kk_exposed_flank",
-           "proto_kk_the_clouds_like_waves", "proto_kk_second_thoughts"}
+           "proto_kk_the_clouds_like_waves", "proto_kk_second_thoughts",
+           # The status batch (2026-10-01).
+           "proto_kk_rally", "proto_kk_pearl_diver", "proto_kk_battle_plan",
+           "proto_kk_feigned_retreat", "proto_kk_moon_signal",
+           "proto_kk_chain_of_command",
+           "proto_kk_all_streams_flow_to_the_sea"}
     assert not cut & set(ids)
-    # Pool completion (2026-10-01): eight rows LAST.
+    # The status batch (2026-10-01): six rows LAST.
+    assert ids[-6:] == C.KOKOMI_STATUS_BATCH_IDS
+    ids = ids[:-6]
+    # Pool completion (2026-10-01): eight rows LAST before them.
     assert ids[-8:] == C.KOKOMI_POOL_COMPLETION_IDS
     ids = ids[:-8]
     # The payoff pass (2026-10-01): two rows LAST before them.
@@ -284,20 +295,23 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
         "proto_kk_kurage_canopy", "proto_kk_coral_tithe")
     ids = ids[:-2]
     # Expansion batch one (2026-09-29): 22 rows LAST, Watatsumi's Grace
-    # among them in The Clouds Like Waves' place.
-    assert len(C.KOKOMI_EXPANSION_BATCH_ONE_IDS) == 22
-    assert ids[-22:] == C.KOKOMI_EXPANSION_BATCH_ONE_IDS
-    ids = ids[:-22]
+    # among them in The Clouds Like Waves' place; 21 since the status batch
+    # cut All Streams Flow to the Sea.
+    assert len(C.KOKOMI_EXPANSION_BATCH_ONE_IDS) == 21
+    assert ids[-21:] == C.KOKOMI_EXPANSION_BATCH_ONE_IDS
+    ids = ids[:-21]
     assert ids[-5:] == (
         "proto_kk_bubble_ward", "proto_kk_nip", "proto_kk_jellyfish_drift",
         "proto_kk_current_read", "proto_kk_brine_sting")
-    assert ids[-18:-5] == (
+    # The Casket pass's thirteen, eleven since the status batch cut Pearl
+    # Diver and Moon Signal.
+    assert ids[-16:-5] == (
         "proto_kk_massed_volley", "proto_kk_signal_arrow",
-        "proto_kk_surging_shoal", "proto_kk_pearl_diver",
+        "proto_kk_surging_shoal",
         "proto_kk_press_the_advantage", "proto_kk_shell_of_sanctuary",
         "proto_kk_driftglass", "proto_kk_what_the_tokoyo_returns",
         "proto_kk_depths_judgment", "proto_kk_tideturn",
-        "proto_kk_moon_signal", "proto_kk_pearl_current",
+        "proto_kk_pearl_current",
         "proto_kk_what_the_tokoyo_took")
     assert "proto_kk_held_tide" not in ids
     assert "proto_kk_tidal_rhythm" not in ids
@@ -444,10 +458,15 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     and Coral Tithe (Uncommon) added: 19 / 37 / 14.
 
     POOL COMPLETION (2026-10-01): Tidal Screen (Common) and seven Rares
-    added, Coral Crash moved Uncommon to Common: 21 / 36 / 21."""
+    added, Coral Crash moved Uncommon to Common: 21 / 36 / 21.
+
+    THE STATUS BATCH (2026-10-01): Rally and Pearl Diver (Common), Battle
+    Plan, Feigned Retreat, Moon Signal and Chain of Command (Uncommon) and
+    All Streams Flow to the Sea (Rare) cut; two Commons and four Uncommons
+    added, the Rare not built: 21 / 36 / 20."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 21, "uncommon": 36, "rare": 21}
+        "common": 21, "uncommon": 36, "rare": 20}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

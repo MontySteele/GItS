@@ -144,7 +144,8 @@ public class KokomiPoolPassFiveTests
         Assert.Equal(KokomiPlan.Kind.ApplyWeak, clause.Kind);
         Assert.Equal(KokomiPlan.Aim.AllEnemies, clause.Aim);
         Assert.DoesNotContain("[gold]Dusk[/gold]", Face(card));
-        Assert.Contains("[gold]Plan[/gold]", Face(card));
+        // The status batch (2026-10-01): "Or plan:".
+        Assert.Contains("Or [gold]plan[/gold]", Face(card));
     }
 
     [Fact]

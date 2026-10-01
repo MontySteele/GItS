@@ -45,7 +45,7 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "War Council"),
-        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies.\n[gold]Plan[/gold]: Gain 2 [gold]Energy[/gold]."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies.\nOr [gold]plan[/gold]: Gain 2 [gold]Energy[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
