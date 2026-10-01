@@ -37,8 +37,8 @@ namespace KleeMod.Relics;
 ///
 /// RELIC AND POTION APPLICATIONS GAIN NO OATH (sec.4, the kit paper's sec.3
 /// terms) and switch no element: Dandelion Seeds' application runs inside
-/// <see cref="VarkaOath.NoCredit"/>. Knight's Commission sets his element and
-/// gains its 1 Oath because its face says so.
+/// <see cref="VarkaOath.NoCredit"/>. Knight's Commission gains its 2 Oath
+/// because its face says so; it sets no element (the Fang does).
 /// </summary>
 public static class VarkaArmRelics
 {
@@ -129,16 +129,19 @@ public abstract class VarkaArmRelic : CustomRelicModel
         KleePck.Path(VarkaArmRelics.Icon(Slug)) ?? base.BigIconPath;
 }
 
-/// <summary>Common. "At the start of each combat, your starting Knight's
-/// element becomes your current element, with 1 Oath." On his first turn,
-/// after the draw (Fresh Catch's hook), so the Fang's Ascension lands in the
-/// opening hand (the paper: "intended"). The starting Knight's element is
-/// the one the Fang rolled for the run (<see cref="VarkaStarterKnight"/>),
-/// kept even after that card is removed or transformed (main session,
-/// 2026-10-01), so it works all run.</summary>
+/// <summary>Common. "At the start of each combat, gain 2 Oath in your
+/// starting Knight's element." On his first turn, after the draw (Fresh
+/// Catch's hook), so the Fang's Ascension lands in the opening hand (the
+/// paper: "intended"). It sets no element: Boreas's Fang makes that element
+/// current on turn one (Varka defence sec.4), which left the Commission's old
+/// face ("becomes your current element, with 1 Oath") redundant; re-aimed to
+/// 2 Oath (main session, 2026-10-01). The starting Knight's element is the
+/// one the Fang rolled for the run (<see cref="VarkaStarterKnight"/>), kept
+/// even after that card is removed or transformed, so it works all run.
+/// </summary>
 public sealed class KnightsCommission : VarkaArmRelic
 {
-    public const int Oath = 1;
+    public const int Oath = 2;
 
     protected override string Slug => "knights_commission";
 
@@ -148,14 +151,12 @@ public sealed class KnightsCommission : VarkaArmRelic
     {
         ("title", "Knight's Commission"),
         ("description",
-            "At the start of each combat, your starting Knight's element "
-          + "becomes your [gold]current element[/gold], with [blue]" + Oath
-          + "[/blue] [gold]Oath[/gold]."),
+            "At the start of each combat, gain [blue]" + Oath
+          + "[/blue] [gold]Oath[/gold] in your starting Knight's element."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCurrentElement(
-            ArmKeywordTips.ForOath(Array.Empty<IHoverTip>(), null), null);
+        ArmKeywordTips.ForOath(Array.Empty<IHoverTip>(), null);
 
     /// <summary>The element of the run's starting Knight: the one recorded
     /// when the Fang rolled it. A run begun before the record existed reads
@@ -174,8 +175,6 @@ public sealed class KnightsCommission : VarkaArmRelic
                                       player.Deck.Cards);
         if (element == Element.None) return;
         Flash();
-        await VarkaOath.SetCurrent(choiceContext, player.Creature, element,
-                                   knight: false);
         await VarkaOath.Gain(choiceContext, player.Creature, element, Oath);
     }
 }

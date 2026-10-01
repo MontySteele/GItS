@@ -212,7 +212,9 @@ public class VarkaExpansionTests : IDisposable
     {
         Assert.Contains("VarkaOath.Count", Calls("VarkaCards", "BlazingCharge"));
         Assert.Contains("VarkaOath.Count", Calls("VarkaCards", "GlacialEdict"));
-        Assert.Contains("VarkaOath.Count", Calls("VarkaCards", "ThunderingVerdict"));
+        // Thundering Verdict reads it through its face's per-hit sum.
+        Assert.Contains("VarkaHitDamageVar.PerHit", Calls("VarkaCards", "ThunderingVerdict"));
+        Assert.Contains("VarkaOath.Count", Calls("VarkaHitDamageVar", "PerHit"));
         Assert.DoesNotContain("VarkaOath.CurrentOath",
                               Calls("VarkaCards", "BlazingCharge"));
         Assert.Equal(1, VarkaCards.GlacialEdictStacks(3, 4));

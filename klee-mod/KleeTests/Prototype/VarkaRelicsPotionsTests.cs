@@ -147,11 +147,13 @@ public class VarkaRelicsPotionsTests : IDisposable
         Assert.Contains("VarkaStarterKnight.Record", upgrade);
         Assert.Contains("VarkaStarterKnight.Of",
                         Il.Calls(Il.Method("KnightsCommission", "AfterPlayerTurnStart")));
-        // It sets the element, then gains through the one door (so the Fang
-        // answers its 1 Oath on turn one).
+        // Re-aimed (main session, 2026-10-01): the Fang sets the element, so
+        // the Commission sets none; it gains 2 Oath through the one door (so
+        // the Fang answers it on turn one).
         var calls = Il.CallSequence(Il.Method("KnightsCommission", "AfterPlayerTurnStart")).ToList();
-        Assert.True(calls.IndexOf("VarkaOath.SetCurrent") < calls.IndexOf("VarkaOath.Gain"));
-        Assert.Equal(1, KnightsCommission.Oath);
+        Assert.DoesNotContain("VarkaOath.SetCurrent", calls);
+        Assert.Contains("VarkaOath.Gain", calls);
+        Assert.Equal(2, KnightsCommission.Oath);
     }
 
     [Fact]

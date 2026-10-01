@@ -119,7 +119,45 @@ public class VarkaElementIdentitiesTests : IDisposable
         Assert.Equal(8m, Var(Upgraded<ProtoVkThunderingVerdict>(), "VkBase"));
         var body = Calls("VarkaCards", "ThunderingVerdict");
         Assert.Contains("CardModel.ResolveEnergyXValue", body);
-        Assert.Contains("VarkaOath.Count", body);
+        Assert.Contains("VarkaHitDamageVar.PerHit", body);
+        Assert.Contains("VarkaOath.Count", Calls("VarkaHitDamageVar", "PerHit"));
+    }
+
+    [Fact]
+    public void Thundering_verdict_prints_its_per_hit_damage_in_combat()
+    {
+        // The element identities round (2026-10-01): "Thundering Verdict
+        // prints no per-hit number." Whirlwind's shape: the face carries one
+        // hit's number, VkBase plus VkPer per Electro Oath, through the game's
+        // damage hooks, and the play reads the same sum.
+        var verdict = new ProtoVkThunderingVerdict();
+        var hit = Assert.IsType<VarkaHitDamageVar>(
+            verdict.DynamicVars[VarkaHitDamageVar.Token]);
+        Assert.Equal(Element.Electro, hit.OathElement);
+        var face = verdict.Localization!.First(r => r.Item1 == "description").Item2;
+        Assert.Contains("{InCombat:", face);
+        Assert.Contains("(Deals {VkHit:diff()} damage each time)", face);
+        // Off a card nobody holds, no Oath: the printed base.
+        Assert.Equal(6, VarkaHitDamageVar.PerHit(verdict, Element.Electro));
+        Assert.Equal(8, VarkaHitDamageVar.PerHit(
+            Upgraded<ProtoVkThunderingVerdict>(), Element.Electro));
+        Assert.Contains("HitElement.Carry",
+                        Calls("VarkaHitDamageVar", "UpdateCardPreview"));
+    }
+
+    [Fact]
+    public void A_face_that_folded_the_amplifier_is_not_amplified_twice()
+    {
+        // The element identities round (2026-10-01): Amber: Sharpshooter's
+        // face read 18 into a Hydro aura, the Vaporize tip said "this card's
+        // 18 lands 27", and 18 landed. A FrontFoldedDamageVar face previews
+        // against the front enemy with that body's own aura hook, so where
+        // the aura is the front enemy's the tip's number is the face's.
+        var amplified = Calls("KleeCardTooltips", "AmplifiedBody");
+        Assert.Contains("KleeCardTooltips.FaceBody", amplified);
+        var face = Calls("KleeCardTooltips", "FaceBody");
+        Assert.Contains("KokomiPlan.FrontEnemy", face);
+        Assert.Contains("FurinaStage.LiveFor", face);
     }
 
     [Fact]

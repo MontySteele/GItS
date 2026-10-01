@@ -2605,6 +2605,11 @@ VARKA_IMPLIED_AIM_KINDS = {"ascension_hit", "avatar_hit"}
 #: upgraded card's TargetType is AllEnemies (Pathfinder's Mark+).
 VARKA_UPGRADE_WIDENS = {"pathfinders_mark"}
 VARKA_VAR_FIELDS = {"per": "VkPer", "base": "VkBase", "amount": "VkAmount"}
+#: A kind whose face prints its per-hit total in combat, `{VkHit}` (the
+#: element identities round, 2026-10-01: Thundering Verdict printed no per-hit
+#: number). The value is the element whose Oath the hit adds; the var is
+#: `VarkaHitDamageVar` (Powers/Prototype/VarkaOath.cs), display only.
+VARKA_HIT_PREVIEW_KINDS = {"thundering_verdict": "Electro"}
 VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
@@ -7742,6 +7747,9 @@ def build_vars(card: dict) -> list[str]:
             for field in VARKA_KIND_FIELDS.get(eff["kind"], ()):
                 out.append(f'new DynamicVar("{VARKA_VAR_FIELDS[field]}", '
                            f'{int(eff[field])}m)')
+            if eff["kind"] in VARKA_HIT_PREVIEW_KINDS:
+                out.append('new VarkaHitDamageVar(Element.'
+                           f'{VARKA_HIT_PREVIEW_KINDS[eff["kind"]]})')
         elif op == "crash_fanfare":
             # Always a var: the Hyperbeam's upgrade IS this number (the
             # floor_drop delta), so the upgraded face has to render it.

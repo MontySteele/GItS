@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -1145,8 +1146,8 @@ public static class VarkaCards
         var owner = card.Owner?.Creature;
         if (owner?.CombatState == null) return;
         var x = card.ResolveEnergyXValue();
-        var damage = CurrentElementDamage(Var(card, "VkBase"), Var(card, "VkPer"),
-                                          VarkaOath.Count(owner, Element.Electro));
+        // The face's per-hit number reads the same sum (VkHit).
+        var damage = VarkaHitDamageVar.PerHit(card, Element.Electro);
         for (var i = 0; i < x; i++)
         {
             foreach (var enemy in owner.CombatState.HittableEnemies.ToList())
@@ -1308,6 +1309,62 @@ public static class VarkaCards
         {
             await ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
                              Var(card, "VkBase"), element);
+        }
+    }
+}
+
+/// <summary>
+/// THE PER-HIT NUMBER OF A VARKA KIND THAT READS AN ELEMENT'S OATH (the
+/// element identities round, 2026-10-01: "Thundering Verdict prints no per-hit
+/// number"; X=4 landed 27 a hit where the seat had seen 10 earlier). Display
+/// only, the base game's Whirlwind shape: the face prints what one hit deals,
+/// <c>VkBase</c> plus <c>VkPer</c> for each Oath of
+/// <see cref="OathElement"/>, folded through the game's damage hooks
+/// (Strength, Weak) with the hit's element carried, as
+/// <see cref="VarkaCards.ThunderingVerdict"/> deals it. Nothing reads it in
+/// play; the play reads the card's own <c>VkBase</c> and <c>VkPer</c>.
+/// Emitted by codegen for the kinds in <c>VARKA_HIT_PREVIEW_KINDS</c>.
+/// </summary>
+public sealed class VarkaHitDamageVar : DamageVar
+{
+    /// <summary>The face's token.</summary>
+    public const string Token = "VkHit";
+
+    /// <summary>The element whose Oath the hit adds, and that it carries.
+    /// </summary>
+    public Element OathElement { get; }
+
+    public VarkaHitDamageVar(Element oathElement)
+        : base(Token, 0m, ValueProp.Move)
+    {
+        OathElement = oathElement;
+    }
+
+    /// <summary>One hit's printed number before the hooks: VkBase plus VkPer
+    /// for each Oath of the element (none off a card nobody holds). PURE.
+    /// </summary>
+    public static int PerHit(CardModel card, Element element)
+    {
+        var owner = card.IsMutable ? card.Owner?.Creature : null;
+        return VarkaCards.CurrentElementDamage(
+            card.DynamicVars["VkBase"].BaseValue,
+            card.DynamicVars["VkPer"].BaseValue,
+            VarkaOath.Count(owner, element));
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        BaseValue = PerHit(card, OathElement);
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        using (HitElement.Carry(card, OathElement))
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
         }
     }
 }
