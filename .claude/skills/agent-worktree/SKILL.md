@@ -21,11 +21,11 @@ files and nothing else. Mint no ids; in `BACKLOG.md`, delete what you built.
 - **Sibling directories only**, and **never link a gitignored asset tree into
   one** (`game_ref/`, `ImageGen/images/`, `art/raw/`): a junction is followed
   and deleted by a teardown, which has destroyed `game_ref/` more than once.
-- **It refuses while a seat is live in this checkout** — an
-  `understudy/logs/embark-*.json` whose ledger still reads `APPLIED` on a lane
-  whose port answers. Tear the lane down first
-  (`python -m understudy.embark --teardown --lane N`); one install means one
-  deployed build for every lane.
+- **It names a live seat and goes on** — an `understudy/logs/embark-*.json`
+  whose ledger still reads `APPLIED` on a lane whose port answers. A sibling
+  worktree does not touch the install; while the lane runs, do not deploy
+  (`tools/deploy_round.py` refuses anyway) and do not pull in the main
+  checkout. `--allow-live-lane` is accepted and does nothing.
 
 ## In the worktree
 

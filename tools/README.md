@@ -73,7 +73,7 @@ Each takes `--help` and `--oneline`; each has a `.claude/skills/` entry.
 the failing test names, raw output to `.gates/<stamp>.log` — the token saver;
 `--fast` is the inner loop and never the pre-push gate),
 `agent_worktree.py` (sibling worktree + `local.props` + CLAUDE.md's read order
-for the task; refuses while a seat is live), `open_pr.py` (the `gh` full path
+for the task; names a live seat, never refuses on one), `open_pr.py` (the `gh` full path
 and the mandatory footer; prints the number and URL only), `land_pr.py` (a
 PLUMBING land: checks, `--merge`, purge, fast-forward, and the untracked-file
 trap), `seat.py` (embark / `blindplay session` / teardown with the lane
