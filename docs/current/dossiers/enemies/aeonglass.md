@@ -126,8 +126,8 @@ generated later, from any source. So there is one global Wither strength for the
 | 4 | 15 |
 
 Copies are added to the **discard pile**, not hand, so they arrive on a delay and then recycle
-forever. Late in the fight a hand holding two Wither+4s is quietly taking 30 unblockable-by-default
-damage per turn on top of the boss's attack, and drawing them costs draw slots as well.
+forever. Late in the fight a hand holding two Wither+4s is quietly taking 30 damage per turn
+(blockable, like Burn: the mod's decompile reading, `klee-mod/KleeCode/Powers/Prototype/FurinaStageGuests.cs`) on top of the boss's attack, and drawing them costs draw slots as well.
 
 ### Withering Presence (the card-throughput tax)
 
