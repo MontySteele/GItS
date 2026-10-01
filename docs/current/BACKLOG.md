@@ -13,7 +13,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 ## Kits and display (the mod)
 
 - Varka has no Ancient card: Darv's Dusty Tome hands him an upgraded Four Winds' Ascension through BaseLib's `ITomeCard` (the row's `dusty_tome` tag) until one is designed; delete the tag with it.
-- Varka's upgraded Boreas's Fang (paper sec.4: it creates Four Winds' Ascension upgraded) is not built, so Touch of Orobas hands him the no-effect Circlet (`NO_UPGRADED_FORM` in `tier0/tests/test_starter_relic_upgrades.py`); it needs the C# relic and a tier05 Orobas row together.
 - Varka's relic and potion pools borrow the Silent's (Kokomi's arrangement); his own pass (sec.5's Dandelion Wine, The Untitled Question) is not built.
 - Varka's Architect finale lines in `tools/build_pck.ps1` are placeholders for a writing pass, like the other three characters'.
 - Varka's Oath tip says "1 of each, per card", which a seat read as one per element; both engines credit applying and Swirling separately (`VarkaOathLedger.TryCredit`, `varka_oath.credit`), so Northwind Avatar on an aura of the current element gains 2. The tip wants to say applying and Swirling each count once per card (Varka Oath round, lane 2 act 2).

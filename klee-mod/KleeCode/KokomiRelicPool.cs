@@ -41,6 +41,10 @@ public sealed class KokomiRelicPool : RelicPoolModel
         // not contain the type -- and Starter rarity keeps it out of every
         // reward roll in a dev build, exactly as it keeps the Pearl out.
         relics = relics.Append(ModelDb.Relic<Relics.TamakushiCasket>());
+        // Its Touch of Orobas upgrade (2026-09-30), a member for the same
+        // reason at the mid-run grant. Ancient rarity: never rolled, the
+        // Pearl of Insight's arrangement below.
+        relics = relics.Append(ModelDb.Relic<Relics.WatatsumiCasket>());
 #endif
         return relics;
     }
