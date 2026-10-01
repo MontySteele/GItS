@@ -198,6 +198,25 @@ public static partial class FurinaStage
         && FurinaStageLedger.For(owner!).CanSpend(PriceOf(owner!, amount));
 
     /// <summary>
+    /// The Spend warning: the guests that could pay for their end-of-turn
+    /// act now and could not after this Spend N
+    /// (<see cref="FurinaStageLedger.StrandedBySpend"/>). Empty where the
+    /// mode is not offered, and where Center of Attention makes the Spend
+    /// free, since nothing is then taken. Read by the Spend mode's face in
+    /// the chooser (<c>ArmKeywordTips.ForSpendShortfall</c>).
+    /// </summary>
+    public static IReadOnlyList<StagePerformer> StrandedBySpend(
+        Creature? owner, int amount)
+    {
+        if (!CanSpend(owner, amount) || CenterOfAttentionPower.Covers(owner))
+        {
+            return System.Array.Empty<StagePerformer>();
+        }
+        return FurinaStageLedger.For(owner!)
+            .StrandedBySpend(PriceOf(owner!, amount));
+    }
+
+    /// <summary>
     /// PALAIS LEDGER, re-aimed by the rules pass (2026-10-01): "Your Spends
     /// cost 1 less Fanfare." The price a chosen Spend mode actually asks:
     /// its printed N, less 1 per Palais Ledger held, floored at 0. Read by

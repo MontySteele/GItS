@@ -438,7 +438,11 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     # since its three cards were cut, so the fade's tip left
                     # the keyword table; the key stays as the sentence the
                     # seat page's glossary mirrors.
-                    "KLEEMOD-ARM_STAGE_FADE"}
+                    "KLEEMOD-ARM_STAGE_FADE",
+                    # The Spend warning (Furina pool round 2026-10-01): the
+                    # guests a Spend would leave unable to pay to act, on a
+                    # Spend mode's face, titling no keyword.
+                    "KLEEMOD-ARM_STAGE_SPEND_SHORT"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():

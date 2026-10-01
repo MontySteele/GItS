@@ -1189,6 +1189,42 @@ public sealed class FurinaStageLedger
     public bool CanSpend(int amount) =>
         Back is not null && TotalFanfare >= amount;
 
+    /// <summary>
+    /// THE SPEND WARNING (Furina pool round 2026-10-01, "What to change" 2):
+    /// the guests whose act this stage pays for now and would not pay for
+    /// after a Spend of <paramref name="price"/>. A guest whose act costs
+    /// Fanfare (Neuvillette, Clorinde, Chevreuse, Lyney, Escoffier) otherwise
+    /// just does nothing at the end of the turn. Asked of the act's own
+    /// payment (<see cref="ActFanfare"/>), run on forecast clones, so the
+    /// warning and the sweep cannot disagree about who can pay. Resting seats
+    /// and a guest the Spend empties (it bows) are not listed. Pure.
+    /// </summary>
+    public IReadOnlyList<StagePerformer> StrandedBySpend(int price)
+    {
+        var stranded = new List<StagePerformer>();
+        if (price <= 0 || !CanSpend(price)) return stranded;
+        var after = CloneForForecast();
+        after.Spend(price);
+        for (var i = 0; i < after._seats.Count; i++)
+        {
+            var who = after._seats[i].Who;
+            if (after._seats[i].Resting || !FurinaStage.IsGuest(who)) continue;
+            if (after.ActPays(i)) continue;
+            var now = _seats.FindIndex(s => s.Who == who);
+            if (now >= 0 && ActPays(now)) stranded.Add(who);
+        }
+        return stranded;
+    }
+
+    /// <summary>Would seat <paramref name="index"/>'s act pay on this board?
+    /// Runs <see cref="ActFanfare"/> on a clone; nothing here moves.</summary>
+    private bool ActPays(int index)
+    {
+        var trial = CloneForForecast();
+        var seat = trial._seats[index];
+        return trial.ActFanfare(seat.Who, seat, null, new List<StageExit>());
+    }
+
     /// <summary>Every performer's Fanfare, front to back.</summary>
     public int TotalFanfare => _seats.Sum(seat => seat.Fanfare);
 

@@ -610,6 +610,9 @@ public static class KleeMod
                     // each other -- but no single face can raise both, because
                     // the arm swaps a shipped row out at every door it enters.
                     [Cards.ArmKeywordTips.SpendKey + ".title"] = "Spend",
+                    // The Spend warning (Furina pool round 2026-10-01).
+                    [Cards.ArmKeywordTips.SpendShortKey + ".title"] =
+                        "Leaves a guest short",
                     [Cards.ArmKeywordTips.FanfareKey + ".title"] =
                         "Fanfare",
                     // The text pass (2026-09-25) retired `Raise` and

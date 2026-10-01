@@ -459,7 +459,12 @@ public class ArmKeywordTipTests
         // FORTY-FIVE with Varka's element identities (2026-10-01):
         // `ForElementSwitch`, a rider titling no keyword ("this card would
         // switch your current element"), through the same `With`.
-        Assert.Equal(45, attaches.Count);
+        //
+        // FORTY-SIX with the Spend warning (Furina pool round 2026-10-01):
+        // `ForSpendShortfall`, a rider titling no keyword, on a Spend mode's
+        // face: the guests this Spend would leave unable to pay to act.
+        Assert.Equal(46, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForSpendShortfall");
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
         Assert.Contains(attaches, m => m.Name == "ForCurrentElement");

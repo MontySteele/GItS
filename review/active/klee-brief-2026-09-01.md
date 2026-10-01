@@ -62,14 +62,14 @@ here. "Shipped" means it exists on the current sheet in some form.
 | Skill *Jumpy Dumpty* | Bounces three times, then **splits into mines** that explode on contact or after a delay | as damage plus one bomb | The starter Jumpy Dumpty: a Bomb that leaves **Mines** when it goes off; Mk.II bounces (rule 3, §8) |
 | Burst *Sparks 'n' Splash* | Sparks attack nearby enemies on their own for a while | kit Burst, retiring | Rare Power: at end of turn, set off a random enemy (§5.2) |
 | Passive *Pounding Surprise* | Jumpy Dumpty and attacks have a chance to grant an Explosive Spark | starter relic | The relic: one Spark per explosion (rule 4, §8) |
-| Passive *Sparkling Burst* | A charged-attack crit gives the party energy | no | Catalytic Converter: a reacting explosion gives 2 Sparks (§5.5) |
+| Passive *Sparkling Burst* | A charged-attack crit gives the party energy | no | Flash Point: a Set off Attack that gains 1 Spark if a Bomb reacted this turn (§5.5; it replaced Catalytic Converter, cut by R276) |
 | Passive *All Of My Treasures!* | Shows Mondstadt chests on the map; bombs are her "treasures" | Rare Skill | Kept; treasure = bombs is the naming voice for the Cook loop |
 | C1 *Chained Reactions* | Attacks and skills summon extra sparks during the Burst | Rare | Rare: every explosion plants a new Bomb somewhere (§5.2) |
 | C2 *Explosive Frags* | **Mines** lower enemy DEF | Rare (explosions apply Vulnerable) | Kept, re-keyed to Mines: a Mine going off applies Vulnerable |
 | C4 *Sparkly Explosion* | Leaving the field during the Burst causes a huge explosion | Rare | Rare Attack, exhaust: set off every Bomb on every enemy at double |
 | C6 *Blazing Delight* | Party-wide Pyro bonus and energy during the Burst | Rare | Co-op card (R144: co-op depth is cards) |
 | Title *Fleeing Sunlight* | She runs after the bang | *Run Away!* exists, plain | **Run Away!**: Block, more if a Bomb went off this turn. Spray's defence (§6) |
-| Jean, solitary confinement | She is grounded when she misbehaves; when she behaves she is safe | *Sorry, Jean...* exists, plain | **Grounded** (Power): Block at the start of your turn if no Bomb went off last turn. Cook's defence (§6) |
+| Jean, solitary confinement | She is grounded when she misbehaves; when she behaves she is safe | *Sorry, Jean...* exists, plain | **Grounded** (Power): Block and 1 Spark at the start of your turn if you played no *Set off* card last turn. Cook's defence (§6) |
 | Confiscation | Jean takes her bombs away | *Confiscated* status exists (Fish Blasting) | **Sorry, Jean...**: remove one of your Bombs, gain Block equal to its size (§6) |
 | Albedo, her caretaker | Cleans up her messes; her big brother | no | Rare Personal Companion, once R234 P5a is answered (§7) |
 | Diona, Barbara, Noelle, Sucrose | The friends who look after her | Diona is a plain Universal | Personal Companions are her **babysitters**: defence hooked to explosions (§7) |
@@ -138,8 +138,8 @@ one enemy, a targeting decision about which bombs to collect.
 
 Her defences are keyed to that same decision, in opposite directions:
 
-- **Grounded** pays her for a turn in which nothing went off. Cooking is the
-  safe turn.
+- **Grounded** pays her for a turn in which she played no *Set off* card.
+  Cooking is the safe turn.
 - **Run Away!** pays her for a turn in which something did. Cashing is the
   safe turn.
 - **A Mine** is both: it is damage she is cooking *and* a trap under the
@@ -152,8 +152,11 @@ fight.
 
 Sparks are the second contest. A Spark buys a free *Set off* Attack now
 (tempo, more explosions, more Sparks) or a Spark-priced Skill that plants,
-grows, or defends (setup). Generation only comes from explosions, so she
-cannot bank Sparks without collecting bombs. Lean in and it flows. Five
+grows, or defends (setup). Generation comes from explosions, so she
+cannot bank Sparks without collecting bombs. The one deliberate exception
+is Grounded's 1 Spark on a quiet turn (`EB-344`, R248): rule 4 mints
+nothing on the turn Grounded is written for, so without it holding would
+be a pause rather than a play. Lean in and it flows. Five
 reads (rounds 23 to 25 and [USER]'s runs) found it never stingy: income
 outran every price on the pool. R270 (2026-09-08) keeps the income and makes
 the contest one between sinks: Spark buys Block, cards or Energy at Regent's
@@ -176,8 +179,8 @@ the plan the starter teaches.
   keep pressure without cashing), Chain Fuse and Explosives Workshop (grow
   faster), Careful Arrangement (pile every Bomb onto one enemy, which also
   makes one big reacting number), Grounded and Sorry, Jean... (defence), Big
-  Badda Boom and The Big One (*Set off* with a multiplier), Remote Detonator
-  (*Set off* on a Skill).
+  Badda Boom and The Big One (*Set off* with a multiplier), Quick Fuse and
+  Countdown (*Set off* on a Skill).
 - **The payoff moment:** the Red Knight of Stormbearer Mountains. A single
   30-plus explosion, then the Sparks it minted pay for the follow-up.
 - **The decision every turn:** "is it big enough, or can I afford one more
@@ -185,7 +188,7 @@ the plan the starter teaches.
 - **The Rare that breaks a rule:** *Alice's Recipe* (Power): Bombs grow by 4.
   Rule 1's number doubles and every quiet turn is worth two.
 - **Weakness:** hallways with three small enemies, and anything that hits
-  harder than Grounded and a Duck and Cover can hold.
+  harder than Grounded and a Defend can hold.
 
 ### 5.2 Spray — "everything explodes now"
 
@@ -195,8 +198,8 @@ mint the Sparks for the next one. The hallway plan and the Shiv analogue.
 - **A turn looks like:** six to nine card plays, random targets, bombs going
   off on every enemy, Run Away! at the end, the board cleared by turn two or
   three.
-- **You draft:** Pop! and Mine Toss (cheap bombs and mines), Fwoosh! and
-  Tinder Toss and Bang Bang! (Spark *Set off* Attacks), Rapid Fire (four
+- **You draft:** Pop! and Mine Toss (cheap bombs and mines), Tinder Toss
+  and Bang Bang! (Spark *Set off* Attacks), Rapid Fire (four
   random hits, *Set off* each enemy hit), Run Away! (defence), Chained
   Reactions (every explosion plants a new Bomb somewhere).
 - **The payoff moment:** the chain, when one Attack sets off three enemies'
@@ -223,7 +226,7 @@ on the *first* one, which is why Careful Arrangement is a React card.
 - **You draft:** Dahlia, Kaeya, Diona, Fischl from the Mondstadt pool (the
   appliers), Sucrose (Swirl spreads the aura), Sizzle and Perfect Timing and
   Flame Dance (*Set off* Attacks that pay extra against an aura), Careful
-  Arrangement, Catalytic Converter (a reacting explosion gives 2 Sparks).
+  Arrangement, Flash Point (1 Spark and a card if a Bomb reacted this turn).
 - **The payoff moment:** a cooked 15 that Vaporizes into 22 and applies Pyro
   on the way out.
 - **The decision every turn:** cash now for the plain number, or wait one turn
@@ -254,15 +257,16 @@ on the *first* one, which is why Careful Arrangement is a React card.
   it hits you** (Mines).
 - **Bombs → cards:** Ammo Scavenging (Common): plant a Bomb 4, then draw a
   card for each Bomb that went off this turn.
-- **Sparks → Attacks** (Fwoosh! and friends, Common), **→ setup and defence**
+- **Sparks → Attacks** (Tinder Toss, Common; Bang Bang!, Uncommon), **→ setup and defence**
   (Dig In, Powder Charge; Blast Shield and Return to Sender, pass two),
   **→ cards** (Bottomless Bag; Once More!, a Set off card back), **→ energy**
   (Sparkling Burst, Uncommon, 3 Sparks; Sugar Rush, Rare; Blazing Delight,
   Rare Power, 5 Sparks). R270 lifted draft 4's "energy only at Rare" line:
   Regent sells Energy for Stars at Uncommon, and what keeps Sparks from
   being a second energy pool is the price, three explosions per Energy.
-- **Reactions → Sparks:** Catalytic Converter. React feeds Spray.
-- **Not exploding → Block** (Grounded); **exploding → Block** (Run Away!).
+- **Reactions → Sparks:** Flash Point. React feeds Spray.
+- **Not setting off → Block and a Spark** (Grounded); **exploding → Block**
+  (Run Away!).
 
 Every currency reaches every other one somewhere in the pool, at the rarity
 that keeps it a discovery rather than a default.
@@ -306,19 +310,19 @@ Two faces changed after the batch landed (2026-09-23):
 
 ## 6. The intended weakness, and how she survives anyway
 
-**She cannot stall, and she cannot block on demand.** Her only plain Block is
-Duck and Cover, 5 for 1. Every other defence she has is conditional on the
+**She cannot stall, and she cannot block on demand.** Her plain Block is
+the base game's Defend, 5 for 1, and Dig In, 8 for a Spark. Every other defence she has is conditional on the
 decision she just made:
 
 | Defence | Trigger | Lore | Which loop |
 |---|---|---|---|
 | **Mine** | Its enemy attacks her: it goes off first, at its cooked size | Jumpy Dumpty's mines explode on contact | All; Spray most |
-| **Grounded** (Uncommon Power) | Start of turn, if no Bomb went off last turn: Block | Jean's solitary confinement: behave and you are safe | Cook |
+| **Grounded** (Uncommon Power) | Start of turn, if you played no *Set off* card last turn: Block and 1 Spark | Jean's solitary confinement: behave and you are safe | Cook |
 | **Run Away!** (Common, 0 energy) | Block, more if a Bomb went off this turn | *Fleeing Sunlight*: she runs after the bang | Spray |
 | **Sorry, Jean...** (Common) | Remove one of your Bombs; Block equal to its size | Jean confiscates the bomb | Cook's emergency exit |
 | **Her friends** (companions) | Block or a shield when an explosion happens, printed on the companion card | Diona, Barbara, Noelle look after her; Albedo cleans up | All, drafted |
 
-Against a boss that hits harder than Grounded plus a Duck and Cover, she must
+Against a boss that hits harder than Grounded plus a Defend, she must
 cash early and small, which is exactly the situation she hates. Against three
 small enemies, a Mine kills the attacker before it swings, and the player who
 cooked a Mine to 12 under a 9-HP raider gets to feel clever. Against a fast

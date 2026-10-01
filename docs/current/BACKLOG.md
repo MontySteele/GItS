@@ -21,6 +21,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Furina rules pass (2026-10-01): rerun the sim on her decks (paper sec.5: Solo, Spend and Guest Cast within 10 points of the default drafter; a smoke test, not a gate).
 - Furina rules pass (2026-10-01): art for Opening Number, Leading Lady and Endless Waltz (they render the placeholder).
 - Furina rules pass (2026-10-01): Palais Ledger's discount, Opening Number's first-card count, Endless Waltz's acts and Wriothesley's full-stage arrival are pinned headless only; watch them in game and through the bridge at the next Furina seat round.
+- Furina Spend warning (pool round 2026-10-01, change 2): the "Leaves a guest short" tip on a Spend mode face is C# only (`FurinaStageLedger.StrandedBySpend`); the sim has no mode-face preview, so mirror it in `tier0/engine/furina_stage.py` if one is built, and check the tip renders in the chooser and on the bridge at the next Furina seat round.
 - Varka has no Ancient card: Darv's Dusty Tome hands him an upgraded Four Winds' Ascension through BaseLib's `ITomeCard` (the row's `dusty_tome` tag) until one is designed; delete the tag with it.
 - Verify Boreas's Fang saved starter element survives save/reload (`Relics/VarkaStarterKnight.cs`, a BaseLib `SavedSpireField`; no test exercises a real serialize/deserialize, so Knight's Commission keeps its deck fallback until then).
 - Varka's Architect finale lines in `tools/build_pck.ps1` are placeholders for a writing pass, like the other three characters'.

@@ -156,4 +156,9 @@ public sealed class ProtoFsIntervalBellModeB : ModalOptionCard
         : base(CardType.Skill)
     {
     }
+
+    /// <summary>The Spend warning: the guests this Spend would leave
+    /// unable to pay for their act.</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForSpendShortfall(base.ExtraHoverTips, this, (IsUpgraded ? 2 : 3));
 }
