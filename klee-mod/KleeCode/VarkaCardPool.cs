@@ -1,4 +1,4 @@
-#if PROTOTYPE_CARDS && VARKA_PROTOTYPE
+#if PROTOTYPE_CARDS
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -13,8 +13,8 @@ namespace KleeMod;
 /// Varka's card pool (the Oath rework). Its MEMBERS are every card of his
 /// -- the generated rows and Change of Guard's four element faces -- so
 /// <c>CardModel.Pool</c> resolves; its OFFER is the seventy-eight-card pool alone
-/// (<see cref="VarkaRoster.Pool"/>). Compiled only with
-/// <c>-p:VarkaPrototype=true</c>, beside the character.
+/// (<see cref="VarkaRoster.Pool"/>). Compiled with the prototype surface,
+/// beside the character.
 /// </summary>
 public sealed class VarkaCardPool : CardPoolModel
 {

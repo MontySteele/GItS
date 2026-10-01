@@ -1,10 +1,10 @@
 """VARKA, THE OATH REWORK -- the sim engine's pins (`tier0/engine/varka_oath.py`).
 
 Rules: `review/active/varka-paper-kit-2026-09-28.md` (every pick ruled
-2026-09-29); rows: the `proto_vk_` block of `docs/prototype-surface.yaml`. The
-switch ships off (`varka_oath.VARKA_OATH`) and the `varka` fixture flips it,
-with the element port's two ruled switches (`C.SWIRL_PAYS`,
-`C.CRYSTALLIZE_KEEPS_AURA`) beside it, and restores all three.
+2026-09-29); rows: the `proto_vk_` block of `docs/prototype-surface.yaml`. His
+rules have no switch (collapsed 2026-10-01: he ships nowhere else); the `varka`
+fixture turns on the element port's two ruled switches (`C.SWIRL_PAYS`,
+`C.CRYSTALLIZE_KEEPS_AURA`) and restores both.
 """
 
 from __future__ import annotations
@@ -26,13 +26,13 @@ def _reset():
 
 @pytest.fixture
 def varka():
-    saved = (V.VARKA_OATH, C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA)
-    V.VARKA_OATH, C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = True, True, True
+    saved = (C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA)
+    C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = True, True
     _reset()
     try:
         yield
     finally:
-        V.VARKA_OATH, C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = saved
+        C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = saved
         _reset()
 
 
@@ -77,7 +77,7 @@ def _hand_ids(st):
 
 
 # ---------------------------------------------------------------------------
-# 0. The switch off.
+# 0. No switch: always on, and dead for anyone who is not Varka.
 # ---------------------------------------------------------------------------
 
 def _ironclad_log(seed):
@@ -88,31 +88,27 @@ def _ironclad_log(seed):
     return combat.run_fight(player, enemies, pilot, seed=seed).log
 
 
-def test_the_switch_ships_off():
-    assert V.VARKA_OATH is False
+def test_his_rules_have_no_switch():
+    """Collapsed 2026-10-01 (legacy cleanup stage 2): he ships nowhere
+    else, so the module carries no switch to turn off."""
+    assert not hasattr(V, "VARKA_OATH")
 
 
-def test_a_non_varka_fight_is_unchanged_by_the_switch():
-    """Every hook is dead with the switch off, and still dead with it on for
-    a player who is not Varka: the same seed writes the same log."""
-    off = _ironclad_log(7)
-    saved = V.VARKA_OATH
-    V.VARKA_OATH = True
+def test_a_non_varka_fight_never_reaches_his_rules():
+    """Every hook is dead for a player who is not Varka: no ledger, no
+    Oath event, and the same seed writes the same log."""
     _reset()
-    try:
-        on = _ironclad_log(7)
-    finally:
-        V.VARKA_OATH = saved
-        _reset()
-    assert off == on
+    log = _ironclad_log(7)
+    assert not any(str(e.get("event", "")).startswith("varka") for e in log)
+    assert log == _ironclad_log(7)
 
 
-def test_switch_off_his_rows_do_not_resolve_and_his_verbs_refuse():
+def test_his_rows_always_resolve_and_his_verbs_refuse_anyone_else():
     _reset()
-    with pytest.raises(KeyError):
-        loader.get_card(_vk("squall"))
-    st = CombatState(player=Player(hp=80, max_hp=80, character_id="varka"),
+    assert loader.get_card(_vk("squall")).id == _vk("squall")
+    st = CombatState(player=Player(hp=80, max_hp=80, character_id="klee"),
                      enemies=[_enemy()], rng=random.Random(0))
+    assert V.ledger(st.player) is None
     card = [c for c in loader.prototype_cards()
             if c.id == _vk("favonius_drill")][0]
     with pytest.raises(NotImplementedError):

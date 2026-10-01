@@ -725,12 +725,11 @@ def _finish_play(state: CombatState, card: Card,
         # R276, PINCER's carry-out: the first face-up Attack this turn is
         # played twice. `FirstAttackTwicePower.ModifyCardPlayCount`.
         replays += kokomi_plan.spend_first_attack_twice(state, card)
-    if varka_oath.VARKA_OATH:
-        # VARKA's Grand Master's Order: the next Knight played this turn is
-        # played twice, and each replay is a Knight play of its own (the
-        # Oath scope and the current-element step open per resolution, in
-        # `effects.resolve_card`). Dead with the switch off.
-        replays += varka_oath.gmo_replays(state, card)
+    # VARKA's Grand Master's Order: the next Knight played this turn is
+    # played twice, and each replay is a Knight play of its own (the Oath
+    # scope and the current-element step open per resolution, in
+    # `effects.resolve_card`). 0 for anyone who is not Varka.
+    replays += varka_oath.gmo_replays(state, card)
     for replay_index in range(replays):
         snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
@@ -1105,10 +1104,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Block has to land here because it reads a ledger that was rolled at the
     # top of this function.
     klee_overhaul.turn_start_late(state)
-    # VARKA (`varka_oath.VARKA_OATH`): his start-of-turn Powers at the same
+    # VARKA (`varka_oath.turn_start`): his start-of-turn Powers at the same
     # post-draw site -- Baron Bunny's burst, Sworn Brotherhood, Oath of the
-    # Knights, in that order. Dead with the switch off and for anyone else.
-    if varka_oath.VARKA_OATH:
+    # Knights, in that order. A no-op for anyone else.
+    if varka_oath.live(state.player):
         varka_oath.turn_start(state)
         _settle_phases(state)
         if not p.alive or state.over:
@@ -1286,10 +1285,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # keep up to 2 unspent Energy." Banked here, after the Dusk drain, and
     # handed back after the next refill. `PatientTidePower` is the twin.
     kokomi_plan.patient_tide_bank(state)
-    # VARKA (`varka_oath.VARKA_OATH`): Oathbound Aegis's end-of-turn Block,
-    # at the same `BeforeSideTurnEnd` site. Dead with the switch off.
-    if varka_oath.VARKA_OATH:
-        varka_oath.turn_end(state)
+    # VARKA (`varka_oath.turn_end`): Oathbound Aegis's end-of-turn Block,
+    # at the same `BeforeSideTurnEnd` site. A no-op for anyone else.
+    varka_oath.turn_end(state)
     # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE ACTS (brief
     # sec.3 rule 10): "Each performer performs at the end of Furina's turn,
     # from any seat, a flat act that does not read its bar."
@@ -1941,10 +1939,9 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # Same line, same reason: Varka's swirled element is per-combat, and a
     # reused Player must not carry one fight's Swirl into the next.
     player.mc_swirl_element = ""
-    # VARKA, THE OATH REWORK (`varka_oath.VARKA_OATH`): his Oath, current
-    # element and Fang are per-combat too. Dead with the switch off.
-    if varka_oath.VARKA_OATH:
-        varka_oath.open_combat(player)
+    # VARKA, THE OATH REWORK (`varka_oath.open_combat`): his Oath, current
+    # element and Fang are per-combat too. A no-op for anyone else.
+    varka_oath.open_combat(player)
     # QUARANTINED (`furina_stage.FURINA_STAGE`). Same line, same reason: the
     # performers are pets and live one combat (the Stage's rule 1), so every
     # fight opens with Usher alone at 3. Every run path in this repo builds a

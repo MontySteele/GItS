@@ -24,13 +24,13 @@ def _reset():
 
 @pytest.fixture
 def varka():
-    saved = (V.VARKA_OATH, C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA)
-    V.VARKA_OATH, C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = True, True, True
+    saved = (C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA)
+    C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = True, True
     _reset()
     try:
         yield
     finally:
-        V.VARKA_OATH, C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = saved
+        C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = saved
         _reset()
 
 

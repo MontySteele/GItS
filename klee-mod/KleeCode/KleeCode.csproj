@@ -161,21 +161,6 @@
   <PropertyGroup Condition="'$(FurinaStage)' == 'true'">
     <DefineConstants>$(DefineConstants);FURINA_STAGE</DefineConstants>
   </PropertyGroup>
-  <!-- VARKA, THE FOURTH CHARACTER (the paper kit
-       review/active/varka-paper-kit-2026-09-28.md sec.10, prototype batch
-       one), defaulted on by Directory.Build.props.
-
-           dotnet build ... -p:VarkaPrototype=false
-
-       Unlike the other arms this one gates a CHARACTER that ships nowhere
-       else, so the property does two things: it moves VarkaPrototype.Enabled's
-       default (the rules under Powers/Prototype/Varka*.cs compile with the
-       surface either way, so the headless pins assert both sides), and it
-       compiles Varka.cs and his two pools, which is what puts him on the
-       character select screen. Off, there is no Varka to select. -->
-  <PropertyGroup Condition="'$(VarkaPrototype)' == 'true'">
-    <DefineConstants>$(DefineConstants);VARKA_PROTOTYPE</DefineConstants>
-  </PropertyGroup>
   <!-- THE TEYVAT RUN FRAME ARM (R272; the frame packet
        review/active/teyvat-run-frame-2026-09-14.md sec.4, and the decompile
        read review/records/teyvat-spike-zone-read-2026-09-14.md sec.7).

@@ -67,12 +67,10 @@
     <CompanionOverhaul Condition="'$(CompanionOverhaul)' == ''">true</CompanionOverhaul>
     <KokomiOverhaul Condition="'$(KokomiOverhaul)' == ''">true</KokomiOverhaul>
     <FurinaStage Condition="'$(FurinaStage)' == ''">true</FurinaStage>
-    <!-- VARKA, THE FOURTH CHARACTER (review/active/varka-paper-kit-2026-09-28.md
-         sec.10, prototype batch one; [USER] 2026-09-29: "You're good to go on
-         building the Varka prototype!"). On like the other current kits;
-         -p:VarkaPrototype=false leaves him out of the build, and
-         -p:ShippedKits=true does too. -->
-    <VarkaPrototype Condition="'$(VarkaPrototype)' == ''">true</VarkaPrototype>
+    <!-- VARKA, THE FOURTH CHARACTER, has no property of his own (collapsed
+         2026-10-01, legacy cleanup stage 2: he ships nowhere else). He
+         compiles with PrototypeCards, so -p:ShippedKits=true, which leaves
+         that unset, still has no Varka on the select screen. -->
     <!-- THE ELEMENT PORT, PHASE ONE (review/ruled/element-home-review-2026-09-28.md
          sec.3/4, ruled sec.6): two switches, one per change, so each is
          tested alone (sec.6 pick 4.4). On in every build that names neither;

@@ -151,7 +151,7 @@ public static class VarkaRules
     /// Swirl's spread lands a copy (<c>ReactionEffects.SwirlPays</c>). PURE.
     /// </summary>
     public static bool SpreadArrivesFresh(CardModel? cardSource) =>
-        VarkaPrototype.Enabled && cardSource is ProtoVkDownburst;
+        cardSource is ProtoVkDownburst;
 
     /// <summary>
     /// Change of Guard's pick: the elements he holds Oath in, as option faces

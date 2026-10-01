@@ -317,7 +317,7 @@ SIM_CALL_SITES = {
     ('kokomi_plan.py', 3): ("'plan'", 'False', "'hydro'"),
     # Expansion batch one: Tidal Riposte's answer, dealt as a planned hit is.
     ('kokomi_plan.py', 4): ("'plan'", 'False', "'hydro'"),
-    # VARKA, THE OATH REWORK (`varka_oath.VARKA_OATH`, off). The expansion's
+    # VARKA, THE OATH REWORK (`varka_oath`, no switch). The expansion's
     # (2026-10-01) Cycle of Seasons and Assembly at the Cathedral: a Power's
     # damage, element-less and unpowered.
     ('varka_oath.py', 1): ("'card'", 'False', 'None'),

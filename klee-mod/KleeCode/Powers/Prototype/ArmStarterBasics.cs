@@ -172,7 +172,7 @@ internal static class ArmStarterBasics
         // VARKA (prototype batch one): his pool holds no Basic Strike at all,
         // so without this Large Capsule's unguarded First() would THROW
         // (KleeSelfCheck R11) rather than answer wrongly.
-        if (character is IVarkaCharacter && VarkaPrototype.Enabled)
+        if (character is IVarkaCharacter)
         {
             return VarkaRoster.StarterStrike();
         }
@@ -198,7 +198,7 @@ internal static class ArmStarterBasics
             return FurinaStageRoster.StarterDefend();
         }
 
-        if (character is IVarkaCharacter && VarkaPrototype.Enabled)
+        if (character is IVarkaCharacter)
         {
             return VarkaRoster.StarterDefend();
         }

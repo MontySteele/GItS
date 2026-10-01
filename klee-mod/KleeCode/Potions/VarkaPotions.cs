@@ -20,7 +20,7 @@ namespace KleeMod.Potions;
 /// sec.4, built at the paper's defaults while its picks are open): a refill,
 /// a burst and one rule-bending turn, Klee's and Furina's shape
 /// (<see cref="ArmPotion"/>: combat only, aimed at a player). His
-/// <c>PotionPool</c> answers <see cref="VarkaPotionPool"/> with the arm live.
+/// <c>PotionPool</c> answers <see cref="VarkaPotionPool"/>.
 ///
 /// RELIC AND POTION APPLICATIONS GAIN NO OATH (sec.4): Bottled Gale's Swirls
 /// run inside <see cref="VarkaOath.NoCredit"/>, so they pay his current
@@ -58,7 +58,7 @@ public sealed class BottledResolve : ArmPotion
         PlayerChoiceContext choiceContext, Creature? target)
     {
         AssertValidForTargetedPotion(target);
-        if (!VarkaPrototype.LiveFor(target)) return;
+        if (!VarkaPrototype.IsVarka(target)) return;
         var element = await VarkaRules.ChooseElement(
             choiceContext, target!.Player, VarkaOathLedger.Elements);
         await Use(choiceContext, target, element);
@@ -68,7 +68,7 @@ public sealed class BottledResolve : ArmPotion
     public static async Task Use(
         PlayerChoiceContext choiceContext, Creature varka, Element element)
     {
-        if (element == Element.None || !VarkaPrototype.LiveFor(varka)) return;
+        if (element == Element.None || !VarkaPrototype.IsVarka(varka)) return;
         await VarkaOath.SetCurrent(choiceContext, varka, element, knight: false);
         await VarkaOath.Gain(choiceContext, varka, element, Oath);
     }
@@ -132,13 +132,13 @@ public sealed class ElixirOfTheFourWinds : ArmPotion
     /// </summary>
     public static bool Use(Creature? varka)
     {
-        if (!VarkaPrototype.LiveFor(varka)) return false;
+        if (!VarkaPrototype.IsVarka(varka)) return false;
         VarkaOathLedger.For(varka!).ReadAllFourThisTurn();
         return true;
     }
 }
 
-/// <summary>Varka's potion pool with his arm live: his three, and nothing
+/// <summary>Varka's potion pool: his three, and nothing
 /// borrowed unless the expansion paper's pick 1 rules (b)
 /// (<see cref="VarkaArmRelics.KeepSilentBorrow"/>).</summary>
 public sealed class VarkaPotionPool : PotionPoolModel

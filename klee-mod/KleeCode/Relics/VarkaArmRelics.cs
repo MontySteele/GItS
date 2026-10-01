@@ -32,8 +32,8 @@ namespace KleeMod.Relics;
 /// QUARANTINED for Salon Solitaire's reason: inside <c>#if PROTOTYPE_CARDS</c>
 /// and under <c>Relics/</c>, so the titles stay in
 /// <c>tools/lint_unique_names.py</c>'s namespace. Every effect asks
-/// <see cref="VarkaPrototype.LiveFor"/>, so a relic held by anyone else, or
-/// with the arm off, does nothing.
+/// <see cref="VarkaPrototype.IsVarka"/>, so a relic held by anyone else, or
+/// does nothing.
 ///
 /// RELIC AND POTION APPLICATIONS GAIN NO OATH (sec.4, the kit paper's sec.3
 /// terms) and switch no element: Dandelion Seeds' application runs inside
@@ -60,10 +60,10 @@ public static class VarkaArmRelics
         typeof(FavoniusDutyRoster),
     };
 
-    /// <summary>How many copies of <typeparamref name="T"/> this Varka holds,
-    /// with the arm live; 0 otherwise.</summary>
+    /// <summary>How many copies of <typeparamref name="T"/> this Varka holds;
+    /// 0 for anyone else.</summary>
     internal static int Held<T>(Creature? varka) where T : RelicModel =>
-        VarkaPrototype.LiveFor(varka) && varka!.Player is { } player
+        VarkaPrototype.IsVarka(varka) && varka!.Player is { } player
             ? player.Relics.OfType<T>().Count()
             : 0;
 
@@ -78,11 +78,10 @@ public static class VarkaArmRelics
         }
     }
 
-    /// <summary>The turn-one gate Fresh Catch uses: his own first turn, the
-    /// arm live.</summary>
+    /// <summary>The turn-one gate Fresh Catch uses: his own first turn.</summary>
     public static bool FirstTurnOf(RelicModel relic, Player player) =>
         player == relic.Owner
-        && VarkaPrototype.LiveFor(player.Creature)
+        && VarkaPrototype.IsVarka(player.Creature)
         && player.PlayerCombatState?.TurnNumber == 1
         && player.Creature is { IsDead: false };
 
@@ -242,7 +241,7 @@ public sealed class DandelionSeeds : VarkaArmRelic
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player != Owner || player.Creature is not { IsDead: false } varka) return;
-        if (!VarkaPrototype.LiveFor(varka)) return;
+        if (!VarkaPrototype.IsVarka(varka)) return;
         var combat = varka.CombatState;
         if (combat == null) return;
         var element = VarkaOath.Current(varka);
@@ -358,7 +357,7 @@ public sealed class AndriussHowl : VarkaArmRelic
     {
         if (cardPlay.Card is ProtoVkFourWindsAscension ascension
             && ascension.Owner == Owner
-            && VarkaPrototype.LiveFor(Owner?.Creature))
+            && VarkaPrototype.IsVarka(Owner?.Creature))
         {
             Played.Add(ascension);
         }
@@ -368,7 +367,7 @@ public sealed class AndriussHowl : VarkaArmRelic
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
-        if (player != Owner || !VarkaPrototype.LiveFor(player.Creature)) return;
+        if (player != Owner || !VarkaPrototype.IsVarka(player.Creature)) return;
         var back = Returning(player);
         Played.Clear();
         if (back.Count == 0) return;

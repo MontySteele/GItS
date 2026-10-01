@@ -145,13 +145,11 @@ def resolve_hit(state: CombatState, enemy: Enemy, element: Optional[str],
 
     `source` is log-only provenance (track H); see `apply_aura`.
     """
-    # VARKA (`varka_oath.VARKA_OATH`): an application of an element to a
+    # VARKA (`varka_oath.note_hit`): an application of an element to a
     # live enemy -- one that sticks, refreshes or reacts -- credits his
     # per-play apply-Oath. Read before the shared rule changes the aura; it
-    # changes nothing the rule reads. Dead with the switch off and for anyone
-    # who is not Varka.
-    if varka_oath.VARKA_OATH:
-        varka_oath.note_hit(state, enemy, element)
+    # changes nothing the rule reads. Dead for anyone who is not Varka.
+    varka_oath.note_hit(state, enemy, element)
     if not element or element == "none":
         return damage
 
@@ -190,10 +188,9 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
 
     if trigger == "anemo":
         name = "swirl"
-        if (C.SWIRL_PAYS and varka_oath.VARKA_OATH
-                and varka_oath.converging(state)):
+        if C.SWIRL_PAYS and varka_oath.converging(state):
             # VARKA's Converging Winds replaces the spread and the flat 2
-            # (`varka_oath.converging_spread`). Dead with the switch off.
+            # (`varka_oath.converging_spread`). Dead for anyone else.
             varka_oath.converging_spread(
                 state, enemy, aura,
                 int(C.SWIRL_DAMAGE * _mc_reaction_mult(state)))
@@ -216,8 +213,7 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
                     continue
                 apply_aura(state, other, aura, "swirl_spread")
                 # VARKA's Downburst (pick 3a): its copies arrive fresh.
-                other.aura_spent = not (varka_oath.VARKA_OATH
-                                        and varka_oath.spread_fresh(state))
+                other.aura_spent = not varka_oath.spread_fresh(state)
             # The flat 2: element-less and outside the pipeline, exactly
             # Overload's splash, so it reacts with nothing. Durin's White
             # scales it for the reason it scales the splash.
@@ -228,9 +224,8 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
             for other in state.living_enemies:
                 apply_aura(state, other, aura, "swirl_spread")
         # VARKA: every Swirl he makes credits Swirl-Oath and then pays his
-        # current element (`varka_oath.on_swirl`). Dead with the switch off.
-        if varka_oath.VARKA_OATH:
-            varka_oath.on_swirl(state, enemy, aura)
+        # current element (`varka_oath.on_swirl`). Dead for anyone else.
+        varka_oath.on_swirl(state, enemy, aura)
     elif trigger == "geo":
         name = "crystallize"
         state.player.block += C.CRYSTALLIZE_BLOCK
@@ -253,9 +248,8 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         # factor, at the one site that computes it.
         splash = int(C.OVERLOAD_SPLASH * _mc_reaction_mult(state))
         # VARKA: an Overload a Converging Winds landing sets off splashes
-        # that enemy only. Dead with the switch off.
-        splashed = ([enemy] if varka_oath.VARKA_OATH
-                    and varka_oath.landing_only(state)
+        # that enemy only. Dead for anyone else.
+        splashed = ([enemy] if varka_oath.landing_only(state)
                     else state.living_enemies)
         for other in splashed:
             _splash(state, other, splash)

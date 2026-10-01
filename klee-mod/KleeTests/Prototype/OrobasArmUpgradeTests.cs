@@ -54,7 +54,6 @@ public class OrobasArmUpgradeTests
         Assert.Null(Bare<WatatsumiCasket>().GetUpgradeReplacement());
     }
 
-#if VARKA_PROTOTYPE
     [Fact]
     public void Both_upgrades_are_members_of_their_pools()
     {
@@ -63,28 +62,22 @@ public class OrobasArmUpgradeTests
         Assert.Contains("ModelDb.Relic<WatatsumiCasket>",
             Il.CallSequence(Il.Method("KokomiRelicPool", "GenerateAllRelics")));
     }
-#endif
 }
 
-#if VARKA_PROTOTYPE
 /// <summary>Wolf's Gravestone: "The first time each combat you gain Oath, add
 /// an upgraded Four Winds' Ascension to your hand. It costs 0 this turn."
 /// </summary>
 [Collection(VarkaArm.Name)]
 public class WolfsGravestoneTests : IDisposable
 {
-    private readonly bool _enabled = VarkaPrototype.Enabled;
-
     public WolfsGravestoneTests()
     {
         HeadlessGame.Arm();
-        VarkaPrototype.Enabled = true;
         VarkaOathLedger.ResetAll();
     }
 
     public void Dispose()
     {
-        VarkaPrototype.Enabled = _enabled;
         VarkaOathLedger.ResetAll();
     }
 
@@ -131,7 +124,6 @@ public class WolfsGravestoneTests : IDisposable
     }
 }
 
-#endif
 
 /// <summary>The Watatsumi Casket: the Tamakushi Casket, starting each combat
 /// with 3.</summary>

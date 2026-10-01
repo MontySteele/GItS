@@ -356,8 +356,8 @@ public sealed class VarkaOathLedger
 /// </summary>
 public static class VarkaOath
 {
-    /// <summary>Is this creature Varka with the arm live?</summary>
-    public static bool Live(Creature? creature) => VarkaPrototype.LiveFor(creature);
+    /// <summary>Is this creature Varka?</summary>
+    public static bool Live(Creature? creature) => VarkaPrototype.IsVarka(creature);
 
     // ---- reads (PURE; the generated readers and the badge take these) -----
 

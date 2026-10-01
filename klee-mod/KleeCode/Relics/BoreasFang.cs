@@ -117,7 +117,7 @@ public class BoreasFang : CustomRelicModel
     /// </summary>
     public override async Task AfterObtained()
     {
-        if (!VarkaPrototype.Enabled || Owner is not { } player) return;
+        if (Owner is not { } player) return;
         var listed = player.Deck.Cards.FirstOrDefault(
             c => c is ProtoVkAmberFieryRain && c.FloorAddedToDeck <= 1);
         if (listed == null) return;

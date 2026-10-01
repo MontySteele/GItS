@@ -170,13 +170,14 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
 
 - **Varka: the Oath rework is built (Prototype, 2026-09-29).** Paper
   `review/active/varka-paper-kit-2026-09-28.md`, every pick ruled ([USER]:
-  "I'm good with all of these Varka defaults"). A new character behind
-  `-p:VarkaPrototype` (on by default beside the other kits; off, and under
-  `-p:ShippedKits=true`, he is not on the select screen). 80 HP, 99 gold;
+  "I'm good with all of these Varka defaults"). A new character with no
+  switch of his own (collapsed 2026-10-01): he compiles with the prototype
+  surface, so under `-p:ShippedKits=true` he is not on the select screen.
+  80 HP, 99 gold;
   starter base Strike x4, Defend x4, Windbound Execution and one starter-only
   Knight rolled per run (8 [11] Block and its element); starting relic
   Boreas's Fang. The rules (`klee-mod/KleeCode/Powers/Prototype/VarkaOath.cs`,
-  sim twin `tier0/engine/varka_oath.py` behind `VARKA_OATH`): one Oath count
+  sim twin `tier0/engine/varka_oath.py`, live for a Varka seat): one Oath count
   per element, counted per card; his current element is his last Knight's,
   or since the open Oath (2026-09-30, [USER]: "Yep, let's ship it and see if
   anything breaks") the last Pyro, Hydro, Cryo or Electro any card of his

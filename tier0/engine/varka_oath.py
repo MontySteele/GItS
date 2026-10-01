@@ -5,13 +5,11 @@ Design: `review/active/varka-paper-kit-2026-09-28.md` (every pick ruled
 C# twin: `klee-mod/KleeCode/Powers/Prototype/VarkaOath.cs` (`VarkaLaw`,
 `VarkaOath`, `VarkaCards`).
 
-THE SWITCH. `VARKA_OATH` is a MODULE constant, off, for the reason
-`furina_stage.FURINA_STAGE` is one: a sim twin ships off because the
-calibration bands are measured on the shipped world, and a prototype's numbers
-live here rather than in `constants.py` so they move neither the constant
-census nor the world stamp. With it off every hook this module adds to the
-shared engine is a dead branch, and with it on every hook is still a dead
-branch for any player who is not Varka (`live`). A test fixture flips it.
+NO SWITCH (collapsed 2026-10-01, legacy cleanup stage 2): he ships nowhere
+else, so there is no shipped world to switch back to. Every hook this module
+adds to the shared engine is a dead branch for any player who is not Varka
+(`live`). His numbers live here rather than in `constants.py` so they move
+neither the constant census nor the world stamp.
 
 THE RULES AS MODELLED:
   * OATH: four counts (pyro, hydro, electro, cryo) on a per-fight ledger on
@@ -97,8 +95,6 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from tier0 import constants as C
-
-VARKA_OATH = False          # THE SWITCH. Off: every hook is a dead branch.
 
 CHARACTER = "varka"
 HP = 80
@@ -272,13 +268,12 @@ class VarkaLedger:
 # --------------------------------------------------------------------------
 
 def live(player) -> bool:
-    """The switch is on and this Player is Varka."""
-    return (VARKA_OATH
-            and getattr(player, "character_id", "") == CHARACTER)
+    """This Player is Varka."""
+    return getattr(player, "character_id", "") == CHARACTER
 
 
 def ledger(player) -> Optional[VarkaLedger]:
-    """His ledger, made on first use; None for anyone else or switch off."""
+    """His ledger, made on first use; None for anyone else."""
     if not live(player):
         return None
     led = getattr(player, "varka_ledger", None)
@@ -454,7 +449,7 @@ def set_current(state, element: str, knight: bool) -> None:
 
 
 # --------------------------------------------------------------------------
-#  Hooks the shared engine calls (each behind `VARKA_OATH`)
+#  Hooks the shared engine calls (each a no-op for anyone but Varka)
 # --------------------------------------------------------------------------
 
 def begin_play(state, card) -> None:
@@ -857,7 +852,7 @@ def fresh_aura_sweep(state, fx: dict, card) -> None:
 def _refuse(what: str) -> None:
     raise NotImplementedError(
         f"{what} is VARKA's (tier0/engine/varka_oath.py) and resolves only "
-        "for a Varka seat with `varka_oath.VARKA_OATH` on; no shipped row "
+        "for a Varka seat; no shipped row "
         "prints it, so reaching this is a defect rather than a degradation.")
 
 
@@ -1159,12 +1154,10 @@ def build_player(element: Optional[str] = None, rng=None,
     """A fresh Varka combat Player (80 HP) holding the starter, `extra` card
     ids, and Boreas's Fang. `element` picks the starter Knight; None rolls it
     with `rng` (a `random.Random`, e.g. the run's), as the C# Fang re-rolls
-    the dealt Knight on `AfterObtained`. Needs the switch on (the `proto_vk_`
-    rows resolve through the loader's flagged door)."""
+    the dealt Knight on `AfterObtained`. The `proto_vk_` rows resolve through
+    the loader's prototype door, always open for his ids."""
     from tier0.content import loader                # late: cycle
     from tier0.engine.state import Player
-    if not VARKA_OATH:
-        raise RuntimeError("varka_oath.build_player needs VARKA_OATH on")
     if element is None:
         if rng is None:
             raise ValueError("pass `element` or an `rng` to roll one")

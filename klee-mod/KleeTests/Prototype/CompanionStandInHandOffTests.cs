@@ -171,15 +171,8 @@ public class CompanionStandInHandOffTests : IDisposable
         var ids = new[] { Seat.Klee(), Seat.Kokomi(), Seat.Furina() }
             .Select(seat => CompanionPool.CharacterId(seat.Player))
             .ToList();
-        // VARKA's four Knights are personal to him. His seat exists only
-        // where his class compiles; elsewhere the rows still do, and "varka"
-        // is the id `CompanionPool.CharacterId` answers for his identity
-        // interface (VarkaPrototypeTests pins that through a real seat).
-#if VARKA_PROTOTYPE
+        // VARKA's four Knights are personal to him.
         ids.Add(CompanionPool.CharacterId(Seat.Varka().Player));
-#else
-        ids.Add(global::KleeMod.Powers.VarkaPrototype.CharacterId);
-#endif
 
         var personals = typeof(ProtoMcDionaShakenNotPurred).Assembly.GetTypes()
             .Where(t => t.Namespace == "KleeMod.Cards.Prototype.Generated"

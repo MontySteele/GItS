@@ -753,9 +753,9 @@ KLEE_OVERHAUL_OPS = frozenset((
 
 #: VARKA's two verbs (the Oath rework, review/active/varka-paper-kit-
 #: 2026-09-28.md): `varka` (one kind per Oath rule, `tier0/engine/varka_oath`)
-#: and Knights' Roll Call's `add_knight`. Resolved in tier0 behind
-#: `varka_oath.VARKA_OATH` (off), and no pool offers a `proto_vk_` row to this
-#: drafter, so they take one pricing decision: ZERO, see `_op_price`.
+#: and Knights' Roll Call's `add_knight`. Resolved in tier0 for a Varka seat
+#: only, and no pool offers a `proto_vk_` row to this drafter, so they take
+#: one pricing decision: ZERO, see `_op_price`.
 VARKA_OPS = frozenset(("varka", "add_knight"))
 
 #: The Kokomi overhaul's verbs (DRAFT 6, QUARANTINED behind
@@ -963,10 +963,10 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     if op == "spotlight_designate":
         return STATIC_SPOTLIGHT_DESIGNATE_VALUE
 
-    # -- VARKA, the Oath rework (`varka_oath.VARKA_OATH`, off) --------------
+    # -- VARKA, the Oath rework (`varka_oath`, Varka seats only) -----------
     if op in VARKA_OPS:
-        # ZERO, and deliberate. tier0 resolves both verbs for a Varka seat
-        # with the switch on, but no character sheet, run template or pool
+        # ZERO, and deliberate. tier0 resolves both verbs for a Varka seat,
+        # but no character sheet, run template or pool
         # offers a `proto_vk_` row to this drafter, so a price would be a
         # number nothing reads; every drafted number in the world is
         # byte-identical with and without this branch. His rows' value is
@@ -2584,9 +2584,9 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "grow_largest", "multiply_largest_bomb",
                   "fetch_from_discard", "add_random_companion",
                   "grant_kapow_each_turn")},
-    # --- VARKA, the Oath rework (varka_oath.VARKA_OATH, off) ---
-    **{op: "ZERO: VARKA's Oath verbs resolve in tier0 only for a Varka seat "
-            "with the switch on, and no pool offers a proto_vk_ row to this "
+    # --- VARKA, the Oath rework (varka_oath, Varka seats only) ---
+    **{op: "ZERO: VARKA's Oath verbs resolve in tier0 only for a Varka seat, "
+            "and no pool offers a proto_vk_ row to this "
             "drafter, so no drafted number moves (prototype surface only)"
        for op in ("varka", "add_knight")},
     # --- the Kokomi overhaul, draft 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ----

@@ -391,7 +391,7 @@ public sealed class ConvergingWindsPower : PowerModel, ILocalizationProvider
 
     /// <summary>Do this dealer's Swirls react where they land? PURE.</summary>
     public static bool Converges(Creature? dealer) =>
-        VarkaPrototype.Enabled && dealer != null
+        dealer != null
         && dealer.HasPower<ConvergingWindsPower>();
 
     /// <summary>

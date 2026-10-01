@@ -139,7 +139,7 @@ public static class KleeMod
                     .Concat(Diagnostics.PlayTelemetryHooks.Subscribe(combatState)));
 
         Log.Info($"[{ModId}] Klee, Furina and Kokomi registered"
-#if PROTOTYPE_CARDS && VARKA_PROTOTYPE
+#if PROTOTYPE_CARDS
                  + ", and Varka (prototype)"
 #endif
                  + ".");
