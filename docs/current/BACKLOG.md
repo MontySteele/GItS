@@ -97,6 +97,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Two lanes embarked at the same moment: the second lane's game never came up (its port refused every call) until a teardown and re-embark (2026-09-25 round).
 - `scenario run` cannot start on a lane whose profile holds a saved run: the relaunched game resumed the old boss fight and the menu never became ready (lane 1, 1336 run-history files, 447 s wait).
 - Lane 1 embark `20260929-145523` was never reverted (all its ledger rows APPLIED, pid 27116 still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch.
+- A ? room printed a shop with no shelves and the bridge refused `buy` (Varka round 2026-10-01, lane 1, act 3, 364 gold); find whether the room or the bridge's read is wrong.
+- `play` asked which enemy while the only enemy was dead with its revive pending (Test Subject, Varka round 2026-10-01); the target check should skip the dead.
 
 ## Sim and measurement (Balance stage; nothing here runs on a prototype)
 
