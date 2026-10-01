@@ -376,7 +376,9 @@ public static partial class FurinaStage
         var now = seats.Select(s => s.Fanfare).ToList();
         var applause = owner.Powers.OfType<ThunderousApplausePower>()
             .Select(p => (int)p.Amount).ToList();
-        var returns = owner.Powers.OfType<FiveCenturyActPower>().Any();
+        // Power cost sweep, 2026-09-30: the returnee's Fanfare is the
+        // Act's amount (1, or 3 upgraded); 0 is "no Act".
+        var returns = FurinaStage.ReturnFanfare(owner);
         var foes = enemies ?? ForecastEnemies(owner);
         var run = new ForecastRun(clone, applause, returns,
                                   foes.Any(e => e.Aura), seats)
@@ -678,7 +680,7 @@ public static partial class FurinaStage
     {
         private readonly FurinaStageLedger _stage;
         private readonly List<int> _applause;
-        private readonly bool _returns;
+        private readonly int _returns;
         private readonly bool _aura;
 
         /// <summary>The stage as the sweep found it, front first: the seats
@@ -695,7 +697,7 @@ public static partial class FurinaStage
             new(ReferenceEqualityComparer.Instance);
 
         internal ForecastRun(FurinaStageLedger stage, List<int> applause,
-                             bool returns, bool aura,
+                             int returns, bool aura,
                              IReadOnlyList<StageSeat> company)
         {
             _stage = stage;
@@ -1044,7 +1046,7 @@ public static partial class FurinaStage
                 _stage.Raise(amount);
             }
             // 2026-09-27: A Five-Century Act returns once a turn.
-            if (_returns) _stage.ReturnOnce(exit.Who);
+            if (_returns > 0) _stage.ReturnOnce(exit.Who, _returns);
         }
     }
 }

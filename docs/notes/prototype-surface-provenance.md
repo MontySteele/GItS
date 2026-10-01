@@ -4509,6 +4509,50 @@ stood); fights won move within noise and HP lost falls by 0.1 to 1.4. The
 tier0 encounters are near 100% won, so this shows nothing breaks, not a
 balance number.
 
+## Power cost sweep, 2026-09-30
+
+[USER]: "my friend and I both noticed that you have a convention of making
+rare powers cost 2 energy with the upgrade putting them to 1. And having
+uncommon powers cost 1 going to 0. It works! But can we do a sweep over the
+current card pools and break them up a bit so it's less of a standard? Alter
+the effects to rebalance at a different energy level, basically (either the
+higher or the lower)". The main session chose eighteen changes; every other
+Power keeps its cost and upgrade (Aftershock, Vermillion Pact, Knights of
+Favonius, At Water's Edge, Arkhe Alignment, Sold Out, Converging Winds and
+Dawn Wind's March stay 2 to 1, Full House 3 to 2, every companion row as is).
+
+| Card | Was | Now |
+|---|---|---|
+| Sparks 'n' Splash | 2, upgrade cost 1 | 3, upgrade Innate |
+| Dodoco | 2, Mine 4, upgrade cost 1 | 1, Mine 3, upgrade Mine 5 |
+| Second Surprise | 1, upgrade cost 0 | 0, upgrade Innate |
+| Nereid's Ascension | 2, upgrade cost 1 | 3, upgrade Innate |
+| Moon Signal | 1, upgrade cost 0 | 0, upgrade Casket gains 2 |
+| Grand Design | 1, upgrade cost 0 | 1, upgrade Innate |
+| The Long Game | 1, upgrade cost 0 | 1, upgrade gain 1 Energy and draw 1 card |
+| Kurage Swarm | 2, upgrade cost 1 | 1, upgrade Innate |
+| A Five-Century Act | 2, returns at 1, upgrade cost 1 | 3, upgrade returns at 3 |
+| Revolving Stage | 1, upgrade cost 0 | 0, upgrade Innate |
+| Star Billing | 1, draw 2, upgrade cost 0 | 1, upgrade draw 3 |
+| Regina of All Waters | 2, upgrade cost 1 | 1, upgrade Innate |
+| One-Woman Show | 2, Energy 1 and draw 1, upgrade cost 1 | 3, Energy 1 and draw 2, upgrade cost 2 |
+| The Crowd Roars | 2, Fanfare 1, upgrade cost 1 | 1, upgrade Fanfare 2 |
+| Stormward Stance | 1, 3 damage, upgrade cost 0 | 1, upgrade 5 damage |
+| Oath of the Knights | 1, upgrade cost 0 | 1, upgrade Innate |
+| Boreas Unbound | 2, upgrade cost 1 | 3, upgrade Innate |
+| Sworn Brotherhood | 2, Oath of every element, upgrade cost 1 | 1, Oath of your current element; upgrade every element |
+
+How the two upgrades with no existing key were built: a new delta key
+`upgraded_power: <power>`, a play-time `IsUpgraded` swap of the power the
+card installs (codegen `gen_klee_cards.upgraded_power_effect`; sim
+`tier0/content/upgrades.py` rewrites the effect's `power`). The Long Game+
+installs `TheLongGamePlusPower` (`kk_the_long_game_plus`), paid by the same
+`TheLongGamePower.Signal`; Sworn Brotherhood's base installs
+`SwornBrotherhoodCurrentPower` (`vk_sworn_brotherhood_current`) and the
+upgrade installs the old every-element power. A Five-Century Act's returnee
+now arrives at the power's amount (`FurinaStage.ReturnFanfare`; sim
+`furina_stage._after_bow`), and One-Woman Show draws 2 a copy.
+
 
 ## Orobas upgrades for Varka and Kokomi, 2026-09-30
 

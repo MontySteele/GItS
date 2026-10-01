@@ -89,8 +89,8 @@ def test_the_thirty_are_the_specs_rows_at_the_specs_shape(overhaul):
     assert shape["proto_ko_fish_fry"] == (2, "attack")
     assert shape["proto_ko_half_a_mountain"] == (1, "skill")
     assert shape["proto_ko_alices_detonator"] == (1, "power")
-    assert shape["proto_ko_second_surprise"] == (1, "power")
-    assert shape["proto_ko_dodoco"] == (2, "power")
+    assert shape["proto_ko_second_surprise"] == (0, "power")   # power cost sweep
+    assert shape["proto_ko_dodoco"] == (1, "power")            # power cost sweep
     assert not rows["proto_ko_half_a_mountain"].exhaust
     assert rows["proto_ko_sit_tight"].retain
     assert rows["proto_ko_wait_for_it"].retain

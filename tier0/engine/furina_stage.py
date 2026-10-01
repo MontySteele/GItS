@@ -179,7 +179,7 @@ STAR_BILLING = "fs_star_billing"            # a Guest Star joins: draw N
 TIDE_OF_APPLAUSE = "fs_tide_of_applause"    # a reaction: the back gains N
 REGINA = "fs_regina_of_all_waters"          # turn start: Hydro on ALL
 SOLILOQUY = "fs_soliloquy"                  # empty stage: Attacks +N a hit
-ONE_WOMAN_SHOW = "fs_one_woman_show"        # empty stage at turn start: +E, +1
+ONE_WOMAN_SHOW = "fs_one_woman_show"        # empty stage at turn start: +E, +2E
 
 
 # ----------------------------------------------------------------------
@@ -295,7 +295,7 @@ POOL_SUBS: dict[str, str] = {
     "standing_ovation": "proto_fs_thunderous_applause", # 1 Power for 1 Power
     # --- Rares (two) ---
     "endless_waltz": "proto_fs_arkhe_alignment",        # 2 Power for 2 Power
-    "prima_donna": "proto_fs_five_century_act",         # 2 Power for 2 Power
+    "prima_donna": "proto_fs_five_century_act",         # 2 Power -> a 3 Power
     # --- THE GUEST CAST (2026-09-25): eight Guest Star Skills, each for a
     # same-rarity shipped Skill the game's EB-736 filter already drops.
     # Rares (three). ---
@@ -935,15 +935,18 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
     # 2026-09-27: the first Bow-and-leave each turn only, however many
     # copies; a return that cannot happen (a full stage) leaves it unused.
     # C# twin: `FurinaStageLedger.ReturnOnce`.
-    if (may_return and p.powers.get(FIVE_CENTURY_ACT, 0)
+    # Power cost sweep, 2026-09-30: the returnee arrives at the Act's amount
+    # (1, or 3 upgraded). C# twin: `FurinaStage.ReturnFanfare`.
+    act = int(p.powers.get(FIVE_CENTURY_ACT, 0))
+    if (may_return and act > 0
             and not p.stage_returned
             and len(_seats(p)) < capacity(p)):
         p.stage_returned = True
-        book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
-        pair = [member, SUMMON_FANFARE]
+        book_gain(state, GAIN_RETURN, act)
+        pair = [member, act]
         _place(_seats(p), pair)
         p.stage_resting.append(pair)
-        state.emit("stage_return", member=member, fanfare=SUMMON_FANFARE)
+        state.emit("stage_return", member=member, fanfare=act)
 
 
 def _bow(state, member: str, exit_: dict | None = None) -> None:
@@ -2264,8 +2267,9 @@ def supporting_pool_turn_start(state) -> None:
     show = int(p.powers.get(ONE_WOMAN_SHOW, 0))
     if show > 0 and not stage(p):
         p.energy += show
-        state.draw(show)
-        state.emit("stage_one_woman_show", energy=show, drew=show)
+        # Power cost sweep, 2026-09-30: draw 2 a copy (was 1).
+        state.draw(2 * show)
+        state.emit("stage_one_woman_show", energy=show, drew=2 * show)
     for _ in range(int(p.powers.get(REVOLVING_STAGE, 0))):
         step_forward(state)
     tickets = int(p.powers.get(SEASON_TICKETS, 0))

@@ -88,6 +88,9 @@ PAYOUT_SOURCE = "card"
 STORMWARD = "vk_stormward_stance"
 OATH_OF_THE_KNIGHTS = "vk_oath_of_the_knights"
 SWORN_BROTHERHOOD = "vk_sworn_brotherhood"
+#: Power cost sweep, 2026-09-30: the base card's power, current element only
+#: (the upgrade installs SWORN_BROTHERHOOD, every element).
+SWORN_BROTHERHOOD_CURRENT = "vk_sworn_brotherhood_current"
 BARON_BUNNY = "vk_baron_bunny"
 FAVONIAN_STANDARD = "vk_favonian_standard"
 DAWN_WINDS_MARCH = "vk_dawn_winds_march"
@@ -488,6 +491,10 @@ def turn_start(state) -> None:
     if sworn:
         for el in ELEMENTS:
             gain(state, el, sworn, "sworn_brotherhood")
+    sworn_current = _power(p, SWORN_BROTHERHOOD_CURRENT)
+    led_now = ledger(p)
+    if sworn_current and led_now is not None and led_now.current is not None:
+        gain(state, led_now.current, sworn_current, "sworn_brotherhood")
     okn = _power(p, OATH_OF_THE_KNIGHTS)
     if okn:
         _block(state, current_oath(p) * okn, "oath_of_the_knights")

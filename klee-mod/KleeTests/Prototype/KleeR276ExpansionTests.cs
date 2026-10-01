@@ -95,11 +95,11 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoAdventureClub), CardRarity.Rare, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoWindblumeFireworks), CardRarity.Rare, CardType.Attack, 2 },
         new object[] { typeof(ProtoKoFireworksFinale), CardRarity.Rare, CardType.Attack, 0 },
-        new object[] { typeof(ProtoKoDodoco), CardRarity.Rare, CardType.Power, 2 },
+        new object[] { typeof(ProtoKoDodoco), CardRarity.Rare, CardType.Power, 1 },
         new object[] { typeof(ProtoKoAftershock), CardRarity.Rare, CardType.Power, 2 },
         new object[] { typeof(ProtoKoSparkKnight), CardRarity.Rare, CardType.Power, 1 },
         new object[] { typeof(ProtoKoAlicesDetonator), CardRarity.Rare, CardType.Power, 1 },
-        new object[] { typeof(ProtoKoSecondSurprise), CardRarity.Rare, CardType.Power, 1 },
+        new object[] { typeof(ProtoKoSecondSurprise), CardRarity.Rare, CardType.Power, 0 },
     };
 
     [Theory]
@@ -615,8 +615,10 @@ public class KleeR276ExpansionTests
                     < run.LastIndexOf("ProtoBombPower.PlaceOnRandom"));
         Assert.Equal(7m, Upgraded<ProtoKoSecretBase>()
                              .DynamicVars["PowerAmount"].BaseValue);
-        Assert.Contains(Il.Calls(Il.Method("ProtoKoDodoco", "OnUpgrade")),
-                        c => c.Contains("EnergyCost.UpgradeBy"));
+        // Power cost sweep, 2026-09-30: Mine 3, upgraded Mine 5, cost 1.
+        Assert.Equal(3m, new ProtoKoDodoco().DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(5m, Upgraded<ProtoKoDodoco>()
+                             .DynamicVars["PowerAmount"].BaseValue);
     }
 
     [Fact]
@@ -700,8 +702,9 @@ public class KleeR276ExpansionTests
         Assert.Equal(4, ProtoBombPower.HalfOf(8));
         Assert.Equal(0, ProtoBombPower.HalfOf(1));
         Assert.Equal(0, ProtoBombPower.HalfOf(0));
-        Assert.Contains(Il.Calls(Il.Method("ProtoKoSecondSurprise", "OnUpgrade")),
-                        c => c.Contains("EnergyCost.UpgradeBy"));
+        // Power cost sweep, 2026-09-30: costs 0, the upgrade is Innate.
+        Assert.Contains(CardKeyword.Innate,
+                        Upgraded<ProtoKoSecondSurprise>().Keywords);
     }
 
     [Fact]

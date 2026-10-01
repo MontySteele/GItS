@@ -278,7 +278,7 @@ public class KokomiPoolPassTests
         var card = new ProtoKkNereidsAscension();
         Assert.Equal(CardType.Power, card.Type);
         Assert.Equal(CardRarity.Rare, card.Rarity);
-        Assert.Equal(2, card.EnergyCost.Canonical);
+        Assert.Equal(3, card.EnergyCost.Canonical);   // power cost sweep
         Assert.False(typeof(IPlannedCard)
                          .IsAssignableFrom(typeof(ProtoKkNereidsAscension)));
         Assert.DoesNotContain(CardKeyword.Exhaust, card.CanonicalKeywords);
@@ -288,15 +288,14 @@ public class KokomiPoolPassTests
     }
 
     [Fact]
-    public void The_ascension_buys_its_turn_back_at_the_smith()
+    public void The_ascension_is_innate_at_the_smith()
     {
-        // The row prints no number the rule may move -- "your first Plan twice" is
-        // a rule, not an amount -- so the upgrade takes the COST clause: its
-        // price is two energy on a turn that writes no Plan, and the `+` card
-        // buys that turn back.
+        // Power cost sweep, 2026-09-30: its price is three energy on a turn
+        // that writes no Plan, and the `+` card is Innate, so that turn is
+        // turn one.
         Assert.Contains(
             Il.Calls(Il.Method("ProtoKkNereidsAscension", "OnUpgrade")),
-            c => c.Contains("UpgradeBy"));
+            c => c.Contains("AddKeyword"));
     }
 
     [Fact]

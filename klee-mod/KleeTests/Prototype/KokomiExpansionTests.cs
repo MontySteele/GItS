@@ -173,8 +173,13 @@ public class KokomiExpansionTests : IDisposable
         Assert.Equal(0, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
         GrandDesignPower.Note(seat.Creature, three);
         Assert.Equal(3, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-        Assert.Contains(Il.Calls(Il.Method("ProtoKkGrandDesign", "OnUpgrade")),
-                        c => c.Contains("UpgradeBy"));
+        // Power cost sweep, 2026-09-30: cost stays 1, the upgrade is Innate.
+        Assert.Contains(CardKeyword.Innate,
+                        Upgraded<ProtoKkGrandDesign>().Keywords);
+        Assert.Equal(1, new ProtoKkGrandDesign().EnergyCost.Canonical);
+        Assert.Equal(1, new ProtoKkKurageSwarm().EnergyCost.Canonical);
+        Assert.Contains(CardKeyword.Innate,
+                        Upgraded<ProtoKkKurageSwarm>().Keywords);
 
         KokomiOverhaulLedger.ResetAll();
         var swarm = Seat.Kokomi().WithPower<KurageSwarmPower>(1);

@@ -1374,6 +1374,19 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = hit is not None
             if hit:
                 hit["choose"] = True
+        elif key == "upgraded_power":
+            # Power cost sweep, 2026-09-30 (The Long Game, Sworn Brotherhood):
+            # upgraded, the card installs a DIFFERENT power, named by the
+            # value. Binds to the first top-level apply_power, the one the
+            # codegen's play-time `IsUpgraded` swap emits.
+            if not isinstance(val, str) or not val:
+                raise ValueError(
+                    f"upgraded_power delta on {base_id!r} must name a power")
+            hit = next((fx for fx in top if fx.get("op") == "apply_power"),
+                       None)
+            ok = hit is not None
+            if hit:
+                hit["power"] = val
         elif key == "block_next_turn":
             # The Charlotte-precedent second half. `block` deliberately hits
             # only the first op, so a card whose upgrade moves BOTH halves
