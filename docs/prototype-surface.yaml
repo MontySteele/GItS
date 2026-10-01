@@ -972,7 +972,9 @@
    cost: 2, type: attack,
    description: "Deal damage equal to your [gold]Block[/gold] to ALL enemies.",
    effects: [{op: damage, target: all_enemies, applies_element: true,
-              amount_formula: {base: 0, per: 1, count: player_block}}]}
+              amount_formula: {base: 0, per: 1, count: player_block}}],
+   # POOL COMPLETION (2026-10-01, paper sec.6, the Body Slam note): cost 2 [1].
+   upgrade: {cost: -1}}
 
 - {id: proto_mc_barbara_melody_loop, name: "Barbara — Melody Loop", character: klee,
    authored_by: [claude],
@@ -1831,11 +1833,14 @@
 
 - {id: proto_kk_coral_crash, name: "Coral Crash", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon,
+   # POOL COMPLETION (2026-10-01, paper sec.6, [USER]: "we're probably
+   # systemically over-pricing this effect"): Uncommon -> Common, and the
+   # upgrade is cost 0 -- Body Slam exactly.
+   cost: 1, type: attack, rarity: common,
    description: "Deal damage equal to your [gold]Block[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   # No upgrade on the paper: the Prototype-stage rule's default stands.
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 1, count: player_block}}]}
+              amount_formula: {base: 0, per: 1, count: player_block}}],
+   upgrade: {cost: -1}}
 
 - {id: proto_kk_evening_watch, name: "Evening Watch", character: kokomi,
    authored_by: [claude],
@@ -1920,6 +1925,86 @@
    effects: [{op: kokomi, kind: coral_tithe, amount: 3}],
    # For every 2.
    upgrade: {kokomi_amount: -1}}
+
+# --- POOL COMPLETION (2026-10-01, review/active/pool-completion-2026-10-01.md
+# sec.4): one Common and seven Rares, LAST in the sheet's order; the pool is 78
+# (21 / 36 / 21). Provenance note, "Pool completion, 2026-10-01". ---
+
+- {id: proto_kk_tidal_screen, name: "Tidal Screen", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 2 cards.",
+   effects: [{op: block, amount: 7}],
+   plan: [{op: draw, amount: 2}],
+   # 10 Block; the Plan line does not upgrade.
+   upgrade: {block: 3}}
+
+- {id: proto_kk_spring_tide, name: "Spring Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   # Change of Plans for the whole queue, Dusk Plans included, in order and
+   # with the drain's riders; mid-turn, so Nereid's Ascension does not double
+   # its first entry. The emptied queue can be written again for the morning.
+   description: "Exhaust. The [gold]Bake-Kurage[/gold] carries out all your [gold]Plans[/gold] now.",
+   effects: [{op: kokomi, kind: spring_tide}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_kurage_school, name: "Kurage School", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   # "0-cost" is the card's cost as it stands in hand; the copies are exact
+   # (an upgraded Nip copies upgraded). The hand is read once, before the
+   # first copy is added, and a full hand stops the copying.
+   description: "Exhaust. Add a copy of each 0-cost card with a [gold]Plan[/gold] line in your hand to your hand.",
+   effects: [{op: kokomi, kind: kurage_school}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_shoal_of_spears, name: "Shoal of Spears", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: rare,
+   # "Wrote" counts every Plan written onto the Bake-Kurage this turn, Moon's
+   # Reflection's included; a Plan cancelled or carried out since still counts.
+   description: "Deal {ExtraDamage:diff()} damage to ALL enemies for each [gold]Plan[/gold] you wrote this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: all_enemies,
+              amount_formula: {base: 0, per: 4,
+                               count: plans_written_this_turn}}],
+   # 5 each.
+   upgrade: {formula_per: 1}}
+
+- {id: proto_kk_patient_tide, name: "Patient Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   # Copies add to the cap.
+   description: "At the end of your turn, keep up to {PowerAmount:diff()} unspent [gold]Energy[/gold].",
+   effects: [{op: apply_power, power: kk_patient_tide, amount: 2, target: self}],
+   # keep 3.
+   upgrade: {power_amount: 1}}
+
+- {id: proto_kk_seas_reproach, name: "Sea's Reproach", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   # Per application of Weak or Vulnerable that she makes, once per enemy it
+   # lands on; Hydro and unpowered, as Tidal Riposte's.
+   description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal 3 damage to it.",
+   effects: [{op: apply_power, power: kk_seas_reproach, amount: 3, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_tidal_rebuke, name: "Tidal Rebuke", character: kokomi,
+   authored_by: [claude],
+   # Paper sec.6: no Exhaust (Body Slam to ALL, a rarity and a cost above).
+   cost: 2, type: attack, rarity: rare,
+   description: "Deal damage equal to your [gold]Block[/gold] to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: all_enemies,
+              amount_formula: {base: 0, per: 1, count: player_block}}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_watatsumi_resistance, name: "Watatsumi Resistance", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   # One Nip per Companion play; copies add.
+   description: "Whenever you play a [gold]Companion[/gold] card, add a Nip to your hand.",
+   effects: [{op: apply_power, power: kk_watatsumi_resistance, amount: 1, target: self}],
+   upgrade: {cost: -1}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.
@@ -2892,6 +2977,75 @@
    effects: [{op: stage_dual_nature},
              {op: draw, amount: 1}]}
 
+# FURINA, THE STAGE -- POOL COMPLETION (2026-10-01, paper sec.5): three
+# Uncommons and three Rares, appended (`furina_stage.POOL_ADDS`); the pool is
+# 78 (23 / 35 / 20). Provenance note, "Pool completion, 2026-10-01".
+
+- {id: proto_fs_aria_for_one, name: "Aria for One", character: furina,
+   # 7 a hit: `conditional_damage` moves every damage op, the third too.
+   upgrade: {conditional_damage: 2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   # "Three times" is the two hits and a third, read once the two have landed
+   # (a branch takes no `times:`).
+   description: "Deal 5 damage twice. If no one is on stage, deal it three times.",
+   effects: [{op: damage, amount: 5, target: enemy, times: 2},
+             {op: conditional, if: stage_empty,
+              then: [{op: damage, amount: 5, target: enemy}]}]}
+
+- {id: proto_fs_interval_bell, name: "Interval Bell", character: furina,
+   # Spend 2: the mode's price, in both the gate and the payment.
+   upgrade: {stage_spend: -1},
+   authored_by: [claude],
+   register: salon, cost: 0, type: skill, rarity: uncommon,
+   description: "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] instead.",
+   effects: [{op: choose_one, modes: [
+              {label: "Draw 1 card",
+               effects: [{op: draw, amount: 1}]},
+              {label: "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] instead",
+               effects: [{op: stage_spend, amount: 3},
+                         {op: draw, amount: 1},
+                         {op: energy, amount: 1}]}]}]}
+
+- {id: proto_fs_casting_agent, name: "Casting Agent", character: furina,
+   # The chosen card arrives upgraded (a play-time read).
+   upgrade: {upgraded_grant: true},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   # Three DIFFERENT Guest Star cards from the ten of the Guest Cast; the
+   # chosen one costs 0 this turn.
+   description: "Exhaust. Choose 1 of 3 random Guest Star cards and add it to your hand. It costs 0 this turn{IfUpgraded:show: and is upgraded|}.",
+   effects: [{op: stage_casting_agent}]}
+
+- {id: proto_fs_the_last_act, name: "The Last Act", character: furina,
+   upgrade: {damage: 6},
+   authored_by: [claude],
+   # An empty seat is one of her seats (three, four under Sold Out) with no
+   # performer in it; the cost floors at 0.
+   register: salon, cost: 3, type: attack, rarity: rare,
+   description: "Costs 1 less for each empty seat. Deal 24 damage.",
+   effects: [{op: damage, amount: 24, target: enemy}]}
+
+- {id: proto_fs_critics_darling, name: "Critics' Darling", character: furina,
+   upgrade: {innate: true},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: rare,
+   # A Spend MODE chosen on a card (`stage_spend`); the damage is what the back
+   # performer actually paid, unpowered and unelemented, once per copy.
+   description: "Whenever you choose a [gold]Spend[/gold] mode, deal damage equal to the [gold]Fanfare[/gold] spent to ALL enemies.",
+   effects: [{op: apply_power, power: fs_critics_darling, amount: 1,
+              target: self}]}
+
+- {id: proto_fs_star_turn, name: "Star Turn", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: power, rarity: rare,
+   # After the arrival (and after Star Billing's draw), the guest's seat acts
+   # once per copy; a guest that left on arrival does not act.
+   description: "Whenever a Guest Star joins the stage, it acts at once.",
+   effects: [{op: apply_power, power: fs_star_turn, amount: 1,
+              target: self}]}
+
 # FURINA, THE STAGE -- SOLD OUT (2026-09-26), family 7 of
 # review/active/furina-supporting-pool-2026-09-26.md: the fourth seat.
 # Provenance: prototype-surface-provenance.md.
@@ -3016,6 +3170,27 @@
    description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], each other player gains 3 [gold]Block[/gold].",
    upgrade: {power_amount: 1},
    effects: [{op: apply_power, power: kk_sangonomiyas_counsel, amount: 3, target: self}]}
+
+# POOL COMPLETION (2026-10-01, paper sec.4): her fourth and fifth co-op cards.
+# "Each player" is every player in the fight, Kokomi included.
+
+- {id: proto_kk_tactical_relay, name: "Tactical Relay", character: kokomi,
+   authored_by: [claude], multiplayer: true,
+   cost: 1, type: skill, rarity: uncommon,
+   # The upgrade ADDS the draw clause: written at 0, printed once upgraded
+   # (Current Read's shape).
+   description: "[gold]Plan[/gold]: Each player gains 1 [gold]Energy[/gold]{IfUpgraded:show: and draws 1 card|}.",
+   effects: [],
+   plan: [{op: each_player_energy, amount: 1}, {op: each_player_draw, amount: 0}],
+   upgrade: {plan_draw: 1}}
+
+- {id: proto_kk_kurages_mercy, name: "Kurage's Mercy", character: kokomi,
+   authored_by: [claude], multiplayer: true,
+   cost: 2, type: skill, rarity: rare, exhaust: true,
+   description: "Exhaust. Each player [gold]Mend[/gold]s {KkAmount:diff()}.",
+   effects: [{op: kokomi, kind: kurages_mercy, amount: 8}],
+   # Mend 12.
+   upgrade: {kokomi_amount: 4}}
 
 # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md, ruled
 # 2026-09-29). Rules: Powers/Prototype/VarkaOath.cs, tier0/engine/varka_oath.py.

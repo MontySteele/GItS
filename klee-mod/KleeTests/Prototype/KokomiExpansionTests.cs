@@ -71,8 +71,9 @@ public class KokomiExpansionTests : IDisposable
             .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
             .ToList();
         // SEVENTY since the payoff pass (2026-10-01): Second Thoughts cut
-        // ahead of the batch, two rows after it.
-        Assert.Equal(70, slice.Count);
+        // ahead of the batch, two rows after it; pool completion (2026-10-01)
+        // eight more.
+        Assert.Equal(78, slice.Count);
         Assert.Equal(Batch, slice.Skip(46).Take(22).ToArray());
         Assert.DoesNotContain(slice, c => c.Contains("CloudsLikeWaves"));
         Assert.Null(typeof(KokomiOverhaulKit).Assembly
@@ -87,7 +88,9 @@ public class KokomiExpansionTests : IDisposable
             .Select(n => ((CardModel)Activator.CreateInstance(
                 asm.GetType("KleeMod.Cards.Prototype.Generated." + n)!)!).Rarity)
             .ToList();
-        Assert.Equal(12, rarities.Count(r => r == CardRarity.Uncommon));
+        // Pool completion (2026-10-01, paper sec.6): Coral Crash is Common.
+        Assert.Equal(11, rarities.Count(r => r == CardRarity.Uncommon));
+        Assert.Equal(1, rarities.Count(r => r == CardRarity.Common));
         Assert.Equal(10, rarities.Count(r => r == CardRarity.Rare));
     }
 
@@ -313,7 +316,8 @@ public class KokomiExpansionTests : IDisposable
     public void Coral_crash_deals_her_block()
     {
         var card = new ProtoKkCoralCrash();
-        Assert.Equal((CardType.Attack, CardRarity.Uncommon),
+        // Pool completion (2026-10-01, paper sec.6): Common, 1 [0].
+        Assert.Equal((CardType.Attack, CardRarity.Common),
                      (card.Type, card.Rarity));
         Assert.Contains("Block", Face(card));
     }

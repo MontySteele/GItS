@@ -420,6 +420,12 @@ def card_cost(state: CombatState, card: Card) -> int:
     discount = klee_overhaul.playdate_discount(state, card)
     if discount:
         cost = max(0, cost - discount)
+    # QUARANTINED (`furina_stage.FURINA_STAGE`). POOL COMPLETION, THE LAST
+    # ACT: "Costs 1 less for each empty seat." Pure, like the lines above.
+    # `FurinaStageHooks.TryModifyEnergyCostInCombat` is the C# twin.
+    seats = furina_stage.last_act_discount(state, card)
+    if seats:
+        cost = max(0, cost - seats)
     # BATTLE PLAN HAS NO COST HOOK, and its absence is `EB-668`. The row's
     # carry-out used to discount the next face-up Attack, and the mod could
     # not mean the same thing by it: `TryModifyEnergyCostInCombat` is handed a
@@ -1071,6 +1077,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         return
 
     p.energy = refpowers.energy_for_turn(state)      # site C, + Pyre
+    # POOL COMPLETION: Patient Tide's kept Energy, on top of the refill (0
+    # without the Power; `kokomi_plan.patient_tide_bank` wrote it).
+    p.energy += kokomi_plan.patient_tide_kept(state)
     # site D, with Hook.ModifyHandDraw folded in (ToolsOfTheTrade and
     # DrawCardsNextTurn). Relic-driven opening-hand bonuses are a different
     # hook and stay where they are.
@@ -1271,6 +1280,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # promise and the only clause of the sentence a card can tell apart.
     # `kokomi_plan.resolve_dusk` carries the rest of the argument.
     kokomi_plan.resolve_dusk(state)
+    # POOL COMPLETION (2026-10-01), PATIENT TIDE: "At the end of your turn,
+    # keep up to 2 unspent Energy." Banked here, after the Dusk drain, and
+    # handed back after the next refill. `PatientTidePower` is the twin.
+    kokomi_plan.patient_tide_bank(state)
     # VARKA (`varka_oath.VARKA_OATH`): Oathbound Aegis's end-of-turn Block,
     # at the same `BeforeSideTurnEnd` site. Dead with the switch off.
     if varka_oath.VARKA_OATH:

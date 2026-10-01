@@ -353,6 +353,9 @@ MIRRORED: dict[str, object] = {
     # THE EXPANSION, BATCH ONE (2026-09-29): The Long Game's threshold.
     "KokomiOverhaulLaw.LongGameWaiting":
         C.KOKOMI_EXPANSION_LONG_GAME_WAITING,
+    # POOL COMPLETION (2026-10-01): the hand limit Kurage School, Casting
+    # Agent and Watatsumi Resistance stop at.
+    "KokomiPoolCompletion.MaxHandSize": C.MAX_HAND_SIZE,
     # THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`; `EB-723` /
     # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
     # same reason -- quarantined is not exempt. These NINE numbers ARE the
@@ -367,6 +370,8 @@ MIRRORED: dict[str, object] = {
     # The supporting pool's Sold Out (2026-09-26): the seat count with the
     # fourth seat open.
     "FurinaStageLaw.SoldOutSeats": _stage("SOLD_OUT_SEATS"),
+    # POOL COMPLETION (2026-10-01): Casting Agent's three.
+    "FurinaStageLaw.CastingAgentOffer": _stage("CASTING_AGENT_OFFER"),
     "FurinaStageLaw.OpeningFanfare": _stage("OPENING_FANFARE"),
     "FurinaStageLaw.SummonFanfare": _stage("SUMMON_FANFARE"),
     "FurinaStageLaw.LeadRegen": _stage("LEAD_REGEN"),

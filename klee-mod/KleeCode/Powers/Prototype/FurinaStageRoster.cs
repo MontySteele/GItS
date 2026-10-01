@@ -299,6 +299,16 @@ public static class FurinaStageRoster
                 // tentative, audited in the balance pass's dedupe.
                 ModelDb.Card<ProtoFsSalonDebut>(),
                 ModelDb.Card<ProtoFsRegalBearing>(),
+                // POOL COMPLETION (2026-10-01, review/active/pool-completion-
+                // 2026-10-01.md sec.5): three Uncommons and three Rares,
+                // appended (sim twin: `furina_stage.POOL_ADDS`). The pool is
+                // 78 (23 / 35 / 20).
+                ModelDb.Card<ProtoFsAriaForOne>(),
+                ModelDb.Card<ProtoFsIntervalBell>(),
+                ModelDb.Card<ProtoFsCastingAgent>(),
+                ModelDb.Card<ProtoFsTheLastAct>(),
+                ModelDb.Card<ProtoFsCriticsDarling>(),
+                ModelDb.Card<ProtoFsStarTurn>(),
             })
             .Concat(MultiplayerRows());
     }
@@ -313,6 +323,26 @@ public static class FurinaStageRoster
     /// pin that reads it, is untouched. They replace no shipped row. Sim
     /// mirror: <c>C.FURINA_STAGE_MULTIPLAYER_IDS</c>.
     /// </summary>
+    /// <summary>
+    /// THE GUEST CAST'S TEN CARDS, one per guest (pool completion,
+    /// 2026-10-01): what <i>Casting Agent</i> offers three of
+    /// (<see cref="FurinaStage.CastingAgent"/>). Sim twin:
+    /// <c>furina_stage.GUEST_STAR_CARD_IDS</c>, same order.
+    /// </summary>
+    public static IReadOnlyList<CardModel> GuestStarCards() => new CardModel[]
+    {
+        ModelDb.Card<ProtoFsGuestStarNeuvillette>(),
+        ModelDb.Card<ProtoFsGuestStarClorinde>(),
+        ModelDb.Card<ProtoFsGuestStarNavia>(),
+        ModelDb.Card<ProtoFsGuestStarChevreuse>(),
+        ModelDb.Card<ProtoFsGuestStarWriothesley>(),
+        ModelDb.Card<ProtoFsGuestStarSigewinne>(),
+        ModelDb.Card<ProtoFsGuestStarCharlotte>(),
+        ModelDb.Card<ProtoFsGuestStarLynette>(),
+        ModelDb.Card<ProtoFsGuestStarLyney>(),
+        ModelDb.Card<ProtoFsGuestStarEscoffier>(),
+    };
+
     public static IEnumerable<CardModel> MultiplayerRows() => new CardModel[]
     {
         ModelDb.Card<ProtoFsGuestOfHonor>(),

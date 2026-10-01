@@ -122,6 +122,8 @@ public static partial class FurinaStage
         // THE SUPPORTING POOL (2026-09-26), Star Billing: after the arrival,
         // whichever of the three ways it came (a second copy's included).
         await StarBilling(choiceContext, owner!);
+        // POOL COMPLETION (2026-10-01), STAR TURN: "it performs at once".
+        await StarTurn(choiceContext, owner!, who);
     }
 
     /// <summary>

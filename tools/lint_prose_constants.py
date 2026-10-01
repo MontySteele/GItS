@@ -234,6 +234,18 @@ ALLOWED: dict[tuple[str, str, str], str] = {
         "POWER face interpolates); the row prints the sheet's literal, as "
         "every authored face does, and `attack` is the only word joining it "
         "to Eula's per-Attack 5.",
+    # POOL COMPLETION (2026-10-01).
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTheLastAct.cs",
+     "SalonConstants.TickEncoreCost", "1"):
+        "The Last Act reads 'Costs 1 less for each empty seat.' The 1 is an "
+        "Energy discount per seat, not the Salon's Encore tick price, and "
+        "`cost` is the only word joining them (Starfrost Swirl's case).",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsCastingAgent.cs",
+     "KurageMemoryLaw.CostPerEnergy", "3"):
+        "Casting Agent reads 'Choose 1 of 3 random Guest Star cards ... It "
+        "costs 0 this turn.' The 3 is the offer's size "
+        "(`FurinaStageLaw.CastingAgentOffer`), not the Kurage memory's "
+        "price, and `cost` is the only word joining them.",
     # DROPPED 2026-09-02, and by the excuse's own last sentence. It said "the
     # card face is the row's `description:`; move the number there" -- and the
     # `EB-283` counted/flag split did exactly that: `weak` is a COUNTED power,

@@ -55,9 +55,10 @@ public class KokomiPayoffPassTests : IDisposable
             .Where(c => c.StartsWith("ModelDb.Card", StringComparison.Ordinal))
             .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
             .ToList();
-        Assert.Equal(70, slice.Count);
+        // Pool completion (2026-10-01) appended eight after the two.
+        Assert.Equal(78, slice.Count);
         Assert.Equal(new[] { "ProtoKkKurageCanopy", "ProtoKkCoralTithe" },
-                     slice.Skip(68).ToArray());
+                     slice.Skip(68).Take(2).ToArray());
         Assert.DoesNotContain(slice, c => c.Contains("SecondThoughts"));
         Assert.Null(typeof(ProtoKkNip).Assembly.GetType(
             "KleeMod.Cards.Prototype.Generated.ProtoKkSecondThoughts"));

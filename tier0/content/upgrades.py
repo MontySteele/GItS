@@ -264,7 +264,9 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
                    "block_front_intent"),
     "plan_mend": ("mend",),
     "plan_power_amount": ("apply_power",),
-    "plan_draw": ("draw",),
+    "plan_draw": ("draw",
+                  # POOL COMPLETION: Tactical Relay's "and draws 1 card".
+                  "each_player_draw"),
     # R276. Feigned Retreat's SECOND printed number ("deal 14 instead") is the
     # same clause's `unhurt_amount` field, not its `amount` --
     # `PLAN_DELTA_FIELDS` names the field, and both appliers read it.
@@ -849,7 +851,10 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             hit = next((fx for fx in top
                         if fx.get("op") == "grant_kapow_each_turn"
                         or (fx.get("op") == "kokomi"
-                            and fx.get("kind") == "shoal_call")), None)
+                            and fx.get("kind") == "shoal_call")
+                        # POOL COMPLETION: Casting Agent's Guest Star
+                        # arrives upgraded.
+                        or fx.get("op") == "stage_casting_agent"), None)
             ok = hit is not None and val is True
             if ok:
                 hit["upgraded"] = True
@@ -938,6 +943,16 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # `STAGE_AMOUNT_VARS` binds the same one. (Stage Whisper's "up to
             # 3" left with its second rework, the same day: no amount.)
             ok = _bump_first((fx for fx in top if fx.get("op") == key),
+                             "amount", val)
+        elif key == "stage_spend":
+            # POOL COMPLETION (2026-10-01), Interval Bell's "Spend 3 [2]": the
+            # FIRST `stage_spend` anywhere on the card -- a Spend is always a
+            # mode's head, so `everywhere` and not `top`. The chooser's gate
+            # reads the same op (`furina_stage.spend_mode_amount`), so the
+            # price moves in both places at once; codegen's
+            # `stage_spend_amount_cs` binds the same one.
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "stage_spend"),
                              "amount", val)
         elif key == "stage_raise":
             # R276 batch two (Hold Your Places, Gala Dinner): a Stage Raise's

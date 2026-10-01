@@ -515,7 +515,8 @@ public class FurinaSupportingPoolTests
                                         .CardRarity.Basic)
             .Where(c => !MultiplayerOnly(c))
             .ToList();
-        Assert.Equal(72, pool.Count);
+        // SEVENTY-EIGHT since pool completion (2026-10-01): six appended.
+        Assert.Equal(78, pool.Count);
     }
 
     private static bool MultiplayerOnly(MegaCrit.Sts2.Core.Models.CardModel card) =>

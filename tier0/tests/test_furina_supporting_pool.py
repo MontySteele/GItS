@@ -164,7 +164,11 @@ def test_every_row_but_solo_verse_replaces_a_row_the_filter_drops(arm):
             continue
         assert rows[rid]["replaces"] == subs[rid]
         assert shipped[subs[rid]]["rarity"] == rows[rid]["rarity"]
-    assert FS.POOL_ADDS == ("proto_fs_solo_verse",)
+    # Pool completion (2026-10-01) appended six more after Solo Verse; it
+    # is still the one row of this batch that replaces nothing.
+    assert FS.POOL_ADDS[:1] == ("proto_fs_solo_verse",)
+    assert [r for r in FS.POOL_ADDS
+            if r in {f"proto_fs_{k}" for k in TABLE}] == ["proto_fs_solo_verse"]
     # Sold Out's own row is built beside this batch and takes
     # `unheard_confession`; no row here may.
     assert "unheard_confession" not in [rows[f"proto_fs_{k}"].get("replaces")
@@ -174,8 +178,12 @@ def test_every_row_but_solo_verse_replaces_a_row_the_filter_drops(arm):
 def test_the_additions_reach_the_offer_and_the_flag_off_pool_does_not(arm):
     from tier05 import rewards
     # Solo Verse, then the starter ruling's two Commons (2026-09-28).
+    # Pool completion (2026-10-01): six more, between the two.
     assert loader.pool_additions("furina") == (
-        "proto_fs_solo_verse", "proto_fs_salon_debut",
+        "proto_fs_solo_verse", "proto_fs_aria_for_one",
+        "proto_fs_interval_bell", "proto_fs_casting_agent",
+        "proto_fs_the_last_act", "proto_fs_critics_darling",
+        "proto_fs_star_turn", "proto_fs_salon_debut",
         "proto_fs_regal_bearing")
     # `character_pool` is lru-cached: a flag-off pool another test on this
     # worker built would answer here, and this test's arm-on pool would

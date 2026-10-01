@@ -24,7 +24,7 @@ namespace KleeMod.Powers;
 /// hers applies Hydro through the arm's cadence; the verbs here deal none.
 /// Sim twin: <c>tier0/engine/kokomi_plan.kind</c>.
 /// </summary>
-public static class KokomiCards
+public static partial class KokomiCards
 {
     private static int Amount(CardModel card) =>
         card.DynamicVars["KkAmount"].IntValue;

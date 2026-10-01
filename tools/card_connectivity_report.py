@@ -494,6 +494,9 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "stage_whisper": [_hook("private", "stage", "write")],
     "stage_verdict": [_hook("private", "stage", "write")],
     "stage_dual_nature": [_hook("private", "stage", "write")],
+    # POOL COMPLETION (2026-10-01): Casting Agent fields a Guest Star card,
+    # which writes the stage when played.
+    "stage_casting_agent": [_hook("private", "stage", "write")],
     "stage_intermission": [_hook("private", "stage", "use")],
     "stage_spend_front_all": [_hook("private", "stage", "use")],
     "stage_grand_finale": [_hook("private", "stage", "use")],
@@ -670,6 +673,10 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # state for -- EMPTY and disclosed, `remove_debuff`'s argument.
     "ally_draw": [],
     "others_attack_damage_this_turn": [],
+    # POOL COMPLETION (2026-10-01): Tactical Relay's clauses are Energy and
+    # cards for every player, no private channel.
+    "each_player_energy": [],
+    "each_player_draw": [],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

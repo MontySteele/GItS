@@ -364,9 +364,10 @@ def test_the_offer_is_seventy(overhaul):
     # Forty-six after the Casket pass; the cleanup pass (2026-09-29) cut two;
     # the feed pass (2026-09-29) cut Exposed Flank and added five; expansion
     # batch one (2026-09-29) cut The Clouds Like Waves and added 22; the
-    # payoff pass (2026-10-01) cut Second Thoughts and added two.
+    # payoff pass (2026-10-01) cut Second Thoughts and added two; pool
+    # completion (2026-10-01) added eight.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 70
+    assert len(ids) == 78
     for cut in ("proto_kk_tide_chart", "proto_kk_cleansing_wave",
                 "proto_kk_ripple", "proto_kk_well_laid",
                 "proto_kk_sea_salt_prayer", "proto_kk_salt_line",
@@ -374,5 +375,6 @@ def test_the_offer_is_seventy(overhaul):
                 "proto_kk_exposed_flank", "proto_kk_second_thoughts"):
         assert cut not in ids
         assert cut not in {c.id for c in loader.prototype_cards()}
-    # And the co-op three stay outside the count.
-    assert len(C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS) == 3
+    # And the co-op five (three, and pool completion's two) stay outside the
+    # count.
+    assert len(C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS) == 5

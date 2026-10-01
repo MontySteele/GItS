@@ -276,24 +276,27 @@ SIM_CALL_SITES = {
     ('effects.py', 26): ("'companion'", None, "'pyro'"),
     ('effects.py', 27): ("'companion'", None, "'pyro'"),
     ('effects.py', 28): ("'companion'", None, "'pyro'"),
+    # POOL COMPLETION (2026-10-01): Critics' Darling, a Power's damage on a
+    # chosen Spend -- element-less and unpowered, Varka's Powers' row.
+    ('furina_stage.py', 1): ("'card'", 'False', 'None'),
     # Furina Stage draft 3 (2026-09-25): the Bow IS the act once more, so
     # the two damage acts are the only sites and each carries both sources;
     # and no act applies Hydro, so neither carries an element.
-    ('furina_stage.py', 1): ("'furina_stage/bow' if bow else 'furina_stage/act'",
-                             'False', 'None'),
     ('furina_stage.py', 2): ("'furina_stage/bow' if bow else 'furina_stage/act'",
+                             'False', 'None'),
+    ('furina_stage.py', 3): ("'furina_stage/bow' if bow else 'furina_stage/act'",
                              'False', 'None'),
     # THE GUEST CAST (2026-09-25): Neuvillette's hit on ALL, and the one
     # random-enemy door Clorinde, Navia and Wriothesley share. Unpowered like
     # the trio's, and each carries its guest's element (the LAW amendment:
     # a guest on Furina's stage may carry its element).
-    ('furina_stage.py', 3): ('source', 'False', 'element'),
     ('furina_stage.py', 4): ('source', 'False', 'element'),
-    # 2026-09-25 night: Lynette's act deals 3 Anemo damage.
     ('furina_stage.py', 5): ('source', 'False', 'element'),
+    # 2026-09-25 night: Lynette's act deals 3 Anemo damage.
+    ('furina_stage.py', 6): ('source', 'False', 'element'),
     # THE SUPPORTING POOL (2026-09-26): Escoffier's 3 Cryo to ALL (Lyney's
     # Pyro hit shares the random-enemy door).
-    ('furina_stage.py', 6): ('source', 'False', 'element'),
+    ('furina_stage.py', 7): ('source', 'False', 'element'),
     ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
     # Sparks 'n' Splash, since 2026-09-25 on a Bomb's own terms (the
     # explosion's unpowered door), at the start of the turn.
@@ -306,11 +309,14 @@ SIM_CALL_SITES = {
     # 2026-09-23, so it cannot spend an aura a companion laid down.
     ('klee_overhaul.py', 4): ("'spark_knight'", None, 'None'),
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
+    # POOL COMPLETION (2026-10-01): Sea's Reproach's answer to a Weak or a
+    # Vulnerable, dealt as Tidal Riposte's is.
+    ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
     # Kokomi core pass: Song of Pearls' strike, dealt as a planned hit is.
     # (The Casket's strike sat between these two until the Casket pass.)
-    ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
-    # Expansion batch one: Tidal Riposte's answer, dealt as a planned hit is.
     ('kokomi_plan.py', 3): ("'plan'", 'False', "'hydro'"),
+    # Expansion batch one: Tidal Riposte's answer, dealt as a planned hit is.
+    ('kokomi_plan.py', 4): ("'plan'", 'False', "'hydro'"),
     # VARKA, THE OATH REWORK (`varka_oath.VARKA_OATH`, off). The expansion's
     # (2026-10-01) Cycle of Seasons and Assembly at the Cathedral: a Power's
     # damage, element-less and unpowered.
@@ -460,8 +466,9 @@ def test_the_stage_refuses_the_dealers_terms_in_both_engines():
 
     stage = [flags for (name, _i), flags in sorted(_sim_call_sites().items())
              if name == "furina_stage.py"]
-    assert len(stage) == 6, stage
-    assert [powered for _s, powered, _e in stage] == ["False"] * 6
+    # POOL COMPLETION (2026-10-01): a seventh, Critics' Darling, unpowered too.
+    assert len(stage) == 7, stage
+    assert [powered for _s, powered, _e in stage] == ["False"] * 7
 
 
 def test_no_trio_act_carries_an_element_in_either_engine():
@@ -490,9 +497,10 @@ def test_no_trio_act_carries_an_element_in_either_engine():
     sites = _sim_call_sites()
     stage = [flags for (name, _i), flags in sorted(sites.items())
              if name == "furina_stage.py"]
-    assert len(stage) == 6, stage
+    # POOL COMPLETION (2026-10-01): Critics' Darling first, element-less.
+    assert len(stage) == 7, stage
     assert [element for _s, _p, element in stage] == [
-        "None", "None", "element", "element", "element", "element"]
+        "None", "None", "None", "element", "element", "element", "element"]
 
 
 def test_the_one_door_is_unpowered_with_no_dealer_and_no_card_source():

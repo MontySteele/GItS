@@ -120,13 +120,13 @@ internal static class KokomiOverhaulRoster
     internal static CardModel StarterDefend() => ModelDb.Card<DefendSilent>();
 
     /// <summary>
-    /// Kokomi's WHOLE offerable pool under the arm: the slice's 70 rows and
+    /// Kokomi's WHOLE offerable pool under the arm: the slice's 78 rows and
     /// nothing else.
     ///
     /// LISTED BY TYPE, not filtered by id prefix. A prefix match would be a
     /// second, softer definition of "which rows are the slice" living next to
     /// the sheet's own, and it would fail silently the day a row is renamed.
-    /// These are the same 70 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
+    /// These are the same 78 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
@@ -154,9 +154,13 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkJointOrders>(),
         ModelDb.Card<ProtoKkCoordinatedStrike>(),
         ModelDb.Card<ProtoKkSangonomiyasCounsel>(),
+        // POOL COMPLETION (2026-10-01): her fourth and fifth -- three
+        // Uncommons and two Rares, the base game's shape.
+        ModelDb.Card<ProtoKkTacticalRelay>(),
+        ModelDb.Card<ProtoKkKuragesMercy>(),
     };
 
-    /// <summary>The slice's own 70 rows, without the Ancient tail
+    /// <summary>The slice's own 78 rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds. FORTY-SIX since the Casket pass
     /// (2026-09-28): six cut, thirteen added; FORTY-FOUR since the cleanup
     /// pass (2026-09-29) cut Scout Ahead and Song of Pearls; FORTY-EIGHT since
@@ -164,7 +168,8 @@ internal static class KokomiOverhaulRoster
     /// Plan-only Commons; SIXTY-NINE since expansion batch one (2026-09-29)
     /// added 22 and cut The Clouds Like Waves Rippling; SEVENTY since the
     /// payoff pass (2026-10-01) cut Second Thoughts and added Kurage Canopy
-    /// and Coral Tithe. The Open the Casket token is in
+    /// and Coral Tithe; SEVENTY-EIGHT since pool completion (2026-10-01)
+    /// added eight. The Open the Casket token is in
     /// no pool; the relic deals it (<see cref="Relics.TamakushiCasket"/>).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
@@ -284,6 +289,17 @@ internal static class KokomiOverhaulRoster
         // Energy and cards. LAST, in the sheet's own order. The pool is 70.
         ModelDb.Card<ProtoKkKurageCanopy>(),
         ModelDb.Card<ProtoKkCoralTithe>(),
+        // POOL COMPLETION (2026-10-01, paper sec.4): one Common and seven
+        // Rares, LAST, in the sheet's own order. The pool is 78 (21 / 36 /
+        // 21); Coral Crash became a Common in place (sec.6).
+        ModelDb.Card<ProtoKkTidalScreen>(),
+        ModelDb.Card<ProtoKkSpringTide>(),
+        ModelDb.Card<ProtoKkKurageSchool>(),
+        ModelDb.Card<ProtoKkShoalOfSpears>(),
+        ModelDb.Card<ProtoKkPatientTide>(),
+        ModelDb.Card<ProtoKkSeasReproach>(),
+        ModelDb.Card<ProtoKkTidalRebuke>(),
+        ModelDb.Card<ProtoKkWatatsumiResistance>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

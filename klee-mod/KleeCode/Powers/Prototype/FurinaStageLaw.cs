@@ -43,6 +43,11 @@ public static class FurinaStageLaw
     /// her. Mirrors <c>furina_stage.SOLD_OUT_SEATS</c>.</summary>
     public const int SoldOutSeats = 4;
 
+    /// <summary><i>Casting Agent</i> (pool completion, 2026-10-01): "Choose 1
+    /// of 3 random Guest Star cards." Mirrors
+    /// <c>furina_stage.CASTING_AGENT_OFFER</c>.</summary>
+    public const int CastingAgentOffer = 3;
+
     /// <summary>What the starting relic Salon Solitaire puts Usher on stage
     /// with, at combat start (sec.3 rule 2). Mirrors
     /// <c>furina_stage.OPENING_FANFARE</c>.</summary>

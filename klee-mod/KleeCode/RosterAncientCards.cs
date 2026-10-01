@@ -35,16 +35,29 @@ public static class RosterAncientCards
     public static IReadOnlyList<CardModel> Klee => _klee ??= new List<CardModel>
     {
         ModelDb.Card<JumpyDumptyMkOmega>(),
+#if PROTOTYPE_CARDS
+        // POOL COMPLETION (2026-10-01): her second, which bends the arm's
+        // rule 2. The Tome draws one of the two at random.
+        ModelDb.Card<AlicesMasterpiece>(),
+#endif
     };
 
     public static IReadOnlyList<CardModel> Furina => _furina ??= new List<CardModel>
     {
         ModelDb.Card<AllTheWorldsAStage>(),
+#if PROTOTYPE_CARDS
+        // POOL COMPLETION (2026-10-01): her second, which bends rule 8.
+        ModelDb.Card<CenterOfAttention>(),
+#endif
     };
 
     public static IReadOnlyList<CardModel> Kokomi => _kokomi ??= new List<CardModel>
     {
         ModelDb.Card<PrincessOfWatatsumi>(),
+#if PROTOTYPE_CARDS
+        // POOL COMPLETION (2026-10-01): her second, which bends rule 2.
+        ModelDb.Card<DivineStrategy>(),
+#endif
     };
 }
 

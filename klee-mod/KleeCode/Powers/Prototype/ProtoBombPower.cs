@@ -1427,6 +1427,13 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         }
 
         ledger.NoteExplosion(reacted, dealt, vulnerablePaid);
+        // POOL COMPLETION (2026-10-01), ALICE'S MASTERPIECE (her second
+        // Ancient): "When one of your Bombs goes off, it stays on the enemy at
+        // half its size, rounded down." The charge already left the pile
+        // (take-then-resolve), so the half that stays is never set off by the
+        // take that set off the whole.
+        await AlicesMasterpiecePower.Remain(choiceContext, applier, target,
+                                            charge, cardSource);
         // `EB-450`, the log half. The badge printed 7 and 12 landed, with the
         // reaction named nowhere, because a Mine fires on the ENEMY's turn
         // where no card is in front of the player to price it. The reaction is

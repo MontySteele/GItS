@@ -48,6 +48,28 @@ public sealed class FurinaStageHooks : AbstractModel
     }
 
     /// <summary>
+    /// POOL COMPLETION (2026-10-01), THE LAST ACT: "Costs 1 less for each
+    /// empty seat." The one card that prices itself off the stage, so the
+    /// stage's own listener answers the cost query (Starfrost's shape): PURE,
+    /// floored at 0, and asked of the holder through
+    /// <c>SparkCost.OwnerCreatureOf</c> (a canonical card has no owner).
+    /// Sim twin: <c>furina_stage.last_act_discount</c> in
+    /// <c>combat.card_cost</c>.
+    /// </summary>
+    public override bool TryModifyEnergyCostInCombat(
+        CardModel card, decimal originalCost, out decimal modifiedCost)
+    {
+        modifiedCost = originalCost;
+        if (card is not Cards.Prototype.Generated.ProtoFsTheLastAct) return false;
+        var owner = SparkCost.OwnerCreatureOf(card);
+        if (!FurinaStage.LiveFor(owner) || originalCost <= 0m) return false;
+        var empty = FurinaStage.EmptySeats(owner);
+        if (empty <= 0) return false;
+        modifiedCost = System.Math.Max(0m, originalCost - empty);
+        return modifiedCost != originalCost;
+    }
+
+    /// <summary>
     /// RULE 4. The site is the retired reframe's opening grant's and its
     /// argument carries over whole: this engine's turn-start effects fire on
     /// <c>AfterPlayerTurnStart</c>, after the block clear, the energy reset and

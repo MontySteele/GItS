@@ -802,7 +802,10 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # THE EXPANSION, BATCH ONE (2026-09-29): four plan clauses and the one
     # now-line op with a `kind:`, each with its own branch in `_op_price`.
     "energy_if_alone", "damage_if_alone", "block_per_attacking_enemy",
-    "double_block", "kokomi"))
+    "double_block", "kokomi",
+    # POOL COMPLETION (2026-10-01): Tactical Relay's two clauses, priced
+    # ZERO beside the co-op set's -- a multiplayer-only row.
+    "each_player_energy", "each_player_draw"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -1170,7 +1173,8 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Battle Plan: `next_attack_damage`'s rule for ONE Attack -- how many
         # Attacks the turn holds is a hand fact an offer screen cannot read.
         return _neutral_amount(fx, 0) * STATIC_NEXT_ATTACK_SHARE
-    if op in ("ally_draw", "others_attack_damage_this_turn"):
+    if op in ("ally_draw", "others_attack_damage_this_turn",
+              "each_player_energy", "each_player_draw"):
         # THE CO-OP SET: paid to ANOTHER player, and tier 0.5 seats one. A
         # multiplayer-only row is never offered to this drafter anyway.
         return 0.0
@@ -2515,6 +2519,8 @@ FURINA_STAGE_OPS = ("stage_summon", "stage_raise", "stage_scene_change",
                     "stage_intermission", "stage_spend_front_all",
                     "stage_grand_finale", "stage_verdict",
                     "stage_dual_nature",
+                    # POOL COMPLETION (2026-10-01).
+                    "stage_casting_agent",
                     # THE CO-OP SET.
                     "stage_share_spotlight",
                     # THE CO-OP SET, SECOND BATCH.
@@ -2686,6 +2692,11 @@ STATIC_OP_PRICING: dict[str, str] = {
               "waiting, Weak on the target, auras, stacks) an offer screen "
               "cannot read",
     # --- the co-op set (review/records/coop-set-2026-09-25.md) ---
+    # POOL COMPLETION (2026-10-01): Tactical Relay, a multiplayer-only row.
+    "each_player_energy": "ZERO: a multiplayer-only row's clause, never "
+                          "offered to this one-seat drafter",
+    "each_player_draw": "ZERO: a multiplayer-only row's clause, never "
+                        "offered to this one-seat drafter",
     "ally_draw": "ZERO: cards drawn by ANOTHER player, and tier 0.5 seats "
                  "one; a multiplayer-only row is never offered here",
     "others_attack_damage_this_turn": "ZERO: damage dealt by OTHER players, "
@@ -2725,6 +2736,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "stage_dual_nature": _STAGE_ZERO,
     "stage_share_spotlight": _STAGE_ZERO,
     "stage_toast": _STAGE_ZERO,
+    # POOL COMPLETION (2026-10-01): Casting Agent hands over a Guest Star
+    # card, and that card is priced at its own row when it is drafted.
+    "stage_casting_agent": _STAGE_ZERO,
     # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
     "block_half_damage": "ZERO: the amount is half of what the card's own "
                          "damage line LANDED, which no static pricer can see "

@@ -12,6 +12,9 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Kits and display (the mod)
 
+- Pool completion (2026-10-01): run paper sec.7's sim checks on the built pools (`review/active/pool-completion-2026-10-01.md`): each of Kokomi's four decks within 10 points of Plan volume with the new Rares granted, Furina's Solo, Spend and Guest decks within 10 points of the default drafter, and no new card taken from over 70% of offers or played in under 5% of the fights where it is held.
+- Pool completion (2026-10-01): art for the 14 new rows and the three new Ancients (Alice's Masterpiece, Divine Strategy, Center of Attention); all render the placeholder.
+- Pool completion (2026-10-01): Divine Strategy's now-line, Casting Agent's choice screen, Center of Attention's short-bar Spend and the two co-op cards (Tactical Relay, Kurage's Mercy) are pinned headless only; watch them in game and through the bridge at the first seat round.
 - Varka has no Ancient card: Darv's Dusty Tome hands him an upgraded Four Winds' Ascension through BaseLib's `ITomeCard` (the row's `dusty_tome` tag) until one is designed; delete the tag with it.
 - Verify Boreas's Fang saved starter element survives save/reload (`Relics/VarkaStarterKnight.cs`, a BaseLib `SavedSpireField`; no test exercises a real serialize/deserialize, so Knight's Commission keeps its deck fallback until then).
 - Varka's Architect finale lines in `tools/build_pck.ps1` are placeholders for a writing pass, like the other three characters'.

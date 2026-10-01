@@ -1428,6 +1428,17 @@ def on_power_applied(state: CombatState, target: Fighter, name: str,
         state.draw(n)
         state.emit("extra_draw", amount=n)
 
+    # POOL COMPLETION (2026-10-01), SEA'S REPROACH: "Whenever you apply Weak or
+    # Vulnerable to an enemy, deal 3 damage to it." Vicious's shape -- a
+    # positive application, by her, once per creature it lands on -- and a
+    # no-op without the Power or with the Kokomi arm off.
+    # `SeasReproachPower.AfterPowerAmountChanged` is the twin.
+    if (name in ("weak", "vulnerable") and stacks > 0
+            and applier is state.player and target is not state.player
+            and state.player.powers.get("kk_seas_reproach", 0)):
+        from tier0.engine import kokomi_plan        # late import: cycle
+        kokomi_plan.seas_reproach(state, target, name, stacks)
+
 
 # ---------------------------------------------------------------------------
 # Damage modifiers (called from powers.modify_damage_taken).

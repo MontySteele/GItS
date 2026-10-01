@@ -6,14 +6,17 @@
     "reachable_by": "understudy give_card / scenario `give:` step"
   },
   "generated": [
+    "proto_fs_aria_for_one",
     "proto_fs_arkhe_alignment",
     "proto_fs_between_acts",
     "proto_fs_bis",
     "proto_fs_bravura",
     "proto_fs_bring_the_house_down",
     "proto_fs_bubble_aria",
+    "proto_fs_casting_agent",
     "proto_fs_cheered_on",
     "proto_fs_counterclaim",
+    "proto_fs_critics_darling",
     "proto_fs_curtain_rise",
     "proto_fs_da_capo",
     "proto_fs_double_casting",
@@ -42,6 +45,7 @@
     "proto_fs_improvised_number",
     "proto_fs_intermission",
     "proto_fs_interposition",
+    "proto_fs_interval_bell",
     "proto_fs_let_the_people_rejoice",
     "proto_fs_mademoiselle_crabaletta",
     "proto_fs_one_woman_show",
@@ -65,9 +69,11 @@
     "proto_fs_stage_whisper",
     "proto_fs_standing_ovation",
     "proto_fs_star_billing",
+    "proto_fs_star_turn",
     "proto_fs_step_forward",
     "proto_fs_surintendante_chevalmarin",
     "proto_fs_the_crowd_roars",
+    "proto_fs_the_last_act",
     "proto_fs_thunderous_applause",
     "proto_fs_tidal_flourish",
     "proto_fs_tide_of_applause",
@@ -103,7 +109,9 @@
     "proto_kk_jellyfish_drift",
     "proto_kk_joint_orders",
     "proto_kk_kurage_canopy",
+    "proto_kk_kurage_school",
     "proto_kk_kurage_swarm",
+    "proto_kk_kurages_mercy",
     "proto_kk_kurages_oath",
     "proto_kk_lull",
     "proto_kk_massed_volley",
@@ -114,6 +122,7 @@
     "proto_kk_nereids_ascension",
     "proto_kk_nip",
     "proto_kk_opening_gambit",
+    "proto_kk_patient_tide",
     "proto_kk_pearl_current",
     "proto_kk_pearl_diver",
     "proto_kk_pincer",
@@ -124,20 +133,26 @@
     "proto_kk_salt_in_the_wound",
     "proto_kk_sango_isshin",
     "proto_kk_sangonomiyas_counsel",
+    "proto_kk_seas_reproach",
     "proto_kk_second_wave",
     "proto_kk_shell_guard",
     "proto_kk_shell_of_sanctuary",
     "proto_kk_shoal_call",
+    "proto_kk_shoal_of_spears",
     "proto_kk_signal_arrow",
     "proto_kk_slack_water",
+    "proto_kk_spring_tide",
     "proto_kk_stolen_chapter",
     "proto_kk_suffocating_deep",
     "proto_kk_surging_shoal",
+    "proto_kk_tactical_relay",
     "proto_kk_the_generals_banner",
     "proto_kk_the_long_game",
     "proto_kk_the_moon_a_ship",
+    "proto_kk_tidal_rebuke",
     "proto_kk_tidal_resonance",
     "proto_kk_tidal_riposte",
+    "proto_kk_tidal_screen",
     "proto_kk_tide_wall",
     "proto_kk_tideturn",
     "proto_kk_treatise",
@@ -146,6 +161,7 @@
     "proto_kk_undertow",
     "proto_kk_vanguard",
     "proto_kk_war_council",
+    "proto_kk_watatsumi_resistance",
     "proto_kk_watatsumis_grace",
     "proto_kk_weight_of_the_plan",
     "proto_kk_what_the_tokoyo_returns",
@@ -403,14 +419,17 @@
     "proto_vk_wolfpack"
   ],
   "owners": {
+    "proto_fs_aria_for_one": "furina",
     "proto_fs_arkhe_alignment": "furina",
     "proto_fs_between_acts": "furina",
     "proto_fs_bis": "furina",
     "proto_fs_bravura": "furina",
     "proto_fs_bring_the_house_down": "furina",
     "proto_fs_bubble_aria": "furina",
+    "proto_fs_casting_agent": "furina",
     "proto_fs_cheered_on": "furina",
     "proto_fs_counterclaim": "furina",
+    "proto_fs_critics_darling": "furina",
     "proto_fs_curtain_rise": "furina",
     "proto_fs_da_capo": "furina",
     "proto_fs_double_casting": "furina",
@@ -439,6 +458,7 @@
     "proto_fs_improvised_number": "furina",
     "proto_fs_intermission": "furina",
     "proto_fs_interposition": "furina",
+    "proto_fs_interval_bell": "furina",
     "proto_fs_let_the_people_rejoice": "furina",
     "proto_fs_mademoiselle_crabaletta": "furina",
     "proto_fs_one_woman_show": "furina",
@@ -462,9 +482,11 @@
     "proto_fs_stage_whisper": "furina",
     "proto_fs_standing_ovation": "furina",
     "proto_fs_star_billing": "furina",
+    "proto_fs_star_turn": "furina",
     "proto_fs_step_forward": "furina",
     "proto_fs_surintendante_chevalmarin": "furina",
     "proto_fs_the_crowd_roars": "furina",
+    "proto_fs_the_last_act": "furina",
     "proto_fs_thunderous_applause": "furina",
     "proto_fs_tidal_flourish": "furina",
     "proto_fs_tide_of_applause": "furina",
@@ -500,7 +522,9 @@
     "proto_kk_jellyfish_drift": "kokomi",
     "proto_kk_joint_orders": "kokomi",
     "proto_kk_kurage_canopy": "kokomi",
+    "proto_kk_kurage_school": "kokomi",
     "proto_kk_kurage_swarm": "kokomi",
+    "proto_kk_kurages_mercy": "kokomi",
     "proto_kk_kurages_oath": "kokomi",
     "proto_kk_lull": "kokomi",
     "proto_kk_massed_volley": "kokomi",
@@ -511,6 +535,7 @@
     "proto_kk_nereids_ascension": "kokomi",
     "proto_kk_nip": "kokomi",
     "proto_kk_opening_gambit": "kokomi",
+    "proto_kk_patient_tide": "kokomi",
     "proto_kk_pearl_current": "kokomi",
     "proto_kk_pearl_diver": "kokomi",
     "proto_kk_pincer": "kokomi",
@@ -521,20 +546,26 @@
     "proto_kk_salt_in_the_wound": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sangonomiyas_counsel": "kokomi",
+    "proto_kk_seas_reproach": "kokomi",
     "proto_kk_second_wave": "kokomi",
     "proto_kk_shell_guard": "kokomi",
     "proto_kk_shell_of_sanctuary": "kokomi",
     "proto_kk_shoal_call": "kokomi",
+    "proto_kk_shoal_of_spears": "kokomi",
     "proto_kk_signal_arrow": "kokomi",
     "proto_kk_slack_water": "kokomi",
+    "proto_kk_spring_tide": "kokomi",
     "proto_kk_stolen_chapter": "kokomi",
     "proto_kk_suffocating_deep": "kokomi",
     "proto_kk_surging_shoal": "kokomi",
+    "proto_kk_tactical_relay": "kokomi",
     "proto_kk_the_generals_banner": "kokomi",
     "proto_kk_the_long_game": "kokomi",
     "proto_kk_the_moon_a_ship": "kokomi",
+    "proto_kk_tidal_rebuke": "kokomi",
     "proto_kk_tidal_resonance": "kokomi",
     "proto_kk_tidal_riposte": "kokomi",
+    "proto_kk_tidal_screen": "kokomi",
     "proto_kk_tide_wall": "kokomi",
     "proto_kk_tideturn": "kokomi",
     "proto_kk_treatise": "kokomi",
@@ -543,6 +574,7 @@
     "proto_kk_undertow": "kokomi",
     "proto_kk_vanguard": "kokomi",
     "proto_kk_war_council": "kokomi",
+    "proto_kk_watatsumi_resistance": "kokomi",
     "proto_kk_watatsumis_grace": "kokomi",
     "proto_kk_weight_of_the_plan": "kokomi",
     "proto_kk_what_the_tokoyo_returns": "kokomi",
@@ -812,6 +844,10 @@
       "ProtoFsInterpositionModeA",
       "ProtoFsInterpositionModeB"
     ],
+    "proto_fs_interval_bell": [
+      "ProtoFsIntervalBellModeA",
+      "ProtoFsIntervalBellModeB"
+    ],
     "proto_fs_quick_cue": [
       "ProtoFsQuickCueModeA",
       "ProtoFsQuickCueModeB"
@@ -846,6 +882,9 @@
     ]
   },
   "upgrades": {
+    "proto_fs_aria_for_one": {
+      "conditional_damage": 2
+    },
     "proto_fs_arkhe_alignment": {
       "cost": -1
     },
@@ -864,12 +903,18 @@
     "proto_fs_bubble_aria": {
       "damage": 1
     },
+    "proto_fs_casting_agent": {
+      "upgraded_grant": true
+    },
     "proto_fs_cheered_on": {
       "damage": 3
     },
     "proto_fs_counterclaim": {
       "damage": 2,
       "conditional_then_damage": 2
+    },
+    "proto_fs_critics_darling": {
+      "innate": true
     },
     "proto_fs_curtain_rise": {
       "conditional_damage": 3,
@@ -959,6 +1004,9 @@
     "proto_fs_interposition": {
       "conditional_block": 3
     },
+    "proto_fs_interval_bell": {
+      "stage_spend": -1
+    },
     "proto_fs_let_the_people_rejoice": {
       "cost": -1
     },
@@ -1031,6 +1079,9 @@
     "proto_fs_star_billing": {
       "power_amount": 1
     },
+    "proto_fs_star_turn": {
+      "cost": -1
+    },
     "proto_fs_step_forward": {
       "block": 2
     },
@@ -1039,6 +1090,9 @@
     },
     "proto_fs_the_crowd_roars": {
       "power_amount": 1
+    },
+    "proto_fs_the_last_act": {
+      "damage": 6
     },
     "proto_fs_thunderous_applause": {
       "power_amount": 1
@@ -1096,10 +1150,7 @@
       "block": 3
     },
     "proto_kk_coral_crash": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "cost": -1
     },
     "proto_kk_coral_tithe": {
       "kokomi_amount": -1
@@ -1146,8 +1197,14 @@
     "proto_kk_kurage_canopy": {
       "power_amount": 1
     },
+    "proto_kk_kurage_school": {
+      "cost": -1
+    },
     "proto_kk_kurage_swarm": {
       "innate": true
+    },
+    "proto_kk_kurages_mercy": {
+      "kokomi_amount": 4
     },
     "proto_kk_kurages_oath": {
       "block": 2,
@@ -1179,6 +1236,9 @@
     },
     "proto_kk_opening_gambit": {
       "damage": 2
+    },
+    "proto_kk_patient_tide": {
+      "power_amount": 1
     },
     "proto_kk_pearl_current": {
       "damage": 1,
@@ -1216,6 +1276,9 @@
     "proto_kk_sangonomiyas_counsel": {
       "power_amount": 1
     },
+    "proto_kk_seas_reproach": {
+      "cost": -1
+    },
     "proto_kk_second_wave": {
       "damage": 2
     },
@@ -1228,6 +1291,9 @@
     "proto_kk_shoal_call": {
       "upgraded_grant": true
     },
+    "proto_kk_shoal_of_spears": {
+      "formula_per": 1
+    },
     "proto_kk_signal_arrow": {
       "damage": 3,
       "plan_damage": 1
@@ -1235,6 +1301,9 @@
     "proto_kk_slack_water": {
       "damage": 3,
       "plan_power_amount": 1
+    },
+    "proto_kk_spring_tide": {
+      "cost": -1
     },
     "proto_kk_stolen_chapter": {
       "draw": 1
@@ -1246,6 +1315,9 @@
       "damage": 4,
       "plan_damage": 6
     },
+    "proto_kk_tactical_relay": {
+      "plan_draw": 1
+    },
     "proto_kk_the_generals_banner": {
       "innate": true
     },
@@ -1256,6 +1328,9 @@
       "block": 4,
       "plan_mend": 2
     },
+    "proto_kk_tidal_rebuke": {
+      "cost": -1
+    },
     "proto_kk_tidal_resonance": {
       "add": {
         "op": "draw",
@@ -1264,6 +1339,9 @@
     },
     "proto_kk_tidal_riposte": {
       "power_amount": 2
+    },
+    "proto_kk_tidal_screen": {
+      "block": 3
     },
     "proto_kk_tide_wall": {
       "block": 2,
@@ -1290,6 +1368,9 @@
     },
     "proto_kk_war_council": {
       "power_amount": 1
+    },
+    "proto_kk_watatsumi_resistance": {
+      "cost": -1
     },
     "proto_kk_watatsumis_grace": {
       "power_amount": 5
