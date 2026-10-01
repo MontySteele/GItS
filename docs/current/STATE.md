@@ -56,8 +56,13 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   is ruled "watch". Seat rounds in acts 2 and 3 (2026-09-26, Opus seats at
   [USER]'s request): five whole runs, two wins, fixes in #697 and #701;
   `review/records/klee-later-acts-2026-09-26.md`, one pick open (the React
-  loop's aura supply). Next: one solo run by [USER] on the current build; fun
-  through act 3 moves her to Balance.
+  loop's aura supply). [USER]'s solo verdict run (2026-10-01, died mid act 2
+  on a three-elite route, "misplays on my part"): "no bad notes here, Klee
+  seems to work basically as designed and the core gameplay loop was indeed
+  fun and interesting, with a challenge around bomb management"; Sparks
+  "only really matter if you're trying to let your bombs cook ... I never
+  really felt pressed for them." Next: the Klee status-engine paper, then
+  Balance.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start
