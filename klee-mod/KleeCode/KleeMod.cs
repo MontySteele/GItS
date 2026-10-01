@@ -339,7 +339,7 @@ public static class KleeMod
                     // aura, spends it, spreads it and deals a flat 2 to all.
                     // The comment sits ABOVE the key, for `gen_keyword_loc.py`.
                     ["KLEEMOD-SWIRL_PREVIEW.description"] =
-                        $"[gold]Anemo[/gold] meets a fresh aura: copy it onto ALL enemies without it and deal [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] damage to ALL enemies. The aura and its copies stay spent.",
+                        $"[gold]Anemo[/gold] meets a fresh aura: copy it onto ALL other enemies and deal [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] damage to ALL enemies. The aura and new copies stay spent; old ones refresh.",
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.title"] = "Reaction preview: Crystallize",
                     // `EB-613` (R263 sec.5 item 1). THE BLOCK IS NOT THE
                     // POINT OF THIS ROW; THE AURA IS. A Geo hit is a COST to

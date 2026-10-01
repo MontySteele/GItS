@@ -1507,9 +1507,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # readers read any Companion play now, so the word and its row left the
     # page with the tip (`ArmKeywordTips`).
     # The element port (2026-09-28) rewrote it with the C#, in one commit.
-    "Swirl": ("On a fresh aura: copy it onto ALL enemies without it and "
-              f"deal {SWIRL_DAMAGE} damage to ALL enemies. The aura and its "
-              "copies stay spent."),
+    # Amended 2026-10-01: the spread refreshes an aura of the same element.
+    "Swirl": ("On a fresh aura: copy it onto ALL other enemies and "
+              f"deal {SWIRL_DAMAGE} damage to ALL enemies. The aura and new "
+              "copies stay spent; old ones refresh."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
     # is a Power card of Klee's, and Kaeya's Cold-Blooded Strike is written
     # against it by name ("Next turn, Grounded pays even if you played a

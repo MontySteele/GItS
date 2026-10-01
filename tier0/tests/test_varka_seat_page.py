@@ -256,6 +256,6 @@ def test_the_words_say_a_spent_aura_still_reacts_and_swirl_copies_are_spent():
     from understudy import blindplay_notes as notes
     assert ("A spent aura still reacts with Pyro, Hydro, Electro and Cryo."
             in notes.ELEMENT_KEYWORDS["aura"])
-    assert "The aura and its copies stay spent." in notes.ARM_KEYWORDS["Swirl"]
+    assert "The aura and new copies stay spent; old ones refresh." in notes.ARM_KEYWORDS["Swirl"]
     page = blindplay.observe(varka_state())
     assert "Other elements still react with it." in page

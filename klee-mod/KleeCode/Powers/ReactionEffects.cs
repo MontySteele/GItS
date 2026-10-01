@@ -652,10 +652,11 @@ internal static class ReactionEffects
     /// §4 A; <see cref="TriggerRules.SwirlPays"/>). The struck enemy KEEPS its
     /// aura -- already marked spent by the lifecycle site that called
     /// <see cref="Resolve"/>. The spread keeps today's reach (every hittable
-    /// enemy) less the ones already wearing this element ("every enemy that
-    /// lacks it"); a different aura is replaced, as today, and nothing reacts
-    /// where a copy lands (the deferred candidate). Copies arrive SPENT, so
-    /// they cannot be Swirled again. Then a flat
+    /// enemy). One already wearing this element, fresh or spent, is
+    /// refreshed to full duration and made FRESH (amended 2026-10-01); a
+    /// different aura is replaced, as today, and nothing reacts where a copy
+    /// lands (the deferred candidate). Copies arrive SPENT, so they cannot be
+    /// Swirled again. Then a flat
     /// <see cref="ReactionConstants.SwirlDamage"/> to every enemy: element-less
     /// and outside the pipeline, the Overload splash's exact call, so it
     /// reacts with nothing. Sim twin: <c>reactions._react</c>'s anemo branch.
@@ -681,15 +682,32 @@ internal static class ReactionEffects
         foreach (var e in bodies)
         {
             if (ReferenceEquals(e, target)) continue;
+            var existing = AuraCmd.Find(e);
+            // Amended 2026-10-01 ([USER]: "reapplying the same element as a
+            // refresh mechanic feels fine and we shouldn't let that brick
+            // other reactions"): a body already wearing this element, fresh
+            // or spent, goes back to full duration and FRESH. Nothing reacts.
+            // Ahead of the Gale Sweep shield, as in the sim, where the shield
+            // restores after the spread and keeps the longer clock.
+            if (existing != null
+                && TriggerRules.SpreadOn(spread, existing.Element)
+                    == TriggerRules.SpreadOutcome.Refresh)
+            {
+#if PROTOTYPE_CARDS
+                // Converging Winds is unchanged: there the same element only
+                // takes the 2 (`varka_oath.converging_spread`).
+                if (converges) continue;
+#endif
+                await existing.RefreshFromSpread(choiceContext, dealer, cardSource);
+                continue;
+            }
 #if PROTOTYPE_CARDS
             // VARKA's Gale Sweep: a body the sweep has still to hit keeps its
             // own fresh aura against this Swirl's spread (sec.9.6).
             if (VarkaRules.SpreadShielded(e)) continue;
 #endif
-            var existing = AuraCmd.Find(e);
             if (existing != null)
             {
-                if (!TriggerRules.SpreadLands(spread, existing.Element)) continue;
 #if PROTOTYPE_CARDS
                 // VARKA's Converging Winds (sec.5): "the spread hit is the
                 // flat 2 carrying the swirled element", and a reaction it

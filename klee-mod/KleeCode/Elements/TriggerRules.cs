@@ -121,15 +121,28 @@ public static class TriggerRules
     public static Reaction ReactionFor(AuraPower aura, Element trigger) =>
         ReactionFor(aura.Element, aura.Spent, trigger);
 
+    /// <summary>What a Swirl's spread does to one other enemy.</summary>
+    public enum SpreadOutcome
+    {
+        /// <summary>No aura, or another element: a SPENT copy replaces it,
+        /// as today, and nothing reacts there (the deferred candidate).</summary>
+        Copy,
+        /// <summary>Already wearing the swirled element, fresh or spent: its
+        /// aura goes back to full duration and FRESH, and nothing reacts.
+        /// [USER], 2026-10-01: "reapplying the same element as a refresh
+        /// mechanic feels fine and we shouldn't let that brick other
+        /// reactions."</summary>
+        Refresh,
+    }
+
     /// <summary>
-    /// Does a Swirl of <paramref name="spread"/> land on an enemy wearing
-    /// <paramref name="existing"/>? §4 A: "every enemy that lacks it". An
-    /// enemy already wearing the element keeps its own aura, fresh or spent,
-    /// with its own clock; one wearing another element has it replaced, as
-    /// today, and nothing reacts there (the deferred candidate).
+    /// What a Swirl of <paramref name="spread"/> does to an enemy wearing
+    /// <paramref name="existing"/> (<see cref="Element.None"/> for no aura).
+    /// §4 A, amended 2026-10-01: the same element refreshes, anything else
+    /// takes a spent copy.
     /// </summary>
-    public static bool SpreadLands(Element spread, Element existing) =>
-        existing != spread;
+    public static SpreadOutcome SpreadOn(Element spread, Element existing) =>
+        existing == spread ? SpreadOutcome.Refresh : SpreadOutcome.Copy;
 
     /// <summary>
     /// Which trigger elements a spent aura refuses, for the badge's words:

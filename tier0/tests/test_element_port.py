@@ -100,16 +100,38 @@ def test_the_two_ignores_block_like_overloads_splash():
 
 
 @pytest.mark.usefixtures("both_on")
-def test_the_spread_skips_an_enemy_already_wearing_the_element():
-    # "every enemy that LACKS it": a body already wearing the aura keeps its
-    # own, fresh and with its own clock.
+def test_the_spread_refreshes_a_fresh_aura_of_the_same_element():
+    # Amended 2026-10-01 ([USER]): "reapplying the same element as a refresh
+    # mechanic feels fine". A body already wearing it goes back to full
+    # duration and stays fresh; nothing reacts there.
     st = three()
     a, b, _ = st.enemies
     hit(st, a, "pyro", 0)
     hit(st, b, "pyro", 0)
     b.aura_turns_left = 1
     hit(st, a, "anemo", 0)
-    assert b.aura == "pyro" and not b.aura_spent and b.aura_turns_left == 1
+    assert b.aura == "pyro" and not b.aura_spent
+    assert b.aura_turns_left == C.AURA_DURATION_TURNS
+    assert [ev["reaction"] for ev in reactions_logged(st)] == ["swirl"]
+
+
+@pytest.mark.usefixtures("both_on")
+def test_the_spread_makes_a_spent_aura_of_the_same_element_fresh():
+    # "we shouldn't let that brick other reactions": a spent copy the spread
+    # reaches again comes back fresh, at full duration, with no reaction, and
+    # a later Swirl of it pays again.
+    st = three()
+    a, b, c = st.enemies
+    hit(st, a, "pyro", 0)
+    hit(st, a, "anemo", 0)                    # b and c: spent copies
+    b.aura_turns_left = 1
+    hit(st, c, "pyro", 0)                     # c fresh again by its own hit
+    hit(st, c, "anemo", 0)                    # c's Swirl reaches b
+    assert b.aura == "pyro" and not b.aura_spent
+    assert b.aura_turns_left == C.AURA_DURATION_TURNS
+    assert [ev["reaction"] for ev in reactions_logged(st)] == ["swirl", "swirl"]
+    hit(st, b, "anemo", 0)                    # b's fresh aura Swirls
+    assert [ev["reaction"] for ev in reactions_logged(st)] == ["swirl"] * 3
 
 
 @pytest.mark.usefixtures("both_on")

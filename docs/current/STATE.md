@@ -188,7 +188,9 @@ embark.
 consume the aura they act on: a hit on a fresh aura reacts and leaves it
 standing, spent; a hit on a spent aura pays nothing until the aura's own
 element refreshes it. Swirl keeps the aura, spreads spent copies to every
-enemy lacking it and deals a flat 2 to every enemy; Crystallize gives its 4
+enemy lacking it, refreshes the aura (full duration, fresh, no reaction) on
+every enemy already wearing it (amended 2026-10-01) and deals a flat 2 to
+every enemy; Crystallize gives its 4
 Block and keeps the aura. The badge and the reaction preview say when an aura
 is spent, and every reaction reports one event (reaction, target, dealer,
 source kind). Two switches, on in every build: `-p:SwirlPays=false` and

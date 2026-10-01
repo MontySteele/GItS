@@ -682,9 +682,10 @@ public static class ArmKeywordTips
         With(inherited, SwirlKey,
             // THE ELEMENT PORT (sec.4 A, 2026-09-28): the preview row's rule,
             // restated for the verb.
-            "On a fresh aura: copy it onto ALL enemies without it and deal "
+            // Amended 2026-10-01: an aura the spread finds already there refreshes.
+            "On a fresh aura: copy it onto ALL other enemies and deal "
           + Elements.ReactionConstants.SwirlDamage
-          + " damage to ALL enemies. The aura and its copies stay spent.");
+          + " damage to ALL enemies. The aura and new copies stay spent; old ones refresh.");
 
     /// <summary>
     /// 2026-09-25, the afternoon Klee seat round. The Opus seat: "Companion is
