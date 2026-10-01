@@ -80,7 +80,7 @@ internal static class KleeSelfCheck
                          ModelDb.Character<Klee>(),
                          ModelDb.Character<Furina>(),
                          ModelDb.Character<Kokomi>(),
-#if PROTOTYPE_CARDS && VARKA_PROTOTYPE
+#if PROTOTYPE_CARDS
                          // Varka (prototype batch one): the same sweep, so his
                          // relic pool (R7), his pool's rarities and types (R3),
                          // his loc (R8) and his Architect lines (R12) are

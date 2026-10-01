@@ -1,4 +1,4 @@
-#if PROTOTYPE_CARDS && VARKA_PROTOTYPE
+#if PROTOTYPE_CARDS
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -16,7 +16,7 @@ namespace KleeMod;
 /// rolled either); the seven for the Casket's reason (<c>KokomiRelicPool</c>).
 ///
 /// THE OFFER is <see cref="GetUnlockedRelics"/>, Klee's and Furina's rule
-/// (<c>Relics.ArmRelicPools</c>): with his arm live, the Fang, his seven and
+/// (<c>Relics.ArmRelicPools</c>): the Fang, his seven and
 /// the Gravestone, and the Silent borrow goes (the paper's pick 1, default
 /// (a)). Pick 1(b), the borrow kept beside them, is
 /// <c>VarkaArmRelics.KeepSilentBorrow</c>: every member is offered.
@@ -43,7 +43,7 @@ public sealed class VarkaRelicPool : RelicPoolModel
         MegaCrit.Sts2.Core.Unlocks.UnlockState unlockState) =>
         Relics.ArmRelicPools.Offer(
             AllRelics,
-            Powers.VarkaPrototype.Enabled && !Relics.VarkaArmRelics.KeepSilentBorrow,
+            !Relics.VarkaArmRelics.KeepSilentBorrow,
             Relics.ArmRelicPools.VarkaArmPool,
             System.Array.Empty<System.Type>());
 }

@@ -161,7 +161,7 @@ public static class CompanionPool
             // VARKA (prototype batch one): a roster character, so the reward
             // clamp, the companion shop and his Knights' personal pool all
             // know him. Matched on the identity interface, which compiles
-            // with the surface; the class itself needs -p:VarkaPrototype.
+            // with the surface, as the class does.
             Powers.IVarkaCharacter => Powers.VarkaPrototype.CharacterId,
 #endif
             _ => null,

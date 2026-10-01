@@ -574,14 +574,13 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
         # and they are still REACHABLE: the hand-off puts one in a deck, and a
         # card in a deck must have a campfire answer like any other.
         reachable |= set(C.COMPANION_STANDIN_IDS)
-    # VARKA's OATH REWORK (`varka_oath.VARKA_OATH`) opens the loader's door
-    # for every `proto_vk_` row -- his starter, his pool and the cards his
-    # rules create -- so each is a row a rest site can offer to smith. Same
-    # discipline as above: off (every shipped tree), nothing is added.
+    # VARKA's OATH REWORK has no switch (he ships nowhere else; collapsed
+    # 2026-10-01): the loader's door is always open for every `proto_vk_`
+    # row -- his starter, his pool and the cards his rules create -- so each
+    # is a row a rest site can offer to smith.
     from tier0.engine import varka_oath        # late: loader imports us
-    if varka_oath.VARKA_OATH:
-        reachable |= {c.id for c in loader.prototype_cards()
-                      if c.id.startswith(varka_oath.ID_PREFIX)}
+    reachable |= {c.id for c in loader.prototype_cards()
+                  if c.id.startswith(varka_oath.ID_PREFIX)}
     deltas: dict[str, dict] = {}
     for card in loader.prototype_cards():
         if card.id not in reachable:

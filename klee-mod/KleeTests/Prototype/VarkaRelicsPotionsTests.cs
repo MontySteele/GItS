@@ -34,18 +34,14 @@ namespace KleeMod.Tests.Prototype;
 [Collection(VarkaArm.Name)]
 public class VarkaRelicsPotionsTests : IDisposable
 {
-    private readonly bool _enabled = VarkaPrototype.Enabled;
-
     public VarkaRelicsPotionsTests()
     {
         HeadlessGame.Arm();
-        VarkaPrototype.Enabled = true;
         VarkaOathLedger.ResetAll();
     }
 
     public void Dispose()
     {
-        VarkaPrototype.Enabled = _enabled;
         VarkaOathLedger.ResetAll();
     }
 
@@ -172,7 +168,6 @@ public class VarkaRelicsPotionsTests : IDisposable
         Assert.Contains("CreatureCmd.GainBlock", changed);
     }
 
-#if VARKA_PROTOTYPE
     [Fact]
     public void His_pool_lists_his_seven_and_offers_them_without_the_borrow()
     {
@@ -191,23 +186,18 @@ public class VarkaRelicsPotionsTests : IDisposable
         Assert.Equal(ArmRelicPools.VarkaArmPool.OrderBy(t => t.Name),
                      offer.OrderBy(t => t.Name));
         Assert.DoesNotContain(offer, t => t.Assembly != typeof(VarkaRelicPool).Assembly);
-
-        // The arm off (no Varka on the select screen): every member.
-        VarkaPrototype.Enabled = false;
-        Assert.Equal(15, pool.GetUnlockedRelics(null!).Count());
     }
 
     [Fact]
-    public void His_potion_pool_is_his_own_with_the_arm_and_the_borrow_without()
+    public void His_potion_pool_is_his_own()
     {
         var calls = Il.CallSequence(typeof(Varka).GetProperty("PotionPool")!.GetGetMethod()!);
-        Assert.Contains("VarkaPrototype.get_Enabled", calls);
         Assert.Contains("ModelDb.PotionPool<VarkaPotionPool>", calls);
-        Assert.Contains("ModelDb.PotionPool<SilentPotionPool>", calls);
+        Assert.DoesNotContain("ModelDb.PotionPool<SilentPotionPool>", calls);
     }
 
     [Fact]
-    public void Windblume_garland_pays_four_block_a_copy_and_nothing_arm_off()
+    public void Windblume_garland_pays_four_block_a_copy_and_nothing_for_anyone_else()
     {
         var varka = Seat.Varka();
         Assert.Equal(0, WindblumeGarland.BlockFor(varka.Creature));
@@ -215,12 +205,9 @@ public class VarkaRelicsPotionsTests : IDisposable
         Assert.Equal(4, WindblumeGarland.BlockFor(varka.Creature));
         Give<WindblumeGarland>(varka);
         Assert.Equal(8, WindblumeGarland.BlockFor(varka.Creature));
-        VarkaPrototype.Enabled = false;
-        Assert.Equal(0, WindblumeGarland.BlockFor(varka.Creature));
         // Held by anyone else it does nothing.
         var klee = Seat.Klee();
         Give<WindblumeGarland>(klee);
-        VarkaPrototype.Enabled = true;
         Assert.Equal(0, WindblumeGarland.BlockFor(klee.Creature));
     }
 
@@ -373,13 +360,9 @@ public class VarkaRelicsPotionsTests : IDisposable
         Assert.False(ledger.AllFourThisTurn);
         Assert.Equal(3, ledger.CurrentOath);
 
-        // Arm off, or anyone else: nothing.
-        VarkaPrototype.Enabled = false;
-        Assert.False(ElixirOfTheFourWinds.Use(varka));
-        VarkaPrototype.Enabled = true;
+        // Anyone else: nothing.
         Assert.False(ElixirOfTheFourWinds.Use(Seat.Klee().Creature));
     }
-#endif
 
     // ==== the ledger =========================================================
 

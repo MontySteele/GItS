@@ -29,15 +29,14 @@ public interface IVarkaCharacter
 ///   * CONVERGING WINDS, card-scoped: his Swirls react where they land
 ///     (<see cref="ConvergingWindsPower"/>, <c>ReactionEffects.SwirlPays</c>).
 ///
-/// TWO SWITCHES, the arms' arrangement. <c>-p:PrototypeCards=true</c> is the
-/// quarantine and compiles this file. <c>-p:VarkaPrototype=true</c> moves
-/// <see cref="Enabled"/>'s default AND compiles the character class and his
-/// two pools, because a character that ships nowhere else has nothing to
-/// switch back to: off, he is simply not on the select screen. The rules
-/// compile either way so one build can pin both sides.
+/// NO SWITCH OF HIS OWN (collapsed 2026-10-01, legacy cleanup stage 2): he
+/// ships nowhere else, so there is no shipped kit to switch back to. He
+/// compiles with the prototype surface (<c>-p:PrototypeCards</c>, on by
+/// default) and is absent from a <c>-p:ShippedKits=true</c> build, which
+/// compiles no surface at all.
 ///
 /// BUILT IN BOTH ENGINES: the sim twin is <c>tier0/engine/varka_oath.py</c>,
-/// behind its own switch (<c>VARKA_OATH</c>, off like the arms').
+/// live whenever the seat is Varka.
 /// </summary>
 public static class VarkaPrototype
 {
@@ -45,28 +44,9 @@ public static class VarkaPrototype
     /// the companion system name him by.</summary>
     public const string CharacterId = "varka";
 
-    /// <summary>The arm's default, from <c>-p:VarkaPrototype</c> (on in every
-    /// build that names no property, <c>klee-mod/Directory.Build.props</c>).
-    /// </summary>
-    public const bool DefaultEnabled =
-#if VARKA_PROTOTYPE
-        true;
-#else
-        false;
-#endif
-
-    /// <summary>Is the arm live? Settable so a headless pin can assert both
-    /// sides of the switch in one build; nothing in the mod writes it.
-    /// </summary>
-    public static bool Enabled { get; set; } = DefaultEnabled;
-
     /// <summary>Is this creature Varka?</summary>
     public static bool IsVarka(Creature? creature) =>
         creature?.Player?.Character is IVarkaCharacter;
-
-    /// <summary>Is the arm live for this creature?</summary>
-    public static bool LiveFor(Creature? creature) =>
-        Enabled && IsVarka(creature);
 }
 
 /// <summary>

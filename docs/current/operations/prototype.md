@@ -200,18 +200,18 @@ are `klee-mod/KleeTests/ElementPortTests.cs`). A sim pin about the old
 consume rule names that world with the `consume_triggers` fixture.
 
 **VARKA IS A CHARACTER, NOT AN ARM OF ONE** (prototype batch one,
-2026-09-29). `VarkaPrototype` is defaulted on beside the arms in
-`Directory.Build.props` and defines `VARKA_PROTOTYPE`, which does two things:
-it moves `KleeMod.Powers.VarkaPrototype.Enabled` (his rules, in
-`Powers/Prototype/Varka*.cs`, compile with the surface either way, so one
-build pins both sides), and it compiles `Varka.cs`, `VarkaCardPool.cs` and
-`VarkaRelicPool.cs`, which is what puts him on the select screen. Off
-(`-p:VarkaPrototype=false`, or `-p:ShippedKits=true`) there is no Varka at
-all. His rows are `proto_vk_`, owner `varka`, a prototype-only profile
+2026-09-29), and he has no switch: the `VarkaPrototype` property, its
+`VARKA_PROTOTYPE` define, `VarkaPrototype.Enabled` and the sim's
+`VARKA_OATH` were collapsed to always-on on 2026-10-01 (legacy cleanup stage
+2), because he ships nowhere else. His rules (`Powers/Prototype/Varka*.cs`),
+`Varka.cs`, `VarkaCardPool.cs` and `VarkaRelicPool.cs` compile with the
+prototype surface (`PROTOTYPE_CARDS`), so a `-p:ShippedKits=true` build,
+which compiles no surface, still has no Varka on the select screen. His rows are `proto_vk_`, owner `varka`, a prototype-only profile
 (`gen_klee_cards.PROTOTYPE_OWNERS`). **The Oath rework (2026-09-29) is built in
 both engines:** the C# rules are `Powers/Prototype/VarkaOath.cs`, and the sim
-twin is `tier0/engine/varka_oath.py` behind its own switch `VARKA_OATH`, off
-like the arms' twins and flipped by `tier0/tests/test_varka_oath.py`. His
+twin is `tier0/engine/varka_oath.py`, live for any Varka seat and dead for
+every other player (`varka_oath.live`; pinned by
+`tier0/tests/test_varka_oath.py`). His
 cards speak one verb, `{op: varka, kind: ...}`, each kind one
 `VarkaCards.<Kind>` call; its numbers are the card's `Vk*` vars and the
 upgrade keys `varka_per` / `varka_base` / `varka_amount` move them. A kind

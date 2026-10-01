@@ -6,8 +6,8 @@ not a Balance measurement).
     .venv/Scripts/python.exe -m tools.varka_expansion_sim --report out.json [--against old.json]
 
 Answers sec.5.2 of `review/active/varka-expansion-2026-10-01.md` on the
-BUILT rows (tier0 with `varka_oath.VARKA_OATH`, `C.SWIRL_PAYS` and
-`C.CRYSTALLIZE_KEEPS_AURA` on for THIS PROCESS ONLY, as the Varka tests
+BUILT rows (tier0 with `C.SWIRL_PAYS` and `C.CRYSTALLIZE_KEEPS_AURA` on
+for THIS PROCESS ONLY, as the Varka tests
 switch them; nothing on disk moves). The pool is read off whatever checkout
 runs it -- every `proto_vk_` row of rarity Common/Uncommon/Rare -- so the
 same file run on the pre-expansion commit (41 rows) and on main (78) is the
@@ -140,8 +140,6 @@ def enable():
     if _ENABLED:
         return
     from tier0 import constants as C
-    from tier0.engine import varka_oath as V
-    V.VARKA_OATH = True
     C.SWIRL_PAYS = True
     C.CRYSTALLIZE_KEEPS_AURA = True
     from tier0.content import loader

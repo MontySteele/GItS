@@ -482,9 +482,9 @@ def _runtime_count(state: CombatState, token: str,
         key = token[len(EXHAUST_SELECTION_PREFIX):]
         if key in counts:
             return counts[key]
-    # VARKA, THE OATH REWORK (`varka_oath.VARKA_OATH`): his current
-    # element's Oath and how many elements he has Oath in. 0 for anyone who
-    # is not Varka and with the switch off, so no shipped read can move.
+    # VARKA, THE OATH REWORK (`varka_oath.count`): his current element's
+    # Oath and how many elements he has Oath in. 0 for anyone who is not
+    # Varka, so no shipped read can move.
     if (token == "current_oath" or token == "oath_elements"
             or token == "enemies_with_aura" or token == "hydro_oath"
             or token == "knights_played_this_combat"):
@@ -1067,8 +1067,8 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # VARKA's Wildfire Oath (element identities, 2026-10-01): the first hit
     # of the turn's first Attack, when Pyro was current at its play, deals
     # his Pyro Oath more (per stack), read now. The C# twin is
-    # `WildfireOathPower.ModifyDamageAdditive`. Dead with the switch off.
-    if varka_oath.VARKA_OATH and source == "attack" and powered:
+    # `WildfireOathPower.ModifyDamageAdditive`. 0 for anyone else.
+    if source == "attack" and powered:
         base = base + varka_oath.take_wildfire(state)
     # Solar Isotoma (Crystallize engine): attack hits vs aura'd enemies
     # grant block — checked before the hit can consume the aura.
@@ -1653,10 +1653,10 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         resources.note_player_hp_loss(state, fx["amount"])  # cost stays paid
         return
 
-    # VARKA (`varka_oath.VARKA_OATH`): Gale Sweep's `only_if: fresh_aura`,
-    # each fresh-aura enemy hit once through this op aimed at its body. Dead
-    # with the switch off and for anyone who is not Varka.
-    if (varka_oath.VARKA_OATH and fx.get("only_if") == "fresh_aura"
+    # VARKA (`varka_oath.fresh_aura_sweep`): Gale Sweep's `only_if:
+    # fresh_aura`, each fresh-aura enemy hit once through this op aimed at
+    # its body. Dead for anyone who is not Varka.
+    if (fx.get("only_if") == "fresh_aura"
             and varka_oath.live(state.player)):
         varka_oath.fresh_aura_sweep(state, fx, card)
         return
@@ -6899,10 +6899,10 @@ def resolve_card(state: CombatState, card: Card) -> None:
         # Companions would have to be widened the first time one of those is
         # ever played before it is burned.
         state.kurage_play_targets[id(card)] = state.card_aim
-    # VARKA (`varka_oath.VARKA_OATH`): this play's Oath scope opens, and a
+    # VARKA (`varka_oath.begin_play`): this play's Oath scope opens, and a
     # Knight sets his current element BEFORE its effects resolve. Both are
-    # dead with the switch off and for anyone who is not Varka.
-    varka = varka_oath.VARKA_OATH and varka_oath.live(state.player)
+    # dead for anyone who is not Varka.
+    varka = varka_oath.live(state.player)
     if varka:
         varka_oath.begin_play(state, card)
     try:
@@ -7007,10 +7007,9 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
             KNOB_READS["GARMENT_ATTACK_BLOCK"] = (
                 KNOB_READS.get("GARMENT_ATTACK_BLOCK", 0) + 1)
     state.current_attack_bonus = bonus
-    if varka_oath.VARKA_OATH:
-        # Stormward Stance's part of that bonus, which his elemental
-        # follow-up hits (not Anemo) do not take. Dead with the switch off.
-        varka_oath.note_attack_bonus(state, card)
+    # VARKA: Stormward Stance's part of that bonus, which his elemental
+    # follow-up hits (not Anemo) do not take. A no-op for anyone else.
+    varka_oath.note_attack_bonus(state, card)
     state.mc_attack_element_override = companion_overhaul_card_start(state, card)
 
     # THE PLAN AIM (QUARANTINED, C.KOKOMI_OVERHAUL, draft 6). "Played on the
@@ -7185,10 +7184,10 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     # knob — repeated-but-bounded payoff, never a spend.
     if p.powers.get("ceremonial_garment", 0) and p.charge:
         bonus += p.charge // C.GARMENT_CHARGE_DIVISOR
-    # VARKA (`varka_oath.VARKA_OATH`): Stormward Stance, on his Anemo Attacks
-    # while his current element's Oath is at the bar. Dead with it off.
-    if varka_oath.VARKA_OATH:
-        bonus += varka_oath.attack_bonus(state, card)
+    # VARKA (`varka_oath.attack_bonus`): Stormward Stance, on his Anemo
+    # Attacks while his current element's Oath is at the bar. 0 for anyone
+    # else.
+    bonus += varka_oath.attack_bonus(state, card)
     return bonus
 
 

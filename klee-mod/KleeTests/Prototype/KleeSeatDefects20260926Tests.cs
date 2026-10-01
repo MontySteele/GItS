@@ -316,7 +316,6 @@ public class KleeSeatDefects20260926Tests
         Assert.Contains("ArmStarterBasics.DefendFor", borrowed);
     }
 
-#if VARKA_PROTOTYPE
     [Fact]
     public void Varka_s_borrowed_basics_transform_into_his_own_pool()
     {
@@ -336,5 +335,4 @@ public class KleeSeatDefects20260926Tests
         Assert.Contains(typeof(IVarkaCharacter), tested);
         Assert.Contains(typeof(IKokomiCharacter), tested);
     }
-#endif
 }

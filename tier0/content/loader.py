@@ -459,8 +459,8 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
     raw = yaml_memo.safe_load(path.read_text(encoding="utf-8")) or []
     shipped = _card_index()
     # VARKA owns rows here and nowhere else. His rules are
-    # `tier0/engine/varka_oath.py`, behind `varka_oath.VARKA_OATH` (off), so
-    # his rows are schema-checked always and resolve only with the switch on.
+    # `tier0/engine/varka_oath.py`, which has no switch (he ships nowhere
+    # else), so his rows are schema-checked and always resolve.
     known_characters = {"klee", "furina", "kokomi", "varka"}
     seen: set[str] = set()
     cards: list[Card] = []
@@ -1092,10 +1092,11 @@ def _card_prototype(card_id: str) -> Card:
                 substituted[base_id] if base_id in substituted
                 else _prototype_index()[base_id])
         card = upgrades.apply_upgrade(base)
-    elif ((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL
-           or C.COMPANION_OVERHAUL or C.KOKOMI_OVERHAUL
-           or furina_stage.FURINA_STAGE or varka_oath.VARKA_OATH)
-            and plain.startswith(PROTOTYPE_ID_PREFIX)):
+    elif (((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL
+            or C.COMPANION_OVERHAUL or C.KOKOMI_OVERHAUL
+            or furina_stage.FURINA_STAGE)
+           and plain.startswith(PROTOTYPE_ID_PREFIX))
+          or plain.startswith(varka_oath.ID_PREFIX)):
         # THE ONE DOOR THE SPARK ARM OPENS INTO THE QUARANTINE, and it is
         # exactly as wide as it has to be. `_starter_ids` substitutes two
         # PROTO ids into Klee's starting deck (PICK 1, options 1+5), and a
@@ -1136,10 +1137,11 @@ def _card_prototype(card_id: str) -> Card:
         # derives campfire reachability from it; this branch is simply reached
         # first.
         #
-        # AND VARKA'S OATH REWORK (`varka_oath.VARKA_OATH`), same door, no
-        # wider: his starter and every card his rules create
-        # (`varka_oath.build_player`, Boreas's Fang, Knights' Roll Call) are
-        # `proto_vk_` id STRINGS resolved back through here.
+        # AND VARKA'S OATH REWORK, with no switch (he ships nowhere else;
+        # collapsed 2026-10-01) and so only for his own `proto_vk_` ids: his
+        # starter and every card his rules create (`varka_oath.build_player`,
+        # Boreas's Fang, Knights' Roll Call) are id STRINGS resolved back
+        # through here.
         card = _prototype_index()[plain]
     else:
         index = _card_index()

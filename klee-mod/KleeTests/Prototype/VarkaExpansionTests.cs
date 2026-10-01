@@ -23,18 +23,14 @@ namespace KleeMod.Tests.Prototype;
 [Collection(VarkaArm.Name)]
 public class VarkaExpansionTests : IDisposable
 {
-    private readonly bool _enabled = VarkaPrototype.Enabled;
-
     public VarkaExpansionTests()
     {
         HeadlessGame.Arm();
-        VarkaPrototype.Enabled = true;
         VarkaOathLedger.ResetAll();
     }
 
     public void Dispose()
     {
-        VarkaPrototype.Enabled = _enabled;
         VarkaOathLedger.ResetAll();
     }
 
