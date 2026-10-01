@@ -127,10 +127,52 @@ def test_the_recorded_combat_page_keeps_its_board():
     tail = words[words.index("## What you can say"):]
     kept = out.splitlines()
     for line in (head + tail).splitlines():
-        if line.strip() and line not in blindplay_brief.DROPPED_LINES:
+        if line.strip() and not blindplay_brief._drop_line(line):
             assert line in kept, line
     assert "Intent:" in out and "- Energy 2/3" in out
     assert len(out) < len(full)
+    # 2026-10-01: the italic glosses under the hand are gone too.
+    assert "*Applies Hydro* — " in full
+    assert "*Applies Hydro*" not in out
+
+
+# --- 2026-10-01: the italic glosses ------------------------------------------
+
+GLOSS = ("    *Applies Hydro* — If the target has no aura, this applies Hydro "
+         "for 2 turns.")
+
+
+def test_the_brief_page_drops_the_italic_glosses_and_keeps_the_hand():
+    """Three of four seats on 2026-10-01 still cut `--brief` with their own
+    `grep -v` to drop the gloss lines. The card's own face stays."""
+    page = _page().replace(NEVER_DROPPED[9],
+                           "\n".join([NEVER_DROPPED[9], GLOSS]))
+    assert GLOSS in page.splitlines()
+    out = blindplay_brief.brief(page).splitlines()
+    assert GLOSS not in out
+    for line in NEVER_DROPPED:
+        assert line in out, line
+
+
+def test_a_gloss_that_carries_a_protected_line_is_kept_in_place():
+    """A line-level drop never removes an intent, a refusal or a verb,
+    whatever it is wrapped in; and it does not cost the rest of the trim."""
+    hit = "    *Weak* — this part lands on you for 6"
+    page = _page().replace(NEVER_DROPPED[9],
+                           "\n".join([NEVER_DROPPED[9], hit, GLOSS]))
+    out = blindplay_brief.brief(page).splitlines()
+    assert hit in out
+    assert GLOSS not in out
+    assert blindplay_brief.BRIEF_NOTE in out
+
+
+def test_an_italic_note_that_is_not_a_gloss_is_kept():
+    """Only the `*Word* — meaning` shape is a gloss. A whole italic sentence
+    can be an instruction (a chooser's `confirm`, a chest's `choose`)."""
+    note = ("*Choosing here arms a pick; it does not close the screen. Say "
+            "`confirm` to close it.*")
+    assert not blindplay_brief._drop_line(note)
+    assert blindplay_brief._drop_line(GLOSS)
 
 
 # --- the CLI -----------------------------------------------------------------

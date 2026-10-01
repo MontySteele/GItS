@@ -560,6 +560,12 @@ def _fight_round(state: dict[str, Any]) -> int:
     return _int(_blob(state, "battle").get("round"))
 
 
+#: The refusal for an aimed card or potion when no enemy is alive to aim at.
+NO_LIVING_ENEMY = ("no enemy can be aimed at right now: every enemy is dead "
+                   "or waiting to revive, so this has nothing to hit until "
+                   "one is back. Nothing was sent")
+
+
 def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     """`(entity id, refusal)` for an enemy named the way the screen names it."""
     enemies = _enemies(state)
@@ -577,6 +583,12 @@ def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     # cannot mean different bodies by `B`.
     handles = _enemy_handles(enemies)
     living = [i for i, e in enumerate(enemies) if _int(e.get("hp")) > 0]
+    if not living:
+        # 2026-10-01 (Varka lane 1, act 3): Test Subject's first phase died
+        # with its revive pending, the wire sent no living body, and the
+        # refusal said "there is more than one enemy, so say which" and listed
+        # none. A dead body waiting to revive is not a target.
+        return "", NO_LIVING_ENEMY
     if not name:
         if len(living) == 1:
             return _entity_id(enemies[living[0]]), ""
@@ -835,7 +847,8 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
             # ("does its own aiming, so it takes no `on`"); this is that
             # sentence's twin, so both refusals name the form that works AND
             # say why the face did not predict it.
-            if not cmd.target and _prints_all_enemies(entry):
+            if (not cmd.target and _prints_all_enemies(entry)
+                    and why != NO_LIVING_ENEMY):
                 why = (f"{titles[idx]!r} prints \"ALL enemies\" and is still "
                        "aimed at one body, so say which: "
                        + ", ".join(_living_enemy_names(state)))
@@ -1382,6 +1395,13 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
     if cmd.verb == SPHERE_REVEAL:
         res = _refuse("there is nothing to reveal here; `reveal` is the "
                       "Crystal Sphere's verb")
+    elif cmd.verb == "leave" and st == "rewards":
+        # 2026-10-01 (Furina seat, act 3). The Crystal Sphere's own exit is
+        # `leave`, and once its divinations are spent the game hands over a
+        # reward screen; `leave` typed there was refused "use proceed". On a
+        # reward screen the two words mean one thing, so it is the proceed,
+        # with the unclaimed-reward check `act` puts in front of every one.
+        res = _proceed(state)
     elif cmd.verb == "leave":
         # `EB-396`, the other half. Off an undriven screen the word has no
         # meaning this page can honour, and the honest answer names the verb
@@ -1551,6 +1571,28 @@ def _card_offers(state: dict[str, Any]) -> list[str]:
         if option["enabled"] and option["name"]:
             out.append(option["name"])
     return out
+
+
+#: The reward rows `proceed` would drop: every kind but a card offer (whose
+#: skip is the screen's own) and the optional card removal.
+UNCLAIMED_KINDS = ("gold", "potion", "relic", "specialcard")
+
+
+def unclaimed_rewards(state: dict[str, Any]) -> list[str]:
+    """The printed names of the rewards still on a reward screen that
+    `proceed` would leave behind; `[]` on any other screen.
+
+    2026-10-01 (Furina seat, act 3): Potion Courier's Ransack offered Heart of
+    Iron on a reward screen (the run history has it, `was_picked: false`),
+    and the seat walked on without it and reported "Ransack gave me no
+    potion". The same silent drop lost two seats their gold (2026-09-28/29).
+    """
+    if _screen(state) != "rewards":
+        return []
+    faces = observation(state).get("items") or []
+    return [str(f.get("name")) for r, f in zip(_reward_items(state), faces)
+            if isinstance(r, dict) and isinstance(f, dict) and f.get("name")
+            and _fold(r.get("type")) in UNCLAIMED_KINDS]
 
 
 def _proceed(state: dict[str, Any]) -> Resolution:

@@ -25,13 +25,24 @@ deck memory already use, for the same one-process-per-call reason): the last
 probe window, and the seat's own thinking time is what makes it long enough
 to be a rate rather than a sample.
 
-THREE SIGNALS, EACH A SEPARATE READING OF THE SAME EVENT (thresholds below):
+TWO SIGNALS, EACH A SEPARATE READING OF THE SAME EVENT (thresholds below):
 
   * the lane's `godot.log` grew at a flood RATE since the last command;
-  * the lane's game process holds more memory than a playing game ever does;
-  * the state endpoint timed out twice running WHILE health kept answering.
+  * the lane's game process holds more memory than a playing game ever does.
 
-Any one of them ends the lane. That is deliberately looser than `hangwatch`'s
+Either one ends the lane.
+
+A STATE TIMEOUT WITH HEALTH ANSWERING IS NOT A DEATH (2026-10-01). It was a
+third signal -- two in a row ended the lane -- and on Varka's lane 2 (act 3,
+floor 45) it tore down a game that was only slow: the lane's `godot.log` shows
+the window regaining focus after 47 minutes in the background ("Restored
+foreground FPS") and the bridge writing both state answers just after the
+client's 20 s timeout had closed the socket. The log had not grown and the
+process held 1.2 GB. So the counter is kept as evidence only, the blind
+commands retry a timed-out read with a backoff while health answers
+(`STATE_RETRY_WAITS_S`), and a lane whose health endpoint answers is never
+torn down by this module on a timeout. The storm itself is still caught by
+the two signals above. That is deliberately looser than `hangwatch`'s
 "either signal, but only on a dead wire": this watchdog's cost of being wrong
 is a torn-down disposable lane and a round that stops early, and its cost of
 being silent was measured at fifteen minutes and 19 GB.
@@ -97,12 +108,12 @@ MIN_WINDOW_S = 1.0
 #: comfortable.
 PROC_BYTES = 2_500_000_000
 
-#: HOW MANY STATE TIMEOUTS, WITH HEALTH STILL ANSWERING, END THE LANE. One is
-#: a slow room load and must not; two running is the `EB-489` /
-#: `hangwatch.STATE_STALL_KIND` pair, which has no recovery from this side --
-#: every further read parks another worker on the same queue. The counter is
-#: reset by any state read that succeeds, so two must be CONSECUTIVE.
-STATE_TIMEOUTS = 2
+#: THE BACKOFF a blind command waits between state reads that timed out while
+#: health answered, in seconds. A game thrown into the background runs at a
+#: throttled frame rate and answers late; the 2026-10-01 lane answered a few
+#: seconds past the 20 s client timeout. After the last wait the command
+#: reports the lane slow and stops, and nothing is torn down.
+STATE_RETRY_WAITS_S = (5.0, 15.0, 30.0)
 
 #: The line the seat is given. `TOOL-BLOCKED` is load-bearing: the brief
 #: already says to stop and write the record on one.
@@ -375,17 +386,9 @@ def check(lane: object = None, *, now: float | None = None,
                 f"past the {PROC_BYTES / 1e9:,.1f} GB bar",
                 evidence)
 
-    if not verdict.dead:
-        stale = int(row.get("state_timeouts") or 0)
-        evidence["state_timeouts"] = stale
-        if stale >= STATE_TIMEOUTS:
-            verdict = Verdict(
-                True,
-                f"the state endpoint timed out {stale} times running while "
-                f"health kept answering -- the game thread has stopped "
-                f"reaching a process frame and every further read parks "
-                f"another worker on its queue",
-                evidence)
+    # The timeout count rides as evidence only: a lane whose health endpoint
+    # answers is never ended on it (see this module's header).
+    evidence["state_timeouts"] = int(row.get("state_timeouts") or 0)
 
     row.update({"log_bytes": size, "seen_at": now})
     if verdict.dead:
@@ -404,7 +407,7 @@ def check(lane: object = None, *, now: float | None = None,
 def is_timeout(exc: BaseException) -> bool:
     """Is this bridge failure a TIMEOUT rather than a refused connection?
 
-    The distinction is the whole of the third signal. A refused or reset
+    The distinction decides whether a blind command retries. A refused or reset
     connection means the process is GONE, which is a different failure with a
     different answer; a timeout with health still answering is the game thread
     stalled. `bridge` wraps every stdlib shape into `BridgeError`, so the

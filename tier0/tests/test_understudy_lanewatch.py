@@ -176,19 +176,19 @@ def test_an_unreadable_memory_reading_is_not_a_death(tmp_path, lane):
 
 # -------------------------------------------------- the timeout counter ----
 
-def test_two_state_timeouts_with_health_answering_end_the_lane(tmp_path,
-                                                               lane):
+def test_state_timeouts_with_health_answering_never_end_the_lane(tmp_path,
+                                                                 lane):
+    """2026-10-01: Varka lane 2 was torn down on two state timeouts while its
+    game was only slow (a backgrounded window answering past the client's
+    timeout). However many there are, the count is evidence, not a death."""
     _sidecar(tmp_path)
     lanewatch.arm(lane)
-    assert lanewatch.record_state_timeout(lane, health_answers=True) == 1
-    v = lanewatch.check(lane, now=0.0, sizer=_sizes(None),
-                        memory=_memory(None))
-    assert not v.dead, "one timeout is a slow room load"
-    assert lanewatch.record_state_timeout(lane, health_answers=True) == 2
-    v = lanewatch.check(lane, now=1.0, sizer=_sizes(None),
-                        memory=_memory(None))
-    assert v.dead
-    assert "timed out 2 times running" in v.reason
+    for n in range(1, 6):
+        assert lanewatch.record_state_timeout(lane, health_answers=True) == n
+        v = lanewatch.check(lane, now=float(n), sizer=_sizes(None),
+                            memory=_memory(1_200_000_000))
+        assert not v.dead
+        assert v.evidence["state_timeouts"] == n
 
 
 def test_a_timeout_with_health_silent_is_not_charged(tmp_path, lane):
@@ -335,47 +335,83 @@ def test_both_blind_commands_stop_on_a_dead_lane(monkeypatch, capsys):
         assert out.startswith(lanewatch.BLOCKED), argv
 
 
-def test_a_state_timeout_is_counted_where_the_command_meets_it(monkeypatch):
-    """The third signal has exactly one live surface: the state read the two
-    commands make. A timeout there with health still answering is charged; a
-    refused connection is re-raised untouched, because a process that is GONE
-    is a different failure with a different answer."""
+def _timeout(_args):
+    raise RuntimeError("bridge connection failed: TimeoutError: timed out")
+
+
+def test_a_slow_state_read_is_retried_while_health_answers(monkeypatch):
+    """The 2026-10-01 lane: two reads timed out, the game answered just after.
+    The read is retried with a backoff and the third answer is the page."""
     from understudy import blindplay
     args = type("A", (), {"raw_file": "", "dry_run": False})()
     charged: list = []
     monkeypatch.setattr(lanewatch, "record_state_timeout",
-                        lambda *a, **k: charged.append(k) or 1)
+                        lambda *a, **k: charged.append(k) or len(charged))
+    monkeypatch.setattr(lanewatch, "record_state_ok", lambda *a, **k: None)
     monkeypatch.setattr(lanewatch, "guard", lambda *a, **k: "")
     monkeypatch.setattr(blindplay.bridge, "health", lambda: {"status": "ok"})
+    answers = iter([_timeout, _timeout, lambda _a: {"state_type": "menu"}])
+    monkeypatch.setattr(blindplay, "_load_state", lambda a: next(answers)(a))
+    slept: list = []
+    assert blindplay._live_load(args, sleep=slept.append) == {
+        "state_type": "menu"}
+    assert charged == [{"health_answers": True}] * 2
+    assert slept == list(lanewatch.STATE_RETRY_WAITS_S[:2])
 
-    def _timeout(_args):
-        raise blindplay.bridge.BridgeError(
-            "bridge connection failed: TimeoutError: timed out")
+
+def test_a_lane_too_slow_for_every_retry_is_refused_not_torn_down(
+        monkeypatch, capsys):
+    from understudy import blindplay
+    torn: list = []
+    monkeypatch.setattr(lanewatch, "tear_down", torn.append)
+    monkeypatch.setattr(lanewatch, "record_state_timeout", lambda *a, **k: 9)
+    monkeypatch.setattr(lanewatch, "guard", lambda *a, **k: "")
+    monkeypatch.setattr(blindplay.bridge, "health", lambda: {"status": "ok"})
     monkeypatch.setattr(blindplay, "_load_state", _timeout)
-    with pytest.raises(blindplay.bridge.BridgeError):
-        blindplay._live_load(args)
-    assert charged == [{"health_answers": True}]
+    monkeypatch.setattr(blindplay.time, "sleep", lambda _s: None)
+    for argv in (["observe"], ["act", "end turn"]):
+        assert blindplay.main(argv) == 1
+        out = capsys.readouterr().out
+        assert out.startswith("NO ANSWER: the game is up but slow"), argv
+        assert lanewatch.BLOCKED not in out
+    assert torn == []
+
+
+def test_a_timeout_with_health_silent_or_a_refusal_is_re_raised(monkeypatch):
+    """A process that is GONE is a different failure with a different answer:
+    no retry, re-raised untouched."""
+    from understudy import blindplay
+    args = type("A", (), {"raw_file": "", "dry_run": False})()
+    monkeypatch.setattr(lanewatch, "record_state_timeout", lambda *a, **k: 0)
+    monkeypatch.setattr(lanewatch, "guard", lambda *a, **k: "")
+
+    def _silent():
+        raise RuntimeError("bridge unreachable")
+    monkeypatch.setattr(blindplay.bridge, "health", _silent)
+    monkeypatch.setattr(blindplay, "_load_state", _timeout)
+    slept: list = []
+    with pytest.raises(RuntimeError):
+        blindplay._live_load(args, sleep=slept.append)
+    assert slept == []
 
     def _refused(_args):
         raise blindplay.bridge.BridgeError("bridge unreachable: refused")
     monkeypatch.setattr(blindplay, "_load_state", _refused)
     with pytest.raises(blindplay.bridge.BridgeError):
-        blindplay._live_load(args)
-    assert len(charged) == 1
+        blindplay._live_load(args, sleep=slept.append)
+    assert slept == []
 
 
-def test_the_second_timeout_reaches_the_seat_as_a_dead_lane(monkeypatch):
+def test_a_storm_found_between_retries_still_ends_the_lane(monkeypatch):
     from understudy import blindplay
     args = type("A", (), {"raw_file": "", "dry_run": False})()
-    monkeypatch.setattr(lanewatch, "record_state_timeout", lambda *a, **k: 2)
+    monkeypatch.setattr(lanewatch, "record_state_timeout", lambda *a, **k: 1)
     monkeypatch.setattr(lanewatch, "guard",
-                        lambda *a, **k: f"{lanewatch.BLOCKED} (stalled)")
+                        lambda *a, **k: f"{lanewatch.BLOCKED} (a storm)")
     monkeypatch.setattr(blindplay.bridge, "health", lambda: {"status": "ok"})
-    monkeypatch.setattr(blindplay, "_load_state", lambda _a: (_ for _ in ()
-                                                              ).throw(
-        TimeoutError("timed out")))
+    monkeypatch.setattr(blindplay, "_load_state", _timeout)
     with pytest.raises(blindplay.LaneDead) as caught:
-        blindplay._live_load(args)
+        blindplay._live_load(args, sleep=lambda _s: None)
     assert str(caught.value).startswith(lanewatch.BLOCKED)
 
 
