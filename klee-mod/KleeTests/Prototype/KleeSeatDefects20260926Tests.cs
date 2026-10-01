@@ -315,4 +315,26 @@ public class KleeSeatDefects20260926Tests
         Assert.Contains("ArmStarterBasics.StrikeFor", borrowed);
         Assert.Contains("ArmStarterBasics.DefendFor", borrowed);
     }
+
+#if VARKA_PROTOTYPE
+    [Fact]
+    public void Varka_s_borrowed_basics_transform_into_his_own_pool()
+    {
+        // 2026-09-30 co-op playtest: Morphic Grove and Astrolabe turned his
+        // Silent Strikes and Defends into Silent cards. The seam's character
+        // test now names him: OptionsFor carries an `isinst IVarkaCharacter`.
+        var method = (MethodInfo)Il.Method("ArmTransformPool", "OptionsFor");
+        var il = method.GetMethodBody()!.GetILAsByteArray()!;
+        var tested = new List<Type>();
+        for (var i = 0; i + 4 < il.Length; i++)
+        {
+            if (il[i] != 0x75) continue;              // isinst <token>
+            var token = BitConverter.ToInt32(il, i + 1);
+            try { tested.Add(method.Module.ResolveType(token)); }
+            catch (ArgumentException) { }
+        }
+        Assert.Contains(typeof(IVarkaCharacter), tested);
+        Assert.Contains(typeof(IKokomiCharacter), tested);
+    }
+#endif
 }

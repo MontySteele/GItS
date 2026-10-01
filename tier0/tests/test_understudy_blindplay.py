@@ -6896,11 +6896,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # any interpolated word (the C# side may gold the keywords).
         "Oath": ["Gained when your card applies or ",
                  "Kept all fight. Cards read your "],
-        "current element": ["The element of the last Knight you played."],
+        "current element": ["The last Pyro, Hydro, Cryo or Electro you "
+                            "applied. "],
         "Knight": ["A Companion titled with a colon, like Lisa: Infinite "
                    "Circuit. ",
-                   "Playing one makes its element your current element; "
-                   "others do "],
+                   "Playing one makes its element your current element."],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces

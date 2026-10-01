@@ -192,7 +192,9 @@ def test_grand_design_adds_one_per_energy_paid(overhaul):
     _write(st, "proto_kk_nip")                     # 0 paid
     kokomi_plan.resolve_all(st)
     assert st.kk_casket == (1 + 2) + 1
-    assert _up("proto_kk_grand_design").cost == 0
+    # Power cost sweep, 2026-09-30: cost stays 1, the upgrade is Innate.
+    assert _up("proto_kk_grand_design").cost == 1
+    assert _up("proto_kk_grand_design").innate
 
 
 def test_the_long_game_pays_on_exactly_one_waiting(overhaul):

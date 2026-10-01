@@ -332,9 +332,10 @@ public class KokomiCasketPassTests : IDisposable
 
         var signal = new ProtoKkMoonSignal();
         Assert.Equal(CardType.Power, signal.Type);
-        Assert.Equal(1, signal.EnergyCost.Canonical);
-        Assert.Equal(0, Upgraded<ProtoKkMoonSignal>().EnergyCost
-            .GetWithModifiers(CostModifiers.None));
+        // Power cost sweep, 2026-09-30: 0 to play; the upgrade gains 2.
+        Assert.Equal(0, signal.EnergyCost.Canonical);
+        Assert.Equal(1m, Var(signal, "PowerAmount"));
+        Assert.Equal(2m, Var(Upgraded<ProtoKkMoonSignal>(), "PowerAmount"));
         Assert.Contains("PowerCmd.Apply<MoonSignalPower>",
                         string.Join(" ", Seq("ProtoKkMoonSignal", "OnPlay")));
         Assert.Equal(2, KokomiOverhaulLaw.MoonSignalThreshold);

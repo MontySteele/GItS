@@ -45,13 +45,14 @@ public sealed class ProtoVkTailwindStride : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tailwind Stride"),
-        ("description", "Draw 2 cards. If you have a [gold]current element[/gold], draw 1 more."),
+        ("description", "Draw 2 cards. If you have a [gold]current element[/gold], draw {DrawThen:diff()} more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(2)
+            new CardsVar(2),
+            new DynamicVar("DrawThen", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -66,12 +67,12 @@ public sealed class ProtoVkTailwindStride : CustomCardModel, ICharacterCard
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
         if (VarkaOath.HasCurrent(Owner.Creature))
         {
-            await CardPileCmd.Draw(choiceContext, 1m, Owner);
+            await CardPileCmd.Draw(choiceContext, DynamicVars["DrawThen"].IntValue, Owner);
         }
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["DrawThen"].UpgradeValueBy(1m);
     }
 }

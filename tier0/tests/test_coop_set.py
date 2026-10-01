@@ -267,7 +267,7 @@ def test_the_second_batch_upgrades_are_the_ruled_ones():
     binds Raise a Toast's ceiling in both engines (`gen.CAP_VAR`)."""
     assert _row("proto_fs_raise_a_toast").upgrade == {"cap": 2}       # 6 -> 8
     assert _row("proto_ko_shrapnel").upgrade == {"bomb_size": 3}     # 4 -> 7
-    assert _row("proto_fs_the_crowd_roars").upgrade == {"cost": -1}  # 2 -> 1
+    assert _row("proto_fs_the_crowd_roars").upgrade == {"power_amount": 1}  # 1 -> 2 Fanfare (power cost sweep)
     assert _row("proto_ko_sparks_for_everyone").upgrade == {"innate": True}
     assert gen.CAP_VAR["stage_toast"] == "ToastCap"
 

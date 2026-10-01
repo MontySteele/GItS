@@ -77,8 +77,10 @@ public sealed class VarkaOathLedger
 
     private readonly Dictionary<Element, int> _oath = Elements.ToDictionary(e => e, _ => 0);
 
-    /// <summary>His current element: the last Knight's, or what Change of
-    /// Guard chose. <see cref="Element.None"/> before the first.</summary>
+    /// <summary>His current element: the last Knight's, the last Oath element
+    /// one of his other cards applied (the open Oath, 2026-09-30), or what
+    /// Change of Guard chose. <see cref="Element.None"/> before the first.
+    /// </summary>
     public Element Current { get; private set; } = Element.None;
 
     /// <summary>Has Boreas's Fang added Four Winds' Ascension this fight?
@@ -171,6 +173,10 @@ public sealed class VarkaOathLedger
     // ---- the per-play credit scope ----------------------------------------
 
     private int _scopeDepth;
+    /// <summary>Per open scope, innermost last: is it an OPEN-OATH play (a
+    /// card of his that is not a Knight), and which card. Baron Bunny's
+    /// scope and a Knight's play are not.</summary>
+    private readonly List<(bool Open, object? Card)> _plays = new();
     private readonly HashSet<(bool Swirl, Element Element)> _credited = new();
     private readonly List<Creature> _swirledThisPlay = new();
 
@@ -181,20 +187,44 @@ public sealed class VarkaOathLedger
     /// Ascension's elemental hit).</summary>
     public int SuppressApply { get; set; }
 
-    /// <summary>A play opens: its credits start empty.</summary>
-    public void OpenScope()
+    /// <summary>A play opens: its credits start empty. <paramref name="open"/>
+    /// marks a play of his own non-Knight card (<paramref name="card"/>),
+    /// whose applications set his current element.</summary>
+    public void OpenScope(bool open = false, object? card = null)
     {
         if (_scopeDepth++ == 0)
         {
             _credited.Clear();
             _swirledThisPlay.Clear();
+            _plays.Clear();
         }
+        _plays.Add((open, card));
     }
 
     /// <summary>A play ends.</summary>
     public void CloseScope()
     {
         if (_scopeDepth > 0) _scopeDepth--;
+        if (_plays.Count > 0) _plays.RemoveAt(_plays.Count - 1);
+    }
+
+    /// <summary>
+    /// THE OPEN OATH ([USER], 2026-09-30): "Any card that applies an element
+    /// other than Anemo counts for Oath effects". Does an application of
+    /// <paramref name="element"/> make it his current element? Only inside a
+    /// play of his own non-Knight card (a Knight set it at the top of its
+    /// play), only for the four Oath elements, never inside a hit that
+    /// credits nothing (Four Winds' Ascension's), and, when the hit names a
+    /// card, only when it is the card being played. Baron Bunny's burst,
+    /// relics, potions and powers outside a play are not plays. PURE.
+    /// </summary>
+    public bool OpenOathSwitches(Element element, object? cardSource = null)
+    {
+        if (_plays.Count == 0 || !_oath.ContainsKey(element)) return false;
+        if (SuppressApply > 0) return false;
+        var (open, card) = _plays[^1];
+        if (!open) return false;
+        return cardSource == null || ReferenceEquals(cardSource, card);
     }
 
     /// <summary>
@@ -276,7 +306,9 @@ public static class VarkaOath
     // ---- the play bracket -------------------------------------------------
 
     /// <summary>
-    /// A card play opens (every replay too). Opens his credit scope, and if
+    /// A card play opens (every replay too). Opens his credit scope (an
+    /// open-Oath one for any card that is not a Knight, <see
+    /// cref="VarkaOathLedger.OpenOathSwitches"/>), and if
     /// the card is a Knight sets his current element BEFORE its effects:
     /// Favonian Standard pays when the Knight's element was already current,
     /// Boreas Unbound when it changes (sec.6).
@@ -286,7 +318,7 @@ public static class VarkaOath
         var owner = card.Owner?.Creature;
         if (!Live(owner)) return;
         var ledger = VarkaOathLedger.For(owner!);
-        ledger.OpenScope();
+        ledger.OpenScope(open: !VarkaRules.IsKnight(card), card: card);
         var element = KnightElement(card);
         if (element == Element.None) return;
         ledger.NoteKnight();
@@ -399,12 +431,23 @@ public static class VarkaOath
     /// An element of <paramref name="element"/> landed on an enemy from
     /// <paramref name="applier"/>: a hit that sticks, refreshes or reacts, or
     /// a damage-less application. Credits 1 Oath once per play (sec.3).
+    /// Inside a play of his own non-Knight card the element first becomes his
+    /// current element (the open Oath, 2026-09-30), so the gain is the current
+    /// element's and Dawn Wind's March pays, as a Knight's does; the last
+    /// one applied wins. <paramref name="cardSource"/> is the hit's card,
+    /// when the hit names one.
     /// </summary>
     public static async Task NoteApplication(
-        PlayerChoiceContext choiceContext, Creature? applier, Element element)
+        PlayerChoiceContext choiceContext, Creature? applier, Element element,
+        CardModel? cardSource = null)
     {
         if (applier == null || !Live(applier) || !element.LeavesAura()) return;
-        if (!VarkaOathLedger.For(applier).TryCredit(swirl: false, element)) return;
+        var ledger = VarkaOathLedger.For(applier);
+        if (ledger.OpenOathSwitches(element, cardSource))
+        {
+            await SetCurrent(choiceContext, applier, element, knight: false);
+        }
+        if (!ledger.TryCredit(swirl: false, element)) return;
         await Gain(choiceContext, applier, element, 1);
     }
 
@@ -506,6 +549,13 @@ public static class VarkaOath
             {
                 await Gain(choiceContext, varka, element, sworn.Amount);
             }
+        }
+        // Power cost sweep, 2026-09-30: the base card, current element only.
+        foreach (var sworn in varka.Powers.OfType<SwornBrotherhoodCurrentPower>().ToList())
+        {
+            var element = Current(varka);
+            if (element == Element.None) continue;
+            await Gain(choiceContext, varka, element, sworn.Amount);
         }
         foreach (var oath in varka.Powers.OfType<OathOfTheKnightsPower>().ToList())
         {

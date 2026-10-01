@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the multiplayer treasure-room hands for Klee, Furina and Kokomi.
+"""Generate the multiplayer treasure-room hands for Klee, Furina, Kokomi and Varka.
 
 Tier F: every output is a recolour of the base game's own hand art, read out
 of the installed `SlayTheSpire2.pck`, so it is private-build art exactly like
@@ -39,6 +39,10 @@ to me"). Each character recolours one base character's arm in HSV:
               navy coat.
   * Kokomi <- the Necrobinder's arm: magenta sleeve -> lavender, sallow skin
               -> pale.
+  * Varka  <- the Ironclad's gauntleted arm, UNCHANGED (2026-09-30 co-op
+              playtest: he drew no hand at a chest). A stand-in until a Varka
+              recolour is drawn and approved; it copies the base pixels, so
+              there is no recipe to approve.
 
 The arithmetic below is the prototype's, verbatim (float64 HSV round trip,
 truncating `astype(uint8)` on the way out), so the outputs match the approved
@@ -92,6 +96,10 @@ OUTPUTS = {
     "multiplayer_hand_kleemod-kokomi_rock.png":      ("necrobinder", "rock"),
     "multiplayer_hand_kleemod-kokomi_paper.png":     ("necrobinder", "paper"),
     "multiplayer_hand_kleemod-kokomi_scissors.png":  ("necrobinder", "scissors"),
+    "multiplayer_hand_kleemod-varka_point.png":      ("ironclad", "point"),
+    "multiplayer_hand_kleemod-varka_rock.png":       ("ironclad", "rock"),
+    "multiplayer_hand_kleemod-varka_paper.png":      ("ironclad", "paper"),
+    "multiplayer_hand_kleemod-varka_scissors.png":   ("ironclad", "scissors"),
 }
 
 
@@ -227,6 +235,8 @@ RECIPES = {
     "silent": klee_pose,
     "regent": lambda img: recolor(img, FURINA_RULES),
     "necrobinder": lambda img: recolor(img, KOKOMI_RULES),
+    # Varka's stand-in: the Ironclad's arm as the base game draws it.
+    "ironclad": lambda img: img.convert("RGBA"),
 }
 
 
@@ -255,7 +265,7 @@ def _decode_ctex(data: bytes) -> Image.Image:
 
 
 def read_base_hands(pck_path: Path) -> dict:
-    """(base character, pose) -> PIL image, for the three base arms we use."""
+    """(base character, pose) -> PIL image, for the four base arms we use."""
     f, _hdr, entries = pck_read.parse(str(pck_path))
     try:
         by_path = {e.path: e for e in entries}

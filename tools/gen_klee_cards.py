@@ -3059,7 +3059,7 @@ APPLY_POWERS = {
         "gains {X} [gold]Fanfare[/gold]. Needs 2 performers."),
     "fs_five_century_act": ("FiveCenturyActPower", None,
         "The first time each turn a performer [gold]Bow[/gold]s and leaves, "
-        "it returns at the back with 1 [gold]Fanfare[/gold] if a seat is "
+        "it returns at the back with {X} [gold]Fanfare[/gold] if a seat is "
         "free."),
     "fs_arkhe_alignment": ("ArkheAlignmentPower", None,
         "At the start of your turn, choose [gold]Ousia[/gold] or "
@@ -3085,7 +3085,7 @@ APPLY_POWERS = {
         "While no one is on stage, your Attacks deal {X} additional damage."),
     "fs_one_woman_show": ("OneWomanShowPower", None,
         "At the start of your turn, if no one is on stage, gain 1 "
-        "[gold]Energy[/gold] and draw 1 card."),
+        "[gold]Energy[/gold] and draw 2 cards."),
     # The supporting pool's Sold Out (2026-09-26): the fourth seat.
     "fs_sold_out": ("SoldOutPower", None, "Your stage has a fourth seat."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
@@ -3176,6 +3176,10 @@ APPLY_POWERS = {
     "kk_the_long_game": ("TheLongGamePower", None,
         "At the start of your turn, if exactly one [gold]Plan[/gold] is "
         "waiting, gain {X} [gold]Energy[/gold]."),
+    # Power cost sweep, 2026-09-30: The Long Game+ installs this twin.
+    "kk_the_long_game_plus": ("TheLongGamePlusPower", None,
+        "At the start of your turn, if exactly one [gold]Plan[/gold] is "
+        "waiting, gain {X} [gold]Energy[/gold] and draw {X} card."),
     "kk_at_waters_edge": ("AtWatersEdgePower", None,
         "Whenever an [gold]Elemental Reaction[/gold] happens on an enemy, "
         "apply {X} Weak and {X} Vulnerable to it."),
@@ -3447,6 +3451,11 @@ APPLY_POWERS = {
     "vk_sworn_brotherhood": ("SwornBrotherhoodPower", None,
         "At the start of your turn, gain {X} [gold]Oath[/gold] of every "
         "element."),
+    # Power cost sweep, 2026-09-30: the base Sworn Brotherhood; the upgrade
+    # installs the every-element power above.
+    "vk_sworn_brotherhood_current": ("SwornBrotherhoodCurrentPower", None,
+        "At the start of your turn, gain {X} [gold]Oath[/gold] of your "
+        "[gold]current element[/gold]."),
     "vk_baron_bunny": ("VarkaBaronBunnyPower", None,
         "At the start of your turn, deal {X} [gold]Pyro[/gold] damage to ALL "
         "enemies."),
@@ -3841,6 +3850,11 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # face states the rule in words and prints no figure a
                        # var could keep honest.
                        "tide_draw",
+                       # Varka co-op pass 2026-09-30 (Tailwind Stride): the
+                       # draw INSIDE a conditional's arms only; the card's own
+                       # top-level draw is left alone. Rides the DrawThen /
+                       # DrawElse vars `draw` already gives branch draws.
+                       "conditional_draw",
                        # `EB-491`, the pool pass. `split_grow` is Split
                        # Charge's upgrade-only clause: it is emitted as
                        # `tide_draw`'s play-time `IsUpgraded` read, because the
@@ -3879,6 +3893,11 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # VARKA (Knights' Roll Call+): the same play-time
                        # IsUpgraded read, one verb over.
                        "choose_knight",
+                       # Power cost sweep, 2026-09-30: upgraded, the card
+                       # installs a different power (the value names it), a
+                       # play-time IsUpgraded swap the face states in its own
+                       # `{IfUpgraded:show:...}`.
+                       "upgraded_power",
                        # VARKA (the Oath rework): a `varka` op's own number,
                        # its `Vk<Field>` var.
                        "varka_per", "varka_base", "varka_amount",
@@ -7736,6 +7755,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                       for e in effects),
         "block": any(e["op"] == "block" for e in effects),
         "draw": any(e["op"] == "draw" for e in everywhere),
+        "conditional_draw": any(
+            e["op"] == "draw" for e in everywhere
+            if all(e is not t for t in effects)),
         # conditional_bonus: tier0 bumps the then-branch's first damage|block;
         # codegen expresses the damage form (ExtraDamage var). A then-block
         # first would need a second Block var -- structural until needed.
@@ -7835,6 +7857,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # play time off `IsUpgraded`; the face carries its own
         # `{IfUpgraded:show:...}` swap.
         "choose_knight": any(e["op"] == "add_knight" for e in effects),
+        # Power cost sweep, 2026-09-30: binds to the first top-level
+        # apply_power on the card's owner, and the named power must exist.
+        "upgraded_power": (
+            upgraded_power_effect(card) is not None
+            and deltas.get("upgraded_power") in APPLY_POWERS),
         # VARKA (the Oath rework): each binds to the `varka` op that prints
         # that field.
         **{f"varka_{field}": any(e["op"] == "varka" and field in e
@@ -8848,9 +8875,12 @@ def branch_draw_upgrade(card: dict) -> int:
     branches (eager_to_help, and Compose Herself which also draws at top
     level). tier0 bumps ALL draw ops; the branch draws ride the vars
     `branch_draw_vars` assigns."""
-    delta = int(upgrade_plan(card)[0].get("draw", 0))
+    plan = upgrade_plan(card)[0]
+    delta = int(plan.get("draw", 0))
     if not delta:
-        return 0
+        # `conditional_draw`: the branch draws alone move (tier0 twin:
+        # upgrades.py), so the vars exist exactly as for `draw`.
+        return int(plan.get("conditional_draw", 0))
     branch_draws = [e for e in _effects_everywhere(card)
                     if e.get("op") == "draw"]
     top_draws = [e for e in card["effects"] if e.get("op") == "draw"]
@@ -8926,6 +8956,18 @@ def set_off_damage_var_effect(card: dict) -> dict | None:
     return next((fx for fx in card.get("effects", [])
                  if fx.get("op") == "set_off"
                  and int(fx.get("damage", 0) or 0)), None)
+
+
+def upgraded_power_effect(card: dict) -> dict | None:
+    """The apply_power an `upgraded_power` delta swaps (power cost sweep,
+    2026-09-30): the first top-level apply_power, on the card's owner. The
+    sim twin (`tier0/content/upgrades.py`) rewrites the same effect's
+    `power`; here OnPlay reads `IsUpgraded` and applies the named power."""
+    hit = next((e for e in card.get("effects", [])
+                if e.get("op") == "apply_power"), None)
+    if hit is None or hit.get("target") != "self":
+        return None
+    return hit
 
 
 def power_upgrade_effect(card: dict) -> dict | None:
@@ -10736,6 +10778,25 @@ def build_body(
                     f"await PowerCmd.Apply<{cls}>(choiceContext, "
                     f"cardPlay.Target, {amount}, applier: Owner.Creature, "
                     "cardSource: this);")
+            elif (eff is upgraded_power_effect(card)
+                  and "upgraded_power" in upgrade_plan(card)[0]):
+                # Power cost sweep, 2026-09-30: the upgraded card installs a
+                # different power, a play-time `IsUpgraded` read (sim twin:
+                # upgrades.py rewrites the effect's `power`).
+                up_cls = APPLY_POWERS[upgrade_plan(card)[0]["upgraded_power"]][0]
+                lines.append(
+                    "if (IsUpgraded)\n"
+                    "        {\n"
+                    f"            await PowerCmd.Apply<{up_cls}>(choiceContext, "
+                    f"Owner.Creature, {amount}, applier: Owner.Creature, "
+                    "cardSource: this);\n"
+                    "        }\n"
+                    "        else\n"
+                    "        {\n"
+                    f"            await PowerCmd.Apply<{cls}>(choiceContext, "
+                    f"Owner.Creature, {amount}, applier: Owner.Creature, "
+                    "cardSource: this);\n"
+                    "        }")
             else:
                 lines.append(
                     f"await PowerCmd.Apply<{cls}>(choiceContext, Owner.Creature, "
@@ -14343,6 +14404,13 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("choose_knight")
         lines.append("// choose_knight: the player picks the Knight, read off "
                      "IsUpgraded when the card is played.")
+    if "upgraded_power" in deltas:
+        # Power cost sweep, 2026-09-30. The same play-time read: OnPlay
+        # applies the named power when upgraded; the face states the swap.
+        done.add("upgraded_power")
+        lines.append("// upgraded_power: the upgraded card installs "
+                     f"{APPLY_POWERS[deltas['upgraded_power']][0]}, read off "
+                     "IsUpgraded when the card is played.")
     if "kokomi_amount" in deltas:
         done.add("kokomi_amount")
         lines.append('DynamicVars["KkAmount"].UpgradeValueBy('
@@ -14435,8 +14503,8 @@ def build_upgrade(card: dict) -> list[str]:
         # already bumped it, so repeating it here would upgrade one number
         # twice (caught on Compose Herself, whose OnUpgrade briefly carried
         # two identical Cards bumps).
-        d = int(deltas["draw"])
-        done.add("draw")
+        d = branch_draw_upgrade(card)
+        done.add("draw" if "draw" in deltas else "conditional_draw")
         for name in dict.fromkeys(branch_draw_vars(card)):
             if not any(f'"{name}"' in decl or f"{name}Var(" in decl
                        for decl in build_vars(card)):

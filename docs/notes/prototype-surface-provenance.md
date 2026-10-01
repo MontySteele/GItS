@@ -4422,6 +4422,137 @@ Undercurrent Snare, Feint, Slack Water, Jellyfish Drift). Big Plan's
 gauntlet is unchanged at 47.7%. The limit is the stock pilot, which writes
 its Plans one at a time and rarely holds a Plan card once two wait.
 
+
+## Varka: co-op playtest 2026-09-30
+
+[USER]'s co-op run, decided by the main session. Three changes, no other card
+moved (Knights' Roll Call stays as is, no Exhaust).
+
+1. **Tailwind Stride.** [USER]: "'Tailwind Stride' sounds like 'draw 3' at 1
+   energy and the upgrade makes it free? Way too good!" Base is unchanged
+   (cost 1, draw 2, draw 1 more with a current element). The upgrade no longer
+   cuts the cost; it raises the conditional draw to 2 (draw 2, plus 2 more with
+   a current element). Built with a new delta key `conditional_draw`, which
+   moves the draws inside a conditional's arms and leaves the top-level draw
+   alone (`draw` bumps all of them). Both engines: `tier0/content/upgrades.py`
+   and `tools/gen_klee_cards.py` (the `DrawThen` var, diff-highlighted).
+2. **Rising Gale** Common to Uncommon. [USER]: "'Rising Gale' is basically a
+   cycling card with a clause - may need a bump to Uncommon". Pool is now
+   15 / 18 / 8.
+3. **Upgrades for the six cards that had none.** [USER]: "A few cards on Varka
+   are missing upgrades"; in the run, upgraded copies did nothing. Oath of the
+   Knights, Rally to the Banner, Change of Guard and Four Winds' Accord cost
+   1 to 0; Unfurled Banner gains Retain; Azure Devour 4 to 5 damage per Oath
+   (`formula_per: 1`).
+
+## Varka: the open Oath (2026-09-30)
+
+[USER] asked: "Is it reasonable to go the other direction and say 'Any card
+that applies an element other than Anemo counts for Oath effects' - widening
+the Companion pool", and on the main session's terms: "Yep, let's ship it and
+see if anything breaks."
+
+The rule: whenever he plays a card that applies Pyro, Hydro, Cryo or Electro,
+that becomes his current element and he gains 1 Oath of it. The four terms:
+
+1. **His own card plays only.** A Swirl's spread, a reaction's side effects,
+   relics, potions, a Power ticking later (Baron Bunny's burst) and another
+   player's cards in co-op do not switch it.
+2. **The four Oath elements only.** Anemo and Geo give nothing and do not
+   change the current element.
+3. **Knight-named payoffs stay Knight-only.** Favonian Standard, Grand
+   Master's Order, Knightly Guard ("if you played a Knight"), Knights' Roll
+   Call and the starter Knight are unchanged; `VarkaRules.IsKnight` is.
+4. **Favonius Drill counts, to watch.** It gains 1 Oath of the current
+   element per play.
+
+How it is built. The Oath part already stood: since the rework every card of
+his that applies an Oath element gained 1 of it per play (sec.3's credit,
+`VarkaOathLedger.TryCredit`, `varka_oath.credit`), Knight or not. What the open
+Oath adds is the switch. A play of his card that is not a Knight opens an
+open-Oath scope (`VarkaOathLedger.OpenScope(open: true, card)`, sim
+`open_scope(open_oath=True)`); an application inside it of an Oath element
+first makes that element current (`SetCurrent(knight: false)`, so Boreas
+Unbound pays on a change and Favonian Standard never does), then credits, so
+the gain is the current element's and Dawn Wind's March pays. The last element
+applied wins; each element still credits its own 1 (sec.3's per-element
+credit is unchanged). In the mod the hit must be dealt by him and, when it
+names a card, by the card being played (`OpenOathSwitches`); Four Winds'
+Ascension's no-credit hit switches nothing. Knights keep their switch at the
+top of the play. The tips: "current element" now reads "The last Pyro, Hydro,
+Cryo or Electro you applied" (the tip ceiling is 135; the Knight tip still
+says playing one makes its element current), and the Knight tip drops
+"others do not". The sim's
+`varka_oath.OPEN_OATH` (on) runs the old rule for a paired comparison.
+
+The paired sim (scratch harness, not committed; tier0 with `VARKA_OATH` on,
+generic pilot, every tier0 encounter in turn, n = 400 fights per cell on
+paired seeds 0 to 399). "pool" is the starter plus Favonius Drill, Oathsworn
+Strike, Eye of the Storm and Knightly Guard; "comp" adds 4 random Companions
+from the three nations' shipped sheets that apply an Oath element.
+
+| deck | start | won old / new | Oath per fight old / new | switches per fight old / new | HP lost old / new |
+|---|---|---|---|---|---|
+| pool | Pyro | 99.8 / 99.8 | 5.64 / 5.64 | 0.98 / 0.98 | 22.5 / 22.5 |
+| pool | Hydro | 99.2 / 99.2 | 5.81 / 5.81 | 0.98 / 0.98 | 21.3 / 21.3 |
+| pool | Electro | 99.8 / 99.8 | 5.55 / 5.55 | 0.98 / 0.98 | 22.3 / 22.3 |
+| pool | Cryo | 99.8 / 99.8 | 5.33 / 5.33 | 0.98 / 0.98 | 20.9 / 20.9 |
+| comp | Pyro | 98.8 / 99.5 | 7.18 / 7.13 | 0.88 / 3.79 | 21.3 / 19.9 |
+| comp | Hydro | 99.5 / 98.8 | 7.36 / 7.26 | 0.89 / 3.90 | 20.8 / 20.4 |
+| comp | Electro | 99.8 / 100.0 | 6.90 / 6.90 | 0.87 / 3.38 | 19.9 / 19.1 |
+| comp | Cryo | 100.0 / 99.8 | 6.93 / 6.94 | 0.88 / 3.72 | 19.9 / 19.8 |
+
+On his own pool nothing moves: every non-Knight card of his that applies an
+Oath element applies the current one. With Companions in the deck he switches
+about four times as often and Oath per fight is unchanged (the credit already
+stood); fights won move within noise and HP lost falls by 0.1 to 1.4. The
+tier0 encounters are near 100% won, so this shows nothing breaks, not a
+balance number.
+
+## Power cost sweep, 2026-09-30
+
+[USER]: "my friend and I both noticed that you have a convention of making
+rare powers cost 2 energy with the upgrade putting them to 1. And having
+uncommon powers cost 1 going to 0. It works! But can we do a sweep over the
+current card pools and break them up a bit so it's less of a standard? Alter
+the effects to rebalance at a different energy level, basically (either the
+higher or the lower)". The main session chose eighteen changes; every other
+Power keeps its cost and upgrade (Aftershock, Vermillion Pact, Knights of
+Favonius, At Water's Edge, Arkhe Alignment, Sold Out, Converging Winds and
+Dawn Wind's March stay 2 to 1, Full House 3 to 2, every companion row as is).
+
+| Card | Was | Now |
+|---|---|---|
+| Sparks 'n' Splash | 2, upgrade cost 1 | 3, upgrade Innate |
+| Dodoco | 2, Mine 4, upgrade cost 1 | 1, Mine 3, upgrade Mine 5 |
+| Second Surprise | 1, upgrade cost 0 | 0, upgrade Innate |
+| Nereid's Ascension | 2, upgrade cost 1 | 3, upgrade Innate |
+| Moon Signal | 1, upgrade cost 0 | 0, upgrade Casket gains 2 |
+| Grand Design | 1, upgrade cost 0 | 1, upgrade Innate |
+| The Long Game | 1, upgrade cost 0 | 1, upgrade gain 1 Energy and draw 1 card |
+| Kurage Swarm | 2, upgrade cost 1 | 1, upgrade Innate |
+| A Five-Century Act | 2, returns at 1, upgrade cost 1 | 3, upgrade returns at 3 |
+| Revolving Stage | 1, upgrade cost 0 | 0, upgrade Innate |
+| Star Billing | 1, draw 2, upgrade cost 0 | 1, upgrade draw 3 |
+| Regina of All Waters | 2, upgrade cost 1 | 1, upgrade Innate |
+| One-Woman Show | 2, Energy 1 and draw 1, upgrade cost 1 | 3, Energy 1 and draw 2, upgrade cost 2 |
+| The Crowd Roars | 2, Fanfare 1, upgrade cost 1 | 1, upgrade Fanfare 2 |
+| Stormward Stance | 1, 3 damage, upgrade cost 0 | 1, upgrade 5 damage |
+| Oath of the Knights | 1, upgrade cost 0 | 1, upgrade Innate |
+| Boreas Unbound | 2, upgrade cost 1 | 3, upgrade Innate |
+| Sworn Brotherhood | 2, Oath of every element, upgrade cost 1 | 1, Oath of your current element; upgrade every element |
+
+How the two upgrades with no existing key were built: a new delta key
+`upgraded_power: <power>`, a play-time `IsUpgraded` swap of the power the
+card installs (codegen `gen_klee_cards.upgraded_power_effect`; sim
+`tier0/content/upgrades.py` rewrites the effect's `power`). The Long Game+
+installs `TheLongGamePlusPower` (`kk_the_long_game_plus`), paid by the same
+`TheLongGamePower.Signal`; Sworn Brotherhood's base installs
+`SwornBrotherhoodCurrentPower` (`vk_sworn_brotherhood_current`) and the
+upgrade installs the old every-element power. A Five-Century Act's returnee
+now arrives at the power's amount (`FurinaStage.ReturnFanfare`; sim
+`furina_stage._after_bow`), and One-Woman Show draws 2 a copy.
+
 **Riptide's Plan draw (2026-09-30, ruled).** After the co-op playtest in which
 a guest played Kokomi, [USER]: "Riptide - buff the Draw from 1 to 2, and
 upgrades to 3; seems a bit weak at 2 energy". `proto_kk_riptide`'s Plan line

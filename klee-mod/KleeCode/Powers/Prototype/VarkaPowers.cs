@@ -370,7 +370,8 @@ public sealed class DawnWindsMarchPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Sworn Brotherhood (sec.6): "At the start of your turn, gain 1
+/// <summary>Sworn Brotherhood+ (sec.6; the upgrade since the power cost
+/// sweep, 2026-09-30): "At the start of your turn, gain 1
 /// Oath of every element." Paid by <see cref="VarkaOath.TurnStart"/>.
 /// </summary>
 public sealed class SwornBrotherhoodPower : PowerModel, ILocalizationProvider
@@ -381,6 +382,27 @@ public sealed class SwornBrotherhoodPower : PowerModel, ILocalizationProvider
         ("description",
             "At the start of your turn, gain [blue]{Amount}[/blue] "
           + "[gold]Oath[/gold] of every element."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary>Sworn Brotherhood, the base card (power cost sweep,
+/// 2026-09-30): "At the start of your turn, gain 1 Oath of your current
+/// element." Nothing without a current element. The upgraded card installs
+/// <see cref="SwornBrotherhoodPower"/> (every element) instead. Paid in
+/// <c>VarkaOath.TurnStart</c>; sim twin: <c>varka_oath</c>'s turn start.
+/// </summary>
+public sealed class SwornBrotherhoodCurrentPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Sworn Brotherhood"),
+        ("description",
+            "At the start of your turn, gain [blue]{Amount}[/blue] "
+          + "[gold]Oath[/gold] of your [gold]current element[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

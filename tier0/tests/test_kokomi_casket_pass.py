@@ -308,8 +308,10 @@ def test_the_uncommons_and_the_rare(overhaul):
 
     # Moon Signal: a Power, cost 1 (0 upgraded).
     signal = _row("proto_kk_moon_signal")
-    assert (signal.type, signal.cost) == ("power", 1)
+    # Power cost sweep, 2026-09-30: 0 to play, and the upgrade gains 2.
+    assert (signal.type, signal.cost) == ("power", 0)
     assert _up("proto_kk_moon_signal").cost == 0
+    assert _up("proto_kk_moon_signal").effects[0]["amount"] == 2
 
     # Pearl Current: 2 x4 / Plan 2 to ALL x3 (3s upgraded).
     current = _row("proto_kk_pearl_current")

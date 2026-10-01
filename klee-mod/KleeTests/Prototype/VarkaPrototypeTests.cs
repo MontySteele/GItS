@@ -139,6 +139,59 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
+    public void The_open_oath_switches_on_his_own_non_knight_plays_only()
+    {
+        // [USER], 2026-09-30: "Any card that applies an element other than
+        // Anemo counts for Oath effects". Inside a play of his non-Knight
+        // card an Oath element's application becomes his current element.
+        var ledger = FreshLedger();
+        var card = new object();
+        Assert.False(ledger.OpenOathSwitches(Element.Hydro));    // no play
+        ledger.OpenScope(open: true, card: card);
+        Assert.True(ledger.OpenOathSwitches(Element.Hydro));
+        Assert.True(ledger.OpenOathSwitches(Element.Electro, card));
+        // Anemo and Geo give nothing.
+        Assert.False(ledger.OpenOathSwitches(Element.Anemo));
+        Assert.False(ledger.OpenOathSwitches(Element.Geo));
+        // A hit naming another card is not this play's.
+        Assert.False(ledger.OpenOathSwitches(Element.Pyro, new object()));
+        // Ascension's elemental hit credits nothing and switches nothing.
+        ledger.SuppressApply++;
+        Assert.False(ledger.OpenOathSwitches(Element.Pyro));
+        ledger.SuppressApply--;
+        // A scoped event inside it (Baron Bunny's shape) is not a play.
+        ledger.OpenScope();
+        Assert.False(ledger.OpenOathSwitches(Element.Pyro));
+        ledger.CloseScope();
+        Assert.True(ledger.OpenOathSwitches(Element.Pyro));
+        ledger.CloseScope();
+        // A Knight's play keeps its own play-time switch only.
+        ledger.OpenScope(open: false, card: card);
+        Assert.False(ledger.OpenOathSwitches(Element.Pyro, card));
+        ledger.CloseScope();
+        Assert.False(ledger.OpenOathSwitches(Element.Pyro));
+    }
+
+    [Fact]
+    public void The_open_oath_sets_the_element_before_it_credits()
+    {
+        // The switch comes first, so the gain is the current element's and
+        // Dawn Wind's March pays as on a Knight; never a Knight's Standard.
+        var note = Il.CallSequence(
+            Il.Method("VarkaOath", "NoteApplication")).ToList();
+        var opens = note.IndexOf("VarkaOathLedger.OpenOathSwitches");
+        var set = note.IndexOf("VarkaOath.SetCurrent");
+        var credit = note.IndexOf("VarkaOathLedger.TryCredit");
+        var gain = note.IndexOf("VarkaOath.Gain");
+        Assert.True(opens >= 0 && set > opens && credit > set && gain > credit,
+                    string.Join(", ", note));
+        Assert.DoesNotContain("VarkaOathLedger.NoteKnight", note);
+        // Only a non-Knight play opens an open-Oath scope.
+        Assert.Contains("VarkaRules.IsKnight",
+                        Il.Calls(Il.Method("VarkaOath", "BeginPlay")));
+    }
+
+    [Fact]
     public void Ascensions_elemental_hit_credits_no_application()
     {
         var ledger = FreshLedger();
@@ -596,7 +649,7 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void The_pool_is_forty_one_cards_sixteen_seventeen_and_eight()
+    public void The_pool_is_forty_one_cards_fifteen_eighteen_and_eight()
     {
         var pool = Cards("VarkaRoster", "Pool")
             .Select(c => c.Substring("ModelDb.Card<".Length).TrimEnd('>'))
@@ -608,8 +661,8 @@ public class VarkaPrototypeTests : IDisposable
             .Select(t => (CardModel)Activator.CreateInstance(t)!)
             .ToList();
         Assert.Equal(41, types.Count);
-        Assert.Equal(16, types.Count(c => c.Rarity == CardRarity.Common));
-        Assert.Equal(17, types.Count(c => c.Rarity == CardRarity.Uncommon));
+        Assert.Equal(15, types.Count(c => c.Rarity == CardRarity.Common));
+        Assert.Equal(18, types.Count(c => c.Rarity == CardRarity.Uncommon));
         Assert.Equal(8, types.Count(c => c.Rarity == CardRarity.Rare));
         Assert.Equal(9, types.Count(VarkaRules.IsKnight));
         // The starter's and the Fang's cards are not offered.

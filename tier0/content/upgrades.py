@@ -1014,6 +1014,16 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)
+        elif key == "conditional_draw":
+            # Varka co-op pass 2026-09-30 (Tailwind Stride): the draw INSIDE a
+            # conditional's arms only. Plain `draw` bumps every draw op, the
+            # top-level one included; this leaves the card's own draw alone.
+            top_ids = {id(fx) for fx in top}
+            hits = [fx for fx in everywhere
+                    if fx.get("op") == "draw" and id(fx) not in top_ids]
+            for fx in hits:
+                fx["amount"] += val
+            ok = bool(hits)
         elif key == "tide_draw":
             # `EB-478`, R257. Tide Chart's FLAT half -- "draw 1 more", meaning
             # one card on top of the one per Plan carried out. A key of its own
@@ -1364,6 +1374,19 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = hit is not None
             if hit:
                 hit["choose"] = True
+        elif key == "upgraded_power":
+            # Power cost sweep, 2026-09-30 (The Long Game, Sworn Brotherhood):
+            # upgraded, the card installs a DIFFERENT power, named by the
+            # value. Binds to the first top-level apply_power, the one the
+            # codegen's play-time `IsUpgraded` swap emits.
+            if not isinstance(val, str) or not val:
+                raise ValueError(
+                    f"upgraded_power delta on {base_id!r} must name a power")
+            hit = next((fx for fx in top if fx.get("op") == "apply_power"),
+                       None)
+            ok = hit is not None
+            if hit:
+                hit["power"] = val
         elif key == "block_next_turn":
             # The Charlotte-precedent second half. `block` deliberately hits
             # only the first op, so a card whose upgrade moves BOTH halves

@@ -1585,24 +1585,26 @@ public sealed class FurinaStageLedger
     /// and RESTS -- it does not act at the end of this turn. False (and
     /// nothing moves) on a full stage.
     /// </summary>
-    public bool ReturnToBack(StagePerformer who)
+    public bool ReturnToBack(StagePerformer who,
+                             int fanfare = FurinaStageLaw.SummonFanfare)
     {
         if (IsFull) return false;
         // 2026-09-29: Wriothesley returns to the front he holds.
-        var seat = new StageSeat(who, FurinaStageLaw.SummonFanfare)
+        var seat = new StageSeat(who, fanfare)
         {
             Resting = true,
         };
         Place(seat);
         Note(new StageBeat("arrive", who, IndexOf(seat),
-                           FurinaStageLaw.SummonFanfare, 0, ""));
+                           fanfare, 0, ""));
         return true;
     }
 
     /// <summary>
     /// 2026-09-27, <i>A Five-Century Act</i> once a turn: "The first time
     /// each turn a performer Bows and leaves, it returns at the back with 1
-    /// Fanfare if a seat is free." One return a turn however many copies;
+    /// Fanfare if a seat is free." (3 upgraded since the power cost sweep,
+    /// 2026-09-30: <paramref name="fanfare"/> on <see cref="ReturnOnce"/>.) One return a turn however many copies;
     /// used only by a return that happens (a full stage leaves it for the
     /// next Bow). Cleared at the start of Furina's turn
     /// (<c>FurinaStage.BeginTurn</c>).
@@ -1612,9 +1614,10 @@ public sealed class FurinaStageLedger
     /// <summary>A Five-Century Act's return, at most once a turn: false (and
     /// nothing moves) once this turn's return is used or on a full stage.
     /// </summary>
-    public bool ReturnOnce(StagePerformer who)
+    public bool ReturnOnce(StagePerformer who,
+                           int fanfare = FurinaStageLaw.SummonFanfare)
     {
-        if (ReturnedThisTurn || !ReturnToBack(who)) return false;
+        if (ReturnedThisTurn || !ReturnToBack(who, fanfare)) return false;
         ReturnedThisTurn = true;
         return true;
     }

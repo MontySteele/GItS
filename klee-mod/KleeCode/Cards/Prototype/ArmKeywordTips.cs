@@ -722,7 +722,7 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForCurrentElement(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, CurrentElementKey,
-            "The element of the last Knight you played. Your "
+            "The last Pyro, Hydro, Cryo or Electro you applied. "
           + "Swirls pay it: Pyro " + VarkaLaw.SwirlPyroDamage + " damage, Hydro "
           + VarkaLaw.SwirlHydroBlock + " [gold]Block[/gold], Cryo "
           + VarkaLaw.SwirlCryoVulnerable + " [gold]Vulnerable[/gold], Electro "
@@ -738,8 +738,7 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, KnightKey,
             "A Companion titled with a colon, like Lisa: Infinite Circuit. "
-          + "Playing one makes its element your current element; others do "
-          + "not.");
+          + "Playing one makes its element your current element.");
 
     // ---------------------------------------------------- Furina ----------
     //

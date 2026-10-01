@@ -620,7 +620,8 @@ GENERATOR_OWNED = {
     # plan.tsv row could source it even if one wanted to claim it.
     "ImageGen/images/mod_image.png":                        "gen_mod_image.py",
     # The co-op treasure room's hands: recolours of the base game's own arms
-    # (Silent -> Klee, Regent -> Furina, Necrobinder -> Kokomi), read out of
+    # (Silent -> Klee, Regent -> Furina, Necrobinder -> Kokomi; Varka
+    # wears the Ironclad's arm unchanged), read out of
     # SlayTheSpire2.pck. build_pck.ps1 packs them at the engine's
     # res://images/ui/hands/ path, which CharacterModel derives from the id.
     "ImageGen/images/hands/multiplayer_hand_kleemod-klee_point.png":      "gen_multiplayer_hands.py",
@@ -635,6 +636,10 @@ GENERATOR_OWNED = {
     "ImageGen/images/hands/multiplayer_hand_kleemod-kokomi_rock.png":     "gen_multiplayer_hands.py",
     "ImageGen/images/hands/multiplayer_hand_kleemod-kokomi_paper.png":    "gen_multiplayer_hands.py",
     "ImageGen/images/hands/multiplayer_hand_kleemod-kokomi_scissors.png": "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-varka_point.png":     "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-varka_rock.png":      "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-varka_paper.png":     "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-varka_scissors.png":  "gen_multiplayer_hands.py",
 }
 
 
