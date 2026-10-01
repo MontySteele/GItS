@@ -5112,3 +5112,90 @@ played after a discard (0 of 167 plays discounted). **The pilot cannot
 sequence discard into Energy or the discount**, so the sim does not read
 Electro's middle; Short Circuit and Chain Lightning are unread here, as the
 Kokomi sim marked Coral Tithe.
+
+
+## Furina rules pass, 2026-10-01
+
+The paper is `review/active/furina-rules-pass-2026-10-01.md`, every pick
+ruled. Built: sec.2 (rules 8, 5 and 4, Wriothesley), sec.3 (the old-kit
+rows) and sec.4 (Quick Cue, the tips, the trims, the brief), in both
+engines; Palais Ledger, Center of Attention and The Curtain Never Falls are
+game-side only, as they were.
+
+**The old-kit rows.** Exactly twelve shipped rows reached her offer through
+`FurinaStageRoster.DropRetiredRows` (the audit's "about 15" counted three
+already swapped): An Invitation, The Guest List, Command Performance, Singer
+of Many Waters, Commanding Gaze, Undercurrent, Stage Combat (`warmup_act`),
+Courtroom Drama, Crashing Waves, Duet, Quick Change and The Witness Stand.
+All twelve are `proto_fs_` rows now and their shipped classes are named in
+`SwapOfferedRows`, so nothing reaches the offer through the filter. Pool 78
+(23 / 35 / 20), unchanged; Skills 34, Attacks 24 (was 37 / 21).
+
+**Readings the paper left open, each the plainest one:**
+
+- *Rule 5, "a card or potion you play".* Read by caller: `FurinaStage.Raise`
+  and `RaiseLead` summon by default (every card, Bottled Applause) and every
+  trigger passes `played: false` (Thunderous Applause, Tide of Applause,
+  Season Tickets, All the World's a Stage, The People of Fontaine and the
+  co-op `RaiseLead` power). `RaiseAll` never summons: "each performer"
+  covers Curtain Water as well as Grand Deluge. Sim: only a `GAIN_CARD`
+  source summons, never `SEAT_ALL`.
+- *Pneuma.* A turn-start choice off Arkhe Alignment's Power, not a played
+  card, so it keeps "regains" and summons nobody.
+- *Rule 4.* `LEAD_REGEN` / `FurinaStageLaw.LeadRegen` are 0 in both engines
+  (the constant and the turn-start door stay for The Curtain Never Falls).
+  The Curtain's face drops "not 1": "Your front performer regains 2 Fanfare
+  at the start of each turn."
+- *Palais Ledger, "Your Spends cost 1 less Fanfare".* Per copy, floored at
+  0, read by the gate and the payment alike (`FurinaStage.PriceOf`). Only a
+  card's Spend N mode: a spend-all (Bravura, Bring the House Down, Let the
+  People Rejoice) has no price to lower, and Chevreuse's act is the
+  performer's. A price of 0 still needs someone on stage. Critics' Darling
+  deals what was paid, after the discount.
+- *Center of Attention.* The gate no longer asks it; its free Spend is
+  claimed at payment as before and still needs someone on stage.
+- *Wriothesley, "Always your front performer".* His own summon on a full
+  stage now Bows the FRONT performer, as any summon does, and he arrives in
+  front holding his Fanfare plus its remainder (`FurinaStage.RecastToFront`,
+  sim `recast_to_front`; until now the back performer Bowed). A summon while
+  he stands there Bows the performer behind him, and the seat moves that
+  would move him still do nothing: both unchanged. The Summon tip keeps "the
+  front one Bows first"; his face is the caveat.
+- *The tips.* The damage order moved from the Fanfare tip to the front
+  performer's ("Takes hits after your Block; what its Fanfare cannot hold
+  reaches you."), so the paper's empty-stage line fits the 135-character tip
+  ceiling. The Bow tip reads "A performer acts one last time, without
+  paying, as it leaves the stage or, if a card says so, stays." (the text
+  lint refuses parentheses). Spend: "...from your back performer first, then
+  forward. Offered only if your performers hold enough." The seat page's
+  refused-Spend line says what the performers hold between them.
+- *Opening Number, "the first card you played this turn".* C# counts the
+  cards she has finished playing this turn (`FurinaStageHooks.AfterCardPlayed`,
+  auto-plays included; zeroed at her turn start) and asks for 0; the sim
+  counts before the play resolves and asks for 1. The pilot treats the
+  predicate as blind. It has no `replaces:`: An Invitation is Rising
+  Applause's starter pairing, so the sim drops it (`POOL_DROPS`) and appends
+  Opening Number (`POOL_ADDS`).
+- *Endless Waltz.* Who has 5 or more is read once, before any act, so an act
+  that moves a bar does not change who acts; a resting returnee sits it out,
+  as with Tutti!. No Exhaust, no element.
+- *Leading Lady.* Reads the front bar at play, as Pneuma Refrain does.
+- *Singer of Many Waters.* "Your front performer gains 6 [9] Fanfare.
+  Exhaust." A played card's gain, so on an empty stage it summons a performer
+  holding it. Keeps its `archon` register and its art.
+- *The eight ported as they are.* Body, cost, rarity, register and upgrade
+  copied from `docs/furina-cards.yaml` and `docs/furina-upgrades.yaml`; the
+  shipped sheet's design fields (`solve`, `tempo_band`, `archetypes`,
+  `role`) are not prototype keys. Each wears its own art (`art_of:`). Stage
+  Combat's id is `proto_fs_warmup_act` (the art-proxy rule wants the id to end
+  in the art it wears), and its face prints its Block as a variable (the
+  orphan-var lint). Duet still names a Companion card.
+- *The trims.* Grand Deluge: "Deal 12 damage and apply Hydro to ALL enemies.
+  On an Elemental Reaction, each performer gains 2 Fanfare." Bravura: "Spend
+  your back performer's Fanfare." Guest of Honor: "Until your next turn, your
+  front performer takes hits on another player after their Block." Pneuma
+  Refrain: "per Fanfare" for "for each Fanfare". Stage Whisper: "Each other
+  performer gives all but 1 Fanfare to your front performer." Bring the House
+  Down: "If it empties, it Bows." after its first sentence.
+- *Art.* Opening Number, Leading Lady and Endless Waltz render the
+  placeholder (`BACKLOG.md`).

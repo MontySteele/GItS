@@ -106,8 +106,8 @@ def test_the_bow_row_is_the_plain_exit():
     # The Guest Cast (2026-09-25): and a guest's Bow does not pay. The
     # second text pass (2026-09-28) dropped the page's hit-Bow rider.
     assert ARM_KEYWORDS["Bow"] == (
-        "A performer that leaves the stage acts one last time on its way "
-        "out, without paying.")
+        "A performer acts one last time, without paying, as it leaves the "
+        "stage or, if a card says so, stays.")
 
 
 # ---------------------------------------------------------------------------

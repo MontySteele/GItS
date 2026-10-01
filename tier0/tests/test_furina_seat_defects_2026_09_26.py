@@ -212,8 +212,8 @@ def test_the_back_performer_row_says_a_lone_performer_is_both():
     # The second text pass (2026-09-28): the tip's words; the fade has its
     # own row, and a lone performer is both seats.
     assert ARM_KEYWORDS["back performer"] == (
-        "Your last performer in line. Spend pays from it. A lone performer "
-        "is both front and back.")
+        "Your last performer in line. Spend pays from it first. A lone "
+        "performer is both front and back.")
 
 
 # ---- 7. The Crystal Sphere --------------------------------------------------
@@ -416,14 +416,17 @@ def test_the_wire_hand_damage_crosses_to_the_observation():
 
 # ---- 24. Wriothesley's face says who makes room ---------------------------
 
-def test_wriothesleys_face_says_the_back_one_makes_room():
+def test_wriothesleys_face_says_he_is_always_the_front():
+    """The rules pass (2026-10-01; [USER]: "Yes on Wriothesley - it's much
+    cleaner"): one sentence replaces his exceptions."""
     import yaml
     from tier0.content import loader
     rows = yaml.safe_load((loader.DOCS_DIR / "prototype-surface.yaml")
                           .read_text(encoding="utf-8"))
     face = next(r for r in rows
                 if r["id"] == "proto_fs_guest_star_wriothesley")["description"]
-    assert "On a full stage, the back one [gold]Bow[/gold]s" in face
+    assert "Always your [gold]front performer[/gold]." in face
+    assert "back one" not in face and "holds the front" not in face
 
 
 # ---- 25. An every-N-cards counter ----------------------------------------

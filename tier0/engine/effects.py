@@ -4002,6 +4002,9 @@ PREDICATE_NAMES = frozenset({
     # THE SUPPORTING POOL (2026-09-26), Counterclaim: did an enemy's hit reach
     # the front performer's bar since the end of her last turn?
     "stage_front_hit",
+    # THE FURINA RULES PASS (2026-10-01), Opening Number: "If this is the
+    # first card you played this turn".
+    "first_card_this_turn",
     # VARKA, THE OATH REWORK (`varka_oath.PREDICATES`): "if you have a
     # current element", "if you played a Knight this turn", "if it Swirls".
     # False for anyone who is not Varka and with the switch off.
@@ -4436,6 +4439,13 @@ def _predicate(state: CombatState, name: str) -> bool:
     if name == "stage_empty":
         return furina_stage.active(state.player) \
             and not furina_stage.can_spend(state.player)
+    if name == "first_card_this_turn":
+        # Opening Number (the Furina rules pass, 2026-10-01). This engine
+        # counts a play BEFORE it resolves (`combat.play_card`, the auto-play
+        # path too), so the card asking is the first when the count is 1. The
+        # C# twin counts AFTER (`FurinaStageLedger.CardsPlayedThisTurn`), so
+        # it asks for 0; both spell "no card before this one".
+        return state.cards_played_this_turn == 1
     if name == "stage_front_hit":
         return furina_stage.active(state.player) \
             and bool(state.player.stage_front_hit)
@@ -6461,10 +6471,10 @@ def _op_stage_spend(state: CombatState, fx: dict, card: Card) -> None:
     """Brief sec.3 rule 8, the Spend mode's payment leg.
 
     THE CHOOSER HAS ALREADY DECIDED THE MODE FIRES. Every Spend face is a
-    `choose_one` whose Spend mode opens with this op, and since R276 that mode
-    is offered only when the BACK performer can pay the whole price
-    (`furina_stage.mode_offered`); a performer the payment empties exactly
-    bows. What is recorded is what was paid, which a payoff on the same card
+    `choose_one` whose Spend mode opens with this op, and since the rules
+    pass (2026-10-01) that mode is offered only when the whole stage holds the
+    price, paid from the back performer first, then forward
+    (`furina_stage.mode_offered`); every performer the payment empties bows. What is recorded is what was paid, which a payoff on the same card
     reads as `stage_spent`.
     """
     paid = furina_stage.spend(state, _amount(state, fx.get("amount", 1)))
@@ -6508,8 +6518,10 @@ def _op_stage_step_forward(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_perform_all(state: CombatState, fx: dict, card: Card) -> None:
-    """*Tutti!* (R276 batch two): every performer performs its act now."""
-    furina_stage.perform_all(state)
+    """*Tutti!* (R276 batch two): every performer performs its act now.
+    `min_fanfare` is *Endless Waltz* (the Furina rules pass, 2026-10-01):
+    "Each performer with 5 or more Fanfare acts." """
+    furina_stage.perform_all(state, int(fx.get("min_fanfare", 0)))
 
 
 def _op_stage_share_spotlight(state: CombatState, fx: dict,

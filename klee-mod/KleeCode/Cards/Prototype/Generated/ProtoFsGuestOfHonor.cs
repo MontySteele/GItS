@@ -43,14 +43,14 @@ public sealed class ProtoFsGuestOfHonor : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFrontPerformer(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_of_honor");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest of Honor"),
-        ("description", "Until your next turn, hits on another player land on their [gold]Block[/gold], then your [gold]front performer[/gold]'s [gold]Fanfare[/gold], then them."),
+        ("description", "Until your next turn, your [gold]front performer[/gold] takes hits on another player after their [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -151,11 +151,19 @@ public class FurinaStageRoundFourTests
     [Theory]
     [InlineData("Raise")]
     [InlineData("RaiseLead")]
-    [InlineData("RaiseAll")]
     public void Every_raise_verb_asks_the_empty_stage_first(string verb)
     {
         var calls = Il.Calls(Il.Method("FurinaStage", verb));
         Assert.Contains("FurinaStage.SummonForRaise", calls);
+    }
+
+    /// <summary>THE RULES PASS (2026-10-01): "each performer" has nobody to
+    /// land on, so the each-performer verb never summons.</summary>
+    [Fact]
+    public void The_each_performer_verb_never_summons()
+    {
+        var calls = Il.Calls(Il.Method("FurinaStage", "RaiseAll"));
+        Assert.DoesNotContain("FurinaStage.SummonForRaise", calls);
     }
 
     [Fact]

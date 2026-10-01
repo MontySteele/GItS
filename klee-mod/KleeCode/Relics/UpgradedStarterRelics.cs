@@ -475,8 +475,9 @@ public sealed class CurtainNeverFalls : CustomRelicModel
 
 #if PROTOTYPE_CARDS
     /// <summary>Under the Stage, the front performer's regain at the start of
-    /// her turn (rule 4's 1, upgraded), from her SECOND turn, the same first
-    /// turn as the shipped rule. The rebuild of 2026-09-27
+    /// her turn, from her SECOND turn, the same first turn as the shipped
+    /// rule. Since the rules pass (2026-10-01) rule 4 is cut and this is the
+    /// only regain ([USER]: "The Ancient relic can give it back"). The rebuild of 2026-09-27
     /// (review/active/relics-potions-klee-furina-2026-09-27.md).
     /// </summary>
     public const int LeadRegen = 2;
@@ -527,9 +528,10 @@ public sealed class CurtainNeverFalls : CustomRelicModel
             // first hand sees, and the mechanism opens at it.
             "Start each combat with [gold]Usher[/gold] in front with [blue]"
           + OpeningFanfare + "[/blue] [gold]Fanfare[/gold]. "
+          // THE RULES PASS (2026-10-01): rule 4 is cut, so this is the
+          // only regain and the face no longer prints "not 1".
           + "Your [gold]front performer[/gold] regains [blue]" + LeadRegen
-          + "[/blue] Fanfare each turn, not [blue]"
-          + Powers.FurinaStageLaw.LeadRegen + "[/blue]."
+          + "[/blue] [gold]Fanfare[/gold] at the start of each turn."
 #else
             "[gold]Center Stage[/gold] and [gold]Guest Cast[/gold] are always "
           + "active. You always count as having moved the "

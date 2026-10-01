@@ -629,25 +629,27 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # review/records/furina-text-pass-2026-09-25.md): `Raise` and
             # `Rotate` retired, the lead renamed the FRONT performer, and
             # every Stage tip reworded in [USER]'s words.
-            "Pay Fanfare from your [gold]back performer[/gold]. Offered only ",
-            "if it can pay in full.\");",
-            # The second text pass (2026-09-28,
-            # review/records/furina-text-pass-2026-09-28.md).
-            "A performer's health. Hits take your [gold]Block[/gold], then ",
-            "your front performer's, then you. Gaining it on an empty stage ",
-            "summons a performer.",
-            # Draft 3 (2026-09-25): the Bow is the performer's act once more.
-            "A performer that leaves the stage acts one last time on its way ",
-            # The Guest Cast (2026-09-25): a guest's Bow does not pay.
-            "out, without paying.\");",
-            "Takes hits first. Regains ",
-            " [gold]Fanfare[/gold] at the start of your turn.",
+            # THE RULES PASS (2026-10-01): back first, then forward.
+            "Pay Fanfare from your [gold]back performer[/gold] first, then ",
+            "forward. Offered only if your performers hold enough.\");",
+            # The rules pass (2026-10-01): only what you play summons, in the
+            # paper's line; the damage order moved to the front's tip.
+            "A performer's health. If no one is on stage, a card that gives ",
+            "Fanfare summons a random performer holding it.\");",
+            # Draft 3 (2026-09-25): the Bow is the performer's act once more;
+            # the Guest Cast: a guest's Bow does not pay; the rules pass: the
+            # Bow covers Grand Finale's stay.
+            "A performer acts one last time, without paying, as it leaves ",
+            "the stage or, if a card says so, stays.\");",
+            # The rules pass (2026-10-01): rule 4 cut, the damage order here.
+            "Takes hits after your [gold]Block[/gold]; what its ",
+            "[gold]Fanfare[/gold] cannot hold reaches you.\");",
             # Round four's empty-stage summon is the Fanfare tip's (above).
             # The second text pass (2026-09-28): the back performer is the
             # last in line and pays Spends; the fade has its own tip. The
             # fade pass (2026-09-29): a quarter of every performer's bar.
-            "Your last performer in line. [gold]Spend[/gold] pays from it. ",
-            "A lone performer is both front and back.\");",
+            "Your last performer in line. [gold]Spend[/gold] pays from it ",
+            "first. A lone performer is both front and back.\");",
             "At the end of your turn, each performer loses a quarter of its ",
             "[gold]Fanfare[/gold], rounded down.\");",
     ):
@@ -680,7 +682,8 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     # the C# suite pins the two together.
     assert "FurinaStageLaw.BowUsherFanfare" not in tips
     assert "FurinaStageLaw.BowCrabalettaDamage" not in tips
-    assert "FurinaStageLaw.LeadRegen" in tips
+    # The rules pass (2026-10-01) cut rule 4: no tip quotes a regain.
+    assert "FurinaStageLaw.LeadRegen" not in tips
     assert "FurinaStageLaw.FadeThreshold" not in tips
     assert "FadeDivisor" in tips
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
@@ -1386,9 +1389,10 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     from understudy import blindplay_notes
     # The second text pass (2026-09-28): the tip's words and nothing after
     # them. The page's hit-Bow sentence left: a hit's Bow is learned in play.
+    # The rules pass (2026-10-01): the Bow tip covers Grand Finale's stay.
     assert rows["Bow"] == (
-        "A performer that leaves the stage acts one last time on its way "
-        "out, without paying.")
+        "A performer acts one last time, without paying, as it leaves the "
+        "stage or, if a card says so, stays.")
     assert not hasattr(blindplay_notes, "STAGE_BOW_ON_HIT")
 
 

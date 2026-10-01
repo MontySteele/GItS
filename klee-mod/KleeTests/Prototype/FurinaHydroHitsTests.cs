@@ -174,7 +174,8 @@ public class FurinaHydroHitsTests
     {
         var source = Generated("ProtoFsQuickCue");
         Assert.Contains(
-            "new FoldedDamageVar(\"BranchDamage\", 14m, ValueProp.Move, carries: Element.Hydro)",
+            // The rules pass (2026-10-01): 11 (was 14).
+            "new FoldedDamageVar(\"BranchDamage\", 11m, ValueProp.Move, carries: Element.Hydro)",
             source);
         Assert.Contains(
             "new FoldedDamageVar(\"PlainDamage\", 3m, ValueProp.Move)", source);

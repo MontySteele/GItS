@@ -466,6 +466,7 @@ UNMIRRORED: dict[str, str] = {
     "CloverCharm.Block": _ARM_ITEMS_REASON,
     "CurtainCallBouquet.BowActs": _ARM_ITEMS_REASON,
     "CurtainNeverFalls.LeadRegen": _ARM_ITEMS_REASON,
+    "PalaisLedger.Discount": _ARM_ITEMS_REASON,
     "CurtainNeverFalls.OpeningFanfare": _ARM_ITEMS_REASON,
     "CurtainWater.Fanfare": _ARM_ITEMS_REASON,
     "DodocoArmy.MineSize": _ARM_ITEMS_REASON,

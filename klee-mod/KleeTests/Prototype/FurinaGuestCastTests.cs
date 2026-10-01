@@ -216,25 +216,30 @@ public class FurinaGuestCastTests
     }
 
     [Fact]
-    public void A_front_guest_on_a_full_stage_recasts_the_back()
+    public void A_front_guest_on_a_full_stage_recasts_the_front()
     {
+        // THE RULES PASS (2026-10-01): "Always your front performer", and
+        // every summon works as normal around him -- so on a full stage the
+        // FRONT performer Bows for him, as for any summon.
         using var _ = new Arm();
         var (_, stage) = Stage(("usher", 5), ("chevalmarin", 2),
                                ("crabaletta", 4));
-        var leaver = stage.BowFromBack()!;
-        Assert.Equal(StagePerformer.Crabaletta, leaver.Who);
-        Assert.Equal(4, leaver.Fanfare);
+        Assert.Equal(0, stage.LeaverIndex);
+        var leaver = stage.BowFromFront()!;
+        Assert.Equal(StagePerformer.Usher, leaver.Who);
+        Assert.Equal(5, leaver.Fanfare);
         Assert.True(stage.ArriveAtFront(StagePerformer.Wriothesley,
                                         leaver.Fanfare + 8));
-        Assert.Equal(new[] { StagePerformer.Wriothesley, StagePerformer.Usher,
-                             StagePerformer.Chevalmarin },
+        Assert.Equal(new[] { StagePerformer.Wriothesley,
+                             StagePerformer.Chevalmarin,
+                             StagePerformer.Crabaletta },
                      stage.Seats.Select(s => s.Who).ToArray());
-        Assert.Equal(new[] { 12, 5, 2 }, Bars(stage));
+        Assert.Equal(new[] { 13, 2, 4 }, Bars(stage));
         // The card's verb: a front guest on a full stage takes that door.
         var calls = Il.Calls(Il.Method("FurinaStage", "GuestStar"));
-        Assert.Contains("FurinaStage.RecastFromBack", calls);
-        var recast = Il.Calls(Il.Method("FurinaStage", "RecastFromBack"));
-        Assert.Contains("FurinaStageLedger.BowFromBack", recast);
+        Assert.Contains("FurinaStage.RecastToFront", calls);
+        var recast = Il.Calls(Il.Method("FurinaStage", "RecastToFront"));
+        Assert.Contains("FurinaStageLedger.BowFromFront", recast);
         Assert.Contains("FurinaStage.Bow", recast);
         Assert.Contains("FurinaStageLedger.ArriveAtFront", recast);
     }
@@ -245,10 +250,10 @@ public class FurinaGuestCastTests
         var face = new global::KleeMod.Cards.Prototype.Generated
             .ProtoFsGuestStarWriothesley().Localization!
             .Single(l => l.Item1 == "description").Item2;
-        // The second text pass (2026-09-28): "Summon". 2026-09-29: he holds
-        // the front while on stage, and the face says so.
+        // The second text pass (2026-09-28): "Summon". The rules pass
+        // (2026-10-01): one sentence replaces his exceptions.
         Assert.StartsWith("Summon Wriothesley with ", face);
-        Assert.Contains("He holds the front while on stage.", face);
+        Assert.EndsWith("Always your [gold]front performer[/gold].", face);
         // The generated play passes the front seat (codegen's `seat: front`).
         var src = RepoFile(Path.Combine("KleeCode", "Cards", "Prototype",
             "Generated", "ProtoFsGuestStarWriothesley.cs"));
@@ -717,7 +722,10 @@ public class FurinaGuestCastTests
           + "makes it [gold]Bow[/gold], then return with the new "
           + "[gold]Fanfare[/gold] added.",
             Printed("ForGuestStar"));
-        Assert.Contains("on its way out, without paying.", Printed("ForBow"));
+        // The rules pass (2026-10-01): the Bow covers Grand Finale's stay.
+        Assert.Contains("A performer acts one last time, without paying, as "
+                        + "it leaves the stage or, if a card says so, stays.",
+                        Printed("ForBow"));
         foreach (var guest in new[] { "Neuvillette", "Clorinde", "Navia",
                                       "Chevreuse", "Wriothesley", "Sigewinne",
                                       "Charlotte", "Lynette" })

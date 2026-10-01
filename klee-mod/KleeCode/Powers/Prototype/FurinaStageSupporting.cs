@@ -242,7 +242,8 @@ public static partial class FurinaStage
     /// your back performer gains 2 Fanfare." Called from
     /// <c>ReactionEffects.Resolve</c>, the one site the mod resolves a
     /// reaction, with the reaction's dealer -- Furina for her cards and her
-    /// performers' acts. A Raise, so on an empty stage it summons (rule 5).
+    /// performers' acts. A trigger's gain, so on an empty stage it does
+    /// nothing (rule 5, the rules pass, 2026-10-01).
     /// Sim twin: <c>furina_stage.note_reaction</c>.
     /// </summary>
     internal static async Task OnReaction(PlayerChoiceContext choiceContext,
@@ -252,7 +253,7 @@ public static partial class FurinaStage
         var amount = (int)dealer!.Powers.OfType<TideOfApplausePower>()
             .Sum(p => p.Amount);
         if (amount <= 0) return;
-        await Raise(dealer, amount);
+        await Raise(dealer, amount, played: false);
     }
 
     /// <summary>
@@ -261,12 +262,11 @@ public static partial class FurinaStage
     /// lead's 1 went to the performer that led last turn:
     ///
     ///   1. <i>One-Woman Show</i>, first, on the stage the turn found: if no
-    ///      one is on stage, gain 1 Energy and draw 1 card per copy -- asked
-    ///      before Season Tickets, whose Raise on an empty stage summons;
+    ///      one is on stage, gain 1 Energy and draw 1 card per copy;
     ///   2. <i>Revolving Stage</i>: the back performer moves to the front,
     ///      once per copy;
-    ///   3. <i>Season Tickets</i>: the back performer gains N (summons on an
-    ///      empty stage);
+    ///   3. <i>Season Tickets</i>: the back performer gains N (nothing on
+    ///      an empty stage: a Power's gain, rule 5);
     ///   4. <i>Regina of All Waters</i>: Hydro on ALL enemies, reactions and
     ///      all.
     ///
@@ -298,7 +298,8 @@ public static partial class FurinaStage
         {
             using (ledger.CausedBy(SeasonTicketsTitle))
             {
-                await Raise(furina, tickets);
+                // A Power's gain: nothing on an empty stage (rule 5).
+                await Raise(furina, tickets, played: false);
             }
         }
         if (furina.Powers.OfType<ReginaOfAllWatersPower>().Any())

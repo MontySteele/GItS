@@ -37,7 +37,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 (66 Stage cards) |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (expansion built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -166,7 +166,20 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   twelve old-kit cards stay (pick 3a). Her second Ancient, Center of
   Attention, is game-side. The pool is 78 (23 / 35 / 20). Klee's second
   Ancient, Alice's Masterpiece, landed in the same build. Provenance note,
-  "Pool completion, 2026-10-01".
+  "Pool completion, 2026-10-01". **The rules pass (2026-10-01, ruled):**
+  paper `review/active/furina-rules-pass-2026-10-01.md`, built in both
+  engines. A Spend pays the back performer first, then forward, refused only
+  when the whole stage holds less ([USER]: "Agreed, spending start
+  back-forwards"); only a card or potion she plays summons on an empty stage;
+  the front no longer regains 1 (The Curtain Never Falls keeps its 2);
+  Wriothesley is "Always your front performer". Palais Ledger is "Your Spends
+  cost 1 less Fanfare"; Center of Attention lost its short-bar clause. Her
+  twelve old-kit rows are prototype rows (legacy cleanup pick 3): Singer of
+  Many Waters gives the front 6 Fanfare, Opening Number, Leading Lady and
+  Endless Waltz replace the three Companion feeders, eight are ported as
+  they are. The pool stays 78 (23 / 35 / 20), every row a `proto_fs_` row.
+  Quick Cue's Spend deals 11; five faces trimmed; brief §3, §6, §12 and §19.
+  Provenance note, "Furina rules pass, 2026-10-01".
 
 - **Varka: the Oath rework is built (Prototype, 2026-09-29).** Paper
   `review/active/varka-paper-kit-2026-09-28.md`, every pick ruled ([USER]:

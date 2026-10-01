@@ -120,11 +120,8 @@ def test_the_eight_rows_are_the_build_tables():
             rarity, cost, "skill")
         assert row["register"] == "salon"
         # The guest seat round (2026-09-25): Wriothesley joins at the front.
-        # 2026-09-29, [USER]: "Can we pin him to the front of the Stage while
-        # he's present?" His face says he holds it, and who makes room on a
-        # full stage.
-        room = (" He holds the front while on stage. On a full stage, the "
-                "back one [gold]Bow[/gold]s for him." if member in FRONT
+        # The rules pass (2026-10-01): "Always your front performer."
+        room = (" Always your [gold]front performer[/gold]." if member in FRONT
                 else "")
         assert row["description"] == (
             f"Summon {name} with {n} [gold]Fanfare[/gold]." + room)
@@ -197,19 +194,20 @@ def test_wriothesley_joins_at_the_front_and_takes_the_next_hit(arm):
     assert st.enemies[0].hp == 100 - (4 + 2 * 5)
 
 
-def test_wriothesley_on_a_full_stage_recasts_the_back(arm):
-    """The recast rule, the leaver at the other end: the BACK performer Bows
-    and leaves, and he arrives at the front holding 8 plus its Fanfare."""
+def test_wriothesley_on_a_full_stage_recasts_the_front(arm):
+    """The rules pass (2026-10-01): "Always your front performer", and every
+    summon works as normal around him. So on a full stage the FRONT performer
+    Bows and leaves, as for any summon, and he arrives at the front holding 8
+    plus its Fanfare."""
     st = _state([["usher", 5], ["chevalmarin", 2], ["crabaletta", 4]],
                 enemies=[_enemy(hp=100)])
     effects.resolve_card(st, _guest_front("wriothesley", 8))
-    assert st.player.stage == [["wriothesley", 8 + 4], ["usher", 5],
-                               ["chevalmarin", 2]]
-    # Crabaletta's Bow is her act.
-    assert st.enemies[0].hp == 100 - FS.ACT_CRABALETTA_DAMAGE
+    assert st.player.stage == [["wriothesley", 8 + 5], ["chevalmarin", 2],
+                               ["crabaletta", 4]]
+    # Usher's Bow is his act.
+    assert st.player.block == FS.ACT_USHER_BLOCK
     leave = [e for e in st.log if e["event"] == "stage_leave"]
-    assert (leave[-1]["member"], leave[-1]["reason"]) == (
-        "crabaletta", "recast")
+    assert (leave[-1]["member"], leave[-1]["reason"]) == ("usher", "recast")
 
 
 def test_a_repeat_wriothesley_returns_to_his_own_seat(arm):
@@ -722,8 +720,8 @@ def test_the_glossary_has_the_guest_star_and_every_guest_word_for_word():
         "You can have one of each on stage. Summoning one already there "
         "makes it Bow, then return with the new Fanfare added.")
     assert ARM_KEYWORDS["Bow"] == (
-        "A performer that leaves the stage acts one last time on its way "
-        "out, without paying.")
+        "A performer acts one last time, without paying, as it leaves the "
+        "stage or, if a card says so, stays.")
     assert ARM_KEYWORDS["Neuvillette"] == (
         "End of your turn: pay 3 of his Fanfare to deal 8 Hydro damage to "
         "ALL enemies.")

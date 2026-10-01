@@ -275,6 +275,12 @@ SCORABLE_PREDICATE_PREFIXES = (
 ) + _ENGINE_LIVE_PREFIXES
 
 BLIND_PREDICATES = frozenset({
+    # THE FURINA RULES PASS (2026-10-01), Opening Number: "If this is the
+    # first card you played this turn". The engine counts the play before it
+    # resolves (`cards_played_this_turn == 1`), so a read at score time,
+    # before the play, would answer the opposite; no `proto_fs_` row reaches
+    # a published world, so blind moves no measured number.
+    "first_card_this_turn",
     # Both read a fact produced BY this card's own earlier ops, mid-
     # resolution. Nothing at score time can answer them without simulating
     # the card, which the pilot deliberately does not do.

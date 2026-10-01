@@ -114,8 +114,8 @@ def test_the_back_performer_row_says_hits_never_reach_it():
     # The second text pass (2026-09-28): the tip's words; the fade has its
     # own row, and a lone performer is both seats.
     assert ARM_KEYWORDS["back performer"] == (
-        "Your last performer in line. Spend pays from it. A lone performer "
-        "is both front and back.")
+        "Your last performer in line. Spend pays from it first. A lone "
+        "performer is both front and back.")
     for row in ARM_KEYWORDS.values():
         assert "reach it last" not in row
 

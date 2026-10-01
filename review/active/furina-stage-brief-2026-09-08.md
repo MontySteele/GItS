@@ -58,7 +58,8 @@ performers with their own bars, and Fanfare is that bar.**
    is empty at the start of every fight except for rule 2.
 2. **Combat opens with Usher in the front seat at 3 Fanfare**, granted by
    her starting relic. Defect's free Lightning orb, as a body. The first
-   hand sees 3: regen (rule 4) begins on her second turn.
+   hand sees 3. (Since the rules pass, 2026-10-01, nothing regains it but The
+   Curtain Never Falls; rule 4 is cut.)
 3. **A summon card fills the back-most empty seat** with that performer at
    1 Fanfare. **A summon on a full stage works like a Defect orb**
    (2026-09-25; [USER]: "treat this like a Defect orb summon? the stage
@@ -85,25 +86,42 @@ performers with their own bars, and Fanfare is that bar.**
    nothing"): the others shift back one, and on a full stage the recast's
    leaver is the back performer instead, which Bows and leaves while he
    arrives at the front holding his 8 plus its remaining Fanfare. A second
-   copy still Bows him and returns him to his own seat. Pools are
+   copy still Bows him and returns him to his own seat. **Wriothesley is
+   "Always your front performer"** (the rules pass, 2026-10-01; [USER]: "Yes
+   on Wriothesley - it's much cleaner"): that one sentence on his face
+   replaces his exceptions. Every summon and seat move works as normal around
+   him, and he is never moved from the front: his own summon on a full stage
+   Bows the front performer, as any summon does, and he takes the front; a
+   summon while he stands there Bows the performer behind him. Pools are
    never lost. A newcomer performs with
    the others at the end of that turn, never on arrival (round one,
    `EB-738`: both engines had read this sentence as an act on play).
-4. **The lead performer regains 1 Fanfare at the start of Furina's turn**,
-   from her second turn on. Only the lead. Bars have no cap.
+4. ~~**The lead performer regains 1 Fanfare at the start of Furina's
+   turn**~~. **Cut by the rules pass (2026-10-01);** [USER]: "Agreed, remove
+   the freebie. The Ancient relic can give it back, as planned." The front
+   regains nothing; The Curtain Never Falls ("Your front performer regains 2
+   Fanfare at the start of each turn", from her second turn) gives the only
+   regain. The fade (rule 12) is no longer cancelled on the front. Bars have
+   no cap.
 5. **Refill lands on the back-most performer.** "Raise 5 Fanfare on the
    back performer." With one performer on stage, that is the lead. The
    front performer is the shield and the back performer is the bank
    (R276): Raise fills the bank, and Spend and the Fanfare readers draw
    from it (rule 8). A face may name another seat (the lead, every
-   performer); a bare Raise means the back performer. **Raise on an empty
-   stage summons** (round four): when a Raise finds no performer on stage,
-   a random performer arrives holding the Raise amount, not the usual 1,
-   and nothing else is raised. This holds for every Raise, whichever seat
-   it names, and for the Raise powers (the Ancient's turn-start Raise,
-   Thunderous Applause), so Gala Dinner on an empty stage summons one
-   performer at 3 (4 upgraded). Arkhe Alignment's Pneuma is a regain, not a
-   Raise, and summons nobody.
+   performer); a bare Raise means the back performer. **Only what you play
+   summons on an empty stage** (the rules pass, 2026-10-01; [USER]: "This
+   makes sense - agreed on your split"): a card or potion you play that gives
+   Fanfare, on an empty stage, summons a random performer holding it, not the
+   usual 1, and nothing else is raised (Rising Applause, Cheered On, Warm
+   Reception, Hold Your Places, Singer of Many Waters, Bottled Applause). A
+   gain from a Power, a relic or a reaction trigger does nothing on an empty
+   stage (Season Tickets, Thunderous Applause, Tide of Applause, the
+   Ancient's turn-start Raise, the co-op powers), and a gain naming "each
+   performer" has nobody to land on (Grand Deluge, Curtain Water). The
+   Fanfare tip: "If no one is on stage, a card that gives Fanfare summons a
+   random performer holding it." (Round four had every Raise summon.)
+   Arkhe Alignment's Pneuma is a turn-start choice, not a played card, so it
+   keeps "regains" and summons nobody.
 6. **Damage order, per attack: Furina's Block, then the lead performer's
    Fanfare, then Furina.** The lead absorbs what one attack puts through
    her Block, up to its bar; the rest reaches Furina. It never runs on to
@@ -117,10 +135,15 @@ performers with their own bars, and Fanfare is that bar.**
 8. **Spend N** is a choice on her cards, made when the card is played:
    "Deal 7" or "Spend 3: deal 13 instead" (round two, `EB-746`: both engines
    had fired the rider whenever a lead stood, and four seats asked for the
-   verb). It pays N from the back performer's bar, in full (R276 picks 1
-   and 2). If the back performer has less than N, or no performer is on
-   stage, the Spend mode cannot be chosen and the card plays its base mode.
-   A performer the Spend empties exactly leaves with a bow.
+   verb). **It pays from the back performer first, then forward** (the
+   rules pass, 2026-10-01; [USER]: "Agreed, spending start back-forwards";
+   R276 had the back pay alone and in full). If the whole stage holds less
+   than N, or no performer is on stage, the Spend mode cannot be chosen and
+   the card plays its base mode. Every performer the Spend empties leaves
+   with a bow, back to front. The bank still empties first. Palais Ledger,
+   which was this rule, now reads "Your Spends cost 1 less Fanfare"; Center
+   of Attention's first Spend each turn is free and no longer chosen on a
+   short bar.
 9. **The Bow is the performer's act, once more** (2026-09-25; [USER] ruled the Stage review's pick 1: one effect per performer, since Chevalmarin's Bow was "strictly worse than the end-of-turn effect"). A performer that Bows acts one last time as it leaves. Ousia and Pneuma double it like any act; Full House does not repeat it.
 10. **Each performer performs at the end of Furina's turn**, from any
     seat, a flat act that does not read its bar: Usher gives Furina 3 Block, Chevalmarin deals 2 to every enemy, Crabaletta deals 5 damage to a random enemy. No act applies Hydro (2026-09-25; [USER]: "we may need to do the same here, removing the Hydro application from the end-of-turn effects on Chevalmarin and Crabaletta", as Klee's Pyro became a payoff). Hydro comes from cards: Tidal Flourish and Quick Cue apply it in their Spend modes, Bubble Aria and Grand Deluge apply it too, and Chevalmarin's card applies it on play. On the four Attacks the Hydro rides the hit, so a reaction multiplies that hit (Bubble Aria: its first hit), as Klee's Pyro does (2026-09-26 seat round: the Hydro rides the hit). Scaling on Fanfare lives in payoff cards
@@ -152,9 +175,11 @@ that the pool has other claims on it and a short life.
   performer on stage it is both, so a lone Usher's bar is shield and bank
   at once. Scene Change moves a fat bank forward as a shield, or a hurt
   lead back to be refilled.
-- **Spend pays the full price.** A Spend needs its whole price on the back
-  performer's bar; a bar short of it cannot choose the Spend mode. A
-  performer the Spend empties exactly takes a bow. So there are two decks,
+- **Spend pays the full price, the bank first.** A Spend needs its whole
+  price on the stage; the back performer pays first, then the one in front
+  of it (the rules pass, 2026-10-01; R276 asked the back alone). A stage
+  short of it cannot choose the Spend mode. Every performer the Spend
+  empties takes a bow. So there are two decks,
   and neither is the approved one:
   - **Preserve.** Keep the lead alive behind Block, Refill the bank, cash
     big with Spend, the readers and the Rare.
@@ -212,8 +237,10 @@ She is weak to a big single hit on a turn her Block is short: it kills the
 lead and lands on her, and she has no Restore. She is weak in a fight she
 enters with a thin deck of summons, because an empty stage makes every
 Spend card a Strike. Her reserve is thin until Refill finds it: a newcomer
-on an empty seat arrives at 1, performs at once, and absorbs nothing until
-it is the lead. She survives anyway because Defend protects the cast and
+on an empty seat arrives at 1, acts at the end of the turn with the others
+(rule 3, `EB-738`), and absorbs nothing until it is the lead. Since the
+rules pass (2026-10-01) only a card or potion she plays refills an empty
+stage, and nothing regains the front but The Curtain Never Falls. She survives anyway because Defend protects the cast and
 the cast protects her, so a plain Block deck keeps the show alive.
 
 ## 7. Fight one: Nibbit, turn by turn
@@ -380,7 +407,8 @@ everywhere, "act" is the one verb for what performers do, and a Spend card's
 face drops "Choose one:".
 
 Seventeen cards, enough to play Preserve and Expend against each other.
-Every `Spend` pays its full price from the back performer (R276); Fanfare a
+Every `Spend` pays its full price, from the back performer first, then
+forward (the rules pass, 2026-10-01; R276 had the back pay alone); Fanfare a
 card gives lands on the back performer unless the face names another.
 Names are provisional.
 
@@ -447,7 +475,7 @@ values; names are provisional. Upgrades in brackets.
 | Between Acts | 1 | Skill | Gain 5 Block. If no one is on stage, draw 2 cards. [8 Block] |
 | Ensemble Piece | 1 | Attack | Deal 5 damage for each performer on stage. [7 each] (2026-09-29 audit pass, §17: was 4, 5 upgraded.) |
 | Hold Your Places | 1 | Skill | Gain 5 Block. Your front performer gains 2 Fanfare. [7 Block, gains 3] |
-| Quick Cue | 0 | Attack | Deal 3 damage. Spend 2: deal 8 and apply Hydro instead. [4 / 10] (2026-09-25, draft 3.) (2026-09-29 fade pass, §18: Spend 3 for 14 [4 / 16]; §16 had made it Spend 3 for 11 [4 / 12].) |
+| Quick Cue | 0 | Attack | Deal 3 damage. Spend 3: deal 11 and apply Hydro instead. [4 / 13] (2026-09-25, draft 3: Spend 2 for 8.) (§16 made it Spend 3 for 11 [4 / 12]; the 2026-09-29 fade pass, §18, 14 [4 / 16]; the rules pass, 2026-10-01, §19: 11 [4 / 13], since at 0 cost it beat Curtain Rise's Spend.) |
 | Step Forward | 0 | Skill | Move your back performer to the front. Gain 3 Block. [5 Block] |
 
 **Uncommons (seven)**
@@ -457,7 +485,7 @@ values; names are provisional. Upgrades in brackets.
 | ~~Gala Dinner~~ | 1 | Skill | Each performer gains 2 Fanfare. [gains 3] (2026-09-28 balance pass: was 3, 4 upgraded.) (2026-09-29: out of the pool, §17.) |
 | Double Casting | 1 | Skill | Summon 2 random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Tutti! | 2 | Skill | All your performers act now. [cost 1] (Round four: was 2, 1 upgraded; round four's 1 and 0 undone in the 2026-09-26 balance review.) |
-| Bravura | 1 | Attack | Spend all of your back performer's Fanfare. Deal 5 damage, plus 4 per point. [plus 5 per point] (2026-09-29 fade pass, §18: was plus 3, 4 upgraded.) (2026-09-29 Bravura fix, §16: was 3 per point, no base, 4 upgraded.) |
+| Bravura | 1 | Attack | Spend your back performer's Fanfare. Deal 5 damage, plus 4 per point. (The rules pass, 2026-10-01: face trimmed.) [plus 5 per point] (2026-09-29 fade pass, §18: was plus 3, 4 upgraded.) (2026-09-29 Bravura fix, §16: was 3 per point, no base, 4 upgraded.) |
 | Full House | 3 | Power | If all three seats are filled at the end of your turn, your performers act twice. [cost 2] (2026-09-26 balance review: was 2, 1 upgraded.) |
 | Thunderous Applause | 1 | Power | Whenever a performer Bows, draw 1 card and your back performer gains 1 Fanfare. [gains 2] (2026-09-28 balance pass: was 2, 3 upgraded; the draw is unchanged.) |
 | ~~A Rapt Audience~~ | 1 | Power | Whenever an enemy hits your front performer, your back performer gains 2 Fanfare. Needs 2 performers. [gains 3] (2026-09-26 balance review: was half the Fanfare lost, all of it upgraded. Copies add; a hit its Block fully absorbs does not count.) (2026-09-29: out of the pool, §17.) |
@@ -467,7 +495,7 @@ values; names are provisional. Upgrades in brackets.
 | card | cost | type | text |
 |---|---|---|---|
 | Arkhe Alignment | 2 | Power | At the start of your turn, choose Ousia or Pneuma. (The Ousia and Pneuma tips carry the two modes: acts deal double damage; or acts give double Block and your front performer gains 2 Fanfare.) [cost 1] |
-| A Five-Century Act | 2 | Power | The first time each turn a performer Bows and leaves, it returns at the back with 1 Fanfare if a seat is free. [cost 1] (2026-09-27, once a turn however many copies; [USER]: "For the furina Fix items - I like your default.") (2026-09-26 seat round: two seats expected a performer that Bowed to make room on a full stage to return; the rule stays, since there is no free seat, and the face now says so.) |
+| A Five-Century Act | 3 | Power | The first time each turn a performer Bows and leaves, it returns at the back with 1 Fanfare if a seat is free. [returns with 3] (2026-09-30 power cost sweep: was 2, cost 1 upgraded.) (2026-09-27, once a turn however many copies; [USER]: "For the furina Fix items - I like your default.") (2026-09-26 seat round: two seats expected a performer that Bowed to make room on a full stage to return; the rule stays, since there is no free seat, and the face now says so.) |
 
 How the edges resolve: Improvised Number and Between Acts check the stage
 when played. Step Forward moves the back performer to the front and shifts
@@ -476,9 +504,9 @@ the back performer exactly, so it always bows; on an empty stage it deals its ba
 Double Casting with one open seat summons one. Full House: each performer's
 act resolves twice, and each further copy adds one more act. Thunderous
 Applause gives its Fanfare after the bowing performer has left, so on an
-empty stage it summons a random performer holding the amount (round four), and the
-draw still happens. Let the People Rejoice's performers return to empty seats
-only, so one that finds none (an applause summon or Usher's Bow took it) does not return. Since the trio can be cloned (2026-09-25) the no-duplicate rule applies to guests only: a guest that a summon already brought back does not return a second time. A Rapt Audience does nothing while one
+empty stage it lands on nobody (the rules pass, 2026-10-01; round four had it
+summon), and the draw still happens. Let the People Rejoice's performers return to empty seats
+only, so one that finds none does not return. Since the trio can be cloned (2026-09-25) the no-duplicate rule applies to guests only: a guest that a summon already brought back does not return a second time. A Rapt Audience does nothing while one
 performer is both front and back. Arkhe Alignment's "double" multiplies the
 act's printed number (Usher 6 Block, Chevalmarin 4 to every enemy, Crabaletta
 10). One question a turn however many copies are in play: copies add (two
@@ -707,3 +735,39 @@ table): Wriothesley holds the front while he is on the stage (no seat move
 takes it from him; a full-stage summon Bows the performer behind him
 instead); Sigewinne is the medic, free: "Your front performer regains half
 the Fanfare hits took from it since her last act, at least 2."
+
+## 19. The rules pass (2026-10-01)
+
+Paper `review/active/furina-rules-pass-2026-10-01.md`, all picks ruled
+([USER], on the check-in: "she finally has a good design to stand around, but
+let's do a similar audit (rules, card pool, lore) to look for what we can
+improve upon"). Built in both engines.
+
+**Rules (§3 above).** Rule 8: a Spend pays the back performer first, then
+forward, refused only when the whole stage holds less. Rule 5: only a card or
+potion you play summons on an empty stage. Rule 4 is cut; The Curtain Never
+Falls keeps its regain of 2. Wriothesley is "Always your front performer".
+Palais Ledger now reads "Your Spends cost 1 less Fanfare"; Center of
+Attention reads "The first Spend you choose each turn takes no Fanfare."
+
+**The old-kit cards.** Her twelve surviving old-kit rows are prototype rows
+now. Singer of Many Waters: "Your front performer gains 6 [9] Fanfare.
+Exhaust." Three Attacks replace the Companion feeders: Opening Number (Common,
+1: deal 9 [12]; if it is the first card you played this turn, your back
+performer gains 2 Fanfare), Leading Lady (Uncommon, 1: deal 6 [9], plus 1 for
+each Fanfare on your front performer) and Endless Waltz (Rare, 2: deal 14
+[18] to ALL; each performer with 5 or more Fanfare acts). Commanding Gaze,
+Undercurrent, Stage Combat, Courtroom Drama, Crashing Waves, Duet, Quick
+Change and The Witness Stand are ported as they are. The pool stays 78.
+
+**Text.** Quick Cue's Spend deals 11 [13]. The Bow tip covers Grand Finale
+("as it leaves the stage or, if a card says so, stays"); Bring the House Down
+adds "If it empties, it Bows."; Grand Deluge, Bravura, Guest of Honor, Pneuma
+Refrain and Stage Whisper are trimmed. The damage order moved from the
+Fanfare tip to the front performer's ("Takes hits after your Block; what its
+Fanfare cannot hold reaches you."), so the Fanfare tip carries the empty-stage
+line within the tip ceiling.
+
+Row provenance and the builder's readings:
+`docs/notes/prototype-surface-provenance.md`, "Furina rules pass,
+2026-10-01".

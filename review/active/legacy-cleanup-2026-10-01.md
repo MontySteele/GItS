@@ -45,7 +45,8 @@ and about 390 Python arm-flag reads.
    `_ARM_FLAGS` residue guard and calibration bands retired (pick 5).
 4. **C# pools re-founded:** the `proto_*` rows become each pool's
    `GenerateAllCards`; Furina's survivors and the Fontaine companions ported
-   (picks 3 and 4); `SwapOfferedRows`, `DropRetiredRows` and the off-pool swap
+   (picks 3 and 4; Furina's twelve were ported by the Furina rules pass,
+   2026-10-01); `SwapOfferedRows`, `DropRetiredRows` and the off-pool swap
    deleted. Verify with a pool-count pin and one deploy plus a seat smoke run.
 5. **The big delete:** shipped card folders, sheets, `Cards/Retired`, the
    retired systems, the `Enabled` branches and `#if`s, `ShippedKits` and its

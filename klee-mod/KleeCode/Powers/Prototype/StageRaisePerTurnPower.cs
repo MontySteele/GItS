@@ -17,8 +17,8 @@ namespace KleeMod.Powers;
 /// an empty Ancient cell ends the run at the act-two door), so it gets the
 /// Stage's own version of the same idea: at the start of her turn, Raise
 /// <see cref="PowerModel.Amount"/> Fanfare on the BACK performer (rule 5 --
-/// the bank; alone on stage, the lead). On an empty stage the Raise summons a
-/// random performer holding the amount (round four).
+/// the bank; alone on stage, the lead). On an empty stage it does nothing:
+/// only what you play summons (rule 5, the rules pass, 2026-10-01).
 ///
 /// AFTER THE TURN START, beside the lead's regen (<c>FurinaStageHooks</c>):
 /// both are "at the start of your turn" moves on the bars, and neither reads
@@ -44,13 +44,13 @@ public sealed class StageRaisePerTurnPower : PowerModel, ILocalizationProvider
     {
         if (Owner == null || player?.Creature != Owner) return;
         if (!FurinaStage.LiveFor(Owner)) return;
-        // Round four: on an empty stage this Raise summons a random performer
-        // holding the amount, as every Raise does. 2026-09-26: the log names
-        // the card behind it.
+        // A Power's gain: on an empty stage it does nothing (rule 5, the
+        // rules pass, 2026-10-01; round four had it summon). 2026-09-26: the
+        // log names the card behind it.
         using (FurinaStageLedger.For(Owner)
                    .CausedBy(FurinaStage.AllTheWorldsAStageTitle))
         {
-            await FurinaStage.Raise(Owner, (int)Amount);
+            await FurinaStage.Raise(Owner, (int)Amount, played: false);
         }
     }
 }

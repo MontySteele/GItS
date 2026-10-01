@@ -894,8 +894,10 @@ public static class ArmKeywordTips
             // The text pass (2026-09-25): the chooser explains itself (#662),
             // so the tip says what is paid and by whom. The bow clause left
             // with rule 7's 2026-09-25 change: the Bow tip covers it.
-            "Pay Fanfare from your [gold]back performer[/gold]. Offered only "
-          + "if it can pay in full.");
+            // THE RULES PASS (2026-10-01): the back pays first, then forward,
+            // and the mode is refused only when the whole stage holds less.
+            "Pay Fanfare from your [gold]back performer[/gold] first, then "
+          + "forward. Offered only if your performers hold enough.");
 
     /// <summary>
     /// Brief sec.2: "Fanfare is the performer's bar itself ... no counter
@@ -911,9 +913,12 @@ public static class ArmKeywordTips
             // prints -- Hold Your Places and Gala Dinner carry no back
             // performer tip. "At 0 it leaves" is dropped on purpose.
             // The second text pass (2026-09-28): "your front performer's".
-            "A performer's health. Hits take your [gold]Block[/gold], then "
-          + "your front performer's, then you. Gaining it on an empty stage "
-          + "summons a performer.");
+            // THE RULES PASS (2026-10-01): only what you play summons, in
+            // the paper's own line. The damage order moved to the front
+            // performer's tip, which is where it happens, so this one fits
+            // the 135-character tip ceiling.
+            "A performer's health. If no one is on stage, a card that gives "
+          + "Fanfare summons a random performer holding it.");
 
     /// <summary>
     /// Brief sec.3 rules 7 and 9 together. Since 2026-09-25 a performer at 0
@@ -930,20 +935,23 @@ public static class ArmKeywordTips
             // exit at 0 Fanfare) is unchanged. THE GUEST CAST (2026-09-25):
             // a guest's act may pay, and its Bow does not -- stated once,
             // here, for every performer.
-            "A performer that leaves the stage acts one last time on its way "
-          + "out, without paying.");
+            // THE RULES PASS (2026-10-01): Grand Finale's Bow keeps the
+            // performer on stage, and the tip now says so.
+            "A performer acts one last time, without paying, as it leaves "
+          + "the stage or, if a card says so, stays.");
 
     /// <summary>
-    /// Brief sec.3 rules 4 and 6: the front seat is the one that regenerates
-    /// and the one that is hit -- the SHIELD, in R276's words -- and both
-    /// facts are about the same seat, which is why one sentence can carry
-    /// them.
+    /// Brief sec.3 rule 6: the front seat is the one that is hit -- the
+    /// SHIELD, in R276's words. THE RULES PASS (2026-10-01) cut rule 4, so it
+    /// no longer regains anything (only The Curtain Never Falls gives a
+    /// regain, on the relic's own face), and the damage order the Fanfare tip
+    /// used to carry is stated here, on the seat it is about.
     /// </summary>
     public static IEnumerable<IHoverTip> ForFrontPerformer(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, FrontPerformerKey,
-            "Takes hits first. Regains " + FurinaStageLaw.LeadRegen
-          + " [gold]Fanfare[/gold] at the start of your turn.");
+            "Takes hits after your [gold]Block[/gold]; what its "
+          + "[gold]Fanfare[/gold] cannot hold reaches you.");
 
     /// <summary>
     /// Brief sec.3 rules 5, 6 and 8, from the other end. The back seat is the
@@ -983,8 +991,9 @@ public static class ArmKeywordTips
             // was, here, in one clause -- until the second text pass
             // (2026-09-28): the fade takes every performer behind the front,
             // not just the back one, so it has its own tip (`ForFade`).
-            "Your last performer in line. [gold]Spend[/gold] pays from it. "
-          + "A lone performer is both front and back.");
+            // THE RULES PASS (2026-10-01): the back pays first, then forward.
+            "Your last performer in line. [gold]Spend[/gold] pays from it "
+          + "first. A lone performer is both front and back.");
 
     /// <summary>
     /// The second text pass (2026-09-28). Brief sec.3 rule 12, THE FADE, on

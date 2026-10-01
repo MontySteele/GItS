@@ -1106,9 +1106,11 @@ def _seat_key(raw: Any) -> int | None:
 #: Charge:". The clause runs to the sentence's end.
 _SPEND_MODE = re.compile(r"\bSpend (\d+): ([^.\n]*)")
 
-#: The relic whose Spend pools across the stage (`FurinaStageLedger.
-#: SpendPools`), by its printed title.
-POOLED_SPEND_RELIC = "Palais Ledger"
+#: The relic that takes 1 off every Spend's price (the Furina rules pass,
+#: 2026-10-01; `FurinaStage.PriceOf`), by its printed title. Until then it
+#: pooled the Spend across the stage, which rule 8 now does for everyone.
+DISCOUNT_SPEND_RELIC = "Palais Ledger"
+DISCOUNT_SPEND_AMOUNT = 1
 
 
 def spend_unavailable(text: str, stage: dict[str, Any] | None,
@@ -1117,9 +1119,10 @@ def spend_unavailable(text: str, stage: dict[str, Any] | None,
 
     THE DEFECT, both Sonnet seats after balance pass one (2026-09-28): "Spend
     2 wasn't offered on some turns and offered on others; I only learned by
-    trying." The game offers a Spend mode only when the back performer can pay
-    its whole price (`FurinaStage.CanSpend`; sim twin
-    `furina_stage.can_pay`), and where it cannot the card plays its plain mode
+    trying." The game offers a Spend mode only when the whole stage holds
+    its price, paid back first, then forward (the rules pass, 2026-10-01;
+    `FurinaStage.CanSpend`; sim twin `furina_stage.can_pay`), and where it
+    cannot the card plays its plain mode
     without opening the chooser (`ModalChoice.TakenWithoutAsking`), so the
     refused mode was never on any screen. The hand now prints it, marked.
 
@@ -1129,24 +1132,25 @@ def spend_unavailable(text: str, stage: dict[str, Any] | None,
     if stage is None:
         return []
     seats = stage.get("seats") or []
-    pooled = any(r.get("name") == POOLED_SPEND_RELIC for r in (relics or []))
-    back = seats[-1].get("fanfare") if seats else None
-    total = sum(s.get("fanfare") or 0 for s in seats)
+    off = sum(DISCOUNT_SPEND_AMOUNT for r in (relics or [])
+              if r.get("name") == DISCOUNT_SPEND_RELIC)
+    bars = [s.get("fanfare") for s in seats]
     out = []
     for m in _SPEND_MODE.finditer(text or ""):
-        price = int(m.group(1))
-        clause = f"Spend {price}: {m.group(2).strip()}"
+        printed = int(m.group(1))
+        price = max(0, printed - off)
+        clause = f"Spend {printed}: {m.group(2).strip()}"
         if not seats:
             why = "the stage is empty"
-        elif not isinstance(back, int):
+        elif not all(isinstance(b, int) for b in bars):
             continue
-        elif back >= price or (pooled and total >= price):
+        elif sum(bars) >= price:
             continue
-        elif pooled:
-            why = (f"your performers hold {total} Fanfare between them, "
-                   f"and {POOLED_SPEND_RELIC} pays from all of them")
+        elif off:
+            why = (f"your performers hold {sum(bars)} Fanfare between them, "
+                   f"and it costs {price} with {DISCOUNT_SPEND_RELIC}")
         else:
-            why = f"your back performer has {back} Fanfare"
+            why = f"your performers hold {sum(bars)} Fanfare between them"
         out.append(f"{clause} — unavailable: {why}")
     return out
 

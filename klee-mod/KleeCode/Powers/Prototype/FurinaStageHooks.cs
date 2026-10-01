@@ -84,7 +84,8 @@ public sealed class FurinaStageHooks : AbstractModel
         FurinaStage.BeginTurn(player.Creature);
         await FurinaStage.RegenLead(player.Creature);
         // THE SUPPORTING POOL (2026-09-26): its turn-start powers, AFTER the
-        // regen, so the lead's 1 went to the performer that led last turn
+        // regen (since the rules pass, 2026-10-01, only The Curtain Never
+        // Falls regains), so it went to the performer that led last turn
         // (One-Woman Show, Revolving Stage, Season Tickets, Regina).
         await FurinaStage.TurnStartPowers(choiceContext, player.Creature);
         // 2026-09-26: the cues go up for the turn they forecast.
@@ -162,6 +163,8 @@ public sealed class FurinaStageHooks : AbstractModel
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         FurinaStage.EndPlay(cardPlay.Card?.Owner?.Creature);
+        // THE RULES PASS (2026-10-01): Opening Number's count.
+        FurinaStage.NoteCardPlayed(cardPlay.Card?.Owner?.Creature);
         Vfx.FurinaStageCues.Refresh(cardPlay.Card?.Owner?.Creature);
         return Task.CompletedTask;
     }

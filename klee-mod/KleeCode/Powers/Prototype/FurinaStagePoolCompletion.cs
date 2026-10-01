@@ -161,12 +161,14 @@ public sealed class StarTurnPower : PowerModel, ILocalizationProvider
 /// <summary>
 /// CENTER OF ATTENTION, Furina's second Ancient (pool completion, 2026-10-01;
 /// <c>Cards/Furina/CenterOfAttention.cs</c>): "The first Spend you choose each
-/// turn takes no Fanfare, and you can choose it even when your back performer
-/// has too little." Bends rule 8. Someone must still be on stage.
+/// turn takes no Fanfare." The Furina rules pass (2026-10-01) dropped its
+/// "and you can choose it even when your back performer has too little"
+/// clause: rule 8 now pays back first, then forward, so the mode is offered
+/// on the same board as any Spend (the whole stage holds the price).
 ///
-/// <see cref="Covers"/> is the chooser's READ (<c>FurinaStage.CanSpend</c>
-/// offers the mode); <see cref="TryClaim"/> is the payment's CLAIM
-/// (<c>FurinaStage.Spend</c> takes nothing). The latch is this power's own
+/// <see cref="Covers"/> is a READ (nothing gates on it since the rules pass);
+/// <see cref="TryClaim"/> is the payment's CLAIM (<c>FurinaStage.Spend</c>
+/// takes nothing). The latch is this power's own
 /// round number, so it opens again at the next turn. Game-side only, like
 /// every Ancient (the sim models no events).
 /// </summary>
@@ -179,8 +181,7 @@ public sealed class CenterOfAttentionPower : PowerModel, ILocalizationProvider
         ("title", "Center of Attention"),
         ("description",
             "The first [gold]Spend[/gold] you choose each turn takes no "
-          + "[gold]Fanfare[/gold], and you can choose it even when your "
-          + "[gold]back performer[/gold] has too little."),
+          + "[gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

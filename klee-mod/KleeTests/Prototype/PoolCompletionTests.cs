@@ -281,12 +281,14 @@ public class PoolCompletionTests : IDisposable
     public void Her_offer_appends_the_six()
     {
         var offer = Cards("FurinaStageRoster", "SwapOfferedRows");
+        // The rules pass (2026-10-01) appended its twelve after them.
+        var six = offer.IndexOf("ProtoFsAriaForOne");
         Assert.Equal(new[]
             {
                 "ProtoFsAriaForOne", "ProtoFsIntervalBell", "ProtoFsCastingAgent",
                 "ProtoFsTheLastAct", "ProtoFsCriticsDarling", "ProtoFsStarTurn",
             },
-            offer.Skip(offer.Count - 6).ToArray());
+            offer.Skip(six).Take(6).ToArray());
         var guests = Cards("FurinaStageRoster", "GuestStarCards");
         Assert.Equal(10, guests.Distinct().Count());
         Assert.All(guests, g => Assert.StartsWith("ProtoFsGuestStar", g));
@@ -360,8 +362,10 @@ public class PoolCompletionTests : IDisposable
         var pay = spend.FindIndex(c => c.Contains("FurinaStageLedger.Spend"));
         var critics = spend.FindIndex(c => c.Contains("FurinaStage.CriticsDarling"));
         Assert.True(claim >= 0 && pay > claim && critics > pay);
-        Assert.Contains(Seq("FurinaStage", "CanSpend"),
-                        c => c.Contains("CenterOfAttentionPower.Covers"));
+        // The rules pass (2026-10-01) dropped its short-bar clause: the gate
+        // no longer asks it.
+        Assert.DoesNotContain(Seq("FurinaStage", "CanSpend"),
+                              c => c.Contains("CenterOfAttentionPower.Covers"));
         Assert.Contains(Seq("FurinaStage", "CriticsDarling"),
                         c => c.Contains("ElementalHit.DealUnelemented"));
     }

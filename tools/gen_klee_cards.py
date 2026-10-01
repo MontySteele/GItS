@@ -1701,6 +1701,11 @@ PREDICATES_CS = {
     # R276 batch two: the empty-stage answers (Improvised Number, Between
     # Acts) ask the opposite question, at play time.
     "stage_empty": "!FurinaStage.Occupied(Owner.Creature)",
+    # THE FURINA RULES PASS (2026-10-01), Opening Number: "If this is the
+    # first card you played this turn". The ledger counts a play AFTER it
+    # resolves, so the card asking is the first when the count is 0 (the
+    # sim counts before, and asks for 1).
+    "first_card_this_turn": "FurinaStage.CardsPlayedThisTurn(Owner.Creature) == 0",
     # THE SUPPORTING POOL (2026-09-26), Counterclaim: an enemy's hit reached
     # the front performer's bar since the end of her last turn.
     "stage_front_hit": "FurinaStage.FrontHitSinceLastTurn(Owner.Creature)",
@@ -1817,6 +1822,7 @@ PREDICATE_TEXT = {
     # "Spend N: <the big number> instead" and no generic clause can say that.
     "stage_occupied": "If a performer is on stage",
     "stage_empty": "If the stage is empty",
+    "first_card_this_turn": "If this is the first card you played this turn",
     "stage_front_hit":
         "If an enemy hit your [gold]front performer[/gold] since your last "
         "turn",
@@ -6507,7 +6513,12 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
         # (`upgraded_grant`), so the call takes the card.
         return "await FurinaStage.CastingAgent(choiceContext, this);"
     if op == "stage_perform_all":
-        return "await FurinaStage.PerformAll(choiceContext, Owner.Creature);"
+        # THE FURINA RULES PASS (2026-10-01), Endless Waltz: `min_fanfare`
+        # is "each performer with N or more Fanfare".
+        least = int(eff.get("min_fanfare", 0))
+        extra = f", minFanfare: {least}" if least else ""
+        return ("await FurinaStage.PerformAll(choiceContext, "
+                f"Owner.Creature{extra});")
     if op == "stage_spend_back_all":
         return ("await FurinaStage.SpendAllOfBack(choiceContext, "
                 "Owner.Creature);")

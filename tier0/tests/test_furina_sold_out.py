@@ -154,14 +154,14 @@ def test_without_sold_out_the_third_summon_still_fills_the_stage(arm):
 # Wriothesley's front-join at four.
 # ---------------------------------------------------------------------------
 
-def test_wriothesley_joins_a_full_four_stage_and_the_back_leaves(arm):
+def test_wriothesley_joins_a_full_four_stage_and_the_front_leaves(arm):
     st = _state([["usher", 3], ["chevalmarin", 2], ["crabaletta", 2],
                  ["usher", 5]])
     FS.guest_star(st, "wriothesley", 8, front=True)
-    # The back Usher Bows (3 Block) and leaves; he arrives at the front with
-    # his 8 plus its 5, and the other three shift back one.
-    assert st.player.stage == [["wriothesley", 13], ["usher", 3],
-                               ["chevalmarin", 2], ["crabaletta", 2]]
+    # The rules pass (2026-10-01): the front Usher Bows (3 Block) and leaves,
+    # as for any summon; he arrives at the front with his 8 plus its 3.
+    assert st.player.stage == [["wriothesley", 11], ["chevalmarin", 2],
+                               ["crabaletta", 2], ["usher", 5]]
     assert st.player.block == FS.ACT_USHER_BLOCK
 
 

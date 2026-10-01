@@ -15,9 +15,9 @@ namespace KleeMod.Cards.Furina;
 /// <summary>
 /// Furina's second Ancient-rarity card (pool completion, 2026-10-01;
 /// review/active/pool-completion-2026-10-01.md sec.3, ruled at the default):
-/// "The first Spend you choose each turn takes no Fanfare, and you can choose
-/// it even when your back performer has too little." Bends the Stage's rule
-/// 8; someone must still be on stage. The rule and its readings are
+/// "The first Spend you choose each turn takes no Fanfare." The Furina rules
+/// pass (2026-10-01) dropped its short-bar clause: rule 8 now pays back
+/// first, then forward, so the mode is offered on the same board as any. The rule and its readings are
 /// <see cref="CenterOfAttentionPower"/>'s, read at the Spend gate and the
 /// Spend payment (<c>FurinaStage.CanSpend</c> / <c>Spend</c>).
 ///
@@ -40,8 +40,7 @@ public sealed class CenterOfAttention : CustomCardModel, ICharacterCard
         ("title", "Center of Attention"),
         ("description",
             "The first [gold]Spend[/gold] you choose each turn takes no "
-          + "[gold]Fanfare[/gold], and you can choose it even when your "
-          + "[gold]back performer[/gold] has too little."),
+          + "[gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>

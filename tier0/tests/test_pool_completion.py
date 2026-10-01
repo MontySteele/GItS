@@ -298,11 +298,12 @@ def _furina_state(stage=(), enemies=None, deck=0):
 
 
 def test_the_six_are_appended_to_her_pool():
-    assert FS.POOL_ADDS[1:] == (
+    # The rules pass (2026-10-01) appended Opening Number after them.
+    assert FS.POOL_ADDS[1:7] == (
         "proto_fs_aria_for_one", "proto_fs_interval_bell",
         "proto_fs_casting_agent", "proto_fs_the_last_act",
         "proto_fs_critics_darling", "proto_fs_star_turn")
-    rarities = [_proto(cid).rarity for cid in FS.POOL_ADDS[1:]]
+    rarities = [_proto(cid).rarity for cid in FS.POOL_ADDS[1:7]]
     assert rarities == ["uncommon"] * 3 + ["rare"] * 3
 
 
