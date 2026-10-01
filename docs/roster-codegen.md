@@ -1,6 +1,6 @@
 # Roster card codegen
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 The mod has one character-aware card generator. Klee remains the compatibility
 baseline and Furina is active as the second playable character.

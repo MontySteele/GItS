@@ -49,7 +49,7 @@ SCRIPTS = sorted(p.stem for p in EXP_DIR.glob("exp_*.py"))
 
 def test_there_are_experiments_to_check():
     """A glob that matches nothing passes every parametrised case below."""
-    assert len(SCRIPTS) >= 20, SCRIPTS
+    assert len(SCRIPTS) >= 5, SCRIPTS
 
 
 @pytest.fixture

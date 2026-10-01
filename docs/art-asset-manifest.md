@@ -1,6 +1,6 @@
 # Klee Art Asset Manifest (measured from Downfall's completed reference character)
 
-> **Lifecycle: LIVING** — expected to change; read it to work on the project. Status index: `docs/registry/identifiers.md` §15.
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Every dimension below is scraped from Hexaghost (complete) / Champ (Spine humanoid) — these are the actual pipeline inputs, not guesses. The ImageGen pipeline handles framing/compositing from these raw inputs.
 

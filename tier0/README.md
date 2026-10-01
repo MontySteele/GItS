@@ -90,10 +90,6 @@ See `tests/test_track_h_telemetry.py`, and
 PYTHONPATH=. .venv/bin/python -m tier0.harness.runner \
     --character klee --deck reaction_weighted --pilot reaction \
     --fights 500 --aura-payoff
-
-# the roster-wide harvest (both surfaces, TSV out)
-PYTHONPATH=. .venv/bin/python -m tier05.exp_reactions_corpus \
-    --cohort --runs 3000 --seed 20260805 --jobs 0 --tsv out.tsv
 ```
 
 ```sh

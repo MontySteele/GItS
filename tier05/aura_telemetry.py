@@ -33,8 +33,8 @@ PREDICTION 7 CLOSED -- baseline accepted (R130 item 11); the accepted
 residual (spotlight -11.5% / fanfare -17.3% post-shrink) rides the same
 sitting's compensation tracks. Numbers and ruling: `git show a64297d`.
 
-Re-run: `python -m tier05.exp_curtain_call` (add `--seed 12 --runs 1000`
-for the rider). Numbers after a stamp move are a NEW baseline, not a
+The `tier05/exp_curtain_call.py` script that produced these was retired
+2026-10-01 (legacy hygiene; in git history). Numbers after a stamp move are a NEW baseline, not a
 comparison against this one, unless labeled.
 """
 

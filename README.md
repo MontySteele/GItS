@@ -9,17 +9,13 @@ Companion cards) for **Slay the Spire 2**, designed simulation-first:
 - `klee-mod/` — the actual C# mod. Design sheets in `docs/*.yaml` are the
   single source of truth; the sims read them directly.
 
-Project documentation lives in `docs/` — see `docs/README.md` for the index
-(current docs vs. `docs/archive/`, plus `docs/archive/missed-requirements.md`, the
-2026-07-26 recap audit of requirements that were never built).
+Project documentation lives in `docs/` — see `docs/README.md` for the index.
+Start from `CLAUDE.md`, which routes each task to the one document it needs.
 
 Two lookup files sit above the index:
 
-- `docs/registry/identifiers.md` — what any short code in this repo means
-  (`R112`, `D14`, `S4-G6`, `S13-X5`, `NC-1`, `FLAG-3`, …), with the collision
-  table for the tokens that several documents mint.
-- `docs/registry/user-queue.md` — the single source of truth for what is open
-  and who owes it.
+- `docs/current/RULINGS.md` — the frozen index of R numbers (R1 to R276).
+- `docs/current/QUEUE.md` — the open picks and who owes them.
 
 ## Building the mod
 
