@@ -215,7 +215,9 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
                     other.aura_spent = False
                     continue
                 apply_aura(state, other, aura, "swirl_spread")
-                other.aura_spent = True
+                # VARKA's Downburst (pick 3a): its copies arrive fresh.
+                other.aura_spent = not (varka_oath.VARKA_OATH
+                                        and varka_oath.spread_fresh(state))
             # The flat 2: element-less and outside the pipeline, exactly
             # Overload's splash, so it reacts with nothing. Durin's White
             # scales it for the reason it scales the splash.

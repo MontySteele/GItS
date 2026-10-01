@@ -311,18 +311,28 @@ SIM_CALL_SITES = {
     ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
     # Expansion batch one: Tidal Riposte's answer, dealt as a planned hit is.
     ('kokomi_plan.py', 3): ("'plan'", 'False', "'hydro'"),
-    # VARKA, THE OATH REWORK (`varka_oath.VARKA_OATH`, off). The Pyro and
-    # Electro Swirl payouts: element-less, unpowered, his card's
-    # (`ElementalHit.DealUnelemented(powered: false)`).
+    # VARKA, THE OATH REWORK (`varka_oath.VARKA_OATH`, off). The expansion's
+    # (2026-10-01) Cycle of Seasons and Assembly at the Cathedral: a Power's
+    # damage, element-less and unpowered.
     ('varka_oath.py', 1): ("'card'", 'False', 'None'),
     ('varka_oath.py', 2): ("'card'", 'False', 'None'),
+    # The Pyro payout (Wildfire Oath's to ALL, then the one enemy) and the
+    # Electro payout: element-less, unpowered, his card's
+    # (`ElementalHit.DealUnelemented(powered: false)`).
+    ('varka_oath.py', 3): ("'card'", 'False', 'None'),
+    ('varka_oath.py', 4): ("'card'", 'False', 'None'),
+    ('varka_oath.py', 5): ("'card'", 'False', 'None'),
     # Baron Bunny's next-turn burst: Pyro to ALL, unpowered.
-    ('varka_oath.py', 3): ("'card'", 'False', "'pyro'"),
+    ('varka_oath.py', 6): ("'card'", 'False', "'pyro'"),
     # Four Winds' Ascension's and Northwind Avatar's elemental follow-up: a
     # powered hit of the card, carrying his current element.
-    ('varka_oath.py', 4): ('source', None, 'led.current'),
+    ('varka_oath.py', 7): ('source', None, 'led.current'),
+    # The expansion's element hits (Cavalry Charge, Blazing Charge,
+    # Thundering Verdict, Razor, Tempest): a powered hit of the card,
+    # carrying the element the card names.
+    ('varka_oath.py', 8): ('source', None, 'element'),
     # Storm Surge's "each enemy it Swirls takes 5 more": element-less, powered.
-    ('varka_oath.py', 5): ("'attack' if card.type == 'attack' else 'card'",
+    ('varka_oath.py', 9): ("'attack' if card.type == 'attack' else 'card'",
                            None, 'None'),
 }
 
@@ -540,10 +550,14 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
     # rework's second hit (Four Winds' Ascension, Northwind Avatar): the
     # card's own hit on its target carrying his current element
     # (`VarkaCards.CurrentElementHit`), an Attack's hit for the same reason.
+    # The expansion (2026-10-01) adds `VarkaCards.ElementHit`, the same hit
+    # carrying the element the card names (Blazing Charge, Thundering
+    # Verdict, Razor, Tempest, Cavalry Charge).
     assert [path for path, _line in sites] == [
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBombPower.cs",
+        "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaRules.cs"]
 

@@ -835,14 +835,17 @@ def test_every_prototype_face_printing_a_base_keyword_attaches_its_tip(
 
 def test_the_four_base_words_the_surface_prints_are_exercised():
     """The denominator. A scrape that silently read nothing would pass the
-    parametrised join above and fail here."""
+    parametrised join above and fail here. Five since the Varka expansion
+    (2026-10-01): Barbara: Wellspring Hymn prints Frail, the word the join
+    above carried for tomorrow."""
     printed = {keyword.word
                for path in _prototype_files()
                for description in _descriptions(
                    path.read_text(encoding="utf-8"))
                for keyword in gen.BASE_KEYWORDS
                if keyword.attach in gen.base_keyword_tip_calls(description)}
-    assert printed == {"Vulnerable", "Weak", "Strength", "Dexterity"}
+    assert printed == {"Vulnerable", "Weak", "Strength", "Dexterity",
+                       "Frail"}
 
 
 def test_the_row_the_defect_was_filed_against_carries_the_vulnerable_tip():

@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -32,11 +31,8 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, IElementalCard, ICompanionCard
+public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
 {
-    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
-    public Element Element => Element.Electro;
-
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
@@ -48,47 +44,35 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, IElementalCard
 
     public string? Nation => "mondstadt";
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesElectro };
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false);
-
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_razor_claw_and_thunder");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor: Awakening"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage."),
+        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies. Enemies that already have [gold]Electro[/gold] take {VkAmount:diff()} more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(7m),
-            new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
+            new DynamicVar("VkBase", 4m),
+            new DynamicVar("VkAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoVkRazorClawAndThunder()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
-            .Execute(choiceContext);
+        await VarkaCards.Awakening(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars["VkBase"].UpgradeValueBy(2m);
     }
 }

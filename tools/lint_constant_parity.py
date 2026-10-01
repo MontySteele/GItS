@@ -417,6 +417,10 @@ MIRRORED: dict[str, object] = {
     "VarkaLaw.SwirlCryoVulnerable": _varka("SWIRL_CRYO_VULNERABLE"),
     "VarkaLaw.SwirlElectroDamageAll": _varka("SWIRL_ELECTRO_DAMAGE_ALL"),
     "VarkaLaw.StormwardOathNeeded": _varka("STORMWARD_OATH_NEEDED"),
+    # THE EXPANSION (2026-10-01): Eye of Stormterror's Swirls a turn and
+    # Absolute Zero's Weak.
+    "VarkaLaw.EyeOfStormterrorSwirls": _varka("EYE_OF_STORMTERROR_SWIRLS"),
+    "VarkaLaw.AbsoluteZeroWeak": _varka("ABSOLUTE_ZERO_WEAK"),
 }
 
 # --------------------------------------------------------------------------

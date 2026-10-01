@@ -15,6 +15,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Varka has no Ancient card: Darv's Dusty Tome hands him an upgraded Four Winds' Ascension through BaseLib's `ITomeCard` (the row's `dusty_tome` tag) until one is designed; delete the tag with it.
 - Verify Boreas's Fang saved starter element survives save/reload (`Relics/VarkaStarterKnight.cs`, a BaseLib `SavedSpireField`; no test exercises a real serialize/deserialize, so Knight's Commission keeps its deck fallback until then).
 - Varka's Architect finale lines in `tools/build_pck.ps1` are placeholders for a writing pass, like the other three characters'.
+- Varka's element kinds (Razor: Awakening, Blazing Charge, Thundering Verdict, Tempest of the Four Winds) carry no "Applies <element>" keyword tip; the codegen derives it only from `damage` / `apply_aura` ops.
+- Weathervane's start-of-turn element grid is untried through the bridge and in co-op: watch it at the expansion's first seat round.
 - Varka's Oath tip says "1 of each, per card", which a seat read as one per element; both engines credit applying and Swirling separately (`VarkaOathLedger.TryCredit`, `varka_oath.credit`), so Northwind Avatar on an aura of the current element gains 2. The tip wants to say applying and Swirling each count once per card (Varka Oath round, lane 2 act 2).
 - Seat page: the Neow bundle page printed one pack's rows jumbled (Oathsworn Strike's line missing, its text under Rising Gale; Varka Oath round, lane 2 act 1). Not reproduced: the bridge strips newlines from each face and the render prints each bundle's cards in wire order; it needs the raw `bundle_select` state from such a screen.
 

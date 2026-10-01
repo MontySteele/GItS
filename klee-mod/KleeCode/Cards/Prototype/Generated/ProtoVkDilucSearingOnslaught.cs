@@ -59,7 +59,7 @@ public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Diluc: Searing Onslaught"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage twice."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage twice. If either hit sets off an [gold]Elemental Reaction[/gold], gain 1 [gold]Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -79,6 +79,7 @@ public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCa
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        var reactionsAtStart = ReactionEffects.TotalResolved;
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .WithHitCount(2)
@@ -86,6 +87,10 @@ public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCa
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+        if (ReactionEffects.TotalResolved > reactionsAtStart)
+        {
+            await PlayerCmd.GainEnergy(1, Owner);
+        }
     }
 
     protected override void OnUpgrade()

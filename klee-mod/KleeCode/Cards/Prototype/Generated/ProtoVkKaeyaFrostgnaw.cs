@@ -52,14 +52,14 @@ public sealed class ProtoVkKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false);
+        BaseKeywordTips.ForVulnerable(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_kaeya_frostgnaw");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaeya: Heart of the Abyss"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Apply 1 [gold]Vulnerable[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -85,6 +85,7 @@ public sealed class ProtoVkKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

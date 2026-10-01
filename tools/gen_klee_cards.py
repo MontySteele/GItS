@@ -1721,6 +1721,14 @@ PREDICATES_CS = {
     "knight_played_this_turn":
         "VarkaOath.KnightsPlayedThisTurn(Owner.Creature) > 0",
     "swirled_by_this": "VarkaOath.SwirlsMadeBy(Owner.Creature) > swirlsAtStart",
+    # THE EXPANSION (2026-10-01). Amber: Sharpshooter's "If the enemy already
+    # has Pyro", a SNAPSHOT at the top of OnPlay (`targetHadPyro`, beside
+    # `targetHadAura`), fresh or spent, so her own first hit cannot turn her
+    # branch on; and Shifting Gale's "If your current element changed this
+    # turn", off the ledger.
+    "target_has_pyro": "targetHadPyro",
+    "element_changed_this_turn":
+        "VarkaOath.ElementChangedThisTurn(Owner.Creature)",
 }
 
 # The if-clause each predicate renders on the card.
@@ -1762,6 +1770,9 @@ PREDICATE_TEXT = {
     "knight_played_this_turn":
         "If you played a [gold]Knight[/gold] this turn",
     "swirled_by_this": "If it [gold]Swirls[/gold]",
+    "target_has_pyro": "If the enemy already has [gold]Pyro[/gold]",
+    "element_changed_this_turn":
+        "If your [gold]current element[/gold] changed this turn",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -2441,15 +2452,48 @@ VARKA_KINDS = {
     "rally": "Rally",
     "accord": "Accord",
     "unfurled_banner": "UnfurledBanner",
+    # THE EXPANSION (2026-10-01, review/active/varka-expansion-2026-10-01.md
+    # sec.3): one method per rule the sheet's grammar cannot spell.
+    "pathfinders_mark": "PathfindersMark",
+    "current_element_strike": "CurrentElementStrike",
+    "blazing_charge": "BlazingCharge",
+    "glacial_edict": "GlacialEdict",
+    "thundering_verdict": "ThunderingVerdict",
+    "awakening": "Awakening",
+    "draw_per_enemy": "DrawPerEnemy",
+    "cleanse": "Cleanse",
+    "apply_current_element_all": "ApplyCurrentElementAll",
+    "crosscurrent": "Crosscurrent",
+    "double_current_oath": "DoubleCurrentOath",
+    "tempest": "Tempest",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
     "ascension_hit": ("per",),
     "avatar_hit": ("base", "per"),
     "swirled_take_more": ("amount",),
+    "current_element_strike": ("base",),
+    "blazing_charge": ("base", "per"),
+    "glacial_edict": ("amount",),
+    "thundering_verdict": ("base", "per"),
+    "awakening": ("base", "amount"),
+    "tempest": ("base",),
 }
 #: A kind that aims at the enemy the card was played on.
-VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit"}
+VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
+                     "pathfinders_mark", "current_element_strike",
+                     "blazing_charge", "glacial_edict", "crosscurrent",
+                     "tempest"}
+#: A kind that reaches ALL enemies (the expansion): the row says
+#: `target: all_enemies`, which makes the card's TargetType AllEnemies.
+VARKA_ALL_KINDS = {"thundering_verdict", "awakening",
+                   "apply_current_element_all"}
+#: A kind that AIMS but whose row needs no `target:` of its own, because the
+#: card's own damage op already aims it (Ascension, Northwind Avatar).
+VARKA_IMPLIED_AIM_KINDS = {"ascension_hit", "avatar_hit"}
+#: A kind whose `varka_upgraded` upgrade widens it to ALL enemies, so the
+#: upgraded card's TargetType is AllEnemies (Pathfinder's Mark+).
+VARKA_UPGRADE_WIDENS = {"pathfinders_mark"}
 VARKA_VAR_FIELDS = {"per": "VkPer", "base": "VkBase", "amount": "VkAmount"}
 VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
@@ -3466,6 +3510,54 @@ APPLY_POWERS = {
     "vk_baron_bunny": ("VarkaBaronBunnyPower", None,
         "At the start of your turn, deal {X} [gold]Pyro[/gold] damage to ALL "
         "enemies."),
+    # THE EXPANSION (2026-10-01). Classes in VarkaPowers.cs; each row carries
+    # its own `description:`. Sim twins: tier0/engine/varka_oath.py.
+    "vk_static_field": ("StaticFieldPower", None,
+        "The first time each turn you apply [gold]Electro[/gold], draw {X} "
+        "cards."),
+    "vk_unwavering_banner": ("UnwaveringBannerPower", None,
+        "Only [gold]Knights[/gold] and cards that name it can change your "
+        "[gold]current element[/gold]."),
+    "vk_cycle_of_seasons": ("CycleOfSeasonsPower", None,
+        "Whenever your [gold]current element[/gold] changes, deal {X} damage "
+        "to ALL enemies."),
+    "vk_eye_wall": ("EyeWallPower", None,
+        "Whenever you [gold]Swirl[/gold] this turn, gain {X} "
+        "[gold]Block[/gold]."),
+    "vk_assembly_at_the_cathedral": ("AssemblyAtTheCathedralPower", None,
+        "Whenever you play a [gold]Knight[/gold], deal {X} damage to a random "
+        "enemy."),
+    "vk_wildfire_oath": ("WildfireOathPower", None,
+        "While your [gold]current element[/gold] is Pyro, your "
+        "[gold]Swirls[/gold]' damage hits ALL enemies, plus {X} for each Pyro "
+        "[gold]Oath[/gold]."),
+    "vk_unbroken_tide": ("UnbrokenTidePower", None,
+        "While your [gold]current element[/gold] is Hydro, your "
+        "[gold]Block[/gold] is not removed at the start of your turn."),
+    "vk_absolute_zero": ("AbsoluteZeroPower", None,
+        "While your [gold]current element[/gold] is Cryo, your "
+        "[gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and "
+        "[gold]Weak[/gold] to ALL enemies."),
+    "vk_oath_unto_death": ("OathUntoDeathPower", None,
+        "Whenever you gain [gold]Oath[/gold] of your [gold]current "
+        "element[/gold], gain {X} more."),
+    "vk_wolfpack": ("WolfpackPower", None,
+        "Whenever you play Four Winds' Ascension, add a copy of it to your "
+        "discard pile."),
+    "vk_oathbound_aegis": ("OathboundAegisPower", None,
+        "At the end of your turn, gain [gold]Block[/gold] equal to your total "
+        "[gold]Oath[/gold], up to {X}."),
+    "vk_weathervane": ("WeathervanePower", None,
+        "At the start of your turn, you may choose an element you have "
+        "[gold]Oath[/gold] in; it becomes your [gold]current element[/gold]."),
+    "vk_twin_gales": ("TwinGalesPower", None,
+        "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
+        "and the element Swirled."),
+    "vk_eye_of_stormterror": ("EyeOfStormterrorPower", None,
+        "The first 3 times you [gold]Swirl[/gold] each turn, draw {X} card."),
+    "vk_the_order_answers": ("TheOrderAnswersPower", None,
+        "At the start of your turn, add {X} random [gold]Knight[/gold] to "
+        "your hand."),
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
@@ -3908,6 +4000,10 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # VARKA (the Oath rework): a `varka` op's own number,
                        # its `Vk<Field>` var.
                        "varka_per", "varka_base", "varka_amount",
+                       # VARKA (the expansion, Pathfinder's Mark+): the row's
+                       # `varka` op reads `IsUpgraded` at play time, and the
+                       # face carries its own `{IfUpgraded:show:...}` swap.
+                       "varka_upgraded",
                        # THE KOKOMI EXPANSION: a `kokomi` op's own number.
                        "kokomi_amount",
                        "bonus_per_detonation", "bonus_slope",
@@ -4953,11 +5049,16 @@ def blocked_reason(
             kind = eff.get("kind")
             if kind not in VARKA_KINDS:
                 return f"varka kind {kind!r}"
-            if "target" in eff and (eff["target"] != "enemy"
-                                    or kind != "apply_current_element"):
-                return "varka: only apply_current_element aims (target 'enemy')"
-            if kind == "apply_current_element" and eff.get("target") != "enemy":
-                return "varka apply_current_element aims (target 'enemy')"
+            # THE EXPANSION: an aimed kind says `target: enemy` (the two
+            # follow-up hits ride their card's own aim), an ALL kind says
+            # `target: all_enemies`, and no other kind takes a target.
+            want_target = ("enemy" if kind in VARKA_AIMED_KINDS
+                           and kind not in VARKA_IMPLIED_AIM_KINDS
+                           else "all_enemies" if kind in VARKA_ALL_KINDS
+                           else None)
+            if eff.get("target") != want_target:
+                return (f"varka {kind} takes target {want_target!r}, "
+                        f"row gives {eff.get('target')!r}")
             wanted = set(VARKA_KIND_FIELDS.get(kind, ()))
             given = set(eff) & set(VARKA_VAR_FIELDS)
             if given != wanted:
@@ -5950,6 +6051,16 @@ VARKA_COUNTS = {
                     "card.Owner.Creature)",
     "oath_elements": "static (card, _) => VarkaOath.ElementsWithOath("
                      "card.Owner.Creature)",
+    # THE EXPANSION (2026-10-01): West Wind Shield's enemies wearing an aura,
+    # Tidal Bulwark's Hydro Oath (read by name, not the current element's),
+    # and Charge of the Knights' Knights played this combat.
+    "enemies_with_aura": "static (card, _) => VarkaOath.EnemiesWithAura("
+                         "card.Owner.Creature)",
+    "hydro_oath": "static (card, _) => VarkaOath.Count("
+                  "card.Owner.Creature, Element.Hydro)",
+    "knights_played_this_combat":
+        "static (card, _) => VarkaOath.KnightsInCombat("
+        "card.Owner.Creature)",
     "attacks_played_this_turn":
         "static (card, _) => CompanionOverhaulLedger.For("
         "card.Owner.Creature).AttacksPlayedThisTurn",
@@ -7864,6 +7975,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # play time off `IsUpgraded`; the face carries its own
         # `{IfUpgraded:show:...}` swap.
         "choose_knight": any(e["op"] == "add_knight" for e in effects),
+        # VARKA (the expansion): the `varka` op reads IsUpgraded itself.
+        "varka_upgraded": any(e["op"] == "varka" for e in effects),
         # Power cost sweep, 2026-09-30: binds to the first top-level
         # apply_power on the card's owner, and the named power must exist.
         "upgraded_power": (
@@ -10321,6 +10434,12 @@ def build_body(
             "var swirlsAtStart = VarkaOath.SwirlsMadeBy(Owner.Creature);")
     if "killed_target" in preds:
         lines.append("var enemiesAtStart = CombatState!.HittableEnemies.ToList();")
+    if "target_has_pyro" in preds:
+        # VARKA (the expansion): Amber: Sharpshooter's snapshot, the
+        # `targetHadAura` shape on one element, fresh or spent.
+        lines.append(
+            "var targetHadPyro = cardPlay.Target != null "
+            "&& AuraCmd.Find(cardPlay.Target) is { Element: Element.Pyro };")
     if "target_has_aura" in preds:
         # SNAPSHOT, not a live read, and the sim is what decides that: tier0's
         # `target_has_aura` returns `state.target_had_aura`, which
@@ -14411,6 +14530,11 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("choose_knight")
         lines.append("// choose_knight: the player picks the Knight, read off "
                      "IsUpgraded when the card is played.")
+    if "varka_upgraded" in deltas:
+        # VARKA (the expansion, Pathfinder's Mark+). The same play-time read.
+        done.add("varka_upgraded")
+        lines.append("// varka_upgraded: the varka op reads IsUpgraded when "
+                     "the card is played.")
     if "upgraded_power" in deltas:
         # Power cost sweep, 2026-09-30. The same play-time read: OnPlay
         # applies the named power when upgraded; the face states the swap.
@@ -14892,8 +15016,9 @@ def emit(
             break
         # VARKA's Favonius Drill: the current element lands on the chosen
         # enemy, so the card aims for the reason `apply_aura` does.
-        if eff["op"] == "varka" and eff.get("target") == "enemy":
-            target_type = TARGET_CS["enemy"]
+        if eff["op"] == "varka" and eff.get("target") in ("enemy",
+                                                           "all_enemies"):
+            target_type = TARGET_CS[eff["target"]]
             break
         # THE KOKOMI EXPANSION's Salt in the Wound reads the chosen enemy.
         if eff["op"] == "kokomi" and eff.get("target") == "enemy":
@@ -16003,6 +16128,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             f"        && {wide_pred}\n"
             "            ? TargetType.AllEnemies\n"
             "            : base.TargetType;")
+    # VARKA (the expansion, Pathfinder's Mark+ "[ALL enemies]"): a `varka`
+    # kind whose UPGRADE widens it to every enemy answers AllEnemies once
+    # upgraded, the same live TargetType, so the upgraded card asks for no
+    # target. The kind reads `IsUpgraded` itself (`varka_upgraded`).
+    elif (target_type == TARGET_CS["enemy"]
+          and "varka_upgraded" in upgrade_plan(card)[0]
+          and any(e.get("op") == "varka"
+                  and e.get("kind") in VARKA_UPGRADE_WIDENS
+                  for e in card["effects"])):
+        wide_target_member = (
+            "\n\n    /// <summary>Upgraded, it reaches ALL enemies and asks"
+            " for no\n    /// target (the Varka expansion).</summary>\n"
+            "    public override TargetType TargetType =>\n"
+            "        IsUpgraded ? TargetType.AllEnemies : base.TargetType;")
     # EB-118 §4.5, the Spark cost line. Sparks are a PowerModel and not a
     # CustomResource, so BaseLib's SetCanonicalCost rail below cannot carry
     # this price: the gate is CardModel.IsPlayable, the extension point the

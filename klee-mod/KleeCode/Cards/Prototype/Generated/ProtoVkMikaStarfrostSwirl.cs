@@ -49,22 +49,20 @@ public sealed class ProtoVkMikaStarfrostSwirl : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true);
+        BaseKeywordTips.ForWeak(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_mika_starfrost_swirl");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mika: Suppressive Barrage"),
-        ("description", "Apply [gold]Cryo[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Apply [gold]Cryo[/gold] and {PowerAmount:diff()} [gold]Weak[/gold] to an enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(6m),
-            new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,11 +76,11 @@ public sealed class ProtoVkMikaStarfrostSwirl : CustomCardModel, ICompanionCard
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Cryo, Owner.Creature);
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
+        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

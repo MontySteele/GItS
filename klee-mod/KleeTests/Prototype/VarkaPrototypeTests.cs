@@ -287,9 +287,13 @@ public class VarkaPrototypeTests : IDisposable
         var onSwirl = Il.Calls(Il.Method("VarkaOath", "OnSwirl"));
         Assert.Contains("VarkaOathLedger.TryCredit", onSwirl);
         Assert.Contains("VarkaOath.Gain", onSwirl);
-        Assert.Contains("ElementalHit.DealUnelemented", onSwirl);   // Pyro, Electro
-        Assert.Contains("CreatureCmd.GainBlock", onSwirl);          // Hydro
-        Assert.Contains("PowerCmd.Apply", onSwirl);                 // Cryo
+        // The expansion moved the four payouts into one `Pay`, which a
+        // Crosscurrent Swirl and Twin Gales call more than once.
+        Assert.Contains("VarkaOath.Pay", onSwirl);
+        var pay = Il.Calls(Il.Method("VarkaOath", "Pay"));
+        Assert.Contains("ElementalHit.DealUnelemented", pay);   // Pyro, Electro
+        Assert.Contains("CreatureCmd.GainBlock", pay);          // Hydro
+        Assert.Contains("PowerCmd.Apply", pay);                 // Cryo
     }
 
     // ---- where Oath is credited, and the play bracket ------------------------
@@ -591,7 +595,7 @@ public class VarkaPrototypeTests : IDisposable
                 t => t.Name == call.Substring("ModelDb.Card<".Length).TrimEnd('>')))!;
         var pool = Cards("VarkaRules", "PoolKnights").Select(Make).ToList();
         var starters = Cards("VarkaRules", "StarterKnights").Select(Make).ToList();
-        Assert.Equal(9, pool.Count);
+        Assert.Equal(13, pool.Count);          // 9, and 13 since the expansion
         Assert.Equal(4, starters.Count);
         Assert.All(pool, k => Assert.True(VarkaRules.IsKnight(k)));
         Assert.All(starters, k => Assert.True(VarkaRules.IsKnight(k)));
@@ -649,22 +653,23 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void The_pool_is_forty_one_cards_fifteen_eighteen_and_eight()
+    public void The_pool_is_seventy_eight_cards_twenty_thirty_five_and_twenty_three()
     {
         var pool = Cards("VarkaRoster", "Pool")
             .Select(c => c.Substring("ModelDb.Card<".Length).TrimEnd('>'))
             .ToList();
-        Assert.Equal(41, pool.Count);
-        Assert.Equal(41, pool.Distinct().Count());
+        // The expansion (2026-10-01): 41 to 78.
+        Assert.Equal(78, pool.Count);
+        Assert.Equal(78, pool.Distinct().Count());
         var types = typeof(VarkaRules).Assembly.GetTypes()
             .Where(t => pool.Contains(t.Name))
             .Select(t => (CardModel)Activator.CreateInstance(t)!)
             .ToList();
-        Assert.Equal(41, types.Count);
-        Assert.Equal(15, types.Count(c => c.Rarity == CardRarity.Common));
-        Assert.Equal(18, types.Count(c => c.Rarity == CardRarity.Uncommon));
-        Assert.Equal(8, types.Count(c => c.Rarity == CardRarity.Rare));
-        Assert.Equal(9, types.Count(VarkaRules.IsKnight));
+        Assert.Equal(78, types.Count);
+        Assert.Equal(20, types.Count(c => c.Rarity == CardRarity.Common));
+        Assert.Equal(35, types.Count(c => c.Rarity == CardRarity.Uncommon));
+        Assert.Equal(23, types.Count(c => c.Rarity == CardRarity.Rare));
+        Assert.Equal(13, types.Count(VarkaRules.IsKnight));
         // The starter's and the Fang's cards are not offered.
         foreach (var starter in new[] { "ProtoVkFourWindsAscension",
                                         "ProtoVkWindboundExecution",

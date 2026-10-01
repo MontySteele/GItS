@@ -38,7 +38,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 70 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 72 (60 Stage cards) |
-| `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (Oath rework built) | 41 |
+| `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (expansion built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
@@ -179,6 +179,18 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   run, one died in act 2. Next: [USER] plays.
   The open-Oath round (`review/records/varka-open-oath-round-2026-10-01.md`):
   one win, one loss to the act-2 Entomancer elite.
+  **The expansion (2026-10-01, ruled):** paper
+  `review/active/varka-expansion-2026-10-01.md`, [USER]: "Agreed on all four.
+  You're good to proceed." Each element has a job (its Swirl payout's) and
+  two payoffs that read its own Oath by name; the Knight pass gives each
+  element one defensive Knight; Muster is six cards. **Sec.3 is built** in
+  both engines: 37 cards (5 / 17 / 15), the Knight pass (Diluc, Gleeful
+  Songs, Heart of the Abyss, Suppressive Barrage, Awakening re-aimed), Noelle
+  a Geo Knight that keeps his element, Downburst's fresh spread (pick 3a).
+  The pool is 78 (20 / 35 / 23), thirteen pool Knights. Readings:
+  provenance note, "Varka expansion, 2026-10-01". His seven relics and three
+  potions (sec.4) are built too (#787). Next: the sec.5 paired sim, then two
+  Sonnet seats.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

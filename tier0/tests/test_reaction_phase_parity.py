@@ -1174,6 +1174,16 @@ CO_TENANCY_LEDGER = {
             "`KleeMod`'s concat, deliberately, so an act cannot move a number "
             "the shipped end-of-turn docket has already drawn. NO SIM TWIN "
             "ORDERS IT: the arm is C# FIRST and tier0 has no stage",
+        ("Powers/Prototype/VarkaPowers.cs", "OathboundAegisPower"):
+            "QUARANTINED (the Varka expansion, 2026-10-01). Oathbound Aegis: "
+            "Block equal to his total Oath, up to its cap. THE ORDERING "
+            "QUESTION, answered: what it READS is the Oath ledger, which no "
+            "co-tenant of this broadcast writes (his relics' and powers' Oath "
+            "moves are play-time and turn-start). What it WRITES is unpowered "
+            "Block, read only by the sequencer's Bond of Life, as Sit Tight's "
+            "below; a power tenant runs ahead of the sequencer, and the sim "
+            "pays it at the same point (`varka_oath.turn_end`, beside Dusk, "
+            "after the hand's own end-of-turn triggers)",
         ("Powers/Prototype/KleeExpansionPowers.cs", "SitTightPower"):
             "QUARANTINED (the Klee overhaul, R276). Sit Tight's delayed "
             "Block: 4 per copy if rule 7's first counter is still 0, then the "
@@ -1235,6 +1245,11 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
+        ("Powers/Prototype/VarkaPowers.cs", "EyeWallPower"):
+            "QUARANTINED (the Varka expansion, 2026-10-01). Eye Wall's 'this "
+            "turn', Grand Master's Order's boundary exactly. Removes itself "
+            "and touches nothing a co-tenant reads. Sim twin: "
+            "`varka_oath.turn_start` pops it",
         ("Powers/Prototype/VarkaPowers.cs", "GrandMastersOrderPower"):
             "QUARANTINED (Varka, prototype batch one). Grand Master's Order's "
             "'this turn', ReplayNextCompanionPower's boundary exactly. Removes "
