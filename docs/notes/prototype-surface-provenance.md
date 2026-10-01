@@ -4422,3 +4422,25 @@ Undercurrent Snare, Feint, Slack Water, Jellyfish Drift). Big Plan's
 gauntlet is unchanged at 47.7%. The limit is the stock pilot, which writes
 its Plans one at a time and rarely holds a Plan card once two wait.
 
+
+## Varka: co-op playtest 2026-09-30
+
+[USER]'s co-op run, decided by the main session. Three changes, no other card
+moved (Knights' Roll Call stays as is, no Exhaust).
+
+1. **Tailwind Stride.** [USER]: "'Tailwind Stride' sounds like 'draw 3' at 1
+   energy and the upgrade makes it free? Way too good!" Base is unchanged
+   (cost 1, draw 2, draw 1 more with a current element). The upgrade no longer
+   cuts the cost; it raises the conditional draw to 2 (draw 2, plus 2 more with
+   a current element). Built with a new delta key `conditional_draw`, which
+   moves the draws inside a conditional's arms and leaves the top-level draw
+   alone (`draw` bumps all of them). Both engines: `tier0/content/upgrades.py`
+   and `tools/gen_klee_cards.py` (the `DrawThen` var, diff-highlighted).
+2. **Rising Gale** Common to Uncommon. [USER]: "'Rising Gale' is basically a
+   cycling card with a clause - may need a bump to Uncommon". Pool is now
+   15 / 18 / 8.
+3. **Upgrades for the six cards that had none.** [USER]: "A few cards on Varka
+   are missing upgrades"; in the run, upgraded copies did nothing. Oath of the
+   Knights, Rally to the Banner, Change of Guard and Four Winds' Accord cost
+   1 to 0; Unfurled Banner gains Retain; Azure Devour 4 to 5 damage per Oath
+   (`formula_per: 1`).

@@ -1014,6 +1014,16 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)
+        elif key == "conditional_draw":
+            # Varka co-op pass 2026-09-30 (Tailwind Stride): the draw INSIDE a
+            # conditional's arms only. Plain `draw` bumps every draw op, the
+            # top-level one included; this leaves the card's own draw alone.
+            top_ids = {id(fx) for fx in top}
+            hits = [fx for fx in everywhere
+                    if fx.get("op") == "draw" and id(fx) not in top_ids]
+            for fx in hits:
+                fx["amount"] += val
+            ok = bool(hits)
         elif key == "tide_draw":
             # `EB-478`, R257. Tide Chart's FLAT half -- "draw 1 more", meaning
             # one card on top of the one per Plan carried out. A key of its own

@@ -67,6 +67,6 @@ public sealed class ProtoVkUnfurledBanner : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        AddKeyword(CardKeyword.Retain);
     }
 }

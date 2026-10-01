@@ -1751,6 +1751,9 @@
     "proto_vk_amber_fiery_rain": {
       "block": 3
     },
+    "proto_vk_azure_devour": {
+      "formula_per": 1
+    },
     "proto_vk_barbara_melody_loop": {
       "block": 3
     },
@@ -1762,6 +1765,9 @@
       "block_next_turn": 2
     },
     "proto_vk_boreas_unbound": {
+      "cost": -1
+    },
+    "proto_vk_change_of_guard": {
       "cost": -1
     },
     "proto_vk_converging_winds": {
@@ -1791,6 +1797,9 @@
     },
     "proto_vk_favonius_drill": {
       "block": 3
+    },
+    "proto_vk_four_winds_accord": {
+      "cost": -1
     },
     "proto_vk_four_winds_ascension": {
       "damage": 3,
@@ -1831,8 +1840,14 @@
       "damage": 4,
       "varka_base": 4
     },
+    "proto_vk_oath_of_the_knights": {
+      "cost": -1
+    },
     "proto_vk_oathsworn_strike": {
       "formula_base": 3
+    },
+    "proto_vk_rally_to_the_banner": {
+      "cost": -1
     },
     "proto_vk_razor_claw_and_thunder": {
       "damage": 3
@@ -1856,10 +1871,13 @@
       "formula_per": 1
     },
     "proto_vk_tailwind_stride": {
-      "cost": -1
+      "conditional_draw": 1
     },
     "proto_vk_tempest_charge": {
       "damage": 3
+    },
+    "proto_vk_unfurled_banner": {
+      "retain": true
     },
     "proto_vk_updraft": {
       "damage": 3
@@ -1874,12 +1892,5 @@
       "damage": 2
     }
   },
-  "no_upgrade": {
-    "proto_vk_azure_devour": "The paper (sec.6) prints no upgrade for this card.",
-    "proto_vk_change_of_guard": "The paper (sec.6) prints no upgrade for this card.",
-    "proto_vk_four_winds_accord": "The paper (sec.6) prints no upgrade for this card.",
-    "proto_vk_oath_of_the_knights": "The paper (sec.6) prints no upgrade for this card.",
-    "proto_vk_rally_to_the_banner": "The paper (sec.6) prints no upgrade for this card.",
-    "proto_vk_unfurled_banner": "The paper (sec.6) prints no upgrade for this card."
-  }
+  "no_upgrade": {}
 }
