@@ -51,7 +51,7 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage.\n[gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1 card."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage.\n[gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} cards."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -61,14 +61,15 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
         new[]
         {
             new KokomiPlan.Planned(KokomiPlan.Kind.Energy, 2, KokomiPlan.Aim.Self),
-            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, 1, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(11m, ValueProp.Move),
-            new ExtraDamageVar(3m)
+            new ExtraDamageVar(3m),
+            new DynamicVar("PlanCards", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -99,5 +100,6 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     {
         DynamicVars.Damage.UpgradeValueBy(3m);
         DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+        DynamicVars["PlanCards"].UpgradeValueBy(1m);
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 using HarmonyLib;
@@ -8,7 +9,10 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes.HoverTips;
 using MegaCrit.Sts2.addons.mega_text;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Nodes.Combat;
@@ -183,7 +187,10 @@ internal static class KokomiPlanStrip
             var thumb = new TextureRect
             {
                 Name = "Plan" + i,
-                MouseFilter = Control.MouseFilterEnum.Ignore,
+                // HOVER SHOWS THE CARD (co-op playtest 2026-09-30: "mousing
+                // over the Plan cards shows only icons"). The mouse is all it
+                // takes; focus stays off (`EB-300`, below).
+                MouseFilter = Control.MouseFilterEnum.Stop,
                 FocusMode = Control.FocusModeEnum.None,
                 ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
                 StretchMode = TextureRect.StretchModeEnum.KeepAspectCovered,
@@ -191,6 +198,7 @@ internal static class KokomiPlanStrip
                 Size = new Vector2(ThumbWidth, ThumbHeight),
                 Visible = false,
             };
+            WireHover(thumb);
             root.AddChildSafely(thumb);
         }
 
@@ -243,10 +251,12 @@ internal static class KokomiPlanStrip
             if (i >= pending.Count)
             {
                 thumb.Visible = false;
+                SetCard(thumb, null);
                 continue;
             }
             thumb.Visible = true;
             thumb.Texture = Portrait(pending[i].Source);
+            SetCard(thumb, pending[i].Source);
         }
 
         if (count == null) return;
@@ -256,6 +266,77 @@ internal static class KokomiPlanStrip
             var n when n > MaxDrawn => "+" + (n - MaxDrawn),
             _ => string.Empty,
         };
+    }
+
+    // ------------------------------------------------------------------
+    // THE HOVER: the whole card, the way the base game previews one
+    // ------------------------------------------------------------------
+
+    /// <summary>The card each thumbnail is drawing, keyed by node instance id.
+    /// Written by <see cref="Paint"/> alone, so a hover always shows the Plan
+    /// the picture is of.</summary>
+    private static readonly Dictionary<ulong, CardModel> Cards = new();
+
+    /// <summary>Whether THIS thumbnail owns a live tip set. On the node, so it
+    /// dies with it. `NHoverTipSet.CreateAndShow` keys its registry by owner and
+    /// ADDS, so a second show without a remove throws -- the Furina cue's
+    /// lesson (`FurinaStageCueNodes`).</summary>
+    private const string HoverShownMeta = "kleemod_plan_hover_shown";
+
+    private static void WireHover(TextureRect thumb)
+    {
+        thumb.MouseEntered += () => ShowHover(thumb);
+        thumb.MouseExited += () => ClearHover(thumb);
+        thumb.TreeExiting += () => Cards.Remove(thumb.GetInstanceId());
+    }
+
+    /// <summary>Point a thumbnail at a card, or at nothing. A changed card
+    /// takes down the tip of the old one: the column shortens under the mouse
+    /// during the morning drain.</summary>
+    private static void SetCard(TextureRect thumb, CardModel? card)
+    {
+        var id = thumb.GetInstanceId();
+        Cards.TryGetValue(id, out var was);
+        if (card == null) Cards.Remove(id);
+        else Cards[id] = card;
+        if (!ReferenceEquals(was, card)) ClearHover(thumb);
+    }
+
+    /// <summary>
+    /// THE CARD PREVIEW AND ITS KEYWORD TIPS, the set the base game shows over
+    /// a hand card (<c>NCardHolder</c>: <c>Model.HoverTips</c>) with the card
+    /// itself in front, as <c>HoverTipFactory.FromCard</c> renders it for an
+    /// "add a card" preview. Placed by the base game's own rule
+    /// (<c>HoverTip.GetHoverTipAlignment</c>), which puts it to the right of a
+    /// left-edge element.
+    /// </summary>
+    private static void ShowHover(TextureRect thumb)
+    {
+        try
+        {
+            if (!thumb.Visible
+                || !Cards.TryGetValue(thumb.GetInstanceId(), out var card))
+            {
+                return;
+            }
+            ClearHover(thumb);
+            var tips = new List<IHoverTip> { HoverTipFactory.FromCard(card) };
+            tips.AddRange(card.HoverTips);
+            NHoverTipSet.CreateAndShow(
+                thumb, tips, HoverTip.GetHoverTipAlignment(thumb));
+            thumb.SetMeta(HoverShownMeta, true);
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] plan strip: hover skipped: {e}");
+        }
+    }
+
+    private static void ClearHover(TextureRect thumb)
+    {
+        if (!thumb.HasMeta(HoverShownMeta)) return;
+        thumb.RemoveMeta(HoverShownMeta);
+        NHoverTipSet.Remove(thumb);
     }
 
     /// <summary>

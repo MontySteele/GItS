@@ -2882,14 +2882,14 @@ def test_riptide_adds_its_rider_per_debuffed_body(overhaul):
 def test_riptides_base_and_rider_upgrade_by_different_amounts(overhaul):
     """14 / 4 more (the Casket pass, 2026-09-28): the `damage` key moves the
     base it rides on and `bonus_vs_debuff` moves the rider's own number. The
-    Plan line (2 Energy and a card) does not upgrade."""
+    Plan's draw goes 2 -> 3 ([USER], 2026-09-30); its 2 Energy does not move."""
     from tier0.content import upgrades
 
     up = upgrades.apply_upgrade(_row("proto_kk_riptide"))
     assert up.effects[0]["amount"] == 14
     assert up.effects[0]["bonus_vs_debuff"] == 4
     assert up.plan == [{"op": "energy", "amount": 2},
-                       {"op": "draw", "amount": 1}]
+                       {"op": "draw", "amount": 3}]
 
 
 def test_battle_plan_writes_this_turns_attack_bonus(overhaul):

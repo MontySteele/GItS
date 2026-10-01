@@ -4422,3 +4422,10 @@ Undercurrent Snare, Feint, Slack Water, Jellyfish Drift). Big Plan's
 gauntlet is unchanged at 47.7%. The limit is the stock pilot, which writes
 its Plans one at a time and rarely holds a Plan card once two wait.
 
+**Riptide's Plan draw (2026-09-30, ruled).** After the co-op playtest in which
+a guest played Kokomi, [USER]: "Riptide - buff the Draw from 1 to 2, and
+upgrades to 3; seems a bit weak at 2 energy". `proto_kk_riptide`'s Plan line
+is now "Gain 2 Energy and draw 2 cards", and the upgrade raises the draw to 3
+through the existing `plan_draw` key (the Plan line's first `draw` clause in
+both engines; the codegen emits it as the `PlanCards` var). The now-line's
+upgrade (14, 4 more on a debuffed enemy) and the Plan's 2 Energy do not move.
