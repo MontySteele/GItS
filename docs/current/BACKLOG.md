@@ -106,6 +106,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Two lanes embarked at the same moment: the second lane's game never came up (its port refused every call) until a teardown and re-embark (2026-09-25 round).
 - `scenario run` cannot start on a lane whose profile holds a saved run: the relaunched game resumed the old boss fight and the menu never became ready (lane 1, 1336 run-history files, 447 s wait).
 - Lane 1 embark `20260929-145523` was never reverted (all its ledger rows APPLIED, pid 27116 still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch.
+- Drowning Beacon's "Bottle" option promised a Glowwater Potion that a base Ironclad seat never received with a slot free (2026-10-01 baseline, `review/records/base-sonnet-baseline-2026-10-01.md`); check whether the game, the mod or the bridge drops it.
+- The bridge does not show the order enemies act in; it decided a base Silent win at 18 HP (same record). Print it when the game exposes it.
 
 ## Sim and measurement (Balance stage; nothing here runs on a prototype)
 - The tier-0.5 Aeonglass (`tier05/content/act3_pool.yaml`) lacks Withering Presence, the growing Strength ramp, Wither upgrades and Artifact, and its Ebb is a stale 22; it cannot test this boss (Aeonglass audit, 2026-10-01). Port from `docs/current/dossiers/enemies/aeonglass.md` when a kit reaches Balance.
