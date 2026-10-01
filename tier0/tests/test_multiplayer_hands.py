@@ -1,12 +1,12 @@
 """The co-op treasure-room hands: names, packing, and the ctex reader.
 
-`tools/gen_multiplayer_hands.py` writes twelve Tier F recolours that the game
+`tools/gen_multiplayer_hands.py` writes sixteen Tier F hands (twelve recolours, Varka's four copies) that the game
 finds only by name: `CharacterModel.Arm<Pose>TexturePath` derives
 `res://images/ui/hands/multiplayer_hand_<id.entry>_<pose>.png` and nothing
 overrides it. So the things that can silently break are all spellings, each
 invisible on its own:
 
-  * the output names against the ids BaseLib gives our three characters;
+  * the output names against the ids BaseLib gives our four characters;
   * the generator's outputs against art_lint's GENERATOR_OWNED claims;
   * build_pck.ps1's copy block landing the files at the ENGINE path;
   * KleeAssetPathFallback no longer sending Klee's arms to the Ironclad's.
@@ -32,7 +32,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import art_lint  # noqa: E402
 import gen_multiplayer_hands as hands  # noqa: E402
 
-CHARACTERS = ("klee", "furina", "kokomi")
+CHARACTERS = ("klee", "furina", "kokomi", "varka")
 BUILD_PCK = ROOT / "tools" / "build_pck.ps1"
 FALLBACK_CS = ROOT / "klee-mod" / "KleeCode" / "KleeAssetPathFallback.cs"
 

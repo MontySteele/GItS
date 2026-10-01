@@ -73,17 +73,15 @@ namespace KleeMod.Vfx;
 /// hue, the <see cref="MeterCostBadge"/> rule, because hue is what a busy
 /// board and a colour-blind player lose first.
 ///
-/// ANEMO AND GEO GET NO GEM, and that is not an omission: they leave no aura
-/// (LAW, combat sec.: "Anemo/Geo leave no aura -- they only trigger"), so there
-/// is no aura icon to draw and they never printed a sentence either. The
-/// indicator says exactly what the sentence said, no more.
+/// GEO GETS NO GEM: it leaves no aura (LAW, combat sec.: "Anemo/Geo leave no
+/// aura -- they only trigger"). ANEMO GOT ONE ON 2026-09-30 (the Varka co-op
+/// playtest; see <see cref="TriggerGemElements"/>): Stormward Stance names
+/// "your Anemo Attacks" and the face has to say which those are.
 ///
-/// `EB-454` GAVE THEM THE KEYWORD ANYWAY, and the split is the point: the two
-/// now carry `KleeKeywords.AppliesAnemo` / `AppliesGeo` -- so they hover a tip
-/// and print `[Anemo]` on the blind page -- while <see cref="AuraElements"/>
-/// and <see cref="IconPathFor"/> stay four, so nothing here paints anything
-/// new. The word is not the picture: the r13 seat read `Jean -- Gale Blade` as
-/// untyped for a whole fight, which is a complaint about the word.
+/// `EB-454` GAVE BOTH THE KEYWORD (`KleeKeywords.AppliesAnemo` /
+/// `AppliesGeo`), so they hover a tip and print `[Anemo]` on the blind page;
+/// the r13 seat read `Jean -- Gale Blade` as untyped for a whole fight. The
+/// Anemo gem now reads that same keyword, so gem and tip stay one declaration.
 /// </summary>
 internal static class ElementBadge
 {
@@ -127,6 +125,30 @@ internal static class ElementBadge
     };
 
     /// <summary>
+    /// ANEMO WEARS A GEM TOO (the Varka + Kokomi co-op playtest, 2026-09-30).
+    /// Stormward Stance reads "your Anemo Attacks", and the player could not
+    /// tell which of Varka's cards those were: the keyword hovered a tip but
+    /// the face showed nothing. The gem is the element's own icon
+    /// (`klee/powers/aura_anemo.png`, art/plan.tsv `power_aura_anemo`); Anemo
+    /// still leaves no aura on a body, so this is the card's element, not a
+    /// promise of an enemy badge. Read AFTER the four aura elements, so a face
+    /// that carries one of them keeps that gem. Geo stays gem-less until a kit
+    /// asks for it.
+    /// </summary>
+    private static readonly Element[] TriggerGemElements =
+    {
+        Element.Anemo,
+    };
+
+    /// <summary>The keyword a gem element is read off. The four aura elements
+    /// go through <see cref="KleeKeywords.AuraApplication"/>, the table the
+    /// tip and codegen share; Anemo is its own keyword.</summary>
+    private static CardKeyword GemKeyword(Element element) =>
+        element == Element.Anemo
+            ? KleeKeywords.AppliesAnemo
+            : KleeKeywords.AuraApplication(element);
+
+    /// <summary>
     /// The element this card's face declares, or <c>Element.None</c>.
     ///
     /// READ OFF THE KEYWORD, not off <see cref="IElementalCard"/> and not off
@@ -151,6 +173,15 @@ internal static class ElementBadge
             }
         }
 
+        foreach (var element in TriggerGemElements)
+        {
+            var keyword = GemKeyword(element);
+            if (keyword != CardKeyword.None && keywords.Contains(keyword))
+            {
+                return element;
+            }
+        }
+
         return Element.None;
     }
 
@@ -167,6 +198,7 @@ internal static class ElementBadge
             Element.Hydro => "klee/powers/aura_hydro.png",
             Element.Electro => "klee/powers/aura_electro.png",
             Element.Cryo => "klee/powers/aura_cryo.png",
+            Element.Anemo => "klee/powers/aura_anemo.png",
             _ => null,
         };
 

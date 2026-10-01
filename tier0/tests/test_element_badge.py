@@ -231,10 +231,14 @@ def test_every_aura_element_declares_a_gem_of_its_own():
         "Hydro": "klee/powers/aura_hydro.png",
         "Electro": "klee/powers/aura_electro.png",
         "Cryo": "klee/powers/aura_cryo.png",
+        # 2026-09-30 (Varka co-op playtest): Anemo's own icon, so Stormward
+        # Stance's "your Anemo Attacks" can be read off the faces.
+        "Anemo": "klee/powers/aura_anemo.png",
     }
-    # The four the keywords name, and only those.
-    assert {e.capitalize() for e in gen.AURA_KEYWORD_BY_ELEMENT} == set(
-        declared)
+    # The four aura keywords, plus Anemo's trigger keyword.
+    assert {e.capitalize() for e in gen.AURA_KEYWORD_BY_ELEMENT} | {
+        "Anemo"} == set(declared)
+    assert "anemo" in gen.ELEMENT_KEYWORD_BY_ELEMENT
 
 
 # ------------------------ `EB-378`: the two holes in the scan ---------------

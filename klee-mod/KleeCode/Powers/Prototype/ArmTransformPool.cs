@@ -40,6 +40,12 @@ namespace KleeMod.Powers;
 /// of her base Strikes or Defends would have offered Silent's pool; she is
 /// claimed here under that arm the same way.
 ///
+/// VARKA TOO (the Varka + Kokomi co-op playtest, 2026-09-30). He starts on
+/// Silent's base pair, and Morphic Grove turned two of his Strikes into Blade
+/// Symphony and Expose; Astrolabe turned three basics into Calculated Gamble,
+/// Slice and Fade (run 1790814703). His basics are claimed here the same way,
+/// so a transform offers his own pool.
+///
 /// NOT A <see cref="ArmStarterBasics"/> SWEPT SITE, and that is why this is a
 /// class of its own: that list is the unguarded `First()` lookups that THROW
 /// or answer wrongly when asked for "the Strike"; this one asks which card a
@@ -65,7 +71,7 @@ public static class ArmTransformPool
         if (owner == null) return null;
         var character = owner.Character;
         if (!(character is IKleeCharacter || character is IKokomiCharacter
-              || character is IFurinaCharacter))
+              || character is IFurinaCharacter || character is IVarkaCharacter))
         {
             return null;
         }

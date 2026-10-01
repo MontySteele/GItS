@@ -3019,7 +3019,10 @@
 # The four starter-only Knights: one joins the starter at random each run.
 
 - {id: proto_vk_amber_fiery_rain, name: "Amber: Precise Shot", character: varka,
-   authored_by: [claude],
+   # No illustration of its own (2026-09-30 co-op playtest: the face was
+   # blank); it wears the companion Amber: Fiery Rain's picture until one is
+   # placed.
+   authored_by: [claude], art_of: proto_mc_amber_fiery_rain,
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: pyro,
    cost: 1, type: skill, personal_pool: varka,
    description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Pyro[/gold] to an enemy.",
