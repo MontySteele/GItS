@@ -108,6 +108,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `play` asked which enemy while the only enemy was dead with its revive pending (Test Subject, Varka round 2026-10-01); the target check should skip the dead.
 
 ## Sim and measurement (Balance stage; nothing here runs on a prototype)
+- The tier-0.5 Aeonglass (`tier05/content/act3_pool.yaml`) lacks Withering Presence, the growing Strength ramp, Wither upgrades and Artifact, and its Ebb is a stale 22; it cannot test this boss (Aeonglass audit, 2026-10-01). Port from `docs/current/dossiers/enemies/aeonglass.md` when a kit reaches Balance.
 
 - `EB-195` (waits for a kit at Balance, legacy cleanup pick 5; on the current kits) the next re-baseline window: one twelve-arm table carrying the HP moves, the `POLICY_VERSION` bump for `PILOT_BURST_DIVISOR`'s removal, `EB-255` and `EB-810`.
 - `EB-255` `archetype_shares` excludes starters by rarity, so 13 starter rows read back as drafts; exclude by membership inside `EB-195`'s bump.
