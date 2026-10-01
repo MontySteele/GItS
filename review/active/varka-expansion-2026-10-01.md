@@ -1,6 +1,8 @@
 # Varka expansion: his own relics, and the pool to 78
 
-Paper, 2026-10-01, revised the same day. Main session design. The kit's rules
+Paper, 2026-10-01, revised the same day. Main session design. **All four picks
+RULED 2026-10-01 at their defaults, [USER]: "Agreed on all four. You're good to
+proceed."** The kit's rules
 are in `review/active/varka-paper-kit-2026-09-28.md` §3; this paper adds
 cards, relics and potions, re-aims five Knights, and changes no rule.
 
