@@ -59,10 +59,13 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
     public override RelicPoolModel RelicPool =>
         ModelDb.RelicPool<VarkaRelicPool>();
 
-    /// <summary>The Silent's potions, the borrow Kokomi runs on, until his
-    /// relic and potion pass (sec.5's flavour list).</summary>
+    /// <summary>His own three with the arm live
+    /// (<c>review/active/varka-expansion-2026-10-01.md</c> sec.4, pick 1);
+    /// the Silent's potions, the borrow Kokomi runs on, with it off.</summary>
     public override PotionPoolModel PotionPool =>
-        ModelDb.PotionPool<SilentPotionPool>();
+        VarkaPrototype.Enabled
+            ? ModelDb.PotionPool<Potions.VarkaPotionPool>()
+            : ModelDb.PotionPool<SilentPotionPool>();
 
     public override IEnumerable<CardModel> StartingDeck =>
         VarkaRoster.StartingDeck();

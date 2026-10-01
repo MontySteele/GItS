@@ -111,8 +111,20 @@ public sealed class VarkaOathLedger
     public int Oath(Element element) =>
         _oath.TryGetValue(element, out var n) ? n : 0;
 
-    /// <summary>The one count his cards read: the current element's.</summary>
-    public int CurrentOath => Oath(Current);
+    /// <summary>The one count his cards read: the current element's, or all
+    /// four together on a turn he drank the Elixir of the Four Winds.
+    /// </summary>
+    public int CurrentOath => AllFourThisTurn ? Total : Oath(Current);
+
+    private int _allFourRound = -1;
+
+    /// <summary>Elixir of the Four Winds: "This turn, your cards read your
+    /// total Oath across all four elements." Read off the round the ledger
+    /// is rolled to, so the next round ends it.</summary>
+    public bool AllFourThisTurn => _allFourRound >= 0 && _allFourRound == _round;
+
+    /// <summary>The Elixir is drunk: this round reads all four.</summary>
+    public void ReadAllFourThisTurn() => _allFourRound = _round;
 
     /// <summary>How many elements he has any Oath in (Tailwind Guard).</summary>
     public int ElementsWithOath => Elements.Count(e => Oath(e) > 0);
@@ -151,6 +163,21 @@ public sealed class VarkaOathLedger
         if (_scopeDepth > 0) _swirledThisPlay.Add(swirled);
     }
 
+    /// <summary>Banner of the West Wind: every point of
+    /// <paramref name="from"/> moves to <paramref name="to"/>. Not a gain.
+    /// Returns how many moved.</summary>
+    public int MoveOath(Element from, Element to)
+    {
+        if (from == to || !_oath.ContainsKey(from) || !_oath.ContainsKey(to))
+        {
+            return 0;
+        }
+        var moved = _oath[from];
+        _oath[from] = 0;
+        _oath[to] += moved;
+        return moved;
+    }
+
     /// <summary>Rally to the Banner: every point moves to the current
     /// element. Nothing without one.</summary>
     public void Rally()
@@ -186,6 +213,11 @@ public sealed class VarkaOathLedger
     /// <summary>While positive, an application credits nothing (Four Winds'
     /// Ascension's elemental hit).</summary>
     public int SuppressApply { get; set; }
+
+    /// <summary>While positive, a Swirl credits nothing either: a relic's or
+    /// a potion's Swirls (the expansion paper, sec.4: "Relic and potion
+    /// applications gain no Oath"). The payout still pays.</summary>
+    public int SuppressSwirl { get; set; }
 
     /// <summary>A play opens: its credits start empty. <paramref name="open"/>
     /// marks a play of his own non-Knight card (<paramref name="card"/>),
@@ -237,6 +269,7 @@ public sealed class VarkaOathLedger
     {
         if (!_oath.ContainsKey(element)) return false;
         if (!swirl && SuppressApply > 0) return false;
+        if (swirl && SuppressSwirl > 0) return false;
         if (_scopeDepth == 0) return true;
         return _credited.Add((swirl, element));
     }
@@ -354,6 +387,22 @@ public static class VarkaOath
         return new Closer(() => ledger.SuppressApply--);
     }
 
+    /// <summary>While open, neither an application nor a Swirl credits Oath,
+    /// and no application switches his element: a relic's or a potion's
+    /// (Dandelion Seeds, Bottled Gale).</summary>
+    public static IDisposable NoCredit(Creature creature)
+    {
+        if (!Live(creature)) return new Closer(null);
+        var ledger = VarkaOathLedger.For(creature);
+        ledger.SuppressApply++;
+        ledger.SuppressSwirl++;
+        return new Closer(() =>
+        {
+            ledger.SuppressApply--;
+            ledger.SuppressSwirl--;
+        });
+    }
+
     private sealed class Closer : IDisposable
     {
         private Action? _close;
@@ -386,8 +435,13 @@ public static class VarkaOath
                     ValueProp.Unpowered, null, fast: true);
             }
         }
+        var was = ledger.Current;
         if (ledger.SetCurrent(element))
         {
+            // His relics (the expansion paper, sec.4): Banner of the West Wind
+            // carries the old element's Oath over first, then Windblume
+            // Garland's Block.
+            await Relics.VarkaArmRelics.OnElementChanged(varka, was, element);
             foreach (var unbound in varka.Powers.OfType<BoreasUnboundPower>().ToList())
             {
                 await unbound.OnElementChanged();
@@ -471,38 +525,43 @@ public static class VarkaOath
             await Gain(choiceContext, dealer, swirled, 1);
         }
         var current = ledger.Current;
-        switch (current)
+        // Stormterror's Scale: "Your Swirls pay twice."
+        var payouts = Relics.StormterrorsScale.TakePayouts(dealer);
+        for (var pay = 0; pay < payouts; pay++)
         {
-            case Element.Pyro:
-                if (target.IsAlive)
-                {
-                    await ElementalHit.DealUnelemented(
-                        choiceContext, target, VarkaLaw.SwirlPyroDamage, dealer,
-                        powered: false);
-                }
-                break;
-            case Element.Hydro:
-                await CreatureCmd.GainBlock(dealer, VarkaLaw.SwirlHydroBlock,
-                    ValueProp.Unpowered, null, fast: true);
-                break;
-            case Element.Cryo:
-                if (target.IsAlive)
-                {
-                    await PowerCmd.Apply<VulnerablePower>(
-                        choiceContext, target, VarkaLaw.SwirlCryoVulnerable,
-                        applier: dealer, cardSource: null);
-                }
-                break;
-            case Element.Electro:
-                foreach (var enemy in dealer.CombatState?.HittableEnemies.ToList()
-                                      ?? new List<Creature>())
-                {
-                    if (!enemy.IsAlive) continue;
-                    await ElementalHit.DealUnelemented(
-                        choiceContext, enemy, VarkaLaw.SwirlElectroDamageAll,
-                        dealer, powered: false);
-                }
-                break;
+            switch (current)
+            {
+                case Element.Pyro:
+                    if (target.IsAlive)
+                    {
+                        await ElementalHit.DealUnelemented(
+                            choiceContext, target, VarkaLaw.SwirlPyroDamage, dealer,
+                            powered: false);
+                    }
+                    break;
+                case Element.Hydro:
+                    await CreatureCmd.GainBlock(dealer, VarkaLaw.SwirlHydroBlock,
+                        ValueProp.Unpowered, null, fast: true);
+                    break;
+                case Element.Cryo:
+                    if (target.IsAlive)
+                    {
+                        await PowerCmd.Apply<VulnerablePower>(
+                            choiceContext, target, VarkaLaw.SwirlCryoVulnerable,
+                            applier: dealer, cardSource: null);
+                    }
+                    break;
+                case Element.Electro:
+                    foreach (var enemy in dealer.CombatState?.HittableEnemies.ToList()
+                                          ?? new List<Creature>())
+                    {
+                        if (!enemy.IsAlive) continue;
+                        await ElementalHit.DealUnelemented(
+                            choiceContext, enemy, VarkaLaw.SwirlElectroDamageAll,
+                            dealer, powered: false);
+                    }
+                    break;
+            }
         }
         if (current != Element.None)
         {

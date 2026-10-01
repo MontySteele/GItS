@@ -63,7 +63,9 @@ public abstract class OathBadgePower : PowerModel, ILocalizationProvider
         {
             if (!IsMutable || Owner == null) return Amount;
             var ledger = VarkaOathLedger.For(Owner);
-            return Element == Element.None ? ledger.Total : ledger.Oath(Element);
+            // Elixir of the Four Winds: this turn his cards read all four.
+            return Element == Element.None || ledger.AllFourThisTurn
+                ? ledger.Total : ledger.Oath(Element);
         }
     }
 

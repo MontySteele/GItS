@@ -35,6 +35,14 @@ public static class ArmRelicPools
             .Append(typeof(CurtainNeverFalls))
             .ToArray();
 
+    /// <summary>Varka's pool: Boreas's Fang, his seven, Wolf's Gravestone
+    /// (<c>review/active/varka-expansion-2026-10-01.md</c> sec.4).</summary>
+    public static readonly IReadOnlyList<Type> VarkaArmPool =
+        new[] { typeof(BoreasFang) }
+            .Concat(VarkaArmRelics.Types)
+            .Append(typeof(WolfsGravestone))
+            .ToArray();
+
     /// <summary>What the pool offers: the arm pool's members with the arm
     /// on, every member but <paramref name="armOnly"/> with it off.</summary>
     public static IEnumerable<RelicModel> Offer(
