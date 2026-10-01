@@ -184,6 +184,11 @@ public sealed class ProtoFsGrandEntranceModeB : ModalOptionCard
     {
     }
 
+    /// <summary>The Spend warning: the guests this Spend would leave
+    /// unable to pay for their act.</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForSpendShortfall(base.ExtraHoverTips, this, 7);
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {

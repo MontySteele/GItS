@@ -733,4 +733,38 @@ public class FurinaGuestCastTests
             Assert.Contains("End of your turn: ", Printed("For" + guest));
         }
     }
+
+    // ---- the Spend warning (pool round 2026-10-01, "What to change" 2) -----
+
+    [Fact]
+    public void A_spend_names_the_guests_it_leaves_unable_to_pay()
+    {
+        using var _ = new Arm();
+        // Neuvillette at the back pays the Spend first: 4 - 2 is short of 3.
+        var (seat, stage) = Stage(("usher", 3), ("neuvillette", 4));
+        Assert.Equal(new[] { StagePerformer.Neuvillette },
+                     stage.StrandedBySpend(2));
+        Assert.Equal(new[] { StagePerformer.Neuvillette },
+                     FurinaStage.StrandedBySpend(seat.Creature, 2));
+        Assert.Empty(stage.StrandedBySpend(1));
+        // Pure: the board is untouched.
+        Assert.Equal(new[] { 3, 4 }, Bars(stage));
+        Assert.Empty(stage.Beats);
+
+        // Clorinde left alone: the Spend empties the only other performer.
+        var (_, clorinde) = Stage(("clorinde", 5), ("usher", 2));
+        Assert.Equal(new[] { StagePerformer.Clorinde },
+                     clorinde.StrandedBySpend(2));
+
+        // Chevreuse's act spends the back performer, which the Spend drained.
+        var (_, chevreuse) = Stage(("chevreuse", 4), ("usher", 3));
+        Assert.Equal(new[] { StagePerformer.Chevreuse },
+                     chevreuse.StrandedBySpend(FurinaStageLaw.ActChevreusePrice));
+
+        // Already short before the Spend: the Spend is not the cause.
+        var (_, already) = Stage(("usher", 3), ("neuvillette", 2));
+        Assert.Empty(already.StrandedBySpend(1));
+        // A Spend the stage cannot pay is not offered, so it warns of nothing.
+        Assert.Empty(already.StrandedBySpend(9));
+    }
 }

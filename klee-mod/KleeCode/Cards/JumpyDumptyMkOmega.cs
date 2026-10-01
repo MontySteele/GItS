@@ -18,8 +18,9 @@ namespace KleeMod.Cards;
 
 /// <summary>
 /// Klee's Ancient-rarity card, the top of the Jumpy Dumpty family
-/// (basic -> Mk.II -> this). Dusty Tome is its only door: reward, transform
-/// and shop generation all filter CardRarity.Ancient upstream (decompiled
+/// (basic -> Mk.III -> this; Mk.II under the old shipped kits). Dusty Tome is
+/// its only door: reward, transform and shop generation all filter
+/// CardRarity.Ancient upstream (decompiled
 /// CardFactory), so membership in RosterAncientCards.Klee does not make it
 /// rollable. DustyTome.AfterObtained upgrades the grant, so the card is
 /// designed to be READ at its upgraded numbers -- the base line exists for
@@ -29,7 +30,6 @@ namespace KleeMod.Cards;
 /// Dumpty ... scaled to the rest of the Ancient rewards". Hand-written and
 /// outside the ratified sheets: the sim models neither events nor relics,
 /// so Ancient cards are game-side-only content (DECISIONS entry 2026-07-23).
-/// Title pending the naming/lore audit.
 ///
 /// UNDER THE KLEE OVERHAUL (R276 hygiene) it is the arm's card too: Dusty
 /// Tome draws it from the arm's own offerable pool (`EB-284`), and a shipped
