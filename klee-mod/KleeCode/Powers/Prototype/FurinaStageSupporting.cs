@@ -282,7 +282,8 @@ public static partial class FurinaStage
         if (show > 0 && !Occupied(furina) && furina.Player is { } player)
         {
             await PlayerCmd.GainEnergy(show, player);
-            await CardPileCmd.Draw(choiceContext, show, player);
+            // Power cost sweep, 2026-09-30: draw 2 a copy (was 1).
+            await CardPileCmd.Draw(choiceContext, 2 * show, player);
         }
         var turns = (int)furina.Powers.OfType<RevolvingStagePower>()
             .Sum(p => p.Amount);
@@ -449,7 +450,8 @@ public sealed class SoliloquyPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary><i>One-Woman Show</i>: "At the start of your turn, if no one is
-/// on stage, gain 1 Energy and draw 1 card", asked first of the turn-start
+/// on stage, gain 1 Energy and draw 2 cards" (draw 1 until the
+/// power cost sweep, 2026-09-30), asked first of the turn-start
 /// powers, on the stage the turn found (<see cref="FurinaStage.TurnStartPowers"/>).
 /// Copies add.</summary>
 public sealed class OneWomanShowPower : PowerModel, ILocalizationProvider
@@ -459,8 +461,8 @@ public sealed class OneWomanShowPower : PowerModel, ILocalizationProvider
         ("title", "One-Woman Show"),
         ("description",
             "At the start of your turn, if no one is on stage, gain "
-          + "[blue]{Amount}[/blue] [gold]Energy[/gold] and draw "
-          + "[blue]{Amount}[/blue] {Amount:plural:card|cards}."),
+          + "[blue]{Amount}[/blue] [gold]Energy[/gold] and draw twice "
+          + "that many cards."),
     };
 
     public override PowerType Type => PowerType.Buff;

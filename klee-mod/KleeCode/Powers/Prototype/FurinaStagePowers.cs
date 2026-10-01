@@ -139,8 +139,8 @@ public sealed class FiveCenturyActPower : PowerModel, ILocalizationProvider
         ("title", "A Five-Century Act"),
         ("description",
             "The first time each turn a performer [gold]Bow[/gold]s and "
-          + "leaves, it returns at the back with 1 [gold]Fanfare[/gold] if a "
-          + "seat is free."),
+          + "leaves, it returns at the back with [blue]{Amount}[/blue] "
+          + "[gold]Fanfare[/gold] if a seat is free."),
     };
 
     public override PowerType Type => PowerType.Buff;

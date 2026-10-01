@@ -353,6 +353,9 @@ PRINCESS_OF_WATATSUMI_DRAW = 1
 #: pick 3) and its power left both engines with it.
 GRAND_DESIGN = "kk_grand_design"          # Casket +N per Energy paid, per carry-out
 LONG_GAME = "kk_the_long_game"            # +N Energy when exactly 1 Plan waits
+#: Power cost sweep, 2026-09-30: The Long Game+ installs this twin instead
+#: (+N Energy and draw N). C# twin: `TheLongGamePlusPower`.
+LONG_GAME_PLUS = "kk_the_long_game_plus"
 AT_WATERS_EDGE = "kk_at_waters_edge"      # Weak N + Vulnerable N per reaction
 CEREMONIAL_GARMENT = "kk_ceremonial_garment"  # +N per debuff, her Attacks
 WATATSUMIS_GRACE = "kk_watatsumis_grace"  # keep up to N Block at turn end
@@ -2415,16 +2418,20 @@ def plan_energy_waiting(state: CombatState) -> int:
 def long_game(state: CombatState, waiting: int) -> None:
     """THE LONG GAME: "At the start of your turn, if exactly one Plan is
     waiting, gain 1 Energy." `waiting` is the queue read before the morning
-    drain, Moon Signal's read. Copies stack the gain.
+    drain, Moon Signal's read. Copies stack the gain. The upgraded card's
+    twin (`LONG_GAME_PLUS`, power cost sweep 2026-09-30) also draws 1.
     `TheLongGamePower.Signal` is the twin."""
     if not live(state):
         return
-    n = int(state.player.powers.get(LONG_GAME, 0))
+    plus = int(state.player.powers.get(LONG_GAME_PLUS, 0))
+    n = int(state.player.powers.get(LONG_GAME, 0)) + plus
     if n <= 0 or waiting != C.KOKOMI_EXPANSION_LONG_GAME_WAITING:
         return
     state.player.energy += n
     state.emit("energy", amount=n)
     state.emit("plan_long_game", amount=n)
+    if plus > 0:
+        state.draw(plus)
 
 
 def note_reaction(state: CombatState, enemy: Enemy) -> None:

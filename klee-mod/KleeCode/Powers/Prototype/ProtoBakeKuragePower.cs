@@ -120,7 +120,7 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         MoonSignalPower.Signal(Owner, waiting);
         // THE EXPANSION, BATCH ONE: The Long Game reads the same pre-drain
         // queue.
-        await TheLongGamePower.Signal(Owner, waiting);
+        await TheLongGamePower.Signal(Owner, waiting, choiceContext);
         await KokomiPlan.ResolveAll(choiceContext, Owner);
         if (quiet) await SongOfPearlsPower.Strike(choiceContext, Owner);
         // `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning:

@@ -213,15 +213,51 @@ public sealed class TheLongGamePower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public static async Task Signal(Creature? kokomi, int waiting)
+    /// <summary>Both twins at once: the base power's Energy, and
+    /// <see cref="TheLongGamePlusPower"/>'s Energy and draw (power cost
+    /// sweep, 2026-09-30). The draw needs <paramref name="choiceContext"/>.
+    /// </summary>
+    public static async Task Signal(Creature? kokomi, int waiting,
+                                    PlayerChoiceContext? choiceContext = null)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         var player = kokomi!.Player;
-        var game = kokomi.Powers.OfType<TheLongGamePower>().FirstOrDefault();
-        if (player == null || game == null || game.Amount <= 0) return;
+        if (player == null) return;
         if (waiting != KokomiOverhaulLaw.LongGameWaiting) return;
-        await PlayerCmd.GainEnergy((int)game.Amount, player);
+        var energy = (int)kokomi.Powers.OfType<TheLongGamePower>()
+            .Sum(p => p.Amount);
+        var plus = (int)kokomi.Powers.OfType<TheLongGamePlusPower>()
+            .Sum(p => p.Amount);
+        if (energy + plus > 0)
+        {
+            await PlayerCmd.GainEnergy(energy + plus, player);
+        }
+        if (plus > 0 && choiceContext != null)
+        {
+            await CardPileCmd.Draw(choiceContext, plus, player);
+        }
     }
+}
+
+/// <summary>The Long Game+ (power cost sweep, 2026-09-30): "At the start of
+/// your turn, if exactly one Plan is waiting, gain 1 Energy and draw 1 card."
+/// The upgraded card installs this twin instead of
+/// <see cref="TheLongGamePower"/>, whose <c>Signal</c> pays both. Sim twin:
+/// <c>kokomi_plan.long_game</c>.</summary>
+public sealed class TheLongGamePlusPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "The Long Game+"),
+        ("description",
+            "At the start of your turn, if exactly one [gold]Plan[/gold] is "
+          + "waiting, gain [blue]{Amount}[/blue] [gold]Energy[/gold] and draw "
+          + "[blue]{Amount}[/blue] {Amount:plural:card|cards}."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary>At Water's Edge (her C1). The Power hooks nothing; the reaction

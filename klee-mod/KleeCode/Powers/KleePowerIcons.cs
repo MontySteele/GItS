@@ -148,6 +148,7 @@ internal static class KleePowerIcons
         KurageSwarmPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
         TheLongGamePower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        TheLongGamePlusPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         NereidsAscensionPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         // The four with no shipped Kokomi power to borrow from -- the Plan
@@ -386,6 +387,8 @@ internal static class KleePowerIcons
             KleePck.Path("varka/powers/stormward_stance.png"),
         DawnWindsMarchPower => KleePck.Path("varka/powers/boreas_unbound.png"),
         SwornBrotherhoodPower =>
+            KleePck.Path("varka/powers/converging_winds.png"),
+        SwornBrotherhoodCurrentPower =>
             KleePck.Path("varka/powers/converging_winds.png"),
         VarkaBaronBunnyPower => KleePck.Path("varka/powers/pyro_wind.png"),
         GrandMastersOrderPower => KleePck.Path("klee/powers/study_buddy.png"),

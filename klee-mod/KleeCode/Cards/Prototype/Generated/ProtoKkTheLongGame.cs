@@ -45,7 +45,7 @@ public sealed class ProtoKkTheLongGame : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Long Game"),
-        ("description", "At the start of your turn, if exactly one [gold]Plan[/gold] is waiting, gain 1 [gold]Energy[/gold]."),
+        ("description", "At the start of your turn, if exactly one [gold]Plan[/gold] is waiting, gain 1 [gold]Energy[/gold]{IfUpgraded:show: and draw 1 card|}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,18 @@ public sealed class ProtoKkTheLongGame : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<TheLongGamePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await PowerCmd.Apply<TheLongGamePlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
+        else
+        {
+            await PowerCmd.Apply<TheLongGamePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        // upgraded_power: the upgraded card installs TheLongGamePlusPower, read off IsUpgraded when the card is played.
     }
 }

@@ -45,13 +45,13 @@ public sealed class ProtoVkStormwardStance : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stormward Stance"),
-        ("description", "While your [gold]current element[/gold] has 4 or more [gold]Oath[/gold], your Anemo Attacks deal 3 additional damage."),
+        ("description", "While your [gold]current element[/gold] has 4 or more [gold]Oath[/gold], your Anemo Attacks deal {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoVkStormwardStance : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<StormwardStancePower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<StormwardStancePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
     }
 }

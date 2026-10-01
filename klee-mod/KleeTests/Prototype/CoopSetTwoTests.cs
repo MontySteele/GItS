@@ -44,7 +44,7 @@ public class CoopSetTwoTests
     public static IEnumerable<object[]> Four => new[]
     {
         Row<ProtoFsRaiseAToast>(1, CardType.Skill, CardRarity.Uncommon),
-        Row<ProtoFsTheCrowdRoars>(2, CardType.Power, CardRarity.Rare),
+        Row<ProtoFsTheCrowdRoars>(1, CardType.Power, CardRarity.Rare),
         Row<ProtoKoShrapnel>(1, CardType.Skill, CardRarity.Uncommon),
         Row<ProtoKoSparksForEveryone>(2, CardType.Power, CardRarity.Rare),
     };
@@ -88,7 +88,7 @@ public class CoopSetTwoTests
             Face(new ProtoFsRaiseAToast()));
         Assert.Equal(
             "Whenever another player loses HP, your [gold]front "
-            + "performer[/gold] gains 1 [gold]Fanfare[/gold].",
+            + "performer[/gold] gains {PowerAmount:diff()} [gold]Fanfare[/gold].",
             Face(new ProtoFsTheCrowdRoars()));
         Assert.Equal(
             "Place a [gold]Mine[/gold] {BombSize:diff()}. While an enemy holds "
@@ -116,9 +116,12 @@ public class CoopSetTwoTests
         Upgrade(shrapnel);
         Assert.Equal(7m, shrapnel.DynamicVars["BombSize"].BaseValue);
 
-        // The Crowd Roars: cost 2 -> 1, and nothing else moves.
+        // The Crowd Roars (power cost sweep, 2026-09-30): costs 1, and the
+        // upgrade raises the front performer's Fanfare 1 -> 2, cost unmoved.
         var roars = new ProtoFsTheCrowdRoars();
+        Assert.Equal(1m, roars.DynamicVars["PowerAmount"].BaseValue);
         Upgrade(roars);
+        Assert.Equal(2m, roars.DynamicVars["PowerAmount"].BaseValue);
         Assert.Equal(1, roars.EnergyCost.GetWithModifiers(CostModifiers.None));
 
         // Sparks for Everyone: gains Innate, and the cost stays 2 ([USER],

@@ -550,6 +550,13 @@ public static class VarkaOath
                 await Gain(choiceContext, varka, element, sworn.Amount);
             }
         }
+        // Power cost sweep, 2026-09-30: the base card, current element only.
+        foreach (var sworn in varka.Powers.OfType<SwornBrotherhoodCurrentPower>().ToList())
+        {
+            var element = Current(varka);
+            if (element == Element.None) continue;
+            await Gain(choiceContext, varka, element, sworn.Amount);
+        }
         foreach (var oath in varka.Powers.OfType<OathOfTheKnightsPower>().ToList())
         {
             var block = CurrentOath(varka) * oath.Amount;

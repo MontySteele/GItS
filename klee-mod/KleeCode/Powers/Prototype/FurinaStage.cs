@@ -1277,6 +1277,13 @@ public static partial class FurinaStage
         await AfterBow(choiceContext, owner, exit.Who, mayReturn);
     }
 
+    /// <summary>A Five-Century Act's returnee Fanfare: the power's amount
+    /// (1 a copy, 3 upgraded; power cost sweep, 2026-09-30), 0 without one.
+    /// Sim twin: <c>furina_stage._after_bow</c>.</summary>
+    public static int ReturnFanfare(Creature? owner) =>
+        owner == null ? 0
+            : (int)owner.Powers.OfType<FiveCenturyActPower>().Sum(p => p.Amount);
+
     /// <summary>
     /// R276 batch two: what a Bow sets off, after the bowing performer has
     /// left and its departure effect has resolved.
@@ -1285,13 +1292,15 @@ public static partial class FurinaStage
     ///     Raise its Amount on the back performer (round four: on an empty
     ///     stage the Raise summons a random performer holding it).
     ///   * <see cref="FiveCenturyActPower"/>, any number of copies: the
-    ///     performer returns to the back-most empty seat at 1 and rests
+    ///     performer returns to the back-most empty seat at the Act's amount
+    ///     (<see cref="ReturnFanfare"/>: 1, or 3 upgraded, since the power
+    ///     cost sweep 2026-09-30) and rests
     ///     through this turn's acts. Once a turn in all (2026-09-27) -- and
     ///     not at all from <i>Let the People Rejoice</i>, whose own return is
     ///     the return.
     ///
     /// THE ORDER IS APPLAUSE THEN RETURN, so the applause's Raise lands on the
-    /// stage the bow left; a returnee arrives after it at 1.
+    /// stage the bow left; a returnee arrives after it.
     /// </summary>
     private static async Task AfterBow(PlayerChoiceContext choiceContext,
                                        Creature owner, StagePerformer who,
@@ -1315,8 +1324,9 @@ public static partial class FurinaStage
         }
         // 2026-09-27: the first Bow-and-leave each turn only, however many
         // copies (`FurinaStageLedger.ReturnOnce`).
-        if (mayReturn && owner.Powers.OfType<FiveCenturyActPower>().Any()
-            && FurinaStageLedger.For(owner).ReturnOnce(who))
+        var fanfare = ReturnFanfare(owner);
+        if (mayReturn && fanfare > 0
+            && FurinaStageLedger.For(owner).ReturnOnce(who, fanfare))
         {
             await FurinaStagePets.Sync(owner);
             Vfx.FurinaStageCues.Refresh(owner);
