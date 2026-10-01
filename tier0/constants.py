@@ -862,6 +862,10 @@ KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD = 2      # Moon Signal: "2 or more Plans"
 # prints, "if exactly one Plan is waiting". Mirrored BY VALUE against
 # `KokomiOverhaulLaw` by `tools/lint_constant_parity.py`.
 KOKOMI_EXPANSION_LONG_GAME_WAITING = 1
+# THE STATUS BATCH (2026-10-01): Abyssal Salvage+'s "and you gain 2 Block" per
+# stack per exhausted status or curse. Mirrored BY VALUE against
+# `AbyssalSalvagePlusPower.BlockPerStack` by `tools/lint_constant_parity.py`.
+KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK = 2
 KOKOMI_OVERHAUL_RALLY_DISCOUNT = 1  # Rally: the next Companion costs this less
 # `EB-668` (`EB-655` reopened). Battle Plan's carry-out: "the next Attack you
 # play face-up this turn deals 4 additional damage." A RULE'S number and not a
@@ -914,7 +918,6 @@ KOKOMI_EXPANSION_BATCH_ONE_IDS: tuple[str, ...] = (
     "proto_kk_grand_design",
     "proto_kk_the_long_game",
     "proto_kk_masterstroke",
-    "proto_kk_all_streams_flow_to_the_sea",
     "proto_kk_drowning_pressure",
     "proto_kk_salt_in_the_wound",
     "proto_kk_undercurrent_snare",
@@ -954,7 +957,25 @@ KOKOMI_POOL_COMPLETION_IDS: tuple[str, ...] = (
     "proto_kk_watatsumi_resistance",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SEVENTY-EIGHT rows since
+# THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-2026-10-01.md,
+# ruled): six cards that deal with statuses and curses through the next hand,
+# appended LAST to `KOKOMI_OVERHAUL_POOL_IDS` in the sheet's own order. Seven
+# rows left the pool (Rally, Pearl Diver, Battle Plan, Feigned Retreat, Moon
+# Signal, Chain of Command, All Streams Flow to the Sea). The paper's seventh
+# card, the Rare Coral Sanctuary, is being redesigned by the main session and
+# is not built: the pool is 77 (21 / 36 / 20) until its replacement lands.
+KOKOMI_STATUS_BATCH_IDS: tuple[str, ...] = (
+    "proto_kk_kelp_wall",
+    "proto_kk_tidecleanse",
+    "proto_kk_sea_glass_harvest",
+    "proto_kk_turning_tide",
+    "proto_kk_flotsam_surge",
+    "proto_kk_abyssal_salvage",
+)
+
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SEVENTY-SEVEN rows since the
+# status batch (2026-10-01: seven cut, six added, one Rare slot open);
+# SEVENTY-EIGHT rows since
 # pool completion (2026-10-01: eight added); SEVENTY since the
 # payoff pass (2026-10-01: Second Thoughts cut, two added; expansion batch one,
 # 2026-09-29, made it 69), in the packet's own order
@@ -1000,15 +1021,12 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_the_moon_a_ship",
     "proto_kk_sango_isshin",
     # The Commander -- Gorou, go (4)
-    "proto_kk_rally",
     "proto_kk_vanguard",
     "proto_kk_the_generals_banner",
-    "proto_kk_chain_of_command",
     # Currencies, tempo, and the one replay (5)
     "proto_kk_stolen_chapter",
     "proto_kk_change_of_plans",
     "proto_kk_undertow",
-    "proto_kk_battle_plan",
     "proto_kk_moons_reflection",
     # THE TEMPO SHELF (round 9 pick 1, 2026-09-04) was Tide Chart and Ripple;
     # the Casket pass (2026-09-28) cut both.
@@ -1020,7 +1038,6 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_riptide",
     "proto_kk_pincer",
     "proto_kk_flank",
-    "proto_kk_feigned_retreat",
     # POOL PASS TWO (`EB-643`, R265): the answer to "the Plan plays itself".
     # Seven rows that make the QUEUE something the player operates on rather
     # than something that empties on a timer -- two riders on the next Plan
@@ -1057,14 +1074,12 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_massed_volley",
     "proto_kk_signal_arrow",
     "proto_kk_surging_shoal",
-    "proto_kk_pearl_diver",
     "proto_kk_press_the_advantage",
     "proto_kk_shell_of_sanctuary",
     "proto_kk_driftglass",
     "proto_kk_what_the_tokoyo_returns",
     "proto_kk_depths_judgment",
     "proto_kk_tideturn",
-    "proto_kk_moon_signal",
     "proto_kk_pearl_current",
     "proto_kk_what_the_tokoyo_took",
     # THE FEED PASS (2026-09-29): five 0-cost Plan-only Commons, the cheap
@@ -1080,9 +1095,12 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # THE PAYOFF PASS (2026-10-01): Kurage Canopy and Coral Tithe. The pool
     # was 70 (19 / 37 / 14).
     *KOKOMI_PAYOFF_PASS_IDS,
-    # POOL COMPLETION (2026-10-01): eight rows, LAST. The pool is 78 (21 / 36
-    # / 21).
+    # POOL COMPLETION (2026-10-01): eight rows. The pool was 78 (21 / 36 /
+    # 21).
     *KOKOMI_POOL_COMPLETION_IDS,
+    # THE STATUS BATCH (2026-10-01): six rows, LAST. The pool is 77 (21 / 36
+    # / 20); Coral Sanctuary's replacement is the open Rare slot.
+    *KOKOMI_STATUS_BATCH_IDS,
 )
 
 # THE CO-OP SET's Kokomi and Furina tiers, on `KLEE_OVERHAUL_MULTIPLAYER_IDS`'s

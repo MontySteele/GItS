@@ -40,6 +40,9 @@ the Bake-Kurage carries it out at the start of her next turn.
    under the now-line ([USER], 2026-09-28: "The idea of Plan cards makes
    sense, but the card text gets harder to read. Can we move all Plan
    lines to the next line down?"); the generator breaks it, not the sheet.
+   Since the status batch (2026-10-01, [USER]: "Agreed on the Plan text
+   change") the keyword prints "Or plan:" ("Or dusk plan:") on every card,
+   and the Plan tip opens "Instead of the line above".
 3. **The jellyfish acts by the book.** A planned Attack strikes the front
    enemy (the leftmost one alive); a single-target Plan is aimed when
    written if the engine can carry a second selection (R250). A planned
@@ -308,6 +311,21 @@ Coral Tithe (Skill, 0: "Empty the Casket. Gain 1 Energy and draw 1 card for
 every 3 in it", every 2 upgraded; nothing without a Casket). The pool is 70:
 19 Common, 37 Uncommon, 14 Rare, plus the three co-op cards. Provenance note,
 "Kokomi payoff pass, 2026-10-01".
+
+### The status batch (2026-10-01)
+
+Paper `review/active/kokomi-status-batch-2026-10-01.md`, ruled ([USER]: "the
+7 removals are good"; "Agreed on the Plan text change"). Both seats on the
+78-card build died at the act-1 boss with hands clogged by statuses. Rule 2
+resolves a Plan after the draw, so a Plan can answer the hand about to be
+dealt. Built in both engines: Kelp Wall and Tidecleanse (Common), Sea Glass
+Harvest (with the Sea Glass token), Turning Tide, Flotsam Surge and Abyssal
+Salvage (Uncommon). Cut: Rally, Pearl Diver, Battle Plan, Feigned Retreat,
+Moon Signal, Chain of Command, All Streams Flow to the Sea. The paper's
+Rare, Coral Sanctuary, was withdrawn for a redesign during the build, so the
+pool is 77 (21 / 36 / 20) until its replacement lands. Every Plan line now
+prints "Or plan:" (rule 2). Readings: provenance note, "Kokomi status batch,
+2026-10-01".
 
 ## 7. What the engine does
 

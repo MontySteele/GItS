@@ -45,7 +45,7 @@ public sealed class ProtoKkShellOfSanctuary : CustomCardModel, ICharacterCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shell of Sanctuary"),
-        ("description", "Draw 1 card.\n[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Draw 1 card.\nOr [gold]dusk[/gold] [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

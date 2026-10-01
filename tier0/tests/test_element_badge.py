@@ -316,7 +316,7 @@ def test_the_plan_half_never_elements_the_cards_own_hit():
     assert arm.damage_applies_element(oath) is True
     plan_only = dict(oath, effects=[{"op": "block", "amount": 4}])
     assert arm.damage_applies_element(plan_only) is False
-    text = (proto.OUT_DIR / "ProtoKkFeignedRetreat.cs").read_text(
+    text = (proto.OUT_DIR / "ProtoKkAmbush.cs").read_text(
         encoding="utf-8")
     assert "IElementalCard" not in text
     # `EB-713`: AND NO GEM EITHER. The gem said "this face applies Hydro" on a
@@ -340,7 +340,7 @@ def test_r276_every_damaging_skill_of_hers_applies_hydro_on_the_arm():
     assert proto._profile_for("kokomi").cadence == gen.CATALYST_EVERY_CARD
     assert gen.KOKOMI_PROFILE.cadence == "catalyst_attack"
     assert proto._profile_for("klee").cadence == "catalyst_attack"
-    for stem in ("ProtoKkChainOfCommand", "ProtoKkOpeningGambit"):
+    for stem in ("ProtoKkOpeningGambit",):
         text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         assert "public Element Element => Element.Hydro;" in text, stem
         assert "KleeKeywords.AppliesHydro" in text, stem
@@ -531,8 +531,7 @@ def test_a_row_declaring_no_element_prints_no_tag_and_no_glossary():
     # (R276 moved the list: Chain of Command's face-up hit applies Hydro and
     # wears the gem, War Council's Plan is Energy, and Kurage's Oath and
     # Ambush gain Block face-up and hit only when carried out.)
-    for stem in ("ProtoKkFeignedRetreat", "ProtoKkAmbush",
-                 "ProtoKkKuragesOath"):
+    for stem in ("ProtoKkAmbush", "ProtoKkKuragesOath"):
         text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         assert "KleeKeywords.AppliesHydro" not in text, stem
         assert "ArmKeywordTips.ForPlanElement(" in text, stem

@@ -462,47 +462,6 @@ def test_an_attack_buff_on_kokomi_reaches_the_line_she_wrote_it_under(
     assert enemy.hp == 40 - 12
 
 
-def test_r276_feigned_retreat_hits_harder_if_she_was_not_hurt(overhaul):
-    """R276 pick 1. "Plan: Deal 9 damage. If you lost no HP since you wrote
-    this, deal 14 instead." Her HP is recorded when the Plan is written and
-    read at carry-out."""
-    card = loader.get_card("proto_kk_feigned_retreat")
-
-    unhurt = make_enemy(hp=200)
-    st = kokomi_state(enemies=[unhurt])
-    kokomi_plan.schedule(st, card)
-    assert st.kk_plan_queue[0].clauses[0][kokomi_plan.HP_AT_WRITE] == \
-        st.player.hp
-    kokomi_plan.resolve_all(st)
-    assert unhurt.hp == 200 - 14
-
-    hurt = make_enemy(hp=200)
-    st = kokomi_state(enemies=[hurt])
-    kokomi_plan.schedule(st, card)
-    st.player.hp -= 1                       # the enemy's swing got through
-    kokomi_plan.resolve_all(st)
-    assert hurt.hp == 200 - 9
-
-
-def test_r276_feigned_retreats_upgrade_moves_both_numbers(overhaul):
-    """Core pass: the now-line is draw 2, discard 1 and does not move; Plan
-    12, or 18 unhurt."""
-    up = loader.get_card("proto_kk_feigned_retreat+")
-    assert up.effects == [{"op": "draw", "amount": 2},
-                          {"op": "discard", "amount": 1, "select": "chosen"}]
-    enemy = make_enemy(hp=200)
-    st = kokomi_state(enemies=[enemy])
-    kokomi_plan.schedule(st, up)
-    kokomi_plan.resolve_all(st)
-    assert enemy.hp == 200 - 18
-    enemy = make_enemy(hp=200)
-    st = kokomi_state(enemies=[enemy])
-    kokomi_plan.schedule(st, up)
-    st.player.hp -= 1
-    kokomi_plan.resolve_all(st)
-    assert enemy.hp == 200 - 12
-
-
 def test_skittish_does_not_fire_on_a_carry_out(overhaul):
     """`EB-538`. A CARRY-OUT IS NOT A HIT, and the seat could not tell.
 
@@ -712,20 +671,6 @@ def test_damage_per_companion_last_turn_reads_last_turn(overhaul):
     assert enemy.hp == 40 - 8
 
 
-def test_chain_of_command_now_line_reads_companions_played_this_turn(overhaul):
-    """`R250` pick 1 (round-4d sec.6, default): the now-line beside the Plan
-    clause above, "Deal 3 damage for each Companion card you played this
-    turn" -- the live half, read off the real sheet row through the ordinary
-    `damage` + `amount_formula` rail (the same shape
-    `test_inazuma_companion_overhaul.test_heartstopper_reads_the_swirls_this_turn`
-    exercises for `swirls_this_turn`), not `damage_per_companion_last_turn`'s
-    Plan-only handover."""
-    st = kokomi_state(enemies=[make_enemy(hp=90, name="only")])
-    st.companion_plays_this_turn = 2
-    effects.resolve_card(st, loader.get_card("proto_kk_chain_of_command"))
-    assert st.enemies[0].hp == 90 - 6
-
-
 def test_applying_weak_and_vulnerable(overhaul):
     a, b = make_enemy(name="a"), make_enemy(name="b")
     st = kokomi_state(enemies=[a, b])
@@ -870,8 +815,9 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     # FORTY-SIX since the Casket pass (2026-09-28); FORTY-FOUR since the
     # cleanup pass (2026-09-29); SIXTY-NINE since expansion batch one;
     # SEVENTY since the payoff pass (2026-10-01); SEVENTY-EIGHT since pool
-    # completion (2026-10-01).
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 78
+    # completion (2026-10-01); SEVENTY-SEVEN since the status batch
+    # (2026-10-01: seven cut, six added).
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 77
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
@@ -2915,19 +2861,6 @@ def test_riptides_base_and_rider_upgrade_by_different_amounts(overhaul):
                        {"op": "draw", "amount": 3}]
 
 
-def test_battle_plan_writes_this_turns_attack_bonus(overhaul):
-    """R276 pick 1. Draw 2 now; Plan: "This turn, your Attacks deal 3
-    additional damage." Upgraded: draw 3, Plan 4."""
-    from tier0.content import upgrades
-
-    row = _row("proto_kk_battle_plan")
-    assert row.effects == [{"op": "draw", "amount": 2}]
-    assert row.plan == [{"op": "attack_damage_this_turn", "amount": 3}]
-    up = upgrades.apply_upgrade(_row("proto_kk_battle_plan"))
-    assert up.effects == [{"op": "draw", "amount": 3}]
-    assert up.plan == [{"op": "attack_damage_this_turn", "amount": 4}]
-
-
 def test_the_rider_pays_a_face_up_attack_and_not_a_write(overhaul):
     """THE FACE-UP CLAUSE, which is what stops the reward paying for more
     writing -- and `EB-668`'s whole point, since it is now asked where the
@@ -3116,7 +3049,8 @@ def test_r276_her_damaging_skills_apply_hydro_face_up(overhaul):
     Attacks' always did. `CatalystCadence.EveryDamagingCardCarriesElement` is
     the twin."""
     st = kokomi_state()
-    for cid in ("proto_kk_chain_of_command", "proto_kk_opening_gambit"):
+    # Chain of Command left the pool in the status batch (2026-10-01).
+    for cid in ("proto_kk_opening_gambit",):
         card = _arm_card(cid)
         assert card.type == "skill", cid
         hit = next(fx for fx in card.effects if fx["op"] == "damage")
@@ -3238,24 +3172,6 @@ def test_r276_stolen_chapter_makes_the_first_card_free(overhaul):
     assert st.player.energy == 1
 
 
-def test_r276_battle_plan_raises_every_attack_this_turn(overhaul):
-    """Battle Plan's Plan: "This turn, your Attacks deal 3 additional
-    damage." Every face-up Attack, per hit; a carry-out is not a play."""
-    enemy = make_enemy(hp=200)
-    st = kokomi_state(enemies=[enemy])
-    carry_out(st, _arm_card("proto_kk_battle_plan").plan)
-    assert st.player.powers["attack_up_this_turn"] == 3
-    effects.resolve_card(st, _attack(5))
-    effects.resolve_card(st, _attack(5))
-    assert enemy.hp == 200 - 2 * (5 + 3)
-
-    planned = make_enemy(hp=200)
-    st2 = kokomi_state(enemies=[planned])
-    st2.player.powers["attack_up_this_turn"] = 3
-    carry_out(st2, [{"op": "damage", "amount": 5, "target": "front_enemy"}])
-    assert planned.hp == 200 - 5, "the jellyfish's hit takes no Attack bonus"
-
-
 def test_r276_tide_wall_blocks_the_front_enemys_intent(overhaul):
     """Tide Wall's Plan: 6 Block (9 upgraded) plus the damage the front enemy
     intends to deal -- every hit of a multi-hit intent. A non-attack intent
@@ -3302,21 +3218,11 @@ _COC_NOW = {"op": "damage", "target": "enemy",
     ("proto_kk_ambush", [_VULN2],
      [{"op": "damage", "amount": 12, "target": "front_enemy"}],
      [_VULN2], [{"op": "damage", "amount": 15, "target": "front_enemy"}]),
-    ("proto_kk_feigned_retreat", _DRAW2_DISCARD1,
-     [{"op": "damage_if_unhurt", "amount": 9, "unhurt_amount": 14,
-       "target": "front_enemy"}],
-     _DRAW2_DISCARD1,
-     [{"op": "damage_if_unhurt", "amount": 12, "unhurt_amount": 18,
-       "target": "front_enemy"}]),
     ("proto_kk_second_wave", [{"op": "damage", "amount": 7,
                                "target": "enemy"}],
      [{"op": "next_plan_extra_carry_out"}],
      [{"op": "damage", "amount": 9, "target": "enemy"}],
      [{"op": "next_plan_extra_carry_out"}]),
-    ("proto_kk_chain_of_command", [_COC_NOW],
-     [{"op": "first_companion_free"}],
-     [dict(_COC_NOW, amount_formula=dict(_COC_NOW["amount_formula"], per=4))],
-     [{"op": "first_companion_free"}]),
 ])
 def test_core_pass_rows_and_upgrades(overhaul, cid, now, plan, up_now,
                                      up_plan):
@@ -3351,11 +3257,6 @@ def test_core_pass_faces(overhaul):
     faces = _faces()
     assert faces["proto_kk_ambush"] == (
         "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 damage.")
-    assert faces["proto_kk_feigned_retreat"].startswith(
-        "Draw 2 cards. Discard 1 card. [gold]Plan[/gold]: Deal 9 damage")
-    assert faces["proto_kk_chain_of_command"].endswith(
-        "[gold]Plan[/gold]: Next turn, the first Companion card you play "
-        "costs 0.")
     assert faces["proto_kk_treatise"] == (
         "Once per turn, when you play a card with a [gold]Plan[/gold] line "
         "normally, draw 1 card.")
@@ -3374,34 +3275,3 @@ def _companion(cid="proto_kk_probe_companion", cost=2):
                 effects=[{"op": "block", "amount": 1}], tags=["companion"])
 
 
-def test_core_pass_chain_of_command_makes_the_first_companion_free(overhaul):
-    """Chain of Command's Plan: "Next turn, the first Companion card you play
-    costs 0." Pure at the cost seam, a non-Companion is untouched, spent by
-    the first Companion paid for, and gone at the end of her turn."""
-    from tier0.engine import combat
-    st = kokomi_state(enemies=[make_enemy(hp=200)])
-    carry_out(st, _row("proto_kk_chain_of_command").plan)
-    assert st.player.powers[kokomi_plan.FIRST_COMPANION_FREE] == 1
-    plain = Card(id="proto_kk_plain", name="p", cost=2, type="skill",
-                 effects=[{"op": "block", "amount": 1}])
-    first, second = _companion(), _companion("proto_kk_probe_companion_2")
-    assert combat.card_cost(st, plain) == 2
-    assert combat.card_cost(st, first) == 0
-    assert combat.card_cost(st, first) == 0, "asking does not spend it"
-    st.player.hand += [plain, first, second]
-    st.player.energy = 5
-    combat.play_card(st, plain)
-    assert st.player.energy == 3, "a non-Companion does not spend it"
-    combat.play_card(st, first)
-    assert st.player.energy == 3
-    assert combat.card_cost(st, second) == 2
-    assert kokomi_plan.FIRST_COMPANION_FREE not in st.player.powers
-
-
-def test_core_pass_chain_of_commands_switch_ends_with_her_turn(overhaul):
-    enemy = make_enemy(hp=200, intents=BLOCKER)
-    st = kokomi_state(enemies=[enemy])
-    kokomi_plan.schedule(st, _row("proto_kk_chain_of_command"))
-    _song_turn(st)
-    assert kokomi_plan.FIRST_COMPANION_FREE not in st.player.powers
-    assert counts(st)["plan_first_companion_free"] == 1

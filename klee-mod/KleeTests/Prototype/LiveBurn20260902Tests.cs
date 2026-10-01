@@ -159,8 +159,14 @@ public class LiveBurn20260902Tests
         // Bake-Kurage." (the codegen's `_plan_only_line`). What this pin is
         // about is unchanged -- the tip says WHERE a Plan card goes, which is
         // the whole of `EB-293`.
-        Assert.DoesNotContain("instead", body);
-        Assert.Contains("Play the card on the [gold]Bake-Kurage[/gold]", body);
+        // THE STATUS BATCH (2026-10-01, sec.3 pick 2, [USER]: "Agreed on the
+        // Plan text change") put the word back as the tip's opening, "Instead
+        // of the line above": the face now prints "Or plan:" on every card.
+        // The tip still says WHERE a Plan card goes.
+        Assert.StartsWith("Instead of the line above, ",
+                          body.Substring(body.IndexOf("Instead",
+                              System.StringComparison.Ordinal)));
+        Assert.Contains("play the card on the [gold]Bake-Kurage[/gold]", body);
     }
 
     // ---- EB-297: no Burst gauge for a Kokomi who has no Burst -------------

@@ -249,22 +249,6 @@ public class KokomiPoolPassTests
     // 6. FEIGNED RETREAT -- both halves, only when planned
     // ======================================================================
 
-    [Fact]
-    public void Feigned_retreat_plans_one_hit_that_reads_her_hp()
-    {
-        // R276 pick 1: 6 Block now; Plan 9 damage, or 14 if she lost no HP
-        // since writing it.
-        var card = new ProtoKkFeignedRetreat();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(CardType.Skill, card.Type);
-
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.DamageIfUnhurt, clause.Kind);
-        Assert.Equal(KokomiPlan.Aim.FrontEnemy, clause.Aim);
-        Assert.Equal(9, clause.Amount);
-        Assert.Equal(14, clause.Alt);
-    }
-
     // ======================================================================
     // 7. NEREID'S ASCENSION -- the Rare, redesigned in place
     // ======================================================================
@@ -362,9 +346,10 @@ public class KokomiPoolPassTests
         // forgot one arm over, which is why the gate exists.
         var slice = Il.CallSequence(
             Il.Method("KokomiOverhaulRoster", "Slice")).ToList();
-        // Four since the Casket pass (2026-09-28) cut Well Laid.
+        // Four since the Casket pass (2026-09-28) cut Well Laid; three since
+        // the status batch (2026-10-01) cut Feigned Retreat.
         foreach (var row in new[] { "ProtoKkRiptide", "ProtoKkPincer",
-                                    "ProtoKkFlank", "ProtoKkFeignedRetreat" })
+                                    "ProtoKkFlank" })
         {
             Assert.Contains(slice, c => c.Contains(row));
         }

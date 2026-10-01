@@ -51,7 +51,7 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage.\n[gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} cards."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage.\nOr [gold]plan[/gold]: Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} cards."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

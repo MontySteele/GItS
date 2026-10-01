@@ -20,7 +20,10 @@ import gen_klee_cards as gen                    # noqa: E402
 import gen_prototype_cards as proto             # noqa: E402
 
 _FACE = re.compile(r'\("description", "(.*?)"\),\n', re.S)
-_CLAUSE = re.compile(r"(?:\[gold\]Dusk\[/gold\] )?\[gold\]Plan\[/gold\]:")
+# THE STATUS BATCH (2026-10-01, sec.3 pick 2): every Plan clause prints
+# "Or plan:" (or "Or dusk plan:").
+_CLAUSE = re.compile(
+    r"Or (?:\[gold\]dusk\[/gold\] )?\[gold\]plan\[/gold\]:")
 
 
 def test_kurages_oath_now_line_is_six_and_upgrades_both_halves():
@@ -57,7 +60,33 @@ def test_every_emitted_plan_clause_opens_a_line():
                 before = face[:m.start()]
                 if before.endswith("your last "):   # Change of Plans' verb
                     continue
+                before = before[:-len("Or ")] if before.endswith("Or ") \
+                    else before
                 seen += 1
                 assert before == "" or before.endswith("\\n"), (
                     f"{path.name}: Plan clause not on its own line: {face}")
     assert seen >= 25
+
+
+def test_the_status_batch_face_says_or():
+    """THE STATUS BATCH (2026-10-01, sec.3 pick 2, [USER]: "Agreed on the
+    Plan text change"). Every Plan line's keyword prints "Or plan:", the
+    starter's Kurage's Oath and Slack Water included; a Dusk Plan prints
+    "Or dusk plan:"; the sheet keeps "Plan:"."""
+    def face(stem):
+        text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
+        return _FACE.search(text).group(1)
+    assert face("ProtoKkKuragesOath") == (
+        "Gain {Block:diff()} [gold]Block[/gold].\\nOr [gold]plan[/gold]: "
+        "Deal {PlanDamage:diff()} damage to ALL enemies.")
+    assert "\\nOr [gold]plan[/gold]: " in face("ProtoKkSlackWater")
+    assert "\\nOr [gold]dusk[/gold] [gold]plan[/gold]: " in face(
+        "ProtoKkBreakwater")
+    f = gen.plan_line_says_or
+    row = {"plan": [{"op": "draw", "amount": 1}],
+           "effects": [{"op": "block", "amount": 1}]}
+    assert f(row, "Gain 1.\n[gold]Plan[/gold]: Draw 1.") == (
+        "Gain 1.\nOr [gold]plan[/gold]: Draw 1.")
+    # A row with no Plan line is untouched.
+    assert f({"effects": []}, "Gain 1.\n[gold]Plan[/gold]: x") == (
+        "Gain 1.\n[gold]Plan[/gold]: x")

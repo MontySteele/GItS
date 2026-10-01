@@ -235,11 +235,7 @@ def test_the_commons(overhaul):
     assert (shoal_up.effects[0]["amount"], shoal_up.plan[0]["amount"]) == \
         (18, 28)
 
-    diver = _row("proto_kk_pearl_diver")
-    assert diver.effects == [{"op": "draw", "amount": 1}]
-    assert diver.plan == [{"op": "casket_gain", "amount": 2}]
-    assert _up("proto_kk_pearl_diver").effects == [{"op": "draw", "amount": 2}]
-
+    # Pearl Diver left the pool in the status batch (2026-10-01).
     # The cleanup pass (2026-09-29): 7 / 11, upgraded 9 / 14.
     press = _row("proto_kk_press_the_advantage")
     st = kokomi_state(enemies=[make_enemy(hp=100)])
@@ -306,12 +302,8 @@ def test_the_uncommons_and_the_rare(overhaul):
     assert _hit(st, _row("proto_kk_tideturn")) == 8
     assert _up("proto_kk_tideturn").effects[0]["amount_formula"]["per"] == 5
 
-    # Moon Signal: a Power, cost 1 (0 upgraded).
-    signal = _row("proto_kk_moon_signal")
-    # Power cost sweep, 2026-09-30: 0 to play, and the upgrade gains 2.
-    assert (signal.type, signal.cost) == ("power", 0)
-    assert _up("proto_kk_moon_signal").cost == 0
-    assert _up("proto_kk_moon_signal").effects[0]["amount"] == 2
+    # Moon Signal left the pool in the status batch (2026-10-01); its
+    # power stays registered (`test_moon_signal_reads_the_queue_...`).
 
     # Pearl Current: 2 x4 / Plan 2 to ALL x3 (3s upgraded).
     current = _row("proto_kk_pearl_current")
@@ -330,14 +322,6 @@ def test_the_uncommons_and_the_rare(overhaul):
     st.kk_casket = 3
     effects.resolve_card(st, took)
     assert st.kk_casket == 6
-
-
-def test_pearl_divers_plan_fills_the_casket(overhaul):
-    st = _casket(enemies=[make_enemy(hp=100)])
-    kokomi_plan.schedule(st, _row("proto_kk_pearl_diver"))
-    kokomi_plan.resolve_all(st)
-    # 2 from the clause and 1 from the relic for the carry-out itself.
-    assert st.kk_casket == 3
 
 
 def test_moon_signal_reads_the_queue_before_the_drain(overhaul):
@@ -365,14 +349,16 @@ def test_the_offer_is_seventy(overhaul):
     # the feed pass (2026-09-29) cut Exposed Flank and added five; expansion
     # batch one (2026-09-29) cut The Clouds Like Waves and added 22; the
     # payoff pass (2026-10-01) cut Second Thoughts and added two; pool
-    # completion (2026-10-01) added eight.
+    # completion (2026-10-01) added eight; the status batch (2026-10-01)
+    # cut seven and added six.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 78
+    assert len(ids) == 77
     for cut in ("proto_kk_tide_chart", "proto_kk_cleansing_wave",
                 "proto_kk_ripple", "proto_kk_well_laid",
                 "proto_kk_sea_salt_prayer", "proto_kk_salt_line",
                 "proto_kk_scout_ahead", "proto_kk_song_of_pearls",
-                "proto_kk_exposed_flank", "proto_kk_second_thoughts"):
+                "proto_kk_exposed_flank", "proto_kk_second_thoughts",
+                "proto_kk_pearl_diver", "proto_kk_moon_signal"):
         assert cut not in ids
         assert cut not in {c.id for c in loader.prototype_cards()}
     # And the co-op five (three, and pool completion's two) stay outside the

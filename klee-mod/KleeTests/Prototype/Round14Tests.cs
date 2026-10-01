@@ -83,8 +83,10 @@ public class Round14Tests
         Assert.Contains(
             Il.Calls(Il.Method("ProtoKkKuragesOath", "get_ExtraHoverTips")),
             c => c.Contains("ForPlanElement"));
+        // Feigned Retreat was the second until the status batch cut it
+        // (2026-10-01); Ambush is the same shape.
         Assert.Contains(
-            Il.Calls(Il.Method("ProtoKkFeignedRetreat", "get_ExtraHoverTips")),
+            Il.Calls(Il.Method("ProtoKkAmbush", "get_ExtraHoverTips")),
             c => c.Contains("ForPlanElement"));
         Assert.DoesNotContain(
             Il.Calls(Il.Method("ProtoKkOpeningGambit", "get_ExtraHoverTips")),
@@ -147,7 +149,7 @@ public class Round14Tests
         var face = Face<ProtoKkKuragesOath>();
 
         Assert.Contains("damage to ALL enemies.", face);
-        Assert.Contains("[gold]Plan[/gold]", face);
+        Assert.Contains("Or [gold]plan[/gold]", face);
         Assert.DoesNotContain("aura", face);
     }
 }

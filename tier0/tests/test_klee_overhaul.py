@@ -670,11 +670,9 @@ def test_the_two_last_clauses_are_exhaust_then_a_draw():
     assert delta("proto_kk_change_of_plans") == {"remove": "exhaust"}
     assert delta("proto_kk_moons_reflection") == {"remove": "exhaust"}
 
-    # Rally is the counted-power half: `weak` at 1 IS a printed number, so it
-    # never reaches the two clauses at all -- Rally+ applies 2 Weak.
-    assert delta("proto_kk_rally") == {"power_amount": 1}
-    # Exposed Flank was the second example until the feed pass cut it
-    # (2026-09-29); War Council's now-line is the same counted Weak.
+    # The counted-power half: `weak` at 1 IS a printed number, so it never
+    # reaches the two clauses at all. Rally was the example until the status
+    # batch cut it (2026-10-01); War Council's now-line is the same Weak.
     assert delta("proto_kk_war_council") == {"power_amount": 1}
 
     # And a row with a now-line, no Exhaust and no number draws one more.

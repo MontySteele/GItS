@@ -50,7 +50,7 @@ public sealed class ProtoKkTacticalRelay : CustomCardModel, ICharacterCard, IPla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tactical Relay"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Each player gains 1 [gold]Energy[/gold]{IfUpgraded:show: and draws 1 card|}."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\nOr [gold]plan[/gold]: Each player gains 1 [gold]Energy[/gold]{IfUpgraded:show: and draws 1 card|}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

@@ -235,6 +235,17 @@ public static class KokomiPlan
         // last. Sim twins: `kokomi_plan.EACH_PLAYER_ENERGY` / `_DRAW`.
         EachPlayerEnergy,
         EachPlayerDraw,
+        // THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-
+        // 2026-10-01.md). Plans that read the hand just drawn, which rule 2's
+        // after-the-draw resolution is what makes possible: Kelp Wall's Block
+        // per status or curse, Tidecleanse's exhaust of up to N, Sea Glass
+        // Harvest's transform into Sea Glass, Turning Tide's discard-and-draw.
+        // Appended last. Bodies in <see cref="KokomiStatusBatch"/>; sim twins
+        // `kokomi_plan`, the same names.
+        BlockPerStatusInHand,
+        ExhaustStatusesInHand,
+        TransformStatusesInHand,
+        DiscardAndDraw,
     }
 
     /// <summary>
@@ -2702,6 +2713,21 @@ public static class KokomiPlan
                 // the card alone).
                 await PlayCopy(choiceContext, kokomi, plan.Card);
                 return null;
+
+            // THE STATUS BATCH (2026-10-01). Each reads the hand as it
+            // stands when the clause runs.
+            case Kind.BlockPerStatusInHand:
+                return await KokomiStatusBatch.BlockPerStatus(
+                    kokomi, plan.Amount);
+            case Kind.ExhaustStatusesInHand:
+                return await KokomiStatusBatch.ExhaustStatuses(
+                    choiceContext, player, plan.Amount, entry?.Source);
+            case Kind.TransformStatusesInHand:
+                return await KokomiStatusBatch.TransformStatuses(
+                    player, entry?.Source?.IsUpgraded ?? false);
+            case Kind.DiscardAndDraw:
+                return await KokomiStatusBatch.DiscardAndDraw(
+                    choiceContext, player, entry?.Source);
         }
         return null;
     }
@@ -2754,6 +2780,11 @@ public static class KokomiPlan
         Kind.DrawPerPlanThisTurn => "cards drawn",
         // THE CASKET PASS (2026-09-28): Pearl Diver's figure is Casket points.
         Kind.CasketGain => "Casket points",
+        // THE STATUS BATCH (2026-10-01).
+        Kind.BlockPerStatusInHand => "Block",
+        Kind.ExhaustStatusesInHand => "cards exhausted",
+        Kind.TransformStatusesInHand => "cards transformed",
+        Kind.DiscardAndDraw => "cards drawn",
         _ => null,
     };
 
@@ -2811,6 +2842,9 @@ public static class KokomiPlan
         Kind.BlockFrontIntent =>
             KokomiOverhaulKit.IntendedDamage(FrontEnemy(kokomi), kokomi)
                 + plan.Amount,
+        // THE STATUS BATCH: Kelp Wall's rate times the statuses in hand.
+        Kind.BlockPerStatusInHand =>
+            plan.Amount * KokomiStatusBatch.StatusesInHand(kokomi.Player),
         _ => plan.Amount,
     };
 

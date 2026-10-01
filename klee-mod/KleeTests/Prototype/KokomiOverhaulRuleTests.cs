@@ -391,7 +391,11 @@ public class KokomiOverhaulRuleTests
                     "CasketGain", "EnergyIfAlone", "DamageIfAlone",
                     "BlockPerAttackingEnemy", "DoubleBlock",
                     // POOL COMPLETION (2026-10-01): Tactical Relay's two.
-                    "EachPlayerEnergy", "EachPlayerDraw" },
+                    "EachPlayerEnergy", "EachPlayerDraw",
+                    // THE STATUS BATCH (2026-10-01): the four that read the
+                    // hand just drawn.
+                    "BlockPerStatusInHand", "ExhaustStatusesInHand",
+                    "TransformStatusesInHand", "DiscardAndDraw" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -946,8 +950,10 @@ public class KokomiOverhaulRuleTests
         // Waves cut, 22 added. SEVENTY since the payoff pass (2026-10-01):
         // Second Thoughts cut, Kurage Canopy and Coral Tithe added.
         // SEVENTY-EIGHT since pool completion (2026-10-01): eight added.
+        // SEVENTY-SEVEN since the status batch (2026-10-01): seven cut, six
+        // added.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(78, Il.CallSequence(slice)
+        Assert.Equal(77, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 
