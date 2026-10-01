@@ -415,8 +415,6 @@ internal static class KleePowerIcons
         BoreasUnboundPower => KleePck.Path("varka/powers/boreas_unbound.png"),
         OathOfTheKnightsPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
-        FavonianStandardPower =>
-            KleePck.Path("varka/powers/stormward_stance.png"),
         DawnWindsMarchPower => KleePck.Path("varka/powers/boreas_unbound.png"),
         SwornBrotherhoodPower =>
             KleePck.Path("varka/powers/converging_winds.png"),
@@ -433,6 +431,9 @@ internal static class KleePowerIcons
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),
+        // Varka defence (2026-10-01): Cycle of Seasons' Block twin.
+        WindborneResolvePower =>
+            KleePck.Path("varka/powers/boreas_unbound.png"),
         EyeWallPower => KleePck.Path("varka/powers/converging_winds.png"),
         AssemblyAtTheCathedralPower =>
             KleePck.Path("klee/powers/study_buddy.png"),

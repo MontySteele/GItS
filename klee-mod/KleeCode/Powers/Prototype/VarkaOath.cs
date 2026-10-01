@@ -344,7 +344,7 @@ public sealed class VarkaOathLedger
 ///
 ///   * <see cref="BeginPlay"/> / <see cref="EndPlay"/> bracket each card play
 ///     (<c>KleeElementalHooks</c>), and a Knight sets his current element
-///     before its effects resolve (Favonian Standard, Boreas Unbound).
+///     before its effects resolve (Boreas Unbound).
 ///   * <see cref="NoteApplication"/> is called where a hit or an application
 ///     of an aura element lands on an enemy (<c>KleeElementalHooks.BeforeDamageReceived</c>,
 ///     <c>ElementalHit.Deal</c> / <c>ApplyOnly</c>); a Swirl's spread never
@@ -379,6 +379,12 @@ public static class VarkaOath
     public static int ElementsWithOath(Creature? creature) =>
         creature != null && Live(creature)
             ? VarkaOathLedger.For(creature).ElementsWithOath : 0;
+
+    /// <summary>Gale Mantle (Varka defence, 2026-10-01): half his total
+    /// Oath, rounded down.</summary>
+    public static int HalfTotalOath(Creature? creature) =>
+        creature != null && Live(creature)
+            ? VarkaOathLedger.For(creature).Total / 2 : 0;
 
     public static int KnightsPlayedThisTurn(Creature? creature) =>
         creature != null && Live(creature)
@@ -426,8 +432,7 @@ public static class VarkaOath
     /// open-Oath one for any card that is not a Knight, <see
     /// cref="VarkaOathLedger.OpenOathSwitches"/>), and if
     /// the card is a Knight sets his current element BEFORE its effects:
-    /// Favonian Standard pays when the Knight's element was already current,
-    /// Boreas Unbound when it changes (sec.6).
+    /// Boreas Unbound pays when it changes (sec.6).
     /// </summary>
     public static async Task BeginPlay(CardModel card)
     {
@@ -533,9 +538,10 @@ public static class VarkaOath
     // ---- the current element ----------------------------------------------
 
     /// <summary>
-    /// Make <paramref name="element"/> his current element. A Knight whose
-    /// element was already current pays Favonian Standard; a change pays
-    /// Boreas Unbound. The badge follows.
+    /// Make <paramref name="element"/> his current element. A change pays
+    /// Boreas Unbound, Cycle of Seasons and Windborne Resolve. The badge
+    /// follows. (<paramref name="knight"/> paid Favonian Standard, retired by
+    /// the Varka defence paper; kept for its callers.)
     /// </summary>
     public static async Task SetCurrent(
         PlayerChoiceContext choiceContext, Creature varka, Element element,
@@ -543,14 +549,6 @@ public static class VarkaOath
     {
         if (!Live(varka)) return;
         var ledger = VarkaOathLedger.For(varka);
-        if (knight && element == ledger.Current)
-        {
-            foreach (var standard in varka.Powers.OfType<FavonianStandardPower>().ToList())
-            {
-                await CreatureCmd.GainBlock(varka, standard.Amount,
-                    ValueProp.Unpowered, null, fast: true);
-            }
-        }
         var was = ledger.Current;
         if (ledger.SetCurrent(element))
         {
@@ -566,6 +564,11 @@ public static class VarkaOath
             foreach (var cycle in varka.Powers.OfType<CycleOfSeasonsPower>().ToList())
             {
                 await cycle.OnElementChanged(choiceContext);
+            }
+            // Windborne Resolve (Varka defence): its Block twin.
+            foreach (var resolve in varka.Powers.OfType<WindborneResolvePower>().ToList())
+            {
+                await resolve.OnElementChanged();
             }
         }
         await OathBadge.Sync(choiceContext, varka);
@@ -1010,7 +1013,7 @@ public static class VarkaCards
     /// <summary>
     /// Change of Guard: "Choose an element you have Oath in. It becomes your
     /// current element. Draw 1 card." A grid of the elements he holds Oath
-    /// in; not a Knight, so Favonian Standard passes it by and Boreas Unbound
+    /// in; not a Knight; Boreas Unbound
     /// sees the change. The draw is the sheet's own op, after this one, so it
     /// draws with no Oath too. (The open-Oath round, 2026-10-01: the Block
     /// went, the card went to 0 with no Exhaust.)

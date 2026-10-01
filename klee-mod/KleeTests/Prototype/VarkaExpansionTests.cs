@@ -290,18 +290,20 @@ public class VarkaExpansionTests : IDisposable
     }
 
     [Fact]
-    public void Aegis_caps_its_block()
+    public void Aegis_pays_half_the_total_per_copy()
     {
-        Assert.Equal(15, OathboundAegisPower.BlockFor(18, 15));
-        Assert.Equal(6, OathboundAegisPower.BlockFor(6, 15));
-        Assert.Equal(0, OathboundAegisPower.BlockFor(0, 15));
+        // Varka defence (2026-10-01): half, rounded down, no cap.
+        Assert.Equal(9, OathboundAegisPower.BlockFor(18, 1));
+        Assert.Equal(20, OathboundAegisPower.BlockFor(41, 1));
+        Assert.Equal(40, OathboundAegisPower.BlockFor(41, 2));
+        Assert.Equal(0, OathboundAegisPower.BlockFor(1, 1));
     }
 
     [Fact]
     public void Downburst_alone_spreads_fresh()
     {
         Assert.True(VarkaRules.SpreadArrivesFresh(new ProtoVkDownburst()));
-        Assert.False(VarkaRules.SpreadArrivesFresh(new ProtoVkSquall()));
+        Assert.False(VarkaRules.SpreadArrivesFresh(new ProtoVkGaleSweep()));
         Assert.False(VarkaRules.SpreadArrivesFresh(null));
         Assert.Contains("VarkaRules.SpreadArrivesFresh",
                         Calls("ReactionEffects", "SwirlPays"));

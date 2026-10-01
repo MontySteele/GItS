@@ -316,7 +316,8 @@ public class VarkaPrototypeTests : IDisposable
         Assert.Contains("VarkaOath.SetCurrent", begin);
         var set = Il.Calls(Il.Method("VarkaOath", "SetCurrent"));
         Assert.Contains("BoreasUnboundPower.OnElementChanged", set);  // a change
-        Assert.Contains("CreatureCmd.GainBlock", set);                // Standard
+        // Favonian Standard's Block left with its card (Varka defence).
+        Assert.Contains("WindborneResolvePower.OnElementChanged", set);
         Assert.Contains("OathBadge.Sync", set);
     }
 
@@ -434,9 +435,6 @@ public class VarkaPrototypeTests : IDisposable
         var bunnyUp = Upgraded<ProtoVkAmberBaronBunny>();
         Assert.Equal(8m, Var(bunnyUp, "CalculationBase"));
         Assert.Equal(8m, Var(bunnyUp, "PowerAmount"));
-        var standard = new ProtoVkFavonianStandard();
-        Assert.Equal(4m, Var(standard, "PowerAmount"));
-        Assert.Equal(5m, Var(Upgraded<ProtoVkFavonianStandard>(), "PowerAmount"));
         var avatar = new ProtoVkNorthwindAvatar();
         Assert.Equal(2, avatar.EnergyCost.Canonical);
         Assert.Equal(10m, Var(avatar, "Damage"));

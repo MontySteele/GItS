@@ -105,7 +105,7 @@ def test_a_non_varka_fight_never_reaches_his_rules():
 
 def test_his_rows_always_resolve_and_his_verbs_refuse_anyone_else():
     _reset()
-    assert loader.get_card(_vk("squall")).id == _vk("squall")
+    assert loader.get_card(_vk("gale_mantle")).id == _vk("gale_mantle")
     st = CombatState(player=Player(hp=80, max_hp=80, character_id="klee"),
                      enemies=[_enemy()], rng=random.Random(0))
     assert V.ledger(st.player) is None
@@ -136,8 +136,8 @@ def test_the_ruled_rows_and_their_upgrades(varka):
         cid = _vk("amber_baron_bunny") + suffix
         assert _fx(cid, "block")["amount"] == want
         assert _fx(cid, "apply_power")["amount"] == want
-    assert _fx(_vk("favonian_standard"), "apply_power")["amount"] == 4
-    assert _fx(_vk("favonian_standard") + "+", "apply_power")["amount"] == 5
+    assert _fx(_vk("windborne_resolve"), "apply_power")["amount"] == 5
+    assert _fx(_vk("windborne_resolve") + "+", "apply_power")["amount"] == 7
     assert _fx(_vk("dawn_winds_march"), "apply_power")["amount"] == 3
     nw = loader.get_card(_vk("northwind_avatar"))
     assert nw.cost == 2
@@ -266,7 +266,7 @@ def test_ascension_with_no_current_element_deals_its_anemo_only(varka):
 def _applier(*elements, target="enemy"):
     """A non-Knight card of his that applies `elements` in order."""
     import copy
-    card = copy.deepcopy(loader.get_card(_vk("squall")))
+    card = copy.deepcopy(loader.get_card(_vk("favonius_cut")))
     card.cost = 0
     card.effects = [{"op": "apply_aura", "element": el, "target": target}
                     for el in elements]
@@ -326,16 +326,6 @@ def test_baron_bunnys_burst_does_not_switch(varka):
     assert _led(st).oath["pyro"] == 1                    # it still credits
 
 
-def test_favonian_standard_stays_knight_only(varka):
-    st = _state(fang=False)
-    st.player.powers[V.FAVONIAN_STANDARD] = 4
-    _play(st, _vk("amber_fiery_rain"))                  # Pyro current
-    block = st.player.block
-    _play(st, _applier("pyro"))                         # not a Knight
-    assert st.player.block == block
-    assert _led(st).knights_this_turn == 1
-
-
 def test_favonius_drill_counts_under_the_open_oath(varka):
     st = _state(fang=False)
     _led(st).current = "electro"
@@ -387,15 +377,16 @@ def test_the_pyro_payout_is_unpowered_and_meets_vulnerable(varka):
 # 4. Powers.
 # ---------------------------------------------------------------------------
 
-def test_favonian_standard_pays_on_a_knight_already_current(varka):
+def test_windborne_resolve_pays_on_every_change(varka):
+    # Varka defence (2026-10-01): Cycle of Seasons' Block twin.
     st = _state(fang=False)
-    st.player.powers[V.FAVONIAN_STANDARD] = 4
-    _play(st, _vk("amber_fiery_rain"))                  # first: no pay
-    assert st.player.block == 8
+    st.player.powers[V.WINDBORNE_RESOLVE] = 5
+    _play(st, _vk("amber_fiery_rain"))                  # None -> Pyro
+    assert st.player.block == 8 + 5
     _play(st, _vk("amber_fiery_rain"))                  # already current
-    assert st.player.block == 8 + 8 + 4
-    _play(st, _vk("barbara_melody_loop"))               # a change: no pay
-    assert st.player.block == 8 + 8 + 4 + 8
+    assert st.player.block == 8 + 5 + 8
+    _play(st, _applier("hydro"))                        # the open Oath
+    assert st.player.block == 8 + 5 + 8 + 5
 
 
 def test_boreas_unbound_pays_on_every_change(varka):
@@ -487,11 +478,10 @@ def test_converging_winds(varka):
 
 def test_grand_masters_order_plays_the_next_knight_twice(varka):
     st = _state(fang=False)
-    st.player.powers[V.FAVONIAN_STANDARD] = 4
     _play(st, _vk("grand_masters_order"))
     _play(st, _vk("barbara_melody_loop"))
-    # two Knight plays: 8 + (8 + 4, the replay's Standard)
-    assert st.player.block == 8 + 8 + 4
+    # two Knight plays, 8 each
+    assert st.player.block == 8 + 8
     assert _led(st).knights_this_turn == 2
     assert V.GRAND_MASTERS_ORDER not in st.player.powers
     _play(st, _vk("barbara_melody_loop"))               # spent: once
@@ -659,7 +649,7 @@ def test_the_counts(varka):
     assert effects._runtime_count(st, "oath_elements") == 2
     _play(st, _vk("tailwind_guard"))
     assert st.player.block == 6
-    _play(st, _vk("squall"))
+    _play(st, _vk("favonius_cut"))
     _play(st, _vk("favonius_cut"))
     block = st.player.block
     _play(st, _vk("lisa_violet_arc"))                   # 4 + 3 x 2 Attacks

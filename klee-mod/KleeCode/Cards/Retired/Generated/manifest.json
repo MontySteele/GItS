@@ -422,6 +422,16 @@
       "owner": "klee"
     },
     {
+      "id": "KLEEMOD-PROTO_VK_FAVONIAN_STANDARD",
+      "class": "RetiredProtoVkFavonianStandard",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_VK_FOUR_BANNERS",
+      "class": "RetiredProtoVkFourBanners",
+      "owner": "klee"
+    },
+    {
       "id": "KLEEMOD-PROTO_VK_FOUR_WINDS_ACCORD",
       "class": "RetiredProtoVkFourWindsAccord",
       "owner": "klee"
@@ -429,6 +439,11 @@
     {
       "id": "KLEEMOD-PROTO_VK_PRESSURE_FRONT",
       "class": "RetiredProtoVkPressureFront",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_VK_SQUALL",
+      "class": "RetiredProtoVkSquall",
       "owner": "klee"
     },
     {

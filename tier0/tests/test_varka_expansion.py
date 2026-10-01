@@ -87,7 +87,8 @@ EXPANSION_IDS = (
     "blazing_charge", "tidal_bulwark", "glacial_edict", "static_field",
     "barbara_wellspring_hymn", "lisa_pulsating_witch",
     "noelle_steadfast_maid", "vow_of_the_blade", "unwavering_banner",
-    "shifting_gale", "cycle_of_seasons", "four_banners", "eye_wall",
+    # Varka defence (2026-10-01): Gust Ward took Four Banners' place.
+    "shifting_gale", "cycle_of_seasons", "gust_ward", "eye_wall",
     # Element identities (2026-10-01): Short Circuit and Retaliating Tide
     # took Pressure Front's and Unbroken Tide's places.
     "short_circuit", "crosscurrent", "assembly_at_the_cathedral",
@@ -144,12 +145,12 @@ def test_noelle_is_a_knight_that_keeps_the_element_and_gains_no_oath(varka):
     st = _state()
     led = _led(st)
     led.current, led.oath["cryo"] = "cryo", 2
-    st.player.powers[V.FAVONIAN_STANDARD] = 4
+    st.player.powers[V.WINDBORNE_RESOLVE] = 5
     _play(st, _vk("noelle_steadfast_maid"))
     assert led.current == "cryo"
     assert led.oath == {"pyro": 0, "hydro": 0, "electro": 0, "cryo": 2}
     assert led.knights_this_turn == 1 and led.knights_this_combat == 1
-    assert st.player.block == 9                        # no Standard Block
+    assert st.player.block == 9                        # no change, no Resolve
     assert len(st.player.hand) == 1                    # drew 1
     assert V.predicate(st, "knight_played_this_turn")
 
@@ -333,17 +334,12 @@ def test_shifting_gale_and_cycle_of_seasons(varka):
     assert st.enemies[0].hp == 90 - 12
 
 
-def test_four_banners_and_charge_of_the_knights(varka):
+def test_charge_of_the_knights(varka):
     st = _state()
-    led = _led(st)
-    led.oath.update(pyro=1, hydro=2, cryo=1)
-    _play(st, _vk("four_banners"))
-    assert st.enemies[0].hp == 85
-    assert st.enemies[0].aura is None                 # element-less
     _play(st, _vk("noelle_steadfast_maid"))
     _play(st, _vk("noelle_steadfast_maid"))
     _play(st, _vk("charge_of_the_knights"))
-    assert st.enemies[0].hp == 85 - 10
+    assert st.enemies[0].hp == 100 - 10
 
 
 def test_eye_wall_crosscurrent_and_eye_of_stormterror(varka):
@@ -411,13 +407,19 @@ def test_wolfpack_copies_ascension_into_discard(varka):
     assert ids.count(V.ASCENSION_ID + "+") == 2       # itself and the copy
 
 
-def test_oathbound_aegis_caps_at_its_amount(varka):
+def test_oathbound_aegis_pays_half_the_total_uncapped(varka):
+    # Varka defence (2026-10-01): half the total, rounded down, no cap; a
+    # second copy pays it again.
     st = _state()
     led = _led(st)
-    led.oath.update(pyro=9, cryo=9)
-    st.player.powers[V.OATHBOUND_AEGIS] = 15
+    led.oath.update(pyro=20, cryo=21)
+    st.player.powers[V.OATHBOUND_AEGIS] = 1
     V.turn_end(st)
-    assert st.player.block == 15
+    assert st.player.block == 20
+    st.player.block = 0
+    st.player.powers[V.OATHBOUND_AEGIS] = 2
+    V.turn_end(st)
+    assert st.player.block == 40
 
 
 def test_weathervane(varka):

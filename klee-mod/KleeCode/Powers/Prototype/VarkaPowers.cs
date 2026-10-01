@@ -457,24 +457,6 @@ public sealed class OathOfTheKnightsPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Favonian Standard (sec.6, pick 3): "Whenever you play a Knight of
-/// your current element, gain 4 [5] Block." Paid by
-/// <see cref="VarkaOath.SetCurrent"/>.</summary>
-public sealed class FavonianStandardPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Favonian Standard"),
-        ("description",
-            "Whenever you play a [gold]Knight[/gold] of your [gold]current "
-          + "element[/gold], gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
 /// <summary>Dawn Wind's March (sec.6, pick 3): "Whenever you gain Oath of
 /// your current element, gain 3 Block." Paid by <see cref="VarkaOath.Gain"/>,
 /// once per gain.</summary>
@@ -651,6 +633,33 @@ public sealed class CycleOfSeasonsPower : PowerModel, ILocalizationProvider
             await ElementalHit.DealUnelemented(choiceContext, enemy, Amount,
                                                Owner, powered: false);
         }
+    }
+}
+
+/// <summary>Windborne Resolve (Varka defence, 2026-10-01): "Whenever your
+/// current element changes, gain 5 [7] Block." Paid by
+/// <see cref="VarkaOath.SetCurrent"/> after Cycle of Seasons; unpowered, a
+/// Power's Block (Favonian Standard's and Dawn Wind's March's door).</summary>
+public sealed class WindborneResolvePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Windborne Resolve"),
+        ("description",
+            "Whenever your [gold]current element[/gold] changes, gain "
+          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal async Task OnElementChanged()
+    {
+        if (Amount <= 0 || Owner == null) return;
+        Flash();
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null,
+                                    fast: true);
     }
 }
 
@@ -898,25 +907,28 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Oathbound Aegis: "At the end of your turn, gain Block equal to
-/// your total Oath, up to 15 [20]." Amount is the cap.</summary>
+/// <summary>Oathbound Aegis (re-aimed by the Varka defence paper,
+/// 2026-10-01): "At the end of your turn, gain Block equal to half your total
+/// Oath." Half rounds down; no cap; the upgrade is a cost cut. Amount counts
+/// the copies, each paying the half.</summary>
 public sealed class OathboundAegisPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Oathbound Aegis"),
         ("description",
-            "At the end of your turn, gain [gold]Block[/gold] equal to your "
-          + "total [gold]Oath[/gold], up to [blue]{Amount}[/blue]."),
+            "At the end of your turn, gain [gold]Block[/gold] equal to half "
+          + "your total [gold]Oath[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>The Block it gives. PURE.</summary>
-    public static int BlockFor(int totalOath, int cap) =>
-        System.Math.Max(0, System.Math.Min(totalOath, cap));
+    /// <summary>The Block it gives: half the total, rounded down, per copy.
+    /// PURE.</summary>
+    public static int BlockFor(int totalOath, int copies) =>
+        System.Math.Max(0, totalOath / 2) * System.Math.Max(0, copies);
 
     /// <summary>EARLY (element identities, 2026-10-01): ahead of Retaliating
     /// Tide's <c>BeforeSideTurnEnd</c>, so the Tide reads this Block, the

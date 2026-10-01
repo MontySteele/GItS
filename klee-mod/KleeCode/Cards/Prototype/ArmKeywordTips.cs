@@ -761,7 +761,7 @@ public static class ArmKeywordTips
     }
 
     /// <summary>His personal Companions (sec.6), named on Knightly Guard,
-    /// Grand Master's Order, Knights' Roll Call and Favonian Standard.
+    /// Grand Master's Order and Knights' Roll Call.
     /// The title shape is the tell (the Oath round, 2026-09-29: a blind seat
     /// had to infer from play which cards count): Knights are "Name: Card",
     /// other Companions "Name — Card".

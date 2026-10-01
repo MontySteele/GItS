@@ -487,7 +487,8 @@ def _runtime_count(state: CombatState, token: str,
     # Varka, so no shipped read can move.
     if (token == "current_oath" or token == "oath_elements"
             or token == "enemies_with_aura" or token == "hydro_oath"
-            or token == "knights_played_this_combat"):
+            or token == "knights_played_this_combat"
+            or token == "half_total_oath"):
         return varka_oath.count(state, token)
     raise ValueError(f"unknown runtime count {token!r}")
 
@@ -4180,6 +4181,8 @@ RUNTIME_COUNT_NAMES = frozenset({
     "enemies_with_aura",
     "hydro_oath",
     "knights_played_this_combat",
+    # VARKA DEFENCE (2026-10-01): Gale Mantle (`varka_oath.COUNTS`).
+    "half_total_oath",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.

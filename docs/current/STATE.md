@@ -246,6 +246,20 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Chain Lightning's discount, so the sim does not read Electro's middle.
   Readings and the tables: provenance note, "Varka element identities,
   2026-10-01".
+  **Defence (2026-10-01, ruled):** paper
+  `review/active/varka-defence-2026-10-01.md`, [USER]: "Everything else
+  looks good!" Built in both engines: Gale Mantle (C, 5 [8] Block plus half
+  his total Oath), Gust Ward (U, 0: 4 [6] Block, draw 1) and Windborne
+  Resolve (U, Power: 5 [7] Block whenever his element changes) replace
+  Squall, Four Banners and Favonian Standard; Oathbound Aegis gives half his
+  total Oath at turn end, uncapped, upgrade cost 2 to 1; Tailwind Guard
+  unchanged. Boreas's Fang makes the starter Knight's element current on
+  his first turn, so the badge shows it from turn one. Pool still 78 (20 /
+  35 / 23). The Block probe: the default drafter's act-3 elite Block over
+  incoming 0.55 to 0.60 (the paper's bar was 0.72), the switch deck's 0.53
+  to 0.66, Hydro mono 1.49 at most; act-3 boss turn-cap stalls rose; the
+  stock drafter never takes Gust Ward. Readings and the tables: provenance
+  note, "Varka defence, 2026-10-01".
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

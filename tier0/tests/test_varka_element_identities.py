@@ -236,8 +236,8 @@ def test_retaliating_tide_reads_the_aegis_block(varka):
     st = _state(n=1)
     led = V.ledger(st.player)
     st.player.powers[V.RETALIATING_TIDE] = 1
-    st.player.powers[V.OATHBOUND_AEGIS] = 15
-    led.oath["hydro"] = 6
+    st.player.powers[V.OATHBOUND_AEGIS] = 1             # half the total
+    led.oath["hydro"] = 12
     st.player.block = 0
     V.turn_end(st)
     assert st.player.block == 6                         # the Aegis's
@@ -253,19 +253,30 @@ def test_unbroken_tide_left_the_engine():
 # 4. Pyro: Wildfire Oath's one big hit.
 # ---------------------------------------------------------------------------
 
+def _squall():
+    """Squall's old row (Deal 4 twice, an Attack), left with the Varka
+    defence paper: a plain two-hit Attack for the Wildfire pins."""
+    import copy
+    card = copy.deepcopy(loader.get_card(_vk("favonius_cut")))
+    card.cost = 1
+    card.effects = [{"op": "damage", "amount": 4, "target": "enemy",
+                     "times": 2}]
+    return card
+
+
 def test_wildfire_adds_pyro_oath_to_the_first_attacks_first_hit(varka):
     st = _state()
     led = V.ledger(st.player)
     led.current, led.oath["pyro"] = "pyro", 7
     st.player.powers[V.WILDFIRE_OATH] = 1
-    _play(st, _vk("squall"))                             # 4 twice
+    _play(st, _squall())                             # 4 twice
     assert st.enemies[0].hp == 100 - (4 + 7) - 4
     hp = st.enemies[0].hp
-    _play(st, _vk("squall"))                             # the turn's second
+    _play(st, _squall())                             # the turn's second
     assert st.enemies[0].hp == hp - 8
     st.turn = 2
     hp = st.enemies[0].hp
-    _play(st, _vk("squall"))                             # a new turn
+    _play(st, _squall())                             # a new turn
     assert st.enemies[0].hp == hp - (4 + 7) - 4
 
 
@@ -274,10 +285,10 @@ def test_wildfire_needs_pyro_current_and_a_first_attack(varka):
     led = V.ledger(st.player)
     led.current, led.oath["pyro"] = "hydro", 7
     st.player.powers[V.WILDFIRE_OATH] = 1
-    _play(st, _vk("squall"))
+    _play(st, _squall())
     assert st.enemies[0].hp == 100 - 8
     led.current = "pyro"
-    _play(st, _vk("squall"))                             # not the first
+    _play(st, _squall())                             # not the first
     assert st.enemies[0].hp == 100 - 16
     # Skills do not spend it; stacks multiply it.
     st = _state()
@@ -325,7 +336,7 @@ def test_the_switch_element_each_row_declares():
         "kaeya_frostgnaw": "cryo",
         "favonius_drill": None, "cavalry_charge": None,
         "pathfinders_mark": None, "noelle_steadfast_maid": None,
-        "squall": None, "northwind_avatar": None,
+        "gale_mantle": None, "northwind_avatar": None,
     }
     got = {k: gen.varka_switch_element(rows[_vk(k)], profile) for k in want}
     assert got == want

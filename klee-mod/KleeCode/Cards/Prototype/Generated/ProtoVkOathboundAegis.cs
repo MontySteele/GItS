@@ -45,13 +45,13 @@ public sealed class ProtoVkOathboundAegis : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Oathbound Aegis"),
-        ("description", "At the end of your turn, gain [gold]Block[/gold] equal to your total [gold]Oath[/gold], up to {PowerAmount:diff()}."),
+        ("description", "At the end of your turn, gain [gold]Block[/gold] equal to half your total [gold]Oath[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 15m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoVkOathboundAegis : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<OathboundAegisPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<OathboundAegisPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(5m);
+        EnergyCost.UpgradeBy(-1);
     }
 }
