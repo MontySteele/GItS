@@ -930,7 +930,23 @@ KOKOMI_PAYOFF_PASS_IDS: tuple[str, ...] = (
     "proto_kk_coral_tithe",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SEVENTY rows since the
+# POOL COMPLETION (2026-10-01, review/active/pool-completion-2026-10-01.md
+# sec.4, ruled at the defaults): one Common and seven Rares, appended LAST to
+# `KOKOMI_OVERHAUL_POOL_IDS` in the sheet's own order. Coral Crash moved to
+# Common in place (sec.6). The pool is 78 (21 / 36 / 21).
+KOKOMI_POOL_COMPLETION_IDS: tuple[str, ...] = (
+    "proto_kk_tidal_screen",
+    "proto_kk_spring_tide",
+    "proto_kk_kurage_school",
+    "proto_kk_shoal_of_spears",
+    "proto_kk_patient_tide",
+    "proto_kk_seas_reproach",
+    "proto_kk_tidal_rebuke",
+    "proto_kk_watatsumi_resistance",
+)
+
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SEVENTY-EIGHT rows since
+# pool completion (2026-10-01: eight added); SEVENTY since the
 # payoff pass (2026-10-01: Second Thoughts cut, two added; expansion batch one,
 # 2026-09-29, made it 69), in the packet's own order
 # -- the Tactician, the
@@ -1052,9 +1068,12 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # THE EXPANSION, BATCH ONE (2026-09-29): the 22 rows of
     # `KOKOMI_EXPANSION_BATCH_ONE_IDS` above, LAST, in the sheet's own order.
     *KOKOMI_EXPANSION_BATCH_ONE_IDS,
-    # THE PAYOFF PASS (2026-10-01): Kurage Canopy and Coral Tithe, LAST. The
-    # pool is 70 (19 / 37 / 14).
+    # THE PAYOFF PASS (2026-10-01): Kurage Canopy and Coral Tithe. The pool
+    # was 70 (19 / 37 / 14).
     *KOKOMI_PAYOFF_PASS_IDS,
+    # POOL COMPLETION (2026-10-01): eight rows, LAST. The pool is 78 (21 / 36
+    # / 21).
+    *KOKOMI_POOL_COMPLETION_IDS,
 )
 
 # THE CO-OP SET's Kokomi and Furina tiers, on `KLEE_OVERHAUL_MULTIPLAYER_IDS`'s
@@ -1064,6 +1083,9 @@ KOKOMI_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
     "proto_kk_joint_orders",
     "proto_kk_coordinated_strike",
     "proto_kk_sangonomiyas_counsel",
+    # POOL COMPLETION (2026-10-01): her fourth and fifth (3 Uncommon, 2 Rare).
+    "proto_kk_tactical_relay",
+    "proto_kk_kurages_mercy",
 )
 FURINA_STAGE_MULTIPLAYER_IDS: tuple[str, ...] = (
     "proto_fs_guest_of_honor",

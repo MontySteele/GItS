@@ -76,7 +76,8 @@ public sealed class ProtoKkShellOfSanctuary : CustomCardModel, ICharacterCard, I
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, dusk: true, paid: cardPlay.Resources.EnergySpent);
-            return;
+            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
+            cardPlay = nowLine;
         }
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }

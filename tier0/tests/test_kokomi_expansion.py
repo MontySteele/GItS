@@ -65,10 +65,13 @@ def _library(st, n=10):
 
 def test_the_batch_is_twelve_uncommon_and_ten_rare_last_in_the_pool(overhaul):
     rarities = [_row(cid).rarity for cid in NEW]
-    assert rarities.count("uncommon") == 12
+    # Pool completion (2026-10-01, paper sec.6) moved Coral Crash to Common.
+    assert rarities.count("uncommon") == 11
+    assert rarities.count("common") == 1
     assert rarities.count("rare") == 10
-    # The payoff pass (2026-10-01) appended two rows after the batch.
-    assert C.KOKOMI_OVERHAUL_POOL_IDS[-24:-2] == NEW
+    # The payoff pass (2026-10-01) appended two rows after the batch, and
+    # pool completion eight more.
+    assert C.KOKOMI_OVERHAUL_POOL_IDS[-32:-10] == NEW
     assert "proto_kk_the_clouds_like_waves" not in C.KOKOMI_OVERHAUL_POOL_IDS
     assert "proto_kk_the_clouds_like_waves" not in {
         c.id for c in loader.prototype_cards()}

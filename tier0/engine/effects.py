@@ -392,6 +392,12 @@ def _runtime_count(state: CombatState, token: str,
         # carry-out this turn, a doubled one twice, written at the plan bus.
         # The C# twin is `KokomiOverhaulLedger.PlansCarriedOutThisTurn`.
         return state.kk_plans_carried_out_this_turn
+    if token == "plans_written_this_turn":
+        # QUARANTINED USE ONLY (pool completion, 2026-10-01) -- Shoal of
+        # Spears, "for each Plan you wrote this turn". Every write onto the
+        # Bake-Kurage this turn, counted at `kokomi_plan.schedule`. The C#
+        # twin is `KokomiOverhaulLedger.PlansWrittenThisTurn`.
+        return state.kk_plans_written_this_turn
     if token == "casket_count":
         # QUARANTINED USE ONLY (the Casket pass) -- Driftglass and Depths'
         # Judgment, the Tamakushi Casket's count. The C# twin is
@@ -4149,6 +4155,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # Casket. Same registry reason as the rows above.
     "plans_carried_out_this_turn",
     "casket_count",
+    # QUARANTINED USE ONLY (pool completion, 2026-10-01) -- Shoal of Spears'
+    # Plans written this turn. Same registry reason.
+    "plans_written_this_turn",
     # QUARANTINED USE ONLY (the Kokomi expansion, batch one) -- Weight of the
     # Plan's "Energy paid for the Plans waiting". Same registry reason.
     "plan_energy_waiting",
@@ -6571,6 +6580,13 @@ def _op_stage_dual_nature(state: CombatState, fx: dict, card: Card) -> None:
     """*Dual Nature*: Ousia or Pneuma, for this turn."""
     furina_stage.dual_nature(state)
 
+
+def _op_stage_casting_agent(state: CombatState, fx: dict, card: Card) -> None:
+    """*Casting Agent* (pool completion, 2026-10-01): one of three random Guest
+    Star cards into the hand, free this turn, upgraded when the card is
+    (`upgraded`, the `upgraded_grant` key's flag)."""
+    furina_stage.casting_agent(state, bool(fx.get("upgraded", False)))
+
 def _op_kokomi(state: CombatState, fx: dict, card: Card) -> None:
     """THE KOKOMI EXPANSION's now-line verbs, one `kind` per card
     (`kokomi_plan.kind`). The aimed kind (Salt in the Wound) reads the body
@@ -6650,6 +6666,7 @@ OPS = {
     "stage_grand_finale": _op_stage_grand_finale,
     "stage_verdict": _op_stage_verdict,
     "stage_dual_nature": _op_stage_dual_nature,
+    "stage_casting_agent": _op_stage_casting_agent,
     # THE CO-OP SET (`engine/coop.py`): Share the Spotlight's verb.
     "stage_share_spotlight": _op_stage_share_spotlight,
     # The second batch: Raise a Toast's verb.
@@ -6827,6 +6844,9 @@ OPS = {
     "damage_if_alone": _op_kokomi_plan_only,
     "block_per_attacking_enemy": _op_kokomi_plan_only,
     "double_block": _op_kokomi_plan_only,
+    # POOL COMPLETION (2026-10-01): Tactical Relay's two plan-only clauses.
+    "each_player_energy": _op_kokomi_plan_only,
+    "each_player_draw": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

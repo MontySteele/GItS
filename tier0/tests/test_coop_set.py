@@ -55,8 +55,9 @@ def arms(monkeypatch):
 
 # ---- the rows ---------------------------------------------------------------
 
-def test_the_thirteen_load_and_are_the_three_tiers():
-    assert len(TIERS) == 13
+def test_the_fifteen_load_and_are_the_three_tiers():
+    # Pool completion (2026-10-01): Kokomi's fourth and fifth.
+    assert len(TIERS) == 15
     assert loader.multiplayer_ids() == frozenset(TIERS)
     ids = {c.id for c in loader.prototype_cards()}
     assert set(TIERS) <= ids
@@ -71,7 +72,9 @@ def test_the_rarities_per_character():
             ["rare", "rare", "uncommon", "uncommon", "uncommon"],
         C.FURINA_STAGE_MULTIPLAYER_IDS:
             ["rare", "rare", "uncommon", "uncommon", "uncommon"],
-        C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS: ["rare", "uncommon", "uncommon"],
+        # Pool completion (2026-10-01): Tactical Relay and Kurage's Mercy.
+        C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS:
+            ["rare", "rare", "uncommon", "uncommon", "uncommon"],
     }
     for tier, rarities in expected.items():
         assert sorted(_row(cid).rarity for cid in tier) == rarities
@@ -82,7 +85,7 @@ def test_the_multiplayer_tier_is_outside_every_pool_count():
         assert not set(pool) & set(TIERS)
     # The counts R276 ruled do not move.
     assert len(C.KLEE_OVERHAUL_POOL_IDS) == 78
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 70    # the payoff pass
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 78    # pool completion
 
 
 def test_no_sim_pool_deals_one(arms):

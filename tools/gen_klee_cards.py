@@ -475,6 +475,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "stage_reverse", "stage_whisper",
                   "stage_intermission", "stage_spend_front_all",
                   "stage_grand_finale", "stage_verdict", "stage_dual_nature",
+                  # POOL COMPLETION (2026-10-01): Casting Agent, one call into
+                  # `FurinaStage.CastingAgent`.
+                  "stage_casting_agent",
                   # THE CO-OP SET (`COOP_ALLY_OPS`): Share the Spotlight, one
                   # call into `FurinaStage.ShareTheSpotlight`.
                   "stage_share_spotlight",
@@ -2605,9 +2608,14 @@ KOKOMI_KINDS = {
     "shoal_call": "ShoalCall",
     # THE PAYOFF PASS (2026-10-01): Coral Tithe; `amount` is the divisor.
     "coral_tithe": "CoralTithe",
+    # POOL COMPLETION (2026-10-01): Spring Tide, Kurage School, and the
+    # multiplayer Kurage's Mercy (`amount` is the Mend).
+    "spring_tide": "SpringTide",
+    "kurage_school": "KurageSchool",
+    "kurages_mercy": "KuragesMercy",
 }
 KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "draw_if_target_weak", "resonance",
-                      "shoal_call", "coral_tithe"}
+                      "shoal_call", "coral_tithe", "kurages_mercy"}
 #: The kind that aims at the enemy the card was played on.
 KOKOMI_AIMED_KINDS = {"draw_if_target_weak"}
 KOKOMI_FIELDS = {"op", "kind", "target", "amount"}
@@ -2719,6 +2727,10 @@ PLAN_CLAUSE_KINDS = {
     "damage_if_alone": "DamageIfAlone",
     "block_per_attacking_enemy": "BlockPerAttackingEnemy",
     "double_block": "DoubleBlock",
+    # POOL COMPLETION (2026-10-01), Tactical Relay: "Each player gains 1
+    # Energy [and draws 1 card]", every player in the fight.
+    "each_player_energy": "EachPlayerEnergy",
+    "each_player_draw": "EachPlayerDraw",
     "apply_power": None,
 }
 
@@ -2794,7 +2806,9 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  "casket_gain",
                  # THE EXPANSION: each names a drain ("this morning", Dusk).
                  "energy_if_alone", "damage_if_alone",
-                 "block_per_attacking_enemy", "double_block"}
+                 "block_per_attacking_enemy", "double_block",
+                 # POOL COMPLETION: Tactical Relay names the carry-out turn.
+                 "each_player_energy", "each_player_draw"}
 
 #: R276. Feigned Retreat's second printed number ("deal 14 instead") -- the
 #: hit when she lost no HP since the Plan was written. The twin of
@@ -2807,7 +2821,10 @@ PLAN_UNHURT_FIELD = "unhurt_amount"
 #: adds a Block clause the base face does not print, so it is written at 0 and
 #: `KokomiPlan` carries a 0 flat Block out as nothing. The sim's twin is
 #: `kokomi_plan.PLAN_ZERO_AMOUNT_OPS`.
-PLAN_ZERO_AMOUNT_OPS = {"block_front_intent", "block"}
+PLAN_ZERO_AMOUNT_OPS = {"block_front_intent", "block",
+                        # POOL COMPLETION: Tactical Relay's draw, added by
+                        # the upgrade.
+                        "each_player_draw"}
 
 
 def plan_reason(card: dict) -> str | None:
@@ -3216,6 +3233,12 @@ APPLY_POWERS = {
         "[gold]Fanfare[/gold]."),
     "fs_star_billing": ("StarBillingPower", None,
         "Whenever a Guest Star joins the stage, draw {X} cards."),
+    # POOL COMPLETION (2026-10-01). Classes in FurinaStagePoolCompletion.cs.
+    "fs_critics_darling": ("CriticsDarlingPower", None,
+        "Whenever you choose a [gold]Spend[/gold] mode, deal damage equal to "
+        "the [gold]Fanfare[/gold] spent to ALL enemies."),
+    "fs_star_turn": ("StarTurnPower", None,
+        "Whenever a Guest Star joins the stage, it acts at once."),
     "fs_tide_of_applause": ("TideOfApplausePower", None,
         "Whenever you trigger an [gold]Elemental Reaction[/gold], your back "
         "performer gains {X} [gold]Fanfare[/gold]."),
@@ -3339,6 +3362,16 @@ APPLY_POWERS = {
     "kk_kurage_canopy": ("KurageCanopyPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold], gain {X} Block."),
+    # POOL COMPLETION (2026-10-01). Classes in KokomiPoolCompletion.cs.
+    "kk_patient_tide": ("PatientTidePower", None,
+        "At the end of your turn, keep up to {X} unspent "
+        "[gold]Energy[/gold]."),
+    "kk_seas_reproach": ("SeasReproachPower", None,
+        "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to "
+        "an enemy, deal {X} damage to it."),
+    "kk_watatsumi_resistance": ("WatatsumiResistancePower", None,
+        "Whenever you play a [gold]Companion[/gold] card, add a Nip to your "
+        "hand."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -4171,6 +4204,9 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                          # THE SUPPORTING POOL (2026-09-26): Intermission's
                          # "for every 3" (`STAGE_AMOUNT_VARS`).
                          "stage_intermission",
+                         # POOL COMPLETION (2026-10-01): Interval Bell's Spend
+                         # price (`stage_spend_amount_cs`).
+                         "stage_spend",
                          # R252, and the same argument one row on: Careful Now
                          # prints a CEILING and no payout ("Block equal to
                          # your largest Bomb, up to 10"), so the cap is the
@@ -6155,6 +6191,11 @@ KOKOMI_CASKET_COUNTS = {
     # paid for the Plans waiting" (`KokomiPlan.EnergyWaiting`).
     "plan_energy_waiting": "static (card, _) => KokomiPlan.EnergyWaiting("
                            "card.Owner.Creature)",
+    # POOL COMPLETION (2026-10-01): Shoal of Spears' "for each Plan you wrote
+    # this turn" (`KokomiOverhaulLedger.PlansWrittenThisTurn`).
+    "plans_written_this_turn":
+        "static (card, _) => KokomiOverhaulLedger.For("
+        "card.Owner.Creature).PlansWrittenThisTurn",
 }
 
 
@@ -6393,6 +6434,8 @@ STAGE_STMT_OPS = {
     "stage_reverse", "stage_whisper", "stage_intermission",
     "stage_spend_front_all", "stage_grand_finale", "stage_verdict",
     "stage_dual_nature",
+    # POOL COMPLETION (2026-10-01).
+    "stage_casting_agent",
 }
 
 #: THE SUPPORTING POOL (2026-09-26): the stage op whose `amount` an upgrade
@@ -6459,6 +6502,10 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
         return "FurinaStage.SetVerdict(Owner.Creature, cardPlay.Target);"
     if op == "stage_dual_nature":
         return "await FurinaStage.DualNature(choiceContext, Owner);"
+    if op == "stage_casting_agent":
+        # POOL COMPLETION (2026-10-01): the card reads its own IsUpgraded
+        # (`upgraded_grant`), so the call takes the card.
+        return "await FurinaStage.CastingAgent(choiceContext, this);"
     if op == "stage_perform_all":
         return "await FurinaStage.PerformAll(choiceContext, Owner.Creature);"
     if op == "stage_spend_back_all":
@@ -6474,8 +6521,9 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
         return ("await FurinaStage.PerformLead(choiceContext, "
                 f"Owner.Creature{extra});")
     if op == "stage_spend":
+        n = amount if amount is not None else str(int(eff.get("amount", 1)))
         return ("await FurinaStage.Spend(choiceContext, Owner.Creature, "
-                f"{int(eff.get('amount', 1))});")
+                f"{n});")
     if op == "stage_spend_all":
         return "FurinaStage.CollectAll(Owner.Creature);"
     if op == "stage_curtain_call":
@@ -8087,6 +8135,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "upgraded_grant": any(e["op"] == "grant_kapow_each_turn"
                               or (e["op"] == "kokomi"
                                   and e.get("kind") == "shoal_call")
+                              # POOL COMPLETION: Casting Agent's pick.
+                              or e["op"] == "stage_casting_agent"
                               for e in effects),
         # VARKA (Knights' Roll Call+): the player chooses the Knight, read at
         # play time off `IsUpgraded`; the face carries its own
@@ -8135,6 +8185,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # name (`STAGE_AMOUNT_VARS`).
         "stage_intermission": any(e["op"] == "stage_intermission"
                                   for e in effects),
+        # POOL COMPLETION (2026-10-01), Interval Bell: the first `stage_spend`
+        # anywhere on the card (a Spend is a mode's head), read at play time
+        # as `(IsUpgraded ? up : base)` -- `stage_spend_amount_cs`.
+        "stage_spend": any(fx.get("op") == "stage_spend"
+                           for fx in iter_effects(effects)),
         # `EB-478`. Binds to the op that OWES the draw, the same one-owner rule
         # every key here keeps; tier0 bumps that op's `amount` and nothing else.
         "tide_draw": any(e["op"] == "draw_after_plans" for e in effects),
@@ -9696,6 +9751,26 @@ def stage_raise_amount(card: dict, eff: dict) -> str | None:
     return None
 
 
+def stage_spend_amount_cs(card: dict, eff: dict) -> str | None:
+    """POOL COMPLETION (2026-10-01), Interval Bell's "Spend 3 [2]": the C#
+    price of a `stage_spend` an upgrade moves, `(IsUpgraded ? up : base)`, or
+    None (the literal). The `stage_spend` key binds the FIRST `stage_spend`
+    anywhere on the card -- tier0's `upgrades.apply_upgrade`, `everywhere` --
+    and the gate (`MODE_RULE_OPS`) and the payment both read it, so the price
+    moves in both places at once."""
+    if eff.get("op") != "stage_spend":
+        return None
+    delta = int(upgrade_plan(card)[0].get("stage_spend", 0) or 0)
+    if not delta:
+        return None
+    first = next((fx for fx in iter_effects(card.get("effects", []))
+                  if fx.get("op") == "stage_spend"), None)
+    if first is not eff:
+        return None
+    base = int(eff.get("amount", 1))
+    return f"(IsUpgraded ? {max(0, base + delta)} : {base})"
+
+
 def stage_amount_upgrade(card: dict, op: str) -> int:
     """`stage_intermission: -N` (2026-09-26)."""
     return int(upgrade_plan(card)[0].get(op, 0))
@@ -10135,7 +10210,7 @@ def _emit_branch_op(
         # deals its bigger number and never pays for it. Seen exactly that way
         # on the first regen of the seventeen: *Curtain Rise* branched on the
         # occupancy and spent nothing.
-        lines.append(stage_stmt(eff))
+        lines.append(stage_stmt(eff, stage_spend_amount_cs(card, eff)))
     elif op == "salon_rotate":
         # EB-118 §5.5. Literal in a branch, like every other branch resolver:
         # no delta grammar reaches a rotation count.
@@ -10394,7 +10469,8 @@ def mode_requirements(card: dict) -> list[tuple[str, str] | None] | None:
         head = body[0] if body else {}
         rule = MODE_RULE_OPS.get(head.get("op"))
         if rule is not None:
-            amount = int(head.get("amount", 1))
+            amount = (stage_spend_amount_cs(card, head)
+                      or str(int(head.get("amount", 1))))
             # The refusal names the RULE and not the number: the price is
             # on the mode's own label, and a numeral typed here would be a
             # second copy of it (`lint_prose_constants`).
@@ -14635,6 +14711,13 @@ def build_upgrade(card: dict) -> list[str]:
             done.add("bonus_vs_bombed")
             lines.append("DynamicVars.ExtraDamage.UpgradeValueBy("
                          f'{int(deltas["bonus_vs_bombed"])}m);')
+    if "stage_spend" in deltas:
+        # POOL COMPLETION (2026-10-01). A play-time `IsUpgraded` read in the
+        # Spend mode's gate and payment (`stage_spend_amount_cs`): nothing
+        # to bump here.
+        done.add("stage_spend")
+        lines.append("// stage_spend: the Spend mode's price is read off "
+                     "IsUpgraded in its gate and its payment.")
     if "upgraded_grant" in deltas:
         # R276 (Alice's Detonator). A play-time `IsUpgraded` read on the
         # install, the `generate_cost_override` shape: nothing to bump here.
@@ -15203,11 +15286,28 @@ def emit(
         schedule = ("await KokomiPlan.Schedule(choiceContext, Owner.Creature, "
                     f"this, PlanClauses{dusk_arg}, "
                     "paid: cardPlay.Resources.EnergySpent);")
+        # POOL COMPLETION (2026-10-01), DIVINE STRATEGY (her Ancient,
+        # hand-written): "The first time each turn you play a card on the
+        # Bake-Kurage, its now-line happens too." A row with a now-line asks
+        # the Power once the Plan is written; a yes hands back the play aimed
+        # where the now-line aims (`DivineStrategyPower.NowLine`) and the
+        # body below runs on it. A Plan-only row has no now-line, so it emits
+        # no ask and never spends the once.
+        # Where the now-line aims once it is off the jellyfish: the front
+        # enemy for a row that aims at an enemy, the Plan's captured ally for
+        # one that aims at a player (Joint Orders), nobody otherwise.
+        divine_aim = ("DivineStrategyPower.Aim.FrontEnemy"
+                      if target_type == "KokomiTargets.PetOrEnemy"
+                      else "DivineStrategyPower.Aim.Ally"
+                      if target_type == "KokomiTargets.PetOrAlly"
+                      else "DivineStrategyPower.Aim.None")
         body = ([schedule] if not card.get("effects") else
                 [f"if (KokomiPlan.PlayedOnPet(cardPlay))",
                  "{",
                  f"    {schedule}",
-                 "    return;",
+                 "    if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, "
+                 f"{divine_aim}) is not {{ }} nowLine) return;",
+                 "    cardPlay = nowLine;",
                  "}"] + body)
     upgrade = build_upgrade(card)
     _, no_upgrade_reason = upgrade_plan(card)

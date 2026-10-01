@@ -91,6 +91,9 @@ PLAN_KINDS = frozenset((
     # `ENERGY_IF_ALONE` and the three beside it.
     "energy_if_alone", "damage_if_alone", "block_per_attacking_enemy",
     "double_block",
+    # POOL COMPLETION (2026-10-01), Tactical Relay: "Each player gains 1
+    # Energy [and draws 1 card]". See `EACH_PLAYER_ENERGY`.
+    "each_player_energy", "each_player_draw",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -152,7 +155,10 @@ HP_AT_WRITE = "hp_at_write"
 #: Block" to its Plan, and no key adds a Plan clause, so the clause is written
 #: at 0 and a 0 flat Block is carried out as nothing (Dexterity does not feed a
 #: clause the face does not print).
-PLAN_ZERO_AMOUNT_OPS = frozenset(("block_front_intent", "block"))
+PLAN_ZERO_AMOUNT_OPS = frozenset(("block_front_intent", "block",
+                                 # POOL COMPLETION: Tactical Relay's draw is
+                                 # written at 0 and added by the upgrade.
+                                 "each_player_draw"))
 
 #: The clauses a `times:` may repeat: the FLAT hit, and nothing else
 #: (`EB-492`, Pincer's "Plan: Deal 3 damage three times"). The two scaled
@@ -210,7 +216,17 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            # a drain, and Brace doubles the Block standing
                            # when the Dusk Plan lands.
                            "energy_if_alone", "damage_if_alone",
-                           "block_per_attacking_enemy", "double_block"))
+                           "block_per_attacking_enemy", "double_block",
+                           # POOL COMPLETION: Tactical Relay's two clauses
+                           # name the carry-out turn for every player.
+                           "each_player_energy", "each_player_draw"))
+
+#: POOL COMPLETION (2026-10-01), TACTICAL RELAY: "Plan: Each player gains 1
+#: Energy [and draws 1 card]." Every player in the fight, Kokomi included.
+#: Tier 0 seats one (`coop.other_players` is empty), so here they land on her
+#: alone. `KokomiPlan.Kind.EachPlayerEnergy` / `EachPlayerDraw` are the twins.
+EACH_PLAYER_ENERGY = "each_player_energy"
+EACH_PLAYER_DRAW = "each_player_draw"
 
 #: Tide Wall's clause (`EB-335`, R246 pick 2): "Gain N Block for each Plan the
 #: Bake-Kurage carries out this morning." PLAN-ONLY by construction -- the
@@ -365,6 +381,14 @@ KURAGE_SWARM = "kk_kurage_swarm"          # Casket +N per 0-cost Plan written
 #: carries out a Plan, gain N Block." Per carry-out, on the plan bus.
 #: `KurageCanopyPower` is the twin.
 KURAGE_CANOPY = "kk_kurage_canopy"
+#: POOL COMPLETION (2026-10-01, paper sec.4). Patient Tide: "At the end of
+#: your turn, keep up to N unspent Energy." Sea's Reproach: "Whenever you
+#: apply Weak or Vulnerable to an enemy, deal N damage to it." Watatsumi
+#: Resistance: "Whenever you play a Companion card, add a Nip to your hand."
+#: `PatientTidePower`, `SeasReproachPower`, `WatatsumiResistancePower`.
+PATIENT_TIDE = "kk_patient_tide"
+SEAS_REPROACH = "kk_seas_reproach"
+WATATSUMI_RESISTANCE = "kk_watatsumi_resistance"
 GENERALS_BANNER = "kk_generals_banner"       # Weak to the front, once a turn
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
 #: Power costing 2 that lasts the fight, so there is no duration to tick and
@@ -943,6 +967,10 @@ def schedule(state: CombatState, card: Card,
     entry = PlanEntry(card_id=card.id, clauses=body, card=held, label=label,
                       dusk=dusk, paid=paid, extra=extra)
     state.kk_plan_queue.append(entry)
+    # POOL COMPLETION (2026-10-01), SHOAL OF SPEARS: "for each Plan you wrote
+    # this turn". Every write, Moon's Reflection's included; cleared by
+    # `roll_turn`. `KokomiOverhaulLedger.PlansWrittenThisTurn` is the twin.
+    state.kk_plans_written_this_turn += 1
     # KURAGE SWARM: "Whenever you write a Plan that costs 0, the Casket gains
     # 1." The cost is the one paid, after reductions.
     swarm = int(state.player.powers.get(KURAGE_SWARM, 0))
@@ -1092,7 +1120,8 @@ def resolve_all(state: CombatState) -> None:
                    pending=len(state.kk_plan_queue))
 
 
-def _drain(state: CombatState, due: list[PlanEntry], why: str) -> None:
+def _drain(state: CombatState, due: list[PlanEntry], why: str,
+           mid_turn: bool = False) -> None:
     """CARRY A LIST OF PLANS OUT, IN ORDER -- the one loop both drains share
     (the morning's, and `EB-643`'s dusk).
 
@@ -1144,8 +1173,12 @@ def _drain(state: CombatState, due: list[PlanEntry], why: str) -> None:
     # deliberately does NOT fold in a `next_plan_extra_carry_out` written
     # inside this drain -- that rider is not on the board when the number is
     # asked, which is the reading the old per-entry term already took.
+    # POOL COMPLETION (2026-10-01), SPRING TIDE: a MID-TURN drain is not the
+    # start of a turn or a Dusk, so Nereid's Ascension does not double its
+    # first entry (`resolve_front`'s reading, for the whole queue).
+    first_times = 1 if mid_turn else carry_out_times(state)
     drain_plans = len(due) + (
-        1 if due and carry_out_times(state) > 1 else 0)
+        1 if due and first_times > 1 else 0)
     # `EB-718`. SCOUT AHEAD'S COUNTER, armed and spent INSIDE THIS DRAIN.
     # The face says "for each later Plan CARRIED OUT with this one", so the
     # card is paid PER LATER CARRY-OUT AS IT HAPPENS rather than off a count
@@ -1185,7 +1218,7 @@ def _drain(state: CombatState, due: list[PlanEntry], why: str) -> None:
         # `CarryOutTimes + 1` UNDER SECOND WAVE, which is the pin: the rider is
         # a FLAG and not a count, so a first entry under Nereid's Ascension
         # that Second Wave also reached is carried out three times, not four.
-        times = ((carry_out_times(state) if index == 0 else 1)
+        times = ((first_times if index == 0 else 1)
                  + (1 if extra else 0) + int(entry.extra))
         for _ in range(times):
             if state.over or not state.player.alive:
@@ -1301,6 +1334,34 @@ def resolve_front(state: CombatState) -> None:
         if state.over or not state.player.alive:
             return
         _resolve_entry(state, entry, why="change_of_plans")
+
+
+def resolve_all_now(state: CombatState) -> None:
+    """SPRING TIDE (pool completion, 2026-10-01): "The Bake-Kurage carries out
+    all your Plans now."
+
+    THE WHOLE QUEUE, IN ORDER, Dusk Plans included: "all your Plans". It is a
+    DRAIN (`_drain`), so "the Plan after this one" riders (Second Wave,
+    Opening Gambit) reach the entry behind them, and each carry-out rings the
+    plan bus and counts for the Casket and Kurage Canopy. MID-TURN, so
+    Nereid's Ascension does not double the first entry (`resolve_front`'s
+    reading, which this extends) and the morning's depth is not touched. Not
+    capped: the cap is a rule about the morning.
+
+    THE QUEUE IS EMPTIED BEFORE THE FIRST CLAUSE RUNS (`resolve_all`'s rule),
+    so a Plan written afterwards -- by a carry-out or by the next card -- waits
+    for the morning: "a volume turn can pay twice". `KokomiPlan.ResolveAllNow`
+    is the twin.
+    """
+    if not live(state):
+        return
+    if not state.kk_plan_queue:
+        state.emit("plan_front_empty")
+        return
+    due = list(state.kk_plan_queue)
+    state.kk_plan_queue.clear()
+    state.emit("plan_resolve_all_now", plans=len(due))
+    _drain(state, due, why="spring_tide", mid_turn=True)
 
 
 def resolve_dusk(state: CombatState) -> None:
@@ -1497,6 +1558,16 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     elif op == "energy":
         p.energy += amount
         state.emit("energy", amount=amount)
+    elif op == EACH_PLAYER_ENERGY:
+        # POOL COMPLETION, TACTICAL RELAY. Every player: here, her.
+        p.energy += amount
+        state.emit("energy", amount=amount)
+        state.emit("plan_each_player", op=op, amount=amount, players=1)
+    elif op == EACH_PLAYER_DRAW:
+        # Written at 0 on the base card: a 0 draws nothing.
+        if amount > 0:
+            state.draw(amount)
+            state.emit("plan_each_player", op=op, amount=amount, players=1)
     elif op == "block":
         # POWERED (`ValueProp.Move`), rule 3, and the same funnel a card's own
         # printed Block goes through -- Frail bites it and Dexterity feeds it.
@@ -1901,6 +1972,8 @@ def roll_turn(state: CombatState) -> None:
     state.kk_plans_this_morning = 0
     # THE EXPANSION: All Streams' gift says "this turn" and dies with it.
     state.kk_next_plan_extra = None
+    # POOL COMPLETION: Shoal of Spears' "Plans you wrote this turn".
+    state.kk_plans_written_this_turn = 0
     # Crystal Collapse's "this turn". It is CLEARED rather than handed over:
     # the capture happens while the Plan is written, so what survives the
     # boundary is the captured card on the entry and never the list.
@@ -1937,6 +2010,9 @@ def note_companion_played(state: CombatState, card: Card) -> None:
     # about the play. A recorder behind that return would remember nothing on
     # every board where the power is not out.
     state.kk_companions_this_turn.append(card)
+    # POOL COMPLETION (2026-10-01), WATATSUMI RESISTANCE: "Whenever you play a
+    # Companion card, add a Nip to your hand." Every play, one Nip per copy.
+    watatsumi_resistance(state)
     n = state.player.powers.get(GENERALS_BANNER, 0)
     if not n:
         return
@@ -2044,6 +2120,108 @@ def coral_tithe(state: CombatState, per: int) -> None:
     state.player.energy += n
     state.emit("energy", amount=n)
     state.draw(n)
+
+
+def kurage_school(state: CombatState, card: Card) -> int:
+    """KURAGE SCHOOL (pool completion, 2026-10-01): "Add a copy of each 0-cost
+    card with a Plan line in your hand to your hand."
+
+    "0-COST" IS THE COST IT HAS IN HAND NOW (`combat.card_cost`), so a card
+    some rule made free this turn counts and an X card does not; "a Plan line"
+    is a printed `plan:`. The hand is read ONCE, before the first copy arrives,
+    so a copy is never copied; the playing card is not in the hand. The copies
+    are exact (an upgraded Nip is copied upgraded) and a full hand stops them.
+    Returns how many arrived. `KokomiCards.KurageSchool` is the twin.
+    """
+    if not live(state):
+        return 0
+    import copy                                     # stdlib, local by habit
+    from tier0.engine import combat, effects        # late import: cycle
+    picks = [c for c in list(state.player.hand)
+             if c is not card and getattr(c, "plan", None)
+             and c.cost != "X" and combat.card_cost(state, c) == 0]
+    arrived = 0
+    for c in picks:
+        if len(state.player.hand) >= C.MAX_HAND_SIZE:
+            break
+        twin = copy.deepcopy(c)
+        effects._add_token(state, twin, "hand")
+        arrived += 1
+    state.emit("plan_kurage_school", copied=arrived, eligible=len(picks))
+    return arrived
+
+
+def kurages_mercy(state: CombatState, amount: int) -> int:
+    """KURAGE'S MERCY (pool completion, multiplayer): "Each player Mends 8."
+    Every player in the fight, Kokomi included -- tier 0 seats one, so the
+    Mend lands on her (`effects.mend`, the keyword's one spelling).
+    `KokomiCards.KuragesMercy` is the twin."""
+    if not live(state) or amount <= 0:
+        return 0
+    from tier0.engine import effects                # late import: cycle
+    healed = effects.mend(state, amount)
+    state.emit("plan_kurages_mercy", amount=amount, healed=healed, players=1)
+    return healed
+
+
+def watatsumi_resistance(state: CombatState) -> int:
+    """WATATSUMI RESISTANCE (pool completion): "Whenever you play a Companion
+    card, add a Nip to your hand." One Nip per copy of the Power, from
+    `note_companion_played`, the arm's one definition of a Companion play.
+    `WatatsumiResistancePower` is the twin."""
+    n = int(state.player.powers.get(WATATSUMI_RESISTANCE, 0))
+    if not live(state) or n <= 0:
+        return 0
+    from tier0.content import loader                # late import: cycle
+    from tier0.engine import effects                # late import: cycle
+    added = 0
+    for _ in range(n):
+        if len(state.player.hand) >= C.MAX_HAND_SIZE:
+            break
+        effects._add_token(state, loader.get_card(NIP_ID), "hand")
+        added += 1
+    state.emit("plan_watatsumi_resistance", nips=added)
+    return added
+
+
+def seas_reproach(state: CombatState, enemy, name: str, stacks: int) -> None:
+    """SEA'S REPROACH (pool completion): "Whenever you apply Weak or
+    Vulnerable to an enemy, deal 3 damage to it." Called from
+    `refpowers.on_power_applied` (the twin of `AfterPowerAmountChanged`) for
+    a POSITIVE application she made; once per enemy it lands on. Hydro and
+    unpowered, Tidal Riposte's hit. `SeasReproachPower` is the twin."""
+    if not live(state) or stacks <= 0 or name not in ("weak", "vulnerable"):
+        return
+    n = int(state.player.powers.get(SEAS_REPROACH, 0))
+    if n <= 0 or enemy is None or enemy is state.player:
+        return
+    if not getattr(enemy, "alive", False):
+        return
+    from tier0.engine import effects                # late import: cycle
+    state.emit("plan_seas_reproach", target=enemy.name, amount=n, power=name)
+    effects.deal_damage_to_enemy(state, enemy, n, element="hydro",
+                                 source="plan", powered=False)
+
+
+def patient_tide_bank(state: CombatState) -> None:
+    """PATIENT TIDE (pool completion), the end of her turn: "keep up to 2
+    unspent Energy". What is kept is banked here and handed back by
+    `patient_tide_kept` after the turn's refill. Copies add to the cap.
+    `PatientTidePower.BeforeSideTurnEnd` is the twin."""
+    cap = int(state.player.powers.get(PATIENT_TIDE, 0))
+    state.kk_patient_tide_kept = 0
+    if not live(state) or cap <= 0:
+        return
+    kept = max(0, min(int(state.player.energy), cap))
+    state.kk_patient_tide_kept = kept
+    state.emit("plan_patient_tide", kept=kept, cap=cap)
+
+
+def patient_tide_kept(state: CombatState) -> int:
+    """The Energy Patient Tide kept, taken (and cleared) at the refill."""
+    kept = int(getattr(state, "kk_patient_tide_kept", 0) or 0)
+    state.kk_patient_tide_kept = 0
+    return kept
 
 
 def moon_signal(state: CombatState, waiting: int) -> None:
@@ -2607,6 +2785,15 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
     elif k == "coral_tithe":
         # CORAL TITHE (the payoff pass): the Casket into Energy and cards.
         coral_tithe(state, amount)
+    elif k == "spring_tide":
+        # SPRING TIDE (pool completion): the whole queue, now.
+        resolve_all_now(state)
+    elif k == "kurage_school":
+        # KURAGE SCHOOL (pool completion): copy the 0-cost Plan cards.
+        kurage_school(state, card)
+    elif k == "kurages_mercy":
+        # KURAGE'S MERCY (pool completion, multiplayer): each player Mends.
+        kurages_mercy(state, amount)
     elif k == "shoal_call":
         # SHOAL CALL: "Add 2 Nips to your hand. [They are upgraded.]"
         from tier0.content import loader, upgrades  # late import: cycle
@@ -2627,7 +2814,10 @@ NIP_ID = "proto_kk_nip"
 KINDS = {"draw_if_no_plan": ("amount",), "draw_if_target_weak": ("amount",),
          "resonance": ("amount",), "double_weak_vulnerable": (),
          "all_streams": (), "shoal_call": ("amount",),
-         "coral_tithe": ("amount",)}
+         "coral_tithe": ("amount",),
+         # POOL COMPLETION (2026-10-01).
+         "spring_tide": (), "kurage_school": (),
+         "kurages_mercy": ("amount",)}
 #: The one kind that aims at the enemy the card was played on.
 AIMED_KINDS = frozenset(("draw_if_target_weak",))
 

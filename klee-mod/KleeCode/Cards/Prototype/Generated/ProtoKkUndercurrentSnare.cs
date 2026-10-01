@@ -75,7 +75,8 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
-            return;
+            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.FrontEnemy) is not { } nowLine) return;
+            cardPlay = nowLine;
         }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 2, applier: Owner.Creature, cardSource: this);

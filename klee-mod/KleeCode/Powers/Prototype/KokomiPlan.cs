@@ -228,6 +228,13 @@ public static class KokomiPlan
         DamageIfAlone,
         BlockPerAttackingEnemy,
         DoubleBlock,
+        // POOL COMPLETION (2026-10-01, multiplayer). Tactical Relay: "Plan:
+        // Each player gains 1 Energy [and draws 1 card]." EVERY living player
+        // in the fight, Kokomi included (<see cref="EachPlayer"/>); the draw
+        // is written at 0 on the base card and added by the upgrade. Appended
+        // last. Sim twins: `kokomi_plan.EACH_PLAYER_ENERGY` / `_DRAW`.
+        EachPlayerEnergy,
+        EachPlayerDraw,
     }
 
     /// <summary>
@@ -1107,6 +1114,10 @@ public static class KokomiPlan
                               Writer: writer);
         int before = queue.Count;
         queue.Add(entry);
+        // POOL COMPLETION (2026-10-01), SHOAL OF SPEARS: "for each Plan you
+        // wrote this turn". Every write, Moon's Reflection's included. Sim
+        // twin: `state.kk_plans_written_this_turn` in `kokomi_plan.schedule`.
+        ledger.NotePlanWritten();
         // KURAGE SWARM: "Whenever you write a Plan that costs 0, the Casket
         // gains 1." The cost paid, after reductions.
         if (entry.Paid == 0) KurageSwarmPower.Note(kokomi);
@@ -1419,7 +1430,8 @@ public static class KokomiPlan
     /// nobody is playing any more.
     /// </summary>
     private static async Task Drain(
-        PlayerChoiceContext choiceContext, Creature kokomi, List<Entry> due)
+        PlayerChoiceContext choiceContext, Creature kokomi, List<Entry> due,
+        bool midTurn = false)
     {
         var player = kokomi.Player;
         var doubleNext = false;
@@ -1442,8 +1454,13 @@ public static class KokomiPlan
         // (`EB-501`). It deliberately does NOT fold in an extra carry-out a
         // later entry may write -- that rider is not on the board when the
         // number is asked, which is the reading the old per-entry term took.
+        // POOL COMPLETION (2026-10-01), SPRING TIDE: a MID-TURN drain is
+        // neither a morning nor a Dusk, so Nereid's Ascension does not double
+        // its first entry -- <see cref="ResolveFront"/>'s reading, for the
+        // whole queue. `kokomi_plan._drain`'s `mid_turn` is the twin.
+        var firstTimes = midTurn ? 1 : CarryOutTimes(kokomi);
         var drainPlans = due.Count
-                       + (due.Count > 0 && CarryOutTimes(kokomi) > 1 ? 1 : 0);
+                       + (due.Count > 0 && firstTimes > 1 ? 1 : 0);
         // `EB-718`. SCOUT AHEAD'S COUNTER, armed and spent INSIDE THIS DRAIN.
         // The face says "for each later Plan CARRIED OUT with this one", so the
         // card is paid PER LATER CARRY-OUT AS IT HAPPENS rather than off a
@@ -1487,13 +1504,14 @@ public static class KokomiPlan
             // entry. That is the drain-local reading every other positional
             // rule in this arm already takes -- "the next Plan" means "in this
             // drain" -- and it is what lets the Rare pay a one-Plan morning.
-            var times = (index == 0 ? CarryOutTimes(kokomi) : 1)
+            var times = (index == 0 ? firstTimes : 1)
                       + (extraThis ? 1 : 0)
                       + System.Math.Max(0, entry.Extra);
             for (var i = 0; i < times; i++)
             {
                 var (wroteDouble, wroteExtra, armed) = await ResolveEntry(
-                    choiceContext, kokomi, entry, doubleDamage: doubleThis,
+                    choiceContext, kokomi, entry, onPlay: midTurn,
+                    doubleDamage: doubleThis,
                     drainPlans: drainPlans, scoutDraw: scoutRate,
                     scoutSource: scoutSource, drainEntries: due.Count);
                 // OR'd ACROSS THIS ENTRY'S OWN CARRY-OUTS, for the reason
@@ -1956,6 +1974,59 @@ public static class KokomiPlan
             if (kokomi.IsDead) return;
             await ResolveNow(choiceContext, kokomi, front);
         }
+    }
+
+    /// <summary>
+    /// SPRING TIDE (pool completion, 2026-10-01): "The Bake-Kurage carries
+    /// out all your Plans now."
+    ///
+    /// THE WHOLE QUEUE, IN ORDER, Dusk Plans included ("all your Plans"),
+    /// through <see cref="Drain"/> -- so a rider reaches the entry behind it,
+    /// and every carry-out rings the plan bus and counts for the Casket and
+    /// Kurage Canopy. MID-TURN: Nereid's Ascension does not double the first
+    /// entry, the morning's depth is untouched and the cap does not apply.
+    /// The queue is emptied before the first clause runs, so a Plan written
+    /// afterwards waits for the morning. An empty queue is a printed no-op.
+    /// Sim twin: <c>kokomi_plan.resolve_all_now</c>.
+    /// </summary>
+    public static async Task ResolveAllNow(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var player = kokomi!.Player;
+        if (player == null) return;
+
+        Rebase(kokomi);
+        if (!_queues.TryGetValue(player, out var queue) || queue.Count == 0)
+        {
+            return;
+        }
+        var due = new List<Entry>(queue);
+        int before = queue.Count;
+        queue.Clear();
+        await Sync(choiceContext, kokomi, "rule:carried_out_now", before);
+        try
+        {
+            await Drain(choiceContext, kokomi, due, midTurn: true);
+        }
+        finally
+        {
+            Vfx.KokomiPlanStrip.Refresh(kokomi);
+        }
+    }
+
+    /// <summary>"Each player" (pool completion, Tactical Relay): every living
+    /// player creature on her side, herself included -- the base game's
+    /// teammates walk (<c>Rally</c>, <c>HuddleUp</c>), with no "other"
+    /// clause. Just her in a one-seat fight.</summary>
+    internal static IReadOnlyList<Creature> EachPlayer(Creature kokomi)
+    {
+        if (kokomi.CombatState is not { } combat) return new[] { kokomi };
+        var all = combat.GetTeammatesOf(kokomi)
+            .Where(c => c != null && c.IsAlive && c.IsPlayer)
+            .ToList();
+        if (!all.Contains(kokomi) && kokomi.IsAlive) all.Insert(0, kokomi);
+        return all;
     }
 
     /// <summary>
@@ -2507,6 +2578,39 @@ public static class KokomiPlan
                 await PlayerCmd.GainEnergy(plan.Amount, player);
                 return plan.Amount;
 
+            case Kind.EachPlayerEnergy:
+                // POOL COMPLETION, TACTICAL RELAY: every living player.
+                foreach (var each in EachPlayer(kokomi))
+                {
+                    if (each.Player is { } them)
+                    {
+                        await PlayerCmd.GainEnergy(plan.Amount, them);
+                    }
+                }
+                return plan.Amount;
+
+            case Kind.EachPlayerDraw:
+            {
+                // Written at 0 on the base card: a 0 draws nothing. Another
+                // seat draws through the base game's door for a draw on a
+                // player who is not acting (Joint Orders' shape).
+                if (plan.Amount <= 0) return null;
+                foreach (var each in EachPlayer(kokomi))
+                {
+                    if (each.Player is not { } them) continue;
+                    if (them == player || entry?.Source is not { } writer)
+                    {
+                        await CardPileCmd.Draw(choiceContext, plan.Amount, them);
+                    }
+                    else
+                    {
+                        await CardPileCmd.DrawWithoutBlockingOnOtherPlayers(
+                            choiceContext, plan.Amount, them, writer);
+                    }
+                }
+                return plan.Amount;
+            }
+
             case Kind.Block:
                 // POWERED, and rule 3 is why: "your Strength and Dexterity
                 // count, since the plans are hers". Draft 2's Plan Block was
@@ -2626,6 +2730,9 @@ public static class KokomiPlan
         // THE CO-OP SET: the cards the OTHER player drew.
         Kind.AllyDraw => "cards drawn",
         Kind.Energy => "Energy",
+        // POOL COMPLETION: Tactical Relay's figure is HER share of it.
+        Kind.EachPlayerEnergy => "Energy",
+        Kind.EachPlayerDraw => "cards drawn",
         Kind.Block or Kind.BlockPerPlanThisMorning
             or Kind.BlockPerPlanHeld or Kind.BlockPerAttackingEnemy
             or Kind.DoubleBlock => "Block",

@@ -78,7 +78,11 @@ def test_the_witness_and_the_side_sheet_name_the_same_three_cards():
     A witness entry with no sheet row means the sim never modelled a card the
     mod ships; a sheet row with no witness means a number nothing checks.
     """
-    assert set(hwp.ANCIENT_WITNESS) == set(WITNESSED.values())
+    # POOL COMPLETION (2026-10-01): each kit's second Ancient is arm-only and
+    # game-side only (`hwp.ARM_ONLY_ANCIENTS`): witnessed, never mirrored.
+    assert (set(hwp.ANCIENT_WITNESS) - hwp.ARM_ONLY_ANCIENTS
+            == set(WITNESSED.values()))
+    assert hwp.ARM_ONLY_ANCIENTS <= set(hwp.ANCIENT_WITNESS)
     # Scoped to the SIDE-SHEET, not to `rarity == "ancient"` across the
     # index: `ancient` is a real base-game rarity and the extracted reference
     # pools carry four of them (Break, Corruption, Suppress, Wraith Form) on

@@ -826,6 +826,15 @@ CO_TENANCY_LEDGER = {
             "ADDITION to the lead's bar, as `FurinaStageHooks`' regen is, so "
             "either order leaves the same number. The sim runs it after the "
             "regen (`furina_stage.turn_start_powers`)",
+        ("Powers/Prototype/KokomiPoolCompletion.cs", "PatientTidePower"):
+            "QUARANTINED (the Kokomi overhaul; pool completion, 2026-10-01). "
+            "Patient Tide hands back the Energy it banked at her last turn's "
+            "end. THE ORDERING QUESTION, answered: this broadcast fires after "
+            "the energy reset, and the co-tenants that also write Energy (the "
+            "morning drain's Energy clauses, The Long Game) all ADD to it, so "
+            "any order leaves the same number; nothing here reads Energy. The "
+            "sim adds the kept Energy on the refill line (`combat._player_turn`, "
+            "`kokomi_plan.patient_tide_kept`)",
         ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
             "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). RULE 8's "
             "resolution point: the Plans she wrote last turn happen here, in "
@@ -1200,6 +1209,15 @@ CO_TENANCY_LEDGER = {
             "so the Bond counts this Block as gained this turn -- and the sim "
             "pays it at the same point, `klee_overhaul.sit_tight_turn_end` "
             "called ahead of `effects.player_turn_end_triggers`",
+        ("Powers/Prototype/KokomiPoolCompletion.cs", "PatientTidePower"):
+            "QUARANTINED (the Kokomi overhaul; pool completion, 2026-10-01). "
+            "Patient Tide banks up to N of her unspent Energy. THE ORDERING "
+            "QUESTION, answered: it READS Energy and writes only its own "
+            "field; the one co-tenant that could move her Energy here is the "
+            "Dusk drain, and no Dusk Plan in her pool pays Energy (Breakwater, "
+            "Shell of Sanctuary, Evening Watch, Brace for the Tide and Slack "
+            "Water's Weak). The sim banks after the Dusk drain "
+            "(`kokomi_plan.patient_tide_bank` after `resolve_dusk`)",
         ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
             "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). DUSK "
             "(`EB-643`, R265): every dusk entry in the Plan queue is carried "

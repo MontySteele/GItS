@@ -180,6 +180,24 @@ TIDE_OF_APPLAUSE = "fs_tide_of_applause"    # a reaction: the back gains N
 REGINA = "fs_regina_of_all_waters"          # turn start: Hydro on ALL
 SOLILOQUY = "fs_soliloquy"                  # empty stage: Attacks +N a hit
 ONE_WOMAN_SHOW = "fs_one_woman_show"        # empty stage at turn start: +E, +2E
+# POOL COMPLETION (2026-10-01, review/active/pool-completion-2026-10-01.md
+# sec.5). C# twins: `CriticsDarlingPower`, `StarTurnPower`.
+CRITICS_DARLING = "fs_critics_darling"      # a Spend mode: its Fanfare to ALL
+STAR_TURN = "fs_star_turn"                  # a Guest Star joins: it acts now
+
+#: THE LAST ACT (pool completion): "Costs 1 less for each empty seat." The one
+#: row that prices itself off the stage, keyed by id in both engines
+#: (`combat.card_cost`; `FurinaStageHooks.TryModifyEnergyCostInCombat`).
+LAST_ACT_ID = "proto_fs_the_last_act"
+
+#: CASTING AGENT (pool completion): "Choose 1 of 3 random Guest Star cards."
+#: The Guest Cast's ten cards, one per guest, in `GUESTS`' order. C# twin:
+#: `FurinaStageRoster.GuestStarCards`.
+GUEST_STAR_CARD_IDS: tuple[str, ...] = tuple(
+    "proto_fs_guest_star_" + g for g in (
+        "neuvillette", "clorinde", "navia", "chevreuse", "wriothesley",
+        "sigewinne", "charlotte", "lynette", "lyney", "escoffier"))
+CASTING_AGENT_OFFER = 3
 
 
 # ----------------------------------------------------------------------
@@ -356,6 +374,15 @@ POOL_SUBS: dict[str, str] = {
 # ----------------------------------------------------------------------
 POOL_ADDS: tuple[str, ...] = (
     "proto_fs_solo_verse",
+    # POOL COMPLETION (2026-10-01, paper sec.5): three Uncommons and three
+    # Rares, appended (the mod's `SwapOfferedRows` appends them too). The pool
+    # is 78 (23 / 35 / 20).
+    "proto_fs_aria_for_one",
+    "proto_fs_interval_bell",
+    "proto_fs_casting_agent",
+    "proto_fs_the_last_act",
+    "proto_fs_critics_darling",
+    "proto_fs_star_turn",
 )
 
 
@@ -1221,7 +1248,76 @@ def spend(state, amount: int) -> int:
     if pair[1] <= 0:
         _leave(state, len(_seats(p)) - 1, bowed=True, reason="spend",
                held=bar)
+    critics_darling(state, paid)
     return paid
+
+
+def critics_darling(state, paid: int) -> None:
+    """*Critics' Darling* (pool completion, 2026-10-01): "Whenever you choose a
+    Spend mode, deal damage equal to the Fanfare spent to ALL enemies." From
+    `spend`, which only a chosen Spend mode reaches (`effects._op_stage_spend`),
+    AFTER the payment and its Bow. Unpowered and unelemented, like an act;
+    once per copy. A payment of 0 deals nothing. C# twin:
+    `FurinaStage.CriticsDarling`."""
+    p = state.player
+    copies = int(p.powers.get(CRITICS_DARLING, 0))
+    if not active(p) or copies <= 0 or paid <= 0:
+        return
+    from tier0.engine import effects                  # late: avoids the cycle
+    state.emit("stage_critics_darling", paid=int(paid), copies=copies)
+    for _ in range(copies):
+        for enemy in list(state.living_enemies):
+            effects.deal_damage_to_enemy(state, enemy, int(paid), element=None,
+                                         powered=False,
+                                         source="card")
+
+
+def empty_seats(player) -> int:
+    """How many of her seats hold nobody: `capacity` less the performers on
+    stage, never below 0. *The Last Act*'s discount. C# twin:
+    `FurinaStage.EmptySeats`."""
+    if not active(player):
+        return 0
+    return max(0, capacity(player) - count(player))
+
+
+def last_act_discount(state, card) -> int:
+    """*The Last Act*: "Costs 1 less for each empty seat." PURE -- a cost
+    query (`combat.card_cost`) may ask as often as it likes."""
+    base = str(getattr(card, "id", "")).split("+")[0]
+    if base != LAST_ACT_ID:
+        return 0
+    return empty_seats(state.player)
+
+
+def casting_agent(state, upgraded: bool = False):
+    """*Casting Agent* (pool completion): "Choose 1 of 3 random Guest Star
+    cards and add it to your hand. It costs 0 this turn [and is upgraded]."
+
+    THREE DIFFERENT CARDS from the Guest Cast's ten (`GUEST_STAR_CARD_IDS`),
+    drawn off the combat rng. THE PILOT TAKES THE FIRST OFFERED, this engine's
+    stand-in for a choice (`_op_scry_take`'s convention: stated, not hidden);
+    the mod opens a choose-a-card screen. A full hand takes nothing. Returns
+    the card added, or None. C# twin: `FurinaStage.CastingAgent`."""
+    import copy                                       # stdlib, local by habit
+    from tier0 import constants as C                  # late, like the rest
+    from tier0.content import loader, upgrades        # late: avoids the cycle
+    from tier0.engine import effects                  # late: avoids the cycle
+    p = state.player
+    if not active(p):
+        return None
+    if len(p.hand) >= C.MAX_HAND_SIZE:
+        state.emit("stage_casting_agent", offered=[], took=None)
+        return None
+    offer = state.rng.sample(list(GUEST_STAR_CARD_IDS),
+                             min(CASTING_AGENT_OFFER, len(GUEST_STAR_CARD_IDS)))
+    pick = offer[0]
+    cid = pick + (upgrades.SUFFIX if upgraded else "")
+    card = copy.deepcopy(loader.get_card(cid))
+    card.free_this_turn = True
+    effects._add_token(state, card, "hand")
+    state.emit("stage_casting_agent", offered=list(offer), took=card.id)
+    return card
 
 
 #: What `collect_all` emptied, read back by `bow_and_return`. On the STATE and
@@ -1759,6 +1855,29 @@ def guest_star(state, member: str, amount: int, front: bool = False) -> None:
     if billing > 0 and not state.over:
         state.draw(billing)
         state.emit("stage_star_billing", member=member, drew=billing)
+    star_turn(state, member)
+
+
+def star_turn(state, member: str) -> None:
+    """*Star Turn* (pool completion, 2026-10-01): "Whenever a Guest Star joins
+    the stage, it acts at once." Bends rule 3 (`EB-738`: a newcomer never
+    acts on arrival). After the arrival and Star Billing's draw, whichever way
+    the guest arrived; the guest's own seat acts once per copy, through the one
+    act every caller uses (`perform`, so it pays as any act does). A guest no
+    longer on stage (a repeat that left, a recast that failed) does not act.
+    C# twin: `FurinaStage.StarTurn`."""
+    p = state.player
+    copies = int(p.powers.get(STAR_TURN, 0))
+    if not active(p) or copies <= 0:
+        return
+    for _ in range(copies):
+        if state.over or not p.alive:
+            return
+        pair = next((s for s in stage(p) if s[0] == member), None)
+        if pair is None:
+            return
+        state.emit("stage_star_turn", member=member)
+        perform(state, member, pair=pair)
 
 
 def _guest_joins(state, member: str, amount: int, front: bool) -> None:

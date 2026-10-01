@@ -51,8 +51,9 @@ def _library(st, n=10):
 
 def test_the_pass_cuts_second_thoughts_and_adds_two_uncommons(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 70
-    assert ids[-2:] == C.KOKOMI_PAYOFF_PASS_IDS == (
+    # Pool completion (2026-10-01) appended eight after the two.
+    assert len(ids) == 78
+    assert ids[-10:-8] == C.KOKOMI_PAYOFF_PASS_IDS == (
         "proto_kk_kurage_canopy", "proto_kk_coral_tithe")
     assert "proto_kk_second_thoughts" not in ids
     assert "proto_kk_second_thoughts" not in {

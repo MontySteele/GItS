@@ -120,7 +120,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # THIRTY-EIGHT with expansion batch one (2026-09-29): Lull, Undertide
     # Lance, Masterstroke, Undercurrent Snare, Evening Watch and Brace for the
     # Tide.
-    assert len(planned) == 38
+    # FORTY with pool completion (2026-10-01): Tidal Screen, and the
+    # multiplayer Tactical Relay.
+    assert len(planned) == 40
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -863,8 +865,9 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     # pool and the absence does not.
     # FORTY-SIX since the Casket pass (2026-09-28); FORTY-FOUR since the
     # cleanup pass (2026-09-29); SIXTY-NINE since expansion batch one;
-    # SEVENTY since the payoff pass (2026-10-01).
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 70
+    # SEVENTY since the payoff pass (2026-10-01); SEVENTY-EIGHT since pool
+    # completion (2026-10-01).
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 78
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids

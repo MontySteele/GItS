@@ -688,6 +688,56 @@ ANCIENT_WITNESS: dict[str, dict] = {
     },
 }
 
+# POOL COMPLETION (2026-10-01, review/active/pool-completion-2026-10-01.md
+# sec.3): each kit's SECOND Ancient, which bends one of the kit's own rules.
+# ARM-ONLY: each file is compiled under `PROTOTYPE_CARDS` alone and has NO sim
+# twin in tier0/content/cards/ancients.yaml (the paper: "game-side only, as the
+# first three were"; the rules they bend live in C# alone), so
+# `tier0/tests/test_eb30m_ancients.py` sets these three names aside by name.
+ARM_ONLY_ANCIENTS = frozenset((
+    "AlicesMasterpiece", "DivineStrategy", "CenterOfAttention"))
+ANCIENT_WITNESS.update({
+    "AlicesMasterpiece": {
+        "why": "Klee's second Ancient (pool completion, 2026-10-01): a Power, "
+               "3 Energy, 2 upgraded; when one of her Bombs goes off it stays "
+               "at half its size. No number on the face but the cost.",
+        "cost": [3],
+        "vars": [],
+        "hits": [],
+        "upgrade_vars": [],
+        "upgrade_cost": [-1],
+        "encore": [],
+        "fanfare_div": [],
+        "fanfare_tip": [],
+    },
+    "DivineStrategy": {
+        "why": "Kokomi's second Ancient (pool completion, 2026-10-01): a "
+               "Power, 2 Energy, 1 upgraded; the turn's first card played on "
+               "the Bake-Kurage does its now-line too.",
+        "cost": [2],
+        "vars": [],
+        "hits": [],
+        "upgrade_vars": [],
+        "upgrade_cost": [-1],
+        "encore": [],
+        "fanfare_div": [],
+        "fanfare_tip": [],
+    },
+    "CenterOfAttention": {
+        "why": "Furina's second Ancient (pool completion, 2026-10-01): a "
+               "Power, 2 Energy, 1 upgraded; the turn's first Spend is free "
+               "and may be chosen on a short bar.",
+        "cost": [2],
+        "vars": [],
+        "hits": [],
+        "upgrade_vars": [],
+        "upgrade_cost": [-1],
+        "encore": [],
+        "fanfare_div": [],
+        "fanfare_tip": [],
+    },
+})
+
 # What a pin must cover. Every numeric category extract_cs produces -- listed
 # explicitly so that adding a category to the extractor breaks every pin at
 # once (a pin silently missing the newest category is a pin that stopped

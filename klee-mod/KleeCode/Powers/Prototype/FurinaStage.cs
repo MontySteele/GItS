@@ -188,7 +188,13 @@ public static partial class FurinaStage
     /// Spend mode and the card plays its base mode.
     /// </summary>
     public static bool CanSpend(Creature? owner, int amount) =>
-        LiveFor(owner) && FurinaStageLedger.For(owner!).CanSpend(amount);
+        LiveFor(owner)
+        && (FurinaStageLedger.For(owner!).CanSpend(amount)
+            // POOL COMPLETION (2026-10-01), CENTER OF ATTENTION (her second
+            // Ancient): the turn's first Spend may be chosen "even when your
+            // back performer has too little" -- someone must still be on
+            // stage. A read; <see cref="Spend"/> takes the claim.
+            || CenterOfAttentionPower.Covers(owner));
 
     /// <summary>The live lead bar, for the `stage_lead_fanfare` count
     /// (<i>Pneuma Refrain</i>, the shield reader).</summary>
@@ -820,6 +826,14 @@ public static partial class FurinaStage
                                         Creature? owner, int amount)
     {
         if (!LiveFor(owner)) return 0;
+        // POOL COMPLETION (2026-10-01), CENTER OF ATTENTION: "The first Spend
+        // you choose each turn takes no Fanfare." Claimed here, where a chosen
+        // Spend mode pays; nothing is taken, so Critics' Darling is paid 0.
+        if (CenterOfAttentionPower.TryClaim(owner!))
+        {
+            Vfx.FurinaStageCues.Refresh(owner);
+            return 0;
+        }
         var result = FurinaStageLedger.For(owner!).Spend(amount);
         if (!result.Fired) return 0;
         // One exit, or -- under Palais Ledger -- every performer the pooled
@@ -827,6 +841,9 @@ public static partial class FurinaStage
         foreach (var exit in result.Exits) await Bow(choiceContext, owner!, exit);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageCues.Refresh(owner);
+        // POOL COMPLETION, CRITICS' DARLING: what this chosen Spend paid, to
+        // ALL enemies, after the payment and its Bow.
+        await CriticsDarling(choiceContext, owner!, result.Paid);
         return result.Paid;
     }
 

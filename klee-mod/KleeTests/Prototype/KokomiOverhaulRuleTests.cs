@@ -389,7 +389,9 @@ public class KokomiOverhaulRuleTests
                     "BlockFrontIntent", "AllyDraw",
                     "OthersAttackDamageThisTurn", "FirstCompanionFree",
                     "CasketGain", "EnergyIfAlone", "DamageIfAlone",
-                    "BlockPerAttackingEnemy", "DoubleBlock" },
+                    "BlockPerAttackingEnemy", "DoubleBlock",
+                    // POOL COMPLETION (2026-10-01): Tactical Relay's two.
+                    "EachPlayerEnergy", "EachPlayerDraw" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -943,8 +945,9 @@ public class KokomiOverhaulRuleTests
         // SIXTY-NINE since expansion batch one (2026-09-29): The Clouds Like
         // Waves cut, 22 added. SEVENTY since the payoff pass (2026-10-01):
         // Second Thoughts cut, Kurage Canopy and Coral Tithe added.
+        // SEVENTY-EIGHT since pool completion (2026-10-01): eight added.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(70, Il.CallSequence(slice)
+        Assert.Equal(78, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

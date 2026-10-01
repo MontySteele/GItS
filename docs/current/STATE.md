@@ -36,8 +36,8 @@ bands are measured there). **Last release package: `0.2.1357`**
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
-| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 70 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 72 (60 Stage cards) |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 (66 Stage cards) |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (expansion built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -113,7 +113,15 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   cut ("an undo is a dead draw") and two Uncommons join: Kurage Canopy (Block
   per carry-out) and Coral Tithe (the Casket into Energy and cards). The pool
   is 70 (19 / 37 / 14). Brief §6; provenance note, "Kokomi payoff pass".
-  Next: [USER] plays.
+  **Pool completion (2026-10-01, ruled at the defaults):** paper
+  `review/active/pool-completion-2026-10-01.md` sec.4 and sec.6, built in
+  both engines: Tidal Screen (Common), seven Rares (Spring Tide, Kurage
+  School, Shoal of Spears, Patient Tide, Sea's Reproach, Tidal Rebuke,
+  Watatsumi Resistance), two co-op cards (Tactical Relay, Kurage's Mercy),
+  Coral Crash to Common 1 [0]; her second Ancient, Divine Strategy, game-side.
+  The pool is 78 (21 / 36 / 21) plus five co-op cards and two Ancients.
+  Provenance note, "Pool completion, 2026-10-01"; sec.7's sim checks wait
+  (BACKLOG). Next: [USER] plays.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any
@@ -151,7 +159,14 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   run on the new fade ("keeping him in the front was actually hard";
   Sigewinne "strictly fanfare-negative"), Wriothesley holds the front while
   on stage and Sigewinne is a free medic who heals the front performer
-  (brief §18, guest paper rule 2 and table).
+  (brief §18, guest paper rule 2 and table). **Pool completion (2026-10-01,
+  ruled at the defaults):** paper `review/active/pool-completion-2026-10-01.md`
+  sec.5, built in both engines: Aria for One, Interval Bell, Casting Agent
+  (Uncommon), The Last Act, Critics' Darling, Star Turn (Rare), appended; her
+  twelve old-kit cards stay (pick 3a). Her second Ancient, Center of
+  Attention, is game-side. The pool is 78 (23 / 35 / 20). Klee's second
+  Ancient, Alice's Masterpiece, landed in the same build. Provenance note,
+  "Pool completion, 2026-10-01".
 
 - **Varka: the Oath rework is built (Prototype, 2026-09-29).** Paper
   `review/active/varka-paper-kit-2026-09-28.md`, every pick ruled ([USER]:

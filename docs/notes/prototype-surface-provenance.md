@@ -4850,6 +4850,135 @@ The fifteen Powers borrow the existing varka power badges
 Converging Winds', an element-change Power Boreas Unbound's, a Knight Power
 Study Buddy's).
 
+## Pool completion, 2026-10-01
+
+The paper is `review/active/pool-completion-2026-10-01.md`, picks 1 to 5
+ruled at the defaults ([USER]: "Overall this looks good, but one balance
+note", the Body Slam note, sec.6). Built: sec.3 (three Ancients), sec.4
+(Kokomi's one Common, seven Rares and two multiplayer cards), sec.5
+(Furina's three Uncommons and three Rares; pick 3(a), her twelve old-kit
+cards stay) and sec.6 (the Body Slam repricing). Sec.4 to sec.6 are built in
+both engines; the Ancients are game-side only, as the first three were. One
+text correction from the main session after a Furina audit: her faces use
+"act" for what performers do, so Star Turn reads "it acts at once".
+
+**Pools.** Kokomi is 78 (21 Common, 36 Uncommon, 21 Rare), the eight
+appended LAST (`C.KOKOMI_POOL_COMPLETION_IDS`, `KokomiOverhaulRoster.Slice`),
+plus five co-op cards (3 Uncommon, 2 Rare). Furina's Stage offer is 78 (23 /
+35 / 20), the six appended (`furina_stage.POOL_ADDS`,
+`FurinaStageRoster.SwapOfferedRows`). Each kit now holds two Ancients
+(`RosterAncientCards`); the Dusty Tome draws one of them at random.
+
+**Readings the paper left open, each the plainest one:**
+
+- *Tidal Screen.* Gain 7 [10] Block; Plan: draw 2. The Plan line does not
+  upgrade.
+- *Spring Tide.* "All your Plans" is the whole queue, Dusk Plans included,
+  in order. It is a drain (`KokomiPlan.ResolveAllNow`,
+  `kokomi_plan.resolve_all_now`), so "the Plan after this one" riders reach
+  the entry behind them, and every carry-out counts for the Casket, Kurage
+  Canopy and the rest of the plan bus. Mid-turn, so Nereid's Ascension does
+  NOT double its first entry (Change of Plans' reading for the whole queue),
+  the morning's depth is untouched, and the Plan cap does not apply. The queue
+  is emptied first, so a Plan written afterwards waits for the morning. An
+  empty queue is a no-op.
+- *Kurage School.* "0-cost" is the cost the card has in hand now
+  (`GetResolved` / `combat.card_cost`), so a card some rule made free counts
+  and an X card never does; "a Plan line" is a printed `plan:`. The hand is
+  read once before the first copy, so copies are not copied; copies are exact
+  (an upgraded Nip copies upgraded); a full hand stops the copying.
+- *Shoal of Spears.* "Each Plan you wrote this turn" counts every write onto
+  the Bake-Kurage this turn, Moon's Reflection's included; a Plan carried out
+  or cancelled since still counts. New count `plans_written_this_turn`
+  (`KokomiOverhaulLedger.PlansWrittenThisTurn`, cleared at the turn roll).
+  4 [5] a Plan to ALL.
+- *Patient Tide.* Copies add to the cap. The Energy left at her turn's end,
+  up to the cap, is banked (after the Dusk drain) and added on top of the next
+  turn's refill (C#: `BeforeSideTurnEnd`, then `AfterPlayerTurnStart`, which
+  the game fires after the energy reset). Upgrade: keep 3.
+- *Sea's Reproach.* A positive application of Weak or Vulnerable that she
+  makes, once per enemy it lands on (Silent's Sadistic Nature); Suffocating
+  Deep's doubling is an application and pays. The 3 damage is Hydro and
+  unpowered, Tidal Riposte's hit. Upgrade: cost 1.
+- *Tidal Rebuke.* Body Slam to ALL: damage equal to her Block, Rare, 2 [1],
+  no Exhaust (sec.6).
+- *Watatsumi Resistance.* "A Companion card" is the arm's existing
+  definition (the one The General's Banner and Chain of Command read): one Nip
+  per Companion play, per copy, no once-a-turn latch. Upgrade: cost 0.
+- *Tactical Relay* (multiplayer). "Each player" is every living player in the
+  fight, Kokomi included. New Plan clauses `each_player_energy` /
+  `each_player_draw`; the draw is written at 0 and the upgrade adds it
+  (`plan_draw`, Current Read's shape). Another seat draws through the base
+  game's door for a draw on a player who is not acting.
+- *Kurage's Mercy* (multiplayer). Each living player Mends 8 [12] through the
+  one Mend rule (never above the HP each walked in with; entry HP is captured
+  for every seat at combat start). Exhaust.
+- *Coral Crash* is Common, 1 [0]: Body Slam exactly (sec.6). The
+  Prototype-stage default had given it "draw 1" on upgrade; the row now says
+  cost -1. *Noelle -- Sweeping Time* states `upgrade: {cost: -1}`: the
+  Prototype-stage default already produced cost 2 [1], so the card does not
+  change.
+- *Aria for One.* "Three times" is the two hits and a third read once they
+  have landed (a branch takes no `times:`); `conditional_damage: 2` moves all
+  three hits to 7.
+- *Interval Bell.* Spend 3 [2] moves the mode's price in both its gate and
+  its payment, through a new upgrade key `stage_spend` (the first
+  `stage_spend` anywhere on the card; codegen emits `(IsUpgraded ? 2 : 3)`).
+  The Spend mode is "draw 1 card and gain 1 Energy instead" of the plain draw.
+- *Casting Agent.* Three DIFFERENT cards from the Guest Cast's ten Guest Star
+  cards (`FurinaStageRoster.GuestStarCards`, `furina_stage.GUEST_STAR_CARD_IDS`),
+  drawn on the combat rng and shown on the choose-a-card screen; the chosen one
+  costs 0 this turn and is upgraded when Casting Agent is. A full hand takes
+  nothing. The sim's pilot takes the first offered.
+- *The Last Act.* An empty seat is one of her seats (three, four under Sold
+  Out) with no performer; the cost floors at 0. Keyed by id in both engines
+  (`combat.card_cost`; `FurinaStageHooks.TryModifyEnergyCostInCombat`).
+  Upgrade: 30 damage.
+- *Critics' Darling.* "A Spend mode" is a chosen `stage_spend` mode, the only
+  caller of `FurinaStage.Spend` / `furina_stage.spend`; Bravura and the other
+  spend-all cards are not modes and do not pay. The damage is what the back
+  performer actually paid, to ALL enemies, after the payment and its Bow,
+  unpowered and element-less (sim source `card`, a Power's damage), once per
+  copy. Upgrade: Innate.
+- *Star Turn.* After the arrival and Star Billing's draw, however the guest
+  arrived (a repeat copy's recast included), the guest's own seat acts once
+  per copy through the one act every caller uses, so it pays as any act
+  does. A guest no longer on stage does not act. Upgrade: cost 1.
+
+**The three Ancients** (game-side only, `#if PROTOTYPE_CARDS`, witnessed by
+`lint_handwritten_parity.ANCIENT_WITNESS` and set aside from the sim's
+Ancient side-sheet by `ARM_ONLY_ANCIENTS`):
+
+- *Alice's Masterpiece* (Klee, Power 3 [2]). Every charge that goes off,
+  Mines included ("a Bomb that also goes off just before its enemy
+  attacks"), whatever set it off. It stays at half its PRINTED size, rounded
+  down, before The Big One's multiplier and Boom Badge; a 1 leaves nothing.
+  The half keeps its kind (a Mine stays a Mine) and loses its payload (Jumpy
+  Dumpty's Mines ride the first explosion only). It is a move, not a
+  placement, so the Dodoco Charm is not paid again. It is placed after the
+  explosion, so the take that set it off never sets it off again; on a dead
+  enemy it jumps through the usual sweep.
+- *Divine Strategy* (Kokomi, Power 2 [1]). The generated Plan branch of every
+  row WITH a now-line asks `DivineStrategyPower.NowLine` after the Plan is
+  written; a Plan-only row emits no ask, so it never spends the once. A row
+  that aims at an enemy runs its now-line on the front enemy (a planned hit's
+  own reader), one that aims at a player on the Plan's ally (Joint Orders),
+  the rest untargeted. The once is claimed only once that aim is found.
+- *Center of Attention* (Furina, Power 2 [1]). The turn's first chosen Spend
+  takes nothing, even when the back performer could pay; while it is open the
+  chooser offers a Spend mode on a short bar, provided someone is on stage.
+  A free Spend pays Critics' Darling nothing.
+
+**Art.** None of the 17 new cards (14 rows and 3 Ancients) has a portrait:
+each renders the placeholder and `tools/art_coverage.py` bills the rows as
+missing. The nine new Powers borrow existing badges (`KleePowerIcons`).
+
+**Not run.** Paper sec.7's sim checks (each Kokomi deck within 10 points of
+Plan volume with the new Rares; Furina's three decks within 10 points of the
+default drafter; offer-take and play-rate bounds) were not run by this build
+(BACKLOG). Pins: `tier0/tests/test_pool_completion.py`,
+`KleeTests/Prototype/PoolCompletionTests.cs`.
+
 ## Varka element identities, 2026-10-01
 
 The paper `review/active/varka-element-identities-2026-10-01.md`, picks 1 to

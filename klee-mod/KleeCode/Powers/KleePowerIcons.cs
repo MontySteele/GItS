@@ -151,6 +151,23 @@ internal static class KleePowerIcons
         // per carry-out, so it wears that badge.
         KurageCanopyPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
+        // POOL COMPLETION (2026-10-01): the six new Powers and three Ancient
+        // Powers borrow the nearest shipped shape, the block above's rule.
+        PatientTidePower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        SeasReproachPower => KleePck.Path(
+            "kokomi/powers/vigil_of_the_deep.png"),
+        WatatsumiResistancePower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
+        DivineStrategyPower => KleePck.Path(
+            "kokomi/powers/before_sun_and_moon.png"),
+        AlicesMasterpiecePower => KleePck.Path(
+            "klee/powers/bomb_damage_up.png"),
+        CriticsDarlingPower => KleePck.Path(
+            "furina/powers/courtroom_drama.png"),
+        StarTurnPower => KleePck.Path(
+            "furina/powers/supporting_cast.png"),
+        CenterOfAttentionPower => KleePck.Path(
+            "furina/powers/limelight.png"),
         TheLongGamePower => KleePck.Path("klee/powers/spark_per_turn.png"),
         TheLongGamePlusPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         NereidsAscensionPower => KleePck.Path(

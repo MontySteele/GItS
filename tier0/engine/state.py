@@ -1546,6 +1546,13 @@ class CombatState:
     # (`kokomi_plan.schedule`), cleared by `kokomi_plan.roll_turn`.
     # `KokomiOverhaulLedger.NextPlanExtra`'s twin.
     kk_next_plan_extra: Optional[int] = None
+    # POOL COMPLETION (2026-10-01). Shoal of Spears' "for each Plan you wrote
+    # this turn" (every write, cleared by `kokomi_plan.roll_turn`;
+    # `KokomiOverhaulLedger.PlansWrittenThisTurn`'s twin), and Patient Tide's
+    # Energy kept across the turn boundary (banked at her turn end, handed
+    # back after the refill; `PatientTidePower`'s twin).
+    kk_plans_written_this_turn: int = 0
+    kk_patient_tide_kept: int = 0
     # QUARANTINED (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
     # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
     # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s

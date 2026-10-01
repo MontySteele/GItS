@@ -1038,8 +1038,9 @@ def test_every_stage_row_is_named_by_one_of_the_two_maps():
     # (the starter ruling, 2026-09-28), less Gentilhomme Usher and
     # Understudy (the balance review, 2026-09-28), less Scene Change, Gala
     # Dinner and A Rapt Audience (the audit pass, 2026-09-29), less Held
-    # Applause, Echoing Hall and Eternal Applause (the fade pass, same day)
-    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1 - 2 - 3 - 3
+    # Applause, Echoing Hall and Eternal Applause (the fade pass, same day),
+    # plus pool completion's six (2026-10-01)
+    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1 - 2 - 3 - 3 + 6
     # THE CO-OP SET's three are the MULTIPLAYER TIER: offered only in co-op,
     # outside the pool, replacing no shipped row -- so neither map names
     # them, and the tier's own mirror does.

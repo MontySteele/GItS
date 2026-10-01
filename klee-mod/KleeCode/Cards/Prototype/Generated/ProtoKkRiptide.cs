@@ -84,7 +84,8 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
-            return;
+            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
+            cardPlay = nowLine;
         }
         foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
         {

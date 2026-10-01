@@ -253,10 +253,12 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     in the sheet's order, The Clouds Like Waves Rippling cut.
 
     SEVENTY SINCE THE PAYOFF PASS (2026-10-01): Second Thoughts cut, Kurage
-    Canopy and Coral Tithe added last in the sheet's order."""
+    Canopy and Coral Tithe added last in the sheet's order.
+
+    SEVENTY-EIGHT SINCE POOL COMPLETION (2026-10-01): eight added last."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 70
-    assert len(set(ids)) == 70
+    assert len(ids) == 78
+    assert len(set(ids)) == 78
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
     assert {"proto_kk_riptide", "proto_kk_pincer", "proto_kk_flank",
@@ -267,7 +269,10 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
            "proto_kk_song_of_pearls", "proto_kk_exposed_flank",
            "proto_kk_the_clouds_like_waves", "proto_kk_second_thoughts"}
     assert not cut & set(ids)
-    # The payoff pass (2026-10-01): two rows LAST.
+    # Pool completion (2026-10-01): eight rows LAST.
+    assert ids[-8:] == C.KOKOMI_POOL_COMPLETION_IDS
+    ids = ids[:-8]
+    # The payoff pass (2026-10-01): two rows LAST before them.
     assert ids[-2:] == C.KOKOMI_PAYOFF_PASS_IDS == (
         "proto_kk_kurage_canopy", "proto_kk_coral_tithe")
     ids = ids[:-2]
@@ -429,10 +434,13 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     Clouds Like Waves Rippling (Rare) cut: 20 / 35 / 14.
 
     THE PAYOFF PASS (2026-10-01): Second Thoughts (Common) cut, Kurage Canopy
-    and Coral Tithe (Uncommon) added: 19 / 37 / 14."""
+    and Coral Tithe (Uncommon) added: 19 / 37 / 14.
+
+    POOL COMPLETION (2026-10-01): Tidal Screen (Common) and seven Rares
+    added, Coral Crash moved Uncommon to Common: 21 / 36 / 21."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 19, "uncommon": 37, "rare": 14}
+        "common": 21, "uncommon": 36, "rare": 21}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

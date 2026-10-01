@@ -161,6 +161,19 @@ public sealed class KokomiOverhaulLedger
     public int PlansCarriedOutThisTurn { get; private set; }
 
     /// <summary>
+    /// POOL COMPLETION (2026-10-01). How many Plans she has WRITTEN this turn
+    /// -- Shoal of Spears' "for each Plan you wrote this turn". Counted up by
+    /// <see cref="NotePlanWritten"/> from <c>KokomiPlan.Schedule</c>, every
+    /// write (Moon's Reflection's included); a Plan cancelled or carried out
+    /// since still counts. Sim twin:
+    /// <c>CombatState.kk_plans_written_this_turn</c>.
+    /// </summary>
+    public int PlansWrittenThisTurn { get; private set; }
+
+    /// <summary>One Plan written onto the Bake-Kurage.</summary>
+    public void NotePlanWritten() => PlansWrittenThisTurn++;
+
+    /// <summary>
     /// THE TAMAKUSHI CASKET'S COUNT (the Casket pass, 2026-09-28). Per combat:
     /// a new combat's ledger starts at 0, and the turn roll never touches it.
     /// "Each Plan the Bake-Kurage carries out adds 1 to the Casket" is
@@ -290,6 +303,8 @@ public sealed class KokomiOverhaulLedger
         _claimed.Clear();
         PlanCarriedOutThisTurn = false;
         PlansCarriedOutThisTurn = 0;
+        // POOL COMPLETION: Shoal of Spears' count is this turn's alone.
+        PlansWrittenThisTurn = 0;
         // `EB-335`. Cleared rather than handed over, and cleared HERE rather
         // than at the drain: `For` rolls on read, so the first ask of a new
         // round zeroes this before `ResolveAll` writes the new morning's depth

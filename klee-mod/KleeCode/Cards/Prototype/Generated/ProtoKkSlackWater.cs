@@ -82,7 +82,8 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
-            return;
+            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.FrontEnemy) is not { } nowLine) return;
+            cardPlay = nowLine;
         }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)

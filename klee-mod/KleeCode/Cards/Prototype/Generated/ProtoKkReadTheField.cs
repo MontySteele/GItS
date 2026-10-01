@@ -76,7 +76,8 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
-            return;
+            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
+            cardPlay = nowLine;
         }
         {
             var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take(DynamicVars["Scry"].IntValue).ToList();
