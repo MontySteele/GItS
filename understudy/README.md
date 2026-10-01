@@ -588,13 +588,14 @@ the first two are the soak's, the third is a blind lane's:
   through `blindplay observe` / `act`. There is no driver and no session there
   — each command is a separate process — so the cursor is a JSON file per lane
   beside the action budget, the probe window is the gap between two commands,
-  and the check runs BEFORE the wire call. Three readings, any one of which
+  and the check runs BEFORE the wire call. Two readings, either of which
   ends the lane: `godot.log` growing at **≥ 250 KB/s** (`hangwatch`'s own bar,
   under a 2 MB / 1 s noise floor so two commands a moment apart cannot divide
-  into a flood); the game process holding **≥ 2.5 GB** (a playing game is
-  ~1 GB, lane 2 was at 3.2 GB); or **2 consecutive** state timeouts while
-  health still answers (the `EB-489` stall pair, which has no recovery from
-  this side). The lane is then torn down through `embark.teardown` — the same
+  into a flood); or the game process holding **≥ 2.5 GB** (a playing game is
+  ~1 GB, lane 2 was at 3.2 GB). A state timeout while health answers is NOT a
+  death (2026-10-01: it tore down a backgrounded game that was only slow): the
+  read is retried after 5, 15 and 30 s, and a lane still slow is refused with
+  `NO ANSWER: the game is up but slow`, never torn down. The lane is then torn down through `embark.teardown` — the same
   undo `--teardown` walks — and the seat is handed `TOOL-BLOCKED: lane dead
   (<reason>)`, which its brief already tells it to stop on. The pid and the
   log path come off that lane's own embark sidecar and ledger, never off an

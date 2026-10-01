@@ -130,6 +130,7 @@ from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     BlindPlayError, BOARD_SETTLE_TRIES, budget_cap, budget_path, budget_spent,
     BUDGET_REACHED, CHARGE_SOURCE_LINE, COMBAT_SCREENS,
     count_action, FIGHT_OVERLAYS, forget_budget, LANE_ENV, lane_tag,
+    clear_refusal, mark_refusal, pending_refusal,
     MAX_ACTIONS_ENV, read_budget, set_budget,
     HAZARD_EVENT_TITLES, HAZARD_EVENTS, _is_rate_limited,
     AURA_DURATION_TURNS, BOMB_GROWTH, CRYSTALLIZE_BLOCK, FRAIL_BLOCK_PCT,
@@ -201,7 +202,7 @@ from understudy.blindplay_grammar import (   # noqa: E402,F401  (re-export)
     _potion_aims_at_an_enemy,
     _pet_target, _play, _proceed, _QUALIFIER, _QUOTED, _refuse, Resolution,
     _resolve_enemy, _rest_keyword, SELF_TARGETS, _skip, _split_qualifier,
-    _STALE_NUMBER, _use_potion, VERBS)
+    _STALE_NUMBER, unclaimed_rewards, _use_potion, VERBS)
 from understudy.blindplay_session import (   # noqa: E402,F401  (re-export)
     AUTHOR_FAMILY, Budget, check_independent, CodexThread, command_schema,
     FIGHT_QUESTIONS, forecast_block, MODEL_FAMILIES, model_family,
@@ -270,37 +271,66 @@ def _lane_guard(args) -> str:
     return lanewatch.guard()
 
 
-def _live_load(args) -> dict[str, Any]:
+class LaneSlow(BlindPlayError):
+    """The state read kept timing out while health answered: the game is up
+    and slow (a backgrounded window runs at a throttled frame rate). Nothing
+    was posted and nothing is torn down; the seat observes again."""
+
+
+#: What a seat is told when every retry of a slow lane timed out.
+LANE_SLOW = ("NO ANSWER: the game is up but slow to answer (its health check "
+             "answers; the screen read timed out {n} times over about {s}s). "
+             "Nothing was sent and nothing was torn down; `observe` again in "
+             "a minute.")
+
+
+def _health_answers() -> bool:
+    try:
+        bridge.health()
+        return True
+    except Exception:                                        # noqa: BLE001
+        return False
+
+
+def _live_load(args, *, sleep=None) -> dict[str, Any]:
     """`_load_state` with `EB-691`'s watchdog wrapped around the wire call.
 
-    THE THIRD SIGNAL IS ONLY VISIBLE HERE. A state read that TIMES OUT while
-    the bridge's health endpoint goes on answering is the game thread stalled
-    (`hangwatch.STATE_STALL_KIND`), and it has no recovery from this side; the
-    2026-09-08 lane retried sixteen times over fifteen minutes because nothing
-    was counting. Two consecutive timeouts end the lane. A read that succeeds
-    resets the count, and a bridge failure that is NOT a timeout is re-raised
-    untouched -- a refused connection means the process is gone, which is a
-    different failure with a different answer.
+    A STATE READ THAT TIMES OUT WHILE HEALTH ANSWERS IS RETRIED, never ended
+    (2026-10-01). Varka's lane 2 was torn down on two such timeouts mid-fight;
+    its `godot.log` shows a backgrounded window regaining focus and the bridge
+    answering both reads just after the client gave up. So the read is retried
+    after each of `lanewatch.STATE_RETRY_WAITS_S`, the storm watchdog
+    (`lanewatch.guard`, log flood and memory) is consulted between tries, and
+    a lane still too slow after the last wait raises `LaneSlow` -- a refusal,
+    not a teardown. A failure that is NOT a timeout, or a timeout with health
+    also silent, is re-raised untouched: a refused connection means the
+    process is gone, which is a different failure with a different answer.
     """
     if args.raw_file:
         return _load_state(args)
-    try:
-        state = _load_state(args)
-    except Exception as exc:                                 # noqa: BLE001
-        if not lanewatch.is_timeout(exc):
-            raise
+    waits = tuple(lanewatch.STATE_RETRY_WAITS_S)
+    tries = 0
+    while True:
         try:
-            bridge.health()
-            health = True
-        except Exception:                                    # noqa: BLE001
-            health = False
-        lanewatch.record_state_timeout(health_answers=health)
-        line = lanewatch.guard()
-        if line:
-            raise LaneDead(line) from None
-        raise
-    lanewatch.record_state_ok()
-    return state
+            state = _load_state(args)
+        except Exception as exc:                             # noqa: BLE001
+            if not lanewatch.is_timeout(exc):
+                raise
+            health = _health_answers()
+            lanewatch.record_state_timeout(health_answers=health)
+            line = lanewatch.guard()
+            if line:
+                raise LaneDead(line) from None
+            if not health:
+                raise
+            if tries >= len(waits):
+                raise LaneSlow(LANE_SLOW.format(
+                    n=tries + 1, s=int(sum(waits)))) from None
+            (sleep or time.sleep)(waits[tries])
+            tries += 1
+            continue
+        lanewatch.record_state_ok()
+        return state
 
 
 def cmd_observe(args) -> int:
@@ -316,6 +346,9 @@ def cmd_observe(args) -> int:
     except LaneDead as dead:
         print(dead)
         return lanewatch.EXIT_LANE_DEAD
+    except LaneSlow as slow:
+        print(slow)
+        return 1
     out = _refusal_stream(args)
     try:
         print(_page(observe(state), args))
@@ -377,6 +410,37 @@ def act_unanswered(exc: BaseException) -> str:
             f"next act.")
 
 
+def refusal_board(state: dict[str, Any]) -> str:
+    """The board a refusal is remembered against: `""` outside a fight.
+
+    The round, the hand, the Energy and the enemies' HP -- what any command
+    that landed would have moved -- so a mark left on one board is never read
+    on another."""
+    if _screen(state) not in COMBAT_SCREENS:
+        return ""
+    battle = state.get("battle") if isinstance(state.get("battle"), dict) else {}
+    player = _player(state)
+    hand = [str(c.get("name") or c.get("title") or c.get("id") or "")
+            for c in (player.get("hand") or []) if isinstance(c, dict)]
+    bodies = [[str(e.get("entity_id") or e.get("name") or ""), e.get("hp")]
+              for e in (battle.get("enemies") or []) if isinstance(e, dict)]
+    return json.dumps([battle.get("round"), player.get("energy"), hand,
+                       bodies], sort_keys=True, default=str)
+
+
+#: What a `proceed` that would leave rewards behind gets, the first time.
+PROCEED_PAST_REWARDS = (
+    "this reward screen still holds {left}. Take each with "
+    "`choose \"<name>\"`; nothing was sent. Say `proceed` again to leave "
+    "them behind")
+
+#: What an `end turn` typed right after a refusal, on the same board, gets.
+END_TURN_AFTER_REFUSAL = (
+    "your last command this turn was refused ({command}: {why}), and nothing "
+    "has changed since, so the turn was not ended. Say `end turn` again to "
+    "end it anyway")
+
+
 def cmd_act(args) -> int:
     # `EB-691` FIRST, ahead of the budget: a dead lane reported as "budget
     # reached" is a true sentence about the wrong problem, and the seat's
@@ -407,6 +471,9 @@ def cmd_act(args) -> int:
     except LaneDead as dead:
         print(dead)
         return lanewatch.EXIT_LANE_DEAD
+    except LaneSlow as slow:
+        print(slow)
+        return 1
     try:
         res = act(state, args.command)
     except qa_packet.PacketLeak as exc:
@@ -423,9 +490,33 @@ def cmd_act(args) -> int:
     # in `}`, and a refusal and a failed POST both stopped there, the refusal
     # with its sentence buried inside the dump and the POST with a traceback.
     # Every exit below now closes on one line of words on stdout.
+    board = refusal_board(state) if live else ""
     if not res["ok"]:
-        print(f"REFUSED: {_text(res.get('refusal')) or ACT_UNRESOLVED}")
+        why = _text(res.get("refusal")) or ACT_UNRESOLVED
+        if board:
+            mark_refusal(board, args.command, why.split(". ")[0])
+        print(f"REFUSED: {why}")
         return 1
+    left = (unclaimed_rewards(state)
+            if live and (res.get("post") or {}).get("action") == "proceed"
+            else [])
+    if left:
+        key = "rewards:" + json.dumps(left)
+        if pending_refusal(key):
+            clear_refusal()
+        else:
+            mark_refusal(key, args.command, "rewards left")
+            print("REFUSED: " + PROCEED_PAST_REWARDS.format(
+                left=", ".join(left)))
+            return 1
+    if board and res["verb"] == "end turn":
+        held = pending_refusal(board)
+        clear_refusal()
+        if held:
+            print("REFUSED: " + END_TURN_AFTER_REFUSAL.format(
+                command=held.get("command") or "a command",
+                why=held.get("why") or ACT_UNRESOLVED))
+            return 1
     if res["verb"] == "wait":
         return _cmd_wait(state, int(res["printed"]["seconds"]), live, args)
     if not live:
@@ -453,6 +544,7 @@ def cmd_act(args) -> int:
         return 1
     # `EB-341`: the row that was taken, then the game's answer -- the same two
     # lines, in the same order, the session hands its seat.
+    clear_refusal()
     said = [line for line in (taken_line(res), _result_line(result)) if line]
     for line in said or [ACT_SENT_SILENT]:
         print(line)

@@ -13,7 +13,16 @@ what a line says:
 - the standing notes that print the same sentence every screen (the enemy
   handle note, the power-feed note, the end-of-turn order note, the play
   guardrail);
-- a section whose only line is its own "nothing here" placeholder.
+- a section whose only line is its own "nothing here" placeholder;
+- the italic gloss lines, `*Word* — what it means`, that print under a card,
+  a relic or an enemy (2026-10-01: three of four seats still cut them with
+  their own `grep -v` after `--brief` shipped), and the standing reference
+  notes on FRONT, auras, multi-part intents, intent figures and repeated
+  names.
+
+A gloss or note line that matches `PROTECTED` is KEPT where it stands rather
+than dropped: the line-level trim never removes an intent, a refusal or a
+verb, whatever it is wrapped in.
 
 Everything else passes through untouched, in order. And then the safety net,
 which is what "by construction" means here: every line the trim removed is
@@ -27,9 +36,12 @@ from __future__ import annotations
 
 import re
 
-from understudy.blindplay_notes import (ENEMY_HANDLE_NOTE,
+from understudy.blindplay_notes import (AURA_NOTE, ENEMY_HANDLE_NOTE,
+                                        FRONT_ENEMY_NOTE, HAND_REPEAT_NOTE,
+                                        MULTI_INTENT_NOTE,
                                         NO_REACTION_THIS_TURN,
-                                        NO_RESOLUTIONS_THIS_TURN, POWER_NOTE)
+                                        NO_RESOLUTIONS_THIS_TURN, POWER_NOTE,
+                                        _INTENT_SOURCE_HEAD)
 from understudy.blindplay_shape import PLAY_GUARDRAIL
 
 #: Sections the brief page drops whole, heading and body.
@@ -40,8 +52,24 @@ DROPPED_SECTIONS = frozenset({"## Words on this screen"})
 DROPPED_LINES = frozenset({ENEMY_HANDLE_NOTE, POWER_NOTE, PLAY_GUARDRAIL,
                            NO_REACTION_THIS_TURN, NO_RESOLUTIONS_THIS_TURN})
 
-#: `TURN_ORDER_NOTE` is formatted per board, so it is matched by its opening.
-DROPPED_PREFIXES = ("*The end of your turn is a step of its own",)
+def _opening(note: str) -> str:
+    """A standing note's first words, which is how a note formatted per board
+    (or wrapped) is matched."""
+    return note[:40]
+
+
+#: `TURN_ORDER_NOTE` is formatted per board, so it is matched by its opening;
+#: so are the standing reference notes seats cut by hand (2026-10-01).
+DROPPED_PREFIXES = ("*The end of your turn is a step of its own",
+                    *(_opening(n) for n in (
+                        FRONT_ENEMY_NOTE, AURA_NOTE, MULTI_INTENT_NOTE,
+                        HAND_REPEAT_NOTE, _INTENT_SOURCE_HEAD,
+                        "*An intent's figure is the game's own")))
+
+#: The italic gloss: `*Word* — what it means`, indented under the thing that
+#: prints it or not. Only this shape; an italic NOTE (a whole sentence in
+#: italics, which may be an instruction) is not a gloss and is kept.
+GLOSS_LINE = re.compile(r"^\s*\*[^*\s][^*]*\* — ")
 
 #: Headings that are never dropped, even when their body is empty.
 KEPT_HEADINGS = frozenset({"## What you can say", "## Your hand",
@@ -62,7 +90,11 @@ PROTECTED = re.compile(
 
 
 def _drop_line(line: str) -> bool:
-    return line in DROPPED_LINES or line.startswith(DROPPED_PREFIXES)
+    if line in DROPPED_LINES:
+        return True
+    if PROTECTED.search(line):
+        return False
+    return line.startswith(DROPPED_PREFIXES) or bool(GLOSS_LINE.match(line))
 
 
 def _trim(text: str) -> tuple[list[str], list[str]]:

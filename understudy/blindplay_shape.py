@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from pathlib import Path
 from typing import Any
 
@@ -228,6 +229,56 @@ def count_action(lane: object = None) -> int:
     row["count"] += 1
     _write_budget(row, lane)
     return row["count"]
+
+
+# 2026-10-01 (Varka lane 2, act 3). A REFUSAL MUST NOT COST THE TURN. A seat
+# batched `play "Fischl - Nightrider"`, two more plays and `end turn`; every
+# play was refused for want of an enemy name, and the `end turn` went through,
+# so the whole turn was lost to a grammar slip. So a refused command in a
+# fight leaves a mark, keyed on the board it was refused against, and an `end
+# turn` typed on that same board is refused once with the refusal named. The
+# mark is cleared by that refusal and by any command that is sent.
+REFUSAL_MARK_TTL_S = 300.0
+
+
+def refusal_mark_path(lane: object = None) -> Path:
+    return _BUDGET_STORE_DIR / f"_blindplay-refused-lane{lane_tag(lane)}.json"
+
+
+def mark_refusal(board: str, command: str, why: str,
+                 lane: object = None, now: float | None = None) -> None:
+    row = {"board": board, "command": command, "why": why,
+           "at": time.time() if now is None else now}
+    try:
+        _BUDGET_STORE_DIR.mkdir(parents=True, exist_ok=True)
+        refusal_mark_path(lane).write_text(json.dumps(row), encoding="utf-8")
+    except OSError:
+        pass
+
+
+def clear_refusal(lane: object = None) -> None:
+    try:
+        refusal_mark_path(lane).unlink()
+    except OSError:
+        pass
+
+
+def pending_refusal(board: str, lane: object = None,
+                    now: float | None = None) -> dict | None:
+    """The refusal left on THIS board, if it is fresh; else `None`."""
+    try:
+        row = json.loads(refusal_mark_path(lane).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(row, dict) or row.get("board") != board:
+        return None
+    now = time.time() if now is None else now
+    try:
+        if now - float(row.get("at") or 0) > REFUSAL_MARK_TTL_S:
+            return None
+    except (TypeError, ValueError):
+        return None
+    return row
 
 
 def forget_budget(lane: object = None) -> None:
