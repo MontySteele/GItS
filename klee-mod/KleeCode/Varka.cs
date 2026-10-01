@@ -1,4 +1,4 @@
-#if PROTOTYPE_CARDS && VARKA_PROTOTYPE
+#if PROTOTYPE_CARDS
 using System.Collections.Generic;
 using System.Linq;
 using BaseLib.Abstracts;
@@ -7,7 +7,6 @@ using Godot;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Characters;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.PotionPools;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using MegaCrit.Sts2.Core.Nodes.Vfx;
 using MegaCrit.Sts2.Core.Unlocks;
@@ -21,10 +20,10 @@ namespace KleeMod;
 /// element, and every aura he lays down or Swirls swears Oath of it to his
 /// blade (<see cref="VarkaPrototype"/> states the rules).
 ///
-/// COMPILED ONLY WITH <c>-p:VarkaPrototype=true</c> (on by default beside the
-/// other current kits), so a <c>-p:ShippedKits=true</c> build has no Varka on
-/// the select screen at all: he ships nowhere else, and there is no shipped
-/// kit for an arm switch to fall back to.
+/// COMPILED WITH THE PROTOTYPE SURFACE (<c>PROTOTYPE_CARDS</c>), so a
+/// <c>-p:ShippedKits=true</c> build has no Varka on the select screen at all:
+/// he ships nowhere else, and has no switch of his own (collapsed
+/// 2026-10-01, legacy cleanup stage 2).
 /// </summary>
 public sealed class Varka : CustomCharacterModel, IVarkaCharacter
 {
@@ -59,13 +58,11 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
     public override RelicPoolModel RelicPool =>
         ModelDb.RelicPool<VarkaRelicPool>();
 
-    /// <summary>His own three with the arm live
-    /// (<c>review/active/varka-expansion-2026-10-01.md</c> sec.4, pick 1);
-    /// the Silent's potions, the borrow Kokomi runs on, with it off.</summary>
+    /// <summary>His own three
+    /// (<c>review/active/varka-expansion-2026-10-01.md</c> sec.4, pick 1).
+    /// </summary>
     public override PotionPoolModel PotionPool =>
-        VarkaPrototype.Enabled
-            ? ModelDb.PotionPool<Potions.VarkaPotionPool>()
-            : ModelDb.PotionPool<SilentPotionPool>();
+        ModelDb.PotionPool<Potions.VarkaPotionPool>();
 
     public override IEnumerable<CardModel> StartingDeck =>
         VarkaRoster.StartingDeck();

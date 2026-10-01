@@ -17,8 +17,8 @@ using Xunit;
 
 namespace KleeMod.Tests.Prototype;
 
-/// <summary>The one collection every pin that flips
-/// <see cref="VarkaPrototype.Enabled"/> runs in.</summary>
+/// <summary>The one collection every pin that resets the static
+/// <see cref="VarkaOathLedger"/> runs in.</summary>
 [CollectionDefinition(Name, DisableParallelization = true)]
 public sealed class VarkaArm
 {
@@ -37,18 +37,14 @@ public sealed class VarkaArm
 [Collection(VarkaArm.Name)]
 public class VarkaPrototypeTests : IDisposable
 {
-    private readonly bool _enabled = VarkaPrototype.Enabled;
-
     public VarkaPrototypeTests()
     {
         HeadlessGame.Arm();
-        VarkaPrototype.Enabled = true;
         VarkaOathLedger.ResetAll();
     }
 
     public void Dispose()
     {
-        VarkaPrototype.Enabled = _enabled;
         VarkaOathLedger.ResetAll();
     }
 
@@ -72,20 +68,16 @@ public class VarkaPrototypeTests : IDisposable
     private static VarkaOathLedger FreshLedger() =>
         VarkaOathLedger.For(Seat.Klee().Creature);
 
-    // ---- the arm -----------------------------------------------------------
+    // ---- no switch -----------------------------------------------------------
 
-    // ON in every build that names no property (Directory.Build.props).
-    // SKIPPED, NOT LEFT TO FAIL, where the build opts him out
-    // (-p:ShippedKits=true or -p:VarkaPrototype=false): there the property
-    // moved the value this pin asserts (operations/prototype.md).
-#if VARKA_PROTOTYPE
+    // Collapsed 2026-10-01 (legacy cleanup stage 2): he ships nowhere else, so
+    // he has no switch; he compiles with the prototype surface and is absent
+    // from a -p:ShippedKits=true build, which compiles none.
     [Fact]
-#else
-    [Fact(Skip = "This build opts Varka out (-p:ShippedKits=true or -p:VarkaPrototype=false), which moves the default this pin asserts.")]
-#endif
-    public void The_arm_ships_on()
+    public void He_has_no_switch()
     {
-        Assert.True(VarkaPrototype.DefaultEnabled);
+        Assert.Null(typeof(VarkaPrototype).GetProperty("Enabled"));
+        Assert.Null(typeof(VarkaPrototype).GetField("DefaultEnabled"));
     }
 
     // ---- the Oath ledger (sec.3) ---------------------------------------------
@@ -679,13 +671,11 @@ public class VarkaPrototypeTests : IDisposable
     {
         var strike = Il.Calls(Il.Method("ArmStarterBasics", "StrikeFor"));
         Assert.Contains("VarkaRoster.StarterStrike", strike);
-        Assert.Contains("VarkaPrototype.get_Enabled", strike);
         Assert.Contains("VarkaRoster.StarterDefend",
                         Il.Calls(Il.Method("ArmStarterBasics", "DefendFor")));
     }
 
-#if VARKA_PROTOTYPE
-    // ---- the character (compiled only with -p:VarkaPrototype=true) ----------
+    // ---- the character --------------------------------------------------------
 
     [Fact]
     public void Varka_is_eighty_hp_ninety_nine_gold_and_he()
@@ -719,9 +709,6 @@ public class VarkaPrototypeTests : IDisposable
         Assert.Equal(Element.Hydro, VarkaOath.Current(varka));
         Assert.Equal(3, VarkaOath.CurrentOath(varka));
         Assert.Equal(1, VarkaOath.Count(varka, Element.Pyro));
-        // With the arm off he has none.
-        VarkaPrototype.Enabled = false;
-        Assert.Equal(0, VarkaOath.CurrentOath(varka));
     }
 
     /// <summary>
@@ -777,5 +764,4 @@ public class VarkaPrototypeTests : IDisposable
         Assert.Contains("ModelDb.Relic",
                         Il.Calls(Il.Method("VarkaRelicPool", "GenerateAllRelics")));
     }
-#endif
 }
