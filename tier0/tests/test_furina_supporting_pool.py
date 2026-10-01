@@ -183,8 +183,8 @@ def test_the_additions_reach_the_offer_and_the_flag_off_pool_does_not(arm):
         "proto_fs_solo_verse", "proto_fs_aria_for_one",
         "proto_fs_interval_bell", "proto_fs_casting_agent",
         "proto_fs_the_last_act", "proto_fs_critics_darling",
-        "proto_fs_star_turn", "proto_fs_salon_debut",
-        "proto_fs_regal_bearing")
+        "proto_fs_star_turn", "proto_fs_opening_number",
+        "proto_fs_salon_debut", "proto_fs_regal_bearing")
     # `character_pool` is lru-cached: a flag-off pool another test on this
     # worker built would answer here, and this test's arm-on pool would
     # answer the next one. Clear on both sides.
@@ -213,7 +213,9 @@ def test_the_two_cut_rows_leave_the_offer_and_their_shipped_rows_stay_out(arm):
                                            "held_breath", "dress_rehearsal",
                                            "crowd_work", "directors_cut",
                                            "pit_orchestra",
-                                           "rapturous_applause")
+                                           "rapturous_applause",
+                                           # the rules pass (2026-10-01)
+                                           "an_invitation")
     rewards.character_pool.cache_clear()
     try:
         offered = {c.id for cs in rewards.character_pool("furina").values()
@@ -254,13 +256,14 @@ def test_plot_twist_reverses_the_seats(arm):
 
 
 def test_revolving_stage_moves_the_back_forward_after_the_regen(arm):
-    """The recommendation taken: AFTER rule 4's regen, so the regen went to
-    the performer that led last turn."""
+    """The recommendation taken: AFTER rule 4's regen. Rule 4 is cut (the
+    rules pass, 2026-10-01), so the order now matters only beside the
+    Curtain Never Falls (game-side): nobody regains here."""
     st = _state([["usher", 3], ["chevalmarin", 4], ["crabaletta", 5]])
     _power(st, FS.REVOLVING_STAGE)
     FS.turn_start_regen(st)
     FS.turn_start_powers(st)
-    assert st.player.stage == [["crabaletta", 5], ["usher", 4],
+    assert st.player.stage == [["crabaletta", 5], ["usher", 3],
                                ["chevalmarin", 4]]
 
 
@@ -393,7 +396,9 @@ def test_cheered_on_hits_and_feeds_the_back(arm):
     assert st.player.stage == [["usher", 3], ["crabaletta", 3]]
 
 
-def test_season_tickets_raise_the_back_and_summon_on_an_empty_stage(arm):
+def test_season_tickets_raise_the_back_and_do_nothing_on_an_empty_stage(arm):
+    """Rule 5, the rules pass (2026-10-01): a Power's gain does nothing on an
+    empty stage; only a card or potion you play summons."""
     st = _state([["usher", 3], ["crabaletta", 1]])
     _power(st, FS.SEASON_TICKETS, 2)
     FS.turn_start_powers(st)
@@ -401,7 +406,7 @@ def test_season_tickets_raise_the_back_and_summon_on_an_empty_stage(arm):
     st = _state([])
     _power(st, FS.SEASON_TICKETS, 3)
     FS.turn_start_powers(st)
-    assert len(st.player.stage) == 1 and st.player.stage[0][1] == 3
+    assert st.player.stage == []
 
 
 def test_escoffier_pays_three_feeds_the_cast_and_hits_all_with_cryo(arm):
@@ -635,8 +640,9 @@ def test_one_woman_show_pays_only_on_an_empty_stage_and_before_tickets(arm):
     FS.turn_start_powers(st)
     assert st.player.energy == 4
     assert len(st.player.hand) == 2     # power cost sweep 2026-09-30: draw 2
-    # Season Tickets then summoned onto the stage the show found empty.
-    assert len(st.player.stage) == 1
+    # Season Tickets then lands on nobody: a Power's gain on an empty stage
+    # does nothing (rule 5, the rules pass 2026-10-01).
+    assert st.player.stage == []
     st = _state([["usher", 3]], deck=5)
     st.player.energy = 3
     _power(st, FS.ONE_WOMAN_SHOW)

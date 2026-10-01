@@ -76,8 +76,9 @@ def test_the_fanfare_row_carries_the_empty_stage_summon():
     Fanfare-giving face prints (Hold Your Places, Gala Dinner)."""
     page = blindplay.observe(_reward_state([SALON_SOLITAIRE]))
 
-    # The second text pass (2026-09-28).
-    assert "Gaining it on an empty stage summons a performer." in page
+    # The rules pass (2026-10-01): only what you play summons.
+    assert ("If no one is on stage, a card that gives Fanfare summons a "
+            "random performer holding it.") in page
     assert "**Raise**" not in page
 
 

@@ -94,12 +94,15 @@ public class FurinaStageSeatFixTests
         using var _ = new Arm();
         var (_, stage) = Stage((StagePerformer.Usher, 3));
 
+        // The rules pass (2026-10-01): rule 4 is cut, so the plain regen
+        // regains nothing; The Curtain Never Falls' 2 is the regain now.
         stage.Regen(turnNumber: 2);
+        stage.Regen(2, 2, firstTurn: 2);               // the Curtain's door
         stage.RaiseLead(2, "regain");                  // Pneuma's door
 
         Assert.Equal(new[] { "regain", "regain" },
                      stage.Beats.Select(b => b.Event).ToArray());
-        Assert.Equal(new[] { 4, 6 },
+        Assert.Equal(new[] { 5, 7 },
                      stage.Beats.Select(b => b.Fanfare).ToArray());
     }
 

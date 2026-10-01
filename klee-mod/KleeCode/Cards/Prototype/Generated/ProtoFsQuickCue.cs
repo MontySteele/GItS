@@ -58,7 +58,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 3 damage", "[gold]Spend[/gold] 3: deal 14 and apply [gold]Hydro[/gold] instead" };
+        new[] { "Deal 3 damage", "[gold]Spend[/gold] 3: deal 11 and apply [gold]Hydro[/gold] instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { true, true };
@@ -67,7 +67,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 3m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 14m, ValueProp.Move, carries: Element.Hydro)
+            new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move, carries: Element.Hydro)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -91,7 +91,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
                                 "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 3 damage", "[gold]Spend[/gold] 3: deal 14 and apply [gold]Hydro[/gold] instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 3 damage", "[gold]Spend[/gold] 3: deal 11 and apply [gold]Hydro[/gold] instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
@@ -106,7 +106,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
             await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
             using (HitElement.Carry(this, Element.Hydro))
             {
-                await DamageCmd.Attack((IsUpgraded ? 16m : 14m))
+                await DamageCmd.Attack((IsUpgraded ? 13m : 11m))
                     .FromCard(this, cardPlay)
                     .Targeting(cardPlay.Target)
                     .WithHitFx("vfx/vfx_attack_slash")
@@ -155,7 +155,7 @@ public sealed class ProtoFsQuickCueModeA : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 3m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 14m, ValueProp.Move, carries: Element.Hydro)
+            new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move, carries: Element.Hydro)
         };
 
     protected override void OnUpgrade()
@@ -194,7 +194,7 @@ public sealed class ProtoFsQuickCueModeB : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 3m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 14m, ValueProp.Move, carries: Element.Hydro)
+            new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move, carries: Element.Hydro)
         };
 
     protected override void OnUpgrade()

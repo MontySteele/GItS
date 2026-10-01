@@ -137,23 +137,23 @@ def test_the_relic_fields_nobody_twice(arm):
     assert FS.stage(st.player) == [["usher", 3]]
 
 
-def test_the_first_hand_sees_three_and_the_second_turn_sees_four(arm):
-    """Rule 4 as sec.3 rule 2 qualifies it: regen begins on her SECOND turn,
-    so the opening hand is played against the 3 the relic granted."""
+def test_rule_four_is_cut_and_the_front_regains_nothing(arm):
+    """The Furina rules pass (2026-10-01; [USER]: "Agreed, remove the
+    freebie. The Ancient relic can give it back, as planned."): the front no
+    longer regains 1 at the start of her turn, on any turn. The Curtain Never
+    Falls' regain of 2 is game-side (this engine models no relics)."""
+    assert FS.LEAD_REGEN == 0
     st = _state(turn=1)
     FS.open_combat(st)
     FS.turn_start_regen(st)
     assert FS.lead_fanfare(st.player) == 3
     st.turn = 2
     FS.turn_start_regen(st)
-    assert FS.lead_fanfare(st.player) == 4
-
-
-def test_only_the_lead_regenerates(arm):
-    st = _state(turn=2)
+    assert FS.lead_fanfare(st.player) == 3
     st.player.stage = [["usher", 5], ["crabaletta", 1]]
     FS.turn_start_regen(st)
-    assert st.player.stage == [["usher", 6], ["crabaletta", 1]]
+    assert st.player.stage == [["usher", 5], ["crabaletta", 1]]
+    assert not [e for e in st.log if e["event"] == "stage_regen"]
 
 
 def test_a_summon_fills_the_back_most_empty_seat_at_one(arm):
@@ -231,13 +231,12 @@ def test_with_one_performer_the_back_seat_is_the_lead(arm):
     assert st.player.stage == [["usher", 8]]
 
 
-@pytest.mark.parametrize("seat", [FS.SEAT_BACK, FS.SEAT_LEAD, FS.SEAT_ALL])
+@pytest.mark.parametrize("seat", [FS.SEAT_BACK, FS.SEAT_LEAD])
 def test_a_raise_onto_an_empty_stage_summons_one_performer_holding_it(arm,
                                                                      seat):
-    """ROUND FOUR. With nobody on stage a Raise summons a random performer
-    HOLDING THE RAISE AMOUNT -- not rule 3's 1 -- and nothing else is raised,
-    whichever seat the face names. Gala Dinner (`SEAT_ALL`) on an empty stage
-    fields ONE performer at 3, not three."""
+    """ROUND FOUR, as the rules pass (2026-10-01) narrowed it: a CARD you
+    play that gives Fanfare, on an empty stage, summons a random performer
+    HOLDING THE AMOUNT -- not rule 3's 1 -- and nothing else is raised."""
     st = _state()
     assert FS.raise_fanfare(st, 3, seat) == 3
     assert len(st.player.stage) == 1
@@ -448,8 +447,9 @@ def _applause_state(stage):
 
 def test_thunderous_applause_reads_a_hits_bow(arm):
     """Draws 1, and the Raise lands on the back performer. Usher's own Bow
-    comes first -- act, then readers -- so his 3 Block lands, and on the stage
-    he empties the applause's 2 is a random performer arriving holding it."""
+    comes first -- act, then readers -- so his 3 Block lands. On the stage he
+    empties the applause's 2 lands on nobody: since the rules pass
+    (2026-10-01) a trigger's gain does nothing on an empty stage."""
     st = _applause_state([["usher", 3], ["crabaletta", 1]])
     hand = len(st.player.hand)
     combat._enemy_turn(st, st.enemies[0])
@@ -461,8 +461,7 @@ def test_thunderous_applause_reads_a_hits_bow(arm):
     hand = len(empty.player.hand)
     combat._enemy_turn(empty, empty.enemies[0])
     assert len(empty.player.hand) == hand + 1
-    assert len(empty.player.stage) == 1
-    assert empty.player.stage[0][1] == 2
+    assert empty.player.stage == []
 
 
 def test_the_hit_that_kills_furina_earns_no_bow(arm):
@@ -649,12 +648,11 @@ class _Seq(random.Random):
 @pytest.mark.parametrize("pick", FS.PERFORMERS)
 @pytest.mark.parametrize("applause", [False, True])
 def test_the_rare_returns_the_trio_beside_a_clone(arm, pick, applause):
-    """2026-09-25: a Thunderous Applause Raise summons a random performer
-    onto the stage the card emptied. Since the trio can be cloned ([USER]:
-    "Let's allow for copies and then check the balance.") the company
-    returns into the empty seats in seat order whoever it picked, so a clone
-    of the pick can stand beside it. Without the applause nothing summons
-    and the company returns in seat order. Every pick."""
+    """2026-09-25: the company returns into the empty seats in seat order.
+    Until the rules pass (2026-10-01) a Thunderous Applause Raise summoned a
+    random performer onto the stage the card emptied; a trigger's gain now
+    does nothing on an empty stage, so with or without the applause the
+    company returns in seat order. Every pick."""
     st = _state(enemies=[_enemy(hp=200)])
     st.rng = _Picks(pick)
     st.player.draw_pile = [_card(cid=str(i)) for i in range(5)]
@@ -667,10 +665,7 @@ def test_the_rare_returns_the_trio_beside_a_clone(arm, pick, applause):
     FS.bow_and_return(st)
     members = [m for m, _f in st.player.stage]
     assert len(members) == FS.SEATS
-    if not applause:
-        assert members == ["usher", "chevalmarin", "crabaletta"]
-        return
-    assert members == [pick, "usher", "chevalmarin"]
+    assert members == ["usher", "chevalmarin", "crabaletta"]
 
 
 def test_the_rare_without_usher_returns_everyone(arm):
@@ -805,20 +800,36 @@ def test_the_same_card_on_an_empty_stage_plays_at_its_base_number(arm):
     assert st.enemies[0].hp == 53
 
 
-def test_a_short_back_performer_is_not_offered_the_spend_mode(arm):
-    """R276 pick 1, one layer up: a back performer at 2 is not offered a Spend
-    asking for 3 -- however fat the lead is -- and the card plays its base
-    mode. At exactly 3 it is offered."""
+def test_a_short_stage_is_not_offered_the_spend_mode(arm):
+    """Rule 8, the rules pass (2026-10-01): the Spend mode is refused only
+    when the WHOLE stage holds less than its price, and the card plays its
+    base mode. A short back performer with a fat lead is offered it."""
     st = _state(enemies=[_enemy(hp=60)])
-    st.player.stage = [["usher", 9], ["crabaletta", 2]]
+    st.player.stage = [["usher", 1], ["crabaletta", 1]]
     card = _curtain_rise()
     modes = card.effects[0]["modes"]
     assert effects.offered_modes(st, modes) == [0]
     effects.resolve_card(st, card)
     assert st.enemies[0].hp == 53
-    assert st.player.stage == [["usher", 9], ["crabaletta", 2]]
-    st.player.stage = [["usher", 9], ["crabaletta", 3]]
+    assert st.player.stage == [["usher", 1], ["crabaletta", 1]]
+    st.player.stage = [["usher", 9], ["crabaletta", 2]]
     assert effects.offered_modes(st, modes) == [0, 1]
+
+
+def test_a_spend_pays_from_the_back_first_then_forward(arm):
+    """Rule 8, the rules pass (2026-10-01; [USER]: "Agreed, spending start
+    back-forwards"): the back performer pays all it holds, then the one in
+    front of it, and every performer the payment empties Bows, back to
+    front. The whole price is paid; what a payoff reads is that price."""
+    st = _state(enemies=[_enemy(hp=200)])
+    st.player.stage = [["usher", 9], ["chevalmarin", 1], ["crabaletta", 2]]
+    assert FS.spend(st, 5) == 5
+    assert st.player.stage == [["usher", 7]]
+    bows = [e["member"] for e in st.log if e["event"] == "stage_bow"]
+    assert bows == ["crabaletta", "chevalmarin"]
+    # A stage holding less pays nothing.
+    assert FS.spend(st, 8) == 0
+    assert st.player.stage == [["usher", 7]]
 
 
 # ---------------------------------------------------------------------------
@@ -1008,8 +1019,9 @@ def test_the_pool_seam_swaps_its_rows_at_the_same_rarity(arm):
     # less Gentilhomme Usher and Understudy (balance review, 2026-09-28),
     # less Scene Change, Gala Dinner and A Rapt Audience (audit pass,
     # 2026-09-29), less Held Applause, Echoing Hall and Eternal Applause
-    # (the fade pass, the same day)
-    assert len(subs) == 14 + 15 + 8 + 27 + 1 - 2 - 3 - 3
+    # (the fade pass, the same day), plus the rules pass's eleven old-kit
+    # rows (2026-10-01; An Invitation's replacement is an addition)
+    assert len(subs) == 14 + 15 + 8 + 27 + 1 - 2 - 3 - 3 + 11
     assert not set(subs) & set(FS.POOL_DROPS)
     rarity = {r["id"]: r["rarity"] for r in _sheet_rows("furina-cards.yaml")}
     rarity.update({r["id"]: r["rarity"] for r in _proto_rows()})
@@ -1039,8 +1051,9 @@ def test_every_stage_row_is_named_by_one_of_the_two_maps():
     # Understudy (the balance review, 2026-09-28), less Scene Change, Gala
     # Dinner and A Rapt Audience (the audit pass, 2026-09-29), less Held
     # Applause, Echoing Hall and Eternal Applause (the fade pass, same day),
-    # plus pool completion's six (2026-10-01)
-    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1 - 2 - 3 - 3 + 6
+    # plus pool completion's six (2026-10-01), plus the rules pass's twelve
+    # old-kit rows (the same day)
+    assert len(on_sheet) == 17 + 15 + 8 + 28 + 1 + 1 - 2 - 3 - 3 + 6 + 12
     # THE CO-OP SET's three are the MULTIPLAYER TIER: offered only in co-op,
     # outside the pool, replacing no shipped row -- so neither map names
     # them, and the tier's own mirror does.
@@ -1189,8 +1202,8 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     # --- turn 2: Salon Début fields Crabaletta, Solicitation, Regal Bearing --
     st.turn = 2
     st.player.block = 0
-    FS.turn_start_regen(st)                                # Usher 3 -> 4
-    assert FS.lead_fanfare(st.player) == 4
+    FS.turn_start_regen(st)                # rule 4 cut: Usher stays at 3
+    assert FS.lead_fanfare(st.player) == 3
     st.player.block += 3                                   # Regal Bearing
     # `EB-738`: she arrives at 1 and does NOT act on arrival, so the board is
     # sec.7's own -- "Solicitation 6 (38 to 32) ... Performances: Usher Block 3
@@ -1207,12 +1220,12 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     # --- turn 3, the REFILL line ---------------------------------------
     st.turn = 3
     st.player.block = 0
-    FS.turn_start_regen(st)                                # Usher 3 -> 4
+    FS.turn_start_regen(st)                # rule 4 cut: Usher stays at 3
     st.player.block += 6                                   # Stage Presence
-    # R276: the Spend is the BACK performer's, and Crabaletta at 1 cannot pay
-    # 3 -- the mode is not offered, whatever the Usher holds.
+    # The rules pass (2026-10-01): the Spend pays from the back first, then
+    # forward, so Crabaletta's 1 and the Usher's 3 together are offered it.
     modes = _curtain_rise().effects[0]["modes"]
-    assert effects.offered_modes(st, modes) == [0]
+    assert effects.offered_modes(st, modes) == [0, 1]
     FS.raise_fanfare(st, FS.REFILL_AMOUNT)                 # Crab 1 -> 6
     assert FS.spend_mode_index(st, modes) == 1             # 6 - 3 survives
     effects.resolve_card(st, _curtain_rise())              # Spend 3: 13
@@ -1223,7 +1236,7 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     # literal card, at sec.7's 13; the sheet's row deals 17 since the fade
     # pass.)
     assert st.enemies[0].hp == 9
-    # The fade: Usher 4 -> 3, Crabaletta 3 keeps all 3.
+    # The fade: Usher 3 and Crabaletta 3 keep all 3.
     assert FS.stage(st.player) == [["usher", 3], ["crabaletta", 3]]
 
 
@@ -1325,10 +1338,11 @@ def test_thunderous_applause_draws_and_raises_after_the_bow(arm):
     assert st.player.stage == [["chevalmarin", 4 + 2]]
 
 
-def test_thunderous_applause_on_the_stage_a_bow_emptied_summons(arm):
-    """ROUND FOUR. The applause Raises after the bowing performer has left,
-    so a bow that empties the stage now summons a random performer holding
-    the Raise; the draw still happens."""
+def test_thunderous_applause_on_the_stage_a_bow_emptied_summons_nobody(arm):
+    """The applause Raises after the bowing performer has left. Round four
+    had a bow that emptied the stage summon a random performer holding the
+    Raise; since the rules pass (2026-10-01) a trigger's gain does nothing on
+    an empty stage. The draw still happens."""
     st = _state()
     st.player.draw_pile = [_card(cid="a"), _card(cid="b")]
     effects.resolve_card(st, _card(type="power", effects=[
@@ -1338,13 +1352,14 @@ def test_thunderous_applause_on_the_stage_a_bow_emptied_summons(arm):
     st.player.stage = [["chevalmarin", 3]]
     FS.spend(st, 3)
     assert len(st.player.hand) == 1
-    assert len(st.player.stage) == 1 and st.player.stage[0][1] == 2
+    assert st.player.stage == []
 
 
 def test_the_rares_curtain_call_with_applause_returns_only_to_empty_seats(arm):
-    """ROUND FOUR made this reachable: Let the People Rejoice empties the
-    stage, the first bow's applause Raise summons onto it, and the company
-    then returns at 1 to the EMPTY seats only -- nobody rotates off."""
+    """Let the People Rejoice empties the stage; the first bow's applause
+    lands on nobody (a trigger's gain on an empty stage, the rules pass
+    2026-10-01), the later bows' applause lands on the performers that have
+    returned, and the company returns at 1 -- nobody rotates off."""
     st = _state(enemies=[_enemy(hp=200)])
     st.player.draw_pile = [_card(cid=str(i)) for i in range(5)]
     effects.resolve_card(st, _card(type="power", effects=[
@@ -1354,10 +1369,8 @@ def test_the_rares_curtain_call_with_applause_returns_only_to_empty_seats(arm):
     FS.collect_all(st)
     FS.bow_and_return(st)
     assert len(st.player.stage) == FS.SEATS
-    # The first bow's applause summons onto the emptied stage at 2, and the
-    # next two bows' applause lands on it too (2 + 2 + 2).
-    assert st.player.stage[0][1] == 6
-    assert [f for _m, f in st.player.stage[1:]] == [1, 1]
+    assert [m for m, _f in st.player.stage] == ["usher", "chevalmarin",
+                                                "crabaletta"]
 
 
 def test_a_five_century_act_returns_the_performer_to_rest(arm):
@@ -1460,7 +1473,7 @@ def test_the_batch_two_upgrades_bind(arm, monkeypatch):
         copy.deepcopy(loader.get_card("proto_fs_quick_cue")))
     modes = cue.effects[0]["modes"]
     assert modes[0]["effects"][0]["amount"] == 4
-    assert modes[1]["effects"][1]["amount"] == 16
+    assert modes[1]["effects"][1]["amount"] == 13     # the rules pass
     hold = upgrades.apply_upgrade(
         copy.deepcopy(loader.get_card("proto_fs_hold_your_places")))
     assert hold.effects == [{"op": "block", "amount": 7},
@@ -1767,7 +1780,7 @@ def test_quick_cue_spend_mode_is_a_hydro_hit(arm, monkeypatch):
     spent = _state(player=_furina(element="hydro"), enemies=[_enemy(hp=60)])
     spent.player.stage = [["usher", 5]]
     _play_mode(spent, card, 1, monkeypatch)
-    assert spent.enemies[0].hp == 60 - 14                  # the fade pass
+    assert spent.enemies[0].hp == 60 - 11                  # the rules pass
     assert spent.enemies[0].aura == "hydro"
     # Into an Electro aura the hit itself reacts with what is there.
     primed = _state(player=_furina(element="hydro"), enemies=[_enemy(hp=60)])

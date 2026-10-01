@@ -112,15 +112,16 @@ def test_an_in_combat_clause_does_not_hide_the_upgrade():
     """Bravura printed "not shown -- the face on this screen is not the
     sentence this card was written with": its template ends in an
     `{InCombat:...|}` arm with a hole of its own."""
-    face = ("Spend all of your back performer's Fanfare. Deal 5 damage, plus "
+    # The rules pass (2026-10-01) trimmed Bravura's face.
+    face = ("Spend your back performer's Fanfare. Deal 5 damage, plus "
             "3 per point.")
     assert qa_packet.upgrade_preview("KLEEMOD-PROTO_FS_BRAVURA", face) == (
-        "Spend all of your back performer's Fanfare. Deal 5 damage, plus "
+        "Spend your back performer's Fanfare. Deal 5 damage, plus "
         "4 per point.", "")
     # Printed in combat, the in-combat line is struck, not copied through.
     assert qa_packet.upgrade_preview(
         "KLEEMOD-PROTO_FS_BRAVURA", face + "\n(Deals 11 damage)")[0] == (
-        "Spend all of your back performer's Fanfare. Deal 5 damage, plus "
+        "Spend your back performer's Fanfare. Deal 5 damage, plus "
         "4 per point.")
     assert qa_packet.upgrade_preview(
         "KLEEMOD-PROTO_FS_DA_CAPO",

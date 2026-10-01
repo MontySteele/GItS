@@ -163,7 +163,6 @@ public class FurinaStageSoldOutTests
             (StagePerformer.Usher, 3), (StagePerformer.Chevalmarin, 1),
             (StagePerformer.Crabaletta, 1));
         Assert.Null(stage.BowFromFront());
-        Assert.Null(stage.BowFromBack());
         Assert.Equal(3, stage.Seats.Count);
     }
 
@@ -187,28 +186,28 @@ public class FurinaStageSoldOutTests
     // ---- Wriothesley's front-join at four -----------------------------------
 
     [Fact]
-    public void Wriothesley_joins_a_full_four_stage_and_the_back_performer_leaves()
+    public void Wriothesley_joins_a_full_four_stage_and_the_front_performer_leaves()
     {
+        // THE RULES PASS (2026-10-01): the front Bows for him, as for any
+        // summon on a full stage.
         using var _ = new Arm();
         var (_, stage) = Stage(true,
             (StagePerformer.Usher, 3), (StagePerformer.Chevalmarin, 2),
             (StagePerformer.Crabaletta, 2), (StagePerformer.Usher, 5));
 
-        var leaver = stage.BowFromBack();
+        var leaver = stage.BowFromFront();
         Assert.NotNull(leaver);
         Assert.Equal(StagePerformer.Usher, leaver!.Who);
-        Assert.Equal(5, leaver.Fanfare);
-        // The seat it left is the back one of FOUR: its index is the count
-        // left standing, which `RecastFromBack` reads for the Bow.
+        Assert.Equal(3, leaver.Fanfare);
         Assert.Equal(3, stage.Seats.Count);
 
         Assert.True(stage.ArriveAtFront(StagePerformer.Wriothesley,
                                         8 + leaver.Fanfare));
         Assert.Equal(
-            new[] { StagePerformer.Wriothesley, StagePerformer.Usher,
-                    StagePerformer.Chevalmarin, StagePerformer.Crabaletta },
+            new[] { StagePerformer.Wriothesley, StagePerformer.Chevalmarin,
+                    StagePerformer.Crabaletta, StagePerformer.Usher },
             Cast(stage));
-        Assert.Equal(new[] { 13, 3, 2, 2 }, Bars(stage));
+        Assert.Equal(new[] { 11, 2, 2, 5 }, Bars(stage));
     }
 
     [Fact]
@@ -230,9 +229,10 @@ public class FurinaStageSoldOutTests
     [Fact]
     public void The_front_join_recast_reads_the_seat_it_left_off_the_stage()
     {
-        // Not the law's `Seats - 1`, which is the back seat of THREE.
-        var calls = Il.Calls(Il.Method("FurinaStage", "RecastFromBack"));
-        Assert.Contains("FurinaStageLedger.get_Seats", calls);
+        // The rules pass (2026-10-01): the seat it left is the leaver's index,
+        // read off the stage (`LeaverIndex`), not assumed.
+        var calls = Il.Calls(Il.Method("FurinaStage", "RecastToFront"));
+        Assert.Contains("FurinaStageLedger.get_LeaverIndex", calls);
     }
 
     // ---- Full House needs every seat ---------------------------------------

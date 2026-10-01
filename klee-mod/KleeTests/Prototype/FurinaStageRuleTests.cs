@@ -352,20 +352,26 @@ public class FurinaStageRuleTests
         Assert.Equal(9, stage.Lead!.Fanfare);
     }
 
-    /// <summary>R276 pick 1 from the other side: the lead's bar is not the
-    /// price's. A fat lead and a thin back cannot pay.</summary>
+    /// <summary>Rule 8, the rules pass (2026-10-01; [USER]: "Agreed,
+    /// spending start back-forwards"): a thin back is paid out first and the
+    /// fat lead pays the rest; the emptied back Bows.</summary>
     [Fact]
-    public void A_fat_lead_does_not_pay_for_a_thin_back()
+    public void A_fat_lead_pays_what_a_thin_back_cannot()
     {
         using var _ = new Arm();
         var (_, stage) = Stage(
             (StagePerformer.Chevalmarin, 9),
             (StagePerformer.Usher, 2));
 
-        Assert.False(stage.CanSpend(3));
-        Assert.False(stage.Spend(3).Fired);
-        Assert.Equal(9, stage.Lead!.Fanfare);
-        Assert.Equal(2, stage.Back!.Fanfare);
+        Assert.True(stage.CanSpend(3));
+        Assert.False(stage.CanSpend(12));
+        var spent = stage.Spend(3);
+        Assert.True(spent.Fired);
+        Assert.Equal(3, spent.Paid);
+        Assert.Equal(new[] { StagePerformer.Usher },
+                     spent.Exits.Select(e => e.Who).ToArray());
+        Assert.Equal(8, stage.Lead!.Fanfare);
+        Assert.Single(stage.Seats);
     }
 
     /// <summary><i>Final Bow</i> takes the BACK performer (R276): the readers
@@ -680,7 +686,8 @@ public class FurinaStageRuleTests
         Assert.Equal(3, FurinaStageLaw.Seats);
         Assert.Equal(3, FurinaStageLaw.OpeningFanfare);
         Assert.Equal(1, FurinaStageLaw.SummonFanfare);
-        Assert.Equal(1, FurinaStageLaw.LeadRegen);
+        // The rules pass (2026-10-01): rule 4 is cut.
+        Assert.Equal(0, FurinaStageLaw.LeadRegen);
         Assert.Equal(5, FurinaStageLaw.RefillAmount);
         Assert.Equal(3, FurinaStageLaw.ActUsherBlock);
         Assert.Equal(2, FurinaStageLaw.ActChevalmarinDamage);

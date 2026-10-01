@@ -703,20 +703,32 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
-    public void Palais_ledger_pays_a_spend_back_to_front_and_bows_every_emptied_performer()
+    public void Palais_ledger_takes_one_off_and_rule_8_pays_back_to_front()
     {
+        // THE RULES PASS (2026-10-01): Palais Ledger's old text ("paid by the
+        // performers in front of it, back to front") is rule 8 itself now, so
+        // the ledger pays that way with no relic; the relic is re-aimed to
+        // "Your Spends cost 1 less Fanfare" (`FurinaStage.PriceOf`).
         using var _ = new StageArm();
         var seat = Seat.Furina().WithCombatState();
         var stage = Stage(seat, (StagePerformer.Usher, 3),
                           (StagePerformer.Chevalmarin, 2),
                           (StagePerformer.Crabaletta, 1));
-        Assert.False(stage.CanSpend(4));
-        Assert.False(stage.Spend(4).Fired);
-
-        Give<PalaisLedger>(seat);
         Assert.True(stage.CanSpend(4));
         Assert.True(stage.CanSpend(6));
         Assert.False(stage.CanSpend(7));             // only if the total covers it
+        Assert.False(stage.Spend(7).Fired);
+        Assert.Equal(3, FurinaStage.PriceOf(seat.Creature, 3));
+
+        Give<PalaisLedger>(seat);
+        Assert.Equal(2, FurinaStage.PriceOf(seat.Creature, 3));
+        Assert.Equal(0, FurinaStage.PriceOf(seat.Creature, 1));
+        Assert.True(FurinaStage.CanSpend(seat.Creature, 7));
+        Assert.False(FurinaStage.CanSpend(seat.Creature, 8));
+        Assert.Contains("FurinaStage.PriceOf",
+                        Il.Calls(Il.Method("FurinaStage", "CanSpend")));
+        Assert.Contains("FurinaStage.PriceOf",
+                        Il.Calls(Il.Method("FurinaStage", "Spend")));
 
         var spent = stage.Spend(4);
         Assert.True(spent.Fired);

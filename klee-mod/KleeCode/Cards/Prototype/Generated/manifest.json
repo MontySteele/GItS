@@ -15,12 +15,17 @@
     "proto_fs_bubble_aria",
     "proto_fs_casting_agent",
     "proto_fs_cheered_on",
+    "proto_fs_commanding_gaze",
     "proto_fs_counterclaim",
+    "proto_fs_courtroom_drama",
+    "proto_fs_crashing_waves",
     "proto_fs_critics_darling",
     "proto_fs_curtain_rise",
     "proto_fs_da_capo",
     "proto_fs_double_casting",
     "proto_fs_dual_nature",
+    "proto_fs_duet",
+    "proto_fs_endless_waltz",
     "proto_fs_ensemble_piece",
     "proto_fs_final_bow",
     "proto_fs_five_century_act",
@@ -46,14 +51,17 @@
     "proto_fs_intermission",
     "proto_fs_interposition",
     "proto_fs_interval_bell",
+    "proto_fs_leading_lady",
     "proto_fs_let_the_people_rejoice",
     "proto_fs_mademoiselle_crabaletta",
     "proto_fs_one_woman_show",
+    "proto_fs_opening_number",
     "proto_fs_oratrices_verdict",
     "proto_fs_ousia_surge",
     "proto_fs_people_of_fontaine",
     "proto_fs_plot_twist",
     "proto_fs_pneuma_refrain",
+    "proto_fs_quick_change",
     "proto_fs_quick_cue",
     "proto_fs_raise_a_toast",
     "proto_fs_regal_bearing",
@@ -62,6 +70,7 @@
     "proto_fs_salon_debut",
     "proto_fs_season_tickets",
     "proto_fs_share_the_spotlight",
+    "proto_fs_singer_of_many_waters",
     "proto_fs_sold_out",
     "proto_fs_soliloquy",
     "proto_fs_solo_verse",
@@ -78,7 +87,10 @@
     "proto_fs_tidal_flourish",
     "proto_fs_tide_of_applause",
     "proto_fs_tutti",
+    "proto_fs_undercurrent",
     "proto_fs_warm_reception",
+    "proto_fs_warmup_act",
+    "proto_fs_witness_stand",
     "proto_itto_superlative_superstrength_either",
     "proto_itto_superlative_superstrength_priced",
     "proto_kk_all_streams_flow_to_the_sea",
@@ -428,12 +440,17 @@
     "proto_fs_bubble_aria": "furina",
     "proto_fs_casting_agent": "furina",
     "proto_fs_cheered_on": "furina",
+    "proto_fs_commanding_gaze": "furina",
     "proto_fs_counterclaim": "furina",
+    "proto_fs_courtroom_drama": "furina",
+    "proto_fs_crashing_waves": "furina",
     "proto_fs_critics_darling": "furina",
     "proto_fs_curtain_rise": "furina",
     "proto_fs_da_capo": "furina",
     "proto_fs_double_casting": "furina",
     "proto_fs_dual_nature": "furina",
+    "proto_fs_duet": "furina",
+    "proto_fs_endless_waltz": "furina",
     "proto_fs_ensemble_piece": "furina",
     "proto_fs_final_bow": "furina",
     "proto_fs_five_century_act": "furina",
@@ -459,14 +476,17 @@
     "proto_fs_intermission": "furina",
     "proto_fs_interposition": "furina",
     "proto_fs_interval_bell": "furina",
+    "proto_fs_leading_lady": "furina",
     "proto_fs_let_the_people_rejoice": "furina",
     "proto_fs_mademoiselle_crabaletta": "furina",
     "proto_fs_one_woman_show": "furina",
+    "proto_fs_opening_number": "furina",
     "proto_fs_oratrices_verdict": "furina",
     "proto_fs_ousia_surge": "furina",
     "proto_fs_people_of_fontaine": "furina",
     "proto_fs_plot_twist": "furina",
     "proto_fs_pneuma_refrain": "furina",
+    "proto_fs_quick_change": "furina",
     "proto_fs_quick_cue": "furina",
     "proto_fs_raise_a_toast": "furina",
     "proto_fs_regal_bearing": "furina",
@@ -475,6 +495,7 @@
     "proto_fs_salon_debut": "furina",
     "proto_fs_season_tickets": "furina",
     "proto_fs_share_the_spotlight": "furina",
+    "proto_fs_singer_of_many_waters": "furina",
     "proto_fs_sold_out": "furina",
     "proto_fs_soliloquy": "furina",
     "proto_fs_solo_verse": "furina",
@@ -491,7 +512,10 @@
     "proto_fs_tidal_flourish": "furina",
     "proto_fs_tide_of_applause": "furina",
     "proto_fs_tutti": "furina",
+    "proto_fs_undercurrent": "furina",
     "proto_fs_warm_reception": "furina",
+    "proto_fs_warmup_act": "furina",
+    "proto_fs_witness_stand": "furina",
     "proto_itto_superlative_superstrength_either": "klee",
     "proto_itto_superlative_superstrength_priced": "klee",
     "proto_kk_all_streams_flow_to_the_sea": "kokomi",
@@ -909,9 +933,18 @@
     "proto_fs_cheered_on": {
       "damage": 3
     },
+    "proto_fs_commanding_gaze": {
+      "weak": 1
+    },
     "proto_fs_counterclaim": {
       "damage": 2,
       "conditional_then_damage": 2
+    },
+    "proto_fs_courtroom_drama": {
+      "power_amount": 1
+    },
+    "proto_fs_crashing_waves": {
+      "damage": 2
     },
     "proto_fs_critics_darling": {
       "innate": true
@@ -929,6 +962,12 @@
     },
     "proto_fs_dual_nature": {
       "draw": 1
+    },
+    "proto_fs_duet": {
+      "draw": 1
+    },
+    "proto_fs_endless_waltz": {
+      "damage": 4
     },
     "proto_fs_ensemble_piece": {
       "formula_per": 2
@@ -1007,6 +1046,9 @@
     "proto_fs_interval_bell": {
       "stage_spend": -1
     },
+    "proto_fs_leading_lady": {
+      "formula_base": 3
+    },
     "proto_fs_let_the_people_rejoice": {
       "cost": -1
     },
@@ -1015,6 +1057,9 @@
     },
     "proto_fs_one_woman_show": {
       "cost": -1
+    },
+    "proto_fs_opening_number": {
+      "damage": 3
     },
     "proto_fs_oratrices_verdict": {
       "draw": 1
@@ -1030,6 +1075,9 @@
     },
     "proto_fs_pneuma_refrain": {
       "formula_base": 3
+    },
+    "proto_fs_quick_change": {
+      "power_amount": 1
     },
     "proto_fs_quick_cue": {
       "conditional_damage": 1,
@@ -1056,6 +1104,9 @@
     },
     "proto_fs_share_the_spotlight": {
       "cost": -1
+    },
+    "proto_fs_singer_of_many_waters": {
+      "stage_raise": 3
     },
     "proto_fs_sold_out": {
       "cost": -1
@@ -1106,8 +1157,17 @@
     "proto_fs_tutti": {
       "cost": -1
     },
+    "proto_fs_undercurrent": {
+      "times": 2
+    },
     "proto_fs_warm_reception": {
       "draw": 1
+    },
+    "proto_fs_warmup_act": {
+      "damage": 2
+    },
+    "proto_fs_witness_stand": {
+      "vulnerable": 1
     },
     "proto_kk_all_streams_flow_to_the_sea": {
       "cost": -1

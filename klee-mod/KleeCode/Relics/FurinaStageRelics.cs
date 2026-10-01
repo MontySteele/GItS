@@ -220,14 +220,18 @@ public sealed class CurtainCallBouquet : CustomRelicModel
         KleePck.Path(FurinaStageRelics.Icon("curtain_call_bouquet")) ?? base.BigIconPath;
 }
 
-/// <summary>Rare. "A Spend your back performer can't cover is paid by the
-/// performers in front of it, back to front." Read by the ledger's
-/// <see cref="FurinaStageLedger.CanSpend"/> and
-/// <see cref="FurinaStageLedger.Spend"/>: the Spend is offered only when the
-/// whole stage covers it, and every performer the payment empties Bows.
+/// <summary>Rare. "Your Spends cost 1 less Fanfare." Re-aimed by the Furina
+/// rules pass (2026-10-01): its old text, "A Spend your back performer can't
+/// cover is paid by the performers in front of it, back to front", became
+/// rule 8 itself, so it needed a new job. Read by
+/// <c>FurinaStage.PriceOf</c>, at the Spend gate and the payment alike.
+/// Game-side only, like every relic.
 /// </summary>
 public sealed class PalaisLedger : CustomRelicModel
 {
+    /// <summary>What it takes off a Spend's price, per copy.</summary>
+    public const int Discount = 1;
+
     public PalaisLedger() : base(autoAdd: false) { }
 
     public override RelicRarity Rarity => RelicRarity.Rare;
@@ -236,8 +240,8 @@ public sealed class PalaisLedger : CustomRelicModel
     {
         ("title", "Palais Ledger"),
         ("description",
-            "A [gold]Spend[/gold] your [gold]back performer[/gold] can't cover "
-          + "is paid by the performers in front of it, back to front."),
+            "Your [gold]Spend[/gold]s cost [blue]" + Discount + "[/blue] less "
+          + "[gold]Fanfare[/gold]."),
     };
 
     protected override string IconBaseName => "snake_ring";

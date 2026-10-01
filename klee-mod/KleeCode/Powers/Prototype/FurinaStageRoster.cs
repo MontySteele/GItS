@@ -121,9 +121,10 @@ public static class FurinaStageRoster
     /// surface that can offer her a card and no list of surfaces has to be
     /// kept in step.
     ///
-    /// WHAT SURVIVES THE FILTER is a dozen plain shipped rows (Commanding
-    /// Gaze, Undercurrent, the Companion feeders and so on); they stay in the
-    /// offer until the Stage's own pool passes replace them.
+    /// NOTHING SURVIVES THE FILTER since the rules pass (2026-10-01): the
+    /// dozen plain shipped rows that used to (Commanding Gaze, Undercurrent,
+    /// the Companion feeders and so on) are named below and offered as
+    /// `proto_fs_` rows instead.
     /// </summary>
     public static IEnumerable<CardModel> SwapOfferedRows(
         IEnumerable<CardModel> offered)
@@ -211,7 +212,26 @@ public static class FurinaStageRoster
                         // below. Basics are never offered, so this only keeps
                         // the sheet's pairing and this list one table.
                         && card is not FurinaGen.SalonDebut
-                        && card is not FurinaGen.RegalBearing)
+                        && card is not FurinaGen.RegalBearing
+                        // THE RULES PASS (2026-10-01, review/active/furina-
+                        // rules-pass-2026-10-01.md sec.3): the twelve old-kit
+                        // rows that survived the text filter, each now a
+                        // `proto_fs_` row below (legacy cleanup pick 3), so
+                        // none reaches the offer through the filter. Sim twin:
+                        // `furina_stage.POOL_SUBS` (and `POOL_DROPS` /
+                        // `POOL_ADDS` for An Invitation).
+                        && card is not FurinaGen.AnInvitation
+                        && card is not FurinaGen.GuestList
+                        && card is not FurinaGen.CommandPerformance
+                        && card is not FurinaGen.SingerOfManyWaters
+                        && card is not FurinaGen.CommandingGaze
+                        && card is not FurinaGen.Undercurrent
+                        && card is not FurinaGen.WarmupAct
+                        && card is not FurinaGen.CourtroomDrama
+                        && card is not FurinaGen.CrashingWaves
+                        && card is not FurinaGen.Duet
+                        && card is not FurinaGen.QuickChange
+                        && card is not FurinaGen.WitnessStand)
             .Concat(new CardModel[]
             {
                 // Commons (five). The 2026-09-28 balance review cut
@@ -309,6 +329,23 @@ public static class FurinaStageRoster
                 ModelDb.Card<ProtoFsTheLastAct>(),
                 ModelDb.Card<ProtoFsCriticsDarling>(),
                 ModelDb.Card<ProtoFsStarTurn>(),
+                // THE RULES PASS (2026-10-01, sec.3): the twelve old-kit rows,
+                // ported. Commons (four).
+                ModelDb.Card<ProtoFsOpeningNumber>(),
+                ModelDb.Card<ProtoFsCommandingGaze>(),
+                ModelDb.Card<ProtoFsUndercurrent>(),
+                ModelDb.Card<ProtoFsWarmupAct>(),
+                // Uncommons (six).
+                ModelDb.Card<ProtoFsLeadingLady>(),
+                ModelDb.Card<ProtoFsCourtroomDrama>(),
+                ModelDb.Card<ProtoFsCrashingWaves>(),
+                ModelDb.Card<ProtoFsDuet>(),
+                ModelDb.Card<ProtoFsQuickChange>(),
+                ModelDb.Card<ProtoFsWitnessStand>(),
+                // Rares (two). The pool stays 78 (23 / 35 / 20), all of it
+                // `proto_fs_` rows.
+                ModelDb.Card<ProtoFsSingerOfManyWaters>(),
+                ModelDb.Card<ProtoFsEndlessWaltz>(),
             })
             .Concat(MultiplayerRows());
     }

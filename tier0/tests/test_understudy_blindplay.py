@@ -6792,21 +6792,24 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # R276 picks 1 and 2: the back performer pays, in full.
         # THE TEXT PASS (2026-09-25): `Raise` and `Rotate` retired, the
         # lead renamed the FRONT performer, every row in [USER]'s words.
-        "Spend": ["Pay Fanfare from your ", ". Offered only ",
-                  "if it can pay in full."],
-        # The second text pass (2026-09-28).
-        "Fanfare": ["A performer's health. Hits take your ",
-                    "your front performer's, then you. Gaining it on an "
-                    "empty stage ", "summons a performer."],
-        # Draft 3 (2026-09-25): the Bow is the performer's act once more.
-        "Bow": ["A performer that leaves the stage acts one last time on "
-                "its way "],
-        "front performer": ["Takes hits first. Regains "],
+        # The rules pass (2026-10-01): back first, then forward.
+        "Spend": ["Pay Fanfare from your ", " first, then ",
+                  "forward. Offered only if your performers hold enough."],
+        # The rules pass (2026-10-01): only what you play summons.
+        "Fanfare": ["A performer's health. If no one is on stage, a card "
+                    "that gives ", "summons a random performer holding it."],
+        # Draft 3 (2026-09-25): the Bow is the performer's act once more;
+        # the rules pass (2026-10-01) covers Grand Finale's stay.
+        "Bow": ["A performer acts one last time, without paying, as it "
+                "leaves "],
+        # The rules pass (2026-10-01): rule 4 cut; the damage order here.
+        "front performer": ["Takes hits after your ", " cannot hold reaches "
+                            "you."],
         # The second text pass (2026-09-28): the last in line, and who
         # pays a Spend. A lone performer is both seats.
         "back performer": ["Your last performer in line. ",
-                           " pays from it. ",
-                           "A lone performer is both front and back."],
+                           " pays from it ",
+                           "first. A lone performer is both front and back."],
         # The second text pass (2026-09-28): the fade's own tip. The fade
         # pass (2026-09-29): a quarter, the front's bar included.
         "fade": ["At the end of your turn, each performer loses a quarter "
@@ -7103,8 +7106,9 @@ def test_the_spend_row_says_the_back_performer_pays_in_full():
     # page-only "not offered at all" sentence is the tip's own "Offered only
     # if it can pay in full" now. The Bow clause left with rule 7's
     # 2026-09-25 change: the Bow row covers every way of reaching 0.
-    for clause in ("Pay Fanfare from your back performer",
-                   "Offered only if it can pay in full"):
+    # The rules pass (2026-10-01): back first, then forward.
+    for clause in ("Pay Fanfare from your back performer first, then forward",
+                   "Offered only if your performers hold enough"):
         assert clause in page, clause
         assert clause in blindplay.ARM_KEYWORDS["Spend"], clause
     assert "If that empties it exactly" not in blindplay.ARM_KEYWORDS["Spend"]
@@ -7114,7 +7118,7 @@ def test_the_spend_row_says_the_back_performer_pays_in_full():
     # The tip's own [gold] spans split the sentence across concatenated
     # literals, so the anchors are the runs that do not straddle a `+`.
     for phrase in ("Pay Fanfare from your ",
-                   "if it can pay in full.\");"):
+                   "forward. Offered only if your performers hold enough.\");"):
         assert phrase in src, phrase
 
 

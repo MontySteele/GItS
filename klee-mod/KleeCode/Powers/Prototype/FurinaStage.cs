@@ -182,19 +182,36 @@ public static partial class FurinaStage
     public static bool Occupied(Creature? owner) => Of(owner).Count > 0;
 
     /// <summary>
-    /// R276 pick 1, and the gate every Spend mode asks: can the BACK performer
-    /// pay <paramref name="amount"/> IN FULL? False on an empty stage and on a
-    /// bar short of the price, and in both cases the chooser does not offer the
-    /// Spend mode and the card plays its base mode.
+    /// Rule 8, the gate every Spend mode asks, as the Furina rules pass ruled
+    /// it (2026-10-01; [USER]: "Agreed, spending start back-forwards"): can
+    /// the WHOLE STAGE pay <paramref name="amount"/>, back performer first,
+    /// then forward? False on an empty stage and on a stage holding less, and
+    /// in both cases the chooser does not offer the Spend mode and the card
+    /// plays its base mode. <i>Palais Ledger</i> takes 1 off the price
+    /// (<see cref="PriceOf"/>). <i>Center of Attention</i> no longer bends
+    /// this gate: the rules pass dropped its "even when your back performer
+    /// has too little" clause, so its free Spend is offered on the same board
+    /// as any other.
     /// </summary>
     public static bool CanSpend(Creature? owner, int amount) =>
         LiveFor(owner)
-        && (FurinaStageLedger.For(owner!).CanSpend(amount)
-            // POOL COMPLETION (2026-10-01), CENTER OF ATTENTION (her second
-            // Ancient): the turn's first Spend may be chosen "even when your
-            // back performer has too little" -- someone must still be on
-            // stage. A read; <see cref="Spend"/> takes the claim.
-            || CenterOfAttentionPower.Covers(owner));
+        && FurinaStageLedger.For(owner!).CanSpend(PriceOf(owner!, amount));
+
+    /// <summary>
+    /// PALAIS LEDGER, re-aimed by the rules pass (2026-10-01): "Your Spends
+    /// cost 1 less Fanfare." The price a chosen Spend mode actually asks:
+    /// its printed N, less 1 per Palais Ledger held, floored at 0. Read by
+    /// the gate and the payment alike, so the two cannot disagree. Only a
+    /// card's Spend N mode reads it: a spend-all (Bravura, Let the People
+    /// Rejoice) has no price to lower, and Chevreuse's act is the
+    /// performer's, not "your" Spend (a builder's reading, flagged).
+    /// </summary>
+    public static int PriceOf(Creature owner, int amount)
+    {
+        var off = Relics.FurinaStageRelics.Count<Relics.PalaisLedger>(owner)
+                  * Relics.PalaisLedger.Discount;
+        return System.Math.Max(0, amount - off);
+    }
 
     /// <summary>The live lead bar, for the `stage_lead_fanfare` count
     /// (<i>Pneuma Refrain</i>, the shield reader).</summary>
@@ -480,18 +497,26 @@ public static partial class FurinaStage
     }
 
     /// <summary>
-    /// ROUND FOUR: RAISE ON AN EMPTY STAGE SUMMONS. Asked first by every
-    /// Raise verb below, so the rule is one door whichever seat a face names:
-    /// with nobody on stage, a random performer arrives holding
-    /// <paramref name="amount"/> and nothing else is raised (Gala Dinner on an
-    /// empty stage fields ONE performer at 3). True when it summoned, and the
-    /// caller then returns without raising. The arrival performs at the end of
-    /// the turn with the others, never on arrival (rule 3, `EB-738`).
+    /// RULE 5'S EMPTY-STAGE SUMMON, as the Furina rules pass narrowed it
+    /// (2026-10-01; [USER]: "This makes sense - agreed on your split"): ONLY
+    /// WHAT YOU PLAY SUMMONS. A card or potion you play that gives Fanfare,
+    /// on an empty stage, summons a random performer holding
+    /// <paramref name="amount"/> and nothing else is raised
+    /// (<paramref name="played"/> true: <see cref="Raise"/> and
+    /// <see cref="RaiseLead"/> from a card or Bottled Applause). A gain from a
+    /// Power, a relic, a Bow reader or a reaction trigger
+    /// (<paramref name="played"/> false) does nothing on an empty stage, and a
+    /// gain naming "each performer" (<see cref="RaiseAll"/>) never asks: it
+    /// has nobody to land on. True when it summoned, and the caller then
+    /// returns without raising. The arrival performs at the end of the turn
+    /// with the others, never on arrival (rule 3, `EB-738`). Sim twin:
+    /// <c>furina_stage.raise_fanfare</c> (a <c>GAIN_CARD</c> source only).
     /// </summary>
-    private static async Task<bool> SummonForRaise(Creature owner, int amount)
+    private static async Task<bool> SummonForRaise(Creature owner, int amount,
+                                                   bool played)
     {
         var ledger = FurinaStageLedger.For(owner);
-        if (amount <= 0 || !ledger.IsEmpty) return false;
+        if (!played || amount <= 0 || !ledger.IsEmpty) return false;
         var who = RollAny(owner);
         if (ledger.SummonOnEmpty(who, amount) == null) return false;
         NoteSummoned(who);
@@ -501,12 +526,15 @@ public static partial class FurinaStage
     }
 
     /// <summary>Rule 5. Raise lands on the back-most performer, which is the
-    /// lead when it is alone; on an empty stage it summons (round four).
-    /// Returns what landed.</summary>
-    public static async Task<int> Raise(Creature? owner, int amount)
+    /// lead when it is alone. On an empty stage it summons only when a card or
+    /// potion you play gives it (<paramref name="played"/>; the rules pass,
+    /// 2026-10-01); a trigger's gain passes <c>played: false</c> and lands on
+    /// nobody. Returns what landed.</summary>
+    public static async Task<int> Raise(Creature? owner, int amount,
+                                        bool played = true)
     {
         if (!LiveFor(owner)) return 0;
-        if (await SummonForRaise(owner!, amount)) return amount;
+        if (await SummonForRaise(owner!, amount, played)) return amount;
         var raised = FurinaStageLedger.For(owner!).Raise(amount);
         if (raised > 0)
         {
@@ -518,11 +546,13 @@ public static partial class FurinaStage
 
     /// <summary>R276 batch two, <i>Hold Your Places</i>: Raise on the LEAD
     /// performer, the one Raise in the kit that lands on the shield. On an
-    /// empty stage it summons (round four).</summary>
-    public static async Task<int> RaiseLead(Creature? owner, int amount)
+    /// empty stage it summons only when played (rule 5, the rules pass).
+    /// </summary>
+    public static async Task<int> RaiseLead(Creature? owner, int amount,
+                                            bool played = true)
     {
         if (!LiveFor(owner)) return 0;
-        if (await SummonForRaise(owner!, amount)) return amount;
+        if (await SummonForRaise(owner!, amount, played)) return amount;
         var raised = FurinaStageLedger.For(owner!).RaiseLead(amount);
         if (raised > 0)
         {
@@ -548,13 +578,13 @@ public static partial class FurinaStage
         return raised;
     }
 
-    /// <summary>R276 batch two, <i>Gala Dinner</i>: Raise on EVERY
-    /// performer. On an empty stage it summons ONE performer holding the
-    /// amount (round four).</summary>
+    /// <summary>R276 batch two: Raise on EVERY performer (Grand Deluge,
+    /// Curtain Water). On an empty stage it does nothing: "each performer"
+    /// has nobody to land on (rule 5, the rules pass, 2026-10-01; until then
+    /// it summoned one performer holding the amount).</summary>
     public static async Task<int> RaiseAll(Creature? owner, int amount)
     {
         if (!LiveFor(owner)) return 0;
-        if (await SummonForRaise(owner!, amount)) return amount;
         var raised = FurinaStageLedger.For(owner!).RaiseAll(amount);
         if (raised > 0)
         {
@@ -664,12 +694,19 @@ public static partial class FurinaStage
     /// <summary>R276 batch two, <i>Tutti!</i>: every performer performs its
     /// act now, front first. The cast is snapshotted, as the end-of-turn
     /// sweep's is. A Five-Century Act's returnee "re-enters without acting
-    /// that turn", so a resting performer sits this out too.</summary>
+    /// that turn", so a resting performer sits this out too.
+    /// <paramref name="minFanfare"/> is <i>Endless Waltz</i> (the Furina
+    /// rules pass, 2026-10-01): "Each performer with 5 or more Fanfare acts."
+    /// Who qualifies is read in the same snapshot, before any act, so an act
+    /// that moves a bar does not change who acts. Sim twin:
+    /// <c>furina_stage.perform_all</c>.</summary>
     public static async Task PerformAll(PlayerChoiceContext choiceContext,
-                                        Creature? owner, int times = 1)
+                                        Creature? owner, int times = 1,
+                                        int minFanfare = 0)
     {
         if (!LiveFor(owner)) return;
-        foreach (var seat in Of(owner).ToList())
+        foreach (var seat in Of(owner).Where(s => s.Fanfare >= minFanfare)
+                     .ToList())
         {
             if (seat.Resting) continue;
             // ENCORE ELIXIR's twice: each repeat resolves in full before the
@@ -816,11 +853,13 @@ public static partial class FurinaStage
 
     /// <summary>
     /// Rule 8's payment leg, for a Spend mode the chooser offered (its gate
-    /// asked <see cref="CanSpend"/>). The BACK performer pays the whole price;
-    /// if that empties it exactly, it bows (R276 picks 1 and 2).
+    /// asked <see cref="CanSpend"/>). The back performer pays first, then the
+    /// one in front of it, and on toward the front; every performer the
+    /// payment empties bows, back to front (the rules pass, 2026-10-01).
+    /// The price is <see cref="PriceOf"/>'s (Palais Ledger takes 1 off).
     ///
     /// <para>Returns what was paid: the price, or 0 where the ledger refused
-    /// a bar short of it.</para>
+    /// a stage short of it.</para>
     /// </summary>
     public static async Task<int> Spend(PlayerChoiceContext choiceContext,
                                         Creature? owner, int amount)
@@ -834,10 +873,9 @@ public static partial class FurinaStage
             Vfx.FurinaStageCues.Refresh(owner);
             return 0;
         }
-        var result = FurinaStageLedger.For(owner!).Spend(amount);
+        var result = FurinaStageLedger.For(owner!).Spend(PriceOf(owner!, amount));
         if (!result.Fired) return 0;
-        // One exit, or -- under Palais Ledger -- every performer the pooled
-        // payment emptied, back to front.
+        // Every performer the payment emptied, back to front.
         foreach (var exit in result.Exits) await Bow(choiceContext, owner!, exit);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageCues.Refresh(owner);
@@ -926,6 +964,27 @@ public static partial class FurinaStage
         ledger.EndRest();
         // 2026-09-27: A Five-Century Act returns once a turn, from here.
         ledger.ReturnedThisTurn = false;
+        // THE RULES PASS (2026-10-01): Opening Number's count opens the turn
+        // at 0.
+        ledger.CardsPlayedThisTurn = 0;
+    }
+
+    /// <summary>
+    /// THE FURINA RULES PASS (2026-10-01), <i>Opening Number</i>: "If this is
+    /// the first card you played this turn". The cards she has FINISHED
+    /// playing this turn (counted at <c>AfterCardPlayed</c>, auto-plays
+    /// too), so the card asking is the first when this reads 0. Sim twin:
+    /// <c>state.cards_played_this_turn</c>, counted before the play resolves
+    /// (it asks for 1).
+    /// </summary>
+    public static int CardsPlayedThisTurn(Creature? owner) =>
+        LiveFor(owner) ? FurinaStageLedger.For(owner!).CardsPlayedThisTurn : 0;
+
+    /// <summary>One card finished; the one write site for the count above.
+    /// </summary>
+    public static void NoteCardPlayed(Creature? owner)
+    {
+        if (LiveFor(owner)) FurinaStageLedger.For(owner!).CardsPlayedThisTurn++;
     }
 
     /// <summary>Rule 4's move. The TURN TEST is inside, on the seat's own
@@ -938,9 +997,11 @@ public static partial class FurinaStage
         var turn = owner!.Player?.PlayerCombatState?.TurnNumber ?? 0;
         var ledger = FurinaStageLedger.For(owner);
         // THE CURTAIN NEVER FALLS, rebuilt for the Stage: "Your front
-        // performer regains 2 Fanfare each turn, not 1." Rule 4's one number,
-        // upgraded, from the same second turn (2026-09-28: the relic opens at
-        // the 5 the first hand used to reach through a turn-one regain).
+        // performer regains 2 Fanfare each turn." From her second turn
+        // (2026-09-28: the relic opens at the 5 the first hand used to reach
+        // through a turn-one regain). THE RULES PASS (2026-10-01): rule 4 is
+        // cut (`FurinaStageLaw.LeadRegen` is 0), so without the relic the
+        // front regains nothing and the relic's 2 is the only regain.
         var regained = Relics.CurtainNeverFalls.OnStage(owner)
             ? ledger.Regen(turn, Relics.CurtainNeverFalls.LeadRegen, firstTurn: 2)
             : ledger.Regen(turn);
@@ -1330,13 +1391,13 @@ public static partial class FurinaStage
             {
                 await CardPileCmd.Draw(choiceContext, 1m, player);
             }
-            // Round four: on the empty stage a bow can leave, this Raise
-            // summons a random performer holding the amount. 2026-09-26: the
-            // log names the card behind it.
+            // A trigger's gain: on the empty stage a bow can leave it lands
+            // on nobody (rule 5, the rules pass, 2026-10-01; round four had
+            // it summon). 2026-09-26: the log names the card behind it.
             using (FurinaStageLedger.For(owner)
                        .CausedBy(ThunderousApplauseTitle))
             {
-                await Raise(owner, (int)applause.Amount);
+                await Raise(owner, (int)applause.Amount, played: false);
             }
         }
         // 2026-09-27: the first Bow-and-leave each turn only, however many

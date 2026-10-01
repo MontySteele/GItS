@@ -45,7 +45,7 @@ public sealed class ProtoFsStageWhisper : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stage Whisper"),
-        ("description", "Your other performers give all but 1 of their [gold]Fanfare[/gold] to your [gold]front performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Each other performer gives all but 1 [gold]Fanfare[/gold] to your [gold]front performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

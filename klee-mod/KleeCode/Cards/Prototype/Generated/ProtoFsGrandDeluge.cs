@@ -51,7 +51,7 @@ public sealed class ProtoFsGrandDeluge : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Deluge"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies and apply [gold]Hydro[/gold]. If this triggers an [gold]Elemental Reaction[/gold], each performer gains 2 [gold]Fanfare[/gold]."),
+        ("description", "Deal {Damage:diff()} damage and apply [gold]Hydro[/gold] to ALL enemies. On an [gold]Elemental Reaction[/gold], each performer gains 2 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

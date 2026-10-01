@@ -58,9 +58,12 @@ public static class FurinaStageLaw
     public const int SummonFanfare = 1;
 
     /// <summary>What the LEAD regains at the start of her turn, from her
-    /// second turn on (sec.3 rule 4). Mirrors
-    /// <c>furina_stage.LEAD_REGEN</c>.</summary>
-    public const int LeadRegen = 1;
+    /// second turn on (sec.3 rule 4). 0 since the Furina rules pass
+    /// (2026-10-01; [USER]: "Agreed, remove the freebie. The Ancient relic can
+    /// give it back, as planned."): rule 4 is cut, and only The Curtain Never
+    /// Falls regains (its own 2). Mirrors <c>furina_stage.LEAD_REGEN</c>.
+    /// </summary>
+    public const int LeadRegen = 0;
 
     /// <summary>What the starter's Refill raises on the back performer
     /// (sec.3 rule 5, sec.12 <i>Rising Applause</i>). Mirrors

@@ -124,8 +124,8 @@ public readonly struct StageSpend
         Exits = exit is { } one ? new[] { one } : System.Array.Empty<StageExit>();
     }
 
-    /// <summary>A Spend Palais Ledger pooled: every performer it emptied,
-    /// back to front, in the order they Bow.</summary>
+    /// <summary>A Spend (rule 8, back first, then forward): every performer
+    /// it emptied, back to front, in the order they Bow.</summary>
     public StageSpend(int paid, IReadOnlyList<StageExit> exits)
     {
         Fired = true;
@@ -897,21 +897,6 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>
-    /// A FRONT-SEAT GUEST ON A FULL STAGE, first half (the guest seat round,
-    /// 2026-09-25): <see cref="BowFromFront"/> at the other end. The BACK
-    /// performer leaves holding its bar -- the newcomer takes it -- and the
-    /// seat comes back for the Bow to read. Null (and nothing moves) on a
-    /// stage that is not full.
-    /// </summary>
-    public StageSeat? BowFromBack()
-    {
-        if (!IsFull || Back is not { } back) return null;
-        _seats.RemoveAt(_seats.Count - 1);
-        Note(new StageBeat("leave", back.Who, -1, 0, back.Fanfare, "recast"));
-        return back;
-    }
-
-    /// <summary>
     /// ONE OF EACH GUEST, first half: a Guest Star for a guest already on
     /// stage makes it Bow. It steps out of its seat holding its bar (the
     /// Bow reads it; nothing is lost), and <see cref="GuestReturns"/> puts it
@@ -1170,72 +1155,51 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>
-    /// RULE 8, as R276 ruled it (picks 1 and 2). Spend N pays from the BACK
-    /// performer -- the bank, the seat a Raise fills -- and only IN FULL:
+    /// RULE 8, as the Furina rules pass ruled it (2026-10-01; [USER]:
+    /// "Agreed, spending start back-forwards"). Spend N pays from the BACK
+    /// performer first -- the bank, the seat a Raise fills -- then the one in
+    /// front of it, and on toward the front until N is met:
     ///
-    ///   * enough on the bar: pays N, the rider fires, the performer stays;
-    ///   * EXACTLY enough: pays N, the rider fires, and the emptied performer
-    ///     leaves with a BOW (rule 7 second clause, rule 9);
-    ///   * NOT enough, or an empty stage: the rider CANNOT fire, nothing is
-    ///     paid, and the card plays at its base number. The chooser never
+    ///   * the stage holds N or more: pays N, the rider fires; every
+    ///     performer the payment empties leaves with a BOW, back to front
+    ///     (rule 7 second clause, rule 9);
+    ///   * the stage holds less, or is empty: the rider CANNOT fire, nothing
+    ///     is paid, and the card plays at its base number. The chooser never
     ///     offers the mode on such a board (<see cref="CanSpend"/>), so this
     ///     branch is the ledger's own refusal rather than a path a play takes.
     ///
-    /// THE BACK AND NOT THE LEAD. Three rounds found the bank a player builds
-    /// with Raise was never the bar Spend took from; the lead is the shield
-    /// (rule 6) and the back is the bank. With one performer on stage it is
-    /// both, and the list's last seat is its first.
+    /// The front-is-the-shield, back-is-the-bank split stays: the bank
+    /// empties first. Until this pass the back paid alone and in full, and
+    /// Palais Ledger's old text ("paid by the performers in front of it, back
+    /// to front") was this rule; the relic is re-aimed (<c>FurinaStage.PriceOf</c>).
+    /// Sim twin: <c>furina_stage.spend</c>.
     /// </summary>
     public StageSpend Spend(int amount)
     {
-        if (Back is not { } back) return new StageSpend(false, 0, null);
+        if (Back is null) return new StageSpend(false, 0, null);
         if (amount <= 0) return new StageSpend(true, 0, null);
-        if (back.Fanfare < amount)
-        {
-            return SpendPools && TotalFanfare >= amount
-                ? SpendPooled(amount)
-                : new StageSpend(false, 0, null);
-        }
-
-        Drain(back, amount);
-        // The per-play record, written where the payment happens rather than
-        // by the caller: `stage_spent` is what a payoff on the SAME card
-        // multiplies, and by the time it resolves the bar is gone.
-        SpentThisPlay = amount;
-        NoteSpend(back, amount);
-        if (back.Fanfare > 0) return new StageSpend(true, amount, null);
-
-        var index = _seats.Count - 1;
-        _seats.RemoveAt(index);
-        Note(new StageBeat("leave", back.Who, -1, 0, amount, "spend"));
-        return new StageSpend(
-            true, amount, ExitOf(back, StageDeparture.Spent, index, held: amount));
+        return TotalFanfare >= amount
+            ? SpendPooled(amount)
+            : new StageSpend(false, 0, null);
     }
 
-    /// <summary>R276 pick 1: can the back performer pay N IN FULL? The one
+    /// <summary>Rule 8 (the rules pass): can the whole stage pay N? The one
     /// question a Spend mode's gate asks, and false on an empty stage.
     /// </summary>
     public bool CanSpend(int amount) =>
-        Back is { } back
-        && (back.Fanfare >= amount || (SpendPools && TotalFanfare >= amount));
-
-    // ---- PALAIS LEDGER (review/active/relics-potions-klee-furina-2026-09-27.md) ----
-
-    /// <summary>Does a Spend the back performer cannot cover pool across the
-    /// stage? Palais Ledger, held by this ledger's Furina.</summary>
-    public bool SpendPools =>
-        _furina != null
-        && Relics.FurinaStageRelics.Holds<Relics.PalaisLedger>(_furina);
+        Back is not null && TotalFanfare >= amount;
 
     /// <summary>Every performer's Fanfare, front to back.</summary>
     public int TotalFanfare => _seats.Sum(seat => seat.Fanfare);
 
     /// <summary>
-    /// "A Spend your back performer can't cover is paid by the performers in
-    /// front of it, back to front." The back pays all it holds, then the one
-    /// in front of it, and on toward the front until the price is met; every
-    /// performer the payment empties leaves and Bows, in that order. The
-    /// caller has already checked the whole stage covers the price.
+    /// Rule 8's payment: the back pays all it holds, then the one in front of
+    /// it, and on toward the front until the price is met; every performer
+    /// the payment empties leaves and Bows, in that order. The caller has
+    /// already checked the whole stage covers the price. The per-play record
+    /// (<see cref="SpentThisPlay"/>) is written here, where the payment
+    /// happens: `stage_spent` is what a payoff on the SAME card multiplies,
+    /// and by the time it resolves the bars are gone.
     /// </summary>
     private StageSpend SpendPooled(int amount)
     {
@@ -1610,6 +1574,12 @@ public sealed class FurinaStageLedger
     /// (<c>FurinaStage.BeginTurn</c>).
     /// </summary>
     public bool ReturnedThisTurn { get; set; }
+
+    /// <summary>Cards she has finished playing this turn (the Furina rules
+    /// pass, 2026-10-01: <i>Opening Number</i>). Written by
+    /// <c>FurinaStage.NoteCardPlayed</c>, zeroed by
+    /// <c>FurinaStage.BeginTurn</c>.</summary>
+    public int CardsPlayedThisTurn { get; set; }
 
     /// <summary>A Five-Century Act's return, at most once a turn: false (and
     /// nothing moves) once this turn's return is used or on a full stage.

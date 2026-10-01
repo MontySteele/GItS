@@ -43,9 +43,10 @@ def arm(monkeypatch):
 #: (2026-09-29) raised every Spend damage number here (Interposition, a Block
 #: card, did not move): Quick Cue 11 -> 14, Spirited Aria 11 -> 14, Tidal
 #: Flourish 10 -> 13, Grand Entrance 32 -> 40; Quick Cue's and Grand
-#: Entrance's Spend numbers upgrade by one more than their plain ones.
+#: Entrance's Spend numbers upgrade by one more than their plain ones. THE
+#: RULES PASS (2026-10-01): Quick Cue 14 -> 11.
 SPEND_PASS = {
-    "proto_fs_quick_cue": (3, 3, 14, {"conditional_damage": 1,
+    "proto_fs_quick_cue": (3, 3, 11, {"conditional_damage": 1,
                                       "conditional_then_damage": 1}),
     "proto_fs_spirited_aria": (8, 3, 14, {"conditional_damage": 3}),
     "proto_fs_tidal_flourish": (5, 3, 13, {"conditional_damage": 3}),
@@ -84,10 +85,12 @@ def _stage(*bars):
             "log": []}
 
 
-def test_a_short_back_bar_prints_the_mode_marked_with_the_reason():
-    assert spend_unavailable(QUICK_CUE, _stage(6, 2)) == [
-        "Spend 3: deal 11 and apply Hydro instead — unavailable: your back "
-        "performer has 2 Fanfare"]
+def test_a_short_stage_prints_the_mode_marked_with_the_reason():
+    """The rules pass (2026-10-01): the Spend pays back first, then forward,
+    so it is refused only when the whole stage holds less."""
+    assert spend_unavailable(QUICK_CUE, _stage(1, 1)) == [
+        "Spend 3: deal 11 and apply Hydro instead — unavailable: your "
+        "performers hold 2 Fanfare between them"]
 
 
 def test_a_payable_spend_prints_nothing_extra():
@@ -96,8 +99,8 @@ def test_a_payable_spend_prints_nothing_extra():
     assert spend_unavailable(QUICK_CUE, _stage(4)) == []
 
 
-def test_the_front_bar_does_not_pay():
-    assert spend_unavailable(QUICK_CUE, _stage(9, 1)) != []
+def test_the_front_bar_pays_after_the_back():
+    assert spend_unavailable(QUICK_CUE, _stage(9, 1)) == []
 
 
 def test_an_empty_stage_says_so():
@@ -106,12 +109,13 @@ def test_an_empty_stage_says_so():
         "is empty"]
 
 
-def test_palais_ledger_pools_the_price():
+def test_palais_ledger_takes_one_off_the_price():
+    """The rules pass (2026-10-01): "Your Spends cost 1 less Fanfare." """
     ledger = [{"name": "Palais Ledger", "text": ""}]
-    assert spend_unavailable(QUICK_CUE, _stage(2, 1), ledger) == []
-    [line] = spend_unavailable(QUICK_CUE, _stage(1, 1), ledger)
-    assert line.endswith("your performers hold 2 Fanfare between them, and "
-                         "Palais Ledger pays from all of them")
+    assert spend_unavailable(QUICK_CUE, _stage(1, 1), ledger) == []
+    [line] = spend_unavailable(QUICK_CUE, _stage(1), ledger)
+    assert line.endswith("your performers hold 1 Fanfare between them, and "
+                         "it costs 2 with Palais Ledger")
 
 
 @pytest.mark.parametrize("text", [
@@ -136,7 +140,8 @@ def test_the_card_face_prints_the_line_under_its_text():
     lines = _render_card(face)
     assert lines[1] == f"    {QUICK_CUE}"
     assert lines[2] == ("    Spend 3: deal 11 and apply Hydro instead — "
-                        "unavailable: your back performer has 2 Fanfare")
+                        "unavailable: your performers hold 2 Fanfare between "
+                        "them")
 
 
 @pytest.fixture
@@ -171,9 +176,9 @@ def _combat_state(bars):
 
 
 def test_the_observed_page_marks_the_hand_card(_fresh_fight):
-    page = blindplay.observe(_combat_state([5, 2]))
+    page = blindplay.observe(_combat_state([1, 1]))
     assert ("Spend 3: deal 11 and apply Hydro instead — unavailable: your "
-            "back performer has 2 Fanfare") in page
+            "performers hold 2 Fanfare between them") in page
     blindplay.forget_fight()
     page = blindplay.observe(_combat_state([5, 3]))
     assert "unavailable:" not in page

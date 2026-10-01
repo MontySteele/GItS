@@ -66,20 +66,21 @@ def _play(st, cid, mode=None, monkeypatch=None, upgraded=False):
     effects.resolve_card(st, card)
 
 
-VAPORIZED_14 = int(14 * C.VAPORIZE_MULT)
+VAPORIZED_11 = int(11 * C.VAPORIZE_MULT)
 
 
 # ---------------------------------------------------------------------------
-# THE FINDING: Vaporize off Quick Cue's Spend mode multiplies its 14 (8
-# until the 2026-09-28 Spend pass, 11 until the 2026-09-29 fade pass).
+# THE FINDING: Vaporize off Quick Cue's Spend mode multiplies its 11 (8
+# until the 2026-09-28 Spend pass, 14 from the 2026-09-29 fade pass until the
+# 2026-10-01 rules pass).
 # ---------------------------------------------------------------------------
 
 def test_vaporize_off_quick_cues_spend_mode_multiplies_its_hit(
         arm, monkeypatch):
     st = _state(enemies=[_enemy(aura="pyro")])
     _play(st, "proto_fs_quick_cue", 1, monkeypatch)
-    assert st.enemies[0].hp == 200 - VAPORIZED_14
-    assert VAPORIZED_14 > 14
+    assert st.enemies[0].hp == 200 - VAPORIZED_11
+    assert VAPORIZED_11 > 11
     assert st.enemies[0].aura is None           # consumed by the hit
     reactions = [e for e in st.log if e["event"] == "reaction"]
     assert [r["reaction"] for r in reactions] == ["vaporize"]
@@ -97,9 +98,9 @@ def test_courtroom_dramas_vulnerable_lands_on_the_reacting_hit(
     st = _state(enemies=[_enemy(aura="pyro")], cross_examination=1)
     st.reactions_this_turn = 0
     _play(st, "proto_fs_quick_cue", 1, monkeypatch)
-    # 14 x Vaporize x the Vulnerable Courtroom Drama put on it before it landed.
+    # 11 x Vaporize x the Vulnerable Courtroom Drama put on it before it landed.
     assert st.enemies[0].hp == 200 - int(
-        14 * C.VAPORIZE_MULT * C.VULNERABLE_TAKEN_MULT)
+        11 * C.VAPORIZE_MULT * C.VULNERABLE_TAKEN_MULT)
     assert st.enemies[0].powers.get("vulnerable", 0) >= 1
     assert st.enemies[0].powers.get("weak", 0) >= 1
 

@@ -58,12 +58,12 @@ def test_a_scripted_fight_adds_up_door_by_door(arm):
     FS.summon(st, "crabaletta")             # crab 1              summon +1
     FS.raise_fanfare(st, 10)                # crab 11             card  +10
     st.turn = 2
-    FS.turn_start_regen(st)                 # usher 4             regen +1
+    FS.turn_start_regen(st)                 # usher 3 (rule 4 cut) regen 0
     assert FS.spend(st, 3) == 3             # crab 8              spent  3
-    assert FS.absorb(st, 2) == 2            # usher 2             hit    2
+    assert FS.absorb(st, 2) == 2            # usher 1             hit    2
     FS.end_of_turn_acts(st)                 # crab 8 -> 6         faded  2
     assert FS.final_bow(st) == 6            # crab leaves with 6  left   6
-    assert FS.absorb(st, 5) == 2            # usher emptied       hit    2
+    assert FS.absorb(st, 5) == 1            # usher emptied       hit    1
     FS.settle_hit(st)                       # his bow: Block, no Fanfare
     assert FS.stage(st.player) == [["chevalmarin", 1]]
     assert FS.collect_all(st) == 1          # the Rare            spent  1
@@ -79,14 +79,14 @@ def test_a_scripted_fight_adds_up_door_by_door(arm):
     led = st.stage_ledger
     assert led["start"] == 0
     assert led["gained"] == {
-        "opening": 3, "regen": 1, "card": 14, "bow": 0, "power": 0,
+        "opening": 3, "regen": 0, "card": 14, "bow": 0, "power": 0,
         "summon": 2, "empty_summon": 4, "return": 1, "guest": 0,
         "gift": 0}
     assert led["spent"] == 7
     assert led["paid_other"] == {"guest": 2}
     assert led["left"] == 6
     assert led["faded"] == 2                # a quarter of 8 (the fade pass)
-    assert led["hit"] == 4
+    assert led["hit"] == 3
     assert led["back_at_turn_end"] == [6]
     assert FS.total_fanfare(st.player) == 4
     assert _balances(st)
@@ -154,7 +154,7 @@ def test_a_reused_player_opens_fight_two_with_usher_alone_at_three(arm):
     would open fight two on fight one's cast; `run_fight` clears it."""
     player = loader.build_player("furina")
     first = combat.run_fight(player, loader.build_encounter("attrition"),
-                             _pilot(), seed=3)
+                             _pilot(), seed=6)  # rules pass 2026-10-01: seed 3 ends castless
     assert first.player.alive and FS.stage(player), \
         "fight one must end with a cast standing, or this pins nothing"
     second = combat.run_fight(player, loader.build_encounter("attrition"),

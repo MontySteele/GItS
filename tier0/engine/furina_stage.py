@@ -58,7 +58,10 @@ SOLD_OUT_SEATS = 4           # Sold Out (2026-09-26): front, two middles, back.
 OPENING_MEMBER = "usher"     # sec.10 default 1 (E): FIXED, for legibility.
 OPENING_FANFARE = 3          # rule 2, from the relic.
 SUMMON_FANFARE = 1           # rule 3: a newcomer arrives at 1.
-LEAD_REGEN = 1               # rule 4: the LEAD only, from her second turn.
+#: Rule 4 is CUT (the Furina rules pass, 2026-10-01; [USER]: "Agreed, remove
+#: the freebie. The Ancient relic can give it back, as planned."). The front
+#: regains nothing; only The Curtain Never Falls (game-side) regains 2.
+LEAD_REGEN = 0               # rule 4, cut: the front regains nothing.
 REFILL_AMOUNT = 5            # rule 5: "Raise 5 Fanfare on the back performer."
 SPEND_RATE_NOMINAL = 2       # sec.4: "a nominal rate, not a measure". NOTHING
                              # READS THIS. It is here because the brief names
@@ -359,6 +362,24 @@ POOL_SUBS: dict[str, str] = {
     # --- THE SUPPORTING POOL (2026-09-26): Sold Out, a Rare Power, for a
     # same-rarity shipped Power the EB-736 filter drops. ---
     "unheard_confession": "proto_fs_sold_out",          # 2 Power for 2 Power
+    # --- THE RULES PASS (2026-10-01, paper sec.3): her surviving old-kit rows
+    # move onto the prototype sheet (legacy cleanup pick 3). Singer of Many
+    # Waters re-aimed; The Guest List and Command Performance replaced (An
+    # Invitation's replacement is `POOL_ADDS`'s: it is Rising Applause's
+    # starter pairing); eight ported as they are. Commons (three). ---
+    "commanding_gaze": "proto_fs_commanding_gaze",
+    "undercurrent": "proto_fs_undercurrent",
+    "warmup_act": "proto_fs_warmup_act",
+    # --- Uncommons (six) ---
+    "guest_list": "proto_fs_leading_lady",
+    "courtroom_drama": "proto_fs_courtroom_drama",
+    "crashing_waves": "proto_fs_crashing_waves",
+    "duet": "proto_fs_duet",
+    "quick_change": "proto_fs_quick_change",
+    "witness_stand": "proto_fs_witness_stand",
+    # --- Rares (two) ---
+    "singer_of_many_waters": "proto_fs_singer_of_many_waters",
+    "command_performance": "proto_fs_endless_waltz",
 }
 
 
@@ -383,6 +404,10 @@ POOL_ADDS: tuple[str, ...] = (
     "proto_fs_the_last_act",
     "proto_fs_critics_darling",
     "proto_fs_star_turn",
+    # THE RULES PASS (2026-10-01, paper sec.3): Opening Number replaces An
+    # Invitation, which `POOL_DROPS` takes out (it is Rising Applause's
+    # starter pairing in `STARTER_SUBS`, so it cannot be a `POOL_SUBS` key).
+    "proto_fs_opening_number",
 )
 
 
@@ -409,6 +434,9 @@ POOL_DROPS: tuple[str, ...] = (
     "directors_cut",
     "pit_orchestra",
     "rapturous_applause",
+    # THE RULES PASS (2026-10-01): An Invitation, whose place Opening Number
+    # takes (`POOL_ADDS`). C# twin: `SwapOfferedRows` names it.
+    "an_invitation",
 )
 
 
@@ -737,20 +765,22 @@ def recast_front(state, newcomer: str | None = None,
                seats=len(seats), rotated=True, via="recast")
 
 
-def recast_back(state, newcomer: str, arrival: int) -> None:
-    """A FRONT-SEAT GUEST ON A FULL STAGE (the guest seat round, 2026-09-25)
-    -- `FurinaStage.RecastFromBack`'s twin. `recast_front` with the leaver at
-    the other end: the BACK performer Bows (a real Bow, its readers too, but
-    no Five-Century return) and leaves, and the newcomer arrives at the FRONT
-    holding `arrival` plus the leaver's remaining Fanfare. Bow, readers,
-    arrival. It does not act on arrival (`EB-738`)."""
+def recast_to_front(state, newcomer: str, arrival: int) -> None:
+    """THE FRONT HOLDER ON A FULL STAGE -- `FurinaStage.RecastToFront`'s
+    twin. The rules pass (2026-10-01; [USER]: "Yes on Wriothesley - it's much
+    cleaner"): his face says only "Always your front performer", so his
+    summon meets a full stage as any summon does: the FRONT performer Bows (a
+    real Bow, its readers too, but no Five-Century return) and leaves, and he
+    arrives holding `arrival` plus the leaver's remaining Fanfare -- in the
+    front seat, which is his. Bow, readers, arrival. It does not act on
+    arrival (`EB-738`). (Until this pass the BACK performer Bowed for him.)"""
     p = state.player
     if not active(p):
         return
     seats = _seats(p)
     if len(seats) < capacity(p):
         return
-    index = len(seats) - 1
+    index = 0
     pair = seats.pop(index)
     leaver, kept = pair
     _unrest(p, pair)
@@ -949,8 +979,8 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
     """R276 batch two: what a Bow sets off once the performer has left and
     its departure effect has resolved -- `FurinaStage.AfterBow`'s twin.
     Thunderous Applause (each copy draws 1 and Raises its share on the back
-    performer -- round four: on an empty stage that Raise summons a random
-    performer holding it), then A Five-Century Act (the performer returns to the back
+    performer -- since the rules pass, 2026-10-01, a trigger's gain does
+    nothing on an empty stage), then A Five-Century Act (the performer returns to the back
     seat at 1 and rests through this turn's acts; once, and never from Let
     the People Rejoice, whose own return is the return)."""
     p = state.player
@@ -1017,11 +1047,12 @@ def turn_start_rest(state) -> None:
 
 
 def turn_start_regen(state) -> None:
-    """Rule 4. The LEAD regains 1 at the start of Furina's turn, from her
-    SECOND turn on (sec.3 rule 2: "the first hand sees 3"). Only the lead.
-    Bars have no cap, so nothing clamps here."""
+    """Rule 4, CUT by the rules pass (2026-10-01): `LEAD_REGEN` is 0, so the
+    front regains nothing. The Curtain Never Falls' regain of 2 is game-side
+    (this engine models no relics). Kept as the door the relic's twin would
+    use: from her SECOND turn on, the lead only, no cap."""
     p = state.player
-    if not active(p) or state.turn < 2:
+    if not active(p) or state.turn < 2 or LEAD_REGEN <= 0:
         return
     pair = lead(p)
     if pair is None:
@@ -1039,12 +1070,14 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
     performer, which is the lead when it is alone. `seat=SEAT_LEAD` is the
     other spelling, for a face that names the lead instead.
 
-    ROUND FOUR: RAISE ON AN EMPTY STAGE SUMMONS. With nobody on stage a random
-    performer arrives HOLDING THE RAISE AMOUNT (not rule 3's 1) and nothing
-    else is raised -- for every seat a face names, and for the Raise powers.
-    Gala Dinner on an empty stage fields ONE performer at 3. The arrival
-    performs at the end of the turn with the others (rule 3, `EB-738`). C#
-    twin: `FurinaStage.SummonForRaise`.
+    RULE 5, THE RULES PASS (2026-10-01): ONLY WHAT YOU PLAY SUMMONS. A card
+    you play that gives Fanfare (`source=GAIN_CARD`), on an empty stage,
+    summons a random performer HOLDING THE AMOUNT (not rule 3's 1) and nothing
+    else is raised. A gain from a Power, a relic, a Bow reader or a reaction
+    (any other `source`) does nothing on an empty stage, and a gain naming
+    "each performer" (`SEAT_ALL`) has nobody to land on. [USER]: "This makes
+    sense - agreed on your split." The arrival performs at the end of the turn
+    with the others (rule 3, `EB-738`). C# twin: `FurinaStage.SummonForRaise`.
 
     `summon_on_empty=False` is Arkhe Alignment's Pneuma, which prints "the
     lead REGAINS" -- a regain like rule 4's, with no lead to regain on an
@@ -1060,7 +1093,8 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
     p = state.player
     if not active(p) or amount <= 0:
         return 0
-    if summon_on_empty and not stage(p):
+    if (summon_on_empty and source == GAIN_CARD and seat != SEAT_ALL
+            and not stage(p)):
         member = state.rng.choice(PERFORMERS)
         book_gain(state, GAIN_EMPTY_SUMMON, int(amount))
         _seats(p).append([member, int(amount)])
@@ -1096,10 +1130,11 @@ def can_spend(player) -> bool:
 
 
 def can_pay(player, amount: int) -> bool:
-    """R276 pick 1: can the BACK performer pay `amount` IN FULL? False on an
-    empty stage and on a bar short of the price. C# twin:
-    `FurinaStage.CanSpend`."""
-    return can_spend(player) and back_fanfare(player) >= int(amount)
+    """Rule 8 (the rules pass, 2026-10-01): can the WHOLE STAGE pay `amount`?
+    A Spend pays from the back performer first, then forward, so it is
+    refused only when every bar together holds less (and on an empty stage).
+    C# twin: `FurinaStage.CanSpend`."""
+    return can_spend(player) and total_fanfare(player) >= int(amount)
 
 
 #: `EB-746`. THE HEAD OP OF A SPEND MODE, which is what makes a `choose_one`
@@ -1223,33 +1258,43 @@ def _mode_kills(state, mode: dict) -> bool:
 
 
 def spend(state, amount: int) -> int:
-    """Rule 8 as R276 ruled it (picks 1 and 2). Pay N from the BACK
-    performer's bar -- the bank -- and only IN FULL. A performer the payment
-    empties EXACTLY leaves with a bow. A bar short of N pays nothing: the
-    chooser never offers such a mode (`mode_offered`), so this is the engine's
-    own refusal rather than a path a play takes.
+    """Rule 8, the rules pass (2026-10-01; [USER]: "Agreed, spending start
+    back-forwards"). Pay N from the BACK performer first, then the one in
+    front of it, and on toward the front until N is met. Every performer the
+    payment empties leaves with a bow, back to front. A stage holding less
+    than N in all pays nothing: the chooser never offers such a mode
+    (`mode_offered`), so this is the engine's own refusal rather than a path
+    a play takes. (Until this pass the back paid alone, in full; Palais
+    Ledger's old text was this rule. C# twin: `FurinaStageLedger.Spend`.)
 
     Returns what was paid: N, or 0 where it refused.
     """
     p = state.player
     if not active(p):
         return 0
-    pair = back(p)
-    if pair is None or pair[1] < int(amount):
+    if not stage(p) or total_fanfare(p) < int(amount):
         state.emit("stage_spend_whiffed", amount=amount)
         return 0
-    member, bar = pair
-    paid = int(amount)
-    book_paid(state, paid)
-    pair[1] = bar - paid
-    state.emit("stage_spend", member=member, asked=int(amount), paid=paid,
-               bar_at_spend=bar, fanfare=pair[1], turn=state.turn,
-               enemies_alive=len(state.living_enemies))
-    if pair[1] <= 0:
-        _leave(state, len(_seats(p)) - 1, bowed=True, reason="spend",
-               held=bar)
-    critics_darling(state, paid)
-    return paid
+    owed = int(amount)
+    book_paid(state, owed)
+    seats = _seats(p)
+    index = len(seats) - 1
+    while owed > 0 and index >= 0:
+        pair = seats[index]
+        member, bar = pair
+        paid = min(bar, owed)
+        if paid > 0:
+            owed -= paid
+            pair[1] = bar - paid
+            state.emit("stage_spend", member=member, asked=int(amount),
+                       paid=paid, bar_at_spend=bar, fanfare=pair[1],
+                       turn=state.turn,
+                       enemies_alive=len(state.living_enemies))
+            if pair[1] <= 0:
+                _leave(state, index, bowed=True, reason="spend", held=bar)
+        index -= 1
+    critics_darling(state, int(amount))
+    return int(amount)
 
 
 def critics_darling(state, paid: int) -> None:
@@ -1701,12 +1746,19 @@ def step_forward(state) -> None:
     state.emit("stage_step_forward", company=[m for m, _f in seats])
 
 
-def perform_all(state) -> None:
-    """*Tutti!*: every performer performs its act now, front first."""
+def perform_all(state, min_fanfare: int = 0) -> None:
+    """*Tutti!*: every performer performs its act now, front first.
+
+    `min_fanfare` is *Endless Waltz* (the Furina rules pass, 2026-10-01):
+    "Each performer with 5 or more Fanfare acts." WHO QUALIFIES IS READ ONCE,
+    before any act, so an act that moves a bar (Clorinde's tax, a payment)
+    does not change who acts (a builder's reading; C# twin
+    `FurinaStage.PerformAll`)."""
     p = state.player
     if not active(p):
         return
-    for pair in list(stage(p)):
+    cast = [pair for pair in stage(p) if pair[1] >= int(min_fanfare)]
+    for pair in cast:
         if state.over or not p.alive or not state.living_enemies:
             break
         if is_resting(p, pair) or not _holds(p, pair):
@@ -1834,10 +1886,10 @@ def guest_star(state, member: str, amount: int, front: bool = False) -> None:
         any summon (`recast_front`);
       * otherwise the back-most empty seat, holding N.
 
-    `front` (the guest seat round, 2026-09-25; Wriothesley's card): he joins
-    in the FRONT seat and the others shift back one, and on a full stage the
-    recast's leaver is the BACK performer (`recast_back`). A repeat copy is
-    unchanged.
+    `front` (Wriothesley's card; the rules pass, 2026-10-01: "Always your
+    front performer"): he joins in the FRONT seat and the others shift back
+    one; on a full stage the front Bows as for any summon and he takes the
+    front (`recast_to_front`). A repeat copy is unchanged.
 
     It does not act on arrival (`EB-738`). C# twin: `FurinaStage.GuestStar`.
 
@@ -1905,7 +1957,7 @@ def _guest_joins(state, member: str, amount: int, front: bool) -> None:
         return
     if len(seats) >= capacity(p):
         if front:
-            recast_back(state, member, int(amount))
+            recast_to_front(state, member, int(amount))
         else:
             recast_front(state, member, int(amount))
         return
@@ -2347,8 +2399,8 @@ def note_reaction(state) -> None:
     """*Tide of Applause*: "Whenever you trigger an Elemental Reaction, your
     back performer gains 2 Fanfare." Called from `reactions._react`, the one
     site this engine counts a reaction (C# twin: `FurinaStage.OnReaction`,
-    from `ReactionEffects.Resolve`). A Raise, so on an empty stage it
-    summons (rule 5)."""
+    from `ReactionEffects.Resolve`). A trigger's gain, so on an empty stage
+    it does nothing (rule 5, the rules pass, 2026-10-01)."""
     p = state.player
     if not active(p):
         return
@@ -2373,11 +2425,11 @@ def supporting_pool_turn_start(state) -> None:
     Alignment's choice. C# twin: `FurinaStage.TurnStartPowers`.
 
       1. *One-Woman Show* first, while the stage is as the turn found it: if
-         no one is on stage, gain 1 Energy and draw 1 card, per copy. (Asked
-         before Season Tickets, whose Raise on an empty stage summons.)
+         no one is on stage, gain 1 Energy and draw 1 card, per copy.
       2. *Revolving Stage*: the back performer moves to the front, once per
          copy.
-      3. *Season Tickets*: the back performer gains N (summons on empty).
+      3. *Season Tickets*: the back performer gains N (nothing on an empty
+         stage: a Power's gain, rule 5).
       4. *Regina of All Waters*: Hydro on ALL enemies.
     """
     p = state.player

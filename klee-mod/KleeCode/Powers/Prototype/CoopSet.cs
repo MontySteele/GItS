@@ -476,7 +476,8 @@ public sealed class PeopleOfFontainePower : PowerModel, ILocalizationProvider
         if (Owner == null || Amount <= 0) return;
         if (!FurinaStage.LiveFor(Owner)) return;
         if (!CoopSet.IsAnotherPlayersAttack(cardPlay, Owner)) return;
-        await FurinaStage.Raise(Owner, (int)Amount);
+        // A Power's gain: nothing on an empty stage (rule 5, the rules pass).
+        await FurinaStage.Raise(Owner, (int)Amount, played: false);
     }
 }
 
@@ -748,6 +749,7 @@ public sealed class TheCrowdRoarsPower : PowerModel, ILocalizationProvider
     {
         if (Amount <= 0 || !Pays(Owner, creature, delta)) return;
         if (!FurinaStage.LiveFor(Owner)) return;
-        await FurinaStage.RaiseLead(Owner, (int)Amount);
+        // A Power's gain: nothing on an empty stage (rule 5, the rules pass).
+        await FurinaStage.RaiseLead(Owner, (int)Amount, played: false);
     }
 }

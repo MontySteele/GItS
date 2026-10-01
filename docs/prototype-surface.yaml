@@ -2451,7 +2451,8 @@
    authored_by: [claude],
    replaces: many_waters_melody,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Fanfare[/gold] on your [gold]front performer[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   # The rules pass (2026-10-01, sec.4): trimmed.
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} per [gold]Fanfare[/gold] on your [gold]front performer[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: block,
               amount_formula: {base: 3, per: 1, count: stage_lead_fanfare}}]}
 
@@ -2536,7 +2537,9 @@
    effects: [{op: block, amount: 5},
              {op: stage_raise, amount: 2, seat: lead}]}
 
-# Fade pass (2026-09-29): Spend 14 (16), was 11 (12).
+# Fade pass (2026-09-29): Spend 14 (16), was 11 (12). The rules pass
+# (2026-10-01, sec.4): Spend 11 (13); at 0 cost it beat the starter's Curtain
+# Rise (1 cost, 17 [21]) for the same Spend.
 - {id: proto_fs_quick_cue, name: "Quick Cue", character: furina,
    upgrade: {conditional_damage: +1, conditional_then_damage: +1},
    authored_by: [claude],
@@ -2546,9 +2549,9 @@
    effects: [{op: choose_one, modes: [
               {label: "Deal 3 damage",
                effects: [{op: damage, amount: 3, target: enemy}]},
-              {label: "[gold]Spend[/gold] 3: deal 14 and apply [gold]Hydro[/gold] instead",
+              {label: "[gold]Spend[/gold] 3: deal 11 and apply [gold]Hydro[/gold] instead",
                effects: [{op: stage_spend, amount: 3},
-                         {op: damage, amount: 14,target: enemy, applies_element: true}]}]}]}
+                         {op: damage, amount: 11, target: enemy, applies_element: true}]}]}]}
 
 - {id: proto_fs_step_forward, name: "Step Forward", character: furina,
    upgrade: {block: +2},
@@ -2587,7 +2590,8 @@
    authored_by: [claude],
    replaces: dramatic_entrance,
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Spend[/gold] all of your [gold]back performer[/gold]'s [gold]Fanfare[/gold]. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # The rules pass (2026-10-01, sec.4): trimmed.
+   description: "[gold]Spend[/gold] your [gold]back performer[/gold]'s [gold]Fanfare[/gold]. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_back_all},
              {op: damage,
               amount_formula: {base: 5, per: 4, count: stage_spent},
@@ -2674,10 +2678,9 @@
    authored_by: [claude],
    replaces: deep_breath,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   # The guest seat round (2026-09-25): "he joins at the back, where hits
-   # never reach him". 2026-09-29, [USER]: "Can we pin him to the front of
-   # the Stage while he's present?" He holds the front while on stage.
-   description: "Summon Wriothesley with 5 [gold]Fanfare[/gold]. He holds the front while on stage. On a full stage, the back one [gold]Bow[/gold]s for him.",
+   # The rules pass (2026-10-01): "Always your front performer" replaces his
+   # exceptions; every summon and seat move works as normal around him.
+   description: "Summon Wriothesley with 5 [gold]Fanfare[/gold]. Always your [gold]front performer[/gold].",
    effects: [{op: stage_guest, member: wriothesley, amount: 5, seat: front}]}
 
 - {id: proto_fs_guest_star_sigewinne, name: "Guest Star: Sigewinne", character: furina,
@@ -2760,7 +2763,8 @@
    authored_by: [claude],
    replaces: ebb_and_flow,
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Your other performers give all but 1 of their [gold]Fanfare[/gold] to your [gold]front performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   # The rules pass (2026-10-01, sec.4): trimmed.
+   description: "Each other performer gives all but 1 [gold]Fanfare[/gold] to your [gold]front performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: stage_whisper}, {op: draw, amount: 1}]}
 
 # --- 2. Feeding ---
@@ -2850,7 +2854,8 @@
    authored_by: [claude],
    replaces: showstopper,
    register: salon, cost: 2, type: attack, rarity: rare,
-   description: "Your [gold]front performer[/gold] loses all its [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage to ALL enemies per point lost.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # The rules pass (2026-10-01, sec.4): the Bow line.
+   description: "Your [gold]front performer[/gold] loses all its [gold]Fanfare[/gold]. If it empties, it [gold]Bow[/gold]s. Deal {ExtraDamage:diff()} damage to ALL enemies per point lost.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_front_all},
              {op: damage,
               amount_formula: {base: 0, per: 4, count: stage_spent},
@@ -2925,7 +2930,9 @@
    authored_by: [claude],
    replaces: high_tide,
    register: salon, cost: 2, type: attack, rarity: rare,
-   description: "Deal 12 damage to ALL enemies and apply [gold]Hydro[/gold]. If this triggers an [gold]Elemental Reaction[/gold], each performer gains 2 [gold]Fanfare[/gold].",
+   # The rules pass (2026-10-01, sec.4): trimmed. On an empty stage the gain
+   # has nobody to land on (rule 5).
+   description: "Deal 12 damage and apply [gold]Hydro[/gold] to ALL enemies. On an [gold]Elemental Reaction[/gold], each performer gains 2 [gold]Fanfare[/gold].",
    effects: [{op: damage, amount: 12, target: all_enemies, applies_element: true},
              {op: conditional, if: reaction_triggered_by_this,
               then: [{op: stage_raise, amount: 2, seat: all}]}]}
@@ -3049,6 +3056,113 @@
    effects: [{op: apply_power, power: fs_star_turn, amount: 1,
               target: self}]}
 
+# FURINA, THE STAGE -- THE RULES PASS (2026-10-01, paper sec.3): her twelve
+# surviving old-kit rows, ported (legacy cleanup pick 3); the pool stays 78.
+# Provenance note, "Furina rules pass, 2026-10-01".
+
+- {id: proto_fs_singer_of_many_waters, name: "Singer of Many Waters", character: furina,
+   upgrade: {stage_raise: +3},
+   authored_by: [claude],
+   replaces: singer_of_many_waters, art_of: singer_of_many_waters,
+   register: archon, cost: 1, type: skill, rarity: rare, exhaust: true,
+   # Was "Heal 6 HP" (breaks rule 11). A played card's gain: on an empty
+   # stage it summons a random performer holding it (rule 5).
+   description: "Your [gold]front performer[/gold] gains 6 [gold]Fanfare[/gold].",
+   effects: [{op: stage_raise, amount: 6, seat: lead}]}
+
+# No `replaces:`: An Invitation is already Rising Applause's starter pairing
+# (`furina_stage.STARTER_SUBS`), so the arm drops it (`POOL_DROPS`) and
+# appends this row (`POOL_ADDS`).
+- {id: proto_fs_opening_number, name: "Opening Number", character: furina,
+   upgrade: {damage: 3},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "Deal 9 damage. If this is the first card you played this turn, your [gold]back performer[/gold] gains 2 [gold]Fanfare[/gold].",
+   effects: [{op: damage, amount: 9, target: enemy},
+             {op: conditional, if: first_card_this_turn,
+              then: [{op: stage_raise, amount: 2}]}]}
+
+- {id: proto_fs_leading_lady, name: "Leading Lady", character: furina,
+   upgrade: {formula_base: +3},
+   authored_by: [claude],
+   replaces: guest_list,
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Fanfare[/gold] on your [gold]front performer[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage,
+              amount_formula: {base: 6, per: 1, count: stage_lead_fanfare},
+              target: enemy}]}
+
+# The performers that qualify are read once, before any acts: an act that
+# moves a bar (Clorinde's tax) does not change who acts.
+- {id: proto_fs_endless_waltz, name: "Endless Waltz", character: furina,
+   upgrade: {damage: 4},
+   authored_by: [claude],
+   replaces: command_performance,
+   register: salon, cost: 2, type: attack, rarity: rare,
+   description: "Deal 14 damage to ALL enemies. Each performer with 5 or more [gold]Fanfare[/gold] acts.",
+   effects: [{op: damage, amount: 14, target: all_enemies},
+             {op: stage_perform_all, min_fanfare: 5}]}
+
+# --- the eight ported as they are (bodies and upgrades from
+# docs/furina-cards.yaml and docs/furina-upgrades.yaml) ---
+
+- {id: proto_fs_commanding_gaze, name: "Commanding Gaze", character: furina,
+   upgrade: {weak: +1},
+   authored_by: [claude],
+   replaces: commanding_gaze, art_of: commanding_gaze,
+   register: archon, cost: 1, type: skill, rarity: common,
+   effects: [{op: block, amount: 2}, {op: apply_power, power: weak, amount: 1, target: all_enemies}]}
+
+- {id: proto_fs_undercurrent, name: "Undercurrent", character: furina,
+   upgrade: {times: +2},
+   authored_by: [claude],
+   replaces: undercurrent, art_of: undercurrent,
+   register: salon, cost: 1, type: attack, rarity: common,
+   effects: [{op: damage, amount: 2, target: all_enemies, times: 3}]}
+
+- {id: proto_fs_warmup_act, name: "Stage Combat", character: furina,
+   upgrade: {damage: +2},
+   authored_by: [claude],
+   replaces: warmup_act, art_of: warmup_act,
+   register: salon, cost: 0, type: attack, rarity: common,
+   description: "Deal {Damage:diff()} damage. If an enemy intends to attack, gain {BranchBlock:diff()} [gold]Block[/gold].",
+   effects: [{op: damage, amount: 3, target: enemy}, {op: conditional, if: enemy_intends_attack, then: [{op: block, amount: 3}]}]}
+
+- {id: proto_fs_courtroom_drama, name: "Courtroom Drama", character: furina,
+   upgrade: {power_amount: +1},
+   authored_by: [claude],
+   replaces: courtroom_drama, art_of: courtroom_drama,
+   register: archon, cost: 1, type: power, rarity: uncommon,
+   effects: [{op: apply_power, power: cross_examination, amount: 1, target: self, note: "the first reaction you trigger each turn applies N Vulnerable and N Weak to its target"}]}
+
+- {id: proto_fs_crashing_waves, name: "Crashing Waves", character: furina,
+   upgrade: {damage: +2},
+   authored_by: [claude],
+   replaces: crashing_waves, art_of: crashing_waves,
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   effects: [{op: damage, amount: 8, target: all_enemies, bonus_vs_aura: 5}]}
+
+- {id: proto_fs_duet, name: "Duet", character: furina,
+   upgrade: {draw: +1},
+   authored_by: [claude],
+   replaces: duet, art_of: duet,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   effects: [{op: replay_next_companion, times: 1, duration: this_turn}, {op: draw, amount: 1}]}
+
+- {id: proto_fs_quick_change, name: "Quick Change", character: furina,
+   upgrade: {power_amount: +1},
+   authored_by: [claude],
+   replaces: quick_change, art_of: quick_change,
+   register: private, cost: 1, type: power, rarity: uncommon,
+   effects: [{op: apply_power, power: first_attack_draw, amount: 1, target: self, note: "the first Attack you play each turn draws N"}]}
+
+- {id: proto_fs_witness_stand, name: "The Witness Stand", character: furina,
+   upgrade: {vulnerable: +1},
+   authored_by: [claude],
+   replaces: witness_stand, art_of: witness_stand,
+   register: archon, cost: 1, type: skill, rarity: uncommon,
+   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}, {op: draw, amount: 1}]}
+
 # FURINA, THE STAGE -- SOLD OUT (2026-09-26), family 7 of
 # review/active/furina-supporting-pool-2026-09-26.md: the fourth seat.
 # Provenance: prototype-surface-provenance.md.
@@ -3113,7 +3227,8 @@
 - {id: proto_fs_guest_of_honor, name: "Guest of Honor", character: furina,
    authored_by: [claude], multiplayer: true,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Until your next turn, hits on another player land on their [gold]Block[/gold], then your [gold]front performer[/gold]'s [gold]Fanfare[/gold], then them.",
+   # The rules pass (2026-10-01, sec.4): trimmed.
+   description: "Until your next turn, your [gold]front performer[/gold] takes hits on another player after their [gold]Block[/gold].",
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: fs_guest_of_honor, amount: 1, target: ally}]}
 

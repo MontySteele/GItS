@@ -170,11 +170,13 @@ def test_the_glossary_says_up_to_three_perform():
     # THE SUPPORTING POOL (2026-09-26): 4 with Sold Out. The second text pass
     # (2026-09-28) dropped the act list the page appended to both seat rows;
     # the seat count is the Stage badge's, which says who acts and when.
+    # The rules pass (2026-10-01): rule 4 cut; the damage order lives here.
     assert ARM_KEYWORDS["front performer"] == (
-        "Takes hits first. Regains 1 Fanfare at the start of your turn.")
+        "Takes hits after your Block; what its Fanfare cannot hold reaches "
+        "you.")
     assert ARM_KEYWORDS["back performer"] == (
-        "Your last performer in line. Spend pays from it. A lone performer "
-        "is both front and back.")
+        "Your last performer in line. Spend pays from it first. A lone "
+        "performer is both front and back.")
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "FurinaStageBadges.cs").read_text(encoding="utf-8")
     assert '"Up to {Seats} performers act at the end of your turn. Then each "' in src

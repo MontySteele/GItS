@@ -72,14 +72,15 @@ public static partial class FurinaStage
     ///     summon"; the recast adds, 2026-09-25);
     ///   * otherwise: the back-most empty seat, holding <paramref name="fanfare"/>.
     ///
-    /// <para>AT THE FRONT (<paramref name="atFront"/>, the guest seat round,
-    /// 2026-09-25): Wriothesley's card puts him in the FRONT seat and the
-    /// others shift back one -- at the back no hit reaches him (rule 6) and
-    /// his act landed nothing. On a full stage the recast's leaver is then
-    /// the BACK performer (<see cref="RecastFromBack"/>): it Bows and leaves,
-    /// and he arrives at the front holding his Fanfare plus its remaining
-    /// Fanfare. A repeat copy is unchanged: he Bows and returns to his own
-    /// seat.</para>
+    /// <para>AT THE FRONT (<paramref name="atFront"/>, Wriothesley's card):
+    /// "Always your front performer" (the Furina rules pass, 2026-10-01;
+    /// [USER]: "Yes on Wriothesley - it's much cleaner"). He takes the FRONT
+    /// seat and the others shift back one. On a full stage his summon works
+    /// as any summon does (<see cref="RecastToFront"/>): the front performer
+    /// Bows and leaves, and he arrives in the front seat holding his Fanfare
+    /// plus its remaining Fanfare. (Until the rules pass the BACK performer
+    /// Bowed for him.) A repeat copy is unchanged: he Bows and returns to his
+    /// own seat.</para>
     ///
     /// It does not act on arrival (`EB-738`): it acts at the end of the turn
     /// with everyone else.
@@ -106,7 +107,7 @@ public static partial class FurinaStage
         {
             if (atFront)
             {
-                await RecastFromBack(choiceContext, owner!, who, fanfare);
+                await RecastToFront(choiceContext, owner!, who, fanfare);
             }
             else
             {
@@ -127,25 +128,27 @@ public static partial class FurinaStage
     }
 
     /// <summary>
-    /// A FRONT-SEAT GUEST ON A FULL STAGE (the guest seat round, 2026-09-25):
-    /// the recast rule with the leaver at the other end. The BACK performer
+    /// THE FRONT HOLDER ON A FULL STAGE (the Furina rules pass, 2026-10-01):
+    /// the recast rule, as any summon meets a full stage. The FRONT performer
     /// Bows (a real Bow: its act and every Bow reader, but no Five-Century
     /// return, <see cref="RecastFromFront"/>'s reason) and leaves, and the
-    /// guest arrives at the front holding <paramref name="arrival"/> plus the
-    /// leaver's remaining Fanfare. Bow, readers, arrival, in that order.
+    /// guest arrives in the front seat -- his, "always your front performer"
+    /// -- holding <paramref name="arrival"/> plus the leaver's remaining
+    /// Fanfare. Bow, readers, arrival, in that order. Sim twin:
+    /// <c>furina_stage.recast_to_front</c>.
     /// </summary>
-    private static async Task RecastFromBack(
+    private static async Task RecastToFront(
         PlayerChoiceContext choiceContext, Creature owner, StagePerformer who,
         int arrival)
     {
         var ledger = FurinaStageLedger.For(owner);
-        if (ledger.BowFromBack() is not { } leaver) return;
-        // The seat it left is the back one of a full stage: with it gone,
-        // the count standing IS that seat's index (2 on three seats, 3 under
-        // Sold Out), read rather than assumed.
+        // He is not on stage (a repeat copy takes the other branch), so the
+        // front is not held and the leaver is the front seat.
+        var former = ledger.LeaverIndex;
+        if (ledger.BowFromFront() is not { } leaver) return;
         await Bow(choiceContext, owner,
                   new StageExit(leaver.Who, StageDeparture.Spent,
-                                leaver.Fanfare, ledger.Seats.Count,
+                                leaver.Fanfare, former,
                                 leaver.LostSinceAct, leaver.BlockedSinceAct)
                   {
                       FrontLost = leaver.FrontLostSinceAct,

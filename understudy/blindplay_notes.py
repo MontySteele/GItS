@@ -1563,14 +1563,16 @@ ARM_KEYWORDS: dict[str, str] = {
     # THE TEXT PASS (2026-09-25, review/records/furina-text-pass-2026-09-25.md):
     # the glossary follows the tooltips word for word. The Spend row's old
     # page-only sentence ("not offered at all") is the tip's own clause now.
-    "Spend": ("Pay Fanfare from your back performer. Offered only if it can "
-              "pay in full."),
+    # THE RULES PASS (2026-10-01): back first, then forward.
+    "Spend": ("Pay Fanfare from your back performer first, then forward. "
+              "Offered only if your performers hold enough."),
     # The follow-up: the empty-stage summon rides the Fanfare row, which
     # every Fanfare-giving face prints.
     # The second text pass (2026-09-28).
-    "Fanfare": ("A performer's health. Hits take your Block, then your front "
-                "performer's, then you. Gaining it on an empty stage summons "
-                "a performer."),
+    # THE RULES PASS (2026-10-01): only what you play summons; the damage
+    # order moved to the front performer's row.
+    "Fanfare": ("A performer's health. If no one is on stage, a card that "
+                "gives Fanfare summons a random performer holding it."),
     # `EB-744`, and rule 7 as changed 2026-09-25: a performer at 0 Fanfare
     # Bows whatever emptied it -- a Spend, a hit or a full-stage summon.
     # Draft 3 (2026-09-25): the Bow is the performer's act once more.
@@ -1579,12 +1581,14 @@ ARM_KEYWORDS: dict[str, str] = {
     # the start of your turn." The waiting Bow is gone.
     # THE GUEST CAST (2026-09-25): a guest's act may pay, and its Bow does
     # not -- stated once, here, for every performer.
-    "Bow": ("A performer that leaves the stage acts one last time on its "
-            "way out, without paying."),
+    # THE RULES PASS (2026-10-01): Grand Finale's Bow stays.
+    "Bow": ("A performer acts one last time, without paying, as it leaves "
+            "the stage or, if a card says so, stays."),
     # `EB-744` put the trio's acts on both seat rows; the second text pass
     # (2026-09-28) took them off: each performer's own row carries its act.
-    "front performer": ("Takes hits first. Regains 1 Fanfare at the start of "
-                        "your turn."),
+    # THE RULES PASS (2026-10-01): rule 4 cut; the damage order lives here.
+    "front performer": ("Takes hits after your Block; what its Fanfare cannot "
+                        "hold reaches you."),
     # `EB-744` and round four. Draft 3 (2026-09-25): rule 12, the fade.
     # The guest round (2026-09-25): "Hits reach it last" was false. Rule 6:
     # the front absorbs and the rest reaches Furina, never a seat behind;
@@ -1597,8 +1601,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # Relics smoke seat 2026-09-27: "'Fade' is never defined." It is, here,
     # in one clause, and this row prints wherever the page says the word.
     # The second text pass (2026-09-28): the fade has its own row below.
-    "back performer": ("Your last performer in line. Spend pays from it. A "
-                       "lone performer is both front and back."),
+    "back performer": ("Your last performer in line. Spend pays from it "
+                       "first. A lone performer is both front and back."),
     # The second text pass (2026-09-28): `ArmKeywordTips.ForFade`'s words.
     # The fade pass (2026-09-29): a quarter of every bar, the front's too.
     "fade": ("At the end of your turn, each performer loses a quarter of its "
@@ -3139,13 +3143,14 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
 #: rule the run is not playing. Keyed by row, then by the relic's printed
 #: title; the sentence is the relic's own rule, shortened.
 RELIC_KEYWORD_RIDERS: dict[str, dict[str, str]] = {
+    # THE RULES PASS (2026-10-01): Palais Ledger re-aimed.
     "Spend": {"Palais Ledger":
-              " With Palais Ledger, the performers in front of it pay what it "
-              "can't, back to front."},
+              " With Palais Ledger, each Spend costs 1 less Fanfare."},
     "fade": {"Grand Theater Program":
              " With Grand Theater Program, no performer fades."},
     "front performer": {"The Curtain Never Falls":
-                        " With The Curtain Never Falls, it regains 2."},
+                        " With The Curtain Never Falls, it regains 2 at the "
+                        "start of your turn."},
     "Bow": {"Curtain Call Bouquet":
             " With Curtain Call Bouquet, it acts twice."},
 }
