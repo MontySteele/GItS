@@ -77,6 +77,14 @@ splash, so it reacts with nothing. The spread copies arrive spent, so they
 cannot be Swirled again. Anemo plus one aura element is now a two-element
 reaction.
 
+*Amended 2026-10-01.* An enemy that already wears the swirled element, fresh
+or spent, is refreshed by the spread: back to full duration and fresh, with
+no reaction. [USER]: "I think that on Swirl, we could allow it to refresh the
+duration without using it up. ... I feel like it makes sense to not want
+Swirl to self-trigger a bunch of reactions, but reapplying the same element
+as a refresh mechanic feels fine and we shouldn't let that brick other
+reactions."
+
 *Later, a separate candidate:* the spread reacts where it lands (a Hydro
 Swirl onto a Pyro-marked enemy Vaporizes there). It is left out because it is
 not bounded. A Pyro Swirl across three Electro-marked enemies makes three

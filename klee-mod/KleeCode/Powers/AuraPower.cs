@@ -115,6 +115,22 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         return spared;
     }
 
+    /// <summary>
+    /// A Swirl's spread reaching an enemy already wearing this element, fresh
+    /// or spent (<see cref="TriggerRules.SpreadOutcome.Refresh"/>; [USER],
+    /// 2026-10-01): full duration, FRESH again, no reaction. The duration is
+    /// what a fresh application would give (<see cref="AuraCmd.Duration"/>),
+    /// and the badge flashes so the player sees the refresh land. Sim twin:
+    /// <c>reactions._react</c>'s anemo branch.
+    /// </summary>
+    internal async Task RefreshFromSpread(
+        PlayerChoiceContext choiceContext, Creature? applier, CardModel? cardSource)
+    {
+        Spent = false;
+        await AuraCmd.Refresh(choiceContext, this, applier, cardSource);
+        Flash();
+    }
+
     /// <summary>The spent face while <see cref="Spent"/>; the ruled face
     /// otherwise, and always on a canonical copy (`IsMutable` first, the
     /// guard every selector in this mod carries).</summary>

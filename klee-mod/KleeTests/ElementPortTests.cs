@@ -141,13 +141,30 @@ public class ElementPortTests : IDisposable
     }
 
     [Fact]
-    public void The_spread_lands_on_every_enemy_lacking_the_element()
+    public void The_spread_refreshes_the_same_element_and_copies_onto_the_rest()
     {
-        // "every enemy that lacks it": a body wearing it already keeps its
-        // own; a body wearing another element has it replaced, as today.
-        Assert.False(TriggerRules.SpreadLands(Element.Pyro, Element.Pyro));
-        Assert.True(TriggerRules.SpreadLands(Element.Pyro, Element.Electro));
-        Assert.True(TriggerRules.SpreadLands(Element.Pyro, Element.None));
+        // Amended 2026-10-01 ([USER]): "reapplying the same element as a
+        // refresh mechanic feels fine and we shouldn't let that brick other
+        // reactions." A body wearing it already, fresh or spent, is
+        // refreshed; another element or none takes a spent copy, as today.
+        Assert.Equal(TriggerRules.SpreadOutcome.Refresh, TriggerRules.SpreadOn(Element.Pyro, Element.Pyro));
+        Assert.Equal(TriggerRules.SpreadOutcome.Copy, TriggerRules.SpreadOn(Element.Pyro, Element.Electro));
+        Assert.Equal(TriggerRules.SpreadOutcome.Copy, TriggerRules.SpreadOn(Element.Pyro, Element.None));
+    }
+
+    [Fact]
+    public void The_spread_refresh_makes_the_aura_fresh_at_full_duration_and_reacts_with_nothing()
+    {
+        // STRUCTURAL: the refresh clears Spent, resets the clock through the
+        // one duration funnel a fresh application uses, and flashes the badge.
+        // It resolves no reaction.
+        var refresh = Il.Calls(Il.Method("AuraPower", "RefreshFromSpread"));
+        Assert.Contains("AuraPower.set_Spent", refresh);
+        Assert.Contains("AuraCmd.Refresh", refresh);
+        Assert.DoesNotContain("ReactionEffects.Resolve", refresh);
+        Assert.Contains("AuraCmd.Duration", Il.Calls(Il.Method("AuraCmd", "Refresh")));
+        Assert.Contains("AuraPower.RefreshFromSpread",
+                        Il.Calls(Il.Method("ReactionEffects", "SwirlPays")));
     }
 
     // --- each switch alone (§6 pick 4.4), and both off --------------------
@@ -225,7 +242,7 @@ public class ElementPortTests : IDisposable
     {
         var swirl = Il.Calls(Il.Method("ReactionEffects", "SwirlPays"));
         Assert.Contains("CreatureCmd.Damage", swirl);
-        Assert.Contains("TriggerRules.SpreadLands", swirl);
+        Assert.Contains("TriggerRules.SpreadOn", swirl);
         // Element-less: not through either elemental door.
         Assert.DoesNotContain("ElementalHit.Deal", swirl);
         Assert.DoesNotContain("ElementalHit.ApplyOnly", swirl);

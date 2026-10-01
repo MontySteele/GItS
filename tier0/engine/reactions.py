@@ -199,13 +199,20 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
                 int(C.SWIRL_DAMAGE * _mc_reaction_mult(state)))
         elif C.SWIRL_PAYS:
             # §4 A. The struck enemy keeps its aura (spent by `resolve_hit`).
-            # The spread keeps today's reach -- every living enemy -- less the
-            # ones already wearing this element ("every enemy that lacks
-            # it"); a different aura is replaced, as today, and nothing
-            # reacts where a copy lands (the deferred candidate). Copies
-            # arrive SPENT, so they cannot be Swirled again.
+            # The spread keeps today's reach -- every living enemy. One
+            # already wearing this element, fresh or spent, goes back to full
+            # duration and FRESH, and nothing reacts (amended 2026-10-01,
+            # [USER]: "reapplying the same element as a refresh mechanic
+            # feels fine and we shouldn't let that brick other reactions").
+            # A different aura is replaced, as today, and nothing reacts
+            # where a copy lands (the deferred candidate). Copies arrive
+            # SPENT, so they cannot be Swirled again.
             for other in state.living_enemies:
-                if other is enemy or other.aura == aura:
+                if other is enemy:
+                    continue
+                if other.aura == aura:
+                    other.aura_turns_left = aura_duration(state)
+                    other.aura_spent = False
                     continue
                 apply_aura(state, other, aura, "swirl_spread")
                 other.aura_spent = True

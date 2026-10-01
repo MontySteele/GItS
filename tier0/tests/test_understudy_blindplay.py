@@ -6754,10 +6754,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  "at the start of this combat"],
         # `EB-377` ADDED `Swirl` to the page beside `Hexerei`, which R276
         # pick 2 retired with its tip.
-        "Swirl": ["On a fresh aura: copy it onto ALL enemies without it "
-                  "and deal ",
-                  " damage to ALL enemies. The aura and its copies stay "
-                  "spent."],
+        "Swirl": ["On a fresh aura: copy it onto ALL other enemies and deal ",
+                  " damage to ALL enemies. The aura and new copies stay "
+                  "spent; old ones refresh."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
         # Strike is written against by name, met by a seat holding neither.
         # `EB-516` moved the condition to the board and `EB-749` moved it on
@@ -7743,9 +7742,9 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
         # The element port (2026-09-28) moved both, in the C# and here.
-        "Swirl": ["copy it onto ALL enemies without it and deal ",
-                  " damage to ALL enemies. The aura and its copies stay "
-                  "spent."],
+        "Swirl": ["copy it onto ALL other enemies and deal ",
+                  " damage to ALL enemies. The aura and new copies stay "
+                  "spent; old ones refresh."],
         # `EB-613`: the price leads. Both copies moved in one commit, which
         # is what this pin is for.
         "Crystallize": [". The aura stays, spent."],
