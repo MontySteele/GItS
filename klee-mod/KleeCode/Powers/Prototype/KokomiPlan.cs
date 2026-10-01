@@ -764,9 +764,10 @@ public static class KokomiPlan
         Pending(kokomi?.Player).Sum(e => System.Math.Max(0, e.Paid));
 
     /// <summary>
-    /// ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans and regain their
-    /// cost. Your next Plan this turn is carried out once more for each Plan
-    /// cancelled." The refund is the Energy actually paid for each. A
+    /// ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans and take their
+    /// cards back. Your next Plan this turn is carried out once more for each
+    /// Plan cancelled." No Energy refund (main session, 2026-10-01: the cards
+    /// return, so a refund made re-writing the biggest Plan free). A
     /// CANCEL IS AN UNDO (main session, 2026-10-01): every cancelled Plan's
     /// card returns to the hand, an Exhaust card too (<see cref="GiveBack"/>).
     /// No loop: All Streams Exhausts, so the cards come back once per copy.
@@ -782,13 +783,9 @@ public static class KokomiPlan
         if (player == null) return;
         Rebase(kokomi);
         var cancelled = 0;
-        var refund = 0;
         if (_queues.TryGetValue(player, out var queue) && queue.Count > 0)
         {
             cancelled = queue.Count;
-            // Main session, 2026-09-29: "regain their cost" -- the Energy
-            // actually paid for each (Second Thoughts' refund).
-            refund = queue.Sum(e => System.Math.Max(0, e.Paid));
             var back = queue.ToList();
             queue.Clear();
             await Sync(choiceContext, kokomi, "rule:plans_cancelled",
@@ -798,7 +795,6 @@ public static class KokomiPlan
                 await GiveBack(player, entry.Returns);
             }
         }
-        if (refund > 0) await PlayerCmd.GainEnergy(refund, player);
         KokomiOverhaulLedger.For(kokomi).NextPlanExtra = cancelled;
     }
 

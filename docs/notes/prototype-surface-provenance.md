@@ -4623,8 +4623,10 @@ carried out, not when it is cancelled. Second Thoughts and All Streams Flow to
 the Sea both give back through `KokomiPlan.GiveBack` / `kokomi_plan._give_back`
 (discard, then exhaust, then draw pile); a Moon's Reflection Plan gives back
 Moon's Reflection, never the card it found. All Streams now reads "Cancel all
-your Plans, taking back their cards and cost. Your next Plan this turn is
-carried out once more for each." Loop
+your Plans and take their cards back. Your next Plan this turn is
+carried out once more for each." It no longer refunds Energy (main session,
+later 2026-10-01): with the cards returned, a refund made re-writing the
+biggest Plan free (Masterstroke carried out 4 times at no net Energy). Loop
 check: no loop, since both cancels Exhaust, so each copy returns cards once;
 All Streams is stronger (a full undo plus its gift). The retired Ebb Tide op
 still returns nothing. (2) A card Moon's Reflection replays at the morning (and

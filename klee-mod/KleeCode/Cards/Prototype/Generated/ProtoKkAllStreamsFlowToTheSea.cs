@@ -48,7 +48,7 @@ public sealed class ProtoKkAllStreamsFlowToTheSea : CustomCardModel, ICharacterC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "All Streams Flow to the Sea"),
-        ("description", "Cancel all your [gold]Plans[/gold], taking back their cards and cost. Your next [gold]Plan[/gold] this turn is carried out once more for each."),
+        ("description", "Cancel all your [gold]Plans[/gold], and take their cards back. Your next [gold]Plan[/gold] this turn is carried out once more for each."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

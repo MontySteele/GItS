@@ -2515,9 +2515,10 @@ def tidal_riposte(state: CombatState, enemy: Enemy, blocked: int,
 
 
 def all_streams(state: CombatState) -> None:
-    """ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans and regain their
-    cost. Your next Plan this turn is carried out once more for each Plan
-    cancelled." The refund is the Energy actually paid for each Plan. A
+    """ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans and take their
+    cards back. Your next Plan this turn is carried out once more for each Plan
+    cancelled." No Energy refund (main session, 2026-10-01: the cards return,
+    so a refund made re-writing the biggest Plan free). A
     CANCEL IS AN UNDO (main session, 2026-10-01): every cancelled Plan's card
     returns to the hand, an Exhaust card too (`_give_back`). No loop: All
     Streams Exhausts, so the cards come back once per copy. The gift waits on
@@ -2526,18 +2527,12 @@ def all_streams(state: CombatState) -> None:
     if not live(state):
         return
     n = len(state.kk_plan_queue)
-    # Main session, 2026-09-29: "regain their cost" -- the Energy actually
-    # paid for each, Second Thoughts' refund.
-    refund = sum(max(0, int(e.paid)) for e in state.kk_plan_queue)
     back = list(state.kk_plan_queue)
     state.kk_plan_queue.clear()
     for entry in back:
         _give_back(state, entry.card_id)
-    if refund:
-        state.player.energy += refund
-        state.emit("energy", amount=refund)
     state.kk_next_plan_extra = n
-    state.emit("plan_all_streams", cancelled=n, refund=refund)
+    state.emit("plan_all_streams", cancelled=n, refund=0)
 
 
 def kind(state: CombatState, fx: dict, card: Card, target) -> None:

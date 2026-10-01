@@ -204,8 +204,8 @@ public class KokomiExpansionTests : IDisposable
                         c => c.Contains("KokomiPlan.CancelAllForNext"));
         Assert.Contains(Seq("KokomiPlan", "CancelAllForNext"),
                         c => c.Contains("set_NextPlanExtra"));
-        Assert.Contains(Seq("KokomiPlan", "CancelAllForNext"),
-                        c => c.Contains("PlayerCmd.GainEnergy"));
+        Assert.DoesNotContain(Seq("KokomiPlan", "CancelAllForNext"),
+                              c => c.Contains("PlayerCmd.GainEnergy"));
         Assert.Equal(1, new ProtoKkAllStreamsFlowToTheSea().EnergyCost.Canonical);
         // The gift dies with the turn.
         KokomiOverhaulLedger.ResetAll();

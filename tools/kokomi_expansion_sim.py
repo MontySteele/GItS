@@ -706,7 +706,7 @@ def sec_cards(out, by, gb):
         f"cancelled per play {m(c for c, _ in cancelled) if cancelled else '-'}; "
         f"the Plan it multiplied was carried out "
         f"{m(t for _, t in cancelled) if cancelled else '-'} times on average; "
-        f"Energy regained per play {m(refunds) if refunds else '-'}; the Plans "
+        f"the Plans "
         f"it multiplied: "
         + ", ".join(f"{k[len(P):]} {v}" for k, v in sorted(
             __import__("collections").Counter(wrote).items(),
