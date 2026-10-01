@@ -2251,8 +2251,14 @@ def _intents(blob: Any) -> list[dict[str, Any]]:
 
 
 def _shop_items(state: dict[str, Any]) -> list[dict[str, Any]]:
-    return [i for i in _listing(state, "items", "shop.items")
-            if isinstance(i, dict)]
+    """The shelves. 2026-10-01 (Varka lane 1, act 3): a `?` room's fake
+    merchant sends them one level deeper, under `fake_merchant.shop.items`
+    (`BuildFakeMerchantState`), and the page read only `shop.items`, so it
+    printed no shelves and `buy` was refused with 364 gold in hand."""
+    rows = _listing(state, "items", "shop.items")
+    if not rows:
+        rows = _listing(_blob(state, "fake_merchant"), "items", "shop.items")
+    return [i for i in rows if isinstance(i, dict)]
 
 def _card_title(entry: dict[str, Any]) -> str:
     return _text(entry.get("name"))

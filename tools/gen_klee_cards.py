@@ -10487,14 +10487,37 @@ def mode_prices(card: dict) -> list[tuple[str, int] | None] | None:
 #: the predicate a format string over the op's `amount`. One entry, and it is
 #: the Stage's Spend.
 #:
-#: R276 pick 1: the rider needs the FULL price from the BACK performer, so the
-#: gate is "the back performer holds at least N". Still a rule gate and not a
+#: The Furina rules pass (2026-10-01): the stage pays, back performer first,
+#: so the gate is "the whole stage holds at least N". Still a rule gate and not a
 #: `MODE_PRICE_OPS` price, because the bar is a performer's and not a meter the
 #: cost badge can read. Sim twin: `furina_stage.mode_offered`.
 MODE_RULE_OPS = {
     "stage_spend": ("FurinaStage.CanSpend(Owner.Creature, {amount})",
                     "needs its full price from the back performer"),
 }
+
+
+def mode_spend_amounts(card: dict) -> list[str | None]:
+    """Per mode, the C# amount of a head-of-body Stage Spend, else None.
+
+    The Spend warning (review/records/furina-pool-round-2026-10-01.md, "What
+    to change" 2): a Spend mode's FACE carries
+    `ArmKeywordTips.ForSpendShortfall`, which names the guests this Spend
+    would leave unable to pay for their act. The amount is the gate's own.
+    """
+    eff = modal_effect(card)
+    if eff is None:
+        return []
+    out: list[str | None] = []
+    for mode in eff["modes"]:
+        body = mode.get("effects") or []
+        head = body[0] if body else {}
+        if head.get("op") == "stage_spend":
+            out.append(stage_spend_amount_cs(card, head)
+                       or str(int(head.get("amount", 1))))
+        else:
+            out.append(None)
+    return out
 
 
 def mode_requirements(card: dict) -> list[tuple[str, str] | None] | None:
@@ -15691,6 +15714,15 @@ def emit(
                 f"        : base({TYPE_CS[card['type']]})\n"
                 "    {\n    }"
                 if mode_requirements(card) is not None else "")
+            spend_amounts = mode_spend_amounts(card)
+            option_tips = (
+                "\n\n    /// <summary>The Spend warning: the guests this Spend"
+                " would leave\n    /// unable to pay for their act.</summary>\n"
+                "    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"
+                "        ArmKeywordTips.ForSpendShortfall(base.ExtraHoverTips, "
+                f"this, {spend_amounts[i]});"
+                if i < len(spend_amounts) and spend_amounts[i] is not None
+                else "")
             option_vars = (
                 "\n\n    protected override IEnumerable<DynamicVar> "
                 "CanonicalVars =>\n        new List<DynamicVar>\n        {\n"
@@ -15753,7 +15785,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     {{
         ("title", "{label}"),
         ("description", "{face}"),
-    }};{option_ctor}{option_vars}{option_upgrade_member}{face_price_member}
+    }};{option_ctor}{option_tips}{option_vars}{option_upgrade_member}{face_price_member}
 }}
 '''
 

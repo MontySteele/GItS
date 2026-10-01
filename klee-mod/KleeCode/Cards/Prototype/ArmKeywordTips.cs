@@ -105,6 +105,7 @@ public static class ArmKeywordTips
     // their keys left with them, and the front seat took a key of its own so
     // no stale loc title can survive under the old one.
     public const string SpendKey = "KLEEMOD-ARM_STAGE_SPEND";
+    public const string SpendShortKey = "KLEEMOD-ARM_STAGE_SPEND_SHORT";
     public const string FanfareKey = "KLEEMOD-ARM_STAGE_FANFARE";
     public const string BowKey = "KLEEMOD-ARM_STAGE_BOW";
     public const string FrontPerformerKey = "KLEEMOD-ARM_STAGE_FRONT";
@@ -900,6 +901,44 @@ public static class ArmKeywordTips
             // and the mode is refused only when the whole stage holds less.
             "Pay Fanfare from your [gold]back performer[/gold] first, then "
           + "forward. Offered only if your performers hold enough.");
+
+    /// <summary>
+    /// THE SPEND WARNING (review/records/furina-pool-round-2026-10-01.md,
+    /// "What to change" 2): on a Spend mode's face in the chooser, the guests
+    /// this Spend would leave unable to pay for their act. Without it a
+    /// Neuvillette, Clorinde or Chevreuse left short simply does nothing at
+    /// the end of the turn. No tip where nobody is left short.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForSpendShortfall(
+        IEnumerable<IHoverTip> inherited, CardModel card, int amount)
+    {
+        var names = StrandedNames(card, amount);
+        return names.Length == 0 ? inherited : With(inherited, SpendShortKey,
+            "After this Spend, " + names + " can't pay to act this turn.");
+    }
+
+    /// <summary>"Neuvillette", "Neuvillette and Clorinde", "A, B and C";
+    /// empty where the Spend strands nobody or the card has no owner yet. A
+    /// tip read must never throw.</summary>
+    private static string StrandedNames(CardModel card, int amount)
+    {
+        try
+        {
+            if (!card.IsMutable || card.Owner?.Creature is not { } owner)
+            {
+                return "";
+            }
+            var names = FurinaStage.StrandedBySpend(owner, amount)
+                .Select(FurinaStageLedger.DisplayName).ToList();
+            if (names.Count <= 1) return names.FirstOrDefault() ?? "";
+            return string.Join(", ", names.Take(names.Count - 1))
+                 + " and " + names[^1];
+        }
+        catch (System.Exception)
+        {
+            return "";
+        }
+    }
 
     /// <summary>
     /// Brief sec.2: "Fanfare is the performer's bar itself ... no counter

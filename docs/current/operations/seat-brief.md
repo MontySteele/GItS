@@ -73,7 +73,13 @@ blocked screen with no verb is still the stop above.
 
 `TOOL-BLOCKED: lane dead (<reason>)` is the same stop and is final: the lane's
 game has been torn down under you (`EB-691`), so no retry can succeed — write
-the record and stop, with the reason in it.
+the record and stop, with the reason in it. `NO ANSWER: the game is up but
+slow` is not a stop: nothing was sent, so `observe` again in a minute.
+
+Two commands are held once, with the reason printed: an `end turn` typed
+right after a refused command on an unchanged board, and a `proceed` (or
+`leave`) that would walk past gold, a potion or a relic still on a reward
+screen. Say it again to go ahead anyway.
 
 ### Your budget
 
