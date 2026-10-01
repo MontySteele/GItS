@@ -634,6 +634,12 @@ public static class KokomiPlan
     /// </summary>
     private static readonly Dictionary<Player, List<Entry>> _showing = new();
 
+    /// <summary>The players whose morning drain is running right now
+    /// (<see cref="ResolveAll"/>). Read by <see cref="Hit"/> alone: a dusk or
+    /// on-play carry-out is not followed by a turn-start tick in the same beat,
+    /// so only a morning hit spares its aura.</summary>
+    private static readonly HashSet<Player> _morning = new();
+
     /// <summary>This turn's carry-out lines, in the order they were said.
     /// Cleared at the top of every morning, so a page never shows yesterday's.
     /// </summary>
@@ -1299,12 +1305,17 @@ public static class KokomiPlan
         _showing[player] = new List<Entry>(due);
         await Sync(choiceContext, kokomi, "rule:morning_drain", due.Count);
 
+        // THE MORNING WINDOW (co-op playtest 2026-09-30): a Plan hit inside it
+        // spares its aura this turn start's tick (<see cref="Hit"/>). Per
+        // player, opened and closed around the drain and on every path.
+        _morning.Add(player);
         try
         {
             await Drain(choiceContext, kokomi, due);
         }
         finally
         {
+            _morning.Remove(player);
             // `EB-453`: WHAT THE FIGHT CUT OFF, recorded before the display
             // list that holds it is torn down. On the ordinary path this loop
             // is empty -- every Plan that resolved has already removed its own
@@ -1509,6 +1520,10 @@ public static class KokomiPlan
     internal static string NoFollowerLine(string card) =>
         card + ": no Plan followed";
 
+    /// <summary>Second Thoughts' bubble: which Plan it cancelled.</summary>
+    public static string CancelledLine(string card) =>
+        card + ": Plan cancelled";
+
     /// <summary>
     /// `EB-643` (R265), DUSK: "the Bake-Kurage carries this Plan out at the
     /// end of this turn, before enemies act."
@@ -1608,6 +1623,13 @@ public static class KokomiPlan
         int before = queue.Count;
         queue.RemoveAt(queue.Count - 1);
         await Sync(choiceContext, kokomi, "rule:plan_cancelled", before);
+        // THE JELLYFISH SAYS WHICH PLAN WENT (co-op playtest 2026-09-30). A
+        // guest wrote Riptide and Vanguard, played Second Thoughts, and read
+        // the next morning's 2 Energy as Vanguard's 1 going missing: the
+        // cancel took Vanguard, the newest, and because Vanguard Exhausts no
+        // card came back to say so. One bubble, the carry-out line's own shape.
+        Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi,
+                           CancelledLine(last.Title));
 
         var card = last.Source;
         var discard = CardPile.Get(PileType.Discard, player);
@@ -2823,6 +2845,16 @@ public static class KokomiPlan
                 var landed = await ElementalHit.Deal(
                     choiceContext, target, Element.Hydro, amount, kokomi,
                     powered: false);
+                // A MORNING HIT'S HYDRO IS WHOLE (co-op playtest 2026-09-30).
+                // The aura tick runs after this broadcast, so without the
+                // spare the Hydro just applied or refreshed reads 1 turn, not
+                // 2 -- one turn short of a card's, and short of the sim's,
+                // which ticks before the morning. See
+                // <see cref="AuraPower.SpareThisTurnStartTick"/>.
+                if (kokomi.Player is { } owner && _morning.Contains(owner))
+                {
+                    AuraPower.SpareThisTurnStartTick(target, Element.Hydro);
+                }
                 first ??= landed;
             }
         }

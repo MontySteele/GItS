@@ -1121,7 +1121,8 @@
     },
     "proto_kk_riptide": {
       "damage": 3,
-      "bonus_vs_debuff": 1
+      "bonus_vs_debuff": 1,
+      "plan_draw": 1
     },
     "proto_kk_salt_in_the_wound": {
       "kokomi_amount": 1

@@ -4583,3 +4583,11 @@ starter's own. Sim: tier0 already modelled the upgraded Fang
 Casket's opening count has no sim twin, and neither upgrade has a tier05
 Orobas row (curated in `tier0/tests/test_starter_relic_upgrades.py`) until the
 kits reach Balance.
+
+**Riptide's Plan draw (2026-09-30, ruled).** After the co-op playtest in which
+a guest played Kokomi, [USER]: "Riptide - buff the Draw from 1 to 2, and
+upgrades to 3; seems a bit weak at 2 energy". `proto_kk_riptide`'s Plan line
+is now "Gain 2 Energy and draw 2 cards", and the upgrade raises the draw to 3
+through the existing `plan_draw` key (the Plan line's first `draw` clause in
+both engines; the codegen emits it as the `PlanCards` var). The now-line's
+upgrade (14, 4 more on a debuffed enemy) and the Plan's 2 Energy do not move.

@@ -201,11 +201,15 @@ def test_the_moved_numbers(overhaul):
     rip = _row("proto_kk_riptide")
     assert (rip.effects[0]["amount"], rip.effects[0]["bonus_vs_debuff"]) == \
         (11, 3)
+    # [USER], co-op playtest 2026-09-30: "Riptide - buff the Draw from 1 to
+    # 2, and upgrades to 3".
     assert rip.plan == [{"op": "energy", "amount": 2},
-                        {"op": "draw", "amount": 1}]
+                        {"op": "draw", "amount": 2}]
     rip_up = _up("proto_kk_riptide")
     assert (rip_up.effects[0]["amount"],
             rip_up.effects[0]["bonus_vs_debuff"]) == (14, 4)
+    assert rip_up.plan == [{"op": "energy", "amount": 2},
+                           {"op": "draw", "amount": 3}]
 
 
 # --- G. the thirteen ------------------------------------------------------------

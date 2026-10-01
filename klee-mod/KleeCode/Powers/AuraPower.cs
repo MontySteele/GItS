@@ -81,6 +81,40 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// </summary>
     public bool Spent { get; set; }
 
+    /// <summary>
+    /// A PLAN'S MORNING AURA SKIPS THIS TURN'S TICK (co-op playtest
+    /// 2026-09-30: her Hydro "doesn't always seem to apply"). The Bake-Kurage
+    /// carries Plans out in <c>AfterPlayerTurnStart</c>, and the aura tick
+    /// below is <c>AfterSideTurnStart</c>, the LAST turn-start broadcast
+    /// (<c>test_reaction_phase_parity.TURN_START_BROADCAST_ORDER</c>). So a
+    /// Plan's Hydro landed at 2 turns and dropped to 1 in the same beat, a
+    /// turn short of the same hit from a card. The sim ticks auras BEFORE the
+    /// morning (`combat._player_turn`: `tick_auras`, then
+    /// `kokomi_plan.resolve_all`), so there the Plan's aura is whole. Set by
+    /// <see cref="SpareThisTurnStartTick"/>; spent by the one tick it spares.
+    /// </summary>
+    private bool _spareTurnStartTick;
+
+    /// <summary>Spare this aura the tick that ends the current turn start.
+    /// Called by <c>KokomiPlan.Hit</c> for the aura its morning hit applied or
+    /// refreshed, and by nothing else.</summary>
+    internal static void SpareThisTurnStartTick(Creature target, Element element)
+    {
+        if (AuraCmd.Find(target) is { } aura && aura.Element == element)
+        {
+            aura._spareTurnStartTick = true;
+        }
+    }
+
+    /// <summary>Read and clear the spare, once. The tick's own door, so the
+    /// headless suite can pin that the tick asks.</summary>
+    private bool TakeSparedTick()
+    {
+        var spared = _spareTurnStartTick;
+        _spareTurnStartTick = false;
+        return spared;
+    }
+
     /// <summary>The spent face while <see cref="Spent"/>; the ruled face
     /// otherwise, and always on a canonical copy (`IsMutable` first, the
     /// guard every selector in this mod carries).</summary>
@@ -403,6 +437,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     {
         if (side == CombatSide.Player)
         {
+            if (TakeSparedTick()) return;
             await PowerCmd.TickDownDuration(this);
         }
     }
