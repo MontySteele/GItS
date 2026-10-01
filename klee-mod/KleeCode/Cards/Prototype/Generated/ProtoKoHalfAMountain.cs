@@ -34,6 +34,9 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKoHalfAMountain : CustomCardModel
 {
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Exhaust };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 

@@ -183,7 +183,7 @@ public class KleeR276ExpansionTests
     }
 
     [Fact]
-    public void Half_a_mountain_doubles_the_largest_bomb_and_is_repeatable()
+    public void Half_a_mountain_doubles_the_largest_bomb_and_exhausts()
     {
         var (klee, a, _) = Board();
         var pile = ProtoBombs.Place(a, klee.Creature,
@@ -192,9 +192,11 @@ public class KleeR276ExpansionTests
         Assert.Equal(36, ProtoBombPower.MultiplyLargest(klee.Creature, 2));
         Assert.Equal(new[] { 5, 36 }, pile.Charges.Select(c => c.Size));
 
-        // No Exhaust; the upgrade buys Retain.
+        // Exhaust (Klee audit, 2026-10-01): one doubling per copy per combat,
+        // so copies no longer stack with The Big One and Boom Badge without
+        // end. The upgrade still buys Retain.
         var card = new ProtoKoHalfAMountain();
-        Assert.DoesNotContain(CardKeyword.Exhaust, card.CanonicalKeywords);
+        Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
         Assert.Contains(Il.Calls(Il.Method("ProtoKoHalfAMountain", "OnUpgrade")),
                         c => c.Contains("AddKeyword"));
         Assert.Contains("ProtoBombPower.MultiplyLargest", Play("ProtoKoHalfAMountain"));
