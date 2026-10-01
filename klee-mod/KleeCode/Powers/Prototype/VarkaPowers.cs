@@ -160,7 +160,127 @@ public static class OathBadge
         {
             badge.Refresh();
         }
+        await SyncLeft(choiceContext, varka, ledger);
     }
+
+    /// <summary>The left-element flag this ledger wants, or null. PURE.
+    /// </summary>
+    public static System.Type? WantedLeft(bool leftThisTurn, Element left,
+                                          Element current) =>
+        !leftThisTurn || left == current ? null : left switch
+        {
+            Element.Pyro => typeof(PyroOathLeftPower),
+            Element.Hydro => typeof(HydroOathLeftPower),
+            Element.Electro => typeof(ElectroOathLeftPower),
+            Element.Cryo => typeof(CryoOathLeftPower),
+            _ => null,
+        };
+
+    /// <summary>
+    /// ELEMENT IDENTITIES sec.7 (2026-10-01): "The Oath panel flashes the
+    /// old element's count when it stops being current." The element he
+    /// left this turn shows beside the badge as its own icon, its count his
+    /// Oath of it, applied loud (the game's apply flash) and gone at the end
+    /// of the turn, or the moment it is current again.
+    /// </summary>
+    private static async Task SyncLeft(PlayerChoiceContext choiceContext,
+                                       Creature varka, VarkaOathLedger ledger)
+    {
+        var wanted = WantedLeft(ledger.LeftThisTurn, ledger.LeftElement,
+                                ledger.Current);
+        foreach (var stale in varka.Powers.OfType<OathLeftPower>()
+                     .Where(b => b.GetType() != wanted).ToList())
+        {
+            await PowerCmd.Remove(stale);
+        }
+        if (wanted != null && !varka.Powers.Any(p => p.GetType() == wanted))
+        {
+            switch (ledger.LeftElement)
+            {
+                case Element.Pyro:
+                    await PowerCmd.Apply<PyroOathLeftPower>(choiceContext, varka, 1, varka, null);
+                    break;
+                case Element.Hydro:
+                    await PowerCmd.Apply<HydroOathLeftPower>(choiceContext, varka, 1, varka, null);
+                    break;
+                case Element.Electro:
+                    await PowerCmd.Apply<ElectroOathLeftPower>(choiceContext, varka, 1, varka, null);
+                    break;
+                case Element.Cryo:
+                    await PowerCmd.Apply<CryoOathLeftPower>(choiceContext, varka, 1, varka, null);
+                    break;
+            }
+        }
+        foreach (var left in varka.Powers.OfType<OathLeftPower>())
+        {
+            left.Refresh();
+        }
+    }
+}
+
+/// <summary>
+/// ELEMENT IDENTITIES sec.7: the element that stopped being current this
+/// turn, beside his badge, its count his Oath of it (kept, not read). Four
+/// rounds of seats lost an Oath without noticing (the Varka round,
+/// 2026-10-01); this is the flag. Placed and cleared by
+/// <see cref="OathBadge.Sync"/>; gone at the end of his turn.
+/// </summary>
+public abstract class OathLeftPower : PowerModel, ILocalizationProvider
+{
+    /// <summary>The element he left.</summary>
+    public abstract Element Element { get; }
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", $"{Element} Oath (left)"),
+        ("description",
+            $"Your [gold]current element[/gold] switched away from {Element} "
+          + $"this turn. Your {Element} [gold]Oath[/gold] is kept, but your "
+          + "cards read your [gold]current element[/gold]'s."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>His Oath of the element he left.</summary>
+    public override int DisplayAmount =>
+        !IsMutable || Owner == null ? Amount
+            : VarkaOathLedger.For(Owner).Oath(Element);
+
+    internal void Refresh()
+    {
+        if (!IsMutable || Owner == null) return;
+        InvokeDisplayAmountChanged();
+    }
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
+}
+
+public sealed class PyroOathLeftPower : OathLeftPower
+{
+    public override Element Element => Element.Pyro;
+}
+
+public sealed class HydroOathLeftPower : OathLeftPower
+{
+    public override Element Element => Element.Hydro;
+}
+
+public sealed class ElectroOathLeftPower : OathLeftPower
+{
+    public override Element Element => Element.Electro;
+}
+
+public sealed class CryoOathLeftPower : OathLeftPower
+{
+    public override Element Element => Element.Cryo;
 }
 
 /// <summary>
@@ -600,39 +720,108 @@ public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
     {
         ("title", "Wildfire Oath"),
         ("description",
-            "While your [gold]current element[/gold] is Pyro, your "
-          + "[gold]Swirls[/gold]' damage hits ALL enemies, plus "
-          + "[blue]{Amount}[/blue] for each Pyro [gold]Oath[/gold]."),
+            "While your [gold]current element[/gold] is Pyro, your first "
+          + "Attack each turn deals additional damage equal to your Pyro "
+          + "[gold]Oath[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>
+    /// ELEMENT IDENTITIES sec.5 (2026-10-01): one big hit. The turn's first
+    /// Attack is armed at the top of its play (<see cref="VarkaOath.BeginPlay"/>,
+    /// with every stack); its first powered hit on an enemy takes his Pyro
+    /// Oath per stack while Pyro is current as it lands. One hit: "multi-hit
+    /// cards do not multiply it". The sim's twin is
+    /// <c>varka_oath.take_wildfire</c>.
+    /// </summary>
+    public override decimal ModifyDamageAdditive(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (dealer != Owner || target == null || target == Owner) return 0m;
+        if (!props.IsPoweredAttack() || cardSource == null) return 0m;
+        if (!VarkaOath.Live(Owner)) return 0m;
+        var ledger = VarkaOathLedger.For(Owner);
+        if (!ReferenceEquals(ledger.WildfireCard, cardSource)) return 0m;
+        return VarkaOath.WildfireBonus(ledger.Current, ledger.Oath(Element.Pyro),
+                                       ledger.WildfireStacks);
+    }
+
+    /// <summary>The armed play's first hit spends the arm, paid or not (it
+    /// lands after <see cref="ModifyDamageAdditive"/> was asked).</summary>
+    public override Task BeforeDamageReceived(
+        PlayerChoiceContext choiceContext, Creature target, decimal amount,
+        ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+        if (dealer != Owner || cardSource == null || target == Owner
+            || !props.IsPoweredAttack() || !VarkaOath.Live(Owner))
+        {
+            return Task.CompletedTask;
+        }
+        var ledger = VarkaOathLedger.For(Owner);
+        if (ReferenceEquals(ledger.WildfireCard, cardSource))
+        {
+            if (VarkaOath.WildfireBonus(ledger.Current,
+                    ledger.Oath(Element.Pyro), ledger.WildfireStacks) > 0)
+            {
+                Flash();
+            }
+            ledger.WildfireCard = null;
+        }
+        return Task.CompletedTask;
+    }
 }
 
-/// <summary>Unbroken Tide: "While your current element is Hydro, your Block
-/// is not removed at the start of your turn." Barricade's hook, read when
-/// the clear is asked.</summary>
-public sealed class UnbrokenTidePower : PowerModel, ILocalizationProvider
+/// <summary>
+/// Retaliating Tide (element identities sec.4, in Unbroken Tide's place): "At
+/// the end of your turn, deal damage equal to your Block, up to your Hydro
+/// Oath, to a random enemy." After Oathbound Aegis (which pays at
+/// <c>BeforeSideTurnEndEarly</c>), so its Block counts; element-less and
+/// unpowered, a Power's damage, like Cycle of Seasons'; once per stack. The
+/// sim's twin is <c>varka_oath.turn_end</c>.
+/// </summary>
+public sealed class RetaliatingTidePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Unbroken Tide"),
+        ("title", "Retaliating Tide"),
         ("description",
-            "While your [gold]current element[/gold] is Hydro, your "
-          + "[gold]Block[/gold] is not removed at the start of your turn."),
+            "At the end of your turn, deal damage equal to your "
+          + "[gold]Block[/gold], up to your Hydro [gold]Oath[/gold], to a "
+          + "random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
-    public override PowerStackType StackType => PowerStackType.Single;
+    public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>Does the Tide keep this creature's Block? PURE on its
-    /// primitives.</summary>
-    public static bool Keeps(Element current) => current == Element.Hydro;
+    /// <summary>One stack's damage. PURE.</summary>
+    public static int DamageFor(int block, int hydroOath) =>
+        System.Math.Max(0, System.Math.Min(block, hydroOath));
 
-    public override bool ShouldClearBlock(Creature creature) =>
-        creature != Owner || !Keeps(VarkaOath.Current(Owner));
+    public override async Task BeforeSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player || !VarkaOath.Live(Owner)) return;
+        var player = Owner.Player;
+        var combat = Owner.CombatState;
+        if (player == null || combat == null) return;
+        for (var i = 0; i < Amount; i++)
+        {
+            var damage = DamageFor(Owner.Block,
+                                   VarkaOath.Count(Owner, Element.Hydro));
+            var living = combat.HittableEnemies.Where(e => e.IsAlive).ToList();
+            if (damage <= 0 || living.Count == 0) return;
+            Flash();
+            var target = player.RunState.Rng.CombatTargets.NextItem(living);
+            await ElementalHit.DealUnelemented(choiceContext, target, damage,
+                                               Owner, powered: false);
+        }
+    }
 }
 
 /// <summary>Absolute Zero: "While your current element is Cryo, your Swirls
@@ -729,7 +918,10 @@ public sealed class OathboundAegisPower : PowerModel, ILocalizationProvider
     public static int BlockFor(int totalOath, int cap) =>
         System.Math.Max(0, System.Math.Min(totalOath, cap));
 
-    public override async Task BeforeSideTurnEnd(
+    /// <summary>EARLY (element identities, 2026-10-01): ahead of Retaliating
+    /// Tide's <c>BeforeSideTurnEnd</c>, so the Tide reads this Block, the
+    /// order the sim's <c>varka_oath.turn_end</c> pays them in.</summary>
+    public override async Task BeforeSideTurnEndEarly(
         PlayerChoiceContext choiceContext, CombatSide side,
         IEnumerable<Creature> participants)
     {

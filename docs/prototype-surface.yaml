@@ -3090,12 +3090,15 @@
    effects: [{op: damage, amount: 4, target: enemy, times: 2}],
    upgrade: {damage: 1}}
 
-- {id: proto_vk_updraft, name: "Updraft", character: varka,
+# Varka element identities (review/active/varka-element-identities-2026-10-01.md
+# sec.3, ruled 2026-10-01): Charged Lunge replaces Updraft.
+- {id: proto_vk_charged_lunge, name: "Charged Lunge", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {Damage:diff()} damage.",
-   effects: [{op: damage, amount: 8, target: enemy}],
-   upgrade: {damage: 3}}
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage. Draw 1 card.",
+   effects: [{op: varka, kind: electro_strike, target: enemy, base: 6},
+             {op: draw, amount: 1}],
+   upgrade: {varka_base: 3}}
 
 - {id: proto_vk_gale_sweep, name: "Gale Sweep", character: varka,
    authored_by: [claude],
@@ -3360,12 +3363,17 @@
               amount_formula: {base: 0, per: 3, count: oath_elements}}],
    upgrade: {formula_per: 1}}
 
-- {id: proto_vk_unfurled_banner, name: "Unfurled Banner", character: varka,
+# Element identities (sec.3): Chain Lightning replaces Unfurled Banner.
+- {id: proto_vk_chain_lightning, name: "Chain Lightning", character: varka,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Put Four Winds' Ascension from your discard pile into your hand. It costs 0 this turn.",
-   effects: [{op: varka, kind: unfurled_banner}],
-   upgrade: {retain: true}}
+   # Eviscerate's discount, spelled the way Stomp's and Pinpoint's are: a
+   # card-level rate the cost line reads (`Card.cost_reduction_per_
+   # discard_this_turn`, C# `EnergyCost.AddThisTurn`).
+   cost: 2, type: attack, rarity: uncommon,
+   cost_reduction_per_discard_this_turn: 1,
+   description: "Costs 1 less for each card you discarded this turn. Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies.",
+   effects: [{op: varka, kind: electro_all, target: all_enemies, base: 8}],
+   upgrade: {varka_base: 3}}
 
 # --- Rare (8; 23 since the expansion) ---
 
@@ -3391,12 +3399,14 @@
              {op: varka, kind: swirl_fresh_auras}],
    upgrade: {block: 6}}
 
-- {id: proto_vk_four_winds_accord, name: "Four Winds' Accord", character: varka,
+# Element identities (sec.3, raised at the ruling to 8 [11] and an Attack):
+# Violet Storm replaces Four Winds' Accord. Storm of Steel's discard.
+- {id: proto_vk_violet_storm, name: "Violet Storm", character: varka,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Split your total [gold]Oath[/gold] evenly among the four elements, rounding down, then gain 1 of each.",
-   effects: [{op: varka, kind: accord}],
-   upgrade: {cost: -1}}
+   cost: 1, type: attack, rarity: rare,
+   description: "Discard your hand. Deal {VkBase:diff()} [gold]Electro[/gold] damage to a random enemy for each card discarded.",
+   effects: [{op: varka, kind: violet_storm, target: random_enemy, base: 8}],
+   upgrade: {varka_base: 3}}
 
 - {id: proto_vk_sworn_brotherhood, name: "Sworn Brotherhood", character: varka,
    authored_by: [claude],
@@ -3589,12 +3599,16 @@
              {op: apply_power, power: vk_eye_wall, amount: 3, target: self}],
    upgrade: {block: 2}}
 
-- {id: proto_vk_pressure_front, name: "Pressure Front", character: varka,
+# Element identities (sec.3): Short Circuit replaces Pressure Front. Silent's
+# Concentrate (discard 3 [2], gain 2 Energy) with an Electro rider.
+- {id: proto_vk_short_circuit, name: "Short Circuit", character: varka,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "Apply your [gold]current element[/gold] to ALL enemies.",
-   effects: [{op: varka, kind: apply_current_element_all, target: all_enemies}],
-   upgrade: {retain: true}}
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Discard {Discards:diff()} cards. Gain 2 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy.",
+   effects: [{op: discard, amount: 3, select: chosen},
+             {op: energy, amount: 2},
+             {op: apply_aura, element: electro, target: enemy}],
+   upgrade: {discard: -1}}
 
 - {id: proto_vk_crosscurrent, name: "Crosscurrent", character: varka,
    authored_by: [claude],
@@ -3621,16 +3635,18 @@
 
 - {id: proto_vk_wildfire_oath, name: "Wildfire Oath", character: varka,
    authored_by: [claude],
+   # Element identities (sec.5): re-aimed from the Swirl AoE to one big hit.
    cost: 2, type: power, rarity: rare,
-   description: "While your [gold]current element[/gold] is Pyro, your [gold]Swirls[/gold]' damage hits ALL enemies, plus 1 for each Pyro [gold]Oath[/gold].",
+   description: "While your [gold]current element[/gold] is Pyro, your first Attack each turn deals additional damage equal to your Pyro [gold]Oath[/gold].",
    effects: [{op: apply_power, power: vk_wildfire_oath, amount: 1, target: self}],
    upgrade: {innate: true}}
 
-- {id: proto_vk_unbroken_tide, name: "Unbroken Tide", character: varka,
+# Element identities (sec.4): Retaliating Tide replaces Unbroken Tide.
+- {id: proto_vk_retaliating_tide, name: "Retaliating Tide", character: varka,
    authored_by: [claude],
-   cost: 3, type: power, rarity: rare,
-   description: "While your [gold]current element[/gold] is Hydro, your [gold]Block[/gold] is not removed at the start of your turn.",
-   effects: [{op: apply_power, power: vk_unbroken_tide, amount: 1, target: self}],
+   cost: 2, type: power, rarity: rare,
+   description: "At the end of your turn, deal damage equal to your [gold]Block[/gold], up to your Hydro [gold]Oath[/gold], to a random enemy.",
+   effects: [{op: apply_power, power: vk_retaliating_tide, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
 - {id: proto_vk_absolute_zero, name: "Absolute Zero", character: varka,
@@ -3642,10 +3658,11 @@
 
 - {id: proto_vk_thundering_verdict, name: "Thundering Verdict", character: varka,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: rare,
-   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies, plus {VkPer:diff()} for each Electro [gold]Oath[/gold].",
-   effects: [{op: varka, kind: thundering_verdict, target: all_enemies, base: 8, per: 2}],
-   upgrade: {varka_base: 3}}
+   # Element identities (sec.3): re-aimed to X, Whirlwind's spend-it-all.
+   cost: X, type: attack, rarity: rare,
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies X times, plus {VkPer:diff()} for each Electro [gold]Oath[/gold] each time.",
+   effects: [{op: varka, kind: thundering_verdict, target: all_enemies, base: 6, per: 1}],
+   upgrade: {varka_base: 2}}
 
 - {id: proto_vk_oath_unto_death, name: "Oath Unto Death", character: varka,
    authored_by: [claude],

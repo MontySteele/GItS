@@ -49,7 +49,7 @@ public sealed class ProtoVkBarbaraWhisperOfWater : CustomCardModel, ICompanionCa
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this, Element.Hydro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_barbara_whisper_of_water");
 

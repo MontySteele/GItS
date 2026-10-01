@@ -57,6 +57,20 @@ READINGS TAKEN WHERE THE SPEC LEAVES ROOM (each also in the builder's report):
   * Gale Sweep and Wall of Gales shield their snapshot: an enemy a sweep's
     earlier Swirl spread over gets its own fresh aura back before its hit.
 
+ELEMENT IDENTITIES (review/active/varka-element-identities-2026-10-01.md,
+ruled 2026-10-01): Electro's discard-and-spend cards, Retaliating Tide, and
+Wildfire Oath's one big hit. What it adds here:
+  * KINDS `electro_strike` (Charged Lunge), `electro_all` (Chain Lightning),
+    `violet_storm` (discard the hand, one random Electro hit per card), and
+    Thundering Verdict at X (`state.current_x` hits of the whole row).
+  * WILDFIRE OATH: the turn's first Attack, if Pyro is current when it is
+    played, arms one bonus (`take_wildfire`), spent by that card's first
+    powered hit on an enemy: his Pyro Oath per stack, read at the hit.
+  * RETALIATING TIDE (`turn_end`, after Oathbound Aegis): min(Block, Hydro
+    Oath) to a random enemy per stack, element-less and unpowered.
+  * Accord, Unfurled Banner, `apply_current_element_all` (Pressure Front)
+    and Unbroken Tide's kept Block left with their cards.
+
 THE EXPANSION (review/active/varka-expansion-2026-10-01.md sec.3, ruled
 2026-10-01): 37 cards and the Knight pass. What it adds here:
   * NOELLE IS A GEO KNIGHT: a Knight for every Knight-played read (Muster,
@@ -64,8 +78,9 @@ THE EXPANSION (review/active/varka-expansion-2026-10-01.md sec.3, ruled
     she sets no current element and gains no Oath.
   * KNIGHTS THIS COMBAT (Charge of the Knights), the turn the current element
     last changed (Shifting Gale), Swirls this turn (Eye of Stormterror).
-  * THE SWIRL PAYOUT, per element (`_pay`): Wildfire Oath (Pyro) and Absolute
-    Zero (Cryo) widen theirs to ALL enemies; Twin Gales pays the element
+  * THE SWIRL PAYOUT, per element (`_pay`): Absolute Zero (Cryo) widens its
+    to ALL enemies (Wildfire Oath's Pyro widening left with element
+    identities); Twin Gales pays the element
     Swirled as well (once, when it is the current one); Crosscurrent's Swirl
     pays twice. Eye Wall and Eye of Stormterror read each Swirl.
   * UNWAVERING BANNER stops the open Oath's switch (a Knight's switch and a
@@ -122,7 +137,7 @@ CYCLE_OF_SEASONS = "vk_cycle_of_seasons"
 EYE_WALL = "vk_eye_wall"                    # this turn only
 ASSEMBLY = "vk_assembly_at_the_cathedral"
 WILDFIRE_OATH = "vk_wildfire_oath"
-UNBROKEN_TIDE = "vk_unbroken_tide"
+RETALIATING_TIDE = "vk_retaliating_tide"
 ABSOLUTE_ZERO = "vk_absolute_zero"
 OATH_UNTO_DEATH = "vk_oath_unto_death"
 WOLFPACK = "vk_wolfpack"
@@ -166,13 +181,13 @@ STARTER_BASE_IDS: tuple[str, ...] = (
 KINDS = frozenset({
     "apply_current_element", "gain_current_oath", "ascension_hit",
     "avatar_hit", "swirled_take_more", "swirl_fresh_auras",
-    "oath_per_cryo_enemy", "change_of_guard", "rally", "accord",
-    "unfurled_banner",
+    "oath_per_cryo_enemy", "change_of_guard", "rally",
     # THE EXPANSION (2026-10-01).
     "pathfinders_mark", "current_element_strike", "blazing_charge",
     "glacial_edict", "thundering_verdict", "awakening", "draw_per_enemy",
-    "cleanse", "apply_current_element_all", "crosscurrent",
-    "double_current_oath", "tempest",
+    "cleanse", "crosscurrent", "double_current_oath", "tempest",
+    # ELEMENT IDENTITIES (2026-10-01).
+    "electro_strike", "electro_all", "violet_storm",
 })
 KIND_FIELDS = {
     "ascension_hit": ("per",),
@@ -184,6 +199,9 @@ KIND_FIELDS = {
     "thundering_verdict": ("base", "per"),
     "awakening": ("base", "amount"),
     "tempest": ("base",),
+    "electro_strike": ("base",),
+    "electro_all": ("base",),
+    "violet_storm": ("base",),
 }
 #: The target each kind's row names (the codegen's `VARKA_AIMED_KINDS` less
 #: the two follow-up hits, and `VARKA_ALL_KINDS`); every other kind, none.
@@ -192,7 +210,8 @@ KIND_TARGETS = {
     "current_element_strike": "enemy", "blazing_charge": "enemy",
     "glacial_edict": "enemy", "crosscurrent": "enemy", "tempest": "enemy",
     "thundering_verdict": "all_enemies", "awakening": "all_enemies",
-    "apply_current_element_all": "all_enemies",
+    "electro_strike": "enemy", "electro_all": "all_enemies",
+    "violet_storm": "random_enemy",
 }
 #: `upgraded` is the `varka_upgraded` delta's mark (Pathfinder's Mark+).
 OP_FIELDS = frozenset({"op", "kind", "target", "per", "base", "amount",
@@ -238,6 +257,9 @@ class VarkaLedger:
     no_apply_credit: int = 0          # > 0 inside a hit that credits nothing
     landing: bool = False             # inside a Converging Winds spread
     stormward_in_bonus: int = 0       # Stormward's part of this play's bonus
+    # --- element identities (2026-10-01) ---
+    first_attack_turn: int = -1       # Wildfire: the turn an Attack began
+    wildfire_armed: int = 0           # > 0: this play's first hit takes it
     # --- the pilot's choices (None: the default reading) ---
     guard_choice: Optional[str] = None
     knight_choice: Optional[str] = None
@@ -446,6 +468,13 @@ def begin_play(state, card) -> None:
                target_pyro=bool(aim is not None and aim.aura == "pyro"))
     if card.id.rstrip("+") == DOWNBURST_ID:
         led.fresh_spread += 1
+    # WILDFIRE OATH (element identities): the turn's FIRST Attack arms the
+    # bonus when Pyro is current as it is played; a later Attack never does.
+    if card.type == "attack" and led.first_attack_turn != state.turn:
+        led.first_attack_turn = state.turn
+        stacks = _power(state.player, WILDFIRE_OATH)
+        if stacks and led.current == "pyro":
+            led.wildfire_armed = stacks
     if is_knight(card):
         led.knights_this_turn += 1
         led.knights_this_combat += 1
@@ -463,6 +492,7 @@ def end_play(state, card=None) -> None:
         return
     if card.id.rstrip("+") == DOWNBURST_ID and led.fresh_spread:
         led.fresh_spread -= 1
+    led.wildfire_armed = 0                          # unspent: gone with it
     p = state.player
     assembly = _power(p, ASSEMBLY)
     if assembly and is_knight(card) and state.living_enemies:
@@ -488,12 +518,20 @@ def spread_fresh(state) -> bool:
     return bool(led is not None and led.fresh_spread)
 
 
-def keeps_block(state) -> bool:
-    """`combat._player_turn`'s Block clear: Unbroken Tide keeps his Block
-    while his current element is Hydro."""
+def take_wildfire(state) -> int:
+    """`effects.deal_damage_to_enemy`, on a powered Attack hit: WILDFIRE
+    OATH's bonus, once. "While your current element is Pyro, your first
+    Attack each turn deals additional damage equal to your Pyro Oath" -- one
+    hit (sec.5: "multi-hit cards do not multiply it"), the Pyro Oath read as
+    the hit lands, per stack. 0 when nothing is armed."""
     led = ledger(state.player)
-    return bool(led is not None and led.current == "hydro"
-                and _power(state.player, UNBROKEN_TIDE))
+    if led is None or not led.wildfire_armed:
+        return 0
+    stacks, led.wildfire_armed = led.wildfire_armed, 0
+    bonus = stacks * led.oath["pyro"]
+    if bonus:
+        state.emit("varka_wildfire", amount=bonus)
+    return bonus
 
 
 def note_hit(state, enemy, element) -> None:
@@ -590,21 +628,15 @@ def on_swirl(state, enemy, aura: str) -> None:
 
 
 def _pay(state, enemy, element: str) -> None:
-    """One Swirl payout of `element` (sec.3), with the expansion's two
-    element Powers: Wildfire Oath widens Pyro's to ALL enemies, plus 1 per
-    Pyro Oath (per stack); Absolute Zero makes Cryo's Vulnerable and Weak to
-    ALL enemies. Each widens only while the CURRENT element is its own."""
+    """One Swirl payout of `element` (sec.3), with Absolute Zero: Cryo's
+    Vulnerable and Weak to ALL enemies while the CURRENT element is Cryo.
+    (Wildfire Oath widened Pyro's until element identities re-aimed it at
+    one big hit, `take_wildfire`.)"""
     from tier0.engine import effects, powers        # late: cycle
     led = ledger(state.player)
     p = state.player
     if element == "pyro":
-        wild = _power(p, WILDFIRE_OATH) if led.current == "pyro" else 0
-        if wild:
-            amount = SWIRL_PYRO_DAMAGE + wild * led.oath["pyro"]
-            for e in list(state.living_enemies):
-                effects.deal_damage_to_enemy(state, e, amount, element=None,
-                                             source="card", powered=False)
-        elif enemy.alive:
+        if enemy.alive:
             effects.deal_damage_to_enemy(state, enemy, SWIRL_PYRO_DAMAGE,
                                          element=None, source="card",
                                          powered=False)
@@ -735,6 +767,18 @@ def turn_end(state) -> None:
     cap = _power(state.player, OATHBOUND_AEGIS)
     if cap:
         _block(state, min(sum(led.oath.values()), cap), "oathbound_aegis")
+    # RETALIATING TIDE (element identities), after the Aegis so its Block
+    # counts: "deal damage equal to your Block, up to your Hydro Oath, to a
+    # random enemy". Element-less and unpowered (a Power's), once per stack.
+    from tier0.engine import effects                # late: cycle
+    for _ in range(_power(state.player, RETALIATING_TIDE)):
+        amount = min(state.player.block, led.oath["hydro"])
+        if amount <= 0 or not state.living_enemies:
+            break
+        e = state.rng.choice(list(state.living_enemies))
+        state.emit("varka_retaliating_tide", target=e.name, amount=amount)
+        effects.deal_damage_to_enemy(state, e, amount, element=None,
+                                     source="card", powered=False)
 
 
 # --------------------------------------------------------------------------
@@ -933,9 +977,33 @@ def _expansion_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
             powers.apply_power(state, aim, "weak", n, applier=p)
             powers.apply_power(state, aim, "vulnerable", n, applier=p)
     elif kind == "thundering_verdict":
+        # Element identities: X times (the Energy spent, `state.current_x`),
+        # each time to ALL. The Electro Oath is read once, before the hits.
         amount = fx["base"] + fx["per"] * led.oath["electro"]
+        for _ in range(int(state.current_x or 0)):
+            for e in list(state.living_enemies):
+                _card_hit(state, card, e, amount, "electro")
+    elif kind == "electro_strike":
+        # Charged Lunge: "Deal 6 Electro damage."
+        _card_hit(state, card, aim, fx["base"], "electro")
+    elif kind == "electro_all":
+        # Chain Lightning: "Deal 8 Electro damage to ALL enemies."
         for e in list(state.living_enemies):
-            _card_hit(state, card, e, amount, "electro")
+            _card_hit(state, card, e, fx["base"], "electro")
+    elif kind == "violet_storm":
+        # "Discard your hand. Deal 8 Electro damage to a random enemy for
+        # each card discarded." Storm of Steel's discard (the sheet's own
+        # `discard` op, `amount: hand_size`, so Sly and the turn's count see
+        # it), then one hit per card actually discarded.
+        before = state.discards_this_turn
+        effects._op_discard(state, {"op": "discard", "amount": "hand_size"},
+                            card)
+        for _ in range(state.discards_this_turn - before):
+            if not state.living_enemies:
+                break
+            _card_hit(state, card,
+                      state.rng.choice(list(state.living_enemies)),
+                      fx["base"], "electro")
     elif kind == "awakening":
         # Razor: "Enemies that already have Electro take 3 more" -- read
         # before the hits, fresh or spent.
@@ -952,11 +1020,6 @@ def _expansion_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
         for name in ("weak", "frail", "vulnerable"):
             if p.powers.pop(name, None):
                 state.emit("varka_cleanse", power=name)
-    elif kind == "apply_current_element_all":
-        if led.current is not None:
-            for e in list(state.living_enemies):
-                reactions.resolve_hit(state, e, led.current, 0,
-                                      "apply_aura_op")
     elif kind == "crosscurrent":
         if aim is not None:
             led.pays_twice += 1
@@ -1041,22 +1104,6 @@ def op_varka(state, fx: dict, card) -> None:
             led.oath = {el: 0 for el in ELEMENTS}
             led.oath[led.current] = total
             state.emit("varka_rally", element=led.current, total=total)
-    elif kind == "accord":
-        each = sum(led.oath.values()) // 4
-        led.oath = {el: each for el in ELEMENTS}
-        state.emit("varka_accord", each=each)
-        for el in ELEMENTS:
-            gain(state, el, 1, "accord")
-    elif kind == "unfurled_banner":
-        if len(p.hand) >= C.MAX_HAND_SIZE:
-            return
-        for i, c in enumerate(p.discard_pile):
-            if c.id.rstrip("+") == ASCENSION_ID:
-                p.discard_pile.pop(i)
-                c.free_this_turn = True
-                p.hand.append(c)
-                state.emit("varka_unfurled_banner", card=c.id)
-                return
     else:
         raise ValueError(f"card {card.id!r}: unknown varka kind {kind!r}")
 

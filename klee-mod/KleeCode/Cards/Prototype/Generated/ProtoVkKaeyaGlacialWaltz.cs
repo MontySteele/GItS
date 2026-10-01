@@ -49,7 +49,7 @@ public sealed class ProtoVkKaeyaGlacialWaltz : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true), this, Element.Cryo);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_kaeya_glacial_waltz");
 

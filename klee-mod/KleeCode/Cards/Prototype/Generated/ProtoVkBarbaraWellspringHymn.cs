@@ -49,7 +49,7 @@ public sealed class ProtoVkBarbaraWellspringHymn : CustomCardModel, ICompanionCa
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForFrail(BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this), this), this);
+        BaseKeywordTips.ForFrail(BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this, Element.Hydro), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_barbara_wellspring_hymn");
 

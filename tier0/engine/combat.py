@@ -385,6 +385,9 @@ def card_cost(state: CombatState, card: Card) -> int:
     if card.cost_reduction_per_skill_this_turn:
         cost = max(0, cost - (card.cost_reduction_per_skill_this_turn
                               * state.skills_played_this_turn))
+    if card.cost_reduction_per_discard_this_turn:
+        cost = max(0, cost - (card.cost_reduction_per_discard_this_turn
+                              * state.discards_this_turn))
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
     # QUARANTINED (C.KOKOMI_OVERHAUL). Rally: "the next Companion card you play
@@ -1001,10 +1004,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # GROW (rule 7). Jumps first, so a Bomb owed one grows on its new enemy
     # this turn rather than next.
     klee_overhaul.turn_start(state)
-    # VARKA's Unbroken Tide (the expansion): his Block stays while his
-    # current element is Hydro. Dead with the switch off.
-    if (refpowers.should_clear_block(p)      # Barricade suppresses the clear
-            and not (varka_oath.VARKA_OATH and varka_oath.keeps_block(state))):
+    # (VARKA's Unbroken Tide kept his Block here; it left with element
+    # identities, 2026-10-01, for Retaliating Tide.)
+    if refpowers.should_clear_block(p):      # Barricade suppresses the clear
         # QUARANTINED (C.KOKOMI_OVERHAUL). THE EXPANSION's Watatsumi's Grace:
         # "keep up to N of your Block" -- the clear takes what is above the
         # cap (the base game's Sturdy Clamp shape). None without the Power.

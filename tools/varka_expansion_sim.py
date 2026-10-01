@@ -82,18 +82,23 @@ KNIGHTS = {
     "electro": ["lisa_violet_arc", "razor_claw_and_thunder",
                 "lisa_pulsating_witch"],
 }
+# Element identities (review/active/varka-element-identities-2026-10-01.md,
+# 2026-10-01): Retaliating Tide is Hydro's Rare in Unbroken Tide's place, and
+# Electro's list gains the four discard-and-spend cards. Pressure Front left
+# GALE and Four Winds' Accord left SWITCH with their cards.
 PAYOFFS = {"pyro": ["blazing_charge", "wildfire_oath"],
-           "hydro": ["tidal_bulwark", "unbroken_tide"],
+           "hydro": ["tidal_bulwark", "retaliating_tide"],
            "cryo": ["glacial_edict", "absolute_zero"],
-           "electro": ["static_field", "thundering_verdict"]}
+           "electro": ["static_field", "thundering_verdict", "charged_lunge",
+                       "short_circuit", "chain_lightning", "violet_storm"]}
 GALE = ["gale_sweep", "crosswind", "rising_gale", "tempest_charge",
         "jean_dandelion_breeze", "storm_surge", "wall_of_gales",
-        "converging_winds", "west_wind_shield", "eye_wall", "pressure_front",
+        "converging_winds", "west_wind_shield", "eye_wall",
         "crosscurrent", "twin_gales", "downburst", "eye_of_stormterror"]
 SWITCH = ["shifting_gale", "cycle_of_seasons", "four_banners", "weathervane",
           "tempest_of_the_four_winds", "twin_gales", "oathbound_aegis",
           "change_of_guard", "boreas_unbound", "tailwind_guard",
-          "four_winds_accord", "rally_to_the_banner"]
+          "rally_to_the_banner"]
 MUSTER = ["knights_roll_call", "grand_masters_order", "knightly_strike",
           "assembly_at_the_cathedral", "charge_of_the_knights",
           "the_order_answers"]
@@ -180,10 +185,6 @@ def _translate(state, fx):
             yield {"op": "apply_aura", "element": el,
                    "target": "all_enemies" if fx.get("upgraded") else "enemy"}
             yield oath_proxy
-    elif kind == "apply_current_element_all":
-        if cur:
-            yield {"op": "apply_aura", "element": el, "target": "all_enemies"}
-            yield oath_proxy
     elif kind == "crosscurrent":
         fresh = any(e.aura and not getattr(e, "aura_spent", False)
                     for e in state.living_enemies)
@@ -210,8 +211,23 @@ def _translate(state, fx):
         yield {"op": "damage", "amount": base + per * oath["pyro"],
                "target": "enemy"}
     elif kind == "thundering_verdict":
+        # Element identities: X times (`_est` prices "X" as the bank).
         yield {"op": "damage", "amount": base + per * oath["electro"],
-               "target": "all_enemies"}
+               "target": "all_enemies", "times": "X"}
+    elif kind == "electro_strike":
+        yield {"op": "damage", "amount": base, "target": "enemy"}
+        yield oath_proxy
+    elif kind == "electro_all":
+        yield {"op": "damage", "amount": base, "target": "all_enemies"}
+        yield oath_proxy
+    elif kind == "violet_storm":
+        # One hit per OTHER card in hand (the card itself is in hand while
+        # it is priced); the discard itself is not priced (the stock scorer
+        # has no value for losing the hand).
+        n = max(0, len(state.player.hand) - 1)
+        if n:
+            yield {"op": "damage", "amount": base, "target": "random_enemy",
+                   "times": n}
     elif kind == "awakening":
         yield {"op": "damage", "amount": base, "target": "all_enemies"}
     elif kind == "tempest":
@@ -232,9 +248,9 @@ def _translate(state, fx):
     elif kind == "swirl_fresh_auras":
         yield {"op": "swirl", "target": "enemy"}
     elif kind in ("gain_current_oath", "double_current_oath", "rally",
-                  "accord", "unfurled_banner", "oath_per_cryo_enemy"):
+                  "oath_per_cryo_enemy"):
         # Oath is setup: priced as one self Power stack.
-        if cur or kind in ("rally", "accord"):
+        if cur or kind == "rally":
             yield {"op": "apply_power", "power": "vk_oath_proxy",
                    "amount": max(1, cur_oath if kind == "double_current_oath"
                                  else 1), "target": "self"}

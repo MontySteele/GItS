@@ -404,6 +404,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     # states its rate truthfully; what no face said is that a
                     # card can make the queue longer than the queue looks.
                     "KLEEMOD-ARM_PLAN_TWICE",
+                    # Varka, element identities sec.7 (2026-10-01): "this
+                    # card would switch your current element", a fact about
+                    # the card on the board, titling no keyword.
+                    "KLEEMOD-ARM_VARKA_ELEMENT_SWITCH",
                     # (`Encore` was the sixth until R276's hygiene: no card
                     # attached its tip, so the body and its key left.)
                     # (`KLEEMOD-ARM_STAGE_READER`, which bar a Stage

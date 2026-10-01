@@ -202,7 +202,6 @@ public class VarkaExpansionTests : IDisposable
     [InlineData("ProtoVkThunderingVerdict", "VarkaCards.ThunderingVerdict")]
     [InlineData("ProtoVkLisaPulsatingWitch", "VarkaCards.DrawPerEnemy")]
     [InlineData("ProtoVkBarbaraWellspringHymn", "VarkaCards.Cleanse")]
-    [InlineData("ProtoVkPressureFront", "VarkaCards.ApplyCurrentElementAll")]
     [InlineData("ProtoVkCrosscurrent", "VarkaCards.Crosscurrent")]
     [InlineData("ProtoVkGrandMastersVerdict", "VarkaCards.DoubleCurrentOath")]
     [InlineData("ProtoVkTempestOfTheFourWinds", "VarkaCards.Tempest")]
@@ -256,8 +255,6 @@ public class VarkaExpansionTests : IDisposable
     [Fact]
     public void The_payout_powers()
     {
-        Assert.Equal(7, VarkaOath.WildfireDamage(4, 1));
-        Assert.Equal(11, VarkaOath.WildfireDamage(4, 2));
         Assert.Equal(1, VarkaLaw.AbsoluteZeroWeak);
         Assert.Equal(3, VarkaLaw.EyeOfStormterrorSwirls);
         var swirl = Calls("VarkaOath", "OnSwirl");
@@ -297,21 +294,18 @@ public class VarkaExpansionTests : IDisposable
     }
 
     [Fact]
-    public void Aegis_caps_and_the_tide_keeps_hydro_block()
+    public void Aegis_caps_its_block()
     {
         Assert.Equal(15, OathboundAegisPower.BlockFor(18, 15));
         Assert.Equal(6, OathboundAegisPower.BlockFor(6, 15));
         Assert.Equal(0, OathboundAegisPower.BlockFor(0, 15));
-        Assert.True(UnbrokenTidePower.Keeps(Element.Hydro));
-        Assert.False(UnbrokenTidePower.Keeps(Element.Pyro));
-        Assert.False(UnbrokenTidePower.Keeps(Element.None));
     }
 
     [Fact]
     public void Downburst_alone_spreads_fresh()
     {
         Assert.True(VarkaRules.SpreadArrivesFresh(new ProtoVkDownburst()));
-        Assert.False(VarkaRules.SpreadArrivesFresh(new ProtoVkUpdraft()));
+        Assert.False(VarkaRules.SpreadArrivesFresh(new ProtoVkSquall()));
         Assert.False(VarkaRules.SpreadArrivesFresh(null));
         Assert.Contains("VarkaRules.SpreadArrivesFresh",
                         Calls("ReactionEffects", "SwirlPays"));
@@ -325,7 +319,7 @@ public class VarkaExpansionTests : IDisposable
             new StaticFieldPower(), new UnwaveringBannerPower(),
             new CycleOfSeasonsPower(), new EyeWallPower(),
             new AssemblyAtTheCathedralPower(), new WildfireOathPower(),
-            new UnbrokenTidePower(), new AbsoluteZeroPower(),
+            new RetaliatingTidePower(), new AbsoluteZeroPower(),
             new OathUntoDeathPower(), new WolfpackPower(),
             new OathboundAegisPower(), new WeathervanePower(),
             new TwinGalesPower(), new EyeOfStormterrorPower(),
@@ -343,8 +337,8 @@ public class VarkaExpansionTests : IDisposable
     [Fact]
     public void The_cost_and_innate_upgrades()
     {
-        Assert.Equal(3, new ProtoVkUnbrokenTide().EnergyCost.Canonical);
-        Assert.Equal(2, Upgraded<ProtoVkUnbrokenTide>().EnergyCost
+        Assert.Equal(2, new ProtoVkRetaliatingTide().EnergyCost.Canonical);
+        Assert.Equal(1, Upgraded<ProtoVkRetaliatingTide>().EnergyCost
             .GetWithModifiers(CostModifiers.None));
         Assert.Equal(2, new ProtoVkTheOrderAnswers().EnergyCost.Canonical);
         Assert.Equal(1, Upgraded<ProtoVkTheOrderAnswers>().EnergyCost
@@ -353,6 +347,5 @@ public class VarkaExpansionTests : IDisposable
         Assert.DoesNotContain(CardKeyword.Innate, new ProtoVkWildfireOath().Keywords);
         Assert.Contains(CardKeyword.Exhaust, new ProtoVkGrandMastersVerdict().Keywords);
         Assert.Contains(CardKeyword.Exhaust, new ProtoVkDawnPatrol().Keywords);
-        Assert.Contains(CardKeyword.Retain, Upgraded<ProtoVkPressureFront>().Keywords);
     }
 }

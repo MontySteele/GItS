@@ -88,9 +88,11 @@ EXPANSION_IDS = (
     "barbara_wellspring_hymn", "lisa_pulsating_witch",
     "noelle_steadfast_maid", "vow_of_the_blade", "unwavering_banner",
     "shifting_gale", "cycle_of_seasons", "four_banners", "eye_wall",
-    "pressure_front", "crosscurrent", "assembly_at_the_cathedral",
+    # Element identities (2026-10-01): Short Circuit and Retaliating Tide
+    # took Pressure Front's and Unbroken Tide's places.
+    "short_circuit", "crosscurrent", "assembly_at_the_cathedral",
     "dawn_patrol",
-    "wildfire_oath", "unbroken_tide", "absolute_zero", "thundering_verdict",
+    "wildfire_oath", "retaliating_tide", "absolute_zero", "thundering_verdict",
     "oath_unto_death", "grand_masters_verdict", "wolfpack",
     "oathbound_aegis", "weathervane", "tempest_of_the_four_winds",
     "twin_gales", "downburst", "eye_of_stormterror",
@@ -124,7 +126,7 @@ def test_the_paper_numbers_and_upgrades(varka):
     assert fx(_vk("razor_claw_and_thunder") + "+", "varka")["base"] == 6
     assert fx(_vk("glacial_edict") + "+", "varka")["amount"] == 3
     assert fx(_vk("pathfinders_mark") + "+", "varka")["upgraded"] is True
-    assert loader.get_card(_vk("unbroken_tide") + "+").cost == 2
+    assert loader.get_card(_vk("retaliating_tide") + "+").cost == 1
     assert loader.get_card(_vk("the_order_answers") + "+").cost == 1
     assert loader.get_card(_vk("wildfire_oath") + "+").innate is True
     assert loader.get_card(_vk("lisa_pulsating_witch") + "+").retain is True
@@ -277,11 +279,16 @@ def test_glacial_edict_stacks_every_four_cryo(varka):
     assert e.powers["weak"] == 3 and e.powers["vulnerable"] == 3
 
 
-def test_thundering_verdict_hits_all_reading_electro(varka):
+def test_thundering_verdict_hits_all_x_times_reading_electro(varka):
+    # Element identities: X cost; 6 + 1 per Electro Oath, read once.
     st = _state(n=2)
     _led(st).oath["electro"] = 2
-    _play(st, _vk("thundering_verdict"))
-    assert [e.hp for e in st.enemies] == [100 - 12] * 2
+    card = loader.get_card(_vk("thundering_verdict"))
+    st.player.hand.append(card)
+    st.player.energy = 2
+    combat.play_card(st, card)
+    assert st.player.energy == 0
+    assert [e.hp for e in st.enemies] == [100 - 2 * 8] * 2
     assert _led(st).oath["electro"] == 3             # one credit per card
 
 
@@ -355,28 +362,17 @@ def test_eye_wall_crosscurrent_and_eye_of_stormterror(varka):
     assert V.EYE_WALL not in p.powers
 
 
-def test_pressure_front_and_assembly(varka):
+def test_assembly(varka):
     st = _state(n=3)
-    _play(st, _vk("pressure_front"))
-    assert all(e.aura is None for e in st.enemies)    # no current element
-    _led(st).current = "pyro"
-    _play(st, _vk("pressure_front"))
-    assert all(e.aura == "pyro" for e in st.enemies)
     st.player.powers[V.ASSEMBLY] = 3
     before = sum(e.hp for e in st.enemies)
     _play(st, _vk("noelle_steadfast_maid"))
     assert before - sum(e.hp for e in st.enemies) == 3
 
 
-def test_wildfire_and_absolute_zero_widen_their_payout(varka):
-    st = _state(n=2, enemies=[_enemy(name="a", aura="hydro"),
-                              _enemy(name="b", aura="hydro")])
-    led = _led(st)
-    led.current, led.oath["pyro"] = "pyro", 4
-    st.player.powers[V.WILDFIRE_OATH] = 1
-    _play(st, _vk("jean_dandelion_breeze"))
-    # The flat 2 to both, then 3 + 4 Pyro Oath to ALL.
-    assert [e.hp for e in st.enemies] == [100 - 2 - 7] * 2
+def test_absolute_zero_widens_its_payout(varka):
+    # (Wildfire Oath widened Pyro's payout until element identities re-aimed
+    # it: tier0/tests/test_varka_element_identities.py.)
     st = _state(enemies=[_enemy(name="a", aura="hydro"), _enemy(name="b")])
     led = _led(st)
     led.current = "cryo"
@@ -394,15 +390,6 @@ def test_twin_gales_pays_the_swirled_element_too(varka):
     _play(st, _vk("jean_dandelion_breeze"))
     assert st.player.block == 7 + 3                   # Hydro paid
     assert st.enemies[0].hp == 100 - 2 - 3           # and Pyro paid
-
-
-def test_unbroken_tide_keeps_block_on_hydro(varka):
-    st = _state()
-    st.player.powers[V.UNBROKEN_TIDE] = 1
-    _led(st).current = "hydro"
-    assert V.keeps_block(st)
-    _led(st).current = "pyro"
-    assert not V.keeps_block(st)
 
 
 def test_oath_unto_death_and_grand_masters_verdict(varka):
@@ -463,7 +450,7 @@ def test_downburst_spreads_fresh_copies(varka):
     b = st.enemies[1]
     assert b.aura == "pyro" and not b.aura_spent
     st = _state(enemies=[_enemy(name="a", aura="pyro"), _enemy(name="b")])
-    _play(st, _vk("updraft"))
+    _play(st, _vk("favonius_cut"))
     assert st.enemies[1].aura_spent
 
 

@@ -34,17 +34,19 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoVkTempestOfTheFourWinds : CustomCardModel, IElementalCard, ICharacterCard
 {
-    /// <summary>Sheet: all Varka attacks apply Anemo (catalyst-grade cadence).</summary>
-    public Element Element => Element.Anemo;
+    /// <summary>Its hits carry their own element (a `varka` kind),
+    /// not the cadence's Anemo; declared rather than omitted, which
+    /// would ask the character (<see cref="CatalystCadence.PrintedElement"/>).</summary>
+    public Element Element => Element.None;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesAnemo };
+        new[] { KleeKeywords.AppliesPyro, KleeKeywords.AppliesHydro, KleeKeywords.AppliesCryo, KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
+        ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Electro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_tempest_of_the_four_winds");
 

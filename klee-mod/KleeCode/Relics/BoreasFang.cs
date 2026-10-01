@@ -105,7 +105,7 @@ public class BoreasFang : CustomRelicModel
         Flash();
         await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, player);
         // Wolf's Gravestone: "It costs 0 this turn." Set once the card is in
-        // play, the Unfurled Banner's order (VarkaOath.UnfurledBanner).
+        // play.
         if (AscensionUpgraded) card.EnergyCost.SetThisTurn(0);
     }
 

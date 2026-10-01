@@ -189,8 +189,23 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   a Geo Knight that keeps his element, Downburst's fresh spread (pick 3a).
   The pool is 78 (20 / 35 / 23), thirteen pool Knights. Readings:
   provenance note, "Varka expansion, 2026-10-01". His seven relics and three
-  potions (sec.4) are built too (#787). Next: the sec.5 paired sim, then two
-  Sonnet seats.
+  potions (sec.4) are built too (#787). The sec.5 paired sim (#789) and two
+  Sonnet seats (`review/records/varka-expansion-round-2026-10-01.md`) ran.
+  **Element identities (2026-10-01, ruled):** paper
+  `review/active/varka-element-identities-2026-10-01.md`, [USER]: "Overall
+  looks reasonable, though Violet Storm looks undertuned" (raised to 8 [11],
+  an Attack). Built in both engines: Electro draws and hits low, discards
+  into Energy in the middle and spends at Rare (Charged Lunge, Short Circuit,
+  Chain Lightning, Thundering Verdict at X, Violet Storm, in place of
+  Updraft, Pressure Front, Unfurled Banner and Four Winds' Accord);
+  Retaliating Tide replaces Unbroken Tide; Wildfire Oath is one big hit; a
+  card that would switch his element says so on hover, and the element he
+  left shows beside his badge for the turn. Pool still 78 (20 / 35 / 23).
+  The sim: Electro mono still 21.7 behind the default drafter in act 1, and
+  the stock pilot never sequences a discard into Short Circuit's Energy or
+  Chain Lightning's discount, so the sim does not read Electro's middle.
+  Readings and the tables: provenance note, "Varka element identities,
+  2026-10-01".
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults
