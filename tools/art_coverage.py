@@ -143,6 +143,24 @@ KNOWN_STALE = {
     "proto_fs_eternal_applause": (
         "The Furina fade pass (2026-09-29) CUT this row from her pool (three rows cut, 75 -> 72; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a furina/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_kk_rally": (
+        "The Kokomi status batch (2026-10-01, #801) CUT this row from her pool (seven rows cut, six added; review/active/kokomi-status-batch-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_pearl_diver": (
+        "The Kokomi status batch (2026-10-01, #801) CUT this row from her pool (seven rows cut, six added; review/active/kokomi-status-batch-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_battle_plan": (
+        "The Kokomi status batch (2026-10-01, #801) CUT this row from her pool (seven rows cut, six added; review/active/kokomi-status-batch-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_feigned_retreat": (
+        "The Kokomi status batch (2026-10-01, #801) CUT this row from her pool (seven rows cut, six added; review/active/kokomi-status-batch-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_moon_signal": (
+        "The Kokomi status batch (2026-10-01, #801) CUT this row from her pool (seven rows cut, six added; review/active/kokomi-status-batch-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_chain_of_command": (
+        "The Kokomi status batch (2026-10-01, #801) CUT this row from her pool (seven rows cut, six added; review/active/kokomi-status-batch-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_exposed_flank": (
         "The Kokomi feed pass (2026-09-29) CUT this row from her pool (one row cut, five added; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
