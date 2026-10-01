@@ -55,6 +55,10 @@ import pytest
 from tier0.content import loader
 from understudy import adapter, policy_v1
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 #: The three offers, verbatim from the soak's `defect` record `state_dump`.
 #: `EB-749` re-pointed the first offer off the cut Fwoosh! and onto Pocket
 #: Match, which is the same Spark-priced Set off shape at 5 with Retain.

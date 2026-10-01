@@ -186,7 +186,10 @@ SPARK_ATTACK_POWER_PRICE = 3
 # (the slice packet sec.5: "C# first, per the ruled process"), so tier0
 # registers the new ops and refuses to resolve them rather than guessing at a
 # second implementation of an unplayed rule.
-KLEE_OVERHAUL = False
+# ON BY DEFAULT since 2026-10-01 (legacy cleanup stage 3,
+# `review/active/legacy-cleanup-2026-10-01.md`, pick 5): the sim runs the
+# current kits, as every C# build does. False reads the shipped world.
+KLEE_OVERHAUL = True
 
 # THE FOUR NUMBERS THE RULES CARRY, and they are the brief's placeholders, not
 # claims (slice packet sec.1: "No number in it is a claim"). They are named here
@@ -496,7 +499,10 @@ KLEE_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
 # THE C# TWIN is `KleeMod.Powers.CompanionOverhaul.Enabled`, compiled only
 # under `-p:PrototypeCards=true` and defaulted from the `COMPANION_OVERHAUL`
 # compile constant (`-p:CompanionOverhaul=true`).
-COMPANION_OVERHAUL = False
+# ON BY DEFAULT since 2026-10-01 (legacy cleanup stage 3,
+# `review/active/legacy-cleanup-2026-10-01.md`, pick 5): the sim runs the
+# current kits, as every C# build does. False reads the shipped world.
+COMPANION_OVERHAUL = True
 
 # THE NUMBERS THE REWRITTEN POWERS CARRY. Every one is lifted verbatim off the
 # workshop's own printed text (sec.3, re-priced in its sec.8) -- nothing here
@@ -833,7 +839,10 @@ CVN_YUEGUI_BOMB_SIZE = 3        # Yaoyao: the Bomb Yuegui throws
 # brought up for slice one"), so tier0 registers the new ops and refuses to
 # resolve them rather than guessing at a second implementation of an unplayed
 # rule -- exactly the arrangement `KLEE_OVERHAUL` makes.
-KOKOMI_OVERHAUL = False
+# ON BY DEFAULT since 2026-10-01 (legacy cleanup stage 3,
+# `review/active/legacy-cleanup-2026-10-01.md`, pick 5): the sim runs the
+# current kits, as every C# build does. False reads the shipped world.
+KOKOMI_OVERHAUL = True
 
 # THE NUMBER THE RULES CARRY, and it is one. Draft 6's rules are structural --
 # where a card lands and when -- so almost every figure is a CARD's and stays

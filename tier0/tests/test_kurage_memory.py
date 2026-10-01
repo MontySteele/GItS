@@ -34,6 +34,10 @@ from tier0.engine.state import Card, CombatState, KurageMemory
 from tier0.pilot.policy import make_pilot
 from tier0.tests.conftest import make_enemy
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 NULL_PILOT = lambda s: None
 
 # The two starter Companions the whole file leans on, and why each:

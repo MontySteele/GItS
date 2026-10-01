@@ -6,6 +6,7 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier0.harness import metrics
 from tier0.harness.runner import run_battery, score_character
+from tier0.tests.shipped_world import RETIRED_CALIBRATION
 
 # Canonical scorecard parameters. These used to be load-bearing: the per-deck
 # A2 band gate was noise-marginal at low fight counts (3.59 vs 3.36 canonical)
@@ -27,6 +28,7 @@ def test_boom_rework_is_amp_nuke():
     assert boom.effects[1]["then"][0]["op"] == "repeat_this"
 
 
+@RETIRED_CALIBRATION
 @pytest.mark.battery
 def test_reaction_solo_floors():
     # Ruling: co-op-primary archetype, accepted solo floors.

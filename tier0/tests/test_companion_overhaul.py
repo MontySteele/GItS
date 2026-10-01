@@ -34,6 +34,12 @@ from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
 from tier05 import rewards
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+from tier0.tests.shipped_world import DEFAULTS  # noqa: E402
+
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 REPO = Path(__file__).resolve().parents[2]
 
 #: The seventeen rows the workshop retires from the offerable pool. Read off
@@ -77,8 +83,10 @@ def _pool_ids(pool):
 # THE FLAG IS OFF, AND THAT IS THE ACCEPTANCE CONDITION
 # ---------------------------------------------------------------------------
 
-def test_the_flag_ships_off():
-    assert C.COMPANION_OVERHAUL is False
+def test_the_flag_ships_on():
+    """The sim runs the current kits by default (legacy cleanup stage 3,
+    2026-10-01, pick 5), as every C# build does."""
+    assert DEFAULTS["COMPANION_OVERHAUL"] is True
 
 
 def test_flag_off_the_seam_returns_none():

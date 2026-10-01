@@ -19,6 +19,10 @@ from tier0.content import loader
 from tier0.engine import combat, furina_stage
 from tier0.engine.state import CombatState, Enemy, Player
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 FS = furina_stage
 
 

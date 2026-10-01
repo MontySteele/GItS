@@ -27,8 +27,9 @@ The old shipped kits (`Klee.cs`, `Kokomi.cs` and `Furina.cs` starters,
 `-p:ShippedKits=true`, for the C# suite's second gate, until their code is
 deleted. **`+proto` now marks only a build that differs from the release**:
 `deploy_proto.ps1 -TeyvatFrame`, and the Teyvat frame is on hold (below). The
-tier0 sim still runs the shipped kits (its arm flags stay off; calibration
-bands are measured there). **Last release package: `0.2.1357`**
+tier0 sim runs the current kits too (2026-10-01, legacy cleanup stage 3: its
+four kit arms default on); its calibration bands, measured on the shipped
+kits, are retired until a kit reaches Balance (legacy cleanup pick 5). **Last release package: `0.2.1357`**
 (2026-08-29), which predates the ruling and carries the old kits.
 
 ## Roster
@@ -258,8 +259,8 @@ Block and keeps the aura. The badge and the reaction preview say when an aura
 is spent, and every reaction reports one event (reaction, target, dealer,
 source kind). Two switches, on in every build: `-p:SwirlPays=false` and
 `-p:CrystallizeKeepsAura=false` (`klee-mod/KleeCode/Elements/TriggerRules.cs`);
-the sim twins `C.SWIRL_PAYS` / `C.CRYSTALLIZE_KEEPS_AURA` stay off, like the
-arms. Next: agent retests with each switch alone (§6 pick 4.4), then phase
+the sim twins `C.SWIRL_PAYS` / `C.CRYSTALLIZE_KEEPS_AURA` stay off until each
+switch's retest. Next: agent retests with each switch alone (§6 pick 4.4), then phase
 two (Burning and Dendro, `BACKLOG.md`).
 
 All three prototypes start with no companion card. Whether each starts with
@@ -281,7 +282,9 @@ elemental shields goes to [USER] before any build.
 ## Live cell
 
 Measurement law binds only at Balance; nothing is there today, so
-`EXPERIMENTS.md` is dormant. Stamps read live via `tier05/cells.py`
+`EXPERIMENTS.md` is dormant. The stamps below describe the shipped world and
+the calibration bands are retired until Balance (2026-10-01, legacy cleanup
+pick 5). Stamps read live via `tier05/cells.py`
 (`PILOT_WEIGHTS_VERSION` 6).
 
 | stamp | value | source | what this value covers |

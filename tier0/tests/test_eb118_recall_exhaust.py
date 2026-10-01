@@ -31,6 +31,10 @@ from tier0.engine.state import Card, CombatState
 from tier0.tests.conftest import make_enemy
 from tier05 import draft
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 REPO = Path(loader.__file__).resolve().parents[2]
 
 RECALL = {"op": "recall_to_draw", "from": "exhaust", "amount": 1}

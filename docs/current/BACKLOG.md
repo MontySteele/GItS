@@ -109,7 +109,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Sim and measurement (Balance stage; nothing here runs on a prototype)
 
-- `EB-195` the next re-baseline window: one twelve-arm table carrying the HP moves, the `POLICY_VERSION` bump for `PILOT_BURST_DIVISOR`'s removal, `EB-255` and `EB-810`.
+- `EB-195` (waits for a kit at Balance, legacy cleanup pick 5; on the current kits) the next re-baseline window: one twelve-arm table carrying the HP moves, the `POLICY_VERSION` bump for `PILOT_BURST_DIVISOR`'s removal, `EB-255` and `EB-810`.
 - `EB-255` `archetype_shares` excludes starters by rarity, so 13 starter rows read back as drafts; exclude by membership inside `EB-195`'s bump.
 - `EB-810` the sim's act-2 Louse has no Curl Up 14; wire it inside `EB-195`'s bump.
 - `EB-241` `Card.is_junk` is rarity-only; make it type- and namespace-aware at the Kokomi fold, with that fold's re-baseline.

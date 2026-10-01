@@ -2,7 +2,11 @@
 
 `tier0/tests` + `tier05/tests` is not a unit suite; it is the repo's gate wall
 (engine pins, sheet/content lints, C#-parity, art checks, encoding/convention
-lints, frozen-battery calibration bands, understudy contracts).
+lints, understudy contracts). The frozen-battery calibration bands are
+retired until a kit reaches Balance (2026-10-01, legacy cleanup pick 5): they
+skip, marked `RETIRED_CALIBRATION` (`tier0/tests/shipped_world.py`). The sim's
+defaults are the current kits; a pin about a shipped kit names the shipped
+world with the `shipped_world` fixture.
 
 ```sh
 python3 -m pytest tier0/tests tier05/tests -q          # what CI runs

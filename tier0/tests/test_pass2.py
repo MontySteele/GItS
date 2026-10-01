@@ -10,6 +10,10 @@ from tier0.harness.runner import run_battery, score_config
 from tier0.pilot.policy import make_pilot
 from tier0.tests.conftest import make_state
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 FIGHTS = 100
 SEED = 11
 

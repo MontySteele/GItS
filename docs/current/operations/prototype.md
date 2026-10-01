@@ -33,13 +33,18 @@ dotnet build klee-mod/KleeCode -p:FurinaStage=false          # one arm off
 The switch is the MSBuild property `PrototypeCards`, which defines the
 `PROTOTYPE_CARDS` compile constant (`klee-mod/KleeCode/KleeCode.csproj`,
 mirrored for the headless tests in `klee-mod/KleeTests/KleeTests.csproj`), on
-by default since the ruling. **The tier0 sim still runs the SHIPPED kits:** its
-twins (`C.KLEE_OVERHAUL`, `C.COMPANION_OVERHAUL`, `C.KOKOMI_OVERHAUL`,
-`tier0/engine/furina_stage.FURINA_STAGE`) stay `False`, because the
-calibration bands are measured on the shipped world. The sim's job before
-Balance is degenerate-loop and dead-card detection off the sheet draft, which
-needs no engine mirror; a two-engine build before the rule is settled is a tax
-on the stage that wants taste, not numbers.
+by default since the ruling. **The tier0 sim runs the CURRENT kits too**
+(2026-10-01, legacy cleanup stage 3, `review/active/legacy-cleanup-2026-10-01.md`):
+its twins (`C.KLEE_OVERHAUL`, `C.COMPANION_OVERHAUL`, `C.KOKOMI_OVERHAUL`,
+`tier0/engine/furina_stage.FURINA_STAGE`) default `True`. Setting them `False`
+reads the shipped world, and a test that pins a shipped rule says so with the
+`shipped_world` fixture (`tier0/tests/shipped_world.py`). The calibration bands
+were measured on the shipped world and are retired until a kit reaches Balance
+(pick 5); they skip, and are re-measured on the current kits then. The sim's
+job before Balance is degenerate-loop and dead-card detection off the sheet
+draft; a two-engine build before the rule is settled is a tax on the stage
+that wants taste, not numbers. The flags and the shipped paths go in stages 5
+and 6.
 
 ```sh
 .venv/Scripts/python tools/gen_prototype_cards.py           # emit the C#

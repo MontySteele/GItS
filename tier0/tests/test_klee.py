@@ -9,6 +9,10 @@ from tier0.content import loader
 from tier0.harness import metrics
 from tier0.harness.runner import run_battery
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 FIGHTS = 100
 SEED = 11
 

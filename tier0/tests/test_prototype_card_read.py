@@ -16,6 +16,10 @@ from tier0.content import loader
 from tier05 import rewards
 from tools import prototype_card_read as pcr
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 
 def test_the_flag_is_restored_and_the_caches_cleared():
     assert C.KOKOMI_OVERHAUL is False

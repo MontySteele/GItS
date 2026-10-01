@@ -26,6 +26,11 @@ from tier0.harness.runner import run_battery
 from tier0.pilot.policy import make_pilot
 
 from .conftest import make_enemy, make_state
+import pytest
+
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
 
 # A reaction-heavy arm: Klee's reaction package is the only battery config that
 # reliably lights every branch of the D1 decomposition.

@@ -43,9 +43,10 @@ from __future__ import annotations
 CHARACTER = "furina"
 
 # ----------------------------------------------------------------------
-# THE FLAG. OFF. It may not default True without a ruling.
+# THE FLAG. ON since 2026-10-01 (legacy cleanup stage 3, pick 5: the sim runs
+# the current kits). Set False to read the shipped Salon world.
 # ----------------------------------------------------------------------
-FURINA_STAGE = False
+FURINA_STAGE = True
 
 # ----------------------------------------------------------------------
 # THE NUMBERS. Brief sec.3 and sec.10 default 3: "Opening Fanfare 3, regen 1

@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from tier0.engine.state import CombatState, Enemy, Player
+from tier0.tests.shipped_world import shipped_world  # noqa: F401  (a fixture)
 
 # --- THE GIT ENVIRONMENT IS SCRUBBED BEFORE ANY TEST RUNS ------------------
 # WHAT HAPPENED, 2026-09-02. Five files in this directory build throwaway git
@@ -97,45 +98,35 @@ def _fresh_blindplay_deck(tmp_path_factory):
     faces._DECK_STORE_DIR = held
 
 
-# --- THE ARMS ARE OFF AT EVERY TEST'S START, AND IT NAMES WHO LEFT ONE ON ---
-# `EB-569`. Two tests -- `test_the_overhaul_ids_do_not_resolve_with_the_flag_off`
-# and `test_no_prototype_row_is_upgradable_with_the_flags_off` -- assert the
-# quarantine's own door is shut, and both passed alone and failed about one run
-# in three under `-n auto`. Each failure was a NEIGHBOUR's residue: an arm test
-# on the same xdist worker had left something behind, and the two tests that
-# read the flag-off tree saw it.
-#
-# TWO LEAKERS, ONE AFTER THE OTHER. The first was the memoized upgrade indices
-# (cleared in the `overhaul` fixture, 2026-09-05). The second was
-# `loader._substituted_card_index`, which is built from `_starter_ids` and
-# `_pool_substitutions` -- both READ THE FLAGS -- and which no fixture and
-# neither test cleared: warmed once under `KLEE_OVERHAUL` it holds
-# `proto_ko_jumpy_dumpty` and `proto_ko_kapow` for the rest of the worker's
-# life, after which `get_card("proto_ko_kapow")` stops raising. Both are now
-# behind `loader.reset_arm_caches()`, one list beside the flags it depends on.
-#
-# THIS FIXTURE IS THE THIRD ONE'S FUTURE. A leak of this shape is a fact about
-# the PREVIOUS test, and pytest reports it against the next one, which is why
-# it took two rounds to find. So the invariant is asserted at every test's
-# START and the failure NAMES THE TEST THAT RAN BEFORE IT on this worker.
-#
-# WHAT IS CHECKED, and what each check costs:
-#
-#   * every arm flag is off -- five attribute reads and one module read;
-#   * `_substituted_card_index` is EMPTY, which is the arms' own promise about
-#     a flag-off tree ("It is empty on every flag-off tree, which is every
-#     shipped tree") -- one memoized call, free;
-#   * `_prototype_upgrade_index` holds nothing but Varka's always-on
-#     `proto_vk_` rows, and ONLY IF IT IS ALREADY WARM.
-#     Building it walks the whole prototype surface (~100ms), so asking a cold
-#     one would put that on every test in the suite; a cold cache has leaked
-#     nothing by construction.
-#
-# AND IT REPAIRS BEFORE IT FAILS, so one leaker costs one red test and not a
-# cascade of them: the flags go back off and the caches are dropped, then the
-# assertion fires.
-_ARM_FLAGS = ("SPARK_ALT_COST_ENABLED", "KLEE_OVERHAUL", "KOKOMI_OVERHAUL",
-              "COMPANION_OVERHAUL", "KURAGE_MEMORY")
+# --- THE ARMS SIT AT THEIR DEFAULTS AT EVERY TEST'S START -----------------
+# `EB-569` asserted the arms were OFF at every test's start, because two tests
+# read the flag-off tree and a neighbour on the same xdist worker kept leaving
+# an arm on. Since legacy cleanup stage 3 (2026-10-01,
+# `review/active/legacy-cleanup-2026-10-01.md`, pick 5) the sim's defaults ARE
+# the current kits, so "off" is no longer the clean state; the module default
+# is. What survives of the guard: every arm flag equals the value it had at
+# import, and a test that leaves one flipped is NAMED at the next test's start
+# (a leak is a fact about the PREVIOUS test). It repairs before it fails --
+# the flags go back and `loader.reset_arm_caches()` drops the memoized views
+# that move with them -- so one leaker costs one red test, not a cascade.
+# The warm-cache checks went with the flag-off tree: a warm substitution index
+# is the normal state now.
+_ARM_FLAGS = (("tier0.constants", "SPARK_ALT_COST_ENABLED"),
+              ("tier0.constants", "KLEE_OVERHAUL"),
+              ("tier0.constants", "KOKOMI_OVERHAUL"),
+              ("tier0.constants", "COMPANION_OVERHAUL"),
+              ("tier0.constants", "KURAGE_MEMORY"),
+              ("tier0.engine.furina_stage", "FURINA_STAGE"))
+
+
+def _arm_defaults():
+    import importlib
+    return {(m, f): getattr(importlib.import_module(m), f)
+            for m, f in _ARM_FLAGS}
+
+
+#: Each flag's value at import -- the default every test starts from.
+_ARM_DEFAULTS = _arm_defaults()
 
 #: The last test to FINISH on this worker -- the one a leak found at the next
 #: test's start belongs to. Per-process, which is per-worker under xdist.
@@ -143,47 +134,28 @@ _previous_test = {"id": "(nothing -- this was the first test on this worker)"}
 
 
 def _arm_residue():
-    """Everything about the world that says an arm is still on. Empty is good."""
-    from tier0 import constants as C
-    from tier0.content import loader, upgrades
-
-    found = []
-    for flag in _ARM_FLAGS:
-        if getattr(C, flag):
-            found.append(f"tier0.constants.{flag} is still True")
-    warm = sorted(loader._substituted_card_index())
-    if warm:
-        found.append("loader._substituted_card_index still holds "
-                     f"{warm} -- it is empty on a flag-off tree")
-    if upgrades._prototype_upgrade_index.cache_info().currsize:
-        # Varka's `proto_vk_` rows are always smithable (his rules have no
-        # switch, collapsed 2026-10-01), so they are not an arm's residue.
-        from tier0.engine import varka_oath
-        rows = sorted(r for r in upgrades._prototype_upgrade_index()
-                      if not r.startswith(varka_oath.ID_PREFIX))
-        if rows:
-            found.append("upgrades._prototype_upgrade_index still holds "
-                         f"{rows} -- it holds only Varka's rows on a "
-                         "flag-off tree")
-    return found
+    """Every arm flag not at its default. Empty is good."""
+    return [f"{m}.{f} is {v!r}, its default is {_ARM_DEFAULTS[(m, f)]!r}"
+            for (m, f), v in _arm_defaults().items()
+            if v != _ARM_DEFAULTS[(m, f)]]
 
 
 @pytest.fixture(autouse=True)
-def _the_arms_stay_quarantined(request):
-    from tier0 import constants as C
+def _the_arms_stay_at_their_defaults(request):
+    import importlib
     from tier0.content import loader
 
     residue = _arm_residue()
     if residue:
-        for flag in _ARM_FLAGS:
-            setattr(C, flag, False)
+        for (m, f), v in _ARM_DEFAULTS.items():
+            setattr(importlib.import_module(m), f, v)
         loader.reset_arm_caches()
     culprit = _previous_test["id"]
     try:
         assert not residue, (
-            "an arm was still on when this test started, which means the test "
-            "BEFORE it on this worker left it on. The leaking test is:\n"
-            f"    {culprit}\n"
+            "an arm flag was off its default when this test started, which "
+            "means the test BEFORE it on this worker left it flipped. The "
+            f"leaking test is:\n    {culprit}\n"
             "It must restore the flag (monkeypatch, or a try/finally) and drop "
             "the memoized views that move with it "
             "(`loader.reset_arm_caches()`, plus `rewards.character_pool` in "

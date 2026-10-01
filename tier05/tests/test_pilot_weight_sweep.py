@@ -46,6 +46,10 @@ from tier0.pilot import policy
 from tier0.tests.conftest import make_enemy, make_state
 from tier05 import pilot_weight_sweep as w4
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 PLACE_5 = {"op": "place_bomb", "amount": 1, "target": "enemy",
            "bomb_damage": 5}
 

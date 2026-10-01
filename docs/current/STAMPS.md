@@ -8,6 +8,10 @@
 > citability and when a standing baseline is owed are in
 > [`EXPERIMENTS.md`](EXPERIMENTS.md).
 
+**Retired until Balance, 2026-10-01** (legacy cleanup pick 5): the sim's
+default world is now the current kits, the calibration bands skip, and every
+level below describes the shipped world it was measured on.
+
 Live cell **`RT13 / D18 / P11 / C22`**, read live via `tier05/cells.py`, with
 `PILOT_WEIGHTS_VERSION` **6**. Numbers are never comparable across a stamp
 boundary unless labeled, and a report without a stamp is not citable.

@@ -21,6 +21,12 @@ from tier0.engine import combat, companion_coven, effects, klee_overhaul
 from tier0.tests.conftest import make_enemy, make_state
 from tier05 import rewards
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+from tier0.tests.shipped_world import DEFAULTS  # noqa: E402
+
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 PRUNE = "proto_mc_prune_hexhunter_chime"
 SAYU = "proto_mc_sayu_silencers_secret"
 QIQI = "proto_mc_qiqi_herald_of_frost"
@@ -66,11 +72,13 @@ def _pool_ids(pool):
 
 
 # ---------------------------------------------------------------------------
-# THE FLAG IS OFF, AND THAT IS THE ACCEPTANCE CONDITION
+# THE FLAG SHIPS ON (2026-10-01); THE FLAG-OFF PINS BELOW NAME THE SHIPPED WORLD
 # ---------------------------------------------------------------------------
 
-def test_the_flag_ships_off():
-    assert C.COMPANION_OVERHAUL is False
+def test_the_flag_ships_on():
+    """The sim runs the current kits by default (legacy cleanup stage 3,
+    2026-10-01, pick 5), as every C# build does."""
+    assert DEFAULTS["COMPANION_OVERHAUL"] is True
 
 
 def test_flag_off_no_coven_row_can_be_offered():

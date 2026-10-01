@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import pytest
 
+from tier0.tests.shipped_world import shipped_world  # noqa: F401  (a fixture)
 from tier05 import maps, model
 
 

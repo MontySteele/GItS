@@ -32,6 +32,10 @@ from tier0.content import loader
 from tier0.engine import combat, effects, furina_stage
 from tier0.engine.state import Card, CombatState, Enemy, Player
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 FS = furina_stage
 
 
@@ -1799,3 +1803,11 @@ def test_chevalmarins_card_applies_hydro_to_all_on_play(arm):
     effects.resolve_card(st, _row("proto_fs_surintendante_chevalmarin"))
     assert all(e.aura == "hydro" for e in st.enemies)
     assert [m for m, _f in st.player.stage] == ["chevalmarin"]
+
+
+def test_the_stage_ships_on():
+    """The sim runs the current kits by default (legacy cleanup stage 3,
+    2026-10-01, pick 5), as every C# build does; the flag-off pins in this
+    file name the shipped world with `shipped_world`."""
+    from tier0.tests.shipped_world import DEFAULTS
+    assert DEFAULTS["FURINA_STAGE"] is True

@@ -35,6 +35,12 @@ from tier0.pilot.policy import make_pilot
 from tier0.tests.conftest import make_enemy, make_state
 from tier05 import rewards
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+from tier0.tests.shipped_world import DEFAULTS  # noqa: E402
+
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 ATTACKER = [{"kind": "attack", "amount": 5}]
 BLOCKER = [{"kind": "block", "amount": 5}]
 
@@ -83,15 +89,16 @@ def sizes(enemy):
 
 
 # ---------------------------------------------------------------------------
-# THE FLAG, OFF -- `The_arm_ships_off`
+# THE FLAG -- ships on since 2026-10-01; off, the gate is shut
 # ---------------------------------------------------------------------------
 
-def test_the_arm_ships_off_and_the_gate_reads_the_character_too():
+def test_the_arm_ships_on_and_off_it_the_gate_is_shut():
     """`The_arm_ships_off`, plus the half the C# spells at each seam instead of
     in one place: `KleeOverhaul.Enabled` is the build switch and every site
     that reads it also asks `player.Character is IKleeCharacter`. `live()` is
     those two clauses in one function, so a co-op Furina never grows Bombs."""
-    assert C.KLEE_OVERHAUL is False
+    assert DEFAULTS["KLEE_OVERHAUL"] is True     # ships on since 2026-10-01
+    assert C.KLEE_OVERHAUL is False              # `shipped_world` turned it off
     assert klee_overhaul.live(klee_state()) is False
 
 

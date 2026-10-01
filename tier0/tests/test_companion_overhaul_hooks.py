@@ -30,6 +30,10 @@ from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
 from tier05 import rewards
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 REPO = Path(__file__).resolve().parents[2]
 
 #: The thirteen, in the workshop's sec.3 order. Read off the constant so the
