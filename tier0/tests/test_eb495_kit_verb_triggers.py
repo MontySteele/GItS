@@ -322,14 +322,16 @@ SIM_CALL_SITES = {
     # damage, element-less and unpowered.
     ('varka_oath.py', 1): ("'card'", 'False', 'None'),
     ('varka_oath.py', 2): ("'card'", 'False', 'None'),
-    # The Pyro payout (Wildfire Oath's to ALL, then the one enemy) and the
-    # Electro payout: element-less, unpowered, his card's
-    # (`ElementalHit.DealUnelemented(powered: false)`).
+    # The Pyro payout (the one enemy; Wildfire Oath's ALL left with element
+    # identities, 2026-10-01) and the Electro payout: element-less,
+    # unpowered, his card's (`ElementalHit.DealUnelemented(powered: false)`).
     ('varka_oath.py', 3): ("'card'", 'False', 'None'),
     ('varka_oath.py', 4): ("'card'", 'False', 'None'),
-    ('varka_oath.py', 5): ("'card'", 'False', 'None'),
     # Baron Bunny's next-turn burst: Pyro to ALL, unpowered.
-    ('varka_oath.py', 6): ("'card'", 'False', "'pyro'"),
+    ('varka_oath.py', 5): ("'card'", 'False', "'pyro'"),
+    # Element identities (2026-10-01): Retaliating Tide, a Power's damage at
+    # his turn's end, element-less and unpowered.
+    ('varka_oath.py', 6): ("'card'", 'False', 'None'),
     # Four Winds' Ascension's and Northwind Avatar's elemental follow-up: a
     # powered hit of the card, carrying his current element.
     ('varka_oath.py', 7): ('source', None, 'led.current'),

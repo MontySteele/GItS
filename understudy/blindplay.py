@@ -90,8 +90,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from understudy import (authorship, blindplay_coop, bridge, lanewatch,
-                       qa_packet, report, seat)
+from understudy import (authorship, blindplay_brief, blindplay_coop, bridge,
+                       lanewatch, qa_packet, report, seat)
 
 # `klee-mod/local.props` is the machine's one statement of where the game is,
 # and this is a DELIBERATE SECOND COPY of the four lines `soak.game_dir()`
@@ -316,10 +316,11 @@ def cmd_observe(args) -> int:
     except LaneDead as dead:
         print(dead)
         return lanewatch.EXIT_LANE_DEAD
+    out = _refusal_stream(args)
     try:
-        print(observe(state))
+        print(_page(observe(state), args))
     except qa_packet.PacketLeak as exc:
-        print(f"REFUSED: {exc}", file=sys.stderr)
+        print(f"REFUSED: {exc}", file=out)
         return 1
     except BlindPlayError as exc:
         # `EB-510`. THE SHAPE GUARD'S REFUSAL REACHES THE SEAT AS A LINE.
@@ -331,9 +332,25 @@ def cmd_observe(args) -> int:
         # "the tool crashed" and neither names the heading the guard already
         # knows. Same catch, same line and same exit code as the leak above,
         # which is the refusal shape the brief already tells a seat to expect.
-        print(f"REFUSED: {exc}", file=sys.stderr)
+        print(f"REFUSED: {exc}", file=out)
         return 1
     return 0
+
+
+def _brief_on(args) -> bool:
+    return bool(getattr(args, "brief", False))
+
+
+def _refusal_stream(args):
+    """Where a refusal goes. `--brief` puts EVERY refusal on stdout, so a
+    seat reading only stdout cannot lose one (2026-09-30: a seat's own filter
+    dropped refusals and intents and cost 41 HP)."""
+    return sys.stdout if _brief_on(args) else sys.stderr
+
+
+def _page(text: str, args) -> str:
+    """The page as printed: whole, or `blindplay_brief.brief` of it."""
+    return blindplay_brief.brief(text) if _brief_on(args) else text
 
 
 def budget_refusal(count: int, cap: int) -> str:
@@ -375,8 +392,9 @@ def cmd_act(args) -> int:
     # costs the budget anything either.
     live = not (args.raw_file or args.dry_run)
     count, cap = budget_spent()
+    out = _refusal_stream(args)
     if live and cap and count >= cap:
-        print(budget_refusal(count, cap), file=sys.stderr)
+        print(budget_refusal(count, cap), file=out)
         return 2
     # `EB-370`: `act` reads through `observation()` before it resolves
     # anything (`blindplay_grammar.act`), so a `PacketLeak` on the read path
@@ -392,9 +410,13 @@ def cmd_act(args) -> int:
     try:
         res = act(state, args.command)
     except qa_packet.PacketLeak as exc:
-        print(f"REFUSED: {exc}", file=sys.stderr)
+        print(f"REFUSED: {exc}", file=out)
         return 1
-    print(json.dumps(res, indent=1, default=str))
+    # `--brief` leaves out the resolution dump and nothing else: the refusal,
+    # the row taken, the game's answer and the action count are all printed
+    # below in words, on stdout, either way.
+    if not _brief_on(args):
+        print(json.dumps(res, indent=1, default=str))
     # 2026-09-25. AN ACT NEVER ENDS ON THE JSON'S CLOSING BRACE. An Opus seat
     # on lane 2 typed `play "Stage Presence (1)"` in a Furina fight and read
     # back a bare `}` with no refusal and no result: the resolution dump ends
@@ -405,8 +427,11 @@ def cmd_act(args) -> int:
         print(f"REFUSED: {_text(res.get('refusal')) or ACT_UNRESOLVED}")
         return 1
     if res["verb"] == "wait":
-        return _cmd_wait(state, int(res["printed"]["seconds"]), live)
+        return _cmd_wait(state, int(res["printed"]["seconds"]), live, args)
     if not live:
+        if _brief_on(args):
+            print("Not sent (a dry run or a saved state): "
+                  + (taken_line(res) or args.command))
         return 0
     post = dict(res["post"] or {})
     action = post.pop("action")
@@ -439,7 +464,8 @@ def cmd_act(args) -> int:
     return 0
 
 
-def _cmd_wait(state: dict[str, Any], seconds: int, live: bool) -> int:
+def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
+              args: Any = None) -> int:
     """CO-OP: `act "wait"` -- hold until the other player moves, then print
     the page. Posts nothing and is never charged against the action budget:
     it is not a move in the run, and a budget spent on waiting for a partner
@@ -463,9 +489,9 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool) -> int:
     print(blindplay_coop.wait_line(waited, moved, latest))
     print()
     try:
-        print(observe(latest))
+        print(_page(observe(latest), args))
     except (qa_packet.PacketLeak, BlindPlayError) as exc:
-        print(f"REFUSED: {exc}", file=sys.stderr)
+        print(f"REFUSED: {exc}", file=_refusal_stream(args))
         return 1
     return 0
 
@@ -645,6 +671,12 @@ def cmd_audit(args) -> int:
     return 0
 
 
+BRIEF_HELP = ("the compact page: no word definitions or standing notes, and "
+              "every refusal on stdout. Intents, HP/Block/Energy, the hand "
+              "and the verbs are never cut. Use this instead of filtering "
+              "the output yourself")
+
+
 def main(argv: list[str] | None = None) -> int:
     # EB-93: this entry point echoes shipped card titles, and two of them carry
     # a music note. A default Windows console is cp1252.
@@ -655,6 +687,7 @@ def main(argv: list[str] | None = None) -> int:
     o = sub.add_parser("observe", help="render the current screen, blind")
     o.add_argument("--raw-file", default="",
                    help="a saved wire state instead of the live one")
+    o.add_argument("--brief", action="store_true", help=BRIEF_HELP)
     o.set_defaults(func=cmd_observe)
 
     a = sub.add_parser("act", help="resolve one player-language command")
@@ -663,6 +696,7 @@ def main(argv: list[str] | None = None) -> int:
                    help="resolve against a saved state and post nothing")
     a.add_argument("--dry-run", action="store_true",
                    help="resolve against the live state and post nothing")
+    a.add_argument("--brief", action="store_true", help=BRIEF_HELP)
     a.set_defaults(func=cmd_act)
 
     s = sub.add_parser("session", help="one blind thread plays the run")
@@ -708,7 +742,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return args.func(args)
     except BlindPlayError as exc:
-        print(f"blind play error: {exc}", file=sys.stderr)
+        print(f"blind play error: {exc}", file=_refusal_stream(args))
         return 2
 
 

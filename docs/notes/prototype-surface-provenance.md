@@ -4978,3 +4978,137 @@ Plan volume with the new Rares; Furina's three decks within 10 points of the
 default drafter; offer-take and play-rate bounds) were not run by this build
 (BACKLOG). Pins: `tier0/tests/test_pool_completion.py`,
 `KleeTests/Prototype/PoolCompletionTests.cs`.
+
+## Varka element identities, 2026-10-01
+
+The paper `review/active/varka-element-identities-2026-10-01.md`, picks 1 to
+5 at the defaults; [USER]: "Overall looks reasonable, though Violet Storm
+looks undertuned" (raised to 8 [11] and an Attack at the ruling). Five swaps
+in place, the pool stays 78 (20 / 35 / 23): Charged Lunge for Updraft (C),
+Short Circuit for Pressure Front (U), Chain Lightning for Unfurled Banner
+(U), Violet Storm for Four Winds' Accord (R), Retaliating Tide for Unbroken
+Tide (R); Thundering Verdict re-aimed to X, Wildfire Oath to one big hit.
+Built in both engines. C#: `VarkaOath.cs` (`VarkaCards.ElectroStrike`,
+`ElectroAll`, `VioletStorm`, the X Verdict, the ledger's first Attack and
+the element he left), `VarkaPowers.cs` (`WildfireOathPower`,
+`RetaliatingTidePower`, the four `OathLeftPower`s), `ArmKeywordTips`
+(`ForElementSwitch`). Sim: `tier0/engine/varka_oath.py`,
+`combat.card_cost`, `effects.deal_damage_to_enemy`. Codegen: three `varka`
+kinds, the card field `cost_reduction_per_discard_this_turn`,
+`VARKA_KIND_ELEMENTS`, `varka_switch_element`. Pins:
+`tier0/tests/test_varka_element_identities.py`,
+`KleeTests/Prototype/VarkaElementIdentitiesTests.cs`.
+
+**Sec.2.** Dawn Patrol already carried Exhaust (the expansion printed it with
+`exhaust: true`), so the rule needed no edit; a pin says so.
+
+**Electro.**
+- Charged Lunge: one Electro hit of the card's own (`electro_strike`), then
+  the row's draw. Under the open Oath it makes Electro current.
+- Short Circuit: the sheet's chosen `discard` (Concentrate's
+  `FromHandForDiscard`, Survivor's sim path), then `energy 2`, then Electro
+  on the chosen enemy. With fewer than 3 cards it discards what there is and
+  still gains 2 (Concentrate's reading). Upgrade: the `Discards` var 3 to 2.
+- Chain Lightning: the discount is a card-level rate,
+  `cost_reduction_per_discard_this_turn: 1`, the shape Stomp's and
+  Pinpoint's rates have in the sim. The C# card prices ITSELF in
+  `TryModifyEnergyCostInCombat` off `KokomiResources.DiscardsThisTurn`
+  (MementoMori's count from the combat history), so the end-of-turn flush
+  (no `CardCmd.Discard`) counts nothing and no state outlives the turn; the
+  sim reads `state.discards_this_turn`. Any discard of his counts, Sly and
+  Violet Storm's included. Then 8 [11] Electro to ALL, one hit each.
+- Thundering Verdict: `cost: X`, Whirlwind's `HasEnergyCostX`; the kind
+  reads `ResolveEnergyXValue` (sim: `state.current_x`). Each of X times hits
+  ALL for 6 [8] + 1 per Electro Oath; the Oath is read once, before the first
+  hit (the old card's reading), so the card's own credit does not grow it
+  mid-volley. X = 0 deals nothing. Upgrade moves only the 6.
+- Violet Storm: Storm of Steel's discard, the whole hand in one
+  `CardCmd.Discard` (sim: the `discard` op, `amount: hand_size`, so Sly and
+  the turn's count see it), then one 8 [11] Electro hit per card discarded,
+  each at a random living enemy (`Rng.CombatTargets` / `state.rng`). The
+  card itself is not in hand while it resolves, so it does not count itself.
+  `target: random_enemy` (TargetType AllEnemies, no aim).
+
+**Retaliating Tide.** At the end of his turn, min(Block, Hydro Oath) to a
+random enemy, element-less and unpowered (a Power's damage, Cycle of
+Seasons' door, Block-able), once per stack. "Your Hydro Oath" is Hydro's by
+name, whatever is current. After Oathbound Aegis, so the Aegis's Block counts:
+the C# Aegis now pays at `BeforeSideTurnEndEarly` and the Tide at
+`BeforeSideTurnEnd`; the sim pays them in that order in `turn_end`. Unbroken
+Tide's kept Block left both engines with the card.
+
+**Wildfire Oath.** The turn's first Attack card arms one bonus at the top of
+its play (whatever is current then); that card's first powered hit on an
+enemy takes his Pyro Oath per stack if Pyro is current as the hit lands, and
+spends the arm either way. So a Pyro Knight Attack (which makes Pyro current
+before its hit) is paid; Blazing Charge, whose own hit makes Pyro current, is
+paid only if Pyro was already current. A Skill does not spend it; an unspent
+arm goes with its play. C#: `ModifyDamageAdditive` gives it,
+`BeforeDamageReceived` spends it (an AoE first Attack pays its first enemy
+only, as the sim's per-enemy hits do). The Pyro Swirl payout is back to 3 on
+the Swirled enemy.
+
+**Sec.7, the switch warnings.**
+1. The hover: every Varka row whose play makes an element current carries
+   `ArmKeywordTips.ForElementSwitch` ("Switches your current element to
+   Pyro."), printed only in a fight, while another element (or none) is
+   current, and for a non-Knight only without Unwavering Banner. Which
+   element is the codegen's `varka_switch_element`: a Knight's own; else the
+   LAST Oath element the row applies, in effect order (Tempest ends on
+   Electro). Rows that apply his current element (Favonius Drill, Cavalry
+   Charge, Pathfinder's Mark) carry none. Universals and other characters'
+   cards he drafts carry none (BACKLOG).
+2. The panel: the element he left this turn shows beside his badge as its
+   own icon, "Pyro Oath (left)", its number his Oath of it, applied loud (the
+   game's apply flash), removed at the end of his turn or when it is current
+   again (`OathBadge.SyncLeft`). A text line inside the badge was the first
+   try and cannot work: a Power's description is registered once, so it
+   cannot carry a per-turn sentence.
+
+**The round's faces (record, "What to change" item 2).**
+- Cavalry Charge is no longer tagged Anemo: a row whose hits are all
+  `varka` kinds with their own element declares `Element.None` and is tagged
+  with the kinds' elements (`VARKA_KIND_ELEMENTS`), so Cavalry Charge carries
+  no element tag (its face says "current element"), and Blazing Charge,
+  Razor, Thundering Verdict and Tempest now say "Applies Pyro / Electro / the
+  four", which closes the BACKLOG line about them.
+- The truth, read in the code: a Swirl's flat 2 is `ValueProp.Unblockable`
+  (`ReactionEffects.SwirlPays`; the sim's `_splash` ignores Block too); the
+  current element's payout damage (Pyro 3, Electro 3 to ALL) goes through
+  `ElementalHit.DealUnelemented`, `ValueProp.Unpowered`, which Block stops.
+  The Swirl tip and the seat glossary now say "deal 2 unblockable damage";
+  to stay under the 135-character tip ceiling their last sentence is now
+  "Enemies wearing it refresh." The payout is ordinary damage and stays
+  unmarked, as base-game damage is (only the exception is printed; the
+  current-element tip is at 132 of 135).
+
+**Shape.** Retired ids: the five left rows got hidden aliases
+(`docs/retired-card-ids.yaml`), filed under Klee's pool because
+`tools/retired_ids.py` has no Varka owner (BACKLOG). No art: the five new rows
+render the placeholder; Retaliating Tide's power and the left-element icons
+borrow the varka element badges.
+
+**The sim (paper sec.8), report only; no number moved on its account.**
+`python -m tools.varka_expansion_sim --seeds 1000 --seed 7 --jobs 14`, the
+built pool against main before this branch (each checkout's own harness;
+this branch's lists drop Pressure Front from Gale and Four Winds' Accord from
+Switch, put Retaliating Tide in Hydro's payoffs and the four new Electro
+cards in Electro's). Default drafter act 1 won 21.3 to 23.5 (+2.2 ±1.0
+paired). Forced decks, act-1 diff against the default (old, new): Pyro +3.9,
++2.7 ±2.7; Hydro -0.4, -3.6 ±3.1; Electro mono -21.6, -21.7 ±3.3; Cryo -8.7,
+-10.5 ±2.9; Gale -8.9, -8.5 ±1.3; Switch -3.9, -4.5 ±1.4; Muster -1.3, -3.1
+±1.3. In absolute act-1 terms every forced deck held or rose (Electro mono
+7.2 to 9.5); the diffs moved mostly because the default rose. Electro is not
+within 10. No new card is taken over 70% or played under 5%; Tempest Charge
+crossed the take flag (68.3 to 70.9). Zero throws; one turn-cap stall.
+
+The pilot, probed over 300 mono-Electro runs: Thundering Verdict is played
+first at full Energy (X = 3 in 39 of 44 plays), so X is priced. Violet Storm is
+played with 3.6 other cards in hand on average, but the harness's scorer
+prices only the hits, not the cards it throws away. Short Circuit is played
+last, at 0 Energy in 247 of 329 plays, with 1.7 cards to discard, so its 2
+Energy mostly lands with nothing left to play, and Chain Lightning was never
+played after a discard (0 of 167 plays discounted). **The pilot cannot
+sequence discard into Energy or the discount**, so the sim does not read
+Electro's middle; Short Circuit and Chain Lightning are unread here, as the
+Kokomi sim marked Coral Tithe.

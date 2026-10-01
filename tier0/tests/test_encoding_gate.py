@@ -154,6 +154,5 @@ def test_the_exemption_did_not_swallow_the_real_offences_in_those_files():
     live = lint.scan()
     for rel in ("tools/art_lint.py", "tools/gen_furina_stills.py",
                 "tools/gen_kokomi_stills.py",
-                "tools/archive/autocrop_card_art.py",
                 "tools/lint_unique_names.py"):
         assert rel not in live, (live.get(rel), rel)

@@ -49,7 +49,7 @@ public sealed class ProtoVkAmberFieryRain : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false, appliesWithoutHit: true);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false, appliesWithoutHit: true), this, Element.Pyro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mc_amber_fiery_rain");
 

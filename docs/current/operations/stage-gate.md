@@ -7,6 +7,11 @@ for one kind of evidence and exits on it.
 written to `review/active/<character>-brief-<date>.md` and read against
 `docs/current/kit-checklist.md`. No build, no flag, no commands. **Exit:** [USER] has read the brief and ruled its picks.
 
+**A card paper carries its readings.** It lists every reading a builder would
+otherwise have to choose: when a condition is checked, what counts as X, how
+two effects stack. A build agent that meets a reading the paper does not list
+picks one, records it in the provenance note, and flags it in its report.
+
 **Prototype, gated by play.** Rows go on `docs/prototype-surface.yaml` and are
 built in **C# first** (next section). Deploy with `tools/deploy_round.py`
 (since 2026-09-28 the release build carries the current kits, so no dev

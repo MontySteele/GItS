@@ -73,7 +73,7 @@ Each takes `--help` and `--oneline`; each has a `.claude/skills/` entry.
 the failing test names, raw output to `.gates/<stamp>.log` — the token saver;
 `--fast` is the inner loop and never the pre-push gate),
 `agent_worktree.py` (sibling worktree + `local.props` + CLAUDE.md's read order
-for the task; refuses while a seat is live), `open_pr.py` (the `gh` full path
+for the task; names a live seat, never refuses on one), `open_pr.py` (the `gh` full path
 and the mandatory footer; prints the number and URL only), `land_pr.py` (a
 PLUMBING land: checks, `--merge`, purge, fast-forward, and the untracked-file
 trap), `seat.py` (embark / `blindplay session` / teardown with the lane
@@ -137,26 +137,3 @@ normalizes `amount` against `amount_formula.base`. Every scanner here that
 used to iterate `card["effects"]` by hand now imports it;
 `lint_effect_branch_scans.py` is the gate that keeps it that way, and carries
 the register of the sites that are top-level-only on purpose.
-
-## archive/
-One-shot experiments whose results were ratified, and superseded tools.
-Kept for reproducibility of the records that cite them; nothing imports
-them. R67 (2026-07-26) deleted `PROGRESSION_GAP_COMPENSATOR`, whose only
-remaining reader was `roster_scale_gap.py` here — so that script no longer
-runs, which is the normal end state for an archived one-shot: it is the
-record of what was measured, not a thing to re-measure with.
-
-R68 (2026-07-26) moved three Furina experiment scripts here from `tier05/`:
-`exp_furina_achievability.py` (hardcodes `SCREENS = 10` from RUNTEMPLATE 2 —
-it runs, it prints numbers, and it describes no world that exists),
-`exp_furina_modes.py` and `exp_furina_pass3.py` (both self-declared archived
-in their own docstrings while still sitting in the live directory). They keep
-their hand-rolled seeds and configs deliberately: those ARE the historical
-record. `tier05/cells.py` governs anything run from today forward.
-
-Scripts here are invoked by path (`python tools/archive/<name>.py`), not as
-`-m` modules, and each inserts the repo root on `sys.path` itself. Note that
-the older arrivals — `banner_variance_cells.py` and anything else using
-`parent.parent` — compute that root as `tools/` rather than the repo, a
-leftover from being moved without their bootstrap being updated. They will
-not import until that line is fixed.

@@ -30,8 +30,7 @@ PYTHONPATH=. python3 -m tier05.runner --character furina --archetype salon \
     --realistic --runs 600 --seed 11 --jobs 0     # prints the run report
 PYTHONPATH=. python3 -m tier05.runner --character klee --ab --runs 1000
 PYTHONPATH=. python3 -m tier05.runner --route-ab --character furina --runs 600
-PYTHONPATH=. python3 -m tier05.exp_roster_anchors --runs 600 --jobs 0
-PYTHONPATH=. python3 -m tier05.exp_pilot_gap all --runs 600 --jobs 0
+PYTHONPATH=. python3 -m tier05.exp_payoff_reach --leg sim --runs 600
 python3 -m pytest tier0/tests tier05/tests -q          # what CI runs
 ```
 
@@ -50,9 +49,10 @@ the same pair — `trace(state.log)` per fight, `aggregate(traces)`
 [block] [--runs N] [--seed N] [--jobs N]`, `main(argv) -> int` under
 `if __name__ == "__main__"`, a module docstring that REGISTERS its metric
 definitions and names the sprint doc it belongs to, and a `Usage:` line
-(`exp_curtain_call.py:1-20`, `exp_pilot_gap.py:1-46`). Cells come from
-`cells.CANONICAL.but(...)` and every table prints `Cell.stamp()`
-(`exp_pilot_gap.py:145`, `exp_roster_anchors.py:1-33`).
+(`exp_kurage_cadence_s1.py`, `exp_payoff_reach.py`). Cells come from
+`cells.CANONICAL.but(...)` and every table prints `Cell.stamp()`.
+The one-shot experiments on retired systems were deleted 2026-10-01; git
+history keeps them.
 
 ## 3. Key invariants
 
@@ -192,11 +192,10 @@ definitions and names the sprint doc it belongs to, and a `Usage:` line
   `tier0/tests/test_exp_strength_missing_arm.py`).
 - **Every published number is world-stamped and worlds are not comparable** —
   RUNTEMPLATE / DRAFTER / POLICY bumps archive their predecessors, which is why
-  `exp_roster_anchors` re-runs anchors in ONE invocation rather than quoting
-  older tables (`exp_roster_anchors.py:1-20`), and why every rate column now
-  carries a Wilson interval so a point estimate cannot be quoted bare
-  (`exp_roster_anchors.py:26-33`;
-  `docs/current/calibration/sprint-sim-hygiene-log-2026-07-29.md:159`).
+  anchors are re-run in ONE invocation rather than quoted from older tables,
+  and why every rate column carries a Wilson interval so a point estimate
+  cannot be quoted bare
+  (`docs/current/calibration/sprint-sim-hygiene-log-2026-07-29.md:159`).
 
 ## 6. Reading order
 
@@ -212,6 +211,6 @@ definitions and names the sprint doc it belongs to, and a `Usage:` line
    aggregate shape and the two hardest reporting rules (per-combat units;
    withheld small cells); `model.py:194-233` and `:558-597` for how traces
    attach.
-6. `tier05/exp_roster_anchors.py` + `exp_pilot_gap.py` — the `exp_*`
+6. `tier05/exp_payoff_reach.py` + `exp_kurage_cadence_s1.py` — the `exp_*`
    convention, cells and stamps; then `tier0/DECISIONS.md` for the R-number
    behind anything you plan to change.

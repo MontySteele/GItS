@@ -220,10 +220,6 @@ public class VarkaPrototypeTests : IDisposable
         Assert.Equal(9, ledger.Oath(Element.Hydro));
         Assert.Equal(0, ledger.Oath(Element.Pyro));
         Assert.Equal(0, ledger.Oath(Element.Cryo));
-        // Accord: 9 / 4 = 2 each, rounding down (the +1s are gains).
-        ledger.Split();
-        Assert.All(VarkaOathLedger.Elements,
-                   e => Assert.Equal(2, ledger.Oath(e)));
     }
 
     [Fact]
@@ -506,10 +502,6 @@ public class VarkaPrototypeTests : IDisposable
                         Il.Calls(Il.Method("VarkaCards", "ChangeOfGuard")));
         Assert.Contains("VarkaOathLedger.Rally",
                         Il.Calls(Il.Method("VarkaCards", "Rally")));
-        Assert.Contains("VarkaOathLedger.Split",
-                        Il.Calls(Il.Method("VarkaCards", "Accord")));
-        Assert.Contains("CardEnergyCost.SetThisTurn",
-                        Il.Calls(Il.Method("VarkaCards", "UnfurledBanner")));
         Assert.Contains("VarkaOath.Gain",
                         Il.Calls(Il.Method("VarkaCards", "OathPerCryoEnemy")));
     }

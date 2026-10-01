@@ -52,7 +52,7 @@ public sealed class ProtoVkAmberSharpshooter : CustomCardModel, IElementalCard, 
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, Element.Pyro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_amber_sharpshooter");
 

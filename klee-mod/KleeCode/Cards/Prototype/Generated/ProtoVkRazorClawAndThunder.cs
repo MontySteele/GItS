@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -43,6 +44,12 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
     public string? PersonalPool => "varka";
 
     public string? Nation => "mondstadt";
+
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesElectro };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Electro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_razor_claw_and_thunder");
 

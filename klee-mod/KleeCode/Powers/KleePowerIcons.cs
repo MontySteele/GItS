@@ -392,6 +392,11 @@ internal static class KleePowerIcons
         // Grand Master's Order borrows Study Buddy's, the replay it narrows
         // to Knights. No new art for a prototype.
         PyroOathPower => KleePck.Path("varka/powers/pyro_wind.png"),
+        // Element identities sec.7: the element he left wears its badge.
+        PyroOathLeftPower => KleePck.Path("varka/powers/pyro_wind.png"),
+        HydroOathLeftPower => KleePck.Path("varka/powers/hydro_wind.png"),
+        CryoOathLeftPower => KleePck.Path("varka/powers/cryo_wind.png"),
+        ElectroOathLeftPower => KleePck.Path("varka/powers/electro_wind.png"),
         HydroOathPower => KleePck.Path("varka/powers/hydro_wind.png"),
         CryoOathPower => KleePck.Path("varka/powers/cryo_wind.png"),
         ElectroOathPower => KleePck.Path("varka/powers/electro_wind.png"),
@@ -426,7 +431,7 @@ internal static class KleePowerIcons
         AssemblyAtTheCathedralPower =>
             KleePck.Path("klee/powers/study_buddy.png"),
         WildfireOathPower => KleePck.Path("varka/powers/pyro_wind.png"),
-        UnbrokenTidePower => KleePck.Path("varka/powers/hydro_wind.png"),
+        RetaliatingTidePower => KleePck.Path("varka/powers/hydro_wind.png"),
         AbsoluteZeroPower => KleePck.Path("varka/powers/cryo_wind.png"),
         OathUntoDeathPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),

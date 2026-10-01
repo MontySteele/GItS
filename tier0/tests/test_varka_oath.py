@@ -461,11 +461,11 @@ def test_stormward_stance(varka):
     st.player.powers[V.STORMWARD] = 3
     led = _led(st)
     led.current, led.oath["pyro"] = "pyro", 3
-    _play(st, _vk("updraft"))
-    assert st.enemies[0].hp == 100 - 8                  # 3 Oath: below bar
+    _play(st, _vk("favonius_cut"))
+    assert st.enemies[0].hp == 100 - 14                 # 3 Oath: below bar
     led.oath["pyro"] = 4
-    _play(st, _vk("updraft"))
-    assert st.enemies[0].hp == 100 - 8 - 11
+    _play(st, _vk("favonius_cut"))
+    assert st.enemies[0].hp == 100 - 14 - 17
     hp = st.enemies[0].hp
     _play(st, _vk("oathsworn_strike"))                  # element-less
     assert st.enemies[0].hp == hp - (6 + 4)
@@ -626,7 +626,7 @@ def test_change_of_guard(varka):
     assert led.current == "pyro" and st.player.block == 0
 
 
-def test_rally_and_accord(varka):
+def test_rally(varka):
     st = _state(fang=False)
     led = _led(st)
     led.oath.update(pyro=1, hydro=2, electro=3, cryo=4)
@@ -635,21 +635,6 @@ def test_rally_and_accord(varka):
     led.current = "hydro"
     _play(st, _vk("rally_to_the_banner"))
     assert led.oath == {"pyro": 0, "hydro": 10, "electro": 0, "cryo": 0}
-    st.player.powers[V.DAWN_WINDS_MARCH] = 3
-    _play(st, _vk("four_winds_accord"))
-    assert led.oath == {"pyro": 3, "hydro": 3, "electro": 3, "cryo": 3}
-    assert st.player.block == 3                         # four events, one hydro
-
-
-def test_unfurled_banner(varka):
-    st = _state(fang=False)
-    _play(st, _vk("unfurled_banner"))                   # none there: nothing
-    assert st.player.hand == []
-    asc = loader.get_card(V.ASCENSION_ID)
-    st.player.discard_pile.append(asc)
-    _play(st, _vk("unfurled_banner"))
-    assert st.player.hand == [asc] and asc.free_this_turn
-    assert combat.card_cost(st, asc) == 0
 
 
 def test_add_knight(varka):
@@ -679,7 +664,7 @@ def test_the_counts(varka):
     _play(st, _vk("tailwind_guard"))
     assert st.player.block == 6
     _play(st, _vk("squall"))
-    _play(st, _vk("updraft"))
+    _play(st, _vk("favonius_cut"))
     block = st.player.block
     _play(st, _vk("lisa_violet_arc"))                   # 4 + 3 x 2 Attacks
     assert st.player.block == block + 10

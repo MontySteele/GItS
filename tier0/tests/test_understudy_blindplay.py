@@ -6755,10 +6755,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-377` ADDED `Swirl` to the page beside `Hexerei`, which R276
         # pick 2 retired with its tip.
         # Reworded 2026-10-01 (the open-Oath round).
+        # Element identities (2026-10-01): the flat damage is unblockable.
         "Swirl": [" meets a fresh aura: deal ",
-                  " damage to ALL enemies and copy it, spent, onto the "
-                  "others. ",
-                  "Enemies already wearing it are refreshed."],
+                  " unblockable damage to ALL enemies and copy it, spent, "
+                  "onto the others. ",
+                  "Enemies wearing it refresh."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
         # Strike is written against by name, met by a seat holding neither.
         # `EB-516` moved the condition to the board and `EB-749` moved it on
@@ -7746,7 +7747,7 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         # The element port (2026-09-28) moved both, in the C# and here.
         "Swirl": [" meets a fresh aura: deal ",
                   " damage to ALL enemies and copy it, spent, onto the "
-                  "others. Enemies already wearing it are refreshed."],
+                  "others. Enemies wearing it refresh."],
         # `EB-613`: the price leads. Both copies moved in one commit, which
         # is what this pin is for.
         "Crystallize": [". The aura stays, spent."],

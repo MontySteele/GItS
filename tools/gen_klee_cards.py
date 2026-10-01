@@ -204,6 +204,11 @@ class CharacterProfile:
         answer for the whole card: a row whose damage clauses disagree is a
         BLOCKER (`blocked_reason`), not a silent majority vote.
         """
+        if varka_kind_owns_element(card):
+            # Element identities (2026-10-01): the kind's own hit carries its
+            # element (`VARKA_KIND_ELEMENTS`), so the cadence's Anemo is not
+            # this card's.
+            return False
         declared = [effect["applies_element"]
                     for effect in _effects_everywhere(card)
                     if effect.get("op") == "damage"
@@ -1158,6 +1163,11 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
         if (effect.get("op") == "apply_aura"
                 and effect.get("element") in AURA_KEYWORD_BY_ELEMENT):
             elements.append(effect["element"])
+        # Element identities (2026-10-01): a `varka` kind's own hit carries
+        # its element (`VARKA_KIND_ELEMENTS`), so the face is tagged with it.
+        if effect.get("op") == "varka":
+            elements.extend(el for el in VARKA_KIND_ELEMENTS.get(
+                effect.get("kind"), ()) if el in AURA_KEYWORD_BY_ELEMENT)
     return list(dict.fromkeys(elements))
 
 
@@ -1198,6 +1208,64 @@ def element_tag_elements_for(card: dict, profile: "CharacterProfile",
     return elements
 
 
+def varka_kind_owns_element(card: dict) -> bool:
+    """Does this character row hit ONLY through `varka` kinds that carry an
+    element of their own (`VARKA_KIND_ELEMENTS`)?
+
+    ELEMENT IDENTITIES (2026-10-01; the Varka round's "faces that mislead":
+    Cavalry Charge was tagged Anemo and hits as the current element). Such a
+    card's hits each carry their kind's element through `HitElement.Carry`,
+    so the cadence's Anemo is not the card's: it declares `Element.None`
+    (`declares_no_element`) and is tagged with the kinds' elements instead
+    (`aura_elements_for`). A row with a `damage` op of its own (Northwind
+    Avatar, Four Winds' Ascension) keeps the cadence.
+    """
+    if is_companion(card):
+        return False
+    effects = _effects_everywhere(card)
+    if any(e.get("op") == "damage" and e.get("target") != "self"
+           for e in effects):
+        return False
+    return any(e.get("op") == "varka" and e.get("kind") in VARKA_KIND_ELEMENTS
+               for e in effects)
+
+
+#: The four elements Varka keeps an Oath in (`VarkaOathLedger.Elements`).
+VARKA_OATH_ELEMENTS = ("pyro", "hydro", "electro", "cryo")
+
+
+def varka_switch_element(card: dict,
+                         profile: "CharacterProfile") -> str | None:
+    """The element playing this Varka row would make his current element.
+
+    ELEMENT IDENTITIES sec.7 (2026-10-01): "The card's hover says 'Switches
+    your element to Pyro' when it would." A Knight sets its own element at
+    the top of its play (Noelle's Geo sets none); any other card of his makes
+    current the LAST Oath element it applies (the open Oath), read off the
+    row in effect order: an `apply_aura`, or a `varka` kind's own hit
+    (`VARKA_KIND_ELEMENTS`, so Tempest ends on Electro). A card that applies
+    his CURRENT element (Favonius Drill, Cavalry Charge, Pathfinder's Mark)
+    switches nothing. Whether it switches NOW (a different element is
+    current, no Unwavering Banner for a non-Knight) is
+    `ArmKeywordTips.ForElementSwitch`'s live question.
+    """
+    if profile.character_id != "varka":
+        return None
+    if is_companion(card):
+        element = card.get("element")
+        return element if element in VARKA_OATH_ELEMENTS else None
+    last = None
+    for effect in _effects_everywhere(card):
+        if (effect.get("op") == "apply_aura"
+                and effect.get("element") in VARKA_OATH_ELEMENTS):
+            last = effect["element"]
+        elif effect.get("op") == "varka":
+            for element in VARKA_KIND_ELEMENTS.get(effect.get("kind"), ()):
+                if element in VARKA_OATH_ELEMENTS:
+                    last = element
+    return last
+
+
 def declares_no_element(card: dict, profile: "CharacterProfile") -> bool:
     """Does this CHARACTER row declare that its own damage applies NOTHING?
 
@@ -1218,6 +1286,8 @@ def declares_no_element(card: dict, profile: "CharacterProfile") -> bool:
     """
     if is_companion(card):
         return False
+    if varka_kind_owns_element(card):
+        return True
     declared = [effect["applies_element"]
                 for effect in _effects_everywhere(card)
                 if effect.get("op") == "damage"
@@ -2453,8 +2523,6 @@ VARKA_KINDS = {
     "oath_per_cryo_enemy": "OathPerCryoEnemy",
     "change_of_guard": "ChangeOfGuard",
     "rally": "Rally",
-    "accord": "Accord",
-    "unfurled_banner": "UnfurledBanner",
     # THE EXPANSION (2026-10-01, review/active/varka-expansion-2026-10-01.md
     # sec.3): one method per rule the sheet's grammar cannot spell.
     "pathfinders_mark": "PathfindersMark",
@@ -2465,10 +2533,16 @@ VARKA_KINDS = {
     "awakening": "Awakening",
     "draw_per_enemy": "DrawPerEnemy",
     "cleanse": "Cleanse",
-    "apply_current_element_all": "ApplyCurrentElementAll",
     "crosscurrent": "Crosscurrent",
     "double_current_oath": "DoubleCurrentOath",
     "tempest": "Tempest",
+    # ELEMENT IDENTITIES (2026-10-01, review/active/varka-element-identities-
+    # 2026-10-01.md sec.3): Electro's fixed-element hits and Violet Storm's
+    # discard-your-hand. Accord, Unfurled Banner and Pressure Front's
+    # `apply_current_element_all` left with their cards.
+    "electro_strike": "ElectroStrike",
+    "electro_all": "ElectroAll",
+    "violet_storm": "VioletStorm",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2481,16 +2555,37 @@ VARKA_KIND_FIELDS = {
     "thundering_verdict": ("base", "per"),
     "awakening": ("base", "amount"),
     "tempest": ("base",),
+    "electro_strike": ("base",),
+    "electro_all": ("base",),
+    "violet_storm": ("base",),
 }
 #: A kind that aims at the enemy the card was played on.
 VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
                      "pathfinders_mark", "current_element_strike",
                      "blazing_charge", "glacial_edict", "crosscurrent",
-                     "tempest"}
+                     "tempest", "electro_strike"}
 #: A kind that reaches ALL enemies (the expansion): the row says
 #: `target: all_enemies`, which makes the card's TargetType AllEnemies.
-VARKA_ALL_KINDS = {"thundering_verdict", "awakening",
-                   "apply_current_element_all"}
+VARKA_ALL_KINDS = {"thundering_verdict", "awakening", "electro_all"}
+#: A kind whose hits land on random enemies (Violet Storm): the row says
+#: `target: random_enemy`, which makes the card's TargetType AllEnemies.
+VARKA_RANDOM_KINDS = {"violet_storm"}
+#: THE ELEMENT A KIND'S OWN HIT CARRIES (element identities, 2026-10-01; the
+#: round record's "faces that mislead"). A card whose hits are all such kinds
+#: declares no Anemo of its own (`varka_kind_owns_element`) and is tagged with
+#: these instead (`aura_elements_for`). `current_element_strike` (Cavalry
+#: Charge) carries his CURRENT element, so it is tagged with none and its face
+#: says "current element". Tempest's four, in its printed order.
+VARKA_KIND_ELEMENTS = {
+    "blazing_charge": ("pyro",),
+    "thundering_verdict": ("electro",),
+    "awakening": ("electro",),
+    "tempest": ("pyro", "hydro", "cryo", "electro"),
+    "electro_strike": ("electro",),
+    "electro_all": ("electro",),
+    "violet_storm": ("electro",),
+    "current_element_strike": (),
+}
 #: A kind that AIMS but whose row needs no `target:` of its own, because the
 #: card's own damage op already aims it (Ascension, Northwind Avatar).
 VARKA_IMPLIED_AIM_KINDS = {"ascension_hit", "avatar_hit"}
@@ -3560,13 +3655,16 @@ APPLY_POWERS = {
     "vk_assembly_at_the_cathedral": ("AssemblyAtTheCathedralPower", None,
         "Whenever you play a [gold]Knight[/gold], deal {X} damage to a random "
         "enemy."),
+    # ELEMENT IDENTITIES (2026-10-01): Wildfire Oath re-aimed to one big hit
+    # (sec.5); Retaliating Tide in Unbroken Tide's place (sec.4).
     "vk_wildfire_oath": ("WildfireOathPower", None,
-        "While your [gold]current element[/gold] is Pyro, your "
-        "[gold]Swirls[/gold]' damage hits ALL enemies, plus {X} for each Pyro "
+        "While your [gold]current element[/gold] is Pyro, your first Attack "
+        "each turn deals additional damage equal to your Pyro "
         "[gold]Oath[/gold]."),
-    "vk_unbroken_tide": ("UnbrokenTidePower", None,
-        "While your [gold]current element[/gold] is Hydro, your "
-        "[gold]Block[/gold] is not removed at the start of your turn."),
+    "vk_retaliating_tide": ("RetaliatingTidePower", None,
+        "At the end of your turn, deal damage equal to your "
+        "[gold]Block[/gold], up to your Hydro [gold]Oath[/gold], to a random "
+        "enemy."),
     "vk_absolute_zero": ("AbsoluteZeroPower", None,
         "While your [gold]current element[/gold] is Cryo, your "
         "[gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and "
@@ -4406,6 +4504,14 @@ CARD_FIELDS = {
     # single-player offer. Prototype arm rows only, and `True` only -- see
     # `card_level_reason`.
     "multiplayer",
+    # VARKA, ELEMENT IDENTITIES (2026-10-01): Chain Lightning's "Costs 1 less
+    # for each card you discarded this turn", Eviscerate's discount. A RATE
+    # the cost line reads, the shape `Card.cost_reduction_per_attack_this_turn`
+    # (Stomp) and `..._per_skill_this_turn` (Pinpoint) already have in the
+    # sim; emitted as the card's own `TryModifyEnergyCostInCombat` over
+    # `KokomiResources.DiscardsThisTurn` (MementoMori's count). A positive
+    # literal int on a numeric-cost row only (`card_level_reason`).
+    "cost_reduction_per_discard_this_turn",
 }
 
 
@@ -4467,6 +4573,16 @@ def card_level_reason(
             and card.get("rarity") == "basic"):
         return ("tags: [strike] on a basic row -- a basic names its tag with "
                 "basic_tag:, the starter's one answer (EB-543)")
+    # Element identities (2026-10-01): a discard discount is a positive
+    # literal rate on a card with a printed number to discount.
+    rate = card.get("cost_reduction_per_discard_this_turn")
+    if rate is not None:
+        if not isinstance(rate, int) or isinstance(rate, bool) or rate <= 0:
+            return ("cost_reduction_per_discard_this_turn must be a positive "
+                    "literal int")
+        if not isinstance(card.get("cost"), int):
+            return ("cost_reduction_per_discard_this_turn on an X or "
+                    "unprinted cost -- there is no number to discount")
     # `EB-643`. DUSK SAYS WHEN A PLAN LANDS, so it needs a Plan to be about,
     # and the value is literally `True` -- the `innate:` / `retain:`
     # precedent, where only true is a ruling and `false` would be a second
@@ -5091,6 +5207,7 @@ def blocked_reason(
             want_target = ("enemy" if kind in VARKA_AIMED_KINDS
                            and kind not in VARKA_IMPLIED_AIM_KINDS
                            else "all_enemies" if kind in VARKA_ALL_KINDS
+                           else "random_enemy" if kind in VARKA_RANDOM_KINDS
                            else None)
             if eff.get("target") != want_target:
                 return (f"varka {kind} takes target {want_target!r}, "
@@ -15100,7 +15217,8 @@ def emit(
         # VARKA's Favonius Drill: the current element lands on the chosen
         # enemy, so the card aims for the reason `apply_aura` does.
         if eff["op"] == "varka" and eff.get("target") in ("enemy",
-                                                           "all_enemies"):
+                                                           "all_enemies",
+                                                           "random_enemy"):
             target_type = TARGET_CS[eff["target"]]
             break
         # THE KOKOMI EXPANSION's Salt in the Wound reads the chosen enemy.
@@ -15644,7 +15762,15 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         )
 
     element_member = ""
-    if declines_element:
+    if declines_element and varka_kind_owns_element(card):
+        # Element identities (2026-10-01): the kinds carry their own element.
+        element_member = (
+            "\n    /// <summary>Its hits carry their own element (a `varka` kind),\n"
+            "    /// not the cadence's Anemo; declared rather than omitted, which\n"
+            "    /// would ask the character (<see cref=\"CatalystCadence.PrintedElement\"/>).</summary>\n"
+            "    public Element Element => Element.None;\n"
+        )
+    elif declines_element:
         # `EB-703`. THE ROW REFUSED THE CADENCE, and the refusal has to be
         # SAID rather than left unsaid: `CatalystCadence.PrintedElement` reads
         # a card that says nothing as "ask the character".
@@ -16084,6 +16210,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         for attach in stage_guest_tip_calls(card):
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
+        # ELEMENT IDENTITIES sec.7 (2026-10-01): a Varka card that would
+        # switch his current element says so while it would. A fact about
+        # THIS card on THIS board, so it sits with the riders above, read
+        # before the definitions of his words.
+        switch_element = varka_switch_element(card, profile)
+        if switch_element is not None:
+            tips_expr = (
+                "ArmKeywordTips.ForElementSwitch("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this, "
+                f"{ELEMENT_CS[switch_element]})")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc + rider_printed,
@@ -16217,6 +16353,27 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # into the arm that reads a target.
     wide_aim = wide_only_target(card)
     wide_target_member = ""
+    # VARKA, ELEMENT IDENTITIES (2026-10-01): Chain Lightning. The card prices
+    # ITSELF off the turn's discards, read live from the combat history (the
+    # count MementoMori reads), so no state outlives the turn and the
+    # end-of-turn flush, which is no `CardCmd.Discard`, counts nothing. The
+    # sim's twin is `combat.card_cost`'s `cost_reduction_per_discard_this_turn`.
+    discard_discount_member = ""
+    discount_rate = card.get("cost_reduction_per_discard_this_turn")
+    if discount_rate:
+        discard_discount_member = (
+            "\n\n    /// <summary>Sheet `cost_reduction_per_discard_this_turn: "
+            f"{int(discount_rate)}`: this card\n    /// costs {int(discount_rate)} less for each "
+            "card its owner discarded this turn.</summary>\n"
+            "    public override bool TryModifyEnergyCostInCombat(\n"
+            "        CardModel card, decimal originalCost, out decimal modifiedCost)\n"
+            "    {\n"
+            "        modifiedCost = originalCost;\n"
+            "        if (!ReferenceEquals(card, this) || originalCost <= 0m) return false;\n"
+            f"        modifiedCost = System.Math.Max(0m, originalCost - {int(discount_rate)}m\n"
+            "            * KokomiResources.DiscardsThisTurn(this));\n"
+            "        return true;\n"
+            "    }")
     if wide_aim is not None and target_type == TARGET_CS["enemy"]:
         wide_pred = predicate_cs(wide_aim["wide_if"])
         wide_target_member = (
@@ -16563,7 +16720,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{wide_target_member}{discard_discount_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

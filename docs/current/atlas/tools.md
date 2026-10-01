@@ -145,10 +145,10 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
 
 ## 4. Rulings that shaped it
 
-- **R67 / R68** — dead knobs deleted rather than marked, and the Furina
-  experiment scripts moved to `tools/archive/` keeping their hand-rolled seeds:
-  an archived one-shot is the record of a measurement, not a thing to re-run
-  (`tier0/DECISIONS.md:2065-2078`, `:2122-2160`; `tools/README.md:44-58`).
+- **R67 / R68** — dead knobs deleted rather than marked; an archived one-shot
+  is the record of a measurement, not a thing to re-run. The `tools/archive/`
+  directory itself was deleted 2026-10-01 (legacy hygiene); its scripts live
+  in git history.
 - **R69** — `lint_unique_names` extends to relic display names read out of the
   emitted C#, not a manifest; both sides of the settled clash are reserved
   (`tier0/DECISIONS.md:2190-2205`).
@@ -201,9 +201,7 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
   Kokomi's source arrives on a WHITE plate — fed to the same code it degrades
   every framing rule to frame-centring, silently reintroducing the B4 defect
   (`tools/README.md:37`; `gen_kokomi_stills.py:16-22`).
-- **`tools/archive/` scripts using `parent.parent` compute the repo root as
-  `tools/` and will not import until that line is fixed** (`tools/README.md:60-65`).
-  `GITS_ILSPY_TREE` is opt-in and env-only for the same class of reason: a
+- **`GITS_ILSPY_TREE` is opt-in** and env-only for the same class of reason: a
   persistent tree is decompiled game source outside `game_ref/`
   (`extract_base_game_pool.py:47-52`).
 - **Native stderr kills a PowerShell deploy even at exit 0** — `lint_constant_parity`

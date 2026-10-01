@@ -34,17 +34,16 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoVkCavalryCharge : CustomCardModel, IElementalCard, ICharacterCard
 {
-    /// <summary>Sheet: all Varka attacks apply Anemo (catalyst-grade cadence).</summary>
-    public Element Element => Element.Anemo;
+    /// <summary>Its hits carry their own element (a `varka` kind),
+    /// not the cadence's Anemo; declared rather than omitted, which
+    /// would ask the character (<see cref="CatalystCadence.PrintedElement"/>).</summary>
+    public Element Element => Element.None;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesAnemo };
-
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCurrentElement(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
+        ArmKeywordTips.ForCurrentElement(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_cavalry_charge");
 

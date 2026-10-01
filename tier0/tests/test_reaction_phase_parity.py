@@ -1183,16 +1183,19 @@ CO_TENANCY_LEDGER = {
             "`KleeMod`'s concat, deliberately, so an act cannot move a number "
             "the shipped end-of-turn docket has already drawn. NO SIM TWIN "
             "ORDERS IT: the arm is C# FIRST and tier0 has no stage",
-        ("Powers/Prototype/VarkaPowers.cs", "OathboundAegisPower"):
-            "QUARANTINED (the Varka expansion, 2026-10-01). Oathbound Aegis: "
-            "Block equal to his total Oath, up to its cap. THE ORDERING "
-            "QUESTION, answered: what it READS is the Oath ledger, which no "
-            "co-tenant of this broadcast writes (his relics' and powers' Oath "
-            "moves are play-time and turn-start). What it WRITES is unpowered "
-            "Block, read only by the sequencer's Bond of Life, as Sit Tight's "
-            "below; a power tenant runs ahead of the sequencer, and the sim "
-            "pays it at the same point (`varka_oath.turn_end`, beside Dusk, "
-            "after the hand's own end-of-turn triggers)",
+        ("Powers/Prototype/VarkaPowers.cs", "RetaliatingTidePower"):
+            "QUARANTINED (Varka element identities, 2026-10-01). Retaliating "
+            "Tide: min(his Block, his Hydro Oath) to a random enemy. THE "
+            "ORDERING QUESTION, answered: what it READS is his Block and the "
+            "Oath ledger. The one Varka tenant that WRITES his Block at turn "
+            "end, Oathbound Aegis, was staged out of this broadcast into the "
+            "strictly earlier BeforeSideTurnEndEarly in the same commit, so "
+            "the Tide reads the Aegis's Block, the order the sim pays them in "
+            "(`varka_oath.turn_end`: the Aegis, then the Tide). Sit Tight "
+            "and the Furina stage belong to other characters. What it WRITES "
+            "is enemy HP, element-less and unpowered; a power tenant runs "
+            "ahead of the model-driven sequencer, whose volleys are other "
+            "kits' and re-read the living enemies per hit",
         ("Powers/Prototype/KleeExpansionPowers.cs", "SitTightPower"):
             "QUARANTINED (the Klee overhaul, R276). Sit Tight's delayed "
             "Block: 4 per copy if rule 7's first counter is still 0, then the "
@@ -1263,6 +1266,11 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
+        ("Powers/Prototype/VarkaPowers.cs", "OathLeftPower"):
+            "QUARANTINED (Varka element identities, 2026-10-01). The "
+            "left-element flag beside his badge expires with his turn. "
+            "Removes itself and touches nothing a co-tenant reads. No sim "
+            "twin: it is a display of the ledger's `LeftElement`",
         ("Powers/Prototype/VarkaPowers.cs", "EyeWallPower"):
             "QUARANTINED (the Varka expansion, 2026-10-01). Eye Wall's 'this "
             "turn', Grand Master's Order's boundary exactly. Removes itself "

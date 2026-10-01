@@ -387,6 +387,31 @@
       "owner": "klee"
     },
     {
+      "id": "KLEEMOD-PROTO_VK_FOUR_WINDS_ACCORD",
+      "class": "RetiredProtoVkFourWindsAccord",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_VK_PRESSURE_FRONT",
+      "class": "RetiredProtoVkPressureFront",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_VK_UNBROKEN_TIDE",
+      "class": "RetiredProtoVkUnbrokenTide",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_VK_UNFURLED_BANNER",
+      "class": "RetiredProtoVkUnfurledBanner",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_VK_UPDRAFT",
+      "class": "RetiredProtoVkUpdraft",
+      "owner": "klee"
+    },
+    {
       "id": "KLEEMOD-RISING_TIDE",
       "class": "RetiredRisingTide",
       "owner": "furina"
