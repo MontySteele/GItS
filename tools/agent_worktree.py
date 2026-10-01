@@ -19,13 +19,19 @@ gitignored asset tree is FOLLOWED and deleted by a worktree teardown, and doing
 it once cost this repo `game_ref/` twice. This tool creates the directory and
 copies ONE file into it, by value.
 
-IT REFUSES WHILE A SEAT IS LIVE IN THIS CHECKOUT. `understudy/logs/embark-*.json`
+A LIVE SEAT IS NAMED, NOT REFUSED (2026-10-01). `understudy/logs/embark-*.json`
 is the manifest of an open run and `--teardown` is what closes it; a sidecar
 whose reversibility ledger still carries APPLIED rows, on a lane whose bridge
-port answers, is a game that is UP. Adding a worktree in that state is how a
-session ends up with two checkouts both thinking they own lane 1's profile --
-and `deploy_proto.ps1` already refuses for the same reason, by image name,
-because one install means one deployed build for every lane.
+port answers, is a game that is UP. This tool used to refuse while one was,
+so that no second checkout would come to think it owned the lane's profile.
+But a sibling directory touches neither the install nor the lane: the two
+things that change the instrument under a running round are a DEPLOY (one
+install serves every lane) and a pull in the main checkout. Both still refuse
+or are forbidden where they happen -- `tools/deploy_round.py` refuses while
+any game process is up and outside the main checkout, `deploy.ps1` and
+`deploy_proto.ps1` refuse by image name -- so this tool prints one line
+naming the live lanes and goes on. `--allow-live-lane` is still accepted, and
+does nothing.
 """
 from __future__ import annotations
 
@@ -149,6 +155,15 @@ def live_lanes(root: Path = REPO) -> list[str]:
     return out
 
 
+def live_lane_note(lanes: list[str]) -> str:
+    """The one line printed when a seat is up. Not a refusal: a worktree does
+    not touch the install, so do not deploy or pull in the main checkout
+    until the round ends."""
+    return ("note: seat lane(s) live -- " + "; ".join(lanes)
+            + ". A worktree is fine; do not deploy or pull in the main "
+              "checkout until they are torn down.")
+
+
 def read_list(task: str) -> list[str]:
     return [*ALWAYS, *READ_LISTS[task]]
 
@@ -168,7 +183,8 @@ def main(argv: list[str]) -> int:
                     help="which of CLAUDE.md's read orders to print")
     ap.add_argument("--no-fetch", action="store_true")
     ap.add_argument("--allow-live-lane", action="store_true",
-                    help="proceed even with a seat up in this checkout")
+                    help="accepted for old command lines; does nothing (a "
+                         "live lane is named, never refused)")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the plan and the read list, create nothing")
     ap.add_argument("--oneline", action="store_true")
@@ -181,13 +197,8 @@ def main(argv: list[str]) -> int:
     lanes = live_lanes()
     if primary != REPO:
         lanes += live_lanes(primary)
-    if lanes and not args.allow_live_lane:
-        print("REFUSED: a seat is live in this checkout -- " + "; ".join(lanes))
-        print("  Tear it down first (python -m understudy.embark --teardown "
-              "[--lane N]); one install means one deployed build for every "
-              "lane, and a second checkout cannot own the same profile.")
-        print("  --allow-live-lane if you have read that and it is fine.")
-        return 2
+    if lanes:
+        print(live_lane_note(lanes))
 
     if target.exists():
         print(f"REFUSED: {target} already exists. Retire it with "
