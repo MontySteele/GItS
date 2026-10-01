@@ -900,7 +900,8 @@ ARM_KEYWORDS = (
     # rules -- a table row for a word no rule has is a tooltip waiting to
     # explain a mechanic that is not there.
     ArmKeyword("Mend", ("Mend", "Mends"), "ArmKeywordTips.ForMend"),
-    ArmKeyword("Plan", ("Plan", "Plans"), "ArmKeywordTips.ForPlan"),
+    # "plan" is the status batch's "Or plan:" (2026-10-01), the same word.
+    ArmKeyword("Plan", ("Plan", "Plans", "plan"), "ArmKeywordTips.ForPlan"),
     # Kokomi's FOURTH, `EB-643` (R265). `Dusk` is the pool pass's one new word
     # and it is a rule about WHEN: the Bake-Kurage carries a Dusk Plan out at
     # the end of the turn it was written on, before the enemies act, instead of
@@ -908,7 +909,8 @@ ARM_KEYWORDS = (
     # because that tip is at its 135-character ceiling and carries five
     # findings already -- and because a player meeting the word on a card needs
     # the definition beside the word. NO PLURAL: it names one moment.
-    ArmKeyword("Dusk", ("Dusk",), "ArmKeywordTips.ForDusk"),
+    # "dusk" is the status batch's "Or dusk plan:" (2026-10-01).
+    ArmKeyword("Dusk", ("Dusk", "dusk"), "ArmKeywordTips.ForDusk"),
     # Kokomi's THIRD, `EB-625`. `Tamakushi Casket` is her relic, and
     # `Shell Guard` is written against it by name -- "whenever the Tamakushi
     # Casket strikes" -- with nothing on screen saying what the Casket is or
@@ -1631,7 +1633,10 @@ BLOCK_NEXT_TURN_FIELDS = {"op", "amount"}
 # reference resolves against the SHEET at generation time instead (the
 # archetype/rarity data lives only there), and every resolved member must
 # itself be a generated class -- both enforced in blocked_reason.
-ADD_CARD_CLASSES = {"confiscated": "Confiscated"}
+ADD_CARD_CLASSES = {"confiscated": "Confiscated",
+                    # THE STATUS BATCH (Flotsam Surge): the base game's Dazed,
+                    # the sim's `statuses.make_status("dazed")`.
+                    "status_dazed": "MegaCrit.Sts2.Core.Models.Cards.Dazed"}
 # add_card's own field totality. EB-90: `sly` used to sit at the head of this
 # set under CARD_FIELDS' comment about it, copied whole from there. `sly` is a
 # CARD-level key -- the discard branch of a card -- and no sheet has ever put
@@ -2737,6 +2742,13 @@ PLAN_CLAUSE_KINDS = {
     # Energy [and draws 1 card]", every player in the fight.
     "each_player_energy": "EachPlayerEnergy",
     "each_player_draw": "EachPlayerDraw",
+    # THE STATUS BATCH (2026-10-01). Plans that read the hand just drawn:
+    # Kelp Wall's Block per status or curse, Tidecleanse's exhaust,
+    # Sea Glass Harvest's transform, Turning Tide's discard-and-draw.
+    "block_per_status_in_hand": "BlockPerStatusInHand",
+    "exhaust_statuses_in_hand": "ExhaustStatusesInHand",
+    "transform_statuses_in_hand": "TransformStatusesInHand",
+    "discard_and_draw": "DiscardAndDraw",
     "apply_power": None,
 }
 
@@ -2755,7 +2767,10 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        # Kokomi core pass, Chain of Command's switch.
                        "first_companion_free",
                        # THE EXPANSION: "Double your Block" prints no size.
-                       "double_block"}
+                       "double_block",
+                       # THE STATUS BATCH: "every status and curse" and "any
+                       # number" print no size.
+                       "transform_statuses_in_hand", "discard_and_draw"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2814,7 +2829,10 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  "energy_if_alone", "damage_if_alone",
                  "block_per_attacking_enemy", "double_block",
                  # POOL COMPLETION: Tactical Relay names the carry-out turn.
-                 "each_player_energy", "each_player_draw"}
+                 "each_player_energy", "each_player_draw",
+                 # THE STATUS BATCH: each reads the hand just drawn.
+                 "block_per_status_in_hand", "exhaust_statuses_in_hand",
+                 "transform_statuses_in_hand", "discard_and_draw"}
 
 #: R276. Feigned Retreat's second printed number ("deal 14 instead") -- the
 #: hit when she lost no HP since the Plan was written. The twin of
@@ -2912,6 +2930,8 @@ PLAN_UPGRADE_VARS = {
     "plan_draw": "PlanCards",
     # R276, Battle Plan's per-Attack bonus.
     "plan_attack_bonus": "PlanAttackBonus",
+    # THE STATUS BATCH, Tidecleanse's "up to N".
+    "plan_exhaust": "PlanExhaust",
 }
 
 #: R276. A `plan_*` key that moves a SECOND number on a clause another key
@@ -3368,6 +3388,14 @@ APPLY_POWERS = {
     "kk_kurage_canopy": ("KurageCanopyPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold], gain {X} Block."),
+    # THE STATUS BATCH (2026-10-01). Abyssal Salvage and the Block its
+    # upgrade adds; classes in KokomiStatusBatch.cs.
+    "kk_abyssal_salvage": ("AbyssalSalvagePower", None,
+        "Whenever a status or curse is exhausted, the "
+        "[gold]Casket[/gold] gains {X}."),
+    "kk_abyssal_salvage_plus": ("AbyssalSalvagePlusPower", None,
+        "Whenever a status or curse is exhausted, the "
+        "[gold]Casket[/gold] gains {X} and you gain 2 Block."),
     # POOL COMPLETION (2026-10-01). Classes in KokomiPoolCompletion.cs.
     "kk_patient_tide": ("PatientTidePower", None,
         "At the end of your turn, keep up to {X} unspent "
@@ -8148,7 +8176,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                                   and e.get("kind") == "shoal_call")
                               # POOL COMPLETION: Casting Agent's pick.
                               or e["op"] == "stage_casting_agent"
-                              for e in effects),
+                              for e in effects)
+        # THE STATUS BATCH: Sea Glass Harvest's Sea Glass+ is read off the
+        # writing card's IsUpgraded when the Plan is carried out.
+        or any(e.get("op") == "transform_statuses_in_hand"
+               for e in plan_line),
         # VARKA (Knights' Roll Call+): the player chooses the Knight, read at
         # play time off `IsUpgraded`; the face carries its own
         # `{IfUpgraded:show:...}` swap.
@@ -14364,8 +14396,41 @@ def _face_riders(card: dict, text: str) -> str:
     `EB-293`. Both are live defects from [USER]'s own play of the arm.
     (`EB-392` made it three with the Hexerei family tag; R276 retired the tag.)
     """
-    return plan_line_on_its_own_line(
+    text = plan_line_on_its_own_line(
         _plan_only_line(card, _dedupe_printed_exhaust(card, text)))
+    return plan_line_says_or(card, text)
+
+
+#: THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-2026-10-01.md
+#: sec.3, pick 2): a broken Plan clause, as `plan_line_on_its_own_line` leaves
+#: it, and its Dusk form.
+_BROKEN_PLAN_CLAUSE = re.compile(
+    r"\n(\[gold\]Dusk\[/gold\] )?\[gold\]Plan\[/gold\]:")
+
+
+def plan_line_says_or(card: dict, text: str) -> str:
+    """Every Plan line's keyword prints "Or plan:" ("Or dusk plan:").
+
+    [USER], 2026-10-01: "Agreed on the Plan text change." Both seats on the
+    78-card build planned a card expecting its now-line too; the face put the
+    Plan line under the now-line with nothing between them. ONE place, beside
+    the line break, so every row (the starter's Kurage's Oath and Slack Water
+    included) gets it and the sheet keeps its prose.
+
+    EVERY ROW, PLAN-ONLY ONES TOO, the paper's "on every card" read
+    literally (provenance note): every Dusk row is Plan-only, so "Or dusk
+    plan:" exists only there. A Plan-only face reads "Play on the
+    Bake-Kurage." then "Or plan: ...".
+    """
+    if not card.get("plan"):
+        return text
+
+    def _or(m: re.Match) -> str:
+        if m.group(1):
+            return "\nOr [gold]dusk[/gold] [gold]plan[/gold]:"
+        return "\nOr [gold]plan[/gold]:"
+
+    return _BROKEN_PLAN_CLAUSE.sub(_or, text)
 
 
 #: A Plan CLAUSE, not a mention of the word: `[gold]Plan[/gold]:` (or its Dusk

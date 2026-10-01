@@ -353,6 +353,9 @@ MIRRORED: dict[str, object] = {
     # THE EXPANSION, BATCH ONE (2026-09-29): The Long Game's threshold.
     "KokomiOverhaulLaw.LongGameWaiting":
         C.KOKOMI_EXPANSION_LONG_GAME_WAITING,
+    # THE STATUS BATCH (2026-10-01): Abyssal Salvage+'s Block per stack.
+    "AbyssalSalvagePlusPower.BlockPerStack":
+        C.KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK,
     # POOL COMPLETION (2026-10-01): the hand limit Kurage School, Casting
     # Agent and Watatsumi Resistance stop at.
     "KokomiPoolCompletion.MaxHandSize": C.MAX_HAND_SIZE,

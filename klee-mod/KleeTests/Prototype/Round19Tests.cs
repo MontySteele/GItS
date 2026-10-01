@@ -275,28 +275,7 @@ public class Round19Tests
     // waiting buys the damage and nothing more. That is the card's shape and a
     // design reading, and no payment moves for it.
 
-    // R276 PICK 1 REWROTE THE CARD to the halves rule: 6 Block now, and the
-    // Plan is one hit whose size reads whether she was hurt since writing it.
-
-    [Fact]
-    public void Feigned_retreats_plan_is_one_hit_that_reads_her_hp()
-    {
-        var card = new ProtoKkFeignedRetreat();
-        var clause = Assert.Single(card.PlanClauses);
-
-        Assert.Equal(KokomiPlan.Kind.DamageIfUnhurt, clause.Kind);
-        Assert.Equal(9, clause.Amount);
-        Assert.Equal(14, clause.Alt);
-        Assert.Equal(KokomiPlan.Aim.FrontEnemy, clause.Aim);
-        // Stamped when WRITTEN, never on the card's own list.
-        Assert.Null(clause.WrittenHp);
-
-        var face = string.Join(" ", Il.Strings(
-            Il.Method("ProtoKkFeignedRetreat", "get_Localization")));
-        // THE 2026-09-25 TEXT PASS: "Deal 9 damage, or 14 if you lost no HP
-        // since playing this." -- one sentence, the same stamp.
-        Assert.Contains("if you lost no HP since playing this", face);
-    }
+    // Feigned Retreat's pin left with the card (the status batch, 2026-10-01).
 
     [Fact]
     public void A_planned_block_is_paid_powered_and_is_the_number_on_the_line()

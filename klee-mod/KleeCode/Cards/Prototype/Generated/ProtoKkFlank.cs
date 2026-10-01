@@ -51,7 +51,7 @@ public sealed class ProtoKkFlank : CustomCardModel, IElementalCard, ICharacterCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flank"),
-        ("description", "Deal {Damage:diff()} damage.\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to each enemy that intended to attack when you wrote this."),
+        ("description", "Deal {Damage:diff()} damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} damage to each enemy that intended to attack when you wrote this."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

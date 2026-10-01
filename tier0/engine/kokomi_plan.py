@@ -94,6 +94,10 @@ PLAN_KINDS = frozenset((
     # POOL COMPLETION (2026-10-01), Tactical Relay: "Each player gains 1
     # Energy [and draws 1 card]". See `EACH_PLAYER_ENERGY`.
     "each_player_energy", "each_player_draw",
+    # THE STATUS BATCH (2026-10-01): four clauses that read the hand just
+    # drawn. See `BLOCK_PER_STATUS_IN_HAND` and the three beside it.
+    "block_per_status_in_hand", "exhaust_statuses_in_hand",
+    "transform_statuses_in_hand", "discard_and_draw",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -117,6 +121,8 @@ PLAN_AMOUNTLESS_OPS = frozenset((
     "first_companion_free",
     # THE EXPANSION: Brace for the Tide's "Double your Block" prints no size.
     "double_block",
+    # THE STATUS BATCH: "every status and curse" and "any number".
+    "transform_statuses_in_hand", "discard_and_draw",
 ))
 
 #: The two debuffs a Plan may apply. `KokomiPlan.PLAN_APPLY_POWERS`' twin.
@@ -219,7 +225,33 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            "block_per_attacking_enemy", "double_block",
                            # POOL COMPLETION: Tactical Relay's two clauses
                            # name the carry-out turn for every player.
-                           "each_player_energy", "each_player_draw"))
+                           "each_player_energy", "each_player_draw",
+                           # THE STATUS BATCH: each reads the hand just
+                           # drawn, which only a Plan can see.
+                           "block_per_status_in_hand",
+                           "exhaust_statuses_in_hand",
+                           "transform_statuses_in_hand",
+                           "discard_and_draw"))
+
+#: THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-2026-10-01.md).
+#: Kelp Wall's "plus 3 for each status or curse in your hand", Tidecleanse's
+#: "Exhaust up to 2 [3]", Sea Glass Harvest's transform and Turning Tide's
+#: "Discard any number of cards, then draw that many". "In your hand" is the
+#: hand just drawn, read when the clause runs. `KokomiPlan.Kind.
+#: BlockPerStatusInHand` and the three beside it are the twins; the bodies are
+#: `KokomiStatusBatch`.
+BLOCK_PER_STATUS_IN_HAND = "block_per_status_in_hand"
+EXHAUST_STATUSES_IN_HAND = "exhaust_statuses_in_hand"
+TRANSFORM_STATUSES_IN_HAND = "transform_statuses_in_hand"
+DISCARD_AND_DRAW = "discard_and_draw"
+#: Abyssal Salvage: "Whenever a status or curse is exhausted, the Casket gains
+#: 1 [and you gain 2 Block]." The upgraded card installs `_PLUS` instead
+#: (`upgraded_power`). Read at `refpowers.after_card_exhausted`.
+ABYSSAL_SALVAGE = "kk_abyssal_salvage"
+ABYSSAL_SALVAGE_PLUS = "kk_abyssal_salvage_plus"
+ABYSSAL_SALVAGE_PLUS_BLOCK = C.KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK
+#: Sea Glass Harvest's token, in no pool. `SeaGlass.cs` is the twin.
+SEA_GLASS = "kk_sea_glass"
 
 #: POOL COMPLETION (2026-10-01), TACTICAL RELAY: "Plan: Each player gains 1
 #: Energy [and draws 1 card]." Every player in the fight, Kokomi included.
@@ -504,6 +536,8 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
             allowed.add("times")
         if op == "damage_if_unhurt":
             allowed.add(UNHURT_FIELD)
+        if op == TRANSFORM_STATUSES_IN_HAND:
+            allowed.add("upgraded")      # the `upgraded_grant` key's flag
         unknown = set(eff) - allowed
         if unknown:
             return (f"plan clause {op} field(s) {sorted(unknown)} "
@@ -1772,8 +1806,124 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         _replay(state, entry.card)
     elif op == PLAY_COPY_OF_COMPANION:
         _play_copy(state, entry.card)
+    elif op == BLOCK_PER_STATUS_IN_HAND:
+        block_per_status(state, amount)
+    elif op == EXHAUST_STATUSES_IN_HAND:
+        exhaust_statuses(state, amount)
+    elif op == TRANSFORM_STATUSES_IN_HAND:
+        transform_statuses(state, bool(clause.get("upgraded")))
+    elif op == DISCARD_AND_DRAW:
+        discard_and_draw(state)
     else:                                   # unreachable: shape-checked at load
         raise ValueError(f"unknown plan clause {op!r}")
+
+
+# ---------------------------------------------------------------------------
+# THE STATUS BATCH (2026-10-01) -- the twins of `KokomiStatusBatch`
+# ---------------------------------------------------------------------------
+
+def is_status_or_curse(card: Optional[Card]) -> bool:
+    """A status or a curse. `Card.is_junk` reads rarity, and an
+    enemy-injected status is built at rarity "basic" with type "status"
+    (`statuses.make_status`), so both are asked. `KokomiStatusBatch.
+    IsStatusOrCurse` reads the card's type."""
+    return card is not None and (card.type in ("status", "curse")
+                                 or card.is_junk)
+
+
+def statuses_in_hand(state: CombatState) -> list[Card]:
+    return [c for c in state.player.hand if is_status_or_curse(c)]
+
+
+def block_per_status(state: CombatState, rate: int) -> int:
+    """KELP WALL: "plus 3 for each status or curse in your hand". Powered,
+    the flat planned Block's funnel."""
+    n = len(statuses_in_hand(state))
+    if n <= 0 or rate <= 0:
+        state.emit("plan_kelp_wall", statuses=n, amount=0)
+        return 0
+    p = state.player
+    gained = powers.modify_block_gained(p, rate * n)
+    if gained:
+        p.block += gained
+        state.emit("block", amount=gained)
+    state.emit("plan_kelp_wall", statuses=n, amount=gained)
+    return gained
+
+
+def exhaust_statuses(state: CombatState, cap: int) -> int:
+    """TIDECLEANSE: "Exhaust up to 2 [3] statuses or curses in your hand."
+    Every one when she holds that many or fewer. When she holds more, the
+    player chooses in the mod; this engine takes them in hand order (an
+    INSTRUMENT SURFACE in `_worst_card`'s sense: every status is a clog)."""
+    from tier0.engine import effects, refpowers     # late import: cycle
+    victims = statuses_in_hand(state)[:max(0, cap)]
+    for card in victims:
+        if effects.remove_instance(state.player.hand, card):
+            refpowers.exhaust_card(state, card)
+    state.emit("plan_tidecleanse", exhausted=len(victims))
+    return len(victims)
+
+
+def sea_glass_card(upgraded: bool = False) -> Card:
+    """Sea Glass: 0, "Gain 1 [2] Energy. Exhaust." In no pool."""
+    return Card(id=SEA_GLASS + ("+" if upgraded else ""), name="Sea Glass",
+                cost=0, type="skill", rarity="token", exhaust=True,
+                effects=[{"op": "energy", "amount": 2 if upgraded else 1}])
+
+
+def transform_statuses(state: CombatState, upgraded: bool) -> int:
+    """SEA GLASS HARVEST: "Transform every status and curse in your hand into
+    Sea Glass [Sea Glass+]." In place, as `CardCmd.Transform` swaps a card
+    where it stands."""
+    hand = state.player.hand
+    n = 0
+    for i, card in enumerate(list(hand)):
+        if is_status_or_curse(card):
+            hand[i] = sea_glass_card(upgraded)
+            n += 1
+    state.emit("plan_sea_glass", transformed=n, upgraded=upgraded)
+    return n
+
+
+def discard_and_draw(state: CombatState) -> int:
+    """TURNING TIDE: "Discard any number of cards, then draw that many."
+    The player chooses in the mod (Gambler's Brew's screen). This engine
+    discards every status and curse in hand and nothing else (an INSTRUMENT
+    SURFACE; the stock pilot is not taught to judge the rest)."""
+    from tier0.engine import effects                # late import: cycle
+    victims = statuses_in_hand(state)
+    for card in victims:
+        if effects.remove_instance(state.player.hand, card):
+            state.player.discard_pile.append(card)
+            state.discards_this_turn += 1
+            effects.note_rotation_event(state)
+            state.emit("discard", card=card.id, chosen=True)
+    if victims:
+        state.draw(len(victims))
+    state.emit("plan_turning_tide", discarded=len(victims))
+    return len(victims)
+
+
+def abyssal_salvage(state: CombatState, card: Card) -> None:
+    """ABYSSAL SALVAGE at the one exhaust funnel: a status or curse of hers
+    exhausted gives the Casket 1 per stack, and the upgraded Power 2 Block
+    per stack as well. `AbyssalSalvagePower` / `AbyssalSalvagePlusPower`."""
+    if not live(state) or not is_status_or_curse(card):
+        return
+    p = state.player
+    base = int(p.powers.get(ABYSSAL_SALVAGE, 0))
+    plus = int(p.powers.get(ABYSSAL_SALVAGE_PLUS, 0))
+    if base + plus <= 0:
+        return
+    gain_casket(state, base + plus)
+    if plus:
+        gained = powers.modify_block_gained(
+            p, ABYSSAL_SALVAGE_PLUS_BLOCK * plus)
+        if gained:
+            p.block += gained
+            state.emit("block", amount=gained)
+    state.emit("plan_abyssal_salvage", card=card.id)
 
 
 def quarter_of_max_hp(state: CombatState) -> int:

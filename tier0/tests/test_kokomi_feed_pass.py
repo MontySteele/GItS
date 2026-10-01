@@ -26,7 +26,7 @@ FEED = ("proto_kk_bubble_ward", "proto_kk_nip", "proto_kk_jellyfish_drift",
 
 MOVED = ("proto_kk_ambush", "proto_kk_read_the_field",
          "proto_kk_stolen_chapter", "proto_kk_riptide", "proto_kk_pincer",
-         "proto_kk_feigned_retreat", "proto_kk_signal_arrow",
+         "proto_kk_signal_arrow",
          "proto_kk_surging_shoal")
 
 
@@ -108,10 +108,11 @@ def test_the_offer_holds_the_feed_after_the_casket_rows(overhaul):
     # Forty-eight at the feed pass; expansion batch one (2026-09-29) appended
     # 22 rows after the feed and cut The Clouds Like Waves Rippling; the
     # payoff pass (2026-10-01) appended two more and cut Second Thoughts;
-    # pool completion (2026-10-01) appended eight.
+    # pool completion (2026-10-01) appended eight; the status batch
+    # (2026-10-01) cut seven (All Streams after the feed) and appended six.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 78
-    assert ids[-37:-32] == FEED
+    assert len(ids) == 77
+    assert ids[-42:-37] == FEED
     assert "proto_kk_exposed_flank" not in ids
     assert "proto_kk_exposed_flank" not in {
         c.id for c in loader.prototype_cards()}

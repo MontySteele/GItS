@@ -273,6 +273,8 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     "plan_unhurt_damage": ("damage_if_unhurt",),
     # R276, Battle Plan: "your Attacks deal N more damage" this turn.
     "plan_attack_bonus": ("attack_damage_this_turn",),
+    # THE STATUS BATCH (2026-10-01), Tidecleanse: "Exhaust up to 2 [3]".
+    "plan_exhaust": ("exhaust_statuses_in_hand",),
 }
 
 #: The field a `plan_*` key bumps when it is not `amount` (R276).
@@ -854,6 +856,12 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                         # POOL COMPLETION: Casting Agent's Guest Star
                         # arrives upgraded.
                         or fx.get("op") == "stage_casting_agent"), None)
+            # THE STATUS BATCH: Sea Glass Harvest's Plan transforms into
+            # Sea Glass+, a flag on the plan clause.
+            if hit is None:
+                hit = next((fx for fx in (getattr(card, "plan", None) or [])
+                            if fx.get("op") == "transform_statuses_in_hand"),
+                           None)
             ok = hit is not None and val is True
             if ok:
                 hit["upgraded"] = True

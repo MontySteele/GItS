@@ -397,6 +397,14 @@ def after_card_exhausted(state: CombatState, card: Card,
     if p.relic_effects:
         from tier0.engine import relics           # late import (relics -> here)
         relics.on_card_exhausted(state)
+    # THE STATUS BATCH (2026-10-01), ABYSSAL SALVAGE: "Whenever a status or
+    # curse is exhausted, the Casket gains 1 [and you gain 2 Block]." At
+    # THIS funnel for the Casket accrual's reason: every exhaust route
+    # passes through it. Dead unless the Power is up.
+    if C.KOKOMI_OVERHAUL and (p.powers.get("kk_abyssal_salvage")
+                              or p.powers.get("kk_abyssal_salvage_plus")):
+        from tier0.engine import kokomi_plan     # late import (cycle)
+        kokomi_plan.abyssal_salvage(state, card)
     n = p.powers.get("feel_no_pain", 0)
     if n:
         gain_block(state, p, n)                  # Unpowered: no Unmovable

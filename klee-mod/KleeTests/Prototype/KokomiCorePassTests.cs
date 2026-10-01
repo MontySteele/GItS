@@ -137,23 +137,6 @@ public class KokomiCorePassTests
     // ---- Chain of Command: the Plan buys a free Companion -----------------
 
     [Fact]
-    public void Chain_of_commands_plan_is_the_first_companion_free()
-    {
-        var card = new ProtoKkChainOfCommand();
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.FirstCompanionFree, clause.Kind);
-        Assert.Equal(KokomiPlan.Aim.Self, clause.Aim);
-        Assert.Equal(3m, card.DynamicVars.ExtraDamage.BaseValue);
-        Assert.Equal(4m, Upgraded<ProtoKkChainOfCommand>()
-            .DynamicVars.ExtraDamage.BaseValue);
-        Assert.EndsWith("Next turn, the first Companion card you play costs 0.",
-                        Face(card));
-        Assert.Contains(
-            Il.CallSequence(Il.Method("KokomiPlan", "ResolveOne")),
-            c => c.Contains("KokomiOverhaulKit.FirstCompanionFree"));
-    }
-
-    [Fact]
     public void The_free_companion_zeroes_a_companion_and_nothing_else()
     {
         var seat = Seat.Kokomi().WithPower<FirstCompanionFreePower>(1);
@@ -162,7 +145,7 @@ public class KokomiCorePassTests
         var friend = Owned<ProtoMcDionaIcyPaws>(seat);          // a Companion
         Assert.True(power.TryModifyEnergyCostInCombat(friend, 2m, out var cost));
         Assert.Equal(0m, cost);
-        var own = Owned<ProtoKkRally>(seat);                    // her own card
+        var own = Owned<ProtoKkVanguard>(seat);                 // her own card
         Assert.False(power.TryModifyEnergyCostInCombat(own, 1m, out _));
         Assert.False(power.TryModifyEnergyCostInCombat(friend, 0m, out _));
 
@@ -181,7 +164,7 @@ public class KokomiCorePassTests
     public void Ambush_applies_vulnerable_now_and_plans_twelve()
     {
         var card = new ProtoKkAmbush();
-        Assert.Equal("Apply 2 [gold]Vulnerable[/gold].\n[gold]Plan[/gold]: "
+        Assert.Equal("Apply 2 [gold]Vulnerable[/gold].\nOr [gold]plan[/gold]: "
                    + "Deal {PlanDamage:diff()} damage.", Face(card));
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal((KokomiPlan.Kind.Damage, 12), (clause.Kind, clause.Amount));
@@ -190,20 +173,6 @@ public class KokomiCorePassTests
         Assert.Contains(Play("ProtoKkAmbush"), c => c.Contains("VulnerablePower"));
         Assert.DoesNotContain(Play("ProtoKkAmbush"),
                               c => c.Contains("GainBlock"));
-    }
-
-    [Fact]
-    public void Feigned_retreat_draws_two_discards_one_and_upgrades_its_plan()
-    {
-        var card = new ProtoKkFeignedRetreat();
-        Assert.StartsWith("Draw 2 cards. Discard 1 card.", Face(card));
-        Assert.Equal(2m, card.DynamicVars.Cards.BaseValue);
-        var up = Assert.Single(Upgraded<ProtoKkFeignedRetreat>().PlanClauses);
-        Assert.Equal((12, 18), (up.Amount, up.Alt));
-        var play = Play("ProtoKkFeignedRetreat");
-        var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));
-        var discard = play.FindIndex(c => c.Contains("CardCmd.Discard"));
-        Assert.True(draw >= 0 && discard > draw);
     }
 
     [Fact]

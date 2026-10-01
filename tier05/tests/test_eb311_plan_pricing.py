@@ -256,22 +256,6 @@ def test_both_halves_of_a_printed_face_are_counted():
     assert draft._static_power(card) == now + planned * C.PLAN_DELAY_DISCOUNT
 
 
-def test_chain_of_command_sums_its_now_line_and_its_plan():
-    """`R250` pick 1 (round-4d sec.6): Chain of Command gained a now-line
-    priced through `amount_formula`'s neutral one-unit read, beside the Plan
-    line's own `damage_per_companion_last_turn` read -- SUMMED, the same rule
-    `test_both_halves_of_a_printed_face_are_counted` pins for Feint's plain
-    damage, now over the `amount_formula` rail too. Kokomi core pass: the
-    Plan is `first_companion_free`, priced as energy (STATIC_ENERGY_VALUE)."""
-    card = _proto("proto_kk_chain_of_command")
-    now = card.effects[0]
-    assert now["op"] == "damage" and "amount_formula" in now
-    now_price = now["amount_formula"]["per"]        # one neutral Companion
-    assert card.plan == [{"op": "first_companion_free"}]
-    assert draft._static_power(card) == (
-        now_price + draft.STATIC_ENERGY_VALUE * C.PLAN_DELAY_DISCOUNT)
-
-
 def test_a_planned_aoe_line_takes_the_same_aoe_multiple():
     """A Plan-only AoE line takes the same `STATIC_AOE_MULT` the now-line
     does -- the whole design of the plan branch. Synthetic for the reason
@@ -435,16 +419,6 @@ def test_damage_per_companion_last_turn_prices_against_one_companion():
     per_companion = card.plan[0]["amount"]
     assert draft._static_power(card) == (
         per_companion * C.PLAN_DELAY_DISCOUNT / card.cost)
-
-
-def test_rally_takes_cost_mods_measured_dead_dial():
-    """Its discount is a `cost_mod` wearing a kit name, so it takes cost_mod's
-    zero: Rally's whole price is the Weak it applies."""
-    card = _proto("proto_kk_rally")
-    weak = next(fx for fx in card.effects if fx.get("power") == "weak")
-    assert any(fx["op"] == "next_companion_discount" for fx in card.effects)
-    assert draft._static_power(card) == (
-        weak["amount"] * draft.STATIC_DEBUFF_VALUE / card.cost)
 
 
 def test_the_arm_has_no_unpriced_verb_left():

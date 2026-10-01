@@ -45,7 +45,7 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undercurrent Snare"),
-        ("description", "Apply 2 [gold]Weak[/gold].\n[gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies."),
+        ("description", "Apply 2 [gold]Weak[/gold].\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

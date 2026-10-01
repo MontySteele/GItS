@@ -50,7 +50,7 @@ public class KokomiR276Tests
         // card of hers whose face-up half deals damage, Skills included.
         foreach (var card in new CardModel[]
                  {
-                     new ProtoKkChainOfCommand(), new ProtoKkOpeningGambit(),
+                     new ProtoKkOpeningGambit(),
                  })
         {
             Assert.Equal(MegaCrit.Sts2.Core.Entities.Cards.CardType.Skill,

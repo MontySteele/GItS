@@ -572,7 +572,7 @@ def test_the_companion_tip_and_the_page_open_with_one_sentence():
     printed = [path.stem for path in _prototype_files()
                if "[gold]Companion[/gold]" in path.read_text(encoding="utf-8")]
     assert {"ProtoKoWitchesCircle", "ProtoKoFriendshipBracelet",
-            "ProtoKoComeBackAndPlay", "ProtoKkRally"} <= set(printed)
+            "ProtoKoComeBackAndPlay"} <= set(printed)
     for stem in printed:
         text = (PROTOTYPE_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         assert "ArmKeywordTips.ForCompanion(" in text, stem
@@ -607,9 +607,11 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # unintuitive"): 292 rendered characters of seat edge cases came
             # off it, and the panel keeps the long forms. Spec and census:
             # review/records/text-pass-2026-09-25/.
-            "Play the card on the [gold]Bake-Kurage[/gold] and this happens ",
-            "at the start of your next turn. Plans are carried out in the ",
-            "order you made them.",
+            # THE STATUS BATCH (2026-10-01, sec.3 pick 2): the face says
+            # "Or plan:" and the tip opens "Instead of the line above".
+            "Instead of the line above, play the card on the ",
+            "[gold]Bake-Kurage[/gold]: this happens at the start of your next ",
+            "turn. Plans go in the order made.\");",
             "heal N HP, but never above the HP you had ",
             # Furina, THE STAGE (`EB-723`; the brief's sec.12 names the
             # seven words and sec.3 states each rule). The reframe's four --
@@ -939,6 +941,9 @@ _GOLD_SPAN = re.compile(r"\[gold\](.*?)\[/gold\]")
 # new face naming a new base keyword cannot ship silently, and adding a word
 # here is a decision somebody has to write down.
 NO_GLOSSARY_ROW_OWED = {
+    # The status batch (2026-10-01, Flotsam Surge): the base game's status
+    # card, which the page prints with its own face once it is shuffled in.
+    "Dazed": "a base-game status card the page prints with its own face",
     # The four numbers the page prints on the player line every single turn.
     "Block": "the page prints the figure on the player line every turn",
     "Energy": "the page prints the figure on the player line every turn",
@@ -998,7 +1003,10 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 "Set it off": "Set off",
                 # The Casket pass (2026-09-28): the relic's short name, one
                 # row and one tip with its full name.
-                "Casket": "Tamakushi Casket"}
+                "Casket": "Tamakushi Casket",
+                # The status batch (2026-10-01): "Or plan:" and "Or dusk
+                # plan:" print the two words in lower case.
+                "plan": "Plan", "dusk": "Dusk"}
 
 
 def _word_owner(word: str) -> str:
@@ -1134,9 +1142,12 @@ def test_a_word_excused_by_a_card_tip_really_carries_that_tip(word):
 # note is pinned where it is built (`test_understudy_blindplay.py`).
 # Spec and census: review/records/text-pass-2026-09-25/.
 
-PLAN_TIP = ("Play the card on the Bake-Kurage and this happens at the start "
-            "of your next turn. Plans are carried out in the order you made "
-            "them.")
+# THE STATUS BATCH (2026-10-01, sec.3 pick 2, [USER]: "Agreed on the Plan
+# text change"): the face prints "Or plan:" and the tip opens "Instead of the
+# line above"; the second sentence was shortened to stay under the ceiling.
+PLAN_TIP = ("Instead of the line above, play the card on the Bake-Kurage: "
+            "this happens at the start of your next turn. Plans go in the "
+            "order made.")
 
 
 def test_the_plan_tip_is_the_rewrite_on_the_page():

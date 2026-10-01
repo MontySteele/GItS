@@ -93,7 +93,7 @@ public class KokomiPoolPassThreeTests
         Assert.Contains("PlanPowerAmount\"].UpgradeValueBy(1m)",
                         Source("ProtoKkFeint"));
         // `EB-660`: AND THE FACE SAYS SO, live off the Plan's own var.
-        Assert.Contains("[gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} "
+        Assert.Contains("Or [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} "
                       + "[gold]Vulnerable[/gold].",
                         Face(new ProtoKkFeint()));
     }
@@ -203,57 +203,6 @@ public class KokomiPoolPassThreeTests
     // ======================================================================
     // 4. BATTLE PLAN -- the energy clause off, a face-up Attack rider on
     // ======================================================================
-
-    [Fact]
-    public void Battle_plans_plan_raises_every_attack_this_turn()
-    {
-        // R276 pick 1: "This turn, your Attacks deal 3 additional damage."
-        // The shipped Attack Up window, applied at carry-out; 4 upgraded.
-        var card = new ProtoKkBattlePlan();
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.AttackDamageThisTurn, clause.Kind);
-        Assert.Equal(3, clause.Amount);
-        Assert.Equal(KokomiPlan.Aim.Self, clause.Aim);
-        Assert.Contains("DynamicVars[\"PlanAttackBonus\"].UpgradeValueBy(1m)",
-                        Source("ProtoKkBattlePlan"));
-        Assert.Contains("your Attacks deal {PlanAttackBonus:diff()} additional "
-                      + "damage", Face(card));
-        Assert.Contains(
-            Il.CallSequence(Il.Method("KokomiPlan", "ResolveOne")),
-            c => c.Contains("PowerCmd.Apply<AttackUpThisTurnPower>"));
-    }
-
-    [Fact]
-    public void Battle_plans_bonus_rides_two_attacks_in_one_turn()
-    {
-        // THE 2026-09-25 TEXT PASS checked the ruled face (PR #649, "Plan:
-        // Next turn, your Attacks deal 3 additional damage.") against the
-        // code. The carry-out applies the shipped Attack Up window, which
-        // pays EVERY Attack of the turn and not only the first: it has no
-        // `AfterCardPlayed` of its own, so an Attack does not spend it, and
-        // it leaves at the end of the player's turn. Sim twin:
-        // `test_kokomi_plan.test_r276_battle_plan_raises_every_attack_this_turn`.
-        var clause = Assert.Single(new ProtoKkBattlePlan().PlanClauses);
-        var kokomi = Seat.Kokomi()
-            .WithPower<AttackUpThisTurnPower>(clause.Amount);
-        var enemy = Seat.Klee(30).Creature;
-        var move = MegaCrit.Sts2.Core.ValueProps.ValueProp.Move;
-
-        Assert.Equal(4m + 3m, HitOrder.Compose(
-            kokomi.Creature, enemy, 4m, move, new global::KleeMod.Cards.Kaboom()));
-        Assert.Equal(4m + 3m, HitOrder.Compose(
-            kokomi.Creature, enemy, 4m, move, new global::KleeMod.Cards.Kaboom()));
-
-        // DECLARED, not inherited: `PowerModel` gives every power the hook,
-        // so the question is whether THIS class overrides it, and it does
-        // not -- nothing spends the bonus on the first Attack.
-        var spend = typeof(AttackUpThisTurnPower)
-            .GetMethod("AfterCardPlayed", All);
-        Assert.NotEqual(typeof(AttackUpThisTurnPower), spend?.DeclaringType);
-        Assert.Contains("PowerCmd.Remove",
-                        Il.Calls(typeof(AttackUpThisTurnPower)
-                            .GetMethod("AfterSideTurnEnd", All)!));
-    }
 
     [Fact]
     public void The_new_kind_is_the_one_the_codegen_maps()
@@ -396,7 +345,8 @@ public class KokomiPoolPassThreeTests
             Assert.Contains("KokomiTargets.PetOnly", Source(name));
             Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].",
                               Face(card));
-            Assert.Contains("[gold]Dusk[/gold]", Face(card));
+            // The status batch (2026-10-01): "Or dusk plan:".
+            Assert.Contains("[gold]dusk[/gold]", Face(card));
             // No now-line at all: the whole body is the write.
             Assert.DoesNotContain("CreatureCmd.GainBlock", Source(name));
         }

@@ -125,9 +125,10 @@ def test_the_cancel_row_says_the_cards_come_back(overhaul):
     rows = {r["id"]: r for r in yaml.safe_load(
         loader.PROTOTYPE_SHEET.read_text(encoding="utf-8"))}
     assert "proto_kk_second_thoughts" not in rows
-    assert "take their cards back" in rows[
-        "proto_kk_all_streams_flow_to_the_sea"]["description"]
-    assert _row("proto_kk_all_streams_flow_to_the_sea").exhaust
+    # All Streams Flow to the Sea, the last row that cancelled, left the pool
+    # in the status batch (2026-10-01); its give-back stays in the engine.
+    assert "proto_kk_all_streams_flow_to_the_sea" not in rows
+    assert callable(kokomi_plan.all_streams)
 
 
 def test_riptide_draws_two_and_three_upgraded(overhaul):

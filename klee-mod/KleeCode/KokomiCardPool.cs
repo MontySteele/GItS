@@ -141,6 +141,9 @@ public static class KokomiOffPoolCards
         // token, dealt by the relic and in no pool -- Furina's Ethereal
         // Spotlight's footing.
         cards.Add(ModelDb.Card<Cards.Prototype.OpenTheCasket>());
+        // THE STATUS BATCH (2026-10-01): Sea Glass Harvest's token, made only
+        // by its Plan's transform and in no pool.
+        cards.Add(ModelDb.Card<Cards.Prototype.SeaGlass>());
 #endif
         return cards;
     }

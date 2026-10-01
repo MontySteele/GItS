@@ -677,6 +677,18 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # cards for every player, no private channel.
     "each_player_energy": [],
     "each_player_draw": [],
+    # THE STATUS BATCH (2026-10-01): four Plan clauses that read the hand
+    # just drawn -- a Block read of it, an exhaust, a transform and a
+    # discard-then-draw, each on the vocabulary its base-game twin uses.
+    "block_per_status_in_hand": [_hook("shared", "hand_contents", "read"),
+                                 _hook("shared", "block_held", "write")],
+    "exhaust_statuses_in_hand": [_hook("shared", "junk_remove", "write"),
+                                 _hook("shared", "exhaust_pile", "write")],
+    "transform_statuses_in_hand": [_hook("shared", "junk_remove", "write"),
+                                   _hook("shared", "hand_contents", "write")],
+    "discard_and_draw": [_hook("shared", "hand_contents", "use"),
+                         _hook("shared", "discard_pile", "write"),
+                         _hook("shared", "draw_pile", "use")],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

@@ -217,6 +217,12 @@ public static class KleeMod
                 // release build.
                 [Powers.KokomiPlan.ReflectionPromptKey] =
                     Powers.KokomiPlan.ReflectionPromptText,
+                // THE STATUS BATCH (2026-10-01): Tidecleanse's and Turning
+                // Tide's hand screens, on the same terms.
+                [Powers.KokomiStatusBatch.ExhaustPromptKey] =
+                    Powers.KokomiStatusBatch.ExhaustPromptText,
+                [Powers.KokomiStatusBatch.DiscardPromptKey] =
+                    Powers.KokomiStatusBatch.DiscardPromptText,
                 // R276, the Klee pool expansion's two discard-pile picks
                 // (Treasure Map, Come Back and Play!), on the same terms.
                 [Powers.KleeExpansion.SetOffPromptKey] =

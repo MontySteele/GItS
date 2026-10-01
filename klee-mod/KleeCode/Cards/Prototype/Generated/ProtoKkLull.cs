@@ -45,7 +45,7 @@ public sealed class ProtoKkLull : CustomCardModel, ICharacterCard, IPlannedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lull"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold].\n[gold]Plan[/gold]: If it is the only [gold]Plan[/gold] carried out at the start of your turn, gain 2 [gold]Energy[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: If it is the only [gold]Plan[/gold] carried out at the start of your turn, gain 2 [gold]Energy[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

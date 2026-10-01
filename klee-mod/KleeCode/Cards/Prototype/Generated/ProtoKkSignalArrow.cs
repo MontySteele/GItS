@@ -51,7 +51,7 @@ public sealed class ProtoKkSignalArrow : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Signal Arrow"),
-        ("description", "Deal {Damage:diff()} damage.\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies twice."),
+        ("description", "Deal {Damage:diff()} damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies twice."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

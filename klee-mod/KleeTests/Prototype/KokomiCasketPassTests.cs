@@ -264,11 +264,7 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal(18m, shoalUp.DynamicVars.Damage.BaseValue);
         Assert.Equal(28, shoalUp.PlanClauses.Single().Amount);
 
-        var diver = new ProtoKkPearlDiver();
-        Assert.Equal(1m, diver.DynamicVars.Cards.BaseValue);
-        Assert.Equal(2m, Upgraded<ProtoKkPearlDiver>().DynamicVars.Cards.BaseValue);
-        Assert.Equal((KokomiPlan.Kind.CasketGain, 2),
-                     (diver.PlanClauses.Single().Kind, diver.PlanClauses.Single().Amount));
+        // Pearl Diver left the pool in the status batch (2026-10-01).
 
         // The cleanup pass (2026-09-29): 7 / 11, upgraded 9 / 14.
         var press = new ProtoKkPressTheAdvantage();
@@ -286,7 +282,8 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal(12m, Var(Upgraded<ProtoKkShellOfSanctuary>(), "PlanBlock"));
         Assert.Contains(Il.Calls(Il.Method("ProtoKkShellOfSanctuary", "OnPlay")),
                         c => c.Contains("KokomiPlan.Schedule"));
-        Assert.Contains("[gold]Dusk[/gold] [gold]Plan[/gold]", Face(shell));
+        // The status batch (2026-10-01): "Or dusk plan:".
+        Assert.Contains("Or [gold]dusk[/gold] [gold]plan[/gold]", Face(shell));
 
         // The cleanup pass (2026-09-29): a base of 6, upgraded 8.
         var glass = new ProtoKkDriftglass();
@@ -296,7 +293,7 @@ public class KokomiCasketPassTests : IDisposable
 
         // Commons never increase deck size (LAW): none of the seven creates a card.
         foreach (var type in new[] { "ProtoKkMassedVolley", "ProtoKkSignalArrow",
-                                     "ProtoKkSurgingShoal", "ProtoKkPearlDiver",
+                                     "ProtoKkSurgingShoal",
                                      "ProtoKkPressTheAdvantage",
                                      "ProtoKkShellOfSanctuary", "ProtoKkDriftglass" })
         {
@@ -330,14 +327,8 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal(4m, Var(turn, "ExtraDamage"));
         Assert.Equal(5m, Var(Upgraded<ProtoKkTideturn>(), "ExtraDamage"));
 
-        var signal = new ProtoKkMoonSignal();
-        Assert.Equal(CardType.Power, signal.Type);
-        // Power cost sweep, 2026-09-30: 0 to play; the upgrade gains 2.
-        Assert.Equal(0, signal.EnergyCost.Canonical);
-        Assert.Equal(1m, Var(signal, "PowerAmount"));
-        Assert.Equal(2m, Var(Upgraded<ProtoKkMoonSignal>(), "PowerAmount"));
-        Assert.Contains("PowerCmd.Apply<MoonSignalPower>",
-                        string.Join(" ", Seq("ProtoKkMoonSignal", "OnPlay")));
+        // Moon Signal left the pool in the status batch (2026-10-01); its
+        // power and threshold stay registered.
         Assert.Equal(2, KokomiOverhaulLaw.MoonSignalThreshold);
 
         var current = new ProtoKkPearlCurrent();
@@ -424,7 +415,7 @@ public class KokomiCasketPassTests : IDisposable
                      (clause.Kind, clause.Amount));
         Assert.Equal(9, Upgraded<ProtoKkTideWall>().PlanClauses.Single().Amount);
         Assert.Equal(4m, card.DynamicVars.Block.BaseValue);
-        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].\n[gold]Plan[/gold]: "
+        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: "
                    + "Gain {PlanBlock:diff()} [gold]Block[/gold], plus the "
                    + "damage the enemy intends.",
                      Face(card));
@@ -440,15 +431,17 @@ public class KokomiCasketPassTests : IDisposable
         // Exposed Flank and added five.
         var slice = Seq("KokomiOverhaulRoster", "Slice");
         // SIXTY-NINE since expansion batch one (2026-09-29); SEVENTY since
-        // the payoff pass (2026-10-01); SEVENTY-EIGHT since pool completion.
-        Assert.Equal(78, slice.Count(c => c.StartsWith("ModelDb.Card")));
+        // the payoff pass (2026-10-01); SEVENTY-EIGHT since pool completion;
+        // SEVENTY-SEVEN since the status batch (2026-10-01), which cut Pearl
+        // Diver and Moon Signal among seven.
+        Assert.Equal(77, slice.Count(c => c.StartsWith("ModelDb.Card")));
         foreach (var row in new[] { "ProtoKkMassedVolley", "ProtoKkSignalArrow",
-                                    "ProtoKkSurgingShoal", "ProtoKkPearlDiver",
+                                    "ProtoKkSurgingShoal",
                                     "ProtoKkPressTheAdvantage",
                                     "ProtoKkShellOfSanctuary", "ProtoKkDriftglass",
                                     "ProtoKkWhatTheTokoyoReturns",
                                     "ProtoKkDepthsJudgment", "ProtoKkTideturn",
-                                    "ProtoKkMoonSignal", "ProtoKkPearlCurrent",
+                                    "ProtoKkPearlCurrent",
                                     "ProtoKkWhatTheTokoyoTook" })
         {
             Assert.Contains(slice, c => c.EndsWith("<" + row + ">",

@@ -51,7 +51,7 @@ public sealed class ProtoKkPearlCurrent : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pearl Current"),
-        ("description", "Deal {Damage:diff()} damage 4 times.\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies 3 times."),
+        ("description", "Deal {Damage:diff()} damage 4 times.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies 3 times."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

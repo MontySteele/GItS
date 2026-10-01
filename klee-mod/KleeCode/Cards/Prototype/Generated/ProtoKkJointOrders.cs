@@ -50,7 +50,7 @@ public sealed class ProtoKkJointOrders : CustomCardModel, ICharacterCard, IPlann
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Joint Orders"),
-        ("description", "Another player gains {Block:diff()} [gold]Block[/gold].\n[gold]Plan[/gold]: They draw 2 cards."),
+        ("description", "Another player gains {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: They draw 2 cards."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
