@@ -56,12 +56,32 @@ namespace KleeMod.Relics;
 ///
 /// IT KEEPS THE COMPANION REWARD SLOT, which is not a Charge rule and which the
 /// Commander loop draws its whole army from.
+///
+/// NOT SEALED: <see cref="WatatsumiCasket"/>, the Touch of Orobas upgrade, IS
+/// a Tamakushi Casket with an opening count, so every
+/// <c>GetRelic&lt;TamakushiCasket&gt;</c> (the game's is an <c>is T</c> test)
+/// -- the carry-out add, the counter, the token -- finds either relic. The
+/// cards never look for the relic at all: Shell Guard, Driftglass, Depths'
+/// Judgment, What the Tokoyo Took, Open the Casket, Kurage Swarm and Grand
+/// Design read the ledger's count.
 /// </summary>
-public sealed class TamakushiCasket : CustomRelicModel
+public class TamakushiCasket : CustomRelicModel
 {
     public TamakushiCasket() : base(autoAdd: false)
     {
     }
+
+    /// <summary>Touch of Orobas: the Watatsumi Casket (2026-09-30).</summary>
+    public override RelicModel? GetUpgradeReplacement() =>
+        ModelDb.Relic<WatatsumiCasket>().ToMutable();
+
+    /// <summary>What the Casket holds when a combat starts. The Tamakushi
+    /// Casket 0; <see cref="WatatsumiCasket"/> 3.</summary>
+    public virtual int OpeningCount => 0;
+
+    /// <summary>The combat this relic last seeded, so a second call in one
+    /// combat seeds nothing.</summary>
+    private object? _seededCombat;
 
     public override RelicRarity Rarity => RelicRarity.Starter;
 
@@ -108,6 +128,7 @@ public sealed class TamakushiCasket : CustomRelicModel
     public override async Task BeforeCombatStart()
     {
         if (!KokomiOverhaul.LiveFor(Owner?.Creature)) return;
+        SeedOpeningCount(Owner!.Creature);
         await BakeKuragePet.Summon(Owner);
         Refresh(Owner!.Creature);
     }
@@ -144,6 +165,23 @@ public sealed class TamakushiCasket : CustomRelicModel
         if (kokomi!.Player?.GetRelic<TamakushiCasket>() == null) return;
         KokomiOverhaulLedger.For(kokomi).AddToCasket(
             KokomiOverhaulLaw.CasketPerPlan);
+        Refresh(kokomi);
+    }
+
+    /// <summary>
+    /// The opening count onto this combat's ledger: the Watatsumi Casket's
+    /// "starts each combat with 3". Nothing for the Tamakushi Casket (0), and
+    /// once per combat per relic.
+    /// </summary>
+    public static void SeedOpeningCount(Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var relic = kokomi!.Player?.GetRelic<TamakushiCasket>();
+        if (relic == null || relic.OpeningCount <= 0) return;
+        var combat = (object?)kokomi.CombatState;
+        if (combat != null && ReferenceEquals(relic._seededCombat, combat)) return;
+        relic._seededCombat = combat;
+        KokomiOverhaulLedger.For(kokomi).AddToCasket(relic.OpeningCount);
         Refresh(kokomi);
     }
 
@@ -196,5 +234,42 @@ public sealed class TamakushiCasket : CustomRelicModel
 
     protected override string BigIconPath =>
         KleePck.Path("kokomi/relics/pearl_of_wisdom.png") ?? base.BigIconPath;
+}
+
+/// <summary>
+/// WATATSUMI CASKET -- the Tamakushi Casket upgraded, Touch of Orobas's
+/// hand-over (main-session design, 2026-09-30, from [USER]'s co-op playtest:
+/// "Varka and Kokomi need Ancient relics for Orobas"). Identical to the
+/// Tamakushi Casket in every way, except the Casket starts each combat with
+/// 3. It IS a Tamakushi Casket (see its header), so the carry-out add, the
+/// counter, the Open the Casket token and the companion reward slot are the
+/// base's, and the only difference is <see cref="OpeningCount"/>.
+///
+/// ANCIENT, NEVER STARTER (see <c>ExplosiveFrags</c>). ICON: the Tamakushi
+/// Casket's own fallback chain, as Pearl of Insight reuses the Pearl's.
+/// NOT IN THE SIM: tier05 has no Orobas row for the prototype arm.
+/// </summary>
+public sealed class WatatsumiCasket : TamakushiCasket
+{
+    public override RelicRarity Rarity => RelicRarity.Ancient;
+
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Watatsumi Casket"),
+        ("description",
+            "Start each combat with the [gold]Bake-Kurage[/gold], "
+          + "[gold]Open the Casket[/gold] in hand and [blue]"
+          + WatatsumiOpeningCount + "[/blue] in the Casket. Each "
+          + "[gold]Plan[/gold] it carries out adds "
+          + KokomiOverhaulLaw.CasketPerPlan + "."),
+    };
+
+    /// <summary>The Casket's count at the start of every combat.</summary>
+    public const int WatatsumiOpeningCount = 3;
+
+    public override int OpeningCount => WatatsumiOpeningCount;
+
+    /// <summary>Already the upgrade: nothing further for Orobas.</summary>
+    public override RelicModel? GetUpgradeReplacement() => null;
 }
 #endif

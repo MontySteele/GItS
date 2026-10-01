@@ -41,12 +41,25 @@ namespace KleeMod.Relics;
 /// QUARANTINED by <c>#if PROTOTYPE_CARDS</c> and living in <c>Relics/</c>,
 /// <c>TamakushiCasket</c>'s reason: <c>tools/lint_unique_names.py</c> reads
 /// relic titles out of this directory only.
+///
+/// NOT SEALED: <see cref="WolfsGravestone"/>, the Touch of Orobas upgrade,
+/// IS a Fang, so <see cref="HeldBy"/> (the game's <c>GetRelic&lt;T&gt;</c> is
+/// an <c>is T</c> test) finds it and the Oath rule's one call site serves
+/// both relics unchanged.
 /// </summary>
-public sealed class BoreasFang : CustomRelicModel
+public class BoreasFang : CustomRelicModel
 {
     public BoreasFang() : base(autoAdd: false)
     {
     }
+
+    /// <summary>Touch of Orobas: Wolf's Gravestone (2026-09-30).</summary>
+    public override RelicModel? GetUpgradeReplacement() =>
+        ModelDb.Relic<WolfsGravestone>().ToMutable();
+
+    /// <summary>Does this relic hand Ascension over upgraded and free this
+    /// turn? The Fang no; <see cref="WolfsGravestone"/> yes.</summary>
+    public virtual bool AscensionUpgraded => false;
 
     public override RelicRarity Rarity => RelicRarity.Starter;
 
@@ -77,8 +90,15 @@ public sealed class BoreasFang : CustomRelicModel
         if (combat == null) return;
         var card = combat.CreateCard<ProtoVkFourWindsAscension>(player);
         if (card == null) return;
+        if (AscensionUpgraded && card.IsUpgradable && !card.IsUpgraded)
+        {
+            card.UpgradeInternal();
+        }
         Flash();
         await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, player);
+        // Wolf's Gravestone: "It costs 0 this turn." Set once the card is in
+        // play, the Unfurled Banner's order (VarkaOath.UnfurledBanner).
+        if (AscensionUpgraded) card.EnergyCost.SetThisTurn(0);
     }
 
     /// <summary>
@@ -132,5 +152,46 @@ public sealed class BoreasFang : CustomRelicModel
 
     protected override string BigIconPath =>
         KleePck.Path("varka/relics/boreas_fang.png") ?? base.BigIconPath;
+}
+
+/// <summary>
+/// WOLF'S GRAVESTONE -- Boreas's Fang upgraded, Touch of Orobas's hand-over
+/// (main-session design, 2026-09-30, from [USER]'s co-op playtest: "Varka and
+/// Kokomi need Ancient relics for Orobas"). "The first time each combat you
+/// gain Oath, add an upgraded Four Winds' Ascension to your hand. It costs 0
+/// this turn." Same trigger as the Fang, which it IS (the subclass is how
+/// <c>VarkaOath.Gain</c>'s <see cref="BoreasFang.HeldBy"/> finds it, so the
+/// per-combat latch is the one the Fang uses); the card comes upgraded and
+/// free this turn. The companion reward slot rides along by inheritance.
+///
+/// ANCIENT, NEVER STARTER (see <c>ExplosiveFrags</c>): a second Orobas finds
+/// its target by Starter rarity. It does not re-roll the starter Knight: that
+/// is a new-run rule, and <c>AfterObtained</c> runs on the mid-run grant.
+///
+/// ICON: the Fang's own (the same fallback chain), as Pearl of Insight and
+/// The Curtain Never Falls reuse their starters'. Sim twin: tier0
+/// <c>varka_oath.FANG_UPGRADED</c>.
+/// </summary>
+public sealed class WolfsGravestone : BoreasFang
+{
+    public override RelicRarity Rarity => RelicRarity.Ancient;
+
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Wolf's Gravestone"),
+        ("description",
+            "The first time each combat you gain [gold]Oath[/gold], add an "
+          + "upgraded [gold]Four Winds' Ascension[/gold] to your hand. It "
+          + "costs 0 this turn."),
+    };
+
+    public override bool AscensionUpgraded => true;
+
+    /// <summary>Already the upgrade: nothing further for Orobas.</summary>
+    public override RelicModel? GetUpgradeReplacement() => null;
+
+    /// <summary>The starter Knight is rolled once, at the run's start, by the
+    /// Fang. The Gravestone arrives mid-run and rolls nothing.</summary>
+    public override Task AfterObtained() => Task.CompletedTask;
 }
 #endif

@@ -4553,6 +4553,37 @@ upgrade installs the old every-element power. A Five-Century Act's returnee
 now arrives at the power's amount (`FurinaStage.ReturnFanfare`; sim
 `furina_stage._after_bow`), and One-Woman Show draws 2 a copy.
 
+
+## Orobas upgrades for Varka and Kokomi, 2026-09-30
+
+[USER]'s co-op playtest: "Varka and Kokomi need Ancient relics for Orobas".
+Touch of Orobas upgrades the starter through BaseLib's
+`GetUpgradeReplacement()`, and neither Boreas's Fang nor the Tamakushi Casket
+overrode it, so both became the no-effect Circlet. Main-session design, built
+as given:
+
+1. **Wolf's Gravestone** (Boreas's Fang upgraded): "The first time each combat
+   you gain Oath, add an upgraded Four Winds' Ascension to your hand. It costs
+   0 this turn." Same trigger as the Fang; the card comes upgraded and free
+   this turn.
+2. **Watatsumi Casket** (Tamakushi Casket upgraded): identical to the Tamakushi
+   Casket in every way, except the Casket starts each combat with 3.
+
+Both are Ancient rarity, members of their character's relic pool (so
+`RelicModel.Pool` resolves at the grant) and never rolled. Each SUBCLASSES its
+starter (`klee-mod/KleeCode/Relics/BoreasFang.cs`, `TamakushiCasket.cs`), so
+the game's `GetRelic<T>` (an `is T` test) finds the upgrade wherever the
+starter is looked up: the Oath rule's `BoreasFang.HeldBy`, the Casket's
+carry-out add and its counter. The Casket cards (Shell Guard, Driftglass,
+Depths' Judgment, What the Tokoyo Took, Open the Casket, Kurage Swarm, Grand
+Design) read the count off `KokomiOverhaulLedger`, never the relic, so the
+opening 3 (seeded at `BeforeCombatStart`) reaches every one. Icons are each
+starter's own. Sim: tier0 already modelled the upgraded Fang
+(`varka_oath.FANG_UPGRADED`) and now makes its Ascension free this turn; the
+Casket's opening count has no sim twin, and neither upgrade has a tier05
+Orobas row (curated in `tier0/tests/test_starter_relic_upgrades.py`) until the
+kits reach Balance.
+
 **Riptide's Plan draw (2026-09-30, ruled).** After the co-op playtest in which
 a guest played Kokomi, [USER]: "Riptide - buff the Draw from 1 to 2, and
 upgrades to 3; seems a bit weak at 2 energy". `proto_kk_riptide`'s Plan line
