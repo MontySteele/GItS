@@ -3155,9 +3155,10 @@
              {op: block, amount: 6}],
    upgrade: {block: 3}}
 
-- {id: proto_vk_jean_dandelion_breeze, name: "Jean: Wind Companion", character: varka,
+- {id: proto_vk_jean_dandelion_breeze, name: "Jean — Wind Companion", character: varka,
    authored_by: [claude],
-   # A Skill, not a Knight: it sets no element.
+   # A Skill, not a Knight. The em dash, not the colon (the open-Oath
+   # round, 2026-10-01): the colon is the Knight's tell.
    cost: 1, type: skill, rarity: common,
    description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] an enemy's fresh aura.",
    effects: [{op: block, amount: 7},
@@ -3306,10 +3307,13 @@
 
 - {id: proto_vk_change_of_guard, name: "Change of Guard", character: varka,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Choose an element you have [gold]Oath[/gold] in. It becomes your [gold]current element[/gold]. Gain [gold]Block[/gold] equal to its Oath.",
-   effects: [{op: varka, kind: change_of_guard}],
-   upgrade: {cost: -1}}
+   # The open-Oath round (2026-10-01): a cheap way back to the element he
+   # built. Was cost 1, Exhaust, Block equal to its Oath.
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Choose an element you have [gold]Oath[/gold] in. It becomes your [gold]current element[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: varka, kind: change_of_guard},
+             {op: draw, amount: 1}],
+   upgrade: {draw: 1}}
 
 - {id: proto_vk_storm_surge, name: "Storm Surge", character: varka,
    authored_by: [claude],

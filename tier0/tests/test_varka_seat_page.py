@@ -112,9 +112,11 @@ def test_a_plain_oath_badge_means_no_current_element_yet():
     page = blindplay.observe(varka_state(
         badge=("Oath", NO_ELEMENT_TEXT, 1)))
     lines = _block(page)
-    assert lines[0] == "- Current element: none. Play a Knight to set it."
+    assert lines[0] == ("- Current element: none. Set by the last Pyro, "
+                        "Hydro, Cryo or Electro you applied.")
     assert lines[1] == "- Oath: Pyro 0, Hydro 1, Electro 0, Cryo 0."
-    assert lines[2] == "- Your Swirls pay nothing until you play a Knight."
+    assert lines[2] == ("- Your Swirls pay nothing until you apply Pyro, "
+                        "Hydro, Cryo or Electro.")
 
 
 def test_no_badge_still_prints_his_block_with_zero_counts():
@@ -256,6 +258,6 @@ def test_the_words_say_a_spent_aura_still_reacts_and_swirl_copies_are_spent():
     from understudy import blindplay_notes as notes
     assert ("A spent aura still reacts with Pyro, Hydro, Electro and Cryo."
             in notes.ELEMENT_KEYWORDS["aura"])
-    assert "The aura and new copies stay spent; old ones refresh." in notes.ARM_KEYWORDS["Swirl"]
+    assert "Enemies already wearing it are refreshed." in notes.ARM_KEYWORDS["Swirl"]
     page = blindplay.observe(varka_state())
     assert "Other elements still react with it." in page

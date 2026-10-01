@@ -682,10 +682,13 @@ public static class ArmKeywordTips
         With(inherited, SwirlKey,
             // THE ELEMENT PORT (sec.4 A, 2026-09-28): the preview row's rule,
             // restated for the verb.
-            // Amended 2026-10-01: an aura the spread finds already there refreshes.
-            "On a fresh aura: copy it onto ALL other enemies and deal "
+            // Amended 2026-10-01: an aura the spread finds already there
+            // refreshes. Reworded the same day (the open-Oath round: two
+            // seats misread "old ones refresh").
+            "[gold]Anemo[/gold] meets a fresh aura: deal "
           + Elements.ReactionConstants.SwirlDamage
-          + " damage to ALL enemies. The aura and new copies stay spent; old ones refresh.");
+          + " damage to ALL enemies and copy it, spent, onto the others. "
+          + "Enemies already wearing it are refreshed.");
 
     /// <summary>
     /// 2026-09-25, the afternoon Klee seat round. The Opus seat: "Companion is

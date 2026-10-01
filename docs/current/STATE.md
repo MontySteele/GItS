@@ -172,6 +172,8 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   old design. The Oath build's seat round
   (`review/records/varka-oath-round-2026-09-29.md`): two seats, one won the
   run, one died in act 2. Next: [USER] plays.
+  The open-Oath round (`review/records/varka-open-oath-round-2026-10-01.md`):
+  one win, one loss to the act-2 Entomancer elite.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

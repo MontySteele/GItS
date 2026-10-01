@@ -673,8 +673,7 @@ def op_varka(state, fx: dict, card) -> None:
         if choice is None:
             choice = max(held, key=lambda el: (led.oath[el],
                                                -ELEMENTS.index(el)))
-        set_current(state, choice, knight=False)
-        _block(state, led.oath[choice], "change_of_guard")
+        set_current(state, choice, knight=False)    # the draw is the row's op
     elif kind == "rally":
         if led.current is not None:
             total = sum(led.oath.values())

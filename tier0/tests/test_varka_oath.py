@@ -415,7 +415,7 @@ def test_boreas_unbound_pays_on_every_change(varka):
     _led(st).oath["hydro"] = 5
     _play(st, _vk("change_of_guard"))                   # counts as a change
     assert _led(st).current == "hydro"
-    assert st.player.energy == 10 - 1 + 1
+    assert st.player.energy == 10 - 0 + 1
 
 
 def test_dawn_winds_march_pays_on_a_gain_of_the_current_element(varka):
@@ -605,16 +605,25 @@ def test_oath_per_cryo_enemy(varka):
 
 
 def test_change_of_guard(varka):
+    # The open-Oath round (2026-10-01): cost 0, no Exhaust, no Block; it
+    # draws 1 (2 upgraded), with no Oath too.
     st = _state(fang=False)
-    _play(st, _vk("change_of_guard"))                   # no Oath: nothing
+    card = loader.get_card(_vk("change_of_guard"))
+    assert card.cost == 0 and not card.exhaust
+    st.player.draw_pile = [loader.get_card(_vk("favonius_drill"))
+                           for _ in range(6)]
+    st.player.hand = []
+    _play(st, card)                                     # no Oath: draws only
     assert _led(st).current is None and st.player.block == 0
+    assert _hand_ids(st) == [_vk("favonius_drill")]
+    assert card in st.player.discard_pile               # no Exhaust
     led = _led(st)
     led.oath.update(pyro=2, hydro=3, electro=3)
     _play(st, _vk("change_of_guard"))                   # most; tie P/H/E/C
-    assert led.current == "hydro" and st.player.block == 3
+    assert led.current == "hydro" and st.player.block == 0
     led.guard_choice = "pyro"
     _play(st, _vk("change_of_guard"))
-    assert led.current == "pyro" and st.player.block == 5
+    assert led.current == "pyro" and st.player.block == 0
 
 
 def test_rally_and_accord(varka):

@@ -1769,7 +1769,7 @@
       "innate": true
     },
     "proto_vk_change_of_guard": {
-      "cost": -1
+      "draw": 1
     },
     "proto_vk_converging_winds": {
       "cost": -1
