@@ -157,8 +157,10 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Knight rolled per run (8 [11] Block and its element); starting relic
   Boreas's Fang. The rules (`klee-mod/KleeCode/Powers/Prototype/VarkaOath.cs`,
   sim twin `tier0/engine/varka_oath.py` behind `VARKA_OATH`): one Oath count
-  per element, counted per card; his current element is his last Knight's and
-  his cards read only its Oath; a Swirl he makes pays that element (Pyro 3
+  per element, counted per card; his current element is his last Knight's,
+  or since the open Oath (2026-09-30, [USER]: "Yep, let's ship it and see if
+  anything breaks") the last Pyro, Hydro, Cryo or Electro any card of his
+  applied, and his cards read only its Oath; a Swirl he makes pays that element (Pyro 3
   damage, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL); the Fang adds
   Four Winds' Ascension to his hand the first time each combat he gains Oath.
   His status bar shows the current element's Oath; the seat page prints the

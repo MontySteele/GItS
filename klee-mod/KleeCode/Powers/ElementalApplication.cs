@@ -342,8 +342,9 @@ public sealed class KleeElementalHooks : AbstractModel
 #if PROTOTYPE_CARDS
         // VARKA (the Oath rework, sec.3): a card's hit that applies an
         // element gains 1 Oath of it -- whether it sticks, refreshes or
-        // reacts -- once per card play.
-        await VarkaOath.NoteApplication(choiceContext, dealer, element);
+        // reacts -- once per card play; his own card's makes it current.
+        await VarkaOath.NoteApplication(choiceContext, dealer, element,
+                                        cardSource);
 #endif
 
         // An existing aura owns this hit (refresh or reaction); one aura per
