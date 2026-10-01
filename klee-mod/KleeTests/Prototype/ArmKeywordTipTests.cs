@@ -453,7 +453,12 @@ public class ArmKeywordTipTests
         // forty-four with his Oath rework (2026-09-29): `ForOath`,
         // `ForCurrentElement` and `ForKnight`, his three words (`ForAbsorb`
         // and `ForWind` retired with the Winds).
-        Assert.Equal(44, attaches.Count);
+        //
+        // FORTY-FIVE with Varka's element identities (2026-10-01):
+        // `ForElementSwitch`, a rider titling no keyword ("this card would
+        // switch your current element"), through the same `With`.
+        Assert.Equal(45, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
         Assert.Contains(attaches, m => m.Name == "ForCurrentElement");
         Assert.Contains(attaches, m => m.Name == "ForKnight");

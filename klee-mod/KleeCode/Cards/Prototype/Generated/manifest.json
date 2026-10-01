@@ -330,8 +330,10 @@
     "proto_vk_blazing_charge",
     "proto_vk_boreas_unbound",
     "proto_vk_cavalry_charge",
+    "proto_vk_chain_lightning",
     "proto_vk_change_of_guard",
     "proto_vk_charge_of_the_knights",
+    "proto_vk_charged_lunge",
     "proto_vk_converging_winds",
     "proto_vk_crosscurrent",
     "proto_vk_crosswind",
@@ -348,7 +350,6 @@
     "proto_vk_favonius_cut",
     "proto_vk_favonius_drill",
     "proto_vk_four_banners",
-    "proto_vk_four_winds_accord",
     "proto_vk_four_winds_ascension",
     "proto_vk_gale_sweep",
     "proto_vk_glacial_edict",
@@ -371,11 +372,12 @@
     "proto_vk_oathbound_aegis",
     "proto_vk_oathsworn_strike",
     "proto_vk_pathfinders_mark",
-    "proto_vk_pressure_front",
     "proto_vk_rally_to_the_banner",
     "proto_vk_razor_claw_and_thunder",
+    "proto_vk_retaliating_tide",
     "proto_vk_rising_gale",
     "proto_vk_shifting_gale",
+    "proto_vk_short_circuit",
     "proto_vk_squall",
     "proto_vk_static_field",
     "proto_vk_storm_surge",
@@ -389,10 +391,8 @@
     "proto_vk_thundering_verdict",
     "proto_vk_tidal_bulwark",
     "proto_vk_twin_gales",
-    "proto_vk_unbroken_tide",
-    "proto_vk_unfurled_banner",
     "proto_vk_unwavering_banner",
-    "proto_vk_updraft",
+    "proto_vk_violet_storm",
     "proto_vk_vow_of_the_blade",
     "proto_vk_wall_of_gales",
     "proto_vk_weathervane",
@@ -727,8 +727,10 @@
     "proto_vk_blazing_charge": "varka",
     "proto_vk_boreas_unbound": "varka",
     "proto_vk_cavalry_charge": "varka",
+    "proto_vk_chain_lightning": "varka",
     "proto_vk_change_of_guard": "varka",
     "proto_vk_charge_of_the_knights": "varka",
+    "proto_vk_charged_lunge": "varka",
     "proto_vk_converging_winds": "varka",
     "proto_vk_crosscurrent": "varka",
     "proto_vk_crosswind": "varka",
@@ -745,7 +747,6 @@
     "proto_vk_favonius_cut": "varka",
     "proto_vk_favonius_drill": "varka",
     "proto_vk_four_banners": "varka",
-    "proto_vk_four_winds_accord": "varka",
     "proto_vk_four_winds_ascension": "varka",
     "proto_vk_gale_sweep": "varka",
     "proto_vk_glacial_edict": "varka",
@@ -768,11 +769,12 @@
     "proto_vk_oathbound_aegis": "varka",
     "proto_vk_oathsworn_strike": "varka",
     "proto_vk_pathfinders_mark": "varka",
-    "proto_vk_pressure_front": "varka",
     "proto_vk_rally_to_the_banner": "varka",
     "proto_vk_razor_claw_and_thunder": "varka",
+    "proto_vk_retaliating_tide": "varka",
     "proto_vk_rising_gale": "varka",
     "proto_vk_shifting_gale": "varka",
+    "proto_vk_short_circuit": "varka",
     "proto_vk_squall": "varka",
     "proto_vk_static_field": "varka",
     "proto_vk_storm_surge": "varka",
@@ -786,10 +788,8 @@
     "proto_vk_thundering_verdict": "varka",
     "proto_vk_tidal_bulwark": "varka",
     "proto_vk_twin_gales": "varka",
-    "proto_vk_unbroken_tide": "varka",
-    "proto_vk_unfurled_banner": "varka",
     "proto_vk_unwavering_banner": "varka",
-    "proto_vk_updraft": "varka",
+    "proto_vk_violet_storm": "varka",
     "proto_vk_vow_of_the_blade": "varka",
     "proto_vk_wall_of_gales": "varka",
     "proto_vk_weathervane": "varka",
@@ -1863,11 +1863,17 @@
     "proto_vk_cavalry_charge": {
       "varka_base": 3
     },
+    "proto_vk_chain_lightning": {
+      "varka_base": 3
+    },
     "proto_vk_change_of_guard": {
       "draw": 1
     },
     "proto_vk_charge_of_the_knights": {
       "formula_per": 1
+    },
+    "proto_vk_charged_lunge": {
+      "varka_base": 3
     },
     "proto_vk_converging_winds": {
       "cost": -1
@@ -1920,9 +1926,6 @@
     },
     "proto_vk_four_banners": {
       "formula_per": 1
-    },
-    "proto_vk_four_winds_accord": {
-      "cost": -1
     },
     "proto_vk_four_winds_ascension": {
       "damage": 3,
@@ -1993,14 +1996,14 @@
     "proto_vk_pathfinders_mark": {
       "varka_upgraded": true
     },
-    "proto_vk_pressure_front": {
-      "retain": true
-    },
     "proto_vk_rally_to_the_banner": {
       "cost": -1
     },
     "proto_vk_razor_claw_and_thunder": {
       "varka_base": 2
+    },
+    "proto_vk_retaliating_tide": {
+      "cost": -1
     },
     "proto_vk_rising_gale": {
       "damage": 2
@@ -2008,6 +2011,9 @@
     "proto_vk_shifting_gale": {
       "damage": 2,
       "conditional_then_damage": 2
+    },
+    "proto_vk_short_circuit": {
+      "discard": -1
     },
     "proto_vk_squall": {
       "damage": 1
@@ -2040,7 +2046,7 @@
       "cost": -1
     },
     "proto_vk_thundering_verdict": {
-      "varka_base": 3
+      "varka_base": 2
     },
     "proto_vk_tidal_bulwark": {
       "formula_base": 2
@@ -2048,17 +2054,11 @@
     "proto_vk_twin_gales": {
       "innate": true
     },
-    "proto_vk_unbroken_tide": {
-      "cost": -1
-    },
-    "proto_vk_unfurled_banner": {
-      "retain": true
-    },
     "proto_vk_unwavering_banner": {
       "innate": true
     },
-    "proto_vk_updraft": {
-      "damage": 3
+    "proto_vk_violet_storm": {
+      "varka_base": 3
     },
     "proto_vk_vow_of_the_blade": {
       "draw": 1

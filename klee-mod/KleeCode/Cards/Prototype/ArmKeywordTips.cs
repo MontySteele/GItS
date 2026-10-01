@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using KleeMod.Elements;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.HoverTips;
@@ -87,6 +88,11 @@ public static class ArmKeywordTips
     public const string OathKey = "KLEEMOD-ARM_VARKA_OATH";
     public const string CurrentElementKey = "KLEEMOD-ARM_VARKA_CURRENT_ELEMENT";
     public const string KnightKey = "KLEEMOD-ARM_VARKA_KNIGHT";
+    // ELEMENT IDENTITIES sec.7 (2026-10-01): a rider that titles no keyword,
+    // a fact about THIS card on THIS board -- playing it would switch his
+    // current element. Four times in one round a seat lost the Oath it was
+    // building to a card of another element and noticed only later.
+    public const string ElementSwitchKey = "KLEEMOD-ARM_VARKA_ELEMENT_SWITCH";
     // THE FURINA STAGE'S SEVEN (`EB-723`, R269). The brief's sec.12 names
     // them: "Spend, Fanfare (the bar), Raise, Bow, the lead, the back
     // performer, Rotate". `Fanfare` collides with the reframe's word by
@@ -685,10 +691,13 @@ public static class ArmKeywordTips
             // Amended 2026-10-01: an aura the spread finds already there
             // refreshes. Reworded the same day (the open-Oath round: two
             // seats misread "old ones refresh").
+            // Element identities (2026-10-01; the Varka round read it two
+            // ways): the flat damage is unblockable
+            // (`ReactionEffects.SwirlPays`, `ValueProp.Unblockable`).
             "[gold]Anemo[/gold] meets a fresh aura: deal "
           + Elements.ReactionConstants.SwirlDamage
-          + " damage to ALL enemies and copy it, spent, onto the others. "
-          + "Enemies already wearing it are refreshed.");
+          + " unblockable damage to ALL enemies and copy it, spent, onto the others. "
+          + "Enemies wearing it refresh.");
 
     /// <summary>
     /// 2026-09-25, the afternoon Klee seat round. The Opus seat: "Companion is
@@ -731,6 +740,22 @@ public static class ArmKeywordTips
           + VarkaLaw.SwirlHydroBlock + " [gold]Block[/gold], Cryo "
           + VarkaLaw.SwirlCryoVulnerable + " [gold]Vulnerable[/gold], Electro "
           + VarkaLaw.SwirlElectroDamageAll + " to ALL.");
+
+    /// <summary>
+    /// ELEMENT IDENTITIES sec.7 (2026-10-01): "The card's hover says
+    /// 'Switches your element to Pyro' when it would." Attached by the
+    /// codegen to every Varka row whose play makes an element current
+    /// (<c>gen_klee_cards.varka_switch_element</c>), and printed only while it
+    /// would switch now (<see cref="VarkaOath.WouldSwitchTo"/>): in a fight,
+    /// another element current, and for a non-Knight no Unwavering Banner.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForElementSwitch(
+        IEnumerable<IHoverTip> inherited, CardModel card, Element element)
+    {
+        if (!VarkaOath.WouldSwitchTo(card, element)) return inherited;
+        return With(inherited, ElementSwitchKey,
+            "Switches your [gold]current element[/gold] to " + element + ".");
+    }
 
     /// <summary>His personal Companions (sec.6), named on Knightly Guard,
     /// Grand Master's Order, Knights' Roll Call and Favonian Standard.

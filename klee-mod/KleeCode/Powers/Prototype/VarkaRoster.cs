@@ -68,7 +68,7 @@ internal static class VarkaRoster
     {
         // The Oath rework's forty-one.
         ModelDb.Card<ProtoVkSquall>(),
-        ModelDb.Card<ProtoVkUpdraft>(),
+        ModelDb.Card<ProtoVkChargedLunge>(),      // element identities
         ModelDb.Card<ProtoVkGaleSweep>(),
         ModelDb.Card<ProtoVkWindWall>(),
         ModelDb.Card<ProtoVkFavoniusDrill>(),
@@ -99,11 +99,11 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkChangeOfGuard>(),
         ModelDb.Card<ProtoVkStormSurge>(),
         ModelDb.Card<ProtoVkTailwindGuard>(),
-        ModelDb.Card<ProtoVkUnfurledBanner>(),
+        ModelDb.Card<ProtoVkChainLightning>(),    // element identities
         ModelDb.Card<ProtoVkConvergingWinds>(),
         ModelDb.Card<ProtoVkBoreasUnbound>(),
         ModelDb.Card<ProtoVkWallOfGales>(),
-        ModelDb.Card<ProtoVkFourWindsAccord>(),
+        ModelDb.Card<ProtoVkVioletStorm>(),       // element identities
         ModelDb.Card<ProtoVkSwornBrotherhood>(),
         ModelDb.Card<ProtoVkNorthwindAvatar>(),
         ModelDb.Card<ProtoVkDawnWindsMarch>(),
@@ -129,13 +129,13 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkCycleOfSeasons>(),
         ModelDb.Card<ProtoVkFourBanners>(),
         ModelDb.Card<ProtoVkEyeWall>(),
-        ModelDb.Card<ProtoVkPressureFront>(),
+        ModelDb.Card<ProtoVkShortCircuit>(),      // element identities
         ModelDb.Card<ProtoVkCrosscurrent>(),
         ModelDb.Card<ProtoVkAssemblyAtTheCathedral>(),
         ModelDb.Card<ProtoVkDawnPatrol>(),
         // Rare (15)
         ModelDb.Card<ProtoVkWildfireOath>(),
-        ModelDb.Card<ProtoVkUnbrokenTide>(),
+        ModelDb.Card<ProtoVkRetaliatingTide>(),   // element identities
         ModelDb.Card<ProtoVkAbsoluteZero>(),
         ModelDb.Card<ProtoVkThunderingVerdict>(),
         ModelDb.Card<ProtoVkOathUntoDeath>(),

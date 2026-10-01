@@ -386,6 +386,13 @@ class Card:
     # an out-of-play hook: at any moment both say "printed cost minus the
     # Skills played this turn", and both reset at the turn boundary.
     cost_reduction_per_skill_this_turn: int = 0
+    # VARKA, ELEMENT IDENTITIES (2026-10-01): Chain Lightning, "Costs 1 less
+    # for each card you discarded this turn" (Eviscerate's discount). Read at
+    # cost time off `state.discards_this_turn`, Pinpoint's declarative shape;
+    # the mod's twin is the card's own `TryModifyEnergyCostInCombat` over
+    # `KokomiResources.DiscardsThisTurn`. A sheet field
+    # (`gen_klee_cards.CARD_FIELDS`).
+    cost_reduction_per_discard_this_turn: int = 0
     # EnergyCost.AddThisTurn / AddThisCombat / SetToFreeThisTurn -- state the
     # base game keeps on the CARD INSTANCE, not on its owner. Two copies of
     # the same card discount themselves independently, and the combat-scoped

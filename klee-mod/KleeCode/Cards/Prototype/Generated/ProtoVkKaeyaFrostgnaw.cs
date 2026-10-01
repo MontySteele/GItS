@@ -52,7 +52,7 @@ public sealed class ProtoVkKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForVulnerable(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this);
+        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this, Element.Cryo), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_kaeya_frostgnaw");
 

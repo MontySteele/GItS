@@ -41,7 +41,7 @@ public sealed class ProtoVkTidalBulwark : CustomCardModel, ICharacterCard
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOath(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this);
+        ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_tidal_bulwark");
 
