@@ -45,7 +45,7 @@ public sealed class ProtoKkTidalScreen : CustomCardModel, ICharacterCard, IPlann
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Screen"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold].\n[gold]Plan[/gold]: Draw 2 cards."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Draw 2 cards."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

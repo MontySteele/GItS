@@ -68,10 +68,12 @@ def test_the_batch_is_twelve_uncommon_and_ten_rare_last_in_the_pool(overhaul):
     # Pool completion (2026-10-01, paper sec.6) moved Coral Crash to Common.
     assert rarities.count("uncommon") == 11
     assert rarities.count("common") == 1
-    assert rarities.count("rare") == 10
-    # The payoff pass (2026-10-01) appended two rows after the batch, and
-    # pool completion eight more.
-    assert C.KOKOMI_OVERHAUL_POOL_IDS[-32:-10] == NEW
+    # The status batch (2026-10-01) cut All Streams Flow to the Sea.
+    assert rarities.count("rare") == 9
+    assert "proto_kk_all_streams_flow_to_the_sea" not in NEW
+    # The payoff pass (2026-10-01) appended two rows after the batch, pool
+    # completion eight more and the status batch six.
+    assert C.KOKOMI_OVERHAUL_POOL_IDS[-37:-16] == NEW
     assert "proto_kk_the_clouds_like_waves" not in C.KOKOMI_OVERHAUL_POOL_IDS
     assert "proto_kk_the_clouds_like_waves" not in {
         c.id for c in loader.prototype_cards()}
@@ -210,26 +212,6 @@ def test_the_long_game_pays_on_exactly_one_waiting(overhaul):
     kokomi_plan.long_game(st, 2)
     kokomi_plan.long_game(st, 0)
     assert st.player.energy == 4
-
-
-def test_all_streams_cancels_without_refund_and_multiplies_the_next_plan(overhaul):
-    """Main session, 2026-10-01: "Cancel all your Plans and take their cards
-    back." No Energy comes back."""
-    enemy = make_enemy(hp=300, intents=QUIET)
-    st = kokomi_state(enemies=[enemy])
-    _write(st, "proto_kk_nip")                     # 0 paid
-    _write(st, "proto_kk_surging_shoal", energy=2)  # 2 paid
-    _write(st, "proto_kk_all_streams_flow_to_the_sea", energy=1)
-    assert st.kk_plan_queue == []
-    assert st.player.energy == 0                   # nothing is refunded
-    assert st.kk_next_plan_extra == 2
-    _write(st, "proto_kk_surging_shoal", energy=2)
-    assert st.kk_plan_queue[0].extra == 2
-    assert st.kk_next_plan_extra is None
-    kokomi_plan.resolve_all(st)
-    assert enemy.hp == 300 - 3 * 22                # once, plus once per cancel
-    assert _row("proto_kk_all_streams_flow_to_the_sea").cost == 1
-    assert _up("proto_kk_all_streams_flow_to_the_sea").cost == 0
 
 
 def test_the_all_streams_gift_dies_with_the_turn(overhaul):

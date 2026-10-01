@@ -45,7 +45,7 @@ public sealed class ProtoKkEveningWatch : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Evening Watch"),
-        ("description", "Draw 1 card.\n[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold] for each enemy intending to attack."),
+        ("description", "Draw 1 card.\nOr [gold]dusk[/gold] [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold] for each enemy intending to attack."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

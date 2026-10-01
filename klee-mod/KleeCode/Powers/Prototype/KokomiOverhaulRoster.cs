@@ -160,7 +160,7 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkKuragesMercy>(),
     };
 
-    /// <summary>The slice's own 78 rows, without the Ancient tail
+    /// <summary>The slice's own 77 rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds. FORTY-SIX since the Casket pass
     /// (2026-09-28): six cut, thirteen added; FORTY-FOUR since the cleanup
     /// pass (2026-09-29) cut Scout Ahead and Song of Pearls; FORTY-EIGHT since
@@ -169,7 +169,8 @@ internal static class KokomiOverhaulRoster
     /// added 22 and cut The Clouds Like Waves Rippling; SEVENTY since the
     /// payoff pass (2026-10-01) cut Second Thoughts and added Kurage Canopy
     /// and Coral Tithe; SEVENTY-EIGHT since pool completion (2026-10-01)
-    /// added eight. The Open the Casket token is in
+    /// added eight; SEVENTY-SEVEN since the status batch (2026-10-01) cut
+    /// seven and added six. The Open the Casket token is in
     /// no pool; the relic deals it (<see cref="Relics.TamakushiCasket"/>).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
@@ -189,15 +190,12 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkTheMoonAShip>(),
         ModelDb.Card<ProtoKkSangoIsshin>(),
         // The Commander -- Gorou, go (4)
-        ModelDb.Card<ProtoKkRally>(),
         ModelDb.Card<ProtoKkVanguard>(),
         ModelDb.Card<ProtoKkTheGeneralsBanner>(),
-        ModelDb.Card<ProtoKkChainOfCommand>(),
         // Currencies, tempo, and the one replay (5)
         ModelDb.Card<ProtoKkStolenChapter>(),
         ModelDb.Card<ProtoKkChangeOfPlans>(),
         ModelDb.Card<ProtoKkUndertow>(),
-        ModelDb.Card<ProtoKkBattlePlan>(),
         ModelDb.Card<ProtoKkMoonsReflection>(),
         // THE TEMPO SHELF (round 9 pick 1, 2026-09-04) was Tide Chart and
         // Ripple; the Casket pass (2026-09-28) cut both.
@@ -210,7 +208,6 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkRiptide>(),
         ModelDb.Card<ProtoKkPincer>(),
         ModelDb.Card<ProtoKkFlank>(),
-        ModelDb.Card<ProtoKkFeignedRetreat>(),
         // POOL PASS TWO (`EB-643`, R265): the QUEUE as something the player
         // operates on rather than something that empties on a timer. Two
         // riders on the entry that follows (Opening Gambit, Second Wave), a
@@ -243,14 +240,12 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkMassedVolley>(),
         ModelDb.Card<ProtoKkSignalArrow>(),
         ModelDb.Card<ProtoKkSurgingShoal>(),
-        ModelDb.Card<ProtoKkPearlDiver>(),
         ModelDb.Card<ProtoKkPressTheAdvantage>(),
         ModelDb.Card<ProtoKkShellOfSanctuary>(),
         ModelDb.Card<ProtoKkDriftglass>(),
         ModelDb.Card<ProtoKkWhatTheTokoyoReturns>(),
         ModelDb.Card<ProtoKkDepthsJudgment>(),
         ModelDb.Card<ProtoKkTideturn>(),
-        ModelDb.Card<ProtoKkMoonSignal>(),
         ModelDb.Card<ProtoKkPearlCurrent>(),
         ModelDb.Card<ProtoKkWhatTheTokoyoTook>(),
         // THE FEED PASS (2026-09-29): five 0-cost Plan-only Commons, the cheap
@@ -270,7 +265,6 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkGrandDesign>(),
         ModelDb.Card<ProtoKkTheLongGame>(),
         ModelDb.Card<ProtoKkMasterstroke>(),
-        ModelDb.Card<ProtoKkAllStreamsFlowToTheSea>(),
         ModelDb.Card<ProtoKkDrowningPressure>(),
         ModelDb.Card<ProtoKkSaltInTheWound>(),
         ModelDb.Card<ProtoKkUndercurrentSnare>(),
@@ -300,6 +294,17 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkSeasReproach>(),
         ModelDb.Card<ProtoKkTidalRebuke>(),
         ModelDb.Card<ProtoKkWatatsumiResistance>(),
+        // THE STATUS BATCH (2026-10-01, ruled): six cards on statuses and
+        // curses, LAST, in the sheet's own order. Seven rows were cut above
+        // (Rally, Chain of Command, Battle Plan, Feigned Retreat, Pearl Diver,
+        // Moon Signal, All Streams Flow to the Sea). The pool is 77 (21 / 36 /
+        // 20): Coral Sanctuary, the paper's Rare, is not built.
+        ModelDb.Card<ProtoKkKelpWall>(),
+        ModelDb.Card<ProtoKkTidecleanse>(),
+        ModelDb.Card<ProtoKkSeaGlassHarvest>(),
+        ModelDb.Card<ProtoKkTurningTide>(),
+        ModelDb.Card<ProtoKkFlotsamSurge>(),
+        ModelDb.Card<ProtoKkAbyssalSalvage>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

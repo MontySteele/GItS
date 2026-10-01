@@ -5294,3 +5294,107 @@ All twelve are `proto_fs_` rows now and their shipped classes are named in
   Down: "If it empties, it Bows." after its first sentence.
 - *Art.* Opening Number, Leading Lady and Endless Waltz render the
   placeholder (`BACKLOG.md`).
+
+## Kokomi status batch, 2026-10-01
+
+Paper `review/active/kokomi-status-batch-2026-10-01.md`, ruled: [USER]
+"Agreed on the Plan text change"; "the 7 removals are good"; Kelp Wall,
+Tidecleanse and Coral Sanctuary revised on his notes. Built in both engines,
+except Coral Sanctuary: the main session withdrew it for a redesign during
+the build ([USER]: "Coral Sanctuary feels messy"), so the pool is **77 (21 /
+36 / 20)** and one Rare slot is open (`BACKLOG.md`).
+
+**In (six rows, LAST in the sheet's order).** Kelp Wall (Skill 1, Common),
+Tidecleanse (Skill 0, Common), Sea Glass Harvest (Skill 1, Uncommon), Turning
+Tide (Skill 0, Uncommon), Flotsam Surge (Attack 1, Uncommon), Abyssal Salvage
+(Power 1, Uncommon), plus the Sea Glass token (0, "Gain 1 [2] Energy.
+Exhaust.", hand-written as `Cards/Prototype/SeaGlass.cs`, in no pool, off-pool
+beside Open the Casket; sim `kokomi_plan.sea_glass_card`).
+
+**Out (seven rows).** Rally, Pearl Diver (Common), Battle Plan, Feigned
+Retreat, Moon Signal, Chain of Command (Uncommon), All Streams Flow to the
+Sea (Rare): out of the sheet, `C.KOKOMI_OVERHAUL_POOL_IDS` and
+`KokomiOverhaulRoster.Slice()`, tombstoned in `docs/retired-card-ids.yaml`.
+Their engine pieces stay registered with no row spelling them (BACKLOG's
+unused-engine-pieces line lists them). The pins that tested only a cut card
+left with it.
+
+**The face says "or" (paper sec.3).** One change in the generator, beside the
+line break: `gen_klee_cards.plan_line_says_or` turns every broken Plan clause
+into "Or [gold]plan[/gold]:" and a Dusk one into "Or [gold]dusk[/gold]
+[gold]plan[/gold]:"; the sheet keeps "Plan:". Kurage's Oath now reads "Gain 6
+Block. / Or plan: Deal 7 damage to ALL enemies." The lower-case words are
+tokens of the Plan and Dusk keyword rows, so the tips still attach. The Plan
+tip (`ArmKeywordTips.ForPlan`, the blind page's glossary row with it) is now
+"Instead of the line above, play the card on the Bake-Kurage: this happens at
+the start of your next turn. Plans go in the order made." (133 of 135).
+
+**Readings the paper left open (the builder's plainest, flagged in the PR):**
+
+1. *"Or plan:" on Plan-only rows.* Read literally ("on every card"): every
+   Dusk row is Plan-only, so "Or dusk plan:" exists only there. A Plan-only
+   face reads "Play on the Bake-Kurage. / Or plan: ...".
+2. *The tip's second sentence* was shortened ("Plans go in the order made.")
+   so the paper's opening fits the 135-character ceiling.
+3. *Tidecleanse's "up to N".* Every status and curse when she holds N or
+   fewer; when she holds more, the mod asks which N (a hand screen,
+   `CardSelectCmd.FromHand`); the sim takes them in hand order.
+4. *Turning Tide's upgrade.* The paper prints none; the row takes the
+   Prototype-stage default, the now-line draws 2.
+5. *Turning Tide in the sim.* The mod asks (Gambler's Brew's screen, any
+   number, none included); the sim discards every status and curse in hand
+   and nothing else. An instrument surface, not tuned.
+6. *Abyssal Salvage's upgrade.* "[and you gain 2 Block]" cannot be an `add:
+   apply_power` delta (not expressible), so the upgraded card installs
+   `AbyssalSalvagePlusPower` (`upgraded_power`, The Long Game's shape): each
+   stack is 1 Casket and 2 Block per exhausted status or curse
+   (`KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK`, mirrored). "A status or curse" is one
+   of hers, by any route (played Slimed, a Dazed's Ethereal exhaust at turn
+   end, Tidecleanse); Block is powered.
+7. *Sea Glass Harvest.* Upgraded, the Plan transforms into Sea Glass+, read
+   off the writing card's `IsUpgraded` at carry-out (sim: the
+   `upgraded_grant` flag on the clause). A curse the game will not transform
+   (`IsTransformable` false) stays in hand.
+8. *Kelp Wall.* The rate (3) does not upgrade; the flat Block does (7 to 10).
+   The count is the hand when the clause runs.
+9. *Flotsam Surge* shuffles the base game's Dazed (`status_dazed` in the sim)
+   into the draw pile at random depths, and applies Hydro through the arm's
+   cadence like every damaging card of hers.
+10. *Drafter prices.* The four new Plan clauses are priced ZERO in
+    `tier05.draft` (a hand fact an offer screen cannot read), the `kokomi`
+    op's precedent; no `DRAFTER_VERSION` bump, as with every prototype op.
+
+**Engine.** Four Plan kinds, appended last: `BlockPerStatusInHand`,
+`ExhaustStatusesInHand`, `TransformStatusesInHand`, `DiscardAndDraw`
+(`KokomiPlan.Kind`; sim `kokomi_plan`, the same names in snake case), bodies
+in `Powers/Prototype/KokomiStatusBatch.cs`. Rule 2's after-the-draw
+resolution is what lets them read the next hand. A status or curse is the
+card's own type (`CardType.Status` / `Curse`); the sim asks type and rarity,
+because an injected status is built at rarity "basic". Abyssal Salvage rides
+`AfterCardExhausted` (sim: `refpowers.after_card_exhausted`). Pins:
+`tier0/tests/test_kokomi_status_batch.py`,
+`KleeTests/Prototype/KokomiStatusBatchTests.cs`.
+
+**Sim read (census wrapper, 600 seeds, five pilots, stock priest pilot, not
+tuned).** Pick % of offers (all drafters / default drafter), plays per fight
+held:
+
+| Card | Pick % | Default drafter | Plays per fight |
+|---|---|---|---|
+| Kelp Wall | 20.3 | 28.8 | 0.07 |
+| Tidecleanse | 7.0 | 9.8 | 1.48 |
+| Sea Glass Harvest | 25.9 | 36.4 | 1.16 |
+| Turning Tide | 0.0 | 0.0 | never held |
+| Flotsam Surge | 58.6 | 82.2 | 1.80 |
+| Abyssal Salvage | 0.0 | 0.0 | never held |
+
+The stock pilot cannot read the next-hand Plans: it writes a Plan only when
+the now-line is empty or no enemy attacks, and it does not foresee the
+statuses it will draw. So Kelp Wall's, Tidecleanse's, Sea Glass Harvest's and
+Turning Tide's Plan halves are unread, and Turning Tide and Abyssal Salvage
+(priced ZERO by the drafter) are never drafted. Flotsam Surge, the one card
+the stock drafter can price, is taken from 82% of the default drafter's
+offers, over the 70% line pool completion's sec.7 uses. The seats decide.
+
+- *Art.* All six rows and Sea Glass render the placeholder; Abyssal Salvage
+  wears the Princess of Watatsumi badge (`BACKLOG.md`).

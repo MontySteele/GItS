@@ -64,8 +64,9 @@ def _events(st, name):
 
 def test_her_pool_is_seventy_eight_with_the_eight_last(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == len(set(ids)) == 78
-    assert ids[-8:] == C.KOKOMI_POOL_COMPLETION_IDS
+    # The status batch (2026-10-01) cut seven and appended six after these.
+    assert len(ids) == len(set(ids)) == 77
+    assert ids[-14:-6] == C.KOKOMI_POOL_COMPLETION_IDS
     rarities = [_row(cid).rarity for cid in C.KOKOMI_POOL_COMPLETION_IDS]
     assert rarities.count("common") == 1 and rarities.count("rare") == 7
     # Her co-op tier is the base game's shape: three Uncommons, two Rares.

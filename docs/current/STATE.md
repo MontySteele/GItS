@@ -37,7 +37,7 @@ kits, are retired until a kit reaches Balance (legacy cleanup pick 5). **Last re
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
-| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 77 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (expansion built) | 78 |
 
@@ -122,7 +122,17 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Coral Crash to Common 1 [0]; her second Ancient, Divine Strategy, game-side.
   The pool is 78 (21 / 36 / 21) plus five co-op cards and two Ancients.
   Provenance note, "Pool completion, 2026-10-01"; sec.7's sim checks wait
-  (BACKLOG). Next: [USER] plays.
+  (BACKLOG). **The status batch (2026-10-01, ruled):** paper
+  `review/active/kokomi-status-batch-2026-10-01.md`, built in both engines.
+  Six cards that answer statuses through the hand a Plan sees after the
+  draw (Kelp Wall, Tidecleanse, Sea Glass Harvest and its Sea Glass token,
+  Turning Tide, Flotsam Surge, Abyssal Salvage); Rally, Pearl Diver, Battle
+  Plan, Feigned Retreat, Moon Signal, Chain of Command and All Streams Flow
+  to the Sea cut. Coral Sanctuary, the paper's Rare, was withdrawn for a
+  redesign, so the pool is 77 (21 / 36 / 20) until its replacement lands
+  (BACKLOG). Every Plan line prints "Or plan:" ("Or dusk plan:"), the
+  starter's included, and the Plan tip opens "Instead of the line above".
+  Provenance note, "Kokomi status batch, 2026-10-01". Next: [USER] plays.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any

@@ -52,7 +52,7 @@ public class KokomiExpansionTests : IDisposable
     {
         "ProtoKkWeightOfThePlan", "ProtoKkLull", "ProtoKkUndertideLance",
         "ProtoKkMeasuredBreath", "ProtoKkGrandDesign", "ProtoKkTheLongGame",
-        "ProtoKkMasterstroke", "ProtoKkAllStreamsFlowToTheSea",
+        "ProtoKkMasterstroke",
         "ProtoKkDrowningPressure", "ProtoKkSaltInTheWound",
         "ProtoKkUndercurrentSnare", "ProtoKkTidalResonance",
         "ProtoKkAtWatersEdge", "ProtoKkCeremonialGarment",
@@ -72,9 +72,11 @@ public class KokomiExpansionTests : IDisposable
             .ToList();
         // SEVENTY since the payoff pass (2026-10-01): Second Thoughts cut
         // ahead of the batch, two rows after it; pool completion (2026-10-01)
-        // eight more.
-        Assert.Equal(78, slice.Count);
-        Assert.Equal(Batch, slice.Skip(46).Take(22).ToArray());
+        // eight more; the status batch (2026-10-01) cut All Streams Flow to
+        // the Sea and five rows ahead of the batch, and appended six.
+        Assert.Equal(77, slice.Count);
+        Assert.Equal(Batch, slice.Skip(40).Take(21).ToArray());
+        Assert.DoesNotContain(slice, c => c.Contains("AllStreams"));
         Assert.DoesNotContain(slice, c => c.Contains("CloudsLikeWaves"));
         Assert.Null(typeof(KokomiOverhaulKit).Assembly
             .GetType("KleeMod.Powers.CloudsLikeWavesPower"));
@@ -91,7 +93,8 @@ public class KokomiExpansionTests : IDisposable
         // Pool completion (2026-10-01, paper sec.6): Coral Crash is Common.
         Assert.Equal(11, rarities.Count(r => r == CardRarity.Uncommon));
         Assert.Equal(1, rarities.Count(r => r == CardRarity.Common));
-        Assert.Equal(10, rarities.Count(r => r == CardRarity.Rare));
+        // The status batch (2026-10-01) cut All Streams Flow to the Sea.
+        Assert.Equal(9, rarities.Count(r => r == CardRarity.Rare));
     }
 
     [Fact]
@@ -202,28 +205,6 @@ public class KokomiExpansionTests : IDisposable
         Assert.Equal(1, KokomiOverhaulLaw.LongGameWaiting);
     }
 
-    [Fact]
-    public void All_streams_cancels_and_leaves_a_gift_for_the_next_write()
-    {
-        Assert.Contains(Seq("KokomiCards", "AllStreams"),
-                        c => c.Contains("KokomiPlan.CancelAllForNext"));
-        Assert.Contains(Seq("KokomiPlan", "CancelAllForNext"),
-                        c => c.Contains("set_NextPlanExtra"));
-        Assert.DoesNotContain(Seq("KokomiPlan", "CancelAllForNext"),
-                              c => c.Contains("PlayerCmd.GainEnergy"));
-        Assert.Equal(1, new ProtoKkAllStreamsFlowToTheSea().EnergyCost.Canonical);
-        // The gift dies with the turn.
-        KokomiOverhaulLedger.ResetAll();
-        var ledger = KokomiOverhaulLedger.For(Seat.Kokomi().Creature);
-        ledger.RollTo(1);
-        ledger.NextPlanExtra = 2;
-        ledger.RollTo(2);
-        Assert.Null(ledger.NextPlanExtra);
-        // A Change of Plans hurry honours it too.
-        Assert.Contains(Seq("KokomiPlan", "ResolveFront"),
-                        c => c.Contains("Entry.get_Extra"));
-    }
-
     // ---- Tide Control ---------------------------------------------------------
 
     [Fact]
@@ -283,9 +264,9 @@ public class KokomiExpansionTests : IDisposable
         Assert.Equal(KokomiPlan.Kind.DoubleBlock, brace.Kind);
         Assert.Contains(CardKeyword.Exhaust,
                         Upgraded<ProtoKkBraceForTheTide>().CanonicalKeywords);
-        Assert.Contains("[gold]Dusk[/gold] [gold]Plan[/gold]",
+        Assert.Contains("Or [gold]dusk[/gold] [gold]plan[/gold]",
                         Face(new ProtoKkEveningWatch()));
-        Assert.Contains("[gold]Dusk[/gold] [gold]Plan[/gold]",
+        Assert.Contains("Or [gold]dusk[/gold] [gold]plan[/gold]",
                         Face(new ProtoKkBraceForTheTide()));
     }
 

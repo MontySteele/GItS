@@ -45,7 +45,7 @@ public sealed class ProtoKkJellyfishDrift : CustomCardModel, ICharacterCard, IPl
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jellyfish Drift"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

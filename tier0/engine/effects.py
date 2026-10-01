@@ -3285,7 +3285,10 @@ def _op_add_card(state: CombatState, fx: dict, card: Card) -> None:
                            reason="no upgrade entry; created unupgraded")
                 token = loader.get_card(cid)
         else:
-            token = loader.get_card(cid)
+            # THE STATUS BATCH (Flotsam Surge): a synthesized status id
+            # (`status_dazed`) resolves through `token_card`, which asks the
+            # loader first, so every pool id resolves exactly as before.
+            token = token_card(cid)
         if "cost_override" in fx:
             token.cost = fx["cost_override"]
         # Enchant-at-creation (R82, Blade Of Ink): the rider attaches in the
@@ -6862,6 +6865,12 @@ OPS = {
     # POOL COMPLETION (2026-10-01): Tactical Relay's two plan-only clauses.
     "each_player_energy": _op_kokomi_plan_only,
     "each_player_draw": _op_kokomi_plan_only,
+    # THE STATUS BATCH (2026-10-01): four plan-only clauses that read the
+    # hand just drawn.
+    "block_per_status_in_hand": _op_kokomi_plan_only,
+    "exhaust_statuses_in_hand": _op_kokomi_plan_only,
+    "transform_statuses_in_hand": _op_kokomi_plan_only,
+    "discard_and_draw": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

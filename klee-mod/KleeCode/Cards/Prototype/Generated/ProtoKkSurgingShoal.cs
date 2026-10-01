@@ -51,7 +51,7 @@ public sealed class ProtoKkSurgingShoal : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surging Shoal"),
-        ("description", "Deal {Damage:diff()} damage.\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

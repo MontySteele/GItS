@@ -1305,12 +1305,9 @@
 
 # --- the Commander: Gorou, go (packet sec.4) ---
 
-- {id: proto_kk_rally, name: "Rally", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Apply 1 [gold]Weak[/gold]. The next [gold]Companion[/gold] card you play this turn costs 1 less.",
-   effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
-             {op: next_companion_discount}]}
+# RALLY IS CUT (the status batch, 2026-10-01,
+# review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
+# note, "Kokomi status batch, 2026-10-01".
 
 - {id: proto_kk_vanguard, name: "Vanguard", character: kokomi,
    authored_by: [claude],
@@ -1332,17 +1329,9 @@
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {innate: true}}
 
-- {id: proto_kk_chain_of_command, name: "Chain of Command", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   # Kokomi core pass: the Plan buys tempo for tomorrow's Companion. Its full
-   # rebuild belongs to the "plan the reaction" batch.
-   description: "Deal {ExtraDamage:diff()} damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Next turn, the first Companion card you play costs 0.",
-   effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 3, count: companions_played_this_turn}}],
-   plan: [{op: first_companion_free}],
-   # 4 per Companion; the Plan line does not upgrade.
-   upgrade: {formula_per: 1}}
+# CHAIN OF COMMAND IS CUT (the status batch, 2026-10-01,
+# review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
+# note, "Kokomi status batch, 2026-10-01".
 
 # --- currencies, tempo, and the one replay (packet sec.4) ---
 
@@ -1375,17 +1364,9 @@
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {damage: +3}}
 
-- {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
-   # Plan line buys what only a head start can buy.
-   # Every Attack played face-up this turn; a carry-out is not a play.
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Next turn, your Attacks deal 3 additional damage.",
-   effects: [{op: draw, amount: 2}],
-   plan: [{op: attack_damage_this_turn, amount: 3}],
-   # now draw 3; Plan 4 more.
-   upgrade: {draw: 1, plan_attack_bonus: 1}}
+# BATTLE PLAN IS CUT (the status batch, 2026-10-01,
+# review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
+# note, "Kokomi status batch, 2026-10-01".
 
 - {id: proto_kk_moons_reflection, name: "Moon's Reflection", character: kokomi,
    authored_by: [claude],
@@ -1440,20 +1421,9 @@
    plan: [{op: damage, amount: 8, target: enemies_intending_attack}],
    upgrade: {damage: 3, plan_damage: 3}}
 
-- {id: proto_kk_feigned_retreat, name: "Feigned Retreat", character: kokomi,
-   authored_by: [claude],
-   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
-   # card that does a thing now AND writes a Plan sits at a higher rarity.
-   cost: 1, type: skill, rarity: uncommon,
-   # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
-   # now-half does something on a quiet turn.
-   # "Since playing this": the entry records her HP when it is written.
-   description: "Draw 2 cards. Discard 1 card. [gold]Plan[/gold]: Deal 9 damage, or 14 if you lost no HP since playing this.",
-   effects: [{op: draw, amount: 2}, {op: discard, amount: 1, select: chosen}],
-   plan: [{op: damage_if_unhurt, amount: 9, unhurt_amount: 14,
-           target: front_enemy}],
-   # Plan 12 / 18; the now-line does not upgrade.
-   upgrade: {plan_damage: 3, plan_unhurt_damage: 4}}
+# FEIGNED RETREAT IS CUT (the status batch, 2026-10-01,
+# review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
+# note, "Kokomi status batch, 2026-10-01".
 
 # --- POOL PASS TWO (`EB-643`, R265): the QUEUE as something the player
 # operates on. Eight rows, LAST in the sheet's own order. The finding, the
@@ -1546,14 +1516,9 @@
    # 18 / Plan 28.
    upgrade: {damage: 4, plan_damage: 6}}
 
-- {id: proto_kk_pearl_diver, name: "Pearl Diver", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: The [gold]Casket[/gold] gains 2.",
-   effects: [{op: draw, amount: 1}],
-   plan: [{op: casket_gain, amount: 2}],
-   # draw 2; the Plan line does not upgrade.
-   upgrade: {draw: 1}}
+# PEARL DIVER IS CUT (the status batch, 2026-10-01,
+# review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
+# note, "Kokomi status batch, 2026-10-01".
 
 - {id: proto_kk_press_the_advantage, name: "Press the Advantage", character: kokomi,
    authored_by: [claude],
@@ -1612,15 +1577,9 @@
    # 5 each.
    upgrade: {formula_per: 1}}
 
-- {id: proto_kk_moon_signal, name: "Moon Signal", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: power, rarity: uncommon,
-   # READ BEFORE THE MORNING'S PLANS ARE CARRIED OUT, or a drained queue could
-   # never show two: `ProtoBakeKuragePower.AfterPlayerTurnStart` (sim:
-   # `combat._player_turn`) asks it beside Song of Pearls' read.
-   description: "At the start of your turn, if 2 or more [gold]Plans[/gold] are waiting, the [gold]Casket[/gold] gains 1.",
-   effects: [{op: apply_power, power: kk_moon_signal, amount: 1, target: self}],
-   upgrade: {power_amount: +1}}
+# MOON SIGNAL IS CUT (the status batch, 2026-10-01,
+# review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
+# note, "Kokomi status batch, 2026-10-01".
 
 - {id: proto_kk_pearl_current, name: "Pearl Current", character: kokomi,
    authored_by: [claude],
@@ -1759,15 +1718,9 @@
    # Plan 40.
    upgrade: {plan_damage: 10}}
 
-- {id: proto_kk_all_streams_flow_to_the_sea, name: "All Streams Flow to the Sea", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: rare, exhaust: true,
-   # Her C5. Main session, 2026-09-29: cost 1 [0]. 2026-10-01: no Energy
-   # refund (the cards return to hand, so a refund made the biggest re-write
-   # free). Provenance note.
-   description: "Exhaust. Cancel all your [gold]Plans[/gold], and take their cards back. Your next [gold]Plan[/gold] this turn is carried out once more for each.",
-   effects: [{op: kokomi, kind: all_streams}],
-   upgrade: {cost: -1}}
+# ALL STREAMS FLOW TO THE SEA IS CUT (the status batch, 2026-10-01,
+# review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
+# note, "Kokomi status batch, 2026-10-01".
 
 # Tide Control: Weak and Vulnerable, and the payoffs that read them.
 
@@ -2008,6 +1961,76 @@
    description: "Whenever you play a [gold]Companion[/gold] card, add a Nip to your hand.",
    effects: [{op: apply_power, power: kk_watatsumi_resistance, amount: 1, target: self}],
    upgrade: {cost: -1}}
+
+# --- THE STATUS BATCH (2026-10-01, ruled), LAST in the sheet's order; seven
+# rows cut above; Coral Sanctuary not built (pool 77). Provenance note,
+# "Kokomi status batch, 2026-10-01". ---
+
+- {id: proto_kk_kelp_wall, name: "Kelp Wall", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   # The count is read when the clause runs; a card an earlier Plan of the
+   # same morning drew is counted.
+   description: "Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand.",
+   effects: [{op: draw, amount: 1}],
+   plan: [{op: block, amount: 7},
+          {op: block_per_status_in_hand, amount: 3}],
+   # Plan 10; the rate does not upgrade.
+   upgrade: {plan_block: 3}}
+
+- {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   # "Up to": every status and curse when she holds that many or fewer; she
+   # chooses which when she holds more.
+   description: "Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Exhaust up to {PlanExhaust:diff()} statuses or curses in your hand.",
+   effects: [{op: apply_power, power: weak, amount: 1, target: enemy}],
+   plan: [{op: exhaust_statuses_in_hand, amount: 2}],
+   # Plan up to 3.
+   upgrade: {plan_exhaust: 1}}
+
+- {id: proto_kk_sea_glass_harvest, name: "Sea Glass Harvest", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   # Defect's Compact on the next hand, curses included. Sea Glass is a token
+   # in no pool: 0, "Gain 1 [2] Energy. Exhaust."
+   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your hand into Sea Glass{IfUpgraded:show:+|}.",
+   effects: [{op: block, amount: 6}],
+   plan: [{op: transform_statuses_in_hand}],
+   # 7 Block; the Sea Glass arrives upgraded.
+   upgrade: {block: 1, upgraded_grant: true}}
+
+- {id: proto_kk_turning_tide, name: "Turning Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   # Gambler's Brew on the next hand: any number, none included.
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Discard any number of cards, then draw that many.",
+   effects: [{op: draw, amount: 1}],
+   plan: [{op: discard_and_draw}],
+   # The paper prints no upgrade: draw 2 now, the Prototype-stage default.
+   upgrade: {draw: 1}}
+
+- {id: proto_kk_flotsam_surge, name: "Flotsam Surge", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   # The self-status engine: well above a Common's AoE rate, paid in Dazed
+   # shuffled into the draw pile at random depths.
+   description: "Deal 13 damage to ALL enemies. Shuffle 2 [gold]Dazed[/gold] into your draw pile.",
+   effects: [{op: damage, amount: 13, target: all_enemies},
+             {op: add_card, card: status_dazed, zone: draw, amount: 2}],
+   # 17 to ALL.
+   upgrade: {damage: 4}}
+
+- {id: proto_kk_abyssal_salvage, name: "Abyssal Salvage", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   # Any status or curse of hers, by any route: a played Slimed, a Dazed at
+   # turn end, Tidecleanse. Copies add.
+   description: "Whenever a status or curse is exhausted, the [gold]Casket[/gold] gains 1{IfUpgraded:show: and you gain 2 [gold]Block[/gold]|}.",
+   effects: [{op: apply_power, power: kk_abyssal_salvage, amount: 1, target: self}],
+   # The upgrade swaps in the Power that also gives 2 Block per exhaust
+   # (`upgraded_power`, The Long Game's shape).
+   upgrade: {upgraded_power: kk_abyssal_salvage_plus}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.

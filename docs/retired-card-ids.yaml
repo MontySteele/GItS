@@ -111,3 +111,10 @@ retired:
   - {id: KLEEMOD-PROTO_VK_FAVONIAN_STANDARD, owner: klee, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_VK_FOUR_BANNERS, owner: klee, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_VK_SQUALL, owner: klee, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_RALLY, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_PEARL_DIVER, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_BATTLE_PLAN, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_FEIGNED_RETREAT, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_MOON_SIGNAL, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_CHAIN_OF_COMMAND, owner: kokomi, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KK_ALL_STREAMS_FLOW_TO_THE_SEA, owner: kokomi, left: "left the prototype codegen"}

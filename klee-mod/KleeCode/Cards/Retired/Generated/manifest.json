@@ -137,8 +137,23 @@
       "owner": "klee"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_ALL_STREAMS_FLOW_TO_THE_SEA",
+      "class": "RetiredProtoKkAllStreamsFlowToTheSea",
+      "owner": "kokomi"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KK_BATTLE_PLAN",
+      "class": "RetiredProtoKkBattlePlan",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_BREAKER",
       "class": "RetiredProtoKkBreaker",
+      "owner": "kokomi"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KK_CHAIN_OF_COMMAND",
+      "class": "RetiredProtoKkChainOfCommand",
       "owner": "kokomi"
     },
     {
@@ -177,8 +192,18 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_FEIGNED_RETREAT",
+      "class": "RetiredProtoKkFeignedRetreat",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_HIGH_TIDE",
       "class": "RetiredProtoKkHighTide",
+      "owner": "kokomi"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KK_MOON_SIGNAL",
+      "class": "RetiredProtoKkMoonSignal",
       "owner": "kokomi"
     },
     {
@@ -192,8 +217,18 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KK_PEARL_DIVER",
+      "class": "RetiredProtoKkPearlDiver",
+      "owner": "kokomi"
+    },
+    {
       "id": "KLEEMOD-PROTO_KK_QUIET_STUDY",
       "class": "RetiredProtoKkQuietStudy",
+      "owner": "kokomi"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KK_RALLY",
+      "class": "RetiredProtoKkRally",
       "owner": "kokomi"
     },
     {

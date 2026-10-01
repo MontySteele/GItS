@@ -431,17 +431,19 @@ public static class ArmKeywordTips
     /// <see cref="ForDusk"/>. Spec and census:
     /// `review/records/text-pass-2026-09-25/`.
     ///
-    /// NO "INSTEAD", on the coordinator's follow-up: a Plan-only row has no
-    /// normal play to be instead of (the r2 seat's finding, `EB-293`), and
-    /// "carried out" is the kit's own verb for a Plan where "goes off" is the
-    /// Bomb's.
+    /// "INSTEAD OF THE LINE ABOVE" (the status batch, 2026-10-01,
+    /// review/active/kokomi-status-batch-2026-10-01.md sec.3, pick 2; [USER]:
+    /// "Agreed on the Plan text change"). Both seats on the 78-card build
+    /// planned a card expecting its now-line too, so the face prints
+    /// "Or plan:" and the tip opens by saying the two halves are a choice.
+    /// The second sentence was shortened to keep the tip under 135.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "Play the card on the [gold]Bake-Kurage[/gold] and this happens "
-          + "at the start of your next turn. Plans are carried out in the "
-          + "order you made them.");
+            "Instead of the line above, play the card on the "
+          + "[gold]Bake-Kurage[/gold]: this happens at the start of your next "
+          + "turn. Plans go in the order made.");
 
     /// <summary>
     /// `EB-643` (R265), THE POOL PASS'S ONE NEW WORD, and it is a rule about

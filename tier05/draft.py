@@ -805,7 +805,11 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "double_block", "kokomi",
     # POOL COMPLETION (2026-10-01): Tactical Relay's two clauses, priced
     # ZERO beside the co-op set's -- a multiplayer-only row.
-    "each_player_energy", "each_player_draw"))
+    "each_player_energy", "each_player_draw",
+    # THE STATUS BATCH (2026-10-01): four plan clauses that read the hand
+    # just drawn, priced ZERO in `_op_price` (a hand fact).
+    "block_per_status_in_hand", "exhaust_statuses_in_hand",
+    "transform_statuses_in_hand", "discard_and_draw"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -1202,6 +1206,13 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     if op == "block_per_attacking_enemy":
         # Evening Watch: its rate for ONE attacker, the neutral estimate.
         return _neutral_amount(fx, 0)
+    if op in ("block_per_status_in_hand", "exhaust_statuses_in_hand",
+              "transform_statuses_in_hand", "discard_and_draw"):
+        # THE STATUS BATCH (2026-10-01). ZERO: each pays off the statuses
+        # and curses in the hand a Plan sees next turn, a fight fact an
+        # offer screen cannot read. Kelp Wall's flat Block is priced by its
+        # own `block` clause.
+        return 0.0
     if op in ("double_block", "kokomi"):
         # ZERO: Brace doubles the Block standing at dusk, and each `kokomi`
         # kind pays off a board, queue or hand fact (Plans waiting, Weak on
@@ -2691,6 +2702,17 @@ STATIC_OP_PRICING: dict[str, str] = {
     "kokomi": "ZERO: each kind pays off a board, queue or hand fact (Plans "
               "waiting, Weak on the target, auras, stacks) an offer screen "
               "cannot read",
+    # --- the Kokomi status batch (2026-10-01) ---
+    "block_per_status_in_hand": "ZERO: a rate per status or curse in the "
+                                "hand a Plan sees, a fight fact an offer "
+                                "screen cannot read",
+    "exhaust_statuses_in_hand": "ZERO: worth the statuses it clears, a "
+                                "fight fact an offer screen cannot read",
+    "transform_statuses_in_hand": "ZERO: worth the statuses it turns to "
+                                  "Energy, a fight fact an offer screen "
+                                  "cannot read",
+    "discard_and_draw": "ZERO: a mulligan of the next hand, worth what that "
+                        "hand holds, which an offer screen cannot read",
     # --- the co-op set (review/records/coop-set-2026-09-25.md) ---
     # POOL COMPLETION (2026-10-01): Tactical Relay, a multiplayer-only row.
     "each_player_energy": "ZERO: a multiplayer-only row's clause, never "
