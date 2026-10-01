@@ -438,12 +438,43 @@ public static class KleeCardTooltips
                  + $"the {mult:0.##}x is the [gold]Bomb[/gold]'s. This card's "
                  + $"own {printed} lands {own}." + UnblockedRaiserClause(dealer);
         }
+        // THE FACE MAY ALREADY CARRY THE AMPLIFIER (the Varka element
+        // identities round, 2026-10-01). Amber: Sharpshooter's face read 18
+        // into a Hydro aura, this tip said "this card's 18 lands 27", and 18
+        // landed: `FrontFoldedDamageVar` previews against the front enemy
+        // with the game's hooks, and that body's own aura hook
+        // (`AuraPower.ModifyDamageMultiplicative`) had already put the 1.5x
+        // into the 18. Where the face folded THIS body, its number is the
+        // landed one and only the cap is left to apply.
+        if (TargetAlreadyFolded(card) && ReferenceEquals(FaceBody(card), enemy))
+        {
+            return $"The triggering hit deals {mult:0.##}x damage and consumes "
+                 + $"the aura. The {printed} on this card already counts it: "
+                 + $"into that {aura} aura it lands {Capped(enemy, printed)}."
+                 + UnblockedRaiserClause(dealer);
+        }
         var landed = TargetAlreadyFolded(card)
             ? Capped(enemy, (int)(printed * mult))
             : SimDamagePipeline.ResolveOnTarget(enemy, printed, mult);
         return $"The triggering hit deals {mult:0.##}x damage and consumes "
              + $"the aura. Into that {aura} aura this card's {printed} lands "
              + $"{landed}." + UnblockedRaiserClause(dealer);
+    }
+
+    /// <summary>
+    /// The body a <c>FrontFoldedDamageVar</c> face folds its number against
+    /// while it sits in the hand with no aim: the front enemy, or none on a
+    /// Furina Stage board (<c>FoldedPreview.Body</c> with no target). Null
+    /// in a release build, where no face folds a body. PURE.
+    /// </summary>
+    private static Creature? FaceBody(CardModel card)
+    {
+#if PROTOTYPE_CARDS
+        var owner = TipOwner.CreatureOf(card);
+        return FurinaStage.LiveFor(owner) ? null : KokomiPlan.FrontEnemy(owner);
+#else
+        return null;
+#endif
     }
 
     /// <summary>

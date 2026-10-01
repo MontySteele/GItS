@@ -4652,7 +4652,7 @@ read his pool as before.
 
 | Tier | Relic | As built |
 |---|---|---|
-| Common | Knight's Commission | His first turn, after the draw: the element of the starter Knight the run rolled becomes current, then 1 Oath of it through `VarkaOath.Gain` (so the Fang answers it). The Fang records that element when it rolls the Knight (`Relics/VarkaStarterKnight.cs`, a BaseLib `SavedSpireField` saved with the Fang and copied to Wolf's Gravestone), so it holds all run after the card is removed or transformed (main session, 2026-10-01). A run begun before the record existed falls back to the starter Knight in the deck. |
+| Common | Knight's Commission | "At the start of each combat, gain 2 Oath in your starting Knight's element." His first turn, after the draw: 2 Oath of the starter Knight's element the run rolled, through `VarkaOath.Gain` (so the Fang answers it). It sets no element: the Fang does (re-aimed from "becomes your current element, with 1 Oath", main session, 2026-10-01). The Fang records that element when it rolls the Knight (`Relics/VarkaStarterKnight.cs`, a BaseLib `SavedSpireField` saved with the Fang and copied to Wolf's Gravestone), so it holds all run after the card is removed or transformed (main session, 2026-10-01). A run begun before the record existed falls back to the starter Knight in the deck. |
 | Uncommon | Windblume Garland | 4 Block a copy on every current-element change, paid in `VarkaOath.SetCurrent`; the fight's first element (none to one) is a change, as Boreas Unbound counts it. |
 | Uncommon | Dandelion Seeds | Late in his turn start (after Knight's Commission and his turn-start Powers): with a current element and no enemy wearing an aura (a spent aura counts as one), applies it to a random enemy. No Oath, no switch. |
 | Rare | Banner of the West Wind | On a change, every point of the old element's Oath moves to the new one (`VarkaOathLedger.MoveOath`), before the Garland and Boreas Unbound pay. A move, not a gain. |
@@ -4669,8 +4669,9 @@ read his pool as before.
 **Relic and potion applications gain no Oath** (sec.4) and switch nothing:
 Dandelion Seeds and Bottled Gale run inside the new `VarkaOath.NoCredit`
 scope, which suppresses both the application credit and the Swirl credit.
-Knight's Commission and Bottled Resolve set his element and gain Oath because
-their faces say so.
+Bottled Resolve sets his element and gains Oath, and Knight's Commission gains
+Oath (it sets no element since its 2026-10-01 re-aim), because their faces say
+so.
 
 **Readings chosen where the draft left it open** (for the main session):
 Bottled Gale's Swirls gain no Oath (read as "potion applications"); the
@@ -4798,7 +4799,7 @@ Static Field: any Electro application of his, a no-credit hit's too (and a
 relic's), but not a Swirl's spread copy; once a turn; it draws on the spot.
 Vow of the Blade draws with no current element too. Unwavering Banner stops
 only the open Oath's switch: the application still credits its own element;
-Knights, Change of Guard, Weathervane, Knight's Commission and Bottled Resolve
+Knights, Change of Guard, Weathervane, Boreas's Fang and Bottled Resolve
 still move it. Cycle of Seasons: element-less, unpowered, to ALL, after Boreas
 Unbound. Eye Wall's 3 is a literal (the paper brackets only its 6 [8]),
 unpowered, gone at the end of the turn. Pressure Front does nothing with no
@@ -5169,8 +5170,9 @@ Pins: `tier0/tests/test_varka_defence.py`,
   current element or any Oath) to that element's badge, "Pyro Oath" and so
   on, showing 0 (the current element's Oath), its tooltip "Your current
   element is Pyro." with the payout sentence and all four counts.
-- Knight's Commission now only adds its 1 Oath on top of the Fang's element
-  (BACKLOG, a pick for its re-aim).
+- Knight's Commission re-aimed to 2 Oath in the starting Knight's element now
+  that the Fang sets the element (main session, 2026-10-01): it no longer sets
+  an element; it keeps its StartingElement fallback for picking which.
 - The sim tool (`tools/varka_expansion_sim.py`): Favonian Standard left FOCUS
   and Four Banners left SWITCH; Gale Mantle and Windborne Resolve joined
   SWITCH (the paper's "split and switch decks"); Gust Ward is in no list.

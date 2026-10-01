@@ -31,7 +31,7 @@ SPENT_HYDRO = ("Spent: Anemo and Geo do nothing to it until Hydro hits it "
                "again. 1 more turn.")
 PYRO_OATH_TEXT = ("Your current element is Pyro. Your Swirls deal 3 damage "
                   "to that enemy. Oath: Pyro 2, Hydro 0, Electro 1, Cryo 0.")
-NO_ELEMENT_TEXT = ("You have no current element yet. "
+NO_ELEMENT_TEXT = ("You have 1 Oath but no current element yet. "
                    "Oath: Pyro 0, Hydro 1, Electro 0, Cryo 0.")
 
 

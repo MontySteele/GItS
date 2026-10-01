@@ -50,8 +50,9 @@ namespace KleeMod.Relics;
 /// door and moment (<see cref="AfterPlayerTurnStart"/>, his first turn, after
 /// the draw) and its element: the one this Fang recorded for the run, else
 /// the starter Knight in the deck. It gains no Oath, so the Ascension still
-/// waits for his first gain. It is a change, as Knight's Commission's is
-/// (Windblume Garland pays). The badge shows it at once.
+/// waits for his first gain. It is a change (Windblume Garland pays). The
+/// badge shows it at once. Knight's Commission, which used to set this
+/// element, now only gains 2 Oath in it (re-aimed, main session, 2026-10-01).
 ///
 /// NOT SEALED: <see cref="WolfsGravestone"/>, the Touch of Orobas upgrade,
 /// IS a Fang, so <see cref="HeldBy"/> (the game's <c>GetRelic&lt;T&gt;</c> is

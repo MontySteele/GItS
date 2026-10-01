@@ -186,7 +186,7 @@ built (#779).
 
 | Tier | Name | Effect (draft) | Serves |
 |---|---|---|---|
-| Common | Knight's Commission | At the start of each combat, your starting Knight's element becomes your current element, with 1 Oath. | All (his core number) |
+| Common | Knight's Commission | At the start of each combat, gain 2 Oath in your starting Knight's element. (Re-aimed from "becomes your current element, with 1 Oath" once Boreas's Fang set the element; main session, 2026-10-01.) | All (his core number) |
 | Uncommon | Windblume Garland | Whenever your current element changes, gain 4 Block. | Switch; Block |
 | Uncommon | Dandelion Seeds | At the start of your turn, if no enemy has an aura, apply your current element to a random enemy. | No-aura turns |
 | Rare | Banner of the West Wind | When your current element changes, the old element's Oath moves to the new one. | Switch (bends §3; pick 4) |

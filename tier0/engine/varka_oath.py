@@ -94,7 +94,7 @@ VARKA DEFENCE (review/active/varka-defence-2026-10-01.md, ruled 2026-10-01):
     total // 2 per copy, uncapped. Favonian Standard left with its card.
   * BOREAS'S FANG (sec.4): on his first turn, post-draw, before Weathervane,
     the starter Knight's element becomes current (`set_current`, not a
-    Knight, so a change as the C# Knight's Commission's is). The element is
+    Knight, so a change, as the C# Fang's is). The element is
     `Player.varka_starter_element` (`build_player`), else the first starter
     Knight among his cards. No Oath, so the Ascension still waits.
 """

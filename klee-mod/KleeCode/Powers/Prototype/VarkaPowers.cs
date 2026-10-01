@@ -32,18 +32,24 @@ public abstract class OathBadgePower : PowerModel, ILocalizationProvider
     /// <summary>The element this badge shows as current, or None.</summary>
     public abstract Element Element { get; }
 
-    /// <summary>The badge's first sentence.</summary>
-    protected string Lead => Element == Element.None
-        ? "You have no [gold]current element[/gold] yet."
+    /// <summary>The badge's first sentence. With no current element the
+    /// in-combat one counts the Oath he holds, so "no current element yet"
+    /// never reads as "no Oath" (the element identities round, 2026-10-01).
+    /// </summary>
+    protected string Lead(bool smart) => Element == Element.None
+        ? smart
+            ? "You have {TotalOath} [gold]Oath[/gold] but no [gold]current "
+              + "element[/gold] yet."
+            : "You have no [gold]current element[/gold] yet."
         : $"Your [gold]current element[/gold] is {Element}. "
           + VarkaOath.PayoutSentence(Element);
 
     public List<(string, string)>? Localization => new()
     {
         ("title", Element == Element.None ? "Oath" : $"{Element} Oath"),
-        ("description", Lead),
+        ("description", Lead(smart: false)),
         ("smartDescription",
-            Lead + "\nOath: Pyro {PyroOath}, Hydro {HydroOath}, "
+            Lead(smart: true) + "\nOath: Pyro {PyroOath}, Hydro {HydroOath}, "
           + "Electro {ElectroOath}, Cryo {CryoOath}."),
     };
 
@@ -54,7 +60,7 @@ public abstract class OathBadgePower : PowerModel, ILocalizationProvider
     protected override IEnumerable<DynamicVar> CanonicalVars => new List<DynamicVar>
     {
         new("PyroOath", 0m), new("HydroOath", 0m),
-        new("ElectroOath", 0m), new("CryoOath", 0m),
+        new("ElectroOath", 0m), new("CryoOath", 0m), new("TotalOath", 0m),
     };
 
     /// <summary>The current element's Oath (the total, before one).</summary>
@@ -80,6 +86,7 @@ public abstract class OathBadgePower : PowerModel, ILocalizationProvider
         DynamicVars["HydroOath"].BaseValue = ledger.Oath(Element.Hydro);
         DynamicVars["ElectroOath"].BaseValue = ledger.Oath(Element.Electro);
         DynamicVars["CryoOath"].BaseValue = ledger.Oath(Element.Cryo);
+        DynamicVars["TotalOath"].BaseValue = ledger.Total;
         InvokeDisplayAmountChanged();
     }
 }

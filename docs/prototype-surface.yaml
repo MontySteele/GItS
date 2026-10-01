@@ -3982,7 +3982,9 @@
    authored_by: [claude],
    # Element identities (sec.3): re-aimed to X, Whirlwind's spend-it-all.
    cost: X, type: attack, rarity: rare,
-   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies X times, plus {VkPer:diff()} for each Electro [gold]Oath[/gold] each time.",
+   # The element identities round (2026-10-01): the face prints the per-hit
+   # total in combat (`VkHit`, codegen's VARKA_HIT_PREVIEW_KINDS).
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies X times, plus {VkPer:diff()} for each Electro [gold]Oath[/gold] each time.{InCombat:\n(Deals {VkHit:diff()} damage each time)|}",
    effects: [{op: varka, kind: thundering_verdict, target: all_enemies, base: 6, per: 1}],
    upgrade: {varka_base: 2}}
 

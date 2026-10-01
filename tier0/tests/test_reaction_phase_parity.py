@@ -1131,8 +1131,9 @@ CO_TENANCY_LEDGER = {
             "before her first card, so turn 1 has no race; the sim has no "
             "counterpart until Balance",
         ("Relics/VarkaArmRelics.cs", "KnightsCommission"):
-            "QUARANTINED (Varka's own relics, 2026-10-01). Turn-1-only: sets "
-            "his current element and gains 1 Oath. Its readers at this "
+            "QUARANTINED (Varka's own relics, 2026-10-01). Turn-1-only: gains "
+            "2 Oath in the starting Knight's element (re-aimed 2026-10-01; it "
+            "sets no element, the Fang does). Its readers at this "
             "broadcast are his turn-start Powers (VarkaOath.TurnStart via "
             "KleeElementalHooks), which cannot be in play before his first "
             "card; Dandelion Seeds, which reads the element, is staged into "
@@ -1140,10 +1141,10 @@ CO_TENANCY_LEDGER = {
         ("Relics/BoreasFang.cs", "BoreasFang"):
             "QUARANTINED (Varka defence sec.4, 2026-10-01). Turn-1-only: "
             "makes the starter Knight's element current, no Oath. Its one "
-            "co-tenant on that resource, Knight's Commission, sets the same "
-            "element, so either order ends with that element current, one "
-            "change (Windblume Garland pays once) and the Commission's 1 "
-            "Oath; his turn-start Powers cannot be in play before his first "
+            "co-tenant, Knight's Commission, gains 2 Oath in that same "
+            "element and sets none, so either order ends with that element "
+            "current, one change (Windblume Garland pays once) and the "
+            "Commission's 2 Oath; his turn-start Powers cannot be in play before his first "
             "card. Sim twin: varka_oath.turn_start, turn 1, first",
         ("Relics/VarkaArmRelics.cs", "FavoniusDutyRoster"):
             "QUARANTINED (Varka's own relics, 2026-10-01). Turn-1-only: adds "

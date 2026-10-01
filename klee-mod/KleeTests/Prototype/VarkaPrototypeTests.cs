@@ -371,6 +371,12 @@ public class VarkaPrototypeTests : IDisposable
         Assert.StartsWith("Your [gold]current element[/gold] is Cryo. Your "
                         + "Swirls apply 1",
                           Row(typeof(CryoOathPower), "description"));
+        // With no current element the in-combat line counts his Oath (the
+        // element identities round, 2026-10-01: "no current element yet"
+        // read as no Oath while he held some).
+        Assert.StartsWith("You have {TotalOath} [gold]Oath[/gold] but no "
+                        + "[gold]current element[/gold] yet.\nOath: Pyro",
+                          Row(typeof(UnswornOathPower), "smartDescription"));
     }
 
     // ---- Four Winds' Ascension and Boreas's Fang (sec.4) ---------------------
