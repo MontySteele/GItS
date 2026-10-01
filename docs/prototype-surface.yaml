@@ -3376,12 +3376,16 @@
 
 # --- Common (15; 20 since the expansion, 2026-10-01) ---
 
-- {id: proto_vk_squall, name: "Squall", character: varka,
+# Varka defence (review/active/varka-defence-2026-10-01.md sec.3, ruled
+# 2026-10-01): Gale Mantle replaces Squall. "Half" rounds down
+# (`half_total_oath`).
+- {id: proto_vk_gale_mantle, name: "Gale Mantle", character: varka,
    authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   description: "Deal {Damage:diff()} damage twice.",
-   effects: [{op: damage, amount: 4, target: enemy, times: 2}],
-   upgrade: {damage: 1}}
+   cost: 1, type: skill, rarity: common,
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus half your total [gold]Oath[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 5, per: 1, count: half_total_oath}}],
+   upgrade: {formula_base: 3}}
 
 # Varka element identities (review/active/varka-element-identities-2026-10-01.md
 # sec.3, ruled 2026-10-01): Charged Lunge replaces Updraft.
@@ -3622,13 +3626,14 @@
              {op: block_next_turn, amount: 4}],
    upgrade: {block: 2, block_next_turn: 2}}
 
-- {id: proto_vk_favonian_standard, name: "Favonian Standard", character: varka,
+# Varka defence (sec.3): Windborne Resolve replaces Favonian Standard, the
+# Block twin of Cycle of Seasons.
+- {id: proto_vk_windborne_resolve, name: "Windborne Resolve", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # Pick 3 (ruled): 3 [4] raised to 4 [5].
-   description: "Whenever you play a [gold]Knight[/gold] of your [gold]current element[/gold], gain {PowerAmount:diff()} [gold]Block[/gold].",
-   effects: [{op: apply_power, power: vk_favonian_standard, amount: 4, target: self}],
-   upgrade: {power_amount: 1}}
+   description: "Whenever your [gold]current element[/gold] changes, gain {PowerAmount:diff()} [gold]Block[/gold].",
+   effects: [{op: apply_power, power: vk_windborne_resolve, amount: 5, target: self}],
+   upgrade: {power_amount: 2}}
 
 - {id: proto_vk_change_of_guard, name: "Change of Guard", character: varka,
    authored_by: [claude],
@@ -3876,13 +3881,14 @@
    effects: [{op: apply_power, power: vk_cycle_of_seasons, amount: 4, target: self}],
    upgrade: {power_amount: 2}}
 
-- {id: proto_vk_four_banners, name: "Four Banners", character: varka,
+# Varka defence (sec.3): Gust Ward replaces Four Banners.
+- {id: proto_vk_gust_ward, name: "Gust Ward", character: varka,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: uncommon,
-   description: "Deal {ExtraDamage:diff()} damage for each element you have [gold]Oath[/gold] in.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: enemy, applies_element: false,
-              amount_formula: {base: 0, per: 5, count: oath_elements}}],
-   upgrade: {formula_per: 1}}
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card.",
+   effects: [{op: block, amount: 4},
+             {op: draw, amount: 1}],
+   upgrade: {block: 2}}
 
 - {id: proto_vk_eye_wall, name: "Eye Wall", character: varka,
    authored_by: [claude],
@@ -3981,10 +3987,12 @@
 
 - {id: proto_vk_oathbound_aegis, name: "Oathbound Aegis", character: varka,
    authored_by: [claude],
+   # Varka defence (sec.3): re-aimed, no cap, half rounds down; the upgrade
+   # is a cost cut. The power's amount counts copies (each pays the half).
    cost: 2, type: power, rarity: rare,
-   description: "At the end of your turn, gain [gold]Block[/gold] equal to your total [gold]Oath[/gold], up to {PowerAmount:diff()}.",
-   effects: [{op: apply_power, power: vk_oathbound_aegis, amount: 15, target: self}],
-   upgrade: {power_amount: 5}}
+   description: "At the end of your turn, gain [gold]Block[/gold] equal to half your total [gold]Oath[/gold].",
+   effects: [{op: apply_power, power: vk_oathbound_aegis, amount: 1, target: self}],
+   upgrade: {cost: -1}}
 
 - {id: proto_vk_weathervane, name: "Weathervane", character: varka,
    authored_by: [claude],

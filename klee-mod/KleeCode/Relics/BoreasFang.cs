@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
+using KleeMod.Elements;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
@@ -41,6 +43,15 @@ namespace KleeMod.Relics;
 /// QUARANTINED by <c>#if PROTOTYPE_CARDS</c> and living in <c>Relics/</c>,
 /// <c>TamakushiCasket</c>'s reason: <c>tools/lint_unique_names.py</c> reads
 /// relic titles out of this directory only.
+///
+/// THE STARTING ELEMENT (<c>review/active/varka-defence-2026-10-01.md</c>
+/// sec.4, ruled 2026-10-01): "At the start of each combat, your starting
+/// Knight's element becomes your current element." Knight's Commission's
+/// door and moment (<see cref="AfterPlayerTurnStart"/>, his first turn, after
+/// the draw) and its element: the one this Fang recorded for the run, else
+/// the starter Knight in the deck. It gains no Oath, so the Ascension still
+/// waits for his first gain. It is a change, as Knight's Commission's is
+/// (Windblume Garland pays). The badge shows it at once.
 ///
 /// NOT SEALED: <see cref="WolfsGravestone"/>, the Touch of Orobas upgrade,
 /// IS a Fang, so <see cref="HeldBy"/> (the game's <c>GetRelic&lt;T&gt;</c> is
@@ -75,13 +86,36 @@ public class BoreasFang : CustomRelicModel
     {
         ("title", "Boreas's Fang"),
         ("description",
-            "The first time each combat you gain [gold]Oath[/gold], add Four "
-          + "Winds' Ascension to your hand."),
+            "At the start of each combat, your starting Knight's element "
+          + "becomes your [gold]current element[/gold]. The first time each "
+          + "combat you gain [gold]Oath[/gold], add Four Winds' Ascension to "
+          + "your hand."),
     };
 
     /// <summary>The word the face leans on.</summary>
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOath(System.Array.Empty<IHoverTip>(), null);
+        ArmKeywordTips.ForCurrentElement(
+            ArmKeywordTips.ForOath(System.Array.Empty<IHoverTip>(), null), null);
+
+    /// <summary>The element the Fang makes current at combat start: the run's
+    /// recorded starter Knight element, else the starter Knight in the deck
+    /// (Knight's Commission's reading). PURE.</summary>
+    public static Element StartingElement(Player player) =>
+        KnightsCommission.StartingElement(VarkaStarterKnight.Of(player),
+                                          player.Deck.Cards);
+
+    /// <summary>Sec.4 of the Varka defence paper: his first turn, after the
+    /// draw, the starter Knight's element becomes current.</summary>
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (!VarkaArmRelics.FirstTurnOf(this, player)) return;
+        var element = StartingElement(player);
+        if (element == Element.None) return;
+        Flash();
+        await VarkaOath.SetCurrent(choiceContext, player.Creature, element,
+                                   knight: false);
+    }
 
     /// <summary>The Fang this player holds, or null. PURE.</summary>
     public static BoreasFang? HeldBy(Player? player) =>
@@ -191,9 +225,10 @@ public sealed class WolfsGravestone : BoreasFang
     {
         ("title", "Wolf's Gravestone"),
         ("description",
-            "The first time each combat you gain [gold]Oath[/gold], add an "
-          + "upgraded [gold]Four Winds' Ascension[/gold] to your hand. It "
-          + "costs 0 this turn."),
+            "At the start of each combat, your starting Knight's element "
+          + "becomes your [gold]current element[/gold]. The first time each "
+          + "combat you gain [gold]Oath[/gold], add an upgraded [gold]Four "
+          + "Winds' Ascension[/gold] to your hand. It costs 0 this turn."),
     };
 
     public override bool AscensionUpgraded => true;

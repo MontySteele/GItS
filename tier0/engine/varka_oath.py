@@ -17,17 +17,17 @@ THE RULES AS MODELLED:
   * CURRENT ELEMENT: None until the first KNIGHT (a companion row with
     `personal_pool: varka`). Playing a Knight sets it to the row's element
     BEFORE the card's effects resolve, so its own application credits the new
-    current element. Favonian Standard pays on a Knight whose element was
-    already current; Boreas Unbound pays on every change (None -> X counts).
+    current element. Boreas Unbound pays on every change (None -> X counts).
+    Since the Varka defence paper (sec.4) Boreas's Fang makes the starter
+    Knight's element current on his first turn (`turn_start`).
   * THE OPEN OATH ([USER], 2026-09-30: "Any card that applies an element
     other than Anemo counts for Oath effects"): inside a play of his own card
     that is NOT a Knight, an application of an Oath element makes it his
     current element before it credits (so Dawn Wind's March pays on it); the
     last one applied wins. A Knight keeps its play-time switch; Baron Bunny's
     burst, a relic, a potion, a power outside a play, a Swirl's spread and a
-    Converging Winds landing switch nothing. Knight-named payoffs (Favonian
-    Standard, Grand Master's Order, Knightly Guard, Knights' Roll Call) stay
-    Knight-only.
+    Converging Winds landing switch nothing. Knight-named payoffs (Grand
+    Master's Order, Knightly Guard, Knights' Roll Call) stay Knight-only.
   * CREDIT, PER CARD PLAY: within one play, the first application of E to a
     live enemy is +1 Oath of E, and the first Swirl of an E aura is +1 Oath of
     E -- two keys, at most once each per play. A Swirl's spread copies, a
@@ -87,6 +87,16 @@ THE EXPANSION (review/active/varka-expansion-2026-10-01.md sec.3, ruled
   * The pilot's Weathervane choice is `VarkaLedger.weathervane_choice`,
     default: keep the current element unless another holds more Oath, then
     the most, ties in P/H/E/C order.
+
+VARKA DEFENCE (review/active/varka-defence-2026-10-01.md, ruled 2026-10-01):
+  * GALE MANTLE reads `half_total_oath` (total Oath // 2). WINDBORNE RESOLVE
+    pays Block on every change, after Cycle of Seasons. OATHBOUND AEGIS pays
+    total // 2 per copy, uncapped. Favonian Standard left with its card.
+  * BOREAS'S FANG (sec.4): on his first turn, post-draw, before Weathervane,
+    the starter Knight's element becomes current (`set_current`, not a
+    Knight, so a change as the C# Knight's Commission's is). The element is
+    `Player.varka_starter_element` (`build_player`), else the first starter
+    Knight among his cards. No Oath, so the Ascension still waits.
 """
 
 from __future__ import annotations
@@ -121,7 +131,6 @@ SWORN_BROTHERHOOD = "vk_sworn_brotherhood"
 #: (the upgrade installs SWORN_BROTHERHOOD, every element).
 SWORN_BROTHERHOOD_CURRENT = "vk_sworn_brotherhood_current"
 BARON_BUNNY = "vk_baron_bunny"
-FAVONIAN_STANDARD = "vk_favonian_standard"
 DAWN_WINDS_MARCH = "vk_dawn_winds_march"
 BOREAS_UNBOUND = "vk_boreas_unbound"
 CONVERGING_WINDS = "vk_converging_winds"
@@ -138,6 +147,8 @@ ABSOLUTE_ZERO = "vk_absolute_zero"
 OATH_UNTO_DEATH = "vk_oath_unto_death"
 WOLFPACK = "vk_wolfpack"
 OATHBOUND_AEGIS = "vk_oathbound_aegis"
+#: Varka defence (2026-10-01): Cycle of Seasons' Block twin.
+WINDBORNE_RESOLVE = "vk_windborne_resolve"
 WEATHERVANE = "vk_weathervane"
 TWIN_GALES = "vk_twin_gales"
 EYE_OF_STORMTERROR = "vk_eye_of_stormterror"
@@ -216,7 +227,9 @@ OP_FIELDS = frozenset({"op", "kind", "target", "per", "base", "amount",
 COUNTS = frozenset({"current_oath", "oath_elements",
                     # THE EXPANSION (2026-10-01).
                     "enemies_with_aura", "hydro_oath",
-                    "knights_played_this_combat"})
+                    "knights_played_this_combat",
+                    # VARKA DEFENCE (2026-10-01): Gale Mantle.
+                    "half_total_oath"})
 PREDICATES = frozenset({"has_current_element", "knight_played_this_turn",
                         "swirled_by_this",
                         # THE EXPANSION (2026-10-01).
@@ -427,8 +440,6 @@ def set_current(state, element: str, knight: bool) -> None:
     if led is None or element not in ELEMENTS:
         return
     p = state.player
-    if knight and element == led.current:
-        _block(state, _power(p, FAVONIAN_STANDARD), "favonian_standard")
     if element != led.current:
         led.current = element
         led.element_changed_turn = state.turn
@@ -446,6 +457,9 @@ def set_current(state, element: str, knight: bool) -> None:
             for e in list(state.living_enemies):
                 effects.deal_damage_to_enemy(state, e, cycle, element=None,
                                              source="card", powered=False)
+        # WINDBORNE RESOLVE (Varka defence): "Whenever your current element
+        # changes, gain 5 Block." Unpowered, a Power's.
+        _block(state, _power(p, WINDBORNE_RESOLVE), "windborne_resolve")
 
 
 # --------------------------------------------------------------------------
@@ -706,6 +720,14 @@ def turn_start(state) -> None:
     led.swirls_this_turn = 0
     p.powers.pop(GRAND_MASTERS_ORDER, None)         # "this turn" ran out
     p.powers.pop(EYE_WALL, None)                    # Eye Wall's too
+    # BOREAS'S FANG (Varka defence sec.4): "At the start of each combat, your
+    # starting Knight's element becomes your current element."
+    if state.turn == 1 and (FANG in p.relic_hooks
+                            or FANG_UPGRADED in p.relic_hooks):
+        el = starting_element(p)
+        if el is not None:
+            state.emit("varka_fang_element", element=el)
+            set_current(state, el, knight=False)
     # WEATHERVANE (the expansion), first: "you may choose an element you have
     # Oath in; it becomes your current element." It names the switch, so the
     # Banner does not stop it; Sworn Brotherhood below gains the new one.
@@ -755,13 +777,14 @@ def _weathervane(state, led: VarkaLedger) -> None:
 
 def turn_end(state) -> None:
     """`combat`'s player turn end, beside Dusk: OATHBOUND AEGIS, "gain Block
-    equal to your total Oath, up to 15", unpowered."""
+    equal to half your total Oath" (rounded down, per copy), unpowered."""
     led = ledger(state.player)
     if led is None:
         return
-    cap = _power(state.player, OATHBOUND_AEGIS)
-    if cap:
-        _block(state, min(sum(led.oath.values()), cap), "oathbound_aegis")
+    copies = _power(state.player, OATHBOUND_AEGIS)
+    if copies:
+        _block(state, (sum(led.oath.values()) // 2) * copies,
+               "oathbound_aegis")
     # RETALIATING TIDE (element identities), after the Aegis so its Block
     # counts: "deal damage equal to your Block, up to your Hydro Oath, to a
     # random enemy". Element-less and unpowered (a Power's), once per stack.
@@ -793,6 +816,8 @@ def count(state, token: str) -> int:
         return 0 if led is None else led.oath["hydro"]
     if token == "knights_played_this_combat":
         return 0 if led is None else led.knights_this_combat
+    if token == "half_total_oath":
+        return 0 if led is None else sum(led.oath.values()) // 2
     raise ValueError(f"not a Varka count: {token!r}")
 
 
@@ -1172,5 +1197,25 @@ def build_player(element: Optional[str] = None, rng=None,
                     character_id=CHARACTER)
     if fang or fang_upgraded:
         player.relic_hooks.append(FANG_UPGRADED if fang_upgraded else FANG)
+    # The run's starter Knight element, as the C# Fang records it
+    # (`VarkaStarterKnight`): Boreas's Fang makes it current at combat start.
+    player.varka_starter_element = element
     player.varka_ledger = VarkaLedger()
     return player
+
+
+def starting_element(player) -> Optional[str]:
+    """The element Boreas's Fang makes current: the recorded starter Knight
+    element, else the first starter Knight among his cards (Knight's
+    Commission's fallback), else None."""
+    el = getattr(player, "varka_starter_element", None)
+    if el in ELEMENTS:
+        return el
+    by_id = {cid: e for e, cid in STARTER_KNIGHT_IDS.items()}
+    for pile in (player.hand, player.draw_pile, player.discard_pile,
+                 player.exhaust_pile):
+        for card in pile:
+            hit = by_id.get(card.id.rstrip("+"))
+            if hit:
+                return hit
+    return None

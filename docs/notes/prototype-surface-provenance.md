@@ -5114,6 +5114,101 @@ Electro's middle; Short Circuit and Chain Lightning are unread here, as the
 Kokomi sim marked Coral Tithe.
 
 
+## Varka defence, 2026-10-01
+
+The paper `review/active/varka-defence-2026-10-01.md`, both picks ruled
+2026-10-01 ([USER]: "Everything else looks good!"; Tailwind Guard left as it
+is). Three swaps in place, the pool stays 78 (20 / 35 / 23): Gale Mantle for
+Squall (C), Gust Ward for Four Banners (U), Windborne Resolve for Favonian
+Standard (U); Oathbound Aegis re-aimed; Tailwind Guard unchanged (3 [4] per
+element, pinned). Built in both engines. C#: `VarkaOath.cs`
+(`HalfTotalOath`, Windborne Resolve in `SetCurrent`, Favonian Standard's pay
+gone), `VarkaPowers.cs` (`WindborneResolvePower`, `OathboundAegisPower`
+re-aimed, `FavonianStandardPower` deleted), `Relics/BoreasFang.cs`
+(`StartingElement`, `AfterPlayerTurnStart`), `VarkaRoster.cs`. Sim:
+`tier0/engine/varka_oath.py` (`half_total_oath`, `WINDBORNE_RESOLVE`,
+`turn_end`, the Fang in `turn_start`, `starting_element`). Codegen: the count
+`half_total_oath`, the power `vk_windborne_resolve`. The three ids are in
+`docs/retired-card-ids.yaml` (owner klee, as element identities' five). Art:
+placeholders (no `art/plan.tsv` rows; Squall's row stays, as Updraft's did).
+Pins: `tier0/tests/test_varka_defence.py`,
+`KleeTests/Prototype/VarkaDefenceTests.cs`.
+
+**Readings taken where the paper leaves room.**
+- Gale Mantle: "half your total Oath" is the four counts summed, halved,
+  rounded down (the paper's "Half rounds down"), read at play. The 5 [8] and
+  the half are one powered Block (Dexterity and Frail apply, as Defend's);
+  the face prints the base and, in a fight, the total.
+- Gust Ward: the Block, then the draw; the upgrade moves only the Block.
+- Windborne Resolve: pays on every change of his current element, the first
+  of a fight included (None to X, as Boreas Unbound and Cycle of Seasons
+  count it), so the Fang's turn-one element pays it if it is somehow already
+  in play; unpowered Block, a Power's; copies add; paid after Cycle of
+  Seasons.
+- Oathbound Aegis: the power's amount counts copies (1 each, was the cap);
+  each copy pays total // 2, unpowered, at the same moment as before (ahead
+  of Retaliating Tide). The upgrade is cost 2 to 1 and nothing else.
+- Favonian Standard's power and its pay on "a Knight already current" left
+  both engines with the card; `SetCurrent` keeps its `knight` argument for its
+  callers.
+- **Boreas's Fang (sec.4).** The starter Knight's element is the one the Fang
+  recorded when it rolled the Knight (`VarkaStarterKnight`, saved on the
+  Fang), else the first starter-only Knight in the deck (Knight's
+  Commission's fallback), else nothing. It fires at Knight's Commission's
+  moment and through its door: his first turn, after the draw
+  (`VarkaArmRelics.FirstTurnOf`), `VarkaOath.SetCurrent(knight: false)`. It
+  gains no Oath, so the Ascension still waits for his first gain. It is a
+  change, as Knight's Commission's is: Windblume Garland pays, and Shifting
+  Gale reads "changed this turn" on turn one. Wolf's Gravestone, a Fang,
+  does the same; its face says so. The relic's face gains one sentence. The
+  sim records the element on the Player (`build_player`,
+  `varka_starter_element`) and sets it in `turn_start` on turn 1, before
+  Weathervane.
+- **How the Oath panel shows it.** `SetCurrent` ends in `OathBadge.Sync`, so
+  on turn one his status bar swaps from no badge (none is shown before a
+  current element or any Oath) to that element's badge, "Pyro Oath" and so
+  on, showing 0 (the current element's Oath), its tooltip "Your current
+  element is Pyro." with the payout sentence and all four counts.
+- Knight's Commission now only adds its 1 Oath on top of the Fang's element
+  (BACKLOG, a pick for its re-aim).
+- The sim tool (`tools/varka_expansion_sim.py`): Favonian Standard left FOCUS
+  and Four Banners left SWITCH; Gale Mantle and Windborne Resolve joined
+  SWITCH (the paper's "split and switch decks"); Gust Ward is in no list.
+
+**The probe (sec.5).** The main session's Block probe
+(`scratchpad/varka-block/block_probe.py`, the sim tool's run, gauntlet and an
+act-3 deck of 27 offers at 80 HP), 500 seeds from 7, every pilot and start,
+on main before this branch (6b2a2f3c) and on the built pool. Block divided by
+incoming damage, base to new:
+
+| deck | A1 elite | A2 boss | A3 normal | A3 elite | A3 boss |
+|---|---|---|---|---|---|
+| default | 0.66 to 0.68 | 0.63 to 0.64 | 0.68 to 0.74 | 0.55 to 0.60 | 0.72 to 0.80 |
+| default, 3+ elements | 0.65 to 0.67 | 0.61 to 0.63 | 0.68 to 0.74 | 0.55 to 0.60 | 0.71 to 0.80 |
+| switch | 0.61 to 0.67 | 0.61 to 0.66 | 0.69 to 0.84 | 0.53 to 0.66 | 0.69 to 0.92 |
+| mono Hydro | 0.82 to 0.82 | 1.03 to 1.00 | 1.22 to 1.23 | 1.06 to 1.07 | 1.47 to 1.49 |
+| mono Pyro | 0.64 to 0.63 | 0.72 to 0.69 | 0.92 to 0.87 | 0.73 to 0.71 | 1.07 to 1.03 |
+| mono Cryo | 0.60 to 0.60 | 0.67 to 0.65 | 0.88 to 0.87 | 0.72 to 0.70 | 1.08 to 1.05 |
+| mono Electro | 0.59 to 0.58 | 0.62 to 0.61 | 0.84 to 0.81 | 0.69 to 0.68 | 1.03 to 1.04 |
+| gale | 0.65 to 0.66 | 0.60 to 0.60 | 0.63 to 0.65 | 0.50 to 0.53 | 0.62 to 0.66 |
+| muster | 0.60 to 0.61 | 0.55 to 0.56 | 0.62 to 0.67 | 0.49 to 0.53 | 0.58 to 0.65 |
+
+Against the paper's bars: the default drafter's act-3 elite Block rose 0.55 to
+0.60, short of 0.72 (act-3 boss 0.80); Hydro mono stays under 1.5 (1.49 at the
+act-3 boss); turn-cap stalls rose at the act-3 boss (default 12 to 21 of 4000,
+switch 3 to 12, Hydro mono 9 to 17 of 1000) and are at most 10 elsewhere
+(Hydro mono at act-3 normals, was 4 of 3000). The
+default drafter's act-1 won 23.3% to 23.8% (n = 2000); the run never stalled.
+Win rates moved within 2 points except switch at the act-3 elite (8 to 12%) and
+boss (8 to 14%). The default drafter holds Gale Mantle in 10.6% of act-1 decks
+and 61.8% of act-3 decks (0.86 plays per fight held), Windborne Resolve 6.4%
+and 31.8% (1.08 plays per fight held, 10% of the default's act-3 Block, 22% of
+the switch deck's), Oathbound Aegis 7.8% of act-3 decks (was 8.2%; its share of
+the switch deck's act-3 Block 18% to 8%). **Gust Ward is never drafted**: the
+stock scorer prices it 1.33 against about 2.2 for the cards beside it, so it
+loses every offer; the sim does not read it. Report only; no number moved on
+the sim's account.
+
 ## Furina rules pass, 2026-10-01
 
 The paper is `review/active/furina-rules-pass-2026-10-01.md`, every pick

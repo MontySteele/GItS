@@ -101,7 +101,7 @@ public class VarkaElementIdentitiesTests : IDisposable
         // The discount reads MementoMori's count and prices only itself.
         Assert.Contains("KokomiResources.DiscardsThisTurn",
                         Calls("ProtoVkChainLightning", "TryModifyEnergyCostInCombat"));
-        Assert.False(chain.TryModifyEnergyCostInCombat(new ProtoVkSquall(), 1m,
+        Assert.False(chain.TryModifyEnergyCostInCombat(new ProtoVkFavoniusCut(), 1m,
                                                       out var other));
         Assert.Equal(1m, other);
         // Out of combat no discard has happened: the printed 2.
@@ -225,7 +225,7 @@ public class VarkaElementIdentitiesTests : IDisposable
     [InlineData("ProtoVkFavoniusDrill", false)]           // his current element
     [InlineData("ProtoVkCavalryCharge", false)]
     [InlineData("ProtoVkNoelleSteadfastMaid", false)]     // Geo
-    [InlineData("ProtoVkSquall", false)]                  // Anemo
+    [InlineData("ProtoVkGaleMantle", false)]              // Anemo
     public void A_card_that_switches_his_element_carries_the_switch_tip(
         string card, bool tipped)
     {

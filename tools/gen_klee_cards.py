@@ -3627,9 +3627,6 @@ APPLY_POWERS = {
     "vk_oath_of_the_knights": ("OathOfTheKnightsPower", None,
         "At the start of your turn, gain [gold]Block[/gold] equal to your "
         "[gold]current element[/gold]'s [gold]Oath[/gold]."),
-    "vk_favonian_standard": ("FavonianStandardPower", None,
-        "Whenever you play a [gold]Knight[/gold] of your [gold]current "
-        "element[/gold], gain {X} [gold]Block[/gold]."),
     "vk_dawn_winds_march": ("DawnWindsMarchPower", None,
         "Whenever you gain [gold]Oath[/gold] of your [gold]current "
         "element[/gold], gain {X} [gold]Block[/gold]."),
@@ -3682,8 +3679,12 @@ APPLY_POWERS = {
         "Whenever you play Four Winds' Ascension, add a copy of it to your "
         "discard pile."),
     "vk_oathbound_aegis": ("OathboundAegisPower", None,
-        "At the end of your turn, gain [gold]Block[/gold] equal to your total "
-        "[gold]Oath[/gold], up to {X}."),
+        "At the end of your turn, gain [gold]Block[/gold] equal to half your "
+        "total [gold]Oath[/gold]."),
+    # VARKA DEFENCE (2026-10-01): the Block twin of Cycle of Seasons.
+    "vk_windborne_resolve": ("WindborneResolvePower", None,
+        "Whenever your [gold]current element[/gold] changes, gain {X} "
+        "[gold]Block[/gold]."),
     "vk_weathervane": ("WeathervanePower", None,
         "At the start of your turn, you may choose an element you have "
         "[gold]Oath[/gold] in; it becomes your [gold]current element[/gold]."),
@@ -6225,6 +6226,10 @@ VARKA_COUNTS = {
     "knights_played_this_combat":
         "static (card, _) => VarkaOath.KnightsInCombat("
         "card.Owner.Creature)",
+    # VARKA DEFENCE (2026-10-01): Gale Mantle's "half your total Oath",
+    # rounded down (`VarkaOath.HalfTotalOath`).
+    "half_total_oath": "static (card, _) => VarkaOath.HalfTotalOath("
+                       "card.Owner.Creature)",
     "attacks_played_this_turn":
         "static (card, _) => CompanionOverhaulLedger.For("
         "card.Owner.Creature).AttacksPlayedThisTurn",

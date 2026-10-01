@@ -66,8 +66,13 @@ RARITY = {"N": (60, 37, 3), "E": (50, 40, 10), "B": (50, 40, 10)}
 ELEMENTS = ("pyro", "hydro", "electro", "cryo")
 P = "proto_vk_"
 
+# Varka defence (review/active/varka-defence-2026-10-01.md, 2026-10-01):
+# Favonian Standard left FOCUS and Four Banners left SWITCH with their cards;
+# the total-Oath and element-change Block (Gale Mantle, Windborne Resolve)
+# joins SWITCH, the paper's "split and switch decks". Gust Ward is in no list
+# (every deck's filler; the default scores price it).
 FOCUS = ["favonius_drill", "oathsworn_strike", "eye_of_the_storm",
-         "stormward_stance", "oath_of_the_knights", "favonian_standard",
+         "stormward_stance", "oath_of_the_knights",
          "dawn_winds_march", "azure_devour", "sworn_brotherhood",
          "northwind_avatar", "wind_wall", "knightly_guard", "tailwind_stride",
          "pathfinders_mark", "cavalry_charge", "vow_of_the_blade",
@@ -95,7 +100,8 @@ GALE = ["gale_sweep", "crosswind", "rising_gale", "tempest_charge",
         "jean_dandelion_breeze", "storm_surge", "wall_of_gales",
         "converging_winds", "west_wind_shield", "eye_wall",
         "crosscurrent", "twin_gales", "downburst", "eye_of_stormterror"]
-SWITCH = ["shifting_gale", "cycle_of_seasons", "four_banners", "weathervane",
+SWITCH = ["shifting_gale", "cycle_of_seasons", "windborne_resolve",
+          "gale_mantle", "weathervane",
           "tempest_of_the_four_winds", "twin_gales", "oathbound_aegis",
           "change_of_guard", "boreas_unbound", "tailwind_guard",
           "rally_to_the_banner"]

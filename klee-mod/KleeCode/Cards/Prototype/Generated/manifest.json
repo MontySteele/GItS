@@ -374,15 +374,15 @@
     "proto_vk_eye_of_stormterror",
     "proto_vk_eye_of_the_storm",
     "proto_vk_eye_wall",
-    "proto_vk_favonian_standard",
     "proto_vk_favonius_cut",
     "proto_vk_favonius_drill",
-    "proto_vk_four_banners",
     "proto_vk_four_winds_ascension",
+    "proto_vk_gale_mantle",
     "proto_vk_gale_sweep",
     "proto_vk_glacial_edict",
     "proto_vk_grand_masters_order",
     "proto_vk_grand_masters_verdict",
+    "proto_vk_gust_ward",
     "proto_vk_jean_dandelion_breeze",
     "proto_vk_kaeya_frostgnaw",
     "proto_vk_kaeya_glacial_waltz",
@@ -406,7 +406,6 @@
     "proto_vk_rising_gale",
     "proto_vk_shifting_gale",
     "proto_vk_short_circuit",
-    "proto_vk_squall",
     "proto_vk_static_field",
     "proto_vk_storm_surge",
     "proto_vk_stormward_stance",
@@ -427,6 +426,7 @@
     "proto_vk_west_wind_shield",
     "proto_vk_wildfire_oath",
     "proto_vk_wind_wall",
+    "proto_vk_windborne_resolve",
     "proto_vk_windbound_execution",
     "proto_vk_wolfpack"
   ],
@@ -799,15 +799,15 @@
     "proto_vk_eye_of_stormterror": "varka",
     "proto_vk_eye_of_the_storm": "varka",
     "proto_vk_eye_wall": "varka",
-    "proto_vk_favonian_standard": "varka",
     "proto_vk_favonius_cut": "varka",
     "proto_vk_favonius_drill": "varka",
-    "proto_vk_four_banners": "varka",
     "proto_vk_four_winds_ascension": "varka",
+    "proto_vk_gale_mantle": "varka",
     "proto_vk_gale_sweep": "varka",
     "proto_vk_glacial_edict": "varka",
     "proto_vk_grand_masters_order": "varka",
     "proto_vk_grand_masters_verdict": "varka",
+    "proto_vk_gust_ward": "varka",
     "proto_vk_jean_dandelion_breeze": "varka",
     "proto_vk_kaeya_frostgnaw": "varka",
     "proto_vk_kaeya_glacial_waltz": "varka",
@@ -831,7 +831,6 @@
     "proto_vk_rising_gale": "varka",
     "proto_vk_shifting_gale": "varka",
     "proto_vk_short_circuit": "varka",
-    "proto_vk_squall": "varka",
     "proto_vk_static_field": "varka",
     "proto_vk_storm_surge": "varka",
     "proto_vk_stormward_stance": "varka",
@@ -852,6 +851,7 @@
     "proto_vk_west_wind_shield": "varka",
     "proto_vk_wildfire_oath": "varka",
     "proto_vk_wind_wall": "varka",
+    "proto_vk_windborne_resolve": "varka",
     "proto_vk_windbound_execution": "varka",
     "proto_vk_wolfpack": "varka"
   },
@@ -2056,21 +2056,18 @@
     "proto_vk_eye_wall": {
       "block": 2
     },
-    "proto_vk_favonian_standard": {
-      "power_amount": 1
-    },
     "proto_vk_favonius_cut": {
       "damage": 5
     },
     "proto_vk_favonius_drill": {
       "block": 3
     },
-    "proto_vk_four_banners": {
-      "formula_per": 1
-    },
     "proto_vk_four_winds_ascension": {
       "damage": 3,
       "varka_per": 1
+    },
+    "proto_vk_gale_mantle": {
+      "formula_base": 3
     },
     "proto_vk_gale_sweep": {
       "damage": 2
@@ -2083,6 +2080,9 @@
     },
     "proto_vk_grand_masters_verdict": {
       "damage": 5
+    },
+    "proto_vk_gust_ward": {
+      "block": 2
     },
     "proto_vk_jean_dandelion_breeze": {
       "block": 3
@@ -2129,7 +2129,7 @@
       "innate": true
     },
     "proto_vk_oathbound_aegis": {
-      "power_amount": 5
+      "cost": -1
     },
     "proto_vk_oathsworn_strike": {
       "formula_base": 3
@@ -2155,9 +2155,6 @@
     },
     "proto_vk_short_circuit": {
       "discard": -1
-    },
-    "proto_vk_squall": {
-      "damage": 1
     },
     "proto_vk_static_field": {
       "power_amount": 1
@@ -2218,6 +2215,9 @@
     },
     "proto_vk_wind_wall": {
       "block": 3
+    },
+    "proto_vk_windborne_resolve": {
+      "power_amount": 2
     },
     "proto_vk_windbound_execution": {
       "damage": 2

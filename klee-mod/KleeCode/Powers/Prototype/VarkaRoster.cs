@@ -67,7 +67,7 @@ internal static class VarkaRoster
     internal static IReadOnlyList<CardModel> Pool() => new CardModel[]
     {
         // The Oath rework's forty-one.
-        ModelDb.Card<ProtoVkSquall>(),
+        ModelDb.Card<ProtoVkGaleMantle>(),        // Varka defence
         ModelDb.Card<ProtoVkChargedLunge>(),      // element identities
         ModelDb.Card<ProtoVkGaleSweep>(),
         ModelDb.Card<ProtoVkWindWall>(),
@@ -95,7 +95,7 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkDilucSearingOnslaught>(),
         ModelDb.Card<ProtoVkEulaIcetideVortex>(),
         ModelDb.Card<ProtoVkBarbaraWhisperOfWater>(),
-        ModelDb.Card<ProtoVkFavonianStandard>(),
+        ModelDb.Card<ProtoVkWindborneResolve>(),  // Varka defence
         ModelDb.Card<ProtoVkChangeOfGuard>(),
         ModelDb.Card<ProtoVkStormSurge>(),
         ModelDb.Card<ProtoVkTailwindGuard>(),
@@ -127,7 +127,7 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkUnwaveringBanner>(),
         ModelDb.Card<ProtoVkShiftingGale>(),
         ModelDb.Card<ProtoVkCycleOfSeasons>(),
-        ModelDb.Card<ProtoVkFourBanners>(),
+        ModelDb.Card<ProtoVkGustWard>(),          // Varka defence
         ModelDb.Card<ProtoVkEyeWall>(),
         ModelDb.Card<ProtoVkShortCircuit>(),      // element identities
         ModelDb.Card<ProtoVkCrosscurrent>(),

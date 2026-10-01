@@ -108,3 +108,6 @@ retired:
   - {id: KLEEMOD-PROTO_VK_UNBROKEN_TIDE, owner: klee, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_VK_UNFURLED_BANNER, owner: klee, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_VK_UPDRAFT, owner: klee, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_VK_FAVONIAN_STANDARD, owner: klee, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_VK_FOUR_BANNERS, owner: klee, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_VK_SQUALL, owner: klee, left: "left the prototype codegen"}
