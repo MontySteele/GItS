@@ -713,7 +713,10 @@
 
 - {id: proto_ko_half_a_mountain, name: "Half a Mountain", character: klee,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: rare,
+   # Exhaust (main session, 2026-10-01, the Klee audit): without it each copy
+   # doubled again, and with The Big One and Boom Badge a Bomb 30 went off for
+   # 480. One doubling per copy per combat.
+   cost: 1, type: skill, rarity: rare, exhaust: true,
    description: "Your largest [gold]Bomb[/gold] doubles in size.",
    upgrade: {retain: true},
    effects: [{op: multiply_largest_bomb, factor: 2}]}
