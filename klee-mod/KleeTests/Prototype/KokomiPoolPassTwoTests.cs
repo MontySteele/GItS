@@ -242,15 +242,13 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void Second_thoughts_is_a_zero_cost_exhaust_with_no_plan_line()
+    public void Second_thoughts_is_cut_and_its_cancel_stays()
     {
-        // A card that UNWRITES a Plan cannot also be one.
-        var card = new ProtoKkSecondThoughts();
-        Assert.Equal(0, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, card.Rarity);
-        Assert.IsNotAssignableFrom<IPlannedCard>(card);
-        Assert.Contains("KokomiPlan.CancelLast",
-                        Il.Calls(Il.Method("ProtoKkSecondThoughts", "OnPlay")));
+        // THE PAYOFF PASS (2026-10-01): the row left the pool; the cancel
+        // (<c>KokomiPlan.CancelLast</c>) stays with nothing spelling it.
+        Assert.Null(typeof(ProtoKkNip).Assembly.GetType(
+            "KleeMod.Cards.Prototype.Generated.ProtoKkSecondThoughts"));
+        Assert.NotNull(typeof(KokomiPlan).GetMethod("CancelLast", All));
     }
 
     [Fact]
@@ -502,17 +500,19 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void All_four_surviving_rows_are_offerable_and_none_is_in_the_starter()
+    public void The_surviving_rows_are_offerable_and_none_is_in_the_starter()
     {
         // FIVE SINCE POOL PASS FIVE (`EB-685`): Night Watch is retired,
         // its Dusk Weak having moved onto Slack Water. FOUR SINCE THE CLEANUP
-        // PASS (2026-09-29): Scout Ahead is cut.
+        // PASS (2026-09-29): Scout Ahead is cut. THREE SINCE THE PAYOFF PASS
+        // (2026-10-01): Second Thoughts is cut.
         var slice = Il.CallSequence(
             Il.Method("KokomiOverhaulRoster", "Slice")).ToList();
+        Assert.DoesNotContain(slice, c => c.Contains("ProtoKkSecondThoughts"));
         foreach (var row in new[]
                  {
                      "ProtoKkOpeningGambit", "ProtoKkSecondWave",
-                     "ProtoKkSecondThoughts", "ProtoKkBreakwater",
+                     "ProtoKkBreakwater",
                  })
         {
             Assert.Contains(slice, c => c.Contains(row));

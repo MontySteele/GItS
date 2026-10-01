@@ -89,6 +89,7 @@
     "proto_kk_coordinated_strike",
     "proto_kk_coral_bulwark",
     "proto_kk_coral_crash",
+    "proto_kk_coral_tithe",
     "proto_kk_current_read",
     "proto_kk_deep_current",
     "proto_kk_depths_judgment",
@@ -101,6 +102,7 @@
     "proto_kk_grand_design",
     "proto_kk_jellyfish_drift",
     "proto_kk_joint_orders",
+    "proto_kk_kurage_canopy",
     "proto_kk_kurage_swarm",
     "proto_kk_kurages_oath",
     "proto_kk_lull",
@@ -122,7 +124,6 @@
     "proto_kk_salt_in_the_wound",
     "proto_kk_sango_isshin",
     "proto_kk_sangonomiyas_counsel",
-    "proto_kk_second_thoughts",
     "proto_kk_second_wave",
     "proto_kk_shell_guard",
     "proto_kk_shell_of_sanctuary",
@@ -448,6 +449,7 @@
     "proto_kk_coordinated_strike": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
     "proto_kk_coral_crash": "kokomi",
+    "proto_kk_coral_tithe": "kokomi",
     "proto_kk_current_read": "kokomi",
     "proto_kk_deep_current": "kokomi",
     "proto_kk_depths_judgment": "kokomi",
@@ -460,6 +462,7 @@
     "proto_kk_grand_design": "kokomi",
     "proto_kk_jellyfish_drift": "kokomi",
     "proto_kk_joint_orders": "kokomi",
+    "proto_kk_kurage_canopy": "kokomi",
     "proto_kk_kurage_swarm": "kokomi",
     "proto_kk_kurages_oath": "kokomi",
     "proto_kk_lull": "kokomi",
@@ -481,7 +484,6 @@
     "proto_kk_salt_in_the_wound": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sangonomiyas_counsel": "kokomi",
-    "proto_kk_second_thoughts": "kokomi",
     "proto_kk_second_wave": "kokomi",
     "proto_kk_shell_guard": "kokomi",
     "proto_kk_shell_of_sanctuary": "kokomi",
@@ -1025,6 +1027,9 @@
         "amount": 1
       }
     },
+    "proto_kk_coral_tithe": {
+      "kokomi_amount": -1
+    },
     "proto_kk_current_read": {
       "plan_block": 2
     },
@@ -1063,6 +1068,9 @@
     },
     "proto_kk_joint_orders": {
       "block": 3
+    },
+    "proto_kk_kurage_canopy": {
+      "power_amount": 1
     },
     "proto_kk_kurage_swarm": {
       "innate": true
@@ -1133,12 +1141,6 @@
     },
     "proto_kk_sangonomiyas_counsel": {
       "power_amount": 1
-    },
-    "proto_kk_second_thoughts": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
     },
     "proto_kk_second_wave": {
       "damage": 2

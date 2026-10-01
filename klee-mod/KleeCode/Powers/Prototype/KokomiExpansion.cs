@@ -114,6 +114,35 @@ public static class KokomiCards
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
         KokomiPlan.CancelAllForNext(choiceContext, card.Owner?.Creature);
 
+    /// <summary>Coral Tithe (the payoff pass, 2026-10-01): "Empty the Casket.
+    /// Gain 1 Energy and draw 1 card for every 3 in it." Only while she holds
+    /// a Casket, found the way the relic's own carry-out add finds it
+    /// (<c>GetRelic&lt;TamakushiCasket&gt;</c>, which also finds the Orobas
+    /// upgrade <see cref="Relics.WatatsumiCasket"/>); without one, nothing.
+    /// Rounds down. Sim twin: <c>kokomi_plan.coral_tithe</c>.</summary>
+    public static async Task CoralTithe(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner;
+        var kokomi = owner?.Creature;
+        if (owner == null || kokomi == null) return;
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (owner.GetRelic<Relics.TamakushiCasket>() == null) return;
+        var per = Amount(card);
+        var points = KokomiOverhaulLedger.For(kokomi).EmptyCasket();
+        Relics.TamakushiCasket.Refresh(kokomi);
+        var n = CoralTithePaid(points, per);
+        if (n <= 0) return;
+        await PlayerCmd.GainEnergy(n, owner);
+        await CardPileCmd.Draw(choiceContext, n, owner);
+    }
+
+    /// <summary>Coral Tithe's arithmetic: one Energy and one card for every
+    /// <paramref name="per"/> points, rounded down (7 at every 3 pays 2).
+    /// </summary>
+    public static int CoralTithePaid(int points, int per) =>
+        per <= 0 || points <= 0 ? 0 : points / per;
+
     /// <summary>Shoal Call: "Add 2 Nips to your hand. [They are upgraded.]"
     /// The Nip is the feed pass's pool row itself.</summary>
     public static async Task ShoalCall(
@@ -192,6 +221,38 @@ public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
         var design = kokomi!.Powers.OfType<GrandDesignPower>().FirstOrDefault();
         if (design == null || design.Amount <= 0) return;
         KokomiOverhaulKit.GainCasket(kokomi, (int)design.Amount * entry.Paid);
+    }
+}
+
+/// <summary>Kurage Canopy (the payoff pass, 2026-10-01): "Whenever the
+/// Bake-Kurage carries out a Plan, gain 2 Block." On the plan bus
+/// (<see cref="IKokomiPlanListener"/>), which <c>KokomiPlan.ResolveEntry</c>
+/// calls once per CARRY-OUT, so a Plan carried out twice (Second Wave,
+/// Nereid's Ascension, All Streams) pays twice. POWERED Block, as her
+/// Ancient's (<see cref="PrincessOfWatatsumiPlanPower"/>). Sim twin:
+/// <c>kokomi_plan._note_plan_resolved</c>.</summary>
+public sealed class KurageCanopyPower
+    : PowerModel, ILocalizationProvider, IKokomiPlanListener
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Kurage Canopy"),
+        ("description",
+            "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+          + "[gold]Plan[/gold], gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public async Task OnPlanResolved(
+        PlayerChoiceContext choiceContext, Creature kokomi)
+    {
+        if (kokomi != Owner) return;                 // co-op: your plans only
+        if (Owner == null || Amount <= 0) return;
+        if (!KokomiOverhaul.LiveFor(Owner)) return;
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
     }
 }
 

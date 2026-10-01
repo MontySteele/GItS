@@ -361,6 +361,10 @@ CEREMONIAL_GARMENT = "kk_ceremonial_garment"  # +N per debuff, her Attacks
 WATATSUMIS_GRACE = "kk_watatsumis_grace"  # keep up to N Block at turn end
 TIDAL_RIPOSTE = "kk_tidal_riposte"        # N to an attacker fully Blocked
 KURAGE_SWARM = "kk_kurage_swarm"          # Casket +N per 0-cost Plan written
+#: THE PAYOFF PASS (2026-10-01): Kurage Canopy, "Whenever the Bake-Kurage
+#: carries out a Plan, gain N Block." Per carry-out, on the plan bus.
+#: `KurageCanopyPower` is the twin.
+KURAGE_CANOPY = "kk_kurage_canopy"
 GENERALS_BANNER = "kk_generals_banner"       # Weak to the front, once a turn
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
 #: Power costing 2 that lasts the fight, so there is no duration to tick and
@@ -1448,6 +1452,15 @@ def _note_plan_resolved(state: CombatState,
     design = int(p.powers.get(GRAND_DESIGN, 0))
     if design and entry is not None and entry.paid > 0:
         gain_casket(state, design * int(entry.paid))
+    # THE PAYOFF PASS, KURAGE CANOPY: "Whenever the Bake-Kurage carries out
+    # a Plan, gain 2 Block." Per carry-out, so a doubled one pays twice.
+    # POWERED, as her Ancient's Block below. `KurageCanopyPower` is the twin.
+    canopy = int(p.powers.get(KURAGE_CANOPY, 0))
+    if canopy:
+        amount = powers.modify_block_gained(p, canopy)
+        p.block += amount
+        state.emit("block", amount=amount)
+        state.emit("plan_kurage_canopy", amount=amount)
     n = p.powers.get(PRINCESS_OF_WATATSUMI, 0)
     if n:
         # Block first, then the card: `PrincessOfWatatsumiPlanPower`'s order.
@@ -2014,6 +2027,25 @@ def fetch_open_casket(state: CombatState) -> None:
     state.emit("casket_fetch", found=True)
 
 
+def coral_tithe(state: CombatState, per: int) -> None:
+    """CORAL TITHE (the payoff pass, 2026-10-01): "Empty the Casket. Gain 1
+    Energy and draw 1 card for every 3 in it." Only while she holds a Casket
+    (`_holds_casket`, the relic's own lookup); without one, nothing. Rounds
+    down. `KokomiCards.CoralTithe` is the twin."""
+    if not live(state) or not _holds_casket(state) or per <= 0:
+        return
+    points = state.kk_casket
+    state.kk_casket = 0
+    state.emit("casket_count", count=0, why="coral_tithe")
+    n = points // per
+    state.emit("plan_coral_tithe", points=points, paid=n)
+    if n <= 0:
+        return
+    state.player.energy += n
+    state.emit("energy", amount=n)
+    state.draw(n)
+
+
 def moon_signal(state: CombatState, waiting: int) -> None:
     """MOON SIGNAL: "At the start of your turn, if 2 or more Plans are
     waiting, the Casket gains 1." `waiting` is the queue read BEFORE the
@@ -2572,6 +2604,9 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
                     powers.apply_power(state, e, name, have, applier=p)
     elif k == "all_streams":
         all_streams(state)
+    elif k == "coral_tithe":
+        # CORAL TITHE (the payoff pass): the Casket into Energy and cards.
+        coral_tithe(state, amount)
     elif k == "shoal_call":
         # SHOAL CALL: "Add 2 Nips to your hand. [They are upgraded.]"
         from tier0.content import loader, upgrades  # late import: cycle
@@ -2591,7 +2626,8 @@ NIP_ID = "proto_kk_nip"
 #: loader's check.
 KINDS = {"draw_if_no_plan": ("amount",), "draw_if_target_weak": ("amount",),
          "resonance": ("amount",), "double_weak_vulnerable": (),
-         "all_streams": (), "shoal_call": ("amount",)}
+         "all_streams": (), "shoal_call": ("amount",),
+         "coral_tithe": ("amount",)}
 #: The one kind that aims at the enemy the card was played on.
 AIMED_KINDS = frozenset(("draw_if_target_weak",))
 

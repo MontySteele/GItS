@@ -119,15 +119,15 @@ def test_all_streams_gives_every_card_back_exhaust_too(overhaul):
     assert st.kk_next_plan_extra == 2
 
 
-def test_the_cancel_rows_say_the_card_comes_back(overhaul):
+def test_the_cancel_row_says_the_cards_come_back(overhaul):
+    # Second Thoughts left the pool in the payoff pass (2026-10-01); its
+    # `cancel_last_plan` op stays, exercised directly above.
     rows = {r["id"]: r for r in yaml.safe_load(
         loader.PROTOTYPE_SHEET.read_text(encoding="utf-8"))}
-    assert "returns to your hand" in rows["proto_kk_second_thoughts"][
-        "description"]
+    assert "proto_kk_second_thoughts" not in rows
     assert "take their cards back" in rows[
         "proto_kk_all_streams_flow_to_the_sea"]["description"]
     assert _row("proto_kk_all_streams_flow_to_the_sea").exhaust
-    assert _row("proto_kk_second_thoughts").exhaust
 
 
 def test_riptide_draws_two_and_three_upgraded(overhaul):

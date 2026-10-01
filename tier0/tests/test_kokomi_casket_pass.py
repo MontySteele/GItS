@@ -360,17 +360,18 @@ def test_moon_signal_reads_the_queue_before_the_drain(overhaul):
 
 # --- F. the offer -------------------------------------------------------------
 
-def test_the_offer_is_sixty_nine(overhaul):
+def test_the_offer_is_seventy(overhaul):
     # Forty-six after the Casket pass; the cleanup pass (2026-09-29) cut two;
     # the feed pass (2026-09-29) cut Exposed Flank and added five; expansion
-    # batch one (2026-09-29) cut The Clouds Like Waves and added 22.
+    # batch one (2026-09-29) cut The Clouds Like Waves and added 22; the
+    # payoff pass (2026-10-01) cut Second Thoughts and added two.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 69
+    assert len(ids) == 70
     for cut in ("proto_kk_tide_chart", "proto_kk_cleansing_wave",
                 "proto_kk_ripple", "proto_kk_well_laid",
                 "proto_kk_sea_salt_prayer", "proto_kk_salt_line",
                 "proto_kk_scout_ahead", "proto_kk_song_of_pearls",
-                "proto_kk_exposed_flank"):
+                "proto_kk_exposed_flank", "proto_kk_second_thoughts"):
         assert cut not in ids
         assert cut not in {c.id for c in loader.prototype_cards()}
     # And the co-op three stay outside the count.

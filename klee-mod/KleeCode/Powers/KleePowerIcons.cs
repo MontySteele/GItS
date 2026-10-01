@@ -147,6 +147,10 @@ internal static class KleePowerIcons
             "kokomi/powers/princess_of_watatsumi.png"),
         KurageSwarmPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
+        // THE PAYOFF PASS (2026-10-01): Kurage Canopy is her Ancient's Block
+        // per carry-out, so it wears that badge.
+        KurageCanopyPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
         TheLongGamePower => KleePck.Path("klee/powers/spark_per_turn.png"),
         TheLongGamePlusPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         NereidsAscensionPower => KleePck.Path(

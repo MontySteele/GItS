@@ -149,6 +149,9 @@ KNOWN_STALE = {
     "proto_kk_the_clouds_like_waves": (
         "Kokomi expansion batch one (2026-09-29) CUT this row from her pool: Watatsumi's Grace replaces it (paper pick 3; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_kk_second_thoughts": (
+        "The Kokomi payoff pass (2026-10-01) CUT this row from her pool (one row cut, two added; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_scout_ahead": (
         "The Kokomi cleanup pass (2026-09-29) CUT this row from her pool (two rows cut; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
