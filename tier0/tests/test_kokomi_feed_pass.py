@@ -109,10 +109,10 @@ def test_the_offer_holds_the_feed_after_the_casket_rows(overhaul):
     # 22 rows after the feed and cut The Clouds Like Waves Rippling; the
     # payoff pass (2026-10-01) appended two more and cut Second Thoughts;
     # pool completion (2026-10-01) appended eight; the status batch
-    # (2026-10-01) cut seven (All Streams after the feed) and appended six.
+    # (2026-10-01) cut seven (All Streams after the feed) and appended seven.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 77
-    assert ids[-42:-37] == FEED
+    assert len(ids) == 78
+    assert ids[-43:-38] == FEED
     assert "proto_kk_exposed_flank" not in ids
     assert "proto_kk_exposed_flank" not in {
         c.id for c in loader.prototype_cards()}

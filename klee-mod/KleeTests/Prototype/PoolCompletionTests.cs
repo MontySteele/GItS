@@ -75,8 +75,8 @@ public class PoolCompletionTests : IDisposable
     public void Her_offer_is_seventy_eight_with_the_eight_last()
     {
         var slice = Cards("KokomiOverhaulRoster", "Slice");
-        // The status batch (2026-10-01): seven cut ahead, six appended.
-        Assert.Equal(77, slice.Count);
+        // The status batch (2026-10-01): seven cut ahead, seven appended.
+        Assert.Equal(78, slice.Count);
         Assert.Equal(new[]
             {
                 "ProtoKkTidalScreen", "ProtoKkSpringTide", "ProtoKkKurageSchool",

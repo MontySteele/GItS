@@ -73,8 +73,8 @@ public class KokomiExpansionTests : IDisposable
         // SEVENTY since the payoff pass (2026-10-01): Second Thoughts cut
         // ahead of the batch, two rows after it; pool completion (2026-10-01)
         // eight more; the status batch (2026-10-01) cut All Streams Flow to
-        // the Sea and five rows ahead of the batch, and appended six.
-        Assert.Equal(77, slice.Count);
+        // the Sea and five rows ahead of the batch, and appended seven.
+        Assert.Equal(78, slice.Count);
         Assert.Equal(Batch, slice.Skip(40).Take(21).ToArray());
         Assert.DoesNotContain(slice, c => c.Contains("AllStreams"));
         Assert.DoesNotContain(slice, c => c.Contains("CloudsLikeWaves"));
@@ -266,8 +266,10 @@ public class KokomiExpansionTests : IDisposable
                         Upgraded<ProtoKkBraceForTheTide>().CanonicalKeywords);
         Assert.Contains("Or [gold]dusk[/gold] [gold]plan[/gold]",
                         Face(new ProtoKkEveningWatch()));
-        Assert.Contains("Or [gold]dusk[/gold] [gold]plan[/gold]",
+        // Plan-only: no line above to choose, so no "or" (2026-10-01).
+        Assert.Contains("\n[gold]Dusk[/gold] [gold]Plan[/gold]: ",
                         Face(new ProtoKkBraceForTheTide()));
+        Assert.DoesNotContain("Or [gold]", Face(new ProtoKkBraceForTheTide()));
     }
 
     [Fact]

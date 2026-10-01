@@ -70,9 +70,11 @@ def test_every_emitted_plan_clause_opens_a_line():
 
 def test_the_status_batch_face_says_or():
     """THE STATUS BATCH (2026-10-01, sec.3 pick 2, [USER]: "Agreed on the
-    Plan text change"). Every Plan line's keyword prints "Or plan:", the
-    starter's Kurage's Oath and Slack Water included; a Dusk Plan prints
-    "Or dusk plan:"; the sheet keeps "Plan:"."""
+    Plan text change"). A Plan line under a now-line prints "Or plan:", the
+    starter's Kurage's Oath and Slack Water included; a Dusk Plan there
+    prints "Or dusk plan:"; the sheet keeps "Plan:". A PLAN-ONLY row keeps
+    "Plan:" ("Dusk Plan:") under "Play on the Bake-Kurage." (the main
+    session's call, 2026-10-01)."""
     def face(stem):
         text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         return _FACE.search(text).group(1)
@@ -81,12 +83,30 @@ def test_the_status_batch_face_says_or():
         "Deal {PlanDamage:diff()} damage to ALL enemies.")
     assert "\\nOr [gold]plan[/gold]: " in face("ProtoKkSlackWater")
     assert "\\nOr [gold]dusk[/gold] [gold]plan[/gold]: " in face(
-        "ProtoKkBreakwater")
+        "ProtoKkShellOfSanctuary")
+    # Plan-only rows: no "or", because there is no line above to choose.
+    assert face("ProtoKkNip") == (
+        "Play on the [gold]Bake-Kurage[/gold].\\n[gold]Plan[/gold]: "
+        "Deal {PlanDamage:diff()} damage.")
+    assert face("ProtoKkBreakwater").startswith(
+        "Play on the [gold]Bake-Kurage[/gold].\\n[gold]Dusk[/gold] "
+        "[gold]Plan[/gold]: ")
+    plan_only = 0
+    for path in sorted(proto.OUT_DIR.glob("ProtoK*.cs")):
+        for one in _FACE.findall(path.read_text(encoding="utf-8")):
+            if one.startswith("Play on the [gold]Bake-Kurage[/gold]."):
+                plan_only += 1
+                assert "Or [gold]" not in one, (path.name, one)
+    assert plan_only >= 8
     f = gen.plan_line_says_or
     row = {"plan": [{"op": "draw", "amount": 1}],
            "effects": [{"op": "block", "amount": 1}]}
     assert f(row, "Gain 1.\n[gold]Plan[/gold]: Draw 1.") == (
         "Gain 1.\nOr [gold]plan[/gold]: Draw 1.")
+    # A Plan-only row is untouched.
+    assert f({"plan": [{"op": "draw", "amount": 1}]},
+             "Play.\n[gold]Plan[/gold]: Draw 1.") == (
+        "Play.\n[gold]Plan[/gold]: Draw 1.")
     # A row with no Plan line is untouched.
     assert f({"effects": []}, "Gain 1.\n[gold]Plan[/gold]: x") == (
         "Gain 1.\n[gold]Plan[/gold]: x")

@@ -350,9 +350,9 @@ def test_the_offer_is_seventy(overhaul):
     # batch one (2026-09-29) cut The Clouds Like Waves and added 22; the
     # payoff pass (2026-10-01) cut Second Thoughts and added two; pool
     # completion (2026-10-01) added eight; the status batch (2026-10-01)
-    # cut seven and added six.
+    # cut seven and added seven.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 77
+    assert len(ids) == 78
     for cut in ("proto_kk_tide_chart", "proto_kk_cleansing_wave",
                 "proto_kk_ripple", "proto_kk_well_laid",
                 "proto_kk_sea_salt_prayer", "proto_kk_salt_line",

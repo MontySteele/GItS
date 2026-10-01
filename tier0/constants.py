@@ -962,8 +962,8 @@ KOKOMI_POOL_COMPLETION_IDS: tuple[str, ...] = (
 # appended LAST to `KOKOMI_OVERHAUL_POOL_IDS` in the sheet's own order. Seven
 # rows left the pool (Rally, Pearl Diver, Battle Plan, Feigned Retreat, Moon
 # Signal, Chain of Command, All Streams Flow to the Sea). The paper's seventh
-# card, the Rare Coral Sanctuary, is being redesigned by the main session and
-# is not built: the pool is 77 (21 / 36 / 20) until its replacement lands.
+# card, the Rare Coral Sanctuary, was cut; Riptide Ruin (ruled 2026-10-01)
+# took its slot, a second status source. The pool is 78 (21 / 36 / 21).
 KOKOMI_STATUS_BATCH_IDS: tuple[str, ...] = (
     "proto_kk_kelp_wall",
     "proto_kk_tidecleanse",
@@ -971,10 +971,11 @@ KOKOMI_STATUS_BATCH_IDS: tuple[str, ...] = (
     "proto_kk_turning_tide",
     "proto_kk_flotsam_surge",
     "proto_kk_abyssal_salvage",
+    "proto_kk_riptide_ruin",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SEVENTY-SEVEN rows since the
-# status batch (2026-10-01: seven cut, six added, one Rare slot open);
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SEVENTY-EIGHT rows since the
+# status batch (2026-10-01: seven cut, seven added, Riptide Ruin the Rare);
 # SEVENTY-EIGHT rows since
 # pool completion (2026-10-01: eight added); SEVENTY since the
 # payoff pass (2026-10-01: Second Thoughts cut, two added; expansion batch one,
@@ -1098,8 +1099,8 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # POOL COMPLETION (2026-10-01): eight rows. The pool was 78 (21 / 36 /
     # 21).
     *KOKOMI_POOL_COMPLETION_IDS,
-    # THE STATUS BATCH (2026-10-01): six rows, LAST. The pool is 77 (21 / 36
-    # / 20); Coral Sanctuary's replacement is the open Rare slot.
+    # THE STATUS BATCH (2026-10-01): seven rows, LAST. The pool is 78 (21 /
+    # 36 / 21); Riptide Ruin is the Rare, in Coral Sanctuary's place.
     *KOKOMI_STATUS_BATCH_IDS,
 )
 

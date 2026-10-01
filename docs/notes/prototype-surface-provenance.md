@@ -5300,9 +5300,10 @@ All twelve are `proto_fs_` rows now and their shipped classes are named in
 Paper `review/active/kokomi-status-batch-2026-10-01.md`, ruled: [USER]
 "Agreed on the Plan text change"; "the 7 removals are good"; Kelp Wall,
 Tidecleanse and Coral Sanctuary revised on his notes. Built in both engines,
-except Coral Sanctuary: the main session withdrew it for a redesign during
-the build ([USER]: "Coral Sanctuary feels messy"), so the pool is **77 (21 /
-36 / 20)** and one Rare slot is open (`BACKLOG.md`).
+except Coral Sanctuary: the main session withdrew it during the build and it
+was cut ([USER]: "Coral Sanctuary feels messy ... since we only have 1 card
+in the deck that makes them, it's not good otherwise"). Riptide Ruin took the
+Rare slot in a follow-up the same day, so the pool is **78 (21 / 36 / 21)**.
 
 **In (six rows, LAST in the sheet's order).** Kelp Wall (Skill 1, Common),
 Tidecleanse (Skill 0, Common), Sea Glass Harvest (Skill 1, Uncommon), Turning
@@ -5331,9 +5332,15 @@ the start of your next turn. Plans go in the order made." (133 of 135).
 
 **Readings the paper left open (the builder's plainest, flagged in the PR):**
 
-1. *"Or plan:" on Plan-only rows.* Read literally ("on every card"): every
-   Dusk row is Plan-only, so "Or dusk plan:" exists only there. A Plan-only
-   face reads "Play on the Bake-Kurage. / Or plan: ...".
+1. *"Or plan:" on Plan-only rows.* The first build read "on every card"
+   literally and printed "Play on the Bake-Kurage. / Or plan: ...". The
+   main session's call, the same day: the "or" chooses between two printed
+   effects, so it appears only when a now-line with an effect sits above
+   the Plan line (`plan_line_says_or` tests `plan` and `effects`, the same
+   test as `_plan_only_line` and the target type). A Plan-only face keeps
+   "Play on the Bake-Kurage. / Plan: ..." ("Dusk Plan:" on Breakwater and
+   Brace for the Tide); Shell of Sanctuary and Evening Watch, which have a
+   now-line, print "Or dusk plan:".
 2. *The tip's second sentence* was shortened ("Plans go in the order made.")
    so the paper's opening fits the 135-character ceiling.
 3. *Tidecleanse's "up to N".* Every status and curse when she holds N or
@@ -5398,3 +5405,14 @@ offers, over the 70% line pool completion's sec.7 uses. The seats decide.
 
 - *Art.* All six rows and Sea Glass render the placeholder; Abyssal Salvage
   wears the Princess of Watatsumi badge (`BACKLOG.md`).
+
+**Riptide Ruin (follow-up, 2026-10-01).** Attack, 2, Rare: "Deal 9 [12]
+damage to ALL enemies twice. Shuffle 3 Dazed into your draw pile." Appended
+last (`C.KOKOMI_STATUS_BATCH_IDS`, `KokomiOverhaulRoster.Slice()`); Hydro
+through the arm's cadence like every damaging card of hers. [USER]: "Riptide
+Ruin sounds quite strong but possibly fine at Rare. My counterpoint example
+would be Echoing Slash on Silent." The upgrade moves the per-hit damage only
+(`upgrade: {damage: 3}`); the hit count and the Dazed count do not move.
+Pins: `test_kokomi_status_batch.py`, `KokomiStatusBatchTests.cs`. Art:
+placeholder. `tools/kokomi_expansion_sim.py` no longer names the cut rows
+(All Streams' pilot rule and report line went with it).

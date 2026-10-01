@@ -367,6 +367,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkPressTheAdvantage>(),
             ModelDb.Card<ProtoKkReadTheField>(),
             ModelDb.Card<ProtoKkRiptide>(),
+            ModelDb.Card<ProtoKkRiptideRuin>(),
             ModelDb.Card<ProtoKkSaltInTheWound>(),
             ModelDb.Card<ProtoKkSangoIsshin>(),
             ModelDb.Card<ProtoKkSangonomiyasCounsel>(),

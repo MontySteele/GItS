@@ -51,7 +51,7 @@ public sealed class ProtoKkMasterstroke : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Masterstroke"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} damage."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

@@ -45,7 +45,7 @@ public sealed class ProtoKkBrineSting : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Brine Sting"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold]."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

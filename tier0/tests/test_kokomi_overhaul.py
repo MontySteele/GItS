@@ -264,11 +264,11 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
 
     SEVENTY-EIGHT SINCE POOL COMPLETION (2026-10-01): eight added last.
 
-    SEVENTY-SEVEN SINCE THE STATUS BATCH (2026-10-01): seven cut, six added
-    last; Coral Sanctuary, the paper's Rare, is not built."""
+    STILL SEVENTY-EIGHT SINCE THE STATUS BATCH (2026-10-01): seven cut,
+    seven added last; Riptide Ruin is the Rare, in Coral Sanctuary's place."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 77
-    assert len(set(ids)) == 77
+    assert len(ids) == 78
+    assert len(set(ids)) == 78
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
     assert {"proto_kk_riptide", "proto_kk_pincer",
@@ -284,9 +284,9 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
            "proto_kk_chain_of_command",
            "proto_kk_all_streams_flow_to_the_sea"}
     assert not cut & set(ids)
-    # The status batch (2026-10-01): six rows LAST.
-    assert ids[-6:] == C.KOKOMI_STATUS_BATCH_IDS
-    ids = ids[:-6]
+    # The status batch (2026-10-01): seven rows LAST.
+    assert ids[-7:] == C.KOKOMI_STATUS_BATCH_IDS
+    ids = ids[:-7]
     # Pool completion (2026-10-01): eight rows LAST before them.
     assert ids[-8:] == C.KOKOMI_POOL_COMPLETION_IDS
     ids = ids[:-8]
@@ -463,10 +463,11 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     THE STATUS BATCH (2026-10-01): Rally and Pearl Diver (Common), Battle
     Plan, Feigned Retreat, Moon Signal and Chain of Command (Uncommon) and
     All Streams Flow to the Sea (Rare) cut; two Commons and four Uncommons
-    added, the Rare not built: 21 / 36 / 20."""
+    added, and Riptide Ruin (Rare) in Coral Sanctuary's place: 21 / 36 /
+    21."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 21, "uncommon": 36, "rare": 20}
+        "common": 21, "uncommon": 36, "rare": 21}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

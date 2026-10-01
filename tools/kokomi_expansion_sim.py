@@ -29,7 +29,7 @@ from attrition.
 PILOTS (drafters) -- one play pilot, five drafting rules:
   * baseline: the repo's default drafter (`tier05.draft.score_offer`,
     archetype "generic", skip under `C.DRAFT_SKIP_THRESHOLD`) over the whole
-    69-card pool. It prices the seven new Powers and Shoal Call at 0, so the
+    current pool. It prices the seven new Powers and Shoal Call at 0, so the
     harness gives those eight the median default score of the other new cards
     (read once against the starter), so their pick rates mean something.
   * the four focused drafters (paper sec.3 grouping, plus the existing parts
@@ -40,8 +40,9 @@ PILOTS (drafters) -- one play pilot, five drafting rules:
     The existing parts:
       - Plan volume: Bubble Ward, Nip, Jellyfish Drift, Current Read, Brine
         Sting, Feint, Sango Isshin, Tideturn, Change of Plans, Second
-        Thoughts, Pearl Diver, Moon Signal, Driftglass, Depths' Judgment, What
-        the Tokoyo Took, What the Tokoyo Returns, Shell Guard.
+        Thoughts, Driftglass, Depths' Judgment, What the Tokoyo Took, What
+        the Tokoyo Returns, Shell Guard. (Pearl Diver and Moon Signal left
+        with the status batch, 2026-10-01.)
       - Big Plan: Opening Gambit, Second Wave, Surging Shoal, Ambush,
         Nereid's Ascension.
       - Tide Control: War Council, Vanguard, Brine Sting, Feint, Ambush,
@@ -54,9 +55,8 @@ wrapper, an INSTRUMENT SURFACE and not a design claim:
   * Open the Casket when it holds 6, or from turn 6 when it holds any (the
     feed pass's wrapper);
   * her Powers are played first when affordable;
-  * All Streams when 2+ Plans wait and a Plan card is affordable after the
-    refund, then the most expensive such card is written on the Bake-Kurage; Brace for the
-    Tide when an enemy intends to attack;
+  * Brace for the Tide when an enemy intends to attack (All Streams Flow to
+    the Sea and its rule left with the status batch, 2026-10-01);
   * a DUSK Plan is written when an enemy intends to attack (the stock rule
     writes a Plan only when none does, which is backwards for Dusk -- applied
     to every pilot, Breakwater and Shell of Sanctuary included);
@@ -80,7 +80,7 @@ FOCUSED = ("volume", "big_plan", "tide", "dusk")
 NEW = {
     "big_plan": ["weight_of_the_plan", "lull", "undertide_lance",
                  "measured_breath", "grand_design", "the_long_game",
-                 "masterstroke", "all_streams_flow_to_the_sea"],
+                 "masterstroke"],
     "tide": ["drowning_pressure", "salt_in_the_wound", "undercurrent_snare",
              "tidal_resonance", "at_waters_edge", "ceremonial_garment",
              "suffocating_deep"],
@@ -91,8 +91,7 @@ NEW = {
 OLD = {
     "volume": ["bubble_ward", "nip", "jellyfish_drift", "current_read",
                "brine_sting", "feint", "sango_isshin", "tideturn",
-               "change_of_plans", "pearl_diver",
-               "moon_signal", "driftglass", "depths_judgment",
+               "change_of_plans", "driftglass", "depths_judgment",
                "what_the_tokoyo_took", "what_the_tokoyo_returns",
                "shell_guard"],
     "big_plan": ["opening_gambit", "second_wave", "surging_shoal", "ambush",
@@ -116,8 +115,6 @@ NOMINAL_IDS = frozenset(P + c for c in (
 # --- the process switch and the harness surfaces ------------------------------
 
 _ENABLED = False
-_AFTER_STREAMS: dict = {}
-_FORCE_PET: set = set()
 
 
 def enable():
@@ -153,20 +150,7 @@ def enable():
                        for e in state.living_enemies)
         return orig_aim(state, card)
 
-    def aim_forced(state, card):
-        if id(card) in _FORCE_PET and card.plan and kokomi_plan.live(state):
-            return True
-        return aim(state, card)
-
-    kokomi_plan.plan_aimed_at_pet = aim_forced
-
-    orig_schedule = kokomi_plan.schedule
-
-    def schedule(state, card, *a, **kw):
-        _FORCE_PET.discard(id(card))
-        return orig_schedule(state, card, *a, **kw)
-
-    kokomi_plan.schedule = schedule
+    kokomi_plan.plan_aimed_at_pet = aim
 
     orig_active = policy._active_effects
 
@@ -233,40 +217,17 @@ def make_pilot():
                   and combat.card_cost(state, c) <= p.energy]
         if powers:
             return max(powers, key=lambda c: combat.card_cost(state, c))
-        # All Streams was just played: write the Plan it was played for, on
-        # the Bake-Kurage (the pet aim is forced for this one play).
-        nxt = _AFTER_STREAMS.pop(id(state), None)
-        if (nxt is not None and nxt in hand
-                and state.kk_next_plan_extra is not None
-                and combat.card_cost(state, nxt) <= p.energy):
-            _FORCE_PET.add(id(nxt))
-            return nxt
         attacking = any(kokomi_plan._intends_to_attack(e)
                         for e in state.living_enemies)
         for c in hand:
             cost = combat.card_cost(state, c)
             if cost > p.energy:
                 continue
-            if c.id == P + "all_streams_flow_to_the_sea":
-                # Main session, 2026-09-29: 2+ Plans waiting and a Plan card
-                # affordable after the refund; then write the most
-                # expensive such card (`_AFTER_STREAMS`).
-                left = (p.energy - cost
-                        + sum(e.paid for e in state.kk_plan_queue))
-                fit = [o for o in hand if o is not c and o.plan
-                       and combat.card_cost(state, o) <= left]
-                if len(state.kk_plan_queue) >= 2 and fit:
-                    _AFTER_STREAMS[id(state)] = max(
-                        fit, key=lambda o: combat.card_cost(state, o))
-                    return c
             if c.id == P + "brace_for_the_tide" and attacking \
                     and not any(e.card_id == c.id
                                 for e in state.kk_plan_queue):
                 return c
-        choice = base(state)
-        if choice is not None and choice.id == P + "all_streams_flow_to_the_sea":
-            return None           # only the harness rule plays it
-        return choice
+        return base(state)
 
     return pilot
 
@@ -351,30 +312,18 @@ def fight(deck, enemies, seed, hp):
     plays = defaultdict(int)
     writes = defaultdict(int)
     close = []
-    streams = []
-    refunds = []
     for r in s.log:
         ev = r.get("event")
         if ev == "play":
             plays[r["card"]] += 1
         elif ev == "plan_written":
             writes[r["card"]] += 1
-            if streams and streams[-1][2] is None:
-                streams[-1][2] = r.get("card")
         elif ev == "turn_close":
             close.append(int(r.get("block", 0)))
-        elif ev == "plan_all_streams":
-            streams.append([int(r.get("cancelled", 0)), 0, None])
-            refunds.append(int(r.get("refund", 0)))
-        elif (ev == "plan_carried_out" and streams
-              and streams[-1][2] == r.get("card")):
-            streams[-1][1] += 1
     return {"won": bool(s.player.alive) and not s.living_enemies,
             "turns": s.turn, "hp_lost": start - max(0, s.player.hp),
             "hp_end": max(0, s.player.hp), "plays": dict(plays),
             "writes": dict(writes), "close_block": close,
-            "streams": [(c, t) for c, t, _ in streams],
-            "refunds": refunds, "stream_cards": [w for _, _, w in streams],
             "casket": s.kk_casket}
 
 
@@ -642,7 +591,8 @@ def _dusk_row(label, fs):
 
 
 def sec_cards(out, by, gb):
-    out("\n## 4. The 22 new cards: pick and play rates")
+    out(f"\n## 4. The {len(NEW_IDS)} new cards still in the pool: pick and "
+        "play rates")
     out("Offers from the gauntlet's full drafts (nine per seed per "
         "pilot). Fights from the runs and the gauntlet. "
         "Offered = times in a 3-card offer; taken = share of those offers "
@@ -656,7 +606,6 @@ def sec_cards(out, by, gb):
     out("|---|---|---|---|---|---|")
     from tier0.content import loader
     owner = {P + c: d for d, cs in NEW.items() for c in cs}
-    cancelled, refunds, wrote = [], [], []
     flags = []
     for cid in NEW_IDS:
         cells = {}
@@ -690,27 +639,6 @@ def sec_cards(out, by, gb):
             f"{loader.get_card(cid).rarity} | {bo} / {pct(bp, bo)} | "
             f"{pct(op_, oo)} of {oo} | {ppf:.2f} ({held}) | {flag} |")
     out(f"\nFlagged: {', '.join(flags) or 'none'}.")
-    ast = P + "all_streams_flow_to_the_sea"
-    held = plays = 0
-    for pl in PILOTS:
-        for r in by[pl] + gb[pl]:
-            for f in r["fights"]:
-                if ast in f["deck"]:
-                    held += 1
-                    plays += f["plays"].get(ast, 0)
-                    cancelled.extend(f["streams"])
-                    refunds.extend(f["refunds"])
-                    wrote.extend(w for w in f["stream_cards"] if w)
-    out(f"\nAll Streams Flow to the Sea: played {plays} times in {held} "
-        f"fights held ({(plays / held) if held else 0:.2f} per fight); Plans "
-        f"cancelled per play {m(c for c, _ in cancelled) if cancelled else '-'}; "
-        f"the Plan it multiplied was carried out "
-        f"{m(t for _, t in cancelled) if cancelled else '-'} times on average; "
-        f"the Plans "
-        f"it multiplied: "
-        + ", ".join(f"{k[len(P):]} {v}" for k, v in sorted(
-            __import__("collections").Counter(wrote).items(),
-            key=lambda kv: -kv[1])[:6]) + ".")
 
 
 def main(argv=None):

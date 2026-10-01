@@ -2,7 +2,8 @@
 
 Paper, 2026-10-01. Main session design. **Ruled 2026-10-01.** [USER]: "Agreed
 on the Plan text change"; "the 7 removals are good"; three cards revised on his
-notes (§2), the rest as drafted.
+notes (§2), the rest as drafted. Coral Sanctuary was then cut and Riptide
+Ruin took the Rare slot (§2), the same day.
 
 ## 1. Why
 
@@ -42,7 +43,7 @@ draw on separate cards.
 | Turning Tide | Skill, 0, U | Draw 1 card. Plan: Discard any number of cards, then draw that many. |
 | Flotsam Surge | Attack, 1, U | Deal 13 [17] damage to ALL enemies. Shuffle 2 Dazed into your draw pile. |
 | Abyssal Salvage | Power, 1, U | Whenever a status or curse is exhausted, the Casket gains 1 [and you gain 2 Block]. |
-| Coral Sanctuary | Power, 1, R | You can play your statuses and curses on the Bake-Kurage for 0. When it carries one out, exhaust it and draw 1 card [and gain 3 Block]. |
+| Riptide Ruin | Attack, 2, R | Deal 9 [12] damage to ALL enemies twice. Shuffle 3 Dazed into your draw pile. |
 
 **Sea Glass** (token): 0, "Gain 1 [2] Energy. Exhaust."
 
@@ -57,13 +58,15 @@ draw on separate cards.
 - **Abyssal Salvage** feeds the Casket from exhausted statuses, so enemies'
   junk and Flotsam's Dazed both count. It also feeds her existing exhaust
   readers (Moon's Reflection, What the Tokoyo Returns).
-- **Coral Sanctuary** is the Rare engine, and it bends a rule: a status
-  becomes a 0-cost Plan. The junk sits in this hand and turns into a fresh
-  card in the next one, so the delay is the price. It draws and gives no
-  Energy (the Fuel lesson), and it has no cap: the statuses you hold are the
-  limit. [USER] on the first draft ("exhaust every status ... gain 1 Energy
-  for each, up to 2"): "reads too strong (basically - always have no statuses
-  and possibly extra energy, and I dislike capping cards anyway)".
+- **Riptide Ruin** is the Rare, and the slot became a second status
+  source. Coral Sanctuary, drafted here first (play statuses and curses on
+  the Bake-Kurage for 0), was cut. [USER]: "Coral Sanctuary feels messy ...
+  since we only have 1 card in the deck that makes them, it's not good
+  otherwise." So the Rare makes them too: Flotsam Surge's shape at Rare
+  size, with more Dazed for the Plans above to turn into Block, Energy and
+  Casket. [USER]: "Riptide Ruin sounds quite strong but possibly fine at
+  Rare. My counterpoint example would be Echoing Slash on Silent." Like every
+  damaging card of hers it applies Hydro.
 - **Revised on [USER]'s notes.** Kelp Wall: "too situational ... if picked
   early, it's probably a brick", so its Plan now carries a flat 7 [10] Block
   and statuses add 3 each. Tidecleanse: "needs a power lift (make it 0
@@ -75,10 +78,9 @@ draw on separate cards.
   resolve in the order written, so a card drawn by one Plan is seen by the
   next.
 - Dazed counts as a status while it is in hand.
-- Coral Sanctuary: a status played this way is a Plan with no lines, written
-  in order like any other. Unplayable statuses (Dazed, Wound) become
-  playable only onto the Bake-Kurage. A curse played this way is exhausted
-  for the rest of the combat, not removed from the deck.
+- Riptide Ruin's upgrade moves the damage per hit (9 to 12); the two hits
+  and the three Dazed do not move. The Dazed go into the draw pile at
+  random depths, as Flotsam Surge's do.
 - Sea Glass is a token and never enters the pool.
 
 **Out** (from the census, 600 seeds and five pilots, plus the seat records;
@@ -101,6 +103,11 @@ the Plan line under the now-line with nothing between them. The keyword
 becomes **"Or plan:"** (and **"Or dusk plan:"**) on every card, the starter's
 Kurage's Oath and Slack Water included, and the Plan tip begins "Instead of
 the line above". This changes starter text, so it is your pick.
+
+As built: "or" appears only where a now-line sits above the Plan line. A
+Plan-only card keeps "Plan:" ("Dusk Plan:") under "Play on the
+Bake-Kurage.", because there is nothing above it to choose against (main
+session, 2026-10-01).
 
 ## 4. Not in this batch
 

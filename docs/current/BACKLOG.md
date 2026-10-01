@@ -12,9 +12,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Kits and display (the mod)
 
-- Kokomi status batch (2026-10-01): the paper's Rare slot is open (pool 77, 21 / 36 / 20). Coral Sanctuary was withdrawn mid-build for a redesign; the main session's replacement ruling (Riptide Ruin) was not built in this PR.
 - Kokomi status batch: art for Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge, Abyssal Salvage and the Sea Glass token (placeholders); Abyssal Salvage borrows the Princess of Watatsumi badge.
-- Kokomi status batch: the stock sim pilot cannot read the next-hand Plans (Kelp Wall's count, Tidecleanse, Sea Glass Harvest, Turning Tide) or plan for statuses it has not drawn; their census rates are unread, as Coral Tithe's were. `tools/kokomi_expansion_sim.py`'s focused-drafter lists still name the seven cut rows.
+- Kokomi status batch: the stock sim pilot cannot read the next-hand Plans (Kelp Wall's count, Tidecleanse, Sea Glass Harvest, Turning Tide) or plan for statuses it has not drawn; their census rates are unread, as Coral Tithe's were.
 - Pool completion (2026-10-01): run paper sec.7's sim checks on the built pools (`review/active/pool-completion-2026-10-01.md`): each of Kokomi's four decks within 10 points of Plan volume with the new Rares granted, Furina's Solo, Spend and Guest decks within 10 points of the default drafter, and no new card taken from over 70% of offers or played in under 5% of the fights where it is held.
 - Pool completion (2026-10-01): art for the 14 new rows and the three new Ancients (Alice's Masterpiece, Divine Strategy, Center of Attention); all render the placeholder.
 - Pool completion (2026-10-01): Divine Strategy's now-line, Casting Agent's choice screen, Center of Attention's free Spend and the two co-op cards (Tactical Relay, Kurage's Mercy) are pinned headless only; watch them in game and through the bridge at the first seat round.

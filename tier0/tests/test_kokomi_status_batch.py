@@ -1,10 +1,10 @@
 """KOKOMI STATUS BATCH (2026-10-01): the sim half.
 
 Paper `review/active/kokomi-status-batch-2026-10-01.md`, ruled: "the 7
-removals are good", "Agreed on the Plan text change". Six cards built here
+removals are good", "Agreed on the Plan text change". Seven cards built here
 (Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge,
-Abyssal Salvage); Coral Sanctuary is not built (the main session is
-redesigning it), so the pool is 77 (21 / 36 / 20). The C# twin is
+Abyssal Salvage, and Riptide Ruin, the Rare that replaced the cut Coral
+Sanctuary), so the pool is 78 (21 / 36 / 21). The C# twin is
 `KleeTests/Prototype/KokomiStatusBatchTests.cs`. NOTHING MEASURED HERE IS
 QUOTABLE (R215 B).
 
@@ -55,17 +55,17 @@ def _carry_out(st, card):
 
 # --- the pool -----------------------------------------------------------------
 
-def test_the_batch_cuts_seven_and_adds_six(overhaul):
+def test_the_batch_cuts_seven_and_adds_seven(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 77
-    assert ids[-6:] == C.KOKOMI_STATUS_BATCH_IDS
+    assert len(ids) == 78
+    assert ids[-7:] == C.KOKOMI_STATUS_BATCH_IDS
     rows = {c.id: c for c in loader.prototype_cards()}
     for cid in CUT:
         assert cid not in ids
         assert cid not in rows
     assert "proto_kk_coral_sanctuary" not in rows
     rarity = collections.Counter(_row(cid).rarity for cid in ids)
-    assert rarity == {"common": 21, "uncommon": 36, "rare": 20}
+    assert rarity == {"common": 21, "uncommon": 36, "rare": 21}
     shapes = {cid: (_row(cid).type, _row(cid).cost, _row(cid).rarity)
               for cid in C.KOKOMI_STATUS_BATCH_IDS}
     assert shapes == {
@@ -75,6 +75,7 @@ def test_the_batch_cuts_seven_and_adds_six(overhaul):
         "proto_kk_turning_tide": ("skill", 0, "uncommon"),
         "proto_kk_flotsam_surge": ("attack", 1, "uncommon"),
         "proto_kk_abyssal_salvage": ("power", 1, "uncommon"),
+        "proto_kk_riptide_ruin": ("attack", 2, "rare"),
     }
 
 
@@ -189,6 +190,25 @@ def test_flotsam_surge_hits_all_and_shuffles_two_dazed(overhaul):
     dazed = [c for c in st.player.draw_pile if c.id == "status_dazed"]
     assert len(dazed) == 2
     assert _up("proto_kk_flotsam_surge").effects[0]["amount"] == 17
+
+
+# --- Riptide Ruin ------------------------------------------------------------------------
+
+def test_riptide_ruin_hits_all_twice_and_shuffles_three_dazed(overhaul):
+    """The Rare in Coral Sanctuary's place (ruled 2026-10-01): "Deal 9 [12]
+    damage to ALL enemies twice. Shuffle 3 Dazed into your draw pile." """
+    st = kokomi_state(enemies=[make_enemy(hp=100), make_enemy(hp=100)])
+    st.player.draw_pile = _filler(4)
+    card = _row("proto_kk_riptide_ruin")
+    assert (card.type, card.cost, card.rarity) == ("attack", 2, "rare")
+    st.player.energy = 3
+    st.player.hand.append(card)
+    combat.play_card(st, card)
+    assert all(e.hp == 100 - 9 * 2 for e in st.enemies)
+    dazed = [c for c in st.player.draw_pile if c.id == "status_dazed"]
+    assert len(dazed) == 3
+    up = _up("proto_kk_riptide_ruin").effects[0]
+    assert (up["amount"], up["times"]) == (12, 2)
 
 
 # --- Abyssal Salvage -----------------------------------------------------------------------
