@@ -1137,6 +1137,14 @@ CO_TENANCY_LEDGER = {
             "KleeElementalHooks), which cannot be in play before his first "
             "card; Dandelion Seeds, which reads the element, is staged into "
             "AfterPlayerTurnStartLate. No sim counterpart until Balance",
+        ("Relics/BoreasFang.cs", "BoreasFang"):
+            "QUARANTINED (Varka defence sec.4, 2026-10-01). Turn-1-only: "
+            "makes the starter Knight's element current, no Oath. Its one "
+            "co-tenant on that resource, Knight's Commission, sets the same "
+            "element, so either order ends with that element current, one "
+            "change (Windblume Garland pays once) and the Commission's 1 "
+            "Oath; his turn-start Powers cannot be in play before his first "
+            "card. Sim twin: varka_oath.turn_start, turn 1, first",
         ("Relics/VarkaArmRelics.cs", "FavoniusDutyRoster"):
             "QUARANTINED (Varka's own relics, 2026-10-01). Turn-1-only: adds "
             "a pool Knight to the hand. It shares only the hand with the "
