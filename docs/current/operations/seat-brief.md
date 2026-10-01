@@ -27,6 +27,9 @@ GITS_LANE=<LANE> python -m understudy.blindplay observe
 GITS_LANE=<LANE> python -m understudy.blindplay act "<command>"
 ```
 
+Use `observe --brief` and `act --brief` instead of filtering output yourself;
+never filter observe or act output with grep.
+
 `observe` prints whichever screen is up — combat, map, rewards, shop, rest,
 event, a selection overlay — as printed faces and nothing else. `act` resolves
 ONE player-language command against that screen by printed names only:

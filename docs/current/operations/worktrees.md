@@ -7,6 +7,19 @@ Sessions never share a working directory; collisions happen *before* commit,
 where CI cannot look. Rationale and incident history:
 `docs/current/rationale/`.
 
+### While seat lanes are live
+
+A new worktree is allowed while a seat lane runs: `tools/agent_worktree.py`
+prints one line naming the live lanes and goes on (`--allow-live-lane` is
+accepted and does nothing). A sibling directory touches neither the install
+nor the lane. What changes the instrument under a running round is a deploy,
+because one install serves every lane, and a pull in the main checkout. So
+while a lane is up, do not deploy (`tools/deploy_round.py`, `deploy.ps1` and
+`deploy_proto.ps1` refuse while any game process runs) and do not pull in the
+main checkout. Embark a seat from the main checkout only: a lane's embark
+records live in that checkout's `understudy/logs/`, and an embark from a
+worktree cannot see them.
+
 ### Two things a new worktree used to owe by hand
 
 **`local.props` is machine state, not workstream state.** It is gitignored (it

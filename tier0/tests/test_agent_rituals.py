@@ -236,19 +236,29 @@ class _FastArgs:
 # --- agent_worktree.py -----------------------------------------------------
 
 def test_agent_worktree_dry_run_creates_nothing():
-    # `--allow-live-lane` because the claim under test is about the DRY RUN and
-    # the live-lane refusal is about the MACHINE: this checkout's seat lanes
-    # come and go while other work runs, so without the switch the test passes
-    # or fails on whether a game happens to be up -- and it failed for exactly
-    # that reason in the pre-push gate on 2026-09-02, blocking every push from
-    # a checkout with a seat in it. The switch weakens nothing here: a dry run
-    # creates no worktree, so there is no second checkout to own the profile,
-    # and the refusal keeps its own coverage below.
     res = _run(["tools/agent_worktree.py", "pytest-should-not-exist",
-                "--task", "build", "--dry-run", "--allow-live-lane"])
+                "--task", "build", "--dry-run"])
     assert res.returncode == 0, res.stdout + res.stderr
     assert not (REPO.parent / "GItS-pytest-should-not-exist").exists()
     assert "would create" in res.stdout
+
+
+def test_agent_worktree_names_a_live_lane_and_does_not_refuse(monkeypatch,
+                                                              capsys):
+    """2026-10-01. A sibling worktree touches neither the install nor the
+    lane, so a live seat is named in one line and the worktree goes ahead;
+    the deploy is what refuses. `--allow-live-lane` is still accepted."""
+    aw = _module("agent_worktree")
+    monkeypatch.setattr(aw, "live_lanes",
+                        lambda root=aw.REPO: ["lane1 (port 15527)"])
+    for extra in ([], ["--allow-live-lane"]):
+        code = aw.main(["pytest-should-not-exist", "--task", "build",
+                        "--dry-run", "--no-fetch", *extra])
+        out = capsys.readouterr().out
+        assert code == 0, out
+        assert "REFUSED" not in out
+        assert "lane1 (port 15527)" in out and "would create" in out
+    assert not (REPO.parent / "GItS-pytest-should-not-exist").exists()
 
 
 def test_agent_worktree_read_lists_are_real_files_or_named_shapes():
