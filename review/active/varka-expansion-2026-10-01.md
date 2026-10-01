@@ -33,7 +33,12 @@ goal." The count agreed: 7 of 13 pool Knights were "apply an element, gain
 Block", and nothing read one element by name, so mono-Pyro and mono-Cryo
 played the same. This version gives each element a role, matching its Swirl
 payout, and a payoff of its own, and cuts the Knights deck from eleven cards
-to six.
+to six. Then: "I think it's fine to allow for each element to have one core
+defensive card as long as they are meaningfully different, and have 4
+flavors of starter that are 'element + block' since you only get one of them
+anyway ... We should do a pass over the Knights and make sure they're all
+independently 'interesting' while also opening up viable identities for
+each element." The Knight table in §3 is that pass.
 
 ## 2. The shape
 
@@ -43,12 +48,16 @@ to six.
 
 **The four elements each have a job**, the one its Swirl already pays:
 
-| Element | Swirl pays | Knights (3 each) | Element payoffs |
-|---|---|---|---|
-| Pyro | damage | hit | Blazing Charge (U), Wildfire Oath (R) |
-| Hydro | Block | block | Tidal Bulwark (U), Unbroken Tide (R) |
-| Cryo | Vulnerable | debuff | Glacial Edict (U), Absolute Zero (R) |
-| Electro | AoE | AoE and draw | Static Field (U), Thundering Verdict (R) |
+| Element | Swirl pays | Its Knights | Its defensive Knight | Element payoffs |
+|---|---|---|---|---|
+| Pyro | damage | hit, and reward re-applying Pyro | Baron Bunny: Block now, fire next turn | Blazing Charge (U), Wildfire Oath (R) |
+| Hydro | Block | block and cleanse | Whisper of Water: Block now and next turn | Tidal Bulwark (U), Unbroken Tide (R) |
+| Cryo | Vulnerable | debuff | Mika: Weak, defence by control | Glacial Edict (U), Absolute Zero (R) |
+| Electro | AoE | AoE and draw | Infinite Circuit: Block for each Attack played | Static Field (U), Thundering Verdict (R) |
+
+Each element keeps exactly one defensive Knight, and the four defend in four
+different ways. The four starter-only Knights stay "element plus 8 Block":
+a run has one of them, so they never sit side by side.
 
 The element payoffs read their own element's Oath by name, at a better rate
 than the generic readers, which read the current element. A mono-element
@@ -66,23 +75,29 @@ Focus readers; a Switch or Gale deck takes the generic cards.
 | Muster | 6 | Knights played |
 | Generic | 6 | |
 
-Block now lives in Hydro, in Noelle (a Geo Knight, below), and in a handful
-of generic cards, not in every Knight.
+Block now lives in Hydro, in one defensive Knight per element, in Noelle (a
+Geo Knight, below) and in a handful of generic cards, not in every Knight.
 
 ## 3. The cards
 
-**Five Knights re-aimed to their element's job** (ids and art unchanged):
+**The Knight pass: all thirteen pool Knights** (ids and art unchanged; new
+ones marked). Each one asks a different question of the turn.
 
-| Knight | Was | Now |
-|---|---|---|
-| Amber: Baron Bunny (C, Pyro) | 6 Block; next turn 6 Pyro to ALL | Deal 4 Pyro damage. Next turn, deal 6 [8] Pyro damage to ALL enemies. |
-| Lisa: Infinite Circuit (C, Electro) | Electro; Block per Attack | Apply Electro to an enemy. Draw 2 cards. [ALL enemies] |
-| Razor: Awakening (C, Electro) | 7 Electro damage | Deal 4 [6] Electro damage to ALL enemies. |
-| Kaeya: Heart of the Abyss (C, Cryo) | 6 Cryo damage | Deal 6 [9] Cryo damage. Apply 1 Vulnerable. |
-| Mika: Suppressive Barrage (C, Cryo) | Cryo; 6 Block | Apply Cryo and 2 [3] Weak to an enemy. |
-
-Barbara: Gleeful Songs (Hydro) keeps its job, with Block 3 raised to 5 [7].
-Diluc, Eula and Barbara: Whisper of Water already fit theirs.
+| Knight | Element, rarity | Text | Its question |
+|---|---|---|---|
+| Amber: Baron Bunny | Pyro, C | 6 [8] Block. Next turn, deal 6 [8] Pyro damage to ALL enemies. (unchanged) | Block now or damage now? |
+| Amber: Sharpshooter (new) | Pyro, C | Deal 8 [11] Pyro damage. If the enemy already has Pyro, deal it again. | Lay Pyro first, then shoot |
+| Diluc: Searing Onslaught | Pyro, U | Deal 6 [8] Pyro damage twice. If either hit sets off a reaction, gain 1 Energy. | Feed him another element first |
+| Barbara: Gleeful Songs | Hydro, C | Apply Hydro to ALL enemies. Gain 5 [7] Block. (Block was 3) | Set up a Gale turn |
+| Barbara: Whisper of Water | Hydro, U | Apply Hydro. 4 [6] Block now and 4 [6] next turn. (unchanged) | Plan a turn ahead |
+| Barbara: Wellspring Hymn (new) | Hydro, U | Remove your Weak, Frail and Vulnerable. Gain 7 [10] Block. Apply Hydro to an enemy. | When are the debuffs worth a card? |
+| Kaeya: Heart of the Abyss | Cryo, C | Deal 6 [9] Cryo damage. Apply 1 Vulnerable. (was damage only) | Open for the finisher |
+| Mika: Suppressive Barrage | Cryo, C | Apply Cryo and 2 [3] Weak to an enemy. (was Cryo and 6 Block) | Which enemy hits hardest? |
+| Eula: Icetide Vortex | Cryo, U | 10 [14] Cryo damage; 1 Cryo Oath per Cryo enemy. (unchanged) | Spread Cryo first |
+| Lisa: Infinite Circuit | Electro, C | Apply Electro. 4 [5] Block, plus 3 [4] per Attack played this turn. (unchanged) | Play it last |
+| Razor: Awakening | Electro, C | Deal 4 [6] Electro damage to ALL enemies. Enemies that already have Electro take 3 more. (was 7 to one) | Lay Electro first |
+| Lisa: Pulsating Witch (new) | Electro, U | Apply Electro to ALL enemies. Draw 1 card for each enemy. [Retain] | Better in a crowd |
+| Noelle: Steadfast Maid (new) | Geo, U | Gain 9 [12] Block. Draw 1 card. | The Knight that keeps your element |
 
 **Common (5)**
 
@@ -92,7 +107,7 @@ Diluc, Eula and Barbara: Whisper of Water already fit theirs.
 | Cavalry Charge | 1 Attack | Deal 7 [10] damage as your current element. | Focus |
 | West Wind Shield | 1 Skill | Gain 5 [7] Block, plus 2 for each enemy with an aura. | Gale; Block |
 | Knightly Strike | 1 Attack | Deal 7 [10] damage. If you played a Knight this turn, deal 4 more. | Muster |
-| Amber: Sharpshooter | 1 Attack, Pyro Knight | Deal 9 [12] Pyro damage. | Pyro |
+| Amber: Sharpshooter | 1 Attack, Pyro Knight | Deal 8 [11] Pyro damage. If the enemy already has Pyro, deal it again. | Pyro |
 
 **Uncommon (17)**
 
@@ -102,9 +117,9 @@ Diluc, Eula and Barbara: Whisper of Water already fit theirs.
 | Tidal Bulwark | 1 Skill | Apply Hydro to an enemy. Gain 4 [6] Block, plus 2 for each Hydro Oath. | Hydro |
 | Glacial Edict | 1 Skill | Apply Cryo to an enemy, and 1 Weak and 1 Vulnerable, plus 1 of each for every 4 [3] Cryo Oath. | Cryo |
 | Static Field | 1 Power | The first time each turn you apply Electro, draw 2 [3] cards. | Electro |
-| Barbara: Wellspring Hymn | 2 Skill, Hydro Knight | Gain 14 [18] Block. Apply Hydro to ALL enemies. | Hydro |
+| Barbara: Wellspring Hymn | 1 Skill, Hydro Knight | Remove your Weak, Frail and Vulnerable. Gain 7 [10] Block. Apply Hydro to an enemy. | Hydro |
 | Lisa: Pulsating Witch | 1 Skill, Electro Knight | Apply Electro to ALL enemies. Draw 1 card for each enemy. [Retain] | Electro |
-| Noelle: Steadfast Maid | 1 Skill, Geo Knight | Gain 10 [14] Block. | Muster; Block |
+| Noelle: Steadfast Maid | 1 Skill, Geo Knight | Gain 9 [12] Block. Draw 1 card. | Muster; Block |
 | Vow of the Blade | 1 Skill | Gain 1 Oath of your current element. Draw 1 [2] card(s). | Focus |
 | Unwavering Banner | 1 Power | Only Knights and cards that name it can change your current element. [Innate] | Focus |
 | Shifting Gale | 1 Attack | Deal 6 [8] damage. If your current element changed this turn, deal it twice. | Switch |
