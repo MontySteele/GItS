@@ -125,7 +125,8 @@ def _fresh_blindplay_deck(tmp_path_factory):
 #   * `_substituted_card_index` is EMPTY, which is the arms' own promise about
 #     a flag-off tree ("It is empty on every flag-off tree, which is every
 #     shipped tree") -- one memoized call, free;
-#   * `_prototype_upgrade_index` is empty, and ONLY IF IT IS ALREADY WARM.
+#   * `_prototype_upgrade_index` holds nothing but Varka's always-on
+#     `proto_vk_` rows, and ONLY IF IT IS ALREADY WARM.
 #     Building it walks the whole prototype surface (~100ms), so asking a cold
 #     one would put that on every test in the suite; a cold cache has leaked
 #     nothing by construction.
@@ -155,10 +156,15 @@ def _arm_residue():
         found.append("loader._substituted_card_index still holds "
                      f"{warm} -- it is empty on a flag-off tree")
     if upgrades._prototype_upgrade_index.cache_info().currsize:
-        rows = sorted(upgrades._prototype_upgrade_index())
+        # Varka's `proto_vk_` rows are always smithable (his rules have no
+        # switch, collapsed 2026-10-01), so they are not an arm's residue.
+        from tier0.engine import varka_oath
+        rows = sorted(r for r in upgrades._prototype_upgrade_index()
+                      if not r.startswith(varka_oath.ID_PREFIX))
         if rows:
             found.append("upgrades._prototype_upgrade_index still holds "
-                         f"{rows} -- it is empty on a flag-off tree")
+                         f"{rows} -- it holds only Varka's rows on a "
+                         "flag-off tree")
     return found
 
 
