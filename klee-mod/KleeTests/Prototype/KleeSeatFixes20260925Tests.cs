@@ -52,14 +52,15 @@ public class KleeSeatFixes20260925Tests
         var card = new ProtoKoSparksNSplash();
         Assert.Equal(CardRarity.Rare, card.Rarity);
         Assert.Equal(CardType.Power, card.Type);
-        Assert.Equal(2, card.EnergyCost.Canonical);
+        Assert.Equal(3, card.EnergyCost.Canonical);   // power cost sweep
         Assert.Equal(rule, Face(card));
         // The badge says the same thing in the same words.
         Assert.Equal(rule, new BombEchoPower().Localization!
             .First(r => r.Item1 == "description").Item2);
-        // Upgrade: cost 1.
-        Assert.Equal(1, Upgraded<ProtoKoSparksNSplash>().EnergyCost
-            .GetWithModifiers(CostModifiers.None));
+        // Upgrade (power cost sweep, 2026-09-30): Innate, cost unmoved.
+        var up = Upgraded<ProtoKoSparksNSplash>();
+        Assert.Contains(CardKeyword.Innate, up.Keywords);
+        Assert.Equal(3, up.EnergyCost.GetWithModifiers(CostModifiers.None));
     }
 
     [Fact]

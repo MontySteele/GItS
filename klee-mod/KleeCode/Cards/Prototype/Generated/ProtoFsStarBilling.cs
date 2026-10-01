@@ -45,13 +45,13 @@ public sealed class ProtoFsStarBilling : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Star Billing"),
-        ("description", "Whenever a Guest Star joins the stage, draw 2 cards."),
+        ("description", "Whenever a Guest Star joins the stage, draw {PowerAmount:diff()} cards."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoFsStarBilling : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<StarBillingPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<StarBillingPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

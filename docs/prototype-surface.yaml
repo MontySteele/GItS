@@ -239,9 +239,9 @@
 
 - {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash (proto)", character: klee,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
+   cost: 3, type: power, rarity: rare,
    description: "At the start of your turn, your largest [gold]Bomb[/gold] deals its size in [gold]Pyro[/gold] damage without going off.",
-   upgrade: {cost: -1},
+   upgrade: {innate: true},
    effects: [{op: apply_power, power: ko_bomb_echo, amount: 1, target: self}]}
 
 # --- React, the one that goes off twice (packet sec.4) ---
@@ -751,10 +751,10 @@
 
 - {id: proto_ko_dodoco, name: "Dodoco", character: klee,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, place a [gold]Mine[/gold] 4 on a random enemy.",
-   upgrade: {cost: -1},
-   effects: [{op: apply_power, power: ko_dodoco, amount: 4, target: self}]}
+   cost: 1, type: power, rarity: rare,
+   description: "At the start of your turn, place a [gold]Mine[/gold] 3 on a random enemy.",
+   upgrade: {power_amount: +2},
+   effects: [{op: apply_power, power: ko_dodoco, amount: 3, target: self}]}
 
 - {id: proto_ko_aftershock, name: "Aftershock", character: klee,
    authored_by: [claude],
@@ -780,9 +780,9 @@
 
 - {id: proto_ko_second_surprise, name: "Second Surprise", character: klee,
    authored_by: [claude],
-   cost: 1, type: power, rarity: rare,
+   cost: 0, type: power, rarity: rare,
    description: "Whenever one of your [gold]Mines[/gold] goes off, place a [gold]Bomb[/gold] half its size, rounded down, on that enemy.",
-   upgrade: {cost: -1},
+   upgrade: {innate: true},
    effects: [{op: apply_power, power: ko_second_surprise, amount: 1, target: self}]}
 
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
@@ -1215,14 +1215,14 @@
 # spent the morning it was meant to pay for. Now a Power, for the fight.
 - {id: proto_kk_nereids_ascension, name: "Nereid's Ascension (proto)", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
+   cost: 3, type: power, rarity: rare,
    # POOL PASS THREE (`EB-655`): THE FIRST PLAN, NOT EVERY PLAN. Doubling
    # every Plan paid for writing MORE, which is the shape the pass undoes.
    description: "At the start of your turn, the [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] twice. Your first [gold]Dusk[/gold] [gold]Plan[/gold] is doubled too.",
    effects: [{op: apply_power, power: kk_nereids_ascension, amount: 1, target: self}],
-   # Its price is two energy on a turn that writes no Plan; the upgrade buys
-   # that turn back rather than moving a number the card does not print.
-   upgrade: {cost: -1}}
+   # Power cost sweep, 2026-09-30: its price is three energy on a turn that
+   # writes no Plan; the upgrade makes it Innate, so that turn is turn one.
+   upgrade: {innate: true}}
 
 # --- the Priestess: Block through the jellyfish, Mend at Rare (packet sec.4) ---
 
@@ -1614,13 +1614,13 @@
 
 - {id: proto_kk_moon_signal, name: "Moon Signal", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
+   cost: 0, type: power, rarity: uncommon,
    # READ BEFORE THE MORNING'S PLANS ARE CARRIED OUT, or a drained queue could
    # never show two: `ProtoBakeKuragePower.AfterPlayerTurnStart` (sim:
    # `combat._player_turn`) asks it beside Song of Pearls' read.
    description: "At the start of your turn, if 2 or more [gold]Plans[/gold] are waiting, the [gold]Casket[/gold] gains 1.",
    effects: [{op: apply_power, power: kk_moon_signal, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   upgrade: {power_amount: +1}}
 
 - {id: proto_kk_pearl_current, name: "Pearl Current", character: kokomi,
    authored_by: [claude],
@@ -1739,14 +1739,16 @@
    # Main session, 2026-09-29: per Energy paid (the sim failed paper check 2).
    description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], the [gold]Casket[/gold] gains 1 more for each [gold]Energy[/gold] paid for it.",
    effects: [{op: apply_power, power: kk_grand_design, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   upgrade: {innate: true}}
 
 - {id: proto_kk_the_long_game, name: "The Long Game", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "At the start of your turn, if exactly one [gold]Plan[/gold] is waiting, gain 1 [gold]Energy[/gold].",
+   description: "At the start of your turn, if exactly one [gold]Plan[/gold] is waiting, gain 1 [gold]Energy[/gold]{IfUpgraded:show: and draw 1 card|}.",
    effects: [{op: apply_power, power: kk_the_long_game, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   # Power cost sweep, 2026-09-30: upgraded, the card installs the twin
+   # that also draws (`upgraded_power`).
+   upgrade: {upgraded_power: kk_the_long_game_plus}}
 
 - {id: proto_kk_masterstroke, name: "Masterstroke", character: kokomi,
    authored_by: [claude],
@@ -1892,10 +1894,10 @@
 
 - {id: proto_kk_kurage_swarm, name: "Kurage Swarm", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
+   cost: 1, type: power, rarity: rare,
    description: "Whenever you write a [gold]Plan[/gold] that costs 0, the [gold]Casket[/gold] gains 1.",
    effects: [{op: apply_power, power: kk_kurage_swarm, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   upgrade: {innate: true}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.
@@ -2513,10 +2515,10 @@
               target: self}]}
 
 - {id: proto_fs_five_century_act, name: "A Five-Century Act", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {power_amount: +2},
    authored_by: [claude],
    replaces: prima_donna,
-   register: salon, cost: 2, type: power, rarity: rare,
+   register: salon, cost: 3, type: power, rarity: rare,
    description: "The first time each turn a performer [gold]Bow[/gold]s and leaves, it returns at the back with 1 [gold]Fanfare[/gold] if a seat is free.",
    effects: [{op: apply_power, power: fs_five_century_act, amount: 1,
               target: self}]}
@@ -2610,10 +2612,10 @@
              {op: damage, amount: 7, target: enemy}]}
 
 - {id: proto_fs_revolving_stage, name: "Revolving Stage", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {innate: true},
    authored_by: [claude],
    replaces: grand_salon,
-   register: salon, cost: 1, type: power, rarity: uncommon,
+   register: salon, cost: 0, type: power, rarity: uncommon,
    description: "At the start of your turn, your [gold]back performer[/gold] moves to the front.",
    effects: [{op: apply_power, power: fs_revolving_stage, amount: 1,
               target: self}]}
@@ -2682,7 +2684,7 @@
    effects: [{op: stage_guest, member: escoffier, amount: 6}]}
 
 - {id: proto_fs_star_billing, name: "Star Billing", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {power_amount: +1},
    authored_by: [claude],
    replaces: supporting_cast,
    register: salon, cost: 1, type: power, rarity: uncommon,
@@ -2819,10 +2821,10 @@
               then: [{op: stage_raise, amount: 2, seat: all}]}]}
 
 - {id: proto_fs_regina_of_all_waters, name: "Regina of All Waters", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {innate: true},
    authored_by: [claude],
    replaces: the_sea_is_my_stage,
-   register: salon, cost: 2, type: power, rarity: rare,
+   register: salon, cost: 1, type: power, rarity: rare,
    description: "At the start of your turn, apply [gold]Hydro[/gold] to ALL enemies.",
    effects: [{op: apply_power, power: fs_regina_of_all_waters, amount: 1,
               target: self}]}
@@ -2854,8 +2856,8 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    replaces: star_of_the_show,
-   register: salon, cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, if no one is on stage, gain 1 [gold]Energy[/gold] and draw 1 card.",
+   register: salon, cost: 3, type: power, rarity: rare,
+   description: "At the start of your turn, if no one is on stage, gain 1 [gold]Energy[/gold] and draw 2 cards.",
    effects: [{op: apply_power, power: fs_one_woman_show, amount: 1,
               target: self}]}
 
@@ -2963,9 +2965,9 @@
 
 - {id: proto_fs_the_crowd_roars, name: "The Crowd Roars", character: furina,
    authored_by: [claude], multiplayer: true,
-   register: salon, cost: 2, type: power, rarity: rare,
+   register: salon, cost: 1, type: power, rarity: rare,
    description: "Whenever another player loses HP, your [gold]front performer[/gold] gains 1 [gold]Fanfare[/gold].",
-   upgrade: {cost: -1},
+   upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: fs_the_crowd_roars, amount: 1, target: self}]}
 
 # --- Kokomi (KokomiOverhaulRoster.MultiplayerSlice) ---
@@ -3250,14 +3252,14 @@
    cost: 1, type: power, rarity: uncommon,
    description: "While your [gold]current element[/gold] has 4 or more [gold]Oath[/gold], your Anemo Attacks deal 3 additional damage.",
    effects: [{op: apply_power, power: vk_stormward_stance, amount: 3, target: self}],
-   upgrade: {cost: -1}}
+   upgrade: {power_amount: +2}}
 
 - {id: proto_vk_oath_of_the_knights, name: "Oath of the Knights", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    description: "At the start of your turn, gain [gold]Block[/gold] equal to your [gold]current element[/gold]'s [gold]Oath[/gold].",
    effects: [{op: apply_power, power: vk_oath_of_the_knights, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   upgrade: {innate: true}}
 
 - {id: proto_vk_rally_to_the_banner, name: "Rally to the Banner", character: varka,
    authored_by: [claude],
@@ -3342,10 +3344,10 @@
 
 - {id: proto_vk_boreas_unbound, name: "Boreas Unbound", character: varka,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
+   cost: 3, type: power, rarity: rare,
    description: "Whenever your [gold]current element[/gold] changes, gain 1 [gold]Energy[/gold].",
    effects: [{op: apply_power, power: vk_boreas_unbound, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   upgrade: {innate: true}}
 
 - {id: proto_vk_wall_of_gales, name: "Wall of Gales", character: varka,
    authored_by: [claude],
@@ -3364,10 +3366,12 @@
 
 - {id: proto_vk_sworn_brotherhood, name: "Sworn Brotherhood", character: varka,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, gain 1 [gold]Oath[/gold] of every element.",
-   effects: [{op: apply_power, power: vk_sworn_brotherhood, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   cost: 1, type: power, rarity: rare,
+   description: "At the start of your turn, gain 1 [gold]Oath[/gold] of {IfUpgraded:show:every element|your [gold]current element[/gold]}.",
+   effects: [{op: apply_power, power: vk_sworn_brotherhood_current, amount: 1, target: self}],
+   # Power cost sweep, 2026-09-30: upgraded, the card installs the
+   # every-element power (`upgraded_power`).
+   upgrade: {upgraded_power: vk_sworn_brotherhood}}
 
 - {id: proto_vk_northwind_avatar, name: "Northwind Avatar", character: varka,
    authored_by: [claude],

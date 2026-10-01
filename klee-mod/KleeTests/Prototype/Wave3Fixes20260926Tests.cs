@@ -68,13 +68,17 @@ public class Wave3Fixes20260926Tests
     [Fact]
     public void A_five_century_act_says_it_returns_only_to_a_free_seat()
     {
-        // 2026-09-27: once a turn.
-        const string face =
+        // 2026-09-27: once a turn. Power cost sweep, 2026-09-30: the
+        // Fanfare is the Act's amount (1, or 3 upgraded), so both faces print
+        // a var where the literal 1 stood.
+        const string head =
             "The first time each turn a performer [gold]Bow[/gold]s and "
-          + "leaves, it returns at the back with 1 [gold]Fanfare[/gold] if a "
-          + "seat is free.";
-        Assert.Equal(face, Description(new ProtoFsFiveCenturyAct().Localization));
-        Assert.Equal(face, Description(new FiveCenturyActPower().Localization));
+          + "leaves, it returns at the back with ";
+        const string tail = " [gold]Fanfare[/gold] if a seat is free.";
+        Assert.Equal(head + "{PowerAmount:diff()}" + tail,
+                     Description(new ProtoFsFiveCenturyAct().Localization));
+        Assert.Equal(head + "[blue]{Amount}[/blue]" + tail,
+                     Description(new FiveCenturyActPower().Localization));
     }
 
     // ---- 3. The Ancient's Elemental Skill keyword under the Klee arm -------

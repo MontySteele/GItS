@@ -816,7 +816,7 @@
       "remove": "exhaust"
     },
     "proto_fs_five_century_act": {
-      "cost": -1
+      "power_amount": 2
     },
     "proto_fs_full_house": {
       "cost": -1
@@ -919,10 +919,10 @@
       "power_amount": 1
     },
     "proto_fs_regina_of_all_waters": {
-      "cost": -1
+      "innate": true
     },
     "proto_fs_revolving_stage": {
-      "cost": -1
+      "innate": true
     },
     "proto_fs_salon_debut": {
       "cost": -1
@@ -953,7 +953,7 @@
       "cost": -1
     },
     "proto_fs_star_billing": {
-      "cost": -1
+      "power_amount": 1
     },
     "proto_fs_step_forward": {
       "block": 2
@@ -962,7 +962,7 @@
       "cost": -1
     },
     "proto_fs_the_crowd_roars": {
-      "cost": -1
+      "power_amount": 1
     },
     "proto_fs_thunderous_applause": {
       "power_amount": 1
@@ -1056,7 +1056,7 @@
       "plan_damage": 3
     },
     "proto_kk_grand_design": {
-      "cost": -1
+      "innate": true
     },
     "proto_kk_jellyfish_drift": {
       "plan_damage": 1
@@ -1065,7 +1065,7 @@
       "block": 3
     },
     "proto_kk_kurage_swarm": {
-      "cost": -1
+      "innate": true
     },
     "proto_kk_kurages_oath": {
       "block": 2,
@@ -1084,13 +1084,13 @@
       "block": 3
     },
     "proto_kk_moon_signal": {
-      "cost": -1
+      "power_amount": 1
     },
     "proto_kk_moons_reflection": {
       "cost": -1
     },
     "proto_kk_nereids_ascension": {
-      "cost": -1
+      "innate": true
     },
     "proto_kk_nip": {
       "plan_damage": 2
@@ -1173,7 +1173,7 @@
       "innate": true
     },
     "proto_kk_the_long_game": {
-      "cost": -1
+      "upgraded_power": "kk_the_long_game_plus"
     },
     "proto_kk_the_moon_a_ship": {
       "block": 4,
@@ -1303,7 +1303,7 @@
       "block": 3
     },
     "proto_ko_dodoco": {
-      "cost": -1
+      "power_amount": 2
     },
     "proto_ko_dodoco_cover": {
       "bomb_size": 2,
@@ -1424,7 +1424,7 @@
       "block": 3
     },
     "proto_ko_second_surprise": {
-      "cost": -1
+      "innate": true
     },
     "proto_ko_secret_base": {
       "power_amount": 2
@@ -1452,7 +1452,7 @@
       "innate": true
     },
     "proto_ko_sparks_n_splash": {
-      "cost": -1
+      "innate": true
     },
     "proto_ko_spinning_sparkler": {
       "damage": 1,
@@ -1765,7 +1765,7 @@
       "block_next_turn": 2
     },
     "proto_vk_boreas_unbound": {
-      "cost": -1
+      "innate": true
     },
     "proto_vk_change_of_guard": {
       "cost": -1
@@ -1841,7 +1841,7 @@
       "varka_base": 4
     },
     "proto_vk_oath_of_the_knights": {
-      "cost": -1
+      "innate": true
     },
     "proto_vk_oathsworn_strike": {
       "formula_base": 3
@@ -1862,10 +1862,10 @@
       "damage": 2
     },
     "proto_vk_stormward_stance": {
-      "cost": -1
+      "power_amount": 2
     },
     "proto_vk_sworn_brotherhood": {
-      "cost": -1
+      "upgraded_power": "vk_sworn_brotherhood"
     },
     "proto_vk_tailwind_guard": {
       "formula_per": 1

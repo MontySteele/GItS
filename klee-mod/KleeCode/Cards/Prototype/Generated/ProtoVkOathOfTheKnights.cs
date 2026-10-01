@@ -68,6 +68,6 @@ public sealed class ProtoVkOathOfTheKnights : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        AddKeyword(CardKeyword.Innate);
     }
 }

@@ -109,7 +109,7 @@ def _events(st, name):
 #: renames made for title clashes (Showstopper, Undertow).
 TABLE = {
     "plot_twist": ("Plot Twist", "common", 1, "attack"),
-    "revolving_stage": ("Revolving Stage", "uncommon", 1, "power"),
+    "revolving_stage": ("Revolving Stage", "uncommon", 0, "power"),
     "oratrices_verdict": ("Oratrice's Verdict", "uncommon", 0, "skill"),
     "guest_star_lyney": ("Guest Star: Lyney", "rare", 1, "skill"),
     "stage_whisper": ("Stage Whisper", "common", 1, "skill"),
@@ -128,10 +128,10 @@ TABLE = {
     "groundswell": ("Groundswell", "uncommon", 1, "attack"),
     "tide_of_applause": ("Tide of Applause", "uncommon", 1, "power"),
     "grand_deluge": ("Grand Deluge", "rare", 2, "attack"),
-    "regina_of_all_waters": ("Regina of All Waters", "rare", 2, "power"),
+    "regina_of_all_waters": ("Regina of All Waters", "rare", 1, "power"),
     "solo_verse": ("Solo Verse", "common", 1, "attack"),
     "soliloquy": ("Soliloquy", "uncommon", 1, "power"),
-    "one_woman_show": ("One-Woman Show", "rare", 2, "power"),
+    "one_woman_show": ("One-Woman Show", "rare", 3, "power"),
     "dual_nature": ("Dual Nature", "uncommon", 1, "skill"),
 }
 
@@ -626,7 +626,7 @@ def test_one_woman_show_pays_only_on_an_empty_stage_and_before_tickets(arm):
     _power(st, FS.SEASON_TICKETS, 2)
     FS.turn_start_powers(st)
     assert st.player.energy == 4
-    assert len(st.player.hand) == 1
+    assert len(st.player.hand) == 2     # power cost sweep 2026-09-30: draw 2
     # Season Tickets then summoned onto the stage the show found empty.
     assert len(st.player.stage) == 1
     st = _state([["usher", 3]], deck=5)
