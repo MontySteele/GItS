@@ -2095,13 +2095,13 @@ def cancel_last_plan(state: CombatState) -> None:
     pile at the end of the play -- so the discard pile is where the card that
     wrote a queued Plan is, on the ordinary path.
 
-    AND ON THE PATHS THAT ARE NOT ORDINARY, NOTHING RETURNS. A Plan written by
-    Moon's Reflection off a card in the EXHAUST pile has a `card_id` that is
-    not in the discard pile, and an Exhaust row's own card is not there either.
-    The Plan is still cancelled and the Energy is still not paid, because what
-    the face promises is the card and the card is not there to promise. It is
-    a printed no-op of the kind this arm already has several of, not a search
-    of every pile for something that looks similar.
+    A CANCEL IS AN UNDO, AN EXHAUST CARD TOO (main session, 2026-10-01, after
+    a co-op Vanguard cancelled by Second Thoughts silently vanished): Exhaust
+    applies when the card is played or its Plan carried out, not when it is
+    cancelled, so `_give_back` looks in the exhaust pile as well. A Moon's
+    Reflection Plan's `card_id` is Moon's Reflection, so that is what comes
+    back. Only a card in none of those piles returns nothing, and then no
+    Energy is paid.
 
     THE ENERGY IS THE RETURNED CARD'S CURRENT COST, read off the card that is
     coming back -- a smithed copy that cost 0 refunds 0, which is what "its
@@ -2111,28 +2111,45 @@ def cancel_last_plan(state: CombatState) -> None:
     AN EMPTY QUEUE IS A PRINTED NO-OP with a line on the ledger, the shape
     `resolve_front` already has.
     """
-    from tier0.engine.state import remove_instance
-
     if not live(state):
         return
     if not state.kk_plan_queue:
         state.emit("plan_cancel_last_empty")
         return
     entry = state.kk_plan_queue.pop()
-    card = next((c for c in state.player.discard_pile
-                 if c.id == entry.card_id), None)
+    card = _give_back(state, entry.card_id)
     if card is None:
         state.emit("plan_cancel_last", card=entry.card_id, returned=False,
                    energy=0)
         return
-    remove_instance(state.player.discard_pile, card)
-    state.player.hand.append(card)
     refund = max(0, int(card.cost))
     state.player.energy += refund
     if refund:
         state.emit("energy", amount=refund)
     state.emit("plan_cancel_last", card=entry.card_id, returned=True,
                energy=refund)
+
+
+#: Where `_give_back` looks, in order: the ordinary play, an Exhaust card, a
+#: reshuffle since. `KokomiPlan.ReturnPiles` is the twin.
+RETURN_PILES = ("discard_pile", "exhaust_pile", "draw_pile")
+
+
+def _give_back(state: CombatState, card_id: str) -> Optional[Card]:
+    """A CANCELLED PLAN'S CARD COMES BACK (main session, 2026-10-01: a cancel
+    is an undo). The newest copy with the writing card's id, searched in
+    `RETURN_PILES` order, moves to the hand; None when there is none.
+    `KokomiPlan.GiveBack` is the twin."""
+    from tier0.engine.state import remove_instance
+
+    for name in RETURN_PILES:
+        pile = getattr(state.player, name)
+        card = next((c for c in reversed(pile) if c.id == card_id), None)
+        if card is not None:
+            remove_instance(pile, card)
+            state.player.hand.append(card)
+            return card
+    return None
 
 
 def cancel_all_plans_cash(state: CombatState) -> None:
@@ -2500,18 +2517,22 @@ def tidal_riposte(state: CombatState, enemy: Enemy, blocked: int,
 def all_streams(state: CombatState) -> None:
     """ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans and regain their
     cost. Your next Plan this turn is carried out once more for each Plan
-    cancelled." The refund is the Energy actually paid for each Plan. A written card already sits
-    in the discard pile (or the exhaust pile, for an Exhaust row), so the
-    cancel moves nothing; the gift waits on the state for the next card
-    written on the Bake-Kurage this turn (`schedule`).
-    `KokomiPlan.CancelAllForNext` is the twin."""
+    cancelled." The refund is the Energy actually paid for each Plan. A
+    CANCEL IS AN UNDO (main session, 2026-10-01): every cancelled Plan's card
+    returns to the hand, an Exhaust card too (`_give_back`). No loop: All
+    Streams Exhausts, so the cards come back once per copy. The gift waits on
+    the state for the next card written on the Bake-Kurage this turn
+    (`schedule`). `KokomiPlan.CancelAllForNext` is the twin."""
     if not live(state):
         return
     n = len(state.kk_plan_queue)
     # Main session, 2026-09-29: "regain their cost" -- the Energy actually
     # paid for each, Second Thoughts' refund.
     refund = sum(max(0, int(e.paid)) for e in state.kk_plan_queue)
+    back = list(state.kk_plan_queue)
     state.kk_plan_queue.clear()
+    for entry in back:
+        _give_back(state, entry.card_id)
     if refund:
         state.player.energy += refund
         state.emit("energy", amount=refund)

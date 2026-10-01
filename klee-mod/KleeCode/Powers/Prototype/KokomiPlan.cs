@@ -329,11 +329,20 @@ public static class KokomiPlan
     /// <param name="Extra">All Streams Flow to the Sea's gift: this entry is
     /// carried out once plus this many more times. Sim twin:
     /// `PlanEntry.extra`.</param>
+    /// <param name="Writer">The card a cancel gives back (Kokomi follow-ups,
+    /// 2026-10-01), where it is not <paramref name="Source"/>: Moon's
+    /// Reflection writes its Plan under the card it FOUND, which stays in the
+    /// exhaust pile, and what cancelling that Plan undoes is Moon's
+    /// Reflection. Sim twin: `PlanEntry.card_id`, which is already the
+    /// writing card.</param>
     public sealed record Entry(CardModel? Source, IReadOnlyList<Planned> Clauses,
                               string? Label = null, bool Dusk = false,
                               string? AimOverride = null, int Paid = 0,
-                              int Extra = 0)
+                              int Extra = 0, CardModel? Writer = null)
     {
+        /// <summary>The card a cancel returns to the hand.</summary>
+        public CardModel? Returns => Writer ?? Source;
+
         /// <summary>What the strip prints for this Plan.
         ///
         /// <paramref name="Label"/> WINS WHERE ONE IS SET, and only a Plan
@@ -757,11 +766,13 @@ public static class KokomiPlan
     /// <summary>
     /// ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans and regain their
     /// cost. Your next Plan this turn is carried out once more for each Plan
-    /// cancelled." The refund is the Energy actually paid for each. A written card is a
-    /// played card, so it already sits in the discard pile (or the exhaust
-    /// pile, for an Exhaust row) and nothing is moved. The gift waits on the
-    /// ledger for the next card written on the Bake-Kurage this turn
-    /// (<see cref="Schedule"/>). Sim twin: `kokomi_plan.all_streams`.
+    /// cancelled." The refund is the Energy actually paid for each. A
+    /// CANCEL IS AN UNDO (main session, 2026-10-01): every cancelled Plan's
+    /// card returns to the hand, an Exhaust card too (<see cref="GiveBack"/>).
+    /// No loop: All Streams Exhausts, so the cards come back once per copy.
+    /// The gift waits on the ledger for the next card written on the
+    /// Bake-Kurage this turn (<see cref="Schedule"/>). Sim twin:
+    /// `kokomi_plan.all_streams`.
     /// </summary>
     public static async Task CancelAllForNext(
         PlayerChoiceContext choiceContext, Creature? kokomi)
@@ -778,9 +789,14 @@ public static class KokomiPlan
             // Main session, 2026-09-29: "regain their cost" -- the Energy
             // actually paid for each (Second Thoughts' refund).
             refund = queue.Sum(e => System.Math.Max(0, e.Paid));
+            var back = queue.ToList();
             queue.Clear();
             await Sync(choiceContext, kokomi, "rule:plans_cancelled",
                        cancelled);
+            foreach (var entry in back)
+            {
+                await GiveBack(player, entry.Returns);
+            }
         }
         if (refund > 0) await PlayerCmd.GainEnergy(refund, player);
         KokomiOverhaulLedger.For(kokomi).NextPlanExtra = cancelled;
@@ -959,7 +975,8 @@ public static class KokomiPlan
     /// kept on the entry as <see cref="Entry.Paid"/>.</param>
     public static async Task Schedule(
         PlayerChoiceContext choiceContext, Creature? kokomi, CardModel? source,
-        IReadOnlyList<Planned> clauses, bool dusk = false, int paid = 0)
+        IReadOnlyList<Planned> clauses, bool dusk = false, int paid = 0,
+        CardModel? writer = null)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         var player = kokomi!.Player;
@@ -1090,7 +1107,8 @@ public static class KokomiPlan
         var extra = ledger.NextPlanExtra ?? 0;
         ledger.NextPlanExtra = null;
         var entry = new Entry(source, body, label, dusk,
-                              Paid: System.Math.Max(0, paid), Extra: extra);
+                              Paid: System.Math.Max(0, paid), Extra: extra,
+                              Writer: writer);
         int before = queue.Count;
         queue.Add(entry);
         // KURAGE SWARM: "Whenever you write a Plan that costs 0, the Casket
@@ -1139,7 +1157,10 @@ public static class KokomiPlan
         var clauses = pick is IPlannedCard { PlanClauses.Count: > 0 } planned
             ? planned.PlanClauses
             : new[] { new Planned(Kind.ReplayExhausted, 1, Aim.Self, pick) };
-        await Schedule(choiceContext, owner.Creature, pick, clauses);
+        // THE WRITER IS MOON'S REFLECTION, so a cancel gives back the card
+        // that was played and never the one it found in the exhaust pile.
+        await Schedule(choiceContext, owner.Creature, pick, clauses,
+                       writer: source);
     }
 
     /// <summary>
@@ -1308,13 +1329,18 @@ public static class KokomiPlan
         // THE MORNING WINDOW (co-op playtest 2026-09-30): a Plan hit inside it
         // spares its aura this turn start's tick (<see cref="Hit"/>). Per
         // player, opened and closed around the drain and on every path.
+        // Kokomi follow-ups (2026-10-01): the window is also open for every
+        // other door an aura is touched through, so a card Moon's Reflection
+        // replays (<see cref="Replay"/>) keeps its Hydro whole too.
         _morning.Add(player);
+        AuraPower.MorningWindow++;
         try
         {
             await Drain(choiceContext, kokomi, due);
         }
         finally
         {
+            AuraPower.MorningWindow--;
             _morning.Remove(player);
             // `EB-453`: WHAT THE FIGHT CUT OFF, recorded before the display
             // list that holds it is torn down. On the ordinary path this loop
@@ -1593,13 +1619,14 @@ public static class KokomiPlan
     /// card is, on the ordinary path -- so the move is a real pile-to-pile
     /// move of that instance rather than a new copy.
     ///
-    /// AND ON THE PATHS THAT ARE NOT ORDINARY, NOTHING RETURNS. A Plan written
-    /// by Moon's Reflection off a card in the EXHAUST pile has a source that
-    /// is not in the discard pile, and an Exhaust row's own card is not there
-    /// either. The Plan is still cancelled and no Energy is paid, because what
-    /// the face promises is the card and the card is not there to promise. It
-    /// is a printed no-op of the kind this arm already has several of, not a
-    /// search of every pile for something that looks similar.
+    /// A CANCEL IS AN UNDO, AN EXHAUST CARD TOO (main session, 2026-10-01,
+    /// after a co-op Vanguard cancelled by Second Thoughts silently vanished):
+    /// Exhaust applies when the card is played or its Plan carried out, not
+    /// when it is cancelled, so <see cref="GiveBack"/> takes the card out of
+    /// the exhaust pile as well. A Moon's Reflection Plan gives back Moon's
+    /// Reflection (<see cref="Entry.Writer"/>). Only a card that is in none of
+    /// those piles (already back in the hand, or gone) returns nothing, and
+    /// then no Energy is paid.
     ///
     /// THE ENERGY IS THE RETURNED CARD'S CURRENT COST, read off the card that
     /// is coming back -- a smithed copy that costs 0 refunds 0, which is what
@@ -1631,18 +1658,8 @@ public static class KokomiPlan
         Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi,
                            CancelledLine(last.Title));
 
-        var card = last.Source;
-        var discard = CardPile.Get(PileType.Discard, player);
-        if (card == null || discard == null || !discard.Cards.Contains(card))
-        {
-            return;
-        }
-        // `CardPileCmd.Add` IS THE MOVE, which is the door <see cref="Replay"/>
-        // one method down already takes a card out of the exhaust pile with:
-        // the game's own pile command removes it from wherever it is. TOP of
-        // the hand, so the card the player just took back is the one they are
-        // looking at.
-        await CardPileCmd.Add(card, PileType.Hand, CardPilePosition.Top);
+        var card = last.Returns;
+        if (card == null || !await GiveBack(player, card)) return;
         // THE RESOLVED COST, which is the number the player would have to pay
         // to play the card again -- `EnergyCost.GetResolved()` is the game's
         // own read and it is what a mid-combat discount or a smith has already
@@ -1650,6 +1667,35 @@ public static class KokomiPlan
         var cost = card.EnergyCost.GetResolved();
         if (cost > 0) await PlayerCmd.GainEnergy(cost, player);
     }
+
+    /// <summary>
+    /// A CANCELLED PLAN'S CARD COMES BACK (main session, 2026-10-01: a cancel
+    /// is an undo). The piles a written card can be in by now are searched --
+    /// discard (the ordinary play), exhaust (an Exhaust card) and draw (a
+    /// reshuffle since) -- and the card moves to the TOP of the hand.
+    /// `CardPileCmd.Add` IS THE MOVE, the door <see cref="Replay"/> takes a
+    /// card out of the exhaust pile with: the game's own pile command removes
+    /// it from wherever it is. False when the card is in none of them. Sim
+    /// twin: `kokomi_plan._give_back`.
+    /// </summary>
+    internal static async Task<bool> GiveBack(Player player, CardModel? card)
+    {
+        if (card == null) return false;
+        foreach (var type in ReturnPiles)
+        {
+            var pile = CardPile.Get(type, player);
+            if (pile == null || !pile.Cards.Contains(card)) continue;
+            await CardPileCmd.Add(card, PileType.Hand, CardPilePosition.Top);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>Where <see cref="GiveBack"/> looks, in order.</summary>
+    internal static readonly PileType[] ReturnPiles =
+    {
+        PileType.Discard, PileType.Exhaust, PileType.Draw,
+    };
 
     /// <summary>
     /// EBB TIDE (`EB-643`): "cancel every Plan you have queued; gain 1 Energy

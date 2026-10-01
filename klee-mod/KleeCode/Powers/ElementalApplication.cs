@@ -444,6 +444,7 @@ public static class AuraCmd
             default:
                 break;   // None / Anemo / Geo: nothing sticks.
         }
+        AuraPower.NoteTouched(Find(target));
     }
 
     /// <summary>
@@ -458,5 +459,6 @@ public static class AuraCmd
             choiceContext, aura,
             Duration(applier) - aura.Amount,
             applier: applier, cardSource: cardSource, silent: true);
+        AuraPower.NoteTouched(aura);
     }
 }

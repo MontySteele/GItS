@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import inspect
 
+import yaml
+
 from tier0.content import loader, upgrades
 from tier0.engine import combat, kokomi_plan, reactions
 from tier0.tests.conftest import make_enemy
@@ -60,10 +62,21 @@ def test_riptide_and_vanguard_plans_pay_three_energy(overhaul):
     assert len(st.player.hand) == 2
 
 
+QUIET = [{"kind": "block", "amount": 5}]
+
+
+def _write(st, cid, energy=10):
+    """Play a card onto the Bake-Kurage through the real play path."""
+    card = _row(cid)
+    st.player.energy = energy
+    st.player.hand.append(card)
+    combat.play_card(st, card)
+    return card
+
+
 def test_second_thoughts_after_both_cancels_vanguard(overhaul):
     """The playtest's turn: Riptide, Vanguard, Second Thoughts. Vanguard is
-    the last Plan, and it Exhausts, so no card comes back -- the morning pays
-    Riptide's 2 Energy alone."""
+    the last Plan; the morning pays Riptide's 2 Energy alone."""
     st = kokomi_state(enemies=[make_enemy(hp=60)])
     _deck(st)
     kokomi_plan.schedule(st, _row("proto_kk_riptide"))
@@ -73,6 +86,48 @@ def test_second_thoughts_after_both_cancels_vanguard(overhaul):
     st.player.energy = 0
     kokomi_plan.resolve_all(st)
     assert st.player.energy == 2
+
+
+# --- Kokomi follow-ups, 2026-10-01: a cancel is an undo ---------------------
+
+def test_a_cancelled_exhaust_plan_comes_back_to_the_hand(overhaul):
+    """Main session: "Exhaust applies when the card is played normally or
+    its Plan is carried out, not when it is cancelled." Vanguard (0, Exhaust)
+    written for real sits in the exhaust pile; Second Thoughts brings it back."""
+    st = kokomi_state(enemies=[make_enemy(hp=60, intents=QUIET)])
+    _deck(st)
+    vanguard = _write(st, "proto_kk_vanguard")
+    assert [e.card_id for e in st.kk_plan_queue] == ["proto_kk_vanguard"]
+    assert vanguard in st.player.exhaust_pile
+    kokomi_plan.cancel_last_plan(st)
+    assert st.kk_plan_queue == []
+    assert vanguard in st.player.hand
+    assert vanguard not in st.player.exhaust_pile
+
+
+def test_all_streams_gives_every_card_back_exhaust_too(overhaul):
+    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
+    _deck(st)
+    vanguard = _write(st, "proto_kk_vanguard")
+    riptide = _write(st, "proto_kk_riptide")
+    assert len(st.kk_plan_queue) == 2
+    kokomi_plan.all_streams(st)
+    assert st.kk_plan_queue == []
+    assert vanguard in st.player.hand and riptide in st.player.hand
+    assert vanguard not in st.player.exhaust_pile
+    assert riptide not in st.player.discard_pile
+    assert st.kk_next_plan_extra == 2
+
+
+def test_the_cancel_rows_say_the_card_comes_back(overhaul):
+    rows = {r["id"]: r for r in yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8"))}
+    assert "returns to your hand" in rows["proto_kk_second_thoughts"][
+        "description"]
+    assert "taking back their cards" in rows[
+        "proto_kk_all_streams_flow_to_the_sea"]["description"]
+    assert _row("proto_kk_all_streams_flow_to_the_sea").exhaust
+    assert _row("proto_kk_second_thoughts").exhaust
 
 
 def test_riptide_draws_two_and_three_upgraded(overhaul):

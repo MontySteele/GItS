@@ -252,7 +252,7 @@ public class Round24Tests
         for (var i = 0; i < clauses.Length; i++) list.SetValue(clauses[i], i);
         return Activator.CreateInstance(
             typeof(KokomiPlan).GetNestedType("Entry", All)!,
-            null, list, null, false, over, 0, 0)!;
+            null, list, null, false, over, 0, 0, null)!;
     }
 
     private static int WrittenFrontDamage(params object[] clauses) =>
