@@ -456,6 +456,11 @@ UNMIRRORED: dict[str, str] = {
     "GuestBook.Bonus": _ARM_ITEMS_REASON,
     "OperaGlasses.OpeningFanfare": _ARM_ITEMS_REASON,
     "StagehandsGloves.Block": _ARM_ITEMS_REASON,
+    "WatatsumiCasket.WatatsumiOpeningCount":
+        "THE KOKOMI OVERHAUL'S TOUCH OF OROBAS UPGRADE (2026-09-30, main-"
+        "session design from the co-op playtest). A Prototype-stage relic "
+        "number built C# first; tier05 has no Orobas row for the arm, and "
+        "the sim twin lands at Balance.",
     "ShrapnelPower.Shred":
         "THE CO-OP SET, SECOND BATCH (review/active/coop-concepts-2026-09-27.md). "
         "Shrapnel's printed '50% more': the multiplier another player's Attack "

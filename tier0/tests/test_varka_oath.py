@@ -430,6 +430,7 @@ def test_the_fang_adds_ascension_on_the_first_gain_once(varka):
     st = _state()
     _play(st, _vk("amber_fiery_rain"))
     assert _hand_ids(st) == [V.ASCENSION_ID]
+    assert st.player.hand[0].free_this_turn is False     # the Fang's is not
     _play(st, _vk("kaeya_glacial_waltz"))
     assert _hand_ids(st).count(V.ASCENSION_ID) == 1
     V.open_combat(st.player)                            # the next fight
@@ -439,6 +440,10 @@ def test_the_fang_adds_ascension_on_the_first_gain_once(varka):
 def test_the_upgraded_fang_adds_it_upgraded_and_a_full_hand_discards(varka):
     st = _state(fang_upgraded=True)
     V.gain(st, "cryo", 1)
+    assert _hand_ids(st) == [V.ASCENSION_ID + "+"]
+    # Wolf's Gravestone: "It costs 0 this turn", and only the first gain.
+    assert st.player.hand[0].free_this_turn is True
+    V.gain(st, "hydro", 1)
     assert _hand_ids(st) == [V.ASCENSION_ID + "+"]
     st = _state()
     st.player.hand = [loader.get_card("strike")

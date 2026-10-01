@@ -230,6 +230,9 @@ def gain(state, element: str, n: int = 1, source: str = "gain") -> None:
 def _add_ascension(state, upgraded: bool) -> None:
     from tier0.content import loader                # late: cycle
     card = loader.get_card(ASCENSION_ID + ("+" if upgraded else ""))
+    # Wolf's Gravestone (the Fang upgraded, 2026-09-30): "It costs 0 this
+    # turn." `BoreasFang.AddAscension`'s `SetThisTurn(0)` is the twin.
+    card.free_this_turn = upgraded
     p = state.player
     if len(p.hand) < C.MAX_HAND_SIZE:
         p.hand.append(card)
