@@ -64,14 +64,16 @@ public class KokomiExpansionTests : IDisposable
     // ---- the offer -------------------------------------------------------
 
     [Fact]
-    public void The_offer_is_sixty_nine_ending_with_the_batch()
+    public void The_offer_is_seventy_with_the_batch_before_the_payoff_pass()
     {
         var slice = Seq("KokomiOverhaulRoster", "Slice")
             .Where(c => c.StartsWith("ModelDb.Card", StringComparison.Ordinal))
             .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
             .ToList();
-        Assert.Equal(69, slice.Count);
-        Assert.Equal(Batch, slice.Skip(47).ToArray());
+        // SEVENTY since the payoff pass (2026-10-01): Second Thoughts cut
+        // ahead of the batch, two rows after it.
+        Assert.Equal(70, slice.Count);
+        Assert.Equal(Batch, slice.Skip(46).Take(22).ToArray());
         Assert.DoesNotContain(slice, c => c.Contains("CloudsLikeWaves"));
         Assert.Null(typeof(KokomiOverhaulKit).Assembly
             .GetType("KleeMod.Powers.CloudsLikeWavesPower"));

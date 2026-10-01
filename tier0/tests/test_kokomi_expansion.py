@@ -67,7 +67,8 @@ def test_the_batch_is_twelve_uncommon_and_ten_rare_last_in_the_pool(overhaul):
     rarities = [_row(cid).rarity for cid in NEW]
     assert rarities.count("uncommon") == 12
     assert rarities.count("rare") == 10
-    assert C.KOKOMI_OVERHAUL_POOL_IDS[-22:] == NEW
+    # The payoff pass (2026-10-01) appended two rows after the batch.
+    assert C.KOKOMI_OVERHAUL_POOL_IDS[-24:-2] == NEW
     assert "proto_kk_the_clouds_like_waves" not in C.KOKOMI_OVERHAUL_POOL_IDS
     assert "proto_kk_the_clouds_like_waves" not in {
         c.id for c in loader.prototype_cards()}

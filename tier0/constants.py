@@ -922,8 +922,17 @@ KOKOMI_EXPANSION_BATCH_ONE_IDS: tuple[str, ...] = (
     "proto_kk_kurage_swarm",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SIXTY-NINE rows since
-# expansion batch one (2026-09-29: one cut, 22 added), in the packet's own order
+# THE PAYOFF PASS (2026-10-01, [USER]: "Sounds good! Please proceed!"): two
+# Uncommons that pay for Plan volume in something other than damage, appended
+# LAST to `KOKOMI_OVERHAUL_POOL_IDS`; Second Thoughts left the pool.
+KOKOMI_PAYOFF_PASS_IDS: tuple[str, ...] = (
+    "proto_kk_kurage_canopy",
+    "proto_kk_coral_tithe",
+)
+
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SEVENTY rows since the
+# payoff pass (2026-10-01: Second Thoughts cut, two added; expansion batch one,
+# 2026-09-29, made it 69), in the packet's own order
 # -- the Tactician, the
 # Priestess, the Commander, then the currencies, the one replay, the tempo
 # shelf and the pool pass. `EB-335` filed R246 pick 2's defensive pair with the
@@ -1011,9 +1020,10 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # no op of its own, so nothing stays registered behind it. FOUR SINCE THE
     # CLEANUP PASS (2026-09-29): Scout Ahead was cut, and its
     # `draw_per_plan_after` op stays registered with nothing spelling it.
+    # THREE SINCE THE PAYOFF PASS (2026-10-01): Second Thoughts was cut, and
+    # its `cancel_last_plan` op stays registered with nothing spelling it.
     "proto_kk_opening_gambit",
     "proto_kk_second_wave",
-    "proto_kk_second_thoughts",
     "proto_kk_breakwater",
     # THE CASKET PASS (2026-09-28). The Tamakushi Casket counts the Plans the
     # Bake-Kurage carries out, and Open the Casket (a relic token, in no pool)
@@ -1041,8 +1051,10 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_brine_sting",
     # THE EXPANSION, BATCH ONE (2026-09-29): the 22 rows of
     # `KOKOMI_EXPANSION_BATCH_ONE_IDS` above, LAST, in the sheet's own order.
-    # The pool is 69 (20 / 35 / 14).
     *KOKOMI_EXPANSION_BATCH_ONE_IDS,
+    # THE PAYOFF PASS (2026-10-01): Kurage Canopy and Coral Tithe, LAST. The
+    # pool is 70 (19 / 37 / 14).
+    *KOKOMI_PAYOFF_PASS_IDS,
 )
 
 # THE CO-OP SET's Kokomi and Furina tiers, on `KLEE_OVERHAUL_MULTIPLAYER_IDS`'s

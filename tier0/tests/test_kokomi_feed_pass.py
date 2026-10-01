@@ -106,10 +106,11 @@ def test_the_now_and_plan_commons_are_uncommon(overhaul, cid):
 
 def test_the_offer_holds_the_feed_after_the_casket_rows(overhaul):
     # Forty-eight at the feed pass; expansion batch one (2026-09-29) appended
-    # 22 rows after the feed and cut The Clouds Like Waves Rippling.
+    # 22 rows after the feed and cut The Clouds Like Waves Rippling; the
+    # payoff pass (2026-10-01) appended two more and cut Second Thoughts.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 69
-    assert ids[-27:-22] == FEED
+    assert len(ids) == 70
+    assert ids[-29:-24] == FEED
     assert "proto_kk_exposed_flank" not in ids
     assert "proto_kk_exposed_flank" not in {
         c.id for c in loader.prototype_cards()}

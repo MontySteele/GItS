@@ -36,7 +36,7 @@ bands are measured there). **Last release package: `0.2.1357`**
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
-| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 69 |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 70 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 72 (60 Stage cards) |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (Oath rework built) | 41 |
 
@@ -107,8 +107,13 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   rather than a wall. All Streams Flow to the Sea is now cost 1 [0] and
   regains the Energy paid for the Plans it cancels; still dead in the sim (7
   plays in 252 fights, each multiplying its Plan to about 4 carry-outs --
-  the stock pilot rarely has 2 Plans waiting and a Plan card left). Next:
-  [USER] plays.
+  the stock pilot rarely has 2 Plans waiting and a Plan card left).
+  **The payoff pass (2026-10-01, ruled):** on the co-op complaint ("no
+  payoff for playing lots of Plans", "short on block"), Second Thoughts is
+  cut ("an undo is a dead draw") and two Uncommons join: Kurage Canopy (Block
+  per carry-out) and Coral Tithe (the Casket into Energy and cards). The pool
+  is 70 (19 / 37 / 14). Brief §6; provenance note, "Kokomi payoff pass".
+  Next: [USER] plays.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any

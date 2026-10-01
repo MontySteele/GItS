@@ -4637,8 +4637,8 @@ inside it. The sim ticks auras before the morning and needs nothing.
 ## Varka relics and potions, 2026-10-01
 
 Built from `review/active/varka-expansion-2026-10-01.md` sec.4 at the
-defaults of its open picks (paper PR #785); nothing here is ruled until those
-picks are. Seven relics (`klee-mod/KleeCode/Relics/VarkaArmRelics.cs`) and
+defaults of its picks, ruled 2026-10-01 ([USER]: "Agreed on all four. You're
+good to proceed."). Seven relics (`klee-mod/KleeCode/Relics/VarkaArmRelics.cs`) and
 three potions (`klee-mod/KleeCode/Potions/VarkaPotions.cs`), Klee's and
 Furina's shape and build: each relic is a member of `VarkaRelicPool`, and the
 pool's offer (`GetUnlockedRelics`, through `ArmRelicPools.Offer`) is Boreas's
@@ -4684,3 +4684,43 @@ either; the three printed numbers are declared unmirrored in
 relic reads `varka/relics/<slug>.png` and each potion `varka/potions/<slug>.png`
 from the pack, with the base game's fallback icon and missing-potion picture
 until an art pass adds them. Tests: `klee-mod/KleeTests/Prototype/VarkaRelicsPotionsTests.cs`.
+
+## Kokomi payoff pass, 2026-10-01
+
+The co-op player's complaint was "no payoff for playing lots of Plans" and
+"short on block". On Second Thoughts the main session said it is "an undo
+button, and an undo is a dead draw" and recommended cutting it in Kokomi's
+next pass alongside a Plan-volume payoff that isn't damage; [USER]: "Sounds
+good! Please proceed!" Built in both engines as given:
+
+1. **Second Thoughts is cut** (`proto_kk_second_thoughts`, Common): out of the
+   sheet, `C.KOKOMI_OVERHAUL_POOL_IDS` and `KokomiOverhaulRoster.Slice()`,
+   tombstoned in `docs/retired-card-ids.yaml`, its painted portrait a
+   known-stale entry in `tools/art_coverage.py`. Its cancel
+   (`kokomi_plan.cancel_last_plan`, `KokomiPlan.CancelLast`) stays registered
+   with no row spelling it, as Converging Tide's did; the give-back it shared
+   with All Streams Flow to the Sea (`GiveBack` / `_give_back`) is All
+   Streams' own door and is untouched.
+2. **Kurage Canopy** (`proto_kk_kurage_canopy`, Power, 1, Uncommon):
+   "Whenever the Bake-Kurage carries out a Plan, gain 2 Block." Upgraded 3
+   (`power_amount: 1`), cost unchanged. `KurageCanopyPower` rides the plan
+   bus (`IKokomiPlanListener`) beside her Ancient, which `ResolveEntry` rings
+   once per carry-out, so a Plan carried out twice (Second Wave, Nereid's
+   Ascension, All Streams' gift) pays twice. Powered Block (Dexterity counts),
+   her Ancient's reading. Sim: `kokomi_plan.KURAGE_CANOPY` in
+   `_note_plan_resolved`. Badge: her Ancient's (`princess_of_watatsumi.png`).
+3. **Coral Tithe** (`proto_kk_coral_tithe`, Skill, 0, Uncommon): "Empty the
+   Casket. Gain 1 Energy and draw 1 card for every 3 in it." Upgraded every 2
+   (`kokomi_amount: -1`, a new `kokomi` kind `coral_tithe` whose `amount` is
+   the divisor). Rounds down (7 pays 2, or 3 upgraded). The relic is found
+   the way the Casket's own carry-out add finds it
+   (`GetRelic<TamakushiCasket>`, which also finds the Orobas upgrade
+   `WatatsumiCasket`; the sim's `_holds_casket`); without one the card does
+   nothing and the count is not touched. The count itself is the ledger's,
+   as every other Casket card reads it.
+
+The pool is 70 (19 Common, 37 Uncommon, 14 Rare) plus the three co-op
+cards. No art: neither new row has a portrait yet, so both render the
+placeholder and `tools/art_coverage.py` bills them as missing, as expansion
+batch one's 22 rows were. Pins: `tier0/tests/test_kokomi_payoff_pass.py`,
+`KleeTests/Prototype/KokomiPayoffPassTests.cs`.
