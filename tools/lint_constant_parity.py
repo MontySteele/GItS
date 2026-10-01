@@ -437,8 +437,20 @@ _ARM_ITEMS_REASON = (
     "potion of the Klee arm or the Stage, built C# first "
     "(operations/prototype.md); no sim twin exists until Balance.")
 
+#: Varka's own relics and potions (review/active/varka-expansion-2026-10-01.md
+#: sec.4), built C# first like the arms' above: tier0's Varka twin
+#: (`tier0/engine/varka_oath.py`) models no relic but the Fang.
+_VARKA_ITEMS_REASON = (
+    "VARKA'S OWN RELICS AND POTIONS (review/active/varka-expansion-2026-10-01.md "
+    "sec.4). A printed number on a Prototype-stage relic or potion of his, "
+    "built C# first (operations/prototype.md); no sim twin exists until "
+    "Balance.")
+
 UNMIRRORED: dict[str, str] = {
     "AlicesGuidebook.Growth": _ARM_ITEMS_REASON,
+    "BottledResolve.Oath": _VARKA_ITEMS_REASON,
+    "KnightsCommission.Oath": _VARKA_ITEMS_REASON,
+    "WindblumeGarland.Block": _VARKA_ITEMS_REASON,
     "BlastingPowder.Growth": _ARM_ITEMS_REASON,
     "BottledApplause.Fanfare": _ARM_ITEMS_REASON,
     "BottledSparks.Sparks": _ARM_ITEMS_REASON,

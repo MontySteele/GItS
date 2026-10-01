@@ -4634,6 +4634,57 @@ Crystal Collapse's copy) kept its Hydro a turn short; the morning drain now
 opens `AuraPower.MorningWindow`, which spares every aura applied or refreshed
 inside it. The sim ticks auras before the morning and needs nothing.
 
+## Varka relics and potions, 2026-10-01
+
+Built from `review/active/varka-expansion-2026-10-01.md` sec.4 at the
+defaults of its picks, ruled 2026-10-01 ([USER]: "Agreed on all four. You're
+good to proceed."). Seven relics (`klee-mod/KleeCode/Relics/VarkaArmRelics.cs`) and
+three potions (`klee-mod/KleeCode/Potions/VarkaPotions.cs`), Klee's and
+Furina's shape and build: each relic is a member of `VarkaRelicPool`, and the
+pool's offer (`GetUnlockedRelics`, through `ArmRelicPools.Offer`) is Boreas's
+Fang, the seven and Wolf's Gravestone, so the Silent borrow is no longer
+offered (pick 1, default (a)). His `PotionPool` is `VarkaPotionPool` with the
+arm live. **Pick 1(b)** (the borrow kept beside them) is one constant,
+`VarkaArmRelics.KeepSilentBorrow`: true offers every relic member and appends
+the Silent's potions to his pool. The Silent relics stay members (through
+`InheritedSilentRelics.Curated()`), so the curation pins and self-check R21
+read his pool as before.
+
+| Tier | Relic | As built |
+|---|---|---|
+| Common | Knight's Commission | His first turn, after the draw: the element of the starter Knight the run rolled becomes current, then 1 Oath of it through `VarkaOath.Gain` (so the Fang answers it). The Fang records that element when it rolls the Knight (`Relics/VarkaStarterKnight.cs`, a BaseLib `SavedSpireField` saved with the Fang and copied to Wolf's Gravestone), so it holds all run after the card is removed or transformed (main session, 2026-10-01). A run begun before the record existed falls back to the starter Knight in the deck. |
+| Uncommon | Windblume Garland | 4 Block a copy on every current-element change, paid in `VarkaOath.SetCurrent`; the fight's first element (none to one) is a change, as Boreas Unbound counts it. |
+| Uncommon | Dandelion Seeds | Late in his turn start (after Knight's Commission and his turn-start Powers): with a current element and no enemy wearing an aura (a spent aura counts as one), applies it to a random enemy. No Oath, no switch. |
+| Rare | Banner of the West Wind | On a change, every point of the old element's Oath moves to the new one (`VarkaOathLedger.MoveOath`), before the Garland and Boreas Unbound pay. A move, not a gain. |
+| Rare | Stormterror's Scale | `VarkaOath.OnSwirl`'s current-element payout runs 1 + copies times; the Swirl's Oath credit and the shared Swirl damage do not repeat. |
+| Rare | Andrius's Howl | Each Four Winds' Ascension he plays is noted; at his next turn start, after the draw, each noted copy still in his draw or discard pile returns to hand, once per copy per turn. A copy already drawn stays; an exhausted one does not return. |
+| Shop | Favonius Duty Roster | His first turn, after the draw: Knights' Roll Call's unchosen add (`VarkaRules.AddKnight`), a random pool Knight (never a starter-only one), costing 0 this turn. No new helper was written. |
+
+| Tier | Potion | As built |
+|---|---|---|
+| Common | Bottled Resolve | Change of Guard's grid over all four elements; the pick becomes current, then 3 Oath of it. |
+| Uncommon | Bottled Gale | Wall of Gales' sweep (`VarkaRules.SwirlFreshAuras`). The Swirls pay his current element but credit no Oath. |
+| Rare | Elixir of the Four Winds | For the round drunk, `VarkaOathLedger.CurrentOath` (every card read of his current element's Oath) answers the total of all four; the badge shows it. |
+
+**Relic and potion applications gain no Oath** (sec.4) and switch nothing:
+Dandelion Seeds and Bottled Gale run inside the new `VarkaOath.NoCredit`
+scope, which suppresses both the application credit and the Swirl credit.
+Knight's Commission and Bottled Resolve set his element and gain Oath because
+their faces say so.
+
+**Readings chosen where the draft left it open** (for the main session):
+Bottled Gale's Swirls gain no Oath (read as "potion applications"); the
+Scale stacks per copy, as Klee's relics do; the Elixir lasts the round (his
+turn and the enemy turn after it); Andrius's Howl does not return a copy he
+exhausted.
+
+**Sim:** not mirrored. tier0 models no relic or potion of Klee's or Furina's
+either; the three printed numbers are declared unmirrored in
+`tools/lint_constant_parity.py` until Balance. **Art:** none fetched; each
+relic reads `varka/relics/<slug>.png` and each potion `varka/potions/<slug>.png`
+from the pack, with the base game's fallback icon and missing-potion picture
+until an art pass adds them. Tests: `klee-mod/KleeTests/Prototype/VarkaRelicsPotionsTests.cs`.
+
 ## Kokomi payoff pass, 2026-10-01
 
 The co-op player's complaint was "no payoff for playing lots of Plans" and

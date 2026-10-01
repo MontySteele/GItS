@@ -54,8 +54,16 @@ public class BoreasFang : CustomRelicModel
     }
 
     /// <summary>Touch of Orobas: Wolf's Gravestone (2026-09-30).</summary>
-    public override RelicModel? GetUpgradeReplacement() =>
-        ModelDb.Relic<WolfsGravestone>().ToMutable();
+    public override RelicModel? GetUpgradeReplacement()
+    {
+        var upgrade = ModelDb.Relic<WolfsGravestone>().ToMutable();
+        // The run's starter Knight element rides along (Knight's Commission).
+        if (upgrade is BoreasFang fang)
+        {
+            VarkaStarterKnight.Record(fang, VarkaStarterKnight.Of(this));
+        }
+        return upgrade;
+    }
 
     /// <summary>Does this relic hand Ascension over upgraded and free this
     /// turn? The Fang no; <see cref="WolfsGravestone"/> yes.</summary>
@@ -115,6 +123,9 @@ public class BoreasFang : CustomRelicModel
         if (listed == null) return;
         var pick = player.PlayerRng.Transformations.NextItem(
             VarkaRules.StarterKnights().ToList());
+        // Recorded for the run (Knight's Commission reads it after the card
+        // is gone): the rolled Knight's element, or the listed one's.
+        VarkaStarterKnight.Record(this, VarkaOath.KnightElement(pick ?? listed));
         if (pick == null || pick is ProtoVkAmberFieryRain) return;
         var rolled = player.RunState.CreateCard(pick, player);
         await CardCmd.Transform(listed, rolled, CardPreviewStyle.None);
