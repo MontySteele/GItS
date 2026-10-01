@@ -345,8 +345,9 @@ public class KokomiPoolPassThreeTests
             Assert.Contains("KokomiTargets.PetOnly", Source(name));
             Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].",
                               Face(card));
-            // The status batch (2026-10-01): "Or dusk plan:".
-            Assert.Contains("[gold]dusk[/gold]", Face(card));
+            // Plan-only, so "Dusk Plan:" with no "or" (2026-10-01).
+            Assert.Contains("[gold]Dusk[/gold] [gold]Plan[/gold]:", Face(card));
+            Assert.DoesNotContain("Or [gold]", Face(card));
             // No now-line at all: the whole body is the write.
             Assert.DoesNotContain("CreatureCmd.GainBlock", Source(name));
         }
