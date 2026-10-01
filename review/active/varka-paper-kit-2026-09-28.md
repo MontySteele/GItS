@@ -45,9 +45,24 @@ swears more of that element to his blade.
 - **Swirl** is the shared rule: an Anemo hit on a fresh aura leaves it on
   that enemy, spent; spreads spent copies to every enemy lacking it; deals a
   flat 2 to every enemy. A spent aura still reacts with a new element.
-- **His current element** is the element of the last Knight he played (or a
-  card that says it changes it). The seat page and his status bar show it
-  with its Oath. Before his first Knight he has none.
+- **His current element** is the element of the last Knight he played, or
+  of the last Pyro, Hydro, Cryo or Electro one of his other cards applied (or
+  a card that says it changes it). The seat page and his status bar show it
+  with its Oath. Before the first he has none.
+- **The open Oath (2026-09-30).** [USER] asked "Is it reasonable to go the
+  other direction and say 'Any card that applies an element other than Anemo
+  counts for Oath effects' - widening the Companion pool", and on the terms
+  below: "Yep, let's ship it and see if anything breaks." Whenever he plays a
+  card that applies Pyro, Hydro, Cryo or Electro, that becomes his current
+  element and he gains 1 Oath of it, through the same credit as a Knight's
+  (Dawn Wind's March, Boreas Unbound and the Fang react the same way). The
+  terms: his own card plays only (a Swirl's spread, a reaction's side
+  effects, relics, potions, a Power's later tick and another player's cards
+  do not switch it); the four Oath elements only (Anemo and Geo do nothing);
+  the Knight-named payoffs stay Knight-only (Favonian Standard, Grand
+  Master's Order, Knightly Guard, Knights' Roll Call, the starter Knight);
+  Favonius Drill counts, to watch. If a card applies two, the last one wins.
+  Knights still switch at the top of their play.
 - **Oath, one count per element** (Pyro, Hydro, Electro, Cryo), **counted per
   card, not per enemy**. A card that applies an element gains 1 Oath of it,
   however many enemies it hits, including an application that reacts

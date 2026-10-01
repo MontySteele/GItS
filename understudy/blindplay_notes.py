@@ -1474,12 +1474,11 @@ ARM_KEYWORDS: dict[str, str] = {
     "Oath": ("Gained when your card applies or Swirls an element: 1 of "
              "each, per card. Kept all fight. Cards read your current "
              "element's Oath."),
-    "current element": ("The element of the last Knight you played. Your "
+    "current element": ("The last Pyro, Hydro, Cryo or Electro you applied. "
                         "Swirls pay it: Pyro 3 damage, Hydro 3 Block, Cryo 1 "
                         "Vulnerable, Electro 3 to ALL."),
     "Knight": ("A Companion titled with a colon, like Lisa: Infinite Circuit. "
-               "Playing one makes its element your current element; others "
-               "do not."),
+               "Playing one makes its element your current element."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read

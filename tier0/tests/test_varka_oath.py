@@ -263,6 +263,100 @@ def test_ascension_with_no_current_element_deals_its_anemo_only(varka):
 
 
 # ---------------------------------------------------------------------------
+# 2b. The open Oath ([USER], 2026-09-30): any card of his that applies Pyro,
+#     Hydro, Cryo or Electro sets his current element and gains 1 Oath of it.
+# ---------------------------------------------------------------------------
+
+def _applier(*elements, target="enemy"):
+    """A non-Knight card of his that applies `elements` in order."""
+    import copy
+    card = copy.deepcopy(loader.get_card(_vk("squall")))
+    card.cost = 0
+    card.effects = [{"op": "apply_aura", "element": el, "target": target}
+                    for el in elements]
+    return card
+
+
+def test_a_non_knight_elemental_card_sets_the_element_and_credits(varka):
+    st = _state(n=3, fang=False)
+    p = st.player
+    p.powers[V.DAWN_WINDS_MARCH] = 3
+    p.powers[V.BOREAS_UNBOUND] = 1
+    p.energy = 5
+    _play(st, _applier("hydro", target="all_enemies"))
+    led = _led(st)
+    assert led.current == "hydro"
+    assert led.oath == {"pyro": 0, "hydro": 1, "electro": 0, "cryo": 0}
+    assert p.block == 3                                  # the March paid
+    assert p.energy == 10 + 1                            # Unbound paid
+
+
+def test_the_last_element_a_card_applies_wins(varka):
+    st = _state(fang=False)
+    _play(st, _applier("pyro", "cryo"))
+    led = _led(st)
+    assert led.current == "cryo"
+    assert led.oath["pyro"] == 1 and led.oath["cryo"] == 1
+
+
+@pytest.mark.parametrize("element", ["anemo", "geo"])
+def test_an_anemo_or_geo_card_neither_credits_nor_switches(
+        varka, element):
+    st = _state(fang=False)                             # no aura to react
+    _led(st).current, _led(st).oath["pyro"] = "pyro", 1
+    before = dict(_led(st).oath)
+    _play(st, _applier(element))
+    assert _led(st).current == "pyro"
+    assert _led(st).oath == before
+
+
+def test_a_swirl_spread_does_not_switch(varka):
+    """Windbound Execution Swirls A's Pyro while Hydro is current: the
+    Swirl credits Pyro, its spread lands on B and C, and Hydro stays."""
+    st = _state(enemies=[_enemy(name="a", aura="pyro"), _enemy(name="b"),
+                         _enemy(name="c")], fang=False)
+    _led(st).current = "hydro"
+    _play(st, _vk("windbound_execution"))
+    assert _led(st).current == "hydro"
+    assert _led(st).oath["pyro"] == 1
+
+
+def test_baron_bunnys_burst_does_not_switch(varka):
+    st = _state(n=2, fang=False)
+    _led(st).current = "cryo"
+    st.player.powers[V.BARON_BUNNY] = 3
+    V.turn_start(st)
+    assert _led(st).current == "cryo"
+    assert _led(st).oath["pyro"] == 1                    # it still credits
+
+
+def test_favonian_standard_stays_knight_only(varka):
+    st = _state(fang=False)
+    st.player.powers[V.FAVONIAN_STANDARD] = 4
+    _play(st, _vk("amber_fiery_rain"))                  # Pyro current
+    block = st.player.block
+    _play(st, _applier("pyro"))                         # not a Knight
+    assert st.player.block == block
+    assert _led(st).knights_this_turn == 1
+
+
+def test_favonius_drill_counts_under_the_open_oath(varka):
+    st = _state(fang=False)
+    _led(st).current = "electro"
+    _play(st, _vk("favonius_drill"))
+    _play(st, _vk("favonius_drill"))
+    assert _led(st).oath["electro"] == 2
+
+
+def test_the_open_oath_switch_off_is_the_old_rule(varka, monkeypatch):
+    monkeypatch.setattr(V, "OPEN_OATH", False)
+    st = _state(fang=False)
+    _play(st, _applier("hydro"))
+    assert _led(st).current is None
+    assert _led(st).oath["hydro"] == 1
+
+
+# ---------------------------------------------------------------------------
 # 3. The Swirl payout of each current element.
 # ---------------------------------------------------------------------------
 

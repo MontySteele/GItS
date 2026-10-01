@@ -4445,6 +4445,70 @@ moved (Knights' Roll Call stays as is, no Exhaust).
    1 to 0; Unfurled Banner gains Retain; Azure Devour 4 to 5 damage per Oath
    (`formula_per: 1`).
 
+## Varka: the open Oath (2026-09-30)
+
+[USER] asked: "Is it reasonable to go the other direction and say 'Any card
+that applies an element other than Anemo counts for Oath effects' - widening
+the Companion pool", and on the main session's terms: "Yep, let's ship it and
+see if anything breaks."
+
+The rule: whenever he plays a card that applies Pyro, Hydro, Cryo or Electro,
+that becomes his current element and he gains 1 Oath of it. The four terms:
+
+1. **His own card plays only.** A Swirl's spread, a reaction's side effects,
+   relics, potions, a Power ticking later (Baron Bunny's burst) and another
+   player's cards in co-op do not switch it.
+2. **The four Oath elements only.** Anemo and Geo give nothing and do not
+   change the current element.
+3. **Knight-named payoffs stay Knight-only.** Favonian Standard, Grand
+   Master's Order, Knightly Guard ("if you played a Knight"), Knights' Roll
+   Call and the starter Knight are unchanged; `VarkaRules.IsKnight` is.
+4. **Favonius Drill counts, to watch.** It gains 1 Oath of the current
+   element per play.
+
+How it is built. The Oath part already stood: since the rework every card of
+his that applies an Oath element gained 1 of it per play (sec.3's credit,
+`VarkaOathLedger.TryCredit`, `varka_oath.credit`), Knight or not. What the open
+Oath adds is the switch. A play of his card that is not a Knight opens an
+open-Oath scope (`VarkaOathLedger.OpenScope(open: true, card)`, sim
+`open_scope(open_oath=True)`); an application inside it of an Oath element
+first makes that element current (`SetCurrent(knight: false)`, so Boreas
+Unbound pays on a change and Favonian Standard never does), then credits, so
+the gain is the current element's and Dawn Wind's March pays. The last element
+applied wins; each element still credits its own 1 (sec.3's per-element
+credit is unchanged). In the mod the hit must be dealt by him and, when it
+names a card, by the card being played (`OpenOathSwitches`); Four Winds'
+Ascension's no-credit hit switches nothing. Knights keep their switch at the
+top of the play. The tips: "current element" now reads "The last Pyro, Hydro,
+Cryo or Electro you applied" (the tip ceiling is 135; the Knight tip still
+says playing one makes its element current), and the Knight tip drops
+"others do not". The sim's
+`varka_oath.OPEN_OATH` (on) runs the old rule for a paired comparison.
+
+The paired sim (scratch harness, not committed; tier0 with `VARKA_OATH` on,
+generic pilot, every tier0 encounter in turn, n = 400 fights per cell on
+paired seeds 0 to 399). "pool" is the starter plus Favonius Drill, Oathsworn
+Strike, Eye of the Storm and Knightly Guard; "comp" adds 4 random Companions
+from the three nations' shipped sheets that apply an Oath element.
+
+| deck | start | won old / new | Oath per fight old / new | switches per fight old / new | HP lost old / new |
+|---|---|---|---|---|---|
+| pool | Pyro | 99.8 / 99.8 | 5.64 / 5.64 | 0.98 / 0.98 | 22.5 / 22.5 |
+| pool | Hydro | 99.2 / 99.2 | 5.81 / 5.81 | 0.98 / 0.98 | 21.3 / 21.3 |
+| pool | Electro | 99.8 / 99.8 | 5.55 / 5.55 | 0.98 / 0.98 | 22.3 / 22.3 |
+| pool | Cryo | 99.8 / 99.8 | 5.33 / 5.33 | 0.98 / 0.98 | 20.9 / 20.9 |
+| comp | Pyro | 98.8 / 99.5 | 7.18 / 7.13 | 0.88 / 3.79 | 21.3 / 19.9 |
+| comp | Hydro | 99.5 / 98.8 | 7.36 / 7.26 | 0.89 / 3.90 | 20.8 / 20.4 |
+| comp | Electro | 99.8 / 100.0 | 6.90 / 6.90 | 0.87 / 3.38 | 19.9 / 19.1 |
+| comp | Cryo | 100.0 / 99.8 | 6.93 / 6.94 | 0.88 / 3.72 | 19.9 / 19.8 |
+
+On his own pool nothing moves: every non-Knight card of his that applies an
+Oath element applies the current one. With Companions in the deck he switches
+about four times as often and Oath per fight is unchanged (the credit already
+stood); fights won move within noise and HP lost falls by 0.1 to 1.4. The
+tier0 encounters are near 100% won, so this shows nothing breaks, not a
+balance number.
+
 
 ## Orobas upgrades for Varka and Kokomi, 2026-09-30
 

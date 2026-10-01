@@ -21,6 +21,15 @@ THE RULES AS MODELLED:
     BEFORE the card's effects resolve, so its own application credits the new
     current element. Favonian Standard pays on a Knight whose element was
     already current; Boreas Unbound pays on every change (None -> X counts).
+  * THE OPEN OATH ([USER], 2026-09-30: "Any card that applies an element
+    other than Anemo counts for Oath effects"): inside a play of his own card
+    that is NOT a Knight, an application of an Oath element makes it his
+    current element before it credits (so Dawn Wind's March pays on it); the
+    last one applied wins. A Knight keeps its play-time switch; Baron Bunny's
+    burst, a relic, a potion, a power outside a play, a Swirl's spread and a
+    Converging Winds landing switch nothing. Knight-named payoffs (Favonian
+    Standard, Grand Master's Order, Knightly Guard, Knights' Roll Call) stay
+    Knight-only.
   * CREDIT, PER CARD PLAY: within one play, the first application of E to a
     live enemy is +1 Oath of E, and the first Swirl of an E aura is +1 Oath of
     E -- two keys, at most once each per play. A Swirl's spread copies, a
@@ -138,6 +147,9 @@ class VarkaLedger:
     #: Per play, parallel to `scopes`: the Swirls this play made and the
     #: enemies they struck (`swirled_by_this`, Storm Surge).
     play_swirls: list = field(default_factory=list)
+    #: Per play, parallel to `scopes`: is it an open-Oath play (his own
+    #: non-Knight card), whose applications set the current element.
+    play_open: list = field(default_factory=list)
     swirls_made: int = 0              # this combat
     knights_this_turn: int = 0        # Knight plays this turn, replays too
     no_apply_credit: int = 0          # > 0 inside a hit that credits nothing
@@ -258,11 +270,12 @@ def credit(state, kind: str, element: str) -> None:
     gain(state, element, 1, kind)
 
 
-def open_scope(state) -> None:
+def open_scope(state, open_oath: bool = False) -> None:
     led = ledger(state.player)
     if led is not None:
         led.scopes.append(set())
         led.play_swirls.append([])
+        led.play_open.append(open_oath)
 
 
 def close_scope(state) -> None:
@@ -270,6 +283,20 @@ def close_scope(state) -> None:
     if led is not None and led.scopes:
         led.scopes.pop()
         led.play_swirls.pop()
+        if led.play_open:
+            led.play_open.pop()
+
+
+#: The open Oath's switch (module, so a paired sim can run the old rule).
+OPEN_OATH = True
+
+
+def open_oath_switches(led: VarkaLedger, element: str) -> bool:
+    """Does this application make `element` current? Only inside an
+    open-Oath play, for an Oath element, outside a no-credit hit."""
+    return bool(OPEN_OATH and led.play_open and led.play_open[-1]
+                and element in ELEMENTS and not led.no_apply_credit
+                and not led.landing)
 
 
 # --------------------------------------------------------------------------
@@ -302,7 +329,7 @@ def begin_play(state, card) -> None:
     led = ledger(state.player)
     if led is None:
         return
-    open_scope(state)
+    open_scope(state, open_oath=not is_knight(card))
     if is_knight(card):
         led.knights_this_turn += 1
         set_current(state, card.element, knight=True)
@@ -320,6 +347,8 @@ def note_hit(state, enemy, element) -> None:
     if (led is None or element not in ELEMENTS or not enemy.alive
             or led.landing or led.no_apply_credit):
         return
+    if open_oath_switches(led, element):
+        set_current(state, element, knight=False)
     credit(state, "apply", element)
 
 
