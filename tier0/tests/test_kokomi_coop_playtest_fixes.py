@@ -124,7 +124,7 @@ def test_the_cancel_rows_say_the_card_comes_back(overhaul):
         loader.PROTOTYPE_SHEET.read_text(encoding="utf-8"))}
     assert "returns to your hand" in rows["proto_kk_second_thoughts"][
         "description"]
-    assert "taking back their cards" in rows[
+    assert "take their cards back" in rows[
         "proto_kk_all_streams_flow_to_the_sea"]["description"]
     assert _row("proto_kk_all_streams_flow_to_the_sea").exhaust
     assert _row("proto_kk_second_thoughts").exhaust

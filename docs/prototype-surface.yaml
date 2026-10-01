@@ -1763,9 +1763,10 @@
 - {id: proto_kk_all_streams_flow_to_the_sea, name: "All Streams Flow to the Sea", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   # Her C5. Main session, 2026-09-29: cost 1 [0] and the Energy paid is
-   # regained (the sim played it twice in 252 fights). Provenance note.
-   description: "Exhaust. Cancel all your [gold]Plans[/gold], taking back their cards and cost. Your next [gold]Plan[/gold] this turn is carried out once more for each.",
+   # Her C5. Main session, 2026-09-29: cost 1 [0]. 2026-10-01: no Energy
+   # refund (the cards return to hand, so a refund made the biggest re-write
+   # free). Provenance note.
+   description: "Exhaust. Cancel all your [gold]Plans[/gold], and take their cards back. Your next [gold]Plan[/gold] this turn is carried out once more for each.",
    effects: [{op: kokomi, kind: all_streams}],
    upgrade: {cost: -1}}
 
