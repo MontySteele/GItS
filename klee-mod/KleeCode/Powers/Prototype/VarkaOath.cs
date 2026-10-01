@@ -689,9 +689,11 @@ public static class VarkaCards
 
     /// <summary>
     /// Change of Guard: "Choose an element you have Oath in. It becomes your
-    /// current element. Gain Block equal to its Oath." A grid of the elements
-    /// he holds Oath in; not a Knight, so Favonian Standard passes it by and
-    /// Boreas Unbound sees the change.
+    /// current element. Draw 1 card." A grid of the elements he holds Oath
+    /// in; not a Knight, so Favonian Standard passes it by and Boreas Unbound
+    /// sees the change. The draw is the sheet's own op, after this one, so it
+    /// draws with no Oath too. (The open-Oath round, 2026-10-01: the Block
+    /// went, the card went to 0 with no Exhaust.)
     /// </summary>
     public static async Task ChangeOfGuard(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
@@ -706,12 +708,6 @@ public static class VarkaCards
             : await VarkaRules.ChooseElement(choiceContext, card.Owner, held);
         if (element == Element.None) return;
         await VarkaOath.SetCurrent(choiceContext, owner, element, knight: false);
-        var block = ledger.Oath(element);
-        if (block > 0)
-        {
-            await CreatureCmd.GainBlock(owner, block, ValueProp.Unpowered, null,
-                                        fast: true);
-        }
     }
 
     /// <summary>Rally to the Banner: "Move all your Oath to your current

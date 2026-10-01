@@ -2050,10 +2050,12 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
 #: sentences are the wire badge's own (`VarkaLaw` numbers).
 OATH_HEADING = "## Your Oath"
 OATH_ELEMENT_LINE = "- Current element: {element}."
-OATH_NO_ELEMENT_LINE = ("- Current element: none. Play a Knight to set it.")
+OATH_NO_ELEMENT_LINE = ("- Current element: none. Set by the last Pyro, "
+                        "Hydro, Cryo or Electro you applied.")
 OATH_COUNTS_LINE = "- Oath: {counts}."
 OATH_PAYOUT_LINE = "- {payout}"
-OATH_NO_PAYOUT_LINE = "- Your Swirls pay nothing until you play a Knight."
+OATH_NO_PAYOUT_LINE = ("- Your Swirls pay nothing until you apply Pyro, "
+                       "Hydro, Cryo or Electro.")
 AURA_FRESH = ("{element}, fresh: an Anemo hit Swirls it.")
 AURA_SPENT = ("{element}, spent: Swirl does nothing to it until "
               "{element} hits it again. Other elements still react with it.")

@@ -4178,7 +4178,8 @@ Readings taken where the paper is silent:
 
 - A Knight is any Companion row in his personal pool; it sets his current
   element before its own effects resolve, so its application credits the new
-  element. Jean: Wind Companion is a Skill, not a Knight.
+  element. Jean — Wind Companion is a Skill, not a Knight (titled with a
+  colon until the open-Oath round, 2026-10-01).
 - Credit is per card play: the first application of an element and the first
   Swirl of an element each give 1, separately; a Swirl's spread and a
   Converging Winds spread reaction give nothing; an event outside a play
@@ -4508,6 +4509,29 @@ about four times as often and Oath per fight is unchanged (the credit already
 stood); fights won move within noise and HP lost falls by 0.1 to 1.4. The
 tier0 encounters are near 100% won, so this shows nothing breaks, not a
 balance number.
+
+### The open-Oath round's changes (2026-10-01)
+
+The round (`review/records/varka-open-oath-round-2026-10-01.md`, "What to
+change" 1 to 3, the main session's design):
+
+1. **Change of Guard** is cost 0 with no Exhaust: "Choose an element you have
+   Oath in. It becomes your current element. Draw 1 card." Upgraded it draws
+   2 (this replaces the cost-0 upgrade from the co-op playtest). The Block
+   equal to its Oath is gone. The draw is the row's own `draw` op, after the
+   switch, so it draws with no Oath too. Lane 1 named the old card NEVER
+   AGAIN in acts 1 and 2: "one card slot for 2 to 5 block and a switch I
+   never needed".
+2. **The rule text says the open rule.** The seat page's Oath block reads
+   "Current element: none. Set by the last Pyro, Hydro, Cryo or Electro you
+   applied." and "Your Swirls pay nothing until you apply Pyro, Hydro, Cryo
+   or Electro." (was "Play a Knight to set it"). Jean's Varka card is
+   "Jean — Wind Companion": the em dash the other Companions use, so the
+   colon means Knight (Grand Master's Order+ fizzled on it in the round).
+3. **The Swirl tip** reads "Anemo meets a fresh aura: deal 2 damage to ALL
+   enemies and copy it, spent, onto the others. Enemies already wearing it
+   are refreshed." on the keyword tip, the reaction preview and the seat
+   page (two seats misread "old ones refresh").
 
 ## Power cost sweep, 2026-09-30
 
