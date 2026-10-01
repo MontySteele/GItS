@@ -160,7 +160,7 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkKuragesMercy>(),
     };
 
-    /// <summary>The slice's own 77 rows, without the Ancient tail
+    /// <summary>The slice's own 78 rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds. FORTY-SIX since the Casket pass
     /// (2026-09-28): six cut, thirteen added; FORTY-FOUR since the cleanup
     /// pass (2026-09-29) cut Scout Ahead and Song of Pearls; FORTY-EIGHT since
@@ -169,8 +169,8 @@ internal static class KokomiOverhaulRoster
     /// added 22 and cut The Clouds Like Waves Rippling; SEVENTY since the
     /// payoff pass (2026-10-01) cut Second Thoughts and added Kurage Canopy
     /// and Coral Tithe; SEVENTY-EIGHT since pool completion (2026-10-01)
-    /// added eight; SEVENTY-SEVEN since the status batch (2026-10-01) cut
-    /// seven and added six. The Open the Casket token is in
+    /// added eight; still SEVENTY-EIGHT since the status batch (2026-10-01)
+    /// cut seven and added seven. The Open the Casket token is in
     /// no pool; the relic deals it (<see cref="Relics.TamakushiCasket"/>).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
@@ -294,17 +294,18 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkSeasReproach>(),
         ModelDb.Card<ProtoKkTidalRebuke>(),
         ModelDb.Card<ProtoKkWatatsumiResistance>(),
-        // THE STATUS BATCH (2026-10-01, ruled): six cards on statuses and
+        // THE STATUS BATCH (2026-10-01, ruled): seven cards on statuses and
         // curses, LAST, in the sheet's own order. Seven rows were cut above
         // (Rally, Chain of Command, Battle Plan, Feigned Retreat, Pearl Diver,
-        // Moon Signal, All Streams Flow to the Sea). The pool is 77 (21 / 36 /
-        // 20): Coral Sanctuary, the paper's Rare, is not built.
+        // Moon Signal, All Streams Flow to the Sea). The pool is 78 (21 / 36 /
+        // 21): Riptide Ruin is the Rare, in Coral Sanctuary's place.
         ModelDb.Card<ProtoKkKelpWall>(),
         ModelDb.Card<ProtoKkTidecleanse>(),
         ModelDb.Card<ProtoKkSeaGlassHarvest>(),
         ModelDb.Card<ProtoKkTurningTide>(),
         ModelDb.Card<ProtoKkFlotsamSurge>(),
         ModelDb.Card<ProtoKkAbyssalSalvage>(),
+        ModelDb.Card<ProtoKkRiptideRuin>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

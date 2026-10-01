@@ -45,7 +45,7 @@ public sealed class ProtoKkCurrentRead : CustomCardModel, ICharacterCard, IPlann
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Current Read"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\nOr [gold]plan[/gold]: Draw 1 card.{IfUpgraded:show: Gain 2 [gold]Block[/gold].|}"),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Draw 1 card.{IfUpgraded:show: Gain 2 [gold]Block[/gold].|}"),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

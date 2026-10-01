@@ -950,10 +950,10 @@ public class KokomiOverhaulRuleTests
         // Waves cut, 22 added. SEVENTY since the payoff pass (2026-10-01):
         // Second Thoughts cut, Kurage Canopy and Coral Tithe added.
         // SEVENTY-EIGHT since pool completion (2026-10-01): eight added.
-        // SEVENTY-SEVEN since the status batch (2026-10-01): seven cut, six
-        // added.
+        // Still SEVENTY-EIGHT since the status batch (2026-10-01): seven cut,
+        // seven added.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(77, Il.CallSequence(slice)
+        Assert.Equal(78, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

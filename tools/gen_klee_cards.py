@@ -900,7 +900,8 @@ ARM_KEYWORDS = (
     # rules -- a table row for a word no rule has is a tooltip waiting to
     # explain a mechanic that is not there.
     ArmKeyword("Mend", ("Mend", "Mends"), "ArmKeywordTips.ForMend"),
-    # "plan" is the status batch's "Or plan:" (2026-10-01), the same word.
+    # "plan" is the status batch's "Or plan:" (2026-10-01), the same word;
+    # a Plan-only row keeps "Plan:".
     ArmKeyword("Plan", ("Plan", "Plans", "plan"), "ArmKeywordTips.ForPlan"),
     # Kokomi's FOURTH, `EB-643` (R265). `Dusk` is the pool pass's one new word
     # and it is a rule about WHEN: the Bake-Kurage carries a Dusk Plan out at
@@ -14409,20 +14410,22 @@ _BROKEN_PLAN_CLAUSE = re.compile(
 
 
 def plan_line_says_or(card: dict, text: str) -> str:
-    """Every Plan line's keyword prints "Or plan:" ("Or dusk plan:").
+    """A Plan line under a now-line prints "Or plan:" ("Or dusk plan:").
 
     [USER], 2026-10-01: "Agreed on the Plan text change." Both seats on the
     78-card build planned a card expecting its now-line too; the face put the
     Plan line under the now-line with nothing between them. ONE place, beside
-    the line break, so every row (the starter's Kurage's Oath and Slack Water
-    included) gets it and the sheet keeps its prose.
+    the line break, so every two-line row (the starter's Kurage's Oath and
+    Slack Water included) gets it and the sheet keeps its prose.
 
-    EVERY ROW, PLAN-ONLY ONES TOO, the paper's "on every card" read
-    literally (provenance note): every Dusk row is Plan-only, so "Or dusk
-    plan:" exists only there. A Plan-only face reads "Play on the
-    Bake-Kurage." then "Or plan: ...".
+    ONLY UNDER A NOW-LINE (the main session's call, 2026-10-01, after the
+    first build read "on every card" literally): the "or" chooses between two
+    printed effects, so a PLAN-ONLY row keeps "Plan:" ("Dusk Plan:") under its
+    "Play on the Bake-Kurage." line, which is an instruction and not an
+    alternative. The test is the one `_plan_only_line` and the card's target
+    type use, `plan` and no `effects`, so the three cannot disagree.
     """
-    if not card.get("plan"):
+    if not card.get("plan") or not card.get("effects"):
         return text
 
     def _or(m: re.Match) -> str:

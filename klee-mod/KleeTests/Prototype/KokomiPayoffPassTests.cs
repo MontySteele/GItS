@@ -56,8 +56,8 @@ public class KokomiPayoffPassTests : IDisposable
             .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
             .ToList();
         // Pool completion (2026-10-01) appended eight after the two; the
-        // status batch (2026-10-01) cut seven ahead and appended six.
-        Assert.Equal(77, slice.Count);
+        // status batch (2026-10-01) cut seven ahead and appended seven.
+        Assert.Equal(78, slice.Count);
         Assert.Equal(new[] { "ProtoKkKurageCanopy", "ProtoKkCoralTithe" },
                      slice.Skip(61).Take(2).ToArray());
         Assert.DoesNotContain(slice, c => c.Contains("SecondThoughts"));

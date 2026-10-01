@@ -41,8 +41,10 @@ the Bake-Kurage carries it out at the start of her next turn.
    sense, but the card text gets harder to read. Can we move all Plan
    lines to the next line down?"); the generator breaks it, not the sheet.
    Since the status batch (2026-10-01, [USER]: "Agreed on the Plan text
-   change") the keyword prints "Or plan:" ("Or dusk plan:") on every card,
-   and the Plan tip opens "Instead of the line above".
+   change") the keyword prints "Or plan:" ("Or dusk plan:") under every
+   now-line, and the Plan tip opens "Instead of the line above". A Plan-only
+   card keeps "Plan:" ("Dusk Plan:") under "Play on the Bake-Kurage.", since
+   there is no line above it to choose against (main session, 2026-10-01).
 3. **The jellyfish acts by the book.** A planned Attack strikes the front
    enemy (the leftmost one alive); a single-target Plan is aimed when
    written if the engine can carry a second selection (R250). A planned
@@ -320,11 +322,12 @@ Paper `review/active/kokomi-status-batch-2026-10-01.md`, ruled ([USER]: "the
 resolves a Plan after the draw, so a Plan can answer the hand about to be
 dealt. Built in both engines: Kelp Wall and Tidecleanse (Common), Sea Glass
 Harvest (with the Sea Glass token), Turning Tide, Flotsam Surge and Abyssal
-Salvage (Uncommon). Cut: Rally, Pearl Diver, Battle Plan, Feigned Retreat,
-Moon Signal, Chain of Command, All Streams Flow to the Sea. The paper's
-Rare, Coral Sanctuary, was withdrawn for a redesign during the build, so the
-pool is 77 (21 / 36 / 20) until its replacement lands. Every Plan line now
-prints "Or plan:" (rule 2). Readings: provenance note, "Kokomi status batch,
+Salvage (Uncommon), and Riptide Ruin (Rare). Cut: Rally, Pearl Diver, Battle
+Plan, Feigned Retreat, Moon Signal, Chain of Command, All Streams Flow to the
+Sea. The paper's first Rare, Coral Sanctuary, was cut ([USER]: "Coral
+Sanctuary feels messy"); Riptide Ruin took the slot, a second status source.
+The pool is 78 (21 / 36 / 21). A Plan line under a now-line prints "Or
+plan:" (rule 2). Readings: provenance note, "Kokomi status batch,
 2026-10-01".
 
 ## 7. What the engine does

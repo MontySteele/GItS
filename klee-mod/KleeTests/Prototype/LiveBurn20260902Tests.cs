@@ -161,7 +161,8 @@ public class LiveBurn20260902Tests
         // the whole of `EB-293`.
         // THE STATUS BATCH (2026-10-01, sec.3 pick 2, [USER]: "Agreed on the
         // Plan text change") put the word back as the tip's opening, "Instead
-        // of the line above": the face now prints "Or plan:" on every card.
+        // of the line above": the face prints "Or plan:" under every now-line
+        // (a Plan-only card keeps "Plan:").
         // The tip still says WHERE a Plan card goes.
         Assert.StartsWith("Instead of the line above, ",
                           body.Substring(body.IndexOf("Instead",

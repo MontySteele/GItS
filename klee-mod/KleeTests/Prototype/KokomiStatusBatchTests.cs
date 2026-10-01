@@ -16,11 +16,12 @@ namespace KleeMod.Tests.Prototype;
 /// <summary>
 /// KOKOMI STATUS BATCH (2026-10-01, ruled). Paper
 /// <c>review/active/kokomi-status-batch-2026-10-01.md</c>: "the 7 removals
-/// are good", "Agreed on the Plan text change". Six cards built (Kelp Wall,
+/// are good", "Agreed on the Plan text change". Seven cards built (Kelp Wall,
 /// Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge, Abyssal
-/// Salvage) and the Sea Glass token; Coral Sanctuary is not built (the main
-/// session is redesigning it), so the pool is 77. Every Plan line prints
-/// "Or plan:" and the Plan tip opens "Instead of the line above". What awaits
+/// Salvage, and Riptide Ruin, the Rare in the cut Coral Sanctuary's place)
+/// and the Sea Glass token, so the pool is 78. A Plan line under a now-line
+/// prints "Or plan:" (a Plan-only card keeps "Plan:") and the Plan tip opens
+/// "Instead of the line above". What awaits
 /// a command is pinned off the compiled methods. Sim twin:
 /// <c>tier0/tests/test_kokomi_status_batch.py</c>.
 /// </summary>
@@ -53,18 +54,19 @@ public class KokomiStatusBatchTests : IDisposable
     {
         "ProtoKkKelpWall", "ProtoKkTidecleanse", "ProtoKkSeaGlassHarvest",
         "ProtoKkTurningTide", "ProtoKkFlotsamSurge", "ProtoKkAbyssalSalvage",
+        "ProtoKkRiptideRuin",
     };
 
     // ---- the offer -----------------------------------------------------------
 
     [Fact]
-    public void The_offer_is_seventy_seven_with_the_six_last_and_the_seven_gone()
+    public void The_offer_is_seventy_eight_with_the_seven_last_and_the_seven_gone()
     {
         var slice = Seq("KokomiOverhaulRoster", "Slice")
             .Where(c => c.StartsWith("ModelDb.Card", StringComparison.Ordinal))
             .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
             .ToList();
-        Assert.Equal(77, slice.Count);
+        Assert.Equal(78, slice.Count);
         Assert.Equal(Batch, slice.Skip(71).ToArray());
         foreach (var gone in new[] { "Rally", "PearlDiver", "BattlePlan",
                                      "FeignedRetreat", "MoonSignal",
@@ -82,7 +84,7 @@ public class KokomiStatusBatchTests : IDisposable
     }
 
     [Fact]
-    public void The_six_rows_have_the_papers_types_costs_and_rarities()
+    public void The_seven_rows_have_the_papers_types_costs_and_rarities()
     {
         var shapes = new (CardModel Card, CardType Type, int Cost, CardRarity Rarity)[]
         {
@@ -92,6 +94,7 @@ public class KokomiStatusBatchTests : IDisposable
             (new ProtoKkTurningTide(), CardType.Skill, 0, CardRarity.Uncommon),
             (new ProtoKkFlotsamSurge(), CardType.Attack, 1, CardRarity.Uncommon),
             (new ProtoKkAbyssalSalvage(), CardType.Power, 1, CardRarity.Uncommon),
+            (new ProtoKkRiptideRuin(), CardType.Attack, 2, CardRarity.Rare),
         };
         foreach (var (card, type, cost, rarity) in shapes)
         {
@@ -112,7 +115,18 @@ public class KokomiStatusBatchTests : IDisposable
         Assert.Contains("\nOr [gold]plan[/gold]: ",
                         Face(new ProtoKkSlackWater()));
         Assert.Contains("\nOr [gold]dusk[/gold] [gold]plan[/gold]: ",
-                        Face(new ProtoKkBreakwater()));
+                        Face(new ProtoKkShellOfSanctuary()));
+    }
+
+    [Fact]
+    public void A_plan_only_card_keeps_plan_with_no_or()
+    {
+        // The main session's call (2026-10-01): "or" only under a now-line.
+        Assert.Equal("Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: "
+                   + "Deal {PlanDamage:diff()} damage.", Face(new ProtoKkNip()));
+        Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].\n[gold]Dusk[/gold] "
+                        + "[gold]Plan[/gold]: ", Face(new ProtoKkBreakwater()));
+        Assert.DoesNotContain("Or [gold]", Face(new ProtoKkBraceForTheTide()));
     }
 
     [Fact]
@@ -271,6 +285,25 @@ public class KokomiStatusBatchTests : IDisposable
         Assert.Contains(play, c => c.Contains("CreateCard<Dazed>")
                                  || c.Contains("Dazed"));
         Assert.Contains(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
+        Assert.Equal(Element.Hydro,
+                     Assert.IsAssignableFrom<IElementalCard>(card).Element);
+    }
+
+    // ---- Riptide Ruin ------------------------------------------------------------------------------
+
+    [Fact]
+    public void Riptide_ruin_hits_all_twice_for_nine_and_shuffles_three_dazed()
+    {
+        var card = new ProtoKkRiptideRuin();
+        Assert.Equal(9m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(12m, Upgraded<ProtoKkRiptideRuin>().DynamicVars.Damage.BaseValue);
+        Assert.Equal(TargetType.AllEnemies, card.TargetType);
+        var play = Seq("ProtoKkRiptideRuin", "OnPlay");
+        Assert.Contains(play, c => c.Contains("WithHitCount"));
+        Assert.Contains(play, c => c.Contains("Dazed"));
+        Assert.Contains(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
+        Assert.Contains("ALL enemies twice. Shuffle 3 [gold]Dazed[/gold]",
+                        Face(card));
         Assert.Equal(Element.Hydro,
                      Assert.IsAssignableFrom<IElementalCard>(card).Element);
     }

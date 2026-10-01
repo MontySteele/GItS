@@ -48,7 +48,7 @@ public sealed class ProtoKkBraceForTheTide : CustomCardModel, ICharacterCard, IP
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Brace for the Tide"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\nOr [gold]dusk[/gold] [gold]plan[/gold]: Double your [gold]Block[/gold]."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Dusk[/gold] [gold]Plan[/gold]: Double your [gold]Block[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

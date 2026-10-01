@@ -432,9 +432,9 @@ public class KokomiCasketPassTests : IDisposable
         var slice = Seq("KokomiOverhaulRoster", "Slice");
         // SIXTY-NINE since expansion batch one (2026-09-29); SEVENTY since
         // the payoff pass (2026-10-01); SEVENTY-EIGHT since pool completion;
-        // SEVENTY-SEVEN since the status batch (2026-10-01), which cut Pearl
-        // Diver and Moon Signal among seven.
-        Assert.Equal(77, slice.Count(c => c.StartsWith("ModelDb.Card")));
+        // still SEVENTY-EIGHT since the status batch (2026-10-01), which cut
+        // Pearl Diver and Moon Signal among seven and added seven.
+        Assert.Equal(78, slice.Count(c => c.StartsWith("ModelDb.Card")));
         foreach (var row in new[] { "ProtoKkMassedVolley", "ProtoKkSignalArrow",
                                     "ProtoKkSurgingShoal",
                                     "ProtoKkPressTheAdvantage",

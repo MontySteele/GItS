@@ -37,7 +37,7 @@ kits, are retired until a kit reaches Balance (legacy cleanup pick 5). **Last re
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
-| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 77 |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (expansion built) | 78 |
 
@@ -126,12 +126,13 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   `review/active/kokomi-status-batch-2026-10-01.md`, built in both engines.
   Six cards that answer statuses through the hand a Plan sees after the
   draw (Kelp Wall, Tidecleanse, Sea Glass Harvest and its Sea Glass token,
-  Turning Tide, Flotsam Surge, Abyssal Salvage); Rally, Pearl Diver, Battle
-  Plan, Feigned Retreat, Moon Signal, Chain of Command and All Streams Flow
-  to the Sea cut. Coral Sanctuary, the paper's Rare, was withdrawn for a
-  redesign, so the pool is 77 (21 / 36 / 20) until its replacement lands
-  (BACKLOG). Every Plan line prints "Or plan:" ("Or dusk plan:"), the
-  starter's included, and the Plan tip opens "Instead of the line above".
+  Turning Tide, Flotsam Surge, Abyssal Salvage) and Riptide Ruin, the Rare
+  in the cut Coral Sanctuary's place, a second status source; Rally, Pearl
+  Diver, Battle Plan, Feigned Retreat, Moon Signal, Chain of Command and All
+  Streams Flow to the Sea cut. The pool is 78 (21 / 36 / 21). A Plan line
+  under a now-line prints "Or plan:" ("Or dusk plan:"), the starter's
+  included; a Plan-only card keeps "Plan:". The Plan tip opens "Instead of
+  the line above".
   Provenance note, "Kokomi status batch, 2026-10-01". Next: [USER] plays.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper

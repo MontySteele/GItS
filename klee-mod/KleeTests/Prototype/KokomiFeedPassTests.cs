@@ -45,7 +45,8 @@ public class KokomiFeedPassTests : IDisposable
     {
         Assert.Equal((CardType.Skill, CardRarity.Common, 0),
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
-        Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].\nOr [gold]plan[/gold]: ",
+        // Plan-only: "Plan:", no "or" (2026-10-01).
+        Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: ",
                           Face(card));
     }
 
@@ -143,9 +144,9 @@ public class KokomiFeedPassTests : IDisposable
             .ToList();
         // SIXTY-NINE since expansion batch one (2026-09-29), whose 22 rows
         // follow the five; SEVENTY since the payoff pass (2026-10-01);
-        // SEVENTY-EIGHT since pool completion; SEVENTY-SEVEN since the status
-        // batch (2026-10-01), which cut six rows ahead of the five.
-        Assert.Equal(77, slice.Count);
+        // SEVENTY-EIGHT since pool completion and since the status batch
+        // (2026-10-01), which cut six rows ahead of the five.
+        Assert.Equal(78, slice.Count);
         Assert.Equal(new[] { "ProtoKkBubbleWard", "ProtoKkNip", "ProtoKkJellyfishDrift",
                              "ProtoKkCurrentRead", "ProtoKkBrineSting" },
                      slice.Skip(35).Take(5).Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))

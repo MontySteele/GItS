@@ -2032,6 +2032,18 @@
    # (`upgraded_power`, The Long Game's shape).
    upgrade: {upgraded_power: kk_abyssal_salvage_plus}}
 
+- {id: proto_kk_riptide_ruin, name: "Riptide Ruin", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare,
+   # The status batch's Rare, in Coral Sanctuary's place (ruled 2026-10-01):
+   # a second status source, Flotsam Surge's shape at Rare size. Hydro
+   # through the arm's cadence like every damaging card of hers.
+   description: "Deal 9 damage to ALL enemies twice. Shuffle 3 [gold]Dazed[/gold] into your draw pile.",
+   effects: [{op: damage, amount: 9, target: all_enemies, times: 2},
+             {op: add_card, card: status_dazed, zone: draw, amount: 3}],
+   # 12 to ALL, twice.
+   upgrade: {damage: 3}}
+
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.
 # Source, readings and hooks: docs/notes/prototype-surface-provenance.md.
