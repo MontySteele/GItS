@@ -33,6 +33,11 @@ import math
 import pytest
 
 from tier05 import run_metrics
+from tier0.tests.shipped_world import RETIRED_CALIBRATION
+
+# RETIRED WITH THE CALIBRATION (legacy cleanup pick 5, 2026-10-01): the band
+# is re-declared, if at all, when Kokomi reaches Balance on the current kit.
+pytestmark = RETIRED_CALIBRATION
 
 
 class _Fight:

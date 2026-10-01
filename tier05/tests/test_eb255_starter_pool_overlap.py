@@ -26,6 +26,10 @@ from tier05 import draft, rewards
 
 from tools import lint_starter_pool_overlap as lint
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 
 def test_an_invitation_is_a_starter_card_that_is_also_offerable():
     """The one live contaminator, stated in full: common (not basic), not a

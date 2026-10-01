@@ -32,6 +32,11 @@ from tier0.engine import combat, effects, resources
 from tier0.engine.state import CombatState
 from tier0.tests.conftest import make_enemy
 from tools import gen_klee_cards as gen
+import pytest
+
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
 
 
 RESOURCES_CS = (gen.REPO / "klee-mod" / "KleeCode" / "Powers"

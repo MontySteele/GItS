@@ -45,6 +45,10 @@ from tier0.pilot.policy import make_pilot
 from tier0.tests.conftest import make_state
 from tier05 import draft
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 SEED = 7
 # `EB-750`: the arm's six priced pool Attacks were SUPERSEDED by R270's
 # currency ruling and left the prototype surface with both substitution maps

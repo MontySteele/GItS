@@ -13,6 +13,10 @@ from tier05 import draft, model, rewards
 from tier05 import maps
 from tier05.run_metrics import summarize_runs, survival_profile
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 SEED = 42
 
 

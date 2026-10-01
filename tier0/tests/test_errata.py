@@ -12,6 +12,7 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier0.harness import metrics
 from tier0.harness.runner import run_battery, score_character
+from tier0.tests.shipped_world import RETIRED_CALIBRATION
 from tier0.tests.conftest import make_enemy, make_state
 
 BAND_FIGHTS = 1000
@@ -121,6 +122,7 @@ V02_MEDIAN = {"A1_frontload": 4.77, "A2_scaling": 3.82, "A3_block": 2.09,
               "A7_setup_tax": 2.37}
 
 
+@RETIRED_CALIBRATION
 @pytest.mark.battery
 def test_v02_median_scorecard_locked():
     rep = score_character("klee", 300, SEED)
@@ -145,6 +147,7 @@ def test_sheet_splash_cap_matches_engine_constant():
     assert fx["splash_procs_per_turn"] == C.DETONATION_SPLASH_PROC_CAP
 
 
+@RETIRED_CALIBRATION
 @pytest.mark.battery
 @pytest.mark.parametrize("deck,pilot,enc", [
     ("demolition_weighted", "demolition", "tank_boss"),

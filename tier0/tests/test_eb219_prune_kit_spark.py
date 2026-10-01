@@ -32,6 +32,10 @@ from tier0.engine import effects
 from tier0.engine.combat import play_card
 from tier0.tests.conftest import make_enemy, make_state
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 
 # The four yields Prune's SHIPPED FACE paid, per play, before EB-219 moved
 # them. (upgraded, reaction) -> Sparks. Nothing derives these; they are the

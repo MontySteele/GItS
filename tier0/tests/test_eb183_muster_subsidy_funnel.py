@@ -39,6 +39,10 @@ from tier0.engine import effects, refpowers
 from tier0.engine.state import Card, CombatState
 from tier0.tests.conftest import make_enemy
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 
 def kokomi_state(seed=0):
     p = loader.build_player("kokomi")

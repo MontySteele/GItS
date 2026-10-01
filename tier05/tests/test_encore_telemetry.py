@@ -12,6 +12,11 @@ from tier0.engine.combat import run_fight
 from tier0.content import loader
 from tier0.pilot.policy import make_pilot
 from tier05 import conditional_telemetry, encore_telemetry
+import pytest
+
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
 
 
 def _upkeep(members: int, encore: int, cost: int = 1) -> dict:

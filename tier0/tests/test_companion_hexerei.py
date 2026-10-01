@@ -27,6 +27,10 @@ from tier0.engine import companion_standins as standins
 from tier0.engine import effects, reactions
 from tier0.tests.conftest import make_enemy, make_state
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 #: The slice, and the Universal each row stands in for.
 FAMILY = {
     "proto_mc_albedo_tectonic_tide": "proto_mc_albedo_solar_isotoma",

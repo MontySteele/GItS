@@ -25,6 +25,10 @@ from tier0.engine.state import CombatState
 from tier05 import draft, model
 from tier05 import maps
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 
 @pytest.fixture(autouse=True)
 def _single_act(monkeypatch):

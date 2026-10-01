@@ -60,6 +60,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from tier0 import constants as C                            # noqa: E402
 from tier0.content import loader                            # noqa: E402
+from tier0.engine import furina_stage                       # noqa: E402
 from tier05 import rewards                                  # noqa: E402
 
 
@@ -214,17 +215,24 @@ def findings() -> tuple[dict[tuple[str, str, str], tuple[int, ...]], list[str]]:
     the shipped rows back under four more names would bury the one row an arm
     is actually responsible for -- which is the row a reader came here for.
     """
-    basics_offered: list[str] = []
-    shipped = _arm_rows(basics_offered, sweep_basics=True)
-    rows = {("shipped", c, i): claims for (c, i), claims in shipped.items()}
-    for arm_name, module, flags in ARMS:
-        if not flags:
-            continue
-        with _arm(module, **flags):
-            for key, claims in _arm_rows(basics_offered,
-                                         sweep_basics=False).items():
-                if shipped.get(key) != claims:
-                    rows[(arm_name, *key)] = claims
+    # THE BASE IS THE SHIPPED TREE, NAMED. Since legacy cleanup stage 3
+    # (2026-10-01) the sim's defaults are the current kits, so "no flags" no
+    # longer means shipped: the four kit arms are turned off here, and each
+    # flagged arm below flips its one flag on top of that base, exactly as
+    # before the flip. This lint goes with the shipped kits (stage 5/6).
+    with _arm(C, KLEE_OVERHAUL=False, KOKOMI_OVERHAUL=False,
+              COMPANION_OVERHAUL=False),             _arm(furina_stage, FURINA_STAGE=False):
+        basics_offered: list[str] = []
+        shipped = _arm_rows(basics_offered, sweep_basics=True)
+        rows = {("shipped", c, i): claims for (c, i), claims in shipped.items()}
+        for arm_name, module, flags in ARMS:
+            if not flags:
+                continue
+            with _arm(module, **flags):
+                for key, claims in _arm_rows(basics_offered,
+                                             sweep_basics=False).items():
+                    if shipped.get(key) != claims:
+                        rows[(arm_name, *key)] = claims
     return rows, basics_offered
 
 

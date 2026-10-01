@@ -38,6 +38,12 @@ from tier0.engine.combat import run_fight
 from tier0.pilot.policy import make_pilot
 from tier05 import draft, rewards
 
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+from tier0.tests.shipped_world import DEFAULTS  # noqa: E402
+
+pytestmark = pytest.mark.usefixtures("shipped_world")
+
 SEED = 11
 
 #: Every op slice one adds. Registered in `effects.OPS` so the loader's
@@ -103,9 +109,10 @@ def log_digest(state) -> str:
 
 # --- 1. FLAG OFF IS BYTE-IDENTICAL -----------------------------------------
 
-def test_the_flag_ships_off():
-    """The quarantine. Everything below only matters while this holds."""
-    assert C.KOKOMI_OVERHAUL is False
+def test_the_flag_ships_on():
+    """The sim runs the current kits by default (legacy cleanup stage 3,
+    2026-10-01, pick 5), as every C# build does."""
+    assert DEFAULTS["KOKOMI_OVERHAUL"] is True
 
 
 def test_a_fixed_seed_kokomi_fight_is_reproducible_with_the_flag_off():

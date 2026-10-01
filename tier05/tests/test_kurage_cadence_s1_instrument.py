@@ -20,6 +20,11 @@ from __future__ import annotations
 
 from tier0 import constants as C
 from tier05 import cells, exp_kurage_cadence_s1 as s1, model
+import pytest
+
+# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
+# defaults to the current kits, and these pins read the shipped ones.
+pytestmark = pytest.mark.usefixtures("shipped_world")
 
 
 # -- 1. the reduction ---------------------------------------------------------
