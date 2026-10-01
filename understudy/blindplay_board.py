@@ -2244,7 +2244,8 @@ _OPTION_FACE_KEYS = (("card_name", "card_description"),
                      ("potion_name", "potion_description"))
 
 
-def _option_faces(entry: Any, skip: str = "") -> list[dict[str, str]]:
+def _option_faces(entry: Any, skip: str = "",
+                  own_text: str = "") -> list[dict[str, str]]:
     """Everything an option NAMES, each with the text the game printed for it.
 
     `EB-448`. THE OUTCOME WAS NEVER ON THE PAGE. Klee r13's Trash Heap "gave a
@@ -2278,16 +2279,30 @@ def _option_faces(entry: Any, skip: str = "") -> list[dict[str, str]]:
         return []
     out: list[dict[str, str]] = []
     seen = {_fold(skip)} if skip else set()
+
+    def _fresh(name: str, text: str) -> bool:
+        # 2026-10-01 (the Doll Room). A face that repeats the row's heading is
+        # dropped only when the row ALREADY printed its text. A doll option is
+        # titled with its relic's name and worded "take the doll"; the relic's
+        # rules arrive only on the hover tip under the same name, and the
+        # dedupe threw them away, so the seat chose between two dolls blind.
+        if _fold(name) not in seen:
+            return True
+        return (bool(skip) and _fold(name) == _fold(skip) and bool(text)
+                and _fold(text) != _fold(own_text)
+                and not any(_fold(f["text"]) == _fold(text) for f in out))
+
     for name_key, text_key in _OPTION_FACE_KEYS:
         name = _text(entry.get(name_key))
-        if name and _fold(name) not in seen:
+        text = _text(entry.get(text_key))
+        if name and _fresh(name, text):
             seen.add(_fold(name))
-            out.append({"name": name, "text": _text(entry.get(text_key))})
+            out.append({"name": name, "text": text})
     for tip in entry.get("keywords") or []:
         if not isinstance(tip, dict) or _is_mod_source_tip(tip):
             continue
         name = _text(tip.get("name"))
-        if name and _fold(name) not in seen:
+        if name and _fresh(name, _text(tip.get("description"))):
             seen.add(_fold(name))
             # THE GUEST SEAT ROUND (2026-09-25). A CARD TIP'S COST. The Wood
             # Carvings event named Toric Toughness with its rules and no cost,
@@ -2336,7 +2351,8 @@ def _event_option(entry: Any) -> dict[str, Any]:
     screens.
     """
     option = _named_option(entry)
-    option["names"] = _option_faces(entry, skip=option["name"])
+    option["names"] = _option_faces(entry, skip=option["name"],
+                                    own_text=option.get("text") or "")
     option["taken"] = bool(isinstance(entry, dict) and entry.get("was_chosen"))
     # `EB-393`: and where the row's own sentence promises a card that neither
     # channel carried, the gap is stated rather than left as a title with no
