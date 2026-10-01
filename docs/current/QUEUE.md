@@ -29,6 +29,10 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
+- **Varka expansion** (`varka-expansion-2026-10-01.md`): 37 cards to 78, his own
+  seven relics and three potions. (1) replace the Silent borrow; (2) each element a job and two payoffs,
+  Muster cut to six; (3) Downburst's fresh spread; (4) Banner of the West Wind. Defaults
+  all (a).
 - **Character four, three paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, `varka-paper-kit-2026-09-28.md`, three
   picks each, revised on GPT's audit). They are not read against each other
