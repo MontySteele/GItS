@@ -1363,6 +1363,17 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "varka"),
                              key[len("varka_"):], val)
+        elif key == "varka_upgraded":
+            # VARKA (the expansion, Pathfinder's Mark+): the row's `varka`
+            # op reads its upgrade at play time (`IsUpgraded` in C#).
+            # Boolean, only True is a ruling.
+            if val is not True:
+                raise ValueError(
+                    f"varka_upgraded delta on {base_id!r} must be true")
+            hit = next((fx for fx in top if fx.get("op") == "varka"), None)
+            ok = hit is not None
+            if hit:
+                hit["upgraded"] = True
         elif key == "choose_knight":
             # VARKA's Knights' Roll Call: upgraded, the player picks the
             # Knight. Boolean, only True is a ruling.

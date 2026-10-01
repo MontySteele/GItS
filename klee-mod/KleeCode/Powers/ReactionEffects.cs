@@ -735,7 +735,13 @@ internal static class ReactionEffects
                 await PowerCmd.Remove(existing);
             }
             await AuraCmd.Apply(choiceContext, e, spread, dealer, cardSource);
-            if (AuraCmd.Find(e) is { } copy) copy.Spent = true;
+            var fresh = false;
+#if PROTOTYPE_CARDS
+            // VARKA's Downburst (the expansion, pick 3a): its copies arrive
+            // fresh, so a second Anemo card can chain.
+            fresh = VarkaRules.SpreadArrivesFresh(cardSource);
+#endif
+            if (AuraCmd.Find(e) is { } copy) copy.Spent = !fresh;
         }
 
         foreach (var e in bodies)

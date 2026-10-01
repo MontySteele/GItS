@@ -214,7 +214,11 @@ twin is `tier0/engine/varka_oath.py` behind its own switch `VARKA_OATH`, off
 like the arms' twins and flipped by `tier0/tests/test_varka_oath.py`. His
 cards speak one verb, `{op: varka, kind: ...}`, each kind one
 `VarkaCards.<Kind>` call; its numbers are the card's `Vk*` vars and the
-upgrade keys `varka_per` / `varka_base` / `varka_amount` move them.
+upgrade keys `varka_per` / `varka_base` / `varka_amount` move them. A kind
+names its `target:` (`enemy` aims the card, `all_enemies` makes it AllEnemies;
+`VARKA_AIMED_KINDS` / `VARKA_ALL_KINDS`), and `varka_upgraded: true` is a
+play-time `IsUpgraded` read for a kind whose upgrade is a rule, not a number
+(Pathfinder's Mark+).
 
 **The companion arm REPLACES THE COMPANION POOL OF TWO NATIONS.** Third arm,
 third property, same terms as the second, on by default since 2026-09-28:

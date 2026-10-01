@@ -314,6 +314,11 @@ BLIND_PREDICATES = frozenset({
     "has_current_element",
     "knight_played_this_turn",
     "swirled_by_this",
+    # The expansion (2026-10-01), on the same terms: Amber: Sharpshooter's
+    # "If the enemy already has Pyro" and Shifting Gale's "If your current
+    # element changed this turn".
+    "target_has_pyro",
+    "element_changed_this_turn",
 })
 BLIND_PREDICATE_PREFIXES: tuple[str, ...] = ()
 

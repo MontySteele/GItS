@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -449,4 +450,375 @@ public sealed class VarkaBaronBunnyPower : PowerModel, ILocalizationProvider
             }
         }
     }
+}
+
+// ==========================================================================
+// THE EXPANSION (review/active/varka-expansion-2026-10-01.md sec.3, ruled
+// 2026-10-01). Fifteen Powers. Each is paid at one site in VarkaOath.cs
+// (named on the class) or by its own hook; sim twins in
+// tier0/engine/varka_oath.py.
+// ==========================================================================
+
+/// <summary>Static Field: "The first time each turn you apply Electro, draw 2
+/// [3] cards." Paid by <see cref="VarkaOath.NoteApplication"/>, once a turn
+/// (<see cref="VarkaOathLedger.TakeStaticField"/>).</summary>
+public sealed class StaticFieldPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Static Field"),
+        ("description",
+            "The first time each turn you apply [gold]Electro[/gold], draw "
+          + "[blue]{Amount}[/blue] cards."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal async Task Draw(PlayerChoiceContext choiceContext)
+    {
+        if (Owner.Player is not { } player || Amount <= 0) return;
+        Flash();
+        await CardPileCmd.Draw(choiceContext, Amount, player);
+    }
+}
+
+/// <summary>Unwavering Banner: "Only Knights and cards that name it can
+/// change your current element." A marker read by
+/// <see cref="VarkaOath.NoteApplication"/>: the open Oath's switch is off;
+/// Knights, Change of Guard and Weathervane still move it.</summary>
+public sealed class UnwaveringBannerPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Unwavering Banner"),
+        ("description",
+            "Only [gold]Knights[/gold] and cards that name it can change your "
+          + "[gold]current element[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+}
+
+/// <summary>Cycle of Seasons: "Whenever your current element changes, deal
+/// 4 [6] damage to ALL enemies." Paid by <see cref="VarkaOath.SetCurrent"/>;
+/// element-less and unpowered, a Power's damage.</summary>
+public sealed class CycleOfSeasonsPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Cycle of Seasons"),
+        ("description",
+            "Whenever your [gold]current element[/gold] changes, deal "
+          + "[blue]{Amount}[/blue] damage to ALL enemies."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal async Task OnElementChanged(PlayerChoiceContext choiceContext)
+    {
+        var enemies = Owner.CombatState?.HittableEnemies.ToList();
+        if (enemies == null || Amount <= 0) return;
+        Flash();
+        foreach (var enemy in enemies)
+        {
+            if (!enemy.IsAlive) continue;
+            await ElementalHit.DealUnelemented(choiceContext, enemy, Amount,
+                                               Owner, powered: false);
+        }
+    }
+}
+
+/// <summary>Eye Wall: "Whenever you Swirl this turn, gain 3 Block." Paid by
+/// <see cref="VarkaOath.OnSwirl"/>; gone at the end of the turn.</summary>
+public sealed class EyeWallPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Eye Wall"),
+        ("description",
+            "Whenever you [gold]Swirl[/gold] this turn, gain "
+          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
+}
+
+/// <summary>Assembly at the Cathedral: "Whenever you play a Knight, deal 3
+/// [4] damage to a random enemy." Paid by <see cref="VarkaOath.EndPlay"/>,
+/// once per play (replays too), element-less and unpowered.</summary>
+public sealed class AssemblyAtTheCathedralPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Assembly at the Cathedral"),
+        ("description",
+            "Whenever you play a [gold]Knight[/gold], deal "
+          + "[blue]{Amount}[/blue] damage to a random enemy."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal async Task OnKnightPlayed(PlayerChoiceContext choiceContext)
+    {
+        var enemies = Owner.CombatState?.HittableEnemies
+            .Where(e => e.IsAlive).ToList();
+        if (enemies == null || enemies.Count == 0 || Amount <= 0) return;
+        if (Owner.Player is not { } player) return;
+        var target = player.RunState.Rng.CombatTargets.NextItem(enemies);
+        if (target == null) return;
+        Flash();
+        await ElementalHit.DealUnelemented(choiceContext, target, Amount, Owner,
+                                           powered: false);
+    }
+}
+
+/// <summary>Wildfire Oath: "While your current element is Pyro, your Swirls'
+/// damage hits ALL enemies, plus 1 for each Pyro Oath." A marker read by the
+/// Pyro payout (<c>VarkaOath.Pay</c>); its Amount is the per-Oath rate.
+/// </summary>
+public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Wildfire Oath"),
+        ("description",
+            "While your [gold]current element[/gold] is Pyro, your "
+          + "[gold]Swirls[/gold]' damage hits ALL enemies, plus "
+          + "[blue]{Amount}[/blue] for each Pyro [gold]Oath[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary>Unbroken Tide: "While your current element is Hydro, your Block
+/// is not removed at the start of your turn." Barricade's hook, read when
+/// the clear is asked.</summary>
+public sealed class UnbrokenTidePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Unbroken Tide"),
+        ("description",
+            "While your [gold]current element[/gold] is Hydro, your "
+          + "[gold]Block[/gold] is not removed at the start of your turn."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    /// <summary>Does the Tide keep this creature's Block? PURE on its
+    /// primitives.</summary>
+    public static bool Keeps(Element current) => current == Element.Hydro;
+
+    public override bool ShouldClearBlock(Creature creature) =>
+        creature != Owner || !Keeps(VarkaOath.Current(Owner));
+}
+
+/// <summary>Absolute Zero: "While your current element is Cryo, your Swirls
+/// apply Vulnerable and Weak to ALL enemies." A marker read by the Cryo
+/// payout (<c>VarkaOath.Pay</c>).</summary>
+public sealed class AbsoluteZeroPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Absolute Zero"),
+        ("description",
+            "While your [gold]current element[/gold] is Cryo, your "
+          + "[gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and "
+          + "[gold]Weak[/gold] to ALL enemies."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+}
+
+/// <summary>Oath Unto Death: "Whenever you gain Oath of your current
+/// element, gain 1 more." Read inside <see cref="VarkaOath.Gain"/>, so the
+/// extra point is part of the same gain.</summary>
+public sealed class OathUntoDeathPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Oath Unto Death"),
+        ("description",
+            "Whenever you gain [gold]Oath[/gold] of your [gold]current "
+          + "element[/gold], gain [blue]{Amount}[/blue] more."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary>Wolfpack: "Whenever you play Four Winds' Ascension, add a copy
+/// of it to your discard pile." Paid by <see cref="VarkaOath.EndPlay"/>, one
+/// copy per stack, upgraded when the played one was.</summary>
+public sealed class WolfpackPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Wolfpack"),
+        ("description",
+            "Whenever you play Four Winds' Ascension, add a copy of it to "
+          + "your discard pile."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal async Task OnAscensionPlayed(CardModel played)
+    {
+        var combat = Owner.CombatState;
+        if (combat == null || Owner.Player is not { } player) return;
+        Flash();
+        for (var i = 0; i < Amount; i++)
+        {
+            var copy = combat.CreateCard(
+                ModelDb.GetById<CardModel>(played.Id), player);
+            if (copy == null) continue;
+            if (played.IsUpgraded && copy.IsUpgradable && !copy.IsUpgraded)
+            {
+                copy.UpgradeInternal();
+            }
+            await CardPileCmd.AddGeneratedCardToCombat(copy, PileType.Discard,
+                                                       player);
+        }
+    }
+}
+
+/// <summary>Oathbound Aegis: "At the end of your turn, gain Block equal to
+/// your total Oath, up to 15 [20]." Amount is the cap.</summary>
+public sealed class OathboundAegisPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Oathbound Aegis"),
+        ("description",
+            "At the end of your turn, gain [gold]Block[/gold] equal to your "
+          + "total [gold]Oath[/gold], up to [blue]{Amount}[/blue]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>The Block it gives. PURE.</summary>
+    public static int BlockFor(int totalOath, int cap) =>
+        System.Math.Max(0, System.Math.Min(totalOath, cap));
+
+    public override async Task BeforeSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player || !VarkaOath.Live(Owner)) return;
+        var block = BlockFor(VarkaOathLedger.For(Owner).Total, Amount);
+        if (block <= 0) return;
+        Flash();
+        await CreatureCmd.GainBlock(Owner, block, ValueProp.Unpowered, null,
+                                    fast: true);
+    }
+}
+
+/// <summary>Weathervane: "At the start of your turn, you may choose an
+/// element you have Oath in; it becomes your current element." Paid first
+/// in <see cref="VarkaOath.TurnStart"/>, on a cancelable grid.</summary>
+public sealed class WeathervanePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Weathervane"),
+        ("description",
+            "At the start of your turn, you may choose an element you have "
+          + "[gold]Oath[/gold] in; it becomes your [gold]current "
+          + "element[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+}
+
+/// <summary>Twin Gales: "Your Swirls pay both your current element and the
+/// element Swirled." A marker read by <see cref="VarkaOath.OnSwirl"/>.
+/// </summary>
+public sealed class TwinGalesPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Twin Gales"),
+        ("description",
+            "Your [gold]Swirls[/gold] pay both your [gold]current "
+          + "element[/gold] and the element Swirled."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+}
+
+/// <summary>Eye of Stormterror: "The first 3 times you Swirl each turn,
+/// draw 1 card." Paid by <see cref="VarkaOath.OnSwirl"/>.</summary>
+public sealed class EyeOfStormterrorPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Eye of Stormterror"),
+        ("description",
+            "The first " + VarkaLaw.EyeOfStormterrorSwirls + " times you "
+          + "[gold]Swirl[/gold] each turn, draw [blue]{Amount}[/blue] "
+          + "card{Amount:plural:|s}."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal async Task Draw(PlayerChoiceContext choiceContext)
+    {
+        if (Owner.Player is not { } player || Amount <= 0) return;
+        Flash();
+        await CardPileCmd.Draw(choiceContext, Amount, player);
+    }
+}
+
+/// <summary>The Order Answers: "At the start of your turn, add a random
+/// Knight to your hand." Paid last in <see cref="VarkaOath.TurnStart"/>, a
+/// pool Knight at its own cost (<see cref="VarkaRules.AddRandomKnight"/>).
+/// </summary>
+public sealed class TheOrderAnswersPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "The Order Answers"),
+        ("description",
+            "At the start of your turn, add [blue]{Amount}[/blue] random "
+          + "[gold]Knight[/gold]{Amount:plural:|s} to your hand."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
 }

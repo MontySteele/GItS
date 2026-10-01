@@ -4724,3 +4724,128 @@ cards. No art: neither new row has a portrait yet, so both render the
 placeholder and `tools/art_coverage.py` bills them as missing, as expansion
 batch one's 22 rows were. Pins: `tier0/tests/test_kokomi_payoff_pass.py`,
 `KleeTests/Prototype/KokomiPayoffPassTests.cs`.
+
+## Varka expansion, 2026-10-01
+
+The paper `review/active/varka-expansion-2026-10-01.md`, all four picks at
+the defaults; [USER]: "Agreed on all four. You're good to proceed." This
+section is sec.3 (the cards); sec.4 (relics and potions) is "Varka relics and potions, 2026-10-01",
+#787. Built in both engines as written, with the readings below where
+a text left room. Pool 41 to 78 (20 Common, 35 Uncommon, 23 Rare), thirteen
+pool Knights. Rows: the "VARKA, THE EXPANSION" block of
+`docs/prototype-surface.yaml` (the five Knight-pass rows edited in place).
+C#: `Powers/Prototype/VarkaOath.cs` (ledger counts, the play bracket, the
+payout, twelve `VarkaCards` kinds), `VarkaPowers.cs` (fifteen Powers),
+`VarkaRules.cs` (pool Knights, `AddRandomKnight`, `SpreadArrivesFresh`, the
+optional element grid), `ReactionEffects.SwirlPays` (Downburst). Sim:
+`tier0/engine/varka_oath.py`. Pins: `tier0/tests/test_varka_expansion.py`,
+`KleeTests/Prototype/VarkaExpansionTests.cs`.
+
+**Element of a plain hit.** The existing convention, kept: a fixed "Deal X
+damage" Attack of his is Anemo (catalyst cadence: Knightly Strike, Shifting
+Gale, Grand Master's Verdict, Downburst), and an Oath-formula Attack is
+element-less (`applies_element: false`, as Oathsworn Strike and Azure
+Devour: Four Banners, Charge of the Knights). A card that names its element
+carries it (Blazing Charge Pyro, Thundering Verdict Electro, Tempest each of
+the four), credits it like any hit of his and, under the open Oath, makes it
+current. Cavalry Charge carries his current element, or is plain Anemo with
+none.
+
+**The new grammar.** Twelve `varka` kinds (`pathfinders_mark`,
+`current_element_strike`, `blazing_charge`, `glacial_edict`,
+`thundering_verdict`, `awakening`, `draw_per_enemy`, `cleanse`,
+`apply_current_element_all`, `crosscurrent`, `double_current_oath`,
+`tempest`); a kind names its target (`enemy` or `all_enemies`). Counts
+`enemies_with_aura` (fresh or spent), `hydro_oath`,
+`knights_played_this_combat`; predicates `target_has_pyro` (a snapshot at the
+top of the play, fresh or spent) and `element_changed_this_turn` (none to an
+element counts, as for Boreas Unbound). Upgrade key `varka_upgraded`. The
+kinds' faces print their own `Vk*` numbers (Northwind Avatar's shape), so
+Blazing Charge, Cavalry Charge, Thundering Verdict, Razor and Tempest preview
+no Strength; Strength still lands (their hits are the card's own
+`DamageCmd`).
+
+**The Knight pass.**
+- Diluc: "sets off a reaction" is any Elemental Reaction either hit sets off
+  (`reaction_triggered_by_this`); 1 Energy once.
+- Gleeful Songs: Block 5 [7]. Heart of the Abyss: the Vulnerable lands after
+  the Cryo hit (its own hit is not amplified); the upgrade moves only the
+  damage. Suppressive Barrage: Weak 2 [3], no Block.
+- Razor: Awakening: one hit per enemy, 4 [6], plus 3 to each enemy wearing
+  Electro (fresh or spent) before the first hit; stays a Skill.
+- Amber: Sharpshooter (new, Common): an Attack, as the paper prints. "Already
+  has Pyro" is read before her hit, so her own Pyro never turns it on; "deal
+  it again" is a second hit of the same number, 8 [11] both.
+- Barbara: Wellspring Hymn (new): in the printed order: the cleanse (Weak,
+  Frail, Vulnerable; nothing else), the Block, the Hydro.
+- Lisa: Pulsating Witch (new): "each enemy" is the living enemies after her
+  Electro; Retain is the upgrade.
+- Noelle: Steadfast Maid (new): a Geo Knight (`role_c: buffer`). She counts
+  for every Knight-played read and Charge of the Knights; Geo keeps no Oath,
+  so she sets no element, gains none, and Favonian Standard never pays on
+  her. She is in the Roll Call / Order Answers / Duty Roster pool.
+
+**Commons.** Pathfinder's Mark: one element for every target; with none it
+rolls one of the four (`Rng.CombatTargets` / `state.rng`) and the open Oath
+makes it current with 1 Oath (not under Unwavering Banner). West Wind Shield:
+powered Block. Knightly Strike: "4 more" is a second hit (Counterclaim's
+shape); tagged `strike`; the upgrade moves the 7.
+
+**Uncommons.** Blazing Charge reads Pyro Oath before its hit. Tidal Bulwark
+and Glacial Edict apply first and read their Oath after (their own point
+counts); Glacial Edict's Weak and Vulnerable are each 1 + floor(Cryo / 4 [3]).
+Static Field: any Electro application of his, a no-credit hit's too (and a
+relic's), but not a Swirl's spread copy; once a turn; it draws on the spot.
+Vow of the Blade draws with no current element too. Unwavering Banner stops
+only the open Oath's switch: the application still credits its own element;
+Knights, Change of Guard, Weathervane, Knight's Commission and Bottled Resolve
+still move it. Cycle of Seasons: element-less, unpowered, to ALL, after Boreas
+Unbound. Eye Wall's 3 is a literal (the paper brackets only its 6 [8]),
+unpowered, gone at the end of the turn. Pressure Front does nothing with no
+current element. Crosscurrent: a Swirl on a spent aura pays nothing (Jean's
+door); "pays twice" runs every payout of that Swirl twice and multiplies
+with Stormterror's Scale; the upgrade adds "Draw 1 card". Assembly at the
+Cathedral: once per Knight play, Grand Master's Order's replays included,
+after the play resolves, to a random enemy, element-less and unpowered.
+
+**Rares.** Wildfire Oath: while the current element is Pyro, the Pyro payout
+is 3 + (stacks x Pyro Oath) to ALL enemies instead of 3 to one. Absolute
+Zero: while current is Cryo, the Cryo payout is 1 Vulnerable and 1 Weak to
+ALL. Neither widens a payout Twin Gales pays under another current element.
+Unbroken Tide: Barricade's hook, read at the start-of-turn clear. Thundering
+Verdict reads Electro Oath once, before its hits; one credit for the card.
+Oath Unto Death: the extra point is inside the same gain, so Dawn Wind's
+March pays once; Grand Master's Verdict's doubling is a gain and takes it.
+Grand Master's Verdict: the Anemo hit, then a gain equal to the current
+element's Oath; nothing to double with none. Wolfpack: after the Ascension
+resolves, one copy per stack into the discard pile, upgraded if it was.
+Oathbound Aegis: at his turn's end, unpowered, min(total Oath, cap); a second
+copy adds its cap. Weathervane: first at the start of his turn (before Baron
+Bunny, Sworn Brotherhood and Oath of the Knights); C# opens Change of Guard's
+element grid, cancelable for "may", and asks nothing when he holds no Oath or
+only the current element's; the sim pilot keeps the current element unless
+another holds more. Tempest of the Four Winds: four hits in the printed
+order, each crediting its element; reactions between them happen (Pyro then
+Hydro vaporizes); Electro, last, wins the open Oath. Twin Gales: the current
+element pays, then the Swirled one, once when they are the same, alone with
+no current element. Downburst (pick 3a): the card is the marker; its Swirl's
+spread copies arrive fresh; Converging Winds still replaces the spread. Eye
+of Stormterror: the first three Swirls each turn draw 1 per stack. Charge of
+the Knights: Knights played this combat, replays and Noelle included. The
+Order Answers: last at the start of turn, a random pool Knight at its own
+cost, one per stack.
+
+**Shape, and what is unfinished.** Pathfinder's Mark+ ("ALL enemies") answers a live
+TargetType, AllEnemies once upgraded (Coven Errand's shape, the codegen's
+`VARKA_UPGRADE_WIDENS`), so it asks for no target. The element kinds
+(Razor's Awakening, Blazing Charge, Thundering Verdict, Tempest) carry no
+"Applies <element>" keyword tip, which the codegen derives only from
+`damage` and `apply_aura` ops (BACKLOG). Weathervane's turn-start grid is
+untried through the bridge and in co-op (BACKLOG).
+
+**Art.** None of the 37 rows has a portrait: each renders the placeholder and
+`tools/art_coverage.py` bills it as missing, as Kokomi's expansion rows were.
+The fifteen Powers borrow the existing varka power badges
+(`KleePowerIcons`: an element Power its element's Vision, a Swirl reader
+Converging Winds', an element-change Power Boreas Unbound's, a Knight Power
+Study Buddy's).

@@ -479,7 +479,9 @@ def _runtime_count(state: CombatState, token: str,
     # VARKA, THE OATH REWORK (`varka_oath.VARKA_OATH`): his current
     # element's Oath and how many elements he has Oath in. 0 for anyone who
     # is not Varka and with the switch off, so no shipped read can move.
-    if token == "current_oath" or token == "oath_elements":
+    if (token == "current_oath" or token == "oath_elements"
+            or token == "enemies_with_aura" or token == "hydro_oath"
+            or token == "knights_played_this_combat"):
         return varka_oath.count(state, token)
     raise ValueError(f"unknown runtime count {token!r}")
 
@@ -3994,6 +3996,9 @@ PREDICATE_NAMES = frozenset({
     "has_current_element",
     "knight_played_this_turn",
     "swirled_by_this",
+    # THE EXPANSION (2026-10-01): Amber: Sharpshooter, Shifting Gale.
+    "target_has_pyro",
+    "element_changed_this_turn",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -4149,6 +4154,11 @@ RUNTIME_COUNT_NAMES = frozenset({
     # (Lisa: Infinite Circuit) is the shared counter registered above.
     "current_oath",
     "oath_elements",
+    # THE EXPANSION (2026-10-01): West Wind Shield, Tidal Bulwark, Charge of
+    # the Knights (`varka_oath.COUNTS`).
+    "enemies_with_aura",
+    "hydro_oath",
+    "knights_played_this_combat",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.
@@ -4479,7 +4489,8 @@ def _predicate(state: CombatState, name: str) -> bool:
         n = int(name.rsplit("_", 1)[1])
         return state.attacks_played_this_turn + 1 == n
     if (name == "has_current_element" or name == "knight_played_this_turn"
-            or name == "swirled_by_this"):
+            or name == "swirled_by_this" or name == "target_has_pyro"
+            or name == "element_changed_this_turn"):
         return varka_oath.predicate(state, name)
     raise ValueError(f"unknown predicate {name!r}")
 
@@ -6872,7 +6883,7 @@ def resolve_card(state: CombatState, card: Card) -> None:
         _resolve_card_bound(state, card)
     finally:
         if varka:
-            varka_oath.end_play(state)
+            varka_oath.end_play(state, card)
         state.card_aim = None
         state.card_aim_bound = False
 

@@ -396,6 +396,31 @@ internal static class KleePowerIcons
             KleePck.Path("varka/powers/converging_winds.png"),
         VarkaBaronBunnyPower => KleePck.Path("varka/powers/pyro_wind.png"),
         GrandMastersOrderPower => KleePck.Path("klee/powers/study_buddy.png"),
+        // THE EXPANSION (2026-10-01): no new art for a prototype, so each
+        // borrows the varka badge nearest its rule -- an element Power its
+        // element's Vision, a Swirl reader Converging Winds', a Block or
+        // Oath Power Stormward Stance's, an element-change Power Boreas
+        // Unbound's, a Knight Power Study Buddy's (Grand Master's Order's).
+        StaticFieldPower => KleePck.Path("varka/powers/electro_wind.png"),
+        UnwaveringBannerPower =>
+            KleePck.Path("varka/powers/stormward_stance.png"),
+        CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),
+        EyeWallPower => KleePck.Path("varka/powers/converging_winds.png"),
+        AssemblyAtTheCathedralPower =>
+            KleePck.Path("klee/powers/study_buddy.png"),
+        WildfireOathPower => KleePck.Path("varka/powers/pyro_wind.png"),
+        UnbrokenTidePower => KleePck.Path("varka/powers/hydro_wind.png"),
+        AbsoluteZeroPower => KleePck.Path("varka/powers/cryo_wind.png"),
+        OathUntoDeathPower =>
+            KleePck.Path("varka/powers/stormward_stance.png"),
+        WolfpackPower => KleePck.Path("varka/powers/boreas_unbound.png"),
+        OathboundAegisPower =>
+            KleePck.Path("varka/powers/stormward_stance.png"),
+        WeathervanePower => KleePck.Path("varka/powers/boreas_unbound.png"),
+        TwinGalesPower => KleePck.Path("varka/powers/converging_winds.png"),
+        EyeOfStormterrorPower =>
+            KleePck.Path("varka/powers/converging_winds.png"),
+        TheOrderAnswersPower => KleePck.Path("klee/powers/study_buddy.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

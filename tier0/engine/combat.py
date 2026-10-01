@@ -1001,7 +1001,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # GROW (rule 7). Jumps first, so a Bomb owed one grows on its new enemy
     # this turn rather than next.
     klee_overhaul.turn_start(state)
-    if refpowers.should_clear_block(p):      # Barricade suppresses the clear
+    # VARKA's Unbroken Tide (the expansion): his Block stays while his
+    # current element is Hydro. Dead with the switch off.
+    if (refpowers.should_clear_block(p)      # Barricade suppresses the clear
+            and not (varka_oath.VARKA_OATH and varka_oath.keeps_block(state))):
         # QUARANTINED (C.KOKOMI_OVERHAUL). THE EXPANSION's Watatsumi's Grace:
         # "keep up to N of your Block" -- the clear takes what is above the
         # cap (the base game's Sturdy Clamp shape). None without the Power.
@@ -1268,6 +1271,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # promise and the only clause of the sentence a card can tell apart.
     # `kokomi_plan.resolve_dusk` carries the rest of the argument.
     kokomi_plan.resolve_dusk(state)
+    # VARKA (`varka_oath.VARKA_OATH`): Oathbound Aegis's end-of-turn Block,
+    # at the same `BeforeSideTurnEnd` site. Dead with the switch off.
+    if varka_oath.VARKA_OATH:
+        varka_oath.turn_end(state)
     # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE ACTS (brief
     # sec.3 rule 10): "Each performer performs at the end of Furina's turn,
     # from any seat, a flat act that does not read its bar."

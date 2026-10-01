@@ -138,7 +138,10 @@ public sealed class KleeElementalHooks : AbstractModel
         if (cardPlay.Card is { } played) ReactionEvents.CardPlayEnds(played);
 #if PROTOTYPE_CARDS
         // VARKA (the Oath rework): the play's Oath scope closes.
-        if (cardPlay.Card is { } oathCard) VarkaOath.EndPlay(oathCard);
+        if (cardPlay.Card is { } oathCard)
+        {
+            await VarkaOath.EndPlay(choiceContext, oathCard);
+        }
 #endif
         // Same ownerless-play guard as BeforeCardPlayed above.
         var owner = cardPlay.Card?.Owner;

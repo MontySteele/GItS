@@ -55,8 +55,9 @@ public static class VarkaRules
     public static bool IsKnight(CardModel? card) =>
         card is ICompanionCard { PersonalPool: VarkaPrototype.CharacterId };
 
-    /// <summary>The nine POOL Knights Knights' Roll Call draws from (sec.6),
-    /// canonical, in pool order. The starter-only four are not among them.
+    /// <summary>The POOL Knights Knights' Roll Call draws from (sec.6),
+    /// canonical, in pool order: nine, and thirteen since the expansion
+    /// (2026-10-01), Noelle among them. The starter-only four are not.
     /// </summary>
     public static IReadOnlyList<CardModel> PoolKnights() => new CardModel[]
     {
@@ -69,6 +70,11 @@ public static class VarkaRules
         ModelDb.Card<ProtoVkDilucSearingOnslaught>(),
         ModelDb.Card<ProtoVkEulaIcetideVortex>(),
         ModelDb.Card<ProtoVkBarbaraWhisperOfWater>(),
+        // THE EXPANSION (2026-10-01).
+        ModelDb.Card<ProtoVkAmberSharpshooter>(),
+        ModelDb.Card<ProtoVkBarbaraWellspringHymn>(),
+        ModelDb.Card<ProtoVkLisaPulsatingWitch>(),
+        ModelDb.Card<ProtoVkNoelleSteadfastMaid>(),
     };
 
     /// <summary>The four starter-only Knights, one of which joins each run's
@@ -123,13 +129,40 @@ public static class VarkaRules
     }
 
     /// <summary>
+    /// The Order Answers: "add a random Knight to your hand", a pool Knight
+    /// at its own cost (<paramref name="free"/> false), off the same roll
+    /// Knights' Roll Call takes.
+    /// </summary>
+    public static async Task AddRandomKnight(Player? owner, bool free)
+    {
+        var combat = owner?.Creature?.CombatState;
+        if (owner == null || combat == null) return;
+        var canonical = owner.RunState.Rng.CombatTargets.NextItem(
+            PoolKnights().ToList());
+        var card = canonical == null ? null : combat.CreateCard(canonical, owner);
+        if (card == null) return;
+        if (free) card.EnergyCost.SetThisTurn(0);
+        await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, owner);
+    }
+
+    /// <summary>
+    /// DOWNBURST (the expansion, pick 3a): "If it Swirls, the copies it
+    /// spreads arrive fresh." The card itself is the marker; read where the
+    /// Swirl's spread lands a copy (<c>ReactionEffects.SwirlPays</c>). PURE.
+    /// </summary>
+    public static bool SpreadArrivesFresh(CardModel? cardSource) =>
+        VarkaPrototype.Enabled && cardSource is ProtoVkDownburst;
+
+    /// <summary>
     /// Change of Guard's pick: the elements he holds Oath in, as option faces
     /// on a grid (<see cref="Cards.Prototype.VarkaModalOptions"/>). Returns
     /// the element, or <see cref="Element.None"/> when nothing came back.
+    /// <paramref name="optional"/> (Weathervane's "you may") lets the player
+    /// close the grid without a pick.
     /// </summary>
     public static async Task<Element> ChooseElement(
         PlayerChoiceContext choiceContext, Player? owner,
-        IReadOnlyList<Element> elements)
+        IReadOnlyList<Element> elements, bool optional = false)
     {
         if (owner?.Creature?.CombatState == null) return Element.None;
         var options = elements
@@ -139,7 +172,10 @@ public static class VarkaRules
             .ToList();
         var picked = (await CardSelectCmd.FromSimpleGrid(
             choiceContext, options, owner,
-            new CardSelectorPrefs(new LocString(Table, ElementPromptKey), 1)))
+            new CardSelectorPrefs(new LocString(Table, ElementPromptKey), 1)
+            {
+                Cancelable = optional,
+            }))
             .FirstOrDefault();
         return picked is Cards.Prototype.ElementOption face
             ? face.OptionElement : Element.None;

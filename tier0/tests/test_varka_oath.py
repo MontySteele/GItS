@@ -162,7 +162,7 @@ def test_the_ruled_rows_and_their_upgrades(varka):
 def test_every_row_resolves_and_every_upgrade_applies(varka):
     rows = [c for c in loader.prototype_cards()
             if c.id.startswith(V.ID_PREFIX)]
-    assert len(rows) == 47
+    assert len(rows) == 84          # 47, and 84 since the expansion
     for c in rows:
         loader.get_card(c.id)
         if c.no_upgrade:
@@ -657,7 +657,7 @@ def test_add_knight(varka):
     _play(st, _vk("knights_roll_call"))
     knight = st.player.hand[-1]
     assert knight.id in V.pool_knight_ids() and knight.free_this_turn
-    assert len(V.pool_knight_ids()) == 9
+    assert len(V.pool_knight_ids()) == 13     # 9 + the expansion's 4
     _led(st).current = "cryo"
     _play(st, _vk("knights_roll_call") + "+")
     assert st.player.hand[-1].id == _vk("kaeya_frostgnaw")

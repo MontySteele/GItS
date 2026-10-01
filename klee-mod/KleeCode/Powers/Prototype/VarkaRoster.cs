@@ -52,9 +52,12 @@ internal static class VarkaRoster
         };
 
     /// <summary>
-    /// The pool: forty-one cards (sec.6), sixteen Commons, seventeen
-    /// Uncommons and eight Rares, the nine pool Knights among them. "Pool
-    /// target 78 comes after the prototype."
+    /// The pool: SEVENTY-EIGHT cards since the expansion (2026-10-01,
+    /// review/active/varka-expansion-2026-10-01.md sec.3): twenty Commons,
+    /// thirty-five Uncommons and twenty-three Rares, the thirteen pool
+    /// Knights among them. It was forty-one (fifteen, eighteen and eight;
+    /// the groups below keep the sheet's order, and each card's own rarity
+    /// is what the game reads).
     ///
     /// NO ANCIENT CARD, because the paper designs none. Darv's Dusty Tome
     /// draws an Ancient from this set and softlocks on an empty draw, so Four
@@ -63,7 +66,7 @@ internal static class VarkaRoster
     /// </summary>
     internal static IReadOnlyList<CardModel> Pool() => new CardModel[]
     {
-        // Common (16)
+        // The Oath rework's forty-one.
         ModelDb.Card<ProtoVkSquall>(),
         ModelDb.Card<ProtoVkUpdraft>(),
         ModelDb.Card<ProtoVkGaleSweep>(),
@@ -80,7 +83,6 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkOathswornStrike>(),
         ModelDb.Card<ProtoVkCrosswind>(),
         ModelDb.Card<ProtoVkRisingGale>(),
-        // Uncommon (17)
         ModelDb.Card<ProtoVkTempestCharge>(),
         ModelDb.Card<ProtoVkFavoniusCut>(),
         ModelDb.Card<ProtoVkGrandMastersOrder>(),
@@ -98,7 +100,6 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkStormSurge>(),
         ModelDb.Card<ProtoVkTailwindGuard>(),
         ModelDb.Card<ProtoVkUnfurledBanner>(),
-        // Rare (8)
         ModelDb.Card<ProtoVkConvergingWinds>(),
         ModelDb.Card<ProtoVkBoreasUnbound>(),
         ModelDb.Card<ProtoVkWallOfGales>(),
@@ -107,6 +108,47 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkNorthwindAvatar>(),
         ModelDb.Card<ProtoVkDawnWindsMarch>(),
         ModelDb.Card<ProtoVkAzureDevour>(),
+        // THE EXPANSION (2026-10-01): thirty-seven, in the sheet's order.
+        // Common (5)
+        ModelDb.Card<ProtoVkPathfindersMark>(),
+        ModelDb.Card<ProtoVkCavalryCharge>(),
+        ModelDb.Card<ProtoVkWestWindShield>(),
+        ModelDb.Card<ProtoVkKnightlyStrike>(),
+        ModelDb.Card<ProtoVkAmberSharpshooter>(),
+        // Uncommon (17)
+        ModelDb.Card<ProtoVkBlazingCharge>(),
+        ModelDb.Card<ProtoVkTidalBulwark>(),
+        ModelDb.Card<ProtoVkGlacialEdict>(),
+        ModelDb.Card<ProtoVkStaticField>(),
+        ModelDb.Card<ProtoVkBarbaraWellspringHymn>(),
+        ModelDb.Card<ProtoVkLisaPulsatingWitch>(),
+        ModelDb.Card<ProtoVkNoelleSteadfastMaid>(),
+        ModelDb.Card<ProtoVkVowOfTheBlade>(),
+        ModelDb.Card<ProtoVkUnwaveringBanner>(),
+        ModelDb.Card<ProtoVkShiftingGale>(),
+        ModelDb.Card<ProtoVkCycleOfSeasons>(),
+        ModelDb.Card<ProtoVkFourBanners>(),
+        ModelDb.Card<ProtoVkEyeWall>(),
+        ModelDb.Card<ProtoVkPressureFront>(),
+        ModelDb.Card<ProtoVkCrosscurrent>(),
+        ModelDb.Card<ProtoVkAssemblyAtTheCathedral>(),
+        ModelDb.Card<ProtoVkDawnPatrol>(),
+        // Rare (15)
+        ModelDb.Card<ProtoVkWildfireOath>(),
+        ModelDb.Card<ProtoVkUnbrokenTide>(),
+        ModelDb.Card<ProtoVkAbsoluteZero>(),
+        ModelDb.Card<ProtoVkThunderingVerdict>(),
+        ModelDb.Card<ProtoVkOathUntoDeath>(),
+        ModelDb.Card<ProtoVkGrandMastersVerdict>(),
+        ModelDb.Card<ProtoVkWolfpack>(),
+        ModelDb.Card<ProtoVkOathboundAegis>(),
+        ModelDb.Card<ProtoVkWeathervane>(),
+        ModelDb.Card<ProtoVkTempestOfTheFourWinds>(),
+        ModelDb.Card<ProtoVkTwinGales>(),
+        ModelDb.Card<ProtoVkDownburst>(),
+        ModelDb.Card<ProtoVkEyeOfStormterror>(),
+        ModelDb.Card<ProtoVkChargeOfTheKnights>(),
+        ModelDb.Card<ProtoVkTheOrderAnswers>(),
     };
 
     /// <summary>

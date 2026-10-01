@@ -94,14 +94,41 @@ public sealed class VarkaOathLedger
     /// <summary>Knights played this turn, replays included.</summary>
     public int KnightsThisTurn { get; private set; }
 
-    private int _round = -1;
+    /// <summary>Knights played this fight, replays included (the expansion's
+    /// Charge of the Knights). Noelle counts.</summary>
+    public int KnightsThisCombat { get; private set; }
 
-    /// <summary>A new round clears the turn's Knight count.</summary>
+    /// <summary>Swirls he made this turn (Eye of Stormterror).</summary>
+    public int SwirlsThisTurn { get; private set; }
+
+    /// <summary>While positive, a Swirl he makes pays twice (Crosscurrent).
+    /// </summary>
+    public int PaysTwice { get; set; }
+
+    private int _round = -1;
+    private int _changedRound = -1;
+    private int _staticFieldRound = -1;
+
+    /// <summary>Did his current element change this turn (Shifting Gale)?
+    /// None to an element counts, as it does for Boreas Unbound.</summary>
+    public bool ChangedThisTurn => _changedRound >= 0 && _changedRound == _round;
+
+    /// <summary>Static Field: is this the turn's first Electro he applied?
+    /// Marks the turn as spent when it is. Returns true once per turn.</summary>
+    public bool TakeStaticField()
+    {
+        if (_staticFieldRound == _round) return false;
+        _staticFieldRound = _round;
+        return true;
+    }
+
+    /// <summary>A new round clears the turn's Knight and Swirl counts.</summary>
     public void RollTo(int round)
     {
         if (round == _round) return;
         _round = round;
         KnightsThisTurn = 0;
+        SwirlsThisTurn = 0;
     }
 
     // ---- reads ------------------------------------------------------------
@@ -150,16 +177,22 @@ public sealed class VarkaOathLedger
     {
         if (!_oath.ContainsKey(element) || element == Current) return false;
         Current = element;
+        _changedRound = _round;
         return true;
     }
 
     /// <summary>A Knight was played (or replayed) this turn.</summary>
-    public void NoteKnight() => KnightsThisTurn++;
+    public void NoteKnight()
+    {
+        KnightsThisTurn++;
+        KnightsThisCombat++;
+    }
 
     /// <summary>A Swirl he made, on <paramref name="swirled"/>.</summary>
     public void NoteSwirl(Creature swirled)
     {
         SwirlsMade++;
+        SwirlsThisTurn++;
         if (_scopeDepth > 0) _swirledThisPlay.Add(swirled);
     }
 
@@ -330,11 +363,36 @@ public static class VarkaOath
         creature != null && Live(creature)
             ? VarkaOathLedger.For(creature).SwirlsMade : 0;
 
+    // ---- the expansion's reads (2026-10-01) ---------------------------------
+
+    /// <summary>Charge of the Knights: Knights played this fight.</summary>
+    public static int KnightsInCombat(Creature? creature) =>
+        creature != null && Live(creature)
+            ? VarkaOathLedger.For(creature).KnightsThisCombat : 0;
+
+    /// <summary>Shifting Gale: did his current element change this turn?
+    /// </summary>
+    public static bool ElementChangedThisTurn(Creature? creature) =>
+        creature != null && Live(creature)
+        && VarkaOathLedger.For(creature).ChangedThisTurn;
+
+    /// <summary>West Wind Shield: hittable enemies wearing an aura, fresh or
+    /// spent.</summary>
+    public static int EnemiesWithAura(Creature? creature) =>
+        creature?.CombatState == null || !Live(creature) ? 0
+            : creature.CombatState.HittableEnemies.Count(
+                e => AuraCmd.Find(e) != null);
+
     /// <summary>The element a Knight card sets, or None for any other card.
     /// PURE.</summary>
     public static Element KnightElement(CardModel? card) =>
         VarkaRules.IsKnight(card) && card is ICompanionCard companion
             ? companion.CompanionElement : Element.None;
+
+    /// <summary>Is <paramref name="element"/> one an Oath is kept in? Geo
+    /// (Noelle: Steadfast Maid) is not. PURE.</summary>
+    public static bool IsOathElement(Element element) =>
+        VarkaOathLedger.Elements.Contains(element);
 
     // ---- the play bracket -------------------------------------------------
 
@@ -352,19 +410,40 @@ public static class VarkaOath
         if (!Live(owner)) return;
         var ledger = VarkaOathLedger.For(owner!);
         ledger.OpenScope(open: !VarkaRules.IsKnight(card), card: card);
-        var element = KnightElement(card);
-        if (element == Element.None) return;
+        if (!VarkaRules.IsKnight(card)) return;
         ledger.NoteKnight();
+        // Noelle (the expansion) is a Geo Knight: a Knight for every
+        // Knight-played read, but Geo keeps no Oath, so she sets nothing.
+        var element = KnightElement(card);
+        if (!IsOathElement(element)) return;
         await SetCurrent(new ThrowingPlayerChoiceContext(), owner!, element,
                          knight: true);
     }
 
-    /// <summary>A card play ends.</summary>
-    public static void EndPlay(CardModel card)
+    /// <summary>A card play ends: the scope closes, then the expansion's
+    /// after-play Powers -- Assembly at the Cathedral on a Knight, Wolfpack
+    /// on Four Winds' Ascension. Every replay is a play.</summary>
+    public static async Task EndPlay(
+        PlayerChoiceContext choiceContext, CardModel card)
     {
         var owner = card.Owner?.Creature;
         if (!Live(owner)) return;
         VarkaOathLedger.For(owner!).CloseScope();
+        if (VarkaRules.IsKnight(card))
+        {
+            foreach (var assembly in owner!.Powers
+                         .OfType<AssemblyAtTheCathedralPower>().ToList())
+            {
+                await assembly.OnKnightPlayed(choiceContext);
+            }
+        }
+        if (card is ProtoVkFourWindsAscension)
+        {
+            foreach (var wolves in owner!.Powers.OfType<WolfpackPower>().ToList())
+            {
+                await wolves.OnAscensionPlayed(card);
+            }
+        }
     }
 
     /// <summary>An event outside a card play that must credit as one
@@ -446,6 +525,11 @@ public static class VarkaOath
             {
                 await unbound.OnElementChanged();
             }
+            // Cycle of Seasons (the expansion): damage to ALL enemies.
+            foreach (var cycle in varka.Powers.OfType<CycleOfSeasonsPower>().ToList())
+            {
+                await cycle.OnElementChanged(choiceContext);
+            }
         }
         await OathBadge.Sync(choiceContext, varka);
     }
@@ -463,6 +547,12 @@ public static class VarkaOath
     {
         if (!Live(varka)) return;
         var ledger = VarkaOathLedger.For(varka);
+        // Oath Unto Death (the expansion): "Whenever you gain Oath of your
+        // current element, gain 1 more." Inside this one gain event.
+        if (element == ledger.Current && n > 0)
+        {
+            n += varka.Powers.OfType<OathUntoDeathPower>().Sum(p => p.Amount);
+        }
         if (!ledger.Add(element, n)) return;
         if (element == ledger.Current)
         {
@@ -497,7 +587,18 @@ public static class VarkaOath
     {
         if (applier == null || !Live(applier) || !element.LeavesAura()) return;
         var ledger = VarkaOathLedger.For(applier);
-        if (ledger.OpenOathSwitches(element, cardSource))
+        // Static Field (the expansion): the turn's first Electro he applies
+        // draws, whether or not it credits.
+        if (element == Element.Electro
+            && applier.Powers.OfType<StaticFieldPower>().ToList() is { Count: > 0 } fields
+            && ledger.TakeStaticField())
+        {
+            foreach (var field in fields) await field.Draw(choiceContext);
+        }
+        // Unwavering Banner (the expansion): only Knights and the cards that
+        // name the switch move it, so the open Oath's switch is off.
+        if (!applier.HasPower<UnwaveringBannerPower>()
+            && ledger.OpenOathSwitches(element, cardSource))
         {
             await SetCurrent(choiceContext, applier, element, knight: false);
         }
@@ -525,42 +626,33 @@ public static class VarkaOath
             await Gain(choiceContext, dealer, swirled, 1);
         }
         var current = ledger.Current;
-        // Stormterror's Scale: "Your Swirls pay twice."
-        var payouts = Relics.StormterrorsScale.TakePayouts(dealer);
-        for (var pay = 0; pay < payouts; pay++)
+        // Stormterror's Scale: "Your Swirls pay twice." The expansion:
+        // Crosscurrent's Swirl pays twice too (the two multiply); Twin Gales
+        // pays the element Swirled as well, once, when it is not the current
+        // one.
+        var twin = dealer.HasPower<TwinGalesPower>();
+        var times = Relics.StormterrorsScale.TakePayouts(dealer)
+                    * (ledger.PaysTwice > 0 ? 2 : 1);
+        for (var pay = 0; pay < times; pay++)
         {
-            switch (current)
+            await Pay(choiceContext, target, dealer, current);
+            if (twin && IsOathElement(swirled) && swirled != current)
             {
-                case Element.Pyro:
-                    if (target.IsAlive)
-                    {
-                        await ElementalHit.DealUnelemented(
-                            choiceContext, target, VarkaLaw.SwirlPyroDamage, dealer,
-                            powered: false);
-                    }
-                    break;
-                case Element.Hydro:
-                    await CreatureCmd.GainBlock(dealer, VarkaLaw.SwirlHydroBlock,
-                        ValueProp.Unpowered, null, fast: true);
-                    break;
-                case Element.Cryo:
-                    if (target.IsAlive)
-                    {
-                        await PowerCmd.Apply<VulnerablePower>(
-                            choiceContext, target, VarkaLaw.SwirlCryoVulnerable,
-                            applier: dealer, cardSource: null);
-                    }
-                    break;
-                case Element.Electro:
-                    foreach (var enemy in dealer.CombatState?.HittableEnemies.ToList()
-                                          ?? new List<Creature>())
-                    {
-                        if (!enemy.IsAlive) continue;
-                        await ElementalHit.DealUnelemented(
-                            choiceContext, enemy, VarkaLaw.SwirlElectroDamageAll,
-                            dealer, powered: false);
-                    }
-                    break;
+                await Pay(choiceContext, target, dealer, swirled);
+            }
+        }
+        // Eye Wall: Block per Swirl this turn. Eye of Stormterror: the first
+        // three Swirls each turn draw.
+        foreach (var wall in dealer.Powers.OfType<EyeWallPower>().ToList())
+        {
+            await CreatureCmd.GainBlock(dealer, wall.Amount,
+                ValueProp.Unpowered, null, fast: true);
+        }
+        if (ledger.SwirlsThisTurn <= VarkaLaw.EyeOfStormterrorSwirls)
+        {
+            foreach (var eye in dealer.Powers.OfType<EyeOfStormterrorPower>().ToList())
+            {
+                await eye.Draw(choiceContext);
             }
         }
         if (current != Element.None)
@@ -569,6 +661,86 @@ public static class VarkaOath
                    + $"{swirled} Oath, paid {current}.");
         }
     }
+
+    /// <summary>
+    /// ONE SWIRL PAYOUT of <paramref name="element"/> (sec.3), with the
+    /// expansion's two element Powers, each only while the CURRENT element is
+    /// its own: Wildfire Oath sends Pyro's damage to ALL enemies, plus 1 per
+    /// Pyro Oath per stack (<see cref="WildfireDamage"/>); Absolute Zero
+    /// makes Cryo's Vulnerable, and a Weak beside it, land on ALL enemies.
+    /// </summary>
+    private static async Task Pay(
+        PlayerChoiceContext choiceContext, Creature target, Creature dealer,
+        Element element)
+    {
+        var ledger = VarkaOathLedger.For(dealer);
+        var enemies = dealer.CombatState?.HittableEnemies.ToList()
+                      ?? new List<Creature>();
+        switch (element)
+        {
+            case Element.Pyro:
+                var wild = ledger.Current == Element.Pyro
+                    ? dealer.Powers.OfType<WildfireOathPower>().Sum(p => p.Amount)
+                    : 0;
+                if (wild > 0)
+                {
+                    var amount = WildfireDamage(ledger.Oath(Element.Pyro), wild);
+                    foreach (var enemy in enemies)
+                    {
+                        if (!enemy.IsAlive) continue;
+                        await ElementalHit.DealUnelemented(
+                            choiceContext, enemy, amount, dealer, powered: false);
+                    }
+                }
+                else if (target.IsAlive)
+                {
+                    await ElementalHit.DealUnelemented(
+                        choiceContext, target, VarkaLaw.SwirlPyroDamage, dealer,
+                        powered: false);
+                }
+                break;
+            case Element.Hydro:
+                await CreatureCmd.GainBlock(dealer, VarkaLaw.SwirlHydroBlock,
+                    ValueProp.Unpowered, null, fast: true);
+                break;
+            case Element.Cryo:
+                if (ledger.Current == Element.Cryo
+                    && dealer.HasPower<AbsoluteZeroPower>())
+                {
+                    foreach (var enemy in enemies)
+                    {
+                        if (!enemy.IsAlive) continue;
+                        await PowerCmd.Apply<VulnerablePower>(
+                            choiceContext, enemy, VarkaLaw.SwirlCryoVulnerable,
+                            applier: dealer, cardSource: null);
+                        await PowerCmd.Apply<WeakPower>(
+                            choiceContext, enemy, VarkaLaw.AbsoluteZeroWeak,
+                            applier: dealer, cardSource: null);
+                    }
+                }
+                else if (target.IsAlive)
+                {
+                    await PowerCmd.Apply<VulnerablePower>(
+                        choiceContext, target, VarkaLaw.SwirlCryoVulnerable,
+                        applier: dealer, cardSource: null);
+                }
+                break;
+            case Element.Electro:
+                foreach (var enemy in enemies)
+                {
+                    if (!enemy.IsAlive) continue;
+                    await ElementalHit.DealUnelemented(
+                        choiceContext, enemy, VarkaLaw.SwirlElectroDamageAll,
+                        dealer, powered: false);
+                }
+                break;
+        }
+    }
+
+    /// <summary>Wildfire Oath's Pyro payout: 3, plus 1 per Pyro Oath for
+    /// each stack. PURE.</summary>
+    public static int WildfireDamage(int pyroOath, int stacks) =>
+        VarkaLaw.SwirlPyroDamage + stacks * pyroOath;
 
     /// <summary>The payout sentence for <paramref name="element"/>, the one
     /// the badge and the current-element tip print. PURE.</summary>
@@ -598,6 +770,13 @@ public static class VarkaOath
     {
         var varka = player.Creature;
         if (!Live(varka)) return;
+        // Weathervane (the expansion), first: Sworn Brotherhood below then
+        // gains the element it chose. It names the switch, so Unwavering
+        // Banner does not stop it.
+        if (varka.HasPower<WeathervanePower>())
+        {
+            await Weathervane(choiceContext, player);
+        }
         foreach (var bunny in varka.Powers.OfType<VarkaBaronBunnyPower>().ToList())
         {
             await bunny.Fire(choiceContext);
@@ -623,6 +802,37 @@ public static class VarkaOath
             await CreatureCmd.GainBlock(varka, block, ValueProp.Unpowered, null,
                                         fast: true);
         }
+        // The Order Answers (the expansion), last: a random pool Knight at
+        // its own cost, one per stack.
+        foreach (var order in varka.Powers.OfType<TheOrderAnswersPower>().ToList())
+        {
+            for (var i = 0; i < order.Amount; i++)
+            {
+                await VarkaRules.AddRandomKnight(player, free: false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Weathervane: "At the start of your turn, you may choose an element you
+    /// have Oath in; it becomes your current element." A grid of the
+    /// elements he holds Oath in, cancelable (the "may"); nothing to ask when
+    /// he holds none, or holds only the current one.
+    /// </summary>
+    private static async Task Weathervane(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        var varka = player.Creature;
+        var ledger = VarkaOathLedger.For(varka);
+        var held = VarkaOathLedger.Elements.Where(e => ledger.Oath(e) > 0).ToList();
+        if (held.Count == 0 || (held.Count == 1 && held[0] == ledger.Current))
+        {
+            return;
+        }
+        var element = await VarkaRules.ChooseElement(
+            choiceContext, player, held, optional: true);
+        if (element == Element.None) return;
+        await SetCurrent(choiceContext, varka, element, knight: false);
     }
 }
 
@@ -793,6 +1003,234 @@ public static class VarkaCards
             await VarkaOath.Gain(choiceContext, owner, element, 1);
         }
         await OathBadge.Sync(choiceContext, owner);
+    }
+
+    // ---- the expansion (2026-10-01) ------------------------------------------
+
+    /// <summary>One powered hit of <paramref name="card"/> on
+    /// <paramref name="target"/> carrying <paramref name="element"/>, through
+    /// the card's own DamageCmd (Strength and the card's riders count), the
+    /// shape <c>CurrentElementHit</c> takes. It credits like any hit of his.
+    /// </summary>
+    private static async Task ElementHit(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay,
+        Creature? target, decimal damage, Element element)
+    {
+        if (target is not { IsAlive: true } || damage <= 0) return;
+        using (HitElement.Carry(card, element))
+        {
+            await DamageCmd.Attack(damage)
+                .FromCard(card, cardPlay)
+                .Targeting(target)
+                .WithHitFx("vfx/vfx_attack_slash")
+                .Execute(choiceContext);
+        }
+    }
+
+    /// <summary>Pathfinder's Mark: "Apply your current element to an enemy
+    /// (a random one of the four if you have none). [ALL enemies]" One
+    /// element for every target; the upgraded card reads its own
+    /// <c>IsUpgraded</c> (the row's <c>varka_upgraded</c>).</summary>
+    public static async Task PathfindersMark(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        var player = card.Owner;
+        if (owner == null || player == null || !VarkaOath.Live(owner)) return;
+        var element = VarkaOath.Current(owner);
+        if (element == Element.None)
+        {
+            element = player.RunState.Rng.CombatTargets.NextItem(
+                VarkaOathLedger.Elements.ToList());
+        }
+        var targets = card.IsUpgraded
+            ? owner.CombatState?.HittableEnemies.ToList() ?? new List<Creature>()
+            : cardPlay.Target is { } one ? new List<Creature> { one }
+            : new List<Creature>();
+        foreach (var target in targets)
+        {
+            if (!target.IsAlive) continue;
+            await ElementalHit.ApplyOnly(choiceContext, target, element, owner);
+        }
+    }
+
+    /// <summary>Cavalry Charge: "Deal 7 [10] damage as your current
+    /// element." Without one, his plain Anemo hit.</summary>
+    public static Task CurrentElementStrike(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var element = VarkaOath.Current(card.Owner?.Creature);
+        return ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
+                          Var(card, "VkBase"),
+                          element == Element.None ? Element.Anemo : element);
+    }
+
+    /// <summary>Blazing Charge: "Deal 5 [7] Pyro damage, plus 2 for each
+    /// Pyro Oath." Its own element's Oath, read before the hit.</summary>
+    public static Task BlazingCharge(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
+        ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
+                   CurrentElementDamage(Var(card, "VkBase"), Var(card, "VkPer"),
+                       VarkaOath.Count(card.Owner?.Creature, Element.Pyro)),
+                   Element.Pyro);
+
+    /// <summary>Glacial Edict's stacks: 1, plus 1 for every
+    /// <paramref name="per"/> Cryo Oath. PURE.</summary>
+    public static int GlacialEdictStacks(int cryoOath, int per) =>
+        1 + (per <= 0 ? 0 : cryoOath / per);
+
+    /// <summary>Glacial Edict: "and 1 Weak and 1 Vulnerable, plus 1 of each
+    /// for every 4 [3] Cryo Oath", read after the row's own Cryo landed.
+    /// </summary>
+    public static async Task GlacialEdict(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null || cardPlay.Target is not { IsAlive: true } target) return;
+        var n = GlacialEdictStacks(VarkaOath.Count(owner, Element.Cryo),
+                                   (int)Var(card, "VkAmount"));
+        await PowerCmd.Apply<WeakPower>(choiceContext, target, n,
+                                        applier: owner, cardSource: card);
+        await PowerCmd.Apply<VulnerablePower>(choiceContext, target, n,
+                                              applier: owner, cardSource: card);
+    }
+
+    /// <summary>Thundering Verdict: "Deal 8 [11] Electro damage to ALL
+    /// enemies, plus 2 for each Electro Oath." Read once, before the hits.
+    /// </summary>
+    public static async Task ThunderingVerdict(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner?.CombatState == null) return;
+        var damage = CurrentElementDamage(Var(card, "VkBase"), Var(card, "VkPer"),
+                                          VarkaOath.Count(owner, Element.Electro));
+        foreach (var enemy in owner.CombatState.HittableEnemies.ToList())
+        {
+            await ElementHit(choiceContext, card, cardPlay, enemy, damage,
+                             Element.Electro);
+        }
+    }
+
+    /// <summary>Razor: Awakening's hit on one enemy: the base, plus the
+    /// bonus when it already wore Electro. PURE.</summary>
+    public static int AwakeningDamage(decimal baseDamage, decimal bonus,
+                                      bool hadElectro) =>
+        (int)(baseDamage + (hadElectro ? bonus : 0m));
+
+    /// <summary>Razor: Awakening: "Deal 4 [6] Electro damage to ALL enemies.
+    /// Enemies that already have Electro take 3 more." Who already wore it,
+    /// fresh or spent, is read before the first hit.</summary>
+    public static async Task Awakening(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner?.CombatState == null) return;
+        var enemies = owner.CombatState.HittableEnemies.ToList();
+        var had = enemies.Where(e => AuraCmd.Find(e) is { Element: Element.Electro })
+            .ToHashSet();
+        foreach (var enemy in enemies)
+        {
+            await ElementHit(choiceContext, card, cardPlay, enemy,
+                AwakeningDamage(Var(card, "VkBase"), Var(card, "VkAmount"),
+                                had.Contains(enemy)),
+                Element.Electro);
+        }
+    }
+
+    /// <summary>Lisa: Pulsating Witch: "Draw 1 card for each enemy."
+    /// </summary>
+    public static async Task DrawPerEnemy(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var player = card.Owner;
+        var n = player?.Creature?.CombatState?.HittableEnemies.Count(e => e.IsAlive) ?? 0;
+        if (player == null || n <= 0) return;
+        await CardPileCmd.Draw(choiceContext, n, player);
+    }
+
+    /// <summary>Barbara: Wellspring Hymn: "Remove your Weak, Frail and
+    /// Vulnerable."</summary>
+    public static async Task Cleanse(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null) return;
+        foreach (var power in owner.Powers
+                     .Where(p => p is WeakPower or FrailPower or VulnerablePower)
+                     .ToList())
+        {
+            await PowerCmd.Remove(power);
+        }
+    }
+
+    /// <summary>Pressure Front: "Apply your current element to ALL enemies."
+    /// Nothing without one.</summary>
+    public static async Task ApplyCurrentElementAll(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        var element = VarkaOath.Current(owner);
+        if (owner?.CombatState == null || element == Element.None) return;
+        foreach (var enemy in owner.CombatState.HittableEnemies.ToList())
+        {
+            if (!enemy.IsAlive) continue;
+            await ElementalHit.ApplyOnly(choiceContext, enemy, element, owner);
+        }
+    }
+
+    /// <summary>Crosscurrent: "Swirl an enemy's fresh aura. This Swirl pays
+    /// twice." A damage-less Anemo hit, Jean's, inside the ledger's
+    /// pays-twice window.</summary>
+    public static async Task Crosscurrent(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null || cardPlay.Target is not { } target) return;
+        var ledger = VarkaOath.Live(owner) ? VarkaOathLedger.For(owner) : null;
+        if (ledger != null) ledger.PaysTwice++;
+        try
+        {
+            await ElementalHit.ApplyOnly(choiceContext, target, Element.Anemo,
+                                         owner);
+        }
+        finally
+        {
+            if (ledger != null) ledger.PaysTwice--;
+        }
+    }
+
+    /// <summary>Grand Master's Verdict: "Double your current element's
+    /// Oath." One gain of what he holds.</summary>
+    public static async Task DoubleCurrentOath(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        var element = VarkaOath.Current(owner);
+        if (owner == null || element == Element.None) return;
+        var held = VarkaOath.Count(owner, element);
+        if (held <= 0) return;
+        await VarkaOath.Gain(choiceContext, owner, element, held);
+    }
+
+    /// <summary>Tempest of the Four Winds' order: Pyro, Hydro, Cryo,
+    /// Electro (the last applied wins the open Oath).</summary>
+    public static readonly IReadOnlyList<Element> TempestOrder = new[]
+    {
+        Element.Pyro, Element.Hydro, Element.Cryo, Element.Electro,
+    };
+
+    /// <summary>Tempest of the Four Winds: "Deal 4 [5] damage four times, as
+    /// Pyro, Hydro, Cryo and Electro." Each hit credits its own element.
+    /// </summary>
+    public static async Task Tempest(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        foreach (var element in TempestOrder)
+        {
+            await ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
+                             Var(card, "VkBase"), element);
+        }
     }
 
     /// <summary>Unfurled Banner: "Put Four Winds' Ascension from your discard
