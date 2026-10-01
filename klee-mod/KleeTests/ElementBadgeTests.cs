@@ -232,11 +232,14 @@ public class ElementBadgeTests
                           e => (string?)iconPathFor.Invoke(
                               null, new object[] { e }));
 
+        // 2026-09-30 (Varka co-op playtest): Anemo wears its own icon too, so
+        // a reader can tell which cards Stormward Stance's "your Anemo
+        // Attacks" means. Geo still declares none.
         var drawn = gems.Where(kv => kv.Value != null).ToList();
-        Assert.Equal(4, drawn.Count);
-        Assert.Equal(4, drawn.Select(kv => kv.Value).Distinct().Count());
+        Assert.Equal(5, drawn.Count);
+        Assert.Equal(5, drawn.Select(kv => kv.Value).Distinct().Count());
         Assert.All(drawn, kv => Assert.StartsWith("klee/powers/aura_", kv.Value));
-        Assert.Null(gems[Element.Anemo]);
+        Assert.Equal("klee/powers/aura_anemo.png", gems[Element.Anemo]);
         Assert.Null(gems[Element.Geo]);
         Assert.Null(gems[Element.None]);
 

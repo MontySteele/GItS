@@ -51,7 +51,7 @@ public sealed class ProtoVkAmberFieryRain : CustomCardModel, ICompanionCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false, appliesWithoutHit: true);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_amber_fiery_rain");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mc_amber_fiery_rain");
 
     public override List<(string, string)>? Localization => new()
     {

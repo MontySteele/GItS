@@ -306,9 +306,21 @@ def test_the_proxy_bill_prints_every_proxy_it_finds():
         assert row["id"] in section, row["id"]
         assert row["wears"] in section, row["wears"]
     # Why the survivors kept their proxy: the neighbour's picture IS the right
-    # picture, because it is the same card under a different id.
+    # picture, because it is the same card under a different id. The one named
+    # exception is a stand-in that wears the same companion's picture until its
+    # own is placed, and it stays on the bill above while it does.
     for row in proxies:
+        if STAND_IN_PROXIES.get(row["id"]) == row["wears"]:
+            continue
         assert row["id"].endswith(row["wears"]), row["id"]
+
+
+# 2026-09-30 (Varka + Kokomi co-op playtest): "Amber: Precise Shot", Varka's
+# starter Amber Knight, drew a blank face. No illustration of its own exists;
+# it wears the companion Amber: Fiery Rain's until one is placed.
+STAND_IN_PROXIES = {
+    "proto_vk_amber_fiery_rain": "proto_mc_amber_fiery_rain",
+}
 
 
 def test_bill_is_derived_from_canonical_sheets():

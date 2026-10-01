@@ -56,8 +56,9 @@ namespace KleeMod;
 ///
 /// THE HANDS (2026-09-27). The four `Arm*TexturePath` getters (the co-op
 /// treasure room's hands) used to be redirected here too, so Klee drew the
-/// Ironclad's arm while Furina and Kokomi drew none. All three now ship their
-/// own at the exact path the getter derives,
+/// Ironclad's arm while Furina and Kokomi drew none. All four (Varka since
+/// 2026-09-30, wearing the Ironclad's arm unchanged) now ship their own at the
+/// exact path the getter derives,
 /// res://images/ui/hands/multiplayer_hand_kleemod-&lt;name&gt;_&lt;pose&gt;.png
 /// (tools/gen_multiplayer_hands.py, packed by tools/build_pck.ps1), so Klee's
 /// arm paths are left alone. A pck without the hands shows no hand for Klee,
