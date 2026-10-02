@@ -7,7 +7,6 @@ this is design tooling; a loud KeyError beats a validation framework.
 from __future__ import annotations
 
 import copy
-import warnings
 from functools import lru_cache
 from pathlib import Path
 
@@ -25,33 +24,16 @@ from tier0.engine import varka_oath
 from tier0.engine.state import Card, Enemy, Player, sly_riders
 
 CONTENT_DIR = Path(__file__).parent
-# Design sheets in docs/ are the single source of truth for real card
-# pools — the sim reads them directly so design and sim never drift.
 DOCS_DIR = CONTENT_DIR.parents[1] / "docs"
-DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
-                    "kokomi-cards.yaml",
-                    "mondstadt-companions.yaml", "fontaine-companions.yaml",
-                    "inazuma-companions.yaml")
 
-# The QUARANTINED prototype surface (R213 B, BACKLOG EB-147). DELIBERATELY
-# NOT in DOCS_CARD_SHEETS and deliberately not named `*-cards.yaml`.
-#
-# Both halves of that sentence are load-bearing:
-#
-#   * Out of DOCS_CARD_SHEETS means out of `_card_index`, which is the ONE
-#     index every pool, run template, reward roll, digest and balance report
-#     reads. A prototype row is therefore absent from ordinary runs BY
-#     CONSTRUCTION rather than by a filter somebody has to remember -- there
-#     is no filter, because the rows never enter.
-#   * Out of the `docs/*-cards.yaml` NAME keeps it out of
-#     `tools/lint_sheet_stamp.py` (whose digest is the sheet half of the stamp
-#     law) and `tools/card_distinctness_report.py`, both of which glob that
-#     pattern. Each of those two ALSO names this file explicitly, so a future
-#     rename cannot quietly re-admit the surface to a stamp.
-#
-# The rows are still SCHEMA-CHECKED: `prototype_cards()` runs them through
-# `Card.from_dict` and the same three validators `_card_index` runs.
-# "Not measured" is the quarantine; "not checked" was never on offer.
+# THE KITS' SHEET (R213 B, BACKLOG EB-147). The shipped kit sheets
+# (`docs/*-cards.yaml`, the three companion sheets) were deleted at legacy
+# cleanup stage 6 (2026-10-01); every current card is a row here. It stays out
+# of `_card_index`, the index the reference characters' pools, digests and
+# balance reports read: the kits reach their rows through `pool_replacement`,
+# `_starter_ids` and `companion_roster_replacement`, which resolve each id by
+# `peek_card`. The rows are still SCHEMA-CHECKED: `prototype_cards()` runs
+# them through `Card.from_dict` and the validators `_card_index` runs.
 PROTOTYPE_SHEET = DOCS_DIR / "prototype-surface.yaml"
 
 # Every prototype id starts here. A prototype is usually a variant of
@@ -342,44 +324,6 @@ def _external_cards() -> list[dict]:
 @lru_cache(maxsize=1)
 def _card_index() -> dict[str, Card]:
     raw = _load_yaml_dir("cards", REF_CARD_SHEETS)
-    for sheet in DOCS_CARD_SHEETS:
-        path = DOCS_DIR / sheet
-        if path.exists():
-            docs = yaml_memo.safe_load(path.read_text(encoding="utf-8"))
-            # R20 (2026-07-20): *-upgrades.yaml sheets are the ONE upgrade
-            # convention. Inline `upgrade:` fields are IGNORED by Tier 0,
-            # and silently ignoring them risks an inline-only upgrade that
-            # never applies -- so the tolerance is loud, not silent.
-            # UserWarning on purpose: DeprecationWarning is filtered out
-            # of non-__main__ code by default, which would be silence.
-            inline = [d["id"] for d in docs if "upgrade" in d]
-            if inline:
-                warnings.warn(
-                    f"{sheet}: DEPRECATED inline `upgrade:` fields on "
-                    f"{inline} (R20, 2026-07-20). Upgrades live in the "
-                    "*-upgrades.yaml sheets; these fields are IGNORED "
-                    "and must be reverted to the upgrade sheet.")
-            # Nation comes from the sheet name ("mondstadt-companions.yaml"),
-            # not a per-card field: it is a property of the pool a card ships
-            # in, and repeating it on every row is just drift waiting to
-            # happen. This is what makes the v1.8 banner roll per-nation
-            # without touching the sheets when Liyue lands.
-            if sheet.endswith("-companions.yaml"):
-                nation = sheet.split("-", 1)[0]
-                for d in docs:
-                    d.setdefault("nation", nation)
-                    # character derives from the id prefix ("fischl_oz" ->
-                    # fischl): same drift argument as nation-from-filename.
-                    # Explicit field wins (Guest Star rows name their cameo
-                    # because their ids are prefixed "guest_").
-                    d.setdefault("character", d["id"].split("_", 1)[0])
-            elif sheet.endswith("-cards.yaml"):
-                # Personal sheets: every row belongs to the character in the
-                # filename. This is what makes self-Spotlight legible.
-                char = sheet[:-len("-cards.yaml")]
-                for d in docs:
-                    d.setdefault("character", char)
-            raw.extend(docs)
     raw.extend(_external_cards())
     cards = [Card.from_dict(d) for d in raw]
     for c in cards:
@@ -554,8 +498,8 @@ def _prototype_index() -> dict[str, Card]:
 
     A SECOND index, deliberately, and never merged into the first: merging is
     exactly what would put a prototype into `all_cards`, `character_pool` and
-    every reward roll. `_card_prototype` consults this one only behind
-    `C.SPARK_ALT_COST_ENABLED` and only for a `proto_`-prefixed id.
+    every reward roll. `_card_prototype` consults this one only for a
+    `proto_`-prefixed id.
     """
     return {c.id: c for c in prototype_cards()}
 
@@ -1008,10 +952,7 @@ def guest_star_generation_pool(rarity: str) -> list[Card]:
     around it, so a Furina r13 seat met `Kaeya -- Frostgnaw` as an 8-damage
     reward card AND as a 6-damage fetched one. The GUEST STAR half is not
     replaced by any arm and still comes off the index."""
-    replaced = companion_roster_replacement()
-    companions = (replaced if replaced is not None
-                  else [c for c in _card_index().values() if c.is_companion])
-    pool = [c for c in list(companions)
+    pool = [c for c in companion_roster_replacement()
             + [c for c in _card_index().values() if c.guest_star
                and not c.is_companion]
             if c.rarity == rarity and not c.kit_card
@@ -1092,56 +1033,10 @@ def _card_prototype(card_id: str) -> Card:
                 substituted[base_id] if base_id in substituted
                 else _prototype_index()[base_id])
         card = upgrades.apply_upgrade(base)
-    elif (((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL
-            or C.COMPANION_OVERHAUL or C.KOKOMI_OVERHAUL
-            or furina_stage.FURINA_STAGE)
-           and plain.startswith(PROTOTYPE_ID_PREFIX))
-          or plain.startswith(varka_oath.ID_PREFIX)):
-        # THE ONE DOOR THE SPARK ARM OPENS INTO THE QUARANTINE, and it is
-        # exactly as wide as it has to be. `_starter_ids` substitutes two
-        # PROTO ids into Klee's starting deck (PICK 1, options 1+5), and a
-        # starting deck is a list of id STRINGS that both `build_player` and
-        # `build_player_from_ids` resolve through here -- so without this
-        # branch the substitution is a KeyError rather than a card.
-        #
-        # THREE GUARDS, ALL NECESSARY, none of them a filter somebody has to
-        # remember: the flag must be ON (with it off this branch does not
-        # exist and every shipped path is byte-identical), the id must carry
-        # `proto_`, and the row must be on the surface. `_card_index` is
-        # still not populated with prototypes, so pools, rewards, drafts and
-        # digests remain structurally unable to see them -- the quarantine
-        # that matters is membership, and membership does not move here.
-        #
-        # THE KLEE OVERHAUL RIDES THE SAME DOOR, for the same reason and no
-        # wider: `_starter_ids` returns ten `proto_ko_` id STRINGS and
-        # `pool_replacement` returns twenty-eight more, and every one of them
-        # is resolved back through here by the run layer on each reward screen.
-        #
-        # AND SO DOES THE MONDSTADT COMPANION OVERHAUL, third arm, same door,
-        # no wider: `companion_roster_replacement` returns `proto_mc_` id
-        # STRINGS for the companion slot, and the reward layer resolves each of
-        # them back through here.
-        #
-        # AND THE KOKOMI OVERHAUL, fourth arm, same door, no wider again:
-        # `_starter_ids` returns ten `proto_kk_` id STRINGS and
-        # `pool_replacement` returns twenty-eight more.
-        #
-        # AND THE FURINA STAGE, fifth arm (`EB-723`), for the reason the
-        # first clause gives and one more of its own. Her starter rows are
-        # `proto_fs_` id STRINGS in the printed ten, so they need this door
-        # like every other dealt prototype -- and this door READS THE FLAG AT
-        # CALL TIME while `_substituted_card_index` is memoized, so a test (or
-        # a sim arm) that flips the flag over a warm cache resolves the row
-        # instead of raising a `KeyError` on the first draw. The substitution
-        # table still carries the row, because `upgrades._prototype_deltas`
-        # derives campfire reachability from it; this branch is simply reached
-        # first.
-        #
-        # AND VARKA'S OATH REWORK, with no switch (he ships nowhere else;
-        # collapsed 2026-10-01) and so only for his own `proto_vk_` ids: his
-        # starter and every card his rules create (`varka_oath.build_player`,
-        # Boreas's Fang, Knights' Roll Call) are id STRINGS resolved back
-        # through here.
+    elif plain.startswith(PROTOTYPE_ID_PREFIX):
+        # THE CURRENT KITS' DOOR (legacy cleanup stage 6: the sim always runs
+        # them). Every kit's starter, pool and companion roster is `proto_` id
+        # STRINGS, and the run layer resolves each one back through here.
         card = _prototype_index()[plain]
     else:
         index = _card_index()
@@ -1241,177 +1136,46 @@ def _starting_relic_effects(spec: dict) -> list[dict]:
 
 
 def _starter_ids(spec: dict) -> list[str]:
-    """The printed starting deck, with the quarantined starter substitutions
-    the two live prototype arms make. Each arm is flagged, each applies only
-    to its own character, and with both flags off this returns
-    `list(spec["starting_deck"])` and nothing else -- the acceptance condition
-    on both flags.
+    """The starting deck: each current kit's ten, or the printed starter.
 
-    THE SEAM IS HERE, IN CODE, AND NO PRINTED SHEET MOVES. Both readers of a
-    printed starter go through this function -- `build_player` (the tier 0
-    battery) and `starting_deck` (the tier 0.5 run) -- so the battery and the
-    run cannot disagree about what a character opens with. That is the same
-    argument `_starting_relic_effects` above makes for her relic. There is ONE
-    such function, not one per arm: two arms that each rewrote the starter
-    behind their own entry point is exactly the disagreement this seam exists
-    to prevent.
-
-    KOKOMI -- the Kurage base kit (`C.KURAGE_MEMORY` + `C.KURAGE_ALWAYS_ON`),
-    ONE substitution. [USER], 2026-08-29: "I think that we will want to make
-    Bake-Kurage part of the base kit (always on) rather than a separate card.
-    So yes, we could add one Muster card to the base deck to teach the
-    pattern." Bake-Kurage leaves -- a card that summons what is always on the
-    field is a card that does nothing -- and one Muster card takes the slot,
-    so that RULE 1 (the card sacrificed to a Muster enters the memory at three
-    times its cost) is printed in fight 1 instead of drafted. The deck size is
-    unchanged at twelve.
-
-    KLEE -- NOTHING, since `EB-750`. The Sparks arm's two starter
-    substitutions (`pop` -> `proto_pop_spark`, one `kaboom` ->
-    `proto_kaboom_sink`) were SUPERSEDED by R270's currency ruling under
-    `KLEE_OVERHAUL`, and the rows, the map and this branch were deleted
-    together on 2026-09-16; they read back at commit
-    `036c12d150d6dbd58f0776a0d07e3c028a321a61`. Under
-    `C.SPARK_ALT_COST_ENABLED` Klee now opens with her printed ten, and the
-    flag governs the RULE alone.
-
+    Both readers of a starter go through this function -- `build_player` (the
+    tier 0 battery) and `starting_deck` (the tier 0.5 run) -- so the battery
+    and the run cannot disagree about what a character opens with. Klee,
+    Kokomi and Furina each open with their kit's ten (base Strike x4, Defend
+    x4 and two cards of their own); the reference characters open with the
+    starter their yaml prints.
     """
-    ids = list(spec["starting_deck"])
     character = spec.get("id")
-
-    if (character == "kokomi"
-            and C.KURAGE_MEMORY and C.KURAGE_ALWAYS_ON):
-        drop, add = C.KURAGE_MEMORY_STARTER_DROP, C.KURAGE_MEMORY_STARTER_ADD
-        if drop not in ids:
-            # Loud rather than silent: if the printed starter ever stops
-            # carrying Bake-Kurage, this swap has become a no-op that nobody
-            # would notice until a smoke ran and the Muster was missing.
-            raise ValueError(
-                f"kurage base kit: {drop!r} is not in the printed starter, so "
-                f"the {add!r} substitution has nothing to replace")
-        ids[ids.index(drop)] = add
-
-    # THE KLEE OVERHAUL takes the starter WHOLE, and it is tested FIRST because
-    # it and the Sparks arm cannot both own these ten slots. The overhaul
-    # retires the rules the Sparks substitutions are priced inside -- Ka-boom!
-    # gains a *Set off* clause it never had and Pop!'s bomb stops detonating
-    # itself -- so the two are ALTERNATIVES, not layers, and a tree with both
-    # flags on is the overhaul's tree. Nothing about the Sparks arm is edited:
-    # with `KLEE_OVERHAUL` off the branch below is reached exactly as before.
-    if character == "klee" and C.KLEE_OVERHAUL:
+    if character == "klee":
         return list(C.KLEE_OVERHAUL_STARTER_IDS)
-
-    # THE KOKOMI OVERHAUL takes the starter WHOLE, and it is tested BEFORE the
-    # Kurage base kit's own substitution above would matter, for the reason the
-    # Klee branch above gives one character over: the two Kokomi arms cannot
-    # both own these slots. The overhaul retires the Charge bank the memory is
-    # priced inside, so they are ALTERNATIVES, not layers, and a tree with both
-    # flags on is the overhaul's tree. Nothing about the memory arm is edited:
-    # with `KOKOMI_OVERHAUL` off the branch above is reached exactly as before.
-    #
-    # THE DECK SHRINKS FROM TWELVE TO TEN, which is the slice packet's own
-    # sec.3 count and a real consequence rather than an oversight: the
-    # twelve-card shape was ruled for a deck that mills itself, and nothing in
-    # this arm exhausts.
-    if character == "kokomi" and C.KOKOMI_OVERHAUL:
+    if character == "kokomi":
         return list(C.KOKOMI_OVERHAUL_STARTER_IDS)
-
-    # `EB-750`: the Sparks arm's two starter substitutions are DELETED. R270
-    # ruled Spark a currency under `KLEE_OVERHAUL`, which supersedes them, so
-    # the rows left the prototype surface and this seam with them. Klee's
-    # printed starter is what `SPARK_ALT_COST_ENABLED` now opens with, exactly
-    # as a flag-off tree does.
-
-    # FURINA, THE STAGE (`EB-723`; rebuilt 2026-09-28) takes the starter
-    # WHOLE, on the two overhaul arms' terms. [USER]: "Typically we'd include
-    # 4 strikes, 4 defends and 2 actually useful cards that teach the
-    # character's core mechanics - this seems like an unnecessary power
-    # spike." The ten are `furina_stage.STARTER_IDS`: the base Strike x4 and
-    # Defend x4 and Curtain Rise and Rising Applause. The printed starter
-    # (`furina.yaml`) does not move; the flag is that module's rather than
-    # `constants.py`'s, for the reason its own header gives.
-    if (character == furina_stage.CHARACTER
-            and furina_stage.FURINA_STAGE):
+    if character == furina_stage.CHARACTER:
         return list(furina_stage.STARTER_IDS)
-    return ids
+    return list(spec["starting_deck"])
 
 
 def starter_replaced_whole(character_id: str) -> bool:
-    """Did a live arm replace this character's starter WHOLE?
+    """Is this character's starter a current kit's ten rather than its yaml's?
 
-    THE TWO `return list(...)` BRANCHES IN `_starter_ids` ABOVE, named, because
-    one other function has to know: `starting_deck`'s randomized-starter roll
-    replaces printed ids BY NAME, and a starter that is somebody else's ten
-    cards has none of those names in it. Without this the roll raises
-    "randomized starter cannot replace missing card 'sayu_daruma_gift'" the
-    first time a tier-0.5 run opens with either overhaul flag on -- the tier-0
-    battery never sees it, because the battery calls `starting_deck` with no
-    RNG and skips the roll entirely.
-
-    A PREDICATE RATHER THAN A `not in deck` CHECK AT THE CALL SITE, so a genuine
-    sheet defect (a `randomized_starter` naming a card the printed starter does
-    not hold) still raises the way it always has. Silence there would be the
-    bug the raise exists to catch.
+    `starting_deck`'s randomized-starter roll replaces printed ids BY NAME,
+    and a kit's ten has none of those names in it, so the roll stands down for
+    these characters. A predicate rather than a `not in deck` check at the call
+    site, so a genuine sheet defect (a `randomized_starter` naming a card the
+    printed starter does not hold) still raises.
     """
-    return bool((character_id == "klee" and C.KLEE_OVERHAUL)
-                or (character_id == "kokomi" and C.KOKOMI_OVERHAUL)
-                # The Stage (2026-09-28): its ten are the arm's, and the
-                # mod's companion roll stands down under it too
-                # (`KleeStartingCompanionsPatch.ResolveFurina`).
-                or (character_id == furina_stage.CHARACTER
-                    and furina_stage.FURINA_STAGE))
+    return character_id in ("klee", "kokomi", furina_stage.CHARACTER)
 
 
 def _pool_substitutions(spec: dict) -> dict[str, str]:
-    """{shipped id: prototype id} for the character's OFFERABLE pool, under
-    the same quarantine flag `_starter_ids` above reads.
+    """{shipped id: prototype id}: the Furina Stage's map, by character spec.
 
-    THE SEAM IS HERE, in code, and the sheets do not move -- the same argument
-    `_starter_ids` makes for the printed starter, made once more for the other
-    half of what a run can be handed. `rewards.character_pool` is the single
-    source of truth for "which ids can be offered to this character" (fight
-    rewards, the shop, every event card screen and the tier 0.5 drafter all
-    read it), so it is the one caller, and gating it there gates them all.
-
-    WHAT THE SWAP IS, and why ([USER], 2026-08-29): "Why does the power print 5
-    instead of 3, exactly?" Under `C.KURAGE_MEMORY` Kurage's Oath's ward is
-    paid on a MEMORY PLAY (`effects.kurage_fire`) and the amount is read off
-    the stacks the card applied. The staged row prints [USER]'s ruled 3; the
-    SHIPPED `kurages_oath` prints 5 (7 upgraded) under a face that says "per
-    Bake-Kurage play", and it is frozen. So with the flag on and no
-    substitution, a flagged run that DRAFTED the shipped Oath paid 5 per
-    memory play under text that cannot bind -- which is D4, a defect, not a
-    balance question. The offer side is what this branch owns: under the flag
-    the shipped id leaves the pool and the prototype takes its slot at the
-    SAME rarity, so the only Oath a flagged run can be offered is the 3.
-
-    THE SECOND ARM, KLEE, IS GONE (`EB-750`). `C.SPARK_ALT_POOL_SUBS` swapped
-    nine shipped rows for priced Spark twins under
-    `C.SPARK_ALT_COST_ENABLED`; R270 ruled Spark a currency under
-    `KLEE_OVERHAUL` and superseded every one of them, so the rows, the map and
-    this branch were deleted together on 2026-09-16 (commit
-    `036c12d150d6dbd58f0776a0d07e3c028a321a61` is where they read back).
-    Klee's offerable pool is therefore unsubstituted under that flag.
-
-    With EITHER flag off this returns `{}` for that character, and with both
-    off `{}` and nothing else, which is the acceptance condition on the flags:
-    no substitution, no second index, and `_card_prototype` never leaves
-    `_card_index`.
+    The shipped rows are gone (legacy cleanup stage 6); the map survives as
+    the record of which prototype row re-authors which retired card, and as
+    one of the inputs `_substituted_card_index` resolves upgrades through.
+    Her offerable pool is `pool_replacement`.
     """
-    character = spec.get("id")
-    # `EB-581`: AND NOT UNDER THE OVERHAUL, because the two Kokomi arms do not
-    # stack. `KOKOMI_OVERHAUL` replaces her offerable pool WHOLE
-    # (`KOKOMI_OVERHAUL_POOL_IDS`), and the memory row's own power -- "whenever
-    # the Bake-Kurage plays a card from its memory" -- names a rule that arm
-    # does not have; a substitution that put it in front of a drafter there
-    # would be offering an inert card under a title the arm's own starter Skill
-    # already prints.
-    if (character == "kokomi" and C.KURAGE_MEMORY
-            and not C.KOKOMI_OVERHAUL):
-        return {C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
-    # THE THIRD ARM (`EB-723`).
-    if (character == furina_stage.CHARACTER
-            and furina_stage.FURINA_STAGE):
+    if spec.get("id") == furina_stage.CHARACTER:
         return dict(furina_stage.POOL_SUBS)
     return {}
 
@@ -1430,10 +1194,7 @@ def declared_pool_substitutions() -> dict[str, str]:
     Derived from the same maps the branch above reads, so an arm cannot have
     a substitution here that the run does not make, or the reverse.
     """
-    subs: dict[str, str] = {
-        C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
-    subs.update(furina_stage.POOL_SUBS)
-    return subs
+    return dict(furina_stage.POOL_SUBS)
 
 
 def declared_starter_substitutions() -> dict[str, str]:
@@ -1455,9 +1216,7 @@ def declared_starter_substitutions() -> dict[str, str]:
     cannot declare a substitution here that the run does not make, or the
     reverse.
     """
-    subs: dict[str, str] = {
-        C.KURAGE_MEMORY_STARTER_DROP: C.KURAGE_MEMORY_STARTER_ADD}
-    subs.update(furina_stage.STARTER_SUBS)
+    subs: dict[str, str] = dict(furina_stage.STARTER_SUBS)
     # 2026-09-28: the Stage's two starter rows that left the starter for the
     # Commons still name the shipped basic they re-author (`replaces:`).
     subs.update(furina_stage.PROMOTED_STARTERS)
@@ -1465,76 +1224,34 @@ def declared_starter_substitutions() -> dict[str, str]:
 
 
 def _pool_additions(spec: dict) -> tuple[str, ...]:
-    """Prototype rows an arm OFFERS WITHOUT REPLACING a shipped row, by
-    character spec -- `_pool_substitutions`' sibling at the same door and on
-    the same flags. Only the Furina Stage has any (`furina_stage.POOL_ADDS`,
-    2026-09-26: the supporting pool has one more Common than her sheet has
-    free Commons). `()` on every flag-off tree.
+    """Prototype rows the Furina Stage offers that re-author no retired row
+    (`furina_stage.POOL_ADDS`), and Take the Stage and Regal Bearing, out of
+    the starter and offered as Commons (`furina_stage.PROMOTED_STARTERS`).
     """
-    if (spec.get("id") == furina_stage.CHARACTER
-            and furina_stage.FURINA_STAGE):
-        # 2026-09-28: Take the Stage and Regal Bearing, out of the starter
-        # and offered as Commons (`furina_stage.PROMOTED_STARTERS`).
+    if spec.get("id") == furina_stage.CHARACTER:
         return (tuple(furina_stage.POOL_ADDS)
                 + tuple(furina_stage.PROMOTED_STARTERS.values()))
     return ()
 
 
-def pool_drops(character_id: str) -> tuple[str, ...]:
-    """Shipped rows an arm takes OUT of the offer with nothing in their slot
-    (`furina_stage.POOL_DROPS`, the 2026-09-28 balance review), on
-    `_pool_additions`' flags. `()` on every flag-off tree."""
-    if (character_id == furina_stage.CHARACTER
-            and furina_stage.FURINA_STAGE):
-        return tuple(furina_stage.POOL_DROPS)
-    return ()
-
-
-def pool_additions(character_id: str) -> tuple[str, ...]:
-    """`_pool_additions` by character id, `pool_substitutions`' twin."""
-    spec = _character_index().get(character_id)
-    return _pool_additions(spec) if spec else ()
-
-
-def pool_substitutions(character_id: str) -> dict[str, str]:
-    """`_pool_substitutions` by character id -- the tier 0.5 door, the way
-    `starting_deck` is the door onto `_starter_ids`."""
-    spec = _character_index().get(character_id)
-    return _pool_substitutions(spec) if spec else {}
-
-
 def pool_replacement(character_id: str) -> list[str] | None:
-    """The character's WHOLE offerable pool, or None to keep the shipped one.
+    """The character's WHOLE offerable pool, or None for a reference
+    character, whose pool is its own sheet's rows.
 
-    THE SIBLING OF `pool_substitutions`, AND IT EXISTS BECAUSE THE OTHER SHAPE
-    CANNOT SAY THIS. `_pool_substitutions` is a one-for-one map: it swaps a
-    shipped id for a prototype at the same rarity and leaves everything else
-    where it was. The Klee overhaul's slice one asks for something the map has
-    no grammar for -- "her offerable pool is these 28 rows and nothing else" --
-    because the overhaul retires the rules every other Klee card is written
-    against (a shipped bomb detonates itself; an overhaul bomb waits to be
-    *Set off*), so a run that could still be offered the shipped 79 would be
-    offered cards that no longer describe what happens.
-
-    IT IS THE SAME SINGLE DOOR. `tier05.rewards.character_pool` is the one
-    source of truth for "which ids can be offered to this character" -- fight
-    rewards, the shop, every event card screen and the tier 0.5 drafter read it
-    and nothing else -- and this is read THERE, beside `pool_substitutions`,
-    rather than at the five mouths. Two seams at one door, not a second door.
-
-    WITH `C.KLEE_OVERHAUL` OFF this returns None for every character and
-    `character_pool` is byte-for-byte what it has always been. That is the
-    acceptance condition on the flag, pinned by
-    `tier0/tests/test_klee_overhaul.py` rather than intended.
+    `tier05.rewards.character_pool` is the one source of truth for "which ids
+    can be offered to this character" -- fight rewards, the shop, every event
+    card screen and the tier 0.5 drafter read it and nothing else -- and this
+    is read there. Each current kit's pool is its prototype roster, the C#
+    pools' `GenerateAllCards` (legacy cleanup stage 4).
     """
-    if character_id == "klee" and C.KLEE_OVERHAUL:
+    if character_id == "klee":
         return list(C.KLEE_OVERHAUL_POOL_IDS)
-    # The Kokomi overhaul's own, on identical terms: her offerable pool is the
-    # slice's 28 rows and nothing else, because the overhaul retires the rules
-    # every other Kokomi card is written against (an Exhaust that pays Charge,
-    # a Muster that transforms, a Burst that gates).
-    if character_id == "kokomi" and C.KOKOMI_OVERHAUL:
+    if character_id == "kokomi":
         return list(C.KOKOMI_OVERHAUL_POOL_IDS)
+    if character_id == furina_stage.CHARACTER:
+        spec = _character_index()[character_id]
+        return (list(_pool_substitutions(spec).values())
+                + list(_pool_additions(spec)))
     return None
 
 
@@ -1576,15 +1293,13 @@ def relic_hooks_replacement(character_id: str) -> list[str] | None:
       * `effects.note_kurage_play`       -- the memory arm's v2 fuel, which is
                                             a different arm's branch anyway.
 
-    WITH THE FLAG OFF this returns None for every character and both builders
-    are byte-for-byte what they have always been.
     """
-    if character_id == "kokomi" and C.KOKOMI_OVERHAUL:
+    if character_id == "kokomi":
         return [OVERHAUL_CASKET_HOOK]
     return None
 
 
-def companion_roster_replacement() -> list[Card] | None:
+def companion_roster_replacement() -> list[Card]:
     """Every COMPANION an offer surface may see, or None to keep the shipped
     roster.
 
@@ -1621,12 +1336,7 @@ def companion_roster_replacement() -> list[Card] | None:
     rarity and nation, and the ids are resolved here once through the same
     `peek_card` door `character_pool` uses for the other arms.
 
-    WITH `C.COMPANION_OVERHAUL` OFF this returns None and both callers are
-    byte-for-byte what they have always been. That is the acceptance condition
-    on the flag, pinned by `tier0/tests/test_companion_overhaul.py`.
     """
-    if not C.COMPANION_OVERHAUL:
-        return None
     kept = [c for c in _card_index().values()
             if c.is_companion and c.nation not in C.COMPANION_OVERHAUL_NATIONS]
     # AND THE PERSONALS, which are not Universals and are not in either

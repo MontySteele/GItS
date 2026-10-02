@@ -64,10 +64,9 @@ TOOLS = REPO / "tools"
 DOCS = REPO / "docs"
 
 # The sheets whose rows this lint reads. Card sheets only: an upgrades sheet
-# carries deltas, not effects.
-SHEETS = ("klee-cards.yaml", "furina-cards.yaml", "kokomi-cards.yaml",
-          "mondstadt-companions.yaml", "fontaine-companions.yaml",
-          "inazuma-companions.yaml")
+# carries deltas, not effects. The prototype surface alone since legacy
+# cleanup stage 6 deleted the shipped kit and companion sheets.
+SHEETS = ("prototype-surface.yaml",)
 
 EXEMPT_MODULES = {
     "gen_klee_cards.py": (
@@ -104,12 +103,6 @@ TOP_LEVEL_ONLY: dict[str, str] = {
         "reads an ANCIENT RELIC's effect list, not a card row. The relic DSL"
         " has no `conditional` op -- a relic hook is a flat list of effects"
         " by grammar -- so there is no tree here to walk."),
-    "lint_strict_domination.py::effect_maps": (
-        "gated value is not unconditional value. Folding a `then:` branch"
-        " into the benefit map would let a card that MIGHT deal 20 dominate"
-        " one that always deals 18, which inverts the whole comparison. The"
-        " conditional is kept as one opaque key so the branch still"
-        " distinguishes two cards without being credited to either."),
 }
 
 # Ops that make a card carry PRINTED RULES -- keyword text, a tooltip, or a
@@ -145,28 +138,35 @@ RULES_BEARING_OPS: dict[str, str] = {
 # kill-conditional `then:` places 2 Bombs at 6 while the shipped card said
 # `includesBombRules: false` -- retired when the generator and the parity gate
 # both learned to walk the tree and the C# was regenerated.
+_COMPANION_CHECK = (
+    " CHECKED, reader by reader (legacy cleanup stage 6, when the surface"
+    " became this lint's sheet). The registered flat sites in TOP_LEVEL_ONLY"
+    " read past it harmlessly: `extract_base_game_pool._row_delta_key` reads"
+    " DLL-translated rows and never a house sheet, and"
+    " `lint_constant_parity._ancient_hook` reads relic hooks, which have no"
+    " `conditional` by grammar. Every reader that asks a rules question walks"
+    " the tree: `role_tempo` and `card_connectivity_report` reach the op"
+    " through `iter_effects`, and the generator's whole-card questions go"
+    " through `_effects_everywhere` -- the emitted card attaches the tip"
+    " where the base game has one for the power, and a custom power supplies"
+    " its own at runtime.")
+
 BRANCH_ONLY_KNOWN: dict[str, tuple[tuple[str, ...], str]] = {
-    "tighten_the_cords": (
+    # tighten_the_cords (EB-125 / R202) was the register's first row; it left
+    # with the shipped Kokomi sheet at legacy cleanup stage 6.
+    "proto_mc_bennett_fantastic_voyage": (
         ("apply_power",),
-        "EB-125 / R202: the ratified body gates its Metallicize on"
-        " `exhaust_pile_at_least_3`, so the card's only apply_power sits in a"
-        " `then:`. CHECKED, reader by reader. The three registered flat sites"
-        " in TOP_LEVEL_ONLY all read past it harmlessly:"
-        " `extract_base_game_pool._row_delta_key` reads DLL-translated rows"
-        " and never a house sheet; `lint_constant_parity._ancient_hook` reads"
-        " relic hooks, which have no `conditional` by grammar; and"
-        " `lint_strict_domination.effect_maps` is flat ON PURPOSE and its"
-        " flatness is the POINT here -- crediting a gated Metallicize as"
-        " unconditional value is exactly what made this card a clone of"
-        " gorou_heart_of_the_clan, and keeping the conditional opaque is what"
-        " separates them. Every reader that asks a rules question walks the"
-        " tree: `role_tempo` and `card_connectivity_report` reach the op"
-        " through `iter_effects`, and `lint_handwritten_parity.walk_effects`"
-        " recurses into `then`/`else` explicitly. The C# side carries no"
-        " card-level tooltip marker for a power in either position --"
-        " MetallicizePower supplies its own at runtime, exactly as it does"
-        " for pearl_current's unconditional apply -- and the generator's"
-        " whole-card questions go through `_effects_everywhere`."),
+        "Bennett's Strength sits in a `then:`; the generated card carries"
+        " `BaseKeywordTips.ForStrength` for it." + _COMPANION_CHECK),
+    "proto_mc_rosaria_ravaging_confession": (
+        ("apply_power",),
+        "Rosaria's Vulnerable sits in a `then:`; the generated card carries"
+        " `BaseKeywordTips.ForVulnerable` for it." + _COMPANION_CHECK),
+    "proto_mc_durin_binary_form": (
+        ("apply_power",),
+        "Durin's two forms are BinaryFormWhitePower / BinaryFormDarkPower,"
+        " each inside its own branch; both are custom powers that carry"
+        " their own hover text at runtime." + _COMPANION_CHECK),
 }
 
 

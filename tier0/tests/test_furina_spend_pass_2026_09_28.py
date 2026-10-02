@@ -36,7 +36,7 @@ def _row(cid):
 
 @pytest.fixture
 def arm(monkeypatch):
-    monkeypatch.setattr(FS, "FURINA_STAGE", True)
+    yield
 
 
 #: id -> (plain, Spend price, Spend amount, upgrade). THE FADE PASS

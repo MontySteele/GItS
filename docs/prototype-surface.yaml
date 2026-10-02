@@ -11,96 +11,8 @@
 # STATE. How to write a row: docs/current/operations/prototype.md. Why each
 # row below exists: docs/notes/prototype-surface-provenance.md, by row id.
 
-- {id: proto_shinobu_sanctifying_ring_either, name: "Shinobu - Warding Ring", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro, cost: 2, type: skill,
-   effects: [{op: choose_one, modes: [
-              {label: "Deal 3 damage to ALL enemies, applying its element",
-               effects: [{op: damage, amount: 3, target: all_enemies, applies_element: true}]},
-              {label: "Gain 4 Block, applying no element",
-               effects: [{op: block, amount: 4}]}]}]}
-
-# Shipped twin: `thoma_crimson_ooyoroi` (8 damage + Pyro, 3 Block, cost 2).
-# Same scope fix as the row above, same reason, same runtime reading: the
-# Pyro is the damage mode's and the Block mode applies nothing.
-- {id: proto_thoma_crimson_ooyoroi_either, name: "Thoma - Blazing Ooyoroi", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro, cost: 2, type: attack,
-   effects: [{op: choose_one, modes: [
-              {label: "Deal 8 damage, applying its element",
-               effects: [{op: damage, amount: 8, target: enemy, applies_element: true}]},
-              {label: "Gain 3 Block, applying no element",
-               effects: [{op: block, amount: 3}]}]}]}
-
-- {id: proto_itto_superlative_superstrength_either, name: "Itto - Oni Rush", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo, cost: 2, type: attack,
-   effects: [{op: choose_one, modes: [
-              {label: "Deal 14 damage",
-               effects: [{op: damage, amount: 14, target: enemy}]},
-              {label: "Gain 6 Block",
-               effects: [{op: block, amount: 6}]}]}]}
-
-- {id: proto_shinobu_sanctifying_ring_priced, name: "Shinobu - Sanctifying Circle", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro, cost: 3, type: skill,
-   effects: [{op: damage, amount: 3, target: all_enemies, applies_element: true}, {op: block, amount: 4}]}
-
-- {id: proto_thoma_crimson_ooyoroi_priced, name: "Thoma - Crimson Guard", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro, cost: 3, type: attack,
-   effects: [{op: damage, amount: 8, target: enemy, applies_element: true}, {op: block, amount: 3}]}
-
-- {id: proto_itto_superlative_superstrength_priced, name: "Itto - Superlative Guard", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo, cost: 3, type: attack,
-   effects: [{op: damage, amount: 14, target: enemy, applies_element: false}, {op: block, amount: 6}]}
-
-- {id: proto_spark_priced_strike, name: "Second Helping", character: klee,
-   authored_by: [claude],
-   cost: 0, type: attack, rarity: uncommon,
-   effects: [{op: spend_spark, amount: 3},
-             {op: damage, amount: 6, target: enemy, times: 2}]}
-
-- {id: proto_spark_priced_draw, name: "Rummage", character: klee,
-   # re-derived from the clause 2026-08-29 (round 3); the seat's text/number discarded
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   effects: [{op: spend_spark, amount: 3},
-             {op: draw, amount: 3}]}
-
-- {id: proto_spark_burst_conversion, name: "Slow Burn", character: klee,
-   # re-derived from the clause 2026-08-29 (round 3); the seat's text/number discarded
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon, tags: [skill_tag],
-   effects: [{op: spend_spark, amount: 3},
-             {op: block, amount: 5},
-             {op: burst_energy, amount: 10}]}
-
-- {id: proto_spark_mode_bombs, name: "Bag of Tricks", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   effects: [{op: choose_one, modes: [
-              {label: "Place 1 [gold]Bomb[/gold] dealing 5",
-               effects: [{op: place_bomb, amount: 1, target: enemy, bomb_damage: 5}]},
-              {label: "Spend 3 [gold]Sparks[/gold]: place 3 [gold]Bombs[/gold] dealing 5",
-               effects: [{op: spend_spark, amount: 3},
-                         {op: place_bomb, amount: 3, target: enemy, bomb_damage: 5}]}]}]}
-
-- {id: proto_kurages_oath_memory, name: "Kurage's Oath", character: kokomi,
-   cost: 1, type: power, rarity: common,
-   authored_by: [claude],
-   effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}],
-   upgrade: {kurage_ward: +2},
-   description: "Whenever the [gold]Bake-Kurage[/gold] plays a card from its memory, gain {PowerAmount:diff()} Block."}
-
-- {id: proto_muster_subsidy_funnel, name: "Bounty of the Isles", character: kokomi,
-   authored_by: [claude],
-   cost: 2, type: skill, rarity: uncommon,
-   effects: [{op: conscript, amount: 2, subsidy: waived}]}
-
-# THE KLEE OVERHAUL, SLICE ONE. Reachable rows, not staged ones: under
-# `C.KLEE_OVERHAUL` these ARE Klee's starter and her whole pool. Why each row
+# THE KLEE OVERHAUL, SLICE ONE. Reachable rows, not staged ones: these ARE
+# Klee's starter and her whole pool. Why each row
 # reads as it does: docs/notes/prototype-surface-provenance.md.
 
 # --- the starter (packet sec.3, DRAFT 4, R242): Strike x4 + Defend x4 are the
@@ -230,7 +142,7 @@
    description: "Whenever one of your [gold]Bombs[/gold] goes off, your other [gold]Bombs[/gold] grow 3.",
    effects: [{op: apply_power, power: ko_chained_reactions, amount: 3, target: self}]}
 
-- {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash (proto)", character: klee,
+- {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash", character: klee,
    authored_by: [claude],
    cost: 3, type: power, rarity: rare,
    description: "At the start of your turn, your largest [gold]Bomb[/gold] deals its size in [gold]Pyro[/gold] damage without going off.",
@@ -387,13 +299,13 @@
 # shelves and a bridge. Why each exists and what the rounds said:
 # docs/notes/prototype-surface-provenance.md.
 
-- {id: proto_ko_all_of_my_treasures, name: "All of My Treasures! (proto)", character: klee,
+- {id: proto_ko_all_of_my_treasures, name: "All of My Treasures!", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
    description: "Place a [gold]Bomb[/gold] the size of your largest [gold]Bomb[/gold] on the enemy.",
    effects: [{op: plant_bomb_copy_largest, target: enemy}]}
 
-- {id: proto_ko_fish_blasting, name: "Fish Blasting (proto)", character: klee,
+- {id: proto_ko_fish_blasting, name: "Fish Blasting", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    description: "Deal 8 damage to ALL enemies. Add a [gold]Confiscated[/gold] to your draw pile.",
@@ -410,7 +322,7 @@
    upgrade: {damage: +2},
    effects: [{op: set_off, target: enemy, damage: 3, charge: largest}]}
 
-- {id: proto_ko_bombs_away, name: "Bombs Away! (proto)", character: klee,
+- {id: proto_ko_bombs_away, name: "Bombs Away!", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    description: "Deal 3 damage to ALL enemies. Place a [gold]Bomb[/gold] 2 on ALL enemies.",
@@ -851,7 +763,7 @@
    upgrade: {retain: true},
    effects: [{op: lose_strength, amount: 1, target: all_enemies, per_status: 1}]}
 
-# THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
+# THE MONDSTADT COMPANION OVERHAUL. These ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and
 # which 13 of the workshop's 34 are absent: docs/notes/prototype-surface-provenance.md.
 
@@ -872,7 +784,7 @@
              {op: conditional, if: hp_pct_below_50,
               then: [{op: block, amount: 4}]}]}
 
-- {id: proto_mc_kaeya_frostgnaw, name: "Kaeya — Frostgnaw (proto)", character: klee,
+- {id: proto_mc_kaeya_frostgnaw, name: "Kaeya — Frostgnaw", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
@@ -887,7 +799,7 @@
    description: "For 3 turns, at the end of your turn deal 6 [gold]Cryo[/gold] damage to a random enemy.",
    effects: [{op: apply_power, power: mc_glacial_waltz, amount: 3, target: self}]}
 
-- {id: proto_mc_barbara_show_begin, name: "Barbara — Let the Show Begin♪ (proto)", character: klee,
+- {id: proto_mc_barbara_show_begin, name: "Barbara — Let the Show Begin♪", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill,
@@ -895,7 +807,7 @@
    effects: [{op: block, amount: 6},
              {op: apply_aura, element: hydro, target: enemy}]}
 
-- {id: proto_mc_albedo_solar_isotoma, name: "Albedo — Solar Isotoma (proto)", character: klee,
+- {id: proto_mc_albedo_solar_isotoma, name: "Albedo — Solar Isotoma", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: power,
@@ -917,7 +829,7 @@
    description: "At the end of your turn, [gold]Swirl[/gold] the enemy with the most auras and gain 6 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mc_dandelion_breeze, amount: 1, target: self}]}
 
-- {id: proto_mc_fischl_nightrider, name: "Fischl — Nightrider (proto)", character: klee,
+- {id: proto_mc_fischl_nightrider, name: "Fischl — Nightrider", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
@@ -926,14 +838,14 @@
              {op: conditional, if: self_has_power_mc_oz,
               then: [{op: damage, amount: 5, target: random_enemy, applies_element: true}]}]}
 
-- {id: proto_mc_fischl_oz, name: "Fischl — Oz, at Your Side (proto)", character: klee,
+- {id: proto_mc_fischl_oz, name: "Fischl — Oz, at Your Side", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: power,
    description: "At the end of your turn, [gold]Oz[/gold] deals 5 [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: apply_power, power: mc_oz, amount: 1, target: self}]}
 
-- {id: proto_mc_sucrose_gust, name: "Sucrose — Wind Spirit Creation (proto)", character: klee,
+- {id: proto_mc_sucrose_gust, name: "Sucrose — Wind Spirit Creation", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 0, type: skill,
@@ -941,14 +853,14 @@
    description: "[gold]Swirl[/gold] the enemy. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
 
-- {id: proto_mc_sucrose_astable, name: "Sucrose — Astable Anemohypostasis (proto)", character: klee,
+- {id: proto_mc_sucrose_astable, name: "Sucrose — Astable Anemohypostasis", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 0, type: skill, exhaust: true,
    description: "[gold]Swirl[/gold] ALL enemies.",
    effects: [{op: swirl, target: all_enemies}]}
 
-- {id: proto_mc_sucrose_catalyst_conversion, name: "Sucrose — Catalyst Conversion (proto)", character: klee,
+- {id: proto_mc_sucrose_catalyst_conversion, name: "Sucrose — Catalyst Conversion", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 0, type: skill, exhaust: true,
@@ -956,7 +868,7 @@
    upgrade: {draw: +1},
    effects: [{op: energy, amount: 1}, {op: draw, amount: 1}]}
 
-- {id: proto_mc_bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage (proto)", character: klee,
+- {id: proto_mc_bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: pyro,
    cost: 1, type: skill, exhaust: true,
@@ -1024,7 +936,7 @@
 # same terms; the hooks are built now, in both engines, and which hook each row
 # spends is in docs/notes/prototype-surface-provenance.md.
 
-- {id: proto_mc_diona_icy_paws, name: "Diona — Icy Paws (proto)", character: klee,
+- {id: proto_mc_diona_icy_paws, name: "Diona — Icy Paws", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: skill,
@@ -1050,21 +962,21 @@
    effects: [{op: block, amount: 4},
              {op: apply_power, power: mc_melody_loop, amount: 3, target: enemy}]}
 
-- {id: proto_mc_bennett_passion_overload, name: "Bennett — Passion Overload (proto)", character: klee,
+- {id: proto_mc_bennett_passion_overload, name: "Bennett — Passion Overload", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: pyro,
    cost: 0, type: skill,
    description: "Your next Attack this turn deals 4 additional damage and applies [gold]Pyro[/gold].",
    effects: [{op: apply_power, power: mc_passion_overload, amount: 4, target: self}]}
 
-- {id: proto_mc_dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower (proto)", character: klee,
+- {id: proto_mc_dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill,
    description: "The next time an enemy attacks you, deal 9 [gold]Hydro[/gold] damage to it first.",
    effects: [{op: apply_power, power: mc_sacramental_shower, amount: 1, target: self}]}
 
-- {id: proto_mc_dahlia_favonian_favor, name: "Dahlia — Favonian Favor (proto)", character: klee,
+- {id: proto_mc_dahlia_favonian_favor, name: "Dahlia — Favonian Favor", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: hydro,
    cost: 1, type: skill,
@@ -1178,15 +1090,15 @@
    description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 8 [gold]Block[/gold] and draw 1 card.",
    effects: [{op: apply_power, power: mc_lions_fang, amount: 8, target: self}]}
 
-# THE KOKOMI OVERHAUL, BRIEF DRAFT 7 (the Plan). Under
-# `C.KOKOMI_OVERHAUL` these ARE her starter and her whole pool. The `plan:`
+# THE KOKOMI OVERHAUL, BRIEF DRAFT 7 (the Plan). These
+# ARE her starter and her whole pool. The `plan:`
 # key, the targets and every row: docs/notes/prototype-surface-provenance.md.
 
 # --- the starter (packet sec.3, R242): Strike x4 + Defend x4 are the BASE
 # GAME's cards and have no row here. The renamed twins Water's Edge and Coral
 # Guard printed the base stat line and left the sheet with the ruling. ---
 
-- {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
+- {id: proto_kk_kurages_oath, name: "Kurage's Oath", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
@@ -1197,7 +1109,7 @@
    # 8 Block / Plan 10 to ALL (2026-09-28: the now-line upgrades too).
    upgrade: {block: 2, plan_damage: 3}}
 
-- {id: proto_kk_slack_water, name: "Slack Water (proto)", character: kokomi,
+- {id: proto_kk_slack_water, name: "Slack Water", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: basic,
    # R267 PICK 1: THE PLAN HALF IS BACK IN THE MORNING. Pass five moved it to
@@ -1281,7 +1193,7 @@
 
 # `EB-492`. THE RARE, REDESIGNED: it was a Plan itself, so the kit's payoff
 # spent the morning it was meant to pay for. Now a Power, for the fight.
-- {id: proto_kk_nereids_ascension, name: "Nereid's Ascension (proto)", character: kokomi,
+- {id: proto_kk_nereids_ascension, name: "Nereid's Ascension", character: kokomi,
    authored_by: [claude],
    cost: 3, type: power, rarity: rare,
    # POOL PASS THREE (`EB-655`): THE FIRST PLAN, NOT EVERY PLAN. Doubling
@@ -1353,7 +1265,7 @@
    # 16 Block; Mend 8.
    upgrade: {block: 4, plan_mend: 2}}
 
-- {id: proto_kk_sango_isshin, name: "Sango Isshin (proto)", character: kokomi,
+- {id: proto_kk_sango_isshin, name: "Sango Isshin", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
    # THE CASKET PASS (2026-09-28): per carry-out this turn, to ALL.
@@ -1398,7 +1310,7 @@
 
 # --- currencies, tempo, and the one replay (packet sec.4) ---
 
-- {id: proto_kk_stolen_chapter, name: "Stolen Chapter (proto)", character: kokomi,
+- {id: proto_kk_stolen_chapter, name: "Stolen Chapter", character: kokomi,
    authored_by: [claude],
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
@@ -1417,7 +1329,7 @@
    description: "Exhaust. The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now.",
    effects: [{op: carry_out_front_plan}]}
 
-- {id: proto_kk_undertow, name: "Undertow (proto)", character: kokomi,
+- {id: proto_kk_undertow, name: "Undertow", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    # `EB-441`: one damage op with a rider, not two literal branches.
@@ -2109,11 +2021,11 @@
    # 12 to ALL, twice.
    upgrade: {damage: 3}}
 
-# THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
-# under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.
+# THE INAZUMA COMPANION OVERHAUL, beside the Mondstadt block:
+# these ARE Inazuma's Universal companion pool.
 # Source, readings and hooks: docs/notes/prototype-surface-provenance.md.
 
-- {id: proto_mi_gorou_inuzaka, name: "Gorou — Inuzaka All-Round Defense (proto)", character: klee,
+- {id: proto_mi_gorou_inuzaka, name: "Gorou — Inuzaka All-Round Defense", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: geo,
    cost: 1, type: attack,
@@ -2121,7 +2033,7 @@
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: block_half_damage}]}
 
-- {id: proto_mi_gorou_war_banner, name: "Gorou — General's War Banner (proto)", character: klee,
+- {id: proto_mi_gorou_war_banner, name: "Gorou — General's War Banner", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: geo,
    cost: 1, type: skill,
@@ -2139,21 +2051,21 @@
    description: "For 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy.",
    effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}]}
 
-- {id: proto_mi_sayu_fuuin_dash, name: "Sayu — Yoohoo Art: Fuuin Dash (proto)", character: klee,
+- {id: proto_mi_sayu_fuuin_dash, name: "Sayu — Yoohoo Art: Fuuin Dash", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
    cost: 1, type: attack,
    description: "Deal 8 damage to a random enemy and [gold]Swirl[/gold] it.",
    effects: [{op: damage, amount: 8, target: random_enemy, applies_element: true}]}
 
-- {id: proto_mi_sayu_daruma, name: "Sayu — Muji-Muji Daruma (proto)", character: klee,
+- {id: proto_mi_sayu_daruma, name: "Sayu — Muji-Muji Daruma", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 1, type: skill, exhaust: true,
    description: "For 2 turns, at the end of your turn: above 70% HP, deal 6 damage to a random enemy; otherwise, gain 6 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_daruma, amount: 2, target: self}]}
 
-- {id: proto_mi_sayu_naptime, name: "Sayu — Naptime (proto)", character: klee,
+- {id: proto_mi_sayu_naptime, name: "Sayu — Naptime", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: anemo,
    cost: 0, type: skill,
@@ -2161,7 +2073,7 @@
    effects: [{op: block, amount: 4},
              {op: apply_power, power: mi_naptime, amount: 2, target: self}]}
 
-- {id: proto_mi_shinobu_sanctifying_ring, name: "Shinobu — Sanctifying Ring (proto)", character: klee,
+- {id: proto_mi_shinobu_sanctifying_ring, name: "Shinobu — Sanctifying Ring", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: skill, exhaust: true,
@@ -2169,7 +2081,7 @@
    effects: [{op: damage, amount: 3, target: self},
              {op: apply_power, power: mi_sanctifying_ring, amount: 3, target: self}]}
 
-- {id: proto_mi_shinobu_grass_ring, name: "Shinobu — Grass Ring of Sanctification (proto)", character: klee,
+- {id: proto_mi_shinobu_grass_ring, name: "Shinobu — Grass Ring of Sanctification", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
    cost: 0, type: skill,
@@ -2178,7 +2090,7 @@
              {op: conditional, if: hp_lost_since_last_turn,
               then: [{op: block, amount: 4}]}]}
 
-- {id: proto_mi_shinobu_thundergrust, name: "Shinobu — Thundergrust (proto)", character: klee,
+- {id: proto_mi_shinobu_thundergrust, name: "Shinobu — Thundergrust", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
@@ -2187,7 +2099,7 @@
              {op: conditional, if: hp_pct_below_50,
               then: [{op: damage, amount: 5, target: enemy, applies_element: true}]}]}
 
-- {id: proto_mi_thoma_blazing_barrier, name: "Thoma — Blazing Barrier (proto)", character: klee,
+- {id: proto_mi_thoma_blazing_barrier, name: "Thoma — Blazing Barrier", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: pyro,
    cost: 1, type: skill,
@@ -2195,21 +2107,21 @@
    effects: [{op: block, amount: 6},
              {op: apply_power, power: mi_blazing_barrier, amount: 6, target: self}]}
 
-- {id: proto_mi_thoma_crimson_ooyoroi, name: "Thoma — Crimson Ooyoroi (proto)", character: klee,
+- {id: proto_mi_thoma_crimson_ooyoroi, name: "Thoma — Crimson Ooyoroi", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro,
    cost: 1, type: skill, exhaust: true,
    description: "For 2 turns, whenever you play an Attack, deal 5 [gold]Pyro[/gold] damage to a random enemy and gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_crimson_ooyoroi, amount: 2, target: self}]}
 
-- {id: proto_mi_sara_crowfeather_cover, name: "Kujou Sara — Crowfeather Cover (proto)", character: klee,
+- {id: proto_mi_sara_crowfeather_cover, name: "Kujou Sara — Crowfeather Cover", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
    cost: 0, type: skill,
    description: "Your next Attack this turn deals 4 additional damage and applies [gold]Electro[/gold].",
    effects: [{op: apply_power, power: mi_crowfeather, amount: 4, target: self}]}
 
-- {id: proto_mi_sara_tengu_stormcall, name: "Kujou Sara — Tengu Stormcall (proto)", character: klee,
+- {id: proto_mi_sara_tengu_stormcall, name: "Kujou Sara — Tengu Stormcall", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: attack,
@@ -2217,7 +2129,7 @@
    effects: [{op: damage, amount: 5, target: enemy, applies_element: true},
              {op: apply_power, power: mi_stormcall, amount: 1, target: self}]}
 
-- {id: proto_mi_itto_superlative_superstrength, name: "Itto — Superlative Superstrength (proto)", character: klee,
+- {id: proto_mi_itto_superlative_superstrength, name: "Itto — Superlative Superstrength", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 2, type: attack,
@@ -2225,7 +2137,7 @@
    effects: [{op: damage, amount: 14, target: enemy, applies_element: true},
              {op: block, amount: 12}]}
 
-- {id: proto_mi_raiden_musou_no_hitotachi, name: "Raiden Shogun — Musou no Hitotachi (proto)", character: klee,
+- {id: proto_mi_raiden_musou_no_hitotachi, name: "Raiden Shogun — Musou no Hitotachi", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: applier, element: electro,
    cost: 3, type: attack,
@@ -2311,133 +2223,133 @@
 # bodies, upgrades and art; the three guest stars are Furina's. Provenance
 # note, "Fontaine companions ported, 2026-10-01". ---
 
-- {id: proto_mf_chevreuse_interdiction_fire, name: "Chevreuse — Interdiction Fire (proto)", character: klee,
+- {id: proto_mf_chevreuse_interdiction_fire, name: "Chevreuse — Interdiction Fire", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: chevreuse_interdiction_fire,
    nation: fontaine, star: 4, rarity: common, role_c: applier, element: pyro, cost: 1, type: attack,
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true}]}
 
-- {id: proto_mf_chevreuse_vanguards_valor, name: "Chevreuse — Vanguard's Valor (proto)", character: klee,
+- {id: proto_mf_chevreuse_vanguards_valor, name: "Chevreuse — Vanguard's Valor", character: klee,
    upgrade: {buff: 2},
    authored_by: [claude],
    art_of: chevreuse_vanguards_valor,
    nation: fontaine, star: 4, rarity: common, role_c: buffer, element: pyro, cost: 0, type: skill,
    effects: [{op: buff_next_attack, amount: 3}, {op: conditional, if: reaction_triggered_this_turn, then: [{op: buff_next_attack, amount: 3}]}]}
 
-- {id: proto_mf_chevreuse_bursting_grenades, name: "Chevreuse — Ring of Bursting Grenades (proto)", character: klee,
+- {id: proto_mf_chevreuse_bursting_grenades, name: "Chevreuse — Ring of Bursting Grenades", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: chevreuse_bursting_grenades,
    nation: fontaine, star: 4, rarity: uncommon, role_c: applier, element: pyro, cost: 2, type: attack,
    effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true}]}
 
-- {id: proto_mf_lynette_enigmatic_feint, name: "Lynette — Enigmatic Feint (proto)", character: klee,
+- {id: proto_mf_lynette_enigmatic_feint, name: "Lynette — Enigmatic Feint", character: klee,
    upgrade: {block: 2},
    authored_by: [claude],
    art_of: lynette_enigmatic_feint,
    nation: fontaine, star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: skill,
    effects: [{op: swirl, target: enemy}, {op: block, amount: 5}]}
 
-- {id: proto_mf_lynette_box_trick, name: "Lynette — Bogglecat Box (proto)", character: klee,
+- {id: proto_mf_lynette_box_trick, name: "Lynette — Bogglecat Box", character: klee,
    upgrade: {draw: 1},
    authored_by: [claude],
    art_of: lynette_box_trick,
    nation: fontaine, star: 4, rarity: common, role_c: buffer, element: anemo, cost: 1, type: skill,
    effects: [{op: draw, amount: 2}]}
 
-- {id: proto_mf_lynette_astonishing_shift, name: "Lynette — Magic Trick: Astonishing Shift (proto)", character: klee,
+- {id: proto_mf_lynette_astonishing_shift, name: "Lynette — Magic Trick: Astonishing Shift", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: lynette_astonishing_shift,
    nation: fontaine, star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill,
    effects: [{op: swirl, target: enemy}, {op: damage, amount: 4, target: all_enemies, applies_element: false}]}
 
-- {id: proto_mf_charlotte_freezing_point, name: "Charlotte — Framing: Freezing Point Composition (proto)", character: klee,
+- {id: proto_mf_charlotte_freezing_point, name: "Charlotte — Framing: Freezing Point Composition", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: charlotte_freezing_point,
    nation: fontaine, star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
    effects: [{op: damage, amount: 4, target: enemy, applies_element: true}, {op: draw, amount: 1}]}
 
-- {id: proto_mf_charlotte_enduring_frosthelm, name: "Charlotte — First-Person Shutter (proto)", character: klee,
+- {id: proto_mf_charlotte_enduring_frosthelm, name: "Charlotte — First-Person Shutter", character: klee,
    upgrade: {block: 2},
    authored_by: [claude],
    art_of: charlotte_enduring_frosthelm,
    nation: fontaine, star: 4, rarity: common, role_c: buffer, element: cryo, cost: 1, type: skill,
    effects: [{op: block, amount: 4}, {op: block_next_turn, amount: 4}]}
 
-- {id: proto_mf_charlotte_snappy_silhouette, name: "Charlotte — Snappy Silhouette (proto)", character: klee,
+- {id: proto_mf_charlotte_snappy_silhouette, name: "Charlotte — Snappy Silhouette", character: klee,
    upgrade: {vulnerable: 1},
    authored_by: [claude],
    art_of: charlotte_snappy_silhouette,
    nation: fontaine, star: 4, rarity: uncommon, role_c: buffer, element: cryo, cost: 1, type: skill,
    effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy}, {op: draw, amount: 1}]}
 
-- {id: proto_mf_freminet_pers_deploy, name: "Freminet — Pers, Deploy! (proto)", character: klee,
+- {id: proto_mf_freminet_pers_deploy, name: "Freminet — Pers, Deploy!", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: freminet_pers_deploy,
    nation: fontaine, star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
    effects: [{op: damage, amount: 6, target: enemy, applies_element: true}]}
 
-- {id: proto_mf_freminet_pressurized_floe, name: "Freminet — Pressurized Floe: Backstroke (proto)", character: klee,
+- {id: proto_mf_freminet_pressurized_floe, name: "Freminet — Pressurized Floe: Backstroke", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: freminet_pressurized_floe,
    nation: fontaine, star: 4, rarity: common, role_c: trigger, element: cryo, cost: 2, type: attack,
    effects: [{op: damage, amount: 10, target: enemy, applies_element: false}, {op: block, amount: 6}]}
 
-- {id: proto_mf_freminet_shattering_pressure, name: "Freminet — Shattering Pressure (proto)", character: klee,
+- {id: proto_mf_freminet_shattering_pressure, name: "Freminet — Shattering Pressure", character: klee,
    upgrade: {power_amount: 2},
    authored_by: [claude],
    art_of: freminet_shattering_pressure,
    nation: fontaine, star: 4, rarity: uncommon, role_c: trigger, element: cryo, cost: 1, type: power,
    effects: [{op: apply_power, power: shatter_bonus, amount: 4, target: self, note: "your Shatters deal +4 damage"}]}
 
-- {id: proto_mf_navia_cannon_fire_support, name: "Navia — Cannon Fire Support (proto)", character: klee,
+- {id: proto_mf_navia_cannon_fire_support, name: "Navia — Cannon Fire Support", character: klee,
    upgrade: {power_amount: 2},
    authored_by: [claude],
    art_of: navia_cannon_fire_support,
    nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: geo, cost: 1, type: power,
    effects: [{op: apply_power, power: cannon_fire_support, amount: 3, target: self, note: "whenever you play a Companion card, gain 3 Block"}]}
 
-- {id: proto_mf_clorinde_impale_the_night, name: "Clorinde — Impale the Night (proto)", character: klee,
+- {id: proto_mf_clorinde_impale_the_night, name: "Clorinde — Impale the Night", character: klee,
    upgrade: {damage: 3},
    authored_by: [claude],
    art_of: clorinde_impale_the_night,
    nation: fontaine, star: 5, rarity: rare, role_c: applier, element: electro, cost: 2, type: attack,
    effects: [{op: damage, amount: 20, target: enemy, applies_element: true}, {op: apply_power, power: night_vigil, amount: 6, target: self, note: "your Attacks against enemies that have an aura deal +6"}]}
 
-- {id: proto_mf_neuvillette_ancient_sea_authority, name: "Neuvillette — Heir to the Ancient Sea's Authority (proto)", character: klee,
+- {id: proto_mf_neuvillette_ancient_sea_authority, name: "Neuvillette — Heir to the Ancient Sea's Authority", character: klee,
    upgrade: {cost: -1},
    authored_by: [claude],
    art_of: neuvillette_ancient_sea_authority,
    nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: hydro, cost: 1, type: power,
    effects: [{op: apply_power, power: ancient_sea_authority, amount: 1, target: self, note: "auras you apply last 1 extra turn"}]}
 
-- {id: proto_mf_arlecchino_masque_red_death, name: "Arlecchino — Masque of the Red Death (proto)", character: klee,
+- {id: proto_mf_arlecchino_masque_red_death, name: "Arlecchino — Masque of the Red Death", character: klee,
    upgrade: {power_amount: 1},
    authored_by: [claude],
    art_of: arlecchino_masque_red_death,
    nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 1, type: power,
    effects: [{op: apply_power, power: masque_red_death, amount: 1, target: self, note: "at the start of each turn gain 1 Strength; your Bond of Life eats the first 5 Block you gain each turn"}]}
 
-- {id: proto_mf_guest_neuvillette_tears, name: "Neuvillette — O Tears, I Shall Repay (proto)", character: furina,
+- {id: proto_mf_guest_neuvillette_tears, name: "Neuvillette — O Tears, I Shall Repay", character: furina,
    no_upgrade: "A Guest Star is made for one fight and never upgraded, as the shipped row.",
    authored_by: [claude],
    art_of: guest_neuvillette_tears,
    nation: fontaine, star: 5, rarity: common, role_c: applier, element: hydro, cost: 1, type: attack, guest_star: true,
    effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}
 
-- {id: proto_mf_guest_neuvillette_droplets, name: "Neuvillette — Sourcewater Droplets (proto)", character: furina,
+- {id: proto_mf_guest_neuvillette_droplets, name: "Neuvillette — Sourcewater Droplets", character: furina,
    no_upgrade: "A Guest Star is made for one fight and never upgraded, as the shipped row.",
    authored_by: [claude],
    art_of: guest_neuvillette_droplets,
    nation: fontaine, star: 5, rarity: common, role_c: buffer, element: hydro, cost: 1, type: skill, guest_star: true,
    effects: [{op: block, amount: 4}, {op: apply_aura, element: hydro, target: random_enemy}]}
 
-- {id: proto_mf_guest_neuvillette_judgment, name: "Neuvillette — Equitable Judgment (proto)", character: furina,
+- {id: proto_mf_guest_neuvillette_judgment, name: "Neuvillette — Equitable Judgment", character: furina,
    no_upgrade: "A Guest Star is made for one fight and never upgraded, as the shipped row.",
    authored_by: [claude],
    art_of: guest_neuvillette_judgment,

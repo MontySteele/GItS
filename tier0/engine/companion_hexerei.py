@@ -213,8 +213,6 @@ def note_reaction(state: "CombatState", enemy: "Enemy", name: str,
     The reverse order could let a chained Electro reaction kill the body their
     damage was owed to.
     """
-    if not C.COMPANION_OVERHAUL:
-        return
     from tier0.engine import effects                # late import (cycle)
 
     p = state.player
@@ -276,8 +274,6 @@ def _pay_ladder(state: "CombatState", card: "Card") -> None:
     Klee card Alice's Introduction Magic marked, for one, carries no
     `element:` at all.
     """
-    if not C.COMPANION_OVERHAUL:
-        return
     n = state.player.powers.get(LADDER_OF_ASCENT, 0)
     if not n or not state.living_enemies:
         return
@@ -301,7 +297,5 @@ def roll_turn_end(state: "CombatState") -> None:
     the enemy's half the way a Mine's can (which is why the CARETAKERS' two
     watchers close at the turn START instead, `companion_standins.roll_turn`).
     """
-    if not C.COMPANION_OVERHAUL:
-        return
     for name in _THIS_TURN:
         state.player.powers.pop(name, None)

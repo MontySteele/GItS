@@ -14,12 +14,19 @@ from __future__ import annotations
 
 from tier0 import constants as C
 from tier0.content import loader
+from tier0.engine.state import Card
 from tier05 import draft
-import pytest
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
+# THE SHIPPED ROWS THESE PINS ONCE NAMED (`salon_debut`, `casting_call`,
+# `grand_salon`, `gentilhomme_usher`, `remote_detonator`) left with the shipped
+# sheets at legacy cleanup stage 6, and no current row carries an archetype
+# tag. The drafter's generic limb still stands, so the pins are made on
+# synthetic rows that carry exactly the role and archetype tags it reads.
+
+
+def _tagged(cid, role, archetypes):
+    return Card(id=cid, name=cid, cost=1, type="skill", rarity="common",
+                role=role, archetypes=list(archetypes))
 
 
 def _cards(*ids):
@@ -36,11 +43,13 @@ def test_exactly_draft_core_size_on_plan_cards_is_a_finished_assembly():
     to make impossible: the predicate and the progress meter would disagree at
     the boundary again.
     """
-    deck = (_cards(*loader.starting_deck("furina"))
-            + _cards("salon_debut", "casting_call", "grand_salon"))
+    on_plan = ([_tagged(f"e{i}", "enabler", ["salon"])
+                for i in range(C.DRAFT_CORE_SIZE - 1)]
+               + [_tagged("p", "payoff", ["salon"])])
+    deck = _cards(*loader.starting_deck("furina")) + on_plan
 
-    on_plan, payoffs = draft._generic_core_counts(deck, "salon")
-    assert on_plan == C.DRAFT_CORE_SIZE and payoffs == 1
+    on_plan_n, payoffs = draft._generic_core_counts(deck, "salon")
+    assert on_plan_n == C.DRAFT_CORE_SIZE and payoffs == 1
     assert draft.core_complete(deck, "salon")
     assert draft._core_progress(deck, "salon") == 1.0
 
@@ -48,20 +57,17 @@ def test_exactly_draft_core_size_on_plan_cards_is_a_finished_assembly():
 def test_a_payoff_for_another_plan_is_not_this_plan_s_payoff():
     """"On-plan" is the whole of what `archetype in c.archetypes` means, and
     it governs BOTH limbs -- `_generic_core_counts` filters once and counts
-    twice. Loosening it so any payoff card counts would let Klee's
-    `remote_detonator`, a demolition payoff with no salon tag on it,
-    complete a salon core: four cards on the plan and the card that cashes
-    them belonging to a different deck entirely.
+    twice. Loosening it so any payoff card counts would let a demolition
+    payoff with no salon tag on it complete a salon core: the cards on the
+    plan and the card that cashes them belonging to a different deck entirely.
     """
     salon_deck = (_cards(*loader.starting_deck("furina"))
-                  + _cards("salon_debut", "casting_call", "gentilhomme_usher"))
-    off_plan_payoff = loader.get_card("remote_detonator")
-    assert off_plan_payoff.role == "payoff"
-    assert "salon" not in off_plan_payoff.archetypes
+                  + [_tagged(f"e{i}", "enabler", ["salon"])
+                     for i in range(C.DRAFT_CORE_SIZE)])
+    off_plan_payoff = _tagged("remote", "payoff", ["demolition"])
 
     with_it = salon_deck + [off_plan_payoff]
-    assert draft._generic_core_counts(with_it, "salon") == \
-        draft._generic_core_counts(salon_deck, "salon")
+    assert draft._generic_core_counts(with_it, "salon") ==         draft._generic_core_counts(salon_deck, "salon")
     assert draft._generic_core_counts(with_it, "salon")[0] >= C.DRAFT_CORE_SIZE
     assert not draft.core_complete(with_it, "salon")
     assert draft._core_progress(with_it, "salon") == 0.5

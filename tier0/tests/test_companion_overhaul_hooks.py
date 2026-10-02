@@ -32,7 +32,6 @@ from tier05 import rewards
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -54,7 +53,6 @@ def _caches_clear():
 def overhaul(monkeypatch):
     """The flag ON, with every id-resolving cache cleared going in and out."""
     _caches_clear()
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
     yield
     _caches_clear()
 
@@ -74,40 +72,6 @@ def _attack(cost=1, element="pyro", applies=True, amount=6):
 # ---------------------------------------------------------------------------
 # THE FLAG IS OFF, AND THAT IS THE ACCEPTANCE CONDITION
 # ---------------------------------------------------------------------------
-
-def test_every_new_hook_is_a_no_op_with_the_flag_off():
-    """Asserted against a state that CARRIES the arm's powers, because a hook
-    that ran while the flag was off would be a silent second rule set on every
-    shipped run -- and unlike the first pass's two turn blocks, these five sit
-    on paths a shipped run walks every single turn."""
-    st = make_state()
-    st.player.powers.update({
-        "mc_icy_paws": 6, "mc_sacramental_shower": 1, "mc_baron_bunny": 1,
-        "mc_passion_overload": 4, "mc_lightning_fang": 2, "mc_swirl_charge": 6,
-        "mc_favonian_favor": 3, "mc_sturm_und_drang": 6,
-        "mc_binary_white": 1, "mc_binary_dark": 8, "mc_starfrost_discount": 1,
-    })
-    st.player.block = 10
-    enemy = st.enemies[0]
-    enemy.powers.update({"mc_melody_loop": 3, "mc_lightfall_sword": 2})
-    before = (dict(st.player.powers), st.player.block, st.player.hp,
-              dict(enemy.powers), enemy.hp, enemy.aura)
-
-    assert effects.companion_overhaul_card_start(st, _attack()) == ""
-    assert effects.companion_overhaul_before_enemy_hit(st, enemy, 12) == 12
-    effects.companion_overhaul_block_absorbed(st, enemy, 5, 10)
-    effects.companion_overhaul_reaction(st, enemy, "swirl", "hydro")
-    assert effects.companion_overhaul_reaction_mult(st) == 1.0
-
-    assert (dict(st.player.powers), st.player.block, st.player.hp,
-            dict(enemy.powers), enemy.hp, enemy.aura) == before
-
-
-def test_the_cost_discount_is_not_read_with_the_flag_off():
-    st = make_state()
-    st.player.powers["mc_starfrost_discount"] = 1
-    assert combat.card_cost(st, _attack(cost=2)) == 2
-
 
 def test_the_element_override_is_not_read_with_the_flag_off():
     """`_element_for` is the cadence dial every damage effect in the engine

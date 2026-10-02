@@ -17,7 +17,7 @@ nothing torn down. What comes next is a person running
 
     python -m understudy.embark --character kokomi
     python -m understudy.embark --character kokomi --hold      # attach, no launch
-    python -m understudy.embark --character klee --arm proto_spark_priced_draw
+    python -m understudy.embark --character klee --arm proto_ko_kapow
     python -m understudy.embark --character klee --lane 1      # a SECOND game
     python -m understudy.embark --character IRONCLAD --lane 1  # base-game CONTROL
     python -m understudy.embark --teardown                     # put it all back
@@ -108,17 +108,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-import yaml
-
-# `EB-581`: the one tier0 read this door makes, and it is a NAME rather than a
-# rule -- `PROTOTYPE_ARM_SUPERSEDED` is the map of rows one arm of a kit
-# retires in another, stated once in `constants.py` and derived there from the
-# arms' own substitution maps, so a row added to an arm cannot be missed by
-# this door. `soak` already pulls tier0 in below, so this costs no import the
-# module did not already pay.
-from tier0 import constants as C
 from understudy import authorship, bridge, instances, report, soak
-from understudy import yaml_memo
+
 # `EB-456`: the LANE'S action budget, and this is the one direction the blind
 # wall runs in. `blindplay` may never import this file; this file may read the
 # blind module's bottom seam, which imports nothing from this package at all.
@@ -228,44 +219,11 @@ def wire_id(arm: str) -> str:
     return f"KLEEMOD-{str(arm).strip().upper()}"
 
 
-def shipped_ids() -> set[str]:
-    """Every card id on a SHIPPED roster or companion sheet.
-
-    `KLEESPARK-W3` is why this exists. A registration can need a deck at a
-    stated maker : sink ratio, and the makers are shipped rows -- Klee's six
-    unconverted `gain_spark` cards -- while the sinks are prototype ones. The
-    door granted prototypes only, so a controlled-ratio deck could not be
-    built at all, and granting the makers around the harness would leave them
-    out of the embark sidecar and therefore out of the sealed record's
-    `arms_granted` line, which is the one place the record says what the deck
-    was. A grant nothing records is worse than a grant nobody can make.
-
-    THE SHEET LIST IS NOT COPIED HERE: `resource_order.SHEETS` already
-    declares every sheet that can print a face, and the prototype surface is
-    excluded because `authorship.rows_authorship()` owns that half.
-    """
-    from understudy import resource_order          # yaml only; no tier0 pull
-    out: set[str] = set()
-    for rel in resource_order.SHEETS:
-        if Path(rel).name == authorship.SURFACE.name:
-            continue
-        path = resource_order.REPO / rel
-        if not path.is_file():
-            continue
-        blob = yaml_memo.safe_load(path.read_text(encoding="utf-8"))
-        if isinstance(blob, dict):
-            blob = blob.get("cards") or blob.get("rows") or []
-        for row in blob or []:
-            if isinstance(row, dict):
-                cid = str(row.get("id") or "").strip()
-                if cid:
-                    out.add(cid)
-    return out
-
-
 def arm_kind(arm: str) -> str:
-    """`"prototype"` or `"shipped"` -- which surface this id came off."""
-    return "prototype" if arm in authorship.rows_authorship() else "shipped"
+    """Which surface this id came off. Always `"prototype"` since legacy
+    cleanup stage 6 deleted the shipped sheets; kept on the sidecar so a
+    record's grant line keeps its shape."""
+    return "prototype"
 
 
 def check_arms(arms: list[str],
@@ -276,60 +234,19 @@ def check_arms(arms: list[str],
     `version` is injectable so the tests can put a release build, a dev build
     and an unreadable one in front of this without a game.
 
-    TWO SURFACES, ONE DOOR. An id is legal if it is a row on the prototype
-    surface OR a card on a shipped roster/companion sheet; anything else is
-    refused HERE, naming both, rather than by the far side's `unknown card
-    id`. The `+proto` build check binds only when a PROTOTYPE row is named --
-    a shipped row exists in a release build, so refusing one there would be a
-    door refusing to open on a question nobody asked.
+    ONE SURFACE, ONE DOOR. An id is legal if it is a row on the prototype
+    surface; anything else is refused HERE rather than by the far side's
+    `unknown card id`. The shipped sheets, and with them the shipped-row
+    grants, left at legacy cleanup stage 6.
     """
-    # `EB-581`. A ROW ITS OWN KIT'S OTHER ARM HAS SUPERSEDED IS REFUSED HERE,
-    # before the id check, because it IS a row and the id check waves it
-    # through.
-    #
-    # THE FIND (Kokomi r21 lane 1, (c) 1 and (c) 2). The coordinator granted
-    # `proto_kurages_oath_memory` -- the `KURAGE_MEMORY` base kit -- into a
-    # `KOKOMI_OVERHAUL` run, where the row's power is INERT ("whenever the
-    # Bake-Kurage plays a card from its memory" names a rule that arm does not
-    # have) and where it prints the SAME TITLE as the arm's own starter Skill.
-    # The seat spent two rounds on a card that could not do anything, with
-    # nothing on screen to tell it from the one that could.
-    #
-    # A REFUSAL AND NOT A WARNING, this door's standing shape: a grant that
-    # half-works is the state it exists to prevent, and "these two arms of one
-    # kit do not stack" is not something a coordinator can read off a build
-    # stamp. THE OFFER DOORS ALREADY SAID IT -- each overhaul replaces its
-    # starter and pool WHOLE -- and this is the door that did not.
-    superseded = [a for a in arms if a in C.PROTOTYPE_ARM_SUPERSEDED]
-    if superseded:
-        named = ", ".join(f"{a} (superseded by {C.PROTOTYPE_ARM_SUPERSEDED[a]})"
-                          for a in superseded)
-        raise EmbarkError(
-            f"{named}: a row from an arm this kit's overhaul retires. The two "
-            f"arms of one kit do not stack -- the overhaul replaces the "
-            f"starter and the pool whole, and the superseded row's rule is "
-            f"not in that build for its power to fire on. Grant the "
-            f"overhaul's own row instead.")
-
     known = authorship.rows_authorship()
-    shipped = shipped_ids()
-    unknown = [a for a in arms if a not in known and a not in shipped]
+    unknown = [a for a in arms if a not in known]
     if unknown:
         raise EmbarkError(
-            f"not a row on {authorship.SURFACE.name} and not a shipped card "
-            f"id: {', '.join(unknown)}. `--arm` names a row by its `id:`, on "
-            f"the prototype surface or on a shipped sheet -- a slice whose "
-            f"rows have already left the surface cannot be granted (the "
-            f"deletion rule).")
-
-    if not any(a in known for a in arms):
-        # Shipped rows only: the prototype classes are irrelevant, so the
-        # build stamp decides nothing here. The read is still made and
-        # returned, because the record names the build either way.
-        if version is None:
-            from understudy import blindplay
-            version = blindplay.build_version()
-        return version
+            f"not a row on {authorship.SURFACE.name}: {', '.join(unknown)}. "
+            f"`--arm` names a row by its `id:` on the prototype surface -- a "
+            f"slice whose rows have already left the surface cannot be "
+            f"granted (the deletion rule).")
 
     if version is None:
         # LAZY, and the direction matters. `blindplay` may never import this
@@ -711,10 +628,8 @@ def main(argv: list[str] | None = None) -> int:
                     dest="arms",
                     help="EB-188: grant a row into the STARTING DECK once the "
                          "run is open, so a blind whole-fight run can meet an "
-                         "arm the pools quarantine. A prototype row from "
-                         "docs/prototype-surface.yaml, or a SHIPPED card id "
-                         "from a roster/companion sheet (KLEESPARK-W3's "
-                         "controlled-ratio deck needs both). Repeatable, and "
+                         "arm the pools quarantine. A row from "
+                         "docs/prototype-surface.yaml. Repeatable, and "
                          "repeat an id to grant a second copy. A prototype id "
                          "is refused unless the deployed build carries the "
                          "current kits (`+proto`, or any build since the "

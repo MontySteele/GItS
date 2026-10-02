@@ -44,7 +44,6 @@ def overhaul(monkeypatch):
     the fixture in test_kokomi_overhaul.py verbatim, and for its reasons."""
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
-    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     yield
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()

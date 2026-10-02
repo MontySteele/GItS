@@ -67,7 +67,6 @@ def overhaul(monkeypatch):
     reasons."""
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
-    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     yield
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()

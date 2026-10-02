@@ -14,9 +14,6 @@ from tier0.pilot.policy import make_pilot
 from tier05 import conditional_telemetry, encore_telemetry
 import pytest
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 
 def _upkeep(members: int, encore: int, cost: int = 1) -> dict:
@@ -134,43 +131,3 @@ def test_the_dead_riders_sort_to_the_top():
            ("b", "q"): {"evaluated": 10, "fired": 0, "rate": 0.0}}
     assert conditional_telemetry.format_rows(agg)[0].startswith("  b")
 
-
-def test_the_engine_actually_emits_what_the_instruments_read():
-    """The instruments above are fed synthetic logs, which proves they do
-    arithmetic and not that the events exist. This runs a real Furina fight
-    and asserts the event names and keys are the ones tier05 reads -- the
-    join between the two halves, which is where a rename would break the
-    measurement silently."""
-    # The starter deck holds no conditional and no deploy, so the join would
-    # be untested on exactly the two events this sprint added. Both are
-    # named into the deck instead.
-    #
-    # `many_waters_melody` replaced `graceful_retreat` here (Fanfare rework
-    # Track C.1, 2026-07-28): Slip Backstage was rewritten into a flat
-    # Encore->Block spender and no longer holds a conditional at all, so it
-    # stopped supplying the event this test names it for. Its replacement
-    # gates on `has_salon_members`, which the crabaletta deploys below
-    # actually satisfy -- so the conditional is both EVALUATED and FIRED,
-    # which is a slightly stronger join than the one it replaces.
-    deck = (loader.starting_deck("furina")
-            + ["many_waters_melody"] * 6 + ["mademoiselle_crabaletta"] * 3)
-    player = loader.build_player_from_ids("furina", deck)
-    pilot = make_pilot(loader.pilot_weights("salon"))
-    state = run_fight(player, loader.build_encounter("punisher"), pilot,
-                      seed=20260728)
-
-    kinds = {ev["event"] for ev in state.log}
-    assert "conditional" in kinds, "no conditional was ever evaluated"
-    assert "salon_upkeep" in kinds, "no salon upkeep snapshot was emitted"
-    assert "salon_tick" in kinds, "no per-member tick was emitted"
-    assert "encore_end" in kinds, "the end-of-combat Encore level is not emitted"
-
-    tr = encore_telemetry.trace(state.log)
-    assert tr.end_encore is not None
-    if tr.upkeeps:
-        # Every upkeep must be paired with its ticks or the rates are lies.
-        assert tr.upkeeps_complete + tr.upkeeps_truncated == tr.upkeeps
-
-    cond = conditional_telemetry.trace(state.log)
-    assert cond.total > 0
-    assert all(isinstance(k, tuple) and len(k) == 2 for k in cond.evaluated)

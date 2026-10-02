@@ -16,12 +16,10 @@ from tier0.engine.state import CombatState
 from tier05 import acts, draft, model
 from tier05 import relics as relic_pool
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 SEED = 77
-BOUNDARY_SEED = 70   # see test_two_act_run_walks_both_acts_and_heals...
+BOUNDARY_SEED = 74   # see test_two_act_run_walks_both_acts_and_heals...
+#                      (70 until legacy cleanup stage 6 changed the starter)
 CHIP = 4          # flat HP loss per stubbed fight -- every fight is won
 
 

@@ -26,9 +26,6 @@ from tier0.engine.state import Card, CombatState
 from tier05 import draft, model, rewards, shop
 from tier05 import maps
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 
 @pytest.fixture(autouse=True)
@@ -113,7 +110,7 @@ def test_run_gold_rises_on_wins_and_falls_on_buy(monkeypatch):
 def test_buys_a_card_the_policy_would_draft(monkeypatch):
     monkeypatch.setattr(shop, "shop_offer",
                         lambda rng, ch, n=C.SHOP_CARD_OFFERS:
-                        [loader.get_card("mine_toss")])
+                        [loader.get_card("proto_ko_fish_blasting")])
     deck = loader.starting_deck("klee")
     # companions=False isolates the CHARACTER shelf, which is what this test
     # is about: the flat §5 price and the policy-reuse contract. The companion
@@ -124,16 +121,16 @@ def test_buys_a_card_the_policy_would_draft(monkeypatch):
     # "visit" joined every purchase record on 2026-08-10 (the P1 attribution
     # repair -- the offer and purchase logs are flattened across a run's shops
     # and had no join key). It defaults to 0 for a direct call like this one.
-    assert out.purchases == [{"buy": "card", "id": "mine_toss",
+    assert out.purchases == [{"buy": "card", "id": "proto_ko_fish_blasting",
                               "price": C.SHOP_CARD_PRICE, "visit": 0}]
     assert out.gold == 300 - C.SHOP_CARD_PRICE
-    assert out.deck_ids.count("mine_toss") == deck.count("mine_toss") + 1
+    assert out.deck_ids.count("proto_ko_fish_blasting") == deck.count("proto_ko_fish_blasting") + 1
 
 
 def test_no_buy_when_gold_short(monkeypatch):
     monkeypatch.setattr(shop, "shop_offer",
                         lambda rng, ch, n=C.SHOP_CARD_OFFERS:
-                        [loader.get_card("mine_toss")])
+                        [loader.get_card("proto_ko_fish_blasting")])
     deck = loader.starting_deck("klee")
     # `companions=False`, like its sibling above. The flag matters here
     # because the companion shelf is priced differently from the card shelf,
@@ -153,7 +150,7 @@ def test_no_buy_when_gold_short(monkeypatch):
 def test_skip_policy_buys_nothing(monkeypatch):
     monkeypatch.setattr(shop, "shop_offer",
                         lambda rng, ch, n=C.SHOP_CARD_OFFERS:
-                        [loader.get_card("mine_toss")])
+                        [loader.get_card("proto_ko_fish_blasting")])
     out = shop.visit_shop(random.Random(0), "klee",
                           loader.starting_deck("klee"), 300, "demolition",
                           _skip)
@@ -173,24 +170,24 @@ def test_is_known_dead_classifier():
     # Curse tag -> dead.
     assert shop.is_known_dead(_fab(id="c", tags=["curse"]))
     # Real Klee basics are upgradable -> NOT dead (clean deck stays clean).
-    assert not shop.is_known_dead(loader.get_card("kaboom"))
+    assert not shop.is_known_dead(loader.get_card("strike"))
     # An already-upgraded basic is spent, not filler -> NOT dead.
-    assert not shop.is_known_dead(loader.get_card("kaboom+"))
+    assert not shop.is_known_dead(loader.get_card("strike+"))
 
 
 def test_removal_removes_a_known_dead_card(monkeypatch):
     monkeypatch.setattr(shop, "shop_offer",
                         lambda *a, **k: [])          # isolate removal
     # Treat a real deck id as dead so a REAL card leaves the deck end-to-end.
-    monkeypatch.setattr(shop, "is_known_dead", lambda c: c.id == "kaboom")
-    deck = loader.starting_deck("klee")              # 4x kaboom
+    monkeypatch.setattr(shop, "is_known_dead", lambda c: c.id == "strike")
+    deck = loader.starting_deck("klee")              # 4x strike
     out = shop.visit_shop(random.Random(0), "klee", deck, 300,
                           "demolition", _skip, removal_uses=0)
     # "visit": the per-visit join key added 2026-08-10 (see the sibling note
     # above); 0 on a direct call.
-    assert out.purchases == [{"buy": "removal", "id": "kaboom",
+    assert out.purchases == [{"buy": "removal", "id": "strike",
                               "price": C.SHOP_REMOVAL_PRICE, "visit": 0}]
-    assert out.deck_ids.count("kaboom") == deck.count("kaboom") - 1
+    assert out.deck_ids.count("strike") == deck.count("strike") - 1
     assert out.removal_uses == 1
     # Rising price: the Nth removal costs base + N*step.
     out2 = shop.visit_shop(random.Random(0), "klee", deck, 300,
@@ -212,7 +209,7 @@ def test_no_removal_on_clean_deck(monkeypatch):
 
 def test_no_removal_when_dead_card_unaffordable(monkeypatch):
     monkeypatch.setattr(shop, "shop_offer", lambda *a, **k: [])
-    monkeypatch.setattr(shop, "is_known_dead", lambda c: c.id == "kaboom")
+    monkeypatch.setattr(shop, "is_known_dead", lambda c: c.id == "strike")
     deck = loader.starting_deck("klee")
     out = shop.visit_shop(random.Random(0), "klee", deck,
                           C.SHOP_REMOVAL_PRICE - 1, "demolition", _skip)

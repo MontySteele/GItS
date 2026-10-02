@@ -27,9 +27,6 @@ Lanes (the registry in `run_lints.py` is the only list):
 
 Notes on individual lints:
 
-- `lint_sheet_stamp.py --update` re-pins `SHEET_DIGEST` after a sheet edit, in
-  the same commit as the edit. It guards Balance-stage measurement: a sheet
-  edit must move a stamp.
 - `lint_prototype_patch_scope.py` (`EB-225`) walks the three `Compile Remove`
   prototype directories: every Harmony patch there must be character-scoped and
   seat-guarded (`LocalContext.GetMe` THROWS on a seatless combat, `d217b4f`);

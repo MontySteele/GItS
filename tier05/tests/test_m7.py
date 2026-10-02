@@ -28,22 +28,6 @@ def test_runs_rest_coherently_and_stay_deterministic():
     assert [r.deck_ids for r in rs] == [r.deck_ids for r in again]
 
 
-def test_upgrade_prefers_on_plan_payoffs():
-    deck = loader.starting_deck("klee") + ["explosives_workshop", "mine_toss"]
-    action, target = model.rest_action(deck, hp=62, max_hp=62,
-                                       archetype="demolition")
-    assert action == "upgrade"
-    assert loader.get_card(target).role == "payoff"      # workshop over toss
-
-
-def test_upgraded_ids_flow_through_metrics_unchanged():
-    """archetype_shares must read mine_toss+ exactly like mine_toss."""
-    starter = [loader.get_card(c) for c in loader.starting_deck("klee")]
-    plain = starter + [loader.get_card("mine_toss")]
-    smithed = starter + [loader.get_card("mine_toss+")]
-    assert draft.archetype_shares(plain) == draft.archetype_shares(smithed)
-
-
 @pytest.mark.battery
 def test_adaptive_runs_are_label_independent_including_rests():
     """Review-workflow regression: M7 smithing consulted the assigned

@@ -90,7 +90,7 @@ assumptions:
      Slime in the front slot and read -7, which says nothing about the rule.
      The fattest body in the fight absorbs 13 and then 7 and is still the
      fattest, so the same creature is resolved for both."
-  - "The modes are answered BY LABEL, `deep-breath-modal-choice.yaml`'s rule:
+  - "The modes are answered BY LABEL, as every modal scenario is:
      the generator emits each label into the option card's title and its
      description, so a label edit on the sheet is an edit to this file too. On
      an empty stage, or with a back performer short of the price, the Spend

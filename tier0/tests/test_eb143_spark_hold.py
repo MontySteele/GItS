@@ -35,6 +35,41 @@ def card(cid, **kw):
     return Card(id=cid, **kw)
 
 
+#: The retired Klee rows this file was written against, kept as their shapes
+#: (legacy cleanup stage 6 deleted the sheet): three `C19` sinks, two readers
+#: of the bank and three cards that read nothing.
+SHAPES = {
+    "kaboom": dict(type="attack", effects=[
+        {"op": "damage", "amount": 7, "target": "enemy"}]),
+    "duck_and_cover": dict(effects=[{"op": "block", "amount": 5}]),
+    "hot_hands": dict(effects=[{"op": "gain_spark", "amount": 3},
+                               {"op": "damage", "amount": 2,
+                                "target": "self"}]),
+    "gleeful_barrage": dict(type="attack", cost=2, effects=[
+        {"op": "damage", "amount": 3, "target": "random_enemy",
+         "times_formula": "2_plus_sparks"}]),
+    "patched_dress": dict(effects=[
+        {"op": "block", "amount": 6},
+        {"op": "conditional", "if": "has_spark",
+         "then": [{"op": "block", "amount": 3}]}]),
+    "hold_the_line": dict(effects=[
+        {"op": "spend_spark", "amount": 2}, {"op": "block", "amount": 5},
+        {"op": "conditional", "if": "enemy_intends_attack",
+         "then": [{"op": "block", "amount": 6}]}]),
+    "smoke_and_sparks": dict(effects=[
+        {"op": "spend_spark", "amount": 2},
+        {"op": "apply_power", "power": "vulnerable", "amount": 3,
+         "target": "enemy"}]),
+    "powder_charge": dict(effects=[
+        {"op": "spend_spark", "amount": 2},
+        {"op": "detonate", "target": "enemy", "bonus": 4}]),
+}
+
+
+def shape(cid):
+    return card(cid, **SHAPES[cid])
+
+
 def sink(price=2, payoff=None):
     """A staged sink in the `C19` shape: a Skill that charges Sparks."""
     fx = [{"op": "spend_spark", "amount": price}]
@@ -59,20 +94,19 @@ def test_only_a_card_that_prints_the_op_pays_anything():
     price the playability gate would not have demanded."""
     state = board([], sparks=5)
     for cid in ("kaboom", "duck_and_cover", "gleeful_barrage", "hot_hands"):
-        assert policy._spark_hold_cost(state, loader.get_card(cid)) == 0.0
+        assert policy._spark_hold_cost(state, shape(cid)) == 0.0
 
     for cid in SINKS:
-        assert policy._spark_hold_cost(state, loader.get_card(cid)) > 0.0
+        assert policy._spark_hold_cost(state, shape(cid)) > 0.0
 
 
-def test_every_shipped_sink_is_priced_and_no_other_row_is():
-    """The reach of the term is enumerable, and it is the same three rows
-    `test_eb118_spend_spark` pins as the whole `spend_spark` set. A fourth row
-    printing the op prices itself here automatically; a row that stopped
-    printing it would fall out. Both directions are the point."""
-    priced = sorted(c.id for c in loader._card_index().values()
-                    if combat.spark_cost(c))
-    assert priced == sorted(SINKS)
+def test_every_priced_current_row_pays_the_term():
+    """The reach of the term is enumerable: every current row that prints a
+    Spark price is charged, and none that prints none."""
+    state = board([], sparks=5)
+    for c in loader.prototype_cards():
+        cost = policy._spark_hold_cost(state, c)
+        assert (cost > 0.0) == bool(combat.spark_cost(c)), c.id
 
 
 # --- leg 1: the stock floor, the gain dial mirrored ------------------------
@@ -137,8 +171,8 @@ def test_a_hand_of_non_readers_contributes_exactly_zero():
     """No epsilon and no tolerance: the probe asks the pilot's own valuations
     at two bank levels, and a card that reads no Spark is identical
     arithmetic on identical inputs."""
-    state = board([sink(price=2), loader.get_card("kaboom"),
-                   loader.get_card("duck_and_cover")], sparks=6)
+    state = board([sink(price=2), shape("kaboom"),
+                   shape("duck_and_cover")], sparks=6)
     assert policy._spark_reader_loss(state, sink(price=2), 6, 4) == 0.0
 
 
@@ -146,7 +180,7 @@ def test_a_spark_scaling_attack_in_hand_makes_the_bank_worth_holding():
     """`gleeful_barrage` hits `2 + sparks` times for 3. Spending 2 Sparks
     costs it two hits, and the term finds that WITHOUT naming the card, the
     op or the formula -- it re-reads what the scorer already reads."""
-    barrage = loader.get_card("gleeful_barrage")
+    barrage = shape("gleeful_barrage")
     state = board([sink(price=2), barrage], sparks=4)
     per_hit = barrage.effects[0]["amount"]
 
@@ -160,7 +194,7 @@ def test_a_has_spark_rider_is_found_the_same_way():
     """The other printed reader shape: a conditional that goes dead when the
     bank empties. `_active_effects` already forecasts it, so the probe sees
     the branch flip without a second copy of the rule."""
-    rider = loader.get_card("patched_dress")     # block 6, +3 while has_spark
+    rider = shape("patched_dress")     # block 6, +3 while has_spark
     state = board([sink(price=2), rider], sparks=2)
     loss = policy._spark_reader_loss(state, sink(price=2), 2, 0)
     assert loss > 0
@@ -181,7 +215,7 @@ def test_the_draw_pile_is_not_read():
     information the player does not have at decision time. The residual error
     UNDER-values banking, which is the safe direction (R194)."""
     state = board([sink(price=2)], sparks=4)
-    state.player.draw_pile = [loader.get_card("gleeful_barrage")]
+    state.player.draw_pile = [shape("gleeful_barrage")]
     assert policy._spark_hold_cost(state, sink(price=2)) == pytest.approx(
         2 * C.PILOT_SPARK_VALUE)
 
@@ -189,14 +223,14 @@ def test_the_draw_pile_is_not_read():
 # --- the probe is a pure reader -------------------------------------------
 
 def test_the_probe_restores_the_bank_it_borrowed():
-    state = board([sink(price=2), loader.get_card("gleeful_barrage")],
+    state = board([sink(price=2), shape("gleeful_barrage")],
                   sparks=4)
     policy._spark_hold_cost(state, sink(price=2))
     assert state.player.sparks == 4
 
 
 def test_the_probe_restores_the_bank_even_when_a_valuation_raises(monkeypatch):
-    state = board([sink(price=2), loader.get_card("kaboom")], sparks=4)
+    state = board([sink(price=2), shape("kaboom")], sparks=4)
 
     def boom(*args, **kwargs):
         raise RuntimeError("probe")
@@ -212,7 +246,7 @@ def test_the_probe_restores_the_bank_even_when_a_valuation_raises(monkeypatch):
 def test_a_sink_is_played_when_its_payoff_beats_the_bank():
     """`hold_the_line` against a real swing: eleven points of Block the pilot
     would otherwise eat is worth more than two banked Sparks."""
-    htl = loader.get_card("hold_the_line")
+    htl = shape("hold_the_line")
     state = board([htl], sparks=3, incoming=14)
     pilot = policy.make_pilot(loader.pilot_weights("spark"))
 
@@ -224,8 +258,8 @@ def test_a_sink_is_refused_when_banking_is_worth_more():
     """The same card, the same bank, one extra card in hand -- and the pilot
     holds the Sparks for the payoff that reads them. This is the whole row:
     the term is a DECISION, not a tax."""
-    htl = loader.get_card("hold_the_line")
-    barrage = loader.get_card("gleeful_barrage")
+    htl = shape("hold_the_line")
+    barrage = shape("gleeful_barrage")
     weights = loader.pilot_weights("spark")
     state = board([htl, barrage], sparks=4, incoming=4)
 
@@ -238,8 +272,8 @@ def test_the_same_board_played_the_sink_before_this_window():
     0.0 the term vanishes and the pilot is byte-identical to `P10` -- which on
     the board above took the sink. The degenerate case is a pin, not an
     argument."""
-    htl = loader.get_card("hold_the_line")
-    barrage = loader.get_card("gleeful_barrage")
+    htl = shape("hold_the_line")
+    barrage = shape("gleeful_barrage")
     weights = loader.pilot_weights("spark")
     state = board([htl, barrage], sparks=4, incoming=4)
 
@@ -256,14 +290,14 @@ def test_zeroing_the_weight_restores_every_pre_window_score():
     the term is live. `SPARK_HOLD_VALUE_WEIGHT` is the ONE place to override
     the term, and this is what "one place" means."""
     weights = loader.pilot_weights("spark")
-    state = board([loader.get_card(cid) for cid in SINKS], sparks=4)
-    live = {cid: policy._score(state, loader.get_card(cid), weights)
+    state = board([shape(cid) for cid in SINKS], sparks=4)
+    live = {cid: policy._score(state, shape(cid), weights)
             for cid in SINKS}
 
     before = policy.SPARK_HOLD_VALUE_WEIGHT
     try:
         policy.SPARK_HOLD_VALUE_WEIGHT = 0.0
-        off = {cid: policy._score(state, loader.get_card(cid), weights)
+        off = {cid: policy._score(state, shape(cid), weights)
                for cid in SINKS}
     finally:
         policy.SPARK_HOLD_VALUE_WEIGHT = before
@@ -277,7 +311,7 @@ def test_the_term_is_pilot_independent():
     pilot's, and the three sinks are drafted by `demolition` and `generic`
     decks as well as `spark` ones. No row of `archetypes.yaml` moves, which is
     also what keeps the archive scope to the cards that print the op."""
-    htl = loader.get_card("hold_the_line")
+    htl = shape("hold_the_line")
     state = board([htl], sparks=3)
     cost = policy._spark_hold_cost(state, htl)
     for pilot_id in ("spark", "demolition", "reaction"):

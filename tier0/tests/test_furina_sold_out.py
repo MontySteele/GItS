@@ -27,7 +27,7 @@ FS = furina_stage
 
 @pytest.fixture
 def arm(monkeypatch):
-    monkeypatch.setattr(FS, "FURINA_STAGE", True)
+    yield
 
 
 def _furina(**kw):
@@ -83,10 +83,8 @@ def test_the_row_is_the_papers():
 
 def test_sold_out_replaces_a_dropped_rare_power():
     assert FS.POOL_SUBS["unheard_confession"] == "proto_fs_sold_out"
-    shipped = {r["id"]: r for r in yaml.safe_load(
-        (loader.DOCS_DIR / "furina-cards.yaml").read_text(encoding="utf-8"))}
-    assert (shipped["unheard_confession"]["rarity"],
-            shipped["unheard_confession"]["type"]) == ("rare", "power")
+    row = loader.peek_card("proto_fs_sold_out")
+    assert (row.rarity, row.type) == ("rare", "power")
 
 
 # ---------------------------------------------------------------------------
@@ -103,11 +101,6 @@ def test_a_second_copy_opens_no_fifth_seat(arm):
     st = _state()
     st.player.powers[FS.SOLD_OUT] = 2
     assert FS.capacity(st.player) == 4
-
-
-def test_capacity_with_the_arm_off_is_three(monkeypatch):
-    monkeypatch.setattr(FS, "FURINA_STAGE", False)
-    assert FS.capacity(_state().player) == FS.SEATS
 
 
 def test_the_card_opens_the_fourth_seat(arm):

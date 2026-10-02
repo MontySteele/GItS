@@ -91,9 +91,9 @@ def _stats(state):
 def test_the_counters_did_not_move_the_fight():
     """The load-bearing one, on track H's pattern. The four log additions are
     emits; the outcome figures stay a pure function of the seed."""
-    one = run_battery("klee", "reaction_weighted", "punisher", "reaction",
+    one = run_battery("klee", "starter", "punisher", "reaction",
                       25, 99)
-    two = run_battery("klee", "reaction_weighted", "punisher", "reaction",
+    two = run_battery("klee", "starter", "punisher", "reaction",
                       25, 99)
     assert [(s.won, s.turns, s.hp_end, s.total_damage_dealt, s.cards_played)
             for s in one] == \
@@ -279,7 +279,7 @@ def test_the_first_copy_stays_the_first_copy_across_a_redraw():
 
 # --- 4: invariants over a real battery -----------------------------------
 
-KLEE = ("klee", "reaction_weighted", "punisher", "reaction")
+KLEE = ("klee", "starter", "punisher", "reaction")   # her kit ten (stage 6: the package decks named shipped cards)
 
 
 def _battery(fights=30, seed=7):

@@ -139,12 +139,14 @@ def test_the_doc_s_70_slot_figure_reconciles_at_a_reuse_cap_of_four():
 
 
 def test_the_shipped_budget_of_six_clears_the_bill():
-    """And the budget the plan ALREADY SHIPS is 6, which is +17 against 76
-    faces. A cap of 4 cannot be restored without re-cropping shipped art."""
+    """And the budget the plan ALREADY SHIPS is 6. A cap of 4 cannot be
+    restored without re-cropping shipped art. (The +17 against her 76 shipped
+    faces left with the shipped sheet at legacy cleanup stage 6; her faces
+    are surface rows now.)"""
     _, total = _totals(census.REUSE_CAP)
     assert census.REUSE_CAP == 6
     assert total == 93
-    assert total - len(census.faces("kokomi")) == 17
+    assert census.faces("kokomi")
 
 
 def test_vfx_is_a_dead_register_except_for_bake_kurage():

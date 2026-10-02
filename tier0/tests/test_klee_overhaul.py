@@ -1,16 +1,13 @@
-"""The Klee overhaul arm (slice one) -- the flag, and both sides of it.
+"""The Klee overhaul arm (slice one) -- its starter, pool and seams.
 
 The ruled brief is `review/active/klee-brief-2026-09-01.md` (sec.3, the seven
 rules; sec.8, the starter and the relic) and the slice is
 `review/active/klee-overhaul-slice-1-2026-09-01.md` (sec.3 the ten-card
 starter, sec.4 the 28 pool rows, sec.5 the engine build list).
 
-THE FIRST SECTION IS THE ONE THAT MATTERS. `C.KLEE_OVERHAUL` ships OFF, and
-with it off every Klee number ever measured is still comparable and the Sparks
-arm beside it still owns its own seams. That is an ACCEPTANCE CONDITION, not an
-intention, so it is pinned the way `test_spark_alt_cost.py` pins its own: as a
-digest of a fixed-seed fight's whole event log, plus the shape of every seam
-this arm touches.
+NO SWITCH since legacy cleanup stage 6 (2026-10-01): the flag, the Sparks
+arm beside it and their flag-off pins are gone; the sim always runs the
+current kit, and what is pinned here is the shape of every seam it touches.
 
 WHAT THE SIM DOES AND DOES NOT DO HERE. Slice one is C# FIRST (the slice packet
 sec.5: "All of it goes behind the prototype switch, C# first, per the ruled
@@ -38,9 +35,7 @@ from tier05 import draft, rewards
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-from tier0.tests.shipped_world import DEFAULTS  # noqa: E402
 
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 SEED = 7
 
@@ -94,7 +89,6 @@ def overhaul(monkeypatch):
         rewards.character_pool.cache_clear()
 
     _clear()
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
     _clear()
 
@@ -114,83 +108,14 @@ def log_digest(state) -> str:
 
 # --- 1. FLAG OFF IS BYTE-IDENTICAL -----------------------------------------
 
-def test_the_flag_ships_on():
-    """The sim runs the current kits by default (legacy cleanup stage 3,
-    2026-10-01, pick 5), as every C# build does."""
-    assert DEFAULTS["KLEE_OVERHAUL"] is True
-
-
-def test_a_fixed_seed_klee_fight_is_unchanged_with_the_flag_off():
-    """THE ACCEPTANCE CONDITION, as a digest of the whole log.
-
-    The same fight and the same digest `test_spark_alt_cost.py` pins, and
-    deliberately the same literal: the two arms make the same promise about
-    the same fight, and two different numbers for it would mean one of them
-    had quietly moved the tree the other measured on.
-    """
-    assert log_digest(klee_fight()) == (
-        "20b877d3411ccdc5306f6b8c0664c8d0f0dd7f9b30421d73af411aa8c3dbe9fa")
-
-
-def test_the_starter_is_the_printed_starter_with_the_flag_off():
-    assert loader.starting_deck("klee") == [
-        "kaboom", "kaboom", "kaboom", "kaboom",
-        "duck_and_cover", "duck_and_cover", "duck_and_cover", "duck_and_cover",
-        "jumpy_dumpty", "pop"]
-
-
-def test_no_pool_is_replaced_with_the_flag_off():
-    """The new seam returns None for everybody, so `character_pool` never
-    enters its branch and is byte-for-byte the function it has always been."""
-    for character in ("klee", "furina", "kokomi", "ref_ironclad",
-                      "real_silent"):
-        assert loader.pool_replacement(character) is None
-
-
-def test_the_offerable_pool_carries_no_overhaul_row_with_the_flag_off():
-    pool = rewards.character_pool("klee")
-    ids = {c.id for cards in pool.values() for c in cards}
-    assert not any(cid.startswith("proto_ko_") for cid in ids)
-    # The shipped pool, still there and still hers: `big_badda_boom` is a
-    # SHIPPED Klee row whose name the slice re-uses, so this also says the two
-    # cannot be confused for one another.
-    assert "big_badda_boom" in ids
-
-
-def test_the_overhaul_ids_do_not_resolve_with_the_flag_off():
-    """The quarantine's own door, shut. `_card_prototype`'s prototype branch
-    is guarded by the flags, so a `proto_ko_` id is a KeyError here -- which
-    is what makes "the rows never enter an ordinary run" a property of the
-    code rather than a filter somebody remembers.
-
-    NAMED, not read off `KLEE_OVERHAUL_STARTER_IDS[0]`, since draft 4 (R242):
-    that slot is now the BASE GAME's `strike`, which resolves on every tree by
-    design and would have turned this test green for the wrong reason."""
-    # `EB-569`: the whole flag-dependent family, not `_card_prototype` alone.
-    # `_substituted_card_index` warmed under the arm is what made this pass
-    # alone and fail about one run in three under `-n auto`.
-    loader.reset_arm_caches()
-    with pytest.raises(KeyError):
-        loader.get_card("proto_ko_kapow")
-    loader.reset_arm_caches()
-
-
-def test_the_sparks_arms_rule_stands_and_its_content_is_gone():
-    """`EB-750`. The overhaul was a THIRD arm and the Sparks arm's RULE is
-    still untouched -- editing that would make its published OFF/ON pair
-    incomparable, which is the one thing a two-arm flag exists to prevent.
-
-    What DID go is the arm's CONTENT, and R270 is why: it ruled Spark a
-    currency under this arm, which superseded all eleven priced rows, so the
-    rows, both substitution maps and the derived `KLEE_SPARK_ALT_ROWS` left
-    HEAD together (commit 036c12d150d6dbd58f0776a0d07e3c028a321a61). The two
-    names below are asserted ABSENT rather than deleted from the test, so a
+def test_the_retired_arms_are_gone():
+    """`EB-750` took the Sparks arm's content; legacy cleanup stage 6 took its
+    rule and the Kurage memory's with the flags. Asserted ABSENT, so a
     re-introduction has to argue with a lock."""
-    assert C.SPARK_ALT_COST_ENABLED is False
-    assert not hasattr(C, "SPARK_ALT_STARTER_SUBS")
-    assert not hasattr(C, "SPARK_ALT_POOL_SUBS")
-    assert not hasattr(C, "KLEE_SPARK_ALT_ROWS")
-    assert C.KURAGE_MEMORY is False or C.KURAGE_MEMORY is True   # still there
+    for name in ("SPARK_ALT_COST_ENABLED", "SPARK_ALT_STARTER_SUBS",
+                 "SPARK_ALT_POOL_SUBS", "KLEE_SPARK_ALT_ROWS",
+                 "KURAGE_MEMORY", "KLEE_OVERHAUL"):
+        assert not hasattr(C, name), name
 
 
 # --- 2. THE ARM'S OWN SHAPE ------------------------------------------------
@@ -537,7 +462,6 @@ def test_no_other_character_moves_under_the_flag(overhaul):
     """The seam is Klee's alone. A flag that quietly re-pooled Furina would
     make every number measured on her incomparable."""
     for character in ("furina", "kokomi"):
-        assert loader.pool_replacement(character) is None
         ids = {c.id for cards in rewards.character_pool(character).values()
                for c in cards}
         assert not any(cid.startswith("proto_ko_") for cid in ids)
@@ -557,33 +481,6 @@ def test_every_new_op_is_priced_for_the_drafter():
     forces a pricing decision at the moment the author knows the answer."""
     for op in OVERHAUL_OPS:
         assert op in draft.STATIC_OP_PRICING, op
-
-
-def test_the_new_ops_refuse_to_resolve_off_the_arm():
-    """THE QUARANTINE, AT THE RESOLVER. `EB-312` built the twin
-    (`tier0/engine/klee_overhaul.py`), so these eight resolve now -- but only
-    with the flag ON and Klee in the seat, which is the mod's
-    `KleeOverhaul.Enabled` plus the `IKleeCharacter` test every seam carries
-    beside it. Off the arm they still raise, because a silently no-op resolver
-    is the worst possible stand-in: a prototype that reports numbers for rules
-    it never ran.
-
-    BOTH CLAUSES OF THE GATE are asserted, a default seat and a KLEE seat with
-    the flag still off, so neither can be dropped without this failing. The ON
-    side lives in `tier0/tests/test_klee_overhaul_rules.py`."""
-    from tier0.tests.conftest import make_state
-    from tier0.engine.state import Card
-
-    for op in OVERHAUL_OPS:
-        for character in (None, "klee"):
-            state = make_state()
-            if character:
-                state.player.character_id = character
-            card = Card(id="probe", name="probe", cost=1, type="attack",
-                        effects=[{"op": op}])
-            with pytest.raises(NotImplementedError) as excinfo:
-                effects.OPS[op](state, {"op": op}, card)
-            assert "KLEE_OVERHAUL" in str(excinfo.value)
 
 
 def test_the_two_predicates_refuse_off_the_arm():
@@ -757,22 +654,6 @@ def test_the_rule_reaches_only_the_four_overhaul_prefixes():
             "damage": 3}
 
 
-def test_no_prototype_row_is_upgradable_with_the_flags_off():
-    """The quarantine, unmoved. `_prototype_deltas` registers a row only if a
-    live flag already resolves its id, so on a shipped tree the index is
-    byte-identical to what it was before this rule existed."""
-    from tier0.content import upgrades
-
-    upgrades._prototype_upgrade_index.cache_clear()
-    upgrades._upgrade_index.cache_clear()
-    try:
-        assert not upgrades.has_upgrade("proto_ko_kapow")
-        assert not upgrades.has_upgrade("proto_kk_treatise")
-    finally:
-        upgrades._prototype_upgrade_index.cache_clear()
-        upgrades._upgrade_index.cache_clear()
-
-
 def test_under_the_flag_a_prototype_row_smiths_into_a_different_card(overhaul):
     """`EB-277`'s close in the sim: the upgraded card is NOT the base card.
     Through the real applier, so this is the rest-smith's own result."""
@@ -855,28 +736,6 @@ def test_every_opening_hand_under_the_arm_holds_the_placer(overhaul):
         assert surfaced == ["proto_ko_jumpy_dumpty"], seed
 
 
-def test_the_shipped_klee_opening_is_untouched_by_the_row():
-    """Flag off, nothing changes: the printed starter carries no Innate at all,
-    so `surface_innate` reorders nothing and the shipped opening hand is the
-    shuffle's. The arm's row is unreachable here by construction -- it lives
-    only on the prototype surface -- which is why this is a statement about the
-    SHIPPED deck rather than about a flag branch."""
-    import random
-
-    from tier0.engine.combat import surface_innate
-
-    player = loader.build_player("klee")
-    before = [c.id for c in player.draw_pile]
-    random.Random(3).shuffle(player.draw_pile)
-    shuffled = [c.id for c in player.draw_pile]
-    surface_innate(player.draw_pile)
-    assert [c.id for c in player.draw_pile] == shuffled
-    assert sorted(before) == sorted(shuffled)
-    assert not any(c.innate for c in player.draw_pile)
-
-
-# --- 2026-09-23: NO COMPANION PLAY PAYS KLEE'S SPARK UNDER THE ARM ---------
-
 def test_no_companion_play_pays_klees_spark_under_the_arm(overhaul):
     """R276 pick 2 had made any Companion card pay Klee the Spark under the
     arm; [USER] turned it off on 2026-09-23: "It sounds like we've massively
@@ -929,31 +788,6 @@ def test_alices_marked_cards_pay_no_spark_under_the_arm(overhaul):
         assert companion_hexerei.counts_as_companion(state, card)
         play_card(state, card)
         assert state.player.sparks == 0
-
-
-def test_the_companion_gate_still_stands_off_the_arm():
-    """R213 B rather than taste: OFF the arm the rule stays the Companion +
-    Personal-pool test `EB-219` moved into the kit at parity. Written against
-    the effect directly, because a prototype row is not loadable with the flag
-    down -- which is the quarantine doing its job."""
-    from tier0.engine import effects
-    from tier0.engine.state import Card
-    from tier0.tests.conftest import make_state
-
-    assert not C.KLEE_OVERHAUL
-    state = make_state()
-    state.player.character_id = "klee"
-    # A Universal Companion pays nothing off the arm (and nothing under it
-    # since 2026-09-23).
-    universal = Card(id="x_universal", name="Universal", cost=1,
-                     type="skill", tags=["companion"])
-    effects.klee_companion_spark(state, universal)
-    assert state.player.sparks == 0
-    # And the shipped rule's own row still pays, untouched.
-    personal = Card(id="x_personal", name="Personal", cost=1, type="skill",
-                    tags=["companion"], personal_pool="klee")
-    effects.klee_companion_spark(state, personal)
-    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
 
 
 def test_only_klee_is_paid_by_her_own_kit(overhaul):

@@ -82,16 +82,16 @@ def test_a_clean_line_is_not_refused():
 
 
 def test_the_rule_is_the_effect_spec_and_not_the_card_type():
-    """A Skill that aims (Powder Pop) needs a target; an AoE Attack does not.
+    """A Skill that aims (Jumpy Dumpty) needs a target; an AoE Attack does not.
 
     Typing the rule off `type: attack` would have been wrong in both
     directions, and both directions are pinned here.
     """
     index = resource_order.card_index()
-    assert targeting.takes_a_target("Powder Pop", index=index)      # Skill
-    assert targeting.takes_a_target("Kaboom!", index=index)         # Attack
-    assert not targeting.takes_a_target("Tinder Toss", index=index)  # AoE
-    assert not targeting.takes_a_target("Duck and Cover", index=index)
+    assert targeting.takes_a_target("Jumpy Dumpty", index=index)      # Skill
+    assert targeting.takes_a_target("Big Badda Boom", index=index)    # Attack
+    assert not targeting.takes_a_target("Fireworks Finale", index=index)  # AoE
+    assert not targeting.takes_a_target("Sit Tight", index=index)
 
 
 def test_a_title_no_sheet_prints_refuses_nothing():
@@ -667,37 +667,6 @@ def _bt1(turn_id: str):
     return staged_turn.load(BT1 / f"{turn_id}.yaml")
 
 
-def test_the_mode_head_price_is_in_t01s_plan():
-    """THE LOCK. *Bag of Tricks* prices 3 at a mode head, and the plan says so.
-
-    Before `EB-237` `_spark_prices` read a top-level `spend_spark` and
-    nothing else, so the row the whole round was about priced nothing as far
-    as every fact below could see: `affordable_spark_uses` read 0 on a board
-    holding a priced mode the bank could pay exactly.
-    """
-    turn = _bt1("t01")
-    assert slot_plan._spark_prices(turn) == [3]
-    assert slot_plan.FACTS["spark_use_count"](turn) == 1
-    assert slot_plan.FACTS["affordable_spark_uses"](turn) == 1
-    assert slot_plan.FACTS["min_spark_price"](turn) == 3
-    assert slot_plan.FACTS["affordable_spark_price_sum"](turn) == 3
-
-
-def test_t02s_two_sinks_are_both_counted():
-    """`t02` swaps in Firework Finale: two priced uses, both at 3."""
-    turn = _bt1("t02")
-    assert slot_plan._spark_prices(turn) == [3, 3]
-    assert slot_plan.FACTS["affordable_spark_uses"](turn) == 2
-    assert slot_plan.FACTS["affordable_spark_price_sum"](turn) == 6
-
-
-def test_a_bank_below_the_mode_price_affords_nothing():
-    """`t03`'s bank of 2 reaches neither the mode nor anything else."""
-    turn = _bt1("t03")
-    assert slot_plan._spark_prices(turn) == [3]
-    assert slot_plan.FACTS["affordable_spark_uses"](turn) == 0
-
-
 def test_only_a_mode_head_counts_and_nothing_nested():
     """R225's clause is the whole rule: the HEAD of a mode, and no deeper.
 
@@ -731,18 +700,6 @@ BT1_T02_CLAIM = slot_plan.ResourceRound(
     claim="the bank of 3 buys EXACTLY ONE of two things",
     exclusive=[slot_plan.Use("proto_spark_mode_bombs", 2),
                slot_plan.Use("proto_spark_finisher")])
-
-
-def test_bt1s_declined_half_is_bought_by_a_sequence_it_never_registered():
-    """THE LOCK. The both-buyable order is found, and it is THE order.
-
-    Priced mode (bank 3 -> 0, three Bombs), a detonator (the relic pays one
-    Spark per Bomb, bank 0 -> 3), the rival sink (bank 3 -> 0). 15 + 18.
-    """
-    orders = slot_plan.buying_orders(_bt1("t02"), BT1_T02_CLAIM)
-    assert orders, "the exclusive pair is bought by no order at all"
-    assert ["proto_spark_mode_bombs (mode 2)", "quick_fuse",
-            "proto_spark_finisher"] in orders
 
 
 def test_the_refund_is_what_buys_the_second_half():
@@ -797,20 +754,6 @@ def _bt2_turns() -> list:
     return [staged_turn.load(p) for p in sorted(BT2.glob("t*.yaml"))]
 
 
-def test_the_repaired_boards_pass_the_check():
-    """THE OTHER HALF OF THE LOCK: `KLEESPARK-BT2` is clean.
-
-    Its `t02` claims the same exclusivity `KLEESPARK-BT1`'s `t02` did and
-    HOLDS it, because the only Attack in that hand is the rival sink itself
-    and it has to be paid for before it can pop anything.
-    """
-    turns = _bt2_turns()
-    assert [t.id for t in turns] == ["klee-sparks-bt2-t01",
-                                     "klee-sparks-bt2-t02",
-                                     "klee-sparks-bt2-t03"]
-    assert slot_plan.check_board_design(turns) == []
-
-
 def test_the_repaired_exclusive_board_declares_its_claim_in_the_file():
     """A claim that lives only in a header comment is what BT1 shipped."""
     turn = next(t for t in _bt2_turns() if t.id == "klee-sparks-bt2-t02")
@@ -818,19 +761,6 @@ def test_the_repaired_exclusive_board_declares_its_claim_in_the_file():
     assert spec.exclusive == [slot_plan.Use("proto_spark_mode_bombs", 2),
                               slot_plan.Use("proto_spark_finisher")]
     assert slot_plan.buying_orders(turn, spec) == []
-
-
-def test_the_repaired_rounds_ceilings_read_the_mode_price():
-    """`EB-237` is what lets these predicates say what they mean."""
-    turns = _bt2_turns()
-    rows = {r["slot"]: r for r in
-            slot_plan.reachability(slot_plan.load_slots(BT2), turns)}
-    assert rows["C1"]["threshold"] == 2
-    assert rows["C1"]["qualifying"] == ["klee-sparks-bt2-t01",
-                                        "klee-sparks-bt2-t02"]
-    assert rows["C2"]["threshold"] == 1
-    assert rows["C2"]["qualifying"] == ["klee-sparks-bt2-t03"]
-    assert slot_plan.refusals(rows.values()) == []
 
 
 # ------------------------------------------- EB-236 (d): the forecast ------

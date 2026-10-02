@@ -62,6 +62,15 @@ def test_core_advance_bonus_does_not_fire_from_the_anchor_s_tags():
     assert unshielded - shielded == 3.0 * draft.GENERIC_PLAN_BONUS_MULT
 
 
+def _foreign(cid):
+    """A non-anchor row carrying the `generic` tag (a Klee card)."""
+    from tier0.engine.state import Card
+    card = Card(id=cid, name=cid, cost=1, type="skill", rarity="common",
+                character="klee", role="enabler", archetypes=["generic"])
+    assert card.character != draft.ANCHOR_TAG_SHIELD_CHARACTER
+    return card
+
+
 def _score_with_shield_disabled(card, deck, archetype):
     """`score_offer` with `_core_advance_view` reduced to the identity --
     i.e. the pre-R121 scorer, reconstructed through the live code path so the
@@ -91,17 +100,15 @@ def test_instrumentation_still_reads_the_anchor_s_tags():
 
 
 def test_the_shield_is_scoped_to_the_anchor_s_own_cards():
-    """Scoping is by owning character, not by the tag value: 83 of the 89
-    `generic`-tagged cards in the pool belong to Klee, Furina and Kokomi, and
-    the ruling shields the ANCHOR ARM's tags. A deck with no anchor card in
-    it is handed back unchanged -- object identity, so the non-anchor arms
-    are not merely equal but bit-identical through this path.
+    """Scoping is by owning character, not by the tag value: the ruling
+    shields the ANCHOR ARM's tags, and the shipped kits' `generic` rows were
+    the control group. They left with the shipped sheets (legacy cleanup
+    stage 6), so the control is three synthetic non-anchor rows carrying the
+    same tag. A deck with no anchor card in it is handed back unchanged --
+    object identity, so the non-anchor arms are not merely equal but
+    bit-identical through this path.
     """
-    foreign = [c for c in loader._card_index().values()
-               if "generic" in c.archetypes
-               and c.character != draft.ANCHOR_TAG_SHIELD_CHARACTER]
-    assert foreign, "the pool's non-anchor generic tags are the control group"
-    deck = foreign[:3]
+    deck = [_foreign(f"f{i}") for i in range(3)]
     assert draft._core_advance_view(deck) is deck
     assert (draft._core_progress(draft._core_advance_view(deck), "generic")
             == draft._core_progress(deck, "generic"))
@@ -133,9 +140,7 @@ def test_the_shield_leaves_the_card_prototypes_alone():
 def test_behavioural_archetypes_is_blind_to_the_anchor_and_only_the_anchor():
     anchor = _anchor(ANCHOR_PAYOFF)
     assert anchor.archetypes and not draft.behavioural_archetypes(anchor)
-    foreign = next(c for c in loader._card_index().values()
-                   if "generic" in c.archetypes
-                   and c.character != draft.ANCHOR_TAG_SHIELD_CHARACTER)
+    foreign = _foreign("f")
     assert draft.behavioural_archetypes(foreign) is foreign.archetypes
 
 

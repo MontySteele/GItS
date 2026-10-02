@@ -139,41 +139,6 @@ def test_klee_profile_remains_the_legacy_default():
     assert gen.KLEE_PROFILE.cadence == "catalyst_attack"
 
 
-def test_card_level_resource_costs_emit_explicit_gates_and_cost_upgrades():
-    by_id = {card["id"]: card for card in _furina_cards()}
-    # dress_rehearsal since Curtain Call B: crowd_work became a Power (its
-    # encore_cost install gate was dropped with the conversion), so the
-    # spend-gate emission pin moves to the surviving Spend-2 card.
-    rehearsal = gen.emit(by_id["dress_rehearsal"], gen.FURINA_PROFILE)
-    assert (
-        "CustomResources<EncoreResource>.SetCanonicalCost(this, 2);"
-        in rehearsal
-    )
-    # Its upgrade softens the gate (Spend 2 -> 1), so the face renders the
-    # templated form rather than a bare literal.
-    assert "Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]." in rehearsal
-
-    # ENCORE is the only card-level resource gate. Fanfare's retired with the
-    # spend grammar ("The Tide Turns", F-A4): it is a read-only momentum stat
-    # and no card spends it, so no Fanfare cost line may be emitted anywhere.
-    # (Blocked cards are skipped: emit() over unregistered grammar is a crash
-    # by design -- UNPARSEABLE discipline -- not a parity statement.)
-    for card in _furina_cards():
-        if gen.blocked_reason(card, gen.FURINA_PROFILE):
-            continue
-        emitted = gen.emit(card, gen.FURINA_PROFILE)
-        assert "CustomResources<FanfareResource>.SetCanonicalCost" not in emitted
-        assert "CustomResources<FanfareResource>.Cost(" not in emitted
-
-    crescendo = gen.emit(by_id["crescendo"], gen.FURINA_PROFILE)
-    # Legibility sprint (2026-07-24): the Fanfare rider renders through a
-    # CalculatedDamageVar (face/preview and hit share one value path) instead
-    # of inline PrintedDamage arithmetic. The scaling lives in the multiplier.
-    # Untouched by F-A -- READING the meter is exactly what survives.
-    assert "FurinaResources.ReadableFanfare(card.Owner.Creature) / 2" in crescendo
-    assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in crescendo
-
-
 def test_unknown_card_level_semantics_block_loudly():
     card = {
         "id": "future_card",
@@ -256,7 +221,8 @@ def test_remove_delta_must_match_a_keyword_the_card_prints(monkeypatch):
 def test_register_never_reaches_the_generated_csharp():
     """`register` is a SHEET-SIDE voice label. Codegen tolerates it and
     ignores it: strip the field and every generated file must come out
-    byte-identical.
+    byte-identical. Run over the prototype surface's Furina rows since legacy
+    cleanup stage 6 deleted her shipped sheet.
 
     Asserted as byte-identity rather than as "the word does not appear",
     because the failure that matters is not a stray literal -- it is the
@@ -266,115 +232,37 @@ def test_register_never_reaches_the_generated_csharp():
 
     The engine-side half of the same law lives in the register lint
     (tools/lint_register_isolation.py): nothing under tier0/engine or tier05
-    may READ the field either. Together they say the column is documentation
-    until somebody rules otherwise.
+    may READ the field either.
     """
-    cards = _furina_cards()
-    stripped = [{k: v for k, v in card.items() if k != "register"}
-                for card in cards]
-    assert any("register" in card for card in cards), (
-        "no card carries a register -- this test would be vacuous")
+    import copy
+    from tools import gen_prototype_cards as gp
 
-    for card, bare in zip(cards, stripped):
-        if gen.blocked_reason(card, gen.FURINA_PROFILE) is not None:
+    profile = gp._profile_for("furina")
+    cards = [c for c in gp._rows() if c.get("character") == "furina"
+             and "register" in c]
+    assert cards, "no surface row carries a register -- vacuous"
+    for row in cards:
+        card = copy.deepcopy(row)
+        gp.effective_upgrade(card)
+        if gen.blocked_reason(card, profile) is not None:
             continue
-        assert (gen.emit(card, gen.FURINA_PROFILE)
-                == gen.emit(bare, gen.FURINA_PROFILE)), card["id"]
-
-
-def test_furina_runtime_clusters_emit_concrete_calls():
-    by_id = {card["id"]: card for card in _furina_cards()}
-
-    salon = gen.emit(by_id["salon_debut"], gen.FURINA_PROFILE)
-    assert "SalonMemberPower.Deploy" in salon
-
-    guest = gen.emit(by_id["an_invitation"], gen.FURINA_PROFILE)
-    assert "GuestStarGenerator.Generate" in guest
-
-    spotlight = gen.emit(by_id["standing_ovation"], gen.FURINA_PROFILE)
-    assert "OvationSpendBoostPower" in spotlight
-
-    healing = gen.emit(by_id["singer_of_many_waters"], gen.FURINA_PROFILE)
-    assert 'DynamicVars["Heal"].BaseValue' in healing
-    assert "CreatureCmd.Heal" in healing
-
-    aura_payoff = gen.emit(by_id["crashing_waves"], gen.FURINA_PROFILE)
-    assert "foreach (var auraTarget" in aura_payoff
-    assert "AuraCmd.Find(auraTarget)" in aura_payoff
+        bare = {k: v for k, v in card.items() if k != "register"}
+        assert gen.emit(card, profile) == gen.emit(bare, profile), card["id"]
 
 
 def test_aoe_aura_riders_stay_per_target():
     # NOT a display nicety -- a correctness guard. AttackCommand resolves a
     # CalculatedDamageVar ONCE with singleTarget == null, so converting an AoE
     # aura rider would collapse a per-enemy "does this one have an aura?"
-    # decision into a single flat value for the whole board. Both of these
-    # must keep their per-target foreach, Furina's and Klee's alike.
-    furina_by_id = {card["id"]: card for card in _furina_cards()}
-    klee_by_id = {
-        card["id"]: card
-        for card in yaml.safe_load(gen.SHEET.read_text(encoding="utf-8"))
-    }
-
-    for source in (
-        gen.emit(furina_by_id["crashing_waves"], gen.FURINA_PROFILE),
-        gen.emit(klee_by_id["flame_dance"], gen.KLEE_PROFILE),
-    ):
-        assert "foreach (var auraTarget" in source
-        assert "AuraCmd.Find(auraTarget)" in source
-        assert "CalculatedDamageVar" not in source
-
-
-def test_furina_skill_grade_cadence_and_character_identity():
-    by_id = {card["id"]: card for card in _furina_cards()}
-
-    normal_attack = gen.emit(
-        by_id["soloists_solicitation"], gen.FURINA_PROFILE
-    )
-    assert "IElementalCard" not in normal_attack
-    assert 'public string CharacterId => "furina";' in normal_attack
-
-    # The damaging-skill cadence pin has now moved twice for the same reason:
-    # Curtain Call B retyped usher_the_waves to a plain attack, moving the pin
-    # to undercurrent, and A5 (2026-07-28) retyped undercurrent the same way.
-    # flood_of_emotion is a damaging skill that KEEPS its skill_tag.
-    damaging_skill = gen.emit(by_id["flood_of_emotion"], gen.FURINA_PROFILE)
-    assert "IElementalCard" in damaging_skill
-    assert "public Element Element => Element.Hydro;" in damaging_skill
-
-    # A5's other half, pinned as a POSITIVE statement of the cadence law
-    # rather than left as an absence: undercurrent is now a plain attack, and
-    # a plain attack never applies hydro no matter how much damage it deals.
-    # This is the assertion that fails if someone re-adds its skill_tag.
-    retyped_aoe = gen.emit(by_id["undercurrent"], gen.FURINA_PROFILE)
-    assert "IElementalCard" not in retyped_aoe
-    assert "KleeKeywords.AppliesHydro" not in retyped_aoe
-
-    nondamaging_skill = gen.emit(by_id["duet"], gen.FURINA_PROFILE)
-    assert "IElementalCard" not in nondamaging_skill
-    assert "KleeKeywords.AppliesHydro" not in nondamaging_skill
-
-
-def test_power_var_binds_only_the_effect_the_sim_upgrades():
-    # 2026-07-23 reward-screen softlock: stage_lights and courtroom_drama
-    # each declared "PowerAmount" twice (one per apply_power), and
-    # DynamicVarSet's constructor throws on the duplicate inside
-    # CardFactory.CreateForReward. The var may exist exactly once, on the
-    # effect tier0 upgrades.py actually bumps; every other power effect
-    # renders its printed literal.
-    by_id = {card["id"]: card for card in _furina_cards()}
-
-    lights = gen.emit(by_id["stage_lights"], gen.FURINA_PROFILE)
-    assert lights.count('new DynamicVar("PowerAmount"') == 1
-    assert 'new DynamicVar("PowerAmount", 2m)' in lights
-    assert "Apply 1 [gold]Weak[/gold] to ALL enemies." in lights
-    assert "Apply<WeakPower>(choiceContext, debuffTarget, 1," in lights
-
-    # courtroom_drama, the softlock's second witness, became a Power at
-    # Curtain Call B (cross_examination is deferred codegen grammar, R85),
-    # so its half of this pin retired with the shape. The regression stays
-    # covered: stage_lights above is the two-apply_power one-var case, and
-    # test_named_power_delta_follows_the_name pins the name-binding rule
-    # the drama half existed to witness.
+    # decision into a single flat value for the whole board. Read off the
+    # shipped artifact (Crashing Waves, the current kits' AoE
+    # aura rider) since the shipped sheets left at legacy cleanup stage 6.
+    out = gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
+    for name in ("ProtoFsCrashingWaves",):
+        source = (out / f"{name}.cs").read_text(encoding="utf-8")
+        assert "foreach (var auraTarget" in source, name
+        assert "AuraCmd.Find(auraTarget)" in source, name
+        assert "CalculatedDamageVar" not in source, name
 
 
 def test_named_power_delta_follows_the_name_not_effect_order(monkeypatch):
@@ -424,35 +312,6 @@ def test_duplicate_dynamic_var_names_fail_the_generator():
         gen.build_vars(card)
 
 
-def test_basics_carry_the_tags_base_game_content_keys_on():
-    # LargeCapsule.GetStrikeForCharacter: `AllCards.First(c => c.Rarity ==
-    # Basic && c.Tags.Contains(CardTag.Strike))` -- an untagged basic hangs
-    # the Ancient event room (2026-07-23 softlock, Furina's first relic).
-    by_id = {card["id"]: card for card in _furina_cards()}
-
-    strike = gen.emit(by_id["soloists_solicitation"], gen.FURINA_PROFILE)
-    assert "CanonicalTags => new() { CardTag.Strike };" in strike
-
-    defend = gen.emit(by_id["stage_presence"], gen.FURINA_PROFILE)
-    assert "CanonicalTags => new() { CardTag.Defend };" in defend
-
-    # macaron_break carries the negative pin. It moved here at Curtain Call C
-    # because the cards that held it (crowd_work, then swelling_overture) had
-    # become deferred grammar and emit() crashes by design on grammar it does
-    # not know. "Take a Bow" shipped both, so the constraint is gone -- but
-    # the pin stays on macaron_break, because a non-basic is a non-basic and
-    # moving it back would be churn for its own sake.
-    non_basic = gen.emit(by_id["macaron_break"], gen.FURINA_PROFILE)
-    assert "CanonicalTags" not in non_basic
-
-    klee_by_id = {
-        card["id"]: card
-        for card in yaml.safe_load(gen.SHEET.read_text(encoding="utf-8"))
-    }
-    jumpy = gen.emit(klee_by_id["jumpy_dumpty"], gen.KLEE_PROFILE)
-    assert "CanonicalTags => new() { CardTag.Strike };" in jumpy
-
-
 def test_a_non_basic_strike_carries_the_strike_tag():
     # 2026-09-29, a Varka seat: Strike Dummy paid on Strike and Strike+ and
     # not on Oathsworn Strike. The base game tags its offered Strikes (Twin
@@ -481,162 +340,6 @@ def _companion_rows() -> list[dict]:
     return rows
 
 
-def test_companion_damage_renders_spotlight_scaling_on_the_face():
-    # Legibility sprint pass 3 (Track L-A4): Spotlight's GuestCast scaling
-    # (1.5x + flat) used to reach the number only at resolution, via
-    # PrintedDamage inside OnPlay -- the card printed its base and hit for
-    # more. Routing it through a CalculatedDamageVar puts face, enemy hover
-    # and hit on one value: base + 1 * (PrintedDamage(base) - base), which is
-    # PrintedDamage(base) exactly, so no resolved number moves.
-    by_id = {card["id"]: card for card in _companion_rows()}
-    kaeya = gen.emit(by_id["kaeya_frostgnaw"])
-
-    assert "new CalculationBaseVar(6m)" in kaeya
-    assert "new ExtraDamageVar(1m)" in kaeya
-    assert "static (card, _) => SpotlightSystem.PrintedDamageDelta(card)" in kaeya
-    assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in kaeya
-    assert "{CalculatedDamage:diff()}" in kaeya
-    # The scaling now lives in the var, so the OnPlay wrap must be gone --
-    # leaving both would apply Spotlight twice.
-    assert "PrintedDamage(this" not in kaeya
-
-
-def test_companion_block_renders_spotlight_scaling_on_the_face():
-    # Block half of L-A4. CalculatedBlockVar is the exact twin of
-    # CalculatedDamageVar -- it overrides UpdateCardPreview to run
-    # Hook.ModifyBlock, so block-modifying powers still reach the preview --
-    # and it reads CalculationBase + CalculationExtra. Resolution goes through
-    # the same var (the base game's own Mirage idiom) so face and gain agree.
-    by_id = {card["id"]: card for card in _companion_rows()}
-    diona = gen.emit(by_id["diona_icy_paws"])
-
-    assert "new CalculationBaseVar(5m)" in diona
-    assert "new CalculationExtraVar(1m)" in diona
-    assert (
-        "new CalculatedBlockVar(ValueProp.Move).WithMultiplier("
-        "static (card, _) => SpotlightSystem.PrintedBlockDelta(card))"
-        in diona
-    )
-    assert "DynamicVars.CalculatedBlock.Calculate(cardPlay.Target)" in diona
-    assert "{CalculatedBlock:diff()}" in diona
-    assert "PrintedBlock(this" not in diona
-    assert "DynamicVars.CalculationBase.UpgradeValueBy(2m);" in diona
-
-
-def test_card_doing_both_damage_and_block_converts_only_its_damage():
-    # CalculatedDamageVar and CalculatedBlockVar BOTH take their base from the
-    # single CalculationBase var, so a card converting both would compute its
-    # block off the damage base. freminet_pressurized_floe is the only card
-    # doing both; its damage conversion wins and its block stays inline.
-    by_id = {card["id"]: card for card in _companion_rows()}
-    freminet = gen.emit(by_id["freminet_pressurized_floe"])
-
-    assert freminet.count("new CalculationBaseVar(") == 1
-    assert "new CalculatedDamageVar(" in freminet
-    assert "new CalculatedBlockVar(" not in freminet
-    assert "new BlockVar(" in freminet
-    assert "PrintedBlock(this" in freminet
-
-
-def test_furina_own_cards_keep_the_identity_spotlight_wrap():
-    # PrintedDamage is identity for a non-companion: its bonus path requires
-    # Mode == GuestCast, and under GuestCast IsSpotlighted accepts only
-    # ICompanionCard, while CenterStage forces the multiplier to 1m. Furina's
-    # own plain-damage cards therefore gain nothing from conversion, and
-    # converting them would add a var (and an upgrade-target move) for no
-    # visible change. Keep them on the plain DamageVar.
-    by_id = {card["id"]: card for card in _furina_cards()}
-    plain = gen.emit(by_id["soloists_solicitation"], gen.FURINA_PROFILE)
-
-    assert "new DamageVar(" in plain
-    assert "CalculatedDamageVar" not in plain
-    assert "PrintedDamage(this" in plain
-
-
-def test_salon_scaled_number_renders_the_replacement_multiplier():
-    # Legibility sprint, salon half. A salon-deploy card whose later effect is
-    # scaled by the bow-out multiplier used to print its unscaled base and
-    # resolve larger. It now renders through a CalculatedVar whose multiplier
-    # asks SalonMemberPower -- the same StageIsFull predicate Deploy's own loop
-    # uses -- so the face and the effect are one expression.
-    by_id = {card["id"]: card for card in _furina_cards()}
-    usher = gen.emit(by_id["gentilhomme_usher"], gen.FURINA_PROFILE)
-
-    assert "new CalculationBaseVar(4m)" in usher
-    assert "new CalculationExtraVar(1m)" in usher
-    assert (
-        "new CalculatedBlockVar(ValueProp.Move).WithMultiplier("
-        "static (card, _) => SalonMemberPower.ReplacementDelta("
-        "card, 1, SalonConstants.ReplacementDamageMultiplier))"
-        in usher
-    )
-    assert "{CalculatedBlock:diff()}" in usher
-    # The inline expression it replaces must be gone: keeping both would apply
-    # the multiplier twice.
-    assert "salonReplacements > 0 ? 3 : 1" not in usher
-    assert "DynamicVars.CalculationBase.UpgradeValueBy(2m);" in usher
-
-
-def test_a_random_deploy_emits_a_null_and_says_so_on_the_face():
-    """A11: `member: random` -> null, which Deploy resolves per iteration off
-    the SHARED combat stream.
-
-    The face assertion is not decoration. The shared template says "typed",
-    which was true while every deploy named its member; on a random deploy
-    that word implies a choice the player does not have. A card whose text
-    still claims a type is worse than one that says nothing.
-    """
-    by_id = {card["id"]: card for card in _furina_cards()}
-    debut = gen.emit(by_id["salon_debut"], gen.FURINA_PROFILE)
-    named = gen.emit(by_id["surintendante_chevalmarin"], gen.FURINA_PROFILE)
-
-    assert "SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, null)" in debut
-    # B5 reworded this from "RANDOM Salon Member(s)" to the named-member
-    # grammar; the requirement is unchanged -- the face must say the member is
-    # not chosen.
-    assert "random Salon Member" in debut
-    assert "SalonMemberTips.ForCard(base.ExtraHoverTips, this, randomMember: true)" in debut
-    assert "members: new[]" not in debut
-
-    # The Common it was de-duped FROM keeps naming its member. If this ever
-    # goes null too, the de-dupe has been undone in the other direction.
-    assert "this, SalonMember.Chevalmarin)" in named
-
-
-def test_every_deploy_card_names_its_member_and_carries_its_tip():
-    """B5 (playtest-2 defect, 2026-07-28), swept across the whole sheet.
-
-    Written as a SWEEP rather than as one case per card on purpose: the
-    defect was that eight cards shared one nameless paragraph, so a fixture
-    that named the cards individually would leave the ninth to be found in
-    play. Any future deploy card is covered the moment it is authored.
-    """
-    seen = 0
-    for card in _furina_cards():
-        deploys = [e for e in card.get("effects", [])
-                   if e.get("op") == "apply_power"
-                   and e.get("power") == "salon_member"]
-        if not deploys or gen.blocked_reason(card, gen.FURINA_PROFILE):
-            continue
-        seen += 1
-        source = gen.emit(card, gen.FURINA_PROFILE)
-
-        # The face names WHO -- every member this card can field.
-        for eff in deploys:
-            name = gen.SALON_MEMBER_NAMES[eff.get("member", "crabaletta")]
-            assert f"[gold]{name}[/gold]" in source, (card["id"], name)
-
-        # The cap paragraph is GONE from the face. It moved to the tip, and
-        # since A12 the number in it is not even a constant any more.
-        assert "Maximum 3" not in source, card["id"]
-        assert "bows its OLDEST member out" not in source, card["id"]
-
-        # ...and the tip that replaced it is attached.
-        assert "SalonMemberTips.ForCard(" in source, card["id"]
-
-    assert seen == 9, f"expected 9 deploy cards, swept {seen}"
-
-
 def test_an_unrecognised_member_is_refused_by_name():
     """The member value is emitted through a lookup, and a lookup miss is a
     KeyError -- a stack trace mid-emit, not a decision. Every other
@@ -651,239 +354,6 @@ def test_an_unrecognised_member_is_refused_by_name():
     reason = gen.blocked_reason(card, gen.FURINA_PROFILE)
     assert reason is not None
     assert "neuvillette" in reason, reason
-
-
-def test_the_per_member_slope_renders_through_the_calculated_rail():
-    """A13/A14: both halves of the per-member slope, pinned STRUCTURALLY.
-
-    Deliberately not a text assertion. Both cards' faces read the same whether
-    the rider is there or not -- "Deal {CalculatedDamage} damage" renders
-    identically over a live multiplier and over a var that never scales -- and
-    that is exactly how B1 and the GrandFinale regression both got past a
-    green suite. So this pins the multiplier expression itself.
-    """
-    by_id = {card["id"]: card for card in _furina_cards()}
-    house = gen.emit(by_id["house_call"], gen.FURINA_PROFILE)
-    dinner = gen.emit(by_id["dinner_service"], gen.FURINA_PROFILE)
-
-    # A14: damage half. Base 6, slope 2, multiplier is the raw member count --
-    # no divisor, because the salon is a capped count where every member is a
-    # full step (the Fanfare/Charge riders divide; this one must not).
-    assert "new CalculationBaseVar(6m)" in house
-    assert "new ExtraDamageVar(2m)" in house
-    assert (
-        "new CalculatedDamageVar(ValueProp.Move).WithMultiplier("
-        "static (card, _) => SalonMemberPower.Count(card.Owner.Creature))"
-        in house
-    )
-    assert "DynamicVars.CalculationBase.UpgradeValueBy(2m);" in house
-
-    # A13: block half. Same slope, same rail, on the op that had no rider
-    # rail at all until B1 built one.
-    assert "new CalculationBaseVar(2m)" in dinner
-    assert "new CalculationExtraVar(2m)" in dinner
-    assert (
-        "new CalculatedBlockVar(ValueProp.Move).WithMultiplier("
-        "static (card, _) => SalonMemberPower.Count(card.Owner.Creature))"
-        in dinner
-    )
-
-    # The threshold shape both cards replace must be GONE. Leaving it would
-    # pay the old conditional on top of the new slope.
-    for source in (house, dinner):
-        assert "SalonMemberPower.Count(Owner.Creature) > 0" not in source
-
-
-def test_a_converted_rider_always_declares_itself_on_the_face():
-    """The L-C bargain, both ops.
-
-    A converted rider's arithmetic moves to the hover tip, so the face MUST
-    keep a short marker naming the mechanism -- otherwise a card read on a
-    reward screen is a flat number with no hint that it scales. The damage
-    path always emitted this; the block path did not, so B1's fix traded a
-    silent drop for a silent number. Thunderous Ovation is the regression
-    case: it is the card B1 was reported against.
-
-    EB-164 changed WHERE the marker sits, not whether it exists: it is a
-    clause on the number's own sentence now, because as a following sentence
-    it read as a further addition on top of a number that already made it.
-    """
-    by_id = {card["id"]: card for card in _furina_cards()}
-    thunder = gen.emit(by_id["thunderous_ovation"], gen.FURINA_PROFILE)
-    dinner = gen.emit(by_id["dinner_service"], gen.FURINA_PROFILE)
-    house = gen.emit(by_id["house_call"], gen.FURINA_PROFILE)
-
-    assert ("Gain {CalculatedBlock:diff()} [gold]Block[/gold], already "
-            "including [gold]Fanfare[/gold]." in thunder)
-    assert ("Gain {CalculatedBlock:diff()} [gold]Block[/gold], already "
-            "including [gold]Salon[/gold]." in dinner)
-    assert ("Deal {CalculatedDamage:diff()} damage, already including "
-            "[gold]Salon[/gold]." in house)
-    for src in (thunder, dinner, house):
-        assert "Scales with" not in src
-    # Not "Member": rpartition on the formula would name it that, and nothing
-    # in the game or on the sheet calls the stage that.
-    assert "[gold]Member[/gold]" not in dinner + house
-
-    # And the rate itself reaches the tip, with the block/damage noun set.
-    assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, salonPer: 2)" in house
-    assert (
-        "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, salonPer: 2, "
-        "salonGrantsBlock: true)" in dinner
-    )
-
-
-def test_salon_scaled_value_is_captured_before_the_cards_own_deploys():
-    # The timing rule that makes the closed form correct. WillReplace reads the
-    # PRE-PLAY company size, but a card's own Deploy calls grow that company
-    # mid-resolution -- so the scaled value is captured at the top of OnPlay,
-    # before the first deploy, which is the state the card face read. Spending
-    # the var afterwards instead would answer a different question than the
-    # preview did.
-    by_id = {card["id"]: card for card in _furina_cards()}
-    usher = gen.emit(by_id["gentilhomme_usher"], gen.FURINA_PROFILE)
-
-    snapshot = usher.index("var salonScaledBlock =")
-    deploy = usher.index("SalonMemberPower.Deploy(")
-    gain = usher.index("CreatureCmd.GainBlock(")
-    assert snapshot < deploy < gain
-    assert "GainBlock(Owner.Creature, salonScaledBlock" in usher
-
-
-def test_salon_numeric_multiplier_covers_draw_encore_and_power():
-    # x2 numerics take the same route as the x3 damage/block, through a plain
-    # CalculatedVar (the base game only ships typed Damage/Block subclasses).
-    by_id = {card["id"]: card for card in _furina_cards()}
-    numeric = "SalonConstants.ReplacementNumericMultiplier"
-
-    rehearsal = gen.emit(by_id["dress_rehearsal"], gen.FURINA_PROFILE)
-    # NOT named "Cards": DynamicVarSet.Cards is a typed accessor that casts to
-    # CardsVar, so a CalculatedVar under that name throws on any read.
-    assert f'new CalculatedVar("DrawCards").WithMultiplier(' in rehearsal
-    assert numeric in rehearsal
-    assert "{DrawCards:diff()}" in rehearsal
-    assert "new CardsVar(" not in rehearsal
-
-    gala = gen.emit(by_id["grand_gala"], gen.FURINA_PROFILE)
-    assert 'new CalculatedVar("Encore")' in gala
-    assert "{Encore:diff()}" in gala
-    # The upgrade moves onto the var's base instead of an IsUpgraded text swap,
-    # so the printed number carries both the upgrade and the salon scaling.
-    assert "DynamicVars.CalculationBase.UpgradeValueBy(3m);" in gala
-    assert "IfUpgraded:show:7|4" not in gala
-
-    waltz = gen.emit(by_id["endless_waltz"], gen.FURINA_PROFILE)
-    assert 'new CalculatedVar("PowerAmount")' in waltz
-    assert "{PowerAmount:diff()}" in waltz
-
-
-def test_only_one_salon_number_per_card_converts():
-    # Every calculated var on a card -- typed or plain -- takes its base term
-    # from the single CalculationBase var, so a second conversion would compute
-    # itself off the first one's base. One per card; the rest keep the inline
-    # expression (and are logged as remaining gaps, not silently dropped).
-    for card in _furina_cards():
-        if not gen.salon_deploy_card(card):
-            continue
-        source = gen.emit(card, gen.FURINA_PROFILE)
-        assert source.count("new CalculationBaseVar(") <= 1, card["id"]
-        converted = [
-            eff for eff in card["effects"]
-            if gen.salon_calc_rider(card, eff) is not None
-        ]
-        assert len(converted) <= 1, card["id"]
-
-
-def test_salon_deploy_count_must_be_static_to_convert():
-    # WillReplace is a closed form over (pre-play company size + this card's
-    # own deploys so far). An upgradeable deploy amount makes that count a
-    # runtime value the face cannot know, so the card stays inline rather than
-    # guessing. mademoiselle_crabaletta is the live case.
-    import copy
-
-    by_id = {card["id"]: card for card in _furina_cards()}
-    crabaletta = copy.deepcopy(by_id["mademoiselle_crabaletta"])
-    crabaletta["effects"].append({"op": "draw", "amount": 1})
-    assert gen._salon_calc_target(crabaletta) is None
-
-    # Control: the identical card with a literal deploy count does convert, so
-    # the exclusion above is the static-count rule and not some other guard.
-    static = copy.deepcopy(crabaletta)
-    static["id"] = "synthetic_static_deploy"   # no upgrade deltas -> no var
-    assert gen.power_upgrade_effect(static) is None
-    assert gen._salon_calc_target(static) is not None
-
-
-def test_unconverted_riders_keep_their_sentence_on_the_face():
-    # The other half of the L-C rule, and the one that matters: a rider whose
-    # number is NOT inside the printed value must keep its full sentence,
-    # because the text is the only place the player can read it. Klee's
-    # detonation rider and the AoE aura riders are both on that side of the
-    # line (AoE aura riders stay per-target, see the L-B pass-2 guard).
-    furina_by_id = {card["id"]: card for card in _furina_cards()}
-    waves = gen.emit(furina_by_id["crashing_waves"], gen.FURINA_PROFILE)
-    assert "Enemies with an aura take 5 additional damage." in waves
-    assert "FurinaRiderTips" not in waves
-
-    klee_by_id = {
-        card["id"]: card
-        for card in yaml.safe_load(gen.SHEET.read_text(encoding="utf-8"))
-    }
-    big_one = gen.emit(klee_by_id["grand_finale"], gen.KLEE_PROFILE)
-    assert "damage per [gold]Bomb[/gold] detonated this combat." in big_one
-    assert "FurinaRiderTips" not in big_one
-    # The VAR, not just the sentence. Caught during the 2026-07-28 sprint:
-    # A5's Times-var insertion captured the BonusPer lines into its own branch
-    # by indentation, so grand_finale silently stopped declaring BonusPer and
-    # lost its campfire upgrade -- with the whole 1305-test suite green,
-    # because every assertion on this card read its TEXT. The bare sentence
-    # renders identically either way; only the var declaration differs.
-    assert 'new DynamicVar("BonusPer", 2m)' in big_one, (
-        "grand_finale lost its BonusPer var: the bonus_per_detonation upgrade "
-        "is silently dead while the card text still reads correctly")
-
-
-def test_crackle_prints_the_sentence_its_semantics_were_pinned_against():
-    """Audit sec.4 item 5: Crackle's semantics are pinned twice, its SENTENCE never.
-
-    `test_crackle_spark_is_priced_by_the_discard` and
-    `test_crackle_upgrade_applies_r36_deltas` both pin what the card DOES.
-    Neither reads what the card SAYS, and the card's text is the only place a
-    player learns that an empty hand pays nothing -- the whole R10 replacement
-    design ("discard is a real cost, not an engine, for Klee").
-
-    The "1" in "gain 1 Spark per card discarded" is a LITERAL, while every
-    other number on the face is a bound `{Var:diff()}` token. That is safe
-    today for exactly one reason: R36 moved `Discards` and `Sparks` by the
-    same delta, so `Math.Min(Sparks, picked.Count)` always equals the number
-    of cards actually discarded. Bump one without the other and the sentence
-    starts lying with the whole lint suite green -- which is why the pin below
-    asserts the sentence AND the invariant that makes it true, not just the
-    sentence.
-    """
-    klee_by_id = {
-        card["id"]: card
-        for card in yaml.safe_load(gen.SHEET.read_text(encoding="utf-8"))
-    }
-    crackle = gen.emit(klee_by_id["crackle"], gen.KLEE_PROFILE)
-
-    assert (
-        '"Deal {Damage:diff()} damage to a random enemy. '
-        'Discard {Discards:diff()} card{Discards:plural:|s}: '
-        'gain 1 [gold]Spark[/gold] per card discarded."' in crackle
-    ), crackle
-
-    # The plural token, not a hardcoded "s": Crackle+ discards 2.
-    assert "{Discards:plural:|s}" in crackle
-
-    # The invariant the literal "1" rests on. Both vars, same delta.
-    assert 'DynamicVars["Discards"].UpgradeValueBy(1m);' in crackle
-    assert 'DynamicVars["Sparks"].UpgradeValueBy(1m);' in crackle
-
-    # "empty hand = no Spark" is the design, and it lives in the Min, not in
-    # the text. The sentence is only honest while this clamp is here.
-    assert ('Math.Min(DynamicVars["Sparks"].IntValue, picked.Count)'
-            in crackle), crackle
 
 
 # ---------------------------------------------------------------------------
@@ -1419,38 +889,3 @@ def test_every_place_bomb_face_prints_the_bombs_own_amount():
         + "\n  ".join(offenders))
 
 
-def test_every_salon_deploy_face_prints_the_performance():
-    """`EB-398`: the deploy's MAIN behaviour, on the deploy's own card.
-
-    A joining member performs the moment it arrives. That rule was printed
-    only on the Salon buff line, after the fact, so a seat learned the card's
-    central effect by accident (Furina r3 act 1 finding 4). Every rendered
-    deploy face now carries it, once per card however many members the body
-    fields, and in the number the sentence before it used.
-    """
-    cards = _furina_cards()
-    deploys = [c for c in cards
-               if any(fx.get("op") == "apply_power"
-                      and fx.get("power") == "salon_member"
-                      for fx in c["effects"])]
-    assert len(deploys) >= 8, "the deploy family has gone missing"
-
-    for card in deploys:
-        face = gen.build_description(card)
-        run = sum(1 for fx in card["effects"]
-                  if fx.get("op") == "apply_power"
-                  and fx.get("power") == "salon_member")
-        clause = "It performs at once." if run == 1 else "They perform at once."
-        assert clause in face, (card["id"], face)
-        # Once per card, never once per member.
-        assert face.count("perform at once") + face.count("performs at once") == 1
-
-    # And it lands on the sentence it belongs to, not at the end of the card.
-    debut = next(c for c in cards if c["id"] == "salon_debut")
-    assert gen.build_description(debut).startswith(
-        "Add 1 [gold]random Salon Member[/gold] to your [gold]Salon[/gold]. "
-        "It performs at once.")
-
-    # A card with no deploy never says it.
-    bow = next(c for c in cards if c["id"] == "take_your_bow")
-    assert "at once" not in gen.build_description(bow)

@@ -32,7 +32,6 @@ from tier0.tests.conftest import make_enemy
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 PROBE = "eb118_ethereal_probe"
 
@@ -101,20 +100,6 @@ def test_retain_still_beats_ethereal():
 
 
 # --- 2. the Charge funnel (Kokomi's rotation law) ---
-
-def test_an_ethereal_personal_card_still_pays_the_charge_funnel():
-    """C11's law drops Statuses and Curses from the funnel by RARITY. An
-    Ethereal personal card is neither, so burning unplayed is still one of
-    HER cards exhausting and still pays -- the exact seam a keyword-shaped
-    reading of the law would break."""
-    st = hand_survives(probe(ethereal=True))
-    assert any(c.id == PROBE for c in st.player.exhaust_pile)
-    assert st.player.charge == C.CHARGE_PER_EXHAUST
-    assert st.player.burst_energy == C.KOKOMI_BURST_PER_EXHAUST
-    assert any(ev["event"] == "gain_charge" for ev in st.log)
-
-
-# --- 3. the remove-on-upgrade delta ---
 
 def test_remove_ethereal_upgrade_clears_the_printed_keyword(monkeypatch):
     monkeypatch.setattr(upgrades, "_upgrade_index",

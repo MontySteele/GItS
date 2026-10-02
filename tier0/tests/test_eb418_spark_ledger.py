@@ -50,7 +50,6 @@ def overhaul(monkeypatch):
     """The arm on, both id-resolving caches cleared either side."""
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()

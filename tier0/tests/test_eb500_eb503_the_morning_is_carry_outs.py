@@ -62,7 +62,7 @@ def _face(card_id) -> str:
 
 @pytest.fixture(autouse=True)
 def arm(monkeypatch):
-    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
+    yield
 
 
 def _state(ascension: bool = False):

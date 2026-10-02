@@ -346,19 +346,17 @@ def test_an_all_enemies_swirl_does_not_move_a_cards_aim():
 #  THE SCOPE PIN -- which live rows this reaches, read off the sheets
 # ---------------------------------------------------------------------------
 
-#: The archive scope of `C20`, ENUMERATED. Every live row carrying a Swirl
-#: that lands on the play's bound aim -- one Inazuma row, two Fontaine, three
-#: Mondstadt (one of them `personal_pool: klee`). No character sheet prints a
-#: Swirl at all, which is why this list is entirely companions and why
-#: `ref_ironclad` / `real_ironclad` / `real_silent` -- who draw no companion
-#: rewards (`tier05.rewards.NO_COMPANION_CHARACTERS`) -- sit outside it.
+#: The live rows carrying a Swirl that lands on the play's bound aim, read off
+#: the current kits' sheet (the shipped sheets left at legacy cleanup stage 6):
+#: five companions and one of Varka's Knights.
 SWIRL_ROWS = frozenset((
-    "lynette_astonishing_shift",
-    "lynette_enigmatic_feint",
-    "prune_witch_hunt",
-    "sayu_yoohoo_windwheel",
-    "sucrose_astable",
-    "sucrose_gust",
+    "proto_mc_jean_gale_blade",
+    "proto_mc_prune_hexhunter_chime",
+    "proto_mc_sucrose_gust",
+    "proto_mc_sucrose_mollis_favonius",
+    "proto_mf_lynette_astonishing_shift",
+    "proto_mf_lynette_enigmatic_feint",
+    "proto_vk_jean_dandelion_breeze",
 ))
 
 
@@ -367,6 +365,6 @@ def test_the_live_sheets_carry_exactly_the_enumerated_swirl_rows():
     `constants.py`'s `C20` block. If a later sheet window prints a seventh
     aimed Swirl, this fails and the scope paragraph gets corrected rather than
     silently outgrown."""
-    live = {cid for cid, card in loader._card_index().items()
+    live = {card.id for card in loader.prototype_cards()
             if effects._card_swirls_at_aim(card)}
     assert live == SWIRL_ROWS

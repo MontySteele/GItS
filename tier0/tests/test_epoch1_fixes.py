@@ -32,27 +32,6 @@ def test_kokomis_archetypes_are_the_sheets():
                                                  "assist")
 
 
-def test_every_registered_archetype_exists_on_a_real_card():
-    """The general form of R66's defect, for the whole roster.
-
-    A registry naming tags no card carries is not a small error: it makes
-    the drafter's synergy term structurally unreachable, so it scores pure
-    static power and reports the result as evidence about drafting. This
-    would have caught Kokomi's tuple the day it drifted.
-    """
-    by_character: dict[str, set[str]] = {}
-    for card in loader._card_index().values():
-        owner = getattr(card, "character", None)
-        if owner:
-            by_character.setdefault(owner, set()).update(card.archetypes or ())
-    for character, family in draft.ROSTER_ARCHETYPES.items():
-        tagged = by_character.get(character, set())
-        for archetype in family:
-            assert archetype in tagged, (
-                f"{character}: registry names {archetype!r}, which exists on "
-                f"no card in her pool. Tagged: {sorted(tagged)}")
-
-
 def test_klee_and_furina_tuples_did_not_move():
     """R66 explicitly does not move their numbers."""
     assert draft.ROSTER_ARCHETYPES["klee"] == ("demolition", "spark",
@@ -109,7 +88,7 @@ def test_the_starvation_alarm_keys_on_the_cohorts_own_archetypes():
     on every run. P1 predicts these go to exactly zero for Kokomi.
     """
     for character in ("furina", "kokomi"):
-        deck = [c for c in loader._card_index().values()
+        deck = [c for c in loader.prototype_cards()
                 if getattr(c, "character", None) == character]
         family = draft.archetypes_for(deck)
         assert family == draft.ROSTER_ARCHETYPES[character]

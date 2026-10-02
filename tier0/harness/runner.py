@@ -136,8 +136,12 @@ def score_character(character: str, fights: int, seed: int) -> dict:
     for deck, pilot in decks.items():
         results[deck] = score_config(character, deck, pilot, fights, seed,
                                      base_stats)
+    # A character with no archetype decks (every current kit since legacy
+    # cleanup stage 6 deleted the shipped battery packages) is read on its
+    # starter alone.
+    median_decks = list(decks) or ["starter"]
     median_scores = {
-        ax: statistics.median(results[d]["scores"][ax] for d in decks)
+        ax: statistics.median(results[d]["scores"][ax] for d in median_decks)
         for ax in axes.AXES}
     median_flags = axes.heuristic_flags(median_scores)
     # R204: the median identity comparison was the OTHER hard edge of the

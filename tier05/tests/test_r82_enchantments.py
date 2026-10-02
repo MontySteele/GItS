@@ -79,27 +79,27 @@ def test_the_catalogue_holds_exactly_the_names_the_events_grant():
 ])
 def test_a_named_enchantment_writes_its_published_rider(name, amount, field,
                                                         expected):
-    card = loader.peek_card(enchantments.decorate("kaboom", name, amount))
+    card = loader.peek_card(enchantments.decorate("strike", name, amount))
     assert getattr(card, field) == expected
 
 
 def test_sown_and_swift_ride_the_first_play_effect_list():
-    sown = loader.peek_card(enchantments.decorate("kaboom", "sown"))
+    sown = loader.peek_card(enchantments.decorate("strike", "sown"))
     assert sown.enchant_first_play_effects == [{"op": "energy", "amount": 1}]
-    swift = loader.peek_card(enchantments.decorate("kaboom", "swift", 2))
+    swift = loader.peek_card(enchantments.decorate("strike", "swift", 2))
     assert swift.enchant_first_play_effects == [{"op": "draw", "amount": 2}]
 
 
 def test_souls_power_unsets_exhaust_rather_than_adding_a_rider():
     """The one enchantment that needs no engine surface at all: it clears a
     printed card field, which IS the published effect ('loses Exhaust')."""
-    base = loader.peek_card("sugar_rush")
+    base = loader.peek_card("proto_ko_all_of_my_treasures")
     ench = loader.peek_card(enchantments.decorate(base.id, "souls_power"))
     assert base.exhaust and not ench.exhaust
 
 
 def test_corrupted_carries_its_hp_cost_on_the_shipped_rider():
-    card = loader.peek_card(enchantments.decorate("kaboom", "corrupted"))
+    card = loader.peek_card(enchantments.decorate("strike", "corrupted"))
     assert card.enchant_effects == [{"op": "damage", "target": "self",
                                      "amount": 2}]
 
@@ -107,7 +107,7 @@ def test_corrupted_carries_its_hp_cost_on_the_shipped_rider():
 def test_an_unenchanted_card_carries_no_rider_at_all():
     """The whole extension is inert unless something asks for it -- the
     reason the frozen battery is byte-identical across this pass."""
-    card = loader.peek_card("kaboom")
+    card = loader.peek_card("strike")
     assert (card.enchant_damage == 0 and card.enchant_block == 0
             and card.enchant_damage_mult == 1.0
             and card.enchant_first_play_damage == 0
@@ -151,32 +151,18 @@ def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
     dry = Card(id="d", name="d", cost=1, type="attack",
                effects=[{"op": "damage", "amount": 9}])
     assert not enchantments.eligible(dry, "nimble")
-    # The named four are the MOD sheets' rows of this shape (three of them
-    # are companions, which carry their OWN character id, so the set is taken
-    # by excluding the reference ids rather than by naming the three
-    # protagonists). Scoping matters: `_card_index()` also
-    # holds the extracted reference sheets when `game_ref/` is present, and
-    # those carry the base game's OWN Block-granting Attacks (`ic_iron_wave`,
-    # `si_dash`). An unscoped equality is therefore green on CI, where
-    # `game_ref/` does not exist, and red on any primary checkout -- the
-    # environment-dependent assertion this repo has a standing rule against.
-    # The reference rows are asserted separately, and as a PRESENCE rather
-    # than an equality, because their count is a fact about an extracted
-    # artifact rather than about this fix.
+    # The named rows are the prototype surface's Attacks of this shape (the
+    # current kits' sheet since legacy cleanup stage 6). The reference rows
+    # are asserted separately, and as a PRESENCE rather than an equality,
+    # because their count is a fact about an extracted artifact (`game_ref/`)
+    # rather than about this fix.
     from tier0 import roster
-    live = {c.id for c in loader._card_index().values()
-            if c.type == "attack"
-            and c.character not in roster.REFERENCE_IDS
-            and enchantments.eligible(c, "nimble")}
-    # FIVE since R208 / W2b (2026-08-25): `depths_judgment` (Sango Isshin) is
-    # an Attack whose ratified body gains Block out of an
-    # `exhaust_pile_at_least_8` branch (bar 6 -> 8 by R209), so it is exactly the shape this test
-    # exists to keep legal. The C# side agrees by construction -- its
-    # generated class declares `GainsBlock => true` because BaseLib's
-    # auto-detect cannot see a conditional Block row (EB-84).
-    assert live == {"warmup_act", "freminet_pressurized_floe",
-                    "thoma_crimson_ooyoroi", "itto_superlative_superstrength",
-                    "depths_judgment"}
+    live = {c.id for c in loader.prototype_cards()
+            if c.type == "attack" and enchantments.eligible(c, "nimble")}
+    assert live == {"proto_fs_warmup_act", "proto_mc_kaeya_frostgnaw",
+                    "proto_mf_freminet_pressurized_floe",
+                    "proto_mi_itto_superlative_superstrength",
+                    "proto_vk_crosswind"}
     reference = {c.id for c in loader._card_index().values()
                  if c.type == "attack"
                  and c.character in roster.REFERENCE_IDS
@@ -197,9 +183,6 @@ def test_nimble_refuses_a_block_next_turn_only_card():
     both = _skill([{"op": "block", "amount": 2},
                    {"op": "block_next_turn", "amount": 4}])
     assert enchantments.eligible(both, "nimble")   # the ordinary row carries it
-    live = {c.id for c in loader._card_index().values()
-            if enchantments.eligible(c, "nimble")}
-    assert "tideline_watch" not in live
 
 
 def test_nimble_sees_block_under_a_conditional():
@@ -216,7 +199,7 @@ def test_nimble_sees_block_under_a_conditional():
 
 
 def test_a_card_holds_exactly_one_enchantment_and_never_swaps_it():
-    once = enchantments.decorate("kaboom", "sharp", 2)
+    once = enchantments.decorate("strike", "sharp", 2)
     with pytest.raises(ValueError):
         enchantments.decorate(once, "vigorous", 8)
 
@@ -225,16 +208,16 @@ def test_the_two_decorations_are_independent_and_compose_either_way():
     """An enchantment must not cost a card its upgrade path, and the
     upgraded-then-enchanted id must resolve to the same card as the
     enchanted-then-upgraded one."""
-    up_then_ench = enchantments.decorate("kaboom" + upgrades.SUFFIX,
+    up_then_ench = enchantments.decorate("strike" + upgrades.SUFFIX,
                                          "sharp", 2)
-    ench_then_up = enchantments.decorate("kaboom", "sharp", 2) \
+    ench_then_up = enchantments.decorate("strike", "sharp", 2) \
         + upgrades.SUFFIX
     assert up_then_ench == ench_then_up
-    assert upgrades.has_upgrade(enchantments.decorate("kaboom", "sharp", 2))
+    assert upgrades.has_upgrade(enchantments.decorate("strike", "sharp", 2))
     assert not upgrades.has_upgrade(up_then_ench)
     card = loader.peek_card(up_then_ench)
     assert card.enchant_damage == 2
-    assert card.effects == loader.peek_card("kaboom" + upgrades.SUFFIX).effects
+    assert card.effects == loader.peek_card("strike" + upgrades.SUFFIX).effects
 
 
 # ---------------------------------------------------------------------------
@@ -294,7 +277,7 @@ def test_move_on_appears_only_when_every_reading_is_locked():
 def test_an_enchant_option_locks_itself_with_no_legal_target():
     """Symbiote's Approach wants an Attack; a deck with none cannot take it,
     and the event still offers its other branch."""
-    st = _st(deck_ids=["duck_and_cover", "duck_and_cover"])
+    st = _st(deck_ids=["defend", "defend"])
     labels = [o["label"] for o in
               events.available(events.get_event("symbiote"), st)]
     assert labels == ["Kill with Fire"]
@@ -307,7 +290,7 @@ def test_a_curse_is_never_an_enchant_target():
 
 
 def test_an_already_enchanted_card_is_not_a_second_target():
-    st = _st(deck_ids=[enchantments.decorate("kaboom", "sharp", 2), "kaboom"])
+    st = _st(deck_ids=[enchantments.decorate("strike", "sharp", 2), "strike"])
     opt = {"enchant": {"name": "vigorous", "amount": 8}}
     assert events._enchant_targets(opt, st) == [1]
 
@@ -370,14 +353,14 @@ def test_the_grave_confront_branch_locks_without_an_exhaust_card():
 
 
 def test_the_grave_confront_branch_opens_once_a_card_exhausts():
-    st = _st(deck_ids=list(loader.starting_deck("klee")) + ["sugar_rush"])
+    st = _st(deck_ids=list(loader.starting_deck("klee")) + ["proto_ko_all_of_my_treasures"])
     labels = [o["label"] for o in
               events.available(events.get_event("grave_of_the_forgotten"), st)]
     assert labels == ["Accept the Lingering Soul", "Recite the True Name"]
 
 
 def test_confronting_costs_decay_and_clears_the_cards_exhaust():
-    st = _st(deck_ids=list(loader.starting_deck("klee")) + ["sugar_rush"])
+    st = _st(deck_ids=list(loader.starting_deck("klee")) + ["proto_ko_all_of_my_treasures"])
     event = events.get_event("grave_of_the_forgotten")
     opt = next(o for o in event["options"] if o["label"] == "Recite the True Name")
     events.resolve(random.Random(0), event, opt, st)
@@ -385,7 +368,7 @@ def test_confronting_costs_decay_and_clears_the_cards_exhaust():
     enchanted = [c for c in st.deck_ids
                  if enchantments.enchantment_of(c) == "souls_power"]
     assert len(enchanted) == 1
-    assert enchantments.split(enchanted[0])[0] == "sugar_rush"
+    assert enchantments.split(enchanted[0])[0] == "proto_ko_all_of_my_treasures"
     assert not loader.peek_card(enchanted[0]).exhaust
 
 
@@ -430,8 +413,8 @@ def _fight_state(deck_ids, hp=80):
 
 
 def test_an_enchanted_deck_card_arrives_in_combat_enchanted():
-    cid = enchantments.decorate("kaboom", "sharp", 2)
-    state = _fight_state([cid, "kaboom"])
+    cid = enchantments.decorate("strike", "sharp", 2)
+    state = _fight_state([cid, "strike"])
     enchanted = [c for c in state.player.draw_pile if c.enchant_damage]
     plain = [c for c in state.player.draw_pile if not c.enchant_damage]
     assert len(enchanted) == 1 and len(plain) == 1
@@ -444,7 +427,7 @@ def test_the_enchantment_survives_every_fight_of_a_run():
     dies with its combat, and a DECK card's must not. Persistence is
     structural here -- the rider is not stored anywhere, it is re-derived
     from the deck id every fight -- so this asserts the structure."""
-    deck = [enchantments.decorate("kaboom", "vigorous", 8), "kaboom"]
+    deck = [enchantments.decorate("strike", "vigorous", 8), "strike"]
     for _ in range(3):                       # three fights off one deck list
         state = _fight_state(deck)
         riders = sorted(c.enchant_first_play_damage
@@ -458,8 +441,8 @@ def test_the_enchantment_survives_every_fight_of_a_run():
 
 
 def test_vigorous_pays_once_and_the_gate_closes():
-    card = loader.get_card(enchantments.decorate("kaboom", "vigorous", 8))
-    state = _fight_state(["kaboom"])
+    card = loader.get_card(enchantments.decorate("strike", "vigorous", 8))
+    state = _fight_state(["strike"])
     state.player.hand = [card]
     before = state.enemies[0].hp
     combat.play_card(state, card)
@@ -473,8 +456,8 @@ def test_vigorous_pays_once_and_the_gate_closes():
 
 
 def test_sown_refunds_energy_on_the_first_play_only():
-    card = loader.get_card(enchantments.decorate("kaboom", "sown"))
-    state = _fight_state(["kaboom"])
+    card = loader.get_card(enchantments.decorate("strike", "sown"))
+    state = _fight_state(["strike"])
     state.player.hand = [card]
     state.player.energy = 3
     cost = card.cost
@@ -499,8 +482,8 @@ def test_perfect_fit_takes_the_reshuffle_and_refuses_the_opening_one():
     merely shuffled does not."""
     top = 0
     for seed in range(40):
-        state = _fight_state([enchantments.decorate("pop", "perfect_fit")]
-                             + ["kaboom"] * 8)
+        state = _fight_state([enchantments.decorate("defend", "perfect_fit")]
+                             + ["strike"] * 8)
         state.rng = random.Random(seed)
         state.rng.shuffle(state.player.draw_pile)
         combat.surface_innate(state.player.draw_pile)
@@ -509,8 +492,8 @@ def test_perfect_fit_takes_the_reshuffle_and_refuses_the_opening_one():
 
     # The mid-combat reshuffle IS the site it rides, every time.
     for seed in range(10):
-        state = _fight_state([enchantments.decorate("pop", "perfect_fit")]
-                             + ["kaboom"] * 8)
+        state = _fight_state([enchantments.decorate("defend", "perfect_fit")]
+                             + ["strike"] * 8)
         state.rng = random.Random(seed)
         state.player.discard_pile = state.player.draw_pile
         state.player.draw_pile = []
@@ -520,9 +503,9 @@ def test_perfect_fit_takes_the_reshuffle_and_refuses_the_opening_one():
 
 def test_perfect_fit_does_not_borrow_innates_opening_hoist():
     """The two flags shared one site; only `innate` keeps it."""
-    state = _fight_state(["kaboom"] * 8)
-    fitted = loader.get_card(enchantments.decorate("pop", "perfect_fit"))
-    innate = loader.get_card("kaboom")
+    state = _fight_state(["strike"] * 8)
+    fitted = loader.get_card(enchantments.decorate("defend", "perfect_fit"))
+    innate = loader.get_card("strike")
     innate.innate = True
     state.player.draw_pile = [fitted, innate] + state.player.draw_pile
     state.rng.shuffle(state.player.draw_pile)
@@ -531,9 +514,9 @@ def test_perfect_fit_does_not_borrow_innates_opening_hoist():
 
 
 def test_normality_caps_the_turn_at_three_plays():
-    state = _fight_state(["kaboom"] * 5 + ["curse_normality"])
+    state = _fight_state(["strike"] * 5 + ["curse_normality"])
     state.hand_play_cap = True
-    state.player.hand = [loader.get_card("kaboom"),
+    state.player.hand = [loader.get_card("strike"),
                          loader.get_card("curse_normality")]
     state.player.energy = 99
     playable = state.player.hand[0]

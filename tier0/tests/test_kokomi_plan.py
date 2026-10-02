@@ -29,7 +29,6 @@ from tier05 import rewards
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 ATTACKER = [{"kind": "attack", "amount": 5}]
 BLOCKER = [{"kind": "block", "amount": 5}]
@@ -61,7 +60,6 @@ def overhaul(monkeypatch):
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
     clear_upgrade_caches()
-    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     yield
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
@@ -186,15 +184,6 @@ def test_the_plan_survives_a_deepcopy_as_its_own_list():
 
 
 # --- 2. THE FLAG OFF -------------------------------------------------------
-
-def test_nothing_plans_with_the_flag_off():
-    st = kokomi_state()
-    card = plan_card([{"op": "draw", "amount": 1}])
-    assert kokomi_plan.live(st) is False
-    assert kokomi_plan.plan_aimed_at_pet(st, card) is False
-    kokomi_plan.schedule(st, card)
-    assert st.kk_plan_queue == []
-
 
 def test_nothing_plans_for_a_seat_that_is_not_kokomi(overhaul):
     """`KokomiOverhaul.LiveFor`'s character limb. A debuff-applying Furina
@@ -1418,19 +1407,6 @@ def test_the_copy_is_doubled_by_nereids_ascension(overhaul):
     assert counts(st)["plan_copy"] == 2
 
 
-def test_nothing_is_recorded_or_planned_with_the_flag_off():
-    """The arm's own gate, and it is the whole file's rule one card over: with
-    `C.KOKOMI_OVERHAUL` off the recorder records nothing and the Plan is never
-    written, so the row cannot be reached at all."""
-    st = kokomi_state(enemies=[make_enemy(hp=40)])
-    caught = a_companion("proto_mi_b", "Gorou — Juuga")
-    card = crystal_collapse()
-    play_companions(st, [caught, card])
-    kokomi_plan.schedule(st, card)
-    assert st.kk_companions_this_turn == []
-    assert st.kk_plan_queue == []
-
-
 def test_the_memory_is_cleared_at_the_turn_boundary(overhaul):
     """"This turn" is cleared rather than handed over, unlike the Companion
     COUNT beside it: the capture already happened when the Plan was written,
@@ -1465,19 +1441,6 @@ def test_change_of_plans_is_unplayable_while_no_plan_is_written(overhaul):
     assert combat.card_playable(st, card) is False
     kokomi_plan.schedule(st, plan_card(ATTACKER))
     assert combat.card_playable(st, card) is True
-
-
-def test_the_gate_is_inert_with_the_flag_off():
-    """`live()` first, this file's rule: nothing the arm invents may reach a
-    release build's playability read."""
-    from tier0.engine import combat
-
-    st = kokomi_state(enemies=[make_enemy(hp=40)])
-    st.player.energy = 3
-    card = Card(id="proto_kk_probe", name="probe", cost=1, type="skill",
-                effects=[{"op": "carry_out_front_plan"}])
-
-    assert kokomi_plan.refuses_for_no_plan(st, card) is False
 
 
 def test_a_carry_out_beside_another_effect_is_never_gated(overhaul):
@@ -2639,15 +2602,6 @@ def test_r276_the_base_strike_and_klee_are_outside_it(overhaul):
     skill = Card(id="probe_skill", name="probe", cost=1, type="skill",
                  effects=[{"op": "damage", "amount": 3, "target": "enemy"}])
     assert effects._element_for(klee, skill.effects[0], skill) is None
-
-
-def test_r276_the_skill_split_is_unchanged_off_the_arm():
-    """Flag off, her damaging Skill applies nothing, exactly as before."""
-    st = kokomi_state()
-    skill = Card(id="probe_skill", name="probe", cost=1, type="skill",
-                 effects=[{"op": "damage", "amount": 3, "target": "enemy"}],
-                 character="kokomi")
-    assert effects._element_for(st, skill.effects[0], skill) is None
 
 
 def test_r276_princess_of_watatsumi_pays_on_every_plan_under_the_arm(overhaul):

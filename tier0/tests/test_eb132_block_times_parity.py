@@ -43,10 +43,10 @@ import yaml
 from tier0.engine import effects
 from tools import gen_klee_cards as gen
 
+# The current kits' one sheet (the shipped kit sheets left at legacy cleanup
+# stage 6).
 SHEETS = [
-    pathlib.Path("docs/klee-cards.yaml"),
-    pathlib.Path("docs/furina-cards.yaml"),
-    pathlib.Path("docs/kokomi-cards.yaml"),
+    pathlib.Path("docs/prototype-surface.yaml"),
 ]
 
 

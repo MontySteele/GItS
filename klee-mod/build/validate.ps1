@@ -256,7 +256,8 @@ foreach ($finding in (Test-LocTemplates -SourceDir $SourceDir)) {
 # bridge, which is the drift class that shipped cant_catch_me at +3 against a
 # ratified +2. tools/lint_handwritten_parity.py extracts each hand-written
 # card's idioms (vars, cost, hit counts, upgrade calls) and compares against
-# klee-cards.yaml + klee-upgrades.yaml. A missing interpreter is a FINDING,
+# its pinned witness (the shipped sheets it once read left at legacy cleanup
+# stage 6; the Ancients are its subject). A missing interpreter is a FINDING,
 # not a skip -- a gate that silently steps aside is not a gate.
 # ---------------------------------------------------------------------------
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)

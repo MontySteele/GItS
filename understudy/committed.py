@@ -48,7 +48,10 @@ from pathlib import Path
 from typing import Any, Sequence
 
 REPO = Path(__file__).resolve().parent.parent
-SHEETS = ("furina-cards.yaml", "klee-cards.yaml", "kokomi-cards.yaml")
+# The shipped sheets that declared these archetypes were deleted at legacy
+# cleanup stage 6; the surface's rows declare none of the three, so the
+# committed arm currently has nothing to commit to.
+SHEETS = ("prototype-surface.yaml",)
 
 # Declarable archetypes. `fanfare` and `salon` are the two the gate package
 # names; `spotlight` is here because the sheets carry it and refusing a word

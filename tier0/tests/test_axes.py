@@ -262,14 +262,3 @@ def test_the_anchors_package_declares_no_identity_so_it_reads_none(package):
     assert package["identity_flags"] is None
 
 
-@pytest.mark.battery
-def test_a_character_package_deck_still_gets_an_identity_reading():
-    """R204 DEMOTED the comparison rather than narrowing it, and the two
-    scopes now differ on purpose. The scorecard invariants are out of scope on
-    a monoculture package (it reads extreme on both and teaches nothing). The
-    identity comparison is NOT: it reported on every deck when it was a gate
-    -- `warn (package deck)` -- so it still reports on every deck now that it
-    is only a report."""
-    klee = score_config("klee", "demolition_weighted", "demolition", 40, SEED)
-    assert klee["invariant_flags"] is None
-    assert isinstance(klee["identity_flags"], list)

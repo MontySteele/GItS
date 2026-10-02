@@ -21,7 +21,7 @@ from tier0.harness.runner import run_battery
 
 from .conftest import make_enemy, make_state
 
-REACTIVE = ("klee", "reaction_weighted", "punisher", "generic")
+REACTIVE = ("klee", "starter", "punisher", "generic")
 
 
 def _stats(**kw) -> metrics.FightStats:

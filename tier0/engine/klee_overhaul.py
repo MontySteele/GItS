@@ -196,7 +196,7 @@ def live(state: CombatState) -> bool:
     character half is not decoration: the flag is a build switch, the arm is
     Klee's rules, and a co-op Furina must not start growing Bombs.
     """
-    return bool(C.KLEE_OVERHAUL and state.player.character_id == "klee")
+    return state.player.character_id == "klee"
 
 
 # ---------------------------------------------------------------------------

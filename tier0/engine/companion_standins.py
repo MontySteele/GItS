@@ -174,7 +174,7 @@ def hand_off(card_id: str, character_id: str | None) -> str:
     Returns `card_id` unchanged for every character but the stand-in's, and for
     every build with the arm off.
     """
-    if not C.COMPANION_OVERHAUL or character_id is None:
+    if character_id is None:
         return card_id
     return _replacements().get((card_id, character_id), card_id)
 
@@ -199,8 +199,6 @@ def roll_turn(state: "CombatState") -> None:
     could clear would sit on the player forever and blind a Grounded drafted
     three fights later.
     """
-    if not C.COMPANION_OVERHAUL:
-        return
     p = state.player
     state.mc_grounded_blind = bool(p.powers.pop(COLD_BLOODED, 0))
     for name in _WATCHERS:
@@ -210,7 +208,7 @@ def roll_turn(state: "CombatState") -> None:
 def grounded_blind(state: "CombatState") -> bool:
     """Does Grounded see nothing this turn? Read once, by
     `klee_overhaul.turn_start_late`, and false on every flag-off tree."""
-    return C.COMPANION_OVERHAUL and state.mc_grounded_blind
+    return state.mc_grounded_blind
 
 
 def _pay_block(state: "CombatState", amount: int, event: str) -> None:
@@ -259,8 +257,6 @@ def note_explosion(state: "CombatState", is_mine: bool) -> None:
     `turn_start` below is untouched, and so is Grounded: a Power that pays at
     the START of a turn is a POWER's Block and not a card's.
     """
-    if not C.COMPANION_OVERHAUL:
-        return
     p = state.player
     # Diona -- ONE-SHOT, popped as it pays.
     n = p.powers.pop(SHAKEN_NOT_PURRED, 0)
@@ -288,8 +284,6 @@ def on_played(state: "CombatState", card: "Card") -> None:
     `effects.resolve_card` after the body, so the watcher the body just applied
     is the stack this spends.
     """
-    if not C.COMPANION_OVERHAUL:
-        return
     if state.ko_set_off_this_turn <= 0:
         return
     p = state.player
@@ -311,8 +305,6 @@ def turn_start(state: "CombatState") -> None:
     a marker that quietly paid a second power would be a rule the player was
     never shown.
     """
-    if not C.COMPANION_OVERHAUL:
-        return
     p = state.player
     n = p.powers.get(LIONS_FANG, 0)
     if not n or state.ko_set_off_last_turn != 0:

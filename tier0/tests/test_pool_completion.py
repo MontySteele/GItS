@@ -93,7 +93,6 @@ def test_coral_crash_is_body_slam_and_tidal_rebuke_keeps_no_exhaust(overhaul):
 
 
 def test_noelles_sweeping_time_upgrades_to_cost_one(monkeypatch):
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
     loader.reset_arm_caches()
     for fn in (upgrades._upgrade_index, upgrades._prototype_upgrade_index):
         getattr(fn, "cache_clear", lambda: None)()
@@ -278,7 +277,6 @@ def _clear_caches():
 @pytest.fixture
 def arm(monkeypatch):
     _clear_caches()
-    monkeypatch.setattr(FS, "FURINA_STAGE", True)
     yield
     _clear_caches()
 

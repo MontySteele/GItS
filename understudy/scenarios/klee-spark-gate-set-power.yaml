@@ -1,0 +1,65 @@
+# EB-146 and EB-652 on the current Klee kit: the `set_power` door and the
+# `hover` door, ported at legacy cleanup stage 6 when the shipped scenarios
+# that exercised them (`set-power-sparks.yaml`, `furina-hover-states.yaml`)
+# left with the shipped cards they named.
+#
+# THE SUBJECT. Boom-Boom Strike prints a 2-Spark price, and its `IsPlayable`
+# is `SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this))`, so the
+# gate reads the bank `set_power` writes. Klee opens a fight with one Spark
+# (rule 4's opening Spark), so the first write CLEARS that badge rather than
+# applying to a creature with none.
+
+name: klee-spark-gate-set-power
+character: KLEEMOD-KLEE
+turns: 4
+
+prototype: true
+
+notes: |
+  Boom-Boom Strike in hand; Sparks written to 0, then 2, then 0, with the
+  price gate read after each write; the card is held under the cursor once
+  with the gate open, for a capture window. No Spark in this file is earned
+  by play.
+
+assumptions:
+  - "`SPARK_POWER` is `SparkPower`'s ModelId entry and the string the wire
+     prints on a status row. If a rename ever moves it, the first `set_power`
+     step fails with the endpoint's own refusal."
+  - "`set_power` writes `Amount`; SparkPower does not override
+     DisplayAmount, so the badge and the write are the same number."
+  - "`BlockedByCardLogic` is the UnplayableReason the card's `IsPlayable`
+     override produces when the bank is short of the price."
+  - "Energy is set to 5 first, so no refusal here can be EnergyCostTooHigh
+     wearing the answer the scenario is looking for."
+  - "Setting a Counter power to 0 is a REMOVAL (`PowerCmd.Remove`), so a 0
+     write reads as `no_power`."
+
+steps:
+  - give: {card: KLEEMOD-PROTO_KO_BANG_BANG, pile: hand, upgraded: false}
+  - set_energy: {amount: 5}
+
+  # ---- the opening Spark cleared: the gate is shut ------------------------
+  - set_power: {who: player, name: SPARK_POWER, amount: 0}
+  - expect:
+      no_power: {who: player, name: "Spark"}
+      can_play: {card: "Boom-Boom Strike", value: false}
+      unplayable_reason: {card: "Boom-Boom Strike", value: "BlockedByCardLogic"}
+
+  # ---- 0 -> 2: the gate opens on the written bank --------------------------
+  - set_power: {who: player, name: SPARK_POWER, amount: 2}
+  - expect:
+      power: {who: player, name: "Spark", stacks: 2}
+      can_play: {card: "Boom-Boom Strike", value: true}
+      unplayable_reason: {card: "Boom-Boom Strike", value: null}
+
+  # ---- the hover door: the priced card held under the cursor ---------------
+  - hover: {card: KLEEMOD-PROTO_KO_BANG_BANG}
+  - wait: {seconds: 10}
+  - unhover: {}
+
+  # ---- 2 -> 0: the gate shuts again ----------------------------------------
+  - set_power: {who: player, name: SPARK_POWER, amount: 0}
+  - expect:
+      no_power: {who: player, name: "Spark"}
+      can_play: {card: "Boom-Boom Strike", value: false}
+      unplayable_reason: {card: "Boom-Boom Strike", value: "BlockedByCardLogic"}

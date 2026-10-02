@@ -53,19 +53,11 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
                 continue
             pool.setdefault(c.rarity, []).append(c)
         return pool
-    # THE QUARANTINED WHOLE-POOL REPLACEMENT (`loader.pool_replacement`, behind
-    # `C.KLEE_OVERHAUL`): None on every flag-off tree, so this branch does not
-    # exist there. It sits at the SAME door as the one-for-one substitution
-    # below because it answers the same question -- "which ids can be offered
-    # to this character" -- and a second door would be a second answer.
-    #
-    # The rows are read through `peek_card`, which is the only reader that can
-    # resolve a `proto_` id at all (`loader._card_prototype`'s flagged branch);
-    # `_card_index` still carries none of them, so the R213 quarantine is
-    # unchanged and the surface remains invisible to digests, balance reports
-    # and every stamp. Off-table rarities are DROPPED rather than refiled, the
-    # same rule the general loop below applies -- an anchor's pool must not be
-    # the one place the rarity vocabulary is lenient, and neither must this.
+    # EACH CURRENT KIT'S POOL IS ITS PROTOTYPE ROSTER (`loader.pool_replacement`).
+    # The rows are read through `peek_card`, which resolves a `proto_` id
+    # (`loader._card_prototype`); `_card_index` carries none of them. Off-table
+    # rarities are DROPPED rather than refiled, the same rule the general loop
+    # below applies.
     replacement = loader.pool_replacement(character_id)
     if replacement is not None:
         pool = {}
@@ -76,17 +68,6 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
             pool.setdefault(c.rarity, []).append(c)
         return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
     index = loader._card_index()
-    # The QUARANTINED offerable-pool swap, and the only one there is
-    # (`loader._pool_substitutions`, behind `C.KURAGE_MEMORY`): {} on every
-    # flag-off tree, so the loop below is byte-for-byte what it has always
-    # been. This function is the single source of truth for "which ids can be
-    # offered to this character" -- `roll_card_offers`, `roll_rewards`,
-    # `shop.shop_offer`, every `events` card screen and the tier 0.5 drafter
-    # read it and nothing else -- so gating it HERE gates every offer surface
-    # at once, which is the point of putting the seam at the source instead of
-    # at the five mouths.
-    subs = loader.pool_substitutions(character_id)
-    drops = set(loader.pool_drops(character_id))
     pool = {}
     for c in index.values():
         # kit_card (v1.9): Bursts are kit, not loot -- never offered. This
@@ -111,31 +92,7 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
         # pool. If that damages the baseline, so be it."
         if c.character != character_id:
             continue
-        if c.id in drops:
-            continue
-        if c.id in subs:
-            # SAME RARITY SLOT, SAME WEIGHT: the prototype is filed under the
-            # SHIPPED row's rarity, and a prototype that declares a different
-            # one is refused rather than quietly promoted or demoted. A
-            # substitution is a face swap; moving a card between tiers would
-            # move the odds it is offered at, which is a balance change
-            # smuggled in as a quarantine.
-            proto = loader.peek_card(subs[c.id])
-            if proto.rarity != c.rarity:
-                raise ValueError(
-                    f"pool substitution {c.id!r} -> {proto.id!r}: the "
-                    f"prototype is {proto.rarity!r} but the shipped row is "
-                    f"{c.rarity!r}; a substitution must not move a card "
-                    "between rarity tiers")
-            c = proto
         pool.setdefault(c.rarity, []).append(c)
-    # QUARANTINED, the same seam's other half (`loader.pool_additions`): rows
-    # an arm offers WITHOUT replacing a shipped one, filed at their OWN
-    # rarity. `()` on every flag-off tree, so this loop is empty there.
-    for extra in loader.pool_additions(character_id):
-        c = loader.peek_card(extra)
-        if c.rarity in C.RARITY_ODDS:
-            pool.setdefault(c.rarity, []).append(c)
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
 
 
@@ -377,7 +334,7 @@ def _spark_seed(rng: random.Random, character_id: str,
     a caller has no floor to give (the event layer's card screens), which is
     the same answer.
     """
-    if floor is None or not C.KLEE_OVERHAUL or character_id != "klee":
+    if floor is None or character_id != "klee":
         return offers
     if floor > int(C.KLEE_OVERHAUL_SPARK_SEED_FLOORS):
         return offers

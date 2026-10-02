@@ -23,9 +23,7 @@ from tier05 import rewards
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-from tier0.tests.shipped_world import DEFAULTS  # noqa: E402
 
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 PRUNE = "proto_mc_prune_hexhunter_chime"
 SAYU = "proto_mc_sayu_silencers_secret"
@@ -45,7 +43,6 @@ def _caches_clear():
 def overhaul(monkeypatch):
     """The companion arm ON, with every id-resolving cache cleared."""
     _caches_clear()
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
     yield
     _caches_clear()
 
@@ -55,8 +52,6 @@ def both_arms(monkeypatch):
     """The companion arm AND the Klee overhaul, which is what the two
     Bomb-speaking rows need: a Bomb is the Klee arm's rule."""
     _caches_clear()
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
     _caches_clear()
 
@@ -74,39 +69,6 @@ def _pool_ids(pool):
 # ---------------------------------------------------------------------------
 # THE FLAG SHIPS ON (2026-10-01); THE FLAG-OFF PINS BELOW NAME THE SHIPPED WORLD
 # ---------------------------------------------------------------------------
-
-def test_the_flag_ships_on():
-    """The sim runs the current kits by default (legacy cleanup stage 3,
-    2026-10-01, pick 5), as every C# build does."""
-    assert DEFAULTS["COMPANION_OVERHAUL"] is True
-
-
-def test_flag_off_no_coven_row_can_be_offered():
-    offerable = _pool_ids(rewards.companion_pool())
-    assert not (set(C.COVEN_PERSONAL_POOL_IDS) & offerable)
-
-
-def test_flag_off_prunes_shipped_row_is_still_offerable():
-    assert "prune_witch_hunt" in _pool_ids(rewards.companion_pool())
-
-
-def test_flag_off_the_coven_hooks_are_no_ops():
-    """Every function in the module returns before touching anything, asserted
-    against a state that CARRIES the coven's powers -- a hook that ran with the
-    flag off would be a silent second rule set on every shipped run."""
-    st = _klee_state()
-    st.player.powers.update({"cvn_hexhunter_chime": 1,
-                             "cvn_herald_of_frost": 3, "cvn_yuegui": 3})
-    before = (dict(st.player.powers), st.player.block,
-              [e.hp for e in st.enemies], [len(e.ko_charges) for e in st.enemies])
-    companion_coven.turn_start(st)
-    companion_coven.turn_end(st)
-    companion_coven.note_swirl(st, "hydro")
-    assert st.cvn_swirl_element == ""
-    assert (dict(st.player.powers), st.player.block,
-            [e.hp for e in st.enemies],
-            [len(e.ko_charges) for e in st.enemies]) == before
-
 
 def test_flag_off_an_explosion_is_still_pyro():
     """The one shipped path this arm reaches into. `bomb_element` is read at
@@ -291,18 +253,6 @@ def test_yuegui_places_a_bomb_at_the_end_of_the_turn(both_arms):
     assert st.player.powers["cvn_yuegui"] == 2
 
 
-def test_yuegui_ticks_even_where_the_bomb_cannot_land(overhaul):
-    """The companion arm on and the KLEE arm off: a Bomb is that arm's rule, so
-    nothing is placed -- and the card's three turns still pass, which is what
-    keeps the power from becoming permanent on a board it could not reach."""
-    st = _klee_state()
-    st.enemies = [make_enemy(hp=99)]
-    st.player.powers["cvn_yuegui"] = 2
-    companion_coven.turn_end(st)
-    assert st.enemies[0].ko_charges == []
-    assert st.player.powers["cvn_yuegui"] == 1
-
-
 def test_yuegui_expires(both_arms):
     st = _klee_state()
     st.player.powers["cvn_yuegui"] = 1
@@ -363,12 +313,3 @@ def test_every_personal_is_smithable_in_the_sim(overhaul):
         plus = upgrades.apply_upgrade(loader.get_card(cid))
         assert plus.id != cid, cid
 
-
-def test_flag_off_no_personal_is_smithable():
-    """The other side of the line above: with the arm off the five are not
-    reachable, so the index registers none of them and stays byte-identical
-    to the shipped tree's."""
-    from tier0.content import upgrades
-    _caches_clear()
-    for cid in C.COVEN_PERSONAL_POOL_IDS + C.INAZUMA_OVERHAUL_PERSONAL_IDS:
-        assert not upgrades.has_upgrade(cid), cid

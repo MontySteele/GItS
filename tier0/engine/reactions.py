@@ -300,14 +300,13 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         # handle on it (`enemy.aura` was cleared before this call), which is
         # exactly what Varka's "of the swirled element" needs.
         _mc_reaction(state, enemy, name, aura)
-        # QUARANTINED (C.KOKOMI_OVERHAUL). THE EXPANSION's At Water's Edge
+        # THE EXPANSION's At Water's Edge
         # (2026-09-29): "Whenever a reaction happens on an enemy, apply 1 Weak
         # and 1 Vulnerable to it" -- any reaction, whoever caused it, read at
         # the site that counts one. `KokomiExpansion.OnReaction` is the twin.
-        if C.KOKOMI_OVERHAUL:
-            from tier0.engine import kokomi_plan         # late: cycle
-            kokomi_plan.note_reaction(state, enemy)
-        # QUARANTINED (`furina_stage.FURINA_STAGE`). THE SUPPORTING POOL's
+        from tier0.engine import kokomi_plan             # late: cycle
+        kokomi_plan.note_reaction(state, enemy)
+        # THE SUPPORTING POOL's
         # Tide of Applause (2026-09-26) rides the same site: "whenever you
         # trigger an Elemental Reaction, your back performer gains 2".
         from tier0.engine import furina_stage            # late: cycle

@@ -18,10 +18,9 @@ WHO OWNS A ROW:
 
   * a row with `personal_pool:` belongs to each character it names (Varka's
     Knights, Klee's personals);
-  * otherwise a row on a `*-companions.yaml` sheet, or a surface row with a
-    `nation:`, is a UNIVERSAL -- conservatively reachable in every run;
-  * otherwise it is its sheet's character's (`*-cards.yaml`) or its
-    `character:`'s (the surface).
+  * otherwise a surface row with a `nation:` is a UNIVERSAL --
+    conservatively reachable in every run;
+  * otherwise it is its `character:`'s.
 
 Own rows are NOT compared with each other: most of the surface is a whole-kit
 swap whose rows print shipped titles on purpose (`proto_ko_pop` and `Pop!` are
@@ -50,10 +49,10 @@ sys.path.insert(0, str(REPO))
 from understudy.report import console_safe          # noqa: E402
 
 DOCS = REPO / "docs"
-CHARACTER_SHEETS = {"klee-cards.yaml": "klee", "furina-cards.yaml": "furina",
-                    "kokomi-cards.yaml": "kokomi"}
-COMPANION_SHEETS = ("mondstadt-companions.yaml", "fontaine-companions.yaml",
-                    "inazuma-companions.yaml")
+# The shipped kit and companion sheets were deleted at legacy cleanup stage 6
+# (2026-10-01); every card a run can hold is a surface row now.
+CHARACTER_SHEETS: dict[str, str] = {}
+COMPANION_SHEETS: tuple[str, ...] = ()
 SURFACE = "prototype-surface.yaml"
 
 #: Known clashes held open, as `(own row id, universal row id)`. SHRINK-ONLY:

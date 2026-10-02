@@ -64,10 +64,8 @@ SITES = [
      lambda c: c.relic_pool_cs, None),
     ("tier0 character sheet",
      lambda c: c.character_yaml, None),
-    ("card sheet",
-     lambda c: c.card_sheet, None),
-    ("upgrade sheet",
-     lambda c: c.upgrade_sheet, None),
+    # The per-character card and upgrade sheets were deleted at legacy cleanup
+    # stage 6 (2026-10-01): every kit's rows are on the prototype surface.
 ]
 
 # Files that carry a CLOSED LIST naming every character, where the token to
@@ -85,9 +83,9 @@ CLOSED_LISTS = [
     ("build_pck.ps1 character loop",
      REPO / "tools" / "build_pck.ps1",
      lambda c: f"'{c.id}'"),
-    ("art_coverage sheet list",
+    ("art_coverage card dirs",
      REPO / "tools" / "art_coverage.py",
-     lambda c: f'"{c.id}-cards.yaml"'),
+     lambda c: f'"{c.id}"'),
     ("companion shop coverage lint",
      REPO / "tools" / "lint_companion_shop_coverage.py",
      lambda c: f'"{c.id}"'),
@@ -106,8 +104,14 @@ CLOSED_LISTS = [
 ]
 
 
+#: Roster characters whose offered pool carries no archetype tag, filled by
+#: `check` (see step 3 there).
+UNTAGGED: list[str] = []
+
+
 def check() -> list[str]:
     findings: list[str] = []
+    UNTAGGED.clear()
 
     # 1. Files that must EXIST, one per character.
     for label, path_of, _ in SITES:
@@ -139,14 +143,25 @@ def check() -> list[str]:
                     f"{character.id} missing -- expected {token!r}")
 
     # 3. The registry's own archetype vocabulary vs the cards themselves.
-    #    This is R66, and it is checked in BOTH directions.
+    #    This is R66, and it is checked in BOTH directions, over the pool the
+    #    character is actually offered (`loader.pool_replacement`).
+    #
+    #    THE CURRENT KITS' ROWS CARRY NO `archetypes:` TAG AT ALL (legacy
+    #    cleanup stage 6 deleted the shipped sheets that did), so for a kit
+    #    whose pool carries none the check has nothing to compare and says so
+    #    in `main` rather than reporting every declared archetype as phantom.
+    #    The registry's vocabulary is then the tier 0.5 drafter's alone, which
+    #    is a known gap (the drafter's synergy term cannot fire on a current
+    #    kit), not a typo this lint could point at.
     from tier0.content import loader
     for character in roster.ROSTER:
         tags: set[str] = set()
-        for card in loader._card_index().values():
-            if card.character == character.id:
-                tags.update(card.archetypes)
+        for cid in loader.pool_replacement(character.id) or ():
+            tags.update(loader.peek_card(cid).archetypes)
         tags.discard("generic")     # everyone has it; nobody IS it
+        if not tags:
+            UNTAGGED.append(character.id)
+            continue
         declared = set(character.archetypes)
         for phantom in sorted(declared - tags):
             findings.append(
@@ -180,6 +195,10 @@ def main() -> int:
         return 1
     print(f"roster registry: OK ({len(roster.ROSTER)} characters x "
           f"{len(CLOSED_LISTS)} closed lists)")
+    if UNTAGGED:
+        print(f"  archetype check (R66) had nothing to compare for "
+              f"{', '.join(UNTAGGED)}: no card in the offered pool carries an "
+              f"`archetypes:` tag")
     return 0
 
 

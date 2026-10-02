@@ -1,15 +1,8 @@
-"""The per-card Spark price on the observed board (the Klee Sparks arm).
+"""The per-card Spark price on the observed board (Klee's Sparks currency).
 
-`EB-185` put the BANK on the wire. That was enough while the bank had exactly
-one destination and the engine chose it. Under the alternative cost it is not,
-for three reasons the bridge comment states and these tests pin:
-
-  * a Spark price is a PRINTED cost and the wire's `cost` is the ENERGY cost,
-    which is 0 for every one of these cards -- so an observed board without the
-    new keys shows a hand of free cards and says nothing about what they charge;
-  * under the strict Rare Power the price is not on the card at all: it is
-    state, contributed by a power, and no other wire key carries it;
-  * `can_play` folds every reason a card is unplayable into one boolean, so a
+`EB-185` put the BANK on the wire. A Spark price is a PRINTED cost and the
+wire's `cost` is the ENERGY cost, so an observed board without the price keys
+says nothing about what a card charges; and `can_play` folds every reason a card is unplayable into one boolean, so a
     seat cannot tell "I cannot afford this" from "there is no legal target".
 
 C# side: `vendor/STS2_MCP/gits/GitsSparkPrice.cs` and the two lines it adds to
@@ -20,25 +13,7 @@ side: `understudy/adapter.build_combat_state`.
 
 from __future__ import annotations
 
-import pytest
-
-from tier0 import constants as C
-from tier0.content import loader
 from understudy import adapter
-
-
-@pytest.fixture
-def alt_cost(monkeypatch):
-    """The flag ON, with the id-resolving cache cleared on both sides.
-
-    Same fixture and the same reason as `test_spark_alt_cost.py`'s:
-    `_card_prototype` is memoized and its answer for a `proto_` id depends on
-    the flag.
-    """
-    loader.reset_arm_caches()
-    monkeypatch.setattr(C, "SPARK_ALT_COST_ENABLED", True)
-    yield
-    loader.reset_arm_caches()
 
 
 def board(hand, status=None):
@@ -74,38 +49,33 @@ def priced(card_id, price, affordable=True, **extra):
 SPARK_BANK = {"id": "SPARK_POWER", "name": "Spark", "amount": 1,
               "type": "Buff", "description": "A resource."}
 
-KNIGHT = {"id": "SPARK_ATTACK_COST_POWER", "name": "True Spark Knight",
-          "amount": 1, "type": "Buff",
-          "description": "Your Attacks that do not already cost Spark cost 3 "
-                         "Spark instead of their Energy cost."}
-
 
 # --------------------------------------------------------- the plain read ---
 
-def test_the_observed_board_carries_each_hand_card_s_spark_price(alt_cost):
+def test_the_observed_board_carries_each_hand_card_s_spark_price():
     """The read itself. Both keys land, per card, keyed by the SIM's id -- the
     id a grader's line and the falsifier both name -- and not by the wire's."""
-    # `EB-750` retired `proto_spark_strike` and `proto_spark_finisher` with
-    # the rest of the superseded Sparks pool; these two are rows that exist.
-    state = board([priced("proto_spark_priced_strike", 3),
-                   priced("proto_spark_priced_draw", 3, affordable=False)],
+    # Two current Klee rows that print a Spark price (Spark is a currency).
+    state = board([priced("proto_ko_bang_bang", 2),
+                   priced("proto_ko_once_more", 2, affordable=False)],
                   status=[SPARK_BANK])
 
     _, notes = adapter.build_combat_state(state, prototype=True)
 
-    assert notes["spark_prices"] == {"proto_spark_priced_strike": 3,
-                                     "proto_spark_priced_draw": 3}
-    assert notes["spark_unaffordable"] == ["proto_spark_priced_draw"]
+    assert notes["spark_prices"] == {"proto_ko_bang_bang": 2,
+                                     "proto_ko_once_more": 2}
+    assert notes["spark_unaffordable"] == ["proto_ko_once_more"]
     assert notes["spark_price_disagreements"] == []
 
 
-def test_a_card_that_charges_nothing_carries_no_price_keys(alt_cost):
+def test_a_card_that_charges_nothing_carries_no_price_keys():
     """The ABSENT case, which is almost every card in the game. The bridge omits
     the pair rather than writing 0, so the board stays the size it was and the
     reader can tell "charges none" from "charges zero"."""
-    state = board([{"id": "KLEEMOD-KABOOM", "name": "Kaboom!", "type": "Attack",
-                    "cost": "1", "can_play": True, "is_upgraded": False,
-                    "description": "Deal 7 damage."}])
+    state = board([{"id": "KLEEMOD-PROTO_KO_KAPOW", "name": "Ka-pow!",
+                    "type": "Attack", "cost": "0", "can_play": True,
+                    "is_upgraded": False,
+                    "description": "Set off. Deal 4 damage."}])
 
     _, notes = adapter.build_combat_state(state, prototype=True)
 
@@ -116,63 +86,19 @@ def test_a_card_that_charges_nothing_carries_no_price_keys(alt_cost):
 
 # ------------------------------------------------------- the cross-check ---
 
-def test_a_wire_price_that_disagrees_with_the_sim_is_reported_by_name(alt_cost):
+def test_a_wire_price_that_disagrees_with_the_sim_is_reported_by_name():
     """The whole reason the keys are worth carrying. `SparkCost.PriceOf` and
     `combat.spark_price` are two implementations of one rule in two languages;
     a divergence is a defect in one of them and is invisible unless something
     asks. It is REPORTED, never repaired -- the posture `unmapped_statuses`
     takes, and for the same reason."""
-    state = board([priced("proto_spark_priced_strike", 2)],
+    state = board([priced("proto_ko_bang_bang", 3)],
                   status=[SPARK_BANK])
 
     _, notes = adapter.build_combat_state(state, prototype=True)
 
-    assert notes["spark_prices"] == {"proto_spark_priced_strike": 2}
+    assert notes["spark_prices"] == {"proto_ko_bang_bang": 3}
     assert notes["spark_price_disagreements"] == [
-        "proto_spark_priced_strike: wire 2, sim 3"]
+        "proto_ko_bang_bang: wire 3, sim 2"]
 
 
-# ------------------------------------ the price that is not on the card ---
-
-def test_the_strict_power_s_price_crosses_and_agrees(alt_cost):
-    """The case no other wire key could carry. `kaboom` prints NO Spark price;
-    under True Spark Knight it costs 3, and that 3 exists only as state. The
-    status row has to map or the sim would price it at 0 while the game charged
-    3 -- a silent disagreement on every Attack in hand."""
-    state = board([priced("kaboom", 3, affordable=False, cost="0")],
-                  status=[SPARK_BANK, KNIGHT])
-
-    cs, notes = adapter.build_combat_state(state, prototype=True)
-
-    assert "true_spark_knight" not in notes["unmapped_statuses"]
-    assert cs.player.powers.get("spark_attack_cost") == 1
-    assert notes["spark_prices"] == {"kaboom": 3}
-    assert notes["spark_unaffordable"] == ["kaboom"]
-    assert notes["spark_price_disagreements"] == []
-
-
-def test_without_the_knight_the_same_attack_prices_at_nothing(alt_cost):
-    """The other direction, which is what makes the test above about the POWER
-    and not about the card: drop the status row and the sim charges 0, so a wire
-    that still claimed 3 would be caught."""
-    state = board([priced("kaboom", 3, affordable=False, cost="0")],
-                  status=[SPARK_BANK])
-
-    _, notes = adapter.build_combat_state(state, prototype=True)
-
-    assert notes["spark_price_disagreements"] == [
-        "kaboom: wire 3, sim 0"]
-
-
-# ------------------------------------------------------------- flag off ---
-
-def test_with_the_flag_off_the_printed_price_still_crosses():
-    """The bridge is NOT behind the flag and must not be: three shipped Klee
-    Skills print a Spark price today, and their price was as invisible on an
-    observed board as a prototype's. Only the POWER's contribution is flagged."""
-    state = board([priced("smoke_and_sparks", 2)], status=[SPARK_BANK])
-
-    _, notes = adapter.build_combat_state(state)
-
-    assert notes["spark_prices"] == {"smoke_and_sparks": 2}
-    assert notes["spark_price_disagreements"] == []

@@ -8,7 +8,7 @@ tested (`tier0/tests/test_staged_turn.py`):
   * IT IMPORTS NOTHING FROM `tier0`. Not the sheet loaders, not the engine,
     not the pilot. An AST walk over this file's imports pins it
     (`test_the_packet_builder_cannot_reach_a_sheet`). A packet builder that
-    could open `docs/kokomi-cards.yaml` would be one refactor away from
+    could open `docs/prototype-surface.yaml` would be one refactor away from
     printing a `role:` into the thing whose whole value is that it has none.
   * IT COPIES FIELD BY FIELD FROM AN ALLOWLIST. Nothing is spread, merged or
     `dict(**wire)`-ed. Every value in a packet was written by a line naming
@@ -646,19 +646,22 @@ def printed_spark_index(repo: Path | None = None) -> dict[str, int]:
 
 # `EB-342`. THE CARDS THIS BUILD DEFINES NO UPGRADE FOR.
 #
-# `tools/gen_prototype_cards.UPGRADE_DEBT` is the register of them, and since
-# `EB-315` emptied the overhaul half it is the Spark arm's alone -- which is
-# exactly where the r7b act-3 seat's two silently-omitted cards live
-# (`proto_powder_charge_spark`, `proto_shinobu_sanctifying_ring_*`).
+# Two registers say so: `tools/gen_prototype_cards.UPGRADE_DEBT` (empty since
+# the Spark arm's rows left the surface at legacy cleanup stage 6) and a row's
+# own `no_upgrade:` key on `docs/prototype-surface.yaml`, which travels with
+# the row and is read by both engines.
 #
-# ONLY THE IDS CROSS. Each row's VALUE is register prose that names ruling and
-# row numbers, which is precisely what may not reach a blind page; the page
-# writes its own plain sentence and reads nothing from here but the key set.
+# ONLY THE IDS CROSS. Each VALUE is register prose that names ruling and row
+# numbers, which is precisely what may not reach a blind page; the page writes
+# its own plain sentence and reads nothing from here but the key set.
 # Parsed with a regex rather than imported for `printed_cost_index`'s reason
 # one function up: the module that owns it reaches a sheet loader, and this
 # index is read from a page that may not.
 _UPGRADE_DEBT_BLOCK = re.compile(
-    r"^UPGRADE_DEBT[^{]*\{(.*?)^\}", re.M | re.S)
+    r"^UPGRADE_DEBT[^{\n]*\{(\}|.*?^\})", re.M | re.S)
+# A surface row's id and, before the next row starts, its `no_upgrade:` key.
+_SURFACE_ROW = re.compile(r"^- \{id: ([a-z0-9_]+),(.*?)(?=^- \{id: |\Z)",
+                          re.M | re.S)
 _UPGRADE_DEBT_KEY = re.compile(r'^\s*"([a-z0-9_]+)"\s*:', re.M)
 
 
@@ -669,11 +672,19 @@ def _no_upgrade_index_cached(repo: Path) -> tuple[str, ...]:
         text = src.read_text(encoding="utf-8")
     except OSError:
         return ()
+    keys: set[str] = set()
     block = _UPGRADE_DEBT_BLOCK.search(text)
-    if block is None:
-        return ()
-    return tuple(sorted(card_key(k)
-                        for k in _UPGRADE_DEBT_KEY.findall(block.group(1))))
+    if block is not None:
+        keys |= set(_UPGRADE_DEBT_KEY.findall(block.group(1)))
+    try:
+        surface = (repo / "docs" / "prototype-surface.yaml").read_text(
+            encoding="utf-8")
+    except OSError:
+        surface = ""
+    for row_id, body in _SURFACE_ROW.findall(surface):
+        if re.search(r"^\s+no_upgrade:", body, re.M):
+            keys.add(row_id)
+    return tuple(sorted(card_key(k) for k in keys))
 
 
 def no_upgrade_index(repo: Path | None = None) -> frozenset[str]:

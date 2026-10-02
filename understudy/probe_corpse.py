@@ -84,7 +84,7 @@ from understudy.policy_v1 import Decision
 
 KABOOM = "kaboom!"
 POP = "pop!"
-# Kaboom!'s printed damage (docs/klee-cards.yaml `kaboom`, amount: 7). Used
+# Kaboom!'s printed damage (the retired shipped `kaboom` row, amount: 7). Used
 # only to SIZE the blow; the readings never consult the sheet.
 KABOOM_DAMAGE = 7
 CHARACTER = "KLEEMOD-KLEE"

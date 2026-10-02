@@ -204,6 +204,37 @@ SHEETS = [path for path in
                                           "*-companions.yaml")))
           if os.path.basename(path) not in EXCLUDED_SHEETS]
 
+# THE KITS ARE SURFACE ROWS (legacy cleanup stage 6, 2026-10-01). The shipped
+# `docs/*-cards.yaml` and `*-companions.yaml` sheets the globs above read are
+# deleted, so the house pools are cut from the prototype surface instead: one
+# pool per kit character (its rows with an offerable rarity, no `nation:` and
+# no multiplayer tag -- 78 each for Klee, Kokomi and Furina, the same counts
+# `KleeTests/Prototype/PoolCountTests.cs` pins) and one per companion nation.
+# The scratch-row argument at EXCLUDED_SHEETS above is why the cut is by pool
+# rather than the whole file.
+SURFACE = os.path.join(REPO, "docs", "prototype-surface.yaml")
+SURFACE_CHARACTERS = ("klee", "kokomi", "furina", "varka")
+OFFERABLE = ("common", "uncommon", "rare")
+
+
+def surface_pools() -> list[tuple[str, list[dict]]]:
+    """`[(pool name, rows)]` for the house pools, cut from the surface."""
+    if not os.path.exists(SURFACE):
+        return []
+    rows = [r for r in load_pool(SURFACE) if isinstance(r, dict)]
+    out = []
+    for ch in SURFACE_CHARACTERS:
+        out.append((ch, [r for r in rows
+                         if r.get("character") == ch and not r.get("nation")
+                         and r.get("rarity") in OFFERABLE
+                         and not r.get("multiplayer")]))
+    nations = sorted({r["nation"] for r in rows if r.get("nation")})
+    for nation in nations:
+        out.append((f"{nation}-companions",
+                    [r for r in rows if r.get("nation") == nation]))
+    return out
+
+
 # EB-249 (b): the rows a Universal-pool metric must not count. Every number
 # this tool prints is a RATIO OVER A DRAFTABLE POOL -- how much a player
 # choosing among these cards is really choosing between -- and two kinds of
@@ -464,6 +495,17 @@ def build_reports(pool_filter: str | None = None,
     both the CLI table and the suite's red gate test, so the two can never
     disagree about which pools exist or what they are called."""
     reports = []
+    for name, rows in surface_pools():
+        if pool_filter and pool_filter not in name:
+            continue
+        rows = universal_rows(rows)
+        if rows:
+            reports.append(analyze(name, rows))
+            if by_rarity:
+                for rar in OFFERABLE:
+                    sub = [c for c in rows if c.get("rarity") == rar]
+                    if sub:
+                        reports.append(analyze(f"{name}/{rar}", sub))
     for path in SHEETS + GAME_REF:
         if not os.path.exists(path):
             continue

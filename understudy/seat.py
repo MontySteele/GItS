@@ -18,7 +18,7 @@ This module wraps `codex exec` in two roles:
 THE GUARD, AND THE THREE PLACES IT LOOKS
 ----------------------------------------
 `--sandbox read-only` stops Codex WRITING. It does not stop it READING: a
-read-only sandbox still lets a model run `cat docs/kokomi-cards.yaml` or
+read-only sandbox still lets a model run `cat docs/prototype-surface.yaml` or
 `rg tempo_band`, and a grader that has read the sheet is not blind however the
 process was launched. The sandbox is therefore not the blindness claim.
 

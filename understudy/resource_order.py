@@ -57,13 +57,9 @@ REPO = Path(__file__).resolve().parents[1]
 # rather than globbed: `*-upgrades.yaml` rows are DELTAS with no printed title
 # of their own, and a glob would silently start reading them the day one grows
 # an `effects:` key.
+# The shipped kit sheets were deleted at legacy cleanup stage 6; every current
+# card is a row on the prototype surface.
 SHEETS: tuple[str, ...] = (
-    "docs/klee-cards.yaml",
-    "docs/furina-cards.yaml",
-    "docs/kokomi-cards.yaml",
-    "docs/mondstadt-companions.yaml",
-    "docs/fontaine-companions.yaml",
-    "docs/inazuma-companions.yaml",
     # A SEALED RECORD'S door, not a live sheet (`EB-750`): the faces of
     # prototype rows a later arm superseded, kept so a sealed round's board and
     # graded form can still be replayed by printed title (R101b). Read here and

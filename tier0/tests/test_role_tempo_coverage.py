@@ -27,53 +27,6 @@ def _run(script, *args):
         capture_output=True, text=True)
 
 
-# --- the gate ---------------------------------------------------------------
-
-def test_the_coverage_gate_finds_exactly_the_pinned_debt():
-    """A NEW finding is a coverage regression; a STALE pin is a cell that
-    moved without anybody saying so. The gate fails on either, which is what
-    makes a green suite mean something while the debt is real and unpaid."""
-    res = _run("lint_role_tempo_coverage.py", "--gate")
-    assert res.returncode == 0, res.stdout + res.stderr
-    assert "gate ok" in res.stdout, res.stdout
-
-
-def test_the_gate_says_out_loud_that_it_only_counts():
-    """R90/1a. The null fired because a SIZE hypothesis was tested with a
-    COUNTING tool, and the ruling's answer was to keep the tool and move the
-    hypothesis. A run whose output does not say which of the two it is doing
-    invites the same mistake a second time."""
-    res = _run("lint_role_tempo_coverage.py", "--gate")
-    assert "COUNTING TOOL" in res.stdout, res.stdout
-    assert "Track B" in res.stdout, res.stdout
-
-
-def test_the_debt_list_records_that_its_shrink_was_not_progress():
-    """The list went 30 -> 19 with no gap fixed, because R90/1c changed the
-    comparison population. A future reader diffing this file must not be able
-    to read that as eleven wins."""
-    text = (REPO / "docs" / "role-tempo-debt.tsv").read_text(encoding="utf-8")
-    assert "30 -> 19" in text, text[:400]
-    assert "NOT ONE GAP WAS FIXED" in text, text[:400]
-
-
-def test_the_lint_can_never_name_a_card():
-    """Charter A0.2(1): floors only. No card can EVER fail -- not for being
-    unclassifiable, not for being hybrid, not for being strange. The unit of
-    failure is (character, archetype, cell) and nothing smaller, so no card id
-    from any sheet may appear anywhere in a full run's output."""
-    res = _run("lint_role_tempo_coverage.py")
-    ids = {row["id"] for path in rt.SHEETS.values()
-           for row in rt.load_rows(path)}
-    leaked = sorted(i for i in ids if i in res.stdout)
-    assert not leaked, f"the floors-only lint named cards: {leaked}"
-
-
-def test_the_review_and_tagthrough_artifacts_are_current():
-    res = _run("suggest_role_tempo_tags.py", "--check")
-    assert res.returncode == 0, res.stdout + res.stderr
-
-
 # --- the floors -------------------------------------------------------------
 
 def _floors() -> dict:
@@ -257,52 +210,25 @@ def test_the_vocabulary_is_the_charters_amended_one():
     assert "aoe" in rt.MODIFIERS
 
 
-def test_every_sheet_declares_its_archetypes_and_the_header_wrap_is_read():
-    """R66 makes the sheet HEADER canonical for the archetype vocabulary, and
-    two of the three headers wrap mid-parenthetical. A naive single-line read
-    silently dropped `generic` from Kokomi's list -- i.e. deleted an identity
-    from the floors without failing anything."""
-    for name, path in rt.SHEETS.items():
-        declared = rt.declared_archetypes(path)
-        assert len(declared) >= 3, (name, declared)
-        assert "generic" in declared, (name, declared)
-
-
-def test_every_card_lands_in_at_least_one_band_on_both_scales():
-    """A card with no band is invisible to every cell, which would let a pool
-    pass by having cards the taxonomy cannot place."""
-    for name, path in rt.SHEETS.items():
-        rows = rt.load_rows(path)
-        scans, _ = rt.classify_pool(rows, name)
-        for row in rows:
-            scan = scans[row["id"]]
-            assert scan["fight"], (name, row["id"])
-            assert scan["run"], (name, row["id"])
-
-
 # --- the landed schema (R92/3b) ---------------------------------------------
 
-def test_tempo_band_landed_on_every_row_of_every_sheet():
-    """A-G1 closed and the tags landed. A partial landing is worse than none:
-    the lint would then be reading a mix of derived and authored bands and no
-    cell result would mean anything."""
-    for name, path in rt.SHEETS.items():
-        rows = rt.load_rows(path)
-        assert rows, name
-        for row in rows:
-            band = row.get("tempo_band")
-            assert isinstance(band, dict), (name, row["id"])
-            assert set(band) == {"fight", "run"}, (name, row["id"])
-            assert set(band["fight"]) <= set(rt.FIGHT_BANDS), row["id"]
-            assert set(band["run"]) <= set(rt.RUN_BANDS), row["id"]
-            assert band["fight"] and band["run"], (name, row["id"])
+def _banded_card():
+    """A row carrying the field, through the loader's own constructor. The
+    shipped sheets that carried it were deleted (legacy cleanup stage 6)."""
+    from tier0.engine.state import Card
+    return Card.from_dict({"id": "banded", "name": "Banded", "cost": 1,
+                           "type": "attack", "rarity": "common",
+                           "tempo_band": {"fight": ["early"],
+                                          "run": ["early"]},
+                           "effects": [{"op": "damage", "amount": 6,
+                                        "target": "enemy"}]})
 
 
 def test_the_sim_loader_reads_tempo_band():
     """READER ONE. `Card.from_dict` refuses unknown fields by design, so the
     field being DECLARED is what keeps 219 rows loadable. This test is half of
     what the cross-session note promised."""
-    card = loader._card_index()["soloists_solicitation"]
+    card = _banded_card()
     assert card.tempo_band == {"fight": ["early"], "run": ["early"]}
 
 
@@ -314,7 +240,7 @@ def test_tempo_band_survives_the_hand_rolled_deepcopy():
     import copy
     from tier0.engine import state
     assert "tempo_band" in state._MUTABLE_FIELDS
-    card = loader._card_index()["soloists_solicitation"]
+    card = _banded_card()
     clone = copy.deepcopy(card)
     assert clone.tempo_band == card.tempo_band
     assert clone.tempo_band is not card.tempo_band
@@ -355,55 +281,6 @@ def test_every_meter_declares_bounded_or_unbounded_with_its_cap_from_constants()
             assert value == getattr(C, const), token
     assert rt.METERS["salon_member"][1] == "SALON_MEMBER_SLOTS"
     assert C.SALON_MEMBER_SLOTS == 3
-
-
-def test_meter_reading_damage_is_scaling_and_frontload_only_if_it_pays_at_zero():
-    """R91/2c, COUNTERSIGNED AS WRITTEN, on the sheets' own cards — read
-    through the PRINTED FLOOR (L4q / R129, 2026-08-07).
-
-    `applause_line` deals a printed number and adds a Fanfare term, so it is
-    both. `pearl_barrage` prints `5 + 1 per exhausted card`: the v0.3 base
-    raise (3 -> 5, "the floor must be playable before the pile exists") gave
-    it a floor AFTER this test's original sentence was written, so the old
-    premise -- "deals nothing at an empty pile" -- had gone stale against the
-    shipped sheet. R129 adopts `effect_walk.printed_floor`: `amount: 5` and
-    `amount_formula: {base: 5, ...}` are the same promise to the player, so
-    the kokomi pile-readers that print a base are both. What stays
-    scaling-ONLY is a line with no printed floor at all: `the_final_verdict`.
-
-    TWO ROWS MOVED AT R208 / W2b (2026-08-25), in opposite directions, and
-    both moves are the rule working rather than an exception to it.
-    `depths_judgment` LEAVES this list: its ratified body prints a flat 14 and
-    buys Block over an exhaust bar, so it reads no meter on a damage line at
-    all and the classifier lands it `block, frontload`. `dramatic_entrance`
-    JOINS it, and it is the first row here to arrive by the GATE form rather
-    than the formula form -- `damage 7`, then `damage 7 to all` behind
-    `fanfare_at_least_12`. A gate on a damage line IS a meter read, so the
-    rule makes it `scaling`, and the always-live 7 is the printed floor that
-    makes it `frontload` as well.
-    """
-    both = {"furina": ["applause_line", "dramatic_entrance"],
-            "kokomi": ["read_the_current", "pearl_barrage", "undertow"]}
-    scaling_only = {"furina": ["the_final_verdict"]}
-    for character, path in rt.SHEETS.items():
-        rows = rt.load_rows(path)
-        scans, _ = rt.classify_pool(rows, character)
-        for card_id in both.get(character, ()):
-            solve = scans[card_id]["solve"]
-            assert "scaling" in solve and "frontload" in solve, (card_id, solve)
-        for card_id in scaling_only.get(character, ()):
-            solve = scans[card_id]["solve"]
-            assert "scaling" in solve, (card_id, solve)
-            assert "frontload" not in solve, (card_id, solve)
-
-
-def test_the_sheets_and_the_classifier_cannot_drift():
-    """The landed tags are machine-derived, so a hand edit on a sheet is a
-    silent fork between what the sheet says and what the lint counts. --check
-    is the gate; this is the suite carrying it."""
-    res = _run("suggest_role_tempo_tags.py", "--check")
-    assert res.returncode == 0, res.stdout + res.stderr
-    assert "three sheets match the classifier" in res.stdout, res.stdout
 
 
 def test_tag_through_entities_all_carry_their_provenance():

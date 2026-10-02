@@ -50,8 +50,6 @@ def _caches_clear():
 @pytest.fixture
 def arms(monkeypatch):
     _caches_clear()
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
     _caches_clear()
 

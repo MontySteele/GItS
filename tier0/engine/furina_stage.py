@@ -16,13 +16,6 @@ by a hit earns nothing (rule 7). Every performer performs a flat act at the
 end of her turn (rule 10), and her own HP is touched by nothing in the kit
 (rule 11).
 
-WHY THE FLAGS LIVE HERE AND NOT IN `constants.py`, and it is `furina_reframe`'s
-argument inherited rather than re-made: a flag in `constants.py` is read by the
-parity gate and the constant census, and a flag the shipped engine only
-branches on is quarantined machinery. With `FURINA_STAGE` False this module's
-every reader returns the empty answer and the engine is the shipped engine byte
-for byte (`tier0/tests/test_furina_stage.py` pins that arm first).
-
 THE ONE STATE THIS ARM ADDS is `Player.stage`: an ordered list of
 `[member, fanfare]` pairs, front seat first. It is the source of truth and
 there is no counter beside it -- the brief's sec.2 lore table is explicit that
@@ -41,12 +34,6 @@ on branch `stage-cs`.
 from __future__ import annotations
 
 CHARACTER = "furina"
-
-# ----------------------------------------------------------------------
-# THE FLAG. ON since 2026-10-01 (legacy cleanup stage 3, pick 5: the sim runs
-# the current kits). Set False to read the shipped Salon world.
-# ----------------------------------------------------------------------
-FURINA_STAGE = True
 
 # ----------------------------------------------------------------------
 # THE NUMBERS. Brief sec.3 and sec.10 default 3: "Opening Fanfare 3, regen 1
@@ -442,8 +429,7 @@ POOL_DROPS: tuple[str, ...] = (
 
 
 # ----------------------------------------------------------------------
-# The readers. Functions rather than module constants at the call sites, so a
-# test can flip the flag with `monkeypatch.setattr` and every branch sees it.
+# The readers.
 # ----------------------------------------------------------------------
 def is_furina(player) -> bool:
     return getattr(player, "character_id", None) == CHARACTER
@@ -451,7 +437,7 @@ def is_furina(player) -> bool:
 
 def active(player) -> bool:
     """Is the Stage live for this player? Every leg is AND-ed with this."""
-    return FURINA_STAGE and is_furina(player)
+    return is_furina(player)
 
 
 def stage(player) -> list:

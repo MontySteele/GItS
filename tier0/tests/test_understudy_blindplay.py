@@ -5805,7 +5805,7 @@ def test_the_map_prints_the_gold_and_the_deck():
     assert "## Your deck" in page
     # A title the run holds one of, and the upgrade mark on the copy that
     # carries it -- the grammar's own `(upgraded)` spelling.
-    assert "- **Bag of Tricks**" in page
+    assert "- **O Tears, I Shall Repay**" in page
     assert "- **Ka-pow! (upgraded)**" in page
     # Repeats are counted rather than listed, and the staleness travels with
     # the list.
@@ -6989,9 +6989,11 @@ def test_the_companion_row_is_the_mods_own_sentence_about_the_slot():
     assert blindplay.COMPANION_SLOT_SENTENCE in body
     # The title's shape, which is the tell a reader has mid-fight, checked
     # against a real companion row rather than against prose.
-    sheet = (REPO / "docs" / "mondstadt-companions.yaml").read_text(
+    # The companion rows are `proto_mc_` rows on the surface since legacy
+    # cleanup stage 6 deleted the companion sheets.
+    sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
-    assert re.search(r'name:\s*"[^"]+ — [^"]+"', sheet)
+    assert re.search(r'id: proto_mc_[a-z_]+, name:\s*"[^"]+ — [^"]+"', sheet)
     assert "a character's name, a dash, then its own" in body
     # `EB-430` PUT A SECOND ARM'S TRIGGER ON THIS ROW, and it is the reason
     # the bound moved. The word rides both kits, and the glossary is the ONE
@@ -8773,12 +8775,12 @@ def upgrade_run_states() -> tuple[dict, dict]:
                       "description": "Gain 5 Block."}
                      for i, name in enumerate(grid)],
             "draw_pile": [
-                # `EB-750` retired `PROTO_POWDER_CHARGE_SPARK` with the
-                # rest of the superseded Sparks pool, so the row this clause
-                # needs -- one on `UPGRADE_DEBT` -- is `Bag of Tricks`.
-                {"id": "KLEEMOD-PROTO_SPARK_MODE_BOMBS",
-                 "name": "Bag of Tricks", "type": "Skill", "cost": "0",
-                 "description": "Place a Bomb 6."},
+                # The row this clause needs is one the build defines no
+                # upgrade for: since legacy cleanup stage 6 emptied
+                # `UPGRADE_DEBT`, that is a row carrying `no_upgrade:`.
+                {"id": "KLEEMOD-PROTO_MF_GUEST_NEUVILLETTE_TEARS",
+                 "name": "O Tears, I Shall Repay", "type": "Skill",
+                 "cost": "0", "description": "Deal 8 damage."},
                 {"id": "KLEEMOD-PROTO_KO_KAPOW", "name": "Ka-pow!",
                  "type": "Attack", "cost": "0", "is_upgraded": True,
                  "description": "Retain. Set off. Deal 6 damage."},
@@ -8810,8 +8812,8 @@ def test_the_smith_says_why_a_card_is_not_on_its_list():
     blindplay.observe(fight)
     page = blindplay.observe(smith)
     assert "## Not on this list, and why" in page
-    assert ("- **Bag of Tricks** — " + blindplay.NO_UPGRADE_DEFINED) \
-        in page
+    assert ("- **O Tears, I Shall Repay** — "
+            + blindplay.NO_UPGRADE_DEFINED) in page
     assert ("- **Ka-pow!** — " + blindplay.ALREADY_UPGRADED) in page
     assert ("- **Sizzle** — " + blindplay.UNEXPLAINED_OMISSION) in page
     # Nothing the grid IS offering is listed as missing.
@@ -8840,12 +8842,13 @@ def test_a_remembered_deck_never_answers_another_runs_smith():
 
 
 def test_the_no_upgrade_register_is_read_by_id_and_only_its_ids_cross():
-    """`UPGRADE_DEBT`'s VALUES are register prose naming ruling and row
-    numbers, which is exactly what may not reach a blind page. Only the key set
-    is read, and the page writes its own plain sentence."""
+    """The registers' VALUES (`UPGRADE_DEBT`, a row's `no_upgrade:`) are
+    register prose naming ruling and row numbers, which is exactly what may
+    not reach a blind page. Only the key set is read, and the page writes its
+    own plain sentence."""
     index = qa_packet.no_upgrade_index()
-    assert "PROTO_SPARK_MODE_BOMBS" in index
-    assert "PROTO_SHINOBU_SANCTIFYING_RING_EITHER" in index
+    assert "PROTO_MF_GUEST_NEUVILLETTE_TEARS" in index
+    assert "PROTO_KO_KAPOW" not in index
     for entry in index:
         assert entry == entry.upper()
     assert not qa_packet.leaks(blindplay.NO_UPGRADE_DEFINED)

@@ -49,8 +49,7 @@ from tier0.engine.state import Card, CombatState, Player
 from tools import effect_walk
 from tools import gen_klee_cards as gen
 
-SHEETS = ["docs/klee-cards.yaml", "docs/furina-cards.yaml",
-          "docs/kokomi-cards.yaml"]
+SHEETS = ["docs/prototype-surface.yaml"]   # the current kits' sheet
 
 RECALL = {"op": "recall_to_draw", "from": "exhaust", "amount": 1}
 
@@ -222,14 +221,3 @@ def test_no_live_row_is_a_sly_exhaust_retriever():
                     offenders.append((sheet, row.get("id"), fx))
     assert offenders == [], offenders
 
-
-def test_the_one_live_sly_recall_is_the_discard_verb():
-    """The near-miss, pinned so it is not rediscovered. Exactly one committed
-    row prints `recall_to_draw` in `sly:`, and it reads the DISCARD pile."""
-    rows = yaml.safe_load(open("docs/kokomi-cards.yaml", encoding="utf-8"))
-    hits = [(r["id"], fx)
-            for r in rows if isinstance(r, dict)
-            for fx in effect_walk.iter_effects(effect_walk.sly_riders(r))
-            if fx.get("op") == "recall_to_draw"]
-    assert [cid for cid, _ in hits] == ["what_the_tokoyo_returns"], hits
-    assert hits[0][1].get("from", "discard") == "discard"

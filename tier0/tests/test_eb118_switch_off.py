@@ -145,36 +145,6 @@ def test_a_modal_card_still_resolves_the_fixed_index(chooser_off):
     assert state.enemies[0].hp == 60
 
 
-def test_deep_breath_resolves_exactly_as_it_did_before_the_conversion(
-        chooser_off):
-    """THE INERTNESS PROOF for the sheet half of 2C, now as a HISTORICAL one.
-
-    The modal conversion kept mode 1 as the card's own shipped body, and with
-    the switch off mode 1 is the mode that resolves -- so the converted card
-    and the effect list it replaced put the same numbers on the same board.
-    That is what made the conversion quiet while the chooser was staged.
-    It is no longer the SHIPPED reading: with 2C thrown, this board (a bank of
-    4) is one the chooser takes mode 2 on, which is the whole point of R205's
-    re-body. The test keeps its claim and forces the world it describes.
-    Unaffected by the 2A flip: Deep Breath places no bomb and exhausts nothing
-    chosen.
-    """
-    old_body = [{"op": "energy", "amount": 1},
-                {"op": "gain_encore", "amount": 2}]
-    before = make_state([make_enemy()])
-    before.player.energy, before.player.encore = 3, 4
-    effects.resolve_card(before, _skill("deep_breath", 1, old_body,
-                                        exhaust=True))
-
-    after = make_state([make_enemy()])
-    after.player.energy, after.player.encore = 3, 4
-    effects.resolve_card(after, loader._card_index()["deep_breath"])
-
-    assert (after.player.energy, after.player.encore, after.player.hp) \
-        == (before.player.energy, before.player.encore, before.player.hp)
-    assert (after.player.energy, after.player.encore) == (4, 6)
-
-
 def test_placement_is_still_the_lowest_hp_aim(policies_off):
     """The inversion test_eb118_policies pins, from the other side: this bomb
     is thrown away on a target that cannot absorb it, and with the switch off

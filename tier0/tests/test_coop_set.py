@@ -44,10 +44,7 @@ def arms(monkeypatch):
     """All three overhaul arms on, with the flag-keyed caches cleared."""
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
-    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     from tier0.engine import furina_stage
-    monkeypatch.setattr(furina_stage, "FURINA_STAGE", True)
     yield
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()

@@ -32,7 +32,6 @@ from tier05 import rewards, shop
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 
@@ -52,7 +51,6 @@ def _caches_clear():
 @pytest.fixture
 def overhaul(monkeypatch):
     _caches_clear()
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
     yield
     _caches_clear()
 
@@ -61,7 +59,6 @@ def overhaul(monkeypatch):
 def arms(monkeypatch, overhaul):
     """Both arms: the caretakers read the Klee overhaul's explosion ledger, so
     their rules cannot be exercised without the arm that keeps it."""
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
 
 
@@ -187,19 +184,6 @@ def test_the_reward_slot_swaps_and_the_odds_do_not_move(overhaul):
                for c in klee)
 
 
-def test_the_reward_slot_hands_the_universal_to_klee_with_the_flag_off():
-    _caches_clear()
-    try:
-        seen = set()
-        for seed in range(120):
-            seen |= {c.id for c in rewards.roll_rewards(
-                random.Random(seed), "klee", companion_offers=1)}
-        assert not seen & set(C.COMPANION_STANDIN_IDS)
-        assert not any(cid.startswith("proto_") for cid in seen)
-    finally:
-        _caches_clear()
-
-
 def test_the_shop_swaps_and_keeps_one_row_per_visit(overhaul):
     seen_standin = False
     for seed in range(120):
@@ -216,13 +200,6 @@ def test_the_shop_swaps_and_keeps_one_row_per_visit(overhaul):
         ids = [c.id for c, _p in shop.companion_shop_offer(random.Random(seed),
                                                        "furina")]
         assert not set(ids) & set(C.COMPANION_STANDIN_IDS)
-
-
-def test_hand_off_is_the_identity_with_the_flag_off():
-    for cid in C.COMPANION_STANDIN_IDS:
-        universal = "proto_mc_diona_icy_paws"
-        assert standins.hand_off(universal, "klee") == universal
-        assert standins.hand_off(cid, "klee") == cid
 
 
 # --- 4. the caretakers' rules -----------------------------------------------
@@ -450,26 +427,6 @@ def test_jean_pays_on_a_quiet_turn_and_draws(arms):
     standins.turn_start(state)
     assert state.player.block == block_before + 8
     assert len(state.player.hand) == hand_before + C.MC_LIONS_FANG_DRAW
-
-
-def test_every_rule_is_inert_with_the_flag_off(monkeypatch):
-    """The acceptance condition on the whole seam, checked rule by rule rather
-    than assumed from the callers."""
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", False)
-    state = _klee_state()
-    state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
-    state.player.powers[standins.I_GOT_YOUR_BACK] = 4
-    state.player.powers[standins.LIONS_FANG] = 8
-    state.player.powers[standins.COLD_BLOODED] = 1
-    before = state.player.block
-    standins.note_explosion(state, is_mine=True)
-    standins.turn_start(state)
-    standins.roll_turn(state)
-    assert state.player.block == before
-    assert standins.grounded_blind(state) is False
-    # Nothing was consumed either: with the arm off these are not this arm's
-    # powers, and eating a stack would be a behaviour change of its own.
-    assert state.player.powers[standins.COLD_BLOODED] == 1
 
 
 # ---------------------------------------------------------------------------

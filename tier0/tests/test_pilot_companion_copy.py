@@ -25,6 +25,15 @@ def _companion() -> Card:
                 type="skill", tags=["companion"], effects=[])
 
 
+def _borrowed_brilliance() -> Card:
+    """The retired shipped row's body, inline (its sheet left at legacy
+    cleanup stage 6): the copy op is still vocabulary the pilot prices."""
+    return Card(id="probe_borrowed_brilliance", name="Borrowed Brilliance",
+                cost=1, type="skill", rarity="uncommon",
+                effects=[{"op": "copy_companion_in_hand", "amount": 1,
+                          "temp": True, "cost_override": 0}])
+
+
 def _plain() -> Card:
     return Card(id="probe_plain", name="Probe Plain", cost=1, type="skill",
                 effects=[{"op": "block", "amount": 1}])
@@ -41,7 +50,7 @@ def test_the_engines_own_predicate_is_what_the_pilot_asks():
 
 def test_borrowed_brilliance_scores_positive_with_a_companion_in_hand():
     state = make_state([make_enemy()])
-    bb = loader.get_card("borrowed_brilliance")
+    bb = _borrowed_brilliance()
     state.player.hand = [bb, _companion()]
 
     # tempo 0.7 x PILOT_COMPANION_COPY_VALUE 1.5 - cost 0.1 x 1 = +0.95
@@ -53,7 +62,7 @@ def test_borrowed_brilliance_stays_dead_with_no_companion_in_hand():
     must not pay for it. Still <= 0, so `pilot()` still declines to play it --
     the 0-play reading was CORRECT in this state and only this state."""
     state = make_state([make_enemy()])
-    bb = loader.get_card("borrowed_brilliance")
+    bb = _borrowed_brilliance()
     state.player.hand = [bb, _plain()]
 
     assert policy._score(state, bb, REACTION) <= 0
@@ -63,7 +72,7 @@ def test_the_pilot_now_actually_plays_it():
     """The end-to-end half: the hard `best_score <= 0` rule is what produced
     0 plays, so the pin that matters is the CHOICE, not the score."""
     state = make_state([make_enemy()])
-    bb = loader.get_card("borrowed_brilliance")
+    bb = _borrowed_brilliance()
     state.player.energy = 3
     state.player.hand = [bb, _companion()]
 

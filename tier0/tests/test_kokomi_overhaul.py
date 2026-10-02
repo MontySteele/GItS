@@ -1,16 +1,13 @@
-"""The Kokomi overhaul arm (slice one) -- the flag, and both sides of it.
+"""The Kokomi overhaul arm (slice one) -- its starter, pool and seams.
 
 The ruled brief is `review/active/kokomi-brief-2026-09-01.md` DRAFT 6
 (direction ruled R240, brief approved R241) and the slice is
 `review/active/kokomi-overhaul-slice-1-2026-09-01.md` draft 6 (sec.3 the
 ten-card starter, sec.4 the 26 pool rows, sec.5 the engine build list).
 
-THE FIRST SECTION IS THE ONE THAT MATTERS. `C.KOKOMI_OVERHAUL` ships OFF, and
-with it off every Kokomi number ever measured is still comparable and the
-Kurage's-memory arm beside it still owns its own seams. That is an ACCEPTANCE
-CONDITION, not an intention, so it is pinned the way `test_klee_overhaul.py`
-pins its own: as a digest of a fixed-seed fight's whole event log, plus the
-shape of every seam this arm touches.
+NO SWITCH since legacy cleanup stage 6 (2026-10-01): the flag, the Kurage's
+memory arm beside it and their flag-off pins are gone; the sim always runs the
+current kit, and what is pinned here is the shape of every seam it touches.
 
 WHAT THE SIM DOES HERE, AND WHERE THE REST OF IT IS. Slice one was C# FIRST
 (the slice packet sec.5: "All of it behind the prototype switch, C# first. The
@@ -18,8 +15,7 @@ Python sim is not brought up for slice one"), and for a while tier0 loaded and
 validated the rows while REFUSING to resolve their ops. The sim twin exists
 now -- `tier0/engine/kokomi_plan.py`, mirroring
 `KleeCode/Powers/Prototype/KokomiPlan.cs` -- so what is left here is the
-QUARANTINE half: the flag ships off, off is byte-identical, and the rows are
-reachable only with it on. The rules themselves are pinned clause by clause in
+seams: the starter, the pool and the relic hook. The rules themselves are pinned clause by clause in
 `test_kokomi_plan.py`, which names the C# sentence each one comes from.
 
 NOTHING MEASURED ON ANY PROTOTYPE ROW IS QUOTABLE ANYWHERE (R215 B). These are
@@ -40,9 +36,7 @@ from tier05 import draft, rewards
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-from tier0.tests.shipped_world import DEFAULTS  # noqa: E402
 
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 SEED = 11
 
@@ -87,7 +81,6 @@ def overhaul(monkeypatch):
     """
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
-    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     yield
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
@@ -108,12 +101,6 @@ def log_digest(state) -> str:
 
 # --- 1. FLAG OFF IS BYTE-IDENTICAL -----------------------------------------
 
-def test_the_flag_ships_on():
-    """The sim runs the current kits by default (legacy cleanup stage 3,
-    2026-10-01, pick 5), as every C# build does."""
-    assert DEFAULTS["KOKOMI_OVERHAUL"] is True
-
-
 def test_a_fixed_seed_kokomi_fight_is_reproducible_with_the_flag_off():
     """THE ACCEPTANCE CONDITION, as a digest of the whole log.
 
@@ -125,63 +112,6 @@ def test_a_fixed_seed_kokomi_fight_is_reproducible_with_the_flag_off():
     """
     assert log_digest(kokomi_fight()) == log_digest(kokomi_fight())
 
-
-def test_the_starter_is_the_printed_starter_with_the_flag_off():
-    """Twelve cards, the Silent shape, exactly as ratified."""
-    ids = loader.starting_deck("kokomi")
-    assert len(ids) == 12
-    assert not any(cid.startswith("proto_kk_") for cid in ids)
-
-
-def test_no_pool_is_replaced_with_the_flag_off():
-    """The seam returns None for everybody, so `character_pool` never enters
-    its branch and is byte-for-byte the function it has always been."""
-    for character in ("klee", "furina", "kokomi", "ref_ironclad",
-                      "real_silent"):
-        assert loader.pool_replacement(character) is None
-
-
-def test_the_offerable_pool_carries_no_overhaul_row_with_the_flag_off():
-    pool = rewards.character_pool("kokomi")
-    ids = {c.id for cards in pool.values() for c in cards}
-    assert not any(cid.startswith("proto_kk_") for cid in ids)
-    # The shipped pool, still there and still hers. `undertow` and
-    # `cleansing_tide` are SHIPPED Kokomi rows whose display names the slice
-    # re-uses under a "(proto)" suffix, so this also says the two cannot be
-    # confused for one another.
-    assert "undertow" in ids
-    assert "cleansing_tide" in ids
-
-
-def test_the_overhaul_ids_do_not_resolve_with_the_flag_off():
-    """The quarantine's own door, shut. `_card_prototype`'s prototype branch
-    is guarded by the flags, so a `proto_kk_` id is a KeyError here -- which
-    is what makes "the rows never enter an ordinary run" a property of the
-    code rather than a filter somebody remembers.
-
-    NAMED, not read off `KOKOMI_OVERHAUL_STARTER_IDS[0]`, since R242: that slot
-    is now the BASE GAME's `strike`, which resolves on every tree by design and
-    would have turned this test green for the wrong reason."""
-    # `EB-569`: the whole flag-dependent family, not `_card_prototype` alone.
-    # `_substituted_card_index` warmed under the arm is what made this pass
-    # alone and fail about one run in three under `-n auto`.
-    loader.reset_arm_caches()
-    with pytest.raises(KeyError):
-        loader.get_card("proto_kk_kurages_oath")
-    loader.reset_arm_caches()
-
-
-def test_the_kurage_memory_arm_is_untouched():
-    """The overhaul is a FOURTH arm. Editing the memory arm's constants would
-    make its OFF/ON pair incomparable, which is the one thing a multi-arm flag
-    exists to prevent."""
-    assert C.KURAGE_MEMORY_STARTER_DROP == "bake_kurage"
-    assert C.KURAGE_MEMORY_POOL_DROP == "kurages_oath"
-    assert C.KLEE_OVERHAUL is False
-    assert C.COMPANION_OVERHAUL is False
-
-
-# --- 2. THE ARM'S OWN SHAPE ------------------------------------------------
 
 def test_the_starter_is_the_canonical_ten():
     """Slice draft 6 sec.3, as R242 amended it: Strike x4, Defend x4, Kurage's
@@ -340,7 +270,7 @@ def test_the_arm_carries_exactly_two_rule_numbers():
     named = {n for n in dir(C) if n.startswith("KOKOMI_OVERHAUL")}
     # `KOKOMI_OVERHAUL_MULTIPLAYER_IDS` is the co-op set's offer list, an id
     # list like the two beside it and not a rule number.
-    assert named == {"KOKOMI_OVERHAUL", "KOKOMI_OVERHAUL_POOL_IDS",
+    assert named == {"KOKOMI_OVERHAUL_POOL_IDS",
                      "KOKOMI_OVERHAUL_STARTER_IDS",
                      "KOKOMI_OVERHAUL_MULTIPLAYER_IDS",
                      "KOKOMI_OVERHAUL_CASKET_PER_PLAN",
@@ -476,17 +406,6 @@ def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):
     assert deck == list(C.KOKOMI_OVERHAUL_STARTER_IDS)
 
 
-def test_the_randomized_starter_still_rolls_with_the_flag_off():
-    """The other half: a sheet defect (a slot naming a card the printed starter
-    does not hold) must still raise, so the predicate is a NAMED branch and not
-    a swallowed lookup failure."""
-    import random
-    assert loader.starter_replaced_whole("kokomi") is False
-    deck = loader.starting_deck("kokomi", random.Random(1))
-    assert len(deck) == 12
-    assert not any(cid.startswith("proto_kk_") for cid in deck)
-
-
 def test_her_starting_relic_becomes_the_tamakushi_casket(overhaul):
     """The arm REPLACES the relic she starts with; it does not add one. The
     shipped `tamakushi_casket` hook IS the Pearl of Wisdom's exhaust-for-Charge
@@ -500,17 +419,20 @@ def test_her_starting_relic_becomes_the_tamakushi_casket(overhaul):
         assert "tamakushi_casket" not in player.relic_hooks
 
 
-def test_the_relic_seam_is_hers_alone_and_shut_with_the_flag_off():
-    for character in ("klee", "furina", "kokomi", "real_silent"):
+def test_the_relic_seam_is_hers_alone():
+    for character in ("klee", "furina", "real_silent"):
         assert loader.relic_hooks_replacement(character) is None
-    assert "tamakushi_casket" in loader.build_player("kokomi").relic_hooks
+    assert (loader.relic_hooks_replacement("kokomi")
+            == [loader.OVERHAUL_CASKET_HOOK])
+    hooks = loader.build_player("kokomi").relic_hooks
+    assert loader.OVERHAUL_CASKET_HOOK in hooks
+    assert "tamakushi_casket" not in hooks
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
     """The seam is Kokomi's alone. A flag that quietly re-pooled Klee would
     make every number measured on him incomparable."""
     for character in ("klee", "furina"):
-        assert loader.pool_replacement(character) is None
         ids = {c.id for cards in rewards.character_pool(character).values()
                for c in cards}
         assert not any(cid.startswith("proto_kk_") for cid in ids)
@@ -638,26 +560,6 @@ def test_every_new_op_is_priced_for_the_drafter():
     forces a pricing decision at the moment the author knows the answer."""
     for op in OVERHAUL_OPS:
         assert op in draft.STATIC_OP_PRICING, op
-
-
-def test_the_new_ops_refuse_to_resolve_with_the_flag_off():
-    """THE QUARANTINE, said out loud. With the flag off her `proto_kk_` rows do
-    not resolve by id at all, so nothing can reach these -- which makes a verb
-    that ran anyway a DEFECT rather than a degradation, and a silently no-op
-    resolver the worst possible stand-in. The refusal is asserted, not
-    tolerated. `test_kokomi_plan.py` holds the other side: with the flag ON and
-    Kokomi in the seat, every one of them resolves."""
-    from tier0.tests.conftest import make_state
-    from tier0.engine.state import Card
-
-    for op in OVERHAUL_OPS:
-        state = make_state()
-        state.player.character_id = "kokomi"    # so the FLAG is the only gate
-        card = Card(id="probe", name="probe", cost=1, type="skill",
-                    effects=[{"op": op}])
-        with pytest.raises(NotImplementedError) as excinfo:
-            effects.OPS[op](state, {"op": op, "amount": 1}, card)
-        assert "KOKOMI_OVERHAUL" in str(excinfo.value)
 
 
 def test_the_plan_only_clauses_refuse_from_a_body_with_the_flag_on(overhaul):

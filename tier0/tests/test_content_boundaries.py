@@ -103,12 +103,15 @@ def test_every_shipped_card_passes_the_vocabulary_check():
     exact class Track A closed. (It was written that way first, and the
     bare-clone gate caught it.)
     """
-    index = loader._card_index()
+    # The kits are prototype-surface rows since legacy cleanup stage 6, so
+    # the surface is swept beside the reference index.
+    index = {**loader._card_index(),
+             **{c.id: c for c in loader.prototype_cards()}}
     for cid, card in index.items():
         loader._validate_effect_vocabulary(cid, card.effects)
 
-    # Non-vacuity: the three shipped characters are committed content and are
-    # present everywhere, so their counts are a real floor.
+    # Non-vacuity: the three kits are committed content and are present
+    # everywhere, so their counts are a real floor.
     by_character: dict[str, int] = {}
     for card in index.values():
         by_character[card.character] = by_character.get(card.character, 0) + 1

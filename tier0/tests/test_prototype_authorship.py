@@ -68,17 +68,6 @@ def test_every_shipped_row_records_a_valid_authored_by():
         assert not authorship.field_findings(row), row.get("id")
 
 
-def test_the_klee_rows_are_claude_authored_again_after_round_three():
-    """Rummage's text and Slow Burn's number WERE the seat's, and rounds 1 and
-    2 recorded that honestly. Klee round 3 re-derived both from the clause the
-    seat named, discarded its text and its number, and set the provenance back
-    -- so all three Klee slice-1 rows are Claude's alone."""
-    known = authorship.rows_authorship()
-    assert known["proto_spark_priced_draw"] == ["claude"]
-    assert known["proto_spark_burst_conversion"] == ["claude"]
-    assert known["proto_spark_priced_strike"] == ["claude"]
-
-
 def test_no_shipped_row_records_a_contributing_family():
     """The state round 3 restored, asserted over the WHOLE surface rather than
     three ids: `claude` authors, and nothing else is recorded as having

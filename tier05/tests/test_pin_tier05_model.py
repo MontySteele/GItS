@@ -105,7 +105,7 @@ def test_shop_relic_purchase_debits_its_price_from_gold(scripted_map):
 def _quota_deck():
     """One basic block card plus five non-basic, non-block cards: the only
     thinnable basic is a blocker, and the deck holds exactly one block card."""
-    return ["duck_and_cover"] + ["kaeya_frostgnaw"] * 5
+    return ["defend"] + ["proto_ko_fish_blasting"] * 5
 
 
 def test_rest_keeps_block_card_when_cut_would_break_defense_quota():
@@ -121,18 +121,18 @@ def test_rest_keeps_block_card_when_cut_would_break_defense_quota():
     action, target = model.rest_action(deck, 100, 100, "demolition",
                                        next_fight=False)
 
-    assert (action, target) == ("upgrade", "duck_and_cover")
+    assert (action, target) == ("upgrade", "defend")
 
 
 def test_rest_thins_block_card_when_quota_survives_the_cut():
     """The same rule the other way round: with 2 block cards in 6, the post-cut
     density is 1/5 = 0.2, which clears DRAFT_BLOCK_DENSITY_MIN, so the rest
     does remove a basic blocker."""
-    deck = ["duck_and_cover"] * 2 + ["kaeya_frostgnaw"] * 4
+    deck = ["defend"] * 2 + ["proto_ko_fish_blasting"] * 4
     n_block = 2
     assert (n_block - 1) / (len(deck) - 1) >= C.DRAFT_BLOCK_DENSITY_MIN
 
     action, target = model.rest_action(deck, 100, 100, "demolition",
                                        next_fight=False)
 
-    assert (action, target) == ("remove", "duck_and_cover")
+    assert (action, target) == ("remove", "defend")

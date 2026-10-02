@@ -292,14 +292,14 @@ def test_the_default_is_no_longer_blind(policies_on):
 
 def test_a_card_printing_no_selection_formula_is_unmoved(policies_on):
     """The other half of the contract, and the reason the change reaches only
-    two rows: a SHIPPED chosen-Exhaust carrier that prints no selection
-    formula pays nothing, so its pick is identical to the blind one."""
-    from tier0.content.loader import get_card
-
+    two rows: a chosen-Exhaust carrier that prints no selection formula pays
+    nothing, so its pick is identical to the blind one."""
     dud = _skill("dud", 0)
     payoff = _skill("payoff", 2, [{"op": "block", "amount": 12}])
     state = make_state([make_enemy()])
-    runner = get_card("send_the_runner")
+    runner = _skill("runner", 1, [{"op": "exhaust_from", "amount": 1,
+                                   "select": "chosen"},
+                                  {"op": "draw", "amount": 2}])
 
     assert list(policy._selection_payout_terms(runner)) == []
     assert policy.formula_aware_payout(state, runner, payoff) == 0.0
@@ -328,43 +328,6 @@ def test_a_wide_formula_reads_the_board(policies_on):
 
     assert (policy.formula_aware_payout(one, aimed, payoff)
             == policy.formula_aware_payout(three, aimed, payoff) == 6.0)
-
-
-def test_no_existing_carriers_pick_moved(policies_on):
-    """The invariance regression that REPLACES a whole scratch run.
-
-    A fourth scratch world with the chooser live and no selection formula on
-    any sheet would be provably bit-identical to baseline, because (i) the new
-    hook returns zero for any card printing no selection formula, (ii) only
-    the two W3 rows print one, and (iii) the chooser is deterministic given the
-    pool. This asserts (i) and (ii) directly, over every chosen-Exhaust carrier
-    on every sheet -- Sly riders included, which is the EB-134 lesson -- in
-    milliseconds and forever."""
-    from tier0.content import loader
-
-    dud = _skill("dud", 0)
-    payoff = _skill("payoff", 2, [{"op": "block", "amount": 12}])
-    state = make_state([make_enemy(name="a"), make_enemy(name="b")])
-    pool = [dud, payoff]
-    blind = policy.exhaust_victim(state, pool,
-                                  payout=policy.identity_blind_payout)
-
-    carriers, printing = [], []
-    for card in loader._card_index().values():
-        bodies = list(card.effects) + list(card.sly or [])
-        if any(fx.get("op") == "exhaust_from" and fx.get("select") == "chosen"
-               for fx in policy._printed_effects(bodies)):
-            carriers.append(card.id)
-        if list(policy._selection_payout_terms(card)):
-            printing.append(card.id)
-
-    assert carriers, "no chosen-Exhaust carrier found -- the sweep is stale"
-    assert sorted(set(printing)) == ["pearl_barrage", "the_tide_remembers"]
-
-    for cid in sorted(set(carriers) - set(printing)):
-        card = loader._card_index()[cid]
-        assert policy.formula_aware_payout(state, card, payoff) == 0.0
-        assert policy.exhaust_victim(state, pool, card=card) is blind
 
 
 def test_the_op_exhausts_through_the_policy(policies_on):

@@ -6,15 +6,8 @@ another branch and not in this tree). Its sec.2 nation shape is "Inazuma reads
 the HP bar" and eight of the rows do; its sec.1 pricing rule is what makes the
 nine Commons beat a Strike.
 
-THE FIRST SECTION IS STILL THE ONE THAT MATTERS. `C.COMPANION_OVERHAUL` ships
-OFF, and this arm widens two things every shipped run walks -- the tail of
-`deal_damage_to_enemy` and the card-play loop -- so "flag off changes nothing"
-is pinned here rather than intended, exactly as the Mondstadt waves pin theirs.
-
-ONE FLAG FOR BOTH NATIONS. There is no `INAZUMA_OVERHAUL` property: the arm
-means "the companion pool is the approved workshops' pool", and a second
-property would let a build offer one nation's rewrites beside the other
-nation's shipped rows -- a state no document describes.
+NO SWITCH: the companion overhaul's flag and its flag-off pins left at legacy
+cleanup stage 6 (2026-10-01); the sim always runs the current companion pool.
 
 NOTHING MEASURED ON A PROTOTYPE ROW IS QUOTABLE ANYWHERE (R215 B). These are
 shape assertions about an engine, not numbers about a game.
@@ -34,18 +27,10 @@ from tier05 import rewards
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-from tier0.tests.shipped_world import DEFAULTS  # noqa: E402
 
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 REPO = Path(__file__).resolve().parents[2]
 
-#: The fifteen rows the workshop retires from the offerable pool. Read off the
-#: shipped sheet rather than listed, so the day a sixteenth Inazuma row ships
-#: this test asks about it too.
-SHIPPED_INAZUMA = tuple(sorted(
-    c.id for c in loader._card_index().values()
-    if c.is_companion and c.nation == "inazuma"))
 
 
 def _caches_clear():
@@ -60,7 +45,6 @@ def _caches_clear():
 def overhaul(monkeypatch):
     """The flag ON, with every id-resolving cache cleared going in and out."""
     _caches_clear()
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
     yield
     _caches_clear()
 
@@ -80,55 +64,6 @@ def _attack(amount=6, element="pyro"):
 # THE FLAG IS OFF, AND THAT IS THE ACCEPTANCE CONDITION
 # ---------------------------------------------------------------------------
 
-def test_the_flag_ships_on_and_owns_every_nation():
-    """The sim runs the current kits by default (legacy cleanup stage 3,
-    2026-10-01, pick 5), as every C# build does; Fontaine joined at stage 4
-    (pick 4, its rows ported as they are)."""
-    assert DEFAULTS["COMPANION_OVERHAUL"] is True
-    assert C.COMPANION_OVERHAUL_NATIONS == ("mondstadt", "inazuma", "fontaine")
-
-
-def test_flag_off_every_shipped_inazuma_row_is_still_offerable():
-    offerable = {c.id for cards in rewards.companion_pool().values()
-                 for c in cards}
-    assert set(SHIPPED_INAZUMA) <= offerable
-
-
-def test_flag_off_the_two_new_hooks_are_no_ops():
-    """Both sit on paths a shipped run walks every turn -- the tail of
-    `deal_damage_to_enemy` and the card-play loop -- so this is a property of
-    two shipped functions rather than of the arm."""
-    st = make_state()
-    st.player.powers["mi_crimson_ooyoroi"] = 2
-    st.enemies[0].powers["mi_aurous_blaze"] = 2
-    before = (dict(st.player.powers), st.player.block,
-              [e.hp for e in st.enemies], st.mi_damage_dealt_this_card)
-
-    effects.companion_overhaul_damage_dealt(st, st.enemies[0], 9, "card")
-    effects.companion_overhaul_card_played(st, _attack())
-
-    assert (dict(st.player.powers), st.player.block,
-            [e.hp for e in st.enemies],
-            st.mi_damage_dealt_this_card) == before
-
-
-def test_flag_off_the_two_turn_blocks_are_no_ops():
-    st = make_state()
-    st.player.powers.update({
-        "mi_juuga": 3, "mi_daruma": 2, "mi_sanctifying_ring": 3,
-        "mi_sesshou_sakura": 3, "mi_soumetsu": 2, "mi_kyouka": 2,
-        "mi_tamoto": 3, "mi_naptime": 2, "mi_stormcall": 1,
-        "mi_surprise_dispatch": 1, "mi_war_banner": 2,
-        "mi_blazing_barrier": 6, "mi_crowfeather": 4,
-    })
-    before = (dict(st.player.powers), st.player.block,
-              [e.hp for e in st.enemies])
-    effects.inazuma_overhaul_turn_start(st)
-    effects.inazuma_overhaul_turn_end(st)
-    assert (dict(st.player.powers), st.player.block,
-            [e.hp for e in st.enemies]) == before
-
-
 def test_flag_off_ignore_block_is_not_reachable_and_block_still_eats():
     """`ignore_block` defaults False, which is the whole of "every shipped
     caller is byte-identical"."""
@@ -139,26 +74,11 @@ def test_flag_off_ignore_block_is_not_reachable_and_block_still_eats():
     assert st.enemies[0].block == 12
 
 
-def test_flag_off_mend_still_refuses_to_resolve():
-    """`mend` belongs to two arms and resolves under one. With the companion
-    flag off it is still the KOKOMI arm's verb, still C# first, and still
-    raises by name rather than healing something quietly."""
-    st = make_state()
-    row = Card(id="probe", name="p", cost=1, type="skill",
-               effects=[{"op": "mend", "amount": 10}])
-    with pytest.raises(NotImplementedError, match="KOKOMI_OVERHAUL"):
-        effects.resolve_card(st, row)
-
-
-# ---------------------------------------------------------------------------
-# THE FLAG IS ON: THE POOL
-# ---------------------------------------------------------------------------
-
-def test_all_twenty_four_are_offerable_and_the_shipped_fifteen_are_not(overhaul):
+def test_all_twenty_four_are_offerable(overhaul):
     offerable = {c.id for cards in rewards.companion_pool().values()
                  for c in cards}
     assert set(C.INAZUMA_OVERHAUL_POOL_IDS) <= offerable
-    assert not (set(SHIPPED_INAZUMA) & offerable)
+    assert all(cid.startswith("proto_") for cid in offerable)
 
 
 def test_the_pool_ids_and_the_sheet_agree(overhaul):

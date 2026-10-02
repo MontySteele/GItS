@@ -250,9 +250,9 @@ def test_the_gauntlet_battery_reports_more_combats_than_records():
     other encounter has one, which is the whole of O-1. The combat count sits
     between `fights` (every run died in stage 1) and 2x it."""
     fights = 25
-    gauntlet = run_battery("klee", "reaction_weighted", "gauntlet",
+    gauntlet = run_battery("klee", "starter", "gauntlet",
                            "reaction", fights, 5)
-    punisher = run_battery("klee", "reaction_weighted", "punisher",
+    punisher = run_battery("klee", "starter", "punisher",
                            "reaction", fights, 5)
     g, p = metrics.aura_profile(gauntlet), metrics.aura_profile(punisher)
     assert g["fights"] == p["fights"] == fights

@@ -13,10 +13,10 @@ import pytest
 from tier0.content import loader, upgrades
 from tier05 import draft, model, rework_sim
 
-# A base card with a real upgrade delta (`kaboom: {damage: +3}`), so the
+# A base card with a real upgrade delta (`strike: {damage: +3}`), so the
 # upgraded prototype is DERIVED from the patched effects rather than sharing
 # the object -- which is what makes the stale cache observable.
-CARD = "kaboom"
+CARD = "strike"
 UPGRADED = CARD + upgrades.SUFFIX
 PATCH = {CARD: [{"op": "damage", "amount": 1, "target": "enemy"}]}
 

@@ -27,7 +27,7 @@ FS = furina_stage
 
 @pytest.fixture
 def arm(monkeypatch):
-    monkeypatch.setattr(FS, "FURINA_STAGE", True)
+    yield
 
 
 def _state(stage=()):

@@ -5,8 +5,10 @@ Track A of the Axis-Validity session (docs/axis-validity-session-charter.md
 tools around it are thin:
 
   tools/canon_role_tempo.py         the five canon pools, out of the local DLL
-  tools/suggest_role_tempo_tags.py  our three sheets -> the REVIEW column
-  tools/lint_role_tempo_coverage.py the floors-only coverage gate
+
+(The tag suggester and the floors-only coverage gate read the three shipped
+sheets' landed `solve` / `tempo_band` tags and left with those sheets at
+legacy cleanup stage 6; the current kits' rows carry no such tags.)
 
 WHAT IS BEING MEASURED, and why it needed a new axis
 ----------------------------------------------------

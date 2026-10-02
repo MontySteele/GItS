@@ -33,7 +33,6 @@ from tier05 import draft
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 REPO = Path(loader.__file__).resolve().parents[2]
 
@@ -100,37 +99,7 @@ def test_the_loan_is_per_instance_not_per_row():
 
     assert keeper.exhaust is True
     assert twin.exhaust is False
-    assert loader.peek_card("waterspout").exhaust is True   # sheet unmoved
-    assert loader.peek_card("pearl_diver").exhaust is False
-
-
-def test_the_returned_card_pays_charge_again_when_it_re_exhausts():
-    """The C11 funnel, end to end: a retrieved PERSONAL card is not junk, so
-    its second rotation pays Charge at refpowers.after_card_exhausted like
-    any other exhaust. Nothing about retrieval is a special case there --
-    that is the point of gaining the ordinary keyword rather than a flag.
-    """
-    st = kokomi_state()
-    keeper = a_keeper()
-    st.player.exhaust_pile = [keeper]
-    pull = retriever()
-    st.player.hand = [pull]
-    st.player.energy = 3
-
-    combat.play_card(st, pull)
-    # The retrieval card itself Exhausts (constraint 2) and pays once.
-    assert pull in st.player.exhaust_pile
-    assert st.player.charge == C.CHARGE_PER_EXHAUST
-
-    st.player.hand = [keeper]
-    st.player.energy = 3
-    combat.play_card(st, keeper)
-
-    assert keeper in st.player.exhaust_pile
-    assert st.player.charge == 2 * C.CHARGE_PER_EXHAUST
-    # Charge is never SPENT (LAW): taking a card out of the pile weakens
-    # pile READERS while it is gone, and the bank does not fall.
-    assert st.player.charge >= C.CHARGE_PER_EXHAUST
+    assert loader.peek_card("proto_mi_gorou_war_banner").exhaust is False
 
 
 def test_the_pile_reader_is_the_only_thing_the_loan_costs():
@@ -232,7 +201,7 @@ def test_junk_and_kit_do_not_block_an_eligible_card():
 def test_a_companion_card_stays_eligible():
     """§6.4 says so explicitly: only kit, retrievers and junk are out."""
     st = kokomi_state()
-    companion = loader.get_card("gorou_war_banner")
+    companion = loader.get_card("proto_mi_gorou_war_banner")
     st.player.exhaust_pile = [companion]
 
     effects.resolve_card(st, retriever())
@@ -306,29 +275,6 @@ def test_the_shape_check_reaches_a_conditional_branch():
     with pytest.raises(ValueError):
         loader._validate_recall_shape(hidden)
 
-
-def test_exactly_one_shipped_card_uses_the_capability():
-    """The staged capability has its first carrier, and the design call was
-    [USER]'s exactly as this test was written to require.
-
-    It used to assert the list was EMPTY -- EB-118 landed retrieval as staged
-    infrastructure and nothing shipped on it. W3 (EB-118 Phase 3, R211) rewrote
-    `shell_of_sanctuary` into "Salvage the Line", the repo's first
-    Exhaust-retrieving row, and the shape rules that governed the staging are
-    satisfied BY CONSTRUCTION rather than by exemption: Uncommon (a Common
-    retriever is refused by name) and self-Exhausting (a retriever that does
-    not Exhaust is refused by name).
-    """
-    carriers = sorted(c.id for c in loader._card_index().values()
-                      if effects.retrieves_from_exhaust(c))
-    assert carriers == ["shell_of_sanctuary"]
-
-    card = loader.get_card("shell_of_sanctuary")
-    assert card.rarity in ("uncommon", "rare")
-    assert card.exhaust is True
-
-
-# --- engine closure -------------------------------------------------------
 
 def test_retrieval_creates_no_card_so_the_closure_detector_stays_quiet():
     """The tier0 closure detector counts cards CREATED against cards

@@ -26,10 +26,22 @@ MODAL_CS = ROOT / "klee-mod" / "KleeCode" / "Cards" / "ModalChoice.cs"
 METER_CS = ROOT / "klee-mod" / "KleeCode" / "Powers" / "MeterCost.cs"
 
 
+#: Furina's shipped `courtroom_drama` row, spelled inline: the modal probes
+#: below were built on it, and the sheet that held it left at legacy cleanup
+#: stage 6. Only its frame matters -- the effects are always replaced.
+_PROBE_BASE = {
+    "id": "courtroom_drama", "name": "Courtroom Drama", "register": "archon",
+    "cost": 1, "type": "power", "rarity": "uncommon", "solve": ["utility"],
+    "tempo_band": {"fight": ["late"], "run": ["early"]},
+    "archetypes": ["generic"], "role": "glue",
+    "effects": [{"op": "apply_power", "power": "cross_examination",
+                 "amount": 1, "target": "self"}]}
+
+
 def modal_card(*modes, **overrides):
-    """A real Furina row with its effects replaced by one `choose_one`."""
-    base = next(c for c in gen._sheet_cards(gen.FURINA_PROFILE.sheet)
-                if c["id"] == "courtroom_drama")
+    """Furina's Courtroom Drama frame with its effects replaced by one
+    `choose_one`."""
+    base = _PROBE_BASE
     card = copy.deepcopy(base)
     for key in ("tags", "sly", "exhaust", "innate", "retain"):
         card.pop(key, None)
