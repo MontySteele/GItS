@@ -93,6 +93,13 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Klee's played-log prints "Put Bomb 1" / "Mine 1" where the card placed Bomb 11 / Mine 3: a count printed where a size is read (Opus seat, 2026-10-02).
 - Louse Progenitor's intent under the player's Weak read "folded Strength and Weak: 14 on the move and 14 after" and the Weak seemed to do nothing; check the fold and the line (Opus seat, 2026-10-02).
 - A Mine going off printed "gives 1 Spark" plus Pounding Surprise's "+1 Spark" but the seat counted +1, not +2; check the Spark accounting or the wording (Opus seat, 2026-10-02).
+- Klee reaction log: "Melt ... No hit came with it, so there was nothing to amplify" printed beside a hit multiplied by 1.75, on three fights (Opus check round, lane 2, 2026-10-02).
+- The Bomb's damage number ignores Boom Badge+'s doubling after Boom Badge+ is played (Opus check round, 2026-10-02).
+- Jean+ is switched off when Dodoco+'s Mine goes off on the enemy's turn ("a Bomb went off last turn"); the face does not say so (Opus check round, 2026-10-02).
+- Perfect Timing's replay did not visibly fire when its first Set off killed the target (Opus check round, 2026-10-02).
+- Mine text does not say whether the enemy's other Bombs go off with it, or that it spends the aura set for the big Bomb (Opus check round, 2026-10-02).
+- Return to Sender turns only its own Block into a Bomb ("8 Block left"); check the face says so (Opus check round, 2026-10-02).
+- Between the act-3 boss's forms, the board shows no enemy and targeted cards are refused ("every enemy is dead or waiting to revive") (Opus check round, 2026-10-02).
 - Furina Stage log: a Gala Premiere turn printed "Usher joined the stage" twice (front, then back) before "took its Bow to make room for a summon" (smoke round, 2026-10-02).
 - Seat page: Cycle of Seasons' trigger damage prints on the line of the card that changed Varka's element, and Cycle's own line reads "Nothing this page can count landed off it" (Varka smoke seat, 2026-10-02).
 - Seat page: a dead Decimillipede segment waiting to Reattach is not on the wire (`BuildBattleState` sends only living enemies), so no page shows its revive countdown; send the body and its countdown (control seats, Ironclad and Necrobinder, 2026-09-26).
