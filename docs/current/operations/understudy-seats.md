@@ -49,6 +49,20 @@ saved last-used level, so a base-game control run can match a mod run (set on
 the select screen after the pick; the sidecar records `ascension_requested`
 beside the read-back `ascension`, and a mismatch fails the embark).
 
+**A fresh seat on a lane that already played** (a per-act handoff: the act 1
+seat stops and a new seat takes act 2 on the same run). `observe --brief`
+defines each word once per LANE, so the new seat would never see the words the
+last one met. Before starting each seat after the first on a lane, the
+coordinator runs:
+
+```sh
+GITS_LANE=1 python -m understudy.blindplay new-seat   # forgets the lane's seen words; budget untouched
+```
+
+A seat can also ask for one word at any time: `observe --define "<Word>"`
+prints the screen's definition, or the glossary's own row marked
+"(not on this screen)".
+
 Environment:
 
 | variable | what it does |

@@ -776,6 +776,17 @@ def cmd_audit(args) -> int:
     return 0
 
 
+def cmd_new_seat(args) -> int:
+    """The coordinator's reset before a fresh seat on a lane that already
+    played (a per-act handoff, 2026-10-02): `--brief` defines each word once
+    per LANE, so the new seat would never see a word the last one met. Forgets
+    the words the lane has been shown; the action budget is left alone."""
+    blindplay_shape.forget_words_seen()
+    print(f"lane {lane_tag(None)}: words forgotten; the next brief page "
+          f"defines each word again (action budget unchanged).")
+    return 0
+
+
 BRIEF_HELP = ("the compact page: no word definitions or standing notes, and "
               "every refusal on stdout. Intents, HP/Block/Energy, the hand "
               "and the verbs are never cut. Use this instead of filtering "
@@ -845,6 +856,13 @@ def main(argv: list[str] | None = None) -> int:
                                      "sentences into its committed record")
     n.add_argument("session_id")
     n.set_defaults(func=cmd_notes)
+
+    w = sub.add_parser("new-seat", help="coordinator: before a fresh seat on "
+                                        "a lane that already played, forget "
+                                        "the words the lane was shown so "
+                                        "--brief defines them again; the "
+                                        "action budget is untouched")
+    w.set_defaults(func=cmd_new_seat)
 
     args = ap.parse_args(argv)
     try:

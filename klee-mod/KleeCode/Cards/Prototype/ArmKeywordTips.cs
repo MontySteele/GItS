@@ -283,7 +283,7 @@ public static class ArmKeywordTips
     /// WHAT IT LEAVES TO THE CARDS. How much Oz deals and for how long are the
     /// two faces' own printed numbers, and both move on an upgrade, so the tip
     /// says what Oz IS and which card puts him out and stops there, the way
-    /// `ForGrounded` defers its payout to the Power card's own line.
+    /// `ForGrounded` leaves its Block number to the Power card's own line.
     /// </summary>
     /// `EB-504`, the second of the two words whose rule is Klee's: the Power
     /// that fields Oz is hers, and Fischl's face is drafted by every
@@ -321,9 +321,10 @@ public static class ArmKeywordTips
     /// WHAT IT SAYS AND WHAT IT LEAVES TO THE CARD. The CONDITION is the whole
     /// rule and it is what a Kaeya reader needs: `EB-749` (R271 sec.5.1) moved
     /// it to "you played no Set off card last turn" and the tip moved with it.
-    /// What Grounded pays for that is the Power card's own printed line and
-    /// moves with its upgrade, so the tip defers to it rather than quoting a
-    /// number that a second card would contradict.
+    /// It names what Grounded pays (2026-10-02: a seat that never drafted the
+    /// Power could not read "its card prints what it pays"): the Spark off
+    /// <see cref="KleeOverhaulLaw.GroundedSpark"/>, and Block with no number,
+    /// because the upgrade moves the Block.
     ///
     /// KAEYA'S OWN CLAUSE MOVED WITH IT, as a TEXT correction and not a rule
     /// change: the force-pay it describes is untouched, and the sentence now
@@ -341,9 +342,10 @@ public static class ArmKeywordTips
         With(inherited, GroundedKey,
             // A card TYPE is a plain word, never golded
             // (`docs/current/text-conventions.md`, and the lint bites).
-            "A Power that pays at the start of your turn, but "
-          + "only if you played no [gold]Set off[/gold] card last turn. Its "
-          + "card prints what it pays.");
+            "A Power that gives [gold]Block[/gold] and "
+          + KleeOverhaulLaw.GroundedSpark + " [gold]Spark[/gold] at the "
+          + "start of your turn, but only if you played no "
+          + "[gold]Set off[/gold] card last turn.");
 
     // ---------------------------------------------------------- Kokomi -----
     //

@@ -6754,9 +6754,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Strike is written against by name, met by a seat holding neither.
         # `EB-516` moved the condition to the board and `EB-749` moved it on
         # again, to the CARDS the player played (R271 sec.5.1).
-        "Grounded": ["that pays at the start of your turn, but ",
-                     "card last turn. Its ",
-                     "card prints what it pays."],
+        # 2026-10-02: the tip names the payout (Block, and the Spark off
+        # `KleeOverhaulLaw.GroundedSpark`).
+        "Grounded": ["A Power that gives ",
+                     "start of your turn, but only if you played no ",
+                     " card last turn."],
         # `EB-446`, Klee's seventh: a name Fischl -- Nightrider is written
         # against and a DIFFERENT companion card grants, so the face that
         # prints it carries the definition.
@@ -6940,7 +6942,8 @@ def test_the_grounded_word_is_defined_wherever_a_face_names_it():
     page = blindplay.observe(keyword_hand_state(
         ["Deal 8 damage. Apply Cryo. Next turn, Grounded pays even if you "
          "played a Set off card."]))
-    assert "- **Grounded** — A Power that pays at the start of your turn"         in page
+    assert ("- **Grounded** — A Power that gives Block and 1 Spark at the "
+            "start of your turn") in page
     assert "played no Set off card last turn" in page  # `EB-749`
 
     # WHETHER OR NOT THE DECK HOLDS IT, which is the state the seat was in:

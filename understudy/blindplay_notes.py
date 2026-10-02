@@ -1556,9 +1556,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # `EB-749` (R271 sec.5.1) moved it again, onto the CARDS the player played.
     # Kaeya's clause above is stale as a result and is left standing by that
     # ruling's scope -- it rules Klee's face and not the companion row.
-    "Grounded": ("A Power that pays at the start of your turn, but only if "
-                 "you played no Set off card last turn. Its card prints what "
-                 "it pays."),
+    # 2026-10-02: the row names what it pays (Block, no number: the upgrade
+    # moves it).
+    "Grounded": ("A Power that gives Block and 1 Spark at the start of your "
+                 "turn, but only if you played no Set off card last turn."),
     # `EB-446`. THE NAME ONE CARD IS WRITTEN AGAINST AND ANOTHER GRANTS.
     # `Fischl -- Nightrider` prints "If Oz is out, he deals 5 Electro damage"
     # and cannot put him out: the Power that does is a DIFFERENT companion
@@ -3141,6 +3142,32 @@ def _wire_keyword_rows(blob: Any) -> list[dict[str, str]]:
     return out
 
 
+def _arm_row_text(word: str, growth: int = BOMB_GROWTH) -> str:
+    """An `ARM_KEYWORDS` row with its `{growth}` filled."""
+    return ARM_KEYWORDS[word].format(growth=growth)
+
+
+#: The tables the glossary rows are drawn from, in `_keyword_rows`' order:
+#: the first that holds a word wins, as it does on the page.
+GLOSSARY_TABLES: tuple[dict[str, str], ...] = (
+    ARM_KEYWORDS, GAME_KEYWORDS, REACTION_KEYWORDS, ELEMENT_KEYWORDS,
+    BASE_KEYWORDS)
+
+
+def glossary_definition(word: str) -> tuple[str, str] | None:
+    """`(word, text)` for a word any glossary table holds, matched
+    case-insensitively, off-screen: `{growth}` takes `BOMB_GROWTH`, as the
+    page does on a screen without the Bomb's own tip. `observe --define`'s
+    fallback (2026-10-02)."""
+    want = word.strip().casefold()
+    for table in GLOSSARY_TABLES:
+        for name, text in table.items():
+            if name.casefold() == want:
+                return name, (_arm_row_text(name) if table is ARM_KEYWORDS
+                              else text)
+    return None
+
+
 def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     """The words this screen prints, each with one definition -- and the
     words THOSE definitions print, until nothing new is raised.
@@ -3305,8 +3332,8 @@ def _keyword_rows(obs: dict[str, Any],
              # definitions is what the r15 seat read as "an empty definition".
              "text": _OFF_ARM_KEYWORD[word]
              if (who and _ARM_KEYWORD_CHARACTER.get(word, who) != who) else
-             ARM_KEYWORDS[word].format(
-                 growth=int(growth.group(1)) if growth else BOMB_GROWTH)
+             _arm_row_text(
+                 word, int(growth.group(1)) if growth else BOMB_GROWTH)
              + ((COMPANION_STAGE_ARM_CLAUSE if arm
                  else COMPANION_STAGE_CLAUSE)
                 if stage and word == "Companion" else "")
