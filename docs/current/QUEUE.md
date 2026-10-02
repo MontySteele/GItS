@@ -13,26 +13,22 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Eyes-on looks (materials ready; no build waits on them)
 
-- **Curtain Call faces:** approve or veto the twelve faces and the A0 smoke by
-  eye, on the `S4-G12` sheet (the re-hunt set is four: `warmup_act`,
-  `crowd_work`, `tempo_change`, `audience_participation`).
-  `review/ruled/art-runs-2026-08-08.md`.
-- **`grand_gala` r6 art:** (1, default) accept r6; (2) re-hunt.
 - **Globe Head:** (1) reskin; (2) redesign. No default: the silhouette is the
   whole question. `dossiers/remap/reskin-gallery.md`.
 - **End-of-turn docket:** does the end of turn read legibly, is the per-seat
   position doing the attribution work, is the chip's prominence right. Frames
   in `art/eb52_captures/` and `understudy/logs/frames/`; no frame isolates the
   electro (Oz) leg, so that order falls to this look (`BACKLOG.md` `EB-53`).
-- **Three running-game looks:** the salon (`AS2-D5`), motion and facing taste
-  (`AS2-B5`), icon picks (`AS2-E2`). `docs/animation-sprint-2-plan.md`.
+- **Two running-game looks:** motion and facing taste (`AS2-B5`), icon picks
+  (`AS2-E2`). The plan is in git only:
+  `git show 762e94d9^:docs/animation-sprint-2-plan.md`.
 
 ## Open packets in `review/active/`
 
-- **Character four, three paper kits** (`zhongli-paper-kit-2026-09-28.md`,
-  `nahida-paper-kit-2026-09-28.md`, `varka-paper-kit-2026-09-28.md`, three
-  picks each, revised on GPT's audit). They are not read against each other
-  until your step 5 (the element review's §6 order).
+- **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
+  `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
+  Varka became character four and is built (`STATE.md`), so his paper's
+  picks are closed.
   - **Zhongli:** (1) one exact-amount Invoice per fight, removed only by
     paying, counted against the credit limit; (2) draftable Contracts that
     raise this fight's credit when kept and add Statuses when broken; (3) one Petrify
@@ -40,8 +36,6 @@ their defaults (R276, the last R number); nothing from them is open here.
   - **Nahida:** (1) Purification is a Dendro hit, set off by reactions at
     most once a turn; (2) no home nation until a Sumeru sheet exists; (3)
     Foresight provisional.
-  - **Varka:** (1) four distinct Winds; (2) Knights' Muster in the starter;
-    (3) Grand Master provisional.
 
   All defaults.
 
@@ -56,7 +50,3 @@ their defaults (R276, the last R number); nothing from them is open here.
 - **Companion cards P5a** (`companion-cards-2026-08-30.md`): how a Rare
   Personal companion would ever be acquired. Deferred by R234; it returns
   before any Rare Personal companion is designed.
-- **Kokomi's staged lever** (`eb74-lever2-options-2026-08-13.md`): merging
-  branch `staged/eb74-lever2-b-alone` (`CHARGE_PER_EXHAUST` 1 to 2) is the
-  pull, and it is yours. It tunes the shipped kit's Charge, which the Plan
-  prototype turns off, so it waits for Kokomi's Balance stage.

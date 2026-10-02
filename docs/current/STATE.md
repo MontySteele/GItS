@@ -11,7 +11,7 @@ frozen in [`workstreams.md`](workstreams.md).
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
-**`MAJOR.AUTO`**. **Installed: `0.2.3962+proto`** (2026-09-28).
+**`MAJOR.AUTO`**. **Installed: `0.2.4218`** (2026-10-02, main after legacy cleanup stage 6).
 
 **The current kits are the release build** (2026-09-28). [USER]: "The current
 character builds are much more progressed than the old prototypes were, even
@@ -75,9 +75,16 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   status pile (2026-10-01, ruled, built):** Up in Smoke! (Weak to ALL, a
   Dazed), Behind Jean's Desk (14 Block, a Confiscated) and Kitchen Alchemy
   (exhaust a status, ALL enemies lose 2 Strength) in for Fish-Flavored Bait,
-  Nova Burst and Spinning Sparkler; still 78, 24 / 33 / 21. Both engines;
-  untested in game until a deploy. Next: the package's seat round (two
-  seats), then Balance.
+  Nova Burst and Spinning Sparkler; still 78, 24 / 33 / 21. Both engines.
+  Seat rounds on it (2026-10-02, `review/records/casket-and-klee-defence-round-2026-10-02.md`
+  and the overnight forced-deck round, `review/records/klee-forced-defence-round-2026-10-02.md`):
+  Kitchen Alchemy was unplayable as written and is now "ALL enemies lose 1
+  [2] Strength; exhaust every status in your hand, they lose 1 more for
+  each" (#830); after the forced-deck seats, Behind Jean's Desk is 11 [14],
+  Up in Smoke! costs 0 and Kitchen Alchemy's upgrade adds Retain (#831).
+  Klee has won 0 of 9 seat runs; seats skip her defence, and Sparks pile up
+  unspent. Next: one more forced-deck round on the tuned three, then a short
+  paper for the final pass (her HP, a defensive Spark sink), then Balance.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start
@@ -168,9 +175,13 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   pile. [USER]: "if it's repeatable, it should probably cost energy, though,
   to make this a real choice and not just button mashing when it comes up?"
   Provenance notes, "A Plan stays open (Kokomi), 2026-10-01" and "Kokomi:
-  the Casket repeats, and the flip, 2026-10-01". Untested in game until a
-  deploy.
-  Next: two seats, then [USER] plays (a central rule changed).
+  the Casket repeats, and the flip, 2026-10-01". Its seat round
+  (`review/records/casket-and-klee-defence-round-2026-10-02.md`, fixed seeds
+  with an Ironclad control): her first whole-run win, one act further on
+  both seeds, still about half the control's damage per turn on the same
+  boss; no seat flipped a Plan.
+  Next: [USER] plays (a central rule changed); the damage gap is a paper
+  after that run.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any
