@@ -233,6 +233,26 @@ internal static class ReactionEffects
     /// (no combat, no encounter, no target during preview enumeration all
     /// answer `false`) and nothing here writes.
     /// </summary>
+    /// <summary>The Frozen row's detail when the target's Artifact will
+    /// negate what the reaction applies (Frozen, or a boss's Vulnerable), or
+    /// null. Read-only; the apply below meets the Artifact itself.</summary>
+    public static string? FrozenArtifactDetail(Creature? body)
+    {
+        if (body == null
+            || !body.Powers.OfType<ArtifactPower>().Any(a => a.Amount > 0))
+        {
+            return null;
+        }
+        if (FrozenBossVulnWillApply(body)) return FrozenBossVulnBlockedByArtifact;
+        return ShatteredThisHit(body) ? null : FrozenBlockedByArtifact;
+    }
+
+    public const string FrozenBlockedByArtifact =
+        "Its Artifact blocked the Frozen, so it is not Frozen.";
+
+    public const string FrozenBossVulnBlockedByArtifact =
+        "Its Artifact blocked the Vulnerable.";
+
     public static bool FrozenBossVulnWillApply(Creature? target) =>
         target != null
         && target.CombatState?.Encounter?.RoomType == RoomType.Boss
@@ -365,6 +385,15 @@ internal static class ReactionEffects
             // written here cannot miss a beat or double one, which is the
             // row's acceptance. Shipped rather than quarantined: every arm
             // reacts. See `ReactionLog`.
+            // 2026-10-01 (a Varka seat): Kaeya's Cryo on a Hydro Cubex
+            // Construct printed "Frozen on Cubex Construct" while its
+            // Artifact ate the freeze. The reaction still happened (the aura
+            // is gone); the row says what did not land.
+            if (reaction == Reaction.Frozen
+                && FrozenArtifactDetail(target) is { } blocked)
+            {
+                ReactionLog.DetailNext(blocked);
+            }
             ReactionLog.Note(reaction, target, dealer, cardSource);
 
             // THE ELEMENT PORT sec.7.3: the one reported event every later

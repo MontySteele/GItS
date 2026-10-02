@@ -332,6 +332,18 @@ public static class KleeCardTooltips
             var substitute = appliesWithoutHit
                 ? NoHitBody(reaction)
                 : AmplifiedBody(card, reaction, enemy, aura.Element);
+            // 2026-10-01 (a Varka seat): Kaeya's Cryo on a Hydro Cubex
+            // Construct promised Frozen, and its Artifact ate the freeze.
+            if (reaction == Reaction.Frozen
+                && ReactionEffects.FrozenArtifactDetail(enemy) != null)
+            {
+                var boss = ReactionEffects.FrozenBossVulnWillApply(enemy);
+                yield return new HoverTip(
+                    new LocString(Table, (boss ? FrozenBossPreviewKey
+                                               : FrozenPreviewKey) + ".title"),
+                    FrozenArtifactBody(boss));
+                continue;
+            }
             yield return substitute == null
                 ? HoverTipFactory.FromKeyword(keyword)
                 : new HoverTip(
@@ -640,6 +652,18 @@ public static class KleeCardTooltips
 
     /// <summary>Melt's half of <see cref="VaporizePreviewKey"/>.</summary>
     public const string MeltPreviewKey = "KLEEMOD-MELT_PREVIEW";
+
+    /// <summary>Frozen's two preview keys, for the Artifact body below.</summary>
+    public const string FrozenPreviewKey = "KLEEMOD-FROZEN_PREVIEW";
+    public const string FrozenBossPreviewKey = "KLEEMOD-FROZEN_BOSS_PREVIEW";
+
+    /// <summary>2026-10-01: the Frozen preview over a target whose Artifact
+    /// will negate what the reaction applies. The aura is still used up.
+    /// </summary>
+    public static string FrozenArtifactBody(bool boss) =>
+        "[gold]Hydro[/gold] meets [gold]Cryo[/gold] and the aura is used up, "
+      + "but its [gold]Artifact[/gold] blocks the "
+      + (boss ? "[gold]Vulnerable[/gold]." : "Frozen.");
 
     private static string NoHitTitleKey(Reaction reaction) =>
         reaction == Reaction.Vaporize ? VaporizePreviewKey : MeltPreviewKey;

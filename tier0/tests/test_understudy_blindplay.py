@@ -6797,7 +6797,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # lead renamed the FRONT performer, every row in [USER]'s words.
         # The rules pass (2026-10-01): back first, then forward.
         "Spend": ["Pay Fanfare from your ", " first, then ",
-                  "forward. Offered only if your performers hold enough."],
+                  "from the next one forward. Offered only if your performers "
+                  "hold ", "enough."],
         # The rules pass (2026-10-01): only what you play summons.
         "Fanfare": ["A performer's health. If no one is on stage, a card "
                     "that gives ", "summons a random performer holding it."],
@@ -7110,7 +7111,8 @@ def test_the_spend_row_says_the_back_performer_pays_in_full():
     # if it can pay in full" now. The Bow clause left with rule 7's
     # 2026-09-25 change: the Bow row covers every way of reaching 0.
     # The rules pass (2026-10-01): back first, then forward.
-    for clause in ("Pay Fanfare from your back performer first, then forward",
+    for clause in ("Pay Fanfare from your back performer first, then from "
+                   "the next one forward",
                    "Offered only if your performers hold enough"):
         assert clause in page, clause
         assert clause in blindplay.ARM_KEYWORDS["Spend"], clause
@@ -7121,7 +7123,7 @@ def test_the_spend_row_says_the_back_performer_pays_in_full():
     # The tip's own [gold] spans split the sentence across concatenated
     # literals, so the anchors are the runs that do not straddle a `+`.
     for phrase in ("Pay Fanfare from your ",
-                   "forward. Offered only if your performers hold enough.\");"):
+                   "from the next one forward. Offered only if your performers hold "):
         assert phrase in src, phrase
 
 

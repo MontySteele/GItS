@@ -181,7 +181,12 @@ public sealed class ArkheAlignmentPower : PowerModel, ILocalizationProvider
         ("title", "Arkhe Alignment"),
         ("description",
             "At the start of your turn, choose [gold]Ousia[/gold] or "
-          + "[gold]Pneuma[/gold]."),
+          + "[gold]Pneuma[/gold]."
+            // 2026-10-01 (a Furina seat): two stacks, off a Duplicator
+            // potion, made Ousia TRIPLE an act, and the badge said nothing.
+            // Stacks add (`Choose`: x(1 + stacks), regain 2 per stack).
+          + " Stacks add: two make the acts triple, and Pneuma's regain "
+          + "is " + PneumaLeadRegain + " per stack."),
     };
 
     public override PowerType Type => PowerType.Buff;

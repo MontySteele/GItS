@@ -95,8 +95,14 @@ public static class ResolutionLedger
     /// creature the hit killed), so a kill arrives with no numbers at all, and
     /// the flag is what keeps the page from printing it as a zero.
     /// </summary>
+    /// `OnPlayer` (2026-10-01, a Varka seat) marks a hit that landed on a
+    /// PLAYER while the card resolved -- an enemy's Thorns answering the
+    /// attack, say. The seat read one under Diluc's row as "Overload hit
+    /// Varka"; a reaction's splash only ever reaches enemies
+    /// (`CombatState.HittableEnemies`), so the page says whose HP it was.
     public readonly record struct Hit(string Target, int Amount, int Blocked,
-                                      string CombatId, bool Killed = false);
+                                      string CombatId, bool Killed = false,
+                                      bool OnPlayer = false);
 
     /// <summary>A power the card put on an enemy, and by how much
     /// (2026-09-26, the Silent control seat: "Poison applied is never shown
@@ -248,8 +254,12 @@ public static class ResolutionLedger
             _open.Overflowed = true;
             return;
         }
+        bool onPlayer;
+        try { onPlayer = target?.IsPlayer ?? false; }
+        catch (System.Exception) { onPlayer = false; }
         _open.Hits.Add(new Hit(Named(target), amount, blocked,
-                               Safe(() => target?.CombatId.ToString())));
+                               Safe(() => target?.CombatId.ToString()),
+                               OnPlayer: onPlayer));
     }
 
     /// <summary>
@@ -393,6 +403,7 @@ public static class ResolutionLedger
                     ["blocked"] = hit.Blocked,
                     ["combat_id"] = hit.CombatId,
                     ["killed"] = hit.Killed,
+                    ["on_player"] = hit.OnPlayer,
                 }),
             ["applied"] = row.Applied.ConvertAll(a =>
                 new Dictionary<string, object?>
