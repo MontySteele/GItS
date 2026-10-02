@@ -91,8 +91,11 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   (`review/active/klee-final-pass-2026-10-02.md`): HP 70; Cover Your Ears!
   in (0 Energy, 2 Sparks, Exhaust: ALL enemies lose 6 [8] Strength this
   turn), Where Did I Put It? out; Blast Shield Common; pool 78, 24 / 33 /
-  21. Untested in game until a deploy. Next: one seat round on fixed seeds,
-  then Balance.
+  21. Its seat round (`review/records/klee-final-pass-round-2026-10-02.md`,
+  0.2.4228, same seeds): both runs cleared act 1 for the first time, one
+  lost the act-2 boss with it at 11/321; seats now draft defence and spend
+  their Sparks in act 2. Next, the finish line: [USER] plays one full run on
+  this build; fun through act 3 moves Klee to Balance.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start
