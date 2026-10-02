@@ -238,10 +238,9 @@ dotnet build klee-mod/KleeCode -p:CompanionOverhaul=false     # off
 `C.COMPANION_OVERHAUL`. With it on, the companion reward slot, the shop channel
 and the Featured Banner all read the approved workshops' rewritten Universals —
 Mondstadt's 34 (`proto_mc_` rows, `C.MONDSTADT_OVERHAUL_POOL_IDS`) and
-Inazuma's 24 (`proto_mi_` rows, `C.INAZUMA_OVERHAUL_POOL_IDS`) — and the 17
-shipped Mondstadt rows and 15 shipped Inazuma rows cannot be offered. Fontaine
-is untouched: it has no workshop yet, and `C.COMPANION_OVERHAUL_NATIONS` is the
-one list that decides. The seam is ONE property in each engine —
+Inazuma's 24 (`proto_mi_` rows, `C.INAZUMA_OVERHAUL_POOL_IDS`) — and
+Fontaine's 16, ported as they are (legacy cleanup pick 4, `proto_mf_` rows,
+`C.FONTAINE_OVERHAUL_POOL_IDS`); no shipped companion row can be offered. The seam is ONE property in each engine —
 `CompanionPool.All` and `loader.companion_roster_replacement` — because the
 banner and the slot must never read different rosters (R64). Flag off, both are
 byte-identical to shipped (`tier0/tests/test_companion_overhaul.py`,
@@ -349,12 +348,14 @@ commit; rejected rows are deleted outright, with the reasoning in the slice's
 packet under `review/`, never as a commented-out row. **This is never a second
 permanent pool**, and an empty file is the healthy state.
 
-What is left of the quarantine since 2026-09-28: under `-p:ShippedKits=true`
-the classes are not compiled at all, so that build cannot reach one; in every
-other build (the release included) they go into each character's OFF-POOL list
-(in the pool so `CardModel.Pool` resolves, out of `GetUnlockedCards` so no
-reward roll or transform can produce one), and the four kit arms, on by
-default, put their own rows in the starters and the offerable pools. The rows never enter tier0's card index, so no run
+Pool wiring since legacy cleanup stage 4 (2026-10-01): under
+`-p:ShippedKits=true` the classes are not compiled at all, so that build
+cannot reach one; in every other build each character's pool lists its
+`proto_` rows FIRST in `GenerateAllCards` (so `CardModel.Pool` resolves), and
+its `FilterThroughEpochs` offers the arm's roster (`*Roster.OfferablePool`,
+`VarkaRoster.Pool`). With an arm off, `PrototypeCards.Ids` strips its owner's
+rows from the shipped offer. The shipped rows stay members, never offered,
+until stage 5 deletes them. Counts pinned by `KleeTests/Prototype/PoolCountTests.cs`. The rows never enter tier0's card index, so no run
 template, digest or balance report sees them, and the sheet is excluded by name
 from `lint_sheet_stamp` and `card_distinctness_report` — **staging a row bumps
 no stamp**. Still checked: the tier0 schema validators, the codegen,

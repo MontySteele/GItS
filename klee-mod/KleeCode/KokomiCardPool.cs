@@ -17,11 +17,8 @@ namespace KleeMod;
 /// poolless card takes down whatever task owned the draw. See
 /// tools/lint_pool_membership.py for the crash of record.
 ///
-/// Every generated card is reward-eligible today. The off-pool split Klee and
-/// Furina carry (kit cards, selector options, Guest Stars) has exactly one
-/// member-in-waiting here: ceremonial_garment, her Burst, which is still
-/// hand-write work. When it lands it goes in KokomiOffPoolCards, NOT in the
-/// roster -- granted-not-drafted is the v1.9 kit invariant.
+/// Since legacy cleanup stage 4 (2026-10-01) the pool IS the current kit:
+/// the `proto_kk_` rows are its members and the arm's roster its offer.
 /// </summary>
 public sealed class KokomiCardPool : CardPoolModel
 {
@@ -42,62 +39,43 @@ public sealed class KokomiCardPool : CardPoolModel
 
     public override bool IsColorless => false;
 
+    /// <summary>
+    /// THE OFFER (<c>GetUnlockedCards</c>, the sole door into reward rolls,
+    /// the shop and transforms). Under the arm, her roster's pool, Ancients
+    /// and co-op tier (<c>KokomiOverhaulRoster.OfferablePool</c>); with it off
+    /// (the <c>-p:ShippedKits=true</c> gate only), the shipped offer less every
+    /// prototype row and token.
+    /// </summary>
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards)
     {
 #if PROTOTYPE_CARDS
-        // QUARANTINED, THE KOKOMI OVERHAUL'S ONE POOL SEAM (slice one sec.6:
-        // the 28 rows are her only reward pool for the prototype run; sim twin
-        // `tier0.content.loader.pool_replacement`, read at the one door
-        // `tier05.rewards.character_pool` already reads).
-        //
-        // A REPLACEMENT AND NOT A FILTER, and it comes FIRST -- above the Oath
-        // substitution below -- because the two arms are alternatives: every
-        // shipped Kokomi card is written against rules this arm retires (an
-        // Exhaust that pays Charge, a Muster that transforms, a Burst that
-        // gates), so a reward screen that could still offer one would be
-        // offering a card whose printed text is no longer what happens, and
-        // substituting one row inside a pool that is being replaced whole
-        // would be a no-op with a misleading name. `GenerateAllCards` is
-        // UNTOUCHED, so `CardModel.Pool` still resolves for every shipped card
-        // and nothing throws "You monster!"; only what may be GENERATED moves,
-        // which is the same split the off-pool list below uses.
-        //
-        // With `KokomiOverhaul.Enabled` off this branch does not run.
         if (Powers.KokomiOverhaul.Enabled)
         {
             return Powers.KokomiOverhaulRoster.OfferablePool();
         }
 #endif
-        var offered = base.FilterThroughEpochs(unlockState, cards)
-            .Where(card => !KokomiOffPoolCards.Ids.Contains(card.Id));
-#if PROTOTYPE_CARDS
-        // QUARANTINED (sec.12.6 ITEM 15). THE ONE OFFER SEAM: this method feeds
-        // GetUnlockedCards, which is the SOLE path into reward rolls, the shop
-        // and card transforms (see KleeMod.PrototypeCards, layer 2), so a
-        // substitution made here reaches every surface that can offer her a
-        // card and no list of surfaces has to be kept in step.
-        //
-        // Under the memory rule the shipped Kurage's Oath would pay 5 Block per
-        // MEMORY PLAY off a face that says "per Bake-Kurage pulse" -- a card
-        // paying a different rule from the one it prints, which is the D4
-        // defect. So the prototype row takes its place at the same rarity, cost
-        // and type, and therefore at the same weight. Reasoning in full on
-        // KurageMemory.SwapOfferedOath.
-        offered = Powers.KurageMemory.SwapOfferedOath(offered);
-#endif
-        return offered;
+        var current = PrototypeCards.Ids("kokomi");
+        return base.FilterThroughEpochs(unlockState, cards)
+            .Where(card => !KokomiOffPoolCards.Ids.Contains(card.Id)
+                           && !current.Contains(card.Id));
     }
 
-    // RosterAncientCards.Kokomi: VISIBLE in the pool (Dusty Tome draws from
-    // GetUnlockedCards) but never rolled, because generation filters Ancient
-    // rarity upstream. A character whose pool holds no Ancient card softlocks
-    // the act-2 Darv event on an empty draw -- that is the defect this concat
-    // exists to prevent, and tools/lint_ancient_coverage.py is its gate.
+    /// <summary>
+    /// MEMBERSHIP, the prototype rows first and as the pool (legacy cleanup
+    /// stage 4, 2026-10-01): every `proto_` row she owns, then her Ancients
+    /// (a character whose pool holds no Ancient softlocks Darv's Dusty Tome;
+    /// <c>tools/lint_ancient_coverage.py</c>), then the never-offered members
+    /// (<see cref="KokomiOffPoolCards"/>: the current kit's hand-written
+    /// tokens and the shipped Burst). The shipped rows follow as members only
+    /// until stage 5 deletes them.
+    /// </summary>
     protected override CardModel[] GenerateAllCards() =>
-        Cards.Kokomi.Generated.KokomiCardRoster.All
+        PrototypeCards.For("kokomi")
             .Concat(RosterAncientCards.Kokomi)
             .Concat(KokomiOffPoolCards.All)
+            .Concat(Cards.Kokomi.Generated.KokomiCardRoster.All)
+            .Distinct()
             .ToArray();
 }
 
@@ -129,13 +107,6 @@ public static class KokomiOffPoolCards
             // meter fills, never rollable.
             ModelDb.Card<CeremonialGarment>(),
         };
-        // QUARANTINED prototype rows (R213 B, EB-147). Empty in every build
-        // that did not set PrototypeCards=true -- the classes are not
-        // compiled. Off-pool for the reason the Burst is: Pool must resolve
-        // or the card throws "You monster!" on draw, and GetUnlockedCards
-        // must not see it or a reward roll could offer a card nobody ruled.
-        // See KleeMod.PrototypeCards.
-        cards.AddRange(PrototypeCards.For("kokomi"));
 #if PROTOTYPE_CARDS
         // THE CASKET PASS (2026-09-28): the Tamakushi Casket's hand-written
         // token, dealt by the relic and in no pool -- Furina's Ethereal

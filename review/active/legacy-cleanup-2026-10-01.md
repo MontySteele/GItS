@@ -48,6 +48,15 @@ and about 390 Python arm-flag reads.
    (picks 3 and 4; Furina's twelve were ported by the Furina rules pass,
    2026-10-01); `SwapOfferedRows`, `DropRetiredRows` and the off-pool swap
    deleted. Verify with a pool-count pin and one deploy plus a seat smoke run.
+   **Done, PR #PRNUM** (2026-10-01): every pool lists its `proto_` rows first
+   and offers its arm's roster; Furina's offer is a list
+   (`FurinaStageRoster.Pool`); Kokomi's Oath swap is gone; the 19 Fontaine
+   rows are `proto_mf_` rows and the companion roster holds no shipped row;
+   `PoolCountTests` pins 78 per kit (Klee 24 / 33 / 21, Kokomi 21 / 36 / 21,
+   Furina 23 / 35 / 20, Varka 20 / 35 / 23), two Ancients and five co-op cards
+   each for the first three, and the companion roster's 34 / 24 / 16. The
+   shipped rows remain members only (so a held shipped card still resolves
+   its pool) until stage 5. The deploy and seat smoke run are owed.
 5. **The big delete:** shipped card folders, sheets, `Cards/Retired`, the
    retired systems, the `Enabled` branches and `#if`s, `ShippedKits` and its
    gate, shipped-only lints, shipped emission in `gen_klee_cards.py` (shared

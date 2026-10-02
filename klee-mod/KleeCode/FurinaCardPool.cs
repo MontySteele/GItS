@@ -28,43 +28,42 @@ public sealed class FurinaCardPool : CardPoolModel
 
     public override bool IsColorless => false;
 
+    /// <summary>
+    /// THE OFFER (<c>GetUnlockedCards</c>, the sole door into reward rolls,
+    /// the shop and transforms). Under the Stage, its roster's pool, her
+    /// Ancients and the co-op tier (<c>FurinaStageRoster.OfferablePool</c>);
+    /// with it off (the <c>-p:ShippedKits=true</c> gate only), the shipped
+    /// offer less every prototype row.
+    /// </summary>
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards)
     {
-        var offered = base.FilterThroughEpochs(unlockState, cards)
-            .Where(card => !FurinaOffPoolCards.Ids.Contains(card.Id));
 #if PROTOTYPE_CARDS
-        // QUARANTINED, THE STAGE ARM'S ONE POOL SEAM (`EB-725`, R269).
-        //
-        // THE SAME PLACE KOKOMI'S OATH SWAP SITS, and for the same reason:
-        // this method feeds GetUnlockedCards, which is the SOLE path into
-        // reward rolls, the shop and card transforms, so a substitution made
-        // here reaches every surface that can offer her a card and no list of
-        // surfaces has to be kept in step.
-        //
-        // Every shipped row that prints a retired word leaves the offer first
-        // (`EB-736`, `FurinaStageRoster.DropRetiredRows`), then fourteen named
-        // shipped rows are swapped for the arm's fourteen `proto_fs_` rows.
-        // The filter removes far more than the swap adds, so the offer odds
-        // DO move: the arm's pool is about 26 cards. Sim twin (the swap only):
-        // `furina_stage.POOL_SUBS`, read at the one door
-        // `tier05.rewards.character_pool` already reads.
-        //
-        // With `FurinaStage.Enabled` off this returns `offered` unchanged,
-        // which the method checks itself rather than leaving to this call --
-        // the shape the line above it already takes.
-        offered = Powers.FurinaStageRoster.SwapOfferedRows(offered);
+        if (Powers.FurinaStage.Enabled)
+        {
+            return Powers.FurinaStageRoster.OfferablePool();
+        }
 #endif
-        return offered;
+        var current = PrototypeCards.Ids("furina");
+        return base.FilterThroughEpochs(unlockState, cards)
+            .Where(card => !FurinaOffPoolCards.Ids.Contains(card.Id)
+                           && !current.Contains(card.Id));
     }
 
-    // RosterAncientCards.Furina: visible (Dusty Tome draws from
-    // GetUnlockedCards) but never rolled -- generation filters Ancient
-    // rarity upstream. Gate: tools/lint_ancient_coverage.py.
+    /// <summary>
+    /// MEMBERSHIP, the prototype rows first and as the pool (legacy cleanup
+    /// stage 4, 2026-10-01): every `proto_` row she owns (the Stage's rows,
+    /// its mode faces and the three Fontaine guest stars), then her Ancients
+    /// (<c>tools/lint_ancient_coverage.py</c>), then the never-offered members
+    /// (<see cref="FurinaOffPoolCards"/>). The shipped rows follow as members
+    /// only until stage 5 deletes them.
+    /// </summary>
     protected override CardModel[] GenerateAllCards() =>
-        FurinaCardRoster.All
+        PrototypeCards.For("furina")
             .Concat(RosterAncientCards.Furina)
             .Concat(FurinaOffPoolCards.All)
+            .Concat(FurinaCardRoster.All)
+            .Distinct()
             .ToArray();
 }
 
@@ -98,13 +97,6 @@ public static class FurinaOffPoolCards
         // tools/gen_klee_cards.py, so a new modal card joins this list
         // without anyone having to remember to add it.
         cards.AddRange(FurinaModalOptions.All);
-        // QUARANTINED prototype rows (R213 B, EB-147). Empty in every
-        // build that did not set PrototypeCards=true -- the classes are not
-        // compiled. Off-pool for the reason everything else here is: Pool
-        // must resolve or the card throws "You monster!" on draw, and
-        // GetUnlockedCards must not see it or a reward roll could offer a
-        // card nobody ruled. See KleeMod.PrototypeCards.
-        cards.AddRange(PrototypeCards.For("furina"));
 #if PROTOTYPE_CARDS
         // R276 batch two: Arkhe Alignment's two hand-written choice faces,
         // on the Ethereal Spotlight options' footing above.

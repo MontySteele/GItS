@@ -138,21 +138,19 @@ def test_flag_on_every_overhaul_row_is_offerable(overhaul):
     assert set(C.MONDSTADT_OVERHAUL_POOL_IDS) <= offerable
 
 
-def test_flag_on_fontaine_is_untouched(overhaul):
-    """Each workshop is a NATION document (both say so in their own sec.6), and
-    Fontaine has none yet. A nation-scoped replacement that quietly moved an
-    unwritten nation's rows would be the defect this asserts against.
-
-    IT USED TO SAY "inazuma and fontaine", and the Inazuma half moved out on
-    2026-09-02 when the Inazuma workshop was approved and built -- so this test
-    is now the last nation the arm leaves alone. `C.COMPANION_OVERHAUL_NATIONS`
-    is the one list that decides, and the assertion below is its complement."""
-    assert "fontaine" not in C.COMPANION_OVERHAUL_NATIONS
-    before = {c.id for c in loader._card_index().values()
-              if c.is_companion and c.nation == "fontaine"}
+def test_flag_on_fontaine_is_its_rows_ported_as_they_are(overhaul):
+    """Fontaine has no workshop, and pick 4 of the legacy cleanup ported its
+    shipped rows to the prototype surface AS THEY ARE: the roster's Fontaine
+    half is the `proto_mf_` twins of the shipped rows, one for one, and the
+    shipped rows themselves leave."""
+    assert "fontaine" in C.COMPANION_OVERHAUL_NATIONS
+    shipped = {c.id for c in loader._card_index().values()
+               if c.is_companion and c.nation == "fontaine"
+               and not c.guest_star}
     after = {c.id for c in rewards._companion_roster()
              if c.nation == "fontaine"}
-    assert before == after
+    assert after == {f"proto_mf_{cid}" for cid in shipped}
+    assert set(C.FONTAINE_OVERHAUL_POOL_IDS) == after
 
 
 def test_every_overhaul_id_resolves_to_a_mondstadt_companion(overhaul):

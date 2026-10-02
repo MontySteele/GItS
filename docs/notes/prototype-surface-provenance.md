@@ -5492,3 +5492,27 @@ status-package block. Pins: `tier0/tests/test_klee_status_package.py`,
 
 - *Art.* The eight new rows render the placeholder; the three Powers borrow
   Party Poppers', Spark Knight's and Playdate's badges (`BACKLOG.md`).
+
+## Fontaine companions ported, 2026-10-01
+
+Legacy cleanup pick 4 (`review/active/legacy-cleanup-2026-10-01.md`, ruled):
+"The 19 Fontaine companion rows move to the prototype sheet as they are. A
+Fontaine rework is its own paper." Built in legacy cleanup stage 4.
+
+- The sixteen companions are `proto_mf_<shipped id>` rows owned by `klee`, as
+  every companion row is (their frame is Klee's pool's, as the shipped rows'
+  was). Bodies, cost, rarity, star, element and role are the shipped rows' from
+  `docs/fontaine-companions.yaml`; each upgrade is the shipped row's from
+  `docs/furina-upgrades.yaml`; `art_of:` borrows the shipped portrait. Names end
+  " (proto)" (the declared-shadow rule) until stage 5 deletes the shipped rows.
+- The three Neuvillette guest stars are `proto_mf_guest_neuvillette_*`, owned by
+  `furina`, `guest_star: true`, `no_upgrade:` (a guest star is made for one
+  fight; the shipped rows had no upgrade). No current card generates a guest
+  star, so they are members only.
+- Both engines' companion roster is now prototype rows only:
+  `CompanionOverhaulRoster.FontaineUniversals` and
+  `C.FONTAINE_OVERHAUL_POOL_IDS`, with `fontaine` in
+  `C.COMPANION_OVERHAUL_NATIONS`.
+- The shipped C# emitter's prototype-surface differences carry over unchanged
+  (the arm keyword-tip wrapper and the front-folded damage var); nothing on a
+  face or in a body moved.

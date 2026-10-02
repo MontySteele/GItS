@@ -235,7 +235,7 @@ public class PoolCellCoverageTests
 
             // THE SURPRISE OF THIS AUDIT. The Stage substitutes one for one at
             // the same rarity, so on paper it inherits the shipped sheet's
-            // coverage -- but `DropRetiredRows`, the arm's TEXT filter, then
+            // coverage -- but the arm's old TEXT filter (gone at legacy cleanup stage 4) then
             // takes every remaining shipped row that still prints Encore,
             // Spotlight, Center Stage, Salon, Fanfare or Burst, and that is
             // most of the sheet: her offer pool was 29 rows, not 84.

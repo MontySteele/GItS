@@ -281,7 +281,7 @@ public class PoolCompletionTests : IDisposable
     [Fact]
     public void Her_offer_appends_the_six()
     {
-        var offer = Cards("FurinaStageRoster", "SwapOfferedRows");
+        var offer = Cards("FurinaStageRoster", "Pool");
         // The rules pass (2026-10-01) appended its twelve after them.
         var six = offer.IndexOf("ProtoFsAriaForOne");
         Assert.Equal(new[]

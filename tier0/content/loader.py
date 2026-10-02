@@ -1641,6 +1641,7 @@ def companion_roster_replacement() -> list[Card] | None:
     # above, which drops every Mondstadt row the lists do not name.
     added = [peek_card(cid) for cid in (C.MONDSTADT_OVERHAUL_POOL_IDS
                                         + C.INAZUMA_OVERHAUL_POOL_IDS
+                                        + C.FONTAINE_OVERHAUL_POOL_IDS
                                         + C.INAZUMA_OVERHAUL_PERSONAL_IDS
                                         + C.COVEN_PERSONAL_POOL_IDS)]
     return sorted(kept + added, key=lambda c: c.id)
