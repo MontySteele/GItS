@@ -65,6 +65,9 @@ public static partial class McpMod
             "end_turn" => ExecuteMultiplayerEndTurn(player),
             "undo_end_turn" => ExecuteUndoEndTurn(player),
 
+            // GItS LOCAL EDIT (Kokomi, pick 5 (a), 2026-10-01): flip a
+            // waiting two-line Plan (gits/GitsKokomiFlip.cs).
+            "kokomi_flip_plan" => ExecuteGitsKokomiFlipPlan(player, data),
             _ => Error($"Unknown multiplayer action: {action}")
         };
     }

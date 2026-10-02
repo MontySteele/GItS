@@ -63,9 +63,10 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
             // `review/records/text-pass-2026-09-25/kokomi-rewrite.md`.
             "Enemies can't target it. It holds your [gold]Plans[/gold] "
           + "until your next turn."
-          // A PLAN STAYS OPEN (2026-10-01, ruled): the rule in one short
-          // sentence, inside the 125 ceiling (100 rendered).
-          + " Then you choose each [gold]Plan[/gold]'s line."
+          // A PLAN STAYS OPEN (2026-10-01, ruled), pick 5 (a): "Plans carry
+          // out on their Plan line; click a waiting Plan to flip it." One
+          // short sentence, inside the 125 ceiling (100 rendered).
+          + " Click a waiting [gold]Plan[/gold] to flip it."
           // `EB-653` (round 24). THE CAP PRINTS WHERE IT BINDS. The r24 cap
           // lane carried out two of four written Plans four mornings running
           // with no surface saying a cap existed, and read the rule as a wall.

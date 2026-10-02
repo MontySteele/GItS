@@ -58,6 +58,18 @@ namespace KleeMod.Vfx;
 /// whether they actually do is a live question and nothing headless can answer
 /// it.
 ///
+/// CLICK A TWO-LINE PLAN TO FLIP IT (a Plan stays open, pick 5 (a),
+/// 2026-10-01): "Plans carry out on their Plan line; click a waiting Plan to
+/// flip it." The strip is the surface because it is already the one place
+/// each waiting Plan has its own clickable picture (the hover below), so the
+/// flip needs no new screen. A left click on a two-line Plan asks
+/// <see cref="KokomiPlan.RequestFlip"/>, which goes through the game's action
+/// queue so a co-op peer flips the same Plan; a second click flips it back.
+/// Under each two-line Plan a caption says the line it will be carried out
+/// as ("Plan line" / "Now-line"), and a flipped picture is tinted. Plans past
+/// <see cref="MaxDrawn"/> have no picture to click; the bridge's `flip` verb
+/// reaches every one.
+///
 /// QUARANTINED. `Vfx/Prototype/**` is Compile Remove'd without
 /// `-p:PrototypeCards=true`. Revert is the flag.
 /// </summary>
@@ -75,6 +87,16 @@ internal static class KokomiPlanStrip
     internal const int MaxDrawn = 4;
 
     private static readonly Color CountColor = StsColors.cream;
+
+    /// <summary>A flipped Plan's tint: the picture reads as "not the Plan
+    /// line" at a glance, and the caption says which line it is.</summary>
+    private static readonly Color FlippedTint = new(0.65f, 0.85f, 1f);
+
+    private const int LineFontSize = 16;
+
+    /// <summary>The caption under a two-line Plan.</summary>
+    internal const string PlanLineCaption = "Plan line";
+    internal const string NowLineCaption = "Now-line";
 
     /// <summary>One element per seat, freed by the shared display skeleton the
     /// way the gauges are.</summary>
@@ -97,7 +119,7 @@ internal static class KokomiPlanStrip
         if (NCombatRoom.Instance?.Ui is not { } ui) return;
 
         Displays.Discard(me);
-        var root = Build();
+        var root = Build(me);
         ui.AddChildSafely(root);
         Displays.Set(me, root);
         Paint(root, me);
@@ -150,7 +172,7 @@ internal static class KokomiPlanStrip
         }
     }
 
-    private static Control Build()
+    private static Control Build(Player me)
     {
         var height = MaxDrawn * ThumbHeight + (MaxDrawn - 1) * ThumbGap
                      + CountFontSize + 8f;
@@ -199,6 +221,22 @@ internal static class KokomiPlanStrip
                 Visible = false,
             };
             WireHover(thumb);
+            WireClick(thumb, me, i);
+            var line = new Label
+            {
+                Name = "Line",
+                MouseFilter = Control.MouseFilterEnum.Ignore,
+                FocusMode = Control.FocusModeEnum.None,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Position = new Vector2(0f, ThumbHeight - LineFontSize - 8f),
+                Size = new Vector2(ThumbWidth, LineFontSize + 6f),
+                Visible = false,
+            };
+            line.AddThemeFontSizeOverride(ThemeConstants.Label.FontSize,
+                                          LineFontSize);
+            line.AddThemeColorOverride(ThemeConstants.Label.FontColor,
+                                       CountColor);
+            thumb.AddChildSafely(line);
             root.AddChildSafely(thumb);
         }
 
@@ -248,15 +286,26 @@ internal static class KokomiPlanStrip
         {
             var thumb = root.GetNodeOrNull<TextureRect>("Plan" + i);
             if (thumb == null) continue;
+            var line = thumb.GetNodeOrNull<Label>("Line");
             if (i >= pending.Count)
             {
                 thumb.Visible = false;
                 SetCard(thumb, null);
+                if (line != null) line.Visible = false;
                 continue;
             }
             thumb.Visible = true;
             thumb.Texture = Portrait(pending[i].Source);
             SetCard(thumb, pending[i].Source);
+            // PICK 5 (a): the line a two-line Plan will be carried out as.
+            var entry = pending[i];
+            var flipped = entry.TwoLine && entry.Now;
+            thumb.Modulate = flipped ? FlippedTint : Colors.White;
+            if (line != null)
+            {
+                line.Visible = entry.TwoLine;
+                line.Text = flipped ? NowLineCaption : PlanLineCaption;
+            }
         }
 
         if (count == null) return;
@@ -282,6 +331,43 @@ internal static class KokomiPlanStrip
     /// ADDS, so a second show without a remove throws -- the Furina cue's
     /// lesson (`FurinaStageCueNodes`).</summary>
     private const string HoverShownMeta = "kleemod_plan_hover_shown";
+
+    /// <summary>
+    /// PICK 5 (a): a left click on the picture of a waiting two-line Plan
+    /// flips it. The thumbnail's slot IS the queue position (the strip draws
+    /// the queue front first), and <see cref="KokomiPlan.RequestFlip"/>
+    /// refuses a Plan-only one, a click outside her turn, and a click during
+    /// the morning drain (<see cref="KokomiPlan.Showing"/> differs from the
+    /// queue then). Any failure is logged and swallowed: a click must never
+    /// throw into the UI.
+    /// </summary>
+    private static void WireClick(TextureRect thumb, Player me, int slot)
+    {
+        thumb.GuiInput += input =>
+        {
+            if (input is not InputEventMouseButton
+                {
+                    ButtonIndex: MouseButton.Left, Pressed: true,
+                })
+            {
+                return;
+            }
+            try
+            {
+                if (!ReferenceEquals(KokomiPlan.Showing(me),
+                                     KokomiPlan.Pending(me)))
+                {
+                    return;
+                }
+                var why = KokomiPlan.RequestFlip(me, slot);
+                if (why == null) thumb.AcceptEvent();
+            }
+            catch (Exception e)
+            {
+                Log.Warn($"[{KleeMod.ModId}] plan strip: flip skipped: {e}");
+            }
+        };
+    }
 
     private static void WireHover(TextureRect thumb)
     {

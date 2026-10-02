@@ -84,7 +84,8 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Pool stays 39 for this pass. Then two seats, then [USER] plays (a central
   rule changed). **The Casket pass (2026-09-28, ruled):** the Tamakushi
   Casket counts the Plans the Bake-Kurage carries out and deals Open the
-  Casket (0, Retain, Exhaust: Strength equal to the count, then empty it);
+  Casket (1, Retain: Strength equal to the count, then empty it; it was 0
+  and Exhaust until 2026-10-01, the four-kit review's Kokomi pick 1);
   its debuff strike is gone. Feint and Sango Isshin pay per carry-out this
   turn, six rows cut, thirteen added: the pool is 46 (plus three co-op).
   Shell Guard, whose strike clause the pass left dead, was re-aimed by the
@@ -152,11 +153,19 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Provenance note, "Kokomi status batch, 2026-10-01". Next: [USER] plays.
   **A Plan stays open (2026-10-01, ruled, built):** paper
   `review/active/kokomi-delay-pays-2026-10-01.md`. When the Bake-Kurage
-  carries out a Plan from a two-line card, she picks its Plan line (default)
-  or its now-line at printed size, on one grid a turn shown only when such a
-  Plan is due; Plan-only and Dusk Plans are unchanged; no number moved. Both
-  engines and the bridge (`flip "<card>"`, `confirm`); provenance note, "A
-  Plan stays open (Kokomi), 2026-10-01". Untested in game until a deploy.
+  carries out a Plan from a two-line card, it is its Plan line (default)
+  or its now-line at printed size; Plan-only and Dusk Plans are unchanged; no
+  number moved. **Pick 5 (a), ruled the same day:** "Plans carry out on their
+  Plan line; click a waiting Plan to flip it." No screen: a click on a
+  waiting two-line Plan in the Plan strip flips it during her turn (a synced
+  game action), and the bridge's verb is `flip <n>`. **The Casket pays more
+  than once (four-kit review, Kokomi pick 1):** Open the Casket costs 1 and
+  has no Exhaust; What the Tokoyo Returns fetches it from the draw or discard
+  pile. [USER]: "if it's repeatable, it should probably cost energy, though,
+  to make this a real choice and not just button mashing when it comes up?"
+  Provenance notes, "A Plan stays open (Kokomi), 2026-10-01" and "Kokomi:
+  the Casket repeats, and the flip, 2026-10-01". Untested in game until a
+  deploy.
   Next: two seats, then [USER] plays (a central rule changed).
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper

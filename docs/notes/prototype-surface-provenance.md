@@ -3935,7 +3935,8 @@ distinct effect."
   DisplayAmount : null`) and the blind page prints "Tamakushi Casket (N)", so
   the seats read it with no new wire field.
 
-**Open the Casket.** Skill, 0, Retain, Exhaust, in no pool: "Gain Strength
+**Open the Casket.** Skill, 1, Retain, in no pool (it was 0, Retain,
+Exhaust until 2026-10-01, the four-kit review's Kokomi pick 1): "Gain Strength
 equal to the Casket's count, then empty it." A hand-written token
 (`Cards/Prototype/OpenTheCasket.cs`, off-pool in `KokomiOffPoolCards`), not a
 sheet row: the surface has no token rarity, and a `proto_kk_` row outside the
@@ -5553,6 +5554,62 @@ now-line at printed size. No card and no number changes.
 **Pins.** `tier0/tests/test_kokomi_open_plan.py`,
 `KleeTests/Prototype/KokomiOpenPlanTests.cs`. Untested in game until a
 deploy.
+
+## Kokomi: the Casket repeats, and the flip, 2026-10-01
+
+The four-kit review (PR #823), Kokomi pick 1, and the coordinator's pick 5,
+ruled. [USER]: "On your new picks agree all around - I think that if it's
+repeatable, it should probably cost energy, though, to make this a real
+choice and not just button mashing when it comes up?" Paper
+`review/active/kokomi-delay-pays-2026-10-01.md`, edited in place.
+
+1. *Open the Casket.* Cost 1 (was 0), Retain, no Exhaust; text unchanged; no
+   upgrade. Played, it goes to the discard pile and comes back with the deck,
+   and each opening takes the count gathered since the last. The relic still
+   deals one copy on turn one. Sim twin `kokomi_plan.open_the_casket_card`.
+2. *What the Tokoyo Returns.* "Put Open the Casket into your hand from your
+   draw pile or discard pile." The draw pile first, then the discard pile;
+   the Exhaust Pile is no longer searched
+   (`KokomiOverhaulKit.FetchOpenCasketPiles`; sim
+   `kokomi_plan.fetch_open_casket`). Cost 1, Exhaust, upgrade cost -1, as
+   before.
+3. *Pick 5 (a): no chooser.* "Plans carry out on their Plan line; click a
+   waiting Plan to flip it." `KokomiPlan.ChooseLines` no longer opens a
+   screen or claims a latch: each due entry keeps its `Now` flag, cleared
+   only on an entry that cannot offer the choice. Every door (morning, Change
+   of Plans, Spring Tide) reads the flips; Dusk is untouched.
+4. *The surface: the Plan strip.* The strip already drew one clickable
+   picture per waiting Plan (its hover), so a left click on a two-line
+   Plan's picture is the flip; a second click flips it back. A caption under
+   each two-line Plan reads "Plan line" or "Now-line", and a flipped picture
+   is tinted. The strip draws the first four Plans; a fifth or later is
+   reached by the bridge verb. Chosen over a power-icon grid because it adds
+   no screen and puts the click on the Plan itself.
+5. *Sync.* The click is a game action (`FlipPlanGameAction`, wire twin
+   `NetFlipPlanAction`), enqueued through `ActionQueueSynchronizer` as a card
+   play is, so a co-op peer flips the same Plan. Play phase only, and
+   `KokomiPlan.Flip` refuses again mid-drain and outside her play phase.
+6. *Forecast.* The bridge's queue row carries `line`; a flipped Plan reports
+   no front damage (its now-line is carried out instead).
+7. *Text.* The Bake-Kurage's box: "Click a waiting Plan to flip it." The Plan
+   tip: "it happens next turn. Click it to flip lines." (133 rendered, under
+   the 135 ceiling).
+8. *Sim pilot.* `kokomi_plan.line_policy` is the Plan line; the pilot sets
+   its flips at the end of its turn (`pilot_flips`, before the Dusk drain).
+   The old heuristic read the carry-out turn's intents, which a flip made a
+   turn early cannot see, and went with the screen.
+9. *Bridge.* `kokomi_flip_plan` (`vendor/STS2_MCP/gits/GitsKokomiFlip.cs`);
+   the page's verb is `flip <n>` or `flip "<card>"`, offered while a waiting
+   Plan has two lines. The chooser page and its `confirm` are gone; `confirm`
+   stays for every other screen.
+
+Items 2 and 7 to 10 of "A Plan stays open (Kokomi)" above describe the first
+build's screen; this note supersedes them.
+
+**Pins.** `tier0/tests/test_kokomi_casket_pass.py`,
+`tier0/tests/test_kokomi_open_plan.py`,
+`KleeTests/Prototype/KokomiCasketPassTests.cs`,
+`KleeTests/Prototype/KokomiOpenPlanTests.cs`.
 
 ## Fontaine companions ported, 2026-10-01
 

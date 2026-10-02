@@ -638,7 +638,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # private channel of hers, filled by the jellyfish's carry-outs, so it is
     # filed on the `kurage` channel: Pearl Diver's gain and What the Tokoyo
     # Took's doubling WRITE it, Open the Casket spends it (a write), and What
-    # the Tokoyo Returns reads the exhaust pile.
+    # the Tokoyo Returns reads the draw and discard piles (2026-10-01: the
+    # token lost its Exhaust and cycles with the deck).
     # THE EXPANSION, BATCH ONE (2026-09-29). Lull and Undertide Lance read the
     # drain they land in (the queue), Evening Watch's Block and Brace's
     # doubling are Block the jellyfish writes, and the `kokomi` op's kinds
@@ -652,7 +653,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "kokomi": [_hook("private", "kurage", "use")],
     "casket_double": [_hook("private", "kurage", "write")],
     "open_casket": [_hook("private", "kurage", "write")],
-    "fetch_open_casket": [_hook("shared", "exhaust_pile", "use")],
+    "fetch_open_casket": [_hook("shared", "draw_pile", "use"),
+                          _hook("shared", "discard_pile", "use")],
     # R276 PICK 1, the halves rewrite. Pincer's replay and Stolen Chapter's
     # free card change what the next play IS, which is where `cost_mod` and
     # `next_attack_damage` are filed; Battle Plan's per-Attack bonus is filed

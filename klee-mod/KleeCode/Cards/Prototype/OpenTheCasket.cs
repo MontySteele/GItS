@@ -23,18 +23,25 @@ namespace KleeMod.Cards.Prototype;
 /// <see cref="KokomiOverhaulLedger.CasketCount"/>; emptying it does not stop
 /// the relic -- "the casket keeps counting" from 0.
 ///
+/// IT PAYS MORE THAN ONCE (2026-10-01, the four-kit review, Kokomi pick 1).
+/// [USER]: "On your new picks agree all around - I think that if it's
+/// repeatable, it should probably cost energy, though, to make this a real
+/// choice and not just button mashing when it comes up?" So it costs 1 Energy
+/// and has no Exhaust: played, it goes to the discard pile and comes back
+/// with the deck, and the count it finds is whatever the Casket gathered
+/// since the last opening. It keeps Retain.
+///
 /// A TOKEN, HAND-WRITTEN, IN NO POOL. The relic deals it into her opening hand
 /// (<see cref="Relics.TamakushiCasket.BeforeHandDraw"/>) and What the Tokoyo
-/// Returns fetches it back out of the Exhaust Pile; nothing offers it. It is
-/// not a sheet row because the prototype surface has no token rarity and a
-/// `proto_kk_` row that is not in the pool is a finding for
+/// Returns fetches it from the draw pile or the discard pile; nothing offers
+/// it. It is not a sheet row because the prototype surface has no token
+/// rarity and a `proto_kk_` row that is not in the pool is a finding for
 /// <c>tools/lint_arm_pool_parity.py</c> -- Furina's Ethereal Spotlight is the
 /// same shape (a relic-dealt token, hand-written, off-pool). It is in
 /// <c>KokomiOffPoolCards</c> so <c>CardModel.Pool</c> resolves. Sim twin:
 /// <c>kokomi_plan.open_the_casket_card</c> and <c>kokomi_plan.open_casket</c>.
 ///
-/// NO UPGRADE: the ruling gives none, and a count-to-Strength conversion at
-/// cost 0 has no number to move.
+/// NO UPGRADE: the ruling gives none.
 /// </summary>
 public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
 {
@@ -53,7 +60,7 @@ public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
     };
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Retain, CardKeyword.Exhaust };
+        new[] { CardKeyword.Retain };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForCasket(base.ExtraHoverTips, this);
@@ -62,7 +69,7 @@ public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
         System.Array.Empty<DynamicVar>();
 
     public OpenTheCasket()
-        : base(0, CardType.Skill, CardRarity.Token, TargetType.Self,
+        : base(1, CardType.Skill, CardRarity.Token, TargetType.Self,
                autoAdd: false)
     {
     }

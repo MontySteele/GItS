@@ -158,19 +158,44 @@ public class KokomiCasketPassTests : IDisposable
     // ---- B. Open the Casket -----------------------------------------------
 
     [Fact]
-    public void Open_the_casket_is_a_zero_cost_retain_exhaust_token()
+    public void Open_the_casket_is_a_one_cost_retain_token_that_does_not_exhaust()
     {
+        // 2026-10-01, the four-kit review, Kokomi pick 1. [USER]: "On your
+        // new picks agree all around - I think that if it's repeatable, it
+        // should probably cost energy, though, to make this a real choice and
+        // not just button mashing when it comes up?"
         var card = new OpenTheCasket();
-        Assert.Equal(0, card.EnergyCost.Canonical);
+        Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Skill, card.Type);
         Assert.Equal(CardRarity.Token, card.Rarity);
         Assert.Contains(CardKeyword.Retain, card.Keywords);
-        Assert.Contains(CardKeyword.Exhaust, card.Keywords);
+        Assert.DoesNotContain(CardKeyword.Exhaust, card.Keywords);
         Assert.Equal("Gain [gold]Strength[/gold] equal to the [gold]Casket[/gold]'s "
                    + "count, then empty it.", Face(card));
         // In no pool: the offer is the Slice, and the token is not in it.
         Assert.DoesNotContain(Seq("KokomiOverhaulRoster", "Slice"),
                               c => c.Contains("OpenTheCasket"));
+    }
+
+    [Fact]
+    public void What_the_tokoyo_returns_fetches_from_the_draw_pile_then_the_discard_pile()
+    {
+        // 2026-10-01: Open the Casket no longer exhausts, so the fetch looks
+        // where it now goes -- the draw pile, then the discard pile, never the
+        // Exhaust Pile.
+        Assert.Equal(new[] { PileType.Draw, PileType.Discard },
+                     KokomiOverhaulKit.FetchOpenCasketPiles);
+        var seq = Seq("KokomiOverhaulKit", "FetchOpenCasket");
+        Assert.Contains(seq, c => c.Contains("FindOpenCasket"));
+        Assert.True(seq.FindIndex(c => c.Contains("FindOpenCasket"))
+                    < seq.FindIndex(c => c.Contains("CardPileCmd.Add")));
+        // The search: the first Open the Casket in a pile, or nothing.
+        var token = new OpenTheCasket();
+        Assert.Same(token, KokomiOverhaulKit.FindOpenCasket(
+            new CardModel[] { new ProtoKkNip(), token }));
+        Assert.Null(KokomiOverhaulKit.FindOpenCasket(
+            new CardModel[] { new ProtoKkNip() }));
+        Assert.Null(KokomiOverhaulKit.FindOpenCasket(null));
     }
 
     [Fact]
@@ -300,6 +325,23 @@ public class KokomiCasketPassTests : IDisposable
                                   c => c.Contains("CreateCard")
                                     || c.Contains("AddGeneratedCard"));
         }
+    }
+
+    [Fact]
+    public void What_the_tokoyo_returns_is_a_one_cost_exhaust_fetch()
+    {
+        var returns = new ProtoKkWhatTheTokoyoReturns();
+        Assert.Equal(1, returns.EnergyCost.Canonical);
+        Assert.Contains(CardKeyword.Exhaust, returns.Keywords);
+        Assert.Equal(0, Upgraded<ProtoKkWhatTheTokoyoReturns>().EnergyCost
+            .GetWithModifiers(CostModifiers.None));
+        Assert.Contains(Il.Calls(Il.Method("ProtoKkWhatTheTokoyoReturns", "OnPlay")),
+                        c => c.Contains("KokomiOverhaulKit.FetchOpenCasket"));
+        Assert.Contains(Il.Calls(Il.Method("KokomiOverhaulKit", "FetchOpenCasket")),
+                        c => c.Contains("CardPileCmd.Add"));
+        // 2026-10-01: Open the Casket no longer exhausts.
+        Assert.Equal("Put [gold]Open the Casket[/gold] into your hand from "
+                     + "your draw pile or discard pile.", Face(returns));
     }
 
     [Fact]

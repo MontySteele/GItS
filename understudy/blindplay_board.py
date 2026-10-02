@@ -1543,21 +1543,8 @@ def name_answer_rows(answers: list[dict[str, Any]],
                                                   row["target"]))
 
 
-#: A PLAN STAYS OPEN (2026-10-01, ruled;
-#: review/active/kokomi-delay-pays-2026-10-01.md sec.3). The turn-start line
-#: chooser's prompt, `KokomiPlan.ChooserPromptText` verbatim: the page knows
-#: the screen by its opening words.
-PLAN_CHOOSER_PROMPT = ("Your Plans are due. Click one to use its other line "
-                       "instead.")
-_PLAN_CHOOSER_HEAD = "Your Plans are due."
-
 #: Where a two-line face turns from its now-line to its Plan line.
 _OR_PLAN = re.compile(r"\s*Or (?:dusk )?plan:\s*")
-
-
-def is_plan_chooser(prompt: Any) -> bool:
-    """Is this card grid Kokomi's turn-start line chooser?"""
-    return _text(prompt).startswith(_PLAN_CHOOSER_HEAD)
 
 
 def split_plan_lines(text: Any) -> tuple[str, str]:
@@ -1567,22 +1554,6 @@ def split_plan_lines(text: Any) -> tuple[str, str]:
     if len(parts) == 2:
         return parts[0].strip(), parts[1].strip()
     return _text(text).strip(), ""
-
-
-def plan_chooser_rows(offers: list[dict[str, Any]],
-                      wire: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """The chooser's rows: each due Plan's printed title, both lines, and the
-    line it will be carried out as -- "now" where the grid holds it picked
-    (flipped), "plan" otherwise. `offers` are the page's numbered faces and
-    `wire` the raw grid entries in the same order."""
-    rows = []
-    for face, raw in zip(offers, wire):
-        now, plan = split_plan_lines(face.get("text"))
-        rows.append({"title": face.get("title") or _text(raw.get("name")),
-                     "now": now, "plan": plan,
-                     "line": "now" if raw.get("selected") is True
-                     else "plan"})
-    return rows
 
 
 def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
@@ -1647,7 +1618,11 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               "aim": _text(row.get("aim")),
               "two_line": row.get("two_line") is True,
               "now_line": _text(row.get("now_line")),
-              "plan_line": _text(row.get("plan_line"))}
+              "plan_line": _text(row.get("plan_line")),
+              # PICK 5 (a) (2026-10-01): the line it will be carried out
+              # as, "now" once flipped. An absent key is a bridge older
+              # than the flip, and reads as the Plan line.
+              "line": "now" if row.get("line") == "now" else "plan"}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

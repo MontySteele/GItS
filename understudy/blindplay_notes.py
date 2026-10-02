@@ -792,18 +792,16 @@ CHOOSER_CONFIRM_NOTE = (
     "every other command is refused.*")
 
 # A PLAN STAYS OPEN (2026-10-01, ruled; review/active/
-# kokomi-delay-pays-2026-10-01.md sec.3). Kokomi's turn-start line chooser:
-# one screen, every due two-line Plan on it at its Plan line, `flip` to switch
-# one and `confirm` to carry them all out. The sentence `assert_chooser_note`
-# accepts on this screen, because its pick verb is `flip` and not `choose`.
-PLAN_CHOOSER_HEADING = "# Your Plans are due"
-#: Under a waiting two-line Plan in the Plan list.
-TWO_LINE_WAITING_NOTE = "When it is carried out, you choose its line."
-PLAN_CHOOSER_NOTE = (
-    "*Each Plan below is carried out as the line marked. Say `flip \"<card>\"` "
-    "to switch one between its Plan line and its now-line (again to switch "
-    "back), then `confirm` to carry them all out. `confirm` alone takes the "
-    "Plan lines.*")
+# kokomi-delay-pays-2026-10-01.md sec.3), pick 5 (a): "Plans carry out on
+# their Plan line; click a waiting Plan to flip it." No screen: under each
+# waiting two-line Plan the page says which line it will be carried out as,
+# and `flip <n>` switches it (again to switch back).
+#: Under a waiting two-line Plan in the Plan list; `{line}`, `{this}`,
+#: `{other_name}`, `{other}` and `{n}` are filled per row.
+TWO_LINE_WAITING_NOTE = "Carried out as its"
+TWO_LINE_WAITING_ROW = (
+    TWO_LINE_WAITING_NOTE + " **{line}**: {this} · {other_name}: {other} · "
+    "`flip {n}` switches it.")
 
 #: The mode chooser (`screen_type: "choose"`), where one `choose` resolves.
 #: It never says `confirm`, because there is no confirm button on this screen
@@ -1485,9 +1483,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # no ceiling; the history of each clause is in git.
     # THE STATUS BATCH (2026-10-01, sec.3 pick 2): the face prints "Or plan:"
     # and the tip opens "Instead of the line above". A PLAN STAYS OPEN
-    # (2026-10-01): "next turn, you choose which line happens".
+    # (2026-10-01), pick 5 (a): "click a waiting Plan to flip it".
     "Plan": ("Instead of the line above, play the card on the Bake-Kurage: "
-             "next turn, you choose which line happens. Plans go in the "
+             "it happens next turn. Click it to flip lines. Plans go in the "
              "order made."),
     # `EB-643` (R265). THE POOL PASS'S ONE NEW WORD, and it is a rule about
     # WHEN and nothing else: everything else about a Dusk Plan is a Plan, and
@@ -1530,7 +1528,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # `Open the Casket` is the relic's token. Both follow
     # `ArmKeywordTips.ForCasket` / `ForOpenTheCasket` word for word.
     "Tamakushi Casket": CASKET_ROW,
-    "Open the Casket": ("0-cost, Retain, Exhaust. Gain Strength equal to the "
+    "Open the Casket": ("1-cost, Retain. Gain Strength equal to the "
                         "Casket's count, then empty it."),
     # `EB-377` ADDED `Swirl`, printed as a VERB by ten Universals, beside
     # `Hexerei` -- which R276 pick 2 retired: the Spark and Klee's three

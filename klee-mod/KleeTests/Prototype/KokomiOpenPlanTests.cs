@@ -15,9 +15,12 @@ namespace KleeMod.Tests.Prototype;
 /// idea! Yes, I think this makes sense. We'd want to make sure that the UX is
 /// reasonably snappy so players don't have to spend forever on their turns,
 /// but it sounds doable." When the Bake-Kurage carries out a Plan written from
-/// a TWO-LINE card, the player picks its Plan line (the default) or its
-/// now-line at printed size, on one grid a turn. Pinned off the compiled
-/// methods, as the rest of the arm is. Sim twin:
+/// a TWO-LINE card, it is its Plan line (the default) or its now-line at
+/// printed size. Pick 5 (a), ruled 2026-10-01: "Plans carry out on their Plan
+/// line; click a waiting Plan to flip it." No screen: the player flips a
+/// waiting Plan during her turn by clicking it in the Plan strip, through a
+/// synced game action, and clicks again to flip it back. Pinned off the
+/// compiled methods, as the rest of the arm is. Sim twin:
 /// <c>tier0/tests/test_kokomi_open_plan.py</c>.
 /// </summary>
 [Collection(KleeOverhaulArm.Name)]
@@ -87,18 +90,71 @@ public class KokomiOpenPlanTests : IDisposable
     }
 
     [Fact]
-    public void The_chooser_is_one_grid_a_turn_with_a_manual_confirm()
+    public void No_chooser_by_default_the_plan_line_is_carried_out()
     {
+        // ChooseLines opens no screen and asks no latch: it keeps each Plan's
+        // own flip and only clears one an entry cannot offer.
         var seq = Seq("KokomiPlan", "ChooseLines");
-        Assert.Contains("KokomiOverhaulLedger.ClaimOncePerTurn", seq);
-        Assert.Contains("CardSelectCmd.FromSimpleGrid", seq);
-        Assert.Contains("CardSelectorPrefs.set_RequireManualConfirmation", seq);
-        Assert.True(seq.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn")
-                    < seq.IndexOf("CardSelectCmd.FromSimpleGrid"));
+        Assert.DoesNotContain(seq, c => c.Contains("CardSelectCmd"));
+        Assert.DoesNotContain(seq, c => c.Contains("ClaimOncePerTurn"));
+        var oath = new ProtoKkKuragesOath();
+        var due = new List<KokomiPlan.Entry>
+        {
+            new(oath, OneHit),
+            new(new ProtoKkNip(), OneHit, Now: true),
+        };
+        var lines = KokomiPlan.ChooseLines(due);
+        Assert.False(lines[0].Now);          // never flipped: the Plan line
+        Assert.False(lines[1].Now);          // Plan-only: cannot be flipped
     }
 
     [Fact]
-    public void Every_door_that_carries_plans_out_asks_the_chooser_but_dusk()
+    public void A_flipped_plan_carries_out_its_now_line()
+    {
+        var queue = new List<KokomiPlan.Entry>
+        {
+            new(new ProtoKkNip(), OneHit),
+            new(new ProtoKkKuragesOath(), OneHit),
+        };
+        Assert.True(KokomiPlan.FlipAt(queue, 1));
+        Assert.True(queue[1].Now);
+        // The flip survives to the carry-out, and the carry-out runs the
+        // now-line for a flipped two-line entry.
+        Assert.True(KokomiPlan.ChooseLines(queue)[1].Now);
+        Assert.Contains("KokomiPlan.CarryOutNowLine",
+                        Seq("KokomiPlan", "ResolveEntry"));
+    }
+
+    [Fact]
+    public void Flipping_back_restores_the_plan_line()
+    {
+        var queue = new List<KokomiPlan.Entry>
+        {
+            new(new ProtoKkKuragesOath(), OneHit),
+        };
+        Assert.True(KokomiPlan.FlipAt(queue, 0));
+        Assert.True(KokomiPlan.FlipAt(queue, 0));
+        Assert.False(queue[0].Now);
+        Assert.False(KokomiPlan.ChooseLines(queue)[0].Now);
+    }
+
+    [Fact]
+    public void Only_a_waiting_two_line_plan_can_be_flipped()
+    {
+        var queue = new List<KokomiPlan.Entry>
+        {
+            new(new ProtoKkNip(), OneHit),
+            new(new ProtoKkKuragesOath(), OneHit, Dusk: true),
+        };
+        Assert.False(KokomiPlan.FlipAt(queue, 0));   // Plan-only
+        Assert.False(KokomiPlan.FlipAt(queue, 1));   // Dusk
+        Assert.False(KokomiPlan.FlipAt(queue, 2));   // no such Plan
+        Assert.False(KokomiPlan.FlipAt(queue, -1));
+        Assert.All(queue, e => Assert.False(e.Now));
+    }
+
+    [Fact]
+    public void Every_door_that_carries_plans_out_reads_the_flips_but_dusk()
     {
         Assert.Contains("KokomiPlan.ChooseLines", Seq("KokomiPlan", "ResolveAll"));
         Assert.Contains("KokomiPlan.ChooseLines",
@@ -107,19 +163,34 @@ public class KokomiOpenPlanTests : IDisposable
                         Seq("KokomiPlan", "ResolveAllNow"));
         Assert.DoesNotContain("KokomiPlan.ChooseLines",
                               Seq("KokomiPlan", "ResolveDusk"));
-        Assert.Contains("KokomiPlan.CarryOutNowLine",
-                        Seq("KokomiPlan", "ResolveEntry"));
+    }
+
+    [Fact]
+    public void The_click_is_a_synced_game_action_that_runs_the_flip()
+    {
+        // The strip's click and the bridge both ask RequestFlip, which goes
+        // through the game's action queue so every co-op peer flips the same
+        // Plan; the action runs Flip, which redraws the strip.
+        Assert.Contains("ActionQueueSynchronizer.RequestEnqueue",
+                        Seq("KokomiPlan", "RequestFlip"));
+        Assert.Contains("KokomiPlan.Flip",
+                        Seq("FlipPlanGameAction", "ExecuteAction"));
+        Assert.Contains("KokomiPlan.FlipAt", Seq("KokomiPlan", "Flip"));
+        Assert.Contains("KokomiPlanStrip.Refresh", Seq("KokomiPlan", "Flip"));
+        var net = new NetFlipPlanAction { index = 3 };
+        Assert.Equal(3u, ((FlipPlanGameAction)net.ToGameAction(null!)).Index);
+        Assert.Equal(MegaCrit.Sts2.Core.Entities.Multiplayer.GameActionType
+                         .CombatPlayPhaseOnly,
+                     new FlipPlanGameAction(null!, 0).ActionType);
     }
 
     [Fact]
     public void The_prompt_and_the_rule_are_short_and_plain()
     {
-        Assert.Equal("Your Plans are due. Click one to use its other line "
-                     + "instead.", KokomiPlan.ChooserPromptText);
         var body = ((ProtoBakeKuragePower)Activator.CreateInstance(
                 typeof(ProtoBakeKuragePower))!).Localization!
             .First(r => r.Item1 == "description").Item2;
-        Assert.Contains(" Then you choose each [gold]Plan[/gold]'s line.",
+        Assert.Contains(" Click a waiting [gold]Plan[/gold] to flip it.",
                         body);
         Assert.Equal("Kurage's Oath (now-line)",
                      KokomiPlan.NowLineTitle("Kurage's Oath"));

@@ -615,7 +615,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "redirect_queued_plans",
                   # THE CASKET PASS (2026-09-28): the two now-lines that work
                   # the Tamakushi Casket's count. What the Tokoyo Returns
-                  # fetches Open the Casket back out of the Exhaust Pile, and
+                  # fetches Open the Casket from the draw or discard pile, and
                   # What the Tokoyo Took doubles the count. One verified call
                   # site each on `KokomiOverhaulKit`.
                   "fetch_open_casket", "casket_double",
@@ -11516,9 +11516,10 @@ def build_body(
                 "choiceContext, Owner.Creature);")
 
         elif op == "fetch_open_casket":
-            # What the Tokoyo Returns (the Casket pass, 2026-09-28). The first
-            # Open the Casket in her Exhaust Pile goes to her hand; none there,
-            # nothing happens.
+            # What the Tokoyo Returns (the Casket pass, 2026-09-28; re-aimed
+            # 2026-10-01 when the token lost its Exhaust). The first Open the
+            # Casket in her draw pile, else her discard pile, goes to her
+            # hand; none in either, nothing happens.
             lines.append(
                 "await KokomiOverhaulKit.FetchOpenCasket("
                 "choiceContext, Owner.Creature);")

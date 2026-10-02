@@ -34,6 +34,13 @@ namespace KleeMod.Relics;
 /// the count: "We don't need this to be the equivalent to Regent's stars or
 /// Klee's sparks. This should feel like a distinct effect."
 ///
+/// THE TOKEN PAYS MORE THAN ONCE (2026-10-01, the four-kit review, Kokomi
+/// pick 1): Open the Casket costs 1 and has no Exhaust, so it cycles with the
+/// deck. [USER]: "if it's repeatable, it should probably cost energy, though,
+/// to make this a real choice and not just button mashing when it comes up?"
+/// This relic still deals ONE copy, on turn one; nothing here assumed the
+/// Exhaust.
+///
 /// THE COUNT LIVES ON THE ARM'S LEDGER, NOT ON THIS INSTANCE
 /// (<see cref="KokomiOverhaulLedger.CasketCount"/>): per combat by
 /// construction (a new combat's ledger starts at 0), readable by a card's

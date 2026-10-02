@@ -1598,7 +1598,9 @@
 - {id: proto_kk_what_the_tokoyo_returns, name: "What the Tokoyo Returns", character: kokomi,
    authored_by: [claude], art_of: what_the_tokoyo_returns,
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Put [gold]Open the Casket[/gold] from your [gold]Exhaust Pile[/gold] into your hand.",
+   # 2026-10-01 (the four-kit review, Kokomi pick 1): Open the Casket lost its
+   # Exhaust, so this fetches it from the draw or discard pile instead.
+   description: "Put [gold]Open the Casket[/gold] into your hand from your draw pile or discard pile.",
    effects: [{op: fetch_open_casket}],
    upgrade: {cost: -1}}
 

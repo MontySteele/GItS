@@ -305,9 +305,9 @@ public static class KokomiPlan
     /// exhaust pile, and what cancelling that Plan undoes is Moon's
     /// Reflection. Sim twin: `PlanEntry.card_id`, which is already the
     /// writing card.</param>
-    /// <param name="Now">A PLAN STAYS OPEN (2026-10-01): the player chose
-    /// this Plan's now-line for the carry-out in hand
-    /// (<see cref="ChooseLines"/>). Every carry-out of the entry takes it.
+    /// <param name="Now">A PLAN STAYS OPEN (2026-10-01): the player flipped
+    /// this waiting Plan to its now-line (<see cref="Flip"/>, pick 5a). Every
+    /// carry-out of the entry takes it.
     /// Sim twin: `PlanEntry.line == "now"`.</param>
     public sealed record Entry(CardModel? Source, IReadOnlyList<Planned> Clauses,
                               string? Label = null, bool Dusk = false,
@@ -1225,9 +1225,9 @@ public static class KokomiPlan
         var held = cap > 0 && queue.Count > cap
             ? new List<Entry>(queue.GetRange(cap, queue.Count - cap))
             : null;
-        // A PLAN STAYS OPEN (2026-10-01): the one chooser, asked while the
-        // strip still shows the queue and before anything is carried out.
-        due = await ChooseLines(choiceContext, kokomi, due);
+        // A PLAN STAYS OPEN (2026-10-01, pick 5a): each Plan is carried out
+        // as the line it was flipped to while it waited.
+        due = ChooseLines(due);
         queue.Clear();
         // `EB-335`. THE MORNING'S DEPTH, recorded on the line the queue is
         // drained on and before the first clause runs -- Tide Wall's "for each
@@ -1743,79 +1743,98 @@ public static class KokomiPlan
     // line, or its now line." Two-line cards only (<see cref="INowLineCard"/>);
     // Plan-only cards and Dusk Plans are unchanged; the now-line is printed
     // size. Every carry-out of an entry (Nereid's Ascension, Second Wave, All
-    // Streams) takes the line chosen for it -- the paper's "the default is the
-    // line chosen for the first". Plan payoffs count either line, because
-    // <see cref="ResolveEntry"/> rings them after either.
+    // Streams) takes the line chosen for it. Plan payoffs count either line,
+    // because <see cref="ResolveEntry"/> rings them after either.
     //
-    // SEC.3, KEPT SNAPPY: ONE screen a turn, and only when a two-line Plan is
-    // due. It is the base game's simple card grid (Varka's Weathervane and
-    // Knights' Roll Call open the same one), the Plans' own cards with both
-    // lines on their faces, nothing picked: a click flips a Plan to its
-    // now-line and a second click flips it back, and Confirm carries them all
-    // out. A later door the same turn (Change of Plans, Spring Tide) after the
-    // screen was shown carries out the Plan line. Sim twin:
-    // `kokomi_plan.choose_lines`.
-
-    /// <summary>The once-a-turn latch the screen claims.</summary>
-    public const string LineChooserKey = "kk_plan_line_chooser";
-
-    /// <summary>The screen's prompt key, merged into the `cards` table by
-    /// <c>KleeMod.InjectLocStrings</c>.</summary>
-    public const string ChooserPromptKey =
-        "KLEEMOD-KOKOMI_PLAN_LINES.selectionScreenPrompt";
-
-    /// <summary>The prompt. `understudy/blindplay_observe` recognises the
-    /// screen by it.</summary>
-    public const string ChooserPromptText =
-        "Your Plans are due. Click one to use its other line instead.";
-
-    private static LocString ChooserPrompt =>
-        new LocString("cards", ChooserPromptKey);
+    // SEC.3, PICK 5 (a) (2026-10-01, ruled): "Plans carry out on their Plan
+    // line; click a waiting Plan to flip it." NO SCREEN. A waiting two-line
+    // Plan carries <see cref="Entry.Now"/>; during her own turn the player
+    // flips it by clicking its picture in the Plan strip
+    // (<c>Vfx.KokomiPlanStrip</c>), and a second click flips it back. The
+    // click is a synced game action (<see cref="FlipPlanGameAction"/>), so a
+    // co-op peer carries out the same line. At carry-out each Plan uses the
+    // line it holds. Sim twin: `kokomi_plan.flip` / `kokomi_plan.choose_lines`.
 
     /// <summary>The beat's name for a Plan carried out as its now-line.</summary>
     public static string NowLineTitle(string title) =>
         title + " (now-line)";
 
     /// <summary>
-    /// Set each due entry's line before it is carried out: every entry starts
-    /// at its Plan line, and when at least one is two-line and the turn's one
-    /// screen has not been shown, the player is asked. Returns the entries in
-    /// the same order. A duplicate card instance (one card that wrote two
-    /// Plans) is shown once and both Plans take its line.
+    /// The lines the due entries are carried out as: each keeps the line it
+    /// was flipped to while it waited, and an entry that cannot offer the
+    /// choice (Plan-only, Dusk) is always its Plan line. No screen (pick 5a).
+    /// Returns the entries in the same order.
     /// </summary>
-    public static async Task<List<Entry>> ChooseLines(
-        PlayerChoiceContext choiceContext, Creature kokomi, List<Entry> due)
+    public static List<Entry> ChooseLines(List<Entry> due) =>
+        due.Select(e => e.Now && !e.TwoLine ? e with { Now = false } : e)
+           .ToList();
+
+    /// <summary>
+    /// Flip the waiting Plan at <paramref name="index"/> between its Plan line
+    /// and its now-line. False, and nothing moves, where there is no entry
+    /// there or it offers no choice. The list is the queue itself.
+    /// </summary>
+    public static bool FlipAt(List<Entry> queue, int index)
     {
-        var lines = due.Select(e => e.Now ? e with { Now = false } : e)
-                       .ToList();
-        var open = Enumerable.Range(0, lines.Count)
-                             .Where(i => lines[i].TwoLine).ToList();
-        if (open.Count == 0) return lines;
-        if (kokomi.Player is not { } player) return lines;
-        if (!KokomiOverhaulLedger.ClaimOncePerTurn(kokomi, LineChooserKey))
+        if (index < 0 || index >= queue.Count || !queue[index].TwoLine)
         {
-            return lines;
+            return false;
         }
-        var faces = new List<CardModel>();
-        foreach (var i in open)
+        queue[index] = queue[index] with { Now = !queue[index].Now };
+        return true;
+    }
+
+    /// <summary>
+    /// THE FLIP ITSELF, run by <see cref="FlipPlanGameAction"/> on every peer.
+    /// Only during the player's own play phase and never mid-drain: a flip
+    /// that arrived late must not land on whatever entry now holds its index.
+    /// Redraws the strip, whose labels and forecast read the flip.
+    /// </summary>
+    public static bool Flip(Player? player, int index)
+    {
+        var kokomi = player?.Creature;
+        if (player == null || !KokomiOverhaul.LiveFor(kokomi)) return false;
+        Rebase(kokomi!);
+        if (_showing.ContainsKey(player)) return false;
+        if (player.PlayerCombatState?.Phase != PlayerTurnPhase.Play)
         {
-            var card = lines[i].Source!;
-            if (!faces.Contains(card)) faces.Add(card);
+            return false;
         }
-        var picked = (await CardSelectCmd.FromSimpleGrid(
-            choiceContext, faces, player,
-            new CardSelectorPrefs(ChooserPrompt, 0, faces.Count)
-            {
-                RequireManualConfirmation = true,
-            })).ToList();
-        foreach (var i in open)
+        if (!_queues.TryGetValue(player, out var queue)) return false;
+        if (!FlipAt(queue, index)) return false;
+        Vfx.KokomiPlanStrip.Refresh(kokomi);
+        return true;
+    }
+
+    /// <summary>
+    /// Ask for a flip: the strip's click and the bridge's `flip` verb both
+    /// come here. Null when the request was sent; otherwise the reason it was
+    /// not, in plain words. It goes through the game's action queue, as a card
+    /// play does, so every co-op peer flips the same Plan.
+    /// </summary>
+    public static string? RequestFlip(Player? player, int index)
+    {
+        var kokomi = player?.Creature;
+        if (player == null || !KokomiOverhaul.LiveFor(kokomi))
         {
-            if (picked.Contains(lines[i].Source!))
-            {
-                lines[i] = lines[i] with { Now = true };
-            }
+            return "there is no Bake-Kurage here";
         }
-        return lines;
+        if (player.PlayerCombatState?.Phase != PlayerTurnPhase.Play)
+        {
+            return "a Plan can be flipped only during your turn";
+        }
+        var queue = Pending(player);
+        if (index < 0 || index >= queue.Count)
+        {
+            return "there is no waiting Plan " + (index + 1);
+        }
+        if (!queue[index].TwoLine)
+        {
+            return queue[index].Title + " has only one line";
+        }
+        MegaCrit.Sts2.Core.Runs.RunManager.Instance.ActionQueueSynchronizer
+            .RequestEnqueue(new FlipPlanGameAction(player, (uint)index));
+        return null;
     }
 
     /// <summary>
@@ -1921,9 +1940,8 @@ public static class KokomiPlan
         int before = queue.Count;
         queue.RemoveAt(0);
         await Sync(choiceContext, kokomi, "rule:carried_out_now", before);
-        // A PLAN STAYS OPEN: the turn's one chooser, if it has not been shown.
-        front = (await ChooseLines(choiceContext, kokomi,
-                                   new List<Entry> { front }))[0];
+        // A PLAN STAYS OPEN (pick 5a): the line it was flipped to.
+        front = ChooseLines(new List<Entry> { front })[0];
         // `EB-329`: Change of Plans is one of the two mid-turn doors, and its
         // card says so in as many words -- "carries out your front Plan NOW".
         // THE EXPANSION: an All Streams gift rides the entry, so a hurried
@@ -1964,8 +1982,8 @@ public static class KokomiPlan
         int before = queue.Count;
         queue.Clear();
         await Sync(choiceContext, kokomi, "rule:carried_out_now", before);
-        // A PLAN STAYS OPEN: the turn's one chooser, if it has not been shown.
-        due = await ChooseLines(choiceContext, kokomi, due);
+        // A PLAN STAYS OPEN (pick 5a): each the line it was flipped to.
+        due = ChooseLines(due);
         try
         {
             await Drain(choiceContext, kokomi, due, midTurn: true);
@@ -3155,6 +3173,9 @@ public static class KokomiPlan
                 ["two_line"] = entry.TwoLine,
                 ["now_line"] = now,
                 ["plan_line"] = plan,
+                // PICK 5 (a): the line it will be carried out as, "now" once
+                // the player has flipped it, "plan" otherwise.
+                ["line"] = entry.Now && entry.TwoLine ? "now" : "plan",
                 ["clauses"] = entry.Clauses.Count,
                 // `EB-773`. WHAT THIS ENTRY HAS ALREADY WRITTEN AGAINST THE
                 // FRONT BODY, so the blind page can say that a Plan queued
@@ -3167,8 +3188,13 @@ public static class KokomiPlan
                 // reportable at all: `PLAN_WRITTEN_NUMBER_NOTE`'s rule is
                 // that a written Plan carries the number it was written with.
                 // So these two keys are a read of state, not a forecast.
-                ["damage"] = WrittenFrontDamage(entry),
-                ["aim"] = WrittenAim(entry),
+                //
+                // A FLIPPED PLAN WRITES NOTHING AT THE FRONT: its now-line is
+                // carried out instead, at printed size, and the forecast
+                // follows the flip (pick 5a).
+                ["damage"] = entry.Now && entry.TwoLine
+                    ? 0 : WrittenFrontDamage(entry),
+                ["aim"] = entry.Now && entry.TwoLine ? "" : WrittenAim(entry),
             };
     }
 
@@ -3476,7 +3502,7 @@ public interface IPlannedCard
 /// Emitted by the generator on every row with both <c>effects:</c> and
 /// <c>plan:</c>. When the Bake-Kurage carries out a Plan this card wrote, the
 /// player may take <see cref="PlayNowLine"/> instead of the Plan line
-/// (<see cref="KokomiPlan.ChooseLines"/>, <see cref="KokomiPlan.CarryOutNowLine"/>).
+/// (<see cref="KokomiPlan.Flip"/>, <see cref="KokomiPlan.CarryOutNowLine"/>).
 /// </summary>
 public interface INowLineCard
 {

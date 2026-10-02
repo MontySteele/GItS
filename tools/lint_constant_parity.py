@@ -655,6 +655,8 @@ UNMIRRORED: dict[str, str] = {
         "presentation: vertical gap between stacked thumbnails, in pixels.",
     "KokomiPlanStrip.CountFontSize":
         "presentation: the overflow count's font size.",
+    "KokomiPlanStrip.LineFontSize":
+        "presentation: the Plan line / Now-line caption's font size (pick 5a).",
     "KokomiPlanStrip.MaxDrawn":
         "presentation: how many pending Plans get a picture before the column "
         "runs off the band. Not a cap on the queue -- nothing limits how many "
