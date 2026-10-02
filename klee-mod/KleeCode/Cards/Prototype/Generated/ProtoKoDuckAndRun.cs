@@ -41,7 +41,7 @@ public sealed class ProtoKoDuckAndRun : CustomCardModel, ISetOffCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Duck and Run"),
+        ("title", "Survival Rulebook"),
         ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Set off[/gold]."),
     };
 

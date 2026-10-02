@@ -3159,7 +3159,7 @@ def spark_priced_state() -> dict:
             "discard_pile_count": 3, "exhaust_pile_count": 0,
             "status": [],
             "hand": [
-                {"id": "KLEEMOD-PROTO_KO_BANG_BANG", "name": "Bang Bang!",
+                {"id": "KLEEMOD-PROTO_KO_BANG_BANG", "name": "Boom-Boom Strike",
                  "type": "Attack", "cost": "0", "can_play": False,
                  "spark_price": 2, "spark_affordable": False,
                  "unplayable_reason": "BlockedByCardLogic",
@@ -3177,9 +3177,9 @@ def spark_priced_state() -> dict:
 
 
 def test_a_spark_priced_hand_line_prints_its_spark_price():
-    """`EB-286`'s acceptance: the seat's `Bang Bang!` line names its price."""
+    """`EB-286`'s acceptance: the seat's `Boom-Boom Strike` line names its price."""
     page = blindplay.observe(spark_priced_state())
-    assert "**Bang Bang!** — cost 2 Sparks, attack" in page
+    assert "**Boom-Boom Strike** — cost 2 Sparks, attack" in page
     assert "**Dig In** — cost 1 Spark, skill" in page
     # A card with no Spark price reads exactly as it always did.
     assert "**Kaboom!** — cost 1, attack" in page
@@ -3196,7 +3196,7 @@ def test_the_spark_price_comes_off_the_shipped_face_when_the_wire_is_silent():
         card.pop("spark_price", None)
         card.pop("spark_affordable", None)
     page = blindplay.observe(state)
-    assert "**Bang Bang!** — cost 2 Sparks, attack" in page
+    assert "**Boom-Boom Strike** — cost 2 Sparks, attack" in page
     assert "**Dig In** — cost 1 Spark, skill" in page
 
     reward = {"state_type": "card_reward",
@@ -3205,10 +3205,10 @@ def test_the_spark_price_comes_off_the_shipped_face_when_the_wire_is_silent():
                               "can_skip": True,
                               "cards": [
                                   {"id": "KLEEMOD-PROTO_KO_BANG_BANG",
-                                   "name": "Bang Bang!", "type": "Attack",
+                                   "name": "Boom-Boom Strike", "type": "Attack",
                                    "cost": "0", "rarity": "Uncommon",
                                    "description": "Set off. Deal 8 damage."}]}}
-    assert "**Bang Bang!** — cost 2 Sparks, attack" in blindplay.observe(reward)
+    assert "**Boom-Boom Strike** — cost 2 Sparks, attack" in blindplay.observe(reward)
 
 
 # ------------------ EB-262 / EB-263: the LIVE shapes, captured 2026-09-02 ---
@@ -6535,7 +6535,7 @@ def hook_hand_state(*, reason: str, spark_price=None,
     own row shape off a recorded capture.
     """
     state = json.loads(json.dumps(combat_state()))
-    card = {"id": "KLEEMOD-PROTO_KO_BANG_BANG", "name": "Bang Bang!",
+    card = {"id": "KLEEMOD-PROTO_KO_BANG_BANG", "name": "Boom-Boom Strike",
             "type": "Attack", "cost": "0", "can_play": False, "index": 0,
             "target_type": "AnyEnemy", "is_upgraded": False, "keywords": [],
             "unplayable_reason": reason,
@@ -12592,7 +12592,7 @@ def test_a_branch_clause_un_folds_too_and_not_only_the_first_one():
             "additional Block.") in page
 
 
-def placer_power_state(name: str = "Witches' Circle",
+def placer_power_state(name: str = "Little Hexenzirkel",
                        amount: int = 3, size: int = 3) -> dict:
     """A player-side placer Power on the buff strip (`EB-722`)."""
     state = json.loads(json.dumps(combat_state()))
@@ -12623,8 +12623,8 @@ def test_a_placer_powers_number_is_labelled_as_the_size_it_places():
     Seen to FAIL: the line printed `Witches' Circle 3 (buff)`.
     """
     page = blindplay.observe(placer_power_state())
-    assert "Witches' Circle: Bomb 3 (buff)" in page
-    assert "Witches' Circle 3 (buff)" not in page
+    assert "Little Hexenzirkel: Bomb 3 (buff)" in page
+    assert "Little Hexenzirkel 3 (buff)" not in page
 
     # A second placer, a different trigger, the same label.
     assert "Chained Reactions: Bomb 5 (buff)" in blindplay.observe(
@@ -12636,7 +12636,7 @@ def test_a_power_that_stacks_and_also_places_reads_as_it_always_did():
     number. A power whose stack count and whose printed size disagree is not a
     placer wearing this shape, and it keeps the line it had."""
     page = blindplay.observe(placer_power_state(amount=2, size=7))
-    assert "Witches' Circle 2 (buff)" in page
+    assert "Little Hexenzirkel 2 (buff)" in page
     assert ": Bomb" not in page
 
 

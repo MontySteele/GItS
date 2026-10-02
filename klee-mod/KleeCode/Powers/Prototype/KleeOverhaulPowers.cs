@@ -110,7 +110,7 @@ public sealed class WitchesCirclePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Witches' Circle"),
+        ("title", "Little Hexenzirkel"),
         ("description",
             "Whenever you play a [gold]Companion[/gold] card, place a "
           + "[gold]Bomb[/gold] [blue]{Amount}[/blue] on a random enemy."),
@@ -449,7 +449,7 @@ public sealed class VermillionPactPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Vermillion Pact"),
+        ("title", "Sparkborne Magic"),
         ("description",
             "When a [gold]Set off[/gold] makes one of your [gold]Bombs[/gold] "
           + "react, every other [gold]Bomb[/gold] it sets off reacts with the "

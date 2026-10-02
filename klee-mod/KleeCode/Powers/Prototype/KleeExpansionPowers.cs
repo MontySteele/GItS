@@ -269,7 +269,7 @@ public sealed class PatienceKleePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Patience, Klee!"),
+        ("title", "Experiment in Progress"),
         ("description",
             "At the end of your turn, if you played no [gold]Set off[/gold] "
           + "card, your largest [gold]Bomb[/gold] grows by "

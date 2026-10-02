@@ -41,7 +41,7 @@ public sealed class ProtoKoWitchesCircle : CustomCardModel
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Witches' Circle"),
+        ("title", "Little Hexenzirkel"),
         ("description", "Whenever you play a [gold]Companion[/gold] card, place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
     };
 
