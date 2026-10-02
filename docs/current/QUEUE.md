@@ -13,14 +13,12 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Eyes-on looks (materials ready; no build waits on them)
 
-- **Globe Head:** (1) reskin; (2) redesign. No default: the silhouette is the
-  whole question. `dossiers/remap/reskin-gallery.md`.
 - **End-of-turn docket:** does the end of turn read legibly, is the per-seat
   position doing the attribution work, is the chip's prominence right. Frames
   in `art/eb52_captures/` and `understudy/logs/frames/`; no frame isolates the
   electro (Oz) leg, so that order falls to this look (`BACKLOG.md` `EB-53`).
-- **Two running-game looks:** motion and facing taste (`AS2-B5`), icon picks
-  (`AS2-E2`). The plan is in git only:
+- **Furina's motion look** (`AS2-B5`): motion and facing taste on her combat
+  body. The plan is in git only:
   `git show 762e94d9^:docs/animation-sprint-2-plan.md`.
 
 ## Open packets in `review/active/`
@@ -39,14 +37,11 @@ their defaults (R276, the last R number); nothing from them is open here.
 
   All defaults.
 
-- **P2 hard-state thresholds** (`p2-hard-state-thresholds-2026-08-13.md`,
-  picks 1 to 4): (1, default) adopt the packet's four proposals (more than one
-  enemy becomes a modifier, incoming fraction 0.45, lethal reach unchanged, a
-  ruling on the low-HP trigger); (2) retire the question, since no hard-state
-  sampling runs today.
-
 ## Parked (they come back when their trigger fires)
 
+- **Globe Head** (the Teyvat frame's enemy reskins; returns with the frame or
+  elemental enemies): (1) reskin; (2) redesign. No default: the silhouette is the
+  whole question. `dossiers/remap/reskin-gallery.md`.
 - **Companion cards P5a** (`companion-cards-2026-08-30.md`): how a Rare
   Personal companion would ever be acquired. Deferred by R234; it returns
   before any Rare Personal companion is designed.
