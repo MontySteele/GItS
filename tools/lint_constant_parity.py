@@ -105,12 +105,6 @@ def _ancient_hook(relic_id: str, hook: str) -> int:
 
 
 MIRRORED: dict[str, object] = {
-    # Klee's upgraded starter (Touch of Orobas -> Dodoco Tales). The sim's
-    # copy is a relic row, not a constant; see _ancient_hook. The key below
-    # is the C# TYPE name, which R69 deliberately left as ExplosiveFrags:
-    # only the player-facing string was renamed, so relic ids stay put.
-    "ExplosiveFrags.OpeningSparks":
-        _ancient_hook("touch_of_orobas_klee", "combat_start_spark"),
     # Kokomi's upgraded starter (Touch of Orobas -> Pearl of Insight). Both
     # were UNMIRRORED until 2026-08-13 because the C# side was the EXPRESSION
     # `KokomiConstants.X * 2`, which parse_number cannot read. R190 ratified
@@ -168,20 +162,6 @@ MIRRORED: dict[str, object] = {
     # it visible here.
 
     # Klee.
-    # The Sparks alternative-cost arm (review/ruled/klee-sparks-2026-08-29.md
-    # sec.5). MIRRORED and not UNMIRRORED even though the class is
-    # quarantined: the tier0 counterpart exists and is the SAME number, and
-    # this pairing is the only thing that would catch one side being repriced
-    # without the other. The row above is the threshold this one retires;
-    # both stay, because the flag runs the two economies as two arms.
-    "SparkAttackCostPower.Price": C.SPARK_ATTACK_POWER_PRICE,
-    # EB-219 / LAW:145 -- "Little Hexenzirkul", Klee's kit answering a PERSONAL
-    # Companion play. These four ARE the declaration the clause requires, so a
-    # drift between the engines would be a drift in a rule, not in a tunable.
-    "CompanionConstants.OzDamage": C.OZ_DMG,
-    "CompanionConstants.WitchsFlameBurst": C.WITCHS_FLAME_BURST,
-    "CompanionConstants.SolarIsotomaBlock": C.SOLAR_ISOTOMA_BLOCK,
-    "CompanionConstants.CelestialGiftBlock": C.CELESTIAL_GIFT_BLOCK,
     "CompanionConstants.MasqueBondBlock": C.MASQUE_BOND_BLOCK,
     "CompanionBanner.FeaturedSlots": C.BANNER_FEATURED_SLOTS,
 
@@ -596,15 +576,12 @@ UNMIRRORED: dict[str, str] = {
         "place. The sim has no ledger to size.",
     "ExplosiveFrags.SparksPerDetonation":
         "the BASE starter's rate, carried forward unchanged by the upgrade -- "
-        "which is the ratified design (the windfall is OpeningSparks; the "
-        "doubling of this rate was rejected at the 2026-07-26 red-pen). Its "
+        "the doubling of this rate was rejected at the 2026-07-26 red-pen. Its "
         "sim counterpart is a literal at the detonation site in effects.py "
         "(`gain_sparks(state, 1)` under spark_on_detonation), not a named "
-        "constant, so there is nothing to compare against by value. "
-        "NOTE: this entry used to read 'tier0 has no relic-upgrade layer', "
-        "which stopped being true when combat_start_spark and "
-        "touch_of_orobas_klee landed -- OpeningSparks is now MIRRORED against "
-        "that row.",
+        "constant, so there is nothing to compare against by value. The "
+        "opening windfall it shipped beside (`OpeningSparks`) left at legacy "
+        "cleanup stage 6, unread under the current kit.",
     # The two PearlOfInsightRelic rates USED TO LIVE HERE, as derived
     # expressions this lint could not read. R190 ratified the 2x relationship
     # as a standing invariant and they moved to MIRRORED above, with INVARIANTS

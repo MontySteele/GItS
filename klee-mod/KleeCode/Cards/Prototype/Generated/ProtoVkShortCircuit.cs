@@ -70,7 +70,7 @@ public sealed class ProtoVkShortCircuit : CustomCardModel, ICharacterCard
             var picked = (await CardSelectCmd.FromHandForDiscard(
                 choiceContext, Owner,
                 new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, DynamicVars["Discards"].IntValue),
-                KitGrant.NotKitCard, this)).ToList();
+                null, this)).ToList();
             await CardCmd.Discard(choiceContext, picked);
         }
         await PlayerCmd.GainEnergy(2, Owner);

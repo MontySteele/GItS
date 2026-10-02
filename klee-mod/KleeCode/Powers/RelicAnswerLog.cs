@@ -95,10 +95,9 @@ public static class RelicAnswerLog
     /// "This relic answered, for this much, on this body."
     ///
     /// CALLED WHERE THE PLAN'S OWN RECEIPT DID NOT CATCH IT, which is what
-    /// keeps the Casket's strike from being named twice on one screen: inside
-    /// a carry-out the rider clause already prints it, and
-    /// <see cref="Prototype.KokomiPlan.NoteRider"/> says whether it filed the
-    /// row. The caller passes that answer in.
+    /// keeps the Casket's strike from being named twice on one screen. The
+    /// caller passes in whether the Plan's receipt filed it (the retired
+    /// `KokomiPlan.NoteRider`, legacy cleanup stage 6; it never does now).
     ///
     /// A ZERO WRITES NOTHING. The number reported is the DELIVERED one
     /// (Vulnerable moves it), and a strike that delivered nothing is not a

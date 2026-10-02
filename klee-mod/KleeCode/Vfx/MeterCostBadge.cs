@@ -78,10 +78,7 @@ namespace KleeMod.Vfx;
 /// `-p:PrototypeCards=true`, because when it was built every priced face it had
 /// to draw was a prototype row. Encore is not a prototype: `deep_breath`,
 /// `ebb_and_flow` and `dress_rehearsal` are shipped Furina cards, so the badge
-/// ships with them. What stays behind the flag is the state-aware half of the
-/// Spark price -- the strict Rare Power's contribution, which
-/// <see cref="SparkCost.PowerPriceOf"/> compiles to a literal 0 in a release
-/// build.
+/// ships with them.
 /// </summary>
 internal static class MeterCostBadge
 {

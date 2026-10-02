@@ -23,9 +23,8 @@ PowerShell, from the repo root of the **art-bearing main checkout**.
 
 3. **Prove the generated C# still matches the sheets** — a stale generator
    makes the pack disagree with the YAML it was built from:
-   `.venv\Scripts\python tools\gen_roster_cards.py --check` and
-   `.venv\Scripts\python tools\gen_prototype_cards.py --check` (the release
-   build compiles the prototype surface since 2026-09-28; S6a runs both)
+   `.venv\Scripts\python tools\gen_prototype_cards.py --check` (every card
+   is a prototype row since legacy cleanup stage 5; validate.ps1 S6a runs it)
 
 4. **Gate the tree before shipping it:**
    `.venv\Scripts\python -m pytest tier0/tests tier05/tests -q -n auto --dist

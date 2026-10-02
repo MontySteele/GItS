@@ -110,23 +110,12 @@ from tier0.content.loader import (PROTOTYPE_ID_PREFIX,          # noqa: E402
 # generator disagreeing about what a tag is would be the defect one layer up.
 from understudy.qa_packet import strip_markup                   # noqa: E402
 
+# THE PROFILES' DEFAULT LOCATIONS name the shipped sheets and output folders,
+# which legacy cleanup stages 5 and 6 deleted. Every card emitted today goes
+# through `gen_prototype_cards._profile_for`, which replaces all four location
+# fields with the prototype surface's; these defaults are never read for a
+# row. Upgrade deltas are registered per row (`register_upgrade_deltas`).
 SHEET = REPO / "docs" / "klee-cards.yaml"
-# Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
-UPGRADE_SHEETS = (REPO / "docs" / "klee-upgrades.yaml",
-                  REPO / "docs" / "furina-upgrades.yaml",
-                  REPO / "docs" / "kokomi-upgrades.yaml")
-
-# Companion sheets -> home nation. The nation is what the reward slot's
-# SAME_NATION_REWARD_SHARE weighting keys on, and tier0's loader derives it
-# from the sheet FILENAME (loader.py: `nation = sheet.split("-", 1)[0]`), so
-# the mapping is stated once here rather than re-derived per card.
-#
-# Fontaine entered Klee's slot by user ruling (2026-07-21): "it's probably
-# best to have some non-Mondstadt cards in the pool to make sure Klee doesn't
-# inadvertently overperform with a 100% Mondstadt roster."
-COMPANION_SHEETS = ((REPO / "docs" / "mondstadt-companions.yaml", "mondstadt"),
-                    (REPO / "docs" / "fontaine-companions.yaml", "fontaine"),
-                    (REPO / "docs" / "inazuma-companions.yaml", "inazuma"))
 OUT_DIR = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated"
 MANIFEST = REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "manifest.json"
 FURINA_SHEET = REPO / "docs" / "furina-cards.yaml"
@@ -413,9 +402,8 @@ PROTOTYPE_OWNERS = {**PROFILES, VARKA_PROFILE.character_id: VARKA_PROFILE}
 # CardCmd.Discard on a random pick from the kit-exempt pool; chosen discard
 # is CardSelectCmd.FromHandForDiscard (the MockDiscardAndAddShivsPotion
 # idiom -- forced pick of N, auto-selects-all on a short hand) with the
-# SAME kit-exempt filter. KitGrant.NotKitCard is the exemption both ride
-# (v1.9 invariant: the Burst is never fodder -- the obligation DECISIONS
-# recorded when the kit sprint landed).
+# no filter: the kit Burst cards the old `KitGrant.NotKitCard` exempted left
+# with the shipped kits (legacy cleanup stages 5 and 6).
 # Bomb-manipulation ops (standing-plan batch, 2026-07-20): detonate rides
 # BombPower.DetonateOn/DetonateAll (returns the count -- Chained Reactions
 # prices its re-bomb per detonation caused by the play, the sim's counter
@@ -498,7 +486,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # over is the half the seats made decisions with.
                   "scry_take", "add_card", "exhaust_from",
                   "apply_aura", "swirl", "buff_next_attack", "block_next_turn",
-                  "cost_mod", "copy_companion_in_hand",
+                  "copy_companion_in_hand",
                   # Curtain Call consolidation ("Take a Bow"): grow_damage is
                   # Rampage's permanent per-instance growth (BaseValue raised
                   # on the card's own var, the SyncDisplay idiom);
@@ -755,66 +743,6 @@ BURST_WORD = re.compile(r"\bBurst\b")
 def prints_burst_word(description: str) -> bool:
     """Does this built card description name the Burst Energy meter?"""
     return bool(BURST_WORD.search(description))
-
-
-# `EB-475`. TWO PHRASES OF FURINA'S THAT GATE A DECISION AND DEFINE NOTHING.
-#
-# "If you moved the [gold]Spotlight[/gold] this turn" is printed by three rows
-# and the Furina r9 seat passed on two of them ("I could not tell whether I
-# could turn the condition on"); "takes their bow" is Take Your Bow's whole
-# body and was declined at a reward, free, unread. Both are matched on the
-# BUILT description -- `EB-272`'s rule and its reason: the phrase on the face
-# is the surface the gap was reported against, and a row that prints it
-# tomorrow carries its definition without anybody remembering.
-#
-# THE GOLDED SPAN IS IN THE FIRST PATTERN AND NOT THE SECOND, because that is
-# how the two are actually printed: `Spotlight` is a keyword and carries the
-# markup, and "takes their bow" is a verb phrase in plain prose. Matching each
-# as it is written is what keeps either from silently missing.
-#
-# THE THIRD WORD, `Guest Star`, IS NOT HERE: no card face prints it. It
-# reaches the player inside `FurinaRiderTips.CompanionBody`'s clause, which is
-# where that tip attaches its definition.
-SPOTLIGHT_MOVE_PHRASE = re.compile(
-    r"moved the \[gold\]Spotlight\[/gold\] this turn")
-TAKES_BOW_PHRASE = re.compile(r"takes their bow")
-
-
-def prints_spotlight_move(description: str) -> bool:
-    """Does this built description gate on having moved the Spotlight?"""
-    return bool(SPOTLIGHT_MOVE_PHRASE.search(description))
-
-
-def prints_takes_bow(description: str) -> bool:
-    """Does this built description use the Salon's `bow` verb?"""
-    return bool(TAKES_BOW_PHRASE.search(description))
-
-
-# `EB-488`. THE FOURTH FURINA WORD, and the one a REWARD screen needed.
-#
-# THE FIND (Furina r10 (c) 5). `Grand Salon` -- "[gold]Salon Member[/gold]
-# numbers are 1 higher" -- was the run's first card reward, offered on a screen
-# with no glossary for the words it is written in, and the seat passed on it
-# partly because it could not price it. The Salon tip had appeared exactly once
-# all run, on `Salon Debut` in fight 1.
-#
-# WHY IT WAS MISSING: `salon_member_tip_args` attaches from the EFFECT -- which
-# member does this row deploy -- which is right for the three member paragraphs
-# and wrong for the RULES paragraph. A face that names the word and deploys
-# nobody is precisely the face whose reader has never met it. So the rules tip
-# attaches from the PRINTED WORD, which is the rule the Companion tip already
-# reaches a reward screen by.
-#
-# GOLDED, because that is how every face prints it, and the plural is the same
-# word: `Salon Member{PowerAmount:plural:|s}` is one interpolated hole away
-# from `Salon Member` and means the same rule.
-SALON_MEMBER_PHRASE = re.compile(
-    r"\[gold\]Salon Member(?:s|\{[^{}]*\})?\[/gold\]")
-
-
-def prints_salon_member(description: str) -> bool:
-    """Does this built description print the words `Salon Member`? `EB-488`."""
-    return bool(SALON_MEMBER_PHRASE.search(description))
 
 
 # --- `EB-272`: the QUARANTINED ARMS' KEYWORDS --------------------------------
@@ -3042,25 +2970,6 @@ APPLY_POWERS = {
         "to that enemy."),
     "spark_threshold_down": ("SparkThresholdDownPower", None,
         "You need {X} fewer [gold]Spark[/gold] for your Attacks to cost 0."),
-    # THE STRICT RARE POWER (PICK 5 wording (1), sub-pick (a); the independent
-    # seat FOLLOWS on both -- review/ruled/klee-sparks-2026-08-29.md sec.9).
-    # QUARANTINED: `SparkAttackCostPower` lives in `Powers/Prototype/` and is
-    # compiled only under `-p:PrototypeCards=true`, so the only row that may
-    # name this power is a `proto_` row on the prototype surface, which is
-    # compiled only under the same switch. The row above is the body this one
-    # REPLACES -- `spark_threshold_down` modifies a threshold that does not
-    # exist once the base rule is retired -- and it stays for the same reason
-    # tier0 keeps `spark_threshold`: an OFF arm needs the shipped rule byte for
-    # byte.
-    #
-    # NO {X} IN THE TEMPLATE, deliberately. The price is a CONSTANT of the rule
-    # (`SparkAttackCostPower.Price` = 3, tier0 `C.SPARK_ATTACK_POWER_PRICE`) and
-    # NOT the power's stack amount: the row applies 1 stack and charges 3, so
-    # rendering the amount here would print "cost 1 Spark" on a card that
-    # charges three. The face text is sec.5's proposal unchanged.
-    "spark_attack_cost": ("SparkAttackCostPower", None,
-        "Your Attacks that do not already cost [gold]Spark[/gold] cost 3 "
-        "[gold]Spark[/gold] instead of their [gold]Energy[/gold] cost."),
     # THE KLEE OVERHAUL, SLICE ONE (QUARANTINED, R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of
     # a release build, so the only rows that may name one are `proto_` rows on
@@ -3401,24 +3310,9 @@ APPLY_POWERS = {
         "Apply {X} [gold]Weak[/gold]{TO}."),
     "vulnerable": ("VulnerablePower", None,
         "Apply {X} [gold]Vulnerable[/gold]{TO}."),
-    # Companion powers (2026-07-21, CompanionPowers.cs): each mirrors a
-    # tier0 player_turn_start/end trigger or attack-bonus branch. No caps
-    # (the sim clamps none of these).
-    "oz_summon": ("OzSummonPower", None,
-        "Summon Oz for {X} turns: at the end of your turn, he deals 3 damage "
-        "and applies [gold]Electro[/gold] to a random enemy."),
-    "witchs_flame": ("WitchsFlamePower", None,
-        "At the end of your turn, consume [gold]Pyro[/gold] from each enemy. "
-        "For each aura consumed, deal {X} damage and gain 3 "
-        "[gold]Burst Energy[/gold]."),
-    # Redesigned 2026-07-26 (red-pen item 4): a per-turn Strength ratchet plus
-    # the same per-turn Block, replacing a static flat attack bonus.
-    "celestial_gift": ("CelestialGiftPower", None,
-        "At the start of your turn, gain {X} [gold]Strength[/gold] and 4 "
-        "[gold]Block[/gold]."),
-    "solar_isotoma": ("SolarIsotomaPower", None,
-        "For {X} turns: your Attacks against enemies holding an elemental "
-        "aura grant 3 [gold]Block[/gold] per hit."),
+    # Companion powers (2026-07-21, CompanionPowers.cs). The shipped Oz,
+    # Witch's Flame, Celestial Gift and Solar Isotoma left at legacy cleanup
+    # stage 6 (no current row applied them).
     "attack_up_this_turn": ("AttackUpThisTurnPower", None,
         "Your Attacks deal {X} more damage this turn."),
     "strength": ("StrengthPower", None,
@@ -3437,8 +3331,7 @@ APPLY_POWERS = {
     # is Compile Remove'd out of a release build, so the only rows that may name
     # one are `proto_mc_` rows on the prototype surface -- compiled under the
     # same switch. Each is one of two shapes the engine already runs: a
-    # start-of-turn payout (CelestialGiftPower's shape) or an end-of-turn volley
-    # (OzSummonPower's). The {X} templates are here for form; every overhaul row
+    # start-of-turn payout or an end-of-turn volley. The {X} templates are here for form; every overhaul row
     # carries its own `description:`, which is the surface's own face channel
     # (EB-215). Sim twins: tier0.engine.effects.player_turn_start_triggers /
     # player_turn_end_triggers, one branch each.
@@ -6858,80 +6751,6 @@ def salon_calc_rider(card: dict, eff: dict) -> tuple[int, int, str, str] | None:
     return int(eff["amount"]), deploys, var, mult
 
 
-def rider_tip_args(card: dict) -> tuple[str, str]:
-    """Track L-C: the C# arguments for the re-homed rider tips.
-
-    Returns `(furina_args, kokomi_args)` -- the arguments for
-    `FurinaRiderTips.ForCard` and for `KokomiRiderTips.ForChargeRider`
-    respectively, each "" when that class has nothing to say. Two strings
-    rather than one because the tip helpers are per-character classes, and a
-    Charge rate has no business being explained by Furina's helper; the
-    SCAN is shared because "which rider did this card convert" is one
-    question about one sheet vocabulary.
-
-    Only riders that were CONVERTED get a tip, because only those have had
-    their arithmetic removed from the card text. An unconverted rider (the
-    Bomb-detonation formula, an AoE aura rider) keeps its full sentence on the
-    face, so re-homing it would delete the only place the player could read
-    it."""
-    args = []
-    kokomi_args = []
-    for eff in card.get("effects", []):
-        # B1: a converted BLOCK rider has had its arithmetic removed from the
-        # face exactly as a converted damage rider has, so it earns the same
-        # tip. Without this the fix would trade a silent drop for a silent
-        # number -- "{CalculatedBlock}" with nothing saying where it came from.
-        if calc_rider(card, eff) is None \
-                and block_calc_rider(card, eff) is None:
-            continue
-        m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
-        members = re.fullmatch(r"(\d+)_per_salon_member",
-                               eff.get("bonus_formula", ""))
-        companions = re.fullmatch(r"(\d+)_per_companion_played_this_turn",
-                                  eff.get("bonus_formula", ""))
-        # L4b: Kokomi's Charge rider took the same bargain as the Fanfare one
-        # -- the face was cut to "Scales with Charge" and the arithmetic
-        # renders inside {CalculatedDamage} -- but no branch here matched
-        # `N_per_M_charge`, so the RATE was printed nowhere at all: not on the
-        # face, not in a tip. The player could see a number move and never
-        # learn what moved it.
-        charge = re.fullmatch(r"(\d+)_per_(\d+)_charge",
-                              eff.get("bonus_formula", ""))
-        if m:
-            args.append(f"fanfarePer: {int(m.group(1))}")
-            args.append(f"fanfareStep: {int(m.group(2))}")
-            if eff.get("op") == "block":
-                # Same noun rule as the salon rider below: a Block-granting
-                # fanfare rider must not read "+N damage" on hover (SYS-7).
-                args.append("grantsBlock: true")
-        elif members:
-            # A13/A14: same re-homing bargain as the Fanfare rider. The face
-            # keeps a short marker, the RATE and what the stage is paying
-            # right now live here.
-            args.append(f"salonPer: {int(members.group(1))}")
-            if eff.get("op") == "block":
-                args.append("salonGrantsBlock: true")
-        elif companions:
-            # Track C.3: same bargain again. The face says it scales; the tip
-            # carries the rate and the live count.
-            args.append(f"companionPer: {int(companions.group(1))}")
-        elif charge:
-            # Same two arguments the Fanfare rider takes, and for the same
-            # reason: a rate is a numerator AND a denominator, and "+1 per
-            # Charge" is a different card from "+1 per 2 Charge".
-            kokomi_args.append(f"chargePer: {int(charge.group(1))}")
-            kokomi_args.append(f"chargeStep: {int(charge.group(2))}")
-            if eff.get("op") == "block":
-                # EB-122 / SYS-7, one meter over: `gyorin_formation` is the
-                # first Charge rider on a BLOCK op, and this tip is the only
-                # surface carrying the rate. Without the noun it would be the
-                # single place a player can read it and would say "damage".
-                kokomi_args.append("chargeGrantsBlock: true")
-        elif "bonus_vs_aura" in eff:
-            args.append(f"auraBonus: {int(eff['bonus_vs_aura'])}")
-    return ", ".join(args), ", ".join(kokomi_args)
-
-
 def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int],
                                             dict[int, list[int]]]:
     """B5: consecutive deploys of the SAME member render as one sentence.
@@ -6997,31 +6816,6 @@ def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int],
             runs[head].append(i)
             skip.add(i)
     return merged, skip, runs
-
-
-def salon_member_tip_args(card: dict) -> str:
-    """B5: the C# arguments naming which member tips this card carries, or "".
-
-    A random deploy passes `randomMember: true` and the tip helper shows all
-    three -- the player is choosing to roll and needs to know the field.
-    Order follows the card's own effects so a multi-deploy card's tips read in
-    the order it summons them.
-    """
-    members: list[str] = []
-    random_deploy = False
-    for eff in card.get("effects", []):
-        if eff.get("op") != "apply_power" or eff.get("power") != "salon_member":
-            continue
-        member = eff.get("member", "crabaletta")
-        if member == "random":
-            random_deploy = True
-        elif SALON_MEMBER_CS[member] not in members:
-            members.append(SALON_MEMBER_CS[member])
-    if random_deploy:
-        return "randomMember: true"
-    if not members:
-        return ""
-    return "members: new[] { " + ", ".join(members) + " }"
 
 
 def salon_scaled_snapshot(card: dict) -> str | None:
@@ -7894,30 +7688,13 @@ _upgrade_deltas: dict | None = None
 
 
 def upgrade_deltas() -> dict:
-    """Per-card delta maps, merged across the upgrade sheets exactly as
-    tier0/content/upgrades.py._upgrade_index does (R20: the upgrade sheets are
-    the only home for deltas; inline `upgrade:` keys block the card).
-
-    Two sheets since the Fontaine companions entered Klee's reward slot
-    (2026-07-21 ruling): their deltas live in furina-upgrades.yaml, and the
-    sim merges both, so a generator reading only klee-upgrades.yaml would emit
-    unupgradeable cards the sim happily smiths. Duplicate ids across sheets are
-    a hard error on the sim side; mirrored here rather than silently
-    last-wins.
+    """Per-card delta maps. Empty until rows register their own
+    (`register_upgrade_deltas`): the shipped upgrade sheets it once merged
+    were deleted at legacy cleanup stage 6.
     """
     global _upgrade_deltas
     if _upgrade_deltas is None:
         merged: dict = {}
-        for sheet in UPGRADE_SHEETS:
-            if not sheet.exists():
-                continue
-            entries = yaml.safe_load(sheet.read_text(encoding="utf-8")) or {}
-            dupes = set(entries) & set(merged)
-            if dupes:
-                raise SystemExit(
-                    f"gen_klee_cards: {sheet.name}: duplicate upgrade ids "
-                    f"{sorted(dupes)} -- the sim raises on this too.")
-            merged.update(entries)
         _upgrade_deltas = merged
     return _upgrade_deltas
 
@@ -11669,7 +11446,7 @@ def build_body(
                     "                choiceContext, Owner,\n"
                     "                new CardSelectorPrefs("
                     f"CardSelectorPrefs.DiscardSelectionPrompt, {n}),\n"
-                    "                KitGrant.NotKitCard, this)).ToList();\n"
+                    "                null, this)).ToList();\n"
                     "            await CardCmd.Discard(choiceContext, picked);\n"
                     "        }"
                 )
@@ -11683,7 +11460,7 @@ def build_body(
                     f"for (var i = 0; i < {n}; i++)\n"
                     "        {\n"
                     "            var pool = CardPile.Get(PileType.Hand, Owner)?"
-                    ".Cards.Where(KitGrant.NotKitCard).ToList();\n"
+                    ".Cards.ToList();\n"
                     "            if (pool == null || pool.Count == 0) break;\n"
                     "            var victim = Owner.RunState.Rng.CombatTargets.NextItem(pool);\n"
                     "            if (victim == null) break;\n"
@@ -11707,23 +11484,13 @@ def build_body(
                 "            choiceContext, Owner,\n"
                 "            new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, "
                 f"{n}),\n"
-                "            KitGrant.NotKitCard, this)).ToList();\n"
+                "            null, this)).ToList();\n"
                 "        await CardCmd.Discard(choiceContext, picked);\n"
                 f"        var sparkGain = Math.Min({m}, picked.Count);\n"
                 "        if (sparkGain > 0)\n"
                 "        {\n"
                 "            await SparkPower.Gain(choiceContext, Owner.Creature, sparkGain, this);\n"
                 "        }"
-            )
-
-        elif op == "cost_mod":
-            # tier0 _op_cost_mod: companion_cost_delta_this_turn += delta.
-            # Amount is the REDUCTION (positive; PowerModel amounts are
-            # non-negative by default).
-            lines.append(
-                f"await PowerCmd.Apply<CompanionCostThisTurnPower>(choiceContext, "
-                f'Owner.Creature, {-int(eff["delta"])}, '
-                "applier: Owner.Creature, cardSource: this);"
             )
 
         elif op == "copy_companion_in_hand":
@@ -11791,17 +11558,13 @@ def build_body(
             # AB-s1 (Q9 / R118, verbatim "Yes."): the copy pool excludes KIT
             # cards, matching the sheet and the sim
             # (_op_copy_spotlighted_in_hand's `not c.kit_card`).
-            # KitGrant.NotKitCard is the same predicate
-            # every other kit-exempt pool in the codebase rides (Crackle,
-            # bright_idea, the Kokomi selectors). Recorded as a MOD BEHAVIOUR
-            # CHANGE, not a parity repair -- the undiscardable copied kit
-            # Burst stops being reachable in game.
+            # No kit card exists since legacy cleanup stage 6, so the C# pool
+            # carries no filter.
             lines.append(
                 "{\n"
                 "            var spotlightTargets = CardPile.Get("
                 "PileType.Hand, Owner)?.Cards\n"
                 "                .Where(SpotlightSystem.IsSpotlighted)\n"
-                "                .Where(KitGrant.NotKitCard)"
                 ".ToList();\n"
                 "            if (spotlightTargets != null "
                 "&& spotlightTargets.Count > 0)\n"
@@ -12429,7 +12192,7 @@ def _upgrade_add_lines(card: dict, salon_deploy_present: bool) -> list[str]:
             "                choiceContext, Owner,\n"
             "                new CardSelectorPrefs("
             f"CardSelectorPrefs.DiscardSelectionPrompt, {added_discard_upgrade(card)}),\n"
-            "                KitGrant.NotKitCard, this)).ToList();\n"
+            "                null, this)).ToList();\n"
             "            await CardCmd.Discard(choiceContext, pickedUpgrade);\n"
             "        }"
         )
@@ -16026,134 +15789,10 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "KleeCardTooltips.ForCard(base.ExtraHoverTips, this, "
             f"{trigger_arg}, includesBombRules: {bomb_arg}"
             f"{confiscated_arg}{no_hit_arg})")
-    # Track L-C: the arithmetic the card text no longer carries. Wraps the
-    # element/bomb tips when both apply, so one override yields both lists.
-    rider_args, charge_rider_args = rider_tip_args(card)
-    if rider_args:
-        tips_expr = (
-            f"FurinaRiderTips.ForCard({tips_expr or 'base.ExtraHoverTips'}, "
-            f"this, {rider_args})")
-    # L4b: the Charge rate, in Kokomi's own tip class. Same bargain as above
-    # -- the face names Charge in the number's own sentence (EB-164), and the
-    # rate and what it is paying right now live in the tip.
-    if charge_rider_args:
-        tips_expr = (
-            "KokomiRiderTips.ForChargeRider("
-            f"{tips_expr or 'base.ExtraHoverTips'}, this, "
-            f"{charge_rider_args})")
-    # `EB-484` WAS A TIP AND IS NOW THE FACE (`EB-624`), which is why no
-    # attach happens here any more.
-    #
-    # The r16 seat could not tell on a SHOP shelf whether `Undertow` "deals 4
-    # or 7", because its face printed one number and a clause about a second.
-    # The remedy then was a tip carrying the pair, on the reading that a card
-    # has exactly one face and cannot branch it. It does not have to: the base
-    # game's own conditional prints BOTH numbers on one face ("Deal A damage.
-    # If the enemy has a debuff, deal B instead."), and `build_vars` now
-    # declares a `FoldedDamageVar` for each, so both are live everywhere and
-    # both are the sheet's own off the board. A tip repeating the sheet
-    # numbers beside a face printing the folded ones would be `EB-441`'s
-    # defect coming back on the other surface.
-    # B5: a deploy card carries the tip for every member it can field, plus
-    # the cap rules its face no longer prints. Attached from the EFFECT, not
-    # from a card list, so a new deploy card cannot ship naming a member that
-    # nothing on screen explains.
-    salon_tip_args = salon_member_tip_args(card)
-    if salon_tip_args:
-        tips_expr = (
-            f"SalonMemberTips.ForCard({tips_expr or 'base.ExtraHoverTips'}, "
-            f"this, {salon_tip_args})")
-    # Kokomi's two hidden reads. Neither can render on a card face -- the
-    # pulse resolves at end of turn from a bank that will have moved, and the
-    # Garment rider lands on OTHER cards -- so the hover tip is the only
-    # surface either number has. See KokomiRiderTips for the argument.
-    # BY character_id, NOT by identity. A prototype row is emitted through a
-    # COPY of the owner's profile (gen_prototype_cards._profile_for calls
-    # dataclasses.replace to move the four location fields), so `is
-    # KOKOMI_PROFILE` was false for every Kokomi row on the quarantined
-    # surface and each of them silently lost every tip below -- the Muster
-    # definition, the Garment rider, the pulse. Silently, because a missing
-    # hover tip renders as nothing at all. Found while attaching the Charge
-    # keyword, which is why it is fixed here rather than filed: the keyword
-    # the slice exists to print would not have printed.
-    if profile.character_id == "kokomi":
-        if any(eff.get("op") == "summon_kurage"
-               for eff in card.get("effects", [])):
-            tips_expr = (
-                "KokomiRiderTips.ForKuragePulse("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-        # THE CASKET PASS (2026-09-28): NOT on an arm row. The Kokomi arm
-        # retired the Garment, so the tip could never show under it.
-        if (card.get("type") == "attack"
-                and not str(card.get("id", "")).startswith("proto_")):
-            tips_expr = (
-                "KokomiRiderTips.ForGarmentAttack("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-        # R78: every Muster card carries the keyword's definition, because
-        # the faces no longer restate it. Attached from the OP rather than
-        # from a card list, so a new conscript card cannot ship with a
-        # keyword nothing on screen defines.
-        if any(eff.get("op") == "conscript"
-               for eff in _effects_everywhere(card)):
-            tips_expr = (
-                "KokomiRiderTips.ForMuster("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-        # R213 E1 / R215 D. Every face that PRINTS the word Charge carries the
-        # keyword's definition, because until the slice the word named a meter
-        # with no rules text anywhere on screen -- the gap R215 D deferred into
-        # E1, with a blind witness in run B6 ("Burst Energy accumulated ...
-        # although I never saw how to spend it").
-        #
-        # The slice scoped this to `spend_charge` and left the gain faces for a
-        # wording-only commit; this IS that commit, and the rule widened to the
-        # printed word rather than to a longer op list, because the op list
-        # cannot be made total. See `prints_charge_word` for the three shapes
-        # that print the meter with no Charge op at all.
-        if prints_charge_word(desc):
-            tips_expr = (
-                "KokomiRiderTips.ForCharge("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-    # The Burst keyword, on the same rule and OUTSIDE the Kokomi block --
-    # Burst is the roster's meter, not one character's, so the attach point is
-    # the roster-wide tooltip class. Charge's twin and the older gap: the word
-    # has been on thirty-eight faces across three characters since the first
-    # spike, and the only surface that ever defined it was a status badge
-    # retired in July. See `prints_burst_word` for why the rule is the printed
-    # word, and KleeCardTooltips.ForBurst for which parts of the rule are
-    # shared and which are read live off the owner.
-    if prints_burst_word(desc):
-        tips_expr = (
-            "KleeCardTooltips.ForBurst("
-            f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-    # `EB-475`, the two Furina phrases, on the same printed-word rule as the
-    # meter words above and in the same tip class the rest of her riders live
-    # in. Scoped to HER, because both phrases are about machinery only she has
-    # -- a row of Klee's quoting "takes their bow" would print a rule with no
-    # stage behind it.
-    if profile.character_id == "furina":
-        if prints_spotlight_move(desc):
-            tips_expr = (
-                "FurinaRiderTips.ForSpotlightMove("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-        if prints_takes_bow(desc):
-            tips_expr = (
-                "FurinaRiderTips.ForBow("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-        # `EB-488`, the third of hers and the one a REWARD screen needed. The
-        # rules paragraph attaches from the PRINTED WORD, unlike the three
-        # member paragraphs `salon_member_tip_args` attaches from the effect --
-        # a face that names the word and deploys nobody is exactly the face
-        # whose reader has never met it.
-        #
-        # AND NOT ON A DEPLOY CARD, which carries this same paragraph through
-        # `SalonMemberTips.ForCard` below: two copies of one definition on one
-        # face is what the game's own tip de-duplication would then be picking
-        # between. The exclusion is read off the same predicate that attach
-        # uses, so the two cannot drift.
-        if prints_salon_member(desc) and not salon_member_tip_args(card):
-            tips_expr = (
-                "SalonMemberTips.ForSalonRules("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+    # The shipped kits' rider tips (`FurinaRiderTips`, `SalonMemberTips`,
+    # `KokomiRiderTips`, `KleeCardTooltips.ForBurst`) left with the shipped
+    # kits (legacy cleanup stages 5 and 6): their classes are deleted and no
+    # current row printed a word or a rider that attached one.
     # `EB-477`'s COMPANION-PERFORM TIP LEFT WITH THE REFRAME (`EB-726`, R269).
     # It said what a Companion play performs, which was the retired arm's rule
     # and is no rule the Stage has: her performers are pets and a Companion

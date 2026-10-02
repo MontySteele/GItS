@@ -73,8 +73,10 @@ internal static class UpgradedStarterRelics
 /// RATIFIED 2026-07-26.
 ///
 /// Her per-detonation Spark income is UNCHANGED at 1 -- this relic keeps the
-/// base behaviour rather than replacing it -- and she banks a fixed windfall
-/// of <see cref="OpeningSparks"/> at the start of every combat.
+/// base behaviour rather than replacing it. The fixed opening windfall it was
+/// ratified with (3 Sparks) went with the shipped Sparks rule: under the
+/// current kit the relic's body is the first-explosion repair below
+/// (legacy cleanup stage 6 deleted the unread constant).
 ///
 /// WHY A WINDFALL AND NOT A RATE. The first attempt doubled the per-detonation
 /// grant, and that was rejected at red-pen as "way too good": a rate multiplies
@@ -129,9 +131,6 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
     /// first.
     /// </summary>
     public const int SparksPerDetonation = 1;
-
-    /// <summary>Sparks banked once, at the start of every combat.</summary>
-    public const int OpeningSparks = 3;
 
     /// <summary>Under the Klee arm, the first explosion each turn pays this
     /// many Sparks instead of one (the relics-and-potions paper's repair,

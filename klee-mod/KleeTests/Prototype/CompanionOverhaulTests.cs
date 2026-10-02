@@ -161,22 +161,6 @@ public class CompanionOverhaulTests
         }
     }
 
-    [Fact]
-    public void The_arm_does_not_edit_the_shipped_companion_powers()
-    {
-        // The reason every rewritten power is a SECOND class rather than a
-        // retune of the shipped one: a flag-off build has to keep meaning what
-        // it printed. Oz is the sharpest case -- the shipped power is a
-        // three-turn Counter and this arm's is permanent.
-        var shipped = new[] { typeof(OzSummonPower), typeof(SolarIsotomaPower),
-                              typeof(CelestialGiftPower), typeof(WitchsFlamePower) }
-            .SelectMany(t => t.GetMethods(All).Where(m => m.DeclaringType == t))
-            .SelectMany(Il.Calls)
-            .ToList();
-        Assert.DoesNotContain(shipped, c => c.StartsWith("CompanionOverhaul"));
-        Assert.DoesNotContain(shipped, c => c.StartsWith("MondstadtOz"));
-    }
-
     // ---- THE ROWS -------------------------------------------------------
 
     [Fact]
@@ -436,7 +420,7 @@ public class CompanionOverhaulTests
     public void Nicole_reads_a_latch_rather_than_live_block()
     {
         // The card cannot ask its question at the start of the turn: the turn
-        // tick clears Block first, which is exactly why CelestialGiftPower can
+        // tick clears Block first, which is exactly why a start-of-turn power can
         // GRANT Block from this same hook and have it survive. So the answer
         // is written at the previous turn's end and only read here.
         var start = typeof(RevelationPower)

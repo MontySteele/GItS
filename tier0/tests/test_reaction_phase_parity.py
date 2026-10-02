@@ -885,9 +885,6 @@ CO_TENANCY_LEDGER = {
             "broadcast writes energy, and the draw is the write NaptimePower "
             "and LionsFangPower already make here on the same terms: no "
             "co-tenant reads the hand's contents",
-        ("Powers/CompanionPowers.cs", "CelestialGiftPower"):
-            "per-turn Strength + Block mint; its body notes the sim's "
-            "Strength-then-Block order is bookkeeping, not a dependency",
         ("Powers/Prototype/CompanionOverhaulPowers.cs", "SignatureMixPower"):
             "QUARANTINED (the Mondstadt companion overhaul). Raw per-turn "
             "Block mint plus its own duration tick, the same shape as "
@@ -1174,8 +1171,6 @@ CO_TENANCY_LEDGER = {
             "draw debt, neither of which a Plan touches. The sim runs it at "
             "the same site (`combat._player_turn`, `kokomi_plan.resolve_dusk` "
             "beside `klee_overhaul.turn_end`) and for the same reason",
-        ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
-            "duration tick-down of itself, player side",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
             "kit-grant check, turn-end site; its body documents the "
             "models-after-powers broadcast order it leans on",
@@ -1254,15 +1249,8 @@ CO_TENANCY_LEDGER = {
             "and touches nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
-        ("Powers/CompanionPowers.cs", "CompanionCostThisTurnPower"):
-            "self-expiry of the per-turn cost-discount accumulator (R114 "
-            "boundary)",
         ("Powers/CompanionPowers.cs", "ReplayNextCompanionPower"):
             "self-expiry at the end of the turn that wrote it (R110)",
-        ("Powers/CompanionPowers.cs", "WitchsFlamePower"):
-            "consumes Pyro auras for damage + Burst, player side; runs "
-            "after the BeforeSideTurnEnd volleys by broadcast order, so it "
-            "eats what they applied",
         ("Powers/CompanionPowers.cs", "AttackUpThisTurnPower"):
             "self-expiry of a this-turn attack buff",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
@@ -1468,8 +1456,6 @@ TURN_END_SEQUENCE = (
      "effects.player_turn_end_triggers pays masque_red_death's Bond FIRST, "
      "at the top of the function, so it eats the Block the turn produced "
      "rather than the Kurage pulse's mending"),
-    ("OzSummonPower",
-     "oz_summon, the Electro volley, is the second"),
 )
 
 
@@ -1499,7 +1485,8 @@ def _order_table() -> str:
 
 
 def test_the_turn_end_sequence_is_the_sims_order():
-    """Bond -> Pyro -> Electro -> Hydro, top to bottom.
+    """The sequence's order, top to bottom (Bond is all that remains since
+    legacy cleanup stages 5 and 6 retired the three volleys).
 
     This is the whole content of the fix: the four used to be independent
     BeforeSideTurnEnd overrides with no relative order, and a fixed-seed
@@ -1540,7 +1527,6 @@ def test_the_sequencer_walks_the_table():
 
 @pytest.mark.parametrize("rel,cls", [
     ("Powers/FontainePowers.cs", "MasqueRedDeathPower"),
-    ("Powers/CompanionPowers.cs", "OzSummonPower"),
 ])
 def test_the_sequenced_powers_do_not_take_the_broadcast_back(rel, cls):
     """The revert this guards: re-adding `override BeforeSideTurnEnd`.

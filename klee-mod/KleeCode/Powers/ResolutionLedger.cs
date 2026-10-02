@@ -140,7 +140,7 @@ public static class ResolutionLedger
     /// <summary>The row hits are being filed against, or null between plays.
     /// The game loop is single threaded and a card resolves whole before the
     /// next one starts, so one open row is the whole of the bookkeeping --
-    /// `KokomiPlan.NoteRider`'s own posture one file over.</summary>
+    /// the posture `KokomiPlan`'s Plan receipt takes.</summary>
     private static Resolved? _open;
 
     /// <summary>Where the player stopped watching, or negative for "no mark

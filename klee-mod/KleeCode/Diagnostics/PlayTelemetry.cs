@@ -230,7 +230,7 @@ internal static class PlayTelemetry
     // -------------------------------------------------------------- turn ---
 
     /// <summary>The turn-opening sample: HP, block, the telegraph BEFORE
-    /// block, the meters, and the enemy HP pool. The pool is what makes an
+    /// block and the enemy HP pool. The pool is what makes an
     /// output curve possible without trusting attribution — per-turn damage is
     /// the pool's own drop, which cannot under-count the way crediting a card
     /// can.</summary>
@@ -278,11 +278,6 @@ internal static class PlayTelemetry
 
                 record.ReactionsByTurn.Add(new[]
                     { round, mine - record.ReactionsAtStart });
-                // The shipped meters these columns read (the Fanfare meter, the
-                // Salon count and slots, Encore) went with the shipped kits
-                // (legacy cleanup stage 5); the columns stay at 0 so the trace
-                // schema `understudy` replays is unchanged until stage 6.
-                record.MetersByTurn.Add(new[] { round, 0, 0, 0, 0 });
             }
 
             SampleDetonations(combat);
@@ -888,7 +883,6 @@ internal static class PlayTelemetry
         public readonly List<int[]> HpTrajectory = new();
         public readonly List<int[]> IncomingByTurn = new();
         public readonly List<int[]> EnemyPoolByTurn = new();
-        public readonly List<int[]> MetersByTurn = new();
         public readonly List<int[]> BlockAtTurnEnd = new();
         public readonly List<int[]> ReactionsByTurn = new();
         /// <summary>-1 until the first turn sample; the counter is monotonic
@@ -976,7 +970,6 @@ internal static class PlayTelemetry
             Pairs(sb, "hp_trajectory", HpTrajectory);
             Pairs(sb, "incoming_by_turn", IncomingByTurn);
             Pairs(sb, "enemy_pool_by_turn", EnemyPoolByTurn);
-            Pairs(sb, "meters_by_turn", MetersByTurn);
             Pairs(sb, "block_at_turn_end", BlockAtTurnEnd);
             Pairs(sb, "reactions_by_turn", ReactionsByTurn);
             sb.Append(",\"cards_played\":[");

@@ -139,8 +139,8 @@ def test_the_ancients_stay_out_of_the_ratified_sheets():
     for cid in WITNESSED:
         assert cid not in surface_ids, f"{cid} reached the prototype surface"
     from tools import gen_klee_cards as gen
-    assert not any(p.name == "ancient-upgrades.yaml"
-                   for p in gen.UPGRADE_SHEETS)
+    # Codegen reads no upgrade sheet at all since legacy cleanup stage 6.
+    assert not hasattr(gen, "UPGRADE_SHEETS")
     assert any(p.name == "ancient-upgrades.yaml"
                for p in upgrades.UPGRADE_SHEETS)
     # Codegen has no CardRarity mapping for `ancient`, and that KeyError is

@@ -57,17 +57,12 @@ public interface ISparkXPricedCard
 }
 
 /// <summary>
-/// What a card charges in Sparks RIGHT NOW: printed plus power. The C# twin of
-/// tier0 <c>combat.spark_price</c>, and it exists for the identical reason that
+/// What a card charges in Sparks RIGHT NOW. The C# twin of tier0
+/// <c>combat.spark_price</c>, and it exists for the identical reason that
 /// function does -- so the playability gate, the payment and the cost badge can
-/// never disagree about the number.
-///
-/// THE PRINTED HALF is on the card and is state-free. THE POWER HALF is
-/// state-aware and is behind the flag: only the strict Rare Power
-/// (<c>SparkAttackCostPower</c>, quarantined in <c>Powers/Prototype/</c>) ever
-/// contributes to it, so with <c>PROTOTYPE_CARDS</c> undefined
-/// <see cref="PriceOf"/> IS the printed price and the shipped behaviour is
-/// unchanged.
+/// never disagree about the number. Only the printed price remains: the strict
+/// Rare Power that added a second half (<c>SparkAttackCostPower</c>) left with
+/// the Spark alternative-cost arm (legacy cleanup stage 6).
 /// </summary>
 public static class SparkCost
 {
@@ -75,19 +70,8 @@ public static class SparkCost
     public static int PrintedPriceOf(CardModel card) =>
         card is ISparkPricedCard priced ? priced.PrintedSparkPrice : 0;
 
-    /// <summary>
-    /// The price a POWER contributes, 0 in a release build. Mirrors tier0
-    /// <c>combat.spark_power_price</c>, whose whole body is behind the same
-    /// flag.
-    /// </summary>
-    public static int PowerPriceOf(CardModel card)
-    {
-        return SparkAttackCostPower.PriceFor(card);
-    }
-
-    /// <summary>Printed plus power: the one number every reader consults.</summary>
-    public static int PriceOf(CardModel card) =>
-        PrintedPriceOf(card) + PowerPriceOf(card);
+    /// <summary>The one number every reader consults.</summary>
+    public static int PriceOf(CardModel card) => PrintedPriceOf(card);
 
     /// <summary>
     /// Does this card print the X price -- "spend all your Sparks" (`EB-445`)?

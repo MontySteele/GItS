@@ -7,8 +7,8 @@ namespace KleeMod;
 
 /// <summary>
 /// Klee cards that BELONG to her pool but must never be GENERATED from it:
-/// the companion roster (the 4th reward slot is their only door), the kit
-/// Burst card (granted by KitGrant), and the token statuses (created at play).
+/// the companion roster (the 4th reward slot is their only door) and the
+/// token statuses (created at play).
 ///
 /// WHY THIS SHAPE (playtest 2026-07-21, two attempts).
 ///

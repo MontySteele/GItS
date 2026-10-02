@@ -649,8 +649,8 @@ public sealed class MelodyLoopPower : PowerModel, ILocalizationProvider
 /// reaches the same answer from the other side by consuming at the head of the
 /// card's resolution, before its effects run.
 ///
-/// <c>CardPlay</c> identity is the latch key, the idiom
-/// <see cref="SparkAttackCostPower"/> documents: a stale reference on a clone
+/// <c>CardPlay</c> identity is the latch key (the idiom the retired
+/// <c>SparkAttackCostPower</c> documented): a stale reference on a clone
 /// can never equal a live <c>CardPlay</c>, so the worst case is a no-op.
 /// </summary>
 public abstract class NextAttackRiderPower : PowerModel

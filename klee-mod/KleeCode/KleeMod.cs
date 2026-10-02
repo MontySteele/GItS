@@ -386,8 +386,6 @@ public static class KleeMod
                     // leave a row quoting a retired number.
                     [Powers.TurnEndAttribution.MasqueKey + ".title"] =
                         "Bond of Life",
-                    [Powers.TurnEndAttribution.OzKey + ".title"] =
-                        "Oz, at Your Side",
 
                     // `EB-272`. QUARANTINED, and inside the switch for the
                     // reason Rally's prompt is: `Cards/Prototype/**` is

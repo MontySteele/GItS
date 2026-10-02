@@ -561,8 +561,7 @@ public class CompanionOverhaulHookTests
         // Mika's card IS an Attack that applies its own rider, which the
         // shipped NextAttackUpPower never had to face -- "remove myself after
         // any Attack" would eat the discount the card just printed. The latch
-        // is the answer, and it is the CardPlay-identity idiom
-        // SparkAttackCostPower documents.
+        // is the answer, and it is the CardPlay-identity idiom.
         var before = typeof(NextAttackRiderPower)
             .GetMethod("BeforeCardPlayed", All)!;
         var after = typeof(NextAttackRiderPower)

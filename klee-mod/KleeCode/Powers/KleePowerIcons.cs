@@ -31,7 +31,6 @@ internal static class KleePowerIcons
         // the power it replaces -- True Spark Knight's old body was
         // spark_threshold_down and the re-authored card keeps the id, the
         // rarity and the cost. No new art for a prototype row, per the slice.
-        SparkAttackCostPower => KleePck.Path("klee/powers/spark_threshold_down.png"),
         // QUARANTINED (the Klee overhaul, slice one). Every one of these borrows
         // the icon of the shipped power whose job it takes over, for the reason
         // the row above gives: art is commissioned when a slice is ACCEPTED, and
@@ -444,15 +443,10 @@ internal static class KleePowerIcons
         // assets is deliberate: KleePck.Path returns null while a file is
         // absent, so behaviour is unchanged until the PNG lands, and the miss
         // is logged ONCE by name instead of failing silently forever.
-        OzSummonPower => KleePck.Path("klee/powers/oz_summon.png"),
-        SolarIsotomaPower => KleePck.Path("klee/powers/solar_isotoma.png"),
-        WitchsFlamePower => KleePck.Path("klee/powers/witchs_flame.png"),
-        CelestialGiftPower => KleePck.Path("klee/powers/celestial_gift.png"),
 
         // The six powers the 2026-07-24 companion sweep MISSED, because that
         // sweep framed itself as "summons" and these are not summons. They had
         // no case at all and rendered the base-game placeholder.
-        CompanionCostThisTurnPower => KleePck.Path("klee/powers/friendly_visit.png"),
         ReplayNextCompanionPower => KleePck.Path("klee/powers/study_buddy.png"),
         AttackUpThisTurnPower => KleePck.Path("klee/powers/fantastic_voyage.png"),
         NextAttackUpPower => KleePck.Path("klee/powers/passion_overload.png"),

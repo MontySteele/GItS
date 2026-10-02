@@ -445,12 +445,11 @@ public class ArmRelicsPotionsTests
     [Fact]
     public void Dodoco_tales_keeps_its_shipped_body_with_the_arm_off()
     {
-        // The detonation bus pays the shipped 1 and the opening bank is the
-        // shipped 3; only the arm's own explosion bus reads the repair.
+        // The detonation bus pays the shipped 1; only the arm's own explosion
+        // bus reads the repair.
         var detonated = Il.Calls(Il.Method("ExplosiveFrags", "OnBombDetonated"));
         Assert.Contains("SparkPower.Gain", detonated);
         Assert.DoesNotContain("ExplosiveFrags.SparksFor", detonated);
-        Assert.Equal(3, ExplosiveFrags.OpeningSparks);
         Assert.Equal(1, ExplosiveFrags.SparksPerDetonation);
     }
 

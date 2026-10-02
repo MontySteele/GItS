@@ -108,7 +108,6 @@ public sealed class TurnEndSource
 public static class TurnEndAttribution
 {
     public const string MasqueKey = "KLEEMOD-TURNEND_MASQUE";
-    public const string OzKey = "KLEEMOD-TURNEND_OZ";
 
 
     private static PowerModel? First<T>(Creature creature) where T : PowerModel =>
@@ -150,30 +149,6 @@ public static class TurnEndAttribution
                              .OfType<MasqueRedDeathPower>().ToList())
                 {
                     await masque.PayBondOfLife(choiceContext);
-                }
-            },
-        },
-        new()
-        {
-            Key = "oz",
-            TitleKey = OzKey,
-            Find = First<OzSummonPower>,
-            TurnsLeft = Amount<OzSummonPower>,
-            Preview = static _ => CompanionConstants.OzDamage.ToString(),
-            Buffed = static _ => false,
-            Body = static creature =>
-                $"[gold]Oz, at Your Side[/gold]: {CompanionConstants.OzDamage} "
-              + "damage and [gold]Electro[/gold] to a RANDOM enemy. Fires "
-              + "SECOND of the three volleys. Lasts "
-              + $"{Amount<OzSummonPower>(creature)} more turn(s). The target is "
-              + "not chosen until the turn ends, so Strength and Vulnerable "
-              + "are not in this number.",
-            Resolve = static async (creature, choiceContext) =>
-            {
-                foreach (var electro in creature.Powers
-                             .OfType<OzSummonPower>().ToList())
-                {
-                    await electro.FireVolley(choiceContext);
                 }
             },
         },
