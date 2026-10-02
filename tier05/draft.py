@@ -740,7 +740,7 @@ KLEE_OVERHAUL_OPS = frozenset((
     "mine_bombs",
     # THE POOL PASS's two (`EB-491`): All of My Treasures! and Split Charge.
     # Same pricing decision as the eleven above.
-    "plant_bomb_copy_largest", "split_largest_bomb",
+    "plant_bomb_copy_largest",
     # POOL PASS TWO's two (`EB-732`): Blast Shield's `return_to_hand` and Once
     # More!'s `return_last_set_off`. Same pricing decision as the fourteen
     # above -- both are the arm's, and neither resolves off it.
@@ -772,10 +772,9 @@ VARKA_OPS = frozenset(("varka", "add_knight"))
 #: `effect_power`, because it needs the card). It is kept as the arm's INDEX,
 #: which is what `STATIC_OP_PRICING` and the test read it as.
 KOKOMI_OVERHAUL_OPS = frozenset((
-    "mend", "next_companion_discount", "remove_debuff",
+    "mend", "remove_debuff",
     "carry_out_front_plan", "plan_from_exhaust", "damage_quarter_max_hp",
-    "damage_per_companion_last_turn",
-    "play_copy_of_companion", "block_per_plan_this_morning",
+    "play_copy_of_companion",
     "draw_after_plans",
     # POOL PASS FIVE (`EB-685`). Breakwater's count, with its own branch in
     # `_op_price` on this set's EB-311 terms.
@@ -783,25 +782,23 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # POOL PASS TWO (`EB-643`, R265). Three now-lines that operate on the
     # QUEUE and three drain-positional plan clauses, each with its own branch
     # in `_op_price` on this set's own EB-311 terms.
-    "cancel_last_plan", "cancel_all_plans_cash", "redirect_queued_plans",
-    "draw_per_plan_after", "draw_per_plan_this_turn",
+    "cancel_all_plans_cash", "redirect_queued_plans",
+    "draw_per_plan_this_turn",
     "next_plan_double_damage",
     "next_plan_extra_carry_out",
     # POOL PASS THREE (`EB-655`). Battle Plan's rider, a plan clause with its
     # own branch in `_op_price` on the same terms.
-    "next_attack_damage",
     # R276 PICK 1, the halves rewrite: five plan clauses, each with its own
     # branch in `_op_price` on the same terms.
-    "first_attack_twice", "first_card_free", "damage_if_unhurt",
-    "attack_damage_this_turn", "block_front_intent",
+    "first_attack_twice", "first_card_free",
+    "block_front_intent",
     # Kokomi core pass: Chain of Command's switch.
-    "first_companion_free",
     # THE CO-OP SET: two plan clauses about ANOTHER player, priced ZERO in
     # `_op_price` -- the one-seat drafter has nobody for them to pay.
     "ally_draw", "others_attack_damage_this_turn",
     # THE CASKET PASS (2026-09-28): the four verbs on the Tamakushi Casket's
     # count, each with its own branch in `_op_price` on this set's terms.
-    "casket_gain", "casket_double", "fetch_open_casket", "open_casket",
+    "casket_double", "fetch_open_casket", "open_casket",
     # THE EXPANSION, BATCH ONE (2026-09-29): four plan clauses and the one
     # now-line op with a `kind:`, each with its own branch in `_op_price`.
     "energy_if_alone", "damage_if_alone", "block_per_attacking_enemy",
@@ -1025,23 +1022,6 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # One point of Block per point Mended. See STATIC_MEND_VALUE for why
         # this is not `heal`'s share and what the cap does to the direction.
         return _neutral_amount(fx, 0) * STATIC_MEND_VALUE
-    if op == "damage_per_companion_last_turn":
-        # Chain of Command. ONE companion is the same neutral single-unit
-        # estimate every live count in this file takes (`amount_formula`'s
-        # "one unit of the live count is a conservative neutral offer-state
-        # estimate", `copy_companions_played_this_combat`'s "ONE unique
-        # companion"): a reward screen cannot see how many Companions the deck
-        # will end up playing in a turn, and guessing more would price the
-        # Commander plan's best case as its printed case.
-        return _neutral_amount(fx, 0) * aoe
-    if op == "block_per_plan_this_morning":
-        # Tide Wall (`EB-335`). ONE PLAN is the same neutral single-unit
-        # estimate the line above takes, and for the same refusal: how many
-        # Plans a deck banks in a turn is a deck fact an offer screen cannot
-        # read, and guessing three would price the built deck's best morning as
-        # the card's printed one. At face value from there, which is what
-        # `block` is priced at inline.
-        return _neutral_amount(fx, 0)
     if op == "block_per_plan_held":
         # Breakwater (`EB-685`, pool pass five). THE SAME PRICE AS THE LINE
         # ABOVE, and the equality is the point: `EB-685` moved WHICH Plans the
@@ -1060,7 +1040,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # of a dead dial the only live one.
         return (int(fx.get("amount", 0)) + int(fx.get("per", 1))) \
             * STATIC_DRAW_VALUE
-    if op in ("draw_per_plan_after", "draw_per_plan_this_turn"):
+    if op in ("draw_per_plan_this_turn"):
         # Scout Ahead (`EB-643`, recounted at `EB-679`, back on the positional
         # count at R267 pick 3 -- both spellings price the same). ZERO, and it is
         # `draw_after_plans`' zero one row up rather than a refusal of its own:
@@ -1086,15 +1066,6 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Second Wave's rider (`EB-643`). ZERO, on the line above's argument
         # word for word: an extra carry-out of an entry the offer screen
         # cannot see is a quantity about the drafted deck.
-        return 0.0
-    if op == "cancel_last_plan":
-        # Second Thoughts (`EB-643`). ZERO, and it is the honest answer rather
-        # than a gap: nothing is created. One Plan is unwritten and the card
-        # that wrote it comes back with its Energy, so what the play produces
-        # is exactly the play it undoes -- and `cost_mod`'s measured dead dial
-        # is what this repo prices returned Energy at anyway. A card that costs
-        # 0 and gives back what it takes is a rewind, and a rewind's value is
-        # the mistake it repairs, which no offer screen can see.
         return 0.0
     if op == "cancel_all_plans_cash":
         # Ebb Tide (`EB-643`). ONE QUEUED PLAN, the neutral single-unit
@@ -1144,48 +1115,22 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # `autoplay_from_exhaust`'s price, one turn late, so it takes the delay
         # discount the printed `plan:` lists take.
         return STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT
-    if op == "next_companion_discount":
-        # Rally's grant, and it is a `cost_mod` wearing a kit name: "the next
-        # Companion card you play this turn costs 1 less", ONE stack, always
-        # (`kokomi_plan.next_companion_discount`). So it takes `cost_mod`'s
-        # rule and `cost_mod`'s dial -- which is the measured dead zero, and
-        # that is the answer rather than a gap in it. Deviating here would
-        # price one character's energy discount above every other card's.
-        return C.KOKOMI_OVERHAUL_RALLY_DISCOUNT * STATIC_ENERGY_VALUE
-    if op == "next_attack_damage":
-        # `EB-668`, Battle Plan's rider. It is `buff_next_attack` wearing a kit
-        # name -- flat damage on the next Attack -- so it takes that op's rule
-        # and that op's dial, and NOT Rally's dead `cost_mod` zero: the clause
-        # stopped being a discount when the mod's cost seam proved unable to
-        # see a write. The `plan:` list it lives in already takes the delay
-        # discount.
-        return (C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS
-                * STATIC_NEXT_ATTACK_SHARE)
     # R276 PICK 1 (QUARANTINED). The halves rewrite's five plan clauses. The
     # `plan:` list they live in already takes the delay discount.
     if op == "first_attack_twice":
         # Pincer: one Attack played again -- `replay_next_companion`'s rule,
         # one replay at STATIC_CARD_COPY_VALUE.
         return STATIC_CARD_COPY_VALUE
-    if op in ("first_card_free", "first_companion_free"):
+    if op in ("first_card_free"):
         # Stolen Chapter, and Chain of Command's Companion-only twin: energy
         # in another costume, so `cost_mod`'s rule and its measured dead dial.
         return STATIC_ENERGY_VALUE
-    if op == "damage_if_unhurt":
-        # Feigned Retreat: priced at the HURT number, the one it deals whatever
-        # happens; whether she takes a hit before it lands is a fight fact an
-        # offer screen cannot read.
-        return _neutral_amount(fx, 0) * aoe
-    if op == "attack_damage_this_turn":
-        # Battle Plan: `next_attack_damage`'s rule for ONE Attack -- how many
-        # Attacks the turn holds is a hand fact an offer screen cannot read.
-        return _neutral_amount(fx, 0) * STATIC_NEXT_ATTACK_SHARE
     if op in ("ally_draw", "others_attack_damage_this_turn",
               "each_player_energy", "each_player_draw"):
         # THE CO-OP SET: paid to ANOTHER player, and tier 0.5 seats one. A
         # multiplayer-only row is never offered to this drafter anyway.
         return 0.0
-    if op in ("casket_gain", "casket_double", "fetch_open_casket",
+    if op in ("casket_double", "fetch_open_casket",
               "open_casket"):
         # THE CASKET PASS (2026-09-28). ZERO, and a refusal that says why:
         # every one of the four is worth Strength a LATER Open the Casket
@@ -2593,7 +2538,7 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "grow_largest_bomb", "damage_set_off_total",
                   "multiply_set_off", "draw_per_set_off",
                   "companion_mark_hand", "mine_bombs",
-                  "plant_bomb_copy_largest", "split_largest_bomb",
+                  "plant_bomb_copy_largest",
                   "return_to_hand", "return_last_set_off",
                   "grow_largest", "multiply_largest_bomb",
                   "fetch_from_discard", "add_random_companion",
@@ -2617,22 +2562,12 @@ STATIC_OP_PRICING: dict[str, str] = {
     "damage_quarter_max_hp": "printed damage: the character sheet's Max HP "
                              "times the fraction the op names, then the AoE "
                              "multiple -- _PRICED_INLINE, it needs the card",
-    "damage_per_companion_last_turn": "its printed damage against ONE "
-                                      "companion, the neutral single-unit "
-                                      "estimate every live count here takes",
-    "block_per_plan_this_morning": "its printed Block for ONE Plan -- the same "
-                                   "neutral single-unit estimate, since Plan "
-                                   "density is a deck fact an offer screen "
-                                   "cannot read",
     "block_per_plan_held": "its printed Block for ONE held Plan -- the same "
                            "neutral single-unit estimate, since Plan density "
                            "is a deck fact an offer screen cannot read",
     "draw_after_plans": "ZERO: STATIC_DRAW_VALUE, the same dead dial `draw` "
                         "is priced on -- one card per Plan carried out, paid "
                         "a turn later, is still draw",
-    "draw_per_plan_after": "ZERO: STATIC_DRAW_VALUE on ONE later carry-out -- "
-                           "the same dead dial `draw` is priced on, and the "
-                           "same neutral single-unit estimate",
     "draw_per_plan_this_turn": "ZERO: STATIC_DRAW_VALUE on ONE carry-out -- "
                            "the same dead dial `draw` is priced on, and the "
                            "same neutral single-unit estimate",
@@ -2642,9 +2577,6 @@ STATIC_OP_PRICING: dict[str, str] = {
     "next_plan_extra_carry_out": "ZERO, on the line above's argument -- an "
                                  "extra carry-out of an entry the offer "
                                  "screen cannot see",
-    "cancel_last_plan": "ZERO: nothing is created. One Plan is unwritten and "
-                        "its card comes back with its Energy, so the play is "
-                        "exactly the play it undoes",
     "cancel_all_plans_cash": "ONE queued Plan's worth -- STATIC_ENERGY_VALUE "
                              "+ STATIC_DRAW_VALUE, both measured dead dials. "
                              "What is given up is a deck fact and is not "
@@ -2662,12 +2594,6 @@ STATIC_OP_PRICING: dict[str, str] = {
                               "resolved free -- a PLANNED clause, so the "
                               "`plan:` list's delay discount is not applied "
                               "a second time here",
-    "next_companion_discount": "ZERO: it is a `cost_mod` wearing a kit name, "
-                               "so it takes cost_mod's rule and cost_mod's "
-                               "measured dead dial (STATIC_ENERGY_VALUE)",
-    "next_attack_damage": "`buff_next_attack`'s price wearing a kit name: "
-                          "flat damage on the next Attack, at "
-                          "STATIC_NEXT_ATTACK_SHARE",
     "remove_debuff": "STATIC_DEBUFF_VALUE, one debuff off HER -- the mirror "
                      "of putting one onto an enemy, at the same rate",
     # --- R276 pick 1, the Kokomi halves rewrite (QUARANTINED) ---
@@ -2675,19 +2601,9 @@ STATIC_OP_PRICING: dict[str, str] = {
                           "replay_next_companion's rule",
     "first_card_free": "ZERO: energy in another costume, so cost_mod's rule "
                        "and cost_mod's measured dead dial (STATIC_ENERGY_VALUE)",
-    "first_companion_free": "first_card_free's price: energy in another "
-                            "costume (STATIC_ENERGY_VALUE)",
-    "damage_if_unhurt": "its HURT number at face, the hit it deals whatever "
-                        "happens -- whether she is hit first is a fight fact",
-    "attack_damage_this_turn": "next_attack_damage's price for ONE Attack, at "
-                               "STATIC_NEXT_ATTACK_SHARE -- the hand is a fact "
-                               "an offer screen cannot read",
     "block_front_intent": "its flat bonus only; ZERO for the intent part, a "
                           "board fact an offer screen cannot read",
     # --- the Casket pass (2026-09-28, QUARANTINED) ---
-    "casket_gain": "ZERO: Casket points are Strength a later Open the Casket "
-                   "grants, off a count the whole deck fills -- a deck and "
-                   "fight fact, not this card's",
     "casket_double": "ZERO, casket_gain's reason: doubling a count the offer "
                      "screen cannot see",
     "fetch_open_casket": "ZERO, casket_gain's reason: a second opening of a "

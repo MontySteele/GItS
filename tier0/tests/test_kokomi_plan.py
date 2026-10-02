@@ -503,76 +503,6 @@ def test_skittish_does_not_fire_on_a_carry_out(overhaul):
 
 # --- `EB-335`: the kit's own defence in act 2 (R246 pick 2) ---------------
 
-def test_tide_wall_blocks_per_plan_of_the_whole_morning(overhaul):
-    """TIDE WALL. "Gain 3 Block for each Plan the Bake-Kurage carries out this
-    morning" -- the packet's own example is a three-Plan morning paying 9."""
-    st = kokomi_state()
-    for i in range(2):
-        kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}],
-                                           cid=f"proto_kk_f{i}"))
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}]))
-    st.player.draw_pile = [plan_card([], cid=f"proto_kk_d{i}")
-                           for i in range(5)]
-    kokomi_plan.resolve_all(st)
-    assert st.kk_plans_this_morning == 3
-    assert st.player.block == 9
-
-
-def test_tide_wall_does_not_care_where_in_the_queue_it_sits(overhaul):
-    """THE ORDER CANNOT MOVE THE NUMBER, which is why the count is taken once
-    at the drain rather than grown as the drain goes: a card whose Block
-    depended on the order the player happened to write in would be unplayable
-    to plan around."""
-    blocks = []
-    for slot in (0, 1, 2):
-        st = kokomi_state()
-        st.player.draw_pile = [plan_card([], cid=f"proto_kk_d{i}")
-                               for i in range(6)]
-        for i in range(3):
-            clauses = ([{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}]
-                       if i == slot else [{"op": "draw", "amount": 1}])
-            kokomi_plan.schedule(st, plan_card(clauses, cid=f"proto_kk_f{i}"))
-        kokomi_plan.resolve_all(st)
-        blocks.append(st.player.block)
-    assert blocks == [9, 9, 9]
-
-
-def test_tide_wall_pays_nothing_on_a_morning_that_drained_nothing(overhaul):
-    """A PRINTED NO-OP AND NOT A FAILURE: Change of Plans can carry this Plan
-    out on a turn whose own morning was empty, and zero times three is the
-    honest answer to "for each Plan carried out this morning"."""
-    st = kokomi_state()
-    kokomi_plan.roll_turn(st)                 # a fresh turn, nothing drained
-    assert st.kk_plans_this_morning == 0
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}]))
-    kokomi_plan.resolve_front(st)
-    assert st.player.block == 0
-
-
-def test_tide_walls_block_is_powered(overhaul):
-    """Rule 3, the half R246 pick 1 left alone: her Dexterity counts and Frail
-    bites, exactly as they do on the flat planned `block` clause."""
-    st = kokomi_state()
-    st.player.powers["dexterity"] = 2
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}]))
-    kokomi_plan.resolve_all(st)
-    assert st.player.block == 5           # 3 x 1 plan, then +2 Dexterity
-
-
-def test_tide_wall_is_plan_only(overhaul):
-    """The count it multiplies is a fact about a MORNING, so a now-line
-    spelling would read a number that is zero every time it is asked. The
-    engine refuses it from a body by name rather than resolving it quietly."""
-    st = kokomi_state()
-    card = Card(id="proto_kk_probe", name="probe", cost=1, type="skill",
-                effects=[{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}])
-    with pytest.raises(NotImplementedError, match="PLAN-ONLY"):
-        effects.resolve_card(st, card)
-
-
 def test_shell_guard_is_the_caskets_defensive_reader(overhaul):
     """SHELL GUARD, re-aimed (main session, 2026-09-28) after the Casket pass
     retired the strike it paid on: "Gain 5 Block, plus 1 for each point in
@@ -666,20 +596,6 @@ def test_the_condition_is_written_wherever_a_plan_is_carried_out(overhaul):
     assert st.kk_plan_carried_out_this_turn is False   # written, not carried
     kokomi_plan.resolve_all(st)
     assert st.kk_plan_carried_out_this_turn is True
-
-
-def test_damage_per_companion_last_turn_reads_last_turn(overhaul):
-    """Chain of Command, and it is a READING the C# records: "last turn" is
-    read at CARRY-OUT. The Plan is written on turn N and resolves at the top
-    of N+1, by which time `combat._player_turn` has rolled the ledger -- so
-    the count it finds is turn N's, the turn the player was looking at."""
-    enemy = make_enemy(hp=40)
-    st = kokomi_state(enemies=[enemy])
-    st.companion_plays_this_turn = 3          # THIS turn: not what it reads
-    st.companion_plays_last_turn = 2
-    carry_out(st, [{"op": "damage_per_companion_last_turn", "amount": 4,
-                    "target": "front_enemy"}])
-    assert enemy.hp == 40 - 8
 
 
 def test_applying_weak_and_vulnerable(overhaul):
@@ -986,66 +902,11 @@ def _song_turn(st, pilot=None):
     combat._player_turn(st, pilot or (lambda state: None))
 
 
-def test_song_of_pearls_strikes_all_enemies_when_no_plan_waits(overhaul):
-    """"At the start of your turn, if no Plan waits, the Bake-Kurage deals 4
-    damage to ALL enemies." Hydro, like every hit of hers."""
-    a = make_enemy(hp=80, name="a", intents=BLOCKER)
-    b = make_enemy(hp=80, name="b", intents=BLOCKER)
-    st = kokomi_state(enemies=[a, b])
-    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 4
-    _song_turn(st)
-    assert (a.hp, b.hp) == (76, 76)
-    assert a.aura == "hydro" and b.aura == "hydro"
-    assert counts(st)["plan_song_of_pearls"] == 1
-
-
-def test_song_of_pearls_is_silent_after_a_carry_out(overhaul):
-    """A morning that carried a Plan out does not also fire it: the queue is
-    read just before the drain empties it."""
-    enemy = make_enemy(hp=80, intents=BLOCKER)
-    st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 4
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
-    _song_turn(st)
-    assert counts(st)["plan_carried_out"] == 1
-    assert enemy.hp == 80
-    assert counts(st)["plan_song_of_pearls"] == 0
-
-
-def test_song_of_pearls_amount_stacks_and_counts_her_strength(overhaul):
-    """Two copies deal 8; her Strength counts, as on her planned hits."""
-    enemy = make_enemy(hp=80, intents=BLOCKER)
-    st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 8
-    _song_turn(st)
-    assert enemy.hp == 72
-    enemy = make_enemy(hp=80, intents=BLOCKER)
-    st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 4
-    st.player.powers["strength"] = 2
-    _song_turn(st)
-    assert enemy.hp == 74
-
-
-def test_song_of_pearls_needs_the_quiet_read(overhaul):
-    """The function deals nothing unless the caller says the queue was
-    empty, and nothing with the power absent."""
-    enemy = make_enemy(hp=80)
-    st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 4
-    kokomi_plan.song_of_pearls(st, quiet=False)
-    assert enemy.hp == 80
-    st.player.powers.pop(kokomi_plan.SONG_OF_PEARLS)
-    kokomi_plan.song_of_pearls(st, quiet=True)
-    assert enemy.hp == 80
-
-
 def test_the_bus_no_longer_pays_treatise_or_song(overhaul):
     """A carry-out rings the bus; neither payoff answers it now."""
     st = kokomi_state()
     _deck(st)
     st.player.powers[kokomi_plan.TREATISE] = 1
-    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 3
     carry_out(st, [{"op": "energy", "amount": 1}])
     assert st.player.hand == []
     assert st.player.block == 0
@@ -1151,39 +1012,7 @@ def test_the_banner_ignores_a_card_that_is_not_a_companion(overhaul):
     assert "weak" not in enemy.powers
 
 
-def test_the_ledger_rolls_this_turns_count_into_last_turns(overhaul):
-    """`KokomiOverhaulLedger.RollTo`'s handover, at the one place the per-turn
-    counter moves."""
-    st = kokomi_state()
-    st.companion_plays_this_turn = 4
-    kokomi_plan.roll_turn(st)
-    assert st.companion_plays_last_turn == 4
-
-
 # --- 10. RALLY AND CLEANSING WAVE ------------------------------------------
-
-def test_rally_is_one_stack_always(overhaul):
-    """The C#: "two Rallies in one turn do not make the next Companion cost two less,
-    because the card says 'costs 1 less' and not 'costs 1 less per Rally'."""
-    st = kokomi_state()
-    kokomi_plan.next_companion_discount(st)
-    kokomi_plan.next_companion_discount(st)
-    assert st.player.powers[kokomi_plan.NEXT_COMPANION_DISCOUNT] == 1
-
-
-def test_rally_discounts_the_next_companion_and_is_then_spent(overhaul):
-    """A DISCOUNT, NOT A ZEROING -- draft 6's change from draft 2's Vanguard --
-    and it is consumed by the play that spends it."""
-    from tier0.engine.combat import card_cost
-    st = kokomi_state()
-    ally = companion_card()
-    ally.cost = 2
-    assert card_cost(st, ally) == 2
-    kokomi_plan.next_companion_discount(st)
-    assert card_cost(st, ally) == 2 - C.KOKOMI_OVERHAUL_RALLY_DISCOUNT
-    kokomi_plan.spend_companion_discount(st, ally)
-    assert card_cost(st, ally) == 2
-
 
 def test_cleansing_wave_removes_the_first_standing_debuff(overhaul):
     """A READING, recorded because the card says "a debuff" and not "the worst
@@ -1827,38 +1656,6 @@ def well_laid():
                               "count": "plans_carried_out_this_morning"}}])
 
 
-def test_well_laids_count_is_the_morning_tide_wall_reads(overhaul):
-    """`plans_carried_out_this_morning` is `kk_plans_this_morning`, written
-    once at the drain -- the same number Tide Wall's planned Block multiplies,
-    so the morning a now-line sees and the morning a Plan clause sees are one
-    fact."""
-    enemy = make_enemy(hp=60)
-    st = kokomi_state(enemies=[enemy])
-    for i in range(3):
-        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                           cid=f"proto_kk_p{i}"))
-    kokomi_plan.resolve_all(st)
-    assert effects._runtime_count(
-        st, "plans_carried_out_this_morning") == 3
-    # And the now-line prices off it: 2 + 3 x 3.
-    effects.resolve_card(st, well_laid())
-    assert enemy.hp == 60 - 11
-
-
-def test_a_morning_that_drained_nothing_reads_an_honest_zero(overhaul):
-    """`roll_turn` clears the count, so Well Laid on a quiet morning is a
-    worse Strike rather than yesterday's payout."""
-    enemy = make_enemy(hp=60)
-    st = kokomi_state(enemies=[enemy])
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
-    kokomi_plan.resolve_all(st)
-    kokomi_plan.roll_turn(st)
-    assert effects._runtime_count(
-        st, "plans_carried_out_this_morning") == 0
-    effects.resolve_card(st, well_laid())
-    assert enemy.hp == 60 - 2
-
-
 # --- POOL PASS TWO (`EB-643`, R265): the queue as something you operate on --
 #
 # Eight rows, one trial keyword (Dusk), three plan clauses, three now-lines and
@@ -2068,101 +1865,6 @@ def scout_cards(state):
                if e["event"] == "plan_scout_ahead")
 
 
-@pytest.mark.parametrize("position,cards", [(0, 2), (1, 1), (2, 0)])
-def test_scout_ahead_counts_the_plans_that_follow_it(overhaul, position,
-                                                     cards):
-    """R267 PICK 3. THE POSITION RULE IS THE CARD: in a morning of three,
-    Scout Ahead written first draws 2, written second draws 1 and written last
-    draws 0. Pool pass four had it count the whole drain wherever it sat,
-    which removed the ordering decision the row exists to pose.
-
-    UNCHANGED BY `EB-718`, which is the point of putting it first: three
-    single carry-outs are three later carry-outs, so the honest count and the
-    old positional one agree wherever nothing is doubled."""
-    st = kokomi_state()
-    rows = [plan_card([{"op": "energy", "amount": 1}], cid=f"proto_kk_p{i}")
-            for i in range(3)]
-    rows[position] = plan_card(
-        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
-        cid="proto_kk_scout")
-    for row in rows:
-        kokomi_plan.schedule(st, row)
-    kokomi_plan.resolve_all(st)
-    assert scout_cards(st) == cards
-
-
-def test_scout_ahead_pays_second_waves_doubled_carry_out_twice(overhaul):
-    """`EB-718`, THE DEFECT, reproduced by the 2026-09-08 review and pinned
-    here. Scout Ahead, then Second Wave, then Battle Plan: Second Wave is one
-    carry-out and Battle Plan is TWO, so three Plans are carried out after the
-    Scout Ahead and the face -- "for each later Plan CARRIED OUT with this
-    one" -- says 3. The entries-based count drew 2.
-
-    IT IS `EB-709`'s RULE POINTED FORWARDS: every per-Plan clause counts a
-    doubled carry-out twice, and every reader counts carry-outs (`EB-501`).
-    """
-    st = kokomi_state()
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
-        cid="proto_kk_scout"))
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT}],
-        cid="proto_kk_second_wave"))
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": "next_attack_damage"}],
-        cid="proto_kk_battle_plan"))
-    kokomi_plan.resolve_all(st)
-    assert scout_cards(st) == 3
-
-
-def test_scout_ahead_written_alone_draws_nothing(overhaul):
-    """R267 pick 3. NOTHING FOLLOWS IT, so the count is 0 -- the face read
-    literally. The Plan half is the whole of the ask; the now-line's 1 card is
-    what a morning of one pays."""
-    st = kokomi_state()
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
-        cid="proto_kk_scout"))
-    kokomi_plan.resolve_all(st)
-    assert scout_cards(st) == 0
-
-
-def test_scout_ahead_hurried_by_change_of_plans_draws_nothing(overhaul):
-    """R267 pick 3. Change of Plans carries ONE entry out, so nothing follows
-    the hurried Scout Ahead inside that drain and it draws 0. `EB-718` keeps
-    that true by construction: the counter it arms is a local of a drain that
-    is over the moment the entry is."""
-    st = kokomi_state()
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
-        cid="proto_kk_scout"))
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                       cid="proto_kk_p0"))
-    kokomi_plan.resolve_front(st)
-    assert scout_cards(st) == 0
-
-
-def test_scout_ahead_under_nereids_arms_twice_and_pays_twice(overhaul):
-    """`EB-718`, THE NEREID'S CONSEQUENCE PINNED, and it is a consequence
-    rather than a second rule: "carried out twice counts twice" (`EB-709`), so
-    a Scout Ahead written first is carried out twice, ARMS twice, and draws 2
-    at every later carry-out.
-
-    THE ARITHMETIC OF THE MORNING BELOW: Scout, Scout again, p0, p1 is four
-    carry-outs. The second Scout is itself a later carry-out and pays the 1
-    armed by the first; then p0 and p1 pay 2 each. 1 + 2 + 2 = 5."""
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
-        cid="proto_kk_scout"))
-    for i in range(2):
-        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                           cid=f"proto_kk_p{i}"))
-    kokomi_plan.resolve_all(st)
-    assert scout_cards(st) == 5
-
-
 def test_the_whole_drain_count_is_kept_resolved_on_no_row(overhaul):
     """R267 pick 3. `draw_per_plan_this_turn` is `EB-679`'s spelling and no
     row spells it now. It stays REGISTERED and RESOLVED the way `scry_bottom`
@@ -2185,73 +1887,6 @@ def test_the_whole_drain_count_is_kept_resolved_on_no_row(overhaul):
 
 
 # --- Second Thoughts ------------------------------------------------------
-
-def test_second_thoughts_returns_the_card_and_refunds_its_cost(overhaul):
-    """The LAST entry, its card out of the discard pile into the hand, and the
-    Energy back."""
-    st = kokomi_state()
-    st.player.energy = 0
-    written = plan_card([hit(10)], cid="proto_kk_written")
-    written.cost = 2
-    st.player.discard_pile.append(written)
-    kokomi_plan.schedule(st, written)
-    kokomi_plan.cancel_last_plan(st)
-    assert st.kk_plan_queue == []
-    assert written in st.player.hand
-    assert written not in st.player.discard_pile
-    assert st.player.energy == 2
-
-
-def test_second_thoughts_takes_the_newest_and_leaves_the_rest(overhaul):
-    """Change of Plans hurries the OLDEST; this takes back the NEWEST."""
-    st = kokomi_state()
-    for i in range(2):
-        kokomi_plan.schedule(st, plan_card([hit(5)], cid=f"proto_kk_p{i}"))
-    kokomi_plan.cancel_last_plan(st)
-    assert [e.card_id for e in st.kk_plan_queue] == ["proto_kk_p0"]
-
-
-def test_second_thoughts_on_an_empty_queue_is_a_printed_no_op(overhaul):
-    st = kokomi_state()
-    st.player.energy = 0
-    kokomi_plan.cancel_last_plan(st)
-    assert counts(st)["plan_cancel_last_empty"] == 1
-    assert st.player.energy == 0
-
-
-def test_a_moons_reflection_entry_gives_back_moons_reflection(overhaul):
-    """Kokomi follow-ups, 2026-10-01: a cancel is an undo, so the card that
-    was played (Moon's Reflection, Exhaust, in the exhaust pile) comes back
-    with its cost -- and the card it FOUND stays in the exhaust pile."""
-    st = kokomi_state()
-    st.player.energy = 0
-    exhausted = plan_card([hit(9)], cid="proto_kk_exhausted")
-    exhausted.cost = 3
-    st.player.exhaust_pile.append(exhausted)
-    moon = Card(id="proto_kk_moon", name="probe", cost=1, type="skill",
-                effects=[{"op": "plan_from_exhaust"}])
-    kokomi_plan.schedule_from_exhaust(st, moon)
-    st.player.exhaust_pile.append(moon)
-    assert len(st.kk_plan_queue) == 1
-    kokomi_plan.cancel_last_plan(st)
-    assert st.kk_plan_queue == []
-    assert st.player.hand == [moon]
-    assert st.player.exhaust_pile == [exhausted]
-    assert st.player.energy == 1
-
-
-def test_a_card_in_no_pile_returns_nothing(overhaul):
-    """The Plan is still cancelled; with no card to give back, no Energy."""
-    st = kokomi_state()
-    st.player.energy = 0
-    written = plan_card([hit(9)], cid="proto_kk_gone")
-    written.cost = 2
-    kokomi_plan.schedule(st, written)
-    kokomi_plan.cancel_last_plan(st)
-    assert st.kk_plan_queue == []
-    assert st.player.hand == []
-    assert st.player.energy == 0
-
 
 # --- Ebb Tide -------------------------------------------------------------
 
@@ -2872,75 +2507,6 @@ def test_riptides_base_and_rider_upgrade_by_different_amounts(overhaul):
                        {"op": "draw", "amount": 3}]
 
 
-def test_the_rider_pays_a_face_up_attack_and_not_a_write(overhaul):
-    """THE FACE-UP CLAUSE, which is what stops the reward paying for more
-    writing -- and `EB-668`'s whole point, since it is now asked where the
-    play is known instead of at a cost seam the mod cannot make target-aware.
-    `flat_attack_bonus` is pure and asks `plan_aimed_at_pet`, so a card that
-    would be WRITTEN reads its printed number and one that would be PLAYED
-    reads the rider."""
-    enemy = make_enemy(hp=200, intents=ATTACKER)
-    st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.NEXT_ATTACK_BONUS] = 1
-    attack = Card(id="proto_kk_a", name="a", cost=2, type="attack",
-                  effects=[{"op": "damage", "amount": 5, "target": "enemy"}])
-    skill = Card(id="proto_kk_s", name="s", cost=2, type="skill",
-                 effects=[{"op": "block", "amount": 5}])
-    assert (effects.flat_attack_bonus(st, attack, 2)
-            == C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS)
-    # A SKILL IS NOT AN ATTACK, so the rider does not reach it.
-    assert effects.flat_attack_bonus(st, skill, 2) == 0
-    # AND A WRITE IS NOT A FACE-UP PLAY: a row with no now-line at all is a
-    # write whatever the board intends, and it reads its printed number.
-    written = Card(id="proto_kk_w", name="w", cost=2, type="attack",
-                   effects=[],
-                   plan=[{"op": "damage", "amount": 9,
-                          "target": "front_enemy"}])
-    assert kokomi_plan.plan_aimed_at_pet(st, written) is True
-    assert effects.flat_attack_bonus(st, written, 2) == 0
-    # AND THE COST SEAM IS GONE: the row moves damage, not price (`EB-668`).
-    from tier0.engine import combat
-    assert combat.card_cost(st, attack) == 2
-
-
-def test_the_rider_is_one_stack_and_is_spent_by_the_play(overhaul):
-    """Rally's two readings one card type over: the face says "deals 4 more
-    damage", not "per Plan", and the rider is consumed by the play that takes
-    it. A WRITE keeps it -- the pin `EB-668` was filed on."""
-    st = kokomi_state(enemies=[make_enemy(hp=200, intents=ATTACKER)])
-    kokomi_plan.next_attack_bonus(st)
-    kokomi_plan.next_attack_bonus(st)
-    assert st.player.powers[kokomi_plan.NEXT_ATTACK_BONUS] == 1
-    written = Card(id="proto_kk_w", name="w", cost=1, type="attack",
-                   effects=[],
-                   plan=[{"op": "damage", "amount": 9,
-                          "target": "front_enemy"}])
-    kokomi_plan.spend_attack_bonus(st, written)
-    assert st.player.powers[kokomi_plan.NEXT_ATTACK_BONUS] == 1
-    skill = Card(id="proto_kk_s", name="s", cost=1, type="skill", effects=[])
-    kokomi_plan.spend_attack_bonus(st, skill)
-    assert st.player.powers[kokomi_plan.NEXT_ATTACK_BONUS] == 1
-    attack = Card(id="proto_kk_a", name="a", cost=1, type="attack",
-                  effects=[{"op": "damage", "amount": 5, "target": "enemy"}])
-    kokomi_plan.spend_attack_bonus(st, attack)
-    assert kokomi_plan.NEXT_ATTACK_BONUS not in st.player.powers
-
-
-def test_the_rider_rides_every_hit_of_the_attack_it_pays(overhaul):
-    """PER HIT, folded in where `next_attack_up` is folded in -- so a two-hit
-    Attack collects it twice, and the play that took it spends it."""
-    enemy = make_enemy(hp=200, intents=[])
-    st = kokomi_state(enemies=[enemy])
-    kokomi_plan.next_attack_bonus(st)
-    attack = Card(id="proto_kk_a", name="a", cost=0, type="attack",
-                  effects=[{"op": "damage", "amount": 5, "target": "enemy",
-                            "times": 2}])
-    before = enemy.hp
-    effects.resolve_card(st, attack)
-    assert before - enemy.hp == 2 * (5 + C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS)
-    assert kokomi_plan.NEXT_ATTACK_BONUS not in st.player.powers
-
-
 def test_nereids_doubles_only_the_first_plan_of_a_drain(overhaul):
     """"Every Plan twice" paid for writing MORE, which is the shape this pass
     undoes. The FIRST entry of each drain is doubled and the rest are not, so
@@ -3002,16 +2568,6 @@ def test_the_written_only_dusk_rows_can_only_be_written(overhaul):
     row = _row("proto_kk_breakwater")
     assert row.effects == []
     assert kokomi_plan.plan_aimed_at_pet(st, row) is True
-
-
-def test_battle_plans_rider_is_plan_only_from_a_body(overhaul):
-    """A now-line spelling would be a different, unpriced card."""
-    op = "next_attack_damage"
-    assert op in kokomi_plan.PLAN_ONLY_OPS
-    with pytest.raises(NotImplementedError, match="PLAN-ONLY"):
-        effects.OPS[op](kokomi_state(), {"op": op},
-                        Card(id="proto_kk_x", name="x", cost=1,
-                             type="skill", effects=[]))
 
 
 def test_an_auto_play_never_aims_at_the_pet(overhaul):

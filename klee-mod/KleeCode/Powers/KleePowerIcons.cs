@@ -73,8 +73,6 @@ internal static class KleePowerIcons
         // borrows the icon of the arm power whose job it is nearest to, and
         // its own illustration stays owed until the slice is accepted.
         PlaydatePower => KleePck.Path("klee/powers/friendly_visit.png"),
-        FriendshipBraceletPower =>
-            KleePck.Path("klee/powers/friendly_visit.png"),
         BoomBadgePower => KleePck.Path("klee/powers/study_buddy.png"),
         WaitForItPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
@@ -132,7 +130,6 @@ internal static class KleePowerIcons
         // the reason the Kokomi block further down records: one shared icon
         // across unrelated effects reads as intentional.
         ProtoBakeKuragePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
-        SongOfPearlsPower => KleePck.Path("kokomi/powers/kurages_oath.png"),
         // THE EXPANSION, BATCH ONE (2026-09-29): Watatsumi's Grace takes the
         // badge of The Clouds Like Waves Rippling, the defensive Power it
         // replaces; Ceremonial Garment wears the shipped Garment's own badge;
@@ -194,21 +191,14 @@ internal static class KleePowerIcons
         // shipped SHAPE, the block above's rule: a replay, and a free card.
         FirstAttackTwicePower => KleePck.Path("klee/powers/study_buddy.png"),
         FirstCardFreePower => KleePck.Path("klee/powers/friendly_visit.png"),
-        FirstCompanionFreePower => KleePck.Path("klee/powers/friendly_visit.png"),
         TreatisePower => KleePck.Path("klee/powers/spark_per_turn.png"),
         GeneralsBannerPower => KleePck.Path("klee/powers/study_buddy.png"),
-        NextCompanionDiscountPower =>
-            KleePck.Path("klee/powers/friendly_visit.png"),
         // `EB-668`. Battle Plan's rider borrows the icon of the shipped power
         // that already means "your next Attack hits harder" -- the same
         // standing rule the discount took from Rally, applied to what the
         // clause now says. Art is commissioned when a slice is ACCEPTED.
-        NextAttackDamagePower =>
-            KleePck.Path("klee/powers/passion_overload.png"),
         // THE CASKET PASS (2026-09-28). Moon Signal borrows her Ancient's
         // sigil, the badge above that counts something waiting to arrive.
-        MoonSignalPower => KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
         // QUARANTINED (the Mondstadt companion overhaul). Every one of these
         // borrows the icon of the SHIPPED companion power whose job it takes
         // over, on the block above's argument verbatim: art is commissioned
@@ -291,7 +281,6 @@ internal static class KleePowerIcons
         // it replaces printed no power at all (Fischl's Nightrider, Sucrose's
         // Wind Spirit Creation), the icon of the arm power whose job the
         // stand-in takes over.
-        TectonicTidePower => KleePck.Path("klee/powers/solar_isotoma.png"),
         SinfulHexPower => KleePck.Path("klee/powers/oz_summon.png"),
         MollisFavoniusPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
         LadderOfAscentPower => KleePck.Path("klee/powers/witchs_flame.png"),

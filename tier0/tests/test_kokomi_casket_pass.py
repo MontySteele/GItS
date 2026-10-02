@@ -324,24 +324,6 @@ def test_the_uncommons_and_the_rare(overhaul):
     assert st.kk_casket == 6
 
 
-def test_moon_signal_reads_the_queue_before_the_drain(overhaul):
-    """"If 2 or more Plans are waiting" is read off the pre-drain queue, which
-    `combat._player_turn` hands in beside Song of Pearls' read -- after the
-    drain it could never be true."""
-    st = kokomi_state(enemies=[make_enemy(hp=100)])
-    st.player.powers[kokomi_plan.MOON_SIGNAL] = 1
-    kokomi_plan.moon_signal(st, 1)
-    assert st.kk_casket == 0
-    kokomi_plan.moon_signal(st, C.KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD)
-    assert st.kk_casket == 1
-
-    import pathlib
-    src = (pathlib.Path(__file__).resolve().parents[2] / "tier0" / "engine"
-           / "combat.py").read_text(encoding="utf-8")
-    assert src.index("kokomi_plan.moon_signal(") < src.index(
-        "kokomi_plan.resolve_all(state)")
-
-
 # --- F. the offer -------------------------------------------------------------
 
 def test_the_offer_is_seventy(overhaul):

@@ -115,9 +115,6 @@ from tier0 import constants as C
 if TYPE_CHECKING:                                   # pragma: no cover
     from tier0.engine.state import Card, CombatState, Enemy
 
-#: Albedo. Stacks are the damage each reaction deals, so a second copy pays
-#: twice -- Favonian Favor's grammar, and the row's own printed number.
-TECTONIC_TIDE = "mc_tectonic_tide"
 #: Fischl. Stacks are the Electro damage per Electro reaction. THIS TURN.
 SINFUL_HEX = "mc_sinful_hex"
 #: Sucrose. Stacks are the flat damage a damaging reaction adds. THIS TURN.
@@ -221,14 +218,7 @@ def note_reaction(state: "CombatState", enemy: "Enemy", name: str,
     from tier0.engine import effects                # late import (cycle)
 
     p = state.player
-    # NC-1 for all three: power-sourced DAMAGE runs the pipeline.
-    n = p.powers.get(TECTONIC_TIDE, 0)
-    if n and enemy.alive:
-        # NO ELEMENT -- the card names none, the same call Solar Isotoma (the
-        # Universal this stands in for) already made.
-        effects.deal_damage_to_enemy(state, enemy, n, element=None,
-                                     source="companion")
-        state.emit("mc_tectonic_tide", amount=n, target=enemy.name)
+    # NC-1: power-sourced DAMAGE runs the pipeline.
     n = p.powers.get(MOLLIS_FAVONIUS, 0)
     if n and name in _DAMAGING_REACTIONS and enemy.alive:
         # ON THE REACTED ENEMY, ONCE -- including Overload, whose splash is

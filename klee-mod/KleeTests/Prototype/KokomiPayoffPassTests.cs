@@ -62,9 +62,6 @@ public class KokomiPayoffPassTests : IDisposable
         Assert.DoesNotContain(slice, c => c.Contains("SecondThoughts"));
         Assert.Null(typeof(ProtoKkNip).Assembly.GetType(
             "KleeMod.Cards.Prototype.Generated.ProtoKkSecondThoughts"));
-        // All Streams' give-back is the door the cut card shared; it stays.
-        Assert.Contains(Seq("KokomiPlan", "CancelAllForNext"),
-                        c => c.Contains("KokomiPlan.GiveBack"));
     }
 
     // ---- Kurage Canopy -------------------------------------------------------

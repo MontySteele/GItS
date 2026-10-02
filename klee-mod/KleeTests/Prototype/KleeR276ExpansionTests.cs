@@ -442,16 +442,6 @@ public class KleeR276ExpansionTests
                         c => c.Contains("EnergyCost.UpgradeBy"));
     }
 
-    [Fact]
-    public void Friendship_bracelet_grows_the_largest_bomb_on_a_companion_play()
-    {
-        var play = Il.Calls(Il.Method("FriendshipBraceletPower", "AfterCardPlayed"));
-        Assert.Contains("KleeExpansion.IsCompanionCard", play);
-        Assert.Contains("ProtoBombPower.GrowLargest", play);
-        // The card left with the Klee status package (2026-10-01); its Power
-        // stays registered with no row spelling it.
-    }
-
     // ---- the Spark-supported Cook -----------------------------------------
 
     [Fact]

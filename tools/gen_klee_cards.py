@@ -546,7 +546,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # block above and each with its own verified call site on
                   # `ProtoBombPower`: `PlaceCopyOfLargest` (All of My
                   # Treasures!) and `SplitLargest` (Split Charge).
-                  "plant_bomb_copy_largest", "split_largest_bomb",
+                  "plant_bomb_copy_largest",
                   # POOL PASS TWO's two (`EB-732`), and neither touches a Bomb.
                   # `return_to_hand` (Blast Shield) is emitted NOT as a
                   # statement but as a `GetResultLocationForCardPlay` override
@@ -598,7 +598,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # is played on the jellyfish instead of where it would
                   # normally go -- so it is a TOP-LEVEL `plan:` list on the
                   # row, in this same vocabulary (see `plan_reason`).
-                  "mend", "next_companion_discount", "remove_debuff",
+                  "mend", "remove_debuff",
                   "carry_out_front_plan", "plan_from_exhaust",
                   "damage_quarter_max_hp",
                   # `EB-478`, R257: Tide Chart's promise. A now-line that draws
@@ -611,7 +611,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # the whole queue in (Ebb Tide), re-aim what is already
                   # written (Converging Tide). They are the arm's first verbs
                   # that UNWRITE a Plan, which is what the pool pass is for.
-                  "cancel_last_plan", "cancel_all_plans_cash",
+                  "cancel_all_plans_cash",
                   "redirect_queued_plans",
                   # THE CASKET PASS (2026-09-28): the two now-lines that work
                   # the Tamakushi Casket's count. What the Tokoyo Returns
@@ -634,11 +634,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # PLAN-ONLY verbs: legal inside a row's `plan:` list and
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
-                  "damage_per_companion_last_turn",
                   # `EB-335`: Tide Wall's per-Plan Block scaler, plan-only for
                   # a reason of its own -- the count it multiplies is a fact
                   # about a MORNING.
-                  "block_per_plan_this_morning",
                   # `EB-685`: Breakwater's per-held-Plan Block scaler, and
                   # plan-only one count over -- "the Plans the jellyfish is
                   # HOLDING" read on a now-line is the queue before the turn's
@@ -648,16 +646,14 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # for a reason they share -- each names a place in a running
                   # drain ("the next Plan", "after this one"), so a now-line
                   # spelling would name a drain that is not running.
-                  "draw_per_plan_after", "draw_per_plan_this_turn",
+                  "draw_per_plan_this_turn",
                   "next_plan_double_damage",
                   "next_plan_extra_carry_out",
                   # THE CASKET PASS (2026-09-28), Pearl Diver's "Plan: The
                   # Casket gains 2". Plan-only: no row prints it on a now-line.
-                  "casket_gain",
                   # `EB-655` (Battle Plan): the carry-out's rider, plan-only
                   # for the same reason -- a now-line spelling would be a
                   # different, unpriced card.
-                  "next_attack_damage",
                   # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B) --
                   # ONE verb, on the same terms as the two blocks above. Gorou's
                   # Inuzaka All-Round Defense prints "Gain Block equal to half
@@ -1182,10 +1178,7 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
 #: reach `ElementalHit.Deal`. A closed set for `PLAN_CLAUSE_KINDS`' reason: a
 #: clause that starts hitting must come here deliberately.
 PLAN_DAMAGE_OPS = frozenset({
-    "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn",
-    # R276, Feigned Retreat: `KokomiPlan.Kind.DamageIfUnhurt` hits through
-    # the same `Hit`.
-    "damage_if_unhurt"})
+    "damage", "damage_quarter_max_hp"})
 
 
 def element_tag_elements_for(card: dict, profile: "CharacterProfile",
@@ -2475,7 +2468,7 @@ DETONATE_FIELDS = {"op", "target", "bonus"}
 #: ONLY the single largest charge on the aimed enemy (ties to the oldest), and
 #: the rest of the pile stays. Still a `set_off`, so every reader of "a Set
 #: off card" (Once More!, Grounded, Treasure Map, Boom Badge...) sees it.
-SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura", "overflow",
+SET_OFF_FIELDS = {"op", "target", "times", "damage", "overflow",
                   "wide_if", "charge"}
 #: `wide_if` is R244's (Coven Errand): the printed target WIDENS to ALL enemies
 #: when the named predicate holds. A field on the op rather than a
@@ -2498,7 +2491,6 @@ PLANT_BOMB_COPY_LARGEST_FIELDS = {"op", "target"}
 #: Split Charge's one number, and it is 0 on the base card: the halves are the
 #: Bomb's own, and `growth` is what the upgrade buys on top of each. NO
 #: `target` -- "your largest Bomb" is board-wide and the halves land at random.
-SPLIT_LARGEST_BOMB_FIELDS = {"op", "growth"}
 #: POOL PASS TWO's two (`EB-732`), same discipline and both bare: neither
 #: prints a number and neither aims. Blast Shield's return is a fact about the
 #: card that was played, and Once More!'s is a fact about a card that already
@@ -2629,7 +2621,6 @@ KOKOMI_KINDS = {
     "draw_if_target_weak": "DrawIfTargetWeak",
     "resonance": "Resonance",
     "double_weak_vulnerable": "DoubleWeakVulnerable",
-    "all_streams": "AllStreams",
     "shoal_call": "ShoalCall",
     # THE PAYOFF PASS (2026-10-01): Coral Tithe; `amount` is the divisor.
     "coral_tithe": "CoralTithe",
@@ -2676,9 +2667,9 @@ DRAW_AFTER_PLANS_FIELDS = {"op", "per", "amount"}
 #: pays is the returned card's own cost and what the other pays is the depth
 #: of the queue it emptied. Converging Tide is NOT here -- it aims, so it takes
 #: a `target` and has its own field set below.
-KOKOMI_BARE_OPS = {"next_companion_discount", "remove_debuff",
+KOKOMI_BARE_OPS = {"remove_debuff",
                    "carry_out_front_plan", "plan_from_exhaust",
-                   "cancel_last_plan", "cancel_all_plans_cash",
+                   "cancel_all_plans_cash",
                    # THE CASKET PASS (2026-09-28): What the Tokoyo Returns and
                    # What the Tokoyo Took. Neither prints a number.
                    "fetch_open_casket", "casket_double"}
@@ -2701,9 +2692,7 @@ PLAN_CLAUSE_KINDS = {
     "mend": "Mend",
     "damage": "Damage",
     "damage_quarter_max_hp": "DamageQuarterMaxHp",
-    "damage_per_companion_last_turn": "DamagePerCompanionLastTurn",
     "play_copy_of_companion": "PlayCopyOfCompanion",
-    "block_per_plan_this_morning": "BlockPerPlanThisMorning",
     # `EB-685` (pool pass five), BREAKWATER's count: the queue as it stands at
     # dusk, never this entry itself. See `KokomiPlan.Kind.BlockPerPlanHeld`.
     "block_per_plan_held": "BlockPerPlanHeld",
@@ -2714,7 +2703,6 @@ PLAN_CLAUSE_KINDS = {
     # of them are PLAN-ONLY below for one reason they share: each names a place
     # in a running drain, and a now-line spelling would name a drain that is
     # not running.
-    "draw_per_plan_after": "DrawPerPlanAfter",
     "draw_per_plan_this_turn": "DrawPerPlanThisTurn",
     "next_plan_double_damage": "NextPlanDoubleDamage",
     "next_plan_extra_carry_out": "NextPlanExtraCarryOut",
@@ -2722,7 +2710,6 @@ PLAN_CLAUSE_KINDS = {
     # face-up this turn deals 4 more damage". A rider and not a number -- the
     # size is the RULE's (`NextAttackDamagePower.Bonus`), so the clause carries
     # no amount, exactly as the two riders above carry none.
-    "next_attack_damage": "NextAttackDamage",
     # R276 PICK 1, THE HALVES REWRITE: Plan lines that buy what only a head
     # start can buy. Pincer's "your first Attack is played twice", Stolen
     # Chapter's "the first card you play costs 0" and Battle Plan's "your
@@ -2734,9 +2721,6 @@ PLAN_CLAUSE_KINDS = {
     "first_card_free": "FirstCardFree",
     # Kokomi core pass, CHAIN OF COMMAND: "Next turn, the first Companion card
     # you play costs 0." Stolen Chapter's switch, narrowed to Companions.
-    "first_companion_free": "FirstCompanionFree",
-    "damage_if_unhurt": "DamageIfUnhurt",
-    "attack_damage_this_turn": "AttackDamageThisTurn",
     "block_front_intent": "BlockFrontIntent",
     # THE CO-OP SET. Joint Orders' "They draw 2 cards" (the player captured
     # when the Plan is written) and Coordinated Strike's "each other player's
@@ -2744,7 +2728,6 @@ PLAN_CLAUSE_KINDS = {
     "ally_draw": "AllyDraw",
     "others_attack_damage_this_turn": "OthersAttackDamageThisTurn",
     # THE CASKET PASS (2026-09-28), Pearl Diver: "Plan: The Casket gains 2."
-    "casket_gain": "CasketGain",
     # THE EXPANSION, BATCH ONE (2026-09-29). Lull's and Undertide Lance's "if
     # no other Plan is carried out this morning", Evening Watch's Block per
     # enemy intending to attack, Brace for the Tide's doubling.
@@ -2775,11 +2758,9 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        "next_plan_double_damage",
                        "next_plan_extra_carry_out",
                        # `EB-655`, Battle Plan's rider: the size is the rule's.
-                       "next_attack_damage",
                        # R276: two switches, "the first ..." has no size.
                        "first_attack_twice", "first_card_free",
                        # Kokomi core pass, Chain of Command's switch.
-                       "first_companion_free",
                        # THE EXPANSION: "Double your Block" prints no size.
                        "double_block",
                        # THE STATUS BATCH: "every status and curse" and "any
@@ -2805,9 +2786,8 @@ PLAN_AIM_CS = {
     "enemies_intending_attack": "KokomiPlan.Aim.EnemiesIntendingAttack",
 }
 PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
-                  "damage_per_companion_last_turn", "apply_power",
+                  "apply_power",
                   # R276, Feigned Retreat.
-                  "damage_if_unhurt",
                   # THE EXPANSION: Undertide Lance's planned hit.
                   "damage_if_alone"}
 #: The clauses a `times:` may repeat -- the flat hit, and nothing else
@@ -2815,30 +2795,27 @@ PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
 PLAN_TIMES_OPS = {"damage"}
 #: Legal inside a `plan:` list and NOWHERE else -- a top-level spelling would
 #: be a different, unpriced card, and `KokomiPlan` is the only caller of both.
-PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
-                 "play_copy_of_companion", "block_per_plan_this_morning",
+PLAN_ONLY_OPS = {
+                 "play_copy_of_companion",
                  # `EB-685`, Breakwater's count. See `PLAN_CLAUSE_KINDS`.
                  "block_per_plan_held",
                  # `EB-643`. The drain-positional clauses -- see
                  # `PLAN_CLAUSE_KINDS` above for the one reason all of them are
                  # here. `kokomi_plan.PLAN_ONLY_OPS` is the twin.
-                 "draw_per_plan_after", "draw_per_plan_this_turn",
+                 "draw_per_plan_this_turn",
                  "next_plan_double_damage",
                  "next_plan_extra_carry_out",
                  # `EB-655`, Battle Plan's rider.
-                 "next_attack_damage",
                  # R276. Each names the carry-out turn or the writing, so a
                  # now-line spelling would be a different, unpriced card.
-                 "first_attack_twice", "first_card_free", "damage_if_unhurt",
-                 "attack_damage_this_turn", "block_front_intent",
+                 "first_attack_twice", "first_card_free",
+                 "block_front_intent",
                  # Kokomi core pass, Chain of Command: "next turn".
-                 "first_companion_free",
                  # THE CO-OP SET: both name the carry-out turn, and the first
                  # a player captured at writing.
                  "ally_draw", "others_attack_damage_this_turn",
                  # THE CASKET PASS (2026-09-28): Pearl Diver's gain is what the
                  # carry-out buys; no row prints it on a now-line.
-                 "casket_gain",
                  # THE EXPANSION: each names a drain ("this morning", Dusk).
                  "energy_if_alone", "damage_if_alone",
                  "block_per_attacking_enemy", "double_block",
@@ -2847,11 +2824,6 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  # THE STATUS BATCH: each reads the hand just drawn.
                  "block_per_status_in_hand", "exhaust_statuses_in_hand",
                  "transform_statuses_in_hand", "discard_and_draw"}
-
-#: R276. Feigned Retreat's second printed number ("deal 14 instead") -- the
-#: hit when she lost no HP since the Plan was written. The twin of
-#: `kokomi_plan.UNHURT_FIELD`.
-PLAN_UNHURT_FIELD = "unhurt_amount"
 
 #: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
 #: on top of a number read off the board, and the base card prints none.
@@ -2898,8 +2870,6 @@ def plan_reason(card: dict) -> str | None:
         # beat is two stacks -- an `amount` -- rather than two applications.
         if op in PLAN_TIMES_OPS:
             allowed.add("times")
-        if op == "damage_if_unhurt":
-            allowed.add(PLAN_UNHURT_FIELD)
         unknown = set(eff) - allowed
         if unknown:
             return (f"plan clause {op} field(s) {sorted(unknown)} "
@@ -2915,12 +2885,6 @@ def plan_reason(card: dict) -> str | None:
             if not isinstance(amount, int) or isinstance(amount, bool) \
                     or amount < floor:
                 return f"plan clause {op} amount must be a positive literal int"
-        if op == "damage_if_unhurt":
-            unhurt = eff.get(PLAN_UNHURT_FIELD)
-            if not isinstance(unhurt, int) or isinstance(unhurt, bool) \
-                    or unhurt <= 0:
-                return (f"plan clause {op} {PLAN_UNHURT_FIELD} must be a "
-                        "positive literal int")
         if op in PLAN_AIMED_OPS and eff.get("target") not in PLAN_AIM_CS:
             return (f"plan clause {op} target {eff.get('target')!r} -- a "
                     f"planned clause lands {sorted(PLAN_AIM_CS)}")
@@ -2946,14 +2910,6 @@ PLAN_UPGRADE_VARS = {
     "plan_attack_bonus": "PlanAttackBonus",
     # THE STATUS BATCH, Tidecleanse's "up to N".
     "plan_exhaust": "PlanExhaust",
-}
-
-#: R276. A `plan_*` key that moves a SECOND number on a clause another key
-#: already owns the var of -- Feigned Retreat's "deal 14 instead" beside its 9.
-#: `{key: (op, field, var)}`; `upgrades.PLAN_DELTA_FIELDS` is the sim's half.
-PLAN_ALT_UPGRADE_VARS = {
-    "plan_unhurt_damage": ("damage_if_unhurt", PLAN_UNHURT_FIELD,
-                           "PlanUnhurtDamage"),
 }
 
 
@@ -2987,28 +2943,7 @@ def plan_var_effects(card: dict) -> dict[int, tuple[str, str]]:
     return out
 
 
-def plan_alt_var_effects(card: dict) -> dict[int, tuple[str, str, str]]:
-    """`{index in plan: (delta key, field, var name)}` for a clause's SECOND
-    upgraded number (R276, `PLAN_ALT_UPGRADE_VARS`). The first clause of the
-    key's op owns it, `plan_var_effects`' rule."""
-    plan = card.get("plan") or []
-    if not plan:
-        return {}
-    deltas = upgrade_plan(card)[0]
-    out: dict[int, tuple[str, str, str]] = {}
-    for key, (op, field, var) in PLAN_ALT_UPGRADE_VARS.items():
-        if key not in deltas:
-            continue
-        idx = next((i for i, fx in enumerate(plan)
-                    if fx.get("op") == op
-                    and isinstance(fx.get(field), int)), None)
-        if idx is not None:
-            out[idx] = (key, field, var)
-    return out
-
-
-def plan_clause_cs(eff: dict, var: str | None = None,
-                   alt_var: str | None = None) -> str:
+def plan_clause_cs(eff: dict, var: str | None = None) -> str:
     """One `KokomiPlan.Planned` literal for one plan clause.
 
     `var` is the DynamicVar this clause's amount rides when the card's upgrade
@@ -3033,11 +2968,6 @@ def plan_clause_cs(eff: dict, var: str | None = None,
     # key existed emits exactly the literal it always did.
     times = eff.get("times")
     tail = f", Times: {int(times)}" if isinstance(times, int) else ""
-    # R276. Feigned Retreat's hit when she lost no HP since writing it.
-    if op == "damage_if_unhurt":
-        alt = (f'DynamicVars["{alt_var}"].IntValue' if alt_var
-               else str(int(eff[PLAN_UNHURT_FIELD])))
-        tail += f", Alt: {alt}"
     return (f"new KokomiPlan.Planned(KokomiPlan.Kind.{kind}, {amount}, "
             f"{aim}{tail})")
 
@@ -3188,9 +3118,6 @@ APPLY_POWERS = {
     "ko_patience": ("PatienceKleePower", None,
         "At the end of your turn, if you played no [gold]Set off[/gold] card "
         "this turn, your largest [gold]Bomb[/gold] grows by {X}."),
-    "ko_friendship_bracelet": ("FriendshipBraceletPower", None,
-        "Whenever you play a [gold]Companion[/gold] card, your largest "
-        "[gold]Bomb[/gold] grows by {X}."),
     # THE KLEE STATUS PACKAGE (2026-10-01). Classes in
     # Powers/Prototype/KleeStatusPackage.cs.
     "ko_finders_keepers": ("FindersKeepersPower", None,
@@ -3335,9 +3262,6 @@ APPLY_POWERS = {
     "fs_the_crowd_roars": ("TheCrowdRoarsPower", None,
         "Whenever another player loses HP, your [gold]front performer[/gold] "
         "gains {X} [gold]Fanfare[/gold]."),
-    "mc_tectonic_tide": ("TectonicTidePower", None,
-        "Whenever an [gold]Elemental Reaction[/gold] happens, deal {X} damage "
-        "to that enemy."),
     "mc_sinful_hex": ("SinfulHexPower", None,
         "Whenever an [gold]Electro[/gold] [gold]Elemental Reaction[/gold] "
         "happens this turn, deal {X} [gold]Electro[/gold] damage to a random "
@@ -3361,9 +3285,6 @@ APPLY_POWERS = {
     "kk_treatise": ("TreatisePower", None,
         "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
         "draw {X}."),
-    "kk_song_of_pearls": ("SongOfPearlsPower", None,
-        "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
-        "gain {X} Block."),
     # `EB-492`. Nereid's Ascension, redesigned from a Plan clause into the
     # Power it always read as: the old row spent the morning it was meant to
     # pay for. A marker power -- the stack means nothing, `CarryOutTimes`
@@ -3375,11 +3296,6 @@ APPLY_POWERS = {
     "kk_generals_banner": ("GeneralsBannerPower", None,
         "Once per turn, when you play a [gold]Companion[/gold] card, the front "
         "enemy gains {X} Weak."),
-    # THE CASKET PASS (2026-09-28). Moon Signal: the queue is read BEFORE the
-    # morning drains it (`ProtoBakeKuragePower.AfterPlayerTurnStart`).
-    "kk_moon_signal": ("MoonSignalPower", None,
-        "At the start of your turn, if 2 or more [gold]Plans[/gold] are "
-        "waiting, the [gold]Casket[/gold] gains {X}."),
     # THE EXPANSION, BATCH ONE (2026-09-29). Every class lives in
     # Powers/Prototype/KokomiExpansion.cs; every row states its own face.
     "kk_grand_design": ("GrandDesignPower", None,
@@ -4117,16 +4033,12 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # top-level draw is left alone. Rides the DrawThen /
                        # DrawElse vars `draw` already gives branch draws.
                        "conditional_draw",
-                       # `EB-491`, the pool pass. `split_grow` is Split
-                       # Charge's upgrade-only clause: it is emitted as
-                       # `tide_draw`'s play-time `IsUpgraded` read, because the
-                       # face states its own `{IfUpgraded:show:...}` swap and a
-                       # var would render one number twice. `spark_price`
+                       # `EB-491`, the pool pass. `spark_price`
                        # is Fireworks Show's, and the face prints NOTHING for
                        # it at all -- a Spark price sits in the cost slot, so
                        # the moved number reaches the player through the badge
                        # and the gate, which both read `PrintedSparkPrice`.
-                       "split_grow", "spark_price",
+                       "spark_price",
                        "encore",
                        "encore_cost", "fanfare_cost", "fanfare_cap",
                        "fanfare_floor", "heal",
@@ -4875,7 +4787,6 @@ def blocked_reason(
                 and player_block_calc_rider(card, effect) is None
                 and companions_played_calc_rider(card, effect) is None
                 and kokomi_companions_this_turn_calc_rider(card, effect) is None
-                and plans_carried_out_morning_rider(card, effect) is None
                 and debuffs_on_target_calc_rider(card, effect) is None
                 and kokomi_casket_calc_rider(card, effect) is None
                 and plans_held_draw_rider(card, effect) is None
@@ -5090,8 +5001,6 @@ def blocked_reason(
                 if value is not None and (not isinstance(value, int)
                                           or value <= 0):
                     return f"set_off {key} must be a positive literal int"
-            if eff.get("aura") not in (None, "non_pyro"):
-                return f"set_off aura filter '{eff.get('aura')}'"
             if eff.get("overflow") not in (None, "bounce"):
                 return f"set_off overflow '{eff.get('overflow')}'"
             if eff.get("overflow") and eff.get("target") != "enemy":
@@ -5102,7 +5011,7 @@ def blocked_reason(
                 return f"set_off charge '{eff.get('charge')}'"
             if eff.get("charge") and (
                     eff.get("target") != "enemy" or eff.get("overflow")
-                    or eff.get("wide_if") or eff.get("aura")):
+                    or eff.get("wide_if")):
                 # Pocket Match's "your largest Bomb on the enemy" is ONE
                 # enemy's largest charge; no other spelling composes with it.
                 return "set_off charge is the plain aimed spelling only"
@@ -5360,18 +5269,6 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if eff.get("target") != "enemy":
                 return f"plant_bomb_copy_largest target '{eff.get('target')}'"
-        if op == "split_largest_bomb":
-            # Split Charge: `growth` is what each half gains, 0 on the base
-            # card and bought by the upgrade. A literal >= 0 rather than
-            # optional, so the row states the base reading rather than leaving
-            # the emitter to assume one.
-            unknown = set(eff) - SPLIT_LARGEST_BOMB_FIELDS
-            if unknown:
-                return f"{op} field(s) {sorted(unknown)} not understood"
-            growth = eff.get("growth")
-            if not isinstance(growth, int) or isinstance(growth, bool) \
-                    or growth < 0:
-                return "split_largest_bomb growth must be a literal int >= 0"
         # POOL PASS TWO's two (`EB-732`), same UNPARSEABLE discipline.
         if op == "return_to_hand":
             unknown = set(eff) - RETURN_TO_HAND_FIELDS
@@ -6174,44 +6071,6 @@ def kokomi_companions_this_turn_calc_rider(
     return (int(formula.get("base", 0)), int(formula.get("per", 1)),
             "static (card, _) => KokomiOverhaulLedger.For("
             "card.Owner.Creature).CompanionsPlayedThisTurn")
-
-
-def plans_carried_out_morning_rider(
-        card: dict, eff: dict) -> tuple[int, int, str] | None:
-    """`amount_formula: {base, per, count: plans_carried_out_this_morning}` --
-    Well Laid (`EB-492`), "Deal 2 damage. Deals 3 more for each Plan the
-    Bake-Kurage carried out this morning."
-
-    THE SAME NUMBER TIDE WALL READS, and that is the point of reading it here
-    rather than counting anything up: `KokomiOverhaulLedger.PlansThisMorning`
-    is written once, at the drain, before the first clause runs, so the morning
-    a Plan card sees and the morning a now-line sees are one fact. Tide Wall
-    pays it in Block through a PLAN clause; this pays it in damage through an
-    Attack's now-line, which is the whole design of the row -- the morning paid
-    a second time, on the damage side, at 0 energy.
-
-    THE PLAN HALF AND THE BOOLEAN AGREE BY CONSTRUCTION. Sango Isshin's
-    `plan_carried_out_this_turn` is the same fact as a yes/no, and both are
-    cleared on the one turn boundary (`KokomiOverhaulLedger.RollTo`), so a
-    morning that drained three Plans reads three here and true there. They part
-    only where the arm's mid-turn doors fire -- Change of Plans and The Moon
-    Overlooks the Waters carry a Plan out inside the turn, which is a Plan
-    carried out and is NOT part of the morning -- and that is the printed
-    difference between "this turn" and "this morning", not a drift.
-
-    Same CalculatedDamageVar triple as the riders around it, and the same
-    damage-only restriction: the count moves every turn of the fight.
-    """
-    if eff.get("op") != "damage" or eff.get("target") == "self":
-        return None
-    formula = eff.get("amount_formula")
-    if not isinstance(formula, dict):
-        return None
-    if formula.get("count") != "plans_carried_out_this_morning":
-        return None
-    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
-            "static (card, _) => KokomiOverhaulLedger.For("
-            "card.Owner.Creature).PlansThisMorning")
 
 
 #: THE CASKET PASS (2026-09-28). Three per-turn or per-combat counts the
@@ -7379,11 +7238,6 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     companions_this_turn = kokomi_companions_this_turn_calc_rider(card, eff)
     if companions_this_turn is not None:
         return companions_this_turn
-    # QUARANTINED USE ONLY (`EB-492`), and the same triple and the same
-    # damage-only rule as the two above: the count moves every morning.
-    plans_morning = plans_carried_out_morning_rider(card, eff)
-    if plans_morning is not None:
-        return plans_morning
     # R276, Well Laid: per distinct debuff on the aimed enemy.
     debuffs_on_target = debuffs_on_target_calc_rider(card, eff)
     if debuffs_on_target is not None:
@@ -7943,8 +7797,6 @@ def build_vars(card: dict) -> list[str]:
                 f'new UnsourcedBlockVar("{var}", {amount}m, ValueProp.Move)')
         else:
             out.append(f'new DynamicVar("{var}", {amount}m)')
-    for index, (_key, field, var) in sorted(plan_alt_var_effects(card).items()):
-        out.append(f'new DynamicVar("{var}", {int(plan_line[index][field])}m)')
     if added_encore_salon(card) is not None:
         base, deploys = added_encore_salon(card)
         # Same trio as salon_calc_var_decls, for the upgrade-appended encore
@@ -8225,7 +8077,6 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # emitted as a play-time `IsUpgraded` read rather than a var -- the
         # face already carries its own `{IfUpgraded:show:...}` swap, so a var
         # would render the number twice.
-        "split_grow": any(e["op"] == "split_largest_bomb" for e in effects),
         # `EB-491` (Fireworks Show): the upgrade cuts the SPARK PRICE. The face
         # never prints a Spark price (`docs/current/text-conventions.md`, the
         # Spark row: it sits in the cost slot), so there is nothing to render
@@ -8331,7 +8182,6 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or player_block_calc_rider(card, e) is not None
             or companions_played_calc_rider(card, e) is not None
             or kokomi_companions_this_turn_calc_rider(card, e) is not None
-            or plans_carried_out_morning_rider(card, e) is not None
             or debuffs_on_target_calc_rider(card, e) is not None
             or kokomi_casket_calc_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
@@ -8354,7 +8204,6 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or player_block_calc_rider(card, e) is not None
             or companions_played_calc_rider(card, e) is not None
             or kokomi_companions_this_turn_calc_rider(card, e) is not None
-            or plans_carried_out_morning_rider(card, e) is not None
             or debuffs_on_target_calc_rider(card, e) is not None
             or kokomi_casket_calc_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
@@ -9692,20 +9541,6 @@ def _tide_draw_flat_expr(card: dict, eff: dict) -> str:
     """
     base = int(eff.get("amount", 0))
     delta = int(upgrade_plan(card)[0].get("tide_draw", 0))
-    return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
-
-
-def _split_growth_expr(card: dict, eff: dict) -> str:
-    """Split Charge's per-half growth, with its `split_grow` delta folded in as
-    a play-time `IsUpgraded` read (`EB-491`).
-
-    `_tide_draw_flat_expr`'s shape, and the base is 0: the upgrade BUYS a clause
-    the base card does not have, so the face prints it inside its own
-    `{IfUpgraded:show:...}` hole and nothing renders on the base card. A `grow`
-    var here would declare a DynamicVar whose value the base face never shows.
-    """
-    base = int(eff.get("growth", 0))
-    delta = int(upgrade_plan(card)[0].get("split_grow", 0))
     return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
 
 
@@ -11325,7 +11160,6 @@ def build_body(
                 if eff is set_off_damage_var_effect(card)
                 else str(int(eff.get("damage", 0))))
             times = int(eff.get("times", 1))
-            aura = "true" if eff.get("aura") == "non_pyro" else "false"
             if eff["target"] == "enemy" and eff.get("charge") == "largest":
                 # Pocket Match (playtest 2026-09-24): only the single largest
                 # charge on the aimed enemy goes off; the rest stay.
@@ -11368,7 +11202,7 @@ def build_body(
                 lines.append(
                     "await ProtoBombPower.SetOffAll("
                     "choiceContext, Owner.Creature, this, cardPlay, "
-                    f"{damage}, nonPyroAuraOnly: {aura});")
+                    f"{damage});")
             else:   # random_enemy, re-rolled per `times` (Tinder Toss)
                 lines.append(
                     "await ProtoBombPower.SetOffRandom("
@@ -11515,15 +11349,6 @@ def build_body(
                 "await ProtoBombPower.PlaceCopyOfLargest("
                 "choiceContext, cardPlay.Target, Owner.Creature, this);")
 
-        elif op == "split_largest_bomb":
-            # THE POOL PASS (Split Charge, `EB-491`). ONE call; the halving is
-            # the power's arithmetic and `growth` is what the upgrade adds to
-            # each half, read at play time off `IsUpgraded` -- the base card
-            # prints no figure for it.
-            lines.append(
-                "await ProtoBombPower.SplitLargest("
-                "choiceContext, Owner.Creature, this, "
-                f"{_split_growth_expr(card, eff)});")
 
         elif op == "return_to_hand":
             # BLAST SHIELD (`EB-732`), and it emits NO STATEMENT here on
@@ -11676,10 +11501,6 @@ def build_body(
                 "await InazumaCompanion.BlockHalfDamage("
                 "choiceContext, Owner.Creature, cardPlay);")
 
-        elif op == "next_companion_discount":
-            lines.append(
-                "await KokomiOverhaulKit.NextCompanionDiscount("
-                "choiceContext, Owner.Creature, this);")
 
         elif op == "remove_debuff":
             lines.append(
@@ -11707,17 +11528,6 @@ def build_body(
             lines.append(
                 "await KokomiOverhaulKit.DoubleCasket(Owner.Creature);")
 
-        elif op == "cancel_last_plan":
-            # Second Thoughts (`EB-643`). THE NEWEST Plan, where Change of
-            # Plans above hurries the OLDEST: the two tempo cards work
-            # opposite ends of one queue. The card that wrote it comes back
-            # from the discard pile and its cost is refunded, both inside
-            # `KokomiPlan.CancelLast` -- which is where the paths that return
-            # nothing (an exhausted source, a Plan written off the exhaust
-            # pile by Moon's Reflection) are recorded.
-            lines.append(
-                "await KokomiPlan.CancelLast("
-                "choiceContext, Owner.Creature);")
 
         elif op == "cancel_all_plans_cash":
             # Ebb Tide (`EB-643`). PER ENTRY and not per carry-out -- "for
@@ -12617,7 +12427,6 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
                 if eff is set_off_damage_var_effect(card)
                 else str(int(eff.get("damage", 0))))
             times = int(eff.get("times", 1))
-            aura = "true" if eff.get("aura") == "non_pyro" else "false"
             if eff["target"] == "enemy":
                 method = ("SetOffLargestAimed"
                           if eff.get("charge") == "largest"
@@ -12629,8 +12438,7 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
             elif eff["target"] == "all_enemies":
                 body.append(
                     "await ProtoBombPower.SetOffAll(choiceContext, "
-                    f"Owner.Creature, this, cardPlay, {damage}, "
-                    f"nonPyroAuraOnly: {aura});")
+                    f"Owner.Creature, this, cardPlay, {damage});")
             else:
                 body.append(
                     "await ProtoBombPower.SetOffRandom(choiceContext, "
@@ -13078,7 +12886,6 @@ def _authored_face_numbers(card: dict):
     # unkeyed number above does: the cursor has to step past it or a later
     # literal gets mistaken for it.
     plan_vars = plan_var_effects(card)
-    alt_vars = plan_alt_var_effects(card)
     for index, eff in enumerate(card.get("plan") or []):
         amount = eff.get("amount")
         if not isinstance(amount, int):
@@ -13088,14 +12895,6 @@ def _authored_face_numbers(card: dict):
             yield key, var, amount
         else:
             yield None, None, amount
-        # R276. Feigned Retreat prints a SECOND number on the same clause.
-        unhurt = eff.get(PLAN_UNHURT_FIELD)
-        if isinstance(unhurt, int):
-            if index in alt_vars:
-                key, _field, var = alt_vars[index]
-                yield key, var, unhurt
-            else:
-                yield None, None, unhurt
 
 
 # `EB-315`. The vars whose printed number is a CARD COUNT, so the face has to
@@ -15035,14 +14834,10 @@ def build_upgrade(card: dict) -> list[str]:
             "// tier0 twin: upgrades.apply key 'tide_draw', which bumps the "
             "same op's `amount`.")
     for flat, where in (
-            ("split_grow",
-             "ProtoBombPower.SplitLargest's growth argument; tier0 twin: "
-             "upgrades.apply key 'split_grow', which bumps the same op's "
-             "`growth`"),
             ("spark_price",
              "PrintedSparkPrice and the SparkPower.Spend beside it; tier0 "
              "twin: upgrades.apply key 'spark_price', which bumps the "
-             "`spend_spark` amount both engines gate on")):
+             "`spend_spark` amount both engines gate on"),):
         if flat not in deltas:
             continue
         # `EB-491`. `tide_draw`'s shape: the number is read at PLAY time off
@@ -15135,12 +14930,6 @@ def build_upgrade(card: dict) -> list[str]:
     # of the fix: before it, `PlanClauses` carried a literal and Feint+ dealt
     # its base number at dawn however often it was smithed.
     for _index, (plan_key, plan_var) in sorted(plan_var_effects(card).items()):
-        if plan_key in deltas and plan_key not in done:
-            done.add(plan_key)
-            lines.append(f'DynamicVars["{plan_var}"].UpgradeValueBy('
-                         f'{int(deltas[plan_key])}m);')
-    for _index, (plan_key, _field, plan_var) in sorted(
-            plan_alt_var_effects(card).items()):
         if plan_key in deltas and plan_key not in done:
             done.add(plan_key)
             lines.append(f'DynamicVars["{plan_var}"].UpgradeValueBy('
@@ -15650,11 +15439,9 @@ def emit(
     plan_member = ""
     if plan_body:
         plan_vars = plan_var_effects(card)
-        alt_vars = plan_alt_var_effects(card)
         clauses = (",\n" + " " * 12).join(
             plan_clause_cs(clause,
-                           plan_vars[i][1] if i in plan_vars else None,
-                           alt_vars[i][2] if i in alt_vars else None)
+                           plan_vars[i][1] if i in plan_vars else None)
             for i, clause in enumerate(plan_body))
         interfaces += ", IPlannedCard"
         if now_line_body is not None:
@@ -16179,37 +15966,6 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # both are the sheet's own off the board. A tip repeating the sheet
     # numbers beside a face printing the folded ones would be `EB-441`'s
     # defect coming back on the other surface.
-    # `EB-539`. THE SAME SPLIT ONE COUNT OVER: a live MORNING total, whose
-    # face cannot say what it is made of.
-    #
-    # THE FIND (Kokomi r19 lane 2). On a bare morning `Well Laid` printed "Deal
-    # 2 damage, already including 3 for each Plan carried out this morning" and
-    # the seat read it as self-contradictory -- 2 cannot already include a 3
-    # that nothing paid. It is `EB-441`'s clause working exactly as written, on
-    # the one board where the fold is zero.
-    #
-    # So the FACE prints the live total alone and the rule moves to the tip,
-    # which is the only surface that can carry a rule AND a live count. Handed
-    # the SAME `base` and `per` the rider emits the vars from, so the sentence
-    # cannot quote a number the hit does not use.
-    #
-    # AND THE WORD GOES WITH IT. The arm-keyword attach below is derived from
-    # the words the card PRINTS, and this rider takes `Plan` off the face and
-    # prints it in the tip instead -- so without this the row would have gone
-    # on saying `Plan` with nothing on screen defining it, which is the exact
-    # silence that rule exists to make impossible. `rider_printed` carries the
-    # words a rider prints into the same scan the face feeds.
-    rider_printed = ""
-    for _eff in card.get("effects", []):
-        _morning = plans_carried_out_morning_rider(card, _eff)
-        if _morning is not None:
-            _base, _per, _ = _morning
-            tips_expr = (
-                "KokomiRiderTips.ForMorningDamageRider("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this, "
-                f"{_base}, {_per})")
-            rider_printed += " [gold]Plan[/gold]"
-            break
     # B5: a deploy card carries the tip for every member it can field, plus
     # the cap rules its face no longer prints. Attached from the EFFECT, not
     # from a card list, so a new deploy card cannot ship naming a member that
@@ -16395,7 +16151,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 f"{ELEMENT_CS[switch_element]})")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
-        for attach in arm_keyword_tip_calls(desc + rider_printed,
+        for attach in arm_keyword_tip_calls(desc,
                                             includes_bomb_rules,
                                             spark_priced):
             tips_expr = (

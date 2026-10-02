@@ -61,30 +61,26 @@ from tier0.engine.state import Card, CombatState, Enemy, PlanEntry
 #: running.
 PLAN_KINDS = frozenset((
     "draw", "energy", "block", "mend", "damage", "damage_quarter_max_hp",
-    "damage_per_companion_last_turn", "apply_power",
-    "play_copy_of_companion", "block_per_plan_this_morning",
+    "apply_power",
+    "play_copy_of_companion",
     # `EB-685` (pool pass five), BREAKWATER's count. See `BLOCK_PER_PLAN_HELD`.
     "block_per_plan_held",
     # R267 pick 3: Scout Ahead is back on the positional count. BOTH spellings
     # stay registered -- see `DRAW_PER_PLAN_AFTER` below.
-    "draw_per_plan_after",
     "draw_per_plan_this_turn", "next_plan_double_damage",
     "next_plan_extra_carry_out",
     # `EB-655` (pool pass three), BATTLE PLAN. See `NEXT_ATTACK_BONUS`.
-    "next_attack_damage",
     # R276 PICK 1, THE HALVES REWRITE. See `FIRST_ATTACK_TWICE` and the four
     # beside it.
-    "first_attack_twice", "first_card_free", "damage_if_unhurt",
-    "attack_damage_this_turn", "block_front_intent",
+    "first_attack_twice", "first_card_free",
+    "block_front_intent",
     # Kokomi core pass: Chain of Command's switch. See `FIRST_COMPANION_FREE`.
-    "first_companion_free",
     # THE CO-OP SET: Joint Orders' "They draw 2 cards" and Coordinated
     # Strike's "each other player's Attacks deal 3 additional damage". Both
     # are about ANOTHER player, and tier 0 seats one (`engine/coop.py`).
     "ally_draw", "others_attack_damage_this_turn",
     # THE CASKET PASS (2026-09-28): Pearl Diver's "The Casket gains 2". See
     # `CASKET_GAIN`.
-    "casket_gain",
     # THE EXPANSION, BATCH ONE (2026-09-29). Lull's and Undertide Lance's
     # "if no other Plan is carried out this morning", Evening Watch's Block
     # per enemy intending to attack, and Brace for the Tide's doubling. See
@@ -113,12 +109,10 @@ PLAN_AMOUNTLESS_OPS = frozenset((
     # RULE's (`C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS`) and not the clause's,
     # exactly as Rally's is, so the clause carries no `amount` for a sheet to
     # move.
-    "next_attack_damage",
     # R276. Two switches: "your first Attack" and "the first card" have no
     # size to print.
     "first_attack_twice", "first_card_free",
     # Kokomi core pass: "the first Companion card", the same kind of switch.
-    "first_companion_free",
     # THE EXPANSION: Brace for the Tide's "Double your Block" prints no size.
     "double_block",
     # THE STATUS BATCH: "every status and curse" and "any number".
@@ -142,18 +136,10 @@ PLAN_AIMS = frozenset(("front_enemy", "all_enemies",
 
 #: The clauses that take an aim. Everything else is self-facing.
 PLAN_AIMED_OPS = frozenset((
-    "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn",
+    "damage", "damage_quarter_max_hp",
     "apply_power",
-    # R276, Feigned Retreat.
-    "damage_if_unhurt",
     # THE EXPANSION: Undertide Lance's planned hit.
     "damage_if_alone"))
-
-#: R276. Feigned Retreat's second printed number, "deal 14 instead": the hit
-#: when she lost no HP since the Plan was written. `schedule` records her HP at
-#: writing under `HP_AT_WRITE`. `gen_klee_cards.PLAN_UNHURT_FIELD` is the twin.
-UNHURT_FIELD = "unhurt_amount"
-HP_AT_WRITE = "hp_at_write"
 
 #: R276. The clauses whose `amount` may be zero: Tide Wall's is a flat bonus on
 #: top of the front enemy's intent, and the base card prints none. THE FEED
@@ -178,9 +164,8 @@ PLAN_TIMES_OPS = frozenset(("damage",))
 #: `effects.OPS` still registers them -- the loader validates a `plan:` list
 #: through the same vocabulary check the body takes -- and the registered
 #: handler refuses, which is what makes "plan-only" true rather than intended.
-PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
+PLAN_ONLY_OPS = frozenset((
                            "play_copy_of_companion",
-                           "block_per_plan_this_morning",
                            # `EB-685`. Breakwater's count. PLAN-ONLY for the
                            # line above's reason one word over: "the Plans the
                            # jellyfish is HOLDING" is a number a now-line would
@@ -193,7 +178,6 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            # Plan", "after this one" -- so a now-line spelling
                            # would ask about a drain that is not running and
                            # answer nothing, every time.
-                           "draw_per_plan_after",
                            "draw_per_plan_this_turn",
                            "next_plan_double_damage",
                            "next_plan_extra_carry_out",
@@ -201,23 +185,19 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            # carry-out pays: a now-line spelling would be a
                            # different, unpriced card that buffed an Attack on
                            # the turn it was played.
-                           "next_attack_damage",
                            # R276. Each names the carry-out turn ("this
                            # turn", "the first ...") or the writing ("since
                            # you wrote this"), so a now-line spelling would be
                            # a different, unpriced card.
                            "first_attack_twice", "first_card_free",
-                           "damage_if_unhurt", "attack_damage_this_turn",
                            "block_front_intent",
                            # Kokomi core pass: "next turn" is the carry-out.
-                           "first_companion_free",
                            # THE CO-OP SET: the player is the one captured
                            # when the Plan was written, and "next turn" is the
                            # carry-out turn.
                            "ally_draw", "others_attack_damage_this_turn",
                            # THE CASKET PASS: Pearl Diver's gain is what the
                            # carry-out buys; no row prints it on a now-line.
-                           "casket_gain",
                            # THE EXPANSION: "this morning" and "at Dusk" name
                            # a drain, and Brace doubles the Block standing
                            # when the Dusk Plan lands.
@@ -259,12 +239,6 @@ SEA_GLASS = "kk_sea_glass"
 #: alone. `KokomiPlan.Kind.EachPlayerEnergy` / `EachPlayerDraw` are the twins.
 EACH_PLAYER_ENERGY = "each_player_energy"
 EACH_PLAYER_DRAW = "each_player_draw"
-
-#: Tide Wall's clause (`EB-335`, R246 pick 2): "Gain N Block for each Plan the
-#: Bake-Kurage carries out this morning." PLAN-ONLY by construction -- the
-#: count it multiplies is a fact about a morning, and a now-line spelling would
-#: read a number that is zero every time it is asked.
-BLOCK_PER_PLAN = "block_per_plan_this_morning"
 
 #: `EB-685` (pool pass five), BREAKWATER: "Gain 5 Block, plus 3 for each Plan
 #: the Bake-Kurage is HOLDING."
@@ -310,27 +284,6 @@ BLOCK_PER_ATTACKING_ENEMY = "block_per_attacking_enemy"
 #: BRACE FOR THE TIDE: "Dusk Plan: Double your Block." Block equal to the
 #: Block she has, unpowered (Entrench's shape).
 DOUBLE_BLOCK = "double_block"
-
-#: SCOUT AHEAD (`EB-643`, restored by R267 pick 3, and counted honestly by
-#: `EB-718`): "draw 1 card for each LATER Plan carried out with this one". The
-#: count is the CARRY-OUTS that follow this entry in the same drain, which is
-#: `EB-501`'s carry-outs-not-entries reading pointed forwards, and it is PAID
-#: AS THEY HAPPEN: the clause arms a drain-local counter and every later
-#: carry-out draws the rate. Written first of three it draws 2, written last 0,
-#: written alone 0 -- the ordering decision the card is FOR.
-#:
-#: ENTRIES WERE THE WRONG COUNT AND THE GPT REVIEW REPRODUCED IT (2026-09-08):
-#: Scout Ahead, Second Wave, Battle Plan is three later carry-outs (Second
-#: Wave's own, and Battle Plan's two), and the positional term drew 2. Every
-#: per-Plan clause in this arm counts a doubled carry-out twice (`EB-709`), so
-#: the face and the register both said 3.
-#:
-#: NEREID'S ASCENSION IS COUNTED THE SAME WAY, which is the consequence of that
-#: rule rather than a second one: the Rare carries the FIRST entry of a drain
-#: out twice, so a Scout Ahead written first ARMS TWICE and draws 2 at every
-#: later carry-out. `amount` is the RATE per carry-out, the shape
-#: `block_per_plan_this_morning` above already has.
-DRAW_PER_PLAN_AFTER = "draw_per_plan_after"
 
 #: `EB-679` (pool pass four), the WHOLE-MORNING count Scout Ahead briefly took:
 #: "draw 1 card for each Plan carried out this turn", itself included. R267
@@ -384,11 +337,9 @@ QUARTER = 4
 #: Every one of them is applied by an ordinary `apply_power` op off a card row.
 #: Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md). TREATISE
 #: draws N, once a turn, when a card with a Plan line is played NORMALLY (not
-#: written on the Bake-Kurage): `note_face_up_plan_card`. SONG OF PEARLS deals N
-#: Hydro to ALL enemies at the start of her turn when no Plan waits:
-#: `song_of_pearls`. `TreatisePower` / `SongOfPearlsPower` are the twins.
+#: written on the Bake-Kurage): `note_face_up_plan_card`. `TreatisePower` is
+#: the twin.
 TREATISE = "kk_treatise"
-SONG_OF_PEARLS = "kk_song_of_pearls"
 #: R276: her Ancient under the arm, "Whenever the Bake-Kurage carries out a
 #: Plan, gain N Block and draw 1 card." EVERY Plan, uncapped -- the card prints
 #: "Whenever" and is the Dusty Tome's single grant. Applied by the second effect
@@ -429,21 +380,6 @@ GENERALS_BANNER = "kk_generals_banner"       # Weak to the front, once a turn
 #: is retired rather than left standing with no row to spell it.
 #: `NereidsAscensionPower` is the twin.
 NEREIDS_ASCENSION = "kk_nereids_ascension"
-#: Rally's grant. ONE STACK, ALWAYS -- the card says "costs 1 less", not
-#: "per Rally" -- and it is consumed by the next Companion play.
-NEXT_COMPANION_DISCOUNT = "kk_next_companion_discount"
-#: `EB-668` (`EB-655` reopened), BATTLE PLAN's carry-out: "the next Attack you
-#: play face-up this turn deals 4 additional damage". Written by a PLAN, so it lands
-#: on the morning the draw lands on -- and a card WRITTEN on the Bake-Kurage is
-#: not a face-up play, so a write neither takes the bonus nor spends it. That
-#: last clause is what stops the reward from paying for more writing, which is
-#: the pass's thesis.
-#:
-#: A RIDER AND NOT A DISCOUNT, which is the whole of `EB-668`: the grant is now
-#: read where the PLAY is known (`effects.flat_attack_bonus` here,
-#: `ModifyDamageAdditive` there) instead of at a cost seam the mod cannot make
-#: target-aware. `NextAttackDamagePower` is the twin.
-NEXT_ATTACK_BONUS = "kk_battle_plan_rider"
 #: R276 PICK 1. PINCER's carry-out: "This turn, your first Attack is played
 #: twice." A SWITCH on the player, consumed by the first Attack played
 #: FACE-UP (`spend_first_attack_twice`) and dropped at her turn's end. A card
@@ -455,23 +391,13 @@ FIRST_ATTACK_TWICE = "kk_first_attack_twice"
 #: by the first card she pays for (`combat.play_card`) -- a WRITE included,
 #: because a written card is played and paid for. `FirstCardFreePower`.
 FIRST_CARD_FREE = "kk_first_card_free"
-#: Kokomi core pass. CHAIN OF COMMAND's carry-out: "the first Companion card
-#: you play costs 0" -- `FIRST_CARD_FREE` narrowed to Companion cards. Read at
-#: `combat.card_cost`, spent by the first Companion she pays for
-#: (`spend_first_companion_free`), dropped at her turn's end.
-#: `FirstCompanionFreePower` is the twin.
-FIRST_COMPANION_FREE = "kk_first_companion_free"
 #: THE CASKET PASS (2026-09-28). The Tamakushi Casket COUNTS: each Plan the
 #: Bake-Kurage carries out adds `C.KOKOMI_OVERHAUL_CASKET_PER_PLAN` while she
 #: holds the relic (`note_casket_carry_out`), and the count is
-#: `state.kk_casket`, per fight. `CASKET_GAIN` is Pearl Diver's plan clause
-#: ("The Casket gains 2"), `MOON_SIGNAL` the Power that adds to it when 2 or
-#: more Plans wait at the start of her turn, and `OPEN_THE_CASKET` the token
+#: `state.kk_casket`, per fight, and `OPEN_THE_CASKET` the token
 #: the relic deals into her opening hand -- "Gain Strength equal to the
 #: Casket's count, then empty it." Twins: `KokomiOverhaulKit`'s Casket block,
-#: `MoonSignalPower`, `OpenTheCasket`.
-CASKET_GAIN = "casket_gain"
-MOON_SIGNAL = "kk_moon_signal"
+#: `OpenTheCasket`.
 OPEN_THE_CASKET = "kk_open_the_casket"
 
 #: What counts as a debuff ON AN ENEMY in this engine, for the Casket and for
@@ -534,20 +460,12 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
             allowed.add("power")
         if op in PLAN_TIMES_OPS:
             allowed.add("times")
-        if op == "damage_if_unhurt":
-            allowed.add(UNHURT_FIELD)
         if op == TRANSFORM_STATUSES_IN_HAND:
             allowed.add("upgraded")      # the `upgraded_grant` key's flag
         unknown = set(eff) - allowed
         if unknown:
             return (f"plan clause {op} field(s) {sorted(unknown)} "
                     "not understood")
-        if op == "damage_if_unhurt":
-            unhurt = eff.get(UNHURT_FIELD)
-            if not isinstance(unhurt, int) or isinstance(unhurt, bool) \
-                    or unhurt <= 0:
-                return (f"plan clause {op} {UNHURT_FIELD} must be a positive "
-                        "literal int")
         if op not in PLAN_AMOUNTLESS_OPS:
             amount = eff.get("amount")
             # A LITERAL POSITIVE INT, the `spend_spark_amount` /
@@ -936,17 +854,6 @@ def schedule(state: CombatState, card: Card,
     body = [dict(c, amount=hers(state, owner, int(c.get("amount", 0))))
             if c.get("op") in ("damage", DAMAGE_IF_ALONE) else c
             for c in body]
-    # R276, FEIGNED RETREAT. Both of its printed hits are hers, so both take
-    # the fold above; and "since you wrote this" is a fact about THIS moment,
-    # so her HP is recorded on the copied clause now. `KokomiPlan.Schedule`
-    # stamps `Planned.WrittenHp` the same way.
-    body = [dict(c,
-                 amount=hers(state, owner, int(c.get("amount", 0))),
-                 **{UNHURT_FIELD: hers(state, owner,
-                                       int(c.get(UNHURT_FIELD, 0))),
-                    HP_AT_WRITE: int(state.player.hp)})
-            if c.get("op") == "damage_if_unhurt" else c
-            for c in body]
     # CRYSTAL COLLAPSE CAPTURES AT WRITING TIME, and that is the card. "The
     # last other Companion card you played THIS TURN" is a fact about the turn
     # the Plan was written on, and the Plan resolves on the next one -- so
@@ -1222,27 +1129,6 @@ def _drain(state: CombatState, due: list[PlanEntry], why: str,
     first_times = 1 if mid_turn else carry_out_times(state)
     drain_plans = len(due) + (
         1 if due and first_times > 1 else 0)
-    # `EB-718`. SCOUT AHEAD'S COUNTER, armed and spent INSIDE THIS DRAIN.
-    # The face says "for each later Plan CARRIED OUT with this one", so the
-    # card is paid PER LATER CARRY-OUT AS IT HAPPENS rather than off a count
-    # of the entries still queued: Scout Ahead in front of Second Wave and
-    # Battle Plan sees THREE later carry-outs, and the old positional term saw
-    # two because it counted entries. Every reader in this arm counts
-    # carry-outs (`EB-501`) and every per-Plan clause counts a doubled
-    # carry-out twice (`EB-709`); this is that rule pointed forwards.
-    #
-    # A RATE AND NOT A FLAG: `scout_rate` is the sum of the `amount`s armed so
-    # far, so two armed Scout Aheads draw 2 at every later carry-out. It is a
-    # LOCAL, which is what scopes it: a fight that ends mid-drain draws nothing
-    # more, and a morning's arming never reaches the evening.
-    #
-    # ARMED WHEN THE ENTRY RESOLVES, so a Scout Ahead carried out twice under
-    # Nereid's Ascension arms twice and pays 2 per later carry-out -- "carried
-    # out twice counts twice" taken literally. `scout_source` names the card on
-    # the page, the later one when two are armed, which is how `rider_source`
-    # below already resolves the same collision. `KokomiPlan.Drain` is the twin.
-    scout_rate = 0
-    scout_source: Optional[str] = None
     for index, entry in enumerate(due):
         if state.over or not state.player.alive:
             return
@@ -1269,8 +1155,6 @@ def _drain(state: CombatState, due: list[PlanEntry], why: str,
             wrote = _resolve_entry(state, entry, why=why,
                                    double_damage=double,
                                    drain_plans=drain_plans,
-                                   scout_draw=scout_rate,
-                                   scout_source=scout_source,
                                    drain_entries=len(due))
             # THE RIDERS THIS ENTRY WROTE, OR'd across its own carry-outs for
             # the reason above: an entry doubled by Nereid's prints its rider
@@ -1278,12 +1162,6 @@ def _drain(state: CombatState, due: list[PlanEntry], why: str,
             # still twice.
             double_next = double_next or wrote[0]
             extra_next = extra_next or wrote[1]
-            # `EB-718`. THE COUNTER THIS CARRY-OUT ARMED, added AFTER the
-            # carry-out that armed it has been paid: a Scout Ahead never draws
-            # for itself, only for what follows.
-            if wrote[2]:
-                scout_rate += wrote[2]
-                scout_source = entry.card_id
         if double_next or extra_next:
             rider_source = entry.card_id
     # `EB-645`. THE DRAIN RAN OUT WITH A RIDER STILL IN HAND.
@@ -1493,9 +1371,8 @@ LINE_CHOOSER_KEY = "kk_plan_line_chooser"
 
 #: The Plan clause ops that deal damage, for the policy's "would the Plan line
 #: hit nothing" read.
-_PLAN_DAMAGE_OPS = frozenset(("damage", DAMAGE_IF_ALONE, "damage_if_unhurt",
-                              "damage_quarter_max_hp",
-                              "damage_per_companion_last_turn"))
+_PLAN_DAMAGE_OPS = frozenset(("damage", DAMAGE_IF_ALONE,
+                              "damage_quarter_max_hp"))
 
 
 def two_line(entry: PlanEntry) -> bool:
@@ -1638,40 +1515,28 @@ def carry_out_now_line(state: CombatState, entry: PlanEntry) -> None:
 
 def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
                    double_damage: bool = False,
-                   drain_plans: int = 1, scout_draw: int = 0,
-                   scout_source: Optional[str] = None,
-                   drain_entries: int = 1
-                   ) -> tuple[bool, bool, int]:
+                   drain_plans: int = 1, drain_entries: int = 1
+                   ) -> tuple[bool, bool]:
     """ONE PLAN CARRIED OUT -- the unit Treatise and Song of Pearls are priced
     in. "Whenever the jellyfish carries out a Plan" is once per ENTRY, and the
     notify at the bottom is the only place it fires, so Change of Plans' early
     resolution pays them exactly as the morning's does.
 
-    `double_damage`, `drain_plans` and `EB-718`'s `scout_draw` ARE THE DRAIN'S,
-    and they are parameters rather than reads for `ResolveEntry`'s own reason
-    one file over: nothing about the state this entry sits in says which entry
-    ran before it, how deep the drain around it is, or how many Scout Aheads
-    are armed in it, so the caller is the only thing that knows and the caller
-    says. `resolve_front`'s defaults are the honest answer for a drain of one
-    -- no rider was doubled, one Plan was carried out, and nothing is armed.
+    `double_damage` and `drain_plans` ARE THE DRAIN'S, and they are parameters
+    rather than reads for `ResolveEntry`'s own reason one file over: nothing
+    about the state this entry sits in says which entry ran before it or how
+    deep the drain around it is, so the caller is the only thing that knows
+    and the caller says. `resolve_front`'s defaults are the honest answer for
+    a drain of one -- no rider was doubled and one Plan was carried out.
 
-    `EB-718`. THE SCOUT AHEAD DRAW IS PAID FIRST, before this entry's own
-    clauses: this carry-out is the "later Plan carried out with" an earlier
-    Scout Ahead, so the cards are in hand for the beat rather than after it.
-
-    IT RETURNS THE RIDERS THIS ENTRY WROTE AND THE SCOUT AHEAD RATE IT ARMED,
-    `(double, extra, scout)`, because the clause that writes one is inside the
+    IT RETURNS THE RIDERS THIS ENTRY WROTE, `(double, extra)`, because the clause that writes one is inside the
     loop below and the drain that spends it is outside: handing them back is
     what keeps "the next Plan" a fact about the DRAIN rather than a flag on the
     state that could outlive it.
     """
     state.emit("plan_carried_out", card=entry.card_id, why=why,
                clauses=len(entry.clauses))
-    if scout_draw > 0:
-        state.emit("plan_scout_ahead", cards=int(scout_draw),
-                   card=scout_source, on=entry.card_id)
-        state.draw(int(scout_draw))
-    wrote = [False, False, 0]
+    wrote = [False, False]
     if entry.line == "now" and entry.now_card is not None:
         # A PLAN STAYS OPEN (2026-10-01): the player chose the now-line. It
         # replaces the Plan line whole, so it writes no rider and Opening
@@ -1687,7 +1552,7 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
                             drain_plans=drain_plans, wrote=wrote,
                             drain_entries=drain_entries)
     _note_plan_resolved(state, entry)
-    return wrote[0], wrote[1], int(wrote[2])
+    return wrote[0], wrote[1]
 
 
 def claim_once_per_turn(state: CombatState, key: str) -> bool:
@@ -1800,30 +1665,6 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         gained = powers.modify_block_gained(p, amount)
         p.block += gained
         state.emit("block", amount=gained)
-    elif op == BLOCK_PER_PLAN:
-        # TIDE WALL (`EB-335`, R246 pick 2): "Gain N Block for each Plan the
-        # Bake-Kurage carries out this morning." The count is the morning's
-        # whole depth, taken at the drain (`resolve_all`), so this card's Block
-        # does not depend on where in the queue it was written -- and it lands
-        # with the rest of the morning, which is what makes it guard the turn a
-        # Defend would have guarded, one turn later and bigger for the wait.
-        #
-        # POWERED, the same funnel the printed `block` clause above takes:
-        # rule 3 says her Dexterity counts and Frail bites, and two Block
-        # clauses of one morning scaling differently is exactly what
-        # `SongOfPearlsPower`'s header refuses.
-        #
-        # A MORNING THAT HELD NOTHING PAYS NOTHING, and it is a printed no-op
-        # rather than a failure: `Change of Plans` can carry this Plan out on a
-        # turn whose own morning was empty, and zero times three is the honest
-        # answer to "for each Plan carried out this morning".
-        gained = powers.modify_block_gained(
-            p, amount * state.kk_plans_this_morning)
-        if gained:
-            p.block += gained
-            state.emit("block", amount=gained)
-        state.emit("plan_tide_wall", amount=gained,
-                   plans=state.kk_plans_this_morning)
     elif op == BLOCK_PER_PLAN_HELD:
         # BREAKWATER (`EB-685`): "plus N Block for each Plan the Bake-Kurage is
         # holding." The count is the QUEUE AS IT STANDS RIGHT NOW, read live
@@ -1846,20 +1687,6 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
             p.block += gained
             state.emit("block", amount=gained)
         state.emit("plan_breakwater", amount=gained, plans=held)
-    elif op == DRAW_PER_PLAN_AFTER:
-        # SCOUT AHEAD (`EB-718`): "draw 1 card for each later Plan carried out
-        # with this one". NOTHING IS DRAWN HERE. The clause ARMS the drain's
-        # counter at the printed rate, and `_drain` pays that rate at every
-        # carry-out that follows -- which is what makes the count CARRY-OUTS
-        # rather than the entries still queued: Second Wave doubling the entry
-        # behind this one is two later carry-outs and pays twice.
-        #
-        # Change of Plans hurries ONE entry, so a Scout Ahead taken that way
-        # arms a drain that is already over and draws nothing -- the face read
-        # literally: nothing follows it.
-        if wrote is not None:
-            wrote[2] += amount
-        state.emit("plan_scout_armed", rate=amount, card=entry.card_id)
     elif op == DRAW_PER_PLAN_THIS_TURN:
         # `EB-679`'s whole-drain count: "draw 1 card for each Plan carried out
         # this turn", itself included. NO ROW SPELLS IT since R267 pick 3 --
@@ -1883,13 +1710,6 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         if wrote is not None:
             wrote[1] = True
         state.emit("plan_rider", rider=NEXT_PLAN_EXTRA_CARRY_OUT)
-    elif op == "next_attack_damage":
-        # BATTLE PLAN's carry-out (`EB-655`, `EB-668`). One stack, always, and
-        # the same switch-not-counter reading Rally's grant keeps: the face
-        # says "deals 4 additional damage" and not "per Plan", so a morning that
-        # carries out two Battle Plans still buffs one Attack. See
-        # `next_attack_bonus`.
-        next_attack_bonus(state)
     elif op == "first_attack_twice":
         # R276, PINCER: "This turn, your first Attack is played twice." One
         # switch however many are carried out -- "your first Attack" is one
@@ -1901,22 +1721,6 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # One switch; `combat.card_cost` reads it, `combat.play_card` spends it.
         p.powers[FIRST_CARD_FREE] = 1
         state.emit("plan_first_card_free")
-    elif op == "first_companion_free":
-        # Kokomi core pass, CHAIN OF COMMAND: the same switch for Companions.
-        p.powers[FIRST_COMPANION_FREE] = 1
-        state.emit("plan_first_companion_free")
-    elif op == "attack_damage_this_turn":
-        # R276, BATTLE PLAN: "This turn, your Attacks deal N more damage."
-        # The shipped `attack_up_this_turn` window, which is exactly that
-        # sentence: every Attack she plays this turn, per hit, popped at the
-        # end of her turn. A carry-out is not a play (`_hit` is unpowered and
-        # never reads `flat_attack_bonus`), so Plans do not take it.
-        # `AttackUpThisTurnPower` is the C# twin.
-        powers.apply_power(state, p, "attack_up_this_turn", amount)
-        state.emit("plan_battle_plan", bonus=amount)
-    elif op == CASKET_GAIN:
-        # THE CASKET PASS, PEARL DIVER: "The Casket gains 2."
-        gain_casket(state, amount)
     elif op == ENERGY_IF_ALONE:
         # THE EXPANSION, LULL. See `ENERGY_IF_ALONE`.
         if drain_entries <= 1:
@@ -1964,13 +1768,6 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
             p.block += gained
             state.emit("block", amount=gained)
         state.emit("plan_tide_wall", amount=gained, intended=intended)
-    elif op == "damage_if_unhurt":
-        # R276, FEIGNED RETREAT: "Deal 9 damage. If you lost no HP since you
-        # wrote this, deal 14 instead." Her HP now against her HP at writing,
-        # both folded numbers written by `schedule`.
-        unhurt = p.hp >= int(clause.get(HP_AT_WRITE, p.hp))
-        hit = int(clause.get(UNHURT_FIELD, amount)) if unhurt else amount
-        _hit(state, clause, hit, entry=entry, double=double_damage)
     elif op == "mend":
         effects.mend(state, amount)
     elif op == "damage":
@@ -1978,14 +1775,6 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     elif op == "damage_quarter_max_hp":
         _hit(state, clause, quarter_of_max_hp(state), entry=entry,
              double=double_damage)
-    elif op == "damage_per_companion_last_turn":
-        # Chain of Command. "LAST TURN" IS READ AT CARRY-OUT: the Plan was
-        # written on turn N and resolves at the top of N+1, and
-        # `combat._player_turn` has already rolled the counter by then -- so
-        # what this reads is turn N, the turn the player was looking at when
-        # they wrote it. `KokomiOverhaulLedger.RollTo` is the same handover.
-        _hit(state, clause, amount * state.companion_plays_last_turn,
-             entry=entry, double=double_damage)
     elif op == "apply_power":
         _debuff(state, clause, clause["power"], amount, entry=entry)
     elif op == REPLAY_EXHAUSTED:
@@ -2295,7 +2084,6 @@ def roll_turn(state: CombatState) -> None:
     `KokomiOverhaulLedger.RollTo` clears the same set.
 
     """
-    state.companion_plays_last_turn = state.companion_plays_this_turn
     state.kk_once_per_turn.clear()
     state.kk_plan_carried_out_this_turn = False
     # The Casket pass: the per-turn count of carry-outs. The Casket's own
@@ -2365,7 +2153,7 @@ def note_companion_played(state: CombatState, card: Card) -> None:
 
 # ---------------------------------------------------------------------------
 # THE CASKET (the Casket pass, 2026-09-28) -- `KokomiOverhaulKit`'s Casket
-# block, `TamakushiCasket.NoteCarriedOut`, `MoonSignalPower`, `OpenTheCasket`
+# block, `TamakushiCasket.NoteCarriedOut`, `OpenTheCasket`
 # ---------------------------------------------------------------------------
 
 def _holds_casket(state: CombatState) -> bool:
@@ -2560,18 +2348,6 @@ def patient_tide_kept(state: CombatState) -> int:
     return kept
 
 
-def moon_signal(state: CombatState, waiting: int) -> None:
-    """MOON SIGNAL: "At the start of your turn, if 2 or more Plans are
-    waiting, the Casket gains 1." `waiting` is the queue read BEFORE the
-    morning drains it -- `combat._player_turn` takes it beside Song of Pearls'
-    `quiet` -- or it could never be true. Copies stack the gain.
-    `MoonSignalPower.Signal` is the twin."""
-    if not live(state):
-        return
-    n = state.player.powers.get(MOON_SIGNAL, 0)
-    if not n or waiting < C.KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD:
-        return
-    gain_casket(state, n)
 
 
 def open_the_casket_card() -> Card:
@@ -2623,79 +2399,6 @@ def debuff_count(enemy: Optional[Enemy]) -> int:
         return 0
     count = sum(1 for n in ENEMY_DEBUFFS if enemy.powers.get(n, 0) > 0)
     return count + (1 if enemy.frozen > 0 else 0)
-
-
-def cancel_last_plan(state: CombatState) -> None:
-    """SECOND THOUGHTS (`EB-643`): "cancel your last Plan: its card returns to
-    your hand and you regain its cost."
-
-    THE LAST ENTRY AND NOT THE FRONT ONE, which is the whole card: Change of
-    Plans hurries the OLDEST Plan and this takes back the NEWEST, so the two
-    tempo cards operate on opposite ends of the same queue and a player who
-    has just written the wrong Plan has a way back.
-
-    THE CARD COMES OUT OF THE DISCARD PILE, and it is found BY ID rather than
-    held on the entry. The entry keeps `card_id` for exactly this reason
-    (`PlanEntry`'s own header: the writing card is kept for the log, and the
-    C# keeps `Source` for the strip), and a play routes its card to the discard
-    pile at the end of the play -- so the discard pile is where the card that
-    wrote a queued Plan is, on the ordinary path.
-
-    A CANCEL IS AN UNDO, AN EXHAUST CARD TOO (main session, 2026-10-01, after
-    a co-op Vanguard cancelled by Second Thoughts silently vanished): Exhaust
-    applies when the card is played or its Plan carried out, not when it is
-    cancelled, so `_give_back` looks in the exhaust pile as well. A Moon's
-    Reflection Plan's `card_id` is Moon's Reflection, so that is what comes
-    back. Only a card in none of those piles returns nothing, and then no
-    Energy is paid.
-
-    THE ENERGY IS THE RETURNED CARD'S CURRENT COST, read off the card that is
-    coming back -- a smithed copy that cost 0 refunds 0, which is what "its
-    cost" says. Nothing is refunded when no card returns, for the same reason:
-    there is no "its" to read.
-
-    AN EMPTY QUEUE IS A PRINTED NO-OP with a line on the ledger, the shape
-    `resolve_front` already has.
-    """
-    if not live(state):
-        return
-    if not state.kk_plan_queue:
-        state.emit("plan_cancel_last_empty")
-        return
-    entry = state.kk_plan_queue.pop()
-    card = _give_back(state, entry.card_id)
-    if card is None:
-        state.emit("plan_cancel_last", card=entry.card_id, returned=False,
-                   energy=0)
-        return
-    refund = max(0, int(card.cost))
-    state.player.energy += refund
-    if refund:
-        state.emit("energy", amount=refund)
-    state.emit("plan_cancel_last", card=entry.card_id, returned=True,
-               energy=refund)
-
-
-#: Where `_give_back` looks, in order: the ordinary play, an Exhaust card, a
-#: reshuffle since. `KokomiPlan.ReturnPiles` is the twin.
-RETURN_PILES = ("discard_pile", "exhaust_pile", "draw_pile")
-
-
-def _give_back(state: CombatState, card_id: str) -> Optional[Card]:
-    """A CANCELLED PLAN'S CARD COMES BACK (main session, 2026-10-01: a cancel
-    is an undo). The newest copy with the writing card's id, searched in
-    `RETURN_PILES` order, moves to the hand; None when there is none.
-    `KokomiPlan.GiveBack` is the twin."""
-    from tier0.engine.state import remove_instance
-
-    for name in RETURN_PILES:
-        pile = getattr(state.player, name)
-        card = next((c for c in reversed(pile) if c.id == card_id), None)
-        if card is not None:
-            remove_instance(pile, card)
-            state.player.hand.append(card)
-            return card
-    return None
 
 
 def cancel_all_plans_cash(state: CombatState) -> None:
@@ -2772,54 +2475,8 @@ def redirect_queued_plans(state: CombatState, target: Optional[Enemy]) -> None:
                target=target.name)
 
 
-def next_attack_bonus(state: CombatState) -> None:
-    """Battle Plan's carry-out: "the next Attack you play face-up this turn
-    deals 4 additional damage".
-
-    ONE STACK, ALWAYS, Rally's reading one card type over: the face says
-    "deals 4 additional damage" and not "per Plan", so a morning carrying out two
-    Battle Plans buffs one Attack.
-
-    A RIDER ON EACH HIT, folded in by `effects.flat_attack_bonus` where every
-    other flat attack rider is folded in, so a two-hit Attack collects it
-    twice -- the same reading `next_attack_up` has always had, and the one
-    `NextAttackDamagePower.ModifyDamageAdditive` gives on the other side.
-
-    IT IS SPENT AT RESOLUTION (`spend_attack_bonus`), by a FACE-UP Attack: a
-    card written on the Bake-Kurage is not a play of that card's face, so it
-    neither takes the bonus nor spends it. `EB-668` is exactly that clause: a
-    cost hook is handed no play and cannot ask, and damage at resolution can.
-    """
-    if not live(state):
-        return
-    if state.player.powers.get(NEXT_ATTACK_BONUS, 0):
-        return
-    state.player.powers[NEXT_ATTACK_BONUS] = 1
-    state.emit("plan_battle_plan",
-               bonus=C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS)
 
 
-def spend_attack_bonus(state: CombatState, card: Card) -> None:
-    """The rider is consumed by the face-up Attack that takes it.
-
-    CALLED FROM `effects._resolve_card_bound`, beside `next_attack_up`'s own
-    consuming pop and AFTER `flat_attack_bonus` has read it -- which is the
-    ordering the rider needs and the reason it is not spent at
-    `combat._finish_play` the way the retired discount was.
-
-    THE PET CHECK IS THE RULE AND NOT A GUARD. A card written on the jellyfish
-    resolves none of its now-line, so it is not "an Attack you played" in the
-    sense the face means -- the rider survives the write and pays the next
-    Attack actually played. `NextAttackDamagePower.AfterCardPlayed` is the
-    twin, gated on `KokomiPlan.PlayedOnPet` at the one site that can see the
-    play's target.
-    """
-    if not live(state) or card.type != "attack":
-        return
-    if plan_aimed_at_pet(state, card):
-        return
-    if state.player.powers.pop(NEXT_ATTACK_BONUS, 0):
-        state.emit("plan_battle_plan_spent", card=card.id)
 
 
 def front_intent_damage(state: CombatState) -> int:
@@ -2861,41 +2518,8 @@ def spend_first_card_free(state: CombatState, card: Card) -> None:
         state.emit("plan_first_card_free_spent", card=card.id)
 
 
-def spend_first_companion_free(state: CombatState, card: Card) -> None:
-    """CHAIN OF COMMAND's switch (core pass), spent by the first Companion
-    card she pays for this turn. `FirstCompanionFreePower.AfterCardPlayed`."""
-    if not live(state) or not card.is_companion:
-        return
-    if state.player.powers.pop(FIRST_COMPANION_FREE, 0):
-        state.emit("plan_first_companion_free_spent", card=card.id)
 
 
-def song_of_pearls(state: CombatState, quiet: bool) -> None:
-    """SONG OF PEARLS (core pass): "At the start of your turn, if no Plan
-    waits, the Bake-Kurage deals N damage to ALL enemies."
-
-    `quiet` IS THE QUEUE READ JUST BEFORE `resolve_all` -- the caller reads it,
-    because the drain empties the queue. So a morning that carried a Plan out
-    never fires this, and a morning with nothing written does. A Dusk Plan has
-    already been carried out the evening before, so it leaves the queue empty.
-
-    Dealt as a planned hit is (`_hit`): Hydro, unpowered, her Strength folded
-    in (`hers`). Stacks add. `SongOfPearlsPower.Strike` is the twin.
-    """
-    from tier0.engine import effects                # late import: cycle
-
-    if not live(state) or not quiet:
-        return
-    n = int(state.player.powers.get(SONG_OF_PEARLS, 0))
-    if n <= 0 or not state.living_enemies:
-        return
-    amount = hers(state, None, n)
-    state.emit("plan_song_of_pearls", amount=amount)
-    for enemy in list(state.living_enemies):
-        if not enemy.alive:
-            continue
-        effects.deal_damage_to_enemy(state, enemy, amount, element="hydro",
-                                     source="plan", powered=False)
 
 
 def note_face_up_plan_card(state: CombatState, card: Card) -> None:
@@ -2912,31 +2536,6 @@ def note_face_up_plan_card(state: CombatState, card: Card) -> None:
         state.emit("plan_treatise", amount=n, card=card.id)
 
 
-def next_companion_discount(state: CombatState) -> None:
-    """Rally: "The next Companion card you play this turn costs 1 less."
-
-    ONE STACK, ALWAYS. The grant is a switch, not a counter -- two Rallies in
-    one turn do not make the next Companion cost two less, because the card
-    says "costs 1 less" and not "costs 1 less per Rally".
-
-    A DISCOUNT, NOT A ZEROING (draft 6's change from draft 2's Vanguard):
-    `combat.card_cost` SUBTRACTS it and floors at zero.
-    """
-    if not live(state):
-        return
-    if state.player.powers.get(NEXT_COMPANION_DISCOUNT, 0):
-        return
-    state.player.powers[NEXT_COMPANION_DISCOUNT] = 1
-    state.emit("plan_rally", discount=C.KOKOMI_OVERHAUL_RALLY_DISCOUNT)
-
-
-def spend_companion_discount(state: CombatState, card: Card) -> None:
-    """The grant is consumed by the play that spends it -- the C#'s
-    `AfterCardPlayed`/`IsLastInSeries` removal, at the one shared play site."""
-    if not live(state) or not card.is_companion:
-        return
-    if state.player.powers.pop(NEXT_COMPANION_DISCOUNT, 0):
-        state.emit("plan_rally_spent", card=card.id)
 
 
 def remove_one_debuff(state: CombatState) -> None:
@@ -3060,25 +2659,6 @@ def tidal_riposte(state: CombatState, enemy: Enemy, blocked: int,
                                  source="plan", powered=False)
 
 
-def all_streams(state: CombatState) -> None:
-    """ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans and take their
-    cards back. Your next Plan this turn is carried out once more for each Plan
-    cancelled." No Energy refund (main session, 2026-10-01: the cards return,
-    so a refund made re-writing the biggest Plan free). A
-    CANCEL IS AN UNDO (main session, 2026-10-01): every cancelled Plan's card
-    returns to the hand, an Exhaust card too (`_give_back`). No loop: All
-    Streams Exhausts, so the cards come back once per copy. The gift waits on
-    the state for the next card written on the Bake-Kurage this turn
-    (`schedule`). `KokomiPlan.CancelAllForNext` is the twin."""
-    if not live(state):
-        return
-    n = len(state.kk_plan_queue)
-    back = list(state.kk_plan_queue)
-    state.kk_plan_queue.clear()
-    for entry in back:
-        _give_back(state, entry.card_id)
-    state.kk_next_plan_extra = n
-    state.emit("plan_all_streams", cancelled=n, refund=0)
 
 
 def kind(state: CombatState, fx: dict, card: Card, target) -> None:
@@ -3116,8 +2696,6 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
                 have = int(e.powers.get(name, 0))
                 if have > 0:
                     powers.apply_power(state, e, name, have, applier=p)
-    elif k == "all_streams":
-        all_streams(state)
     elif k == "coral_tithe":
         # CORAL TITHE (the payoff pass): the Casket into Energy and cards.
         coral_tithe(state, amount)
@@ -3149,7 +2727,7 @@ NIP_ID = "proto_kk_nip"
 #: loader's check.
 KINDS = {"draw_if_no_plan": ("amount",), "draw_if_target_weak": ("amount",),
          "resonance": ("amount",), "double_weak_vulnerable": (),
-         "all_streams": (), "shoal_call": ("amount",),
+         "shoal_call": ("amount",),
          "coral_tithe": ("amount",),
          # POOL COMPLETION (2026-10-01).
          "spring_tide": (), "kurage_school": (),

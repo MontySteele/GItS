@@ -74,62 +74,7 @@ def _write(st, cid, energy=10):
     return card
 
 
-def test_second_thoughts_after_both_cancels_vanguard(overhaul):
-    """The playtest's turn: Riptide, Vanguard, Second Thoughts. Vanguard is
-    the last Plan; the morning pays Riptide's 2 Energy alone."""
-    st = kokomi_state(enemies=[make_enemy(hp=60)])
-    _deck(st)
-    kokomi_plan.schedule(st, _row("proto_kk_riptide"))
-    kokomi_plan.schedule(st, _row("proto_kk_vanguard"))
-    kokomi_plan.cancel_last_plan(st)
-    assert [e.card_id for e in st.kk_plan_queue] == ["proto_kk_riptide"]
-    st.player.energy = 0
-    kokomi_plan.resolve_all(st)
-    assert st.player.energy == 2
-
-
 # --- Kokomi follow-ups, 2026-10-01: a cancel is an undo ---------------------
-
-def test_a_cancelled_exhaust_plan_comes_back_to_the_hand(overhaul):
-    """Main session: "Exhaust applies when the card is played normally or
-    its Plan is carried out, not when it is cancelled." Vanguard (0, Exhaust)
-    written for real sits in the exhaust pile; Second Thoughts brings it back."""
-    st = kokomi_state(enemies=[make_enemy(hp=60, intents=QUIET)])
-    _deck(st)
-    vanguard = _write(st, "proto_kk_vanguard")
-    assert [e.card_id for e in st.kk_plan_queue] == ["proto_kk_vanguard"]
-    assert vanguard in st.player.exhaust_pile
-    kokomi_plan.cancel_last_plan(st)
-    assert st.kk_plan_queue == []
-    assert vanguard in st.player.hand
-    assert vanguard not in st.player.exhaust_pile
-
-
-def test_all_streams_gives_every_card_back_exhaust_too(overhaul):
-    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
-    _deck(st)
-    vanguard = _write(st, "proto_kk_vanguard")
-    riptide = _write(st, "proto_kk_riptide")
-    assert len(st.kk_plan_queue) == 2
-    kokomi_plan.all_streams(st)
-    assert st.kk_plan_queue == []
-    assert vanguard in st.player.hand and riptide in st.player.hand
-    assert vanguard not in st.player.exhaust_pile
-    assert riptide not in st.player.discard_pile
-    assert st.kk_next_plan_extra == 2
-
-
-def test_the_cancel_row_says_the_cards_come_back(overhaul):
-    # Second Thoughts left the pool in the payoff pass (2026-10-01); its
-    # `cancel_last_plan` op stays, exercised directly above.
-    rows = {r["id"]: r for r in yaml.safe_load(
-        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8"))}
-    assert "proto_kk_second_thoughts" not in rows
-    # All Streams Flow to the Sea, the last row that cancelled, left the pool
-    # in the status batch (2026-10-01); its give-back stays in the engine.
-    assert "proto_kk_all_streams_flow_to_the_sea" not in rows
-    assert callable(kokomi_plan.all_streams)
-
 
 def test_riptide_draws_two_and_three_upgraded(overhaul):
     st = kokomi_state(enemies=[make_enemy(hp=60)])

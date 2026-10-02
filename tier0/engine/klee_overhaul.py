@@ -87,7 +87,7 @@ OVERHAUL_OPS = frozenset((
     "damage_set_off_total",
     "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
     "mine_bombs",
-    "plant_bomb_copy_largest", "split_largest_bomb",
+    "plant_bomb_copy_largest",
     #: POOL PASS TWO's two (`EB-732`), and both are about a CARD rather than a
     #: charge -- which is why they are the arm's first two verbs that touch no
     #: Bomb since `companion_mark_hand`. `return_to_hand` (Blast Shield) routes
@@ -1526,45 +1526,6 @@ def place_copy_of_largest(state: CombatState,
     return size
 
 
-def split_largest(state: CombatState, growth: int) -> int:
-    """Split Charge: "Split your largest Bomb into two halves on random
-    enemies." Returns the size that was split, 0 if nothing was.
-    `ProtoBombPower.SplitLargest`'s twin.
-
-    Careful Arrangement's opposite, and the arm's one bridge from Cook to
-    Spray: a pile cooked on one body becomes two fuses wherever they land.
-
-    THE HALVES ARE `n // 2` AND `n - n // 2`, so an odd Bomb loses nothing and
-    the bigger half is the second one; each then grows by `growth`, which is 0
-    until the upgrade buys it.
-
-    EACH HALF ROLLS ITS OWN DESTINATION, independently -- `jump_charges`'s rule
-    -- so both can land on one enemy, and on a single-enemy board they always
-    do. That is the row's printed losing line.
-
-    A MINE'S HALVES ARE PLAIN BOMBS: the Mine is one fuse and splitting it does
-    not make two, which is the price of the bridge.
-
-    A LARGEST BOMB OF 1 DOES NOTHING. There is no split of 1 that leaves two
-    Bombs, and halving it to 0 and 1 would silently delete a charge.
-    """
-    if not live(state):
-        return 0
-    enemy, index, size = largest_charge(state)
-    if enemy is None or size <= 1:
-        return 0
-    enemy.ko_charges.pop(index)
-    growth = int(growth)
-    halves = (size // 2, size - size // 2)
-    state.emit("ko_bomb_split", frm=enemy.name, size=size, halves=list(halves),
-               growth=growth)
-    for half in halves:
-        living = list(state.living_enemies)
-        if not living:
-            return size
-        dest = state.rng.choice(living)
-        place(state, dest, half + growth)
-    return size
 
 
 def draw_per_set_off(state: CombatState) -> None:
@@ -1686,7 +1647,6 @@ WAIT_FOR_IT = "ko_wait_for_it"            # first reaction: draw N, +1 Energy
 PARTY_POPPERS = "ko_party_poppers"        # Spark-priced play: Bomb N
 LOOK_OUT = "ko_look_out"                  # a Mine goes off: N Block
 PATIENCE = "ko_patience"                  # quiet turn: largest grows N
-FRIENDSHIP_BRACELET = "ko_friendship_bracelet"   # Companion play: grows N
 SECRET_BASE = "ko_secret_base"            # empty board at turn start: Bomb N
 DODOCO = "ko_dodoco"                      # turn start: Mine N
 AFTERSHOCK = "ko_aftershock"              # first reaction a turn: copy Bomb
@@ -1738,16 +1698,11 @@ def costs_sparks(card: Optional[Card]) -> bool:
 
 def note_card_played(state: CombatState, card: Card) -> None:
     """R276's card-play listener, once per play index (the replay-counted
-    shape `note_companion_played` takes): Friendship Bracelet's growth and
-    Party Poppers' Bomb, the two Powers' `AfterCardPlayed` twins. The
+    shape `note_companion_played` takes): Party Poppers' Bomb, the Power's
+    `AfterCardPlayed` twin. The
     Companion COUNT Team Effort reads is `note_companion_played`'s."""
     if not live(state):
         return
-    if is_companion_card(state, card):
-        n = state.player.powers.get(FRIENDSHIP_BRACELET, 0)
-        if n:
-            grown = grow_largest(state, n)
-            state.emit("ko_friendship_bracelet", amount=n, size=grown)
     n = state.player.powers.get(PARTY_POPPERS, 0)
     if n and costs_sparks(card):
         living = list(state.living_enemies)

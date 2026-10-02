@@ -64,16 +64,6 @@ public class KokomiCoopPlaytestFixesTests : IDisposable
     }
 
     [Fact]
-    public void Second_thoughts_says_which_plan_it_cancelled()
-    {
-        var calls = Il.Calls(Il.Method("KokomiPlan", "CancelLast"));
-        Assert.Contains("KurageBeat.Say", calls);
-        Assert.Contains("KokomiPlan.CancelledLine", calls);
-        Assert.Equal("Vanguard: Plan cancelled",
-                     KokomiPlan.CancelledLine("Vanguard"));
-    }
-
-    [Fact]
     public void A_plan_thumbnail_previews_the_whole_card_on_hover()
     {
         Assert.Contains("KokomiPlanStrip.WireHover",

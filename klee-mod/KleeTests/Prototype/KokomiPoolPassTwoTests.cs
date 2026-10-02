@@ -54,7 +54,6 @@ public class KokomiPoolPassTwoTests
         // these members BY NAME, so a rename here is a codegen break rather
         // than a silent approximation -- the contract every Kind is under.
         var names = System.Enum.GetNames(typeof(KokomiPlan.Kind));
-        Assert.Contains("DrawPerPlanAfter", names);
         Assert.Contains("DrawPerPlanThisTurn", names);
         Assert.Contains("NextPlanDoubleDamage", names);
         Assert.Contains("NextPlanExtraCarryOut", names);
@@ -155,11 +154,8 @@ public class KokomiPoolPassTwoTests
         // could outlive one -- so a rider written by the last Plan of a
         // morning reaches nothing. Twin:
         // `test_riptide_then_gambit_doubles_nothing`.
-        // A TRIPLE SINCE `EB-718`, and the third slot is the same shape for
-        // the same reason: Scout Ahead's armed rate is noted by the entry and
-        // spent by the drain, so it too dies with the drain that armed it.
         var entry = typeof(KokomiPlan).GetMethod("ResolveEntry", All)!;
-        Assert.Equal("ValueTuple`3", entry.ReturnType.GetGenericArguments()
+        Assert.Equal("ValueTuple`2", entry.ReturnType.GetGenericArguments()
                      .Single().Name);
 
         var drain = typeof(KokomiPlan).GetMethod("Drain", All)!;
@@ -225,13 +221,9 @@ public class KokomiPoolPassTwoTests
         var resolve = typeof(KokomiPlan).GetMethod("ResolveOne", All)!;
         Assert.DoesNotContain(resolve.GetParameters(), p => p.Name == "after");
         Assert.Contains(resolve.GetParameters(), p => p.Name == "drainPlans");
-        var entry = typeof(KokomiPlan).GetMethod("ResolveEntry", All)!;
-        Assert.Contains(entry.GetParameters(), p => p.Name == "scoutDraw");
         var drain = typeof(KokomiPlan).GetMethod("Drain", All)!;
         Assert.Contains("KokomiPlan.CarryOutTimes", Il.Calls(drain));
         var source = Source("KokomiPlan", power: true);
-        Assert.Contains("var scoutRate = 0;", source);
-        Assert.Contains("scoutRate += armed;", source);
         // AND NOT A POSITION. Seen to FAIL against the entries-based term the
         // 2026-09-08 review reproduced.
         Assert.DoesNotContain("var after = due.Count - index - 1;", source);
@@ -242,30 +234,13 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void Second_thoughts_is_cut_and_its_cancel_stays()
+    public void Second_thoughts_is_cut_with_its_cancel()
     {
-        // THE PAYOFF PASS (2026-10-01): the row left the pool; the cancel
-        // (<c>KokomiPlan.CancelLast</c>) stays with nothing spelling it.
+        // THE PAYOFF PASS (2026-10-01): the row left the pool; its cancel
+        // (`KokomiPlan.CancelLast`) left with legacy cleanup stage 5.
         Assert.Null(typeof(ProtoKkNip).Assembly.GetType(
             "KleeMod.Cards.Prototype.Generated.ProtoKkSecondThoughts"));
-        Assert.NotNull(typeof(KokomiPlan).GetMethod("CancelLast", All));
-    }
-
-    [Fact]
-    public void Cancel_last_takes_the_newest_and_pays_the_cards_own_cost()
-    {
-        // STRUCTURAL: the LAST entry (`List.RemoveAt` at `Count - 1`, where
-        // `ResolveFront` removes at 0), the card out of its pile (`GiveBack`) into
-        // the hand, and the Energy read off `EnergyCost.GetResolved` -- "its
-        // cost" means the cost it has now. Twins:
-        // `test_second_thoughts_returns_the_card_and_refunds_its_cost`,
-        // `test_second_thoughts_takes_the_newest_and_leaves_the_rest`.
-        var calls = Il.Calls(typeof(KokomiPlan).GetMethod("CancelLast", All)!)
-                      .ToList();
-        Assert.Contains(calls, c => c.Contains("List`1.RemoveAt"));
-        Assert.Contains(calls, c => c.Contains("KokomiPlan.GiveBack"));
-        Assert.Contains(calls, c => c.Contains("EnergyCost"));
-        Assert.Contains(calls, c => c.Contains("PlayerCmd.GainEnergy"));
+        Assert.Null(typeof(KokomiPlan).GetMethod("CancelLast", All));
     }
 
     [Fact]

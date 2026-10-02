@@ -1658,15 +1658,6 @@ class CombatState:
     # that ignored generated Companions would punish the deck that generates
     # them, which is the deck this card is for.
     companion_plays_this_turn: int = 0
-    # QUARANTINED (C.KOKOMI_OVERHAUL). Chain of Command's "each Companion card
-    # you played LAST turn", and the twin of
-    # `KokomiOverhaulLedger.CompanionsPlayedLastTurn`. Rolled from the counter
-    # above at the ONE place that counter is cleared (`combat._player_turn`),
-    # which is what keeps the card and the count from disagreeing about which
-    # turn "last" was. A Plan written on turn N is carried out at the top of
-    # N+1, AFTER that roll, so what it reads is turn N -- the turn the player
-    # was looking at when they wrote it.
-    companion_plays_last_turn: int = 0
     companion_cost_delta_this_turn: int = 0   # cost_mod op
     replay_next_companion: int = 0            # Study Buddy
     current_card_companion: bool = False      # control provenance (§2.2a)

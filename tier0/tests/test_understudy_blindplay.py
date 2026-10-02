@@ -4624,7 +4624,7 @@ def test_the_number_kind_words_are_the_mods_own():
     """Held in step with `KokomiPlan` from this side: the strings the page
     prints are `NumberKind`'s, and the amount beside them is `AskedFor`'s,
     computed the way `ResolveOne` computes each scaled clause and read BEFORE
-    the clause runs -- two of the three read a ledger the clause itself moves.
+    the clause runs.
     """
     plan = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
             / "KokomiPlan.cs").read_text(encoding="utf-8")
@@ -4636,8 +4636,6 @@ def test_the_number_kind_words_are_the_mods_own():
         assert word in kinds, word
     asked = plan[plan.index("private static int? AskedFor("):]
     asked = asked[:asked.index("/// <summary>")]
-    assert "PlansThisMorning" in asked
-    assert "CompanionsPlayedLastTurn" in asked
     assert "KokomiRules.QuarterOfMaxHp(kokomi)" in asked
     # Read before the clause resolves, which is the whole reason it is a
     # separate call rather than a read inside `Announce`.

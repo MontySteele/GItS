@@ -53,17 +53,16 @@ SEED = 11
 #: into a Power: the clause was RETIRED rather than left standing with no row
 #: to spell it, so it is off `effects.OPS`, off `PLAN_KINDS` and off the
 #: drafter's table together.
-OVERHAUL_OPS = ("mend", "next_companion_discount", "remove_debuff",
+OVERHAUL_OPS = ("mend", "remove_debuff",
                 "carry_out_front_plan", "plan_from_exhaust",
-                "damage_quarter_max_hp",
-                "damage_per_companion_last_turn")
+                "damage_quarter_max_hp")
 
 #: The two that are legal inside a `plan:` list and NOWHERE else. They are in
 #: `OPS` only because the loader validates a `plan:` list through the same
 #: vocabulary check the body takes, and they refuse from a body always -- with
-#: the flag on as well as off, which is what separates them from the six.
-PLAN_ONLY_OPS = ("damage_per_companion_last_turn",
-                 "block_per_plan_this_morning")
+#: the flag on as well as off, which is what separates them from the rest.
+PLAN_ONLY_OPS = ("play_copy_of_companion",
+                 "block_per_plan_held")
 
 
 @pytest.fixture
@@ -327,20 +326,17 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
 
 
-def test_the_arm_carries_exactly_five_rule_numbers():
+def test_the_arm_carries_exactly_two_rule_numbers():
     """Draft 6's rules are STRUCTURAL -- where a card lands and when -- so
-    almost every figure is a card's and stays on its row. Five are not, each
-    printed with no `amount` field behind it: Rally's discount, Battle Plan's
-    bonus (since `EB-655`), and since the Casket pass (2026-09-28) the
-    relic's per-Plan count, Open the Casket's Strength rate and Moon Signal's
-    threshold -- which replaced the relic's retired debuff strike. They are
-    named so `lint_constant_parity` can compare the C# mirrors BY VALUE."""
+    almost every figure is a card's and stays on its row. Two are not, each
+    printed with no `amount` field behind it: since the Casket pass
+    (2026-09-28) the relic's per-Plan count and Open the Casket's Strength
+    rate. Rally's discount, Battle Plan's bonus and Moon Signal's threshold
+    left with their cards (legacy cleanup stage 5). They are named so
+    `lint_constant_parity` can compare the C# mirrors BY VALUE."""
     assert C.KOKOMI_OVERHAUL_CASKET_PER_PLAN == 1
     assert C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT == 1
-    assert C.KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD == 2
     assert not hasattr(C, "KOKOMI_OVERHAUL_CASKET_STRIKE")
-    assert C.KOKOMI_OVERHAUL_RALLY_DISCOUNT == 1
-    assert C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS == 4
     named = {n for n in dir(C) if n.startswith("KOKOMI_OVERHAUL")}
     # `KOKOMI_OVERHAUL_MULTIPLAYER_IDS` is the co-op set's offer list, an id
     # list like the two beside it and not a rule number.
@@ -348,10 +344,7 @@ def test_the_arm_carries_exactly_five_rule_numbers():
                      "KOKOMI_OVERHAUL_STARTER_IDS",
                      "KOKOMI_OVERHAUL_MULTIPLAYER_IDS",
                      "KOKOMI_OVERHAUL_CASKET_PER_PLAN",
-                     "KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT",
-                     "KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD",
-                     "KOKOMI_OVERHAUL_RALLY_DISCOUNT",
-                     "KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS"}
+                     "KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT"}
 
 
 # --- 3. THE FLAG ON: the rows are reachable, and only these rows -----------

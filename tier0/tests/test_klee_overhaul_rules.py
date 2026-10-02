@@ -345,25 +345,6 @@ def test_rule2_a_random_target_set_off_re_rolls_per_hit(overhaul):
     assert a.ko_charges == [] and b.ko_charges == []
 
 
-def test_rule2_an_all_enemies_set_off_takes_the_aura_filter(overhaul):
-    """Flame Dance: "Set off each enemy with a non-Pyro aura." The filter reads
-    the board as it stands when each enemy is reached, which is what "each
-    enemy that HAS" says."""
-    cold, hot, bare = (make_enemy(hp=100, name="cold"),
-                       make_enemy(hp=100, name="hot"),
-                       make_enemy(hp=100, name="bare"))
-    cold.aura, hot.aura = "cryo", "pyro"
-    state = klee_state([cold, hot, bare])
-    for enemy in (cold, hot, bare):
-        klee_overhaul.place(state, enemy, 5)
-
-    effects.resolve_card(state, probe(
-        [{"op": "set_off", "target": "all_enemies", "aura": "non_pyro"}]))
-
-    assert cold.ko_charges == []
-    assert sizes(hot) == [5] and sizes(bare) == [5]
-
-
 # ---------------------------------------------------------------------------
 # RULE 3 -- the Jump
 # ---------------------------------------------------------------------------

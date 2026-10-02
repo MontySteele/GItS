@@ -179,11 +179,11 @@ public class ArmRelicsPotionsTests
     public void Dodoco_charm_is_paid_at_the_placer_and_never_on_a_move()
     {
         // STRUCTURAL (a placement is a `PowerCmd.Apply`): `Place` reads the
-        // bonus, and every caller passes `relocated` -- true for the three
-        // moves (a jump, a merge, a split), false for every placement.
+        // bonus, and every caller passes `relocated` -- true for the two
+        // moves (a jump, a merge), false for every placement.
         Assert.Contains("DodocoCharm.BonusFor",
                         Il.Calls(Il.Method("ProtoBombPower", "Place")));
-        foreach (var move in new[] { "JumpCharges", "MergeAllTo", "SplitLargest" })
+        foreach (var move in new[] { "JumpCharges", "MergeAllTo" })
         {
             Assert.All(PlaceFlags(move), f => Assert.True(f, move));
         }

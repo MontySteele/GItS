@@ -137,9 +137,6 @@ public class Round17Tests
         Assert.Contains(
             Il.Calls(Il.Method("KokomiPlan", "PromisedDraw")),
             c => c.Contains("PlansThisMorning"));
-        Assert.Contains(
-            Il.Calls(Il.Method("KokomiPlan", "ResolveOne")),
-            c => c.Contains("PlansThisMorning"));
     }
 
     [Fact]

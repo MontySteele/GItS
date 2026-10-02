@@ -243,19 +243,6 @@ public class Round13Tests
     // the thing that dealt the other 2.
 
     [Fact]
-    public void A_rider_names_itself_to_the_plan_it_landed_inside()
-    {
-        // `MovedOn` is a SUBTRACTION and a subtraction has no sources, so the
-        // rider is the only thing that can say what it was. The Casket's
-        // strike was the first rider and the Casket pass (2026-09-28)
-        // retired it; Scout Ahead's draw, paid inside a later carry-out, is
-        // the one filed today.
-        var calls = Il.Calls(Il.Method("KokomiPlan", "ResolveEntry"));
-
-        Assert.Contains("KokomiPlan.NoteRider", calls);
-    }
-
-    [Fact]
     public void A_rider_outside_a_plan_is_dropped_rather_than_misfiled()
     {
         // The call is unconditional at the strike, so "am I inside a Plan"

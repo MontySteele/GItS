@@ -400,8 +400,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # alone -- it moves charge between enemies and mints nothing.
     "plant_bomb_copy_largest": [_hook("private", "bombs", "read"),
                                 _hook("private", "bombs", "write")],
-    "split_largest_bomb": [_hook("private", "bombs", "read"),
-                           _hook("private", "bombs", "write")],
     "damage_set_off_total": [_hook("private", "bombs", "read")],
     "multiply_set_off": [_hook("private", "bombs", "read")],
     "draw_per_set_off": [_hook("private", "bombs", "read"),
@@ -572,10 +570,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # damage row -- the Max-HP read moves nothing.
     "damage_quarter_max_hp": [],
     # A cost change, which is what `cost_mod` is filed under.
-    "next_companion_discount": [_hook("shared", "card_identity", "write")],
     # `EB-668`, Battle Plan's rider: `buff_next_attack` wearing a kit name --
     # flat damage on the next Attack -- so it is filed where that op is.
-    "next_attack_damage": [_hook("shared", "card_identity", "write")],
     # Cleansing Wave takes a debuff off HER. The nearest grounded entry is the
     # HP ledger's sibling for statuses, which this vocabulary does not have --
     # so it is EMPTY and disclosed, on `plan`'s own argument below.
@@ -591,8 +587,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # `plays_this_turn` read and nothing else. (`plan_twice` sat here as a
     # write on the jellyfish until `EB-492` retired it with Nereid's
     # Ascension's redesign into a Power.)
-    "damage_per_companion_last_turn": [
-        _hook("shared", "plays_this_turn", "read")],
     # Crystal Collapse (R236) READS the same shared play stream the count above
     # reads -- "the last other Companion card you played this turn" -- and then
     # resolves a card, which is `plays_this_turn` WRITE the way every free play
@@ -605,7 +599,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # the queue it is being drained from -- and pays Block, which this
     # vocabulary carries as a private write nowhere; Block is the player's own
     # pool and no other Block op declares a hook for it.
-    "block_per_plan_this_morning": [_hook("private", "kurage", "read")],
     # Breakwater (`EB-685`) reads the same jellyfish one drain over -- the
     # queue as it STANDS at dusk rather than the morning just drained -- and
     # pays Block, so it declares the line above's one hook for the line
@@ -626,7 +619,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Scout Ahead READS the drain it sits in (how many carry-outs follow) and
     # pays CARDS, which is the player's own draw pile and which no draw op
     # declares a hook for -- `draw_after_plans` one line up states that limit.
-    "draw_per_plan_after": [_hook("private", "kurage", "read")],
     "draw_per_plan_this_turn": [_hook("private", "kurage", "read")],
     # The two riders WRITE what the entry that follows them will do. Nothing is
     # added to or removed from the queue, so a read would be the wrong word:
@@ -636,8 +628,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Second Thoughts takes an entry OFF the queue and a card out of the
     # discard pile into the hand -- the one op here that touches a shared pile
     # as well as the private channel.
-    "cancel_last_plan": [_hook("private", "kurage", "write"),
-                         _hook("shared", "discard_pile", "use")],
     # Ebb Tide empties the queue and pays Energy and cards, neither of which
     # this vocabulary carries; the queue write is the whole of its channel.
     "cancel_all_plans_cash": [_hook("private", "kurage", "write")],
@@ -649,7 +639,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # filed on the `kurage` channel: Pearl Diver's gain and What the Tokoyo
     # Took's doubling WRITE it, Open the Casket spends it (a write), and What
     # the Tokoyo Returns reads the exhaust pile.
-    "casket_gain": [_hook("private", "kurage", "write")],
     # THE EXPANSION, BATCH ONE (2026-09-29). Lull and Undertide Lance read the
     # drain they land in (the queue), Evening Watch's Block and Brace's
     # doubling are Block the jellyfish writes, and the `kokomi` op's kinds
@@ -673,9 +662,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # and disclosed, `remove_debuff`'s argument.
     "first_attack_twice": [_hook("shared", "card_identity", "write")],
     "first_card_free": [_hook("shared", "card_identity", "write")],
-    "first_companion_free": [_hook("shared", "card_identity", "write")],
-    "attack_damage_this_turn": [_hook("shared", "card_identity", "write")],
-    "damage_if_unhurt": [_hook("shared", "hp_ledger", "read")],
     "block_front_intent": [],
     # THE CO-OP SET: both land on ANOTHER player, whom this vocabulary has no
     # state for -- EMPTY and disclosed, `remove_debuff`'s argument.

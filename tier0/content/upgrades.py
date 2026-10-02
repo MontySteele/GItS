@@ -223,9 +223,6 @@ def _proto_power(effects: list[dict]) -> dict | None:
 #
 # WHAT THE PLAN LINE ADDS THAT THE NOW-LINE HAS NOT GOT, and each is one line:
 #
-#   * `damage_per_companion_last_turn` is a PER-INSTANCE number, so it takes
-#     the multi-hit delta (+1) and not the flat one (+3) -- the same reading
-#     `_proto_hit` already applies to a `times: N` attack.
 #   * `draw` gets a default here and deliberately does NOT get one on the
 #     now-line. On a now-line the rule's last clause ADDS a draw, so bumping a
 #     printed one would collide with it (`_DEBT_ALREADY_DRAWS`); a Plan line is
@@ -243,20 +240,17 @@ def _proto_power(effects: list[dict]) -> dict | None:
 #: `gen_klee_cards.PLAN_UPGRADE_VARS`; the three move together or a smithed
 #: prototype is two different cards.
 PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
-    "plan_damage": ("damage", "damage_per_companion_last_turn",
-                    # R276, Feigned Retreat's hit when she WAS hurt.
-                    "damage_if_unhurt",
+    "plan_damage": ("damage",
                     # THE EXPANSION: Undertide Lance's planned hit.
                     "damage_if_alone"),
     # `EB-335`. Tide Wall's per-Plan scaler is a BLOCK clause wearing a count,
-    # exactly as `damage_per_companion_last_turn` is a damage clause wearing
-    # one, so it takes `plan_block`'s key rather than a sixth key of its own --
+    # so it takes `plan_block`'s key rather than a sixth key of its own --
     # one printed Block number per row is still the rule, and the flat `block`
     # spelling wins where a row somehow prints both -- which is exactly
     # Breakwater, whose flat 5 the smith raises and whose per-held-Plan RATE it
     # never touches (`EB-685`): a rate that smithed would scale with a deck the
     # offer screen cannot see.
-    "plan_block": ("block", "block_per_plan_this_morning",
+    "plan_block": ("block",
                    "block_per_plan_held",
                    # THE EXPANSION: Evening Watch's per-enemy rate.
                    "block_per_attacking_enemy",
@@ -267,18 +261,12 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     "plan_draw": ("draw",
                   # POOL COMPLETION: Tactical Relay's "and draws 1 card".
                   "each_player_draw"),
-    # R276. Feigned Retreat's SECOND printed number ("deal 14 instead") is the
-    # same clause's `unhurt_amount` field, not its `amount` --
-    # `PLAN_DELTA_FIELDS` names the field, and both appliers read it.
-    "plan_unhurt_damage": ("damage_if_unhurt",),
     # R276, Battle Plan: "your Attacks deal N more damage" this turn.
-    "plan_attack_bonus": ("attack_damage_this_turn",),
+    "plan_attack_bonus": (),
     # THE STATUS BATCH (2026-10-01), Tidecleanse: "Exhaust up to 2 [3]".
     "plan_exhaust": ("exhaust_statuses_in_hand",),
 }
 
-#: The field a `plan_*` key bumps when it is not `amount` (R276).
-PLAN_DELTA_FIELDS: dict[str, str] = {"plan_unhurt_damage": "unhurt_amount"}
 
 
 def _plan_default_delta(plan: list[dict]) -> dict:
@@ -294,21 +282,13 @@ def _plan_default_delta(plan: list[dict]) -> dict:
     hit = _proto_hit(plan)
     if hit is not None:
         delta["plan_damage"] = PROTOTYPE_DAMAGE_DELTA
-    elif any(fx.get("op") == "damage_per_companion_last_turn"
-             and isinstance(fx.get("amount"), int) for fx in plan):
-        # Per COMPANION, so the base game's per-instance idiom (+1) rather
-        # than the flat hit delta -- see the block comment above.
-        delta["plan_damage"] = PROTOTYPE_MULTI_HIT_DAMAGE_DELTA
     if any(fx.get("op") == "block" and isinstance(fx.get("amount"), int)
            for fx in plan):
         delta["plan_block"] = PROTOTYPE_BLOCK_DELTA
-    elif any(fx.get("op") in ("block_per_plan_this_morning",
-                              "block_per_plan_held")
+    elif any(fx.get("op") == "block_per_plan_held"
              and isinstance(fx.get("amount"), int) for fx in plan):
         # `EB-335`. PER PLAN, so the per-instance idiom (+1) rather than the
-        # flat Block delta -- the same distinction `plan_damage` makes one
-        # branch up between a printed hit and Chain of Command's per-Companion
-        # multiplier.
+        # flat Block delta.
         delta["plan_block"] = PROTOTYPE_MULTI_HIT_DAMAGE_DELTA
     if any(fx.get("op") == "mend" and isinstance(fx.get("amount"), int)
            for fx in plan):
@@ -919,15 +899,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                                   if fx.get("op")
                                   == "exhaust_statuses_grow_largest"),
                                  "amount", val)
-        elif key == "split_grow":
-            # `EB-491` (Split Charge). What each half gains, 0 on the base card
-            # and bought by the upgrade -- so the base face prints no figure
-            # for it and the `+` face states the clause in its own
-            # `{IfUpgraded:show:...}` hole. Its own key because one row can print
-            # both a grow and this, and a key names one op's one field.
-            ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "split_largest_bomb"),
-                             "growth", val)
         elif key == "spark_price":
             # `EB-491` (Fireworks Show). The upgrade cuts the SPARK PRICE, and
             # this is the first delta on any sheet that moves one. It bumps the
@@ -988,7 +959,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # nested spelling would be a row neither engine can load.
             plan_line = list(getattr(card, "plan", None) or [])
             ok = False
-            field = PLAN_DELTA_FIELDS.get(key, "amount")
+            field = "amount"
             for plan_op in PLAN_DELTA_OPS[key]:
                 ok = _bump_first((fx for fx in plan_line
                                   if fx.get("op") == plan_op), field, val)

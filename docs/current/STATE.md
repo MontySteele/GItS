@@ -22,7 +22,8 @@ arms (Klee's overhaul, the companion overhaul, Kokomi's overhaul, Furina's
 Stage) on in every build that names no property: a plain `dotnet build`,
 `klee-mod\build\deploy.ps1`, and the `-Package` handoff zip, all unmarked. **The
 round's build is `tools/deploy_round.py`** (`deploy.ps1`, then the bridge).
-The old shipped kits' C# is deleted (legacy cleanup stage 5a): no
+The old shipped kits' C# is deleted (legacy cleanup stage 5a), and the engine
+pieces only their cut cards used with it (stage 5b): no
 `ShippedKits` opt-out, no arm switches, one C# test configuration; their
 sheets (`docs/*-cards.yaml`) remain for the sim until stage 6. **`+proto` now marks only a build that differs from the release**:
 `deploy_proto.ps1 -TeyvatFrame`, and the Teyvat frame is on hold (below). The

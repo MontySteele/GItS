@@ -228,9 +228,9 @@ internal static class KokomiOverhaulRoster
         // moved to Dusk -- the job Night Watch was rebuilt for one pass
         // earlier. It spelled no rule of its own, so nothing stays behind it.
         // FOUR SINCE THE CLEANUP PASS (2026-09-29): Scout Ahead was cut, and
-        // its <c>DrawPerPlanAfter</c> clause stays with nothing spelling it.
+        // its clause left with legacy cleanup stage 5.
         // THREE SINCE THE PAYOFF PASS (2026-10-01): Second Thoughts was cut,
-        // and <c>KokomiPlan.CancelLast</c> stays with nothing spelling it.
+        // and its cancel left with legacy cleanup stage 5.
         ModelDb.Card<ProtoKkOpeningGambit>(),
         ModelDb.Card<ProtoKkSecondWave>(),
         ModelDb.Card<ProtoKkBreakwater>(),

@@ -298,19 +298,23 @@ public class KokomiOverhaulRuleTests
         // `EnergyIfAlone`, Undertide Lance's `DamageIfAlone`, Evening Watch's
         // `BlockPerAttackingEnemy` and Brace for the Tide's `DoubleBlock`,
         // appended last.
+        //
+        // LEGACY CLEANUP STAGE 5 (2026-10-01) removed the eight kinds no row
+        // spelled: `DamagePerCompanionLastTurn`, `BlockPerPlanThisMorning`,
+        // `DrawPerPlanAfter`, `NextAttackDamage`, `DamageIfUnhurt`,
+        // `AttackDamageThisTurn`, `FirstCompanionFree` and `CasketGain`.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
-                    "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
+                    "DamageQuarterMaxHp",
                     "ApplyWeak", "ApplyVulnerable",
                     "ReplayExhausted", "PlayCopyOfCompanion",
-                    "BlockPerPlanThisMorning", "BlockPerPlanHeld",
-                    "DrawPerPlanAfter", "DrawPerPlanThisTurn",
+                    "BlockPerPlanHeld",
+                    "DrawPerPlanThisTurn",
                     "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
-                    "NextAttackDamage", "FirstAttackTwice", "FirstCardFree",
-                    "DamageIfUnhurt", "AttackDamageThisTurn",
+                    "FirstAttackTwice", "FirstCardFree",
                     "BlockFrontIntent", "AllyDraw",
-                    "OthersAttackDamageThisTurn", "FirstCompanionFree",
-                    "CasketGain", "EnergyIfAlone", "DamageIfAlone",
+                    "OthersAttackDamageThisTurn",
+                    "EnergyIfAlone", "DamageIfAlone",
                     "BlockPerAttackingEnemy", "DoubleBlock",
                     // POOL COMPLETION (2026-10-01): Tactical Relay's two.
                     "EachPlayerEnergy", "EachPlayerDraw",
@@ -469,27 +473,6 @@ public class KokomiOverhaulRuleTests
         Assert.Null(typeof(KokomiPlan).Assembly.GetType(
             "KleeMod.Cards.Prototype.Generated"
           + ".ProtoKkTheMoonOverlooksTheWaters"));
-    }
-
-    [Fact]
-    public void One_plan_is_one_entry_and_the_payoffs_are_priced_in_it()
-    {
-        // "Whenever the jellyfish carries out a Plan" is once per ENTRY, which
-        // is what makes War Council -- two clauses, one sentence -- draw one
-        // card and not two. The bus rings from the one place an entry finishes.
-        var entry = typeof(KokomiPlan)
-            .GetMethod("ResolveEntry", HeadlessGame.All)!;
-        Assert.Contains("IKokomiPlanListener.OnPlanResolved", Il.Calls(entry));
-
-        var one = typeof(KokomiPlan).GetMethod("ResolveOne", HeadlessGame.All)!;
-        Assert.DoesNotContain("IKokomiPlanListener.OnPlanResolved",
-                              Il.Calls(one));
-
-        // Kokomi core pass: Treatise and Song of Pearls left the bus.
-        Assert.False(typeof(IKokomiPlanListener)
-            .IsAssignableFrom(typeof(TreatisePower)));
-        Assert.False(typeof(IKokomiPlanListener)
-            .IsAssignableFrom(typeof(SongOfPearlsPower)));
     }
 
     // ---- THE ONCE-PER-TURN CAPS ([USER], live 2026-09-02) ----------------
@@ -792,24 +775,9 @@ public class KokomiOverhaulRuleTests
         ledger.NoteCompanionPlayed();
         Assert.Equal(2, ledger.CompanionsPlayedThisTurn);
 
-        // THE HANDOVER IS THE WHOLE POINT: a Plan written on turn 3 is carried
-        // out at the top of turn 4, and what it needs is turn 3's count.
         ledger.RollTo(4);
         Assert.Equal(0, ledger.CompanionsPlayedThisTurn);
-        Assert.Equal(2, ledger.CompanionsPlayedLastTurn);
         KokomiOverhaulLedger.ResetAll();
-    }
-
-    [Fact]
-    public void Rally_discounts_rather_than_zeroes()
-    {
-        // Draft 6's change from draft 2's Vanguard: the card prints "costs 1
-        // less", so the grant SUBTRACTS and floors at zero. Setting the cost
-        // would be a different card on an expensive Companion.
-        var hook = typeof(NextCompanionDiscountPower)
-            .GetMethod("TryModifyEnergyCostInCombat", HeadlessGame.All)!;
-        Assert.Contains("Math.Max", Il.Calls(hook));
-        Assert.Equal(1, NextCompanionDiscountPower.Discount);
     }
 
     // ---- the roster ------------------------------------------------------
@@ -1128,8 +1096,6 @@ public class KokomiOverhaulRuleTests
 
         Assert.Contains("KokomiOverhaulLedger.NoteMorning",
                         Il.Calls(Il.Method("KokomiPlan", "ResolveAll")));
-        Assert.Contains("KokomiOverhaulLedger.get_PlansThisMorning",
-                        Il.Calls(Il.Method("KokomiPlan", "ResolveOne")));
     }
 
     [Fact]

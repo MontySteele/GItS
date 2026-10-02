@@ -146,31 +146,7 @@ public class KokomiR276Tests
         var resolve = Il.CallSequence(Il.Method("KokomiPlan", "ResolveOne"));
         Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.FirstAttackTwice"));
         Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.FirstCardFree"));
-        Assert.Contains(resolve, c => c.Contains("PowerCmd.Apply<AttackUpThisTurnPower>"));
         Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.IntendedDamage"));
-        Assert.Contains(resolve, c => c.Contains("KokomiPlan.UnhurtAmount"));
-        // Feigned Retreat's HP is stamped when the Plan is WRITTEN.
-        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "Schedule")),
-                        c => c.Contains("get_CurrentHp"));
-    }
-
-    [Fact]
-    public void Feigned_retreat_reads_her_hp_against_the_written_hp()
-    {
-        var kokomi = Seat.Kokomi().Creature;
-        var hp = kokomi.CurrentHp;
-        var method = typeof(KokomiPlan).GetMethod("UnhurtAmount",
-                                                  HeadlessGame.All)!;
-        int Pay(int? written) => (int)method.Invoke(null, new object[]
-        {
-            kokomi,
-            new KokomiPlan.Planned(KokomiPlan.Kind.DamageIfUnhurt, 9,
-                                   KokomiPlan.Aim.FrontEnemy, Alt: 14,
-                                   WrittenHp: written),
-        })!;
-        Assert.Equal(14, Pay(hp));          // unhurt since writing
-        Assert.Equal(9, Pay(hp + 1));       // lost HP since writing
-        Assert.Equal(14, Pay(null));        // unstamped reads as unhurt
     }
 
     [Fact]

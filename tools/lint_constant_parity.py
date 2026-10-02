@@ -288,8 +288,6 @@ MIRRORED: dict[str, object] = {
     "KokomiOverhaulLaw.CasketPerPlan": C.KOKOMI_OVERHAUL_CASKET_PER_PLAN,
     "KokomiOverhaulLaw.CasketStrengthPerPoint":
         C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT,
-    "KokomiOverhaulLaw.MoonSignalThreshold":
-        C.KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD,
     # THE EXPANSION, BATCH ONE (2026-09-29): The Long Game's threshold.
     "KokomiOverhaulLaw.LongGameWaiting":
         C.KOKOMI_EXPANSION_LONG_GAME_WAITING,
@@ -348,15 +346,6 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ActEscoffierDamage": _stage("ACT_ESCOFFIER_DAMAGE"),
     # R276 batch two: Arkhe Alignment's Pneuma half.
     "ArkheAlignmentPower.PneumaLeadRegain": _stage("PNEUMA_LEAD_REGAIN"),
-    # Rally prints "costs 1 less" but the op carries no amount (it is one
-    # whole printed clause), so the number lives on the power and is
-    # mirrored like every other rule number.
-    "NextCompanionDiscountPower.Discount": C.KOKOMI_OVERHAUL_RALLY_DISCOUNT,
-    # `EB-668`. Battle Plan's carry-out prints "deals 4 more damage" and the
-    # clause carries no amount, so the number lives on the power -- Rally's
-    # case one card type over, mirrored on the same terms.
-    "NextAttackDamagePower.Bonus":
-        C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS,
     # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md,
     # ruled 2026-09-29): the Swirl payout of each current element, and
     # Stormward Stance's Oath bar. Sim twins in `tier0/engine/varka_oath.py`.
