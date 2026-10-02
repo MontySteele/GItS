@@ -116,36 +116,8 @@ public class DefenceShelfTests
         Assert.DoesNotContain(calls, c => c.StartsWith("PowerCmd.Remove"));
     }
 
-    // ---- Careful Now: the card, real off the shipped class ---------------
-
-    [Fact]
-    public void Careful_now_prints_its_cap_and_the_smith_moves_it()
-    {
-        // The row's ONE printed number is its ceiling, because the payout is
-        // read off the board. So the face has to print the cap as a var and
-        // `OnUpgrade` has to move that same var -- or the `+` card promises a
-        // ceiling it does not have (`EB-283` / `EB-291`).
-        var card = new ProtoKoCarefulNow();
-
-        Assert.Contains("{BombCap:diff()}", Face(card));
-        Assert.Equal(10m, Vars(card).Single().BaseValue);
-        Assert.Contains(Il.Calls(Il.Method("ProtoKoCarefulNow", "OnUpgrade")),
-                        c => c.Contains("UpgradeValueBy"));
-    }
-
-    [Fact]
-    public void Careful_now_retains_and_hands_the_var_to_the_rule()
-    {
-        // Retain is on the BASE card (the row's own key), and the play passes
-        // the VAR rather than a literal -- so the smithed ceiling is the
-        // ceiling the rule enforces.
-        var card = new ProtoKoCarefulNow();
-        Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
-
-        var play = Il.Calls(Il.Method("ProtoKoCarefulNow", "OnPlay"));
-        Assert.Contains("ProtoBombPower.BlockForLargestBomb", play);
-        Assert.Contains(play, c => c.EndsWith("get_IntValue"));
-    }
+    // (Careful Now's card pins left with the row: the Klee status package,
+    // 2026-10-01, cut it and Dodoco Cover. The reader above stays.)
 
     // ---- Barbara, Front Row Seat ----------------------------------------
 
@@ -202,38 +174,7 @@ public class DefenceShelfTests
         Assert.Contains(play, c => c.Contains("FrontRowSeatPower"));
     }
 
-    // ---- the shelf's own rule -------------------------------------------
 
-    [Fact]
-    public void No_row_on_the_shelf_is_a_plain_block()
-    {
-        // THE PACKET'S SCOPE STATEMENT, made mechanical: every Klee row on the
-        // shelf names the Bomb state on its own face, so none of them is the
-        // unconditional Block the arm deliberately does not have (Dig In is
-        // that, and it is a Spark sink priced for it). TWO since the R253
-        // charter audit withdrew Fire Safety and Safety Lesson.
-        foreach (var card in new CardModel[]
-                 {
-                     new ProtoKoDodocoCover(), new ProtoKoCarefulNow(),
-                 })
-        {
-            Assert.Contains("Bomb", Face(card));
-        }
-    }
-
-    [Fact]
-    public void Dodoco_cover_places_before_it_blocks()
-    {
-        // The opening hand's answer to "no placer": one card that cooks AND
-        // pays a little safety, in that order, so the Block is what is left
-        // over rather than the point of the card.
-        var play = Il.CallSequence(Il.Method("ProtoKoDodocoCover", "OnPlay"));
-        var place = play.ToList().FindIndex(c => c.Contains("ProtoBombPower.Place"));
-        var block = play.ToList().FindIndex(c => c.Contains("CreatureCmd.GainBlock"));
-
-        Assert.True(place >= 0 && block >= 0);
-        Assert.True(place < block, "the Bomb is placed before the Block lands");
-    }
 
     // ---- helpers ---------------------------------------------------------
 

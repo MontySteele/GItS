@@ -263,10 +263,31 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_ko_kapow",
 )
 
+# THE STATUS PACKAGE (2026-10-01, review/active/klee-status-package-2026-10-01.md,
+# ruled): eight cards on two status taxes -- Dazed on the fair loaders,
+# Confiscated on the busted ones -- and the payoffs that read them, appended
+# LAST to `KLEE_OVERHAUL_POOL_IDS` in the sheet's own order. Eight rows left
+# the pool in the same commit; the pool stays 78 and goes 24 / 36 / 18 ->
+# 24 / 33 / 21.
+KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
+    "proto_ko_forbidden_fun",
+    "proto_ko_it_wasnt_me",
+    "proto_ko_lisas_treats",
+    "proto_ko_red_knight",
+    "proto_ko_finders_keepers",
+    "proto_ko_klee_can_explain",
+    "proto_ko_damage_report",
+    "proto_ko_solitary_confinement",
+)
+
 # THE OFFERABLE POOL, WHOLE (slice packet sec.4). `_pool_substitutions` cannot
 # express this -- it is a one-for-one map and this is "her pool is these and
 # nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
 # same single door.
+#
+# SEVENTY-EIGHT, 24 / 33 / 21, SINCE THE STATUS PACKAGE (2026-10-01): eight
+# cut, eight added (`KLEE_STATUS_PACKAGE_IDS`). SEVENTY-EIGHT, 24 / 36 / 18,
+# since the R276 pool expansion.
 #
 # FORTY-EIGHT SINCE R276 (2026-09-23, `review/ruled/klee-review-2026-09-23.md`
 # pick 1): five rows of R271's lower-value shelf CUT (Long Fuse, Explosives
@@ -321,7 +342,6 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Cook (8)
     "proto_ko_fish_flavored_bait",
-    "proto_ko_pocket_fireworks",
     "proto_ko_chain_fuse",
     "proto_ko_careful_arrangement",
     "proto_ko_big_badda_boom",
@@ -334,13 +354,11 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_tinder_toss",
     "proto_ko_quick_fuse",
     "proto_ko_bang_bang",
-    "proto_ko_rapid_fire",
     "proto_ko_chained_reactions",
     "proto_ko_sparks_n_splash",
     # React (3; Vermillion Pact arrived with the pool pass, below)
     "proto_ko_sizzle",
     "proto_ko_perfect_timing",
-    "proto_ko_flame_dance",
     # Currencies and defence (6; Dig In is back in the pool at draft 4)
     "proto_ko_ammo_scavenging",
     # R271 sec.4 item 3: Powder Charge's SHAPE kept and its body redesigned --
@@ -356,9 +374,8 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # pick drafted four; the R253 charter audit withdrew two of them (Fire
     # Safety and Safety Lesson) and they are on no surface. What is left is
     # the placer with a Block half a starting hand needs, and the capped read
-    # of the pile that asks for a deck around it.
-    "proto_ko_dodoco_cover",
-    "proto_ko_careful_now",
+    # of the pile that asks for a deck around it. BOTH CUT by the status
+    # package (2026-10-01): Dodoco Cover and Careful Now.
     # THE COMPANION READERS (3 -- R244, the ruled packet's sec.2; Hexerei
     # readers until R276). One per rarity: a Common that reads the turn, an
     # Uncommon Power that pays per Companion play, and a Rare that makes the
@@ -387,7 +404,6 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # enemies." at 1 Spark.
     "proto_ko_flash_point",
     "proto_ko_vermillion_pact",
-    "proto_ko_split_charge",
     # POOL PASS TWO (2026-09-08, `EB-732`). Six rows in three pairs, and the
     # pairs are the shelves they extend rather than a new archetype:
     #
@@ -430,7 +446,6 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_spinning_sparkler",
     "proto_ko_mine_all_mine",
     "proto_ko_team_effort",
-    "proto_ko_fish_fry",
     "proto_ko_one_more_charge",
     "proto_ko_sit_tight",
     "proto_ko_treasure_map",
@@ -442,7 +457,6 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_party_poppers",
     "proto_ko_look_out",
     "proto_ko_patience_klee",
-    "proto_ko_friendship_bracelet",
     "proto_ko_secret_base",
     "proto_ko_half_a_mountain",
     "proto_ko_favonius_escort",
@@ -454,6 +468,11 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_spark_knight",
     "proto_ko_alices_detonator",
     "proto_ko_second_surprise",
+    # THE STATUS PACKAGE (2026-10-01): eight rows, LAST. Eight cut above
+    # (Pocket Fireworks, Rapid Fire, Flame Dance, Dodoco Cover, Careful Now,
+    # Split Charge, Fish Fry, Friendship Bracelet). The pool is 78 (24 / 33
+    # / 21).
+    *KLEE_STATUS_PACKAGE_IDS,
 )
 
 # THE CO-OP SET (review/records/coop-set-2026-09-25.md): each overhaul arm's
@@ -629,7 +648,9 @@ COMPANION_STANDIN_IDS: tuple[str, ...] = (
     # ruled. The caretakers read the Klee arm's explosion ledger; these four
     # read the REACTION -- and Nicole's reads the family mark itself, which is
     # what makes that mark mechanical for the first time.
-    "proto_mc_albedo_tectonic_tide",        # for proto_mc_albedo_solar_isotoma
+    # The Klee status package (2026-10-01) replaced Tectonic Tide with Dust
+    # of Purification, which reads statuses rather than reactions.
+    "proto_mc_albedo_dust_of_purification",  # for proto_mc_albedo_solar_isotoma
     "proto_mc_fischl_sinful_hex",           # for proto_mc_fischl_nightrider
     "proto_mc_nicole_ladder_of_ascent",     # for proto_mc_nicole_revelation
     "proto_mc_sucrose_mollis_favonius",     # for proto_mc_sucrose_gust

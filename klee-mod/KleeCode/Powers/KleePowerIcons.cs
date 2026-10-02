@@ -105,6 +105,16 @@ internal static class KleePowerIcons
             KleePck.Path("klee/powers/spark_threshold_down.png"),
         AlicesDetonatorBasePower =>
             KleePck.Path("klee/powers/witchs_flame.png"),
+        // THE STATUS PACKAGE (2026-10-01), on the block above's terms:
+        // Finders Keepers places a Bomb off an event (Party Poppers' badge),
+        // Damage Report hits ALL off an event (Spark Knight's), and Solitary
+        // Confinement changes a cost (Playdate's). Illustrations owed.
+        FindersKeepersPower =>
+            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+        DamageReportPower =>
+            KleePck.Path("klee/powers/spark_threshold_down.png"),
+        SolitaryConfinementPower =>
+            KleePck.Path("klee/powers/friendly_visit.png"),
         // R252's DEFENCE-SHELF POWER, on the block above's terms verbatim: it
         // borrows Grounded's icon, because Grounded is the power whose job it
         // takes over one trigger along -- both pay Block off the arm's own

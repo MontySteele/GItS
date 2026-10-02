@@ -49,49 +49,18 @@ public class Round12Tests
     }
 
     [Fact]
-    public void Rapid_Fires_face_hangs_the_set_off_on_the_enemy_it_rolled()
-    {
-        var face = Face<ProtoKoRapidFire>();
-        // Text pass 2026-09-25: the count trails, "N times", as every other
-        // repeat-count face in the pool prints it.
-        Assert.Equal(
-            "[gold]Set off[/gold] a random enemy and deal "
-          + "{Damage:diff()} damage to it, 4 times.", face);
-        // The clause the seat priced two turns off is gone: nothing on the
-        // face promises a Set off that reaches a body the roll did not pick.
-        Assert.DoesNotContain("each enemy hit", face);
-    }
-
-    [Fact]
     public void Tinder_Toss_no_longer_rolls_a_target_at_all()
     {
         // `EB-749` (R271 sec.5.3) ENDED the random-target complaint on this
         // row rather than re-wording it: the card took Fireworks Show's slot
         // and aims at everything, so there is no roll for a face to name.
-        // Rapid Fire keeps the repeated-Set-off line and its pin above.
+        // (Rapid Fire, which kept the repeated-Set-off line, was cut by the
+        // Klee status package, 2026-10-01.)
         var face = Face<ProtoKoTinderToss>();
         Assert.Equal(
             "[gold]Set off[/gold] ALL enemies. Deal {Damage:diff()} damage "
           + "to ALL enemies.", face);
         Assert.DoesNotContain("random", face);
-    }
-
-    [Fact]
-    public void Both_faces_name_the_roll_before_the_set_off()
-    {
-        // THE ORDER IN THE SENTENCE IS THE ORDER IN THE LOOP. `SetOffRandom`
-        // picks the target, then sets that target off, then deals the hit --
-        // so "a random enemy" has to be inside the Set off's own clause and
-        // not a separate sentence after it, which is how the old faces let a
-        // reader believe the two halves aimed at different things. `EB-612`
-        // put the repeat count in front of the clause, so the clause is
-        // pinned whole rather than at the start of the face.
-        // ONE FACE SINCE `EB-749`, which cut the roll off Tinder Toss.
-        foreach (var face in new[] { Face<ProtoKoRapidFire>() })
-        {
-            Assert.Contains("[gold]Set off[/gold] a random enemy and deal ",
-                            face);
-        }
     }
 
     // ---- EB-432: the order inside the pile -------------------------------

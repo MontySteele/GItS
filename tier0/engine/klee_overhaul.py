@@ -102,7 +102,11 @@ OVERHAUL_OPS = frozenset((
     #: Play!), random Companion cards made free this turn (Tag Along,
     #: Adventure Club) and Alice's Detonator's install.
     "grow_largest", "multiply_largest_bomb", "fetch_from_discard",
-    "add_random_companion", "grant_kapow_each_turn"))
+    "add_random_companion", "grant_kapow_each_turn",
+    #: THE STATUS PACKAGE's two (2026-10-01): every status in hand becomes a
+    #: Pop! (Klee Can Explain!), and every status in hand is exhausted to grow
+    #: the largest Bomb (Albedo -- Dust of Purification).
+    "transform_statuses_into", "exhaust_statuses_grow_largest"))
 
 #: The player-side powers this arm reads, named here rather than spelled at
 #: each site so the sheet's `power:` values and the readers cannot drift. Every
@@ -1751,6 +1755,9 @@ def note_card_played(state: CombatState, card: Card) -> None:
             dest = state.rng.choice(living)
             state.emit("ko_party_poppers", target=dest.name, size=n)
             place(state, dest, n)
+    # THE STATUS PACKAGE (2026-10-01): Finders Keepers pays per Confiscated
+    # played, on the same listener and replay rule.
+    finders_keepers(state, card)
 
 
 def playdate_discount(state: CombatState, card: Card) -> int:
@@ -2158,3 +2165,110 @@ def spark_knight(state: CombatState, landed: int) -> None:
             state.emit("ko_spark_knight", target=target.name, amount=n)
             effects.deal_damage_to_enemy(state, target, n, element=None,
                                          source="spark_knight")
+
+
+# ---------------------------------------------------------------------------
+# THE STATUS PACKAGE (2026-10-01, ruled) -- the twins of `KleeStatusPackage`
+# ---------------------------------------------------------------------------
+#
+# `review/active/klee-status-package-2026-10-01.md`. Two taxes (Dazed on the
+# fair loaders, Confiscated on the busted ones, both through the ordinary
+# `add_card` op) and the cards that read them. C# FIRST:
+# `klee-mod/KleeCode/Powers/Prototype/KleeStatusPackage.cs`, clause for clause.
+
+FINDERS_KEEPERS = "ko_finders_keepers"            # Confiscated played: Bomb N
+DAMAGE_REPORT = "ko_damage_report"                # status drawn: N to ALL
+SOLITARY_CONFINEMENT = "ko_solitary_confinement"  # Confiscated cost 0
+
+#: Fish Blasting's token (`tier0/content/cards/tokens.yaml`), `Confiscated`.
+CONFISCATED_ID = "confiscated"
+
+
+def is_status(card: Optional[Card]) -> bool:
+    """A status: a card of Status TYPE or Status RARITY. The second is what
+    makes Confiscated one -- it is a 1-cost Skill at Status rarity -- and the
+    first is every base-game status (`statuses.make_status` builds them at
+    type "status"). Curses are not statuses. `KleeStatusPackage.IsStatus`."""
+    return card is not None and (card.type == "status"
+                                 or card.rarity == "status")
+
+
+def is_confiscated(card: Optional[Card]) -> bool:
+    """`card is Confiscated` in the mod."""
+    return card is not None and card.id.rstrip("+") == CONFISCATED_ID
+
+
+def solitary_confinement_frees(state: CombatState, card: Card) -> bool:
+    """Solitary Confinement: "Your Confiscated cost 0." PURE, the cost site's
+    read (`combat`); `SolitaryConfinementPower.TryModifyEnergyCostInCombat`."""
+    return (live(state) and is_confiscated(card)
+            and state.player.powers.get(SOLITARY_CONFINEMENT, 0) > 0)
+
+
+def finders_keepers(state: CombatState, card: Card) -> None:
+    """Finders Keepers: "Whenever you play a Confiscated, place a Bomb 5 [7]
+    on a random enemy." Copies add. `FindersKeepersPower.AfterCardPlayed`."""
+    if not live(state) or not is_confiscated(card):
+        return
+    n = state.player.powers.get(FINDERS_KEEPERS, 0)
+    if not n:
+        return
+    living = list(state.living_enemies)
+    if not living:
+        return
+    dest = state.rng.choice(living)
+    state.emit("ko_finders_keepers", target=dest.name, size=n)
+    place(state, dest, n)
+
+
+def damage_report(state: CombatState, card: Card) -> None:
+    """Damage Report: "Whenever you draw a status, deal 5 [7] damage to ALL
+    enemies." Per card drawn (`Hook.AfterCardDrawn`), Spark Knight's
+    unelemented hit. `DamageReportPower.AfterCardDrawn`."""
+    if not live(state) or not is_status(card):
+        return
+    n = state.player.powers.get(DAMAGE_REPORT, 0)
+    if not n:
+        return
+    from tier0.engine import effects                # late import: cycle
+
+    for target in list(state.living_enemies):
+        if not target.alive:
+            continue
+        state.emit("ko_damage_report", target=target.name, amount=n)
+        effects.deal_damage_to_enemy(state, target, n, element=None,
+                                     source="damage_report")
+
+
+def transform_statuses_into(state: CombatState, card_id: str) -> int:
+    """Klee Can Explain!: "Transform every status in your hand into Pop!."
+    In place, as `CardCmd.Transform` swaps a card where it stands; the new
+    card is the pool's own row, unupgraded. Returns how many."""
+    import copy                                     # stdlib, local by habit
+    from tier0.content import loader                # late import: cycle
+
+    hand = state.player.hand
+    n = 0
+    for i, held in enumerate(list(hand)):
+        if is_status(held):
+            hand[i] = copy.deepcopy(loader.get_card(card_id))
+            n += 1
+    state.emit("ko_transform_statuses", into=card_id, transformed=n)
+    return n
+
+
+def exhaust_statuses_grow_largest(state: CombatState, per: int) -> int:
+    """Albedo -- Dust of Purification: "Exhaust every status in your hand.
+    Your largest Bomb grows by 6 [8] for each." One growth of `per` times the
+    count, after the exhausts; no Bomb and the exhausts still happen."""
+    from tier0.engine import effects, refpowers     # late import: cycle
+
+    victims = [c for c in state.player.hand if is_status(c)]
+    for held in victims:
+        if effects.remove_instance(state.player.hand, held):
+            refpowers.exhaust_card(state, held)
+    n = len(victims)
+    if n and per > 0:
+        grow_largest(state, int(per) * n)
+    state.emit("ko_dust_of_purification", exhausted=n, per=int(per))
+    return n

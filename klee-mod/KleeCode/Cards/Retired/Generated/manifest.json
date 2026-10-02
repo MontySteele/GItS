@@ -312,8 +312,18 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KO_CAREFUL_NOW",
+      "class": "RetiredProtoKoCarefulNow",
+      "owner": "klee"
+    },
+    {
       "id": "KLEEMOD-PROTO_KO_CATALYTIC_CONVERTER",
       "class": "RetiredProtoKoCatalyticConverter",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KO_DODOCO_COVER",
+      "class": "RetiredProtoKoDodocoCover",
       "owner": "klee"
     },
     {
@@ -337,6 +347,21 @@
       "owner": "klee"
     },
     {
+      "id": "KLEEMOD-PROTO_KO_FISH_FRY",
+      "class": "RetiredProtoKoFishFry",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KO_FLAME_DANCE",
+      "class": "RetiredProtoKoFlameDance",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KO_FRIENDSHIP_BRACELET",
+      "class": "RetiredProtoKoFriendshipBracelet",
+      "owner": "klee"
+    },
+    {
       "id": "KLEEMOD-PROTO_KO_FWOOSH",
       "class": "RetiredProtoKoFwoosh",
       "owner": "klee"
@@ -357,8 +382,18 @@
       "owner": "klee"
     },
     {
+      "id": "KLEEMOD-PROTO_KO_POCKET_FIREWORKS",
+      "class": "RetiredProtoKoPocketFireworks",
+      "owner": "klee"
+    },
+    {
       "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
       "class": "RetiredProtoKoPowderCharge",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KO_RAPID_FIRE",
+      "class": "RetiredProtoKoRapidFire",
       "owner": "klee"
     },
     {
@@ -367,8 +402,18 @@
       "owner": "klee"
     },
     {
+      "id": "KLEEMOD-PROTO_KO_SPLIT_CHARGE",
+      "class": "RetiredProtoKoSplitCharge",
+      "owner": "klee"
+    },
+    {
       "id": "KLEEMOD-PROTO_KO_SUGAR_RUSH",
       "class": "RetiredProtoKoSugarRush",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_MC_ALBEDO_TECTONIC_TIDE",
+      "class": "RetiredProtoMcAlbedoTectonicTide",
       "owner": "klee"
     },
     {

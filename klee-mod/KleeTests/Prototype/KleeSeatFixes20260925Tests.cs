@@ -182,7 +182,7 @@ public class KleeSeatFixes20260925Tests
         // The Opus seat: "Companion is never defined on screen, yet three
         // offered cards trigger on it."
         foreach (var name in new[] { "ProtoKoWitchesCircle",
-                     "ProtoKoFriendshipBracelet", "ProtoKoComeBackAndPlay" })
+                     "ProtoKoComeBackAndPlay" })
         {
             var getter = Il.Method(name, "get_ExtraHoverTips");
             Assert.Contains("ArmKeywordTips.ForCompanion", Il.Calls(getter));

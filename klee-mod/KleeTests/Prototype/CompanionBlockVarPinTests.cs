@@ -95,8 +95,9 @@ public class CompanionBlockVarPinTests
     {
         var seat = Seat.Klee();
 
-        // `Dodoco Cover` is a plain Block skill on Klee's own prototype shelf.
-        Assert.True(Held<ProtoKoDodocoCover>(seat).GainsBlock);
+        // `Windtrace` is a Block skill on Klee's own prototype shelf (Dodoco
+        // Cover until the status package cut it).
+        Assert.True(Held<ProtoKoHidingSpot>(seat).GainsBlock);
         // `Pocket Match` is a Bomb placer: no Block anywhere on its face.
         Assert.False(Held<ProtoKoPocketMatch>(seat).GainsBlock);
     }

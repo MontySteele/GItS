@@ -61,7 +61,12 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   seems to work basically as designed and the core gameplay loop was indeed
   fun and interesting, with a challenge around bomb management"; Sparks
   "only really matter if you're trying to let your bombs cook ... I never
-  really felt pressed for them." Next: the Klee status-engine paper, then
+  really felt pressed for them." **The status package (2026-10-01, ruled,
+  built):** `review/active/klee-status-package-2026-10-01.md`. Eight cards in
+  (Dazed on the fair loaders, Confiscated on the busted ones, and the payoffs
+  that read them), eight cut, and Albedo's Klee stand-in is now Dust of
+  Purification; the pool stays 78, 24 / 33 / 21. Both engines; untested in
+  game until a deploy. Next: the package's seat round (two seats), then
   Balance.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the

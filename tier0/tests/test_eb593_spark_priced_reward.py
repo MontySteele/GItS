@@ -72,15 +72,19 @@ RUN_AWAY = {"id": "KLEEMOD-PROTO_KO_RUN_AWAY", "name": "Run Away!",
             "rarity": "Common", "is_upgraded": False, "index": 1,
             "description": "Gain 3 Block. If a Bomb went off this turn, gain "
                            "4 additional Block."}
-FLAME_DANCE = {"id": "KLEEMOD-PROTO_KO_FLAME_DANCE", "name": "Flame Dance",
-               "type": "Attack", "cost": "1", "star_cost": None,
-               "rarity": "Uncommon", "is_upgraded": False, "index": 2,
-               "description": "Set off each enemy whose aura is not Pyro. "
-                              "Deal 5 damage to ALL enemies."}
+# The Klee status package (2026-10-01) cut Flame Dance, the soak's third
+# offer; Perfect Timing, the React shelf's other Uncommon Attack, stands in.
+PERFECT_TIMING = {"id": "KLEEMOD-PROTO_KO_PERFECT_TIMING",
+                  "name": "Perfect Timing",
+                  "type": "Attack", "cost": "1", "star_cost": None,
+                  "rarity": "Uncommon", "is_upgraded": False, "index": 2,
+                  "description": "Set off. Deal 8 damage. If a Bomb "
+                                 "triggered an Elemental Reaction this turn, "
+                                 "play this again."}
 
 REWARD = {
     "state_type": "card_reward",
-    "card_reward": {"cards": [SPARK_ROW, RUN_AWAY, FLAME_DANCE],
+    "card_reward": {"cards": [SPARK_ROW, RUN_AWAY, PERFECT_TIMING],
                     "can_skip": True},
     "run": {"act": 1, "floor": 2, "ascension": 0},
     "player": {"character": "Klee", "hp": 56, "max_hp": 62, "block": 0,
@@ -118,7 +122,7 @@ def _select_screen(cards, screen_type, prompt=""):
 def test_every_offer_on_that_screen_resolves_to_its_sheet_row_exactly():
     for entry, sid in ((SPARK_ROW, "proto_ko_tinder_toss"),
                        (RUN_AWAY, "proto_ko_run_away"),
-                       (FLAME_DANCE, "proto_ko_flame_dance")):
+                       (PERFECT_TIMING, "proto_ko_perfect_timing")):
         card, approx = adapter.resolve_card(entry)
         assert card.id == sid
         assert approx is False, (
@@ -186,7 +190,7 @@ def test_with_the_surface_unreachable_it_is_the_soaks_own_reading(monkeypatch):
     monkeypatch.setattr(loader, "_prototype_index", lambda: {})
     decision = policy_v1.decide(copy.deepcopy(REWARD))
     assert sorted((decision.notes or {}).get("approximate_offers") or []) == [
-        "Flame Dance", "Run Away!", "Tinder Toss"]
+        "Perfect Timing", "Run Away!", "Tinder Toss"]
 
 
 # --- 3. KOKOMI'S THREE FORCED DEFAULTS -------------------------------------

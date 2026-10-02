@@ -242,65 +242,6 @@ public class Round8Tests
                         c => c.StartsWith("PowerCmd.Apply"));
     }
 
-    [Fact]
-    public void EB354_rapid_fires_face_and_its_hits_take_the_same_strength()
-    {
-        // THE CARD, read off the shipped class: a base of 3 and a face that
-        // renders the var rather than a literal, so the PRINTED number is
-        // `base + Strength` and never the base.
-        var card = new ProtoKoRapidFire();
-        var damage = Vars(card).OfType<DamageVar>().Single();
-
-        Assert.Equal(3m, damage.BaseValue);
-        Assert.Contains("{Damage:diff()}", Face(card));
-
-        // THE FACE AND THE HIT RUN THE SAME MODIFIER SET.
-        // `DamageVar.UpdateCardPreview` composes `Hook.ModifyDamage(...,
-        // Props, ...)` off `BaseValue`, and the hit `SetOffRandom` deals goes
-        // out through `DamageCmd.Attack`, whose `DamageProps` is that same
-        // `ValueProp.Move`. One props value, one set of modifiers, one answer.
-        Assert.Equal(ValueProp.Move, damage.Props);
-        Assert.Equal(ValueProp.Move, DamageCmd.Attack(3m).DamageProps);
-
-        // And the term itself, run for real -- the game's own StrengthPower
-        // against a real Creature, the way `EB-288` ran WeakPower. At Strength
-        // +1 the face composes 3 + 1 = 4 and each of the four hits deals
-        // 3 + 1 = 4, so 16: exactly what the seat measured. Its predicted 24
-        // read the printed 5 (3 plus the Strength Potion's 2, the face as it
-        // stood BEFORE the turn's first Tender tick) as the card's BASE and
-        // added Strength a second time. That double count is the whole 8, and
-        // the rest of the turn reconciles on the nose: Bomb 11 + Mine 4 + 16
-        // = 31 dealt against 31 measured.
-        var klee = Seat.Klee().WithPower<StrengthPower>(1);
-        var enemy = Seat.Klee(30).Creature;
-        var term = klee.Creature.Powers.OfType<StrengthPower>().Single()
-            .ModifyDamageAdditive(enemy, damage.BaseValue, Attack,
-                                  klee.Creature, card, null);
-
-        Assert.Equal(1m, term);
-        Assert.Equal(4m, damage.BaseValue + term);           // the face
-        Assert.Equal(16m, 4 * (damage.BaseValue + term));    // the four hits
-    }
-
-    [Fact]
-    public void EB354_the_hits_are_dealt_off_the_base_and_never_off_the_preview()
-    {
-        // STRUCTURAL, and it is what keeps the two numbers one number: a card
-        // play needs a live `CombatState`. The generated `OnPlay` hands
-        // `DynamicVars.Damage.BaseValue` -- the raw 3 -- to `SetOffRandom`,
-        // which sends it through `DamageCmd.Attack`, and the pipeline adds
-        // Strength exactly once. Dealing the PREVIEW value instead would add
-        // it twice, which is the shape the seat's prediction assumed and the
-        // card does not have.
-        var play = Il.Calls(Il.Method("ProtoKoRapidFire", "OnPlay"));
-
-        Assert.Contains("ProtoBombPower.SetOffRandom", play);
-        Assert.Contains(play, c => c.EndsWith("get_BaseValue"));
-        Assert.DoesNotContain(play, c => c.EndsWith("get_PreviewValue"));
-        Assert.Contains("DamageCmd.Attack",
-                        Il.Calls(Il.Method("ProtoBombPower", "DealCardDamage")));
-    }
-
     // ---- helpers ---------------------------------------------------------
 
     /// <summary>A power's loc rows, off an instance allocated uninitialised:

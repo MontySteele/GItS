@@ -1434,14 +1434,8 @@ def test_bomb_sized_block_takes_dexterity_like_every_other_card_block(overhaul):
     effects.resolve_card(state, load("proto_ko_sorry_jean"))
     assert state.player.block == 15         # 13 + 2, and the charge is spent
     assert sizes(enemy) == []
-
-    state = klee_state([enemy := make_enemy(hp=400)])
-    state.player.powers["dexterity"] = 2
-    klee_overhaul.place(state, enemy, 13)
-
-    effects.resolve_card(state, load("proto_ko_careful_now"))
-    assert state.player.block == 12         # capped at 10, then + 2
-    assert sizes(enemy) == [13]             # and it spends nothing
+    # (Careful Now's half left with the row: the Klee status package,
+    # 2026-10-01, cut it.)
 
 
 def test_sorry_jean_on_an_empty_board_is_a_printed_no_op(overhaul):
@@ -2138,87 +2132,6 @@ def test_big_bounce_with_no_kill_bounces_nothing(overhaul):
 # case for case.
 
 
-def test_dodoco_cover_places_and_blocks_on_one_card(overhaul):
-    """The opening hand's answer to "no placer": a Bomb 4 AND 5 Block, so a
-    turn that draws no Cook card is still a turn that cooked something."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    state.card_aim, state.card_aim_bound = enemy, True
-
-    effects.resolve_card(state, load("proto_ko_dodoco_cover"))
-
-    assert sizes(enemy) == [4]
-    assert state.player.block == 5
-
-
-def test_dodoco_covers_upgrade_moves_both_printed_numbers(overhaul):
-    """`{bomb_size: +2, block: +2}`: the row prints two numbers and the smith
-    moves both, which is what keeps the `+` card from being a copy."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    state.card_aim, state.card_aim_bound = enemy, True
-
-    effects.resolve_card(state, load("proto_ko_dodoco_cover+"))
-
-    assert sizes(enemy) == [6]
-    assert state.player.block == 7
-
-
-def test_careful_now_blocks_for_the_largest_bomb_and_spends_nothing(overhaul):
-    """Careful Now: "Gain Block equal to your largest Bomb when played, up to 10."
-
-    THE LARGEST SINGLE CHARGE, BOARD-WIDE (`klee_overhaul.largest_size`, the
-    Splash's own reader since R250) -- not the sum, and not one enemy's.
-
-    AND IT SPENDS NOTHING, which is the one line separating it from Sorry,
-    Jean... above: every charge is exactly where it was afterwards, still
-    growing.
-    """
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 3)
-    klee_overhaul.place(state, a, 4)
-    klee_overhaul.place(state, b, 7)
-
-    effects.resolve_card(state, load("proto_ko_careful_now"))
-
-    assert state.player.block == 7          # the largest ONE, not 3+4 or 14
-    assert sizes(a) == [3, 4] and sizes(b) == [7]
-
-
-def test_careful_now_is_capped_and_the_upgrade_raises_the_cap(overhaul):
-    """The cap is the row's printed number and the ONLY thing its upgrade
-    moves -- which is what keeps the row from turning Grounded's cook turn
-    into a stall."""
-    enemy = make_enemy(hp=400)
-    state = klee_state([enemy])
-    klee_overhaul.place(state, enemy, 40)
-
-    effects.resolve_card(state, load("proto_ko_careful_now"))
-    assert state.player.block == 10
-
-    state.player.block = 0
-    effects.resolve_card(state, load("proto_ko_careful_now+"))
-    assert state.player.block == 13
-
-
-def test_careful_now_on_a_bomb_less_board_is_a_printed_no_op(overhaul):
-    """No Bomb, no Block -- `remove_bomb_for_block`'s own answer one row over.
-    A Retain card that banked its cap on an empty board would be exactly the
-    flat Block this shelf is written not to be."""
-    state = klee_state([make_enemy()])
-    effects.resolve_card(state, load("proto_ko_careful_now"))
-    assert state.player.block == 0
-
-
-def test_careful_now_retains_and_keeps_retaining_upgraded(overhaul):
-    """Retain is on the BASE card (the row's own `retain: true`) and the
-    upgrade is the cap, so the `+` card keeps the keyword it was printed
-    with."""
-    assert load("proto_ko_careful_now").retain is True
-    assert load("proto_ko_careful_now+").retain is True
-
-
 # ---------------------------------------------------------------------------
 # THE POOL PASS, ROUND 11 -- Stoke the Fuse, the Spark sink
 # ---------------------------------------------------------------------------
@@ -2401,82 +2314,6 @@ def test_treasures_on_a_bomb_less_board_does_nothing(overhaul):
 
 
 # --- Split Charge: the largest Bomb in two halves ---------------------------
-
-def test_split_charge_halves_the_largest_bomb(overhaul):
-    """"Split your largest Bomb into two halves on random enemies." On a
-    one-enemy board both halves land on it, which is the row's printed losing
-    line."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    klee_overhaul.place(state, enemy, 12)
-
-    effects.resolve_card(state, load("proto_ko_split_charge"))
-
-    assert sorted(sizes(enemy)) == [6, 6]
-
-
-def test_split_charge_loses_nothing_on_an_odd_bomb(overhaul):
-    """`n // 2` and `n - n // 2`: 11 becomes 5 and 6, and the two still sum to
-    what was split."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    klee_overhaul.place(state, enemy, 11)
-
-    effects.resolve_card(state, load("proto_ko_split_charge"))
-
-    assert sorted(sizes(enemy)) == [5, 6]
-
-
-def test_split_charge_leaves_the_smaller_piles_alone(overhaul):
-    """"Your largest Bomb" is ONE charge, board-wide. The 3 and the 4 are
-    exactly where they were."""
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 3)
-    klee_overhaul.place(state, a, 10)
-    klee_overhaul.place(state, b, 4)
-
-    effects.resolve_card(state, load("proto_ko_split_charge"))
-
-    assert sorted(sizes(a) + sizes(b)) == [3, 4, 5, 5]
-
-
-def test_split_charge_halves_a_mine_into_plain_bombs(overhaul):
-    """A Mine is one fuse and splitting it does not make two: the defence is
-    spent, which is the price of the bridge."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    klee_overhaul.place(state, enemy, 8, is_mine=True)
-
-    effects.resolve_card(state, load("proto_ko_split_charge"))
-
-    assert sizes(enemy) == [4, 4]
-    assert klee_overhaul.mine_count(enemy) == 0
-
-
-def test_split_charge_refuses_a_bomb_of_one(overhaul):
-    """There is no split of 1 that leaves two Bombs, and halving it to 0 and 1
-    would silently delete a charge."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    klee_overhaul.place(state, enemy, 1)
-
-    effects.resolve_card(state, load("proto_ko_split_charge"))
-
-    assert sizes(enemy) == [1]
-
-
-def test_split_charge_upgraded_grows_each_half(overhaul):
-    """`upgrade: {split_grow: +2}` -- an upgrade that BUYS a clause the base
-    card does not have, so the base face prints no figure for it."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    klee_overhaul.place(state, enemy, 10)
-
-    effects.resolve_card(state, load("proto_ko_split_charge+"))
-
-    assert sorted(sizes(enemy)) == [7, 7]
-
 
 # --- Tinder Toss: Set off ALL, then 3 to ALL (R271 sec.5.3, `EB-749`) ------
 #
@@ -2854,27 +2691,6 @@ def test_eb516_a_bomb_less_board_is_still_uniform(overhaul):
         if b.hp < 200:
             hit.add("b")
     assert hit == {"a", "b"}, "a Bomb-less board rolls both bodies"
-
-
-def test_eb516_rapid_fire_takes_the_same_aim(overhaul):
-    """One rule, two rows: Rapid Fire rolls four times and every roll is drawn
-    from the same bag."""
-    bombed = make_enemy(hp=200, name="bombed")
-    bare = make_enemy(hp=200, name="bare")
-    state = klee_state([bombed, bare])
-    klee_overhaul.place(state, bombed, 5)
-    state.player.energy = 3
-    card = load("proto_ko_rapid_fire")
-    state.player.hand.append(card)
-    combat.play_card(state, card)
-
-    assert sizes(bombed) == []
-    # The FIRST roll is the only one that can find a Bomb, and after it the
-    # board holds none -- so the remaining three fall back to every living
-    # body, which is the fallback doing its job rather than a stuck aim. The
-    # NUMBERS are untouched by any of it: four rolls, four hits.
-    assert bombed.hp < 200
-    assert counts(state)["ko_explosion"] == 1
 
 
 def test_eb512_stoke_the_fuse_leaves_the_counter_at_zero(overhaul):

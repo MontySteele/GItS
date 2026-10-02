@@ -572,6 +572,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "grow_largest", "multiply_largest_bomb",
                   "fetch_from_discard", "add_random_companion",
                   "grant_kapow_each_turn",
+                  # THE KLEE STATUS PACKAGE (2026-10-01): two single calls
+                  # into `KleeStatusPackage` -- every status in hand becomes
+                  # a named card (Klee Can Explain!), and every status in hand
+                  # is exhausted into the largest Bomb (Albedo -- Dust of
+                  # Purification).
+                  "transform_statuses_into", "exhaust_statuses_grow_largest",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -2509,6 +2515,12 @@ RETURN_LAST_SET_OFF_FIELDS = {"op"}
 GROW_LARGEST_FIELDS = {"op", "amount", "draw_if_at_least", "draw"}
 #: Half a Mountain: the largest Bomb's size times `factor`.
 MULTIPLY_LARGEST_BOMB_FIELDS = {"op", "factor"}
+# THE KLEE STATUS PACKAGE (2026-10-01). The transform names the card it
+# makes, which must be one of the generated rows `TRANSFORM_INTO_CLASSES`
+# knows; the exhaust-and-grow prints one number, the growth per status.
+TRANSFORM_STATUSES_INTO_FIELDS = {"op", "card"}
+TRANSFORM_INTO_CLASSES = {"proto_ko_pop": "ProtoKoPop"}
+EXHAUST_STATUSES_GROW_LARGEST_FIELDS = {"op", "amount"}
 #: Treasure Map and Come Back and Play!: one card of a KIND out of the discard
 #: pile into the hand, the player choosing among the kind.
 FETCH_FROM_DISCARD_FIELDS = {"op", "filter"}
@@ -3183,6 +3195,15 @@ APPLY_POWERS = {
     "ko_friendship_bracelet": ("FriendshipBraceletPower", None,
         "Whenever you play a [gold]Companion[/gold] card, your largest "
         "[gold]Bomb[/gold] grows by {X}."),
+    # THE KLEE STATUS PACKAGE (2026-10-01). Classes in
+    # Powers/Prototype/KleeStatusPackage.cs.
+    "ko_finders_keepers": ("FindersKeepersPower", None,
+        "Whenever you play a [gold]Confiscated[/gold], place a "
+        "[gold]Bomb[/gold] {X} on a random enemy."),
+    "ko_damage_report": ("DamageReportPower", None,
+        "Whenever you draw a status, deal {X} damage to ALL enemies."),
+    "ko_solitary_confinement": ("SolitaryConfinementPower", None,
+        "Your [gold]Confiscated[/gold] cost 0."),
     "ko_secret_base": ("SecretBasePower", None,
         "At the start of your turn, if no enemy has a [gold]Bomb[/gold] of "
         "yours, place a [gold]Bomb[/gold] {X} on a random enemy."),
@@ -5214,6 +5235,20 @@ def blocked_reason(
             factor = eff.get("factor")
             if not isinstance(factor, int) or isinstance(factor, bool)                     or factor < 2:
                 return "multiply_largest_bomb factor must be a literal int >= 2"
+        if op == "transform_statuses_into":
+            unknown = set(eff) - TRANSFORM_STATUSES_INTO_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if eff.get("card") not in TRANSFORM_INTO_CLASSES:
+                return f"transform_statuses_into card {eff.get('card')!r}"
+        if op == "exhaust_statuses_grow_largest":
+            unknown = set(eff) - EXHAUST_STATUSES_GROW_LARGEST_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            value = eff.get("amount")
+            if not isinstance(value, int) or isinstance(value, bool) \
+                    or value <= 0:
+                return f"{op} amount must be a positive literal int"
         if op == "fetch_from_discard":
             unknown = set(eff) - FETCH_FROM_DISCARD_FIELDS
             if unknown:
@@ -9990,7 +10025,11 @@ def grow_var_effect(card: dict) -> dict | None:
                  # R276: One More Charge's flat growth, and Spinning
                  # Sparkler's per-hit rider.
                  or (fx.get("op") == "grow_largest" and "amount" in fx)
-                 or (fx.get("op") == "damage" and "grow_on_hit" in fx)),
+                 or (fx.get("op") == "damage" and "grow_on_hit" in fx)
+                 # THE KLEE STATUS PACKAGE: Dust of Purification's growth
+                 # per status exhausted.
+                 or (fx.get("op") == "exhaust_statuses_grow_largest"
+                     and "amount" in fx)),
                 None)
 
 
@@ -9999,7 +10038,9 @@ GROW_FIELD = {"grow_bombs": "amount", "merge_bombs": "growth",
               "grow_largest_bomb": "per_spark",
               # R276 (One More Charge, Treasure Map): a FLAT growth of the
               # largest Bomb.
-              "grow_largest": "amount"}
+              "grow_largest": "amount",
+              # THE KLEE STATUS PACKAGE (2026-10-01), Dust of Purification.
+              "exhaust_statuses_grow_largest": "amount"}
 
 
 def grow_literal(eff: dict) -> int:
@@ -11543,6 +11584,19 @@ def build_body(
                 f"{grow_expr(card, eff)}, "
                 f"{int(eff.get('draw_if_at_least', 0))}, "
                 f"{int(eff.get('draw', 0))});")
+
+        elif op == "transform_statuses_into":
+            # THE KLEE STATUS PACKAGE: Klee Can Explain!, Compact's body.
+            into_cls = TRANSFORM_INTO_CLASSES[eff["card"]]
+            lines.append(
+                f"await KleeStatusPackage.TransformStatusesInto<{into_cls}>("
+                "Owner);")
+
+        elif op == "exhaust_statuses_grow_largest":
+            # THE KLEE STATUS PACKAGE: Albedo -- Dust of Purification.
+            lines.append(
+                "await KleeStatusPackage.ExhaustStatusesGrowLargest("
+                f"choiceContext, Owner, {grow_expr(card, eff)});")
 
         elif op == "multiply_largest_bomb":
             # Half a Mountain: the largest Bomb's current size, times the row.
@@ -14666,6 +14720,7 @@ def build_upgrade(card: dict) -> list[str]:
                "merge_bombs": 'DynamicVars["Grow"]',
                "grow_largest_bomb": 'DynamicVars["Grow"]',
                "grow_largest": 'DynamicVars["Grow"]',
+               "exhaust_statuses_grow_largest": 'DynamicVars["Grow"]',
                "mend": 'DynamicVars["Mend"]',
                "stage_raise": 'DynamicVars["RaiseAmount"]',
                "stage_guest": 'DynamicVars["GuestFanfare"]',
@@ -16056,14 +16111,22 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     includes_confiscated_rules = any(
         eff.get("op") == "add_card" and eff.get("card") == "confiscated"
         for eff in card.get("effects", []))
+    # THE KLEE STATUS PACKAGE (2026-10-01): a card that shuffles in the base
+    # game's Dazed previews it, as Confiscated's makers carry its tip.
+    includes_dazed_card = any(
+        eff.get("op") == "add_card" and eff.get("card") == "status_dazed"
+        for eff in card.get("effects", []))
     tooltip_member = ""
     tips_expr = ""
-    if preview_element_cs is not None or includes_bomb_rules or includes_confiscated_rules:
+    if (preview_element_cs is not None or includes_bomb_rules
+            or includes_confiscated_rules or includes_dazed_card):
         trigger_arg = preview_element_cs or "Element.None"
         bomb_arg = "true" if includes_bomb_rules else "false"
         confiscated_arg = (
             ", includesConfiscatedRules: true"
             if includes_confiscated_rules else "")
+        if includes_dazed_card:
+            confiscated_arg += ", includesDazedCard: true"
         # `EB-338`, and it rides the PREVIEW rather than the card: a row with
         # no reaction preview has nothing to correct, so the argument is only
         # emitted where one is drawn.
@@ -16364,6 +16427,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
            for eff in card.get("effects", [])):
         tips_expr = ("KleeExpansion.WithKapowPreview("
                      f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+    # THE KLEE STATUS PACKAGE: Klee Can Explain! previews the card it makes,
+    # Compact's Fuel tip.
+    for eff in card.get("effects", []):
+        if eff.get("op") == "transform_statuses_into":
+            into_cls = TRANSFORM_INTO_CLASSES[eff["card"]]
+            tips_expr = (f"KleeStatusPackage.WithPreview<{into_cls}>("
+                         f"{tips_expr or 'base.ExtraHoverTips'})")
     if tips_expr:
         tooltip_member = (
             "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"

@@ -175,7 +175,7 @@ the plan the starter teaches.
 - **A turn looks like:** plant on turn one, then two or three quiet turns of
   plain Attacks, Grounded Block and Skills that grow the bomb, then one loud
   turn.
-- **You draft:** Fish-Flavored Bait and Pocket Fireworks (plain Attacks that
+- **You draft:** Fish-Flavored Bait and Forbidden Fun (plain Attacks that
   keep pressure without cashing), Chain Fuse and Explosives Workshop (grow
   faster), Exquisite Compound (pile every Bomb onto one enemy, which also
   makes one big reacting number), Grounded and Sorry, Jean... (defence), Big
@@ -199,8 +199,7 @@ mint the Sparks for the next one. The hallway plan and the Shiv analogue.
   off on every enemy, Run Away! at the end, the board cleared by turn two or
   three.
 - **You draft:** Pop! and Mine Toss (cheap bombs and mines), Tinder Toss
-  and Boom-Boom Strike (Spark *Set off* Attacks), Rapid Fire (four
-  random hits, *Set off* each enemy hit), Run Away! (defence), Chained
+  and Boom-Boom Strike (Spark *Set off* Attacks), Run Away! (defence), Chained
   Reactions (every explosion plants a new Bomb somewhere).
 - **The payoff moment:** the chain, when one Attack sets off three enemies'
   bombs, the Sparks pay for two more Attacks, and the turn does not end.
@@ -224,8 +223,8 @@ on the *first* one, which is why Exquisite Compound is a React card.
   she sets off the bomb for one and a half times its size. Sequencing is the
   whole game.
 - **You draft:** Dahlia, Kaeya, Diona, Fischl from the Mondstadt pool (the
-  appliers), Sucrose (Swirl spreads the aura), Sizzle and Perfect Timing and
-  Flame Dance (*Set off* Attacks that pay extra against an aura), Exquisite
+  appliers), Sucrose (Swirl spreads the aura), Sizzle and Perfect Timing
+  (*Set off* Attacks that pay extra against an aura), Exquisite
   Compound, Flash Point (1 Spark and a card if a Bomb reacted this turn).
 - **The payoff moment:** a cooked 15 that Vaporizes into 22 and applies Pyro
   on the way out.
@@ -280,14 +279,16 @@ Set off, Spark, Companion, Retain and Exhaust. Numbers are starting values.
 
 - **Cook (6):** Witch's Homework, Sit Tight, Experiment in Progress, Half a Mountain,
   Favonius Escort, Klee's Secret Base.
-- **Spray (9):** Jumpy Dumpty Mk.III, Spinning Sparkler, Fish Fry, Survival
+- **Spray (9):** Jumpy Dumpty Mk.III, Spinning Sparkler, Fish Fry (cut by
+  the status package, §5.7), Survival
   Rulebook, Party Poppers, Boom Badge, Windblume Fireworks, Fireworks Finale,
   Spark Knight.
 - **React (2):** Wait For It..., Aftershock.
 - **Mines (5):** Windtrace, Mine, All Mine!, Look Out!, Dodoco, Second
   Surprise.
 - **The Companion route (6):** Playdate, Team Effort, Tag Along, Come Back
-  and Play!, Friendship Bracelet, Adventure Club.
+  and Play!, Friendship Bracelet (cut by the status package, §5.7),
+  Adventure Club.
 - **Retrieval (2):** Treasure Map, Alice's Detonator.
 
 Two names moved on a clash with shipped cards: Hide and Seek became Hiding
@@ -307,6 +308,31 @@ Two faces changed after the batch landed (2026-09-23):
   random enemy." (3 upgraded). The hit has no element: as a Pyro hit it could
   use up the Hydro a companion had just applied before the cooked Bomb
   reacted with it.
+
+### 5.7 The status package (2026-10-01)
+
+Ruled 2026-10-01 (`review/active/klee-status-package-2026-10-01.md`): cards
+with excellent cost-to-effect ratios that load her deck with statuses, priced
+by how busted they are. The fair loaders pay the light tax, the base game's
+Dazed; the "mega turn now, suffer later" cards pay the heavy one, two
+Confiscated that stay all combat. A status is a card of Status type or Status
+rarity (Confiscated counts; curses do not).
+
+- **Loaders:** Forbidden Fun (Attack 0, Common, 10 [14], a Dazed), It Wasn't
+  Me! (Skill 0, Common, 6 [9] Block, a Dazed), Lisa's Treats (Skill 0,
+  Uncommon, 2 [3] Energy, 2 Confiscated), Red Knight (Attack 2, Rare, 22 [28]
+  to ALL, 2 Confiscated).
+- **Payoffs and answers:** Finders Keepers (Power 1, Uncommon: a Confiscated
+  played places a Bomb 5 [7]), Klee Can Explain! (Skill 1, Uncommon: 6 [8]
+  Block, every status in hand becomes Pop!), Damage Report (Power 1, Rare: a
+  status drawn hits ALL for 5 [7]), Solitary Confinement (Power 1, Rare:
+  Confiscated cost 0; upgraded, Innate).
+- **Albedo's Klee stand-in** is "Albedo — Dust of Purification" (Skill 1,
+  Rare): exhaust every status in hand, and the largest Bomb grows by 6 [8]
+  for each.
+- **Cut to make room:** Pocket Fireworks, Dodoco Cover (Common), Careful Now,
+  Friendship Bracelet, Fish Fry, Flame Dance, Rapid Fire, Split Charge
+  (Uncommon). The pool stays 78 and goes 24 / 36 / 18 to 24 / 33 / 21.
 
 ## 6. The intended weakness, and how she survives anyway
 
@@ -343,6 +369,7 @@ R234 gives Klee three to five Personal Companions and drafted two on
 lore splits her people in two, and this brief proposes that her Personal
 Companions split the same way. **The draft question becomes: am I Jean's Klee
 or Alice's Klee?**
+
 
 ### 7.1 Jean's Klee — the grown-ups, as Klee-only stand-ins in the Mondstadt companion slot
 
@@ -410,7 +437,8 @@ Cryo, so Melt), "Noelle — Sweeping Time" (when a Mine goes off, gain
 Block), "Kaeya — Cold-Blooded Strike" (a cover story: Grounded pays this
 turn even though something went off), "Barbara — Glorious Season" (a Bomb
 went off this turn: heal, Rare-tier by the healing law, so this one waits),
-"Albedo — Tectonic Tide" (Isotoma reads explosions), "Jean — Dandelion
+"Albedo — Tectonic Tide" (Isotoma reads explosions; built, then replaced
+by "Albedo — Dust of Purification" in the status package, §5.7), "Jean — Dandelion
 Breeze" (the ultimate Grounded). Albedo and Jean are 5-star, but a stand-in
 on a Rare Universal rides that Universal's own acquisition, so **R234 P5a,
 which is about how a slot-sharing Rare Personal is acquired, is not
@@ -533,11 +561,11 @@ band:
 
 | Layer | Count | What it is | What it costs |
 |---|---|---|---|
-| Klee's own pool | 78 draftable since R276 (about 60 before) | 2 basics of her own; Cook, Spray, React, Mines and the Companion route; 18 Rares including the rule-breakers (§5.6) | authoring, art |
+| Klee's own pool | 78 draftable since R276 (about 60 before) | 2 basics of her own; Cook, Spray, React, Mines, the Companion route and the status package; 21 Rares since the status package (18 before) including the rule-breakers (§5.6, §5.7) | authoring, art |
 | Personals | 4, up to 5 | The coven, one card each; an imaginary friend as the fifth | reward-slot share, art |
 | Caretaker stand-ins | 4 to 6 | Klee-only cards standing in for Diona, Kaeya, Barbara, Albedo today; Noelle and Jean once they have a Universal | authoring only |
 | Hexerei stand-ins | as many as earn one, 6 to 10 | Family-generic cards standing in for Fischl, Sucrose, Albedo, Durin, Nicole today, and Razor, Mona, Venti, Varka once they have Universals; inherited by future Hexerei characters | authoring only |
-| Klee-side readers | 9 since R276 | Inside the pool, keyed to a Companion play: Coven Errand, Little Hexenzirkel, Alice's Introduction Magic, and R276's Playdate, Team Effort, Friendship Bracelet, Come Back and Play!, Tag Along, Adventure Club | counted above |
+| Klee-side readers | 9 since R276 | Inside the pool, keyed to a Companion play: Coven Errand, Little Hexenzirkel, Alice's Introduction Magic, and R276's Playdate, Team Effort, Come Back and Play!, Tag Along, Adventure Club (Friendship Bracelet was cut by the status package) | counted above |
 
 Stand-ins cost no art and no share of the reward slot, because a stand-in
 replaces the Universal only when Klee is the one dealt it. That is why the
