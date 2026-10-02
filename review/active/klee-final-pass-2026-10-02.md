@@ -1,7 +1,7 @@
 # Klee final pass: HP, Kitchen Alchemy's slot, a Spark sink (2026-10-02)
 
-Status: OPEN (picks 1 to 3). After these are built, there is one seat round
-on fixed seeds with no forced cards, then Balance.
+Status: RULED 2026-10-02 (see "Ruled" at the end). After the build, there is
+one seat round on fixed seeds with no forced cards, then Balance.
 
 ## Why now
 
@@ -71,10 +71,11 @@ The Spark→Block cards today:
   is the card that turns a pile of Sparks into a boss turn survived. In w13
   the lane-1 seat that had it played it four times in the boss fight.
 
-It sits at Uncommon, so seats rarely see it. Playdate is a Common that pays
-only when a Companion card is in hand ("The next Companion card you play
-this turn costs 1 less"), and Companion cards come about once in twenty
-rewards.
+It sits at Uncommon, so seats rarely see it. (This paper first proposed
+moving Playdate to Uncommon on the grounds that companions are rare. That
+was wrong: every post-fight reward offers one, as its fourth choice
+(`PoundingSurprise.TryModifyCardRewardOptions`). The "one card reward in
+twenty" line in the mod's manifest description was stale.)
 
 ## Picks
 
@@ -98,3 +99,34 @@ rewards.
 All three at their defaults are one change each: `Klee.cs`'s HP, one row's
 text and numbers, and two rows' rarity. Both engines get them; then the seat
 round.
+
+## Ruled (2026-10-02)
+
+[USER]:
+
+1. "Makes sense, we can adjust up. Let's try 70 like Silent." **Klee's HP is 70.**
+2. "I think that I prefer the permanent decrease, but what if we separate this
+   into two cards? One remains the permanent strength reducer tied to statuses
+   (-1, and another -1 per status exhausted, upgrades to retain), and another
+   becomes a Star card that gives a temporary debuff."
+   - **Kitchen Alchemy stays as it is.** It is already that card: "ALL
+     enemies lose 1 Strength. Exhaust every status in your hand; they lose 1
+     more for each.", and its upgrade adds Retain.
+   - **A new Spark-priced card does the temporary debuff.** I read "Star
+     card" as Klee's Stars, the Sparks (brief §18: Spark is "a currency ...
+     Regent's Stars the comparison"). The new card is **Cover Your Ears!**
+     (Uncommon Skill, 0 Energy and 2 Sparks, Exhaust): "ALL enemies lose 6
+     [8] Strength this turn." Two Sparks is the pool's price for an Energy's
+     worth (Sparkling Burst, Boom Badge), and the numbers are Piercing
+     Wail's. It is also the second Spark sink, and it fires on the boss turn
+     this paper is about.
+3. "Agreed on Blast Shield. But Companion cards come in the 4th reward slot -
+   you should be offered one every single reward." **Blast Shield becomes a
+   Common.** Playdate stays a Common, since its premise holds.
+
+**Keeping the pool at 78 and 24 / 33 / 21.** Blast Shield up and Cover Your
+Ears! in leave one Common too many. **Where Did I Put It?** is cut: the w14
+act-2 seat named it NEVER AGAIN ("it found a Set off card 1 time in 5 and gave
+no reason when it didn't"), and Countdown, Treasure Map and Once More! already
+fetch Set off cards. This is the main session's call, not a ruled pick; it
+reverses with one row if [USER] would rather cut something else.
