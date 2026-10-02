@@ -25,11 +25,10 @@
    description: "[gold]Set off[/gold]. Deal 4 damage.",
    effects: [{op: set_off, target: enemy, damage: 4}]}
 
-# R261 (`EB-557`): the placer is Innate and the detonator is not. See
-# docs/notes/prototype-surface-provenance.md.
+# Not Innate (the co-op run, 2026-10-02): an opening-hand Bomb drew the
+# turn-one chip seats kept taking. See docs/notes/prototype-surface-provenance.md.
 - {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,
    authored_by: [claude],
-   innate: true,
    cost: 1, type: skill, rarity: basic,
    description: "Place a [gold]Bomb[/gold] 8. When it goes off, place a [gold]Mine[/gold] 3 on ALL enemies.",
    upgrade: {bomb_size: +3, payload_mine: +1},
@@ -1028,8 +1027,9 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: pyro,
    cost: 1, type: skill,
-   description: "The next time an enemy attacks you, take 3 less damage and deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
-   effects: [{op: apply_power, power: mc_baron_bunny, amount: 1, target: self,
+   description: "Enemy loses 3 [gold]Strength[/gold] this turn. The next time an enemy attacks you, deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
+   effects: [{op: lose_strength, amount: 3, target: enemy, this_turn: true},
+             {op: apply_power, power: mc_baron_bunny, amount: 1, target: self,
               summon_damage: 8}]}
 
 - {id: proto_mc_eula_glacial_illumination, name: "Eula — Glacial Illumination", character: klee,
@@ -3981,7 +3981,7 @@
 - {id: proto_vk_barbara_wellspring_hymn, name: "Barbara: Wellspring Hymn", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
-   cost: 1, type: skill, personal_pool: varka,
+   cost: 1, type: skill, exhaust: true, personal_pool: varka,
    description: "Remove your [gold]Weak[/gold], [gold]Frail[/gold] and [gold]Vulnerable[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to an enemy.",
    effects: [{op: varka, kind: cleanse},
              {op: block, amount: 7},

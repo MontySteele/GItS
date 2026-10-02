@@ -270,16 +270,9 @@ MECHANICS = (
             "it -- B3's whole question"
         ),
     ),
-    Mechanic(
-        name="innate",
-        applies=lambda c: bool(c.get("innate")),
-        markers=("CardKeyword.Innate",),
-        why=(
-            "A9: Innate drives opening-hand placement. A card missing it plays "
-            "identically once drawn; the only symptom is that it is not there "
-            "on turn 1"
-        ),
-    ),
+    # (innate left when Jumpy Dumpty, the last Innate row, lost it on
+    # 2026-10-02; the dead-row test would refuse it. Restore it with the next
+    # Innate row.)
     Mechanic(
         name="times",
         applies=_has_literal_times,
@@ -320,7 +313,7 @@ MECHANICS = (
             "pay without the wound. A card that lost the keyword plays "
             "IDENTICALLY the turn it is played; the only symptom is that it "
             "was discarded on some earlier turn the player meant to bank it. "
-            "The exhaust/innate row above, one field over"
+            "The exhaust row above, one field over"
         ),
     ),
 )

@@ -35,3 +35,23 @@ public sealed class ProtoKoCoverYourEarsPower : TemporaryStrengthPower, ILocaliz
 
     protected override bool IsPositive => false;
 }
+
+/// <summary>
+/// Amber, Explosive Puppet's "Enemy loses 3 Strength this turn" (the co-op
+/// run, 2026-10-02): <see cref="ProtoKoCoverYourEarsPower"/>'s shape on the
+/// one chosen enemy. Sim twin: <c>temp_strength_down</c>.
+/// </summary>
+public sealed class ProtoMcAmberExplosivePuppetPower : TemporaryStrengthPower, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Explosive Puppet"),
+        ("description",
+            "Lose [blue]{Amount}[/blue] [gold]Strength[/gold] this turn."),
+    };
+
+    public override AbstractModel OriginModel =>
+        ModelDb.Card<ProtoMcAmberExplosivePuppet>();
+
+    protected override bool IsPositive => false;
+}

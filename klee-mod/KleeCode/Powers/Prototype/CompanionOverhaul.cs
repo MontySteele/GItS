@@ -74,10 +74,6 @@ public static class CompanionOverhaulLaw
     /// Mirrors <c>C.MC_LIGHTNING_FANG_BONUS</c>.</summary>
     public const int LightningFangDamage = 3;
 
-    /// <summary>Amber, Baron Bunny: the damage the decoy eats.
-    /// Mirrors <c>C.MC_BARON_BUNNY_REDUCTION</c>.</summary>
-    public const int BaronBunnyReduction = 3;
-
     /// <summary>Amber, Baron Bunny: the Pyro the decoy answers with.
     /// Mirrors <c>C.MC_BARON_BUNNY_DMG</c>.</summary>
     public const int BaronBunnyDamage = 8;

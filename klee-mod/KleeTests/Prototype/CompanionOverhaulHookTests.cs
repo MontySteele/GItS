@@ -172,7 +172,6 @@ public class CompanionOverhaulHookTests
     [Theory]
     [InlineData(typeof(SacramentalShowerPower), CompanionOverhaulLaw.ShowerDamage)]
     [InlineData(typeof(LightningFangPower), CompanionOverhaulLaw.LightningFangDamage)]
-    [InlineData(typeof(BaronBunnyPower), CompanionOverhaulLaw.BaronBunnyReduction)]
     [InlineData(typeof(LightfallSwordPower), CompanionOverhaulLaw.LightfallBase)]
     [InlineData(typeof(LightfallSwordPower), CompanionOverhaulLaw.LightfallPerAttack)]
     // `EB-463` / `EB-565` TOOK TWO ROWS OFF THIS LIST, and neither number
@@ -313,14 +312,27 @@ public class CompanionOverhaulHookTests
     }
 
     [Fact]
-    public void Baron_bunny_reduces_the_hit_and_never_heals()
+    public void Baron_bunny_no_longer_reduces_the_hit()
     {
-        var seat = Seat.Klee().WithPower<BaronBunnyPower>(1);
-        var bunny = seat.Creature.Powers.OfType<BaronBunnyPower>().Single();
-        var enemy = Seat.Klee().Creature;    // any dealer whose Player is set
-        // A player-side dealer is refused: the decoy answers an ENEMY.
-        Assert.Equal(0m, bunny.ModifyDamageAdditive(
-            seat.Creature, 12m, Attack, enemy, null, null));
+        // The co-op run, 2026-10-02: Explosive Puppet's "take 3 less" became
+        // a this-turn Strength loss on the chosen enemy. The decoy keeps only
+        // its volley, so it declares no damage modifier of its own.
+        Assert.NotEqual(typeof(BaronBunnyPower),
+            typeof(BaronBunnyPower).GetMethod("ModifyDamageAdditive")!.DeclaringType);
+    }
+
+    [Fact]
+    public void Explosive_puppet_takes_strength_from_the_chosen_enemy_this_turn()
+    {
+        var card = new ProtoMcAmberExplosivePuppet();
+        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
+        Assert.Equal(3m, card.DynamicVars["StrengthLoss"].BaseValue);
+        var play = Il.CallSequence(Il.Method("ProtoMcAmberExplosivePuppet", "OnPlay")).ToList();
+        Assert.Contains(play, c => c.Contains("PowerCmd.Apply<ProtoMcAmberExplosivePuppetPower>"));
+        Assert.DoesNotContain(play, c => c.Contains("PowerCmd.Apply<StrengthPower>"));
+        Assert.True(typeof(TemporaryStrengthPower)
+            .IsAssignableFrom(typeof(ProtoMcAmberExplosivePuppetPower)));
+        Assert.Equal(PowerType.Debuff, new ProtoMcAmberExplosivePuppetPower().Type);
     }
 
     [Fact]

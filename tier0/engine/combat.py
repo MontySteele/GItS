@@ -1366,8 +1366,8 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # Sacramental Shower and Amber's Baron Bunny -- fire HERE, after
             # the hit's number is settled and before Block is spent, which is
             # the moment the mod's `BeforeDamageReceived` gives Klee's Mine.
-            # Baron Bunny's "take 3 less" is why this returns the damage
-            # rather than returning None.
+            # It returns the damage so a trap may still re-price the hit
+            # (Baron Bunny's "take 3 less" did until 2026-10-02).
             dmg = effects.companion_overhaul_before_enemy_hit(
                 state, enemy, dmg)
             # QUARANTINED (C.KLEE_OVERHAUL). RULE 6, at the moment the comment

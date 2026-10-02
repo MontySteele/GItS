@@ -974,7 +974,8 @@ prototype placeholder uses.
 #   Varka, Sturm und Drang    a Swirl event that remembers the swirled element
 #                             for the next Attack.
 #   Amber, Explosive Puppet   the same pre-enemy-attack counter as the Shower,
-#                             plus incoming-damage reduction.
+#                             plus incoming-damage reduction (replaced by a
+#                             this-turn Strength loss, 2026-10-02).
 #   Eula, Glacial Illumination a placed counter that tallies Attacks for two
 #                             turns and then pays 8 plus 5 per Attack counted.
 #   Mika, Starfrost Swirl     "your next Attack costs 1 less": no next-Attack
@@ -1012,7 +1013,8 @@ prototype placeholder uses.
 #   can be answered and then not happen, while a hit about to land cannot.
 #   `effects.companion_overhaul_before_enemy_hit`.
 #
-#   THE INCOMING-DAMAGE REDUCTION (Amber's "take 3 less") is
+#   THE INCOMING-DAMAGE REDUCTION (Amber's "take 3 less", REMOVED 2026-10-02:
+#   see "The co-op run notes" at the end of this file) was
 #   `ModifyDamageAdditive` returning a negative -- `PreventExhaustWardPower`'s
 #   shape. It is PURE, because the engine asks it speculatively for the intent
 #   preview; the consumption and the volley are one phase later, which is why
@@ -2358,7 +2360,9 @@ Plan lines drop the design's "to the front enemy" and Tide Wall's says "the
 enemy", because a card line never names the front enemy
 (`tools/lint_text_conventions.py`); the Plan tip says which enemy a Plan hits.
 
-## proto_ko_jumpy_dumpty, `innate: true` (R261, `EB-557`, 2026-09-05)
+## proto_ko_jumpy_dumpty, `innate: true` (R261, `EB-557`, 2026-09-05) -- undone 2026-10-02
+
+Superseded: the co-op run notes (end of this file) took Innate off again.
 
 THE PLACER IS INNATE AND THE DETONATOR IS NOT. [USER] took none of the four
 round-17 options as written: Pop! in the starter was declined ("I still would
@@ -5728,3 +5732,30 @@ with Sparks piling up unspent. Built in both engines. The pool stays **78
 Pins: `tier0/tests/test_klee_final_pass.py`,
 `KleeTests/Prototype/KleeFinalPassTests.cs`. Art: placeholder. Untested in
 game until a deploy.
+
+## The co-op run notes (2026-10-02)
+
+[USER], after a co-op run with a friend:
+
+- "Let's remove Innate from Klee's starting Jumpty Dumpty - I think that's
+  why seats keep getting chip damage hit on round one". **`proto_ko_jumpy_dumpty`**
+  drops `innate: true`, on both faces. Nothing else on the row moves. This
+  undoes R261 (above). Pins: `tier0/tests/test_klee_overhaul.py`,
+  `KleeTests/Prototype/KleeOverhaulRoundTwentyTests.cs`.
+- "Barbara: Wellspring Hymn needs Exhaust". **`proto_vk_barbara_wellspring_hymn`**
+  gains `exhaust: true`. Its upgrade (Block +3) is unchanged.
+- "can we make this a strength debuff instead of the weird wording on the
+  hit?" **`proto_mc_amber_explosive_puppet`** now reads "Enemy loses 3
+  Strength this turn. The next time an enemy attacks you, deal 8 Pyro damage
+  to ALL enemies." It targets an enemy. The loss is Cover Your Ears!'s
+  `lose_strength` with `this_turn: true`, on the chosen enemy: in C# the
+  card's own `ProtoMcAmberExplosivePuppetPower` (a `TemporaryStrengthPower`,
+  `Powers/Prototype/KleeFinalPass.cs`), in the sim `temp_strength_down`.
+  The codegen's `lose_strength` now takes `target: enemy` (it is in
+  `AIMING_OPS`). Baron Bunny keeps only its volley; its "take 3 less" and the
+  constant `MC_BARON_BUNNY_REDUCTION` / `BaronBunnyReduction` are gone. The
+  upgrade is unchanged: it never moved the reduction or the damage, it adds
+  "Draw 1 card" (the Prototype default rule). The power borrows the Bomb's
+  Vulnerable badge, as Cover Your Ears! does.
+
+Untested in game until a deploy.

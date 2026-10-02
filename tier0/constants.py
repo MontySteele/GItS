@@ -509,7 +509,6 @@ MC_LIGHTNING_ROSE_VULN = 1      # Lisa: the Vulnerable that rides it
 MC_SHOWER_DMG = 9               # Dahlia: the Shower's answer to one attack
 MC_BINARY_WHITE_REACTION_MULT = 1.50  # Durin, White: reactions on enemies
 MC_LIGHTNING_FANG_BONUS = 3     # Razor: damage his Attacks gain, 2 turns
-MC_BARON_BUNNY_REDUCTION = 3    # Amber: damage the decoy eats
 MC_BARON_BUNNY_DMG = 8          # Amber: the Pyro the decoy answers with
 MC_LIGHTFALL_BASE = 8           # Eula: the blade's own damage
 MC_LIGHTFALL_PER_ATTACK = 5     # Eula: per Attack the blade counted

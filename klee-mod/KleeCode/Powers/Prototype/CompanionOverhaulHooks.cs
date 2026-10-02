@@ -1130,17 +1130,11 @@ internal sealed class ShowerVar : DynamicVar
 }
 
 /// <summary>
-/// Amber, Explosive Puppet: "Place Baron Bunny: the next time an enemy attacks
-/// you, take 3 less and deal 8 Pyro damage to all enemies."
-///
-/// THE TWO HALVES SIT ON DIFFERENT HOOKS AND THAT IS FORCED. "Take 3 less" has
-/// to change the damage number, and the only hook that can is
-/// <c>ModifyDamageAdditive</c>, which the engine calls SPECULATIVELY for the
-/// intent preview and which therefore may not mutate anything. So the reduction
-/// is a pure read of a standing decoy and the CONSUMPTION plus the volley
-/// happen in <see cref="CompanionOverhaulIncomingHit"/>, one phase later, on
-/// the number this modifier already reduced. The sim, which previews no
-/// incoming damage, does both in one place and says so.
+/// Amber, Explosive Puppet: "The next time an enemy attacks you, deal 8 Pyro
+/// damage to ALL enemies." The consumption and the volley happen in
+/// <see cref="CompanionOverhaulIncomingHit"/>. Its old "take 3 less" is gone
+/// (the co-op run, 2026-10-02): the card's this-turn Strength loss,
+/// <see cref="ProtoMcAmberExplosivePuppetPower"/>, does that job now.
 ///
 /// Amount is the number of decoys; one hit spends one.
 /// </summary>
@@ -1181,13 +1175,11 @@ public sealed class BaronBunnyPower
         // carries the CONSTANT the var is seeded from, and the smart row
         // carries the live number `EB-463` banks at play.
         ("description",
-            "The next time an enemy attacks you, take "
-          + $"[blue]{CompanionOverhaulLaw.BaronBunnyReduction}[/blue] less damage and deal "
+            "The next time an enemy attacks you, deal "
           + $"[blue]{CompanionOverhaulLaw.BaronBunnyDamage}[/blue] [gold]Pyro[/gold] "
           + "damage to ALL enemies."),
         ("smartDescription",
-            "The next time an enemy attacks you, take "
-          + $"[blue]{CompanionOverhaulLaw.BaronBunnyReduction}[/blue] less damage and deal "
+            "The next time an enemy attacks you, deal "
           + "[blue]{Damage}[/blue] [gold]Pyro[/gold] "
           + "damage to ALL enemies."),
     };
@@ -1195,18 +1187,6 @@ public sealed class BaronBunnyPower
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource, CardPlay? cardPlay)
-    {
-        // PURE. One decoy reduces one hit; the reduction floors at the hit's
-        // own size rather than healing.
-        if (target != Owner || amount <= 0m) return 0m;
-        if (dealer == null || dealer.Player != null) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-        return -System.Math.Min(amount, CompanionOverhaulLaw.BaronBunnyReduction);
-    }
 
     internal async Task Explode(PlayerChoiceContext choiceContext)
     {
@@ -1301,7 +1281,7 @@ public sealed class LightfallSwordPower : PowerModel, ILocalizationProvider
 /// drives all three, in the sim's sequence:
 ///
 ///     SacramentalShowerPower   (9 Hydro at the attacker, before its hit)
-///     BaronBunnyPower          (the volley; its -3 is already in `amount`)
+///     BaronBunnyPower          (the volley)
 ///     IcyPawsPower             (Cryo at the attacker, off the Block absorbed)
 ///
 /// THE SHOWER IS FIRST, in sheet order, and the paws are LAST because they read

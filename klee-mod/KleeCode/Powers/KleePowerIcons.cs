@@ -382,6 +382,9 @@ internal static class KleePowerIcons
         // Shrapnel's enemy debuff already wears. Its own art stays owed.
         ProtoKoCoverYourEarsPower =>
             KleePck.Path("klee/powers/detonation_vuln.png"),
+        // Amber, Explosive Puppet's this-turn loss: the same borrowed badge.
+        ProtoMcAmberExplosivePuppetPower =>
+            KleePck.Path("klee/powers/detonation_vuln.png"),
         TheCrowdRoarsPower =>
             KleePck.Path("furina/powers/rising_ovation.png"),
         // VARKA (the Oath rework): his Oath badge wears the Vision of its
