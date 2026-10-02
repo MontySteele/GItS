@@ -87,8 +87,9 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Desk settled (strong), Up in Smoke! fair, Kitchen Alchemy dead (played 2
   times in about 26 hands). Klee has won 0 of the 9 seat runs since the
   status package; she loses on Block at the boss turn, and Sparks pile up
-  unspent. Next: a short paper for the final pass (Kitchen Alchemy's slot,
-  her HP, a defensive Spark sink), then Balance.
+  unspent. Next: the final-pass paper
+  (`review/active/klee-final-pass-2026-10-02.md`, picks open: HP, Kitchen
+  Alchemy's slot, a Spark sink), one seat round, then Balance.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start
