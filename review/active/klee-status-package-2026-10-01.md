@@ -1,5 +1,10 @@
 # Klee status package and dedupe (2026-10-01)
 
+**Ruled 2026-10-01.** [USER]: "1) I think a) is fine - we can keep tho the
+game's conventions 2) and 3) agreed on your defaults." So: Dazed for the fair
+loaders and Confiscated for the busted ones (1a); the eight new cards and
+Albedo's card as written (2a); the eight cuts (3a).
+
 [USER]'s idea: "an Ironclad or Regent-style engine where you play cards with
 excellent cost-to-effect ratios that load your deck with status duds." Also
 ruled into this paper: Albedo's Klee card gets an alchemy hook (lore pass,
