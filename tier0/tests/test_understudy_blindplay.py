@@ -4011,7 +4011,8 @@ def test_the_panel_says_where_a_plan_lands_in_two_sentences():
     Minions alone, and `Aimed` walks every living body for `Aim.AllEnemies`.
     """
     page = blindplay.render(blindplay.observation(plans_combat_state(TWO_PLANS)))
-    assert ("- A Plan with one target hits the front enemy and never a Minion "
+    assert ("- A Plan with one target (damage or a debuff like Weak) lands "
+            "on the front enemy and never a Minion "
             "-- unless every enemy is a Minion, when it takes the front one "
             "anyway. A Plan whose card says ALL hits every living enemy, "
             "Minions included.") in page
@@ -4035,7 +4036,7 @@ def test_a_board_with_no_jellyfish_is_told_no_aim_rule():
     the pet's own line and nowhere else -- a Klee at this table must not be
     read a rule about where her Plans land."""
     page = blindplay.render(blindplay.observation(plans_combat_state(None)))
-    assert "hits the front enemy and never a Minion" not in page
+    assert "lands on the front enemy and never a Minion" not in page
 
 
 def test_a_turn_with_no_carry_out_prints_no_carry_out_block():
@@ -12157,6 +12158,15 @@ def test_the_reward_page_says_where_the_card_offers_skip_lives():
     page = blindplay.observe(rewards_state())
     assert "is a card OFFER" in page
     assert "the skip -- *You may skip this* -- is on THAT screen" in page
+
+
+def test_the_reward_page_says_a_skipped_offer_stays_on_the_list():
+    """2026-10-01 seat round: after `skip` the card row was still on the
+    reward screen and read as a skip that failed. The game keeps it; the page
+    says so beside the row."""
+    page = blindplay.observe(rewards_state())
+    assert ("*If you already skipped this card offer, it stays on this "
+            "list") in page
 
 
 def test_a_reward_screen_with_no_card_offer_reads_as_it_always_did():

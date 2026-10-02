@@ -376,6 +376,15 @@ SKIPPED_CARD_REWARD = (
     "room: it presses the reward screen's alternative button and hands back "
     "the screen the reward came from, and `proceed` is the verb that leaves")
 
+#: 2026-10-01 (seat round): after `skip` the card row is still on the reward
+#: screen, which read as a skip that had not worked. The game's skip closes
+#: only the card screen and leaves the offer on the rewards list (it can be
+#: opened again); no card is added until one is chosen.
+CARD_OFFER_AFTER_SKIP_NOTE = (
+    "*If you already skipped this card offer, it stays on this list: the "
+    "game keeps a skipped offer here until you leave, and no card was added. "
+    "`proceed` leaves.*")
+
 # 2026-09-29 (Varka Oath round, lane 2 act 1). A CHEST'S RELIC IS TAKEN, NOT
 # GIVEN. The seat read Kusarigama in an open chest, typed `proceed`, and the
 # run save shows no relic for that floor: the game's Proceed leaves the relic
@@ -1036,7 +1045,11 @@ ENEMY_REVIVED_LINE = (
 # counts, her Weak and Strength do not -- is the keyword's and stays there.
 # This note is about WHERE a Plan lands, and a panel that restated the whole
 # keyword would be the wall the seat was already reading past.
-PLAN_AIM_NOTE = ("- A Plan with one target hits the front enemy and never a "
+#: 2026-10-01 (seat round, lane 1): "Brine Sting Weak hit the front enemy
+#: only and the text did not say." The rule covers a debuff as well as a hit
+#: (`KokomiPlan.FrontEnemy` aims both), so the note says "lands on".
+PLAN_AIM_NOTE = ("- A Plan with one target (damage or a debuff like Weak) "
+                 "lands on the front enemy and never a "
                  "Minion -- unless every enemy is a Minion, when it takes the "
                  "front one anyway. A Plan whose card says ALL hits every "
                  "living enemy, Minions included.")

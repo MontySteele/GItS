@@ -241,6 +241,29 @@ def test_the_page_prints_what_the_acts_deal_and_their_total():
     ]
 
 
+def test_a_bow_a_hit_earns_prints_as_an_act_on_the_enemy_turn():
+    """2026-10-01 seat round: Crabaletta's Bow on the enemy's turn dealt 5
+    and the page's acts left it out. The mod now sends it, marked."""
+    from understudy.blindplay_render import _render_stage
+    acts = [{"member": "crabaletta", "name": "Mademoiselle Crabaletta",
+             "amount": 5, "element": "", "target": "random", "bow": False},
+            {"member": "crabaletta", "name": "Mademoiselle Crabaletta",
+             "amount": 5, "element": "", "target": "random", "bow": True,
+             "on_hit": True}]
+    lines = _render_stage(
+        _stage(forecast=_forecast(acts=acts, act_total=10,
+                                  act_total_target="Shrinker Beetle"),
+               seats=_SEATS),
+        {"block": 0, "hp": 50, "max_hp": 78})
+    at = lines.index("- What the acts will deal at the end of your turn:")
+    assert lines[at + 1:at + 4] == [
+        "  - **Crabaletta**: 5 to a random enemy",
+        "  - **Crabaletta's Bow**: 5 to a random enemy (on the enemy's turn, "
+        "when a hit empties it)",
+        "  - In all: 10 to Shrinker Beetle",
+    ]
+
+
 def test_an_act_prints_its_hit_and_the_hp_the_body_had():
     """Lane 2: "Wriothesley acted: 1 Cryo to Wriggler" was his 14 into a body
     with 1 HP left."""

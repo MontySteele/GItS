@@ -2167,6 +2167,8 @@ public sealed class FurinaStageLedger
                     ["element"] = act.Element,
                     ["target"] = act.Target,
                     ["bow"] = act.Bow,
+                    // 2026-10-01: a Bow a posted hit earns.
+                    ["on_hit"] = act.OnHit,
                 })
                 .ToList(),
             ["act_total"] = forecast.ActTotal,
