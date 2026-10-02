@@ -55,41 +55,14 @@ internal static class ArmPools
             TypesFrom(Method("KleeMod.Powers.KokomiOverhaulRoster", "Slice"))
                 .Concat(TypesFrom(Getter("KleeMod.RosterAncientCards", "Kokomi")))),
 
-        // The Stage is a SUBSTITUTION on top of the whole shipped sheet, not a
-        // replacement, so its pool is the shipped roster with fourteen rows
-        // lifted out and fourteen `proto_fs_` rows put in their place -- and
-        // then `DropRetiredRows`, which is the arm's own TEXT filter and drops
-        // any remaining shipped row that still prints a word the brief retired.
-        // That last step is run for real here: it is a pure predicate over a
-        // card's printed text and needs no registration.
-        "furina-stage" => FurinaStageRows(),
+        // The Stage's pool is a LIST since legacy cleanup stage 4, as the
+        // other two arms' are.
+        "furina-stage" => Instantiate(
+            TypesFrom(Method("KleeMod.Powers.FurinaStageRoster", "Pool"))
+                .Concat(TypesFrom(Getter("KleeMod.RosterAncientCards", "Furina")))),
 
         _ => throw new InvalidOperationException($"no such arm: {arm}"),
     };
-
-    private static IReadOnlyList<CardModel> FurinaStageRows()
-    {
-        var swap = Method("KleeMod.Powers.FurinaStageRoster", "SwapOfferedRows");
-        var dropped = TestedTypes(swap).ToHashSet();
-        var added = TypesFrom(swap);
-
-        var shipped = TypesFrom(
-                Getter("KleeMod.Cards.Furina.Generated.FurinaCardRoster", "All"))
-            .Concat(TypesFrom(Getter("KleeMod.RosterAncientCards", "Furina")))
-            .Where(t => !dropped.Contains(t));
-
-        var rows = Instantiate(shipped.Concat(added));
-
-        // The arm's own filter, run rather than reimplemented. It is public
-        // for exactly this reason and `FurinaStageRoundTwoTests` already calls
-        // it headlessly.
-        var drop = Mod
-            .GetType("KleeMod.Powers.FurinaStageRoster", throwOnError: true)!
-            .GetMethod("DropRetiredRows", HeadlessGame.All)!;
-
-        return ((IEnumerable<CardModel>)drop.Invoke(null, new object?[] { rows })!)
-            .ToList();
-    }
 
     // ---- Reading the roster ----------------------------------------------
 
@@ -146,56 +119,18 @@ internal static class ArmPools
         return found;
     }
 
-    /// <summary>
-    /// Every type named by an `isinst` in the body -- which is how a
-    /// `card is not FurinaGen.TakeYourBow` chain compiles, and therefore the
-    /// only way to read the Stage's fourteen lifted rows off the seam that
-    /// lifts them.
-    /// </summary>
-    private static List<Type> TestedTypes(MethodBase method)
-    {
-        var found = new List<Type>();
-        var il = method.GetMethodBody()?.GetILAsByteArray();
-        if (il == null) return found;
+    /// <summary>The cards one roster method names, built headlessly, in
+    /// order and with duplicates kept -- what <c>PoolCountTests</c> counts.</summary>
+    internal static IReadOnlyList<CardModel> Named(string type, string method) =>
+        TypesFrom(Method(type, method))
+            .Select(t => (CardModel)Activator.CreateInstance(t)!)
+            .ToList();
 
-        foreach (var body in Lambdas(method, method.Name).Prepend(method))
-        {
-            var bytes = body.GetMethodBody()?.GetILAsByteArray();
-            if (bytes == null) continue;
-            for (var i = 0; i < bytes.Length - 4; i++)
-            {
-                if (bytes[i] != 0x75) continue; // isinst
-                try
-                {
-                    var t = body.Module.ResolveType(BitConverter.ToInt32(bytes, i + 1));
-                    if (typeof(CardModel).IsAssignableFrom(t)) found.Add(t);
-                }
-                catch
-                {
-                    // Not a type token. Expected while byte-scanning.
-                }
-            }
-        }
-
-        return found;
-    }
-
-    /// <summary>
-    /// The compiler moves a `.Where(card =&gt; ...)` body out of the method
-    /// entirely, onto a `&lt;&gt;c` display class nested in the declaring type.
-    /// `Harness/Il.cs` walks these for the same reason: a pin that stops seeing
-    /// a call the moment it is wrapped in a lambda passes for the wrong reason.
-    /// </summary>
-    private static IEnumerable<MethodBase> Lambdas(MethodBase method, string owner) =>
-        method.DeclaringType?
-            .GetNestedTypes(HeadlessGame.All)
-            .Where(t => t.Name.StartsWith("<>c", StringComparison.Ordinal))
-            .SelectMany(t => t.GetMethods(HeadlessGame.All))
-            // `<SwapOfferedRows>b__7_0` -- Roslyn spells a lambda with the
-            // method it came from, so a sibling method's lambdas stay out.
-            .Where(m => m.Name.StartsWith($"<{owner}>", StringComparison.Ordinal))
-            .Cast<MethodBase>()
-        ?? Enumerable.Empty<MethodBase>();
+    /// <summary>The same for a property getter (<c>RosterAncientCards</c>).</summary>
+    internal static IReadOnlyList<CardModel> NamedByGetter(string type, string property) =>
+        TypesFrom(Getter(type, property))
+            .Select(t => (CardModel)Activator.CreateInstance(t)!)
+            .ToList();
 
     private static IReadOnlyList<CardModel> Instantiate(IEnumerable<Type> types) =>
         types.Distinct()

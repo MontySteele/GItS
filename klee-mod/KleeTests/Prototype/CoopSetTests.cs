@@ -157,7 +157,7 @@ public class CoopSetTests
         Assert.Contains("KokomiOverhaulRoster.MultiplayerSlice",
             Il.Calls(Il.Method("KokomiOverhaulRoster", "OfferablePool")));
         Assert.Contains("FurinaStageRoster.MultiplayerRows",
-            Il.Calls(Il.Method("FurinaStageRoster", "SwapOfferedRows")));
+            Il.Calls(Il.Method("FurinaStageRoster", "OfferablePool")));
         Assert.DoesNotContain(
             Il.CallSequence(Il.Method("KleeOverhaulRoster", "Slice")),
             c => c.Contains("PassTheMatch") || c.Contains("HideHere")

@@ -204,7 +204,7 @@ public class FurinaRulesPassTests
     public void The_twelve_are_offered_in_place_of_the_old_rows()
     {
         var offer = Il.CallSequence(Il.Method("FurinaStageRoster",
-                                              "SwapOfferedRows")).ToList();
+                                              "Pool")).ToList();
         foreach (var row in new[]
                  {
                      "ProtoFsOpeningNumber", "ProtoFsCommandingGaze",
@@ -227,7 +227,9 @@ public class FurinaRulesPassTests
                      "QuickChange", "WitnessStand",
                  })
         {
-            Assert.Contains($"card is not FurinaGen.{old}", roster);
+            // Legacy cleanup stage 4: the pool is a list, not a swap over the
+            // shipped sheet, so no shipped row is named in it at all.
+            Assert.DoesNotContain($"FurinaGen.{old}", roster);
         }
     }
 

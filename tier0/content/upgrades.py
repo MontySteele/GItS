@@ -564,6 +564,7 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     if C.COMPANION_OVERHAUL:
         reachable |= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
         reachable |= set(C.INAZUMA_OVERHAUL_POOL_IDS)
+        reachable |= set(C.FONTAINE_OVERHAUL_POOL_IDS)
         # THE PERSONALS ride the same replacement roster -- Gorou's Crystal
         # Collapse and Klee's four coven rows join it beside the two nations'
         # Universals (`loader.companion_roster_replacement`) -- so a draft can

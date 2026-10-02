@@ -768,12 +768,39 @@ INAZUMA_OVERHAUL_PERSONAL_IDS: tuple[str, ...] = (
 # The nation this second replacement owns.
 INAZUMA_OVERHAUL_NATION = "inazuma"
 
+# FONTAINE'S SIXTEEN, PORTED AS THEY ARE (legacy cleanup pick 4, 2026-10-01).
+# Fontaine has no workshop; its shipped rows moved to the prototype surface
+# unchanged (`proto_mf_` rows, bodies and upgrades as shipped), so the
+# companion pool is prototype rows only and the shipped sheet can go. In the
+# sheet's order. The three Neuvillette guest stars are ported too but are not
+# companions: they are Furina's generation targets and in no offer list.
+FONTAINE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
+    "proto_mf_chevreuse_interdiction_fire",
+    "proto_mf_chevreuse_vanguards_valor",
+    "proto_mf_chevreuse_bursting_grenades",
+    "proto_mf_lynette_enigmatic_feint",
+    "proto_mf_lynette_box_trick",
+    "proto_mf_lynette_astonishing_shift",
+    "proto_mf_charlotte_freezing_point",
+    "proto_mf_charlotte_enduring_frosthelm",
+    "proto_mf_charlotte_snappy_silhouette",
+    "proto_mf_freminet_pers_deploy",
+    "proto_mf_freminet_pressurized_floe",
+    "proto_mf_freminet_shattering_pressure",
+    "proto_mf_navia_cannon_fire_support",
+    "proto_mf_clorinde_impale_the_night",
+    "proto_mf_neuvillette_ancient_sea_authority",
+    "proto_mf_arlecchino_masque_red_death",
+)
+
+FONTAINE_OVERHAUL_NATION = "fontaine"
+
 # THE NATIONS THE ARM REPLACES, and the one list `companion_roster_replacement`
-# filters the kept half against. Fontaine is deliberately absent: its workshop
-# does not exist yet (the Mondstadt document's sec.6 and the Inazuma
-# document's sec.6 both say so), so its shipped rows come through untouched.
+# filters the kept half against. All three since Fontaine's port (legacy
+# cleanup pick 4): no shipped companion row comes through.
 COMPANION_OVERHAUL_NATIONS: tuple[str, ...] = (
-    COMPANION_OVERHAUL_NATION, INAZUMA_OVERHAUL_NATION)
+    COMPANION_OVERHAUL_NATION, INAZUMA_OVERHAUL_NATION,
+    FONTAINE_OVERHAUL_NATION)
 
 # =============================================================================
 # KLEE'S COVEN PERSONALS -- SAME FLAG AGAIN, THIRD LIST (QUARANTINED, R236).

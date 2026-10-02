@@ -105,12 +105,14 @@ def test_guest_star_never_in_shared_rewards():
     # a guest had leaked in the moment real Rares landed. Now that four exist
     # (R64), assert the separation directly: the roster is exactly the shared
     # Rares, and no guest id appears in it.
+    # Since legacy cleanup stage 4 (pick 4) the roster is the PORTED rows,
+    # `proto_mf_<shipped id>`, the shipped bodies as they are.
     roster = rewards.five_star_roster("fontaine")
     assert {c.id for c in roster} == {
-        "navia_cannon_fire_support",
-        "clorinde_impale_the_night",
-        "neuvillette_ancient_sea_authority",
-        "arlecchino_masque_red_death",
+        "proto_mf_navia_cannon_fire_support",
+        "proto_mf_clorinde_impale_the_night",
+        "proto_mf_neuvillette_ancient_sea_authority",
+        "proto_mf_arlecchino_masque_red_death",
     }
     assert all(not c.guest_star and c.personal_pool is None for c in roster)
     # D2 in the flesh: Neuvillette is in the banner roster AND has cameos, and

@@ -17,18 +17,17 @@ namespace KleeMod;
 ///    <c>build/deploy.ps1</c> and <c>build/validate.ps1</c> never set the
 ///    property.
 ///
-/// 2. POOL. Under the flag, the rows go into each character's OFF-POOL list,
-///    which is the engine's own idiom and the only runtime-legal shape.
-///    <c>CardModel.Pool</c> walks <c>ModelDb.AllCardPools</c> and falls through
-///    to <c>MockCardPool</c> -- which throws InvalidOperationException("You
-///    monster!") in a shipped build -- so a card in NO pool crashes the moment
-///    it is drawn or previewed (see <c>KleeOffPoolCards</c> for the crash of
-///    record and <c>tools/lint_pool_membership.py</c> for the gate). Off-pool
-///    means IN <c>GenerateAllCards</c>, so Pool resolves and the card has a
-///    frame and an energy colour, and OUT of <c>GetUnlockedCards</c>, which is
-///    the SOLE path into reward rolls (<c>CardCreationOptions.GetPossibleCards</c>)
-///    and card transforms (<c>CardFactory</c>). Nothing else generates from a
-///    pool, so "not in a reward pool" is a property of the code, not a promise.
+/// 2. POOL. Since legacy cleanup stage 4 (2026-10-01) the rows ARE each
+///    character's pool: <c>GenerateAllCards</c> lists every row its owner
+///    holds, first, so <c>CardModel.Pool</c> resolves and the card wears its
+///    owner's frame and energy colour (a card in NO pool throws "You
+///    monster!" on draw; <c>tools/lint_pool_membership.py</c>). What may be
+///    OFFERED is each arm's roster (<c>KleeOverhaulRoster.OfferablePool</c>
+///    and its siblings), returned from <c>FilterThroughEpochs</c>, which feeds
+///    <c>GetUnlockedCards</c> -- the sole path into reward rolls and
+///    transforms. A token, a starter row or a mode face is a member and never
+///    offered. With an arm off (the <c>-p:ShippedKits=true</c> gate) its
+///    owner's rows are filtered out of the offer by <see cref="Ids"/>.
 ///
 /// 3. GRANT. The only door in is <c>gits/GitsGiveCard.cs</c> (EB-52) -- a
 ///    <c>give:</c> step in an <c>understudy/scenarios/*.yaml</c> file, naming
@@ -55,5 +54,20 @@ public static class PrototypeCards
 #else
         return System.Array.Empty<CardModel>();
 #endif
+    }
+
+    private static readonly Dictionary<string, HashSet<ModelId>> IdCache = new();
+
+    /// <summary>The ids of <see cref="For"/>, for an arm-off offer filter.
+    /// Empty in a build that compiles no surface.</summary>
+    public static HashSet<ModelId> Ids(string characterId)
+    {
+        if (!IdCache.TryGetValue(characterId, out var ids))
+        {
+            ids = new HashSet<ModelId>();
+            foreach (var card in For(characterId)) ids.Add(card.Id);
+            IdCache[characterId] = ids;
+        }
+        return ids;
     }
 }

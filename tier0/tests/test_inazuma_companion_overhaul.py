@@ -80,11 +80,12 @@ def _attack(amount=6, element="pyro"):
 # THE FLAG IS OFF, AND THAT IS THE ACCEPTANCE CONDITION
 # ---------------------------------------------------------------------------
 
-def test_the_flag_ships_on_and_owns_two_nations():
+def test_the_flag_ships_on_and_owns_every_nation():
     """The sim runs the current kits by default (legacy cleanup stage 3,
-    2026-10-01, pick 5), as every C# build does."""
+    2026-10-01, pick 5), as every C# build does; Fontaine joined at stage 4
+    (pick 4, its rows ported as they are)."""
     assert DEFAULTS["COMPANION_OVERHAUL"] is True
-    assert C.COMPANION_OVERHAUL_NATIONS == ("mondstadt", "inazuma")
+    assert C.COMPANION_OVERHAUL_NATIONS == ("mondstadt", "inazuma", "fontaine")
 
 
 def test_flag_off_every_shipped_inazuma_row_is_still_offerable():
