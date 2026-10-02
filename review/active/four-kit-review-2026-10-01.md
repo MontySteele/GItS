@@ -93,10 +93,12 @@ with eight Block cards it is still 18%. Every act-3 deck has a dead hand
 every few turns, and raising a Block card from 8 to 11 changes nothing on
 that turn.
 
-The base game does not solve this with Block cards either. Its flat rates
-are no better than ours: Shrug It Off is 8 and True Grit 7 for 1, Backflip
-5, Survivor 8, against Coral Bulwark's 8, Shell of Sanctuary's 9 and a
-starter Knight's 8. It solves it with **defence that is not in the hand**:
+The base game does not solve this with its ordinary Block cards either.
+At one Energy its rates are no better than ours: Shrug It Off is 8 and
+True Grit 7, Backflip 5, Survivor 8, against Coral Bulwark's 8, Shell of
+Sanctuary's 9 and a starter Knight's 8. (It does have big two-Energy Block
+cards that we lack; §2.7.) It solves it with **defence that is not in the
+hand**:
 Powers that pay every turn, Block that carries over, a multiplier on every
 Block card, and HP back between fights. From the extract:
 
@@ -221,6 +223,53 @@ Some, and it is not all "the seats' fault". Three things are mixed:
   the Field, What the Tokoyo Returns, Kelp Wall). The sim reads her tempo
   honestly; it cannot read her cards. `BACKLOG.md` already says so for the
   status batch.
+
+### 2.7 Read against the Opus defence audit (added the same day)
+
+[USER] shared the Opus session's defence audit after this paper was
+drafted; it is not in the repo at this commit. Its Ironclad and Silent
+counts check against the local extract (three and two cards of 10+ Block;
+Piercing Wail and Malaise for Silent's Strength loss). It agrees with §2.1
+that density is not the problem (Kokomi 32% and Varka 33% of the pool
+against the base game's 25%), and it shows two gaps this paper missed:
+
+- **No kit has an answer to one big hit.** Cards giving 10 or more Block
+  outright: 2 to 4 for each base character, and 0, 1, 0 and 1 for Klee,
+  Kokomi, Furina and Varka. Blood Wall is 16 at Common. My "rates are no
+  better than ours" held only at one Energy.
+- **No kit can lower an enemy's Strength.** The base five have 1, 2, 0, 1
+  and 4 sources; ours have none. All three act-3 deaths on 2026-10-01 were
+  to Test Subject's phase 2, which adds 10-damage hits (3, then 4, 5, 6).
+  Strength loss is the base game's answer to exactly that attack, since it
+  comes off every hit, where Weak takes a quarter and Block is spent by
+  the second hit.
+
+One reading ties the audit and §2.2 together. The audit's "total flat
+Block in the pool" row is 61 to 101 for the base five and 25 to 85 for
+ours, with Kokomi at 50 across 15 Block cards. Our Block is not missing;
+it is **conditional on the engine** (the Casket's count, Plans waiting,
+Oath, Fanfare, a Bomb to give up), and every one of those starts each
+fight at or near zero. Base-game Block mostly works on turn one.
+
+Where I read it differently from the audit:
+
+- **Kokomi, "no card change is indicated".** Agreed on cards, and §4 says
+  freeze the pool. But "draft and timing" undersells it: the probes put the
+  loss in tempo, and the opening Plan (pick 1) is a rule, not a card.
+- **Furina, "no action".** Right for now, since [USER]'s run on the rules
+  pass comes first. But her ten lasting defences are one mechanism counted
+  ten times, and the fade caps it (§2.3). She has the least flat Block, no
+  big-hit card and no Strength loss, and she died to the multi-hit. A
+  Strength-loss Spend on Commanding Gaze ("Spend 3: ALL enemies lose
+  Strength this turn instead") is the most direct answer in §5's shape,
+  and an Archon's stare is the right voice for it.
+- **Klee.** The audit is more worried than §3 is, and its point stands:
+  her gap is a whole kind of threat, not a rate, and "fine" was too quick.
+  I would still hold her. It is the weakness the brief chose ("she cannot
+  block on demand"), her big-hit answers cost a Bomb on purpose (Favonius
+  Escort, Sorry, Jean...), and she has the best results of the four. If
+  the status-package round shows another act-3 death to one big hit, HP
+  (62) is a cheaper lever than a Weak card that has no voice in her kit.
 
 ## 3. Klee
 
