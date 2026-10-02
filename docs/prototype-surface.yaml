@@ -1659,7 +1659,7 @@
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
    # Main session, 2026-09-29: 8/16 -> 6/12 (the sim read it dominant).
-   description: "Deal 6 damage to ALL enemies. [gold]Plan[/gold]: Deal 12 damage, doubled if no other [gold]Plan[/gold] is carried out at the start of your turn.",
+   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage, doubled if no other [gold]Plan[/gold] is carried out with it.",
    effects: [{op: damage, amount: 6, target: all_enemies}],
    plan: [{op: damage_if_alone, amount: 12, target: front_enemy}],
    # 9 to ALL / Plan 16.

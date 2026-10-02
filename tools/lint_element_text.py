@@ -50,13 +50,7 @@ HIT = re.compile(
 #: ask to be reworded. Each needs a shorter sentence from the design session.
 #: ROTS ON PURPOSE: an entry whose face has since named its element FAILS, so
 #: the set only shrinks.
-DEBT: dict[str, str] = {
-    "proto_kk_undertide_lance":
-        "naming Hydro on the hit alone puts the face at 126 of 120; the "
-        "shorter 'doubled if it is your only Plan' does not match the code, "
-        "which doubles when it is the only Plan in its own drain (a waiting "
-        "Dusk Plan does not count)",
-}
+DEBT: dict[str, str] = {}
 
 
 def owed_elements(card: dict, profile: gen.CharacterProfile,
