@@ -48,7 +48,7 @@ public sealed class ProtoKoTinderToss : CustomCardModel, IElementalCard, ISetOff
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tinder Toss"),
-        ("description", "[gold]Set off[/gold] ALL enemies. Deal {Damage:diff()} damage to ALL enemies."),
+        ("description", "[gold]Set off[/gold] ALL enemies. Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,

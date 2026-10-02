@@ -51,7 +51,7 @@ public sealed class ProtoVkShiftingGale : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shifting Gale"),
-        ("description", "Deal {Damage:diff()} damage. If your [gold]current element[/gold] changed this turn, deal it twice."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If your [gold]current element[/gold] changed this turn, deal it twice."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

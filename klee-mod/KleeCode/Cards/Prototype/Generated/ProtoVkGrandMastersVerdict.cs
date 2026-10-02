@@ -51,7 +51,7 @@ public sealed class ProtoVkGrandMastersVerdict : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Master's Verdict"),
-        ("description", "Deal {Damage:diff()} damage. Double your [gold]current element[/gold]'s [gold]Oath[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Double your [gold]current element[/gold]'s [gold]Oath[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

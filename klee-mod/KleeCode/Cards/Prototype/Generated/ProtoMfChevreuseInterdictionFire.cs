@@ -59,7 +59,7 @@ public sealed class ProtoMfChevreuseInterdictionFire : CustomCardModel, IElement
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chevreuse — Interdiction Fire"),
-        ("description", "Deal {CalculatedDamage:diff()} damage."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -115,7 +115,7 @@ def test_the_face_is_the_base_games_conditional(overhaul):
     rows = sheet["cards"] if isinstance(sheet, dict) else sheet
     row = next(r for r in rows if r["id"] == "proto_kk_undertow")
     face = row["description"]
-    assert face == ("Deal {PlainDamage:diff()} damage. If the enemy has a "
+    assert face == ("Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy has a "
                     "debuff, deal {DebuffDamage:diff()} instead.")
     assert "already including" not in face
 

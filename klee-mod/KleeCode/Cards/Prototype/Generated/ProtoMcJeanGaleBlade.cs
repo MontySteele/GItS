@@ -59,7 +59,7 @@ public sealed class ProtoMcJeanGaleBlade : CustomCardModel, IElementalCard, ICom
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Gale Blade"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. [gold]Swirl[/gold] the enemy."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage. [gold]Swirl[/gold] the enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

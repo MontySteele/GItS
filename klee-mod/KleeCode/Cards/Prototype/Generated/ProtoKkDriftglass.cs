@@ -51,7 +51,7 @@ public sealed class ProtoKkDriftglass : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Driftglass"),
-        ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

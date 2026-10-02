@@ -51,7 +51,7 @@ public sealed class ProtoVkRisingGale : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rising Gale"),
-        ("description", "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], draw 1 card."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

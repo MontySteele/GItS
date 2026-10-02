@@ -8962,20 +8962,27 @@ def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
     """
     smith = live("upgrade-fresh")
     smith = json.loads(json.dumps(smith.get("state", smith)))
+    # The capture predates the element-text ruling (2026-10-02): today's
+    # Ka-pow! names its Pyro, so the recorded face is brought up to it here
+    # rather than in the recording.
+    for row in smith["card_select"]["cards"]:
+        if row["id"] == "KLEEMOD-PROTO_KO_KAPOW":
+            row["description"] = row["description"].replace(
+                "Deal 7 damage.", "Deal 7 Pyro damage.")
     smith["card_select"]["cards"].append(
         {"id": "KLEEMOD-PROTO_KK_DEEP_CURRENT", "name": "Deep Current",
          "cost": "1", "type": "Attack",
-         "description": "Deal 7 damage to ALL enemies."})
+         "description": "Deal 7 Hydro damage to ALL enemies."})
     page = blindplay.observe(smith)
 
     # The card the seat guessed on, both faces, one under the other (7 and 9
     # since the Casket pass, 2026-09-28; it was 6 to 9 when the seat met it).
-    assert "    Deal 7 damage to ALL enemies." in page
-    assert "    Upgraded: Deal 9 damage to ALL enemies." in page
+    assert "    Deal 7 Hydro damage to ALL enemies." in page
+    assert "    Upgraded: Deal 9 Hydro damage to ALL enemies." in page
     # And the screen's own rows, including one whose printed face carries the
     # game's appended keyword sentence -- which is why the match is a search
     # over the face rather than the whole of it.
-    assert "    Upgraded: Set off. Deal 10 damage. Applies Pyro." in page
+    assert "    Upgraded: Set off. Deal 10 Pyro damage. Applies Pyro." in page
     assert "    Upgraded: Gain 11 Block." in page
 
 
@@ -9040,8 +9047,8 @@ def test_the_upgraded_face_moves_the_number_the_delta_names():
     follows the number it is about rather than being copied."""
     assert qa_packet.upgraded_face(
         "KLEEMOD-PROTO_KK_UNDERTOW",
-        "Deal 7 damage. If the enemy has a debuff, deal 10 instead.") == (
-        "Deal 10 damage. If the enemy has a debuff, deal 13 instead.")
+        "Deal 7 Hydro damage. If the enemy has a debuff, deal 10 instead.") == (
+        "Deal 10 Hydro damage. If the enemy has a debuff, deal 13 instead.")
     assert qa_packet.upgraded_face(
         "KLEEMOD-PROTO_MF_LYNETTE_BOX_TRICK", "Draw 2 cards.") == (
         "Draw 3 cards.")

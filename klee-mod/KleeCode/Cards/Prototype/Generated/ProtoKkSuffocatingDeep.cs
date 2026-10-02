@@ -51,7 +51,7 @@ public sealed class ProtoKkSuffocatingDeep : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Suffocating Deep"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. Double each enemy's [gold]Weak[/gold] and [gold]Vulnerable[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Double each enemy's [gold]Weak[/gold] and [gold]Vulnerable[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

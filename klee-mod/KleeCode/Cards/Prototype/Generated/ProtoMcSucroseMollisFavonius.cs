@@ -45,6 +45,9 @@ public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCa
 
     public string? Nation => "mondstadt";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesAnemo };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this);
 

@@ -178,6 +178,11 @@ REGISTRY: tuple[Lint, ...] = (
     # `docs/current/text-conventions.md` fixes. Carries a curated exception
     # list with a reason per entry and rot semantics, so it can only shrink.
     _ci("text-conventions",     "tools/lint_text_conventions.py"),
+    # 2026-10-02, the co-op run: "Unify the language across all cards - say
+    # if it does an element and also apply the symbol to the card". Every
+    # prototype face whose hit, aura or Plan applies an element names it in
+    # words; the gem is ElementBadge's. 84 faces had drifted silent.
+    _ci("element-text",         "tools/lint_element_text.py"),
     _ci("pool-membership",      "tools/lint_pool_membership.py"),
     # EB-790, beside pool-membership because it polices the other end of the
     # same life: that one asks whether every live card is in a pool, this asks

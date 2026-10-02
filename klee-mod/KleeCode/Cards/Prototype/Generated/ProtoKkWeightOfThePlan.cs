@@ -51,7 +51,7 @@ public sealed class ProtoKkWeightOfThePlan : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Weight of the Plan"),
-        ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Energy[/gold] paid for the [gold]Plans[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Energy[/gold] paid for the [gold]Plans[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

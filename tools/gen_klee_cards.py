@@ -1133,11 +1133,18 @@ def element_tag_elements_for(card: dict, profile: "CharacterProfile",
     face say it is" now has six.
     """
     elements = aura_elements_for(card, profile, elemental)
-    if not elemental:
-        return elements
-    own = card["element"] if is_companion(card) else profile.native_element
-    if own in TRIGGER_KEYWORD_BY_ELEMENT and own not in elements:
-        elements.insert(0, own)
+    if elemental:
+        own = (card["element"] if is_companion(card)
+               else profile.native_element)
+        if own in TRIGGER_KEYWORD_BY_ELEMENT and own not in elements:
+            elements.insert(0, own)
+    # A SWIRL IS ANEMO (the co-op run, 2026-10-02: "say if it does an element
+    # and also apply the symbol to the card"). A Swirl-only face printed the
+    # verb and wore nothing; it now carries Anemo's keyword, so it hovers the
+    # tip and wears the Anemo gem. Its text keeps the verb and adds no word.
+    if "anemo" not in elements and any(
+            effect.get("op") == "swirl" for effect in _effects_everywhere(card)):
+        elements.append("anemo")
     return elements
 
 
@@ -12968,6 +12975,20 @@ def _authored_face_with_tokens(card: dict) -> str:
     return text
 
 
+def _hit_element_word(card: dict, eff: dict) -> str:
+    """The golded element word a generated hit prints before "damage", or "".
+
+    Only a COMPANION row reaches the rendered path with an elemental hit (a
+    character row states its own face in `description:`), and a companion's
+    hit carries its element exactly where the effect says `applies_element`
+    (the cadence exemption, tier0 `_element_for`).
+    """
+    element = card.get("element")
+    if is_companion(card) and eff.get("applies_element") and element:
+        return f"[gold]{element.capitalize()}[/gold] "
+    return ""
+
+
 def build_description(card: dict, *,
                       include_burst_rider: bool = True) -> str:
     """
@@ -13168,20 +13189,27 @@ def build_description(card: dict, *,
                 tok = None                    # literal, see _sly_view
             if tok == "Damage" and eff is not damage_var_effect(card):
                 tok = None                    # see damage_var_effect
+            # THE HIT NAMES ITS ELEMENT (the co-op run, 2026-10-02: "Unify
+            # the language across all cards - say if it does an element and
+            # also apply the symbol to the card"). A companion hit that
+            # applies its element says which, "Deal 6 [gold]Cryo[/gold]
+            # damage.", and the gem beside the type plaque shows it too.
+            # `lint_element_text.py` holds every face to it.
+            dmg = f"{_hit_element_word(card, eff)}damage"
             if tok is None:
                 amount_txt = str(int(eff["amount"]))
                 where = {"enemy": "",
                          "all_enemies": " to ALL enemies"}.get(
                              target, " to a random enemy")
-                parts.append(f"Deal {amount_txt} damage{where}{suffix}.")
+                parts.append(f"Deal {amount_txt} {dmg}{where}{suffix}.")
                 continue
             if target == "enemy":
-                parts.append(f"Deal {{{tok}:diff()}} damage{suffix}.")
+                parts.append(f"Deal {{{tok}:diff()}} {dmg}{suffix}.")
             elif target == "all_enemies":
-                parts.append(f"Deal {{{tok}:diff()}} damage to ALL enemies{suffix}.")
+                parts.append(f"Deal {{{tok}:diff()}} {dmg} to ALL enemies{suffix}.")
             else:
                 plural = "random enemies" if times > 1 else "a random enemy"
-                parts.append(f"Deal {{{tok}:diff()}} damage to {plural}{suffix}.")
+                parts.append(f"Deal {{{tok}:diff()}} {dmg} to {plural}{suffix}.")
             # Track L-C: a rider whose arithmetic now lands inside the printed
             # number keeps only a short marker here; the rate (and what it is
             # worth right now) moves to the hover tip. A rider that is NOT

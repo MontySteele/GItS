@@ -213,17 +213,10 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     # text pass took the parenthesis out (rule 14) and the floor now reads
     # "never fewer than 1", which puts four words between `cost` and the
     # numeral and leaves no affinity to excuse.
-    # 2026-09-02, the text-conventions pass. Both joins are the bare word the
-    # base game uses for a card type: the page un-golded `Attack` on the
-    # prototype faces (card types are plain words, `RAGE_POWER`), and the
-    # lint's affinity now sees it.
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoMiSaraTenguStormcall.cs",
-     "CompanionOverhaulLaw.LightfallPerAttack", "5"):
-        "Tengu Stormcall reads 'Next turn, your Attacks deal 5 additional "
-        "damage.' The 5 is Stormcall's own bonus (`StormcallBonus`, which the "
-        "POWER face interpolates); the row prints the sheet's literal, as "
-        "every authored face does, and `attack` is the only word joining it "
-        "to Eula's per-Attack 5.",
+    # DROPPED 2026-10-02 (the element-text ruling), reported stale by the
+    # lint. Tengu Stormcall's face now reads "Deal 5 [gold]Electro[/gold]
+    # damage. Next turn, your Attacks deal 5 additional damage.", and the
+    # Eula per-Attack 5 coincidence no longer arises.
     # POOL COMPLETION (2026-10-01).
     # DROPPED 2026-09-02, and by the excuse's own last sentence. It said "the
     # card face is the row's `description:`; move the number there" -- and the

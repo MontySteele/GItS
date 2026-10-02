@@ -59,7 +59,7 @@ public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaeya — Cold-Blooded Strike"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] triggers even if you played a [gold]Set off[/gold] card."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Next turn, [gold]Grounded[/gold] triggers even if you played a [gold]Set off[/gold] card."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };

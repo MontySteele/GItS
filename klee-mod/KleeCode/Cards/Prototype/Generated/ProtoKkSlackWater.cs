@@ -51,7 +51,7 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Slack Water"),
-        ("description", "Deal {Damage:diff()} damage. Apply 1 [gold]Weak[/gold].\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage. Apply 1 [gold]Weak[/gold].\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

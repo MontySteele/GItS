@@ -45,7 +45,7 @@ public sealed class ProtoKkNip : CustomCardModel, ICharacterCard, IPlannedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Nip"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

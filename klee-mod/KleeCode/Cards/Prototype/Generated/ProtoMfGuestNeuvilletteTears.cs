@@ -59,7 +59,7 @@ public sealed class ProtoMfGuestNeuvilletteTears : CustomCardModel, IElementalCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Neuvillette — O Tears, I Shall Repay"),
-        ("description", "Deal {CalculatedDamage:diff()} damage."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Hydro[/gold] damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

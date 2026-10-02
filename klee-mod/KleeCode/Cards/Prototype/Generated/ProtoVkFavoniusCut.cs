@@ -51,7 +51,7 @@ public sealed class ProtoVkFavoniusCut : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Favonius Cut"),
-        ("description", "Deal {Damage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

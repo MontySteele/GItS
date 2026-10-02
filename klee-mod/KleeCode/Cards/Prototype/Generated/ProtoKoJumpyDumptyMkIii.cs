@@ -48,7 +48,7 @@ public sealed class ProtoKoJumpyDumptyMkIii : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty Mk.III"),
-        ("description", "Deal {Damage:diff()} damage to a random enemy 3 times. Each hit places a [gold]Bomb[/gold] {BombSize:diff()} on that enemy."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to a random enemy 3 times. Each hit places a [gold]Bomb[/gold] {BombSize:diff()} on that enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

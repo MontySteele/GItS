@@ -134,9 +134,9 @@ public class ElementBadgeTests
         // would notice.
         var fields = AppliesFields();
 
-        // `EB-454` MADE IT SIX. Anemo and Geo leave no aura and still get no
-        // gem (`IconPathFor` answers null for both, and `AuraApplication` still
-        // answers `None`), but they carry the WORD now: a face that names no
+        // `EB-454` MADE IT SIX. Anemo and Geo leave no aura (`AuraApplication`
+        // still answers `None` for both; since 2026-10-02 each draws a gem of its own),
+        // and they carry the WORD: a face that names no
         // element reads as untyped, and the r13 seat read `Jean -- Gale Blade`
         // that way until a reaction preview named Anemo mid-fight. The claim
         // this test makes is about the POSITION, and it is unchanged.
@@ -167,7 +167,7 @@ public class ElementBadgeTests
     // --- the gem's art -----------------------------------------------------
 
     [Fact]
-    public void Every_element_that_leaves_an_aura_declares_a_gem_of_its_own()
+    public void Every_element_declares_a_gem_of_its_own()
     {
         // Three facts, each a way the repair could rot, on
         // `MeterCostBadgeTests.Every_meter_resolves_a_glyph_of_its_own`'s terms:
@@ -194,18 +194,53 @@ public class ElementBadgeTests
 
         // 2026-09-30 (Varka co-op playtest): Anemo wears its own icon too, so
         // a reader can tell which cards Stormward Stance's "your Anemo
-        // Attacks" means. Geo still declares none.
+        // Attacks" means. 2026-10-02 (the co-op run): "say if it does an
+        // element and also apply the symbol to the card" -- Geo as well, so
+        // all six draw a gem of their own.
         var drawn = gems.Where(kv => kv.Value != null).ToList();
-        Assert.Equal(5, drawn.Count);
-        Assert.Equal(5, drawn.Select(kv => kv.Value).Distinct().Count());
+        Assert.Equal(6, drawn.Count);
+        Assert.Equal(6, drawn.Select(kv => kv.Value).Distinct().Count());
         Assert.All(drawn, kv => Assert.StartsWith("klee/powers/aura_", kv.Value));
         Assert.Equal("klee/powers/aura_anemo.png", gems[Element.Anemo]);
-        Assert.Null(gems[Element.Geo]);
+        Assert.Equal("klee/powers/aura_geo.png", gems[Element.Geo]);
         Assert.Null(gems[Element.None]);
 
         // The AURA's own icon, by name: the badge a player will see on the
         // enemy is the picture on the card that puts it there.
         Assert.Equal("klee/powers/aura_pyro.png", gems[Element.Pyro]);
+    }
+
+    // --- 2026-10-02: Swirl wears Anemo, Geo wears Geo ----------------------
+
+    [Fact]
+    public void A_swirl_only_card_wears_the_anemo_gem()
+    {
+        // [USER], 2026-10-02, after a co-op run: "Unify the language across
+        // all cards - say if it does an element and also apply the symbol to
+        // the card". A Swirl-only face printed the verb and wore nothing;
+        // codegen now gives it Anemo's keyword, and the badge reads it.
+        Assert.Equal("AppliesAnemo",
+                     KeywordFieldOf(typeof(global::KleeMod.Cards.Prototype.Generated
+                         .ProtoMcSucroseAstable)));
+        Assert.Equal("AppliesAnemo",
+                     KeywordFieldOf(typeof(global::KleeMod.Cards.Prototype.Generated
+                         .ProtoMfLynetteEnigmaticFeint)));
+    }
+
+    [Fact]
+    public void A_geo_card_wears_the_geo_gem()
+    {
+        Assert.Equal("AppliesGeo",
+                     KeywordFieldOf(typeof(global::KleeMod.Cards.Prototype.Generated
+                         .ProtoMiGorouInuzaka)));
+
+        // The badge reads both trigger elements, Anemo first, after the four
+        // aura elements, through the one keyword switch.
+        var trigger = (Element[])Badge
+            .GetField("TriggerGemElements", All)!.GetValue(null)!;
+        Assert.Equal(new[] { Element.Anemo, Element.Geo }, trigger);
+        Assert.Contains(Il.Calls(Badge.GetMethod("ElementOf", All)!),
+                        c => c.EndsWith("ElementBadge.GemKeyword"));
     }
 
     // --- EB-222: the badge holds no texture across scenes ------------------

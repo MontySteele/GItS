@@ -51,7 +51,7 @@ public sealed class ProtoKkMassedVolley : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Massed Volley"),
-        ("description", "Deal {Damage:diff()} damage 3 times."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage 3 times."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -51,7 +51,7 @@ public sealed class ProtoVkNorthwindAvatar : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Northwind Avatar"),
-        ("description", "Deal {Damage:diff()} damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold], as your [gold]current element[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold], as your [gold]current element[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

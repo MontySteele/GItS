@@ -22,7 +22,7 @@
 - {id: proto_ko_kapow, name: "Ka-pow!", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: basic, retain: true,
-   description: "[gold]Set off[/gold]. Deal 4 damage.",
+   description: "[gold]Set off[/gold]. Deal 4 [gold]Pyro[/gold] damage.",
    effects: [{op: set_off, target: enemy, damage: 4}]}
 
 # Not Innate (the co-op run, 2026-10-02): an opening-hand Bomb drew the
@@ -61,7 +61,7 @@
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 12 damage, then damage equal to what your [gold]Bombs[/gold] dealt.",
+   description: "[gold]Set off[/gold]. Deal 12 [gold]Pyro[/gold] damage, then damage equal to what your [gold]Bombs[/gold] dealt.",
    upgrade: {damage: +4},
    effects: [{op: set_off, target: enemy, damage: 12},
              {op: damage_set_off_total, target: enemy}]}
@@ -107,7 +107,7 @@
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] ALL enemies. Deal 3 damage to ALL enemies.",
+   description: "[gold]Set off[/gold] ALL enemies. Deal 3 [gold]Pyro[/gold] damage to ALL enemies.",
    upgrade: {damage: +2},
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: all_enemies},
@@ -125,7 +125,7 @@
 - {id: proto_ko_bang_bang, name: "Boom-Boom Strike", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 8 damage. Place a [gold]Bomb[/gold] 4.",
+   description: "[gold]Set off[/gold]. Deal 8 [gold]Pyro[/gold] damage. Place a [gold]Bomb[/gold] 4.",
    effects: [{op: spend_spark, amount: 2},
              {op: set_off, target: enemy, damage: 8},
              {op: plant_bomb, target: enemy, size: 4}]}
@@ -153,7 +153,7 @@
 - {id: proto_ko_sizzle, name: "Sizzle", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "[gold]Set off[/gold]. Deal 6 damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage.",
+   description: "[gold]Set off[/gold]. Deal 6 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage.",
    effects: [{op: set_off, target: enemy, damage: 6},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: damage, amount: 6, target: enemy}]}]}
@@ -161,7 +161,7 @@
 - {id: proto_ko_perfect_timing, name: "Perfect Timing", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 8 damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, play this again.",
+   description: "[gold]Set off[/gold]. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, play this again.",
    effects: [{op: set_off, target: enemy, damage: 8},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: repeat_this, times: 1}]}]}
@@ -238,7 +238,7 @@
    cost: 1, type: skill,
    personal_pool: [klee],
    replaces: proto_mc_barbara_show_begin,
-   description: "Gain 5 [gold]Block[/gold]. Apply [gold]Hydro[/gold] twice. Whenever a [gold]Bomb[/gold] goes off this turn, gain 3 [gold]Block[/gold].",
+   description: "Gain 5 [gold]Block[/gold]. Apply [gold]Hydro[/gold] twice to an enemy. Whenever a [gold]Bomb[/gold] goes off this turn, gain 3 [gold]Block[/gold].",
    upgrade: {block: +2, power_amount: +1},
    effects: [{op: block, amount: 5},
              {op: apply_aura, element: hydro, target: enemy},
@@ -307,7 +307,7 @@
 - {id: proto_ko_fish_blasting, name: "Fish Blasting", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 8 damage to ALL enemies. Add a [gold]Confiscated[/gold] to your draw pile.",
+   description: "Deal 8 [gold]Pyro[/gold] damage to ALL enemies. Add a [gold]Confiscated[/gold] to your draw pile.",
    upgrade: {damage: +3},
    effects: [{op: damage, amount: 8, target: all_enemies},
              {op: add_card, card: confiscated, zone: draw, amount: 1}]}
@@ -317,14 +317,14 @@
 - {id: proto_ko_pocket_match, name: "Pocket Match", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common, retain: true,
-   description: "[gold]Set off[/gold] only your largest [gold]Bomb[/gold] on the enemy. Deal 3 damage.",
+   description: "[gold]Set off[/gold] only your largest [gold]Bomb[/gold] on the enemy. Deal 3 [gold]Pyro[/gold] damage.",
    upgrade: {damage: +2},
    effects: [{op: set_off, target: enemy, damage: 3, charge: largest}]}
 
 - {id: proto_ko_bombs_away, name: "Bombs Away!", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 3 damage to ALL enemies. Place a [gold]Bomb[/gold] 2 on ALL enemies.",
+   description: "Deal 3 [gold]Pyro[/gold] damage to ALL enemies. Place a [gold]Bomb[/gold] 2 on ALL enemies.",
    upgrade: {bomb_size: +2},
    effects: [{op: damage, amount: 3, target: all_enemies},
              {op: plant_bomb, target: all_enemies, size: 2}]}
@@ -335,7 +335,7 @@
 - {id: proto_ko_flash_point, name: "Flash Point", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 7 damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold] and draw 1 card.",
+   description: "[gold]Set off[/gold]. Deal 7 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold] and draw 1 card.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 7},
              {op: conditional, if: bomb_reacted_this_turn,
@@ -471,7 +471,7 @@
 - {id: proto_ko_jumpy_dumpty_mk_iii, name: "Jumpy Dumpty Mk.III", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 3 damage to a random enemy 3 times. Each hit places a [gold]Bomb[/gold] 2 on that enemy.",
+   description: "Deal 3 [gold]Pyro[/gold] damage to a random enemy 3 times. Each hit places a [gold]Bomb[/gold] 2 on that enemy.",
    upgrade: {damage: +1, bomb_size: +1},
    effects: [{op: damage, amount: 3, target: random_enemy, times: 3,
               plant_on_hit: 2}]}
@@ -483,14 +483,14 @@
 - {id: proto_ko_mine_all_mine, name: "Mine, All Mine!", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 8 damage to each enemy with a [gold]Mine[/gold].",
+   description: "Deal 8 [gold]Pyro[/gold] damage to each enemy with a [gold]Mine[/gold].",
    upgrade: {damage: +3},
    effects: [{op: damage, amount: 8, target: all_enemies, only_if: mined}]}
 
 - {id: proto_ko_team_effort, name: "Team Effort", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] the enemy, or ALL enemies if you played a [gold]Companion[/gold] card this turn. Deal 6 damage.",
+   description: "[gold]Set off[/gold] the enemy, or ALL enemies if you played a [gold]Companion[/gold] card this turn. Deal 6 [gold]Pyro[/gold] damage.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 6,
               wide_if: companion_played_this_turn}]}
@@ -621,7 +621,7 @@
 - {id: proto_ko_windblume_fireworks, name: "Windblume Fireworks", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold] ALL enemies, deal 10 damage to them, and place a [gold]Bomb[/gold] 6 on each.",
+   description: "[gold]Set off[/gold] ALL enemies, deal 10 [gold]Pyro[/gold] damage to them, and place a [gold]Bomb[/gold] 6 on each.",
    upgrade: {damage: +4, bomb_size: +2},
    effects: [{op: set_off, target: all_enemies},
              {op: damage, amount: 10, target: all_enemies},
@@ -630,7 +630,7 @@
 - {id: proto_ko_fireworks_finale, name: "Fireworks Finale", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: rare,
-   description: "Spend all your [gold]Sparks[/gold]. Deal 5 damage to ALL enemies for each [gold]Spark[/gold] spent.",
+   description: "Spend all your [gold]Sparks[/gold]. Deal 5 [gold]Pyro[/gold] damage to ALL enemies for each [gold]Spark[/gold] spent.",
    upgrade: {damage: +2},
    effects: [{op: spend_spark, amount: all},
              {op: damage, amount: 5, target: all_enemies, times: sparks_spent}]}
@@ -677,7 +677,7 @@
 - {id: proto_ko_forbidden_fun, name: "Forbidden Fun", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "Deal 10 damage. Shuffle a [gold]Dazed[/gold] into your draw pile.",
+   description: "Deal 10 [gold]Pyro[/gold] damage. Shuffle a [gold]Dazed[/gold] into your draw pile.",
    upgrade: {damage: +4},
    effects: [{op: damage, amount: 10, target: enemy},
              {op: add_card, card: status_dazed, zone: draw, amount: 1}]}
@@ -701,7 +701,7 @@
 - {id: proto_ko_red_knight, name: "Red Knight", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "Deal 22 damage to ALL enemies. Add 2 [gold]Confiscated[/gold] to your draw pile.",
+   description: "Deal 22 [gold]Pyro[/gold] damage to ALL enemies. Add 2 [gold]Confiscated[/gold] to your draw pile.",
    upgrade: {damage: +6},
    effects: [{op: damage, amount: 22, target: all_enemies},
              {op: add_card, card: confiscated, zone: draw, amount: 2}]}
@@ -792,7 +792,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 8 damage. Gain 3 [gold]Block[/gold].",
+   description: "Deal 8 [gold]Cryo[/gold] damage. Gain 3 [gold]Block[/gold].",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: block, amount: 3}]}
 
@@ -807,7 +807,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill,
-   description: "Gain 6 [gold]Block[/gold]. Apply [gold]Hydro[/gold].",
+   description: "Gain 6 [gold]Block[/gold]. Apply [gold]Hydro[/gold] to an enemy.",
    effects: [{op: block, amount: 6},
              {op: apply_aura, element: hydro, target: enemy}]}
 
@@ -822,7 +822,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 1, type: attack,
-   description: "Deal 10 damage. [gold]Swirl[/gold] the enemy.",
+   description: "Deal 10 [gold]Anemo[/gold] damage. [gold]Swirl[/gold] the enemy.",
    effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
              {op: swirl, target: enemy}]}
 
@@ -900,7 +900,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 2, type: skill, exhaust: true,
-   description: "Deal 8 damage to ALL enemies. For 2 turns, at the end of your turn [gold]Swirl[/gold] ALL enemies.",
+   description: "Deal 8 [gold]Anemo[/gold] damage to ALL enemies. For 2 turns, at the end of your turn [gold]Swirl[/gold] ALL enemies.",
    effects: [{op: damage, amount: 8, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_grand_ode, amount: 2, target: self}]}
 
@@ -908,7 +908,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: pyro,
    cost: 1, type: attack,
-   description: "Deal 4 damage to ALL enemies 3 times.",
+   description: "Deal 4 [gold]Pyro[/gold] damage to ALL enemies 3 times.",
    effects: [{op: damage, amount: 4, target: all_enemies, times: 3, applies_element: true}]}
 
 - {id: proto_mc_lisa_violet_arc, name: "Lisa — Violet Arc", character: klee,
@@ -931,7 +931,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 9 damage. If the enemy had an aura before the hit, apply 1 [gold]Vulnerable[/gold].",
+   description: "Deal 9 [gold]Cryo[/gold] damage. If the enemy had an aura before the hit, apply 1 [gold]Vulnerable[/gold].",
    effects: [{op: damage, amount: 9, target: enemy, applies_element: true},
              {op: conditional, if: target_has_aura,
               then: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}]}]}
@@ -952,7 +952,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 2, type: attack,
-   description: "Deal damage equal to your [gold]Block[/gold] to ALL enemies.",
+   description: "Deal [gold]Geo[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.",
    effects: [{op: damage, target: all_enemies, applies_element: true,
               amount_formula: {base: 0, per: 1, count: player_block}}],
    # POOL COMPLETION (2026-10-01, paper sec.6, the Body Slam note): cost 2 [1].
@@ -1004,7 +1004,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 8 damage. If this is the third Attack you played this turn, gain 1 [gold]Energy[/gold].",
+   description: "Deal 8 [gold]Electro[/gold] damage. If this is the third Attack you played this turn, gain 1 [gold]Energy[/gold].",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: conditional, if: nth_attack_this_turn_3,
               then: [{op: energy, amount: 1}]}]}
@@ -1043,7 +1043,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 5 damage to ALL enemies. Your next Attack costs 1 less.",
+   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies. Your next Attack costs 1 less.",
    effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}
 
@@ -1081,7 +1081,7 @@
    cost: 1, type: attack, tags: [strike],
    personal_pool: [klee],
    replaces: proto_mc_kaeya_frostgnaw,
-   description: "Deal 8 damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] triggers even if you played a [gold]Set off[/gold] card.",
+   description: "Deal 8 [gold]Cryo[/gold] damage. Next turn, [gold]Grounded[/gold] triggers even if you played a [gold]Set off[/gold] card.",
    upgrade: {damage: 3},
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: apply_power, power: mc_cold_blooded, amount: 1, target: self}]}
@@ -1108,7 +1108,7 @@
    cost: 1, type: skill, rarity: basic,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 7 damage to ALL enemies.",
+   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 7 [gold]Hydro[/gold] damage to ALL enemies.",
    effects: [{op: block, amount: 6}],
    plan: [{op: damage, amount: 7, target: all_enemies}],
    # 8 Block / Plan 10 to ALL (2026-09-28: the now-line upgrades too).
@@ -1120,7 +1120,7 @@
    # R267 PICK 1: THE PLAN HALF IS BACK IN THE MORNING. Pass five moved it to
    # Dusk; the brief names the next-morning Weak as the kit's turn-one
    # decision, and a starter card is [USER]'s.
-   description: "Deal 4 damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
+   description: "Deal 4 [gold]Hydro[/gold] damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
    effects: [{op: damage, amount: 4, target: enemy},
              {op: apply_power, power: weak, amount: 1, target: enemy}],
    plan: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
@@ -1138,7 +1138,7 @@
    # THE CASKET PASS (2026-09-28): keyed to the COUNT of carry-outs this turn.
    # THE CLEANUP PASS (2026-09-29): base 4 -> 6 (upgraded 9), for the
    # zero-floor problem Sango Isshin had. Provenance note.
-   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 6, per: 3,
                                count: plans_carried_out_this_turn}}],
@@ -1153,7 +1153,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
-   description: "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 damage.",
+   description: "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage.",
    effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy}],
    plan: [{op: damage, amount: 12, target: front_enemy}],
    # Plan 15; the now-line does not upgrade.
@@ -1215,7 +1215,7 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    # THE CASKET PASS (2026-09-28): 7 to ALL, 9 upgraded.
-   description: "Deal 7 damage to ALL enemies.",
+   description: "Deal 7 [gold]Hydro[/gold] damage to ALL enemies.",
    upgrade: {damage: 2},
    effects: [{op: damage, amount: 7, target: all_enemies}]}
 
@@ -1276,7 +1276,7 @@
    # THE CASKET PASS (2026-09-28): per carry-out this turn, to ALL.
    # 2026-09-29: gains a base of 8. A seat (Kokomi run KK2EL3M3NTS9) named it
    # NEVER AGAIN because it dealt 0 on turn 1 and after any turn with no Plans.
-   description: "Deal {CalculationBase:diff()} damage to ALL enemies, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies,
               amount_formula: {base: 8, per: 6,
                                count: plans_carried_out_this_turn}}],
@@ -1339,7 +1339,7 @@
    cost: 1, type: attack, rarity: common,
    # `EB-441`: one damage op with a rider, not two literal branches.
    # `EB-624`: two printed numbers, both live -- provenance sec. this row.
-   description: "Deal {PlainDamage:diff()} damage. If the enemy has a debuff, deal {DebuffDamage:diff()} instead.",
+   description: "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy has a debuff, deal {DebuffDamage:diff()} instead.",
    effects: [{op: damage, amount: 7, target: enemy, bonus_vs_debuff: 3}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {damage: +3}}
@@ -1371,7 +1371,7 @@
    # THE CASKET PASS (2026-09-28): 11 to ALL, 3 more on a debuffed enemy;
    # the Plan is 2 Energy and a card.
    # 2026-09-30 [USER]: Plan draw 1 -> 2, upgraded 3 (provenance note).
-   description: "Deal {Damage:diff()} damage to ALL enemies. Enemies with a debuff take {ExtraDamage:diff()} additional damage. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} cards.",
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, {ExtraDamage:diff()} more to debuffed ones. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} cards.",
    effects: [{op: damage, amount: 11, target: all_enemies, bonus_vs_debuff: 3}],
    plan: [{op: energy, amount: 2}, {op: draw, amount: 2}],
    # 14 / 4 more, and the Plan's draw 2 -> 3 (the Energy does not move).
@@ -1384,7 +1384,7 @@
    cost: 1, type: attack, rarity: uncommon,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Deal 4 damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
+   description: "Deal 4 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
    effects: [{op: damage, amount: 4, target: enemy, times: 2}],
    plan: [{op: first_attack_twice}],
    # THE CASKET PASS (2026-09-28): 4 twice; upgraded 5 twice. The Plan line
@@ -1394,7 +1394,7 @@
 - {id: proto_kk_flank, name: "Flank", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 8 damage. [gold]Plan[/gold]: Deal 8 damage to each enemy that intended to attack when you wrote this.",
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 8 [gold]Hydro[/gold] damage to each enemy that intended to attack when you wrote this.",
    effects: [{op: damage, amount: 8, target: enemy}],
    # `EB-492`, the intent-keyed aim. THE SET IS FIXED WHEN THE PLAN IS
    # WRITTEN -- R250's rule for an aimed Plan, applied to a set.
@@ -1414,7 +1414,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # `EB-687`: THE CLAUSE NAMES WHAT IT DOUBLES, so a Plan that deals none is
    # visibly unchanged. The finding and the ceiling: the provenance note.
-   description: "Deal 7 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The Plan after this one deals double damage.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The Plan after this one deals double damage.",
    # THE CASKET PASS (2026-09-28): 5 -> 7 now.
    effects: [{op: damage, amount: 7, target: enemy}],
    # THE RIDER IS THE SECOND CLAUSE and it aims at nothing: "the next Plan" is
@@ -1430,7 +1430,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
-   description: "Deal 7 damage. [gold]Plan[/gold]: The Plan after this one is carried out twice.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The Plan after this one is carried out twice.",
    effects: [{op: damage, amount: 7, target: enemy}],
    # A FLAG AND NOT A COUNT: under Nereid's Ascension the entry this reaches
    # is carried out THREE times (`CarryOutTimes + 1`) and not four, which is
@@ -1470,7 +1470,7 @@
 - {id: proto_kk_massed_volley, name: "Massed Volley", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 3 damage 3 times.",
+   description: "Deal 3 [gold]Hydro[/gold] damage 3 times.",
    effects: [{op: damage, amount: 3, target: enemy, times: 3}],
    upgrade: {damage: 1}}
 
@@ -1479,7 +1479,7 @@
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 7 damage. [gold]Plan[/gold]: Deal 3 damage to ALL enemies twice.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage to ALL enemies twice.",
    effects: [{op: damage, amount: 7, target: enemy}],
    plan: [{op: damage, amount: 3, target: all_enemies, times: 2}],
    # 10 / Plan 4 twice.
@@ -1490,7 +1490,7 @@
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal 14 damage. [gold]Plan[/gold]: Deal 22 damage.",
+   description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 22 [gold]Hydro[/gold] damage.",
    effects: [{op: damage, amount: 14, target: enemy}],
    plan: [{op: damage, amount: 22, target: front_enemy}],
    # 18 / Plan 28.
@@ -1503,7 +1503,7 @@
 - {id: proto_kk_press_the_advantage, name: "Press the Advantage", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] is waiting, deal {BranchDamage:diff()} instead.",
+   description: "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If a [gold]Plan[/gold] is waiting, deal {BranchDamage:diff()} instead.",
    # THE CLEANUP PASS (2026-09-29): 6 / 10 -> 7 / 11.
    effects: [{op: conditional, if: plan_held,
               then: [{op: damage, amount: 11, target: enemy}],
@@ -1525,7 +1525,7 @@
 - {id: proto_kk_driftglass, name: "Driftglass", character: kokomi,
    authored_by: [claude], art_of: driftglass,
    cost: 1, type: attack, rarity: common,
-   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    # THE CLEANUP PASS (2026-09-29): base 5 -> 6.
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 6, per: 1, count: casket_count}}],
@@ -1544,7 +1544,7 @@
 - {id: proto_kk_depths_judgment, name: "Depths' Judgment", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal damage equal to {ExtraDamage:diff()} times the [gold]Casket[/gold]'s count.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal [gold]Hydro[/gold] damage equal to {ExtraDamage:diff()} times the [gold]Casket[/gold]'s count.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 0, per: 3, count: casket_count}}],
    # 4 times.
@@ -1553,7 +1553,7 @@
 - {id: proto_kk_tideturn, name: "Tideturn", character: kokomi,
    authored_by: [claude], art_of: tideturn,
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {ExtraDamage:diff()} damage for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 0, per: 4, count: plans_held}}],
    # 5 each.
@@ -1566,7 +1566,7 @@
 - {id: proto_kk_pearl_current, name: "Pearl Current", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 2 damage 4 times. [gold]Plan[/gold]: Deal 2 damage to ALL enemies 3 times.",
+   description: "Deal 2 [gold]Hydro[/gold] damage 4 times. [gold]Plan[/gold]: Deal 2 [gold]Hydro[/gold] damage to ALL enemies 3 times.",
    effects: [{op: damage, amount: 2, target: enemy, times: 4}],
    plan: [{op: damage, amount: 2, target: all_enemies, times: 3}],
    # 3 x4 / Plan 3 x3.
@@ -1595,7 +1595,7 @@
 - {id: proto_kk_nip, name: "Nip", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "[gold]Plan[/gold]: Deal 5 damage.",
+   description: "[gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage.",
    effects: [],
    plan: [{op: damage, amount: 5, target: front_enemy}],
    # Plan 7.
@@ -1604,7 +1604,7 @@
 - {id: proto_kk_jellyfish_drift, name: "Jellyfish Drift", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "[gold]Plan[/gold]: Deal 2 damage to ALL enemies.",
+   description: "[gold]Plan[/gold]: Deal 2 [gold]Hydro[/gold] damage to ALL enemies.",
    effects: [],
    plan: [{op: damage, amount: 2, target: all_enemies}],
    # Plan 3 to ALL.
@@ -1640,7 +1640,7 @@
 - {id: proto_kk_weight_of_the_plan, name: "Weight of the Plan", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Energy[/gold] paid for the [gold]Plans[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Energy[/gold] paid for the [gold]Plans[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 5, per: 3, count: plan_energy_waiting}}],
    # 7, plus 3 each.
@@ -1659,7 +1659,7 @@
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
    # Main session, 2026-09-29: 8/16 -> 6/12 (the sim read it dominant).
-   description: "Deal 6 damage to ALL enemies. [gold]Plan[/gold]: Deal 12 damage, doubled if no other [gold]Plan[/gold] is carried out at the start of your turn.",
+   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage, doubled if no other [gold]Plan[/gold] is carried out with it.",
    effects: [{op: damage, amount: 6, target: all_enemies}],
    plan: [{op: damage_if_alone, amount: 12, target: front_enemy}],
    # 9 to ALL / Plan 16.
@@ -1694,7 +1694,7 @@
 - {id: proto_kk_masterstroke, name: "Masterstroke", character: kokomi,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare, retain: true,
-   description: "[gold]Plan[/gold]: Deal 30 damage.",
+   description: "[gold]Plan[/gold]: Deal 30 [gold]Hydro[/gold] damage.",
    effects: [],
    plan: [{op: damage, amount: 30, target: front_enemy}],
    # Plan 40.
@@ -1711,7 +1711,7 @@
    cost: 1, type: attack, rarity: uncommon,
    # "Each debuff" is each DISTINCT debuff on the enemy; an elemental aura is
    # a Buff in both engines and does not count.
-   description: "Deal {ExtraDamage:diff()} damage for each debuff on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each debuff on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 0, per: 4, count: debuffs_on_target}}],
    # 6 each.
@@ -1761,7 +1761,7 @@
 - {id: proto_kk_suffocating_deep, name: "Suffocating Deep", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare, exhaust: true,
-   description: "Deal 6 damage to ALL enemies. Double each enemy's [gold]Weak[/gold] and [gold]Vulnerable[/gold]. Exhaust.",
+   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. Double each enemy's [gold]Weak[/gold] and [gold]Vulnerable[/gold]. Exhaust.",
    effects: [{op: damage, amount: 6, target: all_enemies},
              {op: kokomi, kind: double_weak_vulnerable}],
    # 9 to ALL.
@@ -1775,7 +1775,7 @@
    # systemically over-pricing this effect"): Uncommon -> Common, and the
    # upgrade is cost 0 -- Body Slam exactly.
    cost: 1, type: attack, rarity: common,
-   description: "Deal damage equal to your [gold]Block[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 0, per: 1, count: player_block}}],
    upgrade: {cost: -1}}
@@ -1902,7 +1902,7 @@
    cost: 1, type: attack, rarity: rare,
    # "Wrote" counts every Plan written onto the Bake-Kurage this turn, Moon's
    # Reflection's included; a Plan cancelled or carried out since still counts.
-   description: "Deal {ExtraDamage:diff()} damage to ALL enemies for each [gold]Plan[/gold] you wrote this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] you wrote this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies,
               amount_formula: {base: 0, per: 4,
                                count: plans_written_this_turn}}],
@@ -1931,7 +1931,7 @@
    authored_by: [claude],
    # Paper sec.6: no Exhaust (Body Slam to ALL, a rarity and a cost above).
    cost: 2, type: attack, rarity: rare,
-   description: "Deal damage equal to your [gold]Block[/gold] to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies,
               amount_formula: {base: 0, per: 1, count: player_block}}],
    upgrade: {cost: -1}}
@@ -1997,7 +1997,7 @@
    cost: 1, type: attack, rarity: uncommon,
    # The self-status engine: well above a Common's AoE rate, paid in Dazed
    # shuffled into the draw pile at random depths.
-   description: "Deal 13 damage to ALL enemies. Shuffle 2 [gold]Dazed[/gold] into your draw pile.",
+   description: "Deal 13 [gold]Hydro[/gold] damage to ALL enemies. Shuffle 2 [gold]Dazed[/gold] into your draw pile.",
    effects: [{op: damage, amount: 13, target: all_enemies},
              {op: add_card, card: status_dazed, zone: draw, amount: 2}],
    # 17 to ALL.
@@ -2020,7 +2020,7 @@
    # The status batch's Rare, in Coral Sanctuary's place (ruled 2026-10-01):
    # a second status source, Flotsam Surge's shape at Rare size. Hydro
    # through the arm's cadence like every damaging card of hers.
-   description: "Deal 9 damage to ALL enemies twice. Shuffle 3 [gold]Dazed[/gold] into your draw pile.",
+   description: "Deal 9 [gold]Hydro[/gold] damage to ALL enemies twice. Shuffle 3 [gold]Dazed[/gold] into your draw pile.",
    effects: [{op: damage, amount: 9, target: all_enemies, times: 2},
              {op: add_card, card: status_dazed, zone: draw, amount: 3}],
    # 12 to ALL, twice.
@@ -2034,7 +2034,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: geo,
    cost: 1, type: attack,
-   description: "Deal 8 damage. Gain [gold]Block[/gold] equal to half the damage dealt.",
+   description: "Deal 8 [gold]Geo[/gold] damage. Gain [gold]Block[/gold] equal to half the damage dealt.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: block_half_damage}]}
 
@@ -2060,7 +2060,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
    cost: 1, type: attack,
-   description: "Deal 8 damage to a random enemy and [gold]Swirl[/gold] it.",
+   description: "Deal 8 [gold]Anemo[/gold] damage to a random enemy and [gold]Swirl[/gold] it.",
    effects: [{op: damage, amount: 8, target: random_enemy, applies_element: true}]}
 
 - {id: proto_mi_sayu_daruma, name: "Sayu — Muji-Muji Daruma", character: klee,
@@ -2099,7 +2099,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 8 damage. If you are below half HP, deal {BranchDamage:diff()} additional damage.",
+   description: "Deal 8 [gold]Electro[/gold] damage. If you are below half HP, deal {BranchDamage:diff()} additional damage.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: conditional, if: hp_pct_below_50,
               then: [{op: damage, amount: 5, target: enemy, applies_element: true}]}]}
@@ -2130,7 +2130,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 5 damage. Next turn, your Attacks deal 5 additional damage.",
+   description: "Deal 5 [gold]Electro[/gold] damage. Next turn, your Attacks deal 5 additional damage.",
    effects: [{op: damage, amount: 5, target: enemy, applies_element: true},
              {op: apply_power, power: mi_stormcall, amount: 1, target: self}]}
 
@@ -2138,7 +2138,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 2, type: attack,
-   description: "Deal 14 damage. Gain 12 [gold]Block[/gold].",
+   description: "Deal 14 [gold]Geo[/gold] damage. Gain 12 [gold]Block[/gold].",
    effects: [{op: damage, amount: 14, target: enemy, applies_element: true},
              {op: block, amount: 12}]}
 
@@ -2146,7 +2146,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: applier, element: electro,
    cost: 3, type: attack,
-   description: "Deal 20 damage. Deals 5 additional damage for each [gold]Companion[/gold] card you played this combat.",
+   description: "Deal 20 [gold]Electro[/gold] damage. Deals 5 additional damage for each [gold]Companion[/gold] card you played this combat.",
    effects: [{op: damage, target: enemy, applies_element: true,
               amount_formula: {base: 20, per: 5, count: companions_played_this_combat}}]}
 
@@ -2154,7 +2154,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 1, type: attack, exhaust: true,
-   description: "Deal 10 damage and [gold]Swirl[/gold] ALL enemies.",
+   description: "Deal 10 [gold]Anemo[/gold] damage and [gold]Swirl[/gold] ALL enemies.",
    effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true}]}
 
 - {id: proto_mi_yae_sesshou_sakura, name: "Yae Miko — Sesshou Sakura", character: klee,
@@ -2194,7 +2194,7 @@
    cost: 1, type: attack, tags: [strike],
    # `EB-696`: the LIVE total, Well Laid's shape, and the count's window said
    # out loud. The finding: the provenance note.
-   description: "Deal {CalculatedDamage:diff()} damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.",
+   description: "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.",
    effects: [{op: damage, target: enemy, applies_element: true,
               amount_formula: {base: 6, per: 4, count: swirls_this_turn}}]}
 
@@ -2370,7 +2370,7 @@
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 1, type: attack, personal_pool: klee,
    upgrade: {damage: +3},
-   description: "Deal 8 damage. [gold]Swirl[/gold]. The next [gold]Bomb[/gold] you set off this turn deals the swirled element instead of [gold]Pyro[/gold].",
+   description: "Deal 8 [gold]Anemo[/gold] damage. [gold]Swirl[/gold]. The next [gold]Bomb[/gold] you set off this turn deals the swirled element instead of [gold]Pyro[/gold].",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: swirl, target: enemy},
              {op: apply_power, power: cvn_hexhunter_chime, amount: 1, target: self}]}
@@ -3434,7 +3434,7 @@
 - {id: proto_kk_coordinated_strike, name: "Coordinated Strike", character: kokomi,
    authored_by: [claude], multiplayer: true,
    cost: 1, type: attack, rarity: uncommon, tags: [strike],
-   description: "Deal 6 damage. [gold]Plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage.",
+   description: "Deal 6 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage.",
    upgrade: {damage: 3},
    effects: [{op: damage, amount: 6, target: enemy}],
    plan: [{op: others_attack_damage_this_turn, amount: 3}]}
@@ -3478,7 +3478,7 @@
    # Created in combat, never in the deck; played, it goes to the discard
    # pile. `dusty_tome`: no Ancient card yet, so Darv's Tome hands him this.
    cost: 1, type: attack, rarity: basic, tags: [dusty_tome],
-   description: "Deal {Damage:diff()} damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit.",
    effects: [{op: damage, amount: 6, target: enemy},
              {op: varka, kind: ascension_hit, per: 3}],
    upgrade: {damage: 3, varka_per: 1}}
@@ -3486,7 +3486,7 @@
 - {id: proto_vk_windbound_execution, name: "Windbound Execution", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: basic,
-   description: "Deal {Damage:diff()} damage to ALL enemies.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies.",
    effects: [{op: damage, amount: 4, target: all_enemies}],
    upgrade: {damage: 2}}
 
@@ -3557,7 +3557,7 @@
 - {id: proto_vk_gale_sweep, name: "Gale Sweep", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {Damage:diff()} damage to each enemy with a fresh aura. Each hit [gold]Swirls[/gold].",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage to each enemy with a fresh aura. Each hit [gold]Swirls[/gold].",
    effects: [{op: damage, amount: 3, target: all_enemies, only_if: fresh_aura}],
    upgrade: {damage: 2}}
 
@@ -3668,7 +3668,7 @@
 - {id: proto_vk_crosswind, name: "Crosswind", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], gain {BranchBlock:diff()} [gold]Block[/gold].",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {BranchBlock:diff()} [gold]Block[/gold].",
    effects: [{op: damage, amount: 7, target: enemy},
              {op: conditional, if: swirled_by_this,
               then: [{op: block, amount: 4}]}],
@@ -3679,7 +3679,7 @@
 - {id: proto_vk_rising_gale, name: "Rising Gale", character: varka,
    authored_by: [claude],
    cost: 0, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], draw 1 card.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card.",
    effects: [{op: damage, amount: 4, target: enemy},
              {op: conditional, if: swirled_by_this,
               then: [{op: draw, amount: 1}]}],
@@ -3688,7 +3688,7 @@
 - {id: proto_vk_tempest_charge, name: "Tempest Charge", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], draw 1 card.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card.",
    effects: [{op: damage, amount: 8, target: enemy},
              {op: conditional, if: swirled_by_this,
               then: [{op: draw, amount: 1}]}],
@@ -3697,7 +3697,7 @@
 - {id: proto_vk_favonius_cut, name: "Favonius Cut", character: varka,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} damage.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage.",
    effects: [{op: damage, amount: 14, target: enemy}],
    upgrade: {damage: 5}}
 
@@ -3805,7 +3805,7 @@
 - {id: proto_vk_storm_surge, name: "Storm Surge", character: varka,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} damage to ALL enemies. Each enemy it [gold]Swirls[/gold] takes {VkAmount:diff()} more.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies. Each enemy it [gold]Swirls[/gold] takes {VkAmount:diff()} more.",
    effects: [{op: damage, amount: 5, target: all_enemies},
              {op: varka, kind: swirled_take_more, amount: 5}],
    upgrade: {damage: 2}}
@@ -3876,7 +3876,7 @@
    authored_by: [claude],
    # Pick 4 (ruled): cost 2, 10 [14] and 10 [14], plus 2 per Oath.
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold], as your [gold]current element[/gold].",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold], as your [gold]current element[/gold].",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: avatar_hit, base: 10, per: 2}],
    upgrade: {damage: 4, varka_base: 4}}
@@ -3929,7 +3929,7 @@
 - {id: proto_vk_knightly_strike, name: "Knightly Strike", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common, tags: [strike],
-   description: "Deal {Damage:diff()} damage. If you played a [gold]Knight[/gold] this turn, deal {BranchDamage:diff()} more.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If you played a [gold]Knight[/gold] this turn, deal {BranchDamage:diff()} more.",
    effects: [{op: damage, amount: 7, target: enemy},
              {op: conditional, if: knight_played_this_turn,
               then: [{op: damage, amount: 4, target: enemy}]}],
@@ -4025,7 +4025,7 @@
 - {id: proto_vk_shifting_gale, name: "Shifting Gale", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} damage. If your [gold]current element[/gold] changed this turn, deal it twice.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If your [gold]current element[/gold] changed this turn, deal it twice.",
    effects: [{op: damage, amount: 6, target: enemy},
              {op: conditional, if: element_changed_this_turn,
               then: [{op: damage, amount: 6, target: enemy}]}],
@@ -4132,7 +4132,7 @@
 - {id: proto_vk_grand_masters_verdict, name: "Grand Master's Verdict", character: varka,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare, exhaust: true,
-   description: "Deal {Damage:diff()} damage. Double your [gold]current element[/gold]'s [gold]Oath[/gold].",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Double your [gold]current element[/gold]'s [gold]Oath[/gold].",
    effects: [{op: damage, amount: 15, target: enemy},
              {op: varka, kind: double_current_oath}],
    upgrade: {damage: 5}}
@@ -4179,7 +4179,7 @@
    # Pick 3 (ruled, 3a): bends the Swirl rule, a Rare. The card itself is
    # the marker (`VarkaRules.SpreadArrivesFresh`, `varka_oath.spread_fresh`).
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], the copies it spreads arrive fresh.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], the copies it spreads arrive fresh.",
    effects: [{op: damage, amount: 12, target: enemy}],
    upgrade: {damage: 4}}
 

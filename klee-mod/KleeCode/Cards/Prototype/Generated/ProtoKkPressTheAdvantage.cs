@@ -51,7 +51,7 @@ public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Press the Advantage"),
-        ("description", "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] is waiting, deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If a [gold]Plan[/gold] is waiting, deal {BranchDamage:diff()} instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

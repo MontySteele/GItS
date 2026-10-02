@@ -51,7 +51,7 @@ public sealed class ProtoVkStormSurge : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Storm Surge"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. Each enemy it [gold]Swirls[/gold] takes {VkAmount:diff()} more."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies. Each enemy it [gold]Swirls[/gold] takes {VkAmount:diff()} more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

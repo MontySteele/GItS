@@ -48,7 +48,7 @@ public sealed class ProtoKoFlashPoint : CustomCardModel, IElementalCard, ISetOff
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flash Point"),
-        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold] and draw 1 card."),
+        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold] and draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

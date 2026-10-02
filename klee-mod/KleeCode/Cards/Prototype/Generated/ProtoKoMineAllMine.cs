@@ -48,7 +48,7 @@ public sealed class ProtoKoMineAllMine : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mine, All Mine!"),
-        ("description", "Deal {Damage:diff()} damage to each enemy with a [gold]Mine[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to each enemy with a [gold]Mine[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -51,7 +51,7 @@ public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sango Isshin"),
-        ("description", "Deal {CalculationBase:diff()} damage to ALL enemies, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

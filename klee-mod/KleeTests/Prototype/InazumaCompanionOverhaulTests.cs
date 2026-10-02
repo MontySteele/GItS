@@ -644,7 +644,7 @@ public class InazumaCompanionOverhaulTests
         var face = ((CustomCardModel)(CardModel)new ProtoMiHeizouHeartstopper())
             .Localization!.First(r => r.Item1 == "description").Item2;
 
-        Assert.Contains("Deal {CalculatedDamage:diff()} damage.", face);
+        Assert.Contains("Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage.", face);
         // THE 2026-09-25 TEXT PASS put the rate in rule 8's spelling ("Deals
         // 4 additional damage for each Swirl this turn"); the live total
         // above is still the number the hit pays.

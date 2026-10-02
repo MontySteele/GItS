@@ -45,6 +45,9 @@ public sealed class ProtoMcSayuSilencersSecret : CustomCardModel, ICompanionCard
 
     public string? Nation => "inazuma";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesAnemo };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSwirl(ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this);
 

@@ -48,7 +48,7 @@ public sealed class ProtoKoForbiddenFun : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Forbidden Fun"),
-        ("description", "Deal {Damage:diff()} damage. Shuffle a [gold]Dazed[/gold] into your draw pile."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage. Shuffle a [gold]Dazed[/gold] into your draw pile."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

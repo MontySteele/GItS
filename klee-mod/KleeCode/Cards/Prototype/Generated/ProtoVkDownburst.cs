@@ -51,7 +51,7 @@ public sealed class ProtoVkDownburst : CustomCardModel, IElementalCard, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Downburst"),
-        ("description", "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], the copies it spreads arrive fresh."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], the copies it spreads arrive fresh."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -109,7 +109,7 @@ public class KokomiStatusBatchTests : IDisposable
     public void The_starters_oath_prints_or_plan()
     {
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].\nOr "
-                   + "[gold]plan[/gold]: Deal {PlanDamage:diff()} damage to "
+                   + "[gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to "
                    + "ALL enemies.", Face(new ProtoKkKuragesOath()));
         Assert.Contains("\nOr [gold]plan[/gold]: ",
                         Face(new ProtoKkSlackWater()));
@@ -122,7 +122,7 @@ public class KokomiStatusBatchTests : IDisposable
     {
         // The main session's call (2026-10-01): "or" only under a now-line.
         Assert.Equal("Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: "
-                   + "Deal {PlanDamage:diff()} damage.", Face(new ProtoKkNip()));
+                   + "Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage.", Face(new ProtoKkNip()));
         Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].\n[gold]Dusk[/gold] "
                         + "[gold]Plan[/gold]: ", Face(new ProtoKkBreakwater()));
         Assert.DoesNotContain("Or [gold]", Face(new ProtoKkBraceForTheTide()));

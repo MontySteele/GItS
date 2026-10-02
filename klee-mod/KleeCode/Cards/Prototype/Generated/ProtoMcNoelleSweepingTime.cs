@@ -59,7 +59,7 @@ public sealed class ProtoMcNoelleSweepingTime : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Noelle — Sweeping Time"),
-        ("description", "Deal damage equal to your [gold]Block[/gold] to ALL enemies."),
+        ("description", "Deal [gold]Geo[/gold] damage equal to your [gold]Block[/gold] to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -59,7 +59,7 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shinobu — Thundergrust"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. If you are below half HP, deal {BranchDamage:diff()} additional damage."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. If you are below half HP, deal {BranchDamage:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

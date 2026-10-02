@@ -51,7 +51,7 @@ public sealed class ProtoVkTempestCharge : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tempest Charge"),
-        ("description", "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], draw 1 card."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

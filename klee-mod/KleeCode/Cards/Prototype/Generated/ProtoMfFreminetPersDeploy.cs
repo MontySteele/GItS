@@ -59,7 +59,7 @@ public sealed class ProtoMfFreminetPersDeploy : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Freminet — Pers, Deploy!"),
-        ("description", "Deal {CalculatedDamage:diff()} damage."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

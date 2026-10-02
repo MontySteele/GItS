@@ -269,7 +269,7 @@ public class KokomiCasketPassTests : IDisposable
         var volley = new ProtoKkMassedVolley();
         Assert.Equal(3m, volley.DynamicVars.Damage.BaseValue);
         Assert.Equal(4m, Upgraded<ProtoKkMassedVolley>().DynamicVars.Damage.BaseValue);
-        Assert.Equal("Deal {Damage:diff()} damage 3 times.", Face(volley));
+        Assert.Equal("Deal {Damage:diff()} [gold]Hydro[/gold] damage 3 times.", Face(volley));
 
         var arrow = new ProtoKkSignalArrow();
         Assert.Equal(7m, arrow.DynamicVars.Damage.BaseValue);

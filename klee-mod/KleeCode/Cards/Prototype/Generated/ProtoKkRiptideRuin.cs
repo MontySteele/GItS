@@ -51,7 +51,7 @@ public sealed class ProtoKkRiptideRuin : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide Ruin"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies twice. Shuffle 3 [gold]Dazed[/gold] into your draw pile."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies twice. Shuffle 3 [gold]Dazed[/gold] into your draw pile."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

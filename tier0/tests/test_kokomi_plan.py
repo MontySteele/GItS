@@ -2178,7 +2178,7 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     # the drain, and the entries behind this one in it -- where "your next
     # Plan" read as the next one WRITTEN (`EB-687`, `EB-645`).
     assert faces["proto_kk_second_wave"] == (
-        "Deal 7 damage. [gold]Plan[/gold]: The Plan after this "
+        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The Plan after this "
         "one is carried out twice.")
     assert faces["proto_kk_opening_gambit"].endswith(
         "The Plan after this one deals double damage.")
@@ -2777,7 +2777,7 @@ def test_core_pass_treatise_upgrade_is_innate(overhaul):
 def test_core_pass_faces(overhaul):
     faces = _faces()
     assert faces["proto_kk_ambush"] == (
-        "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 damage.")
+        "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage.")
     assert faces["proto_kk_treatise"] == (
         "Once per turn, when you play a card with a [gold]Plan[/gold] line "
         "normally, draw 1 card.")

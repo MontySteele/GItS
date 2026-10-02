@@ -80,14 +80,14 @@ def test_the_status_batch_face_says_or():
         return _FACE.search(text).group(1)
     assert face("ProtoKkKuragesOath") == (
         "Gain {Block:diff()} [gold]Block[/gold].\\nOr [gold]plan[/gold]: "
-        "Deal {PlanDamage:diff()} damage to ALL enemies.")
+        "Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies.")
     assert "\\nOr [gold]plan[/gold]: " in face("ProtoKkSlackWater")
     assert "\\nOr [gold]dusk[/gold] [gold]plan[/gold]: " in face(
         "ProtoKkShellOfSanctuary")
     # Plan-only rows: no "or", because there is no line above to choose.
     assert face("ProtoKkNip") == (
         "Play on the [gold]Bake-Kurage[/gold].\\n[gold]Plan[/gold]: "
-        "Deal {PlanDamage:diff()} damage.")
+        "Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage.")
     assert face("ProtoKkBreakwater").startswith(
         "Play on the [gold]Bake-Kurage[/gold].\\n[gold]Dusk[/gold] "
         "[gold]Plan[/gold]: ")
