@@ -58,7 +58,6 @@ public class Round7bTests
         // pre-emption is spent one hook later, here.
         var klee = Seat.Klee();
         var chomper = Seat.Klee(4).Creature;
-        KleeOverhaul.Enabled = true;
         ProtoBombPower.Preempted.Clear();
         try
         {
@@ -71,7 +70,6 @@ public class Round7bTests
         finally
         {
             ProtoBombPower.Preempted.Clear();
-            KleeOverhaul.Enabled = KleeOverhaul.DefaultEnabled;
         }
     }
 
@@ -82,7 +80,6 @@ public class Round7bTests
         // right: nothing was noted, the attacker is alive, the hit is the hit.
         var klee = Seat.Klee();
         var chomper = Seat.Klee(62).Creature;
-        KleeOverhaul.Enabled = true;
         ProtoBombPower.Preempted.Clear();
         try
         {
@@ -93,7 +90,6 @@ public class Round7bTests
         }
         finally
         {
-            KleeOverhaul.Enabled = KleeOverhaul.DefaultEnabled;
         }
     }
 
@@ -114,7 +110,6 @@ public class Round7bTests
             Kill(chomper);
             ProtoBombPower.Preempted.Note(klee.Creature, chomper);
 
-            KleeOverhaul.Enabled = true;
             // a different victim
             Assert.Equal(8m, Hooks().ModifyHpLostBeforeOsty(
                 other, 8m, Attack, chomper, cardSource: null));
@@ -125,14 +120,10 @@ public class Round7bTests
             Assert.Equal(8m, Hooks().ModifyHpLostBeforeOsty(
                 klee.Creature, 8m, Explosion, chomper, cardSource: null));
 
-            KleeOverhaul.Enabled = false;
-            Assert.Equal(8m, Hooks().ModifyHpLostBeforeOsty(
-                klee.Creature, 8m, Attack, chomper, cardSource: null));
         }
         finally
         {
             ProtoBombPower.Preempted.Clear();
-            KleeOverhaul.Enabled = KleeOverhaul.DefaultEnabled;
         }
     }
 

@@ -154,8 +154,7 @@ public class SelfCheckBbcodeTests
         // the arm's five are checked wherever the build has them. Under
         // `-p:PrototypeCards=true`, which is the configuration the gate runs
         // and the configuration [USER]'s run was in, that is all seven.
-        var required = new[] { "MasqueRedDeathPower",
-                               "CeremonialGarmentPower" };
+        var required = new[] { "MasqueRedDeathPower" };
         foreach (var name in required.Concat(new[]
                  {
                      "WarBannerPower", "SoumetsuPower", "SesshouSakuraPower",

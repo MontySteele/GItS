@@ -46,9 +46,8 @@ namespace KleeMod.Tests.Prototype;
 [Collection(CompanionOverhaulArm.Name)]
 public class CompanionStandInHandOffTests : IDisposable
 {
-    private readonly bool _armWas = CompanionOverhaul.Enabled;
 
-    public void Dispose() => CompanionOverhaul.Enabled = _armWas;
+    public void Dispose() { }
 
     /// <summary>
     /// The pairs, Universal -> stand-in, CONSTRUCTED HERE. These are the
@@ -77,7 +76,6 @@ public class CompanionStandInHandOffTests : IDisposable
     {
         // THE PIN THE SEAT'S ROUND WOULD HAVE FAILED. Red before PR #317's
         // emitter fix, green after, and it does not need the game to say so.
-        CompanionOverhaul.Enabled = true;
         var table = Table();
         foreach (var (universal, standIn) in table)
         {
@@ -93,7 +91,6 @@ public class CompanionStandInHandOffTests : IDisposable
     {
         // The swap is keyed on the stand-in's own PersonalPool, so a table at
         // which another of our characters is sitting hands off nothing.
-        CompanionOverhaul.Enabled = true;
         var table = Table();
         foreach (var (universal, _) in table)
         {
@@ -107,7 +104,6 @@ public class CompanionStandInHandOffTests : IDisposable
     {
         // `CompanionPool.CharacterId` answers null for every character that is
         // not ours, and the mod must not change anything for one of those.
-        CompanionOverhaul.Enabled = true;
         var table = Table();
         foreach (var (universal, _) in table)
         {
@@ -117,27 +113,11 @@ public class CompanionStandInHandOffTests : IDisposable
     }
 
     [Fact]
-    public void With_the_arm_off_even_klee_is_handed_the_universal()
-    {
-        // The acceptance condition: a flag-off build is byte-identical at this
-        // seam, and every stand-in is unreachable rather than merely
-        // unlikely.
-        CompanionOverhaul.Enabled = false;
-        var table = Table();
-        foreach (var (universal, _) in table)
-        {
-            Assert.Same(universal,
-                        CompanionStandIns.HandOffTo(universal, "klee", table));
-        }
-    }
-
-    [Fact]
     public void A_card_the_table_does_not_name_is_handed_back_unchanged()
     {
         // The hand-off is called on EVERY companion the two mouths pick, so
         // the common case is a card no pair mentions. It must fall through --
         // and it must not fall through to some other pair's stand-in.
-        CompanionOverhaul.Enabled = true;
         var picked = new ProtoMcKaeyaGlacialWaltz();
         Assert.Same(picked, CompanionStandIns.HandOffTo(picked, "klee", Table()));
     }
@@ -219,7 +199,6 @@ public class CompanionStandInHandOffTests : IDisposable
         var calls = Il.Calls(handOff);
         Assert.Contains("CompanionStandIns.HandOffTo", calls);
         Assert.Contains("CompanionPool.CharacterId", calls);
-        Assert.Contains("CompanionOverhaul.get_Enabled", calls);
     }
 
     [Fact]

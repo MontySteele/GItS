@@ -61,6 +61,30 @@ and about 390 Python arm-flag reads.
    retired systems, the `Enabled` branches and `#if`s, `ShippedKits` and its
    gate, shipped-only lints, shipped emission in `gen_klee_cards.py` (shared
    with the prototype emitter: trim, do not delete).
+   **5a done, PR #822** (2026-10-01): the shipped card classes
+   (`Cards/Generated`, `Cards/Kokomi/Generated`, `Cards/Furina/Generated`,
+   Klee's hand-written seven) and `Cards/Retired` with its alias register
+   (`docs/retired-card-ids.yaml`, `gen_retired_card_aliases.py`,
+   `retired_ids.py`, `lint_retired_card_ids.py`); the four kit arms'
+   `Enabled` switches, their `#if`s and MSBuild properties, `ShippedKits` and
+   `dotnet-test-shipped`; the Salon, the Spotlight's state and powers, Encore,
+   the shipped Fanfare meter, all three Burst meters and kit Burst cards,
+   Kokomi's Charge, the Kurage Memory, the Muster transform, the shipped
+   Sparks free-Attack rule and the Companion Spark (`KleeCompanionSpark`, and
+   its `ForCovenSpark` rider in the codegen); the starting-companion roll;
+   `gen_roster_cards.py` and the shipped plan builders in `gen_klee_cards.py`.
+   Kept and trimmed because current cards call them: `SpotlightSystem` (the
+   generated print fold, now the identity), `CurtainCallHooks` (Quick Change,
+   Courtroom Drama), `KitGrant.NotKitCard` (now always true), the shipped
+   `BombPower` and companion powers the ported rows apply. The twelve
+   retired-arm prototype rows (`proto_spark_*`, the Shinobu, Thoma and Itto
+   twins, `proto_kurages_oath_memory`, `proto_muster_subsidy_funnel`) emit no
+   C# (`gen_prototype_cards.SIM_ONLY_ROW_IDS`); the sim still reads them.
+   **Moved to stage 6:** the shipped sheets (`docs/*-cards.yaml`,
+   `*-upgrades.yaml`, the three companion sheets), because the sim's
+   flags-off world and its tests still load them; the twelve retired-arm
+   rows; the codegen's spotlight wrap and `NotKitCard` filter; the
+   `MetersByTurn` zero columns in `PlayTelemetry`.
 6. **Python flag removal and docs:** the arm-flag reads, `operations/
    prototype.md` and `codegen.md`, STATE's build paragraph, stale skills.
 

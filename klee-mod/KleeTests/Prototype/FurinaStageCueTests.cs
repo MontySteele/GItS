@@ -28,17 +28,14 @@ public class FurinaStageCueTests
 {
     private sealed class Arm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
-        internal Arm(bool on = true)
+        internal Arm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = on;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }
@@ -524,12 +521,6 @@ public class FurinaStageCueTests
             Assert.True(FurinaStageCues.AppliesTo(Seat.Furina().Creature));
             Assert.False(FurinaStageCues.AppliesTo(Seat.Klee().Creature));
         }
-        using (new Arm(on: false))
-        {
-            var seat = Seat.Furina().WithCombatState();
-            Assert.False(FurinaStageCues.AppliesTo(seat.Creature));
-            Assert.Null(FurinaStageCues.Read(seat.Creature));
-        }
     }
 
     [Fact]
@@ -559,17 +550,6 @@ public class FurinaStageCueTests
         Assert.Contains("FurinaStageCues.CurtainUp",
                         Il.Calls(Il.Method("FurinaStageHooks",
                                            "AfterPlayerTurnStart")));
-    }
-
-    [Fact]
-    public void The_text_box_does_not_mount_under_the_arm()
-    {
-        // The gauge spec is gone: no `furina_stage` key in the table.
-        var table = typeof(GaugeBridge).TypeInitializer!;
-        Assert.DoesNotContain("furina_stage", Il.Strings(table));
-        // And the strip has nothing left to mount with.
-        Assert.Null(typeof(FurinaStageStrip).GetMethod("AppliesTo"));
-        Assert.Null(typeof(FurinaStageStrip).GetMethod("Refresh"));
     }
 
     [Fact]

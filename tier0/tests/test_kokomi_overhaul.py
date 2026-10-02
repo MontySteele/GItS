@@ -631,24 +631,6 @@ def test_a_planned_block_is_powered_and_a_planned_hit_is_the_jellyfishs():
         "attack buffs feed it -- the exact arithmetic `EB-334` reversed")
 
 
-def test_the_shipped_strength_refusal_is_off_under_the_arm():
-    """The one SHIPPED hook this arm turns off, source-level for the same
-    reason. `TryModifyPowerAmountReceived` refuses Strength for Kokomi and pays
-    Charge instead; draft 6's rule 3 needs it to land. What that costs is one
-    early `return false`, and its absence would be SILENT -- the Tactician loop
-    would simply never scale and nothing on screen would say so."""
-    from pathlib import Path
-    root = Path(__file__).resolve().parents[2]
-    src = (root / "klee-mod" / "KleeCode" / "Powers"
-           / "KokomiResources.cs").read_text(encoding="utf-8")
-    marker = "if (KokomiOverhaul.LiveFor(target))"
-    assert marker in src
-    tail = src[src.index(marker):src.index(marker) + 120]
-    assert "return false;" in tail, (
-        "the arm no longer skips the shipped Strength refusal, so her Strength "
-        "is being eaten and rule 3 does not hold")
-
-
 # --- 5. THE OPS ARE REGISTERED AND REFUSE TO RUN ---------------------------
 
 def test_every_new_op_is_registered():

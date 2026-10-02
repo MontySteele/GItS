@@ -38,7 +38,6 @@ public class SeatFixesW9Tests
     }
 
     [Theory]
-    [InlineData("Cards/Furina/Generated/CrashingWaves.cs")]
     [InlineData("Cards/Prototype/Generated/ProtoFsCrashingWaves.cs")]
     [InlineData("Cards/Prototype/Generated/ProtoKkRiptide.cs")]
     public void Per_target_aoe_attacks_carry_vigor(string file)

@@ -143,21 +143,3 @@ def test_the_upgrade_moves_every_number_the_row_carries(overhaul):
     assert 'DynamicVars["DebuffDamage"].UpgradeValueBy(3m);' in src
 
 
-def test_the_tip_that_carried_the_pair_is_gone(overhaul):
-    """`EB-484` put the pair on a hover tip because a face is registered once
-    and cannot branch. It never had to branch. With both numbers printed and
-    live, a tip restating the SHEET's 7 and 10 beside a face printing the
-    folded ones would be `EB-441`'s own defect on the other surface."""
-    tips = (REPO / "klee-mod" / "KleeCode" / "Cards"
-            / "KokomiRiderTips.cs").read_text(encoding="utf-8")
-    assert "ForDebuffRider" not in tips
-    # The KEY is gone as a declaration; the paragraph explaining why it went
-    # still names it, which is the file's own convention for a retired rule.
-    assert "public const string DebuffRiderKey" not in tips
-    mod = (REPO / "klee-mod" / "KleeCode"
-           / "KleeMod.cs").read_text(encoding="utf-8")
-    assert "DebuffRiderKey" not in mod
-    undertow = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
-                / "Generated" / "ProtoKkUndertow.cs").read_text(
-                    encoding="utf-8")
-    assert "ForDebuffRider" not in undertow

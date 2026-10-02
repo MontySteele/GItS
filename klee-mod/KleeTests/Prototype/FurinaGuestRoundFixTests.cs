@@ -1,7 +1,6 @@
 #nullable enable
 
 using System.Linq;
-using KleeMod.Cards.Furina.Generated;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
@@ -58,62 +57,4 @@ public class FurinaGuestRoundFixTests
                         Il.Calls(typeof(FoldedPreview).GetMethod("Body")!));
     }
 
-    [Fact]
-    public void Curtain_rise_folds_the_same_body_as_soloist_on_the_stage()
-    {
-        var curtain = new ProtoFsCurtainRise();
-        var soloist = new SoloistsSolicitation();
-        var enemy = Seat.Furina(30).WithPower<VulnerablePower>(1).Creature;
-
-        // In a hand the base game names no body, and neither does the Stage
-        // face now; aimed, both take the aimed one.
-        Assert.Null(FoldedPreview.Body(true, curtain, CardPreviewMode.Normal,
-                                       null, enemy));
-        Assert.Same(enemy, FoldedPreview.Body(
-            true, curtain, CardPreviewMode.Normal, enemy, enemy));
-        // Off the Stage, `EB-598`'s front enemy stands for the other arms.
-        Assert.Same(enemy, FoldedPreview.Body(
-            false, curtain, CardPreviewMode.Normal, null, enemy));
-        Assert.NotNull(soloist);
-    }
-
-    [Fact]
-    public void Under_weak_both_faces_fold_her_weak_in_hand_and_aimed()
-    {
-        var furina = Seat.Furina().WithPower<WeakPower>(1);
-        var enemy = Seat.Furina(30).Creature;
-        var curtain = new ProtoFsCurtainRise();
-        var soloist = new SoloistsSolicitation();
-
-        var hand = FoldedPreview.Body(true, curtain, CardPreviewMode.Normal,
-                                      null, enemy);
-        // Weak is hers, so it folds whether or not a body is named.
-        Assert.Equal(Plain * 0.75m, Folded(furina, hand, Plain, curtain));
-        Assert.Equal(Branch * 0.75m, Folded(furina, hand, Branch, curtain));
-        Assert.Equal(Soloist * 0.75m, Folded(furina, null, Soloist, soloist));
-    }
-
-    [Fact]
-    public void Under_vulnerable_neither_face_folds_it_in_hand_and_both_do_aimed()
-    {
-        var furina = Seat.Furina();
-        var enemy = Seat.Furina(30).WithPower<VulnerablePower>(1).Creature;
-        var curtain = new ProtoFsCurtainRise();
-        var soloist = new SoloistsSolicitation();
-
-        // In hand: the seat saw Curtain Rise 10 / 19 beside Soloist 6. Now
-        // both print the written number.
-        var hand = FoldedPreview.Body(true, curtain, CardPreviewMode.Normal,
-                                      null, enemy);
-        Assert.Equal(Plain, Folded(furina, hand, Plain, curtain));
-        Assert.Equal(Branch, Folded(furina, hand, Branch, curtain));
-        Assert.Equal(Soloist, Folded(furina, null, Soloist, soloist));
-
-        // Aimed at the Vulnerable body: both fold it, the base game's way.
-        var aimed = FoldedPreview.Body(true, curtain, CardPreviewMode.Normal,
-                                       enemy, enemy);
-        Assert.Equal(Plain * 1.5m, Folded(furina, aimed, Plain, curtain));
-        Assert.Equal(Branch * 1.5m, Folded(furina, aimed, Branch, curtain));
-        Assert.Equal(Soloist * 1.5m, Folded(furina, enemy, Soloist, soloist));
-    }
 }

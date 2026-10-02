@@ -224,8 +224,6 @@ public class CoopSetTwoTests
         Assert.Null(typeof(ProtoFsRaiseAToast).GetProperty(
             "IsPlayable", HeadlessGame.All | System.Reflection.BindingFlags.DeclaredOnly));
 
-        FurinaStage.Enabled = false;
-        Assert.Equal(0, FurinaStage.ToastAmount(furina.Creature, 6));
     }
 
     [Fact]
@@ -412,8 +410,6 @@ public class CoopSetTwoTests
 
         var attack = Owned(new ProtoKkCoordinatedStrike(), ally);
         var play = Play(attack, ally);
-        var arm = KleeOverhaul.Enabled;
-        KleeOverhaul.Enabled = true;
         try
         {
             await knights.BeforeCardPlayed(play);
@@ -427,7 +423,6 @@ public class CoopSetTwoTests
         }
         finally
         {
-            KleeOverhaul.Enabled = arm;
         }
 
         // Nothing sets off before AfterCardPlayed.
@@ -575,17 +570,14 @@ public class CoopSetTwoTests
 
     private sealed class StageArm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
         internal StageArm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = true;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }

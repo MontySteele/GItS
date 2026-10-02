@@ -82,7 +82,9 @@ def test_the_lint_bites_when_a_card_stops_declaring_that_it_gains_block(
     are that shape. Without the explicit override the game would never offer
     them Nimble; this asserts the lint would say so rather than pass.
 
-    THE FIXTURE IS WARM-UP ACT (Furina) since 2026-09-26: Prune -- Little
+    THE FIXTURE IS BENNETT -- FANTASTIC VOYAGE (the Mondstadt companion
+    overhaul) since 2026-10-01, when Warm-Up Act's shipped class left with the
+    shipped kits. Before that it was Warm-Up Act since 2026-09-26: Prune -- Little
     Witch's Hunt, the card this used to strip, now declares a real BlockVar
     (its Klee-arm upgrade moves the Block through `{Block:diff()}`), so it is
     no longer the conditional-only shape.
@@ -94,21 +96,21 @@ def test_the_lint_bites_when_a_card_stops_declaring_that_it_gains_block(
     the one seam needed, so it is the one thing monkeypatched -- every other
     card still resolves to its real committed source.
     """
-    target = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina"
-              / "Generated" / "WarmupAct.cs")
+    target = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+              / "Generated" / "ProtoMcBennettFantasticVoyage.cs")
     original = target.read_text(encoding="utf-8")
     line = "    public override bool GainsBlock => true;\n"
     assert line in original, "the fixture card no longer declares GainsBlock"
 
-    broken = tmp_path / "WarmupAct.cs"
+    broken = tmp_path / "ProtoMcBennettFantasticVoyage.cs"
     broken.write_text(original.replace(line, ""), encoding="utf-8")
     real = lep._source_index()
-    assert "WarmupAct" in real
-    patched = dict(real, WarmupAct=broken)
+    assert "ProtoMcBennettFantasticVoyage" in real
+    patched = dict(real, ProtoMcBennettFantasticVoyage=broken)
     monkeypatch.setattr(lep, "_source_index", lambda: patched)
 
     out = "\n".join(lep.findings())
-    assert "warmup_act" in out, out
+    assert "proto_mc_bennett_fantastic_voyage" in out, out
     assert "nimble" in out, out
     # And the real committed card does NOT trip it -- the bite is the fixture's.
     monkeypatch.setattr(lep, "_source_index", lambda: real)

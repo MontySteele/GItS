@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
@@ -131,4 +130,3 @@ public sealed class SalonSolitaire : CustomRelicModel
         KleePck.Path("furina/relics/ethereal_spotlight.png")
         ?? base.BigIconPath;
 }
-#endif

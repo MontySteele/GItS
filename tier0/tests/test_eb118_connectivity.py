@@ -359,10 +359,6 @@ def test_the_universal_verb_class_is_the_verb_TRIGGER_class():
                   "AfterCardPlayed", "AfterCardDrawn"):
         assert ccr.CANON_UNIVERSAL_VERB.search(
             f"public override Task {token}(x) {{}}")
-    csharp = (REPO / "klee-mod" / "KleeCode" / "Powers"
-              / "DemolitionPowers.cs").read_text(encoding="utf-8")
-    workshop = csharp.split("class ExplosivesWorkshopPower", 1)[1]
-    assert ccr.CANON_UNIVERSAL_VERB.search(workshop)
 
 
 # --- the effect TREE, not the top level -------------------------------------

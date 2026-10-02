@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using KleeMod.Cards.Furina;
-using KleeMod.Cards.Furina.Generated;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Unlocks;
 
@@ -30,24 +29,13 @@ public sealed class FurinaCardPool : CardPoolModel
 
     /// <summary>
     /// THE OFFER (<c>GetUnlockedCards</c>, the sole door into reward rolls,
-    /// the shop and transforms). Under the Stage, its roster's pool, her
-    /// Ancients and the co-op tier (<c>FurinaStageRoster.OfferablePool</c>);
-    /// with it off (the <c>-p:ShippedKits=true</c> gate only), the shipped
-    /// offer less every prototype row.
+    /// the shop and transforms): the Stage roster's pool, her Ancients and
+    /// the co-op tier (<c>FurinaStageRoster.OfferablePool</c>).
     /// </summary>
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards)
     {
-#if PROTOTYPE_CARDS
-        if (Powers.FurinaStage.Enabled)
-        {
-            return Powers.FurinaStageRoster.OfferablePool();
-        }
-#endif
-        var current = PrototypeCards.Ids("furina");
-        return base.FilterThroughEpochs(unlockState, cards)
-            .Where(card => !FurinaOffPoolCards.Ids.Contains(card.Id)
-                           && !current.Contains(card.Id));
+        return Powers.FurinaStageRoster.OfferablePool();
     }
 
     /// <summary>
@@ -62,7 +50,6 @@ public sealed class FurinaCardPool : CardPoolModel
         PrototypeCards.For("furina")
             .Concat(RosterAncientCards.Furina)
             .Concat(FurinaOffPoolCards.All)
-            .Concat(FurinaCardRoster.All)
             .Distinct()
             .ToArray();
 }
@@ -79,30 +66,13 @@ public static class FurinaOffPoolCards
 
     private static List<CardModel> BuildAll()
     {
-        var cards = new List<CardModel>(GuestStarRoster.All)
-        {
-            ModelDb.Card<LetThePeopleRejoice>(),
-            ModelDb.Card<EtherealSpotlight>(),
-            ModelDb.Card<CenterStageOption>(),
-            ModelDb.Card<GuestCastOption>(),
-        };
-        // EB-150: the GENERATED mode faces, on the same footing as the two
-        // hand-written selector options above. A choose-one option card that
-        // is in no pool does not read as null on CardModel.Pool -- the getter
-        // falls through to MockCardPool, whose GenerateAllCards throws
-        // "You monster!" inside NChooseACardSelectionScreen._Ready(), leaving
-        // the overlay's buttons unfetched; the NullReferenceException the
-        // 2026-08-26 playtest logged in AfterOverlayShown() is that, and the
-        // awaited selection never returns. The roster is emitted by
-        // tools/gen_klee_cards.py, so a new modal card joins this list
-        // without anyone having to remember to add it.
-        cards.AddRange(FurinaModalOptions.All);
-#if PROTOTYPE_CARDS
-        // R276 batch two: Arkhe Alignment's two hand-written choice faces,
-        // on the Ethereal Spotlight options' footing above.
+        var cards = new List<CardModel>();
+        // R276 batch two: Arkhe Alignment's two hand-written choice faces. A
+        // choose-one option card in no pool falls through to MockCardPool,
+        // whose GenerateAllCards throws "You monster!" inside
+        // NChooseACardSelectionScreen._Ready() (EB-150).
         cards.Add(ModelDb.Card<Cards.Prototype.ArkheOusiaOption>());
         cards.Add(ModelDb.Card<Cards.Prototype.ArkhePneumaOption>());
-#endif
         return cards;
     }
 }

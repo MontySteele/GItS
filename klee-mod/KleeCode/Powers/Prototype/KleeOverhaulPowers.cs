@@ -122,7 +122,7 @@ public sealed class WitchesCirclePower : PowerModel, ILocalizationProvider
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (!KleeOverhaul.Enabled || Owner == null) return;
+        if (Owner == null) return;
         if (cardPlay.Card?.Owner?.Creature != Owner) return;   // co-op: yours
         if (!CompanionHexerei.CountsAsCompanion(cardPlay.Card)) return;
         var combat = Owner.CombatState;

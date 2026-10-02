@@ -433,25 +433,6 @@ def _cs(rel: str) -> str:
     return (MOD / rel).read_text(encoding="utf-8")
 
 
-def test_every_named_verb_reaches_its_documented_elemental_door():
-    """MATRIX sec.4, the C# column. The door is the cell: `ElementalHit.Deal`
-    means `ValueProp.Unpowered` with `dealer: null`, which is the whole of
-    "this verb is damage-only to every base-game trigger"."""
-    for verb, (rel, door, _powered) in CS_VERB_DOORS.items():
-        assert door in _cs(rel), verb
-
-
-def test_the_three_verbs_that_refuse_the_dealers_terms_still_refuse_them():
-    """`EB-343` (R248), `EB-334` (R246) and `EB-588`, pinned as call-site
-    text. The Klee arm spells its refusal as a named method instead, which
-    `KleeTests` pins structurally; these three spell it as an argument, which
-    only a source read can see."""
-    for verb, (rel, _door, powered) in CS_VERB_DOORS.items():
-        if powered is None:
-            continue
-        assert powered in _cs(rel), verb
-
-
 def test_the_stage_refuses_the_dealers_terms_in_both_engines():
     """DISAGREEMENT D3, REPAIRED, and still pinned from both sides in one
     place so a later move on either side has to come here and decide.
@@ -574,28 +555,6 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaRules.cs"]
-
-
-def test_no_kit_verb_hands_the_game_a_card_source_for_its_debuff():
-    """MATRIX T8 / DISAGREEMENT D7. A verb's debuff carries `cardSource: null`
-    -- the Plan's, the reaction's and the detonation's alike -- which is what
-    keeps `UnsettlingLamp` off it. Pinned so that handing one a cardSource is
-    a deliberate re-answer of the T8 column rather than a copy-paste."""
-    for rel, needle in (
-            ("Powers/Prototype/KokomiPlan.cs",
-             "applier: kokomi,\n                cardSource: null"),
-            ("Powers/DemolitionPowers.cs",
-             "applier: Owner, cardSource: null"),
-    ):
-        assert needle in _cs(rel), rel
-
-
-def test_the_mod_ships_no_potion_so_potion_damage_is_not_a_kit_verb():
-    """The matrix's one deliberate omission, asserted rather than assumed: all
-    three characters return the base game's pool, so there is no kit potion
-    verb for any trigger to see."""
-    for rel in ("Klee.cs", "Furina.cs", "Kokomi.cs"):
-        assert "PotionPool<SilentPotionPool>()" in _cs(rel), rel
 
 
 # ==========================================================================

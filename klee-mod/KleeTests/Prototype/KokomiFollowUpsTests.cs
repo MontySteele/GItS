@@ -28,11 +28,10 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiFollowUpsTests : IDisposable
 {
-    private readonly bool _kokomi = KokomiOverhaul.Enabled;
 
-    public KokomiFollowUpsTests() => KokomiOverhaul.Enabled = true;
+    public KokomiFollowUpsTests() { }
 
-    public void Dispose() => KokomiOverhaul.Enabled = _kokomi;
+    public void Dispose() { }
 
     [Fact]
     public void Both_cancels_give_the_card_back()

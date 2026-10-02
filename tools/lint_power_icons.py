@@ -73,16 +73,10 @@ ICON_DEBT: dict[str, str] = {
         "Fontaine ancient payoff; no icon planned, renders the placeholder",
     "CannonFireSupportPower":
         "Fontaine companion payoff; no icon planned, renders the placeholder",
-    "ExplosivesWorkshopPower":
-        "Klee demolition payoff; no icon planned, renders the placeholder",
     "MasqueRedDeathPower":
         "Bond of Life carrier; the end-of-turn docket titles it, the badge does not",
-    "MetallicizePower":
-        "base-game-shaped block power; no icon planned, renders the placeholder",
     "NightVigilPower":
         "Fontaine ancient payoff; no icon planned, renders the placeholder",
-    "SalonCapUpPower":
-        "Casting Call's cap raise; no icon planned, renders the placeholder",
 }
 
 # THE AURA CONCATENATION'S COVERAGE LIST (shape 2). `Element` -> the

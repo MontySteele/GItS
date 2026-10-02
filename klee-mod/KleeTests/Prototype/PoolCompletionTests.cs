@@ -26,19 +26,13 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class PoolCompletionTests : IDisposable
 {
-    private readonly bool _kokomi = KokomiOverhaul.Enabled;
-    private readonly bool _stage = FurinaStage.Enabled;
 
     public PoolCompletionTests()
     {
-        KokomiOverhaul.Enabled = true;
-        FurinaStage.Enabled = true;
     }
 
     public void Dispose()
     {
-        KokomiOverhaul.Enabled = _kokomi;
-        FurinaStage.Enabled = _stage;
     }
 
     private static T Upgraded<T>() where T : CardModel, new()

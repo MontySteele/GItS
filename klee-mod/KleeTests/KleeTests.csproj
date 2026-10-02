@@ -23,68 +23,13 @@
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
 
-  <!-- THE QUARANTINE, on the test side. `Prototype/` holds pins for rules that
-       exist only under `-p:PrototypeCards=true` (KleeCode.csproj); without the
-       property the rule's types are not compiled, so a pin against them would
-       not compile either. Same switch, same condition, so `dotnet test` and
-       `dotnet test -p:PrototypeCards=true` both build.
-
-       PROTOTYPE_CARDS is defined here as well as removed-from, because one fact
-       has to be asserted BOTH ways round: that the base Spark rule is retired
-       under the flag and still runs without it. A pin that could only be
-       compiled on one side of the switch could not say the second half. -->
-  <PropertyGroup Condition="'$(PrototypeCards)' == 'true'">
-    <DefineConstants>$(DefineConstants);PROTOTYPE_CARDS</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(PrototypeCards)' != 'true'">
-    <Compile Remove="Prototype/**/*.cs" />
-  </ItemGroup>
-
-  <!-- The Klee overhaul arm, mirrored here so `-p:KleeOverhaul=true` builds
-       the test project too. The arm's pins do NOT need it: the rules engine
-       compiles under PrototypeCards alone and `KleeOverhaul.Enabled` is
-       settable, so one build asserts both sides of the switch. This exists so
-       a dev running the game's own build line over the tests gets the same
-       DefineConstants and cannot hit a "property means nothing here" surprise. -->
-  <PropertyGroup Condition="'$(KleeOverhaul)' == 'true'">
-    <DefineConstants>$(DefineConstants);KLEE_OVERHAUL</DefineConstants>
-  </PropertyGroup>
-
-  <!-- The Mondstadt companion overhaul arm, mirrored here on exactly the terms
-       above and for the same reason. Its pins do not need the property either:
-       `CompanionOverhaul.Enabled` is settable, so one build asserts both sides
-       of the switch, including the flag-off acceptance condition: that
-       CompanionPool.All is the generated roster, unchanged. -->
-  <PropertyGroup Condition="'$(CompanionOverhaul)' == 'true'">
-    <DefineConstants>$(DefineConstants);COMPANION_OVERHAUL</DefineConstants>
-  </PropertyGroup>
-
-  <!-- The Kokomi overhaul arm, mirrored here on exactly the terms above and
-       for the same reason. Its pins do not need the property either:
-       `KokomiOverhaul.Enabled` is settable, so one build asserts both sides of
-       the switch, including the flag-off acceptance condition: that her
-       starter, her starting relic and her offerable pool are the shipped ones,
-       unchanged. -->
-  <PropertyGroup Condition="'$(KokomiOverhaul)' == 'true'">
-    <DefineConstants>$(DefineConstants);KOKOMI_OVERHAUL</DefineConstants>
-  </PropertyGroup>
-
-  <!-- The Furina stage arm, mirrored here on exactly the terms above and for
-       the same reason. Its pins do not need the property: FurinaStage.Enabled
-       is settable, so one build asserts both sides of the switch, including
-       the flag-off acceptance condition: that her starter deck, her starting
-       relic and her damage pipeline are the shipped ones, unchanged. -->
   <!-- THE ELEMENT PORT's two switches (KleeMod.Elements.TriggerRules),
-       defaulted on by Directory.Build.props. Unlike the arms they compile in
-       every build: they switch the shared reaction layer, not a kit. -->
+       mirrored from KleeCode.csproj and defaulted on by Directory.Build.props. -->
   <PropertyGroup Condition="'$(SwirlPays)' == 'true'">
     <DefineConstants>$(DefineConstants);SWIRL_PAYS</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(CrystallizeKeepsAura)' == 'true'">
     <DefineConstants>$(DefineConstants);CRYSTALLIZE_KEEPS_AURA</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(FurinaStage)' == 'true'">
-    <DefineConstants>$(DefineConstants);FURINA_STAGE</DefineConstants>
   </PropertyGroup>
 
   <!-- The Teyvat run frame arm, mirrored here on exactly the terms above and

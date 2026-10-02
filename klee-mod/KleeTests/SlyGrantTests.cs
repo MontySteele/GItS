@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
 using KleeMod.Cards.Kokomi;
-using KleeMod.Cards.Kokomi.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.CardSelection;
@@ -73,15 +72,6 @@ public class SlyGrantTests
     }
 
     [Fact]
-    public void A_kit_card_is_never_a_target()
-    {
-        // The v1.9 invariant: the Burst is never fodder. The sim spells the
-        // same clause on the same pool (`not c.kit_card`).
-        Assert.False(SlyGrant.Eligible(new SparksNSplash()));
-        Assert.False(SlyGrant.Eligible(new CeremonialGarment()));
-    }
-
-    [Fact]
     public void A_card_already_sly_this_turn_is_skipped()
     {
         // WHY THE CLAUSE EXISTS: a second grant in one turn must pick a
@@ -126,20 +116,6 @@ public class SlyGrantTests
         Assert.DoesNotContain("CardCmd.AutoPlay", calls);
         Assert.DoesNotContain("CardCmd.Discard", calls);
         Assert.DoesNotContain("CardModel.AddKeyword", calls);
-    }
-
-    [Fact]
-    public void Every_carrier_routes_through_the_one_home()
-    {
-        // One C# home for the verb, the RecallFromExhaust discipline. A card
-        // that re-spelled the filter would drift from the other carrier the
-        // first time either changed.
-        foreach (var name in new[] { "TheGunbaiTurns", "RaiseTheSashimono" })
-        {
-            var calls = Il.Calls(Il.Method(name, "OnPlay"));
-            Assert.Contains("SlyGrant.Grant", calls);
-            Assert.DoesNotContain("CardCmd.ApplySingleTurnSly", calls);
-        }
     }
 
     [Fact]

@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -290,4 +289,3 @@ public sealed class OpeningNight : CustomRelicModel
     protected override string BigIconPath =>
         KleePck.Path(FurinaStageRelics.Icon("opening_night")) ?? base.BigIconPath;
 }
-#endif

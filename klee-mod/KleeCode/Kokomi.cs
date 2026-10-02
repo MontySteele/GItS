@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using BaseLib.Abstracts;
 using BaseLib.Utils.NodeFactories;
 using Godot;
-using KleeMod.Cards.Generated;
-using KleeMod.Cards.Kokomi.Generated;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Characters;
 using MegaCrit.Sts2.Core.Models;
@@ -74,103 +72,15 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         ModelDb.PotionPool<SilentPotionPool>();
 
     /// <summary>
-    /// TWELVE cards, not ten -- the Silent shape, [USER]-ruled in the v0.4
-    /// starter rework and transcribed from characters/kokomi.yaml
-    /// `starting_deck` in sheet order.
-    ///
-    /// Two reasons, both hers. (1) Her opening deck already exhausts, and a
-    /// 10-card deck that mills itself risks decking out early; the extra two
-    /// are the buffer. (2) Starters are supposed to be bad and supposed to
-    /// leave -- two more mediocre cards is a real dilution cost, and
-    /// Tactical Retreat's thinning is how she pays it down.
-    ///
-    /// Shape: 4 Strike + 4 Defend + 2 Companions + 2 mechanic cards (the
-    /// Charge teacher and the exhaust teacher). NO AoE, by ruling: "no one
-    /// starts the game with AoE; if you need it, you draft it" -- Surging
-    /// Shoal and Waterspout both stay in the pool.
-    ///
-    /// Sayu is the RANDOMIZED slot (Sayu or Shinobu, rolled off the run
-    /// seed); Gorou always enlists, for lore reasons (R52 N3). The swap
-    /// happens in KokomiStartingCompanionsPatch, because seeded RNG does not
-    /// exist yet at the moment this property is read.
+    /// The base Strike x4, Defend x4, Kurage's Oath and Slack Water
+    /// (<c>KokomiOverhaulRoster.StartingDeck</c>).
     /// </summary>
-    public override IEnumerable<CardModel> StartingDeck
-    {
-        get
-        {
-#if PROTOTYPE_CARDS
-            // QUARANTINED, THE KOKOMI OVERHAUL'S ONE STARTER SEAM (the ruled
-            // brief kokomi-brief-2026-09-01.md sec.9; sim twin
-            // `tier0/content/loader._starter_ids`, the same one seam). It comes
-            // FIRST because the two prototype arms on this character are
-            // ALTERNATIVES, not layers: the Kurage's memory is priced inside
-            // the Charge bank this arm retires, and a dev build compiles both.
-            // With `KokomiOverhaul.Enabled` off -- which is every build that
-            // did not ask for `-p:KokomiOverhaul=true` -- this branch does not
-            // run and the list below is byte for byte what it was.
-            if (Powers.KokomiOverhaul.Enabled)
-            {
-                return Powers.KokomiOverhaulRoster.StartingDeck();
-            }
-#endif
-            return Template;
-        }
-    }
+    public override IEnumerable<CardModel> StartingDeck =>
+        Powers.KokomiOverhaulRoster.StartingDeck();
 
-    private static CardModel[] Template => new CardModel[]
-    {
-        ModelDb.Card<WatersEdge>(),
-        ModelDb.Card<WatersEdge>(),
-        ModelDb.Card<WatersEdge>(),
-        ModelDb.Card<WatersEdge>(),
-        ModelDb.Card<CoralGuard>(),
-        ModelDb.Card<CoralGuard>(),
-        ModelDb.Card<CoralGuard>(),
-        ModelDb.Card<CoralGuard>(),
-        ModelDb.Card<GorouInuzakaCharge>(),
-        ModelDb.Card<SayuDarumaGift>(),
-#if PROTOTYPE_CARDS
-        // QUARANTINED, v4 BASE KIT (sec.12.6 items 5 and 6). THE ONE STARTER
-        // SEAM: with the flag on this slot is "To the Front!" and with it off
-        // it is Bake-Kurage, byte for byte. The sheet does not move -- only
-        // this list does, and only under the flag. The reasoning, the three
-        // Musters that lost and the sim twin (`loader._starter_ids`) are on
-        // KurageMemory.StarterSlotEleven.
-        Powers.KurageMemory.StarterSlotEleven(),
-#else
-        ModelDb.Card<BakeKurage>(),
-#endif
-        ModelDb.Card<TacticalRetreat>(),
-    };
-
-    /// <summary>
-    /// Pearl of Wisdom. It is the FICTION of the exhaust rule and the place
-    /// its tooltip lives; the accrual itself is gated on character identity
-    /// in KokomiResourceHooks, so a player who somehow loses the relic does
-    /// not lose the character.
-    /// </summary>
-    public override IReadOnlyList<RelicModel> StartingRelics
-    {
-        get
-        {
-#if PROTOTYPE_CARDS
-            // QUARANTINED, THE KOKOMI OVERHAUL'S ONE RELIC SEAM (the ruled
-            // brief draft 6 sec.4: Tamakushi Casket). The Pearl's printed body IS the
-            // exhaust funnel the brief retires, so a run holding it would print
-            // a rule that no longer happens; the Casket takes the slot and
-            // carries the pulse instead. Reasoning in full on
-            // KokomiOverhaulRoster. With the arm off this branch does not run.
-            if (Powers.KokomiOverhaul.Enabled)
-            {
-                return Powers.KokomiOverhaulRoster.StartingRelics();
-            }
-#endif
-            return new RelicModel[]
-            {
-                ModelDb.Relic<Relics.PearlOfWisdomRelic>(),
-            };
-        }
-    }
+    /// <summary>Tamakushi Casket (<c>KokomiOverhaulRoster.StartingRelics</c>).</summary>
+    public override IReadOnlyList<RelicModel> StartingRelics =>
+        Powers.KokomiOverhaulRoster.StartingRelics();
 
     // ART: none of these files exist yet (Track D). Every KleePck.Path call
     // returns null on a miss and the game falls back to its own defaults, so

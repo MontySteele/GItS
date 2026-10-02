@@ -337,7 +337,6 @@ public class KleePlaytest20260924Tests
         var klee = Seat.Klee();
         var furina = Seat.Furina();
         var attacker = Seat.Klee(4).Creature;
-        KleeOverhaul.Enabled = true;
         ProtoBombPower.Preempted.Clear();
         try
         {
@@ -361,7 +360,6 @@ public class KleePlaytest20260924Tests
         finally
         {
             ProtoBombPower.Preempted.Clear();
-            KleeOverhaul.Enabled = KleeOverhaul.DefaultEnabled;
         }
     }
 }

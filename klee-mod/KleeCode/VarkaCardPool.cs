@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -43,4 +42,3 @@ public sealed class VarkaCardPool : CardPoolModel
             .Concat(VarkaModalOptions.All)
             .ToArray();
 }
-#endif

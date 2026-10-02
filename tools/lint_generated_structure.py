@@ -104,7 +104,9 @@ from tools.gen_klee_cards import (  # noqa: E402
 # dir cannot drift apart from what actually shipped.
 from tools.gen_prototype_cards import DIR_PROFILE as PROTOTYPE_PROFILE  # noqa: E402
 
-PROFILES = (KLEE_PROFILE, FURINA_PROFILE, KOKOMI_PROFILE, PROTOTYPE_PROFILE)
+# The shipped sheets emit no C# since legacy cleanup stage 5: the prototype
+# surface is the whole generated corpus.
+PROFILES = (PROTOTYPE_PROFILE,)
 
 # `new DamageVar(...)` declares the var named "Damage"; the typed subclasses
 # are uniformly <Name>Var. `new DynamicVar("Foo", ...)` / `new
@@ -306,30 +308,8 @@ MECHANICS = (
             "rider and the count go with it"
         ),
     ),
-    Mechanic(
-        name="bonus_formula",
-        applies=_has_bonus_formula,
-        # Two legal rails, on purpose. A ratio against a CAPPED resource
-        # (N_per_M_fanfare, N_per_M_charge) becomes a Calculated var triple
-        # with a multiplier. A slope on an UNCAPPED running counter
-        # (2_per_detonation_this_combat) becomes a BonusPer var multiplied
-        # inline at play, because there is no bounded resource to divide.
-        # Either rail satisfies the law; emitting NEITHER is the defect.
-        markers=(
-            "CalculatedDamageVar",
-            "CalculatedBlockVar",
-            "CalculationBaseVar",
-            "BonusPer",
-        ),
-        why=(
-            "B1 exactly: the rider is a Calculated var triple. Without it the "
-            "card emits its flat printed number and the face still reads as "
-            "though it scales"
-        ),
-    ),
-    # --- Fanfare rework (2026-07-28). Three rows, required by the brief's
-    # gate clause: "add L3 rows for any new invisible mechanic -- the negative
-    # floor and the keyword grants qualify."
+    # (bonus_formula, fanfare_keywords and crash_fanfare left with the
+    # shipped sheets' mechanics, legacy cleanup stage 5.)
     Mechanic(
         name="retain",
         applies=lambda c: bool(c.get("retain")),
@@ -341,36 +321,6 @@ MECHANICS = (
             "IDENTICALLY the turn it is played; the only symptom is that it "
             "was discarded on some earlier turn the player meant to bank it. "
             "The exhaust/innate row above, one field over"
-        ),
-    ),
-    Mechanic(
-        name="fanfare_keywords",
-        applies=lambda c: any(
-            e.get("op") in ("raise_fanfare_cap", "gain_fanfare_floor")
-            for e in _effects(c)),
-        markers=("RaiseFanfareCap", "GainFanfareFloor"),
-        why=(
-            "Track B: these two keywords ARE the value that used to arrive "
-            "invisibly -- every Power silently granted 5 Fanfare floor (rares "
-            "8) and no card said so. The whole track is that grant becoming a "
-            "printed line. A generated card that dropped the call would print "
-            "the keyword and grant nothing, which is strictly worse than the "
-            "invisible rule it replaced: the face would now be LYING rather "
-            "than merely silent"
-        ),
-    ),
-    Mechanic(
-        name="crash_fanfare",
-        applies=lambda c: any(e.get("op") == "crash_fanfare"
-                              for e in _effects(c)),
-        markers=("DropFanfareToFloor",),
-        why=(
-            "Track C.2: the Hyperbeam's PRICE. Drop this call and The Final "
-            "Verdict still deals damage equal to Fanfare and simply never "
-            "pays for it -- a card that reads as a costed finisher and "
-            "behaves as a free one. The damage half is visible on screen and "
-            "the cost half is a number moving in a meter, so nothing about "
-            "playing the card would look wrong"
         ),
     ),
 )

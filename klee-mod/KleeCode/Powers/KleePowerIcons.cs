@@ -27,15 +27,6 @@ internal static class KleePowerIcons
     {
         SparkPower => KleePck.Path("klee/powers/spark.png"),
         BombPower => KleePck.Path("klee/powers/bomb.png"),
-        BurstMeterPower => KleePck.Path("klee/powers/burst.png"),
-        BombDamageUpPower => KleePck.Path("klee/powers/bomb_damage_up.png"),
-        DetonationSplashPower => KleePck.Path("klee/powers/detonation_splash.png"),
-        DetonationVulnPower => KleePck.Path("klee/powers/detonation_vuln.png"),
-        BombAndSparkPerTurnPower => KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
-        SparkPerTurnPower => KleePck.Path("klee/powers/spark_per_turn.png"),
-        ZeroCostAttacksUpPower => KleePck.Path("klee/powers/zero_cost_attacks_up.png"),
-        SparkThresholdDownPower => KleePck.Path("klee/powers/spark_threshold_down.png"),
-#if PROTOTYPE_CARDS
         // QUARANTINED (the Sparks alternative-cost arm). It borrows the icon of
         // the power it replaces -- True Spark Knight's old body was
         // spark_threshold_down and the re-authored card keeps the id, the
@@ -314,8 +305,6 @@ internal static class KleePowerIcons
         // every borrow above: the arm copy is the shipped clause at a halved
         // threshold, so it wears the shipped power's own sigil rather than
         // asking for art a prototype may not keep.
-        FanfareAttackPer5Power =>
-            KleePck.Path("furina/powers/rising_ovation.png"),
         // R276: the Ancient's Stage-arm power wears the Ancient's own icon.
         StageRaisePerTurnPower =>
             KleePck.Path("furina/powers/all_the_worlds_a_stage.png"),
@@ -460,10 +449,6 @@ internal static class KleePowerIcons
         EyeOfStormterrorPower =>
             KleePck.Path("varka/powers/converging_winds.png"),
         TheOrderAnswersPower => KleePck.Path("klee/powers/study_buddy.png"),
-#endif
-        ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
-        AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
-        SparksNSplashPower => KleePck.Path("klee/powers/sparks_n_splash.png"),
         // Companion summons/auras. These four had NO case at all and fell to
         // `_ => null`, i.e. the base-game placeholder -- the gap the 2026-07-24
         // sweep found from Oz and Solar Isotoma. Wiring the paths ahead of the
@@ -491,28 +476,6 @@ internal static class KleePowerIcons
         // placeholders. Sprint 2 Track E closed that by fetching the art
         // first: every path below has a file, cut from Furina's own talent and
         // constellation sigils. See docs/archive/icon-gap-2026-07-24.md.
-        FanfareMeterPower => KleePck.Path("furina/powers/fanfare.png"),
-        FanfareAttackPer10Power => KleePck.Path("furina/powers/rising_ovation.png"),
-        SalonMemberPower => KleePck.Path("furina/powers/salon_member.png"),
-        SalonDamageUpPower => KleePck.Path("furina/powers/grand_salon.png"),
-        EncorePerTurnPower => KleePck.Path("furina/powers/all_the_worlds_a_stage.png"),
-
-        // The Spotlight family. The old entry matched the SpotlightPower BASE
-        // and so read as a handful of powers; it was in fact TEN distinct
-        // powers all rendering Dodoco's Duet. Every one is now named, and the
-        // six that derive from SpotlightPower MUST precede any base-class
-        // pattern or C# would match the base first and silently collapse them
-        // all back to one icon.
-        CenterStagePower => KleePck.Path("furina/powers/center_stage.png"),
-        GuestCastPower => KleePck.Path("furina/powers/guest_cast.png"),
-        SpotlightDiscountPower => KleePck.Path("furina/powers/leading_role.png"),
-        SpotlightDrawPower => KleePck.Path("furina/powers/supporting_cast.png"),
-        SpotlightMultBonusPower => KleePck.Path("furina/powers/top_billing.png"),
-        SpotlightMultBonusTurnPower => KleePck.Path("furina/powers/limelight.png"),
-        SpotlightFlatDamagePower => KleePck.Path("furina/powers/star_of_the_show.png"),
-        SpotlightFlatDamageTurnPower => KleePck.Path("furina/powers/stage_lights.png"),
-        OvationSpendBoostPower => KleePck.Path("furina/powers/standing_ovation.png"),
-        SpotlightEncoreFirstPower => KleePck.Path("furina/powers/ovation_trickle.png"),
 
         // Curtain Call's activity-triggered set (R85), shipped by the "Take a
         // Bow" consolidation sprint. Paths are wired AHEAD of the art, which
@@ -522,18 +485,12 @@ internal static class KleePowerIcons
         // and the miss is logged ONCE by name instead of being invisible.
         // Named individually rather than grouped -- the two Stagehands halves
         // are separate powers and a shared icon would read as intentional.
-        SalonDeployBlockPower => KleePck.Path("furina/powers/fortissimo_guard.png"),
-        SalonBowBlockPower => KleePck.Path("furina/powers/stagehands.png"),
-        SalonBowEncorePower => KleePck.Path("furina/powers/stagehands_encore.png"),
         CrossExaminationPower => KleePck.Path("furina/powers/courtroom_drama.png"),
-        EncoreSpendDrawPower => KleePck.Path("furina/powers/the_gallery_stirs.png"),
         FirstAttackDrawPower => KleePck.Path("furina/powers/quick_change.png"),
 
         // A7 (2026-07-29), the last sheet card to reach C#. Same path-ahead-of-
         // art policy as the block above: null until the PNG lands, and R13
         // stops it from being an invisible omission in the meantime.
-        FanfareDeltaBlockPower => KleePck.Path(
-            "furina/powers/unheard_confession.png"),
 
         // KOKOMI (EB-67). This block did not exist at all: every one of her six
         // powers fell to `_ => null` and drew the base-game placeholder, which
@@ -548,31 +505,10 @@ internal static class KleePowerIcons
         // bake_kurage.png -- that one is the CREATURE on the field (the
         // end-of-turn attribution docket), this one is the status badge. Both
         // ship; they are different sizes and different jobs.
-        KurageSummonPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
-        KurageWardPower => KleePck.Path("kokomi/powers/kurages_oath.png"),
-        KurageAmpPower => KleePck.Path("kokomi/powers/before_sun_and_moon.png"),
-        CeremonialGarmentPower => KleePck.Path(
-            "kokomi/powers/ceremonial_garment.png"),
-        PreventExhaustWardPower => KleePck.Path(
-            "kokomi/powers/vigil_of_the_deep.png"),
-        ChargePerTurnPower => KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
-
-        // NO SpotlightPower base case, deliberately. A future subclass added
-        // without an icon should fall to `_ => null` and show the base-game
-        // placeholder -- which reads as "no art yet" -- rather than inherit a
-        // sibling's sigil, which reads as intentional and is the exact failure
-        // this whole sweep was cleaning up. R13 turns that into a boot failure
-        // rather than something only a manual sweep would find.
 
         AuraPower aura => KleePck.Path(
             "klee/powers/aura_" + aura.Element.ToString().ToLowerInvariant() + ".png"),
 
-        // EncoreMeterPower and FurinaBurstMeterPower are absent on purpose:
-        // sprint 2 E1 retired both as displays (Encore's ambient home is the
-        // Salon stage ribbon, Burst's is the overhead gauge) and nothing
-        // applies them any more. They stay registered only so a mid-combat
-        // save written before the retirement still loads. R13 exempts them.
         _ => null,
     };
 
@@ -582,9 +518,6 @@ internal static class KleePowerIcons
     /// </summary>
     internal static readonly Dictionary<Type, string> IconExempt = new()
     {
-        [typeof(EncoreMeterPower)] = "retired display (sprint 2 E1); save-compat only",
-        [typeof(FurinaBurstMeterPower)] = "retired display (sprint 2 E1); save-compat only",
-        [typeof(SpotlightPower)] = "abstract base; every concrete subclass is named",
     };
 }
 

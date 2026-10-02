@@ -311,7 +311,6 @@ public sealed class KnightsOfFavoniusPower : PowerModel, ILocalizationProvider
 
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
-        if (!KleeOverhaul.Enabled) return Task.CompletedTask;
         if (CoopSet.IsAnotherPlayersAttack(cardPlay, Owner))
         {
             Record.Begin(cardPlay.Card);

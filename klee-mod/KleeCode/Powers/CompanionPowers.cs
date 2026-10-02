@@ -364,9 +364,6 @@ public sealed class WitchsFlamePower : PowerModel, ILocalizationProvider
             await CreatureCmd.Damage(
                 choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
                 ValueProp.Unpowered, dealer: null, cardSource: null, cardPlay: null);
-            await KleeBurstResource.Gain(
-                choiceContext, Owner, CompanionConstants.WitchsFlameBurst,
-                cardSource: null);
         }
     }
 }
@@ -508,7 +505,8 @@ public sealed class AttackUpThisTurnPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Bennett Passion's rider (buff_next_attack): your NEXT attack card deals
+/// The buff_next_attack rider (Chevreuse, Vanguard's Valor, since the shipped
+/// Bennett card left at legacy cleanup stage 5): your NEXT attack card deals
 /// +Amount per hit, then the whole stack is consumed. tier0 resolve_card
 /// pops next_attack_up into the play's attack bonus, so the bonus covers
 /// every hit of that one card (its repeat tail included -- same CardPlay)
@@ -519,7 +517,7 @@ public sealed class NextAttackUpPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Passion Overload"),
+        ("title", "Vanguard's Valor"),
         ("description",
             "Your next Attack deals [blue]{Amount}[/blue] additional damage."),
     };
@@ -605,47 +603,3 @@ public sealed class ShatterBonusPower : PowerModel, ILocalizationProvider
         dealer?.Powers.OfType<ShatterBonusPower>().FirstOrDefault()?.Amount ?? 0;
 }
 
-/// <summary>
-/// Metallicize -- Gorou, Forward Unto Victory (Inazuma roster, playtest sprint).
-///
-/// TIMING IS THE SIM'S, NOT THE TABLETOP CONVENTION. Slay the Spire's
-/// Metallicize grants Block at END of turn; tier0's grants it at turn START
-/// (engine/powers.py on_turn_start). Parity with the sim is the contract here,
-/// so this fires at turn start, and the difference is deliberate rather than
-/// an oversight -- start-of-turn Block survives the block-reset and is
-/// therefore strictly better, which is priced into every number her sheet was
-/// measured with. Changing it to end-of-turn is a BALANCE change and needs a
-/// re-measure, not a bugfix.
-///
-/// No native equivalent exists in the game assembly (there is no
-/// MetallicizePower and no PlatedArmor), so this is ours.
-/// </summary>
-public sealed class MetallicizePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Metallicize"),
-        ("description",
-            "At the start of your turn, gain [blue]{Amount}[/blue] "
-          + "[gold]Block[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
-    {
-        if (player.Creature != Owner) return;
-        // NC-11 (R116, Errata Batch 2 item 4): power-sourced block is RAW.
-        // Unpowered, not Move -- StS applies Frail to CARD block via
-        // AbstractCard.applyPowersToBlock, and Dexterity's additive hook
-        // carries the same `IsPoweredCardOrMonsterMoveBlock` predicate, so
-        // passive block (Metallicize, Crystallize, Solar Isotoma) is exempt
-        // from both. tier0 writes `fighter.block +=` at
-        // `powers.on_turn_start` for exactly that reason, and R116 ruled the
-        // exemption canonical.
-        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null);
-    }
-}

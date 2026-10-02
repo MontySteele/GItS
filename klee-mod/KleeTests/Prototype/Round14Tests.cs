@@ -115,16 +115,6 @@ public class Round14Tests
             c => c.Contains("ForPlanElement"));
         Assert.IsNotAssignableFrom<IElementalCard>(new ProtoKkWarCouncil());
     }
-    [Fact]
-    public void Klees_mint_keeps_the_gate_the_performance_lost()
-    {
-        // The other half, and the reason the gate existed: LAW:145 bounds what
-        // a Companion play GENERATES, so the Spark mint still asks.
-        var calls = Il.Calls(
-            Il.Method("KleeElementalHooks", "AfterCardPlayed"));
-
-        Assert.Contains(calls, c => c.Contains("IsFirstInSeries"));
-    }
 
     [Fact]
     public void The_arm_face_no_longer_promises_one_performance()

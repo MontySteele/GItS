@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using BaseLib.Abstracts;
 using BaseLib.Utils.NodeFactories;
 using Godot;
-using KleeMod.Cards.Furina.Generated;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Characters;
 using MegaCrit.Sts2.Core.Models;
@@ -54,75 +53,20 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
     public override RelicPoolModel RelicPool =>
         ModelDb.RelicPool<FurinaRelicPool>();
 
+    // Her own three potions (review/active/relics-potions-klee-furina-2026-09-27.md,
+    // pick 1(a)); the Silent borrow is gone.
     public override PotionPoolModel PotionPool =>
-#if PROTOTYPE_CARDS
-        // QUARANTINED: under the Stage her own three and no Silent borrow
-        // (review/active/relics-potions-klee-furina-2026-09-27.md, pick 1(a)).
-        // Arm off, the pool as it shipped.
-        FurinaStage.Enabled
-            ? ModelDb.PotionPool<Potions.FurinaPotionPool>() :
-#endif
-        ModelDb.PotionPool<SilentPotionPool>();
+        ModelDb.PotionPool<Potions.FurinaPotionPool>();
 
-    public override IEnumerable<CardModel> StartingDeck
-    {
-        get
-        {
-#if PROTOTYPE_CARDS
-            // QUARANTINED, THE STAGE ARM'S WHOLE STARTER. It replaces the deck
-            // rather than a slot in it: since 2026-09-28 ([USER]'s ruling) it
-            // is the base game's Strike x4 and Defend x4 and two kit cards,
-            // the shape the other two arms open with. The shipped list below
-            // is unmoved. See FurinaStageRoster.StartingDeck.
-            //
-            // INLINE AND NOT DELEGATED, which is a pin's requirement rather
-            // than a style: the starter pins read the IL CALL SEQUENCE of THIS
-            // getter to assert the deck is still ten slots. Hoisting the
-            // shipped array into a helper property would empty the sequence
-            // and take those pins with it, so the branch returns from inside
-            // the getter and the shipped list stays where it has always been.
-            if (FurinaStage.Enabled)
-            {
-                return Powers.FurinaStageRoster.StartingDeck();
-            }
-#endif
-            return new CardModel[]
-            {
-            ModelDb.Card<SoloistsSolicitation>(),
-            ModelDb.Card<SoloistsSolicitation>(),
-            ModelDb.Card<SoloistsSolicitation>(),
-            ModelDb.Card<StagePresence>(),
-            ModelDb.Card<StagePresence>(),
-            ModelDb.Card<StagePresence>(),
-            ModelDb.Card<RegalBearing>(),
-                ModelDb.Card<AriaOfRecompense>(),
-                ModelDb.Card<SalonDebut>(),
-                ModelDb.Card<AnInvitation>(),
-            };
-        }
-    }
+    /// <summary>The base Strike x4, Defend x4 and two kit cards
+    /// (<c>FurinaStageRoster.StartingDeck</c>).</summary>
+    public override IEnumerable<CardModel> StartingDeck =>
+        Powers.FurinaStageRoster.StartingDeck();
 
-    public override IReadOnlyList<RelicModel> StartingRelics
-    {
-        get
-        {
-#if PROTOTYPE_CARDS
-            // QUARANTINED: under the stage arm the starting relic is Salon
-            // Solitaire, which opens every combat with the Usher in the front
-            // seat (brief sec.3 rule 2). A replacement and not an addition --
-            // the Spotlight in both modes is retired by that brief, so a run
-            // carrying it would print a rule the arm has turned off.
-            if (FurinaStage.Enabled)
-            {
-                return Powers.FurinaStageRoster.StartingRelics();
-            }
-#endif
-            return new RelicModel[]
-            {
-                ModelDb.Relic<Relics.EtherealSpotlightRelic>(),
-            };
-        }
-    }
+    /// <summary>Salon Solitaire, which opens every combat with the Usher in
+    /// the front seat (brief sec.3 rule 2).</summary>
+    public override IReadOnlyList<RelicModel> StartingRelics =>
+        Powers.FurinaStageRoster.StartingRelics();
 
     // Temporary playtest visuals live under a Furina namespace even while the
     // PCK builder fills missing files from Klee. Distinct scene paths are

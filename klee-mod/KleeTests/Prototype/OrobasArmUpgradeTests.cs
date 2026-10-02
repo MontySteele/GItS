@@ -130,17 +130,14 @@ public class WolfsGravestoneTests : IDisposable
 [Collection(KleeOverhaulArm.Name)]
 public class WatatsumiCasketTests : IDisposable
 {
-    private readonly bool _kokomi = KokomiOverhaul.Enabled;
 
     public WatatsumiCasketTests()
     {
-        KokomiOverhaul.Enabled = true;
         KokomiOverhaulLedger.ResetAll();
     }
 
     public void Dispose()
     {
-        KokomiOverhaul.Enabled = _kokomi;
         KokomiOverhaulLedger.ResetAll();
     }
 

@@ -287,20 +287,6 @@ def test_the_cs_emit_row_mirrors_the_tier0_event():
         ["card", "index", "label"]
 
 
-def test_the_cs_meter_enum_prints_the_sims_meter_names():
-    """EB-220. A `ModePrice` names a `Meter` member instead of a string, and a
-    refusal line prints that member's NAME -- so the enum's members are the
-    sim's printed meter names, or the same refused mode reads differently in
-    the two engines. The badge reads the same enum, which is why it is here and
-    not only in C#."""
-    src = METER_CS.read_text(encoding="utf-8")
-    body = re.search(r"public enum Meter\s*\{([^}]*)\}", src)
-    assert body
-    members = re.findall(r"([A-Z][A-Za-z]*),", body.group(1))
-    assert set(members) == {meter for _field, meter
-                            in effects.MODE_PRICE_OPS.values()}
-
-
 def test_the_cs_side_reuses_the_base_game_choice_screen():
     """The reason this surface is not an invented prompt, pinned in prose AND
     in the call. The behavioural half is KleeTests' IL pin."""
@@ -317,67 +303,6 @@ DEEP_BREATH_CS = (ROOT / "klee-mod" / "KleeCode" / "Cards" / "Furina"
 
 def _deep_breath_cs() -> str:
     return DEEP_BREATH_CS.read_text(encoding="utf-8")
-
-
-def test_the_prototypes_committed_cs_carries_both_ruled_modes():
-    """EB-118 2C, the C# face of `deep_breath`. Read off the COMMITTED file
-    rather than a fresh emit, because what ships is the file: `--check` keeps
-    the two in step, and this says what the file has to contain."""
-    src = _deep_breath_cs()
-    assert ("ModalChoice.SelectAffordableMode(choiceContext, Owner, "
-            "modeOptions, ModePrices)") in src
-    assert "ModalChoice.CreateMatchingOption<DeepBreathModeA>(Owner, this)" in src
-    assert "ModalChoice.CreateMatchingOption<DeepBreathModeB>(Owner, this)" in src
-    assert "public sealed class DeepBreathModeA : ModalOptionCard" in src
-    assert "public sealed class DeepBreathModeB : ModalOptionCard" in src
-
-
-def test_the_prototypes_mode_1_is_the_body_it_shipped_with():
-    """R194's whole reason for this pair: the card players know survives as
-    one mode, and in C# that means the two statements the class emitted
-    before the conversion, unchanged, under `if (modeIndex == 0)`."""
-    mode_1 = _deep_breath_cs().split("if (modeIndex == 0)")[1].split("else")[0]
-    assert "await PlayerCmd.GainEnergy(1, Owner);" in mode_1
-    assert "FurinaResources.GainEncore(Owner.Creature, 2);" in mode_1
-
-
-def test_the_prototypes_mode_2_overdraws_through_the_real_primitive():
-    """EB-119's repair, on the shipped card rather than on a fixture: mode 2
-    calls `SpendEncoreOrHp` -- a thin bank pays TRUE HP -- and not the
-    no-overdraw `SpendEncore`, and not a negative `GainEncore`."""
-    src = _deep_breath_cs()
-    mode_2 = src.split("if (modeIndex == 0)")[1].split("else")[1]
-    assert ("await FurinaResources.SpendEncoreOrHp(choiceContext, "
-            "Owner.Creature, 3, this);") in mode_2
-    assert "await CardPileCmd.Draw(choiceContext, 3m, Owner);" in mode_2
-    assert "GainEncore(Owner.Creature, -3)" not in src
-
-
-def test_the_prototypes_upgrade_is_the_ruled_cost_line():
-    """R194 point 6, and contract point 5 in the same assertion: the upgrade
-    moves the CARD's cost and no mode body, and the Exhaust keyword the card
-    prints survives it."""
-    src = _deep_breath_cs()
-    assert "EnergyCost.UpgradeBy(-1);" in src
-    assert "RemoveKeyword(CardKeyword.Exhaust)" not in src
-    assert "CardKeyword.Exhaust" in src          # still printed on the base
-
-
-def test_the_prototypes_face_prints_the_choice_as_ordinary_text():
-    """Rails: "Choose one:" is a sentence, not a keyword. One face, two
-    labels, no tooltip and nothing registered.
-
-    EB-258 golded the RESOURCES inside the labels, which leaves that claim
-    exactly where it was: `[gold]` is colour on a term the game already
-    explains elsewhere, and the rail is about "Choose one:" never becoming a
-    registered keyword with a tooltip behind it. The `KleeKeywords` assertion
-    below is the half that says so, and it did not move.
-    """
-    src = _deep_breath_cs()
-    assert ('("description", "Choose one: Gain 1 [gold]Energy[/gold] and 2 '
-            '[gold]Encore[/gold] | Spend 3 [gold]Encore[/gold]: draw 3 '
-            'cards."),') in src
-    assert "KleeKeywords" not in src
 
 
 # --- EB-150: the mode faces are POOL MEMBERS -------------------------------
@@ -412,13 +337,6 @@ def _modal_option_classes_in_tree() -> dict[str, Path]:
         for name in OPTION_CLASS_RE.findall(path.read_text(encoding="utf-8")):
             found[name] = path
     return found
-
-
-def test_the_tree_has_the_prototypes_two_faces_and_this_test_can_see_them():
-    """A guard on the guard: a scan that found nothing would pass the
-    membership test below while asserting nothing at all."""
-    assert set(_modal_option_classes_in_tree()) >= {"DeepBreathModeA",
-                                                    "DeepBreathModeB"}
 
 
 def test_every_mode_face_is_carried_by_a_generated_modal_options_roster():

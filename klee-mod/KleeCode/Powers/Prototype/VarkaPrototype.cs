@@ -31,9 +31,7 @@ public interface IVarkaCharacter
 ///
 /// NO SWITCH OF HIS OWN (collapsed 2026-10-01, legacy cleanup stage 2): he
 /// ships nowhere else, so there is no shipped kit to switch back to. He
-/// compiles with the prototype surface (<c>-p:PrototypeCards</c>, on by
-/// default) and is absent from a <c>-p:ShippedKits=true</c> build, which
-/// compiles no surface at all.
+/// compiles in every build.
 ///
 /// BUILT IN BOTH ENGINES: the sim twin is <c>tier0/engine/varka_oath.py</c>,
 /// live whenever the seat is Varka.

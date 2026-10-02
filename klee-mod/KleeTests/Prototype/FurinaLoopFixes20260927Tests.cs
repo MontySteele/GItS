@@ -34,17 +34,14 @@ public class FurinaLoopFixes20260927Tests
 {
     private sealed class Arm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
         internal Arm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = true;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }

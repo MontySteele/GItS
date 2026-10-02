@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards;
-using KleeMod.Cards.Generated;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
@@ -71,19 +70,8 @@ public static class CompanionPool
     /// With the switch and the arm off, <c>CompanionOverhaul.Enabled</c> is
     /// false and it still does.
     /// </summary>
-    public static IReadOnlyList<CardModel> All
-    {
-        get
-        {
-#if PROTOTYPE_CARDS
-            if (Powers.CompanionOverhaul.Enabled)
-            {
-                return Powers.CompanionOverhaulRoster.Roster();
-            }
-#endif
-            return CompanionRoster.All;
-        }
-    }
+    public static IReadOnlyList<CardModel> All =>
+        Powers.CompanionOverhaulRoster.Roster();
 
     /// <summary>
     /// Is this one of OUR characters? The mod must not change anything for a
@@ -157,13 +145,11 @@ public static class CompanionPool
             Klee => "klee",
             Furina => "furina",
             Kokomi => "kokomi",
-#if PROTOTYPE_CARDS
             // VARKA (prototype batch one): a roster character, so the reward
             // clamp, the companion shop and his Knights' personal pool all
             // know him. Matched on the identity interface, which compiles
             // with the surface, as the class does.
             Powers.IVarkaCharacter => Powers.VarkaPrototype.CharacterId,
-#endif
             _ => null,
         };
 
@@ -174,9 +160,7 @@ public static class CompanionPool
             Klee => "mondstadt",
             Furina => "fontaine",
             Kokomi => "inazuma",
-#if PROTOTYPE_CARDS
             Powers.IVarkaCharacter => "mondstadt",
-#endif
             _ => null,
         };
 }

@@ -46,7 +46,7 @@ public sealed class ProtoMfCharlotteSnappySilhouette : CustomCardModel, ICompani
     public string? Nation => "fontaine";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForVulnerable(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("charlotte_snappy_silhouette");
 

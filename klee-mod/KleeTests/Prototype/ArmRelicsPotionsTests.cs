@@ -106,10 +106,8 @@ public class ArmRelicsPotionsTests
     public void Klee_arm_on_offers_her_eight_and_the_ancient_and_no_silent_borrow()
     {
         var pool = Pool<KleeRelicPool>(KleeMembers());
-        var was = KleeOverhaul.Enabled;
         try
         {
-            KleeOverhaul.Enabled = true;
             var offer = Types(pool.GetUnlockedRelics(null!));
             Assert.Equal(
                 new[] { typeof(PoundingSurprise), typeof(ExplosiveFrags) }
@@ -119,54 +117,7 @@ public class ArmRelicsPotionsTests
         }
         finally
         {
-            KleeOverhaul.Enabled = was;
         }
-    }
-
-    [Fact]
-    public void Klee_arm_off_offers_the_pool_as_it_shipped()
-    {
-        var pool = Pool<KleeRelicPool>(KleeMembers());
-        var was = KleeOverhaul.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = false;
-            var offer = Types(pool.GetUnlockedRelics(null!));
-            Assert.Equal(
-                Silent().Append(typeof(PoundingSurprise)).Append(typeof(ExplosiveFrags))
-                    .OrderBy(t => t.Name),
-                offer.OrderBy(t => t.Name));
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = was;
-        }
-    }
-
-    [Fact]
-    public void Furina_stage_on_offers_her_eight_and_the_curtain_without_spotlight_or_borrow()
-    {
-        var pool = Pool<FurinaRelicPool>(FurinaMembers());
-        using var _ = new StageArm();
-        var offer = Types(pool.GetUnlockedRelics(null!));
-        Assert.Equal(
-            new[] { typeof(SalonSolitaire), typeof(CurtainNeverFalls) }
-                .Concat(FurinaStageRelics.Types).OrderBy(t => t.Name),
-            offer.OrderBy(t => t.Name));
-        Assert.DoesNotContain(typeof(EtherealSpotlightRelic), offer);
-    }
-
-    [Fact]
-    public void Furina_stage_off_offers_the_pool_as_it_shipped()
-    {
-        var pool = Pool<FurinaRelicPool>(FurinaMembers());
-        using var _ = new StageArm(enabled: false);
-        var offer = Types(pool.GetUnlockedRelics(null!));
-        Assert.Equal(
-            Silent().Append(typeof(EtherealSpotlightRelic))
-                .Append(typeof(CurtainNeverFalls)).Append(typeof(SalonSolitaire))
-                .OrderBy(t => t.Name),
-            offer.OrderBy(t => t.Name));
     }
 
     [Fact]
@@ -191,9 +142,7 @@ public class ArmRelicsPotionsTests
         // asks its arm, then answers its own pool or the borrow.
         var getter = character.GetProperty("PotionPool")!.GetGetMethod()!;
         var calls = Il.CallSequence(getter);
-        Assert.Contains($"{arm}.get_Enabled", calls);
         Assert.Contains($"ModelDb.PotionPool<{own}>", calls);
-        Assert.Contains("ModelDb.PotionPool<SilentPotionPool>", calls);
 
         var pool = Il.CallSequence(Il.Method(own, "GenerateAllPotions"));
         var three = own == "KleePotionPool" ? ArmPotions.Klee : ArmPotions.Furina;
@@ -224,8 +173,6 @@ public class ArmRelicsPotionsTests
         Assert.Equal(1, DodocoCharm.BonusFor(klee.Creature));
         Give<DodocoCharm>(klee);
         Assert.Equal(2, DodocoCharm.BonusFor(klee.Creature));
-        KleeOverhaul.Enabled = false;
-        Assert.Equal(0, DodocoCharm.BonusFor(klee.Creature));
     }
 
     [Fact]
@@ -540,11 +487,6 @@ public class ArmRelicsPotionsTests
         Assert.Equal(new[] { 12, 6 }, pile.Charges.Select(c => c.Size));
         Assert.Equal(new[] { false, true }, pile.Charges.Select(c => c.IsMine));
 
-        KleeOverhaul.Enabled = false;
-        JumpyJuice.Use(klee.Creature);
-        Assert.Equal(new[] { 12, 6 }, pile.Charges.Select(c => c.Size));
-        Assert.DoesNotContain(Il.Calls(Il.Method("JumpyJuice", "Use")),
-                              c => c.StartsWith("ProtoBombPower.SetOff"));
     }
 
     [Fact]
@@ -800,9 +742,6 @@ public class ArmRelicsPotionsTests
         // Touch of Orobas upgrades the Stage's starter into it.
         Assert.Contains("ModelDb.Relic<CurtainNeverFalls>",
                         Il.CallSequence(Il.Method("SalonSolitaire", "GetUpgradeReplacement")));
-        // Arm off it is not on stage, and the Spotlight still reads it.
-        FurinaStage.Enabled = false;
-        Assert.False(CurtainNeverFalls.OnStage(seat.Creature));
     }
 
     [Fact]
@@ -816,7 +755,6 @@ public class ArmRelicsPotionsTests
         {
             var calls = Il.Calls(Il.Method(type, "TryModifyCardRewardOptions"));
             Assert.Contains("CompanionSlot.Roll", calls);
-            Assert.DoesNotContain("FurinaStage.get_Enabled", calls);
         }
     }
 
@@ -853,34 +791,28 @@ public class ArmRelicsPotionsTests
 
     private sealed class KleeArm : IDisposable
     {
-        private readonly bool _was = KleeOverhaul.Enabled;
 
         internal KleeArm()
         {
             KleeOverhaulLedger.ResetAll();
-            KleeOverhaul.Enabled = true;
         }
 
         public void Dispose()
         {
-            KleeOverhaul.Enabled = _was;
             KleeOverhaulLedger.ResetAll();
         }
     }
 
     private sealed class StageArm : IDisposable
     {
-        private readonly bool _was = FurinaStage.Enabled;
 
-        internal StageArm(bool enabled = true)
+        internal StageArm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = enabled;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _was;
             FurinaStageLedger.ResetAll();
         }
     }
@@ -902,11 +834,6 @@ public class ArmRelicsPotionsTests
     private static List<RelicModel> KleeMembers() =>
         Silent().Append(typeof(PoundingSurprise)).Append(typeof(ExplosiveFrags))
             .Concat(KleeArmRelics.Types).Select(Uninit).ToList();
-
-    private static List<RelicModel> FurinaMembers() =>
-        Silent().Append(typeof(EtherealSpotlightRelic)).Append(typeof(CurtainNeverFalls))
-            .Append(typeof(SalonSolitaire))
-            .Concat(FurinaStageRelics.Types).Select(Uninit).ToList();
 
     private static RelicModel Uninit(Type type) =>
         (RelicModel)RuntimeHelpers.GetUninitializedObject(type);

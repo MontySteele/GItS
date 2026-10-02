@@ -5,7 +5,6 @@ using System.Reflection;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype;
 using KleeMod.Powers;
-using KleeMod.Cards.Generated;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -199,21 +198,6 @@ public class Round16Tests
     // `FURINA_REFRAME` branch is not in the binary. `Round12Tests` reads the
     // same file the same way for the same reason.
 
-    private static string SpotlightDurationTip() =>
-        Printed(typeof(FurinaRiderTips), "ForSpotlightDuration");
-    [Fact]
-    public void The_new_tip_title_is_registered_and_not_a_raw_key()
-    {
-        // The trap this repo has fallen into twice: a `KLEEMOD-` key with no
-        // `.title` row renders AS THE KEY on a live screen, and the pck's
-        // `card_keywords.json` carries none of these -- `KleeMod.cs` is their
-        // only source (`EB-329`'s note on `CompanionKey`).
-        Assert.Equal("KLEEMOD-SPOTLIGHT_LASTS",
-                     FurinaRiderTips.SpotlightLastsKey);
-        Assert.Contains(
-            "[Cards.FurinaRiderTips.SpotlightLastsKey + \".title\"]",
-            Source("KleeMod.cs"));
-    }
 
     // ==================================================================
     // `EB-488` -- a reward screen with no glossary for the word on the card
@@ -229,50 +213,6 @@ public class Round16Tests
     // paragraph -- a face that names the word and deploys nobody is exactly
     // the face whose reader has never met it. So the rules tip attaches from
     // the PRINTED WORD, the way the Companion tip already reaches a reward.
-
-    [Fact]
-    public void A_face_that_names_a_salon_member_and_deploys_none_defines_it()
-    {
-        // The card the finding is about, and it fields nobody at all: its one
-        // effect is a Power that raises everyone else's numbers.
-        var grandSalon = Source("Cards/Furina/Generated/GrandSalon.cs");
-        Assert.Contains("[gold]Salon Member[/gold] numbers are", grandSalon);
-        Assert.Contains(
-            "SalonMemberTips.ForSalonRules(base.ExtraHoverTips, this)",
-            grandSalon);
-    }
-
-    [Fact]
-    public void Every_furina_face_printing_the_word_carries_the_definition()
-    {
-        // THE DENOMINATOR, and the reason the attach is DERIVED rather than
-        // applied by hand: eight of her shipped faces print the word, only one
-        // of them was the seat's, and a row that prints it tomorrow carries
-        // the definition because it printed it.
-        foreach (var cls in new[] { "GrandSalon", "CastingCall",
-                                    "FortissimoGuard", "PitOrchestra",
-                                    "TempoChange", "WatersEmbrace",
-                                    "ManyWatersMelody", "MatineePerformance" })
-        {
-            var src = Source("Cards/Furina/Generated/" + cls + ".cs");
-            Assert.Contains("[gold]Salon Member", src);
-            Assert.Contains("SalonMemberTips.ForSalonRules(", src);
-        }
-    }
-
-    [Fact]
-    public void A_deploy_card_is_left_with_the_one_copy_it_already_had()
-    {
-        // Two copies of one definition on one face is what the game's own tip
-        // de-duplication would then be picking between, so a row that DEPLOYS
-        // keeps `ForCard`'s paragraph and takes no second attach.
-        foreach (var cls in new[] { "SalonDebut", "EndlessWaltz" })
-        {
-            var src = Source("Cards/Furina/Generated/" + cls + ".cs");
-            Assert.Contains("SalonMemberTips.ForCard(", src);
-            Assert.DoesNotContain("SalonMemberTips.ForSalonRules(", src);
-        }
-    }
 
     // ==================================================================
     // `EB-486` -- the play folded and the face did not
@@ -290,94 +230,6 @@ public class Round16Tests
     // claimed it. `spotlight_block_rider`'s own exclusion names this row as
     // the only one it bites, and the reason is the invariant -- one
     // `CalculationBase` per card. So the second number takes a var of its own.
-
-    [Fact]
-    public void Backstrokes_block_previews_the_fold_its_play_already_applied()
-    {
-        var src = Source("Cards/Generated/FreminetPressurizedFloe.cs");
-
-        // The face reads a var that previews the fold...
-        Assert.Contains("new SpotlightSystem.SpotlitBlockVar(6m)", src);
-        Assert.Contains("Gain {Block:diff()} [gold]Block[/gold].", src);
-        // ...and the PLAY is unchanged: the fold is applied once, there.
-        Assert.Contains(
-            "SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue)",
-            src);
-        // The damage keeps the Calculated rail it already had -- which is
-        // exactly why the Block could not have one.
-        Assert.Contains("new CalculationBaseVar(10m)", src);
-        Assert.Contains("new CalculatedDamageVar(ValueProp.Move)", src);
-    }
-
-    [Fact]
-    public void A_lit_backstroke_prints_and_gains_nine_block()
-    {
-        // 6 x 1.5 = 9, the number the seat should have been shown. Read off
-        // the shipped multiplier and the shipped base rather than typed, so a
-        // repricing of either moves this pin with it.
-        var floe = new FreminetPressurizedFloe();
-        var block = ((IEnumerable<DynamicVar>)typeof(
-                FreminetPressurizedFloe)
-            .GetProperty("CanonicalVars", All)!.GetValue(floe)!)
-            .Single(v => v is SpotlightSystem.SpotlitBlockVar);
-
-        Assert.Equal(6m, block.BaseValue);
-        Assert.Equal(
-            9m,
-            Math.Truncate(block.BaseValue
-                          * SpotlightSystem.GuestCastBaseMultiplier));
-
-        // AND THE ACCESSOR THE PLAY USES STILL RESOLVES. `DynamicVars.Block`
-        // is how the emitted `OnPlay` reads the base, and `DynamicVarSet.Block`
-        // CASTS to `BlockVar` -- which is why this var subclasses one rather
-        // than being the plain `DynamicVar` `DeferredBlockVar` can afford to
-        // be. Seen to FAIL as an `InvalidCastException` before it did.
-        var vars = typeof(CardModel)
-            .GetProperty("DynamicVars", All)!.GetValue(floe)!;
-        var read = vars.GetType().GetProperty("Block", All)!.GetValue(vars)!;
-        Assert.Equal(6m, ((DynamicVar)read).BaseValue);
-        Assert.IsType<SpotlightSystem.SpotlitBlockVar>(read);
-    }
-
-    [Fact]
-    public void The_upgrade_moves_the_damage_and_the_sheet_says_the_block_stays()
-    {
-        // "Upgraded moves too" is the DAMAGE, and it always did: the delta
-        // lands on the `CalculationBase` the Calculated rail reads, which is
-        // how the seat saw 18 lit-and-upgraded while the Block sat at 6.
-        var src = Source("Cards/Generated/FreminetPressurizedFloe.cs");
-        Assert.Contains("DynamicVars.CalculationBase.UpgradeValueBy(2m);", src);
-
-        // THE BLOCK NOT MOVING ON UPGRADE IS A RULED NUMBER AND NOT THIS
-        // DEFECT: `docs/furina-upgrades.yaml` says so in as many words, and a
-        // card-sheet number is not a thing a legibility row may change.
-        Assert.Contains(
-            "freminet_pressurized_floe:   {damage: +2}    # 10->12; Block "
-          + "stays 6",
-            Sheet("furina-upgrades.yaml"));
-    }
-
-    [Fact]
-    public void Every_companion_block_the_play_folds_now_previews_it()
-    {
-        // THE DENOMINATOR, and the reason the rule is derived rather than
-        // applied to one card: `emit` wraps EVERY block amount on a
-        // spotlight-capable row, and the two Calculated rails preview only
-        // some of them. Nine faces were printing a flat base while gaining a
-        // folded number; these are the shipped four.
-        foreach (var path in new[] {
-                     "Cards/Generated/FreminetPressurizedFloe.cs",
-                     "Cards/Generated/IttoSuperlativeSuperstrength.cs",
-                     "Cards/Generated/ShinobuSanctifyingRing.cs",
-                     "Cards/Generated/ThomaCrimsonOoyoroi.cs" })
-        {
-            var src = Source(path);
-            Assert.Contains("new SpotlightSystem.SpotlitBlockVar(", src);
-            Assert.Contains(
-                "SpotlightSystem.PrintedBlock(this, "
-              + "DynamicVars.Block.BaseValue)", src);
-        }
-    }
 
     // ==================================================================
     // `EB-484` -- a folded number read on a screen with no enemy on it
@@ -454,38 +306,6 @@ public class Round16Tests
             "DynamicVars[\"PlainDamage\"].UpgradeValueBy(3m);", undertow);
         Assert.Contains(
             "DynamicVars[\"DebuffDamage\"].UpgradeValueBy(3m);", undertow);
-    }
-
-    [Fact]
-    public void Both_printed_numbers_fold_the_way_the_dealt_one_does()
-    {
-        // THE CLAIM OF THE ROW, and the part a headless pin can reach: the two
-        // printed halves go through the same fold the dealt number does --
-        // `Hook.ModifyDamage(..., All)` over one named body, inherited from
-        // `DamageVar` (Strike's var). `EB-328` is why that is now ONE call
-        // rather than the game's fold plus a mod-side target term: the game's
-        // fold already carries the target's side whenever a body is named, so
-        // the second term was the same Vulnerable twice. The NUMBERS need a
-        // live combat (KleeTests/README.md, "The headless boundary"), which is
-        // where the delivered-versus-printed read is.
-        var folded = typeof(FoldedDamageVar);
-        Assert.Equal(
-            typeof(DamageVar),
-            folded.BaseType);
-        var calls = Il.Calls(
-            folded.GetMethod("UpdateCardPreview", All)!).ToList();
-        // The guest seat round (2026-09-25): the body is named through
-        // `FoldedPreview.Body`, which is `HitOrder.BodyForPreview` off a
-        // Furina Stage board.
-        Assert.Contains(calls, c => c.Contains("FoldedPreview.Body"));
-        Assert.Contains(calls, c => c.Contains("FrontEnemy"));
-        Assert.Contains(calls, c => c.Contains("UpdateCardPreview"));
-        Assert.DoesNotContain(calls, c => c.Contains("TargetMods"));
-
-        // And the tip that used to carry the pair is gone rather than left
-        // restating the sheet numbers beside a face printing folded ones.
-        Assert.Null(typeof(KokomiRiderTips).GetMethod("ForDebuffRider", All));
-        Assert.DoesNotContain("DebuffRiderKey", Source("KleeMod.cs"));
     }
 
     /// <summary>One ratified sheet, read whole, off the same walk.</summary>

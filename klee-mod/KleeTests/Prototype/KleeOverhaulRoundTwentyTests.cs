@@ -170,18 +170,6 @@ public class KleeOverhaulRoundTwentyTests
         Assert.Equal("klee", new ProtoMcFischlSinfulHex().PersonalPool);
     }
 
-    [Fact]
-    public void The_spark_rider_says_every_companion_pays()
-    {
-        // The rule's one sentence, on the face that pays: any Companion card.
-        var tip = Printed("ForCovenSpark");
-        Assert.Contains("Playing a [gold]Companion[/gold] card gives Klee", tip);
-        Assert.DoesNotContain("Klee's own", tip);
-        Assert.DoesNotContain("Hexerei", tip);
-        // `EB-619`: no price-denial clause.
-        Assert.DoesNotContain("it never costs", tip);
-    }
-
     /// <summary>The card's printed description.</summary>
     private static string Face(CustomCardModel card) =>
         (card.Localization ?? new List<(string, string)>())

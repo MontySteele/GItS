@@ -66,9 +66,6 @@ public class SparkSeededRewardTests
         var calls = Il.Calls(Postfix);
         // QUARANTINED: the arm's switch and the arm's identity gate, the same
         // pair every other rule in this arm asks.
-        Assert.Contains(calls,
-            c => c.EndsWith("KleeOverhaul.get_Enabled",
-                            System.StringComparison.Ordinal));
         Assert.Contains(calls, c => c.Contains("get_Character"));
         // THE FLOOR, off the run rather than counted here.
         Assert.Contains(calls, c => c.Contains("get_TotalFloor"));

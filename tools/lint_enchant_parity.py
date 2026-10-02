@@ -60,14 +60,12 @@ MOD = REPO / "klee-mod" / "KleeCode" / "Cards"
 # Where a card class may live: the generated tree and its hand-written
 # neighbour, per profile. Order matters only for the error message.
 CARD_DIRS = [
-    MOD, MOD / "Generated",
-    MOD / "Furina", MOD / "Furina" / "Generated",
-    MOD / "Kokomi", MOD / "Kokomi" / "Generated",
+    MOD, MOD / "Furina", MOD / "Kokomi", MOD / "Prototype" / "Generated",
 ]
+# The shipped sheets' manifests left with their C# (legacy cleanup stage 5);
+# the prototype surface is the generated corpus.
 MANIFESTS = [
-    MOD / "Generated" / "manifest.json",
-    MOD / "Furina" / "Generated" / "manifest.json",
-    MOD / "Kokomi" / "Generated" / "manifest.json",
+    MOD / "Prototype" / "Generated" / "manifest.json",
 ]
 
 # The game's own eligibility rule for each shipped enchantment, transcribed
@@ -229,8 +227,10 @@ _CANONICAL_VARS = re.compile(
 # under its own token and is deliberately NOT here: a card whose only Block
 # arrives next turn does not gain Block on the play, which is what
 # `Nimble.CanEnchant` is asking about.
+# FoldedBlockVar and UnsourcedBlockVar (Powers/Prototype) subclass BlockVar,
+# which is what BaseLib's GainsBlock detection reads.
 _BLOCK_VAR = re.compile(
-    r"\bnew (?:Calculated)?BlockVar\(|\bnew SpotlightSystem\.SpotlitBlockVar\(")
+    r"\bnew (?:Calculated|Folded|Unsourced)?BlockVar\(|\bnew SpotlightSystem\.SpotlitBlockVar\(")
 _CTOR_TYPE = re.compile(r":\s*base\([^)]*?CardType\.(\w+)")
 _COST_X = re.compile(r"protected override bool HasEnergyCostX\s*=>\s*true")
 
@@ -297,7 +297,7 @@ def findings() -> list[str]:
             f"renamed; a rule with no sim twin checks nothing.")
 
     sources = _source_index()
-    index = loader._card_index()
+    index = {**loader._card_index(), **loader._prototype_index()}
     checked = 0
     for cid in sorted(_mod_card_ids()):
         card = index.get(cid)

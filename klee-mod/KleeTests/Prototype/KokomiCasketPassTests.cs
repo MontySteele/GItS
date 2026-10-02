@@ -37,11 +37,10 @@ public class KokomiCasketPassTests : IDisposable
 {
     // The arm switch is one static; the rules below are the arm's, so they
     // run with it on and put it back (the shipped-kits build ships it off).
-    private readonly bool _kokomi = KokomiOverhaul.Enabled;
 
-    public KokomiCasketPassTests() => KokomiOverhaul.Enabled = true;
+    public KokomiCasketPassTests() { }
 
-    public void Dispose() => KokomiOverhaul.Enabled = _kokomi;
+    public void Dispose() { }
 
     private static T Upgraded<T>() where T : CardModel, new()
     {

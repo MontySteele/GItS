@@ -224,12 +224,8 @@ public class BaseBasicsTests
     [Fact]
     public void A_base_strike_applies_nothing_for_anybody()
     {
-        var klee = KleeOverhaul.Enabled;
-        var kokomi = KokomiOverhaul.Enabled;
         try
         {
-            KleeOverhaul.Enabled = true;
-            KokomiOverhaul.Enabled = true;
 
             // [USER], 2026-09-02: "I think we actually SHOULD remove the
             // elemental application from the basic Strikes for all characters.
@@ -254,8 +250,6 @@ public class BaseBasicsTests
         }
         finally
         {
-            KleeOverhaul.Enabled = klee;
-            KokomiOverhaul.Enabled = kokomi;
         }
     }
 
@@ -270,12 +264,8 @@ public class BaseBasicsTests
         // (r4c act 2b finding 6). A face with no element on it promises none
         // whatever rarity the run handed it over at. A card of this mod's own
         // is untouched whether it declares an element or leans on the fallback.
-        var klee = KleeOverhaul.Enabled;
-        var kokomi = KokomiOverhaul.Enabled;
         try
         {
-            KleeOverhaul.Enabled = true;
-            KokomiOverhaul.Enabled = true;
             var seat = Seat.Klee().Creature;
 
             // Her own Attack, which declares Pyro through the codegen.
@@ -304,68 +294,6 @@ public class BaseBasicsTests
         }
         finally
         {
-            KleeOverhaul.Enabled = klee;
-            KokomiOverhaul.Enabled = kokomi;
-        }
-    }
-
-    [Fact]
-    public void A_card_that_declares_an_element_keeps_it_and_a_companion_is_exempt()
-    {
-        var was = KleeOverhaul.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = true;
-            var seat = Seat.Klee().Creature;
-
-            // The first branch answers a row that DECLARES, so the fallback
-            // can never overwrite a printed element -- including a deliberate
-            // `Element.None`.
-            Assert.Equal(Element.Cryo, CatalystCadence.PrintedElement(
-                new ProtoMcKaeyaFrostgnaw(), seat));
-
-            // COMPANIONS ARE EXEMPT FROM CADENCE in both engines (the sim:
-            // "what a companion applies is the sheet's explicit call"). Itto's
-            // Rare is the case that would otherwise slip through: a companion
-            // ATTACK whose damage is all `applies_element: false`, so the
-            // codegen gives it no `IElementalCard` at all.
-            var itto = new ProtoIttoSuperlativeSuperstrengthEither();
-            Assert.IsAssignableFrom<ICompanionCard>(itto);
-            Assert.IsNotAssignableFrom<IElementalCard>(itto);
-            Assert.Equal(CardType.Attack, itto.Type);
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(itto, seat));
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = was;
-        }
-    }
-
-    [Fact]
-    public void With_both_arms_off_the_funnel_is_the_old_expression()
-    {
-        // THE ACCEPTANCE CONDITION, and the only one this change owes: with
-        // the arms off `PrintedElement` is `cardSource is IElementalCard e ?
-        // e.Element : Element.None`, character for character.
-        var klee = KleeOverhaul.Enabled;
-        var kokomi = KokomiOverhaul.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = false;
-            KokomiOverhaul.Enabled = false;
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
-                new StrikeIronclad(), Seat.Klee().Creature));
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
-                new StrikeSilent(), Seat.Kokomi().Creature));
-            // A declaring row is untouched either way, which is what makes the
-            // shipped kits byte-identical.
-            Assert.Equal(Element.Cryo, CatalystCadence.PrintedElement(
-                new ProtoMcKaeyaFrostgnaw(), Seat.Klee().Creature));
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = klee;
-            KokomiOverhaul.Enabled = kokomi;
         }
     }
 

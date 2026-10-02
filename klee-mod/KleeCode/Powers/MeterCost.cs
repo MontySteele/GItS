@@ -6,16 +6,13 @@ using MegaCrit.Sts2.Core.Models;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// The three spendable meters a card in this mod can price. The names are the
-/// PRINTED names -- <c>ToString()</c> is what a refusal line says ("needs 3
-/// Encore, bank holds 2"), which is why <see cref="Sparks"/> is plural and the
-/// other two are not.
+/// The spendable meters a card in this mod can price. The name is the PRINTED
+/// name -- <c>ToString()</c> is what a refusal line says. Furina's Encore and
+/// Kokomi's Charge went with the shipped kits (legacy cleanup stage 5).
 /// </summary>
 public enum Meter
 {
     Sparks,
-    Encore,
-    Charge,
 }
 
 /// <summary>One meter and one amount: what a card, or one mode of a card,
@@ -116,8 +113,7 @@ public static class MeterCost
             return new MeterPrice(priced.PricedMeter, priced.PrintedMeterPrice);
         }
 
-        int encore = EncoreCostOf(card);
-        return encore > 0 ? new MeterPrice(Meter.Encore, encore) : null;
+        return null;
     }
 
     /// <summary>
@@ -151,9 +147,7 @@ public static class MeterCost
 
         return meter switch
         {
-            Meter.Sparks => SparkPower.SparksAsResolved(creature),
-            Meter.Encore => FurinaResources.Encore(creature),
-            Meter.Charge => KokomiResources.GetCharge(creature),
+            Meter.Sparks => SparkPower.SparksAtPlay(creature),
             _ => 0,
         };
     }
@@ -168,25 +162,4 @@ public static class MeterCost
         price.Amount <= 0
         || BankOf(SparkCost.OwnerCreatureOf(card), price.Meter) >= price.Amount;
 
-    /// <summary>
-    /// Furina's <c>encore_cost</c>, resolved -- upgrades and cost modifiers
-    /// included, because <c>GetResolved</c> is the number
-    /// <c>CustomResourceCost.ResourceCheck</c> refuses on and the number
-    /// <c>GetAmountToSpend</c> takes.
-    ///
-    /// An X cost is skipped: its amount is the whole bank at play time, not a
-    /// printed number, and the base game draws an X in the energy orb rather
-    /// than a count. No shipped row prints one.
-    /// </summary>
-    private static int EncoreCostOf(CardModel card)
-    {
-        CustomResourceCost<EncoreResource>? cost =
-            CustomResources<EncoreResource>.Cost(card);
-        if (cost == null || cost.CostsX)
-        {
-            return 0;
-        }
-
-        return Math.Max(0, cost.GetResolved());
-    }
 }

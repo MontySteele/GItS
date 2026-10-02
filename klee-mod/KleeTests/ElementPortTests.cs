@@ -60,13 +60,13 @@ public class ElementPortTests : IDisposable
 
     // ON in every build that names neither property (Directory.Build.props).
     // SKIPPED, NOT LEFT TO FAIL, where the build opts them out
-    // (-p:ShippedKits=true, or -p:SwirlPays=false / -p:CrystallizeKeepsAura=false):
+    // (-p:SwirlPays=false / -p:CrystallizeKeepsAura=false):
     // there the property moved the value this pin asserts
     // (docs/current/operations/prototype.md carries the rule).
 #if SWIRL_PAYS && CRYSTALLIZE_KEEPS_AURA
     [Fact]
 #else
-    [Fact(Skip = "This build opts the element port out (-p:ShippedKits=true, -p:SwirlPays=false or -p:CrystallizeKeepsAura=false), which moves the defaults this pin asserts.")]
+    [Fact(Skip = "This build opts the element port out (-p:SwirlPays=false or -p:CrystallizeKeepsAura=false), which moves the defaults this pin asserts.")]
 #endif
     public void Both_changes_ship_on()
     {

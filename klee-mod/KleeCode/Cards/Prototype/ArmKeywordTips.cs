@@ -156,14 +156,6 @@ public static class ArmKeywordTips
     // carry-out, printed where that card is met.
     public const string PlanTwiceKey = "KLEEMOD-ARM_PLAN_TWICE";
 
-    // `EB-418`. THE SECOND KEY HERE THAT TITLES NO KEYWORD, and it names the
-    // one Spark income no screen in the game stated: `KleeCompanionSpark`
-    // ("Little Hexenzirkul"), the kit rule LAW:145 obliges Klee's own KIT to
-    // declare because a Companion card may not print a signature resource on
-    // its own face. It sits beside `PlanElementKey` for that key's reason --
-    // it is a sentence about the CARD in hand, printed where that card is met.
-    public const string CovenSparkKey = "KLEEMOD-ARM_COVEN_SPARK";
-
     // `EB-575`. THE FOURTH KEY HERE THAT TITLES NO KEYWORD, and the only one
     // whose sentence appears and disappears with the board. A `Set off` or a
     // merge played with no Bomb anywhere is ACCEPTED, charges its Energy and
@@ -251,7 +243,6 @@ public static class ArmKeywordTips
         const string word =
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ";
         const string shared = "Gone after combat.";
-        if (!KleeOverhaul.Enabled) return word + shared;
         // R242 pick 1 put the opening bank INTO rule 4, and the tip is where a
         // player meets the word: a Spark-priced card in an opening hand is
         // exactly the moment the r4 seat found unplayable by construction, and
@@ -353,61 +344,6 @@ public static class ArmKeywordTips
             "A Power that pays at the start of your turn, but "
           + "only if you played no [gold]Set off[/gold] card last turn. Its "
           + "card prints what it pays.");
-
-    /// <summary>
-    /// `EB-418`, AND IT IS THE ONE NUMBER IN THE KIT A SEAT COULD NOT READ OFF
-    /// THE SCREEN.
-    ///
-    /// THE GAP. <see cref="KleeMod.Powers.KleeCompanionSpark"/> -- "Little
-    /// Hexenzirkul" -- mints a Spark on every play of one of Klee's OWN
-    /// Personal Companions, and it is printed nowhere: LAW:145 forbids the
-    /// Companion card from carrying the grant on its face ("Companion cards may
-    /// not themselves grant signature resources"), so the rule moved WHOLE into
-    /// her kit at `EB-219` and the sentence did not move with it. The
-    /// companions packet says so in as many words -- "the kit already pays a
-    /// rider neither card prints" -- and the r11 Opus seat met the consequence
-    /// as the only unreadable number in five fights: "My Spark went 1 to 2 with
-    /// no bomb going off... This is the one number in the kit I could not read
-    /// off the screen."
-    ///
-    /// WHERE IT HAPPENS IS THE CARD, so that is where it prints. The Spark
-    /// keyword tip is full -- four sentences and 130 of its 135 characters
-    /// since R242 put the opening bank in it -- and in any case it is met on a
-    /// Spark-priced Attack rather than on the Companion that pays. A rider on
-    /// the Companion's own face is read at the moment the energy is committed,
-    /// which is the moment the seat's read was wrong.
-    ///
-    /// THE THREE LIMBS ARE THE POWER'S OWN, interpolated from the constants the
-    /// grant reads (`EB-89`) so a repricing cannot leave this sentence lying.
-    /// The CAP is deliberately not printed: it is the sum of the three limbs
-    /// (<see cref="KleeMod.Powers.KleeCompanionSpark.MaxPerPlay"/>), so a
-    /// fourth clause would state a bound no reachable play can meet.
-    /// </summary>
-    /// R276 PICK 2: THE RIDER NAMES ANY COMPANION. `EB-642` had pointed it at
-    /// the printed Hexerei word; R276 retired the word and every Companion card
-    /// pays, so the sentence says "a Companion card" -- the same set
-    /// <see cref="KleeMod.Powers.KleeCompanionSpark.PaysKleesSpark"/> tests
-    /// under the arm -- and it rides every companion face on Klee's profile.
-    /// IT ASKS <see cref="KleesRuleBelongsHere"/>, because a Universal is
-    /// drafted by every character, and Klee's rule on a Kokomi shop screen is
-    /// `EB-504` exactly.
-    ///
-    /// 2026-09-23: UNDER THE ARM IT PRINTS NOTHING, because under the arm a
-    /// Companion play no longer pays (<see cref="KleeMod.Powers.KleeCompanionSpark"/>,
-    /// [USER]: "...worth decreasing now to go back to the old levels and then
-    /// see if play is Spark-constrained"). A rider promising income the kit
-    /// does not pay is the `EB-418` defect turned inside out. Off the arm it
-    /// is unchanged.
-    public static IEnumerable<IHoverTip> ForCovenSpark(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        KleeOverhaul.Enabled || !KleesRuleBelongsHere(card) ? inherited :
-        With(inherited, CovenSparkKey,
-            "Playing a [gold]Companion[/gold] card gives Klee [blue]"
-          + KleeCompanionSpark.Base + "[/blue] [gold]Spark[/gold], [blue]"
-          + KleeCompanionSpark.ReactionBonus + "[/blue] more if it triggered "
-          + "an [gold]Elemental Reaction[/gold] and [blue]"
-          + KleeCompanionSpark.UpgradedBonus
-          + "[/blue] more if it is upgraded.");
 
     // ---------------------------------------------------------- Kokomi -----
     //

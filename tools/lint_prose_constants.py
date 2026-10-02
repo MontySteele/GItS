@@ -207,11 +207,6 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
-    ("klee-mod/KleeCode/KleeMod.cs", "SalonConstants.TickEncoreCost", "1"):
-        "The Confiscated keyword says 'A 1-cost Status card that does "
-        "nothing.' -- that 1 is the Status card's ENERGY cost, not the "
-        "Salon's Encore tick price. `cost` joins them and nothing else does. "
-        "Repricing the salon tick must not touch this string.",
     # DROPPED by `EB-345` (R249), and by the lint reporting it stale, which is
     # the whole point of it reporting stale entries. The entry excused True
     # Spark Knight's "for your Attacks to cost 0 (minimum 1)": the shipped
@@ -222,11 +217,6 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     # base game uses for a card type: the page un-golded `Attack` on the
     # prototype faces (card types are plain words, `RAGE_POWER`), and the
     # lint's affinity now sees it.
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoMcMikaStarfrostSwirl.cs",
-     "SalonConstants.TickEncoreCost", "1"):
-        "Starfrost Swirl reads 'Your next Attack costs 1 less.' The 1 is an "
-        "Energy discount on a card, not the Salon's Encore tick price, and "
-        "`cost` is the only word joining them.",
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoMiSaraTenguStormcall.cs",
      "CompanionOverhaulLaw.LightfallPerAttack", "5"):
         "Tengu Stormcall reads 'Next turn, your Attacks deal 5 additional "
@@ -235,17 +225,6 @@ ALLOWED: dict[tuple[str, str, str], str] = {
         "every authored face does, and `attack` is the only word joining it "
         "to Eula's per-Attack 5.",
     # POOL COMPLETION (2026-10-01).
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTheLastAct.cs",
-     "SalonConstants.TickEncoreCost", "1"):
-        "The Last Act reads 'Costs 1 less for each empty seat.' The 1 is an "
-        "Energy discount per seat, not the Salon's Encore tick price, and "
-        "`cost` is the only word joining them (Starfrost Swirl's case).",
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsCastingAgent.cs",
-     "KurageMemoryLaw.CostPerEnergy", "3"):
-        "Casting Agent reads 'Choose 1 of 3 random Guest Star cards ... It "
-        "costs 0 this turn.' The 3 is the offer's size "
-        "(`FurinaStageLaw.CastingAgentOffer`), not the Kurage memory's "
-        "price, and `cost` is the only word joining them.",
     # DROPPED 2026-09-02, and by the excuse's own last sentence. It said "the
     # card face is the row's `description:`; move the number there" -- and the
     # `EB-283` counted/flag split did exactly that: `weak` is a COUNTED power,

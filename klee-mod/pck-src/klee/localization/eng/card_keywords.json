@@ -1,6 +1,4 @@
 {
-  "KLEEMOD-ELEMENTAL_SKILL.title": "Elemental Skill",
-  "KLEEMOD-ELEMENTAL_SKILL.description": "Playing this card grants 5 Burst Energy.",
   "KLEEMOD-APPLIES_PYRO.title": "Applies Pyro",
   "KLEEMOD-APPLIES_PYRO.description": "No aura: applies [gold]Pyro[/gold] for [blue]2[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
   "KLEEMOD-APPLIES_HYDRO.title": "Applies Hydro",

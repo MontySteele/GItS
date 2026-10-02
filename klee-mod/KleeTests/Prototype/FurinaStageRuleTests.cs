@@ -35,17 +35,14 @@ public class FurinaStageRuleTests
 {
     private sealed class Arm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
-        internal Arm(bool on = true)
+        internal Arm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = on;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }
@@ -76,23 +73,6 @@ public class FurinaStageRuleTests
     // 0. THE ARM SHIPS ON (2026-09-28).
     // ==================================================================
 
-#if FURINA_STAGE
-    /// <summary>
-    /// [USER]'s ruling of 2026-09-28: "make all 3 current builds the active
-    /// release builds". `klee-mod/Directory.Build.props` defaults
-    /// `-p:FurinaStage=true`, so every build that names no property carries
-    /// the Stage. SKIPPED by the `#if` in the one configuration that opts the
-    /// arm out (`-p:ShippedKits=true` or `-p:FurinaStage=false`), because
-    /// there the property has moved the value this pin asserts
-    /// (`docs/current/operations/prototype.md`).
-    /// </summary>
-    [Fact]
-    public void The_arm_ships_on()
-    {
-        Assert.True(FurinaStage.DefaultEnabled);
-    }
-#endif
-
     [Fact]
     public void The_arm_is_hers_alone()
     {
@@ -104,13 +84,6 @@ public class FurinaStageRuleTests
         Assert.False(FurinaStage.LiveFor(Seat.Klee().Creature));
         Assert.False(FurinaStage.LiveFor(Seat.Kokomi().Creature));
         Assert.False(FurinaStage.LiveFor(null));
-    }
-
-    [Fact]
-    public void Flag_off_there_is_no_stage_at_all()
-    {
-        using var _ = new Arm(on: false);
-        Assert.False(FurinaStage.LiveFor(Seat.Furina().Creature));
     }
 
     // ==================================================================
@@ -218,39 +191,6 @@ public class FurinaStageRuleTests
         Assert.Equal(0, result.Absorbed);
         Assert.Equal(7, result.ReachedFurina);
         Assert.Null(result.Exit);
-    }
-
-    /// <summary>
-    /// THE SEAM, read off the shipped hook: the stage's absorption runs BEFORE
-    /// the shipped Encore buffer and returns, because under this arm Encore is
-    /// retired (brief sec.2) and a board that fell through would charge one hit
-    /// to two buffers.
-    ///
-    /// STRUCTURAL, and it is the ONE fact in this file that has to be: the hook
-    /// is an instance override the engine calls, and what is being asserted is
-    /// the ORDER of two calls inside it rather than a number either produces.
-    /// </summary>
-    [Fact]
-    public void The_stage_is_asked_before_the_shipped_buffer()
-    {
-        var calls = Il.CallSequence(
-            Il.Method("FurinaResourceHooks", "ModifyHpLostBeforeOsty"));
-
-        // R276 batch two: the ledger's absorb is reached through
-        // `FurinaStage.AbsorbHit`, which adds A Rapt Audience's Raise.
-        var stage = calls.ToList().FindIndex(
-            c => c.EndsWith("FurinaStage.AbsorbHit", StringComparison.Ordinal));
-        var encore = calls.ToList().FindIndex(
-            c => c.EndsWith("FurinaResources.AbsorbDamage",
-                            StringComparison.Ordinal));
-
-        Assert.True(stage >= 0, "the stage's absorption left the damage hook");
-        Assert.True(encore >= 0, "the shipped Encore buffer left the damage hook");
-        Assert.True(stage < encore);
-        // And it is gated: a Klee seat, a Kokomi seat or a flag-off Furina
-        // must never reach the stage branch at all.
-        Assert.Contains(calls, c => c.EndsWith("FurinaStage.LiveFor",
-                                               StringComparison.Ordinal));
     }
 
     // ==================================================================
@@ -625,21 +565,6 @@ public class FurinaStageRuleTests
     }
 
     /// <summary>
-    /// R276 hygiene: UNDER THE ARM HER STARTER IS THE BRIEF'S TEN. The
-    /// shipped starting-companion roll swapped a Solicitation and a Stage
-    /// Presence for two Fontaine companions in every Stage run; it now asks
-    /// the arm first and stands down. A structural pin (the patch needs a
-    /// run seed and a deck this harness has no game for).
-    /// </summary>
-    [Fact]
-    public void The_starter_companion_roll_stands_down_under_the_arm()
-    {
-        var calls = Il.Calls(
-            Il.Method("KleeStartingCompanionsPatch", "ResolveFurina"));
-        Assert.Contains("FurinaStage.get_Enabled", calls);
-    }
-
-    /// <summary>
     /// R276 hygiene: HER ANCIENT UNDER THE ARM. "Gain N Encore" printed a
     /// retired meter; under the arm the face is the Stage's own Raise on the
     /// back performer, 2 and 3 upgraded. With the arm off it is the shipped
@@ -662,10 +587,6 @@ public class FurinaStageRuleTests
                 "At the start of your turn, your [gold]back performer[/gold] "
               + "gains {StageRaise:diff()} [gold]Fanfare[/gold].", face);
             Assert.DoesNotContain("Encore", face);
-        }
-        using (new Arm(on: false))
-        {
-            Assert.Contains("[gold]Encore[/gold]", Face());
         }
     }
 
@@ -768,10 +689,6 @@ public class FurinaStageRuleTests
         {
             Assert.True(Vfx.FurinaStageCues.AppliesTo(Seat.Furina().Creature));
             Assert.False(Vfx.FurinaStageCues.AppliesTo(Seat.Klee().Creature));
-        }
-        using (new Arm(on: false))
-        {
-            Assert.False(Vfx.FurinaStageCues.AppliesTo(Seat.Furina().Creature));
         }
     }
 }

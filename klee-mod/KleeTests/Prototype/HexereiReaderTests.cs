@@ -118,7 +118,6 @@ public class HexereiReaderTests
         var calls = Il.Calls(Il.Method("CompanionHexerei", "NoteCardPlayed"));
         Assert.Contains("CompanionHexerei.CountsAsCompanion", calls);
         Assert.Contains("KleeOverhaulLedger.NoteCompanionPlayed", calls);
-        Assert.Contains("KleeOverhaul.get_Enabled", calls);
 
         var hook = typeof(KleeOverhaulSweepHooks)
             .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
@@ -187,7 +186,6 @@ public class HexereiReaderTests
             .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
         var calls = Il.Calls(hook);
         Assert.Contains("CompanionHexerei.CountsAsCompanion", calls);
-        Assert.Contains("KleeOverhaul.get_Enabled", calls);
         Assert.Contains("ProtoBombPower.Place", calls);
         // It places a plain Bomb and never sets one off.
         Assert.DoesNotContain("ProtoBombPower.TakeAll", calls);
@@ -310,98 +308,10 @@ public class HexereiReaderTests
     }
 
     private static bool Counts(CardModel card) =>
-        (bool)typeof(KleeCompanionSpark).Assembly
+        (bool)typeof(ArmKeywordTips).Assembly
             .GetType("KleeMod.Powers.CompanionHexerei")!
             .GetMethod("CountsAsCompanion", HeadlessGame.All)!
             .Invoke(null, new object?[] { card })!;
-
-    [Fact]
-    public void Under_the_arm_no_companion_play_pays_a_spark_and_the_readers_still_count_it()
-    {
-        // 2026-09-23, [USER]: "It sounds like we've massively increased the
-        // Spark generation and it's worth decreasing now to go back to the
-        // old levels and then see if play is Spark-constrained." R276 pick 2
-        // had paid Klee for any Companion play under the arm, Alice-marked
-        // plays included; now none pays, while the readers' own question
-        // (`CountsAsCompanion`, which Coven Errand, Witches' Circle and the
-        // rest ask) still answers yes for both.
-        //
-        // REAL: `PaysKleesSpark` and `CountsAsCompanion` on real cards against
-        // a real Klee seat. The MINT is `Settle`, which needs a
-        // PlayerChoiceContext and is outside the boundary; what DECIDES is the
-        // predicate. The sim twin plays it on a real board:
-        // `test_a_companion_play_feeds_the_readers_and_mints_no_spark`.
-        var was = KleeOverhaul.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = true;
-            var seat = Seat.Klee();
-            var window = Window(seat);
-
-            var companion = Held<ProtoMcDionaShakenNotPurred>(seat);
-            Assert.IsAssignableFrom<ICompanionCard>(companion);
-            Assert.True(Counts(companion));
-            Assert.False(KleeCompanionSpark.PaysKleesSpark(companion));
-
-            // Even one of her own Personal Companions, which pays off the arm.
-            Assert.Equal("klee", ((ICompanionCard)companion).PersonalPool);
-            Assert.False(KleeCompanionSpark.PaysKleesSpark(companion));
-
-            var marked = Held<ProtoKoPop>(seat);
-            Mark(window, marked);
-            Assert.True(Counts(marked));
-            Assert.False(KleeCompanionSpark.PaysKleesSpark(marked));
-
-            // And the rider that promised the income is not attached.
-            var inherited = System.Array.Empty<IHoverTip>();
-            Assert.Same(inherited,
-                        ArmKeywordTips.ForCovenSpark(inherited, companion));
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = was;
-        }
-    }
-
-    [Fact]
-    public void Off_the_arm_the_shipped_personal_gate_still_pays()
-    {
-        // R213 B: the shipped Personal-Companion gate does not move for a
-        // prototype arm. Off the arm one of Klee's own Personals pays; a
-        // marked card does not, and nobody but Klee is paid (`EB-434`).
-        var was = KleeOverhaul.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = false;
-            var seat = Seat.Klee();
-            var window = Window(seat);
-            var companion = Held<ProtoMcDionaShakenNotPurred>(seat);
-            Assert.True(KleeCompanionSpark.PaysKleesSpark(companion));
-
-            var marked = Held<ProtoKoPop>(seat);
-            Mark(window, marked);
-            Assert.False(KleeCompanionSpark.PaysKleesSpark(marked));
-
-            var kokomi = Seat.Kokomi();
-            Assert.False(KleeCompanionSpark.PaysKleesSpark(
-                Held<ProtoMcDionaShakenNotPurred>(kokomi)));
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = was;
-        }
-    }
-
-    [Fact]
-    public void Under_the_arm_the_spark_gate_returns_before_any_companion_test()
-    {
-        // Structural: the arm branch asks nothing of the card; the
-        // Personal-pool test is what remains below it for the off-arm world.
-        var body = Il.CallSequence(
-            Il.Method("KleeCompanionSpark", "PaysKleesSpark")).ToList();
-        Assert.Contains(body, c => c.Contains("KleeOverhaul"));
-        Assert.DoesNotContain(body, c => c.Contains("CompanionHexerei"));
-    }
 
     // ---- the pool --------------------------------------------------------
 

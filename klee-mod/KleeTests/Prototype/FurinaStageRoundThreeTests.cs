@@ -55,17 +55,14 @@ public class FurinaStageRoundThreeTests
 
     private sealed class StageArm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
         internal StageArm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = true;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }

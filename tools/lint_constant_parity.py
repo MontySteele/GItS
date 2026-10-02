@@ -117,10 +117,6 @@ MIRRORED: dict[str, object] = {
     # the doubling as a standing invariant, the C# side became a literal on
     # OpeningSparks's precedent, and INVARIANTS below asserts the 2x itself --
     # which is the half a by-value mirror cannot express.
-    "PearlOfInsightRelic.ChargePerExhaust":
-        _ancient_hook("touch_of_orobas_kokomi", "charge_per_exhaust"),
-    "PearlOfInsightRelic.BurstPerExhaust":
-        _ancient_hook("touch_of_orobas_kokomi", "burst_per_exhaust"),
     # Shared elemental table (tier0/constants.py, reaction block).
     "ReactionConstants.AuraDurationTurns": C.AURA_DURATION_TURNS,
     "ReactionConstants.OverloadSplash": C.OVERLOAD_SPLASH,
@@ -132,8 +128,6 @@ MIRRORED: dict[str, object] = {
     "ReactionConstants.SwirlDamage": C.SWIRL_DAMAGE,     # the element port, sec.4 A
     "ReactionConstants.ShatterDamage": C.SHATTER_DAMAGE,
     "ReactionConstants.FrozenBossVuln": C.FROZEN_BOSS_VULN,
-    "ReactionKitConstants.CatalyticBurstPerReaction":
-        C.CATALYTIC_BURST_PER_REACTION,
     # Non-integer members of the same table. These were invisible until the
     # lint was widened past `int` during the §4.7 shop sprint -- and they are
     # the amplifier numbers, i.e. the single most consequential multipliers in
@@ -166,24 +160,14 @@ MIRRORED: dict[str, object] = {
         C.SHOP_COMPANION_RARITY_ODDS["uncommon"],
 
     # Furina.
-    "FurinaResourceConstants.FanfareDecayFraction": C.FANFARE_DECAY_FRACTION,
     # New to the map on 2026-08-13 (EB-97), and the reason it is here is the
     # gate's own blind spot: the fraction was an inline `/ 2` in FanfareCap,
     # so it appeared in neither MIRRORED nor UNMIRRORED and the lint's
     # "every balance number in the mod lives twice" promise did not cover
     # the Furina identity record's headline "%maxHP". Naming it on the C# side is what makes
     # it visible here.
-    "FurinaResourceConstants.FanfareCapFraction": C.FANFARE_CAP_FRACTION,
-    "SalonConstants.DryDamageMultiplier": C.SALON_DRY_DAMAGE_MULT,
-    "SpotlightSystem.GuestCastBaseMultiplier": C.SPOTLIGHT_BASE_MULT,
 
     # Klee.
-    "BurstConstants.PerSkillTag": C.BURST_PER_SKILL_TAG,
-    "BurstConstants.PerReaction": C.BURST_PER_REACTION,
-    "BurstConstants.KleeMax": _char("klee", "burst_max"),
-    "KitBurstConstants.VolleyHits": C.SPARKS_N_SPLASH_HITS,
-    "KitBurstConstants.VolleyHitDamage": C.SPARKS_N_SPLASH_HIT_DMG,
-    "SparkPower.Threshold": C.SPARKS_FOR_FREE_ATTACK,
     # The Sparks alternative-cost arm (review/ruled/klee-sparks-2026-08-29.md
     # sec.5). MIRRORED and not UNMIRRORED even though the class is
     # quarantined: the tier0 counterpart exists and is the SAME number, and
@@ -191,16 +175,9 @@ MIRRORED: dict[str, object] = {
     # without the other. The row above is the threshold this one retires;
     # both stay, because the flag runs the two economies as two arms.
     "SparkAttackCostPower.Price": C.SPARK_ATTACK_POWER_PRICE,
-    "DemolitionConstants.SplashBurst": C.DETONATION_SPLASH_BURST,
-    "DemolitionConstants.SplashProcCapPerTurn": C.DETONATION_SPLASH_PROC_CAP,
-    "DemolitionConstants.PlaytimeBombDamage": C.PLAYTIME_BOMB_DAMAGE,
     # EB-219 / LAW:145 -- "Little Hexenzirkul", Klee's kit answering a PERSONAL
     # Companion play. These four ARE the declaration the clause requires, so a
     # drift between the engines would be a drift in a rule, not in a tunable.
-    "KleeCompanionSpark.Base": C.KLEE_COMPANION_SPARK_BASE,
-    "KleeCompanionSpark.ReactionBonus": C.KLEE_COMPANION_SPARK_REACTION_BONUS,
-    "KleeCompanionSpark.UpgradedBonus": C.KLEE_COMPANION_SPARK_UPGRADED_BONUS,
-    "KleeCompanionSpark.MaxPerPlay": C.KLEE_COMPANION_SPARK_MAX_PER_PLAY,
     "CompanionConstants.OzDamage": C.OZ_DMG,
     "CompanionConstants.WitchsFlameBurst": C.WITCHS_FLAME_BURST,
     "CompanionConstants.SolarIsotomaBlock": C.SOLAR_ISOTOMA_BLOCK,
@@ -215,51 +192,14 @@ MIRRORED: dict[str, object] = {
     # pointing at a deleted C.* (which raises) and never quietly stubbed to a
     # literal (which would assert parity between two things that no longer
     # exist). FanfarePerEncoreAbsorbed is new on both sides and joins here.
-    "FurinaResourceConstants.FanfarePerHpLost": C.FANFARE_PER_HP_LOST,
-    "FurinaResourceConstants.FanfarePerEncoreSpent":
-        C.FANFARE_PER_ENCORE_SPENT,
-    "FurinaResourceConstants.FanfarePerEncoreAbsorbed":
-        C.FANFARE_PER_ENCORE_ABSORBED,
-    "FurinaResourceConstants.BurstPerSkillTag": C.BURST_PER_SKILL_TAG,
-    "FurinaResourceConstants.BurstPerReaction": C.BURST_PER_REACTION,
-    "FurinaResourceConstants.BurstPerEncoreSpent": C.BURST_PER_ENCORE_SPENT,
-    "FurinaResourceConstants.BurstPerSalonTick": C.SALON_TICK_BURST,
-    "FurinaResourceConstants.BurstMax": _char("furina", "burst_max"),
-    "SpotlightSystem.FanfarePerCenterStagePlay": C.FANFARE_PER_SPOTLIGHT_CARD,
-    "SalonConstants.MemberSlots": C.SALON_MEMBER_SLOTS,
-    "SalonConstants.FocusPerFanfare": C.SALON_FOCUS_PER,
-    "SalonConstants.ReplacementNumericMultiplier": C.SALON_REPLACE_NUMERIC_MULT,
-    "SalonConstants.ReplacementDamageMultiplier": C.SALON_REPLACE_DAMAGE_MULT,
-    "SalonConstants.TickEncoreCost": C.SALON_TICK_ENCORE_COST,
-    "SalonConstants.CrabalettaTick": _salon("crabaletta", "tick", "damage"),
-    "SalonConstants.CrabalettaBow": _salon("crabaletta", "bow", "damage"),
-    "SalonConstants.UsherTick": _salon("usher", "tick", "block"),
-    "SalonConstants.UsherBow": _salon("usher", "bow", "block"),
-    "SalonConstants.ChevalmarinTick": _salon("chevalmarin", "tick", "damage"),
-    "SalonConstants.ChevalmarinBowEncore": _salon("chevalmarin", "bow", "encore"),
 
     # Kokomi.
-    "KokomiConstants.ChargePerExhaust": C.CHARGE_PER_EXHAUST,
-    "KokomiConstants.BurstPerExhaust": C.KOKOMI_BURST_PER_EXHAUST,
-    "KokomiConstants.BurstPerReaction": C.BURST_PER_REACTION,
-    "KokomiConstants.KurageDuration": C.KURAGE_DURATION,
-    "KokomiConstants.KuragePulseBase": C.KURAGE_PULSE_BASE,
-    "KokomiConstants.KuragePulsePerCharge": C.KURAGE_PULSE_PER_CHARGE,
-    "KokomiConstants.KuragePulseBlock": C.KURAGE_PULSE_BLOCK,
-    "KokomiConstants.GarmentAttackBlock": C.GARMENT_ATTACK_BLOCK,
-    "KokomiConstants.GarmentTurns": C.CEREMONIAL_GARMENT_TURNS,
-    "KokomiConstants.GarmentChargeDivisor": C.GARMENT_CHARGE_DIVISOR,
-    "KokomiConstants.ConscriptCostDelta": C.CONSCRIPT_COST_DELTA,
-    "KokomiConstants.BurstMax": _char("kokomi", "burst_max"),
     # The Kurage's memory (QUARANTINED, R213 B / EB-147 -- the C# rule lives
     # under klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of a
     # release build). Quarantined is not exempt: a prototype arm measured on a
     # number the sim never chose is exactly the failure this lint exists for,
     # and these three are the only numeric constants the rule has. Spec:
     # review/ruled/kokomi-kurage-memory-2026-08-29.md sec.11.4.
-    "KurageMemoryLaw.CostPerEnergy": C.KURAGE_MEMORY_COST_PER_ENERGY,
-    "KurageMemoryLaw.PulseBlock": C.KURAGE_MEMORY_PULSE_BLOCK,
-    "KurageMemoryLaw.QueueCap": C.KURAGE_QUEUE_CAP,
     # The Klee overhaul, slice one (QUARANTINED, R213 B -- the rules engine
     # lives under klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd
     # out of a release build). Quarantined is not exempt, for the same reason
@@ -683,11 +623,6 @@ UNMIRRORED: dict[str, str] = {
     # note said this was the fix; it was taken.
 
     # --- surfaced by widening the lint past `int` (§4.7 shop sprint) ---
-    "FurinaParityVectors.DecayFraction":
-        "derived: it IS FurinaResourceConstants.FanfareDecayFraction, by "
-        "reference rather than by literal. The compiler enforces the link and "
-        "the target is MIRRORED, so comparing here would only add a second "
-        "place to forget.",
     "KleeSelfCheck.RuleCount":
         "diagnostic bookkeeping: how many self-check rules exist. It counts "
         "this file's own contents, not anything the sim models.",
@@ -710,26 +645,11 @@ UNMIRRORED: dict[str, str] = {
         "presentation: which way the source art is drawn. No sim counterpart.",
     "CreatureFacing.DeadZonePx":
         "presentation: pixel threshold below which a creature is not re-aimed.",
-    "GaugeBridge.BarFullWidth":
-        "presentation: meter bar width in pixels.",
     # The Kurage memory card (sec.14). Every number below is SCREEN GEOMETRY or
     # a font size for a HUD element the sim has no notion of: tier0 has no
     # display at all, so there is nothing to compare by value. The affordability
     # rule the element draws IS mirrored, and it carries no constant -- it is a
     # running subtraction over prices the queue already holds.
-    "KurageMemoryCard.EdgeMargin":
-        "presentation: distance from the left edge of the screen, in pixels.",
-    "KurageMemoryCard.ThumbWidth":
-        "presentation: card-thumbnail width in pixels.",
-    "KurageMemoryCard.ThumbHeight":
-        "presentation: thumbnail height, derived from the width by NCard's own "
-        "300x422 aspect so the portrait is not stretched.",
-    "KurageMemoryCard.RingWidth":
-        "presentation: affordability ring thickness on the HUD thumbnail.",
-    "KurageMemoryCard.CountFontSize":
-        "presentation: the Charge count's font size.",
-    "KurageMemoryCard.BadgeFontSize":
-        "presentation: the price badge's font size.",
     # The Kokomi Plan strip (`EB-216`), on the same terms one element over:
     # every number is SCREEN GEOMETRY or a font size for a HUD element the sim
     # has no notion of. The one that is nearly a rule -- how many Plans get a
@@ -788,35 +708,15 @@ UNMIRRORED: dict[str, str] = {
         "presentation: how long the carry-out line stays on screen, in "
         "seconds. Long enough to read, short enough that four Plans in one "
         "morning do not stack their bubbles. The sim has no screen.",
-    "KurageMemoryPileRing.RingWidth":
-        "presentation: ring thickness on a full-size card in the pile viewer, "
-        "thicker than the HUD's because the card is.",
     # EB-248's price band. The SENTENCE it prints is `KurageMemory.PriceText`'s
     # and its multiplier is the law constant, interpolated -- pinned in
     # KleeTests and in tier0/tests/test_kurage_base_kit.py. These three are
     # where the band sits on the card and how big its type is, and the sim has
     # no card to sit on.
-    "KurageMemoryPileRing.PriceFontSize":
-        "presentation: font size of the price line on a card in the pile "
-        "view.",
-    "KurageMemoryPileRing.PriceHeight":
-        "presentation: the price band's height, in the card's own "
-        "coordinates.",
-    "KurageMemoryPileRing.PriceInset":
-        "presentation: how far the price band sits above the bottom edge of "
-        "the card face, in pixels.",
     # EB-214's header. The SENTENCE is what R224 ruled and it is pinned in
     # KleeTests and in tier0/tests/test_kurage_base_kit.py; where it sits and
     # how big it is are presentation, and the sim has no screen to compare
     # them against.
-    "KurageMemoryPileRing.HeaderFontSize":
-        "presentation: font size of the Charge-source line at the head of the "
-        "pile view.",
-    "KurageMemoryPileRing.HeaderTop":
-        "presentation: the header line's inset from the top of the pile "
-        "screen, in pixels.",
-    "KurageMemoryPileRing.HeaderHeight":
-        "presentation: the header line's own height, in pixels.",
     "KleeCombatVfx.LobApexLift":
         "presentation: bomb-toss arc height in pixels.",
     # The element indicator ([USER], 2026-09-01: "instead of saying 'applies
@@ -860,24 +760,6 @@ UNMIRRORED: dict[str, str] = {
     # is one TURN of upkeep at the current stage, which is a derived quantity
     # (members x TickEncoreCost), so the only constants left are the count of
     # segment NODES and the geometry they sit in.
-    "SalonVisualsBridge.RunwaySegments":
-        "presentation: how many runway segments the ribbon can draw before it "
-        "shows the overflow cue. A node count, not a rule -- Encore is "
-        "uncapped, so no sim number corresponds and a sixth turn of runway "
-        "is real whether or not it is drawn.",
-    "SalonVisualsBridge.SceneSlots":
-        "presentation: how many slot nodes salon_stage.tscn ships. The RULE "
-        "is SalonConstants.MemberSlots plus the cap-raise power, which is "
-        "mirrored; this is the ceiling on what the scene can draw.",
-    "SalonVisualsBridge.SpriteScaleMax":
-        "presentation: the largest scale the member art is drawn at, half the "
-        "144px master. A rendering ratio; the sim has no sprites.",
-    "SalonVisualsBridge.SlotHalfSpan":
-        "presentation: how far from centre a slot may sit, in pixels, before "
-        "it overhangs the stage arc.",
-    "SalonVisualsBridge.SlotSpacingMax":
-        "presentation: the shipped three-slot pitch in pixels, kept as the "
-        "maximum gap so a cap raise tightens the row instead of widening it.",
     # EB-53/N1, the end-of-turn attribution docket. The whole widget is a
     # READ: every number it prints comes from the accessor the resolution
     # itself calls (KurageSummonPower.PulseDamage, KitBurstConstants.*,

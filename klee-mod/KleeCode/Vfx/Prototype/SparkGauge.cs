@@ -103,7 +103,7 @@ public static class SparkGauge
     /// badge suppression both come through it.
     /// </summary>
     public static bool AppliesTo(Creature creature) =>
-        KleeOverhaul.Enabled && creature.Player?.Character is IKleeCharacter;
+        creature.Player?.Character is IKleeCharacter;
 
     /// <summary>
     /// The number the counter draws: the bank, right now.

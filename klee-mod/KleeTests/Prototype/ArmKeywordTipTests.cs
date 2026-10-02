@@ -62,10 +62,8 @@ public class ArmKeywordTipTests
     [Fact]
     public void Under_the_overhaul_the_spark_tip_states_the_kit_rule()
     {
-        var was = KleeOverhaul.Enabled;
         try
         {
-            KleeOverhaul.Enabled = true;
 
             var body = SparkBody();
 
@@ -89,41 +87,6 @@ public class ArmKeywordTipTests
         }
         finally
         {
-            KleeOverhaul.Enabled = was;
-        }
-    }
-
-    [Fact]
-    public void With_the_arm_off_the_spark_tip_claims_no_kit_gain()
-    {
-        // The Sparks arm prints `Spark` on twelve faces of its own, and under
-        // THAT arm the gain is Pounding Surprise's -- a relic's body, not a kit
-        // rule. A flat sentence would have explained one arm's word with the
-        // other arm's rules, which is the class of defect this row is about.
-        var was = KleeOverhaul.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = false;
-
-            var body = SparkBody();
-
-            Assert.DoesNotContain("whenever a [gold]Bomb[/gold] goes off",
-                                  body);
-            // R242 pick 1's opening bank is the overhaul's rule too, so the
-            // Sparks arm must not claim it either.
-            Assert.DoesNotContain("Start each combat", body);
-            Assert.DoesNotContain("Pounding Surprise", body);
-            // And the half that is true on BOTH arms is still said: the
-            // alternative cost is live in every prototype build.
-            Assert.False(SparkPower.BaseRuleActive);
-            Assert.Contains(
-                "Some cards cost [gold]Sparks[/gold] instead of Energy, with no "
-                + "cap.", body);
-            Assert.Contains("Gone after combat.", body);
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = was;
         }
     }
 
@@ -249,63 +212,6 @@ public class ArmKeywordTipTests
         Assert.Contains("carries out this [gold]Plan[/gold]", body);
         Assert.Contains("Bake-Kurage", body);
         Assert.Contains("Hydro", body);
-    }
-
-    [Fact]
-    public void The_coven_rider_names_all_three_limbs_of_the_kits_spark()
-    {
-        // `EB-418`. The r11 seat's one unreadable number: Spark 1 to 2 with no
-        // Bomb going off, because `KleeCompanionSpark` mints on any play of a
-        // Companion (R276; a Hexerei one before) and LAW:145 keeps that grant off
-        // the Companion's own face. All three limbs print -- a sentence saying
-        // only "makes a Spark" would leave a reacted upgraded play as
-        // unreadable as the plain one was.
-        var body = Printed("ForCovenSpark");
-        // R276 pick 2: the rider names any Companion card, the set the
-        // payment reads; the Hexerei mark is retired.
-        Assert.Contains("Companion", body);
-        Assert.DoesNotContain("Hexerei", body);
-        Assert.DoesNotContain("Klee's own", body);
-        Assert.Contains("Spark", body);
-        Assert.Contains("more if it triggered", body);
-        Assert.Contains("Elemental Reaction", body);
-        Assert.Contains("more if it is upgraded", body);
-
-        // THE NUMERALS ARE THE POWER'S AND ARE NOT TYPED HERE (`EB-89`): each
-        // limb is an `int` folded into the concat at runtime, so the literals
-        // above carry no digit at all and a repricing moves the sentence with
-        // the grant.
-        Assert.Equal(1, KleeCompanionSpark.Base);
-        Assert.Equal(1, KleeCompanionSpark.ReactionBonus);
-        Assert.Equal(1, KleeCompanionSpark.UpgradedBonus);
-        // The cap is the sum of the three limbs, so no reachable play can meet
-        // a fourth clause and none is printed.
-        Assert.Equal(KleeCompanionSpark.Base + KleeCompanionSpark.ReactionBonus
-                     + KleeCompanionSpark.UpgradedBonus,
-                     KleeCompanionSpark.MaxPerPlay);
-    }
-
-    [Fact]
-    public void The_kits_spark_is_minted_where_the_rider_says_it_is()
-    {
-        // `EB-418`, the other half: the sentence is only true while the grant
-        // is where it says. `Settle` is the mint and `Arm` decides whether it
-        // fires, both keyed on `PaysKleesSpark` -- the row's family mark
-        // against the player's character (`EB-642`, `EB-434`), which is the
-        // same read `gen_klee_cards` makes to decide which faces carry the
-        // sentence.
-        var settle = typeof(KleeCompanionSpark)
-            .GetMethod("Settle", HeadlessGame.All)!;
-        Assert.Contains(Il.Calls(settle),
-                        c => c.EndsWith("SparkPower.Gain",
-                                        System.StringComparison.Ordinal));
-        Assert.Contains("companion:personal/play", Il.Strings(settle));
-
-        var arm = typeof(KleeCompanionSpark).GetMethod("Arm", HeadlessGame.All)!;
-        Assert.Contains(
-            Il.Calls(arm),
-            c => c.EndsWith("KleeCompanionSpark.PaysKleesSpark",
-                            System.StringComparison.Ordinal));
     }
 
     [Fact]
@@ -463,7 +369,9 @@ public class ArmKeywordTipTests
         // FORTY-SIX with the Spend warning (Furina pool round 2026-10-01):
         // `ForSpendShortfall`, a rider titling no keyword, on a Spend mode's
         // face: the guests this Spend would leave unable to pay to act.
-        Assert.Equal(46, attaches.Count);
+        // FORTY-FIVE: `EB-418`'s `ForCovenSpark` left with its rule (legacy
+        // cleanup stage 5).
+        Assert.Equal(45, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForSpendShortfall");
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
@@ -499,7 +407,7 @@ public class ArmKeywordTipTests
         Assert.Contains(attaches, m => m.Name == "ForDusk");
         Assert.Contains(attaches, m => m.Name == "ForCasket");
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
-        Assert.Contains(attaches, m => m.Name == "ForCovenSpark");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForCovenSpark");
         Assert.Contains(attaches, m => m.Name == "ForEmptyField");
         Assert.Contains(attaches, m => m.Name == "ForMergeRiders");
         Assert.All(attaches, m => Assert.Contains(
@@ -644,59 +552,6 @@ public class ArmKeywordTipTests
         return card;
     }
 
-    [Theory]
-    [InlineData("klee", true)]
-    [InlineData("kokomi", false)]
-    [InlineData("furina", false)]
-    public void EB504_klees_two_words_are_klees_runs_alone(
-        string character, bool printed)
-    {
-        // `EB-504`, REOPENED 2026-09-05. The row was closed on the page
-        // glossary off the r17 finding, and the r18 lane-2 seat then met the
-        // same sentence on a CARD: "two Companion cards in a Kokomi run
-        // printed 'Hexerei -- A Companion card that prints the word, and Klee
-        // herself ... Cards of hers pay when you play one.' I could not tell
-        // what is paid, by whom, or whether it applies to me at all, so I
-        // refused both cards partly on that."
-        //
-        // THE WORD IS EVERYONE'S AND THE RULE IS KLEE'S. The Companion Spark
-        // rider rides companion faces the whole roster can draft (it was the
-        // `Hexerei` word until R276); `Oz` is named by Fischl's face, which every
-        // character meets, and the Power that fields him is hers. So the tag
-        // reaches every run and the rule reaches one -- which is what
-        // `blindplay_notes._ARM_KEYWORD_CHARACTER` gates on the page side, and
-        // this is the second source that gate could not see.
-        //
-        // ONE CARD, THREE OWNERS, because that is the whole variable: Albedo
-        // is a Mondstadt Universal every character drafts, so nothing about
-        // the card changes between the three rows.
-        //
-        // THE PREDICATE AND NOT THE MATERIALISED TIP: building a `HoverTip`
-        // resolves a `LocString`, which needs the game's loc tables and is
-        // outside the headless boundary (README). What a test CAN do is ask
-        // the gate, and watch the gated call hand its inherited stack straight
-        // back -- which is the observable half either way.
-        // THE SHIPPED RIDER: the Klee overhaul retires it (`ForCovenSpark`
-        // returns the inherited stack whenever the arm is on), and since
-        // 2026-09-28 the arm is on by default, so this pin names its world.
-        using var _ = ArmScope.ShippedKlee();
-        var seat = character switch
-        {
-            "klee" => Seat.Klee(),
-            "kokomi" => Seat.Kokomi(),
-            _ => Seat.Furina(),
-        };
-        var card = Owned<ProtoMcAlbedoSolarIsotoma>(seat);
-
-        Assert.Equal(printed, ArmKeywordTips.KleesRuleBelongsHere(card));
-
-        var inherited = System.Array.Empty<IHoverTip>();
-        Assert.Equal(!printed,
-            ReferenceEquals(inherited, ArmKeywordTips.ForCovenSpark(inherited, card)));
-        Assert.Equal(!printed,
-            ReferenceEquals(inherited, ArmKeywordTips.ForOz(inherited, card)));
-    }
-
     [Fact]
     public void EB504_silence_about_the_character_still_prints_the_rule()
     {
@@ -715,7 +570,7 @@ public class ArmKeywordTipTests
         // Structural, `Every_keyword_goes_through_the_one_attach_point`'s
         // shape: two words, one predicate, so a third word whose rule belongs
         // to one character cannot arrive with its own copy of the question.
-        foreach (var word in new[] { "ForCovenSpark", "ForOz" })
+        foreach (var word in new[] { "ForOz" })
         {
             Assert.Contains("ArmKeywordTips.KleesRuleBelongsHere",
                             Il.Calls(Il.Method("ArmKeywordTips", word)));

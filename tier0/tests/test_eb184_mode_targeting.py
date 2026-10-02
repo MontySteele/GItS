@@ -138,15 +138,6 @@ def test_a_non_modal_card_declares_neither_row():
     assert "ModeAimsAtChosenEnemy" not in src and "IModalCard" not in src
 
 
-def test_the_card_that_returned_the_arm_carries_the_repair():
-    """`proto_thoma_crimson_ooyoroi_either`, the round-4 `t02` card itself:
-    mode 1 aims, mode 2 (the Block the seat took) does not."""
-    src = THOMA_CS.read_text(encoding="utf-8")
-    assert "IModalCard" in src
-    assert "new[] { true, false }" in src
-    assert 'new[] { "Deal 8 damage, applying its element",' in src
-
-
 # --- the two C# sources agree on the member names --------------------------
 
 def test_the_interface_declares_exactly_what_the_bridge_reads_by_name():

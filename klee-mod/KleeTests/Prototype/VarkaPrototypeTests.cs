@@ -71,8 +71,7 @@ public class VarkaPrototypeTests : IDisposable
     // ---- no switch -----------------------------------------------------------
 
     // Collapsed 2026-10-01 (legacy cleanup stage 2): he ships nowhere else, so
-    // he has no switch; he compiles with the prototype surface and is absent
-    // from a -p:ShippedKits=true build, which compiles none.
+    // he has no switch, and compiles in every build.
     [Fact]
     public void He_has_no_switch()
     {

@@ -261,7 +261,6 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
         List<CardModel> Draw(CardRarity r, string? n)
         {
             IEnumerable<CardModel> drawn = CompanionPool.Eligible(player, r, n);
-#if PROTOTYPE_CARDS
             // THE COMPANION STAND-IN HAND-OFF (QUARANTINED, R213 B), and this
             // is the ONE mouth where it maps the CANDIDATE LIST rather than the
             // pick: `MerchantCardEntry` does its own draw, so there is no
@@ -276,7 +275,6 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
             // tier05/shop.py excludes the same row and reads it the other way
             // round (its `taken` keeps the Universal); the two agree.
             drawn = drawn.Select(c => Powers.CompanionStandIns.HandOff(c, player));
-#endif
             return drawn.Where(c => !stocked.Contains(c)).ToList();
         }
 

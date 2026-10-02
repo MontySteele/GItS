@@ -736,49 +736,9 @@ CO_TENANCY_LEDGER = {
         ("Powers/BombPower.cs", "BombPower"):
             "turn-start detonation of last turn's bombs (enemy-attached; "
             "sim: combat.py detonate_bombs)",
-        ("Powers/DemolitionPowers.cs", "DetonationSplashPower"):
-            "zeroes the Blazing Delight splash-proc cap. Ordered before any "
-            "enemy BombPower detonation by allies-before-enemies iteration "
-            "(R35 -- the ordering proof in the class comment), matching the "
-            "sim's reset-then-detonate (combat.py:501 vs :511)",
-        ("Powers/DemolitionPowers.cs", "ExplosivesWorkshopPower"):
-            "clears its own once-per-turn latch (EB-118 sec.4.4). THE "
-            "ORDERING QUESTION, answered rather than assumed: it shares "
-            "`BombDamageUpPower` with BombPower's turn-start detonation, "
-            "which is a co-tenant of this same broadcast -- but it only "
-            "RESETS a private bool here and writes the shared stat from the "
-            "discard/exhaust hooks, which fire inside the player's turn, "
-            "strictly after every tenant of this broadcast has run. So no "
-            "co-tenant can observe a different bomb-damage number depending "
-            "on order. The sim orders it the same way and for the same "
-            "reason: `discards_this_turn` / `cards_exhausted_this_turn` are "
-            "zeroed at the player turn start and only card play moves them",
         ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
             "purges the Salon company map, clears Curtain Call per-turn "
             "windows; touches nothing its co-tenants read",
-        ("Relics/EtherealSpotlightRelic.cs", "EtherealSpotlightRelic"):
-            "grants the Ethereal Spotlight selector PRE-draw (R123 moved it "
-            "here from AfterPlayerTurnStart; random discard only on a full "
-            "retained hand -- the X14(b) softlock safety). No co-tenant "
-            "touches the hand",
-        ("Powers/FurinaResources.cs", "EncorePerTurnPower"):
-            "All the World's a Stage Encore mint. STAGED HERE from "
-            "AfterPlayerTurnStart to settle the Salon-income race: the upkeep "
-            "SPENDS Encore from AfterPlayerTurnStart, and the sim sources the "
-            "income above it (effects.player_turn_start_triggers, pinned by "
-            "tier0/tests/test_eb30m_ancients.py::"
-            "test_ancient_income_is_sourced_above_the_salon_upkeep plus the "
-            "behavioural half test_the_stage_funds_the_same_turn_s_salon_"
-            "ticks). Pre-draw and pre-block-clear are inert for it: GainEncore "
-            "prints no Fanfare, grants no Block and reads no hand, so it "
-            "shares nothing with the decay/delta-block settle that also lives "
-            "in this broadcast",
-        ("Powers/KokomiResources.cs", "ChargePerTurnPower"):
-            "Princess of Watatsumi Charge mint. Staged here for the same "
-            "reason and by the same pin: the sim reads charge_per_turn above "
-            "the upkeep and above the whole per-turn income group, and every "
-            "consumer of the meter (KokomiResourceHooks' kit-grant check) is "
-            "an AfterPlayerTurnStart tenant. Moves a meter only",
     },
     "AfterSideTurnStart": {
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
@@ -1055,22 +1015,11 @@ CO_TENANCY_LEDGER = {
             "on the same terms: no co-tenant of this broadcast reads the "
             "hand's contents, and the two that touch the hand at all (the "
             "Klee and Kokomi kit-grants) ADD a card and read nothing back",
-        ("Powers/CompanionPowers.cs", "MetallicizePower"):
-            "raw per-turn Block mint (R116)",
-        ("Powers/DemolitionPowers.cs", "BombAndSparkPerTurnPower"):
-            "per-turn bomb + Spark mint",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
             "Klee kit-grant check: adds a card to the hand when the meter "
             "is charged",
         ("Powers/FontainePowers.cs", "MasqueRedDeathPower"):
             "per-turn Strength mint",
-        ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
-            "SpotlightSystem.ResetTurn (the MOVED and PLAYS windows only -- "
-            "the sim zeroes those at the top of the player turn) + "
-            "pending-draw flush + fanfare-delta settle. The spend-boost clear "
-            "that used to sit in ResetTurn has moved to this class's "
-            "AfterSideTurnEnd override, so nothing here reads or writes a "
-            "resource the Salon upkeep touches",
         ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
             "Kokomi kit-grant check: adds a card when charged. Its input, the "
             "Charge meter, is minted a broadcast earlier (see "
@@ -1099,24 +1048,6 @@ CO_TENANCY_LEDGER = {
             "removal, same answer to the ordering question above. The two are "
             "commutative with each other for the reason neither is ordered "
             "against a Block grant: neither reads a number it keeps",
-        ("Powers/KuragePowers.cs", "PreventExhaustWardPower"):
-            "resets the Vigil once-per-turn latch; consumed only from "
-            "damage hooks, never by a co-tenant",
-        ("Powers/SalonPowers.cs", "SalonMemberPower"):
-            "Salon upkeep: spends Encore, ticks stage damage, mints the "
-            "Standing Ovation spend-boost. Both resources it touches are now "
-            "ordered against it by BROADCAST rather than by luck -- the "
-            "Encore income is minted in BeforeSideTurnStart and the "
-            "spend-boost is cleared in AfterSideTurnEnd, so the upkeep is the "
-            "only tenant of THIS broadcast that reads either",
-        ("Powers/SparkKitPowers.cs", "SparkPerTurnPower"):
-            "per-turn Spark mint",
-        ("Powers/SpotlightSystem.cs", "SpotlightDiscountPower"):
-            "resets its qualifying-plays latch; consumed only from card "
-            "plays",
-        ("Relics/UpgradedStarterRelics.cs", "ExplosiveFrags"):
-            "turn-1-only opening Spark windfall (the sim's combat_start "
-            "site)",
         ("Relics/KleeArmRelics.cs", "FreshCatch"):
             "QUARANTINED (the Klee arm's own relics, 2026-09-27). Turn-1-only: "
             "Hydro on one random enemy. No co-tenant reads an aura at this "
@@ -1248,11 +1179,6 @@ CO_TENANCY_LEDGER = {
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
             "kit-grant check, turn-end site; its body documents the "
             "models-after-powers broadcast order it leans on",
-        ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
-            "last-chance pending-draw flush, so an end-of-turn spend "
-            "cannot strand into the next turn",
-        ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
-            "Kokomi kit-grant check, turn-end site",
         ("Powers/TurnEndSequencer.cs", "TurnEndSequencer"):
             "THE ONLY ORDERED TENANT, and the reason four powers no longer "
             "override this broadcast at all. It drives, per player-side "
@@ -1364,24 +1290,6 @@ CO_TENANCY_LEDGER = {
             "window",
         ("Powers/FrozenPower.cs", "FrozenPower"):
             "duration tick-down, enemy side",
-        ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
-            "closes the this-turn Spotlight windows: clears the Standing "
-            "Ovation spend-boost resource. AfterSideTurnEnd is StS2 site M, "
-            "which is where the sim's powers.on_turn_end pops powers.EXPIRING "
-            "(tier0/engine/powers.py:23, :156) -- and "
-            "SpotlightSpendBoostResource is the C# twin of "
-            "spotlight_mult_bonus_turn, one of that tuple's two members. It "
-            "used to be cleared from the turn-START broadcast whose Salon "
-            "upkeep mints it, which is the race this move closes. Its two "
-            "POWER-shaped siblings below expire in the same broadcast; no "
-            "co-tenant reads the Spotlight multiplier, which only modifies "
-            "printed values on CARD plays",
-        ("Powers/KuragePowers.cs", "CeremonialGarmentPower"):
-            "duration tick-down, player side",
-        ("Powers/SpotlightSystem.cs", "SpotlightMultBonusTurnPower"):
-            "self-expiry of a this-turn Spotlight bonus",
-        ("Powers/SpotlightSystem.cs", "SpotlightFlatDamageTurnPower"):
-            "self-expiry of a this-turn Spotlight bonus",
         ("Powers/TurnEndSequencer.cs", "TurnEndSequencer"):
             "EB-53/N1: redraws the attribution docket after the volleys have "
             "fired and ticked down, so the numbers the player looks at next "
@@ -1580,13 +1488,8 @@ TURN_END_SEQUENCE = (
      "effects.player_turn_end_triggers pays masque_red_death's Bond FIRST, "
      "at the top of the function, so it eats the Block the turn produced "
      "rather than the Kurage pulse's mending"),
-    ("SparksNSplashPower",
-     "sparks_n_splash, the Pyro volley, is the first of the three"),
     ("OzSummonPower",
      "oz_summon, the Electro volley, is the second"),
-    ("KurageSummonPower",
-     "kurage_summon, the Hydro pulse, is the last -- and its Block grant is "
-     "therefore strictly after the Bond payment"),
 )
 
 
@@ -1657,9 +1560,7 @@ def test_the_sequencer_walks_the_table():
 
 @pytest.mark.parametrize("rel,cls", [
     ("Powers/FontainePowers.cs", "MasqueRedDeathPower"),
-    ("Powers/KitBurst.cs", "SparksNSplashPower"),
     ("Powers/CompanionPowers.cs", "OzSummonPower"),
-    ("Powers/KuragePowers.cs", "KurageSummonPower"),
 ])
 def test_the_sequenced_powers_do_not_take_the_broadcast_back(rel, cls):
     """The revert this guards: re-adding `override BeforeSideTurnEnd`.
@@ -1765,29 +1666,6 @@ def test_the_navia_snapshot_survives_nested_plays():
     assert "HashSet<CardPlay>" in source, source
 
 
-def test_furina_spends_the_encore_cost_before_draining_burst():
-    """EB-19/M8. The sim's play_card order, which the comment used to invert.
-
-    tier0 spends the "Spend N Encore:" cost line at the top of play_card,
-    right after the energy debit, and empties Burst for a requires-full card
-    near the bottom -- cost, THEN drain, THEN the skill-tag bonus. The mod ran
-    drain -> skill-tag -> cost under a comment claiming that was the sim's
-    order. Latent (no sheet card carries encore_cost on a requires-full Burst
-    card) and fixed anyway, because the thing that makes it reachable is a
-    SHEET edit, which is not where anyone checks a C# hook's statement order.
-    """
-    body = method_body(
-        (SOURCE / "Powers" / "FurinaResources.cs").read_text(encoding="utf-8"),
-        r"public\s+override\s+Task\s+BeforeCardPlayed\s*\(")
-    spend = body.index("FurinaResources.SpendEncore")
-    # The owner-guarded drain, not the ownerless early-return one.
-    drain = body.index("FurinaBurstResource.DrainOnPlay(card)")
-    skill_tag = body.index("BurstPerSkillTag")
-    assert spend < drain < skill_tag, (
-        "FurinaResourceHooks.BeforeCardPlayed no longer runs cost -> drain -> "
-        "skill-tag. tier0 combat.play_card does, in that order.")
-
-
 def test_no_comment_reasserts_the_refuted_drain_first_order():
     """The losing claim, pinned so it cannot come back by paraphrase."""
     source = (SOURCE / "Powers" / "FurinaResources.cs").read_text(
@@ -1798,17 +1676,3 @@ def test_no_comment_reasserts_the_refuted_drain_first_order():
         "test_furina_spends_the_encore_cost_before_draining_burst.")
 
 
-def test_vigil_pays_its_fuel_through_the_reshuffle():
-    """tier0 prevent_damage_exhaust reshuffles BEFORE declaring itself out.
-
-    The C# gate counted draw + discard but the exhaust only ever read the
-    draw pile and bailed when it was empty, so an empty draw over a stocked
-    discard prevented the damage and never paid the card -- free prevention,
-    and a second divergence from the sim on the same rare.
-    """
-    body = method_body(
-        (SOURCE / "Powers" / "KuragePowers.cs").read_text(encoding="utf-8"),
-        r"public\s+override\s+async\s+Task\s+AfterDamageReceived\s*\(")
-    assert "CardPileCmd.ShuffleIfNecessary" in body, body
-    # The latch lives here, with the reshuffle -- not in the modifier.
-    assert "_usedThisTurn = true" in body, body

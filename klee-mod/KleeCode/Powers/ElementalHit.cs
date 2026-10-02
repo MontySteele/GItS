@@ -95,10 +95,8 @@ internal static class ElementalHit
             ? SimDamagePipeline.DealerMods(applier, baseDamage)
             : baseDamage;
 
-#if PROTOTYPE_CARDS
         // VARKA (the Oath rework, sec.3): an application of his credits Oath.
         await VarkaOath.NoteApplication(choiceContext, applier, element);
-#endif
         var aura = AuraCmd.Find(target);
         if (aura == null)
         {
@@ -177,7 +175,6 @@ internal static class ElementalHit
     /// because a call site is what the headless suite can pin. Defaulted true,
     /// so Spark Knight is byte-identical.
     /// </summary>
-#if PROTOTYPE_CARDS
     /// <summary>
     /// QUARANTINED (the Klee arm's Alice's Teapot): a hit that reacts as if
     /// the target held <paramref name="assumedAura"/>, and touches the aura it
@@ -207,7 +204,6 @@ internal static class ElementalHit
             dealer: null, cardSource: null, cardPlay: null);
         return landed;
     }
-#endif
 
     public static async Task<int> DealUnelemented(
         PlayerChoiceContext choiceContext, Creature target,
@@ -234,10 +230,8 @@ internal static class ElementalHit
         PlayerChoiceContext choiceContext, Creature target, Element element,
         Creature? applier)
     {
-#if PROTOTYPE_CARDS
         // VARKA (the Oath rework, sec.3): an application of his credits Oath.
         await VarkaOath.NoteApplication(choiceContext, applier, element);
-#endif
         var aura = AuraCmd.Find(target);
         if (aura == null)
         {

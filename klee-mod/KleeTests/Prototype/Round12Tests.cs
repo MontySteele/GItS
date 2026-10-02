@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using KleeMod.Cards;
-using KleeMod.Cards.Generated;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Relics;
@@ -98,21 +97,6 @@ public class Round12Tests
 
     // ---- EB-392: three words on one screen, now one (R276) ---------------
 
-    [Fact]
-    public void The_spark_rider_names_the_one_set_a_player_can_see()
-    {
-        // The r12 run-2 seat met three words -- `Companion`, `Hexerei` and
-        // "Klee's own Companion" -- and none of the cards said which it was.
-        // `EB-642` retired "Klee's own"; R276 pick 2 retired `Hexerei`, so
-        // the rider names the one word every companion face already is.
-        var rider = string.Concat(Il.Strings(typeof(ArmKeywordTips)
-            .GetMethod("ForCovenSpark", HeadlessGame.All)!));
-        Assert.Contains("[gold]Companion[/gold]", rider);
-        Assert.DoesNotContain("Hexerei", rider);
-        Assert.DoesNotContain("Klee's own", rider);
-        Assert.Null(typeof(ArmKeywordTips).GetMethod("ForHexerei",
-                                                     HeadlessGame.All));
-    }
     // `EB-723` RETIRED THE SECOND HALF OF THIS PAIR. It asserted that
     // `ArmKeywordTips.ForDeploy` was at its ceiling and so could not have
     // carried the aim clause -- and the `Deploy` word left the mod with the
@@ -152,67 +136,7 @@ public class Round12Tests
             "no " + relative + " above " + System.AppContext.BaseDirectory);
     }
 
-    [Fact]
-    public void No_surface_states_the_spotlights_reach_as_bare_Companions()
-    {
-        // THE FIND. The r6 act-1 seat deployed under Guest Cast and watched
-        // the member perform dry: "`Guest Cast 1` was active and claims
-        // Companions are '50% stronger', yet the log printed `Crabaletta hit
-        // Corpse Slug for 4 Hydro` -- 6 x 0.75, with no 1.5x anywhere...
-        // the relic that hands you the card says 'It does nothing once your
-        // Companions are lit', and the salon members are the things the game
-        // calls Companions everywhere else."
-        //
-        // `OutwardMultiplier` refuses anything that is not an
-        // `ICompanionCard`, so the reach is CARDS and every surface says so.
-        foreach (var file in new[] { "Powers/SpotlightSystem.cs",
-                                     "Relics/EtherealSpotlightRelic.cs",
-                                     "Cards/Furina/SpotlightCards.cs" })
-        {
-            var src = Printed(file);
-            Assert.DoesNotContain("[gold]Spotlighted[/gold] Companions", src);
-            Assert.DoesNotContain("your Companions are lit", src);
-        }
-    }
-
     // ---- EB-438: a printed number is the delivered number ---------------
-
-    [Fact]
-    public void A_deferred_block_clause_prints_through_the_fold()
-    {
-        // THE FIND. Charlotte, First-Person Shutter is two Block clauses and
-        // only the first was a var: under Guest Cast the card printed "Gain 4
-        // Block. At the start of your next turn, gain 4 Block." and delivered
-        // 6 and 6. The r6 seat filed the SHAPE rather than the number: "The
-        // Spotlight rewrites the FIRST number of a two-clause card but not the
-        // second, so the card under-reports itself."
-        var src = Printed("Cards/Generated/CharlotteEnduringFrosthelm.cs");
-
-        Assert.Contains(
-            "At the start of your next turn, gain {BlockNextTurn:diff()} "
-          + "[gold]Block[/gold].", src);
-        Assert.Contains("new SpotlightSystem.DeferredBlockVar(4m)", src);
-        // The PLAY is unchanged: the fold is applied once, there, and the var
-        // above previews it.
-        Assert.Contains("(int)SpotlightSystem.PrintedBlock(this, 4)", src);
-    }
-
-    [Fact]
-    public void Every_deferred_block_clause_on_a_spotlit_card_carries_the_var()
-    {
-        // The denominator, and the reason the rule is derived rather than
-        // applied by hand: the emitter already wrapped every one of these
-        // plays in `PrintedBlock`, so the face had to ask the same question.
-        foreach (var cls in new[] { "CharlotteEnduringFrosthelm",
-                                    "SayuDarumaGift",
-                                    "ThomaBlazingBarrier" })
-        {
-            var src = Printed("Cards/Generated/" + cls + ".cs");
-            Assert.Contains("SpotlightSystem.DeferredBlockVar", src);
-            Assert.Contains("gain {BlockNextTurn:diff()} [gold]Block[/gold]",
-                            src);
-        }
-    }
 
     [Fact]
     public void The_stored_shower_prints_the_number_it_will_deal()
@@ -255,36 +179,4 @@ public class Round12Tests
     // and carries its owner (`GuestStarGenerator` hands `source.Owner` to
     // `CreateCard`), so it answers the same question the same way.
 
-    [Fact]
-    public void EB526_a_companion_made_after_the_lighting_is_lit_by_the_same_test()
-    {
-        // The lighting FIRST and the card SECOND, which is the whole of the
-        // seat's question: this copy did not exist when the mode was set.
-        var seat = Seat.Furina().WithRelic<CurtainNeverFalls>();
-        Assert.True(SpotlightSystem.BothModes(seat.Creature));
-
-        var made = new CharlotteFreezingPoint();
-        Seat.Set(made, "IsMutable", true);
-        Seat.Set(made, "Owner", seat.Player);
-
-        Assert.IsAssignableFrom<ICompanionCard>(made);
-        Assert.True(SpotlightSystem.IsSpotlighted(made));
-        // And the number the seat read IS the lit one: 4 printed, 6 shown.
-        Assert.Equal(6m, SpotlightSystem.PrintedDamage(made, 4m));
-    }
-
-    [Fact]
-    public void EB526_an_unlit_seat_prints_the_four_the_sheet_prints()
-    {
-        // The other leg, so the pin above is not passing for a reason
-        // unrelated to the lighting: with no mode set the same copy of the
-        // same card prints its sheet number.
-        var seat = Seat.Furina().WithCombatState();
-        var made = new CharlotteFreezingPoint();
-        Seat.Set(made, "IsMutable", true);
-        Seat.Set(made, "Owner", seat.Player);
-
-        Assert.False(SpotlightSystem.IsSpotlighted(made));
-        Assert.Equal(4m, SpotlightSystem.PrintedDamage(made, 4m));
-    }
 }

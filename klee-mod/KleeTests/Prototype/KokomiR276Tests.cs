@@ -68,12 +68,8 @@ public class KokomiR276Tests
         // same funnel). Under Kokomi's arm her Skill answers Hydro; in Klee's
         // seat the same card answers nothing, because Klee's cadence is still
         // Attack-only; with the arm off it answers nothing, as before.
-        var klee = KleeOverhaul.Enabled;
-        var kokomi = KokomiOverhaul.Enabled;
         try
         {
-            KleeOverhaul.Enabled = true;
-            KokomiOverhaul.Enabled = true;
             var skill = new ProtoKkWarCouncil();
             Assert.IsNotAssignableFrom<IElementalCard>(skill);
 
@@ -92,14 +88,9 @@ public class KokomiR276Tests
             Assert.Equal(Element.None, CatalystCadence.PrintedElement(
                 new StrikeSilent(), Seat.Kokomi().Creature));
 
-            KokomiOverhaul.Enabled = false;
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
-                skill, Seat.Kokomi().Creature));
         }
         finally
         {
-            KleeOverhaul.Enabled = klee;
-            KokomiOverhaul.Enabled = kokomi;
         }
     }
 
@@ -108,24 +99,17 @@ public class KokomiR276Tests
     [Fact]
     public void The_ancient_prints_the_plan_payout_under_the_arm_and_charge_off_it()
     {
-        var was = KokomiOverhaul.Enabled;
         try
         {
-            KokomiOverhaul.Enabled = true;
             var arm = Description(new PrincessOfWatatsumi());
             Assert.Contains("carries out a [gold]Plan[/gold]", arm);
             Assert.Contains("{PlanBlock:diff()} [gold]Block[/gold]", arm);
             Assert.Contains("draw 1 card", arm);
             Assert.DoesNotContain("Charge", arm);
 
-            KokomiOverhaul.Enabled = false;
-            var shipped = Description(new PrincessOfWatatsumi());
-            Assert.Contains("[gold]Charge[/gold]", shipped);
-            Assert.DoesNotContain("Plan", shipped);
         }
         finally
         {
-            KokomiOverhaul.Enabled = was;
         }
     }
 
@@ -150,8 +134,8 @@ public class KokomiR276Tests
         var live = applies.FindIndex(c => c.Contains("KokomiOverhaul.LiveFor"));
         var plan = applies.FindIndex(
             c => c.Contains("PrincessOfWatatsumiPlanPower"));
-        var charge = applies.FindIndex(c => c.Contains("ChargePerTurnPower"));
-        Assert.True(live >= 0 && plan > live && charge > plan);
+        Assert.True(live >= 0 && plan > live);
+        Assert.DoesNotContain(applies, c => c.Contains("ChargePerTurnPower"));
     }
 
     // ---- pick 1: the halves rewrite's five new Plan clauses -----------------

@@ -127,31 +127,6 @@ public class CompanionOverhaulTests
 
     // ---- THE FLAG, ON BY DEFAULT ------------------------------------------
 
-    // THE CURRENT KITS ARE THE DEFAULT BUILD (2026-09-28). [USER]: "Let's go
-    // ahead and make all 3 current builds the active release builds to avoid
-    // this confusion." `klee-mod/Directory.Build.props` now defaults
-    // `-p:CompanionOverhaul=true`, so a build that names no property -- `dotnet test`,
-    // deploy.ps1, the handoff zip -- has this arm on. This pin says so.
-    //
-    // SKIPPED, NOT LEFT TO FAIL, in the one configuration that opts the arm
-    // out (`-p:ShippedKits=true`, the `dotnet-test-shipped` gate, or an
-    // explicit `-p:CompanionOverhaul=false`): there the property has moved the very value
-    // this pin asserts, and a red that means "the opt-out works" teaches
-    // everyone to ignore reds. docs/current/operations/prototype.md carries
-    // the rule.
-#if COMPANION_OVERHAUL
-    [Fact]
-#else
-    [Fact(Skip = "This build opts the arm out (-p:ShippedKits=true or -p:CompanionOverhaul=false), which moves CompanionOverhaul.DefaultEnabled, the value this pin asserts. See docs/current/operations/prototype.md.")]
-#endif
-    public void The_arm_ships_on()
-    {
-        // `Enabled` is settable so a pin can exercise both sides in one
-        // build; nothing in the mod ever writes it.
-        Assert.True(CompanionOverhaul.DefaultEnabled);
-        Assert.Equal(CompanionOverhaul.DefaultEnabled, CompanionOverhaul.Enabled);
-    }
-
     [Fact]
     public void The_one_wiring_seam_reads_the_flag_and_nothing_else()
     {
@@ -162,9 +137,7 @@ public class CompanionOverhaulTests
         var all = typeof(CompanionPool)
             .GetProperty("All", All)!.GetGetMethod(true)!;
         var calls = Il.Calls(all);
-        Assert.Contains("CompanionOverhaul.get_Enabled", calls);
         Assert.Contains("CompanionOverhaulRoster.Roster", calls);
-        Assert.Contains("CompanionRoster.get_All", calls);
     }
 
     [Fact]

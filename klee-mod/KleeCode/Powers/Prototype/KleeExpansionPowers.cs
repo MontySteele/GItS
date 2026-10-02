@@ -220,7 +220,7 @@ public sealed class PartyPoppersPower : PowerModel, ILocalizationProvider
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (!KleeOverhaul.Enabled || Owner == null) return;
+        if (Owner == null) return;
         if (cardPlay.Card?.Owner?.Creature != Owner) return;
         if (!KleeExpansion.CostsSparks(cardPlay.Card)) return;
         await ProtoBombPower.PlaceOnRandom(choiceContext, Owner, Amount,
@@ -412,7 +412,7 @@ public sealed class FriendshipBraceletPower : PowerModel, ILocalizationProvider
     public override Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (!KleeOverhaul.Enabled || Owner == null) return Task.CompletedTask;
+        if (Owner == null) return Task.CompletedTask;
         if (cardPlay.Card?.Owner?.Creature != Owner) return Task.CompletedTask;
         if (!KleeExpansion.IsCompanionCard(cardPlay.Card))
         {
@@ -600,7 +600,7 @@ public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
     internal static async Task AfterSparksGained(
         PlayerChoiceContext choiceContext, Creature? klee, int landed)
     {
-        if (klee == null || !KleeOverhaul.Enabled) return;
+        if (klee == null) return;
         var hits = HitsFor(landed);
         if (hits == 0) return;
         foreach (var knight in klee.Powers.OfType<SparkKnightPower>().ToList())

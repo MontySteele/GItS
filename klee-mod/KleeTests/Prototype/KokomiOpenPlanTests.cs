@@ -23,11 +23,10 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiOpenPlanTests : IDisposable
 {
-    private readonly bool _kokomi = KokomiOverhaul.Enabled;
 
-    public KokomiOpenPlanTests() => KokomiOverhaul.Enabled = true;
+    public KokomiOpenPlanTests() { }
 
-    public void Dispose() => KokomiOverhaul.Enabled = _kokomi;
+    public void Dispose() { }
 
     private static List<string> Seq(string type, string method) =>
         Il.CallSequence(Il.Method(type, method)).ToList();

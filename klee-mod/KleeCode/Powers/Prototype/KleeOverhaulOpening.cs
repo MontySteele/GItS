@@ -42,7 +42,6 @@ internal static class KleeOverhaulOpening
     internal static async Task GrantSpark(
         PlayerChoiceContext choiceContext, Player player)
     {
-        if (!KleeOverhaul.Enabled) return;
         if (player.Character is not IKleeCharacter) return;
         if (player.PlayerCombatState?.TurnNumber != 1) return;
         if (player.Creature is not { } creature) return;

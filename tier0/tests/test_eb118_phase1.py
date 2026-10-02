@@ -225,42 +225,6 @@ def _cs_source(cid):
     return None
 
 
-def test_every_skill_tag_face_prints_the_burst_it_pays():
-    """The tag was worth BURST_PER_SKILL_TAG on play and no face said so --
-    a real number on fifteen cards that the player could only learn by
-    watching the meter. Every one of them now prints it, the hand-written
-    `pop` included, which is the card this pin exists for: it does not come
-    out of the generator and would have been the one that stayed silent."""
-    from tier0 import constants as C
-
-    tagged = [c["id"] for c in _sheet("klee")
-              if "skill_tag" in (c.get("tags") or ())]
-    assert len(tagged) == 15
-
-    line = f"[gold]Burst[/gold] +{C.BURST_PER_SKILL_TAG}."
-    for cid in tagged:
-        source = _cs_source(cid)
-        assert source is not None, cid
-        assert line in source, cid
-
-
-def test_the_burst_line_is_text_and_not_a_third_keyword():
-    """Rail 1 of the packet's binding rails: Klee gets no third keyword out
-    of this pass. A `CardKeyword` would give the line a badge, a tooltip and
-    a place in the game's auto-keyword pipeline -- which is what a keyword
-    IS. So the text is checked to exist and the keyword list is checked not
-    to name it."""
-    marker = "IEnumerable<CardKeyword> CanonicalKeywords"
-    for cid in ("pop", "mine_toss", "all_my_treasures"):
-        source = _cs_source(cid)
-        assert "[gold]Burst[/gold] +5." in source, cid
-        # The DECLARATION, not any prose that mentions it -- the whole point
-        # of the pin is which list the word is in.
-        assert marker in source, cid
-        declaration = source.split(marker, 1)[1].split(";", 1)[0]
-        assert "Burst" not in declaration, cid
-
-
 def test_the_meter_arithmetic_did_not_move():
     """The other half of §4.6: the tag, its membership and its arithmetic
     are untouched, and only the reading changed. One play, one payment, at

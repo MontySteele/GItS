@@ -176,26 +176,3 @@ def test_every_allowlist_entry_still_names_a_real_call_site():
             "creates run-scoped cards -- drop the entry")
 
 
-def test_the_conscript_recruit_is_combat_scoped():
-    """The specific site the playtest burned, pinned by name.
-
-    The general lint above would also catch a regression here, but only as one
-    line in a list. This test says which card verb it is and what it broke, so
-    the failure message carries the playtest with it.
-    """
-    src = (MOD_SRC / "Powers" / "KokomiConscript.cs").read_text(
-        encoding="utf-8")
-    body = src[src.index("private static CardModel? RollRecruit"):]
-    # Code only. The fix comment quotes the line it replaced, and the whole
-    # point of keeping that quote is that the next reader sees what was wrong.
-    body = "\n".join(line for line in body.splitlines()
-                     if not line.lstrip().startswith(("//", "///", "*")))
-
-    assert "CombatState" in body and ".CreateCard(pick, owner)" in body, (
-        "KokomiConscript.RollRecruit must build the recruit from the "
-        "CombatState. Run scope produced a card the combat had never seen: "
-        "Honor Guard -> Gorou, General's War Banner transformed fine, sat in "
-        "hand, and soft locked PlayCardAction on play (2026-07-26 playtest)")
-    assert "RunState" not in body, (
-        "RollRecruit is reaching for RunState again -- that is the exact "
-        "line that soft locked the 2026-07-26 Kokomi playtest")

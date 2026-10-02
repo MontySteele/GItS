@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +45,7 @@ public static class KleeArmRelics
     /// <summary>How many copies of <typeparamref name="T"/> this Klee holds,
     /// with the arm on; 0 otherwise.</summary>
     internal static int Held<T>(Creature? klee) where T : RelicModel =>
-        KleeOverhaul.Enabled && klee?.Player is { } player
+        klee?.Player is { } player
             ? player.Relics.OfType<T>().Count()
             : 0;
 
@@ -147,7 +146,7 @@ public sealed class FreshCatch : CustomRelicModel
     /// <summary>The turn-one gate, shared with <see cref="DodocoArmy"/>: her
     /// own first turn, with the arm on.</summary>
     public static bool FirstTurnOf(RelicModel relic, Player player) =>
-        KleeOverhaul.Enabled && player == relic.Owner
+        player == relic.Owner
         && player.PlayerCombatState?.TurnNumber == 1
         && player.Creature is { IsDead: false };
 
@@ -196,7 +195,7 @@ public sealed class AlicesGuidebook : CustomRelicModel
     public override Task AfterPlayerTurnStartLate(
         PlayerChoiceContext choiceContext, Player player)
     {
-        if (!KleeOverhaul.Enabled || player != Owner) return Task.CompletedTask;
+        if (player != Owner) return Task.CompletedTask;
         if ((player.PlayerCombatState?.TurnNumber ?? 0) < 2) return Task.CompletedTask;
         if (player.Creature is not { IsDead: false } klee) return Task.CompletedTask;
         if (ProtoBombPower.GrowLargest(klee, Growth) > 0) Flash();
@@ -240,7 +239,7 @@ public sealed class FireworksStand : CustomRelicModel, IProtoExplosionListener
     public int SetOffThisPlay => _setOffThisPlay;
 
     private bool IsMine(CardPlay cardPlay) =>
-        KleeOverhaul.Enabled && cardPlay.Card?.Owner == Owner;
+        cardPlay.Card?.Owner == Owner;
 
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
@@ -373,4 +372,3 @@ public sealed class DodocoArmy : CustomRelicModel
     protected override string BigIconPath =>
         KleePck.Path(KleeArmRelics.Icon("dodoco_army")) ?? base.BigIconPath;
 }
-#endif

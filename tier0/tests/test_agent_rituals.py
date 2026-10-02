@@ -123,11 +123,11 @@ def test_gates_optional_lanes_are_off_by_default():
         fast, full, serial, dotnet, codegen, only = True, False, False, False, False, set()
 
     names = [g.name for g in gates.gates(Args())]
-    assert names == ["lints", "pytest", "dotnet-test", "dotnet-test-shipped"]
+    assert names == ["lints", "pytest", "dotnet-test"]
     Args.dotnet = Args.codegen = True
     assert [g.name for g in gates.gates(Args())] == [
-        "lints", "pytest", "codegen-roster", "codegen-prototype",
-        "dotnet-build", "dotnet-test", "dotnet-test-shipped"]
+        "lints", "pytest", "codegen-prototype",
+        "dotnet-build", "dotnet-test"]
 
 
 def test_the_csharp_suite_is_in_both_lanes_in_the_default_build():
@@ -136,11 +136,9 @@ def test_the_csharp_suite_is_in_both_lanes_in_the_default_build():
     KleeTests references four assemblies out of a Steam install, so no GitHub
     runner can hold this check -- which is how two pins stayed red on main for
     days with CI green. It is therefore not optional here and it runs in
-    `--fast` as well as `--full`. It names NO property: since 2026-09-28
-    ([USER]: "make all 3 current builds the active release builds") the
-    default build is the current kits, `klee-mod/Directory.Build.props`
-    turning the prototype surface and the four kit arms on, so the plain line
-    is the world every deploy ships.
+    `--fast` as well as `--full`. It names NO property: the current kits are
+    the only build (legacy cleanup stage 5), so the plain line is the world
+    every deploy ships.
     """
     gates = _module("gates")
 
@@ -157,10 +155,11 @@ def test_the_csharp_suite_is_in_both_lanes_in_the_default_build():
 
     props = (REPO / "klee-mod" / "Directory.Build.props").read_text(
         encoding="utf-8")
+    # Since legacy cleanup stage 5 the kits have no property at all: the
+    # current kits are the only build, and the old opt-out is gone.
     for prop in ("PrototypeCards", "KleeOverhaul", "CompanionOverhaul",
-                 "KokomiOverhaul", "FurinaStage"):
-        assert (f"<{prop} Condition=\"'$({prop})' == ''\">true</{prop}>"
-                in props), prop
+                 "KokomiOverhaul", "FurinaStage", "ShippedKits"):
+        assert f"<{prop} " not in props, prop
     # The dropped frame is NOT defaulted on (STATE.md, "on hold").
     assert "<TeyvatFrame" not in props
 
@@ -172,43 +171,11 @@ def test_the_csharp_suite_is_in_both_lanes_in_the_default_build():
     assert "local-only" in summary
 
 
-def test_the_shipped_kits_configuration_is_a_gate_of_its_own():
-    """The second world the suite has, gated in both lanes.
-
-    `-p:ShippedKits=true -p:PrototypeCards=true` is the old shipped kits with
-    the arms compiled and OFF: the world the old kits' pins and every arm's
-    flag-off pins are written for. A configuration no gate runs goes red
-    quietly -- `EB-781`, when nine shipped Fanfare/Encore pins stood red under
-    the Stage and no gate said so -- so this line stays until the old kits'
-    code goes.
-    """
-    gates = _module("gates")
-
-    class Args:
-        fast, full, serial, dotnet, codegen, only = True, False, False, False, False, set()
-
-    for lane in (True, False):
-        Args.fast, Args.full = lane, not lane
-        picked = [g for g in gates.gates(Args())
-                  if g.name == "dotnet-test-shipped"]
-        assert len(picked) == 1, f"fast={lane}: the shipped lane is missing"
-        assert picked[0].optional == ""
-        assert "-p:ShippedKits=true" in picked[0].argv
-        assert "-p:PrototypeCards=true" in picked[0].argv
-
-    # It reads through the same summariser, so its line carries the counts and
-    # the local-only mark rather than a bare `ok`.
-    out = ("Passed!  - Failed:     0, Passed:  1870, Skipped:     0, "
-           "Total:  1870, Duration: 1 s")
-    summary, _ = gates.summarise(gates.Gate("dotnet-test-shipped", []), out, 0)
-    assert summary.startswith("1870 passed, 0 failed, 0 skipped")
-    assert "local-only" in summary
-
-    # And the pre-push hook asks for BOTH by name, through the same wrapper.
-    # `--only` is a set, so naming the first does not carry the second.
+def test_the_pre_push_hook_asks_for_the_csharp_suite_by_name():
+    """The hook runs the C# suite through the same wrapper, by gate name."""
     hook = _module("pre_push_gate", TOOLS / "hooks")
-    assert "dotnet-test,dotnet-test-shipped" in hook.KLEETESTS
-
+    assert "dotnet-test" in hook.KLEETESTS
+    assert not [a for a in hook.KLEETESTS if "shipped" in a]
 
 def test_a_machine_without_the_game_skips_the_csharp_gate_rather_than_passing(
         tmp_path, monkeypatch):

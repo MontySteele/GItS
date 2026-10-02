@@ -89,22 +89,7 @@ namespace KleeMod.Powers;
 /// </summary>
 public static partial class FurinaStage
 {
-    /// <summary>
-    /// The arm's default: <c>-p:FurinaStage=true</c> turns it on, and since
-    /// 2026-09-28 every build that names no property does
-    /// (<c>klee-mod/Directory.Build.props</c>), the release package
-    /// included.
-    /// </summary>
-    public const bool DefaultEnabled =
-#if FURINA_STAGE
-        true;
-#else
-        false;
-#endif
 
-    /// <summary>The master, and the only flag. Settable so one build can pin
-    /// both sides of it.</summary>
-    public static bool Enabled { get; set; } = DefaultEnabled;
 
     /// <summary>
     /// Is the stage live for THIS creature? Identity is
@@ -119,7 +104,7 @@ public static partial class FurinaStage
     /// The predicate answers for the absent case itself now, so the local
     /// guard is gone rather than duplicated here.</remarks>
     public static bool LiveFor(Creature? creature) =>
-        Enabled && FurinaResources.IsFurina(creature);
+        FurinaResources.IsFurina(creature);
 
     // ==================================================================
     // THE VERB SURFACE. Every member below carries the sim leg's signature,

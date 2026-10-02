@@ -115,8 +115,7 @@ public static class CatalystCadence
     /// <see cref="IElementalCard"/> (and the gem) on the same rows.
     /// </summary>
     public static bool EveryDamagingCardCarriesElement(Creature? dealer) =>
-        KokomiOverhaul.Enabled
-        && dealer?.Player?.Character is IKokomiCharacter;
+        dealer?.Player?.Character is IKokomiCharacter;
 
     /// <summary>
     /// A card this mod did not write: the base game's own, at any rarity --
@@ -155,8 +154,8 @@ public static class CatalystCadence
     {
         var character = dealer?.Player?.Character;
         if (character == null) return Element.None;
-        if (KleeOverhaul.Enabled && character is IKleeCharacter) return Element.Pyro;
-        if (KokomiOverhaul.Enabled && character is IKokomiCharacter) return Element.Hydro;
+        if (character is IKleeCharacter) return Element.Pyro;
+        if (character is IKokomiCharacter) return Element.Hydro;
         return Element.None;
     }
 }

@@ -161,7 +161,6 @@ internal static class CompanionHexerei
     /// </summary>
     internal static void NoteCardPlayed(CardPlay cardPlay)
     {
-        if (!KleeOverhaul.Enabled) return;
         if (!CountsAsCompanion(cardPlay.Card)) return;
         var owner = cardPlay.Card?.Owner?.Creature;
         if (owner == null) return;
@@ -195,7 +194,7 @@ internal static class CompanionHexerei
         PlayerChoiceContext choiceContext, Reaction reaction, Creature target,
         Creature? dealer, Element consumedAura)
     {
-        if (!CompanionOverhaul.Enabled || dealer == null) return;
+        if (dealer == null) return;
 
         // NC-1 for all three: power-sourced DAMAGE runs the pipeline.
         foreach (var tide in dealer.Powers.OfType<TectonicTidePower>().ToList())

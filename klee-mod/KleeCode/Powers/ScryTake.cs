@@ -94,7 +94,6 @@ public static class ScryTake
         bool setOffOnly = false)
     {
         var offer = top;
-#if PROTOTYPE_CARDS
         if (setOffOnly)
         {
             offer = top.Where(card => card is ISetOffCard).ToList();
@@ -109,7 +108,6 @@ public static class ScryTake
                 return new List<CardModel> { offer[0] };
             }
         }
-#endif
         if (offer.Count == 0) return new List<CardModel>();
         if (offer.Count == 1)
         {
@@ -149,9 +147,7 @@ public static class ScryTake
     /// release build.</summary>
     private static void Say(Player owner, string line)
     {
-#if PROTOTYPE_CARDS
         Vfx.KurageBeat.Say(owner.Creature, line);
-#endif
     }
 
     /// <summary>A printed title, or `""`, and never a throw --

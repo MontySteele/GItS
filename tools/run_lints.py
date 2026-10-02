@@ -117,7 +117,6 @@ REGISTRY: tuple[Lint, ...] = (
     # says about it. The playtest that found it ("Klee's cards that give Burst
     # energy are labelled, but Kokomi's are not") is the argument for a gate
     # rather than a test: only a player could see the gap.
-    _ci("burst-legibility",     "tools/lint_burst_legibility.py"),
     # EB-164, the fourth row of that family and the one a BLIND READER found.
     # Burst-legibility guards a number that is paid and never printed; this
     # guards a number that is printed and then claimed AGAIN, so the reader
@@ -147,7 +146,6 @@ REGISTRY: tuple[Lint, ...] = (
     _ci("conflict-markers",     "tools/lint_conflict_markers.py"),
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
-    _ci("codegen-staleness",    "tools/gen_roster_cards.py", "--check"),
     # EB-147 (R213 B). The prototype surface is quarantined from every
     # MEASUREMENT tool and from the release build -- it is NOT quarantined
     # from correctness. Its emitted C# is committed, so it can go stale
@@ -192,7 +190,6 @@ REGISTRY: tuple[Lint, ...] = (
     # the register against the live classes, the codegen manifests and the
     # emitted aliases; the git-history sweep behind `--history` is out of the
     # lane because CI clones shallow.
-    _ci("retired-card-ids",     "tools/lint_retired_card_ids.py"),
     _ci("ancient-coverage",     "tools/lint_ancient_coverage.py"),
     # EB-255, beside pool-membership's family because it asks the other
     # question about the same two lists: that one asks whether every card is

@@ -38,7 +38,6 @@ REPO = Path(__file__).resolve().parents[2]
 CS_SURFACES = (
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated",
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "ArmKeywordTips.cs",
-    REPO / "klee-mod" / "KleeCode" / "Cards" / "KokomiRiderTips.cs",
     # The loc table the tip TITLES come out of, which is where the word
     # survived one pass of this row: the bodies were rewritten and
     # `MorningDamageKey`'s title still read "Damage from the morning".
@@ -156,13 +155,3 @@ def test_the_lint_would_bite():
     assert any("morning" in s.lower() for s in found)
 
 
-def test_a_loc_key_is_not_english():
-    """`MorningDamageKey`'s value is a string literal with the word in it and
-    is not a printed surface -- the C# reader skips it because it has no
-    space, which is the rule that keeps this lint off the engine."""
-    keys = [s for _, s in _cs_printed_strings(
-        REPO / "klee-mod" / "KleeCode" / "Cards" / "KokomiRiderTips.cs")]
-    assert not any(s == "KLEEMOD-MORNING_DAMAGE_RIDER" for s in keys)
-    assert "KLEEMOD-MORNING_DAMAGE_RIDER" in (
-        REPO / "klee-mod" / "KleeCode" / "Cards"
-        / "KokomiRiderTips.cs").read_text(encoding="utf-8")

@@ -51,30 +51,6 @@ public class Round21Tests
     // the engines' one flag for exactly that stage.
 
     [Fact]
-    public void A_performance_asks_the_funnel_for_an_unpowered_hit()
-    {
-        // STRUCTURAL, and read off the SOURCE because an argument's VALUE is
-        // invisible to `Il` -- `Round19Tests` reads `ElementalHit`'s own call
-        // the same way for the carry-out.
-        var source = Source("Powers/SalonPowers.cs").Replace("\r\n", "\n");
-
-        Assert.Contains(
-            "landed = await ElementalHit.Deal(\n"
-          + "                    choiceContext, target, Elements.Element.Hydro,\n"
-          + "                    amount, owner, powered: false);",
-            source);
-
-        // And it is still the elemental funnel and never the Attack door,
-        // which is the OTHER half of "not a card being played" and the half
-        // `EB-548` pinned.
-        Assert.Contains(Il.Calls(Il.Method("SalonMemberPower", "PerformMember")),
-                        c => c == "ElementalHit.Deal");
-        Assert.DoesNotContain(
-            Il.Calls(Il.Method("SalonMemberPower", "PerformMember")),
-            c => c.StartsWith("DamageCmd.", StringComparison.Ordinal));
-    }
-
-    [Fact]
     public void The_flag_that_drops_the_weak_is_the_one_that_drops_strength()
     {
         // ONE FLAG AND NOT TWO, which is `ElementalHit.Deal`'s own written
@@ -88,22 +64,6 @@ public class Round21Tests
 
         Assert.Contains("StrengthPower", mods);
         Assert.Contains("WeakPower", mods);
-    }
-    [Fact]
-    public void The_dry_cut_has_one_site_and_both_acts_read_it()
-    {
-        // A performance and an Evoke take the SAME cut, so the arithmetic is
-        // one method rather than two casts that agree today. `TickValue` is
-        // the performance's reader and `Bow` is the Evoke's.
-        Assert.Contains(Il.Calls(Il.Method("SalonMemberPower", "TickValue")),
-                        c => c == "SalonMemberPower.Dry");
-
-        var source = Source("Powers/SalonPowers.cs").Replace("\r\n", "\n");
-        Assert.Contains(
-            "    private static int Dry(int amount, bool paid) =>\n"
-          + "        paid ? amount : (int)(amount * "
-          + "SalonConstants.DryDamageMultiplier);",
-            source);
     }
 
     // `EB-723` RETIRED THIS PIN WITH ITS WORD. `EB-587` put the Evoke's price
@@ -129,43 +89,6 @@ public class Round21Tests
     // different numbers for one reaction depending on whether a bomb or a card
     // caused it. So the face moved to the engines, not the reverse.
 
-    [Fact]
-    public void The_face_says_the_vulnerable_moves_the_hit_that_applied_it()
-    {
-        var card = Source("Cards/Furina/Generated/CourtroomDrama.cs");
-        var power = Source("Powers/CurtainCallPowers.cs");
-
-        // Text pass 2026-09-25: the same order in plainer words, the
-        // Superconduct preview's shape.
-        foreach (var surface in new[] { card, power })
-        {
-            Assert.Contains("to its target before the hit lands.", surface);
-        }
-    }
-
-    [Fact]
-    public void The_card_and_its_badge_are_the_same_sentence()
-    {
-        // TWO SURFACES, ONE RULE. The generated face comes from
-        // `gen_klee_cards.POWER_DESCRIPTIONS` and the badge is hand-written,
-        // so nothing but a pin holds them together -- and a player meets the
-        // badge for the rest of the run after meeting the card once.
-        var card = Source("Cards/Furina/Generated/CourtroomDrama.cs");
-        var power = Source("Powers/CurtainCallPowers.cs");
-
-        foreach (var clause in new[]
-                 {
-                     "Your first [gold]Elemental Reaction[/gold] each turn ",
-                     "[gold]Vulnerable[/gold] and ",
-                     "[gold]Weak[/gold] ",
-                     "to its target before the hit lands.",
-                 })
-        {
-            Assert.Contains(clause, card);
-            Assert.Contains(clause, power);
-        }
-    }
-
     // ==================================================================
     // `EB-592` -- a card hit is still a hit
     // ==================================================================
@@ -182,36 +105,6 @@ public class Round21Tests
     // through. Both of the seat's own observations are rules that were already
     // there: a KILLING hit grants Block to nobody (the base game's own IsDead
     // guard at the funnel), and a performance is not a hit (`EB-548`).
-
-    [Fact]
-    public void A_companion_attack_still_goes_through_the_powered_door()
-    {
-        // The card the seat was holding, read off its own emitted `OnPlay`:
-        // `DamageCmd.Attack(...).FromCard(...)` is a POWERED hit with a
-        // dealer and a card source, which is what a when-hit power answers --
-        // the exact opposite of the unpowered door a performance, a carry-out
-        // and a Bomb take.
-        var card = Source(
-            "Cards/Generated/ChevreuseInterdictionFire.cs")
-            .Replace("\r\n", "\n");
-
-        Assert.Contains("await DamageCmd.Attack(DynamicVars.CalculatedDamage)\n"
-                      + "            .FromCard(this, cardPlay)", card);
-        Assert.DoesNotContain("ElementalHit.Deal", card);
-    }
-
-    [Fact]
-    public void And_the_performance_beside_it_still_does_not()
-    {
-        // The pair the seat compared, in one place: same fight, same bodies,
-        // two doors. `EB-548`'s rule, re-read here because `EB-592` is the
-        // question of whether it had widened to swallow card hits too.
-        Assert.Contains(Il.Calls(Il.Method("SalonMemberPower", "PerformMember")),
-                        c => c == "ElementalHit.Deal");
-        Assert.DoesNotContain(
-            Il.Calls(Il.Method("SalonMemberPower", "PerformMember")),
-            c => c.StartsWith("DamageCmd.", StringComparison.Ordinal));
-    }
 
     // ==================================================================
     // `EB-580` -- a card's enchantment folds into its Plan line

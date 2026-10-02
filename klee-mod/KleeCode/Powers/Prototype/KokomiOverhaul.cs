@@ -86,24 +86,7 @@ namespace KleeMod.Powers;
 /// </summary>
 public static class KokomiOverhaul
 {
-    /// <summary>
-    /// The arm's default: <c>-p:KokomiOverhaul=true</c> turns it on, and
-    /// since 2026-09-28 every build that names no property does
-    /// (<c>klee-mod/Directory.Build.props</c>). The sim twin
-    /// <c>C.KOKOMI_OVERHAUL</c> still ships <c>False</c>.
-    /// </summary>
-    public const bool DefaultEnabled =
-#if KOKOMI_OVERHAUL
-        true;
-#else
-        false;
-#endif
 
-    /// <summary>
-    /// Is the arm live? Settable so a headless pin can assert both sides of
-    /// the switch in one build; nothing in the mod ever writes it.
-    /// </summary>
-    public static bool Enabled { get; set; } = DefaultEnabled;
 
     /// <summary>
     /// Is the arm live FOR THIS CREATURE? The arm is Kokomi's alone, and every
@@ -112,7 +95,7 @@ public static class KokomiOverhaul
     /// and a bare flag read would hand him a Tide counter.
     /// </summary>
     public static bool LiveFor(MegaCrit.Sts2.Core.Entities.Creatures.Creature? creature) =>
-        Enabled && KokomiResources.IsKokomi(creature);
+        KokomiResources.IsKokomi(creature);
 }
 
 /// <summary>

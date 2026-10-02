@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using Godot;
-using KleeMod.Cards.Generated;
 using KleeMod.Elements;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Commands;
@@ -31,47 +30,25 @@ namespace KleeMod.Cards;
 /// outside the ratified sheets: the sim models neither events nor relics,
 /// so Ancient cards are game-side-only content (DECISIONS entry 2026-07-23).
 ///
-/// UNDER THE KLEE OVERHAUL (R276 hygiene) it is the arm's card too: Dusty
-/// Tome draws it from the arm's own offerable pool (`EB-284`), and a shipped
-/// Bomb -- which detonates by itself -- has no business in a run playing
-/// rule 7. So under the arm it places the arm's Bomb (a plain
-/// <see cref="ProtoBombPower"/> charge of the same size on every enemy) and
-/// its face and tip say so in the arm's words. The flag is read twice, the
-/// way <c>PoundingSurprise</c> reads it: the face and the tip on the compile
-/// constant the deploy line sets (a loc row is registered once at boot), the
-/// play on the runtime switch every other arm seam reads.
+/// It places the Klee overhaul's Bomb (a plain <see cref="ProtoBombPower"/>
+/// charge of the same size on every enemy), which never goes off by itself
+/// (rule 7). R276 hygiene; its shipped Bomb went with the shipped kits.
 /// </summary>
-public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkillTagCard
+public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard
 {
     /// <summary>Family trait: all Klee attacks apply Pyro.</summary>
     public Element Element => Element.Pyro;
 
-    /// <summary>
-    /// 2026-09-26 (wave-3 Klee lane 2b): under the arm Klee has no Burst
-    /// meter, and the <c>Elemental Skill</c> keyword's whole text is "Playing
-    /// this card grants 5 Burst Energy" -- a word the arm retired, printed on
-    /// the Ancient and explained nowhere. Under the arm the card carries
-    /// Applies Pyro alone. DISPLAY ONLY: <see cref="ISkillTagCard"/> still
-    /// rides the class, and the shipped Burst income already refuses to pay
-    /// it under the arm. A runtime read, <see cref="FurinaBurstRider"/>'s
-    /// bargain: the flag's default is the compile switch, and a headless pin
-    /// can read both sides.
+    /// <summary>Applies Pyro alone: Klee has no Burst meter, so the
+    /// <c>Elemental Skill</c> keyword went (2026-09-26, wave-3 Klee lane 2b).
     /// </summary>
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-#if PROTOTYPE_CARDS
-        KleeOverhaul.Enabled
-            ? new[] { KleeKeywords.AppliesPyro } :
-#endif
-        new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesPyro };
+        new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-#if KLEE_OVERHAUL
         ArmKeywordTips.ForBomb(
             KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro,
                                      includesBombRules: false), this);
-#else
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: true);
-#endif
 
     // Art: deliberate family reuse of the Mk.II portrait until the art pass
     // assigns the ancient its own crop (look-pass item, not a blocker).
@@ -80,11 +57,7 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkill
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty Mk.Omega"),
-#if KLEE_OVERHAUL
         ("description", "Deal {Damage:diff()} damage to a random enemy 3 times. Place a [gold]Bomb[/gold] {BombDamage:diff()} on ALL enemies."),
-#else
-        ("description", "Deal {Damage:diff()} damage to random enemies 3 times. Place a [gold]Bomb[/gold] on EVERY enemy dealing {BombDamage:diff()} damage."),
-#endif
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -112,24 +85,12 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkill
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-#if PROTOTYPE_CARDS
-        if (KleeOverhaul.Enabled)
-        {
-            // The arm's Bomb, the arm's placer: a plain charge on every living
-            // enemy, which never goes off by itself (rule 7).
-            await ProtoBombPower.PlaceOnAll(
-                choiceContext, Owner.Creature,
-                (int)DynamicVars["BombDamage"].BaseValue, isMine: false,
-                payloadMineAll: 0, cardSource: this);
-            return;
-        }
-#endif
-        foreach (var enemy in CombatState!.HittableEnemies.ToList())
-        {
-            await BombPower.Place(
-                choiceContext, enemy, (int)DynamicVars["BombDamage"].BaseValue,
-                Owner.Creature, this);
-        }
+        // The arm's Bomb, the arm's placer: a plain charge on every living
+        // enemy, which never goes off by itself (rule 7).
+        await ProtoBombPower.PlaceOnAll(
+            choiceContext, Owner.Creature,
+            (int)DynamicVars["BombDamage"].BaseValue, isMine: false,
+            payloadMineAll: 0, cardSource: this);
     }
 
     protected override void OnUpgrade()

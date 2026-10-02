@@ -21,17 +21,14 @@ public class FurinaStageBatchTwoTests
 {
     private sealed class Arm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
-        internal Arm(bool on = true)
+        internal Arm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = on;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }

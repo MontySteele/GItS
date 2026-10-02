@@ -278,14 +278,11 @@ internal static class PlayTelemetry
 
                 record.ReactionsByTurn.Add(new[]
                     { round, mine - record.ReactionsAtStart });
-                record.MetersByTurn.Add(new[]
-                {
-                    round,
-                    FurinaResources.IsFurina(creature) ? FurinaResources.Fanfare(creature) : 0,
-                    SalonMemberPower.Count(creature),
-                    SalonMemberPower.SlotsFor(creature),
-                    FurinaResources.IsFurina(creature) ? FurinaResources.Encore(creature) : 0,
-                });
+                // The shipped meters these columns read (the Fanfare meter, the
+                // Salon count and slots, Encore) went with the shipped kits
+                // (legacy cleanup stage 5); the columns stay at 0 so the trace
+                // schema `understudy` replays is unchanged until stage 6.
+                record.MetersByTurn.Add(new[] { round, 0, 0, 0, 0 });
             }
 
             SampleDetonations(combat);
@@ -1221,19 +1218,11 @@ public sealed class PlayTelemetryHooks : AbstractModel
                 MeterLedger.Spark, id, title, turn,
                 SparkPower.SparksAtPlay(creature));
 
-            if (creature.Player?.Character is IKokomiCharacter)
+            if (KokomiOverhaul.LiveFor(creature))
             {
                 MeterLedger.OpenPlay(
-                    MeterLedger.Charge, id, title, turn,
-                    KokomiResources.GetCharge(creature));
-#if PROTOTYPE_CARDS
-                if (KokomiOverhaul.LiveFor(creature))
-                {
-                    MeterLedger.OpenPlay(
-                        MeterLedger.Plan, id, title, turn,
-                        KokomiPlan.Pending(creature.Player).Count);
-                }
-#endif
+                    MeterLedger.Plan, id, title, turn,
+                    KokomiPlan.Pending(creature.Player!).Count);
             }
         }
         catch (Exception e)

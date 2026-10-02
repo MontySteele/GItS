@@ -22,17 +22,14 @@ public class Wave3Fixes20260926Tests
 {
     private sealed class Arm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
         internal Arm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = true;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }
@@ -86,23 +83,16 @@ public class Wave3Fixes20260926Tests
     [Fact]
     public void Jumpy_dumpty_mk_omega_drops_the_burst_keyword_under_the_arm()
     {
-        var was = KleeOverhaul.Enabled;
         try
         {
             // BaseLib assigns the custom keywords' values at registration, so
             // headless they are all one value: the pin is the count.
-            KleeOverhaul.Enabled = true;
             var arm = new JumpyDumptyMkOmega().CanonicalKeywords.ToList();
             Assert.Equal(new[] { KleeKeywords.AppliesPyro }, arm);
 
-            KleeOverhaul.Enabled = false;
-            var shipped = new JumpyDumptyMkOmega().CanonicalKeywords.ToList();
-            Assert.Equal(new[] { KleeKeywords.ElementalSkill,
-                                 KleeKeywords.AppliesPyro }, shipped);
         }
         finally
         {
-            KleeOverhaul.Enabled = was;
         }
     }
 

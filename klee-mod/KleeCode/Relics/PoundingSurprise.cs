@@ -30,13 +30,11 @@ namespace KleeMod.Relics;
 /// registers the type itself, which is all StartingRelics needs.
 /// </summary>
 public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
-#if PROTOTYPE_CARDS
     // QUARANTINED. Under the Klee overhaul the relic IS the Spark rule (the
     // ruled brief sec.8), so it listens to the arm's explosion bus as well as
     // to the shipped detonation bus. The seam is inside the switch, so a
     // release build neither compiles the interface nor references it.
     , Powers.IProtoExplosionListener
-#endif
 {
     public PoundingSurprise()
         : base(autoAdd: false)
@@ -59,7 +57,6 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
     {
         ("title", "Pounding Surprise"),
         ("description",
-#if KLEE_OVERHAUL
             // The arm's cards say "Set off" for the action and "goes off"
             // for the event; the relic uses the event word there.
             //
@@ -75,9 +72,6 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
             // relic -- so the relic says which one of them it is.
             "Whenever a [gold]Bomb[/gold] goes off, gain [blue]"
           + KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]."
-#else
-            "Whenever a [gold]Bomb[/gold] detonates, gain 1 [gold]Spark[/gold]."
-#endif
             ),
     };
 
@@ -148,7 +142,6 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
             source: "relic:pounding_surprise/detonation");
     }
 
-#if PROTOTYPE_CARDS
     /// <summary>
     /// THE OVERHAUL'S RULE 4, and the whole of what this relic does under that
     /// arm: one Spark per EXPLOSION.
@@ -170,7 +163,6 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
         PlayerChoiceContext choiceContext, Creature applier, Creature target,
         int size, bool reacted)
     {
-        if (!Powers.KleeOverhaul.Enabled) return;
         if (applier.Player != Owner) return;    // co-op: your explosions only
 
         Flash();
@@ -179,5 +171,4 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
             Powers.KleeOverhaulLaw.SparkPerExplosion,
             cardSource: null, source: "relic:pounding_surprise/explosion");
     }
-#endif
 }

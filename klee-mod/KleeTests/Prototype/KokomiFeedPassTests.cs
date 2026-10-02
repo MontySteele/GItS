@@ -22,11 +22,10 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiFeedPassTests : IDisposable
 {
-    private readonly bool _kokomi = KokomiOverhaul.Enabled;
 
-    public KokomiFeedPassTests() => KokomiOverhaul.Enabled = true;
+    public KokomiFeedPassTests() { }
 
-    public void Dispose() => KokomiOverhaul.Enabled = _kokomi;
+    public void Dispose() { }
 
     private static T Upgraded<T>() where T : CardModel, new()
     {

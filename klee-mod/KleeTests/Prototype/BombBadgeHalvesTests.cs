@@ -89,21 +89,6 @@ public class BombBadgeHalvesTests
     }
 
     [Fact]
-    public void An_ordinary_spark_price_still_draws_its_number()
-    {
-        // The other side of the same branch: a card that prints a real number
-        // is untouched, which is every priced face in the mod but one.
-        var klee = Seat.Klee();
-        var card = Held<ProtoKoBottomlessBag>(klee);
-
-        Assert.False(SparkCost.PricesWholeBank(card));
-        Assert.Equal("2", SlotText(card, new MeterPrice(Meter.Sparks, 2)));
-        // And the X belongs to the Spark price alone: no other meter spells a
-        // whole-bank cost today, so no other meter may borrow the glyph.
-        Assert.Equal("3", SlotText(card, new MeterPrice(Meter.Encore, 3)));
-    }
-
-    [Fact]
     public void The_gate_still_charges_one_on_the_card_that_prints_the_X()
     {
         // The slot says X; the PRICE did not move. `PrintedSparkPrice` is what
@@ -195,10 +180,8 @@ public class BombBadgeHalvesTests
         // Tales), and only under the arm. A placer holding neither -- a
         // Companion card can plant for another character -- reads no Spark
         // clause at all.
-        var was = KleeOverhaul.Enabled;
         try
         {
-            KleeOverhaul.Enabled = true;
 
             var bare = Seat.Klee();
             var target = Seat.Klee(60).Creature;
@@ -222,14 +205,9 @@ public class BombBadgeHalvesTests
               + "first: [blue]{Charges}[/blue].",
                 Row(paid, "smartDescriptionSparks"));
 
-            // Off the arm the relic pays nothing per explosion, so the face
-            // says nothing about Sparks.
-            KleeOverhaul.Enabled = false;
-            Assert.Equal(0, paid.SparksOnSetOff());
         }
         finally
         {
-            KleeOverhaul.Enabled = was;
         }
     }
 

@@ -74,11 +74,9 @@ public class RelicAnswerLogTests
         Assert.Equal(3, row["amount"]);
         Assert.Equal("", row["target"]);
         Assert.Equal("Block", row["unit"]);
-#if PROTOTYPE_CARDS
         // The Gloves exist only under the arms; a release build has no such type.
         Assert.Contains("RelicAnswerLog.NoteGain",
                         Il.Calls(Il.Method("StagehandsGloves", "AfterBow")));
-#endif
     }
 
     [Fact]

@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -423,4 +422,3 @@ public sealed class FavoniusDutyRoster : VarkaArmRelic
         await VarkaRules.AddKnight(choiceContext, player, choose: false);
     }
 }
-#endif

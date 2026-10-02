@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using BaseLib.Patches.Features;
 using KleeMod.Cards;
-using KleeMod.Cards.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -172,118 +171,8 @@ public class LiveBurn20260902Tests
 
     // ---- EB-297: no Burst gauge for a Kokomi who has no Burst -------------
 
-    [Fact]
-    public void The_burst_gauge_stands_down_under_her_own_arm()
-    {
-        // [USER], live on the deployed arm: the overhead meter still read
-        // 0/20. `EB-281`'s fact, one character over -- the arm turns the Burst
-        // gate off, so a spec that still applied drew a bar for a resource she
-        // does not have.
-        var kokomi = Seat.Kokomi().Creature;
-        var was = KokomiOverhaul.Enabled;
-        try
-        {
-            KokomiOverhaul.Enabled = false;
-            Assert.True(KokomiResources.BurstGaugeApplies(kokomi));
-
-            KokomiOverhaul.Enabled = true;
-            Assert.False(KokomiResources.BurstGaugeApplies(kokomi));
-        }
-        finally
-        {
-            KokomiOverhaul.Enabled = was;
-        }
-
-        // And never for anybody else, on either arm -- the co-op clause every
-        // prototype display carries (`EB-194`, `EB-221`).
-        Assert.False(KokomiResources.BurstGaugeApplies(Seat.Klee().Creature));
-        Assert.False(KokomiResources.BurstGaugeApplies(Seat.Furina().Creature));
-    }
-
     // ---- EB-327: and nothing FILLS the meter the gauge stood down from -----
-
-    [Fact]
-    public void A_reaction_pays_no_burst_under_her_own_arm()
-    {
-        // The feed half of `EB-297`'s sentence, and the half that was still
-        // live: the blind seat read `Kokomi Burst: 5/20` off the status line
-        // in round 4 and watched it climb 5 -> 10 -> 15, one reaction at a
-        // time, with no card, relic or keyword in the slice naming the meter.
-        // Three of her four income sites were already off at their own seams;
-        // the reaction funnel (`ReactionEffects.Resolve`) was not.
-        //
-        // Pinned at `GainBurst` because that is where the guard went -- the
-        // funnel every source lands in, as Klee's `EB-266` guard sits in
-        // `BurstResource.Find`. The reaction call site itself is a live path
-        // (it needs a dealer, a target and a consumed aura) and is outside the
-        // headless boundary; what is reachable here is the decision it makes.
-        var kokomi = Seat.Kokomi().WithCombatState().Creature;
-        var was = KokomiOverhaul.Enabled;
-        try
-        {
-            KokomiOverhaul.Enabled = false;
-            KokomiResources.GainBurst(kokomi, KokomiConstants.BurstPerReaction);
-            Assert.Equal(KokomiConstants.BurstPerReaction,
-                         KokomiResources.GetBurst(kokomi));
-
-            KokomiOverhaul.Enabled = true;
-            KokomiResources.GainBurst(kokomi, KokomiConstants.BurstPerReaction);
-            Assert.Equal(KokomiConstants.BurstPerReaction,
-                         KokomiResources.GetBurst(kokomi));  // unmoved
-        }
-        finally
-        {
-            KokomiOverhaul.Enabled = was;
-        }
-
-        // The co-op clause: the guard is HERS, so a Klee or a Furina dealing
-        // the reaction is untouched by it (they have no Kokomi meter to move
-        // either way, which is what `FindBurst` already answers).
-        Assert.Equal(0, KokomiResources.GetBurst(Seat.Klee().Creature));
-    }
 
     // ---- EB-300 / EB-296: the restore fires on exactly the broken path ----
 
-    [Fact]
-    public void The_navigation_restore_fires_only_after_a_custom_target_play()
-    {
-        // The library's controller path omits the game's own
-        // `EnableControllerNavigation()`, so the hand is left unfocusable and
-        // the creature ring unlinked. The postfix that puts the line back must
-        // fire on exactly that path and nowhere else -- in a release build no
-        // card declares a custom target type, and this is what makes it inert
-        // there.
-        var predicate = Type.GetType(
-            "KleeMod.Patches.NCardPlay_TryPlayCard_RestoreControllerNavigation"
-            + "_Patch, klee")!
-            .GetMethod("ShouldRestore", HeadlessGame.All)!;
-        bool Restore(object? card) =>
-            (bool)predicate.Invoke(null, new[] { card })!;
-
-        Assert.False(Restore(null));
-
-        // A card aimed the ordinary way is not on the broken path.
-        var plain = new Kaboom();
-        Assert.False(Restore(plain));
-
-        // A card that DOES declare one, on the process-wide registry the game
-        // populates at `ModelDb.Init` -- which no headless run reaches, so the
-        // registration is this test's own and is taken back out again.
-        var probe = (TargetType)0x5EB300;
-        var table = (System.Collections.IDictionary)typeof(CustomTargetType)
-            .GetField("SingleTargeting", HeadlessGame.All)!
-            .GetValue(null)!;
-        CustomTargetType.RegisterSingleTargetType(probe, (_, _) => true);
-        try
-        {
-            Assert.True(CustomTargetType.IsCustomSingleTargetType(probe));
-            var custom = new Kaboom();
-            Seat.Force(custom, "TargetType", probe);
-            Assert.True(Restore(custom));
-        }
-        finally
-        {
-            table.Remove(probe);
-        }
-    }
 }

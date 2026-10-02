@@ -127,45 +127,6 @@ def test_every_starter_relic_is_accounted_for():
         "them with the no-effect Circlet, silently.")
 
 
-def test_starters_override_the_baselib_hook():
-    classes = _classes()
-    for starter, upgraded in STARTERS.items():
-        assert starter in classes, f"{starter} not found"
-        body = classes[starter]
-        assert "GetUpgradeReplacement" in body, (
-            f"{starter} does not override GetUpgradeReplacement() -- BaseLib's "
-            "StarterUpgradePatches prefix will fall through to vanilla's "
-            "hardcoded table, which does not know us, and Touch of Orobas will "
-            "hand out a Circlet")
-        assert upgraded in body, (
-            f"{starter}.GetUpgradeReplacement() does not name {upgraded}")
-
-
-def test_upgraded_forms_exist_and_are_not_starter_rarity():
-    """The upgraded form must be a real class, and must NOT be Starter rarity.
-
-    Rarity is load-bearing rather than cosmetic. `TouchOfOrobas.GetStarterRelic`
-    finds its target with
-    `p.Relics.FirstOrDefault(r => r.Rarity == RelicRarity.Starter)`, so an
-    upgraded form that kept Starter rarity could be found and upgraded AGAIN by
-    a second Orobas -- and the second pass would find no entry for it and hand
-    back the Circlet. The bug would come back through the fix.
-    """
-    classes = _classes()
-    for starter, upgraded in STARTERS.items():
-        assert upgraded in classes, (
-            f"{upgraded} (the upgraded form of {starter}) does not exist")
-        body = classes[upgraded]
-        assert not re.search(
-            r"RelicRarity\s+Rarity\s*=>\s*RelicRarity\.Starter", body), (
-            f"{upgraded} is Starter rarity; a second Touch of Orobas would "
-            "treat it as the starter and replace it with a Circlet")
-        assert re.search(
-            r"RelicRarity\s+Rarity\s*=>\s*RelicRarity\.Ancient", body), (
-            f"{upgraded} should be Ancient rarity, matching the reward tier "
-            "that grants it")
-
-
 def test_curated_absences_still_apply():
     """A stale exemption reads as a considered decision while covering nothing."""
     classes = _classes()
@@ -176,36 +137,6 @@ def test_curated_absences_still_apply():
         assert "GetUpgradeReplacement" not in classes[name], (
             f"{name} now overrides GetUpgradeReplacement -- move it from "
             "NO_UPGRADED_FORM into STARTERS, the gap is closed")
-
-
-def test_upgraded_forms_carry_forward_their_base_reward_hook():
-    """An upgraded starter must not silently drop the companion reward slot.
-
-    THE NEAR-MISS THIS ENCODES (2026-07-26). `PearlOfInsightRelic` was written
-    before `PearlOfWisdomRelic` gained its reward hook, so for a day the
-    upgraded form did not carry it. Nothing would have crashed or warned:
-    companions are off every rollable pool, so the starter relic's fourth
-    reward option is their ONLY door, and Kokomi's Commander archetype is built
-    entirely out of them. Taking Touch of Orobas would have quietly deleted one
-    of her three archetypes.
-
-    That is the same silent-deletion class the whole upgraded-starter track
-    exists to prevent, reappearing one level up -- in the FIX rather than in
-    the bug. It was caught by reading two files side by side, which is exactly
-    the kind of catch that does not survive contact with a busy week.
-    """
-    declared = _declarations()
-    classes = _classes()
-    hook = "TryModifyCardRewardOptions"
-    for starter, upgraded in STARTERS.items():
-        if hook not in classes[starter]:
-            continue        # base has no reward slot; nothing to carry
-        if declared[upgraded][0] == starter:
-            continue        # a subclass of the starter inherits the slot
-        assert hook in classes[upgraded], (
-            f"{starter} hosts the companion reward slot but its upgraded form "
-            f"{upgraded} does not. Taking Touch of Orobas would remove the "
-            "only door companions have into the deck -- silently.")
 
 
 # --- EPOCH 2 / D1: pool membership, made structural ----------------------
@@ -232,37 +163,6 @@ def _pool_text(filename: str) -> str:
     return (_CODE / filename).read_text(encoding="utf-8")
 
 
-def test_every_upgraded_starter_is_in_its_characters_relic_pool():
-    """audit sec.1.2. All three shipped in NO pool, and that is a crash.
-
-    `RelicModel.Pool` is a non-virtual `First()` over `AllRelicPools` and
-    throws `InvalidOperationException` for a relic in none. That is finding
-    27's crash class -- Pounding Surprise shipped poolless and made Klee look
-    selected while the run started as somebody else -- reappearing one door
-    over, at the mid-run Touch of Orobas grant instead of at character select.
-    Act 2 rather than the menu: later, and much worse.
-
-    KleeSelfCheck R7 now sweeps the upgrade replacement too, so this is
-    belt-and-braces on purpose: R7 fires at BOOT, on the machine running the
-    game, and reaches a Log line. This fires at commit time, on any machine,
-    and is the reason a fourth character cannot repeat it.
-    """
-    for starter, upgraded in STARTERS.items():
-        pool = _pool_text(RELIC_POOLS[starter])
-        assert f"ModelDb.Relic<Relics.{upgraded}>()" in pool, (
-            f"{upgraded} is in no relic pool. RelicModel.Pool throws for a "
-            f"poolless relic, and Touch of Orobas hands this one over mid-run. "
-            f"Append it in {RELIC_POOLS[starter]}.")
-
-
-def test_the_base_starter_is_still_pooled_too():
-    """Non-vacuity: the assertion above is only meaningful while the pool
-    file is the thing that declares membership at all."""
-    for starter in STARTERS:
-        pool = _pool_text(RELIC_POOLS[starter])
-        assert f"ModelDb.Relic<Relics.{starter}>()" in pool
-
-
 def test_every_pool_file_is_named_by_the_map():
     """A new character's pool file must be added here, not discovered."""
     on_disk = {p.name for p in _CODE.glob("*RelicPool.cs")}
@@ -284,36 +184,6 @@ def test_r7_sweeps_the_upgraded_form_not_only_the_starter():
         "R7 must reach the upgraded form through GetUpgradeReplacement rather "
         "than a hardcoded list, so a starter that gains an upgrade later is "
         "covered the day it does")
-
-
-def test_the_kokomi_exhaust_funnel_reads_the_relic_not_the_base_constant():
-    """audit sec.1.1: the relic was a no-op with a lying tooltip.
-
-    `PearlOfInsightRelic` declared `ChargePerExhaust = base * 2` and
-    `BurstPerExhaust = base * 2`, and those constants were read by NOTHING
-    except the relic's own description string. The funnel granted the base
-    1/2 unconditionally. So the relic panel promised doubled per-exhaust
-    accrual, and the red-pen record ("shipped as doubled per-exhaust")
-    described a game that was never built.
-
-    Pinned on the SHAPE rather than on the numbers: the grant site must go
-    through the relic-aware helpers, and must not hand the base constants
-    straight to the grant. Restating the numbers at the grant site is exactly
-    how the description and the funnel came to disagree.
-    """
-    resources = (_CODE / "Powers" / "KokomiResources.cs").read_text(
-        encoding="utf-8")
-    hook = resources[resources.index("AfterCardExhausted"):]
-    hook = hook[:hook.index("</summary>")] if "</summary>" in hook else hook
-
-    assert "ExhaustCharge(owner)" in hook, hook[:800]
-    assert "ExhaustBurst(owner)" in hook, hook[:800]
-    assert "GainCharge(owner, KokomiConstants.ChargePerExhaust)" not in hook, (
-        "the exhaust funnel is granting the base constant directly again; "
-        "PearlOfInsightRelic's doubled numbers become decorative the moment "
-        "it does")
-    assert "PearlOfInsightRelic.ChargePerExhaust" in resources
-    assert "PearlOfInsightRelic.BurstPerExhaust" in resources
 
 
 # --- EB-31: every upgraded starter is modelled in the sim too -------------

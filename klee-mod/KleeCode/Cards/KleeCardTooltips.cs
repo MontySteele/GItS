@@ -25,13 +25,6 @@ public static class KleeCardTooltips
     /// <summary>The hover-tip title table, same one the rider tips use.</summary>
     private const string Table = "card_keywords";
 
-    /// <summary>Loc key for the Burst Energy keyword's title row. The BODY is
-    /// built live below, the Muster/Charge bargain: it quotes constants and
-    /// reads the owner's meter, so a repricing cannot leave a row lying.
-    /// </summary>
-    public const string BurstKey = "KLEEMOD-BURST";
-
-#if PROTOTYPE_CARDS
     /// <summary>`EB-389`. Titles the line a card grows while a rider is
     /// overriding the element it prints.
     ///
@@ -44,7 +37,6 @@ public static class KleeCardTooltips
     /// is <c>Compile Remove</c>d in a release build.</summary>
     public const string OverriddenElementKey = "KLEEMOD-ELEMENT_OVERRIDDEN";
 
-#endif
 
     /// <summary>
     /// `EB-389`. THE ELEMENT THIS CARD'S HIT WILL ACTUALLY APPLY.
@@ -67,7 +59,6 @@ public static class KleeCardTooltips
     /// </summary>
     public static Element AppliedElement(CardModel card, Element printed)
     {
-#if PROTOTYPE_CARDS
         // `EB-94`'s door, and it is not optional here: `CardModel.Owner`'s
         // getter asserts mutability, so asking it on a CANONICAL model -- the
         // compendium, a reward shelf -- throws out of the whole `HoverTips`
@@ -77,7 +68,6 @@ public static class KleeCardTooltips
         var over = CompanionOverhaulRiders.ElementFor(
             card, TipOwner.CreatureOf(card));
         if (over != Element.None) return over;
-#endif
         return printed;
     }
 
@@ -87,136 +77,6 @@ public static class KleeCardTooltips
     public static string OverriddenElementBody(Element applied) =>
         $"While the buff stands, this card's hit applies "
       + $"[gold]{applied}[/gold] instead of the element it prints.";
-
-    /// <summary>
-    /// The [gold]Burst Energy[/gold] KEYWORD, roster-wide.
-    ///
-    /// THE GAP. Burst is the oldest meter in the mod and no face ever said
-    /// what it is: thirty-eight faces across three characters and the
-    /// companion pool print the word, and the only surface that ever
-    /// explained it was <see cref="BurstMeterPower"/>, a status badge retired
-    /// in 2026-07-23 playtest feedback. The blind seat on run B6 reported it
-    /// from the player's side -- Burst "accumulated alongside that plan,
-    /// although I never saw how to spend it". This is the Charge keyword's
-    /// twin, one meter over.
-    ///
-    /// IT LIVES HERE, NOT IN KokomiRiderTips, BECAUSE THE METER IS
-    /// ROSTER-WIDE. Klee, Furina and Kokomi each own a Burst resource, and
-    /// the companion cards that print the word are held by whoever mustered
-    /// or drafted them. This is the shared attach point; the tip states the
-    /// SHARED rules and reads the owner's own numbers for the rest.
-    ///
-    /// WHAT IS SHARED AND WHAT IS NOT. Shared, verbatim from the code: the
-    /// skill-tag grant (BurstConstants.PerSkillTag, mirrored by
-    /// FurinaResourceConstants.BurstPerSkillTag and read for Kokomi at
-    /// KokomiExhaustHooks), the reaction grant (ReactionEffects.Resolve pays
-    /// every character the same 5), the grant-at-full rule (Klee/Furina/
-    /// KokomiKitGrant carry the same four rules) and the drain-the-whole-meter
-    /// cast (each DrainOnPlay sets Amount = 0). NOT shared: the meter's SIZE
-    /// (40 / 70 / 20) and each character's extra income -- Kokomi's exhaust
-    /// accrual, Furina's Salon ticks and Encore spend, Klee's detonation
-    /// splash. So the size is read live from the owner rather than printed as
-    /// a numeral, and the extra income is left to the faces and powers that
-    /// grant it, which print their own lines.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForBurst(
-        IEnumerable<IHoverTip> inherited, CardModel card)
-    {
-        foreach (var tip in inherited) yield return tip;
-#if PROTOTYPE_CARDS
-        // `EB-449`. A RETIRED METER EXPLAINS NOTHING.
-        //
-        // R251 retired Furina's Burst under the reframe, and this paragraph
-        // went on describing it: what the meter is, that a Burst card enters
-        // the hand the moment it fills, and that "energy past full is lost at
-        // the cast". The r7 seat met all three on High Tide at a floor-9
-        // reward with no Burst meter anywhere on the screen -- three rules
-        // about a resource the arm does not have, printed on the one surface
-        // a reader consults before drafting.
-        //
-        // `FurinaResources.StageRetiresTheShippedMeters` IS THE GATE, the
-        // same one that file asks before granting, spending or displaying the
-        // meter. Asking it here makes "she has no Burst meter under the arm"
-        // one decision rather than four, and keeps this branch owner-scoped:
-        // in co-op the other seat may be Klee, whose meter is live, and whose
-        // card must keep the paragraph.
-        //
-        // NOT THE `Elemental Skill` KEYWORD, which is loc registered once at
-        // boot and cannot be owner-branched. Its own retirement is
-        // `EB-200`'s, which rides `EB-199`; this is the tip the seat read.
-        if (FurinaResources.StageRetiresTheShippedMeters(
-                TipOwner.CreatureOf(card)))
-        {
-            yield break;
-        }
-#endif
-        yield return new HoverTip(
-            new LocString(Table, BurstKey + ".title"), BurstBody(card));
-    }
-
-    /// <summary>
-    /// The shared rules, plus the owner's own meter when there is one to read.
-    /// Out of combat (deck view, reward screen) the rules stand alone rather
-    /// than printing a misleading 0 -- the FurinaRiderTips rule.
-    /// </summary>
-    private static string BurstBody(CardModel card)
-    {
-        var meter = MeterOf(TipOwner.CreatureOf(card));
-        // The rates are quoted from the OWNER's constants where an owner can
-        // be read, and from the shared pair otherwise. All three characters
-        // sit at 5/5 today and each per-character constant is documented as
-        // mirroring the same tier0 value -- but "documented as mirroring" is
-        // not "cannot diverge", and this tip must not be the place a
-        // divergence first tells a player something false.
-        var perSkillTag = meter?.PerSkillTag ?? BurstConstants.PerSkillTag;
-        // Text pass 2026-09-25: one number for both incomes, because every
-        // meter fills at the same rate from each (5 and 5, pinned by
-        // `tier0/tests/test_text_pass_2026_09_25.py`). If the two ever part,
-        // this sentence has to name both rates again.
-        var rule =
-            $"Fills {perSkillTag} from each [gold]Elemental Skill[/gold] card "
-          + "and each [gold]Elemental Reaction[/gold]. When full, your Burst "
-          + "card joins your hand, and casting it empties the meter.";
-        if (meter == null || card.CombatState == null) return rule;
-        return $"{rule} {meter.Amount}/{meter.Max}.";
-    }
-
-    /// <summary>One character's Burst meter, or null for an owner that has
-    /// none (no owner at all, or a card being inspected outside a run). The
-    /// three branches are the same three the overhead gauge dispatches on
-    /// (Vfx.GaugeBridge.Specs) and read through the same accessors, so the
-    /// tip and the gauge cannot disagree about the number.</summary>
-    private sealed record BurstMeter(
-        int Amount, int Max, int PerSkillTag, int PerReaction);
-
-    private static BurstMeter? MeterOf(Creature? owner)
-    {
-        if (owner == null) return null;
-        if (KokomiResources.IsKokomi(owner))
-        {
-            return new BurstMeter(
-                KokomiResources.GetBurst(owner), KokomiConstants.BurstMax,
-                BurstConstants.PerSkillTag, KokomiConstants.BurstPerReaction);
-        }
-
-        if (FurinaResources.IsFurina(owner))
-        {
-            return new BurstMeter(
-                FurinaResources.Burst(owner),
-                FurinaResourceConstants.BurstMax,
-                FurinaResourceConstants.BurstPerSkillTag,
-                FurinaResourceConstants.BurstPerReaction);
-        }
-
-        if (owner.Player?.Character is Klee)
-        {
-            return new BurstMeter(
-                KleeBurstResource.AmountFor(owner), BurstConstants.KleeMax,
-                BurstConstants.PerSkillTag, BurstConstants.PerReaction);
-        }
-
-        return null;
-    }
 
     /// <summary>
     /// <paramref name="appliesWithoutHit"/> is `EB-338`. See
@@ -263,14 +123,12 @@ public static class KleeCardTooltips
         // will actually land, and where that differs from the print the card
         // says so in words.
         var applied = AppliedElement(card, trigger);
-#if PROTOTYPE_CARDS
         if (applied != trigger && applied != Element.None)
         {
             yield return new HoverTip(
                 new LocString(Table, OverriddenElementKey + ".title"),
                 OverriddenElementBody(applied));
         }
-#endif
         trigger = applied;
 
         if (trigger == Element.None || card.CombatState == null) yield break;
@@ -489,12 +347,8 @@ public static class KleeCardTooltips
     /// </summary>
     private static Creature? FaceBody(CardModel card)
     {
-#if PROTOTYPE_CARDS
         var owner = TipOwner.CreatureOf(card);
         return FurinaStage.LiveFor(owner) ? null : KokomiPlan.FrontEnemy(owner);
-#else
-        return null;
-#endif
     }
 
     /// <summary>

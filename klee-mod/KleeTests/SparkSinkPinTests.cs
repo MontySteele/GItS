@@ -34,26 +34,6 @@ public class SparkSinkPinTests
     // --- the flag, both ways round ---------------------------------------
 
     [Fact]
-    public void The_base_rule_runs_exactly_when_the_flag_says_it_does()
-    {
-        // THE HALF THAT ONLY THIS FILE CAN SAY. The Sparks alternative-cost arm
-        // (review/ruled/klee-sparks-2026-08-29.md sec.10) retires the base rule
-        // -- at 3 Sparks your Attacks cost 0, playing one consumes 3 -- behind
-        // `-p:PrototypeCards=true`. `Prototype/SparkAlternativeCostPinTests`
-        // asserts it is RETIRED, but that file is not compiled without the
-        // switch, so nothing there can assert the other half: that a RELEASE
-        // build still runs the shipped rule. A flag with only one side pinned is
-        // a flag whose OFF arm nobody is checking, and the whole point of
-        // option 1 (over deleting the rule) was that the two economies stay
-        // runnable as two arms.
-#if PROTOTYPE_CARDS
-        Assert.False(SparkPower.BaseRuleActive);
-#else
-        Assert.True(SparkPower.BaseRuleActive);
-#endif
-    }
-
-    [Fact]
     public void The_gauge_sync_is_the_quarantine_seam_and_a_release_build_has_none()
     {
         // `EB-281`, and THE HALF THAT ONLY THIS FILE CAN SAY, on the argument
@@ -70,11 +50,7 @@ public class SparkSinkPinTests
             ?? throw new System.InvalidOperationException(
                 "SparkPower.SyncGauge is gone -- the gauge seam moved under this pin.");
         var calls = Il.Calls(sync);
-#if PROTOTYPE_CARDS
         Assert.Contains("SparkGauge.Refresh", calls);
-#else
-        Assert.Empty(calls);
-#endif
     }
 
     // --- the gate --------------------------------------------------------
@@ -126,48 +102,13 @@ public class SparkSinkPinTests
 
     // --- True Spark Knight: the threshold is live ------------------------
 
-    [Theory]
-    [InlineData(0, 3)]   // the printed bar, SparkPower.Threshold
-    [InlineData(1, 2)]   // True Spark Knight
-    [InlineData(5, 1)]   // floored at 1, never free
-    public void The_threshold_follows_the_knight_and_floors_at_one(int down, int bar)
-    {
-        // Mirrors tier0 combat.spark_threshold: max(1, 3 - threshold_down).
-        var klee = Seat.Klee().WithPower<SparkPower>(0);
-        if (down > 0)
-        {
-            klee.WithPower<SparkThresholdDownPower>(down);
-        }
-
-        Assert.Equal(bar, CurrentThreshold(klee));
-    }
-
-    [Fact]
-    public void Spending_two_under_the_knight_drops_the_bank_below_the_bar()
-    {
-        // The design point of §4.5, as far as a headless test can carry it:
-        // at the knight's threshold of 2, a bank of exactly 2 both affords
-        // the sink and buys the free Attack -- so paying is forfeiting.
-        var klee = Seat.Klee()
-            .WithPower<SparkPower>(2)
-            .WithPower<SparkThresholdDownPower>(1);
-
-        Assert.Equal(2, CurrentThreshold(klee));
-        Assert.True(SparkPower.CanSpend(klee.Creature, 2));
-        Assert.True(SparkPower.SparksAtPlay(klee.Creature) >= CurrentThreshold(klee));
-
-        klee.SetPowerAmount<SparkPower>(0);            // the spend
-
-        Assert.False(SparkPower.SparksAtPlay(klee.Creature) >= CurrentThreshold(klee));
-        Assert.Equal(2, CurrentThreshold(klee));       // the bar itself never moved
-    }
 
     [Fact]
     public void Nothing_caches_the_bank_or_the_threshold()
     {
         // STRUCTURAL PIN (README's Il idiom, in its bluntest form): the only
-        // instance state SparkPower may hold is the one pending spend
-        // decision. A cached bank or a cached bar is exactly the defect the
+        // instance state SparkPower may hold is none: the shipped free-Attack
+        // rule's pending spend went with the shipped kits. A cached bank or a cached bar is exactly the defect the
         // contract asks about -- the threshold must be recomputed from the
         // live power list at every read -- and it would arrive as a field.
         var fields = typeof(SparkPower)
@@ -177,7 +118,7 @@ public class SparkSinkPinTests
             .OrderBy(n => n)
             .ToArray();
 
-        Assert.Equal(new[] { "_pendingSpendAmount", "_pendingSpendPlay" }, fields);
+        Assert.Empty(fields);
     }
 
     // --- the payment -----------------------------------------------------

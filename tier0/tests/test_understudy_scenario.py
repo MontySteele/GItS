@@ -907,15 +907,6 @@ def test_every_scenario_names_a_character_the_roster_knows():
             f"{p.name}: {s.character} is not a roster member"
 
 
-def test_the_declared_tokens_are_real_classes_in_the_mod():
-    """A token row is a claim that the card exists in the mod and is reachable
-    without a draft. The sheet lint cannot check it, so this does."""
-    src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina"
-           / "SpotlightCards.cs").read_text(encoding="utf-8")
-    for cls in ("EtherealSpotlight", "CenterStageOption", "GuestCastOption"):
-        assert f"class {cls}" in src
-
-
 def test_card_key_folds_the_games_rich_text_tags():
     """A "Choose one" modal names its options WITH the game's markup left in,
     while the packet a grader reads is scrubbed of markup before the face is

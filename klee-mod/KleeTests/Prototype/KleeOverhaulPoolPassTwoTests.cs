@@ -200,7 +200,6 @@ public class KleeOverhaulPoolPassTwoTests
             "ReturnToSenderPower", "SacramentalShowerPower", "BaronBunnyPower",
             "IcyPawsPower", "BlazingBarrierPower",
         }, order);
-        Assert.Contains("if (KleeOverhaul.Enabled)", walk);
     }
 
     [Fact]

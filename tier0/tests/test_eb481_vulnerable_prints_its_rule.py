@@ -89,18 +89,6 @@ def test_the_line_a_player_wears_prices_an_enemys_swing():
     assert "[blue]{Amount}[/blue] {Amount:plural:turn|turns}." in row
 
 
-def test_the_rows_are_arm_scoped_like_the_glossary_they_agree_with():
-    """A release build does not police the base game's English -- the
-    self-check says so in as many words -- and the glossary these words agree
-    with is itself arm-only."""
-    src = _mod_source()
-    start = src.index('["VULNERABLE_POWER.description"]')
-
-    assert "#if PROTOTYPE_CARDS" in src[:start]
-    assert src[:start].rindex("#if PROTOTYPE_CARDS") > src[:start].rindex(
-        "#endif")
-
-
 def test_the_status_line_and_the_glossary_name_the_same_two_cases():
     """One rule, three printers: the two cases the seats actually met -- a
     Skill's damage counts, a potion's does not -- are on the enemy's line and

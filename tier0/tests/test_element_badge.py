@@ -463,29 +463,6 @@ def test_only_the_plan_only_rows_carry_the_when_sentence():
     assert "ProtoKkSangoIsshin" not in carriers
 
 
-def test_a_skill_grade_row_whose_damage_is_branch_gated_is_elemental():
-    """THE PARITY HALF OF `EB-378`. The sim decides per EFFECT at resolution
-    (`effects._element_for` asks `fx["op"] == "damage"` of whatever op is
-    resolving); this generator asks the CARD once, off a scan that read the top
-    level only. `Take It From the Top` -- Block 5, then 10 damage inside
-    `spotlight_moved_this_turn` -- was elemental in the sim and carried no
-    `IElementalCard` in the mod, so the branch applied a Hydro aura in one
-    engine and nothing in the other.
-
-    SEEN TO FAIL: with the old top-level walk this returns False.
-    """
-    row = {"id": "x", "type": "skill",
-           "effects": [{"op": "block", "amount": 5},
-                       {"op": "conditional", "if": "y",
-                        "then": [{"op": "damage", "amount": 10,
-                                  "target": "enemy"}]}]}
-    assert gen.FURINA_PROFILE.damage_applies_element(row) is True
-    text = (gen.FURINA_PROFILE.out_dir / "TakeItFromTheTop.cs").read_text(
-        encoding="utf-8")
-    assert "IElementalCard" in text
-    assert "KleeKeywords.AppliesHydro" in text
-
-
 def test_a_row_declaring_no_element_prints_no_tag_and_no_glossary():
     """`EB-713`. THE TAG IS THE FACE-UP HIT.
 

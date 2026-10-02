@@ -3,8 +3,6 @@ using System.Linq;
 using System.Reflection;
 using BaseLib.Patches.Content;
 using KleeMod.Cards;
-using KleeMod.Cards.Generated;
-using KleeMod.Cards.Kokomi.Generated;
 using KleeMod.Elements;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -148,29 +146,6 @@ public class ElementBadgeTests
             f.GetCustomAttribute<KeywordPropertiesAttribute>()!.Position));
     }
 
-    [Fact]
-    public void The_tip_survives_the_switch_because_it_never_read_the_text()
-    {
-        // WHY THE FLIP IS SAFE, stated as a property of the BASE GAME rather
-        // than as a hope: `CardModel.HoverTips` walks `Keywords` and calls
-        // `HoverTipFactory.FromKeyword` on each of them -- it never consults the
-        // printed description. So a keyword at `None` still hovers, which
-        // `Bomb`, `Confiscated` and the eight reaction previews have
-        // demonstrated since they were written, having never printed a line and
-        // always hovered.
-        var hoverTips = typeof(CardModel).GetProperty("HoverTips", All)!
-            .GetGetMethod()!;
-
-        Assert.Contains(Il.Calls(hoverTips),
-                        c => c.EndsWith("HoverTipFactory.FromKeyword"));
-
-        // And the keyword is still ON the faces, which is what makes that walk
-        // reach them -- the flip moved the POSITION and nothing else.
-        Assert.Equal("AppliesPyro", KeywordFieldOf(typeof(Snap)));
-        Assert.Equal("AppliesHydro", KeywordFieldOf(typeof(PearlBarrage)));
-        Assert.Equal("", KeywordFieldOf(typeof(CoralGuard)));
-    }
-
     // --- the gem reads the tip's own declaration ---------------------------
 
     [Fact]
@@ -188,21 +163,6 @@ public class ElementBadgeTests
         Assert.Contains(calls, c => c.EndsWith("KleeKeywords.AuraApplication"));
         Assert.Contains(calls, c => c.EndsWith("CardModel.get_Keywords"));
     }
-
-    [Fact]
-    public void A_card_reads_back_the_element_its_keyword_declares()
-        => WithKeywordValues(() =>
-        {
-            // The one BEHAVIOURAL read this host allows, with the keyword values
-            // the game would have assigned. The cards are constructed inside the
-            // block on purpose: `CardModel` caches `LocalKeywords` off
-            // `CanonicalKeywords` on first read, so one built before the
-            // assignment would have cached four `CardKeyword.None`s.
-            Assert.Equal(Element.Pyro, ElementOf(new Snap()));
-            Assert.Equal(Element.Hydro, ElementOf(new PearlBarrage()));
-            // A card that applies nothing wears nothing. `Coral Guard` blocks.
-            Assert.Equal(Element.None, ElementOf(new CoralGuard()));
-        });
 
     // --- the gem's art -----------------------------------------------------
 

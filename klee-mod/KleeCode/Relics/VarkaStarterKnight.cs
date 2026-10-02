@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using BaseLib.Utils;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -35,4 +34,3 @@ public static class VarkaStarterKnight
     public static void Record(BoreasFang fang, Element element) =>
         Saved.Set(fang, (int)element);
 }
-#endif

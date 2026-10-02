@@ -40,23 +40,6 @@ namespace KleeMod.Tests;
 /// </summary>
 public class KurageMemorySeatGuardTests
 {
-    private static readonly Assembly Mod = typeof(KurageMemory).Assembly;
-
-    private static object Invoke(string type, string method, params object?[] args)
-    {
-        var t = Mod.GetType(type) ?? throw new InvalidOperationException(type);
-        var m = t.GetMethod(method, BindingFlags.Public | BindingFlags.NonPublic
-                                    | BindingFlags.Static)
-                ?? throw new InvalidOperationException(method);
-        try
-        {
-            return m.Invoke(null, args)!;
-        }
-        catch (TargetInvocationException e)
-        {
-            throw e.InnerException!;
-        }
-    }
 
     /// <summary>A combat that exists but holds no seats — the state
     /// `NCombatRoom._Ready` hands our Deactivate postfix on the way into the
@@ -93,51 +76,4 @@ public class KurageMemorySeatGuardTests
         }
     }
 
-    /// <summary>THE MUTATION GUARD for the first half. Put
-    /// `LocalContext.GetMe` back into `DiscardAll` and this fails — which is
-    /// exactly what escaped `NCombatRoom._Ready` twice.</summary>
-    [Fact]
-    public void The_deactivate_teardown_survives_a_combat_with_no_local_seat()
-    {
-        var previous = LocalContext.NetId;
-        LocalContext.NetId = 7UL;
-        try
-        {
-            Invoke("KleeMod.Vfx.KurageMemoryCard", "DiscardAll", EmptyFight());
-        }
-        finally
-        {
-            LocalContext.NetId = previous;
-        }
-    }
-
-    /// <summary>A null state was always handled; it stays handled.</summary>
-    [Fact]
-    public void The_deactivate_teardown_survives_no_combat_at_all()
-        => Invoke("KleeMod.Vfx.KurageMemoryCard", "DiscardAll",
-                  new object?[] { null });
-
-    /// <summary>THE MUTATION GUARD for the second half: a room whose `_Ready`
-    /// was interrupted has no vfx container, and a gauge spawn into it must
-    /// answer "no display" rather than NRE out of `SetUpCombat`. Passing a
-    /// null room is the only container-less room reachable headlessly — a real
-    /// `NCombatRoom` is a Godot node — and it exercises the same guard.</summary>
-    [Fact]
-    public void A_room_with_no_vfx_container_yields_no_display_rather_than_throwing()
-    {
-        var t = Mod.GetType("KleeMod.Vfx.TrackedDisplayBridge")!;
-        var m = t.GetMethod("Spawn", BindingFlags.Public | BindingFlags.Static)!;
-        var args = new object?[] { null, "shared/gauge.tscn", false, "no gauges" };
-        object? display;
-        try
-        {
-            display = m.Invoke(null, args);
-        }
-        catch (TargetInvocationException e)
-        {
-            throw e.InnerException!;
-        }
-        Assert.Null(display);
-        Assert.True((bool)args[2]!, "the miss must warn exactly once");
-    }
 }

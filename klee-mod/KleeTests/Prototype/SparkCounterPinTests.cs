@@ -39,37 +39,9 @@ public class SparkCounterPinTests
     /// <summary>Run <paramref name="body"/> with the arm forced one way, and
     /// put it back -- <see cref="SparkGaugePinTests"/>' helper, and the reason
     /// this file shares its collection.</summary>
-    private static void WithArm(bool enabled, Action body)
-    {
-        var was = KleeOverhaul.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = enabled;
-            body();
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = was;
-        }
-    }
+    private static void WithArm(Action body) => body();
 
     // --- the class exists, and only under the arm -------------------------
-
-    [Fact]
-    public void The_badge_is_compiled_only_under_the_prototype_arm()
-    {
-        // THE QUARANTINE IS THE FILE'S LOCATION, not an `#if` inside it:
-        // `KleeCode.csproj` `Compile Remove`s `Vfx/Prototype/**/*.cs` without
-        // `-p:PrototypeCards=true`. So the acceptance condition for "a release
-        // build gains nothing" is that the type lives there, and that is what
-        // this asserts -- this test file is itself removed off the arm, so its
-        // mere compilation is the other half.
-        var csproj = Source("KleeCode.csproj");
-        Assert.Contains("<Compile Remove=\"Vfx/Prototype/**/*.cs\" />", csproj);
-
-        Assert.NotNull(Source("Vfx/Prototype/SparkCounter.cs"));
-        Assert.Equal("KleeMod.Vfx", typeof(SparkCounter).Namespace);
-    }
 
     // --- who gets it ------------------------------------------------------
 
@@ -80,7 +52,7 @@ public class SparkCounterPinTests
         var furina = Seat.Furina();
         var kokomi = Seat.Kokomi();
 
-        WithArm(true, () =>
+        WithArm(() =>
         {
             Assert.True(SparkCounter.AppliesTo(klee.Creature));
             // Both are at the same table in co-op and neither has a Spark bank.
@@ -90,12 +62,6 @@ public class SparkCounterPinTests
 
         // THE ACCEPTANCE CONDITION. Off the arm there is no badge at all, so
         // the shipped energy area is exactly the shipped energy area.
-        WithArm(false, () =>
-        {
-            Assert.False(SparkCounter.AppliesTo(klee.Creature));
-            Assert.False(SparkCounter.AppliesTo(furina.Creature));
-            Assert.False(SparkCounter.AppliesTo(kokomi.Creature));
-        });
 
         // And a creature it is never asked about answers false rather than
         // throwing: `Refresh` is called from a power's mutation funnel.
@@ -164,19 +130,6 @@ public class SparkCounterPinTests
         // cadence, and two cadences is how a display and a bank drift.
         Assert.DoesNotContain("void _Process",
                               Source("Vfx/Prototype/SparkCounter.cs"));
-    }
-
-    [Fact]
-    public void It_is_built_at_the_one_combat_lifecycle_entry_point()
-    {
-        // The same `NCombatUi.Activate` postfix the gauges, the Kurage card and
-        // the Plan strip use -- one door, so nothing can disagree about when a
-        // room is live.
-        var postfix = typeof(GaugeBridge).Assembly
-            .GetType("KleeMod.Vfx.NCombatUi_Activate_GaugeSetup")!
-            .GetMethod("Postfix", All)!;
-        Assert.Contains(Il.Calls(postfix),
-            c => c.EndsWith("SparkCounter.Setup", StringComparison.Ordinal));
     }
 
     // --- the geometry, as geometry ----------------------------------------
@@ -353,42 +306,6 @@ public class SparkCounterPinTests
     }
 
     // --- the teardown -----------------------------------------------------
-
-    [Fact]
-    public void The_teardown_is_on_the_game_s_hook_and_names_no_seat()
-    {
-        var patch = typeof(GaugeBridge).Assembly
-            .GetType("KleeMod.Vfx.NCombatUi_Deactivate_KleeSparkCounter_Patch")!;
-
-        var attribute = patch.GetCustomAttribute<HarmonyPatch>()!;
-        Assert.Equal(typeof(NCombatUi), attribute.info.declaringType);
-        Assert.Equal(nameof(NCombatUi.Deactivate), attribute.info.methodName);
-
-        // BY NODE, NOT BY SEAT, and that is the point rather than a shortcut.
-        // `NCombatUi.Deactivate` runs while the NEXT room is being built and
-        // the combat still held may have no seats in it -- `EB-225`, the shape
-        // that ended two blind sessions when a teardown asked for one. So the
-        // postfix reaches `Hide(NCombatUi)`, which frees a child THIS mod
-        // named and touches no run state at all.
-        var postfix = patch.GetMethod("Postfix", All)!;
-        Assert.Contains(Il.Calls(postfix),
-            c => c.EndsWith("SparkCounter.Hide", StringComparison.Ordinal));
-
-        var hide = typeof(SparkCounter).GetMethod("Hide", All)!;
-        Assert.Equal(typeof(NCombatUi),
-                     hide.GetParameters().Single().ParameterType);
-        Assert.Contains(Il.Calls(hide),
-            c => c.EndsWith("Node.FindChild", StringComparison.Ordinal));
-
-        // And the exemption is DECLARED rather than inferred:
-        // `tools/lint_prototype_patch_scope.py` prints every marker on every
-        // run, and a marker with no reason is itself a finding.
-        var source = Source("Vfx/Prototype/SparkCounter.cs").Replace("\r\n", "\n");
-        var marker = source.Split('\n')
-            .First(line => line.Contains("lint: no-seat:"));
-        Assert.True(marker.Trim().Length > "// lint: no-seat:".Length + 10,
-                    "the no-seat exemption must carry a reason");
-    }
 
     // --- source access ----------------------------------------------------
 

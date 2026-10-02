@@ -1346,13 +1346,10 @@ public sealed class CompanionOverhaulIncomingHit : AbstractModel
         // number all of them read and none of them moves. Sim twin: the
         // `klee_overhaul.block_absorbed` call at the head of
         // `effects.companion_overhaul_block_absorbed`.
-        if (KleeOverhaul.Enabled)
+        foreach (var sender in
+                 target.Powers.OfType<ReturnToSenderPower>().ToList())
         {
-            foreach (var sender in
-                     target.Powers.OfType<ReturnToSenderPower>().ToList())
-            {
-                await sender.Bounce(choiceContext, dealer, amount);
-            }
+            await sender.Bounce(choiceContext, dealer, amount);
         }
         foreach (var shower in target.Powers.OfType<SacramentalShowerPower>().ToList())
         {

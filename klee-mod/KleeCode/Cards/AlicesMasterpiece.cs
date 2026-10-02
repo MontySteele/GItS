@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
@@ -65,4 +64,3 @@ public sealed class AlicesMasterpiece : CustomCardModel, ICharacterCard
         EnergyCost.UpgradeBy(-1);
     }
 }
-#endif

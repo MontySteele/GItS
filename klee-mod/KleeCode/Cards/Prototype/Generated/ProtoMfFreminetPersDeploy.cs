@@ -52,7 +52,7 @@ public sealed class ProtoMfFreminetPersDeploy : CustomCardModel, IElementalCard,
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("freminet_pers_deploy");
 
