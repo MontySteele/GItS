@@ -82,9 +82,13 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   [2] Strength; exhaust every status in your hand, they lose 1 more for
   each" (#830); after the forced-deck seats, Behind Jean's Desk is 11 [14],
   Up in Smoke! costs 0 and Kitchen Alchemy's upgrade adds Retain (#831).
-  Klee has won 0 of 9 seat runs; seats skip her defence, and Sparks pile up
-  unspent. Next: one more forced-deck round on the tuned three, then a short
-  paper for the final pass (her HP, a defensive Spark sink), then Balance.
+  The tuned three were read on the same seeds
+  (`review/records/klee-tune-and-smoke-round-2026-10-02.md`): Behind Jean's
+  Desk settled (strong), Up in Smoke! fair, Kitchen Alchemy dead (played 2
+  times in about 26 hands). Klee has won 0 of the 9 seat runs since the
+  status package; she loses on Block at the boss turn, and Sparks pile up
+  unspent. Next: a short paper for the final pass (Kitchen Alchemy's slot,
+  her HP, a defensive Spark sink), then Balance.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start
