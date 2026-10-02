@@ -84,6 +84,9 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Furina Stage: mirror `FurinaStage.HandTurnEndHits` (the cards in her hand that hurt her as her turn ends) in the sim's `furina_stage.forecast` (tests only).
 - Soak: `soak_screens._escape` answers the Crystal Sphere with `crystal_sphere_proceed`, which the game refuses while divinations are owed; spend them first as the seat page's `reveal` does (`blindplay_shape.sphere_reveal_action`).
 - Seat page: no screen prints the run seed or the ascension.
+- Hand Drill gave no Vulnerable when a Bomb broke the boss's Block, only when a Pyro card's hit did (Klee final-pass round, lane 2, 2026-10-02); check a Bomb hit reaches the base relic's break-Block hook.
+- Seat page: Tender (each card played costs 1 Strength and 1 Dexterity this turn) prints only "Tender 3"; Fireworks Finale's "Written: 5" does not name the Strength loss that lowered it; Spiny Toad's Thorns showed on turn 1 only (Klee final-pass round, 2026-10-02).
+- Big Badda Boom's "then damage equal to what your Bombs dealt" does not say whether Bombs set off earlier in the turn count (Klee final-pass round, lane 1, 2026-10-02).
 - Seat page: a Furina seat never saw her own Frail or Dexterity loss printed, so Defend at 1-2 was unexplained (smoke round, 2026-10-02); check the brief page lists the player's debuffs.
 - Seat page: the Tamakushi Casket printed "(1)" between fights; its counter is combat-only (`TamakushiCasket.ShowCounter`), so the page reads `DisplayAmount` before combat state clears (smoke round, 2026-10-02).
 - Seat page: Tuning Fork prints "(7)" with no "of 10" (Klee lane 2, 2026-10-02).
