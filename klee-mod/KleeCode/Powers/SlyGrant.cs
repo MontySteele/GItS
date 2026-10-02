@@ -91,14 +91,11 @@ public static class SlyGrant
     /// Eligible targets. Skills only (the game's filter and the sheet's only
     /// `card_type`), never already Sly this turn -- so a second grant in one
     /// turn picks a different card instead of wasting itself, which is the
-    /// whole reason the game's filter carries that clause -- and never a kit
-    /// card: the v1.9 invariant that the Burst is never fodder, which the sim
-    /// spells as `not c.kit_card` on this same pool.
+    /// whole reason the game's filter carries that clause.
     /// </summary>
     public static bool Eligible(CardModel card) =>
         card.Type == CardType.Skill
-            && !card.IsSlyThisTurn
-            && KitGrant.NotKitCard(card);
+            && !card.IsSlyThisTurn;
 
     /// <summary>
     /// Give one chosen Skill in hand Sly for this turn. No-op when nothing in

@@ -124,8 +124,28 @@ and about 390 Python arm-flag reads.
    `lint_starter_pool_overlap` are deleted; tests of engine, tool and seat
    machinery that used a shipped card as a fixture are ported to current rows
    or inline cards. Regenerated C# is byte-identical (the manifest loses the
-   deleted row's upgrade entry). Left for 6b: the C# dead code, the codegen's
+   deleted row's upgrade entry). **PR #832, merged.** Left for 6b: the C# dead code, the codegen's
    spotlight wrap and shipped-sheet readers, the understudy ports, the docs.
+   **6b (dead code and docs), 2026-10-02:** `KitGrant.NotKitCard` and
+   `Powers/KitBurst.cs` are deleted, and the codegen passes `null` for the
+   selector filter (the one regenerated diff: Short Circuit's dead argument).
+   Also deleted: the codegen's dead rider-tip branches
+   (`KokomiRiderTips`, `FurinaRiderTips`, `SalonMemberTips`,
+   `KleeCardTooltips.ForBurst`, whose classes went in stage 5) and their
+   helpers; its shipped upgrade and companion sheet readers; the `cost_mod`
+   op; `KokomiPlan.NoteRider` and its collector; `PlayTelemetry`'s
+   `MetersByTurn`; `ExplosiveFrags.OpeningSparks`; and the five shipped
+   companion powers no row applies (Oz, Witch's Flame, Solar Isotoma,
+   Celestial Gift, Friendly Visit's `CompanionCostThisTurnPower`), with
+   `SparkAttackCostPower` and its sim constant. `BombPower`,
+   `ReplayNextCompanionPower`, `AttackUpThisTurnPower`, `NextAttackUpPower`,
+   `ShatterBonusPower` and the Fontaine and Curtain Call powers stay: current
+   rows apply them. `lint_keyword_meters` now treats Charge and Burst as
+   retired words. Docs: `operations/prototype.md` and `codegen.md`
+   rewritten, STATE's build paragraph, the deploy skill. **Left over (BACKLOG
+   lines):** the codegen's spotlight wrap and the generated header's
+   upgrades-sheet line, both of which would change the C# emitted for
+   current rows; the sim's shipped-kit machinery.
 
 Out of scope: the Teyvat frame ([USER]: nothing deleted). Element switches
 `SwirlPays` and `CrystallizeKeepsAura` stay until the open retest of each

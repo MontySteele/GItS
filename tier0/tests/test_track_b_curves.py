@@ -178,7 +178,10 @@ CS = REPO / "klee-mod" / "KleeCode" / "Diagnostics" / "PlayTelemetry.cs"
 
 # Recorded rather than derived: each asymmetry is a decision, and a test that
 # silently tolerated a new one would be no test at all.
-BOT_ONLY = {"potions_used"}          # no first-party potion hook exists yet
+BOT_ONLY = {"potions_used",         # no first-party potion hook exists yet
+            "meters_by_turn"}       # the mod's all-zero shipped-meter columns
+#                                      left at legacy cleanup stage 6; the soak's
+#                                      still read the bridge (a BACKLOG line)
 #
 # `selectors` LEFT THIS SET on 2026-08-12 (EB-14). It was bot-only from P1.5
 # because the soak records a selector answer it POSTED itself, while the mod

@@ -17,24 +17,24 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 character builds are much more progressed than the old prototypes were, even
 though it's still a work in progress. Let's go ahead and make all 3 current
 builds the active release builds to avoid this confusion."
-`klee-mod/Directory.Build.props` turns the prototype surface and the four kit
-arms (Klee's overhaul, the companion overhaul, Kokomi's overhaul, Furina's
-Stage) on in every build that names no property: a plain `dotnet build`,
-`klee-mod\build\deploy.ps1`, and the `-Package` handoff zip, all unmarked. **The
+Every build carries them, unmarked: a plain `dotnet build`,
+`klee-mod\build\deploy.ps1`, and the `-Package` handoff zip. **The
 round's build is `tools/deploy_round.py`** (`deploy.ps1`, then the bridge).
-The old shipped kits' C# is deleted (legacy cleanup stage 5a), and the engine
-pieces only their cut cards used with it (stage 5b): no
-`ShippedKits` opt-out, no arm switches, one C# test configuration; their
-sheets (`docs/*-cards.yaml`) remain for the sim until stage 6. **`+proto` now marks only a build that differs from the release**:
-`deploy_proto.ps1 -TeyvatFrame`, and the Teyvat frame is on hold (below). The
-tier0 sim runs the current kits too (2026-10-01, legacy cleanup stage 3: its
-four kit arms default on); its calibration bands, measured on the shipped
-kits, are retired until a kit reaches Balance (legacy cleanup pick 5). Each
-C# pool IS its prototype roster (legacy cleanup stage 4): the `proto_` rows
-are every pool's `GenerateAllCards`, the arm's roster is the offer, and the
-78 / Ancient / co-op counts are pinned
-(`KleeTests/Prototype/PoolCountTests.cs`); the companion roster is prototype
-rows only, Fontaine's sixteen ported as they are (pick 4, `proto_mf_`).
+The old shipped kits are gone from both engines (legacy cleanup stages 5
+and 6, `review/active/legacy-cleanup-2026-10-01.md`): their C#, their sheets
+(`docs/*-cards.yaml`, `*-upgrades.yaml`, the companion sheets), the arm
+switches in C# and in the sim, and the engine pieces only their cards used.
+There is one C# test configuration, and the tier0 sim always runs the current
+kits; its calibration bands, measured on the shipped kits, are retired until a
+kit reaches Balance (pick 5). Every card is a `proto_` row on
+`docs/prototype-surface.yaml` (`operations/prototype.md`). **`+proto` now
+marks only a build that differs from the release**: `deploy_proto.ps1
+-TeyvatFrame`, and the Teyvat frame is on hold (below). Each C# pool IS its
+prototype roster (legacy cleanup stage 4): the `proto_` rows are every pool's
+`GenerateAllCards`, the roster is the offer, and the 78 / Ancient / co-op
+counts are pinned (`KleeTests/Prototype/PoolCountTests.cs`); the companion
+roster is prototype rows only, Fontaine's sixteen ported as they are (pick 4,
+`proto_mf_`).
 **Last release package: `0.2.1357`**
 (2026-08-29), which predates the ruling and carries the old kits.
 

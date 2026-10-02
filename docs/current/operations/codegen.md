@@ -1,18 +1,28 @@
-## Codegen — roster cards
+## Codegen — the kits' cards
 
-One character-aware generator emits the C# card classes from the canonical
-YAML sheets. Klee is the compatibility baseline; Furina and Kokomi are the
-other profiles.
+One character-aware generator (`tools/gen_klee_cards.py`: the profiles, the
+body and upgrade emitters) builds the C# card classes, and
+`tools/gen_prototype_cards.py` drives it over `docs/prototype-surface.yaml`,
+the current kits' one sheet, into `klee-mod/KleeCode/Cards/Prototype/Generated/`
+with its `manifest.json`. The shipped roster generator, its sheets and its
+output are deleted (legacy cleanup stages 5 and 6, 2026-10-01).
 
 ```sh
-.venv/bin/python tools/gen_roster_cards.py           # generate all profiles
-.venv/bin/python tools/gen_roster_cards.py --check    # verify committed output, no write
+.venv/Scripts/python.exe tools/gen_prototype_cards.py           # generate
+.venv/Scripts/python.exe tools/gen_prototype_cards.py --check   # verify committed output, no write
 ```
 
-The generator rejects unknown card-level fields as well as unknown effects
-(load-bearing: `encore_cost` changes playability without being an effect).
-Partial upgrades are forbidden — a card gets its complete ruled upgrade or lists
-under `upgrades.no_upgrade_path`. Depth: `docs/current/atlas/klee-mod-cards.md`.
+The generator rejects unknown card-level fields as well as unknown effects.
+Partial upgrades are forbidden — a row gets its complete upgrade (`upgrade:` on
+the row, or the Prototype-stage default), or says why not with `no_upgrade:`
+(`operations/prototype.md`). Depth: `docs/current/atlas/klee-mod-cards.md`.
+
+**Two shipped leftovers stay in the generated cards**, because removing them
+changes the emitted C# of current rows: each file's header still names
+`docs/<character>-upgrades.yaml` as the source of its upgrade deltas (they
+come from the row since legacy cleanup stage 6), and companion and Furina
+damage and Block still route through `SpotlightSystem`'s print fold, the
+identity since stage 5. Both are `BACKLOG.md` lines.
 
 - **Cost lines are DERIVED from the printed spend, at TWO levels** (`EB-182`).
   A top-level `spend_spark` / `spend_charge` is the CARD's price and makes it

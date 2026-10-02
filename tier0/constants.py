@@ -89,17 +89,6 @@ CONTROL_UPTIME_CARRY = 0.40   # §2.2a detector: won fights with more than
 # it (`combat.spark_threshold`).
 SPARKS_FOR_FREE_ATTACK = 3    # at 3 Sparks, next Attack costs 0
 
-# THE STRICT RARE POWER (PICK 5, wording (1), sub-pick (a)). While
-# `spark_attack_cost` is on the player, an Attack that does NOT already print
-# a Spark price costs 0 Energy and this many Sparks instead, and is unplayable
-# below them. An Attack that already prints one is UNAFFECTED -- sub-pick (a),
-# because (b) would raise the price of the very cards the archetype drafts.
-#
-# 3 IS LIFTED, NOT PICKED: it is [USER]'s own phrase ("converts all attacks
-# into 3-spark-cost attacks") and it is the retired threshold's own number, so
-# the Power charges exactly what the base rule used to hand out for free.
-SPARK_ATTACK_POWER_PRICE = 3
-
 # THE STARTER AND POOL SUBSTITUTIONS ARE DELETED (`EB-750`, R270). The arm's
 # eleven prototype rows -- `proto_pop_spark`, `proto_kaboom_sink`,
 # `proto_spark_strike` (Fwoosh!), `proto_spark_sweep`, `proto_spark_double_tap`,
@@ -113,9 +102,9 @@ SPARK_ATTACK_POWER_PRICE = 3
 # provenance for each row is under that commit in
 # `docs/notes/prototype-surface-provenance.md`.
 #
-# The ENGINE rule the arm ran under left with its rows at legacy cleanup
-# stage 6; `SPARK_ATTACK_POWER_PRICE` above stays only while the C# power that
-# mirrors it does.
+# The ENGINE rule the arm ran under, and its strict Rare Power
+# (`SPARK_ATTACK_POWER_PRICE`, C# `SparkAttackCostPower`), left with its rows at
+# legacy cleanup stage 6.
 
 # =============================================================================
 # THE KLEE OVERHAUL, SLICE ONE -- R213 B PROTOTYPE ARM, QUARANTINED.

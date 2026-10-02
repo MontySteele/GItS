@@ -173,7 +173,6 @@ def _closure() -> tuple[list[str], int]:
 # pin is on the source of the one function both engines route through.
 CS_FILE = "klee-mod/KleeCode/Powers/RecallFromExhaust.cs"
 CS_REQUIRED = {
-    "KitGrant.NotKitCard": "the kit exemption (v1.9)",
     "KokomiResources.IsJunk": "constraint 6, the C11 junk predicate",
     "IExhaustRetriever": "constraint 3, the retriever exclusion",
     "CardPilePosition.Top": "constraint 4, top of the pile",

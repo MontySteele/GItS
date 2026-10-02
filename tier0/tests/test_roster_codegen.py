@@ -126,12 +126,6 @@ def by_id_of(cards: list[dict]) -> dict[str, dict]:
     return {card["id"]: card for card in cards}
 
 
-def _furina_cards() -> list[dict]:
-    return yaml.safe_load(
-        gen.FURINA_PROFILE.sheet.read_text(encoding="utf-8")
-    )
-
-
 def test_klee_profile_remains_the_legacy_default():
     assert gen.KLEE_PROFILE.sheet == gen.SHEET
     assert gen.KLEE_PROFILE.out_dir == gen.OUT_DIR
@@ -329,17 +323,6 @@ def test_a_non_basic_strike_carries_the_strike_tag():
     assert "basic_tag" in (gen.card_level_reason(basic) or "")
 
 
-def _companion_rows() -> list[dict]:
-    rows = []
-    for sheet_path, nation in gen.COMPANION_SHEETS:
-        for card in yaml.safe_load(sheet_path.read_text(encoding="utf-8")):
-            # The generator stamps nation from the sheet it came from; emit()
-            # requires it.
-            card.setdefault("nation", nation)
-            rows.append(card)
-    return rows
-
-
 def test_an_unrecognised_member_is_refused_by_name():
     """The member value is emitted through a lookup, and a lookup miss is a
     KeyError -- a stack trace mid-emit, not a decision. Every other
@@ -486,7 +469,7 @@ def test_a_chosen_discard_emits_the_selection_screen_not_a_random_loop(
     src = gen.emit(_discard_probe(select="chosen"), gen.KOKOMI_PROFILE)
     assert "CardSelectCmd.FromHandForDiscard(" in src
     assert "CardSelectorPrefs.DiscardSelectionPrompt, 2)" in src
-    assert "KitGrant.NotKitCard, this)).ToList();" in src
+    assert "null, this)).ToList();" in src
     assert "await CardCmd.Discard(choiceContext, picked);" in src
     # The random loop must be GONE, not merely accompanied.
     assert "Rng.CombatTargets.NextItem" not in src

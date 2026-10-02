@@ -121,16 +121,19 @@ class Meter:
     prints: Callable[[str], bool]
     # The call the attach rule emits. Matched as a CALL, not as a bare name, so
     # a comment mentioning the method is not mistaken for the tip.
-    attach: str
+    attach: str | None
     # Whose faces may print the word. None = roster-wide, no reach check.
     owner: str | None
 
 
+#: THE METERS ARE RETIRED (legacy cleanup stages 5 and 6): Kokomi's Charge and
+#: the Burst meters left with the shipped kits, and so did the tips that
+#: defined them (`KokomiRiderTips.ForCharge`, `KleeCardTooltips.ForBurst`). A
+#: face that names one now names a word nothing in the game can explain, so
+#: the attach is `None` and any face printing the word is the finding.
 METERS = (
-    Meter("Charge", prints_charge_word, "KokomiRiderTips.ForCharge(",
-          owner="Kokomi"),
-    Meter("Burst", prints_burst_word, "KleeCardTooltips.ForBurst(",
-          owner=None),
+    Meter("Charge", prints_charge_word, None, owner=None),
+    Meter("Burst", prints_burst_word, None, owner=None),
 )
 
 # `EB-258`. The resources a face prints as KEYWORDS, longest first so
@@ -241,12 +244,11 @@ def findings(root: Path = CARD_ROOT,
             named = [d for d in descriptions if meter.prints(d)]
             if not named:
                 continue
-            # Reach is checked against Kokomi because she owns the only meter
-            # that has a reach. A third meter scoped to somebody else needs
-            # this to become a per-owner lookup; until then a second sheet
-            # reader would be a second place for one set to be described
-            # wrongly.
-            if (meter.owner is not None
+            if meter.attach is None:
+                out.append(
+                    f"{rel}: names {meter.word}, a retired meter no tip "
+                    f"defines -- {named[0]!r}")
+            elif (meter.owner is not None
                     and not _is_kokomis(path, kokomi_dir, classes)):
                 out.append(
                     f"{rel}: names {meter.word} on a face outside "

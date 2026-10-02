@@ -393,7 +393,7 @@ def test_both_engines_exclude_the_same_three_things():
     both engines route through (klee-mod/KleeTests carries the runnable
     half). Sim twin: effects.recall_exhaust_pool."""
     text = CS.read_text(encoding="utf-8")
-    for needle in ("KitGrant.NotKitCard", "KokomiResources.IsJunk",
+    for needle in ("KokomiResources.IsJunk",
                    "IExhaustRetriever", "CardPilePosition.Top",
                    "PileType.Draw", "CardKeyword.Exhaust"):
         assert needle in text, needle

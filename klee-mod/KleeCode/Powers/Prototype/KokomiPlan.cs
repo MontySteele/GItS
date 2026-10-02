@@ -562,52 +562,6 @@ public static class KokomiPlan
     private static readonly Dictionary<Player, List<Entry>> _queues = new();
 
     /// <summary>
-    /// The riders landing inside the Plan being resolved RIGHT NOW, or null
-    /// between Plans (`EB-453`).
-    ///
-    /// ONE LIST AND NOT A DICTIONARY PER SEAT, deliberately: a Plan resolves
-    /// inside one synchronous beat of one seat's turn, which is the same
-    /// window `before` is measured across, and a rider that arrives while no
-    /// Plan is running belongs to no Plan and is dropped. `ResolveEntry` saves
-    /// and restores the previous value around its own, because a clause can
-    /// play a card that resolves a second Plan (Moon's Reflection's replay),
-    /// and the inner Plan's riders are the inner Plan's.
-    /// </summary>
-    private static List<Rider>? _riders;
-
-    /// <summary>
-    /// "I landed inside this Plan, I am called X, and I delivered N."
-    ///
-    /// Called by the rider itself rather than inferred here: this file knows
-    /// what the BOARD did (<see cref="MovedOn"/>) and cannot know what caused
-    /// any part of it, which is exactly the gap `EB-453` is. Safe to call at
-    /// any time -- outside a Plan it does nothing, which is what makes it a
-    /// call a rider can make unconditionally.
-    ///
-    /// `EB-518` ADDS THE BODY, for the reason on <see cref="Rider"/>: three
-    /// identical entries cannot be divided among three enemies by a reader,
-    /// and the one that struck twice is exactly the one whose arithmetic does
-    /// not close. The target is read the way <see cref="MovedOn"/> reads it --
-    /// <see cref="EnemyName"/> for the title, <c>CombatId</c> for the handle --
-    /// so the page resolves both rows through one lookup.
-    ///
-    /// `EB-695` MADE IT ANSWER. It returns whether the rider was FILED: true
-    /// inside a Plan, false where no Plan is running -- which is exactly the
-    /// played-card path. The caller needs that answer because the same fact
-    /// has two homes now: inside a carry-out this clause prints it, and from
-    /// hand `RelicAnswerLog` does. A strike named TWICE on one screen would be
-    /// the arithmetic defect `EB-518` closed, reopened from the other side.
-    /// </summary>
-    public static bool NoteRider(string source, int amount,
-                                 Creature? target = null)
-    {
-        if (_riders == null || amount <= 0) return false;
-        _riders.Add(new Rider(source, amount, EnemyName(target),
-                              target?.CombatId.ToString() ?? string.Empty));
-        return true;
-    }
-
-    /// <summary>
     /// WHAT THE STRIP SHOWS WHILE A MORNING IS RUNNING, and it exists only so
     /// the strip can empty ONE ENTRY AT A TIME IN VIEW (`EB-317`).
     ///
@@ -2090,13 +2044,6 @@ public static class KokomiPlan
         // the clause itself moves.
         string? kind = null;
         int? asked = null;
-        // `EB-453`: the window a rider can name itself in, opened here beside
-        // `before` because it closes where `before` is read back. The outer
-        // value is saved rather than assumed null: a clause may play a card
-        // that resolves a second Plan, and that Plan's riders are its own.
-        var outerRiders = _riders;
-        var riders = new List<Rider>();
-        _riders = riders;
         try
         {
             // A PLAN STAYS OPEN (2026-10-01): the player chose the now-line.
@@ -2139,12 +2086,11 @@ public static class KokomiPlan
             // the unwind path and not after it. Every number the board already
             // moved is still measured; the clauses that never ran moved
             // nothing, which is the honest reading.
-            _riders = outerRiders;
             Announce(kokomi,
                      entry.Now && entry.TwoLine
                          ? NowLineTitle(entry.Title) : entry.Title,
                      number, Moved(before, kokomi),
-                     onPlay, kind, asked, riders);
+                     onPlay, kind, asked, System.Array.Empty<Rider>());
         }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
@@ -2651,7 +2597,7 @@ public static class KokomiPlan
         // two riders produce no number at all and fall to the default, and
         // `EB-718` puts Scout Ahead among them -- what it is worth is drawn at
         // the LATER carry-outs, where it rides those beats by name
-        // (<see cref="NoteRider"/>).
+        // (the retired Casket strike's rider, legacy cleanup stage 6).
         Kind.DrawPerPlanThisTurn => "cards drawn",
         // THE STATUS BATCH (2026-10-01).
         Kind.BlockPerStatusInHand => "Block",

@@ -243,21 +243,6 @@ public class Round13Tests
     // the thing that dealt the other 2.
 
     [Fact]
-    public void A_rider_outside_a_plan_is_dropped_rather_than_misfiled()
-    {
-        // The call is unconditional at the strike, so "am I inside a Plan"
-        // has to be answered here -- and a strike on the enemy's turn belongs
-        // to no Plan at all.
-        KokomiPlan.ResetAll();
-
-        KokomiPlan.NoteRider("Tamakushi Casket", 2);
-
-        // Nothing to assert on but the absence of a throw and of a row: the
-        // collector is null between Plans, which is the whole guard.
-        Assert.Empty(KokomiPlan.CarriedOut(Seat.Kokomi().Player));
-    }
-
-    [Fact]
     public void The_wire_carries_the_riders_and_the_unfinished_mark()
     {
         // The field names ARE the contract (`KokomiPlan.Snapshot`'s header),

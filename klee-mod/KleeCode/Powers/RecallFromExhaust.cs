@@ -101,16 +101,14 @@ public static class RecallFromExhaust
     /// Eligible targets (EB-118 §6.4 constraints 3 and 6). Sim twin:
     /// effects.recall_exhaust_pool.
     ///
-    /// Kit cards are never fodder and never loot (the v1.9 invariant every
-    /// other pile pool rides). A retriever is ineligible -- that exclusion is
+    /// A retriever is ineligible -- that exclusion is
     /// what stops the pile closing into a cycle, and it covers the retrieval
     /// card ITSELF, which by then has Exhausted into this very pile.
     /// Status and Curse are out (KokomiResources.IsJunk, the C11 predicate);
     /// ordinary personal and Companion cards stay in.
     /// </summary>
     public static bool Recallable(CardModel card) =>
-        KitGrant.NotKitCard(card)
-            && !KokomiResources.IsJunk(card)
+        !KokomiResources.IsJunk(card)
             && card is not IExhaustRetriever;
 
     /// <summary>

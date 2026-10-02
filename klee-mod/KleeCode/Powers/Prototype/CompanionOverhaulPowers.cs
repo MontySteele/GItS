@@ -19,8 +19,8 @@ namespace KleeMod.Powers;
 /// THE MONDSTADT COMPANION OVERHAUL'S POWERS (QUARANTINED, R213 B).
 ///
 /// Nine powers, in two shapes the engine already runs: a START-OF-TURN payout
-/// (<see cref="CelestialGiftPower"/>'s shape) and an END-OF-TURN volley
-/// (<see cref="OzSummonPower"/>'s). Nothing here invents a hook; what is new
+/// (<c>CelestialGiftPower</c> (retired)'s shape) and an END-OF-TURN volley
+/// (<c>OzSummonPower</c> (retired)'s). Nothing here invents a hook; what is new
 /// is the printed text each one carries, which comes verbatim from the
 /// approved workshop's sec.3.
 ///
@@ -85,7 +85,7 @@ internal static class CompanionOverhaulTargeting
 /// Diona, Signature Mix: "For 2 turns, at the start of your turn gain 4
 /// Block." (The 2 Weak to all enemies is on the card, not here.)
 ///
-/// Amount is TURNS REMAINING -- the <see cref="OzSummonPower"/> grammar, and
+/// Amount is TURNS REMAINING -- the <c>OzSummonPower</c> (retired) grammar, and
 /// the reason a second copy makes the field last longer rather than pay twice
 /// per turn: the number the card prints is the DURATION, so that is the number
 /// the stack holds.
@@ -125,7 +125,7 @@ public sealed class SignatureMixPower : PowerModel, ILocalizationProvider
 ///
 /// THE LATCH IS THE CARD. "Had Block left at the end of your last turn" cannot
 /// be read at the start of this one: the game clears Block on the turn tick,
-/// which is exactly why <see cref="CelestialGiftPower"/> can grant Block from
+/// which is exactly why <c>CelestialGiftPower</c> (retired) can grant Block from
 /// this same hook and have it survive. So the answer is recorded at the END of
 /// the turn, by <see cref="CompanionOverhaulTurnEnd"/>, after every other
 /// overhaul effect has resolved -- two of which GRANT Block, and a latch taken
@@ -275,7 +275,7 @@ public sealed class GlacialWaltzPower : PowerModel, ILocalizationProvider
 /// damage to a random enemy." NO TURN LIMIT -- the workshop's sec.1 rule, and
 /// its sec.3 note: "a Power cannot be reapplied, so Oz stays out, which is his
 /// C1." That is the whole difference from the shipped
-/// <see cref="OzSummonPower"/>, which is a three-turn Counter, and it is why
+/// <c>OzSummonPower</c> (retired), which is a three-turn Counter, and it is why
 /// this is a separate class rather than a retune of that one: the shipped row
 /// has to keep meaning what it printed on a flag-off build.
 ///
@@ -478,7 +478,7 @@ public sealed class DandelionBreezePower : PowerModel, ILocalizationProvider
 /// number of COPIES.
 ///
 /// THE DAMAGE CARRIES NO ELEMENT, because the card's text names none. It runs
-/// the sim's damage pipeline exactly as <see cref="WitchsFlamePower"/>'s does
+/// the sim's damage pipeline exactly as <c>WitchsFlamePower</c> (retired)'s does
 /// (NC-1: power-sourced damage scales with the player) and the Block stays raw
 /// (NC-11) -- adjacent, opposite, both the base game's shape.
 ///
@@ -573,7 +573,7 @@ public sealed class SolarIsotomaBloomPower : PowerModel, ILocalizationProvider
 /// BeforeSideTurnEnd and drives the four shipped tenants there, so running
 /// here puts this arm's block strictly after the shipped chain -- which is
 /// exactly where tier0 puts it. The one other AfterSideTurnEnd tenant is
-/// <see cref="WitchsFlamePower"/>, and Durin's Witch's Flame is one of the
+/// <c>WitchsFlamePower</c> (retired), and Durin's Witch's Flame is one of the
 /// seventeen Mondstadt rows this arm takes out of the pool, so with the arm on
 /// it cannot be drafted and the co-tenancy cannot arise. Stated rather than
 /// assumed: if a later slice puts that row back, this comment is the note that

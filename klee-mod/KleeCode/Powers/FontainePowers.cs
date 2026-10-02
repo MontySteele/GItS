@@ -129,7 +129,7 @@ public sealed class CannonFireSupportPower : PowerModel, ILocalizationProvider
 /// Clorinde, Night Vigil: your Attacks against enemies holding an aura deal
 /// +Amount.
 ///
-/// DELIBERATE MIRROR of <see cref="SolarIsotomaPower"/>: same trigger ("my
+/// DELIBERATE MIRROR of <c>SolarIsotomaPower</c> (retired): same trigger ("my
 /// attack lands on an aura'd enemy"), opposite currency -- Albedo pays Block,
 /// Clorinde pays damage. Recorded here and on the sheet so the pairing reads
 /// as design rather than as one being a copy of the other.
