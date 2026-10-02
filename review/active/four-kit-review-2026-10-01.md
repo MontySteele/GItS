@@ -16,10 +16,11 @@ Opus session already has queued.
 **What I read:** `STATE.md`; the four briefs and their papers in
 `review/active/`; every offered row in `docs/prototype-surface.yaml`; the
 seat records of 2026-09-26 to 2026-10-01 in `review/records/`. **What I did
-not have:** the raw seat transcripts (gitignored, on the playtest machine)
-and `game_ref/` (no base-game extract on this machine), so base-game card
-claims below lean on `docs/current/research/ironclad-brief-calibration-2026-09-01.md`
-and are marked where they are from memory.
+not have:** the raw seat transcripts (gitignored, on the playtest machine).
+Base-game claims come from the only extract on this machine, an August one
+of Ironclad and Silent (`../GItS-parity/game_ref/ironclad.json` and
+`silent.json`), so they miss the other three characters and any card
+changed since.
 
 **What I ran:** five scratch probes on the tier-0 engine (§7). They are
 instrument readings on stock pilots, not registered cells, and nothing here
@@ -92,14 +93,21 @@ with eight Block cards it is still 18%. Every act-3 deck has a dead hand
 every few turns, and raising a Block card from 8 to 11 changes nothing on
 that turn.
 
-The base game does not solve this with Block cards either. It solves it
-with **Block that is not in the hand**: Powers that pay every turn, Block
-that carries over, Block as a side effect of the deck's engine. Ironclad's
-are in the repo's own brief (`ironclad-brief-calibration-2026-09-01.md`
-§5.2 and §5.3: Feel No Pain, Barricade, Juggernaut, Colossus, Stone Armor),
-plus Burning Blood's 6 HP a fight. From memory, Silent's are After Image,
-Footwork, Blur and Wraith Form; the Opus session can confirm against
-`game_ref/silent.json`.
+The base game does not solve this with Block cards either. Its flat rates
+are no better than ours: Shrug It Off is 8 and True Grit 7 for 1, Backflip
+5, Survivor 8, against Coral Bulwark's 8, Shell of Sanctuary's 9 and a
+starter Knight's 8. It solves it with **defence that is not in the hand**:
+Powers that pay every turn, Block that carries over, a multiplier on every
+Block card, and HP back between fights. From the extract:
+
+- **Ironclad:** Feel No Pain, Stone Armor and Colossus at Uncommon;
+  Barricade and Juggernaut at Rare; Burning Blood's 6 HP after every fight.
+- **Silent:** Anticipate (0 cost, Dexterity) and Dodge and Roll (Block next
+  turn) at Common; Footwork (Dexterity) and Blur at Uncommon; Abrasive and
+  Malaise at Rare; a 0-cost Weak in the starter.
+
+None of our four kits has a Dexterity source of its own (the one in the
+sheet is Gorou's companion card), and none heals between fights.
 
 The same census on our kits, counting only defence that works on a hand
 with no Block card in it:
@@ -482,9 +490,9 @@ not pools.
   records (`w8-lane3`, `w8b-lane3`, `w9-lane1`, `w9-lane2`) and the two
   base ones (`base-lane1`, `base-lane2`), for HP by floor, the deck at the
   boss door and cards offered against cards taken; the two Varka `w9`
-  lanes, for Oath by turn in the Test Subject fight; and a
-  `game_ref`-based count of each base character's off-hand defence, to
-  replace my from-memory list in §2.2.
+  lanes, for Oath by turn in the Test Subject fight; and §2.2's census
+  rerun on the playtest machine's current `game_ref/`, for all five base
+  characters.
 
 ## Picks
 
