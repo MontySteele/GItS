@@ -92,7 +92,8 @@ public class KleeOverhaulPoolPassTwoTests
         var card = new ProtoKoBlastShield();
         Assert.DoesNotContain(card.CanonicalKeywords,
                               k => k == CardKeyword.Retain);
-        Assert.Equal(CardRarity.Uncommon, card.Rarity);
+        // Common since the Klee final pass (2026-10-02); Uncommon before.
+        Assert.Equal(CardRarity.Common, card.Rarity);
         Assert.Equal(CardType.Skill, card.Type);
         Assert.Equal(6m, Vars(card).Single().BaseValue);
     }

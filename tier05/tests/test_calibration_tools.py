@@ -63,6 +63,6 @@ def test_loaded_gauntlet_carries_potions_and_max_hp_between_stages(
         potions=["blood_potion"], node_kind="elite")
 
     assert seen == [
-        (["blood_potion"], 62, 62),
-        ([], 65, 65),
+        (["blood_potion"], 70, 70),       # Klee 70 HP since 2026-10-02
+        ([], 73, 73),
     ]

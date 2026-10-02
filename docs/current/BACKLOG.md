@@ -14,6 +14,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 - Klee status package: art for Forbidden Fun, It Wasn't Me!, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report, Solitary Confinement and Albedo — Dust of Purification (placeholders; Dust's plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched); the three Powers borrow Party Poppers', Spark Knight's and Playdate's badges.
 - Klee defence in the status pile (2026-10-01): art for Up in Smoke!, Behind Jean's Desk and Kitchen Alchemy (placeholders).
+- Klee final pass (2026-10-02): art for Cover Your Ears! (placeholder).
+- Klee final pass: the engine piece Where Did I Put It?'s cut left unused (`scry_take`'s `filter: set_off`, the Set off filter in `ScryTake.Choose`); delete it in C# and the sim if no row takes it up.
 - Klee defence in the status pile: engine pieces the three cuts left unused (Nova Burst's `overflow: bounce` Set off / `SetOffAimedBouncing` / `BounceOverflow`, Spinning Sparkler's `grow_on_hit` rider / `HitAndGrow` / `GrowLargestOn`); delete them in C# and the sim.
 - Kokomi status batch: art for Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge, Abyssal Salvage and the Sea Glass token (placeholders); Abyssal Salvage borrows the Princess of Watatsumi badge.
 - Kokomi status batch: the stock sim pilot cannot read the next-hand Plans (Kelp Wall's count, Tidecleanse, Sea Glass Harvest, Turning Tide) or plan for statuses it has not drawn; their census rates are unread, as Coral Tithe's were.
@@ -84,7 +86,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Seat page: no screen prints the run seed or the ascension.
 - Seat page: a Furina seat never saw her own Frail or Dexterity loss printed, so Defend at 1-2 was unexplained (smoke round, 2026-10-02); check the brief page lists the player's debuffs.
 - Seat page: the Tamakushi Casket printed "(1)" between fights; its counter is combat-only (`TamakushiCasket.ShowCounter`), so the page reads `DisplayAmount` before combat state clears (smoke round, 2026-10-02).
-- Seat page: Tuning Fork prints "(7)" with no "of 10"; Where Did I Put It? prints nothing when it finds no Set off card (Klee lane 2, 2026-10-02).
+- Seat page: Tuning Fork prints "(7)" with no "of 10" (Klee lane 2, 2026-10-02).
 - Furina Stage log: a Gala Premiere turn printed "Usher joined the stage" twice (front, then back) before "took its Bow to make room for a summon" (smoke round, 2026-10-02).
 - Seat page: Cycle of Seasons' trigger damage prints on the line of the card that changed Varka's element, and Cycle's own line reads "Nothing this page can count landed off it" (Varka smoke seat, 2026-10-02).
 - Seat page: a dead Decimillipede segment waiting to Reattach is not on the wire (`BuildBattleState` sends only living enemies), so no page shows its revive countdown; send the body and its countdown (control seats, Ironclad and Necrobinder, 2026-09-26).

@@ -5680,3 +5680,51 @@ registered (BACKLOG).
 
 Pins: `tier0/tests/test_klee_status_package.py`,
 `KleeTests/Prototype/KleeStatusPackageTests.cs`. Art: placeholders.
+
+## Klee final pass, 2026-10-02
+
+Paper `review/active/klee-final-pass-2026-10-02.md`, "Ruled". Klee lost all
+nine seat runs since the status package, on Block at the act-2 boss turn,
+with Sparks piling up unspent. Built in both engines. The pool stays **78
+(24 / 33 / 21)**.
+
+- **HP 62 to 70**, Silent's ([USER]: "Let's try 70 like Silent").
+  `Klee.cs` `StartingHp`, `tier0/content/characters/klee.yaml`.
+- **In: `proto_ko_cover_your_ears`**, Cover Your Ears! (Uncommon Skill, 0
+  Energy and 2 Sparks, Exhaust): "ALL enemies lose 6 [8] Strength this
+  turn." Piercing Wail's numbers, priced at the pool's two Sparks for an
+  Energy's worth (Sparkling Burst, Boom Badge). It is the second Spark sink,
+  and it fires on the boss turn. It takes Where Did I Put It?'s slot in
+  `C.KLEE_OVERHAUL_POOL_IDS` and `KleeOverhaulRoster.Slice()`.
+- **Blast Shield** (`proto_ko_blast_shield`) **Uncommon to Common**, so seats
+  see the one repeatable Spark-to-Block card more often. Nothing else moves.
+- **Out: `proto_ko_where_did_i_put_it`** (Common). The w14 act-2 seat named
+  it NEVER AGAIN (it found a Set off card 1 time in 5), and Countdown,
+  Treasure Map and Once More! already fetch Set off cards. The main
+  session's call, not a ruled pick; it reverses with one row. Painted art
+  `KNOWN_STALE`; its pins removed; its `scry_take` `filter: set_off` is left
+  registered (BACKLOG).
+- **Unchanged:** Kitchen Alchemy (the permanent, status-fed reducer, as
+  ruled) and Playdate (Common; every post-fight reward offers a Companion).
+
+**Readings:**
+
+1. *The this-turn loss.* `lose_strength` takes `this_turn: true`. In C# the
+   codegen applies the card's own `TemporaryStrengthPower` subclass,
+   `ProtoKoCoverYourEarsPower` (`IsPositive` false, origin the card; the
+   base game's `PiercingWailPower` shape, `Powers/Prototype/KleeFinalPass.cs`)
+   at plus N to every hittable enemy. It gives the Strength back at the end
+   of that enemy's turn. The sim applies `temp_strength_down`, the
+   TemporaryStrength handling `refpowers` already runs for Mangle. It does
+   not combine with `per_status`. The power borrows the Bomb's Vulnerable
+   badge, as Shrapnel does.
+2. *The upgrade* is `strength_loss: +2`, the key Kitchen Alchemy's first
+   build used.
+3. *The manifest.* Its description said "About one card reward in twenty
+   offers a fourth, Companion, choice", which was stale. It now reads "After
+   each fight, the card reward offers a fourth choice: a Companion card.",
+   and the seat page's `COMPANION_SLOT_SENTENCE` quotes it, as pinned.
+
+Pins: `tier0/tests/test_klee_final_pass.py`,
+`KleeTests/Prototype/KleeFinalPassTests.cs`. Art: placeholder. Untested in
+game until a deploy.

@@ -389,7 +389,9 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Mines batch and slice two, built together.
     "proto_ko_hair_trigger",
     "proto_ko_explosive_frags",
-    "proto_ko_where_did_i_put_it",
+    # Where Did I Put It? cut, Cover Your Ears! in its slot (Klee final pass,
+    # 2026-10-02).
+    "proto_ko_cover_your_ears",
     # Nova Burst (`proto_ko_big_bounce`) cut by the status pile's defence
     # (2026-10-01).
     # THE POOL EXPANSION (R276, 2026-09-23): THIRTY rows toward the 78-card

@@ -40,22 +40,22 @@ def _win_fights(hit):
 
 def test_rest_heal_is_capped_at_max_hp(monkeypatch, scripted_map):
     """A campfire heal can never leave a run above its maximum HP: the 30%-of-
-    max heal is clamped to max_hp, so healing 18 onto 50/62 lands on 62, not
-    68."""
+    max heal is clamped to max_hp, so healing 21 onto 58/70 lands on 70, not
+    79."""
     monkeypatch.setattr(model, "run_fight", _win_fights(12))
     scripted_map("NRB")                  # the rest leads only into the boss
     max_hp = loader._character_index()["klee"]["hp"]
-    assert max_hp == 62
+    assert max_hp == 70                  # Klee final pass, 2026-10-02
 
     res = model.run_one("klee", "demolition", "demolition", _skip, 0,
                         n_acts=1)
 
     assert res.node_kinds == ["N", "R", "B"]
-    assert res.hp_by_node[0] == 50               # 62 - 12, entering the rest
+    assert res.hp_by_node[0] == 58               # 70 - 12, entering the rest
     assert res.rests == [(1, "heal", None)]      # the rest healed
-    # Uncapped this would be 50 + int(0.30 * 62) = 68.
-    assert 50 + int(C.REST_HEAL_FRACTION * max_hp) == 68
-    assert res.hp_by_node[1] == max_hp == 62
+    # Uncapped this would be 58 + int(0.30 * 70) = 79.
+    assert 58 + int(C.REST_HEAL_FRACTION * max_hp) == 79
+    assert res.hp_by_node[1] == max_hp == 70
     assert all(hp <= max_hp for hp in res.hp_by_node)
 
 
@@ -64,8 +64,11 @@ def test_rest_heal_floors_rather_than_rounds(monkeypatch, scripted_map):
     through `SetCurrentHpInternal`, whose body is
     `CurrentHp = (int)Math.Min(amount, MaxHp)` — an explicit truncation — so
     Klee's 0.30 x 62 = 18.6 heals 18, not the 19 a round() would give
-    (EB-110)."""
+    (EB-110). Klee's own HP is 70 since the final pass (2026-10-02), whose
+    30% is whole, so the pin holds her at the 62 it was written against: the
+    rule under test is the truncation, not her HP."""
     monkeypatch.setattr(model, "run_fight", _win_fights(30))
+    monkeypatch.setitem(loader._character_index()["klee"], "hp", 62)
     scripted_map("NRB")                  # the rest leads only into the boss
     max_hp = loader._character_index()["klee"]["hp"]
     assert max_hp == 62

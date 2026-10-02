@@ -209,6 +209,9 @@ KNOWN_STALE = {
     "proto_ko_spinning_sparkler": (
         "Klee defence in the status pile (2026-10-01) CUT this row from her pool (three rows cut, three added; review/active/klee-status-package-2026-10-01.md sec.5). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_ko_where_did_i_put_it": (
+        "The Klee final pass (2026-10-02) CUT this row from her pool (Cover Your Ears! took its slot; review/active/klee-final-pass-2026-10-02.md, \"Ruled\"). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_ko_pocket_fireworks": (
         "The Klee status package (2026-10-01) CUT this row from her pool (eight rows cut, eight added; review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),

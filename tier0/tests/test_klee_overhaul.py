@@ -279,8 +279,11 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
                 "proto_ko_sugar_rush", "proto_ko_kindling",
                 "proto_ko_catalytic_converter"):
         assert cut not in ids, cut
+    # Where Did I Put It? cut, Cover Your Ears! in its slot (Klee final pass,
+    # 2026-10-02).
     assert {"proto_ko_hair_trigger", "proto_ko_explosive_frags",
-            "proto_ko_where_did_i_put_it"} <= set(ids)
+            "proto_ko_cover_your_ears"} <= set(ids)
+    assert "proto_ko_where_did_i_put_it" not in ids
     # THE POOL EXPANSION's thirty (R276), less the status package's two cuts
     # and Spinning Sparkler (the status pile's defence), by name and for the
     # same reason, then the status package's eleven.

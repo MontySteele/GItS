@@ -1429,8 +1429,12 @@ MAP_FLOOR_LINE = ("You are on floor {here}{act}; the rooms above are floor "
 #: run around a fourth slot it will meet once in twenty fights was told
 #: something false by the two surfaces whose job is the opposite. Quoted
 #: verbatim from the manifest and pinned to it, `EB-329`'s rule unchanged.
+#: Klee final pass (2026-10-02): the roll sentence was itself stale. Every
+#: post-fight reward offers the fourth slot
+#: (`PoundingSurprise.TryModifyCardRewardOptions`), so both surfaces say so.
 COMPANION_SLOT_SENTENCE = (
-    "About one card reward in twenty offers a fourth, Companion, choice.")
+    "After each fight, the card reward offers a fourth choice: a Companion "
+    "card.")
 
 #: 2026-09-25. What a Companion IS, word for word the in-game tip
 #: (`ArmKeywordTips.ForCompanion`).

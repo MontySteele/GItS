@@ -42,7 +42,7 @@ roster is prototype rows only, Fontaine's sixteen ported as they are (pick 4,
 
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
-| `klee` | Klee | 62 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
+| `klee` | Klee | 70 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (expansion built) | 78 |
@@ -87,9 +87,12 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Desk settled (strong), Up in Smoke! fair, Kitchen Alchemy dead (played 2
   times in about 26 hands). Klee has won 0 of the 9 seat runs since the
   status package; she loses on Block at the boss turn, and Sparks pile up
-  unspent. Next: the final-pass paper
-  (`review/active/klee-final-pass-2026-10-02.md`, picks open: HP, Kitchen
-  Alchemy's slot, a Spark sink), one seat round, then Balance.
+  unspent. The final pass is ruled and built in both engines
+  (`review/active/klee-final-pass-2026-10-02.md`): HP 70; Cover Your Ears!
+  in (0 Energy, 2 Sparks, Exhaust: ALL enemies lose 6 [8] Strength this
+  turn), Where Did I Put It? out; Blast Shield Common; pool 78, 24 / 33 /
+  21. Untested in game until a deploy. Next: one seat round on fixed seeds,
+  then Balance.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start

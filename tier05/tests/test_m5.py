@@ -85,7 +85,7 @@ def test_combat_max_hp_gain_carries_to_the_next_fight(monkeypatch):
                   lambda rng, deck, offers, archetype: None, SEED,
                   n_acts=1)     # §10: exactly two stubbed fights
 
-    assert seen == [(62, 62), (65, 65)]
+    assert seen == [(70, 70), (73, 73)]     # Klee 70 HP since 2026-10-02
 
 
 def test_realistic_normals_easy_then_hard():

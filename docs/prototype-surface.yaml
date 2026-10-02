@@ -361,7 +361,7 @@
 
 - {id: proto_ko_blast_shield, name: "Blast Shield", character: klee,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
+   cost: 0, type: skill, rarity: common,
    description: "Gain 6 [gold]Block[/gold]. Return this card to your hand.",
    upgrade: {block: +2},
    effects: [{op: spend_spark, amount: 1},
@@ -430,12 +430,17 @@
    upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: ko_mine_frags, amount: 2, target: self}]}
 
-- {id: proto_ko_where_did_i_put_it, name: "Where Did I Put It?", character: klee,
+# WHERE DID I PUT IT? (proto_ko_where_did_i_put_it) IS CUT; COVER YOUR EARS!
+# takes its slot (review/active/klee-final-pass-2026-10-02.md, "Ruled").
+# Provenance note, "Klee final pass, 2026-10-02".
+- {id: proto_ko_cover_your_ears, name: "Cover Your Ears!", character: klee,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   description: "Look at the top {Scry:diff()} cards of your draw pile. Put a [gold]Set off[/gold] card from them into your hand and the rest on the bottom.",
-   upgrade: {scry: 2},
-   effects: [{op: scry_take, amount: 4, filter: set_off}]}
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   description: "ALL enemies lose 6 [gold]Strength[/gold] this turn.",
+   upgrade: {strength_loss: +2},
+   effects: [{op: spend_spark, amount: 2},
+             {op: lose_strength, amount: 6, target: all_enemies,
+              this_turn: true}]}
 
 # NOVA BURST (proto_ko_big_bounce) IS CUT (Klee defence in the status pile, 2026-10-01,
 # review/active/klee-status-package-2026-10-01.md sec.5). Provenance

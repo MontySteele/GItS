@@ -333,7 +333,9 @@ internal static class KleeOverhaulRoster
         // Mine deck's Power, the detonator finder and the overkill carrier.
         ModelDb.Card<ProtoKoHairTrigger>(),
         ModelDb.Card<ProtoKoExplosiveFrags>(),
-        ModelDb.Card<ProtoKoWhereDidIPutIt>(),
+        // Where Did I Put It? cut, Cover Your Ears! in its slot (Klee final
+        // pass, 2026-10-02).
+        ModelDb.Card<ProtoKoCoverYourEars>(),
         // Nova Burst (`ProtoKoBigBounce`) cut by the status pile's defence
         // (2026-10-01).
         // THE POOL EXPANSION (R276, 2026-09-23): THIRTY rows toward the
