@@ -48,7 +48,7 @@ public sealed class ProtoKoBehindJeansDesk : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(14m, ValueProp.Move)
+            new BlockVar(11m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -69,6 +69,6 @@ public sealed class ProtoKoBehindJeansDesk : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(4m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

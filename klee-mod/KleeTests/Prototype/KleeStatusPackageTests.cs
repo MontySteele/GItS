@@ -90,7 +90,7 @@ public class KleeStatusPackageTests
             (new ProtoKoDamageReport(), CardType.Power, 1, CardRarity.Rare),
             (new ProtoKoSolitaryConfinement(), CardType.Power, 1, CardRarity.Rare),
             (new ProtoMcAlbedoDustOfPurification(), CardType.Skill, 1, CardRarity.Rare),
-            (new ProtoKoUpInSmoke(), CardType.Skill, 1, CardRarity.Common),
+            (new ProtoKoUpInSmoke(), CardType.Skill, 0, CardRarity.Common),
             (new ProtoKoBehindJeansDesk(), CardType.Skill, 1, CardRarity.Uncommon),
             (new ProtoKoKitchenAlchemy(), CardType.Skill, 1, CardRarity.Uncommon),
         };
@@ -232,11 +232,13 @@ public class KleeStatusPackageTests
     {
         Assert.Equal((2m, 3m), (new ProtoKoUpInSmoke().DynamicVars["PowerAmount"].BaseValue,
                                 Upgraded<ProtoKoUpInSmoke>().DynamicVars["PowerAmount"].BaseValue));
-        Assert.Equal((14m, 18m), (new ProtoKoBehindJeansDesk().DynamicVars.Block.BaseValue,
+        Assert.Equal((11m, 14m), (new ProtoKoBehindJeansDesk().DynamicVars.Block.BaseValue,
                                   Upgraded<ProtoKoBehindJeansDesk>().DynamicVars.Block.BaseValue));
-        Assert.Equal((1m, 2m), (new ProtoKoKitchenAlchemy().DynamicVars["StrengthLoss"].BaseValue,
+        Assert.Equal((1m, 1m), (new ProtoKoKitchenAlchemy().DynamicVars["StrengthLoss"].BaseValue,
                                 Upgraded<ProtoKoKitchenAlchemy>().DynamicVars["StrengthLoss"].BaseValue));
         Assert.Contains(CardKeyword.Exhaust, new ProtoKoKitchenAlchemy().Keywords);
+        Assert.DoesNotContain(CardKeyword.Retain, new ProtoKoKitchenAlchemy().Keywords);
+        Assert.Contains(CardKeyword.Retain, Upgraded<ProtoKoKitchenAlchemy>().Keywords);
         Assert.Equal(TargetType.AllEnemies, new ProtoKoUpInSmoke().TargetType);
         Assert.Equal(TargetType.AllEnemies, new ProtoKoKitchenAlchemy().TargetType);
         Assert.Equal("Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. "
@@ -245,7 +247,7 @@ public class KleeStatusPackageTests
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. "
                      + "Add a [gold]Confiscated[/gold] to your draw pile.",
                      Face(new ProtoKoBehindJeansDesk()));
-        Assert.Equal("ALL enemies lose {StrengthLoss:diff()} [gold]Strength[/gold]. "
+        Assert.Equal("ALL enemies lose 1 [gold]Strength[/gold]. "
                      + "Exhaust every status in your hand; they lose 1 more for each.",
                      Face(new ProtoKoKitchenAlchemy()));
     }
@@ -275,8 +277,10 @@ public class KleeStatusPackageTests
     }
 
     // Kitchen Alchemy, reworked 2026-10-02 after the forced-deck seat (0 plays
-    // in 7 hands: a status is rarely in hand): "ALL enemies lose 1 [2]
+    // in 7 hands: a status is rarely in hand): "ALL enemies lose 1
     // Strength. Exhaust every status in your hand; they lose 1 more for each."
+    // Upgrade: Retain (tuned 2026-10-02 after three forced-deck seats; it was
+    // +1 loss, and upgraded it took 3 to 5 permanent Strength off one enemy).
 
     [Fact]
     public void Kitchen_alchemy_exhausts_every_status_then_takes_one_total_from_all()
@@ -308,8 +312,8 @@ public class KleeStatusPackageTests
         var upgraded = Upgraded<ProtoKoKitchenAlchemy>().DynamicVars["StrengthLoss"].IntValue;
         Assert.Equal(1, KleeStatusPackage.LossWithStatuses(printed, 1, 0));   // no status
         Assert.Equal(3, KleeStatusPackage.LossWithStatuses(printed, 1, 2));   // two statuses
-        Assert.Equal(2, KleeStatusPackage.LossWithStatuses(upgraded, 1, 0));  // upgraded base
-        Assert.Equal(4, KleeStatusPackage.LossWithStatuses(upgraded, 1, 2));
+        Assert.Equal(1, KleeStatusPackage.LossWithStatuses(upgraded, 1, 0));  // upgrade is Retain
+        Assert.Equal(3, KleeStatusPackage.LossWithStatuses(upgraded, 1, 2));
     }
 
     [Fact]

@@ -68,7 +68,7 @@ def test_the_package_cuts_eight_and_adds_eight(overhaul):
         "proto_ko_klee_can_explain": ("skill", 1, "uncommon"),
         "proto_ko_damage_report": ("power", 1, "rare"),
         "proto_ko_solitary_confinement": ("power", 1, "rare"),
-        "proto_ko_up_in_smoke": ("skill", 1, "common"),
+        "proto_ko_up_in_smoke": ("skill", 0, "common"),
         "proto_ko_behind_jeans_desk": ("skill", 1, "uncommon"),
         "proto_ko_kitchen_alchemy": ("skill", 1, "uncommon"),
     }
@@ -193,19 +193,26 @@ def test_dust_of_purification_is_albedos_klee_stand_in(overhaul):
 # into her status pile, which gives some incentive for players to engage with
 # it. We can give a mix of weak, high-block cards (already present) and
 # perhaps an alchemy-flavored Strength reduction?"
+#
+# Tuned 2026-10-02 after three forced-deck seats: Behind Jean's Desk 11 [14]
+# (strong or too strong to all three), Up in Smoke! cost 0 (about 3.5 damage
+# prevented a play, under a Defend), Kitchen Alchemy's upgrade is Retain
+# (upgraded, it took 3 to 5 permanent Strength off single enemies).
 
 def test_the_defence_rows_numbers_and_upgrades(overhaul):
     smoke = _first(load("proto_ko_up_in_smoke"), "apply_power")
     assert (smoke["power"], smoke["amount"], smoke["target"]) == (
         "weak", 2, "all_enemies")
     assert _first(_up("proto_ko_up_in_smoke"), "apply_power")["amount"] == 3
-    assert _first(load("proto_ko_behind_jeans_desk"), "block")["amount"] == 14
-    assert _first(_up("proto_ko_behind_jeans_desk"), "block")["amount"] == 18
+    assert _first(load("proto_ko_behind_jeans_desk"), "block")["amount"] == 11
+    assert _first(_up("proto_ko_behind_jeans_desk"), "block")["amount"] == 14
     loss = _first(load("proto_ko_kitchen_alchemy"), "lose_strength")
     assert (loss["amount"], loss["target"], loss["per_status"]) == (
         1, "all_enemies", 1)
     up = _first(_up("proto_ko_kitchen_alchemy"), "lose_strength")
-    assert (up["amount"], up["per_status"]) == (2, 1)
+    assert (up["amount"], up["per_status"]) == (1, 1)
+    assert not load("proto_ko_kitchen_alchemy").retain
+    assert _up("proto_ko_kitchen_alchemy").retain
 
 
 def test_up_in_smoke_weakens_every_enemy_and_shuffles_a_dazed(overhaul):
@@ -229,18 +236,19 @@ def test_behind_jeans_desk_blocks_and_adds_a_confiscated(overhaul):
     st = klee_state([enemy])
     st.player.draw_pile = filler(3)
     play(st, load("proto_ko_behind_jeans_desk"))
-    assert st.player.block == 14
+    assert st.player.block == 11
     made = [c for c in st.player.draw_pile if klee_overhaul.is_status(c)]
     assert len(made) == 1 and klee_overhaul.is_confiscated(made[0])
 
     st = klee_state([make_enemy(hp=200)])
     play(st, _up("proto_ko_behind_jeans_desk"))
-    assert st.player.block == 18
+    assert st.player.block == 14
 
 
 # Kitchen Alchemy, reworked 2026-10-02 after the forced-deck seat (0 plays in
-# 7 hands: a status is rarely in hand): "ALL enemies lose 1 [2] Strength.
-# Exhaust every status in your hand; they lose 1 more for each."
+# 7 hands: a status is rarely in hand): "ALL enemies lose 1 Strength.
+# Exhaust every status in your hand; they lose 1 more for each." Upgrade:
+# Retain (tuned 2026-10-02; it was +1 loss).
 
 def test_kitchen_alchemy_plays_with_no_status_and_every_enemy_loses_one(
         overhaul):
@@ -268,18 +276,18 @@ def test_kitchen_alchemy_exhausts_every_status_and_each_adds_one(overhaul):
     assert (a.powers.get("strength"), b.powers.get("strength")) == (-3, -3)
 
 
-def test_kitchen_alchemy_upgraded_base_is_two(overhaul):
+def test_kitchen_alchemy_upgraded_keeps_the_base_of_one(overhaul):
     c = make_enemy(hp=200, name="c")
     st = klee_state([c])
     st.player.hand = []
     play(st, _up("proto_ko_kitchen_alchemy"))
-    assert c.powers.get("strength") == -2
+    assert c.powers.get("strength") == -1
 
     d = make_enemy(hp=200, name="d")
     st = klee_state([d])
     st.player.hand = [statuses.make_status("dazed")]
     play(st, _up("proto_ko_kitchen_alchemy"))
-    assert d.powers.get("strength") == -3        # the per-status 1 holds
+    assert d.powers.get("strength") == -2        # the per-status 1 holds
 
 
 def test_kitchen_alchemy_leaves_a_curse_in_hand(overhaul):
