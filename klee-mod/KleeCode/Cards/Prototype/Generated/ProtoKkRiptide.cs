@@ -87,9 +87,10 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
             if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
             cardPlay = nowLine;
         }
+        var aoeVigor = AoeVigor.Begin(Owner.Creature);
         foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
         {
-            await DamageCmd.Attack(DynamicVars.Damage.BaseValue + (KokomiOverhaulKit.HasDebuff(auraTarget) ? DynamicVars.ExtraDamage.BaseValue : 0))
+            await DamageCmd.Attack((DynamicVars.Damage.BaseValue + (KokomiOverhaulKit.HasDebuff(auraTarget) ? DynamicVars.ExtraDamage.BaseValue : 0)) + aoeVigor.Next())
                 .FromCard(this, cardPlay)
                 .Targeting(auraTarget)
                 .WithHitFx("vfx/vfx_attack_slash")

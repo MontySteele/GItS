@@ -1205,7 +1205,10 @@ def _stage_forecast(raw: Any) -> dict[str, Any] | None:
                      "amount": _int(row.get("amount")),
                      "element": _text(row.get("element")),
                      "target": _stage_target(row.get("target")),
-                     "bow": bool(row.get("bow"))})
+                     "bow": bool(row.get("bow")),
+                     # 2026-10-01: a Bow a posted hit earns (False on an
+                     # older build).
+                     "on_hit": bool(row.get("on_hit"))})
     takers = []
     for row in (raw.get("takers") or []):
         if not isinstance(row, dict):

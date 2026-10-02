@@ -527,7 +527,12 @@ public static partial class FurinaStage
                 }
             }
             run.Block = 0;
+            // 2026-10-01 (seat round): a Bow a hit earns performs its act
+            // too ("Crabaletta's Bow dealt 5"), so its damage is a line of
+            // the forecast, marked as landing on the enemy's turn.
+            run.OnHit = true;
             if (result.Exit is { } gone) run.Bow(gone);
+            run.OnHit = false;
             block += run.Block;
         }
 
@@ -731,7 +736,13 @@ public static partial class FurinaStage
         /// is an act's damage a line of the forecast.</summary>
         internal bool Sweep;
 
-        /// <summary>What the sweep's acts and Bows deal, in order.</summary>
+        /// <summary>True while a Bow a posted hit earned is replayed: its act's
+        /// damage is a forecast line too, marked <see cref="StageForecastAct.OnHit"/>.
+        /// </summary>
+        internal bool OnHit;
+
+        /// <summary>What the sweep's acts and Bows deal, in order, then what
+        /// the Bows the posted hits earn deal.</summary>
         internal readonly List<StageForecastAct> Acts = new();
 
         internal void Act(StagePerformer who, StageSeat? seat, StageExit? exit)
@@ -757,7 +768,15 @@ public static partial class FurinaStage
                     - (exit?.Caught ?? 0));
                 Block += block;
             }
-            var line = Sweep ? Damage(who, seat, exit) : null;
+            StageForecastAct? line = null;
+            if (Sweep || OnHit)
+            {
+                line = Damage(who, seat, exit);
+                if (OnHit && line is { } hitLine)
+                {
+                    line = hitLine with { OnHit = true };
+                }
+            }
             if (line is { } dealt) Acts.Add(dealt);
             if (over != null)
             {
@@ -1135,10 +1154,14 @@ public readonly record struct StageForecastCue(
 /// <see cref="Target"/> is <see cref="All"/>, <see cref="Random"/> or
 /// <see cref="RandomAura"/> (Lynette's "one with an aura if any", where one
 /// wears an aura). <see cref="Bow"/> marks a performer's Bow inside the sweep
-/// (a guest whose payment emptied it).
+/// (a guest whose payment emptied it). <see cref="OnHit"/> (2026-10-01)
+/// marks a Bow a posted hit earns on the enemy's turn: it performs its act
+/// too, and the seat that left it out of the sum lost an enemy it counted
+/// as alive.
 /// </summary>
 public readonly record struct StageForecastAct(
-    StagePerformer Who, int Amount, string Element, string Target, bool Bow)
+    StagePerformer Who, int Amount, string Element, string Target, bool Bow,
+    bool OnHit = false)
 {
     public const string All = "all";
     public const string Random = "random";
