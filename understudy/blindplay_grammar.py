@@ -17,8 +17,8 @@ from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
                                         _map_options, _proceed_option,
                                         _potion_slots, _relic_options,
                                         _rest_options, _reward_items,
-                                        _screen_cards, map_floor,
-                                        reward_alternatives)
+                                        _screen_cards, is_plan_chooser,
+                                        map_floor, reward_alternatives)
 from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _named_option, _reward_option,
@@ -53,7 +53,11 @@ VERBS = ("play", "end turn", "choose", "skip", "go", "buy", "rest",
          "proceed", "leave",
          # 2026-09-26: the Crystal Sphere's one divination, which the game
          # makes the run spend before `leave` is honoured.
-         "reveal")
+         "reveal",
+         # A PLAN STAYS OPEN (2026-10-01): Kokomi's turn-start line chooser.
+         # `flip "<card>"` switches one due Plan between its Plan line and
+         # its now-line; `confirm` carries them all out.
+         "flip")
 
 
 @dataclass
@@ -120,6 +124,15 @@ def parse_command(text: str) -> Command:
     # wherever the tester gave one; a bare number is only ever read as an
     # ordinal, because no screen names a row `2`.
     ordinal = 0
+    # A PLAN STAYS OPEN: `flip` takes the same two handles `choose` does.
+    if verb == "flip" and not names:
+        m = re.fullmatch(r"flip\s+#?(\d+)", head)
+        if m is None:
+            raise BlindPlayError("`flip` needs a Plan's name in quotes, or its "
+                                 "number on the screen (`flip 2`)")
+        ordinal = int(m.group(1))
+        if ordinal < 1:
+            raise BlindPlayError("the rows on a screen are counted from 1")
     if verb == "choose" and not names:
         m = re.fullmatch(r"choose\s+#?(\d+)", head)
         if m is None:
@@ -1446,6 +1459,8 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
             res = _choose(state, cmd)
         else:
             res = _refuse(f"nothing here can {cmd.verb} a card")
+    elif cmd.verb == "flip":
+        res = _flip(state, cmd)
     elif cmd.verb == "confirm":
         res = _confirm(state)
     elif cmd.verb == "skip":
@@ -1458,6 +1473,27 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
         res = _refuse(f"{cmd.verb!r} is not wired to anything")
     res.verb = res.verb or cmd.verb
     return _with_forms(res, obs).as_dict()
+
+
+def _flip(state: dict[str, Any], cmd: Command) -> Resolution:
+    """A PLAN STAYS OPEN (2026-10-01): switch one due Plan on Kokomi's line
+    chooser between its Plan line and its now-line. The screen is a card grid
+    whose click toggles a pick, so a flip is a `select_card` on the named row
+    and a second flip of the same row switches it back."""
+    st = _screen(state)
+    if st != "card_select" \
+            or not is_plan_chooser(_blob(state, st).get("prompt")):
+        return _refuse("there is no Plan to flip here; `flip` is for the "
+                       "Plans due at the start of your turn")
+    entries = _screen_cards(state)
+    idx, why = _match(entries, cmd.name, key=_card_title,
+                      face=_card_face_key, number=True, ordinal=cmd.ordinal)
+    if idx < 0:
+        return _refuse(why)
+    line = "Plan line" if entries[idx].get("selected") is True \
+        else "now-line"
+    return Resolution(True, "flip", {"action": "select_card", "index": idx},
+                      {"card": _card_title(entries[idx]), "now": line})
 
 
 def _confirm(state: dict[str, Any]) -> Resolution:

@@ -29,7 +29,8 @@ import pytest
 from tier0.content import enchantments, loader
 from tier0.engine import kokomi_plan
 from tier0.tests.conftest import make_enemy
-from tier0.tests.test_kokomi_plan import kokomi_state, overhaul  # noqa: F401
+from tier0.tests.test_kokomi_plan import (  # noqa: F401
+    kokomi_state, overhaul, plan_line)
 
 # R276 pick 1 took Riptide's Plan off damage (it pays Energy and a card now),
 # so the fold is pinned on the row whose Plan line still prints a flat hit to
@@ -60,7 +61,7 @@ def test_riptide_under_sharp_two_writes_the_folded_plan_number(overhaul):
     assert entry.clauses[0]["amount"] == plain + SHARP
 
 
-def test_and_the_morning_deals_it(overhaul):
+def test_and_the_morning_deals_it(overhaul, plan_line):
     """THE ROW'S ACCEPTANCE, half two: what the jellyfish actually does with
     it. The clause is `all_enemies`, so one body is the whole read."""
     plain = _printed_plan(_riptide())

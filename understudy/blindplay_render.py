@@ -32,6 +32,9 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         CHOOSER_CONFIRM_NOTE,
+                                        PLAN_CHOOSER_HEADING,
+                                        PLAN_CHOOSER_NOTE,
+                                        TWO_LINE_WAITING_NOTE,
                                         CHOOSER_ONE_CHOICE_NOTE,
                                         CHOOSER_MAYBE_CLOSES_NOTE,
                                         CLOSES_NOTE_HEAD,
@@ -2904,6 +2907,13 @@ def render(obs: dict[str, Any]) -> str:
                                   "END of this turn instead, before the "
                                   "enemies act" if _is_dusk(e) else "")
                                + past_lethal.get(i - 1, ""))
+                    # A PLAN STAYS OPEN (2026-10-01): both lines while it
+                    # waits, so the choice is readable a turn early.
+                    if e.get("two_line") and (e.get("now_line")
+                                              or e.get("plan_line")):
+                        out.append(f"     - {TWO_LINE_WAITING_NOTE} "
+                                   f"Plan line: {e['plan_line']} · "
+                                   f"Now-line: {e['now_line']}")
                 if pl["twice"]:
                     # 2026-09-28 (Kokomi seat): with a Dusk Plan in the
                     # list above, "your FIRST Plan" read as entry 1. The Rare
@@ -3267,6 +3277,20 @@ def render(obs: dict[str, Any]) -> str:
             out += ["", "*This page cannot say what is in your deck yet: the "
                         "deck is on a fight's data feed and no fight of this "
                         "run has been read.*"]
+    elif obs["screen"] == "card_select" and obs.get("plan_chooser") is not None:
+        # A PLAN STAYS OPEN (2026-10-01, ruled): Kokomi's one line chooser a
+        # turn. Every due two-line Plan, both lines, and the line it will be
+        # carried out as; the fight behind it, because the choice is made
+        # against the intents.
+        out += [PLAN_CHOOSER_HEADING, "", PLAN_CHOOSER_NOTE, ""]
+        for i, row in enumerate(obs["plan_chooser"], 1):
+            chosen = "now-line" if row["line"] == "now" else "Plan line"
+            out += [f"{i}. **{row['title']}** — carried out as its "
+                    f"**{chosen}**",
+                    f"   - Plan line: {row['plan']}",
+                    f"   - Now-line: {row['now']}"]
+        if obs.get("board"):
+            out += _render_board_behind(obs["board"])
     elif obs["screen"] in ("card_reward", "card_select"):
         out += [f"# {obs['prompt']}", ""]
         for card in obs["offers"]:
@@ -3607,6 +3631,7 @@ def assert_chooser_note(obs: dict[str, Any], text: str) -> None:
     if "confirm" in (obs.get("commands") or []) \
             and CHOOSER_CONFIRM_NOTE not in text \
             and CHOOSER_MAYBE_CLOSES_NOTE not in text \
+            and PLAN_CHOOSER_NOTE not in text \
             and CLOSES_NOTE_HEAD not in text:
         raise BlindPlayError(
             "this page offers `confirm` and does not say that a pick here is "

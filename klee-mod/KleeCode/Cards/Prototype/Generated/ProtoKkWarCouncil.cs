@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlannedCard
+public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlannedCard, INowLineCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
@@ -78,6 +78,18 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
             if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
             cardPlay = nowLine;
         }
+        await PlayNowLine(choiceContext, cardPlay);
+    }
+
+    /// <summary>Where the now-line aims when the Bake-Kurage carries it out
+    /// for a Plan (a Plan stays open, 2026-10-01).</summary>
+    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.None;
+
+    /// <summary>The card's now-line. Played face-up from <c>OnPlay</c>, and carried
+    /// out by the Bake-Kurage when the player chooses it for a Plan
+    /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
+    public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
         foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
         {
             await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);

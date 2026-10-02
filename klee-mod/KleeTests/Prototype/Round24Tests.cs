@@ -179,7 +179,8 @@ public class Round24Tests
         // that a Plan is written at a body the queue will already have killed.
         // Named literals in `Snapshot`, which is what a headless pin can see --
         // the same shape the summon-log pin above takes.
-        var strings = Il.Strings(typeof(KokomiPlan).GetMethod("Snapshot", All)!);
+        // A PLAN STAYS OPEN (2026-10-01): one queue row is `QueueRow`.
+        var strings = Il.Strings(typeof(KokomiPlan).GetMethod("QueueRow", All)!);
         Assert.Contains("damage", strings);
         Assert.Contains("aim", strings);
     }
@@ -252,7 +253,7 @@ public class Round24Tests
         for (var i = 0; i < clauses.Length; i++) list.SetValue(clauses[i], i);
         return Activator.CreateInstance(
             typeof(KokomiPlan).GetNestedType("Entry", All)!,
-            null, list, null, false, over, 0, 0, null)!;
+            null, list, null, false, over, 0, 0, null, false)!;
     }
 
     private static int WrittenFrontDamage(params object[] clauses) =>

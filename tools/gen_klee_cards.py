@@ -15440,6 +15440,8 @@ def emit(
 
     vars_ = build_vars(card)
     body = build_body(card, profile)
+    now_line_body: list[str] | None = None
+    divine_aim = ""
     if plan_body:
         # THE BRANCH IS ONE `if` AT THE TOP AND NOTHING ELSE, which is what the
         # decompile read settled: the pipeline hands `OnPlay` the CREATURE that
@@ -15476,14 +15478,25 @@ def emit(
                       else "DivineStrategyPower.Aim.Ally"
                       if target_type == "KokomiTargets.PetOrAlly"
                       else "DivineStrategyPower.Aim.None")
-        body = ([schedule] if not card.get("effects") else
-                [f"if (KokomiPlan.PlayedOnPet(cardPlay))",
-                 "{",
-                 f"    {schedule}",
-                 "    if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, "
-                 f"{divine_aim}) is not {{ }} nowLine) return;",
-                 "    cardPlay = nowLine;",
-                 "}"] + body)
+        # A PLAN STAYS OPEN (2026-10-01, ruled;
+        # review/active/kokomi-delay-pays-2026-10-01.md sec.2): when the
+        # Bake-Kurage carries out a Plan written from a TWO-LINE row, the
+        # player may take the now-line instead. So a two-line row's now-line
+        # is its own method, `PlayNowLine`, which `OnPlay` calls on a face-up
+        # play and `KokomiPlan.CarryOutNowLine` calls at carry-out with the
+        # play aimed by `NowLineAim` (Divine Strategy's aim, the same three).
+        if card.get("effects"):
+            now_line_body = body
+            body = [f"if (KokomiPlan.PlayedOnPet(cardPlay))",
+                    "{",
+                    f"    {schedule}",
+                    "    if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, "
+                    f"{divine_aim}) is not {{ }} nowLine) return;",
+                    "    cardPlay = nowLine;",
+                    "}",
+                    "await PlayNowLine(choiceContext, cardPlay);"]
+        else:
+            body = [schedule]
     upgrade = build_upgrade(card)
     _, no_upgrade_reason = upgrade_plan(card)
     desc = build_description(card)
@@ -15674,6 +15687,8 @@ def emit(
                            alt_vars[i][2] if i in alt_vars else None)
             for i, clause in enumerate(plan_body))
         interfaces += ", IPlannedCard"
+        if now_line_body is not None:
+            interfaces += ", INowLineCard"
         plan_member = (
             "\n\n    /// <summary>The card's printed [gold]Plan[/gold] line, "
             "in the order it\n    /// was written. Carried out by the "
@@ -15689,6 +15704,30 @@ def emit(
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()
     vars_block = f"            {vars_cs}\n" if vars_cs else ""
     body_cs = ind.join(body)
+    # A PLAN STAYS OPEN: the now-line as its own method (see the plan branch).
+    now_line_member = ""
+    if now_line_body is not None:
+        now_cs = ind.join(now_line_body)
+        if "await " not in now_cs:
+            now_cs += ind + "await Task.CompletedTask;"
+        now_line_member = chr(10).join([
+            "",
+            "",
+            "    /// <summary>Where the now-line aims when the Bake-Kurage "
+            "carries it out",
+            "    /// for a Plan (a Plan stays open, 2026-10-01).</summary>",
+            f"    public DivineStrategyPower.Aim NowLineAim => {divine_aim};",
+            "",
+            "    /// <summary>The card's now-line. Played face-up from "
+            "<c>OnPlay</c>, and carried",
+            "    /// out by the Bake-Kurage when the player chooses it for a "
+            "Plan",
+            "    /// (<see cref=\"KokomiPlan.ChooseLines\"/>).</summary>",
+            "    public async Task PlayNowLine(PlayerChoiceContext "
+            "choiceContext, CardPlay cardPlay)",
+            "    {",
+            f"        {now_cs}",
+            "    }"])
     # RULED 2026-07-21: companions upgrade like any other card. They used to
     # emit MaxUpgradeLevel 0 on the companion sheets' "companions never scale"
     # header, which contradicted the upgrade sheets -- the sim honours those
@@ -16936,7 +16975,7 @@ public sealed class {cls} : {interfaces}
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {{
         {body_cs}
-    }}
+    }}{now_line_member}
 
     protected override void OnUpgrade()
     {{

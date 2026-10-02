@@ -42,6 +42,8 @@ skip        go "<node>"        buy "<item>"        rest
 upgrade     remove             use potion "<title>"    confirm    proceed
 ```
 
+On a screen that lists your due Plans, `flip "<card>"` switches that Plan between its Plan line and its now-line, and `confirm` carries them all out (`confirm` alone takes every Plan line).
+
 Two things on one screen printing the same name are NUMBERED in printed order —
 `Water's Edge (1)` / `Water's Edge (2)` — and an upgraded copy is separated by
 `(upgraded)` / `(not upgraded)`. A bare name that is ambiguous is refused with

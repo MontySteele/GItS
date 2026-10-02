@@ -438,13 +438,18 @@ public static class ArmKeywordTips
     /// planned a card expecting its now-line too, so the face prints
     /// "Or plan:" and the tip opens by saying the two halves are a choice.
     /// The second sentence was shortened to keep the tip under 135.
+    ///
+    /// A PLAN STAYS OPEN (2026-10-01, ruled;
+    /// review/active/kokomi-delay-pays-2026-10-01.md): "next turn, you choose
+    /// which line happens" -- the Bake-Kurage carries a two-line Plan out as
+    /// either line, the player's pick on one screen.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
             "Instead of the line above, play the card on the "
-          + "[gold]Bake-Kurage[/gold]: this happens at the start of your next "
-          + "turn. Plans go in the order made.");
+          + "[gold]Bake-Kurage[/gold]: next turn, you choose which line "
+          + "happens. Plans go in the order made.");
 
     /// <summary>
     /// `EB-643` (R265), THE POOL PASS'S ONE NEW WORD, and it is a rule about

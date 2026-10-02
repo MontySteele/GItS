@@ -153,7 +153,7 @@ public class KokomiPoolPassTests
         // The now-line takes `WithHitCount`, the base game's own multi-hit
         // door, so the played half is two strikes for everything that reads a
         // strike -- the same statement the Plan half makes with `Times`.
-        var play = Il.Calls(Il.Method("ProtoKkPincer", "OnPlay"));
+        var play = Il.Calls(Il.Method("ProtoKkPincer", "PlayNowLine"));
         Assert.Contains(play, c => c.Contains("WithHitCount"));
     }
 

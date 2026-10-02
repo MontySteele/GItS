@@ -144,6 +144,14 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   included; a Plan-only card keeps "Plan:". The Plan tip opens "Instead of
   the line above".
   Provenance note, "Kokomi status batch, 2026-10-01". Next: [USER] plays.
+  **A Plan stays open (2026-10-01, ruled, built):** paper
+  `review/active/kokomi-delay-pays-2026-10-01.md`. When the Bake-Kurage
+  carries out a Plan from a two-line card, she picks its Plan line (default)
+  or its now-line at printed size, on one grid a turn shown only when such a
+  Plan is due; Plan-only and Dusk Plans are unchanged; no number moved. Both
+  engines and the bridge (`flip "<card>"`, `confirm`); provenance note, "A
+  Plan stays open (Kokomi), 2026-10-01". Untested in game until a deploy.
+  Next: two seats, then [USER] plays (a central rule changed).
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any

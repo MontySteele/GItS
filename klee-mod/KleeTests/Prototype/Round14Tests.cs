@@ -104,7 +104,8 @@ public class Round14Tests
         // to every enemy and nothing else: no damage, no elemental call, so no
         // aura and no reaction. R276 pick 1 made its Plan Energy, so neither
         // half hits and the face carries no aura statement at all.
-        var play = Il.Calls(Il.Method("ProtoKkWarCouncil", "OnPlay"));
+        // A PLAN STAYS OPEN (2026-10-01): the now-line is its own method.
+        var play = Il.Calls(Il.Method("ProtoKkWarCouncil", "PlayNowLine"));
         Assert.DoesNotContain(play, c => c.Contains("ElementalHit"));
         Assert.DoesNotContain(play, c => c.Contains("Aura"));
         Assert.Contains(play, c => c.Contains("PowerCmd.Apply"));

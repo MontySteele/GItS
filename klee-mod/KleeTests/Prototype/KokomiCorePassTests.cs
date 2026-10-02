@@ -46,8 +46,16 @@ public class KokomiCorePassTests
         ((CustomCardModel)card).Localization!
             .First(r => r.Item1 == "description").Item2;
 
-    private static System.Collections.Generic.List<string> Play(string type) =>
-        Il.CallSequence(Il.Method(type, "OnPlay")).ToList();
+    // A PLAN STAYS OPEN (2026-10-01): a two-line row's now-line is its own
+    // method, `PlayNowLine`, which `OnPlay` calls; a play is both bodies.
+    private static System.Collections.Generic.List<string> Play(string type)
+    {
+        var seq = Il.CallSequence(Il.Method(type, "OnPlay")).ToList();
+        var nowLine = typeof(KokomiPlan).Assembly.GetTypes()
+            .FirstOrDefault(t => t.Name == type)?.GetMethod("PlayNowLine");
+        if (nowLine != null) seq.AddRange(Il.CallSequence(nowLine));
+        return seq;
+    }
 
     // ---- Song of Pearls: the empty-queue payoff ---------------------------
 

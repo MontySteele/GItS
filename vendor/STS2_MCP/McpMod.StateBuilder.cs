@@ -417,6 +417,16 @@ public static partial class McpMod
         {
             result["state_type"] = "card_select";
             result["card_select"] = BuildCardSelectState(cardSelectScreen, runState);
+            // GItS LOCAL EDIT (Kokomi, a Plan stays open, 2026-10-01). THE
+            // FIGHT BEHIND A MID-FIGHT GRID, the choose-a-card branch's edit
+            // below carried over: her turn-start line chooser is a card grid,
+            // and a choice of Block or damage is made against the intents.
+            // Additive, and only while a fight is in progress under it.
+            if (currentRoom is CombatRoom gridCombat
+                && CombatManager.Instance.IsInProgress)
+            {
+                result["battle"] = BuildBattleState(runState, gridCombat);
+            }
         }
         else if (topOverlay is NChooseACardSelectionScreen chooseCardScreen)
         {

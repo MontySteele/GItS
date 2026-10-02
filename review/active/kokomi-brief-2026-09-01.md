@@ -45,6 +45,19 @@ the Bake-Kurage carries it out at the start of her next turn.
    now-line, and the Plan tip opens "Instead of the line above". A Plan-only
    card keeps "Plan:" ("Dusk Plan:") under "Play on the Bake-Kurage.", since
    there is no line above it to choose against (main session, 2026-10-01).
+   **A Plan stays open (2026-10-01, ruled;
+   `review/active/kokomi-delay-pays-2026-10-01.md`; [USER]: "Interesting
+   idea! Yes, I think this makes sense. We'd want to make sure that the UX is
+   reasonably snappy so players don't have to spend forever on their turns,
+   but it sounds doable.").** When the Bake-Kurage carries out a Plan
+   written from a two-line card, you choose which line it is: the Plan line
+   (the default) or the now-line at printed size. Plan-only cards and Dusk
+   Plans are unchanged. A Plan carried out more than once (Nereid's
+   Ascension, Second Wave) takes the line chosen for it, and Plan payoffs
+   count either line. One screen a turn, shown only when a two-line Plan is
+   due: every such Plan at its Plan line, a click flips one, Confirm carries
+   them all out; a later Change of Plans or Spring Tide the same turn takes
+   the Plan line.
 3. **The jellyfish acts by the book.** A planned Attack strikes the front
    enemy (the leftmost one alive); a single-target Plan is aimed when
    written if the engine can carry a second selection (R250). A planned
