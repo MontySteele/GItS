@@ -23,6 +23,10 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
+- **Co-op notes, 2026-10-02** (`coop-notes-2026-10-02.md`, four picks):
+  (1) what Balance means for Klee now that the shipped sheets are gone;
+  (2) Varka's Knights; (3) Varka's Electro discard access; (4) the Neuvillette
+  rare.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
