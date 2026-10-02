@@ -1440,7 +1440,9 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                  "amount": _int(h.get("amount")),
                  "blocked": _int(h.get("blocked")),
                  "combat_id": _text(h.get("combat_id")),
-                 "killed": bool(h.get("killed"))}
+                 "killed": bool(h.get("killed")),
+                 # 2026-10-01: a hit that landed on a player.
+                 "on_player": bool(h.get("on_player"))}
                 for h in (row.get("hits") or [])
                 if isinstance(h, dict)]
         # 2026-09-25 evening: who a random summon inside the card rolled, in

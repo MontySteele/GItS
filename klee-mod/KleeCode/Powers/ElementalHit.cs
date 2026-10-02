@@ -256,6 +256,21 @@ internal static class ElementalHit
     /// <see cref="AuraPower"/>'s own lifecycle takes too. Sim twin:
     /// <c>reactions.resolve_hit</c> below its no-aura branch.
     /// </summary>
+    /// <summary>The reaction row's detail for a Vaporize or Melt an
+    /// element-only application set off: nothing to multiply.</summary>
+    public const string NoHitToAmplify =
+        "No hit came with it, so there was nothing to amplify.";
+
+    /// <summary>2026-10-01 (a Varka seat): Barbara's Hydro printed "Vaporize
+    /// ... off Varka" and the seat saw nothing happen. Vaporize and Melt
+    /// amplify a HIT, and an application carries none, so the row says so.
+    /// </summary>
+    private static void NoteNoHit(Element aura, Element element)
+    {
+        if (ReactionTable.Lookup(aura, element) is Reaction.Vaporize or Reaction.Melt)
+            ReactionLog.DetailNext(NoHitToAmplify);
+    }
+
     private static async Task ResolveOnAura(
         PlayerChoiceContext choiceContext, Creature target, AuraPower aura,
         Element element, Creature? applier)
@@ -269,6 +284,7 @@ internal static class ElementalHit
 
             case TriggerRules.HitOutcome.Spend:
                 aura.Spent = true;
+                NoteNoHit(aura.Element, element);
                 await ReactionEffects.Resolve(
                     choiceContext, ReactionTable.Lookup(aura.Element, element),
                     target, applier, null, aura.Element);
@@ -279,6 +295,7 @@ internal static class ElementalHit
                 var reaction = ReactionTable.Lookup(aura.Element, element);
                 var consumed = aura.Element;
                 await PowerCmd.Remove(aura);
+                NoteNoHit(consumed, element);
                 await ReactionEffects.Resolve(
                     choiceContext, reaction, target, applier, null, consumed);
                 break;

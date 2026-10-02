@@ -636,7 +636,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # every Stage tip reworded in [USER]'s words.
             # THE RULES PASS (2026-10-01): back first, then forward.
             "Pay Fanfare from your [gold]back performer[/gold] first, then ",
-            "forward. Offered only if your performers hold enough.\");",
+            "from the next one forward. Offered only if your performers hold ",
+            "enough.\");",
             # The rules pass (2026-10-01): only what you play summons, in the
             # paper's line; the damage order moved to the front's tip.
             "A performer's health. If no one is on stage, a card that gives ",

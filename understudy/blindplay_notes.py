@@ -1579,8 +1579,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # the glossary follows the tooltips word for word. The Spend row's old
     # page-only sentence ("not offered at all") is the tip's own clause now.
     # THE RULES PASS (2026-10-01): back first, then forward.
-    "Spend": ("Pay Fanfare from your back performer first, then forward. "
-              "Offered only if your performers hold enough."),
+    "Spend": ("Pay Fanfare from your back performer first, then from the "
+              "next one forward. Offered only if your performers hold "
+              "enough."),
     # The follow-up: the empty-stage summon rides the Fanfare row, which
     # every Fanfare-giving face prints.
     # The second text pass (2026-09-28).
@@ -3491,6 +3492,11 @@ RESOLUTION_ROW = "- **{card}**{clauses}"
 RESOLUTION_HIT_ROW = "  {n}. **{target}** -- {amount}"
 RESOLUTION_HIT_BLOCKED = " (and {blocked} onto Block)"
 RESOLUTION_HIT_ALL_BLOCKED = "  {n}. **{target}** -- all {blocked} onto Block"
+#: 2026-10-01 (a Varka seat): a hit on YOU while the card resolved -- an
+#: enemy's Thorns answering it, say. Listed under Diluc's row it read as
+#: "Overload hit Varka"; a reaction never hits you, and the line says so.
+RESOLUTION_HIT_ON_YOU = ("  {n}. **{target}** (you) -- {amount}, taken while "
+                         "it resolved; a reaction never hits you")
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
 #: 2026-09-26 (the Silent control seat): "Poison applied is never shown in
 #: 'what it did'." A power the card put on an enemy, or took off one.

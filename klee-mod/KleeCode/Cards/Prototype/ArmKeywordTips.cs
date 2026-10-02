@@ -899,8 +899,11 @@ public static class ArmKeywordTips
             // with rule 7's 2026-09-25 change: the Bow tip covers it.
             // THE RULES PASS (2026-10-01): the back pays first, then forward,
             // and the mode is refused only when the whole stage holds less.
+            // 2026-10-01 (a Furina seat): "then forward" read as a direction,
+            // not as the next performer paying; the clause names it.
             "Pay Fanfare from your [gold]back performer[/gold] first, then "
-          + "forward. Offered only if your performers hold enough.");
+          + "from the next one forward. Offered only if your performers hold "
+          + "enough.");
 
     /// <summary>
     /// THE SPEND WARNING (review/records/furina-pool-round-2026-10-01.md,

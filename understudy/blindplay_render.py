@@ -59,6 +59,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_HIT_ROW,
                                         RESOLUTION_HIT_BLOCKED,
                                         RESOLUTION_HIT_ALL_BLOCKED,
+                                        RESOLUTION_HIT_ON_YOU,
                                         RESOLUTION_NO_HITS,
                                         RESOLUTION_NO_HITS_STAGE,
                                         RESOLUTION_SUMMONED,
@@ -1443,6 +1444,13 @@ def _resolution_lines(rows: list[dict[str, Any]],
             # to no damage hook, so the ledger files the death with no number.
             if hit.get("killed"):
                 out.append(RESOLUTION_HIT_KILLED.format(n=n, target=target))
+                continue
+            if hit.get("on_player"):
+                line = RESOLUTION_HIT_ON_YOU.format(
+                    n=n, target=target, amount=hit["amount"])
+                if hit["blocked"] > 0:
+                    line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
+                out.append(line)
                 continue
             if hit["amount"] <= 0 and hit["blocked"] > 0:
                 out.append(RESOLUTION_HIT_ALL_BLOCKED.format(
@@ -3098,9 +3106,12 @@ def render(obs: dict[str, Any]) -> str:
             if you.get("potion_slots"):
                 out += [f"- {len(you['potions'])} of "
                         f"{you['potion_slots']} slots are full.", ""]
-            for p in you["potions"]:
-                out.append(f"- **{p['title']}** — {p['text']}" if p["text"]
-                           else f"- **{p['title']}**")
+            # 2026-10-01 (a Varka seat): `use potion 1` drank the first
+            # potion when the seat meant another; the belt printed no
+            # numbers. Each row carries the number `use potion <n>` takes.
+            for n, p in enumerate(you["potions"], start=1):
+                out.append(f"- {n}. **{p['title']}** — {p['text']}"
+                           if p["text"] else f"- {n}. **{p['title']}**")
         out += ["", "## Your hand", ""]
         if c.get("spark_note"):
             out += [c["spark_note"], ""]

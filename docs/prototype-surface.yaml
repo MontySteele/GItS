@@ -3539,7 +3539,7 @@
    # Created in combat, never in the deck; played, it goes to the discard
    # pile. `dusty_tome`: no Ancient card yet, so Darv's Tome hands him this.
    cost: 1, type: attack, rarity: basic, tags: [dusty_tome],
-   description: "Deal {Damage:diff()} damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.",
+   description: "Deal {Damage:diff()} damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit.",
    effects: [{op: damage, amount: 6, target: enemy},
              {op: varka, kind: ascension_hit, per: 3}],
    upgrade: {damage: 3, varka_per: 1}}
