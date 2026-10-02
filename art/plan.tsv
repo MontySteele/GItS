@@ -2562,3 +2562,217 @@ proto_fs_opening_number	ImageGen/images/cards/furina/proto_fs_opening_number.png
 proto_fs_star_turn	ImageGen/images/cards/furina/proto_fs_star_turn.png	500	380	cover	x0.21,y0.36@1.8	shortlist	1	png	4th Anniversary Wallpaper 3.jpg		splash	
 # proto_fs_the_last_act <- Furina sitting at night with the cat, face in frame
 proto_fs_the_last_act	ImageGen/images/cards/furina/proto_fs_the_last_act.png	500	380	cover	x0.53,y0.47@1.3	shortlist	1	png	Calamitous Tread Graphic 5.png		splash	
+# ---------- Card art pass 2 (2026-10-02): Kokomi and Varka cards missing art ----------
+# [USER]: "Need another art pass for cards missing art". The main session
+# picked one picture per card; every crop frames a face or the named
+# subject, never legs or feet, with burnt-in title text cropped out.
+# proto_kk_abyssal_salvage <- the glowing pool
+proto_kk_abyssal_salvage	ImageGen/images/cards/kokomi/proto_kk_abyssal_salvage.png	500	380	cover	x0.45,y0.50@1.25	shortlist	1	png	World Quest Heart of Watatsumi.png		splash	kokomi_pool
+# proto_kk_at_waters_edge <- the pier and the sea
+proto_kk_at_waters_edge	ImageGen/images/cards/kokomi/proto_kk_at_waters_edge.png	500	380	cover	x0.42	shortlist	1	png	Archon Quest Sword Fish Resistance.png		splash	kokomi_pool
+# proto_kk_brace_for_the_tide <- the sea at sunset
+proto_kk_brace_for_the_tide	ImageGen/images/cards/kokomi/proto_kk_brace_for_the_tide.png	500	380	cover	x0.45	shortlist	1	png	World Quest Fin of Watatsumi.png		splash	kokomi_pool
+# proto_kk_ceremonial_garment <- Kokomi in her kimono, face in frame
+proto_kk_ceremonial_garment	ImageGen/images/cards/kokomi/proto_kk_ceremonial_garment.png	500	380	cover	x0.57,y0.37@1.5	shortlist	1	png	Sangonomiya Kokomi Birthday 2023.png		splash	kokomi_pool
+# proto_kk_coral_crash <- Kokomi under the sea, face in frame
+proto_kk_coral_crash	ImageGen/images/cards/kokomi/proto_kk_coral_crash.png	500	380	cover	x0.60,y0.40@1.3	shortlist	1	png	Sangonomiya Kokomi Birthday 2026.png		splash	kokomi_pool
+# proto_kk_coral_tithe <- sticker: Kokomi with shopping bags
+proto_kk_coral_tithe	ImageGen/images/cards/kokomi/proto_kk_coral_tithe.png	500	380	cover	y0.52	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 9.png		sticker	kokomi_pool
+# proto_kk_drowning_pressure <- the glowing pool in the cave
+proto_kk_drowning_pressure	ImageGen/images/cards/kokomi/proto_kk_drowning_pressure.png	500	380	cover	x0.45,y0.45@1.3	shortlist	1	png	World Quest Orobashi's Legacy Part III.png		splash	kokomi_pool
+# proto_kk_evening_watch <- night on the rock, Kokomi framed
+proto_kk_evening_watch	ImageGen/images/cards/kokomi/proto_kk_evening_watch.png	500	380	cover	x0.55,y0.42@1.5	shortlist	1	png	Sangonomiya Kokomi TPRGT 2024 - Aether.png		splash	kokomi_pool
+# proto_kk_flotsam_surge <- the Hydro Hypostasis cubes
+proto_kk_flotsam_surge	ImageGen/images/cards/kokomi/proto_kk_flotsam_surge.png	500	380	cover	x0.45,y0.52@1.1	shortlist	1	png	Enemy Hydro Hypostasis.png		splash	kokomi_pool
+# proto_kk_grand_design <- sticker: Kokomi reading
+proto_kk_grand_design	ImageGen/images/cards/kokomi/proto_kk_grand_design.png	500	380	cover	y0.55	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 3.png		sticker	kokomi_pool
+# proto_kk_kelp_wall <- the glowing coral forest
+proto_kk_kelp_wall	ImageGen/images/cards/kokomi/proto_kk_kelp_wall.png	500	380	cover	center	shortlist	1	png	Watatsumi Island Concept Art.png		splash	kokomi_pool
+# proto_kk_kurage_canopy <- the Bake-Kurage, bell and trailing tentacles
+proto_kk_kurage_canopy	ImageGen/images/cards/kokomi/proto_kk_kurage_canopy.png	500	380	cover	y0.42	shortlist	1	png	Bake-Kurage Summon.png		splash	kokomi_pool
+# proto_kk_kurage_school <- chibi Kokomi by the shore, Kokomi framed
+proto_kk_kurage_school	ImageGen/images/cards/kokomi/proto_kk_kurage_school.png	500	380	cover	x0.62,y0.48@1.4	shortlist	1	png	Kokomi, Paimon, And Aether.png		splash	kokomi_pool
+# proto_kk_kurage_swarm <- the Bake-Kurage, close on the bell (second use of the summon card)
+proto_kk_kurage_swarm	ImageGen/images/cards/kokomi/proto_kk_kurage_swarm.png	500	380	cover	x0.50,y0.33@1.3	shortlist	1	png	Bake-Kurage Summon.png		splash	kokomi_pool
+# proto_kk_kurages_mercy <- sticker: Kokomi thumbs up
+proto_kk_kurages_mercy	ImageGen/images/cards/kokomi/proto_kk_kurages_mercy.png	500	380	cover	y0.52	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 2.png		sticker	kokomi_pool
+# proto_kk_lull <- sticker: Kokomi asleep
+proto_kk_lull	ImageGen/images/cards/kokomi/proto_kk_lull.png	500	380	cover	y0.50	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 8.png		sticker	kokomi_pool
+# proto_kk_masterstroke <- Kokomi with the bubble orbs, face in frame
+proto_kk_masterstroke	ImageGen/images/cards/kokomi/proto_kk_masterstroke.png	500	380	cover	x0.50,y0.33@2	shortlist	1	png	Archon Quest In the Name of the Resistance.png		splash	kokomi_pool
+# proto_kk_measured_breath <- sticker: Kokomi, eyes closed, sparkles
+proto_kk_measured_breath	ImageGen/images/cards/kokomi/proto_kk_measured_breath.png	500	380	cover	y0.48	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 10.png		sticker	kokomi_pool
+# proto_kk_patient_tide <- sticker: Kokomi thinking
+proto_kk_patient_tide	ImageGen/images/cards/kokomi/proto_kk_patient_tide.png	500	380	cover	y0.50	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 4.png		sticker	kokomi_pool
+# proto_kk_riptide_ruin <- the storm over Seirai
+proto_kk_riptide_ruin	ImageGen/images/cards/kokomi/proto_kk_riptide_ruin.png	500	380	cover	x0.45	shortlist	1	png	Seirai Island Concept Art.png		splash	kokomi_pool
+# proto_kk_salt_in_the_wound <- sticker: Kokomi, arms crossed
+proto_kk_salt_in_the_wound	ImageGen/images/cards/kokomi/proto_kk_salt_in_the_wound.png	500	380	cover	y0.52	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 7.png		sticker	kokomi_pool
+# proto_kk_sea_glass_harvest <- the glowing crystal on the altar
+proto_kk_sea_glass_harvest	ImageGen/images/cards/kokomi/proto_kk_sea_glass_harvest.png	500	380	cover	x0.50,y0.45@1.2	shortlist	1	png	Watatsumi Altar.png		splash	kokomi_pool
+# proto_kk_seas_reproach <- Kokomi and the fish, face in frame
+proto_kk_seas_reproach	ImageGen/images/cards/kokomi/proto_kk_seas_reproach.png	500	380	cover	x0.40,y0.45@1.4	shortlist	1	png	Sangonomiya Kokomi Birthday 2024.png		splash	kokomi_pool
+# proto_kk_shoal_call <- sprite: Kokomi waving
+proto_kk_shoal_call	ImageGen/images/cards/kokomi/proto_kk_shoal_call.png	500	380	cover	y0.45	shortlist	1	png	TPRGT Sprite Sangonomiya Kokomi Wave.png		sticker	kokomi_pool
+# proto_kk_shoal_of_spears <- Gorou mid-leap with his bow, face and bow
+proto_kk_shoal_of_spears	ImageGen/images/cards/kokomi/proto_kk_shoal_of_spears.png	500	380	cover	x0.50,y0.30@1.15	shortlist	1	png	Gorou Portrait.png		splash	kokomi_pool
+# proto_kk_spring_tide <- close on the altar crystal (second use of Watatsumi Altar)
+proto_kk_spring_tide	ImageGen/images/cards/kokomi/proto_kk_spring_tide.png	500	380	cover	x0.50,y0.35@1.8	shortlist	1	png	Watatsumi Altar.png		splash	kokomi_pool
+# proto_kk_suffocating_deep <- Tsurumi in the mist
+proto_kk_suffocating_deep	ImageGen/images/cards/kokomi/proto_kk_suffocating_deep.png	500	380	cover	x0.45	shortlist	1	png	Tsurumi Island Concept Art.png		splash	kokomi_pool
+# proto_kk_tactical_relay <- chibi Gorou on the boat deck, Gorou framed
+proto_kk_tactical_relay	ImageGen/images/cards/kokomi/proto_kk_tactical_relay.png	500	380	cover	x0.47,y0.45@1.3	shortlist	1	png	Gorou TPRGT 2023 - Aether.png		splash	kokomi_pool
+# proto_kk_the_long_game <- sprite: Kokomi reading
+proto_kk_the_long_game	ImageGen/images/cards/kokomi/proto_kk_the_long_game.png	500	380	cover	y0.45	shortlist	1	png	TPRGT Sprite Sangonomiya Kokomi Happy.png		sticker	kokomi_pool
+# proto_kk_tidal_rebuke <- the ruined statue in teal water
+proto_kk_tidal_rebuke	ImageGen/images/cards/kokomi/proto_kk_tidal_rebuke.png	500	380	cover	x0.48,y0.42@1.2	shortlist	1	png	World Quest Orobashi's Legacy Part IV.png		splash	kokomi_pool
+# proto_kk_tidal_resonance <- Kokomi, lower left of the 3.7 wallpaper
+proto_kk_tidal_resonance	ImageGen/images/cards/kokomi/proto_kk_tidal_resonance.png	500	380	cover	x0.33,y0.52@2.4	shortlist	1	png	Version 3.7 Wallpaper 1.png		splash	kokomi_pool
+# proto_kk_tidal_riposte <- Gorou, face in frame
+proto_kk_tidal_riposte	ImageGen/images/cards/kokomi/proto_kk_tidal_riposte.png	500	380	cover	x0.58,y0.38@1.4	shortlist	1	png	Gorou Birthday 2022.png		splash	kokomi_pool
+# proto_kk_tidal_screen <- the shell shrine
+proto_kk_tidal_screen	ImageGen/images/cards/kokomi/proto_kk_tidal_screen.png	500	380	cover	center	shortlist	1	png	Watatsumi Island Sangonomiya Shrine.png		splash	kokomi_pool
+# proto_kk_tidecleanse <- Kokomi and the butterfly, face in frame
+proto_kk_tidecleanse	ImageGen/images/cards/kokomi/proto_kk_tidecleanse.png	500	380	cover	x0.43,y0.36@1.3	shortlist	1	png	Sangonomiya Kokomi Birthday 2025.png		splash	kokomi_pool
+# proto_kk_turning_tide <- the harbour at sunset
+proto_kk_turning_tide	ImageGen/images/cards/kokomi/proto_kk_turning_tide.png	500	380	cover	x0.45	shortlist	1	png	Archon Quest Setting Sail.png		splash	kokomi_pool
+# proto_kk_undercurrent_snare <- the purple pillar in the water
+proto_kk_undercurrent_snare	ImageGen/images/cards/kokomi/proto_kk_undercurrent_snare.png	500	380	cover	x0.50,y0.45@1.2	shortlist	1	png	World Quest Orobashi's Legacy Part II.png		splash	kokomi_pool
+# proto_kk_undertide_lance <- close on the ruined lantern statue (second use of Orobashi's Legacy IV)
+proto_kk_undertide_lance	ImageGen/images/cards/kokomi/proto_kk_undertide_lance.png	500	380	cover	x0.50,y0.38@1.8	shortlist	1	png	World Quest Orobashi's Legacy Part IV.png		splash	kokomi_pool
+# proto_kk_watatsumi_resistance <- Kokomi and Gorou, both faces
+proto_kk_watatsumi_resistance	ImageGen/images/cards/kokomi/proto_kk_watatsumi_resistance.png	500	380	cover	x0.46	shortlist	1	png	Character Teaser - "Sangonomiya Kokomi- The Ocean's Will" Wallpaper 2.png		splash	kokomi_pool
+# proto_kk_watatsumis_grace <- the coral cliffs
+proto_kk_watatsumis_grace	ImageGen/images/cards/kokomi/proto_kk_watatsumis_grace.png	500	380	cover	x0.42	shortlist	1	png	Watatsumi Island.png		splash	kokomi_pool
+# proto_kk_weight_of_the_plan <- chibi Kokomi at her desk, Kokomi framed
+proto_kk_weight_of_the_plan	ImageGen/images/cards/kokomi/proto_kk_weight_of_the_plan.png	500	380	cover	x0.40,y0.42@1.3	shortlist	1	png	Sangonomiya Kokomi TPRGT 2023 - Aether.png		splash	kokomi_pool
+# proto_vk_absolute_zero <- Ganyu, face and ice
+proto_vk_absolute_zero	ImageGen/images/cards/varka/proto_vk_absolute_zero.png	500	380	cover	x0.45,y0.28@2.2	shortlist	1	png	Character Ganyu Full Wish.png		splash	
+# proto_vk_amber_sharpshooter <- Amber, face in frame
+proto_vk_amber_sharpshooter	ImageGen/images/cards/varka/proto_vk_amber_sharpshooter.png	500	380	cover	x0.42,y0.40@1.4	shortlist	1	png	Amber Birthday 2022.png		splash	
+# proto_vk_assembly_at_the_cathedral <- the cathedral nave
+proto_vk_assembly_at_the_cathedral	ImageGen/images/cards/varka/proto_vk_assembly_at_the_cathedral.png	500	380	cover	x0.45	shortlist	1	png	Favonius Cathedral Interior.png		splash	
+# proto_vk_azure_devour <- Dvalin, head and wings
+proto_vk_azure_devour	ImageGen/images/cards/varka/proto_vk_azure_devour.png	500	380	cover	y0.42	shortlist	1	png	Enemy Dvalin Full Artwork.png		splash	
+# proto_vk_barbara_melody_loop <- Barbara, face in frame
+proto_vk_barbara_melody_loop	ImageGen/images/cards/varka/proto_vk_barbara_melody_loop.png	500	380	cover	x0.52,y0.40@1.4	shortlist	1	png	Barbara Birthday 2022.png		splash	
+# proto_vk_barbara_wellspring_hymn <- Barbara in the cathedral, face in frame
+proto_vk_barbara_wellspring_hymn	ImageGen/images/cards/varka/proto_vk_barbara_wellspring_hymn.png	500	380	cover	x0.55,y0.36@1.4	shortlist	1	png	Barbara Birthday 2023.png		splash	
+# proto_vk_barbara_whisper_of_water <- Barbara by the sea, face in frame
+proto_vk_barbara_whisper_of_water	ImageGen/images/cards/varka/proto_vk_barbara_whisper_of_water.png	500	380	cover	x0.47,y0.38@1.4	shortlist	1	png	Barbara Birthday 2025.png		splash	
+# proto_vk_blazing_charge <- Bennett, face and fire
+proto_vk_blazing_charge	ImageGen/images/cards/varka/proto_vk_blazing_charge.png	500	380	cover	x0.57,y0.26@2.4	shortlist	1	png	Character Bennett Full Wish.png		splash	
+# proto_vk_cavalry_charge <- Varka at the centre of his knights
+proto_vk_cavalry_charge	ImageGen/images/cards/varka/proto_vk_cavalry_charge.png	500	380	cover	x0.50,y0.40@1.2	shortlist	1	png	Story Quest Fated Warrior.png		splash	
+# proto_vk_chain_lightning <- Beidou, face and lightning (Fischl Full Wish is taken: L1)
+proto_vk_chain_lightning	ImageGen/images/cards/varka/proto_vk_chain_lightning.png	500	380	cover	x0.53,y0.25@2	shortlist	1	png	Character Beidou Full Wish.png		splash	
+# proto_vk_change_of_guard <- Jean at her desk in the Knights' office, waist up
+proto_vk_change_of_guard	ImageGen/images/cards/varka/proto_vk_change_of_guard.png	500	380	cover	x0.36,y0.42@4.4	shortlist	1	png	Hangout Event An Ordinary Day for the Knights of Favonius.png		splash	
+# proto_vk_charge_of_the_knights <- Jean leading the Knights in the headquarters hall, waist up
+proto_vk_charge_of_the_knights	ImageGen/images/cards/varka/proto_vk_charge_of_the_knights.png	500	380	cover	x0.66,y0.29@3.4	shortlist	1	png	Archon Quest Knights of Favonius.png		splash	knights_of_favonius_aq
+# proto_vk_charged_lunge <- Cyno, face and lightning (Razor Wish is taken: L1)
+proto_vk_charged_lunge	ImageGen/images/cards/varka/proto_vk_charged_lunge.png	500	380	cover	x0.50,y0.30@1.8	shortlist	1	png	Character Cyno Full Wish.png		splash	
+# proto_vk_crosscurrent <- Sucrose, face in frame
+proto_vk_crosscurrent	ImageGen/images/cards/varka/proto_vk_crosscurrent.png	500	380	cover	x0.47,y0.25@2.4	shortlist	1	png	Character Sucrose Full Wish.png		splash	
+# proto_vk_crosswind <- Venti, face in frame
+proto_vk_crosswind	ImageGen/images/cards/varka/proto_vk_crosswind.png	500	380	cover	x0.45,y0.32@1.4	shortlist	1	png	Venti Birthday 2023.png		splash	
+# proto_vk_cycle_of_seasons <- Mondstadt from the hills
+proto_vk_cycle_of_seasons	ImageGen/images/cards/varka/proto_vk_cycle_of_seasons.png	500	380	cover	x0.45	shortlist	1	png	Mondstadt.png		splash	
+# proto_vk_dawn_patrol <- Dawn Winery
+proto_vk_dawn_patrol	ImageGen/images/cards/varka/proto_vk_dawn_patrol.png	500	380	cover	x0.42	shortlist	1	png	Dawn Winery.png		splash	
+# proto_vk_dawn_winds_march <- the Barbatos statue plaza at Windblume
+proto_vk_dawn_winds_march	ImageGen/images/cards/varka/proto_vk_dawn_winds_march.png	500	380	cover	x0.46	shortlist	1	png	Mondstadt Barbatos Statue Plaza - Windblume.png		splash	
+# proto_vk_diluc_searing_onslaught <- Diluc, face in frame
+proto_vk_diluc_searing_onslaught	ImageGen/images/cards/varka/proto_vk_diluc_searing_onslaught.png	500	380	cover	x0.38,y0.35@1.4	shortlist	1	png	Diluc Birthday 2023.png		splash	
+# proto_vk_downburst <- Dvalin attacking
+proto_vk_downburst	ImageGen/images/cards/varka/proto_vk_downburst.png	500	380	cover	x0.62,y0.40@1.2	shortlist	1	png	Version 1.0 Wallpaper 1.png		splash	
+# proto_vk_eula_icetide_vortex <- Eula, face in frame
+proto_vk_eula_icetide_vortex	ImageGen/images/cards/varka/proto_vk_eula_icetide_vortex.png	500	380	cover	x0.38,y0.35@1.4	shortlist	1	png	Eula Birthday 2022.png		splash	
+# proto_vk_eye_of_stormterror <- Dvalin in the seal
+proto_vk_eye_of_stormterror	ImageGen/images/cards/varka/proto_vk_eye_of_stormterror.png	500	380	cover	center	shortlist	1	png	Dvalin Alternate Fate.png		splash	
+# proto_vk_eye_wall <- the travellers falling past Dvalin
+proto_vk_eye_wall	ImageGen/images/cards/varka/proto_vk_eye_wall.png	500	380	cover	x0.40	shortlist	1	png	Character Aether Diluc Jean Paimon Venti Dvalin.png		splash	
+# proto_vk_gale_mantle <- Varka, face in frame
+proto_vk_gale_mantle	ImageGen/images/cards/varka/proto_vk_gale_mantle.png	500	380	cover	y0.22	shortlist	1	png	Varka Multi Wish.png		splash	
+# proto_vk_glacial_edict <- Rosaria, face in frame
+proto_vk_glacial_edict	ImageGen/images/cards/varka/proto_vk_glacial_edict.png	500	380	cover	x0.47,y0.25@2.4	shortlist	1	png	Character Rosaria Full Wish.png		splash	
+# proto_vk_grand_masters_verdict <- Varka, face in frame
+proto_vk_grand_masters_verdict	ImageGen/images/cards/varka/proto_vk_grand_masters_verdict.png	500	380	cover	x0.38,y0.36@1.4	shortlist	1	png	White Day 2026 - Varka.png		splash	
+# proto_vk_gust_ward <- Jean, face in frame
+proto_vk_gust_ward	ImageGen/images/cards/varka/proto_vk_gust_ward.png	500	380	cover	x0.42,y0.38@1.5	shortlist	1	png	Jean Birthday 2024.png		splash	
+# proto_vk_jean_dandelion_breeze <- Jean, face in frame
+proto_vk_jean_dandelion_breeze	ImageGen/images/cards/varka/proto_vk_jean_dandelion_breeze.png	500	380	cover	x0.50,y0.36@1.6	shortlist	1	png	Jean Birthday 2023.png		splash	
+# proto_vk_kaeya_glacial_waltz <- Kaeya, face in frame
+proto_vk_kaeya_glacial_waltz	ImageGen/images/cards/varka/proto_vk_kaeya_glacial_waltz.png	500	380	cover	x0.55,y0.38@1.4	shortlist	1	png	Kaeya Birthday 2022.png		splash	
+# proto_vk_knightly_guard <- the Knights of Favonius headquarters
+proto_vk_knightly_guard	ImageGen/images/cards/varka/proto_vk_knightly_guard.png	500	380	cover	x0.45	shortlist	1	png	Knights of Favonius Headquarters.png		splash	
+# proto_vk_knightly_strike <- Jean, face in frame, card text cropped out (Jean Character Card is taken: L1)
+proto_vk_knightly_strike	ImageGen/images/cards/varka/proto_vk_knightly_strike.png	500	380	cover	x0.37,y0.32@1.6	shortlist	1	png	Jean Introduction Card.png		splash	
+# proto_vk_lisa_lightning_rose <- Lisa, face in frame
+proto_vk_lisa_lightning_rose	ImageGen/images/cards/varka/proto_vk_lisa_lightning_rose.png	500	380	cover	x0.40,y0.38@1.5	shortlist	1	png	Lisa Birthday 2022.png		splash	
+# proto_vk_lisa_pulsating_witch <- Lisa, face in frame
+proto_vk_lisa_pulsating_witch	ImageGen/images/cards/varka/proto_vk_lisa_pulsating_witch.png	500	380	cover	x0.36,y0.36@1.5	shortlist	1	png	Lisa Birthday 2021.png		splash	
+# proto_vk_mika_starfrost_swirl <- Mika, face in frame
+proto_vk_mika_starfrost_swirl	ImageGen/images/cards/varka/proto_vk_mika_starfrost_swirl.png	500	380	cover	x0.47,y0.33@1.6	shortlist	1	png	Mika Birthday 2026.png		splash	
+# proto_vk_noelle_steadfast_maid <- Noelle, face in frame
+proto_vk_noelle_steadfast_maid	ImageGen/images/cards/varka/proto_vk_noelle_steadfast_maid.png	500	380	cover	x0.58,y0.42@1.4	shortlist	1	png	Noelle Birthday 2022.png		splash	
+# proto_vk_northwind_avatar <- Varka at the right of the banner, title text cropped out
+proto_vk_northwind_avatar	ImageGen/images/cards/varka/proto_vk_northwind_avatar.png	500	380	cover	x0.74,y0.40@1.4	shortlist	1	png	The Northerly Wind's Song of Triumph.png		splash	
+# proto_vk_oath_of_the_knights <- the Knights' emblem
+proto_vk_oath_of_the_knights	ImageGen/images/cards/varka/proto_vk_oath_of_the_knights.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Song of the Welkin Moon Knights of Favonius.png		item	
+# proto_vk_oath_unto_death <- Varka at the right, text cropped out
+proto_vk_oath_unto_death	ImageGen/images/cards/varka/proto_vk_oath_unto_death.png	500	380	cover	x0.82,y0.30@2.2	shortlist	1	png	Facts About Varka I 0.png		splash	
+# proto_vk_oathbound_aegis <- the reinforcement shield
+proto_vk_oathbound_aegis	ImageGen/images/cards/varka/proto_vk_oathbound_aegis.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Icon Fated Warrior Reinforcements.png		item	fated_warrior_reinforcements
+# proto_vk_oathsworn_strike <- Varka mid-swing, banner text cropped out (the Splashscreen is L9-banned)
+proto_vk_oathsworn_strike	ImageGen/images/cards/varka/proto_vk_oathsworn_strike.png	500	380	cover	x0.62,y0.30@1.7	shortlist	1	png	Facts About Varka II 0.png		splash	
+# proto_vk_pathfinders_mark <- the sketch of Jean and Dvalin
+proto_vk_pathfinders_mark	ImageGen/images/cards/varka/proto_vk_pathfinders_mark.png	500	380	cover	center	shortlist	1	png	Mondstadt Tourism Revitalization Project At Peace.png		splash	
+# proto_vk_rally_to_the_banner <- the reinforcement shield, smaller (second use)
+proto_vk_rally_to_the_banner	ImageGen/images/cards/varka/proto_vk_rally_to_the_banner.png	500	380	cover_autocrop	contain@0.25	shortlist	1	png	Icon Fated Warrior Reinforcements.png		item	fated_warrior_reinforcements
+# proto_vk_razor_claw_and_thunder <- Razor, face in frame, RAZOR text cropped out
+proto_vk_razor_claw_and_thunder	ImageGen/images/cards/varka/proto_vk_razor_claw_and_thunder.png	500	380	cover	x0.70,y0.32@1.6	shortlist	1	png	Razor Birthday 2020.png		splash	
+# proto_vk_retaliating_tide <- Mona, face in frame
+proto_vk_retaliating_tide	ImageGen/images/cards/varka/proto_vk_retaliating_tide.png	500	380	cover	x0.48,y0.30@2.6	shortlist	1	png	Character Mona Full Wish.png		splash	
+# proto_vk_rising_gale <- chibi Venti
+proto_vk_rising_gale	ImageGen/images/cards/varka/proto_vk_rising_gale.png	500	380	cover	x0.45,y0.50@1.2	shortlist	1	png	Venti Birthday 2024 - Shorts.png		splash	
+# proto_vk_shifting_gale <- Venti with the apple, face in frame
+proto_vk_shifting_gale	ImageGen/images/cards/varka/proto_vk_shifting_gale.png	500	380	cover	x0.33,y0.42@1.2	shortlist	1	png	Venti Birthday 2021.png		splash	
+# proto_vk_short_circuit <- Razor, face in frame
+proto_vk_short_circuit	ImageGen/images/cards/varka/proto_vk_short_circuit.png	500	380	cover	x0.45,y0.32@1.6	shortlist	1	png	Genshin-Impact-Razor.png		splash	
+# proto_vk_static_field <- Keqing, face in frame
+proto_vk_static_field	ImageGen/images/cards/varka/proto_vk_static_field.png	500	380	cover	x0.56,y0.28@2.4	shortlist	1	png	Character Keqing Full Wish.png		splash	
+# proto_vk_storm_surge <- Dvalin over the forest
+proto_vk_storm_surge	ImageGen/images/cards/varka/proto_vk_storm_surge.png	500	380	cover	x0.55	shortlist	1	png	Dvalin In-Game.png		splash	
+# proto_vk_sworn_brotherhood <- Kaeya in the headquarters hall, waist up (second use of the still)
+proto_vk_sworn_brotherhood	ImageGen/images/cards/varka/proto_vk_sworn_brotherhood.png	500	380	cover	x0.21,y0.29@3.4	shortlist	1	png	Archon Quest Knights of Favonius.png		splash	knights_of_favonius_aq
+# proto_vk_tailwind_guard <- Windwail Highland
+proto_vk_tailwind_guard	ImageGen/images/cards/varka/proto_vk_tailwind_guard.png	500	380	cover	x0.42	shortlist	1	png	Windwail Highland Version 1.0.png		splash	
+# proto_vk_tempest_of_the_four_winds <- the heroes falling past Dvalin, Korean title cropped out (the Splashscreen is L9-banned)
+proto_vk_tempest_of_the_four_winds	ImageGen/images/cards/varka/proto_vk_tempest_of_the_four_winds.png	500	380	cover	x0.60,y0.27@1.9	shortlist	1	png	Character Lumine Diluc Jean Paimon Venti Dvalin.png		splash	
+# proto_vk_the_order_answers <- Eula, face in frame, text cropped out
+proto_vk_the_order_answers	ImageGen/images/cards/varka/proto_vk_the_order_answers.png	500	380	cover	x0.42,y0.30@1.6	shortlist	1	png	Eula Introduction Card.png		splash	
+# proto_vk_thundering_verdict <- Razor, face in frame
+proto_vk_thundering_verdict	ImageGen/images/cards/varka/proto_vk_thundering_verdict.png	500	380	cover	x0.45,y0.38@1.4	shortlist	1	png	Razor Birthday 2025.png		splash	
+# proto_vk_tidal_bulwark <- Freminet, face and water (Furina Full Wish is taken: L1)
+proto_vk_tidal_bulwark	ImageGen/images/cards/varka/proto_vk_tidal_bulwark.png	500	380	cover	x0.60,y0.38@2.4	shortlist	1	png	Character Freminet Full Wish.png		splash	
+# proto_vk_twin_gales <- chibi Aether and Venti picnic
+proto_vk_twin_gales	ImageGen/images/cards/varka/proto_vk_twin_gales.png	500	380	cover	y0.42	shortlist	1	png	Venti Birthday 2021 - Shorts.png		splash	
+# proto_vk_unwavering_banner <- the Mondstadt emblem
+proto_vk_unwavering_banner	ImageGen/images/cards/varka/proto_vk_unwavering_banner.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Mondstadt Emblem Day.png		item	
+# proto_vk_violet_storm <- Lisa, face and lightning (Lisa Wish is taken: L1)
+proto_vk_violet_storm	ImageGen/images/cards/varka/proto_vk_violet_storm.png	500	380	cover	x0.50,y0.25@3	shortlist	1	png	Lisa Wish Old CBT.png		splash	
+# proto_vk_vow_of_the_blade <- Varka's icon portrait, face
+proto_vk_vow_of_the_blade	ImageGen/images/cards/varka/proto_vk_vow_of_the_blade.png	500	380	cover	y0.40	shortlist	1	png	Varka Icon.png		sticker	
+# proto_vk_wall_of_gales <- Stormterror's arena
+proto_vk_wall_of_gales	ImageGen/images/cards/varka/proto_vk_wall_of_gales.png	500	380	cover	center	shortlist	1	png	Domain Confront Stormterror.png		splash	
+# proto_vk_weathervane <- Mondstadt City from above
+proto_vk_weathervane	ImageGen/images/cards/varka/proto_vk_weathervane.png	500	380	cover	x0.42	shortlist	1	png	Mondstadt City.png		splash	
+# proto_vk_west_wind_shield <- Jean, face in frame
+proto_vk_west_wind_shield	ImageGen/images/cards/varka/proto_vk_west_wind_shield.png	500	380	cover	x0.55,y0.38@1.6	shortlist	1	png	Jean Profile.png		splash	
+# proto_vk_wildfire_oath <- Diluc's flames
+proto_vk_wildfire_oath	ImageGen/images/cards/varka/proto_vk_wildfire_oath.png	500	380	cover_autocrop	contain@0.06	shortlist	1	png	Item Diluc Flames.png		item	
+# proto_vk_windborne_resolve <- Venti, face in frame
+proto_vk_windborne_resolve	ImageGen/images/cards/varka/proto_vk_windborne_resolve.png	500	380	cover	x0.47,y0.38@1.4	shortlist	1	png	Venti Birthday 2026.png		splash	
+# proto_vk_wolfpack <- chibi Razor
+proto_vk_wolfpack	ImageGen/images/cards/varka/proto_vk_wolfpack.png	500	380	cover	x0.38,y0.55@1.3	shortlist	1	png	Razor Birthday 2024 - Shorts.png		splash	
