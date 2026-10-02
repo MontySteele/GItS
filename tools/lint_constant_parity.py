@@ -530,6 +530,11 @@ UNMIRRORED: dict[str, str] = {
         "the card is found by matching the flight's own start and end; the "
         "walk is bounded because it runs on a frame the engine is already "
         "struggling with. The sim has no scene tree.",
+    "RewardRowProbe.SettleSeconds":
+        "A UI TIMER, not balance: how long the card reward row probe waits "
+        "before measuring the row, chosen to land after the base screen's "
+        "0.5 s placement tween. It only decides when a godot.log line is "
+        "written. The sim has no screen.",
     # THE FURINA STAGE ARM'S ELEVEN ARE NOT HERE, and their absence is the
     # `EB-723` / `EB-725` reconciliation. This branch declared them UNMIRRORED
     # on the reading that the arm was C#-first; the sim leg had in fact
