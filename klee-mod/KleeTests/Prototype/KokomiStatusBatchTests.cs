@@ -203,7 +203,7 @@ public class KokomiStatusBatchTests : IDisposable
                      (clause.Kind, clause.Amount));
         Assert.Equal(3, Assert.Single(
             Upgraded<ProtoKkTidecleanse>().PlanClauses).Amount);
-        Assert.Contains(Seq("ProtoKkTidecleanse", "OnPlay"),
+        Assert.Contains(Seq("ProtoKkTidecleanse", "PlayNowLine"),
                         c => c.Contains("WeakPower"));
         var body = Seq("KokomiStatusBatch", "ExhaustStatuses");
         Assert.Contains(body, c => c.Contains("CardSelectCmd.FromHand"));

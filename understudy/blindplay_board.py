@@ -1543,6 +1543,48 @@ def name_answer_rows(answers: list[dict[str, Any]],
                                                   row["target"]))
 
 
+#: A PLAN STAYS OPEN (2026-10-01, ruled;
+#: review/active/kokomi-delay-pays-2026-10-01.md sec.3). The turn-start line
+#: chooser's prompt, `KokomiPlan.ChooserPromptText` verbatim: the page knows
+#: the screen by its opening words.
+PLAN_CHOOSER_PROMPT = ("Your Plans are due. Click one to use its other line "
+                       "instead.")
+_PLAN_CHOOSER_HEAD = "Your Plans are due."
+
+#: Where a two-line face turns from its now-line to its Plan line.
+_OR_PLAN = re.compile(r"\s*Or (?:dusk )?plan:\s*")
+
+
+def is_plan_chooser(prompt: Any) -> bool:
+    """Is this card grid Kokomi's turn-start line chooser?"""
+    return _text(prompt).startswith(_PLAN_CHOOSER_HEAD)
+
+
+def split_plan_lines(text: Any) -> tuple[str, str]:
+    """A two-line face's (now-line, Plan line), split where the face prints
+    "Or plan:" ("Or dusk plan:"). A face with no such words is all now-line."""
+    parts = _OR_PLAN.split(_text(text), maxsplit=1)
+    if len(parts) == 2:
+        return parts[0].strip(), parts[1].strip()
+    return _text(text).strip(), ""
+
+
+def plan_chooser_rows(offers: list[dict[str, Any]],
+                      wire: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The chooser's rows: each due Plan's printed title, both lines, and the
+    line it will be carried out as -- "now" where the grid holds it picked
+    (flipped), "plan" otherwise. `offers` are the page's numbered faces and
+    `wire` the raw grid entries in the same order."""
+    rows = []
+    for face, raw in zip(offers, wire):
+        now, plan = split_plan_lines(face.get("text"))
+        rows.append({"title": face.get("title") or _text(raw.get("name")),
+                     "now": now, "plan": plan,
+                     "line": "now" if raw.get("selected") is True
+                     else "plan"})
+    return rows
+
+
 def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
     """The pending Plans as the observed board sees them (`EB-216`).
 
@@ -1596,10 +1638,16 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
     # than the fields sends neither, `_int` answers 0 and `_text` answers "",
     # and the page's warning is gated on `aim == "front"` -- so such a feed
     # prints exactly the queue it always printed.
+    # A PLAN STAYS OPEN (2026-10-01): a two-line Plan's two lines, so the
+    # choice is readable while it waits. Absent on an older bridge, and the
+    # page then prints the row it always did.
     queue = [{"name": _text(row.get("name")),
               "clauses": _int(row.get("clauses")),
               "damage": _int(row.get("damage")),
-              "aim": _text(row.get("aim"))}
+              "aim": _text(row.get("aim")),
+              "two_line": row.get("two_line") is True,
+              "now_line": _text(row.get("now_line")),
+              "plan_line": _text(row.get("plan_line"))}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

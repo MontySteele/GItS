@@ -998,8 +998,16 @@ def schedule(state: CombatState, card: Card,
     if state.kk_next_plan_extra is not None:
         extra = int(state.kk_next_plan_extra)
         state.kk_next_plan_extra = None
+    # A PLAN STAYS OPEN (2026-10-01): the card whose now-line this Plan may
+    # be carried out as. The LINE's owner (`owner`: Moon's Reflection's found
+    # card, or the writing card itself), and only when this is that card's
+    # own Plan line -- Moon's Reflection's replay shape writes a clause of its
+    # own and is not two-line. A Dusk Plan is left as it is (paper sec.2).
+    own_line = clauses is None or enchanted_by is not None
+    now_card = (owner if own_line and not dusk and owner.effects
+                and owner.plan else None)
     entry = PlanEntry(card_id=card.id, clauses=body, card=held, label=label,
-                      dusk=dusk, paid=paid, extra=extra)
+                      dusk=dusk, paid=paid, extra=extra, now_card=now_card)
     state.kk_plan_queue.append(entry)
     # POOL COMPLETION (2026-10-01), SHOAL OF SPEARS: "for each Plan you wrote
     # this turn". Every write, Moon's Reflection's included; cleared by
@@ -1134,6 +1142,7 @@ def resolve_all(state: CombatState) -> None:
     state.kk_plans_this_morning = len(due) + (
         1 if due and carry_out_times(state) > 1 else 0)
     state.emit("plan_resolve_all", plans=len(due))
+    choose_lines(state, due)
     _drain(state, due, why="turn_start")
     # `EB-643`. WHAT THE CAP HELD BACK GOES BACK ON THE FRONT OF THE QUEUE, in
     # order, AFTER the drain -- not before it, because a Plan carried out this
@@ -1362,6 +1371,7 @@ def resolve_front(state: CombatState) -> None:
         state.emit("plan_front_empty")
         return
     entry = state.kk_plan_queue.pop(0)
+    choose_lines(state, [entry])
     # THE EXPANSION: an All Streams gift rides the entry, so a hurried Plan
     # is carried out its full number of times too.
     for _ in range(1 + int(entry.extra)):
@@ -1395,6 +1405,7 @@ def resolve_all_now(state: CombatState) -> None:
     due = list(state.kk_plan_queue)
     state.kk_plan_queue.clear()
     state.emit("plan_resolve_all_now", plans=len(due))
+    choose_lines(state, due)
     _drain(state, due, why="spring_tide", mid_turn=True)
 
 
@@ -1435,6 +1446,9 @@ def resolve_dusk(state: CombatState) -> None:
     due = [e for e in state.kk_plan_queue if e.dusk]
     if not due:
         return
+    # A PLAN STAYS OPEN leaves Dusk Plans as they are: no choice, Plan line.
+    for e in due:
+        e.line = "plan"
     # THE DUSK ENTRIES LEAVE THE QUEUE AND THE OTHERS STAY, in order. Taken
     # before the first clause runs for `resolve_all`'s reason: a Dusk Plan
     # whose body writes another Plan must not carry its own child out on the
@@ -1456,6 +1470,170 @@ def carry_out_times(state: CombatState) -> int:
     ORDER the decision the card is about. `KokomiPlan.CarryOutTimes` is the
     twin, narrowed at its own caller in the same way."""
     return 2 if state.player.powers.get(NEREIDS_ASCENSION, 0) else 1
+
+
+# ---------------------------------------------------------------------------
+# A PLAN STAYS OPEN (2026-10-01, ruled)
+# ---------------------------------------------------------------------------
+#
+# review/active/kokomi-delay-pays-2026-10-01.md sec.2: "When the Bake-Kurage
+# carries out a Plan, you choose which line it is: its Plan line, or its now
+# line." Two-line cards only (a now-line and a Plan line); Plan-only cards and
+# Dusk Plans are unchanged. The now-line is printed size. Every carry-out of
+# an entry (Nereid's Ascension, Second Wave, All Streams) takes the line chosen
+# for it, which is the paper's "the default is the line chosen for the first".
+#
+# ONE CHOOSER A TURN (sec.3, the caller's "at most one chooser screen per
+# turn"). The mod opens one screen when a two-line Plan is due; the latch below
+# is that screen's twin. A later door the same turn (Change of Plans, Spring
+# Tide) after the screen was shown carries out the Plan line. Twin:
+# `KokomiPlan.ChooseLines`.
+
+LINE_CHOOSER_KEY = "kk_plan_line_chooser"
+
+#: The Plan clause ops that deal damage, for the policy's "would the Plan line
+#: hit nothing" read.
+_PLAN_DAMAGE_OPS = frozenset(("damage", DAMAGE_IF_ALONE, "damage_if_unhurt",
+                              "damage_quarter_max_hp",
+                              "damage_per_companion_last_turn"))
+
+
+def two_line(entry: PlanEntry) -> bool:
+    """Does this Plan offer the choice? A two-line card's own line, not Dusk."""
+    return entry.now_card is not None and not entry.dusk
+
+
+def choose_lines(state: CombatState, due: Sequence[PlanEntry]) -> None:
+    """Set each due entry's `line` before it is carried out.
+
+    Every entry starts at the Plan line. When at least one is two-line and no
+    chooser has been shown this turn, the turn's one chooser is claimed and
+    `line_policy` answers for each two-line entry -- the player's screen in
+    the mod (`KokomiPlan.ChooseLines`)."""
+    for entry in due:
+        entry.line = "plan"
+    open_ = [e for e in due if two_line(e)]
+    if not open_ or not claim_once_per_turn(state, LINE_CHOOSER_KEY):
+        return
+    for entry in open_:
+        entry.line = line_policy(state, entry)
+        state.emit("plan_line_chosen", card=entry.card_id, line=entry.line)
+
+
+def incoming_damage(state: CombatState) -> int:
+    """The enemies' total intended damage to her this turn, every hit counted,
+    through the estimate Tide Wall reads (`potions._intent_damage`)."""
+    from tier0.engine import potions               # late import: cycle
+    return sum(int(potions._intent_damage(state, e))
+               for e in state.living_enemies if _intends_to_attack(e))
+
+
+def _plan_line_whiffs(state: CombatState, entry: PlanEntry) -> bool:
+    """Would every damaging clause of the Plan line land on nothing, or only
+    on Intangible bodies? False for a Plan line that deals no damage."""
+    hits = [c for c in entry.clauses if c.get("op") in _PLAN_DAMAGE_OPS]
+    if not hits:
+        return False
+    for clause in hits:
+        bodies = _aimed(state, clause, entry)
+        if any(not b.powers.get("intangible", 0) for b in bodies):
+            return False
+    return True
+
+
+def line_policy(state: CombatState, entry: PlanEntry) -> str:
+    """THE PILOT'S CHOICE OF LINE -- an INSTRUMENT SURFACE in `_worst_card`'s
+    sense (R215 B): the mod asks the player, this engine has none, and nothing
+    measured through this function is a statement about the design.
+
+    The heuristic, kept crude and legible:
+
+      * "now" when the now-line gains Block and the enemies' total intended
+        damage this turn exceeds the Block she holds -- the paper's "defence
+        stops being a guess";
+      * "now" when every damaging clause of the Plan line would land on
+        nothing or on an Intangible body -- "the Intangible turn stops voiding
+        Plans";
+      * "plan" otherwise, the default the screen pre-selects.
+    """
+    card = entry.now_card
+    if card is None:
+        return "plan"
+    # HER Block: Joint Orders' now-line guards another player, not her.
+    if any(fx.get("op") == "block" and fx.get("target") != "ally"
+           for fx in card.effects) \
+            and incoming_damage(state) > int(state.player.block):
+        return "now"
+    if _plan_line_whiffs(state, entry):
+        return "now"
+    return "plan"
+
+
+#: The per-card context a now-line carry-out opens and then restores, on top
+#: of `combat._FREE_PLAY_CONTEXT`: the bound aim, and the replay latch that
+#: keeps a nested read from aiming at the pet.
+_NOW_LINE_CONTEXT = ("card_aim", "card_aim_bound", "kurage_autoplaying")
+
+
+def carry_out_now_line(state: CombatState, entry: PlanEntry) -> None:
+    """THE NOW-LINE, CARRIED OUT BY THE BAKE-KURAGE: the card's printed
+    effects, resolved as her own face-up line would resolve them (her Strength
+    and Dexterity at carry-out, the printed numbers), without the card moving
+    and without counting as a card played. `KokomiPlan.CarryOutNowLine`'s
+    twin, which runs the generated card's `PlayNowLine`.
+
+    THE AIM IS THE PLAN'S RETARGETING RULE: the front enemy, or Converging
+    Tide's override while that body lives (`_aimed`). No living enemy and the
+    line is skipped -- the fight is over.
+
+    THE OUTER CONTEXT IS SAVED AND RESTORED (`combat.resolve_free_play`'s
+    contract), because Change of Plans and Spring Tide carry Plans out inside
+    a card's own play.
+    """
+    from tier0.engine import combat, effects        # late import: cycle
+    _ABSENT = object()
+
+    card = entry.now_card
+    if card is None:
+        return
+    aim = _aimed(state, {"target": "front_enemy"}, entry)
+    if not aim:
+        state.emit("plan_now_line_skipped", card=card.id)
+        return
+    names = tuple(combat._FREE_PLAY_CONTEXT) + _NOW_LINE_CONTEXT
+    saved = [(n, getattr(state, n, _ABSENT)) for n in names]
+    try:
+        state.card_aim = aim[0]
+        state.card_aim_bound = True
+        state.kurage_autoplaying = True
+        state.current_card_companion = False
+        state.reactions_this_card = 0
+        state.kills_this_card = 0
+        state.fatal_kills_this_card = 0
+        state.exhausted_this_card = 0
+        state.block_gains_this_card = 0
+        state.block_gained_this_card = 0
+        state.discards_this_card = 0
+        state.repeat_requested = 0
+        state.current_attack_bonus = 0
+        state.mc_attack_element_override = None
+        state.sparks_at_play = state.player.sparks
+        state.current_card_cost = 0
+        state.target_had_offelement_aura = bool(
+            aim[0].aura and aim[0].aura != state.player.element)
+        state.target_had_aura = bool(aim[0].aura)
+        state.emit("plan_now_line", card=card.id,
+                   target=getattr(aim[0], "name", None))
+        try:
+            effects._resolve_effects(state, card.effects, card)
+        except effects.ChargeUnpaid:
+            pass
+    finally:
+        for name, value in saved:
+            if value is _ABSENT:
+                state.__dict__.pop(name, None)
+            else:
+                setattr(state, name, value)
 
 
 def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
@@ -1494,12 +1672,20 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
                    card=scout_source, on=entry.card_id)
         state.draw(int(scout_draw))
     wrote = [False, False, 0]
-    for clause in entry.clauses:
-        if state.over or not state.player.alive:
-            break
-        _resolve_clause(state, entry, clause, double_damage=double_damage,
-                        drain_plans=drain_plans, wrote=wrote,
-                        drain_entries=drain_entries)
+    if entry.line == "now" and entry.now_card is not None:
+        # A PLAN STAYS OPEN (2026-10-01): the player chose the now-line. It
+        # replaces the Plan line whole, so it writes no rider and Opening
+        # Gambit's double does not reach it (printed size). It is still a
+        # carry-out: the plan bus below pays either line.
+        carry_out_now_line(state, entry)
+    else:
+        for clause in entry.clauses:
+            if state.over or not state.player.alive:
+                break
+            _resolve_clause(state, entry, clause,
+                            double_damage=double_damage,
+                            drain_plans=drain_plans, wrote=wrote,
+                            drain_entries=drain_entries)
     _note_plan_resolved(state, entry)
     return wrote[0], wrote[1], int(wrote[2])
 

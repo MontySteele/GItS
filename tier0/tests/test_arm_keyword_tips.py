@@ -613,8 +613,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # THE STATUS BATCH (2026-10-01, sec.3 pick 2): the face says
             # "Or plan:" and the tip opens "Instead of the line above".
             "Instead of the line above, play the card on the ",
-            "[gold]Bake-Kurage[/gold]: this happens at the start of your next ",
-            "turn. Plans go in the order made.\");",
+            "[gold]Bake-Kurage[/gold]: next turn, you choose which line ",
+            "happens. Plans go in the order made.\");",
             "heal N HP, but never above the HP you had ",
             # Furina, THE STAGE (`EB-723`; the brief's sec.12 names the
             # seven words and sec.3 states each rule). The reframe's four --
@@ -1150,7 +1150,7 @@ def test_a_word_excused_by_a_card_tip_really_carries_that_tip(word):
 # text change"): the face prints "Or plan:" and the tip opens "Instead of the
 # line above"; the second sentence was shortened to stay under the ceiling.
 PLAN_TIP = ("Instead of the line above, play the card on the Bake-Kurage: "
-            "this happens at the start of your next turn. Plans go in the "
+            "next turn, you choose which line happens. Plans go in the "
             "order made.")
 
 

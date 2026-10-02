@@ -5493,6 +5493,67 @@ status-package block. Pins: `tier0/tests/test_klee_status_package.py`,
 - *Art.* The eight new rows render the placeholder; the three Powers borrow
   Party Poppers', Spark Knight's and Playdate's badges (`BACKLOG.md`).
 
+## A Plan stays open (Kokomi), 2026-10-01
+
+Paper `review/active/kokomi-delay-pays-2026-10-01.md`, ruled. [USER]:
+"Interesting idea! Yes, I think this makes sense. We'd want to make sure that
+the UX is reasonably snappy so players don't have to spend forever on their
+turns, but it sounds doable." When the Bake-Kurage carries out a Plan written
+from a two-line card, the player picks its Plan line (the default) or its
+now-line at printed size. No card and no number changes.
+
+**Readings taken.**
+
+1. *Which Plans.* A two-line card's own line, Moon's Reflection's found card
+   included (`KokomiPlan.Entry.TwoLine`: not Dusk, `Source` is an
+   `INowLineCard`; sim `kokomi_plan.two_line`). Thirty rows on the 78.
+2. *One screen a turn.* The chooser claims a once-a-turn latch
+   (`kk_plan_line_chooser`). The morning asks first; a Change of Plans or
+   Spring Tide later the same turn, after the screen was shown, carries out
+   the Plan line. If the morning had no two-line Plan, the first such door
+   that turn shows the screen.
+3. *Copies.* The choice is per entry, so every carry-out of it (Nereid's
+   Ascension, Second Wave, All Streams) takes it -- the paper's "the default
+   is the line chosen for the first", with one screen.
+4. *The now-line is the card's own, at printed size.* Generated two-line rows
+   now put their now-line in `PlayNowLine`, which `OnPlay` calls face-up and
+   `KokomiPlan.CarryOutNowLine` calls at carry-out on an auto-play
+   `CardPlay` (no cost, no card moved, not a card played). Her Strength and
+   Dexterity at carry-out apply, as on a face-up play; Opening Gambit's
+   double does not reach it, and it writes no rider. Sim:
+   `carry_out_now_line` resolves the card's `effects:` under a saved and
+   restored per-card context.
+5. *The aim.* Divine Strategy's: the front enemy, or Converging Tide's
+   override while that body stands (the Plan retargeting rule); Joint
+   Orders' captured ally, or nothing if that player is gone.
+6. *Payoffs.* `ResolveEntry` rings the Casket, Sango Isshin, Feint, Grand
+   Design, Kurage Canopy and the plan bus after either line.
+7. *The screen.* The base game's simple card grid (`CardSelectCmd.FromSimpleGrid`,
+   min 0, max N, manual confirm), the precedent Varka's Weathervane set for
+   a turn-start chooser. It shows the Plans' own card instances, both lines on
+   each face; a picked card is a flipped Plan, a second click unpicks it, and
+   Confirm with nothing picked takes every Plan line. A card instance that
+   wrote two Plans is shown once and both take its line. The grid has no
+   live forecast panel: the highlight is the only thing a flip changes on
+   screen.
+8. *Text.* The Plan tip's middle now reads "next turn, you choose which line
+   happens" (130 rendered characters); the Bake-Kurage's box adds "Then you
+   choose each Plan's line." (100 of its 125). The
+   beat over the pet names a now-line carry-out "<card> (now-line)".
+9. *Sim pilot.* `kokomi_plan.line_policy`, an instrument surface: the
+   now-line when it gains her Block and the enemies' intended damage this
+   turn exceeds her Block, or when every damaging clause of the Plan line
+   would land on nothing or on an Intangible body; else the Plan line.
+10. *Bridge.* The waiting list prints both lines of a two-line Plan; the
+    chooser page lists each due Plan, both lines and its current line, with
+    the fight behind it (`McpMod.StateBuilder` now sends `battle` under a
+    mid-fight card grid). Verbs `flip "<card>"` (or `flip <n>`) and
+    `confirm`.
+
+**Pins.** `tier0/tests/test_kokomi_open_plan.py`,
+`KleeTests/Prototype/KokomiOpenPlanTests.cs`. Untested in game until a
+deploy.
+
 ## Fontaine companions ported, 2026-10-01
 
 Legacy cleanup pick 4 (`review/active/legacy-cleanup-2026-10-01.md`, ruled):

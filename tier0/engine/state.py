@@ -1224,6 +1224,16 @@ class PlanEntry:
     # `KokomiPlan.Entry.Paid` / `Extra` are the twins.
     paid: int = 0
     extra: int = 0
+    # A PLAN STAYS OPEN (2026-10-01, ruled; review/active/
+    # kokomi-delay-pays-2026-10-01.md sec.2). `now_card` is the card whose
+    # now-line this Plan may be carried out as instead: set by `schedule`
+    # only for a Plan written from a TWO-LINE card's own line (Moon's
+    # Reflection's found card included), never for a Plan-only card or a
+    # Dusk Plan. `line` is the line chosen for the carry-out in hand, "plan"
+    # (the default) or "now", written by `kokomi_plan.choose_lines`.
+    # `KokomiPlan.Entry.Now` is the twin of `line`.
+    now_card: Optional["Card"] = None
+    line: str = "plan"
 
 @dataclass
 class CombatState:

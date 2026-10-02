@@ -353,11 +353,22 @@ public static class KokomiPlan
     /// exhaust pile, and what cancelling that Plan undoes is Moon's
     /// Reflection. Sim twin: `PlanEntry.card_id`, which is already the
     /// writing card.</param>
+    /// <param name="Now">A PLAN STAYS OPEN (2026-10-01): the player chose
+    /// this Plan's now-line for the carry-out in hand
+    /// (<see cref="ChooseLines"/>). Every carry-out of the entry takes it.
+    /// Sim twin: `PlanEntry.line == "now"`.</param>
     public sealed record Entry(CardModel? Source, IReadOnlyList<Planned> Clauses,
                               string? Label = null, bool Dusk = false,
                               string? AimOverride = null, int Paid = 0,
-                              int Extra = 0, CardModel? Writer = null)
+                              int Extra = 0, CardModel? Writer = null,
+                              bool Now = false)
     {
+        /// <summary>A PLAN STAYS OPEN: does this Plan offer the choice? A
+        /// two-line card's own line (Moon's Reflection's found card
+        /// included), and not a Dusk Plan. Sim twin:
+        /// `kokomi_plan.two_line`.</summary>
+        public bool TwoLine => !Dusk && Source is INowLineCard;
+
         /// <summary>The card a cancel returns to the hand.</summary>
         public CardModel? Returns => Writer ?? Source;
 
@@ -1311,6 +1322,9 @@ public static class KokomiPlan
         var held = cap > 0 && queue.Count > cap
             ? new List<Entry>(queue.GetRange(cap, queue.Count - cap))
             : null;
+        // A PLAN STAYS OPEN (2026-10-01): the one chooser, asked while the
+        // strip still shows the queue and before anything is carried out.
+        due = await ChooseLines(choiceContext, kokomi, due);
         queue.Clear();
         // `EB-335`. THE MORNING'S DEPTH, recorded on the line the queue is
         // drained on and before the first clause runs -- Tide Wall's "for each
@@ -1953,6 +1967,168 @@ public static class KokomiPlan
     private static int CarryOutTimes(Creature kokomi) =>
         kokomi.Powers.OfType<NereidsAscensionPower>().Any() ? 2 : 1;
 
+    // ---- A PLAN STAYS OPEN (2026-10-01, ruled) ---------------------------
+    //
+    // review/active/kokomi-delay-pays-2026-10-01.md sec.2: "When the
+    // Bake-Kurage carries out a Plan, you choose which line it is: its Plan
+    // line, or its now line." Two-line cards only (<see cref="INowLineCard"/>);
+    // Plan-only cards and Dusk Plans are unchanged; the now-line is printed
+    // size. Every carry-out of an entry (Nereid's Ascension, Second Wave, All
+    // Streams) takes the line chosen for it -- the paper's "the default is the
+    // line chosen for the first". Plan payoffs count either line, because
+    // <see cref="ResolveEntry"/> rings them after either.
+    //
+    // SEC.3, KEPT SNAPPY: ONE screen a turn, and only when a two-line Plan is
+    // due. It is the base game's simple card grid (Varka's Weathervane and
+    // Knights' Roll Call open the same one), the Plans' own cards with both
+    // lines on their faces, nothing picked: a click flips a Plan to its
+    // now-line and a second click flips it back, and Confirm carries them all
+    // out. A later door the same turn (Change of Plans, Spring Tide) after the
+    // screen was shown carries out the Plan line. Sim twin:
+    // `kokomi_plan.choose_lines`.
+
+    /// <summary>The once-a-turn latch the screen claims.</summary>
+    public const string LineChooserKey = "kk_plan_line_chooser";
+
+    /// <summary>The screen's prompt key, merged into the `cards` table by
+    /// <c>KleeMod.InjectLocStrings</c>.</summary>
+    public const string ChooserPromptKey =
+        "KLEEMOD-KOKOMI_PLAN_LINES.selectionScreenPrompt";
+
+    /// <summary>The prompt. `understudy/blindplay_observe` recognises the
+    /// screen by it.</summary>
+    public const string ChooserPromptText =
+        "Your Plans are due. Click one to use its other line instead.";
+
+    private static LocString ChooserPrompt =>
+        new LocString("cards", ChooserPromptKey);
+
+    /// <summary>The beat's name for a Plan carried out as its now-line.</summary>
+    public static string NowLineTitle(string title) =>
+        title + " (now-line)";
+
+    /// <summary>
+    /// Set each due entry's line before it is carried out: every entry starts
+    /// at its Plan line, and when at least one is two-line and the turn's one
+    /// screen has not been shown, the player is asked. Returns the entries in
+    /// the same order. A duplicate card instance (one card that wrote two
+    /// Plans) is shown once and both Plans take its line.
+    /// </summary>
+    public static async Task<List<Entry>> ChooseLines(
+        PlayerChoiceContext choiceContext, Creature kokomi, List<Entry> due)
+    {
+        var lines = due.Select(e => e.Now ? e with { Now = false } : e)
+                       .ToList();
+        var open = Enumerable.Range(0, lines.Count)
+                             .Where(i => lines[i].TwoLine).ToList();
+        if (open.Count == 0) return lines;
+        if (kokomi.Player is not { } player) return lines;
+        if (!KokomiOverhaulLedger.ClaimOncePerTurn(kokomi, LineChooserKey))
+        {
+            return lines;
+        }
+        var faces = new List<CardModel>();
+        foreach (var i in open)
+        {
+            var card = lines[i].Source!;
+            if (!faces.Contains(card)) faces.Add(card);
+        }
+        var picked = (await CardSelectCmd.FromSimpleGrid(
+            choiceContext, faces, player,
+            new CardSelectorPrefs(ChooserPrompt, 0, faces.Count)
+            {
+                RequireManualConfirmation = true,
+            })).ToList();
+        foreach (var i in open)
+        {
+            if (picked.Contains(lines[i].Source!))
+            {
+                lines[i] = lines[i] with { Now = true };
+            }
+        }
+        return lines;
+    }
+
+    /// <summary>
+    /// THE NOW-LINE, CARRIED OUT BY THE BAKE-KURAGE: the card's own
+    /// <see cref="INowLineCard.PlayNowLine"/>, at printed size, on a play the
+    /// game never sees (no cost, no card moved, not a card played). Aimed by
+    /// the Plan's retargeting rule: the front enemy, or Converging Tide's
+    /// override while that body stands (<see cref="Aimed"/>); Joint Orders'
+    /// captured ally, and nothing if that player is gone. No target where one
+    /// is needed and the line does nothing. Sim twin:
+    /// `kokomi_plan.carry_out_now_line`.
+    /// </summary>
+    public static async Task CarryOutNowLine(
+        PlayerChoiceContext choiceContext, Creature kokomi, Entry entry)
+    {
+        if (entry.Source is not INowLineCard card) return;
+        if (kokomi.Player is not { } player) return;
+        Creature? target = card.NowLineAim switch
+        {
+            DivineStrategyPower.Aim.FrontEnemy => Aimed(
+                kokomi, new Planned(Kind.Damage, 0, Aim.FrontEnemy), entry)
+                .FirstOrDefault(),
+            DivineStrategyPower.Aim.Ally => entry.Clauses
+                .Where(c => c.Targets is { Count: > 0 })
+                .Select(c => CoopSet.PlanAllyFor(kokomi, c))
+                .FirstOrDefault(c => c != null),
+            _ => null,
+        };
+        if (card.NowLineAim != DivineStrategyPower.Aim.None && target == null)
+        {
+            return;
+        }
+        var play = new CardPlay
+        {
+            Card = entry.Source!,
+            Player = player,
+            Target = target,
+            ResultPile = PileType.None,
+            Resources = new ResourceInfo
+            {
+                EnergySpent = 0, EnergyValue = 0, StarsSpent = 0,
+                StarValue = 0,
+            },
+            IsAutoPlay = true,
+            PlayIndex = 0,
+            PlayCount = 1,
+        };
+        await card.PlayNowLine(choiceContext, play);
+    }
+
+    /// <summary>
+    /// A two-line card's two lines as text, for the blind page's waiting list:
+    /// the now-line, and the Plan line without its "Or plan:" head. Read off
+    /// the card's own rendered face, split where the face prints "Or plan:"
+    /// ("Or dusk plan:"). Empty strings where the face could not be read.
+    /// </summary>
+    internal static (string Now, string Plan) LineTexts(CardModel? card)
+    {
+        if (card == null) return ("", "");
+        string text;
+        try
+        {
+            text = card.GetDescriptionForPile(PileType.Hand);
+        }
+        catch (System.Exception)
+        {
+            return ("", "");
+        }
+        text = System.Text.RegularExpressions.Regex.Replace(
+            text ?? "", @"\[[^\]]*\]", "");
+        var at = text.IndexOf("Or plan:", System.StringComparison.Ordinal);
+        var head = "Or plan:".Length;
+        if (at < 0)
+        {
+            at = text.IndexOf("Or dusk plan:", System.StringComparison.Ordinal);
+            head = "Or dusk plan:".Length;
+        }
+        if (at < 0) return (text.Trim(), "");
+        return (text.Substring(0, at).Trim(),
+                text.Substring(at + head).Trim());
+    }
+
     /// <summary>
     /// Change of Plans: "The jellyfish carries out your front Plan now."
     ///
@@ -1976,6 +2152,9 @@ public static class KokomiPlan
         int before = queue.Count;
         queue.RemoveAt(0);
         await Sync(choiceContext, kokomi, "rule:carried_out_now", before);
+        // A PLAN STAYS OPEN: the turn's one chooser, if it has not been shown.
+        front = (await ChooseLines(choiceContext, kokomi,
+                                   new List<Entry> { front }))[0];
         // `EB-329`: Change of Plans is one of the two mid-turn doors, and its
         // card says so in as many words -- "carries out your front Plan NOW".
         // THE EXPANSION: an All Streams gift rides the entry, so a hurried
@@ -2016,6 +2195,8 @@ public static class KokomiPlan
         int before = queue.Count;
         queue.Clear();
         await Sync(choiceContext, kokomi, "rule:carried_out_now", before);
+        // A PLAN STAYS OPEN: the turn's one chooser, if it has not been shown.
+        due = await ChooseLines(choiceContext, kokomi, due);
         try
         {
             await Drain(choiceContext, kokomi, due, midTurn: true);
@@ -2150,7 +2331,17 @@ public static class KokomiPlan
                 await CardPileCmd.Draw(choiceContext, scoutDraw, kokomi.Player);
                 if (scoutSource != null) NoteRider(scoutSource, scoutDraw);
             }
-            foreach (var clause in entry.Clauses)
+            // A PLAN STAYS OPEN (2026-10-01): the player chose the now-line.
+            // It replaces the Plan line whole, so it writes no rider and
+            // Opening Gambit's double does not reach it (printed size). It is
+            // still a carry-out: everything after this block pays either line.
+            if (entry.Now && entry.TwoLine)
+            {
+                await CarryOutNowLine(choiceContext, kokomi, entry);
+            }
+            foreach (var clause in entry.Now && entry.TwoLine
+                         ? (IReadOnlyList<Planned>)System.Array.Empty<Planned>()
+                         : entry.Clauses)
             {
                 // `EB-643`. THE RIDERS ARE NOTED HERE AND NOWHERE ELSE, before
                 // the switch, because they do nothing when they resolve: what
@@ -2188,7 +2379,10 @@ public static class KokomiPlan
             // moved is still measured; the clauses that never ran moved
             // nothing, which is the honest reading.
             _riders = outerRiders;
-            Announce(kokomi, entry.Title, number, Moved(before, kokomi),
+            Announce(kokomi,
+                     entry.Now && entry.TwoLine
+                         ? NowLineTitle(entry.Title) : entry.Title,
+                     number, Moved(before, kokomi),
                      onPlay, kind, asked, riders);
         }
 
@@ -3282,24 +3476,7 @@ public static class KokomiPlan
         snapshot["twice"] =
             creature!.Powers.OfType<NereidsAscensionPower>().Any();
         snapshot["queue"] = pending
-            .Select(entry => (object?)new Dictionary<string, object?>
-            {
-                ["name"] = entry.Title,
-                ["clauses"] = entry.Clauses.Count,
-                // `EB-773`. WHAT THIS ENTRY HAS ALREADY WRITTEN AGAINST THE
-                // FRONT BODY, so the blind page can say that a Plan queued
-                // behind a lethal one will find its target gone. The seat
-                // read in `EB-714` is the row: two 8-damage Plans into an
-                // 11-HP body, the second landing on 3 HP with 5 wasted, and
-                // "nothing on the Plan screen warns you".
-                //
-                // THE NUMBERS ARE ALREADY FIXED, which is what makes this
-                // reportable at all: `PLAN_WRITTEN_NUMBER_NOTE`'s rule is
-                // that a written Plan carries the number it was written with.
-                // So these two keys are a read of state, not a forecast.
-                ["damage"] = WrittenFrontDamage(entry),
-                ["aim"] = WrittenAim(entry),
-            })
+            .Select(entry => (object?)QueueRow(entry))
             .ToList();
         // `EB-317`. WHAT THE JELLYFISH HAS ALREADY DONE THIS TURN, in the
         // order it did it, and in the WORDS IT SAID: `line` is the very string
@@ -3324,6 +3501,37 @@ public static class KokomiPlan
         snapshot["summon_hits"] =
             SummonHits(player).Select(CarriedOutRow).ToList();
         return snapshot;
+    }
+
+    /// <summary>One waiting Plan on the wire. A named method for
+    /// <see cref="CarriedOutRow"/>'s reason: the key names are the contract
+    /// with `understudy/blindplay_board.kokomi_plans`.</summary>
+    private static Dictionary<string, object?> QueueRow(Entry entry)
+    {
+        // A PLAN STAYS OPEN (2026-10-01): a two-line Plan carries both lines
+        // while it waits, so the choice is readable a turn early (sec.3).
+        var (now, plan) = entry.TwoLine ? LineTexts(entry.Source) : ("", "");
+        return new Dictionary<string, object?>
+            {
+                ["name"] = entry.Title,
+                ["two_line"] = entry.TwoLine,
+                ["now_line"] = now,
+                ["plan_line"] = plan,
+                ["clauses"] = entry.Clauses.Count,
+                // `EB-773`. WHAT THIS ENTRY HAS ALREADY WRITTEN AGAINST THE
+                // FRONT BODY, so the blind page can say that a Plan queued
+                // behind a lethal one will find its target gone. The seat
+                // read in `EB-714` is the row: two 8-damage Plans into an
+                // 11-HP body, the second landing on 3 HP with 5 wasted, and
+                // "nothing on the Plan screen warns you".
+                //
+                // THE NUMBERS ARE ALREADY FIXED, which is what makes this
+                // reportable at all: `PLAN_WRITTEN_NUMBER_NOTE`'s rule is
+                // that a written Plan carries the number it was written with.
+                // So these two keys are a read of state, not a forecast.
+                ["damage"] = WrittenFrontDamage(entry),
+                ["aim"] = WrittenAim(entry),
+            };
     }
 
     /// <summary>
@@ -3622,6 +3830,24 @@ public interface IPlannedCard
 {
     /// <summary>The card's printed Plan line, in the order it was written.</summary>
     IReadOnlyList<KokomiPlan.Planned> PlanClauses { get; }
+}
+
+/// <summary>
+/// A TWO-LINE card: a now-line and a Plan line (a Plan stays open,
+/// 2026-10-01, ruled; review/active/kokomi-delay-pays-2026-10-01.md sec.2).
+/// Emitted by the generator on every row with both <c>effects:</c> and
+/// <c>plan:</c>. When the Bake-Kurage carries out a Plan this card wrote, the
+/// player may take <see cref="PlayNowLine"/> instead of the Plan line
+/// (<see cref="KokomiPlan.ChooseLines"/>, <see cref="KokomiPlan.CarryOutNowLine"/>).
+/// </summary>
+public interface INowLineCard
+{
+    /// <summary>Where the now-line aims off the jellyfish: Divine Strategy's
+    /// three answers.</summary>
+    DivineStrategyPower.Aim NowLineAim { get; }
+
+    /// <summary>The card's now-line, at printed size, on the play given.</summary>
+    Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay);
 }
 
 /// <summary>

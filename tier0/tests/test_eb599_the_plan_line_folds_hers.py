@@ -27,7 +27,8 @@ from __future__ import annotations
 from tier0.content import enchantments, loader
 from tier0.engine import kokomi_plan
 from tier0.tests.conftest import make_enemy
-from tier0.tests.test_kokomi_plan import kokomi_state, overhaul  # noqa: F401
+from tier0.tests.test_kokomi_plan import (  # noqa: F401
+    kokomi_state, overhaul, plan_line)
 
 OATH = "proto_kk_kurages_oath"
 STRENGTH = 2
@@ -58,7 +59,7 @@ def test_oath_at_strength_two_under_vulnerable_writes_nine(overhaul):
         _printed_plan(_oath()) + STRENGTH)
 
 
-def test_and_the_morning_deals_nine_once_the_vulnerable_has_expired(overhaul):
+def test_and_the_morning_deals_nine_once_the_vulnerable_has_expired(overhaul, plan_line):
     """THE ROW'S ACCEPTANCE, half two -- and it is the seat's own fight.
 
     The debuff that raised the old face is gone by the time the jellyfish

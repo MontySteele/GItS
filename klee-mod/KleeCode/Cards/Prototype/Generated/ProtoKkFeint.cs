@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
+public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard, INowLineCard
 {
     /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
     public Element Element => Element.Hydro;
@@ -87,6 +87,18 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
             if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.FrontEnemy) is not { } nowLine) return;
             cardPlay = nowLine;
         }
+        await PlayNowLine(choiceContext, cardPlay);
+    }
+
+    /// <summary>Where the now-line aims when the Bake-Kurage carries it out
+    /// for a Plan (a Plan stays open, 2026-10-01).</summary>
+    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.FrontEnemy;
+
+    /// <summary>The card's now-line. Played face-up from <c>OnPlay</c>, and carried
+    /// out by the Bake-Kurage when the player chooses it for a Plan
+    /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
+    public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

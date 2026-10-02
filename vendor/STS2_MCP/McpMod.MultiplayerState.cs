@@ -88,6 +88,13 @@ public static partial class McpMod
         {
             result["state_type"] = "card_select";
             result["card_select"] = BuildCardSelectState(cardSelectScreen, runState);
+            // GItS LOCAL EDIT (Kokomi, a Plan stays open, 2026-10-01): the
+            // singleplayer builder's fight-behind-a-grid edit, carried over.
+            if (currentRoom is CombatRoom gridCombat
+                && CombatManager.Instance.IsInProgress)
+            {
+                result["battle"] = BuildMultiplayerBattleState(runState, gridCombat);
+            }
         }
         else if (topOverlay is NChooseACardSelectionScreen chooseCardScreen)
         {

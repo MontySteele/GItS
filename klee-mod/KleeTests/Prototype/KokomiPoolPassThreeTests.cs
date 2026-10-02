@@ -120,7 +120,8 @@ public class KokomiPoolPassThreeTests
         // draw pile -- and `EB-679` only changed what the screen DOES with the
         // pick. The verb, the count and the take are pinned in
         // `KokomiPoolPassFourTests`.
-        var play = Il.Calls(Il.Method("ProtoKkReadTheField", "OnPlay")).ToList();
+        // A PLAN STAYS OPEN (2026-10-01): the now-line is its own method.
+        var play = Il.Calls(Il.Method("ProtoKkReadTheField", "PlayNowLine")).ToList();
         // `EB-686` moved the screen one call out, into `ScryTake.Choose`,
         // which owns the grid and the one-candidate branch alike.
         Assert.Contains(play, c => c.Contains("ScryTake.Choose"));

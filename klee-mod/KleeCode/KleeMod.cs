@@ -217,6 +217,9 @@ public static class KleeMod
                 // release build.
                 [Powers.KokomiPlan.ReflectionPromptKey] =
                     Powers.KokomiPlan.ReflectionPromptText,
+                // A PLAN STAYS OPEN (2026-10-01): the turn's line chooser.
+                [Powers.KokomiPlan.ChooserPromptKey] =
+                    Powers.KokomiPlan.ChooserPromptText,
                 // THE STATUS BATCH (2026-10-01): Tidecleanse's and Turning
                 // Tide's hand screens, on the same terms.
                 [Powers.KokomiStatusBatch.ExhaustPromptKey] =

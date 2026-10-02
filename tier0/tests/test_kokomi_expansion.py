@@ -26,7 +26,7 @@ from tier0.content import loader, upgrades
 from tier0.engine import combat, effects, kokomi_plan, powers, reactions
 from tier0.tests.conftest import make_enemy
 from tier0.tests.test_kokomi_plan import (  # noqa: F401
-    carry_out, kokomi_state, overhaul, plan_card)
+    carry_out, kokomi_state, overhaul, plan_card, plan_line)
 
 NEW = C.KOKOMI_EXPANSION_BATCH_ONE_IDS
 QUIET = [{"kind": "block", "amount": 5}]
@@ -127,7 +127,7 @@ def test_a_reduced_cost_is_what_was_paid(overhaul):
     assert st.kk_plan_queue[0].paid == 0
 
 
-def test_lull_pays_only_when_it_is_the_only_plan_of_the_morning(overhaul):
+def test_lull_pays_only_when_it_is_the_only_plan_of_the_morning(overhaul, plan_line):
     st = kokomi_state()
     kokomi_plan.schedule(st, _row("proto_kk_lull"))
     st.player.energy = 0
@@ -142,7 +142,7 @@ def test_lull_pays_only_when_it_is_the_only_plan_of_the_morning(overhaul):
     assert st.player.energy == 0
 
 
-def test_the_same_plan_twice_is_still_alone(overhaul):
+def test_the_same_plan_twice_is_still_alone(overhaul, plan_line):
     st = kokomi_state()
     st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
     kokomi_plan.schedule(st, _row("proto_kk_lull"))

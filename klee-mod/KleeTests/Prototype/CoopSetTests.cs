@@ -492,7 +492,10 @@ public class CoopSetTests
         var play = Il.Calls(Il.Method("ProtoKkJointOrders", "OnPlay"));
         Assert.Contains("KokomiPlan.PlayedOnPet", play);
         Assert.Contains("KokomiPlan.Schedule", play);
-        Assert.Contains(play, c => c.StartsWith("CreatureCmd.GainBlock"));
+        // A PLAN STAYS OPEN (2026-10-01): the now-line is its own method.
+        Assert.Contains("ProtoKkJointOrders.PlayNowLine", play);
+        Assert.Contains(Il.Calls(Il.Method("ProtoKkJointOrders", "PlayNowLine")),
+                        c => c.StartsWith("CreatureCmd.GainBlock"));
         // The player is captured when the Plan is WRITTEN.
         Assert.Contains("CoopSet.PlanAlly",
             Il.Calls(Il.Method("KokomiPlan", "Schedule")));

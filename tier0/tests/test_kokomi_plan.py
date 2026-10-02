@@ -68,6 +68,17 @@ def overhaul(monkeypatch):
     clear_upgrade_caches()
 
 
+@pytest.fixture
+def plan_line(monkeypatch):
+    """A Plan stays open (2026-10-01): pin the pilot's line choice to the
+    default, the Plan line, for a test about what the Plan line does.
+    `kokomi_plan.line_policy` is an instrument surface; these tests are about
+    the rule underneath it."""
+    monkeypatch.setattr(kokomi_plan, "line_policy",
+                        lambda state, entry: "plan")
+    yield
+
+
 def kokomi_state(enemies=None, hp=80):
     st = make_state(enemies=enemies, hp=hp)
     st.player.character_id = "kokomi"

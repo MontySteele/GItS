@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkJointOrders : CustomCardModel, ICharacterCard, IPlannedCard
+public sealed class ProtoKkJointOrders : CustomCardModel, ICharacterCard, IPlannedCard, INowLineCard
 {
     /// <summary>Multiplayer only: the base game's own constraint, so a
     /// single-player run is never offered this card.</summary>
@@ -83,6 +83,18 @@ public sealed class ProtoKkJointOrders : CustomCardModel, ICharacterCard, IPlann
             if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.Ally) is not { } nowLine) return;
             cardPlay = nowLine;
         }
+        await PlayNowLine(choiceContext, cardPlay);
+    }
+
+    /// <summary>Where the now-line aims when the Bake-Kurage carries it out
+    /// for a Plan (a Plan stays open, 2026-10-01).</summary>
+    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.Ally;
+
+    /// <summary>The card's now-line. Played face-up from <c>OnPlay</c>, and carried
+    /// out by the Bake-Kurage when the player chooses it for a Plan
+    /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
+    public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await CreatureCmd.GainBlock(cardPlay.Target, DynamicVars.Block, cardPlay);
     }

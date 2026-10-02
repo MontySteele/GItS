@@ -6745,8 +6745,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # text now; the long forms are the panel's own notes.
         # THE STATUS BATCH (2026-10-01): "Instead of the line above".
         "Plan": ["Instead of the line above, play the card on the ",
-                 ": this happens at the start of your next ",
-                 "turn. Plans go in the order made."],
+                 ": next turn, you choose which line ",
+                 "happens. Plans go in the order made."],
         # `EB-643` (R265). The pool pass's one new word, and a rule about WHEN
         # alone: everything else about a Dusk Plan is a Plan and the row above
         # says all of it. The sentence straddles two `[gold]` spans on the mod

@@ -791,6 +791,20 @@ CHOOSER_CONFIRM_NOTE = (
     "after `choose` to take it, and until you do this chooser stays open and "
     "every other command is refused.*")
 
+# A PLAN STAYS OPEN (2026-10-01, ruled; review/active/
+# kokomi-delay-pays-2026-10-01.md sec.3). Kokomi's turn-start line chooser:
+# one screen, every due two-line Plan on it at its Plan line, `flip` to switch
+# one and `confirm` to carry them all out. The sentence `assert_chooser_note`
+# accepts on this screen, because its pick verb is `flip` and not `choose`.
+PLAN_CHOOSER_HEADING = "# Your Plans are due"
+#: Under a waiting two-line Plan in the Plan list.
+TWO_LINE_WAITING_NOTE = "When it is carried out, you choose its line."
+PLAN_CHOOSER_NOTE = (
+    "*Each Plan below is carried out as the line marked. Say `flip \"<card>\"` "
+    "to switch one between its Plan line and its now-line (again to switch "
+    "back), then `confirm` to carry them all out. `confirm` alone takes the "
+    "Plan lines.*")
+
 #: The mode chooser (`screen_type: "choose"`), where one `choose` resolves.
 #: It never says `confirm`, because there is no confirm button on this screen
 #: and saying the word costs a refusal (`EB-779`).
@@ -1470,9 +1484,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # `PLAN_COUNT_NOTE`, `PLAN_WRITTEN_NUMBER_NOTE` -- because the panel has
     # no ceiling; the history of each clause is in git.
     # THE STATUS BATCH (2026-10-01, sec.3 pick 2): the face prints "Or plan:"
-    # and the tip opens "Instead of the line above".
+    # and the tip opens "Instead of the line above". A PLAN STAYS OPEN
+    # (2026-10-01): "next turn, you choose which line happens".
     "Plan": ("Instead of the line above, play the card on the Bake-Kurage: "
-             "this happens at the start of your next turn. Plans go in the "
+             "next turn, you choose which line happens. Plans go in the "
              "order made."),
     # `EB-643` (R265). THE POOL PASS'S ONE NEW WORD, and it is a rule about
     # WHEN and nothing else: everything else about a Dusk Plan is a Plan, and

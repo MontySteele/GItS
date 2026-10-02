@@ -219,7 +219,7 @@ public class ArmKeywordTipTests
         // above"; the second sentence shortened to stay under the ceiling.
         Assert.Equal(
             "Instead of the line above, play the card on the Bake-Kurage: "
-          + "this happens at the start of your next turn. Plans go in the "
+          + "next turn, you choose which line happens. Plans go in the "
           + "order made.",
             rendered);
         // The base game's own longest mechanic tip is CHANNELING, 134.
