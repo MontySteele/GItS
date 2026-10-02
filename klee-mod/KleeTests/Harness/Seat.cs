@@ -54,6 +54,9 @@ internal sealed class Seat
     /// <summary>A Varka seat (prototype batch one) at his printed 80.</summary>
     internal static Seat Varka(int maxHp = 80) => Build(new global::KleeMod.Varka(), maxHp);
 
+    /// <summary>A seat on any character, base game's included.</summary>
+    internal static Seat Of(CharacterModel character, int maxHp = 80) => Build(character, maxHp);
+
     private static Seat Build(CharacterModel character, int maxHp)
     {
         var player = (Player)RuntimeHelpers.GetUninitializedObject(typeof(Player));
@@ -97,6 +100,30 @@ internal sealed class Seat
         relics.Add((RelicModel)RuntimeHelpers.GetUninitializedObject(typeof(T)));
         return this;
     }
+
+    /// <summary>Put a relic in THIS seat's run state OWNED by this seat, and
+    /// hand it back. Same uninitialised allocation as <see cref="WithRelic{T}"/>,
+    /// plus the two things RelicModel.Owner's getter reads: the `_owner`
+    /// backing field and the IsMutable flag the game's ToMutable would set.
+    /// For the hooks that ask "is this reward / event mine?".
+    ///
+    /// `_owner` is written through an IL field ref, NOT FieldInfo.SetValue:
+    /// reflection forces RelicModel's static constructor, which builds a
+    /// Godot StringName and kills the test host (README.md, the Godot row).
+    /// A plain `stfld` does not run type initialisation.</summary>
+    internal T OwnRelic<T>() where T : RelicModel
+    {
+        var relic = (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
+        RelicOwner(relic) = Player;
+        Set(relic, "IsMutable", true);
+        ((List<RelicModel>)typeof(Player)
+            .GetField("_relics", HeadlessGame.All)!
+            .GetValue(Player)!).Add(relic);
+        return relic;
+    }
+
+    private static readonly HarmonyLib.AccessTools.FieldRef<RelicModel, Player?> RelicOwner =
+        HarmonyLib.AccessTools.FieldRefAccess<RelicModel, Player?>("_owner");
 
     internal Seat WithMaxHp(int maxHp)
     {
