@@ -61,7 +61,7 @@ and about 390 Python arm-flag reads.
    retired systems, the `Enabled` branches and `#if`s, `ShippedKits` and its
    gate, shipped-only lints, shipped emission in `gen_klee_cards.py` (shared
    with the prototype emitter: trim, do not delete).
-   **5a done, PR #STAGE5A** (2026-10-01): the shipped card classes
+   **5a done, PR #822** (2026-10-01): the shipped card classes
    (`Cards/Generated`, `Cards/Kokomi/Generated`, `Cards/Furina/Generated`,
    Klee's hand-written seven) and `Cards/Retired` with its alias register
    (`docs/retired-card-ids.yaml`, `gen_retired_card_aliases.py`,
