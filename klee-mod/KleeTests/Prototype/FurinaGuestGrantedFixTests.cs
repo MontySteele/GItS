@@ -189,6 +189,30 @@ public class FurinaGuestGrantedFixTests
             forecast.Takers.Select(t => (t.Who, t.Takes, t.Leaves)).ToArray());
     }
 
+    [Fact]
+    public void A_bow_a_hit_earns_is_an_act_line_and_in_the_total()
+    {
+        // 2026-10-01 seat round: "Crabaletta's Bow dealt 5" on the enemy's
+        // turn and the enemy the seat counted as surviving died. The same
+        // board as the split above: Crabaletta's sweep act deals 5, and her
+        // Bow when hit two empties her deals 5 more.
+        using var _ = new Arm();
+        var (seat, _) = Stage(("usher", 3), ("crabaletta", 5));
+
+        var forecast = FurinaStage.Forecast(seat.Creature, new[] { 8, 5 },
+                                            OneEnemy);
+
+        var onHit = Assert.Single(forecast.Acts, a => a.OnHit);
+        Assert.Equal((StagePerformer.Crabaletta, 5, true),
+                     (onHit.Who, onHit.Amount, onHit.Bow));
+        Assert.Equal(forecast.Acts.Sum(a => a.Amount), forecast.ActTotal);
+        Assert.Equal(10, forecast.ActTotal);
+
+        // Without the hits no Bow is earned, and no on-hit line is printed.
+        var quiet = FurinaStage.Forecast(seat.Creature, null, OneEnemy);
+        Assert.DoesNotContain(quiet.Acts, a => a.OnHit);
+    }
+
     // ---- 2. the forecast: what the acts deal -----------------------------
 
     [Fact]

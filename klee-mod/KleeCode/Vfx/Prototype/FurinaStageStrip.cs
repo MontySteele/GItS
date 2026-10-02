@@ -146,7 +146,8 @@ public static class FurinaStageStrip
     /// <summary>One act of the forecast: "Crabaletta 5 to a random enemy",
     /// "Neuvillette 8 Hydro to ALL".</summary>
     private static string ActLine(StageForecastAct act) =>
-        $"{NameOf(act.Who)}{(act.Bow ? " Bow" : "")} {act.Amount}"
+        $"{NameOf(act.Who)}{(act.Bow ? " Bow" : "")}"
+        + (act.OnHit ? " (enemy turn)" : "") + $" {act.Amount}"
         + (act.Element.Length > 0 ? " " + act.Element : "")
         + " to " + TargetWord(act.Target);
 

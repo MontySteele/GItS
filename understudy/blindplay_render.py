@@ -86,6 +86,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RELIC_ANSWER_ROW_NO_TARGET,
                                         RELIC_ANSWER_GAIN_ROW,
                                         RELIC_ANSWERS_HEADING,
+                                        CARD_OFFER_AFTER_SKIP_NOTE,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
                                         PLAN_CASKET_AURA_CLAUSE,
@@ -1900,6 +1901,9 @@ STAGE_INTENT_HAND = (", {n} of it from cards in your hand as your turn ends "
 STAGE_ACTS_HEADING = "- What the acts will deal at the end of your turn:"
 STAGE_ACT_FORECAST_LINE = "  - **{who}**: {n}{element} to {target}"
 STAGE_ACT_FORECAST_BOW = "'s Bow"
+#: 2026-10-01 (seat round): a Bow a posted hit earns performs its act too
+#: ("Crabaletta's Bow dealt 5" to an enemy the seat counted alive at 3).
+STAGE_ACT_ON_HIT = " (on the enemy's turn, when a hit empties it)"
 STAGE_ACT_TOTAL_LINE = "  - In all: {n} to {target}"
 #: ... and a run of identical acts (Full House's repeats, or twins) is one
 #: line with its count (2026-09-26).
@@ -2211,7 +2215,8 @@ def _render_stage_acts(forecast: dict[str, Any]) -> list[str]:
             who=act["name"] + (STAGE_ACT_FORECAST_BOW if act["bow"] else ""),
             n=act["amount"],
             element=(" " + act["element"]) if act["element"] else "",
-            target=_stage_target_words(act["target"])))
+            target=_stage_target_words(act["target"]))
+            + (STAGE_ACT_ON_HIT if act.get("on_hit") else ""))
     at = 0
     while at < len(lines):
         run = 1
@@ -3476,7 +3481,12 @@ def render(obs: dict[str, Any]) -> str:
                       "the card screen, and the skip -- *You may skip this* -- "
                       "is on THAT screen. `skip` typed here has no card reward "
                       "open to skip, and `proceed` leaves the whole reward "
-                      "screen.*"]
+                      "screen.*",
+                    # 2026-10-01 (seat round): the row is still here after a
+                    # skip. The game keeps a skipped offer on the reward
+                    # screen (its skip closes only the card screen), so the
+                    # page says so rather than reading as a failed skip.
+                    "", CARD_OFFER_AFTER_SKIP_NOTE]
         # 2026-09-29 (Varka Oath round, lane 2 act 1): a seat read the
         # chest's relic, typed `proceed` and never had it -- the run save
         # holds no relic for that floor. `proceed` leaves a chest's relic

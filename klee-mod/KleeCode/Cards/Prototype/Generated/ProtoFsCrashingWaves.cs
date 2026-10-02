@@ -59,9 +59,10 @@ public sealed class ProtoFsCrashingWaves : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        var aoeVigor = AoeVigor.Begin(Owner.Creature);
         foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
         {
-            await DamageCmd.Attack(DynamicVars.Damage.BaseValue + (AuraCmd.Find(auraTarget) != null ? 5 : 0))
+            await DamageCmd.Attack((DynamicVars.Damage.BaseValue + (AuraCmd.Find(auraTarget) != null ? 5 : 0)) + aoeVigor.Next())
                 .FromCard(this, cardPlay)
                 .Targeting(auraTarget)
                 .WithHitFx("vfx/vfx_attack_slash")

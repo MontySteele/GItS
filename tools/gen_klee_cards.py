@@ -10973,11 +10973,16 @@ def build_body(
             if (eff["target"] == "all_enemies"
                     and ("bonus_vs_aura" in eff
                          or "bonus_vs_debuff" in eff)):
+                # 2026-10-01 (seat round): one command per enemy, so the base
+                # game's Vigor would pay only the first; `AoeVigor` carries it
+                # to the rest, as one base AoE command pays every target.
                 lines.append(
-                    "foreach (var auraTarget in "
+                    "var aoeVigor = AoeVigor.Begin(Owner.Creature);\n"
+                    "        foreach (var auraTarget in "
                     "CombatState!.HittableEnemies.ToList())\n"
                     "        {\n"
-                    f"            await DamageCmd.Attack({amount_expr})\n"
+                    f"            await DamageCmd.Attack(({amount_expr}) "
+                    "+ aoeVigor.Next())\n"
                     "                .FromCard(this, cardPlay)\n"
                     "                .Targeting(auraTarget)\n"
                     '                .WithHitFx("vfx/vfx_attack_slash")\n'
