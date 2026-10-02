@@ -145,6 +145,12 @@ which to exhaust. The Strength loss is permanent, as Malaise's is.
 
 Why: the census (2026-10-01) found her pool had no Weak, no Strength loss and no card giving 10+ Block outright; all three now live in the status pile, so engaging with it is how she defends.
 
+[USER], on the three cards: "Up in Smoke and Behind Jean's desk look quite
+strong, but we can always nerf them later. Looks good for now!"
+
+Watch: Up in Smoke! and Behind Jean's Desk (strong; nerf candidates after the
+seat round).
+
 ## Picks
 
 1. **Two tiers: Dazed for the fair loaders, Confiscated for the busted ones**
