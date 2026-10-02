@@ -278,6 +278,14 @@ KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
     "proto_ko_klee_can_explain",
     "proto_ko_damage_report",
     "proto_ko_solitary_confinement",
+    # DEFENCE IN THE STATUS PILE (2026-10-01, the paper's sec.5, ruled):
+    # [USER] "add the defensive utility into her status pile". Her pool had no
+    # Weak, no Strength loss and no 10+ Block outright; each now pays a status.
+    # In for Fish-Flavored Bait, Nova Burst and Spinning Sparkler; 24 / 33 / 21
+    # holds.
+    "proto_ko_up_in_smoke",
+    "proto_ko_behind_jeans_desk",
+    "proto_ko_kitchen_alchemy",
 )
 
 # THE OFFERABLE POOL, WHOLE (slice packet sec.4). `_pool_substitutions` cannot
@@ -286,7 +294,8 @@ KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
 # same single door.
 #
 # SEVENTY-EIGHT, 24 / 33 / 21, SINCE THE STATUS PACKAGE (2026-10-01): eight
-# cut, eight added (`KLEE_STATUS_PACKAGE_IDS`). SEVENTY-EIGHT, 24 / 36 / 18,
+# cut, eight added (`KLEE_STATUS_PACKAGE_IDS`), then three more swapped by
+# its sec.5, the defence in the status pile. SEVENTY-EIGHT, 24 / 36 / 18,
 # since the R276 pool expansion.
 #
 # FORTY-EIGHT SINCE R276 (2026-09-23, `review/ruled/klee-review-2026-09-23.md`
@@ -340,8 +349,8 @@ KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
 # touches the shared reaction funnel) and arrived with the pool pass
 # (`EB-491`), in the block below.
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
-    # Cook (8)
-    "proto_ko_fish_flavored_bait",
+    # Cook (8; Fish-Flavored Bait cut by the status pile's defence,
+    # 2026-10-01)
     "proto_ko_chain_fuse",
     "proto_ko_careful_arrangement",
     "proto_ko_big_badda_boom",
@@ -430,7 +439,8 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_hair_trigger",
     "proto_ko_explosive_frags",
     "proto_ko_where_did_i_put_it",
-    "proto_ko_big_bounce",
+    # Nova Burst (`proto_ko_big_bounce`) cut by the status pile's defence
+    # (2026-10-01).
     # THE POOL EXPANSION (R276, 2026-09-23): THIRTY rows toward the 78-card
     # pool R276 ruled (2 Common, 18 Uncommon, 10 Rare), in the sheet's order.
     # Designed by the main session: the Companion route (Playdate, Team
@@ -443,7 +453,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_hiding_spot",
     "proto_ko_playdate",
     "proto_ko_jumpy_dumpty_mk_iii",
-    "proto_ko_spinning_sparkler",
+    # Spinning Sparkler cut by the status pile's defence (2026-10-01).
     "proto_ko_mine_all_mine",
     "proto_ko_team_effort",
     "proto_ko_one_more_charge",

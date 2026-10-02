@@ -13,7 +13,8 @@ namespace KleeMod.Tests.Prototype;
 /// <summary>
 /// R276 (`review/ruled/klee-review-2026-09-23.md` pick 1): R271 sec.7's Mines
 /// batch and slice two, built together -- Hair Trigger, Explosive Frags, Where
-/// Did I Put It? and Big Bounce.
+/// Did I Put It? and Big Bounce (Nova Burst; cut by the Klee status package's
+/// sec.5, 2026-10-01, with its pins).
 ///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL, on
 /// <see cref="PoolPassThreeTests"/>' terms. Hair Trigger's rule is pure and is
@@ -133,7 +134,6 @@ public class KleeR276BatchTests
         Assert.IsAssignableFrom<ISetOffCard>(new ProtoKoKapow());
         Assert.IsAssignableFrom<ISetOffCard>(new ProtoKoCountdown());
         Assert.IsAssignableFrom<ISetOffCard>(new ProtoKoPerfectTiming());
-        Assert.IsAssignableFrom<ISetOffCard>(new ProtoKoBigBounce());
         Assert.False(new ProtoKoPop() is ISetOffCard);
         Assert.False(new ProtoKoHairTrigger() is ISetOffCard);
         Assert.False(new ProtoKoWhereDidIPutIt() is ISetOffCard);
@@ -163,44 +163,6 @@ public class KleeR276BatchTests
         Assert.Contains(choose, c => c.Contains("Where"));
     }
 
-    // ---- Big Bounce ------------------------------------------------------
-
-    [Fact]
-    public void Big_bounce_sets_off_tallies_the_overflow_and_bounces_it_once()
-    {
-        // STRUCTURAL. The card calls the bouncing Set off; that Set off hands
-        // `SetOff` a tally and then bounces its sum ONCE, as a plain hit that
-        // is not itself a Set off; the explosion measures the overflow off
-        // the HP and Block it read before the hit.
-        Assert.Contains("ProtoBombPower.SetOffAimedBouncing",
-                        Il.Calls(Il.Method("ProtoKoBigBounce", "OnPlay")));
-
-        var bouncing = Il.CallSequence(
-            Il.Method("ProtoBombPower", "SetOffAimedBouncing")).ToList();
-        var setOff = bouncing.FindIndex(c => c == "ProtoBombPower.SetOff");
-        var bounce = bouncing.FindIndex(c => c == "ProtoBombPower.BounceOverflow");
-        Assert.True(setOff >= 0 && bounce > setOff);
-
-        var hit = Il.Calls(Il.Method("ProtoBombPower", "BounceOverflow"));
-        Assert.Contains("ElementalHit.Deal", hit);
-        Assert.DoesNotContain(hit, c => c.StartsWith("ProtoBombPower.SetOff"));
-
-        var explode = Il.Calls(Il.Method("ProtoBombPower", "Explode"));
-        Assert.Contains("Creature.get_CurrentHp", explode);
-        Assert.Contains("Creature.get_Block", explode);
-    }
-
-    [Fact]
-    public void Big_bounce_prints_five_and_upgrades_to_eight()
-    {
-        var card = new ProtoKoBigBounce();
-        Assert.Equal(CardRarity.Uncommon, card.Rarity);
-        Assert.Equal(CardType.Attack, card.Type);
-        Assert.Equal(5m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(8m, Upgraded<ProtoKoBigBounce>().DynamicVars.Damage.BaseValue);
-        Assert.Contains("past the enemy's HP", Face(card));
-    }
-
     // ---- the pool --------------------------------------------------------
 
     [Fact]
@@ -211,7 +173,7 @@ public class KleeR276BatchTests
         foreach (var name in new[]
                  {
                      "ProtoKoHairTrigger", "ProtoKoExplosiveFrags",
-                     "ProtoKoWhereDidIPutIt", "ProtoKoBigBounce",
+                     "ProtoKoWhereDidIPutIt",
                  })
         {
             Assert.Contains(slice, c => c.Contains(name));

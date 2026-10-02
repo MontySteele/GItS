@@ -27,6 +27,9 @@ CUT = ("proto_ko_pocket_fireworks", "proto_ko_rapid_fire",
        "proto_ko_flame_dance", "proto_ko_dodoco_cover",
        "proto_ko_careful_now", "proto_ko_split_charge", "proto_ko_fish_fry",
        "proto_ko_friendship_bracelet")
+# Defence in the status pile (2026-10-01, the paper's sec.5): three more out.
+DEFENCE_CUT = ("proto_ko_fish_flavored_bait", "proto_ko_big_bounce",
+               "proto_ko_spinning_sparkler")
 ALBEDO = "proto_mc_albedo_dust_of_purification"
 
 
@@ -47,9 +50,9 @@ def _first(card, op):
 def test_the_package_cuts_eight_and_adds_eight(overhaul):
     ids = C.KLEE_OVERHAUL_POOL_IDS
     assert len(ids) == 78
-    assert ids[-8:] == C.KLEE_STATUS_PACKAGE_IDS
+    assert ids[-11:] == C.KLEE_STATUS_PACKAGE_IDS
     rows = {c.id for c in loader.prototype_cards()}
-    for cid in CUT:
+    for cid in CUT + DEFENCE_CUT:
         assert cid not in ids
         assert cid not in rows
     rarity = collections.Counter(load(cid).rarity for cid in ids)
@@ -65,7 +68,11 @@ def test_the_package_cuts_eight_and_adds_eight(overhaul):
         "proto_ko_klee_can_explain": ("skill", 1, "uncommon"),
         "proto_ko_damage_report": ("power", 1, "rare"),
         "proto_ko_solitary_confinement": ("power", 1, "rare"),
+        "proto_ko_up_in_smoke": ("skill", 1, "common"),
+        "proto_ko_behind_jeans_desk": ("skill", 1, "uncommon"),
+        "proto_ko_kitchen_alchemy": ("skill", 1, "uncommon"),
     }
+    assert load("proto_ko_kitchen_alchemy").exhaust
 
 
 def test_the_papers_numbers_and_upgrades(overhaul):
@@ -178,3 +185,102 @@ def test_dust_of_purification_is_albedos_klee_stand_in(overhaul):
     row = load(ALBEDO)
     assert (row.type, row.cost, row.rarity) == ("skill", 1, "rare")
     assert ALBEDO in companion_standins.standin_ids()
+
+
+# --- defence in the status pile (2026-10-01, the paper's sec.5) ----------------
+#
+# [USER]: "Ok Klee - I'd say we go for option 1 and add the defensive utility
+# into her status pile, which gives some incentive for players to engage with
+# it. We can give a mix of weak, high-block cards (already present) and
+# perhaps an alchemy-flavored Strength reduction?"
+
+def test_the_defence_rows_numbers_and_upgrades(overhaul):
+    smoke = _first(load("proto_ko_up_in_smoke"), "apply_power")
+    assert (smoke["power"], smoke["amount"], smoke["target"]) == (
+        "weak", 2, "all_enemies")
+    assert _first(_up("proto_ko_up_in_smoke"), "apply_power")["amount"] == 3
+    assert _first(load("proto_ko_behind_jeans_desk"), "block")["amount"] == 14
+    assert _first(_up("proto_ko_behind_jeans_desk"), "block")["amount"] == 18
+    loss = _first(load("proto_ko_kitchen_alchemy"), "lose_strength")
+    assert (loss["amount"], loss["target"]) == (2, "all_enemies")
+    assert _first(_up("proto_ko_kitchen_alchemy"),
+                  "lose_strength")["amount"] == 3
+
+
+def test_up_in_smoke_weakens_every_enemy_and_shuffles_a_dazed(overhaul):
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    st = klee_state([a, b])
+    st.player.draw_pile = filler(3)
+    play(st, load("proto_ko_up_in_smoke"))
+    assert (a.powers.get("weak"), b.powers.get("weak")) == (2, 2)
+    made = [c for c in st.player.draw_pile if klee_overhaul.is_status(c)]
+    assert [c.type for c in made] == ["status"]
+    assert not any(klee_overhaul.is_confiscated(c) for c in made)
+
+    a2, b2 = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    st = klee_state([a2, b2])
+    play(st, _up("proto_ko_up_in_smoke"))
+    assert (a2.powers.get("weak"), b2.powers.get("weak")) == (3, 3)
+
+
+def test_behind_jeans_desk_blocks_and_adds_a_confiscated(overhaul):
+    enemy = make_enemy(hp=200)
+    st = klee_state([enemy])
+    st.player.draw_pile = filler(3)
+    play(st, load("proto_ko_behind_jeans_desk"))
+    assert st.player.block == 14
+    made = [c for c in st.player.draw_pile if klee_overhaul.is_status(c)]
+    assert len(made) == 1 and klee_overhaul.is_confiscated(made[0])
+
+    st = klee_state([make_enemy(hp=200)])
+    play(st, _up("proto_ko_behind_jeans_desk"))
+    assert st.player.block == 18
+
+
+def test_kitchen_alchemy_exhausts_a_status_and_takes_strength_from_all(
+        overhaul):
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    b.powers["strength"] = 3
+    st = klee_state([a, b])
+    dazed = statuses.make_status("dazed")
+    st.player.hand = [dazed, load("proto_ko_chain_fuse")]
+    card = load("proto_ko_kitchen_alchemy")
+    assert combat.card_playable(st, card)
+    play(st, card)
+    assert [c.id for c in st.player.hand] == ["proto_ko_chain_fuse"]
+    assert dazed in st.player.exhaust_pile
+    # Permanent: negative Strength on the body, not a this-turn loss.
+    assert (a.powers.get("strength"), b.powers.get("strength")) == (-2, 1)
+
+    c = make_enemy(hp=200, name="c")
+    st = klee_state([c])
+    st.player.hand = [statuses.make_status("dazed")]
+    play(st, _up("proto_ko_kitchen_alchemy"))
+    assert c.powers.get("strength") == -3
+
+
+def test_kitchen_alchemy_takes_one_status_of_several(overhaul):
+    """With several statuses in hand the player chooses one (the mod's
+    `CardSelectCmd.FromHand` of one); the sim's pilot takes the Confiscated,
+    the status that comes back every shuffle."""
+    st = klee_state([make_enemy(hp=200)])
+    dazed, conf = statuses.make_status("dazed"), _confiscated()
+    st.player.hand = [dazed, conf]
+    play(st, load("proto_ko_kitchen_alchemy"))
+    assert st.player.hand == [dazed]
+    assert conf in st.player.exhaust_pile
+
+
+def test_kitchen_alchemy_is_unplayable_with_no_status_in_hand(overhaul):
+    st = klee_state([make_enemy(hp=200)])
+    card = load("proto_ko_kitchen_alchemy")
+    st.player.hand = [load("proto_ko_chain_fuse")]
+    assert klee_overhaul.refuses_for_no_status(st, card)
+    assert not combat.card_playable(st, card)
+    st.player.hand.append(_confiscated())
+    assert not klee_overhaul.refuses_for_no_status(st, card)
+    assert combat.card_playable(st, card)
+    # Only the card that exhausts one carries the gate.
+    st.player.hand = []
+    assert not klee_overhaul.refuses_for_no_status(
+        st, load("proto_ko_up_in_smoke"))

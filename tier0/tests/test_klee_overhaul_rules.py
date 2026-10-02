@@ -2064,42 +2064,6 @@ def test_is_set_off_card_reads_the_row(overhaul):
     assert not klee_overhaul.is_set_off_card(load("proto_ko_pop"))
 
 
-def test_big_bounce_carries_the_overkill_to_another_enemy(overhaul):
-    """"Explosion damage past the enemy's HP is dealt to a random other
-    enemy." One plain Pyro hit for the sum of the overkill."""
-    a, b = make_enemy(hp=10, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 25)
-    state.card_aim, state.card_aim_bound = a, True
-    effects.resolve_card(state, load("proto_ko_big_bounce"))
-    assert not a.alive
-    assert b.hp == 200 - 15
-    # It does not Set off the destination: b's pile is untouched.
-    assert state.ko_set_off_this_turn == 1
-
-
-def test_big_bounce_does_not_reapply_vulnerable_at_the_destination(overhaul):
-    """Vulnerable is applied once, at the source: a Vulnerable destination
-    takes the overflow as it was measured."""
-    a, b = make_enemy(hp=10, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    b.powers["vulnerable"] = 2
-    klee_overhaul.place(state, a, 20)
-    state.card_aim, state.card_aim_bound = a, True
-    effects.resolve_card(state, load("proto_ko_big_bounce"))
-    assert b.hp == 190
-
-
-def test_big_bounce_with_no_kill_bounces_nothing(overhaul):
-    a, b = make_enemy(hp=100, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 20)
-    state.card_aim, state.card_aim_bound = a, True
-    effects.resolve_card(state, load("proto_ko_big_bounce"))
-    assert b.hp == 200
-    assert a.hp == 100 - 20 - 5
-
-
 # ---------------------------------------------------------------------------
 # THE DEFENCE SHELF -- R252
 # (`review/ruled/klee-overhaul-round-9-2026-09-04.md`, pick 1 at its default)

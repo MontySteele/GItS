@@ -143,6 +143,15 @@ KNOWN_STALE = {
     "proto_fs_eternal_applause": (
         "The Furina fade pass (2026-09-29) CUT this row from her pool (three rows cut, 75 -> 72; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a furina/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_ko_fish_flavored_bait": (
+        "Klee defence in the status pile (2026-10-01) CUT this row from her pool (three rows cut, three added; review/active/klee-status-package-2026-10-01.md sec.5). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_big_bounce": (
+        "Klee defence in the status pile (2026-10-01) CUT this row from her pool (three rows cut, three added; review/active/klee-status-package-2026-10-01.md sec.5). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_spinning_sparkler": (
+        "Klee defence in the status pile (2026-10-01) CUT this row from her pool (three rows cut, three added; review/active/klee-status-package-2026-10-01.md sec.5). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_ko_pocket_fireworks": (
         "The Klee status package (2026-10-01) CUT this row from her pool (eight rows cut, eight added; review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),

@@ -1243,6 +1243,12 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                                   if fx.get("op") == scry_op), "amount", val)
                 if ok:
                     break
+        elif key == "strength_loss":
+            # Defence in the status pile (2026-10-01, Kitchen Alchemy): how
+            # much Strength the first top-level `lose_strength` takes.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "lose_strength"),
+                             "amount", val)
         elif key == "spark":
             ok = _bump_first((fx for fx in top if fx.get("op") == "gain_spark"),
                              "amount", val)

@@ -106,7 +106,10 @@ OVERHAUL_OPS = frozenset((
     #: THE STATUS PACKAGE's two (2026-10-01): every status in hand becomes a
     #: Pop! (Klee Can Explain!), and every status in hand is exhausted to grow
     #: the largest Bomb (Albedo -- Dust of Purification).
-    "transform_statuses_into", "exhaust_statuses_grow_largest"))
+    "transform_statuses_into", "exhaust_statuses_grow_largest",
+    #: DEFENCE IN THE STATUS PILE (2026-10-01, the paper's sec.5): Kitchen
+    #: Alchemy's "Exhaust a status in your hand", the player choosing one.
+    "exhaust_a_status"))
 
 #: The player-side powers this arm reads, named here rather than spelled at
 #: each site so the sheet's `power:` values and the readers cannot drift. Every
@@ -1604,6 +1607,21 @@ def refuses_for_no_bomb(state: CombatState, card: Card) -> bool:
     return live(state) and set_off_only(card) and not any_bomb_placed(state)
 
 
+def needs_a_status(card: Card) -> bool:
+    """Does this row exhaust a status from hand (`exhaust_a_status`)? Such a
+    card is unplayable with none there, the way a base-game card with a play
+    condition is. `gen_klee_cards.card_needs_a_status`'s twin."""
+    return any(fx.get("op") == "exhaust_a_status" for fx in card.effects)
+
+
+def refuses_for_no_status(state: CombatState, card: Card) -> bool:
+    """`card_playable`'s status clause (defence in the status pile,
+    2026-10-01): Kitchen Alchemy is unplayable with no status in hand. The mod
+    refuses it at `CardModel.IsPlayable` ("no status in your hand")."""
+    return (live(state) and needs_a_status(card)
+            and not any(is_status(c) for c in state.player.hand))
+
+
 # ---------------------------------------------------------------------------
 # THE AIM -- one helper, for the random-target Set off
 # ---------------------------------------------------------------------------
@@ -2210,6 +2228,25 @@ def transform_statuses_into(state: CombatState, card_id: str) -> int:
             n += 1
     state.emit("ko_transform_statuses", into=card_id, transformed=n)
     return n
+
+
+def exhaust_a_status(state: CombatState, card: Card) -> Optional[Card]:
+    """Kitchen Alchemy: "Exhaust a status in your hand." ONE status; with
+    several the player chooses (`KleeStatusPackage.ExhaustAStatus`, a
+    `CardSelectCmd.FromHand` of one). The sim's pilot takes a Confiscated
+    first, since it is the status that returns every shuffle, else the first
+    status held. None in hand, nothing happens (the gate refuses that play)."""
+    from tier0.engine import effects, refpowers     # late import: cycle
+
+    held = [c for c in state.player.hand if is_status(c)]
+    if not held:
+        state.emit("ko_exhaust_a_status", exhausted=None)
+        return None
+    victim = next((c for c in held if is_confiscated(c)), held[0])
+    if effects.remove_instance(state.player.hand, victim):
+        refpowers.exhaust_card(state, victim)
+    state.emit("ko_exhaust_a_status", exhausted=victim.id)
+    return victim
 
 
 def exhaust_statuses_grow_largest(state: CombatState, per: int) -> int:

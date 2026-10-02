@@ -574,6 +574,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # is exhausted into the largest Bomb (Albedo -- Dust of
                   # Purification).
                   "transform_statuses_into", "exhaust_statuses_grow_largest",
+                  # DEFENCE IN THE STATUS PILE (2026-10-01, Kitchen Alchemy):
+                  # one chosen status out of the hand
+                  # (`KleeStatusPackage.ExhaustAStatus`), and a PERMANENT
+                  # Strength loss -- Malaise's `PowerCmd.Apply<StrengthPower>`
+                  # at minus N.
+                  "exhaust_a_status", "lose_strength",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -1584,6 +1590,18 @@ def card_is_set_off_only(card: dict) -> bool:
     return True
 
 
+def card_needs_a_status(card: dict) -> bool:
+    """Does this row exhaust a status from hand (`exhaust_a_status`)?
+
+    DEFENCE IN THE STATUS PILE (2026-10-01): Kitchen Alchemy needs a status in
+    hand to be playable, the way a base-game card with a play condition does.
+    DERIVED FROM THE ROW, `card_is_set_off_only`'s rule. Twin:
+    `klee_overhaul.needs_a_status`.
+    """
+    return any(eff.get("op") == "exhaust_a_status"
+               for eff in card.get("effects", []))
+
+
 def card_is_carry_out_only(card: dict) -> bool:
     """Does this row do NOTHING while the jellyfish holds no Plan? (`EB-455`.)
 
@@ -2509,6 +2527,13 @@ MULTIPLY_LARGEST_BOMB_FIELDS = {"op", "factor"}
 TRANSFORM_STATUSES_INTO_FIELDS = {"op", "card"}
 TRANSFORM_INTO_CLASSES = {"proto_ko_pop": "ProtoKoPop"}
 EXHAUST_STATUSES_GROW_LARGEST_FIELDS = {"op", "amount"}
+# DEFENCE IN THE STATUS PILE (2026-10-01). The exhaust prints no number (it
+# is always one status); the Strength loss prints one and reaches ALL
+# enemies, the one spelling a row prints (an aimed loss would need the card's
+# TargetType to follow it, which no row asks for yet).
+EXHAUST_A_STATUS_FIELDS = {"op"}
+LOSE_STRENGTH_FIELDS = {"op", "amount", "target"}
+LOSE_STRENGTH_TARGETS = ("all_enemies",)
 #: Treasure Map and Come Back and Play!: one card of a KIND out of the discard
 #: pile into the hand, the player choosing among the kind.
 FETCH_FROM_DISCARD_FIELDS = {"op", "filter"}
@@ -4157,7 +4182,10 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                          # only number an upgrade can move. Not `block`,
                          # because the two are different promises -- what the
                          # card gains, and what it will not gain past.
-                         "cap"}
+                         "cap",
+                         # DEFENCE IN THE STATUS PILE (2026-10-01): Kitchen
+                         # Alchemy's Strength loss, the `StrengthLoss` var.
+                         "strength_loss"}
                       # EB-315, the PLAN line's own numbers. A Plan is the
                       # second half of a printed face, so its clauses upgrade
                       # like any other printed number -- through a per-clause
@@ -5128,6 +5156,20 @@ def blocked_reason(
             if not isinstance(value, int) or isinstance(value, bool) \
                     or value <= 0:
                 return f"{op} amount must be a positive literal int"
+        if op == "exhaust_a_status":
+            unknown = set(eff) - EXHAUST_A_STATUS_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+        if op == "lose_strength":
+            unknown = set(eff) - LOSE_STRENGTH_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            value = eff.get("amount")
+            if not isinstance(value, int) or isinstance(value, bool) \
+                    or value <= 0:
+                return f"{op} amount must be a positive literal int"
+            if eff.get("target", "enemy") not in LOSE_STRENGTH_TARGETS:
+                return f"lose_strength target {eff.get('target')!r}"
         if op == "fetch_from_discard":
             unknown = set(eff) - FETCH_FROM_DISCARD_FIELDS
             if unknown:
@@ -7567,6 +7609,11 @@ def build_vars(card: dict) -> list[str]:
                 f'new DynamicVar("KurageTurns", {int(eff.get("amount", 1))}m)')
         elif op == "energy" and energy_upgrade(card):
             out.append(f'new DynamicVar("Energy", {int(eff["amount"])}m)')
+        elif op == "lose_strength":
+            # Defence in the status pile. Always a var (raise_fanfare_cap's
+            # rule): the face prints it and its one carrier upgrades it.
+            out.append(
+                f'new DynamicVar("StrengthLoss", {int(eff["amount"])}m)')
         elif op == "scry_take" and scry_upgrade(card):
             # `EB-679`. The Sparks idiom again -- a var ONLY when the upgrade
             # has to render, so a look-and-take row whose upgrade moves
@@ -8010,6 +8057,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # `EB-679`: tier0 bumps the scry op's own amount, and the value renders
         # off the "Scry" var this generator declares beside it.
         "scry": any(e["op"] == "scry_take" for e in effects),
+        # Defence in the status pile: tier0 bumps the first top-level
+        # `lose_strength`, and the value renders off its "StrengthLoss" var.
+        "strength_loss": any(e["op"] == "lose_strength" for e in effects),
         "encore": any(e["op"] == "gain_encore" for e in everywhere),
         "encore_cost": int(card.get("encore_cost", 0)) > 0,
         "fanfare_cost": int(card.get("fanfare_cost", 0)) > 0,
@@ -11398,6 +11448,29 @@ def build_body(
                 "await KleeStatusPackage.ExhaustStatusesGrowLargest("
                 f"choiceContext, Owner, {grow_expr(card, eff)});")
 
+        elif op == "exhaust_a_status":
+            # DEFENCE IN THE STATUS PILE: Kitchen Alchemy, one status out of
+            # the hand, the player choosing when several are held.
+            lines.append(
+                "await KleeStatusPackage.ExhaustAStatus("
+                "choiceContext, Owner, this);")
+
+        elif op == "lose_strength":
+            # DEFENCE IN THE STATUS PILE: a PERMANENT Strength loss, the base
+            # game's own Malaise call (`PowerCmd.Apply<StrengthPower>` at
+            # minus N), not a this-turn loss. Sim twin:
+            # `effects._op_lose_strength`. ALL enemies only
+            # (`LOSE_STRENGTH_TARGETS`).
+            loss = 'DynamicVars["StrengthLoss"].IntValue'
+            lines.append(
+                "foreach (var weakened in "
+                "CombatState!.HittableEnemies.ToList())\n"
+                "        {\n"
+                "            await PowerCmd.Apply<StrengthPower>("
+                f"choiceContext, weakened, -{loss}, "
+                "applier: Owner.Creature, cardSource: this);\n"
+                "        }")
+
         elif op == "multiply_largest_bomb":
             # Half a Mountain: the largest Bomb's current size, times the row.
             lines.append(
@@ -12809,10 +12882,22 @@ def _authored_face_numbers(card: dict):
                 else (None, None, int(eff["cap"]))
         elif op in POWER_UPGRADE_OPS and isinstance(eff.get("amount"), int):
             owns = eff is power_upgrade_effect(card)
-            yield ("power_amount", "PowerAmount", eff["amount"]) if owns \
+            # The delta key that BOUND it (`power_upgrade_effect`): a
+            # name-matched `weak: +1` owns PowerAmount as surely as
+            # `power_amount` does, and keying only on the latter left Up in
+            # Smoke!'s `+` face printing its base Weak (2026-10-01).
+            bound = next((k for k in POWER_UPGRADE_KEYS
+                          if k in upgrade_plan(card)[0]), "power_amount")
+            yield (bound, "PowerAmount", eff["amount"]) if owns \
                 else (None, None, eff["amount"])
         elif op == "mend" and isinstance(eff.get("amount"), int):
             yield "mend", "Mend", eff["amount"]
+        elif op == "lose_strength" and isinstance(eff.get("amount"), int):
+            # Defence in the status pile: the first one owns the var.
+            owns = eff is next((f for f in card["effects"]
+                                if f.get("op") == "lose_strength"), None)
+            yield ("strength_loss", "StrengthLoss", eff["amount"]) if owns \
+                else (None, None, eff["amount"])
         elif op == "stage_guest" and isinstance(eff.get("amount"), int):
             owns = eff is stage_guest_var_effect(card)
             yield ("stage_guest", "GuestFanfare", eff["amount"]) if owns \
@@ -14488,13 +14573,16 @@ def build_upgrade(card: dict) -> list[str]:
                "stage_toast": "cap",
                # `EB-679`, Read the Field's look count.
                "scry_take": "scry",
-               "exhaust_from": "exhaust"}
+               "exhaust_from": "exhaust",
+               # Defence in the status pile, Kitchen Alchemy's loss.
+               "lose_strength": "strength_loss"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
                "grow_bombs": 'DynamicVars["Grow"]',
                "merge_bombs": 'DynamicVars["Grow"]',
                "grow_largest_bomb": 'DynamicVars["Grow"]',
                "grow_largest": 'DynamicVars["Grow"]',
                "exhaust_statuses_grow_largest": 'DynamicVars["Grow"]',
+               "lose_strength": 'DynamicVars["StrengthLoss"]',
                "mend": 'DynamicVars["Mend"]',
                "stage_raise": 'DynamicVars["RaiseAmount"]',
                "stage_guest": 'DynamicVars["GuestFanfare"]',
@@ -15137,6 +15225,11 @@ def emit(
                 and eff.get("power") in ENEMY_APPLY_POWERS):
             target_type = TARGET_CS[eff["target"]]
             break
+        # Defence in the status pile: Kitchen Alchemy's Strength loss reaches
+        # every enemy, so the card reads AllEnemies, as Piercing Wail does.
+        if eff["op"] == "lose_strength":
+            target_type = TARGET_CS[eff["target"]]
+            break
         # Element ops (companions): a chosen-enemy swirl/apply_aura makes
         # the card aimable, same rule as place_bomb.
         if eff["op"] in ("apply_aura", "swirl"):
@@ -15410,7 +15503,8 @@ def emit(
     # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
     # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
     # into `BlockedByCardLogic` and has no slot for what the reason was.
-    if card_is_set_off_only(card) or card_is_carry_out_only(card):
+    if (card_is_set_off_only(card) or card_is_carry_out_only(card)
+            or card_needs_a_status(card)):
         interfaces += ", IUnplayableReasonCard"
 
     # EB-184: a modal card DECLARES what each of its modes does about aiming,
@@ -16422,6 +16516,25 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "    protected override bool IsPlayable =>\n"
         f"        {plan_gate_expr};"
         if plan_gated and not spark_price else "")
+    # DEFENCE IN THE STATUS PILE (2026-10-01), the same pair once more: a card
+    # that exhausts a status from hand is unplayable with none there (Kitchen
+    # Alchemy). Twin: `klee_overhaul.refuses_for_no_status`.
+    status_gated = card_needs_a_status(card)
+    status_gate_expr = (
+        "KleeStatusPackage.StatusesInHand(SparkCost.OwnerCreatureOf(this)) > 0")
+    status_gate_member = (
+        "\n\n    // Defence in the status pile: a card that exhausts a status\n"
+        "    // from hand is unplayable with none there, the way a base-game\n"
+        "    // card with a play condition is.\n"
+        "    protected override bool IsPlayable =>\n"
+        f"        {status_gate_expr};"
+        if status_gated and not spark_price else "")
+    status_reason_member = (
+        "\n\n    public string? UnplayableReason =>\n"
+        f"        {status_gate_expr}\n"
+        "            ? null\n"
+        '            : "no status in your hand";'
+        if status_gated else "")
     plan_reason_member = (
         "\n\n    public string? UnplayableReason =>\n"
         f"        {plan_gate_expr}\n"
@@ -16563,7 +16676,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>\n"
             f"        new[] {{ {flags_cs} }};")
     if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member,
-                             bomb_gate_member, plan_gate_member)) > 1:
+                             bomb_gate_member, plan_gate_member,
+                             status_gate_member)) > 1:
         raise ValueError(
             f"{card['id']}: two resource cost lines on one card -- only one "
             "IsPlayable override can be emitted")
@@ -16656,7 +16770,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{discard_discount_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{wide_target_member}{discard_discount_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{status_gate_member}{status_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

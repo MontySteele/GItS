@@ -174,7 +174,9 @@ public class KleeOverhaulRoundThreeTests
         // owns the var, Flame Dance's shape).
         // ELEVEN SINCE THE KLEE STATUS PACKAGE (2026-10-01), which cut Flame
         // Dance and Rapid Fire, both carriers, and added no Set off row.
-        Assert.Equal(11, carriers.Count);
+        // TEN SINCE ITS SEC.5 (defence in the status pile, 2026-10-01), which
+        // cut Nova Burst (Big Bounce), a carrier.
+        Assert.Equal(10, carriers.Count);
         foreach (var card in carriers)
         {
             Assert.Contains("{Damage:diff()}", Face(card));

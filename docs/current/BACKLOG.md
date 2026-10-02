@@ -13,6 +13,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 ## Kits and display (the mod)
 
 - Klee status package: art for Forbidden Fun, It Wasn't Me!, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report, Solitary Confinement and Albedo — Dust of Purification (placeholders; Dust's plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched); the three Powers borrow Party Poppers', Spark Knight's and Playdate's badges.
+- Klee defence in the status pile (2026-10-01): art for Up in Smoke!, Behind Jean's Desk and Kitchen Alchemy (placeholders).
+- Klee defence in the status pile: engine pieces the three cuts left unused (Nova Burst's `overflow: bounce` Set off / `SetOffAimedBouncing` / `BounceOverflow`, Spinning Sparkler's `grow_on_hit` rider / `HitAndGrow` / `GrowLargestOn`); delete them in C# and the sim.
 - Kokomi status batch: art for Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge, Abyssal Salvage and the Sea Glass token (placeholders); Abyssal Salvage borrows the Princess of Watatsumi badge.
 - Kokomi status batch: the stock sim pilot cannot read the next-hand Plans (Kelp Wall's count, Tidecleanse, Sea Glass Harvest, Turning Tide) or plan for statuses it has not drawn; their census rates are unread, as Coral Tithe's were.
 - Pool completion (2026-10-01): run paper sec.7's sim checks on the built pools (`review/active/pool-completion-2026-10-01.md`): each of Kokomi's four decks within 10 points of Plan volume with the new Rares granted, Furina's Solo, Spend and Guest decks within 10 points of the default drafter, and no new card taken from over 70% of offers or played in under 5% of the fights where it is held.
@@ -68,7 +70,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
 - The Big One's x4 stays armed when its Set off finds no Bomb, so a later Mine on the enemy turn can spend it.
 - Kokomi pool extension ([USER] agreed 2026-09-29, defence census): move some Plan Block to Dusk or immediate Block (five of her nine Block cards are Plans, three land next turn), and replace The Clouds Like Waves Rippling with a real defensive Power.
-- Klee: defence left as is ([USER] agreed 2026-09-29, defence census) unless [USER]'s next run says otherwise.
 - A reaction amplifier's payout is not printed: the seat log reads "Vaporize on X" with no x1.5 (Varka seat, 2026-09-29: Weak 4 -> 3 printed, 4 landed). A hit carrying an element chosen at play (Four Winds' Ascension and Northwind Avatar's current-element hit) previews no amplifier either; the multiplier is pinned by `A_current_element_hit_amplifies_like_any_hit`.
 
 ## Harness, bridge and tools

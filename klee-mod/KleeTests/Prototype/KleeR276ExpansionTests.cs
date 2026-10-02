@@ -73,7 +73,6 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoHidingSpot), CardRarity.Common, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoPlaydate), CardRarity.Common, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoJumpyDumptyMkIii), CardRarity.Uncommon, CardType.Attack, 1 },
-        new object[] { typeof(ProtoKoSpinningSparkler), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoMineAllMine), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoTeamEffort), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoOneMoreCharge), CardRarity.Uncommon, CardType.Skill, 1 },
@@ -118,10 +117,11 @@ public class KleeR276ExpansionTests
             .Where(c => c.Contains("ProtoKo")).ToList();
         var names = Rows().Select(r => ((System.Type)r[0]).Name).ToList();
         // 28 since the Klee status package (2026-10-01) cut Fish Fry and
-        // Friendship Bracelet; its own eight follow them at the end.
-        Assert.Equal(28, names.Count);
-        Assert.Equal(28, names.Distinct().Count());
-        var tail = slice.Skip(slice.Count - 36).Take(28).ToList();
+        // Friendship Bracelet, 27 since its sec.5 (defence in the status
+        // pile) cut Spinning Sparkler; its own eleven follow them at the end.
+        Assert.Equal(27, names.Count);
+        Assert.Equal(27, names.Distinct().Count());
+        var tail = slice.Skip(slice.Count - 38).Take(27).ToList();
         for (var i = 0; i < names.Count; i++)
         {
             Assert.Contains(names[i], tail[i]);
@@ -240,34 +240,6 @@ public class KleeR276ExpansionTests
         Assert.Equal(4m, up.DynamicVars.Damage.BaseValue);
         Assert.Equal(3m, up.DynamicVars["BombSize"].BaseValue);
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
-    }
-
-    [Fact]
-    public void Spinning_sparkler_grows_the_bomb_on_the_enemy_it_hit_by_the_printed_number()
-    {
-        // REAL: "grows that Bomb by 2" -- the enemy's own largest charge of
-        // hers takes it, so the pile's total rises by exactly 2; another
-        // Klee's pile and a Bomb-less enemy are untouched.
-        var (klee, a, b) = Board();
-        var other = Seat.Klee().Creature;
-        var mine = ProtoBombs.Place(a, klee.Creature,
-                                    new ProtoBombs.Charge(3), new ProtoBombs.Charge(7));
-        var theirs = ProtoBombs.Place(a, other, new ProtoBombs.Charge(9));
-        Assert.True(ProtoBombPower.GrowLargestOn(a, klee.Creature, 2));
-        Assert.Equal(new[] { 3, 9 }, mine.Charges.Select(c => c.Size));
-        Assert.Equal(new[] { 9 }, theirs.Charges.Select(c => c.Size));
-        Assert.False(ProtoBombPower.GrowLargestOn(b, klee.Creature, 2));
-
-        // STRUCTURAL: a plain Attack, twice, never a Set off.
-        var hits = Il.Calls(Il.Method("ProtoBombPower", "HitAndGrow"));
-        Assert.Contains("ProtoBombPower.GrowLargestOn", hits);
-        Assert.DoesNotContain(hits, c => c.StartsWith("ProtoBombPower.SetOff"));
-        var card = new ProtoKoSpinningSparkler();
-        Assert.Equal(5m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(2m, card.DynamicVars["Grow"].BaseValue);
-        var up = Upgraded<ProtoKoSpinningSparkler>();
-        Assert.Equal(6m, up.DynamicVars.Damage.BaseValue);
-        Assert.Equal(3m, up.DynamicVars["Grow"].BaseValue);
     }
 
     [Fact]

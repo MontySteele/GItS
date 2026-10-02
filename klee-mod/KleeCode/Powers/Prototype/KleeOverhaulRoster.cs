@@ -242,8 +242,8 @@ internal static class KleeOverhaulRoster
     /// subtraction a reader has to do.</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
-        // Cook (8)
-        ModelDb.Card<ProtoKoFishFlavoredBait>(),
+        // Cook (8; Fish-Flavored Bait cut by the status pile's defence,
+        // 2026-10-01)
         ModelDb.Card<ProtoKoChainFuse>(),
         ModelDb.Card<ProtoKoCarefulArrangement>(),
         ModelDb.Card<ProtoKoBigBaddaBoom>(),
@@ -334,7 +334,8 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoHairTrigger>(),
         ModelDb.Card<ProtoKoExplosiveFrags>(),
         ModelDb.Card<ProtoKoWhereDidIPutIt>(),
-        ModelDb.Card<ProtoKoBigBounce>(),
+        // Nova Burst (`ProtoKoBigBounce`) cut by the status pile's defence
+        // (2026-10-01).
         // THE POOL EXPANSION (R276, 2026-09-23): THIRTY rows toward the
         // 78-card pool R276 ruled, in `C.KLEE_OVERHAUL_POOL_IDS`'s order,
         // which is the sheet's -- the Companion route, the Spark-supported
@@ -343,7 +344,7 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoHidingSpot>(),
         ModelDb.Card<ProtoKoPlaydate>(),
         ModelDb.Card<ProtoKoJumpyDumptyMkIii>(),
-        ModelDb.Card<ProtoKoSpinningSparkler>(),
+        // Spinning Sparkler cut by the status pile's defence (2026-10-01).
         ModelDb.Card<ProtoKoMineAllMine>(),
         ModelDb.Card<ProtoKoTeamEffort>(),
         ModelDb.Card<ProtoKoOneMoreCharge>(),
@@ -381,5 +382,12 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoKleeCanExplain>(),
         ModelDb.Card<ProtoKoDamageReport>(),
         ModelDb.Card<ProtoKoSolitaryConfinement>(),
+        // DEFENCE IN THE STATUS PILE (2026-10-01, the paper's sec.5, ruled):
+        // Weak, Strength loss and a 14-Block wall, each paying a status, for
+        // Fish-Flavored Bait, Nova Burst and Spinning Sparkler. Still 78,
+        // 24 / 33 / 21.
+        ModelDb.Card<ProtoKoUpInSmoke>(),
+        ModelDb.Card<ProtoKoBehindJeansDesk>(),
+        ModelDb.Card<ProtoKoKitchenAlchemy>(),
     };
 }

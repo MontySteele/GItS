@@ -120,6 +120,31 @@ There is no rule change, so this is a seat round: two seats, the record and
 the fixes. You play at the finish line, which is the final pass before
 Balance.
 
+## 5. Defence in the status pile (ruled 2026-10-01)
+
+[USER]: "Ok Klee - I'd say we go for option 1 and add the defensive utility
+into her status pile, which gives some incentive for players to engage with
+it. We can give a mix of weak, high-block cards (already present) and perhaps
+an alchemy-flavored Strength reduction?"
+
+| Name | Type, cost, rarity | Text | Upgrade |
+|---|---|---|---|
+| **Up in Smoke!** | Skill, 1, Common | Apply 2 [3] Weak to ALL enemies. Shuffle a Dazed into your draw pile. | Weak +1 |
+| **Behind Jean's Desk** | Skill, 1, Uncommon | Gain 14 [18] Block. Add a Confiscated to your draw pile. | Block +4 |
+| **Kitchen Alchemy** | Skill, 1, Uncommon, Exhaust | Exhaust a status in your hand. ALL enemies lose 2 [3] Strength. | Strength loss +1 |
+
+Kitchen Alchemy is unplayable with no status in hand, the way base-game cards
+with a play condition are. With several statuses in hand the player chooses
+which to exhaust. The Strength loss is permanent, as Malaise's is.
+
+**The three swaps** (rarity stays 24 / 33 / 21):
+
+- Fish-Flavored Bait (Common) → Up in Smoke!
+- Nova Burst (Uncommon) → Behind Jean's Desk
+- Spinning Sparkler (Uncommon) → Kitchen Alchemy
+
+Why: the census (2026-10-01) found her pool had no Weak, no Strength loss and no card giving 10+ Block outright; all three now live in the status pile, so engaging with it is how she defends.
+
 ## Picks
 
 1. **Two tiers: Dazed for the fair loaders, Confiscated for the busted ones**
