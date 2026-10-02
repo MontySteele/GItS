@@ -82,6 +82,10 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Furina Stage: mirror `FurinaStage.HandTurnEndHits` (the cards in her hand that hurt her as her turn ends) in the sim's `furina_stage.forecast` (tests only).
 - Soak: `soak_screens._escape` answers the Crystal Sphere with `crystal_sphere_proceed`, which the game refuses while divinations are owed; spend them first as the seat page's `reveal` does (`blindplay_shape.sphere_reveal_action`).
 - Seat page: no screen prints the run seed or the ascension.
+- Seat page: a Furina seat never saw her own Frail or Dexterity loss printed, so Defend at 1-2 was unexplained (smoke round, 2026-10-02); check the brief page lists the player's debuffs.
+- Seat page: the Tamakushi Casket printed "(1)" between fights; its counter is combat-only (`TamakushiCasket.ShowCounter`), so the page reads `DisplayAmount` before combat state clears (smoke round, 2026-10-02).
+- Seat page: Tuning Fork prints "(7)" with no "of 10"; Where Did I Put It? prints nothing when it finds no Set off card (Klee lane 2, 2026-10-02).
+- Furina Stage log: a Gala Premiere turn printed "Usher joined the stage" twice (front, then back) before "took its Bow to make room for a summon" (smoke round, 2026-10-02).
 - Seat page: Cycle of Seasons' trigger damage prints on the line of the card that changed Varka's element, and Cycle's own line reads "Nothing this page can count landed off it" (Varka smoke seat, 2026-10-02).
 - Seat page: a dead Decimillipede segment waiting to Reattach is not on the wire (`BuildBattleState` sends only living enemies), so no page shows its revive countdown; send the body and its countdown (control seats, Ironclad and Necrobinder, 2026-09-26).
 - Seat page: orb passives and evokes at the start and end of a turn are narrated nowhere (a Frost evoked by a Lightning Rod channel read as unexplained Block); `ResolutionLedger` files card plays only (control seat, Defect, 2026-09-26).
