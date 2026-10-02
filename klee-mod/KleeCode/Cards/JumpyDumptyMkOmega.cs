@@ -57,7 +57,7 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty Mk.Omega"),
-        ("description", "Deal {Damage:diff()} damage to a random enemy 3 times. Place a [gold]Bomb[/gold] {BombDamage:diff()} on ALL enemies."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to a random enemy 3 times. Place a [gold]Bomb[/gold] {BombDamage:diff()} on ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

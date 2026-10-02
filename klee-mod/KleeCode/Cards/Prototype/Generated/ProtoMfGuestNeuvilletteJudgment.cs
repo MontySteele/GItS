@@ -59,7 +59,7 @@ public sealed class ProtoMfGuestNeuvilletteJudgment : CustomCardModel, IElementa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Neuvillette — Equitable Judgment"),
-        ("description", "Lose {HpLoss} HP. Deal {CalculatedDamage:diff()} damage to ALL enemies."),
+        ("description", "Lose {HpLoss} HP. Deal {CalculatedDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

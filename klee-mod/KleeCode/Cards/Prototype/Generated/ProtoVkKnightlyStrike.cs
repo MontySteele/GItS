@@ -51,7 +51,7 @@ public sealed class ProtoVkKnightlyStrike : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Knightly Strike"),
-        ("description", "Deal {Damage:diff()} damage. If you played a [gold]Knight[/gold] this turn, deal {BranchDamage:diff()} more."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If you played a [gold]Knight[/gold] this turn, deal {BranchDamage:diff()} more."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };

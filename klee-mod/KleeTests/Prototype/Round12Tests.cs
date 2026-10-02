@@ -57,7 +57,7 @@ public class Round12Tests
         // Klee status package, 2026-10-01.)
         var face = Face<ProtoKoTinderToss>();
         Assert.Equal(
-            "[gold]Set off[/gold] ALL enemies. Deal {Damage:diff()} damage "
+            "[gold]Set off[/gold] ALL enemies. Deal {Damage:diff()} [gold]Pyro[/gold] damage "
           + "to ALL enemies.", face);
         Assert.DoesNotContain("random", face);
     }

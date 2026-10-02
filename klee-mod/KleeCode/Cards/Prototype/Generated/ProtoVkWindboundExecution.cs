@@ -51,7 +51,7 @@ public sealed class ProtoVkWindboundExecution : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Windbound Execution"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

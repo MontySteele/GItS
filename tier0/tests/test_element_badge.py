@@ -29,9 +29,9 @@ DECLARATION the gem depends on, and each one is a way the change could rot:
      for;
   4. the switch itself, in `KleeKeywords.cs`, since a field quietly returning
      to `After` would put the sentence back on 114 faces; and
-  5. `ElementBadge` declaring a gem for exactly the four elements that leave an
-     aura -- a keyword with no icon draws nothing at all and would be invisible
-     in exactly the way the missing tooltips of `EB-272` were.
+  5. `ElementBadge` declaring a gem for every element a face can declare (the
+     four aura elements, Anemo and Geo) -- a keyword with no icon draws nothing
+     at all and would be invisible the way the missing tooltips of `EB-272` were.
 
 The C# side of the same join is `klee-mod/KleeTests/ElementBadgeTests.cs`, which
 reads the compiled attribute rather than the source line.
@@ -102,13 +102,16 @@ def test_the_rule_takes_the_cadence_first_and_the_printed_aura_after():
         "pyro", "cryo"]
 
 
-def test_an_element_that_leaves_no_aura_gets_no_keyword_and_no_gem():
-    """LAW, combat: *"Anemo/Geo leave no aura -- they only trigger."* A Swirl
-    card has always been keyword-less and sentence-less; it stays gem-less, so
-    the indicator says exactly what the sentence said and no more."""
+def test_a_swirl_leaves_no_aura_and_still_wears_the_anemo_gem():
+    """LAW, combat: *"Anemo/Geo leave no aura -- they only trigger."* So a Swirl
+    is never an AURA element. It IS Anemo, and since the co-op run of
+    2026-10-02 ("say if it does an element and also apply the symbol to the
+    card") a Swirl-only face carries Anemo's keyword, which draws the gem."""
     swirl = {"id": "x", "type": "skill",
              "effects": [{"op": "swirl", "target": "enemy"}]}
     assert gen.aura_elements_for(swirl, gen.KLEE_PROFILE, False) == []
+    assert gen.element_tag_elements_for(swirl, gen.KLEE_PROFILE, False) == [
+        "anemo"]
     assert set(gen.AURA_KEYWORD_BY_ELEMENT) == {
         "pyro", "hydro", "electro", "cryo"}
 
@@ -202,8 +205,8 @@ def test_no_applies_keyword_auto_prints_a_line_any_more():
     fields = dict(_APPLIES_FIELD.findall(
         KEYWORDS_CS.read_text(encoding="utf-8")))
 
-    # `EB-454` MADE IT SIX. Anemo and Geo leave no aura and get no gem --
-    # `IconPathFor` answers null for both, one test down -- but they DO carry
+    # `EB-454` MADE IT SIX. Anemo and Geo leave no aura (since 2026-10-02 each
+    # draws a gem of its own, one test down), and they DO carry
     # the word, because a face that names no element reads as untyped and the
     # r13 seat read `Jean -- Gale Blade` that way for a whole fight. The
     # POSITION claim is what this test is for and it is unchanged: all six are
@@ -234,11 +237,14 @@ def test_every_aura_element_declares_a_gem_of_its_own():
         # 2026-09-30 (Varka co-op playtest): Anemo's own icon, so Stormward
         # Stance's "your Anemo Attacks" can be read off the faces.
         "Anemo": "klee/powers/aura_anemo.png",
+        # 2026-10-02 (the co-op run): "say if it does an element and also
+        # apply the symbol to the card". Geo wears its own icon too.
+        "Geo": "klee/powers/aura_geo.png",
     }
-    # The four aura keywords, plus Anemo's trigger keyword.
-    assert {e.capitalize() for e in gen.AURA_KEYWORD_BY_ELEMENT} | {
-        "Anemo"} == set(declared)
-    assert "anemo" in gen.ELEMENT_KEYWORD_BY_ELEMENT
+    # The four aura keywords, plus both trigger keywords: every element a
+    # face can declare draws a gem.
+    assert {e.capitalize() for e in gen.ELEMENT_KEYWORD_BY_ELEMENT} == set(
+        declared)
 
 
 # ------------------------ `EB-378`: the two holes in the scan ---------------

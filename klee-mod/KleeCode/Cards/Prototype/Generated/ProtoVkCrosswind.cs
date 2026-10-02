@@ -51,7 +51,7 @@ public sealed class ProtoVkCrosswind : CustomCardModel, IElementalCard, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crosswind"),
-        ("description", "Deal {Damage:diff()} damage. If it [gold]Swirls[/gold], gain {BranchBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {BranchBlock:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

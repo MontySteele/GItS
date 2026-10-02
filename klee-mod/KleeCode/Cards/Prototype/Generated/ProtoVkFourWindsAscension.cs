@@ -51,7 +51,7 @@ public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Four Winds' Ascension"),
-        ("description", "Deal {Damage:diff()} damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

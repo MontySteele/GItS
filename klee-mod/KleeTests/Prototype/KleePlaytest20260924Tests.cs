@@ -54,7 +54,7 @@ public class KleePlaytest20260924Tests
         Assert.False(card is ISparkPricedCard);
         Assert.Equal(
             "[gold]Set off[/gold] only your largest [gold]Bomb[/gold] on the "
-          + "enemy. Deal {Damage:diff()} damage.",
+          + "enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage.",
             Face(card));
         Assert.Equal(3m, card.DynamicVars.Damage.BaseValue);
         Assert.Equal(5m, Upgraded<ProtoKoPocketMatch>().DynamicVars.Damage.BaseValue);

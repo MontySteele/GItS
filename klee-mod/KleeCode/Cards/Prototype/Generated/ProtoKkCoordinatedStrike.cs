@@ -56,7 +56,7 @@ public sealed class ProtoKkCoordinatedStrike : CustomCardModel, IElementalCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coordinated Strike"),
-        ("description", "Deal {Damage:diff()} damage.\nOr [gold]plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };

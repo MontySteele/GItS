@@ -120,7 +120,8 @@ def test_the_pair_is_a_shape_and_not_a_card_special_case():
 def test_flanks_face_names_the_moment_the_intents_are_read():
     row = _sheet_row("proto_kk_flank")
     assert row["description"] == (
-        "Deal 8 damage. [gold]Plan[/gold]: Deal 8 damage to each enemy that "
+        "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 8 "
+        "[gold]Hydro[/gold] damage to each enemy that "
         "intended to attack when you wrote this.")
     src = (GENERATED / "ProtoKkFlank.cs").read_text(encoding="utf-8")
     assert "intended to attack when you wrote this." in src

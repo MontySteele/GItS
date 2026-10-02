@@ -59,7 +59,7 @@ public sealed class ProtoMfChevreuseBurstingGrenades : CustomCardModel, IElement
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chevreuse — Ring of Bursting Grenades"),
-        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

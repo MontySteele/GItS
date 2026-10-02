@@ -48,7 +48,7 @@ public sealed class ProtoKoBombsAway : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bombs Away!"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. Place a [gold]Bomb[/gold] {BombSize:diff()} on ALL enemies."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies. Place a [gold]Bomb[/gold] {BombSize:diff()} on ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

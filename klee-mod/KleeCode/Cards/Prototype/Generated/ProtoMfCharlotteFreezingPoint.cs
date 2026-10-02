@@ -59,7 +59,7 @@ public sealed class ProtoMfCharlotteFreezingPoint : CustomCardModel, IElementalC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Charlotte — Framing: Freezing Point Composition"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

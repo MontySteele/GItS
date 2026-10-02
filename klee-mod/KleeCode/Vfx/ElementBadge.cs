@@ -73,10 +73,15 @@ namespace KleeMod.Vfx;
 /// hue, the <see cref="MeterCostBadge"/> rule, because hue is what a busy
 /// board and a colour-blind player lose first.
 ///
-/// GEO GETS NO GEM: it leaves no aura (LAW, combat sec.: "Anemo/Geo leave no
-/// aura -- they only trigger"). ANEMO GOT ONE ON 2026-09-30 (the Varka co-op
-/// playtest; see <see cref="TriggerGemElements"/>): Stormward Stance names
-/// "your Anemo Attacks" and the face has to say which those are.
+/// ANEMO GOT A GEM ON 2026-09-30 (the Varka co-op playtest; see
+/// <see cref="TriggerGemElements"/>): Stormward Stance names "your Anemo
+/// Attacks" and the face has to say which those are. GEO GOT ONE ON
+/// 2026-10-02, with the text rule reversed: [USER], after a co-op run, "Unify
+/// the language across all cards - say if it does an element and also apply
+/// the symbol to the card". The text names the element AND the gem shows it;
+/// a Swirl-only face carries Anemo's keyword, so it wears Anemo's gem. Neither
+/// trigger element leaves an aura on a body (LAW, combat sec.), so their gem
+/// is the card's element, not a promise of an enemy badge.
 ///
 /// `EB-454` GAVE BOTH THE KEYWORD (`KleeKeywords.AppliesAnemo` /
 /// `AppliesGeo`), so they hover a tip and print `[Anemo]` on the blind page;
@@ -132,21 +137,26 @@ internal static class ElementBadge
     /// (`klee/powers/aura_anemo.png`, art/plan.tsv `power_aura_anemo`); Anemo
     /// still leaves no aura on a body, so this is the card's element, not a
     /// promise of an enemy badge. Read AFTER the four aura elements, so a face
-    /// that carries one of them keeps that gem. Geo stays gem-less until a kit
-    /// asks for it.
+    /// that carries one of them keeps that gem. GEO JOINED IT ON 2026-10-02
+    /// ("say if it does an element and also apply the symbol to the card"):
+    /// `klee/powers/aura_geo.png`, art/plan.tsv `power_aura_geo`, which the
+    /// pck already carries with the rest of `ImageGen/images/powers/`.
     /// </summary>
     private static readonly Element[] TriggerGemElements =
     {
-        Element.Anemo,
+        Element.Anemo, Element.Geo,
     };
 
     /// <summary>The keyword a gem element is read off. The four aura elements
     /// go through <see cref="KleeKeywords.AuraApplication"/>, the table the
-    /// tip and codegen share; Anemo is its own keyword.</summary>
+    /// tip and codegen share; Anemo and Geo are their own keywords.</summary>
     private static CardKeyword GemKeyword(Element element) =>
-        element == Element.Anemo
-            ? KleeKeywords.AppliesAnemo
-            : KleeKeywords.AuraApplication(element);
+        element switch
+        {
+            Element.Anemo => KleeKeywords.AppliesAnemo,
+            Element.Geo => KleeKeywords.AppliesGeo,
+            _ => KleeKeywords.AuraApplication(element),
+        };
 
     /// <summary>
     /// The element this card's face declares, or <c>Element.None</c>.
@@ -186,8 +196,8 @@ internal static class ElementBadge
     }
 
     /// <summary>
-    /// The pck-relative texture for an element, or null where it leaves no
-    /// aura. Pure -- no loader, no node -- so the declaration is the half a
+    /// The pck-relative texture for an element, or null for one with no icon.
+    /// Pure -- no loader, no node -- so the declaration is the half a
     /// headless test can reach, the <see cref="MeterCostBadge.IconPathFor"/>
     /// split and for the same reason.
     /// </summary>
@@ -199,6 +209,7 @@ internal static class ElementBadge
             Element.Electro => "klee/powers/aura_electro.png",
             Element.Cryo => "klee/powers/aura_cryo.png",
             Element.Anemo => "klee/powers/aura_anemo.png",
+            Element.Geo => "klee/powers/aura_geo.png",
             _ => null,
         };
 

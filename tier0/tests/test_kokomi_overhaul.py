@@ -640,7 +640,7 @@ def test_undertows_face_prints_two_folded_numbers(overhaul):
     src = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "Generated" / "ProtoKkUndertow.cs").read_text(encoding="utf-8")
 
-    assert ("Deal {PlainDamage:diff()} damage. If the enemy has a debuff, "
+    assert ("Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy has a debuff, "
             "deal {DebuffDamage:diff()} instead." in src)
     assert "already including" not in src
     assert "IfUpgraded:show:10|7" not in src

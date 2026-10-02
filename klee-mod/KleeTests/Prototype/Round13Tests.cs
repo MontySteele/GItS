@@ -125,7 +125,7 @@ public class Round13Tests
     }
 
     [Fact]
-    public void Geo_draws_no_gem_and_Anemo_draws_its_own()
+    public void Geo_and_Anemo_each_draw_their_own_gem()
     {
         // THE SPLIT IS THE FIX, and it is why this is a separate assertion
         // rather than one wider map: the gem is the AURA's own icon -- the
@@ -138,10 +138,12 @@ public class Round13Tests
 
         // 2026-09-30 (Varka co-op playtest): Anemo now wears its own icon so
         // Stormward Stance's "your Anemo Attacks" can be read off the faces.
-        // Geo still draws none.
+        // 2026-10-02 (the co-op run): "say if it does an element and also
+        // apply the symbol to the card" -- Geo draws its own gem too.
         Assert.Equal("klee/powers/aura_anemo.png",
                      iconPathFor.Invoke(null, new object[] { Element.Anemo }));
-        Assert.Null(iconPathFor.Invoke(null, new object[] { Element.Geo }));
+        Assert.Equal("klee/powers/aura_geo.png",
+                     iconPathFor.Invoke(null, new object[] { Element.Geo }));
         Assert.NotNull(iconPathFor.Invoke(null, new object[] { Element.Pyro }));
     }
 

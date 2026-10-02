@@ -48,7 +48,7 @@ public sealed class ProtoKoSizzle : CustomCardModel, IElementalCard, ISetOffCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sizzle"),
-        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage."),
+        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

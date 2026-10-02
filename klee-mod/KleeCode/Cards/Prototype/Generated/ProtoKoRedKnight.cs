@@ -48,7 +48,7 @@ public sealed class ProtoKoRedKnight : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Red Knight"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. Add 2 [gold]Confiscated[/gold] to your draw pile."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies. Add 2 [gold]Confiscated[/gold] to your draw pile."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -51,7 +51,7 @@ public sealed class ProtoKkDrowningPressure : CustomCardModel, IElementalCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Drowning Pressure"),
-        ("description", "Deal {ExtraDamage:diff()} damage for each debuff on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each debuff on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -48,7 +48,7 @@ public sealed class ProtoKoPocketMatch : CustomCardModel, IElementalCard, ISetOf
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pocket Match"),
-        ("description", "[gold]Set off[/gold] only your largest [gold]Bomb[/gold] on the enemy. Deal {Damage:diff()} damage."),
+        ("description", "[gold]Set off[/gold] only your largest [gold]Bomb[/gold] on the enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

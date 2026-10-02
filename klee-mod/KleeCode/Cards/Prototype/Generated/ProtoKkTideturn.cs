@@ -51,7 +51,7 @@ public sealed class ProtoKkTideturn : CustomCardModel, IElementalCard, ICharacte
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tideturn"),
-        ("description", "Deal {ExtraDamage:diff()} damage for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

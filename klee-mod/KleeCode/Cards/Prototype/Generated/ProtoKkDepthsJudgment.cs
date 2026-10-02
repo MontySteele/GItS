@@ -51,7 +51,7 @@ public sealed class ProtoKkDepthsJudgment : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Depths' Judgment"),
-        ("description", "Deal damage equal to {ExtraDamage:diff()} times the [gold]Casket[/gold]'s count.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal [gold]Hydro[/gold] damage equal to {ExtraDamage:diff()} times the [gold]Casket[/gold]'s count.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

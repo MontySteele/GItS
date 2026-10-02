@@ -51,7 +51,7 @@ public sealed class ProtoVkGaleSweep : CustomCardModel, IElementalCard, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gale Sweep"),
-        ("description", "Deal {Damage:diff()} damage to each enemy with a fresh aura. Each hit [gold]Swirls[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage to each enemy with a fresh aura. Each hit [gold]Swirls[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

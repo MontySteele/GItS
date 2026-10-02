@@ -51,7 +51,7 @@ public sealed class ProtoKkShoalOfSpears : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shoal of Spears"),
-        ("description", "Deal {ExtraDamage:diff()} damage to ALL enemies for each [gold]Plan[/gold] you wrote this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] you wrote this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

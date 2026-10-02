@@ -284,7 +284,7 @@ public class Round16Tests
         var undertow = Source(
             "Cards/Prototype/Generated/ProtoKkUndertow.cs");
         Assert.Contains(
-            "\"Deal {PlainDamage:diff()} damage. If the enemy has a debuff, "
+            "\"Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy has a debuff, "
           + "deal {DebuffDamage:diff()} instead.\"", undertow);
         Assert.Contains("new CalculationBaseVar(7m)", undertow);
         Assert.Contains("new ExtraDamageVar(3m)", undertow);

@@ -59,7 +59,7 @@ public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Prune — Ring-A-Ding-Ding! Hexhunter Chime"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. [gold]Swirl[/gold]. The next [gold]Bomb[/gold] you set off this turn deals the swirled element instead of [gold]Pyro[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage. [gold]Swirl[/gold]. The next [gold]Bomb[/gold] you set off this turn deals the swirled element instead of [gold]Pyro[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
