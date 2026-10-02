@@ -61,6 +61,22 @@ public static class CompanionSlot
     /// <summary>tier0 NATION_WEIGHTS -- every nation 1.0 today.</summary>
     private const double NationWeight = 1.0;
 
+    /// <summary>
+    /// Whether a host relic appends the slot to THIS reward: a post-fight
+    /// reward, built for the relic's own owner, who is on the host's
+    /// character. The base game's <c>Hook.TryModifyCardRewardOptions</c> runs
+    /// every active player's relics over every player's reward
+    /// (<c>RunState.IterateHookListeners</c> gathers all seats), passing the
+    /// reward's player. A gate on the character alone therefore let two Klees
+    /// in co-op each add a companion to BOTH rewards -- five options, two of
+    /// them companions. The owner test makes it one per reward.
+    /// </summary>
+    public static bool OffersTo(RelicModel host, Player player,
+        CardCreationOptions creationOptions, bool homeCharacter) =>
+        creationOptions.Source == CardCreationSource.Encounter
+        && homeCharacter
+        && ReferenceEquals(host.Owner, player);
+
     public static CardModel? Roll(Player player, CardRarity? forcedRarity = null)
     {
         // rarity tier -> canonical companion models. personal_pool cards are

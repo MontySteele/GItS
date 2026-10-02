@@ -165,6 +165,12 @@ public class BoreasFang : CustomRelicModel
         await CardCmd.Transform(listed, rolled, CardPreviewStyle.None);
     }
 
+    /// <summary>Whether this relic adds the companion slot to the reward
+    /// being built for <paramref name="player"/>: only its own owner's,
+    /// once (see <see cref="CompanionSlot.OffersTo"/>).</summary>
+    public bool OffersCompanionTo(Player player, CardCreationOptions creationOptions) =>
+        CompanionSlot.OffersTo(this, player, creationOptions, player.Character is IVarkaCharacter);
+
     /// <summary>
     /// His companion reward slot, the fourth card choice every roster
     /// character's starting relic carries (Salon Solitaire, the Tamakushi
@@ -174,11 +180,7 @@ public class BoreasFang : CustomRelicModel
         Player player, List<CardCreationResult> cardRewardOptions,
         CardCreationOptions creationOptions)
     {
-        if (creationOptions.Source != CardCreationSource.Encounter
-            || player.Character is not IVarkaCharacter)
-        {
-            return false;
-        }
+        if (!OffersCompanionTo(player, creationOptions)) return false;
         var rarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
             ? CardRarity.Rare
             : (CardRarity?)null;

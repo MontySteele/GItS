@@ -192,6 +192,12 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
     protected override string BigIconPath =>
         KleePck.Path("klee/relics/dodoco_tales.png") ?? base.BigIconPath;
 
+    /// <summary>Whether this relic adds the companion slot to the reward
+    /// being built for <paramref name="player"/>: only its own owner's,
+    /// once (see <see cref="CompanionSlot.OffersTo"/>).</summary>
+    public bool OffersCompanionTo(Player player, CardCreationOptions creationOptions) =>
+        CompanionSlot.OffersTo(this, player, creationOptions, player.Character is Klee);
+
     /// <summary>
     /// The companion reward slot rides along UNCHANGED. It is not part of the
     /// upgrade -- it is the fourth-offer hook that has to exist for the whole
@@ -202,8 +208,7 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         Player player, List<CardCreationResult> cardRewardOptions,
         CardCreationOptions creationOptions)
     {
-        if (creationOptions.Source != CardCreationSource.Encounter) return false;
-        if (player.Character is not Klee) return false;
+        if (!OffersCompanionTo(player, creationOptions)) return false;
 
         var companionRarity =
             creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
@@ -385,6 +390,12 @@ public sealed class CurtainNeverFalls : CustomRelicModel
         KleePck.Path("furina/relics/ethereal_spotlight.png")
         ?? base.BigIconPath;
 
+    /// <summary>Whether this relic adds the companion slot to the reward
+    /// being built for <paramref name="player"/>: only its own owner's,
+    /// once (see <see cref="CompanionSlot.OffersTo"/>).</summary>
+    public bool OffersCompanionTo(Player player, CardCreationOptions creationOptions) =>
+        CompanionSlot.OffersTo(this, player, creationOptions, player.Character is Furina);
+
     /// <summary>
     /// Furina's companion reward slot, carried forward UNCHANGED from the base
     /// relic. Not part of the upgrade, and not optional: see
@@ -395,11 +406,7 @@ public sealed class CurtainNeverFalls : CustomRelicModel
         Player player, List<CardCreationResult> cardRewardOptions,
         CardCreationOptions creationOptions)
     {
-        if (creationOptions.Source != CardCreationSource.Encounter
-            || player.Character is not Furina)
-        {
-            return false;
-        }
+        if (!OffersCompanionTo(player, creationOptions)) return false;
         var rarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
             ? CardRarity.Rare
             : (CardRarity?)null;

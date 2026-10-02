@@ -206,6 +206,12 @@ public class TamakushiCasket : CustomRelicModel
     /// </summary>
     internal const string SourceName = "Tamakushi Casket";
 
+    /// <summary>Whether this relic adds the companion slot to the reward
+    /// being built for <paramref name="player"/>: only its own owner's,
+    /// once (see <see cref="CompanionSlot.OffersTo"/>).</summary>
+    public bool OffersCompanionTo(Player player, CardCreationOptions creationOptions) =>
+        CompanionSlot.OffersTo(this, player, creationOptions, player.Character is Kokomi);
+
     /// <summary>
     /// Her fourth companion reward option, kept from the Pearl of Wisdom
     /// unchanged -- see this class's header for why.
@@ -214,11 +220,7 @@ public class TamakushiCasket : CustomRelicModel
         Player player, List<CardCreationResult> cardRewardOptions,
         CardCreationOptions creationOptions)
     {
-        if (creationOptions.Source != CardCreationSource.Encounter
-            || player.Character is not Kokomi)
-        {
-            return false;
-        }
+        if (!OffersCompanionTo(player, creationOptions)) return false;
         var rarity = creationOptions.RarityOdds
                      == CardRarityOddsType.BossEncounter
             ? CardRarity.Rare

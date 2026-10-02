@@ -90,6 +90,12 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
     protected override string BigIconPath =>
         KleePck.Path("klee/relics/pounding_surprise.png") ?? base.BigIconPath;
 
+    /// <summary>Whether this relic adds the companion slot to the reward
+    /// being built for <paramref name="player"/>: only its own owner's,
+    /// once (see <see cref="CompanionSlot.OffersTo"/>).</summary>
+    public bool OffersCompanionTo(Player player, CardCreationOptions creationOptions) =>
+        CompanionSlot.OffersTo(this, player, creationOptions, player.Character is Klee);
+
     /// <summary>
     /// The companion reward slot (tier05 roll_rewards, standard mode): one
     /// companion appended to the FIGHT card reward's options.
@@ -119,8 +125,7 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
         Player player, List<CardCreationResult> cardRewardOptions,
         CardCreationOptions creationOptions)
     {
-        if (creationOptions.Source != CardCreationSource.Encounter) return false;
-        if (player.Character is not Klee) return false;
+        if (!OffersCompanionTo(player, creationOptions)) return false;
 
         var companionRarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
             ? CardRarity.Rare

@@ -89,6 +89,12 @@ public sealed class SalonSolitaire : CustomRelicModel
         await FurinaStage.OpenCombat(furina);
     }
 
+    /// <summary>Whether this relic adds the companion slot to the reward
+    /// being built for <paramref name="player"/>: only its own owner's,
+    /// once (see <see cref="CompanionSlot.OffersTo"/>).</summary>
+    public bool OffersCompanionTo(Player player, CardCreationOptions creationOptions) =>
+        CompanionSlot.OffersTo(this, player, creationOptions, player.Character is Furina);
+
     /// <summary>
     /// Furina's companion reward slot, carried over from the Ethereal
     /// Spotlight this relic replaces. The starter relic is where every roster
@@ -101,11 +107,7 @@ public sealed class SalonSolitaire : CustomRelicModel
         Player player, List<CardCreationResult> cardRewardOptions,
         CardCreationOptions creationOptions)
     {
-        if (creationOptions.Source != CardCreationSource.Encounter
-            || player.Character is not Furina)
-        {
-            return false;
-        }
+        if (!OffersCompanionTo(player, creationOptions)) return false;
         var rarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
             ? CardRarity.Rare
             : (CardRarity?)null;
