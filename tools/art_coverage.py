@@ -112,6 +112,48 @@ CARD_DIRS = tuple(dict.fromkeys(outdir for _p, outdir, _l in SHEETS))
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_spark_burst_conversion": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_spark_mode_bombs": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_spark_priced_draw": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_spark_priced_strike": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "spotlight_center_stage": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "spotlight_guest_cast": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kurages_oath_memory": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_muster_subsidy_funnel": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_itto_superlative_superstrength_either": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_itto_superlative_superstrength_priced": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_shinobu_sanctifying_ring_either": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_shinobu_sanctifying_ring_priced": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_thoma_crimson_ooyoroi_either": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_thoma_crimson_ooyoroi_priced": (
+        "Legacy cleanup stage 5 (2026-10-01, #822/#824) retired this card: a retired-arm or shipped-only row that now emits no C# (gen_prototype_cards.SIM_ONLY_ROW_IDS or the deleted shipped classes); stage 6 deletes the rows (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     # RETIRED 2026-09-24 (blank-portrait pass): the seven spare Klee paintings
     # kept here for the cut cards now wear new card ids with the same source
     # and crop (art/plan.tsv -- aftershock, dodoco, half_a_mountain,
