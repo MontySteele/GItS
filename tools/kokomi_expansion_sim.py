@@ -122,8 +122,6 @@ def enable():
     global _ENABLED
     if _ENABLED:
         return
-    from tier0 import constants as C
-    C.KOKOMI_OVERHAUL = True
     from tier0.content import loader, upgrades
     for fn in (upgrades._upgrade_index,):
         try:

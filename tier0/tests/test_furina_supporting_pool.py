@@ -17,7 +17,7 @@ from __future__ import annotations
 import random
 
 import pytest
-import yaml
+
 
 from tier0.content import loader, yaml_memo
 from tier0.engine import effects, furina_stage, reactions
@@ -25,14 +25,13 @@ from tier0.engine.state import Card, CombatState, Enemy, Player
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 FS = furina_stage
 
 
 @pytest.fixture
 def arm(monkeypatch):
-    monkeypatch.setattr(FS, "FURINA_STAGE", True)
+    yield
 
 
 def _furina(**kw):
@@ -159,15 +158,12 @@ def test_the_twenty_eight_rows_are_the_papers_tables():
 def test_every_row_but_solo_verse_replaces_a_row_the_filter_drops(arm):
     rows = _rows()
     subs = {p: s for s, p in FS.POOL_SUBS.items()}
-    shipped = {r["id"]: r for r in yaml.safe_load(
-        (loader.DOCS_DIR / "furina-cards.yaml").read_text(encoding="utf-8"))}
     for key in TABLE:
         rid = f"proto_fs_{key}"
         if rid in FS.POOL_ADDS:
             assert "replaces" not in rows[rid]
             continue
         assert rows[rid]["replaces"] == subs[rid]
-        assert shipped[subs[rid]]["rarity"] == rows[rid]["rarity"]
     # Pool completion (2026-10-01) appended six more after Solo Verse; it
     # is still the one row of this batch that replaces nothing.
     assert FS.POOL_ADDS[:1] == ("proto_fs_solo_verse",)
@@ -183,7 +179,7 @@ def test_the_additions_reach_the_offer_and_the_flag_off_pool_does_not(arm):
     from tier05 import rewards
     # Solo Verse, then the starter ruling's two Commons (2026-09-28).
     # Pool completion (2026-10-01): six more, between the two.
-    assert loader.pool_additions("furina") == (
+    assert tuple(FS.POOL_ADDS) + tuple(FS.PROMOTED_STARTERS.values()) == (
         "proto_fs_solo_verse", "proto_fs_aria_for_one",
         "proto_fs_interval_bell", "proto_fs_casting_agent",
         "proto_fs_the_last_act", "proto_fs_critics_darling",
@@ -200,10 +196,6 @@ def test_the_additions_reach_the_offer_and_the_flag_off_pool_does_not(arm):
         rewards.character_pool.cache_clear()
 
 
-def test_with_the_flag_off_there_are_no_additions():
-    assert loader.pool_additions("furina") == ()
-
-
 def test_the_two_cut_rows_leave_the_offer_and_their_shipped_rows_stay_out(arm):
     """2026-09-28 balance review ("agreed on a)"): Gentilhomme Usher (the
     card) and Understudy left the pool, and the shipped rows they replaced
@@ -212,7 +204,7 @@ def test_the_two_cut_rows_leave_the_offer_and_their_shipped_rows_stay_out(arm):
     # The 2026-09-29 audit pass added three more: Scene Change, Gala Dinner
     # and A Rapt Audience's shipped rows; the fade pass (same day) three
     # more: Held Applause, Echoing Hall and Eternal Applause's.
-    assert loader.pool_drops("furina") == ("gentilhomme_usher",
+    assert tuple(FS.POOL_DROPS) == ("gentilhomme_usher",
                                            "suffering_for_art",
                                            "held_breath", "dress_rehearsal",
                                            "crowd_work", "directors_cut",
@@ -237,14 +229,6 @@ def test_the_two_cut_rows_leave_the_offer_and_their_shipped_rows_stay_out(arm):
     finally:
         rewards.character_pool.cache_clear()
 
-
-def test_with_the_flag_off_there_are_no_drops():
-    assert loader.pool_drops("furina") == ()
-
-
-# ---------------------------------------------------------------------------
-# 1. ARRANGING THE STAGE.
-# ---------------------------------------------------------------------------
 
 def test_plot_twist_reverses_the_seats(arm):
     st = _state([["usher", 3], ["chevalmarin", 4], ["crabaletta", 5]])

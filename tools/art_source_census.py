@@ -129,8 +129,11 @@ NATIVE_DIMS = {
 # thumbnail and is priced at ZERO slots (§2, "vfx IS A DEAD REGISTER FOR HER").
 VFX_EXCEPTIONS = {"Bake-Kurage Summon.png"}
 
-SHEETS = {"kokomi": "kokomi-cards.yaml", "furina": "furina-cards.yaml",
-          "klee": "klee-cards.yaml"}
+# Every kit's faces are prototype-surface rows since legacy cleanup stage 6
+# (2026-10-01) deleted the per-character sheets; a character's faces are the
+# surface rows that name it.
+SURFACE = "prototype-surface.yaml"
+CHARACTERS = ("kokomi", "furina", "klee", "varka")
 
 # Which `art/raw/` filenames belong to a character. A census that only read
 # `art/plan.tsv` would report the pool as exactly the size of the bill by
@@ -330,11 +333,12 @@ def faces(character):
         import yaml
     except ImportError:
         return None
-    path = ROOT / "docs" / SHEETS.get(character, "")
-    if not path.exists():
+    path = ROOT / "docs" / SURFACE
+    if character not in CHARACTERS or not path.exists():
         return None
     rows = yaml.safe_load(path.read_text(encoding="utf-8")) or []
-    return {r["id"] for r in rows if isinstance(r, dict) and "id" in r}
+    return {r["id"] for r in rows if isinstance(r, dict) and "id" in r
+            and r.get("character") == character}
 
 
 def claimed_ids(character):

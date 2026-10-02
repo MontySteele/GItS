@@ -827,7 +827,11 @@ def ancient_witness() -> list[str]:
 # --------------------------------------------------------------------------
 
 def lint() -> int:
-    cards = {c["id"]: c for c in yaml.safe_load(gen.SHEET.read_text(encoding="utf-8"))}
+    # The shipped Klee sheet is deleted (legacy cleanup stage 6) and
+    # `gen.HAND_WRITTEN` is empty with it; a sheet that is gone has no rows.
+    cards = ({c["id"]: c for c in yaml.safe_load(
+        gen.SHEET.read_text(encoding="utf-8")) or []}
+        if gen.SHEET.is_file() else {})
     # gen.upgrade_deltas() is the merged index across every upgrade sheet
     # (klee + furina), matching tier0/content/upgrades.py. It replaced the
     # single-sheet read when the Fontaine companions entered Klee's slot.

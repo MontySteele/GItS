@@ -32,7 +32,6 @@ def overhaul(monkeypatch):
     `test_klee_overhaul.overhaul`'s fixture, for its reasons."""
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()

@@ -141,18 +141,27 @@ def test_the_four_visible_shapes_pass():
         assert gp._upgrade_face_finding({"damage": 3}, source) is None
 
 
-def test_a_debt_entry_for_a_row_that_left_the_surface_is_a_finding():
+#: The register is empty since its Spark-arm rows left the surface (legacy
+#: cleanup stage 6), so the two anti-rot rules are exercised on a stand-in.
+_DEBT = {"proto_probe_debt": "a stand-in debt entry for the two rules that "
+                             "keep the register from rotting"}
+
+
+def test_a_debt_entry_for_a_row_that_left_the_surface_is_a_finding(
+        monkeypatch):
     # R213 B deletes a row WHOLE. An exemption that outlives its row is an
     # exemption nobody can see -- the B6 ledger lesson, one register over.
+    monkeypatch.setattr(gp, "UPGRADE_DEBT", dict(_DEBT))
     findings = gp.upgrade_face_findings([], {}, {})
     assert findings
     assert all("not on the surface" in f for f in findings)
     assert len(findings) == len(gp.UPGRADE_DEBT)
 
 
-def test_a_debt_entry_for_a_row_that_now_passes_is_a_finding():
+def test_a_debt_entry_for_a_row_that_now_passes_is_a_finding(monkeypatch):
     # A paid debt is deleted, never left standing: an entry that no longer
     # excuses anything would quietly excuse the NEXT regression on that id.
+    monkeypatch.setattr(gp, "UPGRADE_DEBT", dict(_DEBT))
     paid = sorted(gp.UPGRADE_DEBT)[0]
     rows = [{"id": paid}]
     generated = {paid: _emitted("Deal {Damage:diff()} damage.",
@@ -172,8 +181,8 @@ def test_every_debt_entry_states_a_reason():
 # `no_upgrade:` is where a new exemption goes: it travels with the row under
 # R213 B's deletion rule, and both engines read it (the codegen through
 # `effective_upgrade`, the sim through `upgrades._prototype_deltas`). The debt
-# dict above is what is left of the same idea kept in a file, and it is now the
-# Spark arm's alone.
+# dict above is what is left of the same idea kept in a file, and it has been
+# empty since the Spark arm's rows left the surface.
 
 def _about(findings: list[str], card_id: str) -> list[str]:
     """Only the findings about one row.

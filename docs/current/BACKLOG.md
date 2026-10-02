@@ -116,13 +116,15 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `M13` `ROUTE_REGRET_MARGIN` has no derivation (Option D, no margin, stands); draft the slate and build `C2` (`review/records/regret-margin-registration-2026-08-12.md`).
 - `EB-84` enchant eligibility live smoke: three of four shapes watched; the `souls_power` to local Exhaust shape still needs a door (an Exhaust-enchant grantor with a Power in the deck).
 - The pilot heuristic (`tier0/pilot/policy.py`) does not price the full-stage Bow, and it still counts an arrival act.
+- Legacy cleanup stage 6 left the sim's shipped-kit machinery unreachable but in place: the Charge, Burst and Fanfare meters, the Kurage summon pulse, the Garment, Muster (`conscript`), the Salon, Encore, the Spotlight and the shipped Bomb detonation, with their ops, powers and constants (`tier0/engine/*`, `tier0/constants.py`, `tier05/draft.py` pricing, the `burst_max` / `fanfare` fields in `tier0/content/characters/*.yaml`); delete them at Balance with a re-baseline.
+- `tier05.draft.ROSTER_ARCHETYPES` still names the shipped archetypes (salon, spotlight, ...) and no current row carries an archetype tag, so the drafter's archetype and core-complete terms are inert on the current kits; tag the rows or retire the terms at Balance.
+- `tools/card_connectivity_report.py` does not know the current kits' Plan, Stage and overhaul ops; its row-classification test is `xfail(strict)` until the vocabulary covers them.
 
 ## Parked: start only when the named trigger fires
 
 - `EB-70` the starter-offer retune (`EB-27p`); wakes when a kit's design sweep reaches the Wings / Little Hexenzirkul class (R134).
 - `EB-80` Kokomi prevention-on-curve review; wakes if a Kokomi playtest shows she needs more warding.
 - `EB-33/34/35` repricing exhibits (The Gallery Stirs 0.0 at offer, Vulnerable as a flat debuff, no defensive term in `_reaction_value`); wake when the `_static_power` repricing session convenes.
-- `EB-198` the Kurage HUD strip's blind read (half discharged, KURAGECAD-W1); wakes with the next blind round on the shipped Kokomi kit.
 - `EB-651` a doubled `The other side` heading seen once and not reproduced; wakes on a sighting carrying the page sha.
 - `EB-12` `bridge_unreachable` with the game alive, seen once; wakes on a second observation (`hangwatch` now classifies it).
 - `EB-15` the seed's `lobby` route is unreachable in standard singleplayer; wakes with a Custom run or a hosted lobby.

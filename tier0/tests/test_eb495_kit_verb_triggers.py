@@ -245,37 +245,38 @@ SIM_CALL_SITES = {
     ('effects.py', 1): ("'bomb'", None, 'bomb.element'),
     ('effects.py', 2): ('source', None, 'element'),
     ('effects.py', 3): ("'salon_final_bow'", None, "'hydro'"),
-    ('effects.py', 4): ("'companion'", None, "'hydro'"),
-    ('effects.py', 5): ("'attack' if card.type == 'attack' else 'card'", None, "'hydro'"),
+    # The Kurage memory's pulse (a Hydro companion hit) left with the memory
+    # rule at legacy cleanup stage 6, and the rows below it moved up one.
+    ('effects.py', 4): ("'attack' if card.type == 'attack' else 'card'", None, "'hydro'"),
     # `EB-470` MOVED ONE ROW WITHOUT CHANGING ONE. Lisa's Lightning Rose volley
     # left the end-of-turn block for the start-of-turn tail, so its Electro
     # entry -- the thirteenth here -- is now the sixth and the seven between
     # rotate down one. The MULTISET is untouched: the same twenty-eight calls
     # with the same source / powered / element triple on every one, which is
     # what this census is about. Nothing here is a flag moving.
-    ('effects.py', 6): ("'companion'", None, "'electro'"),
-    ('effects.py', 7): ("'companion'", None, 'None'),
-    ('effects.py', 8): ("'salon'", 'False', "'hydro'"),
-    ('effects.py', 9): ("'burst'", None, "'pyro'"),
-    ('effects.py', 10): ("'companion'", None, "'electro'"),
-    ('effects.py', 11): ("'companion'", None, "'hydro'"),
-    ('effects.py', 12): ("'companion'", None, 'None'),
-    ('effects.py', 13): ("'companion'", None, "'cryo'"),
-    ('effects.py', 14): ("'companion'", None, "'electro'"),
+    ('effects.py', 5): ("'companion'", None, "'electro'"),
+    ('effects.py', 6): ("'companion'", None, 'None'),
+    ('effects.py', 7): ("'salon'", 'False', "'hydro'"),
+    ('effects.py', 8): ("'burst'", None, "'pyro'"),
+    ('effects.py', 9): ("'companion'", None, "'electro'"),
+    ('effects.py', 10): ("'companion'", None, "'hydro'"),
+    ('effects.py', 11): ("'companion'", None, 'None'),
+    ('effects.py', 12): ("'companion'", None, "'cryo'"),
+    ('effects.py', 13): ("'companion'", None, "'electro'"),
+    ('effects.py', 14): ("'companion'", None, 'None'),
     ('effects.py', 15): ("'companion'", None, 'None'),
-    ('effects.py', 16): ("'companion'", None, 'None'),
-    ('effects.py', 17): ("'companion'", None, "'geo'"),
-    ('effects.py', 18): ("'companion'", None, 'None'),
+    ('effects.py', 16): ("'companion'", None, "'geo'"),
+    ('effects.py', 17): ("'companion'", None, 'None'),
+    ('effects.py', 18): ("'companion'", None, "'electro'"),
     ('effects.py', 19): ("'companion'", None, "'electro'"),
-    ('effects.py', 20): ("'companion'", None, "'electro'"),
+    ('effects.py', 20): ("'companion'", None, "'cryo'"),
     ('effects.py', 21): ("'companion'", None, "'cryo'"),
-    ('effects.py', 22): ("'companion'", None, "'cryo'"),
-    ('effects.py', 23): ("'companion'", None, "'hydro'"),
-    ('effects.py', 24): ("'companion'", None, "'geo'"),
-    ('effects.py', 25): ("'companion'", None, "'hydro'"),
+    ('effects.py', 22): ("'companion'", None, "'hydro'"),
+    ('effects.py', 23): ("'companion'", None, "'geo'"),
+    ('effects.py', 24): ("'companion'", None, "'hydro'"),
+    ('effects.py', 25): ("'companion'", None, "'pyro'"),
     ('effects.py', 26): ("'companion'", None, "'pyro'"),
     ('effects.py', 27): ("'companion'", None, "'pyro'"),
-    ('effects.py', 28): ("'companion'", None, "'pyro'"),
     # POOL COMPLETION (2026-10-01): Critics' Darling, a Power's damage on a
     # chosen Spend -- element-less and unpowered, Varka's Powers' row.
     ('furina_stage.py', 1): ("'card'", 'False', 'None'),

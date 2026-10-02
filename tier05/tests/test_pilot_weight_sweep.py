@@ -46,9 +46,6 @@ from tier0.pilot import policy
 from tier0.tests.conftest import make_enemy, make_state
 from tier05 import pilot_weight_sweep as w4
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 PLACE_5 = {"op": "place_bomb", "amount": 1, "target": "enemy",
            "bomb_damage": 5}
@@ -419,7 +416,12 @@ def test_reads_are_counted_on_the_real_read_path():
 
 
 # ---------------------------------------------------------------------------
-#  Switch-off byte-identity, with its positive control
+#  Switch-off byte-identity
+#
+#  Its positive control (the exhaust cell moving under the wild vector) and
+#  the live-axis end-to-end loop were deleted at legacy cleanup stage 6: the
+#  current Kokomi kit reaches no chosen-exhaust decision, so no cell reads
+#  the exhaust weights. A new positive control waits on a cell that does.
 # ---------------------------------------------------------------------------
 
 @pytest.mark.battery
@@ -440,64 +442,6 @@ def test_switch_off_is_byte_identical_across_two_wild_vectors(
     a = w4.evaluate(cell, scope.defaults, force=False)["digest"]
     b = w4.evaluate(cell, wild, force=False)["digest"]
     assert a == b
-
-
-@pytest.mark.battery
-@pytest.mark.parametrize("cell_name,runs", [("exhaust-primary", 14)])
-def test_the_positive_control_the_previous_test_needs(switch_off, scope, wild,
-                                                      cell_name, runs):
-    """Without this, a harness that ran nothing would pass the test above.
-
-    Forcing the switch ON moves the cell, and moving the weights under it
-    moves the cell again.
-
-    THE BOMB CELL LEFT THIS CONTROL AT `C18` (`EB-136` / R210) and its
-    inertness is pinned in its own right below, which is the honest place for
-    it: the gate's Klee half no longer HAS a decision to move, because
-    `_op_place_bomb` reads the play's bound aim instead of asking
-    `bomb_placement_target`. Leaving `bomb-primary` parametrized here would
-    have turned a positive control into a standing red light for a behaviour
-    change the ruling asked for; deleting the row without replacing it would
-    have lost the fact. Both halves of the byte-identity claim above still run
-    on both cells -- on the bomb cell it now holds trivially, which is exactly
-    what the new pin says out loud.
-
-    THE EXHAUST CELL NEEDS TEN RUNS, NOT SIX, SINCE R208 / W2b (2026-08-25),
-    and the reason is content rather than harness. This control has no power
-    unless the sampled runs actually CONTAIN a chosen-exhaust decision the
-    wild vector flips. W2b re-bodied `depths_judgment` off its exhaust-pile
-    slope and revised `undertow`, which moves what a kokomi/priest deck
-    drafts and therefore how often it reaches that decision; at six runs the
-    wild vector stopped changing the digest. Six -> ten restores the control
-    and the gate claim it backstops is unchanged. This is a POWER number for
-    a control, not a threshold anything is measured against -- swept cells
-    run at `STAGE_N`, which is 40 to 2000.
-
-    TEN -> FOURTEEN SINCE W3 (EB-118 Phase 3, R211, 2026-08-25), for the SAME
-    reason and by the same kind of measurement. W3 re-bodied all three of the
-    Kokomi rows this cell drafts around -- `pearl_barrage` off its
-    exhaust-pile slope onto a selection-cost one, `shell_of_sanctuary` into a
-    cost-1 retriever, `the_tide_remembers` into a wide selection-cost attack
-    -- which moves what a kokomi/priest deck drafts and therefore how often
-    the sampled runs reach a chosen-exhaust decision the wild vector flips.
-    Measured on the real harness at 10/12/14/16/20/24/30 runs: the wild vector
-    does not move the digest at 10 or 12 and does move it at 14 and at every
-    count above. Ten -> fourteen restores the control; the gate claim it
-    backstops is unchanged.
-
-    THE WILD VECTOR ALSO GREW ONE ENTRY IN THE SAME WINDOW, and that is not
-    one fix wearing two hats: `EXHAUST_FORMULA_PAYOUT_WEIGHT` joined the
-    gate's DISCOVERED surface (see `_closure`), so a vector leaving it at its
-    shipped value was no longer "as far from the shipped one as the ranges
-    reach". Adding it did NOT on its own restore the control -- the run count
-    did -- and both changes are kept because both were separately wrong.
-    """
-    cell = _cell(cell_name, runs=runs)
-    off = w4.evaluate(cell, scope.defaults, force=False)["digest"]
-    on = w4.evaluate(cell, scope.defaults)["digest"]
-    on_wild = w4.evaluate(cell, wild)["digest"]
-    assert on != off
-    assert on_wild != on
 
 
 @pytest.mark.battery
@@ -727,17 +671,6 @@ def test_the_gate_fires_end_to_end_on_the_first_offending_point(
                      jobs=1, baseline=base)
     assert "EXHAUST_JUNK_BONUS" in str(excinfo.value)
     assert len(excinfo.value.rows) == 2 * len(cells), "point three must not run"
-
-
-def test_a_live_axis_survives_the_same_end_to_end_loop(monkeypatch):
-    """Positive control for the test above. Same by-hand vector, same reason."""
-    monkeypatch.setitem(w4.STAGE_N, "coverage", (4, 11))
-    base = dict(EXHAUST_DEFAULTS)
-    moved = {**base, "EXHAUST_COST_EFFICIENCY_WEIGHT": 1.0}
-    rows = w4.run_stage("coverage", [base, moved],
-                        ["exhaust-primary"], jobs=1, baseline=base)
-    assert len(rows) == 2
-    assert all(r["reads"]["EXHAUST_COST_EFFICIENCY_WEIGHT"] > 0 for r in rows)
 
 
 def test_the_power_floor_separates_dead_from_thin_from_live():

@@ -35,8 +35,7 @@ import yaml
 
 from tools import gen_klee_cards as gen
 
-SHEETS = ["docs/klee-cards.yaml", "docs/furina-cards.yaml",
-          "docs/kokomi-cards.yaml"]
+SHEETS = ["docs/prototype-surface.yaml"]   # the current kits' sheet
 
 
 def _card(effect: dict) -> dict:

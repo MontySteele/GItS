@@ -24,10 +24,8 @@ Every script, mapped to what actually runs it. "validate" = invoked by
 base game's own eight enchantments will accept on a mod card; the game-side
 rules are transcribed with their decompiled citation and are re-read when the
 pinned build moves. Gated by `test_enchant_parity.py`, red half included),
-`lint_strict_domination.py`, `lint_unique_names.py`, `lint_upgrade_coverage.py`,
-`lint_kokomi_decksize.py`, `lint_companion_shop_coverage.py`,
-`lint_sheet_comments.py` (currently gated on furina-cards.yaml ONLY — 35 open
-findings on the other five sheets, see audit §3.8),
+`lint_unique_names.py`, `lint_upgrade_coverage.py`,
+`lint_companion_shop_coverage.py`,
 `lint_effect_branch_scans.py` + `lint_upgrade_comment_arithmetic.py` (S1
 sweep L4/L7; both in `test_sheet_lints.py`, green and red halves each),
 `art_coverage.py`

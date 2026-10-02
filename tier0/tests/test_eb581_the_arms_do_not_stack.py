@@ -1,19 +1,11 @@
-"""`EB-581`: a row one arm of a kit retires is not grantable and not offered
-under the arm that retires it, and no two prototype rows print one title.
+"""`EB-581`: no two prototype rows print one title.
 
 WHAT THE SEAT SAW (Kokomi r21, assembled lane, (c) 1 and (c) 2). The
-coordinator granted `proto_kurages_oath_memory` -- the `KURAGE_MEMORY` base
-kit's Power, "whenever the Bake-Kurage plays a card from its memory, gain N
-Block" -- into a `KOKOMI_OVERHAUL` run. That arm has no jellyfish memory for
-the rule to fire on, so the card was INERT; and it prints the same title as
-`proto_kk_kurages_oath`, the arm's own starter Skill, so nothing on the seat's
-screen said which card it was holding. Two rounds went on it.
-
-THE ROWS ARE NOT DELETED. They are the base kit behind `C.KURAGE_MEMORY` and
-that arm is untouched. What is stated here is only that two arms of ONE KIT do
-not stack -- which both overhauls already say at the offer door by replacing
-the starter and the pool WHOLE, and which nothing said at the `--arm` grant
-door, the one the coordinator used.
+coordinator granted `proto_kurages_oath_memory` -- a retired arm's Power --
+into a Kokomi run, where it printed the same title as `proto_kk_kurages_oath`,
+the kit's own starter Skill, so nothing on the seat's screen said which card
+it was holding. The retired arm and its rows left at legacy cleanup stage 6;
+what stands is the title rule and the grant door's acceptance of a live row.
 
 NOTHING MEASURED HERE IS QUOTABLE (R215 B).
 """
@@ -25,74 +17,17 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
-from tier0 import constants as C
-from tier0.content import loader
 from understudy import embark
 
 REPO = Path(__file__).resolve().parents[2]
-MEMORY_ROW = "proto_kurages_oath_memory"
 DEV = ("0.2.9999+proto", "manifest")
 
 
-def test_the_memory_row_is_declared_superseded_by_the_overhaul():
-    assert C.PROTOTYPE_ARM_SUPERSEDED[MEMORY_ROW] == "KOKOMI_OVERHAUL"
-    assert MEMORY_ROW == C.KURAGE_MEMORY_POOL_ADD
-
-
-def test_the_klee_half_is_gone_because_the_rows_are(monkeypatch):
-    """`EB-750`, and it is the stronger form of this row's own rule.
-
-    The map used to DERIVE the Sparks arm's eleven rows from its two
-    substitution maps. R270 superseded them, so under the prototype surface's
-    deletion rule the rows themselves left HEAD rather than staying reachable
-    and refused -- a row that does not exist cannot be granted into the wrong
-    arm. Kokomi's two rows still exist, so they are still named."""
-    assert not hasattr(C, "SPARK_ALT_POOL_SUBS")
-    assert set(C.PROTOTYPE_ARM_SUPERSEDED) == {C.KURAGE_MEMORY_POOL_ADD,
-                                               C.KURAGE_MEMORY_STARTER_ADD}
-    for cid in ("proto_pop_spark", "proto_kaboom_sink", "proto_spark_strike"):
-        assert cid not in {c.id for c in loader.prototype_cards()}
-
-
-def test_the_grant_door_refuses_it(monkeypatch):
-    """THE ROW'S ACCEPTANCE, half one -- the door the coordinator used."""
-    with pytest.raises(embark.EmbarkError) as err:
-        embark.check_arms([MEMORY_ROW], DEV)
-
-    assert MEMORY_ROW in str(err.value)
-    assert "KOKOMI_OVERHAUL" in str(err.value)
-
-
-def test_the_arms_own_row_is_still_grantable():
-    """The control that makes the refusal a RULE and not a closed door: the
-    card the coordinator meant to grant goes through."""
+def test_the_retired_memory_row_is_gone_and_the_kits_row_is_grantable():
+    from tier0.content import loader                  # noqa: PLC0415
+    rows = {c.id for c in loader.prototype_cards()}
+    assert "proto_kurages_oath_memory" not in rows
     assert embark.check_arms(["proto_kk_kurages_oath"], DEV) == DEV
-
-
-def test_the_offer_door_does_not_substitute_it_under_the_overhaul(monkeypatch):
-    """THE ROW'S ACCEPTANCE, half two. With `KURAGE_MEMORY` alone the shipped
-    Oath leaves the pool and the memory row takes its slot; with the overhaul
-    on as well the pool is `KOKOMI_OVERHAUL_POOL_IDS` whole and the
-    substitution is not made at all."""
-    spec = {"id": "kokomi"}
-    monkeypatch.setattr(C, "KURAGE_MEMORY", True)
-
-    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", False)
-    assert loader._pool_substitutions(spec) == {
-        C.KURAGE_MEMORY_POOL_DROP: MEMORY_ROW}
-
-    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
-    assert loader._pool_substitutions(spec) == {}
-
-
-def test_the_declared_map_still_names_the_row_as_a_substitution():
-    """`declared_pool_substitutions` is FLAG-BLIND by contract -- it answers
-    "what id is a pool substitution at all", a schema question -- so the
-    branch above must not have taken the row out of the schema."""
-    assert (loader.declared_pool_substitutions()[C.KURAGE_MEMORY_POOL_DROP]
-            == MEMORY_ROW)
 
 
 def test_the_title_lint_is_green_and_saw_the_rows():
@@ -113,10 +48,6 @@ def test_the_title_lint_is_green_and_saw_the_rows():
     seen = re.search(r"unique: (\d+) title", res.stdout)
     assert seen is not None, res.stdout
     assert int(seen.group(1)) > 0, res.stdout
-    # And the pair `EB-581` was filed on is the exemption doing work, not an
-    # empty branch.
-    assert "pair(s) exempt" in res.stdout
-    assert " 0 pair(s) exempt" not in res.stdout
 
 
 def test_the_title_lint_bites_on_two_live_rows(tmp_path, monkeypatch):

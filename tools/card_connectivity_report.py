@@ -168,11 +168,11 @@ VOCAB_VERSION = "eb118-connectivity-v3"
 RECALL_EXHAUST_SOURCE = "exhaust"
 
 DOCS = REPO / "docs"
-MOD_SHEETS = {
-    "klee": DOCS / "klee-cards.yaml",
-    "furina": DOCS / "furina-cards.yaml",
-    "kokomi": DOCS / "kokomi-cards.yaml",
-}
+# THE MOD POOLS ARE SURFACE ROWS since legacy cleanup stage 6 (2026-10-01)
+# deleted the per-character sheets: a pool is the prototype-surface rows that
+# name the character and carry no `nation:` (companion rows are Universals).
+SURFACE = DOCS / "prototype-surface.yaml"
+MOD_CHARACTERS = ("klee", "furina", "kokomi")
 # Rarity-only lookups for cards a pool row CREATES but does not contain
 # (tokens, statuses, curses). Never classified as pool members.
 SIDE_SHEETS = REPO / "tier0" / "content" / "cards"
@@ -546,12 +546,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                   _hook("shared", "hand_contents", "use"),
                   _hook("shared", "card_identity", "write")],
     "summon_kurage": [_hook("private", "kurage", "write")],
-    # Kurage memory v3, QUARANTINED. It USES the bank (the front's price is
-    # spent) and it USES the jellyfish, which is what acts on the memory.
-    # Nothing shipped prints it -- the op exists for the prototype surface --
-    # but the table is total by construction and a missing row is a finding.
-    "play_front_memory": [_hook("private", "charge", "use"),
-                          _hook("private", "kurage", "use")],
     # --- Kokomi overhaul, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ---
     # The arm is C# first and tier0 refuses to resolve these, but the
     # connectivity vocabulary is about what state an op MOVES, which the
@@ -1021,6 +1015,13 @@ CARD_FIELDS_NO_HOOK = frozenset({
     "id", "name", "cost", "type", "rarity", "solve", "tempo_band",
     "archetypes", "role", "effects", "register", "kit_card",
     "upgrade", "notes",
+    # The prototype surface's bookkeeping fields (legacy cleanup stage 6 made
+    # it the mod corpus): who owns and wrote the row, its printed text, the
+    # retired row it re-authors, whose art it wears, and its co-op flag. None
+    # is a rule the card performs. `plan:` / `plan_dusk:` ARE rules and stay
+    # unclassified until the vocabulary learns them.
+    "character", "authored_by", "description", "replaces", "art_of",
+    "multiplayer",
 })
 # `tags:` is the sheets' second printed-rule channel -- Ethereal is spelled
 # as a tag, not as a card field (tier0/content/cards/tokens.yaml). Tags with
@@ -1366,7 +1367,11 @@ def sheet_rows(path: Path) -> list[dict]:
 
 def mod_corpus() -> dict[str, list[dict]]:
     """The three mod pools, classified. Sheets only -- no loader, no engine."""
-    sheets = {name: sheet_rows(path) for name, path in MOD_SHEETS.items()}
+    surface = sheet_rows(SURFACE)
+    sheets = {name: [row for row in surface
+                     if row.get("character") == name
+                     and not row.get("nation")]
+              for name in MOD_CHARACTERS}
     # A card an `add_card` names is often NOT a pool row -- Fish Blasting
     # creates a Status that lives on the token sheet. Junk creation is read
     # off the created row's own `rarity:`, so the side sheets are consulted

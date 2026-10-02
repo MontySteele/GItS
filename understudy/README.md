@@ -155,8 +155,8 @@ soak takes no pictures.
 
 ```
 python -m understudy.scenario check                            # parse only, no game
-python -m understudy.scenario run understudy/scenarios/spark-gate-refusal.yaml \
-    --why "EB-142: does the Spark gate show as unplayable"
+python -m understudy.scenario run understudy/scenarios/kokomi-plan-cap.yaml \
+    --why "does the Plan cap refuse a third Plan"
 ```
 
 The question it exists for is one sentence long: **put card X in hand
@@ -256,11 +256,6 @@ The pack:
 
 | file | asserts |
 |---|---|
-| `eb142-take-it-from-the-top.yaml` | both arms in one turn: Block 5 and NO damage cold, then Block 5 **and** 10 after Center Stage. The order is the design — `SpotlightSystem.ResetTurn` clears `KLEEMOD_SPOTLIGHT_MOVED` at turn start |
-| `powder-charge-detonate-bonus.yaml` | a Pop! bomb (5) plus the printed `bonus: 4` moves 9, with the Spark ladder read at 1 (refused) and 2 (allowed) |
-| `tide-of-names-splash.yaml` | 5 + 2×cost = 9 to **every living enemy**, exhausting a second copy of itself for the cost-2 rung. The splash is the half no sheet lint can see |
-| `spark-gate-refusal.yaml` | `hold_the_line` reads `can_play: false` at Sparks 0 and 1 with the game's own `UnplayableReason`, and playable at 2. The bank is EARNED by play here, which is what makes this the instrument for the rule |
-| `set-power-sparks.yaml` | **EB-146**: the `set_power` door itself — Sparks written 0 -> 2 onto a creature carrying no Spark badge at all (an apply), then 2 -> 0 (a removal), with the gate answering the written bank exactly as it answers a played one |
 | `eb292-plan-on-pet-hang.yaml` | **EB-292**: two Plan cards onto the Bake-Kurage in one turn, the turn boundary that drains them, and a play on the turn after — with `godot.log` read for a non-finite number after each. The only file in the pack whose subject the wire cannot see |
 
 **`assumptions` is part of the file format and is printed with the result.** An
@@ -280,21 +275,12 @@ bookkeeping write stays out of the `ModifyPowerAmountGiven` chain so nothing can
 inflate or shrink the exact number. The receive chain still runs, so Artifact
 still eats a debuff the way it would in play, and the response reports the
 amount REQUESTED with `queued: true` — the landed number is read off the next
-state. `set-power-sparks.yaml` is the file that exercises it.
-
-**The two Klee scenarios that EARN their Sparks keep earning them.**
-`spark-gate-refusal.yaml` and `powder-charge-detonate-bonus.yaml` climb the bank
-by playing Sparkly Treasure (cost 0, `gain_spark 1`), and neither was converted:
-a scenario whose subject is the RULE is more honest when the bank got there the
-way a player's would.
+state.
 
 **`set_power` writes the STACK COUNT; the wire prints `DisplayAmount`.** They
 are the same number for most powers and deliberately different for at least one:
 `BombPower.Amount` is the bomb COUNT and its badge is total pending detonation
-damage (ruled 2026-07-20). An `expect: {power: ...}` is reading the badge, which
-is why `powder-charge-detonate-bonus.yaml` asserts a Pop! bomb at **5** and not
-at 1 — the first live run of that file asserted 1, read 5, and the file was the
-thing that was wrong.
+damage (ruled 2026-07-20). An `expect: {power: ...}` is reading the badge.
 
 **And the count is ALL `set_power` writes**, which is a limit worth knowing
 before it costs a session. A power carrying a payload beside its stack count is

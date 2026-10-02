@@ -173,10 +173,11 @@ def test_neither_reskin_ships_an_upgrade_path():
 def test_the_victim_is_a_starter_and_never_a_drafted_card():
     """`c.IsTransformable && c.Rarity == CardRarity.Basic`, both branches.
 
-    The printed deck is all basics, so the drafted cards are added here: two
-    uncommons and a rare, none of which may be eaten however badly the drafter
+    The printed deck is all basics, so the drafted cards are added here: a
+    common, an uncommon and a rare, none of which may be eaten however badly the drafter
     rates them against the plan."""
-    drafted = ["sugar_rush", "controlled_demolition", "fish_blasting"]
+    drafted = ["proto_ko_fish_blasting", "proto_ko_big_badda_boom",
+               "proto_ko_all_of_my_treasures"]
     st = _st(deck_ids=list(loader.starting_deck("klee")) + drafted)
     assert all(loader.peek_card(c).rarity != events.STARTER_RARITY
                for c in drafted)                 # or the test is vacuous
@@ -206,7 +207,8 @@ def test_a_starterless_deck_locks_both_transform_branches():
     event layer models no event-level availability rule for any of the 36
     events that declare one, so this follows the house treatment rather than
     growing a second gate for one event."""
-    st = _st(deck_ids=["kaeya_frostgnaw", "sugar_rush"])
+    st = _st(deck_ids=["proto_mc_kaeya_frostgnaw",
+                       "proto_ko_all_of_my_treasures"])
     assert all(loader.peek_card(c).rarity != events.STARTER_RARITY
                for c in st.deck_ids)
     assert [o["label"] for o in events.available(_event(), st)] == ["Snake"]
@@ -215,11 +217,12 @@ def test_a_starterless_deck_locks_both_transform_branches():
 def test_a_deck_with_no_slither_target_locks_only_the_snake_branch():
     """The wiki's own parenthetical: 'Locked if no cards can be enchanted with
     Slither'. A deck of X-cost cards is the shape that trips it -- Slither
-    refuses `CostsX` -- and here it is built out of a starter plus Klee's two
-    X-cost rows so the transform branches stay live and the lock is visibly
-    per-option."""
-    st = _st(deck_ids=["kaboom", "controlled_demolition", "fish_blasting"])
-    st.deck_ids[0] = enchantments.decorate("kaboom", "sharp", 2)
+    refuses `CostsX` -- and here it is built out of an already-enchanted
+    starter plus the surface's one X-cost row (twice) so the transform branches
+    stay live and the lock is visibly per-option."""
+    st = _st(deck_ids=["strike", "proto_vk_thundering_verdict",
+                       "proto_vk_thundering_verdict"])
+    st.deck_ids[0] = enchantments.decorate("strike", "sharp", 2)
     labels = [o["label"] for o in events.available(_event(), st)]
     assert labels == ["Bird", "Torus"]
 
@@ -232,7 +235,7 @@ def test_the_transform_counts_as_a_deck_add_for_book_of_five_rings():
     events.resolve(random.Random(0), _event(), _opt("Bird"), st)
     assert st.cards_added == 1
     # ...and it forecasts zero once there is nothing left to transform.
-    dry = _st(deck_ids=["kaeya_frostgnaw"])
+    dry = _st(deck_ids=["proto_mc_kaeya_frostgnaw"])
     assert events._adds_of(_opt("Bird"), dry) == 0
 
 
@@ -316,10 +319,10 @@ def test_slither_rerolls_the_cost_of_its_own_card_when_it_is_drawn():
     in 0..3, the card's neighbours are untouched, and a card that never left
     the draw pile keeps its printed cost."""
     from tier0.engine import refpowers
-    cid = enchantments.decorate("kaboom", "slither")
+    cid = enchantments.decorate("strike", "slither")
     seen = set()
     for seed in range(40):
-        state = _fight_state([cid, "kaboom"], seed=seed)
+        state = _fight_state([cid, "strike"], seed=seed)
         drawn = next(c for c in state.player.draw_pile
                      if c.on_draw_randomise_cost)
         plain = next(c for c in state.player.draw_pile

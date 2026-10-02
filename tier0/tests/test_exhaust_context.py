@@ -29,11 +29,7 @@ from tier0.content import loader
 from tier0.engine import combat, effects
 from tier0.engine.state import Card, CombatState
 from tier0.tests.conftest import make_enemy
-import pytest
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 
 def kokomi_state(seed=0):
@@ -265,17 +261,6 @@ def test_nothing_survives_a_combat():
 
 
 # --- 4. character neutrality ----------------------------------------------
-
-def test_kokomis_context_never_carries_junk():
-    """Her rotation law filters the pool BEFORE the record is written, so the
-    context cannot report a Status even to a card that asks about rarity."""
-    st = kokomi_state()
-    st.player.hand = [loader.get_card("curse_guilty"),
-                      loader.get_card("confiscated"),
-                      a_card(id="hers", cost=1)]
-    effects.resolve_card(st, burner(amount=3))
-    assert [d["id"] for d in st.exhaust_selection] == ["hers"]
-
 
 def test_an_explicit_status_filter_records_its_victims_too():
     """Dodge Roll's shape. The context mechanism is the op's, not Kokomi's --

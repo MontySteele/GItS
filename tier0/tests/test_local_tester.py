@@ -356,9 +356,21 @@ RETIRED_TWIN_TIDES = {
                      {"op": "block", "amount": 12}]}]}]}
 
 
+# And its READER, for the same reason one stage later: `all_streams_flow` was
+# a shipped Kokomi row, deleted with the shipped sheets at legacy cleanup
+# stage 6. Declared here as it printed, so the recorded forms keep their
+# meaning.
+RETIRED_ALL_STREAMS = {
+    "id": "all_streams_flow", "name": "All Streams Flow to the Sea",
+    "character": "kokomi", "cost": 1, "type": "attack", "rarity": "uncommon",
+    "effects": [{"op": "damage", "amount": 5, "target": "enemy",
+                 "bonus_formula": "1_per_2_charge"}]}
+
+
 def _index_with_retired() -> dict:
     index = dict(resource_order.card_index())
-    index[resource_order.normalise(RETIRED_TWIN_TIDES["name"])] =         RETIRED_TWIN_TIDES
+    for row in (RETIRED_TWIN_TIDES, RETIRED_ALL_STREAMS):
+        index[resource_order.normalise(row["name"])] = row
     return index
 
 # The recorded `opus-5-fresh` order on the same board: the Charge-reading
@@ -425,22 +437,30 @@ def test_a_title_no_sheet_prints_is_disclosed_not_flagged():
 def test_a_gain_before_a_read_is_never_flagged():
     """`gain_charge` is not `spend_charge`, and banking before a payoff is the
     line the pilot is supposed to find."""
+    index = _index_with_retired()
+    index["rally the isles"] = {
+        "id": "mass_mobilization", "name": "Rally the Isles",
+        "effects": [{"op": "gain_charge", "amount": 1}]}
     line = [{"card": "Rally the Isles"},
             {"card": "All Streams Flow to the Sea"}]
-    assert resource_order.findings(line) == []
+    assert resource_order.findings(line, index=index) == []
 
 
-def test_the_flag_routes_the_turn_regardless_of_the_rate(server, tmp_path):
+def test_the_flag_routes_the_turn_regardless_of_the_rate(server, tmp_path,
+                                                         monkeypatch):
     """The condition's own words: *require* review. So it is not subject to
     the spot-check rate, and it is not subject to the rate being zero.
 
-    The LINE here is Furina's shipped pair rather than the seat's recorded
-    `t06` one, because this test reads the sheets through `read_turn` and
-    cannot be handed an index: `Twin Tides` left the surface with R227's
-    retirement, and a routing pin that depended on a retired row would be a
-    pin on the fixture rather than on the routing. The shape is the same one
-    -- a spend, then a play that reads what it spent."""
-    line = [{"card": "Slip Backstage"}, {"card": "Compose Herself"}]
+    `read_turn` reads the sheets and cannot be handed an index, and no
+    current row READS a meter, so the seat's recorded `t06` pair is served
+    through the declared index (`card_index` patched for this test). The
+    shape is the one the flag exists for -- a spend, then a play that reads
+    what it spent."""
+    declared = _index_with_retired()
+    monkeypatch.setattr(resource_order, "card_index",
+                        lambda repo=None: declared)
+    line = [{"card": "Twin Tides", "choose": "Spend 6 Charge: gain 12 Block."},
+            {"card": "All Streams Flow to the Sea"}]
     qa = _qa(tmp_path, ORDER_TURN)
     server.content = _form(qa, ORDER_TURN, line)
     record = local_tester.read_turn(ORDER_TURN, client=_client(server),
@@ -450,8 +470,8 @@ def test_the_flag_routes_the_turn_regardless_of_the_rate(server, tmp_path):
     assert record["seat_review_required"]
     assert record["seat_review_reasons"] == ["resource_order"]
     flag = record["resource_order_flag"]
-    assert flag and flag[0]["spent_by"] == "Slip Backstage"
-    assert flag[0]["read_by"] == "Compose Herself"
+    assert flag and flag[0]["spent_by"] == "Twin Tides"
+    assert flag[0]["read_by"] == "All Streams Flow to the Sea"
     assert "charge" in record["resource_order"]["rule"] or \
         "meter" in record["resource_order"]["rule"]
 

@@ -235,20 +235,19 @@ def test_free_attack_zeroes_attacks_and_decrements_per_play_index():
     assert p.powers["free_attack"] == 1
 
 
-def test_free_attack_and_spark_are_both_consumed():
-    # FreeAttackPower.BeforeCardPlayed decrements on ANY owner Attack play --
-    # it does not check whether its discount was the one that mattered. So a
-    # spark-freed attack burns the spark bank (tier0's native branch runs
-    # first in card_cost) AND a FreeAttack stack. Pinning the double spend is
-    # the point; either answer is defensible, silence is not.
+def test_free_attack_is_consumed_and_a_full_spark_bank_is_not():
+    # FreeAttackPower.BeforeCardPlayed decrements on ANY owner Attack play.
+    # The shipped Sparks free-Attack rule ("at 3 Sparks your Attacks cost 0")
+    # left both engines at legacy cleanup stage 5/6, so a full bank is no
+    # longer spent by an Attack: only the FreeAttack stack pays.
     state = bound_state()
     p = state.player
-    p.sparks = combat.spark_threshold(state)
+    p.sparks = 3
     p.powers["free_attack"] = 1
     atk = card("atk", cost=2)
     p.hand = [atk]
     combat.play_card(state, atk)
-    assert p.sparks == 0
+    assert p.sparks == 3
     assert p.powers["free_attack"] == 0
 
 

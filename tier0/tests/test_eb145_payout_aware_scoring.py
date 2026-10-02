@@ -33,6 +33,28 @@ from tier0.tests.conftest import make_enemy, make_state
 
 CARRIERS = ("pearl_barrage", "the_tide_remembers")
 
+#: The two retired Kokomi carriers, kept as their shapes (legacy cleanup stage
+#: 6 deleted the sheet). No current row prints a selection formula, so these
+#: are the fixtures the seam is pinned on.
+SHAPES = {
+    "pearl_barrage": dict(name="Pearl Barrage", cost=1, type="attack",
+                          character="kokomi", rarity="uncommon", effects=[
+        {"op": "exhaust_from", "amount": 1, "select": "chosen"},
+        {"op": "damage", "target": "enemy", "amount_formula": {
+            "base": 5, "per": 3, "count": "exhaust_selection_cost"}}]),
+    "the_tide_remembers": dict(name="Tide of Names", cost=2, type="attack",
+                               character="kokomi", rarity="uncommon",
+                               effects=[
+        {"op": "exhaust_from", "amount": 1, "select": "chosen"},
+        {"op": "damage", "target": "all_enemies", "amount_formula": {
+            "base": 5, "per": 2, "count": "exhaust_selection_cost"}}]),
+}
+
+
+def shape(cid):
+    return Card(id=cid, **{k: (list(v) if k == "effects" else v)
+                           for k, v in SHAPES[cid].items()})
+
 
 def card(cid, cost=1, type="skill", effects_=None, **kw):
     return Card(id=cid, name=cid, cost=cost, type=type,
@@ -49,7 +71,7 @@ def board(hand, enemies=1, hp=80):
 
 
 def formula(cid):
-    row = loader.get_card(cid)
+    row = shape(cid)
     for fx in row.effects:
         if fx.get("op") == "damage" and isinstance(fx.get("amount_formula"),
                                                    dict):
@@ -59,19 +81,8 @@ def formula(cid):
 
 # --- the two carriers ------------------------------------------------------
 
-def test_exactly_two_shipped_rows_print_a_selection_formula():
-    """The blast radius of this repair, enumerable and asserted in both
-    directions. A third row printing one is priced here automatically -- and
-    is a window's worth of moved numbers that has to be said out loud."""
-    printed = sorted(
-        c.id for c in loader._card_index().values()
-        if any(policy._reads_a_selection(fx)
-               for fx in policy._printed_effects(c.effects)))
-    assert printed == sorted(CARRIERS)
-
-
 def test_tide_of_names_scores_base_plus_slope_times_the_chosen_cost():
-    tide = loader.get_card("the_tide_remembers")
+    tide = shape("the_tide_remembers")
     fx, target = formula("the_tide_remembers")
     assert target == "all_enemies"
     victim = card("fat", cost=2)
@@ -85,7 +96,7 @@ def test_the_wide_payout_is_multiplied_by_the_living_bodies():
     """R211's multiplicity clause at the SCORE. It is not a second multiply
     added here: `_expected_damage` already sums an `all_enemies` effect over
     `state.living_enemies`, so making the amount right makes the board right."""
-    tide = loader.get_card("the_tide_remembers")
+    tide = shape("the_tide_remembers")
     fx, _ = formula("the_tide_remembers")
     victim = card("fat", cost=2)
     per_body = fx["base"] + fx["per"] * victim.cost
@@ -99,7 +110,7 @@ def test_the_wide_payout_is_multiplied_by_the_living_bodies():
 def test_pearl_barrage_was_blind_the_same_way_and_is_fixed_in_the_same_seam():
     """The row asks whether the aimed carrier shares the blindness. It does,
     at a STEEPER slope (`per: 3`), and neither card is named in the fix."""
-    pearl = loader.get_card("pearl_barrage")
+    pearl = shape("pearl_barrage")
     fx, target = formula("pearl_barrage")
     assert target == "enemy"
     victim = card("fat", cost=2)
@@ -144,7 +155,7 @@ def test_the_forecast_is_the_selection_the_engine_actually_makes():
     forecast of what it will eat cannot disagree with what it eats. Both sides
     build the pool with `effects.exhaust_pool` and pick with the same chooser,
     so this is agreement by construction rather than by coincidence."""
-    tide = loader.get_card("the_tide_remembers")
+    tide = shape("the_tide_remembers")
     hand = [tide, card("fat", cost=2), card("mid", cost=1),
             card("cheap", cost=0)]
     state = board(hand)
@@ -163,7 +174,7 @@ def test_the_forecast_excludes_the_card_being_played():
     """At resolution the played card has already left hand; at score time it
     has not. `exhaust_pool(exclude=...)` is what makes the two agree, and a
     card that could eat ITSELF would forecast a payout it can never buy."""
-    pearl = loader.get_card("pearl_barrage")
+    pearl = shape("pearl_barrage")
     state = board([pearl])
     assert policy._forecast_exhaust_selection(state, pearl) == []
     fx, _ = formula("pearl_barrage")
@@ -173,7 +184,7 @@ def test_the_forecast_excludes_the_card_being_played():
 def test_the_forecast_respects_kokomis_rotation_law():
     """The pool the engine offers her never holds junk, so neither does the
     pool the score forecasts off. One definition, two consumers."""
-    tide = loader.get_card("the_tide_remembers")
+    tide = shape("the_tide_remembers")
     junk = Card(id="status_burn", name="Burn", cost=2, type="status",
                 rarity="status", effects=[])
     state = board([tide, junk, card("mid", cost=1)])
@@ -189,7 +200,7 @@ def test_the_forecast_follows_the_eb118_switch(monkeypatch):
     is not going to take -- and the W4 gate claim would become false at the
     scorer. Same gate, same fallback."""
     monkeypatch.setattr(policy, "PILOT_POLICIES_ENABLED", False)
-    tide = loader.get_card("the_tide_remembers")
+    tide = shape("the_tide_remembers")
     hand = [tide, card("fat", cost=2), card("cheap", cost=0)]
     state = board(hand)
 
@@ -205,7 +216,7 @@ def test_the_forecast_follows_the_eb118_switch(monkeypatch):
 # --- the forecast leaves no trace ------------------------------------------
 
 def test_the_live_selection_is_restored_after_a_score():
-    tide = loader.get_card("the_tide_remembers")
+    tide = shape("the_tide_remembers")
     state = board([tide, card("fat", cost=2)])
     state.exhaust_selection = [{"id": "earlier", "cost": 9, "type": "skill",
                                 "rarity": "common", "companion": False,
@@ -215,7 +226,7 @@ def test_the_live_selection_is_restored_after_a_score():
 
 
 def test_the_selection_is_restored_even_when_the_formula_raises(monkeypatch):
-    tide = loader.get_card("the_tide_remembers")
+    tide = shape("the_tide_remembers")
     state = board([tide, card("fat", cost=2)])
     before = state.exhaust_selection
 
@@ -241,7 +252,7 @@ def test_a_card_printing_no_selection_formula_never_reaches_the_chooser(
     monkeypatch.setattr(policy, "_forecast_exhaust_selection", boom)
     state = board([], enemies=2)
     tripped = []
-    for row in loader._card_index().values():
+    for row in [*loader.prototype_cards(), *map(shape, CARRIERS)]:
         state.player.hand = [row]
         for term in (policy._expected_damage, policy._raw_block):
             try:
@@ -254,12 +265,12 @@ def test_a_card_printing_no_selection_formula_never_reaches_the_chooser(
     assert sorted(set(tripped)) == sorted(CARRIERS)
 
 
-def test_no_shipped_row_prints_a_selection_reading_BLOCK_formula():
+def test_no_current_row_prints_a_selection_reading_BLOCK_formula():
     """`_raw_block` reads formulas through the same seam, so a Block that
     counted a selection would be priced correctly today. None is printed --
     stated so that the damage-only wording above is a fact about the sheet and
     not a gap in the repair."""
-    for row in loader._card_index().values():
+    for row in loader.prototype_cards():
         for fx in policy._printed_effects(row.effects):
             if fx.get("op") == "block":
                 assert not policy._reads_a_selection(fx), row.id
@@ -271,7 +282,7 @@ def test_the_chooser_itself_is_unchanged_by_this_window():
     ratified pick byte-identical and terminates the recursion -- the forecast
     asks the chooser, the chooser values candidates, and one of the two has to
     stop."""
-    pearl = loader.get_card("pearl_barrage")
+    pearl = shape("pearl_barrage")
     fx, _ = formula("pearl_barrage")
     state = board([card("host", cost=1), pearl, card("fat", cost=2)])
 
@@ -291,8 +302,8 @@ def test_the_chooser_itself_is_unchanged_by_this_window():
 def test_two_carriers_in_one_hand_terminate():
     """The recursion the latch exists for, exercised rather than reasoned
     about: each card forecasts a pool that holds the other."""
-    pearl = loader.get_card("pearl_barrage")
-    tide = loader.get_card("the_tide_remembers")
+    pearl = shape("pearl_barrage")
+    tide = shape("the_tide_remembers")
     state = board([pearl, tide, card("fat", cost=2)])
     assert policy._expected_damage(state, pearl) > 0
     assert policy._expected_damage(state, tide) > 0

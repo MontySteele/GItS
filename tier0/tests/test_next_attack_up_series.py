@@ -41,7 +41,7 @@ COMPANION_POWERS = (
     ROOT / "klee-mod" / "KleeCode" / "Powers" / "CompanionPowers.cs"
 ).read_text(encoding="utf-8")
 
-PROBE = "kaboom"          # klee common, single `damage` effect, no riders
+PROBE = "strike"          # the base Strike: a single `damage` effect, no riders
 
 
 def _damage_dealt(before, after):

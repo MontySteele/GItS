@@ -294,7 +294,6 @@ def test_a_swirl_over_every_enemy_swirls_once(monkeypatch):
     # Venti's Wind's Grand Ode Swirls every enemy at the end of the turn. On
     # the consume rule that was a Swirl per body; now the first spreads spent
     # copies and the rest pay nothing.
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
     st = three()
     hit(st, st.enemies[0], "pyro", 0)
     st.player.powers["mc_grand_ode"] = 1

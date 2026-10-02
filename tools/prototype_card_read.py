@@ -53,10 +53,10 @@ from tier05 import draft, model, rewards, run_metrics
 #: registered default (`roster.ROSTER`), so nothing here invents a pairing
 #: `tier05.runner.resolve_plan` would refuse.
 ARMS: dict[str, dict[str, str]] = {
-    "klee": {"flag": "KLEE_OVERHAUL", "character": "klee",
+    "klee": {"flag": "the Klee kit", "character": "klee",
              "archetype": "demolition", "pilot": "demolition",
              "prefix": "proto_ko_"},
-    "kokomi": {"flag": "KOKOMI_OVERHAUL", "character": "kokomi",
+    "kokomi": {"flag": "the Kokomi kit", "character": "kokomi",
                "archetype": "priest", "pilot": "priest",
                "prefix": "proto_kk_"},
 }
@@ -64,30 +64,17 @@ ARMS: dict[str, dict[str, str]] = {
 
 @contextlib.contextmanager
 def arm_live(arm: str):
-    """`C.<ARM>_OVERHAUL` True inside the block, restored on the way out.
+    """Every memoized door cleared going in and coming out.
 
-    Every memoized door is cleared going in AND coming out, because a cache
-    filled on one side of a flag is a wrong answer on the other. tier0's four
-    are `loader.reset_arm_caches()`, stated once beside the flags they depend
-    on; `rewards.character_pool` is tier 0.5's and is cleared here because
-    tier0 may not import it.
-
-    `EB-569`: this used to name `_card_prototype` alone, which left
-    `_substituted_card_index` and the two upgrade indices warm and holding the
-    arm's rows -- a read run in-process before anything else then answered as
-    if the arm were still on. The suite's own witness was
-    `test_prototype_surface.py` failing after this file's cohort test on the
-    same xdist worker.
+    The kits are always on (legacy cleanup stage 6); this stays a context
+    manager so a read starts from cold caches whatever ran before it in the
+    same process (`EB-569`).
     """
-    flag = ARMS[arm]["flag"]
-    previous = getattr(C, flag)
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
-    setattr(C, flag, True)
     try:
         yield
     finally:
-        setattr(C, flag, previous)
         loader.reset_arm_caches()
         rewards.character_pool.cache_clear()
 
@@ -119,7 +106,7 @@ def probe_arm_runnable(arm: str, seed: int = 7) -> str | None:
         op for op, fn in effects.OPS.items()
         if getattr(fn, "__name__", "") == marker)
     if unbuilt:
-        return (f"the {ARMS[arm]['flag']} arm does not run in this engine: "
+        return (f"{ARMS[arm]['flag']} does not run in this engine: "
                 f"{', '.join(unbuilt)} are registered under a refusing "
                 "handler (C# first; the sim was not brought up for it)")
     return None

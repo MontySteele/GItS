@@ -100,30 +100,6 @@ OUT_DIR = REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
 MANIFEST = OUT_DIR / "manifest.json"
 NAMESPACE = "KleeMod.Cards.Prototype.Generated"
 
-#: RETIRED-ARM ROWS, SIM ONLY (legacy cleanup stage 5, 2026-10-01). The twelve
-#: rows of three retired arms -- the Sparks alternative cost (`proto_spark_`
-#: and the Shinobu, Thoma and Itto twins), the Kurage Memory
-#: (`proto_kurages_oath_memory`) and the Muster subsidy
-#: (`proto_muster_subsidy_funnel`) -- are in no pool's offer, and the shipped
-#: engine pieces their C# held on to (Klee's Burst meter, the shipped Bomb,
-#: the Muster transform, the Bake-Kurage pulse) were deleted with the shipped
-#: kits. The rows stay on the sheet because the sim's arm flags still read
-#: them; stage 6 deletes the rows with those flags. Until then no C# class is
-#: emitted for them.
-SIM_ONLY_ROW_IDS = frozenset({
-    "proto_spark_priced_strike",
-    "proto_spark_priced_draw",
-    "proto_spark_burst_conversion",
-    "proto_spark_mode_bombs",
-    "proto_shinobu_sanctifying_ring_either",
-    "proto_shinobu_sanctifying_ring_priced",
-    "proto_thoma_crimson_ooyoroi_either",
-    "proto_thoma_crimson_ooyoroi_priced",
-    "proto_itto_superlative_superstrength_either",
-    "proto_itto_superlative_superstrength_priced",
-    "proto_kurages_oath_memory",
-    "proto_muster_subsidy_funnel",
-})
 SCRIPT = "tools/gen_prototype_cards.py"
 
 # The directory-and-manifest identity `_check_plan` / `_write_plan` read. Its
@@ -259,13 +235,6 @@ _SPARK_PRICE_UPGRADED = re.compile(
 #: `gen_klee_cards.build_vars`' own branch; the two move together.
 _VAR_FEEDS = {"CalculationBase": {"CalculatedDamage", "CalculatedBlock"}}
 
-_DEBT_SPARK_ARM = (
-    "outside the Prototype-stage rule by declaration: `EB-218`'s Spark-arm "
-    "migration twins and the Spark surface predate `EB-283`, whose prefixes "
-    "(`upgrades.PROTOTYPE_DEFAULT_PREFIXES`) are the five overhaul arms. "
-    "Their upgrades are the SHIPPED rows' and are a Balance-stage ruling, not "
-    "a default this generator may invent")
-
 #: THE DEBT, CURATED AND CHECKED BOTH WAYS.
 #:
 #: `EB-277` was "an upgraded prototype card was identical to its base", and
@@ -285,22 +254,10 @@ _DEBT_SPARK_ARM = (
 #: `plan:` line -- so their entries were DELETED rather than reworded. The two
 #: that still cannot (`proto_mc_lisa_violet_arc`, `proto_mc_sucrose_gust`) say
 #: so ON THE ROW with `no_upgrade:`, which travels with the row under R213 B's
-#: deletion rule and is read by both engines; this dict is now the Spark
-#: arm's alone, which is the one arm the Prototype-stage rule never claimed.
-UPGRADE_DEBT: dict[str, str] = {
-    # The Spark arm and its migration twins (`EB-218`, R224).
-    "proto_itto_superlative_superstrength_either": _DEBT_SPARK_ARM,
-    "proto_itto_superlative_superstrength_priced": _DEBT_SPARK_ARM,
-    "proto_muster_subsidy_funnel": _DEBT_SPARK_ARM,
-    "proto_shinobu_sanctifying_ring_either": _DEBT_SPARK_ARM,
-    "proto_shinobu_sanctifying_ring_priced": _DEBT_SPARK_ARM,
-    "proto_spark_burst_conversion": _DEBT_SPARK_ARM,
-    "proto_spark_mode_bombs": _DEBT_SPARK_ARM,
-    "proto_spark_priced_draw": _DEBT_SPARK_ARM,
-    "proto_spark_priced_strike": _DEBT_SPARK_ARM,
-    "proto_thoma_crimson_ooyoroi_either": _DEBT_SPARK_ARM,
-    "proto_thoma_crimson_ooyoroi_priced": _DEBT_SPARK_ARM,
-}
+#: deletion rule and is read by both engines; this dict held the Spark
+#: arm's rows alone, and is empty since they left the surface (legacy cleanup
+#: stage 6).
+UPGRADE_DEBT: dict[str, str] = {}
 
 
 def _upgrade_face_finding(delta: dict | None, source: str) -> str | None:
@@ -498,8 +455,6 @@ def plan() -> gen.ProfilePlan:
                     "emittable today -- rewrite the delta inside the existing "
                     "grammar, drop the key to stage a base-only row, or take "
                     "the runtime work first.")
-        if card_id in SIM_ONLY_ROW_IDS:
-            continue
         generated[card_id] = gen.emit(card, profile)
         owners[card_id] = character
         mode_faces[card_id] = gen._modal_option_names([card], {card_id})

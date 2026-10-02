@@ -505,7 +505,7 @@ def live(state: CombatState) -> bool:
     the pet aim and the Casket answer are all hers by construction, and a
     debuff-applying Furina must not start writing Plans.
     """
-    return bool(C.KOKOMI_OVERHAUL and state.player.character_id == "kokomi")
+    return state.player.character_id == "kokomi"
 
 
 # ---------------------------------------------------------------------------

@@ -4597,8 +4597,10 @@ _sheet_cards_cache: dict[Path, list] = {}
 def _sheet_cards(sheet: Path) -> list[dict]:
     """The parsed rows of one character sheet, read at most once per run."""
     if sheet not in _sheet_cards_cache:
-        _sheet_cards_cache[sheet] = yaml.safe_load(
-            sheet.read_text(encoding="utf-8"))
+        # The shipped kit sheets are deleted (legacy cleanup stage 6); a
+        # profile that still names one reads no rows.
+        _sheet_cards_cache[sheet] = (yaml.safe_load(
+            sheet.read_text(encoding="utf-8")) if sheet.exists() else [])
     return _sheet_cards_cache[sheet]
 
 

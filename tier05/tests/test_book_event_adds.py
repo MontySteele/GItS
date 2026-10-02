@@ -33,7 +33,7 @@ def _state(deck_ids=None):
 
 
 def _starter_deck():
-    return list(loader._character_index()[CHAR]["starting_deck"])
+    return list(loader.starting_deck(CHAR))
 
 
 def _resolve(opt, st, seed=3, policy=None):

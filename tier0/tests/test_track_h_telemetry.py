@@ -30,7 +30,7 @@ from .conftest import make_enemy, make_state
 # Klee's reaction package is the one battery config that lights every branch of
 # the aura decomposition (op application, hit application, Swirl spread) AND
 # carries reaction-payoff riders. Same arm track D pins on, deliberately.
-REACTIVE = ("klee", "reaction_weighted", "punisher", "reaction")
+REACTIVE = ("klee", "starter", "punisher", "reaction")
 
 
 def _battery(fights=40, seed=7):

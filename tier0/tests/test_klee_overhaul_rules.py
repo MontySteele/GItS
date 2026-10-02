@@ -37,9 +37,7 @@ from tier05 import rewards
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-from tier0.tests.shipped_world import DEFAULTS  # noqa: E402
 
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 ATTACKER = [{"kind": "attack", "amount": 5}]
 BLOCKER = [{"kind": "block", "amount": 5}]
@@ -51,7 +49,6 @@ def overhaul(monkeypatch):
     out -- `test_klee_overhaul.overhaul`'s fixture, for its reasons."""
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
@@ -91,16 +88,6 @@ def sizes(enemy):
 # ---------------------------------------------------------------------------
 # THE FLAG -- ships on since 2026-10-01; off, the gate is shut
 # ---------------------------------------------------------------------------
-
-def test_the_arm_ships_on_and_off_it_the_gate_is_shut():
-    """`The_arm_ships_off`, plus the half the C# spells at each seam instead of
-    in one place: `KleeOverhaul.Enabled` is the build switch and every site
-    that reads it also asks `player.Character is IKleeCharacter`. `live()` is
-    those two clauses in one function, so a co-op Furina never grows Bombs."""
-    assert DEFAULTS["KLEE_OVERHAUL"] is True     # ships on since 2026-10-01
-    assert C.KLEE_OVERHAUL is False              # `shipped_world` turned it off
-    assert klee_overhaul.live(klee_state()) is False
-
 
 def test_the_gate_needs_both_clauses(overhaul):
     assert klee_overhaul.live(klee_state()) is True
@@ -2194,8 +2181,6 @@ def test_stoke_the_fuse_on_a_bomb_less_board_still_spends(overhaul):
     assert state.player.sparks == 0
     assert sizes(enemy) == []
     assert klee_overhaul.set_off_only(load("proto_ko_stoke_the_fuse")) is False
-
-
 
 
 # ---------------------------------------------------------------------------

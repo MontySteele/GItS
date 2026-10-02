@@ -13,16 +13,8 @@ from __future__ import annotations
 
 import random
 
-import pytest
-
-from tier0.engine import combat, furina_stage, reactions, resources
+from tier0.engine import combat, reactions, resources
 from tier0.engine.state import Card, CombatState, Enemy, Player
-
-
-@pytest.fixture(params=[True, False], ids=["arm_on", "arm_off"])
-def arm(request, monkeypatch):
-    monkeypatch.setattr(furina_stage, "FURINA_STAGE", request.param)
-    return request.param
 
 
 def _kit():
@@ -39,29 +31,26 @@ def _state():
     return CombatState(player=player, enemies=[enemy], rng=random.Random(0))
 
 
-def test_a_reaction_pays_burst_only_with_the_arm_off(arm):
+def test_a_reaction_pays_no_burst():
     state = _state()
     enemy = state.enemies[0]
     reactions.apply_aura(state, enemy, "hydro")
     reactions.resolve_hit(state, enemy, "anemo", 5)   # Swirl
     assert state.reactions_this_turn == 1
-    if arm:
-        assert state.player.burst_energy == 0
-    else:
-        assert state.player.burst_energy > 0
+    assert state.player.burst_energy == 0
 
 
-def test_the_funnel_itself_refuses_under_the_arm(arm):
+def test_the_funnel_itself_refuses():
     state = _state()
     resources.gain_burst(state, 5, "probe")
-    assert state.player.burst_energy == (0 if arm else 5)
+    assert state.player.burst_energy == 0
 
 
-def test_the_kit_card_is_never_granted_under_the_arm(arm):
+def test_the_kit_card_is_never_granted():
     state = _state()
     # A meter already at its max (a save, or anything outside the funnel):
     # the grant asks the arm itself.
     state.player.burst_energy = state.player.burst_max
     combat.grant_charged_kit(state)
     granted = [c.id for c in state.player.hand]
-    assert granted == ([] if arm else ["let_the_people_rejoice"])
+    assert granted == []

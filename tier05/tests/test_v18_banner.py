@@ -28,10 +28,6 @@ from tier0.engine.state import Card
 from tier05 import draft, model, rewards, run_metrics, shop
 import pytest
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
-
 MONDSTADT = ("mondstadt",)
 
 
@@ -58,9 +54,9 @@ def test_designed_nations_is_derived_not_listed():
     assert set(nations) >= {"mondstadt", "inazuma", "fontaine"}
     for nation in nations:
         assert rewards.five_star_roster(nation), nation
-    # Derived from the sheets: a nation with 5-stars cannot be left out by
+    # Derived from the roster: a nation with 5-stars cannot be left out by
     # someone forgetting to edit a tuple.
-    from_sheets = {c.nation for c in loader._card_index().values()
+    from_sheets = {c.nation for c in loader.companion_roster_replacement()
                    if c.is_companion and c.star == 5 and c.nation
                    and c.personal_pool is None and not c.guest_star}
     assert set(nations) == from_sheets
@@ -83,8 +79,8 @@ def test_inazuma_five_stars_are_reachable_in_an_inazuma_run():
         banner = rewards.roll_banner(random.Random(s + 2 * 10 ** 9))
         offers = rewards.roll_rewards(random.Random(s), "kokomi", banner=banner)
         seen |= {c.id for c in offers if c.star == 5}
-    assert {"itto_superlative_superstrength",
-            "raiden_musou_no_hitotachi"} & seen, (
+    assert {"proto_mi_itto_superlative_superstrength",
+            "proto_mi_raiden_musou_no_hitotachi"} & seen, (
         "Inazuma's own 5-stars never surfaced in 400 Kokomi runs")
 
 
@@ -157,32 +153,28 @@ def test_the_excluded_rare_never_reaches_shop_slot_one():
     assert checked, "no 5-star ever reached the shop; the assertion is vacuous"
 
 
-# --- the degenerate case, where it still exists -------------------------
-
-
-def test_mondstadt_alone_is_still_degenerate():
-    """Mondstadt sits at exactly the cap, so ITS slice features everyone. Kept
-    because it is the control for the Fontaine assertions above -- selectivity
-    should be a property of roster size, not of the code path."""
-    roster = rewards.five_star_roster("mondstadt")
-    assert len(roster) <= C.BANNER_FEATURED_SLOTS
-    featured = {c.id for c in roster}
-    for seed in range(50):
-        assert rewards.roll_banner(random.Random(seed),
-                                   nations=MONDSTADT) == featured
+# --- who may be featured ------------------------------------------------
 
 
 def test_personal_pool_companions_are_not_banner_eligible():
-    # Prune is Klee's designated teammate, not a shared-pool 5-star draw.
-    assert "prune_witch_hunt" not in {c.id
-                                      for c in rewards.five_star_roster("mondstadt")}
+    # A Personal (Klee's coven, Kokomi's Personals) is one character's
+    # teammate, not a shared-pool 5-star draw. (`prune_witch_hunt` was the
+    # shipped example; it left with the shipped sheets, legacy cleanup
+    # stage 6.)
+    personal = {c.id for c in loader.companion_roster_replacement()
+                if c.personal_pool is not None}
+    assert personal, "no Personal on the roster; the assertion is vacuous"
+    for nation in rewards.designed_nations():
+        assert not personal & {c.id for c in rewards.five_star_roster(nation)}
 
 
-def test_nation_comes_from_the_sheet_not_the_row():
-    assert loader.get_card("albedo_solar_isotoma").nation == "mondstadt"
-    assert loader.get_card("kaeya_frostgnaw").nation == "mondstadt"
+def test_a_companion_carries_its_nation_and_a_kit_card_none():
+    # The shipped companion sheets derived nation from the file name; the
+    # prototype rows that replaced them (legacy cleanup stage 6) carry it.
+    assert loader.get_card("proto_mc_albedo_solar_isotoma").nation == "mondstadt"
+    assert loader.get_card("proto_mc_kaeya_frostgnaw").nation == "mondstadt"
     # Klee's own cards are not companions and carry no nation.
-    assert loader.get_card("kaboom").nation is None
+    assert loader.get_card("proto_ko_kapow").nation is None
 
 
 # --- the mechanism on a synthetic roster (kept: sizes the real one cannot) --
@@ -262,14 +254,11 @@ def test_conditional_assembly_conditions_only_on_five_stars():
     results = model.run_many("klee", "reaction", "reaction",
                              draft.assigned_policy, runs=12, seed=9)
     # 4-star only: never gated, so every run is eligible.
-    ca = run_metrics.conditional_assembly(results, ["kaeya_frostgnaw"])
+    ca = run_metrics.conditional_assembly(results, ["proto_mc_kaeya_frostgnaw"])
     assert ca["eligible_rate"] == 1.0
-    # 5-star: eligible whenever featured. Durin is Mondstadt, which is still at
-    # the cap, so he is featured in every run -- the assertion holds for the
-    # same reason it always did, not by accident of the Fontaine change.
-    ca5 = run_metrics.conditional_assembly(results, ["durin_witchs_flame"])
-    assert ca5["eligible_rate"] == 1.0
-    assert ca5["conditional_rate"] == ca5["unconditional_rate"]
+    # The 5-star half (Durin, featured in every run while Mondstadt sat at the
+    # cap) went with that premise: every nation's roster now exceeds the cap
+    # (legacy cleanup stage 6), so no real 5-star is featured in every run.
 
 
 # --- the MODEL path, not just the shop function (EB-102) ----------------

@@ -34,7 +34,6 @@ from tier0.content import loader
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -61,6 +60,20 @@ def _sheet(tmp_path: Path, rows) -> Path:
     path = tmp_path / "prototype-surface.yaml"
     path.write_text(yaml.safe_dump(rows, sort_keys=False), encoding="utf-8")
     return path
+
+
+#: The tracked surface, bound at import: a test may monkeypatch
+#: `loader.PROTOTYPE_SHEET` to a staged copy.
+_REAL_SURFACE = loader.PROTOTYPE_SHEET
+
+
+def _live_sheet(tmp_path: Path, extra) -> Path:
+    """The real surface plus `extra` rows. Since legacy cleanup stage 6 every
+    kit's starter and pool resolve off the surface unconditionally, so a
+    surface that lacked them would not load at all; a fixture row is staged
+    BESIDE the kits rather than in their place."""
+    real = yaml.safe_load(_REAL_SURFACE.read_text(encoding="utf-8"))
+    return _sheet(tmp_path, list(real) + list(extra))
 
 
 # --- (a) it validates under the SHIPPED schema -------------------------------
@@ -425,12 +438,13 @@ def test_the_sim_reads_the_same_row_carried_delta_and_only_when_reachable(
     needs a live substitution, which a fixture row does not have.
     """
     from tier0.content import upgrades
-    monkeypatch.setattr(loader, "PROTOTYPE_SHEET", _sheet(tmp_path,
-                                                          [UPGRADEABLE]))
+    monkeypatch.setattr(loader, "PROTOTYPE_SHEET", _live_sheet(tmp_path,
+                                                               [UPGRADEABLE]))
     loader.reset_caches()
     try:
-        assert loader.prototype_cards()[0].upgrade == {"block": 3}
-        assert not loader._substituted_card_index()      # no live door
+        assert loader.prototype_cards()[-1].upgrade == {"block": 3}
+        assert ("proto_kokomi_tidecall"
+                not in loader._substituted_card_index())  # no live door
         assert not upgrades.has_upgrade("proto_kokomi_tidecall")
         assert "proto_kokomi_tidecall" not in upgrades._upgrade_index()
     finally:
@@ -452,19 +466,20 @@ def test_the_sim_honours_the_rows_no_upgrade_opt_out(tmp_path, monkeypatch):
 
     probe = dict(FIXTURE, id="proto_kk_optout",
                  effects=[{"op": "block", "amount": 5}])
-    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     monkeypatch.setattr(C, "KOKOMI_OVERHAUL_POOL_IDS", ("proto_kk_optout",))
     monkeypatch.setattr(C, "KOKOMI_OVERHAUL_STARTER_IDS", ())
-    monkeypatch.setattr(loader, "PROTOTYPE_SHEET", _sheet(tmp_path, [probe]))
+    monkeypatch.setattr(loader, "PROTOTYPE_SHEET",
+                        _live_sheet(tmp_path, [probe]))
     loader.reset_caches()
     try:
-        assert upgrades._prototype_deltas({}) == {
-            "proto_kk_optout": {"block": upgrades.PROTOTYPE_BLOCK_DELTA}}
+        assert upgrades._prototype_deltas({}).get("proto_kk_optout") == {
+            "block": upgrades.PROTOTYPE_BLOCK_DELTA}
         monkeypatch.setattr(
             loader, "PROTOTYPE_SHEET",
-            _sheet(tmp_path, [dict(probe, no_upgrade="the reason it cannot")]))
+            _live_sheet(tmp_path,
+                        [dict(probe, no_upgrade="the reason it cannot")]))
         loader.reset_caches()
-        assert upgrades._prototype_deltas({}) == {}
+        assert "proto_kk_optout" not in upgrades._prototype_deltas({})
     finally:
         loader.reset_caches()
 
@@ -502,18 +517,6 @@ def test_a_row_without_a_description_is_still_rendered_from_its_body(
     assert "Draw" in source
 
 
-def test_no_shipped_sheet_row_carries_a_description():
-    """The field is the prototype surface's alone. A shipped face is rendered
-    from the body so it cannot drift from what the card does; hand text on a
-    shipped row would put that guarantee back in a person's hands."""
-    for sheet in loader.DOCS_CARD_SHEETS:
-        path = loader.DOCS_DIR / sheet
-        if not path.exists():
-            continue
-        rows = yaml.safe_load(path.read_text(encoding="utf-8")) or []
-        assert not [r["id"] for r in rows if "description" in r], sheet
-
-
 def test_the_loc_merge_is_gone_from_the_mod():
     """The other half of the duplication: one channel means the pool builder
     no longer rewrites a face it did not generate."""
@@ -525,73 +528,15 @@ def test_the_loc_merge_is_gone_from_the_mod():
 
 # --- (c) no pool, no manifest, no digest, no distinctness, no stamp ----------
 
-def test_prototype_rows_never_enter_the_sim_card_index(tmp_path, monkeypatch):
+def test_prototype_rows_never_enter_the_sim_card_index():
     """The exclusion is STRUCTURAL: there is no filter, the rows never enter.
 
-    `_card_index` is the single index behind `get_card`, `all_cards`,
-    `character_pool`, every reward roll, every run template and every balance
-    report. `prototype_cards` builds its own list and puts nothing back.
-    """
-    monkeypatch.setattr(loader, "PROTOTYPE_SHEET", _sheet(tmp_path, [FIXTURE]))
-    assert loader.prototype_cards()          # the row loads...
+    `_card_index` is the reference characters' index (`get_card`'s fallback,
+    their pools, the digests). The kits reach their rows through
+    `pool_replacement` and `peek_card`, never through this index."""
+    assert loader.prototype_cards()
     index = loader._card_index()
-    assert "proto_kokomi_tidecall" not in index                 # ...and stays out
     assert not any(cid.startswith(loader.PROTOTYPE_ID_PREFIX) for cid in index)
-
-    # tier05 is the run half: its reward pools are a filter over the SAME
-    # index, so an absence there is an absence in every draft, shop and
-    # transform without tier05 needing to know this surface exists.
-    from tier05 import rewards
-    for character in ("klee", "furina", "kokomi"):
-        by_rarity = rewards.character_pool(character)
-        assert by_rarity, character
-        for cards in by_rarity.values():
-            assert not any(c.id.startswith(loader.PROTOTYPE_ID_PREFIX)
-                           for c in cards)
-
-
-def test_version_stamps_cannot_see_the_prototype_surface(tmp_path):
-    """R213 B: 'ignored by ... version stamps'.
-
-    `lint_sheet_stamp`'s digest IS the sheet half of the stamp law. A staged
-    prototype must not bump SHEET_DIGEST: nothing measured moved, and a stamp
-    that bumps several times a week for scratch stops meaning anything.
-
-    `EB-772`: THE STAGED SHEET IS A COPY IN TEMP, and it used to be the
-    TRACKED sheet, written in the real checkout and put back in a `finally`.
-    The 2026-09-02 note below says what that cost once already; the rest of
-    the cost is that it is shared mutable state, so two lanes running this
-    module at the same time can each see the other's staged bytes and can
-    leave the tree dirty. Nothing in this test writes inside the checkout now.
-
-    AND IT PROVES MORE THAN THE OLD ONE DID, because a digest that ignores a
-    file also ignores a file it never saw. Two facts stand together: adding
-    the staged copy to the walk DOES move the digest -- so the walk is
-    sensitive to exactly this content -- and the sheet is not in the walk, so
-    the number the stamp law reads cannot move for it.
-    """
-    from tools import lint_sheet_stamp
-
-    assert loader.PROTOTYPE_SHEET not in lint_sheet_stamp.sheets()
-    assert "docs/prototype-surface.yaml" in lint_sheet_stamp.EXCLUDED
-    before = lint_sheet_stamp.digest()
-    assert lint_sheet_stamp.digest(lint_sheet_stamp.sheets()) == before
-
-    # BYTES, NOT TEXT (2026-09-02). `write_text` on Windows translates "\n"
-    # into "\r\n", so the tracked sheet's old "restore" left it byte-DIFFERENT
-    # from HEAD, which `.gitattributes`' LF working tree reports as a standing
-    # modification. Under `-n auto` that was worse than cosmetic: a tracked
-    # file flickering modified is a working tree flickering DIRTY, and
-    # `test_manifest_version_gate` read exactly that flicker between two
-    # `Get-AutoVersion` calls and went red once for it. The bytes rule is kept
-    # here for the copy, so the staged file is the sheet plus one line and
-    # nothing else.
-    staged = tmp_path / loader.PROTOTYPE_SHEET.name
-    staged.write_bytes(loader.PROTOTYPE_SHEET.read_bytes()
-                       + b"\n# staged, for one assertion\n")
-    assert lint_sheet_stamp.digest(
-        lint_sheet_stamp.sheets() + [staged]) != before
-    assert lint_sheet_stamp.digest() == before
 
 
 def test_distinctness_report_cannot_see_the_prototype_surface():
@@ -749,7 +694,7 @@ def test_the_per_turn_exhaust_count_is_a_turn_window():
                                        intents=[{"kind": "block",
                                                  "amount": 0}])],
                         rng=random.Random(0), turn=1)
-    refpowers.exhaust_card(state, loader.peek_card("coral_guard"))
+    refpowers.exhaust_card(state, loader.peek_card("defend"))
     assert state.exhausts_this_turn == 1
     assert len(state.player.exhaust_pile) == 1
     refpowers.reset_turn_counters(state)
@@ -988,34 +933,6 @@ def test_display_name_strips_the_declaration_and_nothing_else():
     assert loader.display_name("Undertow (proto) II") == "Undertow (proto) II"
 
 
-def test_every_declared_shadow_names_a_row_that_really_ships():
-    """The suffix is a CLAIM -- "this rewrites the shipped row of that name" --
-    and a claim nothing checks is decoration. Read off the live surface and
-    the six shipped sheets, so a row that keeps the suffix after its shipped
-    twin is renamed or retired fails here."""
-    shipped: dict[str, list[str]] = {}
-    for sheet in loader.DOCS_CARD_SHEETS:
-        for row in yaml.safe_load(
-                (loader.DOCS_DIR / sheet).read_text(encoding="utf-8")) or []:
-            shipped.setdefault(row["name"], []).append(row["id"])
-
-    declared = 0
-    for row in yaml.safe_load(
-            loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []:
-        name = row["name"]
-        if not name.endswith(loader.PROTOTYPE_SHADOW_SUFFIX):
-            continue
-        declared += 1
-        bare = loader.display_name(name)
-        assert bare in shipped, (
-            f"{row['id']} declares a shadow of {bare!r}, which no shipped "
-            "row holds -- the suffix shadows nothing and the face prints "
-            "the bare name unchecked")
-    # Non-vacuous: the surface carries declared shadows today, and a sweep
-    # over none of them is the dead-gate class this repo has been bitten by.
-    assert declared >= 30, f"only {declared} declared shadows found"
-
-
 def test_the_sim_carries_the_bare_title_for_a_declared_shadow():
     """The sim's half of "both engines print the same title", taken at the ONE
     seam: a `Card` the engine hands to a report, a draft or a seat page has
@@ -1029,7 +946,9 @@ def test_the_sim_carries_the_bare_title_for_a_declared_shadow():
         if rows[card.id].endswith(loader.PROTOTYPE_SHADOW_SUFFIX):
             checked += 1
             assert card.name == loader.display_name(rows[card.id])
-    assert checked >= 30, f"only {checked} shadowed rows checked"
+    # No row declares a shadow since the shipped rows went (legacy cleanup
+    # stage 6); the sweep above still refuses a suffix that reaches a Card.
+    assert checked == 0, f"{checked} rows still declare a shadow"
 
 
 def test_no_generated_prototype_face_prints_the_suffix():
@@ -1052,16 +971,6 @@ def test_no_generated_prototype_face_prints_the_suffix():
                  if loader.PROTOTYPE_SHADOW_SUFFIX in t}
     assert not offenders, f"generated titles carrying the declaration: {offenders}"
 
-    # And the positive half: the shadowed rows are still THERE, printing the
-    # shipped row's title, which is what the arm is for.
-    rows = {r["id"]: r["name"] for r in yaml.safe_load(
-        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []}
-    checked = 0
-    for cid, title in titles.items():
-        if rows.get(cid, "").endswith(loader.PROTOTYPE_SHADOW_SUFFIX):
-            checked += 1
-            assert title == loader.display_name(rows[cid])
-    assert checked >= 30, f"only {checked} shadowed faces checked"
 
 
 def test_the_sheet_declares_a_shadow_only_with_the_suffix_both_engines_strip():

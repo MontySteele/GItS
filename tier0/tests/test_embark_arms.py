@@ -27,7 +27,7 @@ DEV = ("0.2.1314+proto", "the deployed `mods\\klee\\manifest.json` `version`")
 RELEASE = ("0.2.1314", "the deployed `mods\\klee\\manifest.json` `version`")
 UNREAD = ("", "no deployed package at ...\\mods\\klee\\manifest.json")
 
-ARM = "proto_spark_priced_draw"
+ARM = "proto_ko_kapow"
 
 
 # ------------------------------------------------------------- refusals ----
@@ -81,7 +81,7 @@ def test_a_dev_build_and_a_real_row_pass():
 # ------------------------------------------------------------- the grant ---
 
 def test_the_wire_spelling_is_the_give_card_id():
-    assert embark.wire_id(ARM) == "KLEEMOD-PROTO_SPARK_PRICED_DRAW"
+    assert embark.wire_id(ARM) == "KLEEMOD-PROTO_KO_KAPOW"
     assert embark.wire_id("  proto_x  ") == "KLEEMOD-PROTO_X"
 
 
@@ -94,14 +94,14 @@ def test_the_grant_goes_into_the_deck_not_a_combat_pile(monkeypatch):
     def fake(card_id, count=1, upgraded=False, pile="deck"):
         calls.append({"card_id": card_id, "count": count,
                       "upgraded": upgraded, "pile": pile})
-        return {"status": "ok", "card_name": "Rummage", "message": "granted"}
+        return {"status": "ok", "card_name": "Ka-pow!", "message": "granted"}
 
     monkeypatch.setattr(bridge, "give_card", fake)
     granted = embark.grant_arms([ARM])
-    assert calls == [{"card_id": "KLEEMOD-PROTO_SPARK_PRICED_DRAW",
+    assert calls == [{"card_id": "KLEEMOD-PROTO_KO_KAPOW",
                       "count": 1, "upgraded": False, "pile": "deck"}]
     assert granted[0]["arm"] == ARM
-    assert granted[0]["card_name"] == "Rummage"
+    assert granted[0]["card_name"] == "Ka-pow!"
 
 
 def test_a_failed_grant_stops_the_embark(monkeypatch):
@@ -163,9 +163,9 @@ def _sidecar(tmp_path, seed, arms):
 
 def test_the_record_names_the_arms_granted_into_this_run(tmp_path):
     d = _sidecar(tmp_path, "F128JG2J44Z5",
-                 [{"card_id": "KLEEMOD-PROTO_SPARK_PRICED_DRAW"}])
+                 [{"card_id": "KLEEMOD-PROTO_KO_KAPOW"}])
     named, source = blindplay.granted_arms("F128JG2J44Z5", d)
-    assert named == "KLEEMOD-PROTO_SPARK_PRICED_DRAW"
+    assert named == "KLEEMOD-PROTO_KO_KAPOW"
     assert "matched by run seed" in source
 
 
@@ -173,7 +173,7 @@ def test_a_sidecar_from_another_run_does_not_lend_its_arms(tmp_path):
     """The seed is the run's identity (R95). A stale sidecar naming arms on
     somebody else's run would be a record that is simply false."""
     d = _sidecar(tmp_path, "OTHERSEED0000",
-                 [{"card_id": "KLEEMOD-PROTO_SPARK_PRICED_DRAW"}])
+                 [{"card_id": "KLEEMOD-PROTO_KO_KAPOW"}])
     assert blindplay.granted_arms("F128JG2J44Z5", d)[0] == "(none)"
 
 
@@ -189,9 +189,9 @@ def test_the_identity_block_prints_the_line():
         {"session_id": "x", "guardrail": "g", "fight_records": [],
          "run_record": ""},
         {"run_seed": "F128JG2J44Z5",
-         "arms_granted": "KLEEMOD-PROTO_SPARK_PRICED_DRAW",
+         "arms_granted": "KLEEMOD-PROTO_KO_KAPOW",
          "arms_granted_source": "the embark sidecar"})
-    assert "- **arms_granted**: KLEEMOD-PROTO_SPARK_PRICED_DRAW" in text
+    assert "- **arms_granted**: KLEEMOD-PROTO_KO_KAPOW" in text
     assert "- **arms_granted_source**: the embark sidecar" in text
 
 
@@ -202,56 +202,18 @@ def test_the_guardrail_travels_with_the_grant():
     assert "not one the generators produced" in bridge.GRANT_GUARDRAIL
 
 
-# ------------------------------- the shipped half (`KLEESPARK-W3`) ---------
-#
-# A registration can need a deck at a stated maker : sink ratio, and on the
-# Spark arm the sinks are prototype rows while the makers are SHIPPED ones.
-# The door granted prototypes only, so that deck could not be built at all --
-# and granting the makers around the harness would leave them out of the
-# embark sidecar, which is where the sealed record reads `arms_granted` from.
+# ------------------------------- one surface since stage 6 ----------------
 
-SHIPPED_MAKER = "skip_and_hop"
-
-
-def test_a_shipped_card_id_is_accepted():
-    """`KLEESPARK-W3` sec 18.2's six makers are shipped rows, not prototypes."""
-    assert embark.check_arms([SHIPPED_MAKER], DEV) == DEV
-
-
-def test_a_shipped_only_grant_does_not_need_a_proto_build():
-    """A shipped row exists in a release build, so refusing one there would
-    be the door refusing to open on a question nobody asked."""
-    assert embark.check_arms([SHIPPED_MAKER], RELEASE) == RELEASE
-
-
-def test_a_prototype_row_in_the_list_still_forces_the_proto_check():
-    """One prototype id anywhere in the list and the build stamp binds."""
-    with pytest.raises(embark.EmbarkError) as excinfo:
-        embark.check_arms([SHIPPED_MAKER, ARM], RELEASE)
-    assert "+proto" in str(excinfo.value)
-
-
-def test_an_id_on_neither_surface_is_still_refused():
+def test_an_id_off_the_surface_is_still_refused():
+    """The shipped sheets left at legacy cleanup stage 6, and with them the
+    shipped-row grant: an id that is not a surface row is refused."""
     with pytest.raises(embark.EmbarkError) as excinfo:
         embark.check_arms(["not_a_card_anywhere"], DEV)
     assert "not_a_card_anywhere" in str(excinfo.value)
-    assert "shipped card id" in str(excinfo.value)
 
 
 def test_the_kind_is_recorded_beside_every_grant(monkeypatch):
-    """The sidecar says which surface each granted row came off, so a record
-    of a mixed deck does not read as a record of an all-prototype one."""
     monkeypatch.setattr(bridge, "give_card",
                         lambda *a, **k: {"status": "ok", "card_name": "x"})
-    granted = embark.grant_arms([ARM, SHIPPED_MAKER])
-    assert [g["kind"] for g in granted] == ["prototype", "shipped"]
-
-
-def test_the_shipped_index_holds_the_six_klee_makers():
-    """Named rather than counted: these are the rows sec 18.2 grants, and a
-    sheet rename that dropped one would silently shrink the deck."""
-    ids = embark.shipped_ids()
-    for cid in ("skip_and_hop", "warm_glow", "snap", "hot_hands",
-                "all_my_treasures", "da_da_da"):
-        assert cid in ids
-    assert ARM not in ids          # the prototype surface is NOT in this set
+    granted = embark.grant_arms([ARM])
+    assert [g["kind"] for g in granted] == ["prototype"]

@@ -80,59 +80,16 @@ def test_the_autoplay_rider_adds_exactly_zero_drafted_value():
     assert _static_power(rider) == _static_power(both) == 7.0
 
 
-# Every committed card that carries a Sly rider, priced on the
-# PRE-UNIFICATION tree. All fourteen are Kokomi's Assist lane; nothing
-# committed carries the base-game keyword (it only ever arrives through the
-# extractor, into the gitignored reference pool).
-#
-# THIS IS A CENSUS, NOT A FREEZE. The assertion is that EB-71's unification did
-# not move any Sly card's drafted price -- so a NEW Sly card joins the table at
-# its measured price and proves the same thing about itself. The eight below
-# the line are the pre-EB-69 set and their values are UNCHANGED by the fill,
-# which is the part that would have been the regression.
-PRE_UNIFICATION_SLY_PRICES = {
-    "driftglass": 10.5,
-    "drifting_lantern": 6.0,
-    "driftwood_charm": 3.5,
-    "quiet_harbor": 5.0,
-    "salt_line": 5.25,
-    "tidal_lure": 5.0,
-    # R208 / W2b (2026-08-25): the ratified `undertow` revision moved its
-    # formula base 4 -> 5 and appended an `exhaust_pile_at_least_3` draw, so
-    # the row reads 5.0 -> 6.0. That move is through the card's PRINTED BODY
-    # -- the branch credits zero and the Sly rider is byte-identical -- which
-    # is the one way this census accepts a value moving.
-    "undertow": 6.0,
-    "whispered_word": 2.5,
-    # --- EB-69, the Kokomi pool fill (R198, 2026-08-23): five new Sly rows ---
-    "hold_the_narrows": 5.75,
-    "massed_volley": 12.0,
-    "open_the_stores": 2.25,
-    "what_the_tokoyo_returns": 5.5,
-    "wheel_the_ranks": 2.0,
-    # --- EB-125, the ratified Moon Signal rebuild (R202, 2026-08-24): its
-    # draw moved onto a Sly rider, so the card joins the census at its
-    # measured price, which is exactly what a census is for. The thirteen
-    # rows above are UNCHANGED by it, and that is the assertion.
-    "moon_signal": 1.0,
-}
-
-
-def test_no_committed_sly_card_changed_its_drafted_price():
-    # COMMITTED only, explicitly. `_card_index()` folds in the gitignored
-    # game_ref/ reference pool when a machine has one, and the Silent's real
-    # pool is exactly where the base-game keyword lives -- so on a box with
-    # game_ref this comparison would otherwise pick up seven `si_*` rows that
-    # a bare clone (and CI) never sees. The assertion is about OUR sheets.
+def test_no_committed_card_carries_the_autoplay_marker():
+    """The marker is nowhere in the committed world -- the reference sheets
+    and the current kits' rows -- so nothing in the pool can move through this
+    field. (The shipped Sly rows' price census left with the shipped sheets,
+    legacy cleanup stage 6.)"""
     index = loader._card_index()
     external = {d["id"] for d in loader._external_cards()}
-    committed = {cid: c for cid, c in index.items() if cid not in external}
-    priced = {cid: round(_static_power(c), 10)
-              for cid, c in committed.items() if c.sly}
-    assert priced == PRE_UNIFICATION_SLY_PRICES
-    # And the marker is nowhere in the committed world, so nothing else in
-    # the pool could have moved through this field either.
-    assert not [cid for cid, c in committed.items() if sly_autoplays(c)]
+    committed = [c for cid, c in index.items() if cid not in external]
+    committed += loader.prototype_cards()
+    assert not [c.id for c in committed if sly_autoplays(c)]
 
 
 def test_a_sly_rider_is_vocabulary_checked_at_load_and_the_marker_is_not():

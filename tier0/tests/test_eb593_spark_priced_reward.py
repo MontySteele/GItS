@@ -57,7 +57,6 @@ from understudy import adapter, policy_v1
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 #: The three offers, verbatim from the soak's `defect` record `state_dump`.
 #: `EB-749` re-pointed the first offer off the cut Fwoosh! and onto Pocket
@@ -187,8 +186,15 @@ def test_read_exactly_the_spark_row_is_not_the_best_card_on_the_screen():
 def test_with_the_surface_unreachable_it_is_the_soaks_own_reading(monkeypatch):
     """Seen to FAIL. With no prototype row resolvable the offers go back to
     text stubs, which is the state the soak was in."""
+    # `_card_prototype` is memoized and an earlier test warmed it, so the
+    # unreachable surface is only seen through a cold cache -- dropped on the
+    # way in and out so no neighbour inherits the stubbed answer.
+    loader._card_prototype.cache_clear()
     monkeypatch.setattr(loader, "_prototype_index", lambda: {})
-    decision = policy_v1.decide(copy.deepcopy(REWARD))
+    try:
+        decision = policy_v1.decide(copy.deepcopy(REWARD))
+    finally:
+        loader._card_prototype.cache_clear()
     assert sorted((decision.notes or {}).get("approximate_offers") or []) == [
         "Perfect Timing", "Run Away!", "Tinder Toss"]
 

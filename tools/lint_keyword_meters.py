@@ -107,9 +107,10 @@ KOKOMI_DIR = CARD_ROOT / "Kokomi"
 PROTOTYPE_DIR = CARD_ROOT / "Prototype" / "Generated"
 
 PROTOTYPE_SHEET = REPO / "docs" / "prototype-surface.yaml"
-# Inazuma companions are the pool `Muster` draws from, so they are faces a
-# Kokomi player holds even though they are emitted beside everyone else's.
-POOL_SHEETS = (REPO / "docs" / "inazuma-companions.yaml",)
+# Inazuma companions were the pool the shipped `Muster` drew from, so they
+# were faces a Kokomi player held. Muster and the shipped companion sheets left
+# with the shipped kits (legacy cleanup stages 5 and 6); no pool sheet remains.
+POOL_SHEETS: tuple[Path, ...] = ()
 
 
 @dataclass(frozen=True)

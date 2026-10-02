@@ -324,43 +324,6 @@ def after_card_exhausted(state: CombatState, card: Card,
         # upgrade gets exactly the pre-Orobas numbers back.
         charge, burst = relics.exhaust_accrual(
             p, C.CHARGE_PER_EXHAUST, C.KOKOMI_BURST_PER_EXHAUST)
-        # QUARANTINED (C.KURAGE_MEMORY), v3's FUEL, and it is the SHIPPED
-        # funnel unnarrowed: [USER], 2026-08-29 -- "Charge now builds at a
-        # rate of '1 Exhaust = 1 Charge'". Every Exhaust of one of her
-        # ORIGINAL cards pays, her own AND original Companions, which RETIRES
-        # v2's PICK A1 (where a Companion paid nothing). A Status or a Curse
-        # still pays nothing, by the 2026-08-23 rotation ruling above, and
-        # that is untouched by v3.
-        #
-        # THE ONE THING v3 SUBTRACTS: a MEMORY COPY pays nothing, because its
-        # removal is not an Exhaust event at all. In practice the copy never
-        # reaches this funnel (`effects.kurage_fire` clears the copy's own
-        # `exhaust` flag and lifts it out of its pile afterwards, so no
-        # Exhaust is ever emitted for it). This clause is the belt to that
-        # braces: a copy that some future op exhausts mid-play still must not
-        # mint the Charge the rule says it does not.
-        if C.KURAGE_MEMORY and getattr(card, "from_kurage_memory", False):
-            charge = 0
-            burst = 0
-        # QUARANTINED (prototype surface only, R213 E1 / EB-183) -- THE FUNNEL
-        # CHECK, and the second half of R216 D's deferred question. Slice 2
-        # asked the subsidy as a card's effect list (the order SPENDS Charge);
-        # this asks it as a property of the funnel: a recruit whose order paid
-        # its cost down pays no Charge back when it rotates out. Written only
-        # by `effects._op_conscript` on a `subsidy: waived` op, which no
-        # shipped card carries, so this branch is dead on every shipped pool.
-        #
-        # CHARGE ONLY. The BURST particle is untouched, and that is the
-        # question as R216 D posed it -- "pays 1 Charge, so blocking with one
-        # also advances Kokomi's finisher". Zeroing Burst too would ask a
-        # second question inside the first and make the arm unattributable.
-        #
-        # The `kind` above is unchanged (`exhaust_muster`), so C5's separate
-        # conscript-income bucket still counts the rotation; what moves is the
-        # amount, which is the honest record -- the recruit DID rotate, and it
-        # was paid nothing for it.
-        if getattr(card, "muster_subsidised", False):
-            charge = 0
         resources.gain_charge(state, charge, kind)
         if p.burst_max:
             resources.gain_burst(state, burst, kind)
@@ -375,18 +338,6 @@ def after_card_exhausted(state: CombatState, card: Card,
             p.energy += card.on_exhaust_energy
             state.emit("energy", amount=card.on_exhaust_energy,
                        source="on_exhaust")
-    # QUARANTINED (C.KURAGE_MEMORY), v3 RULE 2 -- ENTRY ON EXHAUST. At THIS
-    # funnel for exactly the reason the Casket accrual above is here: every
-    # exhaust route passes through it, so "a Companion that Exhausts is
-    # remembered" is one definition rather than five sites kept in step.
-    #
-    # OUTSIDE THE RELIC GATE, deliberately: the memory belongs to the
-    # jellyfish, not to the Tamakushi Casket, and a Kokomi who has lost the
-    # relic should still remember what she burned even while she cannot
-    # afford to replay it. The FUEL is the relic's; the MEMORY is not.
-    if C.KURAGE_MEMORY:
-        from tier0.engine import effects as _fx      # late import (cycle)
-        _fx.note_kurage_exhaust(state, card)
     # damage_per_exhaust (EB-82). Sits at the same funnel as the Casket
     # accrual and for the same reason, but outside its relic gate: the two
     # relics are unrelated and either may be held without the other. Opens
@@ -401,8 +352,8 @@ def after_card_exhausted(state: CombatState, card: Card,
     # curse is exhausted, the Casket gains 1 [and you gain 2 Block]." At
     # THIS funnel for the Casket accrual's reason: every exhaust route
     # passes through it. Dead unless the Power is up.
-    if C.KOKOMI_OVERHAUL and (p.powers.get("kk_abyssal_salvage")
-                              or p.powers.get("kk_abyssal_salvage_plus")):
+    if (p.powers.get("kk_abyssal_salvage")
+            or p.powers.get("kk_abyssal_salvage_plus")):
         from tier0.engine import kokomi_plan     # late import (cycle)
         kokomi_plan.abyssal_salvage(state, card)
     n = p.powers.get("feel_no_pain", 0)
@@ -1232,7 +1183,7 @@ def after_card_drawn(state: CombatState, card: Card,
             unpowered_damage(state, enemy, n)
     # THE KLEE STATUS PACKAGE (2026-10-01): Damage Report, per status drawn.
     # Dead unless the Power is up.
-    if C.KLEE_OVERHAUL and p.powers.get("ko_damage_report"):
+    if p.powers.get("ko_damage_report"):
         from tier0.engine import klee_overhaul     # late import (cycle)
         klee_overhaul.damage_report(state, card)
     randomise_cost_on_draw(state, card)

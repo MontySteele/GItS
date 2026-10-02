@@ -16,20 +16,23 @@ import pytest
 
 from tools import card_distinctness_report as cdr
 
-# Known debt at ratification time (docs/archive/a2-gate-ratification-2026-07-27.md,
-# "Where the roster lands"). An entry here is DEBT, not a pass. Remove each
-# as its pool-sweep pass clears it; the staleness test below forces the
-# removal so this list can only shrink.
+# THE DEBT, RE-BASELINED ON THE CURRENT KITS (legacy cleanup stage 6,
+# 2026-10-01). The debt curated at ratification (docs/archive/a2-gate-
+# ratification-2026-07-27.md) was measured on the shipped sheets, which are
+# deleted; the house pools are now cut from the prototype surface
+# (`cdr.surface_pools`), and these are the breaches those pools carry the day
+# they were first measured. Every kit is at the Prototype stage, where
+# measurement binds nothing (EXPERIMENTS.md binds only at Balance). An entry
+# here is DEBT, not a pass, and the staleness test below still forces each one
+# out as it clears.
 KNOWN_FAILING = {
-    ("klee", "uniq"),        # 61% -- signature repetition, one defect
-    # furina uniq/neardup CLEARED by the Curtain Call sweep (R85,
-    # 2026-07-27): 62->76 / 0.94->0.15 per card, inside the official band.
-    # The Track-B maxclu transient (6) resolved in the same sweep (3).
-    ("kokomi", "uniq"),      # 54% -- breadth (was 56% pre-EB-69)
-    ("kokomi", "maxclu"),    # 8 -- the block cluster (was 7 pre-EB-69)
-    # kokomi neardup CLEARED by the EB-125 redesigns (R202, 2026-08-24): the
-    # three ratified bodies take the pool 33 -> 29 pairs, inside the limit of
-    # 30. The breach was ruled TEMPORARY, never a moved threshold (R200).
+    ("kokomi", "uniq"),
+    ("kokomi", "maxclu"),
+    ("kokomi", "neardup"),
+    ("furina", "uniq"),
+    ("furina", "maxclu"),
+    ("varka", "uniq"),
+    ("varka", "maxclu"),
 }
 
 
@@ -61,8 +64,7 @@ def test_the_curated_list_names_only_house_pools():
     # would mean the gate disagrees with its own floor.
     assert not any(pool.startswith("OFFICIAL:") for pool, _ in KNOWN_FAILING)
     # And every curated pool must be a committed sheet CI can actually see.
-    committed = {os.path.basename(p).replace("-cards.yaml", "")
-                 .replace(".yaml", "") for p in cdr.SHEETS}
+    committed = {name for name, _ in cdr.surface_pools()}
     assert {pool for pool, _ in KNOWN_FAILING} <= committed
 
 
@@ -97,4 +99,5 @@ def test_a_pool_file_that_is_absent_is_still_a_no_op(tmp_path, monkeypatch):
     path that does not exist is the documented contract, not a narrowing."""
     monkeypatch.setattr(cdr, "SHEETS", [str(tmp_path / "nope-cards.yaml")])
     monkeypatch.setattr(cdr, "GAME_REF", [])
+    monkeypatch.setattr(cdr, "SURFACE", str(tmp_path / "nope-surface.yaml"))
     assert cdr.build_reports() == []

@@ -36,9 +36,7 @@ from tier05 import rewards
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-from tier0.tests.shipped_world import DEFAULTS  # noqa: E402
 
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -70,7 +68,6 @@ def _caches_clear():
 def overhaul(monkeypatch):
     """The flag ON, with every id-resolving cache cleared going in and out."""
     _caches_clear()
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
     yield
     _caches_clear()
 
@@ -83,45 +80,12 @@ def _pool_ids(pool):
 # THE FLAG IS OFF, AND THAT IS THE ACCEPTANCE CONDITION
 # ---------------------------------------------------------------------------
 
-def test_the_flag_ships_on():
-    """The sim runs the current kits by default (legacy cleanup stage 3,
-    2026-10-01, pick 5), as every C# build does."""
-    assert DEFAULTS["COMPANION_OVERHAUL"] is True
-
-
-def test_flag_off_the_seam_returns_none():
-    """No replacement, so `_companion_roster` is the shipped index filtered
-    exactly as `companion_pool` always filtered it."""
-    assert loader.companion_roster_replacement() is None
-
-
 def test_flag_off_every_shipped_mondstadt_row_is_still_offerable():
     offerable = _pool_ids(rewards.companion_pool())
     # prune_witch_hunt is personal_pool, but `companion_pool` tiers every
     # companion and lets the per-character filter run at the offer site, so
     # all seventeen are in the pool with the flag off.
     assert set(SHIPPED_MONDSTADT) <= offerable
-
-
-def test_flag_off_no_prototype_row_can_be_offered():
-    offerable = _pool_ids(rewards.companion_pool())
-    assert not [i for i in offerable if i.startswith("proto_")]
-
-
-def test_flag_off_the_turn_hooks_are_no_ops():
-    """The two functions the arm adds to the turn structure return before
-    touching anything. Asserted against a state that CARRIES the arm's powers,
-    because a hook that ran while the flag was off would be a silent second
-    rule set on every shipped run."""
-    st = make_state()
-    st.player.powers.update({"mc_signature_mix": 2, "mc_revelation": 1,
-                             "mc_oz": 1, "mc_glacial_waltz": 3})
-    before = (dict(st.player.powers), st.player.block,
-              [e.hp for e in st.enemies])
-    effects.companion_overhaul_turn_start(st)
-    effects.companion_overhaul_turn_end(st)
-    assert (dict(st.player.powers), st.player.block,
-            [e.hp for e in st.enemies]) == before
 
 
 # ---------------------------------------------------------------------------
@@ -142,14 +106,11 @@ def test_flag_on_fontaine_is_its_rows_ported_as_they_are(overhaul):
     """Fontaine has no workshop, and pick 4 of the legacy cleanup ported its
     shipped rows to the prototype surface AS THEY ARE: the roster's Fontaine
     half is the `proto_mf_` twins of the shipped rows, one for one, and the
-    shipped rows themselves leave."""
+    shipped rows themselves are gone (stage 6)."""
     assert "fontaine" in C.COMPANION_OVERHAUL_NATIONS
-    shipped = {c.id for c in loader._card_index().values()
-               if c.is_companion and c.nation == "fontaine"
-               and not c.guest_star}
     after = {c.id for c in rewards._companion_roster()
              if c.nation == "fontaine"}
-    assert after == {f"proto_mf_{cid}" for cid in shipped}
+    assert all(cid.startswith("proto_mf_") for cid in after)
     assert set(C.FONTAINE_OVERHAUL_POOL_IDS) == after
 
 
@@ -674,13 +635,3 @@ def test_no_name_the_generated_pool_can_show_is_offerable_twice(overhaul):
                  for c in loader.guest_star_generation_pool(rarity)]
         assert len(names) == len(set(names)), sorted(names)
 
-
-def test_the_flag_off_pool_is_byte_for_byte_what_it_always_was():
-    """The acceptance condition on the flag, and the half that makes the change
-    narrow: with no replacement the companion half is the shipped index
-    filtered exactly as it was, and the Guest Star half never moved at all."""
-    _caches_clear()
-    ids = {c.id for c in loader.guest_star_generation_pool("common")}
-    assert "kaeya_frostgnaw" in ids
-    assert "proto_mc_kaeya_frostgnaw" not in ids
-    _caches_clear()

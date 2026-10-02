@@ -20,10 +20,11 @@ import pytest
 
 from understudy import committed, policy_v1
 
-# Real sheet ids: `adapter.resolve_card` resolves a `KLEEMOD-` id through
-# `loader.peek_card`, so these carry their sheet archetypes rather than the
-# `["generic"]` a text-approximated card gets. That matters here — a fixture
-# whose archetypes were invented would test the fixture.
+# Ids of shipped rows deleted at legacy cleanup stage 6. They no longer
+# resolve, so they reach the arm as text-approximated cards; the membership
+# pins that read their sheet archetypes left with the sheets, and the
+# committed arm has no current row to commit to (no surface row declares
+# `fanfare`, `salon` or `spotlight`).
 FANFARE = {"id": "KLEEMOD-ARIA_OF_RECOMPENSE", "name": "Aria of Recompense",
            "cost": 1, "type": "Skill", "rarity": "basic"}
 SALON = {"id": "KLEEMOD-CASTING_CALL", "name": "Casting Call",
@@ -41,12 +42,6 @@ def _reward(cards):
 
 
 # ------------------------------------------------------------- the sheets ---
-
-def test_membership_comes_off_the_design_sheet_and_upgrades_resolve():
-    table = committed.archetype_table()
-    assert "fanfare" in table["Aria of Recompense"]
-    assert table["Aria of Recompense+"] == table["Aria of Recompense"]
-
 
 def test_a_card_with_no_sheet_row_belongs_to_no_archetype():
     """Every base-game and colorless card. This is correct rather than a gap:
@@ -139,25 +134,6 @@ def test_the_flag_changes_the_draft_and_nothing_but_the_draft():
 
 # -------------------------------------------------------------- the arm -----
 
-def test_the_committed_arm_takes_the_declared_archetype():
-    d = policy_v1.decide(_reward([PLAIN, FANFARE]), policy_v1.Memo(),
-                         commit="fanfare")
-    assert d.action == {"action": "select_card_reward", "card_index": 1}
-    assert d.revision == policy_v1.COMMIT_REVISION
-    assert d.notes["commit"] == "fanfare"
-    assert d.notes["committed_offers"] == ["Aria of Recompense"]
-
-
-def test_the_two_commitments_take_different_cards_from_one_screen():
-    """The same screen, two declarations, two decks. This is the arm's whole
-    job: one variable per measurement window, and the variable is the word."""
-    offers = _reward([FANFARE, SALON, PLAIN])
-    fan = policy_v1.decide(offers, policy_v1.Memo(), commit="fanfare")
-    sal = policy_v1.decide(offers, policy_v1.Memo(), commit="salon")
-    assert fan.action["card_index"] == 0
-    assert sal.action["card_index"] == 1
-
-
 def test_without_the_archetype_on_offer_the_sims_own_plan_decides():
     """Rung 2, and it keeps the sim's right to skip. A committed arm that took
     junk rather than skip would be measuring junk."""
@@ -170,15 +146,6 @@ def test_without_the_archetype_on_offer_the_sims_own_plan_decides():
 def test_an_empty_screen_is_unavailable_rather_than_a_guess():
     d = policy_v1.decide(_reward([]), policy_v1.Memo(), commit="salon")
     assert not d.available
-
-
-def test_the_committed_arm_still_names_what_it_posts():
-    """Revision #7 is attached in `decide` for every arm, including this one:
-    a soak log that cannot be categorised without reading prose is the thing
-    the P1 blocker existed to prevent."""
-    d = policy_v1.decide(_reward([PLAIN, FANFARE]), policy_v1.Memo(),
-                         commit="fanfare")
-    assert d.notes["names"]["card_name"] == "Aria of Recompense"
 
 
 def test_the_arm_is_deterministic():

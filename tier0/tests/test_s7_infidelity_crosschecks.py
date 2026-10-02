@@ -22,10 +22,8 @@ THE FIVE, WITH THEIR C# COUNTERPARTS
    sim  tier0/engine/effects.py:443-480 (the per-bomb loop)
    C#   klee-mod/KleeCode/Powers/BombPower.cs:467-484
         + Powers/DemolitionPowers.cs:129-153 (DetonationVulnPower)
-3. Conscript nation hard-default 'inazuma'
-   sim  tier0/engine/effects.py:2101
-   C#   klee-mod/KleeCode/Powers/KokomiConscript.cs:57 (a `const`, and the
-        only nation the C# can express -- Run() takes no nation parameter)
+3. (Conscript nation default -- retired with the Muster's C# at legacy
+   cleanup stage 5; its pins left at stage 6.)
 4. Kurage direct `p.block +=` bypass
    sim  tier0/engine/effects.py:2652-2655
    C#   klee-mod/KleeCode/Powers/KuragePowers.cs:96-106 (ValueProp.Unpowered,
@@ -37,14 +35,11 @@ THE FIVE, WITH THEIR C# COUNTERPARTS
         BombPower.cs:502-508, which likewise does not dedupe by type.
 """
 
-import random
-
 import pytest
 
 from tier0 import constants as C
-from tier0.content import loader
 from tier0.engine import effects, powers, reactions, relics
-from tier0.engine.state import Bomb, Card, CombatState
+from tier0.engine.state import Bomb
 from tier0.tests.conftest import make_enemy, make_state
 
 
@@ -176,69 +171,6 @@ def test_detonation_vulnerable_is_withheld_from_a_corpse():
 
     assert not enemy.alive
     assert enemy.powers.get("vulnerable", 0) == 0
-
-
-# ---------------------------------------------------------------------------
-# 3. Conscript nation hard-default 'inazuma' -- MATCHES C#.
-#
-# effects.py:2101 reads `fx.get("nation", "inazuma")`. The C# has no nation
-# parameter AT ALL: KokomiConscript.Nation is a `const string = "inazuma"`
-# (KokomiConscript.cs:57) and Run() is called with
-# (amount, createMode, costOverride) only -- see the nine generated call
-# sites, and gen_klee_cards.py:3147-3153, which never emits a nation.
-#
-# So the sim's default IS the C# behaviour, and the `nation` key is the one
-# thing that could break it: any sheet that set it would be silently dropped
-# by codegen. The second test is the guard that keeps that unreachable.
-# ---------------------------------------------------------------------------
-
-def _conscript_state(seed=0):
-    return CombatState(player=loader.build_player("kokomi"),
-                       enemies=[make_enemy(hp=300)],
-                       rng=random.Random(seed))
-
-
-def _conscript_card(**fx):
-    effect = {"op": "conscript", "amount": 1}
-    effect.update(fx)
-    return Card(id="s7_conscript_probe", name="probe", cost=0, type="skill",
-                character="kokomi", effects=[effect])
-
-
-def test_conscript_default_pool_is_inazuma_matching_the_csharp_const():
-    """No `nation` on the effect dict -> the Inazuma roster, which is the only
-    pool KokomiConscript can produce (KokomiConscript.cs:57, 112-114)."""
-    for seed in range(12):
-        state = _conscript_state(seed)
-        effects.resolve_card(state, _conscript_card(mode="create"))
-        (recruit,) = state.player.hand
-        assert recruit.is_companion
-        assert recruit.nation == "inazuma"
-
-
-def test_the_default_pool_is_exactly_the_csharp_roster_filter():
-    """C#: `CompanionRoster.All.Where(card => card.Nation == "inazuma")`
-    (KokomiConscript.cs:112-114). Sim: loader.companion_pool('inazuma'). The
-    pin is that the sim's default argument selects that same set."""
-    pool = loader.companion_pool("inazuma")
-    assert pool, "the inazuma companion pool is empty"
-    assert {c.nation for c in pool} == {"inazuma"}
-
-
-def test_no_shipped_card_overrides_the_conscript_nation():
-    """The `nation` key is expressible in the sim DSL and NOT expressible in
-    C# -- gen_klee_cards.py:3147-3153 emits amount/mode/cost_override and
-    nothing else, and KokomiConscript.Run has no nation parameter. As long as
-    no sheet sets it the two sides cannot diverge; the day one does, this pin
-    goes red instead of the mod going quiet."""
-    offenders = []
-    for card in loader._card_index().values():
-        for fx in card.effects or []:
-            if fx.get("op") == "conscript" and "nation" in fx:
-                offenders.append((card.id, fx["nation"]))
-    assert offenders == [], (
-        "conscript `nation` override(s) found; C# KokomiConscript has no "
-        "nation parameter, so these would silently be inazuma in the mod")
 
 
 # ---------------------------------------------------------------------------

@@ -35,9 +35,21 @@ def harness():
 
 @pytest.fixture(scope="module")
 def a_real_line():
+    """A red-team line's SHAPE on a deck that exists today.
+
+    The ledger's lines (`exploit-lines.json`) were written on the shipped
+    kits, deleted at legacy cleanup stage 6, so their decks no longer
+    resolve. These pins are about the harness, not the exploit, so the
+    first line's shape is kept and its deck and script are Klee's current
+    starter played greedily.
+    """
     lines = json.loads(LINES_JSON.read_text(encoding="utf-8"))
     by_id = {line["line_id"]: line for line in lines}
-    return by_id["klee_spark_1_bright_idea_refund_infinite"]
+    base = dict(by_id["klee_spark_1_bright_idea_refund_infinite"])
+    base.update(deck=["strike"] * 4 + ["defend"] * 4
+                + ["proto_ko_jumpy_dumpty", "proto_ko_kapow"],
+                script=[["strike"]], script_default="greedy")
+    return base
 
 
 def _line(base, **kw):

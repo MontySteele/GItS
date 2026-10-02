@@ -29,7 +29,6 @@ from tier0.tests.conftest import make_enemy, make_state
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 #: The slice, and the Universal each row stands in for.
 FAMILY = {
@@ -56,7 +55,6 @@ def _caches_clear():
 @pytest.fixture
 def overhaul(monkeypatch):
     _caches_clear()
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
     yield
     _caches_clear()
 
@@ -110,15 +108,6 @@ def test_klee_is_handed_each_one_and_nobody_else_is(overhaul):
             assert standins.hand_off(universal, other) == universal, cid
 
 
-def test_the_hand_off_is_the_identity_with_the_flag_off():
-    _caches_clear()
-    try:
-        for cid, universal in FAMILY.items():
-            assert standins.hand_off(universal, "klee") == universal
-    finally:
-        _caches_clear()
-
-
 # --- Albedo, Tectonic Tide (the Power; its row was cut 2026-10-01) -----------
 
 # --- Sucrose, Mollis Favonius ------------------------------------------------
@@ -170,13 +159,6 @@ def test_sucrose_closes_at_the_turn_end_whether_or_not_it_paid(overhaul):
     effects.companion_overhaul_turn_end(state)
     assert hexerei.MOLLIS_FAVONIUS not in state.player.powers
     assert hexerei.SINFUL_HEX not in state.player.powers
-
-
-def test_sucrose_is_silent_with_the_flag_off():
-    state = _state()
-    state.player.powers[hexerei.MOLLIS_FAVONIUS] = 4
-    _react(state, "hydro", "pyro")
-    assert not _paid(state, "mc_mollis_favonius")
 
 
 # --- Fischl, Undone Be Thy Sinful Hex ----------------------------------------
@@ -235,13 +217,6 @@ def test_fischls_volley_applies_electro_and_terminates(overhaul):
     assert _paid(state, "mc_sinful_hex")
 
 
-def test_fischl_is_silent_with_the_flag_off():
-    state = _state()
-    state.player.powers[hexerei.SINFUL_HEX] = 5
-    _react(state, "electro", "pyro")
-    assert not _paid(state, "mc_sinful_hex")
-
-
 # --- Nicole, Ladder of Divine Ascent -----------------------------------------
 
 def test_nicole_pays_on_any_companion_card_and_on_no_other(overhaul):
@@ -288,20 +263,6 @@ def test_a_companion_card_with_no_element_deals_plain_damage(overhaul):
 def test_nicoles_own_card_is_a_companion(overhaul):
     """She pays for herself once, because her stand-in is a Companion card."""
     assert loader.peek_card("proto_mc_nicole_ladder_of_ascent").is_companion
-
-
-def test_nicole_is_silent_with_the_flag_off():
-    # The card is built here rather than read off the surface: with the flag
-    # off `loader.peek_card` cannot resolve a `proto_` id at all, which is the
-    # quarantine working and not something to route around.
-    from tier0.engine.state import Card
-
-    state = _state()
-    state.player.powers[hexerei.LADDER_OF_ASCENT] = 6
-    hexerei.note_card_played(state, Card(
-        id="proto_mc_x", name="x", cost=1, type="skill", element="anemo",
-        tags=["companion"]))
-    assert not _paid(state, "mc_ladder_of_ascent")
 
 
 # --- everyone else is unchanged ----------------------------------------------

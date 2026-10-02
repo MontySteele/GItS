@@ -8,8 +8,9 @@ rebuilt here, mechanically, against
 `tools/lint_handwritten_parity.ANCIENT_WITNESS`, which reads the C# directly.
 A number can then only be changed in both places or in neither.
 
-The other half of the file pins the two income powers, and in particular the
-ORDER of their turn-start tick against the Salon upkeep. That order is EB-2's
+The other half of the file pins the ORDER of the two income powers'
+turn-start tick against the Salon upkeep (their shipped-world payouts left
+with the shipped kits, legacy cleanup stage 6). That order is EB-2's
 stated parity target, so it is the one thing here that a well-meaning tidy-up
 could silently undo.
 """
@@ -29,10 +30,6 @@ from tier0.content import loader, upgrades
 from tier0.engine import effects, combat
 from tier0.engine.state import CombatState
 from tier0.tests.conftest import make_enemy
-
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 REPO = Path(loader.__file__).resolve().parents[2]
 
@@ -133,15 +130,14 @@ def test_every_number_matches_the_c_sharp_witness(cid):
 def test_the_ancients_stay_out_of_the_ratified_sheets():
     """The whole reason for the side-sheet: codegen must never see them.
 
-    `tools/gen_klee_cards.py` reads the three `docs/<char>-cards.yaml` files
-    and would try to emit a C# class for any row it finds; these three
-    classes are hand-written. The upgrade sheet is registered in the sim's
-    applier only, on the ref-ironclad precedent.
+    The codegen reads the prototype surface (the per-character sheets left
+    at legacy cleanup stage 6) and would try to emit a C# class for any row it
+    finds; these three classes are hand-written. The upgrade sheet is
+    registered in the sim's applier only, on the ref-ironclad precedent.
     """
-    for sheet in loader.DOCS_CARD_SHEETS:
-        text = (loader.DOCS_DIR / sheet).read_text(encoding="utf-8")
-        for cid in WITNESSED:
-            assert cid not in text, f"{cid} reached {sheet}"
+    surface_ids = {c.id for c in loader.prototype_cards()}
+    for cid in WITNESSED:
+        assert cid not in surface_ids, f"{cid} reached the prototype surface"
     from tools import gen_klee_cards as gen
     assert not any(p.name == "ancient-upgrades.yaml"
                    for p in gen.UPGRADE_SHEETS)
@@ -168,43 +164,6 @@ def _play(state, cid):
     return card
 
 
-def test_charge_per_turn_pays_every_turn_and_never_decays():
-    st = _state("kokomi")
-    _play(st, "princess_of_watatsumi")
-    assert st.player.charge == 0            # a Power that pays on the CLOCK
-    for turn in range(1, 5):
-        effects.player_turn_start_triggers(st)
-        assert st.player.charge == 3 * turn
-        # Permanent: absent from powers.DECAYING and powers.EXPIRING, so the
-        # stack count is the same on turn 4 as on turn 1.
-        assert st.player.powers["charge_per_turn"] == 3
-
-
-def test_encore_per_turn_pays_every_turn_and_never_decays():
-    st = _state("furina")
-    _play(st, "all_the_worlds_a_stage")
-    start = st.player.encore
-    for turn in range(1, 5):
-        effects.player_turn_start_triggers(st)
-        assert st.player.encore == start + 5 * turn
-        assert st.player.powers["encore_per_turn"] == 5
-
-
-def test_the_upgraded_forms_pay_the_upgraded_amounts():
-    """The Dusty Tome grants the UPGRADED card, so these are the numbers a
-    run actually meets -- the base rows exist for smith-less paths only."""
-    st = _state("kokomi")
-    _play(st, "princess_of_watatsumi+")
-    effects.player_turn_start_triggers(st)
-    assert st.player.charge == 4
-
-    st = _state("furina")
-    _play(st, "all_the_worlds_a_stage+")
-    before = st.player.encore
-    effects.player_turn_start_triggers(st)
-    assert st.player.encore == before + 7
-
-
 # --- THE EB-2 ORDER PIN ----------------------------------------------------
 
 def test_ancient_income_is_sourced_above_the_salon_upkeep():
@@ -227,29 +186,6 @@ def test_ancient_income_is_sourced_above_the_salon_upkeep():
     # And genuinely ABOVE the group, not merely above one member of it.
     assert upkeep < src.index('p.powers.get("spark_per_turn"')
     assert upkeep < src.index('p.powers.get("celestial_gift"')
-
-
-def test_the_stage_funds_the_same_turn_s_salon_ticks():
-    """The behavioural half: income before upkeep is worth a real tick.
-
-    With an empty buffer and one member, the printed "at the start of your
-    turn" has to arrive first or the member goes dry and resolves at the
-    reduced rate. The `paid` flag on the member's own emit is the reading,
-    and the net Encore is the arithmetic that has to agree with it.
-    """
-    st = _state("furina")
-    _play(st, "all_the_worlds_a_stage")
-    st.player.salon = ["crabaletta"]
-    st.player.encore = 0
-
-    effects.player_turn_start_triggers(st)
-
-    ticks = [e for e in st.log if e["event"] == "salon_tick"]
-    assert [e["paid"] for e in ticks] == [True]
-    assert st.player.encore == 5 - C.SALON_TICK_ENCORE_COST
-    # Log order is the same claim read a second way.
-    kinds = [e["event"] for e in st.log]
-    assert kinds.index("gain_encore") < kinds.index("salon_upkeep")
 
 
 # --- Jumpy Dumpty Mk.Omega in combat ---------------------------------------
@@ -292,28 +228,6 @@ def test_jumpy_applies_pyro_the_way_klee_s_catalyst_grade_does():
     _play(st, "jumpy_dumpty_mk_omega")
     assert {e["target"] for e in st.log
             if e["event"] == "aura_applied" and e["element"] == "pyro"}
-
-
-def test_the_furina_spotlight_divergence_is_known_and_pinned():
-    """The evidence behind the sheet's characterless decision, half (b).
-
-    AllTheWorldsAStage is an `ICharacterCard { CharacterId: "furina" }` in
-    C#, so a Center Stage designation Spotlights it there. Here it carries no
-    `character:`, deliberately -- tagging the row would admit an
-    acquisition-only card into every per-character pool census in the repo.
-
-    THIS TEST EXISTS TO KEEP THAT COST VISIBLE, not to bless it. It fails the
-    day someone adds the tag, which is exactly when the sheet header's
-    argument and the composition pins need re-reading together.
-    """
-    st = _state("furina")
-    st.player.spotlight = st.player.character_id
-    ancient = loader.get_card("all_the_worlds_a_stage")
-    assert ancient.character is None
-    assert not effects.is_spotlighted(st, ancient)
-    # Her ordinary cards are unaffected -- the divergence is scoped to the
-    # three untagged rows and nothing else.
-    assert effects.is_spotlighted(st, loader.get_card("an_invitation"))
 
 
 # --- vocabulary guards -----------------------------------------------------

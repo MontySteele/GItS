@@ -16,11 +16,12 @@ from __future__ import annotations
 from tier05 import charge_telemetry as ct
 
 #: Two real sheet ids, so the attack/skill split is the sheet's and not the
-#: fixture's opinion: `all_streams_flow` is the cost-1 attack that prints a
-#: `1_per_2_charge` rider, `gyorin_formation` is the rare SKILL that prints one
-#: (§5.1's table).
-ATTACK = "all_streams_flow"
-SKILL = "gyorin_formation"
+#: fixture's opinion. The registration named `all_streams_flow` (the attack)
+#: and `gyorin_formation` (the SKILL) from §5.1's table; both left with the
+#: shipped sheets at legacy cleanup stage 6, and the grader reads only
+#: `Card.type`, so a current attack and skill stand in.
+ATTACK = "proto_kk_feint"
+SKILL = "proto_kk_ambush"
 
 
 def _reads(turn: int, by_source: dict[str, int]) -> list[dict]:

@@ -197,23 +197,6 @@ def test_true_spark_knight_lowers_the_threshold_to_two():
     assert C.SPARKS_FOR_FREE_ATTACK == 3
 
 
-def test_a_spend_of_two_forfeits_the_free_attack_under_the_knight():
-    """The design point of §4.5: at the knight's threshold of 2, spending 2
-    is spending the free Attack. The Attack is free BEFORE the sink resolves
-    and full price after, inside one turn."""
-    state = make_state()
-    state.player.energy = 3
-    state.player.powers["spark_threshold_down"] = 1
-    state.player.sparks = 2
-
-    assert combat.card_cost(state, attack()) == 0
-
-    effects.resolve_card(state, sink(price=2))
-
-    assert state.player.sparks == 0
-    assert combat.card_cost(state, attack()) == 1
-
-
 def test_the_threshold_reads_the_live_bank_at_play_time_too():
     """Not just the cost display: play_card's own spend guard re-reads the
     bank. A cached threshold decision would let the emptied bank pay for an
@@ -231,47 +214,3 @@ def test_the_threshold_reads_the_live_bank_at_play_time_too():
     assert state.player.sparks == 0          # nothing left to consume
     assert state.player.energy == 3 - 1 - 1  # the sink, then a PAID Attack
 
-
-def test_a_bank_above_the_price_keeps_the_free_attack():
-    """The competing use is a CHOICE, not a tax: paying 2 out of 4 leaves
-    the knight's threshold intact."""
-    state = make_state()
-    state.player.energy = 3
-    state.player.powers["spark_threshold_down"] = 1
-    state.player.sparks = 4
-
-    effects.resolve_card(state, sink(price=2))
-
-    assert state.player.sparks == 2
-    assert combat.card_cost(state, attack()) == 0
-
-
-# --- staging discipline ----------------------------------------------------
-
-def test_exactly_the_three_w3_sinks_print_the_op():
-    """The staging licence is SPENT, and this test is what records it.
-
-    It used to assert `printed == []`: Route-1 staging landed the op surface
-    with no sheet row using it, so no combat and no drafted number moved and
-    no version stamp was owed. W3 (EB-118 Phase 3, R211) is the window that
-    ends that -- `powder_charge` is the first row on any sheet to print the
-    op, and it is what made `STATIC_SPARK_SPEND_COST` load-bearing and the
-    `DRAFTER_VERSION` bump due.
-
-    Kept as an EXACT SET rather than deleted, because the useful property is
-    unchanged in kind: the op's reach is still enumerable, and a fourth row
-    printing it is a window's worth of drafted-number movement that has to be
-    said out loud rather than discovered.
-
-    Every one prints its price at TOP LEVEL, which is not decoration: a
-    `spend_spark` nested in a conditional branch is invisible to
-    `combat.spark_cost` and therefore to the playability gate, so the card's
-    payoff would fire without the bank ever being charged.
-    """
-    printed = sorted(c.id for c in loader._card_index().values()
-                     if any(fx.get("op") == "spend_spark"
-                            for fx in draft._nested_effects(c.effects)))
-    assert printed == ["hold_the_line", "powder_charge", "smoke_and_sparks"]
-
-    for cid in printed:
-        assert loader.get_card(cid).effects[0]["op"] == "spend_spark"

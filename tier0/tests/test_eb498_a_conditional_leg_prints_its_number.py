@@ -135,7 +135,15 @@ def test_both_vars_fold_the_spotlight_before_the_hooks():
 
 def test_a_modal_row_is_not_given_a_one_sided_pair():
     """Both of a modal's arms are printed, so a single declaration would be
-    half a face. Itto's Superlative Superstrength is the row that bites."""
-    card = _rows()["proto_itto_superlative_superstrength_either"]
+    half a face. Itto's Superlative Superstrength was the row that bites; it
+    left the surface with the Spark arm (legacy cleanup stage 6), so its shape
+    is spelled inline: damage on one arm, Block on the other."""
+    card = {"id": "proto_probe_either", "cost": 2, "type": "attack",
+            "effects": [{"op": "choose_one", "modes": [
+                {"label": "Deal 14 damage",
+                 "effects": [{"op": "damage", "amount": 14,
+                              "target": "enemy"}]},
+                {"label": "Gain 6 Block",
+                 "effects": [{"op": "block", "amount": 6}]}]}]}
     for eff in card["effects"]:
         assert len(folded_branch_damage(card, eff)) in (0, 2)

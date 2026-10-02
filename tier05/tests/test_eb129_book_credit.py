@@ -40,7 +40,7 @@ HEAL = 20
 
 
 def _starter_deck():
-    return list(loader._character_index()[CHAR]["starting_deck"])
+    return list(loader.starting_deck(CHAR))
 
 
 def _state(hp=40, max_hp=None, deck_ids=None, cards_added=0):

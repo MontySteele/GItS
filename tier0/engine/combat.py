@@ -52,45 +52,6 @@ def spark_threshold(state: CombatState) -> int:
                - state.player.powers.get("spark_threshold_down", 0))
 
 
-def spark_power_price(state: CombatState, card: Card) -> int:
-    """The Spark price the STRICT Rare Power contributes to `card`, or 0.
-
-    PICK 5, wording (1), sub-pick (a). "Your Attacks that do not already cost
-    [Spark] cost 3 [Spark] instead of their Energy cost." Three clauses, and
-    each one is a line here:
-
-      * ATTACKS ONLY -- Skills and Powers keep their Energy cost untouched.
-        Energy becomes very nearly pure Skill currency, which is the payoff
-        loop the Power is a bet on.
-      * "THAT DO NOT ALREADY COST [Spark]" -- sub-pick (a). A card printing
-        its own `spend_spark` keeps its printed price; the Power neither
-        raises it nor adds to it. (b) would have re-priced Fwoosh! from 1 to
-        3, punishing the cards the archetype drafts.
-      * X-COST ATTACKS ARE EXEMPT, AND THE PACKET DOES NOT SAY SO. §5 is
-        silent on X and this is the reading taken, stated rather than
-        buried: an X card's cost IS the energy it spends
-        (`card_cost`'s first branch, `state.current_x`), so converting it to
-        a flat 3 Sparks would resolve it at X = 0 and deal nothing --
-        exactly the reasoning R34 gave for the base rule's own X exemption,
-        reached again from the other side. It goes back to [USER] in the
-        packet's §10.
-
-    The price is NOT on the card, so `spark_cost` -- which reads printed
-    top-level ops and nothing else -- cannot see it and is not asked to. This
-    is the second, state-aware half, and `spark_price` below is the sum the
-    gate and the payment both consult.
-    """
-    if not C.SPARK_ALT_COST_ENABLED:
-        return 0
-    if card.type != "attack" or card.cost == "X":
-        return 0
-    if not state.player.powers.get("spark_attack_cost", 0):
-        return 0
-    if spark_cost(card):
-        return 0                # already Spark-priced: unaffected, (a)
-    return C.SPARK_ATTACK_POWER_PRICE
-
-
 def spark_price(state: CombatState, card: Card) -> int:
     """What this card charges in Sparks RIGHT NOW: printed plus power.
 
@@ -98,7 +59,7 @@ def spark_price(state: CombatState, card: Card) -> int:
     term can never disagree about the number -- the same argument
     `spark_cost` makes for the printed half, one layer up.
     """
-    return spark_cost(card) + spark_power_price(state, card)
+    return spark_cost(card)
 
 
 def grant_charged_kit(state: CombatState) -> None:
@@ -393,8 +354,7 @@ def card_cost(state: CombatState, card: Card) -> int:
     # QUARANTINED (C.KOKOMI_OVERHAUL). R276, STOLEN CHAPTER's carry-out: "This
     # turn, the first card you play costs 0." PURE here; `play_card`
     # spends it. `FirstCardFreePower` is the C# twin.
-    if (C.KOKOMI_OVERHAUL
-            and state.player.powers.get(kokomi_plan.FIRST_CARD_FREE, 0)):
+    if state.player.powers.get(kokomi_plan.FIRST_CARD_FREE, 0):
         cost = 0
     # QUARANTINED (R276): Playdate's discount on the next Companion card.
     # `PlaydatePower.TryModifyEnergyCostInCombat`'s twin; 0 with the arm off.
@@ -438,33 +398,8 @@ def card_cost(state: CombatState, card: Card) -> int:
     # not play. THIS SITE IS PURE: the stack is consumed by the next Attack
     # RESOLVING (`effects.companion_overhaul_card_start`), never by being
     # priced, so `card_playable` can ask as often as it likes.
-    if (C.COMPANION_OVERHAUL and card.type == "attack"
-            and p.powers.get("mc_starfrost_discount", 0)):
+    if card.type == "attack" and p.powers.get("mc_starfrost_discount", 0):
         cost = max(0, cost - p.powers["mc_starfrost_discount"])
-    # THE STRICT RARE POWER'S ENERGY HALF (PICK 5): "...instead of their
-    # Energy cost". A converted Attack costs 0 Energy; the Sparks are taken in
-    # `play_card`. Checked BEFORE the retired zeroing branch below so the two
-    # rules can never both fire -- they cannot anyway, the flag makes them
-    # mutually exclusive, and the order says so at the site.
-    if spark_power_price(state, card):
-        return 0
-    # RETIRED-UNDER-FLAG: THE ZEROING. "At 3 Sparks, your Attacks cost 0" --
-    # the base rule's first half, and the half R213 E2 named as feeding none
-    # of D2's six steerable verbs: the bank has one destination and the engine
-    # picks it. With `SPARK_ALT_COST_ENABLED` on, an Attack costs what it
-    # prints (or what the Power above charges), and a full bank discounts
-    # nothing.
-    #
-    # AND RETIRED UNDER THE KLEE OVERHAUL TOO (QUARANTINED, C.KLEE_OVERHAUL),
-    # which is rule 7 in as many words: "no automatic free attack, no 'at 3
-    # Sparks'". The C# says it one switch up -- `SparkPower.BaseRuleActive` is
-    # `false` for the whole of `PROTOTYPE_CARDS`, so both prototype arms
-    # inherit the retirement, and the overhaul's Spark line is the printed
-    # price and nothing else.
-    if (not (C.SPARK_ALT_COST_ENABLED or klee_overhaul.live(state))
-            and card.type == "attack"
-            and state.player.sparks >= spark_threshold(state)):
-        return 0
     # Base-game parity (FreeAttack / Corruption): checked AFTER the spark
     # branch, so a spark-freed attack spends the bank rather than a stack.
     # Precedence pinned by
@@ -489,38 +424,12 @@ def play_card(state: CombatState, card: Card) -> None:
     # attacks spend, and the two has_spark cards are skills, so this card is
     # the whole blast radius.
     state.sparks_at_play = p.sparks
-    # RETIRED-UNDER-FLAG: THE AUTOMATIC CONSUME. "Playing one consumes 3" --
-    # the base rule's second half. Under `SPARK_ALT_COST_ENABLED` nothing
-    # spends implicitly: every Spark that leaves the bank leaves it because a
-    # printed price or the strict Power charged it, both of which are visible
-    # before the card is played. R34's X exemption above goes with it (there
-    # is no spend to be exempt from); the branch is left inert rather than
-    # deleted so the OFF arm still runs the shipped rule byte for byte.
-    # The KLEE OVERHAUL retires it too (rule 7), on the same one switch the
-    # zeroing above is retired by -- see `card_cost` for the C#'s side of it.
-    if (not (C.SPARK_ALT_COST_ENABLED or klee_overhaul.live(state))
-            and card.type == "attack" and cost == 0
-            and p.sparks >= spark_threshold(state)
-            and card.cost != 0 and card.cost != "X"):
-        p.sparks -= spark_threshold(state)
-        state.emit("sparks_spent")
-    # THE STRICT RARE POWER'S PAYMENT (PICK 5), and it is the only new debit
-    # in this function. The printed half of a Spark price is paid by the card's
-    # own top-level `spend_spark` op when its effects resolve; the Power's half
-    # is not on the card, so it is taken here, at the cost line, beside the
-    # energy. `card_playable` has already refused a short bank, so this cannot
-    # half-pay -- and `spend_sparks` is all-or-nothing anyway and emits its
-    # refusal if it ever does.
-    owed = spark_power_price(state, card)
-    if owed:
-        effects.spend_sparks(state, owed)
     if card.cost == "X":
         state.current_x = cost                # X = energy actually spent
     state.current_card_cost = cost
     p.energy -= cost
-    if C.KOKOMI_OVERHAUL:
-        # R276. Stolen Chapter's switch is spent by the first card paid for.
-        kokomi_plan.spend_first_card_free(state, card)
+    # R276. Stolen Chapter's switch is spent by the first card paid for.
+    kokomi_plan.spend_first_card_free(state, card)
     if card.encore_cost:
         # Gated playable -- the "Spend N Encore:" cost line, which is a
         # different sink from the spend_encore OP and is kept apart in the
@@ -626,15 +535,6 @@ def _finish_play(state: CombatState, card: Card,
     reads energy or the hand, so both callers are correct by construction.
     """
     p = state.player
-    # QUARANTINED (C.KURAGE_MEMORY). HERE, at the shared half of a card play,
-    # for the same structural reason the Casket accrual sits at the one
-    # exhaust funnel: a manual play and an auto-play both enter through this
-    # function and nothing else does, so "when Kokomi plays a card" is one
-    # definition rather than per-site discipline. Ahead of the replay loop, so
-    # the memory records the CARD PLAY once even when Study Buddy resolves it
-    # twice -- a replay is one card being resolved again, not a second play.
-    if C.KURAGE_MEMORY:
-        effects.note_kurage_play(state, card)
     # QUARANTINED (C.KOKOMI_OVERHAUL). "YOU PLAYED A COMPANION CARD", at the
     # same shared half of a play and for the same structural reason: a manual
     # play and an auto-play both enter here and nothing else does, so The
@@ -643,12 +543,11 @@ def _finish_play(state: CombatState, card: Card,
     # Command reads, so a replay is one card resolved again rather than a
     # second play -- exactly where `state.companion_plays_this_turn` is
     # incremented below.
-    if C.KOKOMI_OVERHAUL:
-        kokomi_plan.note_companion_played(state, card)
-        # `EB-668`: BATTLE PLAN'S RIDER IS NOT SPENT HERE. It is damage, so it
-        # has to survive until `flat_attack_bonus` has read it --
-        # `effects._resolve_card_bound` spends it one line after that read,
-        # beside `next_attack_up`'s own consuming pop.
+    kokomi_plan.note_companion_played(state, card)
+    # `EB-668`: BATTLE PLAN'S RIDER IS NOT SPENT HERE. It is damage, so it
+    # has to survive until `flat_attack_bonus` has read it --
+    # `effects._resolve_card_bound` spends it one line after that read,
+    # beside `next_attack_up`'s own consuming pop.
     # QUARANTINED (R276): the Klee arm's Playdate is spent by the Companion
     # card it discounted. A no-op with the arm off. (Boom Badge no longer
     # replays a card: since the 2026-09-24 playtest it doubles the Bombs of
@@ -700,10 +599,9 @@ def _finish_play(state: CombatState, card: Card,
     # per play index -- so a doubled attack pays Rage twice, counts twice for
     # Juggling, and burns two FreeAttack stacks.
     replays += refpowers.extra_replays(state, card)
-    if C.KOKOMI_OVERHAUL:
-        # R276, PINCER's carry-out: the first face-up Attack this turn is
-        # played twice. `FirstAttackTwicePower.ModifyCardPlayCount`.
-        replays += kokomi_plan.spend_first_attack_twice(state, card)
+    # R276, PINCER's carry-out: the first face-up Attack this turn is
+    # played twice. `FirstAttackTwicePower.ModifyCardPlayCount`.
+    replays += kokomi_plan.spend_first_attack_twice(state, card)
     # VARKA's Grand Master's Order: the next Knight played this turn is
     # played twice, and each replay is a Knight play of its own (the Oath
     # scope and the current-element step open per resolution, in
@@ -732,7 +630,7 @@ def _finish_play(state: CombatState, card: Card,
         # `tier0.engine.companion_hexerei`.
         companion_hexerei.note_card_played(state, card)
         klee_overhaul.note_card_played(state, card)
-        if replay_index == 0 and (card.is_companion or C.KLEE_OVERHAUL):
+        if replay_index == 0:
             # "Little Hexenzirkul" (EB-219, retargeted by EB-642 and R276):
             # Klee's kit answering a COMPANION play, which is where LAW:145
             # puts the grant now that Prune's face may not carry it. Which
@@ -1026,14 +924,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.encore_spend_draws_this_turn = 0       # Gallery Stirs latch (R85)
     state.cards_created_this_turn = 0            # engine_closure window
     state.charge_reads_this_turn = {}            # EB-78 (2) instrument
-    # QUARANTINED (C.KURAGE_MEMORY): the two per-TURN halves of the memory
-    # rule. The pulse key is cleared here so a turn where she plays nothing
-    # pulses nothing (§2's "a price on a wasted turn"), and the fire latch is
-    # cleared here so the one-card-per-turn cap is a turn boundary and not a
-    # bank size. `kurage_queue` and `kurage_last_attack_target` are per-FIGHT
-    # and deliberately survive this line.
-    state.kurage_last_card_type = ""
-    state.kurage_fired_this_turn = False
 
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:
@@ -1125,25 +1015,24 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # The settle/revive pair below is the `kurage_fire` block's, for its
     # reason: a planned hit can drop a phased boss, and Mend cannot kill her
     # but a reaction the hit causes can move the board under the loop.
-    if C.KOKOMI_OVERHAUL:
-        # THE CASKET PASS (2026-09-28). The relic's token lands on turn one,
-        # before the drain. `ProtoBakeKuragePower.AfterPlayerTurnStart` and
-        # `TamakushiCasket.BeforeHandDraw` are the twins.
-        kokomi_plan.deal_open_the_casket(state)
-        # THE EXPANSION's The Long Game, off the same pre-drain queue.
-        kokomi_plan.long_game(state, len(state.kk_plan_queue))
-        kokomi_plan.resolve_all(state)
-        # `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning
-        # and before anything else reads the hand: the face says "after the
-        # Bake-Kurage carries out its Plans, draw 1 card for each", so the
-        # count it multiplies is the depth the drain above just recorded.
-        # `ProtoBakeKuragePower.AfterPlayerTurnStart` calls
-        # `KokomiPlan.PayPromisedDraws` at exactly this point.
-        kokomi_plan.pay_tide_charts(state)
-        _settle_phases(state)
-        _revive_player_if_needed(state)
-        if not p.alive or state.over:
-            return
+    # THE CASKET PASS (2026-09-28). The relic's token lands on turn one,
+    # before the drain. `ProtoBakeKuragePower.AfterPlayerTurnStart` and
+    # `TamakushiCasket.BeforeHandDraw` are the twins.
+    kokomi_plan.deal_open_the_casket(state)
+    # THE EXPANSION's The Long Game, off the same pre-drain queue.
+    kokomi_plan.long_game(state, len(state.kk_plan_queue))
+    kokomi_plan.resolve_all(state)
+    # `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning
+    # and before anything else reads the hand: the face says "after the
+    # Bake-Kurage carries out its Plans, draw 1 card for each", so the
+    # count it multiplies is the depth the drain above just recorded.
+    # `ProtoBakeKuragePower.AfterPlayerTurnStart` calls
+    # `KokomiPlan.PayPromisedDraws` at exactly this point.
+    kokomi_plan.pay_tide_charts(state)
+    _settle_phases(state)
+    _revive_player_if_needed(state)
+    if not p.alive or state.over:
+        return
 
     grant_charged_kit(state)                 # turn-start gains + full-hand defer
 
@@ -1177,21 +1066,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
                    floor=p.fanfare_floor,
                    at_cap=p.fanfare >= p.fanfare_cap,
                    at_floor=p.fanfare <= p.fanfare_floor)
-
-    # QUARANTINED (C.KURAGE_MEMORY): PICK B1, the turn-START fire. HERE --
-    # after the block clear, the turn-start triggers, the energy refill, the
-    # draw and the relic/potion pass, and immediately BEFORE the first card is
-    # chosen -- because that is the whole argument for B1: the free card must
-    # land in the state the player is planning in, not be tacked onto a turn
-    # already spent. It is also the point the Fanfare snapshot above calls
-    # "the state the pilot actually decides in", so the two agree.
-    if C.KURAGE_MEMORY and C.KURAGE_FIRE_TIMING == "turn_start":
-        effects.kurage_fire(state)
-        _settle_phases(state)    # a replayed attack can drop a phased boss,
-        #                          the same hole the settles above close
-        _revive_player_if_needed(state)
-        if not p.alive or state.over:
-            return
 
     seen_states: set[tuple] = set()
     while not state.over:
@@ -1607,9 +1481,8 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                                          powered_attack=True)
             # QUARANTINED (C.KOKOMI_OVERHAUL). THE EXPANSION's Tidal Riposte:
             # a hit Block absorbed whole answers back, once per hit.
-            if C.KOKOMI_OVERHAUL:
-                kokomi_plan.tidal_riposte(state, enemy, blocked,
-                                          dmg - blocked)
+            kokomi_plan.tidal_riposte(state, enemy, blocked,
+                                      dmg - blocked)
             # QUARANTINED (`furina_stage.FURINA_STAGE`). RULE 7, 2026-09-25:
             # a lead this hit emptied takes its Bow NOW -- after the hit is
             # dealt and before the next hit of the intent, the mod's
@@ -1927,24 +1800,6 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.stage_verdict = None
     player.stage_front_hit = False
     player.stage_bows = 0
-    # QUARANTINED (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): THE BASE KIT.
-    # [USER], 2026-08-29 -- "make Bake-Kurage part of the base kit (always on)
-    # rather than a separate card". The jellyfish is installed HERE, at true
-    # fight start, beside the other per-combat resources, and it never
-    # expires: `kurage_summon` stops being a countdown, or even a summon, and
-    # becomes a fact about Kokomi. It sits on the same line as the meter it
-    # spends because the two now have the same lifetime -- one fight.
-    #
-    # The pulse gate in `player_turn_end_triggers` reads this power, so
-    # installing it here is also what makes the pulse fire at EVERY turn end
-    # from turn 1, with no card played and nothing summoned.
-    #
-    # Its OWN event, not `summon_kurage`: nothing summoned it, and a reader
-    # counting summons must not see one that no card paid for.
-    if C.KURAGE_MEMORY and C.KURAGE_ALWAYS_ON \
-            and player.character_id == "kokomi":
-        player.powers["kurage_summon"] = 1
-        state.emit("kurage_base_kit", persistent=True)
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)
     surface_innate(player.draw_pile)

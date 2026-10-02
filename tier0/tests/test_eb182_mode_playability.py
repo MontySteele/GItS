@@ -12,10 +12,9 @@ the pilot, the falsifier and a replay inherit it without knowing the rule),
 and `combat.card_playable` / `combat.modal_refusal` (the card-level gate and
 its printable reason).
 
-CONSUMERS. Furina's shipped `deep_breath`, whose mode 2 prices *Spend 3
-Encore: draw 3* and was takeable on an empty bank; and the Klee arm this
-unblocks, *Bag of Tricks*, whose expensive mode prices Sparks (R224 item 17
-took option (3): build this, then re-ask the seat).
+CONSUMERS. Furina's retired `deep_breath`, whose mode 2 priced *Spend 3
+Encore: draw 3* and was takeable on an empty bank (its shape, priced in
+Sparks, is the fixture below since legacy cleanup stage 6 deleted the row).
 
 NOT this file's subject: EB-184, the separate targeting defect. Untouched.
 """
@@ -44,21 +43,28 @@ def modal(*bodies, labels=None):
 
 
 def deep_breath():
-    return loader._card_index()["deep_breath"]
+    """The shape of the retired Deep Breath (legacy cleanup stage 6 deleted
+    its sheet), priced in Sparks, the meter a current kit spends: a free mode
+    and a mode that opens with a spend of 3."""
+    return card(id="deep_breath_shape", cost=1, exhaust=True, effects=[modal(
+        [{"op": "energy", "amount": 1}, {"op": "gain_spark", "amount": 2}],
+        [{"op": "spend_spark", "amount": 3}, {"op": "draw", "amount": 3}],
+        labels=["Gain 1 Energy and 2 Sparks",
+                "Spend 3 Sparks: draw 3 cards"])])
 
 
-# --- the shipped consumer: deep_breath -------------------------------------
+# --- the priced-mode consumer ------------------------------------------------
 
 def test_a_short_bank_is_not_offered_deep_breaths_priced_mode(state):
-    """(a) Encore 2 against a price of 3: mode 2 is gone, mode 1 remains.
+    """(a) Sparks 2 against a price of 3: mode 2 is gone, mode 1 remains.
 
-    The card is NOT dead -- mode 1 (*Gain 1 Energy and 2 Encore*) prices
+    The card is NOT dead -- mode 1 (*Gain 1 Energy and 2 Sparks*) prices
     nothing -- so the whole point of per-option playability is that the option
     disappears and the card does not.
     """
     c = deep_breath()
     fx, = c.effects
-    state.player.encore = 2
+    state.player.sparks = 2
     state.player.energy = 1
     assert effects.offered_modes(state, fx["modes"]) == [0]
     assert combat.modal_refusal(state, c) is None
@@ -66,11 +72,11 @@ def test_a_short_bank_is_not_offered_deep_breaths_priced_mode(state):
 
 
 def test_the_priced_mode_returns_when_the_bank_covers_it(state):
-    """(b) Encore 3: both modes are offered again. The gate is the BANK, not
+    """(b) Sparks 3: both modes are offered again. The gate is the BANK, not
     the card -- nothing about the row changed."""
     c = deep_breath()
     fx, = c.effects
-    state.player.encore = 3
+    state.player.sparks = 3
     state.player.energy = 1
     assert effects.offered_modes(state, fx["modes"]) == [0, 1]
     assert combat.card_playable(state, c)
@@ -81,16 +87,15 @@ def test_the_chooser_cannot_resolve_a_mode_it_was_not_offered(state):
     handed a list that does not contain it.
 
     Forced by making mode 2 the obvious pick (a full hand of draw against a
-    body that gains 2 Encore) and then emptying the bank underneath it.
+    body that gains 2 Sparks) and then emptying the bank underneath it.
     """
     c = deep_breath()
-    state.player.encore = 0
+    state.player.sparks = 0
     state.player.draw_pile = [card(id=f"d{i}") for i in range(5)]
     effects.resolve_card(state, c)
     chosen = [e for e in state.log if e["event"] == "mode_chosen"]
     assert [e["index"] for e in chosen] == [0]
     assert state.player.hp == 80          # nothing overdrew into HP
-    assert not [e for e in state.log if e["event"] == "encore_overdraw"]
 
 
 # --- every mode priced out -------------------------------------------------

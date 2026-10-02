@@ -14,14 +14,27 @@ import pytest
 from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, effects
+from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
 
 FONTAINE_4STARS = ("chevreuse", "lynette", "charlotte", "freminet")
 
 
 def _fontaine_cards():
-    return [c for c in loader._card_index().values()
-            if c.nation == "fontaine"]
+    """The Fontaine set: the shipped sheet's rows, ported as they are to the
+    prototype surface as `proto_mf_` (legacy cleanup pick 4)."""
+    return [c for c in loader.prototype_cards()
+            if c.id.startswith("proto_mf_")]
+
+
+def _char(c):
+    """The character a ported row belongs to, off its id: the surface files
+    every companion row under its owner, so the cameo is read off the name
+    (`proto_mf_<character>_...`, `proto_mf_guest_<character>_...`)."""
+    rest = c.id[len("proto_mf_"):]
+    if rest.startswith("guest_"):
+        rest = rest[len("guest_"):]
+    return rest.split("_", 1)[0]
 
 
 # --- sheet structure ---
@@ -38,33 +51,23 @@ def test_fontaine_sheet_loads_ratified_roster():
 
     # 4 characters x 3-card kits (kickoff §10).
     assert len(bench) == 12
-    assert {c.character for c in bench} == set(FONTAINE_4STARS)
+    assert {_char(c) for c in bench} == set(FONTAINE_4STARS)
     for char in FONTAINE_4STARS:
-        assert sum(1 for c in bench if c.character == char) == 3
+        assert sum(1 for c in bench if _char(c) == char) == 3
 
     # 5-star Rares, added 2026-07-25 (R64). §4.2 is EXACTLY ONE CARD each --
     # asserted per character rather than on the total, because four cards
     # from three characters would also sum to four.
-    assert {c.character for c in rares} == set(FONTAINE_5STARS)
+    assert {_char(c) for c in rares} == set(FONTAINE_5STARS)
     for char in FONTAINE_5STARS:
-        assert sum(1 for c in rares if c.character == char) == 1
+        assert sum(1 for c in rares if _char(c) == char) == 1
     assert all(c.rarity == "rare" for c in rares)
     # The roster now EXCEEDS BANNER_FEATURED_SLOTS, which is the whole point of
     # the sprint that added them: it is what makes the banner selective.
     assert len(rares) > C.BANNER_FEATURED_SLOTS
 
-    assert {c.character for c in guests} == {"neuvillette"}
+    assert {_char(c) for c in guests} == {"neuvillette"}
     assert 2 <= len(guests) <= 3          # kickoff §9: 2-3 Neuvillette cards
-
-
-def test_character_field_derivation():
-    # Companion sheets: id prefix. Personal sheets: filename. Explicit wins.
-    assert loader.get_card("fischl_nightrider").character == "fischl"
-    assert loader.get_card("prune_witch_hunt").character == "prune"
-    assert loader.get_card("kaboom").character == "klee"
-    assert loader.get_card("guest_neuvillette_tears").character == "neuvillette"
-    # Engine test pools carry no character: invalid Spotlight targets.
-    assert loader.get_card("strike").character is None
 
 
 def test_cryo_application_budget():
@@ -73,7 +76,7 @@ def test_cryo_application_budget():
     for char in ("charlotte", "freminet"):
         appliers = []
         for c in _fontaine_cards():
-            if c.character != char:
+            if _char(c) != char:
                 continue
             for fx in c.effects:
                 if (fx.get("applies_element")
@@ -158,17 +161,14 @@ def test_unowned_character_pool_fails_loudly():
 
 def test_vanguards_valor_scales_on_any_reaction():
     st = make_state(enemies=[make_enemy(hp=200)])
-    card = loader.get_card("chevreuse_vanguards_valor")
+    card = loader.get_card("proto_mf_chevreuse_vanguards_valor")
     st.reactions_this_turn = 0
     effects.resolve_card(st, card)
     assert st.player.powers.get("next_attack_up", 0) == 3   # base only
     st.player.powers.pop("next_attack_up")
     # Any reaction this turn -- swirl by another card counts (the ruling:
     # never a dead draw off-Pyro/Electro).
-    e = st.enemies[0]
-    effects.resolve_card(st, loader.get_card("dahlia_sacramental_shower"))
-    effects.resolve_card(st, loader.get_card("sucrose_gust"))
-    assert st.reactions_this_turn > 0
+    st.reactions_this_turn = 1
     effects.resolve_card(st, card)
     assert st.player.powers.get("next_attack_up", 0) == 6   # base + rider
 
@@ -184,7 +184,7 @@ def test_reactions_this_turn_resets_at_turn_start():
 
 def test_frosthelm_blocks_now_and_next_turn():
     st = make_state(enemies=[make_enemy(hp=200)])
-    effects.resolve_card(st, loader.get_card("charlotte_enduring_frosthelm"))
+    effects.resolve_card(st, loader.get_card("proto_mf_charlotte_enduring_frosthelm"))
     assert st.player.block == 4
     assert st.player.powers["block_next_turn"] == 4
     combat._player_turn(st, lambda s: None)   # resets block, then trigger
@@ -199,12 +199,12 @@ def test_shatter_bonus_adds_to_shatter_damage():
     e = st.enemies[0]
     # Freeze: hydro aura + cryo attack (Pers), then cash with the untagged
     # attack (Backstroke) under Shattering Pressure.
-    effects.resolve_card(st, loader.get_card("guest_neuvillette_tears"))
-    effects.resolve_card(st, loader.get_card("freminet_pers_deploy"))
+    effects.resolve_card(st, loader.get_card("proto_mf_guest_neuvillette_tears"))
+    effects.resolve_card(st, loader.get_card("proto_mf_freminet_pers_deploy"))
     assert e.frozen
-    effects.resolve_card(st, loader.get_card("freminet_shattering_pressure"))
+    effects.resolve_card(st, loader.get_card("proto_mf_freminet_shattering_pressure"))
     hp_before = e.hp
-    effects.resolve_card(st, loader.get_card("freminet_pressurized_floe"))
+    effects.resolve_card(st, loader.get_card("proto_mf_freminet_pressurized_floe"))
     assert not e.frozen
     shatters = [ev for ev in st.log if ev["event"] == "damage"
                 and ev.get("source") == "shatter"]
@@ -218,7 +218,7 @@ def test_backstroke_applies_no_element():
     st = make_state(enemies=[make_enemy(hp=200)])
     st.player.cadence = "catalyst"
     st.player.element = "pyro"
-    effects.resolve_card(st, loader.get_card("freminet_pressurized_floe"))
+    effects.resolve_card(st, loader.get_card("proto_mf_freminet_pressurized_floe"))
     assert st.enemies[0].aura is None
 
 
@@ -227,33 +227,47 @@ def test_backstroke_applies_no_element():
 def _play(st, card_id):
     """play_card goes through the real hand/energy path -- the companion hook
     being tested lives there, not in resolve_card."""
-    card = loader.get_card(card_id)
+    return _play_card(st, loader.get_card(card_id))
+
+
+def _play_card(st, card):
     st.player.hand.append(card)
     st.player.energy = 9
     combat.play_card(st, card)
     return card
 
 
+def _probe_attack(amount, *, times=1, element=None):
+    """A plain non-Companion Attack, printed `amount` (x `times`)."""
+    fx = {"op": "damage", "amount": amount, "target": "enemy"}
+    if times > 1:
+        fx["times"] = times
+    if element:
+        fx["applies_element"] = True
+    return Card(id="probe_attack", name="Probe", cost=1, type="attack",
+                element=element, effects=[fx])
+
+
 def test_cannon_fire_support_pays_on_every_companion_play():
     """Navia's trigger is the CARD TYPE, not an element -- deliberately, so
     nothing here pre-commits Crystallize (Zhongli's archetype owns it)."""
     st = make_state(enemies=[make_enemy(hp=200)])
-    _play(st, "navia_cannon_fire_support")
+    _play(st, "proto_mf_navia_cannon_fire_support")
     # Her own play does not pay itself: the hook runs before resolution, so the
     # power is not up yet when her own card play is observed.
     assert st.player.block == 0
     assert st.player.powers["cannon_fire_support"] == 3
 
-    _play(st, "lynette_box_trick")
+    _play(st, "proto_mf_lynette_box_trick")
     assert st.player.block == 3
-    _play(st, "charlotte_snappy_silhouette")
+    _play(st, "proto_mf_charlotte_snappy_silhouette")
     assert st.player.block == 6
 
 
 def test_cannon_fire_support_ignores_non_companion_cards():
     st = make_state(enemies=[make_enemy(hp=200)])
     st.player.powers["cannon_fire_support"] = 3
-    _play(st, "kaboom")                                  # Klee's own card
+    _play_card(st, _probe_attack(4))                     # not a Companion
     assert st.player.block == 0
 
 
@@ -266,14 +280,14 @@ def test_night_vigil_pays_only_against_an_aura_and_only_on_attacks():
 
     # No aura: the rider is worth nothing.
     before = e.hp
-    effects.resolve_card(st, loader.get_card("kaeya_frostgnaw"))   # 6, cryo
+    effects.resolve_card(st, _probe_attack(6, element="cryo"))   # 6, cryo
     assert before - e.hp == 6
     assert e.aura == "cryo"
 
     # Aura up: the SAME card now pays the rider, and it is collected even
     # though this hit reacts the aura away.
     before = e.hp
-    effects.resolve_card(st, loader.get_card("chevreuse_interdiction_fire"))
+    effects.resolve_card(st, loader.get_card("proto_mf_chevreuse_interdiction_fire"))
     melt = C.MELT_MULT                    # pyro onto cryo
     assert before - e.hp == int((7 + 3) * melt)
 
@@ -292,19 +306,19 @@ def test_night_vigil_does_not_pay_bombs_or_summons():
 def test_ancient_sea_authority_extends_applied_and_refreshed_auras():
     st = make_state(enemies=[make_enemy(hp=200)])
     e = st.enemies[0]
-    effects.resolve_card(st, loader.get_card("guest_neuvillette_tears"))
+    effects.resolve_card(st, loader.get_card("proto_mf_guest_neuvillette_tears"))
     assert e.aura_turns_left == C.AURA_DURATION_TURNS
 
     st2 = make_state(enemies=[make_enemy(hp=200)])
     e2 = st2.enemies[0]
     effects.resolve_card(
-        st2, loader.get_card("neuvillette_ancient_sea_authority"))
-    effects.resolve_card(st2, loader.get_card("guest_neuvillette_tears"))
+        st2, loader.get_card("proto_mf_neuvillette_ancient_sea_authority"))
+    effects.resolve_card(st2, loader.get_card("proto_mf_guest_neuvillette_tears"))
     assert e2.aura_turns_left == C.AURA_DURATION_TURNS + 1
     # Refresh must agree with application -- the reason aura_duration() is a
     # function rather than the constant read at three call sites.
     e2.aura_turns_left = 1
-    effects.resolve_card(st2, loader.get_card("guest_neuvillette_tears"))
+    effects.resolve_card(st2, loader.get_card("proto_mf_guest_neuvillette_tears"))
     assert e2.aura_turns_left == C.AURA_DURATION_TURNS + 1
 
 
@@ -314,13 +328,13 @@ def test_ancient_sea_authority_applies_no_element_of_its_own():
     priced with self-damage."""
     st = make_state(enemies=[make_enemy(hp=200)])
     effects.resolve_card(
-        st, loader.get_card("neuvillette_ancient_sea_authority"))
+        st, loader.get_card("proto_mf_neuvillette_ancient_sea_authority"))
     assert all(e.aura is None for e in st.enemies)
 
 
 def test_masque_ratchets_strength_every_turn():
     st = make_state(enemies=[make_enemy(hp=300)])
-    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    effects.resolve_card(st, loader.get_card("proto_mf_arlecchino_masque_red_death"))
     assert st.player.powers.get("strength", 0) == 0    # nothing on play
     effects.player_turn_start_triggers(st)
     assert st.player.powers["strength"] == 1
@@ -330,7 +344,7 @@ def test_masque_ratchets_strength_every_turn():
 
 def test_masque_bond_of_life_eats_block_every_turn():
     st = make_state(enemies=[make_enemy(hp=300)])
-    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    effects.resolve_card(st, loader.get_card("proto_mf_arlecchino_masque_red_death"))
 
     st.player.block = 12
     effects.player_turn_end_triggers(st)
@@ -348,7 +362,7 @@ def test_masque_bond_clamps_at_zero_and_never_goes_negative():
     """The debt is paid out of Block, not out of HP -- a turn with less Block
     than the Bond loses what there is and no more."""
     st = make_state(enemies=[make_enemy(hp=300)])
-    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    effects.resolve_card(st, loader.get_card("proto_mf_arlecchino_masque_red_death"))
     st.player.block = 2
     effects.player_turn_end_triggers(st)
     assert st.player.block == 0
@@ -360,9 +374,9 @@ def test_masque_bond_is_universal_and_navia_block_cannot_dodge_it():
     """The reason the Bond is paid at turn end rather than at a card-block
     funnel: power-sourced Block would otherwise slip past it."""
     st = make_state(enemies=[make_enemy(hp=300)])
-    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
+    effects.resolve_card(st, loader.get_card("proto_mf_arlecchino_masque_red_death"))
     st.player.powers["cannon_fire_support"] = 3
-    _play(st, "lynette_box_trick")        # Navia pays 3 Block, not card block
+    _play(st, "proto_mf_lynette_box_trick")        # Navia pays 3 Block, not card block
     assert st.player.block == 3
     effects.player_turn_end_triggers(st)
     assert st.player.block == 0
@@ -385,23 +399,11 @@ def test_masque_pays_no_flat_damage_rider_on_attacks(stacks):
     assert st.player.powers.get("strength", 0) == 0
 
     hp = st.enemies[0].hp
-    _play(st, "big_badda_boom")                    # printed 16, single hit
+    _play_card(st, _probe_attack(16))              # printed 16, single hit
     assert hp - st.enemies[0].hp == 16
 
     hp = st.enemies[0].hp
-    _play(st, "kaboom_beetle_swarm")               # printed 5 x 3, unbombed
+    _play_card(st, _probe_attack(5, times=3))      # printed 5 x 3
     assert hp - st.enemies[0].hp == 15
 
 
-def test_masque_strength_converts_to_charge_for_kokomi():
-    """LAW 3 (Flawless Strategy) says Kokomi cannot gain Strength; it becomes
-    Charge at the one chokepoint. Arlecchino routes through the standard path
-    precisely so this falls out without a special case."""
-    st = make_state(enemies=[make_enemy(hp=300)])
-    st.player.relic_hooks.append("tamakushi_casket")
-    effects.resolve_card(st, loader.get_card("arlecchino_masque_red_death"))
-    effects.player_turn_start_triggers(st)
-    assert st.player.powers.get("strength", 0) == 0
-    assert st.player.charge == 1
-    converted = [ev for ev in st.log if ev["event"] == "strength_converted"]
-    assert converted and converted[-1]["stacks"] == 1

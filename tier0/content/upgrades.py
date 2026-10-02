@@ -37,12 +37,7 @@ from tier0.content import local_reference
 
 _DOCS = Path(__file__).parents[2] / "docs"
 _GAME_REF = local_reference.game_ref_dir()
-UPGRADE_SHEETS = (_DOCS / "klee-upgrades.yaml",
-                  _DOCS / "furina-upgrades.yaml",
-                  # v0.2 Kokomi sheet pass (2026-07-24): rest-smith needs
-                  # upgrade targets or her tier05 runs are structurally
-                  # behind. Cross-session note: docs/archive/kokomi-session-worknote.md
-                  _DOCS / "kokomi-upgrades.yaml",
+UPGRADE_SHEETS = (
                   # Calibration pass (2026-07-24): the ANCHOR had 0/6 pool and
                   # 0/10 starter upgradable while every designed character had
                   # 100%, so rest-smithing, Sand Castle, Yummy Cookie, War
@@ -524,39 +519,31 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     """
     from tier0.content import loader           # late: loader imports us
     reachable = set(loader._substituted_card_index())
-    if C.SPARK_ALT_COST_ENABLED:
-        # The Spark arm's own door (`_card_prototype`): with that flag on any
-        # `proto_` id resolves, because its starter substitution hands one out
-        # by id string.
-        reachable |= {c.id for c in loader.prototype_cards()}
     # EB-283. The three OVERHAUL arms open the same door by id -- their whole
     # starter and pool ARE prototype rows -- so a row those flags make
     # reachable is a row a rest site can offer to smith, and it has to have an
     # answer here or the campfire is empty. Same reachability discipline as the
     # two clauses above: on a flag-off tree (every shipped tree) none of these
     # sets contributes and the index is byte-identical to what it was.
-    if C.KLEE_OVERHAUL:
-        reachable |= set(C.KLEE_OVERHAUL_STARTER_IDS)
-        reachable |= set(C.KLEE_OVERHAUL_POOL_IDS)
-    if C.KOKOMI_OVERHAUL:
-        reachable |= set(C.KOKOMI_OVERHAUL_STARTER_IDS)
-        reachable |= set(C.KOKOMI_OVERHAUL_POOL_IDS)
-    if C.COMPANION_OVERHAUL:
-        reachable |= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
-        reachable |= set(C.INAZUMA_OVERHAUL_POOL_IDS)
-        reachable |= set(C.FONTAINE_OVERHAUL_POOL_IDS)
-        # THE PERSONALS ride the same replacement roster -- Gorou's Crystal
-        # Collapse and Klee's four coven rows join it beside the two nations'
-        # Universals (`loader.companion_roster_replacement`) -- so a draft can
-        # put one in a deck and a rest site must be able to smith it. Left out,
-        # the sim offered all five and could upgrade none, while the C#
-        # upgrades every one.
-        reachable |= set(C.INAZUMA_OVERHAUL_PERSONAL_IDS)
-        reachable |= set(C.COVEN_PERSONAL_POOL_IDS)
-        # The stand-ins are in NO pool by design (see `COMPANION_STANDIN_IDS`),
-        # and they are still REACHABLE: the hand-off puts one in a deck, and a
-        # card in a deck must have a campfire answer like any other.
-        reachable |= set(C.COMPANION_STANDIN_IDS)
+    reachable |= set(C.KLEE_OVERHAUL_STARTER_IDS)
+    reachable |= set(C.KLEE_OVERHAUL_POOL_IDS)
+    reachable |= set(C.KOKOMI_OVERHAUL_STARTER_IDS)
+    reachable |= set(C.KOKOMI_OVERHAUL_POOL_IDS)
+    reachable |= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+    reachable |= set(C.INAZUMA_OVERHAUL_POOL_IDS)
+    reachable |= set(C.FONTAINE_OVERHAUL_POOL_IDS)
+    # THE PERSONALS ride the same replacement roster -- Gorou's Crystal
+    # Collapse and Klee's four coven rows join it beside the two nations'
+    # Universals (`loader.companion_roster_replacement`) -- so a draft can
+    # put one in a deck and a rest site must be able to smith it. Left out,
+    # the sim offered all five and could upgrade none, while the C#
+    # upgrades every one.
+    reachable |= set(C.INAZUMA_OVERHAUL_PERSONAL_IDS)
+    reachable |= set(C.COVEN_PERSONAL_POOL_IDS)
+    # The stand-ins are in NO pool by design (see `COMPANION_STANDIN_IDS`),
+    # and they are still REACHABLE: the hand-off puts one in a deck, and a
+    # card in a deck must have a campfire answer like any other.
+    reachable |= set(C.COMPANION_STANDIN_IDS)
     # VARKA's OATH REWORK has no switch (he ships nowhere else; collapsed
     # 2026-10-01): the loader's door is always open for every `proto_vk_`
     # row -- his starter, his pool and the cards his rules create -- so each

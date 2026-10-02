@@ -162,33 +162,12 @@ SELECT_SCREENS = ("hand_select", "card_select")
 
 # Cards a scenario may name that are on NO sheet, each with the reason it is
 # reachable in a fight. `tier0/tests/test_understudy_scenario.py` checks every
-# other name against `docs/*-cards.yaml`, and without this list that lint would
-# have to be switched off -- at which point a typo in a card name stops being
-# caught at all. Adding a row here is a claim that the card exists in the mod
-# and is reachable without a draft; the test asserts the C# class exists.
-TOKEN_CARDS = {
-    "KLEEMOD-ETHEREAL_SPOTLIGHT":
-        "Furina's starter relic adds one to hand at the start of every turn "
-        "(Relics/EtherealSpotlightRelic.cs)",
-    "Ethereal Spotlight": "the printed title of the above",
-    "Center Stage":
-        "an option on the Ethereal Spotlight's choose-a-card screen "
-        "(Cards/Furina/SpotlightCards.cs, CenterStageOption)",
-    "Guest Cast":
-        "the other option on that screen, offered only when the player owns a "
-        "Companion card (GuestCastOption)",
-    # EB-150. A choose-one card's modes are faces on that same screen, and the
-    # generator prints the sheet's `label` into both the option class's title
-    # and its description -- so a mode is named here exactly as
-    # docs/furina-cards.yaml:707 spells it, and a label edit on the sheet is an
-    # edit here too. That coupling is deliberate: these are the only names in
-    # this table that can go stale from a SHEET edit rather than a code one.
-    "Gain 1 Energy and 2 Encore":
-        "mode 0 of deep_breath on the choose-a-card screen "
-        "(Cards/Furina/Generated/DeepBreath.cs, DeepBreathModeA)",
-    "Spend 3 Encore: draw 3":
-        "mode 1 of the same card (DeepBreathModeB)",
-}
+# other name against the sheets, and without this list that lint would have to
+# be switched off. Adding a row here is a claim that the card exists in the mod
+# and is reachable without a draft. EMPTY since legacy cleanup stage 6: the
+# Spotlight tokens and the Deep Breath mode faces it listed left with the
+# shipped Furina kit, and no scenario names a token today.
+TOKEN_CARDS: dict[str, str] = {}
 
 # Every verb a step may name. Kept as data so the parser can refuse an unknown
 # key with the list, rather than skipping it -- a mistyped step that is silently
@@ -709,7 +688,7 @@ def digest(state: dict[str, Any]) -> dict[str, Any]:
 #
 # Each check is `(spec, before, after) -> str | None`; the string is the reason
 # it failed. They read the WIRE and nothing else -- never a sheet, never tier0.
-# A check that consulted `docs/klee-cards.yaml` for the number it is asserting
+# A check that consulted `docs/prototype-surface.yaml` for the number it is asserting
 # would have the sheet on both sides of its own comparison, which is the
 # `probe_block` rule ("Block cards are recognised from the WIRE's own printed
 # description") applied to assertions.

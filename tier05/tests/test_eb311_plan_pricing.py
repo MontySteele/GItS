@@ -10,23 +10,17 @@ cards, which the read says of itself
 `tier0.pilot.policy._active_effects` swapped in the planned half and valued it
 at FACE, with no discount for the turn of delay (the same record, sec.5).
 
-THIS FILE'S FIRST JOB IS THE PROOF THAT NO STAMP MOVES. The change lands under
-`RT12/D18/P11/C21` unbumped, and that is a claim about OUTPUT: a `plan:` list
-is prototype-surface only, the new op prices belong to verbs no
-`docs/*-cards.yaml` row spells, and the one new conditional predicate is a name
-no shipped sheet prints. `test_every_shipped_price_is_byte_identical` is that
-claim as a fixture hash over every committed row and every upgraded face, and
-`test_no_shipped_sheet_prints_a_prototype_only_predicate` is the half a hash
-cannot state -- the day one of those predicates is authored onto a shipped
-sheet, this goes red and the name owes a `DRAFTER_VERSION` bump.
+THE NO-BUMP PROOF this file opened with (a fixture hash over every shipped
+row's price) left with the shipped sheets at legacy cleanup stage 6.
+`test_no_shipped_sheet_prints_a_prototype_only_predicate` stays: the day one
+of those predicates is authored onto a non-prototype sheet, this goes red and
+the name owes a `DRAFTER_VERSION` bump.
 
 NOTHING MEASURED ON A PROTOTYPE ROW IS QUOTABLE ANYWHERE (R215 B). The
 prototype figures below are pinned as ARITHMETIC -- each is written as the
 expression that produces it -- not published as a statement about the design.
 """
 
-import hashlib
-import json
 
 import pytest
 import yaml
@@ -42,115 +36,9 @@ from tier05 import draft
 # 1. THE PROOF: every shipped price is byte-identical
 # ---------------------------------------------------------------------------
 
-#: sha256 over `[[card id, "%.10f" % _static_power(card)], ...]` for every
-#: committed row and every upgraded face, sorted by id. First taken at
-#: `origin/main` `a63c2b0a`, BEFORE any of EB-311's edits, and unchanged after
-#: them. Rebuild it only alongside a `DRAFTER_VERSION` bump and the re-baseline
-#: that bump owes, OR when the POPULATION moves and every surviving row's price
-#: is proved identical first -- a diff here is a moved world, not a stale
-#: fixture, and which kind of move it was has to be shown rather than assumed.
-#:
-#: RE-PINNED ONCE, at `EB-83` (2026-09-02, `RT12` -> `RT13`). The Wood Carvings
-#: conversion added `tengu_flurry` and `chinju_ward` to
-#: `tier0/content/cards/colorless_event.yaml`; neither takes an upgrade, so the
-#: population went 618 -> 620 exactly. NO EXISTING PRICE MOVED, and
-#: `test_the_eb83_rows_are_the_only_reason_the_digest_moved` below is that
-#: proof rather than this comment -- the digest over the pool MINUS those two
-#: ids still equals the pre-EB-83 hash, which is kept below for it to check.
-#: `DRAFTER_VERSION` therefore stayed at 18, on the same argument EB-311's own
-#: no-bump proof makes: content entering the pool is an `RT` fact, and what
-#: this hash guards is the drafter's arithmetic.
-#:
-#: RE-PINNED A SECOND TIME, at `C22` (2026-09-25, `C21` -> `C22`), and this one
-#: is NOT a population change: [USER] ruled "Undercurrent, pick a", so the
-#: shipped Furina Common `undercurrent` costs 1 where it cost 2, and
-#: `_static_power` divides by cost -- its two faces' prices double. No drafter
-#: CODE moved. The proof is `test_the_c22_rows_are_the_only_reason_the_digest_
-#: moved` below: strike the two Undercurrent faces and the digest over the other
-#: 618 is the one taken at the pre-C22 tree (`06e6eb3c`), digit for digit.
-#: That is the "reason that is not a population change" the pre-`EB-83` pair
-#: named for its own retirement, so it retired here; its proof holds in git.
-SHIPPED_PRICE_DIGEST =     "3dc0679ce3dc4605507d4f92ced6cbc22bf93cb371066d6864f59037f0f4914e"
-#: 620 rows since `EB-83`. Pinned beside the hash because a hash of a shrinking
-#: population also never changes.
-SHIPPED_PRICE_ROWS = 620
-
-#: The pre-`C22` survivors' digest, taken at `06e6eb3c` over every committed
-#: face EXCEPT Undercurrent's two, kept as what the re-pin is CHECKED against.
-#: Retire it only when a bump re-derives the hash for another reason.
-PRE_C22_SURVIVOR_DIGEST =     "6276ea1f02bbd29abe1f29e57cbec6757e199752696a2c6459f0c963a441dac3"
-C22_ROWS = ("undercurrent", "undercurrent+")
-
-
-def _shipped_rows() -> list[Card]:
-    """Every committed card, base face and upgraded face.
-
-    `game_ref/` rows are EXCLUDED and that is not a convenience: the reference
-    sheets are gitignored, so a fixture over them would hash differently on a
-    fresh clone than on the deploy host and the pin would be untrustworthy
-    exactly where it is checked.
-
-    Every face comes through `loader.get_card`, which hands back a FRESH deep
-    copy. `upgrades.apply_upgrade` mutates its argument in place -- its own
-    first line says "Mutate a (deep-copied) base card" -- so calling it on the
-    shared `_card_index()` prototypes would rewrite the pool this fixture is
-    supposed to be measuring, and every later reader's too.
-    """
-    external = {d["id"] for d in loader._external_cards()}
-    rows: list[Card] = []
-    for cid in sorted(loader._card_index()):
-        if cid in external:
-            continue
-        rows.append(loader.get_card(cid))
-        # Some sheets carry the upgraded row as a card of its own
-        # (`albedo_solar_isotoma+`); it is already in the index above.
-        if cid.endswith(upgrades.SUFFIX) or not upgrades.has_upgrade(cid):
-            continue
-        try:
-            rows.append(loader.get_card(cid + upgrades.SUFFIX))
-        except (ValueError, KeyError):     # UNAPPLIABLE / unexpressible delta
-            continue
-    return rows
-
-
-def _digest(rows: list[Card]) -> str:
-    blob = json.dumps(
-        sorted((c.id, f"{draft._static_power(c):.10f}") for c in rows),
-        sort_keys=True)
-    return hashlib.sha256(blob.encode()).hexdigest()
-
-
-def test_every_shipped_price_is_byte_identical():
-    """THE NO-BUMP PROOF. Not "close", not "unchanged for the arms we looked
-    at": the same digits, card for card, on every committed row and both of its
-    faces."""
-    assert _digest(_shipped_rows()) == SHIPPED_PRICE_DIGEST
-
-
-def test_the_c22_rows_are_the_only_reason_the_digest_moved():
-    """The `C22` re-pin's proof, and the reason the hash above could be
-    rewritten without a `DRAFTER_VERSION` bump.
-
-    A re-pinned fixture is worth exactly as much as the argument for re-pinning
-    it, and "one card's cost moved" is not an argument -- a sheet edit can move
-    a price on rows it never touched, through a shared price table or a rarity
-    term. So the claim is checked rather than asserted: strike Undercurrent's
-    two faces out of the population and the pre-C22 survivors' hash comes back,
-    digit for digit, across the other 618. (`EB-83`'s own proof, the same shape
-    for a population change, retired with this re-pin and holds in git.)
-    """
-    rows = _shipped_rows()
-    survivors = [c for c in rows if c.id not in C22_ROWS]
-    assert len(rows) - len(survivors) == len(C22_ROWS)
-    assert _digest(survivors) == PRE_C22_SURVIVOR_DIGEST
-
-
-def test_the_digest_covers_the_whole_committed_pool():
-    """A hash of nothing also never changes. Pin the population too."""
-    rows = _shipped_rows()
-    assert len(rows) == SHIPPED_PRICE_ROWS
-    assert not any(c.plan for c in rows), \
-        "a shipped row grew a `plan:` list -- the no-bump argument is spent"
+#: THE NO-BUMP DIGEST OVER THE SHIPPED ROWS (`SHIPPED_PRICE_DIGEST`, 620
+#: faces) left with the shipped sheets at legacy cleanup stage 6; it read back
+#: in git. What stays is the predicate check below.
 
 
 def test_no_shipped_sheet_prints_a_prototype_only_predicate():
@@ -212,7 +100,6 @@ def overhaul(monkeypatch):
     """Her flag on, with the id-resolving caches cleared both ways -- the
     `test_kokomi_overhaul` fixture's arrangement, for its reasons."""
     loader.reset_arm_caches()
-    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     yield
     loader.reset_arm_caches()
 

@@ -46,7 +46,6 @@ def arm(monkeypatch):
     """The Inazuma companion overhaul on, and the loader's caches cleared on
     the way in and out -- `test_inazuma_companion_overhaul`'s own fixture."""
     loader.reset_arm_caches()
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
     yield
     loader.reset_arm_caches()
 

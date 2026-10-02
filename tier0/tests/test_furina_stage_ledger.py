@@ -21,14 +21,13 @@ from tier0.engine.state import CombatState, Enemy, Player
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 FS = furina_stage
 
 
 @pytest.fixture
 def arm(monkeypatch):
-    monkeypatch.setattr(FS, "FURINA_STAGE", True)
+    yield
 
 
 def _state(turn=1):
@@ -44,15 +43,6 @@ def _state(turn=1):
 
 def _balances(st):
     return FS.ledger_expected_end(st.stage_ledger) == FS.total_fanfare(st.player)
-
-
-def test_with_the_flag_off_the_ledger_stays_empty():
-    st = _state()
-    FS.open_combat(st)
-    FS.summon(st, "usher")
-    FS.raise_fanfare(st, 5)
-    FS.end_of_turn_acts(st)
-    assert st.stage_ledger == {}
 
 
 def test_a_scripted_fight_adds_up_door_by_door(arm):

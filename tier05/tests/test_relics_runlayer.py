@@ -25,9 +25,6 @@ from tier0.engine.state import CombatState
 from tier05 import draft, model
 from tier05 import maps
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 
 @pytest.fixture(autouse=True)
@@ -187,15 +184,14 @@ def test_book_of_five_rings_heals_after_five_cards(monkeypatch):
 # --- fishing_rod: a deck card gets upgraded after 3 normal wins -------------
 
 def test_fishing_rod_upgrades_after_three_normal_wins(monkeypatch):
-    # Skip drafting so the deck only moves via rest-smithing + the fishing
-    # upgrade; both runs rest-smith identically (same HP curve under the fixed
+    # Skip drafting so the deck only moves via rest actions + the fishing
+    # upgrade; both runs rest identically (same HP curve under the fixed
     # hit), so the sole delta is fishing_rod's every-3rd-N-win upgrade.
     # Hit 0 (was 8): the v5 pre-E/B lookahead heals any bruised rest arrival,
     # so rests only smith when the run arrives near-full.
     monkeypatch.setattr(model, "run_fight", _win_stub(0))
     base = model.run_one(CHAR, ARCH, PILOT, _skip, SEED)
     relic = model.run_one(CHAR, ARCH, PILOT, _skip, SEED, relics=["fishing_rod"])
-    assert _n_upgraded(base.deck_ids) >= 1                  # rests smith too
     assert _n_upgraded(relic.deck_ids) == _n_upgraded(base.deck_ids) + 1
 
 

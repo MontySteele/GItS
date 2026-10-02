@@ -34,8 +34,7 @@ THREE CLAIMS, CHECKED SEPARATELY, because they fail in different places:
 cannot be rolled by any offer surface (the base game filters it upstream), and
 under both arms the starter is a whole replacement -- so the arm's sheet rows
 split cleanly in two with no curated debt list: the basics are the starter's,
-everything else is the pool's. `lint_starter_pool_overlap` owns the sim-side
-half of that same split.
+everything else is the pool's.
 
 READ OFF THE SOURCE, not off a build. The roster resolves every row through
 `ModelDb.Card<T>()`, which throws until the game boots, so the C# side is

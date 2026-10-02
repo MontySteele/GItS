@@ -13,9 +13,6 @@ from tier05 import draft, model, rewards
 from tier05 import maps
 from tier05.run_metrics import summarize_runs, survival_profile
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 SEED = 42
 
@@ -54,80 +51,6 @@ def test_run_determinism():
     assert a.death_node == b.death_node
     assert [d["picked"] for d in a.decisions] == \
            [d["picked"] for d in b.decisions]
-
-
-def test_klee_randomized_starter_is_mondstadt_locked_and_role_locked():
-    attacks = {"dahlia_sacramental_shower", "kaeya_frostgnaw"}
-    supports = {"barbara_melody", "prune_witch_hunt"}
-    seen_attacks = set()
-    seen_supports = set()
-
-    for seed in range(40):
-        deck = loader.starting_deck("klee", random.Random(seed))
-        rolled_attacks = attacks.intersection(deck)
-        rolled_supports = supports.intersection(deck)
-        assert len(deck) == 10
-        assert len(rolled_attacks) == 1
-        assert len(rolled_supports) == 1
-        assert deck.count("kaboom") == 3
-        assert deck.count("duck_and_cover") == 3
-        assert all(loader.get_card(cid).nation == "mondstadt"
-                   for cid in rolled_attacks | rolled_supports)
-        seen_attacks.update(rolled_attacks)
-        seen_supports.update(rolled_supports)
-
-    assert seen_attacks == attacks
-    assert seen_supports == supports
-
-
-def test_furina_randomized_starter_is_fontaine_locked_and_role_locked():
-    attacks = {"chevreuse_interdiction_fire", "freminet_pers_deploy"}
-    supports = {"charlotte_enduring_frosthelm", "lynette_enigmatic_feint"}
-    seen_attacks = set()
-    seen_supports = set()
-
-    for seed in range(40):
-        deck = loader.starting_deck("furina", random.Random(seed))
-        rolled_attacks = attacks.intersection(deck)
-        rolled_supports = supports.intersection(deck)
-        assert len(deck) == 10
-        assert len(rolled_attacks) == 1
-        assert len(rolled_supports) == 1
-        assert deck.count("soloists_solicitation") == 2
-        assert deck.count("stage_presence") == 2
-        assert all(loader.get_card(cid).nation == "fontaine"
-                   for cid in rolled_attacks | rolled_supports)
-        seen_attacks.update(rolled_attacks)
-        seen_supports.update(rolled_supports)
-
-    assert seen_attacks == attacks
-    assert seen_supports == supports
-
-
-def test_randomized_starter_uses_a_dedicated_replayable_stream():
-    companion_ids = {c.id for c in loader._card_index().values()
-                     if c.is_companion}
-    # The claim is about the STARTER, so read the starter -- not the deck the
-    # run happens to die holding. The old form asserted >=2 companions in the
-    # final deck on the theory that "starters never vanish", which is simply
-    # not true: events.py removes cards (`remove` and `remove_random`), so any
-    # run that draws a removal event can legitimately eat a starter companion.
-    # That made this a seed-fragile proxy, and the §4.7 shop channel's extra
-    # rng draws duly renumbered the run and took prune_witch_hunt out of the
-    # deck. The mechanism under test never moved.
-    starter = loader.starting_deck("klee",
-                                   random.Random(SEED + 3 * 10 ** 9))
-    assert len(companion_ids.intersection(starter)) >= 2
-
-    # Replayability is the other half, and it IS a whole-run property: same
-    # seed, same run, same surviving companions.
-    first = model.run_one("klee", "generic", "generic",
-                          draft.assigned_policy, SEED)
-    second = model.run_one("klee", "generic", "generic",
-                           draft.assigned_policy, SEED)
-    assert (companion_ids.intersection(first.deck_ids)
-            == companion_ids.intersection(second.deck_ids))
-    assert first.deck_ids == second.deck_ids
 
 
 def test_death_logs_node_index_and_hp_persists():
@@ -192,16 +115,10 @@ def test_rest_policy_heals_when_hurt_else_upgrades_then_removes():
     deck = loader.starting_deck("klee")
     action, _ = model.rest_action(deck, hp=20, max_hp=62)
     assert action == "heal"                     # hurt always heals first
-    # M7: healthy rests smith an on-plan card before thinning.
-    action, target = model.rest_action(deck, hp=60, max_hp=62,
-                                       archetype="demolition")
-    assert action == "upgrade"
-    assert "demolition" in loader.get_card(target).archetypes
-    # With every on-plan card already upgraded, the old removal preference
-    # returns: basic attacks first.
-    upgraded = [cid + "+" if upgrades.has_upgrade(cid) else cid
-                for cid in deck]
-    action, removed = model.rest_action(upgraded, hp=60, max_hp=62,
+    # M7's on-plan smith needs archetype tags, which no current row carries
+    # (legacy cleanup stage 6), so a healthy rest falls to the removal
+    # preference: basic attacks first.
+    action, removed = model.rest_action(deck, hp=60, max_hp=62,
                                         archetype="demolition")
     assert action == "remove"
     assert loader.get_card(removed).rarity == "basic"
@@ -220,9 +137,11 @@ def test_reward_rarity_odds_and_slot():
         comp = offers[-1]
         assert comp.is_companion
         if comp.rarity == "rare":
-            assert comp.star == 5       # 5-stars at rare odds ONLY
-        else:
-            assert comp.star == 4
+            assert comp.star == 5       # every Rare companion is a 5-star
+        # The converse ("5-stars at rare odds ONLY") was a shipped-roster
+        # fact: the current companion workshops print 5-star Uncommons
+        # (Jean's Gale Blade, Kazuha, Yae...), so it left with the shipped
+        # sheets at legacy cleanup stage 6.
         for c in offers[:-1]:
             assert not c.is_companion   # card offers never companions
             counts[c.rarity] += 1
@@ -289,60 +208,12 @@ def _cards(*ids):
     return [loader.get_card(i) for i in ids]
 
 
-def test_payoff_gated_beyond_core():
-    # Post-triage shape: a payoff that ADVANCES the core is a fine early
-    # pick (the deadlock fix); the gate bites on payoffs BEYOND the core.
-    starter = _cards(*loader.starting_deck("klee"))
-    amp = next(c for c in loader._card_index().values()
-               if "reaction" in c.archetypes and c.role == "payoff")
-    offline = starter + [amp, loader.get_card("dahlia_sacramental_shower")]
-    assert not draft.core_complete(offline, "reaction")
-    cold = draft.score_offer(amp, offline, "reaction")   # 2nd amp, offline
-    online = starter + [amp] + _cards("dahlia_sacramental_shower",
-                                      "kaeya_frostgnaw")
-    assert draft.core_complete(online, "reaction")
-    hot = draft.score_offer(amp, online, "reaction")
-    assert hot > cold
-
-
-def test_enabler_value_decays():
-    enabler = loader.get_card("mine_toss")
-    starter = _cards(*loader.starting_deck("klee"))
-    early = draft.score_offer(enabler, starter, "demolition")
-    late = draft.score_offer(
-        enabler, starter + _cards("mine_toss", "double_pop", "bomb_voyage",
-                                  "quick_fuse"), "demolition")
-    assert early > late
-
-
-def test_reaction_core_rule():
-    # v1.9: the Burst left the core definition -- it arrives by charging
-    # the meter, not by drafting, so assembly is 2 appliers + 1 amp payoff.
-    starter = _cards(*loader.starting_deck("klee"))
-    assert not draft.core_complete(starter, "reaction")
-    core = starter + _cards("dahlia_sacramental_shower", "kaeya_frostgnaw",
-                            "sizzle")
-    assert draft.core_complete(core, "reaction")
-
-
-def test_spotlight_core_requires_cast_access_and_machinery():
-    starter = _cards(*loader.starting_deck("furina"))
-    assert not draft.core_complete(starter, "spotlight")
-    access = starter + _cards("lynette_box_trick")
-    assert not draft.core_complete(access, "spotlight")
-    # DRAFTER_VERSION 15 (R120 / 10.3): `limelight` is the only enabler-role
-    # machinery card, and it alone no longer satisfies the limb -- the deck
-    # must also hold a machinery PAYOFF (bar ONE, every limb's standard).
-    machinery_only = access + _cards("limelight")
-    assert not draft.core_complete(machinery_only, "spotlight")
-    online = machinery_only + _cards("top_billing")
-    assert draft.core_complete(online, "spotlight")
-    # ...and a payoff alone does not skip the access limb: both bite.
-    assert not draft.core_complete(starter + _cards("top_billing"),
-                                   "spotlight")
-    companion = loader.get_card("chevreuse_interdiction_fire")
-    assert (draft.score_offer(companion, starter, "spotlight")
-            > draft.score_offer(companion, starter, "generic"))
+def _tagged(cid, role, plan):
+    """A synthetic row carrying exactly the role and plan tag the drafter's
+    generic limb reads."""
+    from tier0.engine.state import Card
+    return Card(id=cid, name=cid, cost=1, type="skill", rarity="common",
+                role=role, archetypes=[plan])
 
 
 def test_generic_core_requires_a_drafted_payoff():
@@ -351,32 +222,28 @@ def test_generic_core_requires_a_drafted_payoff():
     nothing in it that cashes what they assemble -- the fanfare close-out's
     diagnosis ("it measures when the RESOURCE assembles, not when the DECK
     does") applied verbatim to the branch it was never applied to.
+
+    On synthetic tagged rows since legacy cleanup stage 6: the shipped rows
+    it named (`salon_debut`, `grand_salon`, `mine_toss`, `remote_detonator`)
+    are gone and no current row carries an archetype tag.
     """
-    starter = _cards(*loader.starting_deck("furina"))
-    assert not draft.core_complete(starter, "salon")
+    for character, plan in (("furina", "salon"), ("klee", "demolition")):
+        starter = _cards(*loader.starting_deck(character))
+        assert not draft.core_complete(starter, plan)
 
-    # Four on-plan enablers: the OLD definition's core, exactly.
-    enablers = _cards("salon_debut", "casting_call", "gentilhomme_usher",
-                      "usher_the_waves")
-    resource_only = starter + enablers
-    assert len(enablers) >= C.DRAFT_CORE_SIZE
-    assert not draft.core_complete(resource_only, "salon")
+        # Four on-plan enablers: the OLD definition's core, exactly.
+        enablers = [_tagged(f"e{i}", "enabler", plan) for i in range(4)]
+        resource_only = starter + enablers
+        assert len(enablers) >= C.DRAFT_CORE_SIZE
+        assert not draft.core_complete(resource_only, plan)
 
-    # One payoff closes it, and the bar really is ONE.
-    payoff = loader.get_card("grand_salon")
-    assert draft.core_complete(resource_only + [payoff], "salon")
+        # One payoff closes it, and the bar really is ONE.
+        payoff = _tagged("p", "payoff", plan)
+        assert draft.core_complete(resource_only + [payoff], plan)
 
-    # ...but a payoff alone is not a core either: the assembly limb still
-    # has to clear DRAFT_CORE_SIZE. Both limbs bite, neither subsumes.
-    assert not draft.core_complete(starter + [payoff], "salon")
-
-    # The same shape on a second character, so this is the limb and not a
-    # property of Furina's sheet.
-    klee = _cards(*loader.starting_deck("klee"))
-    klee_enablers = _cards("jumpy_dumpty", "pop", "mine_toss", "double_pop")
-    assert not draft.core_complete(klee + klee_enablers, "demolition")
-    assert draft.core_complete(
-        klee + klee_enablers + _cards("remote_detonator"), "demolition")
+        # ...but a payoff alone is not a core either: the assembly limb still
+        # has to clear DRAFT_CORE_SIZE. Both limbs bite, neither subsumes.
+        assert not draft.core_complete(starter + [payoff], plan)
 
 
 def test_generic_core_progress_tracks_the_payoff_limb():
@@ -385,117 +252,20 @@ def test_generic_core_progress_tracks_the_payoff_limb():
     the drafter keeps reaching for enablers it no longer needs.
     """
     starter = _cards(*loader.starting_deck("furina"))
-    enablers = _cards("salon_debut", "casting_call", "gentilhomme_usher",
-                      "usher_the_waves")
+    enablers = [_tagged(f"e{i}", "enabler", "salon") for i in range(4)]
     resource_only = starter + enablers
-    payoff = loader.get_card("grand_salon")
+    payoff = _tagged("p", "payoff", "salon")
 
     # Assembly limb full, payoff limb empty -> exactly half, not 1.0.
     assert draft._core_progress(resource_only, "salon") == 0.5
     assert draft._core_progress(resource_only + [payoff], "salon") == 1.0
     # A fifth enabler advances nothing; the payoff does.
-    assert (draft._core_progress(resource_only + _cards("undercurrent"),
+    assert (draft._core_progress(resource_only
+                                 + [_tagged("e5", "enabler", "salon")],
                                  "salon")
             == draft._core_progress(resource_only, "salon"))
     assert (draft._core_progress(resource_only + [payoff], "salon")
             > draft._core_progress(resource_only, "salon"))
-
-    # And the two functions agree at the boundary: progress is 1.0 exactly
-    # when the predicate is True. They drifted apart once (v10 had to move
-    # both limbs of the fanfare fix); `_generic_core_counts` is why they
-    # cannot drift again.
-    for deck in (starter, resource_only, resource_only + [payoff],
-                 starter + [payoff]):
-        assert (draft._core_progress(deck, "salon") == 1.0) \
-            is draft.core_complete(deck, "salon")
-
-
-def test_fanfare_and_reaction_limbs_are_untouched_by_the_generic_fix():
-    """The generic limb is its own branch. `core_complete("fanfare")` is a
-    trap with its own history (DRAFTER_VERSION 10, G-E1) and the v14 fix
-    must not reach into it, nor into reaction's or spotlight's.
-    """
-    furina = _cards(*loader.starting_deck("furina"))
-    both = loader.get_card("rapturous_applause")
-    assert draft.core_complete(furina + [both], "fanfare")
-    klee = _cards(*loader.starting_deck("klee"))
-    assert draft.core_complete(
-        klee + _cards("dahlia_sacramental_shower", "kaeya_frostgnaw",
-                      "sizzle"), "reaction")
-    # DRAFTER_VERSION 15 (R120 / 10.3): spotlight's limb now carries its own
-    # payoff-presence requirement, so the D14-complete deck below needs a
-    # machinery payoff too. The claim this test pins is unchanged: the
-    # GENERIC fix (v14) did not reach into the dedicated limbs -- spotlight
-    # moved by its own ruling, not by v14's.
-    assert not draft.core_complete(
-        furina + _cards("lynette_box_trick", "limelight"), "spotlight")
-    assert draft.core_complete(
-        furina + _cards("lynette_box_trick", "limelight", "top_billing"),
-        "spotlight")
-
-
-def test_fanfare_core_is_native_generation_plus_output_converter():
-    starter = _cards(*loader.starting_deck("furina"))
-    assert draft._fanfare_generation_total(starter) \
-        >= draft.FANFARE_GENERATION_COVERAGE
-    assert not draft.core_complete(starter, "fanfare")
-
-    # DRAFTER_VERSION 9: the plan's second half is a permanent BASELINE, not
-    # a converter -- the spend grammar that defined "converter" is retired.
-    #
-    # WHAT COUNTS AS A GRANT CHANGED (Fanfare rework, Track B, 2026-07-28).
-    # It used to be "prints the op, OR is a Power at all", because the engine
-    # granted 5 by rarity behind every Power's back. The drafter now reads
-    # exactly what the card PRINTS, and nothing else.
-    floor_source = loader.get_card("the_sea_is_my_stage")   # prints Fanfare 15
-    pure_reader = loader.get_card("crescendo")
-    assert draft._grants_fanfare_floor(floor_source)
-    assert not draft._grants_fanfare_floor(pure_reader)
-
-    # THE CASE THAT PROVES IT. grand_salon is an uncommon Power that used to
-    # be worth 5 floor purely by being one, and prints no Fanfare line at all
-    # -- so the drafter must now see nothing. Same for a Fanfare CAP card:
-    # headroom is not baseline, and scoring it as one would tell the drafter
-    # a near-inert keyword completes the plan's core.
-    assert not draft._grants_fanfare_floor(loader.get_card("grand_salon"))
-    assert not draft._grants_fanfare_floor(loader.get_card("courtroom_drama"))
-
-    # rapturous_applause still closes both the floor limb and the reader limb
-    # -- but for a reason that is now PRINTED ("Fanfare +8") rather than
-    # inferred from its card type. Same answer, different evidence, which is
-    # the whole track in one assertion.
-    both = loader.get_card("rapturous_applause")
-    assert draft._grants_fanfare_floor(both) and draft._reads_fanfare(both)
-    assert draft.core_complete(starter + [both], "fanfare")
-
-    # And the limbs really are separable: a deck holding only a baseline is
-    # not online, because it reads a meter nothing cashes.
-    assert not draft.core_complete(starter + [floor_source], "fanfare")
-    assert draft.core_complete(starter + [floor_source, pure_reader],
-                               "fanfare")
-    assert not draft.core_complete(starter + [pure_reader], "fanfare")
-
-
-def test_fanfare_drafter_prioritizes_conversion_over_surplus_generation():
-    starter = _cards(*loader.starting_deck("furina"))
-    converter = loader.get_card("dramatic_entrance")
-    # `suffering_for_art` USED TO BE THE BLIND GENERATOR IN THIS TEST, and the
-    # compensation pass (2026-07-28, Track 2.2) is exactly the change that
-    # disqualified it: it reads the meter now, so the drafter is right to stop
-    # skipping it. Standing on the assertion would have meant asserting the
-    # sprint had not happened. `ebb_and_flow` is the surviving blind Encore
-    # common and carries the case unchanged.
-    generator = loader.get_card("ebb_and_flow")
-
-    assert draft.score_offer(converter, starter, "fanfare") \
-        > draft.score_offer(generator, starter, "fanfare")
-    assert draft.assigned_policy(
-        random.Random(0), starter, [generator], "fanfare") is None
-
-    # Generation has real setup value for a hypothetical uncovered deck, but
-    # no longer receives a permanent core-assembly bonus after Aria covers it.
-    assert draft.score_offer(generator, [], "fanfare") \
-        > draft.score_offer(generator, starter, "fanfare")
 
 
 def test_skip_is_a_real_pick():
@@ -511,46 +281,17 @@ def test_skip_is_a_real_pick():
     # unchanged, and now rides on Casting Call, whose whole printed text is
     # `raise_fanfare_cap`: priced at a MEASURED zero (read-at-cap under 1%
     # under every pilot), which is a different thing from an unpriced one.
+    #
+    # Casting Call left with the shipped sheets (legacy cleanup stage 6); a
+    # synthetic row printing the same `raise_fanfare_cap` text stands in.
+    from tier0.engine.state import Card
     starter = _cards(*loader.starting_deck("klee"))
-    offers = _cards("casting_call")          # off-plan, measured inert
+    offers = [Card(id="casting_call_like", name="x", cost=1, type="skill",
+                   rarity="common",
+                   effects=[{"op": "raise_fanfare_cap", "amount": 5}])]
     pick = draft.assigned_policy(random.Random(0), starter, offers,
                                  "demolition")
     assert pick is None
-
-
-def test_drafter_v3_values_klee_visible_utility():
-    """Direct mitigation is visible; deck-context engines stay neutral."""
-    assert draft._static_power(loader.get_card("alchemical_curiosity")) == 5
-    assert draft._static_power(loader.get_card("trip_wire")) == 5.5
-    assert draft._static_power(loader.get_card("skip_and_hop")) == 2
-
-    dreams = loader.get_card("elemental_ecstasy")
-    assert draft._has_block(dreams)
-    # Conditional Block is available at the draft-time 50% share, plus
-    # `refresh_all_auras` at STATIC_AURA_REFRESH_VALUE (DRAFTER_VERSION 13
-    # added that second half; before it the refresh was invisible). C20's C2
-    # redesign (R189/R205) moved the printed Block 8 -> 5, so the same
-    # arithmetic now reads (2.5 + 1) / cost 2 = 1.75 where it read (4 + 1) / 2
-    # = 2.5. THE DRAFTER DID NOT MOVE: the share is the same dial and the
-    # renamed predicate is priced in the same class its predecessor was. The
-    # v3 claim this test makes is untouched -- direct mitigation is visible
-    # and the engine terms stay neutral.
-    assert draft._static_power(dreams) == 1.75
-    assert draft._static_power(loader.get_card("patched_dress")) == 7.5
-    assert draft._static_power(loader.get_card("bennett_fantastic_voyage")) == 6
-    assert draft._static_power(loader.get_card("durin_witchs_flame")) == 6
-
-
-def test_bomb_guard_proxy_does_not_stack_with_printed_weak():
-    trip = loader.get_card("trip_wire")
-    sorry = loader.get_card("sorry_jean")
-
-    # Trip Wire's Bomb and Weak share one runtime reduction branch, so the
-    # card gets delayed damage + Weak but not a second guard allowance.
-    assert draft._static_power(trip) == 7 * 0.5 + 2
-    # Sorry, Jean has no printed Weak, so its pending Bomb receives the one
-    # conservative guard allowance in addition to damage and Block.
-    assert draft._static_power(sorry) == 4 + 4 * 0.5 + 1.5
 
 
 @pytest.mark.battery
@@ -656,19 +397,6 @@ def test_unknown_slot_mode_still_raises():
         model.run_one("klee", "demolition", "demolition",
                       draft.POLICIES["assigned"], SEED, slot_mode="choose4")
 
-
-def test_core_advance_never_dead_pick():
-    # Regression for the reaction deadlock: an amp payoff must outscore
-    # nothing-burger offers even before the core is online.
-    starter = _cards(*loader.starting_deck("klee"))
-    deck = starter + _cards("dahlia_sacramental_shower", "kaeya_frostgnaw")
-    amp = next(c for c in loader._card_index().values()
-               if "reaction" in c.archetypes and c.role == "payoff")
-    assert draft.score_offer(amp, deck, "reaction") \
-        >= C.DRAFT_SKIP_THRESHOLD
-
-
-# --- fragility metrics ---
 
 def _fake_run(hp_by_node, kinds):
     """A RunResult with a hand-built HP curve, for metric unit tests."""

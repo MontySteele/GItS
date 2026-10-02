@@ -222,8 +222,8 @@ def test_a_full_hp_player_is_not_made_to_drink():
 def _rest_state(hp=52):
     return {"state_type": "rest_site", "run": {"act": 1, "floor": 7},
             "player": {"hp": hp, "max_hp": 71,
-                       "deck": [{"id": "KLEEMOD-STAGE_PRESENCE"},
-                                {"id": "KLEEMOD-SOLOISTS_SOLICITATION"}]},
+                       "deck": [{"id": "KLEEMOD-PROTO_FS_GRAND_FINALE"},
+                                {"id": "KLEEMOD-PROTO_FS_BRAVURA"}]},
             "rest_site": {"options": [{"index": 0, "name": "Rest"},
                                       {"index": 1, "name": "Smith"}]}}
 
@@ -399,17 +399,17 @@ def test_policy_v0_is_frozen_by_this_sprint():
 def _grid(prompt, screen_type="select", can_confirm=False, preview=False):
     return {"state_type": "card_select", "run": {"act": 1, "floor": 5},
             "player": {"hp": 42, "max_hp": 71, "hand": [],
-                       "draw_pile": [{"id": "KLEEMOD-SALON_DEBUT"},
-                                     {"id": "KLEEMOD-STAGE_PRESENCE"}],
+                       "draw_pile": [{"id": "KLEEMOD-PROTO_FS_CURTAIN_RISE"},
+                                     {"id": "KLEEMOD-PROTO_FS_BRAVURA"}],
                        "discard_pile": [], "exhaust_pile": []},
             "card_select": {"screen_type": screen_type, "prompt": prompt,
                             "can_confirm": can_confirm,
                             "preview_showing": preview,
                             "cards": [
-                                {"id": "KLEEMOD-SALON_DEBUT",
-                                 "name": "Salon Debut", "cost": 1, "index": 0},
-                                {"id": "KLEEMOD-STAGE_PRESENCE",
-                                 "name": "Stage Presence", "cost": 1,
+                                {"id": "KLEEMOD-PROTO_FS_CURTAIN_RISE",
+                                 "name": "Curtain Rise", "cost": 1, "index": 0},
+                                {"id": "KLEEMOD-PROTO_FS_BRAVURA",
+                                 "name": "Bravura", "cost": 1,
                                  "index": 1}]}}
 
 
@@ -728,13 +728,15 @@ def test_a_spent_rest_site_that_refuses_its_exit_still_declines():
 
 def _amalgamator(can_confirm=False):
     """The recorded EB-106 screen. Two cards are wanted; four are offered."""
-    kaboom = {"id": "KLEEMOD-KABOOM", "name": "Kaboom!", "type": "Attack",
-              "cost": "1", "rarity": "Basic", "is_upgraded": False,
-              "description": "Deal 7 damage. Applies Pyro."}
-    jumpy = {"id": "KLEEMOD-JUMPY_DUMPTY", "name": "Jumpy Dumpty",
-             "type": "Attack", "cost": "2", "rarity": "Basic",
-             "is_upgraded": False,
-             "description": "Deal 8 damage to random enemies twice."}
+    # Ported to the current kit at legacy cleanup stage 6: the recorded
+    # screen held three Kaboom! and a Jumpy Dumpty, shipped rows since
+    # deleted; Ka-pow! and Jumpy Dumpty are their current-kit successors.
+    kaboom = {"id": "KLEEMOD-PROTO_KO_KAPOW", "name": "Ka-pow!",
+              "type": "Attack", "cost": "0", "rarity": "Basic",
+              "is_upgraded": False, "description": "Set off. Deal 4 damage."}
+    jumpy = {"id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY", "name": "Jumpy Dumpty",
+             "type": "Skill", "cost": "1", "rarity": "Basic",
+             "is_upgraded": False, "description": "Place a Bomb 8."}
     cards = [dict(kaboom, index=0), dict(kaboom, index=1),
              dict(kaboom, index=2), dict(jumpy, index=3)]
     return {"state_type": "card_select", "run": {"act": 2, "floor": 20},

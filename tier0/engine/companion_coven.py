@@ -62,8 +62,6 @@ def note_swirl(state: CombatState, aura: str) -> None:
     what it remembers is "the last element swirled this turn" and nothing
     longer.
     """
-    if not C.COMPANION_OVERHAUL:
-        return
     state.cvn_swirl_element = aura
 
 
@@ -86,8 +84,6 @@ def bomb_element(state: CombatState) -> str:
     Returns `"pyro"` with either arm off, which is what leaves every shipped
     explosion byte-identical.
     """
-    if not C.COMPANION_OVERHAUL:
-        return "pyro"
     if not state.player.powers.pop("cvn_hexhunter_chime", 0):
         return "pyro"
     return state.cvn_swirl_element or "pyro"
@@ -114,8 +110,6 @@ def turn_start(state: CombatState) -> None:
     application is what makes the card its own reaction -- the first Cryo meets
     whatever is standing, the second lands on the Cryo the first left.
     """
-    if not C.COMPANION_OVERHAUL:
-        return
     from tier0.engine import reactions            # late import: cycle
 
     p = state.player
@@ -162,8 +156,6 @@ def turn_end(state: CombatState) -> None:
     is the reading that keeps the power from becoming permanent on a board it
     could not reach.
     """
-    if not C.COMPANION_OVERHAUL:
-        return
     from tier0.engine import klee_overhaul        # late import: cycle
 
     p = state.player

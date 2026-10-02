@@ -10,9 +10,7 @@ committed files and exit.
 Three properties this wrapper has that a pasted list does not:
 
   * **It reports, it does not judge.** Every tool's exit code is printed the
-    same way, including the ones known to be red today. `lint_role_tempo_coverage
-    --gate` exits 1 on `main` (disclosed furina/spotlight tempo debt); it shows
-    up here as `FAIL` like anything else. A wrapper that special-cases a known
+    same way, including the ones known to be red today. A wrapper that special-cases a known
     red is a wrapper you cannot trust when a second thing goes red.
   * **It cannot go stale silently.** `tools/lint_*.py` is globbed and compared
     against the registry below; a lint that is neither registered nor
@@ -191,18 +189,8 @@ REGISTRY: tuple[Lint, ...] = (
     # emitted aliases; the git-history sweep behind `--history` is out of the
     # lane because CI clones shallow.
     _ci("ancient-coverage",     "tools/lint_ancient_coverage.py"),
-    # EB-255, beside pool-membership's family because it asks the other
-    # question about the same two lists: that one asks whether every card is
-    # IN a pool, this asks whether the STARTER and the draftable pool are the
-    # disjoint, rarity-separated sets `tier05.draft.archetype_shares` says
-    # they are. [USER]'s solo playtest found it from the far end -- a starter
-    # card read back as a card the drafter chose. Carries a curated debt set
-    # (thirteen rows, one of them the live contamination) so it is green today
-    # and bites on the fourteenth; the flagged arms are walked too, because
-    # the second contaminator is one flag away.
-    _ci("starter-pool-overlap", "tools/lint_starter_pool_overlap.py"),
-    # Round 10, 2026-09-04. The THIRD question about the same two lists, and
-    # the one neither of the two above asks: is the arm's OFFER roster in the
+    # Round 10, 2026-09-04. A question about the starter and the pool
+    # lists: is the arm's OFFER roster in the
     # MOD the same set as the sheet and as the sim's mirror? R252 shipped four
     # rows to the sheet, the sim, the powers and the codegen and not to
     # `KleeOverhaulRoster.Slice()` -- pool-membership stayed green (the classes
@@ -224,8 +212,6 @@ REGISTRY: tuple[Lint, ...] = (
     # Frostgnaw" (a companion) in one deck. Both lints above compare exact
     # strings; this one compares names a player cannot tell apart.
     _ci("run-name-clashes",     "tools/lint_run_name_clashes.py"),
-    _ci("role-tempo-artifacts", "tools/suggest_role_tempo_tags.py", "--check"),
-    _ci("role-tempo-coverage",  "tools/lint_role_tempo_coverage.py", "--gate"),
     _ci("roster-registry",      "tools/lint_roster_registry.py"),
     # EB-109. Structural, over committed source, so it runs where the other
     # invisible-seam gates run: an enchanted id became reachable at
@@ -241,7 +227,6 @@ REGISTRY: tuple[Lint, ...] = (
     # register/ruling/packet shape lints that sat here retired under the
     # 2026-09-23 process trim (retrieve at `git show 2b73880a:tools/<name>`).
     _ci("stamp-rows",           "tools/lint_stamp_rows.py"),
-    _ci("sheet-stamp",          "tools/lint_sheet_stamp.py"),
     # The hooks under tools/hooks/ are the only code here that no test imports
     # and no lint reads -- they run out of process, on stdin JSON. A refusal
     # that quietly stopped refusing looks exactly like a session that never
@@ -260,15 +245,11 @@ REGISTRY: tuple[Lint, ...] = (
     _suite("effect-branch-scans",      "tools/lint_effect_branch_scans.py"),
     _suite("enchant-parity",           "tools/lint_enchant_parity.py"),
     _suite("furina-registers",         "tools/lint_furina_registers.py"),
-    _suite("kokomi-decksize",          "tools/lint_kokomi_decksize.py"),
     _suite("recall-exhaust",           "tools/lint_recall_exhaust.py"),
     _suite("register-isolation",       "tools/lint_register_isolation.py"),
-    _suite("sheet-comments",           "tools/lint_sheet_comments.py"),
-    # The other half of the sheet-comment pair (2026-09-01): `sheet-comments`
-    # checks that the prose on a sheet is TRUE, this one checks that there is
-    # not too much of it for an agent to open the sheet cheaply.
+    # (2026-09-01) There is not too much prose on a sheet for an agent to
+    # open it cheaply.
     _suite("sheet-comment-blocks",     "tools/lint_sheet_comment_blocks.py"),
-    _suite("strict-domination",        "tools/lint_strict_domination.py"),
     _suite("upgrade-comment-arith",    "tools/lint_upgrade_comment_arithmetic.py"),
     _suite("upgrade-coverage",         "tools/lint_upgrade_coverage.py"),
 

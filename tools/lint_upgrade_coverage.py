@@ -247,18 +247,20 @@ def _onupgrade_body(text: str) -> tuple[str, str] | None:
 def main() -> int:
     findings: list[str] = []
 
-    # Scope is the DOCS sheets: the cards this project authors. The reference
-    # characters' sheets are deliberately out -- ref_ironclad's upgrades are
-    # a hand-approximation of the real game's, and holding a reference
-    # approximation to our own authoring law would be checking someone else's
-    # homework.
-    cards = []
-    for sheet in loader.DOCS_CARD_SHEETS:
-        rows = yaml.safe_load(
-            (loader.DOCS_DIR / sheet).read_text(encoding="utf-8")) or []
-        for row in rows:
-            if isinstance(row, dict) and "id" in row:
-                cards.append(loader.peek_card(row["id"]))
+    # Scope is the cards this project authors that a player can DRAFT: every
+    # kit's offered pool and the companion roster. Since legacy cleanup stage
+    # 6 those are prototype-surface rows (the shipped `docs/*-cards.yaml`
+    # sheets are deleted), read through the same doors the run layer reads.
+    # The reference characters' sheets are deliberately out -- ref_ironclad's
+    # upgrades are a hand-approximation of the real game's, and holding a
+    # reference approximation to our own authoring law would be checking
+    # someone else's homework.
+    from tier0 import roster
+    ids: set[str] = set()
+    for character in roster.ROSTER:
+        ids.update(loader.pool_replacement(character.id) or ())
+    ids.update(c.id for c in loader.companion_roster_replacement())
+    cards = [loader.peek_card(cid) for cid in sorted(ids)]
 
     # ---------------- Layer 1: the sheet ----------------
     for card in sorted(cards, key=lambda c: c.id):
@@ -478,7 +480,7 @@ def main() -> int:
     # relic line: a layer that read ZERO files reports the same clean word as
     # one that read them all, and this one globs for its inputs.
     print(f"upgrade coverage OK: {drafted} draftable cards across "
-          f"{len(loader.DOCS_CARD_SHEETS)} sheets, "
+          f"the kits' pools and the companion roster, "
           f"{len(CODEGEN_DEBT)} curated codegen debt(s), "
           f"{bodies_read} generated OnUpgrade bodies read")
     return 0

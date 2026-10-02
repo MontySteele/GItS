@@ -34,7 +34,6 @@ from tier0.engine.state import Card, CombatState, Enemy, Player
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 FS = furina_stage
 
@@ -44,7 +43,6 @@ def arm(monkeypatch):
     """ONE flag and no legs. The Stage is one rule set: a build that could run
     the damage order without the acts, or the acts without the bars, is a game
     no packet describes and no seat could be asked to grade."""
-    monkeypatch.setattr(FS, "FURINA_STAGE", True)
 
 
 def _furina(hp=200, max_hp=200, **kw):
@@ -92,25 +90,9 @@ def _card(cid="probe", type="skill", **kw):
 #    quarantine rests on.
 # ---------------------------------------------------------------------------
 
-def test_with_the_flag_off_the_stage_is_empty_and_every_verb_is_inert():
-    st = _state()
-    FS.open_combat(st)
-    FS.summon(st, "usher")
-    FS.raise_fanfare(st, 5)
-    assert FS.stage(st.player) == []
-    assert FS.lead(st.player) is None
-    assert FS.can_spend(st.player) is False
-    assert FS.spend(st, 3) == 0
-    assert FS.absorb(st, 10) == 0
-    assert FS.collect_all(st) == 0
-    assert FS.final_bow(st) == 0
-    assert st.log == []
-
-
 def test_with_the_flag_off_no_other_character_grows_a_stage(monkeypatch):
     """CHARACTER-SCOPED, and checked with the flag ON: the Stage is one
     character's kit and a roster-wide branch would be a different change."""
-    monkeypatch.setattr(FS, "FURINA_STAGE", True)
     st = _state(player=Player(hp=100, max_hp=100, character_id="klee"))
     FS.open_combat(st)
     FS.summon(st, "usher")
@@ -866,14 +848,6 @@ def test_the_pilot_spends_a_dying_bar_to_finish_the_fight(arm):
     assert FS.spend_mode_index(st, _curtain_rise().effects[0]["modes"]) == 1
 
 
-def test_the_policy_answers_nothing_with_the_arm_off():
-    """QUARANTINED: `POLICY_VERSION` is untouched because the chooser is not
-    reached on any board the arm is off on."""
-    st = _state(enemies=[_enemy(hp=60)])
-    st.player.stage = [["usher", 8]]
-    assert FS.spend_mode_index(st, _curtain_rise().effects[0]["modes"]) is None
-
-
 def test_a_named_summon_clones_a_performer_already_on_stage(arm):
     """2026-09-25: the trio can be cloned ([USER]: "Let's allow for copies
     and then check the balance."). A named summon always summons."""
@@ -981,7 +955,7 @@ def test_the_starter_is_four_strikes_four_defends_and_two_kit_cards(arm):
 
 def test_take_the_stage_and_regal_bearing_are_offered_as_commons(arm):
     """2026-09-28: out of the starter, appended to the offer at Common."""
-    adds = loader.pool_additions("furina")
+    adds = loader.pool_replacement("furina")
     assert "proto_fs_salon_debut" in adds
     assert "proto_fs_regal_bearing" in adds
     rarity = {r["id"]: r["rarity"] for r in _proto_rows()}
@@ -1003,21 +977,14 @@ def test_take_the_stage_summons_a_random_performer_holding_three(arm):
     assert len(st.player.hand) == 1
 
 
-def test_with_the_flag_off_the_printed_starter_is_dealt():
-    ids = loader.starting_deck("furina")
-    assert not [i for i in ids if i.startswith("proto_fs_")]
-    assert "aria_of_recompense" in ids and "salon_debut" in ids
-
-
 def test_the_pool_seam_swaps_its_rows_at_the_same_rarity(arm):
     """RARITY FOR RARITY, so the offer odds do not move -- which is the one
     thing `rewards.character_pool` refuses a substitution over.
 
-    Read off the SHEETS rather than through `loader.get_card`, because the
-    substituted-card index is `lru_cache`d at the flag's value and a fixture
-    that flips a module constant cannot reach behind it. What is being asked
-    here is a question about two committed files anyway."""
-    subs = loader.pool_substitutions("furina")
+    The retired rows' sheet is deleted (legacy cleanup stage 6), so the
+    rarity half is now the pool's own count, pinned in `test_pool_completion`;
+    what stays here is the map's size and its disjointness from the drops."""
+    subs = FS.POOL_SUBS
     # batch one, R276's batch two, the Guest Cast (2026-09-25) and the
     # supporting pool's 27 that replace a row and Sold Out (2026-09-26),
     # less Gentilhomme Usher and Understudy (balance review, 2026-09-28),
@@ -1027,14 +994,7 @@ def test_the_pool_seam_swaps_its_rows_at_the_same_rarity(arm):
     # rows (2026-10-01; An Invitation's replacement is an addition)
     assert len(subs) == 14 + 15 + 8 + 27 + 1 - 2 - 3 - 3 + 11
     assert not set(subs) & set(FS.POOL_DROPS)
-    rarity = {r["id"]: r["rarity"] for r in _sheet_rows("furina-cards.yaml")}
-    rarity.update({r["id"]: r["rarity"] for r in _proto_rows()})
-    for shipped, proto in subs.items():
-        assert rarity[shipped] == rarity[proto], shipped
-
-
-def test_with_the_flag_off_the_pool_seam_is_empty():
-    assert loader.pool_substitutions("furina") == {}
+    assert set(subs.values()) <= set(loader.pool_replacement("furina"))
 
 
 def test_every_stage_row_is_named_by_one_of_the_two_maps():
@@ -1804,10 +1764,3 @@ def test_chevalmarins_card_applies_hydro_to_all_on_play(arm):
     assert all(e.aura == "hydro" for e in st.enemies)
     assert [m for m, _f in st.player.stage] == ["chevalmarin"]
 
-
-def test_the_stage_ships_on():
-    """The sim runs the current kits by default (legacy cleanup stage 3,
-    2026-10-01, pick 5), as every C# build does; the flag-off pins in this
-    file name the shipped world with `shipped_world`."""
-    from tier0.tests.shipped_world import DEFAULTS
-    assert DEFAULTS["FURINA_STAGE"] is True

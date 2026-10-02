@@ -455,13 +455,8 @@ def main(argv=None) -> int:
     from understudy.report import console_safe
     console_safe()
 
-    # THE ARM, ON, for this process and nothing else. Set BEFORE any engine
-    # import that binds a reader, which is why every import below this line is
-    # inside a function.
-    furina_stage.FURINA_STAGE = True
-
     print(f"FURINA, THE STAGE -- sec.13 reports\n"
-          f"arm: FURINA_STAGE on; fights per arm: {args.fights}; "
+          f"fights per arm: {args.fights}; "
           f"seed: {args.seed}; encounter: {args.encounter}")
     print("NOT QUOTABLE (R215 B): a shape for a seat round to read against, "
           "never a measured result.")

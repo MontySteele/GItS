@@ -1,6 +1,8 @@
-"""Cross-sheet lint gates (tools/lint_strict_domination.py).
+"""Cross-sheet lint gates.
 
-This module holds the lints that sweep every docs card sheet at once.
+This module holds the lints that sweep every docs card sheet at once. (The
+strict-domination, sheet-comment-number and Kokomi deck-size lints left with
+the shipped kit sheets at legacy cleanup stage 6.)
 
 G1 (Serenitea Sweep, 2026-07-26) moved the comment/number lint here from
 `test_furina_sheet`, where it gated ONE sheet of six. Audit sec.3.8: run
@@ -24,227 +26,7 @@ REPO = Path(loader.__file__).resolve().parents[2]
 
 
 sys.path.insert(0, str(REPO / "tools"))
-import lint_strict_domination as dom     # noqa: E402
 import lint_handwritten_parity as hwp    # noqa: E402
-
-
-def _sheet_paths():
-    return [loader.DOCS_DIR / s for s in loader.DOCS_CARD_SHEETS]
-
-
-def test_no_strict_domination_on_docs_sheets():
-    sheets = [str(p) for p in _sheet_paths()]
-    res = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "lint_strict_domination.py"),
-         *sheets],
-        capture_output=True, text=True)
-    assert res.returncode == 0, res.stdout + res.stderr
-    # The gate must be running the CROSS-SHEET pass, not only the within-sheet
-    # one. Before 2026-07-29 the whole comparison was per-file, so a dominating
-    # pair split across two sheets was structurally invisible -- and the one
-    # that existed (Clorinde/Raiden) was caught by a human reading the set.
-    assert "CROSS-SHEET" in res.stdout, res.stdout
-    assert "NOT RUN" not in res.stdout, res.stdout
-
-
-# --- the reporting defect: CLEAN with no denominator ----------------------
-
-def test_the_summary_states_its_scope_not_just_a_verdict():
-    """`CLEAN: <sheet names>` claimed the sheets were clean when it meant
-    "the rows I compared had no findings" -- and it dropped basics, rows with
-    no `effects`, non-draftable rows and formula amounts before comparing.
-    A verdict without a denominator is the confident half of a partial check.
-    """
-    res = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "lint_strict_domination.py")],
-        capture_output=True, text=True)
-    assert res.returncode == 0, res.stdout + res.stderr
-    assert "scope (rows this sweep has NO opinion about" in res.stdout
-    assert "compared card(s) in" in res.stdout
-    # Every sheet must own a scope line with a real denominator.
-    for p in _sheet_paths():
-        line = [ln for ln in res.stdout.splitlines() if p.name in ln
-                and "compared" in ln]
-        assert line, f"{p.name} has no scope line: {res.stdout}"
-        assert "/0 " not in line[0], line[0]
-
-
-def test_a_run_that_compares_nothing_refuses_to_print_clean(tmp_path):
-    """The dead-gate direction. A sheet of nothing but basics used to produce
-    the identical `CLEAN` line as a full sweep."""
-    empty = tmp_path / "basics-only.yaml"
-    empty.write_text(
-        '- {id: probe_strike, name: "Probe Strike", cost: 1, type: attack,\n'
-        '   rarity: basic, effects: [{op: damage, amount: 6, target: enemy}]}\n',
-        encoding="utf-8")
-    res = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "lint_strict_domination.py"),
-         str(empty)], capture_output=True, text=True)
-    assert res.returncode == 1, res.stdout
-    assert "VACUOUS" in res.stdout
-    assert "CLEAN" not in res.stdout
-
-
-def test_within_only_says_the_cross_pass_did_not_run():
-    """A narrower run is fine; a narrower run that reads like a full one is
-    not. `--within-only` must name what it left unchecked."""
-    res = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "lint_strict_domination.py"),
-         "--within-only"], capture_output=True, text=True)
-    assert res.returncode == 0, res.stdout + res.stderr
-    assert "NOT RUN (--within-only)" in res.stdout
-    assert "WITHIN-SHEET ONLY" in res.stdout
-
-
-# --- the cross-sheet sweep, both directions -------------------------------
-
-def test_the_cross_sheet_sweep_catches_the_clorinde_raiden_shape(tmp_path):
-    """THE RED DEMONSTRATION, rebuilt from the case that needed a human.
-
-    docs/archive/fontaine-rares-banner-sprint-log.md item 2: a Clorinde (Fontaine) /
-    Raiden (Inazuma) dominating pair "was flagged BY HAND because no lint could
-    see it". Two companion sheets, one shared reward pool, and a per-file lint.
-    The pair was resolved by buffing Raiden, so the live sheets no longer carry
-    it -- which is exactly why the demonstration is synthetic: the fix must be
-    provable without re-introducing the defect into shipped content.
-    """
-    a = tmp_path / "alpha-companions.yaml"
-    b = tmp_path / "beta-companions.yaml"
-    a.write_text(
-        '- {id: probe_big, name: "Probe Big", rarity: uncommon, cost: 2,\n'
-        '   type: attack, effects: [{op: damage, amount: 20, target: enemy}]}\n',
-        encoding="utf-8")
-    b.write_text(
-        '- {id: probe_small, name: "Probe Small", rarity: common, cost: 2,\n'
-        '   type: attack, effects: [{op: damage, amount: 18, target: enemy}]}\n',
-        encoding="utf-8")
-
-    lint = str(REPO / "tools" / "lint_strict_domination.py")
-    # WITHIN-SHEET: each file holds one card, so the old scope sees nothing.
-    within = subprocess.run([sys.executable, lint, "--within-only",
-                             str(a), str(b)], capture_output=True, text=True)
-    assert within.returncode == 0, within.stdout
-    assert "probe_big" not in within.stdout, (
-        "the within-sheet sweep cannot see a cross-sheet pair; if it does, "
-        "this test is no longer demonstrating the gap")
-
-    # CROSS-SHEET: the same two files, one finding.
-    across = subprocess.run([sys.executable, lint, str(a), str(b)],
-                            capture_output=True, text=True)
-    assert across.returncode == 1, across.stdout
-    assert "CROSS-SHEET" in across.stdout
-    assert "probe_big" in across.stdout and "probe_small" in across.stdout
-
-
-def test_two_personal_sheets_are_not_compared_across(tmp_path):
-    """The comparability rule the cross pass adds, in the negative.
-
-    Klee's cards and Kokomi's never appear in one run (`rewards.character_pool`
-    requires `c.character == character_id`), so a domination between them is
-    not a draft decision. Flagging it would be noise, and noise is how a gate
-    gets switched off.
-    """
-    a = tmp_path / "alpha-cards.yaml"
-    b = tmp_path / "beta-cards.yaml"
-    a.write_text(
-        '- {id: probe_big, name: "Probe Big", rarity: uncommon, cost: 2,\n'
-        '   type: attack, effects: [{op: damage, amount: 20, target: enemy}]}\n',
-        encoding="utf-8")
-    b.write_text(
-        '- {id: probe_small, name: "Probe Small", rarity: common, cost: 2,\n'
-        '   type: attack, effects: [{op: damage, amount: 18, target: enemy}]}\n',
-        encoding="utf-8")
-    res = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "lint_strict_domination.py"),
-         str(a), str(b)], capture_output=True, text=True)
-    assert res.returncode == 0, res.stdout
-    assert "probe_big" not in res.stdout
-    # ...and the pair-count says so, rather than leaving it to be inferred.
-    assert "0 co-draftable sheet pair(s)" in res.stdout
-
-
-def test_co_draftable_matches_the_pool_assembly():
-    assert dom.co_draftable("fontaine-companions.yaml",
-                            "inazuma-companions.yaml")
-    assert dom.co_draftable("klee-cards.yaml", "mondstadt-companions.yaml")
-    assert dom.co_draftable("mondstadt-companions.yaml", "klee-cards.yaml")
-    assert not dom.co_draftable("klee-cards.yaml", "kokomi-cards.yaml")
-
-
-def test_the_cross_sheet_allowlist_is_not_stale():
-    """CROSS_KNOWN is DEBT, exactly like test_distinctness_gate.KNOWN_FAILING.
-
-    The cross pass surfaced seven pre-existing pairs the day it was switched
-    on. Editing a printed card needs red-pen, so they print as notes and CI
-    stays green -- but an entry that outlives its pair becomes cover for the
-    next real cross-sheet domination on those ids. When one is errata'd, this
-    fails and the entry has to come out.
-    """
-    live = set()
-    for note in _cross_notes():
-        live.add(note)
-    stale = sorted(sorted(pair) for pair in dom.CROSS_KNOWN
-                   if not any(all(i in msg for i in pair) for msg in live))
-    assert not stale, (
-        "these CROSS_KNOWN pairs no longer dominate -- the errata landed, so "
-        f"DELETE them from the set: {stale}")
-
-
-def test_the_cross_sheet_allowlist_is_not_a_blanket():
-    """Each entry names two real card ids, so the set cannot be widened by a
-    wildcard or by an id that no longer exists."""
-    ids = {c["id"] for p in _sheet_paths() for c in dom.sheet_cards(p)[0]}
-    for pair in dom.CROSS_KNOWN:
-        assert len(pair) == 2, pair
-        missing = sorted(i for i in pair if i not in ids)
-        assert not missing, (
-            f"CROSS_KNOWN names {missing}, which is not a comparable card on "
-            "any sheet -- the entry is guarding nothing")
-
-
-def _cross_notes():
-    """Every cross-sheet domination message, with the allowlist LIFTED."""
-    saved = dom.CROSS_KNOWN
-    try:
-        dom.CROSS_KNOWN = set()
-        findings, notes, _ = dom.lint_cross_sheet(_sheet_paths())
-    finally:
-        dom.CROSS_KNOWN = saved
-    return findings + notes
-
-
-def test_sheet_comments_match_numbers_on_every_sheet():
-    """G1: fanned from one sheet to all six.
-
-    Per-line `(lint-ok: <reason>)` markers rather than a blanket suppression:
-    a sheet-wide exemption would switch off the drift class this lint exists
-    for, and the reasons are what let a reviewer tell "cites a sibling card"
-    from "cites a number this row no longer has".
-    """
-    sheets = [str(loader.DOCS_DIR / s) for s in loader.DOCS_CARD_SHEETS]
-    assert len(sheets) >= 6, sheets
-    res = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "lint_sheet_comments.py"),
-         *sheets],
-        capture_output=True, text=True)
-    assert res.returncode == 0, res.stdout + res.stderr
-
-
-def test_the_comment_lint_still_catches_real_drift(tmp_path):
-    """The negative half. A gate fanned out and never seen failing is a gate
-    whose new scope nobody has tested."""
-    sheet = tmp_path / "drift.yaml"
-    sheet.write_text(
-        '- {id: probe, name: "Probe", cost: 1, type: attack, rarity: common,\n'
-        '   effects: [{op: damage, amount: 10, target: enemy}]}\n'
-        '   # The ceiling: 8 damage, single target.\n',
-        encoding="utf-8")
-    res = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "lint_sheet_comments.py"),
-         str(sheet)],
-        capture_output=True, text=True)
-    assert res.returncode == 1, res.stdout
-    assert "comment cites 8" in res.stdout
 
 
 # --- the sheet comment diet (2026-09-01) ----------------------------------
@@ -325,10 +107,8 @@ def test_a_moved_block_left_a_sidecar_behind():
     the sheet says where it went -- a diet whose sidecar nobody can find from
     the sheet is a deletion with extra steps."""
     notes = REPO / "docs" / "notes"
-    for sheet in ("furina-cards", "kokomi-cards", "klee-cards",
-                  "fontaine-companions", "inazuma-companions",
-                  "mondstadt-companions", "furina-upgrades",
-                  "klee-upgrades", "kokomi-upgrades", "ancient-upgrades",
+    # The nine shipped kit sheets left at legacy cleanup stage 6.
+    for sheet in ("prototype-surface", "ancient-upgrades",
                   "ref-ironclad-upgrades"):
         note = notes / f"{sheet}-provenance.md"
         assert note.exists(), note
@@ -450,8 +230,7 @@ def test_upgrade_comment_arithmetic_still_adds_up():
     # and a run that recomputed nothing must not read like a full sweep.
     assert "pair(s) recomputed" in res.stdout
     assert "(0 pair(s) recomputed)" not in res.stdout
-    for sheet in ("klee-upgrades.yaml", "furina-upgrades.yaml",
-                  "kokomi-upgrades.yaml", "ref-ironclad-upgrades.yaml"):
+    for sheet in ("ancient-upgrades.yaml", "ref-ironclad-upgrades.yaml"):
         assert f"scope {sheet}:" in res.stdout, res.stdout
 
 
@@ -516,24 +295,12 @@ def test_a_lint_ok_marker_excuses_its_pair_and_nothing_else(tmp_path):
     assert "excuses a pair that is not on this line" in stale.stdout
 
 
-def test_kokomi_decksize_grammar():
-    """Kokomi kickoff §1 law 4 (user-authored, machine-checkable → gate):
-    Commons in HER pool net card delta <= 0. Scope is her personal sheet
-    only — deliberately not the companion pools, not mod-wide."""
-    res = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "lint_kokomi_decksize.py"),
-         str(loader.DOCS_DIR / "kokomi-cards.yaml")],
-        capture_output=True, text=True)
-    assert res.returncode == 0, res.stdout + res.stderr
-
-
 def test_furina_register_grammar():
     """Curtain Call sweep (R85): every Furina card carries a register in
     {salon, archon, private}; Fanfare touches are archon, salon_member
-    deploys are salon, pure-Encore cards are private, and EXACTLY two rares
-    carry the focalors flavor tag. Scope is her personal sheet only; the
-    third-instance rule generalizes this when a second character adopts
-    registers."""
+    deploys are salon, pure-Encore cards are private, and at most two rares
+    carry the focalors flavor tag. Scope is her own `proto_fs_` rows on the
+    prototype surface (her shipped sheet left at legacy cleanup stage 6)."""
     res = subprocess.run(
         [sys.executable, str(REPO / "tools" / "lint_furina_registers.py")],
         capture_output=True, text=True)
@@ -623,8 +390,8 @@ def test_card_names_are_unique():
     # taught this lint what a ` (proto)` name means and then no invocation
     # ever handed it one -- every declared shadow lives on that sheet -- so
     # the rule was dead code while a Furina r13 seat met both halves of one.
-    sheets = [str(loader.DOCS_DIR / s) for s in loader.DOCS_CARD_SHEETS]
-    sheets.append(str(loader.DOCS_DIR / "prototype-surface.yaml"))
+    # The surface is the only card sheet since legacy cleanup stage 6.
+    sheets = [str(loader.DOCS_DIR / "prototype-surface.yaml")]
     res = subprocess.run(
         [sys.executable, str(REPO / "tools" / "lint_unique_names.py"),
          *sheets],
@@ -635,10 +402,7 @@ def test_card_names_are_unique():
     # that scans them all (the §3.1/§3.7 dead-gate class).
     assert "relic names unique" in res.stdout
     assert " 0 relic " not in res.stdout
-    # AND THE SHADOW ROWS REACHED IT, the same dead-gate argument one sheet
-    # over: a run over seven sheets that saw no shadow would print this same
-    # clean line.
-    assert "7 sheet(s)" in res.stdout
+    assert "1 sheet(s)" in res.stdout
 
 
 def test_the_shadow_rule_bites_on_the_sheet_it_was_written_for(tmp_path):

@@ -75,8 +75,10 @@ from tools.effect_walk import iter_effects, printed_floor  # noqa: E402
 
 DOCS = REPO / "docs"
 
-UPGRADE_SHEETS = ("klee-upgrades.yaml", "furina-upgrades.yaml",
-                  "kokomi-upgrades.yaml", "ref-ironclad-upgrades.yaml")
+# The three kit upgrade sheets left with the shipped kits (legacy cleanup
+# stage 6); the kits' deltas ride their prototype rows, which carry no
+# `a -> b` comment column.
+UPGRADE_SHEETS = ("ancient-upgrades.yaml", "ref-ironclad-upgrades.yaml")
 
 # Where the BASE cards live. The ref-ironclad rows are modelled analogues in
 # tier0, not docs sheets, so both trees are indexed -- an upgrade sheet whose

@@ -6,10 +6,12 @@ its allowlist — both branches, including an unconditional else. With
 else-glue (2 Encore + 1 draw) scored ~0 and the card measured drawn 974 /
 played 0 (EB-20 census;
 `git show 12f4a21:review/active/eb24-dead-riders-worksheet.md`).
-These pin the read on the real sheet card, both branch states.
+These pinned the read on the real sheet card; since legacy cleanup stage 6
+deleted that sheet, they pin it on the card's shape, with Block in place of
+the retired Encore, both branch states.
 """
 
-from tier0.content import loader
+from tier0.engine.state import Card
 from tier0.pilot import policy
 from tier0.tests.conftest import make_enemy, make_state
 
@@ -18,13 +20,24 @@ def _ops(state, card):
     return [fx["op"] for fx in policy._active_effects(state, card.effects)]
 
 
+def _crowd_answers():
+    """The retired `audience_participation`'s shape."""
+    return Card(id="audience_participation", name="The Crowd Answers",
+                cost=1, type="skill", effects=[
+                    {"op": "conditional", "if": "reaction_triggered_this_turn",
+                     "then": [{"op": "block", "amount": 4},
+                              {"op": "draw", "amount": 2}],
+                     "else": [{"op": "block", "amount": 2},
+                              {"op": "draw", "amount": 1}]}])
+
+
 def test_the_pilot_sees_the_else_glue_on_a_quiet_turn():
     st = make_state(enemies=[make_enemy(hp=50)])
-    card = loader.get_card("audience_participation")
+    card = _crowd_answers()
     st.reactions_this_turn = 0
     # The defect state was []: the whole conditional skipped, every value
     # term seeing a card with no effects.
-    assert _ops(st, card) == ["gain_encore", "draw"]
+    assert _ops(st, card) == ["block", "draw"]
     amounts = [fx["amount"]
                for fx in policy._active_effects(st, card.effects)]
     assert amounts == [2, 1]
@@ -32,11 +45,11 @@ def test_the_pilot_sees_the_else_glue_on_a_quiet_turn():
 
 def test_the_pilot_sees_the_reaction_payoff_when_the_window_is_open():
     st = make_state(enemies=[make_enemy(hp=50)])
-    card = loader.get_card("audience_participation")
+    card = _crowd_answers()
     st.reactions_this_turn = 2
     amounts = [fx["amount"]
                for fx in policy._active_effects(st, card.effects)]
-    assert _ops(st, card) == ["gain_encore", "draw"]
+    assert _ops(st, card) == ["block", "draw"]
     assert amounts == [4, 2]
 
 

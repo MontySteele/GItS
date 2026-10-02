@@ -11,11 +11,21 @@ import random
 
 from tier0 import constants as C
 from tier0.content import loader
+from tier0.engine.state import Card
 from tier05 import draft
 
 
 def _cards(*ids):
     return [loader.get_card(i) for i in ids]
+
+
+# The shipped rows these pins named (`waterspout`, `blast_radius`,
+# `durin_witchs_flame`, `sizzle`, `rapid_fire`) left with the shipped sheets at
+# legacy cleanup stage 6. The drafter arithmetic they pinned still stands, so
+# the pins are made on synthetic rows of the same shape.
+def _attack(cid, damage, target="enemy", rarity="common"):
+    return Card(id=cid, name=cid, cost=1, type="attack", rarity=rarity,
+                effects=[{"op": "damage", "amount": damage, "target": target}])
 
 
 class _AlwaysSample:
@@ -34,7 +44,7 @@ def test_all_enemies_damage_is_priced_at_the_aoe_multiple_of_its_face():
     same cost."""
     # Undercurrent prints 2 damage x3 at all_enemies, cost 1 (C22,
     # 2026-09-25: [USER] "Undercurrent, pick a" took it from cost 2).
-    undercurrent = loader.get_card("undercurrent")
+    undercurrent = loader.get_card("proto_fs_undercurrent")
     single_target_reading = 2 * 3 / 1
     assert draft._static_power(undercurrent) == \
         single_target_reading * draft.STATIC_AOE_MULT
@@ -43,7 +53,7 @@ def test_all_enemies_damage_is_priced_at_the_aoe_multiple_of_its_face():
     # The premium is large enough to reorder cards: 8 damage to all enemies
     # at cost 1 prices above 10 damage to one enemy at cost 1.
     cleave = loader.get_card("cleave_like")          # 8 all_enemies, cost 1
-    waterspout = loader.get_card("waterspout")       # 10 enemy, cost 1
+    waterspout = _attack("waterspout", 10)           # 10 enemy, cost 1
     assert draft._static_power(cleave) == 16.0
     assert draft._static_power(waterspout) == 10.0
     assert draft._static_power(cleave) > draft._static_power(waterspout)
@@ -63,11 +73,14 @@ def test_lean_gate_engages_at_exactly_draft_lean_cap_cards():
     assert len(deck_below) == draft.DRAFT_LEAN_CAP - 1
     assert len(deck_at_cap) == draft.DRAFT_LEAN_CAP
 
-    # blast_radius is the higher-scoring offer but is a plain common attack:
-    # no Power, no tempo, no Block, not a rare. durin_witchs_flame scores
-    # lower and survives the gate purely by being a Power.
-    blast = loader.get_card("blast_radius")
-    durin = loader.get_card("durin_witchs_flame")
+    # `blast` is the higher-scoring offer but is a plain common attack:
+    # no Power, no tempo, no Block, not a rare. `durin` scores lower and
+    # survives the gate purely by being a Power.
+    blast = _attack("blast", 12)
+    durin = Card(id="durin", name="durin", cost=1, type="power",
+                 rarity="uncommon",
+                 effects=[{"op": "apply_power", "power": "strength",
+                           "amount": 1, "target": "self"}])
     assert draft.score_offer(blast, deck_at_cap, "demolition") > \
         draft.score_offer(durin, deck_at_cap, "demolition")
     assert durin.type == "power"
@@ -89,29 +102,20 @@ def test_draft_regret_needs_a_full_point_of_hindsight_advantage():
     rival that merely outscores the pick by a fraction is not a regret."""
     assert C.DRAFT_REGRET_SAMPLE == 0.10
     final_deck = _cards(*loader.starting_deck("klee"))
-    # FIXTURE SWAP 2026-08-06 (R118 10.2 rider): the near-miss rival used to
-    # be `cleave_like`, but the ref_ironclad package cards gained
-    # `archetypes: [generic]` for the anchor instrumentation, and the
-    # drafter's off-plan generic term (+0.8) moved cleave_like's score to an
-    # exact tie with blast_radius -- no longer "beaten by a fraction".
-    # `sizzle` carries the same 0-< delta <-1 shape (0.8) with no tag in
-    # play. The pin's invariant (a regret needs MORE THAN a full point of
-    # hindsight advantage) is untouched.
-    score = {cid: draft.score_offer(loader.get_card(cid), final_deck,
-                                    "demolition")
-             for cid in ("blast_radius", "sizzle", "rapid_fire")}
+    blast, sizzle, rapid_fire = (_attack("blast", 9), _attack("sizzle", 7),
+                                 _attack("rapid_fire", 4))
+    score = {c.id: draft.score_offer(c, final_deck, "demolition")
+             for c in (blast, sizzle, rapid_fire)}
 
     # Rival beats the pick, but by less than a point -- not a regret.
-    assert 0 < score["blast_radius"] - score["sizzle"] < 1.0
-    near_miss = {"offers": _cards("sizzle", "blast_radius"),
-                 "picked": "sizzle"}
+    assert 0 < score["blast"] - score["sizzle"] < 1.0
+    near_miss = {"offers": [sizzle, blast], "picked": "sizzle"}
     assert draft.draft_regret(_AlwaysSample(), [near_miss], final_deck,
                               "demolition") == 0
 
     # Rival beats the pick by more than a point -- a regret.
-    assert score["blast_radius"] - score["rapid_fire"] > 1.0
-    real_regret = {"offers": _cards("rapid_fire", "blast_radius"),
-                   "picked": "rapid_fire"}
+    assert score["blast"] - score["rapid_fire"] > 1.0
+    real_regret = {"offers": [rapid_fire, blast], "picked": "rapid_fire"}
     assert draft.draft_regret(_AlwaysSample(), [real_regret], final_deck,
                               "demolition") == 1
 

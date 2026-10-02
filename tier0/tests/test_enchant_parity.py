@@ -126,14 +126,28 @@ def test_the_three_shapes_the_sweep_argued_about_now_all_agree():
     swallowed exactly the finding the test above builds. That narrowness is
     the standing requirement on whoever adds the next excuse.
     """
-    index = loader._card_index()
-    ordinary = index["prune_witch_hunt"]          # Skill, conditional Block
+    # The three cards the sweep argued over were shipped rows (Prune's Witch
+    # Hunt, Tideline Watch, Freminet's Pressurized Floe), deleted at legacy
+    # cleanup stage 6; their three SHAPES are spelled inline.
+    from tier0.engine.state import Card
+
+    def row(cid, ctype, effects):
+        return Card.from_dict({"id": cid, "name": cid, "cost": 1,
+                               "type": ctype, "rarity": "common",
+                               "effects": effects})
+
+    ordinary = row("probe_conditional_block", "skill", [   # conditional Block
+        {"op": "conditional", "if": "enemy_has_aura",
+         "then": [{"op": "block", "amount": 6}]}])
     assert enchantments.eligible(ordinary, "nimble")
-    delayed = index["tideline_watch"]             # Skill, block_next_turn only
+    delayed = row("probe_block_next_turn", "skill", [      # next-turn only
+        {"op": "block_next_turn", "amount": 8}])
     # EB-85 divergence 4: block_next_turn is not GainsBlock, in either engine.
     assert not enchantments.eligible(delayed, "nimble")
     # EB-85 divergence 1: a Block-granting Attack is eligible in both.
-    attack = index["freminet_pressurized_floe"]
+    attack = row("probe_attack_block", "attack", [
+        {"op": "damage", "amount": 6, "target": "enemy"},
+        {"op": "block", "amount": 4}])
     assert enchantments.eligible(attack, "nimble")
     for card in (ordinary, delayed, attack):
         assert lep.sim_reason("nimble", card, True) is None

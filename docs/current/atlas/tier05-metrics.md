@@ -49,7 +49,7 @@ the same pair — `trace(state.log)` per fight, `aggregate(traces)`
 [block] [--runs N] [--seed N] [--jobs N]`, `main(argv) -> int` under
 `if __name__ == "__main__"`, a module docstring that REGISTERS its metric
 definitions and names the sprint doc it belongs to, and a `Usage:` line
-(`exp_kurage_cadence_s1.py`, `exp_payoff_reach.py`). Cells come from
+(`exp_payoff_reach.py`). Cells come from
 `cells.CANONICAL.but(...)` and every table prints `Cell.stamp()`.
 The one-shot experiments on retired systems were deleted 2026-10-01; git
 history keeps them.
@@ -211,6 +211,6 @@ history keeps them.
    aggregate shape and the two hardest reporting rules (per-combat units;
    withheld small cells); `model.py:194-233` and `:558-597` for how traces
    attach.
-6. `tier05/exp_payoff_reach.py` + `exp_kurage_cadence_s1.py` — the `exp_*`
+6. `tier05/exp_payoff_reach.py` — the `exp_*`
    convention, cells and stamps; then `tier0/DECISIONS.md` for the R-number
    behind anything you plan to change.

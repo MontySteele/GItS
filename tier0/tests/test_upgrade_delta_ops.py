@@ -294,17 +294,26 @@ def test_bounded_history_card_deltas_apply(monkeypatch):
     assert upgraded.on_exhaust_energy == 3
 
 
-def test_add_before_inserts_the_added_effect_ahead_of_the_op_it_names():
+def test_add_before_inserts_the_added_effect_ahead_of_the_op_it_names(
+        monkeypatch):
     """`add:` appends, which is right for a rider bought by an upgrade and
     wrong for an upgrade whose new line resolves in the MIDDLE of the body.
 
-    send_the_runner+ is the live row: ruled draw 2 -> discard 1 chosen ->
+    send_the_runner+ was the live row: ruled draw 2 -> discard 1 chosen ->
     exhaust 1 chosen ([USER], D2a), and a bare append loaded it as draw /
     exhaust / discard -- the player was asked what to Exhaust before being
-    asked what to throw, and each question changes the answer to the other.
+    asked what to throw. The shipped row left with its sheet (legacy cleanup
+    stage 6); its shape is spelled here.
     """
-    from tier0.content import loader
-    upgraded = loader.get_card("send_the_runner" + upgrades.SUFFIX)
+    monkeypatch.setattr(upgrades, "_upgrade_index", lambda: {"synthetic": {
+        "draw": 1,
+        "add": {"op": "discard", "amount": 1, "select": "chosen"},
+        "add_before": "exhaust_from"}})
+    card = Card(id="synthetic", name="Synthetic", cost=1, type="skill",
+                effects=[{"op": "draw", "amount": 1},
+                         {"op": "exhaust_from", "amount": 1,
+                          "select": "chosen"}])
+    upgraded = upgrades.apply_upgrade(card)
     assert [(fx["op"], fx.get("select")) for fx in upgraded.effects] == [
         ("draw", None), ("discard", "chosen"), ("exhaust_from", "chosen")]
     # The other key on the same row still lands: draw 1 -> 2.

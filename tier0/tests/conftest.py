@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 from tier0.engine.state import CombatState, Enemy, Player
-from tier0.tests.shipped_world import shipped_world  # noqa: F401  (a fixture)
 
 # --- THE GIT ENVIRONMENT IS SCRUBBED BEFORE ANY TEST RUNS ------------------
 # WHAT HAPPENED, 2026-09-02. Five files in this directory build throwaway git
@@ -96,73 +95,6 @@ def _fresh_blindplay_deck(tmp_path_factory):
     yield
     faces.forget_deck()
     faces._DECK_STORE_DIR = held
-
-
-# --- THE ARMS SIT AT THEIR DEFAULTS AT EVERY TEST'S START -----------------
-# `EB-569` asserted the arms were OFF at every test's start, because two tests
-# read the flag-off tree and a neighbour on the same xdist worker kept leaving
-# an arm on. Since legacy cleanup stage 3 (2026-10-01,
-# `review/active/legacy-cleanup-2026-10-01.md`, pick 5) the sim's defaults ARE
-# the current kits, so "off" is no longer the clean state; the module default
-# is. What survives of the guard: every arm flag equals the value it had at
-# import, and a test that leaves one flipped is NAMED at the next test's start
-# (a leak is a fact about the PREVIOUS test). It repairs before it fails --
-# the flags go back and `loader.reset_arm_caches()` drops the memoized views
-# that move with them -- so one leaker costs one red test, not a cascade.
-# The warm-cache checks went with the flag-off tree: a warm substitution index
-# is the normal state now.
-_ARM_FLAGS = (("tier0.constants", "SPARK_ALT_COST_ENABLED"),
-              ("tier0.constants", "KLEE_OVERHAUL"),
-              ("tier0.constants", "KOKOMI_OVERHAUL"),
-              ("tier0.constants", "COMPANION_OVERHAUL"),
-              ("tier0.constants", "KURAGE_MEMORY"),
-              ("tier0.engine.furina_stage", "FURINA_STAGE"))
-
-
-def _arm_defaults():
-    import importlib
-    return {(m, f): getattr(importlib.import_module(m), f)
-            for m, f in _ARM_FLAGS}
-
-
-#: Each flag's value at import -- the default every test starts from.
-_ARM_DEFAULTS = _arm_defaults()
-
-#: The last test to FINISH on this worker -- the one a leak found at the next
-#: test's start belongs to. Per-process, which is per-worker under xdist.
-_previous_test = {"id": "(nothing -- this was the first test on this worker)"}
-
-
-def _arm_residue():
-    """Every arm flag not at its default. Empty is good."""
-    return [f"{m}.{f} is {v!r}, its default is {_ARM_DEFAULTS[(m, f)]!r}"
-            for (m, f), v in _arm_defaults().items()
-            if v != _ARM_DEFAULTS[(m, f)]]
-
-
-@pytest.fixture(autouse=True)
-def _the_arms_stay_at_their_defaults(request):
-    import importlib
-    from tier0.content import loader
-
-    residue = _arm_residue()
-    if residue:
-        for (m, f), v in _ARM_DEFAULTS.items():
-            setattr(importlib.import_module(m), f, v)
-        loader.reset_arm_caches()
-    culprit = _previous_test["id"]
-    try:
-        assert not residue, (
-            "an arm flag was off its default when this test started, which "
-            "means the test BEFORE it on this worker left it flipped. The "
-            f"leaking test is:\n    {culprit}\n"
-            "It must restore the flag (monkeypatch, or a try/finally) and drop "
-            "the memoized views that move with it "
-            "(`loader.reset_arm_caches()`, plus `rewards.character_pool` in "
-            "tier 0.5). What was found:\n  " + "\n  ".join(residue))
-        yield
-    finally:
-        _previous_test["id"] = request.node.nodeid
 
 
 # --- THE SEAM FAMILY, FOR THE FENCES THAT READ SOURCE ----------------------

@@ -34,9 +34,10 @@ from tier0.content import loader
 
 def _pool(*rarities: str) -> dict[str, list]:
     """A stand-in pool holding one real card per named tier. The cards are
-    the loader's own, so `loader.get_card` on the pick resolves."""
+    the prototype surface's own (the kits' sheet since legacy cleanup stage
+    6), so `loader.get_card` on the pick resolves."""
     by_rarity: dict[str, list] = {}
-    for card in loader._card_index().values():
+    for card in loader.prototype_cards():
         if card.rarity in rarities and card.rarity not in by_rarity:
             by_rarity[card.rarity] = [card]
     assert set(by_rarity) == set(rarities), f"no card for {rarities}"

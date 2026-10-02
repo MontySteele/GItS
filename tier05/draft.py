@@ -905,19 +905,6 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # sheet, THAT is the change that moves the drafter and archives the
         # numbers -- see the slice-2 packet.
         return -_neutral_amount(fx, 0) * STATIC_CHARGE_VALUE
-    if op == "play_front_memory":
-        # ZERO, and a DELIBERATE zero (the Kurage's memory v3, QUARANTINED
-        # behind C.KURAGE_MEMORY). The op plays a card the memory already
-        # holds, so its whole value is the value of THAT card -- which the
-        # drafter priced when it priced the card, and would double-count if
-        # it priced it again here. There is also nothing to price against: no
-        # sheet row prints this op, no pool or digest can see it, and with the
-        # flag off it cannot even fire. `spend_charge`'s argument for not
-        # bumping DRAFTER_VERSION applies unchanged: every drafted number in
-        # the world is byte-identical with and without this branch. If an
-        # acceleration keyword is ever authored onto a real sheet, THAT is the
-        # change that moves the drafter and archives the old world.
-        return 0.0
     if op == "raise_fanfare_cap":
         return _neutral_amount(fx, 0) * STATIC_FANFARE_CAP_VALUE
     if op == "crash_fanfare":
@@ -2421,7 +2408,7 @@ SPARK_ALT_NONDAMAGE_SPEND_COST = STATIC_SPARK_SPEND_COST   # 2.50, see above.
 
 def spark_gain_value() -> float:
     """The per-Spark GAIN dial in force. `SPARK_ALT_VALUE` under the flag."""
-    return SPARK_ALT_VALUE if C.SPARK_ALT_COST_ENABLED else STATIC_SPARK_VALUE
+    return STATIC_SPARK_VALUE
 
 
 def spark_spend_cost(*, prints_damage: Optional[bool] = None) -> float:
@@ -2435,8 +2422,7 @@ def spark_spend_cost(*, prints_damage: Optional[bool] = None) -> float:
     is None when the caller has no card in hand; that keeps the dearer rate,
     so an un-informed call can never under-charge a sink.
     """
-    if not C.SPARK_ALT_COST_ENABLED:
-        return STATIC_SPARK_SPEND_COST
+    return STATIC_SPARK_SPEND_COST
     return (SPARK_ALT_NONDAMAGE_SPEND_COST if prints_damage is False
             else SPARK_ALT_VALUE)
 
@@ -2518,10 +2504,6 @@ STATIC_OP_PRICING: dict[str, str] = {
                     "prototype surface only -- no shipped row prints it and "
                     "no drafted number moves)",
     "summon_kurage": "ONE pulse, not the duration (v8)",
-    "play_front_memory": "ZERO: the memory's own card carries the value and "
-                         "was priced once already (Kurage memory v3, "
-                         "prototype surface only -- no shipped row prints it "
-                         "and no drafted number moves)",
     "gain_fanfare_floor": "STATIC_FANFARE_FLOOR_VALUE per point (v9)",
     "grow_damage": "one discounted future redraw",
     # --- the Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) ------
@@ -3354,11 +3336,9 @@ def archetype_shares(deck: list[Card], *, companions: bool = True) -> dict[str, 
     Furina's starter AND in her reward pool, so every Furina run is credited
     with a drafted spotlight card before a reward screen is shown -- the exact
     contamination the basics exclusion exists to prevent, arriving through the
-    door the exclusion leaves open. `to_the_front` is the same shape for
-    Kokomi, one flag away (`C.KURAGE_MEMORY`).
+    door the exclusion leaves open.
 
-    `tools/lint_starter_pool_overlap.py` is that invariant made checkable, and
-    it carries the thirteen rows as curated debt. THE FIX IS NOT HERE YET, and
+    THE FIX IS NOT HERE YET, and
     deliberately: excluding by starter MEMBERSHIP instead of by rarity moves
     this number for Furina and Kokomi, hence `dominant_archetype`, hence the
     rest plan and the adaptive drafter -- a `POLICY_VERSION` window with a

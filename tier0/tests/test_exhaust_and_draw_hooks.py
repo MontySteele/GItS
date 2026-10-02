@@ -66,7 +66,8 @@ def test_no_shipped_card_declares_the_on_draw_randomiser():
     """
     assert all(c.on_draw_randomise_cost is None
                and c.cost_set_this_combat is None
-               for c in loader._card_index().values())
+               for c in (list(loader._card_index().values())
+                         + loader.prototype_cards()))
     # Slither LEFT `UNEXPRESSED` at EB-83 (2026-09-02), because Wood Carvings
     # converted and an enchantment with a granting event is a name with a
     # caller. The dict is now empty and stays that way until an event names an
@@ -74,7 +75,8 @@ def test_no_shipped_card_declares_the_on_draw_randomiser():
     assert "slither" in enchantments.CATALOG
     assert enchantments.UNEXPRESSED == {}
     # ...and the rider it writes is the roll's exclusive bound, `NextInt(4)`.
-    enchanted = loader.peek_card(enchantments.decorate("kaboom", "slither"))
+    enchanted = loader.peek_card(
+        enchantments.decorate("proto_ko_kapow", "slither"))
     assert enchanted.on_draw_randomise_cost == 4
     assert enchanted.cost_set_this_combat is None      # written on DRAW only
 

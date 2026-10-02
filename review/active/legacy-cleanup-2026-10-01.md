@@ -104,6 +104,28 @@ and about 390 Python arm-flag reads.
    and `KokomiPlan.NoteRider`, which no rider calls now.
 6. **Python flag removal and docs:** the arm-flag reads, `operations/
    prototype.md` and `codegen.md`, STATE's build paragraph, stale skills.
+   **6a (the sim's flags-off world and the sheets), 2026-10-02:** the arm
+   flags are gone from the sim (`KLEE_OVERHAUL`, `COMPANION_OVERHAUL`,
+   `KOKOMI_OVERHAUL`, `FURINA_STAGE` always on; `SPARK_ALT_COST_ENABLED` and
+   `KURAGE_MEMORY` deleted with the Spark alternative cost, the Kurage Memory
+   and the Muster subsidy), with the `shipped_world` fixture and the arm
+   residue guard. The nine shipped sheets are deleted
+   (`docs/{klee,kokomi,furina}-{cards,upgrades}.yaml`, the three companion
+   sheets; `ancient-upgrades.yaml` and `ref-ironclad-upgrades.yaml` stay,
+   because the Ancients and the base Strike/Defend read them), and so are the
+   twelve retired-arm rows; their fourteen `KNOWN_STALE` art entries stay. The
+   sim's Furina pool is now `pool_replacement` (her 78, matching C#: the stray
+   shipped Overflowing Hospitality is gone), her shipped Ethereal Spotlight
+   relic hook and the three kit Bursts left the character yamls, and the
+   yamls' battery packages and winrate bands went with the sheets.
+   Shipped-only tests, five shipped-only lints (`lint_sheet_stamp`,
+   `lint_role_tempo_coverage`, `lint_strict_domination`,
+   `lint_sheet_comments`, `lint_kokomi_decksize`) and
+   `lint_starter_pool_overlap` are deleted; tests of engine, tool and seat
+   machinery that used a shipped card as a fixture are ported to current rows
+   or inline cards. Regenerated C# is byte-identical (the manifest loses the
+   deleted row's upgrade entry). Left for 6b: the C# dead code, the codegen's
+   spotlight wrap and shipped-sheet readers, the understudy ports, the docs.
 
 Out of scope: the Teyvat frame ([USER]: nothing deleted). Element switches
 `SwirlPays` and `CrystallizeKeepsAura` stay until the open retest of each

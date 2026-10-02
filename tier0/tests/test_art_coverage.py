@@ -41,23 +41,17 @@ PROBE_PNG = bytes.fromhex(
 
 
 def first_companion_id():
-    """A real expected id from a canonical companion sheet, read not hardcoded.
-
-    Used to seed a COVERED probe. Which row it is does not matter; that it
-    comes from the sheet rather than a literal does -- a literal here would be
-    the `test_bill_is_derived_from_canonical_sheets` failure mode one level up.
-    """
+    """A real expected id, read not hardcoded: the first companion portrait
+    key the generated C# requests (the companion sheets that used to supply it
+    were deleted at legacy cleanup stage 6; the mod art keys are the whole
+    expected set now). Used to seed a COVERED probe."""
     sys.path.insert(0, str(REPO / "tools"))
     import art_coverage
 
-    for path, outdir, _label in art_coverage.SHEETS:
-        if outdir != COMPANION_ART:
-            continue
-        rows = yaml.safe_load(path.read_text(encoding="utf-8"))
-        for r in rows:
-            if isinstance(r, dict) and "id" in r:
-                return r["id"]
-    raise AssertionError("no companion sheet row found to seed a covered probe")
+    for key in sorted(art_coverage.mod_art_keys()):
+        if key.startswith("proto_mc_"):
+            return key
+    raise AssertionError("no companion art key found to seed a covered probe")
 
 
 def test_no_unrecorded_stale_art():
@@ -139,38 +133,6 @@ def test_stale_file_is_not_counted_as_coverage():
                 path.rmdir()
             except OSError:
                 break
-
-
-@pytest.mark.skipif(not (COMPANION_ART / "dahlia_sacramental_shower.png").exists(),
-                    reason="Tier F art is gitignored; only meaningful on a machine that has fetched it")
-def test_existing_portrait_is_not_rebilled_as_missing():
-    """Regression for the requirements-doc bill (defect D1 in the tool docstring).
-
-    docs/furina-art-pass-requirements.md sec.1/sec.7 billed
-    dahlia_sacramental_shower as missing -- 'this row existed in the plan but
-    never reached the final output directory'. It had. Re-fetching it would
-    have overwritten an eyes-on-approved 2026-07-21 portrait, and the doc's
-    22-missing-companions figure was 21.
-
-    Run this against the doc's bill rather than the tool's and it fails; that
-    is the point. The derived number belongs to the tool.
-
-    The invariant is anchored positively -- the existing portrait shows up in
-    the COVERED list -- rather than by asserting some sibling is still missing.
-    The art pass has since covered every row (favonian_favor included), so a
-    "this one is missing" control would rot the moment the pass finished; the
-    D1 regression itself does not depend on anything remaining unpainted.
-    """
-    res = run_tool()
-    body = res.stdout
-    missing_section = body.split("MISSING (the art bill)")[1].split("STALE")[0]
-    # The shipped row's id exactly: `proto_mc_dahlia_sacramental_shower`, the
-    # companion prototype's own row (2026-09-02), is a different row that may
-    # legitimately sit on the bill, and a substring test read it as this one.
-    assert not re.search(r"(?<![A-Za-z0-9_])dahlia_sacramental_shower\b",
-                         missing_section)
-    covered = "".join(ln for ln in body.splitlines() if ln.strip().startswith("have:"))
-    assert "dahlia_sacramental_shower" in covered, "the existing portrait must read as covered"
 
 
 def test_mod_art_key_scan_reads_literal_portrait_requests(tmp_path):

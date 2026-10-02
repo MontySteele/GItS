@@ -4,9 +4,9 @@
 (engine pins, sheet/content lints, C#-parity, art checks, encoding/convention
 lints, understudy contracts). The frozen-battery calibration bands are
 retired until a kit reaches Balance (2026-10-01, legacy cleanup pick 5): they
-skip, marked `RETIRED_CALIBRATION` (`tier0/tests/shipped_world.py`). The sim's
-defaults are the current kits; a pin about a shipped kit names the shipped
-world with the `shipped_world` fixture.
+skip, marked `RETIRED_CALIBRATION` (`tier0/tests/retired_calibration.py`). The sim
+runs the current kits only; the shipped kits, their sheets and the
+`shipped_world` fixture are deleted (legacy cleanup stage 6).
 
 ```sh
 python3 -m pytest tier0/tests tier05/tests -q          # what CI runs
@@ -101,13 +101,8 @@ dev box 2026-08-29 at `917e07f`: 4451 passed / 46 skipped / 12 xfailed either
 way, **281.4 s serial → 59.2 s parallel**. No test needed isolating and no
 `serial` marker was added, exactly as the 2026-08-24 measurement predicted.
 
-Two facts this measurement turned up, neither fixed here:
+A fact this measurement turned up, not fixed here:
 
-- `tools/lint_role_tempo_coverage.py --gate` is **green** — 17 findings against
-  the 17 then pinned when this was measured on `4bbc9bc`, and 18 against 18
-  since the `EB-118` Window-1 label pass disclosed an inherited
-  `furina/spotlight frontload|mid` gap. Only the bare invocation, which no gate
-  uses, exits 1.
 - `tools/card_distinctness_report.py --gate` exits **2** — "NO OFFICIAL ANCHOR
   IN THIS RUN" — on the art-bearing main checkout as well as in a worktree,
   because its official pools want `tools/extract_base_game_pool.py` to have

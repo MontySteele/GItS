@@ -1,10 +1,11 @@
 """M6: adaptive policy, divergence / relevance / achievability, A/B harness.
 
-The regression that matters most here is test_starting_deck_does_not_
-precommit_the_shape. Measured with basics counted, adaptive drafting
-"converged" on demolition in 100% of runs -- which was Klee's starting deck
-being read back as a pool finding. That confound is the reason this metric
-exists at all, so it gets a test rather than a comment.
+The regression that mattered most here was test_starting_deck_does_not_
+precommit_the_shape: measured with basics counted, adaptive drafting
+"converged" on demolition in 100% of runs -- Klee's starting deck read back
+as a pool finding. Its premise (a starter carrying archetype tags) left with
+the shipped kits at legacy cleanup stage 6, and the test with it; the basics
+exclusion it guarded is still pinned below.
 """
 
 from __future__ import annotations
@@ -17,29 +18,21 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier05 import ab, draft, model
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
-
-
 def _cards(*ids):
     return [loader.get_card(i) for i in ids]
 
 
+def _tagged(cid, role, plan):
+    """A synthetic row carrying the role and plan tag the drafter reads. No
+    current row carries an archetype tag (the shipped kits' tagged rows left
+    with their sheets at legacy cleanup stage 6), so the drafter's
+    tag-driven claims are pinned on these."""
+    from tier0.engine.state import Card
+    return Card(id=cid, name=cid, cost=1, type="skill", rarity="common",
+                role=role, archetypes=[plan])
+
+
 # --- the confound ------------------------------------------------------
-
-
-def test_starting_deck_does_not_precommit_the_shape():
-    starter = _cards(*loader.starting_deck("klee"))
-    # Jumpy Dumpty and Pop are demolition-tagged, but they are basics and
-    # were never drafted. Commitment must be measured over drafted cards.
-    assert any("demolition" in c.archetypes for c in starter), (
-        "premise changed: the starter no longer carries archetype tags, so "
-        "this regression can no longer occur -- re-derive the exclusion.")
-    assert draft.archetype_shares(starter) == {"demolition": 0.0,
-                                               "spark": 0.0,
-                                               "reaction": 0.0}
-    assert draft.dominant_archetype(starter) == "goodstuff"
 
 
 def test_basics_are_never_draftable_so_the_exclusion_is_exact():
@@ -58,56 +51,11 @@ def test_kit_burst_never_draftable():
                    for cs in pool.values() for c in cs)
 
 
-def test_companions_feed_scoring_but_not_commitment():
-    """Companions are reaction fuel, not evidence of a plan.
-
-    They now carry a derived `reaction` tag so the adaptive scorer can value
-    Burst and amp payoffs in a deck full of appliers -- that bootstrap was
-    genuinely broken. But the reward screen has a GUARANTEED companion slot, so
-    every deck is offered one every screen and taking them signals nothing
-    about commitment. Counting them for classification put 65.6% of decks in
-    'reaction' while only 3.5% of those had an online reaction core.
-    """
-    starter = _cards(*loader.starting_deck("klee"))
-    comps = [c for c in loader._card_index().values()
-             if c.is_companion and "reaction" in c.archetypes][:4]
-    assert comps, "premise: some companions must derive a reaction tag"
-    deck = starter + comps
-
-    # Scoring sees them...
-    assert draft.archetype_shares(deck)["reaction"] > 0.0
-    # ...commitment does not.
-    assert draft.archetype_shares(deck, companions=False)["reaction"] == 0.0
-    assert draft.dominant_archetype(deck) == "goodstuff"
-
-
-def test_companion_tag_is_derived_from_effects_not_hand_written():
-    """The tag must follow what the card does, or it drifts."""
-    idx = loader._card_index()
-    fuel = idx["dahlia_sacramental_shower"]      # applies_element
-    swirl = idx["sucrose_gust"]                  # swirl IS a reaction
-    plain = idx["barbara_melody"]                # block + meter (R8), no element
-    assert "reaction" in fuel.archetypes
-    assert "reaction" in swirl.archetypes
-    assert "reaction" not in plain.archetypes
-    # M7 ruling R4: the two prose-only misses got structured fields, and
-    # the tag derives from those fields (no hand-tag survived migration).
-    albedo = idx["albedo_solar_isotoma"]         # consumes_aura
-    oz = idx["fischl_oz"]                        # summon_element
-    assert "reaction" in albedo.archetypes
-    assert "reaction" in oz.archetypes
-    # Drift guard: the engine's oz_summon tick applies the literal
-    # "electro"; the sheet's structured field must agree with it.
-    assert any(fx.get("summon_element") == "electro" for fx in oz.effects)
-
-
-# --- adaptive policy ---------------------------------------------------
-
-
 def test_adaptive_ignores_the_assigned_archetype():
     """The A/B is meaningless if adaptive peeks at the target."""
     deck = _cards(*loader.starting_deck("klee"))
-    offers = _cards("mine_toss", "crackle", "sizzle")
+    offers = _cards("proto_ko_fish_blasting", "proto_ko_bombs_away",
+                    "proto_mc_kaeya_frostgnaw")
     picks = {draft.adaptive_policy(random.Random(0), deck, offers, a).id
              for a in ("demolition", "spark", "reaction", "generic")}
     assert len(picks) == 1
@@ -115,8 +63,8 @@ def test_adaptive_ignores_the_assigned_archetype():
 
 def test_commitment_emerges_from_what_was_drafted():
     starter = _cards(*loader.starting_deck("klee"))
-    spark_deck = starter + _cards("crackle", "pocket_fireworks",
-                                  "sparkly_treasure")
+    spark_deck = starter + [_tagged(f"s{i}", "enabler", "spark")
+                            for i in range(3)]
     shares = draft.archetype_shares(spark_deck)
     assert shares["spark"] > shares["demolition"]
     assert draft.dominant_archetype(spark_deck) == "spark"
@@ -127,12 +75,11 @@ def test_adaptive_payoffs_ramp_rather_than_gate():
     so a hard gate would make payoffs permanently unpickable and no shape
     could ever finish -- the same deadlock shape as the M5 amp-payoff bug."""
     starter = _cards(*loader.starting_deck("klee"))
-    payoff = next(c for c in loader._card_index().values()
-                  if c.role == "payoff" and "spark" in c.archetypes)
+    payoff = _tagged("p", "payoff", "spark")
     bare = draft.adaptive_score(payoff, starter)
     committed = draft.adaptive_score(
-        payoff, starter + _cards("crackle", "pocket_fireworks",
-                                 "sparkly_treasure"))
+        payoff, starter + [_tagged(f"s{i}", "enabler", "spark")
+                           for i in range(3)])
     assert committed > bare, "payoff value must rise with its enablers"
 
 
@@ -199,13 +146,13 @@ def test_relevance_is_deck_sensitive_for_reaction():
     as advancing a plan that was already complete.
     """
     starter = _cards(*loader.starting_deck("klee"))
-    offers = _cards("crackle", "mine_toss", "sizzle")
+    offers = _cards("proto_mc_kaeya_frostgnaw", "proto_ko_fish_blasting",
+                    "proto_ko_kapow")
     assert not draft.core_complete(starter, "reaction")
 
-    done = starter + [c for c in loader._card_index().values()
+    done = starter + [c for c in loader.prototype_cards()
                       if draft._is_applier(c)][:2]
-    done += [c for c in loader._card_index().values()
-             if draft._is_amp_payoff(c)][:1]
+    done += [_tagged("amp", "payoff", "reaction")]      # no current amp row
     assert draft.core_complete(done, "reaction"), "premise: core must be online"
     assert not draft.offer_advances_plan(offers, done, "reaction")
 

@@ -29,7 +29,7 @@ from tools.effect_walk import iter_effects  # noqa: E402
 
 @pytest.fixture
 def arm(monkeypatch):
-    monkeypatch.setattr(FS, "FURINA_STAGE", True)
+    yield
 
 
 def _state(stage=(("usher", 5),), enemies=None, cross_examination=0):

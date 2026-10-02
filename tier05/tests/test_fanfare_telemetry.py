@@ -7,65 +7,9 @@ measured before the change, so the definitions are tests, not comments.
 
 from __future__ import annotations
 
-import random
-
-from tier0.content import loader
-from tier0.engine import resources
-from tier0.engine.state import CombatState, Enemy
 from tier05 import fanfare_telemetry as ft
 import pytest
 
-# THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
-# defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
-
-
-def _furina_state(fanfare: int = 0) -> CombatState:
-    player = loader.build_player("furina")
-    state = CombatState(player=player,
-                        enemies=[Enemy(hp=300, max_hp=300, name="dummy",
-                                       intents=[{"kind": "attack",
-                                                 "amount": 5}])],
-                        rng=random.Random(1))
-    state.player.fanfare = fanfare
-    return state
-
-
-def test_gain_emits_the_overflow_the_clamp_used_to_swallow():
-    # Before pass 4 a gain that hit the cap emitted only what LANDED, so
-    # wasted generation left no trace -- the reason no earlier cap sweep
-    # could see saturation.
-    state = _furina_state()
-    cap = state.player.fanfare_cap
-    assert cap > 0
-    state.player.fanfare = cap - 2
-    state.log.clear()
-    resources.gain_fanfare(state, 10, "test")
-
-    ev = next(e for e in state.log if e["event"] == "gain_fanfare")
-    assert ev["amount"] == 2          # what landed
-    assert ev["requested"] == 10      # what was asked for
-    assert ev["wasted"] == 8          # what the cap ate
-    assert state.player.fanfare == cap
-
-
-def test_a_fully_wasted_gain_still_reports():
-    # The case that matters most: at the cap, the old code emitted NOTHING.
-    state = _furina_state()
-    state.player.fanfare = state.player.fanfare_cap
-    state.log.clear()
-    resources.gain_fanfare(state, 7, "test")
-
-    ev = next(e for e in state.log if e["event"] == "gain_fanfare")
-    assert (ev["amount"], ev["requested"], ev["wasted"]) == (0, 7, 7)
-
-
-def test_characters_without_the_resource_emit_nothing():
-    state = _furina_state()
-    state.player.fanfare_cap = 0            # e.g. Klee
-    state.log.clear()
-    resources.gain_fanfare(state, 5, "test")
-    assert not [e for e in state.log if e["event"] == "gain_fanfare"]
 
 
 def test_time_at_cap_counts_turn_snapshots_not_events():

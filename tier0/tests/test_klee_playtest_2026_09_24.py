@@ -29,7 +29,6 @@ def overhaul(monkeypatch):
     `test_klee_overhaul.overhaul`'s fixture, for its reasons."""
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
@@ -45,7 +44,6 @@ def companions(monkeypatch):
         rewards.five_star_roster.cache_clear()
         rewards.designed_nations.cache_clear()
     clear()
-    monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
     yield
     clear()
 

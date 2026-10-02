@@ -26,15 +26,13 @@ from tier0.harness.runner import run_battery
 from tier0.pilot.policy import make_pilot
 
 from .conftest import make_enemy, make_state
-import pytest
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
-pytestmark = pytest.mark.usefixtures("shipped_world")
 
 # A reaction-heavy arm: Klee's reaction package is the only battery config that
 # reliably lights every branch of the D1 decomposition.
-REACTIVE = ("klee", "reaction_weighted", "punisher", "generic")
+REACTIVE = ("klee", "starter", "punisher", "generic")
 
 
 def _battery(fights=40, seed=7):
@@ -187,8 +185,11 @@ def test_incoming_is_pre_mitigation_and_never_below_what_landed():
 def test_block_at_end_uses_minus_one_for_a_turn_the_fight_ended_inside():
     """A fight that ends on the player's turn never reaches `turn_close`. The
     missing sample is -1, never 0 -- "the player held no block" and "nobody
-    looked" are different facts and a mean over them is different too."""
-    stats = _battery(fights=60)
+    looked" are different facts and a mean over them is different too.
+    Read on Kokomi's starter in `attrition`: her morning Plans resolve before
+    the turn's first card, so some fights end inside a turn that never closes
+    (the shipped decks reached it through start-of-turn Bomb detonation)."""
+    stats = run_battery("kokomi", "starter", "attrition", "generic", 60, 7)
     tails = [s.turn_trajectory[-1][3] for s in stats if s.turn_trajectory]
     assert any(v == -1 for v in tails), (
         "no fight ended inside a player turn in 60 fights -- the sentinel is "
@@ -223,7 +224,7 @@ def test_turn_profile_is_empty_not_exploding_on_no_fights():
 # --- merging staged fights -----------------------------------------------
 
 def test_gauntlet_merge_offsets_turn_rows_and_keeps_the_reaction_split():
-    a = run_battery("klee", "reaction_weighted", "gauntlet", "generic", 10, 5)
+    a = run_battery("klee", "starter", "gauntlet", "generic", 10, 5)
     for s in a:
         turns = [row[0] for row in s.turn_trajectory]
         assert turns == list(range(1, len(turns) + 1)), (

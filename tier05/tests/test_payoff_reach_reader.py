@@ -558,13 +558,13 @@ def test_enchanting_a_live_card_moves_neither_role_nor_archetypes():
     numbered zero, and `T3` fired under neither normalization)."""
     from tier0.content import enchantments, loader
     for name in sorted(enchantments.CATALOG):
-        plain = loader.peek_card("undertow")
+        plain = loader.peek_card("proto_kk_undertow")
         amount = 2 if enchantments.CATALOG[name].rider(2) is not None else None
         decorated = loader.peek_card(
-            enchantments.decorate("undertow", name, amount))
+            enchantments.decorate("proto_kk_undertow", name, amount))
         assert decorated.role == plain.role
         assert decorated.archetypes == plain.archetypes
-        assert reach.base_id(decorated.id) == "undertow"
+        assert reach.base_id(decorated.id) == "proto_kk_undertow"
 
 
 def test_the_audit_compares_the_upgraded_form_against_the_printed_row():

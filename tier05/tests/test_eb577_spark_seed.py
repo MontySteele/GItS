@@ -29,7 +29,6 @@ from tier05 import rewards
 
 @pytest.fixture
 def arm(monkeypatch):
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
     yield
@@ -78,19 +77,6 @@ def test_a_screen_that_already_rolled_one_is_untouched(arm):
         if _sparks(bare) == 0:
             continue
         assert [c.id for c in _offers(seed, 1)] == [c.id for c in bare]
-
-
-def test_the_seed_is_quarantined(monkeypatch):
-    """`C.KLEE_OVERHAUL` off, any character but Klee, or a caller with no floor
-    to give: the identity, in every direction."""
-    monkeypatch.setattr(C, "KLEE_OVERHAUL", False)
-    loader.reset_arm_caches()
-    rewards.character_pool.cache_clear()
-    for seed in SEEDS:
-        assert ([c.id for c in _offers(seed, 1)]
-                == [c.id for c in _offers(seed, None)])
-    loader.reset_arm_caches()
-    rewards.character_pool.cache_clear()
 
 
 def test_no_floor_is_the_identity(arm):
@@ -145,3 +131,10 @@ def test_the_swap_keeps_the_rolled_rarity_where_the_pool_has_one(arm):
         moved = [(b, s) for b, s in zip(bare, seeded) if b.id != s.id]
         assert len(moved) == 1
         assert moved[0][0].rarity == moved[0][1].rarity
+
+
+def test_the_seed_is_klees_alone(arm):
+    """Any character but Klee: the identity, floor or no floor."""
+    for seed in SEEDS:
+        assert ([c.id for c in _offers(seed, 1, "kokomi")]
+                == [c.id for c in _offers(seed, None, "kokomi")])
