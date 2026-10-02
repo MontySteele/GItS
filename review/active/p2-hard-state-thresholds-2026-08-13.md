@@ -1,4 +1,4 @@
-Status: OPEN (picks 1-4, the four threshold proposals)
+Status: RETIRED 2026-10-02 (option 2: no hard-state sampling runs; reopen if pilots are compared again)
 
 # P2: what counts as a "hard state"? — a proposal, with the first numbers
 
