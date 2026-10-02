@@ -1,5 +1,12 @@
 # Klee lore pass (2026-10-01)
 
+**Ruled 2026-10-01.** [USER]: "Pick 1: looks good! Pick 2: Sparks for
+Everyone sounds fine as-is; we can hold that name until we find a use later.
+Pick 3: Agreed on Albedo; let's include him in the status package, which seems
+like a natural place for alchemy-flavored cards." So: all ten renames (1a);
+Sparks for Everyone keeps its name and Secret Rite is held for a later use
+(2a); Albedo's re-hook goes into the Klee status package (3a).
+
 [USER] asked for a check for "blinding gaps in her lore regarding the Knights
 of Favonius, Hexenzirkel / Little Hexenzirkel / Hexerei ties that aren't
 properly expressed through her current card pool, or anything else, as well
