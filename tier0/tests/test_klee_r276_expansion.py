@@ -21,8 +21,9 @@ from tier0.tests.conftest import make_enemy, make_state
 from tier05 import rewards
 
 # The thirty less Fish Fry and Friendship Bracelet, which the Klee status
-# package (2026-10-01) cut; its eight rows follow them at the tuple's end.
-EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-36:-8]
+# package (2026-10-01) cut, and Spinning Sparkler, which its sec.5 (defence in
+# the status pile) cut; its eleven rows follow them at the tuple's end.
+EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-38:-11]
 
 
 @pytest.fixture
@@ -81,11 +82,11 @@ def filler(n=5):
 
 def test_the_thirty_are_the_specs_rows_at_the_specs_shape(overhaul):
     rows = {cid: load(cid) for cid in EXPANSION}
-    assert len(rows) == 28
+    assert len(rows) == 27
     by_rarity = {}
     for card in rows.values():
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + 1
-    assert by_rarity == {"common": 2, "uncommon": 16, "rare": 10}
+    assert by_rarity == {"common": 2, "uncommon": 15, "rare": 10}
     shape = {cid: (c.cost, c.type) for cid, c in rows.items()}
     assert shape["proto_ko_hiding_spot"] == (1, "skill")
     assert shape["proto_ko_half_a_mountain"] == (1, "skill")
@@ -193,25 +194,6 @@ def test_mk_iii_upgraded_hits_four_and_plants_three(overhaul):
     state = klee_state([enemy])
     play(state, load("proto_ko_jumpy_dumpty_mk_iii+"))
     assert sizes(enemy) == [3, 3, 3]
-
-
-def test_spinning_sparkler_grows_the_bomb_on_each_hit(overhaul):
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    klee_overhaul.place(state, enemy, 3)
-    klee_overhaul.place(state, enemy, 7)
-    play(state, load("proto_ko_spinning_sparkler"), aim=enemy)
-    assert sizes(enemy) == [3, 11]
-    assert enemy.hp < 200
-    # A plain Attack: nothing went off.
-    assert state.ko_set_off_this_turn == 0
-
-
-def test_spinning_sparkler_grows_nothing_on_a_bombless_enemy(overhaul):
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    play(state, load("proto_ko_spinning_sparkler"), aim=enemy)
-    assert sizes(enemy) == []
 
 
 def test_mine_all_mine_hits_only_the_mined_enemies(overhaul):

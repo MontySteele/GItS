@@ -125,12 +125,9 @@
 
 # --- Cook, the starter's plan (packet sec.4) ---
 
-- {id: proto_ko_fish_flavored_bait, name: "Fish-Flavored Bait", character: klee,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   description: "Deal 4 damage. Place a [gold]Bomb[/gold] 4.",
-   effects: [{op: damage, amount: 4, target: enemy},
-             {op: plant_bomb, target: enemy, size: 4}]}
+# FISH-FLAVORED BAIT IS CUT (Klee defence in the status pile, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.5). Provenance
+# note, "Klee defence in the status pile, 2026-10-01".
 
 # POCKET FIREWORKS IS CUT (the Klee status package, 2026-10-01,
 # review/active/klee-status-package-2026-10-01.md sec.3). Provenance
@@ -528,12 +525,9 @@
    upgrade: {scry: 2},
    effects: [{op: scry_take, amount: 4, filter: set_off}]}
 
-- {id: proto_ko_big_bounce, name: "Nova Burst", character: klee,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 5 damage. Explosion damage past the enemy's HP hits a random other enemy.",
-   upgrade: {damage: +3},
-   effects: [{op: set_off, target: enemy, damage: 5, overflow: bounce}]}
+# NOVA BURST (proto_ko_big_bounce) IS CUT (Klee defence in the status pile, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.5). Provenance
+# note, "Klee defence in the status pile, 2026-10-01".
 
 # Klee balance review, pick 4a, 2026-09-25 (review/records/klee-balance-2026-09-25.md)
 # moved numbers on thirteen rows across this section and the one above it.
@@ -566,13 +560,9 @@
    effects: [{op: damage, amount: 3, target: random_enemy, times: 3,
               plant_on_hit: 2}]}
 
-- {id: proto_ko_spinning_sparkler, name: "Spinning Sparkler", character: klee,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 5 damage twice. Each hit on an enemy with a [gold]Bomb[/gold] grows that [gold]Bomb[/gold] by 2.",
-   upgrade: {damage: +1, grow: +1},
-   effects: [{op: damage, amount: 5, target: enemy, times: 2,
-              grow_on_hit: 2}]}
+# SPINNING SPARKLER IS CUT (Klee defence in the status pile, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.5). Provenance
+# note, "Klee defence in the status pile, 2026-10-01".
 
 - {id: proto_ko_mine_all_mine, name: "Mine, All Mine!", character: klee,
    authored_by: [claude],
@@ -830,6 +820,37 @@
    description: "Your [gold]Confiscated[/gold] cost 0.",
    upgrade: {innate: true},
    effects: [{op: apply_power, power: ko_solitary_confinement, amount: 1, target: self}]}
+
+# --- DEFENCE IN THE STATUS PILE (2026-10-01, ruled; the status package
+# paper's sec.5): three rows, LAST, for three cut above. Provenance note,
+# "Klee defence in the status pile, 2026-10-01". ---
+
+- {id: proto_ko_up_in_smoke, name: "Up in Smoke!", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. Shuffle a [gold]Dazed[/gold] into your draw pile.",
+   upgrade: {weak: +1},
+   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
+             {op: add_card, card: status_dazed, zone: draw, amount: 1}]}
+
+- {id: proto_ko_behind_jeans_desk, name: "Behind Jean's Desk", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 14 [gold]Block[/gold]. Add a [gold]Confiscated[/gold] to your draw pile.",
+   upgrade: {block: +4},
+   effects: [{op: block, amount: 14},
+             {op: add_card, card: confiscated, zone: draw, amount: 1}]}
+
+# Unplayable with no status in hand (the gate is derived from the
+# `exhaust_a_status` op); with several, the player chooses. The Strength loss
+# is permanent, Disarm's kind.
+- {id: proto_ko_kitchen_alchemy, name: "Kitchen Alchemy", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Exhaust a status in your hand. ALL enemies lose 2 [gold]Strength[/gold].",
+   upgrade: {strength_loss: +1},
+   effects: [{op: exhaust_a_status},
+             {op: lose_strength, amount: 2, target: all_enemies}]}
 
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and

@@ -71,9 +71,13 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   built):** `review/active/klee-status-package-2026-10-01.md`. Eight cards in
   (Dazed on the fair loaders, Confiscated on the busted ones, and the payoffs
   that read them), eight cut, and Albedo's Klee stand-in is now Dust of
-  Purification; the pool stays 78, 24 / 33 / 21. Both engines; untested in
-  game until a deploy. Next: the package's seat round (two seats), then
-  Balance.
+  Purification; the pool stays 78, 24 / 33 / 21. **Its sec.5, defence in the
+  status pile (2026-10-01, ruled, built):** Up in Smoke! (Weak to ALL, a
+  Dazed), Behind Jean's Desk (14 Block, a Confiscated) and Kitchen Alchemy
+  (exhaust a status, ALL enemies lose 2 Strength) in for Fish-Flavored Bait,
+  Nova Burst and Spinning Sparkler; still 78, 24 / 33 / 21. Both engines;
+  untested in game until a deploy. Next: the package's seat round (two
+  seats), then Balance.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start

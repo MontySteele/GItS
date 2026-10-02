@@ -445,6 +445,13 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "exhaust_statuses_grow_largest": [_hook("shared", "junk_remove", "write"),
                                       _hook("shared", "exhaust_pile", "write"),
                                       _hook("private", "bombs", "write")],
+    # DEFENCE IN THE STATUS PILE (2026-10-01): Kitchen Alchemy exhausts one
+    # status from hand and takes Strength off every enemy.
+    "exhaust_a_status": [_hook("shared", "junk_remove", "write"),
+                         _hook("shared", "exhaust_pile", "write")],
+    # A debuff that only shrinks the enemy's own output, as `strength` and
+    # `weak` carry no hook in POWER_HOOKS.
+    "lose_strength": [],
     # VARKA, the Oath rework. His one op paints and Swirls enemies through
     # the shared reaction layer (`apply_current_element`, the follow-up hits,
     # `swirl_fresh_auras`), which is `apply_aura`'s channel; Knights' Roll

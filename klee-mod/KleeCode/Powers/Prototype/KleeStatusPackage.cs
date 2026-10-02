@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
 using KleeMod.Elements;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -42,6 +44,38 @@ public static class KleeStatusPackage
         if (player == null) return new List<CardModel>();
         var hand = PileType.Hand.GetPile(player);
         return hand?.Cards.Where(IsStatus).ToList() ?? new List<CardModel>();
+    }
+
+    /// <summary>How many statuses are in the hand of
+    /// <paramref name="owner"/>'s player. PURE; the gate Kitchen Alchemy's
+    /// generated <c>IsPlayable</c> reads.</summary>
+    public static int StatusesInHand(Creature? owner) =>
+        HandStatuses(owner?.Player).Count;
+
+    /// <summary>DEFENCE IN THE STATUS PILE (2026-10-01), Kitchen Alchemy:
+    /// "Exhaust a status in your hand." ONE status. With one held it goes;
+    /// with several the player chooses (<c>CardSelectCmd.FromHand</c> of one,
+    /// the base game's exhaust prompt, offering statuses only). None held,
+    /// nothing happens: the card's own gate refuses that play. Sim twin:
+    /// <c>klee_overhaul.exhaust_a_status</c>.</summary>
+    public static async Task<int> ExhaustAStatus(
+        PlayerChoiceContext choiceContext, Player player, CardModel source)
+    {
+        var held = HandStatuses(player);
+        if (held.Count == 0) return 0;
+        var victim = held[0];
+        if (held.Count > 1)
+        {
+            var picked = (await CardSelectCmd.FromHand(
+                choiceContext, player,
+                new CardSelectorPrefs(
+                    CardSelectorPrefs.ExhaustSelectionPrompt, 1),
+                IsStatus, source)).ToList();
+            if (picked.Count == 0) return 0;
+            victim = picked[0];
+        }
+        await CardCmd.Exhaust(choiceContext, victim);
+        return 1;
     }
 
     /// <summary>Klee Can Explain!: "Transform every status in your hand into

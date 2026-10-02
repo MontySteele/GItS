@@ -270,7 +270,7 @@ public class BaseBasicsTests
 
             // Her own Attack, which declares Pyro through the codegen.
             Assert.Equal(Element.Pyro, CatalystCadence.PrintedElement(
-                new ProtoKoFishFlavoredBait(), seat));
+                new ProtoKoForbiddenFun(), seat));
 
             // AND THE FALLBACK IS STILL THERE for a card this mod authored
             // that names nothing: the Ancient is a `CustomCardModel`, so the

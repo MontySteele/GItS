@@ -5634,3 +5634,47 @@ Fontaine rework is its own paper." Built in legacy cleanup stage 4.
 - The shipped C# emitter's prototype-surface differences carry over unchanged
   (the arm keyword-tip wrapper and the front-folded damage var); nothing on a
   face or in a body moved.
+
+## Klee defence in the status pile, 2026-10-01
+
+The status package paper's sec.5, ruled: [USER] "Ok Klee - I'd say we go for
+option 1 and add the defensive utility into her status pile, which gives some
+incentive for players to engage with it. We can give a mix of weak,
+high-block cards (already present) and perhaps an alchemy-flavored Strength
+reduction?" Built in both engines. The pool stays **78 (24 / 33 / 21)**.
+
+**In (three rows, appended to `C.KLEE_STATUS_PACKAGE_IDS`, LAST in her pool).**
+Up in Smoke! (Skill 1, Common: 2 [3] Weak to ALL, a Dazed), Behind Jean's
+Desk (Skill 1, Uncommon: 14 [18] Block, a Confiscated), Kitchen Alchemy
+(Skill 1, Uncommon, Exhaust: exhaust a status in hand, ALL enemies lose 2 [3]
+Strength).
+
+**Out (three rows).** Fish-Flavored Bait (Common), Nova Burst
+(`proto_ko_big_bounce`) and Spinning Sparkler (Uncommon): out of the sheet,
+`C.KLEE_OVERHAUL_POOL_IDS` and `KleeOverhaulRoster.Slice()`; painted art
+`KNOWN_STALE`; pins that tested only a cut card removed; engine pieces left
+registered (BACKLOG).
+
+**Readings:**
+
+1. *Kitchen Alchemy's gate.* Unplayable with no status in hand, through the
+   card's own `IsPlayable` (`KleeStatusPackage.StatusesInHand`), with the
+   reason "no status in your hand" on `IUnplayableReasonCard`. Derived from
+   the `exhaust_a_status` op (`gen_klee_cards.card_needs_a_status`, sim
+   `klee_overhaul.refuses_for_no_status` in `combat.card_playable`).
+2. *Which status.* One; with several the player chooses
+   (`CardSelectCmd.FromHand` of one, the base exhaust prompt, statuses only).
+   The sim's pilot takes a Confiscated first, else the first status held.
+3. *The Strength loss* is permanent: Malaise's `PowerCmd.Apply<StrengthPower>`
+   at minus N on every hittable enemy (new op `lose_strength`, ALL enemies
+   only; sim `effects._op_lose_strength`, negative `strength` on the enemy).
+   Upgrade key `strength_loss`, the `StrengthLoss` var.
+4. *Up in Smoke!'s face.* A name-matched power delta (`weak: +1`) on a row
+   with its own `description:` now swaps the printed number for
+   `{PowerAmount:diff()}` (`_authored_face_numbers`); before, only
+   `power_amount` did. No other generated card changed.
+5. *Drafter prices.* `exhaust_a_status` and `lose_strength` are priced ZERO in
+   `tier05.draft`, the arm's other verbs' decision; no `DRAFTER_VERSION` bump.
+
+Pins: `tier0/tests/test_klee_status_package.py`,
+`KleeTests/Prototype/KleeStatusPackageTests.cs`. Art: placeholders.

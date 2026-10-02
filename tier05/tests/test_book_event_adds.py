@@ -36,8 +36,16 @@ def _starter_deck():
     return list(loader._character_index()[CHAR]["starting_deck"])
 
 
-def _resolve(opt, st, seed=3):
-    events.resolve(random.Random(seed), {"id": "test_event"}, opt, st)
+def _resolve(opt, st, seed=3, policy=None):
+    events.resolve(random.Random(seed), {"id": "test_event"}, opt, st,
+                   policy=policy)
+
+
+def _take_first(_rng, _deck, offers, _arch):
+    """A drafter that always picks. The screens' tests are about the TALLY,
+    and the stock drafter may skip a seeded screen whose offers it prices at
+    zero (the Klee arm's verbs), which moved when her pool did (2026-10-01)."""
+    return offers[0]
 
 
 # --- the door: every event add site feeds it ------------------------------
@@ -62,13 +70,13 @@ def test_random_card_counts_each_body():
 
 def test_card_reward_counts_the_pick():
     st = _state()
-    _resolve({"label": "x", "card_reward": 3}, st)
+    _resolve({"label": "x", "card_reward": 3}, st, policy=_take_first)
     assert st.cards_added == 1
 
 
 def test_card_screens_counts_one_pick_per_screen():
     st = _state()
-    _resolve({"label": "x", "card_screens": 2}, st)
+    _resolve({"label": "x", "card_screens": 2}, st, policy=_take_first)
     assert st.cards_added == 2
 
 

@@ -355,13 +355,13 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
                 "proto_ko_catalytic_converter"):
         assert cut not in ids, cut
     assert {"proto_ko_hair_trigger", "proto_ko_explosive_frags",
-            "proto_ko_where_did_i_put_it",
-            "proto_ko_big_bounce"} <= set(ids)
-    # THE POOL EXPANSION's thirty (R276), less the status package's two cuts,
-    # by name and for the same reason, then the status package's eight.
-    assert list(ids[-36:-8]) == [
+            "proto_ko_where_did_i_put_it"} <= set(ids)
+    # THE POOL EXPANSION's thirty (R276), less the status package's two cuts
+    # and Spinning Sparkler (the status pile's defence), by name and for the
+    # same reason, then the status package's eleven.
+    assert list(ids[-38:-11]) == [
         "proto_ko_hiding_spot", "proto_ko_playdate",
-        "proto_ko_jumpy_dumpty_mk_iii", "proto_ko_spinning_sparkler",
+        "proto_ko_jumpy_dumpty_mk_iii",
         "proto_ko_mine_all_mine", "proto_ko_team_effort",
         "proto_ko_one_more_charge",
         "proto_ko_sit_tight", "proto_ko_treasure_map",
@@ -381,7 +381,12 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
                 "proto_ko_careful_now", "proto_ko_split_charge",
                 "proto_ko_fish_fry", "proto_ko_friendship_bracelet"):
         assert cut not in ids, cut
-    assert ids[-8:] == C.KLEE_STATUS_PACKAGE_IDS
+    # DEFENCE IN THE STATUS PILE (2026-10-01): three more cut, three more
+    # arrived, still last.
+    for cut in ("proto_ko_fish_flavored_bait", "proto_ko_big_bounce",
+                "proto_ko_spinning_sparkler"):
+        assert cut not in ids, cut
+    assert ids[-11:] == C.KLEE_STATUS_PACKAGE_IDS
 
 
 def test_the_numbers_are_the_briefs_placeholders():
@@ -453,10 +458,10 @@ def test_a_base_strike_in_her_hand_applies_nothing(overhaul):
 
     # AND HER OWN ATTACK IS UNMOVED, which is the whole point of the exemption
     # being about the base game's card rather than about her cadence.
-    bait = next(c for c in loader.prototype_cards()
-                if c.id == "proto_ko_fish_flavored_bait")
-    assert bait.element == "none"
-    assert fx_mod._element_for(state, bait.effects[0], bait) == "pyro"
+    fun = next(c for c in loader.prototype_cards()
+               if c.id == "proto_ko_forbidden_fun")
+    assert fun.element == "none"
+    assert fx_mod._element_for(state, fun.effects[0], fun) == "pyro"
 
 
 def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):

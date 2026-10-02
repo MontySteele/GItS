@@ -8,6 +8,7 @@ using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -46,21 +47,26 @@ public class KleeStatusPackageTests
         "ProtoKoForbiddenFun", "ProtoKoItWasntMe", "ProtoKoLisasTreats",
         "ProtoKoRedKnight", "ProtoKoFindersKeepers", "ProtoKoKleeCanExplain",
         "ProtoKoDamageReport", "ProtoKoSolitaryConfinement",
+        // Defence in the status pile (2026-10-01, the paper's sec.5).
+        "ProtoKoUpInSmoke", "ProtoKoBehindJeansDesk", "ProtoKoKitchenAlchemy",
     };
 
     [Fact]
-    public void The_offer_is_seventy_eight_with_the_eight_last_and_the_eight_gone()
+    public void The_offer_is_seventy_eight_with_the_package_last_and_the_cuts_gone()
     {
         var slice = Seq("KleeOverhaulRoster", "Slice")
             .Where(c => c.StartsWith("ModelDb.Card", StringComparison.Ordinal))
             .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
             .ToList();
         Assert.Equal(78, slice.Count);
-        Assert.Equal(Package, slice.Skip(70).ToArray());
+        Assert.Equal(Package, slice.Skip(67).ToArray());
         foreach (var gone in new[] { "PocketFireworks", "RapidFire",
                                      "FlameDance", "DodocoCover", "CarefulNow",
                                      "SplitCharge", "FishFry",
-                                     "FriendshipBracelet" })
+                                     "FriendshipBracelet",
+                                     // Defence in the status pile.
+                                     "FishFlavoredBait", "BigBounce",
+                                     "SpinningSparkler" })
         {
             Assert.DoesNotContain(slice, c => c == "ProtoKo" + gone);
             Assert.Null(typeof(ProtoKoPop).Assembly.GetType(
@@ -84,6 +90,9 @@ public class KleeStatusPackageTests
             (new ProtoKoDamageReport(), CardType.Power, 1, CardRarity.Rare),
             (new ProtoKoSolitaryConfinement(), CardType.Power, 1, CardRarity.Rare),
             (new ProtoMcAlbedoDustOfPurification(), CardType.Skill, 1, CardRarity.Rare),
+            (new ProtoKoUpInSmoke(), CardType.Skill, 1, CardRarity.Common),
+            (new ProtoKoBehindJeansDesk(), CardType.Skill, 1, CardRarity.Uncommon),
+            (new ProtoKoKitchenAlchemy(), CardType.Skill, 1, CardRarity.Uncommon),
         };
         foreach (var (card, type, cost, rarity) in shapes)
         {
@@ -183,5 +192,135 @@ public class KleeStatusPackageTests
                         c => c.Contains("Dazed"));
         Assert.Contains("Pop!", Face(new ProtoKoKleeCanExplain()));
         Assert.Contains("[gold]Confiscated[/gold]", Face(new ProtoKoSolitaryConfinement()));
+    }
+
+    // ---- defence in the status pile (2026-10-01, the paper's sec.5) ------
+    //
+    // [USER]: "Ok Klee - I'd say we go for option 1 and add the defensive
+    // utility into her status pile, which gives some incentive for players to
+    // engage with it. We can give a mix of weak, high-block cards (already
+    // present) and perhaps an alchemy-flavored Strength reduction?"
+
+    private static string Source(string type)
+    {
+        var repo = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
+        while (repo != null && !System.IO.Directory.Exists(
+                   System.IO.Path.Combine(repo.FullName, "klee-mod")))
+        {
+            repo = repo.Parent;
+        }
+        Assert.NotNull(repo);
+        return System.IO.File.ReadAllText(System.IO.Path.Combine(
+            repo!.FullName, "klee-mod", "KleeCode", "Cards", "Prototype",
+            "Generated", type + ".cs"));
+    }
+
+    private static bool Playable(CardModel card) =>
+        (bool)typeof(CardModel)
+            .GetProperty("IsPlayable", HeadlessGame.All)!
+            .GetValue(card)!;
+
+    private static List<CardModel> Hand(Seat seat) =>
+        (List<CardModel>)typeof(CardPile)
+            .GetField("_cards", HeadlessGame.All)!
+            .GetValue(PileType.Hand.GetPile(seat.Player)!)!;
+
+    [Fact]
+    public void The_defence_rows_numbers_and_their_upgrades()
+    {
+        Assert.Equal((2m, 3m), (new ProtoKoUpInSmoke().DynamicVars["PowerAmount"].BaseValue,
+                                Upgraded<ProtoKoUpInSmoke>().DynamicVars["PowerAmount"].BaseValue));
+        Assert.Equal((14m, 18m), (new ProtoKoBehindJeansDesk().DynamicVars.Block.BaseValue,
+                                  Upgraded<ProtoKoBehindJeansDesk>().DynamicVars.Block.BaseValue));
+        Assert.Equal((2m, 3m), (new ProtoKoKitchenAlchemy().DynamicVars["StrengthLoss"].BaseValue,
+                                Upgraded<ProtoKoKitchenAlchemy>().DynamicVars["StrengthLoss"].BaseValue));
+        Assert.Contains(CardKeyword.Exhaust, new ProtoKoKitchenAlchemy().Keywords);
+        Assert.Equal(TargetType.AllEnemies, new ProtoKoUpInSmoke().TargetType);
+        Assert.Equal(TargetType.AllEnemies, new ProtoKoKitchenAlchemy().TargetType);
+        Assert.Equal("Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. "
+                     + "Shuffle a [gold]Dazed[/gold] into your draw pile.",
+                     Face(new ProtoKoUpInSmoke()));
+        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. "
+                     + "Add a [gold]Confiscated[/gold] to your draw pile.",
+                     Face(new ProtoKoBehindJeansDesk()));
+        Assert.Equal("Exhaust a status in your hand. ALL enemies lose "
+                     + "{StrengthLoss:diff()} [gold]Strength[/gold].",
+                     Face(new ProtoKoKitchenAlchemy()));
+    }
+
+    [Fact]
+    public void Up_in_smoke_weakens_all_and_shuffles_a_dazed()
+    {
+        var play = Seq("ProtoKoUpInSmoke", "OnPlay");
+        Assert.Contains(play, c => c.Contains("PowerCmd.Apply<WeakPower>"));
+        Assert.Contains(play, c => c.Contains("Dazed"));
+        Assert.Contains(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
+        Assert.DoesNotContain(play, c => c.Contains("Confiscated"));
+        var source = Source("ProtoKoUpInSmoke");
+        Assert.Contains("CombatState!.HittableEnemies", source);
+        Assert.Contains("PileType.Draw, Owner, CardPilePosition.Random", source);
+    }
+
+    [Fact]
+    public void Behind_jeans_desk_blocks_and_adds_a_confiscated()
+    {
+        var play = Seq("ProtoKoBehindJeansDesk", "OnPlay");
+        Assert.Contains(play, c => c.Contains("CreatureCmd.GainBlock"));
+        Assert.Contains(play, c => c.Contains("Confiscated"));
+        Assert.Contains(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
+        Assert.DoesNotContain(play, c => c.Contains("Dazed"));
+        Assert.Contains("PileType.Draw", Source("ProtoKoBehindJeansDesk"));
+    }
+
+    [Fact]
+    public void Kitchen_alchemy_exhausts_one_chosen_status_and_takes_strength_from_all()
+    {
+        // STRUCTURAL: the play needs a live combat. One status exhausted,
+        // through the base game's hand chooser when several are held, then
+        // Malaise's own call -- StrengthPower at MINUS the printed number, a
+        // permanent loss -- on every hittable enemy.
+        var play = Seq("ProtoKoKitchenAlchemy", "OnPlay");
+        var exhaust = play.FindIndex(c => c.Contains("KleeStatusPackage.ExhaustAStatus"));
+        var loss = play.FindIndex(c => c.Contains("PowerCmd.Apply<StrengthPower>"));
+        Assert.True(exhaust >= 0 && loss > exhaust);
+        Assert.DoesNotContain(play, c => c.Contains("TemporaryStrength"));
+        var source = Source("ProtoKoKitchenAlchemy");
+        Assert.Contains("foreach (var weakened in CombatState!.HittableEnemies.ToList())", source);
+        Assert.Contains("weakened, -DynamicVars[\"StrengthLoss\"].IntValue", source);
+
+        var chooser = Seq("KleeStatusPackage", "ExhaustAStatus");
+        var pick = chooser.FindIndex(c => c.Contains("CardSelectCmd.FromHand"));
+        var gone = chooser.FindIndex(c => c.Contains("CardCmd.Exhaust"));
+        Assert.True(pick >= 0 && gone > pick);
+    }
+
+    [Fact]
+    public void Kitchen_alchemy_is_unplayable_with_no_status_in_hand()
+    {
+        var seat = Seat.Klee().WithCombatState();
+        var card = new ProtoKoKitchenAlchemy();
+        Seat.Set(card, "IsMutable", true);
+        Seat.Force(card, "Owner", seat.Player);
+        var hand = Hand(seat);
+
+        Assert.Equal(0, KleeStatusPackage.StatusesInHand(seat.Creature));
+        Assert.False(Playable(card));
+        Assert.Equal("no status in your hand",
+                     ((IUnplayableReasonCard)card).UnplayableReason);
+
+        hand.Add(new ProtoKoPop());                     // not a status
+        Assert.False(Playable(card));
+
+        hand.Add(new MegaCrit.Sts2.Core.Models.Cards.Dazed());
+        Assert.Equal(1, KleeStatusPackage.StatusesInHand(seat.Creature));
+        Assert.True(Playable(card));
+        Assert.Null(((IUnplayableReasonCard)card).UnplayableReason);
+
+        hand.Add(new Confiscated());                    // Status rarity counts
+        Assert.Equal(2, KleeStatusPackage.StatusesInHand(seat.Creature));
+
+        // The other two defence rows carry no gate.
+        Assert.False(new ProtoKoUpInSmoke() is IUnplayableReasonCard);
+        Assert.False(new ProtoKoBehindJeansDesk() is IUnplayableReasonCard);
     }
 }

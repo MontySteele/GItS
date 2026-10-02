@@ -752,7 +752,11 @@ KLEE_OVERHAUL_OPS = frozenset((
     "add_random_companion", "grant_kapow_each_turn",
     # THE STATUS PACKAGE's two (2026-10-01): Klee Can Explain!'s transform and
     # Albedo -- Dust of Purification's exhaust-and-grow. Same decision.
-    "transform_statuses_into", "exhaust_statuses_grow_largest"))
+    "transform_statuses_into", "exhaust_statuses_grow_largest",
+    # DEFENCE IN THE STATUS PILE (2026-10-01): Kitchen Alchemy's two. Same
+    # decision; `lose_strength` resolves off the arm too, but only her
+    # prototype row prints it, so no drafted number moves.
+    "exhaust_a_status", "lose_strength"))
 
 #: VARKA's two verbs (the Oath rework, review/active/varka-paper-kit-
 #: 2026-09-28.md): `varka` (one kind per Oath rule, `tier0/engine/varka_oath`)
@@ -2544,7 +2548,8 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "fetch_from_discard", "add_random_companion",
                   "grant_kapow_each_turn",
                   "transform_statuses_into",
-                  "exhaust_statuses_grow_largest")},
+                  "exhaust_statuses_grow_largest",
+                  "exhaust_a_status", "lose_strength")},
     # --- VARKA, the Oath rework (varka_oath, Varka seats only) ---
     **{op: "ZERO: VARKA's Oath verbs resolve in tier0 only for a Varka seat, "
             "and no pool offers a proto_vk_ row to this "

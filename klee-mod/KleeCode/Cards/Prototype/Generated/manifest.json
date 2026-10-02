@@ -184,8 +184,8 @@
     "proto_ko_all_of_my_treasures",
     "proto_ko_ammo_scavenging",
     "proto_ko_bang_bang",
+    "proto_ko_behind_jeans_desk",
     "proto_ko_big_badda_boom",
-    "proto_ko_big_bounce",
     "proto_ko_blast_shield",
     "proto_ko_blazing_delight",
     "proto_ko_bombs_away",
@@ -207,7 +207,6 @@
     "proto_ko_finders_keepers",
     "proto_ko_fireworks_finale",
     "proto_ko_fish_blasting",
-    "proto_ko_fish_flavored_bait",
     "proto_ko_flash_point",
     "proto_ko_forbidden_fun",
     "proto_ko_grounded",
@@ -219,6 +218,7 @@
     "proto_ko_jumpy_dumpty",
     "proto_ko_jumpy_dumpty_mk_iii",
     "proto_ko_kapow",
+    "proto_ko_kitchen_alchemy",
     "proto_ko_klee_can_explain",
     "proto_ko_knights_of_favonius",
     "proto_ko_lisas_treats",
@@ -249,13 +249,13 @@
     "proto_ko_sparkling_burst",
     "proto_ko_sparks_for_everyone",
     "proto_ko_sparks_n_splash",
-    "proto_ko_spinning_sparkler",
     "proto_ko_stoke_the_fuse",
     "proto_ko_tag_along",
     "proto_ko_team_effort",
     "proto_ko_the_big_one",
     "proto_ko_tinder_toss",
     "proto_ko_treasure_map",
+    "proto_ko_up_in_smoke",
     "proto_ko_vermillion_pact",
     "proto_ko_wait_for_it",
     "proto_ko_where_did_i_put_it",
@@ -616,8 +616,8 @@
     "proto_ko_all_of_my_treasures": "klee",
     "proto_ko_ammo_scavenging": "klee",
     "proto_ko_bang_bang": "klee",
+    "proto_ko_behind_jeans_desk": "klee",
     "proto_ko_big_badda_boom": "klee",
-    "proto_ko_big_bounce": "klee",
     "proto_ko_blast_shield": "klee",
     "proto_ko_blazing_delight": "klee",
     "proto_ko_bombs_away": "klee",
@@ -639,7 +639,6 @@
     "proto_ko_finders_keepers": "klee",
     "proto_ko_fireworks_finale": "klee",
     "proto_ko_fish_blasting": "klee",
-    "proto_ko_fish_flavored_bait": "klee",
     "proto_ko_flash_point": "klee",
     "proto_ko_forbidden_fun": "klee",
     "proto_ko_grounded": "klee",
@@ -651,6 +650,7 @@
     "proto_ko_jumpy_dumpty": "klee",
     "proto_ko_jumpy_dumpty_mk_iii": "klee",
     "proto_ko_kapow": "klee",
+    "proto_ko_kitchen_alchemy": "klee",
     "proto_ko_klee_can_explain": "klee",
     "proto_ko_knights_of_favonius": "klee",
     "proto_ko_lisas_treats": "klee",
@@ -681,13 +681,13 @@
     "proto_ko_sparkling_burst": "klee",
     "proto_ko_sparks_for_everyone": "klee",
     "proto_ko_sparks_n_splash": "klee",
-    "proto_ko_spinning_sparkler": "klee",
     "proto_ko_stoke_the_fuse": "klee",
     "proto_ko_tag_along": "klee",
     "proto_ko_team_effort": "klee",
     "proto_ko_the_big_one": "klee",
     "proto_ko_tinder_toss": "klee",
     "proto_ko_treasure_map": "klee",
+    "proto_ko_up_in_smoke": "klee",
     "proto_ko_vermillion_pact": "klee",
     "proto_ko_wait_for_it": "klee",
     "proto_ko_where_did_i_put_it": "klee",
@@ -1466,11 +1466,11 @@
       "damage": 3,
       "bomb_size": 2
     },
+    "proto_ko_behind_jeans_desk": {
+      "block": 4
+    },
     "proto_ko_big_badda_boom": {
       "damage": 4
-    },
-    "proto_ko_big_bounce": {
-      "damage": 3
     },
     "proto_ko_blast_shield": {
       "block": 2
@@ -1538,10 +1538,6 @@
     "proto_ko_fish_blasting": {
       "damage": 3
     },
-    "proto_ko_fish_flavored_bait": {
-      "damage": 3,
-      "bomb_size": 2
-    },
     "proto_ko_flash_point": {
       "damage": 3
     },
@@ -1577,6 +1573,9 @@
     },
     "proto_ko_kapow": {
       "damage": 3
+    },
+    "proto_ko_kitchen_alchemy": {
+      "strength_loss": 1
     },
     "proto_ko_klee_can_explain": {
       "block": 2
@@ -1670,10 +1669,6 @@
     "proto_ko_sparks_n_splash": {
       "innate": true
     },
-    "proto_ko_spinning_sparkler": {
-      "damage": 1,
-      "grow": 1
-    },
     "proto_ko_stoke_the_fuse": {
       "grow": 2
     },
@@ -1691,6 +1686,9 @@
     },
     "proto_ko_treasure_map": {
       "cost": -1
+    },
+    "proto_ko_up_in_smoke": {
+      "weak": 1
     },
     "proto_ko_vermillion_pact": {
       "cost": -1
