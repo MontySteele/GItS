@@ -9020,12 +9020,42 @@ _R12_SMITH = (
      "Deal 7 damage. Spend 3: deal 17 instead."),
     ("KLEEMOD-PROTO_FS_SALON_DEBUT",
      "Summon a random performer who is not on stage."),
-    ("KLEEMOD-AN_INVITATION",
-     "Add 1 random Common Companion card to your hand."),
+    # Legacy cleanup stage 6: the shipped An Invitation left with its sheet;
+    # Alice's Detonator is the current row whose upgrade swaps one arm.
+    ("KLEEMOD-PROTO_KO_ALICES_DETONATOR",
+     "At the start of your turn, add a Ka-pow! to your hand."),
     ("KLEEMOD-PROTO_MC_FISCHL_OZ",
      "At the end of your turn, Oz deals 5 Electro damage to a random "
      "enemy."),
 )
+
+
+def test_the_upgraded_face_moves_the_number_the_delta_names():
+    """`CalculationBase` is the input to a `Calculated*` var, so the face
+    prints one name and `OnUpgrade` moves another; a face that prints TWO
+    numbers off two bases of its own moves both (`EB-624`). A plural arm
+    follows the number it is about rather than being copied."""
+    assert qa_packet.upgraded_face(
+        "KLEEMOD-PROTO_KK_UNDERTOW",
+        "Deal 7 damage. If the enemy has a debuff, deal 10 instead.") == (
+        "Deal 10 damage. If the enemy has a debuff, deal 13 instead.")
+    assert qa_packet.upgraded_face(
+        "KLEEMOD-PROTO_MF_LYNETTE_BOX_TRICK", "Draw 2 cards.") == (
+        "Draw 3 cards.")
+
+
+def test_the_two_arm_swap_writes_the_upgraded_arm():
+    """Three of the four, and no arithmetic in any of them: the pattern reads
+    the UNUPGRADED arm off the printed face and the render writes the other.
+    An EMPTY unupgraded arm takes the space in front of it with it, and the
+    added draw resolves on play, so the clause LEADS (`EB-571`)."""
+    assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
+        "Deal 10 damage. Spend 3: deal 21 instead.")
+    assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
+        "At the start of your turn, add an upgraded Ka-pow! to your hand.")
+    assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
+        "Draw 1 card. At the end of your turn, Oz deals 5 Electro damage to "
+        "a random enemy.")
 
 
 def test_every_one_of_the_four_now_prints_a_face_or_a_reason():
@@ -12438,34 +12468,57 @@ def test_a_board_with_no_multiplier_prints_no_fold_line():
 # ---------- EB-700: the written face beside the one the board is printing ----
 
 def _folded_hand_state(printed: str, upgraded: bool = False) -> dict:
-    """A combat whose hand holds one Slack Water at a given printed face."""
+    """A combat whose hand holds one Coral Bulwark (written `Gain 8 Block`,
+    +3 upgraded) at a given printed face. It was the shipped Slack Water until
+    legacy cleanup stage 6 deleted that sheet."""
     state = copy.deepcopy(combat_state())
     state["player"]["hand"] = [
-        {"id": "KLEEMOD-SLACK_WATER", "name": "Slack Water", "type": "Skill",
-         "cost": "1", "can_play": True, "index": 0, "target_type": "Self",
-         "is_upgraded": upgraded, "keywords": [], "description": printed}]
+        {"id": "KLEEMOD-PROTO_KK_CORAL_BULWARK", "name": "Coral Bulwark",
+         "type": "Skill", "cost": "1", "can_play": True, "index": 0,
+         "target_type": "Self", "is_upgraded": upgraded, "keywords": [],
+         "description": printed}]
     return state
+
+
+def test_a_folded_face_prints_the_written_one_beside_it():
+    """`EB-700`. Seen to FAIL: the face printed only the current number, so a
+    seat "cannot tell a modified number from a base one and reconstructs the
+    base from HP". Coral Bulwark is written `Gain 8 Block`; a board printing 6
+    now says both."""
+    page = blindplay.observe(_folded_hand_state("Gain 6 Block."))
+    assert "Gain 6 Block." in page
+    assert "Written: Gain 8 Block." in page
+    assert "the difference is the board's" in page
+
+
+def test_an_upgraded_cards_written_face_is_the_upgraded_one():
+    """The card in front of the player is the upgraded one, so its written
+    number is the canonical value plus its own OnUpgrade delta -- 8 + 3."""
+    page = blindplay.observe(_folded_hand_state("Gain 9 Block.",
+                                                upgraded=True))
+    assert "Written: Gain 11 Block." in page
 
 
 def test_an_unfolded_face_prints_no_written_line():
     """The gate is a difference: a board with nothing folding into the card
     prints the face it always did and no second sentence."""
     assert "Written:" not in blindplay.observe(_folded_hand_state(
-        "Gain 4 Block. At the start of your next turn, gain 4 Block."))
+        "Gain 8 Block."))
 
 
 def test_a_face_this_build_has_reworded_prints_nothing_rather_than_a_guess():
     """The template is matched against the WIRE's own face; a sentence this
     repo does not recognise gets silence, never a rebuilt number."""
+    # The match is a SEARCH by design (text around the card's own sentence is
+    # kept), so the reworded face here carries none of Coral Bulwark's.
     assert "Written:" not in blindplay.observe(_folded_hand_state(
-        "Something this card has never said. Gain 3 Block."))
+        "Something this card has never said. Shield 3."))
 
 
 def test_the_written_face_is_read_by_id_and_not_by_title():
     """`EB-267`'s rule, one field over: a prototype row may print a shipped
     card's name at different numbers, so an unknown id answers nothing."""
-    state = _folded_hand_state(
-        "Gain 3 Block. At the start of your next turn, gain 4 Block.")
+    state = _folded_hand_state("Gain 6 Block.")
     state["player"]["hand"][0]["id"] = "KLEEMOD-NO_SUCH_CARD"
     assert "Written:" not in blindplay.observe(state)
 
