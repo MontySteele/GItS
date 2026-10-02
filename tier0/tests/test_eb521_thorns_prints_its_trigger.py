@@ -73,17 +73,6 @@ def test_the_live_line_keeps_the_amount_hole():
     assert "[blue]{Amount}[/blue]" in _row("THORNS_POWER.smartDescription")
 
 
-def test_the_rows_are_arm_scoped_like_the_vulnerable_row_beside_them():
-    """A release build does not police the base game's English -- the
-    self-check says so in as many words -- and this row sits inside the same
-    quarantine `EB-481`'s does."""
-    src = MOD.read_text(encoding="utf-8")
-    start = src.index('["THORNS_POWER.description"]')
-
-    assert src[:start].rindex("#if PROTOTYPE_CARDS") > src[:start].rindex(
-        "#endif")
-
-
 # ---- and the trigger the words are read off -------------------------------
 
 def test_a_powered_hit_is_thorned_whatever_the_card_that_dealt_it():

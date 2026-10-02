@@ -91,8 +91,6 @@
     "proto_fs_warm_reception",
     "proto_fs_warmup_act",
     "proto_fs_witness_stand",
-    "proto_itto_superlative_superstrength_either",
-    "proto_itto_superlative_superstrength_priced",
     "proto_kk_abyssal_salvage",
     "proto_kk_ambush",
     "proto_kk_at_waters_edge",
@@ -263,7 +261,6 @@
     "proto_ko_where_did_i_put_it",
     "proto_ko_windblume_fireworks",
     "proto_ko_witches_circle",
-    "proto_kurages_oath_memory",
     "proto_mc_albedo_dust_of_purification",
     "proto_mc_albedo_solar_isotoma",
     "proto_mc_amber_explosive_puppet",
@@ -355,15 +352,6 @@
     "proto_mi_thoma_crimson_ooyoroi",
     "proto_mi_yae_sesshou_sakura",
     "proto_mi_yoimiya_aurous_blaze",
-    "proto_muster_subsidy_funnel",
-    "proto_shinobu_sanctifying_ring_either",
-    "proto_shinobu_sanctifying_ring_priced",
-    "proto_spark_burst_conversion",
-    "proto_spark_mode_bombs",
-    "proto_spark_priced_draw",
-    "proto_spark_priced_strike",
-    "proto_thoma_crimson_ooyoroi_either",
-    "proto_thoma_crimson_ooyoroi_priced",
     "proto_vk_absolute_zero",
     "proto_vk_amber_baron_bunny",
     "proto_vk_amber_fiery_rain",
@@ -535,8 +523,6 @@
     "proto_fs_warm_reception": "furina",
     "proto_fs_warmup_act": "furina",
     "proto_fs_witness_stand": "furina",
-    "proto_itto_superlative_superstrength_either": "klee",
-    "proto_itto_superlative_superstrength_priced": "klee",
     "proto_kk_abyssal_salvage": "kokomi",
     "proto_kk_ambush": "kokomi",
     "proto_kk_at_waters_edge": "kokomi",
@@ -707,7 +693,6 @@
     "proto_ko_where_did_i_put_it": "klee",
     "proto_ko_windblume_fireworks": "klee",
     "proto_ko_witches_circle": "klee",
-    "proto_kurages_oath_memory": "kokomi",
     "proto_mc_albedo_dust_of_purification": "klee",
     "proto_mc_albedo_solar_isotoma": "klee",
     "proto_mc_amber_explosive_puppet": "klee",
@@ -799,15 +784,6 @@
     "proto_mi_thoma_crimson_ooyoroi": "klee",
     "proto_mi_yae_sesshou_sakura": "klee",
     "proto_mi_yoimiya_aurous_blaze": "klee",
-    "proto_muster_subsidy_funnel": "kokomi",
-    "proto_shinobu_sanctifying_ring_either": "klee",
-    "proto_shinobu_sanctifying_ring_priced": "klee",
-    "proto_spark_burst_conversion": "klee",
-    "proto_spark_mode_bombs": "klee",
-    "proto_spark_priced_draw": "klee",
-    "proto_spark_priced_strike": "klee",
-    "proto_thoma_crimson_ooyoroi_either": "klee",
-    "proto_thoma_crimson_ooyoroi_priced": "klee",
     "proto_vk_absolute_zero": "varka",
     "proto_vk_amber_baron_bunny": "varka",
     "proto_vk_amber_fiery_rain": "varka",
@@ -922,25 +898,9 @@
       "ProtoFsTidalFlourishModeA",
       "ProtoFsTidalFlourishModeB"
     ],
-    "proto_itto_superlative_superstrength_either": [
-      "ProtoIttoSuperlativeSuperstrengthEitherModeA",
-      "ProtoIttoSuperlativeSuperstrengthEitherModeB"
-    ],
     "proto_mc_durin_binary_form": [
       "ProtoMcDurinBinaryFormModeA",
       "ProtoMcDurinBinaryFormModeB"
-    ],
-    "proto_shinobu_sanctifying_ring_either": [
-      "ProtoShinobuSanctifyingRingEitherModeA",
-      "ProtoShinobuSanctifyingRingEitherModeB"
-    ],
-    "proto_spark_mode_bombs": [
-      "ProtoSparkModeBombsModeA",
-      "ProtoSparkModeBombsModeB"
-    ],
-    "proto_thoma_crimson_ooyoroi_either": [
-      "ProtoThomaCrimsonOoyoroiEitherModeA",
-      "ProtoThomaCrimsonOoyoroiEitherModeB"
     ]
   },
   "upgrades": {

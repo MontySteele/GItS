@@ -417,7 +417,6 @@ internal static class ReactionEffects
                 }
             }
 
-#if PROTOTYPE_CARDS
             // QUARANTINED (the Mondstadt companion overhaul). THE MOD COUNTS
             // REACTIONS AND BROADCASTS NONE, which is why two of the workshop's
             // cards -- Dahlia's Favonian Favor and Varka's Sturm und Drang --
@@ -438,54 +437,6 @@ internal static class ReactionEffects
             // (2026-09-29): "Whenever a reaction happens on an enemy, apply 1
             // Weak and 1 Vulnerable to it" -- any reaction, whoever caused it.
             await KokomiExpansion.OnReaction(choiceContext, target);
-#endif
-        }
-
-        // Burst economy, reaction half: +5 for EVERY named reaction --
-        // amplifiers included (the sim credits BURST_PER_REACTION whenever
-        // resolve_hit names a reaction, and Vaporize/Melt are named). This is
-        // the single funnel: AuraPower.AfterDamageReceived and
-        // BombPower.Detonate both route here, so no gain site is missed and
-        // none double-counts. Dealer-credited; Gain gates on Klee (sim:
-        // `if p.burst_max`), so a dealer-less detonation edge case no-ops
-        // harmlessly rather than crediting the wrong side.
-        if (reaction != Reaction.None && dealer != null)
-        {
-            await KleeBurstResource.Gain(
-                choiceContext, dealer, BurstConstants.PerReaction, cardSource);
-            FurinaResources.GainBurst(
-                dealer, FurinaResourceConstants.BurstPerReaction);
-            // Kokomi takes the same +5. The sim's gate is `if p.burst_max`
-            // (reactions.py), i.e. UNIVERSAL for anyone who owns a meter --
-            // not a Klee rule that Furina was granted an exception to. She is
-            // a catalyst, so every attack she plays applies Hydro and reaction
-            // income is a large share of her fill rate; leaving her off this
-            // line left the Burst reachable on paper and rare in play.
-            //
-            // `EB-327`: under KOKOMI_OVERHAUL this pays nothing, and the guard
-            // is inside GainBurst rather than written out here -- same place,
-            // same reason, as KleeBurstResource.Find's (`EB-266`). Read that
-            // header for why the arm answers "no meter" once instead of at
-            // each of four income sites.
-            KokomiResources.GainBurst(
-                dealer, KokomiConstants.BurstPerReaction);
-
-            // Catalytic Converter (R120 rename), right after the flat +5
-            // exactly as in the
-            // sim (reactions.py _react): +Amount Sparks and +Amount x 5 Burst
-            // Energy per reaction. Same funnel, so it can neither miss a
-            // reaction nor double-count one.
-            var catalytic = dealer.Powers
-                .OfType<ReactionBonusSparkEnergyPower>().FirstOrDefault()?.Amount ?? 0;
-            if (catalytic > 0)
-            {
-                await SparkPower.Gain(choiceContext, dealer, catalytic, cardSource,
-                    source: "power:catalytic_converter/reaction");
-                await KleeBurstResource.Gain(
-                    choiceContext, dealer,
-                    ReactionKitConstants.CatalyticBurstPerReaction * catalytic,
-                    cardSource);
-            }
         }
 
         switch (reaction)
@@ -562,14 +513,12 @@ internal static class ReactionEffects
                 // False on every other caller.
                 if (spreadReaction) splashTargets = new List<Creature> { target };
                 var splash = ReactionConstants.OverloadSplash;
-#if PROTOTYPE_CARDS
                 // QUARANTINED. The other half of Durin's White form: the splash
                 // IS damage a reaction deals, so it takes the same factor the
                 // amplifier takes, at the one site that computes it. Truncated
                 // like the sim's `int(C.OVERLOAD_SPLASH * mult)`.
                 splash = (int)(splash
                     * CompanionOverhaulReactions.DamageMultiplier(dealer));
-#endif
                 if (splashTargets != null)
                 {
                     foreach (var e in splashTargets)
@@ -664,7 +613,6 @@ internal static class ReactionEffects
                      $"(consumed {consumedAura}).");
         }
 
-#if PROTOTYPE_CARDS
         // VARKA (the Oath rework, sec.3): a Swirl he makes gains 1 Oath of the
         // Swirled element once per card, then pays his current element's one
         // effect. After the Swirl's own spread and flat 2. Every Swirl in the
@@ -673,7 +621,6 @@ internal static class ReactionEffects
         {
             await VarkaOath.OnSwirl(choiceContext, target, dealer, consumedAura);
         }
-#endif
     }
 
     /// <summary>
@@ -698,13 +645,11 @@ internal static class ReactionEffects
         if (bodies == null) return;
 
         var damage = ReactionConstants.SwirlDamage;
-#if PROTOTYPE_CARDS
         // Durin's White scales it for the reason it scales Overload's splash:
         // it is damage a reaction deals. Truncated like the sim's int(...).
         damage = (int)(damage * CompanionOverhaulReactions.DamageMultiplier(dealer));
         // VARKA's Converging Winds: the spread reacts where it lands.
         var converges = ConvergingWindsPower.Converges(dealer);
-#endif
         // The bodies whose flat 2 was the spread's own elemental hit.
         var reacted = new HashSet<Creature>();
 
@@ -722,22 +667,17 @@ internal static class ReactionEffects
                 && TriggerRules.SpreadOn(spread, existing.Element)
                     == TriggerRules.SpreadOutcome.Refresh)
             {
-#if PROTOTYPE_CARDS
                 // Converging Winds is unchanged: there the same element only
                 // takes the 2 (`varka_oath.converging_spread`).
                 if (converges) continue;
-#endif
                 await existing.RefreshFromSpread(choiceContext, dealer, cardSource);
                 continue;
             }
-#if PROTOTYPE_CARDS
             // VARKA's Gale Sweep: a body the sweep has still to hit keeps its
             // own fresh aura against this Swirl's spread (sec.9.6).
             if (VarkaRules.SpreadShielded(e)) continue;
-#endif
             if (existing != null)
             {
-#if PROTOTYPE_CARDS
                 // VARKA's Converging Winds (sec.5): "the spread hit is the
                 // flat 2 carrying the swirled element", and a reaction it
                 // sets off "lands on that enemy only". The aura is consumed,
@@ -760,16 +700,13 @@ internal static class ReactionEffects
                     reacted.Add(e);
                     continue;
                 }
-#endif
                 await PowerCmd.Remove(existing);
             }
             await AuraCmd.Apply(choiceContext, e, spread, dealer, cardSource);
             var fresh = false;
-#if PROTOTYPE_CARDS
             // VARKA's Downburst (the expansion, pick 3a): its copies arrive
             // fresh, so a second Anemo card can chain.
             fresh = VarkaRules.SpreadArrivesFresh(cardSource);
-#endif
             if (AuraCmd.Find(e) is { } copy) copy.Spent = !fresh;
         }
 

@@ -13,23 +13,6 @@ namespace KleeMod.Cards;
 /// </summary>
 public static class KleeKeywords
 {
-    /// <summary>
-    /// Display marker for the sheet's `skill_tag` (playtest finding, sprint of
-    /// 2026-07-20: players had no way to see which cards feed the Burst
-    /// meter). AutoKeywordPosition.After renders a gold "Elemental Skill."
-    /// line after the card text and RichKeyword gives it a hover tip; the loc
-    /// entries ship in the pck and have a DLL-side playtest fallback in
-    /// KleeMod.InjectLocStrings (key = KLEEMOD-ELEMENTAL_SKILL from the
-    /// namespace prefix + the CustomEnum name).
-    ///
-    /// DISPLAY ONLY: gameplay still reads the ISkillTagCard marker
-    /// (KleeElementalHooks), never this keyword. Codegen emits both from the
-    /// same sheet tag, and the parity lint holds hand-written cards to it.
-    /// </summary>
-    [CustomEnum("elemental_skill")]
-    [KeywordProperties(AutoKeywordPosition.After)]
-    public static CardKeyword ElementalSkill;
-
     // Elemental application badges. Unlike Bomb (which is merely referenced
     // by many cards), these are actual card properties -- so the element they
     // name is a card's PROPERTY and belongs on the face as such.
@@ -157,34 +140,6 @@ public static class KleeKeywords
     [CustomEnum("crystallize_spent_preview")]
     [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword CrystallizeSpentPreview;
-
-    // B5 (playtest-2, 2026-07-28): the salon-deploy cards used to render one
-    // boilerplate paragraph that named no member and restated the cap rules on
-    // every copy. The face now names WHO takes the stage; these carry what
-    // that member DOES, and the cap rules, so the paragraph does not have to
-    // be reprinted eight times.
-    //
-    // Auto=None: cards opt in through ExtraHoverTips, and a deploy card asks
-    // for exactly the members it deploys.
-    [CustomEnum("salon_crabaletta")]
-    [KeywordProperties(AutoKeywordPosition.None)]
-    public static CardKeyword SalonCrabaletta;
-
-    [CustomEnum("salon_usher")]
-    [KeywordProperties(AutoKeywordPosition.None)]
-    public static CardKeyword SalonUsher;
-
-    [CustomEnum("salon_chevalmarin")]
-    [KeywordProperties(AutoKeywordPosition.None)]
-    public static CardKeyword SalonChevalmarin;
-
-    public static CardKeyword SalonMemberKeyword(SalonMember member) => member switch
-    {
-        SalonMember.Crabaletta => SalonCrabaletta,
-        SalonMember.Usher => SalonUsher,
-        SalonMember.Chevalmarin => SalonChevalmarin,
-        _ => CardKeyword.None,
-    };
 
     public static CardKeyword AuraApplication(Element element) => element switch
     {

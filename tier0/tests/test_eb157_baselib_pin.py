@@ -64,13 +64,9 @@ LOCAL_PROPS = ROOT / "klee-mod" / "local.props"
 CALLED_BASELIB_TYPES: frozenset[str] = frozenset({
     "AncientDialogueUtil",     # BaseLib.Utils
     "AutoKeywordPosition",     # BaseLib.Patches.Content
-    "BasicCustomResource",     # BaseLib.Abstracts
     "CustomCardModel",         # BaseLib.Abstracts -- 327 uses, the roster
     "CustomCharacterModel",    # BaseLib.Abstracts -- the three characters
     "CustomRelicModel",        # BaseLib.Abstracts
-    "CustomResource",          # BaseLib.Abstracts -- the meters
-    "CustomResourceCost",      # BaseLib.Abstracts
-    "CustomResources",         # BaseLib.Abstracts
     "ICustomModel",            # BaseLib.Abstracts
     "ILocalizationProvider",   # BaseLib.Abstracts -- 65 uses
     "NodeFactory",             # BaseLib.Utils.NodeFactories

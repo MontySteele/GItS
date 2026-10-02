@@ -199,45 +199,6 @@ def test_the_attach_is_scoped_to_the_quarantined_surface():
         assert proto._profile_for(character).arm_keyword_tips is True
 
 
-def test_every_klee_companion_carries_the_kits_spark_rider():
-    """`EB-418`, the committed tree, retargeted by R276 pick 2. Every Companion
-    row on Klee's profile carries `ForCovenSpark`, and no other row does.
-
-    THE DENOMINATOR IS THE POINT. The trigger is keyed on the SET
-    (`effects.klee_companion_spark`, `KleeCompanionSpark`), and R276 made the
-    set "any Companion card", so the sentence has to reach every companion row
-    Klee's profile emits, or the next row added is the r11 seat's finding
-    again.
-
-    2026-09-23: UNDER THE ARM THE RIDER PRINTS NOTHING, because no Companion
-    play pays there any more; `ForCovenSpark` returns its inherited tips at
-    runtime (`HexereiReaderTests`), so the call is still emitted on every
-    row for the off-arm world this test pins.
-
-    GOROU IS THE NEGATIVE CASE, and he is a real one: he is a Personal
-    Companion of KOKOMI'S on this same sheet, and Sparks are Klee's resource
-    with no surface of Kokomi's to read them off. The sentence is scoped to the
-    kit that declared it.
-    """
-    owed, carried = set(), set()
-    for row in proto._rows():
-        if not gen.is_companion(row):
-            continue
-        cls = gen.pascal(row["id"])
-        if row.get("character") == "klee":
-            owed.add(cls)
-        path = PROTOTYPE_DIR / f"{cls}.cs"
-        if path.exists() and "ForCovenSpark" in path.read_text(encoding="utf-8"):
-            carried.add(cls)
-
-    assert owed, "no Klee Companion on the sheet is not a read"
-    assert owed == carried
-    assert "ProtoMiGorouCrystalCollapse" in {
-        gen.pascal(r["id"]) for r in proto._rows()
-        if gen.is_companion(r) and r.get("character") == "kokomi"}
-    assert "ProtoMiGorouCrystalCollapse" not in carried
-
-
 def test_no_face_prints_a_family_mark():
     """R276 pick 2 retired the Hexerei mark, and `EB-642` had retired "Klee's
     own" before it: no generated prototype face prints either, and no card
@@ -346,20 +307,6 @@ def test_a_spark_priced_row_keeps_its_tip_without_the_sentence():
     assert "ArmKeywordTips.ForSpark(" not in pop
 
 
-def test_the_sparks_arms_bomb_rows_keep_the_shipped_definition():
-    """SEEN, not asserted in the abstract: the three rows the exclusion drops
-    are the three that place a shipped Bomb, and they still carry the shipped
-    keyword and the arm's Spark tip."""
-    # `EB-750` retired `ProtoPopSpark` and `ProtoPowderChargeSpark` with the
-    # rest of the superseded Sparks pool; `ProtoSparkModeBombs` is the row of
-    # the three that still exists, and it carries the same proof.
-    for stem in ("ProtoSparkModeBombs",):
-        text = (PROTOTYPE_DIR / f"{stem}.cs").read_text(encoding="utf-8")
-        assert "includesBombRules: true" in text, stem
-        assert "ArmKeywordTips.ForBomb(" not in text, stem
-        assert "ArmKeywordTips.ForSpark(" in text, stem
-
-
 # ----------------------------------------------------------- the C# side ---
 
 def _key_const(keyword: gen.ArmKeyword) -> str:
@@ -387,12 +334,11 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
 
 # `EB-378` put ONE key in this file that titles no keyword: the Plan-element
 # rider, which is a sentence about a card rather than a definition of a word.
-# `EB-418` put the second, the Spark Klee's KIT mints on a play of one of her
-# own Personal Companions -- a rule LAW:145 keeps off the Companion's face, so
-# no word on any card can carry it. (`EB-553`'s third left with the retired
+# (`EB-418`'s Companion Spark rider left with its rule, legacy cleanup
+# stage 5; `EB-553`'s third left with the retired
 # reframe under `EB-726`.) They are named here so the count below stays a
 # real pin instead of a number somebody bumps.
-NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
+NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # `EB-575`: the fourth rider here that titles no keyword,
                     # and the first whose sentence comes and goes with the
                     # board.
@@ -704,20 +650,6 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     assert "KokomiOverhaulLaw.CasketStrike" not in casket + tips
 
 
-def test_the_tips_are_quarantined_out_of_a_release_build():
-    """The file lives where `KleeCode.csproj` removes it, and its title rows
-    are inside the same switch."""
-    assert TIPS_CS.parent.name == "Prototype"
-    mod = MOD_CS.read_text(encoding="utf-8")
-    head = mod.index("ArmKeywordTips.BombKey")
-    tail = mod.index("ArmKeywordTips.SwirlKey")
-    # The nearest switch ABOVE the rows, not the file's first one (Rally's
-    # selection prompt opens an earlier block of its own).
-    assert mod.rindex("#if PROTOTYPE_CARDS", 0, head) > mod.index(
-        "KleeCardTooltips.BurstKey")
-    assert "#endif" in mod[tail:]
-
-
 # ------------------------------------------------------- the blind page ----
 
 SET_OFF_TIP = {
@@ -923,17 +855,6 @@ def test_the_base_keys_never_collide_with_an_arm_key():
     assert not base & arm
 
 
-def test_the_base_tips_are_quarantined_out_of_a_release_build():
-    """The file lives where `KleeCode.csproj` removes it, and its title rows
-    are inside the same `#if PROTOTYPE_CARDS` switch the arm rows are."""
-    assert BASE_TIPS_CS.parent.name == "Prototype"
-    mod = MOD_CS.read_text(encoding="utf-8")
-    head = mod.index("BaseKeywordTips.VulnerableKey")
-    assert mod.rindex("#if PROTOTYPE_CARDS", 0, head) > mod.index(
-        "KleeCardTooltips.BurstKey")
-    assert "#endif" in mod[mod.index("BaseKeywordTips.DexterityKey"):]
-
-
 # ------------------------------ `EB-377`: no page names a word it defines not --
 
 _GOLD_SPAN = re.compile(r"\[gold\](.*?)\[/gold\]")
@@ -984,10 +905,8 @@ NO_GLOSSARY_ROW_OWED = {
 # proves the attach is really on a face that prints the word -- so an entry
 # here is a claim about the generated tree rather than an excuse.
 DEFINED_BY_A_CARD_TIP = {
-    "Charge": "KokomiRiderTips.ForCharge",
-    "Muster": "KokomiRiderTips.ForMuster",
-    "Burst": "KleeCardTooltips.ForBurst",
-    "Burst Energy": "KleeCardTooltips.ForBurst",
+    # (Charge, Muster, Burst and Burst Energy left with the shipped kits'
+    # meters, legacy cleanup stage 5: no current face prints them.)
     # `EB-491` (Fish Blasting). Confiscated is a STATUS CARD, not a keyword: it
     # is a card the player will hold, with its own printed face, and the rule a
     # reader wants is what that card does -- which the tip on the row that

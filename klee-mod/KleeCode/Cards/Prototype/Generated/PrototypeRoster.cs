@@ -144,8 +144,6 @@ public static class PrototypeRoster
     private static List<CardModel> BuildKlee() =>
         new()
         {
-            ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEither>(),
-            ModelDb.Card<ProtoIttoSuperlativeSuperstrengthPriced>(),
             ModelDb.Card<ProtoKoAdventureClub>(),
             ModelDb.Card<ProtoKoAftershock>(),
             ModelDb.Card<ProtoKoAlicesDetonator>(),
@@ -318,24 +316,8 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoMiThomaCrimsonOoyoroi>(),
             ModelDb.Card<ProtoMiYaeSesshouSakura>(),
             ModelDb.Card<ProtoMiYoimiyaAurousBlaze>(),
-            ModelDb.Card<ProtoShinobuSanctifyingRingEither>(),
-            ModelDb.Card<ProtoShinobuSanctifyingRingPriced>(),
-            ModelDb.Card<ProtoSparkBurstConversion>(),
-            ModelDb.Card<ProtoSparkModeBombs>(),
-            ModelDb.Card<ProtoSparkPricedDraw>(),
-            ModelDb.Card<ProtoSparkPricedStrike>(),
-            ModelDb.Card<ProtoThomaCrimsonOoyoroiEither>(),
-            ModelDb.Card<ProtoThomaCrimsonOoyoroiPriced>(),
-            ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEitherModeA>(),
-            ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEitherModeB>(),
             ModelDb.Card<ProtoMcDurinBinaryFormModeA>(),
             ModelDb.Card<ProtoMcDurinBinaryFormModeB>(),
-            ModelDb.Card<ProtoShinobuSanctifyingRingEitherModeA>(),
-            ModelDb.Card<ProtoShinobuSanctifyingRingEitherModeB>(),
-            ModelDb.Card<ProtoSparkModeBombsModeA>(),
-            ModelDb.Card<ProtoSparkModeBombsModeB>(),
-            ModelDb.Card<ProtoThomaCrimsonOoyoroiEitherModeA>(),
-            ModelDb.Card<ProtoThomaCrimsonOoyoroiEitherModeB>(),
         };
 
     private static List<CardModel> BuildKokomi() =>
@@ -426,9 +408,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkWeightOfThePlan>(),
             ModelDb.Card<ProtoKkWhatTheTokoyoReturns>(),
             ModelDb.Card<ProtoKkWhatTheTokoyoTook>(),
-            ModelDb.Card<ProtoKuragesOathMemory>(),
             ModelDb.Card<ProtoMiGorouCrystalCollapse>(),
-            ModelDb.Card<ProtoMusterSubsidyFunnel>(),
         };
 
     private static List<CardModel> BuildVarka() =>

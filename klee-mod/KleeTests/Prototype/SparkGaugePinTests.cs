@@ -49,19 +49,7 @@ public class SparkGaugePinTests
     /// put it back. The arm is one process-wide static (see
     /// <see cref="KleeOverhaulArm"/>), which is why this file is in that
     /// collection.</summary>
-    private static void WithArm(bool enabled, Action body)
-    {
-        var was = KleeOverhaul.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = enabled;
-            body();
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = was;
-        }
-    }
+    private static void WithArm(Action body) => body();
 
     // --- who gets the gauge ----------------------------------------------
 
@@ -80,7 +68,7 @@ public class SparkGaugePinTests
         Assert.False(furina.Player.Character is IKleeCharacter);
         Assert.False(kokomi.Player.Character is IKleeCharacter);
 
-        WithArm(true, () =>
+        WithArm(() =>
         {
             Assert.True(SparkGauge.AppliesTo(klee.Creature));
             // The other two are on the same table in co-op and must not sprout
@@ -91,12 +79,6 @@ public class SparkGaugePinTests
 
         // THE ACCEPTANCE CONDITION. Off the arm the gauge does not exist, so
         // the shipped display is exactly the shipped display.
-        WithArm(false, () =>
-        {
-            Assert.False(SparkGauge.AppliesTo(klee.Creature));
-            Assert.False(SparkGauge.AppliesTo(furina.Creature));
-            Assert.False(SparkGauge.AppliesTo(kokomi.Creature));
-        });
     }
 
     [Fact]
@@ -145,33 +127,6 @@ public class SparkGaugePinTests
     }
 
     [Fact]
-    public void The_arm_hides_the_spark_badge_and_leaves_every_other_badge_alone()
-    {
-        var klee = WithNetId(Seat.Klee(), 1UL)
-            .WithPower<SparkPower>(2)
-            .WithPower<SparkThresholdDownPower>(1)
-            .WithPower<BombPower>(3);
-        var spark = klee.Creature.Powers.OfType<SparkPower>().Single();
-
-        WithArm(true, () => AsLocalSeat(1UL, () =>
-        {
-            Assert.True(SparkGauge.HidesBadge(spark));
-
-            // Klee's STATUSES keep their badges. The finding was about a
-            // RESOURCE sitting among the statuses, not about the strip.
-            foreach (var other in klee.Creature.Powers.Where(p => p != spark))
-            {
-                Assert.False(SparkGauge.HidesBadge(other));
-            }
-        }));
-
-        // THE MUTATION GUARD, and the acceptance condition again: off the arm
-        // the very same power on the very same seat keeps its badge.
-        WithArm(false, () => AsLocalSeat(1UL,
-            () => Assert.False(SparkGauge.HidesBadge(spark))));
-    }
-
-    [Fact]
     public void A_second_seats_spark_badge_is_judged_by_its_own_owner()
     {
         // Co-op. `HidesBadge` asks the POWER's owner, so a Spark counter on a
@@ -179,7 +134,7 @@ public class SparkGaugePinTests
         var furina = WithNetId(Seat.Furina(), 1UL).WithPower<SparkPower>(3);
         var stray = furina.Creature.Powers.OfType<SparkPower>().Single();
 
-        WithArm(true, () => AsLocalSeat(1UL,
+        WithArm(() => AsLocalSeat(1UL,
             () => Assert.False(SparkGauge.HidesBadge(stray))));
     }
 
@@ -194,7 +149,7 @@ public class SparkGaugePinTests
         var klee = WithNetId(Seat.Klee(), 1UL).WithPower<SparkPower>(4);
         var spark = klee.Creature.Powers.OfType<SparkPower>().Single();
 
-        WithArm(true, () =>
+        WithArm(() =>
         {
             // Klee's own screen: the counter draws the bank, the badge hides.
             AsLocalSeat(1UL, () => Assert.True(SparkGauge.HidesBadge(spark)));
@@ -212,7 +167,7 @@ public class SparkGaugePinTests
         // on a canonical model, and a throw there would take the whole status
         // strip with it. An ownerless power simply has no badge to suppress.
         var canonical = new SparkPower();
-        WithArm(true, () => Assert.False(SparkGauge.HidesBadge(canonical)));
+        WithArm(() => Assert.False(SparkGauge.HidesBadge(canonical)));
     }
 
     // --- the wire's own precondition -------------------------------------
@@ -246,119 +201,12 @@ public class SparkGaugePinTests
 
     // --- the gauge spec ---------------------------------------------------
 
-    /// <summary>The `GaugeBridge` spec table, by reflection: `GaugeSpec` is a
-    /// private nested type and the array is private. STRUCTURAL by necessity --
-    /// the alternative is drawing one, which is Godot.</summary>
-    private static object Spec(string key) =>
-        ((IEnumerable)typeof(GaugeBridge).GetField("Specs", All)!.GetValue(null)!)
-        .Cast<object>()
-        .Single(s => (string)s.GetType().GetProperty("Key", All)!.GetValue(s)! == key);
-
     private static object? Prop(object spec, string name) =>
         spec.GetType().GetProperty(name, All)!.GetValue(spec);
 
-    [Fact]
-    public void Klee_has_no_overhead_spark_gauge()
-    {
-        // Playtest 2026-09-24, [USER]: "Klee also still has a spark counter
-        // over her head, which is redundant with the main UI gauge." The
-        // `klee_spark` spec (`EB-281`) is deleted, so nothing draws the bank
-        // over her head; the energy-area counter (`SparkCounter`) is its one
-        // display and the strip badge stays suppressed (pinned above).
-        var keys = ((IEnumerable)typeof(GaugeBridge).GetField("Specs", All)!
-                .GetValue(null)!)
-            .Cast<object>()
-            .Select(s => (string)s.GetType().GetProperty("Key", All)!.GetValue(s)!)
-            .ToList();
-        Assert.DoesNotContain("klee_spark", keys);
-        Assert.Contains("burst", keys);
-
-        // And no spec draws off the Spark bank under some other key.
-        foreach (var spec in ((IEnumerable)typeof(GaugeBridge)
-                     .GetField("Specs", All)!.GetValue(null)!).Cast<object>())
-        {
-            var read = (Delegate)Prop(spec, "ReadValue")!;
-            Assert.NotEqual(typeof(SparkGauge), read.Method.DeclaringType);
-            var applies = (Delegate)Prop(spec, "AppliesTo")!;
-            Assert.NotEqual(typeof(SparkGauge), applies.Method.DeclaringType);
-        }
-
-        // The refresh no longer reaches the gauge bridge at all: it redraws
-        // the energy-area counter and nothing else.
-        var refresh = Il.Calls(typeof(SparkGauge)
-            .GetMethod(nameof(SparkGauge.Refresh), All)!);
-        Assert.DoesNotContain(refresh,
-            c => c.EndsWith("GaugeBridge.Refresh", StringComparison.Ordinal));
-        Assert.Contains(refresh,
-            c => c.EndsWith("SparkCounter.Refresh", StringComparison.Ordinal));
-    }
-
     // --- Burst stands down under the arm ---------------------------------
 
-    [Fact]
-    public void The_burst_gauge_stands_down_for_klee_under_the_arm()
-    {
-        // `EB-266`'s DISPLAY half. Nothing feeds Klee's Burst under the arm
-        // (`KleeBurstResource.Find` returns null), but the gauge's predicate was
-        // a bare `is Klee`, so the bar built itself anyway and sat at 0/40 with
-        // a bomb on the end of it for the whole run -- the same "no idea what it
-        // was" the meter itself earned.
-        var klee = Seat.Klee();
-
-        WithArm(true, () =>
-        {
-            Assert.False(KleeBurstResource.GaugeApplies(klee.Creature));
-            Assert.Equal(0, KleeBurstResource.AmountFor(klee.Creature));
-        });
-
-        // THE MUTATION GUARD: off the arm the same seat still gets it, so what
-        // the assertion above measured is the arm and not the harness.
-        WithArm(false, () => Assert.True(KleeBurstResource.GaugeApplies(klee.Creature)));
-
-        // And it was never anybody else's.
-        Assert.False(KleeBurstResource.GaugeApplies(Seat.Furina().Creature));
-    }
-
-    [Fact]
-    public void The_burst_spec_asks_the_resource_rather_than_the_character()
-    {
-        // STRUCTURAL. The guard has to be the one on `KleeBurstResource`, not a
-        // second character test written out in the bridge, or the feed and the
-        // display can be retired by halves -- which is exactly how they came
-        // apart in the first place.
-        var applies = (Func<Creature, bool>)Prop(Spec("burst"), "AppliesTo")!;
-        Assert.Equal(typeof(KleeBurstResource), applies.Method.DeclaringType);
-        Assert.Equal(nameof(KleeBurstResource.GaugeApplies), applies.Method.Name);
-    }
-
     // --- the refresh funnels ----------------------------------------------
-
-    [Fact]
-    public void Every_funnel_that_moves_the_bank_redraws_the_gauge()
-    {
-        // STRUCTURAL: a Spark gain or spend needs a live `CombatState`, and the
-        // sync reaches Godot on the far side. What is pinned is the property
-        // that keeps the display honest -- the gauge is refreshed at exactly the
-        // three chokepoints the `spark` meter ledger rides, so the number on
-        // screen and the number in the ledger cannot come from different reads.
-        foreach (var funnel in new[] { "Gain", "Spend", "AfterCardPlayed" })
-        {
-            var calls = Il.Calls(typeof(SparkPower).GetMethod(funnel, All)!);
-            Assert.Contains("SparkPower.SyncGauge", calls);
-            Assert.Contains("MeterLedger.Note", calls);
-        }
-
-        // And the sync itself goes to the gauge rather than carrying its own
-        // arm test: `SparkGauge.Refresh` is where the arm is read.
-        var sync = Il.Calls(typeof(SparkPower).GetMethod("SyncGauge", All)!);
-        Assert.Contains("SparkGauge.Refresh", sync);
-
-        // The catch-all for a bank moved by something that is not this mod (the
-        // understudy's `set_power` door): the game's own fanned hook.
-        var hook = Il.Calls(
-            typeof(SparkPower).GetMethod(nameof(SparkPower.AfterPowerAmountChanged), All)!);
-        Assert.Contains("SparkPower.SyncGauge", hook);
-    }
 
     [Fact]
     public void The_refresh_declines_off_the_arm_and_for_everyone_else()
@@ -369,12 +217,7 @@ public class SparkGaugePinTests
         // acceptance condition for the release build -- a shipped Spark gain
         // gains no gauge work.
         var klee = Seat.Klee();
-        WithArm(false, () =>
-        {
-            SparkGauge.Refresh(klee.Creature);
-            SparkGauge.Refresh(null);
-        });
-        WithArm(true, () =>
+        WithArm(() =>
         {
             SparkGauge.Refresh(Seat.Kokomi().Creature);
             SparkGauge.Refresh(null);

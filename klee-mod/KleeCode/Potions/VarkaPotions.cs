@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -164,4 +163,3 @@ public sealed class VarkaPotionPool : PotionPoolModel
         return own;
     }
 }
-#endif

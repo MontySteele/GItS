@@ -1,5 +1,4 @@
 using System.Linq;
-using KleeMod.Cards.Kokomi.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.CardSelection;
@@ -96,39 +95,6 @@ public class RecallFromDiscardTests
     }
 
     // --- the self-recall, which is what D3 ruled -------------------------
-
-    [Fact]
-    public void The_carrier_is_not_an_exhaust_retriever()
-    {
-        // Constraint 3's marker is the EXHAUST pool's cycle exclusion, and a
-        // discard reader is not in that cycle. Stamping it would have quietly
-        // removed this card from a pool it belongs in -- and the sim reads the
-        // same distinction off `from` (`effects.retrieves_from_exhaust`).
-        // `is` would be a COMPILE-time answer here (and a warning); the type
-        // test is the runtime question the pool filter actually asks.
-        Assert.False(typeof(IExhaustRetriever)
-            .IsInstanceOfType(new WhatTheTokoyoReturns()));
-        // ... while the pool that DOES exclude retrievers still accepts it,
-        // which is the other half of the same fact.
-        Assert.True(RecallFromExhaust.Recallable(new WhatTheTokoyoReturns()));
-    }
-
-    [Fact]
-    public void Both_faces_route_through_the_same_call()
-    {
-        // THE SELF-RECALL, as close as the headless boundary allows. The
-        // played face is resolving and so is not in a pile; the Sly face IS in
-        // the discard pile when its rider fires, because
-        // CardCmd.DiscardAndDraw adds the victim to the pile BEFORE firing
-        // Hook.AfterCardDiscarded (verified against sts2.dll v0.107.1). The
-        // two faces therefore differ by WHERE THE CARD IS, not by what the
-        // call does -- which is exactly the sim's story, and is why the same
-        // call has to appear on both.
-        Assert.Contains("RecallFromDiscard.Recall",
-            Il.Calls(Il.Method("WhatTheTokoyoReturns", "OnPlay")));
-        Assert.Contains("RecallFromDiscard.Recall",
-            Il.Calls(Il.Method("WhatTheTokoyoReturns", "AfterCardDiscarded")));
-    }
 
     [Fact]
     public void The_prompt_reads_the_ruled_copy_and_not_a_stand_in()

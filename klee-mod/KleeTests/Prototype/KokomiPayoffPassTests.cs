@@ -24,11 +24,10 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiPayoffPassTests : IDisposable
 {
-    private readonly bool _kokomi = KokomiOverhaul.Enabled;
 
-    public KokomiPayoffPassTests() => KokomiOverhaul.Enabled = true;
+    public KokomiPayoffPassTests() { }
 
-    public void Dispose() => KokomiOverhaul.Enabled = _kokomi;
+    public void Dispose() { }
 
     private static T Upgraded<T>() where T : CardModel, new()
     {

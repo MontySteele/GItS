@@ -7,14 +7,11 @@ using MegaCrit.Sts2.Core.Models.RelicPools;
 namespace KleeMod;
 
 /// <summary>
-/// Kokomi borrows the Silent relic roster for the playtest build, exactly as
-/// Furina does. Her starter is appended for legal pool membership; Starter
-/// rarity keeps it out of ordinary reward rolls.
-///
-/// The borrow has a KNOWN consequence worth stating rather than discovering:
-/// a real Silent relic can co-occur with Pearl of Wisdom in one run, which is
-/// why the relic ships a packed icon path of its own instead of leaning on
-/// the borrowed snake_ring slug (see PearlOfWisdomRelic).
+/// Kokomi borrows the Silent relic roster, exactly as the pool shipped. Her
+/// starter, the Tamakushi Casket, and its Touch of Orobas upgrade are appended
+/// for legal pool membership: RelicModel.Pool is a non-virtual First() over
+/// AllRelicPools and THROWS for a poolless relic. Starter and Ancient rarity
+/// keep both out of every reward roll.
 /// </summary>
 public sealed class KokomiRelicPool : RelicPoolModel
 {
@@ -22,49 +19,11 @@ public sealed class KokomiRelicPool : RelicPoolModel
 
     public override Color LabOutlineColor => new("6FC8D6");
 
-    protected override IEnumerable<RelicModel> GenerateAllRelics()
-    {
-        var relics = Shipped();
-#if PROTOTYPE_CARDS
-        // QUARANTINED (the Kokomi overhaul, slice one). MEMBERSHIP, not loot,
-        // and it is the same non-negotiable the two Appends below record:
-        // RelicModel.Pool is a non-virtual First() over AllRelicPools and
-        // THROWS for a poolless relic, so the arm's starting relic has to be
-        // a member of a pool the moment a run hands it over -- which is at
-        // character select, the earliest moment there is.
-        //
-        // APPENDED UNDER THE COMPILE FLAG AND NOT UNDER THE ARM'S OWN, which
-        // is deliberate: `GenerateAllRelics` runs once at pool construction,
-        // long before anything reads `KokomiOverhaul.Enabled`, so gating it on
-        // the arm would be a race rather than a quarantine. The compile flag
-        // is the quarantine here as everywhere else -- a release build does
-        // not contain the type -- and Starter rarity keeps it out of every
-        // reward roll in a dev build, exactly as it keeps the Pearl out.
-        relics = relics.Append(ModelDb.Relic<Relics.TamakushiCasket>());
-        // Its Touch of Orobas upgrade (2026-09-30), a member for the same
-        // reason at the mid-run grant. Ancient rarity: never rolled, the
-        // Pearl of Insight's arrangement below.
-        relics = relics.Append(ModelDb.Relic<Relics.WatatsumiCasket>());
-#endif
-        return relics;
-    }
-
-    private static IEnumerable<RelicModel> Shipped() =>
+    protected override IEnumerable<RelicModel> GenerateAllRelics() =>
         // The borrowed roster MINUS Helical Dart and Snecko Skull (the ruling
         // on QUEUE pick `fanout-picks-2026-09-16 4.3`, at its default). See
         // InheritedSilentRelics for why the two go and why the drop is safe.
         InheritedSilentRelics.Curated()
-            .Append(ModelDb.Relic<Relics.PearlOfWisdomRelic>())
-            // EPOCH 2 / D1 (audit sec.1.2). The UPGRADED starter was in no pool at
-            // all. RelicModel.Pool is a non-virtual First() over AllRelicPools
-            // and THROWS for a poolless relic -- finding 27's crash class, one
-            // door over: this one is reachable not at character select but the
-            // moment Touch of Orobas hands the upgrade over mid-run.
-            //
-            // Membership does NOT make it loot. Relic rewards roll
-            // Common/Uncommon/Rare/Shop/Boss (decompiled; the same enumeration
-            // KleeRelicPool's header records for the Starter-rarity case), and
-            // these are RelicRarity.Ancient. Same shape as the Ancient CARDS in
-            // the card pools: visible members, never rolled.
-            .Append(ModelDb.Relic<Relics.PearlOfInsightRelic>());
+            .Append(ModelDb.Relic<Relics.TamakushiCasket>())
+            .Append(ModelDb.Relic<Relics.WatatsumiCasket>());
 }

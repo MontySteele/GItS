@@ -335,23 +335,9 @@ if (-not (Test-Path $venvPython)) {
 }
 
 # ---------------------------------------------------------------------------
-# S6a. Generated roster cards and blocker manifests must match their sheets.
-#
-# This is the character-aware entry point: it checks Klee's shipping output
-# and every staged future-character tranche. A blocked card is valid; a stale
-# or silently approximated generated card is not.
+# S6a. The generated cards must match their sheet. Since legacy cleanup stage
+# 5 the shipped sheets emit no C#; the prototype surface is the only one.
 # ---------------------------------------------------------------------------
-$rosterCodegen = Join-Path $repoRoot 'tools\gen_roster_cards.py'
-if (-not (Test-Path $venvPython)) {
-    Fail 'S6a' "repo venv python not found at $venvPython; cannot check roster codegen."
-} elseif (-not (Test-Path $rosterCodegen)) {
-    Fail 'S6a' "tools/gen_roster_cards.py is missing."
-} else {
-    $codegenOut = Invoke-RepoPython $rosterCodegen --check
-    if ($LASTEXITCODE -ne 0) {
-        Fail 'S6a' "roster codegen is stale:`n    $($codegenOut -join "`n    ")"
-    }
-}
 # THE PROTOTYPE SURFACE, SINCE 2026-09-28 A RELEASE INPUT. [USER]: "make all 3
 # current builds the active release builds". The default build now compiles
 # docs/prototype-surface.yaml's generated C# (klee-mod/Directory.Build.props),

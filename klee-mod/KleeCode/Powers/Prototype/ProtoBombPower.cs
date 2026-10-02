@@ -319,7 +319,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     public int SparksOnSetOff()
     {
-        if (_charges.Count == 0 || !IsMutable || !KleeOverhaul.Enabled) return 0;
+        if (_charges.Count == 0 || !IsMutable) return 0;
         var player = Applier?.Player;
         if (player == null) return 0;
         var payers = player.Relics.Count(

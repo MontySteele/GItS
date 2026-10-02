@@ -329,7 +329,6 @@ public class InazumaCompanionOverhaulTests
         var live = Il.Method("KokomiRules", "MendIsLive");
         var calls = Il.Calls(live);
         Assert.Contains(calls, c => c.Contains("KokomiOverhaul.LiveFor"));
-        Assert.Contains(calls, c => c.Contains("CompanionOverhaul.get_Enabled"));
     }
 
     [Fact]

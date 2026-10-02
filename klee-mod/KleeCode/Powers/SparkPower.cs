@@ -72,61 +72,14 @@ public interface IKleeCharacter
 /// </summary>
 public sealed class SparkPower : PowerModel, ILocalizationProvider
 {
-    /// <summary>
-    /// THE ALTERNATIVE-COST FLAG, C# side (review/ruled/klee-sparks-2026-08-29.md
-    /// sec.10.1, PICK 6 option 1). Twin of tier0's
-    /// <c>C.SPARK_ALT_COST_ENABLED</c>, and it is the SAME switch that
-    /// quarantines the prototype surface: <c>-p:PrototypeCards=true</c> defines
-    /// <c>PROTOTYPE_CARDS</c>, compiles <c>Cards/Prototype/**</c> and
-    /// <c>Powers/Prototype/**</c>, and stamps a deploy <c>+proto</c>. One flag,
-    /// one revert.
-    ///
-    /// FALSE means the base rule is RETIRED: at no bank do Attacks cost 0 and
-    /// nothing is consumed automatically. It is a const rather than a
-    /// <c>#if</c> at each site so the retirement reads as one fact with three
-    /// call sites, and so the bite-check can assert the fact itself.
-    ///
-    /// NOTHING BELOW IS DELETED, which is deliberate and is tier0's own posture
-    /// (<c>combat.spark_threshold</c> carries the identical RETIRED-UNDER-FLAG
-    /// note): the two economies are meant to be runnable as two arms, and an
-    /// OFF arm needs the shipped rule byte for byte.
-    /// </summary>
-#if PROTOTYPE_CARDS
-    public const bool BaseRuleActive = false;
-#else
-    public const bool BaseRuleActive = true;
-#endif
-
-    /// <summary>Mirrors tier0 constants.py SPARKS_FOR_FREE_ATTACK = 3.</summary>
-    public const int Threshold = 3;
-
-    /// <summary>
-    /// The live threshold: True Spark Knight lowers it, floored at 1 (sim:
-    /// combat.py spark_threshold, `max(1, 3 - spark_threshold_down)`). Used
-    /// for BOTH the cost gate and the spend, so they can never disagree --
-    /// the sim reads spark_threshold(state) at both sites too.
-    /// </summary>
-    private int CurrentThreshold => System.Math.Max(
-        1, Threshold
-           - (Owner?.Powers.OfType<SparkThresholdDownPower>()
-                  .FirstOrDefault()?.Amount ?? 0));
-
-    /// <summary>
-    /// The counter's face. Under the flag the base rule's sentence is a lie --
-    /// nothing costs 0 and nothing is consumed -- and D4 makes a power that
-    /// prints a rule it does not run a defect, not a cosmetic loose end. So the
-    /// text retires with the rule it describes and the bank says only what it
-    /// is: a resource cards charge for.
-    /// </summary>
+    /// <summary>The counter's face: a resource cards charge for. The
+    /// shipped free-Attack rule (3 Sparks) went with the shipped kits.</summary>
     public List<(string, string)>? Localization => new()
     {
         ("title", "Spark"),
         ("description",
-            BaseRuleActive
-                ? "At 3 [gold]Sparks[/gold], your Attacks cost 0. "
-                  + "Playing one consumes 3 [gold]Sparks[/gold]."
-                : "A resource. Cards that print a [gold]Spark[/gold] price "
-                  + "spend it."),
+            "A resource. Cards that print a [gold]Spark[/gold] price "
+          + "spend it."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -156,13 +109,11 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
         Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Spark,
             source ?? SourceOf(cardSource), Bank(player) - before, before);
         SyncGauge(player);
-#if PROTOTYPE_CARDS
         // R276, SPARK KNIGHT, and it rides this chokepoint for the ledger's
         // reason: every Spark any source grants passes here, so "whenever you
         // gain a Spark" has one door. The Sparks that LANDED, not the ask.
         await SparkKnightPower.AfterSparksGained(
             choiceContext, player, Bank(player) - before);
-#endif
     }
 
     /// <summary>
@@ -189,9 +140,7 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     /// </summary>
     private static void SyncGauge(Creature? player)
     {
-#if PROTOTYPE_CARDS
         Vfx.SparkGauge.Refresh(player);
-#endif
     }
 
     /// <summary>
@@ -224,9 +173,8 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>The bank right now, 0 when the counter is not on the creature
-    /// yet. LEDGER READS ONLY -- <see cref="SparksAtPlay"/> and
-    /// <see cref="SparksAsResolved"/> are the accessors a RULE reads, and they
-    /// are spelled separately on purpose.</summary>
+    /// yet. LEDGER READS ONLY -- <see cref="SparksAtPlay"/> is the accessor a
+    /// RULE reads, and it is spelled separately on purpose.</summary>
     private static int Bank(Creature owner) =>
         owner.Powers.OfType<SparkPower>().FirstOrDefault()?.Amount ?? 0;
 
@@ -261,15 +209,9 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     /// your draw pile is empty"), consulted by <c>CanPlay</c> before any
     /// energy is committed -- so a short bank shows as an unplayable card
     /// rather than as a play that quietly does nothing.
-    ///
-    /// Reads <see cref="SparksAsResolved"/> and not the raw Amount, for the
-    /// reason that accessor exists: the sim spends the threshold charge
-    /// before a card's effects resolve while our consume runs after, so a
-    /// mid-play read must subtract the pending spend or it sees a bank the
-    /// sim never shows. Out of hand (the playability read) the two agree.
     /// </summary>
     public static bool CanSpend(Creature owner, int amount) =>
-        amount > 0 && SparksAsResolved(owner) >= amount;
+        amount > 0 && SparksAtPlay(owner) >= amount;
 
     /// <summary>
     /// Spend Sparks as a COST, the sink's payment half (sim mirror:
@@ -346,144 +288,10 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// The base rule's predicate. RETIRED-UNDER-FLAG: the first clause is the
-    /// flag itself, so the zeroing hook, the spend DECISION and the consume all
-    /// stand down together and cannot be retired by halves. Kept rather than
-    /// deleted for the reason on <see cref="BaseRuleActive"/>.
-    /// </summary>
-    private bool AppliesTo(CardModel card) =>
-        BaseRuleActive
-        && Amount >= CurrentThreshold
-        && card.Type == CardType.Attack
-        && !card.EnergyCost.CostsX
-        && card.Owner?.Creature == Owner;
-
-    public override bool TryModifyEnergyCostInCombat(
-        CardModel card, decimal originalCost, out decimal modifiedCost)
-    {
-        modifiedCost = originalCost;
-        if (originalCost <= 0m || !AppliesTo(card))
-        {
-            return false;
-        }
-
-        modifiedCost = 0m;
-        return true;
-    }
-
-    /// <summary>
-    /// The spend DECISION, snapshotted at play start (playtest finding
-    /// 2026-07-20, the Snap bug): the sim's play_card evaluates
-    /// `sparks >= threshold` BEFORE the card's effects resolve, so a card
-    /// whose own rider pushes the bank to threshold mid-resolution must NOT
-    /// eat the charge -- the player paid energy for that play. Deciding in
-    /// AfterCardPlayed (the old shape) read the post-rider bank: Snap at 2
-    /// Sparks cost 1 energy, granted the 3rd Spark, then wrongly consumed
-    /// all 3. Printed cost is read off EnergyCost.Canonical -- the sim's
-    /// guard is `card.cost != 0` (a printed-0 attack never consumes).
-    ///
-    /// IsFirstInSeries reproduces "once per play_card call" across replays,
-    /// same as the burst grant in KleeElementalHooks. The threshold is
-    /// snapshotted with the decision (sim: `p.sparks -= spark_threshold(state)`
-    /// reads the state at play time).
-    /// </summary>
-    public override Task BeforeCardPlayed(CardPlay cardPlay)
-    {
-        if (cardPlay.IsFirstInSeries
-            && AppliesTo(cardPlay.Card)
-            && cardPlay.Card.EnergyCost.Canonical != 0)
-        {
-            _pendingSpendPlay = cardPlay;
-            _pendingSpendAmount = CurrentThreshold;
-        }
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Transient decision state; only ever set between a BeforeCardPlayed and
-    /// its AfterCardPlayed (one card resolves at a time). Not cloned
-    /// meaningfully by MutableClone -- a stale reference on a clone can never
-    /// equal a live CardPlay, so the worst case is a no-op.
-    /// </summary>
-    private CardPlay? _pendingSpendPlay;
-    private int _pendingSpendAmount;
-
-    /// <summary>
-    /// The Spark bank as the sim sees it DURING a card's resolution. The
-    /// sim's play_card spends BEFORE resolve_card, but our consume executes
-    /// in AfterCardPlayed (payment-ordering safety, above) -- so mid-play
-    /// readers must subtract the pending spend, or they read a pre-spend bank
-    /// the sim never shows. This is the caveat recorded with the Snap fix.
-    ///
-    /// R39 NARROWED ITS SCOPE (2026-07-21): the only reader that ever needed
-    /// this was Gleeful Barrage's hit count, and that card now deliberately
-    /// reads the PRE-spend bank instead (SparksAtPlay). Spark spend fires on
-    /// attacks only, and both has_spark cards are skills, so no current
-    /// reader can observe a pending spend at all. Kept because the accessor
-    /// is the correct one for any FUTURE attack that reads the bank mid-play
-    /// and wants the sim's post-spend view.
-    /// </summary>
-    public static int SparksAsResolved(Creature owner)
-    {
-        var power = owner.Powers.OfType<SparkPower>().FirstOrDefault();
-        if (power == null) return 0;
-        return power._pendingSpendPlay == null
-            ? power.Amount
-            : power.Amount - power._pendingSpendAmount;
-    }
-
-    /// <summary>
-    /// The Spark bank as it stood when the card was played, BEFORE that
-    /// card's own spark spend -- tier0 state.sparks_at_play (R39).
-    ///
-    /// Our consume runs in AfterCardPlayed, so during OnPlay the power's
-    /// Amount IS still the pre-spend bank; the pending spend is a decision
-    /// that has not been executed. That makes this the plain read, and it is
-    /// spelled out as its own accessor so the intent is legible at the call
-    /// site rather than looking like someone forgot SparksAsResolved.
+    /// The Spark bank as it stood when the card was played -- tier0
+    /// state.sparks_at_play (R39). Nothing spends Sparks between the play and
+    /// the card's resolution, so this is the plain read.
     /// </summary>
     public static int SparksAtPlay(Creature owner) =>
         owner.Powers.OfType<SparkPower>().FirstOrDefault()?.Amount ?? 0;
-
-    /// <summary>
-    /// The consume, executing the play-time decision. Kept AFTER resolution:
-    /// mutating the bank in BeforeCardPlayed could drop Amount below
-    /// threshold before the payment machinery reads the (zeroed) cost --
-    /// that ordering has no decompile evidence, so the safe side wins. The
-    /// sim spends pre-resolution, which only differs observably for cards
-    /// that READ the bank mid-play (formula cards; none are shipped --
-    /// revisit with evidence when formula codegen lands).
-    /// </summary>
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        if (cardPlay != _pendingSpendPlay)
-        {
-            return;
-        }
-        _pendingSpendPlay = null;
-
-        // applier: null -- the spend is bookkeeping, not a power "given" by
-        // anyone; keeping it out of the ModifyPowerAmountGiven hook chain
-        // means nothing can inflate or shrink the exact spend.
-        int before = Amount;
-        await PowerCmd.ModifyAmount(
-            choiceContext, this, -_pendingSpendAmount, applier: null,
-            cardSource: cardPlay.Card);
-        // `EB-216`. NAMED AS THE RULE AND NOT AS THE CARD: the base free-Attack
-        // consume is charged by the threshold rule, not printed on the card
-        // that triggered it, and a grader reading `card:` here would count a
-        // printed price the face never showed.
-        Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Spark,
-            "rule:threshold_consume", Amount - before, before);
-        // The third funnel. UNREACHABLE under the overhaul arm -- the base rule
-        // is retired wherever the gauge compiles (BaseRuleActive is false under
-        // PROTOTYPE_CARDS) -- and refreshed anyway, so "every funnel that moves
-        // the bank redraws it" stays one fact rather than two-thirds of one.
-        SyncGauge(Owner);
-
-        // Sparks-spend VFX (sprint plan E3); concurrency-capped in the
-        // spawner so burst turns cannot particle-storm the screen.
-        Vfx.KleeCombatVfx.SpawnDodocoPop(Owner);
-    }
 }

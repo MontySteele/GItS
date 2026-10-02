@@ -122,6 +122,13 @@ def _grants_block(effects) -> bool:
         if fx.get("op") == "conditional":
             if _grants_block(fx.get("then")) or _grants_block(fx.get("else")):
                 return True
+        # A `choose_one` whose mode gains Block: the game's card carries the
+        # BlockVar and so `GainsBlock` (found 2026-10-01, the first time
+        # lint_enchant_parity read the prototype surface).
+        if fx.get("op") == "choose_one":
+            if any(_grants_block(mode.get("effects"))
+                   for mode in fx.get("modes") or ()):
+                return True
     return False
 
 
@@ -150,7 +157,11 @@ def _gains_block(c) -> bool:
     type-only predicate welds Nimble onto cards where its one printed effect
     could never fire, silently.
     """
-    return _grants_block(c.effects) or _grants_block(c.enchant_effects)
+    # A Kokomi `plan:` line's Block counts too: the game's card declares the
+    # BlockVar, so BaseLib's GainsBlock is true (found 2026-10-01, the first
+    # time lint_enchant_parity read the prototype surface).
+    return (_grants_block(c.effects) or _grants_block(c.enchant_effects)
+            or _grants_block(getattr(c, "plan", None)))
 
 
 def _exhausts(c) -> bool:

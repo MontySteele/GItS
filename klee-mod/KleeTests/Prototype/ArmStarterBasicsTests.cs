@@ -99,11 +99,6 @@ public class ArmStarterBasicsTests
             .Where(c => c.StartsWith("ModelDb.Card<", StringComparison.Ordinal))
             .ToList();
 
-    private static Type PatchType(string name) =>
-        typeof(KleeOverhaul).Assembly.GetTypes()
-            .FirstOrDefault(t => t.Name == name)
-        ?? throw new InvalidOperationException($"no type named {name} in klee.dll");
-
     private static object Answer(string method, CharacterModel character) =>
         Il.Method("ArmStarterBasics", method)
             .Invoke(null, new object[] { character });
@@ -122,105 +117,7 @@ public class ArmStarterBasicsTests
         ?? throw new InvalidOperationException(
             $"{target.Name}.{member} did not resolve in the shipped assembly");
 
-    /// <summary>
-    /// The live `CardModel` behind every `ModelDb.Card&lt;T&gt;` an IL read
-    /// named. Real cards: the type is found in klee.dll and constructed, which
-    /// is what makes `Tags` a measured fact rather than a restated one.
-    /// </summary>
-    private static IEnumerable<CardModel> Built(IEnumerable<string> calls)
-    {
-        foreach (var call in calls)
-        {
-            var name = call.Substring("ModelDb.Card<".Length).TrimEnd('>');
-            var type = typeof(KleeOverhaul).Assembly.GetTypes()
-                           .FirstOrDefault(t => t.Name == name)
-                       ?? throw new InvalidOperationException(
-                           $"no card type named {name} in klee.dll");
-            yield return (CardModel)Activator.CreateInstance(type)!;
-        }
-    }
-
     // ---- no shipped row reaches the arm, on either seam --------------------
-
-    [Fact]
-    public void The_klee_arm_opens_with_ten_ids_and_not_one_is_a_shipped_row()
-    {
-        // THE STARTER, restated as the defect's own question: not "is it ten
-        // cards" (`BaseBasicsTests` pins that against R242's ruled order) but
-        // "can a shipped Klee row be in the deck a run opens on".
-        var starter = Cards("KleeOverhaulRoster", "StartingDeck");
-        var shipped = Cards("KleeCardPool", "ShippedRows");
-
-        Assert.Equal(10, starter.Count);
-        // The sets must be non-empty or the intersection below is a free pass:
-        // an IL read that resolved nothing would "prove" the arm clean.
-        Assert.NotEmpty(shipped);
-        Assert.Contains("ModelDb.Card<Kaboom>", shipped);
-        Assert.Contains("ModelDb.Card<DuckAndCover>", shipped);
-
-        Assert.Empty(starter.Intersect(shipped));
-    }
-
-    [Fact]
-    public void No_shipped_klee_row_is_offerable_under_the_arm()
-    {
-        // The OFFER surface, read at the list the arm states rather than at
-        // `OfferablePool`, whose body is a Concat and names no card itself.
-        // The Ancient tail it adds is deliberately shared with the shipped
-        // pool (`EB-284`, Dusty Tome), which is why the slice is the honest
-        // thing to intersect.
-        var slice = Cards("KleeOverhaulRoster", "Slice");
-        var shipped = Cards("KleeCardPool", "ShippedRows");
-
-        Assert.NotEmpty(slice);
-        Assert.NotEmpty(shipped);
-        Assert.Empty(slice.Intersect(shipped));
-    }
-
-    [Fact]
-    public void The_kokomi_arm_names_no_shipped_row_on_either_seam()
-    {
-        // The same defect lives on her arm for the same reason -- Large
-        // Capsule would hand a Kokomi overhaul run her shipped Water's Edge
-        // and Coral Guard -- so the same two pins are owed here.
-        var starter = Cards("KokomiOverhaulRoster", "StartingDeck");
-        var slice = Cards("KokomiOverhaulRoster", "Slice");
-        var shipped = Cards("KokomiCardRoster", "get_All");
-
-        Assert.Equal(10, starter.Count);
-        Assert.NotEmpty(slice);
-        Assert.NotEmpty(shipped);
-        Assert.Contains("ModelDb.Card<WatersEdge>", shipped);
-        Assert.Contains("ModelDb.Card<CoralGuard>", shipped);
-
-        Assert.Empty(starter.Intersect(shipped));
-        Assert.Empty(slice.Intersect(shipped));
-    }
-
-    [Fact]
-    public void The_stage_arm_names_no_shipped_basic_on_the_starter()
-    {
-        // 2026-09-28, [USER]: "We should really just replace Soloist's
-        // Solicitation and Stage Presence with the basic strike and defend."
-        // The Stage starter holds no shipped Furina row at all: Silent's base
-        // pair and two `proto_fs_` kit cards.
-        var starter = Cards("FurinaStageRoster", "StartingDeck");
-        var shipped = Cards("FurinaCardRoster", "get_All");
-
-        Assert.Equal(10, starter.Count);
-        Assert.NotEmpty(shipped);
-        Assert.Contains("ModelDb.Card<SoloistsSolicitation>", shipped);
-        Assert.Contains("ModelDb.Card<StagePresence>", shipped);
-        Assert.Contains("ModelDb.Card<RegalBearing>", shipped);
-
-        Assert.Empty(starter.Intersect(shipped));
-        Assert.Equal(new[]
-                     {
-                         "ModelDb.Card<ProtoFsCurtainRise>",
-                         "ModelDb.Card<ProtoFsStandingOvation>",
-                     },
-                     starter.Where(c => c.Contains("ProtoFs")).ToArray());
-    }
 
     // ---- the third seam answers with the starter's own pair ---------------
 
@@ -262,140 +159,17 @@ public class ArmStarterBasicsTests
         var strike = Il.Calls(Il.Method("ArmStarterBasics", "StrikeFor"));
         Assert.Contains("KleeOverhaulRoster.StarterStrike", strike);
         Assert.Contains("KokomiOverhaulRoster.StarterStrike", strike);
-        Assert.Contains("KleeOverhaul.get_Enabled", strike);
-        Assert.Contains("KokomiOverhaul.get_Enabled", strike);
         Assert.Contains("FurinaStageRoster.StarterStrike", strike);
-        Assert.Contains("FurinaStage.get_Enabled", strike);
 
         var defend = Il.Calls(Il.Method("ArmStarterBasics", "DefendFor"));
         Assert.Contains("KleeOverhaulRoster.StarterDefend", defend);
         Assert.Contains("KokomiOverhaulRoster.StarterDefend", defend);
-        Assert.Contains("KleeOverhaul.get_Enabled", defend);
-        Assert.Contains("KokomiOverhaul.get_Enabled", defend);
         Assert.Contains("FurinaStageRoster.StarterDefend", defend);
-        Assert.Contains("FurinaStage.get_Enabled", defend);
     }
 
     // ---- the patch, against the real game method --------------------------
 
-    [Fact]
-    public void The_patch_targets_the_two_methods_the_base_game_still_declares()
-    {
-        // REAL, not structural, and it is the pin that catches a Steam move:
-        // both target methods are resolved off the shipped `LargeCapsule`, and
-        // the PARAMETER NAME is asserted because Harmony binds a prefix's
-        // arguments by name -- a rename would arm the patch and then never
-        // pass it a character.
-        foreach (var (patch, target, seam) in new[]
-                 {
-                     ("LargeCapsule_ArmStarterStrike_Patch",
-                      "GetStrikeForCharacter", "ArmStarterBasics.StrikeFor"),
-                     ("LargeCapsule_ArmStarterDefend_Patch",
-                      "GetDefendForCharacter", "ArmStarterBasics.DefendFor"),
-                 })
-        {
-            var method = AccessTools.Method(typeof(LargeCapsule), target);
-            Assert.NotNull(method);
-            Assert.True(method.IsStatic);
-            var parameter = Assert.Single(method.GetParameters());
-            Assert.Equal("character", parameter.Name);
-            Assert.Equal(typeof(CharacterModel), parameter.ParameterType);
-
-            // The class-level [HarmonyPatch] names that same method, which is
-            // what `KleePatchBootstrap` reports on if it ever stops resolving.
-            var declared = PatchType(patch)
-                .GetCustomAttributes(inherit: true)
-                .OfType<HarmonyPatch>()
-                .Select(a => a.info)
-                .ToList();
-            Assert.Contains(declared, i => i.declaringType == typeof(LargeCapsule)
-                                           && i.methodName == target);
-
-            // A PREFIX, not a postfix: a postfix would have to let the base
-            // game's own unguarded `First()` run first, which is the throw
-            // KleeSelfCheck's R11 exists to prevent.
-            var prefix = PatchType(patch).GetMethod("Prefix", HeadlessGame.All);
-            Assert.NotNull(prefix);
-            Assert.Equal(typeof(bool), prefix.ReturnType);
-            Assert.Contains(seam, Il.Calls(prefix));
-        }
-    }
-
-    [Fact]
-    public void The_shipped_basics_are_what_the_relic_would_otherwise_hand_over()
-    {
-        // WHY THE SEAM IS NEEDED AT ALL, asserted rather than described. These
-        // two rows satisfy Large Capsule's predicate exactly, they are first in the
-        // shipped rows' declaration, and they CANNOT be taken out of it -- a card
-        // missing from `AllCards` has no `CardModel.Pool` and throws "You
-        // monster!" on draw, which is why `GenerateAllCards` is untouched by
-        // the arm. Delete the patch and this pair is what an arm run receives.
-        var kaboom = new Kaboom();
-        Assert.Equal(CardRarity.Basic, kaboom.Rarity);
-        Assert.Contains(CardTag.Strike, kaboom.Tags);
-
-        var duckAndCover = new DuckAndCover();
-        Assert.Equal(CardRarity.Basic, duckAndCover.Rarity);
-        Assert.Contains(CardTag.Defend, duckAndCover.Tags);
-
-        var shipped = Cards("KleeCardPool", "ShippedRows");
-        Assert.Equal("ModelDb.Card<Kaboom>", shipped[0]);
-        Assert.Equal("ModelDb.Card<DuckAndCover>", shipped[1]);
-    }
-
     // ---- EB-352: Fasten, the second door ----------------------------------
-
-    [Fact]
-    public void The_swept_pool_lookups_are_the_three_this_seam_covers()
-    {
-        // THE LIST IS THE CLAIM. Three rows, each resolving on the shipped
-        // game type, each claimed by exactly one patch class in klee.dll, and
-        // nothing else in the mod routing through the seam. Every one of those
-        // four assertions has to be edited by hand to add a site.
-        Assert.Equal(3, SweptSites.Length);
-
-        foreach (var (target, member, getter, patch, seam) in SweptSites)
-        {
-            // (1) The base game still declares it. This is the pin that
-            // catches a Steam move: a renamed member fails HERE with the name
-            // in the message, rather than at boot with Harmony's "Patching
-            // exception in method null".
-            Assert.NotNull(Site(target, member, getter));
-
-            // (2) The class-level [HarmonyPatch] names that same member, which
-            // is what `KleePatchBootstrap` reports on if it stops resolving.
-            var declared = PatchType(patch)
-                .GetCustomAttributes(inherit: true)
-                .OfType<HarmonyPatch>()
-                .Select(a => a.info)
-                .ToList();
-            Assert.Contains(declared, i => i.declaringType == target
-                                           && i.methodName == member);
-
-            // (3) A PREFIX returning bool, reaching the seam. A postfix would
-            // have to let the base game's own unguarded `First()` run, which
-            // is the throw the whole file exists to prevent.
-            var prefix = PatchType(patch).GetMethod("Prefix", HeadlessGame.All);
-            Assert.NotNull(prefix);
-            Assert.Equal(typeof(bool), prefix.ReturnType);
-            Assert.Contains(seam, Il.Calls(prefix));
-        }
-
-        // (4) NOTHING ELSE IN THE MOD ANSWERS THIS QUESTION. A fourth patch
-        // wired to ArmStarterBasics without a row above fails here, so the
-        // list cannot quietly fall behind the code it describes.
-        var routed = typeof(KleeOverhaul).Assembly.GetTypes()
-            .Where(t => t.GetCustomAttributes(inherit: true).OfType<HarmonyPatch>().Any())
-            .Where(t => t.GetMethods(HeadlessGame.All)
-                         .Any(m => Il.Calls(m).Any(c => c.StartsWith(
-                                       "ArmStarterBasics.", StringComparison.Ordinal))))
-            .Select(t => t.Name)
-            .OrderBy(n => n, StringComparer.Ordinal)
-            .ToList();
-
-        Assert.Equal(SweptSites.Select(s => s.Patch).OrderBy(n => n, StringComparer.Ordinal),
-                     routed);
-    }
 
     [Fact]
     public void Fastens_defend_tip_is_still_the_unguarded_pool_read_it_was()
@@ -430,36 +204,6 @@ public class ArmStarterBasicsTests
     }
 
     [Fact]
-    public void The_fasten_prefix_binds_the_two_arguments_harmony_passes_by_name()
-    {
-        // Harmony binds a prefix's arguments BY NAME, so a signature that
-        // reads correctly and is named wrongly arms the patch and then never
-        // receives the card. `__result` must also be `ref` and must be the
-        // property's own type, or the replacement is written to a copy.
-        var prefix = PatchType("Fasten_ArmDefendTip_Patch")
-            .GetMethod("Prefix", HeadlessGame.All);
-        Assert.NotNull(prefix);
-
-        var parameters = prefix.GetParameters();
-        Assert.Equal(2, parameters.Length);
-
-        Assert.Equal("__instance", parameters[0].Name);
-        Assert.Equal(typeof(Fasten), parameters[0].ParameterType);
-
-        Assert.Equal("__result", parameters[1].Name);
-        Assert.True(parameters[1].ParameterType.IsByRef);
-        Assert.Equal(typeof(IEnumerable<IHoverTip>),
-                     parameters[1].ParameterType.GetElementType());
-
-        // The card-shaped guard is the patch's, and it is the base game's own
-        // order: `IsMutable` before `Owner`, because `Owner` calls
-        // `AssertMutable()` and throws on a canonical model.
-        var calls = Il.Calls(prefix);
-        Assert.Contains("AbstractModel.get_IsMutable", calls);
-        Assert.Contains("CardModel.get_Owner", calls);
-    }
-
-    [Fact]
     public void The_tip_pair_is_the_starters_defend_and_comes_from_the_one_seam()
     {
         // ONE ANSWER, NOT TWO. `DefendTipsFor` spells the tip PAIR and nothing
@@ -478,80 +222,6 @@ public class ArmStarterBasicsTests
         Assert.DoesNotContain("FurinaStageRoster.StarterDefend", calls);
     }
 
-    [Fact]
-    public void No_card_either_arm_offers_carries_the_defend_tag()
-    {
-        // WHY THE LOOKUP THROWS RATHER THAN ANSWERING WRONGLY, measured on the
-        // real card objects rather than asserted in prose. The arm's
-        // `GetUnlockedCards` IS `OfferablePool()` (`KleeCardPool` /
-        // `KokomiCardPool` `FilterThroughEpochs`), and not one row in it --
-        // slice or Ancient tail -- satisfies `c.Tags.Contains(CardTag.Defend)`.
-        //
-        // THIS IS ALSO THE FIX'S BOUNDARY. Making one of these rows carry the
-        // tag would silence Fasten and would ALSO put a Defend in the reward
-        // roll, which is not the fix and is why the answer is a seam instead.
-        foreach (var (roster, ancients) in new[]
-                 {
-                     ("KleeOverhaulRoster", nameof(RosterAncientCards.Klee)),
-                     ("KokomiOverhaulRoster", nameof(RosterAncientCards.Kokomi)),
-                 })
-        {
-            var offered = Built(Cards(roster, "Slice"))
-                .Concat(Built(Cards("RosterAncientCards", "get_" + ancients)))
-                .ToList();
-
-            // Non-empty or the assertion below is a free pass.
-            Assert.NotEmpty(offered);
-            Assert.DoesNotContain(offered, c => c.Tags.Contains(CardTag.Defend));
-        }
-    }
-
     // ---- flag off ---------------------------------------------------------
 
-    [Fact]
-    public void With_the_arms_off_the_seam_claims_nobody()
-    {
-        // THE ACCEPTANCE CONDITION. Off the arms all three seams return null
-        // before they touch `ModelDb`, every prefix returns true, and Large
-        // Capsule and Fasten answer exactly as the base game wrote them -- her
-        // shipped basics and a picture of Duck and Cover, which off the arm is
-        // the right answer.
-        var klee = KleeOverhaul.Enabled;
-        var kokomi = KokomiOverhaul.Enabled;
-        var stage = FurinaStage.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = false;
-            KokomiOverhaul.Enabled = false;
-            FurinaStage.Enabled = false;
-
-            foreach (CharacterModel character in new CharacterModel[]
-                     { new global::KleeMod.Klee(), new global::KleeMod.Kokomi(),
-                       new global::KleeMod.Furina() })
-            {
-                Assert.Null(Answer("StrikeFor", character));
-                Assert.Null(Answer("DefendFor", character));
-                Assert.Null(Answer("DefendTipsFor", character));
-            }
-
-            // FURINA IS CLAIMED ONLY BY HER OWN ARM. Klee's and Kokomi's arms
-            // on, the Stage off: her shipped basics are still the honest
-            // answer and the base game already gives it. (Stage on, the seam
-            // answers `FurinaStageRoster`'s pair -- a `ModelDb` read the
-            // headless host cannot make, so that half is the structural pin
-            // `Both_arms_route_through_the_one_seam`.)
-            KleeOverhaul.Enabled = true;
-            KokomiOverhaul.Enabled = true;
-            var furina = new global::KleeMod.Furina();
-            Assert.Null(Answer("StrikeFor", furina));
-            Assert.Null(Answer("DefendFor", furina));
-            Assert.Null(Answer("DefendTipsFor", furina));
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = klee;
-            KokomiOverhaul.Enabled = kokomi;
-            FurinaStage.Enabled = stage;
-        }
-    }
 }

@@ -22,17 +22,10 @@ reading it is a deliberate second step rather than the default.
 
 THE ONE GATE THAT CANNOT BE CI's (2026-09-02). `dotnet-test` -- the mod's C#
 suite, `klee-mod/KleeTests` -- runs in BOTH lanes and is not behind `--dotnet`
-any more. It is TWO lines, because the suite has two worlds. Since 2026-09-28
-([USER]: "make all 3 current builds the active release builds") the DEFAULT
-build is the current kits -- `klee-mod/Directory.Build.props` turns on the
-prototype surface and the four kit arms when no property is named -- so
-`dotnet-test` names no property and runs the world every deploy ships.
-`dotnet-test-shipped` passes `-p:ShippedKits=true -p:PrototypeCards=true`: the
-old shipped kits with the arms compiled but off, where the old kits' pins and
-each arm's flag-off pins run. (Before the ruling the second line was
-`dotnet-test-stage`, `EB-781`: a configuration no gate runs is a configuration
-that goes red quietly, which is how nine shipped meter pins stood red under
-the Stage.) It was optional here, absent from
+any more. It names no property and runs the world every deploy ships: since
+legacy cleanup stage 5 (2026-10-01) the current kits are the only build, so
+the second line that ran the old shipped kits (`dotnet-test-shipped`) is
+gone with them. It was optional here, absent from
 `.github/workflows/repo.yml` and absent from the pre-push hook, so it was in no
 gate at all: two pins sat red on main for days and nothing said so. It cannot
 become a CI job, and that is a fact about the assemblies rather than a
@@ -129,8 +122,6 @@ def gates(args) -> list[Gate]:
         Gate("lints", [py, "tools/run_lints.py", "--lane", "ci"]),
         Gate("pytest", [py, "-m", "pytest", *suite, "-q",
                         "-p", "no:cacheprovider", *lane, *jobs]),
-        Gate("codegen-roster", [py, "tools/gen_roster_cards.py", "--check"],
-             optional="codegen"),
         Gate("codegen-prototype",
              [py, "tools/gen_prototype_cards.py", "--check"],
              optional="codegen"),
@@ -142,16 +133,6 @@ def gates(args) -> list[Gate]:
         # world deploy.ps1 ships and the seats play.
         Gate("dotnet-test", ["dotnet", "test", "klee-mod/KleeTests",
                              "--nologo", "-v", "q"]),
-        # THE SECOND WORLD: the old shipped kits, arms compiled but OFF. The
-        # old kits' pins and every arm's flag-off pins are written for it,
-        # and a configuration no gate runs goes red quietly (`EB-781`, when
-        # nine shipped meter pins stood red under the Stage for a week). It
-        # goes when the old kits' code does. About four seconds; the two
-        # configurations share nothing and each rebuilds.
-        Gate("dotnet-test-shipped",
-             ["dotnet", "test", "klee-mod/KleeTests",
-              "-p:ShippedKits=true", "-p:PrototypeCards=true",
-              "--nologo", "-v", "q"]),
     ]
     picked = []
     for gate in out:

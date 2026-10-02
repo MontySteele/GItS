@@ -571,39 +571,6 @@ def _row(sheet_name: str, card_id: str) -> dict:
     return next(r for r in rows if r["id"] == card_id)
 
 
-def test_furina_kit_burst_numbers_come_from_her_sheet():
-    """EB-3. `let_the_people_rejoice` was the last named deferral in the
-    hand-written parity gate: its ops (gain_encore, and a Fanfare damage
-    rider) had no parity rule, so four numbers in
-    Cards/Furina/LetThePeopleRejoice.cs -- 8, 1, 4 and 6 -- existed in C# with
-    nothing comparing them to docs/furina-cards.yaml.
-
-    Asserted here at the RULE level rather than only through the lint's exit
-    code, because the failure mode that matters is a rule that stops firing:
-    a walk that quietly produced no Encore expectation would still leave the
-    lint green, since the C# side would then match an empty expectation.
-    """
-    assert "let_the_people_rejoice" not in hwp.ROSTER_DEFERRED
-
-    row = _row("furina-cards.yaml", "let_the_people_rejoice")
-    exp = hwp.Expected()
-    hwp.walk_effects(row["effects"], exp, row)
-    assert sorted(exp.vars) == [1, 8]        # base damage + the rider's step
-    assert exp.encore == [6]                 # gain_encore, not a DynamicVar
-    assert exp.fanfare_riders == [(1, 4)]    # 1_per_4_fanfare
-
-    path = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina"
-            / "LetThePeopleRejoice.cs")
-    got = hwp.extract_cs(path.read_text(encoding="utf-8"))
-    assert hwp.furina_number_findings(exp, got, path.name) == []
-    # And it bites: the Encore literal is a bare int argument, which is the
-    # reason it needed a category of its own.
-    drifted = hwp.extract_cs(
-        path.read_text(encoding="utf-8").replace(
-            "GainEncore(Owner.Creature, 6)", "GainEncore(Owner.Creature, 7)"))
-    assert hwp.furina_number_findings(exp, drifted, path.name)
-
-
 def test_every_ancient_card_carries_a_pinned_witness():
     """EB-3, the other half. Ancient-rarity cards have no sheet row and never
     will -- the sim models neither events nor relics -- so `+5 Encore per
@@ -895,55 +862,6 @@ def test_the_op_parity_lint_still_catches_a_newly_registered_op():
 # builder), and nothing linked them -- so thirteen of Furina's faces and one
 # of Kokomi's collected 5 Burst Energy that nothing on the card mentioned.
 
-def test_every_skill_tag_card_prints_the_burst_it_pays():
-    res = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "lint_burst_legibility.py")],
-        capture_output=True, text=True)
-    assert res.returncode == 0, res.stdout + res.stderr
-    # A verdict with a denominator, and a denominator that is not zero: the
-    # dead-gate rule this file already applies to the domination sweep.
-    assert "skill_tag card(s) print the reading" in res.stdout, res.stdout
-    assert "OK: 0 skill_tag" not in res.stdout, res.stdout
-
-
-def test_the_burst_legibility_lint_still_catches_a_silent_grant():
-    """The red half, on SYNTHETIC data.
-
-    Both of the lint's inputs are injectable for exactly this: a probe row
-    written into a live sheet, or a probe class written into live C#, is the
-    pattern that once orphaned a file on a hard kill and produced a phantom CI
-    failure. Nothing here touches the tree.
-    """
-    import importlib
-    from pathlib import Path
-
-    lint = importlib.import_module("tools.lint_burst_legibility")
-    sheet = Path("docs/nowhere-cards.yaml")
-
-    assert lint.findings() == [], "the lint must be green before it is red"
-
-    # A tagged row whose face says nothing -- [USER]'s report, in miniature.
-    silent = lint.findings(tagged={"tidal_hymn": sheet},
-                           shipped={"TidalHymn": "Gain 5 [gold]Block[/gold]."})
-    assert len(silent) == 1, silent
-    assert "SILENT BURST" in silent[0] and "tidal_hymn" in silent[0]
-
-    # The same row, printing the reading, is clean.
-    assert lint.findings(
-        tagged={"tidal_hymn": sheet},
-        shipped={"TidalHymn": f"Gain 5 [gold]Block[/gold]. {lint.READING}"}
-    ) == []
-
-    # And the other sign: a face promising Burst that no hook will pay.
-    phantom = lint.findings(
-        tagged={}, shipped={"TidalHymn": f"Gain 5 [gold]Block[/gold]. "
-                                         f"{lint.READING}"})
-    assert len(phantom) == 1, phantom
-    assert "PHANTOM BURST" in phantom[0]
-
-    assert lint.findings() == [], "and green again on the real tree"
-
-
 # --- EB-164: a face states its scaling once -------------------------------
 #
 # Kokomi slice 1 round 2, 2026-08-28. Seventeen faces printed a number that
@@ -952,17 +870,6 @@ def test_the_burst_legibility_lint_still_catches_a_silent_grant():
 # the Sea* as 13 where the game deals 9. The phantom four manufactured a lethal
 # line and seven refusals, three of them on shipped control halves;
 # `staged_turn execute` settled it live at 22 HP -> 1.
-
-def test_no_card_face_states_its_scaling_twice():
-    res = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "lint_face_scaling.py")],
-        capture_output=True, text=True)
-    assert res.returncode == 0, res.stdout + res.stderr
-    # A verdict with a denominator, and a denominator that is not zero: a lint
-    # that reads no faces would pass on an empty tree.
-    assert "face(s) state a fold once" in res.stdout, res.stdout
-    assert "OK: 0 face(s)" not in res.stdout, res.stdout
-
 
 def test_the_face_scaling_lint_still_catches_a_double_stated_rider():
     """The red half, on SYNTHETIC data -- no probe class in the live tree."""
@@ -1005,19 +912,6 @@ def test_the_face_scaling_lint_still_catches_a_double_stated_rider():
     assert any("SCALING STATED TWICE" in line for line in twice), twice
 
     assert lint.findings() == [], "and green again on the real tree"
-
-
-def test_the_face_scaling_lint_reads_a_concatenated_hand_written_face():
-    """`let_the_people_rejoice` carries EB-164's defect across a C# string
-    concatenation, which a one-literal scrape would have read straight past --
-    the hand-written faces are exactly where a generator fix cannot reach."""
-    import importlib
-
-    lint = importlib.import_module("tools.lint_face_scaling")
-    shipped = lint.shipped_descriptions()
-    face = shipped["LetThePeopleRejoice"]
-    assert "{CalculatedDamage" in face and "Gain 6 [gold]Encore[/gold]" in face
-    assert lint.FOLD in face and "Scales with" not in face
 
 
 def test_a_finding_on_a_music_note_title_prints_on_a_cp1252_console(tmp_path):

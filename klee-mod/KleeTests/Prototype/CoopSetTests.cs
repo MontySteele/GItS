@@ -358,10 +358,6 @@ public class CoopSetTests
             ally.Creature, 8m, Attack | ValueProp.Unblockable, enemy, null));
         Assert.Equal(5, stage.Lead!.Fanfare);
 
-        // With the Stage off nothing is redirected.
-        FurinaStage.Enabled = false;
-        Assert.Equal(8m, guest.ModifyHpLostBeforeOsty(
-            ally.Creature, 8m, Attack, enemy, null));
     }
 
     [Fact]
@@ -530,17 +526,14 @@ public class CoopSetTests
 
     private sealed class StageArm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
         internal StageArm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = true;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }

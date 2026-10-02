@@ -28,11 +28,10 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiStatusBatchTests : IDisposable
 {
-    private readonly bool _kokomi = KokomiOverhaul.Enabled;
 
-    public KokomiStatusBatchTests() => KokomiOverhaul.Enabled = true;
+    public KokomiStatusBatchTests() { }
 
-    public void Dispose() => KokomiOverhaul.Enabled = _kokomi;
+    public void Dispose() { }
 
     private static T Upgraded<T>() where T : CardModel, new()
     {

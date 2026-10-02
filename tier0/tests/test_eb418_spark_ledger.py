@@ -169,11 +169,3 @@ def test_under_the_arm_a_companion_play_is_no_gain_at_all(overhaul):
             row["source"] for row in _gains(state)], cid
 
 
-def test_the_name_is_the_rules_and_not_one_companions(overhaul):
-    """`EB-219` moved the grant off Prune's face and keyed it on a SET, so a
-    ledger row saying "prune" over another witch's play is the same unreadable
-    number one surface further in. Both engines say `companion:personal/play`."""
-    src = (REPO / "klee-mod" / "KleeCode" / "Powers"
-           / "KleeCompanionSpark.cs").read_text(encoding="utf-8")
-    assert 'source: "companion:personal/play"' in src
-    assert "companion:prune/play" not in src

@@ -100,15 +100,3 @@ def test_no_canonical_model_reaches_a_mutating_command():
           "ToMutable() for you, or call .ToMutable() explicitly.")
 
 
-def test_kurage_uses_the_generic_apply():
-    """The specific regression, pinned by name.
-
-    The general scan above would catch a literal repeat, but not somebody
-    'fixing' this by reintroducing the non-generic call with a mutable local
-    obtained some other way. This card is the one we know softlocks.
-    """
-    src = (_CS / "Powers" / "KuragePowers.cs").read_text(encoding="utf-8")
-    assert "PowerCmd.Apply<KurageSummonPower>(" in src, (
-        "KurageSummon.Field no longer uses the generic PowerCmd.Apply<T>; "
-        "the non-generic overload asserts mutability on the model it is "
-        "handed and softlocks on the first Bake-Kurage of a combat")

@@ -113,8 +113,10 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # IT WENT FIVE -> FOUR ON 2026-09-16 (`EB-726`): the Salon panel's own
     # teardown patch left HEAD with the retired reframe, which is the only arm
     # that ever built the panel.
-    # A FIFTH appearing here is the next review question.
-    assert len(markers) == 4, markers
+    # IT WENT FOUR -> THREE ON 2026-10-01 (legacy cleanup stage 5): the
+    # Kurage memory card's teardown left with the retired Kurage memory.
+    # A FOURTH appearing here is the next review question.
+    assert len(markers) == 3, markers
 
 
 def test_registered_in_the_ci_lane() -> None:

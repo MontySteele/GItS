@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System.Collections.Generic;
 using System.Linq;
 using BaseLib.Abstracts;
@@ -20,10 +19,8 @@ namespace KleeMod;
 /// element, and every aura he lays down or Swirls swears Oath of it to his
 /// blade (<see cref="VarkaPrototype"/> states the rules).
 ///
-/// COMPILED WITH THE PROTOTYPE SURFACE (<c>PROTOTYPE_CARDS</c>), so a
-/// <c>-p:ShippedKits=true</c> build has no Varka on the select screen at all:
-/// he ships nowhere else, and has no switch of his own (collapsed
-/// 2026-10-01, legacy cleanup stage 2).
+/// He has no switch of his own (collapsed 2026-10-01, legacy cleanup stage
+/// 2) and compiles in every build.
 /// </summary>
 public sealed class Varka : CustomCharacterModel, IVarkaCharacter
 {
@@ -132,4 +129,3 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
         "vfx/vfx_attack_slash",
     };
 }
-#endif

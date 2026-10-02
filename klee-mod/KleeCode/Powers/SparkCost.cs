@@ -82,11 +82,7 @@ public static class SparkCost
     /// </summary>
     public static int PowerPriceOf(CardModel card)
     {
-#if PROTOTYPE_CARDS
         return SparkAttackCostPower.PriceFor(card);
-#else
-        return 0;
-#endif
     }
 
     /// <summary>Printed plus power: the one number every reader consults.</summary>

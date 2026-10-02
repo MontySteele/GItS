@@ -5,7 +5,6 @@ using BaseLib.Utils.NodeFactories;
 using Godot;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using KleeMod.Cards;
-using KleeMod.Cards.Generated;
 using MegaCrit.Sts2.Core.Entities.Characters;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;
@@ -94,65 +93,18 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
     // (Relics/KleeArmRelics.cs), offered only under it.
     public override RelicPoolModel RelicPool => ModelDb.RelicPool<KleeRelicPool>();
 
+    // Her own three potions (review/active/relics-potions-klee-furina-2026-09-27.md,
+    // pick 1(a)); the Silent borrow is gone.
     public override PotionPoolModel PotionPool =>
-#if PROTOTYPE_CARDS
-        // QUARANTINED: under the Klee arm her own three and no Silent borrow
-        // (review/active/relics-potions-klee-furina-2026-09-27.md, pick 1(a)).
-        // Arm off, the pool as it shipped.
-        Powers.KleeOverhaul.Enabled
-            ? ModelDb.PotionPool<Potions.KleePotionPool>() :
-#endif
-        ModelDb.PotionPool<SilentPotionPool>();
+        ModelDb.PotionPool<Potions.KleePotionPool>();
 
     /// <remarks>
-    /// Printed template: 4x Kaboom, 4x Duck and Cover, 1x Jumpy Dumpty,
-    /// 1x Pop. KleeStartingCompanionsPatch replaces one Kaboom with Dahlia or
-    /// Kaeya and one Duck and Cover with Barbara or Prune after the run seed
-    /// exists. Keeping the template here makes character-select/self-check
-    /// reads stable; only actual new-run creation resolves the random pair.
+    /// The base Strike x4, Defend x4 and two kit cards
+    /// (<c>KleeOverhaulRoster.StartingDeck</c>; sim twin
+    /// <c>tier0/content/loader._starter_ids</c>).
     /// </remarks>
-    public override IEnumerable<CardModel> StartingDeck
-    {
-        get
-        {
-#if PROTOTYPE_CARDS
-            // QUARANTINED, THE KLEE OVERHAUL'S ONE STARTER SEAM (the ruled
-            // brief klee-brief-2026-09-01.md sec.8; sim twin
-            // `tier0/content/loader._starter_ids`, the same one seam). It comes
-            // FIRST because the two prototype arms are ALTERNATIVES, not
-            // layers: the Sparks substitutions below are priced inside rules
-            // this arm retires, and a dev build compiles both. With
-            // `KleeOverhaul.Enabled` off -- which is every build that did not
-            // ask for `-p:KleeOverhaul=true` -- this branch does not run and
-            // the list below is byte for byte what it was.
-            if (Powers.KleeOverhaul.Enabled)
-            {
-                return Powers.KleeOverhaulRoster.StartingDeck();
-            }
-#endif
-            // `EB-750`: the Sparks arm's two starter substitutions
-            // (`SparkStarter.PricedKaboom`, `SparkStarter.SparkingPop`) are
-            // DELETED. R270 ruled Spark a currency under the overhaul, which
-            // superseded the priced twins, so the rows left the prototype
-            // surface and this seam went with them. Under
-            // `-p:PrototypeCards=true` Klee now opens with her printed ten,
-            // exactly as a release build does. They read back at commit
-            // 036c12d150d6dbd58f0776a0d07e3c028a321a61.
-            return new CardModel[]
-            {
-                ModelDb.Card<Kaboom>(),
-                ModelDb.Card<Kaboom>(),
-                ModelDb.Card<Kaboom>(),
-                ModelDb.Card<Kaboom>(),
-                ModelDb.Card<DuckAndCover>(),
-                ModelDb.Card<DuckAndCover>(),
-                ModelDb.Card<DuckAndCover>(),
-                ModelDb.Card<DuckAndCover>(),
-                ModelDb.Card<JumpyDumpty>(),
-                ModelDb.Card<Pop>(),
-            };
-        }
-    }
+    public override IEnumerable<CardModel> StartingDeck =>
+        Powers.KleeOverhaulRoster.StartingDeck();
 
     /// <remarks>
     /// Pounding Surprise (+1 Spark per Bomb detonation) — the real starting

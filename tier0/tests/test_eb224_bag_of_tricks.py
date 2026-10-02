@@ -233,59 +233,6 @@ def emitted():
     return proto_gen.plan().generated[ROW_ID]
 
 
-def test_the_generator_emits_this_row_rather_than_blocking_it(emitted):
-    """A prototype the emitter refuses cannot be staged, and `spend_spark`
-    inside a mode body WAS refused until EB-224 added the branch resolver: the
-    written clause only admitted a top-level Spark price, so the codegen
-    grammar only admitted one there too."""
-    assert "public sealed class ProtoSparkModeBombs" in emitted
-
-
-def test_the_price_is_declared_once_and_read_by_the_gate_and_the_badge(
-        emitted):
-    """EB-182 + EB-220, on this row. ONE literal: the `ModePrices` table. The
-    playability gate consults it, the screen filter consults it, and the mode
-    FACE reads its own row out of it -- so the badge paints the very number the
-    bank was measured against, with the Spark glyph, and no second copy exists
-    to drift."""
-    assert "new ModePrice(Meter.Sparks, 3)" in emitted
-    assert emitted.split("ModePrices =")[1].lstrip().startswith("{\n        null,")
-    assert ("protected override bool IsPlayable =>\n"
-            "        ModalChoice.AnyAffordable(Owner, ModePrices);") in emitted
-    assert ("ModalChoice.SelectAffordableMode(choiceContext, Owner, "
-            "modeOptions, ModePrices)") in emitted
-    assert ("public sealed class ProtoSparkModeBombsModeB : ModalOptionCard, "
-            "IMeterPricedCard") in emitted
-    assert ("public Meter PricedMeter =>\n"
-            "        ProtoSparkModeBombs.ModePrices[1]!.Value.Meter;") in emitted
-    assert ("public int PrintedMeterPrice =>\n"
-            "        ProtoSparkModeBombs.ModePrices[1]!.Value.Amount;") in emitted
-    # The free mode declares no price at all -- not a price of zero.
-    assert ("public sealed class ProtoSparkModeBombsModeA : ModalOptionCard\n"
-            in emitted)
-
-
-def test_the_mode_head_spend_is_emitted_GUARDED(emitted):
-    """THE DEFECT EB-224 CLOSED, and it is why this test is spelled out.
-
-    `spend_spark` was in neither `BRANCH_OPS` nor `_emit_branch_op`. The first
-    absence blocked the ROW; the second meant `emit()` -- which does not
-    consult `blocked_reason`, and which `test_eb118_modal_parity`'s badge case
-    calls directly -- produced a mode that declared a 3-Spark price, filtered
-    the option in by it, and then placed the Bombs WITHOUT DEBITING THE BANK.
-    An op in a price table with no resolver is an unpaid payoff.
-
-    The resolver is the GUARDED form, matching `spend_charge`: a mode body has
-    no `IsPlayable` of its own, so the early return is what makes the price a
-    price if anything ever reaches the body past the screen."""
-    assert ("if (!await SparkPower.Spend(choiceContext, Owner.Creature, 3, "
-            "this)) return;") in emitted
-    # ... and it precedes the payoff it pays for, three Bombs at 5.
-    body = emitted.split("else\n        {")[1]
-    assert body.index("SparkPower.Spend") < body.index("BombPower.Place")
-    assert "for (var i = 0; i < 3; i++)" in body
-
-
 def test_the_two_engines_agree_on_which_ops_may_head_a_priced_mode():
     """The parity that made this row legal in one engine and not the other.
     `effects.MODE_PRICE_OPS` (sim) and the codegen's `MODE_PRICE_OPS` name the

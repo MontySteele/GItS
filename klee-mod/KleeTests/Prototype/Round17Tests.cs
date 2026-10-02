@@ -5,9 +5,6 @@ using System.Reflection;
 using BaseLib.Abstracts;
 using KleeMod.Cards.Furina;
 using KleeMod.Cards;
-using KleeGen = KleeMod.Cards.Generated;
-using FurinaGen = KleeMod.Cards.Furina.Generated;
-using KleeMod.Cards.Generated;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
 using KleeMod.Powers;
@@ -59,24 +56,6 @@ public class Round17Tests
     // truncated landed amount since `EB-270` for exactly this reason, and now
     // that is what the row carries.
 
-    /// <summary>The seat's card, so the base is the sheet's and not a
-    /// literal retyped here.</summary>
-    private static decimal ChevreuseBase() =>
-        new ChevreuseInterdictionFire().DynamicVars.CalculationBase.BaseValue;
-
-    [Fact]
-    public void The_spotlight_rewrites_the_printed_number_and_the_rest_multiply_it()
-    {
-        // Guest Cast is a multiplier on the PRINTED base and truncates there:
-        // 7 -> 10, which is the number the seat read on turn 3 with Weak
-        // gone.
-        var printed = Math.Truncate(
-            ChevreuseBase() * SpotlightSystem.GuestCastBaseMultiplier);
-
-        Assert.Equal(7m, ChevreuseBase());
-        Assert.Equal(10m, printed);
-    }
-
     [Fact]
     public void Weak_and_vaporize_compose_over_the_spotlit_base()
     {
@@ -97,33 +76,6 @@ public class Round17Tests
         Assert.NotEqual(8, landed);
     }
 
-    [Fact]
-    public void The_two_powers_the_game_folds_are_each_still_their_own_factor()
-    {
-        // THE POWERED-ATTACK PATH, run for real. `Hook.ModifyDamageInternal`
-        // walks every listener doing `num *= num3` (the fold
-        // `BombPower.IsSuppressionArbiter` is written against), so what a test
-        // can check headless is that each listener still answers its own
-        // multiplier when the other one is standing.
-        var attacker = Seat.Furina().WithPower<WeakPower>(1);
-        var wearer = Seat.Klee(400).WithPower<HydroAuraPower>(2);
-        var card = new ChevreuseInterdictionFire();
-        var props = ValueProp.Move;
-        Assert.True(props.IsPoweredAttack());
-        Assert.Equal(Element.Pyro, card.Element);
-
-        var weak = attacker.Creature.Powers.OfType<WeakPower>().Single();
-        var aura = wearer.Creature.Powers.OfType<HydroAuraPower>().Single();
-
-        var weakMult = weak.ModifyDamageMultiplicative(
-            wearer.Creature, 10m, props, attacker.Creature, card, null);
-        var auraMult = aura.ModifyDamageMultiplicative(
-            wearer.Creature, 10m, props, attacker.Creature, card, null);
-
-        Assert.Equal(0.75m, weakMult);
-        Assert.Equal(ReactionConstants.VaporizeMult, auraMult);
-        Assert.Equal(11, (int)(10m * weakMult * auraMult));
-    }
     [Fact]
     public void Deal_still_hands_back_what_it_dealt()
     {
@@ -268,100 +220,6 @@ public class Round17Tests
     //
     // SHEET-WIDE, over the classes themselves rather than a list retyped here.
 
-    private static IReadOnlyList<CustomCardModel> FurinaSkillTagFaces() =>
-        typeof(FurinaGen.GentilhommeUsher).Assembly.GetTypes()
-            .Where(t => !t.IsAbstract
-                     && typeof(CustomCardModel).IsAssignableFrom(t)
-                     && typeof(ISkillTagCard).IsAssignableFrom(t)
-                     && t.Namespace == typeof(FurinaGen.GentilhommeUsher)
-                                           .Namespace)
-            .Select(t => (CustomCardModel)Activator.CreateInstance(t)!)
-            .ToList();
-
-    [Fact]
-    public void Her_whole_skill_tag_sheet_is_found_by_the_rule()
-    {
-        var faces = FurinaSkillTagFaces();
-
-        // Thirteen today. The number is asserted so a row that silently loses
-        // its tag -- or a new one that never gained it -- is visible here,
-        // which is the census the row asked for.
-        Assert.Equal(13, faces.Count);
-        Assert.Contains(faces, card => card is FurinaGen.GentilhommeUsher);
-    }
-
-    [Fact]
-    public void No_face_under_the_arm_prints_the_retired_meter()
-    {
-        using var arm = new FurinaBurstArm(retired: true);
-
-        foreach (var card in FurinaSkillTagFaces())
-        {
-            var face = Face(card);
-            Assert.DoesNotContain("Burst", face);
-            Assert.DoesNotContain(KleeKeywords.ElementalSkill,
-                                  card.CanonicalKeywords);
-        }
-    }
-
-    [Fact]
-    public void Off_the_arm_every_one_of_them_still_prints_it()
-    {
-        // The quarantine's other half, and what makes the blank a fact about
-        // the ARM rather than a deletion: a release build is unchanged.
-        using var arm = new FurinaBurstArm(retired: false);
-
-        foreach (var card in FurinaSkillTagFaces())
-        {
-            Assert.Contains(
-                $"[gold]Burst[/gold] +{BurstConstants.PerSkillTag}.",
-                Face(card));
-            Assert.Contains(KleeKeywords.ElementalSkill,
-                            card.CanonicalKeywords);
-        }
-    }
-
-    [Fact]
-    public void The_gameplay_marker_is_untouched_on_both_sides()
-    {
-        // Only the WORDS move. `ISkillTagCard` still rides every row, and
-        // `FurinaResources` still decides whether it pays -- so the day the
-        // arm is withdrawn the meter and its words come back together.
-        using var arm = new FurinaBurstArm(retired: true);
-
-        Assert.All(FurinaSkillTagFaces(),
-                   card => Assert.IsAssignableFrom<ISkillTagCard>(card));
-    }
-
-    [Fact]
-    public void Klees_and_kokomis_faces_keep_their_meters()
-    {
-        // The blank is Furina-scoped: `skill_tag` is on fifteen Klee rows and
-        // one of Kokomi's, and those meters are not retired.
-        using var arm = new FurinaBurstArm(retired: true);
-        var line = $"[gold]Burst[/gold] +{BurstConstants.PerSkillTag}.";
-
-        Assert.Contains(line, Face(new KleeGen.MineToss()));
-    }
-
-    /// <summary>`EB-726`: the Burst retirement moved from the retired reframe
-    /// to the STAGE, which is the arm that has it now (brief sec.2 and rule
-    /// 11). The rule and these pins are unchanged; only the flag they flip
-    /// is.</summary>
-    private sealed class FurinaBurstArm : IDisposable
-    {
-        private readonly bool _enabled = FurinaStage.Enabled;
-
-        internal FurinaBurstArm(bool retired)
-        {
-            FurinaStage.Enabled = retired;
-        }
-
-        public void Dispose()
-        {
-            FurinaStage.Enabled = _enabled;
-        }
-    }
 
     /// <summary>A card's printed body, joined the way the generator writes
     /// it.</summary>

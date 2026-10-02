@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -41,10 +40,7 @@ public sealed class VarkaRelicPool : RelicPoolModel
 
     public override IEnumerable<RelicModel> GetUnlockedRelics(
         MegaCrit.Sts2.Core.Unlocks.UnlockState unlockState) =>
-        Relics.ArmRelicPools.Offer(
-            AllRelics,
-            !Relics.VarkaArmRelics.KeepSilentBorrow,
-            Relics.ArmRelicPools.VarkaArmPool,
-            System.Array.Empty<System.Type>());
+        Relics.VarkaArmRelics.KeepSilentBorrow
+            ? AllRelics
+            : Relics.ArmRelicPools.Offer(AllRelics, Relics.ArmRelicPools.VarkaArmPool);
 }
-#endif

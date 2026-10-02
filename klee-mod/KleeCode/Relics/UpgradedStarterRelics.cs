@@ -116,13 +116,11 @@ internal static class UpgradedStarterRelics
 /// never removes.
 /// </summary>
 public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
-#if PROTOTYPE_CARDS
     // QUARANTINED, and the same seam Pounding Surprise takes: under the Klee
     // overhaul this relic is the upgraded form of the Spark rule, so it listens
     // to the arm's explosion bus too. Inside the switch, so a release build
     // neither compiles the interface nor references it.
     , Powers.IProtoExplosionListener
-#endif
 {
     /// <summary>
     /// Sparks per detonation. UNCHANGED from the base relic -- the upgrade is
@@ -135,12 +133,10 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
     /// <summary>Sparks banked once, at the start of every combat.</summary>
     public const int OpeningSparks = 3;
 
-#if PROTOTYPE_CARDS
     /// <summary>Under the Klee arm, the first explosion each turn pays this
     /// many Sparks instead of one (the relics-and-potions paper's repair,
     /// ruled 2026-09-27).</summary>
     public const int FirstExplosionSparks = 2;
-#endif
 
     public ExplosiveFrags() : base(autoAdd: false)
     {
@@ -161,7 +157,6 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         // Rare Power card of that name. See the class summary.
         ("title", "Dodoco Tales"),
         ("description",
-#if KLEE_OVERHAUL
             // Under the arm the opening bank is gated OFF
             // (`AfterPlayerTurnStart` below) and the repair of 2026-09-27
             // (review/active/relics-potions-klee-furina-2026-09-27.md) is the
@@ -173,11 +168,6 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
           + Powers.KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]. "
           + "The first time each turn, gain [blue]" + FirstExplosionSparks
           + "[/blue] instead."
-#else
-            $"Start each combat with [blue]{OpeningSparks}[/blue] "
-          + "[gold]Sparks[/gold]. Whenever a [gold]Bomb[/gold] detonates, "
-          + $"gain [blue]{SparksPerDetonation}[/blue] [gold]Spark[/gold]."
-#endif
             ),
     };
 
@@ -226,39 +216,6 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         return true;
     }
 
-    /// <summary>
-    /// The opening bank.
-    ///
-    /// SITE CHOSEN FOR SIM PARITY, not convenience. `BeforeCombatStart()` is
-    /// the obvious-sounding hook and is wrong here twice over: it carries no
-    /// PlayerChoiceContext (which granting a power needs), and the sim fires
-    /// its `combat_start_*` relic effects on TURN 1 after the block clear,
-    /// energy reset and draw — not before the combat exists
-    /// (combat.py `_player_turn`, `if state.turn == 1: apply_combat_start`).
-    /// Turn 1 of `AfterPlayerTurnStart` is that same moment.
-    ///
-    /// `TurnNumber == 1` rather than `<= 1` so an extra first turn cannot pay
-    /// the windfall twice, and per-PLAYER so a co-op partner's turn counter
-    /// cannot trigger Klee's bank.
-    /// </summary>
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
-    {
-        if (player != Owner || player.PlayerCombatState?.TurnNumber != 1) return;
-#if PROTOTYPE_CARDS
-        // THE OVERHAUL GATES THIS HALF OFF. Rule 4 is "Sparks come ONLY from
-        // explosions" (the ruled brief sec.3), and the brief's relic paragraph
-        // turns on the relic being the ONLY free Spark source; an opening bank
-        // of three would hand the player the Spray loop's whole first turn
-        // before a single Bomb had gone off. The per-explosion half below
-        // stays, which is the rule the upgrade is an upgrade OF.
-        if (Powers.KleeOverhaul.Enabled) return;
-#endif
-        Flash();
-        await SparkPower.Gain(
-            choiceContext, Owner.Creature, OpeningSparks, cardSource: null,
-            source: "relic:explosive_frags/combat_start");
-    }
 
     public async Task OnBombDetonated(
         PlayerChoiceContext choiceContext, Creature? applier, Creature target,
@@ -274,7 +231,6 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
             source: "relic:explosive_frags/detonation");
     }
 
-#if PROTOTYPE_CARDS
     /// <summary>The overhaul's rule 4 on the upgraded relic: the same one Spark
     /// per explosion the base relic mints, so an act-2 Touch of Orobas cannot
     /// silently take the arm's only income away.</summary>
@@ -282,7 +238,6 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         PlayerChoiceContext choiceContext, Creature applier, Creature target,
         int size, bool reacted)
     {
-        if (!Powers.KleeOverhaul.Enabled) return;
         if (applier.Player != Owner) return;
 
         Flash();
@@ -299,117 +254,6 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         Powers.KleeOverhaulLedger.For(applier).TakeDodocoTales()
             ? FirstExplosionSparks
             : Powers.KleeOverhaulLaw.SparkPerExplosion;
-#endif
-}
-
-/// <summary>
-/// Kokomi's upgraded starter (Touch of Orobas). Same hook, doubled numbers.
-///
-/// Like the base relic this is the FICTION of the rule and the place the
-/// tooltip lives, not the mechanism -- the exhaust funnel is keyed to her
-/// character identity, so a player who loses the relic does not lose the
-/// character. Which is precisely why the upgraded form has to declare its own
-/// numbers rather than assume the funnel reads them from here.
-///
-/// PROPOSED. Included because G-C3(b) says Kokomi's rides along if her starter
-/// relic already exists in-tree, and PearlOfWisdomRelic does. The tension with
-/// the sprint's "Kokomi anything" non-goal is noted in the log; leaving her
-/// starter to degrade into a Circlet while fixing exactly that bug for the
-/// other two would have been knowingly shipping a known defect.
-/// </summary>
-public sealed class PearlOfInsightRelic : CustomRelicModel
-{
-    /// <summary>
-    /// RATIFIED INVARIANT (R190, 2026-08-13): the upgraded rates are exactly
-    /// TWICE their base rates, in BOTH engines, permanently.
-    ///
-    /// WHY THESE ARE LITERALS AND NOT `KokomiConstants.X * 2`. The expression
-    /// form looks stronger and was weaker. The compiler enforced the doubling
-    /// on THIS side, and nothing at all enforced it on the sim's -- where the
-    /// same two numbers are literals in tier05/content/relics.yaml. So bumping
-    /// a base constant moved C# and left the sim behind, and the parity lint
-    /// was structurally blind to it, because an expression is not a numeric
-    /// literal and `parse_number` cannot read one: both members sat in
-    /// UNMIRRORED with a note saying exactly this, and saying that making them
-    /// literals is what would fix it (EB-74 packet §3f found the same hole
-    /// from the other direction).
-    ///
-    /// As literals they are MIRRORED against the sim's relic row, and
-    /// tools/lint_constant_parity.py additionally asserts that row is 2x the
-    /// tier0 base constant. That closes the loop the compiler could only close
-    /// halfway: C# literal == sim relic row == 2 x tier0 base, checked on every
-    /// suite run. ExplosiveFrags.OpeningSparks is the in-repo precedent for the
-    /// literal-plus-MIRRORED shape.
-    ///
-    /// CONSEQUENCE FOR ANYONE MOVING THE BASE RATE (e.g. EB-74's lever-2
-    /// candidate B, CHARGE_PER_EXHAUST 1 -> 2): you move FOUR numbers, not one.
-    /// The lint tells you so and fails until you have. It must be green
-    /// BEFORE any such change is pulled -- that ordering is part of R190.
-    ///
-    /// This class is the FICTION and the tooltip, never the mechanism: the
-    /// exhaust funnel is keyed to her character identity, which is why the
-    /// upgraded form has to declare its own numbers rather than read the
-    /// funnel's.
-    /// </summary>
-    public const int ChargePerExhaust = 2;   // = KokomiConstants.ChargePerExhaust * 2
-    public const int BurstPerExhaust = 4;    // = KokomiConstants.BurstPerExhaust * 2
-
-    public PearlOfInsightRelic() : base(autoAdd: false)
-    {
-    }
-
-    public override RelicRarity Rarity => RelicRarity.Ancient;
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Pearl of Insight"),
-        ("description",
-            "Whenever a card is [gold]Exhausted[/gold], gain [blue]"
-          + $"{ChargePerExhaust}[/blue] [gold]Charge[/gold] and [blue]"
-          + $"{BurstPerExhaust}[/blue] [gold]Burst Energy[/gold]."),
-    };
-
-    /// <summary>
-    /// Kokomi's fourth companion reward option, carried forward from the base
-    /// relic UNCHANGED.
-    ///
-    /// This is not part of the upgrade and must never be treated as optional.
-    /// Companions are off every rollable pool, so the starter relic's reward
-    /// slot is their ONLY door — and her Commander archetype is built entirely
-    /// out of them. An upgraded starter that dropped this hook would not crash
-    /// or warn; it would quietly delete one of her three archetypes the moment
-    /// Touch of Orobas was taken, which is the same class of silent deletion
-    /// the whole upgraded-starter track exists to prevent.
-    ///
-    /// It was in fact missing here for a day: this class was written before
-    /// the base relic gained the hook, and the omission was caught by reading
-    /// the two files side by side rather than by any check.
-    /// </summary>
-    public override bool TryModifyCardRewardOptions(
-        Player player, List<CardCreationResult> cardRewardOptions,
-        CardCreationOptions creationOptions)
-    {
-        if (creationOptions.Source != CardCreationSource.Encounter
-            || player.Character is not Kokomi)
-        {
-            return false;
-        }
-        var rarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
-            ? CardRarity.Rare
-            : (CardRarity?)null;
-        var offer = CompanionSlot.Roll(player, rarity);
-        if (offer == null) return false;
-        cardRewardOptions.Add(new CardCreationResult(offer));
-        return true;
-    }
-
-    protected override string IconBaseName => "snake_ring";
-
-    public override string PackedIconPath =>
-        KleePck.Path("kokomi/relics/pearl_of_wisdom.png") ?? base.PackedIconPath;
-
-    protected override string BigIconPath =>
-        KleePck.Path("kokomi/relics/pearl_of_wisdom.png") ?? base.BigIconPath;
 }
 
 /// <summary>
@@ -473,7 +317,6 @@ public sealed class CurtainNeverFalls : CustomRelicModel
     {
     }
 
-#if PROTOTYPE_CARDS
     /// <summary>Under the Stage, the front performer's regain at the start of
     /// her turn, from her SECOND turn, the same first turn as the shipped
     /// rule. Since the rules pass (2026-10-01) rule 4 is cut and this is the
@@ -512,7 +355,6 @@ public sealed class CurtainNeverFalls : CustomRelicModel
         if (!Powers.FurinaStage.LiveFor(furina)) return;
         await Powers.FurinaStage.OpenCombat(furina);
     }
-#endif
 
     // Ancient, never Starter -- see ExplosiveFrags for why that matters.
     public override RelicRarity Rarity => RelicRarity.Ancient;
@@ -521,7 +363,6 @@ public sealed class CurtainNeverFalls : CustomRelicModel
     {
         ("title", "The Curtain Never Falls"),
         ("description",
-#if FURINA_STAGE
             // The Stage's face: a loc row is registered once at boot, so the
             // switch is the compile constant the deploy line sets.
             // The third text pass (2026-09-28): the face prints the 5 the
@@ -532,11 +373,6 @@ public sealed class CurtainNeverFalls : CustomRelicModel
           // only regain and the face no longer prints "not 1".
           + "Your [gold]front performer[/gold] regains [blue]" + LeadRegen
           + "[/blue] [gold]Fanfare[/gold] at the start of each turn."
-#else
-            "[gold]Center Stage[/gold] and [gold]Guest Cast[/gold] are always "
-          + "active. You always count as having moved the "
-          + "[gold]Spotlight[/gold]."
-#endif
             ),
     };
 

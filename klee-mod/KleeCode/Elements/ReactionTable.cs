@@ -116,29 +116,18 @@ public static class ReactionTable
         var baseMult = AmplifierMultiplier(reaction);
         if (baseMult == 1m || dealer == null) return baseMult;
 
-        // Multiplicative on the base (sim _amp_mult): +100 doubles the
-        // Vaporize/Melt amplifier rather than adding one flat damage point.
-        var pct = dealer.Powers.OfType<AmpReactionUpPower>().FirstOrDefault()?.Amount ?? 0;
-        var mult = baseMult * (1m + pct / 100m);
-
-#if PROTOTYPE_CARDS
-        // QUARANTINED (the Mondstadt companion overhaul's Durin, WHITE form):
-        // "enemies take 50% more damage FROM REACTIONS". That scales the
-        // reaction's OWN contribution, `mult - 1`, and not the hit that
-        // triggered it -- a different sentence from Vermillion Pact's amp boost
-        // one line up, which is why it is applied here instead of folded into
-        // `pct`. Sim twin: `reactions._react`,
+        // The Mondstadt companion overhaul's Durin, WHITE form: "enemies take
+        // 50% more damage FROM REACTIONS". That scales the reaction's OWN
+        // contribution, `mult - 1`, and not the hit that triggered it. Sim twin: `reactions._react`,
         // `out = damage + (out - damage) * m`, the same algebra. Returns
         // `mult` unmoved with no White standing.
-        mult = 1m + (mult - 1m)
+        var mult = 1m + (baseMult - 1m)
              * Powers.CompanionOverhaulReactions.DamageMultiplier(dealer);
-#endif
 
         if (mult > ReactionConstants.AmpStackLimit)
         {
             Log.Warn($"[{KleeMod.ModId}] AMP_STACK guard: multiplier {mult} exceeds " +
-                     $"{ReactionConstants.AmpStackLimit} on {reaction} " +
-                     $"(amp boost {pct}%).");
+                     $"{ReactionConstants.AmpStackLimit} on {reaction}.");
         }
 
         return mult;

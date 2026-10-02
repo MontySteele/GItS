@@ -80,13 +80,11 @@ internal static class KleeSelfCheck
                          ModelDb.Character<Klee>(),
                          ModelDb.Character<Furina>(),
                          ModelDb.Character<Kokomi>(),
-#if PROTOTYPE_CARDS
                          // Varka (prototype batch one): the same sweep, so his
                          // relic pool (R7), his pool's rarities and types (R3),
                          // his loc (R8) and his Architect lines (R12) are
                          // checked at boot like everyone's.
                          ModelDb.Character<Varka>(),
-#endif
                      })
             {
                 CheckCharacterInvariants(character);
@@ -104,18 +102,6 @@ internal static class KleeSelfCheck
             // it, and both keys that shipped raw belonged to a rider and a
             // meter rather than to any roster's card pool.
             CheckKeywordTitleRows();
-
-            // R19 (G-A5a). Furina's Fanfare arithmetic against vectors derived
-            // from the sim. This is where the C# port is executed against the
-            // design of record IN THE GAME; `klee-mod/KleeTests` (EB-105) now
-            // runs mod arithmetic headlessly too, but only a boot check runs it
-            // in the configuration a player is actually in. The Python suite
-            // guarantees the vectors themselves are the sim's; this guarantees
-            // our code answers them correctly.
-            foreach (var finding in FurinaParityVectors.Check())
-            {
-                Fail("R19", finding);
-            }
 
             // R116 (Errata Batch 2). The non-card parity vectors: the same
             // two-halves construction, for rulings that belong to no kit --
@@ -444,7 +430,6 @@ internal static class KleeSelfCheck
         // ArmStarterBasics, which is the seam that answers it.
         foreach (var tag in new[] { CardTag.Strike, CardTag.Defend })
         {
-#if PROTOTYPE_CARDS
             // VARKA's pool holds no Basic Strike or Defend at all -- his
             // starter's base pair is Silent's -- and his answer is the seam
             // above, `ArmStarterBasics`, which Large Capsule and Fasten are
@@ -454,7 +439,6 @@ internal static class KleeSelfCheck
             {
                 break;
             }
-#endif
             if (!pool.Any(c => c.Rarity == CardRarity.Basic && c.Tags.Contains(tag)))
             {
                 Fail("R11", $"{character.GetType().Name}: no Basic-rarity card tagged "

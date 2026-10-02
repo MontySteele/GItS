@@ -42,24 +42,10 @@ MEMBERSHIP_FILES = [
     REPO / "klee-mod" / "KleeCode" / "KleeCardPool.cs",
     REPO / "klee-mod" / "KleeCode" / "KleeOffPoolCards.cs",
     REPO / "klee-mod" / "KleeCode" / "RosterAncientCards.cs",
-    REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated" / "CompanionRoster.cs",
     REPO / "klee-mod" / "KleeCode" / "FurinaCardPool.cs",
-    REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"
-    / "FurinaCardRoster.cs",
-    REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"
-    / "GuestStarRoster.cs",
     REPO / "klee-mod" / "KleeCode" / "KokomiCardPool.cs",
-    REPO / "klee-mod" / "KleeCode" / "Cards" / "Kokomi" / "Generated"
-    / "KokomiCardRoster.cs",
-    # QUARANTINED prototype surface (R213 B, EB-147). Listed here because the
-    # quarantine does NOT extend to runtime legality: a prototype card is
-    # drawn and previewed by the real game during a staged turn, so it must
-    # resolve CardModel.Pool exactly like a shipped card or it takes down the
-    # task that owned the draw. KleeMod.PrototypeCards hands this roster to
-    # each character's OFF-POOL list -- in the pool, out of GetUnlockedCards
-    # -- which is the same split the kit cards and the companions use. The
-    # file is committed even when the surface is empty (an empty roster
-    # class), so this path never goes missing.
+    # The prototype surface: every current-kit card. `PrototypeCards.For`
+    # hands this roster to each character's GenerateAllCards.
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
     / "PrototypeRoster.cs",
     # VARKA: `VarkaCardPool.GenerateAllCards` reads `VarkaRoster.Members()`,

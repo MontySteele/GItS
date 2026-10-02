@@ -95,15 +95,6 @@ def test_a_spend_cards_modes_wear_the_parents_type_and_no_orb(stem):
         assert f": base({parent})" in body
 
 
-def test_a_modal_card_with_no_rule_gate_keeps_its_bytes():
-    """The shipped `deep_breath` has meter prices and no rule gate: its
-    options keep their authored titles and the parameterless base."""
-    text = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"
-            / "DeepBreath.cs").read_text(encoding="utf-8")
-    assert ": base(CardType." not in text
-    assert '("title", "Spend 3 Encore: draw 3 cards")' in text
-
-
 def _mode_chooser_state() -> dict:
     """SYNTHETIC, in `BuildChooseCardState`'s shape, with the two mode faces
     Curtain Rise opens under Weak."""

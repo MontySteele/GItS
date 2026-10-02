@@ -32,11 +32,10 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiCoopPlaytestFixesTests : IDisposable
 {
-    private readonly bool _kokomi = KokomiOverhaul.Enabled;
 
-    public KokomiCoopPlaytestFixesTests() => KokomiOverhaul.Enabled = true;
+    public KokomiCoopPlaytestFixesTests() { }
 
-    public void Dispose() => KokomiOverhaul.Enabled = _kokomi;
+    public void Dispose() { }
 
     private static T Upgraded<T>() where T : CardModel, new()
     {

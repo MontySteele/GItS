@@ -98,7 +98,7 @@ public sealed class KleeOverhaulSweepHooks : AbstractModel
         PlayerChoiceContext choiceContext, Creature creature,
         bool wasRemovalPrevented, float deathAnimLength)
     {
-        if (!KleeOverhaul.Enabled || wasRemovalPrevented) return;
+        if (wasRemovalPrevented) return;
         await ProtoBombPower.SweepJumps(choiceContext, creature.CombatState);
     }
 
@@ -119,7 +119,6 @@ public sealed class KleeOverhaulSweepHooks : AbstractModel
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (!KleeOverhaul.Enabled) return;
         CompanionHexerei.NoteCardPlayed(cardPlay);
         await ProtoBombPower.SweepJumps(
             choiceContext, cardPlay.Card?.CombatState);
@@ -152,7 +151,7 @@ public sealed class KleeOverhaulSweepHooks : AbstractModel
         Creature target, decimal amount, ValueProp props, Creature? dealer,
         CardModel? cardSource)
     {
-        if (!KleeOverhaul.Enabled || amount <= 0m) return amount;
+        if (amount <= 0m) return amount;
         if (!props.IsPoweredAttack()) return amount;
         return ProtoBombPower.Preempted.Covers(target, dealer) ? 0m : amount;
     }

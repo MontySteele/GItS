@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards;
-using KleeMod.Cards.Generated;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod;
@@ -71,13 +70,9 @@ public static class KleeOffPoolCards
     private static List<CardModel> BuildAll()
     {
         // Companions: the reward slot (CompanionSlot.Roll) is their only door.
-        var cards = new List<CardModel>(CompanionRoster.All)
+        var cards = new List<CardModel>
         {
-            // Kit Burst card: granted to hand by KitGrant when the meter
-            // fills, never draftable or transformable.
-            ModelDb.Card<SparksNSplash>(),
-
-            // Token status: created at play time by Fish Blasting.
+            // The status package's token (Confiscated), created at play.
             ModelDb.Card<Confiscated>(),
         };
         return cards;

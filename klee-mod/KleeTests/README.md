@@ -29,9 +29,7 @@ and only the second one is worth anything to a reader.
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # the current kits (the default build since 2026-09-28)
-dotnet test -p:ShippedKits=true -p:PrototypeCards=true  # the old kits, arms compiled and off
-dotnet test -p:ShippedKits=true   # the old kits, no Prototype/ at all
+dotnet test                       # the current kits (the only build since legacy cleanup stage 5)
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -48,10 +46,8 @@ so nothing here hardcodes a Steam path (spec §0.3).
 
 ### A PUSH gate since 2026-09-02, and still not a deploy gate
 
-`tools/gates.py` runs this project in both lanes, twice (`dotnet-test`, the
-default build, which since 2026-09-28 is the current kits, and
-`dotnet-test-shipped`, `-p:ShippedKits=true -p:PrototypeCards=true`), no
-longer behind `--dotnet`, and
+`tools/gates.py` runs this project in both lanes (`dotnet-test`, the current
+kits), no longer behind `--dotnet`, and
 the git `pre-push` hook runs it through that same wrapper. Before that it was in
 no gate anywhere -- optional locally, impossible in CI -- and two pins sat red on
 `main` for days. It cannot be a CI job: the four references above live in a
@@ -132,11 +128,8 @@ either pinned structurally and labelled, or left out.
 
 ## The prototype suite (`Prototype/`, opt-in with the rest)
 
-`Prototype/` is `Compile Remove`d unless `PrototypeCards` is true (the default
-since 2026-09-28, `klee-mod/Directory.Build.props`; off under
-`-p:ShippedKits=true`), the same
-switch that compiles the rules it pins (`KleeCode.csproj`). Without the property
-those types do not exist, so a pin against them could not compile either.
+`Prototype/` pins the current kits. Since legacy cleanup stage 5 it compiles
+in every build: the `PrototypeCards` switch and its `Compile Remove` are gone.
 
 | File | Tests | What it holds |
 |---|---|---|

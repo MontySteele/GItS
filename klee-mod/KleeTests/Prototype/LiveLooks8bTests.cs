@@ -47,17 +47,14 @@ public class LiveLooks8bTests
 
     private sealed class StageArm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
         internal StageArm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = true;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }
@@ -204,66 +201,9 @@ public class LiveLooks8bTests
     // `EB-745` caveat 1 -- the GRANT site, not only the offer filter
     // ==================================================================
 
-    [Fact]
-    public void The_stage_arm_retires_the_shipped_salon_at_the_grant_site()
-    {
-        // THE FIND. "A hand-granted shipped `Salon Début` DOES still grant
-        // `Salon Member 3 (buff)` under the arm, with the full shipped Encore
-        // glossary on it -- the arm's guard is the offer filter (`EB-736`),
-        // not the grant site."
-        //
-        // An offer filter is not a rule about a HAND: a `give_card`, a
-        // Conscript or any later route puts such a row on the board anyway.
-        var deploy = Source(Path.Combine("klee-mod", "KleeCode", "Powers",
-                                         "SalonPowers.cs"));
-        Assert.Contains(
-            "if (FurinaResources.StageRetiresTheShippedMeters(owner)) return 0;",
-            deploy);
-    }
-
-    [Fact]
-    public void The_gate_the_grant_site_takes_is_the_one_the_meters_take()
-    {
-        // One question with one answer, rather than two that can drift.
-        using var _ = new StageArm();
-        var furina = Seat.Furina().WithCombatState().Creature;
-        Assert.True(FurinaResources.StageRetiresTheShippedMeters(furina));
-    }
-
     // ==================================================================
     // `EB-745` caveat 2 -- the shipped Burst bar under the arm
     // ==================================================================
-
-    [Fact]
-    public void The_shipped_burst_gauge_does_not_draw_under_the_stage_arm()
-    {
-        // THE FIND. "The in-game HUD still draws the shipped Burst bar
-        // (`0/70`, later `15/70`) above Furina under the arm, on a board with
-        // no shipped card played." `EB-726` took the reframe out of the tree,
-        // which left `BurstGaugeApplies` a bare `IsFurina`; the Stage brief
-        // has no Burst bar in it at all (R269, rule 11).
-        using var _ = new StageArm();
-        var furina = Seat.Furina().WithCombatState().Creature;
-        Assert.False(FurinaResources.BurstGaugeApplies(furina));
-    }
-
-    [Fact]
-    public void The_shipped_burst_gauge_still_draws_with_the_arm_off()
-    {
-        // The release build is unchanged, which is the other half of every
-        // arm guard in this file.
-        var enabled = FurinaStage.Enabled;
-        try
-        {
-            FurinaStage.Enabled = false;
-            var furina = Seat.Furina().WithCombatState().Creature;
-            Assert.True(FurinaResources.BurstGaugeApplies(furina));
-        }
-        finally
-        {
-            FurinaStage.Enabled = enabled;
-        }
-    }
 
     // ==================================================================
     // `EB-739`'s second pair -- one printed name per card
@@ -291,39 +231,6 @@ public class LiveLooks8bTests
     // ==================================================================
     // Defect 6 -- the Kurage memory warning at every combat start
     // ==================================================================
-
-    [Fact]
-    public void The_kurage_seat_read_is_silent_on_a_table_with_nobody_at_it()
-    {
-        // THE FIND. "`kurage memory: no local seat in this combat
-        // (InvalidOperationException: Local player not found in combat.);
-        // drawing nothing.` -- seven times in the Klee run and at EVERY combat
-        // start in the Kokomi run, logged BEFORE `Creating NCombatRoom`."
-        //
-        // It is the `Deactivate` postfix at the bottom of that file, running
-        // while the INCOMING room is built: the combat holds no players yet,
-        // `LocalContext.GetMe` throws, and a teardown with nothing to tear
-        // down logs a warning about it. The loud warning is for the case it
-        // was written for -- a combat with a table in it and no local seat at
-        // that table -- and a line that fires on every fight is a line nobody
-        // reads on the fight where it means something.
-        //
-        // A SOURCE PIN: `TryGetMe` takes a `CombatState`, which this harness
-        // cannot build. What it CAN say is that the guard is asked before the
-        // throwing call, which is the whole of the change.
-        var card = Source(Path.Combine("klee-mod", "KleeCode", "Vfx",
-                                       "Prototype", "KurageMemoryCard.cs"));
-        var guard = card.IndexOf("if (!Seated(state)) return null;",
-                                 StringComparison.Ordinal);
-        var call = card.IndexOf("return LocalContext.GetMe(state);",
-                                StringComparison.Ordinal);
-        Assert.True(guard > 0, "the no-table guard is gone");
-        Assert.True(call > 0);
-        Assert.True(guard < call,
-                    "the guard must be asked BEFORE the call that throws");
-        // The warning itself stays, for the case it was written for.
-        Assert.Contains("no local seat in this ", card);
-    }
 
     // ==================================================================
     // The bridge halves, source-pinned: Godot and game types, not compiled

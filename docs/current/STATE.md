@@ -22,20 +22,18 @@ arms (Klee's overhaul, the companion overhaul, Kokomi's overhaul, Furina's
 Stage) on in every build that names no property: a plain `dotnet build`,
 `klee-mod\build\deploy.ps1`, and the `-Package` handoff zip, all unmarked. **The
 round's build is `tools/deploy_round.py`** (`deploy.ps1`, then the bridge).
-The old shipped kits (`Klee.cs`, `Kokomi.cs` and `Furina.cs` starters,
-`docs/*-cards.yaml` pools) are no longer what plays; they build only under
-`-p:ShippedKits=true`, for the C# suite's second gate, until their code is
-deleted. **`+proto` now marks only a build that differs from the release**:
+The old shipped kits' C# is deleted (legacy cleanup stage 5a): no
+`ShippedKits` opt-out, no arm switches, one C# test configuration; their
+sheets (`docs/*-cards.yaml`) remain for the sim until stage 6. **`+proto` now marks only a build that differs from the release**:
 `deploy_proto.ps1 -TeyvatFrame`, and the Teyvat frame is on hold (below). The
 tier0 sim runs the current kits too (2026-10-01, legacy cleanup stage 3: its
 four kit arms default on); its calibration bands, measured on the shipped
 kits, are retired until a kit reaches Balance (legacy cleanup pick 5). Each
 C# pool IS its prototype roster (legacy cleanup stage 4): the `proto_` rows
-are listed first in every pool's `GenerateAllCards`, the arm's roster is the
-offer, and the 78 / Ancient / co-op counts are pinned
+are every pool's `GenerateAllCards`, the arm's roster is the offer, and the
+78 / Ancient / co-op counts are pinned
 (`KleeTests/Prototype/PoolCountTests.cs`); the companion roster is prototype
-rows only, Fontaine's sixteen ported as they are (pick 4, `proto_mf_`). The
-shipped rows stay pool members, never offered, until stage 5 deletes them.
+rows only, Fontaine's sixteen ported as they are (pick 4, `proto_mf_`).
 **Last release package: `0.2.1357`**
 (2026-08-29), which predates the ruling and carries the old kits.
 
@@ -221,8 +219,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
 - **Varka: the Oath rework is built (Prototype, 2026-09-29).** Paper
   `review/active/varka-paper-kit-2026-09-28.md`, every pick ruled ([USER]:
   "I'm good with all of these Varka defaults"). A new character with no
-  switch of his own (collapsed 2026-10-01): he compiles with the prototype
-  surface, so under `-p:ShippedKits=true` he is not on the select screen.
+  switch of his own (collapsed 2026-10-01): he compiles in every build.
   80 HP, 99 gold;
   starter base Strike x4, Defend x4, Windbound Execution and one starter-only
   Knight rolled per run (8 [11] Block and its element); starting relic

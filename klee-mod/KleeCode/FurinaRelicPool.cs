@@ -22,21 +22,16 @@ public sealed class FurinaRelicPool : RelicPoolModel
         // The borrowed roster MINUS Helical Dart and Snecko Skull (the ruling
         // on QUEUE pick `fanout-picks-2026-09-16 4.3`, at its default). See
         // InheritedSilentRelics for why the two go and why the drop is safe.
+        // Members only: the offer below is her own pool. Salon Solitaire is
+        // the Stage's starting relic; a starter is never rolled, so membership
+        // only lets RelicModel.Pool resolve (R269, EB-725).
         IEnumerable<RelicModel> relics = InheritedSilentRelics.Curated()
-            .Append(ModelDb.Relic<Relics.EtherealSpotlightRelic>())
+            .Append(ModelDb.Relic<Relics.SalonSolitaire>())
             // EPOCH 2 / D1 (audit sec.1.2): the upgraded starter was poolless and
             // RelicModel.Pool throws for a poolless relic, mid-run at the Touch
             // of Orobas grant. Ancient rarity keeps it off reward rolls, which
             // take Common/Uncommon/Rare/Shop/Boss only.
             .Append(ModelDb.Relic<Relics.CurtainNeverFalls>());
-#if PROTOTYPE_CARDS
-        // THE STAGE'S STARTING RELIC (R269, EB-725). The first Stage deploy
-        // read back Ironclad at character select: KleeSelfCheck R7 named it --
-        // Salon Solitaire was in NO pool, RelicModel.Pool threw inside
-        // SelectCharacter, and the character looked selected but was not. A
-        // starter is never rolled as a reward, so pool membership is only
-        // what lets Pool resolve.
-        relics = relics.Append(ModelDb.Relic<Relics.SalonSolitaire>());
         // QUARANTINED: FURINA'S OWN SEVEN (review/active/relics-potions-klee-
         // furina-2026-09-27.md, pick 1(a)); membership only, for the reason
         // above. What may be rolled is `GetUnlockedRelics` below.
@@ -48,11 +43,9 @@ public sealed class FurinaRelicPool : RelicPoolModel
             .Append(ModelDb.Relic<Relics.CurtainCallBouquet>())
             .Append(ModelDb.Relic<Relics.PalaisLedger>())
             .Append(ModelDb.Relic<Relics.OpeningNight>());
-#endif
         return relics;
     }
 
-#if PROTOTYPE_CARDS
     /// <summary>
     /// THE OFFER. Under the Stage her pool is Salon Solitaire, her seven and
     /// The Curtain Never Falls: the Silent borrow goes, and so does the
@@ -61,8 +54,5 @@ public sealed class FurinaRelicPool : RelicPoolModel
     /// </summary>
     public override IEnumerable<RelicModel> GetUnlockedRelics(
         MegaCrit.Sts2.Core.Unlocks.UnlockState unlockState) =>
-        Relics.ArmRelicPools.Offer(AllRelics, Powers.FurinaStage.Enabled,
-                                   Relics.ArmRelicPools.FurinaArmPool,
-                                   Relics.FurinaStageRelics.Types);
-#endif
+        Relics.ArmRelicPools.Offer(AllRelics, Relics.ArmRelicPools.FurinaArmPool);
 }

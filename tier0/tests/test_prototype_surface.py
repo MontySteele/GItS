@@ -203,29 +203,6 @@ def test_dev_profile_emits_the_row(monkeypatch, tmp_path):
     assert manifest["owners"] == {"proto_kokomi_tidecall": "kokomi"}
 
 
-def test_default_generator_run_emits_no_prototype(monkeypatch, tmp_path):
-    """R213 B: 'the default generator run does not emit them'.
-
-    Three independent statements of the same fact, because one of them alone
-    would be an accident: the prototype sheet is not any character profile's
-    sheet, `--character all` cannot select it (it is not in PROFILES), and no
-    character's PLAN puts the id in its output.
-    """
-    import tools.gen_klee_cards as gen
-    import tools.gen_prototype_cards as genproto
-
-    assert "prototype" not in gen.PROFILES
-    assert "prototype" not in gen.PLAN_BUILDERS
-    assert genproto.SHEET not in {p.sheet for p in gen.PROFILES.values()}
-    assert genproto.OUT_DIR not in {p.out_dir for p in gen.PROFILES.values()}
-
-    for profile in gen.PROFILES.values():
-        plan = gen.PLAN_BUILDERS[profile.character_id](profile)
-        assert not any(k.startswith(loader.PROTOTYPE_ID_PREFIX)
-                       for k in plan.generated)
-        assert loader.PROTOTYPE_ID_PREFIX not in plan.manifest_src
-
-
 def test_an_inexpressible_prototype_row_stops_the_run(monkeypatch, tmp_path):
     """A blocked prototype is a build failure, not a manifest line.
 
@@ -525,21 +502,6 @@ def test_a_row_without_a_description_is_still_rendered_from_its_body(
     assert "Draw" in source
 
 
-def test_the_face_reaches_the_generated_file_with_no_merge_in_the_path():
-    """`EB-215`'s acceptance, on the SHIPPED surface rather than a fixture:
-    the committed C# is right as committed. Before this the file carried the
-    shipped Oath's pulse wording and only a boot-time loc merge made it read
-    correctly, so the generated artifact and the played card disagreed."""
-    row = next(r for r in yaml.safe_load(
-        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
-        if r["id"] == "proto_kurages_oath_memory")
-    emitted = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
-               / "Generated" / "ProtoKuragesOathMemory.cs").read_text(
-                   encoding="utf-8")
-    assert f'("description", "{row["description"]}"),' in emitted
-    assert "memory" in row["description"]
-
-
 def test_no_shipped_sheet_row_carries_a_description():
     """The field is the prototype surface's alone. A shipped face is rendered
     from the body so it cannot drift from what the card does; hand text on a
@@ -642,38 +604,30 @@ def test_distinctness_report_cannot_see_the_prototype_surface():
 
 def test_the_release_build_compiles_the_prototype_classes_by_default():
     """2026-09-28, [USER]: "make all 3 current builds the active release
-    builds". This pin used to say the opposite (R213 B's quarantine: no
-    prototype class in a release build); the ruling moved it.
-
-    The release build now compiles the surface because the DEFAULT does:
-    `klee-mod/Directory.Build.props` sets `PrototypeCards` when nothing else
-    has, so `deploy.ps1` and `validate.ps1` still never name the property --
-    the default decides, in one file. The `Compile Remove` stays for the one
-    opt-out, `-p:ShippedKits=true`, which is the old shipped kits whole.
+    builds"; since legacy cleanup stage 5 (2026-10-01) the prototype surface
+    is not a switch at all. No property, no define and no `Compile Remove`
+    names it, so every build carries the current kits and no script can opt
+    out of them.
     """
     props = (REPO / "klee-mod" / "Directory.Build.props").read_text(
         encoding="utf-8")
-    assert ("<PrototypeCards Condition=\"'$(PrototypeCards)' == ''\">true"
-            "</PrototypeCards>") in props
-    assert "'$(ShippedKits)' != 'true'" in props
+    assert "<PrototypeCards " not in props
+    assert "<ShippedKits " not in props
 
     csproj = (REPO / "klee-mod" / "KleeCode" / "KleeCode.csproj").read_text(
         encoding="utf-8")
-    assert '<Compile Remove="Cards/Prototype/**/*.cs" />' in csproj
-    assert "'$(PrototypeCards)' != 'true'" in csproj
-    assert "PROTOTYPE_CARDS" in csproj
+    assert "Compile Remove=\"Cards/Prototype" not in csproj
+    assert "PROTOTYPE_CARDS" not in csproj
 
     for script in ("deploy.ps1", "validate.ps1"):
         body = (REPO / "klee-mod" / "build" / script).read_text(
             encoding="utf-8", errors="replace")
         assert "-p:PrototypeCards" not in body, (
-            f"{script} names the property; the default decides")
+            f"{script} names a property that no longer exists")
 
     hook = (REPO / "klee-mod" / "KleeCode" / "PrototypeCards.cs").read_text(
         encoding="utf-8")
-    assert "#if PROTOTYPE_CARDS" in hook
-    assert "System.Array.Empty<CardModel>()" in hook
-
+    assert "#if PROTOTYPE_CARDS" not in hook
 
 def test_prototype_cards_are_each_characters_pool(tmp_path, monkeypatch):
     """The prototype rows ARE each pool (legacy cleanup stage 4, 2026-10-01).
@@ -681,8 +635,7 @@ def test_prototype_cards_are_each_characters_pool(tmp_path, monkeypatch):
     Every row a character owns is listed in its pool's `GenerateAllCards`, so
     `CardModel.Pool` resolves (a poolless card falls through to MockCardPool
     and throws "You monster!" the first time the real game draws it -- see
-    tools/lint_pool_membership.py), and with the arm off the offer filter
-    strips them by id, so the shipped gate offers none.
+    tools/lint_pool_membership.py).
     """
     code = REPO / "klee-mod" / "KleeCode"
     for path, character in (("KleeCardPool.cs", "klee"),
@@ -690,7 +643,6 @@ def test_prototype_cards_are_each_characters_pool(tmp_path, monkeypatch):
                             ("KokomiCardPool.cs", "kokomi")):
         body = (code / path).read_text(encoding="utf-8")
         assert f'PrototypeCards.For("{character}")' in body, path
-        assert f'PrototypeCards.Ids("{character}")' in body, path
 
     from tools import lint_pool_membership
     roster = (code / "Cards" / "Prototype" / "Generated" / "PrototypeRoster.cs")

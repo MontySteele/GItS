@@ -1,4 +1,3 @@
-using KleeMod.Cards.Furina.Generated;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
@@ -35,25 +34,5 @@ namespace KleeMod.Tests;
 /// </summary>
 public class CardTargetTypePinTests
 {
-    [Fact]
-    public void Take_it_from_the_top_aims_at_an_enemy()
-    {
-        var card = new TakeItFromTheTop();
 
-        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
-        Assert.NotEqual(TargetType.Self, card.TargetType);
-    }
-
-    [Fact]
-    public void Take_it_from_the_top_is_still_the_skill_the_sheet_prints()
-    {
-        // Guard on the pin above: an aiming TargetType is only the right
-        // answer for THIS card while its body is still Block-plus-branched-
-        // damage. If the row is ever rewritten to a pure self card, this fails
-        // beside it rather than leaving a stale assertion standing.
-        var card = new TakeItFromTheTop();
-
-        Assert.Equal(CardType.Skill, card.Type);
-        Assert.Equal(CardRarity.Uncommon, card.Rarity);
-    }
 }

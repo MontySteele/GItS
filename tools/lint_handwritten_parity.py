@@ -923,8 +923,9 @@ def lint() -> int:
                           f"C# PileType.None override {got['kit_pile']} "
                           "(kit cards return to the kit, no pile)")
 
-    findings.extend(roster_handwritten_parity())
-    findings.extend(kit_no_pile())
+    # The shipped sheets' kit cards and roster hand-written cards went with the
+    # shipped kits (legacy cleanup stage 5): the Ancients are the gate's
+    # remaining subject.
     findings.extend(ancient_witness())
 
     if findings:

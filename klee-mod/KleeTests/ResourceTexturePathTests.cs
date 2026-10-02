@@ -80,13 +80,6 @@ public class KleeResourceTexturePathTests
         "SpotlightSpendBoostResource",
     };
 
-    private static List<Type> Resources() =>
-        typeof(KleeBurstResource).Assembly
-            .GetTypes()
-            .Where(t => !t.IsAbstract && typeof(BasicCustomResource).IsAssignableFrom(t))
-            .OrderBy(t => t.Name, StringComparer.Ordinal)
-            .ToList();
-
     private static string TexturePathOf(Type t)
     {
         var getter = t.GetMethod("get_TexturePath", All);
@@ -96,52 +89,6 @@ public class KleeResourceTexturePathTests
 
         var instance = RuntimeHelpers.GetUninitializedObject(t);
         return (string?)getter!.Invoke(instance, null) ?? "";
-    }
-
-    [Fact]
-    public void The_resource_set_is_the_twelve_this_pin_was_written_against()
-    {
-        // Not a freeze: a thirteenth resource is a normal addition. It is here
-        // so that the assertions below are known to have covered EVERY
-        // resource, and so a rename shows up as a name rather than a count.
-        var found = Resources().Select(t => t.Name).ToArray();
-
-        Assert.Equal(KnownTwelve, found);
-    }
-
-    [Fact]
-    public void Every_custom_resource_overrides_TexturePath_with_a_res_path()
-    {
-        foreach (var t in Resources())
-        {
-            var path = TexturePathOf(t);
-
-            Assert.False(string.IsNullOrWhiteSpace(path),
-                t.Name + ".TexturePath is empty; BaseLib 3.4.7 hands it to "
-                + "ResourceLoader.Load unconditionally (EB-751).");
-            Assert.StartsWith("res://", path, StringComparison.Ordinal);
-            Assert.True(path.Length > "res://".Length,
-                t.Name + ".TexturePath is a bare res:// root.");
-            Assert.EndsWith(".png", path, StringComparison.Ordinal);
-        }
-    }
-
-    [Fact]
-    public void Every_declared_texture_is_a_path_the_art_pipeline_produces()
-    {
-        var produced = ProducedOutPaths();
-
-        foreach (var t in Resources())
-        {
-            var source = ImageGenSourceOf(TexturePathOf(t));
-
-            Assert.True(produced.Contains(source),
-                t.Name + ".TexturePath resolves to " + source
-                + ", which has no row in art/plan.tsv and no GENERATOR_OWNED "
-                + "entry in tools/art_lint.py -- nothing produces it, so "
-                + "build_pck.ps1 cannot pack it and the load fails exactly as "
-                + "the empty path did (EB-751).");
-        }
     }
 
     /// <summary>

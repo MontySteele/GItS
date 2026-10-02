@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -122,7 +121,7 @@ public sealed class BlastingPowder : ArmPotion
     /// <summary>The whole effect: pure, so the tests run it.</summary>
     public static void Use(Creature klee)
     {
-        if (!KleeOverhaul.Enabled || klee.CombatState == null) return;
+        if (klee.CombatState == null) return;
         foreach (var enemy in klee.CombatState.HittableEnemies.ToList())
         {
             ProtoBombPower.GrowOn(enemy, klee, Growth);
@@ -156,7 +155,7 @@ public sealed class JumpyJuice : ArmPotion
 
     public static void Use(Creature klee)
     {
-        if (!KleeOverhaul.Enabled || klee.CombatState == null) return;
+        if (klee.CombatState == null) return;
         foreach (var enemy in klee.CombatState.HittableEnemies.ToList())
         {
             ProtoBombPower.DoubleOn(enemy, klee);
@@ -293,4 +292,3 @@ public sealed class FurinaPotionPool : PotionPoolModel
         ModelDb.Potion<EncoreElixir>(),
     };
 }
-#endif

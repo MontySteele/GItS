@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards;
-#if PROTOTYPE_CARDS
 using KleeMod.Cards.Prototype.Generated;
-#endif
 using KleeMod.Elements;
 using KleeMod.Tests.Harness;
 using Xunit;
@@ -176,7 +174,6 @@ public class ReactionPreviewNoHitTests
     // `EB-733` -- a card that Sets off first does not get its own amplifier
     // ==================================================================
 
-#if PROTOTYPE_CARDS
     [Fact]
     public void A_set_off_first_face_is_recognised_off_its_printed_order()
     {
@@ -198,7 +195,6 @@ public class ReactionPreviewNoHitTests
         // is right as it stands.
         Assert.False(KleeCardTooltips.SetsOffFirst(new ProtoKoBombsAway()));
     }
-#endif
 
     [Fact]
     public void The_set_off_branch_names_the_order_and_the_number_that_lands()

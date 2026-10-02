@@ -28,17 +28,14 @@ public class FurinaStageSoldOutTests
 {
     private sealed class Arm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
         internal Arm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = true;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }
@@ -388,15 +385,6 @@ public class FurinaStageSoldOutTests
 
         seat.WithPower<SoldOutPower>(1);
         Assert.Equal(4, LiveSeats(badge));
-    }
-
-    [Fact]
-    public void The_arm_offers_sold_out_in_place_of_unheard_confession()
-    {
-        var pool = ArmPools.Offerable("furina-stage");
-        Assert.Contains(pool, c => c is ProtoFsSoldOut);
-        Assert.DoesNotContain(
-            pool, c => c is global::KleeMod.Cards.Furina.Generated.UnheardConfession);
     }
 
     private static string Loc<T>(string key)

@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Reflection;
 using KleeMod.Cards;
-using KleeMod.Cards.Generated;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
@@ -56,43 +55,6 @@ public class SparkAlternativeCostPinTests
 
     // --- the flag -------------------------------------------------------
 
-    [Fact]
-    public void The_base_rule_is_retired_under_the_flag()
-    {
-        // The one fact the whole arm hangs off, and the reason KleeTests defines
-        // PROTOTYPE_CARDS as well as removing this directory without it: the
-        // twin assertion lives in SparkSinkPinTests and says the opposite for a
-        // release build. Neither half is worth much alone.
-        Assert.False(SparkPower.BaseRuleActive);
-    }
-
-    [Fact]
-    public void The_zeroing_hook_does_not_fire_at_any_bank()
-    {
-        // The retirement, measured rather than asserted. A bank of 5 is over any
-        // threshold the base rule ever had, on a printed-cost Attack the rule
-        // would have zeroed, and the hook declines.
-        var klee = Seat.Klee().WithPower<SparkPower>(5);
-        var power = klee.Creature.Powers.OfType<SparkPower>().First();
-        var card = Held<Kaboom>(klee);
-
-        Assert.False(power.TryModifyEnergyCostInCombat(card, 1m, out var cost));
-        Assert.Equal(1m, cost);
-    }
-
-    [Fact]
-    public void The_consume_decision_is_never_taken()
-    {
-        // The other half of the retirement. BeforeCardPlayed is what SETS the
-        // pending spend, and AfterCardPlayed consumes only what it set -- so a
-        // null pending field after a play decision is the consume standing down.
-        var klee = Seat.Klee().WithPower<SparkPower>(5);
-        var power = klee.Creature.Powers.OfType<SparkPower>().First();
-
-        Assert.Null(typeof(SparkPower).GetField("_pendingSpendPlay", All)!
-                        .GetValue(power));
-    }
-
     // --- the derived price ------------------------------------------------
     //
     // `EB-750`: the per-row price theory is DELETED with its rows. It ran the
@@ -103,148 +65,8 @@ public class SparkAlternativeCostPinTests
     // declaration is still pinned here, on a row that DOES exist, and by the
     // strict-Rare-Power clauses below, which read a price off a shipped card.
 
-    [Fact]
-    public void A_card_with_no_price_is_not_a_priced_card()
-    {
-        // Defence in depth for the interface itself: the marker is emitted only
-        // for a row that prints a top-level spend_spark, so a card that does not
-        // must not answer the question at all. `PrintedPriceOf` is the codegen's
-        // one declaration and `PriceOf` is what the gate and the badge consult,
-        // so the two agreeing with no Power on the board is the no-drift
-        // property itself.
-        Assert.IsNotAssignableFrom<ISparkPricedCard>(new Kaboom());
-        Assert.IsAssignableFrom<ISparkPricedCard>(new ProtoSparkPricedStrike());
-        Assert.Equal(3, SparkCost.PrintedPriceOf(new ProtoSparkPricedStrike()));
-        Assert.Equal(3, SparkCost.PriceOf(new ProtoSparkPricedStrike()));
-    }
-
     // --- the strict Rare Power -------------------------------------------
 
-    [Fact]
-    public void The_power_prices_an_unpriced_attack_at_three()
-    {
-        var klee = Seat.Klee().WithPower<SparkAttackCostPower>(1);
-        var card = Held<Kaboom>(klee);
-
-        Assert.Equal(0, SparkCost.PrintedPriceOf(card));
-        Assert.Equal(SparkAttackCostPower.Price, SparkCost.PriceOf(card));
-        Assert.Equal(3, SparkAttackCostPower.Price);   // tier0 C.SPARK_ATTACK_POWER_PRICE
-    }
-
-    [Fact]
-    public void The_power_zeroes_that_attack_s_energy_cost()
-    {
-        // "...instead of their Energy cost." The Energy line goes to 0 whether
-        // or not the bank can pay, so a brick reads "0 energy, 3 Sparks, and you
-        // have 1" rather than a printed cost that lies until you can afford it.
-        var klee = Seat.Klee().WithPower<SparkAttackCostPower>(1);
-        var power = klee.Creature.Powers.OfType<SparkAttackCostPower>().First();
-        var card = Held<Kaboom>(klee);
-
-        Assert.True(power.TryModifyEnergyCostInCombat(card, 1m, out var cost));
-        Assert.Equal(0m, cost);
-    }
-
-    [Theory]
-    [InlineData(0, false)]
-    [InlineData(2, false)]   // short by one: the whole price or nothing
-    [InlineData(3, true)]
-    [InlineData(7, true)]
-    public void The_gate_is_two_versus_three_sparks(int bank, bool playable)
-    {
-        // The decisive read. `ShouldPlay` is what Hook.ShouldPlay fans out and
-        // CardModel.CanPlay consults before any energy is committed, so a short
-        // bank is an unplayable card and not a play that quietly does nothing.
-        var klee = Seat.Klee()
-            .WithPower<SparkAttackCostPower>(1)
-            .WithPower<SparkPower>(bank);
-        var power = klee.Creature.Powers.OfType<SparkAttackCostPower>().First();
-        var card = Held<Kaboom>(klee);
-
-        Assert.Equal(playable, power.ShouldPlay(card, AutoPlayType.None));
-        Assert.Equal(playable, SparkCost.Affordable(card));
-    }
-
-    [Fact]
-    public void An_already_priced_attack_is_unaffected()
-    {
-        // SUB-PICK (a), and it is the clause with a live alternative: (b) would
-        // have re-priced Fwoosh! from 1 to 3, punishing the very cards the
-        // archetype drafts. The Power neither raises the printed price nor adds
-        // to it, and the gate charges the card's own 1.
-        var klee = Seat.Klee()
-            .WithPower<SparkAttackCostPower>(1)
-            .WithPower<SparkPower>(3);
-        var power = klee.Creature.Powers.OfType<SparkAttackCostPower>().First();
-        var card = Held<ProtoSparkPricedStrike>(klee);
-
-        Assert.Equal(3, SparkCost.PriceOf(card));
-        Assert.True(power.ShouldPlay(card, AutoPlayType.None));
-        Assert.False(power.TryModifyEnergyCostInCombat(card, 1m, out _));
-    }
-
-    [Fact]
-    public void An_x_cost_attack_is_exempt()
-    {
-        // sec.5 is SILENT on X and this is the reading taken (sec.10.11 item 3,
-        // and it goes back to [USER]). An X card's cost IS the energy it spends,
-        // so a flat 3-Spark conversion would resolve it at X = 0 and it would
-        // deal nothing -- R34's own reasoning for the base rule's X exemption,
-        // reached again from the other side.
-        var klee = Seat.Klee().WithPower<SparkAttackCostPower>(1);
-        var power = klee.Creature.Powers.OfType<SparkAttackCostPower>().First();
-        var card = Held<FishBlasting>(klee);
-
-        Assert.True(card.EnergyCost.CostsX, "the fixture must be an X card");
-        Assert.Equal(0, SparkCost.PriceOf(card));
-        Assert.True(power.ShouldPlay(card, AutoPlayType.None));
-    }
-
-    [Fact]
-    public void Skills_and_powers_keep_their_energy_cost()
-    {
-        // "Your ATTACKS..." -- Energy becomes very nearly pure Skill currency,
-        // which is the payoff loop the card is a bet on. A Skill priced at 3
-        // Sparks would make the Power a tax rather than a conversion.
-        var klee = Seat.Klee().WithPower<SparkAttackCostPower>(1);
-        var power = klee.Creature.Powers.OfType<SparkAttackCostPower>().First();
-        var skill = Held<DuckAndCover>(klee);
-
-        Assert.Equal(0, SparkCost.PriceOf(skill));
-        Assert.True(power.ShouldPlay(skill, AutoPlayType.None));
-        Assert.False(power.TryModifyEnergyCostInCombat(skill, 1m, out _));
-    }
-
-    [Fact]
-    public void A_second_seat_s_knight_never_prices_this_seat_s_attacks()
-    {
-        // Every hook here is fanned to EVERY model in the combat
-        // (Hook.IterateCombatHookListeners), the other seat's powers included --
-        // so the ownership clause is not defensive tidiness, it is the rule. The
-        // sim cannot see this at all: tier 0.5 models one seat.
-        var klee = Seat.Klee();
-        var partner = Seat.Klee().WithPower<SparkAttackCostPower>(1);
-        var theirs = partner.Creature.Powers.OfType<SparkAttackCostPower>().First();
-        var mine = Held<Kaboom>(klee);
-
-        Assert.Equal(0, SparkCost.PriceOf(mine));
-        Assert.True(theirs.ShouldPlay(mine, AutoPlayType.None));
-    }
-
-    [Fact]
-    public void A_canonical_card_has_no_bank_and_is_never_affordable()
-    {
-        // EB-94's throw, met from this side. CardModel.Owner asserts mutability,
-        // and the badge renders in the compendium where every card is canonical
-        // -- so the price is still readable off the row and the AFFORDABILITY is
-        // false, rather than a crash or a badge painted playable on a card
-        // nobody holds.
-        var card = new ProtoSparkPricedStrike();
-
-        Assert.False(card.IsMutable);
-        Assert.Equal(3, SparkCost.PriceOf(card));
-        Assert.False(SparkCost.Affordable(card));
-    }
 
     // --- the payment, structurally ---------------------------------------
 
@@ -306,28 +128,4 @@ public class SparkAlternativeCostPinTests
 
     // --- the starter ------------------------------------------------------
 
-    [Fact]
-    public void The_starter_is_the_printed_ten_under_the_flag_too()
-    {
-        // STRUCTURAL PIN, and the boundary is the reason: `Klee.StartingDeck` is
-        // ten `ModelDb.Card<T>()` lookups, and ModelDb is populated only by the
-        // game's boot -- calling the getter here throws KeyNotFoundException on
-        // the first id (README, the ModelDb row).
-        //
-        // `EB-750` INVERTED WHAT THIS PINS. The arm used to swap two of the ten
-        // slots for `SparkStarter.PricedKaboom()` and `SparkStarter.SparkingPop()`;
-        // R270 ruled Spark a currency under the overhaul, the two priced twins
-        // were superseded, and the rows, the seam and `SparkStarter` itself left
-        // HEAD (commit 036c12d150d6dbd58f0776a0d07e3c028a321a61). So the fact
-        // worth pinning now is the ABSENCE: under `-p:PrototypeCards=true` the
-        // deck is four Ka-boom!, four Duck and Cover, Jumpy Dumpty and Pop --
-        // byte for byte the release list, with no seam left to drift.
-        var calls = Il.CallSequence(Il.Method("Klee", "get_StartingDeck"));
-
-        Assert.DoesNotContain(calls, c => c.Contains("SparkStarter"));
-        Assert.Equal(4, calls.Count(c => c == "ModelDb.Card<Kaboom>"));
-        Assert.Equal(4, calls.Count(c => c == "ModelDb.Card<DuckAndCover>"));
-        Assert.Equal(1, calls.Count(c => c == "ModelDb.Card<Pop>"));
-        Assert.Equal(1, calls.Count(c => c == "ModelDb.Card<JumpyDumpty>"));
-    }
 }

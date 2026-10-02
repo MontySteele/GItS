@@ -41,24 +41,13 @@ public sealed class KokomiCardPool : CardPoolModel
 
     /// <summary>
     /// THE OFFER (<c>GetUnlockedCards</c>, the sole door into reward rolls,
-    /// the shop and transforms). Under the arm, her roster's pool, Ancients
-    /// and co-op tier (<c>KokomiOverhaulRoster.OfferablePool</c>); with it off
-    /// (the <c>-p:ShippedKits=true</c> gate only), the shipped offer less every
-    /// prototype row and token.
+    /// the shop and transforms): her roster's pool, Ancients and co-op tier
+    /// (<c>KokomiOverhaulRoster.OfferablePool</c>).
     /// </summary>
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards)
     {
-#if PROTOTYPE_CARDS
-        if (Powers.KokomiOverhaul.Enabled)
-        {
-            return Powers.KokomiOverhaulRoster.OfferablePool();
-        }
-#endif
-        var current = PrototypeCards.Ids("kokomi");
-        return base.FilterThroughEpochs(unlockState, cards)
-            .Where(card => !KokomiOffPoolCards.Ids.Contains(card.Id)
-                           && !current.Contains(card.Id));
+        return Powers.KokomiOverhaulRoster.OfferablePool();
     }
 
     /// <summary>
@@ -74,7 +63,6 @@ public sealed class KokomiCardPool : CardPoolModel
         PrototypeCards.For("kokomi")
             .Concat(RosterAncientCards.Kokomi)
             .Concat(KokomiOffPoolCards.All)
-            .Concat(Cards.Kokomi.Generated.KokomiCardRoster.All)
             .Distinct()
             .ToArray();
 }
@@ -101,13 +89,7 @@ public static class KokomiOffPoolCards
 
     private static List<CardModel> BuildAll()
     {
-        var cards = new List<CardModel>
-        {
-            // Kit Burst card: granted to hand by KokomiKitGrant when the
-            // meter fills, never rollable.
-            ModelDb.Card<CeremonialGarment>(),
-        };
-#if PROTOTYPE_CARDS
+        var cards = new List<CardModel>();
         // THE CASKET PASS (2026-09-28): the Tamakushi Casket's hand-written
         // token, dealt by the relic and in no pool -- Furina's Ethereal
         // Spotlight's footing.
@@ -115,7 +97,6 @@ public static class KokomiOffPoolCards
         // THE STATUS BATCH (2026-10-01): Sea Glass Harvest's token, made only
         // by its Plan's transform and in no pool.
         cards.Add(ModelDb.Card<Cards.Prototype.SeaGlass>());
-#endif
         return cards;
     }
 }

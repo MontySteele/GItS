@@ -62,49 +62,4 @@ public class PrototypeUpgradeChannelTests
     private static string Description(CustomCardModel card) =>
         card.Localization!.Single(row => row.Item1 == "description").Item2;
 
-    [Fact]
-    public void The_substituted_oath_reports_an_upgraded_form()
-    {
-        // EB-213's acceptance, in one line: before the channel this card had
-        // an empty OnUpgrade carrying the generator's "NO upgrade path"
-        // comment, so a campfire raised its level and moved nothing.
-        var upgraded = Upgraded<ProtoKuragesOathMemory>();
-
-        Assert.True(upgraded.IsUpgraded);
-    }
-
-    [Fact]
-    public void The_upgrade_moves_the_ward_to_the_ruled_five()
-    {
-        var card = new ProtoKuragesOathMemory();
-        Assert.Equal(3m, card.DynamicVars["PowerAmount"].BaseValue);
-
-        var upgraded = Upgraded<ProtoKuragesOathMemory>();
-
-        Assert.Equal(5m, upgraded.DynamicVars["PowerAmount"].BaseValue);
-    }
-
-    [Fact]
-    public void The_face_says_both_numbers_before_the_campfire_is_reached()
-    {
-        // The delta is emitted through the op's OWN var, which is what makes
-        // the printed amount a token rather than a literal — a card whose face
-        // hard-codes 3 is a face that cannot tell the player what the campfire
-        // buys. `diff()` is the shipped renderer, not a prototype one.
-        Assert.Contains("{PowerAmount:diff()}",
-                        Description(new ProtoKuragesOathMemory()));
-    }
-
-    [Fact]
-    public void The_applied_power_reads_the_var_rather_than_a_literal()
-    {
-        // STRUCTURAL, and labelled: applying the power needs a live
-        // PlayerChoiceContext (README, "The headless boundary"). What is
-        // checkable is that OnPlay asks the var at all — an upgraded var that
-        // OnPlay never reads is the same defect one step in, and it is the
-        // shape the pre-EB-213 class had by construction.
-        var calls = Il.Calls(Il.Method("ProtoKuragesOathMemory", "OnPlay"));
-
-        Assert.Contains("DynamicVarSet.get_Item", calls);
-    }
 }

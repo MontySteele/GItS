@@ -2339,17 +2339,6 @@ def banked_combat_state(bank: int = 3) -> dict:
     }
 
 
-def test_the_play_page_states_the_spark_rule_and_the_printed_costs():
-    """`EB-186` on the whole-run page. The tester playing a live run reads the
-    same screen a staged grader does, so it carries the same two facts."""
-    page = blindplay.render(blindplay.observation(banked_combat_state(3)))
-    assert "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 " \
-           "Sparks." in page
-    assert "covers 1 of the 2" in page
-    assert page.count("The cost printed on this card") == 2
-    assert "The cost printed on this card is 2; it is showing 0 here." in page
-
-
 def test_the_play_page_says_nothing_extra_with_no_bank():
     page = blindplay.render(blindplay.observation(banked_combat_state(0)))
     assert "The cost printed on this card" not in page
@@ -8954,17 +8943,6 @@ def test_a_victory_screens_short_union_still_never_replaces_the_deck():
     blindplay.forget_deck()
 
 
-def test_the_generator_adds_to_the_combat_and_to_no_permanent_list():
-    """The C# half of the read, which is why nothing moved there: the one
-    generation site in the mod goes through the combat-only door."""
-    src = (REPO / "klee-mod" / "KleeCode" / "Powers"
-           / "GuestStarGenerator.cs").read_text(encoding="utf-8")
-
-    assert "CardPileCmd.AddGeneratedCardToCombat(" in src
-    assert "PileType.Hand" in src
-    assert "MasterDeck" not in src
-
-
 # ------------- `EB-483`: what the Smith is offering, and what it becomes -----
 
 
@@ -9014,24 +8992,6 @@ def test_a_face_the_upgrade_index_cannot_render_prints_no_second_face():
     assert "Upgraded:" not in hand
 
 
-def test_the_upgraded_face_moves_the_number_the_delta_names():
-    """`CalculationBase` is the input to a `Calculated*` var, so the face
-    prints one name and `OnUpgrade` moves another -- resolved only where the
-    template holds exactly one `Calculated*` hole, which is the same invariant
-    the generator emits under (`block_calc_rider`: one CalculationBase per
-    card)."""
-    # `EB-624`: and a face that prints TWO numbers off two bases of its own
-    # moves both, while the `CalculationBase` that feeds the DEALT number has
-    # no hole to land in and needs none.
-    assert qa_packet.upgraded_face(
-        "KLEEMOD-PROTO_KK_UNDERTOW",
-        "Deal 7 damage. If the enemy has a debuff, deal 10 instead.") == (
-        "Deal 10 damage. If the enemy has a debuff, deal 13 instead.")
-    # A plural arm follows the number it is about rather than being copied.
-    assert qa_packet.upgraded_face(
-        "KLEEMOD-LYNETTE_BOX_TRICK", "Draw 2 cards.") == "Draw 3 cards."
-
-
 # --- `EB-529`: THE FOUR SMITH ROWS THAT SHOWED NOTHING AND SAID NOTHING ------
 #
 # THE FIND (Furina r12 lane 2). "The upgrade screen showed no upgrade at all
@@ -9073,23 +9033,6 @@ def test_every_one_of_the_four_now_prints_a_face_or_a_reason():
     for card_id, printed in _R12_SMITH:
         built, why = qa_packet.upgrade_preview(card_id, printed)
         assert bool(built) != bool(why), card_id
-
-
-def test_the_two_arm_swap_writes_the_upgraded_arm():
-    """Three of the four, and no arithmetic in any of them: the pattern reads
-    the UNUPGRADED arm off the printed face and the render writes the other."""
-    assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
-        "Deal 10 damage. Spend 3: deal 21 instead.")
-    assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
-        "Add 1 random Common Companion card to your hand, free this turn.")
-    # AN EMPTY UNUPGRADED ARM TAKES THE SPACE IN FRONT OF IT WITH IT: the game
-    # prints the trimmed sentence, and the upgraded face needs the space back.
-    # `EB-571`: the added draw resolves ON PLAY and the body is the end-of-turn
-    # rule, so the clause LEADS -- appended, the page told a seat deciding a
-    # Smith that the draw happened at the end of the turn.
-    assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
-        "Draw 1 card. At the end of your turn, Oz deals 5 Electro damage to "
-        "a random enemy.")
 
 
 def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():
@@ -9784,29 +9727,6 @@ def test_encore_is_defined_on_the_screen_that_first_prints_it():
     page = blindplay.observe(state)
     assert "- **Encore** — " in page
     assert "absorbs damage before HP" in page
-
-
-def test_the_encore_gloss_states_the_order_a_hit_and_a_performance_take_it():
-    """The half nothing printed. Three sites draw on one amount and none of
-    them reserves any: `FurinaResources.AbsorbDamage` takes what is there
-    after Block, `FurinaResourceHooks.BeforeCardPlayed` spends a card's price
-    before the card resolves, and `SalonPowers.PerformMember` pays 1 if it can
-    and performs at `DryDamageMultiplier` if it cannot. So the pool is one
-    pool and the order is the order things land -- which is why a hit can
-    leave a member performing dry.
-    """
-    text = blindplay.ARM_KEYWORDS["Encore"]
-    assert "One pool, as each lands" in text
-    assert "a card pays to resolve" in text
-    assert "a member spends 1 to perform or acts at 3/4" in text
-    salon = (REPO / "klee-mod" / "KleeCode" / "Powers"
-             / "SalonPowers.cs").read_text(encoding="utf-8")
-    assert "TickEncoreCost = 1;" in salon
-    assert "DryDamageMultiplier = 0.75m;" in salon
-    furina = (REPO / "klee-mod" / "KleeCode" / "Powers"
-              / "FurinaResources.cs").read_text(encoding="utf-8")
-    absorb = furina.split("public static decimal AbsorbDamage")[1][:600]
-    assert "Math.Min(resource.Amount" in absorb
 
 
 def test_the_encore_meter_line_does_not_repeat_the_gloss():
@@ -12526,34 +12446,11 @@ def _folded_hand_state(printed: str, upgraded: bool = False) -> dict:
     return state
 
 
-def test_a_folded_face_prints_the_written_one_beside_it():
-    """`EB-700`. Seen to FAIL: the face printed only the current number, so a
-    seat "cannot tell a modified number from a base one and reconstructs the
-    base from HP". Slack Water is written `Gain 4 Block`; a board printing 3
-    now says both.
-    """
-    page = blindplay.observe(_folded_hand_state(
-        "Gain 3 Block. At the start of your next turn, gain 4 Block."))
-    assert "Gain 3 Block. At the start of your next turn" in page
-    assert ("Written: Gain 4 Block. At the start of your next turn, gain 4 "
-            "Block.") in page
-    assert "the difference is the board's" in page
-
-
 def test_an_unfolded_face_prints_no_written_line():
     """The gate is a difference: a board with nothing folding into the card
     prints the face it always did and no second sentence."""
     assert "Written:" not in blindplay.observe(_folded_hand_state(
         "Gain 4 Block. At the start of your next turn, gain 4 Block."))
-
-
-def test_an_upgraded_cards_written_face_is_the_upgraded_one():
-    """The card in front of the player is the upgraded one, so its written
-    number is the canonical value plus its own OnUpgrade delta -- 4 + 3."""
-    page = blindplay.observe(_folded_hand_state(
-        "Gain 5 Block. At the start of your next turn, gain 4 Block.",
-        upgraded=True))
-    assert "Written: Gain 7 Block." in page
 
 
 def test_a_face_this_build_has_reworded_prints_nothing_rather_than_a_guess():

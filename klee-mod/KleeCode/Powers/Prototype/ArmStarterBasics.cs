@@ -154,17 +154,17 @@ internal static class ArmStarterBasics
     /// </summary>
     internal static CardModel? StrikeFor(CharacterModel character)
     {
-        if (character is IKleeCharacter && KleeOverhaul.Enabled)
+        if (character is IKleeCharacter)
         {
             return KleeOverhaulRoster.StarterStrike();
         }
 
-        if (character is IKokomiCharacter && KokomiOverhaul.Enabled)
+        if (character is IKokomiCharacter)
         {
             return KokomiOverhaulRoster.StarterStrike();
         }
 
-        if (character is IFurinaCharacter && FurinaStage.Enabled)
+        if (character is IFurinaCharacter)
         {
             return FurinaStageRoster.StarterStrike();
         }
@@ -183,17 +183,17 @@ internal static class ArmStarterBasics
     /// <summary>The Defend twin of <see cref="StrikeFor"/>.</summary>
     internal static CardModel? DefendFor(CharacterModel character)
     {
-        if (character is IKleeCharacter && KleeOverhaul.Enabled)
+        if (character is IKleeCharacter)
         {
             return KleeOverhaulRoster.StarterDefend();
         }
 
-        if (character is IKokomiCharacter && KokomiOverhaul.Enabled)
+        if (character is IKokomiCharacter)
         {
             return KokomiOverhaulRoster.StarterDefend();
         }
 
-        if (character is IFurinaCharacter && FurinaStage.Enabled)
+        if (character is IFurinaCharacter)
         {
             return FurinaStageRoster.StarterDefend();
         }

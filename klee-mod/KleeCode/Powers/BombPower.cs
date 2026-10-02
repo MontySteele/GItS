@@ -797,18 +797,6 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         var applier = pile.Applier;
         var combatState = pile.Combat;
 
-        // Explosives Workshop: flat bonus per detonation, added BEFORE
-        // amplification -- the sim totals `bomb.damage + bonus + bomb_damage_up`
-        // and only then enters the elemental pipeline (effects.py detonate_bombs).
-        //
-        // R205, co-op: `applier` is now THIS PILE's placer rather than whoever
-        // happened to bomb the enemy first, so the Workshop bonus and every
-        // dealer-side amplification below read the right Klee's board. That is
-        // a detonation-DAMAGE move, forced by the ruling and stated here so it
-        // is not mistaken for drift.
-        var damageUp =
-            applier?.Powers.OfType<BombDamageUpPower>().FirstOrDefault()?.Amount ?? 0;
-
         // One VFX per detonation EVENT, not per bomb stack (sprint plan E2's
         // spam guard) — this method is the per-event funnel. R205 makes "event"
         // mean "one placer's pile", so a two-Klee enemy lobs two: the spam
@@ -837,7 +825,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
             // is what keeps bombs from chain-detonating each other).
             await ElementalHit.Deal(
                 choiceContext, target, Element.Pyro,
-                damage + bonus + damageUp, applier);
+                damage + bonus, applier);
 
             await NotifyDetonationListeners(choiceContext, applier, target, damage);
         }

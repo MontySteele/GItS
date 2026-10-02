@@ -52,7 +52,7 @@ public sealed class ProtoMcNoelleSweepingTime : CustomCardModel, IElementalCard,
         new[] { KleeKeywords.AppliesGeo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_noelle_sweeping_time");
 

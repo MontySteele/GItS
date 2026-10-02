@@ -108,25 +108,8 @@ public sealed class TurnEndSource
 public static class TurnEndAttribution
 {
     public const string MasqueKey = "KLEEMOD-TURNEND_MASQUE";
-    public const string SparksKey = "KLEEMOD-TURNEND_SPARKS";
     public const string OzKey = "KLEEMOD-TURNEND_OZ";
-    public const string KurageKey = "KLEEMOD-TURNEND_KURAGE";
 
-    /// <summary>
-    /// The Bake-Kurage entity, cut from the summon art by
-    /// tools/cut_kurage_summon.py (art_lint L11 GENERATOR_OWNED). This is the
-    /// one source whose slot renders a CREATURE rather than a badge, because
-    /// it is the one source that is a creature — the Salon stage's members are
-    /// the precedent, and the ask (EB-53/N1) is "render the summon entity".
-    ///
-    /// Wiring the path ahead of the asset is deliberate and already ruled:
-    /// KleePck.Path returns null while a file is absent, the sprite stays
-    /// hidden, and the chip with the number renders anyway. Unlike the power
-    /// badges of EB-65 there is no base-game getter to fall through to, so an
-    /// absent file cannot produce a NOPE placeholder here — it produces a
-    /// number with no picture, which is the degradation we want.
-    /// </summary>
-    private const string KurageSprite = "kokomi/summon/bake_kurage.png";
 
     private static PowerModel? First<T>(Creature creature) where T : PowerModel =>
         creature.Powers.OfType<T>().FirstOrDefault();
@@ -172,32 +155,6 @@ public static class TurnEndAttribution
         },
         new()
         {
-            Key = "sparks",
-            TitleKey = SparksKey,
-            Find = First<SparksNSplashPower>,
-            TurnsLeft = Amount<SparksNSplashPower>,
-            Preview = static _ =>
-                $"{KitBurstConstants.VolleyHits}x{KitBurstConstants.VolleyHitDamage}",
-            Buffed = static _ => false,
-            Body = static creature =>
-                $"[gold]Sparks 'n' Splash[/gold] (Burst): "
-              + $"{KitBurstConstants.VolleyHits} hits of "
-              + $"{KitBurstConstants.VolleyHitDamage}, each to a RANDOM enemy, "
-              + $"each applying [gold]Pyro[/gold]. Fires FIRST of the three "
-              + $"volleys. Lasts {Amount<SparksNSplashPower>(creature)} more "
-              + "turn(s). The targets are not chosen until the turn ends, so "
-              + "Strength and Vulnerable are not in this number.",
-            Resolve = static async (creature, choiceContext) =>
-            {
-                foreach (var pyro in creature.Powers
-                             .OfType<SparksNSplashPower>().ToList())
-                {
-                    await pyro.FireVolley(choiceContext);
-                }
-            },
-        },
-        new()
-        {
             Key = "oz",
             TitleKey = OzKey,
             Find = First<OzSummonPower>,
@@ -217,63 +174,6 @@ public static class TurnEndAttribution
                              .OfType<OzSummonPower>().ToList())
                 {
                     await electro.FireVolley(choiceContext);
-                }
-            },
-        },
-        new()
-        {
-            Key = "kurage",
-            TitleKey = KurageKey,
-            SpritePath = KurageSprite,
-            Find = First<KurageSummonPower>,
-            TurnsLeft = Amount<KurageSummonPower>,
-#if PROTOTYPE_CARDS
-            // `EB-247`. QUARANTINED, and it is this whole docket row that
-            // moves. Under the memory rule `PulseDamage` and `PulseMultiplier`
-            // are the retired arithmetic -- the pulse reads the bank not at
-            // all -- so the chip previewed a number the hit does not deal and
-            // flagged it "raised" off an amp that no longer amplifies
-            // anything. The preview reads the same forecast the wire and the
-            // fielding tip do, through `KurageMemory.Forecast`.
-            Preview = static creature =>
-            {
-                var (kind, _, amount) = KurageMemory.Forecast(creature);
-                return kind == "none" ? "-" : amount.ToString();
-            },
-            // NOTHING RAISES THIS PULSE ANY MORE. Every branch is a flat law
-            // constant, so the chip has no amped state to mark, and claiming
-            // one would be the same class of falsehood as the number above.
-            Buffed = static _ => false,
-            // NO DURATION SENTENCE. Same fact `EB-197` settled on the buff
-            // itself: the stacks are clamped to 1 and never tick, so "Lasts N
-            // more turn(s)" was a countdown the power does not have -- and
-            // this was the one surface still appending it.
-            Body = static creature =>
-                Cards.KokomiRiderTips.PulseBody(creature, inCombat: true),
-#else
-            // THE ASK, literally: the pulse's damage, before end of turn,
-            // through the accessor the hit uses.
-            Preview = static creature =>
-                KurageSummonPower.PulseDamage(creature).ToString(),
-            // CLOSES THE GAP KurageAmpPower FLAGGED. Its own summary records
-            // that "a player holding two copies sees the Bake-Kurage text
-            // quote the unamped number while the hit uses the amped one",
-            // because Localization resolves on the canonical model with no
-            // owner to read an amp off. This chip has an owner, so it shows
-            // the amped number AND marks it as raised.
-            Buffed = static creature =>
-                KurageSummonPower.PulseMultiplier(creature)
-                > KokomiConstants.KuragePulsePerCharge,
-            Body = static creature =>
-                Cards.KokomiRiderTips.PulseBody(creature, inCombat: true)
-              + $" Lasts {Amount<KurageSummonPower>(creature)} more turn(s).",
-#endif
-            Resolve = static async (creature, choiceContext) =>
-            {
-                foreach (var hydro in creature.Powers
-                             .OfType<KurageSummonPower>().ToList())
-                {
-                    await hydro.FirePulse(choiceContext);
                 }
             },
         },

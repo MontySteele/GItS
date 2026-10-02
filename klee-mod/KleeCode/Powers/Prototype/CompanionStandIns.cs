@@ -106,7 +106,6 @@ public static class CompanionStandIns
     /// </summary>
     internal static CardModel HandOff(CardModel picked, Player player)
     {
-        if (!CompanionOverhaul.Enabled) return picked;
         return HandOffTo(picked, CompanionPool.CharacterId(player), Pairs());
     }
 
@@ -133,7 +132,6 @@ public static class CompanionStandIns
         CardModel picked, string? characterId,
         IReadOnlyList<(CardModel Universal, CardModel StandIn)> pairs)
     {
-        if (!CompanionOverhaul.Enabled) return picked;
         if (characterId == null) return picked;
         foreach (var (universal, standIn) in pairs)
         {
@@ -162,7 +160,6 @@ public static class CompanionStandIns
     internal static async Task OnExplosion(
         PlayerChoiceContext choiceContext, Creature applier, bool isMine)
     {
-        if (!CompanionOverhaul.Enabled) return;
         foreach (var power in applier.Powers.ToList())
         {
             switch (power)
@@ -191,7 +188,7 @@ public static class CompanionStandIns
     /// counter, which Jean's stand-in also reads.
     /// </summary>
     internal static bool GroundedBlind(Creature owner) =>
-        CompanionOverhaul.Enabled && StandInLedger.For(owner).GroundedBlind;
+        StandInLedger.For(owner).GroundedBlind;
 }
 
 /// <summary>

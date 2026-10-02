@@ -26,8 +26,7 @@ namespace KleeMod.Elements;
 ///
 /// Both are ON in every build that names neither property
 /// (<c>klee-mod/Directory.Build.props</c>): <c>-p:SwirlPays=false</c> or
-/// <c>-p:CrystallizeKeepsAura=false</c> turns one off, and
-/// <c>-p:ShippedKits=true</c> turns both off. The sim twins
+/// <c>-p:CrystallizeKeepsAura=false</c> turns one off. The sim twins
 /// (<c>C.SWIRL_PAYS</c>, <c>C.CRYSTALLIZE_KEEPS_AURA</c>) ship <c>False</c>,
 /// the arm convention, and pin both sides by flipping them.
 ///

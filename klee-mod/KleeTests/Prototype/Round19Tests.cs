@@ -110,19 +110,6 @@ public class Round19Tests
                               c => c.StartsWith("DamageCmd.",
                                                 StringComparison.Ordinal));
     }
-    [Fact]
-    public void A_performance_hands_the_hit_no_attacker_either()
-    {
-        // The behavioural half, structural for the reason `EB-538`'s is:
-        // `PerformMember` is the ONE implementation of a member acting and it
-        // asks the same unpowered funnel a carry-out does, so neither can fire
-        // a power keyed on being hit.
-        Assert.Contains(Il.Calls(Il.Method("SalonMemberPower", "PerformMember")),
-                        c => c == "ElementalHit.Deal");
-        Assert.DoesNotContain(
-            Il.Calls(Il.Method("SalonMemberPower", "PerformMember")),
-            c => c.StartsWith("DamageCmd.", StringComparison.Ordinal));
-    }
 
 
     // ==================================================================
@@ -367,36 +354,6 @@ public class Round19Tests
     // R276 pick 2 retired the Hexerei word that pointed at it, so the rider
     // is the one surface and these pins are its.
 
-    [Fact]
-    public void The_numbers_are_the_kits_own_declaration_and_not_typed()
-    {
-        // `EB-89`'s rule: a retune must not leave the sentence quoting a
-        // retired figure, so the numerals come off `KleeCompanionSpark` --
-        // the declaration LAW:145 obliges Klee's KIT to make.
-        var coven = Printed(typeof(ArmKeywordTips), "ForCovenSpark");
-
-        Assert.DoesNotContain(KleeCompanionSpark.Base.ToString(), coven);
-        // AND THE VALUES THEMSELVES, so the sentence and the grant move
-        // together: the cap is the sum of the three limbs, which is why the
-        // rider prints no bound.
-        Assert.Equal(1, KleeCompanionSpark.Base);
-        Assert.Equal(KleeCompanionSpark.Base + KleeCompanionSpark.ReactionBonus
-                     + KleeCompanionSpark.UpgradedBonus,
-                     KleeCompanionSpark.MaxPerPlay);
-        Assert.DoesNotContain("up to", coven);
-        Assert.DoesNotContain("Cards of hers pay", coven);
-        Assert.DoesNotContain("never costs", coven);
-    }
-
-    [Fact]
-    public void And_the_rider_still_says_nothing_on_a_run_that_is_not_klees()
-    {
-        // `EB-504`'s gate is untouched: a Universal rides every character's
-        // run and the RULE is Klee's, so a Kokomi run does not meet it.
-        var body = Il.Method("ArmKeywordTips", "ForCovenSpark");
-        Assert.Contains("ArmKeywordTips.KleesRuleBelongsHere", Il.Calls(body));
-    }
-
     // ==================================================================
     // `EB-540` -- a Skill's damage spends no next-Attack buff
     // ==================================================================
@@ -479,20 +436,6 @@ public class Round19Tests
     // prints the rule and both numbers and the morning rider is off the card.
     // (`KokomiRiderTips.MorningDamageBody` stays, attached to no row today.)
     // The Casket pass (2026-09-28) cut Well Laid; its face pin left with it.
-
-    [Fact]
-    public void EB539_off_the_board_the_rule_stands_without_a_count()
-    {
-        // The `FurinaRiderTips` rule every tip in that file keeps: a shop
-        // shelf and a deck view have no morning, and "it carried out 0" printed
-        // there would be the same false certainty the row was filed on. So the
-        // body asks for an owner and a combat before it counts.
-        var calls = Il.Calls(typeof(KokomiRiderTips)
-            .GetMethod("MorningDamageBody", All)!);
-        Assert.Contains(calls, c => c.Contains("CreatureOf"));
-        Assert.Contains(calls, c => c.Contains("get_CombatState"));
-        Assert.Contains(calls, c => c.Contains("get_PlansThisMorning"));
-    }
 
     // ==================================================================
     // `EB-542` -- raw LocString keys in the carry-out log
@@ -720,21 +663,6 @@ public class Round19Tests
                      AuraCmd.ElementOfPlay(null, null));
     }
 
-    [Fact]
-    public void A_card_that_prints_one_is_the_only_source_the_funnel_reads()
-    {
-        // The other half, so the gloss's "from a CARD that prints one" is a
-        // claim about this method and not about a card: the funnel asks the
-        // card for its element, and a card that declares none -- a Defend --
-        // answers none.
-        var seat = Seat.Klee();
-
-        Assert.Equal(Element.Pyro, AuraCmd.ElementOfPlay(
-            new Kaboom(), seat.Creature));
-        Assert.Equal(Element.None, AuraCmd.ElementOfPlay(
-            new DuckAndCover(), seat.Creature));
-    }
-
     // ==================================================================
     // `EB-546` -- the Vaporize that did not multiply
     // ==================================================================
@@ -765,46 +693,6 @@ public class Round19Tests
         Assert.Equal(1.5m, ReactionConstants.VaporizeMult);
     }
 
-    [Fact]
-    public void The_dry_cut_is_a_size_and_the_amplifier_is_a_separate_term()
-    {
-        // The two numbers the seat's readings turn on, off the one expression
-        // the badge and the hit share: a paid Crabaletta is her printed tick
-        // and a dry one is three-quarters of it, TRUNCATED -- 6 and 4, which
-        // is what makes 9 and 6 the two amplified answers.
-        var seat = Seat.Furina().WithCombatState();
-
-        var paid = SalonMemberPower.TickValue(
-            seat.Creature, SalonMember.Crabaletta, paid: true);
-        var dry = SalonMemberPower.TickValue(
-            seat.Creature, SalonMember.Crabaletta, paid: false);
-
-        Assert.Equal(SalonConstants.CrabalettaTick, paid);
-        Assert.Equal((int)(paid * SalonConstants.DryDamageMultiplier), dry);
-        Assert.Equal(6, paid);
-        Assert.Equal(4, dry);
-    }
-
-    [Fact]
-    public void A_performance_goes_through_the_funnel_that_multiplies()
-    {
-        // STRUCTURAL, and it is the whole of what a headless test can say
-        // about the live reading: there is ONE implementation of a member
-        // acting, it asks `ElementalHit.Deal`, and `Deal` multiplies by the
-        // amplifier and then reads the target's terms -- in that order, with
-        // no branch between them that the Encore buffer can reach.
-        Assert.Contains("ElementalHit.Deal",
-                        Il.Calls(Il.Method("SalonMemberPower", "PerformMember")));
-
-        var deal = Il.CallSequence(Il.Method("ElementalHit", "Deal")).ToList();
-        var amp = deal.FindIndex(c => c.Contains("AmplifierMultiplier"));
-        var mods = deal.FindIndex(c => c.Contains("TargetMods"));
-        var hit = deal.FindIndex(c => c.Contains("CreatureCmd.Damage"));
-
-        Assert.True(amp >= 0 && mods > amp && hit > mods,
-                    "amplifier, then the target's terms, then the hit");
-    }
-
     // ------------------------------------------------------------------
     // THE CAUSE, 2026-09-16, and it was never the amplifier.
     // ------------------------------------------------------------------
@@ -830,27 +718,6 @@ public class Round19Tests
     // all). A performance asks the funnel for an UNPOWERED hit in both
     // engines now and `Round21Tests` pins that call; these two pin the
     // ARITHMETIC either side of it, which is what the r13 reading lacked.
-
-    [Fact]
-    public void The_seats_six_is_the_dealers_weak_and_the_amplifier_together()
-    {
-        // `SimDamagePipeline.Resolve` IS the pre-`EB-588` performance, and it
-        // says so in its own doc: the dealer's terms, the amplifier, the
-        // target's, one truncation. Run it on the seat's numbers and the
-        // answer is the six that was on the bar.
-        var weakened = Seat.Furina().WithPower<WeakPower>(1);
-        var target = Seat.Klee().WithCombatState();
-
-        Assert.Equal(6, SimDamagePipeline.Resolve(
-            weakened.Creature, target.Creature,
-            SalonConstants.CrabalettaTick, ReactionConstants.VaporizeMult));
-
-        // And the number the seat expected, which is what the same board
-        // lands today: the same call with the dealer's terms not entering.
-        Assert.Equal(9, SimDamagePipeline.Resolve(
-            null, target.Creature,
-            SalonConstants.CrabalettaTick, ReactionConstants.VaporizeMult));
-    }
 
     [Fact]
     public void The_enemy_the_seat_named_is_the_one_that_applies_the_weak()
@@ -885,15 +752,6 @@ public class Round19Tests
     // around it -- `EB-491`'s lesson one door over.
 
     [Fact]
-    public void The_guest_star_generator_reads_the_arm_aware_door()
-    {
-        var calls = Il.Calls(Il.Method("GuestStarGenerator", "Generate"));
-
-        Assert.Contains("CompanionPool.get_All", calls);
-        Assert.DoesNotContain("CompanionRoster.get_All", calls);
-    }
-
-    [Fact]
     public void And_that_door_is_the_one_the_offer_surfaces_read()
     {
         // The claim the fix rests on, read where it lives: `CompanionPool.All`
@@ -901,9 +759,7 @@ public class Round19Tests
         // otherwise, so every consumer of it sees one row per printed name.
         var door = Il.Calls(Il.Method("CompanionPool", "get_All"));
 
-        Assert.Contains("CompanionOverhaul.get_Enabled", door);
         Assert.Contains("CompanionOverhaulRoster.Roster", door);
-        Assert.Contains("CompanionRoster.get_All", door);
     }
 
     /// <summary>The loc key a pile's badge is resolving right now.

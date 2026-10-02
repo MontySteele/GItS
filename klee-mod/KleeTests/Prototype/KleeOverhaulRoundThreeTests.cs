@@ -298,7 +298,6 @@ public class KleeOverhaulRoundThreeTests
         {
             var calls = Il.Calls(hooks.GetMethod(name, HeadlessGame.All)!);
             Assert.Contains("ProtoBombPower.SweepJumps", calls);
-            Assert.Contains("KleeOverhaul.get_Enabled", calls);
         }
 
         // A BROADCAST listener, not a power on the dying enemy: the corpse's

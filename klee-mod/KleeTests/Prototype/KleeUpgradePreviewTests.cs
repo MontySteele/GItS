@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using BaseLib.Abstracts;
-using KleeMod.Cards.Generated;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
@@ -39,54 +38,6 @@ public class KleeUpgradePreviewTests
         card.Localization!.Single(row => row.Item1 == "description").Item2;
 
     // ---- Prune: the arm's upgrade is the Block ---------------------------
-
-    [Fact]
-    public void Prunes_face_prints_its_block_through_the_diff_var()
-    {
-        var prune = new PruneWitchHunt();
-        Assert.Contains("gain {Block:diff()} [gold]Block[/gold]",
-                        Description(prune));
-        Assert.Equal(5m, prune.DynamicVars.Block.BaseValue);
-    }
-
-    [Fact]
-    public void Under_the_arm_prunes_upgrade_is_block_five_to_eight()
-    {
-        var was = KleeOverhaul.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = true;
-            var prune = new PruneWitchHunt();
-            Upgrade(prune);
-            Assert.Equal(8m, prune.DynamicVars.Block.BaseValue);
-            // The Smith's green: the var the face prints was moved by the
-            // upgrade, which is what `:diff()` highlights.
-            Assert.True(prune.DynamicVars.Block.WasJustUpgraded);
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = was;
-        }
-    }
-
-    [Fact]
-    public void Off_the_arm_prunes_upgrade_leaves_the_block_at_five()
-    {
-        var was = KleeOverhaul.Enabled;
-        try
-        {
-            KleeOverhaul.Enabled = false;
-            var prune = new PruneWitchHunt();
-            Upgrade(prune);
-            Assert.True(prune.IsUpgraded);
-            Assert.Equal(5m, prune.DynamicVars.Block.BaseValue);
-            Assert.False(prune.DynamicVars.Block.WasJustUpgraded);
-        }
-        finally
-        {
-            KleeOverhaul.Enabled = was;
-        }
-    }
 
     // ---- the Spark price on the Smith's preview ---------------------------
 

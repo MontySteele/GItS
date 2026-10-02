@@ -35,17 +35,14 @@ public class FurinaStageUiCleanupTests
 {
     private sealed class Arm : IDisposable
     {
-        private readonly bool _enabled = FurinaStage.Enabled;
 
-        internal Arm(bool on = true)
+        internal Arm()
         {
             FurinaStageLedger.ResetAll();
-            FurinaStage.Enabled = on;
         }
 
         public void Dispose()
         {
-            FurinaStage.Enabled = _enabled;
             FurinaStageLedger.ResetAll();
         }
     }
@@ -81,47 +78,6 @@ public class FurinaStageUiCleanupTests
     // ==================================================================
     // 1. The shipped Salon stage does not mount under the arm.
     // ==================================================================
-
-    [Fact]
-    public void Under_the_stage_arm_the_salon_stage_does_not_mount()
-    {
-        using var _ = new Arm();
-        Assert.False(SalonVisualsBridge.AppliesTo(Seat.Furina().Creature));
-    }
-
-    [Fact]
-    public void With_the_arm_off_the_salon_stage_still_mounts_for_furina()
-    {
-        using var _ = new Arm(on: false);
-        Assert.True(SalonVisualsBridge.AppliesTo(Seat.Furina().Creature));
-    }
-
-    [Fact]
-    public void The_salon_stage_is_never_anyone_elses()
-    {
-        using (new Arm())
-        {
-            Assert.False(SalonVisualsBridge.AppliesTo(Seat.Klee().Creature));
-            Assert.False(SalonVisualsBridge.AppliesTo(null));
-        }
-        using (new Arm(on: false))
-        {
-            Assert.False(SalonVisualsBridge.AppliesTo(Seat.Klee().Creature));
-        }
-    }
-
-    /// <summary>Both doors ask the gate: the combat-open mount and the lazy
-    /// rebuild inside Refresh, which every Encore and Salon funnel calls. A
-    /// Refresh that skipped it would rebuild the stage the mount refused.
-    /// </summary>
-    [Theory]
-    [InlineData("Setup")]
-    [InlineData("Refresh")]
-    public void Both_doors_ask_the_gate(string door)
-    {
-        Assert.Contains("SalonVisualsBridge.AppliesTo",
-                        Il.Calls(Il.Method("SalonVisualsBridge", door)));
-    }
 
     // ==================================================================
     // 2. The fade shows, one number per fading performer.
@@ -166,16 +122,6 @@ public class FurinaStageUiCleanupTests
         Assert.Empty(pops.Seen);
     }
 
-    [Fact]
-    public void With_the_arm_off_nothing_fades_and_nothing_pops()
-    {
-        using var _ = new Arm(on: false);
-        using var pops = new Pops();
-        var seat = Seat.Furina().WithCombatState();
-        Assert.Empty(FurinaStage.FadeAndShow(seat.Creature));
-        Assert.Empty(pops.Seen);
-    }
-
     // ==================================================================
     // 2b. A hit on the lead shows too (the pets had no number for it).
     // ==================================================================
@@ -209,62 +155,6 @@ public class FurinaStageUiCleanupTests
     // ==================================================================
     // 3. The Stage retires the shipped Burst (EB-726 dropped the guards).
     // ==================================================================
-
-    /// <summary>A reaction's Burst credit lands in <c>GainBurst</c>
-    /// (<c>ReactionEffects.Resolve</c>, pinned below); the reaction itself is
-    /// a live path outside the headless boundary, so the funnel's decision is
-    /// what is asked, as Kokomi's `EB-327` pin asks it.</summary>
-    [Fact]
-    public void A_reaction_pays_no_burst_under_the_stage()
-    {
-        using var _ = new Arm();
-        var furina = Seat.Furina().WithCombatState().Creature;
-        FurinaResources.GainBurst(furina, FurinaResourceConstants.BurstPerReaction);
-        Assert.Equal(0, FurinaResources.Burst(furina));
-    }
-
-    [Fact]
-    public void With_the_arm_off_a_reaction_pays_burst_as_it_ships()
-    {
-        using var _ = new Arm(on: false);
-        var furina = Seat.Furina().WithCombatState().Creature;
-        FurinaResources.GainBurst(furina, FurinaResourceConstants.BurstPerReaction);
-        Assert.Equal(FurinaResourceConstants.BurstPerReaction,
-                     FurinaResources.Burst(furina));
-    }
-
-    [Fact]
-    public void The_reaction_credit_still_goes_through_the_guarded_funnel()
-    {
-        Assert.Contains("FurinaResources.GainBurst",
-                        Il.Calls(Il.Method("ReactionEffects", "Resolve")));
-    }
-
-    /// <summary>
-    /// The shipped <i>Let the People Rejoice</i> is never granted under the
-    /// arm, even from a meter already at its max (a save, or any write
-    /// outside the funnel). The grant asks the arm before it reads the meter
-    /// or touches the hand, so a full meter returns without creating a card.
-    /// </summary>
-    [Fact]
-    public void The_kit_card_is_never_granted_under_the_stage()
-    {
-        using var _ = new Arm();
-        var seat = Seat.Furina().WithCombatState();
-        CustomResources<FurinaBurstResource>
-            .Get(seat.Player.PlayerCombatState!).Amount =
-            FurinaResourceConstants.BurstMax;
-
-        var grant = FurinaKitGrant.GrantIfCharged(
-            new ThrowingPlayerChoiceContext(), seat.Player);
-        Assert.True(grant.IsCompletedSuccessfully);
-
-        var calls = Il.CallSequence(Il.Method("FurinaKitGrant", "GrantIfCharged"))
-            .ToList();
-        var gate = calls.IndexOf("FurinaResources.StageRetiresTheShippedMeters");
-        var hand = calls.IndexOf("CardPile.Get");
-        Assert.True(gate >= 0 && hand > gate, string.Join(", ", calls));
-    }
 
     [Fact]
     public void A_hit_with_nothing_through_block_or_no_stage_pops_nothing()

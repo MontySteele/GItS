@@ -245,23 +245,6 @@ public class KitVerbBaseTriggerPinTests
                                            "DealWithoutDealerMods")));
     }
 
-    [Theory]
-    // MATRIX V4, V12, V13 -- the SHIPPED verbs. Each reaches the one door
-    // and none of them reaches `DamageCmd`, which is the whole of their row:
-    // damage-only under T5 and `none` everywhere else. V11, the Casket, is
-    // the Kokomi arm's relic and is pinned with the other quarantined verbs.
-    [InlineData("BombPower", "ResolvePayload")]        // V4  detonation
-    [InlineData("SalonMemberPower", "PerformMember")]  // V12 performance
-    [InlineData("SalonMemberPower", "Bow")]            // V13 bow / Evoke
-    public void A_shipped_kit_verb_goes_through_the_one_door(
-        string type, string method)
-    {
-        var calls = Il.Calls(Il.Method(type, method));
-
-        Assert.Contains("ElementalHit.Deal", calls);
-        Assert.DoesNotContain("DamageCmd.Attack", calls);
-    }
-
     [Fact]
     public void A_kit_verbs_debuff_carries_no_card_source()
     {

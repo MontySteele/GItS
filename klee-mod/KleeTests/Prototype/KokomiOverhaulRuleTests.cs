@@ -47,31 +47,6 @@ public class KokomiOverhaulRuleTests
 
     // ---- THE FLAG, ON BY DEFAULT ------------------------------------------
 
-    // THE CURRENT KITS ARE THE DEFAULT BUILD (2026-09-28). [USER]: "Let's go
-    // ahead and make all 3 current builds the active release builds to avoid
-    // this confusion." `klee-mod/Directory.Build.props` now defaults
-    // `-p:KokomiOverhaul=true`, so a build that names no property -- `dotnet test`,
-    // deploy.ps1, the handoff zip -- has this arm on. This pin says so.
-    //
-    // SKIPPED, NOT LEFT TO FAIL, in the one configuration that opts the arm
-    // out (`-p:ShippedKits=true`, the `dotnet-test-shipped` gate, or an
-    // explicit `-p:KokomiOverhaul=false`): there the property has moved the very value
-    // this pin asserts, and a red that means "the opt-out works" teaches
-    // everyone to ignore reds. docs/current/operations/prototype.md carries
-    // the rule.
-#if KOKOMI_OVERHAUL
-    [Fact]
-#else
-    [Fact(Skip = "This build opts the arm out (-p:ShippedKits=true or -p:KokomiOverhaul=false), which moves KokomiOverhaul.DefaultEnabled, the value this pin asserts. See docs/current/operations/prototype.md.")]
-#endif
-    public void The_arm_ships_on()
-    {
-        // `Enabled` is settable so a pin can exercise both sides in one
-        // build; nothing in the mod ever writes it.
-        Assert.True(KokomiOverhaul.DefaultEnabled);
-        Assert.Equal(KokomiOverhaul.DefaultEnabled, KokomiOverhaul.Enabled);
-    }
-
     [Fact]
     public void The_arm_is_hers_alone()
     {
@@ -79,20 +54,15 @@ public class KokomiOverhaulRuleTests
         // him a Tide counter. Every rule in the arm asks through `LiveFor`.
         // BOTH SIDES OF THE SWITCH IN ONE BUILD, which is what `Enabled` is
         // settable for -- and restored, so no other pin reads a moved default.
-        var was = KokomiOverhaul.Enabled;
         try
         {
-            KokomiOverhaul.Enabled = true;
             Assert.False(KokomiOverhaul.LiveFor(Seat.Klee().Creature));
             Assert.False(KokomiOverhaul.LiveFor(Seat.Furina().Creature));
             Assert.True(KokomiOverhaul.LiveFor(Seat.Kokomi().Creature));
 
-            KokomiOverhaul.Enabled = false;
-            Assert.False(KokomiOverhaul.LiveFor(Seat.Kokomi().Creature));
         }
         finally
         {
-            KokomiOverhaul.Enabled = was;
         }
     }
 
@@ -105,18 +75,15 @@ public class KokomiOverhaulRuleTests
         // exactly what they were.
         var deck = typeof(global::KleeMod.Kokomi)
             .GetProperty("StartingDeck", HeadlessGame.All)!.GetGetMethod(true)!;
-        Assert.Contains("KokomiOverhaul.get_Enabled", Il.Calls(deck));
         Assert.Contains("KokomiOverhaulRoster.StartingDeck", Il.Calls(deck));
 
         var relics = typeof(global::KleeMod.Kokomi)
             .GetProperty("StartingRelics", HeadlessGame.All)!
             .GetGetMethod(true)!;
-        Assert.Contains("KokomiOverhaul.get_Enabled", Il.Calls(relics));
         Assert.Contains("KokomiOverhaulRoster.StartingRelics", Il.Calls(relics));
 
         var filter = typeof(global::KleeMod.KokomiCardPool)
             .GetMethod("FilterThroughEpochs", HeadlessGame.All)!;
-        Assert.Contains("KokomiOverhaul.get_Enabled", Il.Calls(filter));
         Assert.Contains("KokomiOverhaulRoster.OfferablePool", Il.Calls(filter));
 
         var open = typeof(KokomiResourceHooks)
@@ -129,52 +96,7 @@ public class KokomiOverhaulRuleTests
         // applied to, so it would hand an arm run her two SHIPPED basics.
         // `ArmStarterBasicsTests` holds the rest of it.
         var basics = Il.Calls(Il.Method("ArmStarterBasics", "StrikeFor"));
-        Assert.Contains("KokomiOverhaul.get_Enabled", basics);
         Assert.Contains("KokomiOverhaulRoster.StarterStrike", basics);
-    }
-
-    [Fact]
-    public void The_shipped_jellyfish_is_not_edited_by_this_arm()
-    {
-        // The whole reason the overhaul is a SECOND power. If this ever fails,
-        // the arm has reached into the summon whose duration, ward and amp the
-        // Kurage's-memory arm is also live inside.
-        var shipped = typeof(KurageSummonPower).GetMethods(HeadlessGame.All)
-            .Where(m => m.DeclaringType == typeof(KurageSummonPower))
-            .SelectMany(Il.Calls)
-            .ToList();
-        Assert.DoesNotContain(shipped, c => c.StartsWith("ProtoBakeKurage"));
-        Assert.DoesNotContain(shipped, c => c.StartsWith("KokomiRules"));
-        Assert.DoesNotContain(shipped, c => c.StartsWith("KokomiOverhaul"));
-    }
-
-    [Fact]
-    public void The_memory_arm_is_switched_off_at_its_one_predicate()
-    {
-        // The two Kokomi arms are ALTERNATIVES, not layers, and this is the one
-        // line that says so: `IsLive` is the single gate the whole memory arm
-        // asks, so gating it here covers the entry rules, the fire, the keyword
-        // door and the strip at once.
-        var live = typeof(KurageMemory).GetMethod("IsLive", HeadlessGame.All)!;
-        Assert.Contains("KokomiOverhaul.get_Enabled", Il.Calls(live));
-    }
-
-    [Fact]
-    public void The_shipped_funnel_is_switched_off_under_the_arm()
-    {
-        // Brief sec.4, "What leaves": the Charge bank and its exhaust engine,
-        // and the Burst gate. Each is one early return on the arm.
-        var exhaust = typeof(KokomiResourceHooks)
-            .GetMethod("AfterCardExhausted", HeadlessGame.All)!;
-        Assert.Contains("KokomiOverhaul.LiveFor", Il.Calls(exhaust));
-
-        var played = typeof(KokomiResourceHooks)
-            .GetMethod("BeforeCardPlayed", HeadlessGame.All)!;
-        Assert.Contains("KokomiOverhaul.LiveFor", Il.Calls(played));
-
-        var grant = typeof(KokomiResourceHooks)
-            .GetMethod("GrantKitIfLive", HeadlessGame.All)!;
-        Assert.Contains("KokomiOverhaul.LiveFor", Il.Calls(grant));
     }
 
     // ---- RULE 1: the Bake-Kurage is a pet, and enemies cannot touch it ----
@@ -855,22 +777,6 @@ public class KokomiOverhaulRuleTests
 
     // ---- rule 3's other half: Strength is HERS again ---------------------
 
-    [Fact]
-    public void Rule3_the_shipped_strength_refusal_is_skipped_under_the_arm()
-    {
-        // Draft 2 sent her Strength to the Tide at this chokepoint. Draft 6
-        // says "your Strength and Dexterity count, since the plans are hers",
-        // so the arm SKIPS the refusal and the Strength simply lands. The
-        // shipped conversion is still there for a flag-off run.
-        var hook = typeof(KokomiResourceHooks)
-            .GetMethod("TryModifyPowerAmountReceived", HeadlessGame.All)!;
-        var calls = Il.Calls(hook);
-        Assert.Contains("KokomiOverhaul.LiveFor", calls);
-        Assert.Contains("KokomiResources.GainCharge", calls);
-        // Nothing of this arm's is paid into any more.
-        Assert.DoesNotContain(calls, c => c.StartsWith("KokomiRules.Gain"));
-    }
-
     // ---- the Commander's two powers --------------------------------------
 
     [Fact]
@@ -1272,10 +1178,8 @@ public class KokomiOverhaulRuleTests
     [Fact]
     public void EB478_tide_chart_pays_one_card_for_each_plan_carried_out()
     {
-        var was = KokomiOverhaul.Enabled;
         try
         {
-            KokomiOverhaul.Enabled = true;
             // The base row, `{per: 1, amount: 0}`: two Plans carried out, two
             // cards.
             Assert.Equal(2, KokomiPlan.PromisedDraw(
@@ -1297,7 +1201,6 @@ public class KokomiOverhaulRuleTests
         }
         finally
         {
-            KokomiOverhaul.Enabled = was;
             KokomiPlan.ResetAll();
             KokomiOverhaulLedger.ResetAll();
         }
@@ -1306,10 +1209,8 @@ public class KokomiOverhaulRuleTests
     [Fact]
     public void EB478_the_promise_is_paid_once_and_after_the_morning()
     {
-        var was = KokomiOverhaul.Enabled;
         try
         {
-            KokomiOverhaul.Enabled = true;
             var seat = PromisedSeat(flat: 0, per: 1, plans: 2);
             // A second copy played the same turn adds its own rate: the
             // promise is arithmetic, not a list of cards.
@@ -1322,7 +1223,6 @@ public class KokomiOverhaulRuleTests
         }
         finally
         {
-            KokomiOverhaul.Enabled = was;
             KokomiPlan.ResetAll();
             KokomiOverhaulLedger.ResetAll();
         }

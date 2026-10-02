@@ -105,8 +105,6 @@ internal static class MeterCostBadge
     private static string? IconPathFor(Meter meter) => meter switch
     {
         Meter.Sparks => "klee/powers/spark.png",
-        Meter.Encore => "furina/powers/encore.png",
-        Meter.Charge => "kokomi/powers/charge.png",
         _ => null,
     };
 
@@ -117,17 +115,9 @@ internal static class MeterCostBadge
     /// Sparks keep <c>StsColors.cream</c> -- the base game's own cost colour --
     /// because the spark GLYPH already carries the identity there, and recolour-
     /// ing a look [USER] has not yet had eyes on would be two changes in one.
-    /// Encore and Charge keep theirs now that they have glyphs too: the glyph is
-    /// drawn IN this colour (gen_meter_glyphs.py reads the same two values), so
-    /// number and icon are one object rather than two decisions.
-    /// Encore's value is the Salon stage ribbon's fill
-    /// (`furina/ui/salon_stage.tscn`, %Seg1) and Charge's is the second-row
-    /// gauge's fill (<see cref="GaugeBridge"/>, the `kokomi_charge` spec).
     /// </summary>
     private static Color ColorFor(Meter meter) => meter switch
     {
-        Meter.Encore => new Color(0.35f, 0.75f, 1f),
-        Meter.Charge => new Color(0.44f, 0.78f, 0.84f),
         _ => StsColors.cream,
     };
 

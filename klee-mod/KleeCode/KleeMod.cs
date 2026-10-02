@@ -80,13 +80,11 @@ public static class KleeMod
                 Powers.KleeElementalHooks.Subscribe(combatState)
                     .Concat(Powers.FurinaResourceHooks.Subscribe(combatState))
                     .Concat(Powers.KokomiResourceHooks.Subscribe(combatState))
-                    .Concat(Powers.KokomiGarmentHooks.Subscribe(combatState))
                     // EB-19/races-a + races-c: the four end-of-turn tenants
                     // that share the player's Block and the enemy reaction
                     // board no longer each override BeforeSideTurnEnd. This
                     // one listener drives them in the sim's fixed order.
                     .Concat(Powers.TurnEndSequencer.Subscribe(combatState))
-#if PROTOTYPE_CARDS
                     // QUARANTINED (R213 B). The Mondstadt companion overhaul's
                     // own end-of-turn tenant, on the same argument one line up:
                     // six of its powers fire at the end of the player's turn,
@@ -131,7 +129,6 @@ public static class KleeMod
                     // build, and inert with the arm off -- every method's
                     // first line is `FurinaStage.LiveFor`.
                     .Concat(Powers.FurinaStageHooks.Subscribe(combatState))
-#endif
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see
                     // the three rules in PlayTelemetry.cs, the first of which
@@ -139,9 +136,7 @@ public static class KleeMod
                     .Concat(Diagnostics.PlayTelemetryHooks.Subscribe(combatState)));
 
         Log.Info($"[{ModId}] Klee, Furina and Kokomi registered"
-#if PROTOTYPE_CARDS
                  + ", and Varka (prototype)"
-#endif
                  + ".");
     }
 
@@ -207,7 +202,6 @@ public static class KleeMod
                 // bottom. Outside the compile switch for the row above's
                 // reason: a sheet verb, not a prototype rule.
                 [Powers.ScryTake.PromptKey] = Powers.ScryTake.PromptText,
-#if PROTOTYPE_CARDS
                 // QUARANTINED (the Kokomi overhaul, draft 6). Moon's
                 // Reflection's exhaust-pile screen, on exactly the terms the three rows
                 // above have: a LocString is a table plus a key with no
@@ -238,7 +232,6 @@ public static class KleeMod
                     Powers.VarkaRules.KnightPromptText,
                 [Powers.VarkaRules.ElementPromptKey] =
                     Powers.VarkaRules.ElementPromptText,
-#endif
             });
 
             // Runtime copy of the custom-keyword loc. The pck carries the
@@ -258,9 +251,6 @@ public static class KleeMod
             var keywordTable = LocManager.Instance.GetTable("card_keywords");
             var keywordFallback = new Dictionary<string, string>
                 {
-                    ["KLEEMOD-ELEMENTAL_SKILL.title"] = "Elemental Skill",
-                    ["KLEEMOD-ELEMENTAL_SKILL.description"] =
-                        $"Playing this card grants {Powers.BurstConstants.PerSkillTag} Burst Energy.",
                     // `EB-345` / R249. The shared tips took the text pass.
                     // The Applies-X four said one rule in two long clauses
                     // and named no keyword; the eight reaction previews all
@@ -392,119 +382,16 @@ public static class KleeMod
                     // node's text only where the row resolves to something.
                     ["KLEEMOD-TURN_END_DOCKET.header"] = "END OF TURN",
 
-                    // Legibility sprint L-C: titles for the re-homed rider
-                    // tips (FurinaRiderTips). These are NOT card keywords --
-                    // they are hover-tip titles, which need a LocString --
-                    // but they live in the same table so the one merge point
-                    // covers them and a code-only rebuild never shows a raw
-                    // key. The bodies are built per card in C#, because a
-                    // shared row cannot carry a per-card rate.
-                    [Cards.FurinaRiderTips.FanfareKey + ".title"] =
-                        "Fanfare scaling",
-                    [Cards.FurinaRiderTips.AuraKey + ".title"] =
-                        "Elemental aura bonus",
-                    [Cards.FurinaRiderTips.SalonKey + ".title"] =
-                        "Salon scaling",
-                    // The fourth rider tip had no row and shipped as the raw
-                    // key: `Blocking Notes+` rendered
-                    // "card_keywords.KLEEMOD-COMPANION_RIDER.title" on the
-                    // card-reward screen of a live run (0.2-589). The pck's
-                    // card_keywords.json carries none of these four either, so
-                    // this dictionary is their only source and a missing entry
-                    // is directly player-visible.
-                    [Cards.FurinaRiderTips.CompanionKey + ".title"] =
-                        "Companion scaling",
-                    // `EB-475`: three words that gated decisions with no
-                    // definition anywhere. Same dictionary, same reason as the
-                    // four above -- a missing row here is directly
-                    // player-visible as the raw key.
-                    [Cards.FurinaRiderTips.SpotlightMoveKey + ".title"] =
-                        "Moved the Spotlight",
-                    [Cards.FurinaRiderTips.GuestStarKey + ".title"] =
-                        "Guest Star",
-                    [Cards.FurinaRiderTips.BowKey + ".title"] =
-                        "Takes their bow",
-                    // `EB-485`: how long the lighting lasts, on the card that
-                    // pays for it. Same dictionary and the same reason as
-                    // every row above -- the pck's `card_keywords.json`
-                    // carries none of these, so a missing row here is
-                    // directly player-visible as the raw key.
-                    [Cards.FurinaRiderTips.SpotlightLastsKey + ".title"] =
-                        "Lit for this combat",
-
-                    // B5: the member tips the deploy faces hand off to. Only
-                    // the TITLES are rows -- the bodies are built live in
-                    // SalonMemberTips, because the numbers live in
-                    // SalonConstants and the cap is a per-player stat.
-                    [Cards.SalonMemberTips.CrabalettaKey + ".title"] =
-                        "Mademoiselle Crabaletta",
-                    [Cards.SalonMemberTips.UsherKey + ".title"] =
-                        "Gentilhomme Usher",
-                    [Cards.SalonMemberTips.ChevalmarinKey + ".title"] =
-                        "Surintendante Chevalmarin",
-                    [Cards.SalonMemberTips.SalonRulesKey + ".title"] =
-                        "Salon",
-
                     // EB-53/N1: the end-of-turn docket's per-slot hovers.
-                    // TITLES only, the same bargain as the member tips above --
+                    // TITLES only --
                     // every body is built live in TurnEndAttribution from the
                     // constants the resolution reads, so a repricing cannot
                     // leave a row quoting a retired number.
                     [Powers.TurnEndAttribution.MasqueKey + ".title"] =
                         "Bond of Life",
-                    [Powers.TurnEndAttribution.SparksKey + ".title"] =
-                        "Sparks 'n' Splash",
                     [Powers.TurnEndAttribution.OzKey + ".title"] =
                         "Oz, at Your Side",
-                    [Powers.TurnEndAttribution.KurageKey + ".title"] =
-                        "Bake-Kurage",
 
-                    // Kokomi's two hidden reads (KokomiRiderTips). Both
-                    // resolve somewhere no card face can print -- the pulse at
-                    // end of turn, the Garment rider on OTHER cards -- so the
-                    // tip is the only surface either number has.
-                    [Cards.KokomiRiderTips.PulseKey + ".title"] =
-                        "Bake-Kurage pulse",
-                    [Cards.KokomiRiderTips.GarmentKey + ".title"] =
-                        "Ceremonial Garment is active",
-                    // L4b: the printed Charge rider's rate. Unlike the two
-                    // above, the NUMBER was always visible -- this row titles
-                    // the tip that says what the number is made of.
-                    [Cards.KokomiRiderTips.ChargeKey + ".title"] =
-                        "Charge scaling",
-                    // EB-64's shape, one key over: Muster had no row and
-                    // shipped as the raw key -- `Reinforcements` rendered
-                    // "card_keywords.KLEEMOD-MUSTER.title" as the keyword name
-                    // on a live shop screen (0.2-634, EB-53 capture session).
-                    [Cards.KokomiRiderTips.MusterKey + ".title"] = "Muster",
-                    // `EB-484`'s row is gone: `EB-624` moved the pair onto
-                    // the FACE, where the base game's own conditional puts it,
-                    // so there is no debuff-rider tip left to title.
-                    // `EB-539`: the same split one count over. The face prints
-                    // the live morning TOTAL and this row titles the tip that
-                    // says what the total is made of -- because "Deal 2
-                    // damage, already including 3 for each Plan" is a
-                    // contradiction on the one board where the fold is zero.
-                    [Cards.KokomiRiderTips.MorningDamageKey + ".title"] =
-                        "Damage from carried-out Plans",
-                    // QUARANTINED (R213 E1): the Charge KEYWORD's title. The
-                    // BODY is built live in KokomiRiderTips, because it
-                    // quotes CHARGE_PER_EXHAUST and reads the current bank --
-                    // the same bargain the Muster and pulse tips already
-                    // make. Distinct from CHARGE_RIDER above, which titles a
-                    // per-card RATE tip on a card that READS the meter.
-                    [Cards.KokomiRiderTips.ChargeWordKey + ".title"] =
-                        "Charge",
-                    // The Charge keyword's twin, one meter over and three
-                    // characters wide: the Burst KEYWORD's title. The body is
-                    // built live in KleeCardTooltips because the meter's size
-                    // is per character and the tip says what the owner holds.
-                    // The retired BurstMeterPower badge used to be the only
-                    // surface that ever defined the word; nothing replaced it
-                    // until now.
-                    [Cards.KleeCardTooltips.BurstKey + ".title"] =
-                        "Burst Energy",
-#if PROTOTYPE_CARDS
                     // `EB-272`. QUARANTINED, and inside the switch for the
                     // reason Rally's prompt is: `Cards/Prototype/**` is
                     // Compile Remove'd from a release build, so
@@ -537,14 +424,6 @@ public static class KleeMod
                     // `EB-446`, Klee's seventh: the raven ANOTHER companion
                     // card puts out, named on a face that cannot grant him.
                     [Cards.ArmKeywordTips.OzKey + ".title"] = "Oz",
-                    // `EB-418`. The second rider, not a keyword: the Spark her
-                    // KIT mints on a play of one of her own Companions, which
-                    // LAW:145 keeps off the Companion's own face and which
-                    // therefore had no surface at all. Since 2026-09-23 it
-                    // never prints under the Klee overhaul arm, where a
-                    // Companion play mints no Spark.
-                    [Cards.ArmKeywordTips.CovenSparkKey + ".title"] =
-                        "Sparks from your Companion",
                     // `EB-575`. The fourth rider here that titles no keyword,
                     // and the only one whose sentence comes and goes with the
                     // board: a Set off or a merge played with no Bomb on the
@@ -693,13 +572,11 @@ public static class KleeMod
                         "Strength",
                     [Cards.BaseKeywordTips.DexterityKey + ".title"] =
                         "Dexterity",
-#endif
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))
                 .ToDictionary(pair => pair.Key, pair => pair.Value));
 
-#if PROTOTYPE_CARDS
             // `EB-481`, THE HALF THIS MOD DOES NOT OWN A KEYWORD FOR.
             //
             // The row was closed once on the tips and reopened on 2026-09-05,
@@ -841,7 +718,6 @@ public static class KleeMod
                       + "every hit{Amount:cond:==1? next turn|>1? for the "
                       + "next [blue]{}[/blue] turns|}, a Skill's damage too.",
                 });
-#endif
 
             // Klee's character strings moved onto the model itself
             // (Klee.Localization) when she became a CustomCharacterModel:

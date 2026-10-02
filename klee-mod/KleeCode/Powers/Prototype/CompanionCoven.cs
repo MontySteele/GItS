@@ -116,7 +116,6 @@ public static class CompanionCovenBombs
     public static async Task<Element> ElementFor(
         PlayerChoiceContext choiceContext, Creature applier)
     {
-        if (!CompanionOverhaul.Enabled) return Element.Pyro;
         var chime = applier.Powers.OfType<HexhunterChimePower>().FirstOrDefault();
         if (chime == null) return Element.Pyro;
         await PowerCmd.Remove(chime);
@@ -222,7 +221,7 @@ public sealed class YueguiPower : PowerModel, ILocalizationProvider
         // BOTH ARMS, and the second one is the KLEE overhaul's own gate --
         // `KleeOverhaul.Enabled` plus the identity test every seam in the mod
         // carries beside it. Sim twin: `klee_overhaul.live`.
-        if (KleeOverhaul.Enabled && Owner.Player.Character is IKleeCharacter)
+        if (Owner.Player.Character is IKleeCharacter)
         {
             await ProtoBombPower.PlaceOnRandom(
                 choiceContext, Owner, CompanionCovenLaw.YueguiBombSize,

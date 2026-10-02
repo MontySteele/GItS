@@ -788,40 +788,6 @@ def _quarantined_span(body):
     return body[start:body.index("#endif", start)]
 
 
-def test_the_muster_keyword_prints_rule_one(base_kit):
-    """Under the flag the keyword carries the memory-creation rule itself."""
-    quarantined = _quarantined_span(_for_muster_body())
-    for phrase in RULE_ONE:
-        assert phrase in quarantined, phrase
-
-
-def test_the_muster_keyword_states_the_price_from_the_constant(base_kit):
-    """P3 asks a tester to say "at price Y", so the price is on the keyword --
-    and it is READ from the C# law constant rather than typed, the same
-    discipline the Muster discount above it already keeps."""
-    quarantined = _quarantined_span(_for_muster_body())
-    assert "KurageMemoryLaw.CostPerEnergy" in quarantined
-    assert "3" not in quarantined, "the multiplier must not be hand-typed"
-
-
-def test_the_shipped_muster_keyword_did_not_move():
-    """THE RELEASE PIN, and it takes no fixture: with the flag off this is
-    R78's text as EB-254 amended it, and every added word is inside the
-    quarantined span."""
-    body = _for_muster_body()
-    released = body.replace(_quarantined_span(body), "")
-
-    for chunk in SHIPPED_MUSTER_TEXT:
-        assert chunk in released, chunk
-    for phrase in RULE_ONE + ("Charge", "memory"):
-        assert phrase not in released, phrase
-
-
-def test_the_muster_discount_never_ships_without_its_duration_again():
-    """EB-254. The -1 is rest-of-COMBAT and the sentence has to say so."""
-    assert BARE_DISCOUNT not in _for_muster_body()
-
-
 # --------------------------------------------------------------------------
 # EB-247: THE END-OF-TURN DOCKET'S JELLYFISH ROW
 #
@@ -866,20 +832,6 @@ def _prototype_span(body):
                      if not line.lstrip().startswith("//"))
 
 
-def test_the_docket_previews_the_pulse_the_memory_rule_actually_fires():
-    """EB-247. The chip reads the wire's forecast, not the retired rate."""
-    live = _prototype_span(_kurage_docket_row())
-
-    assert "KurageMemory.Forecast(" in live
-    assert "PulseDamage" not in live
-    assert "PulseMultiplier" not in live
-
-
-def test_the_docket_row_prints_no_countdown_under_the_memory_rule():
-    """EB-197's fact, on the surface that still appended it."""
-    assert "Lasts" not in _prototype_span(_kurage_docket_row())
-
-
 # --------------------------------------------------------------------------
 # EB-248: THE QUEUE PRINTS THE COST IT MULTIPLIED
 #
@@ -912,30 +864,3 @@ def _uncommented(path):
         if not line.lstrip().startswith(("//", "///")))
 
 
-def test_the_one_price_sentence_interpolates_the_rate():
-    """`PriceText` is the sentence, and the multiplier is read from the law
-    constant rather than typed -- the same discipline the Muster keyword
-    above keeps, so a retune moves every surface at once."""
-    body = _uncommented(MEMORY_RULE)
-    start = body.index("public static string PriceText(")
-    sentence = body[start:body.index(";", start)]
-
-    assert "Charge, cost {cost} x {KurageMemoryLaw.CostPerEnergy}" in sentence
-    assert '"free"' in sentence
-    assert "x 3" not in sentence, "the multiplier must not be hand-typed"
-
-
-def test_both_queue_surfaces_route_through_the_one_sentence():
-    """The strip and the pile view print the price the same way because they
-    print it from the same place. A surface that formatted its own would be
-    free to fall behind, which is exactly what EB-248 is."""
-    rule = _uncommented(MEMORY_RULE)
-    strip = rule[rule.index("public static string StripText("):]
-    assert "PriceText(e.Cost, e.Price)" in strip
-    # The retired formatter, by name: "no derivation" is the defect rather
-    # than "a wrong derivation", so its absence is asserted.
-    assert '$"{e.Price} Charge"' not in strip
-
-    card = _uncommented(MEMORY_CARD)
-    assert "KurageMemory.PriceText(" in card
-    assert "Charge\"" not in card, "the pile view must not word its own price"

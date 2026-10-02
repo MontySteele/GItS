@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards;
-using KleeMod.Cards.Generated;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;

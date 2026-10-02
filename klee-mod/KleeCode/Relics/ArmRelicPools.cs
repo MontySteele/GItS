@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +8,8 @@ namespace KleeMod.Relics;
 /// <summary>
 /// THE ARMS' RELIC OFFER, one rule for both pools
 /// (<c>review/active/relics-potions-klee-furina-2026-09-27.md</c>, pick 1(a)):
-/// under its arm a character's pool is the starter, its own seven and the
-/// Ancient, and the Silent borrow goes; arm off, the seven are never offered
-/// and every other member is, exactly as the pool shipped. Kokomi's pool has
-/// no override and keeps the borrow.
+/// a character's pool is the starter, its own seven and the Ancient; the
+/// Silent borrow is gone. Kokomi's pool has no override and keeps the borrow.
 ///
 /// Pure, over the pool's own members, so the tests run it on the real
 /// relic types without a booted <c>ModelDb</c>.
@@ -43,13 +40,8 @@ public static class ArmRelicPools
             .Append(typeof(WolfsGravestone))
             .ToArray();
 
-    /// <summary>What the pool offers: the arm pool's members with the arm
-    /// on, every member but <paramref name="armOnly"/> with it off.</summary>
+    /// <summary>What the pool offers: the members in the arm pool.</summary>
     public static IEnumerable<RelicModel> Offer(
-        IEnumerable<RelicModel> members, bool armOn,
-        IReadOnlyList<Type> armPool, IReadOnlyList<Type> armOnly) =>
-        armOn
-            ? members.Where(relic => armPool.Contains(relic.GetType()))
-            : members.Where(relic => !armOnly.Contains(relic.GetType()));
+        IEnumerable<RelicModel> members, IReadOnlyList<Type> armPool) =>
+        members.Where(relic => armPool.Contains(relic.GetType()));
 }
-#endif

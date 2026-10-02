@@ -51,7 +51,7 @@ public static class KleeStatusPackage
         where T : CardModel
     {
         var combat = player.Creature?.CombatState;
-        if (combat == null || !KleeOverhaul.Enabled) return 0;
+        if (combat == null) return 0;
         var targets = HandStatuses(player).Where(c => c.IsTransformable)
             .ToList();
         if (targets.Count == 0) return 0;
@@ -71,7 +71,6 @@ public static class KleeStatusPackage
     public static async Task<int> ExhaustStatusesGrowLargest(
         PlayerChoiceContext choiceContext, Player player, int per)
     {
-        if (!KleeOverhaul.Enabled) return 0;
         var victims = HandStatuses(player);
         foreach (var card in victims)
         {
@@ -117,7 +116,7 @@ public sealed class FindersKeepersPower : PowerModel, ILocalizationProvider
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (!KleeOverhaul.Enabled || Owner == null) return;
+        if (Owner == null) return;
         if (cardPlay.Card?.Owner?.Creature != Owner) return;
         if (!KleeStatusPackage.IsConfiscated(cardPlay.Card)) return;
         await ProtoBombPower.PlaceOnRandom(choiceContext, Owner, Amount,
@@ -149,7 +148,7 @@ public sealed class DamageReportPower : PowerModel, ILocalizationProvider
     public override async Task AfterCardDrawn(
         PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
     {
-        if (!KleeOverhaul.Enabled || Owner == null || Amount <= 0) return;
+        if (Owner == null || Amount <= 0) return;
         if (card?.Owner?.Creature != Owner) return;
         if (!KleeStatusPackage.IsStatus(card)) return;
         var combat = Owner.CombatState;
@@ -185,7 +184,6 @@ public sealed class SolitaryConfinementPower : PowerModel, ILocalizationProvider
         CardModel card, decimal originalCost, out decimal modifiedCost)
     {
         modifiedCost = originalCost;
-        if (!KleeOverhaul.Enabled) return false;
         if (!KleeStatusPackage.IsConfiscated(card)) return false;
         if (card.Owner?.Creature != Owner) return false;
         if (originalCost <= 0m) return false;

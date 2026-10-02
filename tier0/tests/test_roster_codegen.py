@@ -282,92 +282,6 @@ def test_register_never_reaches_the_generated_csharp():
                 == gen.emit(bare, gen.FURINA_PROFILE)), card["id"]
 
 
-def test_furina_profile_emits_every_non_kit_card():
-    all_ids = {card["id"] for card in _furina_cards()}
-    generated = {
-        card["id"]
-        for card in _furina_cards()
-        if gen.blocked_reason(card, gen.FURINA_PROFILE) is None
-    }
-    withheld = FURINA_HAND_WRITTEN | FURINA_DEFERRED_TO_FD
-    assert generated == all_ids - withheld
-
-    # A7 IS RELEASED (2026-07-29) and this is the positive assertion that
-    # replaces the deferral check. Written as its own line rather than left to
-    # the set arithmetic above, because "unheard_confession generates" is the
-    # single fact two sprints of deferral were about, and it should fail by
-    # name if it ever regresses.
-    assert "unheard_confession" in generated
-    assert gen.blocked_reason(
-        by_id_of(_furina_cards())["unheard_confession"],
-        gen.FURINA_PROFILE) is None
-
-    # The deferral must be for the REASON we think it is. A card that stopped
-    # generating for some unrelated breakage would otherwise hide inside the
-    # curated set and read as intentional. Vacuous while a set is empty, and
-    # deliberately kept so: it re-arms the moment anything is deferred again.
-    for cid in FURINA_DEFERRED_TO_FD:
-        reason = gen.blocked_reason(by_id_of(_furina_cards())[cid],
-                                    gen.FURINA_PROFILE)
-        assert reason is not None, cid
-
-    # Both deferral sets are empty and asserted so. G-A2 emptied FD; the "Take
-    # a Bow" consolidation sprint emptied the Curtain Call set by shipping the
-    # C# parity R85 gated on, and DELETED it rather than leaving an empty
-    # escape hatch behind -- an empty set is an invitation, and the positive
-    # assertion above already covers the invariant it existed to state.
-    assert not FURINA_DEFERRED_TO_FD
-
-    manifest = json.loads(
-        gen.FURINA_PROFILE.manifest.read_text(encoding="utf-8")
-    )
-    # 79 cards: A4 (playtest-2 red-pen, 2026-07-28) CUT rising_tide, A12 added
-    # the salon cap-raise power back, and the FANFARE REWORK (2026-07-28)
-    # added ONE more -- take_your_bow, the Track D on-demand-bow probe.
-    #
-    # `blocked` HELD AT 2 THROUGH THE REWORK, which is the number worth
-    # reading here: the sprint introduced four new codegen surfaces (base-card
-    # `retain`, the `crash_fanfare` and `salon_bow` ops, and a Companion-tempo
-    # bonus_formula) and every one of them was IMPLEMENTED rather than
-    # deferred. Each surfaced first as a loud block -- "card field(s)
-    # ['retain'] not understood", "op 'crash_fanfare'" -- which is the design
-    # working: a card that retains in the sim and does not in the game is
-    # exactly the divergence the blocker exists to stop.
-    #
-    # The two still withheld are the hand-written kit Burst and A7's
-    # unheard_confession, both unchanged (as of that sprint).
-    # COMPENSATION PASS (2026-07-28): 79 -> 82, three new common readers.
-    # `blocked` HELD AT 2 AGAIN, and this time for the quieter reason: the pass
-    # introduced no new codegen surface at all. Every card it added or rewrote
-    # is built from ops the generator already emits, which is what "reader
-    # density" means mechanically -- more cards on the rails the rework built,
-    # not more rails.
-    #
-    # A7 (2026-07-29): blocked 2 -> 1. Every card on this sheet now exists in
-    # the actual game except the hand-written kit Burst, which is not a gap.
-    # The count is the whole point of the deferral discipline: it was 2 for two
-    # sprints, visibly, and it moved when the gap closed rather than when
-    # somebody remembered.
-    #
-    # W3 (EB-118 Phase 3, R211, 2026-08-25): 82 -> 84, two new Uncommons
-    # (change_the_bill, take_it_from_the_top). `blocked` HELD AT 1 -- the
-    # hand-written kit Burst -- and that is the number to read: the window
-    # introduced the first sheet use of BOTH Salon verbs and the generator
-    # emitted them at top level with no new blocker. The one thing that window
-    # did NOT express -- take_it_from_the_top's `conditional_damage` UPGRADE --
-    # lives in a different ledger (manifest `upgrades.no_upgrade_path`) and was
-    # closed by EB-140 the same day, so that ledger is empty below.
-    assert manifest["coverage"] == {
-        "total": 84,
-        "generated": 83,
-        "blocked": 1,
-    }
-    assert set(manifest["generated"]) == generated
-    assert set(manifest["blocked"]) == withheld
-    assert (set(manifest["upgrades"]["no_upgrade_path"])
-            == FURINA_UPGRADE_GAP_PENDING_FB1)
-
-
 def test_furina_runtime_clusters_emit_concrete_calls():
     by_id = {card["id"]: card for card in _furina_cards()}
 
@@ -387,37 +301,6 @@ def test_furina_runtime_clusters_emit_concrete_calls():
     aura_payoff = gen.emit(by_id["crashing_waves"], gen.FURINA_PROFILE)
     assert "foreach (var auraTarget" in aura_payoff
     assert "AuraCmd.Find(auraTarget)" in aura_payoff
-
-
-def test_single_target_aura_rider_renders_through_a_calculated_var():
-    # Legibility sprint pass 2 (2026-07-24): CalculatedVar.Calculate(target)
-    # receives the hovered creature during preview and the real one at
-    # resolution, so a single-target bonus_vs_aura greens exactly when you
-    # hover an aura'd enemy -- and the hit agrees, because AttackCommand
-    # resolves the same var. The multiplier must be static (CalculatedVar
-    # rejects instance targets) and must null-guard: preview calls
-    # Calculate(null) whenever nothing is hovered.
-    #
-    # UN-DEFERRED by the "Take a Bow" consolidation sprint. torrential_turn is
-    # the pool's only single-target bonus_vs_aura card, and while its
-    # refresh_all_auras op had no C# home this could only run on a direct
-    # emit() -- a fixture describing a card that did not ship. Now it reads
-    # the GENERATED FILE, so the assertion is about the artifact the game
-    # loads rather than about what the generator would produce if asked.
-    torrential = _generated_source("TorrentialTurn")
-
-    assert "new CalculationBaseVar(10m)" in torrential
-    assert "new ExtraDamageVar(3m)" in torrential
-    assert (
-        "static (_, target) => "
-        "target != null && AuraCmd.Find(target) != null ? 1 : 0"
-        in torrential
-    )
-    assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in torrential
-    assert "{CalculatedDamage:diff()}" in torrential
-    # The base term moved out of Damage, so the upgrade must follow it.
-    assert "DynamicVars.CalculationBase.UpgradeValueBy(3m);" in torrential
-    assert "DynamicVars.Damage" not in torrential
 
 
 def test_aoe_aura_riders_stay_per_target():
@@ -754,22 +637,6 @@ def test_every_deploy_card_names_its_member_and_carries_its_tip():
     assert seen == 9, f"expected 9 deploy cards, swept {seen}"
 
 
-def test_the_face_and_the_tooltip_call_members_the_same_thing():
-    """The face says "Add Gentilhomme Usher" and the tooltip explaining him is
-    titled "Gentilhomme Usher". Those strings live in two languages -- Python
-    and C# -- so nothing but a test makes them agree, and if they drift the
-    player cannot tell the two are about the same member."""
-    tips = (Path(gen.REPO) / "klee-mod" / "KleeCode" / "Cards"
-            / "SalonMemberTips.cs").read_text(encoding="utf-8")
-    loc = (Path(gen.REPO) / "klee-mod" / "KleeCode"
-           / "KleeMod.cs").read_text(encoding="utf-8")
-    for member, name in gen.SALON_MEMBER_NAMES.items():
-        if member == "random":
-            continue
-        assert f'"{name}"' in tips, (member, name)
-        assert f'"{name}"' in loc, (member, name)
-
-
 def test_an_unrecognised_member_is_refused_by_name():
     """The member value is emitted through a lookup, and a lookup miss is a
     KeyError -- a stack trace mid-emit, not a decision. Every other
@@ -947,85 +814,6 @@ def test_salon_deploy_count_must_be_static_to_convert():
     assert gen._salon_calc_target(static) is not None
 
 
-def test_handwritten_furina_burst_matches_the_sheet_contract():
-    row = next(
-        card for card in _furina_cards()
-        if card["id"] == "let_the_people_rejoice"
-    )
-    # Anchored to THIS FILE, not to the working directory. It was written as
-    # a bare relative `Path(...)` and passed every full-repo pytest run,
-    # because those all start at the repo root -- but validate.ps1's portable
-    # suite runs pytest from the STAGED PACKAGE directory, where the relative
-    # path resolves to nothing and the test died with FileNotFoundError
-    # instead of checking anything. A test that only works from one cwd is a
-    # test that silently stops running when the harness moves.
-    repo = Path(__file__).resolve().parent.parent.parent
-    source = (
-        (repo / "klee-mod/KleeCode/Cards/Furina/LetThePeopleRejoice.cs")
-        .read_text(encoding="utf-8")
-    )
-    damage, encore = row["effects"]
-
-    # Legibility sprint (2026-07-24): the Fanfare rider renders through a
-    # CalculatedDamageVar (base + N*(Fanfare/M)) so face/preview and the hit
-    # agree -- same form the generator emits for own-card fanfare riders.
-    n, _, rest = damage["bonus_formula"].partition("_per_")
-    div = rest.partition("_")[0]
-    assert f'new CalculationBaseVar({damage["amount"]}m)' in source
-    assert f'new ExtraDamageVar({n}m)' in source
-    assert f"FurinaResources.ReadableFanfare(card.Owner.Creature) / {div}" in source
-    assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in source
-    assert f"FurinaResources.GainEncore(Owner.Creature, {encore['amount']});" in source
-    assert "CustomResources<FurinaBurstResource>.SetCanonicalCost" in source
-    assert "FurinaResourceConstants.BurstMax" in source
-    assert "CardKeyword.Retain" in source
-    assert "IElementalCard" in source
-    assert "Element Element => Element.Hydro" in source
-
-    # Track L-C: the rider's arithmetic moved to the hover tip, so the face
-    # keeps only the marker. Hand-written card, wired by hand -- pin both ends
-    # so it cannot drift from the generated cards' treatment.
-    assert f"fanfarePer: {n}, fanfareStep: {div}" in source
-    # EB-164: the marker is a clause on the number's sentence, and the
-    # hand-written face carries it across a string concatenation.
-    assert "damage to ALL enemies, already " in source
-    assert "including [gold]Fanfare[/gold]." in source
-    assert "Scales with" not in source
-    assert f"plus {n} damage per" not in source
-
-
-def test_converted_riders_move_their_arithmetic_to_the_hover_tip():
-    # Track L-C. Once the rider renders inside the printed number, restating
-    # "+1 damage per 2 Fanfare" on the face is duplicate bookkeeping -- the
-    # number already shows the answer. The face keeps a marker naming the
-    # mechanism (so a reward-screen read still declares that it scales) and
-    # the rate moves to a tip that can also price it live.
-    # Both cards were deferred grammar when this fixture was written and could
-    # only be checked through emit(). "Take a Bow" shipped them, so the
-    # fixture now reads the generated files -- the tips are a DISPLAY claim,
-    # and a display claim should be made against what is displayed.
-    crescendo = _generated_source("Crescendo")
-    assert ("Deal {CalculatedDamage:diff()} damage, already including "
-            "[gold]Fanfare[/gold]." in crescendo)      # EB-164
-    assert "Scales with" not in crescendo
-    assert "+1 damage per 2" not in crescendo
-    assert (
-        "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, "
-        "fanfarePer: 1, fanfareStep: 2)" in crescendo
-    )
-
-    torrential = _generated_source("TorrentialTurn")
-    # EB-164: the aura multiplier reads the AIMED target, so the previewed
-    # number already carries the bonus whenever that target has an aura. Said
-    # as its own sentence it promised an addition the number had made.
-    assert ("Deal {CalculatedDamage:diff()} damage, already including "
-            "{ExtraDamage:diff()} if the target has an elemental aura."
-            in torrential)
-    assert "Bonus damage vs." not in torrential
-    assert "+3 damage if the enemy" not in torrential
-    assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, auraBonus: 3)" in torrential
-
-
 def test_unconverted_riders_keep_their_sentence_on_the_face():
     # The other half of the L-C rule, and the one that matters: a rider whose
     # number is NOT inside the printed value must keep its full sentence,
@@ -1181,44 +969,6 @@ def test_cadence_comment_comes_from_the_profile():
                 assert "damaging Skills, Burst-tagged cards" in src, path
 
 
-def test_copy_paths_carry_printed_upgrade_state():
-    """L8 (SYS-4, R114/FLAG-2(i)): a copy is built from the PRINTED card --
-    combat-acquired state does not travel -- but an upgraded target still
-    copies as upgraded. The sim rides the `+` id convention; the C# rebuild
-    must transfer the upgrade explicitly. UpgradeInternal is the game's own
-    instance-upgrade call (vendor/STS2_MCP/McpMod.Helpers.cs:54-66).
-
-    Also pins R118/Q9: the spotlight copy pool excludes kit cards.
-    """
-    for cls, picked in (("EncorePerformance", "selectedSpotlight"),
-                        ("BorrowedBrilliance", "pickedCompanion")):
-        src = None
-        for d in _ALL_GENERATED_DIRS:
-            p = d / f"{cls}.cs"
-            if p.exists():
-                src = p.read_text(encoding="utf-8")
-        assert src is not None, cls
-        assert f"if ({picked}.IsUpgraded)" in src, cls
-        assert "UpgradeInternal();" in src, cls
-    shoulder = (gen.KOKOMI_PROFILE.out_dir
-                / "ShoulderToShoulder.cs").read_text(encoding="utf-8")
-    assert "if (pickedCompanion.IsUpgraded)" in shoulder
-    assert "UpgradeInternal();" in shoulder
-    encore = (gen.FURINA_PROFILE.out_dir
-              / "EncorePerformance.cs").read_text(encoding="utf-8")
-    assert ".Where(KitGrant.NotKitCard)" in encore
-    # copy_companions_played_this_combat is the same root through a LEDGER
-    # rather than a live card: the entry carries the upgrade flag because
-    # ModelDb.GetById rebuilds the printed card pristine (BFF-copy). Ordered
-    # before the cost override, or the upgrade would overwrite the free copy.
-    bff = (gen.KLEE_PROFILE.out_dir
-           / "BestFriendsForever.cs").read_text(encoding="utf-8")
-    assert "if (companionPlay.IsUpgraded)" in bff
-    assert "playedToken.UpgradeInternal();" in bff
-    assert bff.index("UpgradeInternal();") < bff.index(
-        "playedToken.EnergyCost.SetThisCombat(0);")
-
-
 def test_salon_replacement_multiplier_is_never_a_bare_literal():
     """SYS-14 (lint candidate L5): the replacement multipliers reach the
     emitted C# only as SalonConstants members, never as inline `? 2 : 1` /
@@ -1230,24 +980,6 @@ def test_salon_replacement_multiplier_is_never_a_bare_literal():
         assert ("salonReplacements > 0 ? 2 : 1" not in src
                 and "salonReplacements > 0 ? 3 : 1" not in src), (
             f"{rel}: bare replacement multiplier literal")
-
-
-def test_salon_debut_added_encore_renders_replacement_scaled():
-    """SYS-6: the upgrade-appended encore on a salon-deploy card renders and
-    resolves through the CalculatedVar + ReplacementDelta trio -- the
-    IsUpgraded literal printed "Gain 2 Encore" while a replacement deploy
-    granted 4."""
-    src = _generated_source("SalonDebut")
-    assert "{IfUpgraded:show:Gain {Encore:diff()} [gold]Encore[/gold].|}" in src
-    assert ("SalonMemberPower.ReplacementDelta(card, 1, "
-            "SalonConstants.ReplacementNumericMultiplier)") in src
-    assert "GainEncore(Owner.Creature, (int)salonScaledEncore);" in src
-    # The capture happens at the top of OnPlay, against the pre-play company
-    # the face read -- after the deploy it would price the stage the card
-    # itself just changed.
-    body = src[src.index("OnPlay"):]
-    assert body.index("salonScaledEncore = ") < body.index(
-        "SalonMemberPower.Deploy")
 
 
 def _discard_probe(**eff) -> dict:
@@ -1303,21 +1035,6 @@ def test_a_default_discard_keeps_the_random_loop(monkeypatch):
     assert "Rng.CombatTargets.NextItem(pool);" in src
     assert "CardSelectCmd.FromHandForDiscard" not in src
     assert "Discard 2 random cards." in src
-
-
-def test_the_shipped_eb69_chosen_discards_carry_the_selection_idiom():
-    """The three live rows, asserted against the artifact the game loads."""
-    for class_name, count in (("CouncilAtBourou", 1),
-                              ("WheelTheRanks", 1),
-                              ("OpenTheStores", 2)):
-        path = gen.KOKOMI_PROFILE.out_dir / f"{class_name}.cs"
-        src = path.read_text(encoding="utf-8")
-        assert "CardSelectCmd.FromHandForDiscard(" in src, class_name
-        assert (f"CardSelectorPrefs.DiscardSelectionPrompt, {count})"
-                in src), class_name
-        plural = "" if count == 1 else "s"
-        assert f"Discard {count} card{plural}." in src, class_name
-        assert "random card" not in src, class_name
 
 
 def _add_before_probe() -> dict:
@@ -1413,44 +1130,6 @@ def _klee_generated_source(class_name: str) -> str:
         f"{class_name} is not generated -- regenerate with "
         "`python tools/gen_roster_cards.py`")
     return path.read_text(encoding="utf-8")
-
-
-def test_conditional_block_moves_both_of_hold_the_lines_halves():
-    """tier0 bumps EVERY literal-int block op the row prints, so the printed 5
-    and the branch's 6 both move -- and they move through two different
-    grammars, which is the whole of what EB-140 built."""
-    source = _klee_generated_source("HoldTheLine")
-
-    # The top-level half: the op owns `DynamicVars.Block`, so the campfire
-    # bumps the var and the face re-renders itself off `{Block:diff()}`.
-    assert "DynamicVars.Block.UpgradeValueBy(3m);" in source
-    assert "Gain {Block:diff()} [gold]Block[/gold]." in source
-
-    # The branch half: a literal, so it swaps on an IsUpgraded read.
-    assert ("await CreatureCmd.GainBlock(Owner.Creature, "
-            "new BlockVar((IsUpgraded ? 9m : 6m), ValueProp.Move), "
-            "cardPlay);") in source
-    assert ("If an enemy intends to attack, gain {IfUpgraded:show:9|6} "
-            "[gold]Block[/gold].") in source
-
-    # And the shape this row existed to remove is gone.
-    assert "NO upgrade path" not in source
-
-
-def test_conditional_damage_moves_take_it_from_the_tops_branch_only():
-    """`{conditional_damage: +4}` binds to non-self damage ops, and this card's
-    only one is the branch's -- so the swing goes 10 -> 14 and the printed
-    Block 5 does not move. The Block var carries no bump at all."""
-    source = _generated_source("TakeItFromTheTop")
-
-    assert ("await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, "
-            "(IsUpgraded ? 14m : 10m)))") in source
-    assert ("If you moved the [gold]Spotlight[/gold] this turn, deal "
-            "{IfUpgraded:show:14|10} damage.") in source
-
-    assert "new BlockVar(5m, ValueProp.Move)" in source
-    assert "UpgradeValueBy" not in source
-    assert "NO upgrade path" not in source
 
 
 # --- `EB-729`: a whole-card delta holes EVERY branch, not the then-arm alone --
@@ -1738,108 +1417,6 @@ def test_every_place_bomb_face_prints_the_bombs_own_amount():
     assert not offenders, (
         "A Bomb's face must print the Bomb's own amount (EB-230):\n  "
         + "\n  ".join(offenders))
-
-
-def test_every_sheet_bomb_amount_reaches_its_face_unmodified():
-    """The other half of the lock: the number the face SHOWS is the sheet's
-    `bomb_damage`. Walks both sheets a `place_bomb` can live on -- the ruled
-    roster sheet and the quarantined prototype surface -- so a prototype row
-    cannot reintroduce the drift the shipped rows just lost."""
-    from tools.effect_walk import iter_effects
-
-    sheets = [
-        (gen.KLEE_PROFILE, yaml.safe_load(
-            (gen.REPO / "docs" / "klee-cards.yaml").read_text(
-                encoding="utf-8"))),
-        (None, yaml.safe_load(
-            (gen.REPO / "docs" / "prototype-surface.yaml").read_text(
-                encoding="utf-8"))),
-    ]
-    proto_dir = (gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
-                 / "Generated")
-    hand_dir = gen.REPO / "klee-mod" / "KleeCode" / "Cards"
-    checked, offenders = 0, []
-    for profile, sheet in sheets:
-        rows = sheet["cards"] if isinstance(sheet, dict) else sheet
-        for card in rows:
-            amounts = {int(e["bomb_damage"])
-                       for e in iter_effects(card)
-                       if e.get("op") in {"place_bomb",
-                                          "chance_bomb_per_detonation"}}
-            if not amounts:
-                continue
-            name = gen.pascal(card["id"]) + ".cs"
-            path = next((d / name for d in (
-                (profile.out_dir if profile else proto_dir), proto_dir,
-                hand_dir) if (d / name).exists()), None)
-            if path is None:
-                continue                      # not emitted (blocked row)
-            src = path.read_text(encoding="utf-8")
-            for desc in _DESCRIPTION_LINE.findall(src):
-                for shape in _BOMB_FACE_SHAPES:
-                    for shown in shape.findall(desc):
-                        checked += 1
-                        if shown.isdigit():
-                            if int(shown) not in amounts:
-                                offenders.append(
-                                    f"{card['id']}: face prints {shown}, "
-                                    f"sheet says {sorted(amounts)}")
-                            continue
-                        var = shown[1:shown.index(":")]
-                        if not any(f'new DynamicVar("{var}", {a}m)' in src
-                                   for a in amounts):
-                            offenders.append(
-                                f"{card['id']}: face var {var} is not "
-                                f"declared at {sorted(amounts)}")
-    assert checked, "no Bomb faces found -- the sweep is not looking at them"
-    assert not offenders, "\n  ".join(offenders)
-
-
-def test_eb338_the_no_hit_preview_flag_follows_the_op_that_applies():
-    """`EB-338`. Which cards carry `appliesWithoutHit`, derived from the sheet.
-
-    THE SPLIT IS ALREADY IN THE EMITTER and this row only spends it: a row
-    whose element rides its own damage (`damage_applies_element`) has a hit for
-    a reaction to multiply, and a row whose element comes from an `apply_aura`
-    or a `swirl` does not -- the reaction is triggered by the APPLICATION.
-    Barbara's stand-in is the second shape ("Gain 6 Block. Apply Hydro") and
-    its Vaporize preview promised 1.5x on a card with no damage at all.
-
-    ATTACHED, NOT REMEMBERED, which is `ArmKeywordTips`' bargain one attach
-    over: the sheet knows which op puts the element on the board, so a new
-    apply-only row carries the corrected preview because of what it does.
-
-    The C# half -- what the corrected body SAYS -- is
-    `klee-mod/KleeTests/ReactionPreviewNoHitTests.cs`.
-    """
-    generated = [
-        gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated",
-        gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated",
-        gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Kokomi" / "Generated",
-        gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated",
-    ]
-    flagged, previewed = set(), set()
-    for folder in generated:
-        for path in sorted(folder.glob("*.cs")):
-            src = path.read_text(encoding="utf-8")
-            for call in re.findall(
-                    r"KleeCardTooltips\.ForCard\([^;]*?\)", src):
-                if "Element.None" in call:
-                    continue
-                previewed.add(path.name)
-                if "appliesWithoutHit: true" in call:
-                    flagged.add(path.name)
-
-    assert previewed, "no reaction previews found -- the sweep sees nothing"
-    # The seat's own card, and Diona's twin beside it: apply-only skills.
-    assert "ProtoMcBarbaraShowBegin.cs" in flagged
-    assert "DionaIcyPaws.cs" in flagged
-    # A companion attack whose damage carries the element keeps its preview:
-    # the hit is real and 1.5x is a true promise about it.
-    assert "ProtoMcAmberFieryRain.cs" in previewed
-    assert "ProtoMcAmberFieryRain.cs" not in flagged
-    # And the flag is never raised where no preview is drawn at all.
-    assert flagged <= previewed
 
 
 def test_every_salon_deploy_face_prints_the_performance():

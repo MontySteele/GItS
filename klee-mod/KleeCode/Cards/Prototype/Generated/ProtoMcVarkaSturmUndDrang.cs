@@ -46,7 +46,7 @@ public sealed class ProtoMcVarkaSturmUndDrang : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForSwirl(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_varka_sturm_und_drang");
 

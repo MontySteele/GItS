@@ -39,6 +39,7 @@ public sealed class KleeRelicPool : RelicPoolModel
         // The borrowed roster MINUS Helical Dart and Snecko Skull (the ruling
         // on QUEUE pick `fanout-picks-2026-09-16 4.3`, at its default). See
         // InheritedSilentRelics for why the two go and why the drop is safe.
+        // Members only: the offer below is her own pool.
         var relics = InheritedSilentRelics.Curated()
             .Append(ModelDb.Relic<Relics.PoundingSurprise>())
             // EPOCH 2 / D1 (audit sec.1.2): the upgraded starter was poolless,
@@ -48,7 +49,6 @@ public sealed class KleeRelicPool : RelicPoolModel
             // Ancient rarity keeps it off reward rolls, which take
             // Common/Uncommon/Rare/Shop/Boss only (see the header above).
             .Append(ModelDb.Relic<Relics.ExplosiveFrags>());
-#if PROTOTYPE_CARDS
         // QUARANTINED: KLEE'S OWN SEVEN (review/active/relics-potions-klee-
         // furina-2026-09-27.md, pick 1(a)). MEMBERSHIP under the compile flag,
         // for the Casket's reason (`KokomiRelicPool`): this runs once, before
@@ -62,11 +62,9 @@ public sealed class KleeRelicPool : RelicPoolModel
             .Append(ModelDb.Relic<Relics.FireworksStand>())
             .Append(ModelDb.Relic<Relics.AlicesTeapot>())
             .Append(ModelDb.Relic<Relics.DodocoArmy>());
-#endif
         return relics;
     }
 
-#if PROTOTYPE_CARDS
     /// <summary>
     /// THE OFFER, the one seam the relic grab bag reads
     /// (<c>RelicGrabBag.Populate</c>). Under the Klee arm her pool is the
@@ -75,8 +73,5 @@ public sealed class KleeRelicPool : RelicPoolModel
     /// </summary>
     public override IEnumerable<RelicModel> GetUnlockedRelics(
         MegaCrit.Sts2.Core.Unlocks.UnlockState unlockState) =>
-        Relics.ArmRelicPools.Offer(AllRelics, Powers.KleeOverhaul.Enabled,
-                                   Relics.ArmRelicPools.KleeArmPool,
-                                   Relics.KleeArmRelics.Types);
-#endif
+        Relics.ArmRelicPools.Offer(AllRelics, Relics.ArmRelicPools.KleeArmPool);
 }

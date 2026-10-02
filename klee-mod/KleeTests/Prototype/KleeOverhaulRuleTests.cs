@@ -34,31 +34,6 @@ public class KleeOverhaulRuleTests
 
     // ---- THE FLAG, ON BY DEFAULT ------------------------------------------
 
-    // THE CURRENT KITS ARE THE DEFAULT BUILD (2026-09-28). [USER]: "Let's go
-    // ahead and make all 3 current builds the active release builds to avoid
-    // this confusion." `klee-mod/Directory.Build.props` now defaults
-    // `-p:KleeOverhaul=true`, so a build that names no property -- `dotnet test`,
-    // deploy.ps1, the handoff zip -- has this arm on. This pin says so.
-    //
-    // SKIPPED, NOT LEFT TO FAIL, in the one configuration that opts the arm
-    // out (`-p:ShippedKits=true`, the `dotnet-test-shipped` gate, or an
-    // explicit `-p:KleeOverhaul=false`): there the property has moved the very value
-    // this pin asserts, and a red that means "the opt-out works" teaches
-    // everyone to ignore reds. docs/current/operations/prototype.md carries
-    // the rule.
-#if KLEE_OVERHAUL
-    [Fact]
-#else
-    [Fact(Skip = "This build opts the arm out (-p:ShippedKits=true or -p:KleeOverhaul=false), which moves KleeOverhaul.DefaultEnabled, the value this pin asserts. See docs/current/operations/prototype.md.")]
-#endif
-    public void The_arm_ships_on()
-    {
-        // `Enabled` is settable so a pin can exercise both sides in one
-        // build; nothing in the mod ever writes it.
-        Assert.True(KleeOverhaul.DefaultEnabled);
-        Assert.Equal(KleeOverhaul.DefaultEnabled, KleeOverhaul.Enabled);
-    }
-
     [Fact]
     public void The_three_wiring_seams_read_the_flag_and_nothing_else()
     {
@@ -69,12 +44,10 @@ public class KleeOverhaulRuleTests
         // through to the shipped off-pool filter.
         var deck = typeof(global::KleeMod.Klee)
             .GetProperty("StartingDeck", HeadlessGame.All)!.GetGetMethod(true)!;
-        Assert.Contains("KleeOverhaul.get_Enabled", Il.Calls(deck));
         Assert.Contains("KleeOverhaulRoster.StartingDeck", Il.Calls(deck));
 
         var filter = typeof(global::KleeMod.KleeCardPool)
             .GetMethod("FilterThroughEpochs", HeadlessGame.All)!;
-        Assert.Contains("KleeOverhaul.get_Enabled", Il.Calls(filter));
         Assert.Contains("KleeOverhaulRoster.OfferablePool", Il.Calls(filter));
 
         // THE THIRD, ADDED BY `EB-351`: which pair of basics is hers when a
@@ -83,7 +56,6 @@ public class KleeOverhaulRuleTests
         // never applied to, so it was handing an arm run her two SHIPPED
         // basics. `ArmStarterBasicsTests` holds the rest of it.
         var basics = Il.Calls(Il.Method("ArmStarterBasics", "StrikeFor"));
-        Assert.Contains("KleeOverhaul.get_Enabled", basics);
         Assert.Contains("KleeOverhaulRoster.StarterStrike", basics);
     }
 
@@ -254,7 +226,6 @@ public class KleeOverhaulRuleTests
             .GetMethod("OnBombExploded", HeadlessGame.All)!;
         var calls = Il.Calls(relic);
         Assert.Contains("SparkPower.Gain", calls);
-        Assert.Contains("KleeOverhaul.get_Enabled", calls);
 
         Assert.Contains("ProtoBombPower.NotifyExplosionListeners",
                         Il.Calls(Method("Explode")));
@@ -302,8 +273,6 @@ public class KleeOverhaulRuleTests
         var frags = typeof(global::KleeMod.Relics.ExplosiveFrags);
         Assert.Contains("SparkPower.Gain",
             Il.Calls(frags.GetMethod("OnBombExploded", HeadlessGame.All)!));
-        Assert.Contains("KleeOverhaul.get_Enabled",
-            Il.Calls(frags.GetMethod("AfterPlayerTurnStart", HeadlessGame.All)!));
     }
 
     // ---- RULE 6: the Mine ------------------------------------------------

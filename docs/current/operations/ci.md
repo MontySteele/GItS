@@ -43,10 +43,9 @@ absent from the push hook — and two pins sat red on `main` for days with every
 badge green (a roster sweep in `CompanionOverhaulTests`, and the Kokomi Plan
 clause-count pin that R236's twelfth clause moved). It is now a first-class gate
 in `tools/gates.py`, in **both** lanes and no longer optional, running `dotnet
-test klee-mod/KleeTests` twice: the default build, which since 2026-09-28 is
-the current kits (`klee-mod/Directory.Build.props`), and `-p:ShippedKits=true
--p:PrototypeCards=true`, the old shipped kits with the arms compiled but off,
-and the git `pre-push` hook runs it through that same wrapper — one
+test klee-mod/KleeTests` on the default build, the current kits (the only
+build since legacy cleanup stage 5; the second, old-shipped-kits configuration
+went with them), and the git `pre-push` hook runs it through that same wrapper — one
 implementation, two callers. Its line in the gates output says `local-only: no
 game dlls on a runner` every time, green or red, so a green CI run is never read
 as evidence about it; a machine with no `dotnet` or no `local.props` gets a

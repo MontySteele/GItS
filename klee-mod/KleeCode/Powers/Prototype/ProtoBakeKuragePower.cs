@@ -402,7 +402,7 @@ public static class KokomiRules
     /// </summary>
     internal static bool MendIsLive(Creature? creature) =>
         KokomiOverhaul.LiveFor(creature)
-        || (CompanionOverhaul.Enabled && creature?.Player != null);
+        || (creature?.Player != null);
 
     /// <summary>
     /// MEND: heal, never above entry HP. Returns the HP that actually landed.

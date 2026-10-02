@@ -115,17 +115,3 @@ def test_the_tile_prints_the_shipped_face_and_the_arm_face_under_a_label():
     assert "Burst" in body
 
 
-def test_the_rider_regex_finds_the_real_rows_in_the_mod():
-    """The live half: the shipped tree really does hold rider-wrapped rows,
-    so this fixture is pinning a shape that exists. Skipped rather than failed
-    where the mod tree is absent, the way the gallery itself degrades."""
-    cards = gallery.MOD_CARDS_DIR
-    if not cards.exists():
-        return
-    hits = [p for p in cards.rglob("*.cs")
-            if gallery._RIDER_RE.search(p.read_text(encoding="utf-8",
-                                                    errors="replace"))]
-    assert hits, "no FurinaBurstRider.Face row found; has the rider retired?"
-    for path in hits:
-        src = path.read_text(encoding="utf-8", errors="replace")
-        assert re.search(r'FurinaBurstRider\.Face\(', src)

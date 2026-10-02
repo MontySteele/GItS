@@ -99,6 +99,31 @@ SHEET = REPO / "docs" / "prototype-surface.yaml"
 OUT_DIR = REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
 MANIFEST = OUT_DIR / "manifest.json"
 NAMESPACE = "KleeMod.Cards.Prototype.Generated"
+
+#: RETIRED-ARM ROWS, SIM ONLY (legacy cleanup stage 5, 2026-10-01). The twelve
+#: rows of three retired arms -- the Sparks alternative cost (`proto_spark_`
+#: and the Shinobu, Thoma and Itto twins), the Kurage Memory
+#: (`proto_kurages_oath_memory`) and the Muster subsidy
+#: (`proto_muster_subsidy_funnel`) -- are in no pool's offer, and the shipped
+#: engine pieces their C# held on to (Klee's Burst meter, the shipped Bomb,
+#: the Muster transform, the Bake-Kurage pulse) were deleted with the shipped
+#: kits. The rows stay on the sheet because the sim's arm flags still read
+#: them; stage 6 deletes the rows with those flags. Until then no C# class is
+#: emitted for them.
+SIM_ONLY_ROW_IDS = frozenset({
+    "proto_spark_priced_strike",
+    "proto_spark_priced_draw",
+    "proto_spark_burst_conversion",
+    "proto_spark_mode_bombs",
+    "proto_shinobu_sanctifying_ring_either",
+    "proto_shinobu_sanctifying_ring_priced",
+    "proto_thoma_crimson_ooyoroi_either",
+    "proto_thoma_crimson_ooyoroi_priced",
+    "proto_itto_superlative_superstrength_either",
+    "proto_itto_superlative_superstrength_priced",
+    "proto_kurages_oath_memory",
+    "proto_muster_subsidy_funnel",
+})
 SCRIPT = "tools/gen_prototype_cards.py"
 
 # The directory-and-manifest identity `_check_plan` / `_write_plan` read. Its
@@ -473,6 +498,8 @@ def plan() -> gen.ProfilePlan:
                     "emittable today -- rewrite the delta inside the existing "
                     "grammar, drop the key to stage a base-only row, or take "
                     "the runtime work first.")
+        if card_id in SIM_ONLY_ROW_IDS:
+            continue
         generated[card_id] = gen.emit(card, profile)
         owners[card_id] = character
         mode_faces[card_id] = gen._modal_option_names([card], {card_id})

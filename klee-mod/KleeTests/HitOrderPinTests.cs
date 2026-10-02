@@ -151,58 +151,6 @@ public class HitOrderPinTests
 
     // ---- PAIR: an arm modifier x each of the three ------------------------
 
-    /// <summary>An Attack card, for the one modifier that asks what kind of
-    /// card is dealing: <c>AttackUpThisTurnPower</c> declines anything that is
-    /// not <c>CardType.Attack</c>.</summary>
-    private static CardModel AnAttack() => new global::KleeMod.Cards.Kaboom();
-
-    [Fact]
-    public void Pair_arm_modifier_x_strength_share_the_additive_phase()
-    {
-        var klee = Seat.Klee()
-            .WithPower<AttackUpThisTurnPower>(5)
-            .WithPower<StrengthPower>(2);
-        var enemy = Seat.Klee(30).Creature;
-
-        // Two flat riders, one phase: 4 + 5 + 2.
-        Assert.Equal(11m, Composed(klee.Creature, enemy, Base, AnAttack()));
-    }
-
-    [Fact]
-    public void Pair_arm_modifier_x_weak_is_the_row_s_own_example()
-    {
-        // `EB-328`'s find, in the shape it was filed in: "under Weak 1 and
-        // Fantastic Voyage 5 together, Slack Water printed 3 and dealt 6
-        // (4 + 5, x0.75), keeping the Weak and dropping the buff". The buff is
-        // `AttackUpThisTurnPower` -- `EB-699` renamed it after its effect.
-        var klee = Seat.Klee()
-            .WithPower<AttackUpThisTurnPower>(5)
-            .WithPower<WeakPower>(1);
-        var enemy = Seat.Klee(30).Creature;
-
-        var composed = Composed(klee.Creature, enemy, Base, AnAttack());
-        Assert.Equal(6.75m, composed);
-        Assert.Equal(6, (int)composed);
-        // 3 was the printed number, and it is what you get by keeping the Weak
-        // and dropping the buff.
-        Assert.Equal(3, (int)Composed(
-            Seat.Klee().WithPower<WeakPower>(1).Creature, enemy, Base, AnAttack()));
-    }
-
-    [Fact]
-    public void Pair_arm_modifier_x_vulnerable_folds_the_target_once()
-    {
-        var klee = Seat.Klee().WithPower<AttackUpThisTurnPower>(5);
-        var enemy = Seat.Klee(30).WithPower<VulnerablePower>(1).Creature;
-        var card = AnAttack();
-
-        Assert.Equal(13.5m, HitOrder.Compose(klee.Creature, enemy, Base, Move, card));
-        Assert.Equal(
-            20.25m,
-            SimDamagePipeline.TargetMods(
-                enemy, HitOrder.Compose(klee.Creature, enemy, Base, Move, card)));
-    }
-
     [Fact]
     public void An_arm_modifier_declines_a_skill_so_the_face_shape_matters()
     {
@@ -394,54 +342,4 @@ public class HitOrderPinTests
 
     // ---- EB-689: one folding rule per screen ------------------------------
 
-    [Fact]
-    public void Every_attack_face_takes_the_same_body_whatever_it_targets()
-    {
-        var enemy = Seat.Klee(30).Creature;
-        var anyEnemy = AnAttack();
-        Assert.Equal(TargetType.AnyEnemy, anyEnemy.TargetType);
-
-        // Aimed: the game named the body, and the face keeps it.
-        Assert.Same(
-            enemy,
-            HitOrder.BodyForPreview(anyEnemy, CardPreviewMode.Normal, enemy, null));
-        // In hand: no body from the game, so the front enemy -- the same body
-        // for every Attack on the screen, which is the row's acceptance.
-        Assert.Same(
-            enemy,
-            HitOrder.BodyForPreview(anyEnemy, CardPreviewMode.Normal, null, enemy));
-    }
-
-    [Fact]
-    public void The_all_enemies_branch_is_left_to_the_game()
-    {
-        var card = AnAttack();
-        var enemy = Seat.Klee(30).Creature;
-
-        // Not an all-enemies face, so the predicate is false whatever the
-        // preview mode, and the front enemy stands.
-        Assert.False(HitOrder.GameFoldsEveryEnemyItself(
-            card, CardPreviewMode.MultiCreatureTargeting));
-        Assert.Same(enemy, HitOrder.BodyForPreview(
-            card, CardPreviewMode.MultiCreatureTargeting, null, enemy));
-
-        // And an all-enemies face outside that preview mode is an ordinary
-        // face: the mode is half the predicate.
-        Seat.Force(card, "TargetType", TargetType.AllEnemies);
-        Assert.False(HitOrder.GameFoldsEveryEnemyItself(card, CardPreviewMode.Normal));
-
-        // THE PILE CLAUSE IS STRUCTURAL and says so. `CardModel.Pile` is
-        // computed -- `_owner?.Piles.FirstOrDefault(p => p.Cards.Contains(this))`
-        // -- so a card only has one inside a live combat, which is the headless
-        // boundary (README). A card with no pile is not in Hand or Play and the
-        // predicate is false, which is the behaviour this CAN assert; that the
-        // clause reads the pile at all is read off the compiled method.
-        Assert.Null(card.Pile);
-        Assert.False(HitOrder.GameFoldsEveryEnemyItself(
-            card, CardPreviewMode.MultiCreatureTargeting));
-        var calls = Il.Calls(typeof(HitOrder).GetMethod(
-            nameof(HitOrder.GameFoldsEveryEnemyItself))!);
-        Assert.Contains("CardModel.get_Pile", calls);
-        Assert.Contains("CardModel.get_TargetType", calls);
-    }
 }

@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -272,4 +271,3 @@ public sealed class WatatsumiCasket : TamakushiCasket
     /// <summary>Already the upgrade: nothing further for Orobas.</summary>
     public override RelicModel? GetUpgradeReplacement() => null;
 }
-#endif

@@ -350,15 +350,6 @@ def test_the_packet_says_where_each_card_text_came_from():
     assert all(c["text_source"] == "bridge" for c in packet["board"]["hand"])
 
 
-def test_a_card_with_no_wire_text_falls_back_and_says_so():
-    state = wire_state()
-    state["player"]["hand"][0]["description"] = ""
-    packet = qa_packet.build(state, "t", repo=REPO)
-    card = packet["board"]["hand"][0]
-    assert card["text_source"].startswith("generated-cs")
-    assert card["text"], "the generated Localization block was not found"
-
-
 def test_the_guardrail_rides_on_the_packet():
     packet = qa_packet.build(wire_state(), "t")
     assert packet["guardrail"] == qa_packet.PACKET_GUARDRAIL
@@ -1279,42 +1270,6 @@ def banked_state(bank: int = 3):
     }
 
 
-def test_the_printed_cost_index_reads_the_shipped_face():
-    """The face in `klee-mod` is where the number comes from, and it agrees
-    with the sheet the generator emitted it from -- EVERY id, not a sample.
-    `qa_packet` may not import a sheet loader; this test may, which is
-    exactly why the cross-check lives here."""
-    from tier0.content import loader
-    index = qa_packet.printed_cost_index(REPO)
-    assert index["KABOOM"] == 1 and index["RAPID_FIRE"] == 2
-    assert index["FLAME_ON_THE_WICK"] == 0
-    disagree = [(c.id, index[c.id.upper()], c.cost)
-                for c in loader._card_index().values()
-                if c.id.upper() in index and isinstance(c.cost, int)
-                and index[c.id.upper()] != c.cost]
-    assert not disagree, f"the face and the sheet disagree: {disagree}"
-    assert len(index) > 200, f"only {len(index)} faces carried a cost"
-
-
-def test_the_printed_cost_index_is_keyed_by_id_not_by_title():
-    """`EB-267`. The prototype surface ships a re-priced twin of a shipped
-    card under the SAME printed name, so a title-keyed map had one row where
-    the game has two faces: *Flame Dance* was cost 2 shipped and cost 1 on the
-    proto row, and the page told a blind reader the proto card's own printed
-    cost was wrong. Both rows are here, under the ids the wire sends. (The
-    Klee status package cut the proto Flame Dance; Bombs Away!, 3 shipped and
-    1 proto, is the pair now.)"""
-    index = qa_packet.printed_cost_index(REPO)
-    assert index["BOMBS_AWAY"] == 3
-    assert index["PROTO_KO_BOMBS_AWAY"] == 1
-    # The key is the wire's `Id.Entry` with the mod prefix off, which is what
-    # every hand entry carries.
-    assert qa_packet.card_key("KLEEMOD-PROTO_KO_BOMBS_AWAY") \
-        == "PROTO_KO_BOMBS_AWAY"
-    assert qa_packet.card_key("KLEEMOD-KABOOM") == "KABOOM"
-    assert qa_packet.card_key(None) == ""
-
-
 def test_the_class_name_key_agrees_with_every_generated_sheet_id():
     """The key is derived from the C# CLASS NAME because that is what BaseLib
     derives `ModelId.Entry` from (`KleeMod.cs:81`). The generated header also
@@ -1334,46 +1289,6 @@ def test_the_class_name_key_agrees_with_every_generated_sheet_id():
 
 
 # ------------------------ EB-282, the Spark price in the cost slot ---
-
-def test_the_printed_spark_index_reads_the_shipped_face():
-    """`EB-282`. The row's own body no longer says "Spend 1 Spark." -- the
-    price is on the badge in game, and on THIS page it has to come from
-    somewhere or the seats are reading a card whose cost they cannot see.
-
-    It comes off the same faces `printed_cost_index` reads, out of the one
-    place the generator writes the number: `ISparkPricedCard.PrintedSparkPrice`,
-    which the card's own playability gate reads back through
-    `SparkCost.PriceOf`. Cross-checked against the surface here, in a test that
-    MAY import a loader, for the reason the energy twin above gives.
-    """
-    from tier0.content import loader
-    index = qa_packet.printed_spark_index(REPO)
-    # `EB-749`: was Fwoosh!, then Pocket Match until it lost its price.
-    assert index["PROTO_KO_TINDER_TOSS"] == 1
-    assert "PROTO_KO_POCKET_MATCH" not in index
-    assert index["PROTO_KO_BANG_BANG"] == 2
-    # A card with no Spark price has NO row -- silence, never a zero.
-    assert "KABOOM" not in index
-    assert "PROTO_KO_KAPOW" not in index, (
-        "draft 3 made Ka-pow! pay energy; a stale Spark price would print a "
-        "cost the card does not charge")
-
-    # `spend_spark_price` AND NOT the raw `amount`: the X price ("spend all
-    # your Sparks", the round-11 pool pass's Stoke the Fuse) prints no literal,
-    # and what the badge and the gate BOTH show for it is 1. This is the reader
-    # `combat.spark_cost` and the emitted `PrintedSparkPrice` already share, so
-    # the page, the sim's gate and the mod's gate cannot disagree about it.
-    from tier0.engine import effects as fx_mod
-
-    disagree = []
-    for card in loader.prototype_cards():
-        priced = [f for f in card.effects if f.get("op") == "spend_spark"]
-        want = fx_mod.spend_spark_price(priced[0]) if priced else None
-        got = index.get(card.id.upper())
-        if want != got:
-            disagree.append((card.id, got, want))
-    assert not disagree, f"the face and the surface disagree: {disagree}"
-
 
 def test_the_cost_slot_prints_the_spark_price():
     """The page says the price in the same slot the game paints the badge in,
@@ -1451,26 +1366,6 @@ def test_the_rendered_page_shows_a_spark_priced_card_at_its_price():
     assert "- Cost: 1 Spark" in page
 
 
-def test_a_same_named_proto_row_prints_no_discrepancy():
-    """`EB-267`'s acceptance, both directions. The proto *Bombs Away!* (the
-    proto *Flame Dance* until the Klee status package cut it) is
-    drawn at the cost its own row prints, so the page says nothing about it; a
-    card the board really is discounting still says so on its own line."""
-    state = banked_state(0)
-    state["player"]["hand"] = [
-        {"id": "KLEEMOD-PROTO_KO_BOMBS_AWAY", "name": "Bombs Away!",
-         "type": "Attack", "cost": "1", "can_play": True, "is_upgraded": False,
-         "description": "Deal 3 damage to ALL enemies."},
-        {"id": "KLEEMOD-KABOOM", "name": "Kaboom!", "type": "Attack",
-         "cost": "0", "can_play": True, "is_upgraded": False,
-         "description": "Deal 7 damage. Applies Pyro."},
-    ]
-    page = qa_packet.render(qa_packet.build(state, "t", repo=REPO))
-    assert "The cost printed on this card is 3" not in page
-    assert "The cost printed on this card is 1; it is showing 0 here." in page
-    assert page.count("The cost printed on this card") == 1
-
-
 def test_the_unplayable_enum_reaches_the_page_as_plain_words():
     """`EB-264`. The wire's reason is `UnplayableReason.ToString()`, and a
     blind tester reported `CANNOT BE PLAYED: BlockedByCardLogic` as the least
@@ -1502,21 +1397,6 @@ def test_an_unmapped_enum_is_spelled_out_rather_than_dropped():
         == "you do not have enough energy; you do not have enough Stars"
     assert qa_packet.unplayable_reason("None") == ""
     assert qa_packet.unplayable_reason(None) == ""
-
-
-def test_a_banked_board_prints_the_rule_and_names_every_discount():
-    """EB-186's acceptance. At a bank of three the page states Spark's OWN
-    words once, and beside each Attack shown below its printed cost says what
-    that card prints. Round 1's readers had neither."""
-    page = qa_packet.render(
-        qa_packet.build(banked_state(3), "t", repo=REPO))
-    assert "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 " \
-           "Sparks." in page
-    assert "covers 1 of the 2" in page
-    assert "The cost printed on this card is 1; it is showing 0 here." in page
-    assert "The cost printed on this card is 2; it is showing 0 here." in page
-    # And the card that is NOT discounted carries no note.
-    assert page.count("The cost printed on this card") == 2
 
 
 def test_an_unbanked_board_prints_nothing_extra():

@@ -71,7 +71,7 @@ internal static class CardFactory_CreateForReward_SparkSeed_Patch
     public static void Postfix(Player player, CardCreationOptions options,
                                ref IEnumerable<CardCreationResult> __result)
     {
-        if (!KleeOverhaul.Enabled || player?.Character is not IKleeCharacter)
+        if (player?.Character is not IKleeCharacter)
         {
             return;
         }

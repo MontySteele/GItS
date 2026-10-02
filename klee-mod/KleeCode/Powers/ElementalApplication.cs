@@ -72,51 +72,16 @@ public sealed class KleeElementalHooks : AbstractModel
         // THE ELEMENT PORT sec.7.3: a reaction inside this play is the card's
         // (`ReactionEvents.SourceKindFor`). Every replay pushes and pops.
         if (cardPlay.Card is { } playing) ReactionEvents.CardPlayBegins(playing);
-#if PROTOTYPE_CARDS
         // VARKA (the Oath rework): the play's Oath scope opens, and a Knight
         // sets his current element before its effects resolve. Every replay
         // is a play (Grand Master's Order). Nothing for anyone else.
         if (cardPlay.Card is { } oathCard) await VarkaOath.BeginPlay(oathCard);
-#endif
-        // Sim order (combat.py play_card): the requires-full drain happens
-        // FIRST, then the skill-tag bonus. Once per play, never per replay.
-        if (cardPlay.IsFirstInSeries)
-        {
-            KleeBurstResource.DrainOnPlay(cardPlay.Card);
-        }
-        // Owner is null on autoplay/token paths. This hook fires for every
-        // card every player plays, inside CombatManager's async continuation,
-        // so an NRE here reaches the player as a black screen rather than an
-        // error -- guarded for the same reason DrainOnPlay guards internally.
-        if (cardPlay.Card is ISkillTagCard && cardPlay.IsFirstInSeries
-            && cardPlay.Card.Owner?.Creature is { } skillTagOwner)
-        {
-            KleeBurstResource.GainPreResolution(
-                skillTagOwner, BurstConstants.PerSkillTag);
-        }
         // Best Friends Forever's ledger (tier0 _finish_play records
         // companions_played before resolution; once per play, deduped on the
         // base id -- BFF-dedupe, ruled 2026-08-06).
         if (cardPlay.Card is ICompanionCard && cardPlay.IsFirstInSeries)
         {
             CompanionPlays.Record(cardPlay.Card.CombatState, cardPlay.Card);
-        }
-        // "Little Hexenzirkul" (EB-219 / LAW:145, retargeted by EB-642 and
-        // R276): Klee's kit answering a COMPANION play, armed here and settled in
-        // AfterCardPlayed. Same IsFirstInSeries gate as the ledger above,
-        // and for the same reason -- once per play_card call, never once
-        // per replay. The sim's twin brackets the same span
-        // (effects.klee_companion_spark, called from
-        // combat._finish_play after the FIRST resolution).
-        //
-        // OUTSIDE THE COMPANION BRANCH SINCE `EB-663`: under the arm a Klee
-        // card Alice's Introduction Magic marked pays too, so WHICH plays pay is
-        // KleeCompanionSpark.PaysKleesSpark's question and not this line's.
-        // Arm is a no-op for every play it answers no to, and Settle clears
-        // the snapshot whether or not it mints.
-        if (cardPlay.IsFirstInSeries)
-        {
-            KleeCompanionSpark.Arm(cardPlay);
         }
     }
 
@@ -136,27 +101,11 @@ public sealed class KleeElementalHooks : AbstractModel
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (cardPlay.Card is { } played) ReactionEvents.CardPlayEnds(played);
-#if PROTOTYPE_CARDS
         // VARKA (the Oath rework): the play's Oath scope closes.
         if (cardPlay.Card is { } oathCard)
         {
             await VarkaOath.EndPlay(choiceContext, oathCard);
         }
-#endif
-        // Same ownerless-play guard as BeforeCardPlayed above.
-        var owner = cardPlay.Card?.Owner;
-        if (owner?.Creature is not { } creature) return;
-        // The Companion Spark mint, settled BEFORE the gauge sync and
-        // the kit-grant check: a Spark is not Burst Energy, but a reader of
-        // this method should see the resource writes finish before the display
-        // and the grant read them. Settle is a no-op unless BeforeCardPlayed
-        // armed it, and it disarms itself either way.
-        if (cardPlay.IsFirstInSeries)
-        {
-            await KleeCompanionSpark.Settle(choiceContext, cardPlay);
-        }
-        KleeBurstResource.SyncGauge(creature);
-        await KitGrant.GrantIfCharged(choiceContext, owner);
     }
 
     /// <summary>
@@ -169,13 +118,10 @@ public sealed class KleeElementalHooks : AbstractModel
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
-#if PROTOTYPE_CARDS
         await KleeOverhaulOpening.GrantSpark(choiceContext, player);
         // VARKA (the Oath rework): Baron Bunny, Sworn Brotherhood, then Oath
         // of the Knights, after the draw.
         await VarkaOath.TurnStart(choiceContext, player);
-#endif
-        await KitGrant.GrantIfCharged(choiceContext, player);
     }
 
     /// <summary>
@@ -224,13 +170,6 @@ public sealed class KleeElementalHooks : AbstractModel
         // ledger cleared on the wrong window would drop exactly the turn
         // nobody watched.
         ResolutionLedger.MarkPlayerTurnEnd();
-        foreach (var creature in participants)
-        {
-            if (creature.Player != null)
-            {
-                await KitGrant.GrantIfCharged(choiceContext, creature.Player);
-            }
-        }
     }
 
     /// <summary>
@@ -342,13 +281,11 @@ public sealed class KleeElementalHooks : AbstractModel
         var element = AuraCmd.ElementOfPlay(cardSource, dealer);
         if (!element.LeavesAura()) return;   // None, and trigger-only Anemo/Geo
 
-#if PROTOTYPE_CARDS
         // VARKA (the Oath rework, sec.3): a card's hit that applies an
         // element gains 1 Oath of it -- whether it sticks, refreshes or
         // reacts -- once per card play; his own card's makes it current.
         await VarkaOath.NoteApplication(choiceContext, dealer, element,
                                         cardSource);
-#endif
 
         // An existing aura owns this hit (refresh or reaction); one aura per
         // enemy is the invariant.
@@ -390,12 +327,7 @@ public static class AuraCmd
     /// </summary>
     public static Element ElementOfPlay(CardModel? cardSource, Creature? dealer)
     {
-#if PROTOTYPE_CARDS
         return CompanionOverhaulRiders.ElementFor(cardSource, dealer);
-#else
-        return cardSource is IElementalCard elemental
-            ? elemental.Element : Element.None;
-#endif
     }
 
     /// <summary>

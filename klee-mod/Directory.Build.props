@@ -32,50 +32,19 @@
   <Import Project="$(GitsLocalProps)"
           Condition="!Exists('$(MSBuildThisFileDirectory)local.props') and '$(GitsLocalProps)' != '' and Exists('$(GitsLocalProps)')" />
 
-  <!-- THE CURRENT KITS ARE THE DEFAULT BUILD (2026-09-28).
+  <!-- THE ELEMENT PORT, PHASE ONE (review/ruled/element-home-review-2026-09-28.md
+       sec.3/4, ruled sec.6): two switches, one per change, so each is tested
+       alone (sec.6 pick 4.4). On in every build that names neither;
+       -p:SwirlPays=false or -p:CrystallizeKeepsAura=false turns one off.
+       KleeMod.Elements.TriggerRules.
 
-       [USER]'s ruling, in his words: "The current character builds are much
-       more progressed than the old prototypes were, even though it's still a
-       work in progress. Let's go ahead and make all 3 current builds the
-       active release builds to avoid this confusion."
-
-       So every build that names no property (a plain `dotnet build`,
-       `dotnet test`, klee-mod\build\deploy.ps1, validate.ps1 and the -Package
-       handoff zip) compiles the prototype surface and turns on the four
-       kit arms: Klee's overhaul, the companion overhaul, Kokomi's overhaul
-       and Furina's Stage. The KleeCode and KleeTests csproj blocks that read
-       these properties are unchanged; only their defaults moved, here, in
-       the one file both projects import before their own bodies.
-
-       An explicit property still wins (`-p:FurinaStage=false` turns one arm
-       off), and ONE opt-out puts the old shipped kits back whole:
-
-           dotnet build ... -p:ShippedKits=true
-
-       which leaves all five unset, exactly the build every script made before
-       this ruling. It exists for the C# suite's `dotnet-test-shipped` gate
-       (tools/gates.py), where the old kits' pins and each arm's "flag off"
-       pins still run, and it goes when the old kits' code does.
-
-       THE TEYVAT FRAME IS NOT HERE ON PURPOSE: [USER] dropped it
-       (docs/current/STATE.md, "The Teyvat run frame: on hold"), so it stays
-       off in every build and only klee-mod\build\deploy_proto.ps1
-       -TeyvatFrame turns it on. -->
-  <PropertyGroup Condition="'$(ShippedKits)' != 'true'">
-    <PrototypeCards Condition="'$(PrototypeCards)' == ''">true</PrototypeCards>
-    <KleeOverhaul Condition="'$(KleeOverhaul)' == ''">true</KleeOverhaul>
-    <CompanionOverhaul Condition="'$(CompanionOverhaul)' == ''">true</CompanionOverhaul>
-    <KokomiOverhaul Condition="'$(KokomiOverhaul)' == ''">true</KokomiOverhaul>
-    <FurinaStage Condition="'$(FurinaStage)' == ''">true</FurinaStage>
-    <!-- VARKA, THE FOURTH CHARACTER, has no property of his own (collapsed
-         2026-10-01, legacy cleanup stage 2: he ships nowhere else). He
-         compiles with PrototypeCards, so -p:ShippedKits=true, which leaves
-         that unset, still has no Varka on the select screen. -->
-    <!-- THE ELEMENT PORT, PHASE ONE (review/ruled/element-home-review-2026-09-28.md
-         sec.3/4, ruled sec.6): two switches, one per change, so each is
-         tested alone (sec.6 pick 4.4). On in every build that names neither;
-         -p:SwirlPays=false or -p:CrystallizeKeepsAura=false turns one off,
-         -p:ShippedKits=true both. KleeMod.Elements.TriggerRules. -->
+       The prototype surface and the four kit arms (PrototypeCards,
+       KleeOverhaul, CompanionOverhaul, KokomiOverhaul, FurinaStage) and the
+       ShippedKits opt-out that used to be defaulted here are gone: since
+       legacy cleanup stage 5 (2026-10-01) the current kits are the only
+       build. THE TEYVAT FRAME stays off in every build and only
+       klee-mod/build/deploy_proto.ps1 -TeyvatFrame turns it on. -->
+  <PropertyGroup>
     <SwirlPays Condition="'$(SwirlPays)' == ''">true</SwirlPays>
     <CrystallizeKeepsAura Condition="'$(CrystallizeKeepsAura)' == ''">true</CrystallizeKeepsAura>
   </PropertyGroup>

@@ -321,36 +321,6 @@ _POWERS_DIR = (Path(__file__).resolve().parents[2] / "klee-mod" / "KleeCode"
                / "Powers")
 
 
-def test_the_three_exempt_block_grants_are_unpowered_in_csharp():
-    """NC-11's mod-side fix, pinned as source text.
-
-    The C# cannot be executed from here and the exemption is not arithmetic
-    -- it is a FLAG. `ValueProp.Unpowered` is the predicate that Frail's
-    multiplicative hook and Dexterity's additive hook both gate on, so the
-    whole of the fix is which enum each of the three grants passes. Reading
-    the call sites is the achievable check, and the same idiom
-    `test_a7_port.py` already uses for an Unpowered claim.
-
-    A grant that goes back to `ValueProp.Move` re-arms exactly the divergence
-    R116 ruled against, and would otherwise be invisible until someone
-    measured a Frail fight in game.
-    """
-    companions = (_POWERS_DIR / "CompanionPowers.cs").read_text(encoding="utf-8")
-    kurage = (_POWERS_DIR / "KuragePowers.cs").read_text(encoding="utf-8")
-
-    metallicize = companions.split("class MetallicizePower")[1]
-    assert "GainBlock(Owner, Amount, ValueProp.Unpowered" in metallicize, (
-        "Metallicize's block grant is not Unpowered -- NC-11 (R116) exempts "
-        "power-sourced block from Frail and Dexterity")
-
-    assert ("GainBlock(Owner, block, ValueProp.Unpowered" in kurage), (
-        "the Kurage pulse's block grant is not Unpowered -- NC-11 (R116)")
-    assert ("KokomiConstants.GarmentAttackBlock, ValueProp.Unpowered"
-            in kurage), (
-        "the Ceremonial Garment rider's block grant is not Unpowered -- "
-        "NC-11 (R116). The Attack is its trigger, not its source")
-
-
 _DMG_ROW = re.compile(
     r"new\(\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,"
     r"\s*(-?\d+)\s*\)")

@@ -262,13 +262,3 @@ def test_the_card_is_not_blocked():
 
 # --- 3. the shipped artifact ----------------------------------------------
 
-def test_the_committed_generated_card_carries_it():
-    cs = GENERATED.read_text(encoding="utf-8")
-    assert "CardKeyword.Ethereal" in cs
-    assert "RemoveKeyword(CardKeyword.Ethereal);" in cs
-    assert "UpgradeValueBy" not in cs
-    # The ruled rider reached the SHIPPED file, not just the generator.
-    assert "if (enemiesAtStart.Any(e => e.IsDead))" in cs
-    assert f"DamageCmd.Attack({SPLASH}m)" in cs
-    assert ".TargetingRandomOpponents(CombatState!)" in cs
-    assert "to a random other enemy." in cs

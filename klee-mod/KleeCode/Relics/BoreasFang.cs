@@ -1,4 +1,3 @@
-#if PROTOTYPE_CARDS
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -241,4 +240,3 @@ public sealed class WolfsGravestone : BoreasFang
     /// Fang. The Gravestone arrives mid-run and rolls nothing.</summary>
     public override Task AfterObtained() => Task.CompletedTask;
 }
-#endif
