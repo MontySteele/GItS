@@ -24,14 +24,7 @@ namespace KleeMod.Powers;
 ///     guarantees that marker is on her every turn of every combat --
 ///     `EB-362`: it used to be written by The General's Banner's play hook
 ///     alone, a card she may never draw, so the count read a permanent zero
-///     on most boards) -- and it exists for what it becomes at the boundary:
-///   * <see cref="CompanionsPlayedLastTurn"/> -- the same card's Plan line,
-///     "Deal 6 damage for each Companion card you played LAST turn". A Plan
-///     written on turn N is carried out at the top of N+1, so what the clause
-///     needs is the count for the turn the player was looking at when they
-///     wrote it. The roll below is the only place that number moves, which is
-///     what keeps the card and the counter from disagreeing about which turn
-///     "last" was.
+///     on most boards).
 ///   * the ONCE-PER-TURN latches (<see cref="ClaimOncePerTurn"/>) -- Treatise,
 ///     Song of Pearls and The General's Banner, capped at one payout a turn
 ///     each by [USER]'s live 2026-09-02 verdict.
@@ -112,10 +105,6 @@ public sealed class KokomiOverhaulLedger
 
     /// <summary>Companion cards played this turn.</summary>
     public int CompanionsPlayedThisTurn { get; private set; }
-
-    /// <summary>Companion cards played on the turn before this one -- what
-    /// Chain of Command's Plan reads when it is carried out.</summary>
-    public int CompanionsPlayedLastTurn { get; private set; }
 
     /// <summary>
     /// THE ONCE-PER-TURN LATCHES, one set shared by every payoff that has one
@@ -295,10 +284,6 @@ public sealed class KokomiOverhaulLedger
     public void RollTo(int round)
     {
         if (round == _round) return;
-        // A ledger created mid-combat has never seen the previous turn, so
-        // there is nothing to hand over on its FIRST roll -- and handing over a
-        // zero it never counted is exactly right.
-        CompanionsPlayedLastTurn = CompanionsPlayedThisTurn;
         CompanionsPlayedThisTurn = 0;
         _claimed.Clear();
         PlanCarriedOutThisTurn = false;

@@ -369,23 +369,6 @@ def _runtime_count(state: CombatState, token: str,
         # handover (`kokomi_plan.roll_turn`), so this reads the one count
         # rather than minting a second.
         return state.companion_plays_this_turn
-    if token == "plans_carried_out_this_morning":
-        # QUARANTINED USE ONLY (`EB-492`) -- Well Laid, "Deals 3 more for each
-        # Plan the Bake-Kurage carried out this morning", on a NOW-line.
-        #
-        # THE MORNING'S DEPTH, `kk_plans_this_morning`: written once at the
-        # drain, before the first clause runs, and cleared by `roll_turn`. It
-        # is the same number Tide Wall's planned clause multiplies, which is
-        # the point -- the morning a Plan card sees and the morning a now-line
-        # sees are one fact rather than two counts that can drift.
-        #
-        # NOT `plans_held` beside it: that is the queue, what she has WRITTEN
-        # and not yet carried out. This card pays for what already happened.
-        # Sango Isshin's `plan_carried_out_this_turn` is the same fact as a
-        # yes/no and parts from this only at the arm's mid-turn doors, which
-        # is the printed difference between "this turn" and "this morning".
-        # The C# twin is `KokomiOverhaulLedger.PlansThisMorning`.
-        return state.kk_plans_this_morning
     if token == "plans_carried_out_this_turn":
         # QUARANTINED USE ONLY (the Casket pass, 2026-09-28) -- Feint and
         # Sango Isshin, "for each Plan carried out this turn". Every
@@ -4153,7 +4136,6 @@ RUNTIME_COUNT_NAMES = frozenset({
     # Bake-Kurage carried out this morning". Registered here as well as
     # resolved in `_runtime_count` for this registry's own reason: the loader
     # validates every count token at LOAD off this set.
-    "plans_carried_out_this_morning",
     # QUARANTINED USE ONLY (R276) -- Well Laid's "for each debuff on the
     # enemy". Same registry reason as the two above.
     "debuffs_on_target",
@@ -5877,15 +5859,8 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
                                "target": "enemy"}, card)
 
     if spec == "all_enemies":
-        # Flame Dance: "Set off each enemy that has a non-Pyro aura." The
-        # filter reads the board AS IT STANDS when each enemy is reached, so an
-        # enemy whose aura an earlier explosion consumed is no longer eligible
-        # -- which is what "each enemy that HAS" says.
         for enemy in list(state.living_enemies):
             if not enemy.alive:
-                continue
-            if fx.get("aura") == "non_pyro" and (
-                    enemy.aura is None or enemy.aura == "pyro"):
                 continue
             klee_overhaul.set_off(state, enemy, card, badge=badge)
             hit(enemy)
@@ -6024,12 +5999,6 @@ def _op_plant_bomb_copy_largest(state: CombatState, fx: dict,
     klee_overhaul.place_copy_of_largest(state, dest[0] if dest else None)
 
 
-def _op_split_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
-    """Split Charge (`EB-491`). ONE call; the halving is the arm's arithmetic
-    and `growth` is what the upgrade adds to each half."""
-    if not klee_overhaul.live(state):
-        _op_klee_overhaul_off(state, fx, card)        # always raises
-    klee_overhaul.split_largest(state, int(fx.get("growth", 0)))
 
 
 def _op_merge_bombs(state: CombatState, fx: dict, card: Card) -> None:
@@ -6361,13 +6330,6 @@ def _op_open_casket(state: CombatState, fx: dict, card: Card) -> None:
     kokomi_plan.open_casket(state)
 
 
-def _op_cancel_last_plan(state: CombatState, fx: dict, card: Card) -> None:
-    """Second Thoughts (`EB-643`). The readings -- which end of the queue, the
-    pile the card comes back from, and what happens when it is in neither --
-    are recorded at `kokomi_plan.cancel_last_plan`."""
-    if not kokomi_plan.live(state):
-        _op_kokomi_overhaul_off(state, fx, card)      # always raises
-    kokomi_plan.cancel_last_plan(state)
 
 
 def _op_cancel_all_plans_cash(state: CombatState, fx: dict,
@@ -6395,12 +6357,6 @@ def _op_redirect_queued_plans(state: CombatState, fx: dict,
     kokomi_plan.redirect_queued_plans(state, targets[0] if targets else None)
 
 
-def _op_next_companion_discount(state: CombatState, fx: dict,
-                                card: Card) -> None:
-    """Rally's grant. One stack, always -- see `kokomi_plan`."""
-    if not kokomi_plan.live(state):
-        _op_kokomi_overhaul_off(state, fx, card)      # always raises
-    kokomi_plan.next_companion_discount(state)
 
 
 def _op_remove_debuff(state: CombatState, fx: dict, card: Card) -> None:
@@ -6753,7 +6709,6 @@ OPS = {
     # above: one call each into `klee_overhaul`, and a raise with the flag off
     # or on a seat that is not Klee.
     "plant_bomb_copy_largest": _op_plant_bomb_copy_largest,
-    "split_largest_bomb": _op_split_largest_bomb,
     "remove_bomb_for_block": _op_remove_bomb_for_block,
     # R252's verb, the defence shelf's own (Careful Now). Beside Sorry, Jean...
     # because it reads the same pile, and distinct from it because it spends
@@ -6801,7 +6756,6 @@ OPS = {
     # RESOLVED under `C.COMPANION_OVERHAUL` (a Universal prints it) as well as
     # under the Kokomi arm -- see `_op_mend`.
     "mend": _op_mend,
-    "next_companion_discount": _op_next_companion_discount,
     "remove_debuff": _op_remove_debuff,
     "carry_out_front_plan": _op_carry_out_front_plan,
     "plan_from_exhaust": _op_plan_from_exhaust,
@@ -6815,7 +6769,6 @@ OPS = {
     # not be staged at all. `engine.kokomi_plan` resolves them off a `plan:`
     # list; reached from a BODY they refuse, which is what makes "plan-only"
     # a property of the code.
-    "damage_per_companion_last_turn": _op_kokomi_plan_only,
     # THREE now, and the third is Crystal Collapse's (R236). Same terms: it is
     # registered so `loader.prototype_cards` can validate the row's `plan:`
     # list through the body's own vocabulary check, and it refuses when it is
@@ -6826,7 +6779,6 @@ OPS = {
     # terms, and plan-only for a reason of its own -- the count it multiplies
     # is a fact about a MORNING, so a now-line spelling would print a number
     # that is zero every time it is read.
-    "block_per_plan_this_morning": _op_kokomi_plan_only,
     # FIVE, and the fifth is Breakwater's (`EB-685`, pool pass five): "plus N
     # Block for each Plan the Bake-Kurage is HOLDING". Same terms, and
     # plan-only for the line above's reason one count over -- a now-line
@@ -6840,19 +6792,14 @@ OPS = {
     # running and answer nothing every time it was played.
     # R267 pick 3: Scout Ahead is back on the positional count. Both spellings
     # stay registered; only `draw_per_plan_after` is on a row today.
-    "draw_per_plan_after": _op_kokomi_plan_only,
     "draw_per_plan_this_turn": _op_kokomi_plan_only,
     "next_plan_double_damage": _op_kokomi_plan_only,
     "next_plan_extra_carry_out": _op_kokomi_plan_only,
     # `EB-655`, Battle Plan's grant. Legal in a `plan:` list and nowhere else.
-    "next_attack_damage": _op_kokomi_plan_only,
     # R276 PICK 1, the halves rewrite: five Plan-only clauses.
     "first_attack_twice": _op_kokomi_plan_only,
     "first_card_free": _op_kokomi_plan_only,
     # Kokomi core pass: Chain of Command's switch, Stolen Chapter's narrowed.
-    "first_companion_free": _op_kokomi_plan_only,
-    "damage_if_unhurt": _op_kokomi_plan_only,
-    "attack_damage_this_turn": _op_kokomi_plan_only,
     # THE CO-OP SET's two Plan clauses about another player (`engine/coop.py`).
     coop.ALLY_DRAW: _op_kokomi_plan_only,
     coop.OTHERS_ATTACK_DAMAGE_THIS_TURN: _op_kokomi_plan_only,
@@ -6862,7 +6809,6 @@ OPS = {
     # and re-aim what is already written (Converging Tide). They are the
     # arm's first verbs that UNWRITE a Plan, which is the pool pass's whole
     # answer to a queue that empties on a timer.
-    "cancel_last_plan": _op_cancel_last_plan,
     "cancel_all_plans_cash": _op_cancel_all_plans_cash,
     "redirect_queued_plans": _op_redirect_queued_plans,
     # THE CASKET PASS (2026-09-28). What the Tokoyo Returns and What the
@@ -6873,7 +6819,6 @@ OPS = {
     "fetch_open_casket": _op_fetch_open_casket,
     "casket_double": _op_casket_double,
     "open_casket": _op_open_casket,
-    "casket_gain": _op_kokomi_plan_only,
     # THE KOKOMI EXPANSION, BATCH ONE: four plan-only clauses (Lull, Undertide
     # Lance, Evening Watch, Brace for the Tide).
     "energy_if_alone": _op_kokomi_plan_only,
@@ -7022,14 +6967,6 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     if card.type == "attack":
         p = state.player
         p.powers.pop("next_attack_up", 0)
-        # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-668`. Battle Plan's rider is
-        # consumed HERE and not at `combat._finish_play`, for the reason the
-        # pop above it sits here: the bonus has to be READ before it is spent,
-        # and `flat_attack_bonus` read it one line up. `spend_attack_bonus`
-        # asks `plan_aimed_at_pet` itself, so a write leaves the rider
-        # standing exactly as it leaves the damage unpaid.
-        if C.KOKOMI_OVERHAUL:
-            kokomi_plan.spend_attack_bonus(state, card)
         if p.powers.get("ceremonial_garment", 0) and p.charge:
             KNOB_READS["GARMENT_CHARGE_DIVISOR"] = (
                 KNOB_READS.get("GARMENT_CHARGE_DIVISOR", 0) + 1)
@@ -7148,23 +7085,6 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     # double-count class the AoE-blindness finding warned about.
     bonus = (p.powers.get("next_attack_up", 0)
              + p.powers.get("attack_up_this_turn", 0))
-    if C.KOKOMI_OVERHAUL:
-        # QUARANTINED. `EB-668`, BATTLE PLAN's carry-out: "the next Attack you
-        # play face-up this turn deals 4 additional damage." Folded in exactly where
-        # `next_attack_up` is folded in, because it says the same English --
-        # a second summing site is how two riders come to disagree about
-        # whether Strength lands before or after them.
-        #
-        # THE FACE-UP CLAUSE IS ASKED HERE, and it may be: `plan_aimed_at_pet`
-        # is pure, and it is the same read `_resolve_card_bound` makes one
-        # screen down to decide which half of the face runs. So an Attack that
-        # would be WRITTEN is valued and resolved at its printed number, and
-        # the rider waits -- which is what stops the reward paying for more
-        # writing, and what `EB-668` moved off the cost seam to make true in
-        # the mod as well.
-        if (p.powers.get(kokomi_plan.NEXT_ATTACK_BONUS, 0)
-                and not kokomi_plan.plan_aimed_at_pet(state, card)):
-            bonus += C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS
     if C.COMPANION_OVERHAUL:
         # THE MONDSTADT COMPANION OVERHAUL'S THREE ATTACK RIDERS (QUARANTINED).
         # Flat, and folded in exactly where `next_attack_up` is folded in --

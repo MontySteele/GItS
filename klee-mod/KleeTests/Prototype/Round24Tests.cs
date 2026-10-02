@@ -203,7 +203,7 @@ public class Round24Tests
         // A mixed entry reports the part it knows; the page's sentence says
         // "may" for exactly this reason.
         Assert.Equal(8, WrittenFrontDamage(
-            Damage(8), Clause("DamagePerCompanionLastTurn", 4)));
+            Damage(8), Clause("DamageQuarterMaxHp", 0)));
     }
 
     [Fact]

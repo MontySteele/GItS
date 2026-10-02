@@ -108,12 +108,6 @@ public static partial class KokomiCards
         }
     }
 
-    /// <summary>All Streams Flow to the Sea (<see
-    /// cref="KokomiPlan.CancelAllForNext"/>).</summary>
-    public static Task AllStreams(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
-        KokomiPlan.CancelAllForNext(choiceContext, card.Owner?.Creature);
-
     /// <summary>Coral Tithe (the payoff pass, 2026-10-01): "Empty the Casket.
     /// Gain 1 Energy and draw 1 card for every 3 in it." Only while she holds
     /// a Casket, found the way the relic's own carry-out add finds it

@@ -1084,8 +1084,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
 
     public static async Task SetOffAll(
         PlayerChoiceContext choiceContext, Creature applier,
-        CardModel cardSource, CardPlay cardPlay, decimal damage,
-        bool nonPyroAuraOnly)
+        CardModel cardSource, CardPlay cardPlay, decimal damage)
     {
         // ONCE MORE!'s NOTE (`EB-732`), taken HERE and above every early
         // return below: "the last Set off card you played this combat" is a
@@ -1102,11 +1101,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         foreach (var enemy in combat.HittableEnemies.ToList())
         {
             if (enemy.IsDead) continue;
-            if (nonPyroAuraOnly)
-            {
-                var aura = AuraCmd.Find(enemy);
-                if (aura == null || aura.Element == Element.Pyro) continue;
-            }
             await SetOff(choiceContext, enemy, applier, cardSource, badge: badge);
             await DealCardDamage(choiceContext, enemy, damage, cardSource, cardPlay);
         }
@@ -2371,58 +2365,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         if (size <= 0) return;
         await Place(choiceContext, target, size, isMine: false,
                     payloadMineAll: 0, applier, cardSource);
-    }
-
-    /// <summary>
-    /// Split Charge (the pool pass, `EB-491`): "Split your largest Bomb into
-    /// two halves on random enemies." Careful Arrangement's opposite, and the
-    /// arm's one bridge from Cook to Spray -- a pile cooked on one body becomes
-    /// two fuses wherever they land.
-    ///
-    /// THE HALVES ARE <c>n/2</c> AND <c>n - n/2</c>, so an odd Bomb loses
-    /// nothing and the bigger half is the second one; each then grows by
-    /// <paramref name="growth"/>, which is 0 until the upgrade buys it.
-    ///
-    /// EACH HALF ROLLS ITS OWN DESTINATION, independently, which is
-    /// <see cref="JumpCharges"/>'s rule and means both halves can land on one
-    /// enemy -- on a single-enemy board they always do, which is the row's
-    /// printed losing line (two piles growing 4 apiece where one grew 4, into
-    /// Block, for a card and an energy).
-    ///
-    /// A MINE'S HALVES ARE PLAIN BOMBS. The Mine is one fuse and splitting it
-    /// does not make two; the defence is spent, which is the price of the
-    /// bridge.
-    ///
-    /// A LARGEST BOMB OF 1 DOES NOTHING: there is no split of 1 that leaves two
-    /// Bombs, and halving it to 0 and 1 would silently delete a charge. Sim
-    /// twin: <c>klee_overhaul.split_largest</c>.
-    /// </summary>
-    public static async Task SplitLargest(
-        PlayerChoiceContext choiceContext, Creature applier,
-        CardModel? cardSource, int growth)
-    {
-        var combat = applier.CombatState;
-        if (combat == null) return;
-
-        var (pile, index, size) = LargestCharge(applier);
-        if (pile == null || size <= 1) return;
-        if (pile.TakeAt(index) is not { } removed) return;
-        if (pile.TotalSize == 0 && pile.Charges.Count == 0)
-        {
-            await PowerCmd.Remove(pile);
-        }
-
-        var halves = new[] { removed.Size / 2, removed.Size - removed.Size / 2 };
-        foreach (var half in halves)
-        {
-            var candidates = combat.HittableEnemies.Where(e => !e.IsDead).ToList();
-            if (candidates.Count == 0) return;
-            var dest = combat.RunState.Rng.CombatTargets.NextItem(candidates);
-            if (dest == null) return;
-            await Place(choiceContext, dest, half + growth, isMine: false,
-                        payloadMineAll: 0, applier, cardSource,
-                        relocated: true);
-        }
     }
 
     /// <summary>Big Badda Boom's second clause reads this: the damage this

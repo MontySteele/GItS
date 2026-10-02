@@ -67,7 +67,7 @@ public sealed class ProtoKoWindblumeFireworks : CustomCardModel, IElementalCard,
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await ProtoBombPower.SetOffAll(choiceContext, Owner.Creature, this, cardPlay, 0, nonPyroAuraOnly: false);
+        await ProtoBombPower.SetOffAll(choiceContext, Owner.Creature, this, cardPlay, 0);
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)

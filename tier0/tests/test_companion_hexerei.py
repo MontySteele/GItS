@@ -34,7 +34,7 @@ pytestmark = pytest.mark.usefixtures("shipped_world")
 #: The slice, and the Universal each row stands in for.
 FAMILY = {
     # The Klee status package (2026-10-01): Dust of Purification is Albedo's
-    # stand-in now; Tectonic Tide's Power stays registered and is pinned below.
+    # stand-in now; Tectonic Tide's Power left with legacy cleanup stage 5.
     "proto_mc_albedo_dust_of_purification": "proto_mc_albedo_solar_isotoma",
     "proto_mc_fischl_sinful_hex": "proto_mc_fischl_nightrider",
     "proto_mc_nicole_ladder_of_ascent": "proto_mc_nicole_revelation",
@@ -120,36 +120,6 @@ def test_the_hand_off_is_the_identity_with_the_flag_off():
 
 
 # --- Albedo, Tectonic Tide (the Power; its row was cut 2026-10-01) -----------
-
-def test_albedo_pays_on_any_reaction_including_one_that_deals_nothing(overhaul):
-    state = _state()
-    state.player.powers[hexerei.TECTONIC_TIDE] = 4
-    _react(state, "anemo", "pyro")                  # a Swirl: no damage at all
-    assert [e["amount"] for e in _paid(state, "mc_tectonic_tide")] == [4]
-    _react(state, "hydro", "pyro")                  # a Vaporize
-    assert [e["amount"] for e in _paid(state, "mc_tectonic_tide")] == [4, 4]
-
-
-def test_albedo_hits_the_enemy_that_reacted_and_carries_no_element(overhaul):
-    state = _state()
-    state.enemies.append(make_enemy(hp=400, name="second"))
-    state.player.powers[hexerei.TECTONIC_TIDE] = 4
-    bystander = state.enemies[1]
-    reactions.apply_aura(state, bystander, "cryo", "test")
-    reacted = _react(state, "anemo", "pyro", enemy=state.enemies[0])
-    paid = _paid(state, "mc_tectonic_tide")
-    assert [e["target"] for e in paid] == [reacted.name]
-    # NO ELEMENT: the 4 cannot consume the bystander's aura or start a second
-    # reaction. The Swirl above spread Pyro to it, so it is carrying one.
-    assert bystander.aura is not None
-
-
-def test_albedo_is_silent_with_the_flag_off():
-    state = _state()
-    state.player.powers[hexerei.TECTONIC_TIDE] = 4
-    _react(state, "hydro", "pyro")
-    assert not _paid(state, "mc_tectonic_tide")
-
 
 # --- Sucrose, Mollis Favonius ------------------------------------------------
 
@@ -337,14 +307,14 @@ def test_nicole_is_silent_with_the_flag_off():
 # --- everyone else is unchanged ----------------------------------------------
 
 def test_no_rule_here_fires_without_its_own_power(overhaul):
-    """The arm is ON and Klee holds none of the four: a reaction and a card
+    """The arm is ON and Klee holds none of the three: a reaction and a card
     play must move nothing this slice owns."""
     state = _state()
     _react(state, "hydro", "pyro")
     _react(state, "electro", "cryo")
     hexerei.note_card_played(
         state, loader.peek_card("proto_mc_sucrose_astable"))
-    for event in ("mc_tectonic_tide", "mc_mollis_favonius", "mc_sinful_hex",
+    for event in ("mc_mollis_favonius", "mc_sinful_hex",
                   "mc_ladder_of_ascent"):
         assert not _paid(state, event), event
 
@@ -354,7 +324,6 @@ def test_the_arms_other_reaction_readers_still_get_their_event(overhaul):
     replacement: Dahlia's Block and the Swirl counter must be untouched."""
     state = _state()
     state.player.powers["mc_favonian_favor"] = 3
-    state.player.powers[hexerei.TECTONIC_TIDE] = 4
     before = state.player.block
     _react(state, "anemo", "pyro")
     assert state.player.block == before + 3

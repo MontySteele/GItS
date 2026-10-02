@@ -121,14 +121,8 @@ def test_the_engine_still_names_the_morning():
     accessors keep the word, because renaming them would move a rule while
     pretending to move a sentence."""
     # R276 took both spellings off the SHEET (Tide Wall and Well Laid were
-    # re-aimed), and the engine keeps them registered.
-    plan = (REPO / "tier0" / "engine" / "kokomi_plan.py").read_text(
-        encoding="utf-8")
-    assert "block_per_plan_this_morning" in plan
-    engine = (REPO / "tier0" / "engine" / "effects.py").read_text(
-        encoding="utf-8")
-    assert "plans_carried_out_this_morning" in engine
-
+    # re-aimed); legacy cleanup stage 5 took their ops out of the engine. The
+    # counter and its accessor stay: Tide Chart's promise reads them.
     state = (REPO / "tier0" / "engine" / "state.py").read_text(encoding="utf-8")
     assert "kk_plans_this_morning" in state
 

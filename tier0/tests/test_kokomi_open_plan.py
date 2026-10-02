@@ -135,7 +135,7 @@ def test_a_now_line_writes_no_rider(overhaul):
     entry = st.kk_plan_queue.pop(0)
     entry.line = "now"
     wrote = kokomi_plan._resolve_entry(st, entry, why="test")
-    assert wrote == (False, False, 0)
+    assert wrote == (False, False)
     assert st.enemies[0].hp < 200
 
 

@@ -196,17 +196,7 @@ internal static class CompanionHexerei
     {
         if (dealer == null) return;
 
-        // NC-1 for all three: power-sourced DAMAGE runs the pipeline.
-        foreach (var tide in dealer.Powers.OfType<TectonicTidePower>().ToList())
-        {
-            if (target.IsDead) break;
-            // NO ELEMENT -- the card names none, the same call Solar Isotoma
-            // (the Universal this stands in for) already made, so it can
-            // neither consume an aura nor start a second reaction.
-            await InazumaCompanion.DealUnelemented(
-                choiceContext, target, (int)tide.Amount, dealer);
-        }
-
+        // NC-1: power-sourced DAMAGE runs the pipeline.
         if (DamagingReactions.Contains(reaction))
         {
             foreach (var gust in
@@ -233,35 +223,6 @@ internal static class CompanionHexerei
                 choiceContext, victim, Element.Electro, hex.Amount, dealer);
         }
     }
-}
-
-/// <summary>
-/// Albedo, Tectonic Tide: "Whenever a reaction happens, deal 4 damage to that
-/// enemy."
-///
-/// ANY reaction, exactly as Dahlia's Favonian Favor counts any; the card names
-/// none. The stack is the DAMAGE, so a second copy pays twice, and the printed
-/// number is the row's -- which is what lets the Prototype-stage upgrade rule
-/// move it.
-///
-/// THE POWER HOOKS NOTHING. It is read at the one reaction site
-/// (<see cref="CompanionHexerei.OnReaction"/>), which is
-/// <see cref="BinaryFormWhitePower"/>'s argument for its own shape: a power
-/// whose whole job is to be present and countable does not need a broadcast.
-/// </summary>
-public sealed class TectonicTidePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Tectonic Tide"),
-        ("description",
-            "Whenever an [gold]Elemental Reaction[/gold] happens, deal "
-          + "[blue]{Amount}[/blue] damage to that enemy."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary>

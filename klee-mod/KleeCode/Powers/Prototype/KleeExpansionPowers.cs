@@ -26,8 +26,7 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// Playdate: "The next Companion card you play this turn costs 1 less."
-/// <c>NextCompanionDiscountPower</c>'s construction (Kokomi's Rally), under
-/// Klee's own name and Klee's own reading of a Companion card
+/// A cost-seam discount under Klee's own reading of a Companion card
 /// (<see cref="KleeExpansion.IsCompanionCard"/>). EACH COPY IS 1 OFF THE SAME
 /// NEXT CARD: two Playdates are two sentences about one card, so the discount
 /// is the stack and the whole stack is spent on it. Expires at the end of the
@@ -388,38 +387,6 @@ public sealed class SitTightPower : PowerModel, ILocalizationProvider
         {
             await CreatureCmd.GainBlock(Owner, amount, ValueProp.Unpowered, null);
         }
-    }
-}
-
-/// <summary>
-/// Friendship Bracelet: "Whenever you play a Companion card, your largest Bomb
-/// grows by 3." One growth per play, on the one reading of "your largest
-/// Bomb" the arm has (<see cref="ProtoBombPower.GrowLargest"/>).
-/// </summary>
-public sealed class FriendshipBraceletPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Friendship Bracelet"),
-        ("description",
-            "Whenever you play a [gold]Companion[/gold] card, your largest "
-          + "[gold]Bomb[/gold] grows by [blue]{Amount}[/blue]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        if (Owner == null) return Task.CompletedTask;
-        if (cardPlay.Card?.Owner?.Creature != Owner) return Task.CompletedTask;
-        if (!KleeExpansion.IsCompanionCard(cardPlay.Card))
-        {
-            return Task.CompletedTask;
-        }
-        ProtoBombPower.GrowLargest(Owner, Amount);
-        return Task.CompletedTask;
     }
 }
 

@@ -214,14 +214,6 @@ def test_the_long_game_pays_on_exactly_one_waiting(overhaul):
     assert st.player.energy == 4
 
 
-def test_the_all_streams_gift_dies_with_the_turn(overhaul):
-    st = kokomi_state()
-    kokomi_plan.all_streams(st)
-    assert st.kk_next_plan_extra == 0
-    kokomi_plan.roll_turn(st)
-    assert st.kk_next_plan_extra is None
-
-
 # --- Tide Control ---------------------------------------------------------------
 
 def test_drowning_pressure_counts_distinct_debuffs_not_auras(overhaul):

@@ -1223,7 +1223,7 @@ CO_TENANCY_LEDGER = {
         ("Powers/Prototype/KleeExpansionPowers.cs", "PlaydatePower"):
             "QUARANTINED (the Klee overhaul, R276). Playdate's discount "
             "expiring at the end of the turn that wrote it, "
-            "NextCompanionDiscountPower's shape and boundary exactly. Removes "
+            "CompanionCostThisTurnPower's boundary. Removes "
             "itself and touches nothing a co-tenant reads",
         ("Powers/Prototype/KleeExpansionPowers.cs", "BoomBadgePower"):
             "QUARANTINED (the Klee overhaul, R276). Boom Badge's replay grant "
@@ -1243,33 +1243,13 @@ CO_TENANCY_LEDGER = {
             "turn on 2026-09-25) -- the sim's order in "
             "klee_overhaul.turn_end",
         ("Powers/Prototype/KokomiOverhaulPowers.cs",
-         "NextCompanionDiscountPower"):
-            "QUARANTINED (the Kokomi overhaul, draft 6). Rally's grant, "
-            "expiring at the end of the turn that wrote it -- the ratified "
-            "same-turn boundary (FLAG-1 / R114), and the identical shape and "
-            "broadcast as CompanionCostThisTurnPower and "
-            "ReplayNextCompanionPower below. Removes itself and touches "
-            "nothing else",
-        ("Powers/Prototype/KokomiOverhaulPowers.cs",
-         "NextAttackDamagePower"):
-            "QUARANTINED (the Kokomi overhaul, `EB-655`/`EB-668`). Battle "
-            "Plan's rider, beside Rally's grant above and on the same "
-            "same-turn boundary. Removes itself and touches nothing else, so "
-            "it shares no resource with any co-tenant and its order among "
-            "them cannot matter",
-        ("Powers/Prototype/KokomiOverhaulPowers.cs",
          "FirstAttackTwicePower"):
             "QUARANTINED (the Kokomi overhaul, R276). Pincer's carry-out, "
-            "\"this turn\", on NextAttackDamagePower's boundary above. "
+            "\"this turn\", on the same-turn boundary (FLAG-1 / R114). "
             "Removes itself and touches nothing else",
         ("Powers/Prototype/KokomiOverhaulPowers.cs",
          "FirstCardFreePower"):
             "QUARANTINED (the Kokomi overhaul, R276). Stolen Chapter's "
-            "carry-out, \"this turn\", on the same boundary. Removes itself "
-            "and touches nothing else",
-        ("Powers/Prototype/KokomiOverhaulPowers.cs",
-         "FirstCompanionFreePower"):
-            "QUARANTINED (the Kokomi overhaul, core pass). Chain of Command's "
             "carry-out, \"this turn\", on the same boundary. Removes itself "
             "and touches nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):

@@ -59,58 +59,6 @@ public class KokomiCorePassTests
 
     // ---- Song of Pearls: the empty-queue payoff ---------------------------
 
-    [Fact]
-    public void Song_of_pearls_reads_the_queue_before_the_drain_and_fires_after()
-    {
-        // "If no Plan waits" is the queue read just before ResolveAll empties
-        // it, so a morning that carried a Plan out never also fires it.
-        var calls = Il.CallSequence(
-            Il.Method("ProtoBakeKuragePower", "AfterPlayerTurnStart")).ToList();
-        var read = calls.FindIndex(c => c.Contains("KokomiPlan.PlansHeld"));
-        var drain = calls.FindIndex(c => c.Contains("KokomiPlan.ResolveAll"));
-        var strike = calls.FindIndex(c => c.Contains("SongOfPearlsPower.Strike"));
-        Assert.True(read >= 0 && drain > read && strike > drain);
-    }
-
-    [Fact]
-    public void Song_of_pearls_strikes_all_enemies_as_a_planned_hit()
-    {
-        // Hydro, unpowered, her Strength folded in by the same door a Plan's
-        // damage takes -- and it is off the plan bus now.
-        var calls = Il.CallSequence(Il.Method("SongOfPearlsPower", "Strike"))
-            .ToList();
-        var fold = calls.FindIndex(c => c.Contains("KokomiPlan.Hers"));
-        var deal = calls.FindIndex(c => c.Contains("ElementalHit.Deal"));
-        Assert.True(fold >= 0 && deal > fold);
-        Assert.Contains(calls, c => c.Contains("get_HittableEnemies"));
-        Assert.False(typeof(IKokomiPlanListener)
-            .IsAssignableFrom(typeof(SongOfPearlsPower)));
-    }
-
-    [Fact]
-    public void Song_of_pearls_counts_her_strength_and_stacks()
-    {
-        var seat = Seat.Kokomi().WithPower<StrengthPower>(2);
-        Assert.Equal(6, KokomiPlan.Hers(seat.Creature, null, 4));
-        Assert.Equal(4, KokomiPlan.Hers(Seat.Kokomi().Creature, null, 4));
-        // Two copies are one power at 8: the amount stacks.
-        Assert.Equal(PowerStackType.Counter, new SongOfPearlsPower().StackType);
-        // An empty queue is what the read sees on a fresh seat.
-        Assert.Equal(0, KokomiPlan.PlansHeld(Seat.Kokomi().Creature));
-    }
-
-    [Fact]
-    public void Song_of_pearls_card_is_cut_and_its_power_stays()
-    {
-        // The cleanup pass (2026-09-29) cut the card; the power stays
-        // registered with nothing granting it, as Tide Chart's pay did.
-        Assert.DoesNotContain(typeof(SongOfPearlsPower).Assembly.GetTypes(),
-                              t => t.Name == "ProtoKkSongOfPearls");
-        Assert.DoesNotContain(
-            Il.CallSequence(Il.Method("KokomiOverhaulRoster", "Slice")),
-            c => c.Contains("SongOfPearls"));
-    }
-
     // ---- Treatise: the now-line payoff ------------------------------------
 
     [Fact]
@@ -143,28 +91,6 @@ public class KokomiCorePassTests
     }
 
     // ---- Chain of Command: the Plan buys a free Companion -----------------
-
-    [Fact]
-    public void The_free_companion_zeroes_a_companion_and_nothing_else()
-    {
-        var seat = Seat.Kokomi().WithPower<FirstCompanionFreePower>(1);
-        var power = seat.Creature.Powers.OfType<FirstCompanionFreePower>()
-            .Single();
-        var friend = Owned<ProtoMcDionaIcyPaws>(seat);          // a Companion
-        Assert.True(power.TryModifyEnergyCostInCombat(friend, 2m, out var cost));
-        Assert.Equal(0m, cost);
-        var own = Owned<ProtoKkVanguard>(seat);                 // her own card
-        Assert.False(power.TryModifyEnergyCostInCombat(own, 1m, out _));
-        Assert.False(power.TryModifyEnergyCostInCombat(friend, 0m, out _));
-
-        var spent = Il.Calls(Il.Method("FirstCompanionFreePower",
-                                       "AfterCardPlayed"));
-        Assert.Contains(spent, c => c.Contains("get_IsAutoPlay"));
-        Assert.Contains(spent, c => c.Contains("PowerCmd.Remove"));
-        Assert.Contains(Il.Calls(Il.Method("FirstCompanionFreePower",
-                                           "AfterSideTurnEnd")),
-                        c => c.Contains("PowerCmd.Remove"));
-    }
 
     // ---- the five rewritten faces -----------------------------------------
 

@@ -79,7 +79,6 @@ public class KokomiPoolPassFourTests
         // `test_scout_ahead_counts_the_plans_that_follow_it`,
         // `test_scout_ahead_pays_second_waves_doubled_carry_out_twice`.
         var source = Source("KokomiPlan", power: true);
-        Assert.Contains("var scoutRate = 0;", source);
         Assert.Contains("var drainPlans = due.Count", source);
 
         // CARRY-OUTS AND NOT ENTRIES (`EB-501`, `EB-709`). Seen to FAIL

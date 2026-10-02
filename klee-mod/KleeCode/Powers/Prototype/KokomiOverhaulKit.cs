@@ -20,43 +20,6 @@ namespace KleeMod.Powers;
 /// </summary>
 public static class KokomiOverhaulKit
 {
-    /// <summary>
-    /// Rally: "The next Companion card you play this turn costs 1 less."
-    ///
-    /// ONE STACK, ALWAYS. The grant is a switch, not a counter -- two Rallies
-    /// in one turn do not make the next Companion cost two less, because the
-    /// card says "costs 1 less" and not "costs 1 less per Rally" -- so this
-    /// applies at 1 whether or not the power is already there, and
-    /// <see cref="NextCompanionDiscountPower"/> removes itself on the play that
-    /// spends it.
-    /// </summary>
-    public static async Task NextCompanionDiscount(
-        PlayerChoiceContext choiceContext, Creature? kokomi, CardModel? cardSource)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (kokomi!.Powers.OfType<NextCompanionDiscountPower>().Any()) return;
-        await PowerCmd.Apply<NextCompanionDiscountPower>(
-            choiceContext, kokomi, 1, applier: kokomi, cardSource: cardSource);
-    }
-
-    /// <summary>
-    /// Battle Plan's carry-out (`EB-655`, `EB-668`): "the next Attack you play
-    /// face-up this turn deals 4 additional damage."
-    ///
-    /// ONE STACK, ALWAYS, on <see cref="NextCompanionDiscount"/>'s terms and
-    /// for its reason: the face says "deals 4 additional damage" and not "per Plan",
-    /// so a morning that carries out two Battle Plans buffs one Attack.
-    /// <see cref="NextAttackDamagePower"/> removes itself on the face-up
-    /// Attack that spends it, and at the end of the turn either way.
-    /// </summary>
-    public static async Task NextAttackDamage(
-        PlayerChoiceContext choiceContext, Creature? kokomi, CardModel? cardSource)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (kokomi!.Powers.OfType<NextAttackDamagePower>().Any()) return;
-        await PowerCmd.Apply<NextAttackDamagePower>(
-            choiceContext, kokomi, 1, applier: kokomi, cardSource: cardSource);
-    }
 
     /// <summary>
     /// PINCER's carry-out (R276): "This turn, your first Attack is played
@@ -82,19 +45,6 @@ public static class KokomiOverhaulKit
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         if (kokomi!.Powers.OfType<FirstCardFreePower>().Any()) return;
         await PowerCmd.Apply<FirstCardFreePower>(
-            choiceContext, kokomi, 1, applier: kokomi, cardSource: null);
-    }
-
-    /// <summary>
-    /// CHAIN OF COMMAND's carry-out (Kokomi core pass): "the first Companion
-    /// card you play costs 0." ONE STACK, ALWAYS, Stolen Chapter's reason.
-    /// </summary>
-    public static async Task FirstCompanionFree(
-        PlayerChoiceContext choiceContext, Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (kokomi!.Powers.OfType<FirstCompanionFreePower>().Any()) return;
-        await PowerCmd.Apply<FirstCompanionFreePower>(
             choiceContext, kokomi, 1, applier: kokomi, cardSource: null);
     }
 
@@ -203,8 +153,7 @@ public static class KokomiOverhaulKit
     /// <summary>
     /// What the Tokoyo Returns: "Put Open the Casket from your Exhaust Pile
     /// into your Hand." The FIRST one there; none there, nothing happens.
-    /// <c>CardPileCmd.Add</c> to the hand is the door Second Thoughts' return
-    /// takes (<see cref="KokomiPlan.CancelLast"/>).
+    /// <c>CardPileCmd.Add</c> to the hand is the move.
     /// </summary>
     public static async Task FetchOpenCasket(
         PlayerChoiceContext choiceContext, Creature? kokomi)

@@ -1502,8 +1502,8 @@
    upgrade: {damage: 2}}
 
 # SECOND THOUGHTS IS CUT (the Kokomi payoff pass, 2026-10-01; main session: "an undo
-# button, and an undo is a dead draw"). The `cancel_last_plan` op stays
-# registered with no row spelling it, the way `redirect_queued_plans` did.
+# button, and an undo is a dead draw"). Its `cancel_last_plan` op left with legacy
+# cleanup stage 5.
 
 # CONVERGING TIDE IS RETIRED (POOL PASS THREE, `EB-655`); the
 # `redirect_queued_plans` op stays registered with no row spelling it, the way

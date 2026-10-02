@@ -303,69 +303,8 @@ public class KokomiCasketPassTests : IDisposable
     }
 
     [Fact]
-    public void The_uncommons_and_the_rare()
-    {
-        var returns = new ProtoKkWhatTheTokoyoReturns();
-        Assert.Equal(1, returns.EnergyCost.Canonical);
-        Assert.Contains(CardKeyword.Exhaust, returns.Keywords);
-        Assert.Equal(0, Upgraded<ProtoKkWhatTheTokoyoReturns>().EnergyCost
-            .GetWithModifiers(CostModifiers.None));
-        Assert.Contains(Il.Calls(Il.Method("ProtoKkWhatTheTokoyoReturns", "OnPlay")),
-                        c => c.Contains("KokomiOverhaulKit.FetchOpenCasket"));
-        Assert.Contains(Il.Calls(Il.Method("KokomiOverhaulKit", "FetchOpenCasket")),
-                        c => c.Contains("CardPileCmd.Add"));
-
-        var judgment = new ProtoKkDepthsJudgment();
-        Assert.Equal(2, judgment.EnergyCost.Canonical);
-        Assert.Equal(0m, Var(judgment, "CalculationBase"));
-        Assert.Equal(3m, Var(judgment, "ExtraDamage"));
-        Assert.Equal(4m, Var(Upgraded<ProtoKkDepthsJudgment>(), "ExtraDamage"));
-        Assert.Contains("{CalculatedDamage:diff()}", Face(judgment));
-
-        var turn = new ProtoKkTideturn();
-        Assert.Equal(4m, Var(turn, "ExtraDamage"));
-        Assert.Equal(5m, Var(Upgraded<ProtoKkTideturn>(), "ExtraDamage"));
-
-        // Moon Signal left the pool in the status batch (2026-10-01); its
-        // power and threshold stay registered.
-        Assert.Equal(2, KokomiOverhaulLaw.MoonSignalThreshold);
-
-        var current = new ProtoKkPearlCurrent();
-        Assert.Equal(2m, current.DynamicVars.Damage.BaseValue);
-        var currentPlan = current.PlanClauses.Single();
-        Assert.Equal((2, 3, KokomiPlan.Aim.AllEnemies),
-                     (currentPlan.Amount, currentPlan.Times, currentPlan.Aim));
-        var currentUp = Upgraded<ProtoKkPearlCurrent>();
-        Assert.Equal(3m, currentUp.DynamicVars.Damage.BaseValue);
-        Assert.Equal(3, currentUp.PlanClauses.Single().Amount);
-
-        var took = new ProtoKkWhatTheTokoyoTook();
-        Assert.Equal(CardRarity.Rare, took.Rarity);
-        Assert.Equal(2, took.EnergyCost.Canonical);
-        Assert.Contains(CardKeyword.Exhaust, took.Keywords);
-        Assert.Equal(1, Upgraded<ProtoKkWhatTheTokoyoTook>().EnergyCost
-            .GetWithModifiers(CostModifiers.None));
-        Assert.Contains(Il.Calls(Il.Method("ProtoKkWhatTheTokoyoTook", "OnPlay")),
-                        c => c.Contains("KokomiOverhaulKit.DoubleCasket"));
-    }
-
-    [Fact]
-    public void Moon_signal_reads_the_queue_before_the_morning_drains_it()
-    {
-        // "If 2 or more Plans are waiting" could never be true after a drain
-        // empties the queue, so the read is taken first and handed in.
-        var turn = Seq("ProtoBakeKuragePower", "AfterPlayerTurnStart");
-        var read = turn.FindIndex(c => c.Contains("KokomiPlan.PlansHeld"));
-        var signal = turn.FindIndex(c => c.Contains("MoonSignalPower.Signal"));
-        var drain = turn.FindIndex(c => c.Contains("KokomiPlan.ResolveAll"));
-        Assert.True(read >= 0 && signal > read && drain > signal);
-    }
-
-    [Fact]
     public void A_plan_can_gain_the_casket()
     {
-        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "ResolveOne")),
-                        c => c.Contains("KokomiOverhaulKit.GainCasket"));
         KokomiOverhaulLedger.ResetAll();
         var seat = Seat.Kokomi();
         KokomiOverhaulKit.GainCasket(seat.Creature, 2);

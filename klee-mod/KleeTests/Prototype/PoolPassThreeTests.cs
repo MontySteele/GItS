@@ -76,27 +76,6 @@ public class PoolPassThreeTests
         Assert.Empty(Vars(card));
     }
 
-    // ---- Split Charge: the bridge -----------------------------------------
-
-    [Fact]
-    public void Split_charge_takes_one_charge_and_places_two()
-    {
-        // STRUCTURAL for the same reason: both halves land through
-        // `PowerCmd.Apply`. What is pinned is that the row REMOVES exactly one
-        // charge (`TakeAt`, not `TakeAll`) and rolls a destination per half
-        // off the combat RNG -- the independent roll that lets both halves
-        // land on one enemy, which is the row's printed losing line. Twins:
-        // `test_split_charge_halves_the_largest_bomb`,
-        // `test_split_charge_leaves_the_smaller_piles_alone`.
-        var calls = Il.Calls(Il.Method("ProtoBombPower", "SplitLargest"));
-
-        Assert.Contains(calls, c => c.Contains("LargestCharge"));
-        Assert.Contains(calls, c => c.Contains("TakeAt"));
-        Assert.DoesNotContain(calls, c => c.Contains("TakeAll"));
-        Assert.Contains(calls, c => c.Contains("NextItem"));
-        Assert.Contains(calls, c => c.Contains("ProtoBombPower.Place"));
-    }
-
     // ---- Fireworks Show: Set off ALL, at a price the upgrade cuts ----------
 
     [Fact]
@@ -125,16 +104,14 @@ public class PoolPassThreeTests
     public void Tinder_toss_sets_off_all_enemies_and_then_hits_them_all()
     {
         // `EB-749` (R271 sec.5.3): Tinder Toss took Fireworks Show's slot in
-        // the ruling that cut that row. `SetOffAll` with the aura filter OFF
-        // and a literal 0 for the card's own hit -- Flame Dance's spelling on
+        // the ruling that cut that row. `SetOffAll` with a literal 0 for the card's own hit -- Flame Dance's spelling on
         // every enemy -- and then the printed 3 to all, IN THAT ORDER, which
         // is the rule and not an implementation detail. Because it HAS a line
         // of its own it is not `EB-261`-gated and does not refuse a bare
         // board.
         var source = Printed("Cards/Prototype/Generated/ProtoKoTinderToss.cs");
         var setOff = source.IndexOf("ProtoBombPower.SetOffAll(choiceContext, "
-                                    + "Owner.Creature, this, cardPlay, 0, "
-                                    + "nonPyroAuraOnly: false)",
+                                    + "Owner.Creature, this, cardPlay, 0)",
                                     System.StringComparison.Ordinal);
         var hit = source.IndexOf("TargetingAllOpponents",
                                  System.StringComparison.Ordinal);

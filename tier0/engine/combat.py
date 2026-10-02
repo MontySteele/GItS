@@ -390,33 +390,11 @@ def card_cost(state: CombatState, card: Card) -> int:
                               * state.discards_this_turn))
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
-    # QUARANTINED (C.KOKOMI_OVERHAUL). Rally: "the next Companion card you play
-    # this turn costs 1 less." SUBTRACTIVE and floored, beside the accumulator
-    # above because it is the same kind of thing -- and NOT a zeroing, which is
-    # draft 6's change from draft 2's Vanguard ("costs 1 less" would be a
-    # different card on an expensive Companion). The number is the rule's, not
-    # the card's: `C.KOKOMI_OVERHAUL_RALLY_DISCOUNT`, mirrored by value against
-    # `NextCompanionDiscountPower.Discount`.
-    #
-    # THIS SITE IS PURE. The grant is consumed by the next Companion RESOLVING
-    # (`_finish_play`), never by being priced, so `card_playable` may ask as
-    # often as it likes -- the same contract Mika's discount one block down
-    # keeps.
-    if (C.KOKOMI_OVERHAUL and card.is_companion
-            and state.player.powers.get(
-                kokomi_plan.NEXT_COMPANION_DISCOUNT, 0)):
-        cost = max(0, cost - C.KOKOMI_OVERHAUL_RALLY_DISCOUNT)
     # QUARANTINED (C.KOKOMI_OVERHAUL). R276, STOLEN CHAPTER's carry-out: "This
-    # turn, the first card you play costs 0." PURE here, like Rally's line
-    # above; `play_card` spends it. `FirstCardFreePower` is the C# twin.
+    # turn, the first card you play costs 0." PURE here; `play_card`
+    # spends it. `FirstCardFreePower` is the C# twin.
     if (C.KOKOMI_OVERHAUL
             and state.player.powers.get(kokomi_plan.FIRST_CARD_FREE, 0)):
-        cost = 0
-    # Kokomi core pass, CHAIN OF COMMAND's carry-out: the same, for the first
-    # Companion card. `FirstCompanionFreePower` is the C# twin.
-    if (C.KOKOMI_OVERHAUL and card.is_companion
-            and state.player.powers.get(
-                kokomi_plan.FIRST_COMPANION_FREE, 0)):
         cost = 0
     # QUARANTINED (R276): Playdate's discount on the next Companion card.
     # `PlaydatePower.TryModifyEnergyCostInCombat`'s twin; 0 with the arm off.
@@ -543,8 +521,6 @@ def play_card(state: CombatState, card: Card) -> None:
     if C.KOKOMI_OVERHAUL:
         # R276. Stolen Chapter's switch is spent by the first card paid for.
         kokomi_plan.spend_first_card_free(state, card)
-        # Core pass: Chain of Command's, by the first Companion paid for.
-        kokomi_plan.spend_first_companion_free(state, card)
     if card.encore_cost:
         # Gated playable -- the "Spend N Encore:" cost line, which is a
         # different sink from the spend_encore OP and is kept apart in the
@@ -669,7 +645,6 @@ def _finish_play(state: CombatState, card: Card,
     # incremented below.
     if C.KOKOMI_OVERHAUL:
         kokomi_plan.note_companion_played(state, card)
-        kokomi_plan.spend_companion_discount(state, card)
         # `EB-668`: BATTLE PLAN'S RIDER IS NOT SPENT HERE. It is damage, so it
         # has to survive until `flat_attack_bonus` has read it --
         # `effects._resolve_card_bound` spends it one line after that read,
@@ -1151,22 +1126,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # reason: a planned hit can drop a phased boss, and Mend cannot kill her
     # but a reaction the hit causes can move the board under the loop.
     if C.KOKOMI_OVERHAUL:
-        # Core pass, SONG OF PEARLS: "if no Plan waits" is the queue read
-        # here, just before the drain empties it, so a morning that carried a
-        # Plan out does not also fire it. `ProtoBakeKuragePower` reads the
-        # same queue at the same point.
-        quiet = not state.kk_plan_queue
         # THE CASKET PASS (2026-09-28). The relic's token lands on turn one,
-        # and MOON SIGNAL reads "2 or more Plans waiting" off the same
-        # pre-drain queue Song of Pearls reads -- after the drain it could
-        # never be true. `ProtoBakeKuragePower.AfterPlayerTurnStart` and
+        # before the drain. `ProtoBakeKuragePower.AfterPlayerTurnStart` and
         # `TamakushiCasket.BeforeHandDraw` are the twins.
         kokomi_plan.deal_open_the_casket(state)
-        kokomi_plan.moon_signal(state, len(state.kk_plan_queue))
         # THE EXPANSION's The Long Game, off the same pre-drain queue.
         kokomi_plan.long_game(state, len(state.kk_plan_queue))
         kokomi_plan.resolve_all(state)
-        kokomi_plan.song_of_pearls(state, quiet)
         # `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning
         # and before anything else reads the hand: the face says "after the
         # Bake-Kurage carries out its Plans, draw 1 card for each", so the
@@ -1394,21 +1360,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # turn -- the same shape X11's errata hit, and the same shape the X1 pin
     # still reports. That loop is governed by the X2 rarity law (R109).
     state.companion_cost_delta_this_turn = 0
-    # QUARANTINED (C.KOKOMI_OVERHAUL). RALLY'S GRANT DIES WITH ITS TURN, on the
-    # same boundary and for the same ratified reason the two above take: the
-    # card says "the next Companion card you play THIS TURN". Its C# twin is
-    # `NextCompanionDiscountPower.AfterSideTurnEnd`, the same removal on the
-    # same side turn end.
-    state.player.powers.pop(kokomi_plan.NEXT_COMPANION_DISCOUNT, None)
-    # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-655`. BATTLE PLAN'S RIDER DIES WITH
-    # ITS TURN, beside Rally's and for its reason: the clause says "this turn".
-    # Its C# twin is `NextAttackDamagePower.AfterSideTurnEnd`.
-    state.player.powers.pop(kokomi_plan.NEXT_ATTACK_BONUS, None)
     # QUARANTINED (C.KOKOMI_OVERHAUL). R276: Pincer's and Stolen Chapter's
     # switches say "this turn" and die with it, on the same boundary.
     state.player.powers.pop(kokomi_plan.FIRST_ATTACK_TWICE, None)
     state.player.powers.pop(kokomi_plan.FIRST_CARD_FREE, None)
-    state.player.powers.pop(kokomi_plan.FIRST_COMPANION_FREE, None)
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never

@@ -126,10 +126,6 @@ public static class KokomiOverhaulLaw
     /// Mirrors <c>C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT</c>.</summary>
     public const int CasketStrengthPerPoint = 1;
 
-    /// <summary>Moon Signal's "if 2 or more Plans are waiting". Mirrors
-    /// <c>C.KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD</c>.</summary>
-    public const int MoonSignalThreshold = 2;
-
     /// <summary>The Long Game's "if exactly one Plan is waiting". Mirrors
     /// <c>C.KOKOMI_EXPANSION_LONG_GAME_WAITING</c>.</summary>
     public const int LongGameWaiting = 1;

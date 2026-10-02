@@ -406,21 +406,6 @@ def test_the_rare_power_takes_the_engine_credit():
         draft.STATIC_POWER_ENGINE_VALUE / card.cost)
 
 
-def test_damage_per_companion_last_turn_prices_against_one_companion():
-    """The neutral single-unit estimate every live count in the file takes,
-    off `damage_per_companion_last_turn` directly. Synthetic rather than
-    Chain of Command (`test_chain_of_command_sums_its_now_line_and_its_plan`
-    covers the real row): `R250` pick 1 gave it a now-line of its own, whose
-    separate price this test has no business depending on."""
-    card = Card(id="proto_kk_t_per_companion", name="t", cost=1, type="skill",
-                effects=[],
-                plan=[{"op": "damage_per_companion_last_turn", "amount": 6,
-                       "target": "front_enemy"}])
-    per_companion = card.plan[0]["amount"]
-    assert draft._static_power(card) == (
-        per_companion * C.PLAN_DELAY_DISCOUNT / card.cost)
-
-
 def test_the_arm_has_no_unpriced_verb_left():
     """Every verb in the arm's index answers, and none of them answers with the
     blanket zero this row replaced."""

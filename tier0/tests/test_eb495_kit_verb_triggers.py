@@ -240,9 +240,8 @@ def test_the_hp_loss_cap_runs_at_the_one_place_the_game_runs_it():
 #: absence is spelled rather than folded away.
 SIM_CALL_SITES = {
     ('companion_hexerei.py', 1): ("'companion'", None, 'None'),
-    ('companion_hexerei.py', 2): ("'companion'", None, 'None'),
-    ('companion_hexerei.py', 3): ("'companion'", None, "'electro'"),
-    ('companion_hexerei.py', 4): ("'companion'", None, 'element'),
+    ('companion_hexerei.py', 2): ("'companion'", None, "'electro'"),
+    ('companion_hexerei.py', 3): ("'companion'", None, 'element'),
     ('effects.py', 1): ("'bomb'", None, 'bomb.element'),
     ('effects.py', 2): ('source', None, 'element'),
     ('effects.py', 3): ("'salon_final_bow'", None, "'hydro'"),
@@ -316,11 +315,8 @@ SIM_CALL_SITES = {
     # POOL COMPLETION (2026-10-01): Sea's Reproach's answer to a Weak or a
     # Vulnerable, dealt as Tidal Riposte's is.
     ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
-    # Kokomi core pass: Song of Pearls' strike, dealt as a planned hit is.
-    # (The Casket's strike sat between these two until the Casket pass.)
-    ('kokomi_plan.py', 3): ("'plan'", 'False', "'hydro'"),
     # Expansion batch one: Tidal Riposte's answer, dealt as a planned hit is.
-    ('kokomi_plan.py', 4): ("'plan'", 'False', "'hydro'"),
+    ('kokomi_plan.py', 3): ("'plan'", 'False', "'hydro'"),
     # VARKA, THE OATH REWORK (`varka_oath`, no switch). The expansion's
     # (2026-10-01) Cycle of Seasons and Assembly at the Cathedral: a Power's
     # damage, element-less and unpowered.

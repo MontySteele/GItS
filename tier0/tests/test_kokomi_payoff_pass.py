@@ -59,8 +59,7 @@ def test_the_pass_cuts_second_thoughts_and_adds_two_uncommons(overhaul):
     assert "proto_kk_second_thoughts" not in ids
     assert "proto_kk_second_thoughts" not in {
         c.id for c in loader.prototype_cards()}
-    # The cancel op stays registered: All Streams' give-back shares its door.
-    assert callable(kokomi_plan.cancel_last_plan)
+    assert not hasattr(kokomi_plan, "cancel_last_plan")
     for cid in C.KOKOMI_PAYOFF_PASS_IDS:
         assert _row(cid).rarity == "uncommon"
     assert _row("proto_kk_kurage_canopy").cost == 1

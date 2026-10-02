@@ -110,22 +110,12 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
     {
         if (Owner == null || player.Creature != Owner) return;
         if (!KokomiOverhaul.LiveFor(Owner)) return;
-        // Kokomi core pass, SONG OF PEARLS: "if no Plan waits" is the queue
-        // read HERE, just before the drain empties it, so a morning that
-        // carried a Plan out does not also fire it. Sim twin: the `quiet`
-        // read in `combat._player_turn`.
+        // THE EXPANSION, BATCH ONE: The Long Game reads the queue HERE, just
+        // before the drain empties it, so a queue the morning is about to
+        // empty still counts.
         var waiting = KokomiPlan.PlansHeld(Owner);
-        var quiet = waiting == 0;
-        // THE CASKET PASS (2026-09-28), MOON SIGNAL: "if 2 or more Plans are
-        // waiting" is the same pre-drain read, so a queue the morning is about
-        // to empty still counts. Sim twin: `kokomi_plan.moon_signal`, called
-        // from `combat._player_turn` beside the `quiet` read.
-        MoonSignalPower.Signal(Owner, waiting);
-        // THE EXPANSION, BATCH ONE: The Long Game reads the same pre-drain
-        // queue.
         await TheLongGamePower.Signal(Owner, waiting, choiceContext);
         await KokomiPlan.ResolveAll(choiceContext, Owner);
-        if (quiet) await SongOfPearlsPower.Strike(choiceContext, Owner);
         // `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning:
         // its face is "Next turn, after the Bake-Kurage carries out its Plans,
         // draw 1 card for each", so the count it multiplies is the depth the

@@ -85,6 +85,23 @@ and about 390 Python arm-flag reads.
    flags-off world and its tests still load them; the twelve retired-arm
    rows; the codegen's spotlight wrap and `NotKitCard` filter; the
    `MetersByTurn` zero columns in `PlayTelemetry`.
+   **5b done, PR #PRNUM** (2026-10-01): the engine pieces only cut cards
+   used, in C#, the sim and the codegen (the two BACKLOG lines). Klee:
+   `SplitLargest` / `split_largest_bomb`, Flame Dance's non-Pyro Set off
+   filter, `FriendshipBraceletPower`, `TectonicTidePower`. Kokomi: eight Plan
+   kinds no row spelled (`DamagePerCompanionLastTurn`,
+   `BlockPerPlanThisMorning`, `DrawPerPlanAfter` and Scout Ahead's drain
+   rate, `NextAttackDamage`, `DamageIfUnhurt`, `AttackDamageThisTurn`,
+   `FirstCompanionFree`, `CasketGain`), their powers (Song of Pearls, Moon
+   Signal, Rally's discount, Battle Plan's rider, Chain of Command's free
+   Companion), the cancels and their give-back (`CancelLast`,
+   `CancelAllForNext`, `GiveBack`, `all_streams`), the morning-damage rider,
+   the second-number upgrade path, and the three rule constants (Moon Signal,
+   Rally, Battle Plan). No current card's behaviour moved; the regenerated
+   cards differ only in Tinder Toss and Windblume Fireworks dropping a
+   `nonPyroAuraOnly: false` argument. **Also for stage 6:** the codegen's
+   `KokomiRiderTips` branches (shipped-only, no prototype row reaches them)
+   and `KokomiPlan.NoteRider`, which no rider calls now.
 6. **Python flag removal and docs:** the arm-flag reads, `operations/
    prototype.md` and `codegen.md`, STATE's build paragraph, stale skills.
 

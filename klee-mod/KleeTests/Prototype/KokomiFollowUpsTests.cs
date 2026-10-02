@@ -34,26 +34,6 @@ public class KokomiFollowUpsTests : IDisposable
     public void Dispose() { }
 
     [Fact]
-    public void Both_cancels_give_the_card_back()
-    {
-        Assert.Contains("KokomiPlan.GiveBack",
-                        Il.Calls(Il.Method("KokomiPlan", "CancelLast")));
-        Assert.Contains("KokomiPlan.GiveBack",
-                        Il.Calls(Il.Method("KokomiPlan", "CancelAllForNext")));
-        Assert.Contains("CardPileCmd.Add",
-                        Il.Calls(Il.Method("KokomiPlan", "GiveBack")));
-    }
-
-    [Fact]
-    public void A_cancel_looks_in_the_exhaust_pile_too()
-    {
-        var piles = (PileType[])typeof(KokomiPlan)
-            .GetField("ReturnPiles", HeadlessGame.All)!.GetValue(null)!;
-        Assert.Equal(new[] { PileType.Discard, PileType.Exhaust, PileType.Draw },
-                     piles);
-    }
-
-    [Fact]
     public void A_moons_reflection_plan_gives_back_moons_reflection()
     {
         var found = new ProtoKkVanguard();

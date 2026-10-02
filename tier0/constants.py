@@ -905,7 +905,6 @@ KOKOMI_OVERHAUL = True
 # `KokomiOverhaulLaw` by `tools/lint_constant_parity.py`.
 KOKOMI_OVERHAUL_CASKET_PER_PLAN = 1            # added per carried-out Plan
 KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT = 1  # Open the Casket's rate
-KOKOMI_OVERHAUL_MOON_SIGNAL_THRESHOLD = 2      # Moon Signal: "2 or more Plans"
 # THE EXPANSION, BATCH ONE (2026-09-29): the rule number The Long Game
 # prints, "if exactly one Plan is waiting". Mirrored BY VALUE against
 # `KokomiOverhaulLaw` by `tools/lint_constant_parity.py`.
@@ -914,21 +913,6 @@ KOKOMI_EXPANSION_LONG_GAME_WAITING = 1
 # stack per exhausted status or curse. Mirrored BY VALUE against
 # `AbyssalSalvagePlusPower.BlockPerStack` by `tools/lint_constant_parity.py`.
 KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK = 2
-KOKOMI_OVERHAUL_RALLY_DISCOUNT = 1  # Rally: the next Companion costs this less
-# `EB-668` (`EB-655` reopened). Battle Plan's carry-out: "the next Attack you
-# play face-up this turn deals 4 additional damage." A RULE'S number and not a
-# card's, on exactly Rally's terms -- the card prints it, the power carries it,
-# and `NextAttackDamagePower.Bonus` is the C# mirror `lint_constant_parity`
-# compares BY VALUE.
-#
-# IT IS DAMAGE AND NOT A DISCOUNT because a discount could not be made to mean
-# the same thing in both engines: the mod's cost seam
-# (`TryModifyEnergyCostInCombat`) is handed a card and no `CardPlay`, so it
-# cannot ask whether the play was a WRITE onto the Bake-Kurage, while
-# `combat.card_cost` asks the pure `plan_aimed_at_pet` and charges full. A
-# rider applied at RESOLUTION is asked at the one moment both engines know the
-# answer.
-KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS = 4
 
 # THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards, in
 # the printed order. A REPLACEMENT and not a substitution list because every one

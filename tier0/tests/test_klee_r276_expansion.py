@@ -353,17 +353,6 @@ def test_tag_along_and_adventure_club_add_free_companions(overhaul):
     assert all(c.free_this_turn for c in state.player.hand)
 
 
-def test_friendship_bracelet_grows_the_largest_bomb_per_companion_play(
-        overhaul):
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    state.player.powers[klee_overhaul.FRIENDSHIP_BRACELET] = 3
-    klee_overhaul.place(state, enemy, 4)
-    klee_overhaul.note_card_played(state, friend())
-    klee_overhaul.note_card_played(state, load("proto_ko_pop"))
-    assert sizes(enemy) == [7]
-
-
 # ---------------------------------------------------------------------------
 # THE SPARK-SUPPORTED COOK
 # ---------------------------------------------------------------------------

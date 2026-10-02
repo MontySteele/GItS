@@ -92,7 +92,6 @@ public static class KokomiPlan
         Mend,
         Damage,
         DamageQuarterMaxHp,
-        DamagePerCompanionLastTurn,
         ApplyWeak,
         ApplyVulnerable,
         ReplayExhausted,
@@ -102,12 +101,6 @@ public static class KokomiPlan
         // WRITTEN -- see <see cref="Schedule"/> -- and a copy of it is played
         // for free at the morning.
         PlayCopyOfCompanion,
-        // `EB-335`, R246 pick 2. Tide Wall: "Plan: Gain 3 Block for each Plan
-        // the Bake-Kurage carries out this morning." The count is the whole
-        // morning's depth, taken once at the drain
-        // (<see cref="KokomiOverhaulLedger.PlansThisMorning"/>), so a Tide Wall
-        // written first, second or last in the queue pays the same number.
-        BlockPerPlanThisMorning,
         // `EB-685`, POOL PASS FIVE. Breakwater: "Dusk Plan: Gain 5 Block,
         // plus 3 for each Plan the Bake-Kurage is HOLDING."
         //
@@ -128,24 +121,6 @@ public static class KokomiPlan
         // hurried out by Change of Plans has already left the queue and does
         // not count. Sim twin: `kokomi_plan.BLOCK_PER_PLAN_HELD`.
         BlockPerPlanHeld,
-        // `EB-643`, R265. THE DRAIN-POSITIONAL CLAUSES, and what makes them one
-        // group is that each names a PLACE IN A RUNNING DRAIN rather than a
-        // quantity. They are plan-only on both sides for that reason
-        // (`gen_klee_cards.PLAN_ONLY_OPS`): a now-line spelling would name a
-        // drain that is not running and answer nothing, every time.
-        //
-        // Scout Ahead: "draw 1 card for each LATER Plan carried out with this
-        // one" (R267 pick 3, counted honestly at `EB-718`). The count is the
-        // CARRY-OUTS that follow this entry in the same drain -- `EB-501`'s
-        // carry-outs-not-entries reading pointed forwards -- and it is PAID AS
-        // THEY HAPPEN: the clause arms a drain-local counter and every later
-        // carry-out draws the rate. First of three draws 2, last draws 0, alone
-        // draws 0; first of {Scout Ahead, Second Wave, Battle Plan} draws 3,
-        // because Second Wave's rider makes Battle Plan two carry-outs.
-        // NEREID'S ASCENSION IS COUNTED THE SAME WAY: the Rare carries out the
-        // FIRST entry of a drain twice, so a Scout Ahead written first arms
-        // twice and draws 2 at every later carry-out.
-        DrawPerPlanAfter,
         // `EB-679`'s WHOLE-DRAIN count, "each Plan carried out this turn, this
         // one included": Scout Ahead briefly took it and R267 pick 3 took it
         // back off. NO CARD SPELLS IT TODAY -- it is kept resolved the way the
@@ -163,15 +138,6 @@ public static class KokomiPlan
         // not 4.
         NextPlanDoubleDamage,
         NextPlanExtraCarryOut,
-        // `EB-655`, R266 (pool pass three), reworked by `EB-668`. BATTLE
-        // PLAN: "the next Attack you play face-up this turn deals 4 more
-        // damage." A RIDER and not a number -- the size is the rule's
-        // (<see cref="NextAttackDamagePower.Bonus"/>) -- so the clause carries
-        // no amount, exactly as the two riders above carry none. It replaced
-        // an `Energy` clause that paid the write back its own cost, which is
-        // the shape this pass exists to undo; `EB-668` then made it DAMAGE,
-        // because a cost seam cannot tell a face-up play from a write.
-        NextAttackDamage,
         // R276 PICK 1, THE HALVES REWRITE: Plan lines that buy what only a
         // head start can buy. The three switches mean THIS TURN, the turn the
         // Plan is carried out on:
@@ -184,8 +150,6 @@ public static class KokomiPlan
         // intent, read at carry-out. Sim twins: `kokomi_plan`, same names.
         FirstAttackTwice,
         FirstCardFree,
-        DamageIfUnhurt,
-        AttackDamageThisTurn,
         BlockFrontIntent,
         // THE CO-OP SET (review/records/coop-set-2026-09-25.md), two clauses
         // about ANOTHER player, and a one-seat fight has none:
@@ -203,18 +167,6 @@ public static class KokomiPlan
         // `others_attack_damage_this_turn`, both inert with one seat.
         AllyDraw,
         OthersAttackDamageThisTurn,
-        // KOKOMI CORE PASS (2026-09-27). Chain of Command: "Next turn, the
-        // first Companion card you play costs 0." <see cref="FirstCardFree"/>
-        // narrowed to Companion cards (<see cref="FirstCompanionFreePower"/>).
-        // Appended last so no earlier ordinal moves. Sim twin:
-        // `kokomi_plan.FIRST_COMPANION_FREE`.
-        FirstCompanionFree,
-        // THE CASKET PASS (2026-09-28). Pearl Diver: "Plan: The Casket gains
-        // 2." The Tamakushi Casket's count
-        // (<see cref="KokomiOverhaulLedger.CasketCount"/>) goes up by the
-        // clause's amount at carry-out. Appended last. Sim twin:
-        // `kokomi_plan.CASKET_GAIN`.
-        CasketGain,
         // THE EXPANSION, BATCH ONE (2026-09-29). Lull: "If it is the only
         // Plan carried out this morning, gain 2 Energy." Undertide Lance:
         // "Deal 16 damage, doubled if no other Plan is carried out this
@@ -793,41 +745,6 @@ public static class KokomiPlan
         Pending(kokomi?.Player).Sum(e => System.Math.Max(0, e.Paid));
 
     /// <summary>
-    /// ALL STREAMS FLOW TO THE SEA: "Cancel all your Plans and take their
-    /// cards back. Your next Plan this turn is carried out once more for each
-    /// Plan cancelled." No Energy refund (main session, 2026-10-01: the cards
-    /// return, so a refund made re-writing the biggest Plan free). A
-    /// CANCEL IS AN UNDO (main session, 2026-10-01): every cancelled Plan's
-    /// card returns to the hand, an Exhaust card too (<see cref="GiveBack"/>).
-    /// No loop: All Streams Exhausts, so the cards come back once per copy.
-    /// The gift waits on the ledger for the next card written on the
-    /// Bake-Kurage this turn (<see cref="Schedule"/>). Sim twin:
-    /// `kokomi_plan.all_streams`.
-    /// </summary>
-    public static async Task CancelAllForNext(
-        PlayerChoiceContext choiceContext, Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var player = kokomi!.Player;
-        if (player == null) return;
-        Rebase(kokomi);
-        var cancelled = 0;
-        if (_queues.TryGetValue(player, out var queue) && queue.Count > 0)
-        {
-            cancelled = queue.Count;
-            var back = queue.ToList();
-            queue.Clear();
-            await Sync(choiceContext, kokomi, "rule:plans_cancelled",
-                       cancelled);
-            foreach (var entry in back)
-            {
-                await GiveBack(player, entry.Returns);
-            }
-        }
-        KokomiOverhaulLedger.For(kokomi).NextPlanExtra = cancelled;
-    }
-
-    /// <summary>
     /// WHAT TO DRAW ON THE JELLYFISH RIGHT NOW: the morning's remaining Plans
     /// while one is running, and the pending queue every other moment.
     ///
@@ -1034,11 +951,9 @@ public static class KokomiPlan
         // the buff and the card can be anywhere by the morning.
         //
         // THE PRINTED-DAMAGE CLAUSE ONLY, and that is exact rather than
-        // partial. `DamageQuarterMaxHp` and `DamagePerCompanionLastTurn` print
-        // no flat number for a flat rider to join -- one is read off Max HP and
-        // the other is a per-companion RATE, where a flat add would be paid
-        // once per body counted -- so there is nothing on those faces the fold
-        // could be about. `PlanDamageVar` previews the same call, so the number
+        // partial. `DamageQuarterMaxHp` prints no flat number for a flat
+        // rider to join -- it is read off Max HP -- so there is nothing on
+        // that face the fold could be about. `PlanDamageVar` previews the same call, so the number
         // queued here is the number the face printed.
         for (var i = 0; i < body.Count; i++)
         {
@@ -1048,18 +963,6 @@ public static class KokomiPlan
                 body[i] = body[i] with
                 {
                     Amount = Hers(kokomi, source, body[i].Amount),
-                };
-            }
-            // R276, FEIGNED RETREAT. Both printed hits are hers and take the
-            // fold; "since you wrote this" is a fact about NOW, so her HP is
-            // stamped on the clause. `kokomi_plan.schedule` does the same.
-            if (body[i].Kind == Kind.DamageIfUnhurt)
-            {
-                body[i] = body[i] with
-                {
-                    Amount = Hers(kokomi, source, body[i].Amount),
-                    Alt = Hers(kokomi, source, body[i].Alt),
-                    WrittenHp = kokomi.CurrentHp,
                 };
             }
         }
@@ -1486,31 +1389,6 @@ public static class KokomiPlan
         var firstTimes = midTurn ? 1 : CarryOutTimes(kokomi);
         var drainPlans = due.Count
                        + (due.Count > 0 && firstTimes > 1 ? 1 : 0);
-        // `EB-718`. SCOUT AHEAD'S COUNTER, armed and spent INSIDE THIS DRAIN.
-        // The face says "for each later Plan CARRIED OUT with this one", so the
-        // card is paid PER LATER CARRY-OUT AS IT HAPPENS rather than off a
-        // count of the entries still queued. The 2026-09-08 review reproduced
-        // the gap: Scout Ahead, Second Wave, Battle Plan is THREE later
-        // carry-outs -- Second Wave's own and Battle Plan's two -- and the
-        // positional term drew 2, because it counted entries. Every per-Plan
-        // clause in this arm counts a doubled carry-out twice (`EB-709`) and
-        // every reader counts carry-outs (`EB-501`); this is that rule pointed
-        // forwards.
-        //
-        // A RATE AND NOT A FLAG: <c>scoutRate</c> is the sum of the amounts
-        // armed so far, so two armed Scout Aheads draw 2 at every later
-        // carry-out. It is a LOCAL, which is what scopes it -- a drain that
-        // ends draws nothing more, and a morning's arming never reaches the
-        // evening.
-        //
-        // ARMED WHEN THE ENTRY RESOLVES, so a Scout Ahead carried out twice
-        // under Nereid's Ascension arms twice and pays 2 per later carry-out:
-        // "carried out twice counts twice" taken literally.
-        // <c>scoutSource</c> names the card on the page, the later one when two
-        // are armed, which is how <c>riderSource</c> above already resolves the
-        // same collision. `kokomi_plan._drain` is the twin.
-        var scoutRate = 0;
-        string? scoutSource = null;
         for (var index = 0; index < due.Count; index++)
         {
             var entry = due[index];
@@ -1534,24 +1412,15 @@ public static class KokomiPlan
                       + System.Math.Max(0, entry.Extra);
             for (var i = 0; i < times; i++)
             {
-                var (wroteDouble, wroteExtra, armed) = await ResolveEntry(
+                var (wroteDouble, wroteExtra) = await ResolveEntry(
                     choiceContext, kokomi, entry, onPlay: midTurn,
                     doubleDamage: doubleThis,
-                    drainPlans: drainPlans, scoutDraw: scoutRate,
-                    scoutSource: scoutSource, drainEntries: due.Count);
+                    drainPlans: drainPlans, drainEntries: due.Count);
                 // OR'd ACROSS THIS ENTRY'S OWN CARRY-OUTS, for the reason
                 // above: an entry doubled by Nereid's prints its rider twice
                 // and twice said twice is still twice.
                 doubleNext = doubleNext || wroteDouble;
                 extraNext = extraNext || wroteExtra;
-                // `EB-718`. THE COUNTER THIS CARRY-OUT ARMED, added AFTER the
-                // carry-out that armed it has been paid: a Scout Ahead never
-                // draws for itself, only for what follows.
-                if (armed > 0)
-                {
-                    scoutRate += armed;
-                    scoutSource = entry.Title;
-                }
             }
             if (doubleNext || extraNext) riderSource = entry.Title;
             if (player != null
@@ -1584,10 +1453,6 @@ public static class KokomiPlan
     /// game. `kokomi_plan._drain` emits the same string.</summary>
     internal static string NoFollowerLine(string card) =>
         card + ": no Plan followed";
-
-    /// <summary>Second Thoughts' bubble: which Plan it cancelled.</summary>
-    public static string CancelledLine(string card) =>
-        card + ": Plan cancelled";
 
     /// <summary>
     /// `EB-643` (R265), DUSK: "the Bake-Kurage carries this Plan out at the
@@ -1645,98 +1510,6 @@ public static class KokomiPlan
     }
 
     /// <summary>
-    /// SECOND THOUGHTS (`EB-643`): "cancel your last Plan: its card returns to
-    /// your hand and you regain its cost."
-    ///
-    /// THE LAST ENTRY AND NOT THE FRONT ONE, which is the whole card:
-    /// <see cref="ResolveFront"/> hurries the OLDEST Plan and this takes back
-    /// the NEWEST, so the two tempo cards operate on opposite ends of one
-    /// queue and a player who has just written the wrong Plan has a way back.
-    ///
-    /// THE CARD COMES OUT OF THE DISCARD PILE. <see cref="Entry.Source"/> is
-    /// the card that wrote the Plan and the discard pile is where a played
-    /// card is, on the ordinary path -- so the move is a real pile-to-pile
-    /// move of that instance rather than a new copy.
-    ///
-    /// A CANCEL IS AN UNDO, AN EXHAUST CARD TOO (main session, 2026-10-01,
-    /// after a co-op Vanguard cancelled by Second Thoughts silently vanished):
-    /// Exhaust applies when the card is played or its Plan carried out, not
-    /// when it is cancelled, so <see cref="GiveBack"/> takes the card out of
-    /// the exhaust pile as well. A Moon's Reflection Plan gives back Moon's
-    /// Reflection (<see cref="Entry.Writer"/>). Only a card that is in none of
-    /// those piles (already back in the hand, or gone) returns nothing, and
-    /// then no Energy is paid.
-    ///
-    /// THE ENERGY IS THE RETURNED CARD'S CURRENT COST, read off the card that
-    /// is coming back -- a smithed copy that costs 0 refunds 0, which is what
-    /// "its cost" says. AN EMPTY QUEUE IS A PRINTED NO-OP, the shape
-    /// <see cref="ResolveFront"/> already has. Sim twin:
-    /// `kokomi_plan.cancel_last_plan`.
-    /// </summary>
-    public static async Task CancelLast(
-        PlayerChoiceContext choiceContext, Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var player = kokomi!.Player;
-        if (player == null) return;
-
-        Rebase(kokomi);
-        if (!_queues.TryGetValue(player, out var queue) || queue.Count == 0)
-        {
-            return;
-        }
-        var last = queue[queue.Count - 1];
-        int before = queue.Count;
-        queue.RemoveAt(queue.Count - 1);
-        await Sync(choiceContext, kokomi, "rule:plan_cancelled", before);
-        // THE JELLYFISH SAYS WHICH PLAN WENT (co-op playtest 2026-09-30). A
-        // guest wrote Riptide and Vanguard, played Second Thoughts, and read
-        // the next morning's 2 Energy as Vanguard's 1 going missing: the
-        // cancel took Vanguard, the newest, and because Vanguard Exhausts no
-        // card came back to say so. One bubble, the carry-out line's own shape.
-        Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi,
-                           CancelledLine(last.Title));
-
-        var card = last.Returns;
-        if (card == null || !await GiveBack(player, card)) return;
-        // THE RESOLVED COST, which is the number the player would have to pay
-        // to play the card again -- `EnergyCost.GetResolved()` is the game's
-        // own read and it is what a mid-combat discount or a smith has already
-        // moved. "Its cost" on the face means the cost it has now.
-        var cost = card.EnergyCost.GetResolved();
-        if (cost > 0) await PlayerCmd.GainEnergy(cost, player);
-    }
-
-    /// <summary>
-    /// A CANCELLED PLAN'S CARD COMES BACK (main session, 2026-10-01: a cancel
-    /// is an undo). The piles a written card can be in by now are searched --
-    /// discard (the ordinary play), exhaust (an Exhaust card) and draw (a
-    /// reshuffle since) -- and the card moves to the TOP of the hand.
-    /// `CardPileCmd.Add` IS THE MOVE, the door <see cref="Replay"/> takes a
-    /// card out of the exhaust pile with: the game's own pile command removes
-    /// it from wherever it is. False when the card is in none of them. Sim
-    /// twin: `kokomi_plan._give_back`.
-    /// </summary>
-    internal static async Task<bool> GiveBack(Player player, CardModel? card)
-    {
-        if (card == null) return false;
-        foreach (var type in ReturnPiles)
-        {
-            var pile = CardPile.Get(type, player);
-            if (pile == null || !pile.Cards.Contains(card)) continue;
-            await CardPileCmd.Add(card, PileType.Hand, CardPilePosition.Top);
-            return true;
-        }
-        return false;
-    }
-
-    /// <summary>Where <see cref="GiveBack"/> looks, in order.</summary>
-    internal static readonly PileType[] ReturnPiles =
-    {
-        PileType.Discard, PileType.Exhaust, PileType.Draw,
-    };
-
-    /// <summary>
     /// EBB TIDE (`EB-643`): "cancel every Plan you have queued; gain 1 Energy
     /// and draw 1 card for each."
     ///
@@ -1755,10 +1528,6 @@ public static class KokomiPlan
     /// shows and <see cref="PlansHeld"/> answers. Nereid's Ascension would
     /// have doubled them at the morning and did not, which is exactly the
     /// thing this card gives up.
-    ///
-    /// NO CARD COMES BACK, unlike <see cref="CancelLast"/>, and that is the
-    /// trade rather than an omission: this cancels a whole queue for a
-    /// currency and that one buys a single Plan back at its own price.
     ///
     /// THE ENERGY IS PAID BEFORE THE DRAW, in that order, so a drawn card
     /// meets a hand that can already afford it. Sim twin:
@@ -2234,7 +2003,7 @@ public static class KokomiPlan
     /// <see cref="ResolveEntry"/> straight, so the split is readable from the
     /// call graph.
     /// </summary>
-    private static Task<(bool Double, bool Extra, int Scout)> ResolveNow(
+    private static Task<(bool Double, bool Extra)> ResolveNow(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry) =>
         ResolveEntry(choiceContext, kokomi, entry, onPlay: true);
 
@@ -2265,28 +2034,18 @@ public static class KokomiPlan
     /// <param name="drainPlans">`EB-679`. The whole-drain count, this entry
     /// included, which no card spells today. The default is the honest answer
     /// for a drain of one (<see cref="ResolveFront"/>).</param>
-    /// <param name="scoutDraw">`EB-718`. The Scout Ahead rate armed EARLIER in
-    /// this drain, drawn at the top of this carry-out because this carry-out is
-    /// the "later Plan carried out with" it. The default is the honest answer
-    /// for a drain of one -- nothing was armed before it
-    /// (<see cref="ResolveFront"/>).</param>
-    /// <param name="scoutSource">`EB-718`. The card that armed it, so the beat
-    /// can name what the cards came from.</param>
-    /// <returns>`EB-643` and `EB-718`. The riders THIS entry wrote and the
-    /// Scout Ahead rate it armed, which the drain spends on the carry-outs that
-    /// follow it. They are handed back rather than stored because the clause
+    /// <returns>`EB-643`. The riders THIS entry wrote, which the drain spends
+    /// on the carry-out that follows it. They are handed back rather than stored because the clause
     /// that writes one is inside the loop below and the drain that spends it is
     /// outside -- returning them is what keeps "the next Plan" a fact about a
     /// DRAIN rather than a flag on this class that could outlive one.</returns>
-    private static async Task<(bool Double, bool Extra, int Scout)> ResolveEntry(
+    private static async Task<(bool Double, bool Extra)> ResolveEntry(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry,
         bool onPlay = false, bool doubleDamage = false,
-        int drainPlans = 1, int scoutDraw = 0, string? scoutSource = null,
-        int drainEntries = 1)
+        int drainPlans = 1, int drainEntries = 1)
     {
         var wroteDouble = false;
         var wroteExtra = false;
-        var scoutArmed = 0;
         // `EB-317`, the first half of the beat: THE JELLYFISH ACTS BEFORE THE
         // PLAN LANDS. Awaited, so the clause's damage number arrives after the
         // lunge rather than inside it -- the same argument the casket's strike
@@ -2322,15 +2081,6 @@ public static class KokomiPlan
         _riders = riders;
         try
         {
-            // `EB-718`. THE SCOUT AHEAD DRAW IS PAID FIRST, before this
-            // entry's own clauses: the cards are in hand for the beat rather
-            // than after it, and the rider window is already open so the page
-            // can say where they came from.
-            if (scoutDraw > 0 && kokomi.Player != null)
-            {
-                await CardPileCmd.Draw(choiceContext, scoutDraw, kokomi.Player);
-                if (scoutSource != null) NoteRider(scoutSource, scoutDraw);
-            }
             // A PLAN STAYS OPEN (2026-10-01): the player chose the now-line.
             // It replaces the Plan line whole, so it writes no rider and
             // Opening Gambit's double does not reach it (printed size). It is
@@ -2348,13 +2098,6 @@ public static class KokomiPlan
                 // they do is tell the drain about the entry that follows.
                 if (clause.Kind == Kind.NextPlanDoubleDamage) wroteDouble = true;
                 if (clause.Kind == Kind.NextPlanExtraCarryOut) wroteExtra = true;
-                // `EB-718`. SCOUT AHEAD IS NOTED HERE TOO, and for the same
-                // reason: it does nothing when it resolves -- what it does is
-                // tell the drain about every carry-out that follows.
-                if (clause.Kind == Kind.DrawPerPlanAfter)
-                {
-                    scoutArmed += clause.Amount;
-                }
                 var wanted = AskedFor(kokomi, clause, drainPlans);
                 var produced = await ResolveOne(choiceContext, kokomi, clause,
                                                 entry, doubleDamage,
@@ -2407,7 +2150,7 @@ public static class KokomiPlan
                 await listener.OnPlanResolved(choiceContext, kokomi);
             }
         }
-        return (wroteDouble, wroteExtra, scoutArmed);
+        return (wroteDouble, wroteExtra);
     }
 
     /// <summary>
@@ -2614,23 +2357,6 @@ public static class KokomiPlan
 
         switch (plan.Kind)
         {
-            case Kind.DrawPerPlanAfter:
-                // SCOUT AHEAD (`EB-718`): "draw 1 card for each later Plan
-                // carried out with this one." NOTHING IS DRAWN HERE. The
-                // clause ARMS the drain's counter at the printed rate -- noted
-                // in <see cref="ResolveEntry"/> before this switch, exactly as
-                // the two riders are -- and <see cref="Drain"/> pays that rate
-                // at every carry-out that follows. That is what makes the count
-                // CARRY-OUTS rather than the entries still queued: Second Wave
-                // doubling the entry behind it is two later carry-outs and pays
-                // twice. Change of Plans hurries ONE entry, so a Scout Ahead
-                // taken that way arms a drain that is already over and draws
-                // nothing -- the face read literally.
-                //
-                // NO NUMBER, for the riders' reason below: the figure this card
-                // is worth lands on later Plans, so a number here would be an
-                // estimate printed as a receipt.
-                return null;
             case Kind.DrawPerPlanThisTurn:
             {
                 // `EB-679`'s WHOLE-DRAIN count, on no card since R267 pick 3.
@@ -2654,15 +2380,6 @@ public static class KokomiPlan
                 // the honest line for a Plan whose effect is on the NEXT one.
                 return null;
 
-            case Kind.NextAttackDamage:
-                // `EB-668`. BATTLE PLAN's rider, applied here and read at the
-                // damage seam. No number on the beat: the size is the rule's
-                // and the line the player wants is "Battle Plan happened", the
-                // same shape the two riders above take.
-                await KokomiOverhaulKit.NextAttackDamage(
-                    choiceContext, kokomi, null);
-                return null;
-
             case Kind.FirstAttackTwice:
                 // R276, PINCER. A switch; no number on the beat.
                 await KokomiOverhaulKit.FirstAttackTwice(choiceContext, kokomi);
@@ -2672,18 +2389,6 @@ public static class KokomiPlan
                 // R276, STOLEN CHAPTER. A switch; no number on the beat.
                 await KokomiOverhaulKit.FirstCardFree(choiceContext, kokomi);
                 return null;
-
-            case Kind.FirstCompanionFree:
-                // Core pass, CHAIN OF COMMAND. The same switch, Companions only.
-                await KokomiOverhaulKit.FirstCompanionFree(
-                    choiceContext, kokomi);
-                return null;
-
-            case Kind.CasketGain:
-                // THE CASKET PASS, PEARL DIVER: the Casket gains the amount.
-                // The number on the beat is the gain.
-                KokomiOverhaulKit.GainCasket(kokomi, plan.Amount);
-                return plan.Amount;
 
             // THE EXPANSION, BATCH ONE (2026-09-29).
             case Kind.EnergyIfAlone:
@@ -2712,18 +2417,6 @@ public static class KokomiPlan
                 return (int)await CreatureCmd.GainBlock(
                     kokomi, standing, ValueProp.Unpowered, null);
             }
-
-            case Kind.AttackDamageThisTurn:
-                // R276, BATTLE PLAN: "This turn, your Attacks deal N more
-                // damage." The shipped <see cref="AttackUpThisTurnPower"/> is
-                // that sentence exactly -- every Attack she plays, per hit,
-                // removed at her turn's end. A carry-out is not a play: a
-                // planned hit is dealt by the Bake-Kurage, so the power's
-                // `dealer != Owner` test keeps Plans out of it.
-                await PowerCmd.Apply<AttackUpThisTurnPower>(
-                    choiceContext, kokomi, plan.Amount, applier: kokomi,
-                    cardSource: null);
-                return null;
 
             case Kind.AllyDraw:
             {
@@ -2769,11 +2462,6 @@ public static class KokomiPlan
                     KokomiOverhaulKit.IntendedDamage(FrontEnemy(kokomi), kokomi)
                         + plan.Amount,
                     ValueProp.Move, null);
-
-            case Kind.DamageIfUnhurt:
-                return await Hit(choiceContext, kokomi, plan,
-                                 UnhurtAmount(kokomi, plan), entry,
-                                 doubleDamage);
 
             case Kind.Draw:
                 await CardPileCmd.Draw(choiceContext, plan.Amount, player);
@@ -2834,20 +2522,6 @@ public static class KokomiPlan
                 return (int)await CreatureCmd.GainBlock(
                     kokomi, plan.Amount, ValueProp.Move, null);
 
-            case Kind.BlockPerPlanThisMorning:
-                // TIDE WALL (`EB-335`). POWERED, exactly as the flat planned
-                // Block above is and for the same reason: rule 3 says her
-                // Dexterity counts, and two Block clauses of one morning
-                // scaling differently is what rule 3 refuses. A morning that drained nothing pays nothing, which
-                // is a printed no-op rather than a failure -- Change of Plans
-                // can carry this Plan out on a turn whose own morning was
-                // empty, and zero times three is the honest answer.
-                return (int)await CreatureCmd.GainBlock(
-                    kokomi,
-                    plan.Amount * KokomiOverhaulLedger.For(kokomi)
-                                      .PlansThisMorning,
-                    ValueProp.Move, null);
-
             case Kind.BlockPerPlanHeld:
                 // BREAKWATER (`EB-685`). POWERED, the flat planned Block's
                 // funnel exactly and for the reason Tide Wall's branch above
@@ -2874,16 +2548,6 @@ public static class KokomiPlan
             case Kind.DamageQuarterMaxHp:
                 return await Hit(choiceContext, kokomi, plan,
                                  KokomiRules.QuarterOfMaxHp(kokomi),
-                                 entry, doubleDamage);
-
-            case Kind.DamagePerCompanionLastTurn:
-                // Chain of Command. "Last turn" is read at CARRY-OUT: the Plan
-                // was written on turn N and resolves at the top of N+1, and the
-                // ledger has rolled by then, so the count it holds is turn N's
-                // -- the turn the player was looking at when they wrote it.
-                return await Hit(choiceContext, kokomi, plan,
-                                 plan.Amount * KokomiOverhaulLedger.For(kokomi)
-                                                   .CompanionsPlayedLastTurn,
                                  entry, doubleDamage);
 
             case Kind.ApplyWeak:
@@ -2953,14 +2617,13 @@ public static class KokomiPlan
         // POOL COMPLETION: Tactical Relay's figure is HER share of it.
         Kind.EachPlayerEnergy => "Energy",
         Kind.EachPlayerDraw => "cards drawn",
-        Kind.Block or Kind.BlockPerPlanThisMorning
+        Kind.Block
             or Kind.BlockPerPlanHeld or Kind.BlockPerAttackingEnemy
             or Kind.DoubleBlock => "Block",
         Kind.EnergyIfAlone => "Energy",
         Kind.Mend => "HP healed",
         Kind.Damage or Kind.DamageQuarterMaxHp
-            or Kind.DamagePerCompanionLastTurn
-            or Kind.DamageIfUnhurt or Kind.DamageIfAlone => "damage",
+            or Kind.DamageIfAlone => "damage",
         Kind.BlockFrontIntent => "Block",
         Kind.ApplyWeak => "Weak",
         Kind.ApplyVulnerable => "Vulnerable",
@@ -2972,8 +2635,6 @@ public static class KokomiPlan
         // the LATER carry-outs, where it rides those beats by name
         // (<see cref="NoteRider"/>).
         Kind.DrawPerPlanThisTurn => "cards drawn",
-        // THE CASKET PASS (2026-09-28): Pearl Diver's figure is Casket points.
-        Kind.CasketGain => "Casket points",
         // THE STATUS BATCH (2026-10-01).
         Kind.BlockPerStatusInHand => "Block",
         Kind.ExhaustStatusesInHand => "cards exhausted",
@@ -3014,8 +2675,6 @@ public static class KokomiPlan
         // carry-out now, so there is no figure to ask for at this clause and
         // nothing prints an entries-based estimate anywhere.
         Kind.DrawPerPlanThisTurn => plan.Amount * drainPlans,
-        Kind.BlockPerPlanThisMorning =>
-            plan.Amount * KokomiOverhaulLedger.For(kokomi).PlansThisMorning,
         // `EB-685`. A FIFTH SCALED KIND, and it reads the QUEUE rather than a
         // ledger -- asked here BEFORE the clause runs, which for this one is
         // the same moment the clause itself asks: `ResolveDusk` has already
@@ -3026,13 +2685,8 @@ public static class KokomiPlan
         Kind.BlockPerAttackingEnemy =>
             plan.Amount * IntendingAttack(kokomi).Count,
         Kind.DoubleBlock => (int)kokomi.Block,
-        Kind.DamagePerCompanionLastTurn =>
-            plan.Amount * KokomiOverhaulLedger.For(kokomi)
-                              .CompanionsPlayedLastTurn,
         Kind.DamageQuarterMaxHp => KokomiRules.QuarterOfMaxHp(kokomi),
-        // R276. Feigned Retreat asks for whichever of its two hits her HP
-        // earns, and Tide Wall for the intent plus its bonus.
-        Kind.DamageIfUnhurt => UnhurtAmount(kokomi, plan),
+        // R276. Tide Wall asks for the intent plus its bonus.
         Kind.BlockFrontIntent =>
             KokomiOverhaulKit.IntendedDamage(FrontEnemy(kokomi), kokomi)
                 + plan.Amount,
@@ -3041,17 +2695,6 @@ public static class KokomiPlan
             plan.Amount * KokomiStatusBatch.StatusesInHand(kokomi.Player),
         _ => plan.Amount,
     };
-
-    /// <summary>
-    /// FEIGNED RETREAT's hit (R276): <see cref="Planned.Alt"/> if she lost no
-    /// HP since the Plan was written -- her HP now against the HP
-    /// <see cref="Schedule"/> stamped -- and <see cref="Planned.Amount"/>
-    /// otherwise. An unstamped clause reads as unhurt. Sim twin:
-    /// `kokomi_plan._resolve_clause`'s `damage_if_unhurt` branch.
-    /// </summary>
-    internal static int UnhurtAmount(Creature kokomi, Planned plan) =>
-        kokomi.CurrentHp >= (plan.WrittenHp ?? kokomi.CurrentHp)
-            ? plan.Alt : plan.Amount;
 
     /// <summary>
     /// The front enemy: leftmost alive, SKIPPING A MINION (`R250`, round-5
@@ -3403,10 +3046,9 @@ public static class KokomiPlan
     /// body, or 0.
     ///
     /// ONLY <see cref="Kind.Damage"/>, and only where it aims at the front.
-    /// The other two damage kinds are derived at CARRY-OUT --
-    /// <see cref="Kind.DamageQuarterMaxHp"/> off the target's max HP and
-    /// <see cref="Kind.DamagePerCompanionLastTurn"/> off a count that is not
-    /// taken yet -- so a number for them here would be a forecast, and this
+    /// The other damage kind is derived at CARRY-OUT --
+    /// <see cref="Kind.DamageQuarterMaxHp"/> off the target's max HP -- so a
+    /// number for it here would be a forecast, and this
     /// key's whole claim is that it is a read of a number already fixed
     /// (`PLAN_WRITTEN_NUMBER_NOTE`). An entry that mixes one in reports the
     /// part it knows, and the page's own sentence says "may".
@@ -3438,11 +3080,7 @@ public static class KokomiPlan
     {
         var damage = entry.Clauses.Where(clause =>
             clause.Kind == Kind.Damage
-            || clause.Kind == Kind.DamageQuarterMaxHp
-            || clause.Kind == Kind.DamagePerCompanionLastTurn
-            // R276, Feigned Retreat: its size is read at carry-out, so it
-            // adds no written number above, but it does land at the front.
-            || clause.Kind == Kind.DamageIfUnhurt).ToList();
+            || clause.Kind == Kind.DamageQuarterMaxHp).ToList();
         if (damage.Count == 0) return "";
         if (entry.AimOverride != null) return "other";
         if (damage.Any(clause => clause.Aim == Aim.AllEnemies)) return "all";
