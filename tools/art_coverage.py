@@ -118,6 +118,15 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_vk_knights_muster": (
+        "Legacy cleanup stage 6 (2026-10-02, #832) deleted this retired Varka row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_vk_squall": (
+        "Legacy cleanup stage 6 (2026-10-02, #832) deleted this retired Varka row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_vk_updraft": (
+        "Legacy cleanup stage 6 (2026-10-02, #832) deleted this retired Varka row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_spark_burst_conversion": (
         "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
