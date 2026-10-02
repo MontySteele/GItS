@@ -145,7 +145,20 @@ and about 390 Python arm-flag reads.
    rewritten, STATE's build paragraph, the deploy skill. **Left over (BACKLOG
    lines):** the codegen's spotlight wrap and the generated header's
    upgrades-sheet line, both of which would change the C# emitted for
-   current rows; the sim's shipped-kit machinery.
+   current rows; the sim's shipped-kit machinery. **PR #833, merged.**
+   **6c (the understudy ports), 2026-10-02:** of the thirteen understudy
+   tests stage 5 deleted with the shipped faces, nine still tested something
+   real and are back on current rows: the generated-text fallback, the
+   printed cost and Spark indices (cross-checked against the surface), the
+   by-id cost key and its discount note (`test_staged_turn.py`), and the
+   upgraded-face, two-arm swap and folded "Written:" face
+   (`test_understudy_blindplay.py`; the folded tests had been passing
+   vacuously on a deleted id). Four stay deleted: the shipped Sparks
+   free-Attack rule on two pages, the Encore gloss and the Spotlight token
+   classes. **Left over (a BACKLOG line):** the seat page's Kurage memory and
+   Salon panels and the bridge files that fed them
+   (`vendor/STS2_MCP/gits/GitsKurageMemory.cs`, `GitsFurinaSalon.cs`), which
+   need a bridge deploy to retire.
 
 Out of scope: the Teyvat frame ([USER]: nothing deleted). Element switches
 `SwirlPays` and `CrystallizeKeepsAura` stay until the open retest of each

@@ -1853,3 +1853,84 @@ def test_bt3s_own_published_boards_declare_the_intent_they_drew():
         with pytest.raises(staged_turn.TurnError) as e:
             staged_turn.wire_assumption_preflight(turn, wire)
         assert "intent:" in str(e.value)
+
+
+# ------------------------------------- ported at legacy cleanup stage 6 ---
+# These five pinned the page's card-text and printed-cost machinery on the
+# shipped kits' faces, and stage 5 deleted them with those faces. The
+# machinery is current, so they read the prototype surface's faces now.
+
+def test_a_card_with_no_wire_text_falls_back_and_says_so():
+    state = wire_state()
+    card = state["player"]["hand"][0]
+    card.update(id="KLEEMOD-PROTO_KO_BOMBS_AWAY", name="Bombs Away!",
+                description="")
+    packet = qa_packet.build(state, "t", repo=REPO)
+    shown = packet["board"]["hand"][0]
+    assert shown["text_source"].startswith("generated-cs")
+    assert shown["text"], "the generated Localization block was not found"
+
+
+def test_the_printed_cost_index_reads_the_generated_face():
+    """The face in `klee-mod` is where the number comes from, and it agrees
+    with the surface the generator emitted it from -- EVERY row, not a
+    sample. `qa_packet` may not import a sheet loader; this test may."""
+    from tier0.content import loader
+    index = qa_packet.printed_cost_index(REPO)
+    assert index["PROTO_KO_BOMBS_AWAY"] == 1
+    assert index["PROTO_KO_KAPOW"] == 0
+    disagree = [(c.id, index[c.id.upper()], c.cost)
+                for c in loader.prototype_cards()
+                if c.id.upper() in index and isinstance(c.cost, int)
+                and index[c.id.upper()] != c.cost]
+    assert not disagree, f"the face and the surface disagree: {disagree}"
+    assert len(index) > 200, f"only {len(index)} faces carried a cost"
+
+
+def test_the_printed_cost_index_is_keyed_by_id_not_by_title():
+    """`EB-267`: the key is the wire's `Id.Entry` with the mod prefix off,
+    which is what every hand entry carries."""
+    assert qa_packet.card_key("KLEEMOD-PROTO_KO_BOMBS_AWAY") \
+        == "PROTO_KO_BOMBS_AWAY"
+    assert qa_packet.card_key(None) == ""
+    assert "BOMBS_AWAY" not in qa_packet.printed_cost_index(REPO)
+
+
+def test_the_printed_spark_index_reads_the_generated_face():
+    """`EB-282`. The price is on the badge in game, and on this page it comes
+    off the one place the generator writes the number,
+    `ISparkPricedCard.PrintedSparkPrice`. Cross-checked against the surface
+    through the reader the sim's gate uses (`spend_spark_price`)."""
+    from tier0.content import loader
+    from tier0.engine import effects as fx_mod
+    index = qa_packet.printed_spark_index(REPO)
+    assert index["PROTO_KO_TINDER_TOSS"] == 1
+    assert index["PROTO_KO_BANG_BANG"] == 2
+    # A card with no Spark price has NO row -- silence, never a zero.
+    assert "PROTO_KO_KAPOW" not in index
+    disagree = []
+    for card in loader.prototype_cards():
+        priced = [f for f in card.effects if f.get("op") == "spend_spark"]
+        want = fx_mod.spend_spark_price(priced[0]) if priced else None
+        got = index.get(card.id.upper())
+        if want != got:
+            disagree.append((card.id, got, want))
+    assert not disagree, f"the face and the surface disagree: {disagree}"
+
+
+def test_only_a_card_shown_below_its_printed_cost_carries_the_note():
+    """`EB-267`'s acceptance: a card drawn at the cost its own row prints
+    says nothing; a card the board really is discounting says so."""
+    state = banked_state(0)
+    state["player"]["status"] = []
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_KO_BOMBS_AWAY", "name": "Bombs Away!",
+         "type": "Attack", "cost": "1", "can_play": True, "is_upgraded": False,
+         "description": "Deal 3 damage to ALL enemies."},
+        {"id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY", "name": "Jumpy Dumpty",
+         "type": "Skill", "cost": "0", "can_play": True, "is_upgraded": False,
+         "description": "Place a Bomb 8."},
+    ]
+    page = qa_packet.render(qa_packet.build(state, "t", repo=REPO))
+    assert "The cost printed on this card is 1; it is showing 0 here." in page
+    assert page.count("The cost printed on this card") == 1
