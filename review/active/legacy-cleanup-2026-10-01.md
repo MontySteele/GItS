@@ -48,7 +48,7 @@ and about 390 Python arm-flag reads.
    (picks 3 and 4; Furina's twelve were ported by the Furina rules pass,
    2026-10-01); `SwapOfferedRows`, `DropRetiredRows` and the off-pool swap
    deleted. Verify with a pool-count pin and one deploy plus a seat smoke run.
-   **Done, PR #PRNUM** (2026-10-01): every pool lists its `proto_` rows first
+   **Done, PR #818** (2026-10-01): every pool lists its `proto_` rows first
    and offers its arm's roster; Furina's offer is a list
    (`FurinaStageRoster.Pool`); Kokomi's Oath swap is gone; the 19 Fontaine
    rows are `proto_mf_` rows and the companion roster holds no shipped row;
