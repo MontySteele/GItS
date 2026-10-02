@@ -129,11 +129,13 @@ an alchemy-flavored Strength reduction?"
 
 | Name | Type, cost, rarity | Text | Upgrade |
 |---|---|---|---|
-| **Up in Smoke!** | Skill, 1, Common | Apply 2 [3] Weak to ALL enemies. Shuffle a Dazed into your draw pile. | Weak +1 |
-| **Behind Jean's Desk** | Skill, 1, Uncommon | Gain 14 [18] Block. Add a Confiscated to your draw pile. | Block +4 |
-| **Kitchen Alchemy** | Skill, 1, Uncommon, Exhaust | ALL enemies lose 1 [2] Strength. Exhaust every status in your hand; they lose 1 more for each. | Strength loss +1 (base only) |
+| **Up in Smoke!** | Skill, 0, Common | Apply 2 [3] Weak to ALL enemies. Shuffle a Dazed into your draw pile. | Weak +1 |
+| **Behind Jean's Desk** | Skill, 1, Uncommon | Gain 11 [14] Block. Add a Confiscated to your draw pile. | Block +3 |
+| **Kitchen Alchemy** | Skill, 1, Uncommon, Exhaust | ALL enemies lose 1 Strength. Exhaust every status in your hand; they lose 1 more for each. | Retain |
 
 Reworked 2026-10-02 after the forced-deck seat (0 plays in 7 hands: a status is rarely in hand): always playable, more with statuses.
+
+Tuned 2026-10-02 after three forced-deck seats (round record casket-and-klee-defence-round-2026-10-02.md and w13): Behind Jean's Desk 11 [14], Up in Smoke! cost 0, Kitchen Alchemy's upgrade is Retain.
 
 Kitchen Alchemy is always playable. Each enemy loses the base plus 1 for each
 status exhausted from hand, applied once as one total; curses stay in hand.
@@ -150,8 +152,8 @@ Why: the census (2026-10-01) found her pool had no Weak, no Strength loss and no
 [USER], on the three cards: "Up in Smoke and Behind Jean's desk look quite
 strong, but we can always nerf them later. Looks good for now!"
 
-Watch: Up in Smoke! and Behind Jean's Desk (strong; nerf candidates after the
-seat round).
+Watch: Behind Jean's Desk (all three seats called it strong or too strong at
+14 [18]; now 11 [14]).
 
 ## Picks
 

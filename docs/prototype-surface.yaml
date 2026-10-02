@@ -827,7 +827,7 @@
 
 - {id: proto_ko_up_in_smoke, name: "Up in Smoke!", character: klee,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
+   cost: 0, type: skill, rarity: common,
    description: "Apply 2 [gold]Weak[/gold] to ALL enemies. Shuffle a [gold]Dazed[/gold] into your draw pile.",
    upgrade: {weak: +1},
    effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
@@ -836,9 +836,9 @@
 - {id: proto_ko_behind_jeans_desk, name: "Behind Jean's Desk", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 14 [gold]Block[/gold]. Add a [gold]Confiscated[/gold] to your draw pile.",
-   upgrade: {block: +4},
-   effects: [{op: block, amount: 14},
+   description: "Gain 11 [gold]Block[/gold]. Add a [gold]Confiscated[/gold] to your draw pile.",
+   upgrade: {block: +3},
+   effects: [{op: block, amount: 11},
              {op: add_card, card: confiscated, zone: draw, amount: 1}]}
 
 # Reworked 2026-10-02: always playable. `per_status` exhausts every status in
@@ -848,7 +848,7 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
    description: "ALL enemies lose 1 [gold]Strength[/gold]. Exhaust every status in your hand; they lose 1 more for each.",
-   upgrade: {strength_loss: +1},
+   upgrade: {retain: true},
    effects: [{op: lose_strength, amount: 1, target: all_enemies, per_status: 1}]}
 
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
