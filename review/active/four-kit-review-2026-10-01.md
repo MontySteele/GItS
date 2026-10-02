@@ -663,6 +663,17 @@ not pools.
 
 ## Picks
 
+**Ruled 2026-10-01.** [USER], on all four picks and the coordinator's
+added pick 5 (the open-Plan chooser made opt-in): "On your new picks agree
+all around - I think that if it's repeatable, it should probably cost
+energy, though, to make this a real choice and not just button mashing
+when it comes up?" So: 1a with Open the Casket costing 1 Energy (it was 0);
+2a hold; 3a on her own Common relic; 4a fixed seeds with an Ironclad
+control and the save-file table; 5a Plans carry out on their Plan line and
+a click on a waiting Plan flips it. What the Tokoyo Returns, which fetched
+the Casket from the Exhaust Pile, now fetches it from the draw or discard
+pile.
+
 Re-ordered after §2.8. Pick 1 is new; the old picks 1 and 2 are now 2 and
 3 with their defaults moved to "wait".
 
