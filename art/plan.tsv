@@ -1811,8 +1811,8 @@ proto_mc_kaeya_cold_blooded_strike	ImageGen/images/cards/companions/proto_mc_kae
 # proto_mc_jean_lions_fang <- her TCG card. The literal match, 'Constellation Lion's
 #   Fang, Fair Protector of Mondstadt', is a 256px constellation sigil and L8 bars it.
 proto_mc_jean_lions_fang	ImageGen/images/cards/companions/proto_mc_jean_lions_fang.png	500	380	cover	top	shortlist	1	png	Jean Card.png		tcg	jean
-# proto_mc_albedo_dust_of_purification <- Albedo's Wish splash, re-pointed from the cut Tectonic Tide (Klee status package, 2026-10-01); the Talent sigil is 256px (L8)
-proto_mc_albedo_dust_of_purification	ImageGen/images/cards/companions/proto_mc_albedo_dust_of_purification.png	500	380	cover	top	shortlist	1	png	Albedo Wish.png		splash	albedo
+# proto_mc_albedo_dust_of_purification <- Albedo at a window in falling golden leaves, face in frame (art pass, 2026-10-02); was Albedo Wish.png
+proto_mc_albedo_dust_of_purification	ImageGen/images/cards/companions/proto_mc_albedo_dust_of_purification.png	500	380	cover	x0.45,y0.38@1.4	shortlist	1	png	Albedo Birthday 2026.png		splash	albedo
 # proto_mc_fischl_sinful_hex <- her full Wish art; the Talent sigil is 256px (L8)
 proto_mc_fischl_sinful_hex	ImageGen/images/cards/companions/proto_mc_fischl_sinful_hex.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Fischl Full Wish.png		splash	fischl
 # proto_mc_sucrose_mollis_favonius <- her Wish splash; the Talent sigil is 256px (L8)
@@ -1904,7 +1904,7 @@ proto_ko_jumpy_dumpty_mk_iii	ImageGen/images/cards/klee/proto_ko_jumpy_dumpty_mk
 # proto_ko_look_out <- snap: Klee pointing -- look out!
 proto_ko_look_out	ImageGen/images/cards/klee/proto_ko_look_out.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 1.png		sticker	
 # proto_ko_mine_all_mine <- gleeful_barrage: Klee with her arms flung wide -- all mine
-proto_ko_mine_all_mine	ImageGen/images/cards/klee/proto_ko_mine_all_mine.png	500	380	cover	x0.50,y0.35@1.25	shortlist	1	png	Klee Birthday 2024.png		splash	
+proto_ko_mine_all_mine	ImageGen/images/cards/klee/proto_ko_mine_all_mine.png	500	380	cover	x0.50,y0.35@1.25	shortlist	1	png	Klee Birthday 2024.png		splash	klee_birthday_2024
 # proto_ko_one_more_charge <- no_holding_back: Klee's arm up for one more throw
 proto_ko_one_more_charge	ImageGen/images/cards/klee/proto_ko_one_more_charge.png	500	380	cover	y0.30	shortlist	1	png	Klee Multi Wish.png		splash	
 # proto_ko_playdate <- smoke_and_sparks: a beach day with balloons and a slime
@@ -2516,3 +2516,49 @@ proto_kk_the_moon_a_ship	ImageGen/images/cards/kokomi/proto_kk_the_moon_a_ship.p
 proto_kk_what_the_tokoyo_took	ImageGen/images/cards/kokomi/proto_kk_what_the_tokoyo_took.png	500	380	cover	x0.45	shortlist	1	png	Enkanomiya.png		splash	kokomi_pool
 # proto_kk_pearl_diver <- chibi Kokomi in the shallow water, face in frame
 proto_kk_pearl_diver	ImageGen/images/cards/kokomi/proto_kk_pearl_diver.png	500	380	cover	x0.62,y0.52@1.6	shortlist	1	png	Drifting Luminescence 2022-03-08 - Sangonomiya Kokomi Shorts.png		splash	kokomi_pool
+# ---------- Card art pass (2026-10-02): cards missing art ----------
+# [USER]: "Need another art pass for cards missing art". The main session
+# picked one picture per card; every crop frames a face or the named
+# subject, never legs or feet.
+# proto_ko_behind_jeans_desk <- Jean at her desk, hand to her mouth, pizza and gift boxes
+proto_ko_behind_jeans_desk	ImageGen/images/cards/klee/proto_ko_behind_jeans_desk.png	500	380	cover	x0.45,y0.38@1.3	shortlist	1	png	Jean Birthday 2025.png		splash	
+# proto_ko_cover_your_ears <- Klee sticker, eyes shut, yelling
+proto_ko_cover_your_ears	ImageGen/images/cards/klee/proto_ko_cover_your_ears.png	500	380	cover	y0.55	shortlist	1	png	Mondstadt Tourism Revitalization Project Klee 01.png		sticker	
+# proto_ko_damage_report <- Klee with her notepad
+proto_ko_damage_report	ImageGen/images/cards/klee/proto_ko_damage_report.png	500	380	cover	x0.56	shortlist	1	png	TSB Klee.png		sticker	
+# proto_ko_finders_keepers <- Klee with her satchel and the found things, face in frame; shares Klee Birthday 2024 with mine_all_mine at a tighter crop
+proto_ko_finders_keepers	ImageGen/images/cards/klee/proto_ko_finders_keepers.png	500	380	cover	x0.55,y0.36@1.45	shortlist	1	png	Klee Birthday 2024.png		splash	klee_birthday_2024
+# proto_ko_forbidden_fun <- chibi Klee fleeing a fireball
+proto_ko_forbidden_fun	ImageGen/images/cards/klee/proto_ko_forbidden_fun.png	500	380	cover	x0.33,y0.38@1.3	shortlist	1	png	Slime Paradise Gallery 10.png		splash	
+# proto_ko_it_wasnt_me <- Klee, eyes shut, innocent smile
+proto_ko_it_wasnt_me	ImageGen/images/cards/klee/proto_ko_it_wasnt_me.png	500	380	cover	y0.50	shortlist	1	png	Klee Expression 2.png		splash	
+# proto_ko_kitchen_alchemy <- chibi Klee at a table with a cake and jars
+proto_ko_kitchen_alchemy	ImageGen/images/cards/klee/proto_ko_kitchen_alchemy.png	500	380	cover	x0.53	shortlist	1	png	Gratifying Gathering Klee Cake 01.png		splash	
+# proto_ko_klee_can_explain <- chibi Klee laughing with Dodoco
+proto_ko_klee_can_explain	ImageGen/images/cards/klee/proto_ko_klee_can_explain.png	500	380	cover	x0.45,y0.46@1.5	shortlist	1	png	Version 2.3 Commemorative Lottery Event Klee.png		splash	
+# proto_ko_lisas_treats <- Lisa with a slice of cake, face in frame
+proto_ko_lisas_treats	ImageGen/images/cards/klee/proto_ko_lisas_treats.png	500	380	cover	x0.31,y0.44@1.6	shortlist	1	png	Lisa Birthday 2020.png		splash	
+# proto_ko_red_knight <- Klee on the orange burst, face and arms out
+proto_ko_red_knight	ImageGen/images/cards/klee/proto_ko_red_knight.png	500	380	cover	y0.30	shortlist	1	png	Klee Character Card.png		splash	
+# proto_ko_solitary_confinement <- Klee alone in an empty room, the whole room
+proto_ko_solitary_confinement	ImageGen/images/cards/klee/proto_ko_solitary_confinement.png	500	380	cover	y0.52	shortlist	1	png	Happy Times Klee Preview.png		splash	
+# proto_ko_up_in_smoke <- Klee and the ghost on Halloween night, Klee framed
+proto_ko_up_in_smoke	ImageGen/images/cards/klee/proto_ko_up_in_smoke.png	500	380	cover	x0.62,y0.33@1.6	shortlist	1	png	Halloween 2022.png		splash	
+# proto_fs_aria_for_one <- Furina alone on an empty stage, the whole stage
+proto_fs_aria_for_one	ImageGen/images/cards/furina/proto_fs_aria_for_one.png	500	380	cover	center	shortlist	1	png	Starlight Reverie Wallpaper Furina.png		splash	
+# proto_fs_casting_agent <- Furina and Navia's tea party over the cards
+proto_fs_casting_agent	ImageGen/images/cards/furina/proto_fs_casting_agent.png	500	380	cover	x0.53,y0.55@1.1	shortlist	1	png	Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png		splash	
+# proto_fs_critics_darling <- Furina posing in the clock hall, face in frame
+proto_fs_critics_darling	ImageGen/images/cards/furina/proto_fs_critics_darling.png	500	380	cover	x0.45,y0.38@1.5	shortlist	1	png	VIP Ace Detective Wallpaper.png		splash	
+# proto_fs_endless_waltz <- Furina dancing at night with the cat; the hooded watcher cropped out
+proto_fs_endless_waltz	ImageGen/images/cards/furina/proto_fs_endless_waltz.png	500	380	cover	x0.74,y0.62@2	shortlist	1	png	Fragmented Memories Archive 3.png		splash	
+# proto_fs_interval_bell <- chibi Furina in the clock shop
+proto_fs_interval_bell	ImageGen/images/cards/furina/proto_fs_interval_bell.png	500	380	cover	x0.55,y0.55@1.2	shortlist	1	png	VIP Ace Detective 1.png		splash	
+# proto_fs_leading_lady <- Furina out in front of the 4.1 cast under the flower arch, face in frame (the picked Introduction Banner is L9-banned for its wordmark)
+proto_fs_leading_lady	ImageGen/images/cards/furina/proto_fs_leading_lady.png	500	380	cover	x0.28,y0.36@1.6	shortlist	1	png	Version 4.1 Wallpaper 3.png		splash	
+# proto_fs_opening_number <- Furina in the Masquerade of the Guilty art, face in frame
+proto_fs_opening_number	ImageGen/images/cards/furina/proto_fs_opening_number.png	500	380	cover	x0.57,y0.33@1.6	shortlist	1	png	Version 4.2 Website Announcement.png		splash	
+# proto_fs_star_turn <- Furina at the left of the anniversary cast
+proto_fs_star_turn	ImageGen/images/cards/furina/proto_fs_star_turn.png	500	380	cover	x0.21,y0.36@1.8	shortlist	1	png	4th Anniversary Wallpaper 3.jpg		splash	
+# proto_fs_the_last_act <- Furina sitting at night with the cat, face in frame
+proto_fs_the_last_act	ImageGen/images/cards/furina/proto_fs_the_last_act.png	500	380	cover	x0.53,y0.47@1.3	shortlist	1	png	Calamitous Tread Graphic 5.png		splash	
