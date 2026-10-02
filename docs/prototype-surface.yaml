@@ -841,16 +841,15 @@
    effects: [{op: block, amount: 14},
              {op: add_card, card: confiscated, zone: draw, amount: 1}]}
 
-# Unplayable with no status in hand (the gate is derived from the
-# `exhaust_a_status` op); with several, the player chooses. The Strength loss
-# is permanent, Disarm's kind.
+# Reworked 2026-10-02: always playable. `per_status` exhausts every status in
+# hand, then each enemy loses `amount` plus that per status, one total. The
+# loss is permanent; why: docs/notes/prototype-surface-provenance.md.
 - {id: proto_ko_kitchen_alchemy, name: "Kitchen Alchemy", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Exhaust a status in your hand. ALL enemies lose 2 [gold]Strength[/gold].",
+   description: "ALL enemies lose 1 [gold]Strength[/gold]. Exhaust every status in your hand; they lose 1 more for each.",
    upgrade: {strength_loss: +1},
-   effects: [{op: exhaust_a_status},
-             {op: lose_strength, amount: 2, target: all_enemies}]}
+   effects: [{op: lose_strength, amount: 1, target: all_enemies, per_status: 1}]}
 
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and

@@ -263,11 +263,6 @@ def card_playable(state: CombatState, card: Card) -> bool:
     # `klee_overhaul.set_off_only` -- never a per-card flag.
     if klee_overhaul.refuses_for_no_bomb(state, card):
         return False
-    # DEFENCE IN THE STATUS PILE (2026-10-01): Kitchen Alchemy exhausts a
-    # status from hand and is unplayable with none there.
-    # `klee_overhaul.needs_a_status`; the mod's `IsPlayable` twin.
-    if klee_overhaul.refuses_for_no_status(state, card):
-        return False
     # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-455`, the clause above one mechanic
     # over: a card whose whole body is a carry-out pays its energy, exhausts
     # itself and does NOTHING while the jellyfish holds no Plan. The r13 seat

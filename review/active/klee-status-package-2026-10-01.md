@@ -131,11 +131,13 @@ an alchemy-flavored Strength reduction?"
 |---|---|---|---|
 | **Up in Smoke!** | Skill, 1, Common | Apply 2 [3] Weak to ALL enemies. Shuffle a Dazed into your draw pile. | Weak +1 |
 | **Behind Jean's Desk** | Skill, 1, Uncommon | Gain 14 [18] Block. Add a Confiscated to your draw pile. | Block +4 |
-| **Kitchen Alchemy** | Skill, 1, Uncommon, Exhaust | Exhaust a status in your hand. ALL enemies lose 2 [3] Strength. | Strength loss +1 |
+| **Kitchen Alchemy** | Skill, 1, Uncommon, Exhaust | ALL enemies lose 1 [2] Strength. Exhaust every status in your hand; they lose 1 more for each. | Strength loss +1 (base only) |
 
-Kitchen Alchemy is unplayable with no status in hand, the way base-game cards
-with a play condition are. With several statuses in hand the player chooses
-which to exhaust. The Strength loss is permanent, as Malaise's is.
+Reworked 2026-10-02 after the forced-deck seat (0 plays in 7 hands: a status is rarely in hand): always playable, more with statuses.
+
+Kitchen Alchemy is always playable. Each enemy loses the base plus 1 for each
+status exhausted from hand, applied once as one total; curses stay in hand.
+The Strength loss is permanent, as Malaise's is.
 
 **The three swaps** (rarity stays 24 / 33 / 21):
 

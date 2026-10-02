@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
 using KleeMod.Elements;
-using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -47,36 +46,33 @@ public static class KleeStatusPackage
     }
 
     /// <summary>How many statuses are in the hand of
-    /// <paramref name="owner"/>'s player. PURE; the gate Kitchen Alchemy's
-    /// generated <c>IsPlayable</c> reads.</summary>
+    /// <paramref name="owner"/>'s player. PURE: the count Kitchen Alchemy's
+    /// <see cref="ExhaustStatuses"/> would exhaust (curses are not
+    /// statuses).</summary>
     public static int StatusesInHand(Creature? owner) =>
         HandStatuses(owner?.Player).Count;
 
-    /// <summary>DEFENCE IN THE STATUS PILE (2026-10-01), Kitchen Alchemy:
-    /// "Exhaust a status in your hand." ONE status. With one held it goes;
-    /// with several the player chooses (<c>CardSelectCmd.FromHand</c> of one,
-    /// the base game's exhaust prompt, offering statuses only). None held,
-    /// nothing happens: the card's own gate refuses that play. Sim twin:
-    /// <c>klee_overhaul.exhaust_a_status</c>.</summary>
-    public static async Task<int> ExhaustAStatus(
-        PlayerChoiceContext choiceContext, Player player, CardModel source)
+    /// <summary>Kitchen Alchemy (reworked 2026-10-02): "Exhaust every status
+    /// in your hand." Returns how many went; none held, nothing happens and
+    /// the card still plays. Dust of Purification's exhaust, shared. Sim
+    /// twin: <c>klee_overhaul.exhaust_statuses</c>.</summary>
+    public static async Task<int> ExhaustStatuses(
+        PlayerChoiceContext choiceContext, Player player)
     {
-        var held = HandStatuses(player);
-        if (held.Count == 0) return 0;
-        var victim = held[0];
-        if (held.Count > 1)
+        var victims = HandStatuses(player);
+        foreach (var card in victims)
         {
-            var picked = (await CardSelectCmd.FromHand(
-                choiceContext, player,
-                new CardSelectorPrefs(
-                    CardSelectorPrefs.ExhaustSelectionPrompt, 1),
-                IsStatus, source)).ToList();
-            if (picked.Count == 0) return 0;
-            victim = picked[0];
+            await CardCmd.Exhaust(choiceContext, card);
         }
-        await CardCmd.Exhaust(choiceContext, victim);
-        return 1;
+        return victims.Count;
     }
+
+    /// <summary>Kitchen Alchemy: "ALL enemies lose 1 [2] Strength. Exhaust
+    /// every status in your hand; they lose 1 more for each." The printed
+    /// base plus <paramref name="per"/> for each status exhausted, applied
+    /// once as one total. PURE.</summary>
+    public static int LossWithStatuses(int printed, int per, int exhausted) =>
+        printed + per * (exhausted > 0 ? exhausted : 0);
 
     /// <summary>Klee Can Explain!: "Transform every status in your hand into
     /// Pop!." Defect's Compact body (<c>CardCmd.Transform</c> over
@@ -105,12 +101,7 @@ public static class KleeStatusPackage
     public static async Task<int> ExhaustStatusesGrowLargest(
         PlayerChoiceContext choiceContext, Player player, int per)
     {
-        var victims = HandStatuses(player);
-        foreach (var card in victims)
-        {
-            await CardCmd.Exhaust(choiceContext, card);
-        }
-        var n = victims.Count;
+        var n = await ExhaustStatuses(choiceContext, player);
         if (n > 0 && per > 0 && player.Creature != null)
         {
             ProtoBombPower.GrowLargest(player.Creature, per * n);

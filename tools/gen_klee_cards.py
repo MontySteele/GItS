@@ -574,12 +574,13 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # is exhausted into the largest Bomb (Albedo -- Dust of
                   # Purification).
                   "transform_statuses_into", "exhaust_statuses_grow_largest",
-                  # DEFENCE IN THE STATUS PILE (2026-10-01, Kitchen Alchemy):
-                  # one chosen status out of the hand
-                  # (`KleeStatusPackage.ExhaustAStatus`), and a PERMANENT
-                  # Strength loss -- Malaise's `PowerCmd.Apply<StrengthPower>`
-                  # at minus N.
-                  "exhaust_a_status", "lose_strength",
+                  # DEFENCE IN THE STATUS PILE (2026-10-01, Kitchen Alchemy,
+                  # reworked 2026-10-02): a PERMANENT Strength loss --
+                  # Malaise's `PowerCmd.Apply<StrengthPower>` at minus N --
+                  # that with `per_status` first exhausts every status in
+                  # hand (`KleeStatusPackage.ExhaustStatuses`) and grows by
+                  # that many.
+                  "lose_strength",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -1590,18 +1591,6 @@ def card_is_set_off_only(card: dict) -> bool:
     return True
 
 
-def card_needs_a_status(card: dict) -> bool:
-    """Does this row exhaust a status from hand (`exhaust_a_status`)?
-
-    DEFENCE IN THE STATUS PILE (2026-10-01): Kitchen Alchemy needs a status in
-    hand to be playable, the way a base-game card with a play condition does.
-    DERIVED FROM THE ROW, `card_is_set_off_only`'s rule. Twin:
-    `klee_overhaul.needs_a_status`.
-    """
-    return any(eff.get("op") == "exhaust_a_status"
-               for eff in card.get("effects", []))
-
-
 def card_is_carry_out_only(card: dict) -> bool:
     """Does this row do NOTHING while the jellyfish holds no Plan? (`EB-455`.)
 
@@ -2527,12 +2516,12 @@ MULTIPLY_LARGEST_BOMB_FIELDS = {"op", "factor"}
 TRANSFORM_STATUSES_INTO_FIELDS = {"op", "card"}
 TRANSFORM_INTO_CLASSES = {"proto_ko_pop": "ProtoKoPop"}
 EXHAUST_STATUSES_GROW_LARGEST_FIELDS = {"op", "amount"}
-# DEFENCE IN THE STATUS PILE (2026-10-01). The exhaust prints no number (it
-# is always one status); the Strength loss prints one and reaches ALL
-# enemies, the one spelling a row prints (an aimed loss would need the card's
-# TargetType to follow it, which no row asks for yet).
-EXHAUST_A_STATUS_FIELDS = {"op"}
-LOSE_STRENGTH_FIELDS = {"op", "amount", "target"}
+# DEFENCE IN THE STATUS PILE (2026-10-01, reworked 2026-10-02). The Strength
+# loss prints one number and reaches ALL enemies, the one spelling a row
+# prints (an aimed loss would need the card's TargetType to follow it, which
+# no row asks for yet). `per_status` (Kitchen Alchemy): exhaust every status
+# in hand first, and each enemy loses that much more for each, one total.
+LOSE_STRENGTH_FIELDS = {"op", "amount", "target", "per_status"}
 LOSE_STRENGTH_TARGETS = ("all_enemies",)
 #: Treasure Map and Come Back and Play!: one card of a KIND out of the discard
 #: pile into the hand, the player choosing among the kind.
@@ -5156,10 +5145,6 @@ def blocked_reason(
             if not isinstance(value, int) or isinstance(value, bool) \
                     or value <= 0:
                 return f"{op} amount must be a positive literal int"
-        if op == "exhaust_a_status":
-            unknown = set(eff) - EXHAUST_A_STATUS_FIELDS
-            if unknown:
-                return f"{op} field(s) {sorted(unknown)} not understood"
         if op == "lose_strength":
             unknown = set(eff) - LOSE_STRENGTH_FIELDS
             if unknown:
@@ -5170,6 +5155,10 @@ def blocked_reason(
                 return f"{op} amount must be a positive literal int"
             if eff.get("target", "enemy") not in LOSE_STRENGTH_TARGETS:
                 return f"lose_strength target {eff.get('target')!r}"
+            if "per_status" in eff:
+                per = eff["per_status"]
+                if not isinstance(per, int) or isinstance(per, bool)                         or per <= 0:
+                    return f"{op} per_status must be a positive literal int"
         if op == "fetch_from_discard":
             unknown = set(eff) - FETCH_FROM_DISCARD_FIELDS
             if unknown:
@@ -11448,20 +11437,23 @@ def build_body(
                 "await KleeStatusPackage.ExhaustStatusesGrowLargest("
                 f"choiceContext, Owner, {grow_expr(card, eff)});")
 
-        elif op == "exhaust_a_status":
-            # DEFENCE IN THE STATUS PILE: Kitchen Alchemy, one status out of
-            # the hand, the player choosing when several are held.
-            lines.append(
-                "await KleeStatusPackage.ExhaustAStatus("
-                "choiceContext, Owner, this);")
-
         elif op == "lose_strength":
             # DEFENCE IN THE STATUS PILE: a PERMANENT Strength loss, the base
             # game's own Malaise call (`PowerCmd.Apply<StrengthPower>` at
             # minus N), not a this-turn loss. Sim twin:
             # `effects._op_lose_strength`. ALL enemies only
-            # (`LOSE_STRENGTH_TARGETS`).
+            # (`LOSE_STRENGTH_TARGETS`). With `per_status` (Kitchen Alchemy,
+            # reworked 2026-10-02) every status in hand is exhausted first
+            # and the loss grows by `per_status` for each, ONE application.
             loss = 'DynamicVars["StrengthLoss"].IntValue'
+            if "per_status" in eff:
+                lines.append(
+                    "var exhausted = await KleeStatusPackage.ExhaustStatuses("
+                    "choiceContext, Owner);")
+                lines.append(
+                    "var loss = KleeStatusPackage.LossWithStatuses("
+                    f"{loss}, {int(eff['per_status'])}, exhausted);")
+                loss = "loss"
             lines.append(
                 "foreach (var weakened in "
                 "CombatState!.HittableEnemies.ToList())\n"
@@ -15504,8 +15496,7 @@ def emit(
     # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
     # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
     # into `BlockedByCardLogic` and has no slot for what the reason was.
-    if (card_is_set_off_only(card) or card_is_carry_out_only(card)
-            or card_needs_a_status(card)):
+    if card_is_set_off_only(card) or card_is_carry_out_only(card):
         interfaces += ", IUnplayableReasonCard"
 
     # EB-184: a modal card DECLARES what each of its modes does about aiming,
@@ -16517,25 +16508,6 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "    protected override bool IsPlayable =>\n"
         f"        {plan_gate_expr};"
         if plan_gated and not spark_price else "")
-    # DEFENCE IN THE STATUS PILE (2026-10-01), the same pair once more: a card
-    # that exhausts a status from hand is unplayable with none there (Kitchen
-    # Alchemy). Twin: `klee_overhaul.refuses_for_no_status`.
-    status_gated = card_needs_a_status(card)
-    status_gate_expr = (
-        "KleeStatusPackage.StatusesInHand(SparkCost.OwnerCreatureOf(this)) > 0")
-    status_gate_member = (
-        "\n\n    // Defence in the status pile: a card that exhausts a status\n"
-        "    // from hand is unplayable with none there, the way a base-game\n"
-        "    // card with a play condition is.\n"
-        "    protected override bool IsPlayable =>\n"
-        f"        {status_gate_expr};"
-        if status_gated and not spark_price else "")
-    status_reason_member = (
-        "\n\n    public string? UnplayableReason =>\n"
-        f"        {status_gate_expr}\n"
-        "            ? null\n"
-        '            : "no status in your hand";'
-        if status_gated else "")
     plan_reason_member = (
         "\n\n    public string? UnplayableReason =>\n"
         f"        {plan_gate_expr}\n"
@@ -16677,8 +16649,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>\n"
             f"        new[] {{ {flags_cs} }};")
     if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member,
-                             bomb_gate_member, plan_gate_member,
-                             status_gate_member)) > 1:
+                             bomb_gate_member, plan_gate_member)) > 1:
         raise ValueError(
             f"{card['id']}: two resource cost lines on one card -- only one "
             "IsPlayable override can be emitted")
@@ -16771,7 +16742,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{discard_discount_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{status_gate_member}{status_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{wide_target_member}{discard_discount_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
