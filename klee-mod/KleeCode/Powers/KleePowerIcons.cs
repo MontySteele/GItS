@@ -377,6 +377,11 @@ internal static class KleePowerIcons
         SparksForEveryonePower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         RaiseAToastPower => KleePck.Path("furina/powers/limelight.png"),
+        // Klee final pass (2026-10-02): Cover Your Ears!'s this-turn Strength
+        // loss on an enemy borrows the Bomb's Vulnerable sigil, the badge
+        // Shrapnel's enemy debuff already wears. Its own art stays owed.
+        ProtoKoCoverYourEarsPower =>
+            KleePck.Path("klee/powers/detonation_vuln.png"),
         TheCrowdRoarsPower =>
             KleePck.Path("furina/powers/rising_ovation.png"),
         // VARKA (the Oath rework): his Oath badge wears the Vision of its

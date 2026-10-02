@@ -136,32 +136,11 @@ public class KleeR276BatchTests
         Assert.IsAssignableFrom<ISetOffCard>(new ProtoKoPerfectTiming());
         Assert.False(new ProtoKoPop() is ISetOffCard);
         Assert.False(new ProtoKoHairTrigger() is ISetOffCard);
-        Assert.False(new ProtoKoWhereDidIPutIt() is ISetOffCard);
     }
 
-    [Fact]
-    public void Where_did_i_put_it_offers_only_set_off_cards_and_looks_at_four()
-    {
-        // STRUCTURAL: the draw pile and the grid are outside the headless
-        // boundary. The shape is the rule -- the card looks at the top N, asks
-        // the one chooser with the filter on, and bottoms everything it saw
-        // and did not take.
-        var card = new ProtoKoWhereDidIPutIt();
-        Assert.Equal(CardRarity.Common, card.Rarity);
-        // Klee balance review, pick 4a, 2026-09-25. 1 -> 0 Energy.
-        Assert.Equal(0, card.EnergyCost.Canonical);
-        Assert.Equal(4m, card.DynamicVars["Scry"].BaseValue);
-        Assert.Equal(6m, Upgraded<ProtoKoWhereDidIPutIt>()
-                             .DynamicVars["Scry"].BaseValue);
-        Assert.Contains("[gold]Set off[/gold] card", Face(card));
-
-        var play = Il.Calls(Il.Method("ProtoKoWhereDidIPutIt", "OnPlay"));
-        Assert.Contains("ScryTake.Choose", play);
-        Assert.Contains("CardPileCmd.Add", play);
-
-        var choose = Il.CallSequence(Il.Method("ScryTake", "Choose"));
-        Assert.Contains(choose, c => c.Contains("Where"));
-    }
+    // Where Did I Put It?'s pin left with the row (Klee final pass,
+    // 2026-10-02: cut). `ScryTake`'s Set off filter stays registered
+    // (BACKLOG).
 
     // ---- the pool --------------------------------------------------------
 
@@ -173,7 +152,9 @@ public class KleeR276BatchTests
         foreach (var name in new[]
                  {
                      "ProtoKoHairTrigger", "ProtoKoExplosiveFrags",
-                     "ProtoKoWhereDidIPutIt",
+                     // Where Did I Put It? cut, Cover Your Ears! in its slot
+                     // (Klee final pass, 2026-10-02).
+                     "ProtoKoCoverYourEars",
                  })
         {
             Assert.Contains(slice, c => c.Contains(name));
@@ -182,7 +163,7 @@ public class KleeR276BatchTests
                  {
                      "ProtoKoLongFuse", "ProtoKoExplosivesWorkshop",
                      "ProtoKoSugarRush", "ProtoKoKindling",
-                     "ProtoKoCatalyticConverter",
+                     "ProtoKoCatalyticConverter", "ProtoKoWhereDidIPutIt",
                  })
         {
             Assert.DoesNotContain(slice, c => c.Contains(name));

@@ -78,9 +78,9 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
     /// <remarks>C1: always available, no unlock gate while testing.</remarks>
     protected override CharacterModel? UnlocksAfterRunAs => null;
 
-    /// <remarks>62 HP per spec C1.4 — run-level fragility is a design premise
-    /// under test (playtest checklist: "do you notice being fragile?").</remarks>
-    public override int StartingHp => 62;
+    /// <remarks>70 HP, Silent's (Klee final pass, 2026-10-02,
+    /// review/active/klee-final-pass-2026-10-02.md pick 1; 62 before).</remarks>
+    public override int StartingHp => 70;
 
     public override int StartingGold => 99;
 

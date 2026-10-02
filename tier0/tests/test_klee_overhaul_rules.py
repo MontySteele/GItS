@@ -2006,43 +2006,9 @@ def test_explosive_frags_pays_for_a_mine_a_card_set_off(overhaul):
     assert a.powers.get("vulnerable", 0) == 3
 
 
-def test_where_did_i_put_it_takes_a_set_off_card_and_bottoms_the_rest(
-        overhaul):
-    """"Look at the top 4 cards of your draw pile. Put a Set off card from
-    them into your hand and the rest on the bottom." The sim's stand-in for
-    the choice is the cheapest Set off card."""
-    state = klee_state([make_enemy(hp=200)])
-    kapow = load("proto_ko_kapow")
-    fillers = [probe([], cid=f"filler{i}", ctype="skill") for i in range(4)]
-    under = probe([], cid="under", ctype="skill")
-    state.player.draw_pile = [fillers[0], kapow, fillers[1], fillers[2],
-                              under]
-    state.player.hand = []
-    effects.resolve_card(state, load("proto_ko_where_did_i_put_it"))
-    assert state.player.hand == [kapow]
-    assert [c.id for c in state.player.draw_pile] == [
-        "under", "filler0", "filler1", "filler2"]
-
-
-def test_where_did_i_put_it_with_no_set_off_card_bottoms_everything(overhaul):
-    state = klee_state([make_enemy(hp=200)])
-    fillers = [probe([], cid=f"filler{i}", ctype="skill") for i in range(5)]
-    state.player.draw_pile = list(fillers)
-    state.player.hand = []
-    effects.resolve_card(state, load("proto_ko_where_did_i_put_it"))
-    assert state.player.hand == []
-    assert [c.id for c in state.player.draw_pile] == [
-        "filler4", "filler0", "filler1", "filler2", "filler3"]
-
-
-def test_where_did_i_put_it_upgraded_looks_at_six(overhaul):
-    state = klee_state([make_enemy(hp=200)])
-    fillers = [probe([], cid=f"filler{i}", ctype="skill") for i in range(5)]
-    kapow = load("proto_ko_kapow")
-    state.player.draw_pile = [*fillers, kapow]
-    state.player.hand = []
-    effects.resolve_card(state, load("proto_ko_where_did_i_put_it+"))
-    assert state.player.hand == [kapow]
+# Where Did I Put It?'s three pins left with the row (Klee final pass,
+# 2026-10-02: cut). Its `scry_take` `filter: set_off` engine piece stays
+# registered (BACKLOG).
 
 
 def test_is_set_off_card_reads_the_row(overhaul):

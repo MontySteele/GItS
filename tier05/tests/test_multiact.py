@@ -18,8 +18,9 @@ from tier05 import relics as relic_pool
 
 
 SEED = 77
-BOUNDARY_SEED = 74   # see test_two_act_run_walks_both_acts_and_heals...
-#                      (70 until legacy cleanup stage 6 changed the starter)
+BOUNDARY_SEED = 75   # see test_two_act_run_walks_both_acts_and_heals...
+#                      (70 until legacy cleanup stage 6 changed the starter;
+#                      74 until Klee's HP went 62 -> 70, final pass 2026-10-02)
 CHIP = 4          # flat HP loss per stubbed fight -- every fight is won
 
 

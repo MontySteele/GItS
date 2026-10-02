@@ -2449,7 +2449,12 @@ EXHAUST_STATUSES_GROW_LARGEST_FIELDS = {"op", "amount"}
 # prints (an aimed loss would need the card's TargetType to follow it, which
 # no row asks for yet). `per_status` (Kitchen Alchemy): exhaust every status
 # in hand first, and each enemy loses that much more for each, one total.
-LOSE_STRENGTH_FIELDS = {"op", "amount", "target", "per_status"}
+# `this_turn: true` (Cover Your Ears!, Klee final pass 2026-10-02): the loss
+# is the base game's Piercing Wail shape, a `TemporaryStrengthPower` that
+# gives the Strength back at the end of the enemy's turn. The power is the
+# card's own `<Card>Power` class (its title is the card's), hand-written
+# beside the rules it serves.
+LOSE_STRENGTH_FIELDS = {"op", "amount", "target", "per_status", "this_turn"}
 LOSE_STRENGTH_TARGETS = ("all_enemies",)
 #: Treasure Map and Come Back and Play!: one card of a KIND out of the discard
 #: pile into the hand, the player choosing among the kind.
@@ -5054,6 +5059,11 @@ def blocked_reason(
                 per = eff["per_status"]
                 if not isinstance(per, int) or isinstance(per, bool)                         or per <= 0:
                     return f"{op} per_status must be a positive literal int"
+            if "this_turn" in eff:
+                if eff["this_turn"] is not True:
+                    return f"{op} this_turn must be true or absent"
+                if "per_status" in eff:
+                    return f"{op} this_turn and per_status do not combine"
         if op == "fetch_from_discard":
             unknown = set(eff) - FETCH_FROM_DISCARD_FIELDS
             if unknown:
@@ -11225,6 +11235,14 @@ def build_body(
             # reworked 2026-10-02) every status in hand is exhausted first
             # and the loss grows by `per_status` for each, ONE application.
             loss = 'DynamicVars["StrengthLoss"].IntValue'
+            # `this_turn` (Cover Your Ears!, Klee final pass 2026-10-02):
+            # Piercing Wail's call verbatim -- the card's own
+            # TemporaryStrengthPower subclass (IsPositive false) at PLUS N,
+            # which takes the Strength and gives it back at the end of the
+            # enemy's turn. Sim twin: `temp_strength_down`.
+            power, sign = "StrengthPower", "-"
+            if eff.get("this_turn"):
+                power, sign = f"{pascal(card['id'])}Power", ""
             if "per_status" in eff:
                 lines.append(
                     "var exhausted = await KleeStatusPackage.ExhaustStatuses("
@@ -11237,8 +11255,8 @@ def build_body(
                 "foreach (var weakened in "
                 "CombatState!.HittableEnemies.ToList())\n"
                 "        {\n"
-                "            await PowerCmd.Apply<StrengthPower>("
-                f"choiceContext, weakened, -{loss}, "
+                f"            await PowerCmd.Apply<{power}>("
+                f"choiceContext, weakened, {sign}{loss}, "
                 "applier: Owner.Creature, cardSource: this);\n"
                 "        }")
 

@@ -5576,8 +5576,17 @@ def _op_lose_strength(state: CombatState, fx: dict, card: Card) -> None:
     (Kitchen Alchemy, reworked 2026-10-02): "Exhaust every status in your
     hand; they lose 1 more for each." The exhausts first, then ONE loss of
     the base plus `per_status` for each (`KleeStatusPackage.LossWithStatuses`).
+    With `this_turn` (Cover Your Ears!, Klee final pass 2026-10-02) the loss
+    is Piercing Wail's instead: `temp_strength_down`, the TemporaryStrength
+    shape `refpowers` already runs for Mangle, returned at the end of the
+    enemy's own turn.
     """
     amount = int(_amount(state, fx["amount"]))
+    if fx.get("this_turn"):
+        for enemy in _pick_targets(state, fx.get("target", "enemy")):
+            powers.apply_power(state, enemy, "temp_strength_down", amount,
+                               applier=state.player)
+        return
     if "per_status" in fx:
         if not klee_overhaul.live(state):
             _op_klee_overhaul_off(state, fx, card)    # always raises

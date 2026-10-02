@@ -198,6 +198,7 @@
     "proto_ko_come_back_and_play",
     "proto_ko_countdown",
     "proto_ko_coven_errand",
+    "proto_ko_cover_your_ears",
     "proto_ko_damage_report",
     "proto_ko_dig_in",
     "proto_ko_dodoco",
@@ -258,7 +259,6 @@
     "proto_ko_up_in_smoke",
     "proto_ko_vermillion_pact",
     "proto_ko_wait_for_it",
-    "proto_ko_where_did_i_put_it",
     "proto_ko_windblume_fireworks",
     "proto_ko_witches_circle",
     "proto_mc_albedo_dust_of_purification",
@@ -630,6 +630,7 @@
     "proto_ko_come_back_and_play": "klee",
     "proto_ko_countdown": "klee",
     "proto_ko_coven_errand": "klee",
+    "proto_ko_cover_your_ears": "klee",
     "proto_ko_damage_report": "klee",
     "proto_ko_dig_in": "klee",
     "proto_ko_dodoco": "klee",
@@ -690,7 +691,6 @@
     "proto_ko_up_in_smoke": "klee",
     "proto_ko_vermillion_pact": "klee",
     "proto_ko_wait_for_it": "klee",
-    "proto_ko_where_did_i_put_it": "klee",
     "proto_ko_windblume_fireworks": "klee",
     "proto_ko_witches_circle": "klee",
     "proto_mc_albedo_dust_of_purification": "klee",
@@ -1511,6 +1511,9 @@
     "proto_ko_coven_errand": {
       "bomb_size": 2
     },
+    "proto_ko_cover_your_ears": {
+      "strength_loss": 2
+    },
     "proto_ko_damage_report": {
       "power_amount": 2
     },
@@ -1695,9 +1698,6 @@
     },
     "proto_ko_wait_for_it": {
       "power_amount": 1
-    },
-    "proto_ko_where_did_i_put_it": {
-      "scry": 2
     },
     "proto_ko_windblume_fireworks": {
       "damage": 4,
