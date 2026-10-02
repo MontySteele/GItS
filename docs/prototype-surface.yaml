@@ -132,11 +132,9 @@
    effects: [{op: damage, amount: 4, target: enemy},
              {op: plant_bomb, target: enemy, size: 4}]}
 
-- {id: proto_ko_pocket_fireworks, name: "Pocket Fireworks", character: klee,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   description: "Deal 9 damage.",
-   effects: [{op: damage, amount: 9, target: enemy}]}
+# POCKET FIREWORKS IS CUT (the Klee status package, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.3). Provenance
+# note, "Klee status package, 2026-10-01".
 
 - {id: proto_ko_chain_fuse, name: "Chain Fuse", character: klee,
    authored_by: [claude],
@@ -224,11 +222,9 @@
              {op: set_off, target: enemy, damage: 8},
              {op: plant_bomb, target: enemy, size: 4}]}
 
-- {id: proto_ko_rapid_fire, name: "Rapid Fire", character: klee,
-   authored_by: [claude],
-   cost: 2, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] a random enemy and deal 3 damage to it, 4 times.",
-   effects: [{op: set_off, target: random_enemy, damage: 3, times: 4}]}
+# RAPID FIRE IS CUT (the Klee status package, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.3). Provenance
+# note, "Klee status package, 2026-10-01".
 
 # Reworked 2026-09-27 ([USER]: "very OP"): grows Bombs, places none.
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
@@ -262,12 +258,9 @@
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: repeat_this, times: 1}]}]}
 
-- {id: proto_ko_flame_dance, name: "Flame Dance", character: klee,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] each enemy that has an aura other than [gold]Pyro[/gold]. Deal 5 damage to ALL enemies.",
-   effects: [{op: set_off, target: all_enemies, aura: non_pyro},
-             {op: damage, amount: 5, target: all_enemies}]}
+# FLAME DANCE IS CUT (the Klee status package, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.3). Provenance
+# note, "Klee status package, 2026-10-01".
 
 # --- currencies and defence (packet sec.4) ---
 
@@ -323,20 +316,13 @@
 # the Bomb state, none a plain Block. Per-row reasoning:
 # docs/notes/prototype-surface-provenance.md. ---
 
-- {id: proto_ko_dodoco_cover, name: "Dodoco Cover", character: klee,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Bomb[/gold] 4. Gain 5 [gold]Block[/gold].",
-   upgrade: {bomb_size: +2, block: +2},
-   effects: [{op: plant_bomb, target: enemy, size: 4},
-             {op: block, amount: 5}]}
+# DODOCO COVER IS CUT (the Klee status package, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.3). Provenance
+# note, "Klee status package, 2026-10-01".
 
-- {id: proto_ko_careful_now, name: "Careful Now", character: klee,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon, retain: true,
-   description: "Gain [gold]Block[/gold] equal to your largest [gold]Bomb[/gold], up to 10.",
-   upgrade: {cap: +3},
-   effects: [{op: block_largest_bomb, cap: 10}]}
+# CAREFUL NOW IS CUT (the Klee status package, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.3). Provenance
+# note, "Klee status package, 2026-10-01".
 
 - {id: proto_mc_barbara_front_row_seat, name: "Barbara — Front Row Seat", character: klee,
    authored_by: [claude],
@@ -456,12 +442,9 @@
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: ko_vermillion_pact, amount: 1, target: self}]}
 
-- {id: proto_ko_split_charge, name: "Split Charge", character: klee,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "Split your largest [gold]Bomb[/gold] into two halves on random enemies.{IfUpgraded:show: Halves grow by 2.|}",
-   upgrade: {split_grow: +2},
-   effects: [{op: split_largest_bomb, growth: 0}]}
+# SPLIT CHARGE IS CUT (the Klee status package, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.3). Provenance
+# note, "Klee status package, 2026-10-01".
 
 # THE POOL PASS, ROUND TWO (`EB-732`, 2026-09-08). Six rows in three pairs:
 # the defence shelf's two, the Spark sinks' two, the Energy engines' two.
@@ -606,12 +589,9 @@
    effects: [{op: set_off, target: enemy, damage: 6,
               wide_if: companion_played_this_turn}]}
 
-- {id: proto_ko_fish_fry, name: "Fish Fry", character: klee,
-   authored_by: [claude],
-   cost: 2, type: attack, rarity: uncommon,
-   description: "Deal 7 damage to ALL enemies. Enemies with a [gold]Bomb[/gold] take 5 additional damage.",
-   upgrade: {damage: +3, bonus_vs_bombed: +2},
-   effects: [{op: damage, amount: 7, target: all_enemies, bonus_vs_bombed: 5}]}
+# FISH FRY IS CUT (the Klee status package, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.3). Provenance
+# note, "Klee status package, 2026-10-01".
 
 - {id: proto_ko_one_more_charge, name: "Witch's Homework", character: klee,
    authored_by: [claude],
@@ -697,12 +677,9 @@
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_patience, amount: 4, target: self}]}
 
-- {id: proto_ko_friendship_bracelet, name: "Friendship Bracelet", character: klee,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a [gold]Companion[/gold] card, your largest [gold]Bomb[/gold] grows by 3.",
-   upgrade: {power_amount: +1},
-   effects: [{op: apply_power, power: ko_friendship_bracelet, amount: 3, target: self}]}
+# FRIENDSHIP BRACELET IS CUT (the Klee status package, 2026-10-01,
+# review/active/klee-status-package-2026-10-01.md sec.3). Provenance
+# note, "Klee status package, 2026-10-01".
 
 - {id: proto_ko_secret_base, name: "Klee's Secret Base", character: klee,
    authored_by: [claude],
@@ -787,6 +764,72 @@
    description: "Whenever one of your [gold]Mines[/gold] goes off, place a [gold]Bomb[/gold] half its size, rounded down, on that enemy.",
    upgrade: {innate: true},
    effects: [{op: apply_power, power: ko_second_surprise, amount: 1, target: self}]}
+
+# --- THE STATUS PACKAGE (2026-10-01, ruled), LAST in her pool's order; eight
+# rows cut above. Provenance note, "Klee status package, 2026-10-01". ---
+
+- {id: proto_ko_forbidden_fun, name: "Forbidden Fun", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common,
+   description: "Deal 10 damage. Shuffle a [gold]Dazed[/gold] into your draw pile.",
+   upgrade: {damage: +4},
+   effects: [{op: damage, amount: 10, target: enemy},
+             {op: add_card, card: status_dazed, zone: draw, amount: 1}]}
+
+- {id: proto_ko_it_wasnt_me, name: "It Wasn't Me!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "Gain 6 [gold]Block[/gold]. Shuffle a [gold]Dazed[/gold] into your draw pile.",
+   upgrade: {block: +3},
+   effects: [{op: block, amount: 6},
+             {op: add_card, card: status_dazed, zone: draw, amount: 1}]}
+
+- {id: proto_ko_lisas_treats, name: "Lisa's Treats", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Gain 2 [gold]Energy[/gold]. Add 2 [gold]Confiscated[/gold] to your draw pile.",
+   upgrade: {energy: +1},
+   effects: [{op: energy, amount: 2},
+             {op: add_card, card: confiscated, zone: draw, amount: 2}]}
+
+- {id: proto_ko_red_knight, name: "Red Knight", character: klee,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare,
+   description: "Deal 22 damage to ALL enemies. Add 2 [gold]Confiscated[/gold] to your draw pile.",
+   upgrade: {damage: +6},
+   effects: [{op: damage, amount: 22, target: all_enemies},
+             {op: add_card, card: confiscated, zone: draw, amount: 2}]}
+
+- {id: proto_ko_finders_keepers, name: "Finders Keepers", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you play a [gold]Confiscated[/gold], place a [gold]Bomb[/gold] 5 on a random enemy.",
+   upgrade: {power_amount: +2},
+   effects: [{op: apply_power, power: ko_finders_keepers, amount: 5, target: self}]}
+
+# Defect's Compact in her colours: every status in hand, Confiscated
+# included, becomes the pool's own Pop! (unupgraded).
+- {id: proto_ko_klee_can_explain, name: "Klee Can Explain!", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 6 [gold]Block[/gold]. Transform every status in your hand into Pop!.",
+   upgrade: {block: +2},
+   effects: [{op: block, amount: 6},
+             {op: transform_statuses_into, card: proto_ko_pop}]}
+
+- {id: proto_ko_damage_report, name: "Damage Report", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   description: "Whenever you draw a status, deal 5 damage to ALL enemies.",
+   upgrade: {power_amount: +2},
+   effects: [{op: apply_power, power: ko_damage_report, amount: 5, target: self}]}
+
+- {id: proto_ko_solitary_confinement, name: "Solitary Confinement", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   description: "Your [gold]Confiscated[/gold] cost 0.",
+   upgrade: {innate: true},
+   effects: [{op: apply_power, power: ko_solitary_confinement, amount: 1, target: self}]}
 
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and
@@ -2296,14 +2339,17 @@
 # The FAMILY half of the seam. R276 retired the printed Hexerei mark.
 # R236 sec.3; reasoning in docs/notes/prototype-surface-provenance.md.
 
-- {id: proto_mc_albedo_tectonic_tide, name: "Albedo — Tectonic Tide", character: klee,
+# Klee status package (2026-10-01, ruled; lore pass pick 3): his sixth
+# constellation, in Tectonic Tide's place.
+- {id: proto_mc_albedo_dust_of_purification, name: "Albedo — Dust of Purification", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
-   cost: 1, type: power,
+   cost: 1, type: skill,
    personal_pool: [klee],
    replaces: proto_mc_albedo_solar_isotoma,
-   description: "Whenever an [gold]Elemental Reaction[/gold] happens, deal 4 damage to that enemy.",
-   effects: [{op: apply_power, power: mc_tectonic_tide, amount: 4, target: self}]}
+   description: "Exhaust every status in your hand. Your largest [gold]Bomb[/gold] grows by 6 for each.",
+   upgrade: {grow: +2},
+   effects: [{op: exhaust_statuses_grow_largest, amount: 6}]}
 
 - {id: proto_mc_fischl_sinful_hex, name: "Fischl — Undone Be Thy Sinful Hex", character: klee,
    authored_by: [claude],

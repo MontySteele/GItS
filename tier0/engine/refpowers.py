@@ -1230,6 +1230,11 @@ def after_card_drawn(state: CombatState, card: Card,
     if n and not from_hand_draw and state.in_player_turn:
         for enemy in list(state.living_enemies):
             unpowered_damage(state, enemy, n)
+    # THE KLEE STATUS PACKAGE (2026-10-01): Damage Report, per status drawn.
+    # Dead unless the Power is up.
+    if C.KLEE_OVERHAUL and p.powers.get("ko_damage_report"):
+        from tier0.engine import klee_overhaul     # late import (cycle)
+        klee_overhaul.damage_report(state, card)
     randomise_cost_on_draw(state, card)
 
 

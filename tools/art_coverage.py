@@ -143,6 +143,33 @@ KNOWN_STALE = {
     "proto_fs_eternal_applause": (
         "The Furina fade pass (2026-09-29) CUT this row from her pool (three rows cut, 75 -> 72; docs/notes/prototype-surface-provenance.md). Kept rather than deleted, as the entries below are: a painted asset on a furina/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_ko_pocket_fireworks": (
+        "The Klee status package (2026-10-01) CUT this row from her pool (eight rows cut, eight added; review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_rapid_fire": (
+        "The Klee status package (2026-10-01) CUT this row from her pool (eight rows cut, eight added; review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_flame_dance": (
+        "The Klee status package (2026-10-01) CUT this row from her pool (eight rows cut, eight added; review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_dodoco_cover": (
+        "The Klee status package (2026-10-01) CUT this row from her pool (eight rows cut, eight added; review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_careful_now": (
+        "The Klee status package (2026-10-01) CUT this row from her pool (eight rows cut, eight added; review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_split_charge": (
+        "The Klee status package (2026-10-01) CUT this row from her pool (eight rows cut, eight added; review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_fish_fry": (
+        "The Klee status package (2026-10-01) CUT this row from her pool (eight rows cut, eight added; review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_friendship_bracelet": (
+        "The Klee status package (2026-10-01) CUT this row from her pool (eight rows cut, eight added; review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mc_albedo_tectonic_tide": (
+        "The Klee status package (2026-10-01) replaced this Klee stand-in with Albedo — Dust of Purification (review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a companions/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_rally": (
         "The Kokomi status batch (2026-10-01, #801) CUT this row from her pool (seven rows cut, six added; review/active/kokomi-status-batch-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),

@@ -5418,3 +5418,77 @@ would be Echoing Slash on Silent." The upgrade moves the per-hit damage only
 Pins: `test_kokomi_status_batch.py`, `KokomiStatusBatchTests.cs`. Art:
 placeholder. `tools/kokomi_expansion_sim.py` no longer names the cut rows
 (All Streams' pilot rule and report line went with it).
+
+## Klee status package, 2026-10-01
+
+Paper `review/active/klee-status-package-2026-10-01.md`, ruled: [USER] "1) I
+think a) is fine - we can keep tho the game's conventions 2) and 3) agreed on
+your defaults". Built in both engines. The pool stays **78 (24 / 33 / 21)**,
+from 24 / 36 / 18.
+
+**In (eight rows, LAST in her pool's order, `C.KLEE_STATUS_PACKAGE_IDS`).**
+Forbidden Fun (Attack 0, Common: 10 [14], a Dazed), It Wasn't Me! (Skill 0,
+Common: 6 [9] Block, a Dazed), Lisa's Treats (Skill 0, Uncommon: 2 [3]
+Energy, 2 Confiscated), Red Knight (Attack 2, Rare: 22 [28] to ALL, 2
+Confiscated), Finders Keepers (Power 1, Uncommon: Confiscated played, a Bomb
+5 [7] on a random enemy), Klee Can Explain! (Skill 1, Uncommon: 6 [8] Block,
+every status in hand becomes Pop!), Damage Report (Power 1, Rare: a status
+drawn, 5 [7] to ALL), Solitary Confinement (Power 1, Rare: Confiscated cost
+0; upgrade adds Innate).
+
+**Albedo's Klee stand-in.** "Albedo — Dust of Purification"
+(`proto_mc_albedo_dust_of_purification`, Skill 1, Rare, Mondstadt, the same
+slot: `personal_pool: [klee]`, `replaces: proto_mc_albedo_solar_isotoma`)
+replaces "Albedo — Tectonic Tide": "Exhaust every status in your hand. Your
+largest Bomb grows by 6 [8] for each." Tectonic Tide's id is tombstoned.
+
+**Out (eight rows).** Pocket Fireworks, Dodoco Cover (Common), Careful Now,
+Friendship Bracelet, Fish Fry, Flame Dance, Rapid Fire, Split Charge
+(Uncommon): out of the sheet, `C.KLEE_OVERHAUL_POOL_IDS` and
+`KleeOverhaulRoster.Slice()`, tombstoned in `docs/retired-card-ids.yaml`
+(with Tectonic Tide). Their painted art, Tectonic Tide's too, is `KNOWN_STALE`
+(`tools/art_coverage.py`). Engine pieces only they used stay registered with
+no row spelling them (BACKLOG). The pins that tested only a cut card left
+with it.
+
+**Readings the paper left open (the builder's plainest):**
+
+1. *What a status is.* A card of Status TYPE or Status RARITY
+   (`KleeStatusPackage.IsStatus`, sim `klee_overhaul.is_status`).
+   Confiscated is a Status-rarity Skill, so it counts; curses do not.
+2. *The taxes.* Dazed is the base game's (`status_dazed`, Flotsam Surge's
+   spelling), shuffled into the draw pile at a random depth; Confiscated is
+   the existing token, added the way Fish Blasting adds it.
+3. *Tips.* A card that shuffles in a Dazed now previews the base card
+   (`KleeCardTooltips.ForCard(..., includesDazedCard: true)`, derived from
+   the `add_card` op), so Kokomi's Flotsam Surge and Riptide Ruin gained it
+   too; Confiscated's makers keep the Confiscated keyword tip. Klee Can
+   Explain! previews Pop! (Compact's Fuel shape).
+4. *Klee Can Explain!* transforms every status in hand that the game will
+   transform (`IsTransformable`), Compact's body; the Pop!s arrive
+   unupgraded.
+5. *Dust of Purification.* The exhausts first, then one growth of 6 [8]
+   times the count on her single largest Bomb; with no Bomb out the
+   exhausts still happen. Art: a placeholder, since a stand-in may not wear
+   a neighbour's art (`test_no_standin_wears_a_neighbours_art`); Tectonic
+   Tide's painted file is `KNOWN_STALE`.
+6. *Damage Report* is per card drawn (`AfterCardDrawn`; sim
+   `refpowers.after_card_drawn`), Spark Knight's unelemented hit on every
+   living enemy. Copies add.
+7. *Finders Keepers* is Party Poppers' shape: a play of a Confiscated
+   (replays count) places a plain Bomb of the stack's size on a random
+   enemy.
+8. *Solitary Confinement* is Playdate's cost seam for every Confiscated of
+   hers for the rest of combat (sim `combat.card_cost`).
+9. *Drafter prices.* The two new ops are priced ZERO in `tier05.draft`, the
+   arm's other verbs' decision; no `DRAFTER_VERSION` bump.
+
+**Engine.** Two ops, `transform_statuses_into` and
+`exhaust_statuses_grow_largest`, and three Powers (`ko_finders_keepers`,
+`ko_damage_report`, `ko_solitary_confinement`); C# in
+`Powers/Prototype/KleeStatusPackage.cs`, sim in `klee_overhaul.py`'s
+status-package block. Pins: `tier0/tests/test_klee_status_package.py`,
+`KleeTests/Prototype/KleeStatusPackageTests.cs`.
+
+- *Art.* The eight new rows render the placeholder; the three Powers borrow
+  Party Poppers', Spark Knight's and Playdate's badges (`BACKLOG.md`).

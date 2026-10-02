@@ -911,6 +911,13 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                 ok = _bump_first((fx for fx in top
                                   if fx.get("op") == "damage"),
                                  "grow_on_hit", val)
+            # THE KLEE STATUS PACKAGE (2026-10-01): Albedo -- Dust of
+            # Purification's growth per status exhausted.
+            if not ok:
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op")
+                                  == "exhaust_statuses_grow_largest"),
+                                 "amount", val)
         elif key == "split_grow":
             # `EB-491` (Split Charge). What each half gains, 0 on the base card
             # and bought by the upgrade -- so the base face prints no figure

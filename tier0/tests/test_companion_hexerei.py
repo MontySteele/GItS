@@ -33,7 +33,9 @@ pytestmark = pytest.mark.usefixtures("shipped_world")
 
 #: The slice, and the Universal each row stands in for.
 FAMILY = {
-    "proto_mc_albedo_tectonic_tide": "proto_mc_albedo_solar_isotoma",
+    # The Klee status package (2026-10-01): Dust of Purification is Albedo's
+    # stand-in now; Tectonic Tide's Power stays registered and is pinned below.
+    "proto_mc_albedo_dust_of_purification": "proto_mc_albedo_solar_isotoma",
     "proto_mc_fischl_sinful_hex": "proto_mc_fischl_nightrider",
     "proto_mc_nicole_ladder_of_ascent": "proto_mc_nicole_revelation",
     "proto_mc_sucrose_mollis_favonius": "proto_mc_sucrose_gust",
@@ -117,7 +119,7 @@ def test_the_hand_off_is_the_identity_with_the_flag_off():
         _caches_clear()
 
 
-# --- Albedo, Tectonic Tide ---------------------------------------------------
+# --- Albedo, Tectonic Tide (the Power; its row was cut 2026-10-01) -----------
 
 def test_albedo_pays_on_any_reaction_including_one_that_deals_nothing(overhaul):
     state = _state()

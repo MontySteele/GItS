@@ -12,6 +12,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Kits and display (the mod)
 
+- Klee status package: art for Forbidden Fun, It Wasn't Me!, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report, Solitary Confinement and Albedo — Dust of Purification (placeholders; Dust's plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched); the three Powers borrow Party Poppers', Spark Knight's and Playdate's badges.
+- Klee status package: engine pieces the cuts left unused (`split_largest_bomb` / `SplitLargest`, Flame Dance's `aura: non_pyro` Set off, `FriendshipBraceletPower` / `ko_friendship_bracelet`, `TectonicTidePower` / `mc_tectonic_tide`); delete them in C# and the sim.
 - Kokomi status batch: art for Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge, Abyssal Salvage and the Sea Glass token (placeholders); Abyssal Salvage borrows the Princess of Watatsumi badge.
 - Kokomi status batch: the stock sim pilot cannot read the next-hand Plans (Kelp Wall's count, Tidecleanse, Sea Glass Harvest, Turning Tide) or plan for statuses it has not drawn; their census rates are unread, as Coral Tithe's were.
 - Pool completion (2026-10-01): run paper sec.7's sim checks on the built pools (`review/active/pool-completion-2026-10-01.md`): each of Kokomi's four decks within 10 points of Plan volume with the new Rares granted, Furina's Solo, Spend and Guest decks within 10 points of the default drafter, and no new card taken from over 70% of offers or played in under 5% of the fights where it is held.

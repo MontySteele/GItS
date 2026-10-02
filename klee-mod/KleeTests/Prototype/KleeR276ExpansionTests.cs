@@ -76,7 +76,6 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoSpinningSparkler), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoMineAllMine), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoTeamEffort), CardRarity.Uncommon, CardType.Attack, 1 },
-        new object[] { typeof(ProtoKoFishFry), CardRarity.Uncommon, CardType.Attack, 2 },
         new object[] { typeof(ProtoKoOneMoreCharge), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoSitTight), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoTreasureMap), CardRarity.Uncommon, CardType.Skill, 1 },
@@ -88,7 +87,6 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoPartyPoppers), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoLookOut), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoPatienceKlee), CardRarity.Uncommon, CardType.Power, 1 },
-        new object[] { typeof(ProtoKoFriendshipBracelet), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoSecretBase), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoHalfAMountain), CardRarity.Rare, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoFavoniusEscort), CardRarity.Rare, CardType.Skill, 1 },
@@ -119,9 +117,11 @@ public class KleeR276ExpansionTests
         var slice = Il.CallSequence(Il.Method("KleeOverhaulRoster", "Slice"))
             .Where(c => c.Contains("ProtoKo")).ToList();
         var names = Rows().Select(r => ((System.Type)r[0]).Name).ToList();
-        Assert.Equal(30, names.Count);
-        Assert.Equal(30, names.Distinct().Count());
-        var tail = slice.Skip(slice.Count - 30).ToList();
+        // 28 since the Klee status package (2026-10-01) cut Fish Fry and
+        // Friendship Bracelet; its own eight follow them at the end.
+        Assert.Equal(28, names.Count);
+        Assert.Equal(28, names.Distinct().Count());
+        var tail = slice.Skip(slice.Count - 36).Take(28).ToList();
         for (var i = 0; i < names.Count; i++)
         {
             Assert.Contains(names[i], tail[i]);
@@ -288,27 +288,6 @@ public class KleeR276ExpansionTests
     }
 
     [Fact]
-    public void Fish_fry_reads_the_bombed_enemies_once_and_adds_the_bonus_to_their_hit()
-    {
-        var (klee, a, b) = Board();
-        ProtoBombs.Place(a, klee.Creature, new ProtoBombs.Charge(2));
-        var bombed = ProtoBombPower.BombedEnemies(new[] { a, b }, klee.Creature);
-        Assert.Contains(a, bombed);
-        Assert.DoesNotContain(b, bombed);
-
-        var card = new ProtoKoFishFry();
-        Assert.Equal(7m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(5m, card.DynamicVars.ExtraDamage.BaseValue);
-        var up = Upgraded<ProtoKoFishFry>();
-        Assert.Equal(10m, up.DynamicVars.Damage.BaseValue);
-        Assert.Equal(7m, up.DynamicVars.ExtraDamage.BaseValue);
-        var fry = Il.CallSequence(Il.Method("ProtoBombPower", "HitAllBombedBonus"))
-            .ToList();
-        Assert.True(fry.IndexOf("ProtoBombPower.BombedEnemies")
-                    < fry.IndexOf("ProtoBombPower.DealCardDamage"));
-    }
-
-    [Fact]
     public void Team_effort_widens_on_a_companion_play_and_hits_the_target_only()
     {
         // STRUCTURAL: the card reads the ledger's Companion count; the wide
@@ -469,8 +448,8 @@ public class KleeR276ExpansionTests
         var play = Il.Calls(Il.Method("FriendshipBraceletPower", "AfterCardPlayed"));
         Assert.Contains("KleeExpansion.IsCompanionCard", play);
         Assert.Contains("ProtoBombPower.GrowLargest", play);
-        Assert.Equal(4m, Upgraded<ProtoKoFriendshipBracelet>()
-                             .DynamicVars["PowerAmount"].BaseValue);
+        // The card left with the Klee status package (2026-10-01); its Power
+        // stays registered with no row spelling it.
     }
 
     // ---- the Spark-supported Cook -----------------------------------------

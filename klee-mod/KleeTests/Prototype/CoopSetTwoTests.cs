@@ -145,7 +145,7 @@ public class CoopSetTwoTests
         var solo = pool.GetUnlockedCards(
             null!, CardMultiplayerConstraint.SingleplayerOnly).ToList();
         Assert.Single(solo);
-        Assert.IsType<ProtoKoCarefulNow>(solo[0]);
+        Assert.IsType<ProtoKoChainFuse>(solo[0]);
 
         var coop = pool.GetUnlockedCards(
             null!, CardMultiplayerConstraint.MultiplayerOnly).ToList();
@@ -162,7 +162,7 @@ public class CoopSetTwoTests
 
         protected override CardModel[] GenerateAllCards() => new CardModel[]
         {
-            new ProtoKoCarefulNow(),
+            new ProtoKoChainFuse(),
             new ProtoFsRaiseAToast(), new ProtoFsTheCrowdRoars(),
             new ProtoKoShrapnel(), new ProtoKoSparksForEveryone(),
         };

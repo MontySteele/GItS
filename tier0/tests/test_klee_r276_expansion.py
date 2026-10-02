@@ -20,7 +20,9 @@ from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
 from tier05 import rewards
 
-EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-30:]
+# The thirty less Fish Fry and Friendship Bracelet, which the Klee status
+# package (2026-10-01) cut; its eight rows follow them at the tuple's end.
+EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-36:-8]
 
 
 @pytest.fixture
@@ -79,14 +81,13 @@ def filler(n=5):
 
 def test_the_thirty_are_the_specs_rows_at_the_specs_shape(overhaul):
     rows = {cid: load(cid) for cid in EXPANSION}
-    assert len(rows) == 30
+    assert len(rows) == 28
     by_rarity = {}
     for card in rows.values():
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + 1
-    assert by_rarity == {"common": 2, "uncommon": 18, "rare": 10}
+    assert by_rarity == {"common": 2, "uncommon": 16, "rare": 10}
     shape = {cid: (c.cost, c.type) for cid, c in rows.items()}
     assert shape["proto_ko_hiding_spot"] == (1, "skill")
-    assert shape["proto_ko_fish_fry"] == (2, "attack")
     assert shape["proto_ko_half_a_mountain"] == (1, "skill")
     assert shape["proto_ko_alices_detonator"] == (1, "power")
     assert shape["proto_ko_second_surprise"] == (0, "power")   # power cost sweep
@@ -221,14 +222,6 @@ def test_mine_all_mine_hits_only_the_mined_enemies(overhaul):
     play(state, load("proto_ko_mine_all_mine"))
     assert a.hp < 200
     assert b.hp == 200 and c.hp == 200
-
-
-def test_fish_fry_adds_the_bonus_to_bombed_enemies_only(overhaul):
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 2)
-    play(state, load("proto_ko_fish_fry"))
-    assert (200 - a.hp) - (200 - b.hp) == 5
 
 
 def test_team_effort_sets_off_the_target_alone_without_a_companion(overhaul):

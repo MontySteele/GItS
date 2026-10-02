@@ -44,7 +44,7 @@ public sealed class ProtoKkRiptideRuin : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, includesDazedCard: true);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_riptide_ruin");
 
