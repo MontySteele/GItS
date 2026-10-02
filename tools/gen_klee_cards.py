@@ -2445,9 +2445,9 @@ TRANSFORM_STATUSES_INTO_FIELDS = {"op", "card"}
 TRANSFORM_INTO_CLASSES = {"proto_ko_pop": "ProtoKoPop"}
 EXHAUST_STATUSES_GROW_LARGEST_FIELDS = {"op", "amount"}
 # DEFENCE IN THE STATUS PILE (2026-10-01, reworked 2026-10-02). The Strength
-# loss prints one number and reaches ALL enemies, the one spelling a row
-# prints (an aimed loss would need the card's TargetType to follow it, which
-# no row asks for yet). `per_status` (Kitchen Alchemy): exhaust every status
+# loss prints one number and reaches ALL enemies, or the chosen enemy
+# (Amber, Explosive Puppet, 2026-10-02: `lose_strength` is in AIMING_OPS, so
+# the card's TargetType follows it). `per_status` (Kitchen Alchemy): exhaust every status
 # in hand first, and each enemy loses that much more for each, one total.
 # `this_turn: true` (Cover Your Ears!, Klee final pass 2026-10-02): the loss
 # is the base game's Piercing Wail shape, a `TemporaryStrengthPower` that
@@ -2455,7 +2455,7 @@ EXHAUST_STATUSES_GROW_LARGEST_FIELDS = {"op", "amount"}
 # card's own `<Card>Power` class (its title is the card's), hand-written
 # beside the rules it serves.
 LOSE_STRENGTH_FIELDS = {"op", "amount", "target", "per_status", "this_turn"}
-LOSE_STRENGTH_TARGETS = ("all_enemies",)
+LOSE_STRENGTH_TARGETS = ("all_enemies", "enemy")
 #: Treasure Map and Come Back and Play!: one card of a KIND out of the discard
 #: pile into the hand, the player choosing among the kind.
 FETCH_FROM_DISCARD_FIELDS = {"op", "filter"}
@@ -3403,8 +3403,8 @@ APPLY_POWERS = {
         "Whenever a [gold]Swirl[/gold] happens, your next [gold]Attack[/gold] "
         "deals {X} more damage of the swirled element."),
     "mc_baron_bunny": ("BaronBunnyPower", None,
-        "The next time an enemy attacks you, take 3 less damage and deal 8 "
-        "damage and [gold]Pyro[/gold] to ALL enemies."),
+        "The next time an enemy attacks you, deal 8 damage and "
+        "[gold]Pyro[/gold] to ALL enemies."),
     "mc_lightfall_sword": ("LightfallSwordPower", None,
         "Counts its owner's [gold]Attacks[/gold]. When it falls, deals 8 "
         "damage plus 5 per [gold]Attack[/gold] counted. Falls in {X} turn(s)."),
@@ -4183,7 +4183,10 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               "varka",
               # THE KOKOMI EXPANSION: Salt in the Wound's "if the enemy has
               # Weak" reads `cardPlay.Target`.
-              "kokomi")
+              "kokomi",
+              # Amber, Explosive Puppet (2026-10-02): "Enemy loses 3
+              # Strength this turn" lands on `cardPlay.Target`.
+              "lose_strength")
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
@@ -11230,7 +11233,7 @@ def build_body(
             # DEFENCE IN THE STATUS PILE: a PERMANENT Strength loss, the base
             # game's own Malaise call (`PowerCmd.Apply<StrengthPower>` at
             # minus N), not a this-turn loss. Sim twin:
-            # `effects._op_lose_strength`. ALL enemies only
+            # `effects._op_lose_strength`. ALL enemies, or the chosen enemy
             # (`LOSE_STRENGTH_TARGETS`). With `per_status` (Kitchen Alchemy,
             # reworked 2026-10-02) every status in hand is exhausted first
             # and the loss grows by `per_status` for each, ONE application.
@@ -11251,14 +11254,21 @@ def build_body(
                     "var loss = KleeStatusPackage.LossWithStatuses("
                     f"{loss}, {int(eff['per_status'])}, exhausted);")
                 loss = "loss"
-            lines.append(
-                "foreach (var weakened in "
-                "CombatState!.HittableEnemies.ToList())\n"
-                "        {\n"
-                f"            await PowerCmd.Apply<{power}>("
-                f"choiceContext, weakened, {sign}{loss}, "
-                "applier: Owner.Creature, cardSource: this);\n"
-                "        }")
+            if eff.get("target", "enemy") == "enemy":
+                _target_guard(lines, ctx)
+                lines.append(
+                    f"await PowerCmd.Apply<{power}>(choiceContext, "
+                    f"cardPlay.Target, {sign}{loss}, "
+                    "applier: Owner.Creature, cardSource: this);")
+            else:
+                lines.append(
+                    "foreach (var weakened in "
+                    "CombatState!.HittableEnemies.ToList())\n"
+                    "        {\n"
+                    f"            await PowerCmd.Apply<{power}>("
+                    f"choiceContext, weakened, {sign}{loss}, "
+                    "applier: Owner.Creature, cardSource: this);\n"
+                    "        }")
 
         elif op == "multiply_largest_bomb":
             # Half a Mountain: the largest Bomb's current size, times the row.

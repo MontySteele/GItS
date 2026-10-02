@@ -332,21 +332,30 @@ def test_one_trap_answers_one_hit(overhaul):
     assert st.enemies[0].hp == 90 - 2 * C.MC_SHOWER_DMG
 
 
-def test_baron_bunny_eats_three_and_answers_the_board(overhaul):
+def test_baron_bunny_answers_the_board_and_eats_nothing(overhaul):
+    """The co-op run, 2026-10-02: "can we make this a strength debuff instead
+    of the weird wording on the hit?" The trap no longer reduces the hit."""
     st = make_state(enemies=[make_enemy(hp=50, name="a"),
                              make_enemy(hp=50, name="b")])
     _play(st, "proto_mc_amber_explosive_puppet")
     dmg = effects.companion_overhaul_before_enemy_hit(st, st.enemies[0], 12)
-    assert dmg == 12 - C.MC_BARON_BUNNY_REDUCTION
+    assert dmg == 12
     assert [e.hp for e in st.enemies] == [50 - C.MC_BARON_BUNNY_DMG,
                                           50 - C.MC_BARON_BUNNY_DMG]
     assert "mc_baron_bunny" not in st.player.powers
 
 
-def test_the_reduction_floors_at_zero_rather_than_healing(overhaul):
-    st = make_state()
-    st.player.powers["mc_baron_bunny"] = 1
-    assert effects.companion_overhaul_before_enemy_hit(st, st.enemies[0], 2) == 0
+def test_explosive_puppet_takes_three_strength_from_one_enemy_this_turn(overhaul):
+    """"Enemy loses 3 Strength this turn": Cover Your Ears!'s
+    `temp_strength_down`, on the chosen enemy alone."""
+    from tier0.engine import powers
+    a, b = make_enemy(hp=50, name="a"), make_enemy(hp=50, name="b")
+    st = make_state(enemies=[a, b])
+    _play(st, "proto_mc_amber_explosive_puppet")
+    assert (a.powers.get("strength", 0), b.powers.get("strength", 0)) == (-3, 0)
+    st.in_player_turn = False
+    powers.on_turn_end(st, a)
+    assert a.powers.get("strength", 0) == 0
 
 
 def test_the_traps_fire_inside_a_real_enemy_turn(overhaul):

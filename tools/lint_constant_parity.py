@@ -222,7 +222,6 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.BinaryWhiteReactionMult":
         C.MC_BINARY_WHITE_REACTION_MULT,
     "CompanionOverhaulLaw.LightningFangDamage": C.MC_LIGHTNING_FANG_BONUS,
-    "CompanionOverhaulLaw.BaronBunnyReduction": C.MC_BARON_BUNNY_REDUCTION,
     "CompanionOverhaulLaw.BaronBunnyDamage": C.MC_BARON_BUNNY_DMG,
     "CompanionOverhaulLaw.LightfallBase": C.MC_LIGHTFALL_BASE,
     "CompanionOverhaulLaw.LightfallPerAttack": C.MC_LIGHTFALL_PER_ATTACK,

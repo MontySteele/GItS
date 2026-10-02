@@ -57,7 +57,8 @@ def test_the_two_rows_declare_the_summons_printed_damage(arm):
     chiori = loader.peek_card("proto_mi_chiori_hasode")
     amber = loader.peek_card("proto_mc_amber_explosive_puppet")
     assert [fx.get("summon_damage") for fx in chiori.effects] == [6]
-    assert [fx.get("summon_damage") for fx in amber.effects] == [8]
+    # Amber's first effect is her Strength loss (2026-10-02); the trap is second.
+    assert [fx.get("summon_damage") for fx in amber.effects] == [None, 8]
 
 
 def test_a_row_with_no_grammar_banks_nothing(arm):

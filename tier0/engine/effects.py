@@ -7670,12 +7670,8 @@ def companion_overhaul_before_enemy_hit(state: CombatState, enemy: Enemy,
     the arm's end-of-turn block answers it. The C# twin
     (`CompanionOverhaulIncomingHit`) walks the same list.
 
-    THE C# SIDE SPLITS THIS IN TWO AND THIS ENGINE DOES NOT, which is a fact
-    about the mod rather than a difference in the rule. `ModifyDamageAdditive`
-    is called SPECULATIVELY there (the intent preview asks it what a hit would
-    cost), so it has to be pure -- Baron Bunny's "take 3 less" is returned from
-    it and its consumption plus its volley happen in `BeforeDamageReceived`.
-    The sim previews no incoming damage, so both halves sit here.
+    Baron Bunny no longer reduces the hit (the co-op run, 2026-10-02): the
+    card's this-turn Strength loss does that job, before the attack.
     """
     p = state.player
     # Dahlia, Sacramental Shower: "the next time an enemy attacks you, deal 9
@@ -7684,12 +7680,10 @@ def companion_overhaul_before_enemy_hit(state: CombatState, enemy: Enemy,
         _mc_spend_one(p, "mc_sacramental_shower")
         deal_damage_to_enemy(state, enemy, C.MC_SHOWER_DMG,
                              element="hydro", source="companion")
-    # Amber, Explosive Puppet: "take 3 less and deal 8 Pyro damage to ALL
-    # enemies". The reduction is on THIS hit only -- the trap answers one
-    # attack -- and floors at zero rather than healing the player.
+    # Amber, Explosive Puppet: "deal 8 Pyro damage to ALL enemies". One
+    # attack spends one trap.
     if p.powers.get("mc_baron_bunny", 0):
         _mc_spend_one(p, "mc_baron_bunny")
-        dmg = max(0, dmg - C.MC_BARON_BUNNY_REDUCTION)
         # `EB-565`, `EB-463`'s grammar one card over: the triggered damage is
         # the number the CARD printed, folded at play.
         puppet = p.summon_damage.get("mc_baron_bunny", C.MC_BARON_BUNNY_DMG)
