@@ -28,8 +28,14 @@ is quotable as balance.
 
 ## 1. The short version
 
+**Revised the same day against the raw run records (§2.8).** Items 1, 3
+and 4 changed: Kokomi's problem is damage in the boss fight, not HP lost in
+hallways, and the picks were re-ordered to match.
+
 1. **"Block deficit" is three different problems under one name.** Kokomi
-   bleeds out in act-1 hallways because every fight starts a turn behind.
+   cannot kill an act-1 boss fast enough: her seats dealt 8 to 15 damage a
+   turn where base Ironclad and Silent dealt 20 to 22, while taking *less*
+   per turn than Ironclad did (§2.8).
    Furina's shield cannot grow past about four times what she feeds it each
    turn. Varka's scaling Block reads one element's Oath, and most of his
    drafts split Oath across four. Klee is fine.
@@ -40,13 +46,17 @@ is quotable as balance.
    have little of it.
 3. **[USER]'s act-3 theory is half right.** It holds for Furina (by
    construction) and for Varka in any deck that splits its Oath. It is the
-   wrong act for Kokomi:
-   she dies in act 1, where scaling has not started.
+   wrong act and the wrong side for Kokomi: she dies in act 1, and what
+   fails to scale is her damage. Her one scaling engine, the Casket, pays
+   once a fight and sat dead at a count of 10 to 13 in the boss fights she
+   lost.
 4. **Kokomi is the only kit whose mechanic starts every fight at zero and a
    turn late.** The other three were each given a turn-one grant (Usher,
    the Fang's element, an Innate Jumpy Dumpty and a Spark). In the sim, a
    Plan already written when combat opens roughly halves her hallway HP
-   loss; a flat Block-per-Plan trickle barely moves it.
+   loss. The run records do not make this her binding problem, though: her
+   hallway losses match the base game's, so the opening Plan is now a
+   second step, not the first (picks 1 and 2).
 5. **The two kits that work make defence a by-product of the engine** (Klee's
    Mines and Sparks, Furina's front performer). The two that struggle buy
    defence separately from the engine (Kokomi, and Varka in a split deck).
@@ -153,6 +163,10 @@ from the starter. §4 to §6 name one for each.
 
 ### 2.4 Kokomi: a turn behind, every fight
 
+*Written from the sim before the raw records arrived. §2.8 corrects it:
+the delay is real, but the place it costs her is the boss fight, not the
+hallways.*
+
 Plan pays a turn late. In a three- or four-turn hallway fight that is a
 quarter to a third of the fight, and the enemies get one more swing than
 they would against a deck that hits now. [USER]'s own run said it before any
@@ -255,7 +269,7 @@ Where I read it differently from the audit:
 
 - **Kokomi, "no card change is indicated".** Agreed on cards, and §4 says
   freeze the pool. But "draft and timing" undersells it: the probes put the
-  loss in tempo, and the opening Plan (pick 1) is a rule, not a card.
+  loss in tempo, and the opening Plan (pick 2) is a rule, not a card.
 - **Furina, "no action".** Right for now, since [USER]'s run on the rules
   pass comes first. But her ten lasting defences are one mechanism counted
   ten times, and the fade caps it (§2.3). She has the least flat Block, no
@@ -270,6 +284,99 @@ Where I read it differently from the audit:
   Escort, Sorry, Jean...), and she has the best results of the four. If
   the status-package round shows another act-3 death to one big hit, HP
   (62) is a cheaper lever than a Weak card that has no voice in her kit.
+
+### 2.8 Read against the raw run records (added the same day)
+
+[USER] sent the save-file histories and seat records for ten runs: the
+four Kokomi act-1 deaths (`w8-lane3`, `w8b-lane3`, `w9-lane1`,
+`w9-lane2`), the two Kokomi seats on the open-Plan build (`w11-lane1`,
+`w11-lane2`), the two base runs and the two Varka runs. They are not in
+the repo. Oath by turn was not recorded and deck lists carry no upgrade
+marks. The records change this paper's reading of Kokomi and of Varka.
+
+**Kokomi's hallways are in family. Her boss fights are not.**
+
+| Act-1 normal fights | Fights | HP lost per fight |
+|---|---|---|
+| Kokomi, four pre-rule seats | 26 | 11.6 |
+| Base Ironclad | 6 | 11.7 (5.7 after Burning Blood) |
+| Base Silent | 6 | 10.7 |
+| Varka, two seats | 12 | 4.3 |
+
+| Act-1 boss fight | HP at the door | Turns | Damage dealt per turn | Damage taken per turn | End |
+|---|---|---|---|---|---|
+| Kokomi `w9-lane2`, Lagavulin Matriarch 222 | 71 of 80 | 13 | 11 | 5.5 | died, boss at 78 |
+| Ironclad, Lagavulin Matriarch 222 | 74 of 80 | 11 | 20 | 6.2 | won at 6 HP |
+| Kokomi `w9-lane1`, Ceremonial Beast 252 | 55 | 13 | 15 | 4.2 | died, boss at 53 |
+| Kokomi `w8b-lane3`, Soul Fysh 211 | 49 | 17 | 8 | 3.0 | died, boss at 68 |
+| Silent, Waterfall Giant 240 | 85 | 11 | 22 | 4.9 | won |
+| Varka, Waterfall Giant 240 and Vantom 173 | 80 and 68 | 6 and 7 | 40 and 25 | 0.5 and 3.1 | won both |
+| Kokomi `w11-lane2`, Waterfall Giant 240 | 77 of 101 | 12 | 22 | 7.7 | killed it on turn 11, died to its Death Blow |
+| Kokomi `w11-lane1`, Waterfall Giant 240 | 80 | 6 | 40 | 7.3 | won |
+
+The same boss, the same HP at the door: Ironclad won in 11 turns and
+Kokomi died on turn 13 with a third of it left, having taken less damage
+each turn than he did. She does not lose these fights on Block. She loses
+them on length. That overturns §2.4's "bleeds out in hallways" (the sim's
+stock pilot plays her hallways worse than a seat does) and §1's old item
+1, and it qualifies the audit's "draft and timing": `w9-lane1` held eight
+Block cards in twenty and Orichalcum, and `w9-lane2` walked in nearly
+full.
+
+**Why the damage is low: the Casket pays once.** Four of six records say
+the same thing about the boss fight:
+
+- "at the boss the count reached 10 and was dead weight after round 4"
+  (`w8b-lane3`);
+- "a long fight gave the Casket many Plans but one cash-in" (`w9-lane2`);
+- "Casket reached 13 at death ... a dead number" (`w11-lane2`);
+- "it never became an engine because I only Opened it for 1-4 Str"
+  (`w8-lane3`).
+
+Every seat opens it at 1 to 4, because Strength now beats Strength later
+in a short fight, and then the relic is finished. So in a 13-turn boss
+fight her only scaling is +2 or +3 Strength from turn 3. Ironclad had two
+Perfected Strikes by then and Silent had poison. My sim cannot read this:
+in a no-Exhaust trial its pilot ended act-1 boss fights at about 3
+Strength, so it carries out a handful of Plans where a seat's count
+reached 13.
+
+**The open-Plan rule did nothing either seat could use.** About 57 chooser
+screens across the two `w11` seats and one flip, which its seat called a
+mistake. "The chooser was a confirm, not a decision." The Plan line is the
+bigger number by construction, so it is nearly always right. The seat that
+cleared two acts did it with a Cryo companion: Kaeya onto her Hydro for
+Frozen, then Shatter, and Clorinde for 20 to 40. That is the Hydro pillar
+working for the first time (§4, lore), not the rule. Both `w11` seats also
+met Waterfall Giant, the boss base Silent and Varka beat, where the four
+earlier seats met four others; boss identity is a confound a fixed seed
+removes.
+
+**Seat testimony about offers is unreliable; the save file is not.** The
+round record says the rewards "rarely offered Block". The histories show
+`w8b-lane3` declining Coral Bulwark three times and Tide Wall once, and
+`w8-lane3` declining Coral Bulwark and Bubble Ward and then paying to
+remove a Defend. The audit is right that Block was on offer and not
+taken. The boss table says taking it would not have been enough.
+
+**§2.2 holds up.** The base decks that reached the act-3 boss each carried
+two off-hand defensive Powers (Ironclad: Juggernaut+ and Crimson Mantle;
+Silent: Afterimage and Footwork). Of the two Varka decks one had none and
+one took Oathbound Aegis two floors before the boss.
+
+**Varka: in family, and my guard-mode idea is withdrawn.** His act-3
+deaths look like the base game's: one seat reached Test Subject at 51 of
+87 and drew no Block on the 60-damage turn; the other went in at full,
+raced, and fell one turn short with the boss near 63 of 200. Base Ironclad
+died to his act-3 boss from 39 HP and Silent won hers on about 3. The
+records also put his Oath at 5 to 8 in act-3 fights, not the 35 to 50 an
+earlier round saw. At that count every "half your total Oath" reader is a
+flat card (Gale Mantle gives 8), and the guard mode I proposed in §6 would
+give about 7 Block against 60. Oath is the wrong axis for his defence in
+fights of ordinary length. Test Subject's Enrage also taxes every Skill,
+and all his Block is Skills. The other end deserves a note for Balance:
+his act-1 hallways cost 4 HP a fight against the base game's 11, and both
+seats reached the act-1 boss nearly full and killed it in 6 or 7 turns.
 
 ## 3. Klee
 
@@ -373,25 +480,33 @@ for.
   Common at a smaller number. For example Bubble Ward as "Plan: Gain 4
   Block, and 4 more if an enemy intends to attack."
 
-**What I would do, in order.**
-1. **The opening Plan (pick 1).** "Kokomi wins the fight before it starts"
+**What I would do, in order** (re-ordered after §2.8).
+1. **Make the Casket pay more than once (pick 1).** It is the only thing
+   in her kit that scales, the records show it dead in exactly the fights
+   she loses, and the delay paper already names it as the next variable.
+2. **The opening Plan (pick 2), after that round.** "Kokomi wins the fight
+   before it starts"
    is the brief's first sentence; make it literal. The Bake-Kurage starts
    each combat with a Plan already written. With the open-Plan rule that is
    a choice of 6 Block or 7 to ALL on turn one, made with the first intent
    showing, so every fight opens on a Plan decision instead of a hand of
    basics (which also answers R268's "Plan-less hand"). It needs no number
    moved on any card.
-2. **The jellyfish heals after the fight (pick 2).** Small, relic-scale,
-   tied to Plans carried out. It is her identity, the law allows it, and
-   attrition is what kills her.
-3. **Freeze the pool at 78** until two rounds clear act 1. Within it, swap
+3. **The jellyfish heals after the fight (pick 3).** Small, relic-scale,
+   tied to Plans carried out. It is her identity and the law allows it.
+   The records do not make it urgent (§2.8), so it can wait for her own
+   relic set.
+4. **Freeze the pool at 78** until two rounds clear act 1. Within it, swap
    rather than add: the "alone" conditions off (point 3), one or two status
    cards back out for "plan the reaction".
-4. **The Casket's cash-out**, at the re-read the delay paper already
-   schedules. I would not remove Exhaust (Strength for every Plan ever
-   carried out is Demon Form for free). I would have Open the Casket return
-   to hand when the count next reaches 5, so the count is never dead and
-   the cash-out stays a timing decision.
+5. **Make the open-Plan chooser opt-in.** One flip in about 57 screens
+   (§2.8) is a click a turn for nothing. Carry out the Plan lines unless
+   the player taps a waiting Plan to flip it; the rule stays, the screen
+   goes.
+6. **Plan the reaction.** The one seat that cleared two acts did it by
+   freezing enemies with a Cryo companion on her Hydro. That batch was
+   ruled on 2026-09-27 and never built; it is the first card work I would
+   do once the Casket is read.
 
 ## 5. Furina
 
@@ -482,8 +597,13 @@ the pool sounds like him. His defence has a ready voice in "laughs it off"
 (a cleanse, or Block for debuffs on him), which would also give the kit a
 second answer to Weak and Frail beside Barbara's Wellspring Hymn.
 
-**What I would do.** The round record already owes "a defensive cash-out
-that scales the way his Oath damage does". My candidate for that paper:
+**What I would do.** *Withdrawn after §2.8: at the Oath his seats
+actually reach in act 3 (5 to 8), the guard mode below is about 7 Block.
+His act-3 results are in the base game's range, and I would hold him for
+data, as the audit says. The second bullet still stands.*
+
+The round record already owes "a defensive cash-out
+that scales the way his Oath damage does". My candidate for that paper was:
 
 - **Give Four Winds' Ascension a guard mode.** "Deal 6 damage, then 3 for
   each Oath of your current element. Or: gain Block equal to your total
@@ -535,36 +655,45 @@ not pools.
 - **Same seeds for kits and control.** Recent rounds used game-rolled
   seeds, so a kit's round and the base baseline met different bosses. The
   feed round set its seeds (`KK4FEED0929`), so this is free.
-- **Logs that would settle open questions here:** the four Kokomi act-1
-  records (`w8-lane3`, `w8b-lane3`, `w9-lane1`, `w9-lane2`) and the two
-  base ones (`base-lane1`, `base-lane2`), for HP by floor, the deck at the
-  boss door and cards offered against cards taken; the two Varka `w9`
-  lanes, for Oath by turn in the Test Subject fight; and §2.2's census
-  rerun on the playtest machine's current `game_ref/`, for all five base
-  characters.
+- **The logs arrived (§2.8), and the save-file table is the instrument.**
+  One row a floor with turns, HP, damage taken and cards offered against
+  taken answered in minutes what four seat records had argued about. I
+  would attach it to every round record. Two gaps to close: Oath (and the
+  Casket's count) by turn, and upgrade marks on the deck lists.
 
 ## Picks
 
-1. **Kokomi: the Bake-Kurage starts each combat with a Plan written.**
+Re-ordered after §2.8. Pick 1 is new; the old picks 1 and 2 are now 2 and
+3 with their defaults moved to "wait".
+
+1. **Kokomi: the Casket pays more than once.** Her relic, so yours. The
+   records show its count dead at 10 to 13 in the boss fights she loses.
+   - **(a, default)** Open the Casket loses Exhaust and keeps Retain. Played,
+     it goes to the discard pile and comes back with the deck, as Four
+     Winds' Ascension does. It is the reading seats already give the card
+     ("reads as reusable", `kokomi-feed-round-2026-09-29.md`). Total
+     Strength is still one per Plan carried out, which you set and said
+     could come down; that number is the knob if act 3 runs away.
+   - (b) It keeps Exhaust and returns to hand when the count next reaches 5.
+   - (c) Leave it until your own run on the open-Plan build.
+2. **Kokomi: the Bake-Kurage starts each combat with a Plan written.**
    A kit rule (it can live on the jellyfish's tip; the Casket's text is at
    the 120-character ceiling already).
-   - **(a, default)** A free copy of her Kurage's Oath, upgraded if hers is.
-     Predictable, teaches the open-Plan choice on turn one of fight one.
-   - (b) A free copy of a random Plan card from her deck. Scales with the
-     draft; swingier.
-   - (c) No opening Plan; read the open-Plan round first.
-2. **Kokomi: the Bake-Kurage heals her after combat** (a relic-scale
+   - **(a, default)** Hold it until pick 1's round is read: one variable at a
+     time, and the records say hallways are not where she loses.
+   - (b) Build it now: a free copy of her Kurage's Oath, upgraded if hers
+     is.
+   - (c) Drop it.
+3. **Kokomi: the Bake-Kurage heals her after combat** (a relic-scale
    trickle, which `LAW.md` exempts; the direction was ruled 2026-09-27,
    pick 3a).
-   - **(a, default)** On the starting relic now, 1 HP per Plan carried out,
-     up to 6, with the relic's text trimmed to fit. In the sim the flat 6
-     did more than the per-Plan version early (24% against 16.5% reaching
-     the boss), so the number is the first thing to move.
-   - (b) On the Common relic of her own set, when that set is built.
+   - **(a, default)** On the Common relic of her own set, when that set is
+     built.
+   - (b) On the starting relic now, 1 HP per Plan carried out, up to 6.
    - (c) No heal.
-3. **Seat rounds: what a round records.**
+4. **Seat rounds: what a round records.**
    - **(a, default)** Still two seats, on two fixed seeds that one Ironclad
-     control also plays once; every record adds HP at each boss door and the
-     hand on the death turn.
+     control also plays once; every record carries the save-file table
+     (§8).
    - (b) The same, with four seats for a kit that changed a rule.
    - (c) Leave rounds as they are.

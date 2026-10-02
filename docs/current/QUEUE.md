@@ -31,17 +31,20 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 - **Four-kit design review** (`four-kit-review-2026-10-01.md`, a second main
   session's fresh read of all four kits and of why the seats die):
-  - **Pick 1, Kokomi:** the Bake-Kurage starts each combat with a Plan
-    written. (a, default) a free copy of her Kurage's Oath; (b) a free copy
-    of a random Plan card from her deck; (c) no, read the open-Plan round
-    first.
-  - **Pick 2, Kokomi:** the Bake-Kurage heals her after combat. (a, default)
-    on the starting relic now, 1 HP per Plan carried out, up to 6; (b) on
-    the Common relic of her own set; (c) no heal.
-  - **Pick 3, seat rounds:** (a, default) two seats on two fixed seeds that
-    one Ironclad control also plays, and every record adds HP at each boss
-    door and the hand on the death turn; (b) the same with four seats after
-    a rule change; (c) as they are.
+  - **Pick 1, Kokomi:** the Casket pays more than once. (a, default) Open
+    the Casket loses Exhaust and keeps Retain; (b) it keeps Exhaust and
+    returns to hand when the count next reaches 5; (c) leave it until your
+    own run.
+  - **Pick 2, Kokomi:** the Bake-Kurage starts each combat with a Plan
+    written. (a, default) hold until pick 1's round is read; (b) build it
+    now, a free copy of her Kurage's Oath; (c) drop it.
+  - **Pick 3, Kokomi:** the Bake-Kurage heals her after combat. (a, default)
+    on the Common relic of her own set; (b) on the starting relic now, 1 HP
+    per Plan carried out, up to 6; (c) no heal.
+  - **Pick 4, seat rounds:** (a, default) two seats on two fixed seeds that
+    one Ironclad control also plays, every record carrying the save-file
+    table; (b) the same with four seats after a rule change; (c) as they
+    are.
 
 - **Character four, three paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, `varka-paper-kit-2026-09-28.md`, three
