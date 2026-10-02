@@ -17,8 +17,7 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         _map_ahead, _map_boss, _map_paths,
                                         _map_options, _omitted_from_upgrade,
                                         _omitted_from_removal,
-                                        is_plan_chooser, is_removal_screen,
-                                        plan_chooser_rows,
+                                        is_removal_screen,
                                         reward_alternatives,
                                         _potion_slots, _preview_cards,
                                         _proceed_option, _relic_options,
@@ -295,6 +294,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
                 obs["commands"].insert(
                     1, f'play "<card title>" on "{plans["pet_name"]}"'
                        "   (writes its Plan instead of playing it now)")
+        # A PLAN STAYS OPEN, PICK 5 (a) (2026-10-01): "Plans carry out on
+        # their Plan line; click a waiting Plan to flip it." Offered only
+        # while a waiting Plan has two lines to flip between.
+        if plans and any(e.get("two_line") for e in plans.get("queue") or []):
+            obs["commands"].insert(
+                len(obs["commands"]) - 1,
+                "flip <n>   (switches waiting Plan n between its Plan line "
+                "and its now-line)")
     elif st == "map":
         obs["screen"] = "map"
         obs["nodes"] = _map_options(state)
@@ -541,13 +548,6 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["clone_marked"] = any(
             "(Clone)" in _text(c.get("title"))
             for c in obs["offers"] + obs["selected"])
-        # A PLAN STAYS OPEN (2026-10-01): Kokomi's turn-start line chooser,
-        # known by its prompt. Each due Plan with both lines and the line it
-        # will be carried out as; two verbs, `flip` and `confirm`.
-        if st == "card_select" and is_plan_chooser(obs["prompt"]):
-            obs["plan_chooser"] = plan_chooser_rows(obs["offers"],
-                                                    _screen_cards(state))
-            obs["commands"] = ['flip "<card>"', "confirm"]
     elif st == "bundle_select":
         # `EB-173`: A BUNDLE HAS NO NAME, and asking for one printed
         # `- **(unnamed)**` twice, on a screen whose only verb is

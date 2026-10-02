@@ -1229,8 +1229,9 @@ class PlanEntry:
     # now-line this Plan may be carried out as instead: set by `schedule`
     # only for a Plan written from a TWO-LINE card's own line (Moon's
     # Reflection's found card included), never for a Plan-only card or a
-    # Dusk Plan. `line` is the line chosen for the carry-out in hand, "plan"
-    # (the default) or "now", written by `kokomi_plan.choose_lines`.
+    # Dusk Plan. `line` is the line it will be carried out as, "plan" (the
+    # default) or "now" once the player has flipped it while it waits
+    # (`kokomi_plan.flip`, pick 5a).
     # `KokomiPlan.Entry.Now` is the twin of `line`.
     now_card: Optional["Card"] = None
     line: str = "plan"

@@ -7,7 +7,21 @@ stays open until it is carried out (§2), with the one-screen chooser in §3.
 The first draft's shield (2 Block per Energy paid for waiting Plans) is
 withdrawn. [USER] on it: "just giving Kokomi 2 block per plan is patching a
 structural problem with a numbers crutch... it does not feel very elegant."
-Open the Casket keeps its Exhaust.
+Open the Casket kept its Exhaust in that ruling.
+
+**Ruled 2026-10-01, later the same day** (the four-kit review, PR #823,
+Kokomi pick 1, and the coordinator's pick 5). [USER]: "On your new picks agree all around - I think that if it's
+repeatable, it should probably cost energy, though, to make this a real choice
+and not just button mashing when it comes up?"
+So:
+
+- **Open the Casket pays more than once.** It loses Exhaust, keeps Retain and
+  costs 1 Energy (was 0). Played, it goes to the discard pile and comes back
+  with the deck; each opening takes whatever the Casket gathered since the
+  last. What the Tokoyo Returns now reads "Put Open the Casket into your hand
+  from your draw pile or discard pile." (§5's set-aside item is taken up.)
+- **Pick 5 (a): Plans carry out on their Plan line; click a waiting Plan to
+  flip it.** The turn-start chooser is gone (§3).
 
 [USER], earlier the same day: "that's the recurring challenge of Kokomi - we
 have an interesting idea, but how do we make it 'worth' it without just
@@ -82,18 +96,29 @@ GPT's review (2026-10-01) corrected three claims in the first draft:
 
 ## 3. Keeping the turn snappy
 
-[USER]'s condition. The chooser is one screen per turn, not one per Plan:
+[USER]'s condition. **Ruled 2026-10-01, pick 5 (a): Plans carry out on their
+Plan line; click a waiting Plan to flip it.** There is no chooser screen:
 
-- **It appears only if a two-line Plan is due.** Turns with only Plan-only or
-  Dusk Plans show nothing new.
-- **Every open Plan is listed with its Plan line already selected.** One click
-  confirms, so a player who wants the default spends one click a turn.
-- **Clicking a Plan flips it** to its now line, and clicking again flips it
-  back. The forecast numbers update as you flip.
-- **The bridge gets one verb:** `flip "<card>"` then `confirm`, or `confirm`
-  alone.
-- **The Plan strip shows both lines** while a Plan waits, so the choice is
-  readable a turn early.
+- **A Plan carries out on its Plan line** unless the player flipped it. A
+  player who wants the default spends no clicks at all.
+- **During her own turn, clicking a waiting two-line Plan in the Plan strip
+  flips it** to its now line, and clicking again flips it back. A flipped Plan
+  is tinted and captioned "Now-line"; an unflipped two-line Plan is captioned
+  "Plan line". The click is a synced game action, so a co-op partner sees the
+  same flip.
+- **At carry-out each Plan uses the line it holds.** The bridge's forecast
+  (the damage a waiting Plan has written at the front body) follows the flip.
+- **The bridge gets one verb:** `flip <n>` (or `flip "<card>"`) during her
+  turn. No `confirm`.
+- **The page shows both lines** while a Plan waits, the one it will be
+  carried out as first.
+
+The trade, stated: a flip is decided during the turn the Plan waits, before
+the next intents show, so "defence stops being a guess" (§2) holds only as
+far as the player reads the enemy a turn ahead.
+
+The first build (a one-screen chooser at the start of her turn, `confirm` to
+close it) is in git history.
 
 ## 4. What the round records
 
@@ -110,3 +135,4 @@ changed, so two seats, then [USER] plays.
   batch needs the right draw. The rule makes every two-line card adaptive.
 - **Open the Casket without Exhaust:** permanent Strength for every Plan she
   ever carried out; one variable at a time. Re-read after this round.
+  *Taken up 2026-10-01* (the ruling at the top): repeatable, at 1 Energy.

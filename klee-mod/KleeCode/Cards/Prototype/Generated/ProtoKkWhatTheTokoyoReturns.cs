@@ -48,7 +48,7 @@ public sealed class ProtoKkWhatTheTokoyoReturns : CustomCardModel, ICharacterCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "What the Tokoyo Returns"),
-        ("description", "Put [gold]Open the Casket[/gold] from your [gold]Exhaust Pile[/gold] into your hand."),
+        ("description", "Put [gold]Open the Casket[/gold] into your hand from your draw pile or discard pile."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

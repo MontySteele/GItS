@@ -54,10 +54,10 @@ the Bake-Kurage carries it out at the start of her next turn.
    (the default) or the now-line at printed size. Plan-only cards and Dusk
    Plans are unchanged. A Plan carried out more than once (Nereid's
    Ascension, Second Wave) takes the line chosen for it, and Plan payoffs
-   count either line. One screen a turn, shown only when a two-line Plan is
-   due: every such Plan at its Plan line, a click flips one, Confirm carries
-   them all out; a later Change of Plans or Spring Tide the same turn takes
-   the Plan line.
+   count either line. No screen (pick 5 (a), ruled 2026-10-01: "Plans carry
+   out on their Plan line; click a waiting Plan to flip it."): during her
+   turn a click on a waiting two-line Plan flips it, a second click flips it
+   back, and each Plan is carried out as the line it holds.
 3. **The jellyfish acts by the book.** A planned Attack strikes the front
    enemy (the leftmost one alive); a single-target Plan is aimed when
    written if the engine can carry a second selection (R250). A planned
@@ -80,9 +80,14 @@ the Bake-Kurage carries it out at the start of her next turn.
 7. **The Casket counts (2026-09-28).** Her relic, the Tamakushi Casket,
    gains 1 each time the Bake-Kurage carries out a Plan -- in the morning,
    at Dusk or hurried by Change of Plans, and a Plan carried out twice adds
-   twice. The count is per combat and starts at 0. Open the Casket (a 0-cost
-   Retain, Exhaust token the relic puts in her opening hand) turns the count
-   into Strength, 1 per point, and empties it; the Casket keeps counting.
+   twice. The count is per combat and starts at 0. Open the Casket (a 1-cost
+   Retain token the relic puts in her opening hand) turns the count into
+   Strength, 1 per point, and empties it; the Casket keeps counting. Since
+   2026-10-01 it has no Exhaust and cycles with the deck, so it pays more
+   than once (the four-kit review, Kokomi pick 1). [USER]:
+   "On your new picks agree all around - I think that if it's repeatable,
+   it should probably cost energy, though, to make this a real choice and
+   not just button mashing when it comes up?"
    Cards may read or add to the count; none spends it. [USER]: "We don't
    need this to be the equivalent to Regent's stars or Klee's sparks. This
    should feel like a distinct effect."
@@ -146,7 +151,8 @@ to ALL written; upgrade 7 damage and 2 Weak written).
 Relic, **Tamakushi Casket** (the Casket pass, 2026-09-28): "Start each
 combat with the Bake-Kurage and Open the Casket in hand. Each Plan it
 carries out adds 1 to the Casket." Open the Casket: "Gain Strength equal to
-the Casket's count, then empty it." (0, Retain, Exhaust.) [USER], choosing
+the Casket's count, then empty it." (1, Retain; it was 0, Retain, Exhaust
+until 2026-10-01, when it became repeatable at a cost: rule 7.) [USER], choosing
 this Forge-style relic over a Vigor-style one, because Vigor "devolves into
 'solve for lethal, press the I Win button'": "an artifact that grants /
 tracks an alternative energy that builds by 1 for every Plan played, and

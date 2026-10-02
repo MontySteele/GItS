@@ -6307,7 +6307,7 @@ def _op_damage_quarter_max_hp(state: CombatState, fx: dict,
 
 def _op_fetch_open_casket(state: CombatState, fx: dict, card: Card) -> None:
     """What the Tokoyo Returns (the Casket pass, 2026-09-28). The first Open
-    the Casket in her Exhaust Pile goes to her hand; see
+    the Casket in her draw pile, else her discard pile, goes to her hand; see
     `kokomi_plan.fetch_open_casket`."""
     if not kokomi_plan.live(state):
         _op_kokomi_overhaul_off(state, fx, card)      # always raises

@@ -90,6 +90,9 @@ public static partial class McpMod
             "crystal_sphere_set_tool" => ExecuteCrystalSphereSetTool(data),
             "crystal_sphere_click_cell" => ExecuteCrystalSphereClickCell(data),
             "crystal_sphere_proceed" => ExecuteCrystalSphereProceed(),
+            // GItS LOCAL EDIT (Kokomi, pick 5 (a), 2026-10-01): flip a
+            // waiting two-line Plan (gits/GitsKokomiFlip.cs).
+            "kokomi_flip_plan" => ExecuteGitsKokomiFlipPlan(player, data),
             _ => Error($"Unknown action: {action}")
         };
     }

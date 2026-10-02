@@ -151,9 +151,14 @@ public static class KokomiOverhaulKit
     }
 
     /// <summary>
-    /// What the Tokoyo Returns: "Put Open the Casket from your Exhaust Pile
-    /// into your Hand." The FIRST one there; none there, nothing happens.
-    /// <c>CardPileCmd.Add</c> to the hand is the move.
+    /// What the Tokoyo Returns: "Put Open the Casket into your hand from your
+    /// draw pile or discard pile." The draw pile is searched first, then the
+    /// discard pile; the FIRST one found moves, and none in either means
+    /// nothing happens. Open the Casket lost its Exhaust on 2026-10-01 (the
+    /// four-kit review, Kokomi pick 1), so the Exhaust Pile this card used to
+    /// search no longer holds it. <c>CardPileCmd.Add</c> to the hand is the
+    /// move.
+    /// Sim twin: <c>kokomi_plan.fetch_open_casket</c>.
     /// </summary>
     public static async Task FetchOpenCasket(
         PlayerChoiceContext choiceContext, Creature? kokomi)
@@ -161,12 +166,25 @@ public static class KokomiOverhaulKit
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         var player = kokomi!.Player;
         if (player == null) return;
-        var exhaust = CardPile.Get(PileType.Exhaust, player);
-        var token = exhaust?.Cards.OfType<Cards.Prototype.OpenTheCasket>()
-            .FirstOrDefault();
+        Cards.Prototype.OpenTheCasket? token = null;
+        foreach (var pile in FetchOpenCasketPiles)
+        {
+            token = FindOpenCasket(CardPile.Get(pile, player)?.Cards);
+            if (token != null) break;
+        }
         if (token == null) return;
         await CardPileCmd.Add(token, PileType.Hand, CardPilePosition.Top);
     }
+
+    /// <summary>Where What the Tokoyo Returns looks, in order: "from your
+    /// draw pile or discard pile". Never the Exhaust Pile.</summary>
+    public static readonly PileType[] FetchOpenCasketPiles =
+        { PileType.Draw, PileType.Discard };
+
+    /// <summary>The first Open the Casket in a pile, or null.</summary>
+    public static Cards.Prototype.OpenTheCasket? FindOpenCasket(
+        System.Collections.Generic.IEnumerable<CardModel>? pile) =>
+        pile?.OfType<Cards.Prototype.OpenTheCasket>().FirstOrDefault();
 
     /// <summary>
     /// Undertow's "if the enemy has a debuff". The definition is the ENGINE'S

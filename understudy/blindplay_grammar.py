@@ -17,7 +17,7 @@ from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
                                         _map_options, _proceed_option,
                                         _potion_slots, _relic_options,
                                         _rest_options, _reward_items,
-                                        _screen_cards, is_plan_chooser,
+                                        _screen_cards,
                                         map_floor, reward_alternatives)
 from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
@@ -54,9 +54,9 @@ VERBS = ("play", "end turn", "choose", "skip", "go", "buy", "rest",
          # 2026-09-26: the Crystal Sphere's one divination, which the game
          # makes the run spend before `leave` is honoured.
          "reveal",
-         # A PLAN STAYS OPEN (2026-10-01): Kokomi's turn-start line chooser.
-         # `flip "<card>"` switches one due Plan between its Plan line and
-         # its now-line; `confirm` carries them all out.
+         # A PLAN STAYS OPEN, pick 5 (a) (2026-10-01): during her turn,
+         # `flip <n>` (or `flip "<card>"`) switches one waiting Plan between
+         # its Plan line and its now-line. No screen and no `confirm`.
          "flip")
 
 
@@ -129,7 +129,7 @@ def parse_command(text: str) -> Command:
         m = re.fullmatch(r"flip\s+#?(\d+)", head)
         if m is None:
             raise BlindPlayError("`flip` needs a Plan's name in quotes, or its "
-                                 "number on the screen (`flip 2`)")
+                                 "number in the waiting list (`flip 2`)")
         ordinal = int(m.group(1))
         if ordinal < 1:
             raise BlindPlayError("the rows on a screen are counted from 1")
@@ -1476,24 +1476,32 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
 
 
 def _flip(state: dict[str, Any], cmd: Command) -> Resolution:
-    """A PLAN STAYS OPEN (2026-10-01): switch one due Plan on Kokomi's line
-    chooser between its Plan line and its now-line. The screen is a card grid
-    whose click toggles a pick, so a flip is a `select_card` on the named row
-    and a second flip of the same row switches it back."""
+    """A PLAN STAYS OPEN, PICK 5 (a) (2026-10-01): "Plans carry out on their
+    Plan line; click a waiting Plan to flip it." During her turn, switch one
+    waiting two-line Plan between its Plan line and its now-line; a second
+    flip of the same Plan switches it back. Named by its title or by its
+    number in the waiting list; the bridge's `kokomi_flip_plan` is the same
+    click the Plan strip takes."""
     st = _screen(state)
-    if st != "card_select" \
-            or not is_plan_chooser(_blob(state, st).get("prompt")):
+    if st not in COMBAT_SCREENS:
         return _refuse("there is no Plan to flip here; `flip` is for the "
-                       "Plans due at the start of your turn")
-    entries = _screen_cards(state)
-    idx, why = _match(entries, cmd.name, key=_card_title,
-                      face=_card_face_key, number=True, ordinal=cmd.ordinal)
+                       "Plans waiting on the Bake-Kurage during your turn")
+    queue = list((_combat(state).get("plans") or {}).get("queue") or [])
+    if not any(row.get("two_line") is True for row in queue):
+        return _refuse("there is no Plan to flip here: no waiting Plan has "
+                       "two lines")
+    idx, why = _match(queue, cmd.name, key=lambda r: _text(r.get("name")),
+                      number=True, ordinal=cmd.ordinal)
     if idx < 0:
         return _refuse(why)
-    line = "Plan line" if entries[idx].get("selected") is True \
-        else "now-line"
-    return Resolution(True, "flip", {"action": "select_card", "index": idx},
-                      {"card": _card_title(entries[idx]), "now": line})
+    row = queue[idx]
+    if row.get("two_line") is not True:
+        return _refuse(f"{_text(row.get('name'))} has only one line; "
+                       "there is nothing to flip")
+    line = "Plan line" if row.get("line") == "now" else "now-line"
+    return Resolution(True, "flip", {"action": "kokomi_flip_plan",
+                                     "index": idx},
+                      {"card": _text(row.get("name")), "now": line})
 
 
 def _confirm(state: dict[str, Any]) -> Resolution:

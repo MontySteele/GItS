@@ -5,7 +5,8 @@ turns the count into Strength, and the pool moves.
 "devolves into 'solve for lethal, press the I Win button'": "an artifact that
 grants / tracks an alternative energy that builds by 1 for every Plan played,
 and adds one 0-cost Retain / Exhaust card that converts that energy into
-Strength." Counting: "when it's carried out". Rate: "1 strength per point
+Strength." (2026-10-01: the token now costs 1 and has no Exhaust, so it pays
+more than once; the four-kit review, Kokomi pick 1.) Counting: "when it's carried out". Rate: "1 strength per point
 seems fine; we can adjust down if we need to." "the casket keeps counting." No
 card spends the gauge: "We don't need this to be the equivalent to Regent's
 stars or Klee's sparks. This should feel like a distinct effect." On the
@@ -101,11 +102,44 @@ def test_the_count_is_per_fight_and_never_rolled_by_the_turn(overhaul):
 
 # --- B. Open the Casket ------------------------------------------------------
 
-def test_the_token_is_a_zero_cost_retain_exhaust_skill_in_no_pool(overhaul):
+def test_the_token_is_a_one_cost_retain_skill_in_no_pool(overhaul):
+    """2026-10-01, the four-kit review, Kokomi pick 1. [USER]: "On your new
+    picks agree all around - I think that if it's repeatable, it should
+    probably cost energy, though, to make this a real choice and not just
+    button mashing when it comes up?" Cost 1 (was 0), no Exhaust."""
     card = kokomi_plan.open_the_casket_card()
-    assert (card.cost, card.type, card.rarity) == (0, "skill", "token")
-    assert card.retain and card.exhaust
+    assert (card.cost, card.type, card.rarity) == (1, "skill", "token")
+    assert card.retain and not card.exhaust
     assert card.id not in C.KOKOMI_OVERHAUL_POOL_IDS
+
+
+def test_the_token_is_reshuffled_and_opens_again_from_zero(overhaul):
+    """It pays more than once: played, it goes to the discard pile, comes back
+    with the deck, and the second opening finds only what the Casket gathered
+    since the first."""
+    from tier0.engine import combat
+    st = _casket(enemies=[make_enemy(hp=100)])
+    token = kokomi_plan.open_the_casket_card()
+    st.player.hand.append(token)
+    st.player.energy = 3
+    st.kk_casket = 3
+    combat.play_card(st, token)
+    assert st.player.energy == 2                     # it cost 1
+    assert st.player.powers.get("strength") == 3
+    assert st.kk_casket == 0
+    assert token in st.player.discard_pile           # not exhausted
+    assert token not in st.player.exhaust_pile
+    # The Casket fills again from 0; the deck comes round.
+    carry_out(st, [{"op": "energy", "amount": 1}])
+    carry_out(st, [{"op": "energy", "amount": 1}])
+    assert st.kk_casket == 2
+    st.shuffle_discard_into_draw()
+    st.draw(1)
+    assert token in st.player.hand
+    st.player.energy = 3
+    combat.play_card(st, token)
+    assert st.player.powers.get("strength") == 5     # 3 + 2
+    assert st.kk_casket == 0
 
 
 def test_opening_grants_strength_equal_to_the_count_and_empties_it(overhaul):
@@ -275,13 +309,17 @@ def test_no_common_increases_deck_size(overhaul):
 
 
 def test_the_uncommons_and_the_rare(overhaul):
-    # What the Tokoyo Returns: fetch the token out of the Exhaust Pile.
-    st = _casket(enemies=[make_enemy(hp=100)])
-    st.player.exhaust_pile = [kokomi_plan.open_the_casket_card()]
-    effects.resolve_card(st, _row("proto_kk_what_the_tokoyo_returns"))
-    assert [c.id for c in st.player.hand] == [kokomi_plan.OPEN_THE_CASKET]
-    # None there: nothing happens.
+    # What the Tokoyo Returns: fetch the token from the draw pile or the
+    # discard pile (2026-10-01: it no longer exhausts).
+    for pile in ("draw_pile", "discard_pile"):
+        st = _casket(enemies=[make_enemy(hp=100)])
+        setattr(st.player, pile, [kokomi_plan.open_the_casket_card()])
+        effects.resolve_card(st, _row("proto_kk_what_the_tokoyo_returns"))
+        assert [c.id for c in st.player.hand] == [kokomi_plan.OPEN_THE_CASKET]
+        assert getattr(st.player, pile) == []
+    # None in either: nothing happens, and the Exhaust Pile is not searched.
     empty = _casket(enemies=[make_enemy(hp=100)])
+    empty.player.exhaust_pile = [kokomi_plan.open_the_casket_card()]
     effects.resolve_card(empty, _row("proto_kk_what_the_tokoyo_returns"))
     assert empty.player.hand == []
     returns = _row("proto_kk_what_the_tokoyo_returns")

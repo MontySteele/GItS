@@ -95,8 +95,11 @@ def test_our_additions_live_apart_from_upstreams_source():
     # `BuildMultiplayerGameState` / `BuildAllPlayersState` (the run's end, the
     # fight behind a chooser, a player's combat id), each a dictionary entry
     # in the middle of a private builder, with nothing to route around.
+    # Kokomi pick 5 (a) (2026-10-01): `kokomi_flip_plan` on both action
+    # switches, so `McpMod.MultiplayerActions.cs` joined the list.
     assert modified == ["McpMod.Actions.cs", "McpMod.Compendium.cs",
-                        "McpMod.cs", "McpMod.MultiplayerState.cs",
+                        "McpMod.cs", "McpMod.MultiplayerActions.cs",
+                        "McpMod.MultiplayerState.cs",
                         "McpMod.StateBuilder.cs", "McpMod.Wiki.cs"], (
         f"upstream files we have edited changed: {modified}. Update PROVENANCE.md's "
         f"'What we changed' table and this assertion together, deliberately.")

@@ -1250,6 +1250,12 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # burst one line up does; and before any enemy acts, which is the printed
     # promise and the only clause of the sentence a card can tell apart.
     # `kokomi_plan.resolve_dusk` carries the rest of the argument.
+    #
+    # A PLAN STAYS OPEN, PICK 5 (a) (2026-10-01): the pilot's flips first,
+    # its last act of the turn, while the queue it reads is the one the next
+    # morning will carry out (`kokomi_plan.pilot_flips`; the Plan line by
+    # default).
+    kokomi_plan.pilot_flips(state)
     kokomi_plan.resolve_dusk(state)
     # POOL COMPLETION (2026-10-01), PATIENT TIDE: "At the end of your turn,
     # keep up to 2 unspent Energy." Banked here, after the Dusk drain, and

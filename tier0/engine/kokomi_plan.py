@@ -1361,18 +1361,13 @@ def carry_out_times(state: CombatState) -> int:
 # an entry (Nereid's Ascension, Second Wave, All Streams) takes the line chosen
 # for it, which is the paper's "the default is the line chosen for the first".
 #
-# ONE CHOOSER A TURN (sec.3, the caller's "at most one chooser screen per
-# turn"). The mod opens one screen when a two-line Plan is due; the latch below
-# is that screen's twin. A later door the same turn (Change of Plans, Spring
-# Tide) after the screen was shown carries out the Plan line. Twin:
-# `KokomiPlan.ChooseLines`.
-
-LINE_CHOOSER_KEY = "kk_plan_line_chooser"
-
-#: The Plan clause ops that deal damage, for the policy's "would the Plan line
-#: hit nothing" read.
-_PLAN_DAMAGE_OPS = frozenset(("damage", DAMAGE_IF_ALONE,
-                              "damage_quarter_max_hp"))
+# PICK 5 (a) (sec.3, ruled 2026-10-01): "Plans carry out on their Plan line;
+# click a waiting Plan to flip it." No screen. A waiting two-line Plan holds
+# its `line`; during her turn the player flips it (`flip`, the click on the
+# Plan strip in the mod) and flips it back the same way; at carry-out each
+# Plan uses the line it holds (`choose_lines`). This engine's player is the
+# pilot, which flips at the end of its turn by `line_policy` -- the Plan line
+# by default. Twins: `KokomiPlan.Flip`, `KokomiPlan.ChooseLines`.
 
 
 def two_line(entry: PlanEntry) -> bool:
@@ -1380,70 +1375,55 @@ def two_line(entry: PlanEntry) -> bool:
     return entry.now_card is not None and not entry.dusk
 
 
-def choose_lines(state: CombatState, due: Sequence[PlanEntry]) -> None:
-    """Set each due entry's `line` before it is carried out.
-
-    Every entry starts at the Plan line. When at least one is two-line and no
-    chooser has been shown this turn, the turn's one chooser is claimed and
-    `line_policy` answers for each two-line entry -- the player's screen in
-    the mod (`KokomiPlan.ChooseLines`)."""
-    for entry in due:
-        entry.line = "plan"
-    open_ = [e for e in due if two_line(e)]
-    if not open_ or not claim_once_per_turn(state, LINE_CHOOSER_KEY):
-        return
-    for entry in open_:
-        entry.line = line_policy(state, entry)
-        state.emit("plan_line_chosen", card=entry.card_id, line=entry.line)
-
-
-def incoming_damage(state: CombatState) -> int:
-    """The enemies' total intended damage to her this turn, every hit counted,
-    through the estimate Tide Wall reads (`potions._intent_damage`)."""
-    from tier0.engine import potions               # late import: cycle
-    return sum(int(potions._intent_damage(state, e))
-               for e in state.living_enemies if _intends_to_attack(e))
-
-
-def _plan_line_whiffs(state: CombatState, entry: PlanEntry) -> bool:
-    """Would every damaging clause of the Plan line land on nothing, or only
-    on Intangible bodies? False for a Plan line that deals no damage."""
-    hits = [c for c in entry.clauses if c.get("op") in _PLAN_DAMAGE_OPS]
-    if not hits:
+def flip(state: CombatState, index: int) -> bool:
+    """The player clicks the waiting Plan at `index` (front = 0): a two-line
+    Plan switches between its Plan line and its now-line. False, and nothing
+    moves, outside her turn, past the queue, or on a Plan with one line.
+    `KokomiPlan.Flip` is the twin."""
+    if not live(state) or not state.in_player_turn:
         return False
-    for clause in hits:
-        bodies = _aimed(state, clause, entry)
-        if any(not b.powers.get("intangible", 0) for b in bodies):
-            return False
+    queue = state.kk_plan_queue
+    if index < 0 or index >= len(queue) or not two_line(queue[index]):
+        return False
+    entry = queue[index]
+    entry.line = "plan" if entry.line == "now" else "now"
+    state.emit("plan_flipped", card=entry.card_id, line=entry.line)
     return True
 
 
+def choose_lines(state: CombatState, due: Sequence[PlanEntry]) -> None:
+    """Set each due entry's `line` before it is carried out: a two-line Plan
+    keeps the line it was flipped to while it waited, and every other Plan is
+    its Plan line. No screen, no latch (pick 5a). `KokomiPlan.ChooseLines`
+    is the twin."""
+    for entry in due:
+        if not two_line(entry):
+            entry.line = "plan"
+            continue
+        state.emit("plan_line_chosen", card=entry.card_id, line=entry.line)
+
+
 def line_policy(state: CombatState, entry: PlanEntry) -> str:
-    """THE PILOT'S CHOICE OF LINE -- an INSTRUMENT SURFACE in `_worst_card`'s
-    sense (R215 B): the mod asks the player, this engine has none, and nothing
-    measured through this function is a statement about the design.
+    """THE PILOT'S FLIP -- an INSTRUMENT SURFACE in `_worst_card`'s sense
+    (R215 B): the mod leaves it to the player, and nothing measured through
+    this function is a statement about the design.
 
-    The heuristic, kept crude and legible:
-
-      * "now" when the now-line gains Block and the enemies' total intended
-        damage this turn exceeds the Block she holds -- the paper's "defence
-        stops being a guess";
-      * "now" when every damaging clause of the Plan line would land on
-        nothing or on an Intangible body -- "the Intangible turn stops voiding
-        Plans";
-      * "plan" otherwise, the default the screen pre-selects.
-    """
-    card = entry.now_card
-    if card is None:
-        return "plan"
-    # HER Block: Joint Orders' now-line guards another player, not her.
-    if any(fx.get("op") == "block" and fx.get("target") != "ally"
-           for fx in card.effects) \
-            and incoming_damage(state) > int(state.player.block):
-        return "now"
-    if _plan_line_whiffs(state, entry):
-        return "now"
+    THE PLAN LINE, by default (pick 5a: "Plans carry out on their Plan
+    line"). The old heuristic read the carry-out turn's intents, which a
+    player flipping during the turn before cannot see; it went with the
+    turn-start screen."""
     return "plan"
+
+
+def pilot_flips(state: CombatState) -> None:
+    """The pilot's last act of its turn: each waiting two-line Plan's line,
+    by `line_policy`, set through `flip` as a click would set it. Called by
+    `combat._player_turn` before the Dusk drain."""
+    if not live(state):
+        return
+    for index, entry in enumerate(list(state.kk_plan_queue)):
+        if two_line(entry) and line_policy(state, entry) != entry.line:
+            flip(state, index)
 
 
 #: The per-card context a now-line carry-out opens and then restores, on top
@@ -2209,17 +2189,24 @@ def open_casket(state: CombatState) -> None:
 
 
 def fetch_open_casket(state: CombatState) -> None:
-    """What the Tokoyo Returns: "Put Open the Casket from your Exhaust Pile
-    into your Hand." The first one there; none there, nothing happens.
-    `KokomiOverhaulKit.FetchOpenCasket` is the twin."""
+    """What the Tokoyo Returns: "Put Open the Casket into your hand from your
+    draw pile or discard pile." The draw pile first, then the discard pile;
+    the first one found moves, and none in either means nothing happens.
+    (Open the Casket lost its Exhaust on 2026-10-01, so the Exhaust Pile this
+    used to search no longer holds it.) `KokomiOverhaulKit.FetchOpenCasket`
+    is the twin."""
     if not live(state):
         return
     p = state.player
-    token = next((c for c in p.exhaust_pile if c.id == OPEN_THE_CASKET), None)
-    if token is None:
+    token, pile = None, None
+    for pile in (p.draw_pile, p.discard_pile):
+        token = next((c for c in pile if c.id == OPEN_THE_CASKET), None)
+        if token is not None:
+            break
+    if token is None or pile is None:
         state.emit("casket_fetch", found=False)
         return
-    p.exhaust_pile.remove(token)
+    pile.remove(token)
     if len(p.hand) >= C.MAX_HAND_SIZE:
         p.discard_pile.append(token)
     else:
@@ -2351,11 +2338,17 @@ def patient_tide_kept(state: CombatState) -> int:
 
 
 def open_the_casket_card() -> Card:
-    """The token, as this engine's `Card`: Skill, 0, Retain, Exhaust, in no
-    pool. Built here rather than on a sheet for the C#'s reason (the
-    prototype surface has no token rarity); `OpenTheCasket.cs` is the twin."""
-    return Card(id=OPEN_THE_CASKET, name="Open the Casket", cost=0,
-                type="skill", rarity="token", exhaust=True, retain=True,
+    """The token, as this engine's `Card`: Skill, 1, Retain, in no pool.
+    Built here rather than on a sheet for the C#'s reason (the prototype
+    surface has no token rarity); `OpenTheCasket.cs` is the twin.
+
+    NO EXHAUST SINCE 2026-10-01 (the four-kit review, Kokomi pick 1): played,
+    it goes to the discard pile and comes back with the deck. [USER]: "if
+    it's repeatable, it should probably cost energy, though, to make this a
+    real choice and not just button mashing when it comes up?" -- so it costs
+    1 (was 0)."""
+    return Card(id=OPEN_THE_CASKET, name="Open the Casket", cost=1,
+                type="skill", rarity="token", exhaust=False, retain=True,
                 effects=[{"op": "open_casket"}])
 
 

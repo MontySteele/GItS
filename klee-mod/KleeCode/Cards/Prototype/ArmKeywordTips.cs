@@ -376,16 +376,16 @@ public static class ArmKeywordTips
     /// The second sentence was shortened to keep the tip under 135.
     ///
     /// A PLAN STAYS OPEN (2026-10-01, ruled;
-    /// review/active/kokomi-delay-pays-2026-10-01.md): "next turn, you choose
-    /// which line happens" -- the Bake-Kurage carries a two-line Plan out as
-    /// either line, the player's pick on one screen.
+    /// review/active/kokomi-delay-pays-2026-10-01.md), pick 5 (a): "Plans
+    /// carry out on their Plan line; click a waiting Plan to flip it." The
+    /// Bake-Kurage carries a two-line Plan out as either line; no screen.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
             "Instead of the line above, play the card on the "
-          + "[gold]Bake-Kurage[/gold]: next turn, you choose which line "
-          + "happens. Plans go in the order made.");
+          + "[gold]Bake-Kurage[/gold]: it happens next turn. Click it to flip "
+          + "lines. Plans go in the order made.");
 
     /// <summary>
     /// `EB-643` (R265), THE POOL PASS'S ONE NEW WORD, and it is a rule about
@@ -518,7 +518,7 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForOpenTheCasket(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, OpenTheCasketKey,
-            "0-cost, Retain, Exhaust. Gain [gold]Strength[/gold] equal to the "
+            "1-cost, Retain. Gain [gold]Strength[/gold] equal to the "
           + "Casket's count, then empty it.");
 
     /// <summary>
