@@ -5646,8 +5646,10 @@ reduction?" Built in both engines. The pool stays **78 (24 / 33 / 21)**.
 **In (three rows, appended to `C.KLEE_STATUS_PACKAGE_IDS`, LAST in her pool).**
 Up in Smoke! (Skill 1, Common: 2 [3] Weak to ALL, a Dazed), Behind Jean's
 Desk (Skill 1, Uncommon: 14 [18] Block, a Confiscated), Kitchen Alchemy
-(Skill 1, Uncommon, Exhaust: exhaust a status in hand, ALL enemies lose 2 [3]
-Strength).
+(Skill 1, Uncommon, Exhaust: ALL enemies lose 1 [2] Strength; exhaust every
+status in hand, they lose 1 more for each).
+
+Reworked 2026-10-02 after the forced-deck seat (0 plays in 7 hands: a status is rarely in hand): always playable, more with statuses.
 
 **Out (three rows).** Fish-Flavored Bait (Common), Nova Burst
 (`proto_ko_big_bounce`) and Spinning Sparkler (Uncommon): out of the sheet,
@@ -5657,23 +5659,23 @@ registered (BACKLOG).
 
 **Readings:**
 
-1. *Kitchen Alchemy's gate.* Unplayable with no status in hand, through the
-   card's own `IsPlayable` (`KleeStatusPackage.StatusesInHand`), with the
-   reason "no status in your hand" on `IUnplayableReasonCard`. Derived from
-   the `exhaust_a_status` op (`gen_klee_cards.card_needs_a_status`, sim
-   `klee_overhaul.refuses_for_no_status` in `combat.card_playable`).
-2. *Which status.* One; with several the player chooses
-   (`CardSelectCmd.FromHand` of one, the base exhaust prompt, statuses only).
-   The sim's pilot takes a Confiscated first, else the first status held.
+1. *No gate (2026-10-02).* The first build was unplayable with no status in
+   hand (an `exhaust_a_status` op and an `IsPlayable` gate); the rework
+   removed both. The card always plays.
+2. *Which statuses.* All of them in hand (`KleeStatusPackage.ExhaustStatuses`,
+   sim `klee_overhaul.exhaust_statuses`; Dust of Purification's exhaust,
+   shared). A status is Status type or Status rarity; curses stay.
 3. *The Strength loss* is permanent: Malaise's `PowerCmd.Apply<StrengthPower>`
-   at minus N on every hittable enemy (new op `lose_strength`, ALL enemies
-   only; sim `effects._op_lose_strength`, negative `strength` on the enemy).
-   Upgrade key `strength_loss`, the `StrengthLoss` var.
+   at minus N on every hittable enemy (op `lose_strength`, ALL enemies only;
+   sim `effects._op_lose_strength`, negative `strength` on the enemy). Its
+   `per_status: 1` field exhausts the statuses first and adds 1 per status,
+   applied once as one total (`KleeStatusPackage.LossWithStatuses`). Upgrade
+   key `strength_loss` moves the base only, the `StrengthLoss` var.
 4. *Up in Smoke!'s face.* A name-matched power delta (`weak: +1`) on a row
    with its own `description:` now swaps the printed number for
    `{PowerAmount:diff()}` (`_authored_face_numbers`); before, only
    `power_amount` did. No other generated card changed.
-5. *Drafter prices.* `exhaust_a_status` and `lose_strength` are priced ZERO in
+5. *Drafter prices.* `lose_strength` is priced ZERO in
    `tier05.draft`, the arm's other verbs' decision; no `DRAFTER_VERSION` bump.
 
 Pins: `tier0/tests/test_klee_status_package.py`,

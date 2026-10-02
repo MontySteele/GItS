@@ -202,9 +202,10 @@ def test_the_defence_rows_numbers_and_upgrades(overhaul):
     assert _first(load("proto_ko_behind_jeans_desk"), "block")["amount"] == 14
     assert _first(_up("proto_ko_behind_jeans_desk"), "block")["amount"] == 18
     loss = _first(load("proto_ko_kitchen_alchemy"), "lose_strength")
-    assert (loss["amount"], loss["target"]) == (2, "all_enemies")
-    assert _first(_up("proto_ko_kitchen_alchemy"),
-                  "lose_strength")["amount"] == 3
+    assert (loss["amount"], loss["target"], loss["per_status"]) == (
+        1, "all_enemies", 1)
+    up = _first(_up("proto_ko_kitchen_alchemy"), "lose_strength")
+    assert (up["amount"], up["per_status"]) == (2, 1)
 
 
 def test_up_in_smoke_weakens_every_enemy_and_shuffles_a_dazed(overhaul):
@@ -237,50 +238,58 @@ def test_behind_jeans_desk_blocks_and_adds_a_confiscated(overhaul):
     assert st.player.block == 18
 
 
-def test_kitchen_alchemy_exhausts_a_status_and_takes_strength_from_all(
+# Kitchen Alchemy, reworked 2026-10-02 after the forced-deck seat (0 plays in
+# 7 hands: a status is rarely in hand): "ALL enemies lose 1 [2] Strength.
+# Exhaust every status in your hand; they lose 1 more for each."
+
+def test_kitchen_alchemy_plays_with_no_status_and_every_enemy_loses_one(
         overhaul):
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     b.powers["strength"] = 3
     st = klee_state([a, b])
-    dazed = statuses.make_status("dazed")
-    st.player.hand = [dazed, load("proto_ko_chain_fuse")]
+    st.player.hand = [load("proto_ko_chain_fuse")]
     card = load("proto_ko_kitchen_alchemy")
     assert combat.card_playable(st, card)
     play(st, card)
     assert [c.id for c in st.player.hand] == ["proto_ko_chain_fuse"]
-    assert dazed in st.player.exhaust_pile
     # Permanent: negative Strength on the body, not a this-turn loss.
-    assert (a.powers.get("strength"), b.powers.get("strength")) == (-2, 1)
+    assert (a.powers.get("strength"), b.powers.get("strength")) == (-1, 2)
 
+
+def test_kitchen_alchemy_exhausts_every_status_and_each_adds_one(overhaul):
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    st = klee_state([a, b])
+    dazed, conf = statuses.make_status("dazed"), _confiscated()
+    st.player.hand = [dazed, load("proto_ko_chain_fuse"), conf]
+    play(st, load("proto_ko_kitchen_alchemy"))
+    assert [c.id for c in st.player.hand] == ["proto_ko_chain_fuse"]
+    assert dazed in st.player.exhaust_pile and conf in st.player.exhaust_pile
+    # 1 + 1 per status, applied once as one total.
+    assert (a.powers.get("strength"), b.powers.get("strength")) == (-3, -3)
+
+
+def test_kitchen_alchemy_upgraded_base_is_two(overhaul):
     c = make_enemy(hp=200, name="c")
     st = klee_state([c])
+    st.player.hand = []
+    play(st, _up("proto_ko_kitchen_alchemy"))
+    assert c.powers.get("strength") == -2
+
+    d = make_enemy(hp=200, name="d")
+    st = klee_state([d])
     st.player.hand = [statuses.make_status("dazed")]
     play(st, _up("proto_ko_kitchen_alchemy"))
-    assert c.powers.get("strength") == -3
+    assert d.powers.get("strength") == -3        # the per-status 1 holds
 
 
-def test_kitchen_alchemy_takes_one_status_of_several(overhaul):
-    """With several statuses in hand the player chooses one (the mod's
-    `CardSelectCmd.FromHand` of one); the sim's pilot takes the Confiscated,
-    the status that comes back every shuffle."""
-    st = klee_state([make_enemy(hp=200)])
-    dazed, conf = statuses.make_status("dazed"), _confiscated()
-    st.player.hand = [dazed, conf]
+def test_kitchen_alchemy_leaves_a_curse_in_hand(overhaul):
+    enemy = make_enemy(hp=200)
+    st = klee_state([enemy])
+    curse = Card(id="regret", name="Regret", cost=-1, type="curse",
+                 rarity="curse", effects=[])
+    dazed = statuses.make_status("dazed")
+    st.player.hand = [curse, dazed]
     play(st, load("proto_ko_kitchen_alchemy"))
-    assert st.player.hand == [dazed]
-    assert conf in st.player.exhaust_pile
-
-
-def test_kitchen_alchemy_is_unplayable_with_no_status_in_hand(overhaul):
-    st = klee_state([make_enemy(hp=200)])
-    card = load("proto_ko_kitchen_alchemy")
-    st.player.hand = [load("proto_ko_chain_fuse")]
-    assert klee_overhaul.refuses_for_no_status(st, card)
-    assert not combat.card_playable(st, card)
-    st.player.hand.append(_confiscated())
-    assert not klee_overhaul.refuses_for_no_status(st, card)
-    assert combat.card_playable(st, card)
-    # Only the card that exhausts one carries the gate.
-    st.player.hand = []
-    assert not klee_overhaul.refuses_for_no_status(
-        st, load("proto_ko_up_in_smoke"))
+    assert st.player.hand == [curse]
+    assert curse not in st.player.exhaust_pile
+    assert enemy.powers.get("strength") == -2

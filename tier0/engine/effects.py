@@ -6198,21 +6198,24 @@ def _op_exhaust_statuses_grow_largest(state: CombatState, fx: dict,
     klee_overhaul.exhaust_statuses_grow_largest(state, int(fx["amount"]))
 
 
-def _op_exhaust_a_status(state: CombatState, fx: dict, card: Card) -> None:
-    """DEFENCE IN THE STATUS PILE: Kitchen Alchemy's chosen status exhaust."""
-    if not klee_overhaul.live(state):
-        _op_klee_overhaul_off(state, fx, card)        # always raises
-    klee_overhaul.exhaust_a_status(state, card)
-
-
 def _op_lose_strength(state: CombatState, fx: dict, card: Card) -> None:
     """"ALL enemies lose N Strength." PERMANENT, Disarm's and Malaise's kind:
     negative Strength on the target, not a this-turn loss (the mod's
     `PowerCmd.Apply<StrengthPower>` at minus N). First carrier: Kitchen
-    Alchemy (defence in the status pile, 2026-10-01)."""
-    amount = _amount(state, fx["amount"])
+    Alchemy (defence in the status pile, 2026-10-01). With `per_status`
+    (Kitchen Alchemy, reworked 2026-10-02): "Exhaust every status in your
+    hand; they lose 1 more for each." The exhausts first, then ONE loss of
+    the base plus `per_status` for each (`KleeStatusPackage.LossWithStatuses`).
+    """
+    amount = int(_amount(state, fx["amount"]))
+    if "per_status" in fx:
+        if not klee_overhaul.live(state):
+            _op_klee_overhaul_off(state, fx, card)    # always raises
+        exhausted = klee_overhaul.exhaust_statuses(state)
+        amount += int(fx["per_status"]) * exhausted
+        state.emit("ko_kitchen_alchemy", exhausted=exhausted, loss=amount)
     for enemy in _pick_targets(state, fx.get("target", "enemy")):
-        powers.apply_power(state, enemy, "strength", -int(amount),
+        powers.apply_power(state, enemy, "strength", -amount,
                            applier=state.player)
 
 
@@ -6757,7 +6760,6 @@ OPS = {
     "multiply_largest_bomb": _op_multiply_largest_bomb,
     "transform_statuses_into": _op_transform_statuses_into,
     "exhaust_statuses_grow_largest": _op_exhaust_statuses_grow_largest,
-    "exhaust_a_status": _op_exhaust_a_status,
     "lose_strength": _op_lose_strength,
     "fetch_from_discard": _op_fetch_from_discard,
     "add_random_companion": _op_add_random_companion,

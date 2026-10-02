@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoKitchenAlchemy : CustomCardModel, IUnplayableReasonCard
+public sealed class ProtoKoKitchenAlchemy : CustomCardModel
 {
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };
@@ -45,24 +45,13 @@ public sealed class ProtoKoKitchenAlchemy : CustomCardModel, IUnplayableReasonCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitchen Alchemy"),
-        ("description", "Exhaust a status in your hand. ALL enemies lose {StrengthLoss:diff()} [gold]Strength[/gold]."),
+        ("description", "ALL enemies lose {StrengthLoss:diff()} [gold]Strength[/gold]. Exhaust every status in your hand; they lose 1 more for each."),
     };
-
-    // Defence in the status pile: a card that exhausts a status
-    // from hand is unplayable with none there, the way a base-game
-    // card with a play condition is.
-    protected override bool IsPlayable =>
-        KleeStatusPackage.StatusesInHand(SparkCost.OwnerCreatureOf(this)) > 0;
-
-    public string? UnplayableReason =>
-        KleeStatusPackage.StatusesInHand(SparkCost.OwnerCreatureOf(this)) > 0
-            ? null
-            : "no status in your hand";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("StrengthLoss", 2m)
+            new DynamicVar("StrengthLoss", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -74,10 +63,11 @@ public sealed class ProtoKoKitchenAlchemy : CustomCardModel, IUnplayableReasonCa
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KleeStatusPackage.ExhaustAStatus(choiceContext, Owner, this);
+        var exhausted = await KleeStatusPackage.ExhaustStatuses(choiceContext, Owner);
+        var loss = KleeStatusPackage.LossWithStatuses(DynamicVars["StrengthLoss"].IntValue, 1, exhausted);
         foreach (var weakened in CombatState!.HittableEnemies.ToList())
         {
-            await PowerCmd.Apply<StrengthPower>(choiceContext, weakened, -DynamicVars["StrengthLoss"].IntValue, applier: Owner.Creature, cardSource: this);
+            await PowerCmd.Apply<StrengthPower>(choiceContext, weakened, -loss, applier: Owner.Creature, cardSource: this);
         }
     }
 
