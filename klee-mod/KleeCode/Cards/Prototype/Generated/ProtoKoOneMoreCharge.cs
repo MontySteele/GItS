@@ -41,7 +41,7 @@ public sealed class ProtoKoOneMoreCharge : CustomCardModel
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "One More Charge"),
+        ("title", "Witch's Homework"),
         ("description", "Your largest [gold]Bomb[/gold] grows by {Grow:diff()}. If it is now 20 or more, draw 1 card."),
     };
 

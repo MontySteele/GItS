@@ -145,7 +145,7 @@
    upgrade: {grow: +3},
    effects: [{op: grow_bombs, target: enemy, amount: 6}]}
 
-- {id: proto_ko_careful_arrangement, name: "Careful Arrangement", character: klee,
+- {id: proto_ko_careful_arrangement, name: "Exquisite Compound", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
    description: "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by 5, and is a [gold]Mine[/gold] if any of them were.",
@@ -216,7 +216,7 @@
              {op: grow_bombs, target: enemy, amount: 3},
              {op: set_off, target: enemy}]}
 
-- {id: proto_ko_bang_bang, name: "Bang Bang!", character: klee,
+- {id: proto_ko_bang_bang, name: "Boom-Boom Strike", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: uncommon,
    description: "[gold]Set off[/gold]. Deal 8 damage. Place a [gold]Bomb[/gold] 4.",
@@ -271,7 +271,7 @@
 
 # --- currencies and defence (packet sec.4) ---
 
-- {id: proto_ko_ammo_scavenging, name: "Ammo Scavenging", character: klee,
+- {id: proto_ko_ammo_scavenging, name: "Lizard-Tail Gunpowder", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    description: "Place a [gold]Bomb[/gold] 4. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn.",
@@ -362,7 +362,7 @@
    effects: [{op: plant_bomb, target: enemy, size: 5,
               wide_if: companion_played_this_turn}]}
 
-- {id: proto_ko_witches_circle, name: "Witches' Circle", character: klee,
+- {id: proto_ko_witches_circle, name: "Little Hexenzirkel", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    upgrade: {power_amount: +2},
@@ -449,7 +449,7 @@
                      {op: draw, amount: 1}]}]}
 
 # Reworked 2026-09-27: the aura one Bomb reacts with feeds every other Bomb in the same Set off.
-- {id: proto_ko_vermillion_pact, name: "Vermillion Pact (proto)", character: klee,
+- {id: proto_ko_vermillion_pact, name: "Sparkborne Magic", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
    description: "When a [gold]Set off[/gold] makes one of your [gold]Bombs[/gold] react, every other [gold]Bomb[/gold] it sets off reacts with the same aura.",
@@ -545,7 +545,7 @@
    upgrade: {scry: 2},
    effects: [{op: scry_take, amount: 4, filter: set_off}]}
 
-- {id: proto_ko_big_bounce, name: "Big Bounce", character: klee,
+- {id: proto_ko_big_bounce, name: "Nova Burst", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    description: "[gold]Set off[/gold]. Deal 5 damage. Explosion damage past the enemy's HP hits a random other enemy.",
@@ -559,7 +559,7 @@
 # designed by the main session and built as specified. Why each exists:
 # docs/notes/prototype-surface-provenance.md.
 
-- {id: proto_ko_hiding_spot, name: "Hiding Spot", character: klee,
+- {id: proto_ko_hiding_spot, name: "Windtrace", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    description: "Gain 6 [gold]Block[/gold]. Place a [gold]Mine[/gold] 3 on a random enemy.",
@@ -613,7 +613,7 @@
    upgrade: {damage: +3, bonus_vs_bombed: +2},
    effects: [{op: damage, amount: 7, target: all_enemies, bonus_vs_bombed: 5}]}
 
-- {id: proto_ko_one_more_charge, name: "One More Charge", character: klee,
+- {id: proto_ko_one_more_charge, name: "Witch's Homework", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
    description: "Your largest [gold]Bomb[/gold] grows by 8. If it is now 20 or more, draw 1 card.",
@@ -668,7 +668,7 @@
    upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: ko_wait_for_it, amount: 2, target: self}]}
 
-- {id: proto_ko_duck_and_run, name: "Duck and Run", character: klee,
+- {id: proto_ko_duck_and_run, name: "Survival Rulebook", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
    description: "Gain 7 [gold]Block[/gold]. [gold]Set off[/gold].",
@@ -690,7 +690,7 @@
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_look_out, amount: 4, target: self}]}
 
-- {id: proto_ko_patience_klee, name: "Patience, Klee!", character: klee,
+- {id: proto_ko_patience_klee, name: "Experiment in Progress", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    description: "At the end of your turn, if you played no [gold]Set off[/gold] card, your largest [gold]Bomb[/gold] grows by 4.",

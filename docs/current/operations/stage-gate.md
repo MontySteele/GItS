@@ -57,7 +57,7 @@ moves the kit to Balance.** If it is not fun, his notes say which part, and
 that part is fixed.
 
 - **Klee** (`review/ruled/klee-review-2026-09-23.md`): the pick-1 batch lands
-  first (Tripwire, Explosive Frags, Where Did I Put It?, Big Bounce in; five
+  first (Tripwire, Explosive Frags, Where Did I Put It?, Nova Burst in; five
   shelf cards out; 48 draftable), then the pool grows to 78, then two seats
   and one full run by [USER]. The old three-line calibration gate
   (`review/records/klee-fun-calibration-2026-09-14.md`) is retired.

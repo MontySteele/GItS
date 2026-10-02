@@ -47,7 +47,7 @@ public sealed class ProtoKoBigBounce : CustomCardModel, IElementalCard, ISetOffC
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Big Bounce"),
+        ("title", "Nova Burst"),
         ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. Explosion damage past the enemy's HP hits a random other enemy."),
     };
 

@@ -41,7 +41,7 @@ public sealed class ProtoKoAmmoScavenging : CustomCardModel
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Ammo Scavenging"),
+        ("title", "Lizard-Tail Gunpowder"),
         ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn."),
     };
 

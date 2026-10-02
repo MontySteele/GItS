@@ -177,7 +177,7 @@ the plan the starter teaches.
   turn.
 - **You draft:** Fish-Flavored Bait and Pocket Fireworks (plain Attacks that
   keep pressure without cashing), Chain Fuse and Explosives Workshop (grow
-  faster), Careful Arrangement (pile every Bomb onto one enemy, which also
+  faster), Exquisite Compound (pile every Bomb onto one enemy, which also
   makes one big reacting number), Grounded and Sorry, Jean... (defence), Big
   Badda Boom and The Big One (*Set off* with a multiplier), Quick Fuse and
   Countdown (*Set off* on a Skill).
@@ -199,7 +199,7 @@ mint the Sparks for the next one. The hallway plan and the Shiv analogue.
   off on every enemy, Run Away! at the end, the board cleared by turn two or
   three.
 - **You draft:** Pop! and Mine Toss (cheap bombs and mines), Tinder Toss
-  and Bang Bang! (Spark *Set off* Attacks), Rapid Fire (four
+  and Boom-Boom Strike (Spark *Set off* Attacks), Rapid Fire (four
   random hits, *Set off* each enemy hit), Run Away! (defence), Chained
   Reactions (every explosion plants a new Bomb somewhere).
 - **The payoff moment:** the chain, when one Attack sets off three enemies'
@@ -218,20 +218,20 @@ mint the Sparks for the next one. The hallway plan and the Shiv analogue.
 Explosions are Pyro, so a Bomb set off on an enemy carrying a foreign aura
 reacts: Vaporize on Hydro, Melt on Cryo, Overload splash on Electro. The
 multiplier lands on the cooked number, and since bombs go off one at a time,
-on the *first* one, which is why Careful Arrangement is a React card.
+on the *first* one, which is why Exquisite Compound is a React card.
 
 - **A turn looks like:** a companion applies Hydro this turn, and next turn
   she sets off the bomb for one and a half times its size. Sequencing is the
   whole game.
 - **You draft:** Dahlia, Kaeya, Diona, Fischl from the Mondstadt pool (the
   appliers), Sucrose (Swirl spreads the aura), Sizzle and Perfect Timing and
-  Flame Dance (*Set off* Attacks that pay extra against an aura), Careful
-  Arrangement, Flash Point (1 Spark and a card if a Bomb reacted this turn).
+  Flame Dance (*Set off* Attacks that pay extra against an aura), Exquisite
+  Compound, Flash Point (1 Spark and a card if a Bomb reacted this turn).
 - **The payoff moment:** a cooked 15 that Vaporizes into 22 and applies Pyro
   on the way out.
 - **The decision every turn:** cash now for the plain number, or wait one turn
   for the aura and risk the enemy's swing.
-- **The Rare that breaks a rule:** *Vermillion Pact* (Power): when an
+- **The Rare that breaks a rule:** *Sparkborne Magic* (Power): when an
   explosion reacts, the Attack that set it off reacts too. The shared "one
   aura, consumed by the first hit" rule is broken for her chain.
 - **Weakness:** she cannot apply the second element herself. Without an
@@ -255,9 +255,9 @@ on the *first* one, which is why Careful Arrangement is a React card.
 - **Bombs → damage** (rule 2), **→ Sparks** (rule 4), **→ Block** (Sorry,
   Jean..., Common: at a cost, the bomb is gone), **→ the attacker's HP before
   it hits you** (Mines).
-- **Bombs → cards:** Ammo Scavenging (Common): plant a Bomb 4, then draw a
+- **Bombs → cards:** Lizard-Tail Gunpowder (Common): plant a Bomb 4, then draw a
   card for each Bomb that went off this turn.
-- **Sparks → Attacks** (Tinder Toss, Common; Bang Bang!, Uncommon), **→ setup and defence**
+- **Sparks → Attacks** (Tinder Toss, Common; Boom-Boom Strike, Uncommon), **→ setup and defence**
   (Dig In, Powder Charge; Blast Shield and Return to Sender, pass two),
   **→ cards** (Bottomless Bag; Once More!, a Set off card back), **→ energy**
   (Sparkling Burst, Uncommon, 3 Sparks; Sugar Rush, Rare; Blazing Delight,
@@ -278,20 +278,20 @@ left 48 (22 Common, 18 Uncommon, 8 Rare); these thirty take it to 78 (24
 Common, 36 Uncommon, 18 Rare). No new keyword: every card uses Bomb, Mine,
 Set off, Spark, Companion, Retain and Exhaust. Numbers are starting values.
 
-- **Cook (6):** One More Charge, Sit Tight, Patience, Klee!, Half a Mountain,
+- **Cook (6):** Witch's Homework, Sit Tight, Experiment in Progress, Half a Mountain,
   Favonius Escort, Klee's Secret Base.
-- **Spray (9):** Jumpy Dumpty Mk.III, Spinning Sparkler, Fish Fry, Duck and
-  Run, Party Poppers, Boom Badge, Windblume Fireworks, Fireworks Finale,
+- **Spray (9):** Jumpy Dumpty Mk.III, Spinning Sparkler, Fish Fry, Survival
+  Rulebook, Party Poppers, Boom Badge, Windblume Fireworks, Fireworks Finale,
   Spark Knight.
 - **React (2):** Wait For It..., Aftershock.
-- **Mines (5):** Hiding Spot, Mine, All Mine!, Look Out!, Dodoco, Second
+- **Mines (5):** Windtrace, Mine, All Mine!, Look Out!, Dodoco, Second
   Surprise.
 - **The Companion route (6):** Playdate, Team Effort, Tag Along, Come Back
   and Play!, Friendship Bracelet, Adventure Club.
 - **Retrieval (2):** Treasure Map, Alice's Detonator.
 
-Two names moved on a clash with shipped cards: Hide and Seek is **Hiding
-Spot**, and Jumpy Dumpty Mk.II is **Jumpy Dumpty Mk.III**.
+Two names moved on a clash with shipped cards: Hide and Seek became Hiding
+Spot (now **Windtrace**, the lore pass of 2026-10-01), and Jumpy Dumpty Mk.II is **Jumpy Dumpty Mk.III**.
 
 Two faces changed after the batch landed (2026-09-23):
 
@@ -505,7 +505,7 @@ makes Hexerei a *family* rather than a path, and it changes the shape of
    unchanged. The payoff is now the readers alone. Three
    readers, as a bridge into the companion layer and not a fourth loop:
    Coven Errand ("if you played a Companion card this turn, place it on ALL
-   enemies instead"), Witches' Circle ("whenever you play a Companion card,
+   enemies instead"), Little Hexenzirkel ("whenever you play a Companion card,
    place a Bomb 3 on a random enemy") and Alice's Introduction Magic ("all
    cards in your hand count as Companion cards this turn").
 3. **Hexerei stand-ins are the exception, not the rule.** A Universal gets
@@ -537,7 +537,7 @@ band:
 | Personals | 4, up to 5 | The coven, one card each; an imaginary friend as the fifth | reward-slot share, art |
 | Caretaker stand-ins | 4 to 6 | Klee-only cards standing in for Diona, Kaeya, Barbara, Albedo today; Noelle and Jean once they have a Universal | authoring only |
 | Hexerei stand-ins | as many as earn one, 6 to 10 | Family-generic cards standing in for Fischl, Sucrose, Albedo, Durin, Nicole today, and Razor, Mona, Venti, Varka once they have Universals; inherited by future Hexerei characters | authoring only |
-| Klee-side readers | 9 since R276 | Inside the pool, keyed to a Companion play: Coven Errand, Witches' Circle, Alice's Introduction Magic, and R276's Playdate, Team Effort, Friendship Bracelet, Come Back and Play!, Tag Along, Adventure Club | counted above |
+| Klee-side readers | 9 since R276 | Inside the pool, keyed to a Companion play: Coven Errand, Little Hexenzirkel, Alice's Introduction Magic, and R276's Playdate, Team Effort, Friendship Bracelet, Come Back and Play!, Tag Along, Adventure Club | counted above |
 
 Stand-ins cost no art and no share of the reward slot, because a stand-in
 replaces the Universal only when Klee is the one dealt it. That is why the
@@ -694,8 +694,8 @@ drafts, and the first Run Away! she is offered will make immediate sense.
 
 ### Script B — act-1 boss, single enemy (Cook, mid-act deck)
 
-**Deck additions since fight one:** Grounded, Chain Fuse, Careful
-Arrangement, Big Badda Boom, Fish-Flavored Bait, Sorry, Jean..., one Dahlia.
+**Deck additions since fight one:** Grounded, Chain Fuse, Exquisite
+Compound, Big Badda Boom, Fish-Flavored Bait, Sorry, Jean..., one Dahlia.
 **Boss (stand-in):** 140 HP, pattern Swing 12, Swing 12, Crush 20 and gains
 Block, repeat.
 
@@ -707,14 +707,14 @@ next turn starts with 7 Block. She attacked the boss and still cooked, which
 is what plain Attacks are for.
 
 **Turn 3.** Bombs at 9 and 9, plus a third at 6 from Chain Fuse on turn two.
-Grounded has paid twice. Hand: Careful Arrangement, Kaboom!, Duck and Cover,
+Grounded has paid twice. Hand: Exquisite Compound, Kaboom!, Duck and Cover,
 Big Badda Boom, Sorry, Jean.... Incoming: Crush 20. Energy 3, Block 7 from
 Grounded already.
 
 The decision the loop exists for. Cash: Big Badda Boom (2) sets off 9, 9 and
 6 one at a time, then 16, then reads the bombs again for 24. That is 64,
 boss to 71, three Sparks, Duck for 12 total, take 8, and Grounded pays
-nothing next turn. Cook: Careful Arrangement piles the three into one 26
+nothing next turn. Cook: Exquisite Compound piles the three into one 26
 (its rider adds 2), Duck and Cover for 12, take 8, Grounded pays 7 again,
 and next turn the pile is 28 into Big Badda Boom for 28 plus 16 plus 28.
 Same 8 HP either way; the cook line pays 72 instead of 64, a turn later, and
@@ -811,7 +811,7 @@ otherwise:**
    recommendation; a LAW amendment]. (2) Keep it, which caps a cooked bomb.
 9. **Bomb count and growth.** (1) *Each Bomb grows separately, so three small
    bombs on one enemy cook three times as fast as one big one* [default; it is
-   why Careful Arrangement and Bombs Away! are interesting]. (2) Per enemy.
+   why Exquisite Compound and Bombs Away! are interesting]. (2) Per enemy.
 
 ## 13. What this document does not do
 

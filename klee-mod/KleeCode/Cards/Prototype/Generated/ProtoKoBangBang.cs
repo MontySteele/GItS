@@ -47,7 +47,7 @@ public sealed class ProtoKoBangBang : CustomCardModel, IElementalCard, ISetOffCa
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Bang Bang!"),
+        ("title", "Boom-Boom Strike"),
         ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. Place a [gold]Bomb[/gold] {BombSize:diff()}."),
     };
 

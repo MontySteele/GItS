@@ -41,7 +41,7 @@ public sealed class ProtoKoHidingSpot : CustomCardModel
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Hiding Spot"),
+        ("title", "Windtrace"),
         ("description", "Gain {Block:diff()} [gold]Block[/gold]. Place a [gold]Mine[/gold] {BombSize:diff()} on a random enemy."),
     };
 
