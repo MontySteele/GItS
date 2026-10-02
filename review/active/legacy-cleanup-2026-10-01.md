@@ -85,7 +85,7 @@ and about 390 Python arm-flag reads.
    flags-off world and its tests still load them; the twelve retired-arm
    rows; the codegen's spotlight wrap and `NotKitCard` filter; the
    `MetersByTurn` zero columns in `PlayTelemetry`.
-   **5b done, PR #PRNUM** (2026-10-01): the engine pieces only cut cards
+   **5b done, PR #824** (2026-10-01): the engine pieces only cut cards
    used, in C#, the sim and the codegen (the two BACKLOG lines). Klee:
    `SplitLargest` / `split_largest_bomb`, Flame Dance's non-Pyro Set off
    filter, `FriendshipBraceletPower`, `TectonicTidePower`. Kokomi: eight Plan
