@@ -90,6 +90,9 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Seat page: a Furina seat never saw her own Frail or Dexterity loss printed, so Defend at 1-2 was unexplained (smoke round, 2026-10-02); check the brief page lists the player's debuffs.
 - Seat page: the Tamakushi Casket printed "(1)" between fights; its counter is combat-only (`TamakushiCasket.ShowCounter`), so the page reads `DisplayAmount` before combat state clears (smoke round, 2026-10-02).
 - Seat page: Tuning Fork prints "(7)" with no "of 10" (Klee lane 2, 2026-10-02).
+- Klee's played-log prints "Put Bomb 1" / "Mine 1" where the card placed Bomb 11 / Mine 3: a count printed where a size is read (Opus seat, 2026-10-02).
+- Louse Progenitor's intent under the player's Weak read "folded Strength and Weak: 14 on the move and 14 after" and the Weak seemed to do nothing; check the fold and the line (Opus seat, 2026-10-02).
+- A Mine going off printed "gives 1 Spark" plus Pounding Surprise's "+1 Spark" but the seat counted +1, not +2; check the Spark accounting or the wording (Opus seat, 2026-10-02).
 - Furina Stage log: a Gala Premiere turn printed "Usher joined the stage" twice (front, then back) before "took its Bow to make room for a summon" (smoke round, 2026-10-02).
 - Seat page: Cycle of Seasons' trigger damage prints on the line of the card that changed Varka's element, and Cycle's own line reads "Nothing this page can count landed off it" (Varka smoke seat, 2026-10-02).
 - Seat page: a dead Decimillipede segment waiting to Reattach is not on the wire (`BuildBattleState` sends only living enemies), so no page shows its revive countdown; send the body and its countdown (control seats, Ironclad and Necrobinder, 2026-09-26).

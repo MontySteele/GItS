@@ -14,7 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from understudy import blindplay, blindplay_brief, blindplay_shape
+from understudy import (blindplay, blindplay_brief, blindplay_notes,
+                        blindplay_shape)
 from understudy.blindplay_notes import (ENEMY_HANDLE_NOTE,
                                         NO_REACTION_THIS_TURN, POWER_NOTE)
 from understudy.blindplay_shape import PLAY_GUARDRAIL
@@ -307,10 +308,40 @@ def test_define_prints_the_row_and_the_gloss_of_one_word():
     assert hydro == ["- **Applies Hydro** — " + GLOSS.split(" — ", 1)[1]]
 
 
-def test_define_says_when_the_screen_has_no_such_word():
-    out = blindplay_brief.define(_page([TAINTED]), "Vulnerable")
-    assert out.startswith('No definition of "Vulnerable" on this screen.')
+def test_define_says_when_no_table_has_the_word():
+    out = blindplay_brief.define(_page([TAINTED]), "Zorbulate")
+    assert out.startswith('No definition of "Zorbulate" on this screen.')
     assert "Tainted" in out
+
+
+def test_define_falls_back_to_the_glossary_marked_off_screen():
+    """2026-10-02: an act-2 seat asked for Grounded, Companion and Bomb on a
+    screen that defined none of them and was told there was no definition."""
+    page = _page([TAINTED])
+    out = blindplay_brief.define(page, "grounded")
+    assert out == ("- **Grounded** — "
+                   + blindplay_notes.ARM_KEYWORDS["Grounded"]
+                   + blindplay_brief.OFF_SCREEN_MARK + "\n")
+    assert out.rstrip("\n").endswith("(not on this screen)")
+    assert blindplay_brief.define(page, '"Companion"').startswith(
+        "- **Companion** — A card titled with")
+    # The Bomb row's `{growth}` is filled with the rule's constant.
+    bomb = blindplay_brief.define(page, "BOMB")
+    assert "{" not in bomb and "}" not in bomb
+    assert f"Grows {blindplay_shape.BOMB_GROWTH} at the start" in bomb
+    assert "If its enemy dies, it jumps to another." in bomb
+    # Another table than the arms': the base game's words.
+    assert blindplay_brief.define(page, "vulnerable").startswith(
+        "- **Vulnerable** — ")
+    # A word the screen DOES define is the screen's row, unmarked.
+    assert blindplay_brief.define(page, "tainted") == TAINTED + "\n"
+
+
+def test_no_glossary_row_prints_a_raw_brace_off_screen():
+    for table in blindplay_notes.GLOSSARY_TABLES:
+        for word in table:
+            found = blindplay_notes.glossary_definition(word)
+            assert found and "{" not in found[1], word
 
 
 def test_observe_brief_remembers_the_lanes_words(lane_budget, capsys,
@@ -348,6 +379,25 @@ def test_observe_define_prints_one_definition(lane_budget, capsys):
     assert all(line.startswith("- **Exhaust**") for line in out)
     assert blindplay.cmd_observe(_args(define="Nope")) == 0
     assert capsys.readouterr().out.startswith('No definition of "Nope"')
+
+
+def test_new_seat_forgets_the_words_and_keeps_the_budget(lane_budget,
+                                                        capsys, monkeypatch):
+    """2026-10-02: a per-act handoff put a fresh seat on a lane that had
+    already met every word, so `--brief` defined none of them for it."""
+    monkeypatch.setenv(blindplay.LANE_ENV, "7")
+    blindplay_shape.set_budget(120, "7")
+    blindplay_shape.count_action("7")
+    assert blindplay.cmd_observe(_args()) == 0
+    capsys.readouterr()
+    assert blindplay_shape.words_seen_path("7").exists()
+    assert blindplay.main(["new-seat"]) == 0
+    line = capsys.readouterr().out
+    assert line.count("\n") == 1 and "lane 7" in line
+    assert not blindplay_shape.words_seen_path("7").exists()
+    assert blindplay_shape.read_budget("7") == {"cap": 120, "count": 1}
+    assert blindplay.cmd_observe(_args()) == 0
+    assert "## Words on this screen" in capsys.readouterr().out
 
 
 def test_the_seat_brief_names_define():

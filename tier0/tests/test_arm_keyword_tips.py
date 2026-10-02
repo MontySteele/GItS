@@ -170,15 +170,16 @@ def test_the_buff_kaeyas_card_leaves_behind_carries_it_too():
     assert "ArmKeywordTips.ForGrounded(base.ExtraHoverTips)" in body
 
 
-def test_the_grounded_tip_states_the_condition_and_defers_on_the_payout():
-    """The CONDITION is the whole rule a Kaeya reader needs. What Grounded
-    pays is the Power card's own printed line and moves with its upgrade, so
-    the tip must not quote a number a second card would contradict."""
+def test_the_grounded_tip_states_the_condition_and_the_payout():
+    """The CONDITION, and what it pays (2026-10-02): Block with no number,
+    because the upgrade moves it, and the Spark off the shared constant."""
     tips = TIPS_CS.read_text(encoding="utf-8")
-    assert "that pays at the start of your turn, but " in tips
-    assert ("only if you played no [gold]Set off[/gold] card last turn. "
-            "Its ") in tips
-    assert "card prints what it pays." in tips
+    assert '"A Power that gives [gold]Block[/gold] and "' in tips
+    assert ('+ KleeOverhaulLaw.GroundedSpark + " [gold]Spark[/gold] at the "'
+            in tips)
+    assert '"start of your turn, but only if you played no "' in tips
+    assert '"[gold]Set off[/gold] card last turn.");' in tips
+    assert "card prints what it pays." not in tips
     sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
     # `EB-622`: the payout moved 6 -> 4 (upgrade still `+2`, so 6 upgraded).

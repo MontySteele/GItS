@@ -50,7 +50,8 @@ from understudy.blindplay_notes import (AURA_NOTE, ENEMY_HANDLE_NOTE,
                                         MULTI_INTENT_NOTE,
                                         NO_REACTION_THIS_TURN,
                                         NO_RESOLUTIONS_THIS_TURN, POWER_NOTE,
-                                        _INTENT_SOURCE_HEAD)
+                                        _INTENT_SOURCE_HEAD,
+                                        glossary_definition)
 from understudy.blindplay_shape import PLAY_GUARDRAIL
 
 #: The glossary section. Its rows are kept the first time each prints on a
@@ -225,14 +226,18 @@ def brief(text: str, seen: set[str] | None = None) -> str:
     return "\n".join(_collapse_blanks(kept)) + "\n"
 
 
-#: What `observe --define` prints when the screen defines no such word.
+#: The marker on a `--define` row taken from the glossary, not this screen.
+OFF_SCREEN_MARK = " (not on this screen)"
+
+#: What `observe --define` prints when no glossary table has the word.
 NOT_DEFINED = ("No definition of \"{word}\" on this screen. Words defined "
                "here: {words}.")
 
 
 def define(text: str, word: str) -> str:
     """Every definition of `word` a full page prints -- its glossary row and
-    its italic glosses, once each -- or the one line saying there is none."""
+    its italic glosses, once each -- else the glossary's own row, marked as
+    not on this screen, else the one line saying there is none."""
     want = word.strip().strip('"*').strip().casefold()
     rows: list[str] = []
     words: list[str] = []
@@ -249,5 +254,10 @@ def define(text: str, word: str) -> str:
                 rows.append(row)
     if rows:
         return "\n".join(rows) + "\n"
+    # 2026-10-02: a word this screen does not define is looked up in the
+    # glossary's own tables, and marked as off-screen.
+    found = glossary_definition(want)
+    if found:
+        return f"- **{found[0]}** — {found[1]}{OFF_SCREEN_MARK}\n"
     return NOT_DEFINED.format(word=word.strip(),
                               words=", ".join(words) or "none") + "\n"
