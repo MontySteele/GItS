@@ -229,7 +229,8 @@ public static class KleeCardTooltips
         Element trigger = Element.None,
         bool includesBombRules = false,
         bool includesConfiscatedRules = false,
-        bool appliesWithoutHit = false)
+        bool appliesWithoutHit = false,
+        bool includesDazedCard = false)
     {
         foreach (var tip in inherited) yield return tip;
 
@@ -241,6 +242,13 @@ public static class KleeCardTooltips
         if (includesConfiscatedRules)
         {
             yield return HoverTipFactory.FromKeyword(KleeKeywords.Confiscated);
+        }
+
+        // THE KLEE STATUS PACKAGE (2026-10-01): a card that shuffles in the
+        // base game's Dazed previews it, the way a Shiv maker previews a Shiv.
+        if (includesDazedCard)
+        {
+            yield return HoverTipFactory.FromCard<MegaCrit.Sts2.Core.Models.Cards.Dazed>(false);
         }
 
         // `EB-389`. THE ELEMENT A RIDER IS ABOUT TO APPLY, not the one the face

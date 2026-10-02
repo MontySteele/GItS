@@ -1811,8 +1811,8 @@ proto_mc_kaeya_cold_blooded_strike	ImageGen/images/cards/companions/proto_mc_kae
 # proto_mc_jean_lions_fang <- her TCG card. The literal match, 'Constellation Lion's
 #   Fang, Fair Protector of Mondstadt', is a 256px constellation sigil and L8 bars it.
 proto_mc_jean_lions_fang	ImageGen/images/cards/companions/proto_mc_jean_lions_fang.png	500	380	cover	top	shortlist	1	png	Jean Card.png		tcg	jean
-# proto_mc_albedo_tectonic_tide <- Albedo's Wish splash; the Talent sigil is 256px (L8)
-proto_mc_albedo_tectonic_tide	ImageGen/images/cards/companions/proto_mc_albedo_tectonic_tide.png	500	380	cover	top	shortlist	1	png	Albedo Wish.png		splash	albedo
+# proto_mc_albedo_dust_of_purification <- Albedo's Wish splash, re-pointed from the cut Tectonic Tide (Klee status package, 2026-10-01); the Talent sigil is 256px (L8)
+proto_mc_albedo_dust_of_purification	ImageGen/images/cards/companions/proto_mc_albedo_dust_of_purification.png	500	380	cover	top	shortlist	1	png	Albedo Wish.png		splash	albedo
 # proto_mc_fischl_sinful_hex <- her full Wish art; the Talent sigil is 256px (L8)
 proto_mc_fischl_sinful_hex	ImageGen/images/cards/companions/proto_mc_fischl_sinful_hex.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Fischl Full Wish.png		splash	fischl
 # proto_mc_sucrose_mollis_favonius <- her Wish splash; the Talent sigil is 256px (L8)

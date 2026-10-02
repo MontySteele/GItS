@@ -575,8 +575,7 @@ def test_the_companion_tip_and_the_page_open_with_one_sentence():
     # And the tip reaches every face that prints the word, on every arm.
     printed = [path.stem for path in _prototype_files()
                if "[gold]Companion[/gold]" in path.read_text(encoding="utf-8")]
-    assert {"ProtoKoWitchesCircle", "ProtoKoFriendshipBracelet",
-            "ProtoKoComeBackAndPlay"} <= set(printed)
+    assert {"ProtoKoWitchesCircle", "ProtoKoComeBackAndPlay"} <= set(printed)
     for stem in printed:
         text = (PROTOTYPE_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         assert "ArmKeywordTips.ForCompanion(" in text, stem

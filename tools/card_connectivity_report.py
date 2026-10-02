@@ -439,6 +439,14 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "fetch_from_discard": [_hook("shared", "discard_pile", "use"),
                            _hook("shared", "hand_contents", "write")],
     "add_random_companion": [_hook("shared", "hand_contents", "write")],
+    # THE KLEE STATUS PACKAGE (2026-10-01): Klee Can Explain! turns the
+    # statuses in hand into Pop!s (Sea Glass Harvest's vocabulary), and
+    # Albedo's Dust of Purification exhausts them into the largest Bomb.
+    "transform_statuses_into": [_hook("shared", "junk_remove", "write"),
+                                _hook("shared", "hand_contents", "write")],
+    "exhaust_statuses_grow_largest": [_hook("shared", "junk_remove", "write"),
+                                      _hook("shared", "exhaust_pile", "write"),
+                                      _hook("private", "bombs", "write")],
     # VARKA, the Oath rework. His one op paints and Swirls enemies through
     # the shared reaction layer (`apply_current_element`, the follow-up hits,
     # `swirl_fresh_auras`), which is `apply_aura`'s channel; Knights' Roll

@@ -423,6 +423,10 @@ def card_cost(state: CombatState, card: Card) -> int:
     discount = klee_overhaul.playdate_discount(state, card)
     if discount:
         cost = max(0, cost - discount)
+    # THE KLEE STATUS PACKAGE (2026-10-01): Solitary Confinement, "Your
+    # Confiscated cost 0." `SolitaryConfinementPower` is the C# twin.
+    if klee_overhaul.solitary_confinement_frees(state, card):
+        cost = 0
     # QUARANTINED (`furina_stage.FURINA_STAGE`). POOL COMPLETION, THE LAST
     # ACT: "Costs 1 less for each empty seat." Pure, like the lines above.
     # `FurinaStageHooks.TryModifyEnergyCostInCombat` is the C# twin.

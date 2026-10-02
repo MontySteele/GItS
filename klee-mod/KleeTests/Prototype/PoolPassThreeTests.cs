@@ -97,21 +97,6 @@ public class PoolPassThreeTests
         Assert.Contains(calls, c => c.Contains("ProtoBombPower.Place"));
     }
 
-    [Fact]
-    public void Split_charge_buys_its_growth_with_the_upgrade_only()
-    {
-        // The base card prints no figure for the halves' growth because there
-        // is none: the upgrade BUYS a clause, so the face states it in its own
-        // `{IfUpgraded:show:...}` hole and the play reads `IsUpgraded`. A
-        // `Grow` var here would declare a number the base face never shows.
-        var card = new ProtoKoSplitCharge();
-
-        Assert.Contains("{IfUpgraded:show: Halves grow by 2.|}", Face(card));
-        Assert.Empty(Vars(card));
-        Assert.Contains(Il.Calls(Il.Method("ProtoKoSplitCharge", "OnPlay")),
-                        c => c.Contains("ProtoBombPower.SplitLargest"));
-    }
-
     // ---- Fireworks Show: Set off ALL, at a price the upgrade cuts ----------
 
     [Fact]
@@ -273,11 +258,12 @@ public class PoolPassThreeTests
 
         foreach (var row in new[]
                  {
-                     // Long Fuse and Kindling were cut at R276.
+                     // Long Fuse and Kindling were cut at R276, Split
+                     // Charge by the Klee status package (2026-10-01).
                      "ProtoKoAllOfMyTreasures",
                      "ProtoKoFishBlasting", "ProtoKoPocketMatch",
                      "ProtoKoBombsAway", "ProtoKoFlashPoint",
-                     "ProtoKoVermillionPact", "ProtoKoSplitCharge",
+                     "ProtoKoVermillionPact",
                  })
         {
             Assert.Contains(slice, c => c.Contains(row));

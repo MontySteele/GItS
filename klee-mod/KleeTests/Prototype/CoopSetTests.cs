@@ -118,7 +118,7 @@ public class CoopSetTests
         var solo = pool.GetUnlockedCards(
             null!, CardMultiplayerConstraint.SingleplayerOnly).ToList();
         Assert.Single(solo);
-        Assert.IsType<ProtoKoCarefulNow>(solo[0]);
+        Assert.IsType<ProtoKoChainFuse>(solo[0]);
 
         var coop = pool.GetUnlockedCards(
             null!, CardMultiplayerConstraint.MultiplayerOnly).ToList();
@@ -137,7 +137,7 @@ public class CoopSetTests
 
         protected override CardModel[] GenerateAllCards() => new CardModel[]
         {
-            new ProtoKoCarefulNow(),
+            new ProtoKoChainFuse(),
             new ProtoKoPassTheMatch(), new ProtoKoHideHere(),
             new ProtoKoKnightsOfFavonius(), new ProtoFsGuestOfHonor(),
             new ProtoFsShareTheSpotlight(), new ProtoFsPeopleOfFontaine(),

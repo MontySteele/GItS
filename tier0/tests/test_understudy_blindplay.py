@@ -1437,12 +1437,14 @@ def test_a_same_named_proto_card_prints_no_cost_discrepancy():
     surface ships a re-priced twin of a shipped card under the same printed
     name, and the title-keyed cost map answered the shipped card's 2 for the
     proto card's 1: the page told the tester the cost on the card in front of
-    them was wrong when nothing was wrong with it."""
+    them was wrong when nothing was wrong with it. (Flame Dance was the
+    finding's card; the Klee status package cut it, so Bombs Away!, shipped 3
+    and proto 1, stands in.)"""
     state = {"state_type": "card_reward",
              "card_reward": {"can_skip": True, "cards": [
-                 {"id": "KLEEMOD-PROTO_KO_FLAME_DANCE", "name": "Flame Dance",
+                 {"id": "KLEEMOD-PROTO_KO_BOMBS_AWAY", "name": "Bombs Away!",
                   "cost": "1", "type": "Attack",
-                  "description": "Deal 9 damage to ALL enemies."}]}}
+                  "description": "Deal 3 damage to ALL enemies."}]}}
     page = blindplay.observe(state)
     assert "The cost printed on this card" not in page
     # ...and a card the board really is discounting still says so.
@@ -8717,7 +8719,7 @@ def test_the_seats_page_asks_the_bridge_for_a_resolving_part_marker():
 def discounted_hand_state() -> dict:
     """The r7b fight-15 hand: one permanent upgrade, one one-turn discount.
 
-    `The Big One+` prints 3 on its shipped face and 2 here; `Flame Dance`
+    `The Big One+` prints 3 on its shipped face and 2 here; `Bombs Away!`
     prints 1 and is showing 0 under a `Vexing Puzzlebox`.
     """
     state = json.loads(json.dumps(combat_state()))
@@ -8726,10 +8728,10 @@ def discounted_hand_state() -> dict:
          "type": "Attack", "cost": "2", "can_play": True, "index": 0,
          "target_type": "AnyEnemy", "is_upgraded": True, "keywords": [],
          "description": "Set off for quadruple damage."},
-        {"id": "KLEEMOD-PROTO_KO_FLAME_DANCE", "name": "Flame Dance",
-         "type": "Skill", "cost": "0", "can_play": True, "index": 1,
-         "target_type": "Self", "is_upgraded": False, "keywords": [],
-         "description": "Set off each enemy whose aura is not Pyro."}]
+        {"id": "KLEEMOD-PROTO_KO_BOMBS_AWAY", "name": "Bombs Away!",
+         "type": "Attack", "cost": "0", "can_play": True, "index": 1,
+         "target_type": "AllEnemies", "is_upgraded": False, "keywords": [],
+         "description": "Deal 3 damage to ALL enemies."}]
     return state
 
 

@@ -1299,16 +1299,18 @@ def test_the_printed_cost_index_reads_the_shipped_face():
 def test_the_printed_cost_index_is_keyed_by_id_not_by_title():
     """`EB-267`. The prototype surface ships a re-priced twin of a shipped
     card under the SAME printed name, so a title-keyed map had one row where
-    the game has two faces: *Flame Dance* is cost 2 shipped and cost 1 on the
+    the game has two faces: *Flame Dance* was cost 2 shipped and cost 1 on the
     proto row, and the page told a blind reader the proto card's own printed
-    cost was wrong. Both rows are here, under the ids the wire sends."""
+    cost was wrong. Both rows are here, under the ids the wire sends. (The
+    Klee status package cut the proto Flame Dance; Bombs Away!, 3 shipped and
+    1 proto, is the pair now.)"""
     index = qa_packet.printed_cost_index(REPO)
-    assert index["FLAME_DANCE"] == 2
-    assert index["PROTO_KO_FLAME_DANCE"] == 1
+    assert index["BOMBS_AWAY"] == 3
+    assert index["PROTO_KO_BOMBS_AWAY"] == 1
     # The key is the wire's `Id.Entry` with the mod prefix off, which is what
     # every hand entry carries.
-    assert qa_packet.card_key("KLEEMOD-PROTO_KO_FLAME_DANCE") \
-        == "PROTO_KO_FLAME_DANCE"
+    assert qa_packet.card_key("KLEEMOD-PROTO_KO_BOMBS_AWAY") \
+        == "PROTO_KO_BOMBS_AWAY"
     assert qa_packet.card_key("KLEEMOD-KABOOM") == "KABOOM"
     assert qa_packet.card_key(None) == ""
 
@@ -1450,20 +1452,21 @@ def test_the_rendered_page_shows_a_spark_priced_card_at_its_price():
 
 
 def test_a_same_named_proto_row_prints_no_discrepancy():
-    """`EB-267`'s acceptance, both directions. The proto *Flame Dance* is
+    """`EB-267`'s acceptance, both directions. The proto *Bombs Away!* (the
+    proto *Flame Dance* until the Klee status package cut it) is
     drawn at the cost its own row prints, so the page says nothing about it; a
     card the board really is discounting still says so on its own line."""
     state = banked_state(0)
     state["player"]["hand"] = [
-        {"id": "KLEEMOD-PROTO_KO_FLAME_DANCE", "name": "Flame Dance",
+        {"id": "KLEEMOD-PROTO_KO_BOMBS_AWAY", "name": "Bombs Away!",
          "type": "Attack", "cost": "1", "can_play": True, "is_upgraded": False,
-         "description": "Deal 9 damage to ALL enemies."},
+         "description": "Deal 3 damage to ALL enemies."},
         {"id": "KLEEMOD-KABOOM", "name": "Kaboom!", "type": "Attack",
          "cost": "0", "can_play": True, "is_upgraded": False,
          "description": "Deal 7 damage. Applies Pyro."},
     ]
     page = qa_packet.render(qa_packet.build(state, "t", repo=REPO))
-    assert "The cost printed on this card is 2" not in page
+    assert "The cost printed on this card is 3" not in page
     assert "The cost printed on this card is 1; it is showing 0 here." in page
     assert page.count("The cost printed on this card") == 1
 

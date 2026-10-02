@@ -244,7 +244,6 @@ internal static class KleeOverhaulRoster
     {
         // Cook (8)
         ModelDb.Card<ProtoKoFishFlavoredBait>(),
-        ModelDb.Card<ProtoKoPocketFireworks>(),
         ModelDb.Card<ProtoKoChainFuse>(),
         ModelDb.Card<ProtoKoCarefulArrangement>(),
         ModelDb.Card<ProtoKoBigBaddaBoom>(),
@@ -258,13 +257,11 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoTinderToss>(),
         ModelDb.Card<ProtoKoQuickFuse>(),
         ModelDb.Card<ProtoKoBangBang>(),
-        ModelDb.Card<ProtoKoRapidFire>(),
         ModelDb.Card<ProtoKoChainedReactions>(),
         ModelDb.Card<ProtoKoSparksNSplash>(),
         // React (3)
         ModelDb.Card<ProtoKoSizzle>(),
         ModelDb.Card<ProtoKoPerfectTiming>(),
-        ModelDb.Card<ProtoKoFlameDance>(),
         // Currencies and defence (6; Dig In is back in the pool at draft 4)
         ModelDb.Card<ProtoKoAmmoScavenging>(),
         // R271 sec.4 item 3: Powder Charge's SHAPE kept and its body
@@ -276,14 +273,13 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoRunAway>(),
         ModelDb.Card<ProtoKoGrounded>(),
         ModelDb.Card<ProtoKoSorryJean>(),
-        // THE DEFENCE SHELF (2 -- R252, Klee round 9 pick 1 at its default).
+        // THE DEFENCE SHELF (R252; both rows cut by the status package,
+        // 2026-10-01).
         // The pick drafted four; the R253 charter audit withdrew Fire Safety
         // and Safety Lesson, and they are on no surface. What is left is the
         // placer with a Block half a starting hand needs and the capped read
         // of the pile that asks for a deck around it. In
         // `C.KLEE_OVERHAUL_POOL_IDS`'s order, which is the sheet's.
-        ModelDb.Card<ProtoKoDodocoCover>(),
-        ModelDb.Card<ProtoKoCarefulNow>(),
         // The Companion readers (3 -- R244, the ruled packet's sec.2; they
         // read Hexerei until R276). One per rarity: a Common that reads the
         // turn, an Uncommon Power that pays per Companion play, and a Rare
@@ -317,7 +313,6 @@ internal static class KleeOverhaulRoster
         // Tinder Toss, which prints its line at 1 Spark with 3 damage behind.
         ModelDb.Card<ProtoKoFlashPoint>(),
         ModelDb.Card<ProtoKoVermillionPact>(),
-        ModelDb.Card<ProtoKoSplitCharge>(),
         // POOL PASS TWO (2026-09-08, `EB-732`). SIX rows in three pairs, in
         // `C.KLEE_OVERHAUL_POOL_IDS`'s order, which is the sheet's: the
         // defence shelf's two (a Block the hand keeps, and the shelf's first
@@ -351,7 +346,6 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoSpinningSparkler>(),
         ModelDb.Card<ProtoKoMineAllMine>(),
         ModelDb.Card<ProtoKoTeamEffort>(),
-        ModelDb.Card<ProtoKoFishFry>(),
         ModelDb.Card<ProtoKoOneMoreCharge>(),
         ModelDb.Card<ProtoKoSitTight>(),
         ModelDb.Card<ProtoKoTreasureMap>(),
@@ -363,7 +357,6 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoPartyPoppers>(),
         ModelDb.Card<ProtoKoLookOut>(),
         ModelDb.Card<ProtoKoPatienceKlee>(),
-        ModelDb.Card<ProtoKoFriendshipBracelet>(),
         ModelDb.Card<ProtoKoSecretBase>(),
         ModelDb.Card<ProtoKoHalfAMountain>(),
         ModelDb.Card<ProtoKoFavoniusEscort>(),
@@ -375,5 +368,18 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoSparkKnight>(),
         ModelDb.Card<ProtoKoAlicesDetonator>(),
         ModelDb.Card<ProtoKoSecondSurprise>(),
+        // THE STATUS PACKAGE (2026-10-01, ruled): eight rows, LAST, in
+        // `C.KLEE_STATUS_PACKAGE_IDS`' order, which is the sheet's. Eight
+        // were cut above (Pocket Fireworks, Rapid Fire, Flame Dance, Dodoco
+        // Cover, Careful Now, Split Charge, Fish Fry, Friendship Bracelet);
+        // the pool stays 78 and is 24 / 33 / 21.
+        ModelDb.Card<ProtoKoForbiddenFun>(),
+        ModelDb.Card<ProtoKoItWasntMe>(),
+        ModelDb.Card<ProtoKoLisasTreats>(),
+        ModelDb.Card<ProtoKoRedKnight>(),
+        ModelDb.Card<ProtoKoFindersKeepers>(),
+        ModelDb.Card<ProtoKoKleeCanExplain>(),
+        ModelDb.Card<ProtoKoDamageReport>(),
+        ModelDb.Card<ProtoKoSolitaryConfinement>(),
     };
 }

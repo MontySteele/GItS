@@ -6213,6 +6213,22 @@ def _op_grow_largest(state: CombatState, fx: dict, card: Card) -> None:
                                   int(fx.get("draw", 0)))
 
 
+def _op_transform_statuses_into(state: CombatState, fx: dict,
+                                card: Card) -> None:
+    """THE KLEE STATUS PACKAGE: Klee Can Explain!'s transform."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.transform_statuses_into(state, str(fx["card"]))
+
+
+def _op_exhaust_statuses_grow_largest(state: CombatState, fx: dict,
+                                      card: Card) -> None:
+    """THE KLEE STATUS PACKAGE: Albedo -- Dust of Purification."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.exhaust_statuses_grow_largest(state, int(fx["amount"]))
+
+
 def _op_multiply_largest_bomb(state: CombatState, fx: dict,
                               card: Card) -> None:
     """Half a Mountain: the largest Bomb's current size times `factor`."""
@@ -6766,6 +6782,8 @@ OPS = {
     # R276, the pool expansion's five.
     "grow_largest": _op_grow_largest,
     "multiply_largest_bomb": _op_multiply_largest_bomb,
+    "transform_statuses_into": _op_transform_statuses_into,
+    "exhaust_statuses_grow_largest": _op_exhaust_statuses_grow_largest,
     "fetch_from_discard": _op_fetch_from_discard,
     "add_random_companion": _op_add_random_companion,
     "grant_kapow_each_turn": _op_grant_kapow_each_turn,

@@ -301,6 +301,11 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     (Long Fuse, Explosives Workshop, Sugar Rush, Kindling, Catalytic
     Converter) and four ARRIVED (Hair Trigger, Explosive Frags, Where Did I
     Put It?, Big Bounce). Both halves pinned, for the cut rows' reason above.
+
+    SEVENTY-EIGHT STILL SINCE THE STATUS PACKAGE (2026-10-01): eight CUT
+    (Pocket Fireworks, Rapid Fire, Flame Dance, Dodoco Cover, Careful Now,
+    Split Charge, Fish Fry, Friendship Bracelet) and eight ARRIVED, last
+    (`C.KLEE_STATUS_PACKAGE_IDS`). Both halves pinned.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
     assert len(ids) == 78
@@ -313,10 +318,8 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     assert {"proto_ko_coven_errand", "proto_ko_witches_circle",
             "proto_ko_alices_introduction_magic"} <= set(ids)
     assert "proto_ko_hex_and_wick" not in ids
-    # R252's two, and only two: the R253 charter audit withdrew the other two
-    # and they are on no surface, so their absence is pinned beside the
-    # presence for the reason `proto_ko_hex_and_wick`'s is.
-    assert {"proto_ko_dodoco_cover", "proto_ko_careful_now"} <= set(ids)
+    # R252's two left with the status package (2026-10-01); the R253 charter
+    # audit's two withdrawn rows stay absent.
     assert "proto_ko_fire_safety" not in ids
     assert "proto_ko_safety_lesson" not in ids
     # The round-10 pool pass's one, and only one: the Spark sink written with
@@ -333,7 +336,7 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     assert {"proto_ko_all_of_my_treasures",
             "proto_ko_fish_blasting", "proto_ko_pocket_match",
             "proto_ko_bombs_away", "proto_ko_flash_point",
-            "proto_ko_vermillion_pact", "proto_ko_split_charge"} <= set(ids)
+            "proto_ko_vermillion_pact"} <= set(ids)
     # R271 STAGE ONE's two cuts and its one redesign (`EB-749`), pinned both
     # ways: the cut ids are on no surface, and Booby Trap stands in Powder
     # Charge's slot.
@@ -354,24 +357,31 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     assert {"proto_ko_hair_trigger", "proto_ko_explosive_frags",
             "proto_ko_where_did_i_put_it",
             "proto_ko_big_bounce"} <= set(ids)
-    # THE POOL EXPANSION's thirty (R276), by name and for the same reason,
-    # in their own block at the end of the tuple.
-    assert list(ids[-30:]) == [
+    # THE POOL EXPANSION's thirty (R276), less the status package's two cuts,
+    # by name and for the same reason, then the status package's eight.
+    assert list(ids[-36:-8]) == [
         "proto_ko_hiding_spot", "proto_ko_playdate",
         "proto_ko_jumpy_dumpty_mk_iii", "proto_ko_spinning_sparkler",
         "proto_ko_mine_all_mine", "proto_ko_team_effort",
-        "proto_ko_fish_fry", "proto_ko_one_more_charge",
+        "proto_ko_one_more_charge",
         "proto_ko_sit_tight", "proto_ko_treasure_map",
         "proto_ko_tag_along", "proto_ko_come_back_and_play",
         "proto_ko_boom_badge", "proto_ko_wait_for_it",
         "proto_ko_duck_and_run", "proto_ko_party_poppers",
         "proto_ko_look_out", "proto_ko_patience_klee",
-        "proto_ko_friendship_bracelet", "proto_ko_secret_base",
+        "proto_ko_secret_base",
         "proto_ko_half_a_mountain", "proto_ko_favonius_escort",
         "proto_ko_adventure_club", "proto_ko_windblume_fireworks",
         "proto_ko_fireworks_finale", "proto_ko_dodoco",
         "proto_ko_aftershock", "proto_ko_spark_knight",
         "proto_ko_alices_detonator", "proto_ko_second_surprise"]
+    # THE STATUS PACKAGE (2026-10-01): eight cut, eight arrived, last.
+    for cut in ("proto_ko_pocket_fireworks", "proto_ko_rapid_fire",
+                "proto_ko_flame_dance", "proto_ko_dodoco_cover",
+                "proto_ko_careful_now", "proto_ko_split_charge",
+                "proto_ko_fish_fry", "proto_ko_friendship_bracelet"):
+        assert cut not in ids, cut
+    assert ids[-8:] == C.KLEE_STATUS_PACKAGE_IDS
 
 
 def test_the_numbers_are_the_briefs_placeholders():
@@ -508,10 +518,14 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
 
     THE POOL EXPANSION (R276) adds TWO Commons, EIGHTEEN Uncommons and TEN
     Rares toward the 78-card pool R276 ruled, which is where 24 / 36 / 18
-    comes from. R276 is the ruling the Rare count moves with."""
+    comes from. R276 is the ruling the Rare count moves with.
+
+    THE STATUS PACKAGE (2026-10-01) cuts TWO Commons and SIX Uncommons and
+    adds TWO Commons, THREE Uncommons and THREE Rares: 24 / 33 / 21, toward
+    the base game's thicker Rares (the paper's sec.3)."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 24, "uncommon": 36, "rare": 18}
+        "common": 24, "uncommon": 33, "rare": 21}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
@@ -599,7 +613,7 @@ def test_the_prototype_rule_states_the_rows_own_numbers():
         return upgrades.prototype_default_delta(card.id, card.cost, card.effects)
 
     assert delta("proto_ko_kapow") == {"damage": 3}          # a set_off's hit
-    assert delta("proto_ko_rapid_fire") == {"damage": 1}     # 4 hits: +1 each
+    assert delta("proto_ko_jumpy_dumpty_mk_iii") == {"damage": 1}  # 3 hits: +1 each
     assert delta("proto_ko_run_away") == {"block": 3}
     assert delta("proto_ko_pop") == {"bomb_size": 2}
     assert delta("proto_ko_jumpy_dumpty") == {"bomb_size": 2, "payload_mine": 1}
@@ -894,7 +908,7 @@ def test_alices_marked_cards_pay_no_spark_under_the_arm(overhaul):
     from tier0.tests.conftest import make_state
 
     alices = loader.get_card("proto_ko_alices_introduction_magic")
-    marked = [loader.get_card("proto_ko_careful_now") for _ in range(3)]
+    marked = [loader.get_card("proto_ko_sorry_jean") for _ in range(3)]
     assert not alices.is_companion
     assert not any(card.is_companion for card in marked)
 

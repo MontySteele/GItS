@@ -172,7 +172,9 @@ public class KleeOverhaulRoundThreeTests
         // THIRTEEN SINCE THE R276 POOL EXPANSION: Team Effort (a Set off with
         // its own hit) and Windblume Fireworks (a Set off ALL whose AoE hit
         // owns the var, Flame Dance's shape).
-        Assert.Equal(13, carriers.Count);
+        // ELEVEN SINCE THE KLEE STATUS PACKAGE (2026-10-01), which cut Flame
+        // Dance and Rapid Fire, both carriers, and added no Set off row.
+        Assert.Equal(11, carriers.Count);
         foreach (var card in carriers)
         {
             Assert.Contains("{Damage:diff()}", Face(card));
@@ -446,8 +448,9 @@ public class KleeOverhaulRoundThreeTests
         // R276 pick 1 moved The Moon's Mend onto its Plan line (6, 8
         // upgraded) and gave it a Block now-line.
         AssertUpgradeMoves<ProtoKkTheMoonAShip>("PlanMend", 6m, 8m);
-        // The multi-hit clause: +1 PER HIT rather than +3 once.
-        AssertUpgradeMoves<ProtoKoRapidFire>("Damage", 3m, 4m);
+        // The multi-hit clause: +1 PER HIT rather than +3 once (Rapid Fire's
+        // pin until the Klee status package cut it, 2026-10-01).
+        AssertUpgradeMoves<ProtoKoJumpyDumptyMkIii>("Damage", 3m, 4m);
     }
 
     [Fact]

@@ -71,6 +71,7 @@ KIT_SOURCES = (
     "set_off",              # V5  Klee-overhaul explosion, and V6 a Mine
     "bomb_echo",            # V8  Sparks 'n' Splash echo
     "spark_knight",         # V8b R276's Spark Knight, a Power's element-less hit
+    "damage_report",        # V8c the status package's Damage Report, the same
     "plan",                 # V9  Kokomi planned hit
     # V11, the Tamakushi Casket's strike (`source="casket"`), was retired by
     # the Casket pass (2026-09-28): the relic counts Plans now.
@@ -308,6 +309,9 @@ SIM_CALL_SITES = {
     # Klee's own terms), under its own source. NO ELEMENT since
     # 2026-09-23, so it cannot spend an aura a companion laid down.
     ('klee_overhaul.py', 4): ("'spark_knight'", None, 'None'),
+    # THE STATUS PACKAGE (2026-10-01): Damage Report, a Power's hit per
+    # status drawn, on Spark Knight's terms (no element).
+    ('klee_overhaul.py', 5): ("'damage_report'", None, 'None'),
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
     # POOL COMPLETION (2026-10-01): Sea's Reproach's answer to a Weak or a
     # Vulnerable, dealt as Tidal Riposte's is.
