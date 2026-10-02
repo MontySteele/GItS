@@ -120,8 +120,8 @@ public class KokomiOpenPlanTests : IDisposable
         var body = ((ProtoBakeKuragePower)Activator.CreateInstance(
                 typeof(ProtoBakeKuragePower))!).Localization!
             .First(r => r.Item1 == "description").Item2;
-        Assert.Contains("When a [gold]Plan[/gold] is carried out, you choose "
-                        + "its Plan line or its other line.", body);
+        Assert.Contains(" Then you choose each [gold]Plan[/gold]'s line.",
+                        body);
         Assert.Equal("Kurage's Oath (now-line)",
                      KokomiPlan.NowLineTitle("Kurage's Oath"));
     }

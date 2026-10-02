@@ -5537,8 +5537,8 @@ now-line at printed size. No card and no number changes.
    live forecast panel: the highlight is the only thing a flip changes on
    screen.
 8. *Text.* The Plan tip's middle now reads "next turn, you choose which line
-   happens" (130 rendered characters); the Bake-Kurage's box adds "When a
-   Plan is carried out, you choose its Plan line or its other line." The
+   happens" (130 rendered characters); the Bake-Kurage's box adds "Then you
+   choose each Plan's line." (100 of its 125). The
    beat over the pet names a now-line carry-out "<card> (now-line)".
 9. *Sim pilot.* `kokomi_plan.line_policy`, an instrument surface: the
    now-line when it gains her Block and the enemies' intended damage this
