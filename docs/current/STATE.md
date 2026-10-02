@@ -29,7 +29,14 @@ deleted. **`+proto` now marks only a build that differs from the release**:
 `deploy_proto.ps1 -TeyvatFrame`, and the Teyvat frame is on hold (below). The
 tier0 sim runs the current kits too (2026-10-01, legacy cleanup stage 3: its
 four kit arms default on); its calibration bands, measured on the shipped
-kits, are retired until a kit reaches Balance (legacy cleanup pick 5). **Last release package: `0.2.1357`**
+kits, are retired until a kit reaches Balance (legacy cleanup pick 5). Each
+C# pool IS its prototype roster (legacy cleanup stage 4): the `proto_` rows
+are listed first in every pool's `GenerateAllCards`, the arm's roster is the
+offer, and the 78 / Ancient / co-op counts are pinned
+(`KleeTests/Prototype/PoolCountTests.cs`); the companion roster is prototype
+rows only, Fontaine's sixteen ported as they are (pick 4, `proto_mf_`). The
+shipped rows stay pool members, never offered, until stage 5 deletes them.
+**Last release package: `0.2.1357`**
 (2026-08-29), which predates the ruling and carries the old kits.
 
 ## Roster

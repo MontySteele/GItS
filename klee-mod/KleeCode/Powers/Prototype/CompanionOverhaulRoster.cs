@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards;
-using KleeMod.Cards.Generated;
 using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.Models;
 
@@ -20,43 +19,25 @@ namespace KleeMod.Powers;
 /// once, which is the point of putting the seam at the source rather than at
 /// the three mouths.
 ///
-/// A REPLACEMENT OF ONE NATION, NOT OF THE ROSTER. The workshop is a Mondstadt
-/// document (its sec.6: "It does not ... decide Inazuma (its own document, same
-/// rules)"), so Inazuma and Fontaine come through untouched and the seventeen
-/// shipped Mondstadt rows do not come through at all.
-///
-/// THE KEPT HALF IS FILTERED BY NATION and the ADDED HALF IS LISTED BY TYPE,
-/// and the asymmetry is deliberate. The arm's rule about the other two nations
-/// is literally "not Mondstadt", so a hand-copied list of thirty Inazuma and
-/// Fontaine rows would be a second, staler statement of a rule the sheet
-/// already carries -- it would silently drop the next Fontaine row somebody
-/// ships. The arm's rule about Mondstadt is "these rows and nothing else", and
-/// there a prefix match would be a second, softer definition of which rows are
-/// the slice: it would fail silently the day a row is renamed. Listing types
-/// puts the correspondence in the compiler's hands, because a deleted row takes
-/// its class with it and this file stops building.
+/// A REPLACEMENT OF EVERY NATION, LISTED BY TYPE. Mondstadt's and Inazuma's
+/// approved workshops rewrote their Universals; Fontaine's rows were ported as
+/// they are (legacy cleanup pick 4). No shipped companion row comes through.
+/// Listing types puts the correspondence in the compiler's hands, because a
+/// deleted row takes its class with it and this file stops building.
 /// </summary>
 internal static class CompanionOverhaulRoster
 {
-    /// <summary>tier0 <c>C.COMPANION_OVERHAUL_NATION</c>. The FIRST nation the
-    /// arm replaces, named once so the line that decides it is greppable.</summary>
-    internal const string Nation = "mondstadt";
-
-    /// <summary>tier0 <c>C.INAZUMA_OVERHAUL_NATION</c>. The second, added when
-    /// the Inazuma workshop was approved and built (2026-09-02).</summary>
-    internal const string InazumaNation = "inazuma";
-
-    /// <summary>tier0 <c>C.COMPANION_OVERHAUL_NATIONS</c>: the nations this arm
-    /// replaces, and the one list the kept half is filtered against. Fontaine
-    /// is deliberately absent -- its workshop does not exist yet, and both
-    /// approved documents say so in their own sec.6.</summary>
-    private static readonly string[] Nations = { Nation, InazumaNation };
-
     private static IReadOnlyList<CardModel>? _roster;
 
     /// <summary>
-    /// Every companion an offer surface may see while the arm is on: the other
-    /// nations' shipped rows, then Mondstadt's rewritten Universals.
+    /// Every companion an offer surface may see while the arm is on: the
+    /// three nations' Universals, all prototype rows, then the Personals.
+    ///
+    /// NO SHIPPED ROW SINCE LEGACY CLEANUP STAGE 4 (2026-10-01). Fontaine had
+    /// no workshop, so its shipped rows used to come through a nation filter
+    /// over <c>CompanionRoster.All</c>; pick 4 ported them to the prototype
+    /// surface as they are (<see cref="FontaineUniversals"/>), so the roster
+    /// is listed by type, whole.
     ///
     /// CACHED, and lazily. <c>ModelDb.Card&lt;T&gt;()</c> throws
     /// KeyNotFoundException until the models are built (they are
@@ -65,16 +46,14 @@ internal static class CompanionOverhaulRoster
     /// the EB-194 lesson, applied here before it can be learned twice.
     /// </summary>
     internal static IReadOnlyList<CardModel> Roster() =>
-        _roster ??= CompanionRoster.All
-            .Where(c => !Nations.Contains((c as ICompanionCard)?.Nation))
-            .Concat(Universals())
+        _roster ??= Universals()
             .Concat(InazumaUniversals())
-            // AND KLEE'S COVEN PERSONALS (R236). They are on this list for the
-            // reason the Universals are -- one roster, three offer surfaces --
-            // and it is the `PersonalPool` filter at each offer site
-            // (`CompanionPool.IsOfferable`) that keeps them Klee's, not a
-            // second roster. `CompanionCovenRoster` says why Prune's shipped
-            // row needs no exclusion of its own.
+            .Concat(FontaineUniversals())
+            // AND THE PERSONALS (R236). They are on this list for the reason
+            // the Universals are -- one roster, three offer surfaces -- and it
+            // is the `PersonalPool` filter at each offer site
+            // (`CompanionPool.IsOfferable`) that keeps them their owner's, not
+            // a second roster.
             .Concat(CompanionCovenRoster.Personals())
             .Concat(InazumaPersonals())
             .ToList();
@@ -185,6 +164,32 @@ internal static class CompanionOverhaulRoster
         ModelDb.Card<ProtoMiKiraraSurpriseDispatch>(),
         ModelDb.Card<ProtoMiMizukiAnraku>(),
         ModelDb.Card<ProtoMiChioriHasode>(),
+    };
+
+    /// <summary>
+    /// Fontaine's sixteen, ported as they are (legacy cleanup pick 4,
+    /// 2026-10-01): the shipped rows' bodies and upgrades on `proto_mf_` ids,
+    /// in the sheet's order. A Fontaine rework is its own paper. tier0 twin:
+    /// <c>C.FONTAINE_OVERHAUL_POOL_IDS</c>.
+    /// </summary>
+    private static IEnumerable<CardModel> FontaineUniversals() => new CardModel[]
+    {
+        ModelDb.Card<ProtoMfChevreuseInterdictionFire>(),
+        ModelDb.Card<ProtoMfChevreuseVanguardsValor>(),
+        ModelDb.Card<ProtoMfChevreuseBurstingGrenades>(),
+        ModelDb.Card<ProtoMfLynetteEnigmaticFeint>(),
+        ModelDb.Card<ProtoMfLynetteBoxTrick>(),
+        ModelDb.Card<ProtoMfLynetteAstonishingShift>(),
+        ModelDb.Card<ProtoMfCharlotteFreezingPoint>(),
+        ModelDb.Card<ProtoMfCharlotteEnduringFrosthelm>(),
+        ModelDb.Card<ProtoMfCharlotteSnappySilhouette>(),
+        ModelDb.Card<ProtoMfFreminetPersDeploy>(),
+        ModelDb.Card<ProtoMfFreminetPressurizedFloe>(),
+        ModelDb.Card<ProtoMfFreminetShatteringPressure>(),
+        ModelDb.Card<ProtoMfNaviaCannonFireSupport>(),
+        ModelDb.Card<ProtoMfClorindeImpaleTheNight>(),
+        ModelDb.Card<ProtoMfNeuvilletteAncientSeaAuthority>(),
+        ModelDb.Card<ProtoMfArlecchinoMasqueRedDeath>(),
     };
 
     /// <summary>

@@ -149,7 +149,7 @@ public class ArmStarterBasicsTests
         // cards" (`BaseBasicsTests` pins that against R242's ruled order) but
         // "can a shipped Klee row be in the deck a run opens on".
         var starter = Cards("KleeOverhaulRoster", "StartingDeck");
-        var shipped = Cards("KleeCardPool", "GenerateAllCards");
+        var shipped = Cards("KleeCardPool", "ShippedRows");
 
         Assert.Equal(10, starter.Count);
         // The sets must be non-empty or the intersection below is a free pass:
@@ -170,7 +170,7 @@ public class ArmStarterBasicsTests
         // pool (`EB-284`, Dusty Tome), which is why the slice is the honest
         // thing to intersect.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        var shipped = Cards("KleeCardPool", "GenerateAllCards");
+        var shipped = Cards("KleeCardPool", "ShippedRows");
 
         Assert.NotEmpty(slice);
         Assert.NotEmpty(shipped);
@@ -325,8 +325,8 @@ public class ArmStarterBasicsTests
     public void The_shipped_basics_are_what_the_relic_would_otherwise_hand_over()
     {
         // WHY THE SEAM IS NEEDED AT ALL, asserted rather than described. These
-        // two rows satisfy Large Capsule's predicate exactly, they are first in
-        // the pool's declaration, and they CANNOT be taken out of it -- a card
+        // two rows satisfy Large Capsule's predicate exactly, they are first in the
+        // shipped rows' declaration, and they CANNOT be taken out of it -- a card
         // missing from `AllCards` has no `CardModel.Pool` and throws "You
         // monster!" on draw, which is why `GenerateAllCards` is untouched by
         // the arm. Delete the patch and this pair is what an arm run receives.
@@ -338,7 +338,7 @@ public class ArmStarterBasicsTests
         Assert.Equal(CardRarity.Basic, duckAndCover.Rarity);
         Assert.Contains(CardTag.Defend, duckAndCover.Tags);
 
-        var shipped = Cards("KleeCardPool", "GenerateAllCards");
+        var shipped = Cards("KleeCardPool", "ShippedRows");
         Assert.Equal("ModelDb.Card<Kaboom>", shipped[0]);
         Assert.Equal("ModelDb.Card<DuckAndCover>", shipped[1]);
     }

@@ -675,21 +675,22 @@ def test_the_release_build_compiles_the_prototype_classes_by_default():
     assert "System.Array.Empty<CardModel>()" in hook
 
 
-def test_prototype_cards_are_off_pool_in_every_character(tmp_path, monkeypatch):
-    """In the pool (Pool resolves) and out of GetUnlockedCards (no rolls).
+def test_prototype_cards_are_each_characters_pool(tmp_path, monkeypatch):
+    """The prototype rows ARE each pool (legacy cleanup stage 4, 2026-10-01).
 
-    Not "in no pool": a poolless card falls through to MockCardPool and throws
-    "You monster!" the first time the real game draws or previews it, which is
-    exactly what a staged turn does. See tools/lint_pool_membership.py.
+    Every row a character owns is listed in its pool's `GenerateAllCards`, so
+    `CardModel.Pool` resolves (a poolless card falls through to MockCardPool
+    and throws "You monster!" the first time the real game draws it -- see
+    tools/lint_pool_membership.py), and with the arm off the offer filter
+    strips them by id, so the shipped gate offers none.
     """
     code = REPO / "klee-mod" / "KleeCode"
-    for path, character in (("KleeOffPoolCards.cs", "klee"),
+    for path, character in (("KleeCardPool.cs", "klee"),
                             ("FurinaCardPool.cs", "furina"),
                             ("KokomiCardPool.cs", "kokomi")):
         body = (code / path).read_text(encoding="utf-8")
         assert f'PrototypeCards.For("{character}")' in body, path
-        # The off-pool list is what FilterThroughEpochs strips from rolls.
-        assert "OffPool" in body
+        assert f'PrototypeCards.Ids("{character}")' in body, path
 
     from tools import lint_pool_membership
     roster = (code / "Cards" / "Prototype" / "Generated" / "PrototypeRoster.cs")

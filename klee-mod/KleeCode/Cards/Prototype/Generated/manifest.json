@@ -311,6 +311,25 @@
     "proto_mc_varka_sturm_und_drang",
     "proto_mc_venti_grand_ode",
     "proto_mc_yaoyao_yuegui_throwing_mode",
+    "proto_mf_arlecchino_masque_red_death",
+    "proto_mf_charlotte_enduring_frosthelm",
+    "proto_mf_charlotte_freezing_point",
+    "proto_mf_charlotte_snappy_silhouette",
+    "proto_mf_chevreuse_bursting_grenades",
+    "proto_mf_chevreuse_interdiction_fire",
+    "proto_mf_chevreuse_vanguards_valor",
+    "proto_mf_clorinde_impale_the_night",
+    "proto_mf_freminet_pers_deploy",
+    "proto_mf_freminet_pressurized_floe",
+    "proto_mf_freminet_shattering_pressure",
+    "proto_mf_guest_neuvillette_droplets",
+    "proto_mf_guest_neuvillette_judgment",
+    "proto_mf_guest_neuvillette_tears",
+    "proto_mf_lynette_astonishing_shift",
+    "proto_mf_lynette_box_trick",
+    "proto_mf_lynette_enigmatic_feint",
+    "proto_mf_navia_cannon_fire_support",
+    "proto_mf_neuvillette_ancient_sea_authority",
     "proto_mi_ayaka_soumetsu",
     "proto_mi_ayato_kyouka",
     "proto_mi_chiori_hasode",
@@ -736,6 +755,25 @@
     "proto_mc_varka_sturm_und_drang": "klee",
     "proto_mc_venti_grand_ode": "klee",
     "proto_mc_yaoyao_yuegui_throwing_mode": "klee",
+    "proto_mf_arlecchino_masque_red_death": "klee",
+    "proto_mf_charlotte_enduring_frosthelm": "klee",
+    "proto_mf_charlotte_freezing_point": "klee",
+    "proto_mf_charlotte_snappy_silhouette": "klee",
+    "proto_mf_chevreuse_bursting_grenades": "klee",
+    "proto_mf_chevreuse_interdiction_fire": "klee",
+    "proto_mf_chevreuse_vanguards_valor": "klee",
+    "proto_mf_clorinde_impale_the_night": "klee",
+    "proto_mf_freminet_pers_deploy": "klee",
+    "proto_mf_freminet_pressurized_floe": "klee",
+    "proto_mf_freminet_shattering_pressure": "klee",
+    "proto_mf_guest_neuvillette_droplets": "furina",
+    "proto_mf_guest_neuvillette_judgment": "furina",
+    "proto_mf_guest_neuvillette_tears": "furina",
+    "proto_mf_lynette_astonishing_shift": "klee",
+    "proto_mf_lynette_box_trick": "klee",
+    "proto_mf_lynette_enigmatic_feint": "klee",
+    "proto_mf_navia_cannon_fire_support": "klee",
+    "proto_mf_neuvillette_ancient_sea_authority": "klee",
     "proto_mi_ayaka_soumetsu": "klee",
     "proto_mi_ayato_kyouka": "klee",
     "proto_mi_chiori_hasode": "klee",
@@ -1875,6 +1913,54 @@
     "proto_mc_yaoyao_yuegui_throwing_mode": {
       "power_amount": 1
     },
+    "proto_mf_arlecchino_masque_red_death": {
+      "power_amount": 1
+    },
+    "proto_mf_charlotte_enduring_frosthelm": {
+      "block": 2
+    },
+    "proto_mf_charlotte_freezing_point": {
+      "damage": 2
+    },
+    "proto_mf_charlotte_snappy_silhouette": {
+      "vulnerable": 1
+    },
+    "proto_mf_chevreuse_bursting_grenades": {
+      "damage": 2
+    },
+    "proto_mf_chevreuse_interdiction_fire": {
+      "damage": 2
+    },
+    "proto_mf_chevreuse_vanguards_valor": {
+      "buff": 2
+    },
+    "proto_mf_clorinde_impale_the_night": {
+      "damage": 3
+    },
+    "proto_mf_freminet_pers_deploy": {
+      "damage": 2
+    },
+    "proto_mf_freminet_pressurized_floe": {
+      "damage": 2
+    },
+    "proto_mf_freminet_shattering_pressure": {
+      "power_amount": 2
+    },
+    "proto_mf_lynette_astonishing_shift": {
+      "damage": 2
+    },
+    "proto_mf_lynette_box_trick": {
+      "draw": 1
+    },
+    "proto_mf_lynette_enigmatic_feint": {
+      "block": 2
+    },
+    "proto_mf_navia_cannon_fire_support": {
+      "power_amount": 2
+    },
+    "proto_mf_neuvillette_ancient_sea_authority": {
+      "cost": -1
+    },
     "proto_mi_ayaka_soumetsu": {
       "power_amount": 1
     },
@@ -2223,5 +2309,9 @@
       "innate": true
     }
   },
-  "no_upgrade": {}
+  "no_upgrade": {
+    "proto_mf_guest_neuvillette_droplets": "A Guest Star is made for one fight and never upgraded, as the shipped row.",
+    "proto_mf_guest_neuvillette_judgment": "A Guest Star is made for one fight and never upgraded, as the shipped row.",
+    "proto_mf_guest_neuvillette_tears": "A Guest Star is made for one fight and never upgraded, as the shipped row."
+  }
 }
