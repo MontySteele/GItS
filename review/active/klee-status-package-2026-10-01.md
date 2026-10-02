@@ -5,27 +5,37 @@ excellent cost-to-effect ratios that load your deck with status duds." Also
 ruled into this paper: Albedo's Klee card gets an alchemy hook (lore pass,
 pick 3), and a dedupe makes the room. The pool stays at 78.
 
-## 1. The status: Confiscated, unchanged
+## 1. Two statuses, priced by how busted the card is
 
-Klee already has a status. **Confiscated** costs 1 and "Does nothing." It is
-not exhausted when played, so it stays in the deck all combat. Fish Blasting
-adds it today (`klee-mod/KleeCode/Cards/Confiscated.cs`).
-It is her lore exactly: Jean confiscates her bombs once or twice a week
-(character story 2). So the engine is built on it: no new status and no rule
-change.
+[USER], on the first draft: "Defect cards add a mix of defects depending on
+their power level ... it's worth drawing a distinction between the completely
+busted cards which are 'mega turn now, suffer later' like Lisa's Treats or Red
+Knight and the simpler ones like It Wasn't Me!" Defect does exactly this: Boost
+Away adds a Dazed, Turbo a Void, Overclock a Burn, Fight Through a Wound.
 
-It is harsher than the base game's duds. Dazed vanishes at the end of turn,
-and Slimed exhausts when you pay for it; Confiscated costs 1 every time it
-comes around. The loaders' ratios are priced against that.
+- **Light tax: Dazed** (the base game's: Unplayable, Ethereal). It clogs one
+  hand and leaves. It goes on the simple, fairly priced loaders. Using the
+  base card means nothing new to learn; Kokomi's Flotsam Surge already uses it.
+- **Heavy tax: Confiscated** (hers, unchanged). It costs 1, "Does nothing,"
+  and is not exhausted when played, so it comes back every shuffle all combat
+  (`klee-mod/KleeCode/Cards/Confiscated.cs`). It goes on the "mega turn now,
+  suffer later" cards. It is her lore exactly: Jean confiscates her bombs once
+  or twice a week (character story 2). Fish Blasting (Common, 8 [11] to ALL
+  for 1, above the Common AoE rate) already pays it and keeps paying it.
+
+**Payoffs read the tier they care about.** The answers (Klee Can Explain!,
+Albedo, Damage Report) read any status, the way Compact and Fire Breathing do.
+The bend-the-rule pair (Finders Keepers, Solitary Confinement) reads
+Confiscated only, because only Confiscated is played.
 
 ## 2. The new cards (8 in the pool, plus Albedo)
 
-**Loaders: an excellent ratio, paid in Confiscated.**
+**Loaders.** The two Commons pay the light tax; the two busted cards pay the heavy one.
 
 | Card | Type, cost, rarity | Text | Base yardstick |
 |---|---|---|---|
-| **Forbidden Fun** | Attack, 0, C | Deal 10 [14] damage. Add a Confiscated to your draw pile. | Regent's Collision Course: 0, 10 [14], plus a Debris |
-| **It Wasn't Me!** | Skill, 0, C | Gain 7 [10] Block. Add a Confiscated to your draw pile. | Defect's Boost Away: 0, 6 [9] Block, plus a Dazed |
+| **Forbidden Fun** | Attack, 0, C | Deal 10 [14] damage. Shuffle a Dazed into your draw pile. | Regent's Collision Course: 0, 10 [14], plus a Debris |
+| **It Wasn't Me!** | Skill, 0, C | Gain 6 [9] Block. Shuffle a Dazed into your draw pile. | Defect's Boost Away: 0, 6 [9] Block, plus a Dazed (exact parity) |
 | **Lisa's Treats** | Skill, 0, U | Gain 2 [3] Energy. Add 2 Confiscated to your draw pile. | Defect's Turbo (Common): 0, 2 [3] Energy, plus a Void |
 | **Red Knight** | Attack, 2, R | Deal 22 [28] damage to ALL enemies. Add 2 Confiscated to your draw pile. | Kokomi's Riptide Ruin: 2, 9 [12] to ALL twice, plus 3 Dazed |
 
@@ -34,8 +44,8 @@ comes around. The loaders' ratios are priced against that.
 | Card | Type, cost, rarity | Text |
 |---|---|---|
 | **Finders Keepers** | Power, 1, U | Whenever you play a Confiscated, place a Bomb 5 [7] on a random enemy. |
-| **Klee Can Explain!** | Skill, 1, U | Gain 6 [8] Block. Transform every Confiscated in your hand into Pop!. |
-| **Damage Report** | Power, 1, R | Whenever you draw a Confiscated, deal 6 [9] damage to ALL enemies. |
+| **Klee Can Explain!** | Skill, 1, U | Gain 6 [8] Block. Transform every status in your hand into Pop!. |
+| **Damage Report** | Power, 1, R | Whenever you draw a status, deal 5 [7] damage to ALL enemies. |
 | **Solitary Confinement** | Power, 1, R | Your Confiscated cost 0. [Innate.] |
 
 **Albedo's Klee card** replaces "Albedo — Tectonic Tide" (it stands in for
@@ -43,7 +53,7 @@ Solar Isotoma, Rare, as now):
 
 | Card | Type, cost | Text |
 |---|---|---|
-| **Albedo — Dust of Purification** | Skill, 1 | Exhaust every Confiscated in your hand. Your largest Bomb grows by 6 [8] for each. |
+| **Albedo — Dust of Purification** | Skill, 1 | Exhaust every status in your hand. Your largest Bomb grows by 6 [8] for each. |
 
 Dust of Purification is his sixth constellation. He cleans up after her and
 turns the mess into gunpowder, which is the brief's planned hook (§7.1, "the
@@ -51,17 +61,19 @@ man who cleans up after her").
 
 **How the pieces fit.**
 
-- **On their own,** the four loaders are good cards with a tax. That covers
-  most drafts: a Common 0-cost 10 damage is worth one Confiscated.
+- **On their own,** the Commons are fair cards at base-game parity (a Dazed
+  each). Lisa's Treats and Red Knight are the mega turns, and the bill is two
+  Confiscated that stay all combat.
 - **Finders Keepers** turns each Confiscated into a 1-cost Bomb 5: a bad
   card, not a dead one.
-- **Klee Can Explain!** is her Compact: the duds in hand become Pop!s. Base
-  Compact is 6 [7] Block, Uncommon.
+- **Klee Can Explain!** is her Compact: every status in hand becomes a Pop!.
+  Base Compact is 6 [7] Block, Uncommon.
 - **The Rares bend the rule.** With Solitary Confinement, Confiscated cost 0,
-  so with Finders Keepers each is a free Bomb 5. With Damage Report, each draw
-  of one also hits everything for 6. That is the high roll. It is bounded by
-  how many Confiscated the loaders put in, and none of the payoffs draws
-  cards, so there is no draw loop.
+  so with Finders Keepers each is a free Bomb 5. With Damage Report, every
+  status drawn (a Dazed too) hits everything for 5. Damage Report drops from
+  6 to 5 because it now reads Dazed as well. That is the high roll. It is
+  bounded by how many statuses the loaders put in, and none of the payoffs
+  draws cards, so there is no draw loop.
 - **Lore:** Jean confiscates, Klee swears it wasn't her, explains, gets
   grounded, writes the damage report, and sneaks her bombs back. Lisa slips
   her treats, and Albedo cleans up.
@@ -105,9 +117,10 @@ Balance.
 
 ## Picks
 
-1. **Build on Confiscated as it is** (a, default), or make it exhaust when
-   played, like Slimed (b). (b) is gentler and makes the loaders weaker, but
-   then Finders Keepers fires once per Confiscated, not once per cycle.
+1. **Two tiers: Dazed for the fair loaders, Confiscated for the busted ones**
+   (a, default). (b) a Klee-flavoured light status (a "Dud": Unplayable,
+   Ethereal) instead of the base Dazed. That is the same rules with her name
+   on it, but one more card to learn.
 2. **The eight new cards and Albedo's card as written** (a, default), or name
    the ones to change.
 3. **The eight cuts** (a, default), or name the ones to keep and a
