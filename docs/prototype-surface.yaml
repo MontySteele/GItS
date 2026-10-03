@@ -25,11 +25,12 @@
    description: "[gold]Set off[/gold]. Deal 4 [gold]Pyro[/gold] damage.",
    effects: [{op: set_off, target: enemy, damage: 4}]}
 
-# Not Innate (the co-op run, 2026-10-02): an opening-hand Bomb drew the
-# turn-one chip seats kept taking. See docs/notes/prototype-surface-provenance.md.
+# Innate again (2026-10-03): taken off after the co-op run, restored after
+# the w17 sanity round lost the act-1 boss twice. See
+# docs/notes/prototype-surface-provenance.md.
 - {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: basic,
+   cost: 1, type: skill, rarity: basic, innate: true,
    description: "Place a [gold]Bomb[/gold] 8. When it goes off, place a [gold]Mine[/gold] 3 on ALL enemies.",
    upgrade: {bomb_size: +3, payload_mine: +1},
    effects: [{op: plant_bomb, target: enemy, size: 8, payload_mine_all: 3}]}
@@ -307,10 +308,10 @@
 - {id: proto_ko_fish_blasting, name: "Fish Blasting", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 8 [gold]Pyro[/gold] damage to ALL enemies. Add a [gold]Confiscated[/gold] to your draw pile.",
+   description: "Deal 8 [gold]Pyro[/gold] damage to ALL enemies. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {damage: +3},
    effects: [{op: damage, amount: 8, target: all_enemies},
-             {op: add_card, card: confiscated, zone: draw, amount: 1}]}
+             {op: add_card, card: confiscated, zone: discard, amount: 1}]}
 
 # Playtest 2026-09-24 ([USER]: "Pocket Match is redundant with Ka-pow!"): a
 # new design. Only the single largest charge goes off; the rest stay and grow.
@@ -677,34 +678,34 @@
 - {id: proto_ko_forbidden_fun, name: "Forbidden Fun", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "Deal 10 [gold]Pyro[/gold] damage. Shuffle a [gold]Dazed[/gold] into your draw pile.",
+   description: "Deal 10 [gold]Pyro[/gold] damage. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {damage: +4},
    effects: [{op: damage, amount: 10, target: enemy},
-             {op: add_card, card: status_dazed, zone: draw, amount: 1}]}
+             {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
 
 - {id: proto_ko_it_wasnt_me, name: "It Wasn't Me!", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. Shuffle a [gold]Dazed[/gold] into your draw pile.",
+   description: "Gain 6 [gold]Block[/gold]. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {block: +3},
    effects: [{op: block, amount: 6},
-             {op: add_card, card: status_dazed, zone: draw, amount: 1}]}
+             {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
 
 - {id: proto_ko_lisas_treats, name: "Lisa's Treats", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Gain 2 [gold]Energy[/gold]. Add 2 [gold]Confiscated[/gold] to your draw pile.",
+   description: "Gain 2 [gold]Energy[/gold]. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {energy: +1},
    effects: [{op: energy, amount: 2},
-             {op: add_card, card: confiscated, zone: draw, amount: 2}]}
+             {op: add_card, card: confiscated, zone: discard, amount: 2}]}
 
 - {id: proto_ko_red_knight, name: "Red Knight", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "Deal 22 [gold]Pyro[/gold] damage to ALL enemies. Add 2 [gold]Confiscated[/gold] to your draw pile.",
+   description: "Deal 22 [gold]Pyro[/gold] damage to ALL enemies. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {damage: +6},
    effects: [{op: damage, amount: 22, target: all_enemies},
-             {op: add_card, card: confiscated, zone: draw, amount: 2}]}
+             {op: add_card, card: confiscated, zone: discard, amount: 2}]}
 
 - {id: proto_ko_finders_keepers, name: "Finders Keepers", character: klee,
    authored_by: [claude],
@@ -744,18 +745,18 @@
 - {id: proto_ko_up_in_smoke, name: "Up in Smoke!", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. Shuffle a [gold]Dazed[/gold] into your draw pile.",
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {weak: +1},
    effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
-             {op: add_card, card: status_dazed, zone: draw, amount: 1}]}
+             {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
 
 - {id: proto_ko_behind_jeans_desk, name: "Behind Jean's Desk", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 11 [gold]Block[/gold]. Add a [gold]Confiscated[/gold] to your draw pile.",
+   description: "Gain 11 [gold]Block[/gold]. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {block: +3},
    effects: [{op: block, amount: 11},
-             {op: add_card, card: confiscated, zone: draw, amount: 1}]}
+             {op: add_card, card: confiscated, zone: discard, amount: 1}]}
 
 # Reworked 2026-10-02: always playable. `per_status` exhausts every status in
 # hand, then each enemy loses `amount` plus that per status, one total. The
@@ -1996,10 +1997,11 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    # The self-status engine: well above a Common's AoE rate, paid in Dazed
-   # shuffled into the draw pile at random depths.
-   description: "Deal 13 [gold]Hydro[/gold] damage to ALL enemies. Shuffle 2 [gold]Dazed[/gold] into your draw pile.",
+   # added to the discard pile, as the base game adds every status ([USER],
+   # 2026-10-03: "I agree that we should adopt the same convention").
+   description: "Deal 13 [gold]Hydro[/gold] damage to ALL enemies. Add 2 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
    effects: [{op: damage, amount: 13, target: all_enemies},
-             {op: add_card, card: status_dazed, zone: draw, amount: 2}],
+             {op: add_card, card: status_dazed, zone: discard, amount: 2}],
    # 17 to ALL.
    upgrade: {damage: 4}}
 
@@ -2020,9 +2022,9 @@
    # The status batch's Rare, in Coral Sanctuary's place (ruled 2026-10-01):
    # a second status source, Flotsam Surge's shape at Rare size. Hydro
    # through the arm's cadence like every damaging card of hers.
-   description: "Deal 9 [gold]Hydro[/gold] damage to ALL enemies twice. Shuffle 3 [gold]Dazed[/gold] into your draw pile.",
+   description: "Deal 9 [gold]Hydro[/gold] damage to ALL enemies twice. Add 3 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
    effects: [{op: damage, amount: 9, target: all_enemies, times: 2},
-             {op: add_card, card: status_dazed, zone: draw, amount: 3}],
+             {op: add_card, card: status_dazed, zone: discard, amount: 3}],
    # 12 to ALL, twice.
    upgrade: {damage: 3}}
 
@@ -2329,9 +2331,11 @@
 - {id: proto_mf_neuvillette_ancient_sea_authority, name: "Neuvillette — Heir to the Ancient Sea's Authority", character: klee,
    upgrade: {cost: -1},
    authored_by: [claude],
+   # Co-op notes pick 4 (ruled 2026-10-02): plus a Hydro aura each turn, a
+   # free reaction partner. The face is the power's (`ancient_sea_authority`).
    art_of: neuvillette_ancient_sea_authority,
    nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: hydro, cost: 1, type: power,
-   effects: [{op: apply_power, power: ancient_sea_authority, amount: 1, target: self, note: "auras you apply last 1 extra turn"}]}
+   effects: [{op: apply_power, power: ancient_sea_authority, amount: 1, target: self, note: "at the start of your turn apply Hydro to a random enemy; auras you apply last 1 extra turn"}]}
 
 - {id: proto_mf_arlecchino_masque_red_death, name: "Arlecchino — Masque of the Red Death", character: klee,
    upgrade: {power_amount: 1},
@@ -3711,7 +3715,7 @@
 - {id: proto_vk_knights_roll_call, name: "Knights' Roll Call", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Add {IfUpgraded:show:a Knight you choose|a random [gold]Knight[/gold]} to your hand. It costs 0 this turn.",
+   description: "Add {IfUpgraded:show:a [gold]Knight[/gold] you choose|a random [gold]Knight[/gold]} to your hand. It costs 0 this turn.",
    effects: [{op: add_knight}],
    upgrade: {choose_knight: true}}
 
@@ -4075,9 +4079,11 @@
 
 - {id: proto_vk_assembly_at_the_cathedral, name: "Assembly at the Cathedral", character: varka,
    authored_by: [claude],
+   # Co-op notes pick 2 (ruled 2026-10-02): on any element applied, so the
+   # number drops from 3 [4]. Was "Whenever you play a Knight".
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a [gold]Knight[/gold], deal {PowerAmount:diff()} damage to a random enemy.",
-   effects: [{op: apply_power, power: vk_assembly_at_the_cathedral, amount: 3, target: self}],
+   description: "Whenever you apply an element, deal {PowerAmount:diff()} damage to a random enemy.",
+   effects: [{op: apply_power, power: vk_assembly_at_the_cathedral, amount: 2, target: self}],
    upgrade: {power_amount: 1}}
 
 - {id: proto_vk_dawn_patrol, name: "Dawn Patrol", character: varka,

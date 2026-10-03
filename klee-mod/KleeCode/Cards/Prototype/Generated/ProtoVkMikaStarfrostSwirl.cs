@@ -46,7 +46,7 @@ public sealed class ProtoVkMikaStarfrostSwirl : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesCryo };
+        new[] { KleeKeywords.Knight, KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         BaseKeywordTips.ForWeak(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true), this, Element.Cryo), this);

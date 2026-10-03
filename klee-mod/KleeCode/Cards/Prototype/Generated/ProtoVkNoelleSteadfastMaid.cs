@@ -44,6 +44,9 @@ public sealed class ProtoVkNoelleSteadfastMaid : CustomCardModel, ICompanionCard
 
     public string? Nation => "mondstadt";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.Knight };
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_noelle_steadfast_maid");
 
     public override List<(string, string)>? Localization => new()

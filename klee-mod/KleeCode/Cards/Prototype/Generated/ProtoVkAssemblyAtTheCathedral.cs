@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -37,21 +36,18 @@ public sealed class ProtoVkAssemblyAtTheCathedral : CustomCardModel, ICharacterC
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForKnight(base.ExtraHoverTips, this);
-
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_assembly_at_the_cathedral");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Assembly at the Cathedral"),
-        ("description", "Whenever you play a [gold]Knight[/gold], deal {PowerAmount:diff()} damage to a random enemy."),
+        ("description", "Whenever you apply an element, deal {PowerAmount:diff()} damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m)
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

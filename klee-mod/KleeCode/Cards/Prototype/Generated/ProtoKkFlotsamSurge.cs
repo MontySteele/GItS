@@ -51,7 +51,7 @@ public sealed class ProtoKkFlotsamSurge : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flotsam Surge"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Shuffle 2 [gold]Dazed[/gold] into your draw pile."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Add 2 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -79,7 +79,7 @@ public sealed class ProtoKkFlotsamSurge : CustomCardModel, IElementalCard, IChar
             for (var i = 0; i < 2; i++)
             {
                 var token = CombatState!.CreateCard<MegaCrit.Sts2.Core.Models.Cards.Dazed>(Owner);
-                await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Draw, Owner, CardPilePosition.Random);
+                await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
             }
         }
     }

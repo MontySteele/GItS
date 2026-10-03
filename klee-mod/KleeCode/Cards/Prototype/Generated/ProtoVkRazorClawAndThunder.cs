@@ -46,7 +46,7 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesElectro };
+        new[] { KleeKeywords.Knight, KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Electro);

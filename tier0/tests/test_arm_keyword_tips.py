@@ -868,12 +868,14 @@ _GOLD_SPAN = re.compile(r"\[gold\](.*?)\[/gold\]")
 # here is a decision somebody has to write down.
 NO_GLOSSARY_ROW_OWED = {
     # The status batch (2026-10-01, Flotsam Surge): the base game's status
-    # card, which the page prints with its own face once it is shuffled in.
+    # card, which the page prints with its own face once it is added.
     "Dazed": "a base-game status card the page prints with its own face",
     # The four numbers the page prints on the player line every single turn.
     "Block": "the page prints the figure on the player line every turn",
     "Energy": "the page prints the figure on the player line every turn",
     "Exhaust Pile": "a zone the page prints by name, with its contents",
+    # Status cards go to the discard pile, as in the base game (2026-10-03).
+    "Discard Pile": "a zone the page prints by name, with its contents",
     # The elements. None is a glossary row and none should be: the element is
     # the card's own indicator (`blindplay_faces._element` puts it on the card
     # LINE), and every pairing it can make is a `REACTION_KEYWORDS` row on any

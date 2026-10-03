@@ -45,7 +45,7 @@ public sealed class ProtoVkKnightsRollCall : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Knights' Roll Call"),
-        ("description", "Add {IfUpgraded:show:a Knight you choose|a random [gold]Knight[/gold]} to your hand. It costs 0 this turn."),
+        ("description", "Add {IfUpgraded:show:a [gold]Knight[/gold] you choose|a random [gold]Knight[/gold]} to your hand. It costs 0 this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

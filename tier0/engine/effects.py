@@ -1606,15 +1606,11 @@ def token_card(card_id: str) -> Card:
 def _add_token(state: CombatState, card: Card, zone: str) -> None:
     if zone == "hand" and len(state.player.hand) < C.MAX_HAND_SIZE:
         state.player.hand.append(card)
-    elif zone == "draw":
-        # `EB-491` (Fish Blasting), the third zone: SHUFFLED INTO the draw
-        # pile, which is `CardPilePosition.Random` on the C# side and a random
-        # index here. The whole cost of the Status is that the player does not
-        # know when it will arrive, so neither end of the pile is the honest
-        # answer. `draw` pops index 0, so the range spans top and bottom alike.
-        state.player.draw_pile.insert(
-            state.rng.randrange(len(state.player.draw_pile) + 1), card)
     else:
+        # Every status a card of ours makes lands here, as the base game's do
+        # (Turbo, Overclock, Gunk Up, Boost Away, Fight Through). The old
+        # `draw` zone (shuffled in at a random depth) is gone: [USER],
+        # 2026-10-03, "I agree that we should adopt the same convention".
         state.player.discard_pile.append(card)
     # Kokomi §7 engine_closure diagnostic: every created card funnels
     # through here (add_card tokens, generators, conscript-create), so the
@@ -6677,6 +6673,17 @@ def player_turn_start_triggers(state: CombatState) -> None:
     n = p.powers.get("masque_red_death", 0)
     if n:
         powers.apply_power(state, p, "strength", n, applier=p)
+    # Neuvillette -- co-op notes pick 4 (2026-10-02): "At the start of your
+    # turn, apply Hydro to a random enemy." One per copy (the amount counts
+    # copies; the upgrade is a cost cut), through `resolve_hit` like the
+    # apply_aura op, so it reacts and credits. C# twin:
+    # `AncientSeaAuthorityPower.AfterPlayerTurnStart`.
+    for _ in range(p.powers.get("ancient_sea_authority", 0)):
+        if not state.living_enemies:
+            break
+        enemy = state.rng.choice(list(state.living_enemies))
+        reactions.resolve_hit(state, enemy, "hydro", 0,
+                              "ancient_sea_authority")
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
     if n:
         gain_sparks(state, n, source="power:endless_fireworks/turn_start")

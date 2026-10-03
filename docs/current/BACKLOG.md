@@ -100,6 +100,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Perfect Timing's replay did not visibly fire when its first Set off killed the target (Opus check round, 2026-10-02).
 - Mine text does not say whether the enemy's other Bombs go off with it, or that it spends the aura set for the big Bomb (Opus check round, 2026-10-02).
 - Return to Sender turns only its own Block into a Bomb ("8 Block left"); check the face says so (Opus check round, 2026-10-02).
+- Ka-pow!'s Set off reaches only the targeted enemy's Bombs, and nothing on the card says so; a seat aimed it at a Gas Bomb expecting the Fog's Bomb to go off (w18 lane 2, 2026-10-03).
 - Between the act-3 boss's forms, the board shows no enemy and targeted cards are refused ("every enemy is dead or waiting to revive") (Opus check round, 2026-10-02).
 - Furina Stage log: a Gala Premiere turn printed "Usher joined the stage" twice (front, then back) before "took its Bow to make room for a summon" (smoke round, 2026-10-02).
 - Seat page: Cycle of Seasons' trigger damage prints on the line of the card that changed Varka's element, and Cycle's own line reads "Nothing this page can count landed off it" (Varka smoke seat, 2026-10-02).

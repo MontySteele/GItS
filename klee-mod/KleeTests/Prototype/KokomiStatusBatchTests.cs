@@ -275,7 +275,7 @@ public class KokomiStatusBatchTests : IDisposable
     // ---- Flotsam Surge ------------------------------------------------------------------------------
 
     [Fact]
-    public void Flotsam_surge_hits_all_for_thirteen_and_shuffles_two_dazed()
+    public void Flotsam_surge_hits_all_for_thirteen_and_discards_two_dazed()
     {
         var card = new ProtoKkFlotsamSurge();
         Assert.Equal(13m, card.DynamicVars.Damage.BaseValue);
@@ -291,7 +291,7 @@ public class KokomiStatusBatchTests : IDisposable
     // ---- Riptide Ruin ------------------------------------------------------------------------------
 
     [Fact]
-    public void Riptide_ruin_hits_all_twice_for_nine_and_shuffles_three_dazed()
+    public void Riptide_ruin_hits_all_twice_for_nine_and_discards_three_dazed()
     {
         var card = new ProtoKkRiptideRuin();
         Assert.Equal(9m, card.DynamicVars.Damage.BaseValue);
@@ -301,7 +301,7 @@ public class KokomiStatusBatchTests : IDisposable
         Assert.Contains(play, c => c.Contains("WithHitCount"));
         Assert.Contains(play, c => c.Contains("Dazed"));
         Assert.Contains(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
-        Assert.Contains("ALL enemies twice. Shuffle 3 [gold]Dazed[/gold]",
+        Assert.Contains("ALL enemies twice. Add 3 [gold]Dazed[/gold]",
                         Face(card));
         Assert.Equal(Element.Hydro,
                      Assert.IsAssignableFrom<IElementalCard>(card).Element);
