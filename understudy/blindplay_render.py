@@ -64,6 +64,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_NO_HITS,
                                         RESOLUTION_NO_HITS_STAGE,
                                         RESOLUTION_SUMMONED,
+                                        RESOLUTION_OATH, RESOLUTION_FANG,
                                         RESOLUTION_HIT_KILLED,
                                         RESOLUTION_KILLED,
                                         RESOLUTION_AUTO_CLAUSE,
@@ -1429,8 +1430,19 @@ def _resolution_lines(rows: list[dict[str, Any]],
         if row.get("summoned"):
             out.append(RESOLUTION_SUMMONED.format(names=_and_list(
                 [f"**{name}**" for name in row["summoned"]])))
+        # The rebalance round (2026-10-03): Varka's Oath gains, sourced,
+        # printed after the hits and powers that made them.
+        oath_lines = [RESOLUTION_OATH.format(
+            n=gain["amount"], element=gain["element"],
+            source=f" ({gain['source']})" if gain["source"] else "")
+            for gain in row.get("oath") or []]
+        if oath_lines and row.get("fang_ascension"):
+            oath_lines.append(RESOLUTION_FANG)
         killed = row.get("killed") or []
         applied = row.get("applied") or []
+        if not row["hits"] and not killed and not applied and oath_lines:
+            out += oath_lines
+            continue
         if not row["hits"] and not killed and not applied:
             # 2026-09-25 (opus-furina-l2b): on a board with a stage, a card
             # that hit nothing may still have moved a bar, and the stage log
@@ -1468,6 +1480,7 @@ def _resolution_lines(rows: list[dict[str, Any]],
                         else RESOLUTION_REMOVED).format(
                 power=a["power"], n=abs(a["amount"]),
                 target=a["target"] or "an enemy"))
+        out += oath_lines
         # And a kill the ledger did not file, read off the board: after the
         # numbered hits, because no place in their order is known.
         if killed:

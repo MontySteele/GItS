@@ -662,15 +662,16 @@ public static class ArmKeywordTips
     // ---------------------------------------------------- Varka -----------
 
     /// <summary>
-    /// WHAT HIS CARDS CHARGE (the Oath rework, sec.3): one count per element,
-    /// gained per card. Printed on every Oath reader and on Boreas's Fang.
+    /// WHAT HIS CARDS CHARGE (the Oath rework, sec.3): one count per element.
+    /// Applying and Swirling each credit once per card (`TryCredit`); the old
+    /// "1 of each, per card" read as one per element (the Varka Oath round). Printed on every Oath reader and on Boreas's Fang.
     /// <paramref name="card"/> may be null for the relic's hover.
     /// </summary>
     public static IEnumerable<IHoverTip> ForOath(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, OathKey,
-            "Gained when your card applies or [gold]Swirls[/gold] an element: "
-          + "1 of each, per card. Kept all fight. Cards read your current "
+            "A card gives 1 Oath per element it applies, plus 1 per element "
+          + "it [gold]Swirls[/gold]. Kept all fight. Cards read your current "
           + "element's Oath.");
 
     /// <summary>

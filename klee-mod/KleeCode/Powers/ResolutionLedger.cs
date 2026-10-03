@@ -131,6 +131,13 @@ public static class ResolutionLedger
         /// </summary>
         public List<(string Member, string Name)> Summoned { get; } = new();
 
+        /// <summary>Varka's Oath gains inside this card, in order: the
+        /// element, the amount, and "applied", "Swirl" or "" for its source
+        /// (<see cref="NoteOath"/>). `FangAscension` marks the card whose
+        /// gain made Boreas's Fang add Four Winds' Ascension.</summary>
+        public List<(string Element, int Amount, string Source)> Oath { get; } = new();
+        public bool FangAscension { get; set; }
+
         public bool Carried { get; set; }
         public bool Overflowed { get; set; }
     }
@@ -353,6 +360,30 @@ public static class ResolutionLedger
         _open.Applied.Add(new PowerApplied(target, power, amount, combatId));
     }
 
+    /// <summary>
+    /// "Varka gained this Oath inside the card that is resolving" (the
+    /// rebalance round, 2026-10-03: two seats could not tell where Oath came
+    /// from). <paramref name="source"/> is "applied", "Swirl" or "". Dropped
+    /// where no play is open, <see cref="NoteHit"/>'s rule and its reason.
+    /// </summary>
+    public static void NoteOath(string element, int amount, string source)
+    {
+        if (_open == null || amount <= 0 || string.IsNullOrEmpty(element)) return;
+        if (_open.Oath.Count >= MaxHits)
+        {
+            _open.Overflowed = true;
+            return;
+        }
+        _open.Oath.Add((element, amount, source ?? string.Empty));
+    }
+
+    /// <summary>"This card's Oath gain made Boreas's Fang add Four Winds'
+    /// Ascension." Dropped where no play is open.</summary>
+    public static void NoteFangAscension()
+    {
+        if (_open != null) _open.FangAscension = true;
+    }
+
     /// <summary>"That card has finished." Closes the row.</summary>
     public static void ClosePlay() => _open = null;
 
@@ -419,5 +450,13 @@ public static class ResolutionLedger
                     ["member"] = s.Member,
                     ["name"] = s.Name,
                 }),
+            ["oath"] = row.Oath.ConvertAll(o =>
+                new Dictionary<string, object?>
+                {
+                    ["element"] = o.Element,
+                    ["amount"] = o.Amount,
+                    ["source"] = o.Source,
+                }),
+            ["fang_ascension"] = row.FangAscension,
         });
 }

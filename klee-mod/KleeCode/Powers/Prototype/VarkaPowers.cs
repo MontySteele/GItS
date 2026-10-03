@@ -89,6 +89,11 @@ public abstract class OathBadgePower : PowerModel, ILocalizationProvider
         DynamicVars["TotalOath"].BaseValue = ledger.Total;
         InvokeDisplayAmountChanged();
     }
+
+    /// <summary>The badge flashes on an Oath gain, so the gain reads as
+    /// happening in the play that made it (the rebalance round, 2026-10-03).
+    /// </summary>
+    internal void Pulse() => Flash();
 }
 
 public sealed class PyroOathPower : OathBadgePower

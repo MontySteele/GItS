@@ -326,6 +326,8 @@ public sealed class VarkaOathLedger
             _credited.Clear();
             _swirledThisPlay.Clear();
             _plays.Clear();
+            _gainClauses.Clear();
+            FangInThisPlay = false;
         }
         _plays.Add((open, card));
     }
@@ -374,6 +376,41 @@ public sealed class VarkaOathLedger
     /// <summary>The enemies this play has Swirled, in order (Storm Surge).
     /// </summary>
     public IReadOnlyList<Creature> SwirledThisPlay => _swirledThisPlay;
+
+    // ---- where each gain came from (the rebalance round, 2026-10-03) ------
+
+    private readonly List<string> _gainClauses = new();
+
+    /// <summary>The open play's gains, in order, as
+    /// <see cref="VarkaOath.GainClause"/> prints them, and whether one of
+    /// them made Boreas's Fang add Four Winds' Ascension.</summary>
+    public IReadOnlyList<string> GainClauses => _gainClauses;
+    public bool FangInThisPlay { get; private set; }
+
+    /// <summary>File one gain's clause against the open play.</summary>
+    public void NoteGainClause(string clause) => _gainClauses.Add(clause);
+
+    /// <summary>The Fang fired inside the open play.</summary>
+    public void NoteFangInPlay() => FangInThisPlay = true;
+
+    /// <summary>Hand back and forget the outermost play's gains.</summary>
+    public (List<string> Clauses, bool Fang) TakeGainClauses()
+    {
+        var taken = (new List<string>(_gainClauses), FangInThisPlay);
+        _gainClauses.Clear();
+        FangInThisPlay = false;
+        return taken;
+    }
+}
+
+/// <summary>Where one Oath gain came from: an element his card applied, a
+/// Swirl it made, or anything else (a card's own text, a power, a relic).
+/// </summary>
+public enum OathSource
+{
+    Other,
+    Applied,
+    Swirl,
 }
 
 /// <summary>
@@ -511,6 +548,14 @@ public static class VarkaOath
         if (!Live(owner)) return;
         var ledger = VarkaOathLedger.For(owner!);
         ledger.CloseScope();
+        // The rebalance round (2026-10-03): the play's Oath gains, said over
+        // his head once the card has resolved, naming the card.
+        if (!ledger.Scoped)
+        {
+            var (clauses, fang) = ledger.TakeGainClauses();
+            var line = GainLine(Safe(() => card.Title?.ToString()), clauses, fang);
+            if (line.Length > 0) global::KleeMod.Vfx.KurageBeat.Say(owner, line);
+        }
         // Wildfire Oath: an unspent bonus goes with its play.
         if (ReferenceEquals(ledger.WildfireCard, card)) ledger.WildfireCard = null;
         if (card is ProtoVkFourWindsAscension)
@@ -617,7 +662,7 @@ public static class VarkaOath
     /// </summary>
     public static async Task Gain(
         PlayerChoiceContext choiceContext, Creature varka, Element element,
-        int n)
+        int n, OathSource source = OathSource.Other)
     {
         if (!Live(varka)) return;
         var ledger = VarkaOathLedger.For(varka);
@@ -637,11 +682,67 @@ public static class VarkaOath
             }
         }
         await OathBadge.Sync(choiceContext, varka);
+        // The rebalance round (2026-10-03): every gain names its source. The
+        // badge flashes; the play's line is said at its end (EndPlay); a gain
+        // outside a play is said now; and the seat page's resolution row
+        // files it under the card.
+        foreach (var badge in varka.Powers.OfType<OathBadgePower>().ToList())
+        {
+            badge.Pulse();
+        }
+        var clause = GainClause(element, n, source);
+        ResolutionLedger.NoteOath(element.ToString(), n, SourceWord(source));
+        if (ledger.Scoped) ledger.NoteGainClause(clause);
+        else global::KleeMod.Vfx.KurageBeat.Say(varka, clause);
         if (!ledger.FangFired && varka.Player is { } player
             && Relics.BoreasFang.HeldBy(player) is { } fang)
         {
             ledger.FangFired = true;
+            ResolutionLedger.NoteFangAscension();
+            if (ledger.Scoped) ledger.NoteFangInPlay();
             await fang.AddAscension(player);
+        }
+    }
+
+    /// <summary>The source as the seat page and the line print it: "applied",
+    /// "Swirl", or "" for anything else. PURE.</summary>
+    public static string SourceWord(OathSource source) => source switch
+    {
+        OathSource.Applied => "applied",
+        OathSource.Swirl => "Swirl",
+        _ => "",
+    };
+
+    /// <summary>One gain, as said over his head: "+1 Pyro Oath (Swirl)".
+    /// PURE.</summary>
+    public static string GainClause(Element element, int n, OathSource source)
+    {
+        var word = SourceWord(source);
+        return $"+{n} {element} Oath" + (word.Length > 0 ? $" ({word})" : "");
+    }
+
+    /// <summary>A play's gains in one line: "Amber: Precise Shot — +1 Pyro
+    /// Oath (applied)", and the Fang's card when one of them added it. Empty
+    /// when the play gained nothing. PURE.</summary>
+    public static string GainLine(string? card, IReadOnlyList<string> clauses,
+                                  bool fang)
+    {
+        if (clauses.Count == 0) return string.Empty;
+        var line = string.Join(", ", clauses);
+        if (!string.IsNullOrEmpty(card)) line = $"{card} — {line}";
+        if (fang) line += ". Boreas's Fang: Four Winds' Ascension";
+        return line;
+    }
+
+    private static string Safe(Func<string?> read)
+    {
+        try
+        {
+            return read() ?? string.Empty;
+        }
+        catch (Exception)
+        {
+            return string.Empty;
         }
     }
 
@@ -678,7 +779,7 @@ public static class VarkaOath
         }
         if (ledger.TryCredit(swirl: false, element))
         {
-            await Gain(choiceContext, applier, element, 1);
+            await Gain(choiceContext, applier, element, 1, OathSource.Applied);
         }
         // Assembly at the Cathedral (co-op notes pick 2, 2026-10-02):
         // "Whenever you apply an element", whether or not it credits. Its
@@ -707,7 +808,7 @@ public static class VarkaOath
         ledger.NoteSwirl(target);
         if (ledger.TryCredit(swirl: true, swirled))
         {
-            await Gain(choiceContext, dealer, swirled, 1);
+            await Gain(choiceContext, dealer, swirled, 1, OathSource.Swirl);
         }
         var current = ledger.Current;
         // Stormterror's Scale: "Your Swirls pay twice." The expansion:
