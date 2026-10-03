@@ -110,6 +110,8 @@ internal static class CompanionOverhaulRoster
         ModelDb.Card<ProtoMcDahliaSacramentalShower>(),
         ModelDb.Card<ProtoMcDahliaFavonianFavor>(),
         ModelDb.Card<ProtoMcDurinBinaryForm>(),
+        // The AoE trim (2026-10-03) split Durin in two: the burst.
+        ModelDb.Card<ProtoMcDurinPrincipleOfPurity>(),
         ModelDb.Card<ProtoMcRazorClawAndThunder>(),
         ModelDb.Card<ProtoMcRazorLightningFang>(),
         ModelDb.Card<ProtoMcVarkaSturmUndDrang>(),

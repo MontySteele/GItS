@@ -162,11 +162,9 @@ BRANCH_ONLY_KNOWN: dict[str, tuple[tuple[str, ...], str]] = {
         ("apply_power",),
         "Rosaria's Vulnerable sits in a `then:`; the generated card carries"
         " `BaseKeywordTips.ForVulnerable` for it." + _COMPANION_CHECK),
-    "proto_mc_durin_binary_form": (
-        ("apply_power",),
-        "Durin's two forms are BinaryFormWhitePower / BinaryFormDarkPower,"
-        " each inside its own branch; both are custom powers that carry"
-        " their own hover text at runtime." + _COMPANION_CHECK),
+    # proto_mc_durin_binary_form left at the AoE trim (2026-10-03): its forms
+    # are damage now, and Principle of Purity's form powers sit beside a
+    # top-level apply_power, so no op hides in a branch.
 }
 
 

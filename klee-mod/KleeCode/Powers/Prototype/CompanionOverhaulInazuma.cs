@@ -845,33 +845,58 @@ public sealed class SesshouSakuraPower : PowerModel, ILocalizationProvider
 // ---------------------------------------------------------------------------
 
 /// <summary>
-/// Yoimiya, Aurous Blaze: "Mark an enemy for 2 turns. Whenever it takes damage
-/// from a card that is not an Attack, deal 6 Pyro damage to ALL enemies."
+/// Yoimiya, Aurous Blaze (AoE trim, 2026-10-03): "Deal 6 Pyro damage. For 2
+/// turns, whenever you play a Skill, deal 3 Pyro damage to that enemy."
 ///
-/// HOSTED ON THE ENEMY, which is what "mark an enemy" means when a power holds
+/// HOSTED ON THE ENEMY, which is what "that enemy" means when a power holds
 /// no target: the body holds the mark. Barbara's Melody Loop and Eula's
 /// Lightfall Sword are the two rows that established the seam, and this is the
 /// third; a body that dies takes the mark with it.
 ///
-/// "FROM A CARD THAT IS NOT AN ATTACK" IS <c>cardSource</c>, and the test has
-/// to be three-way rather than two: a Skill's damage line and an Attack's both
-/// arrive as powered card damage, and a bomb, a volley or a Shatter arrives
-/// with NO card at all. So the mark fires when a card is present AND its type
-/// is not Attack -- which also means the blast it fires cannot re-trigger any
-/// mark, its own included, because a power-sourced hit names no card.
+/// "YOU" IS THE PLAYER WHO MARKED IT (<see cref="PowerModel.Applier"/>), and
+/// the card that placed the mark does not answer it: "for 2 turns, whenever
+/// you play a Skill" is the Skills after it. The 3 is the CARD's printed
+/// number, banked at play (<see cref="ISummonDamagePower"/>, `EB-463`).
 ///
 /// Amount is TURNS REMAINING, so re-marking a body extends the window rather
-/// than doubling the blast.
+/// than doubling the hit. Sim twin: `effects._aurous_blaze_on_skill`.
 /// </summary>
-public sealed class AurousBlazePower : PowerModel, ILocalizationProvider
+public sealed class AurousBlazePower : PowerModel, ILocalizationProvider,
+    ISummonDamagePower
 {
+    /// <summary>The card's printed 3 with its fold, or the arm's constant
+    /// where nothing banked one.</summary>
+    public int SummonDamage { get; private set; } =
+        CompanionOverhaulLaw.AurousBlazeDamage;
+
+    public void NoteSummonDamage(int amount)
+    {
+        SummonDamage = amount;
+        var damage = DynamicVars["Damage"];
+        damage.BaseValue = amount;
+        damage.ResetToBase();
+        InvokeDisplayAmountChanged();
+    }
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[]
+        {
+            new DynamicVar("Damage", CompanionOverhaulLaw.AurousBlazeDamage),
+        };
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Aurous Blaze"),
+        // The compendium row carries the constant, the smart row the live
+        // number (`EB-353` / `EB-754`).
         ("description",
-            "Whenever this enemy takes damage from a non-Attack card, deal "
+            "Whenever its marker plays a Skill, deal "
           + $"[blue]{CompanionOverhaulLaw.AurousBlazeDamage}[/blue] [gold]Pyro[/gold] "
-          + "damage to ALL enemies. "
+          + "damage to this enemy. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
+        ("smartDescription",
+            "Whenever its marker plays a Skill, deal "
+          + "[blue]{Damage}[/blue] [gold]Pyro[/gold] damage to this enemy. "
           + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
@@ -879,24 +904,22 @@ public sealed class AurousBlazePower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task AfterDamageReceived(
-        PlayerChoiceContext choiceContext, Creature target, DamageResult result,
-        ValueProp props, Creature? dealer, CardModel? cardSource)
+    /// <summary>Does this play answer the mark? A Skill of the marker's that
+    /// is not the card that placed it. Pure, for the headless pin.</summary>
+    public static bool Answers(CardModel? card, Creature? marker) =>
+        card is { Type: CardType.Skill }
+        && marker != null
+        && card.Owner?.Creature == marker
+        && card is not Cards.Prototype.Generated.ProtoMiYoimiyaAurousBlaze;
+
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (target != Owner) return;
-        if (cardSource == null || cardSource.Type == CardType.Attack) return;
-        if (result.UnblockedDamage <= 0) return;
-        var applier = Applier ?? dealer;
-        if (applier == null) return;
-        var board = CombatState?.HittableEnemies.ToList();
-        if (board == null) return;
-        foreach (var enemy in board)
-        {
-            if (enemy.IsDead) continue;
-            await ElementalHit.Deal(
-                choiceContext, enemy, Element.Pyro,
-                CompanionOverhaulLaw.AurousBlazeDamage, applier);
-        }
+        var applier = Applier;
+        if (!Answers(cardPlay.Card, applier)) return;
+        if (Owner.IsDead) return;
+        await ElementalHit.Deal(
+            choiceContext, Owner, Element.Pyro, SummonDamage, applier);
     }
 
     /// <summary>The clock, run down by the arm's ordered end-of-turn walk.

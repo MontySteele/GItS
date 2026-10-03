@@ -45,29 +45,29 @@ public sealed class ProtoFsEndlessWaltz : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Endless Waltz"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. Each performer with 5 or more [gold]Fanfare[/gold] acts."),
+        ("description", "Deal {Damage:diff()} damage. Each performer with 5 or more [gold]Fanfare[/gold] acts."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(14m, ValueProp.Move)
+            new DamageVar(18m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoFsEndlessWaltz()
-        : base(2, CardType.Attack, CardRarity.Rare, TargetType.AllEnemies, autoAdd: false)
+        : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
-            .TargetingAllOpponents(CombatState!)
+            .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
-            .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
         await FurinaStage.PerformAll(choiceContext, Owner.Creature, minFanfare: 5);
     }

@@ -1833,6 +1833,31 @@ _NTH_ATTACK = re.compile(r"^nth_attack_this_turn_(\d+)$")
 _SELF_HAS_POWER = re.compile(r"^self_has_power_(.+)$")
 
 
+def _bonus_if_reason(eff: dict) -> str | None:
+    """`bonus_if: {if: <predicate>, amount: N}` (AoE trim, 2026-10-03), or
+    why it cannot be emitted. The predicate goes through `predicate_cs`, the
+    reader a `conditional`'s `if:` takes. None when the op carries none."""
+    rider = eff.get("bonus_if")
+    if rider is None:
+        return None
+    if not isinstance(rider, dict) or set(rider) != {"if", "amount"}:
+        return f"bonus_if {rider!r} must be {{if, amount}}"
+    amount = rider["amount"]
+    if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
+        return "bonus_if amount must be a positive literal int"
+    if predicate_cs(rider["if"]) is None:
+        return f"bonus_if predicate '{rider['if']}'"
+    return None
+
+
+def bonus_if_cs(eff: dict) -> str:
+    """The rider as a C# term: ` + (<predicate> ? N : 0)`, or ""."""
+    rider = eff.get("bonus_if")
+    if not rider:
+        return ""
+    return f" + ({predicate_cs(rider['if'])} ? {int(rider['amount'])} : 0)"
+
+
 def predicate_cs(name: str) -> str | None:
     """C# expression for a sheet predicate, or None if unsupported.
 
@@ -2161,7 +2186,11 @@ BRANCH_FIELDS = {
     # the element, the declared hit carries it alone, through
     # `HitElement.Carry` round its own `DamageCmd` (`carried_hits`,
     # `_emit_damage`). Quick Cue's and Tidal Flourish's Spend modes.
-    "damage": {"op", "amount", "target", "applies_element"},
+    "damage": {"op", "amount", "target", "applies_element",
+               # AoE trim, 2026-10-03 (Durin: Binary Form's Dark mode, "4
+               # damage to an enemy 3 times"): a LITERAL hit count, which
+               # `_emit_damage_call` already emits as `WithHitCount(N)`.
+               "times"},
     "block": {"op", "amount"},
     "draw": {"op", "amount"},
     "gain_spark": {"op", "amount"},
@@ -2226,6 +2255,10 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
             and (eff.get("target") not in DAMAGE_TARGETS
                  or eff.get("target") == "self")):
         return f"branch damage target '{eff.get('target')}'"
+    if eff.get("op") == "damage" and "times" in eff and (
+            not isinstance(eff["times"], int) or isinstance(eff["times"], bool)
+            or eff["times"] < 2):
+        return "branch damage times must be a literal int of 2 or more"
     if (eff.get("op") == "place_bomb"
             and eff.get("target") not in BOMB_TARGETS):
         return f"branch place_bomb target '{eff.get('target')}'"
@@ -2372,6 +2405,13 @@ def _modal_reason(eff: dict) -> str | None:
     # have aimed the card before choosing what it does.
     targets = {_mode_target_type(mode) for mode in modes}
     targets.discard(None)
+    # AoE trim, 2026-10-03 (Durin: Binary Form): ONE mixture is legal -- an
+    # all-enemies mode beside an aimed one. The card declares AnyEnemy (the
+    # player aims first, as for every aimed card), the all-enemies mode never
+    # reads the aim, and `ModeAimsAtChosenEnemy` tells the bridge which is
+    # which (EB-184).
+    if targets == {TARGET_CS["all_enemies"], TARGET_CS["enemy"]}:
+        targets = {TARGET_CS["enemy"]}
     if len(targets) > 1:
         return (f"choose_one modes disagree on TargetType {sorted(targets)} "
                 "(the card is aimed before the mode is chosen)")
@@ -2411,7 +2451,10 @@ DETONATE_FIELDS = {"op", "target", "bonus"}
 #: the rest of the pile stays. Still a `set_off`, so every reader of "a Set
 #: off card" (Once More!, Grounded, Treasure Map, Boom Badge...) sees it.
 SET_OFF_FIELDS = {"op", "target", "times", "damage", "overflow",
-                  "wide_if", "charge"}
+                  "wide_if", "charge",
+                  # AoE trim, 2026-10-03 (Mine, All Mine!): only the aimed
+                  # enemy's MINES go off (`ProtoBombPower.SetOffMinesAimed`).
+                  "mines_only"}
 #: `wide_if` is R244's (Coven Errand): the printed target WIDENS to ALL enemies
 #: when the named predicate holds. A field on the op rather than a
 #: `conditional` around two `plant_bomb`s, because the card prints ONE Bomb
@@ -2419,7 +2462,11 @@ SET_OFF_FIELDS = {"op", "target", "times", "damage", "overflow",
 #: through (`_authored_face_numbers`) -- two ops would print 7 in one clause
 #: and place 5 in the other. Sim twin: `effects._op_plant_bomb`.
 PLANT_BOMB_FIELDS = {"op", "target", "size", "mine", "payload_mine_all",
-                     "wide_if"}
+                     "wide_if",
+                     # AoE trim, 2026-10-03 (Coven Errand): `bonus_if: {if,
+                     # amount}` -- the Bomb is `amount` bigger while the
+                     # predicate holds. Sim twin: `effects.bonus_if_amount`.
+                     "bonus_if"}
 GROW_BOMBS_FIELDS = {"op", "target", "amount"}
 #: Stoke the Fuse. NO `target`: "your largest Bomb" is board-wide, the same
 #: scope `block_largest_bomb` reads, so the row aims at nobody.
@@ -3081,7 +3128,7 @@ APPLY_POWERS = {
         "Whenever you play a [gold]Confiscated[/gold], place a "
         "[gold]Bomb[/gold] {X} on a random enemy."),
     "ko_damage_report": ("DamageReportPower", None,
-        "Whenever you draw a status, deal {X} damage to ALL enemies."),
+        "Whenever you draw a status, gain {X} [gold]Block[/gold]."),
     "ko_solitary_confinement": ("SolitaryConfinementPower", None,
         "Your [gold]Confiscated[/gold] cost 0."),
     "ko_secret_base": ("SecretBasePower", None,
@@ -3425,6 +3472,15 @@ APPLY_POWERS = {
     "mc_binary_dark": ("BinaryFormDarkPower", None,
         "Your [gold]Pyro[/gold] [gold]Attacks[/gold] that react deal {X} more "
         "damage."),
+    # AoE trim, 2026-10-03: Durin, Principle of Purity's three
+    # (`Powers/Prototype/PrincipleOfPurity.cs`).
+    "mc_purity_strike": ("PurityStrikePower", None,
+        "At the start of your turn, deal {X} damage and apply "
+        "[gold]Pyro[/gold] to a random enemy."),
+    "mc_purity_white": ("PurityWhitePower", None,
+        "Enemies take {X}% more damage from [gold]Elemental Reactions[/gold]."),
+    "mc_purity_dark": ("PurityDarkPower", None,
+        "Your [gold]Pyro[/gold] damage deals {X} more."),
     "mc_lightning_fang": ("LightningFangPower", None,
         "Your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal 3 more "
         "damage. Lasts {X} more turn(s)."),
@@ -3483,9 +3539,8 @@ APPLY_POWERS = {
         "applies [gold]Electro[/gold] to a random enemy; every one placed "
         "beside another deals 3 more. {X} out."),
     "mi_aurous_blaze": ("AurousBlazePower", None,
-        "Whenever this enemy takes damage from a card that is not an "
-        "[gold]Attack[/gold], deal 6 damage and apply [gold]Pyro[/gold] to "
-        "ALL enemies. Lasts {X} more turn(s)."),
+        "Whenever you play a Skill, deal 3 damage and apply "
+        "[gold]Pyro[/gold] to this enemy. Lasts {X} more turn(s)."),
     "mi_soumetsu": ("SoumetsuPower", None,
         "At the end of your turn, deal 8 damage and apply [gold]Cryo[/gold] "
         "to ALL enemies; when it ends, 16 more. Lasts {X} more turn(s)."),
@@ -3781,7 +3836,10 @@ APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
 #: `summon_damage:` on the row has somewhere to land. Blocked by name for
 #: `never_reduces`' reason one block down: a row asking for the fold on a power
 #: that cannot bank it would ship a sim/mod split, silently.
-SUMMON_DAMAGE_POWERS = {"mi_tamoto", "mc_baron_bunny"}
+SUMMON_DAMAGE_POWERS = {"mi_tamoto", "mc_baron_bunny",
+                        # AoE trim, 2026-10-03: Yoimiya's mark, banked on
+                        # the enemy it lands on.
+                        "mi_aurous_blaze"}
 
 # Powers whose C# class implements the floor-not-clamp read (EB-26 D2). The
 # sim honours `never_reduces` at its own chokepoint for ANY power, but the mod
@@ -3946,6 +4004,9 @@ HAND_WRITTEN_ROSTER: set[str] = set()
 #                  `conditional_bonus`, which moves ONE branch number through
 #                  the ExtraDamage var; these move ALL of them.
 EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
+                       # AoE trim, 2026-10-03: per-mode numbers, play-time
+                       # `IsUpgraded` reads (`mode_upgrade_bump`).
+                       "mode_damage", "mode_power_amount",
                        # EB-219 / LAW:145: the upgrade of a PERSONAL COMPANION
                        # whose Spark grant lives in its owner's KIT and not on
                        # its face. There is no face number to bump -- that is
@@ -4840,6 +4901,18 @@ def blocked_reason(
             tgt = eff.get("target")
             if tgt not in DAMAGE_TARGETS:
                 return f"damage target '{tgt}'"
+            if "bonus_if" in eff:
+                # AoE trim, 2026-10-03 (Team Effort): "N more if ...". One
+                # plain hit, the rider added to its printed number.
+                bonus_reason = _bonus_if_reason(eff)
+                if bonus_reason:
+                    return f"damage {bonus_reason}"
+                if (tgt == "self" or damage_rider(card, eff) is not None
+                        or calc_rider(card, eff) is not None
+                        or any(k in eff for k in (
+                            "bonus_vs_aura", "bonus_vs_debuff",
+                            "bonus_formula", "amount_formula"))):
+                    return "damage bonus_if rides a plain printed hit only"
             if eff.get("times_formula", "2_plus_sparks") != "2_plus_sparks":
                 # The sim's only times formula (effects.py raises on others).
                 return f"times_formula '{eff['times_formula']}'"
@@ -4960,6 +5033,12 @@ def blocked_reason(
                 return "set_off overflow is the aimed spelling only"
             if eff.get("charge") not in (None, "largest"):
                 return f"set_off charge '{eff.get('charge')}'"
+            if "mines_only" in eff:
+                if eff["mines_only"] is not True:
+                    return "set_off mines_only must be true or absent"
+                if (eff.get("target") != "enemy" or eff.get("charge")
+                        or eff.get("overflow") or eff.get("wide_if")):
+                    return "set_off mines_only is the plain aimed spelling only"
             if eff.get("charge") and (
                     eff.get("target") != "enemy" or eff.get("overflow")
                     or eff.get("wide_if")):
@@ -4995,6 +5074,12 @@ def blocked_reason(
             payload = eff.get("payload_mine_all", 0)
             if not isinstance(payload, int) or payload < 0:
                 return "plant_bomb payload_mine_all must be a literal int >= 0"
+            bonus_reason = _bonus_if_reason(eff)
+            if bonus_reason:
+                return f"plant_bomb {bonus_reason}"
+            if "bonus_if" in eff and (eff.get("target") != "enemy"
+                                      or eff.get("wide_if")):
+                return "plant_bomb bonus_if is the plain aimed spelling only"
             wide = eff.get("wide_if")
             if wide is not None:
                 # R244. The predicate goes through the SAME reader a
@@ -6102,7 +6187,15 @@ VARKA_COUNTS = {
 }
 
 #: The per-combat counts either rail may read by name.
-RUNTIME_COUNTS = {**KOKOMI_CASKET_COUNTS, **VARKA_COUNTS}
+#: AoE trim, 2026-10-03 (Bombs Away!): "plus 2 for each enemy with a Bomb",
+#: her own charges only (R205), read when the Block is gained. Sim twin: the
+#: `enemies_with_bomb` runtime count.
+KLEE_COUNTS = {
+    "enemies_with_bomb": "static (card, _) => ProtoBombPower."
+                         "EnemiesHoldingChargeFrom(card.Owner.Creature)",
+}
+
+RUNTIME_COUNTS = {**KOKOMI_CASKET_COUNTS, **VARKA_COUNTS, **KLEE_COUNTS}
 
 
 def kokomi_casket_calc_rider(
@@ -7916,6 +8009,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # play time off `IsUpgraded`; the face carries its own
         # `{IfUpgraded:show:...}` swap.
         "choose_knight": any(e["op"] == "add_knight" for e in effects),
+        # AoE trim, 2026-10-03: the per-mode keys (`mode_upgrade_bump`).
+        **{key: _mode_upgrade_reason(card, key, deltas[key]) is None
+           for key in MODE_UPGRADE_KEYS if key in deltas},
         # VARKA (the expansion): the `varka` op reads IsUpgraded itself.
         "varka_upgraded": any(e["op"] == "varka" for e in effects),
         # Power cost sweep, 2026-09-30: binds to the first top-level
@@ -9820,6 +9916,49 @@ def _branch_amount(card: dict, eff: dict, key: str) -> str:
     return f"(IsUpgraded ? {base + delta}m : {base}m)"
 
 
+#: AoE trim, 2026-10-03 (Durin's split): the per-MODE upgrade keys. The value
+#: is a list in mode order; entry i moves the FIRST op of that kind in mode i
+#: of the row's first top-level `choose_one`. Sim twin: `upgrades.apply_upgrade`.
+MODE_UPGRADE_KEYS = {"mode_damage": "damage", "mode_power_amount": "apply_power"}
+
+
+def mode_upgrade_bump(card: dict, eff: dict) -> int:
+    """How far a per-mode delta moves `eff`'s amount, or 0. Bound by identity
+    to the first `damage` / `apply_power` of each mode, the one-owner rule."""
+    deltas = upgrade_plan(card)[0]
+    modal = next((fx for fx in card.get("effects") or []
+                  if fx.get("op") == "choose_one"), None)
+    if modal is None:
+        return 0
+    for key, op in MODE_UPGRADE_KEYS.items():
+        bumps = deltas.get(key)
+        if not bumps:
+            continue
+        for mode, bump in zip(modal.get("modes") or [], bumps):
+            first = next((e for e in mode.get("effects") or []
+                          if e.get("op") == op
+                          and isinstance(e.get("amount"), int)), None)
+            if first is eff:
+                return int(bump)
+    return 0
+
+
+def _mode_upgrade_reason(card: dict, key: str, val) -> str | None:
+    """Why a per-mode delta cannot land, or None."""
+    modal = next((fx for fx in card.get("effects") or []
+                  if fx.get("op") == "choose_one"), None)
+    modes = (modal or {}).get("modes") or []
+    if not isinstance(val, list) or len(val) != len(modes) or not all(
+            isinstance(v, int) and not isinstance(v, bool) for v in val):
+        return f"{key} must be a list of ints, one per mode"
+    op = MODE_UPGRADE_KEYS[key]
+    for mode in modes:
+        if not any(e.get("op") == op and isinstance(e.get("amount"), int)
+                   for e in mode.get("effects") or []):
+            return f"{key}: a mode prints no {op} number"
+    return None
+
+
 def _aura_lines(eff: dict, ctx: dict) -> list[str]:
     """`apply_aura` / `swirl`, as statements.
 
@@ -9882,6 +10021,10 @@ def _emit_branch_op(
             amount = "DynamicVars.ExtraDamage.BaseValue"
         else:
             amount = _branch_amount(card, eff, "conditional_damage")
+        bump = mode_upgrade_bump(card, eff)
+        if bump:
+            base = int(eff["amount"])
+            amount = f"(IsUpgraded ? {base + bump}m : {base}m)"
         if spotlight_capable:
             amount = f"SpotlightSystem.PrintedDamage(this, {amount})"
         _emit_damage(card, eff, lines, ctx, amount)
@@ -10021,17 +10164,21 @@ def _emit_branch_op(
         # here. Stack caps stay with the power's own
         # TryModifyPowerAmountReceived, so the call site is a plain Apply.
         cls = APPLY_POWERS[eff["power"]][0]
+        amount = str(int(eff["amount"]))
+        bump = mode_upgrade_bump(card, eff)
+        if bump:
+            amount = f"(IsUpgraded ? {int(eff['amount']) + bump} : {amount})"
         if eff.get("target") == "enemy":
             _target_guard(lines, ctx)
             lines.append(
                 f"await PowerCmd.Apply<{cls}>(choiceContext, cardPlay.Target, "
-                f'{int(eff["amount"])}, applier: Owner.Creature, '
+                f'{amount}, applier: Owner.Creature, '
                 "cardSource: this);"
             )
         else:
             lines.append(
                 f"await PowerCmd.Apply<{cls}>("
-                f'choiceContext, Owner.Creature, {int(eff["amount"])}, '
+                f'choiceContext, Owner.Creature, {amount}, '
                 "applier: Owner.Creature, cardSource: this);"
             )
 
@@ -10593,6 +10740,9 @@ def build_body(
                            if _is_sly_branch(card)
                            or eff is not damage_var_effect(card)
                            else "DynamicVars.Damage.BaseValue")
+            # AoE trim, 2026-10-03 (Team Effort): the `bonus_if` rider,
+            # read when the hit is made, as the sim reads it at cast.
+            amount_expr += bonus_if_cs(eff)
             if "bonus_vs_aura" in eff:
                 aura_target = (
                     "cardPlay.Target!" if eff["target"] == "enemy"
@@ -10850,6 +11000,12 @@ def build_body(
                         f"await PowerCmd.Apply<{cls}>(choiceContext, cardPlay.Target, "
                         f"{amount}, applier: Owner.Creature, cardSource: this);"
                     )
+                    # `EB-463`'s fold on a power HOSTED by its target (AoE
+                    # trim, 2026-10-03: Yoimiya's mark), banked on the body.
+                    if "summon_damage" in eff:
+                        lines.append(
+                            f"SummonDamage.Note<{cls}>(cardPlay.Target, this, "
+                            f"{int(eff['summon_damage'])});")
                 elif eff["target"] == "random_enemy":
                     # tier0 _pick_targets: ONE enemy, rolled. Same shape the
                     # aura emitter uses. Emitted separately because the
@@ -11030,6 +11186,14 @@ def build_body(
                     "await ProtoBombPower.SetOffLargestAimed("
                     "choiceContext, cardPlay.Target, Owner.Creature, this, "
                     f"cardPlay, {damage});")
+            elif eff["target"] == "enemy" and eff.get("mines_only"):
+                # AoE trim, 2026-10-03 (Mine, All Mine!): only the MINES on
+                # the aimed enemy go off; plain Bombs stay.
+                _target_guard(lines, ctx)
+                lines.append(
+                    "await ProtoBombPower.SetOffMinesAimed("
+                    "choiceContext, cardPlay.Target, Owner.Creature, this, "
+                    f"cardPlay, {damage});")
             elif eff["target"] == "enemy" and eff.get("overflow") == "bounce":
                 # R276 (Big Bounce). The same aimed Set off with the overflow
                 # tallied and bounced; one call, so the tally and the bounce
@@ -11072,7 +11236,7 @@ def build_body(
                     f"{damage}, {times});")
 
         elif op == "plant_bomb":
-            size = bomb_size_expr(card, eff)
+            size = bomb_size_expr(card, eff) + bonus_if_cs(eff)
             mine = "true" if eff.get("mine") else "false"
             payload = payload_mine_expr(card, eff)
             if eff["target"] == "enemy" and eff.get("wide_if"):
@@ -12316,6 +12480,7 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
             if eff["target"] == "enemy":
                 method = ("SetOffLargestAimed"
                           if eff.get("charge") == "largest"
+                          else "SetOffMinesAimed" if eff.get("mines_only")
                           else "SetOffAimedBouncing"
                           if eff.get("overflow") == "bounce" else "SetOffAimed")
                 body.append(
@@ -12663,6 +12828,10 @@ def _authored_face_numbers(card: dict):
             elif rider == "bonus_vs_bombed":
                 yield ("bonus_vs_bombed", "ExtraDamage",
                        int(eff["bonus_vs_bombed"]))
+            # AoE trim, 2026-10-03: "6 more if ..." -- the rider's own literal,
+            # printed after the hit and moved by no delta.
+            if eff.get("bonus_if"):
+                yield (None, None, int(eff["bonus_if"]["amount"]))
         elif op == "set_off" and int(eff.get("damage", 0) or 0):
             owns = eff is set_off_damage_var_effect(card)
             yield ("damage", "Damage", int(eff["damage"])) if owns \
@@ -12677,6 +12846,16 @@ def _authored_face_numbers(card: dict):
             owns = eff is plant_bomb_var_effect(card)
             yield ("bomb_size", "BombSize", int(eff["size"])) if owns \
                 else (None, None, int(eff["size"]))
+            if eff.get("bonus_if"):
+                # AoE trim, 2026-10-03 (Coven Errand): "Bomb 5, 8 if ..." --
+                # the bigger Bomb is the printed size plus the rider, so a
+                # `bomb_size` delta moves both numbers; the face swaps the
+                # second with the base game's `{IfUpgraded:show:up|base}`.
+                big = int(eff["size"]) + int(eff["bonus_if"]["amount"])
+                delta = int(upgrade_plan(card)[0].get("bomb_size", 0))
+                yield (("bomb_size",
+                        f"{{IfUpgraded:show:{big + delta}|{big}}}", big)
+                       if owns and delta else (None, None, big))
             payload = int(eff.get("payload_mine_all", 0))
             if payload:
                 yield ("payload_mine", "PayloadMine", payload) if owns \
@@ -12735,6 +12914,23 @@ def _authored_face_numbers(card: dict):
                 else (None, None, eff["amount"])
         elif op == "draw" and isinstance(eff.get("amount"), int):
             yield None, None, eff["amount"]
+        elif op == "choose_one" and any(
+                k in upgrade_plan(card)[0] for k in MODE_UPGRADE_KEYS):
+            # AoE trim, 2026-10-03: a per-mode delta's number, swapped with
+            # `{IfUpgraded:show:up|base}` (a mode amount owns no var). Only
+            # the first op of each kind per mode moves; in mode order, which
+            # is the order an authored face prints its modes in.
+            for mode in eff.get("modes") or []:
+                for inner in mode.get("effects") or []:
+                    bump = (mode_upgrade_bump(card, inner)
+                            if inner.get("op") in ("damage", "apply_power")
+                            else 0)
+                    if bump:
+                        base = int(inner["amount"])
+                        key = next(k for k, o in MODE_UPGRADE_KEYS.items()
+                                   if o == inner["op"])
+                        yield (key, f"{{IfUpgraded:show:{base + bump}|{base}}}",
+                               base)
         elif op == "conditional":
             # `EB-140`'s BRANCH numbers, on the AUTHORED face. A branch amount
             # is a literal by construction, so a `conditional_*` delta says
@@ -12985,6 +13181,7 @@ def _authored_face_with_tokens(card: dict) -> str:
             # `{IfUpgraded:show:up|base}` swap `_branch_amount_text` builds),
             # because a branch amount owns no var to print a `:diff()` of.
             token = (var if key in _CONDITIONAL_DELTA_OPS
+                     or var.startswith("{")
                      else f"{{{var}:diff()}}")
             if plural and match.group("noun"):
                 token += f" card{{{var}:plural:|s}}"
@@ -14583,6 +14780,14 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("stage_spend")
         lines.append("// stage_spend: the Spend mode's price is read off "
                      "IsUpgraded in its gate and its payment.")
+    for mode_key in MODE_UPGRADE_KEYS:
+        if mode_key in deltas:
+            # AoE trim, 2026-10-03. Each mode's number is a play-time
+            # `IsUpgraded` read in its own body (`mode_upgrade_bump`), and the
+            # face carries the `{IfUpgraded:show:...}` swap: nothing to bump.
+            done.add(mode_key)
+            lines.append(f"// {mode_key}: each mode's number is read off "
+                         "IsUpgraded in its own body.")
     if "upgraded_grant" in deltas:
         # R276 (Alice's Detonator). A play-time `IsUpgraded` read on the
         # install, the `generate_cost_override` shape: nothing to bump here.
@@ -15090,9 +15295,13 @@ def emit(
         # and be unaimable. blocked_reason has already refused modes that
         # disagree, so the first mode that names a target names the card's.
         if eff["op"] == "choose_one":
-            modal_target = next(
-                (t for t in (_mode_target_type(m) for m in eff["modes"])
-                 if t is not None), None)
+            mode_targets = [t for t in (_mode_target_type(m)
+                                        for m in eff["modes"])
+                            if t is not None]
+            # AoE trim: an aimed mode beside an all-enemies one aims the card.
+            modal_target = (TARGET_CS["enemy"]
+                            if TARGET_CS["enemy"] in mode_targets
+                            else next(iter(mode_targets), None))
             if modal_target is not None:
                 target_type = modal_target
                 break

@@ -30,7 +30,8 @@ def test_personal_rows_are_not_in_the_universal_pool():
     Knights, the coven); the universal pool is the companion roster's 34."""
     rows = _pools()["mondstadt-companions"]
     assert any(r.get("personal_pool") for r in rows)
-    assert len(cdr.universal_rows(rows)) == 34
+    # 35 since Durin split in two (AoE trim, 2026-10-03).
+    assert len(cdr.universal_rows(rows)) == 35
 
 
 def test_guest_stars_are_not_in_the_universal_pool():

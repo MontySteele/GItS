@@ -81,6 +81,8 @@ public class CompanionOverhaulTests
         typeof(ProtoMcDahliaSacramentalShower),
         typeof(ProtoMcDahliaFavonianFavor),
         typeof(ProtoMcDurinBinaryForm),
+        // The AoE trim (2026-10-03): Durin split in two.
+        typeof(ProtoMcDurinPrincipleOfPurity),
         typeof(ProtoMcRazorClawAndThunder),
         typeof(ProtoMcRazorLightningFang),
         typeof(ProtoMcVarkaSturmUndDrang),
@@ -166,7 +168,8 @@ public class CompanionOverhaulTests
     [Fact]
     public void Every_row_is_an_offerable_mondstadt_companion()
     {
-        Assert.Equal(34, Universals.Length);
+        // 35 since the AoE trim (2026-10-03) split Durin in two.
+        Assert.Equal(35, Universals.Length);
         foreach (var type in Universals)
         {
             var card = (CardModel)Activator.CreateInstance(type)!;

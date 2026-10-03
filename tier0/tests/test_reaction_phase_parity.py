@@ -916,6 +916,16 @@ CO_TENANCY_LEDGER = {
             "up. Two Melody Loops are on two different enemies by "
             "construction, because the card places the power on the body it "
             "targeted",
+        ("Powers/Prototype/PrincipleOfPurity.cs", "PurityStrikePower"):
+            "QUARANTINED (the AoE trim, 2026-10-03: Durin, Principle of "
+            "Purity). One powered Pyro hit at a random enemy. THE ORDERING "
+            "QUESTION, answered, and it is a RACE filed as a BACKLOG line: the "
+            "Pyro can react with the Hydro MelodyLoopPower lays or the Cryo "
+            "HeraldOfFrostPower lays, and it draws from Rng.CombatTargets "
+            "beside SurpriseDispatchPower and Herald. The sim runs it after "
+            "Melody Loop and before the Inazuma and coven readers "
+            "(effects.companion_overhaul_turn_start); the mod gives no order "
+            "among same-broadcast tenants",
         ("Powers/Prototype/CompanionCoven.cs", "HeraldOfFrostPower"):
             "QUARANTINED (Klee's coven Personals, R236). Applies Cryo twice to "
             "a random enemy, pays raw Block, then ticks its own duration. THE "

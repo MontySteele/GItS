@@ -12,6 +12,7 @@ using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
@@ -151,10 +152,10 @@ public sealed class FindersKeepersPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Damage Report: "Whenever you draw a status, deal 5 [7] damage to ALL
-/// enemies." Per card drawn, any status (a Dazed too). Spark Knight's hit:
-/// unelemented, through <see cref="ElementalHit.DealUnelemented"/>. Sim
-/// twin: <c>klee_overhaul.damage_report</c>, read at
+/// Damage Report (AoE trim, 2026-10-03): "Whenever you draw a status, gain 4
+/// [6] Block." Per card drawn, any status (a Dazed too). Power-sourced Block,
+/// raw like the arm's other powers' (NC-11). It dealt 5 [7] to ALL enemies
+/// before the trim. Sim twin: <c>klee_overhaul.damage_report</c>, read at
 /// <c>refpowers.after_card_drawn</c>.
 /// </summary>
 public sealed class DamageReportPower : PowerModel, ILocalizationProvider
@@ -163,8 +164,8 @@ public sealed class DamageReportPower : PowerModel, ILocalizationProvider
     {
         ("title", "Damage Report"),
         ("description",
-            "Whenever you draw a status, deal [blue]{Amount}[/blue] damage to "
-          + "ALL enemies."),
+            "Whenever you draw a status, gain [blue]{Amount}[/blue] "
+          + "[gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -176,15 +177,8 @@ public sealed class DamageReportPower : PowerModel, ILocalizationProvider
         if (Owner == null || Amount <= 0) return;
         if (card?.Owner?.Creature != Owner) return;
         if (!KleeStatusPackage.IsStatus(card)) return;
-        var combat = Owner.CombatState;
-        if (combat == null) return;
-        foreach (var target in combat.HittableEnemies
-                     .Where(e => !e.IsDead).ToList())
-        {
-            if (target.IsDead) continue;
-            await ElementalHit.DealUnelemented(choiceContext, target, Amount,
-                                               Owner);
-        }
+        await CreatureCmd.GainBlock(
+            Owner, Amount, ValueProp.Unpowered, null, fast: true);
     }
 }
 

@@ -181,8 +181,9 @@ def test_endless_waltz_acts_only_the_performers_at_five_or_more(arm):
     effects.resolve_card(st, _proto("proto_fs_endless_waltz"))
     acted = [e["member"] for e in st.log if e["event"] == "stage_act"]
     assert acted == ["usher", "chevalmarin"]
-    # 14 to ALL, then Chevalmarin's 2 to ALL; Usher's act is Block.
-    assert st.enemies[0].hp == 500 - 14 - FS.ACT_CHEVALMARIN_DAMAGE
+    # 18 to the enemy (AoE trim, 2026-10-03), then Chevalmarin's 2 to ALL;
+    # Usher's act is Block.
+    assert st.enemies[0].hp == 500 - 18 - FS.ACT_CHEVALMARIN_DAMAGE
     assert st.player.block == FS.ACT_USHER_BLOCK
 
 

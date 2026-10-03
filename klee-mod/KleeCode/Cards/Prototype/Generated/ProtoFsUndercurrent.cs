@@ -41,31 +41,31 @@ public sealed class ProtoFsUndercurrent : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undercurrent"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies {Times:diff()} times."),
+        ("description", "Deal {Damage:diff()} damage {Times:diff()} times."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(2m, ValueProp.Move),
+            new DamageVar(3m, ValueProp.Move),
             new DynamicVar("Times", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoFsUndercurrent()
-        : base(1, CardType.Attack, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .WithHitCount(DynamicVars["Times"].IntValue)
             .FromCard(this, cardPlay)
-            .TargetingAllOpponents(CombatState!)
+            .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
-            .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
     }
 

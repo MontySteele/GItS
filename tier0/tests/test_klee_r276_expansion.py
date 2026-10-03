@@ -195,12 +195,17 @@ def test_mk_iii_upgraded_hits_four_and_plants_three(overhaul):
     assert sizes(enemy) == [3, 3, 3]
 
 
-def test_mine_all_mine_hits_only_the_mined_enemies(overhaul):
+def test_mine_all_mine_hits_and_sets_off_the_aimed_enemys_mines(overhaul):
+    """AoE trim, 2026-10-03: "Deal 8 Pyro damage. Set off the Mines on that
+    enemy." One enemy; another body's Mine and the aimed body's plain Bomb
+    stay where they are."""
     a, b, c = (make_enemy(hp=200, name=n) for n in "abc")
     state = klee_state([a, b, c])
     klee_overhaul.place(state, a, 4, is_mine=True)
-    klee_overhaul.place(state, b, 9)
-    play(state, load("proto_ko_mine_all_mine"))
+    klee_overhaul.place(state, a, 9)
+    klee_overhaul.place(state, b, 4, is_mine=True)
+    play(state, load("proto_ko_mine_all_mine"), aim=a)
+    assert sizes(a) == [9] and sizes(b) == [4]
     assert a.hp < 200
     assert b.hp == 200 and c.hp == 200
 
@@ -214,17 +219,18 @@ def test_team_effort_sets_off_the_target_alone_without_a_companion(overhaul):
     assert sizes(a) == [] and sizes(b) == [5]
 
 
-def test_team_effort_sets_off_every_enemy_after_a_companion_play(overhaul):
+def test_team_effort_hits_harder_after_a_companion_play(overhaul):
+    """AoE trim, 2026-10-03: "Set off. Deal 6 Pyro damage, 6 more if you
+    played a Companion card this turn." The Set off stays on the target."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     klee_overhaul.place(state, a, 5)
     klee_overhaul.place(state, b, 5)
     state.ko_companion_this_turn = 1
     play(state, load("proto_ko_team_effort"), aim=a)
-    assert sizes(a) == [] and sizes(b) == []
-    # The card's own 6 lands on the target only: b took its Bomb and no more.
-    assert 200 - b.hp == 5
-    assert 200 - a.hp > 200 - b.hp
+    assert sizes(a) == [] and sizes(b) == [5]
+    assert b.hp == 200
+    assert 200 - a.hp >= 5 + 12
 
 
 def test_windblume_fireworks_sets_off_then_hits_then_plants(overhaul):

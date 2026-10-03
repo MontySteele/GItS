@@ -128,7 +128,8 @@ public class InazumaCompanionOverhaulTests
         Assert.Equal(24, referenced);
 
         var mondstadt = Il.Method("CompanionOverhaulRoster", "Universals");
-        Assert.Equal(34, Il.CallSequence(mondstadt)
+        // 35 since the AoE trim (2026-10-03) split Durin in two.
+        Assert.Equal(35, Il.CallSequence(mondstadt)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

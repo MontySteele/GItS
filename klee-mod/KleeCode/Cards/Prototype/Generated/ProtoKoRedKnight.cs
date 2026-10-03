@@ -48,29 +48,29 @@ public sealed class ProtoKoRedKnight : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Red Knight"),
-        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(22m, ValueProp.Move)
+            new DamageVar(34m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKoRedKnight()
-        : base(2, CardType.Attack, CardRarity.Rare, TargetType.AllEnemies, autoAdd: false)
+        : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
-            .TargetingAllOpponents(CombatState!)
+            .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
-            .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
         {
             for (var i = 0; i < 2; i++)

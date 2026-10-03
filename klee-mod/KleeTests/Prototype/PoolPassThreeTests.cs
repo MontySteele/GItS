@@ -267,17 +267,21 @@ public class PoolPassThreeTests
     }
 
     [Fact]
-    public void Bombs_away_is_the_attack_placer_the_smoggy_reading_asked_for()
+    public void Bombs_away_places_one_bomb_and_blocks_per_bombed_enemy()
     {
-        // Smoggy allows one SKILL per turn, and the arm's placers are Skills
-        // by rule -- so the shelf needed a placer that is not one. It hits
-        // ALL and places on ALL, and it sets nothing off.
+        // AoE trim (2026-10-03): "Place a Bomb 4 on an enemy. Gain 4 Block,
+        // plus 2 for each enemy with a Bomb." A Skill now; the Block is the
+        // CalculatedBlockVar over her bombed enemies, gained AFTER the Bomb.
         var card = new ProtoKoBombsAway();
-        Assert.Equal(CardType.Attack, card.Type);
-        Assert.Equal(TargetType.AllEnemies, card.TargetType);
+        Assert.Equal(CardType.Skill, card.Type);
+        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
+        Assert.Equal(4m, card.DynamicVars["BombSize"].BaseValue);
 
-        var play = Il.Calls(Il.Method("ProtoKoBombsAway", "OnPlay"));
-        Assert.Contains(play, c => c.Contains("ProtoBombPower.PlaceOnAll"));
+        var play = Il.CallSequence(Il.Method("ProtoKoBombsAway", "OnPlay")).ToList();
+        var place = play.IndexOf("ProtoBombPower.Place");
+        var block = play.IndexOf("CreatureCmd.GainBlock");
+        Assert.True(place >= 0 && block > place);
+        Assert.DoesNotContain(play, c => c.Contains("PlaceOnAll"));
         Assert.DoesNotContain(play, c => c.Contains("SetOff"));
     }
 

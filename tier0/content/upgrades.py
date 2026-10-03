@@ -1104,6 +1104,29 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)
+        elif key in ("mode_damage", "mode_power_amount"):
+            # AoE trim, 2026-10-03 (Durin's split): a `choose_one` whose modes
+            # print DIFFERENT upgrades ("6 [8] to ALL" / "4 [5] three times").
+            # The value is a list in MODE ORDER; entry i moves the first
+            # `damage` (or `apply_power`) amount of mode i of the row's first
+            # top-level `choose_one`. A list shorter or longer than the modes
+            # is a sheet error.
+            op = "damage" if key == "mode_damage" else "apply_power"
+            modal = next((fx for fx in top if fx.get("op") == "choose_one"),
+                         None)
+            modes = (modal or {}).get("modes") or []
+            ok = (isinstance(val, list) and len(val) == len(modes)
+                  and all(isinstance(v, int) for v in val))
+            if ok:
+                for mode, bump in zip(modes, val):
+                    first = next((e for e in mode.get("effects") or []
+                                  if e.get("op") == op
+                                  and isinstance(e.get("amount"), int)),
+                                 None)
+                    if first is None:
+                        ok = False
+                        break
+                    first["amount"] += bump
         elif key == "bonus_vs_debuff":
             # `EB-655` (Riptide). The RIDER's own number, where `damage` moves
             # the base it rides on: "9 damage to ALL, and 4 more to each enemy

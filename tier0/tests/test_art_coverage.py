@@ -282,6 +282,9 @@ def test_the_proxy_bill_prints_every_proxy_it_finds():
 # it wears the companion Amber: Fiery Rain's until one is placed.
 STAND_IN_PROXIES = {
     "proto_vk_amber_fiery_rain": "proto_mc_amber_fiery_rain",
+    # The AoE trim (2026-10-03) split Durin in two; the burst wears the
+    # skill's picture until its own is placed.
+    "proto_mc_durin_principle_of_purity": "proto_mc_durin_binary_form",
 }
 
 

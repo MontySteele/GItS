@@ -460,6 +460,12 @@ def _runtime_count(state: CombatState, token: str,
     # the current card's exhaust_from just resolved. Registered as one prefix
     # family rather than eight tokens so the vocabulary and the emitted parity
     # row cannot disagree about what exists -- both enumerate the same dict.
+    if token == "enemies_with_bomb":
+        # AoE trim, 2026-10-03 (Bombs Away!): "plus 2 for each enemy with a
+        # Bomb". LIVING enemies holding one of Klee's charges (Mines are
+        # Bombs, rule 6), read at resolution -- after the card's own Bomb.
+        return sum(1 for e in state.living_enemies
+                   if klee_overhaul.holds_charge(e))
     if token.startswith(EXHAUST_SELECTION_PREFIX):
         counts = exhaust_selection_counts(state.exhaust_selection)
         key = token[len(EXHAUST_SELECTION_PREFIX):]
@@ -985,6 +991,11 @@ def _spotlight_scale(state: CombatState, card: Card, amount: int) -> int:
 #: So "the damage came out of a card" is membership in this pair.
 CARD_DAMAGE_SOURCES = ("attack", "card")
 
+#: Hits Principle of Purity's Dark does not add to: a reaction's or a shipped
+#: detonation's splash, a Shatter and poison are not her Pyro damage.
+PURITY_DARK_EXCLUDED = frozenset(("reaction_splash", "detonation_splash",
+                                  "shatter", "poison"))
+
 
 def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
                          element: Optional[str] = None,
@@ -1084,6 +1095,13 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     if (element == "pyro" and source == "attack"
             and enemy.aura and enemy.aura != element):
         dmg += state.player.powers.get("mc_binary_dark", 0)
+    # Durin, Principle of Purity / DARK (AoE trim, 2026-10-03): "Your Pyro
+    # damage deals 4 more." EVERY Pyro hit she deals -- card, Bomb, Mine,
+    # companion volley and the Power's own turn-start hit -- in the additive
+    # phase, before the amplifier, where the flat bonuses live. A reaction's
+    # splash is the reaction's damage, not Pyro damage, and is left alone.
+    if element == "pyro" and source not in PURITY_DARK_EXCLUDED:
+        dmg += state.player.powers.get("mc_purity_dark", 0)
     log_mark = len(state.log)
     dmg = reactions.resolve_hit(state, enemy, element, dmg)
     amped = dmg != unamped
@@ -1621,6 +1639,17 @@ def _add_token(state: CombatState, card: Card, zone: str) -> None:
 
 # --- ops ---
 
+def bonus_if_amount(state: CombatState, fx: dict) -> int:
+    """The `bonus_if:` rider (AoE trim, 2026-10-03): `{if: <predicate>,
+    amount: N}` adds N to the op's printed number when the predicate holds.
+    One vocabulary with `conditional`'s `if:`, checked at load
+    (`loader._validate_effect_vocabulary`). 0 when absent."""
+    rider = fx.get("bonus_if")
+    if not rider:
+        return 0
+    return int(rider["amount"]) if _predicate(state, rider["if"]) else 0
+
+
 def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     element = _element_for(state, fx, card)
     source = "attack" if card.type == "attack" else "card"
@@ -1741,6 +1770,10 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     bombed_at_cast = ({id(e) for e in state.enemies
                        if e.bombs or e.ko_charges}
                       if fx.get("bonus_vs_bombed") else frozenset())
+    # AoE trim, 2026-10-03 (Team Effort): `bonus_if: {if: <predicate>,
+    # amount: N}` -- "N more if ...". ONE damage op owning one upgradable
+    # number, the predicate read once at cast (the snapshot idiom above).
+    base += bonus_if_amount(state, fx)
 
     # A POWER THAT REWRITES THIS ROW'S TargetType. FanOfKnivesPower does
     # exactly that to the Shiv (`TargetType => HasFanOfKnives ? AllEnemies :
@@ -4146,6 +4179,8 @@ RUNTIME_COUNT_NAMES = frozenset({
     "knights_played_this_combat",
     # VARKA DEFENCE (2026-10-01): Gale Mantle (`varka_oath.COUNTS`).
     "half_total_oath",
+    # AoE trim, 2026-10-03: Bombs Away!'s "for each enemy with a Bomb".
+    "enemies_with_bomb",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.
@@ -5258,6 +5293,14 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
             hit(enemy)
         return
 
+    if fx.get("mines_only"):
+        # AoE trim, 2026-10-03 (Mine, All Mine!): "Set off the Mines on that
+        # enemy." Only the MINES on the aimed body go off; plain Bombs stay.
+        for enemy in _pick_targets(state, spec, allow_dead=True):
+            klee_overhaul.set_off_mines(state, enemy, card, badge=badge)
+            hit(enemy)
+        return
+
     if fx.get("charge") == "largest":
         # POCKET MATCH (playtest 2026-09-24): only the single largest charge
         # on the aimed enemy goes off, before the card's own hit
@@ -5323,7 +5366,9 @@ def _op_plant_bomb(state: CombatState, fx: dict, card: Card) -> None:
     """
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
-    size = int(fx["size"])
+    # AoE trim, 2026-10-03 (Coven Errand): "Bomb 5, 8 if you played a
+    # Companion" is the printed size plus a `bonus_if:` rider.
+    size = int(fx["size"]) + bonus_if_amount(state, fx)
     is_mine = bool(fx.get("mine", False))
     payload = int(fx.get("payload_mine_all", 0))
     spec = fx.get("target", "enemy")
@@ -6798,6 +6843,14 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
             enemy.powers["mc_melody_loop"] = n - 1
         else:
             del enemy.powers["mc_melody_loop"]
+    # Durin, Principle of Purity (AoE trim, 2026-10-03): "At the start of your
+    # turn, deal 4 Pyro damage to a random enemy." PERMANENT, the stack is the
+    # damage (copies add into one hit). After Melody Loop, the other element.
+    n = p.powers.get("mc_purity_strike", 0)
+    if n and state.living_enemies:
+        enemy = state.rng.choice(state.living_enemies)
+        deal_damage_to_enemy(state, enemy, n, element="pyro",
+                             source="companion")
     inazuma_overhaul_turn_start(state)
     # ---- and KLEE'S COVEN PERSONALS, last (QUARANTINED, R236) --------------
     # Qiqi's Herald applies Cryo, which can resolve a reaction, and Mona's omen
@@ -7497,6 +7550,11 @@ def inazuma_overhaul_turn_end(state: CombatState) -> None:
             p.powers["dexterity"] = left
         else:
             p.powers.pop("dexterity", None)
+    # Yoimiya, Aurous Blaze -- "for 2 turns", hosted on the ENEMY: the clock,
+    # where the mod's walk ticks it (after the banner). The sim had no clock
+    # for it before the AoE trim (2026-10-03).
+    for enemy in state.enemies:
+        _mi_tick(enemy, "mi_aurous_blaze")
     # Sayu, Naptime -- the promise breaks if an Attack was played this turn.
     # Read here rather than at the start of the next turn because "this turn"
     # is THIS turn, and the counter is cleared at the next turn's start.
@@ -7860,9 +7918,14 @@ def companion_overhaul_reaction_mult(state: CombatState) -> float:
     rather than compounded: two Durins are +100%, not +125%.
     """
     n = state.player.powers.get("mc_binary_white", 0)
-    if not n:
+    # Durin, Principle of Purity / WHITE (AoE trim, 2026-10-03): the stack IS
+    # the percentage (50, 75 upgraded), copies add. TEAM-WIDE as printed:
+    # every player's reactions against enemies. The sim seats one player, so
+    # the holder's reactions are every player's.
+    pct = state.player.powers.get("mc_purity_white", 0)
+    if not n and not pct:
         return 1.0
-    return 1.0 + (C.MC_BINARY_WHITE_REACTION_MULT - 1.0) * n
+    return 1.0 + (C.MC_BINARY_WHITE_REACTION_MULT - 1.0) * n + pct / 100.0
 
 
 # =============================================================================
@@ -7929,17 +7992,30 @@ def companion_overhaul_damage_dealt(state: CombatState, enemy: Enemy,
         # the DEALER is the player and a `cardSource` is present, and its
         # power-sourced hits (`ElementalHit.Deal`) carry neither.
         state.mi_damage_dealt_this_card += int(hp_dmg)
-    if source != "card" or hp_dmg <= 0:
+    # Yoimiya's mark left this reader at the AoE trim (2026-10-03): it now
+    # answers a Skill PLAY (`companion_overhaul_card_played`).
+
+
+#: The card that marks the body. Its own play does not answer its own mark:
+#: "for 2 turns, whenever you play a Skill" reads as the Skills after it.
+AUROUS_BLAZE_CARD = "proto_mi_yoimiya_aurous_blaze"
+
+
+def _aurous_blaze_on_skill(state: CombatState, card: Card) -> None:
+    """Yoimiya, Aurous Blaze (AoE trim, 2026-10-03): "For 2 turns, whenever
+    you play a Skill, deal 3 Pyro damage to that enemy." Each marked body
+    takes the card's printed 3 (`summon_damage:`) once per Skill played,
+    after the Skill resolves. The stack is TURNS REMAINING, so a second mark
+    lengthens the window and does not double the hit; it ticks at the end of
+    the turn (`inazuma_overhaul_turn_end`)."""
+    if card.type != "skill" or card.id.rstrip("+") == AUROUS_BLAZE_CARD:
         return
-    if not enemy.powers.get("mi_aurous_blaze", 0):
-        return
-    # ONE DETONATION PER HIT, however many marks the body carries: the stack is
-    # TURNS REMAINING, not copies, so re-marking a body extends the window
-    # rather than doubling the blast -- the arm's standing rule for a timed
-    # power, and the reading that keeps a second copy from being a multiplier.
-    for other in list(state.living_enemies):
-        deal_damage_to_enemy(state, other, C.MI_AUROUS_BLAZE_DMG,
-                             element="pyro", source="companion")
+    dmg = state.player.summon_damage.get("mi_aurous_blaze",
+                                         C.MI_AUROUS_BLAZE_DMG)
+    for enemy in list(state.living_enemies):
+        if enemy.powers.get("mi_aurous_blaze", 0):
+            deal_damage_to_enemy(state, enemy, dmg, element="pyro",
+                                 source="companion")
 
 
 def companion_overhaul_card_played(state: CombatState, card: Card) -> None:
@@ -7957,6 +8033,7 @@ def companion_overhaul_card_played(state: CombatState, card: Card) -> None:
     The clock itself runs down at the end of the turn, in
     `inazuma_overhaul_turn_end`, like every other duration here.
     """
+    _aurous_blaze_on_skill(state, card)
     if card.type != "attack":
         return
     p = state.player

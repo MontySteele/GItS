@@ -32,48 +32,40 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoBombsAway : CustomCardModel, IElementalCard
+public sealed class ProtoKoBombsAway : CustomCardModel
 {
-    /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>
-    public Element Element => Element.Pyro;
-
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesPyro };
-
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
+        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_bombs_away");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bombs Away!"),
-        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies. Place a [gold]Bomb[/gold] {BombSize:diff()} on ALL enemies."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()} on an enemy. Gain 4 [gold]Block[/gold], plus 2 for each enemy with a [gold]Bomb[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(3m, ValueProp.Move),
-            new DynamicVar("BombSize", 2m)
+            new DynamicVar("BombSize", 4m),
+            new CalculationBaseVar(4m),
+            new CalculationExtraVar(2m),
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => ProtoBombPower.EnemiesHoldingChargeFrom(card.Owner.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKoBombsAway()
-        : base(1, CardType.Attack, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this, cardPlay)
-            .TargetingAllOpponents(CombatState!)
-            .WithElementHitFx(this)
-            .SpawningHitVfxOnEachCreature()
-            .Execute(choiceContext);
-        await ProtoBombPower.PlaceOnAll(choiceContext, Owner.Creature, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, cardSource: this);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, Owner.Creature, this);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
