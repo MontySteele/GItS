@@ -2728,8 +2728,8 @@ proto_vk_oathbound_aegis	ImageGen/images/cards/varka/proto_vk_oathbound_aegis.pn
 proto_vk_oathsworn_strike	ImageGen/images/cards/varka/proto_vk_oathsworn_strike.png	500	380	cover	x0.62,y0.30@1.7	shortlist	1	png	Facts About Varka II 0.png		splash	
 # proto_vk_pathfinders_mark <- the sketch of Jean and Dvalin
 proto_vk_pathfinders_mark	ImageGen/images/cards/varka/proto_vk_pathfinders_mark.png	500	380	cover	center	shortlist	1	png	Mondstadt Tourism Revitalization Project At Peace.png		splash	
-# proto_vk_rally_to_the_banner <- the reinforcement shield, smaller (second use)
-proto_vk_rally_to_the_banner	ImageGen/images/cards/varka/proto_vk_rally_to_the_banner.png	500	380	cover_autocrop	contain@0.25	shortlist	1	png	Icon Fated Warrior Reinforcements.png		item	fated_warrior_reinforcements
+# proto_vk_rally_to_the_banner <- Varka before the four nations' emblems
+proto_vk_rally_to_the_banner	ImageGen/images/cards/varka/proto_vk_rally_to_the_banner.png	500	380	cover	y0.27	shortlist	1	png	Varka Card.png		splash	
 # proto_vk_razor_claw_and_thunder <- Razor, face in frame, RAZOR text cropped out
 proto_vk_razor_claw_and_thunder	ImageGen/images/cards/varka/proto_vk_razor_claw_and_thunder.png	500	380	cover	x0.70,y0.32@1.6	shortlist	1	png	Razor Birthday 2020.png		splash	
 # proto_vk_retaliating_tide <- Mona, face in frame
