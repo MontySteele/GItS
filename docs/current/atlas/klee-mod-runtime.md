@@ -18,7 +18,7 @@ this DLL only executes inside Godot, so nothing here can be run against the sim
 (`Diagnostics/FurinaParityVectors.cs:10-13`). Its second job is **not losing
 runs** — several patches exist only to stop base-game code from soft-locking on a
 pool it never anticipated (`KleeMod.cs:243-269,318-344`). Card *content* is
-generated elsewhere (`tools/gen_roster_cards.py` → `Cards/Generated/`); this
+generated elsewhere (`tools/gen_prototype_cards.py` → `Cards/Generated/`); this
 module owns the systems those cards call into.
 
 ## 2. Entry points

@@ -52,8 +52,8 @@ Regenerate the cards. The generator writes the C# from the YAML sheets, and
 `--check` verifies the committed output without writing.
 
 ```sh
-.venv/bin/python tools/gen_roster_cards.py           # generate all profiles
-.venv/bin/python tools/gen_roster_cards.py --check    # verify, no write
+.venv/Scripts/python.exe tools/gen_prototype_cards.py           # generate
+.venv/Scripts/python.exe tools/gen_prototype_cards.py --check   # verify, no write
 ```
 
 Run the lints. `run_lints.py` is the one entry point; the `lints` job in

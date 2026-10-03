@@ -29,8 +29,8 @@ From the repo root with `PYTHONPATH=.` (validate.ps1 pins the same via
 `Invoke-RepoPython`, `klee-mod/build/validate.ps1:274-296`):
 
 ```sh
-PYTHONPATH=. python3 tools/gen_roster_cards.py            # regen all 3 profiles
-PYTHONPATH=. python3 tools/gen_roster_cards.py --check    # CI guard (S6a)
+PYTHONPATH=. python3 tools/gen_prototype_cards.py         # regenerate
+PYTHONPATH=. python3 tools/gen_prototype_cards.py --check # CI guard
 PYTHONPATH=. python3 tools/gen_klee_cards.py --character furina   # one profile
 PYTHONPATH=. python3 tools/lint_generated_structure.py    # L1/L2/L3 on emitted .cs
 PYTHONPATH=. python3 tools/lint_handwritten_parity.py     # handwritten vs sheets (S6)
