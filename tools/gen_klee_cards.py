@@ -3467,11 +3467,6 @@ APPLY_POWERS = {
         "[gold]Hydro[/gold] to it first."),
     "mc_favonian_favor": ("FavonianFavorPower", None,
         "Whenever a reaction happens this turn, gain {X} [gold]Block[/gold]."),
-    "mc_binary_white": ("BinaryFormWhitePower", None,
-        "Enemies take 50% more damage from reactions."),
-    "mc_binary_dark": ("BinaryFormDarkPower", None,
-        "Your [gold]Pyro[/gold] [gold]Attacks[/gold] that react deal {X} more "
-        "damage."),
     # AoE trim, 2026-10-03: Durin, Principle of Purity's three
     # (`Powers/Prototype/PrincipleOfPurity.cs`).
     "mc_purity_strike": ("PurityStrikePower", None,

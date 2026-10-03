@@ -1075,26 +1075,6 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     dmg = (powers.modify_damage_dealt(state.player, base) if powered
            else float(base))
     unamped = dmg                   # EB-57: the pre-amplifier counterfactual
-    # QUARANTINED (C.COMPANION_OVERHAUL). Durin's DARK form: "your Pyro Attacks
-    # that react deal 8 more damage."
-    #
-    # ALL THREE CLAUSES ARE READ HERE AND NOWHERE ELSE. "Pyro" is the element
-    # this hit actually applies -- which is what an override on the Attack
-    # (Bennett's, Razor's, Varka's) can change, so reading `element` rather than
-    # the card's printed element is what keeps those three honest. "Attack" is
-    # `source == "attack"`, the sim's own name for a hit from an Attack card.
-    #
-    # "THAT REACT" IS A FORECAST, not a look back, and it is the same forecast
-    # `resolve_hit` is about to make one line down: a differently-elemented aura
-    # is standing, so the hit will consume it. Forecasting is what lets the 8
-    # land in the ADDITIVE phase, before the amplifier -- which is where the
-    # flat bonuses live in this engine and where the C# twin's
-    # `ModifyDamageAdditive` necessarily puts it, the C# multiplicative phase
-    # being a later hook. A Vaporize therefore amplifies the 8 along with the
-    # rest of the hit, in both engines.
-    if (element == "pyro" and source == "attack"
-            and enemy.aura and enemy.aura != element):
-        dmg += state.player.powers.get("mc_binary_dark", 0)
     # Durin, Principle of Purity / DARK (AoE trim, 2026-10-03): "Your Pyro
     # damage deals 4 more." EVERY Pyro hit she deals -- card, Bomb, Mine,
     # companion volley and the Power's own turn-start hit -- in the additive
@@ -7898,34 +7878,27 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
 
 
 def companion_overhaul_reaction_mult(state: CombatState) -> float:
-    """Durin, Binary Form / WHITE: "enemies take 50% more damage from
-    reactions."
+    """Durin, Principle of Purity / WHITE (AoE trim, 2026-10-03): "Enemies
+    take X% more damage from Elemental Reactions."
 
     THE MULTIPLIER IS ON THE REACTION'S OWN DAMAGE, not on the hit that
-    triggered it, and that is the literal reading of the printed words: a
-    Vaporize that turns a 10 into a 20 has dealt 10 damage AS A REACTION, and
-    White makes that 15 rather than making the whole 20 a 30.
+    triggered it: a Vaporize that turns a 10 into a 20 has dealt 10 damage AS
+    A REACTION, and 50% makes that 15 rather than making the whole 20 a 30.
 
     WHAT IT REACHES, exhaustively, and both engines reach the same two places:
     the AMPLIFIER's contribution (Vaporize and Melt) and the OVERLOAD splash.
     Superconduct, Frozen, Crystallize and Swirl deal no damage of their own,
-    and Electro-Charged applies a dot POWER rather than damage -- multiplying a
-    stack count is not what "more damage" says, so it is left alone. Written
-    down here so the boundary is a decision rather than a consequence of where
-    the code happened to be.
+    and Electro-Charged applies a dot POWER rather than damage, so it is left
+    alone.
 
-    STACKS ARE COPIES and each copy is another 50 percentage points, added
-    rather than compounded: two Durins are +100%, not +125%.
+    The stack IS the percentage (50, 75 upgraded), copies add. TEAM-WIDE as
+    printed: every player's reactions against enemies. The sim seats one
+    player, so the holder's reactions are every player's.
     """
-    n = state.player.powers.get("mc_binary_white", 0)
-    # Durin, Principle of Purity / WHITE (AoE trim, 2026-10-03): the stack IS
-    # the percentage (50, 75 upgraded), copies add. TEAM-WIDE as printed:
-    # every player's reactions against enemies. The sim seats one player, so
-    # the holder's reactions are every player's.
     pct = state.player.powers.get("mc_purity_white", 0)
-    if not n and not pct:
+    if not pct:
         return 1.0
-    return 1.0 + (C.MC_BINARY_WHITE_REACTION_MULT - 1.0) * n + pct / 100.0
+    return 1.0 + pct / 100.0
 
 
 # =============================================================================

@@ -230,8 +230,6 @@ internal static class KleePowerIcons
             KleePck.Path("klee/powers/passion_overload.png"),
         SturmUndDrangPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
         FavonianFavorPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        BinaryFormWhitePower => KleePck.Path("klee/powers/witchs_flame.png"),
-        BinaryFormDarkPower => KleePck.Path("klee/powers/witchs_flame.png"),
         // Durin, Principle of Purity (AoE trim, 2026-10-03): Binary Form's icon.
         PurityStrikePower => KleePck.Path("klee/powers/witchs_flame.png"),
         PurityWhitePower => KleePck.Path("klee/powers/witchs_flame.png"),

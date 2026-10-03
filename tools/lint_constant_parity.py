@@ -219,8 +219,6 @@ MIRRORED: dict[str, object] = {
     # The same arm's SECOND WAVE -- the seven numbers its thirteen new rows
     # hand to a POWER rather than print on a card. Same terms again.
     "CompanionOverhaulLaw.ShowerDamage": C.MC_SHOWER_DMG,
-    "CompanionOverhaulLaw.BinaryWhiteReactionMult":
-        C.MC_BINARY_WHITE_REACTION_MULT,
     "CompanionOverhaulLaw.LightningFangDamage": C.MC_LIGHTNING_FANG_BONUS,
     "CompanionOverhaulLaw.BaronBunnyDamage": C.MC_BARON_BUNNY_DMG,
     "CompanionOverhaulLaw.LightfallBase": C.MC_LIGHTFALL_BASE,
