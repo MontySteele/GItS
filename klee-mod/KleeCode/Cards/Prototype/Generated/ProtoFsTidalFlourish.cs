@@ -97,7 +97,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
             await DamageCmd.Attack((IsUpgraded ? 8m : 5m))
                 .FromCard(this, cardPlay)
                 .TargetingAllOpponents(CombatState!)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .SpawningHitVfxOnEachCreature()
                 .Execute(choiceContext);
         }
@@ -109,7 +109,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
                 await DamageCmd.Attack((IsUpgraded ? 16m : 13m))
                     .FromCard(this, cardPlay)
                     .TargetingAllOpponents(CombatState!)
-                    .WithHitFx("vfx/vfx_attack_slash")
+                    .WithElementHitFx(this)
                     .SpawningHitVfxOnEachCreature()
                     .Execute(choiceContext);
             }

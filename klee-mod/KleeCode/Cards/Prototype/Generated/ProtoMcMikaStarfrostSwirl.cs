@@ -82,7 +82,7 @@ public sealed class ProtoMcMikaStarfrostSwirl : CustomCardModel, IElementalCard,
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
         await PowerCmd.Apply<StarfrostDiscountPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);

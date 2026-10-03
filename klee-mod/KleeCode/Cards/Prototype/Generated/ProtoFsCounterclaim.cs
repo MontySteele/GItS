@@ -68,14 +68,14 @@ public sealed class ProtoFsCounterclaim : CustomCardModel, ICharacterCard
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         if (FurinaStage.FrontHitSinceLastTurn(Owner.Creature))
         {
             await DamageCmd.Attack((IsUpgraded ? 9m : 7m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

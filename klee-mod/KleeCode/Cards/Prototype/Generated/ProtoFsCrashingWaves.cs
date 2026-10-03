@@ -65,7 +65,7 @@ public sealed class ProtoFsCrashingWaves : CustomCardModel, ICharacterCard
             await DamageCmd.Attack((DynamicVars.Damage.BaseValue + (AuraCmd.Find(auraTarget) != null ? 5 : 0)) + aoeVigor.Next())
                 .FromCard(this, cardPlay)
                 .Targeting(auraTarget)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

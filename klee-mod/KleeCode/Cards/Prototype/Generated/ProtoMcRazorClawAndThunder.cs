@@ -83,7 +83,7 @@ public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         if (CompanionOverhaulLedger.For(Owner.Creature).AttacksPlayedThisTurn + 1 == 3)
         {

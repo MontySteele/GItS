@@ -1186,7 +1186,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         await DamageCmd.Attack(damage)
             .FromCard(cardSource, cardPlay)
             .Targeting(target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(cardSource)
             .Execute(choiceContext);
     }
 

@@ -75,7 +75,7 @@ public sealed class ProtoKkWeightOfThePlan : CustomCardModel, IElementalCard, IC
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
     }
 

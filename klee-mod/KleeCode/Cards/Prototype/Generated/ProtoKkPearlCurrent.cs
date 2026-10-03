@@ -102,7 +102,7 @@ public sealed class ProtoKkPearlCurrent : CustomCardModel, IElementalCard, IChar
             .WithHitCount(4)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
     }
 

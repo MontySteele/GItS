@@ -74,14 +74,14 @@ public sealed class ProtoVkShiftingGale : CustomCardModel, IElementalCard, IChar
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         if (VarkaOath.ElementChangedThisTurn(Owner.Creature))
         {
             await DamageCmd.Attack((IsUpgraded ? 8m : 6m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

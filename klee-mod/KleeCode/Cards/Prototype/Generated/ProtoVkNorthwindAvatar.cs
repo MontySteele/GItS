@@ -75,7 +75,7 @@ public sealed class ProtoVkNorthwindAvatar : CustomCardModel, IElementalCard, IC
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         await VarkaCards.AvatarHit(choiceContext, this, cardPlay);
     }

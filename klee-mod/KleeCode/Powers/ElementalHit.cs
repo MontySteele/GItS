@@ -121,6 +121,9 @@ internal static class ElementalHit
         var landed = targetMods
             ? (int)SimDamagePipeline.TargetMods(target, dealt)
             : (int)dealt;
+        // 2026-10-02 (combat visual audit, gap 3): the element's hit effect,
+        // the same one an Attack card of that element draws. Visual only.
+        ElementHitFx.SpawnOn(target, element);
         await CreatureCmd.Damage(
             choiceContext, target, landed,
             ignoreBlock ? ValueProp.Unpowered | ValueProp.Unblockable
@@ -199,6 +202,7 @@ internal static class ElementalHit
         await ReactionEffects.Resolve(
             choiceContext, reaction, target, applier, null, assumedAura);
         var landed = (int)SimDamagePipeline.TargetMods(target, dealt);
+        ElementHitFx.SpawnOn(target, element);
         await CreatureCmd.Damage(
             choiceContext, target, landed, ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);

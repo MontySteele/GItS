@@ -83,7 +83,7 @@ public sealed class ProtoMcAmberFieryRain : CustomCardModel, IElementalCard, ICo
             .WithHitCount(3)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
     }

@@ -229,7 +229,7 @@ public static class VarkaRules
                 await DamageCmd.Attack(damage)
                     .FromCard(card, cardPlay)
                     .Targeting(body)
-                    .WithHitFx("vfx/vfx_attack_slash")
+                    .WithElementHitFx(Element.Anemo)
                     .Execute(choiceContext);
             }
         }

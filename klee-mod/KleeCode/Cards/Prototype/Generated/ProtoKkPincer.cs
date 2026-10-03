@@ -101,7 +101,7 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
             .WithHitCount(2)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
     }
 
