@@ -98,15 +98,16 @@ this tooltip". Built on branch `coop-rulings`:
   that the game prints and hovers. It is not typed into the 17 faces. The
   printed line and every golded [gold]Knight[/gold] on other cards hover the
   same tip: "One of Varka's Companions. Playing one makes its element your
-  current element." One exception the tip does not spell out: Noelle is a
-  Geo Knight, and Geo keeps no Oath, so playing her does not change his
-  element.
+  current element (except Geo)." The exception is Noelle: she is a Geo
+  Knight, and Geo keeps no Oath, so playing her does not change his element.
 - The language pass found one stray form. Knights' Roll Call+ said "a Knight
   you choose" without the gold, so it had no tip; it now golds the word. The
   Order Answers' power badge golded only "Knight" in "Knights"; it now golds
   the whole word. Every other card that names Knights already used
   [gold]Knight[/gold] or [gold]Knights[/gold], and no Varka card uses
   "Companion" to mean a Knight.
+  His three relics that say "starting Knight" (Knight's Commission, Boreas's
+  Fang, Wolf's Gravestone) now gold the word and carry the same tip.
 
 ## 3. Varka's Electro discard cards
 
