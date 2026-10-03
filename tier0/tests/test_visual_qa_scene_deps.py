@@ -144,8 +144,9 @@ def test_combat_scenes_carry_the_four_router_states():
         for states, _ in scene.state_machines().values():
             trees += 1
             assert set(scene_deps.CREATURE_STATES) <= states, path
-    assert trees == 139, (
-        "klee's and furina's combat scenes drive a state machine, and so do "
+    assert trees == 141, (
+        "klee's, furina's, kokomi's and varka's combat scenes drive a state "
+        "machine, and so do "
         "the Bake-Kurage pet's (kokomi/model/bake_kurage.tscn) and the Furina "
         "stage's three performers (furina/model/{usher,chevalmarin,"
         "crabaletta}.tscn, `EB-725`) -- six -- plus the stage's ten guest "

@@ -1,0 +1,52 @@
+character: varka
+source: art/raw/Varka_Portrait.png   # 1376x1776, already cut out
+out_dir: ImageGen/images/varka/model/layers
+file_prefix: varka
+alpha_threshold: 16
+source_pad: [73, 0, 73, 0]
+combat_box: [240, 280]
+master_pad: 4
+combat_pad: 2
+layers:
+  - {id: 1, name: cape,       dilate_priority: 1}
+  - {id: 2, name: coat,       dilate_priority: 2}
+  - {id: 3, name: body,       dilate_priority: 3}
+  - {id: 4, name: greatsword, dilate_priority: 4}
+fences:
+  width: 3
+  lines:
+    - name: cape | high blade underside
+      points: [[60, 553], [120, 549], [200, 534], [280, 519], [360, 506],
+               [440, 495], [462, 491]]
+    - name: cape | left arm, hilt spikes, boot
+      points: [[462, 491], [445, 505], [440, 530], [445, 560], [455, 600], [465, 650],
+               [470, 700], [465, 750], [472, 770], [480, 800], [492, 850],
+               [506, 900], [521, 950], [540, 1000], [552, 1050], [548, 1100],
+               [565, 1150], [575, 1190]]
+    - name: coat | belt and right leg
+      points: [[1010, 455], [975, 445], [945, 440], [920, 442], [935, 500],
+               [945, 560], [960, 610], [985, 640], [998, 680], [1000, 720],
+               [990, 770], [995, 820], [1008, 870], [1015, 920], [1015, 960],
+               [1003, 1010], [990, 1060], [978, 1100], [1020, 1122]]
+    - name: greatsword | hilt (cut across the blade) and right side
+      points: [[690, 1010], [730, 988], [771, 966], [785, 1010], [795, 1040],
+               [810, 1065]]
+    - name: greatsword | left leg
+      points: [[690, 1010], [700, 1040], [715, 1080], [728, 1110],
+               [742, 1140], [752, 1165], [762, 1190], [775, 1215],
+               [787, 1245]]
+seeds:
+  - {layer: cape,       at: [360, 660]}
+  - {layer: cape,       at: [531, 1250]}
+  - {layer: coat,       at: [1250, 900]}
+  - {layer: greatsword, at: [900, 1350]}
+  - {layer: body,       at: [760, 700]}
+unreached_layer: body
+satellites:
+  low_saturation_layer: body
+  saturation_threshold: 35
+  other_layer: body
+fill_behind:
+  - {layer: cape, radius: 30, covered_by: [body, greatsword]}
+  - {layer: coat, radius: 30, covered_by: [body, greatsword]}
+  - {layer: body, radius: 16, covered_by: [greatsword]}

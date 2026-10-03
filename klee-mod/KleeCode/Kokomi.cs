@@ -131,25 +131,29 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         KleePck.Path("kokomi/model/merchant_character.tscn");
 
     /// <summary>
-    /// Combat model. Klee and Furina run a scene-first chain against their
-    /// convention combat.tscn; Kokomi has no rig yet, so this is the static
-    /// half of that chain and nothing else.
-    ///
-    /// Deliberately NOT written as "try the scene, then fall back". A branch
-    /// that probes a path no build step produces is dead on every run, and a
-    /// dead branch reads as a working feature -- the failure mode this file's
-    /// own logging discipline is aimed at. When her rig ships, the scene
-    /// branch comes back with it, together with the scene.
-    ///
-    /// A null return is correct and safe here: the base scene lookup takes
-    /// over, so she is visible and playable while Track D is outstanding.
+    /// Combat model, scene-first like Klee and Furina: the layer-cut rig at
+    /// kokomi/model/combat.tscn (fences in tools/combat_layer_fences/kokomi.yaml),
+    /// which carries %Facing and %AnimationTree, so CreatureAnimationRouter,
+    /// the death seam and the facing fix all apply with no code of hers.
+    /// Falls back to the static 240x280 combat_model.png when the pck predates
+    /// the rig; a null return hands the game its own scene lookup.
     /// </summary>
     public override NCreatureVisuals? CreateCustomVisuals()
     {
-        MegaCrit.Sts2.Core.Logging.Log.Info(
-            $"[{KleeMod.ModId}] Kokomi has no convention combat scene yet; "
-            + "using static combat_model.png (expected until her art pass "
-            + "lands -- see KleeSceneTelemetry's EXPECTED MISSING list)");
+        string? scenePath = KleePck.Path("kokomi/model/combat.tscn");
+        if (scenePath != null)
+        {
+            var visuals = NodeFactory<NCreatureVisuals>.CreateFromScene(scenePath);
+            MegaCrit.Sts2.Core.Logging.Log.Info(
+                $"[{KleeMod.ModId}] combat visuals from convention scene "
+                + $"{scenePath}: {visuals.GetType().Name}");
+            return visuals;
+        }
+
+        MegaCrit.Sts2.Core.Logging.Log.Warn(
+            $"[{KleeMod.ModId}] Kokomi convention combat scene missing; falling "
+            + "back to static combat_model.png (pck stale? rebuild with "
+            + "tools/build_pck.ps1)");
         var path = KleePck.Path("kokomi/model/combat_model.png");
         return path == null
             ? null

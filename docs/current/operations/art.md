@@ -8,7 +8,7 @@ python3 tools/art_fetch.py && python3 tools/art_process.py [--apply-picks art/pi
 python3 tools/art_coverage.py            # CI runs it WITHOUT --strict (empty bill on a runner)
 python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 .venv/Scripts/python tools/cut_combat_layers.py klee [--check]
-.venv/Scripts/python tools/cut_combat_layers.py --all [--check|--verify]   # 8 configs
+.venv/Scripts/python tools/cut_combat_layers.py --all [--check|--verify]   # 10 configs
 .venv/Scripts/python tools/gen_furina_stills.py    # and gen_kokomi_stills.py
 .venv/Scripts/python tools/gen_char_icon_outlines.py [--check]   # all three outline halos
 .venv/Scripts/python tools/gen_mod_image.py [--check]      # Mods-screen badge, EB-161
@@ -23,7 +23,13 @@ up at their manifest offsets and diffs against the source, and GATES on that
 for a config declaring `recompose_exact: true` — which the six do and configs
 #1/#2 never claimed. `--art-root <checkout>` lets a worktree cut against the
 main tree's `ImageGen/`, which is the only supported way to reach it (never
-link an asset tree into a worktree).
+link an asset tree into a worktree). Kokomi's and Varka's configs (#9/#10)
+prepare the source before fencing with `source_crop`, `source_scale` and
+`source_pad` (Kokomi's 4900x5700 master is scaled to a quarter; Varka's is
+padded to the 240x280 aspect so the box resize does not stretch him); fence
+coordinates are in the prepared canvas. Their rigs are
+`pck-src/{kokomi,varka}/model/combat.tscn`, which carry the optional
+`cast`, `power` and `idle_low` states beside the four the router requires.
 
 **The edge lint (L13, `art_lint.py --edges`).** `cover` is the wrong default for
 a figure. It scales the trimmed subject to FILL the plate and crops the

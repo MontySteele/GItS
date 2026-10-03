@@ -40,19 +40,16 @@ internal static class KleeSceneTelemetry
         // base game's ironclad counter, so a miss here is Furina-only and
         // otherwise silent -- she just keeps wearing the red orb.
         "furina/ui/energy_counter.tscn",
-        // Kokomi. combat.tscn is EXPECTED MISSING until her art pass lands --
-        // she runs on the combat_visuals.tscn fallback, which the pck builder
-        // fills from Klee. Listed anyway, because "expected missing" and
-        // "silently missing" are the same thing at 2am and only one of them
-        // says so in the log.
+        // Kokomi: her layer-cut rig (combat.tscn) since 2026-10-02.
         "kokomi/model/combat.tscn",
         "kokomi/model/combat_visuals.tscn",
         "kokomi/model/rest_character.tscn",
         "kokomi/model/merchant_character.tscn",
         "kokomi/ui/character_icon.tscn",
         "kokomi/ui/char_select_bg_kokomi.tscn",
-        // Varka (prototype batch one): the build_pck.ps1-authored shapes
-        // Kokomi runs on; he has no rig.
+        // Varka: his layer-cut rig (combat.tscn) since 2026-10-02, plus the
+        // build_pck.ps1-authored rest/merchant/select shapes.
+        "varka/model/combat.tscn",
         "varka/model/combat_visuals.tscn",
         "varka/model/rest_character.tscn",
         "varka/model/merchant_character.tscn",
@@ -83,6 +80,10 @@ internal static class KleeSceneTelemetry
         ("furina/model/combat.tscn", "Facing"),
         ("klee/model/combat.tscn", "AnimationTree"),
         ("furina/model/combat.tscn", "AnimationTree"),
+        ("kokomi/model/combat.tscn", "Facing"),
+        ("varka/model/combat.tscn", "Facing"),
+        ("kokomi/model/combat.tscn", "AnimationTree"),
+        ("varka/model/combat.tscn", "AnimationTree"),
         ("furina/ui/salon_stage.tscn", "RibbonLabel"),
         ("shared/gauge.tscn", "ValueLabel"),
         // Without ChipLabel1 the docket renders slots with no numbers, which

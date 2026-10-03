@@ -100,12 +100,29 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
         KleePck.Path("varka/model/merchant_character.tscn");
 
     /// <summary>
-    /// The static combat model (240x280, bottom-anchored), Kokomi's half of
-    /// the chain: he has no rig. A null return hands the game its own scene
-    /// lookup, so he is visible and playable with no file at all.
+    /// Combat model, scene-first like Klee and Furina: the layer-cut rig at
+    /// varka/model/combat.tscn (fences in tools/combat_layer_fences/varka.yaml),
+    /// which carries %Facing and %AnimationTree, so CreatureAnimationRouter,
+    /// the death seam and the facing fix all apply. Falls back to the static
+    /// 240x280 combat_model.png when the pck predates the rig; a null return
+    /// hands the game its own scene lookup.
     /// </summary>
     public override NCreatureVisuals? CreateCustomVisuals()
     {
+        string? scenePath = KleePck.Path("varka/model/combat.tscn");
+        if (scenePath != null)
+        {
+            var visuals = NodeFactory<NCreatureVisuals>.CreateFromScene(scenePath);
+            MegaCrit.Sts2.Core.Logging.Log.Info(
+                $"[{KleeMod.ModId}] combat visuals from convention scene "
+                + $"{scenePath}: {visuals.GetType().Name}");
+            return visuals;
+        }
+
+        MegaCrit.Sts2.Core.Logging.Log.Warn(
+            $"[{KleeMod.ModId}] Varka convention combat scene missing; falling "
+            + "back to static combat_model.png (pck stale? rebuild with "
+            + "tools/build_pck.ps1)");
         var path = KleePck.Path("varka/model/combat_model.png");
         return path == null
             ? null

@@ -1,0 +1,48 @@
+character: kokomi
+source: ImageGen/images/kokomi/model/kokomi_portrait_cutout.png   # 4900x5700
+out_dir: ImageGen/images/kokomi/model/layers
+file_prefix: kokomi
+alpha_threshold: 16
+source_crop: [200, 80, 4750, 5530]
+source_scale: 0.25
+source_pad: [15, 0, 14, 0]
+combat_box: [240, 280]
+master_pad: 4
+combat_pad: 2
+layers:
+  - {id: 1, name: hair_back, dilate_priority: 1}
+  - {id: 2, name: tail,      dilate_priority: 2}
+  - {id: 3, name: body,      dilate_priority: 4}
+  - {id: 4, name: fish,      dilate_priority: 3}
+  - {id: 5, name: hand,      dilate_priority: 5}
+fences:
+  width: 3
+  lines:
+    - name: hair_back | sleeve and hand
+      points: [[20, 665], [60, 655], [100, 640], [118, 650], [125, 690],
+               [150, 702], [200, 702], [240, 700], [280, 697], [320, 692],
+               [365, 700]]
+    - name: tail (upper fin) | thigh
+      points: [[815, 725], [797, 765], [800, 800], [805, 840], [806, 880],
+               [800, 920], [795, 950], [790, 975], [785, 1000]]
+    - name: tail (lower fin) | shin
+      points: [[785, 1000], [765, 1035], [757, 1050], [742, 1085],
+               [726, 1120], [710, 1155], [697, 1185], [690, 1215]]
+    - name: hand | sleeve (forearm cut at the cuff)
+      points: [[802, 312], [796, 330], [793, 348], [800, 362], [818, 368],
+               [836, 366]]
+seeds:
+  - {layer: hand,      at: [870, 330]}
+  - {layer: hair_back, at: [200, 850]}
+  - {layer: tail,      at: [950, 800]}
+  - {layer: tail,      at: [900, 1120]}
+  - {layer: body,      at: [600, 500]}
+unreached_layer: body
+satellites:
+  low_saturation_layer: fish
+  saturation_threshold: 35
+  other_layer: fish
+fill_behind:
+  - {layer: hair_back, radius: 24, covered_by: [body]}
+  - {layer: tail,      radius: 24, covered_by: [body]}
+  - {layer: body,      radius: 14, covered_by: [hand]}
