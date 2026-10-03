@@ -262,11 +262,14 @@ def test_the_substitution_trick_cannot_be_generated(amount):
     assert reason and "must be a positive literal int" in reason
 
 
-def test_modes_that_would_aim_differently_block():
+def test_an_aimed_mode_beside_an_all_enemies_mode_aims_the_card():
+    """AoE trim, 2026-10-03 (Durin: Binary Form). The one legal mixture: the
+    card declares AnyEnemy and the all-enemies mode never reads the aim. (It
+    was refused before; no other pair of mode TargetTypes is reachable, so the
+    refusal stays only as a guard.)"""
     away = {"label": "Hit them all",
             "effects": [{"op": "damage", "amount": 3, "target": "all_enemies"}]}
-    reason = gen.blocked_reason(modal_card(HIT, away), gen.FURINA_PROFILE)
-    assert reason and "disagree on TargetType" in reason
+    assert gen.blocked_reason(modal_card(HIT, away), gen.FURINA_PROFILE) is None
 
 
 def test_two_modals_on_one_card_block():

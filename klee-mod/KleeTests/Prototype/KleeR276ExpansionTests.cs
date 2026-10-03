@@ -260,23 +260,22 @@ public class KleeR276ExpansionTests
     }
 
     [Fact]
-    public void Team_effort_widens_on_a_companion_play_and_hits_the_target_only()
+    public void Team_effort_sets_off_the_target_then_hits_harder_after_a_companion()
     {
-        // STRUCTURAL: the card reads the ledger's Companion count; the wide
-        // arm Sets off every enemy (one at a time) and THEN deals the card's
-        // own hit to the aimed body.
-        var play = Play("ProtoKoTeamEffort");
-        Assert.Contains("KleeOverhaulLedger.get_CompanionPlayedThisTurn", play);
-        Assert.Contains("ProtoBombPower.SetOffAllThenHit", play);
-        Assert.Contains("ProtoBombPower.SetOffAimed", play);
-        var wide = Il.CallSequence(Il.Method("ProtoBombPower", "SetOffAllThenHit"))
+        // AoE trim (2026-10-03): "Set off. Deal 6 Pyro damage, 6 more if you
+        // played a Companion card this turn." STRUCTURAL: the aimed Set off
+        // first, then ONE hit whose number the ledger's Companion count grows;
+        // nothing widens to ALL any more.
+        var play = Il.CallSequence(Il.Method("ProtoKoTeamEffort", "OnPlay"))
             .ToList();
-        Assert.True(wide.IndexOf("KleeOverhaulLedger.NoteSetOffCardPlayed")
-                    < wide.IndexOf("ProtoBombPower.SetOff"));
-        Assert.True(wide.IndexOf("ProtoBombPower.SetOff")
-                    < wide.IndexOf("ProtoBombPower.DealCardDamage"));
+        Assert.Contains("KleeOverhaulLedger.get_CompanionPlayedThisTurn", play);
+        Assert.DoesNotContain("ProtoBombPower.SetOffAllThenHit", play);
+        var setOff = play.IndexOf("ProtoBombPower.SetOffAimed");
+        var hit = play.FindIndex(c => c.StartsWith("DamageCmd.Attack"));
+        Assert.True(setOff >= 0 && hit > setOff);
         Assert.IsAssignableFrom<ISetOffCard>(new ProtoKoTeamEffort());
         Assert.Equal(9m, Upgraded<ProtoKoTeamEffort>().DynamicVars.Damage.BaseValue);
+        Assert.Contains("6 more", Face(new ProtoKoTeamEffort()));
     }
 
     [Fact]

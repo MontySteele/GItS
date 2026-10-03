@@ -364,13 +364,22 @@ public static class CompanionOverhaulReactions
     /// than compounded: two Durins are +100%, not +125%. Sim twin:
     /// `effects.companion_overhaul_reaction_mult`.
     /// </summary>
+    ///
+    /// DURIN, PRINCIPLE OF PURITY / WHITE (AoE trim, 2026-10-03) is the TEAM
+    /// form: its percentage is summed over EVERY player, so any player's
+    /// reaction against an enemy is boosted while any player holds it
+    /// (<see cref="PurityWhitePower.TeamPercent"/>). Added to the copies above,
+    /// never compounded. A reaction an ENEMY causes is not boosted. Sim twin:
+    /// the `mc_purity_white` read in the same function.
     public static decimal DamageMultiplier(Creature? dealer)
     {
-        if (dealer == null) return 1m;
+        if (dealer == null || dealer.IsEnemy) return 1m;
         var stacks = dealer.Powers.OfType<BinaryFormWhitePower>()
             .Sum(p => (int)p.Amount);
-        if (stacks <= 0) return 1m;
-        return 1m + (CompanionOverhaulLaw.BinaryWhiteReactionMult - 1m) * stacks;
+        var percent = PurityWhitePower.TeamPercent(dealer);
+        if (stacks <= 0 && percent <= 0) return 1m;
+        return 1m + (CompanionOverhaulLaw.BinaryWhiteReactionMult - 1m) * stacks
+             + percent / 100m;
     }
 }
 

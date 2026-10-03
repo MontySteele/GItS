@@ -111,13 +111,14 @@ public class KleeStatusPackageTests
                                 Upgraded<ProtoKoItWasntMe>().DynamicVars.Block.BaseValue));
         Assert.Equal((2m, 3m), (new ProtoKoLisasTreats().DynamicVars["Energy"].BaseValue,
                                 Upgraded<ProtoKoLisasTreats>().DynamicVars["Energy"].BaseValue));
-        Assert.Equal((22m, 28m), (new ProtoKoRedKnight().DynamicVars.Damage.BaseValue,
+        // AoE trim (2026-10-03): 34 to one enemy, Block on a status drawn.
+        Assert.Equal((34m, 40m), (new ProtoKoRedKnight().DynamicVars.Damage.BaseValue,
                                   Upgraded<ProtoKoRedKnight>().DynamicVars.Damage.BaseValue));
         Assert.Equal((5m, 7m), (new ProtoKoFindersKeepers().DynamicVars["PowerAmount"].BaseValue,
                                 Upgraded<ProtoKoFindersKeepers>().DynamicVars["PowerAmount"].BaseValue));
         Assert.Equal((6m, 8m), (new ProtoKoKleeCanExplain().DynamicVars.Block.BaseValue,
                                 Upgraded<ProtoKoKleeCanExplain>().DynamicVars.Block.BaseValue));
-        Assert.Equal((5m, 7m), (new ProtoKoDamageReport().DynamicVars["PowerAmount"].BaseValue,
+        Assert.Equal((4m, 6m), (new ProtoKoDamageReport().DynamicVars["PowerAmount"].BaseValue,
                                 Upgraded<ProtoKoDamageReport>().DynamicVars["PowerAmount"].BaseValue));
         Assert.Equal((6m, 8m), (new ProtoMcAlbedoDustOfPurification().DynamicVars["Grow"].BaseValue,
                                 Upgraded<ProtoMcAlbedoDustOfPurification>().DynamicVars["Grow"].BaseValue));
@@ -173,8 +174,9 @@ public class KleeStatusPackageTests
         Assert.Contains(dust, c => c.Contains("ProtoBombPower.GrowLargest"));
         Assert.Contains(Seq("FindersKeepersPower", "AfterCardPlayed"),
                         c => c.Contains("ProtoBombPower.PlaceOnRandom"));
-        Assert.Contains(Seq("DamageReportPower", "AfterCardDrawn"),
-                        c => c.Contains("ElementalHit.DealUnelemented"));
+        var report = Seq("DamageReportPower", "AfterCardDrawn");
+        Assert.Contains(report, c => c.Contains("CreatureCmd.GainBlock"));
+        Assert.DoesNotContain(report, c => c.Contains("ElementalHit"));
     }
 
     [Fact]

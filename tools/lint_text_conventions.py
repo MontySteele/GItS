@@ -77,7 +77,9 @@ IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi|fr|fs)_")
 
 # --- the exceptions: id -> reason. Rot semantics, see the module doc. ----
 EXCEPTIONS = {
-    "proto_mc_durin_binary_form": (
+    # Durin's split (AoE trim, 2026-10-03): the two-mode Power is Principle
+    # of Purity now; Binary Form, the Attack, is under its ceiling.
+    "proto_mc_durin_principle_of_purity": (
         "a two-mode Power must print both modes on the reward screen, where "
         "the choose-a-card screen's mode faces are not yet visible; the base "
         "game has no static modal card to measure against"),

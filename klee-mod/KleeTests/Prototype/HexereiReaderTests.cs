@@ -146,12 +146,14 @@ public class HexereiReaderTests
     {
         // STRUCTURAL, and labelled: `ProtoBombPower.Place` applies a power, so
         // the placement itself is outside the headless boundary. What is
-        // checkable is the SHAPE the ruling asks for -- the ledger decides,
-        // both arms exist, and both read the same var.
+        // checkable is the SHAPE the ruling asks for. AoE trim (2026-10-03):
+        // "Place a Bomb 5 on an enemy, 8 if you played a Companion card this
+        // turn" -- ONE aimed placement whose size the ledger grows, never ALL.
         var calls = Il.Calls(Il.Method("ProtoKoCovenErrand", "OnPlay"));
         Assert.Contains("KleeOverhaulLedger.get_CompanionPlayedThisTurn", calls);
-        Assert.Contains("ProtoBombPower.PlaceOnAll", calls);
+        Assert.DoesNotContain("ProtoBombPower.PlaceOnAll", calls);
         Assert.Contains("ProtoBombPower.Place", calls);
+        Assert.Contains("{IfUpgraded:show:10|8}", Face(new ProtoKoCovenErrand()));
         Assert.Contains("DynamicVarSet.get_Item", calls);
         // It PLACES; it does not detonate (rule 7).
         Assert.DoesNotContain("ProtoBombPower.SetOffAimed", calls);

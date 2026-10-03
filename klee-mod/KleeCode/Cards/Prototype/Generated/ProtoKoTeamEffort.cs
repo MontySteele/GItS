@@ -48,7 +48,7 @@ public sealed class ProtoKoTeamEffort : CustomCardModel, IElementalCard, ISetOff
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Team Effort"),
-        ("description", "[gold]Set off[/gold] the enemy, or ALL enemies if you played a [gold]Companion[/gold] card this turn. Deal {Damage:diff()} [gold]Pyro[/gold] damage."),
+        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} [gold]Pyro[/gold] damage, 6 more if you played a [gold]Companion[/gold] card this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -67,10 +67,12 @@ public sealed class ProtoKoTeamEffort : CustomCardModel, IElementalCard, ISetOff
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        if (KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0)
-            await ProtoBombPower.SetOffAllThenHit(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue);
-        else
-            await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue);
+        await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, 0);
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue + (KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0 ? 6 : 0))
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()

@@ -162,16 +162,13 @@ public class KleeSeatDefects20260926Tests
     // ==================================================================
 
     [Fact]
-    public void Coven_errand_answers_all_enemies_while_its_predicate_holds()
+    public void Coven_errand_always_aims_since_the_aoe_trim()
     {
-        var target = typeof(ProtoKoCovenErrand).GetProperty(
-            "TargetType", All | BindingFlags.DeclaredOnly);
-        Assert.NotNull(target);
-        Assert.Contains("KleeOverhaulLedger.get_CompanionPlayedThisTurn",
-                        Il.Calls(target!.GetGetMethod(true)!));
-
-        // A canonical copy -- a reward shelf, the compendium -- is the base
-        // answer: it aims, because its first arm does.
+        // AoE trim (2026-10-03): Coven Errand places ONE Bomb on an enemy
+        // either way, so it no longer answers AllEnemies while its predicate
+        // holds -- the override is gone and the card always aims.
+        Assert.Null(typeof(ProtoKoCovenErrand).GetProperty(
+            "TargetType", All | BindingFlags.DeclaredOnly));
         Assert.Equal(TargetType.AnyEnemy, new ProtoKoCovenErrand().TargetType);
 
         // Team Effort widens its Set off too, but its HIT still lands on the

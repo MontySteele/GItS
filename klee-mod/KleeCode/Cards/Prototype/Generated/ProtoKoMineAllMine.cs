@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoMineAllMine : CustomCardModel, IElementalCard
+public sealed class ProtoKoMineAllMine : CustomCardModel, IElementalCard, ISetOffCard
 {
     /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>
     public Element Element => Element.Pyro;
@@ -41,14 +41,14 @@ public sealed class ProtoKoMineAllMine : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForMine(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
+        ArmKeywordTips.ForMine(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_mine_all_mine");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mine, All Mine!"),
-        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to each enemy with a [gold]Mine[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage. [gold]Set off[/gold] the [gold]Mines[/gold] on that enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -60,13 +60,19 @@ public sealed class ProtoKoMineAllMine : CustomCardModel, IElementalCard
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKoMineAllMine()
-        : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AllEnemies, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await ProtoBombPower.HitMined(choiceContext, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
+        await ProtoBombPower.SetOffMinesAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, 0);
     }
 
     protected override void OnUpgrade()

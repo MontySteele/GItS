@@ -276,6 +276,7 @@
     "proto_mc_diona_shaken_not_purred",
     "proto_mc_diona_signature_mix",
     "proto_mc_durin_binary_form",
+    "proto_mc_durin_principle_of_purity",
     "proto_mc_eula_glacial_illumination",
     "proto_mc_fischl_nightrider",
     "proto_mc_fischl_oz",
@@ -708,6 +709,7 @@
     "proto_mc_diona_shaken_not_purred": "klee",
     "proto_mc_diona_signature_mix": "klee",
     "proto_mc_durin_binary_form": "klee",
+    "proto_mc_durin_principle_of_purity": "klee",
     "proto_mc_eula_glacial_illumination": "klee",
     "proto_mc_fischl_nightrider": "klee",
     "proto_mc_fischl_oz": "klee",
@@ -901,6 +903,10 @@
     "proto_mc_durin_binary_form": [
       "ProtoMcDurinBinaryFormModeA",
       "ProtoMcDurinBinaryFormModeB"
+    ],
+    "proto_mc_durin_principle_of_purity": [
+      "ProtoMcDurinPrincipleOfPurityModeA",
+      "ProtoMcDurinPrincipleOfPurityModeB"
     ]
   },
   "upgrades": {
@@ -1763,7 +1769,17 @@
       "power_amount": 1
     },
     "proto_mc_durin_binary_form": {
-      "damage": 3
+      "mode_damage": [
+        2,
+        1
+      ]
+    },
+    "proto_mc_durin_principle_of_purity": {
+      "power_amount": 2,
+      "mode_power_amount": [
+        25,
+        2
+      ]
     },
     "proto_mc_eula_glacial_illumination": {
       "power_amount": 1
@@ -1998,6 +2014,7 @@
       }
     },
     "proto_mi_yoimiya_aurous_blaze": {
+      "damage": 3,
       "power_amount": 1
     },
     "proto_vk_absolute_zero": {

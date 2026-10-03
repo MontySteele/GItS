@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -31,8 +32,11 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiYoimiyaAurousBlaze : CustomCardModel, ICompanionCard
+public sealed class ProtoMiYoimiyaAurousBlaze : CustomCardModel, IElementalCard, ICompanionCard
 {
+    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
+    public Element Element => Element.Pyro;
+
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
@@ -45,19 +49,25 @@ public sealed class ProtoMiYoimiyaAurousBlaze : CustomCardModel, ICompanionCard
     public string? Nation => "inazuma";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Exhaust };
+        new[] { CardKeyword.Exhaust, KleeKeywords.AppliesPyro };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_yoimiya_aurous_blaze");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yoimiya — Aurous Blaze"),
-        ("description", "For {PowerAmount:diff()} turns, whenever the enemy takes damage from a non-Attack card, deal 6 [gold]Pyro[/gold] damage to ALL enemies."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage. For {PowerAmount:diff()} turns, whenever you play a Skill, deal 3 [gold]Pyro[/gold] damage to that enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new CalculationBaseVar(6m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
             new DynamicVar("PowerAmount", 2m)
         };
 
@@ -71,11 +81,18 @@ public sealed class ProtoMiYoimiyaAurousBlaze : CustomCardModel, ICompanionCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
         await PowerCmd.Apply<AurousBlazePower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        SummonDamage.Note<AurousBlazePower>(cardPlay.Target, this, 3);
     }
 
     protected override void OnUpgrade()
     {
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
         DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

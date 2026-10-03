@@ -1021,7 +1021,7 @@
 # White is the team form (every player's reactions); Dark is all the
 # holder's Pyro damage, Bombs and Mines included.
 - {id: proto_mc_durin_principle_of_purity, name: "Durin — Principle of Purity", character: klee,
-   authored_by: [claude],
+   authored_by: [claude], art_of: proto_mc_durin_binary_form,
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
    description: "At the start of your turn, deal 4 [gold]Pyro[/gold] damage to a random enemy. Choose one for the combat. [gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: Your [gold]Pyro[/gold] damage deals 4 more.",

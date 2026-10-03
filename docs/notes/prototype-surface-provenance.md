@@ -5835,10 +5835,23 @@ game until a deploy.
 
 `review/active/aoe-trim-2026-10-03.md`, all picks ruled 2026-10-03. Klee,
 Furina and Varka come down to the base five's AoE range (10 AoE cards or
-fewer, 7 direct or fewer); Kokomi keeps her delayed AoE. Built in the SIM
-FIRST (tier0 and these rows); the C# twin waits until the sim reads well, so
-the generated cards are stale against these rows until it lands. Varka's two
+fewer, 7 direct or fewer); Kokomi keeps her delayed AoE. Built in the sim
+first, then in C# once the sim read well (the same branch). Varka's two
 (sec.4) are another branch's.
+
+The C# side: codegen learned `bonus_if` on `damage` and `plant_bomb`, the
+`enemies_with_bomb` count (`ProtoBombPower.EnemiesHoldingChargeFrom`),
+`set_off` `mines_only` (`ProtoBombPower.SetOffMinesAimed` / `SetOffMines`), a
+literal `times` inside a mode, the per-mode upgrade keys (play-time
+`IsUpgraded` reads; the face swaps with `{IfUpgraded:show:...}`), and one
+legal mode mixture: an all-enemies mode beside an aimed one aims the card
+(Binary Form). New powers in `Powers/Prototype/PrincipleOfPurity.cs`; White
+is summed over every player in `CompanionOverhaulReactions.DamageMultiplier`,
+which feeds the amplifier and the Overload and Swirl splashes; Dark adds in
+`ElementalHit.Deal` (Bombs, Mines, volleys) and in `ModifyDamageAdditive`
+(cards). `DamageReportPower` gains Block; `AurousBlazePower` takes the card's
+banked 3 (`ISummonDamagePower`) and answers its marker's Skills. Pins:
+`KleeTests/Prototype/AoeTrimTests.cs`.
 
 Klee (sec.2), AoE moved into Block and single-target burst:
 
