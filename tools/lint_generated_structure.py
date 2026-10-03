@@ -220,7 +220,7 @@ def _effects(card: dict) -> list[dict]:
 #: R276. The Klee arm's per-hit damage riders: the hit count is an ARGUMENT
 #: to one `ProtoBombPower` call that loops the hits itself (each hit has its
 #: own rider), so the marker to look for is that call, not `WithHitCount`.
-_DAMAGE_RIDERS = ("plant_on_hit", "grow_on_hit")
+_DAMAGE_RIDERS = ("plant_on_hit",)
 
 
 def _has_literal_times(card: dict) -> bool:
@@ -294,7 +294,7 @@ MECHANICS = (
     Mechanic(
         name="rider_times",
         applies=_has_rider_times,
-        markers=("ProtoBombPower.HitRandomAndPlant", "ProtoBombPower.HitAndGrow"),
+        markers=("ProtoBombPower.HitRandomAndPlant",),
         why=(
             "R276: a per-hit rider's hit count is the argument to the one "
             "ProtoBombPower call that loops the hits; lose the call and the "

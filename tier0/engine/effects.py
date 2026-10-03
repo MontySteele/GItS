@@ -1001,16 +1001,9 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
                          element: Optional[str] = None,
                          source: str = "card",
                          ignore_block: bool = False,
-                         powered: bool = True,
-                         vulnerable: bool = True) -> float:
+                         powered: bool = True) -> float:
     """Full damage pipeline: strength/weak -> reaction amp -> vulnerable ->
     block -> hp. Returns damage actually dealt to HP (for metrics).
-
-    `vulnerable` is QUARANTINED (C.KLEE_OVERHAUL) and has one caller, Big
-    Bounce's overflow hit (R276, `klee_overhaul.bounce_overflow`): its damage
-    already paid the SOURCE enemy's Vulnerable, so False skips the target's
-    Vulnerable multiplier and nothing else. C# twin:
-    `ElementalHit.Deal(..., targetMods: false)`.
 
     `ignore_block` is QUARANTINED (C.COMPANION_OVERHAUL) and has exactly one
     caller: Chiori's Tamoto, whose printed text is "deal 6 Geo damage to a
@@ -1089,8 +1082,7 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # `source` names what dealt it; "card" and "attack" are the two card
     # sources, everything else (bombs, summon pulses, shatter, splash) is
     # the base game's `cardSource == null` case.
-    dmg = powers.modify_damage_taken(enemy, dmg, from_card=from_card,
-                                     vulnerable=vulnerable)
+    dmg = powers.modify_damage_taken(enemy, dmg, from_card=from_card)
     # Slow (§10.9 promotion): +N% damage from Attacks per card played this
     # turn BEFORE this one. `EB-532`: the live read (`EB-525`, Furina r12
     # lane 1) is that the attacking card does not count itself -- "it counts
@@ -1158,8 +1150,7 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         # landed. An amp whose whole contribution was overkill (or eaten by
         # block) therefore reports 0, which is the same clamp `_splash` and
         # the `damage` emit already use.
-        un = powers.modify_damage_taken(enemy, unamped, from_card=from_card,
-                                        vulnerable=vulnerable)
+        un = powers.modify_damage_taken(enemy, unamped, from_card=from_card)
         if slow_mult != 1.0:
             un *= slow_mult
         un = int(un)
@@ -5278,17 +5269,6 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
         # (`ProtoBombPower.SetOffLargestAimed`).
         for enemy in _pick_targets(state, spec, allow_dead=True):
             klee_overhaul.set_off_largest(state, enemy, card, badge=badge)
-            hit(enemy)
-        return
-
-    if fx.get("overflow") == "bounce":
-        # R276, BIG BOUNCE: the aimed Set off with its overkill tallied and
-        # carried to a random OTHER enemy as one plain Pyro hit, before the
-        # card's own hit (`ProtoBombPower.SetOffAimedBouncing`).
-        for enemy in _pick_targets(state, spec, allow_dead=True):
-            overflow: list = []
-            klee_overhaul.set_off(state, enemy, card, overflow, badge=badge)
-            klee_overhaul.bounce_overflow(state, enemy, sum(overflow))
             hit(enemy)
         return
 

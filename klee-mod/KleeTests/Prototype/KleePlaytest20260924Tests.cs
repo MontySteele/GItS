@@ -187,7 +187,7 @@ public class KleePlaytest20260924Tests
         // ALL enemies, Rapid Fire's rolls) shares the one doubling.
         foreach (var entry in new[]
                  {
-                     "SetOffAimed", "SetOffAimedBouncing", "SetOffAll",
+                     "SetOffAimed", "SetOffAll",
                      "SetOffRandom", "SetOffAllThenHit", "SetOffLargestAimed",
                  })
         {

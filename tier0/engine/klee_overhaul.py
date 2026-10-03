@@ -428,8 +428,7 @@ def peek_multiplier(state: CombatState) -> int:
 # ---------------------------------------------------------------------------
 
 def set_off(state: CombatState, enemy: Optional[Enemy],
-            card: Optional[Card] = None,
-            overflow: Optional[list] = None, badge: int = 1) -> int:
+            card: Optional[Card] = None, badge: int = 1) -> int:
     """RULE 2. Every Bomb on `enemy` goes off, ONE AT A TIME, each a Pyro hit
     for its own size. Returns how many charges went off. `SetOff`'s twin.
 
@@ -460,9 +459,6 @@ def set_off(state: CombatState, enemy: Optional[Enemy],
     ALL is one take per enemy, each with its own aura. C# twin: the same loop
     in `ProtoBombPower.SetOff`.
 
-    `overflow` is R276's (Big Bounce): a list each killing explosion appends
-    its damage past the kill to. None everywhere else, which is byte-identical.
-
     `badge` is Boom Badge's factor (`take_boom_badge`), taken once per Set off
     clause by the caller and handed to every enemy that clause reaches. It
     MULTIPLIES The Big One's armed multiplier: x4 and x2 meet at x8.
@@ -484,7 +480,7 @@ def set_off(state: CombatState, enemy: Optional[Enemy],
             break
         if pact_aura:
             _pact_restore(state, enemy, pact_aura)
-        consumed = _explode(state, enemy, charge, multiplier, overflow)
+        consumed = _explode(state, enemy, charge, multiplier)
         if pact and not pact_aura:
             pact_aura = consumed
         exploded += 1
@@ -513,8 +509,7 @@ def _pact_restore(state: CombatState, enemy: Enemy, aura: str) -> None:
 
 
 def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
-             multiplier: int,
-             overflow: Optional[list] = None) -> Optional[str]:
+             multiplier: int) -> Optional[str]:
     """ONE explosion, which is the unit every other rule is priced in: one Pyro
     hit for the charge's size, one Spark, one payload, one entry in both of
     rule 7's counters. `Explode`'s twin.
@@ -564,7 +559,6 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # THE AURA THIS EXPLOSION MAY CONSUME, read BEFORE the funnel eats it
     # (the Vermillion Pact's one read). C# twin: `auraBefore` in `Explode`.
     aura_before = enemy.aura
-    was_alive = enemy.alive
     # THE VULNERABLE THIS HIT PAID (2026-09-26, Big Badda Boom's echo), read
     # on both sides of the hit -- a Superconduct lays it inside -- and before
     # Explosive Frags below lays one it did not pay. C# twin: `HasVulnerable`
@@ -576,11 +570,6 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     vulnerable_paid = (vulnerable_before
                        or enemy.powers.get("vulnerable", 0) > 0)
     reacted = state.reactions_this_turn > before
-    # R276 (Big Bounce): the swing past the kill, after the target's own terms.
-    # This engine lets HP go below zero by exactly the overkill, so that is the
-    # overflow. C# twin: `dealt - (hp + block)` at `ProtoBombPower.Explode`.
-    if overflow is not None and was_alive and not enemy.alive and enemy.hp < 0:
-        overflow.append(-enemy.hp)
     # CONSUMED means it reacted AND the aura is gone, read straight after the
     # hit: an aura still standing (a Pyro refresh) was not spent.
     consumed = aura_before if (reacted and aura_before
@@ -1118,7 +1107,7 @@ def mark_hand_companion(state: CombatState) -> int:
 
 
 # ---------------------------------------------------------------------------
-# R276's TWO NEW RULES -- Hair Trigger and Big Bounce
+# R276's Hair Trigger
 # ---------------------------------------------------------------------------
 
 def mine_all_on(state: CombatState, enemy: Optional[Enemy]) -> int:
@@ -1136,48 +1125,6 @@ def mine_all_on(state: CombatState, enemy: Optional[Enemy]) -> int:
     return len(enemy.ko_charges)
 
 
-def bounce_overflow(state: CombatState, from_enemy: Optional[Enemy],
-                    amount: int) -> None:
-    """Big Bounce's second half: `amount` as ONE plain Pyro hit on a random
-    living enemy other than `from_enemy`. Not a Set off, no second bounce,
-    neither Klee's terms (`powered=False`) nor the destination's Vulnerable
-    (`vulnerable=False`), because both were settled where the overflow was
-    measured. `ProtoBombPower.BounceOverflow`'s twin.
-    """
-    from tier0.engine import effects                # late import: cycle
-
-    if amount <= 0 or not live(state):
-        return
-    candidates = [e for e in state.living_enemies if e is not from_enemy]
-    if not candidates:
-        return
-    dest = state.rng.choice(candidates)
-    state.emit("ko_big_bounce", target=dest.name, amount=int(amount))
-    effects.deal_damage_to_enemy(state, dest, int(amount), element="pyro",
-                                 source=EXPLOSION_SOURCE, powered=False,
-                                 vulnerable=False)
-    sweep_jumps(state)
-
-
-def is_set_off_card(card: Card) -> bool:
-    """Is this a Set off card? Where Did I Put It?'s filter (R276), off the
-    row's own `set_off` op anywhere in its body. C# twin: `ISetOffCard`,
-    emitted off the same op."""
-    return any(fx.get("op") == "set_off" for fx in _walk(card.effects))
-
-
-def _walk(effects) -> Iterator[dict]:
-    """Every effect in a body, nested ones included (`conditional` branches and
-    `choose_one` modes) -- the sheet-side `tools.effect_walk.iter_effects`'s
-    reach, which the codegen's `ISetOffCard` is derived with."""
-    for fx in effects or []:
-        if not isinstance(fx, dict):
-            continue
-        yield fx
-        for key in ("then", "else", "effects"):
-            yield from _walk(fx.get(key))
-        for mode in fx.get("modes") or []:
-            yield from _walk(mode.get("effects"))
 
 
 # ---------------------------------------------------------------------------
@@ -1826,17 +1773,6 @@ def multiply_largest(state: CombatState, factor: int) -> int:
     return grow_largest(state, size * (int(factor) - 1))
 
 
-def grow_largest_on(enemy: Enemy, amount: int) -> bool:
-    """Spinning Sparkler: THIS enemy's largest charge grows by `amount`.
-    `ProtoBombPower.GrowLargestOn`'s twin (first largest on a tie)."""
-    if not enemy.ko_charges or amount <= 0:
-        return False
-    best = max(range(len(enemy.ko_charges)),
-               key=lambda i: (enemy.ko_charges[i].size, -i))
-    enemy.ko_charges[best].size += int(amount)
-    return True
-
-
 def half_of(size: int) -> int:
     """Second Surprise's Bomb: half, rounded down. `HalfOf`'s twin."""
     return int(size) // 2 if size > 0 else 0
@@ -1876,7 +1812,7 @@ def remove_largest_for_block_times(state: CombatState, multiplier: int) -> int:
 
 
 #: The damage op's prototype riders (`gen_klee_cards.DAMAGE_RIDERS`).
-DAMAGE_RIDERS = ("plant_on_hit", "grow_on_hit", "only_if")
+DAMAGE_RIDERS = ("plant_on_hit", "only_if")
 
 
 def damage_rider(fx: dict) -> Optional[str]:
@@ -1890,7 +1826,7 @@ def damage_rider(fx: dict) -> Optional[str]:
 
 
 def resolve_damage_rider(state: CombatState, fx: dict, card: Card) -> None:
-    """Jumpy Dumpty Mk.III, Spinning Sparkler and Mine, All Mine!, one hit at
+    """Jumpy Dumpty Mk.III and Mine, All Mine!, one hit at
     a time, each through the ordinary damage op aimed at its body -- the way
     `_op_set_off` hands its own hit back to `_op_damage`, so Strength, the Pyro
     cadence and Vulnerable land exactly as on any hit of hers."""
@@ -1914,19 +1850,6 @@ def resolve_damage_rider(state: CombatState, fx: dict, card: Card) -> None:
             enemy = state.rng.choice(living)
             hit(enemy)
             place_or_jump(state, enemy, size)
-        return
-    if rider == "grow_on_hit":
-        grow = int(fx["grow_on_hit"])
-        targets = effects._pick_targets(state, "enemy")
-        if not targets:
-            return
-        enemy = targets[0]
-        for _ in range(hits):
-            if not enemy.alive:
-                return
-            hit(enemy)
-            if enemy.alive:
-                grow_largest_on(enemy, grow)
         return
     # only_if: mined -- the bodies read once, before the first hit.
     for enemy in [e for e in state.living_enemies if mine_count(e) > 0]:

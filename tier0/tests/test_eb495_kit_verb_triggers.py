@@ -306,13 +306,10 @@ SIM_CALL_SITES = {
     # Sparks 'n' Splash, since 2026-09-25 on a Bomb's own terms (the
     # explosion's unpowered door), at the start of the turn.
     ('klee_overhaul.py', 2): ('ECHO_SOURCE', 'False', "'pyro'"),
-    # R276's Big Bounce: the overflow is an explosion's damage carried on, so
-    # it keeps the explosion's source and its unpowered posture.
-    ('klee_overhaul.py', 3): ('EXPLOSION_SOURCE', 'False', "'pyro'"),
     # R276's Spark Knight: a Power's hit per Spark gained (not an Attack,
     # Klee's own terms), under its own source. NO ELEMENT since
     # 2026-09-23, so it cannot spend an aura a companion laid down.
-    ('klee_overhaul.py', 4): ("'spark_knight'", None, 'None'),
+    ('klee_overhaul.py', 3): ("'spark_knight'", None, 'None'),
     # Damage Report's hit per status drawn left at the AoE trim (2026-10-03):
     # it gains Block now.
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),

@@ -869,16 +869,12 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                 ok = _bump_first((fx for fx in top
                                   if fx.get("op") == "grow_largest_bomb"),
                                  "per_spark", val)
-            # R276: One More Charge's flat growth, and Spinning Sparkler's
-            # per-hit rider -- the codegen's `grow_var_effect` order.
+            # R276: One More Charge's flat growth -- the codegen's
+            # `grow_var_effect` order.
             if not ok:
                 ok = _bump_first((fx for fx in top
                                   if fx.get("op") == "grow_largest"),
                                  "amount", val)
-            if not ok:
-                ok = _bump_first((fx for fx in top
-                                  if fx.get("op") == "damage"),
-                                 "grow_on_hit", val)
             # THE KLEE STATUS PACKAGE (2026-10-01): Albedo -- Dust of
             # Purification's growth per status exhausted.
             if not ok:
