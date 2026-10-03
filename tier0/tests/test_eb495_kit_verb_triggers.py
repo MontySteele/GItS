@@ -548,11 +548,13 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
     # (`VarkaCards.CurrentElementHit`), an Attack's hit for the same reason.
     # The expansion (2026-10-01) adds `VarkaCards.ElementHit`, the same hit
     # carrying the element the card names (Blazing Charge, Thundering
-    # Verdict, Razor, Tempest, Cavalry Charge).
+    # Verdict, Razor, Tempest). The rebalance (2026-10-03) adds Kindled
+    # Edge's "deal 7 more": the card's own second hit, with no element.
     assert [path for path, _line in sites] == [
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBombPower.cs",
+        "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaRules.cs"]

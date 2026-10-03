@@ -49,20 +49,20 @@ public sealed class ProtoVkKaeyaGlacialWaltz : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true), this, Element.Cryo);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true), this, Element.Cryo), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_kaeya_glacial_waltz");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaeya: Hidden Strength"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] and 1 [gold]Weak[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(8m),
+            new CalculationBaseVar(5m),
             new CalculationExtraVar(1m),
             new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
         };
@@ -79,10 +79,11 @@ public sealed class ProtoVkKaeyaGlacialWaltz : CustomCardModel, ICompanionCard
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Cryo, Owner.Creature);
+        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

@@ -612,9 +612,10 @@ public sealed class UnwaveringBannerPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Single;
 }
 
-/// <summary>Cycle of Seasons: "Whenever your current element changes, deal
-/// 4 [6] damage to ALL enemies." Paid by <see cref="VarkaOath.SetCurrent"/>;
-/// element-less and unpowered, a Power's damage.</summary>
+/// <summary>Cycle of Seasons (the AoE trim, sec.4): "Whenever your current
+/// element changes, deal 4 [6] damage to a random enemy." Paid by
+/// <see cref="VarkaOath.SetCurrent"/>; element-less and unpowered, a Power's
+/// damage, at a random living enemy (<c>Rng.CombatTargets</c>).</summary>
 public sealed class CycleOfSeasonsPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -622,7 +623,7 @@ public sealed class CycleOfSeasonsPower : PowerModel, ILocalizationProvider
         ("title", "Cycle of Seasons"),
         ("description",
             "Whenever your [gold]current element[/gold] changes, deal "
-          + "[blue]{Amount}[/blue] damage to ALL enemies."),
+          + "[blue]{Amount}[/blue] damage to a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -631,15 +632,17 @@ public sealed class CycleOfSeasonsPower : PowerModel, ILocalizationProvider
 
     internal async Task OnElementChanged(PlayerChoiceContext choiceContext)
     {
-        var enemies = Owner.CombatState?.HittableEnemies.ToList();
-        if (enemies == null || Amount <= 0) return;
-        Flash();
-        foreach (var enemy in enemies)
+        var living = Owner.CombatState?.HittableEnemies
+            .Where(e => e.IsAlive).ToList();
+        if (living == null || living.Count == 0 || Amount <= 0
+            || Owner.Player is not { } player)
         {
-            if (!enemy.IsAlive) continue;
-            await ElementalHit.DealUnelemented(choiceContext, enemy, Amount,
-                                               Owner, powered: false);
+            return;
         }
+        Flash();
+        var target = player.RunState.Rng.CombatTargets.NextItem(living);
+        await ElementalHit.DealUnelemented(choiceContext, target, Amount,
+                                           Owner, powered: false);
     }
 }
 
@@ -733,19 +736,17 @@ public sealed class AssemblyAtTheCathedralPower : PowerModel, ILocalizationProvi
     }
 }
 
-/// <summary>Wildfire Oath: "While your current element is Pyro, your Swirls'
-/// damage hits ALL enemies, plus 1 for each Pyro Oath." A marker read by the
-/// Pyro payout (<c>VarkaOath.Pay</c>); its Amount is the per-Oath rate.
-/// </summary>
+/// <summary>Wildfire Oath (the rebalance, sec.2): "Your first Attack each turn
+/// deals additional damage equal to half your Pyro Oath." Its Amount is the
+/// stacks the armed hit multiplies.</summary>
 public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Wildfire Oath"),
         ("description",
-            "While your [gold]current element[/gold] is Pyro, your first "
-          + "Attack each turn deals additional damage equal to your Pyro "
-          + "[gold]Oath[/gold]."),
+            "Your first Attack each turn deals additional damage equal to "
+          + "half your Pyro [gold]Oath[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -769,7 +770,7 @@ public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
         if (!VarkaOath.Live(Owner)) return 0m;
         var ledger = VarkaOathLedger.For(Owner);
         if (!ReferenceEquals(ledger.WildfireCard, cardSource)) return 0m;
-        return VarkaOath.WildfireBonus(ledger.Current, ledger.Oath(Element.Pyro),
+        return VarkaOath.WildfireBonus(ledger.Oath(Element.Pyro),
                                        ledger.WildfireStacks);
     }
 
@@ -787,8 +788,8 @@ public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
         var ledger = VarkaOathLedger.For(Owner);
         if (ReferenceEquals(ledger.WildfireCard, cardSource))
         {
-            if (VarkaOath.WildfireBonus(ledger.Current,
-                    ledger.Oath(Element.Pyro), ledger.WildfireStacks) > 0)
+            if (VarkaOath.WildfireBonus(ledger.Oath(Element.Pyro),
+                    ledger.WildfireStacks) > 0)
             {
                 Flash();
             }
@@ -847,23 +848,45 @@ public sealed class RetaliatingTidePower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Absolute Zero: "While your current element is Cryo, your Swirls
-/// apply Vulnerable and Weak to ALL enemies." A marker read by the Cryo
-/// payout (<c>VarkaOath.Pay</c>).</summary>
+/// <summary>Absolute Zero (the rebalance, sec.2): "Whenever you apply Weak or
+/// Vulnerable to an enemy, deal damage equal to your Cryo Oath to it." Sea's
+/// Reproach's test (a positive application he made, once per enemy it lands
+/// on), element-less and unpowered, per stack. Sim twin:
+/// <c>varka_oath.on_debuff_applied</c>, from <c>refpowers.on_power_applied</c>.
+/// </summary>
 public sealed class AbsoluteZeroPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Absolute Zero"),
         ("description",
-            "While your [gold]current element[/gold] is Cryo, your "
-          + "[gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and "
-          + "[gold]Weak[/gold] to ALL enemies."),
+            "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] "
+          + "to an enemy, deal damage equal to your Cryo [gold]Oath[/gold] "
+          + "to it."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
-    public override PowerStackType StackType => PowerStackType.Single;
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>One application's damage: the Cryo Oath per stack. PURE.
+    /// </summary>
+    public static int DamageFor(int cryoOath, int stacks) =>
+        System.Math.Max(0, cryoOath * stacks);
+
+    public override async Task AfterPowerAmountChanged(
+        PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
+        Creature? applier, CardModel? cardSource)
+    {
+        if (!SeasReproachPower.Pays(power, amount, applier, Owner)) return;
+        if (!VarkaOath.Live(Owner)) return;
+        var damage = DamageFor(VarkaOath.Count(Owner, Element.Cryo),
+                               (int)Amount);
+        if (damage <= 0) return;
+        Flash();
+        await ElementalHit.DealUnelemented(choiceContext, power.Owner!, damage,
+                                           Owner, powered: false);
+    }
 }
 
 /// <summary>Oath Unto Death: "Whenever you gain Oath of your current

@@ -3497,43 +3497,50 @@
 # The four starter-only Knights: one joins the starter at random each run.
 
 - {id: proto_vk_amber_fiery_rain, name: "Amber: Precise Shot", character: varka,
-   # No illustration of its own (2026-09-30 co-op playtest: the face was
-   # blank); it wears the companion Amber: Fiery Rain's picture until one is
-   # placed.
+   # Wears Amber: Fiery Rain's picture until its own is placed. Rebalance
+   # sec.5: four different starters; Block 5 is PR #863's variant A
+   # (the paper's first number was 4).
    authored_by: [claude], art_of: proto_mc_amber_fiery_rain,
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: pyro,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Pyro[/gold] to an enemy.",
-   effects: [{op: block, amount: 8},
-             {op: apply_aura, element: pyro, target: enemy}],
-   upgrade: {block: 3}}
+   description: "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage. Gain {Block:diff()} [gold]Block[/gold].",
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
+             {op: block, amount: 5}],
+   upgrade: {damage: 3, block: 1}}
 
 - {id: proto_vk_barbara_melody_loop, name: "Barbara: Glorious Season", character: varka,
    authored_by: [claude],
+   # The rebalance (sec.5): delayed Block.
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to an enemy.",
-   effects: [{op: block, amount: 8},
-             {op: apply_aura, element: hydro, target: enemy}],
-   upgrade: {block: 3}}
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold]. Next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
+   effects: [{op: block, amount: 6},
+             {op: apply_aura, element: hydro, target: enemy},
+             {op: block_next_turn, amount: 3}],
+   upgrade: {block: 2, block_next_turn: 1}}
 
 - {id: proto_vk_lisa_lightning_rose, name: "Lisa: Induced Aftershock", character: varka,
    authored_by: [claude],
+   # The rebalance (sec.5): draw. Block 6 is the sim's (PR #863, variant A;
+   # the paper's first number was 5).
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: electro,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Electro[/gold] to an enemy.",
-   effects: [{op: block, amount: 8},
-             {op: apply_aura, element: electro, target: enemy}],
-   upgrade: {block: 3}}
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Electro[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: block, amount: 6},
+             {op: apply_aura, element: electro, target: enemy},
+             {op: draw, amount: 1}],
+   upgrade: {block: 2, draw: 1}}
 
 - {id: proto_vk_kaeya_glacial_waltz, name: "Kaeya: Hidden Strength", character: varka,
    authored_by: [claude],
+   # The rebalance (sec.5): statuses. No Ethereal, so the Weak stays 1.
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: cryo,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy.",
-   effects: [{op: block, amount: 8},
-             {op: apply_aura, element: cryo, target: enemy}],
-   upgrade: {block: 3}}
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] and 1 [gold]Weak[/gold].",
+   effects: [{op: block, amount: 5},
+             {op: apply_aura, element: cryo, target: enemy},
+             {op: apply_power, power: weak, amount: 1, target: enemy}],
+   upgrade: {block: 2}}
 
 # --- Common (15; 20 since the expansion, 2026-10-01) ---
 
@@ -3565,22 +3572,22 @@
    effects: [{op: damage, amount: 3, target: all_enemies, only_if: fresh_aura}],
    upgrade: {damage: 2}}
 
-- {id: proto_vk_wind_wall, name: "Wind Wall", character: varka,
+- {id: proto_vk_rippling_guard, name: "Rippling Guard", character: varka,
+   # The rebalance (sec.3): replaces Wind Wall. No illustration yet.
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. If you have a [gold]current element[/gold], gain {BranchBlock:diff()} more.",
-   effects: [{op: block, amount: 7},
-             {op: conditional, if: has_current_element,
-              then: [{op: block, amount: 3}]}],
-   upgrade: {block: 3}}
+   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each other card you played this turn.",
+   effects: [{op: apply_aura, element: hydro, target: enemy},
+             {op: varka, kind: rippling_guard, base: 3, per: 2}],
+   upgrade: {varka_per: 1}}
 
-- {id: proto_vk_favonius_drill, name: "Favonius Drill", character: varka,
+- {id: proto_vk_frost_ward, name: "Frost Ward", character: varka,
+   # The rebalance (sec.4): Cryo's payoff; replaces Favonius Drill.
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Apply your [gold]current element[/gold] to an enemy.",
-   effects: [{op: block, amount: 6},
-             {op: varka, kind: apply_current_element, target: enemy}],
-   upgrade: {block: 3}}
+   description: "Apply 1 [gold]Weak[/gold] to each enemy with an aura. Gain {VkAmount:diff()} [gold]Block[/gold] for each.",
+   effects: [{op: varka, kind: frost_ward, target: all_enemies, amount: 3}],
+   upgrade: {varka_amount: 1}}
 
 - {id: proto_vk_amber_baron_bunny, name: "Amber: Baron Bunny", character: varka,
    authored_by: [claude],
@@ -3596,11 +3603,10 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {CalculatedBlock:diff()} [gold]Block[/gold].",
-   # The expansion's Knight pass (2026-10-01): Block 3 raised to 5 [7].
-   effects: [{op: apply_aura, element: hydro, target: all_enemies},
-             {op: block, amount: 5}],
-   upgrade: {block: 2}}
+   # The rebalance (sec.3): Block that scales with reactions.
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy it reacts on.",
+   effects: [{op: varka, kind: gleeful_songs, target: all_enemies, base: 4, per: 3}],
+   upgrade: {varka_base: 2, varka_per: 1}}
 
 - {id: proto_vk_lisa_violet_arc, name: "Lisa: Infinite Circuit", character: varka,
    authored_by: [claude],
@@ -3627,9 +3633,10 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: skill, personal_pool: varka,
-   # The expansion's Knight pass (2026-10-01): was 7 [10] to one enemy.
-   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies. Enemies that already have [gold]Electro[/gold] take {VkAmount:diff()} more.",
-   effects: [{op: varka, kind: awakening, target: all_enemies, base: 4, amount: 3}],
+   # The AoE trim (review/active/aoe-trim-2026-10-03.md sec.4): one enemy,
+   # same numbers. Was ALL enemies.
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} more.",
+   effects: [{op: varka, kind: awakening, target: enemy, base: 4, amount: 3}],
    upgrade: {varka_base: 2}}
 
 - {id: proto_vk_mika_starfrost_swirl, name: "Mika: Suppressive Barrage", character: varka,
@@ -3781,11 +3788,12 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold] now and {BlockNextTurn:diff()} next turn.",
+   # The rebalance (sec.3): three turns of Block.
+   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold] now and {VkAmount:diff()} at the start of your next 2 turns.",
    effects: [{op: apply_aura, element: hydro, target: enemy},
              {op: block, amount: 4},
-             {op: block_next_turn, amount: 4}],
-   upgrade: {block: 2, block_next_turn: 2}}
+             {op: varka, kind: echo_block, amount: 4}],
+   upgrade: {block: 2, varka_amount: 2}}
 
 # Varka defence (sec.3): Windborne Resolve replaces Favonian Standard, the
 # Block twin of Cycle of Seasons.
@@ -3915,11 +3923,13 @@
    effects: [{op: varka, kind: pathfinders_mark, target: enemy}],
    upgrade: {varka_upgraded: true}}
 
-- {id: proto_vk_cavalry_charge, name: "Cavalry Charge", character: varka,
+- {id: proto_vk_kindled_edge, name: "Kindled Edge", character: varka,
+   # The rebalance (sec.4): Pyro's payoff; replaces Cavalry Charge. The
+   # "more" is a second, element-less hit on the same enemy.
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {VkBase:diff()} damage as your [gold]current element[/gold].",
-   effects: [{op: varka, kind: current_element_strike, target: enemy, base: 7}],
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it sets off an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} more.",
+   effects: [{op: varka, kind: kindled_edge, target: enemy, base: 7}],
    upgrade: {varka_base: 3}}
 
 - {id: proto_vk_west_wind_shield, name: "West Wind Shield", character: varka,
@@ -4037,19 +4047,21 @@
 
 - {id: proto_vk_cycle_of_seasons, name: "Cycle of Seasons", character: varka,
    authored_by: [claude],
+   # The AoE trim (sec.4): a random enemy. Was ALL enemies.
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever your [gold]current element[/gold] changes, deal {PowerAmount:diff()} damage to ALL enemies.",
+   description: "Whenever your [gold]current element[/gold] changes, deal {PowerAmount:diff()} damage to a random enemy.",
    effects: [{op: apply_power, power: vk_cycle_of_seasons, amount: 4, target: self}],
    upgrade: {power_amount: 2}}
 
 # Varka defence (sec.3): Gust Ward replaces Four Banners.
-- {id: proto_vk_gust_ward, name: "Gust Ward", character: varka,
+- {id: proto_vk_storm_battery, name: "Storm Battery", character: varka,
+   # The rebalance (sec.4, pick 5 at cost 1): Electro's payoff; replaces
+   # Gust Ward.
    authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card.",
-   effects: [{op: block, amount: 4},
-             {op: draw, amount: 1}],
-   upgrade: {block: 2}}
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your hand.",
+   effects: [{op: varka, kind: storm_battery, target: all_enemies, per: 2}],
+   upgrade: {varka_per: 1}}
 
 - {id: proto_vk_eye_wall, name: "Eye Wall", character: varka,
    authored_by: [claude],
@@ -4098,8 +4110,9 @@
 - {id: proto_vk_wildfire_oath, name: "Wildfire Oath", character: varka,
    authored_by: [claude],
    # Element identities (sec.5): re-aimed from the Swirl AoE to one big hit.
+   # The rebalance (sec.2): half the Pyro Oath, whatever is current.
    cost: 2, type: power, rarity: rare,
-   description: "While your [gold]current element[/gold] is Pyro, your first Attack each turn deals additional damage equal to your Pyro [gold]Oath[/gold].",
+   description: "Your first Attack each turn deals additional damage equal to half your Pyro [gold]Oath[/gold].",
    effects: [{op: apply_power, power: vk_wildfire_oath, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -4113,8 +4126,10 @@
 
 - {id: proto_vk_absolute_zero, name: "Absolute Zero", character: varka,
    authored_by: [claude],
+   # The rebalance (sec.2): Cryo's status payoff. Was a team-wide Swirl
+   # debuff while Cryo was current.
    cost: 2, type: power, rarity: rare,
-   description: "While your [gold]current element[/gold] is Cryo, your [gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and [gold]Weak[/gold] to ALL enemies.",
+   description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal damage equal to your Cryo [gold]Oath[/gold] to it.",
    effects: [{op: apply_power, power: vk_absolute_zero, amount: 1, target: self}],
    upgrade: {innate: true}}
 

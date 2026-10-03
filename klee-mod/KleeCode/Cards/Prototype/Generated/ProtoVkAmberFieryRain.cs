@@ -32,8 +32,11 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkAmberFieryRain : CustomCardModel, ICompanionCard
+public sealed class ProtoVkAmberFieryRain : CustomCardModel, IElementalCard, ICompanionCard
 {
+    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
+    public Element Element => Element.Pyro;
+
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
@@ -49,22 +52,23 @@ public sealed class ProtoVkAmberFieryRain : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false, appliesWithoutHit: true), this, Element.Pyro);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, Element.Pyro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mc_amber_fiery_rain");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Amber: Precise Shot"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Pyro[/gold] to an enemy."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(8m),
-            new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
+            new CalculationBaseVar(7m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
+            new SpotlightSystem.SpotlitBlockVar(5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -76,13 +80,18 @@ public sealed class ProtoVkAmberFieryRain : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Pyro, Owner.Creature);
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
+        await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars.Block.UpgradeValueBy(1m);
     }
 }

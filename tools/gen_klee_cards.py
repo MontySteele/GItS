@@ -2509,6 +2509,14 @@ VARKA_KINDS = {
     "electro_strike": "ElectroStrike",
     "electro_all": "ElectroAll",
     "violet_storm": "VioletStorm",
+    # THE REBALANCE (2026-10-03, review/active/varka-rebalance-2026-10-03.md
+    # secs.3-4): the borrowing payoffs and Hydro's scaling Block.
+    "kindled_edge": "KindledEdge",
+    "storm_battery": "StormBattery",
+    "frost_ward": "FrostWard",
+    "gleeful_songs": "GleefulSongs",
+    "rippling_guard": "RipplingGuard",
+    "echo_block": "EchoBlock",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2524,15 +2532,25 @@ VARKA_KIND_FIELDS = {
     "electro_strike": ("base",),
     "electro_all": ("base",),
     "violet_storm": ("base",),
+    "kindled_edge": ("base",),
+    "storm_battery": ("per",),
+    "frost_ward": ("amount",),
+    "gleeful_songs": ("base", "per"),
+    "rippling_guard": ("base", "per"),
+    "echo_block": ("amount",),
 }
 #: A kind that aims at the enemy the card was played on.
 VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
                      "pathfinders_mark", "current_element_strike",
                      "blazing_charge", "glacial_edict", "crosscurrent",
-                     "tempest", "electro_strike"}
+                     "tempest", "electro_strike",
+                     # The AoE trim (sec.4): Razor: Awakening at one enemy.
+                     "awakening", "kindled_edge"}
 #: A kind that reaches ALL enemies (the expansion): the row says
 #: `target: all_enemies`, which makes the card's TargetType AllEnemies.
-VARKA_ALL_KINDS = {"thundering_verdict", "awakening", "electro_all"}
+VARKA_ALL_KINDS = {"thundering_verdict", "electro_all",
+                   # The rebalance (2026-10-03).
+                   "storm_battery", "frost_ward", "gleeful_songs"}
 #: A kind whose hits land on random enemies (Violet Storm): the row says
 #: `target: random_enemy`, which makes the card's TargetType AllEnemies.
 VARKA_RANDOM_KINDS = {"violet_storm"}
@@ -2551,6 +2569,10 @@ VARKA_KIND_ELEMENTS = {
     "electro_all": ("electro",),
     "violet_storm": ("electro",),
     "current_element_strike": (),
+    # The rebalance (2026-10-03).
+    "kindled_edge": ("pyro",),
+    "storm_battery": ("electro",),
+    "gleeful_songs": ("hydro",),
 }
 #: A kind that AIMS but whose row needs no `target:` of its own, because the
 #: card's own damage op already aims it (Ascension, Northwind Avatar).

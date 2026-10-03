@@ -44,21 +44,18 @@ be taken; the harness gives every pool row the default scores under the skip
 line against the starter the median of the others (`_nominal`), Kokomi's
 fix.
 
-THE REBALANCE WORLD (review/active/varka-rebalance-2026-10-03.md secs.2-5,
-aoe-trim-2026-10-03.md sec.4 on branch aoe-trim; SIM ONLY, nothing built in
-C#): `--world rebalance` swaps the paper's rows in over the sheet
-(`rebalance_rows`, written to a temporary sheet the loader reads) and turns on
-`varka_oath.REBALANCE` (Wildfire Oath, Absolute Zero, Cycle of Seasons).
-`--world current` (the default) is the sheet, run for run what main runs.
-`--knob name=int` moves one of the paper's numbers (KNOBS), never a text.
-The `elem_` pilots are the paper's borrowing decks (`deck_lists`); the
-`report_bars` section reads the paper's bars. `--no-gauntlet` skips the
-gauntlet's fights (at full HP it wins every act-1 fight and loses every
-act-2 boss, so it separates nothing) and keeps its drafts.
+THE REBALANCE (review/active/varka-rebalance-2026-10-03.md, aoe-trim sec.4;
+built 2026-10-03, PR #863): the `elem_` pilots are the paper's borrowing decks
+(`deck_lists`), and `report_bars` reads its bars (starter spread, element
+spread, cross-element plays, Block, multi-target share, the paper's cards,
+and with `--against` a paired comparison). The PR #863 measurement ran these
+rows as a sim overlay before they reached the sheet; its tables are in the
+PR body. `--no-gauntlet` skips the gauntlet's fights (at full HP it wins
+every act-1 fight and loses every act-2 boss, so it separates nothing) and
+keeps its drafts.
 
-    .venv/Scripts/python.exe -m tools.varka_expansion_sim --seeds 2400 --seed 7 --jobs 15 --world current --no-gauntlet --json base.json
-    .venv/Scripts/python.exe -m tools.varka_expansion_sim --seeds 2400 --seed 7 --jobs 15 --world rebalance --no-gauntlet --json new.json
-    .venv/Scripts/python.exe -m tools.varka_expansion_sim --report new.json --against base.json
+    .venv/Scripts/python.exe -m tools.varka_expansion_sim --seeds 2400 --seed 7 --jobs 15 --no-gauntlet --json new.json
+    .venv/Scripts/python.exe -m tools.varka_expansion_sim --report new.json --against old.json
 
 THE PLAY PILOT is the stock `generic` pilot, as the open-Oath paired sim
 used, with one INSTRUMENT SURFACE (not a design claim): the `varka` and
@@ -87,11 +84,11 @@ P = "proto_vk_"
 # the total-Oath and element-change Block (Gale Mantle, Windborne Resolve)
 # joins SWITCH, the paper's "split and switch decks". Gust Ward is in no list
 # (every deck's filler; the default scores price it).
-FOCUS = ["favonius_drill", "oathsworn_strike", "eye_of_the_storm",
+FOCUS = ["oathsworn_strike", "eye_of_the_storm",
          "stormward_stance", "oath_of_the_knights",
          "dawn_winds_march", "azure_devour", "sworn_brotherhood",
-         "northwind_avatar", "wind_wall", "knightly_guard", "tailwind_stride",
-         "pathfinders_mark", "cavalry_charge", "vow_of_the_blade",
+         "northwind_avatar", "knightly_guard", "tailwind_stride",
+         "pathfinders_mark", "vow_of_the_blade",
          "unwavering_banner", "oath_unto_death", "grand_masters_verdict",
          "wolfpack", "oathbound_aegis"]
 KNIGHTS = {
@@ -107,11 +104,13 @@ KNIGHTS = {
 # 2026-10-01): Retaliating Tide is Hydro's Rare in Unbroken Tide's place, and
 # Electro's list gains the four discard-and-spend cards. Pressure Front left
 # GALE and Four Winds' Accord left SWITCH with their cards.
-PAYOFFS = {"pyro": ["blazing_charge", "wildfire_oath"],
-           "hydro": ["tidal_bulwark", "retaliating_tide"],
-           "cryo": ["glacial_edict", "absolute_zero"],
+# The rebalance (sec.4): each element's borrowing payoff joins its list.
+PAYOFFS = {"pyro": ["blazing_charge", "wildfire_oath", "kindled_edge"],
+           "hydro": ["tidal_bulwark", "retaliating_tide", "rippling_guard"],
+           "cryo": ["glacial_edict", "absolute_zero", "frost_ward"],
            "electro": ["static_field", "thundering_verdict", "charged_lunge",
-                       "short_circuit", "chain_lightning", "violet_storm"]}
+                       "short_circuit", "chain_lightning", "violet_storm",
+                       "storm_battery"]}
 GALE = ["gale_sweep", "crosswind", "rising_gale", "tempest_charge",
         "jean_dandelion_breeze", "storm_surge", "wall_of_gales",
         "converging_winds", "west_wind_shield", "eye_wall",
@@ -143,29 +142,20 @@ DECKS = {
     "switch": _deck(SWITCH, [k for ks in KNIGHTS.values() for k in ks]),
     "muster": _deck(MUSTER, ALL_KNIGHTS),
 }
-# THE REBALANCE PAPER (review/active/varka-rebalance-2026-10-03.md sec.4):
-# each element's new payoff joins its element's list. Kept apart from the
-# lists above so those name only live sheet rows; `deck_lists` merges them
-# under `--world rebalance`, where `rebalance_rows` puts them in the pool.
-REBALANCE_PAYOFFS = {"pyro": ["kindled_edge"], "hydro": ["rippling_guard"],
-                     "cryo": ["frost_ward"], "electro": ["storm_battery"]}
 #: Rebalance sec.4's "borrows" for Electro: the generic draw cards.
 GENERIC_DRAW = ["rising_gale", "tempest_charge", "tailwind_stride",
                 "change_of_guard", "vow_of_the_blade", "dawn_patrol",
                 "eye_of_stormterror", "noelle_steadfast_maid"]
 
 
-def deck_lists(world="current"):
-    """The forced decks for a world. The `elem_` pilots are the rebalance
+def deck_lists():
+    """The forced decks. The `elem_` pilots are the rebalance
     paper's borrowing decks (sec.4's "Borrows" column, read as a drafter):
     their element's Knights and payoffs are core, every OTHER element's
     Knights (the appliers) are support beside the Oath cards, and only the
     other elements' payoffs work against them. Electro also borrows the
-    generic draw cards. Same drafter in both worlds, so a paired read is the
-    pool's change, not the drafter's."""
-    payoffs = {el: list(PAYOFFS[el]) + (REBALANCE_PAYOFFS[el]
-                                        if world == "rebalance" else [])
-               for el in ELEMENTS}
+    generic draw cards."""
+    payoffs = {el: list(PAYOFFS[el]) for el in ELEMENTS}
     decks = {
         **{f"mono_{el}": _deck(
             KNIGHTS[el] + payoffs[el], FOCUS + ["noelle_steadfast_maid"],
@@ -191,12 +181,12 @@ DECKS.update({k: v for k, v in deck_lists()[0].items()
 PILOTS = ("default",) + tuple(DECKS)
 
 
-def element_of(world="current"):
+def element_of():
     """{card id: Oath element} -- the Knights, the starter Knights and each
     element's payoffs; every other row is generic (absent)."""
     from tier0.engine import varka_oath as V
     out = {cid: el for el, cid in V.STARTER_KNIGHT_IDS.items()}
-    _, payoffs = deck_lists(world)
+    _, payoffs = deck_lists()
     for el in ELEMENTS:
         for c in KNIGHTS[el] + payoffs[el]:
             out[P + c] = el
@@ -209,238 +199,13 @@ def starts_for(pilot):
     return ELEMENTS
 
 
-# --- the rebalance world: an OVERLAY on the sheet, sim only ---------------------
-#
-# The paper's rows are NOT on `docs/prototype-surface.yaml`: the sheet compiles
-# to the mod, and these rows need C# the paper has not had built (new `varka`
-# kinds, Wildfire Oath / Absolute Zero / Cycle of Seasons rule changes). Under
-# `--world rebalance` the harness writes the sheet with these rows swapped in
-# to a temporary file, points the loader at it, and turns on
-# `varka_oath.REBALANCE`. Texts are the paper's verbatim; the numbers are
-# KNOBS so a variant can move only numbers.
-
-#: The paper's first numbers (rebalance secs.3-5; aoe-trim sec.4 keeps
-#: Awakening's and Cycle of Seasons' numbers).
-KNOBS = {
-    "amber_damage": 7, "amber_block": 4,
-    "barbara_block": 6, "barbara_next": 3,
-    "lisa_block": 5, "lisa_draw": 1,
-    "kaeya_block": 5, "kaeya_weak": 1,
-    "gleeful_base": 4, "gleeful_per": 3,
-    "rippling_base": 3, "rippling_per": 2,
-    "whisper_block": 4,
-    "kindled_base": 7,
-    "storm_per": 2,
-    "frost_per": 3,
-    "awakening_base": 4, "awakening_more": 3,
-    "cycle_amount": 4,
-}
-
-
-def rebalance_rows(knobs=None):
-    """{replaced id: new row dict} for the overlay; the key is the row it
-    stands in for (same position, same id unless the paper names a new card).
-    """
-    k = dict(KNOBS, **(knobs or {}))
-    unknown = set(k) - set(KNOBS)
-    if unknown:
-        raise ValueError(f"unknown knobs {sorted(unknown)}")
-    vk = "proto_vk_"
-    base = {"character": "varka", "authored_by": ["claude"]}
-    knight = {"nation": "mondstadt", "star": 4, "role_c": "applier",
-              "personal_pool": "varka"}
-    rows = {
-        # sec.5: four different starter Knights (rarity basic, same ids).
-        vk + "amber_fiery_rain": {
-            **base, **knight, "id": vk + "amber_fiery_rain",
-            "name": "Amber: Precise Shot", "rarity": "basic",
-            "element": "pyro", "cost": 1, "type": "skill",
-            "description": "Deal 7 [10] Pyro damage. Gain 4 [5] Block.",
-            "effects": [{"op": "damage", "amount": k["amber_damage"],
-                         "target": "enemy", "applies_element": True},
-                        {"op": "block", "amount": k["amber_block"]}],
-            "upgrade": {"damage": 3, "block": 1}},
-        vk + "barbara_melody_loop": {
-            **base, **knight, "id": vk + "barbara_melody_loop",
-            "name": "Barbara: Glorious Season", "rarity": "basic",
-            "element": "hydro", "cost": 1, "type": "skill",
-            "description": "Gain 6 [8] Block. Apply Hydro. Next turn, gain "
-                           "3 [4] Block.",
-            "effects": [{"op": "block", "amount": k["barbara_block"]},
-                        {"op": "apply_aura", "element": "hydro",
-                         "target": "enemy"},
-                        {"op": "block_next_turn",
-                         "amount": k["barbara_next"]}],
-            "upgrade": {"block": 2, "block_next_turn": 1}},
-        vk + "lisa_lightning_rose": {
-            **base, **knight, "id": vk + "lisa_lightning_rose",
-            "name": "Lisa: Induced Aftershock", "rarity": "basic",
-            "element": "electro", "cost": 1, "type": "skill",
-            "description": "Gain 5 [7] Block. Apply Electro. Draw 1 [2] "
-                           "card(s).",
-            "effects": [{"op": "block", "amount": k["lisa_block"]},
-                        {"op": "apply_aura", "element": "electro",
-                         "target": "enemy"},
-                        {"op": "draw", "amount": k["lisa_draw"]}],
-            "upgrade": {"block": 2, "draw": 1}},
-        vk + "kaeya_glacial_waltz": {
-            **base, **knight, "id": vk + "kaeya_glacial_waltz",
-            "name": "Kaeya: Hidden Strength", "rarity": "basic",
-            "element": "cryo", "cost": 1, "type": "skill",
-            "description": "Gain 5 [7] Block. Apply Cryo and 1 Weak.",
-            "effects": [{"op": "block", "amount": k["kaeya_block"]},
-                        {"op": "apply_aura", "element": "cryo",
-                         "target": "enemy"},
-                        {"op": "apply_power", "power": "weak",
-                         "amount": k["kaeya_weak"], "target": "enemy"}],
-            "upgrade": {"block": 2}},
-        # sec.3: Hydro scales.
-        vk + "barbara_show_begin": {
-            **base, **knight, "id": vk + "barbara_show_begin",
-            "name": "Barbara: Gleeful Songs", "rarity": "common",
-            "element": "hydro", "cost": 1, "type": "skill",
-            "description": "Apply Hydro to ALL enemies. Gain 4 [6] Block, "
-                           "plus 3 [4] for each enemy it reacts on.",
-            "effects": [{"op": "varka", "kind": "gleeful_songs",
-                         "target": "all_enemies", "base": k["gleeful_base"],
-                         "per": k["gleeful_per"]}],
-            "upgrade": {"varka_base": 2, "varka_per": 1}},
-        vk + "wind_wall": {
-            **base, "id": vk + "rippling_guard", "name": "Rippling Guard",
-            "cost": 1, "type": "skill", "rarity": "common",
-            "description": "Apply Hydro to an enemy. Gain 3 Block, plus 2 [3] "
-                           "for each other card you played this turn.",
-            "effects": [{"op": "apply_aura", "element": "hydro",
-                         "target": "enemy"},
-                        {"op": "varka", "kind": "rippling_guard",
-                         "base": k["rippling_base"],
-                         "per": k["rippling_per"]}],
-            "upgrade": {"varka_per": 1}},
-        vk + "barbara_whisper_of_water": {
-            **base, **knight, "id": vk + "barbara_whisper_of_water",
-            "name": "Barbara: Whisper of Water", "rarity": "uncommon",
-            "element": "hydro", "cost": 1, "type": "skill",
-            "description": "Apply Hydro to an enemy. Gain 4 [6] Block now and "
-                           "at the start of your next 2 turns.",
-            "effects": [{"op": "apply_aura", "element": "hydro",
-                         "target": "enemy"},
-                        {"op": "block", "amount": k["whisper_block"]},
-                        {"op": "varka", "kind": "echo_block",
-                         "amount": k["whisper_block"]}],
-            "upgrade": {"block": 2, "varka_amount": 2}},
-        # sec.4: payoffs that borrow.
-        vk + "cavalry_charge": {
-            **base, "id": vk + "kindled_edge", "name": "Kindled Edge",
-            "cost": 1, "type": "attack", "rarity": "common",
-            "description": "Deal 7 [10] Pyro damage. If it sets off an "
-                           "Elemental Reaction, deal 7 [10] more.",
-            "effects": [{"op": "varka", "kind": "kindled_edge",
-                         "target": "enemy", "base": k["kindled_base"]}],
-            "upgrade": {"varka_base": 3}},
-        vk + "gust_ward": {
-            **base, "id": vk + "storm_battery", "name": "Storm Battery",
-            "cost": 1, "type": "attack", "rarity": "uncommon",
-            "description": "Deal 2 [3] Electro damage to ALL enemies for each "
-                           "other card in your hand.",
-            "effects": [{"op": "varka", "kind": "storm_battery",
-                         "target": "all_enemies", "per": k["storm_per"]}],
-            "upgrade": {"varka_per": 1}},
-        vk + "favonius_drill": {
-            **base, "id": vk + "frost_ward", "name": "Frost Ward",
-            "cost": 1, "type": "skill", "rarity": "common",
-            "description": "Apply 1 Weak to each enemy with an aura. Gain "
-                           "3 [4] Block for each.",
-            "effects": [{"op": "varka", "kind": "frost_ward",
-                         "target": "all_enemies", "amount": k["frost_per"]}],
-            "upgrade": {"varka_amount": 1}},
-        # aoe-trim sec.4: Awakening at one enemy, same numbers.
-        vk + "razor_claw_and_thunder": {
-            **base, **knight, "id": vk + "razor_claw_and_thunder",
-            "name": "Razor: Awakening", "rarity": "common",
-            "element": "electro", "cost": 1, "type": "skill",
-            "description": "Deal Electro damage to an enemy, more if it "
-                           "already has Electro.",
-            "effects": [{"op": "varka", "kind": "awakening_single",
-                         "target": "enemy", "base": k["awakening_base"],
-                         "amount": k["awakening_more"]}],
-            "upgrade": {"varka_base": 2}},
-    }
-    return rows, k
-
-
-def _overlay_sheet(knobs=None):
-    """The sheet with the rebalance rows swapped in (Wildfire Oath, Absolute
-    Zero and Cycle of Seasons keep their rows: their change is the rule,
-    `varka_oath.REBALANCE`; Cycle's number is a knob)."""
-    import copy
-    import yaml
-    rows, k = rebalance_rows(knobs)
-    raw = yaml.safe_load(_SHEET.read_text(encoding="utf-8"))
-    out = []
-    for d in raw:
-        d = copy.deepcopy(d)
-        if d.get("id") in rows:
-            d = rows[d["id"]]
-        elif d.get("id") == P + "cycle_of_seasons":
-            d["effects"][0]["amount"] = k["cycle_amount"]
-            d["description"] = ("Whenever your current element changes, deal "
-                                "4 [6] damage to a random enemy.")
-        elif d.get("id") == P + "wildfire_oath":
-            d["description"] = ("Your first Attack each turn deals additional "
-                                "damage equal to half your Pyro Oath.")
-        elif d.get("id") == P + "absolute_zero":
-            d["description"] = ("Whenever you apply Weak or Vulnerable to an "
-                                "enemy, deal damage equal to your Cryo Oath "
-                                "to it.")
-        out.append(d)
-    return out
-
-
 # --- the process switch and the scorer surface --------------------------------
 
 _ENABLED = False
-WORLD = "current"
-_SHEET = None
 
 
-def set_world(world="current", knobs=None):
-    """Point this process at a world: `current` is the sheet as it stands;
-    `rebalance` is the overlay (`_overlay_sheet`) plus `varka_oath.REBALANCE`.
-    Re-entrant (the tests flip it both ways)."""
-    global WORLD, _SHEET
-    import os
-    import tempfile
-    from pathlib import Path
-    import yaml
-    from tier0.content import loader
-    from tier0.engine import varka_oath as V
-    if _SHEET is None:
-        _SHEET = loader.PROTOTYPE_SHEET
-    loader.PROTOTYPE_SHEET = _SHEET
-    if world == "rebalance":
-        fd, path = tempfile.mkstemp(prefix="varka-rebalance-",
-                                    suffix=".yaml")
-        with os.fdopen(fd, "w", encoding="utf-8") as fh:
-            yaml.safe_dump(_overlay_sheet(knobs), fh, allow_unicode=True,
-                           sort_keys=False)
-        loader.PROTOTYPE_SHEET = Path(path)
-        V.REBALANCE = True
-    elif world == "current":
-        V.REBALANCE = False
-    else:
-        raise ValueError(f"unknown world {world!r}")
-    WORLD = world
-    DECKS.clear()
-    DECKS.update(deck_lists(world)[0])
-    loader._prototype_index.cache_clear()
-    loader.reset_arm_caches()
-    _NOMINAL.clear()
-
-
-def enable(world=None, knobs=None):
+def enable():
     global _ENABLED
-    if world is not None:
-        set_world(world, knobs)
     if _ENABLED:
         return
     from tier0 import constants as C
@@ -531,13 +296,12 @@ def _translate(state, fx):
             yield {"op": "damage", "amount": base, "target": "random_enemy",
                    "times": n}
     elif kind == "awakening":
-        yield {"op": "damage", "amount": base, "target": "all_enemies"}
-    # --- the rebalance overlay's kinds (sim only) ---
-    elif kind == "awakening_single":
         more = amt if any(e.aura == "electro"
                           for e in state.living_enemies) else 0
         yield {"op": "damage", "amount": base + more, "target": "enemy"}
         yield oath_proxy
+    # --- the rebalance's kinds (2026-10-03) ---
+
     elif kind == "kindled_edge":
         # The "more" if any enemy wears an aura Pyro reacts with.
         react = any(e.aura in ("hydro", "cryo", "electro")
@@ -674,8 +438,8 @@ def _nominal(element):
 #: hand, two enemies with an aura). The default drafter prices `varka` at 0,
 #: and the rows these replace printed stock ops it priced (Gleeful Songs' and
 #: Wind Wall's Block, Gust Ward's Block and draw); without this the new rows
-#: would read as blanks beside the rows they replace. The old world's kinds
-#: are untouched, so `--world current` drafts exactly as before.
+#: would read as blanks beside the rows they replace. Razor's Awakening
+#: is priced here too since it went single-target.
 def _draft_ops(fx):
     kind = fx.get("kind")
     base, per, amt = fx.get("base", 0), fx.get("per", 0), fx.get("amount", 0)
@@ -696,7 +460,7 @@ def _draft_ops(fx):
     if kind == "storm_battery":
         return [{"op": "damage", "amount": 4 * per,
                  "target": "all_enemies"}]
-    if kind == "awakening_single":
+    if kind == "awakening":
         return [{"op": "damage", "amount": base + amt // 2,
                  "target": "enemy"}]
     return None
@@ -950,13 +714,12 @@ def _wo(args):
             "offers": offers, "fights": []}
 
 
-def pmap(fn, jobs, argl, world="current", knobs=None):
+def pmap(fn, jobs, argl):
     if jobs <= 1:
-        enable(world, knobs)
+        enable()
         return [fn(a) for a in argl]
     import multiprocessing as mp
-    with mp.get_context("spawn").Pool(jobs, initializer=enable,
-                                      initargs=(world, knobs)) as p:
+    with mp.get_context("spawn").Pool(jobs, initializer=enable) as p:
         return p.map(fn, argl, chunksize=8)
 
 
@@ -1180,14 +943,12 @@ def report_bars(data, against=None, out=print):
     starter spread, cross-element plays, Block and multi-target damage, and
     the new cards. Every rate is act 1 won on the stylised run."""
     runs, gaunt = data["runs"], data["gauntlet"]
-    world = data.get("world", "current")
-    elements = data.get("elements") or element_of(world)
+    elements = data.get("elements") or element_of()
     by = defaultdict(list)
     for r in runs:
         by[(r["pilot"], r["element"])].append(r)
     have = {r["pilot"] for r in runs}
-    out(f"\n# Rebalance bars -- world `{world}`"
-        + (f", knobs {data['knobs']}" if data.get("knobs") else ""))
+    out("\n# Rebalance bars")
 
     out("\n## Starter bar: default drafter, act 1 by forced starter Knight")
     out("| start | n | act 1 |")
@@ -1332,7 +1093,7 @@ def report_bars(data, against=None, out=print):
             f"{a} | {b} | {d} |")
 
     if against is not None:
-        out("\n## Paired against the other world (same seeds, starts, "
+        out("\n## Paired against the other file (same seeds, starts, "
             "offers by slot)")
         out("| deck | start | n | other | this | this - other (paired) |")
         out("|---|---|---|---|---|---|")
@@ -1363,22 +1124,10 @@ def main(argv=None):
     ap.add_argument("--json", help="write the raw results here")
     ap.add_argument("--report", help="report a --json file instead of running")
     ap.add_argument("--against", help="a --json file from the other pool")
-    ap.add_argument("--world", default="current",
-                    choices=("current", "rebalance"),
-                    help="rebalance: the paper's overlay rows and rules "
-                         "(sim only, `rebalance_rows`)")
     ap.add_argument("--no-gauntlet", action="store_true",
-                    help="skip the gauntlet (its offers still drafted for "
-                         "the card table)")
-    ap.add_argument("--knob", action="append", default=[],
-                    help="name=int, a rebalance number (KNOBS); repeatable")
+                    help="skip the gauntlet's fights (its drafts are kept "
+                         "for the card table)")
     args = ap.parse_args(argv)
-    knobs = {}
-    for kv in args.knob:
-        name, _, val = kv.partition("=")
-        knobs[name] = int(val)
-    if knobs and args.world != "rebalance":
-        ap.error("--knob moves the rebalance world's numbers only")
     if args.report:
         with open(args.report, encoding="utf-8") as fh:
             data = json.load(fh)
@@ -1388,26 +1137,23 @@ def main(argv=None):
                 against = json.load(fh)
         report(data, against)
         return
-    enable(args.world, knobs)
+    enable()
     from tier0.content import loader
     pl = pool()
     seeds = [args.seed + i for i in range(args.seeds)]
     pilots = [p for p in args.pilots.split(",") if p]
     argl = [(s, p, e) for p in pilots for e in starts_for(p) for s in seeds]
     print(f"{len(argl)} runs + {len(argl)} gauntlets", file=sys.stderr)
-    runs = pmap(_w, args.jobs, argl, args.world, knobs)
-    gaunt = pmap(_wg if not args.no_gauntlet else _wo, args.jobs, argl,
-                 args.world, knobs)
+    runs = pmap(_w, args.jobs, argl)
+    gaunt = pmap(_wg if not args.no_gauntlet else _wo, args.jobs, argl)
     traces = [f["trace"] for src in (runs, gaunt) for r in src
               for f in r["fights"] if f.get("trace")][:3]
     for src in (runs, gaunt):
         for r in src:
             for f in r["fights"]:
                 f.pop("trace", None)
-    data = {"seeds": args.seeds, "seed": args.seed, "world": args.world,
-            "knobs": dict(KNOBS, **knobs) if args.world == "rebalance"
-            else {},
-            "elements": element_of(args.world),
+    data = {"seeds": args.seeds, "seed": args.seed,
+            "elements": element_of(),
             "pool_size": sum(len(v) for v in pl.values()),
             "pool_counts": {k: len(v) for k, v in pl.items()},
             "cards": {c: (loader.get_card(c).name, r)

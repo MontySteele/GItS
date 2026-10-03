@@ -1402,6 +1402,14 @@ def on_power_applied(state: CombatState, target: Fighter, name: str,
             and state.player.powers.get("kk_seas_reproach", 0)):
         from tier0.engine import kokomi_plan        # late import: cycle
         kokomi_plan.seas_reproach(state, target, name, stacks)
+    # VARKA, THE REBALANCE (2026-10-03), ABSOLUTE ZERO: "Whenever you apply
+    # Weak or Vulnerable to an enemy, deal damage equal to your Cryo Oath to
+    # it." Sea's Reproach's test; `varka_oath` is a no-op for anyone else.
+    if (name in ("weak", "vulnerable") and stacks > 0
+            and applier is state.player and target is not state.player
+            and state.player.powers.get("vk_absolute_zero", 0)):
+        from tier0.engine import varka_oath         # late import: cycle
+        varka_oath.on_debuff_applied(state, target, name, stacks)
 
 
 # ---------------------------------------------------------------------------

@@ -1,11 +1,10 @@
-"""VARKA, THE REBALANCE PAPER -- the sim-only overlay's pins.
+"""VARKA, THE REBALANCE -- the sim engine's pins.
 
-`review/active/varka-rebalance-2026-10-03.md` secs.2-5 and the Varka part of
-`review/active/aoe-trim-2026-10-03.md` sec.4 (branch aoe-trim). The rows live
-in `tools/varka_expansion_sim.py` (`rebalance_rows`, `--world rebalance`),
-NOT on the sheet: they need C# the paper has not had built. The rules sit
-behind `varka_oath.REBALANCE`. These pins check each text resolves as
-written, and that `--world current` leaves today's sheet and rules alone.
+`review/active/varka-rebalance-2026-10-03.md` secs.2-5 (ruled 2026-10-03,
+the starters at the PR #863 sim's variant A) and the Varka part of
+`review/active/aoe-trim-2026-10-03.md` sec.4. Rows: the `proto_vk_` block of
+`docs/prototype-surface.yaml`; rules: `tier0/engine/varka_oath.py`. The C#
+twin is `klee-mod/KleeTests/Prototype/VarkaRebalanceTests.cs`.
 """
 
 from __future__ import annotations
@@ -27,11 +26,10 @@ from tools import varka_expansion_sim as X
 def rebalance():
     saved = (C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA)
     C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = True, True
-    X.set_world("rebalance")
+    loader.reset_arm_caches()
     try:
         yield
     finally:
-        X.set_world("current")
         C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = saved
         loader.reset_arm_caches()
 
@@ -83,41 +81,24 @@ NEW = ("rippling_guard", "kindled_edge", "storm_battery", "frost_ward")
 GONE = ("wind_wall", "cavalry_charge", "gust_ward", "favonius_drill")
 
 
-def test_the_overlay_swaps_four_rows_and_keeps_78(rebalance):
+def test_four_rows_swapped_and_the_pool_stays_78(rebalance):
     pool = X.pool()
     ids = {c for r in pool.values() for c in r}
     assert sum(len(v) for v in pool.values()) == 78
     assert {k: len(v) for k, v in pool.items()} == {
         "common": 20, "uncommon": 35, "rare": 23}
     assert {_vk(c) for c in NEW} <= ids
-    assert not ({_vk(c) for c in GONE} & ids)
-    assert V.REBALANCE is True
+    sheet = {c.id for c in loader.prototype_cards()}
+    assert not ({_vk(c) for c in GONE} & sheet)
 
 
-def test_the_current_world_is_the_sheet(rebalance):
-    X.set_world("current")
-    assert V.REBALANCE is False
-    ids = {c for r in X.pool().values() for c in r}
-    assert {_vk(c) for c in GONE} <= ids
-    assert not ({_vk(c) for c in NEW} & ids)
-    assert X.deck_lists("current")[1]["pyro"] == X.PAYOFFS["pyro"]
-
-
-def test_every_overlay_row_upgrades(rebalance):
+def test_every_changed_row_upgrades(rebalance):
     for cid in [_vk(c) for c in NEW] + [
             _vk("barbara_show_begin"), _vk("barbara_whisper_of_water"),
             _vk("razor_claw_and_thunder")] + list(
             V.STARTER_KNIGHT_IDS.values()):
         assert loader.get_card(cid + "+").effects != \
             loader.get_card(cid).effects, cid
-
-
-def test_knobs_move_numbers_only():
-    rows, k = X.rebalance_rows({"kindled_base": 9})
-    fx = rows[_vk("cavalry_charge")]["effects"][0]
-    assert fx["base"] == 9 and fx["kind"] == "kindled_edge"
-    with pytest.raises(ValueError):
-        X.rebalance_rows({"no_such_knob": 1})
 
 
 # ---------------------------------------------------------------------------
@@ -249,7 +230,7 @@ def test_awakening_hits_one_enemy_more_if_electro(rebalance):
 def test_amber_hits_and_blocks(rebalance):
     st = _state()
     _play(st, V.STARTER_KNIGHT_IDS["pyro"])
-    assert st.enemies[0].hp == 100 - 7 and st.player.block == 4
+    assert st.enemies[0].hp == 100 - 7 and st.player.block == 5
     assert st.enemies[0].aura == "pyro"
 
 
@@ -263,7 +244,7 @@ def test_barbara_blocks_now_and_next_turn(rebalance):
 def test_lisa_blocks_and_draws(rebalance):
     st = _state(element="electro")
     _play(st, V.STARTER_KNIGHT_IDS["electro"])
-    assert st.player.block == 5 and len(st.player.hand) == 1
+    assert st.player.block == 6 and len(st.player.hand) == 1
     assert st.enemies[0].aura == "electro"
 
 

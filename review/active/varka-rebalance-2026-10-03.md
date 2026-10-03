@@ -160,9 +160,9 @@ decided by Block) and adding its element's job. The sim balances them.
 
 | Starter Knight | Text (first numbers; the sim moves them) | Job |
 |---|---|---|
-| Amber: Precise Shot | Deal 7 [10] Pyro damage. Gain 4 [5] Block. | the hit |
+| Amber: Precise Shot | Deal 7 [10] Pyro damage. Gain 5 [6] Block. | the hit |
 | Barbara: Glorious Season | Gain 6 [8] Block. Apply Hydro. Next turn, gain 3 [4] Block. | delayed Block |
-| Lisa: Induced Aftershock | Gain 5 [7] Block. Apply Electro. Draw 1 [2] card(s). | draw |
+| Lisa: Induced Aftershock | Gain 6 [8] Block. Apply Electro. Draw 1 [2] card(s). | draw |
 | Kaeya: Hidden Strength | Gain 5 [7] Block. Apply Cryo and 1 Weak. | statuses |
 
 Base yardsticks: Silent's starter Survivor (8 [11] Block, discard 1),
@@ -182,6 +182,8 @@ Rerun `tools/varka_expansion_sim.py` on the new pool. The bars:
 - no new card dominant or dead.
 
 The numbers above move with the sim. Then a Varka seat round.
+
+Sim 2026-10-03 (PR #863): at the paper's numbers the starters spread 7.6 points; Amber Block 5 and Lisa Block 6 bring it to 1.6. Element decks within 10.4 of the default drafter and 9.3 of the mixing deck.
 
 ## Picks
 

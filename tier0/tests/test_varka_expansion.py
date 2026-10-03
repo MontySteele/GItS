@@ -82,13 +82,15 @@ def _rows():
 # ---------------------------------------------------------------------------
 
 EXPANSION_IDS = (
-    "pathfinders_mark", "cavalry_charge", "west_wind_shield",
+    # The rebalance (2026-10-03): Kindled Edge took Cavalry Charge's place
+    # and Storm Battery Gust Ward's.
+    "pathfinders_mark", "kindled_edge", "west_wind_shield",
     "knightly_strike", "amber_sharpshooter",
     "blazing_charge", "tidal_bulwark", "glacial_edict", "static_field",
     "barbara_wellspring_hymn", "lisa_pulsating_witch",
     "noelle_steadfast_maid", "vow_of_the_blade", "unwavering_banner",
     # Varka defence (2026-10-01): Gust Ward took Four Banners' place.
-    "shifting_gale", "cycle_of_seasons", "gust_ward", "eye_wall",
+    "shifting_gale", "cycle_of_seasons", "storm_battery", "eye_wall",
     # Element identities (2026-10-01): Short Circuit and Retaliating Tide
     # took Pressure Front's and Unbroken Tide's places.
     "short_circuit", "crosscurrent", "assembly_at_the_cathedral",
@@ -120,8 +122,7 @@ def test_the_pool_is_78_twenty_thirty_five_twenty_three(varka):
 def test_the_paper_numbers_and_upgrades(varka):
     def fx(cid, op, i=0):
         return [f for f in loader.get_card(cid).effects if f["op"] == op][i]
-    assert fx(_vk("barbara_show_begin"), "block")["amount"] == 5
-    assert fx(_vk("barbara_show_begin") + "+", "block")["amount"] == 7
+    # Gleeful Songs' numbers moved with the rebalance (test_varka_rebalance).
     assert fx(_vk("mika_starfrost_swirl"), "apply_power")["amount"] == 2
     assert fx(_vk("mika_starfrost_swirl") + "+", "apply_power")["amount"] == 3
     assert fx(_vk("razor_claw_and_thunder") + "+", "varka")["base"] == 6
@@ -179,13 +180,16 @@ def test_kaeya_applies_vulnerable_and_mika_weak(varka):
     assert st.player.block == 0
 
 
-def test_razor_hits_all_and_more_on_electro(varka):
+def test_razor_hits_one_enemy_and_more_on_electro(varka):
+    # The AoE trim (sec.4): one enemy, no longer ALL.
     st = _state(enemies=[_enemy(name="a", aura="electro"), _enemy(name="b")])
     _play(st, _vk("razor_claw_and_thunder"))
     a, b = st.enemies
-    assert a.hp == 100 - 7 and b.hp == 100 - 4
-    assert b.aura == "electro"
+    assert a.hp == 100 - 7 and b.hp == 100
     assert _led(st).current == "electro"
+    st = _state(enemies=[_enemy(name="c")])
+    _play(st, _vk("razor_claw_and_thunder"))
+    assert st.enemies[0].hp == 100 - 4 and st.enemies[0].aura == "electro"
 
 
 def test_sharpshooter_shoots_again_only_on_pyro(varka):
@@ -227,16 +231,6 @@ def test_pathfinders_mark(varka):
     _led(st).current = "hydro"
     _play(st, _vk("pathfinders_mark") + "+")
     assert all(e.aura == "hydro" for e in st.enemies)
-
-
-def test_cavalry_charge_carries_the_current_element_or_anemo(varka):
-    st = _state()
-    _led(st).current = "cryo"
-    _play(st, _vk("cavalry_charge"))
-    assert st.enemies[0].aura == "cryo" and st.enemies[0].hp == 93
-    st = _state(enemies=[_enemy(aura="pyro")])
-    _play(st, _vk("cavalry_charge"))
-    assert _led(st).swirls_made == 1                 # plain Anemo Swirled
 
 
 def test_west_wind_shield_and_knightly_strike(varka):
@@ -327,11 +321,13 @@ def test_shifting_gale_and_cycle_of_seasons(varka):
     assert st.enemies[0].hp == 94
     st.player.powers[V.CYCLE_OF_SEASONS] = 4
     _play(st, _vk("mika_starfrost_swirl"))             # none -> Cryo
-    assert [e.hp for e in st.enemies] == [90, 96]
+    # The AoE trim (sec.4): 4 to ONE random enemy, not ALL.
+    assert sum(100 - e.hp for e in st.enemies) == 6 + 4
     st.enemies[0].aura = None                          # no Swirl, no Vulnerable
     st.enemies[0].powers.clear()
+    hp = st.enemies[0].hp
     _play(st, _vk("shifting_gale"))
-    assert st.enemies[0].hp == 90 - 12
+    assert st.enemies[0].hp == hp - 12
 
 
 def test_charge_of_the_knights(varka):
@@ -378,16 +374,15 @@ def test_assembly(varka):
     assert before - sum(e.hp for e in st.enemies) == 3 * 2
 
 
-def test_absolute_zero_widens_its_payout(varka):
-    # (Wildfire Oath widened Pyro's payout until element identities re-aimed
-    # it: tier0/tests/test_varka_element_identities.py.)
+def test_absolute_zero_no_longer_widens_its_payout(varka):
+    # The rebalance (sec.2) made it a debuff payoff (test_varka_rebalance);
+    # the Cryo Swirl pays its one Vulnerable on the enemy Swirled.
     st = _state(enemies=[_enemy(name="a", aura="hydro"), _enemy(name="b")])
     led = _led(st)
     led.current = "cryo"
     st.player.powers[V.ABSOLUTE_ZERO] = 1
     _play(st, _vk("jean_dandelion_breeze"))
-    for e in st.enemies:
-        assert e.powers.get("vulnerable") == 1 and e.powers.get("weak") == 1
+    assert [e.powers.get("weak", 0) for e in st.enemies] == [0, 0]
 
 
 def test_twin_gales_pays_the_swirled_element_too(varka):

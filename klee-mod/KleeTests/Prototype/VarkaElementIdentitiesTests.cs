@@ -206,12 +206,13 @@ public class VarkaElementIdentitiesTests : IDisposable
     // ---- sec.5: Wildfire Oath ---------------------------------------------------
 
     [Fact]
-    public void Wildfire_is_the_pyro_oath_on_one_hit_while_pyro_is_current()
+    public void Wildfire_is_half_the_pyro_oath_on_one_hit()
     {
-        Assert.Equal(5, VarkaOath.WildfireBonus(Element.Pyro, 5, 1));
-        Assert.Equal(10, VarkaOath.WildfireBonus(Element.Pyro, 5, 2));
-        Assert.Equal(0, VarkaOath.WildfireBonus(Element.Hydro, 5, 1));
-        Assert.Equal(0, VarkaOath.WildfireBonus(Element.Pyro, 5, 0));
+        // The rebalance (sec.2): half, rounded down, whatever is current.
+        Assert.Equal(2, VarkaOath.WildfireBonus(5, 1));
+        Assert.Equal(4, VarkaOath.WildfireBonus(5, 2));
+        Assert.Equal(3, VarkaOath.WildfireBonus(6, 1));
+        Assert.Equal(0, VarkaOath.WildfireBonus(5, 0));
         var ledger = FreshLedger();
         ledger.RollTo(2);
         Assert.True(ledger.TakeFirstAttack());
@@ -260,8 +261,9 @@ public class VarkaElementIdentitiesTests : IDisposable
     [InlineData("ProtoVkShortCircuit", true)]
     [InlineData("ProtoVkTempestOfTheFourWinds", true)]
     [InlineData("ProtoVkAmberBaronBunny", true)]          // a Knight
-    [InlineData("ProtoVkFavoniusDrill", false)]           // his current element
-    [InlineData("ProtoVkCavalryCharge", false)]
+    [InlineData("ProtoVkKindledEdge", true)]              // the rebalance
+    [InlineData("ProtoVkStormBattery", true)]
+    [InlineData("ProtoVkFrostWard", false)]               // applies no element
     [InlineData("ProtoVkNoelleSteadfastMaid", false)]     // Geo
     [InlineData("ProtoVkGaleMantle", false)]              // Anemo
     public void A_card_that_switches_his_element_carries_the_switch_tip(
@@ -293,7 +295,7 @@ public class VarkaElementIdentitiesTests : IDisposable
         // element". A kind's hit carries its own element.
         foreach (var card in new CardModel[]
                  {
-                     new ProtoVkCavalryCharge(), new ProtoVkBlazingCharge(),
+                     new ProtoVkKindledEdge(), new ProtoVkBlazingCharge(),
                      new ProtoVkChargedLunge(), new ProtoVkVioletStorm(),
                  })
         {

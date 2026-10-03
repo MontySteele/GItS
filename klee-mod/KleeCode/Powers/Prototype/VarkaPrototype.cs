@@ -77,7 +77,7 @@ public static class VarkaLaw
     /// draw.</summary>
     public const int EyeOfStormterrorSwirls = 3;
 
-    /// <summary>Absolute Zero (the expansion): the Weak its Cryo payout adds
-    /// beside the Vulnerable.</summary>
-    public const int AbsoluteZeroWeak = 1;
+    /// <summary>Whisper of Water (the rebalance, 2026-10-03): the turns its
+    /// later Block lasts ("at the start of your next 2 turns").</summary>
+    public const int EchoBlockTurns = 2;
 }

@@ -56,15 +56,16 @@ public sealed class ProtoVkBarbaraMelodyLoop : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara: Glorious Season"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to an enemy."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold]. Next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(8m),
+            new CalculationBaseVar(6m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new SpotlightSystem.DeferredBlockVar(3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -79,10 +80,12 @@ public sealed class ProtoVkBarbaraMelodyLoop : CustomCardModel, ICompanionCard
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Hydro, Owner.Creature);
+        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, (int)SpotlightSystem.PrintedBlock(this, DynamicVars["BlockNextTurn"].IntValue), applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
+        DynamicVars["BlockNextTurn"].UpgradeValueBy(1m);
     }
 }

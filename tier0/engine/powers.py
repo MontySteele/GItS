@@ -252,8 +252,3 @@ def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
     # leave it None and refpowers recovers it from the acting side.
     from tier0.engine import refpowers          # late import avoids cycle
     refpowers.on_power_applied(state, target, name, stacks, applier)
-    # VARKA, the rebalance paper's Absolute Zero (sim only, behind
-    # `varka_oath.REBALANCE`): a Weak or Vulnerable he applies to an enemy.
-    if name in ("weak", "vulnerable") and target is not state.player:
-        from tier0.engine import varka_oath     # late import avoids cycle
-        varka_oath.on_debuff_applied(state, target, name, stacks)

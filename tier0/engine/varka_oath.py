@@ -98,22 +98,19 @@ VARKA DEFENCE (review/active/varka-defence-2026-10-01.md, ruled 2026-10-01):
     `Player.varka_starter_element` (`build_player`), else the first starter
     Knight among his cards. No Oath, so the Ascension still waits.
 
-THE REBALANCE PAPER, SIM ONLY (review/active/varka-rebalance-2026-10-03.md
-secs.2-5, and the Varka part of review/active/aoe-trim-2026-10-03.md sec.4 on
-branch aoe-trim). NOT BUILT IN C#: the rows live in the sim harness's overlay
-(`tools/varka_expansion_sim.py`, `--world rebalance`), never on the sheet, and
-the rule changes sit behind `REBALANCE` (default False, today's rules, so the
-C# twin and this module still agree). With it on:
+THE REBALANCE (review/active/varka-rebalance-2026-10-03.md secs.2-5, and the
+Varka part of review/active/aoe-trim-2026-10-03.md sec.4; simmed in PR #863,
+variant A's starter numbers):
   * WILDFIRE OATH: the turn's first Attack arms the bonus whatever the current
     element, and it is half the Pyro Oath (rounded down) per stack.
   * ABSOLUTE ZERO: no Swirl widening; "Whenever you apply Weak or Vulnerable
     to an enemy, deal damage equal to your Cryo Oath to it" -- element-less,
-    unpowered, per stack (`on_debuff_applied`, from `powers.apply_power`).
+    unpowered, per stack (`on_debuff_applied`, from
+    `refpowers.on_power_applied`, Sea's Reproach's seat).
   * CYCLE OF SEASONS: its damage hits one random enemy, not ALL.
-The overlay's new kinds are vocabulary here whatever the switch (no sheet row
-prints them): `kindled_edge`, `storm_battery`, `frost_ward`, `gleeful_songs`,
-`rippling_guard`, `echo_block` (Whisper of Water's next two turns) and
-`awakening_single` (Razor: Awakening at one enemy).
+  * RAZOR: AWAKENING (`awakening`) hits the one enemy it is played on.
+  * KINDS `kindled_edge`, `storm_battery`, `frost_ward`, `gleeful_songs`,
+    `rippling_guard` and `echo_block` (Whisper of Water's next two turns).
 """
 
 from __future__ import annotations
@@ -172,9 +169,6 @@ EYE_OF_STORMTERROR = "vk_eye_of_stormterror"
 THE_ORDER_ANSWERS = "vk_the_order_answers"
 #: Eye of Stormterror: "The first 3 times you Swirl each turn".
 EYE_OF_STORMTERROR_SWIRLS = 3
-#: Absolute Zero: the Weak its Cryo payout adds (the Vulnerable is
-#: SWIRL_CRYO_VULNERABLE's).
-ABSOLUTE_ZERO_WEAK = 1
 #: Downburst (pick 3a): its Swirl's spread copies arrive fresh.
 DOWNBURST_ID = "proto_vk_downburst"
 #: Tempest of the Four Winds' four hits, in the printed order.
@@ -212,9 +206,9 @@ KINDS = frozenset({
     "cleanse", "crosscurrent", "double_current_oath", "tempest",
     # ELEMENT IDENTITIES (2026-10-01).
     "electro_strike", "electro_all", "violet_storm",
-    # THE REBALANCE PAPER (2026-10-03), sim-only overlay rows.
+    # THE REBALANCE (2026-10-03).
     "kindled_edge", "storm_battery", "frost_ward", "gleeful_songs",
-    "rippling_guard", "echo_block", "awakening_single",
+    "rippling_guard", "echo_block",
 })
 KIND_FIELDS = {
     "ascension_hit": ("per",),
@@ -235,7 +229,6 @@ KIND_FIELDS = {
     "gleeful_songs": ("base", "per"),
     "rippling_guard": ("base", "per"),
     "echo_block": ("amount",),
-    "awakening_single": ("base", "amount"),
 }
 #: The target each kind's row names (the codegen's `VARKA_AIMED_KINDS` less
 #: the two follow-up hits, and `VARKA_ALL_KINDS`); every other kind, none.
@@ -243,12 +236,11 @@ KIND_TARGETS = {
     "apply_current_element": "enemy", "pathfinders_mark": "enemy",
     "current_element_strike": "enemy", "blazing_charge": "enemy",
     "glacial_edict": "enemy", "crosscurrent": "enemy", "tempest": "enemy",
-    "thundering_verdict": "all_enemies", "awakening": "all_enemies",
+    "thundering_verdict": "all_enemies", "awakening": "enemy",
     "electro_strike": "enemy", "electro_all": "all_enemies",
     "violet_storm": "random_enemy",
     "kindled_edge": "enemy", "storm_battery": "all_enemies",
     "frost_ward": "all_enemies", "gleeful_songs": "all_enemies",
-    "awakening_single": "enemy",
 }
 #: `upgraded` is the `varka_upgraded` delta's mark (Pathfinder's Mark+).
 OP_FIELDS = frozenset({"op", "kind", "target", "per", "base", "amount",
@@ -450,9 +442,6 @@ def close_scope(state) -> None:
 #: The open Oath's switch (module, so a paired sim can run the old rule).
 OPEN_OATH = True
 
-#: THE REBALANCE PAPER's rule changes (sim only; see the module docstring).
-#: Off is today's rules, which the C# twin builds.
-REBALANCE = False
 #: Whisper of Water (rebalance sec.3): "at the start of your next 2 turns".
 ECHO_BLOCK_TURNS = 2
 
@@ -493,9 +482,9 @@ def set_current(state, element: str, knight: bool) -> None:
         if cycle:
             from tier0.engine import effects        # late: cycle
             state.emit("varka_cycle_of_seasons", amount=cycle)
-            # REBALANCE (aoe-trim sec.4): "deal damage to a random enemy".
+            # The AoE trim (sec.4): "deal damage to a random enemy".
             targets = list(state.living_enemies)
-            if REBALANCE and targets:
+            if targets:
                 targets = [state.rng.choice(targets)]
             for e in targets:
                 effects.deal_damage_to_enemy(state, e, cycle, element=None,
@@ -525,8 +514,8 @@ def begin_play(state, card) -> None:
     if card.type == "attack" and led.first_attack_turn != state.turn:
         led.first_attack_turn = state.turn
         stacks = _power(state.player, WILDFIRE_OATH)
-        # REBALANCE (sec.2): no current-element condition.
-        if stacks and (REBALANCE or led.current == "pyro"):
+        # The rebalance (sec.2): no current-element condition.
+        if stacks:
             led.wildfire_armed = stacks
     if is_knight(card):
         led.knights_this_turn += 1
@@ -574,9 +563,8 @@ def take_wildfire(state) -> int:
     if led is None or not led.wildfire_armed:
         return 0
     stacks, led.wildfire_armed = led.wildfire_armed, 0
-    # REBALANCE (sec.2): "equal to half your Pyro Oath", rounded down.
-    pyro = led.oath["pyro"] // 2 if REBALANCE else led.oath["pyro"]
-    bonus = stacks * pyro
+    # The rebalance (sec.2): "equal to half your Pyro Oath", rounded down.
+    bonus = stacks * (led.oath["pyro"] // 2)
     if bonus:
         state.emit("varka_wildfire", amount=bonus)
     return bonus
@@ -686,10 +674,9 @@ def on_swirl(state, enemy, aura: str) -> None:
 
 
 def _pay(state, enemy, element: str) -> None:
-    """One Swirl payout of `element` (sec.3), with Absolute Zero: Cryo's
-    Vulnerable and Weak to ALL enemies while the CURRENT element is Cryo.
-    (Wildfire Oath widened Pyro's until element identities re-aimed it at
-    one big hit, `take_wildfire`.)"""
+    """One Swirl payout of `element` (sec.3). (Wildfire Oath widened Pyro's
+    until element identities; Absolute Zero widened Cryo's until the
+    rebalance, which made it a debuff payoff, `on_debuff_applied`.)"""
     from tier0.engine import effects, powers        # late: cycle
     led = ledger(state.player)
     p = state.player
@@ -701,15 +688,9 @@ def _pay(state, enemy, element: str) -> None:
     elif element == "hydro":
         _block(state, SWIRL_HYDRO_BLOCK, "swirl_hydro")
     elif element == "cryo":
-        if (not REBALANCE and _power(p, ABSOLUTE_ZERO)
-                and led.current == "cryo"):
-            for e in list(state.living_enemies):
-                powers.apply_power(state, e, "vulnerable",
-                                   SWIRL_CRYO_VULNERABLE)
-                powers.apply_power(state, e, "weak", ABSOLUTE_ZERO_WEAK)
-        elif enemy.alive:
+        if enemy.alive:
             powers.apply_power(state, enemy, "vulnerable",
-                               SWIRL_CRYO_VULNERABLE)
+                               SWIRL_CRYO_VULNERABLE, applier=p)
     elif element == "electro":
         for e in list(state.living_enemies):
             effects.deal_damage_to_enemy(state, e, SWIRL_ELECTRO_DAMAGE_ALL,
@@ -718,10 +699,12 @@ def _pay(state, enemy, element: str) -> None:
 
 
 def on_debuff_applied(state, target, name: str, stacks: int) -> None:
-    """`powers.apply_power`, last line. REBALANCE's ABSOLUTE ZERO: "Whenever
+    """`refpowers.on_power_applied`, for a Weak or Vulnerable HE applied
+    (Sea's Reproach's test). ABSOLUTE ZERO (the rebalance, sec.2): "Whenever
     you apply Weak or Vulnerable to an enemy, deal damage equal to your Cryo
-    Oath to it." Element-less and unpowered (a Power's), per stack."""
-    if not REBALANCE or name not in ("weak", "vulnerable") or stacks <= 0:
+    Oath to it." Element-less and unpowered (a Power's), per stack. C# twin:
+    `AbsoluteZeroPower.AfterPowerAmountChanged`."""
+    if name not in ("weak", "vulnerable") or stacks <= 0:
         return
     led = ledger(state.player)
     if (led is None or target is state.player
@@ -1102,13 +1085,12 @@ def _expansion_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
                       state.rng.choice(list(state.living_enemies)),
                       fx["base"], "electro")
     elif kind == "awakening":
-        # Razor: "Enemies that already have Electro take 3 more" -- read
-        # before the hits, fresh or spent.
-        had = {id(e) for e in state.living_enemies if e.aura == "electro"}
-        for e in list(state.living_enemies):
-            _card_hit(state, card, e,
-                      fx["base"] + (fx["amount"] if id(e) in had else 0),
-                      "electro")
+        # Razor (the AoE trim, sec.4): "Deal 4 Electro damage to an enemy, 3
+        # more if it already has Electro" -- fresh or spent, read before the
+        # hit.
+        if aim is not None and aim.alive:
+            more = fx["amount"] if aim.aura == "electro" else 0
+            _card_hit(state, card, aim, fx["base"] + more, "electro")
     elif kind == "draw_per_enemy":
         n = len(state.living_enemies)
         if n:
@@ -1146,8 +1128,8 @@ def _powered_block(state, card, amount: int) -> None:
 
 
 def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
-    """THE REBALANCE PAPER's overlay kinds (sim only). True when `fx` was one
-    of them."""
+    """THE REBALANCE's kinds. True when `fx` was one of them. C# twins:
+    `VarkaCards.<Kind>`."""
     from tier0.engine import effects, powers, reactions  # late: cycle
     kind = fx["kind"]
     p = state.player
@@ -1191,12 +1173,6 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
     elif kind == "echo_block":
         # Whisper of Water's "and at the start of your next 2 turns".
         led.echo_block.append([fx["amount"], ECHO_BLOCK_TURNS])
-    elif kind == "awakening_single":
-        # aoe-trim sec.4: "Deal Electro damage to an enemy, more if it
-        # already has Electro."
-        if aim is not None and aim.alive:
-            more = fx["amount"] if aim.aura == "electro" else 0
-            _card_hit(state, card, aim, fx["base"] + more, "electro")
     else:
         return False
     return True

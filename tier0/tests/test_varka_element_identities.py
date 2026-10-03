@@ -264,38 +264,39 @@ def _squall():
     return card
 
 
-def test_wildfire_adds_pyro_oath_to_the_first_attacks_first_hit(varka):
+def test_wildfire_adds_half_pyro_oath_to_the_first_attacks_first_hit(varka):
+    # The rebalance (sec.2): half the Pyro Oath, rounded down.
     st = _state()
     led = V.ledger(st.player)
     led.current, led.oath["pyro"] = "pyro", 7
     st.player.powers[V.WILDFIRE_OATH] = 1
     _play(st, _squall())                             # 4 twice
-    assert st.enemies[0].hp == 100 - (4 + 7) - 4
+    assert st.enemies[0].hp == 100 - (4 + 3) - 4
     hp = st.enemies[0].hp
     _play(st, _squall())                             # the turn's second
     assert st.enemies[0].hp == hp - 8
     st.turn = 2
     hp = st.enemies[0].hp
     _play(st, _squall())                             # a new turn
-    assert st.enemies[0].hp == hp - (4 + 7) - 4
+    assert st.enemies[0].hp == hp - (4 + 3) - 4
 
 
-def test_wildfire_needs_pyro_current_and_a_first_attack(varka):
+def test_wildfire_needs_only_a_first_attack(varka):
+    # The rebalance (sec.2): no current-element condition.
     st = _state()
     led = V.ledger(st.player)
     led.current, led.oath["pyro"] = "hydro", 7
     st.player.powers[V.WILDFIRE_OATH] = 1
     _play(st, _squall())
-    assert st.enemies[0].hp == 100 - 8
-    led.current = "pyro"
+    assert st.enemies[0].hp == 100 - 8 - 3
     _play(st, _squall())                             # not the first
-    assert st.enemies[0].hp == 100 - 16
+    assert st.enemies[0].hp == 100 - 16 - 3
     # Skills do not spend it; stacks multiply it.
     st = _state()
     led = V.ledger(st.player)
-    led.current, led.oath["pyro"] = "pyro", 3
+    led.current, led.oath["pyro"] = "pyro", 6
     st.player.powers[V.WILDFIRE_OATH] = 2
-    _play(st, _vk("wind_wall"))
+    _play(st, _vk("knightly_guard"))
     _play(st, _vk("favonius_cut"))
     assert st.enemies[0].hp == 100 - 14 - 6
 
@@ -334,7 +335,7 @@ def test_the_switch_element_each_row_declares():
         "tidal_bulwark": "hydro", "glacial_edict": "cryo",
         "amber_baron_bunny": "pyro", "lisa_pulsating_witch": "electro",
         "kaeya_frostgnaw": "cryo",
-        "favonius_drill": None, "cavalry_charge": None,
+        "frost_ward": None, "kindled_edge": "pyro", "storm_battery": "electro",
         "pathfinders_mark": None, "noelle_steadfast_maid": None,
         "gale_mantle": None, "northwind_avatar": None,
     }
@@ -346,7 +347,7 @@ def test_element_kinds_are_tagged_with_their_element_not_anemo():
     import tools.gen_klee_cards as gen
     profile = gen.PROTOTYPE_OWNERS["varka"]
     rows = _rows()
-    for name, tags in (("cavalry_charge", []), ("blazing_charge", ["pyro"]),
+    for name, tags in (("kindled_edge", ["pyro"]), ("blazing_charge", ["pyro"]),
                        ("charged_lunge", ["electro"]),
                        ("violet_storm", ["electro"]),
                        ("thundering_verdict", ["electro"]),
@@ -364,9 +365,9 @@ def test_element_kinds_are_tagged_with_their_element_not_anemo():
 
 def test_the_generated_faces():
     gen_dir = REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
-    cavalry = (gen_dir / "ProtoVkCavalryCharge.cs").read_text(encoding="utf-8")
-    assert "AppliesAnemo" not in cavalry
-    assert "public Element Element => Element.None;" in cavalry
+    edge = (gen_dir / "ProtoVkKindledEdge.cs").read_text(encoding="utf-8")
+    assert "AppliesAnemo" not in edge
+    assert "public Element Element => Element.None;" in edge
     blazing = (gen_dir / "ProtoVkBlazingCharge.cs").read_text(encoding="utf-8")
     assert "KleeKeywords.AppliesPyro" in blazing
     assert "ArmKeywordTips.ForElementSwitch(" in blazing

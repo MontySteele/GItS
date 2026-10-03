@@ -38,14 +38,14 @@ public sealed class ProtoVkWildfireOath : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForOath(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_wildfire_oath");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Wildfire Oath"),
-        ("description", "While your [gold]current element[/gold] is Pyro, your first Attack each turn deals additional damage equal to your Pyro [gold]Oath[/gold]."),
+        ("description", "Your first Attack each turn deals additional damage equal to half your Pyro [gold]Oath[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
