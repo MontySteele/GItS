@@ -122,11 +122,17 @@ In-process (dot-source `build/version.ps1`): `Get-PackageVersion`,
 
 ## 5. Traps
 
-- **`$artSrcDirs` is a hand-maintained list of every roster character**
-  (`deploy.ps1:118-128`). Omitting one fails nothing — green build, green gates,
-  loaded mod, blank portraits. Kokomi shipped that way for a day. S9 checks the
-  *outcome* against the stage, in both the "no staged art at all" and "partial
-  copy" directions (`validate.ps1:649-716`).
+- **Card art ships only as the shipped set** (2026-10-02). `deploy.ps1` and
+  `deploy_proto.ps1` stage `images/cards` through `tools/shipped_card_art.py`:
+  every literal `RosterArt.CardPortrait` key in the mod source plus every live
+  prototype-surface id and `art_of` target, read from every dir under
+  `ImageGen/images/cards` (no hand-kept dir list; Kokomi's art once missed the
+  stage for a day because one was missing). ImageGen keeps the art of cut cards
+  on purpose; it no longer ships. A key with no png is allowed only on
+  `art_coverage.KNOWN_MISSING`. S9 checks the stage against the set in both
+  directions: a shipped png missing from the stage, and a staged png no card
+  can draw. The pck carries no card portraits. Dry run:
+  `python tools/shipped_card_art.py`.
 - **`$pckDeferred` is checked in BOTH directions** (`validate.ps1:871-912`,
   `:981-989`): art that has landed, or an entry nothing references any more, is a
   stale exemption and fails. Portable half:

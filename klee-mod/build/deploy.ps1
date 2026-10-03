@@ -59,6 +59,29 @@ $csproj     = Join-Path $root 'KleeCode\KleeCode.csproj'
 $packageDir = Join-Path $root 'Klee'   # NOT $package: collides with the -Package switch
 $stage      = Join-Path $root 'dist\klee'
 $localProps = Join-Path $root 'local.props'
+$venvPython = Join-Path $repoRoot '.venv\Scripts\python.exe'
+
+function Invoke-RepoPython {
+    <#
+      The repo's own interpreter, with PYTHONPATH pinned to the repo root, in
+      deploy_proto.ps1's shape (tier0/tests/test_repo_python_convention).
+      EAP is lowered around the call and restored in `finally`: in PS 5.1 a
+      native command's stderr under EAP=Stop raises NativeCommandError even
+      on exit code 0.
+    #>
+    param([Parameter(Mandatory = $true, ValueFromRemainingArguments = $true)]
+          [string[]]$Arguments)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $prevPyPath = $env:PYTHONPATH
+    $env:PYTHONPATH = if ($prevPyPath) { "$repoRoot;$prevPyPath" } else { $repoRoot }
+    try {
+        & $venvPython @Arguments 2>&1
+    } finally {
+        $ErrorActionPreference = $prev
+        $env:PYTHONPATH = $prevPyPath
+    }
+}
 
 if (-not (Test-Path $localProps)) {
     throw "local.props not found. Copy local.props.example to local.props and set GameDir."
@@ -145,39 +168,34 @@ if ($version.UntrackedFiles.Count -gt 0) {
 # BaseLib's CustomPortrait accepts a Texture2D object we build at runtime.
 # Source of truth is the art pipeline's output dir, which is gitignored.
 # RosterArt.CardPortrait looks up images/cards/<cardId>.png -- one FLAT dir keyed
-# by sheet id. The pipeline keeps each character's cards and the companion cards
-# in separate source dirs, so all of them are staged into that one flat
-# destination. Ids are unique across the sheets (tools/lint_unique_names.py
-# gates that), so nothing collides.
+# by card id, so every character's dir and the companions dir land in it.
 #
-# EVERY ROSTER CHARACTER MUST BE LISTED HERE. A character missing from this
-# array does not fail anything -- the build is green, validate is green, and
-# the mod loads -- their cards simply render with no portrait. Kokomi shipped
-# that way for one day (2026-07-25): 58 painted faces sat in ImageGen and none
-# of them reached the game.
-$artSrcDirs = @(
-    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\klee'),
-    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\furina'),
-    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\kokomi'),
-    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\varka'),
-    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\companions')
-)
+# ONLY THE SHIPPED SET IS STAGED (2026-10-02). ImageGen keeps the paintings of
+# cut cards and of the deleted old kits on purpose, and copying every png in
+# the card dirs shipped 743 images where 433 can be drawn (~71 MB of dead
+# art). tools/shipped_card_art.py is the one list: every literal
+# RosterArt.CardPortrait key in the mod source, widened by every live
+# prototype-surface id and art_of target. It reads EVERY dir under
+# ImageGen\images\cards (klee, furina, kokomi, varka, companions today) off
+# disk rather than a closed list here: Kokomi's art missed the stage for a
+# day (2026-07-25) because a character was left off this script's list.
+# Dry run, listing what is left behind:
+#     .venv\Scripts\python.exe tools\shipped_card_art.py
+# validate.ps1 S9 then holds the stage to exactly that set.
+$artRoot = Join-Path $repoRoot 'ImageGen\images\cards'
 $artDst = Join-Path $stage 'images\cards'
-$foundAny = $false
-foreach ($artSrc in $artSrcDirs) {
-    if (Test-Path $artSrc) {
-        New-Item -ItemType Directory -Force -Path $artDst | Out-Null
-        Copy-Item (Join-Path $artSrc '*.png') -Destination $artDst
-        $foundAny = $true
-    } else {
-        Write-Host "WARNING: no card art at $artSrc" -ForegroundColor Yellow
+if (Test-Path $artRoot) {
+    if (-not (Test-Path $venvPython)) {
+        throw "repo venv python not found at $venvPython; cannot stage card art."
     }
-}
-if ($foundAny) {
-    $artCount = (Get-ChildItem $artDst -Filter *.png).Count
-    Write-Host "Staged $artCount card images" -ForegroundColor Cyan
+    $artOut = Invoke-RepoPython 'tools\shipped_card_art.py' '--images-root' $artRoot '--stage' $artDst
+    if ($LASTEXITCODE -ne 0) {
+        $artOut | ForEach-Object { Write-Host $_ }
+        throw "tools/shipped_card_art.py --stage failed (exit $LASTEXITCODE)."
+    }
+    $artOut | ForEach-Object { Write-Host $_ -ForegroundColor Cyan }
 } else {
-    Write-Host "WARNING: no card art found (cards will fall back to BETA placeholder)" -ForegroundColor Yellow
+    Write-Host "WARNING: no card art at $artRoot (cards will render the blank portrait)" -ForegroundColor Yellow
 }
 
 # The pck carries the res://-bound art (select screen, top-panel icon, map

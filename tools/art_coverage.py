@@ -338,6 +338,19 @@ KNOWN_STALE = {
 }
 
 
+# KNOWN MISSING: portrait keys the mod asks for that have no png yet, so the
+# card renders RosterArt's blank portrait. Each is open art debt with a reason
+# on record. `tools/shipped_card_art.py` and its test fail on a missing key NOT
+# listed here, and on an entry here that has since been painted or cut.
+KNOWN_MISSING = {
+    "alices_masterpiece": "Klee's second Ancient card (pool completion, 2026-10-01); no painting yet.",
+    "center_of_attention": "Furina's second Ancient card (pool completion, 2026-10-01); no painting yet.",
+    "divine_strategy": "Kokomi's second Ancient card (pool completion, 2026-10-01); no painting yet.",
+    "kk_open_the_casket": "The Tamakushi Casket's token (OpenTheCasket.cs, hand-written, 2026-09-28); no painting yet.",
+    "kk_sea_glass": "Sea Glass Harvest's token (SeaGlass.cs, hand-written, 2026-10-01); no painting yet.",
+}
+
+
 # D5 (`EB-778`). THE PROXY BILL. A sheet row may say `art_of: <neighbour>`,
 # and the generator then emits the NEIGHBOUR's key in that card's
 # `CustomPortrait` getter (`tools/gen_klee_cards.py`: `card.get("art_of") or
@@ -555,7 +568,8 @@ def main():
         order = (lambda k: (RARITY_ORDER.get(k, 9), k)) if by == "rarity" else (lambda k: k)
         for key in sorted(groups, key=order):
             ids = sorted(groups[key])
-            print(f"  {key:12s} {len(ids):3d}  {', '.join(ids)}")
+            shown = [i if i in KNOWN_MISSING else f"{i} [NEW]" for i in ids]
+            print(f"  {key:12s} {len(ids):3d}  {', '.join(shown)}")
 
     print("\n" + "-" * 72)
     print("STALE (files with no sheet row -- NOT coverage)")

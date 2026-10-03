@@ -271,30 +271,21 @@ if ($version.UntrackedFiles.Count -gt 0) {
     Write-Host ("note: $($version.UntrackedFiles.Count) untracked file(s) in the tree; they do not affect the version stamp.") -ForegroundColor DarkGray
 }
 
-# Card art, the same flat destination deploy.ps1 stages into and the same
-# four source dirs. A prototype row has no art of its own by design -- art is
-# commissioned when a slice is ACCEPTED and its rows move to a real sheet --
-# so a prototype card renders with no portrait, which is correct and is not
-# a warning.
-$artSrcDirs = @(
-    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\klee'),
-    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\furina'),
-    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\kokomi'),
-    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\varka'),
-    (Join-Path (Split-Path -Parent $root) 'ImageGen\images\cards\companions')
-)
+# Card art, the same flat destination and the same shipped set deploy.ps1
+# stages (tools/shipped_card_art.py: only images some card can draw). A
+# prototype row with no painting renders RosterArt's blank portrait, which is
+# correct and is not a warning.
+$artRoot = Join-Path $repoRoot 'ImageGen\images\cards'
 $artDst = Join-Path $stage 'images\cards'
-foreach ($artSrc in $artSrcDirs) {
-    if (Test-Path $artSrc) {
-        New-Item -ItemType Directory -Force -Path $artDst | Out-Null
-        Copy-Item (Join-Path $artSrc '*.png') -Destination $artDst
-    } else {
-        Write-Host "WARNING: no card art at $artSrc" -ForegroundColor Yellow
+if (Test-Path $artRoot) {
+    $artOut = Invoke-RepoPython 'tools\shipped_card_art.py' '--images-root' $artRoot '--stage' $artDst
+    if ($LASTEXITCODE -ne 0) {
+        $artOut | ForEach-Object { Write-Host $_ }
+        throw "tools/shipped_card_art.py --stage failed (exit $LASTEXITCODE)."
     }
-}
-if (Test-Path $artDst) {
-    $n = (Get-ChildItem $artDst -Filter '*.png').Count
-    Write-Host "Staged $n card images" -ForegroundColor Cyan
+    $artOut | ForEach-Object { Write-Host $_ -ForegroundColor Cyan }
+} else {
+    Write-Host "WARNING: no card art at $artRoot" -ForegroundColor Yellow
 }
 
 # The pck, exactly as deploy.ps1 stages it. Missing is a warning here and a
