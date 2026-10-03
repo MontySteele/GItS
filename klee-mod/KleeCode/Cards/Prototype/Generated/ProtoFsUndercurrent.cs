@@ -64,7 +64,7 @@ public sealed class ProtoFsUndercurrent : CustomCardModel, ICharacterCard
             .WithHitCount(DynamicVars["Times"].IntValue)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
     }

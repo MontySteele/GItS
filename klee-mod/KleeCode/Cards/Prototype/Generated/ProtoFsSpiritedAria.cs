@@ -95,7 +95,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
             await DamageCmd.Attack((IsUpgraded ? 11m : 8m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
         else
@@ -104,7 +104,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
             await DamageCmd.Attack((IsUpgraded ? 17m : 14m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
             await CardPileCmd.Draw(choiceContext, 2m, Owner);
         }

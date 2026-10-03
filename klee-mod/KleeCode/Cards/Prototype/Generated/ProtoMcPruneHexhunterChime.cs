@@ -83,7 +83,7 @@ public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Anemo, Owner.Creature);
         await PowerCmd.Apply<HexhunterChimePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);

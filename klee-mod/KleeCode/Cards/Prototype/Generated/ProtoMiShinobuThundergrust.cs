@@ -84,14 +84,14 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         if (Owner.Creature.CurrentHp * 100m < Owner.Creature.MaxHp * 50m)
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 5m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

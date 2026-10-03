@@ -82,7 +82,7 @@ public sealed class ProtoMiSayuFuuinDash : CustomCardModel, IElementalCard, ICom
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .TargetingRandomOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
     }
 

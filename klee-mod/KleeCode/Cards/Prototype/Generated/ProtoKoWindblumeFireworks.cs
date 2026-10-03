@@ -71,7 +71,7 @@ public sealed class ProtoKoWindblumeFireworks : CustomCardModel, IElementalCard,
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
         await ProtoBombPower.PlaceOnAll(choiceContext, Owner.Creature, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, cardSource: this);

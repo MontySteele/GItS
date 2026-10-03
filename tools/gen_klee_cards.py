@@ -9167,7 +9167,9 @@ def _emit_damage_call(card: dict, eff: dict, lines: list[str], ctx: dict,
         # can reach it.
         call.append(".TargetingRandomOpponents(CombatState!)")
 
-    call.append('.WithHitFx("vfx/vfx_attack_slash")')
+    # 2026-10-02 (combat visual audit): the card's element picks its hit
+    # effect through one door, `ElementHitFx` (klee-mod/KleeCode/Vfx).
+    call.append(".WithElementHitFx(this)")
     if target == "all_enemies":
         call.append(".SpawningHitVfxOnEachCreature()")
     call.append(".Execute(choiceContext);")
@@ -10628,7 +10630,7 @@ def build_body(
                     "+ aoeVigor.Next())\n"
                     "                .FromCard(this, cardPlay)\n"
                     "                .Targeting(auraTarget)\n"
-                    '                .WithHitFx("vfx/vfx_attack_slash")\n'
+                    "                .WithElementHitFx(this)\n"
                     "                .Execute(choiceContext);\n"
                     "        }")
             else:

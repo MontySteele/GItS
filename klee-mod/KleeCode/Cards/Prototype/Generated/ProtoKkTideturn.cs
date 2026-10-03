@@ -75,7 +75,7 @@ public sealed class ProtoKkTideturn : CustomCardModel, IElementalCard, ICharacte
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
     }
 

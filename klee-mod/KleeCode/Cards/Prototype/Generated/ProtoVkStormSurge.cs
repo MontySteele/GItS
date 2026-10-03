@@ -73,7 +73,7 @@ public sealed class ProtoVkStormSurge : CustomCardModel, IElementalCard, ICharac
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
         await VarkaCards.SwirledTakeMore(choiceContext, this, cardPlay);

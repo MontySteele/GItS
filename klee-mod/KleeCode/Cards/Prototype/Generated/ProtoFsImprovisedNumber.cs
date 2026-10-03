@@ -67,7 +67,7 @@ public sealed class ProtoFsImprovisedNumber : CustomCardModel, ICharacterCard
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         if (!FurinaStage.Occupied(Owner.Creature))
         {

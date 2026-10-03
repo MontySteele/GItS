@@ -84,7 +84,7 @@ public sealed class ProtoMiGorouInuzaka : CustomCardModel, IElementalCard, IComp
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         await InazumaCompanion.BlockHalfDamage(choiceContext, Owner.Creature, cardPlay);
     }

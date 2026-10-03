@@ -95,7 +95,7 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
             await DamageCmd.Attack((IsUpgraded ? 10m : 7m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
         else
@@ -104,7 +104,7 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
             await DamageCmd.Attack((IsUpgraded ? 21m : 17m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

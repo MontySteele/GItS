@@ -105,7 +105,7 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
             await DamageCmd.Attack((DynamicVars.Damage.BaseValue + (KokomiOverhaulKit.HasDebuff(auraTarget) ? DynamicVars.ExtraDamage.BaseValue : 0)) + aoeVigor.Next())
                 .FromCard(this, cardPlay)
                 .Targeting(auraTarget)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

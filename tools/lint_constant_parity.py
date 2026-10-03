@@ -705,6 +705,9 @@ UNMIRRORED: dict[str, str] = {
     "ElementBadge.Gap":
         "presentation: pixels between the gem's right edge and the type "
         "plaque's left, so the pair reads as one row.",
+    "ReactionFx.FlashSeconds":
+        "presentation: a reaction's body-flash length in seconds; nothing "
+        "waits on it, and the sim draws nothing.",
     "KleeCombatVfx.LobDuration":
         "presentation: bomb-toss animation length in seconds.",
     "KleeCombatVfx.MaxConcurrentPops":

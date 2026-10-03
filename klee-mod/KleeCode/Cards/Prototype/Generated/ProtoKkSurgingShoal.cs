@@ -101,7 +101,7 @@ public sealed class ProtoKkSurgingShoal : CustomCardModel, IElementalCard, IChar
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
     }
 

@@ -83,7 +83,7 @@ public sealed class ProtoMiSaraTenguStormcall : CustomCardModel, IElementalCard,
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         await PowerCmd.Apply<TenguStormcallPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }

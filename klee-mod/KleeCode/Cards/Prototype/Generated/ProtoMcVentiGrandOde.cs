@@ -83,7 +83,7 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
         await PowerCmd.Apply<GrandOdePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);

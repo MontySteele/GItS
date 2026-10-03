@@ -84,7 +84,7 @@ public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, IC
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         await PowerCmd.Apply<SinfulHexPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }

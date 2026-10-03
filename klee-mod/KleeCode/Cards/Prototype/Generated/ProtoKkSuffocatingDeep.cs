@@ -72,7 +72,7 @@ public sealed class ProtoKkSuffocatingDeep : CustomCardModel, IElementalCard, IC
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
         await KokomiCards.DoubleWeakVulnerable(choiceContext, this, cardPlay);

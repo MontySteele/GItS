@@ -83,7 +83,7 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 18m))
                 .FromCard(this, cardPlay)
                 .TargetingAllOpponents(CombatState!)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .SpawningHitVfxOnEachCreature()
                 .Execute(choiceContext);
         }

@@ -83,7 +83,7 @@ public sealed class ProtoMfClorindeImpaleTheNight : CustomCardModel, IElementalC
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         await PowerCmd.Apply<NightVigilPower>(choiceContext, Owner.Creature, 6, applier: Owner.Creature, cardSource: this);
     }

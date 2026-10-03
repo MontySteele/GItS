@@ -69,7 +69,7 @@ public sealed class ProtoFsDaCapo : CustomCardModel, ICharacterCard
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
     }
 

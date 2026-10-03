@@ -84,7 +84,7 @@ public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElem
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
     }
