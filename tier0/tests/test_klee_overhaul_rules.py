@@ -2277,12 +2277,12 @@ def test_once_more_upgraded_charges_one_spark_less(overhaul):
     assert combat.card_playable(state, up) is True
 
 
-# --- Fish Blasting: the draw-pile zone -------------------------------------
+# --- Fish Blasting: the status goes to the discard pile ---------------------
 
-def test_fish_blasting_shuffles_a_confiscated_into_the_draw_pile(overhaul):
-    """The third `add_card` zone. It lands in the DRAW pile at a random index,
-    which is `CardPilePosition.Random` on the other side: the whole cost of the
-    Status is that the player does not know when it arrives."""
+def test_fish_blasting_adds_a_confiscated_into_the_discard_pile(overhaul):
+    """Every status our cards make goes to the DISCARD pile, as the base game's
+    do (Turbo, Overclock, Gunk Up, Boost Away, Fight Through). [USER],
+    2026-10-03: "I agree that we should adopt the same convention"."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.player.draw_pile = [probe([], cid="f%d" % i, ctype="skill")
@@ -2291,8 +2291,8 @@ def test_fish_blasting_shuffles_a_confiscated_into_the_draw_pile(overhaul):
     effects.resolve_card(state, load("proto_ko_fish_blasting"))
 
     assert (a.hp, b.hp) == (192, 192)      # 8 to ALL since the balance review
-    assert [c.id for c in state.player.draw_pile].count("confiscated") == 1
-    assert not any(c.id == "confiscated" for c in state.player.discard_pile)
+    assert [c.id for c in state.player.discard_pile].count("confiscated") == 1
+    assert not any(c.id == "confiscated" for c in state.player.draw_pile)
 
 
 def test_fish_blasting_sets_nothing_off(overhaul):

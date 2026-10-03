@@ -249,16 +249,15 @@ public class PoolPassThreeTests
     }
 
     [Fact]
-    public void Fish_blasting_shuffles_its_status_into_the_draw_pile()
+    public void Fish_blasting_adds_its_status_into_the_discard_pile()
     {
-        // The third `add_card` zone, and the position is the point: SHUFFLED
-        // IN (`CardPilePosition.Random`) rather than laid on the bottom, which
-        // is the parameter's default. The whole cost of the Status is that the
-        // player does not know when it will arrive. Twin:
-        // `test_fish_blasting_shuffles_a_confiscated_into_the_draw_pile`.
+        // A status goes to the discard pile, as the base game adds every one
+        // ([USER], 2026-10-03: "I agree that we should adopt the same
+        // convention"). Twin:
+        // `test_fish_blasting_adds_a_confiscated_into_the_discard_pile`.
         var source = Printed("Cards/Prototype/Generated/ProtoKoFishBlasting.cs");
-        Assert.Contains("PileType.Draw, Owner, CardPilePosition.Random",
-                        source);
+        Assert.Contains("PileType.Discard, Owner);", source);
+        Assert.DoesNotContain("PileType.Draw", source);
 
         // And it does NOT Set off: plain pressure, which is what separates it
         // from every detonator beside it.

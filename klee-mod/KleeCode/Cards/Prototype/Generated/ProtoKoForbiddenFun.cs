@@ -48,7 +48,7 @@ public sealed class ProtoKoForbiddenFun : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Forbidden Fun"),
-        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage. Shuffle a [gold]Dazed[/gold] into your draw pile."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -74,7 +74,7 @@ public sealed class ProtoKoForbiddenFun : CustomCardModel, IElementalCard
             .Execute(choiceContext);
         {
             var token = CombatState!.CreateCard<MegaCrit.Sts2.Core.Models.Cards.Dazed>(Owner);
-            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Draw, Owner, CardPilePosition.Random);
+            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
         }
     }
 

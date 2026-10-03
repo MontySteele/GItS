@@ -691,20 +691,22 @@ def test_under_the_flag_a_prototype_row_smiths_into_a_different_card(overhaul):
         upgrades._upgrade_index.cache_clear()
 
 
-# --- Jumpy Dumpty is no longer Innate (the co-op run, 2026-10-02) ---------
+# --- Jumpy Dumpty is Innate again (2026-10-03) ------------------------------
 
-def test_neither_basic_is_innate(overhaul):
-    """R261 had made Jumpy Dumpty Innate. [USER], 2026-10-02: "Let's remove
-    Innate from Klee's starting Jumpty Dumpty - I think that's why seats keep
-    getting chip damage hit on round one". Both faces lose it; Ka-pow! never
-    had it."""
-    for cid in ("proto_ko_jumpy_dumpty", "proto_ko_jumpy_dumpty+",
-                "proto_ko_kapow", "proto_ko_kapow+"):
+def test_jumpy_dumpty_is_innate_and_kapow_is_not(overhaul):
+    """R261 made Jumpy Dumpty Innate; the co-op notes (2026-10-02) took it
+    off; the w17 sanity round lost the act-1 boss on both seats, and
+    [USER], 2026-10-03: "OK, let's put it back on". Both faces carry it;
+    Ka-pow! never had it."""
+    for cid in ("proto_ko_jumpy_dumpty", "proto_ko_jumpy_dumpty+"):
+        assert loader.get_card(cid).innate is True, cid
+    for cid in ("proto_ko_kapow", "proto_ko_kapow+"):
         assert loader.get_card(cid).innate is False, cid
 
 
-def test_no_card_in_klees_starter_is_surfaced(overhaul):
-    """The opening hand is a plain draw: `surface_innate` moves nothing."""
+def test_jumpy_dumpty_surfaces_to_the_opening_hand(overhaul):
+    """`surface_innate` puts Jumpy Dumpty on top of the shuffled draw pile,
+    so the first hand of five always holds it."""
     import random
 
     from tier0.engine.combat import surface_innate
@@ -712,10 +714,9 @@ def test_no_card_in_klees_starter_is_surfaced(overhaul):
     for seed in range(5):
         player = loader.build_player("klee")
         random.Random(seed).shuffle(player.draw_pile)
-        before = [c.id for c in player.draw_pile]
         surface_innate(player.draw_pile)
-        assert [c.id for c in player.draw_pile] == before, seed
-        assert not any(c.innate for c in player.draw_pile), seed
+        assert player.draw_pile[0].id == "proto_ko_jumpy_dumpty", seed
+        assert sum(c.innate for c in player.draw_pile) == 1, seed
 
 
 def test_no_companion_play_pays_klees_spark_under_the_arm(overhaul):

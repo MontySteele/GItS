@@ -128,12 +128,12 @@ public class KleeStatusPackageTests
     }
 
     [Fact]
-    public void The_loaders_shuffle_dazed_or_add_confiscated_to_the_draw_pile()
+    public void The_loaders_add_dazed_or_confiscated_into_the_discard_pile()
     {
         foreach (var dazed in new[] { "ProtoKoForbiddenFun", "ProtoKoItWasntMe" })
         {
             Assert.Contains(Seq(dazed, "OnPlay"), c => c.Contains("Dazed"));
-            Assert.Contains("Shuffle a [gold]Dazed[/gold] into your draw pile.",
+            Assert.Contains("Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
                             Face((CardModel)Activator.CreateInstance(
                                 typeof(ProtoKoPop).Assembly.GetType(
                                     "KleeMod.Cards.Prototype.Generated." + dazed)!)!));
@@ -242,10 +242,10 @@ public class KleeStatusPackageTests
         Assert.Equal(TargetType.AllEnemies, new ProtoKoUpInSmoke().TargetType);
         Assert.Equal(TargetType.AllEnemies, new ProtoKoKitchenAlchemy().TargetType);
         Assert.Equal("Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. "
-                     + "Shuffle a [gold]Dazed[/gold] into your draw pile.",
+                     + "Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
                      Face(new ProtoKoUpInSmoke()));
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. "
-                     + "Add a [gold]Confiscated[/gold] to your draw pile.",
+                     + "Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
                      Face(new ProtoKoBehindJeansDesk()));
         Assert.Equal("ALL enemies lose 1 [gold]Strength[/gold]. "
                      + "Exhaust every status in your hand; they lose 1 more for each.",
@@ -253,7 +253,7 @@ public class KleeStatusPackageTests
     }
 
     [Fact]
-    public void Up_in_smoke_weakens_all_and_shuffles_a_dazed()
+    public void Up_in_smoke_weakens_all_and_discards_a_dazed()
     {
         var play = Seq("ProtoKoUpInSmoke", "OnPlay");
         Assert.Contains(play, c => c.Contains("PowerCmd.Apply<WeakPower>"));
@@ -262,7 +262,7 @@ public class KleeStatusPackageTests
         Assert.DoesNotContain(play, c => c.Contains("Confiscated"));
         var source = Source("ProtoKoUpInSmoke");
         Assert.Contains("CombatState!.HittableEnemies", source);
-        Assert.Contains("PileType.Draw, Owner, CardPilePosition.Random", source);
+        Assert.Contains("PileType.Discard, Owner);", source);
     }
 
     [Fact]
@@ -273,7 +273,7 @@ public class KleeStatusPackageTests
         Assert.Contains(play, c => c.Contains("Confiscated"));
         Assert.Contains(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
         Assert.DoesNotContain(play, c => c.Contains("Dazed"));
-        Assert.Contains("PileType.Draw", Source("ProtoKoBehindJeansDesk"));
+        Assert.Contains("PileType.Discard, Owner);", Source("ProtoKoBehindJeansDesk"));
     }
 
     // Kitchen Alchemy, reworked 2026-10-02 after the forced-deck seat (0 plays
