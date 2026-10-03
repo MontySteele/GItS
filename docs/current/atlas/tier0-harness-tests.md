@@ -47,7 +47,7 @@ Library-level: `runner.run_battery`, `runner.run_full_battery`,
 
 CI's `lints` job invokes the standalone lints directly (`.github/workflows/*.yml`):
 `tools/lint_handwritten_parity.py`, `lint_constant_parity.py`, `lint_op_parity.py`,
-`gen_roster_cards.py --check`, `lint_pool_membership.py`, `lint_ancient_coverage.py`,
+`gen_prototype_cards.py --check`, `lint_pool_membership.py`, `lint_ancient_coverage.py`,
 `suggest_role_tempo_tags.py --check`, `lint_role_tempo_coverage.py --gate`,
 `lint_roster_registry.py`, `lint_vendor_pin.py`, `art_coverage.py`.
 

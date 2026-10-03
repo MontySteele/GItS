@@ -38,7 +38,7 @@ scripts that import siblings insert the root themselves
 python3 tools/lint_handwritten_parity.py   # S6      | lint_pool_membership.py  S6b
 python3 tools/lint_constant_parity.py      # S6e     | lint_ancient_coverage.py S6d
 python3 tools/lint_op_parity.py            # engine OPS vs drafter pricing
-python3 tools/gen_roster_cards.py --check  # S6a codegen staleness
+python3 tools/gen_prototype_cards.py --check  # S6a codegen staleness
 python3 tools/suggest_role_tempo_tags.py --check   # [--land] writes the 3 sheets
 python3 tools/lint_role_tempo_coverage.py --gate   # [--write-debt]
 python3 tools/lint_roster_registry.py
