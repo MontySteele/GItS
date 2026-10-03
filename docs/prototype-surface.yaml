@@ -3656,11 +3656,13 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: skill, personal_pool: varka,
-   # Picks 2 and 5 (ruled); the floor is 4 [5] after the R6 sim (#768 sec.10).
+   # Picks 2 and 5 (ruled); the floor was 4 [5] after the R6 sim (#768
+   # sec.10), 6 [7] since the Electro Knights pass (provenance, "Varka
+   # Electro Knights, 2026-10-03").
    description: "Apply [gold]Electro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each Attack you played this turn.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: apply_aura, element: electro, target: enemy},
              {op: block,
-              amount_formula: {base: 4, per: 3, count: attacks_played_this_turn}}],
+              amount_formula: {base: 6, per: 3, count: attacks_played_this_turn}}],
    upgrade: {formula_base: 1, formula_per: 1}}
 
 - {id: proto_vk_kaeya_frostgnaw, name: "Kaeya: Heart of the Abyss", character: varka,
@@ -3678,9 +3680,10 @@
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: skill, personal_pool: varka,
    # The AoE trim (review/active/aoe-trim-2026-10-03.md sec.4): one enemy,
-   # same numbers. Was ALL enemies.
+   # same numbers. Was ALL enemies. 6 [8], +4 since the Electro Knights
+   # pass (was 4 [6], +3; provenance, "Varka Electro Knights, 2026-10-03").
    description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} more.",
-   effects: [{op: varka, kind: awakening, target: enemy, base: 4, amount: 3}],
+   effects: [{op: varka, kind: awakening, target: enemy, base: 6, amount: 4}],
    upgrade: {varka_base: 2}}
 
 - {id: proto_vk_mika_starfrost_swirl, name: "Mika: Suppressive Barrage", character: varka,
@@ -4052,7 +4055,9 @@
 - {id: proto_vk_lisa_pulsating_witch, name: "Lisa: Pulsating Witch", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
-   cost: 1, type: skill, personal_pool: varka,
+   # Cost 0 since the Electro Knights pass (was 1; provenance, "Varka
+   # Electro Knights, 2026-10-03").
+   cost: 0, type: skill, personal_pool: varka,
    description: "Apply [gold]Electro[/gold] to ALL enemies. Draw 1 card for each enemy.",
    effects: [{op: apply_aura, element: electro, target: all_enemies},
              {op: varka, kind: draw_per_enemy}],

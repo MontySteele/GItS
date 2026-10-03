@@ -125,7 +125,12 @@ def test_the_paper_numbers_and_upgrades(varka):
     # Gleeful Songs' numbers moved with the rebalance (test_varka_rebalance).
     assert fx(_vk("mika_starfrost_swirl"), "apply_power")["amount"] == 2
     assert fx(_vk("mika_starfrost_swirl") + "+", "apply_power")["amount"] == 3
-    assert fx(_vk("razor_claw_and_thunder") + "+", "varka")["base"] == 6
+    # The Electro Knights pass (2026-10-03): Razor 6 [8], +4; Pulsating
+    # Witch costs 0.
+    assert fx(_vk("razor_claw_and_thunder"), "varka")["base"] == 6
+    assert fx(_vk("razor_claw_and_thunder"), "varka")["amount"] == 4
+    assert fx(_vk("razor_claw_and_thunder") + "+", "varka")["base"] == 8
+    assert loader.get_card(_vk("lisa_pulsating_witch")).cost == 0
     assert fx(_vk("glacial_edict") + "+", "varka")["amount"] == 3
     assert fx(_vk("pathfinders_mark") + "+", "varka")["upgraded"] is True
     assert loader.get_card(_vk("retaliating_tide") + "+").cost == 1
@@ -185,11 +190,11 @@ def test_razor_hits_one_enemy_and_more_on_electro(varka):
     st = _state(enemies=[_enemy(name="a", aura="electro"), _enemy(name="b")])
     _play(st, _vk("razor_claw_and_thunder"))
     a, b = st.enemies
-    assert a.hp == 100 - 7 and b.hp == 100
+    assert a.hp == 100 - 10 and b.hp == 100
     assert _led(st).current == "electro"
     st = _state(enemies=[_enemy(name="c")])
     _play(st, _vk("razor_claw_and_thunder"))
-    assert st.enemies[0].hp == 100 - 4 and st.enemies[0].aura == "electro"
+    assert st.enemies[0].hp == 100 - 6 and st.enemies[0].aura == "electro"
 
 
 def test_sharpshooter_shoots_again_only_on_pyro(varka):

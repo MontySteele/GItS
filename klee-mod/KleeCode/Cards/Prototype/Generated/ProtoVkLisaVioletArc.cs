@@ -62,7 +62,7 @@ public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(4m),
+            new CalculationBaseVar(6m),
             new CalculationExtraVar(3m),
             new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionOverhaulLedger.For(card.Owner.Creature).AttacksPlayedThisTurn)
         };
