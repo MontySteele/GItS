@@ -121,6 +121,10 @@ internal static class ElementalHit
         var landed = targetMods
             ? (int)SimDamagePipeline.TargetMods(target, dealt)
             : (int)dealt;
+        // TELEMETRY ONLY: the dealer stays null for the engine; the scope
+        // names the seat for `PlayTelemetry` (an outer Bomb or pet scope wins).
+        using var credit = Diagnostics.DamageCredit.OpenIfNone(
+            applier, Diagnostics.DamageCredit.Element);
         // 2026-10-02 (combat visual audit, gap 3): the element's hit effect,
         // the same one an Attack card of that element draws. Visual only.
         ElementHitFx.SpawnOn(target, element);
@@ -202,6 +206,8 @@ internal static class ElementalHit
         await ReactionEffects.Resolve(
             choiceContext, reaction, target, applier, null, assumedAura);
         var landed = (int)SimDamagePipeline.TargetMods(target, dealt);
+        using var credit = Diagnostics.DamageCredit.OpenIfNone(
+            applier, Diagnostics.DamageCredit.Element);
         ElementHitFx.SpawnOn(target, element);
         await CreatureCmd.Damage(
             choiceContext, target, landed, ValueProp.Unpowered,
@@ -217,6 +223,8 @@ internal static class ElementalHit
             ? SimDamagePipeline.DealerMods(applier, baseDamage)
             : baseDamage;
         var landed = (int)SimDamagePipeline.TargetMods(target, dealt);
+        using var credit = Diagnostics.DamageCredit.OpenIfNone(
+            applier, Diagnostics.DamageCredit.Power);
         await CreatureCmd.Damage(
             choiceContext, target, landed, ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);

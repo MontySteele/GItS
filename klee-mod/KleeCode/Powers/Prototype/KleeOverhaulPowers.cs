@@ -250,6 +250,9 @@ public sealed class BombEchoPower : PowerModel, ILocalizationProvider
     internal static async Task Fire(
         PlayerChoiceContext choiceContext, Creature klee, int copies)
     {
+        // TELEMETRY ONLY: the echo pays a Bomb's size on a Bomb's terms.
+        using var credit = Diagnostics.DamageCredit.Open(
+            klee, Diagnostics.DamageCredit.Bomb, "Bomb");
         for (var copy = 0; copy < copies; copy++)
         {
             var (target, size) = ProtoBombPower.LargestBombFor(klee);

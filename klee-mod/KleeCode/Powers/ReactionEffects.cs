@@ -374,6 +374,13 @@ internal static class ReactionEffects
         Element consumedAura,
         bool spreadReaction = false)
     {
+        // TELEMETRY ONLY. Every reaction's own damage (Overload's splash,
+        // Swirl's flat hit) goes out with `dealer: null`; this scope names the
+        // seat for `PlayTelemetry` and changes no argument the engine reads.
+        using var credit = reaction == Reaction.None
+            ? default
+            : Diagnostics.DamageCredit.Open(
+                dealer, Diagnostics.DamageCredit.Reaction, reaction.ToString());
         if (reaction != Reaction.None)
         {
             TotalResolved++;

@@ -1050,6 +1050,10 @@ public static partial class FurinaStage
                                   string beat, StageSeat? seat = null,
                                   StageExit? exit = null)
     {
+        // TELEMETRY ONLY: every act's hit is Furina's performer's, so it is
+        // her pet damage, labelled with the performer.
+        using var credit = Diagnostics.DamageCredit.Open(
+            owner, Diagnostics.DamageCredit.Pet, who.ToString());
         // THE GUEST CAST (2026-09-25), rule 4: EVERY ACT PAYS, first. The
         // Fanfare half is the ledger's (so the forecast runs the same move);
         // an act that cannot pay does nothing. A Bow is free (rule 5): the
