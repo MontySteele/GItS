@@ -103,13 +103,13 @@ public class CreatureAnimationRouterTests
         // The word the new door carries has to be one the table knows, and it
         // has to land on idle: that is what a base-game spine rig does with
         // the trigger and what `ImmediatelySetIdle` does with the animator.
-        var table = (Dictionary<string, string>)
+        var table = (Dictionary<string, string[]>)
             Il.Method("CreatureAnimationRouter", "Route").DeclaringType!
-                .GetField("TriggerToState", All)!
+                .GetField("TriggerToStates", All)!
                 .GetValue(null)!;
 
-        Assert.Equal("idle", table["Revive"]);
-        Assert.Equal("death", table["Dead"]);
+        Assert.Equal(new[] { "idle" }, table["Revive"]);
+        Assert.Equal(new[] { "death" }, table["Dead"]);
         // Unknown triggers are IGNORED rather than forced to idle, so a future
         // game trigger cannot yank a mid-flight animation. The table is the
         // whole allowlist.
@@ -674,8 +674,9 @@ public class CreatureAnimationRouterTests
 
         // ABOVE THE TRIGGER LOOKUP: an unknown trigger returns early, and a
         // body that only ever heard unknown triggers would otherwise stay in
-        // lockstep with its neighbours.
-        var lookup = calls.FindIndex(c => c.Contains("TryGetValue"));
+        // lockstep with its neighbours. (The lookup moved into the pure
+        // `SelectState` in the motion pass, 2026-10-02.)
+        var lookup = calls.FindIndex(c => c.Contains("SelectState"));
         var apply = calls.FindIndex(c => c.Contains("IdleDesync"));
         Assert.True(apply >= 0 && apply < lookup, $"{apply} vs {lookup}");
     }

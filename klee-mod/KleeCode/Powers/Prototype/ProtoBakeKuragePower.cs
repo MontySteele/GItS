@@ -349,7 +349,7 @@ public static class KokomiRules
         await DamageCmd.Attack(amount)
             .FromCard(card, cardPlay)
             .Targeting(target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(card)
             .Execute(choiceContext);
     }
 
@@ -368,7 +368,7 @@ public static class KokomiRules
         await DamageCmd.Attack(amount)
             .FromCard(card, cardPlay)
             .TargetingAllOpponents(combat)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(card)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
     }

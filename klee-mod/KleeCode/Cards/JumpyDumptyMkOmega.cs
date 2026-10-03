@@ -83,7 +83,7 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard
             .WithHitCount(3)
             .FromCard(this, cardPlay)
             .TargetingRandomOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         // The arm's Bomb, the arm's placer: a plain charge on every living
         // enemy, which never goes off by itself (rule 7).

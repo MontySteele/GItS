@@ -83,14 +83,14 @@ public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, I
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         if (Owner.Creature.Powers.OfType<MondstadtOzPower>().Any())
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 5m))
                 .FromCard(this, cardPlay)
                 .TargetingRandomOpponents(CombatState!)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

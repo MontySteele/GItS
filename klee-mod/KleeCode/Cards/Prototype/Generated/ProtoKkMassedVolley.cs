@@ -74,7 +74,7 @@ public sealed class ProtoKkMassedVolley : CustomCardModel, IElementalCard, IChar
             .WithHitCount(3)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
     }
 

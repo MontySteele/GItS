@@ -705,12 +705,24 @@ UNMIRRORED: dict[str, str] = {
     "ElementBadge.Gap":
         "presentation: pixels between the gem's right edge and the type "
         "plaque's left, so the pair reads as one row.",
+    "ReactionFx.FlashSeconds":
+        "presentation: a reaction's body-flash length in seconds; nothing "
+        "waits on it, and the sim draws nothing.",
     "KleeCombatVfx.LobDuration":
         "presentation: bomb-toss animation length in seconds.",
     "KleeCombatVfx.MaxConcurrentPops":
         "presentation: how many pop effects may overlap before they are "
         "dropped. A frame-rate guard, not a rule -- the sim resolves every "
         "detonation regardless of what is drawn.",
+    "CreatureAnimationRouter.LowHealthFraction":
+        "presentation: the HP fraction at or under which a combat body plays "
+        "its slumped idle -- the base game's own CharacterModel.IsLowHealth "
+        "line (0.25). It picks a pose and moves no number; the sim draws no "
+        "bodies.",
+    "StagePerformerBeat.ActSeconds":
+        "presentation: how long a Furina performer's lunge holds before its "
+        "act resolves (motion pass, 2026-10-02). Screen time only -- the act "
+        "resolves the same either way, and the sim draws no bodies.",
     # EB-38, the rest-site and merchant breathe. All four are the SHAPE of one
     # loop -- two of them seconds, two of them the size of the move -- on a
     # portrait the sim does not draw, at two rooms the sim does not render. A

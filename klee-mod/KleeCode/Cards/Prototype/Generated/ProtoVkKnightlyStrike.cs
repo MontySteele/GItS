@@ -76,14 +76,14 @@ public sealed class ProtoVkKnightlyStrike : CustomCardModel, IElementalCard, ICh
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         if (VarkaOath.KnightsPlayedThisTurn(Owner.Creature) > 0)
         {
             await DamageCmd.Attack(4m)
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

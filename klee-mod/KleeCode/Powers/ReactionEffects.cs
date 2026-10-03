@@ -403,6 +403,11 @@ internal static class ReactionEffects
             }
             ReactionLog.Note(reaction, target, dealer, cardSource);
 
+            // 2026-10-02 (combat visual audit, gap 3): the reaction's visible
+            // beat -- a base effect and a short flash, fire and forget, so
+            // the base game's pacing is untouched. One site, so one beat.
+            Vfx.ReactionFx.Play(reaction, target, consumedAura);
+
             // THE ELEMENT PORT sec.7.3: the one reported event every later
             // listener reads (what fired, on whom, from what kind of source).
             // The listeners above and below keep their direct calls.

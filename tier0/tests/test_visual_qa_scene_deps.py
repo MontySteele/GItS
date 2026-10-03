@@ -98,10 +98,12 @@ def test_router_contract_is_read_from_the_csharp_source_not_invented():
     """CREATURE_STATES must stay equal to CreatureAnimationRouter's map."""
     text = (CSHARP / "Vfx" / "CreatureAnimationRouter.cs").read_text(
         encoding="utf-8")
-    body = text[text.index("TriggerToState = new()"):]
+    body = text[text.index("TriggerToStates = new()"):]
     body = body[: body.index("};")]
+    # The last state of each row is the required contract; the ones before it
+    # are optional (cast / power, motion pass 2026-10-02).
     states = {
-        line.split('"')[3] for line in body.splitlines() if '] = "' in line
+        line.split('"')[-2] for line in body.splitlines() if '] = new[]' in line
     }
     assert set(scene_deps.CREATURE_STATES) == states
 

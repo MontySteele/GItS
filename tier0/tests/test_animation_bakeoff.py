@@ -99,9 +99,13 @@ def test_routed_states_still_match_the_shipped_router():
     if not ROUTER_CS.exists():  # pragma: no cover - present in this repo
         pytest.skip("CreatureAnimationRouter.cs not in this checkout")
     text = ROUTER_CS.read_text(encoding="utf-8")
-    block = text[text.index("TriggerToState"):]
+    # Each row is `["Trigger"] = new[] { optional..., "required" }`; the LAST
+    # state is the required contract a scene must carry (the motion pass,
+    # 2026-10-02, added the optional cast / power / idle_low in front).
+    block = text[text.index("TriggerToStates = new()"):]
     block = block[: block.index("};")]
-    mapped = re.findall(r'\]\s*=\s*"([a-z]+)"', block)
+    rows = re.findall(r'\]\s*=\s*new\[\]\s*\{([^}]*)\}', block)
+    mapped = [re.findall(r'"([a-z_]+)"', row)[-1] for row in rows]
     assert set(mapped) == set(spec.ROUTED_STATES), (
         "CreatureAnimationRouter's trigger table moved; update spec.ROUTED_STATES"
     )

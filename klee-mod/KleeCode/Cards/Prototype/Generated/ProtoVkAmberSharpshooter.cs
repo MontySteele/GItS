@@ -85,14 +85,14 @@ public sealed class ProtoVkAmberSharpshooter : CustomCardModel, IElementalCard, 
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         if (targetHadPyro)
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, (IsUpgraded ? 11m : 8m)))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

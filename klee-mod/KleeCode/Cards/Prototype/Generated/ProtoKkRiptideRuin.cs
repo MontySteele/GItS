@@ -73,7 +73,7 @@ public sealed class ProtoKkRiptideRuin : CustomCardModel, IElementalCard, IChara
             .WithHitCount(2)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
         {

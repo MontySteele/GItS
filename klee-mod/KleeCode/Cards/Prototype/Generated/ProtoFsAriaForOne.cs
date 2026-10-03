@@ -65,14 +65,14 @@ public sealed class ProtoFsAriaForOne : CustomCardModel, ICharacterCard
             .WithHitCount(2)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         if (!FurinaStage.Occupied(Owner.Creature))
         {
             await DamageCmd.Attack((IsUpgraded ? 7m : 5m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

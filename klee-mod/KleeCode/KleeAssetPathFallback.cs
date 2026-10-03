@@ -40,19 +40,23 @@ namespace KleeMod;
 ///    missing klee.pck lands right back on this postfix instead of on a
 ///    missing-resource throw at character select. That is the crash O6 records.
 ///
-/// SCOPE, AND THE OPEN ASYMMETRY. The postfix is patched onto CharacterModel,
-/// so it RUNS for every character in the game, but it rewrites only when the
-/// instance is Klee — base characters and our other two return unchanged. The
-/// gap in (1) is roster-wide, so **Furina and Kokomi have no fallback for those
-/// 5 paths at all.**
+/// SCOPE. The postfix is patched onto CharacterModel, so it RUNS for every
+/// character in the game. For Klee it rewrites the whole set to Ironclad's, as
+/// it always has. For the other three it rewrites ONLY the five FMOD events,
+/// each to a base character whose sounds fit (2026-10-02, the combat visual
+/// audit, gap 4: "Furina, Kokomi and Varka make no character sounds"):
 ///
-/// Deliberately NOT extended to them in this sprint. Redirecting a shipped
-/// character's combat SFX to Ironclad's is an audible change to two
-/// characters, and it would also mask the stale-pck warning `KleePck.Path`
-/// already logs. Whether the gap manifests in play is **UNMEASURED** — no
-/// play session has been run against it either way, and D4 forbids spending an
-/// unmeasured claim as a reason to act. Registered for [USER]: extend, leave,
-/// or rule the 5 paths out of scope.
+///   * Furina  -> the Silent's      (lighter; Hydro duelist)
+///   * Kokomi  -> the Necrobinder's (lighter; a caster, distinct from Furina's
+///                in a two-Hydro co-op)
+///   * Varka   -> the Regent's      (heavier; a knight, distinct from Klee's
+///                Ironclad borrow in a Mondstadt co-op)
+///
+/// Their 13 art paths are NOT redirected: each ships its own art, and sending
+/// a stale pck to another character's art would mask the warning `KleePck.Path`
+/// logs. Real voices are new audio, a money pick for [USER]; this is a borrow.
+/// The pure mapping is <see cref="SfxDonorFor"/> and <see cref="RedirectSfx"/>,
+/// pinned headlessly in `KleeTests/AssetPathFallbackTests.cs`.
 ///
 /// THE HANDS (2026-09-27). The four `Arm*TexturePath` getters (the co-op
 /// treasure room's hands) used to be redirected here too, so Klee drew the
@@ -102,8 +106,8 @@ internal static class KleeAssetPathFallback
         "MapMarkerPath",
         "TrailPath",
 
-        // --- Overridden by NOBODY. Klee's only source; Furina and Kokomi have
-        //     no equivalent (see the asymmetry note in the class header). ---
+        // --- Overridden by NOBODY. Klee's only source, and since 2026-10-02
+        //     Furina's, Kokomi's and Varka's too (SfxProperties below). ---
         // FMOD event paths. Missing events only warn ("cannot find sfx path")
         // rather than throw, but they spam the log we debug from.
         "CharacterSelectSfx",
@@ -133,10 +137,56 @@ internal static class KleeAssetPathFallback
         }
     }
 
-    [HarmonyPostfix]
-    private static void RedirectToPlaceholder(CharacterModel __instance, ref string __result)
+    /// <summary>The five FMOD-event members: the only ones redirected for
+    /// the three characters who are not Klee.</summary>
+    internal static readonly HashSet<string> SfxProperties = new()
     {
-        if (__instance is Klee klee && !string.IsNullOrEmpty(__result))
+        "CharacterSelectSfx",
+        "CharacterTransitionSfx",
+        "AttackSfx",
+        "CastSfx",
+        "DeathSfx",
+    };
+
+    /// <summary>The base character whose sounds a mod character borrows, by
+    /// its lower-cased id entry's name part; null for none.</summary>
+    internal static string? SfxDonorFor(string characterName) => characterName switch
+    {
+        "klee" => Placeholder,
+        "furina" => "silent",
+        "kokomi" => "necrobinder",
+        "varka" => "regent",
+        _ => null,
+    };
+
+    /// <summary>
+    /// One FMOD event path rewritten onto <paramref name="donor"/>'s. The four
+    /// id-derived events swap the id; the transition wipe is the donor's REAL
+    /// one, because Defect, Necrobinder and Regent override
+    /// <c>CharacterTransitionSfx</c> to <c>wipe_ironclad</c> (0.111.0
+    /// decompile): there is no <c>wipe_regent</c> event to swap into.
+    /// </summary>
+    internal static string RedirectSfx(
+        string property, string path, string idEntryLower, string donor)
+    {
+        if (property == "CharacterTransitionSfx")
+        {
+            return donor is "ironclad" or "silent"
+                ? "event:/sfx/ui/wipe_" + donor
+                : "event:/sfx/ui/wipe_ironclad";
+        }
+        return path.Replace(idEntryLower, donor);
+    }
+
+    [HarmonyPostfix]
+    private static void RedirectToPlaceholder(
+        CharacterModel __instance, MethodBase __originalMethod, ref string __result)
+    {
+        if (string.IsNullOrEmpty(__result))
+        {
+            return;
+        }
+        if (__instance is Klee klee)
         {
             // The paths embed Id.Entry lowercased, NOT the mod id. BaseLib
             // prefixes custom model ids (KLEE -> KLEEMOD-KLEE), so replacing
@@ -145,6 +195,24 @@ internal static class KleeAssetPathFallback
             // Read the entry off the live model so the substring we replace is
             // by construction the one the paths contain.
             __result = __result.Replace(klee.Id.Entry.ToLowerInvariant(), Placeholder);
+            return;
+        }
+
+        // Furina, Kokomi, Varka: the five sound events only.
+        var donor = __instance switch
+        {
+            Furina => SfxDonorFor("furina"),
+            Kokomi => SfxDonorFor("kokomi"),
+            Varka => SfxDonorFor("varka"),
+            _ => null,
+        };
+        var property = __originalMethod.Name.StartsWith("get_")
+            ? __originalMethod.Name.Substring(4)
+            : __originalMethod.Name;
+        if (donor != null && SfxProperties.Contains(property))
+        {
+            __result = RedirectSfx(
+                property, __result, __instance.Id.Entry.ToLowerInvariant(), donor);
         }
     }
 }

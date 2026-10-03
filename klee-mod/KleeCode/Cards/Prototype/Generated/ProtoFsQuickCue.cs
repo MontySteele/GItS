@@ -98,7 +98,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
             await DamageCmd.Attack((IsUpgraded ? 4m : 3m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
         else
@@ -109,7 +109,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
                 await DamageCmd.Attack((IsUpgraded ? 13m : 11m))
                     .FromCard(this, cardPlay)
                     .Targeting(cardPlay.Target)
-                    .WithHitFx("vfx/vfx_attack_slash")
+                    .WithElementHitFx(this)
                     .Execute(choiceContext);
             }
         }

@@ -74,7 +74,7 @@ public sealed class ProtoKoSizzle : CustomCardModel, IElementalCard, ISetOffCard
             await DamageCmd.Attack(6m)
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

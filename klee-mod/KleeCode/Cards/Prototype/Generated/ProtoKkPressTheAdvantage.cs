@@ -76,7 +76,7 @@ public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, 
             await DamageCmd.Attack((IsUpgraded ? 14m : 11m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
         else
@@ -85,7 +85,7 @@ public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, 
             await DamageCmd.Attack((IsUpgraded ? 9m : 7m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

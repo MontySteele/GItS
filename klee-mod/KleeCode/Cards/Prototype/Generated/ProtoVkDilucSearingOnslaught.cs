@@ -85,7 +85,7 @@ public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCa
             .WithHitCount(2)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
+            .WithElementHitFx(this)
             .Execute(choiceContext);
         if (ReactionEffects.TotalResolved > reactionsAtStart)
         {

@@ -774,6 +774,12 @@ if (Test-Path $venvPython) {
 #    because it bills against the sheets rather than against the package. So
 #    the break is gone and every painted portrait must reach the stage. The
 #    failure names counts and examples, not just the first miss.
+#
+# THE SHIPPED SET (2026-10-02). The stage no longer carries every png in
+# ImageGen: deploy stages tools/shipped_card_art.py's set, the images some
+# card can draw. So "every painted portrait" is now "every SHIPPED portrait",
+# and the rule checks the other direction too -- a staged png no card can draw
+# is dead weight that the old blanket copy shipped by the hundred.
 # ---------------------------------------------------------------------------
 # ImageGen lives at the REPO root, not under klee-mod. Getting this wrong makes
 # Test-Path false and silently skips the whole rule -- which it did on the first
@@ -790,29 +796,50 @@ if (Test-Path $cardsRoot) {
             "and the staged package has no images\cards directory at all. " +
             "Every card in the game will render with no art.")
     } elseif ($sourcePngs.Count -gt 0) {
+        # The shipped set, one stem per line, from the one function deploy
+        # staged with. A failure to compute it is itself the finding.
+        $shipped = @{}
+        $listOut = Invoke-RepoPython (Join-Path $repoRoot 'tools\shipped_card_art.py') '--images-root' $cardsRoot '--list'
+        if ($LASTEXITCODE -ne 0) {
+            Fail 'S9' ("tools/shipped_card_art.py --list failed: " + (($listOut | Select-Object -First 5) -join ' | '))
+        } else {
+            foreach ($line in $listOut) {
+                $stem = "$line".Trim()
+                if ($stem) { $shipped["$stem.png"] = $true }
+            }
+        }
         $staged = @{}
         foreach ($f in Get-ChildItem $stagedArt -Filter *.png -ErrorAction SilentlyContinue) {
             $staged[$f.Name] = $true
         }
         foreach ($charDir in Get-ChildItem $cardsRoot -Directory -ErrorAction SilentlyContinue) {
-            $pngs = @(Get-ChildItem $charDir.FullName -Filter *.png -ErrorAction SilentlyContinue)
-            if ($pngs.Count -eq 0) { continue }   # nothing painted yet is not a defect
+            $pngs = @(Get-ChildItem $charDir.FullName -Filter *.png -ErrorAction SilentlyContinue |
+                Where-Object { $shipped.ContainsKey($_.Name) })
+            if ($pngs.Count -eq 0) { continue }   # nothing shipped from here is not a defect
             $missing = @($pngs | Where-Object { -not $staged.ContainsKey($_.Name) })
             if ($missing.Count -eq $pngs.Count) {
                 Fail 'S9' ("ImageGen\images\cards\$($charDir.Name) holds $($pngs.Count) " +
-                    "portrait(s) and NONE of them are in the staged package. That " +
-                    "directory is missing from deploy.ps1's `$artSrcDirs -- their " +
-                    "cards will render with no art and nothing else will complain.")
+                    "shipped portrait(s) and NONE of them are in the staged package. " +
+                    "The deploy's card-art step (tools/shipped_card_art.py --stage) " +
+                    "did not run or skipped that directory -- their cards will " +
+                    "render with no art and nothing else will complain.")
             } elseif ($missing.Count -gt 0) {
-                # The half no gate covered: the directory IS wired, and some of
-                # its portraits still did not land. A per-file copy filter, a
-                # name collision in the flat stage, or a partial copy all look
-                # like this, and all of them ship blank cards.
+                # The directory IS wired, and some of its shipped portraits
+                # still did not land: a copy filter, a name collision in the
+                # flat stage, or a partial copy. All of them ship blank cards.
                 $sample = ($missing | Select-Object -First 5 |
                     ForEach-Object { $_.Name }) -join ', '
                 Fail 'S9' ("ImageGen\images\cards\$($charDir.Name): " +
-                    "$($missing.Count) of $($pngs.Count) portrait(s) did not reach " +
+                    "$($missing.Count) of $($pngs.Count) shipped portrait(s) did not reach " +
                     "the staged package (e.g. $sample). Those cards render blank.")
+            }
+        }
+        if ($shipped.Count -gt 0) {
+            $dead = @($staged.Keys | Where-Object { -not $shipped.ContainsKey($_) } | Sort-Object)
+            if ($dead.Count -gt 0) {
+                $sample = ($dead | Select-Object -First 5) -join ', '
+                Fail 'S9' ("$($dead.Count) staged card png(s) are drawn by no card " +
+                    "(e.g. $sample). Stage with tools/shipped_card_art.py --stage.")
             }
         }
     }

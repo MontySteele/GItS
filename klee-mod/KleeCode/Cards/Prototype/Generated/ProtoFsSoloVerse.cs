@@ -66,7 +66,7 @@ public sealed class ProtoFsSoloVerse : CustomCardModel, ICharacterCard
             await DamageCmd.Attack((IsUpgraded ? 16m : 12m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
         else
@@ -75,7 +75,7 @@ public sealed class ProtoFsSoloVerse : CustomCardModel, ICharacterCard
             await DamageCmd.Attack((IsUpgraded ? 8m : 6m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .Execute(choiceContext);
         }
     }

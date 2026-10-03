@@ -88,7 +88,7 @@ public sealed class ProtoKoFireworksFinale : CustomCardModel, IElementalCard, IS
                 .WithHitCount(sparksSpent)
                 .FromCard(this, cardPlay)
                 .TargetingAllOpponents(CombatState!)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(this)
                 .SpawningHitVfxOnEachCreature()
                 .Execute(choiceContext);
         }

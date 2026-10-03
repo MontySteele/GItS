@@ -764,6 +764,8 @@ public static partial class FurinaStage
         // shows HP loss (the fade's number, below, is the same pop). The body
         // is still standing: a lead this hit emptied leaves at the flush.
         Vfx.FurinaStageLossPop.Show(lead, result.Absorbed);
+        // ...and the body flinches, as any hit body does (motion pass).
+        Vfx.StagePerformerBeat.Flinch(lead?.Pet, result.Absorbed);
         // THE SUPPORTING POOL (2026-09-26), Counterclaim: an enemy's hit
         // reached the front performer's bar since the end of her last turn --
         // the notion of a hit A Rapt Audience pays on, below.
@@ -1064,6 +1066,10 @@ public static partial class FurinaStage
             Vfx.FurinaStageCues.Refresh(owner);
             return;
         }
+        // Motion pass (2026-10-02): the performer's own body lunges before
+        // its act resolves, the Bake-Kurage's beat. A Bow's act has no seat
+        // to read a body off and stays still.
+        await Vfx.StagePerformerBeat.Act(seat?.Pet);
         if (IsGuest(who))
         {
             await GuestAct(choiceContext, owner, who, beat, seat, exit);

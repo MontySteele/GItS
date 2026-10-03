@@ -969,7 +969,7 @@ public static class VarkaCards
             await DamageCmd.Attack(damage)
                 .FromCard(card, cardPlay)
                 .Targeting(target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(element)
                 .Execute(choiceContext);
         }
     }
@@ -1062,7 +1062,7 @@ public static class VarkaCards
             await DamageCmd.Attack(damage)
                 .FromCard(card, cardPlay)
                 .Targeting(target)
-                .WithHitFx("vfx/vfx_attack_slash")
+                .WithElementHitFx(element)
                 .Execute(choiceContext);
         }
     }
