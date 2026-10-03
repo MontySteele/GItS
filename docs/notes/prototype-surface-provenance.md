@@ -2360,9 +2360,15 @@ Plan lines drop the design's "to the front enemy" and Tide Wall's says "the
 enemy", because a card line never names the front enemy
 (`tools/lint_text_conventions.py`); the Plan tip says which enemy a Plan hits.
 
-## proto_ko_jumpy_dumpty, `innate: true` (R261, `EB-557`, 2026-09-05) -- undone 2026-10-02
+## proto_ko_jumpy_dumpty, `innate: true` (R261, `EB-557`, 2026-09-05) -- undone 2026-10-02, restored 2026-10-03
 
-Superseded: the co-op run notes (end of this file) took Innate off again.
+The co-op run notes (end of this file) took Innate off; the w17 sanity round
+(`review/records/klee-sanity-round-2026-10-03.md`) then lost the act-1 boss
+on both seats, on seeds where all four earlier seats beat it, with turn-one
+Dumpty plays down by about a third. [USER], 2026-10-03: "OK, let's put it
+back on." The reasoning below stands again: an opening hand of five holds
+1.78 Defends with Dumpty Innate against 2.0 without, about 1 Block, for a
+Bomb that starts growing a turn earlier.
 
 THE PLACER IS INNATE AND THE DETONATOR IS NOT. [USER] took none of the four
 round-17 options as written: Pop! in the starter was declined ("I still would
@@ -5741,7 +5747,8 @@ game until a deploy.
   why seats keep getting chip damage hit on round one". **`proto_ko_jumpy_dumpty`**
   drops `innate: true`, on both faces. Nothing else on the row moves. This
   undoes R261 (above). Pins: `tier0/tests/test_klee_overhaul.py`,
-  `KleeTests/Prototype/KleeOverhaulRoundTwentyTests.cs`.
+  `KleeTests/Prototype/KleeOverhaulRoundTwentyTests.cs`. Restored
+  2026-10-03 (see the R261 entry).
 - "Barbara: Wellspring Hymn needs Exhaust". **`proto_vk_barbara_wellspring_hymn`**
   gains `exhaust: true`. Its upgrade (Block +3) is unchanged.
 - "can we make this a strength debuff instead of the weird wording on the
@@ -5800,3 +5807,26 @@ Varka element rebalance, so Charged Lunge and Static Field do not move.
 Pins: `KleeTests/Prototype/CoopNotesRulingsTests.cs`,
 `tier0/tests/test_varka_expansion.py::test_assembly`,
 `tier0/tests/test_fontaine.py`. Untested in game until a deploy.
+
+## Status cards go to the discard pile (2026-10-03)
+
+[USER], adopting the base game's convention: "I agree that we should adopt
+the same convention". In the 0.111.0 decompile every base card that creates
+a status (Turbo, Overclock, Gunk Up, Boost Away, Fight Through) adds it with
+`CardPileCmd.AddGeneratedCardToCombat(card, PileType.Discard, owner)`; none
+uses the draw pile. Nine rows of ours shuffled a status into the draw pile at
+a random depth (the `zone: draw` of the pool pass, `EB-491`). Each now adds
+it into the discard pile, and its face takes the base's wording (`OVERCLOCK`:
+"Add a [gold]Burn[/gold] into your [gold]Discard Pile[/gold]."):
+
+- Klee, Confiscated: Fish Blasting, Lisa's Treats, Red Knight, Behind Jean's
+  Desk.
+- Klee, Dazed: Forbidden Fun, It Wasn't Me!, Up in Smoke!.
+- Kokomi, Dazed: Flotsam Surge (2), Riptide Ruin (3).
+
+Numbers, costs and upgrades are unchanged. The `draw` zone is retired in both
+engines: the codegen refuses it by name and `effects._add_token` no longer
+inserts at a random index. Pins: `KleeTests/Prototype/StatusToDiscardTests.cs`
+and the sim twins in `test_klee_status_package.py`,
+`test_kokomi_status_batch.py` and `test_klee_overhaul_rules.py`. Untested in
+game until a deploy.

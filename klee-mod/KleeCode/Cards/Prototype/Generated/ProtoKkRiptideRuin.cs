@@ -51,7 +51,7 @@ public sealed class ProtoKkRiptideRuin : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide Ruin"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies twice. Shuffle 3 [gold]Dazed[/gold] into your draw pile."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies twice. Add 3 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -80,7 +80,7 @@ public sealed class ProtoKkRiptideRuin : CustomCardModel, IElementalCard, IChara
             for (var i = 0; i < 3; i++)
             {
                 var token = CombatState!.CreateCard<MegaCrit.Sts2.Core.Models.Cards.Dazed>(Owner);
-                await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Draw, Owner, CardPilePosition.Random);
+                await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
             }
         }
     }

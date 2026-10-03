@@ -179,7 +179,7 @@ def test_turning_tide_discards_the_clogs_and_draws_that_many(overhaul):
 
 # --- Flotsam Surge ------------------------------------------------------------------------
 
-def test_flotsam_surge_hits_all_and_shuffles_two_dazed(overhaul):
+def test_flotsam_surge_hits_all_and_discards_two_dazed(overhaul):
     st = kokomi_state(enemies=[make_enemy(hp=100), make_enemy(hp=100)])
     st.player.draw_pile = _filler(4)
     card = _row("proto_kk_flotsam_surge")
@@ -187,16 +187,16 @@ def test_flotsam_surge_hits_all_and_shuffles_two_dazed(overhaul):
     st.player.hand.append(card)
     combat.play_card(st, card)
     assert all(e.hp == 100 - 13 for e in st.enemies)
-    dazed = [c for c in st.player.draw_pile if c.id == "status_dazed"]
+    dazed = [c for c in st.player.discard_pile if c.id == "status_dazed"]
     assert len(dazed) == 2
     assert _up("proto_kk_flotsam_surge").effects[0]["amount"] == 17
 
 
 # --- Riptide Ruin ------------------------------------------------------------------------
 
-def test_riptide_ruin_hits_all_twice_and_shuffles_three_dazed(overhaul):
+def test_riptide_ruin_hits_all_twice_and_discards_three_dazed(overhaul):
     """The Rare in Coral Sanctuary's place (ruled 2026-10-01): "Deal 9 [12]
-    damage to ALL enemies twice. Shuffle 3 Dazed into your draw pile." """
+    damage to ALL enemies twice. Add 3 Dazed into your Discard Pile." """
     st = kokomi_state(enemies=[make_enemy(hp=100), make_enemy(hp=100)])
     st.player.draw_pile = _filler(4)
     card = _row("proto_kk_riptide_ruin")
@@ -205,7 +205,7 @@ def test_riptide_ruin_hits_all_twice_and_shuffles_three_dazed(overhaul):
     st.player.hand.append(card)
     combat.play_card(st, card)
     assert all(e.hp == 100 - 9 * 2 for e in st.enemies)
-    dazed = [c for c in st.player.draw_pile if c.id == "status_dazed"]
+    dazed = [c for c in st.player.discard_pile if c.id == "status_dazed"]
     assert len(dazed) == 3
     up = _up("proto_kk_riptide_ruin").effects[0]
     assert (up["amount"], up["times"]) == (12, 2)

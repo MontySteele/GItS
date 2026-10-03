@@ -21,7 +21,7 @@ namespace KleeMod.Tests.Prototype;
 /// round seventeen.
 ///
 ///   * `EB-557` (R261) -- Jumpy Dumpty gained Innate; the co-op run
-///     (2026-10-02) took it off again.
+///     (2026-10-02) took it off; restored 2026-10-03.
 ///
 /// WHAT IS REAL HERE. The keywords are the models' own `CanonicalKeywords` and
 /// the tip sentences are read off the compiled method's string constants, the
@@ -39,22 +39,22 @@ public class KleeOverhaulRoundTwentyTests
         Il.Strings(typeof(ArmKeywordTips).GetMethod(
             method, HeadlessGame.All)!));
 
-    // ---- Neither basic is Innate (the co-op run, 2026-10-02) -------------
+    // ---- Jumpy Dumpty is Innate again (2026-10-03) -------------------------
 
     [Fact]
-    public void Neither_basic_is_innate()
+    public void Jumpy_dumpty_is_innate_and_kapow_is_not()
     {
-        // "Let's remove Innate from Klee's starting Jumpty Dumpty - I think
-        // that's why seats keep getting chip damage hit on round one" (the
-        // co-op run, 2026-10-02), undoing R261. Ka-pow! keeps its Retain.
+        // R261 made it Innate; the co-op run (2026-10-02) took it off; after
+        // the w17 sanity round, "OK, let's put it back on" (2026-10-03).
+        // Ka-pow! keeps its Retain and never had Innate.
         var placer = new ProtoKoJumpyDumpty();
-        Assert.DoesNotContain(CardKeyword.Innate, placer.CanonicalKeywords);
+        Assert.Contains(CardKeyword.Innate, placer.CanonicalKeywords);
 
         var upgraded = new ProtoKoJumpyDumpty();
         Seat.Set(upgraded, "IsMutable", true);
         typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
             .Invoke(upgraded, new object?[] { });
-        Assert.DoesNotContain(CardKeyword.Innate, upgraded.CanonicalKeywords);
+        Assert.Contains(CardKeyword.Innate, upgraded.CanonicalKeywords);
 
         var detonator = new ProtoKoKapow();
         Assert.DoesNotContain(CardKeyword.Innate, detonator.CanonicalKeywords);

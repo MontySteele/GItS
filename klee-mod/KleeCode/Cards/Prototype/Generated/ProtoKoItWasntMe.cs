@@ -42,7 +42,7 @@ public sealed class ProtoKoItWasntMe : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "It Wasn't Me!"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Shuffle a [gold]Dazed[/gold] into your draw pile."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoKoItWasntMe : CustomCardModel
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         {
             var token = CombatState!.CreateCard<MegaCrit.Sts2.Core.Models.Cards.Dazed>(Owner);
-            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Draw, Owner, CardPilePosition.Random);
+            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
         }
     }
 

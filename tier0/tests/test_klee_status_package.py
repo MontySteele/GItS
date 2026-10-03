@@ -104,13 +104,15 @@ def test_the_loaders_pay_the_tier_the_paper_names(overhaul):
                           ("proto_ko_lisas_treats", "confiscated", 2),
                           ("proto_ko_red_knight", "confiscated", 2)):
         fx = _first(load(cid), "add_card")
-        assert (fx["card"], fx["zone"], fx["amount"]) == (token, "draw", n)
+        assert (fx["card"], fx["zone"], fx["amount"]) == (token, "discard", n)
         enemy = make_enemy(hp=400)
         st = klee_state([enemy])
         st.player.draw_pile = filler(3)
         play(st, load(cid), aim=enemy)
-        made = [c for c in st.player.draw_pile if klee_overhaul.is_status(c)]
+        made = [c for c in st.player.discard_pile
+                if klee_overhaul.is_status(c)]
         assert len(made) == n
+        assert not any(klee_overhaul.is_status(c) for c in st.player.draw_pile)
 
 
 # --- what counts as a status ---------------------------------------------------
@@ -215,13 +217,13 @@ def test_the_defence_rows_numbers_and_upgrades(overhaul):
     assert _up("proto_ko_kitchen_alchemy").retain
 
 
-def test_up_in_smoke_weakens_every_enemy_and_shuffles_a_dazed(overhaul):
+def test_up_in_smoke_weakens_every_enemy_and_discards_a_dazed(overhaul):
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     st = klee_state([a, b])
     st.player.draw_pile = filler(3)
     play(st, load("proto_ko_up_in_smoke"))
     assert (a.powers.get("weak"), b.powers.get("weak")) == (2, 2)
-    made = [c for c in st.player.draw_pile if klee_overhaul.is_status(c)]
+    made = [c for c in st.player.discard_pile if klee_overhaul.is_status(c)]
     assert [c.type for c in made] == ["status"]
     assert not any(klee_overhaul.is_confiscated(c) for c in made)
 
@@ -237,7 +239,7 @@ def test_behind_jeans_desk_blocks_and_adds_a_confiscated(overhaul):
     st.player.draw_pile = filler(3)
     play(st, load("proto_ko_behind_jeans_desk"))
     assert st.player.block == 11
-    made = [c for c in st.player.draw_pile if klee_overhaul.is_status(c)]
+    made = [c for c in st.player.discard_pile if klee_overhaul.is_status(c)]
     assert len(made) == 1 and klee_overhaul.is_confiscated(made[0])
 
     st = klee_state([make_enemy(hp=200)])

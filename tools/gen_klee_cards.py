@@ -5664,13 +5664,11 @@ def blocked_reason(
             if unknown:
                 return f"add_card field(s) {sorted(unknown)} not understood"
             zone = eff.get("zone") or eff.get("to", "discard")
-            # `draw` is the pool pass's third zone (`EB-491`, Fish Blasting):
-            # the token is SHUFFLED into the draw pile rather than laid on the
-            # discard, so what it costs the deck is a draw at an unknown moment
-            # rather than a card after the next reshuffle. `CardPilePosition`
-            # is the base game's own vocabulary for the difference and the sim
-            # answers it with an insert at a random index -- see the emitter.
-            if zone not in ("hand", "discard", "draw"):
+            # Two zones. The pool pass's `draw` zone (`EB-491`, shuffled in
+            # at a random depth) is retired: a status goes to the discard
+            # pile, as every base card that makes one adds it ([USER],
+            # 2026-10-03: "I agree that we should adopt the same convention").
+            if zone not in ("hand", "discard"):
                 return f"add_card zone '{zone}'"
             if "pool" in eff:
                 members = _pool_members(eff["pool"], profile)
@@ -11953,15 +11951,11 @@ def build_body(
 
         elif op == "add_card":
             zone = eff.get("zone") or eff.get("to", "discard")
-            pile = {"hand": "PileType.Hand",
-                    "draw": "PileType.Draw"}.get(zone, "PileType.Discard")
-            # `EB-491` (Fish Blasting), the draw-pile zone: SHUFFLED IN, which
-            # is `CardPilePosition.Random` and not the parameter's default
-            # (bottom). A token laid on the bottom of the draw pile is a token
-            # the player knows the moment of, and the whole cost of the Status
-            # is that they do not. Sim twin: `effects._add_token`'s random
-            # index. Every other zone keeps the default it always had.
-            position = ", CardPilePosition.Random" if zone == "draw" else ""
+            pile = {"hand": "PileType.Hand"}.get(zone, "PileType.Discard")
+            # No position argument: the draw zone that took
+            # `CardPilePosition.Random` is retired (status to discard, as the
+            # base game does it; [USER], 2026-10-03).
+            position = ""
             n = int(eff.get("amount", 1))
             if "pool" in eff:
                 # Pool resolved from the sheet at generation time; picks are
@@ -13887,8 +13881,7 @@ def build_description(card: dict, *,
 
         elif op == "add_card":
             n = eff.get("amount", 1)
-            zone_txt = {"hand": "your hand",
-                        "draw": "your draw pile"}.get(
+            zone_txt = {"hand": "your hand"}.get(
                             eff.get("zone") or eff.get("to", "discard"),
                             "your discard pile")
             if "pool" in eff:

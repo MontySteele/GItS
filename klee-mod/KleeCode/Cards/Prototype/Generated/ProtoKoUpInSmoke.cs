@@ -42,7 +42,7 @@ public sealed class ProtoKoUpInSmoke : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Up in Smoke!"),
-        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. Shuffle a [gold]Dazed[/gold] into your draw pile."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -66,7 +66,7 @@ public sealed class ProtoKoUpInSmoke : CustomCardModel
         }
         {
             var token = CombatState!.CreateCard<MegaCrit.Sts2.Core.Models.Cards.Dazed>(Owner);
-            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Draw, Owner, CardPilePosition.Random);
+            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
         }
     }
 

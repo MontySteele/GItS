@@ -42,7 +42,7 @@ public sealed class ProtoKoBehindJeansDesk : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Behind Jean's Desk"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Add a [gold]Confiscated[/gold] to your draw pile."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoKoBehindJeansDesk : CustomCardModel
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         {
             var token = CombatState!.CreateCard<Confiscated>(Owner);
-            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Draw, Owner, CardPilePosition.Random);
+            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
         }
     }
 

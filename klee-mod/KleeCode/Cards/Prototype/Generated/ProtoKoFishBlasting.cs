@@ -48,7 +48,7 @@ public sealed class ProtoKoFishBlasting : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fish Blasting"),
-        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies. Add a [gold]Confiscated[/gold] to your draw pile."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -74,7 +74,7 @@ public sealed class ProtoKoFishBlasting : CustomCardModel, IElementalCard
             .Execute(choiceContext);
         {
             var token = CombatState!.CreateCard<Confiscated>(Owner);
-            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Draw, Owner, CardPilePosition.Random);
+            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
         }
     }
 
