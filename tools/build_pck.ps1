@@ -586,6 +586,17 @@ if (-not (Test-Path $furinaLayerSrc)) { Note-Skip 'furina\model\layers' $furinaL
     Copy-Item (Join-Path $furinaLayerSrc '*.png') -Destination $to
 }
 
+# Kokomi and Varka combat rigs (2026-10-02): the same treatment, cut by
+# tools/cut_combat_layers.py kokomi / varka. Their model\ loop below is
+# non-recursive, so the layers\combat subdirectory needs its own block.
+foreach ($rigChar in 'kokomi', 'varka') {
+    $rigLayerSrc = Join-Path $src "$rigChar\model\layers\combat"
+    if (-not (Test-Path $rigLayerSrc)) { Note-Skip "$rigChar\model\layers" $rigLayerSrc; continue }
+    $to = Join-Path $work "$rigChar\model\layers"
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    Copy-Item (Join-Path $rigLayerSrc '*.png') -Destination $to
+}
+
 # Animation sprint 2 (Track D1): Salon member stage sprites, cut by
 # tools/cut_salon_members.py. Silhouette-first mini-sprites for salon_stage.tscn.
 $salonSrc = Join-Path $src 'furina\salon'

@@ -98,6 +98,23 @@ class Config:
         # so neither stacks back up to its master and neither ever claimed to.
         # A config that sets this is promising that it does.
         self.recompose_exact = bool(raw.get("recompose_exact", False))
+        # Optional source preparation, applied in this order before any fence
+        # is read (configs #9 and #10, Kokomi and Varka, 2026-10-02). Fence
+        # and seed coordinates are in the PREPARED canvas.
+        #   source_crop  [x0, y0, x1, y1]  keep this box of the raw source
+        #   source_scale s                 resample by s (LANCZOS)
+        #   source_pad   [l, t, r, b]      transparent margin, so the canvas
+        #                                  has the combat box's aspect and the
+        #                                  box resize does not stretch her
+        # Kokomi's master is 4900x5700, which the pure-Python flood fill
+        # cannot walk in reasonable time, and Varka's is 1376x1776, which is
+        # not the 240x280 aspect. Absent keys change nothing, so configs #1-#8
+        # cut byte-identically.
+        crop = raw.get("source_crop")
+        self.source_crop = tuple(int(v) for v in crop) if crop else None
+        self.source_scale = float(raw.get("source_scale", 1.0))
+        pad = raw.get("source_pad")
+        self.source_pad = tuple(int(v) for v in pad) if pad else None
 
         self.layers = list(raw["layers"])
         self.names = {int(l["id"]): l["name"] for l in self.layers}
@@ -155,6 +172,23 @@ class Config:
         return self.by_name[layer_name]
 
 
+def load_source(cfg):
+    """The source as the fences see it: raw, or cropped/scaled/padded."""
+    im = Image.open(cfg.source).convert("RGBA")
+    if cfg.source_crop:
+        im = im.crop(cfg.source_crop)
+    if cfg.source_scale != 1.0:
+        im = im.resize((round(im.width * cfg.source_scale),
+                        round(im.height * cfg.source_scale)), Image.LANCZOS)
+    if cfg.source_pad:
+        l, t, r, b = cfg.source_pad
+        canvas = Image.new("RGBA", (im.width + l + r, im.height + t + b),
+                           (0, 0, 0, 0))
+        canvas.paste(im, (l, t))
+        im = canvas
+    return np.asarray(im).astype(np.float64)
+
+
 def config_path(name):
     return CONFIG_DIR / f"{name}.yaml"
 
@@ -182,6 +216,8 @@ ALL_CONFIGS = (
     "teyvat/emperor_of_fire_and_iron",
     "teyvat/golden_wolflord",
     "teyvat/everlasting_lord_of_arcane_wisdom",
+    "kokomi",
+    "varka",
 )
 
 
@@ -329,7 +365,7 @@ def partition(cfg, rgba):
 
 
 def cut(cfg, out_dir, manifest_path=None):
-    rgba = np.asarray(Image.open(cfg.source).convert("RGBA")).astype(np.float64)
+    rgba = load_source(cfg)
     H, W = rgba.shape[:2]
     part = partition(cfg, rgba)
 
@@ -473,7 +509,7 @@ def verify(cfg):
         pre = sp + pre * (1 - sa)[..., None]
         acc = sa + acc * (1 - sa)
 
-    source = np.asarray(Image.open(cfg.source).convert("RGBA")).astype(np.float64)
+    source = load_source(cfg)
     # The pixels the cut KEEPS. Anything at or below `alpha_threshold` is
     # background by the config's own definition and is dropped on purpose.
     keep = source[..., 3] > cfg.alpha_threshold
