@@ -1,7 +1,13 @@
 # Varka: elements that borrow from each other
 
-Status: PICKS OPEN. Main session design, on [USER]'s direction (2026-10-02
-and 10-03).
+Status: PICKS 1 AND 3 RULED 2026-10-03; picks 2 and 4 revised and open.
+Main session design, on [USER]'s direction (2026-10-02 and 10-03).
+
+[USER], 2026-10-03: "Otherwise the picks in 1 make sense" (Absolute Zero
+excepted, §2); "Agreed on 3"; on 2, "can we do a cross-check against
+similar cards on the base game and see if these are reasonably priced?"
+(§3); on 4, "My favorite answer would be '4 different but equally balanced
+starter cards, one per element' If we can pull it off somehow." (§5).
 
 ## 1. Why
 
@@ -47,8 +53,17 @@ element to use the Oath, we downscale appropriately."
   - Wildfire Oath: "Your first Attack each turn deals additional damage
     equal to half your Pyro Oath." (Was the full Oath, only while Pyro is
     current.)
-  - Absolute Zero: "Your Swirls apply 1 Weak to ALL enemies." (Was Weak and
-    Vulnerable, only while Cryo is current.)
+  - Absolute Zero (revised on [USER]'s note: "it used to read 'all enemies
+    are always weak and vulnerable if you swirl at least once per turn' ...
+    both conditions being ridiculously strong as multiplayer payoffs, that
+    is a sizeable nerf to cross damage output"): it stops being a team-wide
+    debuff and becomes Cryo's missing status payoff (identities paper §6).
+    Rare Power, 2: "Whenever you apply [gold]Weak[/gold] or
+    [gold]Vulnerable[/gold] to an enemy, deal damage equal to your Cryo
+    [gold]Oath[/gold] to it." Base analogues: Necrobinder's Shroud (U, 1:
+    3 [4] Block each time you apply Doom), the "pays on applying a debuff"
+    shape at Uncommon; this one scales with Cryo Oath, so Rare. Fed by
+    Mika, Kaeya, Glacial Edict, Frost Ward and Cryo Swirls.
 
 So borrowing a card costs you Oath growth (only Pyro cards grow Pyro Oath),
 never your payoff. Staying in one element builds one Oath high. Mixing gets
@@ -62,9 +77,27 @@ big numbers card' is really what we want to put into Anemo."
 
 | Card | Rarity | Today | Becomes | Scales with |
 |---|---|---|---|---|
-| Barbara: Gleeful Songs | C | Apply Hydro to ALL. Gain 5 [7] Block. | Apply Hydro to ALL enemies. Gain 3 [4] Block for each enemy it reacts on. | reactions (needs other appliers) |
-| Rippling Guard (new; replaces Wind Wall) | C | Wind Wall: Gain 7 [10] Block, 3 more with a current element. | Apply Hydro to an enemy. Gain 2 [3] Block for each other card you played this turn. | cards played |
-| Barbara: Whisper of Water | U | Hydro. Block now and next turn. | Apply Hydro to an enemy. Gain 4 [5] Block now and at the start of your next 2 turns. | delayed |
+| Barbara: Gleeful Songs | C | Apply Hydro to ALL. Gain 5 [7] Block. | Apply Hydro to ALL enemies. Gain 4 [6] Block, plus 3 [4] for each enemy it reacts on. | reactions (needs other appliers) |
+| Rippling Guard (new; replaces Wind Wall) | C | Wind Wall: Gain 7 [10] Block, 3 more with a current element. | Apply Hydro to an enemy. Gain 3 Block, plus 2 [3] for each other card you played this turn. | cards played |
+| Barbara: Whisper of Water | U | Hydro. Block now and next turn. | Apply Hydro to an enemy. Gain 4 [6] Block now and at the start of your next 2 turns. | delayed |
+
+**Priced against the base game** (the base cards read from the game's own
+code; full table in this session's scratchpad, `base-block-census.md`). A
+cost-1 Common Skill buys about 8 [11] Block with a small rider: Shrug It Off
+8 [11] and draw 1, Gather Light 8 [11] and a Star, Leap 9 [12] alone.
+- **Gleeful Songs.** The first draft, 3 [4] per reacting enemy and nothing
+  else, gave 3 against one enemy: far under the line. With a 4 [6] floor it
+  is 7 [10] when one enemy reacts and 13 [18] when three do, plus the Hydro
+  aura on all. Taunt (C, 6 [7] and Vulnerable) and Shrug It Off bracket it.
+- **Rippling Guard.** The first draft, 2 [3] per other card, gave 4 to 6 on a
+  normal turn. With a 3 floor it is 7 [9] as the third card and 9 [12] as the
+  fourth. The base scales the same way only at Uncommon or as a 0-cost
+  Skill (Rage: 3 [5] per Attack, this turn only), so a Common pays with a
+  floor.
+- **Whisper of Water.** 12 [18] over three turns, plus Hydro. Dodge and Roll
+  (C: 4 [6] now and again next turn, 8 [12] in all) and Glitterstream (C,
+  cost 2: 11 [13] now and 5 [7] next turn) bracket it; the third turn is
+  what an Uncommon adds.
 | Tidal Bulwark | U | unchanged | | Hydro Oath |
 | Barbara: Wellspring Hymn | U | unchanged (cleanse, Exhaust) | | |
 | Retaliating Tide | R | unchanged (Block becomes damage, capped by Hydro Oath) | | the payoff |
@@ -109,11 +142,21 @@ element"), and Four Winds' Ascension from Boreas's Fang on his first Oath
 - Windbound Execution is the only Swirl in the starter. Ascension arrives
   only after the first Oath, and the Knight is what makes that Oath.
 
-So my read is that the three earn their slots. The alternative is starter
-Knights that teach their element's job, at the cost of reopening the act-1
-gap: Amber "Deal 8 [11] Pyro damage", Barbara "Gain 8 [11] Block. Apply
-Hydro", Lisa "Apply Electro. Draw 2 [3] cards", Kaeya "Apply Cryo and 2 [3]
-Weak".
+So the three earn their slots. The change is to the Knight itself: four
+different starters, one per element, each keeping some Block (the start is
+decided by Block) and adding its element's job. The sim balances them.
+
+| Starter Knight | Text (first numbers; the sim moves them) | Job |
+|---|---|---|
+| Amber: Precise Shot | Deal 7 [10] Pyro damage. Gain 4 [5] Block. | the hit |
+| Barbara: Glorious Season | Gain 6 [8] Block. Apply Hydro. Next turn, gain 3 [4] Block. | delayed Block |
+| Lisa: Induced Aftershock | Gain 5 [7] Block. Apply Electro. Draw 1 card. | draw |
+| Kaeya: Hidden Strength | Gain 5 [7] Block. Apply Cryo and 1 [2] Weak. | statuses |
+
+Base yardsticks: Silent's starter Survivor (8 [11] Block, discard 1) and
+Backflip (C, 5 [8] Block, draw 2). The bar: the four starters' act-1 win
+rates within 5 points of each other, tighter than the 10 points the sim
+reached before only by making them identical.
 
 ## 6. Before the build
 
@@ -126,12 +169,12 @@ The numbers above move with the sim. Then a Varka seat round.
 
 ## Picks
 
-1. **The Oath rule (§2):** element cards read their own Oath, Anemo and
-   generic cards read the current one; Wildfire Oath and Absolute Zero lose
-   the condition and shrink. Default: yes.
-2. **Hydro scales (§3):** Gleeful Songs and Whisper of Water rewritten,
-   Rippling Guard replaces Wind Wall. Default: yes.
-3. **Borrowing payoffs (§4):** Kindled Edge, Storm Battery and Frost Ward
-   replace Cavalry Charge, Gust Ward and Favonius Drill. Default: yes.
-4. **The starter (§5):** (a) keep it as is (default); (b) starter Knights
-   that teach their element's job.
+1. **The Oath rule (§2):** RULED. Open only on the revised Absolute Zero (a
+   status payoff that reads Cryo Oath). Default: yes.
+2. **Hydro scales (§3), at the base-game prices:** Gleeful Songs 4 [6] plus
+   3 [4] per reacting enemy; Rippling Guard 3 plus 2 [3] per other card;
+   Whisper of Water 4 [6] for three turns. Default: yes.
+3. **Borrowing payoffs (§4):** RULED.
+4. **The starter (§5):** four different starter Knights, one per element,
+   balanced by the sim to within 5 points; Strike, Defend, Windbound
+   Execution and Ascension unchanged. Default: yes.
