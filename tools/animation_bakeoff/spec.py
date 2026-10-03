@@ -272,8 +272,9 @@ MOTIONS: tuple[Motion, ...] = (IDLE, INTENT, ATTACK, HURT, DEATH)
 #: The five motions this lane's charter requires, in the order it names them.
 REQUIRED_MOTIONS: tuple[str, ...] = ("idle", "intent", "attack", "hurt", "death")
 
-#: States the shipped router can reach today
-#: (`klee-mod/KleeCode/Vfx/CreatureAnimationRouter.cs:45-54`).
+#: States every routed scene must carry (the last, required state of each
+#: row of the router's TriggerToStates; cast / power / idle_low are optional)
+#: (`klee-mod/KleeCode/Vfx/CreatureAnimationRouter.cs`).
 ROUTED_STATES: tuple[str, ...] = ("idle", "attack", "hurt", "death")
 
 

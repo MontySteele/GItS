@@ -213,6 +213,12 @@ public static class KleeExpansion
         }
         foreach (var dodoco in klee.Powers.OfType<DodocoPower>().ToList())
         {
+            // Motion pass (2026-10-02): Dodoco's pop over Klee as its Mine
+            // goes out. The scene's old caller was the shipped Sparks spend,
+            // deleted with the shipped kits (5a1e9e19); this is the one
+            // moment left where Dodoco itself acts. Capped at three live pops
+            // inside the spawner, and a no-op headless.
+            Vfx.KleeCombatVfx.SpawnDodocoPop(klee);
             await ProtoBombPower.PlaceOnRandom(choiceContext, klee,
                                                dodoco.Amount, isMine: true,
                                                payloadMineAll: 0,

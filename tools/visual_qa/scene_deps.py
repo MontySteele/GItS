@@ -45,8 +45,9 @@ GATE = "scene-deps"
 
 #: The four creature states CreatureAnimationRouter travels to, plus the RESET
 #: pose Godot writes. Source: klee-mod/KleeCode/Vfx/CreatureAnimationRouter.cs
-#: TriggerToState -- idle / attack / hurt / death. Passed in explicitly by the
-#: caller; this constant is the documented default for combat scenes, never
+#: TriggerToStates (the last, required state of each row) -- idle / attack /
+#: hurt / death; cast, power and idle_low are optional and fall back. Passed
+#: in explicitly by the caller; this constant is the documented default for combat scenes, never
 #: applied to every scene (a gauge has no "hurt").
 CREATURE_STATES = ("idle", "attack", "hurt", "death")
 
