@@ -44,6 +44,22 @@ be taken; the harness gives every pool row the default scores under the skip
 line against the starter the median of the others (`_nominal`), Kokomi's
 fix.
 
+THE REBALANCE WORLD (review/active/varka-rebalance-2026-10-03.md secs.2-5,
+aoe-trim-2026-10-03.md sec.4 on branch aoe-trim; SIM ONLY, nothing built in
+C#): `--world rebalance` swaps the paper's rows in over the sheet
+(`rebalance_rows`, written to a temporary sheet the loader reads) and turns on
+`varka_oath.REBALANCE` (Wildfire Oath, Absolute Zero, Cycle of Seasons).
+`--world current` (the default) is the sheet, run for run what main runs.
+`--knob name=int` moves one of the paper's numbers (KNOBS), never a text.
+The `elem_` pilots are the paper's borrowing decks (`deck_lists`); the
+`report_bars` section reads the paper's bars. `--no-gauntlet` skips the
+gauntlet's fights (at full HP it wins every act-1 fight and loses every
+act-2 boss, so it separates nothing) and keeps its drafts.
+
+    .venv/Scripts/python.exe -m tools.varka_expansion_sim --seeds 2400 --seed 7 --jobs 15 --world current --no-gauntlet --json base.json
+    .venv/Scripts/python.exe -m tools.varka_expansion_sim --seeds 2400 --seed 7 --jobs 15 --world rebalance --no-gauntlet --json new.json
+    .venv/Scripts/python.exe -m tools.varka_expansion_sim --report new.json --against base.json
+
 THE PLAY PILOT is the stock `generic` pilot, as the open-Oath paired sim
 used, with one INSTRUMENT SURFACE (not a design claim): the `varka` and
 `add_knight` ops, which the stock scorer cannot see, are valued as their
@@ -127,22 +143,304 @@ DECKS = {
     "switch": _deck(SWITCH, [k for ks in KNIGHTS.values() for k in ks]),
     "muster": _deck(MUSTER, ALL_KNIGHTS),
 }
+# THE REBALANCE PAPER (review/active/varka-rebalance-2026-10-03.md sec.4):
+# each element's new payoff joins its element's list. Kept apart from the
+# lists above so those name only live sheet rows; `deck_lists` merges them
+# under `--world rebalance`, where `rebalance_rows` puts them in the pool.
+REBALANCE_PAYOFFS = {"pyro": ["kindled_edge"], "hydro": ["rippling_guard"],
+                     "cryo": ["frost_ward"], "electro": ["storm_battery"]}
+#: Rebalance sec.4's "borrows" for Electro: the generic draw cards.
+GENERIC_DRAW = ["rising_gale", "tempest_charge", "tailwind_stride",
+                "change_of_guard", "vow_of_the_blade", "dawn_patrol",
+                "eye_of_stormterror", "noelle_steadfast_maid"]
+
+
+def deck_lists(world="current"):
+    """The forced decks for a world. The `elem_` pilots are the rebalance
+    paper's borrowing decks (sec.4's "Borrows" column, read as a drafter):
+    their element's Knights and payoffs are core, every OTHER element's
+    Knights (the appliers) are support beside the Oath cards, and only the
+    other elements' payoffs work against them. Electro also borrows the
+    generic draw cards. Same drafter in both worlds, so a paired read is the
+    pool's change, not the drafter's."""
+    payoffs = {el: list(PAYOFFS[el]) + (REBALANCE_PAYOFFS[el]
+                                        if world == "rebalance" else [])
+               for el in ELEMENTS}
+    decks = {
+        **{f"mono_{el}": _deck(
+            KNIGHTS[el] + payoffs[el], FOCUS + ["noelle_steadfast_maid"],
+            [k for e2 in ELEMENTS if e2 != el
+             for k in KNIGHTS[e2] + payoffs[e2]])
+           for el in ELEMENTS},
+        **{f"elem_{el}": _deck(
+            KNIGHTS[el] + payoffs[el],
+            FOCUS + ["noelle_steadfast_maid"]
+            + [k for e2 in ELEMENTS if e2 != el for k in KNIGHTS[e2]]
+            + (GENERIC_DRAW if el == "electro" else []),
+            [k for e2 in ELEMENTS if e2 != el for k in payoffs[e2]])
+           for el in ELEMENTS},
+        "gale": _deck(GALE),
+        "switch": _deck(SWITCH, [k for ks in KNIGHTS.values() for k in ks]),
+        "muster": _deck(MUSTER, ALL_KNIGHTS),
+    }
+    return decks, payoffs
+
+
+DECKS.update({k: v for k, v in deck_lists()[0].items()
+              if k.startswith("elem_")})
 PILOTS = ("default",) + tuple(DECKS)
 
 
+def element_of(world="current"):
+    """{card id: Oath element} -- the Knights, the starter Knights and each
+    element's payoffs; every other row is generic (absent)."""
+    from tier0.engine import varka_oath as V
+    out = {cid: el for el, cid in V.STARTER_KNIGHT_IDS.items()}
+    _, payoffs = deck_lists(world)
+    for el in ELEMENTS:
+        for c in KNIGHTS[el] + payoffs[el]:
+            out[P + c] = el
+    return out
+
+
 def starts_for(pilot):
-    if pilot.startswith("mono_"):
+    if pilot.startswith(("mono_", "elem_")):
         return (pilot[5:],)
     return ELEMENTS
+
+
+# --- the rebalance world: an OVERLAY on the sheet, sim only ---------------------
+#
+# The paper's rows are NOT on `docs/prototype-surface.yaml`: the sheet compiles
+# to the mod, and these rows need C# the paper has not had built (new `varka`
+# kinds, Wildfire Oath / Absolute Zero / Cycle of Seasons rule changes). Under
+# `--world rebalance` the harness writes the sheet with these rows swapped in
+# to a temporary file, points the loader at it, and turns on
+# `varka_oath.REBALANCE`. Texts are the paper's verbatim; the numbers are
+# KNOBS so a variant can move only numbers.
+
+#: The paper's first numbers (rebalance secs.3-5; aoe-trim sec.4 keeps
+#: Awakening's and Cycle of Seasons' numbers).
+KNOBS = {
+    "amber_damage": 7, "amber_block": 4,
+    "barbara_block": 6, "barbara_next": 3,
+    "lisa_block": 5, "lisa_draw": 1,
+    "kaeya_block": 5, "kaeya_weak": 1,
+    "gleeful_base": 4, "gleeful_per": 3,
+    "rippling_base": 3, "rippling_per": 2,
+    "whisper_block": 4,
+    "kindled_base": 7,
+    "storm_per": 2,
+    "frost_per": 3,
+    "awakening_base": 4, "awakening_more": 3,
+    "cycle_amount": 4,
+}
+
+
+def rebalance_rows(knobs=None):
+    """{replaced id: new row dict} for the overlay; the key is the row it
+    stands in for (same position, same id unless the paper names a new card).
+    """
+    k = dict(KNOBS, **(knobs or {}))
+    unknown = set(k) - set(KNOBS)
+    if unknown:
+        raise ValueError(f"unknown knobs {sorted(unknown)}")
+    vk = "proto_vk_"
+    base = {"character": "varka", "authored_by": ["claude"]}
+    knight = {"nation": "mondstadt", "star": 4, "role_c": "applier",
+              "personal_pool": "varka"}
+    rows = {
+        # sec.5: four different starter Knights (rarity basic, same ids).
+        vk + "amber_fiery_rain": {
+            **base, **knight, "id": vk + "amber_fiery_rain",
+            "name": "Amber: Precise Shot", "rarity": "basic",
+            "element": "pyro", "cost": 1, "type": "skill",
+            "description": "Deal 7 [10] Pyro damage. Gain 4 [5] Block.",
+            "effects": [{"op": "damage", "amount": k["amber_damage"],
+                         "target": "enemy", "applies_element": True},
+                        {"op": "block", "amount": k["amber_block"]}],
+            "upgrade": {"damage": 3, "block": 1}},
+        vk + "barbara_melody_loop": {
+            **base, **knight, "id": vk + "barbara_melody_loop",
+            "name": "Barbara: Glorious Season", "rarity": "basic",
+            "element": "hydro", "cost": 1, "type": "skill",
+            "description": "Gain 6 [8] Block. Apply Hydro. Next turn, gain "
+                           "3 [4] Block.",
+            "effects": [{"op": "block", "amount": k["barbara_block"]},
+                        {"op": "apply_aura", "element": "hydro",
+                         "target": "enemy"},
+                        {"op": "block_next_turn",
+                         "amount": k["barbara_next"]}],
+            "upgrade": {"block": 2, "block_next_turn": 1}},
+        vk + "lisa_lightning_rose": {
+            **base, **knight, "id": vk + "lisa_lightning_rose",
+            "name": "Lisa: Induced Aftershock", "rarity": "basic",
+            "element": "electro", "cost": 1, "type": "skill",
+            "description": "Gain 5 [7] Block. Apply Electro. Draw 1 [2] "
+                           "card(s).",
+            "effects": [{"op": "block", "amount": k["lisa_block"]},
+                        {"op": "apply_aura", "element": "electro",
+                         "target": "enemy"},
+                        {"op": "draw", "amount": k["lisa_draw"]}],
+            "upgrade": {"block": 2, "draw": 1}},
+        vk + "kaeya_glacial_waltz": {
+            **base, **knight, "id": vk + "kaeya_glacial_waltz",
+            "name": "Kaeya: Hidden Strength", "rarity": "basic",
+            "element": "cryo", "cost": 1, "type": "skill",
+            "description": "Gain 5 [7] Block. Apply Cryo and 1 Weak.",
+            "effects": [{"op": "block", "amount": k["kaeya_block"]},
+                        {"op": "apply_aura", "element": "cryo",
+                         "target": "enemy"},
+                        {"op": "apply_power", "power": "weak",
+                         "amount": k["kaeya_weak"], "target": "enemy"}],
+            "upgrade": {"block": 2}},
+        # sec.3: Hydro scales.
+        vk + "barbara_show_begin": {
+            **base, **knight, "id": vk + "barbara_show_begin",
+            "name": "Barbara: Gleeful Songs", "rarity": "common",
+            "element": "hydro", "cost": 1, "type": "skill",
+            "description": "Apply Hydro to ALL enemies. Gain 4 [6] Block, "
+                           "plus 3 [4] for each enemy it reacts on.",
+            "effects": [{"op": "varka", "kind": "gleeful_songs",
+                         "target": "all_enemies", "base": k["gleeful_base"],
+                         "per": k["gleeful_per"]}],
+            "upgrade": {"varka_base": 2, "varka_per": 1}},
+        vk + "wind_wall": {
+            **base, "id": vk + "rippling_guard", "name": "Rippling Guard",
+            "cost": 1, "type": "skill", "rarity": "common",
+            "description": "Apply Hydro to an enemy. Gain 3 Block, plus 2 [3] "
+                           "for each other card you played this turn.",
+            "effects": [{"op": "apply_aura", "element": "hydro",
+                         "target": "enemy"},
+                        {"op": "varka", "kind": "rippling_guard",
+                         "base": k["rippling_base"],
+                         "per": k["rippling_per"]}],
+            "upgrade": {"varka_per": 1}},
+        vk + "barbara_whisper_of_water": {
+            **base, **knight, "id": vk + "barbara_whisper_of_water",
+            "name": "Barbara: Whisper of Water", "rarity": "uncommon",
+            "element": "hydro", "cost": 1, "type": "skill",
+            "description": "Apply Hydro to an enemy. Gain 4 [6] Block now and "
+                           "at the start of your next 2 turns.",
+            "effects": [{"op": "apply_aura", "element": "hydro",
+                         "target": "enemy"},
+                        {"op": "block", "amount": k["whisper_block"]},
+                        {"op": "varka", "kind": "echo_block",
+                         "amount": k["whisper_block"]}],
+            "upgrade": {"block": 2, "varka_amount": 2}},
+        # sec.4: payoffs that borrow.
+        vk + "cavalry_charge": {
+            **base, "id": vk + "kindled_edge", "name": "Kindled Edge",
+            "cost": 1, "type": "attack", "rarity": "common",
+            "description": "Deal 7 [10] Pyro damage. If it sets off an "
+                           "Elemental Reaction, deal 7 [10] more.",
+            "effects": [{"op": "varka", "kind": "kindled_edge",
+                         "target": "enemy", "base": k["kindled_base"]}],
+            "upgrade": {"varka_base": 3}},
+        vk + "gust_ward": {
+            **base, "id": vk + "storm_battery", "name": "Storm Battery",
+            "cost": 1, "type": "attack", "rarity": "uncommon",
+            "description": "Deal 2 [3] Electro damage to ALL enemies for each "
+                           "other card in your hand.",
+            "effects": [{"op": "varka", "kind": "storm_battery",
+                         "target": "all_enemies", "per": k["storm_per"]}],
+            "upgrade": {"varka_per": 1}},
+        vk + "favonius_drill": {
+            **base, "id": vk + "frost_ward", "name": "Frost Ward",
+            "cost": 1, "type": "skill", "rarity": "common",
+            "description": "Apply 1 Weak to each enemy with an aura. Gain "
+                           "3 [4] Block for each.",
+            "effects": [{"op": "varka", "kind": "frost_ward",
+                         "target": "all_enemies", "amount": k["frost_per"]}],
+            "upgrade": {"varka_amount": 1}},
+        # aoe-trim sec.4: Awakening at one enemy, same numbers.
+        vk + "razor_claw_and_thunder": {
+            **base, **knight, "id": vk + "razor_claw_and_thunder",
+            "name": "Razor: Awakening", "rarity": "common",
+            "element": "electro", "cost": 1, "type": "skill",
+            "description": "Deal Electro damage to an enemy, more if it "
+                           "already has Electro.",
+            "effects": [{"op": "varka", "kind": "awakening_single",
+                         "target": "enemy", "base": k["awakening_base"],
+                         "amount": k["awakening_more"]}],
+            "upgrade": {"varka_base": 2}},
+    }
+    return rows, k
+
+
+def _overlay_sheet(knobs=None):
+    """The sheet with the rebalance rows swapped in (Wildfire Oath, Absolute
+    Zero and Cycle of Seasons keep their rows: their change is the rule,
+    `varka_oath.REBALANCE`; Cycle's number is a knob)."""
+    import copy
+    import yaml
+    rows, k = rebalance_rows(knobs)
+    raw = yaml.safe_load(_SHEET.read_text(encoding="utf-8"))
+    out = []
+    for d in raw:
+        d = copy.deepcopy(d)
+        if d.get("id") in rows:
+            d = rows[d["id"]]
+        elif d.get("id") == P + "cycle_of_seasons":
+            d["effects"][0]["amount"] = k["cycle_amount"]
+            d["description"] = ("Whenever your current element changes, deal "
+                                "4 [6] damage to a random enemy.")
+        elif d.get("id") == P + "wildfire_oath":
+            d["description"] = ("Your first Attack each turn deals additional "
+                                "damage equal to half your Pyro Oath.")
+        elif d.get("id") == P + "absolute_zero":
+            d["description"] = ("Whenever you apply Weak or Vulnerable to an "
+                                "enemy, deal damage equal to your Cryo Oath "
+                                "to it.")
+        out.append(d)
+    return out
 
 
 # --- the process switch and the scorer surface --------------------------------
 
 _ENABLED = False
+WORLD = "current"
+_SHEET = None
 
 
-def enable():
+def set_world(world="current", knobs=None):
+    """Point this process at a world: `current` is the sheet as it stands;
+    `rebalance` is the overlay (`_overlay_sheet`) plus `varka_oath.REBALANCE`.
+    Re-entrant (the tests flip it both ways)."""
+    global WORLD, _SHEET
+    import os
+    import tempfile
+    from pathlib import Path
+    import yaml
+    from tier0.content import loader
+    from tier0.engine import varka_oath as V
+    if _SHEET is None:
+        _SHEET = loader.PROTOTYPE_SHEET
+    loader.PROTOTYPE_SHEET = _SHEET
+    if world == "rebalance":
+        fd, path = tempfile.mkstemp(prefix="varka-rebalance-",
+                                    suffix=".yaml")
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            yaml.safe_dump(_overlay_sheet(knobs), fh, allow_unicode=True,
+                           sort_keys=False)
+        loader.PROTOTYPE_SHEET = Path(path)
+        V.REBALANCE = True
+    elif world == "current":
+        V.REBALANCE = False
+    else:
+        raise ValueError(f"unknown world {world!r}")
+    WORLD = world
+    DECKS.clear()
+    DECKS.update(deck_lists(world)[0])
+    loader._prototype_index.cache_clear()
+    loader.reset_arm_caches()
+    _NOMINAL.clear()
+
+
+def enable(world=None, knobs=None):
     global _ENABLED
+    if world is not None:
+        set_world(world, knobs)
     if _ENABLED:
         return
     from tier0 import constants as C
@@ -234,6 +532,44 @@ def _translate(state, fx):
                    "times": n}
     elif kind == "awakening":
         yield {"op": "damage", "amount": base, "target": "all_enemies"}
+    # --- the rebalance overlay's kinds (sim only) ---
+    elif kind == "awakening_single":
+        more = amt if any(e.aura == "electro"
+                          for e in state.living_enemies) else 0
+        yield {"op": "damage", "amount": base + more, "target": "enemy"}
+        yield oath_proxy
+    elif kind == "kindled_edge":
+        # The "more" if any enemy wears an aura Pyro reacts with.
+        react = any(e.aura in ("hydro", "cryo", "electro")
+                    for e in state.living_enemies)
+        yield {"op": "damage", "amount": base * (2 if react else 1),
+               "target": "enemy"}
+        yield oath_proxy
+    elif kind == "storm_battery":
+        # One hit per OTHER card in hand (the card is in hand while priced).
+        n = max(0, len(state.player.hand) - 1)
+        if n:
+            yield {"op": "damage", "amount": per * n,
+                   "target": "all_enemies"}
+            yield oath_proxy
+    elif kind == "frost_ward":
+        n = sum(1 for e in state.living_enemies if e.aura)
+        if n:
+            yield {"op": "apply_power", "power": "weak", "amount": 1,
+                   "target": "enemy"}
+            yield {"op": "block", "amount": amt * n}
+    elif kind == "gleeful_songs":
+        n = sum(1 for e in state.living_enemies
+                if e.aura in ("pyro", "cryo", "electro"))
+        yield {"op": "apply_aura", "element": "hydro",
+               "target": "all_enemies"}
+        yield {"op": "block", "amount": base + per * n}
+        yield oath_proxy
+    elif kind == "rippling_guard":
+        yield {"op": "block",
+               "amount": base + per * state.cards_played_this_turn}
+    elif kind == "echo_block":
+        yield {"op": "block_next_turn", "amount": 2 * amt}
     elif kind == "tempest":
         yield {"op": "damage", "amount": base, "target": "enemy", "times": 4}
     elif kind == "ascension_hit":
@@ -322,7 +658,8 @@ def _nominal(element):
         from tier05 import draft
         starter = [loader.get_card(c) for c in V.starter_ids(element)]
         ids = [c for r in pool().values() for c in r]
-        sc = {c: draft.score_offer(loader.get_card(c), starter, "generic")
+        sc = {c: draft.score_offer(_draft_view(loader.get_card(c)), starter,
+                                   "generic")
               for c in ids}
         priced = sorted(v for v in sc.values()
                         if v >= C.DRAFT_SKIP_THRESHOLD)
@@ -332,12 +669,61 @@ def _nominal(element):
     return _NOMINAL[element]
 
 
+#: The rebalance overlay's kinds as stock ops FOR THE DRAFTER ONLY, at a
+#: nominal board (one reacting enemy, two other cards played, four cards in
+#: hand, two enemies with an aura). The default drafter prices `varka` at 0,
+#: and the rows these replace printed stock ops it priced (Gleeful Songs' and
+#: Wind Wall's Block, Gust Ward's Block and draw); without this the new rows
+#: would read as blanks beside the rows they replace. The old world's kinds
+#: are untouched, so `--world current` drafts exactly as before.
+def _draft_ops(fx):
+    kind = fx.get("kind")
+    base, per, amt = fx.get("base", 0), fx.get("per", 0), fx.get("amount", 0)
+    if kind == "gleeful_songs":
+        return [{"op": "apply_aura", "element": "hydro",
+                 "target": "all_enemies"},
+                {"op": "block", "amount": base + per}]
+    if kind == "rippling_guard":
+        return [{"op": "block", "amount": base + 2 * per}]
+    if kind == "echo_block":
+        return [{"op": "block_next_turn", "amount": 2 * amt}]
+    if kind == "frost_ward":
+        return [{"op": "apply_power", "power": "weak", "amount": 1,
+                 "target": "enemy"}, {"op": "block", "amount": 2 * amt}]
+    if kind == "kindled_edge":
+        return [{"op": "damage", "amount": base + base // 2,
+                 "target": "enemy"}]
+    if kind == "storm_battery":
+        return [{"op": "damage", "amount": 4 * per,
+                 "target": "all_enemies"}]
+    if kind == "awakening_single":
+        return [{"op": "damage", "amount": base + amt // 2,
+                 "target": "enemy"}]
+    return None
+
+
+def _draft_view(card):
+    """The card the default drafter scores: the overlay's kinds swapped for
+    `_draft_ops`; any other card as it is."""
+    if not any(_draft_ops(fx) for fx in card.effects
+               if fx.get("op") == "varka"):
+        return card
+    import copy
+    view = copy.copy(card)
+    effects = []
+    for fx in card.effects:
+        ops = _draft_ops(fx) if fx.get("op") == "varka" else None
+        effects.extend(ops if ops else [fx])
+    view.effects = effects
+    return view
+
+
 def _default(card, deck_cards, element):
     from tier05 import draft
     med, low = _nominal(element)
     if card.id in low:
         return med
-    return draft.score_offer(card, deck_cards, "generic")
+    return draft.score_offer(_draft_view(card), deck_cards, "generic")
 
 
 def _score(card, deck, deck_cards, pilot, element):
@@ -349,8 +735,8 @@ def _score(card, deck, deck_cards, pilot, element):
     if card.id in d["against"]:
         return -1.0, floor
     if card.id in d["core"]:
-        knight = pilot.startswith("mono_") and card.id[len(P):] in KNIGHTS.get(
-            pilot[5:], ())
+        knight = (pilot.startswith(("mono_", "elem_"))
+                  and card.id[len(P):] in KNIGHTS.get(pilot[5:], ()))
         cap = 3 if knight else (
             1 if (card.type == "power" or card.rarity == "rare") else 2)
         if deck.count(card.id) < cap:
@@ -378,6 +764,11 @@ def _draft(offer, deck, pilot, element):
 
 def fight(element, deck, enemies, seed, hp):
     from tier0.engine import combat, varka_oath as V
+    # Instrument only: enemy names repeat ("inklet" x3), and the report tells
+    # a multi-target hit from a single one by the `damage` event's target.
+    # Names are log text in the engine, so nothing a fight does moves.
+    for i, e in enumerate(enemies):
+        e.name = f"{e.name}#{i}"
     player = V.build_player(element, extra=tuple(deck))
     player.hp = min(hp, player.max_hp)
     start = player.hp
@@ -393,11 +784,54 @@ def fight(element, deck, enemies, seed, hp):
     led = getattr(s.player, "varka_ledger", None)
     oath = sum(led.oath.values()) if led else 0
     won = bool(s.player.alive) and not s.living_enemies
+    block, dmg, multi = _log_reads(s.log)
     return {"won": won, "turns": s.turn,
             "hp_lost": start - max(0, s.player.hp),
             "hp_end": max(0, s.player.hp), "plays": dict(plays),
             "oath": oath, "stall": s.player.alive and bool(s.living_enemies),
-            "deck": full, "error": None}
+            "deck": full, "error": None, "block": block, "dmg": dmg,
+            "dmg_multi": multi, "enemies": len(enemies)}
+
+
+#: Log events that open a new damage group: a card play, and each of his
+#: Powers' own triggers (their damage is theirs, not the last card's).
+_GROUP_MARKS = frozenset({"play", "varka_cycle_of_seasons", "varka_assembly",
+                          "varka_absolute_zero", "varka_retaliating_tide",
+                          "varka_baron_bunny"})
+
+
+def _log_reads(log):
+    """(Block gained, damage dealt to enemies, the part of it dealt by
+    MULTI-TARGET groups). A group is the events from one card play (or one
+    Power trigger) to the next, cut at each turn; it is multi-target when its
+    hits struck two or more different enemies (`fight` numbers the names). Damage counts
+    HP lost plus Block stripped."""
+    block = 0
+    dmg = multi = 0.0
+    group: list = []
+    turn = None
+
+    def close():
+        nonlocal multi
+        ids = {e for e, _ in group}
+        if len(ids) >= 2:
+            multi += sum(a for _, a in group)
+
+    for r in log:
+        ev = r.get("event")
+        if ev == "block":
+            block += r.get("amount", 0)
+            continue
+        if ev in _GROUP_MARKS or r.get("turn") != turn:
+            close()
+            group = []
+            turn = r.get("turn")
+        if ev == "damage" and r.get("target") != "player":
+            a = float(r.get("amount", 0)) + float(r.get("blocked", 0) or 0)
+            dmg += a
+            group.append((r.get("target"), a))
+    close()
+    return block, dmg, multi
 
 
 def run(seed, pilot, element):
@@ -465,10 +899,28 @@ def gauntlet(seed, pilot, element):
 
 
 def _slim(r):
-    """Drop the per-fight deck list down to what the report reads."""
+    """Drop the per-fight deck list: `_fight_decks` rebuilds it from the
+    starter and the picks (a 2,400-seed file is otherwise ~700 MB)."""
     for f in r["fights"]:
-        f["deck"] = Counter(f["deck"])
+        f.pop("deck", None)
     return r
+
+
+def _fight_decks(r):
+    """(fight, Counter of its deck) for each fight of a run or gauntlet. A
+    run's fight i holds the starter and the picks of the i offers before it
+    (every won fight but the last is followed by one offer); a gauntlet's
+    every fight holds all its picks."""
+    from tier0.engine import varka_oath as V
+    starter = V.starter_ids(r["element"])
+    picks = [pick for _, pick in r["offers"]]
+    gauntlet = "act1" not in r
+    for i, f in enumerate(r["fights"]):
+        if "deck" in f:                              # an older file
+            yield f, Counter(f["deck"])
+            continue
+        got = picks if gauntlet else picks[:i]
+        yield f, Counter(starter + [c for c in got if c])
 
 
 def _w(args):
@@ -481,11 +933,30 @@ def _wg(args):
     return _slim(gauntlet(*args))
 
 
-def pmap(fn, jobs, argl):
+def _wo(args):
+    """`--no-gauntlet`: the gauntlet's nine drafts only, no fights."""
+    enable()
+    seed, pilot, element = args
+    offer_rng = random.Random(seed + 10 ** 6)
+    pl = pool()
+    deck, offers = [], []
+    for kind in [k for k in TEMPLATE if k != "R"]:
+        offer = _offer(offer_rng, kind, pl)
+        pick = _draft(offer, deck, pilot, element)
+        offers.append((offer, pick))
+        if pick:
+            deck.append(pick)
+    return {"seed": seed, "pilot": pilot, "element": element,
+            "offers": offers, "fights": []}
+
+
+def pmap(fn, jobs, argl, world="current", knobs=None):
     if jobs <= 1:
+        enable(world, knobs)
         return [fn(a) for a in argl]
     import multiprocessing as mp
-    with mp.get_context("spawn").Pool(jobs) as p:
+    with mp.get_context("spawn").Pool(jobs, initializer=enable,
+                                      initargs=(world, knobs)) as p:
         return p.map(fn, argl, chunksize=8)
 
 
@@ -564,11 +1035,12 @@ def report(data, against=None, out=print):
             gm = {r["seed"]: r for r in gb[(pilot, e)]}
             gd = {r["seed"]: r for r in gb[("default", e)]}
             for s in gm:
-                ga.append((st.mean(f["won"] for f in gm[s]["fights"]),
-                           st.mean(f["won"] for f in gd[s]["fights"])))
+                if gm[s]["fights"] and gd[s]["fights"]:
+                    ga.append((st.mean(f["won"] for f in gm[s]["fights"]),
+                               st.mean(f["won"] for f in gd[s]["fights"])))
         d1 = paired_diff(*zip(*a))
         d2 = paired_diff(*zip(*b))
-        d3 = paired_diff(*zip(*ga))
+        d3 = paired_diff(*zip(*ga)) if ga else (0.0, 0.0)
         ok = all(d[0] > -10 for d in (d1, d3))
         out(f"| {pilot} | {d1[0]:+.1f} ±{d1[1]:.1f} | {d2[0]:+.1f} "
             f"±{d2[1]:.1f} | {d3[0]:+.1f} ±{d3[1]:.1f} | "
@@ -609,7 +1081,7 @@ def report(data, against=None, out=print):
             def share(r):
                 fs = [f["won"] for f in r["fights"]
                       if kind is None or f["kind"] == kind]
-                return st.mean(fs)
+                return st.mean(fs) if fs else 0.0
             o = [share(oldg[k]) for k in gkeys]
             nw = [share(newg[k]) for k in gkeys]
             d = paired_diff(nw, o)
@@ -642,8 +1114,8 @@ def report(data, against=None, out=print):
     held, played, plays, copies = Counter(), Counter(), Counter(), Counter()
     for src in (runs, gaunt):
         for r in src:
-            for f in r["fights"]:
-                for c, n in f["deck"].items():
+            for f, deck in _fight_decks(r):
+                for c, n in deck.items():
                     held[c] += 1
                     copies[c] += n
                     k = f["plays"].get(c, 0)
@@ -688,6 +1160,198 @@ def report(data, against=None, out=print):
            or "none"))
     if data.get("traces"):
         out("\nFirst trace:\n" + data["traces"][0])
+    report_bars(data, against, out)
+
+
+#: The rebalance paper's new and rewritten pool rows (the card bar reads
+#: these; the starter Knights have the starter bar).
+REBALANCE_CARDS = ("kindled_edge", "storm_battery", "frost_ward",
+                   "rippling_guard", "barbara_show_begin",
+                   "barbara_whisper_of_water", "razor_claw_and_thunder",
+                   "wildfire_oath", "absolute_zero", "cycle_of_seasons")
+
+
+def _act1(rs):
+    return sum(r["act1"] for r in rs), len(rs)
+
+
+def report_bars(data, against=None, out=print):
+    """The rebalance paper's bars (secs.5 and 6): the element spread, the
+    starter spread, cross-element plays, Block and multi-target damage, and
+    the new cards. Every rate is act 1 won on the stylised run."""
+    runs, gaunt = data["runs"], data["gauntlet"]
+    world = data.get("world", "current")
+    elements = data.get("elements") or element_of(world)
+    by = defaultdict(list)
+    for r in runs:
+        by[(r["pilot"], r["element"])].append(r)
+    have = {r["pilot"] for r in runs}
+    out(f"\n# Rebalance bars -- world `{world}`"
+        + (f", knobs {data['knobs']}" if data.get("knobs") else ""))
+
+    out("\n## Starter bar: default drafter, act 1 by forced starter Knight")
+    out("| start | n | act 1 |")
+    out("|---|---|---|")
+    rates = {}
+    for el in ELEMENTS:
+        k, n = _act1(by[("default", el)])
+        if n:
+            rates[el] = 100 * k / n
+            out(f"| {el} | {n} | {pc(k, n)} |")
+    if rates:
+        spread = max(rates.values()) - min(rates.values())
+        out(f"Spread {spread:.1f} points (bar: within 5) -> "
+            f"{'MET' if spread <= 5 else 'MISSED'}")
+
+    out("\n## Element bar: each element deck (own start) and the mixed deck")
+    out("| deck | n | act 1 |")
+    out("|---|---|---|")
+    groups = {}
+    for fam in ("mono", "elem"):
+        cells = {}
+        for el in ELEMENTS:
+            pilot = f"{fam}_{el}"
+            if pilot not in have:
+                continue
+            k, n = _act1(by[(pilot, el)])
+            cells[pilot] = 100 * k / n
+            out(f"| {pilot} | {n} | {pc(k, n)} |")
+        groups[fam] = cells
+    mixed = {}
+    for pilot in ("default", "switch"):
+        if pilot in have:
+            rs = [r for el in ELEMENTS for r in by[(pilot, el)]]
+            k, n = _act1(rs)
+            mixed[pilot] = 100 * k / n
+            out(f"| {pilot} (mixed, all four starts) | {n} | {pc(k, n)} |")
+    for fam, cells in groups.items():
+        for mix, rate in mixed.items():
+            if not cells:
+                continue
+            vals = list(cells.values()) + [rate]
+            spread = max(vals) - min(vals)
+            out(f"Spread {fam}_* + {mix}: {spread:.1f} points (bar: within "
+                f"10) -> {'MET' if spread <= 10 else 'MISSED'}")
+
+    out("\n## Cross-element plays (a deck playing the cards of an Oath "
+        "element other than its start; runs, all fights)")
+    out("Other = a Knight, starter Knight or payoff of an Oath element other "
+        "than the start. Bar: at least three such plays a run.")
+    out("| deck | start | runs | other plays/run | distinct other cards/run "
+        "| runs with 3+ other plays |")
+    out("|---|---|---|---|---|---|")
+    for pilot in [p for p in PILOTS if p in have]:
+        for el in starts_for(pilot):
+            rs = by[(pilot, el)]
+            if not rs:
+                continue
+            tot, dist, three = [], [], 0
+            for r in rs:
+                c = Counter()
+                for f in r["fights"]:
+                    for cid, k in f["plays"].items():
+                        e2 = elements.get(cid.rstrip("+"))
+                        if e2 and e2 != el:
+                            c[cid] += k
+                tot.append(sum(c.values()))
+                dist.append(len(c))
+                three += sum(c.values()) >= 3
+            out(f"| {pilot} | {el} | {len(rs)} | {st.mean(tot):.2f} | "
+                f"{st.mean(dist):.2f} | {pc(three, len(rs))} |")
+
+    out("\n## Block gained and multi-target damage (runs, all fights)")
+    out("Multi-target share: damage from card plays and Power triggers whose "
+        "hits struck 2+ different enemies, over all damage dealt (HP lost "
+        "plus Block stripped); fights with 2+ enemies only.")
+    out("| deck | fights | Block/fight | damage/fight | multi-target share "
+        "(2+ enemy fights) |")
+    out("|---|---|---|---|---|")
+    for pilot in [p for p in PILOTS if p in have]:
+        fs = [f for el in starts_for(pilot) for r in by[(pilot, el)]
+              for f in r["fights"] if "block" in f]
+        if not fs:
+            continue
+        multi = [f for f in fs if f.get("enemies", 1) >= 2]
+        md = sum(f["dmg"] for f in multi)
+        share = 100 * sum(f["dmg_multi"] for f in multi) / md if md else 0
+        out(f"| {pilot} | {len(fs)} | {st.mean(f['block'] for f in fs):.1f} "
+            f"| {st.mean(f['dmg'] for f in fs):.1f} | {share:.1f}% |")
+
+    out("\n## The paper's cards (default drafter's gauntlet drafts; played "
+        "= all pilots, runs and gauntlet)")
+    out("Won with/without: the default drafter's RUN fights at an elite or "
+        "the act-1 boss (where runs are lost), won with the card in the deck "
+        "against without it (fights held by a pilot of any start). "
+        "Survivorship leans it: a card held at a boss was drafted by a deck "
+        "that got there.")
+    out("| card | offered | taken | played in | elite+boss won with | "
+        "without | diff |")
+    out("|---|---|---|---|---|---|---|")
+    off, tak = Counter(), Counter()
+    held, played = Counter(), Counter()
+    with_w, with_n = Counter(), Counter()
+    tot_w = tot_n = 0
+    for g in gaunt:
+        if g["pilot"] != "default":
+            continue
+        for offer, pick in g["offers"]:
+            for c in offer:
+                off[c] += 1
+            if pick:
+                tak[pick] += 1
+    for r in runs:
+        if r["pilot"] != "default":
+            continue
+        for f, deck in _fight_decks(r):
+            if f["kind"] not in ("E", "B"):
+                continue
+            tot_w += f["won"]
+            tot_n += 1
+            for c in deck:
+                with_w[c] += f["won"]
+                with_n[c] += 1
+    for src in (runs, gaunt):
+        for r in src:
+            for f, deck in _fight_decks(r):
+                for c in deck:
+                    held[c] += 1
+                    played[c] += f["plays"].get(c, 0) > 0
+    names = data["cards"]
+    for short in REBALANCE_CARDS:
+        cid = P + short
+        if cid not in names:
+            continue
+        ww, wn = with_w[cid], with_n[cid]
+        ow, on = tot_w - ww, tot_n - wn
+        a = f"{100 * ww / wn:.1f} (n {wn})" if wn else "-"
+        b = f"{100 * ow / on:.1f}" if on else "-"
+        d = (f"{100 * ww / wn - 100 * ow / on:+.1f}" if wn and on else "-")
+        out(f"| {names[cid][0]} | {off[cid]} | "
+            f"{pc(tak[cid], off[cid]) if off[cid] else '-'} | "
+            f"{(100 * played[cid] / held[cid]) if held[cid] else 0:.1f}% | "
+            f"{a} | {b} | {d} |")
+
+    if against is not None:
+        out("\n## Paired against the other world (same seeds, starts, "
+            "offers by slot)")
+        out("| deck | start | n | other | this | this - other (paired) |")
+        out("|---|---|---|---|---|---|")
+        old = {(r["pilot"], r["element"], r["seed"]): r
+               for r in against["runs"]}
+        for pilot in [p for p in PILOTS if p in have]:
+            starts = list(starts_for(pilot))
+            for el in starts + (["all"] if len(starts) > 1 else []):
+                els = starts if el == "all" else [el]
+                pairs = [(r["act1"], old[(pilot, e, r["seed"])]["act1"])
+                         for e in els for r in by[(pilot, e)]
+                         if (pilot, e, r["seed"]) in old]
+                if not pairs:
+                    continue
+                a, b = zip(*pairs)
+                d = paired_diff(a, b)
+                out(f"| {pilot} | {el} | {len(pairs)} | "
+                    f"{pc(sum(b), len(b))} | {pc(sum(a), len(a))} | "
+                    f"{d[0]:+.1f} ±{d[1]:.1f} |")
 
 
 def main(argv=None):
@@ -699,7 +1363,22 @@ def main(argv=None):
     ap.add_argument("--json", help="write the raw results here")
     ap.add_argument("--report", help="report a --json file instead of running")
     ap.add_argument("--against", help="a --json file from the other pool")
+    ap.add_argument("--world", default="current",
+                    choices=("current", "rebalance"),
+                    help="rebalance: the paper's overlay rows and rules "
+                         "(sim only, `rebalance_rows`)")
+    ap.add_argument("--no-gauntlet", action="store_true",
+                    help="skip the gauntlet (its offers still drafted for "
+                         "the card table)")
+    ap.add_argument("--knob", action="append", default=[],
+                    help="name=int, a rebalance number (KNOBS); repeatable")
     args = ap.parse_args(argv)
+    knobs = {}
+    for kv in args.knob:
+        name, _, val = kv.partition("=")
+        knobs[name] = int(val)
+    if knobs and args.world != "rebalance":
+        ap.error("--knob moves the rebalance world's numbers only")
     if args.report:
         with open(args.report, encoding="utf-8") as fh:
             data = json.load(fh)
@@ -709,22 +1388,26 @@ def main(argv=None):
                 against = json.load(fh)
         report(data, against)
         return
-    enable()
+    enable(args.world, knobs)
     from tier0.content import loader
     pl = pool()
     seeds = [args.seed + i for i in range(args.seeds)]
     pilots = [p for p in args.pilots.split(",") if p]
     argl = [(s, p, e) for p in pilots for e in starts_for(p) for s in seeds]
     print(f"{len(argl)} runs + {len(argl)} gauntlets", file=sys.stderr)
-    runs = pmap(_w, args.jobs, argl)
-    gaunt = pmap(_wg, args.jobs, argl)
+    runs = pmap(_w, args.jobs, argl, args.world, knobs)
+    gaunt = pmap(_wg if not args.no_gauntlet else _wo, args.jobs, argl,
+                 args.world, knobs)
     traces = [f["trace"] for src in (runs, gaunt) for r in src
               for f in r["fights"] if f.get("trace")][:3]
     for src in (runs, gaunt):
         for r in src:
             for f in r["fights"]:
                 f.pop("trace", None)
-    data = {"seeds": args.seeds, "seed": args.seed,
+    data = {"seeds": args.seeds, "seed": args.seed, "world": args.world,
+            "knobs": dict(KNOBS, **knobs) if args.world == "rebalance"
+            else {},
+            "elements": element_of(args.world),
             "pool_size": sum(len(v) for v in pl.values()),
             "pool_counts": {k: len(v) for k, v in pl.items()},
             "cards": {c: (loader.get_card(c).name, r)
