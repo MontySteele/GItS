@@ -95,10 +95,11 @@ public class PoolCountTests
         var universals = new[] { "Universals", "InazumaUniversals", "FontaineUniversals" }
             .SelectMany(m => ArmPools.Named(Powers + "CompanionOverhaulRoster", m))
             .ToList();
-        Assert.Equal(34 + 24 + 16, universals.Count);
+        // Mondstadt 35 since the AoE trim (2026-10-03) split Durin in two.
+        Assert.Equal(35 + 24 + 16, universals.Count);
         var byNation = universals.GroupBy(c => ((ICompanionCard)c).Nation)
             .ToDictionary(g => g.Key!, g => g.Count());
-        Assert.Equal(34, byNation["mondstadt"]);
+        Assert.Equal(35, byNation["mondstadt"]);
         Assert.Equal(24, byNation["inazuma"]);
         Assert.Equal(16, byNation["fontaine"]);
         Assert.All(universals, c => Assert.Null(((ICompanionCard)c).PersonalPool));

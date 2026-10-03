@@ -97,7 +97,8 @@ def test_the_new_predicate_is_registered_both_ways():
 # ---------------------------------------------------------------------------
 
 def test_all_thirteen_are_in_the_replacement_pool(overhaul):
-    assert len(C.MONDSTADT_OVERHAUL_POOL_IDS) == 34
+    # 34, and Durin split in two at the AoE trim (2026-10-03).
+    assert len(C.MONDSTADT_OVERHAUL_POOL_IDS) == 35
     roster = {c.id for c in loader.companion_roster_replacement()}
     for cid in SECOND_WAVE:
         assert cid in roster, cid
@@ -442,14 +443,16 @@ def test_a_non_swirl_reaction_banks_nothing(overhaul):
 # DURIN -- THE TWO DAMAGE-PIPELINE MODIFIERS
 # ---------------------------------------------------------------------------
 
-def test_binary_form_offers_two_modes_and_hits_the_board(overhaul):
+def test_principle_of_purity_offers_two_forms_for_the_fight(overhaul):
+    """The split (AoE trim, 2026-10-03): the form choice is the Rare Power's,
+    Principle of Purity, and Binary Form is an Attack."""
     st = make_state(enemies=[make_enemy(hp=50, name="a"),
                              make_enemy(hp=50, name="b")])
-    _play(st, "proto_mc_durin_binary_form")
-    assert [e.hp for e in st.enemies] == [40, 40]
-    chosen = ("mc_binary_white" in st.player.powers,
-              "mc_binary_dark" in st.player.powers)
+    _play(st, "proto_mc_durin_principle_of_purity")
+    chosen = ("mc_purity_white" in st.player.powers,
+              "mc_purity_dark" in st.player.powers)
     assert chosen.count(True) == 1, "exactly one form, for the fight"
+    assert st.player.powers["mc_purity_strike"] == 4
 
 
 def test_white_scales_the_reaction_and_not_the_hit(overhaul):

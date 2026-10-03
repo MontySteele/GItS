@@ -38,13 +38,13 @@ public sealed class ProtoKoDamageReport : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Damage Report"),
-        ("description", "Whenever you draw a status, deal {PowerAmount:diff()} damage to ALL enemies."),
+        ("description", "Whenever you draw a status, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m)
+            new DynamicVar("PowerAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

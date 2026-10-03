@@ -560,6 +560,8 @@ MONDSTADT_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mc_dahlia_sacramental_shower",
     "proto_mc_dahlia_favonian_favor",
     "proto_mc_durin_binary_form",
+    # AoE trim, 2026-10-03: Durin split in two, the burst as its own Rare.
+    "proto_mc_durin_principle_of_purity",
     "proto_mc_razor_claw_and_thunder",
     "proto_mc_razor_lightning_fang",
     "proto_mc_varka_sturm_und_drang",

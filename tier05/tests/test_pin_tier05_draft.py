@@ -44,11 +44,13 @@ def test_all_enemies_damage_is_priced_at_the_aoe_multiple_of_its_face():
     same cost."""
     # Undercurrent prints 2 damage x3 at all_enemies, cost 1 (C22,
     # 2026-09-25: [USER] "Undercurrent, pick a" took it from cost 2).
-    undercurrent = loader.get_card("proto_fs_undercurrent")
-    single_target_reading = 2 * 3 / 1
-    assert draft._static_power(undercurrent) == \
+    # The AoE trim (2026-10-03) made Undercurrent single target, so the pin
+    # reads Amber: Fiery Rain instead: 4 damage x3 at all_enemies, cost 1.
+    fiery_rain = loader.get_card("proto_mc_amber_fiery_rain")
+    single_target_reading = 4 * 3 / 1
+    assert draft._static_power(fiery_rain) == \
         single_target_reading * draft.STATIC_AOE_MULT
-    assert draft._static_power(undercurrent) == 12.0
+    assert draft._static_power(fiery_rain) == 24.0
 
     # The premium is large enough to reorder cards: 8 damage to all enemies
     # at cost 1 prices above 10 damage to one enemy at cost 1.

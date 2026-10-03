@@ -71,7 +71,6 @@ KIT_SOURCES = (
     "set_off",              # V5  Klee-overhaul explosion, and V6 a Mine
     "bomb_echo",            # V8  Sparks 'n' Splash echo
     "spark_knight",         # V8b R276's Spark Knight, a Power's element-less hit
-    "damage_report",        # V8c the status package's Damage Report, the same
     "plan",                 # V9  Kokomi planned hit
     # V11, the Tamakushi Casket's strike (`source="casket"`), was retired by
     # the Casket pass (2026-09-28): the relic counts Plans now.
@@ -254,29 +253,34 @@ SIM_CALL_SITES = {
     # rotate down one. The MULTISET is untouched: the same twenty-eight calls
     # with the same source / powered / element triple on every one, which is
     # what this census is about. Nothing here is a flag moving.
-    ('effects.py', 5): ("'companion'", None, "'electro'"),
-    ('effects.py', 6): ("'companion'", None, 'None'),
-    ('effects.py', 7): ("'salon'", 'False', "'hydro'"),
-    ('effects.py', 8): ("'burst'", None, "'pyro'"),
-    ('effects.py', 9): ("'companion'", None, "'electro'"),
-    ('effects.py', 10): ("'companion'", None, "'hydro'"),
-    ('effects.py', 11): ("'companion'", None, 'None'),
-    ('effects.py', 12): ("'companion'", None, "'cryo'"),
-    ('effects.py', 13): ("'companion'", None, "'electro'"),
-    ('effects.py', 14): ("'companion'", None, 'None'),
+    # THE AoE TRIM (2026-10-03): Durin's Principle of Purity's start-of-turn
+    # Pyro hit is the fifth (the Mondstadt block), so the rows below it moved
+    # down one; Yoimiya's Aurous Blaze answers a Skill play now, the
+    # twenty-eighth, in place of its old volley on a non-Attack hit.
+    ('effects.py', 5): ("'companion'", None, "'pyro'"),
+    ('effects.py', 6): ("'companion'", None, "'electro'"),
+    ('effects.py', 7): ("'companion'", None, 'None'),
+    ('effects.py', 8): ("'salon'", 'False', "'hydro'"),
+    ('effects.py', 9): ("'burst'", None, "'pyro'"),
+    ('effects.py', 10): ("'companion'", None, "'electro'"),
+    ('effects.py', 11): ("'companion'", None, "'hydro'"),
+    ('effects.py', 12): ("'companion'", None, 'None'),
+    ('effects.py', 13): ("'companion'", None, "'cryo'"),
+    ('effects.py', 14): ("'companion'", None, "'electro'"),
     ('effects.py', 15): ("'companion'", None, 'None'),
-    ('effects.py', 16): ("'companion'", None, "'geo'"),
-    ('effects.py', 17): ("'companion'", None, 'None'),
-    ('effects.py', 18): ("'companion'", None, "'electro'"),
+    ('effects.py', 16): ("'companion'", None, 'None'),
+    ('effects.py', 17): ("'companion'", None, "'geo'"),
+    ('effects.py', 18): ("'companion'", None, 'None'),
     ('effects.py', 19): ("'companion'", None, "'electro'"),
-    ('effects.py', 20): ("'companion'", None, "'cryo'"),
+    ('effects.py', 20): ("'companion'", None, "'electro'"),
     ('effects.py', 21): ("'companion'", None, "'cryo'"),
-    ('effects.py', 22): ("'companion'", None, "'hydro'"),
-    ('effects.py', 23): ("'companion'", None, "'geo'"),
-    ('effects.py', 24): ("'companion'", None, "'hydro'"),
-    ('effects.py', 25): ("'companion'", None, "'pyro'"),
+    ('effects.py', 22): ("'companion'", None, "'cryo'"),
+    ('effects.py', 23): ("'companion'", None, "'hydro'"),
+    ('effects.py', 24): ("'companion'", None, "'geo'"),
+    ('effects.py', 25): ("'companion'", None, "'hydro'"),
     ('effects.py', 26): ("'companion'", None, "'pyro'"),
     ('effects.py', 27): ("'companion'", None, "'pyro'"),
+    ('effects.py', 28): ("'companion'", None, "'pyro'"),
     # POOL COMPLETION (2026-10-01): Critics' Darling, a Power's damage on a
     # chosen Spend -- element-less and unpowered, Varka's Powers' row.
     ('furina_stage.py', 1): ("'card'", 'False', 'None'),
@@ -309,9 +313,8 @@ SIM_CALL_SITES = {
     # Klee's own terms), under its own source. NO ELEMENT since
     # 2026-09-23, so it cannot spend an aura a companion laid down.
     ('klee_overhaul.py', 4): ("'spark_knight'", None, 'None'),
-    # THE STATUS PACKAGE (2026-10-01): Damage Report, a Power's hit per
-    # status drawn, on Spark Knight's terms (no element).
-    ('klee_overhaul.py', 5): ("'damage_report'", None, 'None'),
+    # Damage Report's hit per status drawn left at the AoE trim (2026-10-03):
+    # it gains Block now.
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
     # POOL COMPLETION (2026-10-01): Sea's Reproach's answer to a Weak or a
     # Vulnerable, dealt as Tidal Riposte's is.

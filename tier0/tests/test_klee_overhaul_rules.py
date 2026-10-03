@@ -1776,22 +1776,20 @@ def test_coven_errand_places_one_bomb_with_no_companion_played(overhaul):
     assert sizes(b) == []
 
 
-def test_coven_errand_goes_wide_after_a_companion(overhaul):
-    """"If you played a Companion card this turn, place it on ALL enemies
-    instead." INSTEAD is the load-bearing word: the aimed enemy holds ONE
-    Bomb, not two."""
+def test_coven_errand_grows_after_a_companion(overhaul):
+    """AoE trim, 2026-10-03: "Place a Bomb 5 on an enemy, 8 if you played a
+    Companion card this turn." Still ONE Bomb on the aimed enemy."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
-    assert sizes(a) == [5]
-    assert sizes(b) == [5]
+    assert sizes(a) == [8]
+    assert sizes(b) == []
 
 
-def test_coven_errands_upgrade_moves_both_arms(overhaul):
-    """"Upgrade: Bomb 7." ONE printed number, so the wide arm and the aimed
-    arm cannot upgrade to different Bombs."""
+def test_coven_errands_upgrade_moves_both_numbers(overhaul):
+    """"Upgrade: Bomb 7." The rider rides the printed size: 7, or 10."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.card_aim, state.card_aim_bound = a, True
@@ -1803,8 +1801,8 @@ def test_coven_errands_upgrade_moves_both_arms(overhaul):
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand+"))
-    assert sizes(a) == [7]
-    assert sizes(b) == [7]
+    assert sizes(a) == [10]
+    assert sizes(b) == []
 
 
 def test_the_companion_count_is_per_turn(overhaul):
@@ -1867,13 +1865,13 @@ def test_a_companion_play_feeds_the_readers_and_mints_no_spark(overhaul):
         row["source"] for row in state.spark_ledger]
     assert counts(state)["klee_companion_spark"] == 0
 
-    # Coven Errand reads the same window and still goes wide.
+    # Coven Errand reads the same window and still grows its Bomb.
     state = klee_state([a := make_enemy(hp=200, name="a"),
                         b := make_enemy(hp=200, name="b")])
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
-    assert sizes(a) == [5] and sizes(b) == [5]
+    assert sizes(a) == [8] and sizes(b) == []
     assert state.player.sparks == 0
 
 
@@ -2308,20 +2306,23 @@ def test_fish_blasting_sets_nothing_off(overhaul):
     assert counts(state)["ko_set_off"] == 0
 
 
-# --- Bombs Away!: the Attack placer ----------------------------------------
+# --- Bombs Away!: Block keyed to the Bombs (AoE trim, 2026-10-03) ---------
 
-def test_bombs_away_hits_and_places_on_every_enemy(overhaul):
-    """The Attack placer the Smoggy reading asked for: one Skill per turn does
-    not stop it, because it is not a Skill."""
+def test_bombs_away_places_one_bomb_and_blocks_per_bombed_enemy(overhaul):
+    """"Place a Bomb 4 on an enemy. Gain 4 Block, plus 2 for each enemy with
+    a Bomb." A Skill now; the count includes the Bomb it just placed."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
+    klee_overhaul.place(state, b, 3)
 
     card = load("proto_ko_bombs_away")
-    assert card.type == "attack"
+    assert card.type == "skill"
+    state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, card)
 
-    assert (a.hp, b.hp) == (197, 197)
-    assert sizes(a) == [2] and sizes(b) == [2]
+    assert (a.hp, b.hp) == (200, 200)
+    assert sizes(a) == [4] and sizes(b) == [3]
+    assert state.player.block == 4 + 2 * 2
 
 
 # --- The Vermillion Pact ---------------------------------------------------

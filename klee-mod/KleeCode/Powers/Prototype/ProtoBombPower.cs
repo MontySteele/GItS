@@ -965,6 +965,73 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
+    /// MINE, ALL MINE! (AoE trim, 2026-10-03): "Deal 8 Pyro damage. Set off
+    /// the Mines on that enemy." <see cref="SetOffAimed"/> with only the
+    /// MINES taken (<see cref="SetOffMines"/>); the note and the Boom Badge
+    /// are taken the same way, so it is a Set off card to every reader. The
+    /// card's own hit is a separate statement BEFORE this one, so
+    /// <paramref name="damage"/> is 0 from the generated card. Sim twin: the
+    /// `mines_only` arm of <c>effects._op_set_off</c>.
+    /// </summary>
+    public static async Task SetOffMinesAimed(
+        PlayerChoiceContext choiceContext, Creature? target, Creature applier,
+        CardModel cardSource, CardPlay cardPlay, decimal damage)
+    {
+        KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
+        var badge = await BoomBadgePower.Spend(applier);
+        if (target == null) return;
+        await SetOffMines(choiceContext, target, applier, cardSource, badge);
+        await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
+    }
+
+    /// <summary>
+    /// The Mines-only Set off: every MINE this placer has on
+    /// <paramref name="target"/> leaves the pile (<see cref="TakeMines"/>) and
+    /// goes off one at a time; plain Bombs stay and keep growing. A card's Set
+    /// off, so it SPENDS The Big One's multiplier (and Boom Badge's
+    /// <paramref name="badge"/>), and only when a Mine is there to spend it
+    /// on. A kill sends the Mines behind it to jump (rule 3). Returns how many
+    /// went off. Sim twin: <c>klee_overhaul.set_off_mines</c>.
+    /// </summary>
+    public static async Task<int> SetOffMines(
+        PlayerChoiceContext choiceContext, Creature? target, Creature applier,
+        CardModel? cardSource, int badge = 1)
+    {
+        if (target == null) return 0;
+        var taken = new List<ProtoCharge>();
+        foreach (var pile in target.Powers.OfType<ProtoBombPower>().ToList())
+        {
+            if (pile.Applier != applier) continue;   // R205: your pile only
+            if (pile.TakeMines() is { } mines) taken.AddRange(mines);
+        }
+        foreach (var pile in target.Powers.OfType<ProtoBombPower>().ToList())
+        {
+            if (pile.Applier == applier && pile.TotalSize == 0)
+            {
+                await PowerCmd.Remove(pile);
+            }
+        }
+        if (taken.Count == 0) return 0;
+
+        var multiplier = KleeOverhaulLedger.For(applier).TakeMultiplier() * badge;
+        var exploded = 0;
+        for (var i = 0; i < taken.Count; i++)
+        {
+            if (target.IsDead)
+            {
+                await JumpCharges(choiceContext, target, taken.Skip(i).ToList(),
+                                  applier, cardSource);
+                break;
+            }
+            await Explode(choiceContext, target, taken[i], applier, cardSource,
+                          multiplier);
+            exploded++;
+        }
+        await SweepJumps(choiceContext, applier.CombatState);
+        return exploded;
+    }
+
+    /// <summary>
     /// Pocket Match's rule: this placer's SINGLE LARGEST charge on
     /// <paramref name="target"/> -- the OLDEST on a tie -- leaves the pile and
     /// goes off; every other charge stays where it is and keeps growing.
@@ -1951,6 +2018,18 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             if (pile.Applier == applier && pile._charges.Count > 0) return true;
         }
         return false;
+    }
+
+    /// <summary>Bombs Away! (AoE trim, 2026-10-03): "plus 2 for each enemy
+    /// with a Bomb" -- the LIVING enemies holding a charge this placer placed
+    /// (Mines are Bombs, rule 6). Pure and R205-scoped. Sim twin: the
+    /// `enemies_with_bomb` runtime count.</summary>
+    public static int EnemiesHoldingChargeFrom(Creature? applier)
+    {
+        var combat = applier?.CombatState;
+        if (applier == null || combat == null) return 0;
+        return combat.Enemies.Count(
+            enemy => !enemy.IsDead && HoldsChargeFrom(enemy, applier));
     }
 
     /// <summary>

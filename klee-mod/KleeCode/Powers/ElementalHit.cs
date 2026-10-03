@@ -94,6 +94,11 @@ internal static class ElementalHit
         var dealt = powered
             ? SimDamagePipeline.DealerMods(applier, baseDamage)
             : baseDamage;
+        // DURIN, PRINCIPLE OF PURITY / DARK (AoE trim, 2026-10-03): "Your Pyro
+        // damage deals 4 more", Bombs and Mines included (this door is theirs,
+        // `powered` or not), before the amplifier -- the sim's additive phase
+        // in `deal_damage_to_enemy`.
+        dealt += PurityDarkPower.BonusFor(applier, element);
 
         // VARKA (the Oath rework, sec.3): an application of his credits Oath.
         await VarkaOath.NoteApplication(choiceContext, applier, element);
@@ -202,7 +207,10 @@ internal static class ElementalHit
             return await DealWithoutDealerMods(
                 choiceContext, target, element, baseDamage, applier);
         }
-        var dealt = baseDamage * ReactionTable.AmplifierMultiplier(reaction, applier);
+        // Principle of Purity's Dark, as in `Deal` (a Teapot Bomb is still her
+        // Pyro damage).
+        var dealt = (baseDamage + PurityDarkPower.BonusFor(applier, element))
+            * ReactionTable.AmplifierMultiplier(reaction, applier);
         await ReactionEffects.Resolve(
             choiceContext, reaction, target, applier, null, assumedAura);
         var landed = (int)SimDamagePipeline.TargetMods(target, dealt);

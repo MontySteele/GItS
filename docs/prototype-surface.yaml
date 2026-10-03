@@ -95,9 +95,11 @@
 - {id: proto_ko_mine_toss, name: "Mine Toss", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Mine[/gold] 4 on ALL enemies.",
+   # AoE trim, 2026-10-03 (review/active/aoe-trim-2026-10-03.md sec.2):
+   # single target, was a Mine 4 on ALL enemies.
+   description: "Place a [gold]Mine[/gold] 7 on an enemy.",
    upgrade: {bomb_size: +3},
-   effects: [{op: plant_bomb, target: all_enemies, size: 4, mine: true}]}
+   effects: [{op: plant_bomb, target: enemy, size: 7, mine: true}]}
 
 # R271 sec.4, item 1: Fwoosh! is CUT. (Pocket Match, the Retain twin it was
 # cut for, became a single-charge Set off on 2026-09-24.)
@@ -253,9 +255,11 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    upgrade: {bomb_size: +2},
-   description: "Place a [gold]Bomb[/gold] 5 on the enemy, or on ALL enemies if you played a [gold]Companion[/gold] card this turn.",
+   # AoE trim, 2026-10-03 (sec.2): one Bomb that grows by 3 after a
+   # Companion, where it went to ALL enemies. `bonus_if:` is the rider.
+   description: "Place a [gold]Bomb[/gold] 5 on an enemy, 8 if you played a [gold]Companion[/gold] card this turn.",
    effects: [{op: plant_bomb, target: enemy, size: 5,
-              wide_if: companion_played_this_turn}]}
+              bonus_if: {if: companion_played_this_turn, amount: 3}}]}
 
 - {id: proto_ko_witches_circle, name: "Little Hexenzirkel", character: klee,
    authored_by: [claude],
@@ -324,11 +328,13 @@
 
 - {id: proto_ko_bombs_away, name: "Bombs Away!", character: klee,
    authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   description: "Deal 3 [gold]Pyro[/gold] damage to ALL enemies. Place a [gold]Bomb[/gold] 2 on ALL enemies.",
+   # AoE trim, 2026-10-03 (sec.2): a Skill now, Block keyed to the Bombs on
+   # the board (the count is read after this Bomb lands).
+   cost: 1, type: skill, rarity: common,
+   description: "Place a [gold]Bomb[/gold] 4 on an enemy. Gain 4 [gold]Block[/gold], plus 2 for each enemy with a [gold]Bomb[/gold].",
    upgrade: {bomb_size: +2},
-   effects: [{op: damage, amount: 3, target: all_enemies},
-             {op: plant_bomb, target: all_enemies, size: 2}]}
+   effects: [{op: plant_bomb, target: enemy, size: 4},
+             {op: block, amount_formula: {base: 4, per: 2, count: enemies_with_bomb}}]}
 
 # R271 sec.4 item 2: Fireworks Show is CUT and MERGED into Tinder Toss, which
 # now prints "Set off ALL enemies. Deal 3 damage to ALL enemies." at 1 Spark.
@@ -484,17 +490,23 @@
 - {id: proto_ko_mine_all_mine, name: "Mine, All Mine!", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 8 [gold]Pyro[/gold] damage to each enemy with a [gold]Mine[/gold].",
+   # AoE trim, 2026-10-03 (sec.2): single target. The hit first, then only
+   # that enemy's Mines go off (`set_off` with `mines_only:`).
+   description: "Deal 8 [gold]Pyro[/gold] damage. [gold]Set off[/gold] the [gold]Mines[/gold] on that enemy.",
    upgrade: {damage: +3},
-   effects: [{op: damage, amount: 8, target: all_enemies, only_if: mined}]}
+   effects: [{op: damage, amount: 8, target: enemy},
+             {op: set_off, target: enemy, mines_only: true}]}
 
 - {id: proto_ko_team_effort, name: "Team Effort", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] the enemy, or ALL enemies if you played a [gold]Companion[/gold] card this turn. Deal 6 [gold]Pyro[/gold] damage.",
+   # AoE trim, 2026-10-03 (sec.2): the Companion pays 6 more damage on the
+   # aimed enemy instead of widening the Set off to ALL.
+   description: "[gold]Set off[/gold]. Deal 6 [gold]Pyro[/gold] damage, 6 more if you played a [gold]Companion[/gold] card this turn.",
    upgrade: {damage: +3},
-   effects: [{op: set_off, target: enemy, damage: 6,
-              wide_if: companion_played_this_turn}]}
+   effects: [{op: set_off, target: enemy},
+             {op: damage, amount: 6, target: enemy,
+              bonus_if: {if: companion_played_this_turn, amount: 6}}]}
 
 # FISH FRY IS CUT (the Klee status package, 2026-10-01,
 # review/active/klee-status-package-2026-10-01.md sec.3). Provenance
@@ -702,9 +714,10 @@
 - {id: proto_ko_red_knight, name: "Red Knight", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "Deal 22 [gold]Pyro[/gold] damage to ALL enemies. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
+   # AoE trim, 2026-10-03 (sec.2): single-target burst, was 22 to ALL.
+   description: "Deal 34 [gold]Pyro[/gold] damage. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {damage: +6},
-   effects: [{op: damage, amount: 22, target: all_enemies},
+   effects: [{op: damage, amount: 34, target: enemy},
              {op: add_card, card: confiscated, zone: discard, amount: 2}]}
 
 - {id: proto_ko_finders_keepers, name: "Finders Keepers", character: klee,
@@ -727,9 +740,10 @@
 - {id: proto_ko_damage_report, name: "Damage Report", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever you draw a status, deal 5 damage to ALL enemies.",
+   # AoE trim, 2026-10-03 (sec.2): Block per status drawn, was 5 to ALL.
+   description: "Whenever you draw a status, gain 4 [gold]Block[/gold].",
    upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_damage_report, amount: 5, target: self}]}
+   effects: [{op: apply_power, power: ko_damage_report, amount: 4, target: self}]}
 
 - {id: proto_ko_solitary_confinement, name: "Solitary Confinement", character: klee,
    authored_by: [claude],
@@ -989,17 +1003,35 @@
    effects: [{op: block, amount: 7},
              {op: apply_power, power: mc_favonian_favor, amount: 3, target: self}]}
 
+# DURIN, SPLIT IN TWO (AoE trim, 2026-10-03, review/active/aoe-trim-2026-10-03.md
+# sec.5): the skill and the burst. Provenance note, "AoE trim, 2026-10-03".
 - {id: proto_mc_durin_binary_form, name: "Durin — Binary Form", character: klee,
    authored_by: [claude],
+   nation: mondstadt, star: 5, rarity: uncommon, role_c: trigger, element: pyro,
+   cost: 1, type: attack,
+   description: "Choose one, then draw 1 card. [gold]White[/gold]: Deal 6 [gold]Pyro[/gold] damage to ALL enemies. [gold]Dark[/gold]: Deal 4 [gold]Pyro[/gold] damage to an enemy 3 times.",
+   upgrade: {mode_damage: [2, 1]},
+   effects: [{op: choose_one, modes: [
+              {label: "[gold]White[/gold]: Deal 6 [gold]Pyro[/gold] damage to ALL enemies",
+               effects: [{op: damage, amount: 6, target: all_enemies, applies_element: true}]},
+              {label: "[gold]Dark[/gold]: Deal 4 [gold]Pyro[/gold] damage to an enemy 3 times",
+               effects: [{op: damage, amount: 4, target: enemy, times: 3, applies_element: true}]}]},
+             {op: draw, amount: 1}]}
+
+# White is the team form (every player's reactions); Dark is all the
+# holder's Pyro damage, Bombs and Mines included.
+- {id: proto_mc_durin_principle_of_purity, name: "Durin — Principle of Purity", character: klee,
+   authored_by: [claude], art_of: proto_mc_durin_binary_form,
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
-   description: "Deal 10 damage to ALL enemies, then choose one for the combat. [gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage.",
-   effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true},
+   description: "At the start of your turn, deal 4 [gold]Pyro[/gold] damage to a random enemy. Choose one for the combat. [gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: Your [gold]Pyro[/gold] damage deals 4 more.",
+   upgrade: {power_amount: +2, mode_power_amount: [25, 2]},
+   effects: [{op: apply_power, power: mc_purity_strike, amount: 4, target: self},
              {op: choose_one, modes: [
-              {label: "[gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]",
-               effects: [{op: apply_power, power: mc_binary_white, amount: 1, target: self}]},
-              {label: "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage",
-               effects: [{op: apply_power, power: mc_binary_dark, amount: 8, target: self}]}]}]}
+              {label: "[gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]",
+               effects: [{op: apply_power, power: mc_purity_white, amount: 50, target: self}]},
+              {label: "[gold]Dark[/gold]: Your [gold]Pyro[/gold] damage deals 4 more",
+               effects: [{op: apply_power, power: mc_purity_dark, amount: 4, target: self}]}]}]}
 
 - {id: proto_mc_razor_claw_and_thunder, name: "Razor — Claw and Thunder", character: klee,
    authored_by: [claude],
@@ -2170,8 +2202,13 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: pyro,
    cost: 1, type: skill, exhaust: true,
-   description: "For 2 turns, whenever the enemy takes damage from a non-Attack card, deal 6 [gold]Pyro[/gold] damage to ALL enemies.",
-   effects: [{op: apply_power, power: mi_aurous_blaze, amount: 2, target: enemy}]}
+   # AoE trim, 2026-10-03 (review/active/aoe-trim-2026-10-03.md sec.6): it
+   # hits on the turn it is played and leaves the AoE count. The mark's 3 is
+   # the card's (`summon_damage:`); the stack is turns remaining.
+   description: "Deal 6 [gold]Pyro[/gold] damage. For 2 turns, whenever you play a Skill, deal 3 [gold]Pyro[/gold] damage to that enemy.",
+   effects: [{op: damage, amount: 6, target: enemy, applies_element: true},
+             {op: apply_power, power: mi_aurous_blaze, amount: 2, target: enemy,
+              summon_damage: 3}]}
 
 - {id: proto_mi_ayaka_soumetsu, name: "Kamisato Ayaka — Soumetsu", character: klee,
    authored_by: [claude],
@@ -3260,8 +3297,10 @@
    authored_by: [claude],
    replaces: command_performance,
    register: salon, cost: 2, type: attack, rarity: rare,
-   description: "Deal 14 damage to ALL enemies. Each performer with 5 or more [gold]Fanfare[/gold] acts.",
-   effects: [{op: damage, amount: 14, target: all_enemies},
+   # AoE trim, 2026-10-03 (review/active/aoe-trim-2026-10-03.md sec.3):
+   # single target, was 14 to ALL enemies.
+   description: "Deal 18 damage. Each performer with 5 or more [gold]Fanfare[/gold] acts.",
+   effects: [{op: damage, amount: 18, target: enemy},
              {op: stage_perform_all, min_fanfare: 5}]}
 
 # --- the eight ported as they are (bodies and upgrades from
@@ -3279,7 +3318,9 @@
    authored_by: [claude],
    replaces: undercurrent, art_of: undercurrent,
    register: salon, cost: 1, type: attack, rarity: common,
-   effects: [{op: damage, amount: 2, target: all_enemies, times: 3}]}
+   # AoE trim, 2026-10-03 (sec.3): "Deal 3 damage 3 times.", was 2 to ALL
+   # enemies 3 times.
+   effects: [{op: damage, amount: 3, target: enemy, times: 3}]}
 
 - {id: proto_fs_warmup_act, name: "Stage Combat", character: furina,
    upgrade: {damage: +2},

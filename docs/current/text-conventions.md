@@ -125,7 +125,7 @@ its TARGET is what a rewrite aims below.
 
 ## Exceptions the lint carries (each with its reason in the lint)
 
-**The prototype gate:** `proto_mc_durin_binary_form` (a two-mode Power must
+**The prototype gate:** `proto_mc_durin_principle_of_purity` (a two-mode Power must
 print both modes on the reward screen; the base has no static modal card); the
 ten prototype Bomb-badge faces that carry the rider sentence (`EB-573`, 126 to
 164 rendered; since the text pass of 2026-09-25 every other Bomb face, and the

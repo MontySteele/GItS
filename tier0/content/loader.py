@@ -781,6 +781,17 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
                 raise ValueError(
                     f"card {card_id!r}: unknown predicate {wide!r} on "
                     "plant_bomb `wide_if:`")
+        if fx.get("bonus_if") is not None:
+            # AoE trim, 2026-10-03: `bonus_if: {if: <predicate>, amount: N}`
+            # (Team Effort, Coven Errand) is a THIRD door into the same
+            # predicate vocabulary, checked here for the `wide_if:` reason.
+            rider = fx["bonus_if"]
+            if (not isinstance(rider, dict) or set(rider) != {"if", "amount"}
+                    or not isinstance(rider["amount"], int)
+                    or not _effects.is_known_predicate(rider["if"])):
+                raise ValueError(
+                    f"card {card_id!r}: `bonus_if:` must be {{if: <known "
+                    f"predicate>, amount: <int>}}, got {rider!r}")
         _validate_count_vocabulary(card_id, fx)
         if op == "gain_encore" and isinstance(fx.get("amount"), int) \
                 and fx["amount"] <= 0:

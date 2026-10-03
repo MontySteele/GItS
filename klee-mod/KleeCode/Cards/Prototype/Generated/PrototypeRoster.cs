@@ -244,6 +244,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoMcDionaShakenNotPurred>(),
             ModelDb.Card<ProtoMcDionaSignatureMix>(),
             ModelDb.Card<ProtoMcDurinBinaryForm>(),
+            ModelDb.Card<ProtoMcDurinPrincipleOfPurity>(),
             ModelDb.Card<ProtoMcEulaGlacialIllumination>(),
             ModelDb.Card<ProtoMcFischlNightrider>(),
             ModelDb.Card<ProtoMcFischlOz>(),
@@ -318,6 +319,8 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoMiYoimiyaAurousBlaze>(),
             ModelDb.Card<ProtoMcDurinBinaryFormModeA>(),
             ModelDb.Card<ProtoMcDurinBinaryFormModeB>(),
+            ModelDb.Card<ProtoMcDurinPrincipleOfPurityModeA>(),
+            ModelDb.Card<ProtoMcDurinPrincipleOfPurityModeB>(),
         };
 
     private static List<CardModel> BuildKokomi() =>

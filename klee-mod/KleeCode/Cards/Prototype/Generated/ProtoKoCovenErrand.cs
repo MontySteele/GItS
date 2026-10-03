@@ -42,16 +42,8 @@ public sealed class ProtoKoCovenErrand : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coven Errand"),
-        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()} on the enemy, or on ALL enemies if you played a [gold]Companion[/gold] card this turn."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()} on an enemy, {IfUpgraded:show:10|8} if you played a [gold]Companion[/gold] card this turn."),
     };
-
-    /// <summary>The ALL arm aims at nobody, so while its predicate holds
-    /// the card asks for no target (the 2026-09-26 seat round).</summary>
-    public override TargetType TargetType =>
-        IsMutable && Owner?.Creature != null
-        && KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0
-            ? TargetType.AllEnemies
-            : base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -68,13 +60,8 @@ public sealed class ProtoKoCovenErrand : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0)
-            await ProtoBombPower.PlaceOnAll(choiceContext, Owner.Creature, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, cardSource: this);
-        else
-        {
-            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, Owner.Creature, this);
-        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue + (KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0 ? 3 : 0), isMine: false, payloadMineAll: 0, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()

@@ -102,7 +102,8 @@ public class CompanionOverhaulHookTests
         // would report one.
         var referenced = Il.CallSequence(universals)
             .Count(c => c.StartsWith("ModelDb.Card"));
-        Assert.Equal(34, referenced);
+        // 35 since the AoE trim (2026-10-03) split Durin in two.
+        Assert.Equal(35, referenced);
     }
 
     [Fact]
@@ -121,24 +122,43 @@ public class CompanionOverhaulHookTests
     }
 
     [Fact]
-    public void Binary_form_is_the_arms_only_modal_row()
+    public void Principle_of_purity_is_the_power_that_chooses_a_form()
     {
-        var card = (CardModel)Activator.CreateInstance(
-            typeof(ProtoMcDurinBinaryForm))!;
+        // The AoE trim (2026-10-03) split Durin: the form choice is the Rare
+        // Power's. Neither form aims; the choice is "for the combat".
+        var card = new ProtoMcDurinPrincipleOfPurity();
         var modal = Assert.IsAssignableFrom<IModalCard>(card);
         Assert.Equal(2, modal.ModeLabels.Count);
         Assert.All(modal.ModeAimsAtChosenEnemy, Assert.False);
-        // A POWER card that chooses. The two forms are applied by the two
-        // branches, and the choice is "for the fight" -- neither power ticks.
-        Assert.Equal(CardType.Power, card.Type);
+        Assert.Equal((CardType.Power, CardRarity.Rare, 2),
+                     (card.Type, card.Rarity, card.EnergyCost.Canonical));
         // STRUCTURAL: the choice goes through the base game's own card-level
         // screen, which is what ModalChoice wraps -- a mode picked any other
         // way would not sync a co-op seat.
-        var play = typeof(ProtoMcDurinBinaryForm).GetMethod("OnPlay", All)!;
-        var calls = Il.Calls(play);
+        var calls = Il.Calls(typeof(ProtoMcDurinPrincipleOfPurity)
+            .GetMethod("OnPlay", All)!);
         Assert.Contains(calls, c => c.Contains("ModalChoice.SelectMode"));
         Assert.Contains(calls, c => c.Contains("ModalChoice.RecordChoice"));
         Assert.Contains(calls, c => c.Contains("PowerCmd.Apply"));
+    }
+
+    [Fact]
+    public void Binary_form_is_an_attack_whose_modes_aim_differently()
+    {
+        // "Choose one, then draw 1 card. White: 6 to ALL. Dark: 4 to an enemy
+        // 3 times." The card aims (Dark reads the target); White does not.
+        var card = new ProtoMcDurinBinaryForm();
+        var modal = Assert.IsAssignableFrom<IModalCard>(card);
+        Assert.Equal(new[] { false, true }, modal.ModeAimsAtChosenEnemy);
+        Assert.Equal((CardType.Attack, CardRarity.Uncommon, 1),
+                     (card.Type, card.Rarity, card.EnergyCost.Canonical));
+        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
+        var calls = Il.Calls(typeof(ProtoMcDurinBinaryForm)
+            .GetMethod("OnPlay", All)!);
+        Assert.Contains(calls, c => c.Contains("ModalChoice.SelectMode"));
+        Assert.Contains(calls, c => c.Contains("WithHitCount"));
+        Assert.Contains(calls, c => c.Contains("CardPileCmd.Draw"));
+        Assert.DoesNotContain(calls, c => c.Contains("PowerCmd.Apply"));
     }
 
     // ---- THE POWERS -----------------------------------------------------

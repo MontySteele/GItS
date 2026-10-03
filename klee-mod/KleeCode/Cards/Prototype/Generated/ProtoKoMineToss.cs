@@ -42,25 +42,26 @@ public sealed class ProtoKoMineToss : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mine Toss"),
-        ("description", "Place a [gold]Mine[/gold] {BombSize:diff()} on ALL enemies."),
+        ("description", "Place a [gold]Mine[/gold] {BombSize:diff()} on an enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("BombSize", 4m)
+            new DynamicVar("BombSize", 7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKoMineToss()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await ProtoBombPower.PlaceOnAll(choiceContext, Owner.Creature, DynamicVars["BombSize"].IntValue, isMine: true, payloadMineAll: 0, cardSource: this);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue, isMine: true, payloadMineAll: 0, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
