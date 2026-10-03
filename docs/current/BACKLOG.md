@@ -99,6 +99,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Louse Progenitor's intent under the player's Weak read "folded Strength and Weak: 14 on the move and 14 after" and the Weak seemed to do nothing; check the fold and the line (Opus seat, 2026-10-02).
 - A Mine going off printed "gives 1 Spark" plus Pounding Surprise's "+1 Spark" but the seat counted +1, not +2; check the Spark accounting or the wording (Opus seat, 2026-10-02).
 - Klee reaction log: "Melt ... No hit came with it, so there was nothing to amplify" printed beside a hit multiplied by 1.75, on three fights (Opus check round, lane 2, 2026-10-02).
+- Jumpy Dumpty prints "place a Mine 3 on ALL enemies" but refuses to play without a named target (it aims the first Bomb); the face does not say a target is needed (w19 lane 1, 2026-10-03).
 - The Bomb's damage number ignores Boom Badge+'s doubling after Boom Badge+ is played (Opus check round, 2026-10-02).
 - Jean+ is switched off when Dodoco+'s Mine goes off on the enemy's turn ("a Bomb went off last turn"); the face does not say so (Opus check round, 2026-10-02).
 - Perfect Timing's replay did not visibly fire when its first Set off killed the target (Opus check round, 2026-10-02).
