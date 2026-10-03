@@ -62,6 +62,27 @@ used, with one INSTRUMENT SURFACE (not a design claim): the `varka` and
 `add_knight` ops, which the stock scorer cannot see, are valued as their
 nearest stock op (`_translate`) so it plays them. Nothing in the engine's
 resolution moves.
+
+THE DISCARD SEQUENCER (2026-10-03, [USER]: "Agreed - let's make the sim
+useful."): the second INSTRUMENT SURFACE. The stock scorer has no plan for
+a turn, so it played Short Circuit last at 0 Energy, never played Chain
+Lightning after a discard and did not price the cards Violet Storm throws
+away. `_electro_pick` orders his four discard cards before the stock pilot
+picks; it prices each card in hand by the stock scorer's own value with its
+Energy charge added back (`_gross`) and a turn by a greedy best-per-Energy
+fill (`_plan`):
+  * SHORT CIRCUIT now when the hand after its discards, with 2 more Energy
+    (and Chain Lightning's discount), is worth more than the whole hand
+    without it; its discards are the lowest-value cards (`_discard_victims`,
+    the chosen-discard pick, is replaced for this process only).
+  * CHAIN LIGHTNING after the discards: Short Circuit goes first when it is
+    worth it, and its discount is in the plan that says so.
+  * VIOLET STORM now when its hits on the hand as it stands are worth at
+    least the best turn on the rest of the hand plus its hits on what that
+    leaves; otherwise held (played at the end of the turn if nothing else
+    is).
+  * STORM BATTERY before either discard card, with the hand still full.
+Nothing the engine resolves moves; the choices are the player's.
 """
 
 from __future__ import annotations
@@ -221,6 +242,16 @@ def enable():
             yield from _translate(state, fx)
 
     policy._active_effects = active
+    from tier0.engine import effects
+    orig_victims = effects._discard_victims
+
+    def victims(state, n, chosen):
+        if not chosen:
+            yield from orig_victims(state, n, chosen)
+            return
+        yield from lowest_victims(state, n)
+
+    effects._discard_victims = victims
     _ENABLED = True
 
 
@@ -364,11 +395,136 @@ def _translate(state, fx):
         return
 
 
+# --- the discard sequencer (see the docstring) -----------------------------------
+
+SHORT_CIRCUIT, CHAIN_LIGHTNING = P + "short_circuit", P + "chain_lightning"
+VIOLET_STORM, STORM_BATTERY = P + "violet_storm", P + "storm_battery"
+
+
+def _base_id(card):
+    return card.id.rstrip("+")
+
+
+def _gross(state, card):
+    """A card's value to the stock scorer with its Energy charge added back
+    (0 for a card that cannot be played): what it is worth if paid for."""
+    from tier0.content import loader
+    from tier0.engine import combat
+    from tier0.pilot import policy
+    if not combat.card_playable(state, card):
+        return 0.0
+    w = loader.pilot_weights("generic")
+    return max(0.0, policy._score(state, card, w)
+               + w["cost"] * combat.card_cost(state, card))
+
+
+def lowest_victims(state, n):
+    """A chosen discard's batch, picked up front off the hand as it stands
+    (the engine's contract): the `n` lowest-value cards."""
+    cands = [c for c in state.player.hand if not c.kit_card]
+    return sorted(cands, key=lambda c: _gross(state, c))[:n]
+
+
+def _plan(state, cards, energy, discounted=0):
+    """(value, cards left unplayed) of the best greedy turn: the cards by
+    value per Energy, each played while the bank pays for it. Chain
+    Lightning's cost falls by `discounted` more discards."""
+    from tier0.engine import combat
+    priced = []
+    for c in cards:
+        cost = combat.card_cost(state, c)
+        if _base_id(c) == CHAIN_LIGHTNING:
+            cost = max(0, cost - discounted)
+        priced.append((_gross(state, c), cost, c))
+    priced.sort(key=lambda t: t[0] / max(t[1], 0.5), reverse=True)
+    value, left = 0.0, []
+    for v, cost, c in priced:
+        if v > 0 and cost <= energy:
+            value += v
+            energy -= cost
+        else:
+            left.append(c)
+    return value, left
+
+
+def _short_circuit_now(state, sc):
+    from tier0.engine import combat
+    p = state.player
+    n = sum(fx.get("amount", 0) for fx in sc.effects
+            if fx.get("op") == "discard")
+    others = [c for c in p.hand if c is not sc]
+    if not others:
+        return False
+    keep = sorted(others, key=lambda c: _gross(state, c))[n:]
+    gained = sum(fx.get("amount", 0) for fx in sc.effects
+                 if fx.get("op") == "energy")
+    left = p.energy - combat.card_cost(state, sc) + gained
+    with_sc, _ = _plan(state, keep, left, discounted=min(n, len(others)))
+    without, _ = _plan(state, others, p.energy)
+    return with_sc >= without
+
+
+def _violet_storm_now(state, vs):
+    from tier0.engine import combat
+    p = state.player
+    others = [c for c in p.hand if c is not vs]
+    if not others:
+        return False
+    now = _gross(state, vs)
+    per_hit = now / len(others)
+    rest, left = _plan(state, others, p.energy - combat.card_cost(state, vs))
+    return now >= rest + per_hit * len(left)
+
+
+def _electro_pick(state, base):
+    """His discard cards' order; None hands the turn to the stock pilot
+    with any held card hidden from it."""
+    from tier0.engine import combat
+    p = state.player
+    ready = {}
+    for c in p.hand:
+        b = _base_id(c)
+        if (b in (SHORT_CIRCUIT, VIOLET_STORM, STORM_BATTERY, CHAIN_LIGHTNING)
+                and combat.card_playable(state, c)
+                and combat.card_cost(state, c) <= p.energy):
+            ready.setdefault(b, c)
+    if not ready.keys() & {SHORT_CIRCUIT, VIOLET_STORM}:
+        return base(state)
+    sc, vs = ready.get(SHORT_CIRCUIT), ready.get(VIOLET_STORM)
+    discard_now = None
+    if sc is not None and _short_circuit_now(state, sc):
+        discard_now = sc
+    elif vs is not None and _violet_storm_now(state, vs):
+        discard_now = vs
+    if discard_now is not None:
+        sb = ready.get(STORM_BATTERY)
+        if sb is not None and _gross(state, sb) > 0:
+            return sb
+        return discard_now
+    hidden = [c for c in p.hand
+              if _base_id(c) in (SHORT_CIRCUIT, VIOLET_STORM)]
+    saved = p.hand
+    p.hand = [c for c in saved if all(c is not h for h in hidden)]
+    try:
+        pick = base(state)
+    finally:
+        p.hand = saved
+    if pick is not None:
+        return pick
+    # Nothing else worth playing: a held discard card goes last (Short
+    # Circuit's Electro, Violet Storm's hits on what is left).
+    for c in (vs, sc):
+        if c is not None and _gross(state, c) > 0:
+            return c
+    return None
+
+
 def make_pilot():
     """The stock `generic` pilot, with his Powers played first when
     affordable, most expensive first (the Kokomi expansion harness's rule:
     the stock scorer prices a one-stack Power as almost nothing, so it holds
-    them and a play rate would read the scorer, not the card)."""
+    them and a play rate would read the scorer, not the card), then the
+    discard sequencer (`_electro_pick`)."""
     from tier0.content import loader
     from tier0.engine import combat
     from tier0.pilot.policy import make_pilot as stock
@@ -382,7 +538,7 @@ def make_pilot():
                   and combat.card_cost(state, c) <= p.energy]
         if powers:
             return max(powers, key=lambda c: combat.card_cost(state, c))
-        return base(state)
+        return _electro_pick(state, base)
 
     return pilot
 
