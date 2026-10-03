@@ -6000,3 +6000,46 @@ seat's weakest card in the starter round, so each gets a small number tune.
 - `proto_vk_dawn_winds_march` (Dawn Wind's March): cost 2 to 1; the upgrade
   no longer cuts the cost, it raises the Block per Oath gain 3 to 4. The face
   prints the number as `{PowerAmount:diff()}` so the upgrade shows.
+
+## Varka Electro Knights, 2026-10-03
+
+The main session's Electro census found the three Electro Knights with the
+least face value. The default drafter took them from 0.1% (Infinite Circuit),
+2.3% (Awakening) and 1.0% (Pulsating Witch) of offers. The numbers are the
+main session's.
+
+- `proto_vk_lisa_violet_arc` (Lisa: Infinite Circuit): Block 4 [5] plus 3 [4]
+  per Attack becomes 6 [7] plus 3 [4]. Only the base moved; the upgrade is
+  still +1 base and +1 per Attack.
+- `proto_vk_razor_claw_and_thunder` (Razor: Awakening): 4 [6] becomes 5 [7],
+  and the extra on an enemy with Electro goes from 3 to 4. It was tried at
+  6 [8] first. The drafter took it from 81.4% of offers there, over the 70%
+  bar, so the main session trimmed the base to 5.
+- `proto_vk_lisa_pulsating_witch` (Lisa: Pulsating Witch): cost 1 becomes 0.
+  The text and the Retain upgrade are unchanged.
+
+The sim used `tools.varka_expansion_sim --seeds 2400 --seed 7 --jobs 15
+--no-gauntlet` with the discard-sequencing pilot, and was paired against the
+same pilot on the old numbers. These are act-1 win rates.
+
+| read | old | new | paired |
+|---|---|---|---|
+| default drafter, all four starts | 31.0 | 30.8 | -0.2 ±0.6 |
+| mono_electro | 8.5 | 14.3 | +5.8 ±1.1 |
+| elem_electro | 22.2 | 30.2 | +8.0 ±1.3 |
+| starter spread (P / H / E / C) | 31.0 / 31.1 / 31.7 / 30.1 (1.6) | 30.9 / 30.6 / 31.6 / 30.1 (1.5) | |
+
+| card | taken, old | taken, new | played in, old | played in, new |
+|---|---|---|---|---|
+| Lisa: Infinite Circuit | 0.1% | 0.1% | 68.8% | 76.3% |
+| Razor: Awakening | 2.3% | 62.2% | 49.4% | 58.1% |
+| Lisa: Pulsating Witch | 1.0% | 1.0% | 37.2% | 94.9% |
+
+The 6 [8] trial read: mono_electro 15.6, elem_electro 31.6, default 31.7,
+starter spread 2.4, and Awakening taken from 81.4% of offers and played in
+68.2%. The default drafter's take of the two
+Lisas did not move, because it prices them by its own scores (the Block
+formula, and the `varka` draw it does not see). Their play rate is the reading
+that changed. Every Knight still feeds the Muster, switch and `elem_` decks:
+paired, muster +8.8, switch +6.8, and elem_pyro, elem_hydro and elem_cryo
++4.8 to +6.7.

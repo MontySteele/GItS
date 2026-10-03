@@ -421,13 +421,14 @@ public class VarkaPrototypeTests : IDisposable
     // ---- the cards' own numbers (the ruled picks) ----------------------------
 
     [Fact]
-    public void Lisa_is_four_plus_three_per_attack_and_five_plus_four_upgraded()
+    public void Lisa_is_six_plus_three_per_attack_and_seven_plus_four_upgraded()
     {
+        // The Electro Knights pass (2026-10-03): base 4 -> 6.
         var lisa = new ProtoVkLisaVioletArc();
-        Assert.Equal(4m, Var(lisa, "CalculationBase"));
+        Assert.Equal(6m, Var(lisa, "CalculationBase"));
         Assert.Equal(3m, Var(lisa, "CalculationExtra"));
         var up = Upgraded<ProtoVkLisaVioletArc>();
-        Assert.Equal(5m, Var(up, "CalculationBase"));
+        Assert.Equal(7m, Var(up, "CalculationBase"));
         Assert.Equal(4m, Var(up, "CalculationExtra"));
         Assert.Contains("ElementalHit.ApplyOnly",
                         Il.Calls(Il.Method("ProtoVkLisaVioletArc", "OnPlay")));

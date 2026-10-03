@@ -152,9 +152,11 @@ public class VarkaExpansionTests : IDisposable
         Assert.Equal(3m, Var(Upgraded<ProtoVkMikaStarfrostSwirl>(), "PowerAmount"));
         var razor = new ProtoVkRazorClawAndThunder();
         Assert.Equal(TargetType.AnyEnemy, razor.TargetType);      // the AoE trim
-        Assert.Equal(4m, Var(razor, "VkBase"));
-        Assert.Equal(3m, Var(razor, "VkAmount"));
-        Assert.Equal(6m, Var(Upgraded<ProtoVkRazorClawAndThunder>(), "VkBase"));
+        // The Electro Knights pass (2026-10-03): 5 [7], +4.
+        Assert.Equal(5m, Var(razor, "VkBase"));
+        Assert.Equal(4m, Var(razor, "VkAmount"));
+        Assert.Equal(7m, Var(Upgraded<ProtoVkRazorClawAndThunder>(), "VkBase"));
+        Assert.Equal(0, new ProtoVkLisaPulsatingWitch().EnergyCost.Canonical);
         Assert.Contains("VarkaCards.Awakening",
                         Calls("ProtoVkRazorClawAndThunder", "OnPlay"));
         Assert.Contains("PowerCmd.Apply",

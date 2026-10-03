@@ -410,3 +410,67 @@ def test_the_sim_harness_names_only_live_rows(varka):
     assert {"charged_lunge", "short_circuit", "chain_lightning",
             "violet_storm", "thundering_verdict"} <= set(S.PAYOFFS["electro"])
     assert "retaliating_tide" in S.PAYOFFS["hydro"]
+
+
+# ---------------------------------------------------------------------------
+# The sim's discard sequencer (2026-10-03): an instrument surface in
+# tools/varka_expansion_sim.py. `enable()` patches for the whole process, so
+# the scorer's `_translate` is put in place by monkeypatch instead.
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def sim(varka, monkeypatch):
+    from tier0.pilot import policy
+    from tools import varka_expansion_sim as S
+    orig = policy._active_effects
+
+    def active(state, effect_list, card=None):
+        for fx in orig(state, effect_list, card):
+            yield from S._translate(state, fx)
+
+    monkeypatch.setattr(policy, "_active_effects", active)
+    return S
+
+def _hand(st, ids, energy):
+    from tier0.engine import effects
+    st.player.hand = [loader.get_card(c) if not c.startswith("status_")
+                      else effects.token_card(c) for c in ids]
+    st.player.energy = energy
+    return st.player.hand
+
+
+def test_the_sequencer_plays_short_circuit_first_over_a_dead_hand(sim):
+    S = sim
+    st = _state(n=2)
+    hand = _hand(st, ["status_dazed"] * 3
+                 + [_vk("chain_lightning"), _vk("short_circuit")], 0)
+    assert S._electro_pick(st, lambda s: None) is hand[-1]
+    # Its discards are the three dead cards, not Chain Lightning.
+    assert [c.id for c in S.lowest_victims(st, 3)] == ["status_dazed"] * 3
+
+
+def test_the_sequencer_holds_short_circuit_over_a_hand_worth_playing(sim):
+    S = sim
+    st = _state()
+    hand = _hand(st, ["strike"] * 3 + [_vk("short_circuit")], 3)
+    pick = S._electro_pick(st, lambda s: s.player.hand[0])
+    assert pick is hand[0]                      # the stock pick, a Strike
+
+
+def test_the_sequencer_plays_storm_battery_before_violet_storm(sim):
+    S = sim
+    st = _state(n=2)
+    hand = _hand(st, ["status_dazed"] * 3
+                 + [_vk("storm_battery"), _vk("violet_storm")], 2)
+    seen = []
+
+    def stock(s):
+        seen.extend(c.id for c in s.player.hand)
+        return next((c for c in s.player.hand
+                     if combat.card_playable(s, c)), None)
+
+    # Storm Battery's hits on the full hand, then Violet Storm's on what is
+    # left, beat Violet Storm now: it is hidden and the stock pilot plays
+    # Storm Battery.
+    assert S._electro_pick(st, stock) is hand[3]
+    assert _vk("violet_storm") not in seen

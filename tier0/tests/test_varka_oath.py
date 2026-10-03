@@ -128,9 +128,9 @@ def _fx(cid, op, **match):
 
 def test_the_ruled_rows_and_their_upgrades(varka):
     lisa = _fx(_vk("lisa_violet_arc"), "block")["amount_formula"]
-    assert (lisa["base"], lisa["per"]) == (4, 3)
+    assert (lisa["base"], lisa["per"]) == (6, 3)    # Electro Knights pass
     lisa_up = _fx(_vk("lisa_violet_arc") + "+", "block")["amount_formula"]
-    assert (lisa_up["base"], lisa_up["per"]) == (5, 4)
+    assert (lisa_up["base"], lisa_up["per"]) == (7, 4)
     for suffix, want in (("", 6), ("+", 8)):
         cid = _vk("amber_baron_bunny") + suffix
         assert _fx(cid, "block")["amount"] == want
@@ -674,8 +674,8 @@ def test_the_counts(varka):
     _play(st, _vk("favonius_cut"))
     _play(st, _vk("favonius_cut"))
     block = st.player.block
-    _play(st, _vk("lisa_violet_arc"))                   # 4 + 3 x 2 Attacks
-    assert st.player.block == block + 10
+    _play(st, _vk("lisa_violet_arc"))                   # 6 + 3 x 2 Attacks
+    assert st.player.block == block + 12
 
 
 def test_the_predicates(varka):
