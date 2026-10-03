@@ -41,7 +41,9 @@ def test_the_gate_is_not_vacuous():
     sweeps everything -- the audit's sec.3.1/sec.3.7 dead-gate class, and the
     reason S8 passed for its entire life."""
     assert len(roster.ROSTER) >= 3
-    assert len(lint.CLOSED_LISTS) >= 10
+    # 9 since 2026-10-02: deploy.ps1's card-art dir list was retired (card art
+    # is staged from every dir on disk by tools/shipped_card_art.py).
+    assert len(lint.CLOSED_LISTS) >= 9
 
 
 def test_an_unregistered_character_is_a_structural_failure(monkeypatch):
@@ -62,7 +64,7 @@ def test_an_unregistered_character_is_a_structural_failure(monkeypatch):
     # Named individually rather than by count: the count is the headline, but
     # the VALUE is that each finding tells you a specific file to go edit.
     for expected in ("Zhongli.cs", "ZhongliCardPool.cs", "zhongli.yaml",
-                     "KleeSelfCheck", "deploy.ps1",
+                     "KleeSelfCheck",
                      "build_pck.ps1", "art_coverage", "lint_pool_membership",
                      "RosterAncientCards", "gen_klee_cards"):
         assert expected in joined, f"{expected} not covered by the sweep"

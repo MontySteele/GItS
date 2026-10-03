@@ -77,9 +77,9 @@ CLOSED_LISTS = [
     ("KleeMod character registration",
      CODE / "KleeMod.cs",
      lambda c: c.cs_class),
-    ("deploy.ps1 art source dirs",
-     REPO / "klee-mod" / "build" / "deploy.ps1",
-     lambda c: f"images\\cards\\{c.id}"),
+    # deploy.ps1's card-art source dirs left this list on 2026-10-02: card art
+    # is staged by tools/shipped_card_art.py, which reads every dir under
+    # ImageGen/images/cards off disk, so there is no closed list to forget.
     ("build_pck.ps1 character loop",
      REPO / "tools" / "build_pck.ps1",
      lambda c: f"'{c.id}'"),
