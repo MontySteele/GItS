@@ -192,9 +192,9 @@ def test_the_page_glossary_defines_his_three_words():
     glossary = page.split("## Words on this screen", 1)[1]
     for word in ("Oath", "current element", "Knight"):
         assert f"- **{word}** — " in glossary, word
-    assert ("- **Oath** — Gained when your card applies or Swirls an "
-            "element: 1 of each, per card. Kept all fight. Cards read your "
-            "current element's Oath.") in glossary
+    assert ("- **Oath** — A card gives 1 Oath per element it applies, plus "
+            "1 per element it Swirls. Kept all fight. Cards read your current "
+            "element's Oath.") in glossary
     for retired in ("Absorb", "Wind"):
         assert f"- **{retired}** — " not in glossary, retired
 
@@ -261,3 +261,50 @@ def test_the_words_say_a_spent_aura_still_reacts_and_swirl_copies_are_spent():
     assert "Enemies wearing it refresh." in notes.ARM_KEYWORDS["Swirl"]
     page = blindplay.observe(varka_state())
     assert "Other elements still react with it." in page
+
+
+# ---- the rebalance round, 2026-10-03: where each Oath gain came from --------
+
+def _oath_row(card: str, oath: list[dict], fang: bool = False,
+              hits: bool = True) -> dict:
+    return {"card_id": "X", "card": card, "auto_played": False,
+            "carried": False, "overflowed": False,
+            "hits": ([{"target": "Hilichurl 1", "amount": 6, "blocked": 0,
+                       "combat_id": "100", "killed": False}] if hits else []),
+            "applied": [], "summoned": [], "oath": oath,
+            "fang_ascension": fang}
+
+
+def test_each_oath_gain_prints_under_the_card_that_made_it():
+    """Two act-1 seats could not tell where Oath came from
+    (review/records/varka-rebalance-round-2026-10-03.md)."""
+    state = varka_state()
+    state["player"]["resolutions"] = [
+        _oath_row("Amber: Precise Shot",
+                  [{"element": "Pyro", "amount": 1, "source": "applied"}],
+                  fang=True),
+        _oath_row("Windbound Execution",
+                  [{"element": "Pyro", "amount": 1, "source": "Swirl"},
+                   {"element": "Pyro", "amount": 1, "source": ""}]),
+    ]
+    page = blindplay.observe(state)
+    precise = page.index("- **Amber: Precise Shot**")
+    windbound = page.index("- **Windbound Execution**")
+    applied = page.index("  +1 Pyro Oath (applied)")
+    fang = page.index("  That gain made **Boreas's Fang** add **Four Winds' "
+                      "Ascension** to your hand.")
+    assert precise < applied < fang < windbound
+    assert page.index("  +1 Pyro Oath (Swirl)") > windbound
+    assert "  +1 Pyro Oath\n" in page
+
+
+def test_a_card_whose_only_effect_was_oath_does_not_say_nothing_landed():
+    state = varka_state()
+    state["player"]["resolutions"] = [
+        _oath_row("Change of Guard",
+                  [{"element": "Hydro", "amount": 2, "source": ""}],
+                  hits=False)]
+    page = blindplay.observe(state)
+    assert "  +2 Hydro Oath" in page
+    section = page.split("- **Change of Guard**", 1)[1]
+    assert "Nothing this page can count" not in section.split("\n\n", 1)[0]

@@ -305,7 +305,8 @@ public class ResolutionLedgerTests
 
         var row = ResolutionLedger.Snapshot()[0];
         Assert.Equal(new[] { "card_id", "card", "auto_played", "carried",
-                             "overflowed", "hits", "applied", "summoned" },
+                             "overflowed", "hits", "applied", "summoned",
+                             "oath", "fang_ascension" },
                      new List<string>(row.Keys).ToArray());
 
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];

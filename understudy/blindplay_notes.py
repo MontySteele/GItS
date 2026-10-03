@@ -1503,8 +1503,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # VARKA (the Oath rework), in step with `ArmKeywordTips.ForOath`,
     # `ForCurrentElement` and `ForKnight` word for word, markup folded out
     # and the payout numbers written out (`VarkaLaw`).
-    "Oath": ("Gained when your card applies or Swirls an element: 1 of "
-             "each, per card. Kept all fight. Cards read your current "
+    "Oath": ("A card gives 1 Oath per element it applies, plus 1 per "
+             "element it Swirls. Kept all fight. Cards read your current "
              "element's Oath."),
     "current element": ("The last Pyro, Hydro, Cryo or Electro you applied. "
                         "Swirls pay it: Pyro 3 damage, Hydro 3 Block, Cryo 1 "
@@ -3556,6 +3556,13 @@ RESOLUTION_NO_HITS_STAGE = ("  No hit on an enemy landed off it. What it did "
 #: section printed Take the Stage, Understudy and Double Casting with no
 #: performer, and the seat had to find the arrival on the stage log.
 RESOLUTION_SUMMONED = "  It summoned {names}."
+#: VARKA (the rebalance round, 2026-10-03): each Oath gain the card made, with
+#: its source, so a seat can tell where Oath came from. `{source}` is
+#: " (applied)", " (Swirl)" or "" (the card's own text).
+RESOLUTION_OATH = "  +{n} {element} Oath{source}"
+#: And the gain that made Boreas's Fang add Four Winds' Ascension.
+RESOLUTION_FANG = ("  That gain made **Boreas's Fang** add **Four Winds' "
+                   "Ascension** to your hand.")
 #: A body that DIED inside the play. The game never hands a killing hit to the
 #: damage hook the ledger reads, so a kill arrives with no number, and the
 #: first wording printed it as "Nothing this page can count landed off it"

@@ -1461,7 +1461,19 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                    for a in (row.get("applied") or [])
                    if isinstance(a, dict) and _text(a.get("power"))
                    and _int(a.get("amount"))]
+        # The rebalance round (2026-10-03): Varka's Oath gains inside the
+        # card, sourced ("applied", "Swirl" or ""), and whether one of them
+        # made Boreas's Fang add Four Winds' Ascension. Absent on an older
+        # mod, and then nothing prints.
+        oath = [{"element": _text(o.get("element")),
+                 "amount": _int(o.get("amount")),
+                 "source": _text(o.get("source"))}
+                for o in (row.get("oath") or [])
+                if isinstance(o, dict) and _text(o.get("element"))
+                and _int(o.get("amount")) > 0]
         out.append({"card": card,
+                    "oath": oath,
+                    "fang_ascension": bool(row.get("fang_ascension")),
                     "applied": applied,
                     "auto_played": bool(row.get("auto_played")),
                     "carried": bool(row.get("carried")),
