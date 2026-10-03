@@ -87,6 +87,9 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Furina Stage: mirror `FurinaStage.HandTurnEndHits` (the cards in her hand that hurt her as her turn ends) in the sim's `furina_stage.forecast` (tests only).
 - Soak: `soak_screens._escape` answers the Crystal Sphere with `crystal_sphere_proceed`, which the game refuses while divinations are owed; spend them first as the seat page's `reveal` does (`blindplay_shape.sphere_reveal_action`).
 - Seat page: no screen prints the run seed or the ascension.
+- Shop card removal: after the first card is picked the screen refuses a re-pick and offers only confirm or skip, so a mis-pick removed a Strike instead of a Defend (Varka starter round, lane 2 act 1, floor 14); check whether the base screen allows a deselect and the bridge lacks the verb.
+- Seat page: Oathsworn Strike's line printed "Deals 29" and hit 31 on a Vulnerable target (Varka starter round, lane 1 act 3); the hand preview folds no target's Vulnerable, and the page does not say so.
+- Seat page: an autoplaying relic (the Earring, Varka starter round, lane 2 act 3) plays the first turn with no line saying what it will play or played.
 - Hand Drill gave no Vulnerable when a Bomb broke the boss's Block, only when a Pyro card's hit did (Klee final-pass round, lane 2, 2026-10-02); check a Bomb hit reaches the base relic's break-Block hook.
 - Seat page: Tender (each card played costs 1 Strength and 1 Dexterity this turn) prints only "Tender 3"; Fireworks Finale's "Written: 5" does not name the Strength loss that lowered it; Spiny Toad's Thorns showed on turn 1 only (Klee final-pass round, 2026-10-02).
 - Big Badda Boom's "then damage equal to what your Bombs dealt" does not say whether Bombs set off earlier in the turn count (Klee final-pass round, lane 1, 2026-10-02).
