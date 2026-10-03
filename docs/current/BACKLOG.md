@@ -74,7 +74,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
 - The Big One's x4 stays armed when its Set off finds no Bomb, so a later Mine on the enemy turn can spend it.
-- Kokomi pool extension ([USER] agreed 2026-09-29, defence census): move some Plan Block to Dusk or immediate Block (five of her nine Block cards are Plans, three land next turn), and replace The Clouds Like Waves Rippling with a real defensive Power.
 - A reaction amplifier's payout is not printed: the seat log reads "Vaporize on X" with no x1.5 (Varka seat, 2026-09-29: Weak 4 -> 3 printed, 4 landed). A hit carrying an element chosen at play (Four Winds' Ascension and Northwind Avatar's current-element hit) previews no amplifier either; the multiplier is pinned by `A_current_element_hit_amplifies_like_any_hit`.
 
 ## Harness, bridge and tools

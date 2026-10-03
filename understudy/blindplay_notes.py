@@ -1503,9 +1503,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # VARKA (the Oath rework), in step with `ArmKeywordTips.ForOath`,
     # `ForCurrentElement` and `ForKnight` word for word, markup folded out
     # and the payout numbers written out (`VarkaLaw`).
-    "Oath": ("A card gives 1 Oath per element it applies, plus 1 per "
-             "element it Swirls. Kept all fight. Cards read your current "
-             "element's Oath."),
+    "Oath": ("1 Oath per element a card applies, plus 1 per element it "
+             "Swirls. Kept all fight. Element cards read their own; others, "
+             "the current."),
     "current element": ("The last Pyro, Hydro, Cryo or Electro you applied. "
                         "Swirls pay it: Pyro 3 damage, Hydro 3 Block, Cryo 1 "
                         "Vulnerable, Electro 3 to ALL."),

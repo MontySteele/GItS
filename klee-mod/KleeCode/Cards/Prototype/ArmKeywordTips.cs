@@ -670,9 +670,9 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForOath(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, OathKey,
-            "A card gives 1 Oath per element it applies, plus 1 per element "
-          + "it [gold]Swirls[/gold]. Kept all fight. Cards read your current "
-          + "element's Oath.");
+            "1 Oath per element a card applies, plus 1 per element it "
+          + "[gold]Swirls[/gold]. Kept all fight. Element cards read their "
+          + "own; others, the current.");
 
     /// <summary>
     /// THE ONE ELEMENT HIS CARDS READ (sec.3), and what his Swirls pay for
