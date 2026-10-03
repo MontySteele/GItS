@@ -195,17 +195,18 @@ def test_mk_iii_upgraded_hits_four_and_plants_three(overhaul):
     assert sizes(enemy) == [3, 3, 3]
 
 
-def test_mine_all_mine_hits_and_sets_off_the_aimed_enemys_mines(overhaul):
-    """AoE trim, 2026-10-03: "Deal 8 Pyro damage. Set off the Mines on that
-    enemy." One enemy; another body's Mine and the aimed body's plain Bomb
-    stay where they are."""
+def test_mine_all_mine_hits_and_places_a_mine_on_the_aimed_enemy(overhaul):
+    """Klee finish-line batch, 2026-10-03: "Deal 8 Pyro damage. Place a Mine 4
+    on that enemy." Nothing goes off: the aimed body's Mine and plain Bomb
+    stay, and the new Mine joins them."""
     a, b, c = (make_enemy(hp=200, name=n) for n in "abc")
     state = klee_state([a, b, c])
     klee_overhaul.place(state, a, 4, is_mine=True)
     klee_overhaul.place(state, a, 9)
     klee_overhaul.place(state, b, 4, is_mine=True)
     play(state, load("proto_ko_mine_all_mine"), aim=a)
-    assert sizes(a) == [9] and sizes(b) == [4]
+    assert sizes(a) == [4, 9, 4] and sizes(b) == [4]
+    assert a.ko_charges[-1].is_mine
     assert a.hp < 200
     assert b.hp == 200 and c.hp == 200
 

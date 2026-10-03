@@ -2447,10 +2447,7 @@ DETONATE_FIELDS = {"op", "target", "bonus"}
 #: the rest of the pile stays. Still a `set_off`, so every reader of "a Set
 #: off card" (Once More!, Grounded, Treasure Map, Boom Badge...) sees it.
 SET_OFF_FIELDS = {"op", "target", "times", "damage",
-                  "wide_if", "charge",
-                  # AoE trim, 2026-10-03 (Mine, All Mine!): only the aimed
-                  # enemy's MINES go off (`ProtoBombPower.SetOffMinesAimed`).
-                  "mines_only"}
+                  "wide_if", "charge"}
 #: `wide_if` is R244's (Coven Errand): the printed target WIDENS to ALL enemies
 #: when the named predicate holds. A field on the op rather than a
 #: `conditional` around two `plant_bomb`s, because the card prints ONE Bomb
@@ -3121,7 +3118,7 @@ APPLY_POWERS = {
     # THE KLEE STATUS PACKAGE (2026-10-01). Classes in
     # Powers/Prototype/KleeStatusPackage.cs.
     "ko_finders_keepers": ("FindersKeepersPower", None,
-        "Whenever you play a [gold]Confiscated[/gold], place a "
+        "Whenever you draw a status, place a "
         "[gold]Bomb[/gold] {X} on a random enemy."),
     "ko_damage_report": ("DamageReportPower", None,
         "Whenever you draw a status, gain {X} [gold]Block[/gold]."),
@@ -5017,12 +5014,6 @@ def blocked_reason(
                     return f"set_off {key} must be a positive literal int"
             if eff.get("charge") not in (None, "largest"):
                 return f"set_off charge '{eff.get('charge')}'"
-            if "mines_only" in eff:
-                if eff["mines_only"] is not True:
-                    return "set_off mines_only must be true or absent"
-                if (eff.get("target") != "enemy" or eff.get("charge")
-                        or eff.get("wide_if")):
-                    return "set_off mines_only is the plain aimed spelling only"
             if eff.get("charge") and (
                     eff.get("target") != "enemy" or eff.get("wide_if")):
                 # Pocket Match's "your largest Bomb on the enemy" is ONE
@@ -11146,14 +11137,6 @@ def build_body(
                     "await ProtoBombPower.SetOffLargestAimed("
                     "choiceContext, cardPlay.Target, Owner.Creature, this, "
                     f"cardPlay, {damage});")
-            elif eff["target"] == "enemy" and eff.get("mines_only"):
-                # AoE trim, 2026-10-03 (Mine, All Mine!): only the MINES on
-                # the aimed enemy go off; plain Bombs stay.
-                _target_guard(lines, ctx)
-                lines.append(
-                    "await ProtoBombPower.SetOffMinesAimed("
-                    "choiceContext, cardPlay.Target, Owner.Creature, this, "
-                    f"cardPlay, {damage});")
             elif eff["target"] == "enemy" and eff.get("wide_if"):
                 # R276 (Team Effort). The predicate widens WHICH bodies go
                 # off; the card's own hit stays on the aimed one either way,
@@ -12426,7 +12409,6 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
             if eff["target"] == "enemy":
                 method = ("SetOffLargestAimed"
                           if eff.get("charge") == "largest"
-                          else "SetOffMinesAimed" if eff.get("mines_only")
                           else "SetOffAimed")
                 body.append(
                     f"await ProtoBombPower.{method}(choiceContext, "

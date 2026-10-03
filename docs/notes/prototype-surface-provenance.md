@@ -5908,6 +5908,59 @@ Pins: `tier0/tests/test_aoe_trim.py`, and the rows' existing pins updated
 in place. Measured: the tier-0.5 drafted run sim, base vs trim on the same
 seeds (the session's results file).
 
+## Klee finish-line batch, 2026-10-03
+
+[USER], after his Klee finish-line run: "Agreed all around!" to five
+changes, designed by the main session. Ruling recorded in
+`review/active/klee-brief-2026-09-01.md`. Pins:
+`KleeTests/Prototype/KleeFinishBatchTests.cs` and
+`tier0/tests/test_klee_finish_batch.py`, with the old pins updated in place.
+
+- `confiscated` (the token; C# `Cards/Confiscated.cs`): `CardType.Status`,
+  was a Skill at Status rarity. [USER]: "Confiscated should be a Status, not
+  a Skill? Was this deliberate? Prevents Klee's cards from removing it."
+  Still 1 Energy and does nothing: the base game's Slimed is a playable
+  Status (no Unplayable keyword; `CardModel.CanPlay` reads only the keyword,
+  the cost and the hooks). The sim's `combat.card_playable` refuses every
+  `type: status` card, so Confiscated is exempted there by
+  `klee_overhaul.is_confiscated`; `tokens.yaml` says `type: status`. Both
+  engines' `IsStatus` already counted Status rarity, so the readers (Klee
+  Can Explain!, Kitchen Alchemy, Dust of Purification, Damage Report) see it
+  either way; the type change also stops it counting as a Skill for every
+  Skill reader. Solitary Confinement keys on the class / id, unchanged.
+- `proto_ko_finders_keepers`: "Whenever you draw a status, place a Bomb 4 on
+  a random enemy." Upgrade 4 -> 6. Was "Whenever you play a Confiscated,
+  place a Bomb 5 [7]." [USER]: "Finders Keepers seems too niche to be
+  useful". Damage Report's trigger in both engines:
+  `FindersKeepersPower.AfterCardDrawn` (any status, per card drawn) and the
+  sim's `klee_overhaul.finders_keepers` read at `refpowers.after_card_drawn`;
+  the play listener is gone from `note_card_played`.
+- Dodoco Tales (`ExplosiveFrags`, the Touch of Orobas upgrade of Pounding
+  Surprise): adds "Start each combat with 4 more Sparks." to its face, so an
+  upgraded Klee opens at 5 (the kit's 1 plus 4). [USER]: "a bump from 1
+  starting sparks to 3 or 5 ... would be a much stronger increase", the
+  Regent's 3 -> 7 stars as the yardstick. C#: `ExplosiveFrags.OpeningSparks`
+  = 4, paid by `GrantOpeningSparks` from `KleeOverhaulOpening.GrantSpark`
+  right after the kit's Spark (one site, so the relic is not a second tenant
+  of `AfterPlayerTurnStart`). Sim: `touch_of_orobas_klee`'s
+  `combat_start_spark` is 4 (was 3) and no longer gated off under the kit;
+  `lint_constant_parity` mirrors the two. The first-explosion 2 stays C#
+  only, as before.
+- `proto_ko_mine_all_mine`: "Deal 8 Pyro damage. Place a Mine 4 on that
+  enemy." Upgrade damage +3, Mine +2 (8 [11], Mine 4 [6]). [USER]: "how
+  often do you have mines you want to detonate early?" The mines-only Set
+  off is gone, and with it the engine piece no other row used: `set_off`
+  `mines_only` in the codegen, `ProtoBombPower.SetOffMinesAimed` /
+  `SetOffMines`, and the sim's `klee_overhaul.set_off_mines` and its
+  `effects._op_set_off` arm. It is no longer a Set off card (the carrier
+  count is 10).
+- `proto_mc_amber_explosive_puppet`: rarity common -> uncommon, nothing
+  else. [USER]: "probably too good to be a Common now. Exhaust tag, or bump
+  to Uncommon?"; the main session chose Uncommon to keep it repeatable. A
+  companion card, so Klee's 78-card pool counts do not move.
+
+Art: none (no new cards).
+
 ## Varka starter: Retain Ascension, 0-cost Windbound, 2026-10-03
 
 `review/active/varka-rebalance-2026-10-03.md`, end of sec.5. [USER]: "I do

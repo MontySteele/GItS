@@ -1599,7 +1599,8 @@
       "power_amount": 2
     },
     "proto_ko_mine_all_mine": {
-      "damage": 3
+      "damage": 3,
+      "bomb_size": 2
     },
     "proto_ko_mine_toss": {
       "bomb_size": 3

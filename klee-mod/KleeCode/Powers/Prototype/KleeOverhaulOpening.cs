@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -12,10 +13,12 @@ namespace KleeMod.Powers;
 /// it under the relic paragraph, but the ruled brief's RULE 4 is what carries
 /// the line (R242: "Rule 4 in the brief carries the line"), and the difference
 /// is load-bearing: Touch of Orobas swaps <c>PoundingSurprise</c> for
-/// <c>ExplosiveFrags</c> at the act-2 starter-relic reward, and that relic's
-/// own opening bank is deliberately gated OFF under this arm. A relic clause
+/// <c>ExplosiveFrags</c> at the act-2 starter-relic reward. A relic clause
 /// would silently take the opening Spark away from a player who upgraded, which
-/// is the opposite of what the pick bought.
+/// is the opposite of what the pick bought. Since the Klee finish-line batch
+/// (2026-10-03) the upgraded relic ADDS its own opening bank
+/// (<c>ExplosiveFrags.OpeningSparks</c>, 4) on top, paid below right after the
+/// kit's Spark.
 ///
 /// THE SITE, AND IT IS THE SIM's. <c>BeforeCombatStart()</c> sounds right and
 /// is wrong twice over, for the two reasons <c>ExplosiveFrags</c> already
@@ -49,5 +52,13 @@ internal static class KleeOverhaulOpening
         await SparkPower.Gain(
             choiceContext, creature, KleeOverhaulLaw.OpeningSpark,
             cardSource: null, source: "klee_overhaul/opening_spark");
+
+        // Dodoco Tales (Klee finish-line batch, 2026-10-03): "Start each
+        // combat with 4 more Sparks." Paid here, after the kit's Spark, so the
+        // relic is not a second tenant of the turn-start broadcast.
+        foreach (var relic in player.Relics.OfType<global::KleeMod.Relics.ExplosiveFrags>())
+        {
+            await relic.GrantOpeningSparks(choiceContext, creature);
+        }
     }
 }

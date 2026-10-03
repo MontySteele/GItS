@@ -939,3 +939,21 @@ Rule 4 is unchanged. Pool pass two
 (`review/records/klee-pool-pass-two-2026-09-08.md`) is the ruling's work:
 six Spark-priced rows paying Block, cards and Energy on Regent's price
 ladder, read at the doctrine door first.
+
+## 19. The finish-line batch (2026-10-03)
+
+After his Klee finish-line run [USER] ruled "Agreed all around!" on five
+changes, and Klee goes to Balance after this batch and its two-seat round.
+His notes, in his words: "Confiscated should be a Status, not a Skill? Was
+this deliberate? Prevents Klee's cards from removing it." (Confiscated is
+now a Status, still 1 Energy, doing nothing.) "Finders Keepers seems too
+niche to be useful" (it now reads "Whenever you draw a status, place a Bomb
+4 on a random enemy", 6 upgraded). Dodoco Tales: "a bump from 1 starting
+sparks to 3 or 5 ... would be a much stronger increase", with the Regent's
+3 -> 7 stars as the yardstick (it adds "Start each combat with 4 more
+Sparks", so 5 in all). Mine, All Mine!: "how often do you have mines you want
+to detonate early?" (now "Deal 8 Pyro damage. Place a Mine 4 on that enemy.",
+8 [11], Mine 4 [6]). Amber — Explosive Puppet: "probably too good to be a
+Common now. Exhaust tag, or bump to Uncommon?" (Uncommon, kept repeatable).
+Readings: `docs/notes/prototype-surface-provenance.md`, "Klee finish-line
+batch, 2026-10-03".

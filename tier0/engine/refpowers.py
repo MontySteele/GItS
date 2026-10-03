@@ -1186,6 +1186,11 @@ def after_card_drawn(state: CombatState, card: Card,
     if p.powers.get("ko_damage_report"):
         from tier0.engine import klee_overhaul     # late import (cycle)
         klee_overhaul.damage_report(state, card)
+    # Finders Keepers (Klee finish-line batch, 2026-10-03), the same trigger:
+    # a Bomb per status drawn.
+    if p.powers.get("ko_finders_keepers"):
+        from tier0.engine import klee_overhaul     # late import (cycle)
+        klee_overhaul.finders_keepers(state, card)
     randomise_cost_on_draw(state, card)
 
 

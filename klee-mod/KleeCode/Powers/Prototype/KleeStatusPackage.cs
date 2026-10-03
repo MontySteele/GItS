@@ -25,8 +25,9 @@ namespace KleeMod.Powers;
 /// The two taxes are ordinary <c>add_card</c> rows (the base game's
 /// <c>Dazed</c>, and her <see cref="Confiscated"/>); this file is the cards
 /// that READ them. A STATUS is a card of <c>CardType.Status</c> or of
-/// <c>CardRarity.Status</c>: the second is what makes Confiscated one (a
-/// 1-cost Skill at Status rarity). Curses are not statuses. Sim twins:
+/// <c>CardRarity.Status</c>; Confiscated is both since the Klee finish-line
+/// batch (2026-10-03; it was a 1-cost Skill at Status rarity). Curses are not
+/// statuses. Sim twins:
 /// <c>tier0/engine/klee_overhaul.py</c>, the status-package block.
 /// </summary>
 public static class KleeStatusPackage
@@ -122,9 +123,13 @@ public static class KleeStatusPackage
 }
 
 /// <summary>
-/// Finders Keepers: "Whenever you play a Confiscated, place a Bomb 5 [7] on a
-/// random enemy." Party Poppers' shape, one trigger over: the stack is the
-/// Bomb size. Sim twin: <c>klee_overhaul.finders_keepers</c>.
+/// Finders Keepers (Klee finish-line batch, 2026-10-03): "Whenever you draw a
+/// status, place a Bomb 4 [6] on a random enemy." Damage Report's trigger
+/// (<see cref="DamageReportPower.AfterCardDrawn"/>: per card drawn, any status,
+/// Confiscated and Dazed alike) with Party Poppers' payload. It read "Whenever
+/// you play a Confiscated, place a Bomb 5 [7]" before the batch. Sim twin:
+/// <c>klee_overhaul.finders_keepers</c>, read at
+/// <c>refpowers.after_card_drawn</c>.
 /// </summary>
 public sealed class FindersKeepersPower : PowerModel, ILocalizationProvider
 {
@@ -132,19 +137,19 @@ public sealed class FindersKeepersPower : PowerModel, ILocalizationProvider
     {
         ("title", "Finders Keepers"),
         ("description",
-            "Whenever you play a [gold]Confiscated[/gold], place a "
+            "Whenever you draw a status, place a "
           + "[gold]Bomb[/gold] [blue]{Amount}[/blue] on a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    public override async Task AfterCardDrawn(
+        PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
     {
-        if (Owner == null) return;
-        if (cardPlay.Card?.Owner?.Creature != Owner) return;
-        if (!KleeStatusPackage.IsConfiscated(cardPlay.Card)) return;
+        if (Owner == null || Amount <= 0) return;
+        if (card?.Owner?.Creature != Owner) return;
+        if (!KleeStatusPackage.IsStatus(card)) return;
         await ProtoBombPower.PlaceOnRandom(choiceContext, Owner, Amount,
                                            isMine: false, payloadMineAll: 0,
                                            cardSource: null);

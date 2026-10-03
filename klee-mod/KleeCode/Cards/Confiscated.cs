@@ -11,7 +11,11 @@ namespace KleeMod.Cards;
 /// <summary>
 /// Fish Blasting's downside token (tier0 tokens.yaml): a Status that costs 1
 /// and does nothing -- the tax is the energy and the draw it wastes, and
-/// Dodge Roll can exhaust it. Deliberately NOT in KleeCardPool, so it is never
+/// Dodge Roll can exhaust it. <c>CardType.Status</c> since the Klee
+/// finish-line batch (2026-10-03; [USER]: "Confiscated should be a Status,
+/// not a Skill?"): it was a Skill at Status rarity. Still playable, the base
+/// game's <c>Slimed</c> shape (a Status with no Unplayable keyword plays at
+/// its cost); it no longer counts as a Skill for any Skill reader. Deliberately NOT in KleeCardPool, so it is never
 /// rolled as a reward; generated add_card bodies create instances via
 /// CombatState.CreateCard. It IS in KleeExtraCardPool -- a card that belongs
 /// to no pool at all throws "You monster!" out of CardModel.Pool the moment it
@@ -28,7 +32,7 @@ public sealed class Confiscated : CustomCardModel
     };
 
     public Confiscated()
-        : base(1, CardType.Skill, CardRarity.Status, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Status, CardRarity.Status, TargetType.Self, autoAdd: false)
     {
     }
 

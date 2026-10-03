@@ -490,16 +490,20 @@ def test_rule4_no_slice_row_mints_a_spark(overhaul):
             card.id
 
 
-def test_rule4_the_upgraded_relics_opening_windfall_is_off(overhaul):
-    """`Rule4_the_upgraded_relic_keeps_the_rate_and_loses_the_windfall`. An
-    act-2 Touch of Orobas must not hand out a bank before any Bomb has gone
-    off; the RATE is untouched (the test above proves it still pays)."""
+def test_rule4_the_upgraded_relics_opening_windfall_is_on(overhaul):
+    """Klee finish-line batch, 2026-10-03 (ruled "Agreed all around!"): Dodoco
+    Tales adds "Start each combat with 4 more Sparks." The windfall was gated
+    off under the kit from R242 until this batch; the RATE is untouched (the
+    test above proves it still pays). C#
+    `ExplosiveFrags.GrantOpeningSparks`."""
     from tier0.engine import relics
+    from tier05 import relics as t05
 
     state = klee_state()
-    state.player.relic_effects = [{"hook": "combat_start_spark", "amount": 4}]
+    state.player.relic_effects = list(
+        t05.ancient_pool()["touch_of_orobas_klee"]["effects"])
     relics.apply_combat_start(state)
-    assert state.player.sparks == 0
+    assert state.player.sparks == 4
 
 
 def test_rule4_a_spark_priced_row_spends_sparks_and_not_energy(overhaul):

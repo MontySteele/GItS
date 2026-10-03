@@ -23,7 +23,7 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
-- **Klee to Balance** (`review/records/klee-rerun-round-2026-10-03.md`, `klee-aoe-trim-round-2026-10-03.md`): the w17 defects did not recur and both w19 seats cleared act 1; both runs then died in act 2 to attrition. Move Klee to Balance (default) or run another round first.
+- **Klee to Balance: ruled yes** (2026-10-03, "Agreed all around!"), after the finish-line batch (`review/active/klee-brief-2026-09-01.md` §19) and its two-seat round.
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).

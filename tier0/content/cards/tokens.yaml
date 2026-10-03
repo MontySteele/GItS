@@ -2,8 +2,10 @@
 - id: confiscated
   name: "Confiscated"
   cost: 1
-  type: skill
+  type: status         # Klee finish-line batch, 2026-10-03: was skill.
   rarity: status       # Fish Blasting's downside; Dodge Roll can exhaust it
+  # PLAYABLE for its 1 Energy (the base game's Slimed shape):
+  # `combat.card_playable` exempts it from the unplayable-status rule.
   effects: []
 # Furina's selector (kickoff §3.1): delivered to hand each turn by her
 # ethereal_spotlight relic hook, never drafted (rarity token keeps it out

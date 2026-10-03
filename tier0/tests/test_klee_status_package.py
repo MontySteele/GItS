@@ -7,8 +7,8 @@ for Dust of Purification. The C# twin is
 `KleeTests/Prototype/KleeStatusPackageTests.cs`. NOTHING MEASURED HERE IS
 QUOTABLE (R215 B).
 
-"Status" is a card of Status TYPE or Status RARITY, so Confiscated (a 1-cost
-Skill at Status rarity) counts; curses do not.
+"Status" is a card of Status TYPE or Status RARITY; Confiscated is both since
+the Klee finish-line batch (2026-10-03). Curses do not count.
 """
 
 from __future__ import annotations
@@ -86,8 +86,9 @@ def test_the_papers_numbers_and_upgrades(overhaul):
     # gains 4 Block (review/active/aoe-trim-2026-10-03.md sec.2).
     assert _first(load("proto_ko_red_knight"), "damage")["amount"] == 34
     assert _first(_up("proto_ko_red_knight"), "damage")["amount"] == 40
-    assert _first(load("proto_ko_finders_keepers"), "apply_power")["amount"] == 5
-    assert _first(_up("proto_ko_finders_keepers"), "apply_power")["amount"] == 7
+    # Klee finish-line batch, 2026-10-03: Finders Keepers is 4 [6].
+    assert _first(load("proto_ko_finders_keepers"), "apply_power")["amount"] == 4
+    assert _first(_up("proto_ko_finders_keepers"), "apply_power")["amount"] == 6
     assert _first(load("proto_ko_klee_can_explain"), "block")["amount"] == 6
     assert _first(_up("proto_ko_klee_can_explain"), "block")["amount"] == 8
     assert _first(load("proto_ko_damage_report"), "apply_power")["amount"] == 4
@@ -131,13 +132,20 @@ def test_status_is_status_type_or_status_rarity():
 
 # --- the payoffs ---------------------------------------------------------------
 
-def test_finders_keepers_places_a_bomb_per_confiscated_played(overhaul):
+def test_finders_keepers_places_a_bomb_per_status_drawn(overhaul):
+    """Klee finish-line batch, 2026-10-03: "Whenever you draw a status, place
+    a Bomb 4 on a random enemy." Damage Report's trigger; playing a
+    Confiscated no longer pays."""
     enemy = make_enemy(hp=200)
     st = klee_state([enemy])
-    st.player.powers[klee_overhaul.FINDERS_KEEPERS] = 5
+    st.player.powers[klee_overhaul.FINDERS_KEEPERS] = 4
+    st.player.hand = []
+    st.player.draw_pile = [statuses.make_status("dazed"), _confiscated(),
+                           load("proto_ko_pop")]
+    st.draw(3)
+    assert sizes(enemy) == [4, 4]
     klee_overhaul.note_card_played(st, _confiscated())
-    klee_overhaul.note_card_played(st, load("proto_ko_pop"))
-    assert sizes(enemy) == [5]
+    assert sizes(enemy) == [4, 4]
 
 
 def test_solitary_confinement_frees_confiscated_only(overhaul):
