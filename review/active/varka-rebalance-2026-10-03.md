@@ -1,13 +1,14 @@
 # Varka: elements that borrow from each other
 
-Status: PICKS 1 AND 3 RULED 2026-10-03; picks 2 and 4 revised and open.
+Status: ALL FOUR PICKS RULED 2026-10-03; Storm Battery's cost is open (pick 5).
 Main session design, on [USER]'s direction (2026-10-02 and 10-03).
 
 [USER], 2026-10-03: "Otherwise the picks in 1 make sense" (Absolute Zero
 excepted, §2); "Agreed on 3"; on 2, "can we do a cross-check against
 similar cards on the base game and see if these are reasonably priced?"
 (§3); on 4, "My favorite answer would be '4 different but equally balanced
-starter cards, one per element' If we can pull it off somehow." (§5).
+starter cards, one per element' If we can pull it off somehow." (§5). On the
+revised picks 2 and 4: "Otherwise all picks make sense."
 
 ## 1. Why
 
@@ -111,8 +112,19 @@ and Gust Ward leave (§4), so the generic Block pool shrinks by three.
 | Element | Payoff | Card | Borrows |
 |---|---|---|---|
 | Pyro | a hit that grows when it reacts | **Kindled Edge** (C Attack, 1; replaces Cavalry Charge): "Deal 7 [10] Pyro damage. If it sets off an Elemental Reaction, deal 7 [10] more." | every Hydro, Cryo and Electro applier (Vaporize, Melt, Overload) |
-| Electro | a big hand | **Storm Battery** (U Attack, 2; replaces Gust Ward): "Deal 2 [3] Electro damage to ALL enemies for each other card in your hand." | the twelve generic draw cards |
+| Electro | a big hand | **Storm Battery** (U Attack, 1 proposed, was 2; replaces Gust Ward): "Deal 2 [3] Electro damage to ALL enemies for each other card in your hand." | the twelve generic draw cards |
 | Cryo | auras on enemies | **Frost Ward** (C Skill, 1; replaces Favonius Drill): "Apply 1 Weak to each enemy with an aura. Gain 3 [4] Block for each." | every applier, AoE appliers best |
+
+**Storm Battery's price (open).** [USER]: "played in a fresh hand of 5,
+that's 2 energy to AoE for 8 when the going rate on commons is to aoe for 5
+or 6 for 1 energy ... I'm not sure if dropping to 1 energy would be balanced
+at Uncommon." The base cards (read from the game's code): Dagger Spray (C, 1:
+4 [6] twice to ALL, so 8 [12]), Breakthrough (C, 1: 9 [13] to ALL),
+Thunderclap (C, 1: 4 [7] and Vulnerable to ALL), Echoing Slash (U, 1: 10 [13]
+to ALL). Proposed: **cost 1, numbers unchanged.** Played first from a fresh
+hand it is 8 [12], Dagger Spray's number one rarity up; played third it is
+4 [6]; it beats Echoing Slash only with a draw engine (7 cards in hand: 12
+[18]).
 
 Wildfire Oath stays as the stay-on-Pyro payoff and Kindled Edge is the mixing
 one; Glacial Edict and Absolute Zero stay as Cryo's. The discard cards
@@ -175,10 +187,11 @@ The numbers above move with the sim. Then a Varka seat round.
 
 1. **The Oath rule (§2):** RULED. Open only on the revised Absolute Zero (a
    status payoff that reads Cryo Oath). Default: yes.
-2. **Hydro scales (§3), at the base-game prices:** Gleeful Songs 4 [6] plus
+2. **Hydro scales (§3), at the base-game prices:** RULED. Gleeful Songs 4 [6] plus
    3 [4] per reacting enemy; Rippling Guard 3 plus 2 [3] per other card;
-   Whisper of Water 4 [6] for three turns. Default: yes.
+   Whisper of Water 4 [6] for three turns.
 3. **Borrowing payoffs (§4):** RULED.
 4. **The starter (§5):** four different starter Knights, one per element,
    balanced by the sim to within 5 points; Strike, Defend, Windbound
-   Execution and Ascension unchanged. Default: yes.
+   Execution and Ascension unchanged. RULED.
+5. **Storm Battery at cost 1 (§4),** numbers unchanged. Default: yes.
