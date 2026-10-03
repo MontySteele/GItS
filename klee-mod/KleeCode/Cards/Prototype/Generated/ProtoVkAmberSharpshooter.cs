@@ -49,7 +49,7 @@ public sealed class ProtoVkAmberSharpshooter : CustomCardModel, IElementalCard, 
     public string? Nation => "mondstadt";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesPyro };
+        new[] { KleeKeywords.Knight, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, Element.Pyro);

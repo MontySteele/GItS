@@ -46,7 +46,7 @@ public sealed class ProtoVkBarbaraWellspringHymn : CustomCardModel, ICompanionCa
     public string? Nation => "mondstadt";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Exhaust, KleeKeywords.AppliesHydro };
+        new[] { KleeKeywords.Knight, CardKeyword.Exhaust, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         BaseKeywordTips.ForFrail(BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this, Element.Hydro), this), this), this);

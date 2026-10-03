@@ -46,7 +46,7 @@ public sealed class ProtoVkLisaPulsatingWitch : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesElectro };
+        new[] { KleeKeywords.Knight, KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false, appliesWithoutHit: true), this, Element.Electro);

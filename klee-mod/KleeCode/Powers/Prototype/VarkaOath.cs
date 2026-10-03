@@ -461,8 +461,9 @@ public static class VarkaOath
     }
 
     /// <summary>A card play ends: the scope closes, then the expansion's
-    /// after-play Powers -- Assembly at the Cathedral on a Knight, Wolfpack
-    /// on Four Winds' Ascension. Every replay is a play.</summary>
+    /// after-play Power, Wolfpack on Four Winds' Ascension. Every replay is
+    /// a play. (Assembly at the Cathedral left this site with co-op notes
+    /// pick 2: it pays at <see cref="NoteApplication"/> now.)</summary>
     public static async Task EndPlay(
         PlayerChoiceContext choiceContext, CardModel card)
     {
@@ -472,14 +473,6 @@ public static class VarkaOath
         ledger.CloseScope();
         // Wildfire Oath: an unspent bonus goes with its play.
         if (ReferenceEquals(ledger.WildfireCard, card)) ledger.WildfireCard = null;
-        if (VarkaRules.IsKnight(card))
-        {
-            foreach (var assembly in owner!.Powers
-                         .OfType<AssemblyAtTheCathedralPower>().ToList())
-            {
-                await assembly.OnKnightPlayed(choiceContext);
-            }
-        }
         if (card is ProtoVkFourWindsAscension)
         {
             foreach (var wolves in owner!.Powers.OfType<WolfpackPower>().ToList())
@@ -643,8 +636,18 @@ public static class VarkaOath
         {
             await SetCurrent(choiceContext, applier, element, knight: false);
         }
-        if (!ledger.TryCredit(swirl: false, element)) return;
-        await Gain(choiceContext, applier, element, 1);
+        if (ledger.TryCredit(swirl: false, element))
+        {
+            await Gain(choiceContext, applier, element, 1);
+        }
+        // Assembly at the Cathedral (co-op notes pick 2, 2026-10-02):
+        // "Whenever you apply an element", whether or not it credits. Its
+        // hit is element-less, so it never comes back through here.
+        foreach (var assembly in applier.Powers
+                     .OfType<AssemblyAtTheCathedralPower>().ToList())
+        {
+            await assembly.OnElementApplied(choiceContext);
+        }
     }
 
     // ---- the Swirl ------------------------------------------------------------

@@ -165,14 +165,21 @@ public sealed class NightVigilPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Neuvillette, Heir to the Ancient Sea's Authority: auras you apply last
-/// Amount extra turns.
+/// Neuvillette, Heir to the Ancient Sea's Authority: at the start of your
+/// turn, apply Hydro to a random enemy; auras you apply last Amount extra
+/// turns.
 ///
-/// A marker power with no hook of its own -- AuraCmd.Duration reads it at the
-/// one place aura duration is decided, which is why that helper exists. It is
-/// authority over water, not more water: it applies no element itself, and
-/// must not, or it would re-open the mass-Frozen watchlist that the Guest Star
-/// judgment card deliberately priced with self-damage.
+/// The duration half has no hook of its own -- AuraCmd.Duration reads it at
+/// the one place aura duration is decided, which is why that helper exists.
+///
+/// CO-OP NOTES PICK 4 ([USER], 2026-10-02, "Agreed on Neuvillette's a)"):
+/// the card was a 5-star Rare that did nothing by itself, so it now applies
+/// Hydro each turn as well, a free reaction partner for any kit. That
+/// reverses the old "authority over water, not more water" line, which kept
+/// it off Hydro for the mass-Frozen watchlist; the ruling is the newer fact.
+/// Amount counts copies (the upgrade is a cost cut), so each copy applies
+/// once. Through <see cref="ElementalHit.ApplyOnly"/>, the damage-less
+/// element door, so the application reacts and credits as any other does.
 /// </summary>
 public sealed class AncientSeaAuthorityPower : PowerModel, ILocalizationProvider
 {
@@ -180,13 +187,38 @@ public sealed class AncientSeaAuthorityPower : PowerModel, ILocalizationProvider
     {
         ("title", "Heir to the Ancient Sea's Authority"),
         ("description",
-            "Elemental auras you apply last [blue]{Amount}[/blue] extra "
-          + "{Amount:plural:turn|turns}."),
+            "At the start of your turn, apply [gold]Hydro[/gold] to a random "
+          + "enemy. Elemental auras you apply last [blue]{Amount}[/blue] "
+          + "extra {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature != Owner) return;
+        await ApplyHydro(choiceContext, player);
+    }
+
+    /// <summary>The turn's Hydro: one random hittable enemy per copy.
+    /// </summary>
+    internal async Task ApplyHydro(PlayerChoiceContext choiceContext, Player player)
+    {
+        for (var i = 0; i < Amount; i++)
+        {
+            var enemies = Owner.CombatState?.HittableEnemies
+                .Where(e => e.IsAlive).ToList();
+            if (enemies == null || enemies.Count == 0) return;
+            var target = player.RunState.Rng.CombatTargets.NextItem(enemies);
+            if (target == null) return;
+            Flash();
+            await ElementalHit.ApplyOnly(
+                choiceContext, target, Elements.Element.Hydro, Owner);
+        }
+    }
 
     /// <summary>Extra aura turns this creature grants, 0 if none.</summary>
     public static int ExtraTurnsFrom(Creature? applier) =>

@@ -695,16 +695,18 @@ public sealed class EyeWallPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Assembly at the Cathedral: "Whenever you play a Knight, deal 3
-/// [4] damage to a random enemy." Paid by <see cref="VarkaOath.EndPlay"/>,
-/// once per play (replays too), element-less and unpowered.</summary>
+/// <summary>Assembly at the Cathedral: "Whenever you apply an element, deal
+/// 2 [3] damage to a random enemy." (co-op notes pick 2, ruled 2026-10-02;
+/// was 3 [4] on a Knight's play). Paid by
+/// <see cref="VarkaOath.NoteApplication"/>, element-less and
+/// unpowered.</summary>
 public sealed class AssemblyAtTheCathedralPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Assembly at the Cathedral"),
         ("description",
-            "Whenever you play a [gold]Knight[/gold], deal "
+            "Whenever you apply an element, deal "
           + "[blue]{Amount}[/blue] damage to a random enemy."),
     };
 
@@ -712,7 +714,12 @@ public sealed class AssemblyAtTheCathedralPower : PowerModel, ILocalizationProvi
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    internal async Task OnKnightPlayed(PlayerChoiceContext choiceContext)
+    /// <summary>Co-op notes pick 2 (2026-10-02): paid by
+    /// <see cref="VarkaOath.NoteApplication"/>, the one site every
+    /// application of his passes (a hit that sticks, refreshes or reacts, or
+    /// a damage-less apply). Was paid on a Knight's play. Its own hit has no
+    /// element, so it cannot pay itself.</summary>
+    internal async Task OnElementApplied(PlayerChoiceContext choiceContext)
     {
         var enemies = Owner.CombatState?.HittableEnemies
             .Where(e => e.IsAlive).ToList();
@@ -1026,7 +1033,8 @@ public sealed class TheOrderAnswersPower : PowerModel, ILocalizationProvider
         ("title", "The Order Answers"),
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] random "
-          + "[gold]Knight[/gold]{Amount:plural:|s} to your hand."),
+          + "{Amount:plural:[gold]Knight[/gold]|[gold]Knights[/gold]} to your "
+          + "hand."),
     };
 
     public override PowerType Type => PowerType.Buff;

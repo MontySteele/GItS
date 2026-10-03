@@ -3541,9 +3541,9 @@ APPLY_POWERS = {
     "vk_eye_wall": ("EyeWallPower", None,
         "Whenever you [gold]Swirl[/gold] this turn, gain {X} "
         "[gold]Block[/gold]."),
+    # Co-op notes pick 2 (2026-10-02): on any element applied.
     "vk_assembly_at_the_cathedral": ("AssemblyAtTheCathedralPower", None,
-        "Whenever you play a [gold]Knight[/gold], deal {X} damage to a random "
-        "enemy."),
+        "Whenever you apply an element, deal {X} damage to a random enemy."),
     # ELEMENT IDENTITIES (2026-10-01): Wildfire Oath re-aimed to one big hit
     # (sec.5); Retaliating Tide in Unbroken Tide's place (sec.4).
     "vk_wildfire_oath": ("WildfireOathPower", None,
@@ -3594,8 +3594,10 @@ APPLY_POWERS = {
     "night_vigil": ("NightVigilPower", None,
         "Your Attacks against enemies holding an elemental aura deal {X} "
         "additional damage."),
+    # Co-op notes pick 4 (2026-10-02): plus a Hydro aura each turn.
     "ancient_sea_authority": ("AncientSeaAuthorityPower", None,
-        "Elemental auras you apply last {X} extra turn{XS}."),
+        "At the start of your turn, apply [gold]Hydro[/gold] to a random "
+        "enemy. Elemental auras you apply last {X} extra turn{XS}."),
     "masque_red_death": ("MasqueRedDeathPower", None,
         "At the start of your turn, gain {X} [gold]Strength[/gold]. Your "
         "[gold]Bond of Life[/gold] eats the first 5 [gold]Block[/gold] you "
@@ -15778,6 +15780,14 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # build_upgrade, exactly as Apparition/EchoForm/VoidForm do.
     if card.get("ethereal"):
         keywords.append("CardKeyword.Ethereal")
+    # CO-OP NOTES PICK 2 (2026-10-02): "every Knight prints a first line,
+    # 'Knight.', the way a card prints Exhaust". A Knight is a Varka Companion
+    # card (`VarkaRules.IsKnight`: a companion row with `personal_pool:
+    # varka`), so the keyword is derived from the row and never hand-typed
+    # into a face. `KleeKeywords.Knight` rides `AutoKeywordPosition.Before`,
+    # which the game prints as the rules box's first line and hovers.
+    if is_companion(card) and personal_pool_id(card) == "varka":
+        keywords.append("KleeKeywords.Knight")
     if card.get("exhaust"):
         keywords.append("CardKeyword.Exhaust")
     # A9: base-card Innate rides the same CanonicalKeywords rail as Exhaust,

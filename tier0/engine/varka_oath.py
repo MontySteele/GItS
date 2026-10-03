@@ -492,9 +492,9 @@ def begin_play(state, card) -> None:
 
 
 def end_play(state, card=None) -> None:
-    """The play's scope closes; then the expansion's after-play Powers:
-    Assembly at the Cathedral on a Knight, Wolfpack on Four Winds'
-    Ascension."""
+    """The play's scope closes; then the expansion's after-play Power,
+    Wolfpack on Four Winds' Ascension. (Assembly at the Cathedral pays at
+    `note_hit` since co-op notes pick 2.)"""
     close_scope(state)
     led = ledger(state.player)
     if led is None or card is None:
@@ -503,13 +503,6 @@ def end_play(state, card=None) -> None:
         led.fresh_spread -= 1
     led.wildfire_armed = 0                          # unspent: gone with it
     p = state.player
-    assembly = _power(p, ASSEMBLY)
-    if assembly and is_knight(card) and state.living_enemies:
-        from tier0.engine import effects            # late: cycle
-        e = state.rng.choice(list(state.living_enemies))
-        state.emit("varka_assembly", target=e.name, amount=assembly)
-        effects.deal_damage_to_enemy(state, e, assembly, element=None,
-                                     source="card", powered=False)
     wolves = _power(p, WOLFPACK)
     if wolves and card.id.rstrip("+") == ASCENSION_ID:
         from tier0.content import loader            # late: cycle
@@ -559,11 +552,21 @@ def note_hit(state, enemy, element) -> None:
             led.static_field_turn = state.turn
             state.emit("varka_static_field", draw=sf)
             state.draw(sf)
-    if led.no_apply_credit:
-        return
-    if open_oath_switches(led, element, state.player):
-        set_current(state, element, knight=False)
-    credit(state, "apply", element)
+    if not led.no_apply_credit:
+        if open_oath_switches(led, element, state.player):
+            set_current(state, element, knight=False)
+        credit(state, "apply", element)
+    # ASSEMBLY AT THE CATHEDRAL (co-op notes pick 2, 2026-10-02): "Whenever
+    # you apply an element, deal 2 [3] damage to a random enemy" -- any
+    # application of his, a no-credit hit's too. Element-less, so its own
+    # hit never comes back here. C# twin: `VarkaOath.NoteApplication`.
+    assembly = _power(state.player, ASSEMBLY)
+    if assembly and state.living_enemies:
+        from tier0.engine import effects            # late: cycle
+        e = state.rng.choice(list(state.living_enemies))
+        state.emit("varka_assembly", target=e.name, amount=assembly)
+        effects.deal_damage_to_enemy(state, e, assembly, element=None,
+                                     source="card", powered=False)
 
 
 def converging(state) -> bool:

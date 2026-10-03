@@ -49,7 +49,7 @@ public sealed class ProtoMfNeuvilletteAncientSeaAuthority : CustomCardModel, ICo
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Neuvillette — Heir to the Ancient Sea's Authority"),
-        ("description", "Elemental auras you apply last 1 extra turn."),
+        ("description", "At the start of your turn, apply [gold]Hydro[/gold] to a random enemy. Elemental auras you apply last 1 extra turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

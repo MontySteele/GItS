@@ -6677,6 +6677,17 @@ def player_turn_start_triggers(state: CombatState) -> None:
     n = p.powers.get("masque_red_death", 0)
     if n:
         powers.apply_power(state, p, "strength", n, applier=p)
+    # Neuvillette -- co-op notes pick 4 (2026-10-02): "At the start of your
+    # turn, apply Hydro to a random enemy." One per copy (the amount counts
+    # copies; the upgrade is a cost cut), through `resolve_hit` like the
+    # apply_aura op, so it reacts and credits. C# twin:
+    # `AncientSeaAuthorityPower.AfterPlayerTurnStart`.
+    for _ in range(p.powers.get("ancient_sea_authority", 0)):
+        if not state.living_enemies:
+            break
+        enemy = state.rng.choice(list(state.living_enemies))
+        reactions.resolve_hit(state, enemy, "hydro", 0,
+                              "ancient_sea_authority")
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
     if n:
         gain_sparks(state, n, source="power:endless_fireworks/turn_start")

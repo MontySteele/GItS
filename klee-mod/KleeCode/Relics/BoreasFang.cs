@@ -86,16 +86,22 @@ public class BoreasFang : CustomRelicModel
     {
         ("title", "Boreas's Fang"),
         ("description",
-            "At the start of each combat, your starting Knight's element "
+            "At the start of each combat, your starting [gold]Knight[/gold]'s "
+          + "element "
           + "becomes your [gold]current element[/gold]. The first time each "
           + "combat you gain [gold]Oath[/gold], add Four Winds' Ascension to "
           + "your hand."),
     };
 
-    /// <summary>The word the face leans on.</summary>
+    /// <summary>The words the face leans on. Knight joined with the co-op
+    /// notes language pass (2026-10-02); Wolf's Gravestone inherits it.
+    /// </summary>
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCurrentElement(
-            ArmKeywordTips.ForOath(System.Array.Empty<IHoverTip>(), null), null);
+        ArmKeywordTips.ForKnight(
+            ArmKeywordTips.ForCurrentElement(
+                ArmKeywordTips.ForOath(System.Array.Empty<IHoverTip>(), null),
+                null),
+            null);
 
     /// <summary>The element the Fang makes current at combat start: the run's
     /// recorded starter Knight element, else the starter Knight in the deck
@@ -227,7 +233,8 @@ public sealed class WolfsGravestone : BoreasFang
     {
         ("title", "Wolf's Gravestone"),
         ("description",
-            "At the start of each combat, your starting Knight's element "
+            "At the start of each combat, your starting [gold]Knight[/gold]'s "
+          + "element "
           + "becomes your [gold]current element[/gold]. The first time each "
           + "combat you gain [gold]Oath[/gold], add an upgraded [gold]Four "
           + "Winds' Ascension[/gold] to your hand. It costs 0 this turn."),

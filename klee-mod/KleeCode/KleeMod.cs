@@ -471,6 +471,11 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.CurrentElementKey + ".title"] =
                         "Current element",
                     [Cards.ArmKeywordTips.KnightKey + ".title"] = "Knight",
+                    // Co-op notes pick 2 (2026-10-02): the key is also
+                    // `KleeKeywords.Knight`'s, the printed "Knight." line,
+                    // and the keyword's own hover reads this row.
+                    [Cards.ArmKeywordTips.KnightKey + ".description"] =
+                        Cards.ArmKeywordTips.KnightTipText,
                     // Element identities sec.7: a rider, titling no keyword.
                     [Cards.ArmKeywordTips.ElementSwitchKey + ".title"] =
                         "Element switch",

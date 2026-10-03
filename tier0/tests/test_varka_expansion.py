@@ -359,11 +359,23 @@ def test_eye_wall_crosscurrent_and_eye_of_stormterror(varka):
 
 
 def test_assembly(varka):
+    """Co-op notes pick 2 (2026-10-02): "Whenever you apply an element, deal
+    2 [3] damage to a random enemy." Noelle is a Knight that applies no
+    element, so she pays nothing now; a non-Knight's application pays."""
     st = _state(n=3)
-    st.player.powers[V.ASSEMBLY] = 3
+    st.player.powers[V.ASSEMBLY] = 2
     before = sum(e.hp for e in st.enemies)
     _play(st, _vk("noelle_steadfast_maid"))
-    assert before - sum(e.hp for e in st.enemies) == 3
+    assert before - sum(e.hp for e in st.enemies) == 0
+    _play(st, _vk("glacial_edict"))                 # applies Cryo, no damage
+    assert before - sum(e.hp for e in st.enemies) == 2
+    # Every application pays: Barbara: Gleeful Songs applies Hydro to ALL 3
+    # (a fresh board, so no reaction adds its own damage).
+    st = _state(n=3)
+    st.player.powers[V.ASSEMBLY] = 2
+    before = sum(e.hp for e in st.enemies)
+    _play(st, _vk("barbara_show_begin"))
+    assert before - sum(e.hp for e in st.enemies) == 3 * 2
 
 
 def test_absolute_zero_widens_its_payout(varka):
