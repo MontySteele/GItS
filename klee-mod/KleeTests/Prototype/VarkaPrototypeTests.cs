@@ -381,17 +381,19 @@ public class VarkaPrototypeTests : IDisposable
     // ---- Four Winds' Ascension and Boreas's Fang (sec.4) ---------------------
 
     [Fact]
-    public void Ascension_is_six_anemo_then_three_per_oath_and_does_not_exhaust()
+    public void Ascension_is_ten_anemo_then_three_per_oath_and_does_not_exhaust()
     {
+        // Starter ruling 2026-10-03: cost 2 with Retain, 10 [13].
         var card = new ProtoVkFourWindsAscension();
-        Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.Equal(2, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Attack, card.Type);
         Assert.DoesNotContain(CardKeyword.Exhaust, card.Keywords);
-        Assert.Equal(6m, Var(card, "Damage"));
+        Assert.Contains(CardKeyword.Retain, card.Keywords);
+        Assert.Equal(10m, Var(card, "Damage"));
         Assert.Equal(3m, Var(card, "VkPer"));
-        // The upgraded card's numbers: 9 Anemo, 4 per Oath.
+        // The upgraded card's numbers: 13 Anemo, 4 per Oath.
         var up = Upgraded<ProtoVkFourWindsAscension>();
-        Assert.Equal(9m, Var(up, "Damage"));
+        Assert.Equal(13m, Var(up, "Damage"));
         Assert.Equal(4m, Var(up, "VkPer"));
         Assert.Equal(Element.Anemo, ((IElementalCard)card).Element);
         Assert.Contains("VarkaCards.AscensionHit",

@@ -207,4 +207,34 @@ public class VarkaRebalanceTests : IDisposable
         Assert.Contains("Rng.NextItem", cycle);
         Assert.Single(cycle, c => c == "ElementalHit.DealUnelemented");
     }
+
+    // ---- the starter ruling, 2026-10-03 -------------------------------------
+
+    [Fact]
+    public void Ascension_costs_2_and_retains_like_sovereign_blade()
+    {
+        // The Fang creates it with CombatState.CreateCard, which builds the
+        // model's canonical keywords, so a generated copy retains too.
+        var card = new ProtoVkFourWindsAscension();
+        Assert.Equal(2, card.EnergyCost.Canonical);
+        Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
+        Assert.Contains(CardKeyword.Retain, card.Keywords);
+        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
+        Assert.Equal(10m, Var(card, "Damage"));
+        Assert.Equal(13m, Var(Upgraded<ProtoVkFourWindsAscension>(), "Damage"));
+        Assert.Contains(Calls("BoreasFang", "AddAscension"),
+                        c => c.EndsWith(".CreateCard"));
+    }
+
+    [Fact]
+    public void Windbound_execution_is_0_cost_single_target()
+    {
+        var card = new ProtoVkWindboundExecution();
+        Assert.Equal(0, card.EnergyCost.Canonical);
+        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
+        Assert.Equal(4m, Var(card, "Damage"));
+        Assert.Equal(6m, Var(Upgraded<ProtoVkWindboundExecution>(), "Damage"));
+        Assert.DoesNotContain(Calls("ProtoVkWindboundExecution", "OnPlay"),
+                              c => c.Contains("TargetingAllOpponents"));
+    }
 }

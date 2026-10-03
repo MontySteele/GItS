@@ -147,7 +147,7 @@ def test_the_ruled_rows_and_their_upgrades(varka):
     assert _fx(up.id, "damage")["amount"] == 14
     assert _fx(up.id, "varka")["base"] == 14
     asc = loader.get_card(_vk("four_winds_ascension") + "+")
-    assert _fx(asc.id, "damage")["amount"] == 9
+    assert _fx(asc.id, "damage")["amount"] == 13
     assert _fx(asc.id, "varka")["per"] == 4
     assert loader.get_card(_vk("grand_masters_order") + "+").retain is True
     assert _fx(_vk("knights_roll_call") + "+", "add_knight")["choose"] is True
@@ -241,19 +241,19 @@ def test_northwind_credits_both_keys_and_ascension_only_the_swirl(varka):
     _play(st, _vk("northwind_avatar"))
     assert led.oath["pyro"] == 3
     assert st.enemies[0].hp == 100 - (10 + 2 + 3 + 14)
-    # Ascension: 6 Anemo Swirls (+1), then 3 x 2 Pyro that credits nothing.
+    # Ascension: 10 Anemo Swirls (+1), then 3 x 2 Pyro that credits nothing.
     st = _state(enemies=[_enemy(aura="pyro")], fang=False)
     led = _led(st)
     led.current, led.oath["pyro"] = "pyro", 1
     _play(st, _vk("four_winds_ascension"))
     assert led.oath["pyro"] == 2
-    assert st.enemies[0].hp == 100 - (6 + 2 + 3 + 6)
+    assert st.enemies[0].hp == 100 - (10 + 2 + 3 + 6)
 
 
 def test_ascension_with_no_current_element_deals_its_anemo_only(varka):
     st = _state(fang=False)
     _play(st, _vk("four_winds_ascension"))
-    assert st.enemies[0].hp == 94
+    assert st.enemies[0].hp == 90
     assert _led(st).oath == dict.fromkeys(V.ELEMENTS, 0)
 
 
