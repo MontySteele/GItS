@@ -129,6 +129,9 @@ public sealed class FrozenPower : PowerModel, ILocalizationProvider
         var shatter = ReactionConstants.ShatterDamage
             + ShatterBonusPower.BonusFor(dealer);
 
+        // TELEMETRY ONLY: the Shatter is the breaker's reaction damage.
+        using var credit = Diagnostics.DamageCredit.Open(
+            dealer, Diagnostics.DamageCredit.Reaction, "Shatter");
         await CreatureCmd.Damage(
             choiceContext, target, shatter,
             ValueProp.Unblockable | ValueProp.Unpowered,

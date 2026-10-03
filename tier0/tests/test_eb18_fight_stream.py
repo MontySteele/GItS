@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import pytest
 
 from tier1 import analyze
 
@@ -350,3 +351,42 @@ def test_the_big_ones_input_is_untouched_by_the_new_counter():
     total = body.index("_detonationsByPlayer[player] =")
     corpse = body.index("if (!onCorpse) return;")
     assert total < corpse, "the total must increment before the corpse gate"
+
+
+# ------------------------------------------- 2026-10-02: the credit keys ---
+
+def test_credit_keys_sum_by_kind_and_cover_the_pool_per_fight():
+    """Two seats of one fight: the kinds add up across seats, and coverage is
+    the fight's credited damage (unblocked plus Block broken) over the pool at
+    its first turn, counted once per fight and not once per seat."""
+    pool = [[1, 100], [2, 40]]
+    klee = _fight(seats=2, seat_index=0, enemy_pool_by_turn=pool,
+                  damage_by_kind={"bomb": 30, "direct": 10}, damage_dealt=40,
+                  damage_blocked=5, killing_blows=1, block_gained=12,
+                  block_given=0, mine_detonations=2)
+    varka = _fight(seats=2, seat_index=1, character="Varka",
+                   enemy_pool_by_turn=pool,
+                   damage_by_kind={"reaction": 15, "direct": 25},
+                   damage_dealt=40, damage_blocked=5, killing_blows=0,
+                   block_gained=30, block_given=6, mine_detonations=0)
+    s = analyze.summarize_fights([klee, varka])
+    assert s["credit_fights"] == 2
+    assert s["damage_by_kind"] == {"bomb": 30, "direct": 35, "reaction": 15}
+    assert s["block_gained"] == 42 and s["block_given"] == 6
+    assert s["mine_detonations"] == 2 and s["killing_blows"] == 1
+    assert s["credit_coverage"] == pytest.approx(0.9)
+
+
+def test_records_without_the_credit_keys_are_not_read_as_zero_credit():
+    s = analyze.summarize_fights([_fight()])
+    assert s["credit_fights"] == 0
+    assert s["credit_coverage"] is None
+    analyze.print_fight_report(s)
+
+
+def test_the_writer_emits_the_credit_keys():
+    src = CS_TELEMETRY.read_text(encoding="utf-8")
+    for key in ("damage_by_kind", "damage_blocked", "killing_blows",
+                "block_gained_by_turn", "block_gained", "block_given",
+                "mine_detonations"):
+        assert f'\\"{key}\\":' in src, key

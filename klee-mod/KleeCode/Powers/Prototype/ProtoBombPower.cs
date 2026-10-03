@@ -1076,6 +1076,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         if (dest == null) return;
         KleeOverhaulLedger.For(applier).NoteLine(
             amount + " damage bounced to " + NameOf(dest));
+        using var credit = Diagnostics.DamageCredit.Open(
+            applier, Diagnostics.DamageCredit.Bomb, "Bomb");
         await ElementalHit.Deal(choiceContext, dest, Element.Pyro, amount,
                                 applier, ignoreBlock: false, powered: false,
                                 targetMods: false);
@@ -1349,6 +1351,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     {
         var ledger = KleeOverhaulLedger.For(applier);
         var size = charge.Size * multiplier;
+        // TELEMETRY ONLY: this explosion's hit is the placer's Bomb (or Mine)
+        // damage. A reaction it sets off opens its own scope inside.
+        using var credit = Diagnostics.DamageCredit.Open(
+            applier, Diagnostics.DamageCredit.Bomb, charge.IsMine ? "Mine" : "Bomb");
 
         Vfx.KleeCombatVfx.SpawnBombLob(applier, target);
 
@@ -1421,6 +1427,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         }
 
         ledger.NoteExplosion(reacted, dealt, vulnerablePaid);
+        // TELEMETRY ONLY: the per-seat count `PlayTelemetry` samples.
+        RecordExplosion(applier, charge.IsMine);
         // POOL COMPLETION (2026-10-01), ALICE'S MASTERPIECE (her second
         // Ancient): "When one of your Bombs goes off, it stays on the enemy at
         // half its size, rounded down." The charge already left the pile

@@ -2819,6 +2819,10 @@ public static class KokomiPlan
     {
         if (amount <= 0) return null;
         if (doubleDamage) amount *= 2;
+        // TELEMETRY ONLY: a Plan's hit is the Bake-Kurage's (`EB-334`), so it
+        // is Kokomi's pet damage. The applier the engine reads is unchanged.
+        using var credit = Diagnostics.DamageCredit.Open(
+            kokomi, Diagnostics.DamageCredit.Pet, "Bake-Kurage");
         var times = plan.Times < 1 ? 1 : plan.Times;
         int? first = null;
         for (var pass = 0; pass < times; pass++)

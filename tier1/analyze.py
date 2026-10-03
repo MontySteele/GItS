@@ -333,6 +333,46 @@ def summarize_fights(fights: list[dict]) -> dict:
         "corpse_detonations": sum(f.get("corpse_detonations", 0) for f in scored),
         "fights_with_corpse": sum(1 for f in scored
                                   if f.get("corpse_detonations", 0) > 0),
+        **summarize_credit(fights),
+    }
+
+
+def summarize_credit(fights: list[dict]) -> dict:
+    """The 2026-10-02 credit keys: damage by kind, Block gained, Mines.
+
+    Only records that carry `damage_by_kind` are read -- an older record
+    credited direct hits alone, so mixing the two would read as a drop in
+    everything but cards. COVERAGE is the credited damage (unblocked plus the
+    Block it broke) of every seat in one fight over the enemy pool standing at
+    its first turn; summons and phase changes make it approximate, which is
+    why it is reported and never graded.
+    """
+    carried = [f for f in fights if "damage_by_kind" in f]
+    kinds: Counter = Counter()
+    for f in carried:
+        for kind, amount in (f.get("damage_by_kind") or {}).items():
+            kinds[kind] += amount
+    by_fight: dict[tuple, list[dict]] = {}
+    for f in carried:
+        key = run_key(f) + (f.get("fight_index", 0), f.get("floor", 0))
+        by_fight.setdefault(key, []).append(f)
+    credited = pool = 0
+    for seats in by_fight.values():
+        first = (seats[0].get("enemy_pool_by_turn") or [[0, 0]])[0]
+        if len(first) < 2 or not first[1]:
+            continue
+        pool += first[1]
+        credited += sum(s.get("damage_dealt", 0) + s.get("damage_blocked", 0)
+                        for s in seats)
+    return {
+        "credit_fights": len(carried),
+        "damage_by_kind": kinds,
+        "damage_blocked": sum(f.get("damage_blocked", 0) for f in carried),
+        "killing_blows": sum(f.get("killing_blows", 0) for f in carried),
+        "block_gained": sum(f.get("block_gained", 0) for f in carried),
+        "block_given": sum(f.get("block_given", 0) for f in carried),
+        "mine_detonations": sum(f.get("mine_detonations", 0) for f in carried),
+        "credit_coverage": (credited / pool) if pool else None,
     }
 
 
@@ -421,6 +461,21 @@ def print_fight_report(s: dict, join: dict | None = None) -> None:
         print("    after the record is written (PlayTelemetry.FlushAll).")
     else:
         print("    no record carries them (logs predate EB-18)")
+
+    # 2026-10-02: who dealt it, by kind, and the Block side of the ledger.
+    print(f"\n  -- credit, over {s.get('credit_fights', 0)} record(s) carrying "
+          "`damage_by_kind` --")
+    if s.get("credit_fights"):
+        kinds = ", ".join(f"{k} {n}" for k, n in s["damage_by_kind"].most_common())
+        print(f"    damage by kind       {kinds or '(none)'}")
+        print(f"    block broken / kills {s['damage_blocked']} / {s['killing_blows']}")
+        print(f"    block gained / given {s['block_gained']} / {s['block_given']}")
+        print(f"    mine detonations     {s['mine_detonations']}")
+        if s["credit_coverage"] is not None:
+            print(f"    coverage             {s['credit_coverage']:.0%} of the "
+                  "turn-1 enemy pool (approximate: summons, phases)")
+    else:
+        print("    no record carries them (logs predate the credit keys)")
 
     if join:
         print("\n  -- joined to run history --")

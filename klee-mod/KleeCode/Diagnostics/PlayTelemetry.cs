@@ -175,6 +175,7 @@ internal static class PlayTelemetry
         try
         {
             FlushAll("interrupted");
+            Pending.Clear();
             var run = RunManager.Instance?.DebugOnlyGetState();
             var combat = CombatManager.Instance?.DebugOnlyGetState();
             if (run == null || combat == null) return;
@@ -307,8 +308,16 @@ internal static class PlayTelemetry
     {
         foreach (var (player, record) in Open)
         {
+            // 2026-10-02: the Klee arm's Bombs and Mines are `ProtoBombPower`,
+            // which never touched `BombPower`'s counter, so a whole Klee run
+            // read 0. Both powers count now; a seat only ever holds one.
             record.Detonations = Math.Max(
-                record.Detonations, BombPower.DetonationsThisCombat(combat, player));
+                record.Detonations,
+                BombPower.DetonationsThisCombat(combat, player)
+                + ProtoBombPower.ExplosionsThisCombat(combat, player));
+            record.MineDetonations = Math.Max(
+                record.MineDetonations,
+                ProtoBombPower.MineExplosionsThisCombat(combat, player));
             record.CorpseDetonations = Math.Max(
                 record.CorpseDetonations,
                 BombPower.CorpseDetonationsThisCombat(combat, player));
@@ -474,34 +483,18 @@ internal static class PlayTelemetry
     {
         try
         {
-            var amount = (int)result.UnblockedDamage;
-            if (amount <= 0) return;
-
-            if (target?.Player is { } victim && Open.TryGetValue(victim, out var taken))
+            if (!RecordDamage(target, (int)result.UnblockedDamage,
+                              (int)result.BlockedDamage, dealer, cardSource))
             {
-                taken.DamageTaken += amount;
-                if (target.IsDead)
-                {
-                    var over = CombatManager.Instance?.DebugOnlyGetState();
-                    if (over != null) MaybeClose(over);
-                }
-
                 return;
             }
-
-            var dealerPlayer = dealer?.Player;
-            if (dealerPlayer == null || !Open.TryGetValue(dealerPlayer, out var dealt)) return;
-            var source = cardSource != null ? CardName(cardSource) : "(uncredited)";
-            dealt.DamageBySource.TryGetValue(source, out var running);
-            dealt.DamageBySource[source] = running + amount;
 
             // A KILLING BLOW ENDS THE FIGHT, and it has to end the record with
             // it. The first run-verification recorded every won fight as
             // `interrupted`, closed by the NEXT fight's stale-flush -- so the
             // HP ledger swallowed whatever happened in between (a campfire, an
             // event, a potion) and reported it as damage taken in a fight that
-            // was already over. There is no first-party combat-end hook; the
-            // last enemy dying is the closest thing the game offers.
+            // was already over. The combat-end hook (R100/5) is the backstop.
             var combat = CombatManager.Instance?.DebugOnlyGetState();
             if (combat != null) MaybeClose(combat);
         }
@@ -509,6 +502,250 @@ internal static class PlayTelemetry
         {
             Warn("Damage", e);
         }
+    }
+
+    /// <summary>
+    /// 2026-10-02 — WHO A HIT BELONGS TO, and what kind of hit it was.
+    ///
+    /// The co-op fact-check found the credited damage covered 36% of the
+    /// enemies' HP plus Block (29% in bosses), because a hit counted only
+    /// when the engine named the seat's own creature as the dealer. In order:
+    ///
+    ///   1. a PET dealer (<c>PetOwner</c> set) is its owner's `pet` damage;
+    ///   2. the seat's own creature as dealer is `direct`, as it always was;
+    ///   3. otherwise the innermost <see cref="DamageCredit"/> scope names the
+    ///      seat and the kind: `element`, `reaction`, `bomb`, `pet`, `power`.
+    ///
+    /// The source key is the card when the game hands one over, else the
+    /// scope's label in parentheses ("(Bomb)", "(Overload)", "(Bake-Kurage)"),
+    /// else `(uncredited)` as before. Measurement only: nothing here is read
+    /// back by the game.
+    /// </summary>
+    internal static (Player? Owner, string Kind, string Source) Credit(
+        Creature? dealer, CardModel? cardSource)
+    {
+        var card = cardSource != null ? CardName(cardSource) : null;
+        if (dealer?.PetOwner is { } master)
+        {
+            var frame = DamageCredit.Current;
+            var label = frame?.Kind == DamageCredit.Pet ? frame.Label ?? "pet" : "pet";
+            return (master, DamageCredit.Pet, card ?? "(" + label + ")");
+        }
+
+        if (dealer?.Player is { } own)
+        {
+            return (own, DamageCredit.Direct, card ?? "(uncredited)");
+        }
+
+        if (DamageCredit.Current is { Owner: { } owner } scope)
+        {
+            return (owner, scope.Kind, card ?? "(" + (scope.Label ?? scope.Kind) + ")");
+        }
+
+        return (null, string.Empty, string.Empty);
+    }
+
+    /// <summary>The hook-free half of <see cref="Damage"/>, and the test
+    /// seam: files one hit and answers whether it could have ended the fight.
+    /// </summary>
+    internal static bool RecordDamage(Creature? target, int unblocked, int blocked,
+                                      Creature? dealer, CardModel? cardSource)
+    {
+        // This hit reached its `AfterDamageReceived`, so the snapshot its
+        // `BeforeDamageReceived` took is spent (see `NoteBeforeDamage`).
+        if (target != null) PopPending(target);
+        if (unblocked <= 0 && blocked <= 0) return false;
+
+        if (target?.Player is { } victim)
+        {
+            if (unblocked <= 0 || !Open.TryGetValue(victim, out var taken)) return false;
+            taken.DamageTaken += unblocked;
+            return target.IsDead;
+        }
+
+        var (owner, kind, source) = Credit(dealer, cardSource);
+        if (owner == null || !Open.TryGetValue(owner, out var dealt)) return false;
+        FileHit(dealt, kind, source, unblocked, blocked);
+        return unblocked > 0;
+    }
+
+    private static void FileHit(FightRecord record, string kind, string source,
+                             int unblocked, int blocked)
+    {
+        if (unblocked > 0)
+        {
+            record.DamageBySource.TryGetValue(source, out var running);
+            record.DamageBySource[source] = running + unblocked;
+            record.DamageByKind.TryGetValue(kind, out var byKind);
+            record.DamageByKind[kind] = byKind + unblocked;
+        }
+
+        record.DamageBlocked += Math.Max(0, blocked);
+    }
+
+    // ---------------------------------------------------- killing blows ---
+
+    /// <summary>One hit in flight: who it credits, and what stood in front of
+    /// it when it started.</summary>
+    private readonly record struct PendingHit(
+        Player? Owner, string Kind, string Source, Player? Victim, int Hp, int Block);
+
+    private static readonly Dictionary<Creature, List<PendingHit>> Pending = new();
+
+    /// <summary>
+    /// THE KILLING HIT, which <see cref="Damage"/> never sees:
+    /// <c>CreatureCmd.Damage</c> skips <c>AfterDamageReceived</c> for a
+    /// creature the hit killed (<c>PlayTelemetryHooks.AfterDeath</c> and
+    /// <c>ResolutionLedger.NoteKill</c> say the same). So the last hit on every
+    /// enemy was credited to nobody. The snapshot is taken here, before the
+    /// hit, under the same credit rules; <see cref="RecordDamage"/> drops it
+    /// when the hit lands on a survivor, and <see cref="RecordDeath"/> files it
+    /// when the target died instead: the HP it had is the HP the hit took, and
+    /// the Block it had is what the hit broke. A STACK per target, because a
+    /// hit's own broadcast can start a nested hit on the same body.
+    /// </summary>
+    internal static void NoteBeforeDamage(Creature target, Creature? dealer,
+                                          CardModel? cardSource)
+    {
+        try
+        {
+            if (Open.Count == 0 || target == null) return;
+            var hp = Math.Max(0, (int)target.CurrentHp);
+            var block = Math.Max(0, (int)target.Block);
+            PendingHit hit;
+            if (target.Player is { } victim)
+            {
+                if (!Open.ContainsKey(victim)) return;
+                hit = new PendingHit(null, string.Empty, string.Empty, victim, hp, block);
+            }
+            else
+            {
+                var (owner, kind, source) = Credit(dealer, cardSource);
+                if (owner == null || !Open.ContainsKey(owner)) return;
+                hit = new PendingHit(owner, kind, source, null, hp, block);
+            }
+
+            if (!Pending.TryGetValue(target, out var stack))
+            {
+                stack = new List<PendingHit>();
+                Pending[target] = stack;
+            }
+
+            stack.Add(hit);
+        }
+        catch (Exception e)
+        {
+            Warn("NoteBeforeDamage", e);
+        }
+    }
+
+    /// <summary>A death the game prevented: the hit did not kill.</summary>
+    internal static void DropPending(Creature creature)
+    {
+        try
+        {
+            if (creature != null) Pending.Remove(creature);
+        }
+        catch (Exception e)
+        {
+            Warn("DropPending", e);
+        }
+    }
+
+    private static PendingHit? PopPending(Creature target)
+    {
+        if (!Pending.TryGetValue(target, out var stack) || stack.Count == 0) return null;
+        var top = stack[stack.Count - 1];
+        stack.RemoveAt(stack.Count - 1);
+        if (stack.Count == 0) Pending.Remove(target);
+        return top;
+    }
+
+    /// <summary>A creature died. If a hit was in flight on it, that hit
+    /// killed it: file the HP it took and the Block it broke.</summary>
+    internal static void RecordDeath(Creature creature)
+    {
+        try
+        {
+            if (creature == null || PopPending(creature) is not { } hit) return;
+            Pending.Remove(creature);
+            if (hit.Victim != null)
+            {
+                if (Open.TryGetValue(hit.Victim, out var taken)) taken.DamageTaken += hit.Hp;
+                return;
+            }
+
+            if (hit.Owner == null || !Open.TryGetValue(hit.Owner, out var dealt)) return;
+            FileHit(dealt, hit.Kind, hit.Source, hit.Hp, hit.Block);
+            dealt.KillingBlows++;
+        }
+        catch (Exception e)
+        {
+            Warn("RecordDeath", e);
+        }
+    }
+
+    // ------------------------------------------------------------- block ---
+
+    /// <summary>
+    /// 2026-10-02 — BLOCK GAINED, per seat per round. `block_at_turn_end` is
+    /// what was STANDING, which hides every point the enemy already broke and
+    /// every point gained on the enemy's turn. Credited to the seat whose
+    /// creature received it; Block a card put on someone else's creature is
+    /// also counted against the card's owner as `block_given`.
+    /// </summary>
+    internal static void BlockGained(Creature creature, decimal amount,
+                                     CardModel? cardSource)
+    {
+        try
+        {
+            if (Open.Count == 0) return;
+            var round = CombatManager.Instance?.DebugOnlyGetState()?.RoundNumber ?? 0;
+            RecordBlock(creature, (int)amount, cardSource?.Owner, round);
+        }
+        catch (Exception e)
+        {
+            Warn("BlockGained", e);
+        }
+    }
+
+    /// <summary>The hook-free half of <see cref="BlockGained"/>, and the
+    /// test seam.</summary>
+    internal static void RecordBlock(Creature? creature, int amount, Player? giver,
+                                     int round)
+    {
+        if (amount <= 0 || creature?.Player is not { } receiver) return;
+        if (Open.TryGetValue(receiver, out var record))
+        {
+            record.BlockGained.TryGetValue(round, out var running);
+            record.BlockGained[round] = running + amount;
+        }
+
+        if (giver != null && !ReferenceEquals(giver, receiver)
+            && Open.TryGetValue(giver, out var given))
+        {
+            given.BlockGiven += amount;
+        }
+    }
+
+    // ------------------------------------------------------ test seams ---
+
+    /// <summary>Test seam: open a bare record for one seat, with no run and no
+    /// combat. The mod never calls it.</summary>
+    internal static void OpenSeatForTest(Player player, int seats, int seatIndex)
+    {
+        Open[player] = new FightRecord { Seats = seats, SeatIndex = seatIndex };
+    }
+
+    /// <summary>Test seam: the JSON a seat's open record would write.</summary>
+    internal static string? JsonForTest(Player player) =>
+        Open.TryGetValue(player, out var record) ? record.ToJson() : null;
+
+    /// <summary>Test seam: forget every open record. The mod never calls it.</summary>
+    internal static void ResetForTest()
+    {
+        Open.Clear();
+        Pending.Clear();
     }
 
     // ------------------------------------------------------------- close ---
@@ -867,6 +1104,7 @@ internal static class PlayTelemetry
         public int FightIndex;
         public string Encounter = string.Empty;
         public int Detonations;
+        public int MineDetonations;
         public int CorpseDetonations;
         public int Act;
         public int Floor;
@@ -905,6 +1143,19 @@ internal static class PlayTelemetry
         /// `Powers.ExhaustSelection.ParityRow`, which owns the names.</summary>
         public readonly List<string> ExhaustSelections = new();
         public readonly Dictionary<string, int> DamageBySource = new();
+        /// <summary>2026-10-02. The same damage split by kind
+        /// (<see cref="DamageCredit"/>'s constants), so a reader can tell a
+        /// card's hit from an element hit, a reaction, a pet or a Bomb.</summary>
+        public readonly Dictionary<string, int> DamageByKind = new();
+        /// <summary>Block this seat's credited hits broke.</summary>
+        public int DamageBlocked;
+        /// <summary>Hits of this seat's that killed (filed through
+        /// <see cref="RecordDeath"/>).</summary>
+        public int KillingBlows;
+        /// <summary>Block gained by this seat's creature, by round.</summary>
+        public readonly SortedDictionary<int, int> BlockGained = new();
+        /// <summary>Block this seat's cards put on another seat.</summary>
+        public int BlockGiven;
         public int DamageTaken;
 
         /// <summary>
@@ -1030,11 +1281,40 @@ internal static class PlayTelemetry
 
             sb.Append('}');
             sb.Append(",\"damage_dealt\":").Append(DamageBySource.Values.Sum());
+            // 2026-10-02. Additive keys (understudy/README.md): the kind
+            // split, the Block the credited hits broke, the killing hits
+            // (which `damage_dealt` now includes), and Block gained.
+            sb.Append(",\"damage_by_kind\":{");
+            first = true;
+            foreach (var pair in DamageByKind.OrderBy(p => p.Key, StringComparer.Ordinal))
+            {
+                if (!first) sb.Append(',');
+                first = false;
+                Quote(sb, pair.Key);
+                sb.Append(':').Append(pair.Value);
+            }
+
+            sb.Append('}');
+            sb.Append(",\"damage_blocked\":").Append(DamageBlocked);
+            sb.Append(",\"killing_blows\":").Append(KillingBlows);
+            sb.Append(",\"block_gained_by_turn\":[");
+            first = true;
+            foreach (var pair in BlockGained)
+            {
+                if (!first) sb.Append(',');
+                first = false;
+                sb.Append('[').Append(pair.Key).Append(',').Append(pair.Value).Append(']');
+            }
+
+            sb.Append(']');
+            sb.Append(",\"block_gained\":").Append(BlockGained.Values.Sum());
+            sb.Append(",\"block_given\":").Append(BlockGiven);
             sb.Append(",\"damage_taken\":").Append(DamageTaken);
             // EB-18. This seat's bombs, and how many of them went off on a
             // body that was already dead (probe (e) / Q11's question, asked of
             // every fight instead of one scripted pair).
             sb.Append(",\"detonations\":").Append(Detonations);
+            sb.Append(",\"mine_detonations\":").Append(MineDetonations);
             sb.Append(",\"corpse_detonations\":").Append(CorpseDetonations);
             sb.Append(",\"ts\":").Append(
                 (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0)
@@ -1266,6 +1546,24 @@ public sealed class PlayTelemetryHooks : AbstractModel
         return Task.CompletedTask;
     }
 
+    /// <summary>2026-10-02. The killing-hit snapshot
+    /// (<see cref="PlayTelemetry.NoteBeforeDamage"/>): read-only.</summary>
+    public override Task BeforeDamageReceived(PlayerChoiceContext choiceContext,
+        Creature target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource)
+    {
+        PlayTelemetry.NoteBeforeDamage(target, dealer, cardSource);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>2026-10-02. Block gained, per seat per round.</summary>
+    public override Task AfterBlockGained(Creature creature, decimal amount,
+        ValueProp props, CardModel? cardSource)
+    {
+        PlayTelemetry.BlockGained(creature, amount, cardSource);
+        return Task.CompletedTask;
+    }
+
     public override Task AfterDamageReceived(PlayerChoiceContext choiceContext,
         Creature target, DamageResult result, ValueProp props,
         Creature? dealer, CardModel? cardSource)
@@ -1323,6 +1621,10 @@ public sealed class PlayTelemetryHooks : AbstractModel
         {
             ResolutionLedger.NoteKill(creature);
         }
+        // 2026-10-02: the killing hit's damage, credited to its seat. A
+        // prevented death drops the snapshot without filing it.
+        if (!wasRemovalPrevented) PlayTelemetry.RecordDeath(creature);
+        else PlayTelemetry.DropPending(creature);
         return Task.CompletedTask;
     }
 }

@@ -796,6 +796,9 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     {
         var applier = pile.Applier;
         var combatState = pile.Combat;
+        // TELEMETRY ONLY: the payload's hits are this placer's Bomb damage.
+        using var credit = Diagnostics.DamageCredit.Open(
+            applier, Diagnostics.DamageCredit.Bomb, "Bomb");
 
         // One VFX per detonation EVENT, not per bomb stack (sprint plan E2's
         // spam guard) — this method is the per-event funnel. R205 makes "event"

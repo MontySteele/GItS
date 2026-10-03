@@ -227,7 +227,15 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # wire narrates a card leaving a pile, not the identity of the
             # selection that took it, so a bot-feed twin is new wire surface
             # and a separate piece of work. Added, never a rename.
-            "exhaust_selections"}
+            "exhaust_selections",
+            # 2026-10-02 (the co-op credit fix). Who dealt each hit, by kind
+            # (`DamageCredit`), the Block those hits broke, the killing hits,
+            # Block gained per round, Block put on a partner, and the
+            # prototype Bomb's Mines. All read off in-engine hooks and scopes
+            # the wire cannot see; MOD FEED ONLY, added, never a rename.
+            "damage_by_kind", "damage_blocked", "killing_blows",
+            "block_gained_by_turn", "block_gained", "block_given",
+            "mine_detonations"}
 
 
 def _csharp_keys() -> set[str]:
