@@ -325,6 +325,11 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   to 0.66, Hydro mono 1.49 at most; act-3 boss turn-cap stalls rose; the
   stock drafter never takes Gust Ward. Readings and the tables: provenance
   note, "Varka defence, 2026-10-01".
+  **The starter seat round (2026-10-03,
+  `review/records/varka-starter-round-2026-10-03.md`):** on the rebalance
+  round's two seeds, both runs reached the final boss and died there (last
+  round: act 2 and floor 42); Windbound was no seat's NEVER AGAIN, and
+  holding Ascension became a named decision.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults
