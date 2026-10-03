@@ -164,6 +164,28 @@ if (-not (Test-Path $manifestPath)) {
                         Fail 'S2' 'PCK does not match its build contract; rebuild rather than deploying a stale pack.'
                     }
                 }
+                # S2b (2026-10-02). The Teyvat run frame is off in a release
+                # build, so its resources never load there: res://teyvat/**
+                # (bodies, plates, map, rest site, ~316 MB of music) and the six
+                # faces' res://scenes/backgrounds/<face>/**. tools\build_pck.ps1
+                # prunes them unless -TeyvatFrame; this refuses a release
+                # package that carries any. -PrototypeBuild is set only by
+                # deploy_proto.ps1, which builds only the frame arm and stages
+                # klee-teyvat.pck. The list is build_pck.ps1's $frameOnly,
+                # pinned equal by tier0/tests/test_pck_frame_split.py.
+                if (-not $PrototypeBuild) {
+                    $frameOnlyRes = @('res://teyvat/') + @('mondstadt', 'liyue', 'natlan', 'inazuma', 'fontaine', 'sumeru' |
+                        ForEach-Object { "res://scenes/backgrounds/$_/" })
+                    $leaked = @($contractLines | Where-Object {
+                        $line = $_
+                        $line -like 'resource=*' -and
+                            ($frameOnlyRes | Where-Object { $line.Substring('resource='.Length).StartsWith($_) })
+                    })
+                    if ($leaked.Count -gt 0) {
+                        Fail 'S2b' ("release pck carries $($leaked.Count) Teyvat-frame resource(s) the release build never loads, e.g. " +
+                            "$($leaked[0]). Rebuild with tools\build_pck.ps1 (no -TeyvatFrame).")
+                    }
+                }
             }
         }
     }
