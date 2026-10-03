@@ -23,6 +23,8 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
+- **Varka rebalance** (`varka-rebalance-2026-10-03.md`, PR to follow): (1) element cards read their own Oath, Anemo and generic the current one; (2) Hydro Block scales; (3) Kindled Edge, Storm Battery and Frost Ward borrow from other elements; (4) the starter, keep (default) or element-job Knights.
+
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
