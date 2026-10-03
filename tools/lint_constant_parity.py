@@ -111,6 +111,11 @@ MIRRORED: dict[str, object] = {
     # the doubling as a standing invariant, the C# side became a literal on
     # OpeningSparks's precedent, and INVARIANTS below asserts the 2x itself --
     # which is the half a by-value mirror cannot express.
+    # Klee's upgraded starter (Touch of Orobas -> Dodoco Tales): the opening
+    # bank, live again under the current kit (Klee finish-line batch,
+    # 2026-10-03).
+    "ExplosiveFrags.OpeningSparks":
+        _ancient_hook("touch_of_orobas_klee", "combat_start_spark"),
     # Shared elemental table (tier0/constants.py, reaction block).
     "ReactionConstants.AuraDurationTurns": C.AURA_DURATION_TURNS,
     "ReactionConstants.OverloadSplash": C.OVERLOAD_SPLASH,
@@ -582,8 +587,7 @@ UNMIRRORED: dict[str, str] = {
         "sim counterpart is a literal at the detonation site in effects.py "
         "(`gain_sparks(state, 1)` under spark_on_detonation), not a named "
         "constant, so there is nothing to compare against by value. The "
-        "opening windfall it shipped beside (`OpeningSparks`) left at legacy "
-        "cleanup stage 6, unread under the current kit.",
+        "opening windfall beside it (`OpeningSparks`) is MIRRORED above.",
     # The two PearlOfInsightRelic rates USED TO LIVE HERE, as derived
     # expressions this lint could not read. R190 ratified the 2x relationship
     # as a standing invariant and they moved to MIRRORED above, with INVARIANTS

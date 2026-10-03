@@ -490,12 +490,13 @@
 - {id: proto_ko_mine_all_mine, name: "Mine, All Mine!", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   # AoE trim, 2026-10-03 (sec.2): single target. The hit first, then only
-   # that enemy's Mines go off (`set_off` with `mines_only:`).
-   description: "Deal 8 [gold]Pyro[/gold] damage. [gold]Set off[/gold] the [gold]Mines[/gold] on that enemy.",
-   upgrade: {damage: +3},
+   # AoE trim, 2026-10-03 (sec.2): single target. Klee finish-line batch,
+   # 2026-10-03 ([USER]: "how often do you have mines you want to detonate
+   # early?"): the mines-only Set off is gone; the hit places a Mine instead.
+   description: "Deal 8 [gold]Pyro[/gold] damage. Place a [gold]Mine[/gold] 4 on that enemy.",
+   upgrade: {damage: +3, bomb_size: +2},
    effects: [{op: damage, amount: 8, target: enemy},
-             {op: set_off, target: enemy, mines_only: true}]}
+             {op: plant_bomb, target: enemy, size: 4, mine: true}]}
 
 - {id: proto_ko_team_effort, name: "Team Effort", character: klee,
    authored_by: [claude],
@@ -723,9 +724,12 @@
 - {id: proto_ko_finders_keepers, name: "Finders Keepers", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a [gold]Confiscated[/gold], place a [gold]Bomb[/gold] 5 on a random enemy.",
+   # Klee finish-line batch, 2026-10-03 ([USER]: "Finders Keepers seems too
+   # niche to be useful"): Damage Report's draw-a-status trigger, was "play a
+   # Confiscated" for a Bomb 5 [7].
+   description: "Whenever you draw a status, place a [gold]Bomb[/gold] 4 on a random enemy.",
    upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_finders_keepers, amount: 5, target: self}]}
+   effects: [{op: apply_power, power: ko_finders_keepers, amount: 4, target: self}]}
 
 # Defect's Compact in her colours: every status in hand, Confiscated
 # included, becomes the pool's own Pop! (unupgraded).
@@ -1056,9 +1060,11 @@
    description: "Whenever a [gold]Swirl[/gold] happens, your next Attack deals 6 additional damage of the swirled element.",
    effects: [{op: apply_power, power: mc_sturm_und_drang, amount: 6, target: self}]}
 
+# Klee finish-line batch, 2026-10-03: Common -> Uncommon ([USER]: "probably
+# too good to be a Common now"), kept repeatable rather than given Exhaust.
 - {id: proto_mc_amber_explosive_puppet, name: "Amber — Explosive Puppet", character: klee,
    authored_by: [claude],
-   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: pyro,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: pyro,
    cost: 1, type: skill,
    description: "Enemy loses 3 [gold]Strength[/gold] this turn. The next time an enemy attacks you, deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
    effects: [{op: lose_strength, amount: 3, target: enemy, this_turn: true},

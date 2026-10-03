@@ -42,13 +42,13 @@ public sealed class ProtoKoFindersKeepers : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Finders Keepers"),
-        ("description", "Whenever you play a [gold]Confiscated[/gold], place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
+        ("description", "Whenever you draw a status, place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m)
+            new DynamicVar("PowerAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

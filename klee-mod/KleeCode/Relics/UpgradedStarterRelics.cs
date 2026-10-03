@@ -137,6 +137,14 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
     /// ruled 2026-09-27).</summary>
     public const int FirstExplosionSparks = 2;
 
+    /// <summary>The opening bank (Klee finish-line batch, 2026-10-03, ruled
+    /// "Agreed all around!"): "Start each combat with 4 more Sparks." On top
+    /// of the kit's <see cref="Powers.KleeOverhaulLaw.OpeningSpark"/>, so an
+    /// upgraded Klee opens at 5, the Regent's 3 -> 7 stars as the yardstick.
+    /// Sim twin: <c>touch_of_orobas_klee</c>'s <c>combat_start_spark</c>
+    /// (tier05/content/relics.yaml).</summary>
+    public const int OpeningSparks = 4;
+
     public ExplosiveFrags() : base(autoAdd: false)
     {
     }
@@ -166,7 +174,10 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
             "Whenever a [gold]Bomb[/gold] goes off, gain [blue]"
           + Powers.KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]. "
           + "The first time each turn, gain [blue]" + FirstExplosionSparks
-          + "[/blue] instead."
+          + "[/blue] instead. "
+          // Klee finish-line batch, 2026-10-03: the opening bank.
+          + "Start each combat with [blue]" + OpeningSparks
+          + "[/blue] more [gold]Sparks[/gold]."
             ),
     };
 
@@ -233,6 +244,23 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
             choiceContext, Owner.Creature, SparksPerDetonation,
             cardSource: null,
             source: "relic:explosive_frags/detonation");
+    }
+
+    /// <summary>
+    /// The opening bank: <see cref="OpeningSparks"/> on Klee's first turn,
+    /// paid from the kit's own opening site
+    /// (<see cref="Powers.KleeOverhaulOpening.GrantSpark"/>: turn 1 after the
+    /// draw, per player, Klee only) right after the kit's Spark, so the first
+    /// hand sees all five and the two gains have one fixed order rather than
+    /// two co-tenants of <c>AfterPlayerTurnStart</c>.
+    /// </summary>
+    public async Task GrantOpeningSparks(
+        PlayerChoiceContext choiceContext, Creature creature)
+    {
+        Flash();
+        await SparkPower.Gain(
+            choiceContext, creature, OpeningSparks,
+            cardSource: null, source: "relic:explosive_frags/combat_start");
     }
 
     /// <summary>The overhaul's rule 4 on the upgraded relic: the same one Spark

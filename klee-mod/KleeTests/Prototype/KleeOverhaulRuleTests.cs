@@ -266,13 +266,16 @@ public class KleeOverhaulRuleTests
     }
 
     [Fact]
-    public void Rule4_the_upgraded_relic_keeps_the_rate_and_loses_the_windfall()
+    public void Rule4_the_upgraded_relic_keeps_the_rate_and_adds_the_windfall()
     {
-        // An act-2 Touch of Orobas must not take the arm's only income away,
-        // and must not hand out a bank before any Bomb has gone off.
+        // An act-2 Touch of Orobas must not take the arm's only income away.
+        // Klee finish-line batch (2026-10-03): it adds "Start each combat
+        // with 4 more Sparks", paid from the kit's own opening site.
         var frags = typeof(global::KleeMod.Relics.ExplosiveFrags);
         Assert.Contains("SparkPower.Gain",
             Il.Calls(frags.GetMethod("OnBombExploded", HeadlessGame.All)!));
+        Assert.Contains("SparkPower.Gain",
+            Il.Calls(frags.GetMethod("GrantOpeningSparks", HeadlessGame.All)!));
     }
 
     // ---- RULE 6: the Mine ------------------------------------------------

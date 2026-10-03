@@ -44,31 +44,9 @@ public class AoeTrimTests
 
     // ---- Klee ----------------------------------------------------------
 
-    [Fact]
-    public void Mine_all_mine_hits_then_sets_off_only_that_enemys_mines()
-    {
-        var play = Il.CallSequence(Il.Method("ProtoKoMineAllMine", "OnPlay"))
-            .ToList();
-        var hit = play.FindIndex(c => c.StartsWith("DamageCmd.Attack"));
-        var mines = play.IndexOf("ProtoBombPower.SetOffMinesAimed");
-        Assert.True(hit >= 0 && mines > hit);
-        Assert.DoesNotContain("ProtoBombPower.HitMined", play);
-        Assert.Equal(TargetType.AnyEnemy, new ProtoKoMineAllMine().TargetType);
-    }
-
-    [Fact]
-    public void The_mines_set_off_is_a_set_off_card_and_takes_only_mines()
-    {
-        var aimed = Il.CallSequence(Il.Method("ProtoBombPower", "SetOffMinesAimed"))
-            .ToList();
-        Assert.True(aimed.IndexOf("KleeOverhaulLedger.NoteSetOffCardPlayed")
-                    < aimed.IndexOf("ProtoBombPower.SetOffMines"));
-        Assert.Contains("BoomBadgePower.Spend", aimed);
-        var rule = Il.Calls(Il.Method("ProtoBombPower", "SetOffMines"));
-        Assert.Contains("ProtoBombPower.TakeMines", rule);
-        Assert.DoesNotContain("ProtoBombPower.TakeAll", rule);
-        Assert.Contains("KleeOverhaulLedger.TakeMultiplier", rule);
-    }
+    // Mine, All Mine!'s mines-only Set off (`SetOffMinesAimed`) left in the
+    // Klee finish-line batch (2026-10-03); its new body is pinned in
+    // KleeFinishBatchTests.
 
     [Fact]
     public void Nobody_holds_a_charge_without_a_combat()

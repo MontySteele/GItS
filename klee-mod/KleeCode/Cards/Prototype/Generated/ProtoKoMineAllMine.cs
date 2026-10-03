@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoMineAllMine : CustomCardModel, IElementalCard, ISetOffCard
+public sealed class ProtoKoMineAllMine : CustomCardModel, IElementalCard
 {
     /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>
     public Element Element => Element.Pyro;
@@ -41,20 +41,21 @@ public sealed class ProtoKoMineAllMine : CustomCardModel, IElementalCard, ISetOf
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForMine(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, true), this), this);
+        ArmKeywordTips.ForMine(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_mine_all_mine");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mine, All Mine!"),
-        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage. [gold]Set off[/gold] the [gold]Mines[/gold] on that enemy."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage. Place a [gold]Mine[/gold] {BombSize:diff()} on that enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move)
+            new DamageVar(8m, ValueProp.Move),
+            new DynamicVar("BombSize", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,11 +73,12 @@ public sealed class ProtoKoMineAllMine : CustomCardModel, IElementalCard, ISetOf
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        await ProtoBombPower.SetOffMinesAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, 0);
+        await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue, isMine: true, payloadMineAll: 0, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars["BombSize"].UpgradeValueBy(2m);
     }
 }

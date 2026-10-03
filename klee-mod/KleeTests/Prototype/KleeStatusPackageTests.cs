@@ -114,7 +114,8 @@ public class KleeStatusPackageTests
         // AoE trim (2026-10-03): 34 to one enemy, Block on a status drawn.
         Assert.Equal((34m, 40m), (new ProtoKoRedKnight().DynamicVars.Damage.BaseValue,
                                   Upgraded<ProtoKoRedKnight>().DynamicVars.Damage.BaseValue));
-        Assert.Equal((5m, 7m), (new ProtoKoFindersKeepers().DynamicVars["PowerAmount"].BaseValue,
+        // Klee finish-line batch (2026-10-03): Finders Keepers is 4 [6].
+        Assert.Equal((4m, 6m), (new ProtoKoFindersKeepers().DynamicVars["PowerAmount"].BaseValue,
                                 Upgraded<ProtoKoFindersKeepers>().DynamicVars["PowerAmount"].BaseValue));
         Assert.Equal((6m, 8m), (new ProtoKoKleeCanExplain().DynamicVars.Block.BaseValue,
                                 Upgraded<ProtoKoKleeCanExplain>().DynamicVars.Block.BaseValue));
@@ -172,7 +173,9 @@ public class KleeStatusPackageTests
         Assert.Contains(Seq("KleeStatusPackage", "ExhaustStatuses"),
                         c => c.Contains("CardCmd.Exhaust"));
         Assert.Contains(dust, c => c.Contains("ProtoBombPower.GrowLargest"));
-        Assert.Contains(Seq("FindersKeepersPower", "AfterCardPlayed"),
+        // Klee finish-line batch (2026-10-03): Finders Keepers pays on a
+        // status DRAWN, Damage Report's hook.
+        Assert.Contains(Seq("FindersKeepersPower", "AfterCardDrawn"),
                         c => c.Contains("ProtoBombPower.PlaceOnRandom"));
         var report = Seq("DamageReportPower", "AfterCardDrawn");
         Assert.Contains(report, c => c.Contains("CreatureCmd.GainBlock"));

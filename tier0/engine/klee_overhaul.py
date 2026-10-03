@@ -710,34 +710,6 @@ def set_off_largest(state: CombatState, enemy: Optional[Enemy],
     return exploded
 
 
-def set_off_mines(state: CombatState, enemy: Optional[Enemy],
-                  card: Optional[Card] = None, badge: int = 1) -> int:
-    """MINE, ALL MINE! (AoE trim, 2026-10-03): "Set off the Mines on that
-    enemy." Only the MINES leave the pile (`take_mines`) and go off one at a
-    time; plain Bombs stay and keep growing. It IS a Set off, so it spends The
-    Big One's multiplier and Boom Badge's factor as `set_off` does, and a kill
-    sends the Mines left behind to jump. Returns how many went off."""
-    if enemy is None or not live(state):
-        return 0
-    mines = take_mines(enemy)
-    if not mines:
-        return 0
-    state.emit("ko_set_off", target=enemy.name, charges=len(mines),
-               size=sum(c.size for c in mines))
-    multiplier = take_multiplier(state) * int(badge)
-    exploded = 0
-    for index, mine in enumerate(mines):
-        if not enemy.alive:
-            jump_charges(state, enemy, mines[index:])
-            break
-        _explode(state, enemy, mine, multiplier)
-        exploded += 1
-        if state.over or not state.player.alive:
-            break
-    sweep_jumps(state)
-    return exploded
-
-
 def sweep_jumps(state: CombatState) -> None:
     """RULE 3 for the death this arm did NOT cause: "A partner or a poison
     killed the enemy: all of them jump." `SweepJumps`' twin.
@@ -1685,9 +1657,6 @@ def note_card_played(state: CombatState, card: Card) -> None:
             dest = state.rng.choice(living)
             state.emit("ko_party_poppers", target=dest.name, size=n)
             place(state, dest, n)
-    # THE STATUS PACKAGE (2026-10-01): Finders Keepers pays per Confiscated
-    # played, on the same listener and replay rule.
-    finders_keepers(state, card)
 
 
 def playdate_discount(state: CombatState, card: Card) -> int:
@@ -2082,8 +2051,8 @@ def spark_knight(state: CombatState, landed: int) -> None:
 # `add_card` op) and the cards that read them. C# FIRST:
 # `klee-mod/KleeCode/Powers/Prototype/KleeStatusPackage.cs`, clause for clause.
 
-FINDERS_KEEPERS = "ko_finders_keepers"            # Confiscated played: Bomb N
-DAMAGE_REPORT = "ko_damage_report"                # status drawn: N to ALL
+FINDERS_KEEPERS = "ko_finders_keepers"            # status drawn: Bomb N
+DAMAGE_REPORT = "ko_damage_report"                # status drawn: N Block
 SOLITARY_CONFINEMENT = "ko_solitary_confinement"  # Confiscated cost 0
 
 #: Fish Blasting's token (`tier0/content/cards/tokens.yaml`), `Confiscated`.
@@ -2091,10 +2060,11 @@ CONFISCATED_ID = "confiscated"
 
 
 def is_status(card: Optional[Card]) -> bool:
-    """A status: a card of Status TYPE or Status RARITY. The second is what
-    makes Confiscated one -- it is a 1-cost Skill at Status rarity -- and the
-    first is every base-game status (`statuses.make_status` builds them at
-    type "status"). Curses are not statuses. `KleeStatusPackage.IsStatus`."""
+    """A status: a card of Status TYPE or Status RARITY. Confiscated is both
+    since the Klee finish-line batch (2026-10-03; it was a 1-cost Skill at
+    Status rarity), and every base-game status is the first
+    (`statuses.make_status` builds them at type "status"). Curses are not
+    statuses. `KleeStatusPackage.IsStatus`."""
     return card is not None and (card.type == "status"
                                  or card.rarity == "status")
 
@@ -2112,9 +2082,12 @@ def solitary_confinement_frees(state: CombatState, card: Card) -> bool:
 
 
 def finders_keepers(state: CombatState, card: Card) -> None:
-    """Finders Keepers: "Whenever you play a Confiscated, place a Bomb 5 [7]
-    on a random enemy." Copies add. `FindersKeepersPower.AfterCardPlayed`."""
-    if not live(state) or not is_confiscated(card):
+    """Finders Keepers (Klee finish-line batch, 2026-10-03): "Whenever you
+    draw a status, place a Bomb 4 [6] on a random enemy." Damage Report's
+    trigger, per card drawn (`Hook.AfterCardDrawn`), read at
+    `refpowers.after_card_drawn`; it paid per Confiscated PLAYED before the
+    batch. Copies add. `FindersKeepersPower.AfterCardDrawn`."""
+    if not live(state) or not is_status(card):
         return
     n = state.player.powers.get(FINDERS_KEEPERS, 0)
     if not n:

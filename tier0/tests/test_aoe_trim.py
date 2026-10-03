@@ -117,36 +117,9 @@ def test_mine_toss_places_one_mine_seven_on_one_enemy():
     assert sizes(a) == [10]
 
 
-def test_mine_all_mine_hits_then_sets_off_only_that_enemys_mines():
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    st = klee_state([a, b])
-    klee_overhaul.place(st, a, 5, is_mine=True)
-    klee_overhaul.place(st, a, 9)                      # a plain Bomb stays
-    klee_overhaul.place(st, b, 4, is_mine=True)        # another body's Mine
-    play(st, load("proto_ko_mine_all_mine"), aim=a)
-    assert sizes(a) == [9]
-    assert [(ch.size, ch.is_mine) for ch in b.ko_charges] == [(4, True)]
-    assert 200 - a.hp >= 8 + 5
-    assert b.hp == 200
-
-
-def test_set_off_mines_spends_the_big_ones_multiplier():
-    a = make_enemy(hp=200)
-    st = klee_state([a])
-    klee_overhaul.place(st, a, 5, is_mine=True)
-    klee_overhaul.arm_multiplier(st, 4)
-    assert klee_overhaul.set_off_mines(st, a) == 1
-    assert st.ko_set_off_multiplier == 1
-    assert 200 - a.hp >= 20
-
-
-def test_set_off_mines_on_a_mineless_body_keeps_the_multiplier():
-    a = make_enemy(hp=200)
-    st = klee_state([a])
-    klee_overhaul.place(st, a, 5)
-    klee_overhaul.arm_multiplier(st, 4)
-    assert klee_overhaul.set_off_mines(st, a) == 0
-    assert st.ko_set_off_multiplier == 4 and sizes(a) == [5]
+# Mine, All Mine!'s mines-only Set off left in the Klee finish-line batch
+# (2026-10-03), with its engine piece; the card's new body is pinned in
+# `test_klee_finish_batch.py`.
 
 
 def test_team_effort_sets_off_the_target_only_and_pays_six_more():

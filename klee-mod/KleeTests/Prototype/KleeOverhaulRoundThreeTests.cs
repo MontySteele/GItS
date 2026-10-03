@@ -178,7 +178,9 @@ public class KleeOverhaulRoundThreeTests
         // cut Nova Burst (Big Bounce), a carrier.
         // ELEVEN SINCE THE AoE TRIM (2026-10-03): Mine, All Mine! hits its
         // enemy and then sets off that enemy's Mines (`SetOffMinesAimed`).
-        Assert.Equal(11, carriers.Count);
+        // TEN SINCE THE KLEE FINISH-LINE BATCH (2026-10-03): Mine, All Mine!
+        // places a Mine instead, and its mines-only Set off is deleted.
+        Assert.Equal(10, carriers.Count);
         foreach (var card in carriers)
         {
             Assert.Contains("{Damage:diff()}", Face(card));

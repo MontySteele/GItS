@@ -162,18 +162,13 @@ def apply_combat_start(state: CombatState) -> None:
             # listener), so spark_on_detonation is still present and is the
             # honest test for "this player runs the Spark economy".
             #
-            # AND NOT UNDER THE KLEE OVERHAUL (QUARANTINED, C.KLEE_OVERHAUL).
-            # Rule 4 says Sparks come ONLY from explosions, so an act-2 Touch
-            # of Orobas keeps the per-explosion RATE and loses the OPENING
-            # WINDFALL -- otherwise the upgrade hands out a bank before any
-            # Bomb has gone off, which is the opposite of what R242's own
-            # opening Spark was priced against. The mod gates the identical
-            # clause at `ExplosiveFrags.AfterPlayerTurnStart` on the same flag,
-            # and its `OnBombExploded` half stays live.
-            from tier0.engine import klee_overhaul  # late import (cycle)
+            # LIVE UNDER THE CURRENT KIT AGAIN (Klee finish-line batch,
+            # 2026-10-03, ruled "Agreed all around!"): "Start each combat with
+            # 4 more Sparks", on top of the kit's opening Spark. It was gated
+            # off under the overhaul from R242 until this batch. The mod's
+            # clause is `ExplosiveFrags.AfterPlayerTurnStart`, turn 1.
             amt = int(fx["amount"])
-            if (amt > 0 and "spark_on_detonation" in p.relic_hooks
-                    and not klee_overhaul.live(state)):
+            if amt > 0 and "spark_on_detonation" in p.relic_hooks:
                 from tier0.engine import effects   # late import (cycle)
                 effects.gain_sparks(
                     state, amt, source="relic:explosive_frags/combat_start")

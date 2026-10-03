@@ -164,8 +164,10 @@ def _settle_phases(state: CombatState) -> None:
 
 
 def card_playable(state: CombatState, card: Card) -> bool:
-    if card.type == "status":
-        return False        # §10.2 injected statuses: unplayable clogs
+    if card.type == "status" and not klee_overhaul.is_confiscated(card):
+        return False        # §10.2 injected statuses: unplayable clogs.
+        # Confiscated (Klee finish-line batch, 2026-10-03) is a Status that
+        # plays for 1 and does nothing, the base game's Slimed shape.
     # Normality: "you cannot play more than 3 cards this turn", read off
     # whatever cap-bearing card is IN HAND. Gated on a per-combat flag set at
     # fight start so the battery -- where nothing carries a cap -- never even

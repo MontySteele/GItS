@@ -208,9 +208,13 @@ ancient:
     # red-pen -- it compounds with every bomb in the deck, where this dilutes
     # across a long fight. Measured before ratification, act-2 acquisition,
     # generous case: spark +2.3pt, demolition +7.1, reaction +5.0.
+    # Klee finish-line batch, 2026-10-03 (ruled "Agreed all around!"): the
+    # windfall is back under the current kit at 4, "Start each combat with 4
+    # more Sparks", on top of the kit's opening 1. C#
+    # `ExplosiveFrags.OpeningSparks` / `AfterPlayerTurnStart`.
     owner: [klee]
     effects:
-      - {hook: combat_start_spark, amount: 3}
+      - {hook: combat_start_spark, amount: 4}
 
   touch_of_orobas_kokomi:
     name: "Pearl of Insight"        # Orobas (Act 2): Kokomi's upgraded starter

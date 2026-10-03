@@ -5255,14 +5255,6 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
             hit(enemy)
         return
 
-    if fx.get("mines_only"):
-        # AoE trim, 2026-10-03 (Mine, All Mine!): "Set off the Mines on that
-        # enemy." Only the MINES on the aimed body go off; plain Bombs stay.
-        for enemy in _pick_targets(state, spec, allow_dead=True):
-            klee_overhaul.set_off_mines(state, enemy, card, badge=badge)
-            hit(enemy)
-        return
-
     if fx.get("charge") == "largest":
         # POCKET MATCH (playtest 2026-09-24): only the single largest charge
         # on the aimed enemy goes off, before the card's own hit
