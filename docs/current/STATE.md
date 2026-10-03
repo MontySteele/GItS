@@ -260,8 +260,9 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   "I'm good with all of these Varka defaults"). A new character with no
   switch of his own (collapsed 2026-10-01): he compiles in every build.
   80 HP, 99 gold;
-  starter base Strike x4, Defend x4, Windbound Execution and one starter-only
-  Knight rolled per run (8 [11] Block and its element); starting relic
+  starter base Strike x4, Defend x4, Windbound Execution (since 2026-10-03:
+  cost 0, 4 [6] Anemo to one enemy) and one of four starter-only Knights,
+  one per element, rolled per run; starting relic
   Boreas's Fang. The rules (`klee-mod/KleeCode/Powers/Prototype/VarkaOath.cs`,
   sim twin `tier0/engine/varka_oath.py`, live for a Varka seat): one Oath count
   per element, counted per card; his current element is his last Knight's,
@@ -269,7 +270,9 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   anything breaks") the last Pyro, Hydro, Cryo or Electro any card of his
   applied, and his cards read only its Oath; a Swirl he makes pays that element (Pyro 3
   damage, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL); the Fang adds
-  Four Winds' Ascension to his hand the first time each combat he gains Oath.
+  Four Winds' Ascension to his hand the first time each combat he gains Oath
+  (since 2026-10-03: cost 2 with Retain, like Regent's Sovereign Blade, 10
+  [13] Anemo then 3 [4] per Oath).
   His status bar shows the current element's Oath; the seat page prints the
   current element, all four counts and the Swirl payout. Pool 41 (15 / 18 /
   8), nine Knights. Absorb, the Winds and Knights' Muster are retired. The

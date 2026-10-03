@@ -5907,3 +5907,26 @@ where the mod's end-of-turn walk ticks it, after War Banner.
 Pins: `tier0/tests/test_aoe_trim.py`, and the rows' existing pins updated
 in place. Measured: the tier-0.5 drafted run sim, base vs trim on the same
 seeds (the session's results file).
+
+## Varka starter: Retain Ascension, 0-cost Windbound, 2026-10-03
+
+`review/active/varka-rebalance-2026-10-03.md`, end of sec.5. [USER]: "I do
+think that we should consider modifying Ascension to be 2 cost with Retain,
+similar to Regent's Sovereign Blade", and on Windbound: "What about making it
+single target but 0 energy? It nerfs his AoE output but we already found that
+we print too many AoE cards." Then: "Sounds good! Please proceed."
+
+- `proto_vk_four_winds_ascension`: cost 1 to 2, `retain: true`, damage 6 to
+  10 (upgrade +3, so 10 [13]); per-Oath 3 [4] unchanged. The Fang creates it
+  with `CombatState.CreateCard`, which builds the canonical keywords, so the
+  created copy retains (C# `CanonicalKeywords` carries `CardKeyword.Retain`;
+  the sim's `_add_ascension` reads the row, whose `retain` the end-of-turn
+  flush keeps). Wolf's Gravestone's "costs 0 this turn" still lapses at turn
+  end on a retained copy (`SetThisTurn`; the sim's turn sweep clears
+  `free_this_turn`).
+- `proto_vk_windbound_execution`: cost 1 to 0, `target: enemy` (was
+  `all_enemies`), text "Deal 4 [6] Anemo damage." It Swirls by the normal
+  element rules; the Swirl's own flat damage and spread are untouched.
+
+Pins: `KleeTests/Prototype/VarkaRebalanceTests.cs` and
+`tier0/tests/test_varka_rebalance.py`, "the starter ruling".

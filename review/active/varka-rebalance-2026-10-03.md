@@ -174,6 +174,19 @@ her Weak stays 1 when upgraded. "Amber and Barbara are solid." The bar: the four
 rates within 5 points of each other, tighter than the 10 points the sim
 reached before only by making them identical.
 
+**The starter ruling, 2026-10-03.** After the seat round
+(`review/records/varka-rebalance-round-2026-10-03.md`: Windbound Execution
+NEVER AGAIN in all four records). [USER] on Ascension: "I do think that we
+should consider modifying Ascension to be 2 cost with Retain, similar to
+Regent's Sovereign Blade." On Windbound: "What about making it single target
+but 0 energy? It nerfs his AoE output but we already found that we print too
+many AoE cards." Then: "Sounds good! Please proceed." Four Winds' Ascension
+costs 2 (was 1), gains Retain, and deals 10 [13] Anemo (was 6 [9]), then
+3 [4] per Oath as before. Windbound Execution costs 0 (was 1) and deals 4 [6]
+Anemo to one enemy (was to ALL); it still Swirls by the element rules, the
+Swirl's flat 2 to all and its spread unchanged. Wolf's Gravestone and Darv's
+Dusty Tome stay as written.
+
 ## 6. Before the build
 
 Rerun `tools/varka_expansion_sim.py` on the new pool. The bars:
@@ -185,6 +198,8 @@ The numbers above move with the sim. Then a Varka seat round.
 
 Sim 2026-10-03 (PR #863): at the paper's numbers the starters spread 7.6 points; Amber Block 5 and Lisa Block 6 bring it to 1.6. Element decks within 10.4 of the default drafter and 9.3 of the mixing deck.
 
+Sim after the starter ruling (2026-10-03, 2,400 seeds paired against main): the default drafter's act 1 rises 22.9 to 29.4 (+6.5); the starters 29.0 / 29.2 / 31.0 / 28.5, a spread of 2.5 (was 1.6); element decks within 11.2 of the default drafter and of the mixing deck (were 10.4 and 9.3); the default drafter's multi-target share in fights with two or more enemies falls 40.3% to 30.2%.
+
 ## Picks
 
 1. **The Oath rule (§2):** RULED. Open only on the revised Absolute Zero (a
@@ -195,5 +210,6 @@ Sim 2026-10-03 (PR #863): at the paper's numbers the starters spread 7.6 points;
 3. **Borrowing payoffs (§4):** RULED.
 4. **The starter (§5):** four different starter Knights, one per element,
    balanced by the sim to within 5 points; Strike, Defend, Windbound
-   Execution and Ascension unchanged. RULED.
+   Execution and Ascension unchanged. RULED. (Both changed by the starter
+   ruling of 2026-10-03, end of §5.)
 5. **Storm Battery at cost 1 (§4),** numbers unchanged. Default: yes.

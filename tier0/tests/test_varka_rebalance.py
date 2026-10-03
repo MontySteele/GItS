@@ -256,6 +256,34 @@ def test_kaeya_blocks_and_weakens(rebalance):
 
 
 # ---------------------------------------------------------------------------
+# 5b. The starter ruling, 2026-10-03: Ascension costs 2 with Retain (Regent's
+#     Sovereign Blade), 10 [13]; Windbound Execution costs 0, one enemy.
+# ---------------------------------------------------------------------------
+
+def test_ascension_costs_2_retains_and_hits_10(rebalance):
+    card = loader.get_card(_vk("four_winds_ascension"))
+    assert (card.cost, card.retain) == (2, True)
+    assert [e["amount"] for e in card.effects if e["op"] == "damage"] == [10]
+    up = loader.get_card(_vk("four_winds_ascension") + "+")
+    assert (up.cost, up.retain) == (2, True)
+    assert [e["amount"] for e in up.effects if e["op"] == "damage"] == [13]
+    # The Fang's created copy carries the keyword the end-of-turn flush reads.
+    st = _state()
+    V._add_ascension(st, upgraded=False)
+    made = [c for c in st.player.hand if c.id == _vk("four_winds_ascension")]
+    assert made and made[0].retain is True
+
+
+def test_windbound_costs_0_and_hits_one_enemy(rebalance):
+    card = loader.get_card(_vk("windbound_execution"))
+    assert card.cost == 0
+    assert [e.get("target") for e in card.effects] == ["enemy"]
+    st = _state(n=3)
+    _play(st, card)
+    assert sorted(e.hp for e in st.enemies) == [96, 100, 100]
+
+
+# ---------------------------------------------------------------------------
 # 6. The harness's reads.
 # ---------------------------------------------------------------------------
 

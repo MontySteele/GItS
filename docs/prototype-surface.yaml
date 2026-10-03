@@ -3522,17 +3522,20 @@
    authored_by: [claude],
    # Created in combat, never in the deck; played, it goes to the discard
    # pile. `dusty_tome`: no Ancient card yet, so Darv's Tome hands him this.
-   cost: 1, type: attack, rarity: basic, tags: [dusty_tome],
+   # Starter ruling 2026-10-03: Sovereign Blade's shape (provenance note).
+   cost: 2, type: attack, rarity: basic, retain: true, tags: [dusty_tome],
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit.",
-   effects: [{op: damage, amount: 6, target: enemy},
+   effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: ascension_hit, per: 3}],
    upgrade: {damage: 3, varka_per: 1}}
 
 - {id: proto_vk_windbound_execution, name: "Windbound Execution", character: varka,
    authored_by: [claude],
-   cost: 1, type: attack, rarity: basic,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies.",
-   effects: [{op: damage, amount: 4, target: all_enemies}],
+   # Starter ruling 2026-10-03 ([USER]: "single target but 0 energy ... we
+   # print too many AoE cards"): cost 0, one enemy; still Swirls.
+   cost: 0, type: attack, rarity: basic,
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage.",
+   effects: [{op: damage, amount: 4, target: enemy}],
    upgrade: {damage: 2}}
 
 # The four starter-only Knights: one joins the starter at random each run.
