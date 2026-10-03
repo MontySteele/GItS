@@ -6897,7 +6897,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "current element": ["The last Pyro, Hydro, Cryo or Electro you "
                             "applied. "],
         "Knight": ["One of Varka's Companions. ",
-                   "Playing one makes its element your current element."],
+                   "Playing one makes its element your current element "
+                   "(except Geo)."],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces

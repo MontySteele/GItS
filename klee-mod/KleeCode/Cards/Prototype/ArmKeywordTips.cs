@@ -710,9 +710,9 @@ public static class ArmKeywordTips
     /// key), so the colon is no longer the only tell and the sentence no
     /// longer leans on it. The keyword's description row and this body are
     /// one constant, <see cref="KnightTipText"/>: the card that IS a Knight
-    /// and the card that names one hover the same tip. Noelle is the
-    /// exception the sentence does not spell: a Geo Knight, she sets no
-    /// element (<see cref="VarkaOath.BeginPlay"/>).
+    /// and the card that names one hover the same tip. "(except Geo)" is
+    /// Noelle: a Geo Knight sets no element, because Geo keeps no Oath
+    /// (<see cref="VarkaOath.BeginPlay"/>).
     /// </summary>
     public static IEnumerable<IHoverTip> ForKnight(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
@@ -723,7 +723,7 @@ public static class ArmKeywordTips
     /// is a tip key (`ArmKeywordTipTests`).</summary>
     internal const string KnightTipText =
         "One of Varka's Companions. "
-      + "Playing one makes its element your current element.";
+      + "Playing one makes its element your current element (except Geo).";
 
     // ---------------------------------------------------- Furina ----------
     //

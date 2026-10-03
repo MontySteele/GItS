@@ -147,7 +147,8 @@ public class CoopNotesRulingsTests
         Assert.Contains(ArmKeywordTips.KnightKey + ".title", registered);
         Assert.Contains(ArmKeywordTips.KnightKey + ".description", registered);
         Assert.Equal("One of Varka's Companions. "
-                   + "Playing one makes its element your current element.",
+                   + "Playing one makes its element your current element "
+                   + "(except Geo).",
                      (string)typeof(ArmKeywordTips).GetField("KnightTipText",
                          HeadlessGame.All)!.GetRawConstantValue()!);
     }

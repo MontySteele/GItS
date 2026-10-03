@@ -5783,11 +5783,13 @@ Varka element rebalance, so Charged Lunge and Static Field do not move.
     `ArmKeywordTips.ForKnight` already titled. So the printed line and a
     golded [gold]Knight[/gold] hover one tip, and its sentence is one
     constant: "One of Varka's Companions. Playing one makes its element your
-    current element." Noelle is a Geo Knight and sets no element; the tip
-    does not spell that out.
+    current element (except Geo)." The exception is Noelle, a Geo Knight,
+    who sets no element.
   - **The language pass:** Knights' Roll Call+ golds "a [gold]Knight[/gold]
     you choose", and The Order Answers' power golds the whole plural. No
-    other face changed.
+    other face changed. Knight's Commission, Boreas's Fang and Wolf's
+    Gravestone gold "starting [gold]Knight[/gold]" and attach the same tip
+    (`ArmKeywordTips.ForKnight`).
 - Pick 4, "Agreed on Neuvillette's a)". **`proto_mf_neuvillette_ancient_sea_authority`**
   reads "At the start of your turn, apply [gold]Hydro[/gold] to a random
   enemy. Elemental auras you apply last 1 extra turn." The power applies

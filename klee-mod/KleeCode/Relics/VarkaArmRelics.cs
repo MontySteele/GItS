@@ -151,11 +151,14 @@ public sealed class KnightsCommission : VarkaArmRelic
         ("title", "Knight's Commission"),
         ("description",
             "At the start of each combat, gain [blue]" + Oath
-          + "[/blue] [gold]Oath[/gold] in your starting Knight's element."),
+          + "[/blue] [gold]Oath[/gold] in your starting [gold]Knight[/gold]'s "
+          + "element."),
     };
 
+    // Knight joined with the co-op notes language pass (2026-10-02).
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOath(Array.Empty<IHoverTip>(), null);
+        ArmKeywordTips.ForKnight(
+            ArmKeywordTips.ForOath(Array.Empty<IHoverTip>(), null), null);
 
     /// <summary>The element of the run's starting Knight: the one recorded
     /// when the Fang rolled it. A run begun before the record existed reads
