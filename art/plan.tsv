@@ -2776,3 +2776,11 @@ proto_vk_wildfire_oath	ImageGen/images/cards/varka/proto_vk_wildfire_oath.png	50
 proto_vk_windborne_resolve	ImageGen/images/cards/varka/proto_vk_windborne_resolve.png	500	380	cover	x0.47,y0.38@1.4	shortlist	1	png	Venti Birthday 2026.png		splash	
 # proto_vk_wolfpack <- chibi Razor
 proto_vk_wolfpack	ImageGen/images/cards/varka/proto_vk_wolfpack.png	500	380	cover	x0.38,y0.55@1.3	shortlist	1	png	Razor Birthday 2024 - Shorts.png		splash	
+# proto_vk_kindled_edge <- Amber (Pyro starter companion)
+proto_vk_kindled_edge	ImageGen/images/cards/varka/proto_vk_kindled_edge.png	500	380	cover	y0.30	shortlist	1	png	Amber Birthday 2024.png		splash	
+# proto_vk_storm_battery <- Lisa (Electro)
+proto_vk_storm_battery	ImageGen/images/cards/varka/proto_vk_storm_battery.png	500	380	cover	y0.30	shortlist	1	png	Lisa Birthday 2024.png		splash	
+# proto_vk_frost_ward <- Kaeya (Cryo)
+proto_vk_frost_ward	ImageGen/images/cards/varka/proto_vk_frost_ward.png	500	380	cover	y0.30	shortlist	1	png	Kaeya Birthday 2024.png		splash	
+# proto_vk_rippling_guard <- Barbara (Hydro)
+proto_vk_rippling_guard	ImageGen/images/cards/varka/proto_vk_rippling_guard.png	500	380	cover	y0.30	shortlist	1	png	Barbara Birthday 2024.png		splash	
