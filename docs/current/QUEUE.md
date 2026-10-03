@@ -23,7 +23,8 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
-- **Varka rebalance** (`varka-rebalance-2026-10-03.md`, PR to follow): (1) element cards read their own Oath, Anemo and generic the current one; (2) Hydro Block scales; (3) Kindled Edge, Storm Battery and Frost Ward borrow from other elements; (4) the starter, keep (default) or element-job Knights.
+- **Varka seat round** (`review/records/varka-rebalance-round-2026-10-03.md`): (1) Windbound Execution, his starter Swirl card, was NEVER AGAIN in all four records ("4 damage that does nothing without an aura"); keep it (default) or open a starter change.
+- **Klee to Balance** (`review/records/klee-rerun-round-2026-10-03.md`, `klee-aoe-trim-round-2026-10-03.md`): the w17 defects did not recur and both w19 seats cleared act 1; both runs then died in act 2 to attrition. Move Klee to Balance (default) or run another round first.
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
