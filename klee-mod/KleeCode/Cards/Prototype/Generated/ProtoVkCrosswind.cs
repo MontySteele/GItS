@@ -57,8 +57,8 @@ public sealed class ProtoVkCrosswind : CustomCardModel, IElementalCard, ICharact
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 4m, ValueProp.Move)
+            new DamageVar(8m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 5m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -79,7 +79,7 @@ public sealed class ProtoVkCrosswind : CustomCardModel, IElementalCard, ICharact
             .Execute(choiceContext);
         if (VarkaOath.SwirlsMadeBy(Owner.Creature) > swirlsAtStart)
         {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 6m : 4m), ValueProp.Move), cardPlay);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 7m : 5m), ValueProp.Move), cardPlay);
         }
     }
 

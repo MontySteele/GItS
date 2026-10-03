@@ -691,7 +691,7 @@ def test_the_predicates(varka):
     st.enemies[0].aura, st.enemies[0].aura_turns_left = "hydro", 2
     st.enemies[0].aura_spent = False
     _play(st, _vk("crosswind"))
-    assert st.player.block == block + 4
+    assert st.player.block == block + 5
     assert V.predicate(st, "swirled_by_this") is False  # outside a play
 
 

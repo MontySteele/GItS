@@ -2091,7 +2091,7 @@
       "draw": 1
     },
     "proto_vk_dawn_winds_march": {
-      "cost": -1
+      "power_amount": 1
     },
     "proto_vk_diluc_searing_onslaught": {
       "damage": 2
