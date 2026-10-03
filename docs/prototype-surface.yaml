@@ -3680,10 +3680,10 @@
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: skill, personal_pool: varka,
    # The AoE trim (review/active/aoe-trim-2026-10-03.md sec.4): one enemy,
-   # same numbers. Was ALL enemies. 6 [8], +4 since the Electro Knights
-   # pass (was 4 [6], +3; provenance, "Varka Electro Knights, 2026-10-03").
+   # same numbers. Was ALL enemies. 5 [7], +4 since 2026-10-03 (was
+   # 4 [6], +3): provenance, "Varka Electro Knights, 2026-10-03".
    description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} more.",
-   effects: [{op: varka, kind: awakening, target: enemy, base: 6, amount: 4}],
+   effects: [{op: varka, kind: awakening, target: enemy, base: 5, amount: 4}],
    upgrade: {varka_base: 2}}
 
 - {id: proto_vk_mika_starfrost_swirl, name: "Mika: Suppressive Barrage", character: varka,

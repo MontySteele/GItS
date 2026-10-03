@@ -220,7 +220,7 @@ def test_awakening_hits_one_enemy_more_if_electro(rebalance):
                               _enemy(name="b", aura="electro")])
     _play(st, _vk("razor_claw_and_thunder"))
     lost = sorted(100 - e.hp for e in st.enemies)
-    assert lost == [0, 6 + 4]                   # the Electro Knights pass
+    assert lost == [0, 5 + 4]                   # the Electro Knights pass
 
 
 # ---------------------------------------------------------------------------
