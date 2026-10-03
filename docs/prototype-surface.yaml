@@ -3723,10 +3723,10 @@
 
 - {id: proto_vk_crosswind, name: "Crosswind", character: varka,
    authored_by: [claude],
-   # 7 [10] / 4 [6] to 9 [12] / 5 [7]: provenance, "Varka weak cards, 2026-10-03".
+   # 7 [10] / 4 [6] to 8 [11] / 5 [7]: provenance, "Varka weak cards, 2026-10-03".
    cost: 1, type: attack, rarity: common,
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {BranchBlock:diff()} [gold]Block[/gold].",
-   effects: [{op: damage, amount: 9, target: enemy},
+   effects: [{op: damage, amount: 8, target: enemy},
              {op: conditional, if: swirled_by_this,
               then: [{op: block, amount: 5}]}],
    upgrade: {damage: 3, conditional_block: 2}}

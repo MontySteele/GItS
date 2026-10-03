@@ -57,7 +57,7 @@ public sealed class ProtoVkCrosswind : CustomCardModel, IElementalCard, ICharact
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(9m, ValueProp.Move),
+            new DamageVar(8m, ValueProp.Move),
             new FoldedBlockVar("BranchBlock", 5m, ValueProp.Move)
         };
 

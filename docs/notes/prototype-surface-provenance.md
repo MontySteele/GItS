@@ -5936,8 +5936,9 @@ Pins: `KleeTests/Prototype/VarkaRebalanceTests.cs` and
 `review/records/varka-starter-round-2026-10-03.md`: each of these three was a
 seat's weakest card in the starter round, so each gets a small number tune.
 
-- `proto_vk_crosswind` (Crosswind): damage 7 [10] to 9 [12]; the Block on a
-  Swirl 4 [6] to 5 [7].
+- `proto_vk_crosswind` (Crosswind): damage 7 [10] to 8 [11]; the Block on a
+  Swirl 4 [6] to 5 [7]. First built at 9 [12], it overshot in the drafted
+  sim (taken from 19% to 69% of offers, at the 70% bar), so it came back to 8.
 - `proto_vk_jean_dandelion_breeze` (Jean — Wind Companion): Block 7 [10] to
   8 [11].
 - `proto_vk_dawn_winds_march` (Dawn Wind's March): cost 2 to 1; the upgrade
