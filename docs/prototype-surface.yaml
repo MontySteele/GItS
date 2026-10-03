@@ -2329,9 +2329,11 @@
 - {id: proto_mf_neuvillette_ancient_sea_authority, name: "Neuvillette — Heir to the Ancient Sea's Authority", character: klee,
    upgrade: {cost: -1},
    authored_by: [claude],
+   # Co-op notes pick 4 (ruled 2026-10-02): plus a Hydro aura each turn, a
+   # free reaction partner. The face is the power's (`ancient_sea_authority`).
    art_of: neuvillette_ancient_sea_authority,
    nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: hydro, cost: 1, type: power,
-   effects: [{op: apply_power, power: ancient_sea_authority, amount: 1, target: self, note: "auras you apply last 1 extra turn"}]}
+   effects: [{op: apply_power, power: ancient_sea_authority, amount: 1, target: self, note: "at the start of your turn apply Hydro to a random enemy; auras you apply last 1 extra turn"}]}
 
 - {id: proto_mf_arlecchino_masque_red_death, name: "Arlecchino — Masque of the Red Death", character: klee,
    upgrade: {power_amount: 1},
@@ -3711,7 +3713,7 @@
 - {id: proto_vk_knights_roll_call, name: "Knights' Roll Call", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Add {IfUpgraded:show:a Knight you choose|a random [gold]Knight[/gold]} to your hand. It costs 0 this turn.",
+   description: "Add {IfUpgraded:show:a [gold]Knight[/gold] you choose|a random [gold]Knight[/gold]} to your hand. It costs 0 this turn.",
    effects: [{op: add_knight}],
    upgrade: {choose_knight: true}}
 
@@ -4075,9 +4077,11 @@
 
 - {id: proto_vk_assembly_at_the_cathedral, name: "Assembly at the Cathedral", character: varka,
    authored_by: [claude],
+   # Co-op notes pick 2 (ruled 2026-10-02): on any element applied, so the
+   # number drops from 3 [4]. Was "Whenever you play a Knight".
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a [gold]Knight[/gold], deal {PowerAmount:diff()} damage to a random enemy.",
-   effects: [{op: apply_power, power: vk_assembly_at_the_cathedral, amount: 3, target: self}],
+   description: "Whenever you apply an element, deal {PowerAmount:diff()} damage to a random enemy.",
+   effects: [{op: apply_power, power: vk_assembly_at_the_cathedral, amount: 2, target: self}],
    upgrade: {power_amount: 1}}
 
 - {id: proto_vk_dawn_patrol, name: "Dawn Patrol", character: varka,

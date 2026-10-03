@@ -322,14 +322,18 @@ def test_ancient_sea_authority_extends_applied_and_refreshed_auras():
     assert e2.aura_turns_left == C.AURA_DURATION_TURNS + 1
 
 
-def test_ancient_sea_authority_applies_no_element_of_its_own():
-    """It is authority over water, not more water. If it applied Hydro it
-    would re-open the mass-Frozen watchlist the guest card deliberately
-    priced with self-damage."""
+def test_ancient_sea_authority_applies_hydro_each_turn_start():
+    """Co-op notes pick 4 (2026-10-02, "Agreed on Neuvillette's a)"): "At
+    the start of your turn, apply Hydro to a random enemy." Nothing on play;
+    the Hydro lands at the turn start and lasts the extra turn."""
     st = make_state(enemies=[make_enemy(hp=200)])
     effects.resolve_card(
         st, loader.get_card("proto_mf_neuvillette_ancient_sea_authority"))
     assert all(e.aura is None for e in st.enemies)
+    effects.player_turn_start_triggers(st)
+    e = st.enemies[0]
+    assert e.aura == "hydro"
+    assert e.aura_turns_left == C.AURA_DURATION_TURNS + 1
 
 
 def test_masque_ratchets_strength_every_turn():

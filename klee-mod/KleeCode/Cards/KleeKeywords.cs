@@ -141,6 +141,22 @@ public static class KleeKeywords
     [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword CrystallizeSpentPreview;
 
+    // CO-OP NOTES PICK 2 ([USER], 2026-10-02): "every Knight prints a first
+    // line, 'Knight.', the way a card prints Exhaust." POSITION `Before`:
+    // BaseLib adds it to the base game's `CardKeywordOrder.beforeDescription`,
+    // and `CardModel` inserts each before-keyword's `[gold]Title[/gold].` at
+    // the top of the rules box, so the line is the game's and never typed into
+    // a face. Codegen declares it on every Varka Companion row (the rows
+    // `VarkaRules.IsKnight` answers yes for).
+    //
+    // THE NAME MAKES THE KEY `KLEEMOD-ARM_VARKA_KNIGHT`, the same key
+    // `ArmKeywordTips.ForKnight` titles the tip on cards that NAME a Knight,
+    // so a Knight and a card written against Knights hover one tip: one
+    // title row and one description row in `KleeMod.InjectLocStrings`.
+    [CustomEnum("arm_varka_knight")]
+    [KeywordProperties(AutoKeywordPosition.Before)]
+    public static CardKeyword Knight;
+
     public static CardKeyword AuraApplication(Element element) => element switch
     {
         Element.Pyro => AppliesPyro,

@@ -6896,8 +6896,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  "Kept all fight. Cards read your "],
         "current element": ["The last Pyro, Hydro, Cryo or Electro you "
                             "applied. "],
-        "Knight": ["A Companion titled with a colon, like Lisa: Infinite "
-                   "Circuit. ",
+        "Knight": ["One of Varka's Companions. ",
                    "Playing one makes its element your current element."],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step

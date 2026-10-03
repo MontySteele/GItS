@@ -45,6 +45,9 @@ public sealed class ProtoVkAmberBaronBunny : CustomCardModel, ICompanionCard
 
     public string? Nation => "mondstadt";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.Knight };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro);
 

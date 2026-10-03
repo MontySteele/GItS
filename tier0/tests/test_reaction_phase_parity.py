@@ -1017,6 +1017,13 @@ CO_TENANCY_LEDGER = {
             "is charged",
         ("Powers/FontainePowers.cs", "MasqueRedDeathPower"):
             "per-turn Strength mint",
+        ("Powers/FontainePowers.cs", "AncientSeaAuthorityPower"):
+            "co-op notes pick 4 (2026-10-02): Neuvillette's per-turn Hydro on "
+            "a random enemy. It writes one enemy aura and reads nothing a "
+            "co-tenant here writes; the sim applies it in "
+            "player_turn_start_triggers after the Strength mints, and no "
+            "co-tenant of this broadcast reads an enemy aura, so the order "
+            "cannot move a number",
         ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
             "Kokomi kit-grant check: adds a card when charged. Its input, the "
             "Charge meter, is minted a broadcast earlier (see "

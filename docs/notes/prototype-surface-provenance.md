@@ -5759,3 +5759,42 @@ game until a deploy.
   Vulnerable badge, as Cover Your Ears! does.
 
 Untested in game until a deploy.
+
+## The co-op notes rulings (2026-10-02)
+
+The paper `review/active/coop-notes-2026-10-02.md` (PR #843), ruled
+2026-10-02. Pick 1 (Klee to Balance) waits on a sanity playtest and builds
+nothing yet. Pick 3 (Varka's Electro discard) was reopened and folded into a
+Varka element rebalance, so Charged Lunge and Static Field do not move.
+
+- Pick 2, "Agreed on both fronts - let's do a pass over the Varka card pool
+  to standardize the language around the existence of this tooltip".
+  - **`proto_vk_assembly_at_the_cathedral`** reads "Whenever you apply an
+    element, deal 2 [3] damage to a random enemy." It was 3 [4] on a
+    Knight's play. Cost, type and rarity are unchanged. It now pays at
+    `VarkaOath.NoteApplication`, after the Oath credit; the sim twin is
+    `varka_oath.note_hit`. Its own hit has no element, so it cannot pay
+    itself.
+  - **Every Knight prints "Knight." first.** `KleeKeywords.Knight`
+    (`AutoKeywordPosition.Before`, the base game's before-description rail)
+    is declared by codegen on every companion row with `personal_pool:
+    varka`. That is the 17 colon-titled rows that `VarkaRules.IsKnight`
+    answers yes for. Its key is `KLEEMOD-ARM_VARKA_KNIGHT`, the key
+    `ArmKeywordTips.ForKnight` already titled. So the printed line and a
+    golded [gold]Knight[/gold] hover one tip, and its sentence is one
+    constant: "One of Varka's Companions. Playing one makes its element your
+    current element." Noelle is a Geo Knight and sets no element; the tip
+    does not spell that out.
+  - **The language pass:** Knights' Roll Call+ golds "a [gold]Knight[/gold]
+    you choose", and The Order Answers' power golds the whole plural. No
+    other face changed.
+- Pick 4, "Agreed on Neuvillette's a)". **`proto_mf_neuvillette_ancient_sea_authority`**
+  reads "At the start of your turn, apply [gold]Hydro[/gold] to a random
+  enemy. Elemental auras you apply last 1 extra turn." The power applies
+  Hydro once per copy through `ElementalHit.ApplyOnly` in
+  `AfterPlayerTurnStart`. The sim twin is `player_turn_start_triggers`. This
+  reverses the row's old "applies no element of its own" note.
+
+Pins: `KleeTests/Prototype/CoopNotesRulingsTests.cs`,
+`tier0/tests/test_varka_expansion.py::test_assembly`,
+`tier0/tests/test_fontaine.py`. Untested in game until a deploy.

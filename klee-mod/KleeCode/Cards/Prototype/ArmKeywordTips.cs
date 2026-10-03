@@ -704,16 +704,26 @@ public static class ArmKeywordTips
     }
 
     /// <summary>His personal Companions (sec.6), named on Knightly Guard,
-    /// Grand Master's Order and Knights' Roll Call.
-    /// The title shape is the tell (the Oath round, 2026-09-29: a blind seat
-    /// had to infer from play which cards count): Knights are "Name: Card",
-    /// other Companions "Name — Card".
+    /// Grand Master's Order, Knights' Roll Call and the rest.
+    /// CO-OP NOTES PICK 2 (2026-10-02): every Knight now prints "Knight." as
+    /// its first line (<see cref="KleeKeywords.Knight"/>, which shares this
+    /// key), so the colon is no longer the only tell and the sentence no
+    /// longer leans on it. The keyword's description row and this body are
+    /// one constant, <see cref="KnightTipText"/>: the card that IS a Knight
+    /// and the card that names one hover the same tip. Noelle is the
+    /// exception the sentence does not spell: a Geo Knight, she sets no
+    /// element (<see cref="VarkaOath.BeginPlay"/>).
     /// </summary>
     public static IEnumerable<IHoverTip> ForKnight(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
-        With(inherited, KnightKey,
-            "A Companion titled with a colon, like Lisa: Infinite Circuit. "
-          + "Playing one makes its element your current element.");
+        With(inherited, KnightKey, KnightTipText);
+
+    /// <summary>The Knight tip's one sentence ([USER], co-op notes pick 2,
+    /// 2026-10-02). INTERNAL, not public: every public string constant here
+    /// is a tip key (`ArmKeywordTipTests`).</summary>
+    internal const string KnightTipText =
+        "One of Varka's Companions. "
+      + "Playing one makes its element your current element.";
 
     // ---------------------------------------------------- Furina ----------
     //

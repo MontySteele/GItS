@@ -285,7 +285,9 @@ public class VarkaExpansionTests : IDisposable
                     string.Join(", ", start));
         Assert.Contains("VarkaRules.ChooseElement", Calls("VarkaOath", "Weathervane"));
         var end = Calls("VarkaOath", "EndPlay");
-        Assert.Contains("AssemblyAtTheCathedralPower.OnKnightPlayed", end);
+        // Co-op notes pick 2 (2026-10-02): Assembly left EndPlay for
+        // NoteApplication (CoopNotesRulingsTests).
+        Assert.DoesNotContain("AssemblyAtTheCathedralPower.OnElementApplied", end);
         Assert.Contains("WolfpackPower.OnAscensionPlayed", end);
         Assert.Contains("CardPileCmd.AddGeneratedCardToCombat",
                         Calls("WolfpackPower", "OnAscensionPlayed"));

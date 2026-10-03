@@ -1509,7 +1509,7 @@ ARM_KEYWORDS: dict[str, str] = {
     "current element": ("The last Pyro, Hydro, Cryo or Electro you applied. "
                         "Swirls pay it: Pyro 3 damage, Hydro 3 Block, Cryo 1 "
                         "Vulnerable, Electro 3 to ALL."),
-    "Knight": ("A Companion titled with a colon, like Lisa: Infinite Circuit. "
+    "Knight": ("One of Varka's Companions. "
                "Playing one makes its element your current element."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
