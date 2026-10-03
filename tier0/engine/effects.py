@@ -3671,23 +3671,14 @@ def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
     top = state.player.draw_pile[:n]
     if not top:
         return
-    # R276 (Where Did I Put It?): `filter: set_off` narrows what may be TAKEN
-    # and nothing else. With no Set off card among the N nothing is taken and
-    # every card seen goes to the bottom. C# twin: `ScryTake.Choose`'s
-    # `setOffOnly`.
-    offer = ([c for c in top if klee_overhaul.is_set_off_card(c)]
-             if fx.get("filter") == "set_off" else top)
-    pick = (min(offer, key=lambda c: (c.cost if isinstance(c.cost, int) else 0))
-            if offer else None)
+    pick = min(top, key=lambda c: (c.cost if isinstance(c.cost, int) else 0))
     for seen in top:
         remove_instance(state.player.draw_pile, seen)
-    if pick is not None:
-        state.player.hand.append(pick)
+    state.player.hand.append(pick)
     for seen in top:
         if seen is not pick:
             state.player.draw_pile.append(seen)
-    state.emit("scry_take", card=pick.id if pick is not None else None,
-               seen=len(top))
+    state.emit("scry_take", card=pick.id, seen=len(top))
 
 
 def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:

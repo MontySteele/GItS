@@ -2005,8 +2005,8 @@ def test_explosive_frags_pays_for_a_mine_a_card_set_off(overhaul):
 
 
 # Where Did I Put It?'s three pins left with the row (Klee final pass,
-# 2026-10-02: cut). Its `scry_take` `filter: set_off` engine piece stays
-# registered (BACKLOG).
+# 2026-10-02: cut), and its `scry_take` `filter: set_off` engine piece after
+# it.
 
 
 def test_is_set_off_card_reads_the_row(overhaul):

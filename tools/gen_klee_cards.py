@@ -1595,9 +1595,7 @@ ADD_CARD_FIELDS = {
 }
 GUEST_STAR_FIELDS = {"op", "rarity", "amount", "to", "cost_override"}
 ENERGY_FIELDS = {"op", "amount"}
-#: `filter` is R276's (Where Did I Put It?) and `scry_take`'s only: `set_off`
-#: offers only the Set off cards among the cards seen.
-SCRY_FIELDS = {"op", "amount", "filter"}
+SCRY_FIELDS = {"op", "amount"}
 # exhaust_from: dodge_roll's shape only -- a random Status from hand. The
 # filterless form (kit-exempt any-card) blocks until a card needs it.
 EXHAUST_FROM_FIELDS = {"op", "zone", "filter", "amount",
@@ -5649,9 +5647,6 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if not isinstance(eff.get("amount"), int):
                 return f"{op} amount must be a literal int"
-            if eff.get("filter") is not None and (
-                    op != "scry_take" or eff["filter"] != "set_off"):
-                return f"{op} filter '{eff.get('filter')}'"
         if op == "exhaust_from":
             unknown = set(eff) - EXHAUST_FROM_FIELDS
             if unknown:
@@ -12021,18 +12016,13 @@ def build_body(
             # picking moved.
             n = ('DynamicVars["Scry"].IntValue' if scry_upgrade(card)
                  else int(eff["amount"]))
-            # R276 (Where Did I Put It?). A filter narrows what may be TAKEN
-            # and nothing else: every card seen still goes to the bottom if it
-            # is not taken, so a look with no Set off card in it buries all.
-            take_filter = (", setOffOnly: true"
-                           if eff.get("filter") == "set_off" else "")
             lines.append(
                 "{" + "\n" +
                 f"            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take({n}).ToList();" + "\n" +
                 "            if (top != null && top.Count > 0)" + "\n" +
                 "            {" + "\n" +
                 "                var takePick = await ScryTake.Choose(" + "\n" +
-                f"                    choiceContext, top, Owner{take_filter});" + "\n" +
+                "                    choiceContext, top, Owner);" + "\n" +
                 "                foreach (var taken in takePick)" + "\n" +
                 "                {" + "\n" +
                 "                    await CardPileCmd.Add(taken, PileType.Hand);" + "\n" +
@@ -14021,10 +14011,6 @@ def build_description(card: dict, *,
             n = ("{Scry:diff()}" if scry_upgrade(card)
                  else str(int(eff["amount"])))
             parts.append(
-                f"Look at the top {n} cards of your draw pile. Put a "
-                "[gold]Set off[/gold] card from them into your hand and the "
-                "rest on the bottom."
-                if eff.get("filter") == "set_off" else
                 f"Look at the top {n} cards of your draw pile; put one into "
                 "your hand and the rest on the bottom.")
 
