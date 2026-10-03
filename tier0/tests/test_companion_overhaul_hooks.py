@@ -457,59 +457,32 @@ def test_principle_of_purity_offers_two_forms_for_the_fight(overhaul):
 
 def test_white_scales_the_reaction_and_not_the_hit(overhaul):
     """The multiplier is on the REACTION'S OWN contribution. A Vaporize turns
-    10 into 20; White makes that 25, not 30."""
+    10 into 20; White at 50% makes that 25, not 30."""
     st = make_state(enemies=[make_enemy(hp=90)])
     st.enemies[0].aura = "hydro"
     plain = reactions.resolve_hit(st, st.enemies[0], "pyro", 10)
     assert plain == 10 * C.VAPORIZE_MULT
 
-    st.player.powers["mc_binary_white"] = 1
+    st.player.powers["mc_purity_white"] = 50
     st.enemies[0].aura = "hydro"
     amped = reactions.resolve_hit(st, st.enemies[0], "pyro", 10)
-    assert amped == 10 + (plain - 10) * C.MC_BINARY_WHITE_REACTION_MULT
+    assert amped == 10 + (plain - 10) * 1.5
 
 
 def test_white_scales_the_overload_splash(overhaul):
     st = make_state(enemies=[make_enemy(hp=90, name="a"),
                              make_enemy(hp=90, name="b")])
     st.enemies[0].aura = "electro"
-    st.player.powers["mc_binary_white"] = 1
+    st.player.powers["mc_purity_white"] = 50
     reactions.resolve_hit(st, st.enemies[0], "pyro", 0)
-    scaled = int(C.OVERLOAD_SPLASH * C.MC_BINARY_WHITE_REACTION_MULT)
+    scaled = int(C.OVERLOAD_SPLASH * 1.5)
     assert st.enemies[1].hp == 90 - scaled
 
 
-def test_white_stacks_add_rather_than_compound(overhaul):
+def test_white_percentage_is_the_multiplier(overhaul):
     st = make_state()
-    st.player.powers["mc_binary_white"] = 2
+    st.player.powers["mc_purity_white"] = 100
     assert effects.companion_overhaul_reaction_mult(st) == pytest.approx(2.0)
-
-
-def test_dark_pays_only_on_a_pyro_attack_that_reacts(overhaul):
-    st = make_state(enemies=[make_enemy(hp=90)])
-    st.player.powers["mc_binary_dark"] = 8
-
-    # No aura: no reaction, no bonus.
-    effects.deal_damage_to_enemy(st, st.enemies[0], 10, element="pyro",
-                                 source="attack")
-    assert st.enemies[0].hp == 80
-
-    # Hydro aura: Vaporize, and the 8 is added BEFORE the amplifier -- the
-    # additive phase, where the C# twin's ModifyDamageAdditive also puts it.
-    st.enemies[0].aura = "hydro"
-    st.enemies[0].hp = 90
-    effects.deal_damage_to_enemy(st, st.enemies[0], 10, element="pyro",
-                                 source="attack")
-    assert st.enemies[0].hp == 90 - int((10 + 8) * C.VAPORIZE_MULT)
-
-
-def test_dark_pays_nothing_on_an_off_element_attack(overhaul):
-    st = make_state(enemies=[make_enemy(hp=90)])
-    st.player.powers["mc_binary_dark"] = 8
-    st.enemies[0].aura = "pyro"
-    effects.deal_damage_to_enemy(st, st.enemies[0], 10, element="hydro",
-                                 source="attack")
-    assert st.enemies[0].hp == 90 - int(10 * C.VAPORIZE_MULT)
 
 
 # ---------------------------------------------------------------------------
@@ -684,7 +657,7 @@ def test_every_new_power_has_a_c_sharp_class_the_generator_knows():
           / "CompanionOverhaulHooks.cs").read_text(encoding="utf-8")
     for power in ("mc_icy_paws", "mc_melody_loop", "mc_passion_overload",
                   "mc_sacramental_shower", "mc_favonian_favor",
-                  "mc_binary_white", "mc_binary_dark", "mc_lightning_fang",
+                  "mc_lightning_fang",
                   "mc_sturm_und_drang", "mc_baron_bunny",
                   "mc_lightfall_sword", "mc_starfrost_discount"):
         cls = gen.APPLY_POWERS[power][0]

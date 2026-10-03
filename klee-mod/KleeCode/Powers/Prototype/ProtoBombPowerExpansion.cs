@@ -104,27 +104,6 @@ public sealed partial class ProtoBombPower
         return GrowLargest(applier, size * (factor - 1));
     }
 
-    /// <summary>
-    /// Spinning Sparkler's per-hit growth: THIS enemy's largest charge of hers
-    /// grows by <paramref name="amount"/>. "That Bomb" is the enemy's joined
-    /// Bomb, so one charge takes the growth -- the largest, first on a tie --
-    /// and the pile's total rises by exactly the printed number. Returns
-    /// whether anything grew. PURE.
-    /// </summary>
-    public static bool GrowLargestOn(Creature? enemy, Creature applier, int amount)
-    {
-        if (enemy == null || amount <= 0) return false;
-        ProtoBombPower? best = null;
-        foreach (var pile in enemy.Powers.OfType<ProtoBombPower>())
-        {
-            if (pile.Applier != applier || pile._charges.Count == 0) continue;
-            if (best == null || pile.LargestSize > best.LargestSize) best = pile;
-        }
-        if (best == null) return false;
-        best.GrowLargestChargeBy(amount);
-        return true;
-    }
-
     /// <summary>Second Surprise's Bomb: half a Mine's size, rounded down.
     /// PURE, and 0 means "place nothing".</summary>
     public static int HalfOf(int size) => size <= 0 ? 0 : size / 2;
@@ -186,28 +165,6 @@ public sealed partial class ProtoBombPower
                                  cardPlay);
             await PlaceOrJump(choiceContext, target, size, isMine: false,
                               applier, cardSource);
-        }
-    }
-
-    /// <summary>
-    /// Spinning Sparkler: "Deal N damage twice. Each hit on an enemy with a
-    /// Bomb grows that Bomb by G." A PLAIN Attack -- it never Sets off -- and
-    /// the growth is read per hit, after the hit lands, off the enemy it hit
-    /// (<see cref="GrowLargestOn"/>). A hit that kills grows nothing: the
-    /// Bombs are about to jump, and they jump at the size they had.
-    /// </summary>
-    public static async Task HitAndGrow(
-        PlayerChoiceContext choiceContext, Creature? target, Creature applier,
-        CardModel cardSource, CardPlay cardPlay, decimal damage, int hits,
-        int grow)
-    {
-        if (target == null) return;
-        for (var i = 0; i < hits; i++)
-        {
-            if (target.IsDead) return;
-            await DealCardDamage(choiceContext, target, damage, cardSource,
-                                 cardPlay);
-            if (!target.IsDead) GrowLargestOn(target, applier, grow);
         }
     }
 

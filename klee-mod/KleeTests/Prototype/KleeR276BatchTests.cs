@@ -139,8 +139,7 @@ public class KleeR276BatchTests
     }
 
     // Where Did I Put It?'s pin left with the row (Klee final pass,
-    // 2026-10-02: cut). `ScryTake`'s Set off filter stays registered
-    // (BACKLOG).
+    // 2026-10-02: cut), and `ScryTake`'s Set off filter after it.
 
     // ---- the pool --------------------------------------------------------
 

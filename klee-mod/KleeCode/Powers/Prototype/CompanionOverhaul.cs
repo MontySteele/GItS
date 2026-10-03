@@ -65,11 +65,6 @@ public static class CompanionOverhaulLaw
     /// Mirrors <c>C.MC_SHOWER_DMG</c>.</summary>
     public const int ShowerDamage = 9;
 
-    /// <summary>Durin, White: "enemies take 50% more damage from reactions",
-    /// as a multiplier on the reaction's own damage.
-    /// Mirrors <c>C.MC_BINARY_WHITE_REACTION_MULT</c>.</summary>
-    public const decimal BinaryWhiteReactionMult = 1.50m;
-
     /// <summary>Razor, Lightning Fang: damage his Attacks gain, 2 turns.
     /// Mirrors <c>C.MC_LIGHTNING_FANG_BONUS</c>.</summary>
     public const int LightningFangDamage = 3;

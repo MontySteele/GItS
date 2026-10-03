@@ -1595,9 +1595,7 @@ ADD_CARD_FIELDS = {
 }
 GUEST_STAR_FIELDS = {"op", "rarity", "amount", "to", "cost_override"}
 ENERGY_FIELDS = {"op", "amount"}
-#: `filter` is R276's (Where Did I Put It?) and `scry_take`'s only: `set_off`
-#: offers only the Set off cards among the cards seen.
-SCRY_FIELDS = {"op", "amount", "filter"}
+SCRY_FIELDS = {"op", "amount"}
 # exhaust_from: dodge_roll's shape only -- a random Status from hand. The
 # filterless form (kit-exempt any-card) blocks until a card needs it.
 EXHAUST_FROM_FIELDS = {"op", "zone", "filter", "amount",
@@ -2441,8 +2439,6 @@ UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow", "salon_rotate",
 # field encodes a mechanic; block loudly, never approximate).
 DETONATE_FIELDS = {"op", "target", "bonus"}
 # The Klee overhaul's own, same discipline (QUARANTINED, C.KLEE_OVERHAUL).
-#: `overflow` is R276's (Big Bounce): `bounce` sends the explosions' damage
-#: past the target's HP to a random other enemy as one plain Pyro hit.
 #: `wide_if` is R276's too (Team Effort), Coven Errand's field one verb
 #: over: the aimed Set off WIDENS to every enemy when the predicate holds,
 #: and the card's own hit stays on the aimed body.
@@ -2450,7 +2446,7 @@ DETONATE_FIELDS = {"op", "target", "bonus"}
 #: ONLY the single largest charge on the aimed enemy (ties to the oldest), and
 #: the rest of the pile stays. Still a `set_off`, so every reader of "a Set
 #: off card" (Once More!, Grounded, Treasure Map, Boom Badge...) sees it.
-SET_OFF_FIELDS = {"op", "target", "times", "damage", "overflow",
+SET_OFF_FIELDS = {"op", "target", "times", "damage",
                   "wide_if", "charge",
                   # AoE trim, 2026-10-03 (Mine, All Mine!): only the aimed
                   # enemy's MINES go off (`ProtoBombPower.SetOffMinesAimed`).
@@ -3467,11 +3463,6 @@ APPLY_POWERS = {
         "[gold]Hydro[/gold] to it first."),
     "mc_favonian_favor": ("FavonianFavorPower", None,
         "Whenever a reaction happens this turn, gain {X} [gold]Block[/gold]."),
-    "mc_binary_white": ("BinaryFormWhitePower", None,
-        "Enemies take 50% more damage from reactions."),
-    "mc_binary_dark": ("BinaryFormDarkPower", None,
-        "Your [gold]Pyro[/gold] [gold]Attacks[/gold] that react deal {X} more "
-        "damage."),
     # AoE trim, 2026-10-03: Durin, Principle of Purity's three
     # (`Powers/Prototype/PrincipleOfPurity.cs`).
     "mc_purity_strike": ("PurityStrikePower", None,
@@ -4944,7 +4935,6 @@ def blocked_reason(
                 # target spelling and literal numbers, because each is one
                 # awaited call into `ProtoBombPower` with the number handed in.
                 shape = {"plant_on_hit": "random_enemy",
-                         "grow_on_hit": "enemy",
                          "only_if": "all_enemies",
                          "bonus_vs_bombed": "all_enemies"}[rider]
                 if eff.get("target") != shape:
@@ -5025,23 +5015,16 @@ def blocked_reason(
                 if value is not None and (not isinstance(value, int)
                                           or value <= 0):
                     return f"set_off {key} must be a positive literal int"
-            if eff.get("overflow") not in (None, "bounce"):
-                return f"set_off overflow '{eff.get('overflow')}'"
-            if eff.get("overflow") and eff.get("target") != "enemy":
-                # Big Bounce's "the enemy's HP" is ONE enemy's: the aimed
-                # spelling is the only one the sentence is true of.
-                return "set_off overflow is the aimed spelling only"
             if eff.get("charge") not in (None, "largest"):
                 return f"set_off charge '{eff.get('charge')}'"
             if "mines_only" in eff:
                 if eff["mines_only"] is not True:
                     return "set_off mines_only must be true or absent"
                 if (eff.get("target") != "enemy" or eff.get("charge")
-                        or eff.get("overflow") or eff.get("wide_if")):
+                        or eff.get("wide_if")):
                     return "set_off mines_only is the plain aimed spelling only"
             if eff.get("charge") and (
-                    eff.get("target") != "enemy" or eff.get("overflow")
-                    or eff.get("wide_if")):
+                    eff.get("target") != "enemy" or eff.get("wide_if")):
                 # Pocket Match's "your largest Bomb on the enemy" is ONE
                 # enemy's largest charge; no other spelling composes with it.
                 return "set_off charge is the plain aimed spelling only"
@@ -5654,9 +5637,6 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if not isinstance(eff.get("amount"), int):
                 return f"{op} amount must be a literal int"
-            if eff.get("filter") is not None and (
-                    op != "scry_take" or eff["filter"] != "set_off"):
-                return f"{op} filter '{eff.get('filter')}'"
         if op == "exhaust_from":
             unknown = set(eff) - EXHAUST_FROM_FIELDS
             if unknown:
@@ -7371,18 +7351,14 @@ def build_vars(card: dict) -> list[str]:
                     out.append(f'new DynamicVar("BonusPer", {n}m)')
                 # R276, the damage op's prototype riders. Each rider's own
                 # number takes the var its key already names elsewhere --
-                # `BombSize` for a per-hit Bomb, `Grow` for a per-hit growth,
-                # `ExtraDamage` for the Bomb bonus -- declared only when the
+                # `BombSize` for a per-hit Bomb, `ExtraDamage` for the Bomb
+                # bonus -- declared only when the
                 # upgrade must render it, the Sparks idiom.
                 rider = damage_rider(card, eff)
                 if (rider == "plant_on_hit" and bomb_size_upgrade(card)
                         and eff is plant_bomb_var_effect(card)):
                     out.append('new DynamicVar("BombSize", '
                                f'{int(eff["plant_on_hit"])}m)')
-                if (rider == "grow_on_hit" and grow_upgrade(card)
-                        and eff is grow_var_effect(card)):
-                    out.append('new DynamicVar("Grow", '
-                               f'{int(eff["grow_on_hit"])}m)')
                 if rider == "bonus_vs_bombed":
                     out.append(
                         f'new ExtraDamageVar({eff["bonus_vs_bombed"]}m)')
@@ -9725,14 +9701,12 @@ def plant_bomb_var_effect(card: dict) -> dict | None:
 #: the plain `DamageCmd` into ONE awaited call into `ProtoBombPower`:
 #:   plant_on_hit: N -- each hit (a fresh random enemy per hit) places a
 #:                      Bomb N on the enemy it hit (Jumpy Dumpty Mk.III);
-#:   grow_on_hit:  N -- each hit on an enemy holding a Bomb grows that enemy's
-#:                      largest Bomb by N (Spinning Sparkler);
 #:   only_if: mined  -- the all-enemies hit lands only on enemies holding a
 #:                      Mine (Mine, All Mine!);
 #:   bonus_vs_bombed -- on an all-enemies proto hit, N more to each enemy
 #:                      holding a Bomb (Fish Fry), the shipped field's name.
 #: `proto_` rows only: the shipped sheets keep every refusal they had.
-DAMAGE_RIDERS = ("plant_on_hit", "grow_on_hit", "only_if")
+DAMAGE_RIDERS = ("plant_on_hit", "only_if")
 
 
 def damage_rider(card: dict, eff: dict) -> str | None:
@@ -9785,10 +9759,8 @@ def grow_var_effect(card: dict) -> dict | None:
                  or (fx.get("op") == "merge_bombs" and "growth" in fx)
                  or (fx.get("op") == "grow_largest_bomb"
                      and "per_spark" in fx)
-                 # R276: One More Charge's flat growth, and Spinning
-                 # Sparkler's per-hit rider.
+                 # R276: One More Charge's flat growth.
                  or (fx.get("op") == "grow_largest" and "amount" in fx)
-                 or (fx.get("op") == "damage" and "grow_on_hit" in fx)
                  # THE KLEE STATUS PACKAGE: Dust of Purification's growth
                  # per status exhausted.
                  or (fx.get("op") == "exhaust_statuses_grow_largest"
@@ -9808,9 +9780,6 @@ GROW_FIELD = {"grow_bombs": "amount", "merge_bombs": "growth",
 
 def grow_literal(eff: dict) -> int:
     """The printed grow number on whichever of the three ops carries it."""
-    if eff["op"] == "damage":
-        # R276 (Spinning Sparkler): the per-hit rider's number.
-        return int(eff.get("grow_on_hit", 0))
     return int(eff.get(GROW_FIELD[eff["op"]], 0))
 
 
@@ -10698,15 +10667,6 @@ def build_body(
                         "await ProtoBombPower.HitRandomAndPlant("
                         "choiceContext, Owner.Creature, this, cardPlay, "
                         f"{dmg}, {hits}, {size});")
-                elif rider == "grow_on_hit":
-                    _target_guard(lines, ctx)
-                    grow = _var_or_literal(
-                        grow_upgrade(card) and eff is grow_var_effect(card),
-                        "Grow", eff["grow_on_hit"])
-                    lines.append(
-                        "await ProtoBombPower.HitAndGrow("
-                        "choiceContext, cardPlay.Target, Owner.Creature, "
-                        f"this, cardPlay, {dmg}, {hits}, {grow});")
                 elif rider == "only_if" and eff["only_if"] == "fresh_aura":
                     # VARKA's Gale Sweep: the fresh-aura bodies are taken
                     # when it is played, and each takes its own hit.
@@ -11192,15 +11152,6 @@ def build_body(
                 _target_guard(lines, ctx)
                 lines.append(
                     "await ProtoBombPower.SetOffMinesAimed("
-                    "choiceContext, cardPlay.Target, Owner.Creature, this, "
-                    f"cardPlay, {damage});")
-            elif eff["target"] == "enemy" and eff.get("overflow") == "bounce":
-                # R276 (Big Bounce). The same aimed Set off with the overflow
-                # tallied and bounced; one call, so the tally and the bounce
-                # cannot be separated by a card that forgets one.
-                _target_guard(lines, ctx)
-                lines.append(
-                    "await ProtoBombPower.SetOffAimedBouncing("
                     "choiceContext, cardPlay.Target, Owner.Creature, this, "
                     f"cardPlay, {damage});")
             elif eff["target"] == "enemy" and eff.get("wide_if"):
@@ -12026,18 +11977,13 @@ def build_body(
             # picking moved.
             n = ('DynamicVars["Scry"].IntValue' if scry_upgrade(card)
                  else int(eff["amount"]))
-            # R276 (Where Did I Put It?). A filter narrows what may be TAKEN
-            # and nothing else: every card seen still goes to the bottom if it
-            # is not taken, so a look with no Set off card in it buries all.
-            take_filter = (", setOffOnly: true"
-                           if eff.get("filter") == "set_off" else "")
             lines.append(
                 "{" + "\n" +
                 f"            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take({n}).ToList();" + "\n" +
                 "            if (top != null && top.Count > 0)" + "\n" +
                 "            {" + "\n" +
                 "                var takePick = await ScryTake.Choose(" + "\n" +
-                f"                    choiceContext, top, Owner{take_filter});" + "\n" +
+                "                    choiceContext, top, Owner);" + "\n" +
                 "                foreach (var taken in takePick)" + "\n" +
                 "                {" + "\n" +
                 "                    await CardPileCmd.Add(taken, PileType.Hand);" + "\n" +
@@ -12481,8 +12427,7 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
                 method = ("SetOffLargestAimed"
                           if eff.get("charge") == "largest"
                           else "SetOffMinesAimed" if eff.get("mines_only")
-                          else "SetOffAimedBouncing"
-                          if eff.get("overflow") == "bounce" else "SetOffAimed")
+                          else "SetOffAimed")
                 body.append(
                     f"await ProtoBombPower.{method}(choiceContext, "
                     f"cardPlay.Target, Owner.Creature, this, cardPlay, {damage});")
@@ -12821,10 +12766,6 @@ def _authored_face_numbers(card: dict):
                 mine = eff is plant_bomb_var_effect(card)
                 yield (("bomb_size", "BombSize", int(eff["plant_on_hit"]))
                        if mine else (None, None, int(eff["plant_on_hit"])))
-            elif rider == "grow_on_hit":
-                mine = eff is grow_var_effect(card)
-                yield (("grow", "Grow", int(eff["grow_on_hit"]))
-                       if mine else (None, None, int(eff["grow_on_hit"])))
             elif rider == "bonus_vs_bombed":
                 yield ("bonus_vs_bombed", "ExtraDamage",
                        int(eff["bonus_vs_bombed"]))
@@ -14026,10 +13967,6 @@ def build_description(card: dict, *,
             n = ("{Scry:diff()}" if scry_upgrade(card)
                  else str(int(eff["amount"])))
             parts.append(
-                f"Look at the top {n} cards of your draw pile. Put a "
-                "[gold]Set off[/gold] card from them into your hand and the "
-                "rest on the bottom."
-                if eff.get("filter") == "set_off" else
                 f"Look at the top {n} cards of your draw pile; put one into "
                 "your hand and the rest on the bottom.")
 
@@ -14763,11 +14700,6 @@ def build_upgrade(card: dict) -> list[str]:
             done.add("bomb_size")
             lines.append('DynamicVars["BombSize"].UpgradeValueBy('
                          f'{int(deltas["bomb_size"])}m);')
-        if (rider == "grow_on_hit" and "grow" in deltas
-                and "grow" not in done and eff is grow_var_effect(card)):
-            done.add("grow")
-            lines.append('DynamicVars["Grow"].UpgradeValueBy('
-                         f'{int(deltas["grow"])}m);')
         if (rider == "bonus_vs_bombed" and "bonus_vs_bombed" in deltas
                 and "bonus_vs_bombed" not in done):
             done.add("bonus_vs_bombed")

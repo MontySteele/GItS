@@ -356,30 +356,21 @@ public static class CompanionOverhaulReactions
     }
 
     /// <summary>
-    /// Durin's WHITE form: "enemies take 50% more damage from reactions", as a
-    /// multiplier on the REACTION'S OWN damage. 1 with no White standing, which
-    /// is what leaves the shipped reaction pipeline byte-identical.
+    /// DURIN, PRINCIPLE OF PURITY / WHITE (AoE trim, 2026-10-03): a multiplier
+    /// on the REACTION'S OWN damage. 1 with no White standing, which is what
+    /// leaves the shipped reaction pipeline byte-identical.
     ///
-    /// Stacks are COPIES and each is another 50 percentage points, ADDED rather
-    /// than compounded: two Durins are +100%, not +125%. Sim twin:
-    /// `effects.companion_overhaul_reaction_mult`.
+    /// It is the TEAM form: its percentage is summed over EVERY player, so any
+    /// player's reaction against an enemy is boosted while any player holds it
+    /// (<see cref="PurityWhitePower.TeamPercent"/>). A reaction an ENEMY causes
+    /// is not boosted. Sim twin: `effects.companion_overhaul_reaction_mult`.
     /// </summary>
-    ///
-    /// DURIN, PRINCIPLE OF PURITY / WHITE (AoE trim, 2026-10-03) is the TEAM
-    /// form: its percentage is summed over EVERY player, so any player's
-    /// reaction against an enemy is boosted while any player holds it
-    /// (<see cref="PurityWhitePower.TeamPercent"/>). Added to the copies above,
-    /// never compounded. A reaction an ENEMY causes is not boosted. Sim twin:
-    /// the `mc_purity_white` read in the same function.
     public static decimal DamageMultiplier(Creature? dealer)
     {
         if (dealer == null || dealer.IsEnemy) return 1m;
-        var stacks = dealer.Powers.OfType<BinaryFormWhitePower>()
-            .Sum(p => (int)p.Amount);
         var percent = PurityWhitePower.TeamPercent(dealer);
-        if (stacks <= 0 && percent <= 0) return 1m;
-        return 1m + (CompanionOverhaulLaw.BinaryWhiteReactionMult - 1m) * stacks
-             + percent / 100m;
+        if (percent <= 0) return 1m;
+        return 1m + percent / 100m;
     }
 }
 
@@ -954,76 +945,6 @@ public sealed class FavonianFavorPower : PowerModel, ILocalizationProvider
     {
         if (side != CombatSide.Player) return;
         await PowerCmd.Remove(this);
-    }
-}
-
-/// <summary>
-/// Durin, Binary Form / WHITE: "enemies take 50% more damage from reactions."
-///
-/// The power stores nothing and hooks nothing: the multiplier is computed in
-/// ONE place (<see cref="CompanionOverhaulReactions.DamageMultiplier"/>) and
-/// spent at the two sites a reaction deals damage, so this power's whole job is
-/// to be present and countable.
-/// </summary>
-public sealed class BinaryFormWhitePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Binary Form: White"),
-        ("description",
-            "Enemies take 50% more damage from [gold]Elemental Reactions[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary>
-/// Durin, Binary Form / DARK: "your Pyro Attacks that react deal 8 more."
-///
-/// ALL THREE CLAUSES ARE READ IN THE ADDITIVE PHASE, which is where they can be
-/// read purely. "Pyro" is the element the play ACTUALLY applies
-/// (<see cref="CompanionOverhaulRiders"/>), so Bennett's and Varka's overrides
-/// are honoured. "Attack" is the card type. "That react" is a FORECAST off the
-/// standing aura -- <c>ReactionTable.Lookup</c> against the aura the target is
-/// carrying right now, which is exactly the read
-/// <see cref="AuraPower.ModifyDamageMultiplicative"/> already makes one phase
-/// later, and it is available because the aura is not consumed until
-/// <c>AfterDamageReceived</c>.
-///
-/// The forecast is what lets the 8 land BEFORE the amplifier, in the same
-/// additive phase Strength lands in, which is where the sim puts it too.
-/// </summary>
-public sealed class BinaryFormDarkPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Binary Form: Dark"),
-        ("description",
-            "Your [gold]Pyro[/gold] Attacks that react deal "
-          + "[blue]{Amount}[/blue] additional damage."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource, CardPlay? cardPlay)
-    {
-        if (dealer != Owner || target == null || target == Owner) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-        if (cardSource is not { Type: CardType.Attack }) return 0m;
-        if (CompanionOverhaulRiders.ElementFor(cardSource, dealer) != Element.Pyro)
-        {
-            return 0m;
-        }
-        var aura = AuraCmd.Find(target);
-        if (aura == null) return 0m;
-        return ReactionTable.Lookup(aura.Element, Element.Pyro) == Reaction.None
-            ? 0m : Amount;
     }
 }
 

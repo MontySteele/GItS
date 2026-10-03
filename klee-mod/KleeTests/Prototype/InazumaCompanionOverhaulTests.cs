@@ -372,15 +372,10 @@ public class InazumaCompanionOverhaulTests
         // count here is a real guard against a third. Every read is by
         // NAME; only the count is positional.
         //
-        // EIGHT SINCE R276, and the third flag is a deliberate one: Big
-        // Bounce's overflow already paid the SOURCE enemy's Vulnerable, so
-        // `targetMods: false` skips the destination's. Its default is asserted
-        // by name below, like the other two.
+        // R276's third flag (`targetMods`, Big Bounce's) left with the cut
+        // card's engine piece, so the count is seven again.
         var deal = Il.Method("ElementalHit", "Deal");
-        Assert.Equal(8, deal.GetParameters().Length);
-        var targetMods = deal.GetParameters().Single(p => p.Name == "targetMods");
-        Assert.True(targetMods.HasDefaultValue);
-        Assert.Equal(true, targetMods.DefaultValue);
+        Assert.Equal(7, deal.GetParameters().Length);
         var ignore = deal.GetParameters().Single(p => p.Name == "ignoreBlock");
         Assert.True(ignore.HasDefaultValue);
         Assert.Equal(false, ignore.DefaultValue);

@@ -60,13 +60,13 @@ public class CompanionOverhaulHookTests
         typeof(ProtoMcMikaStarfrostSwirl),
     };
 
-    /// <summary>The thirteen new powers, by class.</summary>
+    /// <summary>The wave's new powers still applied by a row, by class
+    /// (Durin's two Binary Form powers left when Durin split, 2026-10-03).</summary>
     private static readonly Type[] NewPowers =
     {
         typeof(IcyPawsPower), typeof(MelodyLoopPower),
         typeof(PassionOverloadPower), typeof(SacramentalShowerPower),
-        typeof(FavonianFavorPower), typeof(BinaryFormWhitePower),
-        typeof(BinaryFormDarkPower), typeof(LightningFangPower),
+        typeof(FavonianFavorPower), typeof(LightningFangPower),
         typeof(SturmUndDrangPower), typeof(SwirlChargePower),
         typeof(BaronBunnyPower), typeof(LightfallSwordPower),
         typeof(StarfrostDiscountPower),
@@ -375,16 +375,15 @@ public class CompanionOverhaulHookTests
     }
 
     [Fact]
-    public void The_white_multiplier_adds_per_copy()
+    public void The_white_multiplier_is_the_purity_percentage()
     {
         Assert.Equal(1m, CompanionOverhaulReactions.DamageMultiplier(null));
         Assert.Equal(1m, CompanionOverhaulReactions.DamageMultiplier(
             Seat.Klee().Creature));
-        Assert.Equal(CompanionOverhaulLaw.BinaryWhiteReactionMult,
-            CompanionOverhaulReactions.DamageMultiplier(
-                Seat.Klee().WithPower<BinaryFormWhitePower>(1).Creature));
+        Assert.Equal(1.5m, CompanionOverhaulReactions.DamageMultiplier(
+            Seat.Klee().WithPower<PurityWhitePower>(50).Creature));
         Assert.Equal(2m, CompanionOverhaulReactions.DamageMultiplier(
-            Seat.Klee().WithPower<BinaryFormWhitePower>(2).Creature));
+            Seat.Klee().WithPower<PurityWhitePower>(100).Creature));
     }
 
     [Fact]
@@ -536,14 +535,11 @@ public class CompanionOverhaulHookTests
     }
 
     [Fact]
-    public void The_two_permanent_powers_never_tick_down()
+    public void The_permanent_power_never_ticks_down()
     {
-        // The workshop's sec.1 rule: "A Power has no turn limit." Durin's two
-        // forms are chosen "for the fight" and Varka's reads every Swirl, so
-        // none of the three may carry a clock.
-        foreach (var type in new[] { typeof(BinaryFormWhitePower),
-                                     typeof(BinaryFormDarkPower),
-                                     typeof(SturmUndDrangPower) })
+        // The workshop's sec.1 rule: "A Power has no turn limit." Varka's
+        // reads every Swirl, so it may not carry a clock.
+        foreach (var type in new[] { typeof(SturmUndDrangPower) })
         {
             var calls = type.GetMethods(All)
                 .Where(m => m.DeclaringType == type)

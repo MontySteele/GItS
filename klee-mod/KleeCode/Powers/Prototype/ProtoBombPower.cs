@@ -1100,57 +1100,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// an enemy whose aura an earlier explosion in the same play consumed is
     /// no longer eligible -- which is what "each enemy that HAS" says.
     /// </summary>
-    /// <summary>
-    /// R276, BIG BOUNCE: the aimed Set off, with the explosions' damage past
-    /// the target's HP summed and dealt as ONE plain Pyro hit to a random
-    /// OTHER living enemy.
-    ///
-    /// THE BOUNCE IS NOT A SET OFF AND DOES NOT BOUNCE AGAIN: it is one
-    /// <see cref="ElementalHit.Deal"/> with neither Klee's terms nor the
-    /// destination's Vulnerable (both were settled at the source, where the
-    /// overflow was measured). A Bomb that jumps off the dead target is rule
-    /// 3's and untouched; the two do not overlap, because a jump moves a charge
-    /// that did NOT go off. Sim twin: <c>klee_overhaul.bounce_overflow</c>.
-    /// </summary>
-    public static async Task SetOffAimedBouncing(
-        PlayerChoiceContext choiceContext, Creature? target, Creature applier,
-        CardModel cardSource, CardPlay cardPlay, decimal damage)
-    {
-        KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
-        var badge = await BoomBadgePower.Spend(applier);
-        if (target == null) return;
-        var overflow = new List<int>();
-        await SetOff(choiceContext, target, applier, cardSource, overflow, badge);
-        await BounceOverflow(choiceContext, target, applier, overflow.Sum());
-        await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
-    }
-
-    /// <summary>Big Bounce's second half: <paramref name="amount"/> as one
-    /// plain Pyro hit on a random living enemy other than
-    /// <paramref name="from"/>. Nothing to do with no overflow or no other
-    /// enemy.</summary>
-    public static async Task BounceOverflow(
-        PlayerChoiceContext choiceContext, Creature from, Creature applier,
-        int amount)
-    {
-        if (amount <= 0) return;
-        var combat = applier.CombatState;
-        if (combat == null) return;
-        var candidates = combat.HittableEnemies
-            .Where(e => e != from && !e.IsDead).ToList();
-        if (candidates.Count == 0) return;
-        var dest = combat.RunState.Rng.CombatTargets.NextItem(candidates);
-        if (dest == null) return;
-        KleeOverhaulLedger.For(applier).NoteLine(
-            amount + " damage bounced to " + NameOf(dest));
-        using var credit = Diagnostics.DamageCredit.Open(
-            applier, Diagnostics.DamageCredit.Bomb, "Bomb");
-        await ElementalHit.Deal(choiceContext, dest, Element.Pyro, amount,
-                                applier, ignoreBlock: false, powered: false,
-                                targetMods: false);
-        await SweepJumps(choiceContext, combat);
-    }
-
     public static async Task SetOffAll(
         PlayerChoiceContext choiceContext, Creature applier,
         CardModel cardSource, CardPlay cardPlay, decimal damage)
@@ -1341,7 +1290,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     public static async Task<int> SetOff(
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
-        CardModel? cardSource, List<int>? overflow = null, int badge = 1)
+        CardModel? cardSource, int badge = 1)
     {
         if (target == null) return 0;
 
@@ -1384,8 +1333,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                                                   pactAura);
             }
             var consumed = await Explode(choiceContext, target, taken[i],
-                                         applier, cardSource, multiplier,
-                                         overflow);
+                                         applier, cardSource, multiplier);
             if (pact && pactAura == Element.None) pactAura = consumed;
             exploded++;
         }
@@ -1413,8 +1361,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private static async Task<Element> Explode(
         PlayerChoiceContext choiceContext, Creature target, ProtoCharge charge,
-        Creature applier, CardModel? cardSource, int multiplier,
-        List<int>? overflow = null)
+        Creature applier, CardModel? cardSource, int multiplier)
     {
         var ledger = KleeOverhaulLedger.For(applier);
         var size = charge.Size * multiplier;
@@ -1460,10 +1407,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // that is the target's: the aura, the reaction, the Vulnerable and the
         // per-hit cap. Sparks 'n' Splash's echo takes the same door
         // (2026-09-25): it pays a Bomb's size on a Bomb's terms.
-        // R276 (Big Bounce): what stood between this hit and the kill, read
-        // BEFORE the hit spends it. Only a caller that passes `overflow` reads
-        // it, and every other Set off is byte-identical.
-        var standingBefore = target.CurrentHp + target.Block;
         // THE VULNERABLE THIS HIT PAID (2026-09-26, Big Badda Boom's echo):
         // the funnel's `TargetMods` multiplies by the target's Vulnerable as
         // it stands when the hit resolves -- before it, or applied by this
@@ -1485,14 +1428,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                        && AuraCmd.Find(target) == null
             ? auraBefore
             : Element.None;
-        // THE OVERFLOW IS THE HIT PAST THE KILL, after the target's own terms
-        // (Vulnerable is already in `dealt`), so the bounce carries it without
-        // applying them a second time. A hit that did not kill has none.
-        if (overflow != null && target.IsDead && dealt > standingBefore)
-        {
-            overflow.Add(dealt - standingBefore);
-        }
-
         ledger.NoteExplosion(reacted, dealt, vulnerablePaid);
         // TELEMETRY ONLY: the per-seat count `PlayTelemetry` samples.
         RecordExplosion(applier, charge.IsMine);

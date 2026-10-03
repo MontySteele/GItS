@@ -297,7 +297,6 @@ public class DamageCreditTelemetryTests : IDisposable
     [InlineData("ReactionEffects", "Resolve", "DamageCredit.Open")]
     [InlineData("FrozenPower", "AfterDamageReceived", "DamageCredit.Open")]
     [InlineData("ProtoBombPower", "Explode", "DamageCredit.Open")]
-    [InlineData("ProtoBombPower", "BounceOverflow", "DamageCredit.Open")]
     [InlineData("BombEchoPower", "Fire", "DamageCredit.Open")]
     [InlineData("BombPower", "ResolvePayload", "DamageCredit.Open")]
     [InlineData("KokomiPlan", "Hit", "DamageCredit.Open")]
