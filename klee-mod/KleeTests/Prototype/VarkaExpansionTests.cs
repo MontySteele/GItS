@@ -148,12 +148,10 @@ public class VarkaExpansionTests : IDisposable
     [Fact]
     public void The_knight_pass_numbers()
     {
-        Assert.Equal(5m, Var(new ProtoVkBarbaraShowBegin(), "CalculationBase"));
-        Assert.Equal(7m, Var(Upgraded<ProtoVkBarbaraShowBegin>(), "CalculationBase"));
         Assert.Equal(2m, Var(new ProtoVkMikaStarfrostSwirl(), "PowerAmount"));
         Assert.Equal(3m, Var(Upgraded<ProtoVkMikaStarfrostSwirl>(), "PowerAmount"));
         var razor = new ProtoVkRazorClawAndThunder();
-        Assert.Equal(TargetType.AllEnemies, razor.TargetType);
+        Assert.Equal(TargetType.AnyEnemy, razor.TargetType);      // the AoE trim
         Assert.Equal(4m, Var(razor, "VkBase"));
         Assert.Equal(3m, Var(razor, "VkAmount"));
         Assert.Equal(6m, Var(Upgraded<ProtoVkRazorClawAndThunder>(), "VkBase"));
@@ -192,7 +190,7 @@ public class VarkaExpansionTests : IDisposable
 
     [Theory]
     [InlineData("ProtoVkPathfindersMark", "VarkaCards.PathfindersMark")]
-    [InlineData("ProtoVkCavalryCharge", "VarkaCards.CurrentElementStrike")]
+    [InlineData("ProtoVkKindledEdge", "VarkaCards.KindledEdge")]
     [InlineData("ProtoVkBlazingCharge", "VarkaCards.BlazingCharge")]
     [InlineData("ProtoVkGlacialEdict", "VarkaCards.GlacialEdict")]
     [InlineData("ProtoVkThunderingVerdict", "VarkaCards.ThunderingVerdict")]
@@ -253,7 +251,6 @@ public class VarkaExpansionTests : IDisposable
     [Fact]
     public void The_payout_powers()
     {
-        Assert.Equal(1, VarkaLaw.AbsoluteZeroWeak);
         Assert.Equal(3, VarkaLaw.EyeOfStormterrorSwirls);
         var swirl = Calls("VarkaOath", "OnSwirl");
         Assert.Contains("VarkaOath.Pay", swirl);

@@ -365,7 +365,6 @@
     "proto_vk_barbara_whisper_of_water",
     "proto_vk_blazing_charge",
     "proto_vk_boreas_unbound",
-    "proto_vk_cavalry_charge",
     "proto_vk_chain_lightning",
     "proto_vk_change_of_guard",
     "proto_vk_charge_of_the_knights",
@@ -383,17 +382,17 @@
     "proto_vk_eye_of_the_storm",
     "proto_vk_eye_wall",
     "proto_vk_favonius_cut",
-    "proto_vk_favonius_drill",
     "proto_vk_four_winds_ascension",
+    "proto_vk_frost_ward",
     "proto_vk_gale_mantle",
     "proto_vk_gale_sweep",
     "proto_vk_glacial_edict",
     "proto_vk_grand_masters_order",
     "proto_vk_grand_masters_verdict",
-    "proto_vk_gust_ward",
     "proto_vk_jean_dandelion_breeze",
     "proto_vk_kaeya_frostgnaw",
     "proto_vk_kaeya_glacial_waltz",
+    "proto_vk_kindled_edge",
     "proto_vk_knightly_guard",
     "proto_vk_knightly_strike",
     "proto_vk_knights_roll_call",
@@ -411,10 +410,12 @@
     "proto_vk_rally_to_the_banner",
     "proto_vk_razor_claw_and_thunder",
     "proto_vk_retaliating_tide",
+    "proto_vk_rippling_guard",
     "proto_vk_rising_gale",
     "proto_vk_shifting_gale",
     "proto_vk_short_circuit",
     "proto_vk_static_field",
+    "proto_vk_storm_battery",
     "proto_vk_storm_surge",
     "proto_vk_stormward_stance",
     "proto_vk_sworn_brotherhood",
@@ -433,7 +434,6 @@
     "proto_vk_weathervane",
     "proto_vk_west_wind_shield",
     "proto_vk_wildfire_oath",
-    "proto_vk_wind_wall",
     "proto_vk_windborne_resolve",
     "proto_vk_windbound_execution",
     "proto_vk_wolfpack"
@@ -798,7 +798,6 @@
     "proto_vk_barbara_whisper_of_water": "varka",
     "proto_vk_blazing_charge": "varka",
     "proto_vk_boreas_unbound": "varka",
-    "proto_vk_cavalry_charge": "varka",
     "proto_vk_chain_lightning": "varka",
     "proto_vk_change_of_guard": "varka",
     "proto_vk_charge_of_the_knights": "varka",
@@ -816,17 +815,17 @@
     "proto_vk_eye_of_the_storm": "varka",
     "proto_vk_eye_wall": "varka",
     "proto_vk_favonius_cut": "varka",
-    "proto_vk_favonius_drill": "varka",
     "proto_vk_four_winds_ascension": "varka",
+    "proto_vk_frost_ward": "varka",
     "proto_vk_gale_mantle": "varka",
     "proto_vk_gale_sweep": "varka",
     "proto_vk_glacial_edict": "varka",
     "proto_vk_grand_masters_order": "varka",
     "proto_vk_grand_masters_verdict": "varka",
-    "proto_vk_gust_ward": "varka",
     "proto_vk_jean_dandelion_breeze": "varka",
     "proto_vk_kaeya_frostgnaw": "varka",
     "proto_vk_kaeya_glacial_waltz": "varka",
+    "proto_vk_kindled_edge": "varka",
     "proto_vk_knightly_guard": "varka",
     "proto_vk_knightly_strike": "varka",
     "proto_vk_knights_roll_call": "varka",
@@ -844,10 +843,12 @@
     "proto_vk_rally_to_the_banner": "varka",
     "proto_vk_razor_claw_and_thunder": "varka",
     "proto_vk_retaliating_tide": "varka",
+    "proto_vk_rippling_guard": "varka",
     "proto_vk_rising_gale": "varka",
     "proto_vk_shifting_gale": "varka",
     "proto_vk_short_circuit": "varka",
     "proto_vk_static_field": "varka",
+    "proto_vk_storm_battery": "varka",
     "proto_vk_storm_surge": "varka",
     "proto_vk_stormward_stance": "varka",
     "proto_vk_sworn_brotherhood": "varka",
@@ -866,7 +867,6 @@
     "proto_vk_weathervane": "varka",
     "proto_vk_west_wind_shield": "varka",
     "proto_vk_wildfire_oath": "varka",
-    "proto_vk_wind_wall": "varka",
     "proto_vk_windborne_resolve": "varka",
     "proto_vk_windbound_execution": "varka",
     "proto_vk_wolfpack": "varka"
@@ -2025,7 +2025,8 @@
       "power_amount": 2
     },
     "proto_vk_amber_fiery_rain": {
-      "block": 3
+      "damage": 3,
+      "block": 1
     },
     "proto_vk_amber_sharpshooter": {
       "damage": 3,
@@ -2038,26 +2039,25 @@
       "formula_per": 1
     },
     "proto_vk_barbara_melody_loop": {
-      "block": 3
+      "block": 2,
+      "block_next_turn": 1
     },
     "proto_vk_barbara_show_begin": {
-      "block": 2
+      "varka_base": 2,
+      "varka_per": 1
     },
     "proto_vk_barbara_wellspring_hymn": {
       "block": 3
     },
     "proto_vk_barbara_whisper_of_water": {
       "block": 2,
-      "block_next_turn": 2
+      "varka_amount": 2
     },
     "proto_vk_blazing_charge": {
       "varka_base": 2
     },
     "proto_vk_boreas_unbound": {
       "innate": true
-    },
-    "proto_vk_cavalry_charge": {
-      "varka_base": 3
     },
     "proto_vk_chain_lightning": {
       "varka_base": 3
@@ -2114,12 +2114,12 @@
     "proto_vk_favonius_cut": {
       "damage": 5
     },
-    "proto_vk_favonius_drill": {
-      "block": 3
-    },
     "proto_vk_four_winds_ascension": {
       "damage": 3,
       "varka_per": 1
+    },
+    "proto_vk_frost_ward": {
+      "varka_amount": 1
     },
     "proto_vk_gale_mantle": {
       "formula_base": 3
@@ -2136,9 +2136,6 @@
     "proto_vk_grand_masters_verdict": {
       "damage": 5
     },
-    "proto_vk_gust_ward": {
-      "block": 2
-    },
     "proto_vk_jean_dandelion_breeze": {
       "block": 3
     },
@@ -2146,7 +2143,10 @@
       "damage": 3
     },
     "proto_vk_kaeya_glacial_waltz": {
-      "block": 3
+      "block": 2
+    },
+    "proto_vk_kindled_edge": {
+      "varka_base": 3
     },
     "proto_vk_knightly_guard": {
       "block": 3
@@ -2158,7 +2158,8 @@
       "choose_knight": true
     },
     "proto_vk_lisa_lightning_rose": {
-      "block": 3
+      "block": 2,
+      "draw": 1
     },
     "proto_vk_lisa_pulsating_witch": {
       "retain": true
@@ -2201,6 +2202,9 @@
     "proto_vk_retaliating_tide": {
       "cost": -1
     },
+    "proto_vk_rippling_guard": {
+      "varka_per": 1
+    },
     "proto_vk_rising_gale": {
       "damage": 2
     },
@@ -2213,6 +2217,9 @@
     },
     "proto_vk_static_field": {
       "power_amount": 1
+    },
+    "proto_vk_storm_battery": {
+      "varka_per": 1
     },
     "proto_vk_storm_surge": {
       "damage": 2
@@ -2267,9 +2274,6 @@
     },
     "proto_vk_wildfire_oath": {
       "innate": true
-    },
-    "proto_vk_wind_wall": {
-      "block": 3
     },
     "proto_vk_windborne_resolve": {
       "power_amount": 2

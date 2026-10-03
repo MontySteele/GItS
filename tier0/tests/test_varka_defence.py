@@ -67,8 +67,8 @@ def _fx(cid, op):
 # 1. The pool: 78 at 20 / 35 / 23, three in and three out.
 # ---------------------------------------------------------------------------
 
-NEW = {"gale_mantle": "common", "gust_ward": "uncommon",
-       "windborne_resolve": "uncommon"}
+# Gust Ward left with the rebalance (2026-10-03): Storm Battery's place.
+NEW = {"gale_mantle": "common", "windborne_resolve": "uncommon"}
 GONE = ("squall", "four_banners", "favonian_standard")
 
 
@@ -122,16 +122,6 @@ def test_half_total_oath_is_zero_for_anyone_else():
     assert effects._runtime_count(st, "half_total_oath") == 0
 
 
-def test_gust_ward_is_0_cost_block_and_a_draw(varka):
-    card = loader.get_card(_vk("gust_ward"))
-    assert (card.cost, card.type) == (0, "skill")
-    assert _fx(_vk("gust_ward") + "+", "block")["amount"] == 6
-    st = _state()
-    _play(st, _vk("gust_ward"), energy=0)
-    assert st.player.block == 4
-    assert len(st.player.hand) == 1
-
-
 def test_windborne_resolve_rows(varka):
     card = loader.get_card(_vk("windborne_resolve"))
     assert (card.cost, card.type) == (1, "power")
@@ -142,7 +132,7 @@ def test_windborne_resolve_rows(varka):
     _play(st, _vk("windborne_resolve") + "+")
     assert st.player.powers[V.WINDBORNE_RESOLVE] == 5 + 7
     _play(st, _vk("kaeya_glacial_waltz"))             # None -> Cryo
-    assert st.player.block == 8 + 12
+    assert st.player.block == 5 + 12
 
 
 # ---------------------------------------------------------------------------

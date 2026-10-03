@@ -38,14 +38,14 @@ public sealed class ProtoVkAbsoluteZero : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForSwirl(base.ExtraHoverTips, this), this), this), this);
+        BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForOath(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_absolute_zero");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Absolute Zero"),
-        ("description", "While your [gold]current element[/gold] is Cryo, your [gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and [gold]Weak[/gold] to ALL enemies."),
+        ("description", "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal damage equal to your Cryo [gold]Oath[/gold] to it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

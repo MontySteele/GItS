@@ -56,7 +56,7 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor: Awakening"),
-        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies. Enemies that already have [gold]Electro[/gold] take {VkAmount:diff()} more."),
+        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -69,7 +69,7 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoVkRazorClawAndThunder()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 

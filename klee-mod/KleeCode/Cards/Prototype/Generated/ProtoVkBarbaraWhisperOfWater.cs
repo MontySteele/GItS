@@ -56,7 +56,7 @@ public sealed class ProtoVkBarbaraWhisperOfWater : CustomCardModel, ICompanionCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara: Whisper of Water"),
-        ("description", "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold] now and {BlockNextTurn:diff()} next turn."),
+        ("description", "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold] now and {VkAmount:diff()} at the start of your next 2 turns."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -65,7 +65,7 @@ public sealed class ProtoVkBarbaraWhisperOfWater : CustomCardModel, ICompanionCa
             new CalculationBaseVar(4m),
             new CalculationExtraVar(1m),
             new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
-            new SpotlightSystem.DeferredBlockVar(4m)
+            new DynamicVar("VkAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -80,12 +80,12 @@ public sealed class ProtoVkBarbaraWhisperOfWater : CustomCardModel, ICompanionCa
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Hydro, Owner.Creature);
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
-        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, (int)SpotlightSystem.PrintedBlock(this, DynamicVars["BlockNextTurn"].IntValue), applier: Owner.Creature, cardSource: this);
+        await VarkaCards.EchoBlock(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.CalculationBase.UpgradeValueBy(2m);
-        DynamicVars["BlockNextTurn"].UpgradeValueBy(2m);
+        DynamicVars["VkAmount"].UpgradeValueBy(2m);
     }
 }

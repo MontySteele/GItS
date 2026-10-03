@@ -152,13 +152,51 @@ public sealed class VarkaOathLedger
         return true;
     }
 
-    /// <summary>A new round clears the turn's Knight and Swirl counts.</summary>
+    /// <summary>Cards he played this turn, replays included (the rebalance's
+    /// Rippling Guard reads the others; the playing card counts itself).
+    /// </summary>
+    public int PlaysThisTurn { get; private set; }
+
+    /// <summary>A card play opened (<see cref="VarkaOath.BeginPlay"/>).
+    /// </summary>
+    public void NotePlay() => PlaysThisTurn++;
+
+    private readonly List<int[]> _echoBlock = new();
+
+    /// <summary>Whisper of Water (the rebalance, sec.3): <paramref
+    /// name="block"/> at the start of each of his next
+    /// <paramref name="turns"/> turns.</summary>
+    public void AddEchoBlock(int block, int turns)
+    {
+        if (block > 0 && turns > 0) _echoBlock.Add(new[] { block, turns });
+    }
+
+    /// <summary>The echo Block due this turn start, each entry spending a
+    /// turn. Returns the total.</summary>
+    public int TakeEchoBlock()
+    {
+        var total = 0;
+        foreach (var echo in _echoBlock)
+        {
+            total += echo[0];
+            echo[1]--;
+        }
+        _echoBlock.RemoveAll(e => e[1] <= 0);
+        return total;
+    }
+
+    /// <summary>The echo Block still owed, for a test.</summary>
+    public int EchoEntries => _echoBlock.Count;
+
+    /// <summary>A new round clears the turn's Knight, Swirl and play counts.
+    /// </summary>
     public void RollTo(int round)
     {
         if (round == _round) return;
         _round = round;
         KnightsThisTurn = 0;
         SwirlsThisTurn = 0;
+        PlaysThisTurn = 0;
     }
 
     // ---- reads ------------------------------------------------------------
@@ -441,9 +479,11 @@ public static class VarkaOath
         if (!Live(owner)) return;
         var ledger = VarkaOathLedger.For(owner!);
         ledger.OpenScope(open: !VarkaRules.IsKnight(card), card: card);
-        // WILDFIRE OATH (element identities sec.5): the turn's first Attack
-        // arms one bonus, which its first powered hit takes while Pyro is
-        // current (<see cref="WildfireOathPower"/>). A later Attack never does.
+        ledger.NotePlay();
+        // WILDFIRE OATH (element identities sec.5; the rebalance sec.2): the
+        // turn's first Attack arms one bonus, which its first powered hit
+        // takes, whatever is current (<see cref="WildfireOathPower"/>). A
+        // later Attack never does.
         if (card.Type == CardType.Attack && ledger.TakeFirstAttack())
         {
             var stacks = owner!.Powers.OfType<WildfireOathPower>().Sum(p => p.Amount);
@@ -554,7 +594,7 @@ public static class VarkaOath
             {
                 await unbound.OnElementChanged();
             }
-            // Cycle of Seasons (the expansion): damage to ALL enemies.
+            // Cycle of Seasons (the AoE trim): damage to a random enemy.
             foreach (var cycle in varka.Powers.OfType<CycleOfSeasonsPower>().ToList())
             {
                 await cycle.OnElementChanged(choiceContext);
@@ -707,16 +747,15 @@ public static class VarkaOath
     }
 
     /// <summary>
-    /// ONE SWIRL PAYOUT of <paramref name="element"/> (sec.3), with Absolute
-    /// Zero, only while the CURRENT element is Cryo: Cryo's Vulnerable, and a
-    /// Weak beside it, land on ALL enemies. (Wildfire Oath widened Pyro's
-    /// until element identities re-aimed it at one big hit, 2026-10-01.)
+    /// ONE SWIRL PAYOUT of <paramref name="element"/> (sec.3). (Wildfire Oath
+    /// widened Pyro's until element identities; Absolute Zero widened Cryo's
+    /// until the rebalance, 2026-10-03, made it a debuff payoff,
+    /// <see cref="AbsoluteZeroPower"/>.)
     /// </summary>
     private static async Task Pay(
         PlayerChoiceContext choiceContext, Creature target, Creature dealer,
         Element element)
     {
-        var ledger = VarkaOathLedger.For(dealer);
         var enemies = dealer.CombatState?.HittableEnemies.ToList()
                       ?? new List<Creature>();
         switch (element)
@@ -734,21 +773,7 @@ public static class VarkaOath
                     ValueProp.Unpowered, null, fast: true);
                 break;
             case Element.Cryo:
-                if (ledger.Current == Element.Cryo
-                    && dealer.HasPower<AbsoluteZeroPower>())
-                {
-                    foreach (var enemy in enemies)
-                    {
-                        if (!enemy.IsAlive) continue;
-                        await PowerCmd.Apply<VulnerablePower>(
-                            choiceContext, enemy, VarkaLaw.SwirlCryoVulnerable,
-                            applier: dealer, cardSource: null);
-                        await PowerCmd.Apply<WeakPower>(
-                            choiceContext, enemy, VarkaLaw.AbsoluteZeroWeak,
-                            applier: dealer, cardSource: null);
-                    }
-                }
-                else if (target.IsAlive)
+                if (target.IsAlive)
                 {
                     await PowerCmd.Apply<VulnerablePower>(
                         choiceContext, target, VarkaLaw.SwirlCryoVulnerable,
@@ -767,11 +792,11 @@ public static class VarkaOath
         }
     }
 
-    /// <summary>Wildfire Oath's bonus on the armed hit (element identities
-    /// sec.5): his Pyro Oath per stack, while Pyro is current; else 0. PURE.
-    /// </summary>
-    public static int WildfireBonus(Element current, int pyroOath, int stacks) =>
-        current == Element.Pyro && stacks > 0 ? stacks * pyroOath : 0;
+    /// <summary>Wildfire Oath's bonus on the armed hit (the rebalance,
+    /// sec.2): half his Pyro Oath, rounded down, per stack, whatever element
+    /// is current. PURE.</summary>
+    public static int WildfireBonus(int pyroOath, int stacks) =>
+        stacks > 0 ? stacks * (pyroOath / 2) : 0;
 
     /// <summary>
     /// ELEMENT IDENTITIES sec.7: would playing <paramref name="card"/> now
@@ -828,6 +853,14 @@ public static class VarkaOath
     {
         var varka = player.Creature;
         if (!Live(varka)) return;
+        // Whisper of Water (the rebalance, sec.3): "and at the start of your
+        // next 2 turns". Unpowered, as BlockNextTurnPower's payout is.
+        var echo = VarkaOathLedger.For(varka).TakeEchoBlock();
+        if (echo > 0)
+        {
+            await CreatureCmd.GainBlock(varka, echo, ValueProp.Unpowered, null,
+                                        fast: true);
+        }
         // Weathervane (the expansion), first: Sworn Brotherhood below then
         // gains the element it chose. It names the switch, so Unwavering
         // Banner does not stop it.
@@ -1215,24 +1248,135 @@ public static class VarkaCards
                                       bool hadElectro) =>
         (int)(baseDamage + (hadElectro ? bonus : 0m));
 
-    /// <summary>Razor: Awakening: "Deal 4 [6] Electro damage to ALL enemies.
-    /// Enemies that already have Electro take 3 more." Who already wore it,
-    /// fresh or spent, is read before the first hit.</summary>
+    /// <summary>Razor: Awakening (the AoE trim, sec.4): "Deal 4 [6] Electro
+    /// damage to an enemy. If it already has Electro, deal 3 more." Whether it
+    /// wore Electro, fresh or spent, is read before the hit.</summary>
     public static async Task Awakening(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        if (cardPlay.Target is not { IsAlive: true } target) return;
+        var had = AuraCmd.Find(target) is { Element: Element.Electro };
+        await ElementHit(choiceContext, card, cardPlay, target,
+            AwakeningDamage(Var(card, "VkBase"), Var(card, "VkAmount"), had),
+            Element.Electro);
+    }
+
+    // ---- THE REBALANCE (2026-10-03, review/active/varka-rebalance-2026-10-03.md
+    // secs.3-4). Sim twins: varka_oath._rebalance_kind.
+
+    /// <summary>Kindled Edge: "Deal 7 [10] Pyro damage. If it sets off an
+    /// Elemental Reaction, deal 7 [10] more." The more is a second hit on the
+    /// same enemy with no element (a second application is not printed).
+    /// The reaction is read off the target's aura: it wore one Pyro reacts
+    /// with, and the hit consumed it.</summary>
+    public static async Task KindledEdge(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null || cardPlay.Target is not { IsAlive: true } target) return;
+        var amount = Var(card, "VkBase");
+        var before = ReactionEffects.TotalResolved;
+        await ElementHit(choiceContext, card, cardPlay, target, amount,
+                         Element.Pyro);
+        if (ReactionEffects.TotalResolved > before && target.IsAlive)
+        {
+            await DamageCmd.Attack(amount)
+                .FromCard(card, cardPlay)
+                .Targeting(target)
+                .Execute(choiceContext);
+        }
+    }
+
+    /// <summary>Storm Battery: "Deal 2 [3] Electro damage to ALL enemies for
+    /// each other card in your hand." The card has left the hand when it
+    /// resolves, so the hand is the others.</summary>
+    public static async Task StormBattery(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var player = card.Owner;
+        var combat = player?.Creature?.CombatState;
+        if (player == null || combat == null) return;
+        var others = PileType.Hand.GetPile(player).Cards.Count(c => c != card);
+        var damage = Var(card, "VkPer") * others;
+        if (damage <= 0) return;
+        foreach (var enemy in combat.HittableEnemies.ToList())
+        {
+            await ElementHit(choiceContext, card, cardPlay, enemy, damage,
+                             Element.Electro);
+        }
+    }
+
+    /// <summary>Frost Ward: "Apply 1 Weak to each enemy with an aura. Gain
+    /// 3 [4] Block for each." The enemies wearing an aura, fresh or spent,
+    /// when it is played.</summary>
+    public static async Task FrostWard(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
         var owner = card.Owner?.Creature;
         if (owner?.CombatState == null) return;
-        var enemies = owner.CombatState.HittableEnemies.ToList();
-        var had = enemies.Where(e => AuraCmd.Find(e) is { Element: Element.Electro })
-            .ToHashSet();
-        foreach (var enemy in enemies)
+        var marked = owner.CombatState.HittableEnemies
+            .Where(e => e.IsAlive && AuraCmd.Find(e) != null).ToList();
+        foreach (var enemy in marked)
         {
-            await ElementHit(choiceContext, card, cardPlay, enemy,
-                AwakeningDamage(Var(card, "VkBase"), Var(card, "VkAmount"),
-                                had.Contains(enemy)),
-                Element.Electro);
+            await PowerCmd.Apply<WeakPower>(choiceContext, enemy, 1,
+                                            applier: owner, cardSource: card);
         }
+        await GainCardBlock(owner, Var(card, "VkAmount") * marked.Count,
+                            cardPlay);
+    }
+
+    /// <summary>Barbara: Gleeful Songs: "Apply Hydro to ALL enemies. Gain
+    /// 4 [6] Block, plus 3 [4] for each enemy it reacts on."</summary>
+    public static async Task GleefulSongs(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner?.CombatState == null) return;
+        var reacted = 0;
+        foreach (var enemy in owner.CombatState.HittableEnemies.ToList())
+        {
+            var before = ReactionEffects.TotalResolved;
+            await ElementalHit.ApplyOnly(choiceContext, enemy, Element.Hydro,
+                                         owner);
+            if (ReactionEffects.TotalResolved > before) reacted++;
+        }
+        await GainCardBlock(owner,
+            Var(card, "VkBase") + Var(card, "VkPer") * reacted, cardPlay);
+    }
+
+    /// <summary>Rippling Guard: "Gain 3 Block, plus 2 [3] for each other card
+    /// you played this turn." The ledger counts this play too.</summary>
+    public static async Task RipplingGuard(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null || !VarkaOath.Live(owner)) return;
+        var others = System.Math.Max(
+            0, VarkaOathLedger.For(owner).PlaysThisTurn - 1);
+        await GainCardBlock(owner,
+            Var(card, "VkBase") + Var(card, "VkPer") * others, cardPlay);
+    }
+
+    /// <summary>Whisper of Water's "and at the start of your next 2 turns":
+    /// the ledger pays it at <see cref="VarkaOath.TurnStart"/>.</summary>
+    public static Task EchoBlock(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner != null && VarkaOath.Live(owner))
+        {
+            VarkaOathLedger.For(owner).AddEchoBlock(
+                (int)Var(card, "VkAmount"), VarkaLaw.EchoBlockTurns);
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>A card's printed Block, powered (Dexterity, Frail).</summary>
+    private static async Task GainCardBlock(
+        Creature owner, decimal amount, CardPlay cardPlay)
+    {
+        if (amount <= 0) return;
+        await CreatureCmd.GainBlock(owner, amount, ValueProp.Move, cardPlay);
     }
 
     /// <summary>Lisa: Pulsating Witch: "Draw 1 card for each enemy."

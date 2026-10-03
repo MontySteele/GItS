@@ -109,8 +109,7 @@ def test_his_rows_always_resolve_and_his_verbs_refuse_anyone_else():
     st = CombatState(player=Player(hp=80, max_hp=80, character_id="klee"),
                      enemies=[_enemy()], rng=random.Random(0))
     assert V.ledger(st.player) is None
-    card = [c for c in loader.prototype_cards()
-            if c.id == _vk("favonius_drill")][0]
+    card = _drill()
     with pytest.raises(NotImplementedError):
         effects.OPS["varka"](st, card.effects[1], card)
     assert V.predicate(st, "has_current_element") is False
@@ -200,7 +199,7 @@ def test_a_knight_sets_the_current_element_before_its_effects(varka):
     led = _led(st)
     assert led.current == "pyro"
     assert led.oath == {"pyro": 1, "hydro": 0, "electro": 0, "cryo": 0}
-    assert st.player.block == 8
+    assert st.player.block == 5                         # the rebalance's Amber
     assert st.enemies[0].aura == "pyro"
 
 
@@ -262,6 +261,29 @@ def test_ascension_with_no_current_element_deals_its_anemo_only(varka):
 # 2b. The open Oath ([USER], 2026-09-30): any card of his that applies Pyro,
 #     Hydro, Cryo or Electro sets his current element and gains 1 Oath of it.
 # ---------------------------------------------------------------------------
+
+def _skill(*effects):
+    """A non-Knight Skill of his carrying `effects` (the rebalance retired
+    the rows these pins used to borrow: Favonius Drill and Wind Wall)."""
+    import copy
+    card = copy.deepcopy(loader.get_card(_vk("knightly_guard")))
+    card.effects = [dict(fx) for fx in effects]
+    return card
+
+
+def _drill():
+    """Favonius Drill's old row: Block 6, apply the current element."""
+    return _skill({"op": "block", "amount": 6},
+                  {"op": "varka", "kind": "apply_current_element",
+                   "target": "enemy"})
+
+
+def _wind_wall():
+    """Wind Wall's old row: Block 7, 3 more with a current element."""
+    return _skill({"op": "block", "amount": 7},
+                  {"op": "conditional", "if": "has_current_element",
+                   "then": [{"op": "block", "amount": 3}]})
+
 
 def _applier(*elements, target="enemy"):
     """A non-Knight card of his that applies `elements` in order."""
@@ -329,8 +351,8 @@ def test_baron_bunnys_burst_does_not_switch(varka):
 def test_favonius_drill_counts_under_the_open_oath(varka):
     st = _state(fang=False)
     _led(st).current = "electro"
-    _play(st, _vk("favonius_drill"))
-    _play(st, _vk("favonius_drill"))
+    _play(st, _drill())
+    _play(st, _drill())
     assert _led(st).oath["electro"] == 2
 
 
@@ -382,11 +404,11 @@ def test_windborne_resolve_pays_on_every_change(varka):
     st = _state(fang=False)
     st.player.powers[V.WINDBORNE_RESOLVE] = 5
     _play(st, _vk("amber_fiery_rain"))                  # None -> Pyro
-    assert st.player.block == 8 + 5
+    assert st.player.block == 5 + 5
     _play(st, _vk("amber_fiery_rain"))                  # already current
-    assert st.player.block == 8 + 5 + 8
+    assert st.player.block == 5 + 5 + 5
     _play(st, _applier("hydro"))                        # the open Oath
-    assert st.player.block == 8 + 5 + 8 + 5
+    assert st.player.block == 5 + 5 + 5 + 5
 
 
 def test_boreas_unbound_pays_on_every_change(varka):
@@ -409,11 +431,11 @@ def test_dawn_winds_march_pays_on_a_gain_of_the_current_element(varka):
     st = _state(fang=False)
     st.player.powers[V.DAWN_WINDS_MARCH] = 3
     _play(st, _vk("amber_fiery_rain"))                  # current set first
-    assert st.player.block == 8 + 3
+    assert st.player.block == 5 + 3
     V.gain(st, "hydro", 1)                              # not current
-    assert st.player.block == 11
+    assert st.player.block == 8
     V.gain(st, "pyro", 2)                               # one gain event
-    assert st.player.block == 14
+    assert st.player.block == 11
 
 
 def test_the_turn_start_order_bunny_sworn_oath_of_the_knights(varka):
@@ -480,8 +502,8 @@ def test_grand_masters_order_plays_the_next_knight_twice(varka):
     st = _state(fang=False)
     _play(st, _vk("grand_masters_order"))
     _play(st, _vk("barbara_melody_loop"))
-    # two Knight plays, 8 each
-    assert st.player.block == 8 + 8
+    # two Knight plays, 6 each (the rebalance's Barbara)
+    assert st.player.block == 6 + 6
     assert _led(st).knights_this_turn == 2
     assert V.GRAND_MASTERS_ORDER not in st.player.powers
     _play(st, _vk("barbara_melody_loop"))               # spent: once
@@ -544,10 +566,10 @@ def test_no_fang_no_ascension(varka):
 
 def test_apply_current_element(varka):
     st = _state(fang=False)
-    _play(st, _vk("favonius_drill"))
+    _play(st, _drill())
     assert st.enemies[0].aura is None and st.player.block == 6
     _led(st).current = "electro"
-    _play(st, _vk("favonius_drill"))
+    _play(st, _drill())
     assert st.enemies[0].aura == "electro"
     assert _led(st).oath["electro"] == 1
 
@@ -596,12 +618,12 @@ def test_change_of_guard(varka):
     st = _state(fang=False)
     card = loader.get_card(_vk("change_of_guard"))
     assert card.cost == 0 and not card.exhaust
-    st.player.draw_pile = [loader.get_card(_vk("favonius_drill"))
+    st.player.draw_pile = [loader.get_card(_vk("knightly_guard"))
                            for _ in range(6)]
     st.player.hand = []
     _play(st, card)                                     # no Oath: draws only
     assert _led(st).current is None and st.player.block == 0
-    assert _hand_ids(st) == [_vk("favonius_drill")]
+    assert _hand_ids(st) == [_vk("knightly_guard")]
     assert card in st.player.discard_pile               # no Exhaust
     led = _led(st)
     led.oath.update(pyro=2, hydro=3, electro=3)
@@ -658,10 +680,10 @@ def test_the_counts(varka):
 
 def test_the_predicates(varka):
     st = _state(fang=False)
-    _play(st, _vk("wind_wall"))
+    _play(st, _wind_wall())
     assert st.player.block == 7
     _led(st).current = "pyro"
-    _play(st, _vk("wind_wall"))
+    _play(st, _wind_wall())
     assert st.player.block == 7 + 10
     block = st.player.block
     _play(st, _vk("crosswind"))                         # no aura: no Swirl
@@ -680,7 +702,7 @@ def test_the_predicates(varka):
 def test_a_varka_fight_runs_to_the_end(varka):
     from tier0.pilot.policy import make_pilot
     player = V.build_player("electro", extra=(
-        _vk("gale_sweep"), _vk("storm_surge"), _vk("favonius_drill"),
+        _vk("gale_sweep"), _vk("storm_surge"), _vk("frost_ward"),
         _vk("sworn_brotherhood"), _vk("amber_baron_bunny")))
     enemies = loader.build_encounter("punisher")
     pilot = make_pilot(loader.pilot_weights("generic"))

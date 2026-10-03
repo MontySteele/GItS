@@ -49,22 +49,21 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this, Element.Hydro);
+        ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Hydro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_barbara_show_begin");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara: Gleeful Songs"),
-        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {CalculatedBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy it reacts on."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(5m),
-            new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
+            new DynamicVar("VkBase", 4m),
+            new DynamicVar("VkPer", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -76,15 +75,12 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
-        {
-            await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Hydro, Owner.Creature);
-        }
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
+        await VarkaCards.GleefulSongs(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(2m);
+        DynamicVars["VkPer"].UpgradeValueBy(1m);
+        DynamicVars["VkBase"].UpgradeValueBy(2m);
     }
 }

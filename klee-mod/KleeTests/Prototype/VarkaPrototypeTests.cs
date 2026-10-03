@@ -453,8 +453,10 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Each_starter_knight_is_eight_block_and_its_element()
+    public void Each_starter_knight_is_its_element()
     {
+        // The rebalance (sec.5): four different starters, one per element;
+        // their numbers are pinned in VarkaRebalanceTests.
         var knights = new (CardModel Card, Element Element)[]
         {
             (new ProtoVkAmberFieryRain(), Element.Pyro),
@@ -465,13 +467,11 @@ public class VarkaPrototypeTests : IDisposable
         foreach (var (card, element) in knights)
         {
             Assert.Equal(CardRarity.Basic, card.Rarity);
-            Assert.Equal(8m, Var(card, "CalculationBase"));
             Assert.Equal(element, VarkaOath.KnightElement(card));
             Assert.True(VarkaRules.IsStarterKnight(card));
-            Assert.Contains("ElementalHit.ApplyOnly",
+            Assert.Contains("CreatureCmd.GainBlock",
                             Il.Calls(Il.Method(card.GetType().Name, "OnPlay")));
         }
-        Assert.Equal(11m, Var(Upgraded<ProtoVkKaeyaGlacialWaltz>(), "CalculationBase"));
         Assert.Equal(knights.Select(k => $"ModelDb.Card<{k.Card.GetType().Name}>"),
                      Cards("VarkaRules", "StarterKnights"));
     }
@@ -479,8 +479,6 @@ public class VarkaPrototypeTests : IDisposable
     [Fact]
     public void The_verbs_are_one_call_each()
     {
-        Assert.Contains("VarkaCards.ApplyCurrentElement",
-                        Il.Calls(Il.Method("ProtoVkFavoniusDrill", "OnPlay")));
         Assert.Contains("ElementalHit.ApplyOnly",
                         Il.Calls(Il.Method("VarkaCards", "ApplyCurrentElement")));
         Assert.Contains("VarkaOath.Gain",
@@ -593,7 +591,7 @@ public class VarkaPrototypeTests : IDisposable
         // Jean is a Skill that sets no element; his own Attacks are not Knights.
         Assert.False(VarkaRules.IsKnight(new ProtoVkJeanDandelionBreeze()));
         Assert.False(VarkaRules.IsKnight(new ProtoVkWindboundExecution()));
-        Assert.Equal(Element.None, VarkaOath.KnightElement(new ProtoVkFavoniusDrill()));
+        Assert.Equal(Element.None, VarkaOath.KnightElement(new ProtoVkFrostWard()));
     }
 
     [Fact]

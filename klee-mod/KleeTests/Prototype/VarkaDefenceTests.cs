@@ -81,20 +81,6 @@ public class VarkaDefenceTests : IDisposable
     }
 
     [Fact]
-    public void Gust_ward_is_0_cost_block_and_a_draw()
-    {
-        var ward = new ProtoVkGustWard();
-        Assert.Equal(CardType.Skill, ward.Type);
-        Assert.Equal(CardRarity.Uncommon, ward.Rarity);
-        Assert.Equal(0, ward.EnergyCost.Canonical);
-        Assert.Equal(4m, Var(ward, "Block"));
-        Assert.Equal(6m, Var(Upgraded<ProtoVkGustWard>(), "Block"));
-        var play = Calls("ProtoVkGustWard", "OnPlay");
-        Assert.Contains("CreatureCmd.GainBlock", play);
-        Assert.Contains("CardPileCmd.Draw", play);
-    }
-
-    [Fact]
     public void Windborne_resolve_pays_block_on_every_change()
     {
         var resolve = new ProtoVkWindborneResolve();

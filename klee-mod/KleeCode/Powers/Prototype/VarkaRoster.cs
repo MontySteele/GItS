@@ -70,8 +70,8 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkGaleMantle>(),        // Varka defence
         ModelDb.Card<ProtoVkChargedLunge>(),      // element identities
         ModelDb.Card<ProtoVkGaleSweep>(),
-        ModelDb.Card<ProtoVkWindWall>(),
-        ModelDb.Card<ProtoVkFavoniusDrill>(),
+        ModelDb.Card<ProtoVkRipplingGuard>(),     // the rebalance
+        ModelDb.Card<ProtoVkFrostWard>(),         // the rebalance
         ModelDb.Card<ProtoVkAmberBaronBunny>(),
         ModelDb.Card<ProtoVkBarbaraShowBegin>(),
         ModelDb.Card<ProtoVkLisaVioletArc>(),
@@ -111,7 +111,7 @@ internal static class VarkaRoster
         // THE EXPANSION (2026-10-01): thirty-seven, in the sheet's order.
         // Common (5)
         ModelDb.Card<ProtoVkPathfindersMark>(),
-        ModelDb.Card<ProtoVkCavalryCharge>(),
+        ModelDb.Card<ProtoVkKindledEdge>(),       // the rebalance
         ModelDb.Card<ProtoVkWestWindShield>(),
         ModelDb.Card<ProtoVkKnightlyStrike>(),
         ModelDb.Card<ProtoVkAmberSharpshooter>(),
@@ -127,7 +127,7 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkUnwaveringBanner>(),
         ModelDb.Card<ProtoVkShiftingGale>(),
         ModelDb.Card<ProtoVkCycleOfSeasons>(),
-        ModelDb.Card<ProtoVkGustWard>(),          // Varka defence
+        ModelDb.Card<ProtoVkStormBattery>(),      // the rebalance
         ModelDb.Card<ProtoVkEyeWall>(),
         ModelDb.Card<ProtoVkShortCircuit>(),      // element identities
         ModelDb.Card<ProtoVkCrosscurrent>(),

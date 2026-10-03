@@ -331,20 +331,24 @@ SIM_CALL_SITES = {
     # unpowered, his card's (`ElementalHit.DealUnelemented(powered: false)`).
     ('varka_oath.py', 3): ("'card'", 'False', 'None'),
     ('varka_oath.py', 4): ("'card'", 'False', 'None'),
+    # The rebalance paper's Absolute Zero (sim only, behind
+    # `varka_oath.REBALANCE`): a Power's damage per Weak or Vulnerable he
+    # applies, element-less and unpowered.
+    ('varka_oath.py', 5): ("'card'", 'False', 'None'),
     # Baron Bunny's next-turn burst: Pyro to ALL, unpowered.
-    ('varka_oath.py', 5): ("'card'", 'False', "'pyro'"),
+    ('varka_oath.py', 6): ("'card'", 'False', "'pyro'"),
     # Element identities (2026-10-01): Retaliating Tide, a Power's damage at
     # his turn's end, element-less and unpowered.
-    ('varka_oath.py', 6): ("'card'", 'False', 'None'),
+    ('varka_oath.py', 7): ("'card'", 'False', 'None'),
     # Four Winds' Ascension's and Northwind Avatar's elemental follow-up: a
     # powered hit of the card, carrying his current element.
-    ('varka_oath.py', 7): ('source', None, 'led.current'),
+    ('varka_oath.py', 8): ('source', None, 'led.current'),
     # The expansion's element hits (Cavalry Charge, Blazing Charge,
     # Thundering Verdict, Razor, Tempest): a powered hit of the card,
     # carrying the element the card names.
-    ('varka_oath.py', 8): ('source', None, 'element'),
+    ('varka_oath.py', 9): ('source', None, 'element'),
     # Storm Surge's "each enemy it Swirls takes 5 more": element-less, powered.
-    ('varka_oath.py', 9): ("'attack' if card.type == 'attack' else 'card'",
+    ('varka_oath.py', 10): ("'attack' if card.type == 'attack' else 'card'",
                            None, 'None'),
 }
 
@@ -547,11 +551,13 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
     # (`VarkaCards.CurrentElementHit`), an Attack's hit for the same reason.
     # The expansion (2026-10-01) adds `VarkaCards.ElementHit`, the same hit
     # carrying the element the card names (Blazing Charge, Thundering
-    # Verdict, Razor, Tempest, Cavalry Charge).
+    # Verdict, Razor, Tempest). The rebalance (2026-10-03) adds Kindled
+    # Edge's "deal 7 more": the card's own second hit, with no element.
     assert [path for path, _line in sites] == [
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBombPower.cs",
+        "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaRules.cs"]
