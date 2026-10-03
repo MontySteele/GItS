@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -174,6 +175,32 @@ public static class FurinaStagePlacement
     /// Lay the stage out front-to-back. A no-op with no room, no node or no
     /// stage.
     /// </summary>
+    /// <summary>The seat key of the lead each Furina last showed, so the
+    /// shine marks a CHANGE of lead and not every reflow.</summary>
+    private static readonly ConditionalWeakTable<Creature, StrongBox<int?>> LastLead = new();
+
+    /// <summary>
+    /// THE SPOTLIGHT, ON THE STAGE (motion pass, 2026-10-02). The shipped
+    /// kit's Spotlight was a mode Furina designated, and its beam
+    /// (<c>furina/vfx/spotlight_shine.tscn</c>) fired once per designation;
+    /// that funnel was deleted with the shipped kits (5a1e9e19). On the stage
+    /// the spotlight is the FRONT seat -- the lead takes the hits and is the
+    /// one <i>Bis!</i> repeats -- so the beam now falls on a performer the
+    /// moment it becomes the lead: the first summon of a fight, a Step
+    /// Forward, or the next performer moving up after a Bow.
+    /// </summary>
+    internal static bool LeadChanged(int? lastKey, int? nowKey) =>
+        nowKey is not null && nowKey != lastKey;
+
+    private static void ShineOnNewLead(Creature furina, StageSeat? lead)
+    {
+        var box = LastLead.GetOrCreateValue(furina);
+        int? now = lead?.Pet is { IsDead: false } ? lead.Key : null;
+        var changed = LeadChanged(box.Value, now);
+        box.Value = now;
+        if (changed) Vfx.KleeCombatVfx.SpawnSpotlightShine(lead!.Pet);
+    }
+
     public static void Reflow(Creature? furina)
     {
         if (!FurinaStage.LiveFor(furina)) return;
@@ -209,6 +236,8 @@ public static class FurinaStagePlacement
                 line[slot].Position = new Vector2(
                     centres[slot], owner.Position.Y + OwnerYOffset);
             }
+
+            ShineOnNewLead(furina!, seats.Count > 0 ? seats[0] : null);
         }
         catch (Exception e)
         {

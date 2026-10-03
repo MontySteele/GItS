@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3]
+[gd_scene load_steps=36 format=3]
 
 [ext_resource type="Texture2D" path="res://klee/model/layers/klee_combat_smoke.png" id="1_smoke"]
 [ext_resource type="Texture2D" path="res://klee/model/layers/klee_combat_floaters.png" id="2_floaters"]
@@ -326,14 +326,255 @@ tracks/2/keys = {
 "values": [Vector2(0, -140), Vector2(0, -128)]
 }
 
+[sub_resource type="Animation" id="Animation_cast"]
+resource_name = "cast"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Rig:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.12, 0.4),
+"transitions": PackedFloat32Array(0.5, 1.6, 1),
+"update": 0,
+"values": [Vector2(0, -140), Vector2(0, -152), Vector2(0, -140)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Rig:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.12, 0.4),
+"transitions": PackedFloat32Array(0.5, 1.6, 1),
+"update": 0,
+"values": [0.0, -0.04, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Rig:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.12, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1.3, 1.18, 0.95, 1), Color(1, 1, 1, 1)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Rig/Dodoco:position")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.4),
+"transitions": PackedFloat32Array(0.5, 1.6, 1),
+"update": 0,
+"values": [Vector2(27.5, 31.5), Vector2(27.5, 22), Vector2(27.5, 31.5)]
+}
+
+[sub_resource type="Animation" id="Animation_power"]
+resource_name = "power"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Rig:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.18, 0.32, 0.5),
+"transitions": PackedFloat32Array(0.5, 1.6, 1, 1),
+"update": 0,
+"values": [Vector2(0, -140), Vector2(0, -158), Vector2(0, -156), Vector2(0, -140)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Rig:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.18, 0.5),
+"transitions": PackedFloat32Array(0.5, 1.6, 1),
+"update": 0,
+"values": [0.0, -0.06, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Rig:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.18, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1.45, 1.2, 0.85, 1), Color(1, 1, 1, 1)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Rig/Smoke:position")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(18, -36), Vector2(22, -46), Vector2(18, -36)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Rig/Floaters:position")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0, 12), Vector2(0, 4), Vector2(0, 12)]
+}
+
+[sub_resource type="Animation" id="Animation_idle_low"]
+resource_name = "idle_low"
+length = 4
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Rig:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0, -133), Vector2(0, -131.5), Vector2(0, -133)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Rig:rotation")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.035, 0.045, 0.035]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Rig:modulate")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0.88, 0.84, 0.84, 1), Color(0.88, 0.84, 0.84, 1)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Rig/Smoke:position")
+tracks/3/interp = 2
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(18, -33), Vector2(19, -32.5), Vector2(18, -33)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Rig/Floaters:position")
+tracks/4/interp = 2
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0, 16), Vector2(0, 17), Vector2(0, 16)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Visuals/Facing/Rig/Dumpty:position")
+tracks/5/interp = 2
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(-51, -80), Vector2(-51, -81.5), Vector2(-51, -80)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Visuals/Facing/Rig/Body:position")
+tracks/6/interp = 2
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(4, 43.5), Vector2(4, 45.5), Vector2(4, 43.5)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Rig/Dodoco:position")
+tracks/7/interp = 2
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(27.5, 34), Vector2(27.5, 35.5), Vector2(27.5, 34)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Rig/Dodoco:rotation")
+tracks/8/interp = 2
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.08, 0.1, 0.08]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_klee"]
 _data = {
 &"RESET": SubResource("Animation_reset"),
 &"attack": SubResource("Animation_attack"),
+&"cast": SubResource("Animation_cast"),
 &"death": SubResource("Animation_death"),
 &"hurt": SubResource("Animation_hurt"),
-&"idle": SubResource("Animation_idle")
+&"idle": SubResource("Animation_idle"),
+&"idle_low": SubResource("Animation_idle_low"),
+&"power": SubResource("Animation_power")
 }
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_cast"]
+animation = &"cast"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_power"]
+animation = &"power"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_idle_low"]
+animation = &"idle_low"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_attack"]
 animation = &"attack"
@@ -377,18 +618,42 @@ advance_mode = 2
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_death"]
 advance_mode = 0
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_cast_idle"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_idle"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_idle_low"]
+xfade_time = 0.4
+advance_mode = 2
+advance_condition = &"low_hp"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_idle"]
+xfade_time = 0.4
+advance_mode = 2
+advance_condition = &"healthy"
+
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_klee"]
 states/End/position = Vector2(628, 153)
 states/Start/position = Vector2(186, 153)
 states/attack/node = SubResource("AnimationNodeAnimation_attack")
 states/attack/position = Vector2(327, 64)
+states/cast/node = SubResource("AnimationNodeAnimation_cast")
+states/cast/position = Vector2(186, 64)
 states/death/node = SubResource("AnimationNodeAnimation_death")
 states/death/position = Vector2(470, 153)
 states/hurt/node = SubResource("AnimationNodeAnimation_hurt")
 states/hurt/position = Vector2(327, 278)
 states/idle/node = SubResource("AnimationNodeAnimation_idle")
 states/idle/position = Vector2(327, 153)
-transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "death", SubResource("Transition_idle_death"), "idle", "hurt", SubResource("Transition_idle_hurt"), "hurt", "idle", SubResource("Transition_hurt_idle"), "death", "End", SubResource("Transition_death_end"), "hurt", "death", SubResource("Transition_hurt_death"), "idle", "attack", SubResource("Transition_idle_attack"), "attack", "idle", SubResource("Transition_attack_idle"), "attack", "death", SubResource("Transition_attack_death")]
+states/idle_low/node = SubResource("AnimationNodeAnimation_idle_low")
+states/idle_low/position = Vector2(327, 365)
+states/power/node = SubResource("AnimationNodeAnimation_power")
+states/power/position = Vector2(470, 64)
+transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "death", SubResource("Transition_idle_death"), "idle", "hurt", SubResource("Transition_idle_hurt"), "hurt", "idle", SubResource("Transition_hurt_idle"), "death", "End", SubResource("Transition_death_end"), "hurt", "death", SubResource("Transition_hurt_death"), "idle", "attack", SubResource("Transition_idle_attack"), "attack", "idle", SubResource("Transition_attack_idle"), "attack", "death", SubResource("Transition_attack_death"), "cast", "idle", SubResource("Transition_cast_idle"), "power", "idle", SubResource("Transition_power_idle"), "idle", "idle_low", SubResource("Transition_idle_idle_low"), "idle_low", "idle", SubResource("Transition_idle_low_idle")]
 
 [node name="KleeCombat" type="Node2D"]
 

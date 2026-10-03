@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 using HarmonyLib;
@@ -26,6 +27,13 @@ namespace KleeMod.Vfx;
 /// script-less by pipeline rule (see pck-src/README.md), so the routing target
 /// is found by node lookup instead of an interface on a scene script.
 ///
+/// THE SCENE CONTRACT is the four states idle/attack/hurt/death (+ RESET),
+/// plus three OPTIONAL ones a scene may add (motion pass, 2026-10-02):
+/// <c>cast</c> (Skill plays), <c>power</c> (Power plays) and <c>idle_low</c>
+/// (HP at or under 25%). Each optional state is looked up on the scene's own
+/// state machine and falls back silently when absent (see
+/// <see cref="SelectState"/>).
+///
 /// Inert by construction for every creature whose visuals carry no
 /// %AnimationTree — which today is everything, including the static Track-A
 /// Klee scene. The lookup is per-trigger, not per-frame: triggers fire a
@@ -35,23 +43,91 @@ namespace KleeMod.Vfx;
 internal static class CreatureAnimationRouter
 {
     /// <summary>
-    /// Game trigger -> AnimationTree state. The scene contract is exactly the
-    /// four states idle/attack/hurt/death (+ RESET), per the sprint plan (B2).
-    /// Cast and PowerUp share the attack lunge until the [USER] look pass says
-    /// otherwise; Revive returns to idle. Unknown triggers are ignored —
-    /// never forced to idle — so a future game trigger cannot yank a
-    /// mid-flight animation.
+    /// Game trigger -> the AnimationTree states that may answer it, in order
+    /// of preference. The FIRST state the scene's state machine actually has
+    /// wins, so a scene opts in to a richer state by carrying it and a scene
+    /// without it falls back silently -- which is how Kokomi's and Varka's
+    /// scenes, or any future one, work with no code change.
+    ///
+    /// Cast and PowerUp have states of their own since the motion pass
+    /// (2026-10-02): the base game plays a separate cast clip for both
+    /// (<c>CharacterModel.AnimationStates</c>: Cast and PowerUp both map to
+    /// "cast"), and our scenes may also carry a distinct "power" state. A
+    /// scene with neither keeps the old attack-lunge alias. Revive returns to
+    /// idle. Unknown triggers are ignored -- never forced to idle -- so a
+    /// future game trigger cannot yank a mid-flight animation.
+    ///
+    /// THE LAST ENTRY OF EACH ROW IS THE REQUIRED CONTRACT (idle, attack,
+    /// hurt, death); everything before it is optional. Literals on purpose:
+    /// `tools/visual_qa/scene_deps.py` and `tools/animation_bakeoff/spec.py`
+    /// copy this table and their pins parse it.
     /// </summary>
-    private static readonly Dictionary<string, string> TriggerToState = new()
+    private static readonly Dictionary<string, string[]> TriggerToStates = new()
     {
-        ["Idle"] = "idle",
-        ["Revive"] = "idle",
-        ["Attack"] = "attack",
-        ["Cast"] = "attack",
-        ["PowerUp"] = "attack",
-        ["Hit"] = "hurt",
-        ["Dead"] = "death",
+        ["Idle"] = new[] { "idle" },
+        ["Revive"] = new[] { "idle" },
+        ["Attack"] = new[] { "attack" },
+        ["Cast"] = new[] { "cast", "attack" },
+        ["PowerUp"] = new[] { "power", "cast", "attack" },
+        ["Hit"] = new[] { "hurt" },
+        ["Dead"] = new[] { "death" },
     };
+
+    internal const string IdleState = "idle";
+    internal const string LowHealthIdleState = "idle_low";
+    internal const string CastState = "cast";
+    internal const string PowerState = "power";
+
+    /// <summary>
+    /// The two AnimationTree conditions the low-HP idle hangs off. A scene
+    /// that carries <see cref="LowHealthIdleState"/> wires
+    /// <c>idle -> idle_low</c> on <c>low_hp</c> and <c>idle_low -> idle</c>
+    /// on <c>healthy</c> (both auto, cross-faded), so every one-shot that
+    /// returns to idle lands on the right one with no extra code -- the shape
+    /// of the base's own <c>AddNextState(idle, !IsLowHealth)</c> /
+    /// <c>AddNextState(low_health_loop, IsLowHealth)</c> pair.
+    /// </summary>
+    internal const string LowHealthCondition = "parameters/conditions/low_hp";
+    internal const string HealthyCondition = "parameters/conditions/healthy";
+
+    /// <summary>The base's own line: <c>CharacterModel.IsLowHealth</c> is
+    /// <c>GetHpPercentRemaining() &lt;= 0.25</c>.</summary>
+    internal const double LowHealthFraction = 0.25;
+
+    /// <summary>
+    /// THE ONE CONDITION for the low-HP idle, in the base's terms: current
+    /// over max at or under a quarter. A creature with no max HP is never
+    /// "low" (nothing to divide by).
+    /// </summary>
+    internal static bool IsLowHealth(int currentHp, int maxHp)
+        => maxHp > 0 && (double)currentHp / maxHp <= LowHealthFraction;
+
+    /// <summary>
+    /// Which state a trigger travels to, given which states this scene has.
+    /// Pure, so the whole fallback table is testable headless: null means
+    /// "ignore", and the idle family resolves to the low-HP variant only when
+    /// the scene carries one.
+    /// </summary>
+    internal static string? SelectState(
+        string trigger, Func<string, bool> hasState, bool lowHealth)
+    {
+        if (!TriggerToStates.TryGetValue(trigger, out var candidates))
+        {
+            return null;
+        }
+        foreach (var state in candidates)
+        {
+            if (state == IdleState && lowHealth && hasState(LowHealthIdleState))
+            {
+                return LowHealthIdleState;
+            }
+            if (hasState(state))
+            {
+                return state;
+            }
+        }
+        return null;
+    }
 
     public static void Route(NCreature creature, string trigger)
     {
@@ -77,7 +153,11 @@ internal static class CreatureAnimationRouter
         // every body the arm does not cover.
         IdleDesync.Apply(creature, tree);
 
-        if (!TriggerToState.TryGetValue(trigger, out var state))
+        var hasState = StatesOf(tree);
+        var low = RefreshLowHealth(creature, tree, hasState);
+
+        var target = SelectState(trigger, hasState, low);
+        if (target == null)
         {
             return;
         }
@@ -86,8 +166,55 @@ internal static class CreatureAnimationRouter
         {
             // Travel to the current state is a no-op, so a double "Dead"
             // (StartDeathAnim re-entry) cannot restart the death animation.
-            playback.Travel(state);
+            playback.Travel(target);
         }
+    }
+
+    /// <summary>
+    /// What this tree's state machine carries. A tree whose root is not a
+    /// state machine cannot be asked; it keeps the pre-motion-pass behaviour
+    /// for the four contract states and has none of the optional ones.
+    /// </summary>
+    private static Func<string, bool> StatesOf(AnimationTree tree)
+    {
+        if (tree.TreeRoot is AnimationNodeStateMachine machine)
+        {
+            return state => machine.HasNode(state);
+        }
+        return state => state is not (CastState or PowerState or LowHealthIdleState);
+    }
+
+    /// <summary>
+    /// Re-reads the creature's HP into the tree's two idle conditions, and
+    /// returns whether it is low. Called on every trigger (the base also only
+    /// re-asks at a state change, and a hit's "Hit" arrives after the HP has
+    /// moved) and on every card play (<see cref="CardPlayMotion"/>), so a
+    /// fight that starts low slumps by the first play. Writes nothing for a
+    /// scene with no low-HP idle: its tree has no such parameters.
+    /// </summary>
+    private static bool RefreshLowHealth(
+        NCreature creature, AnimationTree tree, Func<string, bool> hasState)
+    {
+        var entity = creature.Entity;
+        var low = entity != null && entity.IsAlive
+            && IsLowHealth(entity.CurrentHp, entity.MaxHp);
+        if (hasState(LowHealthIdleState))
+        {
+            tree.Set(LowHealthCondition, low);
+            tree.Set(HealthyCondition, !low);
+        }
+        return low;
+    }
+
+    /// <summary>The low-HP refresh from outside a trigger, for a creature
+    /// node that may not carry a tree at all.</summary>
+    public static void RefreshLowHealth(NCreature? creature)
+    {
+        if (creature == null || !GodotObject.IsInstanceValid(creature)) return;
+        var visuals = creature.Visuals;
+        if (visuals == null || !GodotObject.IsInstanceValid(visuals)) return;
+        if (visuals.GetNodeOrNull<AnimationTree>("%AnimationTree") is not { } tree) return;
+        RefreshLowHealth(creature, tree, StatesOf(tree));
     }
 }
 
