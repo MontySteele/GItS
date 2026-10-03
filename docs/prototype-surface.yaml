@@ -3697,10 +3697,10 @@
    authored_by: [claude],
    # A Skill, not a Knight. The em dash, not the colon (the open-Oath
    # round, 2026-10-01): the colon is the Knight's tell.
-   # Block 7 to 8: provenance, "Varka weak cards, 2026-10-03".
+   # Tried at 8 Block, reverted: provenance, "Varka weak cards, 2026-10-03".
    cost: 1, type: skill, rarity: common,
    description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] an enemy's fresh aura.",
-   effects: [{op: block, amount: 8},
+   effects: [{op: block, amount: 7},
              {op: swirl, target: enemy}],
    upgrade: {block: 3}}
 

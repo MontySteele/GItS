@@ -5939,8 +5939,11 @@ seat's weakest card in the starter round, so each gets a small number tune.
 - `proto_vk_crosswind` (Crosswind): damage 7 [10] to 8 [11]; the Block on a
   Swirl 4 [6] to 5 [7]. First built at 9 [12], it overshot in the drafted
   sim (taken from 19% to 69% of offers, at the 70% bar), so it came back to 8.
-- `proto_vk_jean_dandelion_breeze` (Jean — Wind Companion): Block 7 [10] to
-  8 [11].
+- `proto_vk_jean_dandelion_breeze` (Jean — Wind Companion): unchanged at
+  7 [10] Block. It was tried at 8 [11] and reverted because it crossed the 70%
+  take bar in the drafted sim (70.8% of offers). The drafter already took it
+  from 65% of offers at 7, so the seats' complaint is its aura timing, not
+  its size.
 - `proto_vk_dawn_winds_march` (Dawn Wind's March): cost 2 to 1; the upgrade
   no longer cuts the cost, it raises the Block per Oath gain 3 to 4. The face
   prints the number as `{PowerAmount:diff()}` so the upgrade shows.
