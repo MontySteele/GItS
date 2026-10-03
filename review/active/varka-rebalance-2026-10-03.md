@@ -150,11 +150,15 @@ decided by Block) and adding its element's job. The sim balances them.
 |---|---|---|
 | Amber: Precise Shot | Deal 7 [10] Pyro damage. Gain 4 [5] Block. | the hit |
 | Barbara: Glorious Season | Gain 6 [8] Block. Apply Hydro. Next turn, gain 3 [4] Block. | delayed Block |
-| Lisa: Induced Aftershock | Gain 5 [7] Block. Apply Electro. Draw 1 card. | draw |
-| Kaeya: Hidden Strength | Gain 5 [7] Block. Apply Cryo and 1 [2] Weak. | statuses |
+| Lisa: Induced Aftershock | Gain 5 [7] Block. Apply Electro. Draw 1 [2] card(s). | draw |
+| Kaeya: Hidden Strength | Gain 5 [7] Block. Apply Cryo and 1 Weak. | statuses |
 
-Base yardsticks: Silent's starter Survivor (8 [11] Block, discard 1) and
-Backflip (C, 5 [8] Block, draw 2). The bar: the four starters' act-1 win
+Base yardsticks: Silent's starter Survivor (8 [11] Block, discard 1),
+Backflip (C, 5 [8] Block, draw 2) and Necrobinder's Defy (C, 6 [9] Block and
+1 Weak, Ethereal). [USER] on the first draft: Lisa "looks weak ... the
+upgrade looks weaker", so her upgrade draws 2; Kaeya "is closer to
+Necrobinder's Defy ... Ethereal cards often run hot", so without Ethereal
+her Weak stays 1 when upgraded. "Amber and Barbara are solid." The bar: the four starters' act-1 win
 rates within 5 points of each other, tighter than the 10 points the sim
 reached before only by making them identical.
 
