@@ -6892,9 +6892,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                       " damage to ALL enemies."],
         # VARKA (the Oath rework): the leading prose of each tip, before
         # any interpolated word (the C# side may gold the keywords).
-        "Oath": ["A card gives 1 Oath per element it applies, plus 1 per "
-                 "element ",
-                 ". Kept all fight. Cards read your current "],
+        "Oath": ["1 Oath per element a card applies, plus 1 per element "
+                 "it ",
+                 ". Kept all fight. Element cards read their "],
         "current element": ["The last Pyro, Hydro, Cryo or Electro you "
                             "applied. "],
         "Knight": ["One of Varka's Companions. ",
