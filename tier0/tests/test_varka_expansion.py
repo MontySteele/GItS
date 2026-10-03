@@ -391,7 +391,7 @@ def test_twin_gales_pays_the_swirled_element_too(varka):
     led.current = "hydro"
     st.player.powers[V.TWIN_GALES] = 1
     _play(st, _vk("jean_dandelion_breeze"))
-    assert st.player.block == 7 + 3                   # Hydro paid
+    assert st.player.block == 8 + 3                   # Hydro paid
     assert st.enemies[0].hp == 100 - 2 - 3           # and Pyro paid
 
 

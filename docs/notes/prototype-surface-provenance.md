@@ -5930,3 +5930,16 @@ we print too many AoE cards." Then: "Sounds good! Please proceed."
 
 Pins: `KleeTests/Prototype/VarkaRebalanceTests.cs` and
 `tier0/tests/test_varka_rebalance.py`, "the starter ruling".
+
+## Varka weak cards, 2026-10-03
+
+`review/records/varka-starter-round-2026-10-03.md`: each of these three was a
+seat's weakest card in the starter round, so each gets a small number tune.
+
+- `proto_vk_crosswind` (Crosswind): damage 7 [10] to 9 [12]; the Block on a
+  Swirl 4 [6] to 5 [7].
+- `proto_vk_jean_dandelion_breeze` (Jean — Wind Companion): Block 7 [10] to
+  8 [11].
+- `proto_vk_dawn_winds_march` (Dawn Wind's March): cost 2 to 1; the upgrade
+  no longer cuts the cost, it raises the Block per Oath gain 3 to 4. The face
+  prints the number as `{PowerAmount:diff()}` so the upgrade shows.

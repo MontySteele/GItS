@@ -381,7 +381,7 @@ def test_each_swirl_payout(varka, current):
     extra_b = {"electro": 3}.get(current, 0)
     assert a.hp == 100 - 2 - extra_a
     assert b.hp == 100 - 2 - extra_b
-    assert st.player.block == 7 + (3 if current == "hydro" else 0)
+    assert st.player.block == 8 + (3 if current == "hydro" else 0)
     assert a.powers.get("vulnerable", 0) == (1 if current == "cryo" else 0)
 
 
@@ -691,7 +691,7 @@ def test_the_predicates(varka):
     st.enemies[0].aura, st.enemies[0].aura_turns_left = "hydro", 2
     st.enemies[0].aura_spent = False
     _play(st, _vk("crosswind"))
-    assert st.player.block == block + 4
+    assert st.player.block == block + 5
     assert V.predicate(st, "swirled_by_this") is False  # outside a play
 
 

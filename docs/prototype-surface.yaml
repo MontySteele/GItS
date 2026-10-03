@@ -3697,9 +3697,10 @@
    authored_by: [claude],
    # A Skill, not a Knight. The em dash, not the colon (the open-Oath
    # round, 2026-10-01): the colon is the Knight's tell.
+   # Block 7 to 8: provenance, "Varka weak cards, 2026-10-03".
    cost: 1, type: skill, rarity: common,
    description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] an enemy's fresh aura.",
-   effects: [{op: block, amount: 7},
+   effects: [{op: block, amount: 8},
              {op: swirl, target: enemy}],
    upgrade: {block: 3}}
 
@@ -3722,11 +3723,12 @@
 
 - {id: proto_vk_crosswind, name: "Crosswind", character: varka,
    authored_by: [claude],
+   # 7 [10] / 4 [6] to 9 [12] / 5 [7]: provenance, "Varka weak cards, 2026-10-03".
    cost: 1, type: attack, rarity: common,
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {BranchBlock:diff()} [gold]Block[/gold].",
-   effects: [{op: damage, amount: 7, target: enemy},
+   effects: [{op: damage, amount: 9, target: enemy},
              {op: conditional, if: swirled_by_this,
-              then: [{op: block, amount: 4}]}],
+              then: [{op: block, amount: 5}]}],
    upgrade: {damage: 3, conditional_block: 2}}
 
 # --- Uncommon (18; 35 since the expansion) ---
@@ -3939,11 +3941,12 @@
 
 - {id: proto_vk_dawn_winds_march, name: "Dawn Wind's March", character: varka,
    authored_by: [claude],
-   # Pick 3 (ruled): 2 raised to 3.
-   cost: 2, type: power, rarity: rare,
-   description: "Whenever you gain [gold]Oath[/gold] of your [gold]current element[/gold], gain 3 [gold]Block[/gold].",
+   # Pick 3 (ruled): 2 raised to 3. Cost 2 to 1, upgrade Block +1 for
+   # the cost cut: provenance, "Varka weak cards, 2026-10-03".
+   cost: 1, type: power, rarity: rare,
+   description: "Whenever you gain [gold]Oath[/gold] of your [gold]current element[/gold], gain {PowerAmount:diff()} [gold]Block[/gold].",
    effects: [{op: apply_power, power: vk_dawn_winds_march, amount: 3, target: self}],
-   upgrade: {cost: -1}}
+   upgrade: {power_amount: 1}}
 
 - {id: proto_vk_azure_devour, name: "Azure Devour", character: varka,
    authored_by: [claude],
