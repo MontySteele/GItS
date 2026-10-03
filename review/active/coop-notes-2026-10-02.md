@@ -1,6 +1,6 @@
 # Co-op notes, 2026-10-02: Klee to Balance, Varka's Knights and Electro, Neuvillette
 
-Status: PICKS OPEN.
+Status: RULED 2026-10-02.
 
 [USER]'s co-op run reached the final fight: "it went much better than the
 seats did." Klee: "Klee seems pretty well good to me! I'm comfortable moving
@@ -56,6 +56,12 @@ has nowhere to go.
   blind grading, stamps) for every Klee change from now on.
 - **(c) Wait** until Kokomi or Furina is also ready, and move them together.
 
+**Ruled (a), 2026-10-02.** [USER]: "Agreed on Klee - let's push the new
+build with the most recent changes, give it one last playtest as a sanity
+check, and if nothing turns up, then we move to Balance and clean up anything
+stale in LAW or the queue / backlog." Nothing is built for this pick yet:
+Klee moves to Balance only after that sanity playtest comes back clean.
+
 ## 2. Varka's Knights
 
 A Knight is a Varka Companion card: one of the 17 with a colon in its name,
@@ -82,6 +88,26 @@ the word:
   Call adds "a random card of your current element".
 - **(c) Only tag the Knights;** Assembly is unchanged.
 
+**Ruled (a), 2026-10-02.** [USER]: "Agreed on both fronts - let's do a pass
+over the Varka card pool to standardize the language around the existence of
+this tooltip". Built on branch `coop-rulings`:
+- Assembly at the Cathedral reads "Whenever you apply an element, deal 2 [3]
+  damage to a random enemy." Same cost, type and rarity.
+- Every Knight (all 17, the four starter-only ones included) prints
+  "Knight." as its first line. This is a real keyword (`KleeKeywords.Knight`)
+  that the game prints and hovers. It is not typed into the 17 faces. The
+  printed line and every golded [gold]Knight[/gold] on other cards hover the
+  same tip: "One of Varka's Companions. Playing one makes its element your
+  current element." One exception the tip does not spell out: Noelle is a
+  Geo Knight, and Geo keeps no Oath, so playing her does not change his
+  element.
+- The language pass found one stray form. Knights' Roll Call+ said "a Knight
+  you choose" without the gold, so it had no tip; it now golds the word. The
+  Order Answers' power badge golded only "Knight" in "Knights"; it now golds
+  the whole word. Every other card that names Knights already used
+  [gold]Knight[/gold] or [gold]Knights[/gold], and no Varka card uses
+  "Companion" to mean a Knight.
+
 ## 3. Varka's Electro discard cards
 
 The package is three cards:
@@ -104,6 +130,13 @@ without discarding a card for it". The fix is access, not the rule.
   the payoff is seen in act 1.
 - **(c) Leave it** and watch the next Varka run.
 
+**Reopened: folded into a Varka element rebalance.** [USER]: "I don't think
+that Varka's electro deck has any problem drawing lots of cards; the issue is
+the payoff. Unless he has a payoff ties to discards that I missed, this
+change doesn't do anything by itself." He then reopened Varka's Electro
+design as part of a wider rebalance. Charged Lunge and Static Field are
+unchanged on this branch.
+
 His Block and draw ("trivial", by your read) are a watch item, not a pick.
 Hydro's Block is meant to be big (identities paper §4). If the next run
 reads the same, the Common Block numbers go to a pass.
@@ -120,6 +153,11 @@ is a 5-star Rare that does nothing by itself.
   turn." That gives a free reaction partner every turn, for any kit.
 - **(b) Cost 0 [0, Innate].** Only cheaper.
 - **(c) Leave it.**
+
+**Ruled (a), 2026-10-02.** [USER]: "Agreed on Neuvillette's a)". Built on
+branch `coop-rulings`: the card reads "At the start of your turn, apply
+[gold]Hydro[/gold] to a random enemy. Elemental auras you apply last 1 extra
+turn." Each copy applies Hydro once.
 
 ## Picks
 
