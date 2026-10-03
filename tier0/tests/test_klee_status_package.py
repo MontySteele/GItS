@@ -82,14 +82,16 @@ def test_the_papers_numbers_and_upgrades(overhaul):
     assert _first(_up("proto_ko_it_wasnt_me"), "block")["amount"] == 9
     assert _first(load("proto_ko_lisas_treats"), "energy")["amount"] == 2
     assert _first(_up("proto_ko_lisas_treats"), "energy")["amount"] == 3
-    assert _first(load("proto_ko_red_knight"), "damage")["amount"] == 22
-    assert _first(_up("proto_ko_red_knight"), "damage")["amount"] == 28
+    # AoE trim, 2026-10-03: Red Knight is 34 to one enemy, Damage Report
+    # gains 4 Block (review/active/aoe-trim-2026-10-03.md sec.2).
+    assert _first(load("proto_ko_red_knight"), "damage")["amount"] == 34
+    assert _first(_up("proto_ko_red_knight"), "damage")["amount"] == 40
     assert _first(load("proto_ko_finders_keepers"), "apply_power")["amount"] == 5
     assert _first(_up("proto_ko_finders_keepers"), "apply_power")["amount"] == 7
     assert _first(load("proto_ko_klee_can_explain"), "block")["amount"] == 6
     assert _first(_up("proto_ko_klee_can_explain"), "block")["amount"] == 8
-    assert _first(load("proto_ko_damage_report"), "apply_power")["amount"] == 5
-    assert _first(_up("proto_ko_damage_report"), "apply_power")["amount"] == 7
+    assert _first(load("proto_ko_damage_report"), "apply_power")["amount"] == 4
+    assert _first(_up("proto_ko_damage_report"), "apply_power")["amount"] == 6
     assert not load("proto_ko_solitary_confinement").innate
     assert _up("proto_ko_solitary_confinement").innate
     grow = "exhaust_statuses_grow_largest"
@@ -146,15 +148,16 @@ def test_solitary_confinement_frees_confiscated_only(overhaul):
     assert combat.card_cost(st, load("proto_ko_chain_fuse")) == 1
 
 
-def test_damage_report_hits_all_per_status_drawn(overhaul):
+def test_damage_report_blocks_per_status_drawn(overhaul):
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     st = klee_state([a, b])
-    st.player.powers[klee_overhaul.DAMAGE_REPORT] = 5
+    st.player.powers[klee_overhaul.DAMAGE_REPORT] = 4
     st.player.hand = []
     st.player.draw_pile = [statuses.make_status("dazed"), _confiscated(),
                            load("proto_ko_pop")]
     st.draw(3)
-    assert (200 - a.hp, 200 - b.hp) == (10, 10)
+    assert st.player.block == 8
+    assert (a.hp, b.hp) == (200, 200)
 
 
 def test_klee_can_explain_turns_every_status_into_pop(overhaul):

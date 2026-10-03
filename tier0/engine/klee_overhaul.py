@@ -721,6 +721,34 @@ def set_off_largest(state: CombatState, enemy: Optional[Enemy],
     return exploded
 
 
+def set_off_mines(state: CombatState, enemy: Optional[Enemy],
+                  card: Optional[Card] = None, badge: int = 1) -> int:
+    """MINE, ALL MINE! (AoE trim, 2026-10-03): "Set off the Mines on that
+    enemy." Only the MINES leave the pile (`take_mines`) and go off one at a
+    time; plain Bombs stay and keep growing. It IS a Set off, so it spends The
+    Big One's multiplier and Boom Badge's factor as `set_off` does, and a kill
+    sends the Mines left behind to jump. Returns how many went off."""
+    if enemy is None or not live(state):
+        return 0
+    mines = take_mines(enemy)
+    if not mines:
+        return 0
+    state.emit("ko_set_off", target=enemy.name, charges=len(mines),
+               size=sum(c.size for c in mines))
+    multiplier = take_multiplier(state) * int(badge)
+    exploded = 0
+    for index, mine in enumerate(mines):
+        if not enemy.alive:
+            jump_charges(state, enemy, mines[index:])
+            break
+        _explode(state, enemy, mine, multiplier)
+        exploded += 1
+        if state.over or not state.player.alive:
+            break
+    sweep_jumps(state)
+    return exploded
+
+
 def sweep_jumps(state: CombatState) -> None:
     """RULE 3 for the death this arm did NOT cause: "A partner or a poison
     killed the enemy: all of them jump." `SweepJumps`' twin.
@@ -2177,22 +2205,18 @@ def finders_keepers(state: CombatState, card: Card) -> None:
 
 
 def damage_report(state: CombatState, card: Card) -> None:
-    """Damage Report: "Whenever you draw a status, deal 5 [7] damage to ALL
-    enemies." Per card drawn (`Hook.AfterCardDrawn`), Spark Knight's
-    unelemented hit. `DamageReportPower.AfterCardDrawn`."""
+    """Damage Report: "Whenever you draw a status, gain 4 [6] Block." Per
+    card drawn (`Hook.AfterCardDrawn`). AoE trim, 2026-10-03: it dealt 5 [7]
+    to ALL enemies. Power-sourced Block, RAW like the arm's other powers'
+    (NC-11): no Dexterity, no Frail. `DamageReportPower.AfterCardDrawn`."""
     if not live(state) or not is_status(card):
         return
     n = state.player.powers.get(DAMAGE_REPORT, 0)
     if not n:
         return
-    from tier0.engine import effects                # late import: cycle
-
-    for target in list(state.living_enemies):
-        if not target.alive:
-            continue
-        state.emit("ko_damage_report", target=target.name, amount=n)
-        effects.deal_damage_to_enemy(state, target, n, element=None,
-                                     source="damage_report")
+    state.player.block += n
+    state.emit("ko_damage_report", amount=n)
+    state.emit("block", amount=n)
 
 
 def transform_statuses_into(state: CombatState, card_id: str) -> int:

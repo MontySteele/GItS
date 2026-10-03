@@ -5830,3 +5830,67 @@ inserts at a random index. Pins: `KleeTests/Prototype/StatusToDiscardTests.cs`
 and the sim twins in `test_klee_status_package.py`,
 `test_kokomi_status_batch.py` and `test_klee_overhaul_rules.py`. Untested in
 game until a deploy.
+
+## AoE trim, 2026-10-03
+
+`review/active/aoe-trim-2026-10-03.md`, all picks ruled 2026-10-03. Klee,
+Furina and Varka come down to the base five's AoE range (10 AoE cards or
+fewer, 7 direct or fewer); Kokomi keeps her delayed AoE. Built in the SIM
+FIRST (tier0 and these rows); the C# twin waits until the sim reads well, so
+the generated cards are stale against these rows until it lands. Varka's two
+(sec.4) are another branch's.
+
+Klee (sec.2), AoE moved into Block and single-target burst:
+
+- `proto_ko_bombs_away`: a Skill. "Place a Bomb 4 on an enemy. Gain 4 Block,
+  plus 2 for each enemy with a Bomb." The count is the runtime count
+  `enemies_with_bomb` (living enemies holding a charge, Mines included), read
+  after the card's own Bomb lands, so the floor is 6. Upgrade still moves the
+  Bomb (+2).
+- `proto_ko_mine_toss`: "Place a Mine 7 on an enemy." Was Mine 4 on ALL.
+- `proto_ko_mine_all_mine`: "Deal 8 Pyro damage. Set off the Mines on that
+  enemy." The hit first, then `set_off` with `mines_only: true`
+  (`klee_overhaul.set_off_mines`): only the Mines on the aimed body go off,
+  plain Bombs stay; it spends The Big One and Boom Badge as a Set off does.
+- `proto_ko_team_effort`: "Set off. Deal 6 Pyro damage, 6 more if you played
+  a Companion card this turn." The `bonus_if: {if, amount}` rider on one
+  damage op, so the upgrade (+3) moves the 6 and not the rider.
+- `proto_ko_coven_errand`: "Place a Bomb 5 on an enemy, 8 if you played a
+  Companion card this turn." The same rider on `plant_bomb` (+3); upgraded
+  7, or 10.
+- `proto_ko_red_knight`: 34 Pyro to one enemy, was 22 to ALL; upgrade +6.
+- `proto_ko_damage_report`: "Whenever you draw a status, gain 4 Block."
+  Power-sourced Block, raw (NC-11); upgrade 6.
+
+Furina (sec.3): `proto_fs_undercurrent` is 3 damage 3 times to one enemy
+(was 2 to ALL 3 times; upgrade still +2 hits). `proto_fs_endless_waltz` is
+18 to one enemy (was 14 to ALL; upgrade +4).
+
+Durin split in two (sec.5), names from his character sheet:
+
+- `proto_mc_durin_binary_form`: Uncommon Attack, 1. "Choose one, then draw 1
+  card. White: 6 [8] Pyro to ALL. Dark: 4 [5] Pyro to an enemy 3 times."
+  The upgrade is `mode_damage: [2, 1]`, one number per mode in mode order.
+- `proto_mc_durin_principle_of_purity`: Rare Power, 2. "At the start of
+  your turn, deal 4 [6] Pyro damage to a random enemy. Choose one for the
+  combat. White: Enemies take 50% [75%] more damage from Elemental
+  Reactions. Dark: Your Pyro damage deals 4 [6] more." Powers
+  `mc_purity_strike` (the stack is the damage), `mc_purity_white` (the stack
+  is the percentage) and `mc_purity_dark` (flat). White is the team form,
+  as the text says: every player's reactions, not only the holder's; the sim
+  seats one player, so it reads the holder's. Dark adds to every Pyro hit
+  she deals, Bombs and Mines included, in the additive phase before the
+  amplifier; a reaction's splash is not Pyro damage. The upgrade is
+  `power_amount: +2` (the strike) and `mode_power_amount: [25, 2]`. The old
+  `mc_binary_white` / `mc_binary_dark` powers no row applies any more.
+
+Yoimiya (sec.6): `proto_mi_yoimiya_aurous_blaze` is "Deal 6 Pyro damage.
+For 2 turns, whenever you play a Skill, deal 3 Pyro damage to that enemy."
+The 3 is the card's (`summon_damage:`), the mark's stack is turns
+remaining, and the card's own play does not answer its own mark. The sim
+had no clock for the mark before this (it lasted the fight); it now ticks
+where the mod's end-of-turn walk ticks it, after War Banner.
+
+Pins: `tier0/tests/test_aoe_trim.py`, and the rows' existing pins updated
+in place. Measured: the tier-0.5 drafted run sim, base vs trim on the same
+seeds (the session's results file).

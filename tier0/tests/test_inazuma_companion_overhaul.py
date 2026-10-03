@@ -168,7 +168,7 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks():
     assert seen == ["mi_juuga", "mi_daruma", "mi_sanctifying_ring",
                     "mi_sesshou_sakura", "mi_soumetsu", "mi_kyouka",
                     "mi_tamoto", "mi_crimson_ooyoroi", "mi_war_banner",
-                    "mi_naptime", "mi_crowfeather"], seen
+                    "mi_aurous_blaze", "mi_naptime", "mi_crowfeather"], seen
 
 
 def test_the_start_of_turn_order_is_the_one_the_mod_walks():
@@ -682,26 +682,31 @@ def test_the_sakura_swing_with_your_strength(overhaul):
     assert st.enemies[0].hp == 200 - (C.MI_SAKURA_DMG + 3)
 
 
-def test_aurous_blaze_detonates_on_a_skill_and_not_on_an_attack(overhaul):
+def test_aurous_blaze_answers_a_skill_on_the_marked_enemy_only(overhaul):
+    """AoE trim, 2026-10-03: "Deal 6 Pyro damage. For 2 turns, whenever you
+    play a Skill, deal 3 Pyro damage to that enemy." """
     st = make_state(enemies=[make_enemy(hp=90, name="a"),
                              make_enemy(hp=90, name="b")])
     _play(st, "proto_mi_yoimiya_aurous_blaze")
     assert st.enemies[0].powers["mi_aurous_blaze"] == 2
+    assert st.enemies[0].hp == 84
 
-    # A Skill's damage line on the marked body: the blast answers.
-    skill = Card(id="s", name="s", cost=1, type="skill",
-                 effects=[{"op": "damage", "amount": 5, "target": "enemy"}])
-    effects.resolve_card(st, skill)
-    assert st.enemies[0].hp == 90 - 5 - C.MI_AUROUS_BLAZE_DMG
-    assert st.enemies[1].hp == 90 - C.MI_AUROUS_BLAZE_DMG
+    skill = Card(id="s", name="s", cost=1, type="skill", effects=[])
+    effects.companion_overhaul_card_played(st, skill)
+    assert st.enemies[0].hp == 84 - 3
+    assert st.enemies[1].hp == 90
 
 
 def test_aurous_blaze_ignores_an_attack(overhaul):
     st = make_state(enemies=[make_enemy(hp=90, name="a"),
                              make_enemy(hp=90, name="b")])
     _play(st, "proto_mi_yoimiya_aurous_blaze")
-    effects.resolve_card(st, _attack(amount=5, element="geo"))
-    assert st.enemies[1].hp == 90                     # no blast
+    hp = st.enemies[0].hp
+    attack = _attack(amount=5, element="geo")
+    effects.resolve_card(st, attack)
+    effects.companion_overhaul_card_played(st, attack)
+    assert st.enemies[0].hp == hp - 5                 # no answer
+    assert st.enemies[1].hp == 90
 
 
 def test_soumetsu_sweeps_twice_then_ends_on_the_big_one(overhaul):
