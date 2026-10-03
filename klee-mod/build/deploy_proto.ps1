@@ -288,19 +288,25 @@ if (Test-Path $artRoot) {
     Write-Host "WARNING: no card art at $artRoot" -ForegroundColor Yellow
 }
 
-# The pck, exactly as deploy.ps1 stages it. Missing is a warning here and a
-# validate finding below (S2/S12), which is the same split deploy.ps1 uses.
-$pck = Join-Path $root 'assets\klee.pck'
-$pckContract = Join-Path $root 'assets\klee.pck.contract.txt'
+# The pck. The release pck (assets\klee.pck) has the frame-only resources
+# pruned out (2026-10-02), so the frame arm stages the FRAME VARIANT that
+# `tools\build_pck.ps1 -TeyvatFrame` builds, under the name the game loads
+# (mods\klee\klee.pck) and with its contract renamed to match. The contract's
+# sha256 is of the bytes, so the rename keeps validate.ps1 S2 true. Missing is
+# a warning here and a validate finding below (S2/S12), the same split
+# deploy.ps1 uses.
+$pckBuild = if ($TeyvatFrame) { '-TeyvatFrame' } else { '' }
+$pck = if ($TeyvatFrame) { Join-Path $root 'assets\klee-teyvat.pck' } else { Join-Path $root 'assets\klee.pck' }
+$pckContract = "$pck.contract.txt"
 if (Test-Path $pck) {
-    Copy-Item $pck -Destination $stage
+    Copy-Item $pck -Destination (Join-Path $stage 'klee.pck')
     if (Test-Path $pckContract) {
-        Copy-Item $pckContract -Destination $stage
+        Copy-Item $pckContract -Destination (Join-Path $stage 'klee.pck.contract.txt')
     } else {
-        Write-Host "WARNING: no PCK contract at $pckContract; rebuild with tools\build_pck.ps1." -ForegroundColor Yellow
+        Write-Host "WARNING: no PCK contract at $pckContract; rebuild with tools\build_pck.ps1 $pckBuild." -ForegroundColor Yellow
     }
 } else {
-    Write-Host "WARNING: no klee.pck at $pck; run tools\build_pck.ps1 first (validate will fail below)." -ForegroundColor Yellow
+    Write-Host "WARNING: no pck at $pck; run tools\build_pck.ps1 $pckBuild first (validate will fail below)." -ForegroundColor Yellow
 }
 
 # THE SAME GATE, WHOLE. -PrototypeBuild changes exactly one rule: S3 accepts

@@ -5,6 +5,16 @@
 C# suite. From a worktree the one legal command is
 `klee-mod\build\deploy_bridge.ps1 -BuildOnly` (`EB-142`).
 
+**Two pcks (2026-10-02).** `build_pck.ps1` builds the release
+`klee-mod\assets\klee.pck` with every Teyvat-frame resource pruned
+(`res://teyvat/**`, the music included, and `res://scenes/backgrounds/<face>/**`):
+about 15 MB where it was 376 MB, because the frame never loads in a release
+build. `build_pck.ps1 -TeyvatFrame` builds `klee-teyvat.pck`, the whole frame,
+which `deploy_proto.ps1 -TeyvatFrame` stages as `klee.pck`.
+`tools/deploy_round.py --arms teyvat` passes the switch to both. `validate.ps1`
+S2b refuses a release package that carries a frame row, and
+`tier0/tests/test_pck_frame_split.py` pins the lists.
+
 ### The gate's S7 arm — when the suite runs here, and when CI's run stands
 
 `validate.ps1`'s S7 is the pytest suite. Until 2026-09-02 it ran the WHOLE

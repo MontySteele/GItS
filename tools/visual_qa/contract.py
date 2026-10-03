@@ -46,6 +46,23 @@ _VERSION_LINE = re.compile(r"^contract=(.*)$")
 #: which is the whole class C4 retired.
 _SCAFFOLDING = ("project.godot", "export_presets.cfg", ".godot/", ".import")
 
+#: The six faces of the Teyvat run frame, in build_pck.ps1's order.
+TEYVAT_DRESSINGS = ("mondstadt", "liyue", "natlan", "inazuma", "fontaine",
+                    "sumeru")
+
+#: Pck-relative prefixes only the Teyvat run frame loads (2026-10-02). The
+#: release pck (`tools/build_pck.ps1` with no `-TeyvatFrame`) prunes them, and
+#: validate.ps1 S2b refuses a release package that carries any; the frame
+#: variant `klee-teyvat.pck` keeps them. Pinned equal to both scripts' lists by
+#: tier0/tests/test_pck_frame_split.py.
+FRAME_ONLY_PREFIXES = ("teyvat/",) + tuple(
+    f"scenes/backgrounds/{d}/" for d in TEYVAT_DRESSINGS)
+
+
+def is_frame_only(relative: str) -> bool:
+    """True for a pck-relative path only the Teyvat run frame loads."""
+    return relative.startswith(FRAME_ONLY_PREFIXES)
+
 
 @dataclass
 class Contract:
@@ -265,8 +282,14 @@ def check_sources(
                      "the failure mode, not a pass.")
         return
     packed = contract.resource_set
+    # A RELEASE contract carries no frame-only row by construction (the build
+    # prunes them), so the frame's committed sources are expected absent from
+    # it; only a frame-variant contract owes them rows.
+    release = not any(is_frame_only(r) for r in packed)
     for path in sources:
         relative = path.relative_to(pck_src).as_posix()
+        if release and is_frame_only(relative):
+            continue
         if relative not in packed:
             report.error(
                 "PK-SRC-UNPACKED",

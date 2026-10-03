@@ -71,6 +71,12 @@ ARMS = {
 RELEASE_DEFAULT_ARMS = ("klee", "companion", "kokomi", "furina-stage")
 
 PCK = "klee-mod/assets/klee.pck"
+#: The FRAME variant (2026-10-02): `build_pck.ps1 -TeyvatFrame` builds it and
+#: `deploy_proto.ps1 -TeyvatFrame` stages it. The release pck above prunes
+#: every frame-only resource (res://teyvat/**, ~316 MB of it music, and the
+#: six faces' background scenes), because the frame never loads in a release
+#: build.
+FRAME_PCK = "klee-mod/assets/klee-teyvat.pck"
 #: What the pck is BUILT FROM. `ImageGen/images` is gitignored Tier F art and
 #: `klee-mod/pck-src` is the git-tracked scene-source overlay; the build reads
 #: both, so either moving makes the pck stale.
@@ -122,11 +128,17 @@ def newest(rel: str, root: Path = REPO) -> float:
     return best
 
 
-def pck_decision(root: Path = REPO) -> tuple[bool, str]:
+def pck_for(arms) -> str:
+    """The pck a round with these dev arms stages: the frame variant for
+    `teyvat`, the release pck otherwise."""
+    return FRAME_PCK if "teyvat" in (arms or ()) else PCK
+
+
+def pck_decision(root: Path = REPO, pck_rel: str = PCK) -> tuple[bool, str]:
     """`(rebuild?, why)` -- the mtime comparison, stated in words."""
-    pck = newest(PCK, root)
+    pck = newest(pck_rel, root)
     if not pck:
-        return True, f"{PCK} does not exist"
+        return True, f"{pck_rel} does not exist"
     movers = [rel for rel in PCK_SOURCES if newest(rel, root) > pck]
     if movers:
         return True, f"{', '.join(movers)} changed since the pck was built"
@@ -176,11 +188,14 @@ def verification(root: Path = REPO) -> list[str]:
 def plan(args) -> list[list[str]]:
     """The PowerShell commands this round would run, in order."""
     out: list[list[str]] = []
-    rebuild, _ = pck_decision()
-    if args.pck or rebuild:
-        out.append(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
-                    "-File", "tools\\build_pck.ps1"])
+    rebuild, _ = pck_decision(pck_rel=pck_for(args.arms))
     switches = [ARMS[a] for a in args.arms if a in ARMS]
+    if args.pck or rebuild:
+        # The frame arm's switch is build_pck's too: it builds the frame
+        # variant (klee-teyvat.pck) that deploy_proto.ps1 stages.
+        frame = ["-TeyvatFrame"] if "-TeyvatFrame" in switches else []
+        out.append(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
+                    "-File", "tools\\build_pck.ps1", *frame])
     if switches:
         # A DEV arm: `deploy_proto.ps1` stamps `+proto` and installs the
         # bridge itself as its last step.
@@ -249,7 +264,7 @@ def main(argv: list[str]) -> int:
               f"(python -m understudy.embark --teardown --lane N).")
         return 2
 
-    rebuild, why = pck_decision()
+    rebuild, why = pck_decision(pck_rel=pck_for(args.arms))
     steps = plan(args)
 
     if args.dry_run:

@@ -272,7 +272,9 @@ reported `loop` true and `loop_offset` 1.25. A blank `loop_start_s` writes no
 `.import` at all, so the importer's defaults stand.
 
 Order is unchanged and non-negotiable: **`build_pck` before deploy**, on the
-art-bearing main checkout only (`operations/build-deploy.md`).
+art-bearing main checkout only (`operations/build-deploy.md`). Music ships
+only in the frame variant, `build_pck.ps1 -TeyvatFrame` (`klee-teyvat.pck`);
+the release pck prunes `res://teyvat/**` (2026-10-02).
 
 ### 5. `.gitignore` lines
 

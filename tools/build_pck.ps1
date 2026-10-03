@@ -11,7 +11,10 @@
   itself: manifest has_pck true makes ModManager call LoadResourcePack on
   mods/klee/klee.pck during mod read, before mod initializers run.
 
-  Output goes to klee-mod\assets\klee.pck, which deploy.ps1 stages. *.pck is
+  Output goes to klee-mod\assets\klee.pck (the release pck, frame-only
+  resources pruned), which deploy.ps1 stages; -TeyvatFrame builds
+  klee-mod\assets\klee-teyvat.pck, which deploy_proto.ps1 -TeyvatFrame
+  stages under the name klee.pck. *.pck is
   gitignored (public repo, Tier F art never ships in the repo), so every
   machine builds its own with this script.
 
@@ -20,15 +23,31 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$MegaDot = 'C:\Users\Monty\Downloads\megadot-4.5.1-m.14-windows-x86_64-llvm-editor-csharp\MegaDot_v4.5.1-stable_mono_win64_console.exe'
+    [string]$MegaDot = 'C:\Users\Monty\Downloads\megadot-4.5.1-m.14-windows-x86_64-llvm-editor-csharp\MegaDot_v4.5.1-stable_mono_win64_console.exe',
+    # THE FRAME VARIANT (2026-10-02). Without this switch the build is the
+    # RELEASE pck, klee-mod\assets\klee.pck, and every frame-only resource
+    # ($frameOnly below) is pruned from it. With it the build is
+    # klee-mod\assets\klee-teyvat.pck, the whole frame included, which only
+    # deploy_proto.ps1 -TeyvatFrame stages (tools/deploy_round.py --arms
+    # teyvat passes both). The frame is off in a release build
+    # (TeyvatFrame.DefaultEnabled is #if TEYVAT_FRAME, and every Teyvat patch,
+    # registration and music seam returns on !TeyvatFrame.Enabled), so the
+    # release pck used to carry ~340 MB -- 27 music tracks and the six faces'
+    # plates, bodies and scenes -- that could never load.
+    [switch]$TeyvatFrame
 )
 
 $ErrorActionPreference = 'Stop'
 
 $repo = Split-Path -Parent $PSScriptRoot
 $src  = Join-Path $repo 'ImageGen\images'
-$work = Join-Path $repo 'klee-mod\dist\pck-work'
-$out  = Join-Path $repo 'klee-mod\assets\klee.pck'
+if ($TeyvatFrame) {
+    $work = Join-Path $repo 'klee-mod\dist\pck-work-teyvat'
+    $out  = Join-Path $repo 'klee-mod\assets\klee-teyvat.pck'
+} else {
+    $work = Join-Path $repo 'klee-mod\dist\pck-work'
+    $out  = Join-Path $repo 'klee-mod\assets\klee.pck'
+}
 $py   = Join-Path $repo '.venv\Scripts\python.exe'
 
 # --- native stderr under Windows PowerShell 5.1 ----------------------------
@@ -355,7 +374,8 @@ if (-not (Test-Path $teyvatPortraits)) { Note-Skip 'teyvat\creature_visuals' $te
 # lowercased `Id.Entry` of each, which is `FilePathIdentifier`, which is what
 # every path here derives from -- and it is pinned against the generator's own
 # NATIONS tuple by tier0/tests/test_act_placeholder_plan.py.
-foreach ($dressing in 'mondstadt', 'liyue', 'natlan', 'inazuma', 'fontaine', 'sumeru') {
+$teyvatDressings = @('mondstadt', 'liyue', 'natlan', 'inazuma', 'fontaine', 'sumeru')
+foreach ($dressing in $teyvatDressings) {
     $bgSrc = Join-Path $src "teyvat\backgrounds\$dressing"
     if (-not (Test-Path $bgSrc)) { Note-Skip "teyvat\backgrounds\$dressing" $bgSrc } else {
         $to = Join-Path $work "teyvat\backgrounds\$dressing"
@@ -1297,6 +1317,31 @@ if (Test-Path $pckSrc) {
     Write-Host "Overlaid pck-src scene sources." -ForegroundColor Cyan
 }
 
+# FRAME-ONLY RESOURCES LEAVE THE RELEASE PCK (2026-10-02). Pruned here, after
+# every copy block and the pck-src overlay, so ONE list decides it whatever
+# block or overlay put the files there:
+#
+#   * res://teyvat/** -- dressed creature bodies and their motion sets, the six
+#     faces' background plates, map overlays, rest-site plates and the music.
+#     Read only by KleeCode/Teyvat/** and the two Vfx seams, all behind
+#     TeyvatFrame.Enabled (CurrentActEntry is null with the arm off);
+#   * res://scenes/backgrounds/<face>/** -- the six faces' combat background
+#     scenes, reached only through a dressing act's FilePathIdentifier, and
+#     the dressing acts exist only when ModelDbActsPatch splices them in,
+#     which it does only with the arm on.
+#
+# The same list is pinned by tier0/tests/test_pck_frame_split.py and refused
+# in a release package by validate.ps1 S2b, so a frame asset cannot creep
+# back into the release pck through a new copy block.
+$frameOnly = @('teyvat') + @($teyvatDressings | ForEach-Object { "scenes\backgrounds\$_" })
+if (-not $TeyvatFrame) {
+    foreach ($rel in $frameOnly) {
+        $p = Join-Path $work $rel
+        if (Test-Path $p) { Remove-Item $p -Recurse -Force }
+    }
+    Write-Host "Release pck: pruned the frame-only trees ($($frameOnly -join ', '))." -ForegroundColor Cyan
+}
+
 # Build id stamp: boot telemetry logs this, so a stale pck announces itself in
 # godot.log instead of silently rendering old art (animation sprint 1, A3).
 try { $gitSha = (& git -C $repo rev-parse --short HEAD) } catch { $gitSha = $null }
@@ -1370,8 +1415,13 @@ $contract = "$out.contract.txt"
 # ROSTER-PCK-V3 is a real version bump, and validate.ps1 S2 requires it: a v2
 # contract is a hand-written one, and reading it as current would be reading
 # an assertion as a measurement. Rebuild with this script.
+# The two MegaDot logs Assert-GodotLogClean writes into the work dir are not
+# resources either: the exporter never packs a .log (checked against the pck's
+# file table, 2026-10-02), so listing them made the contract claim two files
+# the pack does not hold, at the pack root where visual_qa's CT-NO-NAMESPACE
+# flags them.
 $contractSkip = @('*\.godot\*', '*\project.godot', '*\export_presets.cfg',
-                  '*\klee.pck')
+                  '*\klee.pck', '*\megadot-*.log')
 $packed = @(Get-ChildItem $work -Recurse -File |
     Where-Object {
         $p = $_.FullName
@@ -1382,6 +1432,15 @@ $packed = @(Get-ChildItem $work -Recurse -File |
         'resource=res://' + $_.FullName.Substring($work.Length + 1).Replace('\', '/')
     } | Sort-Object)
 if ($packed.Count -eq 0) { throw "Contract would be empty: nothing landed in $work." }
+if (-not $TeyvatFrame) {
+    $leaked = @($packed | Where-Object {
+        $r = $_.Substring('resource=res://'.Length).Replace('/', '\')
+        $frameOnly | Where-Object { $r -like "$_\*" }
+    })
+    if ($leaked.Count -gt 0) {
+        throw "Release pck carries $($leaked.Count) frame-only resource(s), e.g. $($leaked[0]). They belong in -TeyvatFrame only."
+    }
+}
 $contractLines = @('contract=roster-pck-v3', "sha256=$hash") + $packed
 [IO.File]::WriteAllLines($contract, $contractLines)
 Write-Host "Built $out ($size bytes; contract roster-pck-v3, $($packed.Count) resources)" -ForegroundColor Green
