@@ -44,7 +44,7 @@ roster is prototype rows only, Fontaine's sixteen ported as they are (pick 4,
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 70 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (frozen; re-founding in sim) | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (expansion built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -202,6 +202,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   boss; no seat flipped a Plan.
   Next: [USER] plays (a central rule changed); the damage gap is a paper
   after that run.
+- **Furina: frozen (2026-10-04).** [USER]: "Let's freeze Furina's current build as-is for now, with the expectation that it gets shelved once we have a better idea." No card or rule changes to the current Stage build. The re-founding (`review/active/furina-refounding-2026-10-03.md`, ruled, sec.8 and sec.9) is being built as a sim-only slice; if it finds a strong structure, it replaces this build. The history below is the frozen build's.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
   `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any
