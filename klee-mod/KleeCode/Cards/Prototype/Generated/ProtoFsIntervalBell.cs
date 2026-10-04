@@ -55,7 +55,9 @@ public sealed class ProtoFsIntervalBell : CustomCardModel, ICharacterCard, IModa
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Draw 1 card", "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] instead" };
+        IsUpgraded
+            ? new[] { "Draw 1 card", "[gold]Spend[/gold] 2: draw 1 card and gain 1 [gold]Energy[/gold] instead" }
+            : new[] { "Draw 1 card", "[gold]Spend[/gold] 3: draw 1 card and gain 1 [gold]Energy[/gold] instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -148,9 +150,13 @@ public sealed class ProtoFsIntervalBellModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend {IfUpgraded"),
+        ("title", "Spend 3"),
         ("description", "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] instead"),
     };
+
+    /// <summary>The upgraded side of a price the upgrade moves.</summary>
+    public override string Title =>
+        IsUpgraded ? "Spend 2+" : base.Title;
 
     public ProtoFsIntervalBellModeB()
         : base(CardType.Skill)

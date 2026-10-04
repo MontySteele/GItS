@@ -10148,9 +10148,26 @@ def _sentence_mode_faces(card: dict, desc: str,
 #: One `{Var...}` token of a face, the live number the board folds.
 _FACE_VAR_TOKEN = re.compile(r"\{[^{}]*\}")
 
+#: A flat `{IfUpgraded:show:up|base}` swap -- the shape a Spend price takes
+#: when the upgrade moves it (Interval Bell, "Spend {IfUpgraded:show:2|3}").
+_UPGRADE_SWAP = re.compile(r"\{IfUpgraded:show:([^{}|]*)\|([^{}|]*)\}")
+
+
+def resolve_upgrade_swap(text: str, upgraded: bool) -> str:
+    """`text` with every flat upgrade swap rendered for one side.
+
+    2026-10-04 (Furina v2 seat round): a mode TITLE carries no vars and no
+    SmartFormat, so Interval Bell's chooser printed its price label cut at
+    the template's own colon -- "Spend {IfUpgraded". The title is rendered
+    per side instead, and the upgraded side is served by a `Title` override.
+    """
+    return _UPGRADE_SWAP.sub(
+        lambda m: m.group(1) if upgraded else m.group(2), text)
+
 
 def stage_mode_title(card: dict, index: int,
-                     faces: list[str] | None) -> str | None:
+                     faces: list[str] | None,
+                     upgraded: bool = False) -> str | None:
     """A Stage Spend card's mode TITLE, with no number the board can fold.
 
     2026-09-25 (opus-furina-l2b, (c) 2). The option's TITLE was the sheet's
@@ -10174,6 +10191,7 @@ def stage_mode_title(card: dict, index: int,
         return None
     label = strip_markup(str(eff["modes"][index].get("label") or ""))
     if index < len(rules) and rules[index] is not None:
+        label = resolve_upgrade_swap(label, upgraded)
         return label.split(":", 1)[0].strip() or label
     source = (_FACE_VAR_TOKEN.sub("", faces[index]) if faces
               else re.sub(r"\b\d+\b", "", label))
@@ -10287,6 +10305,37 @@ def mode_requirements(card: dict) -> list[tuple[str, str] | None] | None:
             rule = (rule[0].format(amount=amount), rule[1])
         rules.append(rule)
     return rules if any(r is not None for r in rules) else None
+
+
+def _applies_element(effect: dict) -> bool:
+    return bool(effect.get("applies_element")) or effect.get("op") in (
+        "apply_aura", "swirl")
+
+
+def element_only_in_gated_modes(card: dict) -> bool:
+    """Does the card's element land ONLY in a Spend-gated mode?
+
+    2026-10-04 (Furina v2 seat round): Tidal Flourish wears the Hydro gem
+    and previewed "Frozen" over a Cryo aura, but its plain mode applies no
+    Hydro -- only "Spend 3: ... apply Hydro" does. The reaction preview
+    then says so (`KleeCardTooltips.ForCard`'s `elementOnlyOnSpend`).
+    """
+    rules = mode_requirements(card)
+    eff = modal_effect(card)
+    if rules is None or eff is None:
+        return False
+    if any(_applies_element(e) for e in iter_effects(
+            [e for e in card.get("effects", []) if e is not eff])):
+        return False
+    gated = plain = False
+    for i, mode in enumerate(eff["modes"]):
+        if any(_applies_element(e)
+               for e in iter_effects(mode.get("effects") or [])):
+            if i < len(rules) and rules[i] is not None:
+                gated = True
+            else:
+                plain = True
+    return gated and not plain
 
 
 def mode_is_priced(card: dict, index: int) -> bool:
@@ -15561,6 +15610,18 @@ def emit(
             # walked past it.
             label = cs_escape(stage_mode_title(card, i, option_faces)
                               or strip_markup(mode["label"]))
+            # A price the upgrade moves: the loc title is the base side, and
+            # the upgraded option (`CreateMatchingOption` upgrades it with
+            # its parent) reads the other side, with the "+" every upgraded
+            # `CardModel.Title` carries.
+            up_title = stage_mode_title(card, i, option_faces, upgraded=True)
+            option_title = (
+                "\n\n    /// <summary>The upgraded side of a price the"
+                " upgrade moves.</summary>\n"
+                "    public override string Title =>\n"
+                f'        IsUpgraded ? "{cs_escape(up_title)}+" : base.Title;'
+                if up_title is not None and cs_escape(up_title) != label
+                else "")
             face = cs_escape(option_faces[i] if option_faces
                              else mode["label"])
             # 2026-09-25 (opus-furina-l2b, (c) 2): a Stage Spend card's
@@ -15643,7 +15704,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     {{
         ("title", "{label}"),
         ("description", "{face}"),
-    }};{option_ctor}{option_tips}{option_vars}{option_upgrade_member}{face_price_member}
+    }};{option_title}{option_ctor}{option_tips}{option_vars}{option_upgrade_member}{face_price_member}
 }}
 '''
 
@@ -15931,6 +15992,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         no_hit_arg = (
             ", appliesWithoutHit: true"
             if applies_without_hit and preview_element_cs is not None else "")
+        if (preview_element_cs is not None
+                and element_only_in_gated_modes(card)):
+            no_hit_arg += ", elementOnlyOnSpend: true"
         tips_expr = (
             "KleeCardTooltips.ForCard(base.ExtraHoverTips, this, "
             f"{trigger_arg}, includesBombRules: {bomb_arg}"
@@ -16414,9 +16478,18 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # a refusal).
     modal_aim_member = ""
     if aims is not None:
-        labels_cs = ", ".join(
-            '"' + label.replace("\\", "\\\\").replace('"', '\\"') + '"'
-            for label, _ in aims)
+        def _labels_cs(upgraded: bool) -> str:
+            return ", ".join(
+                '"' + resolve_upgrade_swap(label, upgraded)
+                .replace("\\", "\\\\").replace('"', '\\"') + '"'
+                for label, _ in aims)
+        labels_cs = "new[] { " + _labels_cs(False) + " }"
+        # 2026-10-04: a label carrying an upgrade swap (Interval Bell's
+        # "Spend {IfUpgraded:show:2|3}") is rendered per side -- the bridge
+        # shows these rows verbatim and a template is not a label.
+        if _labels_cs(True) != _labels_cs(False):
+            labels_cs = (f"IsUpgraded\n            ? new[] {{ {_labels_cs(True)} }}"
+                         f"\n            : {labels_cs}")
         flags_cs = ", ".join("true" if a else "false" for _, a in aims)
         modal_aim_member = (
             "\n\n    // EB-184: what each mode does about AIMING, in sheet"
@@ -16432,7 +16505,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    // that attacks nothing. These two rows are what it reads"
             " instead.\n"
             f"    public IReadOnlyList<string> ModeLabels =>\n"
-            f"        new[] {{ {labels_cs} }};\n\n"
+            f"        {labels_cs};\n\n"
             "    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>\n"
             f"        new[] {{ {flags_cs} }};")
     if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member,

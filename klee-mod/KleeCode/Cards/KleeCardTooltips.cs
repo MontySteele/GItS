@@ -90,7 +90,8 @@ public static class KleeCardTooltips
         bool includesBombRules = false,
         bool includesConfiscatedRules = false,
         bool appliesWithoutHit = false,
-        bool includesDazedCard = false)
+        bool includesDazedCard = false,
+        bool elementOnlyOnSpend = false)
     {
         foreach (var tip in inherited) yield return tip;
 
@@ -183,14 +184,33 @@ public static class KleeCardTooltips
                 yield return new HoverTip(
                     new LocString(Table, (boss ? FrozenBossPreviewKey
                                                : FrozenPreviewKey) + ".title"),
-                    FrozenArtifactBody(boss));
+                    (elementOnlyOnSpend ? SpendOnlyPrefix : "")
+                        + FrozenArtifactBody(boss));
                 continue;
             }
-            yield return substitute == null
-                ? HoverTipFactory.FromKeyword(keyword)
-                : new HoverTip(
-                    new LocString(Table, NoHitTitleKey(reaction) + ".title"),
-                    substitute);
+            // 2026-10-04 (Furina v2 seat round): Tidal Flourish previewed
+            // "Frozen" over a Cryo aura while its plain mode applies no Hydro
+            // at all -- only the Spend mode does. Where the element lands only
+            // behind a Spend, the preview names that condition first.
+            if (elementOnlyOnSpend)
+            {
+                var key = PreviewKey(reaction,
+                    keyword == KleeKeywords.FrozenBossPreview);
+                yield return new HoverTip(
+                    new LocString(Table, (substitute == null
+                        ? key : NoHitTitleKey(reaction)) + ".title"),
+                    SpendOnlyPrefix + (substitute
+                        ?? new LocString(Table, key + ".description")
+                            .GetFormattedText()));
+            }
+            else
+            {
+                yield return substitute == null
+                    ? HoverTipFactory.FromKeyword(keyword)
+                    : new HoverTip(
+                        new LocString(Table, NoHitTitleKey(reaction) + ".title"),
+                        substitute);
+            }
             // Text pass 2026-09-25: the Electro-Charged preview names Poison
             // and no longer spells out how it ticks, so Poison's own tip
             // rides beside it. A hover tip cannot nest, so this is the attach.
@@ -506,6 +526,27 @@ public static class KleeCardTooltips
         "[gold]Hydro[/gold] meets [gold]Cryo[/gold] and the aura is used up, "
       + "but its [gold]Artifact[/gold] blocks the "
       + (boss ? "[gold]Vulnerable[/gold]." : "Frozen.");
+
+    /// <summary>2026-10-04: the condition a Spend-gated element's
+    /// reaction preview opens with.</summary>
+    public const string SpendOnlyPrefix = "Only if you [gold]Spend[/gold]: ";
+
+    /// <summary>The loc key of a reaction's preview keyword, the keys
+    /// `KleeMod.InjectLocStrings` registers.</summary>
+    public static string PreviewKey(Reaction reaction, bool frozenBoss) =>
+        reaction switch
+        {
+            Reaction.Vaporize => VaporizePreviewKey,
+            Reaction.Melt => MeltPreviewKey,
+            Reaction.Overload => "KLEEMOD-OVERLOAD_PREVIEW",
+            Reaction.Superconduct => "KLEEMOD-SUPERCONDUCT_PREVIEW",
+            Reaction.ElectroCharged => "KLEEMOD-ELECTRO_CHARGED_PREVIEW",
+            Reaction.Frozen => frozenBoss ? FrozenBossPreviewKey
+                                          : FrozenPreviewKey,
+            Reaction.Swirl => "KLEEMOD-SWIRL_PREVIEW",
+            Reaction.Crystallize => "KLEEMOD-CRYSTALLIZE_PREVIEW",
+            _ => "",
+        };
 
     private static string NoHitTitleKey(Reaction reaction) =>
         reaction == Reaction.Vaporize ? VaporizePreviewKey : MeltPreviewKey;
