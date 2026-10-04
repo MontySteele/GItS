@@ -194,10 +194,12 @@
    effects: [{op: spend_spark, amount: 1},
              {op: plant_bomb, target: enemy, size: 5, mine: true}]}
 
+# 2026-10-03, Klee pre-Balance sweep: Block stays 8, upgrade +3 stated.
 - {id: proto_ko_dig_in, name: "Dig In", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
    description: "Gain 8 [gold]Block[/gold].",
+   upgrade: {block: +3},
    effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 8}]}
 
@@ -242,15 +244,16 @@
 # the coven readers (R244 sec.2), in her OWN pool; since R276 pick 2 they read
 # any Companion play. Per-row reasoning: docs/notes/prototype-surface-provenance.md.
 
+# 2026-10-03, Klee pre-Balance sweep: Bomb 5 / 8 -> 8 / 12.
 - {id: proto_ko_coven_errand, name: "Coven Errand", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    upgrade: {bomb_size: +2},
    # AoE trim, 2026-10-03 (sec.2): one Bomb that grows by 3 after a
    # Companion, where it went to ALL enemies. `bonus_if:` is the rider.
-   description: "Place a [gold]Bomb[/gold] 5 on an enemy, 8 if you played a [gold]Companion[/gold] card this turn.",
-   effects: [{op: plant_bomb, target: enemy, size: 5,
-              bonus_if: {if: companion_played_this_turn, amount: 3}}]}
+   description: "Place a [gold]Bomb[/gold] 8 on an enemy, 12 if you played a [gold]Companion[/gold] card this turn.",
+   effects: [{op: plant_bomb, target: enemy, size: 8,
+              bonus_if: {if: companion_played_this_turn, amount: 4}}]}
 
 - {id: proto_ko_witches_circle, name: "Little Hexenzirkel", character: klee,
    authored_by: [claude],
@@ -259,12 +262,14 @@
    description: "Whenever you play a [gold]Companion[/gold] card, place a [gold]Bomb[/gold] 3 on a random enemy.",
    effects: [{op: apply_power, power: ko_witches_circle, amount: 3, target: self}]}
 
+# 2026-10-03, Klee pre-Balance sweep: draws 2 after the mark.
 - {id: proto_ko_alices_introduction_magic, name: "Alice's Introduction Magic", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare,
    upgrade: {retain: true},
-   description: "All cards in your hand count as [gold]Companion[/gold] cards this turn.",
-   effects: [{op: companion_mark_hand}]}
+   description: "All cards in your hand count as [gold]Companion[/gold] cards this turn. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: companion_mark_hand},
+             {op: draw, amount: 2}]}
 
 # the pool pass, round 10 (2026-09-04): the arm's one energy-priced plain
 # detonator, beside Sizzle's reaction-keyed one. Why it exists:
@@ -294,11 +299,13 @@
 # shelves and a bridge. Why each exists and what the rounds said:
 # docs/notes/prototype-surface-provenance.md.
 
+# 2026-10-03, Klee pre-Balance sweep: cost 1 -> 2, on ALL enemies, upgrade Retain.
 - {id: proto_ko_all_of_my_treasures, name: "All of My Treasures!", character: klee,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Place a [gold]Bomb[/gold] the size of your largest [gold]Bomb[/gold] on the enemy.",
-   effects: [{op: plant_bomb_copy_largest, target: enemy}]}
+   cost: 2, type: skill, rarity: rare, exhaust: true,
+   description: "Place a [gold]Bomb[/gold] the size of your largest [gold]Bomb[/gold] on ALL enemies.",
+   upgrade: {retain: true},
+   effects: [{op: plant_bomb_copy_largest, target: all_enemies}]}
 
 - {id: proto_ko_fish_blasting, name: "Fish Blasting", character: klee,
    authored_by: [claude],
@@ -356,13 +363,14 @@
 # the defence shelf's two, the Spark sinks' two, the Energy engines' two.
 # Why each exists: docs/notes/prototype-surface-provenance.md.
 
+# 2026-10-03, Klee pre-Balance sweep: Block 6 -> 4 (upgrade +2 -> 6).
 - {id: proto_ko_blast_shield, name: "Blast Shield", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. Return this card to your hand.",
+   description: "Gain 4 [gold]Block[/gold]. Return this card to your hand.",
    upgrade: {block: +2},
    effects: [{op: spend_spark, amount: 1},
-             {op: block, amount: 6},
+             {op: block, amount: 4},
              {op: return_to_hand}]}
 
 - {id: proto_ko_return_to_sender, name: "Return to Sender", character: klee,
@@ -725,11 +733,12 @@
    effects: [{op: block, amount: 6},
              {op: transform_statuses_into, card: proto_ko_pop}]}
 
+# 2026-10-03, Klee pre-Balance sweep: also 1 Spark per status drawn.
 - {id: proto_ko_damage_report, name: "Damage Report", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    # AoE trim, 2026-10-03 (sec.2): Block per status drawn, was 5 to ALL.
-   description: "Whenever you draw a status, gain 4 [gold]Block[/gold].",
+   description: "Whenever you draw a status, gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_damage_report, amount: 4, target: self}]}
 

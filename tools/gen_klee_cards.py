@@ -3115,7 +3115,8 @@ APPLY_POWERS = {
         "Whenever you draw a status, place a "
         "[gold]Bomb[/gold] {X} on a random enemy."),
     "ko_damage_report": ("DamageReportPower", None,
-        "Whenever you draw a status, gain {X} [gold]Block[/gold]."),
+        "Whenever you draw a status, gain {X} [gold]Block[/gold] and 1 "
+        "[gold]Spark[/gold]."),
     "ko_secret_base": ("SecretBasePower", None,
         "At the start of your turn, if no enemy has a [gold]Bomb[/gold] of "
         "yours, place a [gold]Bomb[/gold] {X} on a random enemy."),
@@ -5261,7 +5262,8 @@ def blocked_reason(
             unknown = set(eff) - PLANT_BOMB_COPY_LARGEST_FIELDS
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
-            if eff.get("target") != "enemy":
+            # 2026-10-03, Klee pre-Balance sweep: ALL enemies is the row.
+            if eff.get("target") not in {"enemy", "all_enemies"}:
                 return f"plant_bomb_copy_largest target '{eff.get('target')}'"
         # POOL PASS TWO's two (`EB-732`), same UNPARSEABLE discipline.
         if op == "return_to_hand":
@@ -11265,10 +11267,17 @@ def build_body(
             # carries no number: the size is read off the board inside
             # `ProtoBombPower`, so the card cannot express a second reading of
             # "your largest Bomb".
-            _target_guard(lines, ctx)
-            lines.append(
-                "await ProtoBombPower.PlaceCopyOfLargest("
-                "choiceContext, cardPlay.Target, Owner.Creature, this);")
+            if eff.get("target") == "all_enemies":
+                # 2026-10-03, Klee pre-Balance sweep: one read of the
+                # largest Bomb, then the same size on every living enemy.
+                lines.append(
+                    "await ProtoBombPower.PlaceCopyOfLargestOnAll("
+                    "choiceContext, Owner.Creature, this);")
+            else:
+                _target_guard(lines, ctx)
+                lines.append(
+                    "await ProtoBombPower.PlaceCopyOfLargest("
+                    "choiceContext, cardPlay.Target, Owner.Creature, this);")
 
 
         elif op == "return_to_hand":
@@ -15121,6 +15130,10 @@ def emit(
         # (Quick Fuse) or move destination (Careful Arrangement) makes the
         # card enemy-targeted; detonate-all reads as AllEnemies.
         if eff["op"] in ("detonate", "move_bombs"):
+            target_type = TARGET_CS[eff["target"]]
+            break
+        # All of My Treasures! (2026-10-03) copies onto ALL enemies.
+        if eff["op"] == "plant_bomb_copy_largest":
             target_type = TARGET_CS[eff["target"]]
             break
         # Enemy debuffs too: Surprise Visit is nothing but a chosen-enemy

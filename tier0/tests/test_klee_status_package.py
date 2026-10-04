@@ -160,6 +160,22 @@ def test_damage_report_blocks_per_status_drawn(overhaul):
     assert (a.hp, b.hp) == (200, 200)
 
 
+def test_damage_report_grants_a_spark_per_status_drawn(overhaul):
+    """Klee pre-Balance sweep (2026-10-03): "...gain 4 Block and 1 Spark."
+    The Spark goes through the one Spark door (`gain_sparks`), so it lands
+    on the ledger under its own source and every Spark reader sees it."""
+    st = klee_state([make_enemy(hp=200)])
+    st.player.powers[klee_overhaul.DAMAGE_REPORT] = 4
+    st.player.sparks = 0
+    st.player.hand = []
+    st.player.draw_pile = [statuses.make_status("dazed"), _confiscated(),
+                           load("proto_ko_pop")]
+    st.draw(3)
+    assert st.player.sparks == 2 * C.KLEE_OVERHAUL_DAMAGE_REPORT_SPARK == 2
+    assert [row["source"] for row in st.spark_ledger].count(
+        "power:damage_report/status_drawn") == 2
+
+
 def test_klee_can_explain_turns_every_status_into_pop(overhaul):
     enemy = make_enemy(hp=200)
     st = klee_state([enemy])

@@ -164,6 +164,9 @@ KLEE_OVERHAUL_OPENING_SPARK = 1
 # why it is named here beside rule 4's other two rates rather than riding the
 # power's amount. C# twin `KleeOverhaulLaw.GroundedSpark`.
 KLEE_OVERHAUL_GROUNDED_SPARK = 1
+# Damage Report's Spark per status drawn (Klee pre-Balance sweep, 2026-10-03);
+# flat at both levels. `KleeOverhaulLaw.DamageReportSpark`.
+KLEE_OVERHAUL_DAMAGE_REPORT_SPARK = 1
 # THE SPARK SEED (`EB-577`, D default off the Klee r21 packet sec.5). Sparks
 # read as inert until a sink is drafted, six rounds running (r17-r21): r21 lane
 # 2 ended fights holding 3, 4 and 5 Sparks with Dig In the deck's only reader.

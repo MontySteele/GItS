@@ -838,7 +838,8 @@ def _pass_two_state(enemies=None, hp=62):
 
 
 def test_blast_shield_comes_back_to_hand_and_can_be_played_again(overhaul):
-    """ROW 1. "Gain 6 Block. Return this card to your hand."
+    """ROW 1. "Gain 4 Block. Return this card to your hand." (6 until the
+    Klee pre-Balance sweep, 2026-10-03.)
 
     THE ROUTING IS THE RULE. The card is in no pile while it resolves, so the
     `return_to_hand` op raises a per-play flag and `_finish_play` reads it at
@@ -858,13 +859,13 @@ def test_blast_shield_comes_back_to_hand_and_can_be_played_again(overhaul):
     state.player.hand = [card]
 
     play_card(state, card)
-    assert state.player.block == 6
+    assert state.player.block == 4
     assert state.player.sparks == 4
     assert card in state.player.hand, "the card came back"
     assert card not in state.player.discard_pile
 
     play_card(state, card)
-    assert state.player.block == 12, "played twice, paid twice"
+    assert state.player.block == 8, "played twice, paid twice"
     assert state.player.sparks == 3
     assert card in state.player.hand
 
@@ -874,7 +875,7 @@ def test_blast_shield_comes_back_to_hand_and_can_be_played_again(overhaul):
     state2.player.sparks = 2
     state2.player.hand = [up]
     play_card(state2, up)
-    assert state2.player.block == 8
+    assert state2.player.block == 6
     assert up in state2.player.hand
 
 

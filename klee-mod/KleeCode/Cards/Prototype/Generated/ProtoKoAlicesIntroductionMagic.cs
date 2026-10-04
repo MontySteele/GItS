@@ -42,13 +42,13 @@ public sealed class ProtoKoAlicesIntroductionMagic : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Alice's Introduction Magic"),
-        ("description", "All cards in your hand count as [gold]Companion[/gold] cards this turn."),
+        ("description", "All cards in your hand count as [gold]Companion[/gold] cards this turn. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CardsVar(2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,6 +61,7 @@ public sealed class ProtoKoAlicesIntroductionMagic : CustomCardModel
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CompanionHexerei.MarkHand(choiceContext, Owner);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()

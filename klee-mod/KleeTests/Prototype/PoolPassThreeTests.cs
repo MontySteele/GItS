@@ -61,19 +61,40 @@ public class PoolPassThreeTests
     }
 
     [Fact]
-    public void Treasures_is_an_exhausting_rare_skill_that_aims()
+    public void Treasures_reads_the_board_once_and_places_on_all()
     {
-        // The row's shape, off the shipped class: a Rare that fires ONCE (it
-        // Exhausts), aimed, and printing no number of its own -- "equal to
-        // your largest Bomb" is a read, and a figure here would be a second
-        // reading of it.
+        // Klee pre-Balance sweep (2026-10-03): "Place a Bomb the size of your
+        // largest Bomb on ALL enemies." STRUCTURAL: one read of the largest
+        // charge, then `PlaceOnAll` (every living enemy) at that size; no
+        // TakeAt/TakeAll. Twin:
+        // `test_treasures_copies_the_largest_bomb_onto_every_living_enemy`.
+        var calls = Il.Calls(Il.Method("ProtoBombPower", "PlaceCopyOfLargestOnAll"));
+        Assert.Contains(calls, c => c.Contains("LargestCharge"));
+        Assert.Contains(calls, c => c.Contains("ProtoBombPower.PlaceOnAll"));
+        Assert.DoesNotContain(calls, c => c.Contains("TakeAt"));
+        Assert.DoesNotContain(calls, c => c.Contains("TakeAll"));
+        Assert.Contains("ProtoBombPower.PlaceCopyOfLargestOnAll",
+            Il.Calls(Il.Method("ProtoKoAllOfMyTreasures", "OnPlay")));
+    }
+
+    [Fact]
+    public void Treasures_is_an_exhausting_rare_skill_that_hits_all()
+    {
+        // The row's shape, off the shipped class: a 2-cost Rare that fires
+        // ONCE (it Exhausts), on ALL enemies since the Klee pre-Balance sweep
+        // (2026-10-03), and printing no number of its own -- "your largest
+        // Bomb" is a read. The upgrade adds Retain and keeps Exhaust.
         var card = new ProtoKoAllOfMyTreasures();
 
         Assert.Equal(CardRarity.Rare, card.Rarity);
         Assert.Equal(CardType.Skill, card.Type);
-        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
+        Assert.Equal(2, card.EnergyCost.Canonical);
+        Assert.Equal(TargetType.AllEnemies, card.TargetType);
         Assert.Contains(card.CanonicalKeywords, k => k == CardKeyword.Exhaust);
         Assert.Empty(Vars(card));
+        var upgrade = Il.Calls(Il.Method("ProtoKoAllOfMyTreasures", "OnUpgrade"));
+        Assert.Contains(upgrade, c => c.Contains("AddKeyword"));
+        Assert.DoesNotContain(upgrade, c => c.Contains("RemoveKeyword"));
     }
 
     // ---- Fireworks Show: Set off ALL, at a price the upgrade cuts ----------

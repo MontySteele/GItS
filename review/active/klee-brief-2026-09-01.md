@@ -957,3 +957,16 @@ to detonate early?" (now "Deal 8 Pyro damage. Place a Mine 4 on that enemy.",
 Common now. Exhaust tag, or bump to Uncommon?" (Uncommon, kept repeatable).
 Readings: `docs/notes/prototype-surface-provenance.md`, "Klee finish-line
 batch, 2026-10-03".
+
+## 20. The pre-Balance sweep (2026-10-03)
+
+[USER] asked for "one last rundown of her kit right now" before Balance: no
+card obviously bad, none redundant. Six rows moved. All of My Treasures!
+costs 2 and places a Bomb the size of your largest on ALL enemies (Exhaust
+kept, upgrade Retain). Coven Errand places 8, or 12 after a Companion (10 /
+14 upgraded). Alice's Introduction Magic also draws 2 cards. Damage Report
+gains 4 Block and 1 Spark per status drawn. Blast Shield gains 4 Block (6
+upgraded), down from 6, because one card turned the whole Spark bank into
+Block. Dig In stays at 8 with its +3 upgrade stated on the row. Countdown
+already drew 2 (3 upgraded). Readings: `docs/notes/prototype-surface-provenance.md`,
+"Klee pre-Balance sweep, 2026-10-03".
