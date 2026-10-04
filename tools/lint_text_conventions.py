@@ -330,7 +330,7 @@ def tip_rows() -> list[Row]:
     # the prose is allowed to contain.
     for name, body in re.findall(
             r"With\(inherited, (\w+Key),\s*(.*?)\);", src, re.S):
-        if "SparkBody()" in body:
+        if "SparkBody(" in body:
             continue
         rows.append(Row("tip", name, csharp_text(body), where))
     concat = r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'

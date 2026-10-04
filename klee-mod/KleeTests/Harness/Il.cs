@@ -210,6 +210,84 @@ internal static class Il
         return found;
     }
 
+    /// <summary>
+    /// The methods this body calls, as RESOLVED methods rather than names, so a
+    /// caller can walk a closure (<c>KleeOffCharacterSweepTests</c>). Same
+    /// byte-scan and the same caveat as <see cref="Calls"/>.
+    /// </summary>
+    internal static IReadOnlyCollection<MethodBase> Callees(MethodBase method)
+    {
+        var found = new HashSet<MethodBase>();
+        foreach (var body in Bodies(method))
+        {
+            var il = body.GetMethodBody()?.GetILAsByteArray();
+            if (il == null) continue;
+
+            for (var i = 0; i < il.Length - 4; i++)
+            {
+                var operandAt = i + 1;
+                if (il[i] == 0xFE && i + 1 < il.Length && il[i + 1] == 0x06)
+                {
+                    operandAt = i + 2;
+                }
+                else if (il[i] != 0x28 && il[i] != 0x6F && il[i] != 0x73)
+                {
+                    continue;
+                }
+
+                if (operandAt + 4 > il.Length) continue;
+                try
+                {
+                    var target = body.Module.ResolveMethod(
+                        BitConverter.ToInt32(il, operandAt),
+                        body.DeclaringType?.GetGenericArguments(),
+                        body.IsGenericMethod ? body.GetGenericArguments() : null);
+                    if (target != null) found.Add(target);
+                }
+                catch
+                {
+                    // Not a method token. Expected while byte-scanning.
+                }
+            }
+        }
+
+        return found;
+    }
+
+    /// <summary>
+    /// Every type this body TESTS against (<c>isinst</c>, <c>castclass</c>):
+    /// the IL of <c>x is T</c> and <c>(T)x</c>. The byte-scan caveat holds, so
+    /// an assertion on this should name the types it cares about.
+    /// </summary>
+    internal static IReadOnlyCollection<Type> TypesTested(MethodBase method)
+    {
+        var found = new HashSet<Type>();
+        foreach (var body in Bodies(method))
+        {
+            var il = body.GetMethodBody()?.GetILAsByteArray();
+            if (il == null) continue;
+
+            for (var i = 0; i < il.Length - 4; i++)
+            {
+                if (il[i] != 0x75 && il[i] != 0x74) continue; // isinst, castclass
+                try
+                {
+                    var type = body.Module.ResolveType(
+                        BitConverter.ToInt32(il, i + 1),
+                        body.DeclaringType?.GetGenericArguments(),
+                        body.IsGenericMethod ? body.GetGenericArguments() : null);
+                    if (type != null) found.Add(type);
+                }
+                catch
+                {
+                    // Not a type token. Expected while byte-scanning.
+                }
+            }
+        }
+
+        return found;
+    }
+
     private static IEnumerable<MethodBase> Bodies(MethodBase method)
     {
         yield return method;

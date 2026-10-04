@@ -115,12 +115,21 @@ namespace KleeMod.Vfx;
 /// ledger cannot come from different reads. There is no
 /// <c>_Process</c> anywhere in this file.
 ///
-/// KLEE'S SEAT, UNDER THE ARM, AND NOBODY ELSE'S. The scope is
-/// <see cref="SparkGauge.AppliesTo"/> verbatim -- one predicate for this
-/// counter and the strip-badge suppression rather than two that can drift -- which is
-/// <c>KleeOverhaul.Enabled &amp;&amp; character is IKleeCharacter</c>. And the
-/// element is built for the LOCAL seat only: a co-op partner's screen is their
-/// own energy area and must not gain Klee's bank.
+/// ANYONE WITH A SPARK, AND KLEE FROM ZERO (2026-10-04). [USER]: "Klee's
+/// cards need to work universally like Regent's." The base game shows the
+/// Regent's Star counter for ANY character once their Stars pass 0
+/// (<c>NStarCounter.RefreshVisibility</c>: <c>Visible = Visible ||
+/// ShouldAlwaysShowStarCounter || stars &gt; 0</c>, so once shown it stays for
+/// the combat), and from turn one for the Regent. This counter does the same:
+/// <see cref="ShowsFor"/> is Klee (<see cref="SparkGauge.AppliesTo"/>, the
+/// always-show half), or a bank above 0, or a counter already built this
+/// combat. It is still built for the LOCAL seat only: a co-op partner's screen
+/// is their own energy area.
+///
+/// BESIDE FURINA'S FANFARE. <see cref="FanfareCounter"/> uses this file's
+/// placement. A Furina holding Sparks shows both, in one row above the energy
+/// orb: Fanfare in the first slot (her own resource, from turn one) and Sparks
+/// in the next (<see cref="SlotFor"/>, <see cref="PlaceInRow"/>).
 ///
 /// WHAT NOTHING HEADLESS CAN ANSWER. Whether the badge lands where the star
 /// counter lands, and whether the displaced energy orb reads well beside it.
@@ -173,13 +182,32 @@ public static class SparkCounter
     private static bool _warnedGlyph;
 
     /// <summary>
-    /// Does this seat get the badge? <see cref="SparkGauge.AppliesTo"/> and
-    /// nothing else. `EB-281` already settled who owns a Spark display and
-    /// spelled the co-op reason at length; a second copy of that predicate here
-    /// would be a second thing to keep true.
+    /// Is this the seat whose counter is ALWAYS shown, from 0?
+    /// <see cref="SparkGauge.AppliesTo"/> and nothing else: Klee, the
+    /// <c>ShouldAlwaysShowStarCounter</c> half of the base game's rule.
     /// </summary>
     public static bool AppliesTo(Creature? creature) =>
         creature != null && SparkGauge.AppliesTo(creature);
+
+    /// <summary>
+    /// Is the counter on this creature's screen? The base game's Star rule,
+    /// whole: always for Klee, and for anyone else from their first Spark to
+    /// the end of the combat (a built counter stays). Headless-safe: with no
+    /// counter built the registry answers without touching Godot.
+    /// </summary>
+    public static bool ShowsFor(Creature? creature)
+    {
+        if (creature?.Player is not { } player) return false;
+        return AppliesTo(creature) || Read(creature) > 0
+            || Displays.Get(player) != null;
+    }
+
+    /// <summary>
+    /// The counter's place in the row above the energy orb: after Furina's
+    /// Fanfare gauge when she holds Sparks, first otherwise.
+    /// </summary>
+    public static int SlotFor(Creature? creature) =>
+        FanfareCounter.AppliesTo(creature) ? 1 : 0;
 
     /// <summary>The number the badge draws: the bank, right now, through the
     /// arm's one read
@@ -196,7 +224,7 @@ public static class SparkCounter
     public static void Setup(CombatState? state)
     {
         var me = TryGetMe(state);
-        if (me == null || !AppliesTo(me.Creature)) return;
+        if (me == null || !ShowsFor(me.Creature)) return;
         if (NCombatRoom.Instance?.Ui is not { } ui) return;
 
         // `%StarCounter` is in every character's combat scene -- Regent is the
@@ -219,7 +247,8 @@ public static class SparkCounter
         parent.AddChildSafely(root);
         Displays.Set(me, root);
 
-        Apply(root, panel, side, ui.GetViewportRect().Size);
+        Apply(root, panel, side, ui.GetViewportRect().Size,
+              SlotFor(me.Creature));
 
         Paint(root, me.Creature);
     }
@@ -232,7 +261,7 @@ public static class SparkCounter
     {
         var player = creature?.Player;
         if (player == null || !LocalContext.IsMe(player)) return;
-        if (!AppliesTo(creature)) return;
+        if (!ShowsFor(creature)) return;
 
         var root = Displays.Get(player);
         if (root == null)
@@ -331,6 +360,20 @@ public static class SparkCounter
     /// the panel is the one that matters -- an unreadable number in the corner
     /// beats a readable one painted over the energy cost.
     /// </summary>
+    /// <summary>
+    /// <see cref="Place"/>, then <paramref name="slot"/> badges further along
+    /// the row (one side and one <see cref="PanelMargin"/> each), held inside
+    /// the viewport. Slot 0 is <see cref="Place"/> itself. Pure, like it.
+    /// </summary>
+    internal static Rect2 PlaceInRow(
+        Rect2 energy, float side, Vector2 viewport, int slot)
+    {
+        var first = Place(energy, side, viewport);
+        if (slot <= 0) return first;
+        var at = first.Position + new Vector2(slot * (side + PanelMargin), 0f);
+        return new Rect2(Hold(at, side, viewport), first.Size);
+    }
+
     private static Vector2 Hold(Vector2 at, float side, Vector2 viewport) =>
         new(viewport.X > side ? Mathf.Clamp(at.X, 0f, viewport.X - side) : at.X,
             viewport.Y > side ? Mathf.Clamp(at.Y, 0f, viewport.Y - side) : at.Y);
@@ -348,13 +391,14 @@ public static class SparkCounter
     /// literal is the honest guess rather than nothing on screen.
     /// </summary>
     internal static void Apply(
-        Control root, Control? panel, float side, Vector2 viewport)
+        Control root, Control? panel, float side, Vector2 viewport,
+        int slot = 0)
     {
         if (panel == null)
         {
-            var guess = Place(
+            var guess = PlaceInRow(
                 new Rect2(EnergyCounterOffset, new Vector2(side, side)),
-                side, viewport);
+                side, viewport, slot);
             root.AnchorLeft = 0f;
             root.AnchorTop = 0f;
             root.AnchorRight = 0f;
@@ -367,7 +411,8 @@ public static class SparkCounter
         }
 
         var rect = new Rect2(panel.Position, panel.Size);
-        var delta = Place(rect, side, viewport).Position - rect.Position;
+        var delta = PlaceInRow(rect, side, viewport, slot).Position
+                  - rect.Position;
 
         root.AnchorLeft = panel.AnchorLeft;
         root.AnchorRight = panel.AnchorLeft;
@@ -436,7 +481,9 @@ public static class SparkCounter
     /// ZERO IS DRAWN, NOT HIDDEN. That is <c>ShouldAlwaysShowStarCounter</c>'s
     /// posture and the reason it exists: a resource a whole kit is priced
     /// against has to be on screen from turn one, or the player learns it is
-    /// there only once they already have some. The colour at zero is
+    /// there only once they already have some. Anyone else's counter appears
+    /// on their first Spark and then also stays, at 0 in red, as a spent
+    /// Star counter does. The colour at zero is
     /// <c>StsColors.red</c> and otherwise <c>StsColors.cream</c>, which is
     /// <c>NStarCounter.SetStarCountText</c>'s own pair.
     /// </summary>

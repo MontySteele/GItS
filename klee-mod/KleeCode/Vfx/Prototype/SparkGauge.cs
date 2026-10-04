@@ -83,10 +83,10 @@ public static class SparkGauge
     public const string GlyphPath = "klee/powers/spark.png";
 
     /// <summary>
-    /// Does this creature get the arm's Spark display? Klee, and only while the
-    /// arm is live. OFF THE ARM THIS IS FALSE AND NOTHING ELSE IN THE FILE
-    /// RUNS: the counter is not built, the badge is not suppressed, and the
-    /// shipped display is what it was.
+    /// Is this creature's Spark display shown ALWAYS, from 0? Klee: the
+    /// Regent's <c>ShouldAlwaysShowStarCounter</c> half. Anyone else's
+    /// counter appears on their first Spark (<see cref="SparkCounter.ShowsFor"/>,
+    /// 2026-10-04).
     ///
     /// The arm is the same runtime read <c>Klee.StartingDeck</c> and
     /// <c>KleeCardPool.FilterThroughEpochs</c> take, for the reason
@@ -136,10 +136,16 @@ public static class SparkGauge
     /// the overhead gauge this used to redraw first is gone, so there is no
     /// <c>GaugeBridge.Refresh</c> here. The counter scopes itself to the LOCAL
     /// seat.
+    ///
+    /// ANY HOLDER SINCE 2026-10-04 ([USER]: "Klee's cards need to work
+    /// universally like Regent's"): a Spark gained by anyone may raise their
+    /// counter, so this no longer asks <see cref="AppliesTo"/>.
+    /// <see cref="SparkCounter.Refresh"/> decides (<see cref="SparkCounter.ShowsFor"/>),
+    /// and declines before any node work for a seat with no Spark.
     /// </summary>
     public static void Refresh(Creature? creature)
     {
-        if (creature == null || !AppliesTo(creature))
+        if (creature == null)
         {
             return;
         }
@@ -172,8 +178,14 @@ public static class SparkGauge
             return false;
         }
 
+        // ANY HOLDER (2026-10-04): hidden exactly where the energy-area
+        // counter shows the same bank, which is Klee always and anyone else
+        // from their first Spark (`SparkCounter.ShowsFor`). The strip adds the
+        // badge as the first Spark lands, and the same funnel builds the
+        // counter right after, so a holder never sees the number twice.
         Creature? owner = OwnerOf(power);
-        return owner != null && AppliesTo(owner) && LocalContext.IsMe(owner);
+        return owner != null && LocalContext.IsMe(owner)
+            && (AppliesTo(owner) || SparkCounter.ShowsFor(owner));
     }
 
     /// <summary>

@@ -49,13 +49,9 @@ public class ArmKeywordTipTests
     private static string Printed(string method) => string.Concat(
         Il.Strings(Tips.GetMethod(method, HeadlessGame.All)!));
 
-    private static string SparkBody()
-    {
-        var body = Tips.GetMethod("SparkBody", HeadlessGame.All)
-            ?? throw new System.InvalidOperationException(
-                "ArmKeywordTips.SparkBody is gone -- the Spark rule moved.");
-        return (string)body.Invoke(null, System.Array.Empty<object>())!;
-    }
+    /// <summary>The Spark tip as a Klee reads it (the opening bank is hers;
+    /// `KleeOffCharacterSweepTests` holds the other reader).</summary>
+    private static string SparkBody() => ArmKeywordTips.SparkBody(openingBank: true);
 
     // ---- the one runtime branch -------------------------------------------
 

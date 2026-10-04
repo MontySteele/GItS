@@ -197,10 +197,12 @@ public static class ArmKeywordTips
 
     /// <summary>Rule 4. The gain rate is read from
     /// <see cref="KleeOverhaulLaw.SparkPerExplosion"/>, which is also
-    /// Pounding Surprise's whole body under this arm.</summary>
+    /// Pounding Surprise's whole body under this arm. The opening bank is
+    /// Klee's kit rule, so it is printed only to a Klee
+    /// (<see cref="KleeOpensWithASpark"/>).</summary>
     public static IEnumerable<IHoverTip> ForSpark(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, SparkKey, SparkBody());
+        With(inherited, SparkKey, SparkBody(KleeOpensWithASpark(card)));
 
     /// <summary>
     /// THE ONE SENTENCE THAT IS NOT THE SAME IN BOTH KLEE ARMS, so it is the
@@ -217,8 +219,14 @@ public static class ArmKeywordTips
     /// `SparkPower.BaseRuleActive` is `false` whenever `PROTOTYPE_CARDS` is
     /// defined. So the shared clauses are unconditional and the kit rule joins
     /// them only under the arm that owns it.
+    ///
+    /// KLEE'S CARDS ON ANYONE (2026-10-04, [USER]: "Klee's cards need to work
+    /// universally like Regent's"). The opening Spark is paid by Klee's kit
+    /// (<c>KleeOverhaulOpening.GrantSpark</c>), not by her cards, so a card of
+    /// hers in anyone else's hand prints the word and the price and not a bank
+    /// that player will never be given. PUBLIC for the sweep in KleeTests.
     /// </summary>
-    private static string SparkBody()
+    public static string SparkBody(bool openingBank)
     {
         const string word =
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ";
@@ -228,6 +236,7 @@ public static class ArmKeywordTips
         // exactly the moment the r4 seat found unplayable by construction, and
         // the sentence that fixes it belongs beside the one that was already
         // there rather than on a relic the player may not have read.
+        if (!openingBank) return word + shared;
         return word + "Start each combat with " + KleeOverhaulLaw.OpeningSpark
              + ". " + shared;
     }
@@ -783,6 +792,29 @@ public static class ArmKeywordTips
             return owner.Character is IKleeCharacter || (inRun ?? false);
         }
         return inRun ?? true;
+    }
+
+    /// <summary>
+    /// Does this card's holder start each combat with Klee's Spark? Her kit
+    /// pays it (<c>KleeOverhaulOpening.GrantSpark</c>), so the answer is the
+    /// OWNER's character when the card has one. With no owner (a compendium
+    /// or a reward shelf) it falls back to the run, as
+    /// <see cref="KleesRuleBelongsHere"/> does, and prints when nothing
+    /// answers. Never throws.
+    /// </summary>
+    public static bool KleeOpensWithASpark(CardModel card)
+    {
+        Player? owner = null;
+        try
+        {
+            if (card.IsMutable) owner = card.Owner;
+        }
+        catch (System.Exception)
+        {
+            owner = null;
+        }
+        if (owner != null) return owner.Character is IKleeCharacter;
+        return KleeAmongTheRunsPlayers() ?? true;
     }
 
     /// <summary>Is any seat in this run playing Klee, or does nothing answer?
