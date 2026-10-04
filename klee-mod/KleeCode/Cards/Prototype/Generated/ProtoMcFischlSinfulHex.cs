@@ -44,7 +44,7 @@ public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, IC
 
     public Element CompanionElement => Element.Electro;
 
-    public string? PersonalPool => "klee";
+    public string? PersonalPool => null;
 
     public string? Nation => "mondstadt";
 

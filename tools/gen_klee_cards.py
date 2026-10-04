@@ -539,12 +539,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # `return_to_hand` (Blast Shield) is emitted NOT as a
                   # statement but as a `GetResultLocationForCardPlay` override
                   # -- the game's own seam for "where does this card go when it
-                  # is played", verified on `SparksNSplash`'s kit rule -- and
-                  # `return_last_set_off` (Once More!) is one call into
-                  # `KleeOverhaulLedger.ReturnLastSetOff`, whose move is
-                  # `CardPileCmd.Add(card, PileType.Hand, ...)`, the same
-                  # verified door `KokomiPlan.Replay` takes.
-                  "return_to_hand", "return_last_set_off",
+                  # is played", verified on `SparksNSplash`'s kit rule. (Once
+                  # More!'s `return_last_set_off` left 2026-10-03.)
+                  "return_to_hand",
                   # THE POOL EXPANSION's five (R276). Each is one awaited call
                   # into `ProtoBombPower` or `KleeExpansion`
                   # (Powers/Prototype/KleeExpansion.cs): a flat growth of the
@@ -2478,7 +2475,6 @@ PLANT_BOMB_COPY_LARGEST_FIELDS = {"op", "target"}
 #: card that was played, and Once More!'s is a fact about a card that already
 #: was -- there is nothing on either for a field to carry.
 RETURN_TO_HAND_FIELDS = {"op"}
-RETURN_LAST_SET_OFF_FIELDS = {"op"}
 #: THE POOL EXPANSION's five (R276), same discipline.
 #: One More Charge and Treasure Map: a FLAT growth of the largest Bomb, with
 #: One More Charge's optional draw when the grown Bomb reaches a bar.
@@ -3003,11 +2999,9 @@ def plan_clause_cs(eff: dict, var: str | None = None) -> str:
 #: `ko_grounded` and `mc_lions_fang` pay at TURN START off a Power the card
 #: only granted -- a POWER's Block, not a card's, which is the distinction
 #: `GroundedPower` states in as many words. Those stay raw.
-BLOCK_PAYING_POWERS = frozenset((
-    "mc_shaken_not_purred",
-    "mc_i_got_your_back",
-    "mc_front_row_seat",
-))
+#: EMPTY since the Klee-only companions (2026-10-03): its three members
+#: (Shaken, Not Purred; I Got Your Back; Front Row Seat) were cut.
+BLOCK_PAYING_POWERS: frozenset[str] = frozenset()
 
 # apply_power (power-card pass)
 # apply_power (power-card pass): sheet power id -> (C# PowerModel class,
@@ -3122,8 +3116,6 @@ APPLY_POWERS = {
         "[gold]Bomb[/gold] {X} on a random enemy."),
     "ko_damage_report": ("DamageReportPower", None,
         "Whenever you draw a status, gain {X} [gold]Block[/gold]."),
-    "ko_solitary_confinement": ("SolitaryConfinementPower", None,
-        "Your [gold]Confiscated[/gold] cost 0."),
     "ko_secret_base": ("SecretBasePower", None,
         "At the start of your turn, if no enemy has a [gold]Bomb[/gold] of "
         "yours, place a [gold]Bomb[/gold] {X} on a random enemy."),
@@ -3140,30 +3132,9 @@ APPLY_POWERS = {
     "ko_sit_tight": ("SitTightPower", None,
         "At the end of this turn, if no [gold]Bomb[/gold] of yours went off "
         "this turn, gain {X} [gold]Block[/gold]."),
-    "ko_second_surprise": ("SecondSurprisePower", None,
-        "Whenever one of your [gold]Mines[/gold] goes off, place a "
-        "[gold]Bomb[/gold] half its size on that enemy."),
-    # THE COMPANION STAND-INS' FOUR (QUARANTINED, R213 B). Every class below
-    # lives in klee-mod/KleeCode/Powers/Prototype/CompanionStandIns.cs and is
-    # compiled only under `-p:PrototypeCards=true`, so the only rows that may
-    # name one are `proto_mc_` stand-ins on the prototype surface. They are
-    # HERE, beside Klee's own, rather than in the companion block below,
-    # because all four read the Klee overhaul's explosion ledger -- which is
-    # what a caretaker stand-in is for. The {X} templates are for form; every
-    # row carries its own `description:` (EB-215).
-    "mc_shaken_not_purred": ("ShakenNotPurredPower", None,
-        "The next time one of your [gold]Bombs[/gold] goes off this turn, "
-        "gain {X} Block."),
-    "mc_i_got_your_back": ("IGotYourBackPower", None,
-        "Whenever one of your [gold]Mines[/gold] goes off this turn, gain {X} "
-        "Block."),
-    # R252's fifth caretaker (Barbara, Front Row Seat). Noelle's power with her
-    # Mines-only clause taken off, which is the one line between the two.
-    "mc_front_row_seat": ("FrontRowSeatPower", None,
-        "Whenever one of your [gold]Bombs[/gold] goes off this turn, gain {X} "
-        "Block."),
-    "mc_cold_blooded": ("ColdBloodedPower", None,
-        "Next turn, Grounded triggers even if you played a Set off card."),
+    # Jean's Lion's Fang (once a companion stand-in; in Klee's own pool since
+    # the Klee-only companions, 2026-10-03). The class lives in
+    # klee-mod/KleeCode/Powers/Prototype/CompanionStandIns.cs.
     "mc_lions_fang": ("LionsFangPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block and draw 1 card."),
@@ -3553,9 +3524,6 @@ APPLY_POWERS = {
     "cvn_herald_of_frost": ("HeraldOfFrostPower", None,
         "At the start of your turn, apply [gold]Cryo[/gold] twice to a random "
         "enemy and gain 3 [gold]Block[/gold]. Lasts {X} more turn(s)."),
-    "cvn_yuegui": ("YueguiPower", None,
-        "At the end of your turn, place a [gold]Bomb[/gold] 3 on a random "
-        "enemy. Lasts {X} more turn(s)."),
     # VARKA (the Oath rework). Every class lives in
     # klee-mod/KleeCode/Powers/Prototype/VarkaPowers.cs and is Compile
     # Remove'd out of a release build, so the only rows that may name one are
@@ -5298,10 +5266,6 @@ def blocked_reason(
         # POOL PASS TWO's two (`EB-732`), same UNPARSEABLE discipline.
         if op == "return_to_hand":
             unknown = set(eff) - RETURN_TO_HAND_FIELDS
-            if unknown:
-                return f"{op} field(s) {sorted(unknown)} not understood"
-        if op == "return_last_set_off":
-            unknown = set(eff) - RETURN_LAST_SET_OFF_FIELDS
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
         # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL).
@@ -11318,15 +11282,6 @@ def build_body(
             # `combat._finish_play`'s routing line.
             pass
 
-        elif op == "return_last_set_off":
-            # ONCE MORE! (`EB-732`). ONE call into the ledger, which is where
-            # "the last Set off card you played this combat" is written, so the
-            # card cannot express a second reading of it. Deterministic and
-            # silent: nothing is prompted, and a card that is not in the
-            # discard pile is simply not moved.
-            lines.append(
-                "await KleeOverhaulLedger.ReturnLastSetOff("
-                "Owner);")
 
         # ---- THE POOL EXPANSION (R276) -----------------------------------
         # Same discipline as the arm's block above: ONE awaited call per op,

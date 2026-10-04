@@ -228,7 +228,7 @@ KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
     "proto_ko_finders_keepers",
     "proto_ko_klee_can_explain",
     "proto_ko_damage_report",
-    "proto_ko_solitary_confinement",
+    # Solitary Confinement cut by the Klee-only companions (2026-10-03).
     # DEFENCE IN THE STATUS PILE (2026-10-01, the paper's sec.5, ruled):
     # [USER] "add the defensive utility into her status pile". Her pool had no
     # Weak, no Strength loss and no 10+ Block outright; each now pays a status.
@@ -237,6 +237,20 @@ KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
     "proto_ko_up_in_smoke",
     "proto_ko_behind_jeans_desk",
     "proto_ko_kitchen_alchemy",
+)
+
+# THE KLEE-ONLY COMPANIONS (2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4, ruled): three
+# companion cards that read Klee's own rules move OUT of the companion slot
+# and INTO her draftable pool, appended LAST in the sheet's order. They stay
+# Companion cards (`role_c`), so her Companion readers still count them. In
+# for Second Surprise (R), Solitary Confinement (R) and Once More! (U;
+# Kitchen Alchemy kept, [USER]: "it's quite good!"): the pool stays 78,
+# 24 / 33 / 21.
+KLEE_OWN_COMPANION_IDS: tuple[str, ...] = (
+    "proto_mc_jean_lions_fang",                 # Rare
+    "proto_mc_prune_hexhunter_chime",           # Uncommon
+    "proto_mc_albedo_dust_of_purification",     # Rare
 )
 
 # THE OFFERABLE POOL, WHOLE (slice packet sec.4). `_pool_substitutions` cannot
@@ -382,7 +396,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_blast_shield",
     "proto_ko_return_to_sender",
     "proto_ko_bottomless_bag",
-    "proto_ko_once_more",
+    # Once More! cut by the Klee-only companions (2026-10-03).
     "proto_ko_sparkling_burst",
     "proto_ko_blazing_delight",
     # R276 (`review/ruled/klee-review-2026-09-23.md` pick 1): R271 sec.7's
@@ -430,12 +444,14 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_aftershock",
     "proto_ko_spark_knight",
     "proto_ko_alices_detonator",
-    "proto_ko_second_surprise",
+    # Second Surprise cut by the Klee-only companions (2026-10-03).
     # THE STATUS PACKAGE (2026-10-01): eight rows, LAST. Eight cut above
     # (Pocket Fireworks, Rapid Fire, Flame Dance, Dodoco Cover, Careful Now,
     # Split Charge, Fish Fry, Friendship Bracelet). The pool is 78 (24 / 33
     # / 21).
     *KLEE_STATUS_PACKAGE_IDS,
+    # THE KLEE-ONLY COMPANIONS (2026-10-03), after it. Still 78, 24 / 33 / 21.
+    *KLEE_OWN_COMPANION_IDS,
 )
 
 # THE CO-OP SET (review/records/coop-set-2026-09-25.md): each overhaul arm's
@@ -566,6 +582,14 @@ MONDSTADT_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mc_amber_explosive_puppet",
     "proto_mc_eula_glacial_illumination",
     "proto_mc_mika_starfrost_swirl",
+    # THE KLEE-ONLY COMPANIONS (2026-10-03, review/active/
+    # mondstadt-companions-2026-10-03.md sec.4): four rows that read nothing
+    # of Klee's join the shared pool. Fischl's, Sucrose's and Nicole's were
+    # her stand-ins; Qiqi's was her coven Personal.
+    "proto_mc_fischl_sinful_hex",
+    "proto_mc_sucrose_mollis_favonius",
+    "proto_mc_nicole_ladder_of_ascent",
+    "proto_mc_qiqi_herald_of_frost",
 )
 
 # The nation the FIRST workshop owns. Named rather than spelled "mondstadt"
@@ -592,28 +616,13 @@ COMPANION_OVERHAUL_NATION = "mondstadt"
 # REACHABLE, and so smithable at a campfire. `companion_standins.standin_ids()`
 # is the derivation it is pinned against.
 COMPANION_STANDIN_IDS: tuple[str, ...] = (
-    # R252's fifth caretaker, on the same terms as the four below it: Barbara's
-    # Front Row Seat replaces Let the Show Begin♪, applies Hydro TWICE so
-    # Klee's own Pyro does not eat it (round 8's Diona finding), and pays Block
-    # per Bomb this turn. Filed in the caretakers' block because it reads the
-    # Klee arm's explosion bus, which is what a caretaker stand-in is for.
-    "proto_mc_barbara_front_row_seat",      # for proto_mc_barbara_show_begin
-    "proto_mc_diona_shaken_not_purred",     # for proto_mc_diona_icy_paws
-    "proto_mc_jean_lions_fang",             # for proto_mc_jean_dandelion_breeze
-    "proto_mc_kaeya_cold_blooded_strike",   # for proto_mc_kaeya_frostgnaw
-    "proto_mc_noelle_i_got_your_back",      # for proto_mc_noelle_breastplate
-    # THE HEXEREI FAMILY'S FOUR (R236 sec.3), a second contiguous block rather
-    # than four ids folded into the caretakers' above: the two groups read
-    # different events and leave the surface separately when the slice is
-    # ruled. The caretakers read the Klee arm's explosion ledger; these four
-    # read the REACTION -- and Nicole's reads the family mark itself, which is
-    # what makes that mark mechanical for the first time.
-    # The Klee status package (2026-10-01) replaced Tectonic Tide with Dust
-    # of Purification, which reads statuses rather than reactions.
-    "proto_mc_albedo_dust_of_purification",  # for proto_mc_albedo_solar_isotoma
-    "proto_mc_fischl_sinful_hex",           # for proto_mc_fischl_nightrider
-    "proto_mc_nicole_ladder_of_ascent",     # for proto_mc_nicole_revelation
-    "proto_mc_sucrose_mollis_favonius",     # for proto_mc_sucrose_gust
+    # EMPTY SINCE THE KLEE-ONLY COMPANIONS (2026-10-03,
+    # review/active/mondstadt-companions-2026-10-03.md sec.4). Of the nine
+    # stand-ins, four were cut (Front Row Seat, Shaken Not Purred, I Got Your
+    # Back, Cold-Blooded Strike), three joined the shared pool (Sinful Hex,
+    # Mollis Favonius, Ladder of Divine Ascent) and two joined Klee's own
+    # draftable pool (Lion's Fang, Dust of Purification). The seam stays, with
+    # nothing to hand off.
 )
 
 # JEAN'S DRAW IS A LITERAL 1 IN BOTH ENGINES, AND DELIBERATELY NOT A CONSTANT.
@@ -789,10 +798,10 @@ COMPANION_OVERHAUL_NATIONS: tuple[str, ...] = (
 # `_nation_weighted_choice`) or filtered out of the shop's HOME slot and
 # reachable in its any-region slot. That is today's behaviour, unchanged.
 COVEN_PERSONAL_POOL_IDS: tuple[str, ...] = (
-    "proto_mc_prune_hexhunter_chime",
-    "proto_mc_sayu_silencers_secret",
-    "proto_mc_qiqi_herald_of_frost",
-    "proto_mc_yaoyao_yuegui_throwing_mode",
+    # EMPTY SINCE THE KLEE-ONLY COMPANIONS (2026-10-03, sec.4): Prune's Chime
+    # is in Klee's own draftable pool (`KLEE_OWN_COMPANION_IDS`), Qiqi is a
+    # shared Universal (`MONDSTADT_OVERHAUL_POOL_IDS`), Sayu and Yaoyao are
+    # cut.
 )
 
 # THE NUMBERS THE COVEN'S POWERS CARRY, on the same terms as the two blocks
@@ -801,7 +810,6 @@ COVEN_PERSONAL_POOL_IDS: tuple[str, ...] = (
 # (`tools/lint_constant_parity.py`). Every one is R236's printed text.
 CVN_HERALD_BLOCK = 3            # Qiqi: Block at the start of each turn
 CVN_HERALD_APPLICATIONS = 2     # Qiqi: "apply Cryo twice"
-CVN_YUEGUI_BOMB_SIZE = 3        # Yaoyao: the Bomb Yuegui throws
 
 # =============================================================================
 # THE KOKOMI OVERHAUL, SLICE ONE -- QUARANTINED (R213 B, BACKLOG EB-147).

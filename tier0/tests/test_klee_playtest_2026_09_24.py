@@ -123,17 +123,17 @@ def test_pocket_match_breaks_a_tie_to_the_oldest_charge(overhaul):
     assert klee_overhaul.mine_count(enemy) == 0, "the OLDEST 7, the Mine, went"
 
 
-def test_pocket_matchs_mine_answers_frags_and_second_surprise(overhaul):
+def test_pocket_matchs_mine_answers_frags(overhaul):
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.player.powers[klee_overhaul.MINE_FRAGS] = 2
-    state.player.powers[klee_overhaul.SECOND_SURPRISE] = 1
     klee_overhaul.place(state, enemy, 3)
     klee_overhaul.place(state, enemy, 8, is_mine=True)
     play(state, load("proto_ko_pocket_match"), aim=enemy)
     assert enemy.powers.get("vulnerable", 0) == 2
-    # Second Surprise's half-size Bomb joins the 3 that stayed.
-    assert sorted(sizes(enemy)) == [3, 4]
+    # The 3 stayed. (Second Surprise, which added half the Mine, was cut
+    # 2026-10-03.)
+    assert sorted(sizes(enemy)) == [3]
 
 
 def test_pocket_match_kill_sends_the_rest_of_the_pile_to_a_survivor(overhaul):
@@ -155,7 +155,6 @@ def test_pocket_match_is_a_set_off_card_to_every_reader(overhaul):
     card = load("proto_ko_pocket_match")
     play(state, card, aim=enemy)
     assert state.ko_set_off_cards_this_turn == 1
-    assert state.ko_last_set_off_card is card
 
 
 def test_pocket_match_on_an_empty_enemy_is_just_its_hit(overhaul):
@@ -351,7 +350,7 @@ def test_balance_review_numbers(overhaul):
     assert _first(g("proto_ko_look_out+"), "apply_power")["amount"] == 6
     assert combat.spark_cost(g("proto_ko_blast_shield")) == 1
     assert combat.spark_cost(g("proto_ko_return_to_sender")) == 0
-    for cid, base in (("proto_ko_once_more", 2), ("proto_ko_sparkling_burst", 2),
+    for cid, base in (("proto_ko_sparkling_burst", 2),
                       ("proto_ko_blazing_delight", 3)):
         assert combat.spark_cost(g(cid)) == base
         assert combat.spark_cost(g(cid + "+")) == base - 1

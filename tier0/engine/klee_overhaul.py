@@ -88,14 +88,11 @@ OVERHAUL_OPS = frozenset((
     "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
     "mine_bombs",
     "plant_bomb_copy_largest",
-    #: POOL PASS TWO's two (`EB-732`), and both are about a CARD rather than a
-    #: charge -- which is why they are the arm's first two verbs that touch no
-    #: Bomb since `companion_mark_hand`. `return_to_hand` (Blast Shield) routes
-    #: the played card to the hand instead of the discard; `return_last_set_off`
-    #: (Once More!) takes the last Set off card back out of the discard pile.
-    #: They are the arm's anyway, for `companion_mark_hand`'s reason: the rule
-    #: "the last SET OFF card" is a fact about her vocabulary and nobody else's.
-    "return_to_hand", "return_last_set_off",
+    #: POOL PASS TWO's (`EB-732`), about a CARD rather than a charge:
+    #: `return_to_hand` (Blast Shield) routes the played card to the hand
+    #: instead of the discard. (Once More!'s `return_last_set_off` left with
+    #: the Klee-only companions, 2026-10-03.)
+    "return_to_hand",
     #: THE POOL EXPANSION's five (R276): a flat growth of the largest Bomb
     #: (One More Charge, Treasure Map), the largest Bomb multiplied (Half a
     #: Mountain), a pick out of the discard pile (Treasure Map, Come Back and
@@ -585,13 +582,6 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # computed it (`EB-270`): Big Badda Boom's face says "the damage the Bombs
     # dealt", and under the target's Vulnerable that is not `size`.
     note_explosion(state, reacted, int(dealt), vulnerable_paid)
-    # QUARANTINED (C.COMPANION_OVERHAUL). The stand-in seam's two this-turn
-    # watchers (Diona's Bomb, Noelle's Mine), here rather than on
-    # `_notify_explosion` below because that bus carries no Mine flag and
-    # widening it for one card would put a stand-in's rule inside this arm's
-    # own hook. A no-op with the companion arm off.
-    from tier0.engine import companion_standins    # late import: cycle
-    companion_standins.note_explosion(state, charge.is_mine)
 
     # THE BOMB PAYLOAD (Jumpy Dumpty). It rides the EXPLOSION rather than the
     # card, which is the whole of what makes the starter's promise legible: the
@@ -925,8 +915,6 @@ def turn_start_late(state: CombatState) -> None:
     # early return.
     _turn_start_expansion(state)
 
-    from tier0.engine import companion_standins    # late import: cycle
-
     # `EB-533`: THE ANSWER IS EMITTED EITHER WAY. Klee r19 lane 1 logged the
     # card every turn and it failed twice with "no near-miss line, I caught it
     # only by diffing my own Block". The condition is unchanged and so is every
@@ -936,8 +924,7 @@ def turn_start_late(state: CombatState) -> None:
     n = state.player.powers.get(GROUNDED, 0)
     if not n:
         return
-    paid = bool(state.ko_set_off_cards_last_turn == 0
-                or companion_standins.grounded_blind(state))
+    paid = state.ko_set_off_cards_last_turn == 0
     if not paid:
         state.emit("ko_grounded", amount=0, spark=0, paid=False)
         return
@@ -1152,39 +1139,7 @@ def note_set_off_card(state: CombatState, card: Optional[Card]) -> None:
     """
     if not live(state) or card is None:
         return
-    state.ko_last_set_off_card = card
     state.ko_set_off_cards_this_turn += 1
-
-
-def return_last_set_off(state: CombatState) -> Optional[Card]:
-    """Once More!: "Return the last Set off card you played this combat to your
-    hand." Returns the card moved, or None.
-
-    DETERMINISTIC AND SILENT, with no prompt: there is one answer and the
-    player already knows it. NOTHING HAPPENS AND THE SPARKS ARE STILL SPENT
-    when the card is not in the discard pile -- exhausted, still in hand, or
-    never played -- because the price is a cost line and a cost line is paid
-    before the body runs (`spend_spark` is the row's first effect). That is the
-    same bargain every Spark-priced row makes and it is not a defect: the card
-    is a Spark SINK for a deck that cashes its detonators.
-
-    BY INSTANCE. Two copies of Ka-pow! are two cards and only one of them was
-    played; an id match would hand back whichever copy the discard pile happens
-    to hold first.
-    """
-    if not live(state):
-        return None
-    card = state.ko_last_set_off_card
-    if card is None:
-        return None
-    pile = state.player.discard_pile
-    for index, held in enumerate(pile):
-        if held is card:
-            pile.pop(index)
-            state.player.hand.append(card)
-            state.emit("ko_once_more", card=card.id)
-            return card
-    return None
 
 
 def block_absorbed(state: CombatState, enemy: Enemy, blocked: int,
@@ -1599,7 +1554,6 @@ DODOCO = "ko_dodoco"                      # turn start: Mine N
 AFTERSHOCK = "ko_aftershock"              # first reaction a turn: copy Bomb
 SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N to ALL
 SIT_TIGHT = "ko_sit_tight"                # held turn: N Block at turn end
-SECOND_SURPRISE = "ko_second_surprise"    # a Mine goes off: half-size Bomb
 ALICES_DETONATOR = "ko_alices_detonator"            # turn start: Ka-pow!
 ALICES_DETONATOR_PLUS = "ko_alices_detonator_plus"  # ... an upgraded one
 
@@ -1740,11 +1694,6 @@ def multiply_largest(state: CombatState, factor: int) -> int:
     if size <= 0 or factor <= 1:
         return size
     return grow_largest(state, size * (int(factor) - 1))
-
-
-def half_of(size: int) -> int:
-    """Second Surprise's Bomb: half, rounded down. `HalfOf`'s twin."""
-    return int(size) // 2 if size > 0 else 0
 
 
 def place_or_jump(state: CombatState, enemy: Enemy, size: int,
@@ -1979,7 +1928,8 @@ def sit_tight_turn_end(state: CombatState) -> None:
 def _after_charge_exploded(state: CombatState, enemy: Enemy,
                            charge: KleeCharge, reacted: bool) -> None:
     """The charge-aware door (`KleeExpansion.AfterChargeExploded`): Look Out!,
-    Second Surprise, Aftershock and Wait For It..., after the explosion bus."""
+    Aftershock and Wait For It..., after the explosion bus. (Second Surprise
+    left with the Klee-only companions, 2026-10-03.)"""
     p = state.player
     if charge.is_mine:
         n = p.powers.get(LOOK_OUT, 0)
@@ -1987,12 +1937,6 @@ def _after_charge_exploded(state: CombatState, enemy: Enemy,
             p.block += n
             state.emit("block", amount=n)
             state.emit("ko_look_out", amount=n)
-        n = p.powers.get(SECOND_SURPRISE, 0)
-        half = half_of(charge.size)
-        if n and half:
-            for _ in range(n):
-                state.emit("ko_second_surprise", target=enemy.name, size=half)
-                place_or_jump(state, enemy, half)
     if not reacted:
         return
     n = p.powers.get(AFTERSHOCK, 0)
@@ -2053,7 +1997,6 @@ def spark_knight(state: CombatState, landed: int) -> None:
 
 FINDERS_KEEPERS = "ko_finders_keepers"            # status drawn: Bomb N
 DAMAGE_REPORT = "ko_damage_report"                # status drawn: N Block
-SOLITARY_CONFINEMENT = "ko_solitary_confinement"  # Confiscated cost 0
 
 #: Fish Blasting's token (`tier0/content/cards/tokens.yaml`), `Confiscated`.
 CONFISCATED_ID = "confiscated"
@@ -2072,13 +2015,6 @@ def is_status(card: Optional[Card]) -> bool:
 def is_confiscated(card: Optional[Card]) -> bool:
     """`card is Confiscated` in the mod."""
     return card is not None and card.id.rstrip("+") == CONFISCATED_ID
-
-
-def solitary_confinement_frees(state: CombatState, card: Card) -> bool:
-    """Solitary Confinement: "Your Confiscated cost 0." PURE, the cost site's
-    read (`combat`); `SolitaryConfinementPower.TryModifyEnergyCostInCombat`."""
-    return (live(state) and is_confiscated(card)
-            and state.player.powers.get(SOLITARY_CONFINEMENT, 0) > 0)
 
 
 def finders_keepers(state: CombatState, card: Card) -> None:

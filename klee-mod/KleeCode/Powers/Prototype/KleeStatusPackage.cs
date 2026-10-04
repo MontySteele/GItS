@@ -187,31 +187,3 @@ public sealed class DamageReportPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>
-/// Solitary Confinement: "Your Confiscated cost 0. [Innate.]" Playdate's
-/// cost seam (<c>TryModifyEnergyCostInCombat</c>), for every Confiscated of
-/// hers for the rest of combat. Sim twin:
-/// <c>klee_overhaul.solitary_confinement_frees</c>.
-/// </summary>
-public sealed class SolitaryConfinementPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Solitary Confinement"),
-        ("description", "Your [gold]Confiscated[/gold] cost 0."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override bool TryModifyEnergyCostInCombat(
-        CardModel card, decimal originalCost, out decimal modifiedCost)
-    {
-        modifiedCost = originalCost;
-        if (!KleeStatusPackage.IsConfiscated(card)) return false;
-        if (card.Owner?.Creature != Owner) return false;
-        if (originalCost <= 0m) return false;
-        modifiedCost = 0m;
-        return true;
-    }
-}

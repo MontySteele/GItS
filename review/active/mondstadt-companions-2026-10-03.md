@@ -65,3 +65,39 @@ Built: Mona's next-turn omen power (`mc_omen` / `StellarisOmenPower`) had no
 other user and is deleted in both engines. Wind Spirit Creation now costs 1
 while its Klee stand-in Sucrose — Mollis Favonius keeps 0; the stand-in pin
 that required equal cost exempts that one pair (rarity still matches).
+
+## 4. The Klee-only companions (ruled)
+
+[USER], 2026-10-03: "Yeah, agreed on all of these." Then, on Kitchen Alchemy:
+keep it, "it's quite good!", and cut Once More! in its place.
+
+The 13 `proto_mc_` rows with `personal_pool: klee`:
+
+| Change | Rows |
+|---|---|
+| To the shared pool (they read nothing of Klee's) | Qiqi — Herald of Frost, Fischl — Undone Be Thy Sinful Hex, Sucrose — Mollis Favonius, Nicole — Ladder of Divine Ascent |
+| Cut (each reads Bombs, Mines or Grounded and has a near-twin in the shared pool) | Barbara — Front Row Seat, Diona — Shaken, Not Purred, Noelle — I Got Your Back, Kaeya — Cold-Blooded Strike, Sayu — Yoohoo Art: Silencer's Secret, Yaoyao — Yuegui: Throwing Mode |
+| Into Klee's own draftable pool (text, numbers and rarity unchanged; still Companion cards) | Albedo — Dust of Purification (R), Jean — Lion's Fang, Fair Protector (R), Prune — Ring-A-Ding-Ding! Hexhunter Chime (U) |
+| Cut from Klee's pool to hold 78 and 24 / 33 / 21 | Second Surprise (R), Solitary Confinement (R), Once More! (U) |
+
+Gorou — Crystal Collapse (Kokomi's) is untouched.
+
+Counts: Klee's pool 78 (24 / 33 / 21); the shared Mondstadt roster 35 to 39
+(38 Mondstadt and Qiqi, Liyue's); no Klee-only companion is left, so the
+stand-in table and the coven Personal list are empty (the hand-off seam stays,
+handing nothing off).
+
+Built as worded, with four mechanical notes:
+
+1. The three stand-ins that went to the shared pool also lose `replaces:`,
+   not only `personal_pool:`. The sheet refuses `replaces:` without an owner.
+2. The three rows in Klee's pool keep their `proto_mc_` ids. The arm-pool
+   parity lint wanted the `proto_ko_` prefix; it now accepts the three by
+   name (`C.KLEE_OWN_COMPANION_IDS`) rather than renaming them.
+3. There is no `docs/retired-card-ids.yaml`. Each cut row is tombstoned in
+   `docs/prototype-surface.yaml` the way earlier cuts were (an "IS CUT"
+   comment where the row stood); art plan rows stay, as for earlier cuts.
+4. Engine pieces only the cut cards used are deleted in both engines: the
+   three caretaker watchers and Kaeya's Grounded blind, Yuegui, Second
+   Surprise's half-size Bomb, Solitary Confinement's cost rule, and Once
+   More!'s `return_last_set_off` op with the last-Set-off-card note it read.

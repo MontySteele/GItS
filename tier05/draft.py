@@ -741,10 +741,10 @@ KLEE_OVERHAUL_OPS = frozenset((
     # THE POOL PASS's two (`EB-491`): All of My Treasures! and Split Charge.
     # Same pricing decision as the eleven above.
     "plant_bomb_copy_largest",
-    # POOL PASS TWO's two (`EB-732`): Blast Shield's `return_to_hand` and Once
-    # More!'s `return_last_set_off`. Same pricing decision as the fourteen
-    # above -- both are the arm's, and neither resolves off it.
-    "return_to_hand", "return_last_set_off",
+    # POOL PASS TWO (`EB-732`): Blast Shield's `return_to_hand` (Once More!'s
+    # `return_last_set_off` left 2026-10-03). Same pricing decision as the
+    # fourteen above -- the arm's, and it does not resolve off it.
+    "return_to_hand",
     # THE POOL EXPANSION's five (R276). Same pricing decision as the sixteen
     # above -- the arm's verbs, quarantined, and no published world drafts
     # them.
@@ -2525,7 +2525,7 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "multiply_set_off", "draw_per_set_off",
                   "companion_mark_hand", "mine_bombs",
                   "plant_bomb_copy_largest",
-                  "return_to_hand", "return_last_set_off",
+                  "return_to_hand",
                   "grow_largest", "multiply_largest_bomb",
                   "fetch_from_discard", "add_random_companion",
                   "grant_kapow_each_turn",

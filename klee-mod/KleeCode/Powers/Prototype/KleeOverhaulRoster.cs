@@ -325,7 +325,7 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoBlastShield>(),
         ModelDb.Card<ProtoKoReturnToSender>(),
         ModelDb.Card<ProtoKoBottomlessBag>(),
-        ModelDb.Card<ProtoKoOnceMore>(),
+        // Once More! cut by the Klee-only companions (2026-10-03).
         ModelDb.Card<ProtoKoSparklingBurst>(),
         ModelDb.Card<ProtoKoBlazingDelight>(),
         // R276 (`review/ruled/klee-review-2026-09-23.md` pick 1). R271 sec.7's
@@ -370,7 +370,7 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoAftershock>(),
         ModelDb.Card<ProtoKoSparkKnight>(),
         ModelDb.Card<ProtoKoAlicesDetonator>(),
-        ModelDb.Card<ProtoKoSecondSurprise>(),
+        // Second Surprise cut by the Klee-only companions (2026-10-03).
         // THE STATUS PACKAGE (2026-10-01, ruled): eight rows, LAST, in
         // `C.KLEE_STATUS_PACKAGE_IDS`' order, which is the sheet's. Eight
         // were cut above (Pocket Fireworks, Rapid Fire, Flame Dance, Dodoco
@@ -383,7 +383,7 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoFindersKeepers>(),
         ModelDb.Card<ProtoKoKleeCanExplain>(),
         ModelDb.Card<ProtoKoDamageReport>(),
-        ModelDb.Card<ProtoKoSolitaryConfinement>(),
+        // Solitary Confinement cut by the Klee-only companions (2026-10-03).
         // DEFENCE IN THE STATUS PILE (2026-10-01, the paper's sec.5, ruled):
         // Weak, Strength loss and a 14-Block wall, each paying a status, for
         // Fish-Flavored Bait, Nova Burst and Spinning Sparkler. Still 78,
@@ -391,5 +391,12 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoUpInSmoke>(),
         ModelDb.Card<ProtoKoBehindJeansDesk>(),
         ModelDb.Card<ProtoKoKitchenAlchemy>(),
+        // THE KLEE-ONLY COMPANIONS (2026-10-03,
+        // review/active/mondstadt-companions-2026-10-03.md sec.4): three
+        // companion cards that read her rules, in her own pool now, LAST in
+        // `C.KLEE_OWN_COMPANION_IDS`' order. Still 78, 24 / 33 / 21.
+        ModelDb.Card<ProtoMcJeanLionsFang>(),
+        ModelDb.Card<ProtoMcPruneHexhunterChime>(),
+        ModelDb.Card<ProtoMcAlbedoDustOfPurification>(),
     };
 }

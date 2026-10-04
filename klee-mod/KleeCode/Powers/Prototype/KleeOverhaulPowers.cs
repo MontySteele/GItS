@@ -395,15 +395,7 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         // CARDS the player played whose Set off resolved, which is exactly what
         // R271 sec.5.1 asks for -- and it is why a Mine answering an attack and
         // Sparks 'n' Splash's end-of-turn hit are both silent here.
-        // KAEYA'S COVER STORY, the only line the companion stand-in seam adds
-        // to this arm: Cold-Blooded Strike forces Grounded to pay this turn
-        // whatever its condition says. The WIRING never moves -- it did not
-        // move for `EB-516` and it did not move for `EB-749` -- and what moves
-        // instead is the stand-in's printed clause, which now reads "Next
-        // turn, Grounded pays even if you played a Set off card." False on
-        // every build with the companion arm off.
-        if (ledger.SetOffCardsLastTurn > 0
-            && !CompanionStandIns.GroundedBlind(Owner))
+        if (ledger.SetOffCardsLastTurn > 0)
         {
             // `EB-533`: the answer is recorded BEFORE the return, which is the
             // only line of this method the row moves.

@@ -41,7 +41,7 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard
 
     public Element CompanionElement => Element.Anemo;
 
-    public string? PersonalPool => "klee";
+    public string? PersonalPool => null;
 
     public string? Nation => "mondstadt";
 

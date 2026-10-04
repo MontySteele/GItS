@@ -494,44 +494,6 @@ public sealed class AftershockPower
 }
 
 /// <summary>
-/// Second Surprise: "Whenever one of your Mines goes off, place a Bomb half its
-/// size, rounded down, on that enemy." Answering an attack or Set off by a
-/// card, it is the same Mine. A PLAIN Bomb; nothing when the half is 0; and if
-/// the Mine's explosion killed the enemy, the half jumps to a survivor, rule 3
-/// (<see cref="ProtoBombPower.PlaceOrJump"/>). The Bomb lands after the Mine's
-/// explosion, so the Set off already in progress does not take it.
-/// </summary>
-public sealed class SecondSurprisePower
-    : PowerModel, ILocalizationProvider, IProtoChargeListener
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Second Surprise"),
-        ("description",
-            "Whenever one of your [gold]Mines[/gold] goes off, place a "
-          + "[gold]Bomb[/gold] half its size, rounded down, on that enemy."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public async Task AfterChargeExploded(
-        PlayerChoiceContext choiceContext, Creature applier, Creature target,
-        ProtoBombPower.ProtoCharge charge, bool reacted)
-    {
-        if (applier != Owner || !charge.IsMine) return;
-        var half = ProtoBombPower.HalfOf(charge.Size);
-        if (half <= 0) return;
-        for (var copy = 0; copy < Amount; copy++)
-        {
-            await ProtoBombPower.PlaceOrJump(choiceContext, target, half,
-                                             isMine: false, Owner,
-                                             cardSource: null);
-        }
-    }
-}
-
-/// <summary>
 /// Spark Knight: "Whenever you gain a Spark, deal 3 damage to ALL enemies."
 /// (Playtest 2026-09-24, [USER]: "seems underpowered": cost 2 to 1, and a
 /// random enemy for 2 became ALL enemies for 3.) EACH SPARK IS ITS OWN VOLLEY:

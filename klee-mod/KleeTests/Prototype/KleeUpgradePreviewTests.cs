@@ -77,10 +77,6 @@ public class KleeUpgradePreviewTests
         AssertPreviewGreensThePrice<ProtoKoSparklingBurst>(2, 1);
 
     [Fact]
-    public void Once_mores_preview_greens_its_price_two_to_one() =>
-        AssertPreviewGreensThePrice<ProtoKoOnceMore>(2, 1);
-
-    [Fact]
     public void Boom_badges_preview_greens_its_price_two_to_one() =>
         AssertPreviewGreensThePrice<ProtoKoBoomBadge>(2, 1);
 

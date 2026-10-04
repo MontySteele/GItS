@@ -50,7 +50,10 @@ def _first(card, op):
 def test_the_package_cuts_eight_and_adds_eight(overhaul):
     ids = C.KLEE_OVERHAUL_POOL_IDS
     assert len(ids) == 78
-    assert ids[-11:] == C.KLEE_STATUS_PACKAGE_IDS
+    # The Klee-only companions (2026-10-03): Solitary Confinement cut from the
+    # package; her three Companion rows follow it.
+    assert ids[-13:-3] == C.KLEE_STATUS_PACKAGE_IDS
+    assert ids[-3:] == C.KLEE_OWN_COMPANION_IDS
     rows = {c.id for c in loader.prototype_cards()}
     for cid in CUT + DEFENCE_CUT:
         assert cid not in ids
@@ -67,7 +70,6 @@ def test_the_package_cuts_eight_and_adds_eight(overhaul):
         "proto_ko_finders_keepers": ("power", 1, "uncommon"),
         "proto_ko_klee_can_explain": ("skill", 1, "uncommon"),
         "proto_ko_damage_report": ("power", 1, "rare"),
-        "proto_ko_solitary_confinement": ("power", 1, "rare"),
         "proto_ko_up_in_smoke": ("skill", 0, "common"),
         "proto_ko_behind_jeans_desk": ("skill", 1, "uncommon"),
         "proto_ko_kitchen_alchemy": ("skill", 1, "uncommon"),
@@ -93,8 +95,6 @@ def test_the_papers_numbers_and_upgrades(overhaul):
     assert _first(_up("proto_ko_klee_can_explain"), "block")["amount"] == 8
     assert _first(load("proto_ko_damage_report"), "apply_power")["amount"] == 4
     assert _first(_up("proto_ko_damage_report"), "apply_power")["amount"] == 6
-    assert not load("proto_ko_solitary_confinement").innate
-    assert _up("proto_ko_solitary_confinement").innate
     grow = "exhaust_statuses_grow_largest"
     assert _first(load(ALBEDO), grow)["amount"] == 6
     assert _first(_up(ALBEDO), grow)["amount"] == 8
@@ -148,14 +148,6 @@ def test_finders_keepers_places_a_bomb_per_status_drawn(overhaul):
     assert sizes(enemy) == [4, 4]
 
 
-def test_solitary_confinement_frees_confiscated_only(overhaul):
-    st = klee_state()
-    assert combat.card_cost(st, _confiscated()) == 1
-    st.player.powers[klee_overhaul.SOLITARY_CONFINEMENT] = 1
-    assert combat.card_cost(st, _confiscated()) == 0
-    assert combat.card_cost(st, load("proto_ko_chain_fuse")) == 1
-
-
 def test_damage_report_blocks_per_status_drawn(overhaul):
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     st = klee_state([a, b])
@@ -192,12 +184,14 @@ def test_dust_of_purification_exhausts_statuses_into_the_largest_bomb(
     assert sizes(enemy) == [17]
 
 
-def test_dust_of_purification_is_albedos_klee_stand_in(overhaul):
-    assert ALBEDO in C.COMPANION_STANDIN_IDS
-    assert "proto_mc_albedo_tectonic_tide" not in C.COMPANION_STANDIN_IDS
+def test_dust_of_purification_is_in_klees_own_pool(overhaul):
+    """A stand-in until the Klee-only companions (2026-10-03); her own
+    draftable pool since."""
+    assert ALBEDO not in C.COMPANION_STANDIN_IDS
+    assert ALBEDO in C.KLEE_OVERHAUL_POOL_IDS
     row = load(ALBEDO)
     assert (row.type, row.cost, row.rarity) == ("skill", 1, "rare")
-    assert ALBEDO in companion_standins.standin_ids()
+    assert row.is_companion and row.personal_pool is None
 
 
 # --- defence in the status pile (2026-10-01, the paper's sec.5) ----------------

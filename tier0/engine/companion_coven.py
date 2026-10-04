@@ -1,15 +1,14 @@
-"""KLEE'S FOUR COVEN PERSONALS (QUARANTINED, `C.COMPANION_OVERHAUL`).
+"""THE COVEN ROWS' RULES (QUARANTINED, `C.COMPANION_OVERHAUL`).
 
 The approved Mondstadt workshop's sec.4 and its sec.3 Prune entry, ruled R236.
-Four rows, offered to Klee alone through the Personal channel
-`prune_witch_hunt` already rides, and three engine behaviours between them:
+Since the Klee-only companions (2026-10-03,
+review/active/mondstadt-companions-2026-10-03.md sec.4) two rows remain, and
+neither is a Personal any more: Prune's Chime is in Klee's own draftable pool
+and Qiqi's Herald is a shared Universal (Sayu and Yaoyao are cut):
 
     proto_mc_prune_hexhunter_chime   the next Bomb set off this turn deals the
                                      swirled element instead of Pyro
-    proto_mc_sayu_silencers_secret   no power: `swirl` + `block` + the shipped
-                                     `bomb_went_off_this_turn` predicate
     proto_mc_qiqi_herald_of_frost    a start-of-turn payout, 3 turns
-    proto_mc_yaoyao_yuegui_throwing_mode  an end-of-turn Bomb, 3 turns
 
 A SEPARATE MODULE, not three more branches in `effects.companion_overhaul_*`,
 and the reason is the same one that gave the Klee overhaul its own file: these
@@ -22,8 +21,8 @@ before touching anything while `C.COMPANION_OVERHAUL` is off -- that is the
 arm's acceptance condition, pinned rather than intended. The two rows that
 speak about Bombs also need the KLEE overhaul live, because a Bomb is that
 arm's rule and not this one's: `klee_overhaul.live` is the same gate the ops
-take, so a Yuegui thrown by a co-op Furina plants nothing and a Chime armed on
-a board with no Bomb rules is inert rather than an exception.
+take, so a Chime armed on a board with no Bomb rules is inert rather than an
+exception.
 
 NOTHING MEASURED ON A PROTOTYPE ROW IS QUOTABLE ANYWHERE (R215 B).
 """
@@ -37,7 +36,7 @@ from tier0.engine.state import CombatState
 #: seam is greppable from one end as well as the other:
 #:
 #:   effects.player_turn_start_triggers  -> turn_start   (Qiqi's payout)
-#:   effects.player_turn_end_triggers    -> turn_end     (Yuegui, then expiry)
+#:   effects.player_turn_end_triggers    -> turn_end     (the Chime's expiry)
 #:   effects.companion_overhaul_reaction -> note_swirl   (Prune's latch)
 #:   klee_overhaul._explode              -> bomb_element (Prune's override)
 HOOKS = ("turn_start", "turn_end", "note_swirl", "bomb_element")
@@ -136,39 +135,10 @@ def turn_start(state: CombatState) -> None:
 
 
 def turn_end(state: CombatState) -> None:
-    """The coven's end-of-turn block: Yuegui, then the Chime's expiry.
-
-    Called from the tail of `effects.player_turn_end_triggers`, AFTER
-    `companion_overhaul_turn_end` and its Inazuma half. Same argument as the
-    start-of-turn block: Yuegui's Bomb draws from `state.rng`, so its position
-    decides every later roll in the fight, and one sequence is written down per
-    engine. C# twin: the tail of `CompanionOverhaulTurnEnd`, before Nicole's
-    latch -- a Bomb grants no Block, so it cannot change the latch's answer.
-
-    Yuegui: Throwing Mode -- "For 3 turns, at the end of your turn place a Bomb
-    3 on a random enemy." Stacks are TURNS REMAINING; FIRE, THEN TICK, the
-    idiom the arm's other volleys use, so a stack count still means "this many
-    more turns, including this one".
-
-    THE CLOCK TICKS EVEN WHERE THE BOMB CANNOT LAND. `klee_overhaul.live` is
-    false for a seat that is not running the Bomb rules, and an empty board has
-    nobody to throw at; in both cases the card's three turns still pass, which
-    is the reading that keeps the power from becoming permanent on a board it
-    could not reach.
+    """The coven's end-of-turn block: the Chime's expiry. (Yuegui's Bomb, which
+    ran first here, left with the Klee-only companions, 2026-10-03.)
     """
-    from tier0.engine import klee_overhaul        # late import: cycle
-
     p = state.player
-    n = p.powers.get("cvn_yuegui", 0)
-    if n:
-        living = state.living_enemies
-        if living and klee_overhaul.live(state):
-            klee_overhaul.place(state, state.rng.choice(living),
-                                C.CVN_YUEGUI_BOMB_SIZE)
-        if n > 1:
-            p.powers["cvn_yuegui"] = n - 1
-        else:
-            del p.powers["cvn_yuegui"]
     # "THIS TURN" IS THE REMOVAL, the shipped `attack_up_this_turn` shape and
     # the one the C# `PassionOverloadPower` takes for the same clause. A Chime
     # that survived the turn boundary would colour a Bomb the card never

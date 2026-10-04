@@ -96,7 +96,6 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoAftershock), CardRarity.Rare, CardType.Power, 2 },
         new object[] { typeof(ProtoKoSparkKnight), CardRarity.Rare, CardType.Power, 1 },
         new object[] { typeof(ProtoKoAlicesDetonator), CardRarity.Rare, CardType.Power, 1 },
-        new object[] { typeof(ProtoKoSecondSurprise), CardRarity.Rare, CardType.Power, 0 },
     };
 
     [Theory]
@@ -118,10 +117,12 @@ public class KleeR276ExpansionTests
         var names = Rows().Select(r => ((System.Type)r[0]).Name).ToList();
         // 28 since the Klee status package (2026-10-01) cut Fish Fry and
         // Friendship Bracelet, 27 since its sec.5 (defence in the status
-        // pile) cut Spinning Sparkler; its own eleven follow them at the end.
-        Assert.Equal(27, names.Count);
-        Assert.Equal(27, names.Distinct().Count());
-        var tail = slice.Skip(slice.Count - 38).Take(27).ToList();
+        // pile) cut Spinning Sparkler; 26 since the Klee-only companions
+        // (2026-10-03) cut Second Surprise. The package's ten follow them (the
+        // three companion rows after it are not `ProtoKo`).
+        Assert.Equal(26, names.Count);
+        Assert.Equal(26, names.Distinct().Count());
+        var tail = slice.Skip(slice.Count - 36).Take(26).ToList();
         for (var i = 0; i < names.Count; i++)
         {
             Assert.Contains(names[i], tail[i]);
@@ -619,9 +620,9 @@ public class KleeR276ExpansionTests
     }
 
     [Fact]
-    public async Task Look_out_and_second_surprise_ignore_a_plain_bomb()
+    public async Task Look_out_ignores_a_plain_bomb()
     {
-        var seat = Seat.Klee().WithPower<LookOutPower>(3).WithPower<SecondSurprisePower>(1);
+        var seat = Seat.Klee().WithPower<LookOutPower>(3);
         var enemy = Seat.Klee(200).Creature;
         var plain = new ProtoBombPower.ProtoCharge(8, false, 0);
         foreach (var power in seat.Creature.Powers.OfType<IProtoChargeListener>())
@@ -631,22 +632,7 @@ public class KleeR276ExpansionTests
         }
         Assert.Contains("CreatureCmd.GainBlock",
                         Il.Calls(Il.Method("LookOutPower", "AfterChargeExploded")));
-        var surprise = Il.Calls(Il.Method("SecondSurprisePower", "AfterChargeExploded"));
-        Assert.Contains("ProtoBombPower.HalfOf", surprise);
-        Assert.Contains("ProtoBombPower.PlaceOrJump", surprise);
         Assert.Equal(6m, Upgraded<ProtoKoLookOut>().DynamicVars["PowerAmount"].BaseValue);
-    }
-
-    [Fact]
-    public void Second_surprise_places_half_rounded_down_and_nothing_at_zero()
-    {
-        Assert.Equal(3, ProtoBombPower.HalfOf(7));
-        Assert.Equal(4, ProtoBombPower.HalfOf(8));
-        Assert.Equal(0, ProtoBombPower.HalfOf(1));
-        Assert.Equal(0, ProtoBombPower.HalfOf(0));
-        // Power cost sweep, 2026-09-30: costs 0, the upgrade is Innate.
-        Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKoSecondSurprise>().Keywords);
     }
 
     [Fact]

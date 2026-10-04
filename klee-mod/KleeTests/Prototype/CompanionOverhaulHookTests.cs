@@ -102,8 +102,9 @@ public class CompanionOverhaulHookTests
         // would report one.
         var referenced = Il.CallSequence(universals)
             .Count(c => c.StartsWith("ModelDb.Card"));
-        // 35 since the AoE trim (2026-10-03) split Durin in two.
-        Assert.Equal(35, referenced);
+        // 35 since the AoE trim (2026-10-03) split Durin in two; 39 since the
+        // Klee-only companions (2026-10-03) added four shared rows.
+        Assert.Equal(39, referenced);
     }
 
     [Fact]

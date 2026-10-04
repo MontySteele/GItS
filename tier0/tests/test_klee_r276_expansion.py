@@ -23,7 +23,9 @@ from tier05 import rewards
 # The thirty less Fish Fry and Friendship Bracelet, which the Klee status
 # package (2026-10-01) cut, and Spinning Sparkler, which its sec.5 (defence in
 # the status pile) cut; its eleven rows follow them at the tuple's end.
-EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-38:-11]
+# Second Surprise cut, the package ten long and Klee's three Companion rows
+# last since the Klee-only companions (2026-10-03).
+EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-39:-13]
 
 
 @pytest.fixture
@@ -81,16 +83,15 @@ def filler(n=5):
 
 def test_the_thirty_are_the_specs_rows_at_the_specs_shape(overhaul):
     rows = {cid: load(cid) for cid in EXPANSION}
-    assert len(rows) == 27
+    assert len(rows) == 26
     by_rarity = {}
     for card in rows.values():
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + 1
-    assert by_rarity == {"common": 2, "uncommon": 15, "rare": 10}
+    assert by_rarity == {"common": 2, "uncommon": 15, "rare": 9}
     shape = {cid: (c.cost, c.type) for cid, c in rows.items()}
     assert shape["proto_ko_hiding_spot"] == (1, "skill")
     assert shape["proto_ko_half_a_mountain"] == (1, "skill")
     assert shape["proto_ko_alices_detonator"] == (1, "power")
-    assert shape["proto_ko_second_surprise"] == (0, "power")   # power cost sweep
     assert shape["proto_ko_dodoco"] == (1, "power")            # power cost sweep
     assert rows["proto_ko_half_a_mountain"].exhaust            # Klee audit, 2026-10-01
     assert rows["proto_ko_sit_tight"].retain
@@ -542,31 +543,6 @@ def test_look_out_blocks_when_a_mine_goes_off(overhaul):
     klee_overhaul.place(state, enemy, 4, is_mine=True)
     klee_overhaul.mines_answer_attack(state, enemy)
     assert state.player.block == 3
-
-
-def test_second_surprise_leaves_half_a_mine_on_its_enemy(overhaul):
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    state.player.powers[klee_overhaul.SECOND_SURPRISE] = 1
-    klee_overhaul.place(state, enemy, 7, is_mine=True)
-    klee_overhaul.mines_answer_attack(state, enemy)
-    assert sizes(enemy) == [3]
-    assert klee_overhaul.mine_count(enemy) == 0
-    # Half of 1 is 0: nothing placed.
-    klee_overhaul.take_all(enemy)
-    klee_overhaul.place(state, enemy, 1, is_mine=True)
-    klee_overhaul.set_off(state, enemy)
-    assert sizes(enemy) == []
-
-
-def test_second_surprise_jumps_if_the_mine_killed(overhaul):
-    a, b = make_enemy(hp=3, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    state.player.powers[klee_overhaul.SECOND_SURPRISE] = 1
-    klee_overhaul.place(state, a, 8, is_mine=True)
-    klee_overhaul.set_off(state, a)
-    assert not a.alive
-    assert sizes(b) == [4]
 
 
 def test_aftershock_copies_the_first_reacting_bomb_each_turn(overhaul):

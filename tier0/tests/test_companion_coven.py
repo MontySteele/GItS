@@ -26,9 +26,7 @@ from tier05 import rewards
 
 
 PRUNE = "proto_mc_prune_hexhunter_chime"
-SAYU = "proto_mc_sayu_silencers_secret"
 QIQI = "proto_mc_qiqi_herald_of_frost"
-YAOYAO = "proto_mc_yaoyao_yuegui_throwing_mode"
 
 
 def _caches_clear():
@@ -88,40 +86,23 @@ def test_flag_off_a_five_star_personal_clause_is_unreachable():
 
 
 # ---------------------------------------------------------------------------
-# THE FLAG IS ON: THE FOUR ROWS ARE KLEE'S, AND ONLY KLEE'S
+# WHERE THE TWO REMAINING ROWS LIVE (the Klee-only companions, 2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4): Prune's Chime in
+# Klee's own draftable pool, Qiqi's Herald a shared Universal. Sayu and
+# Yaoyao are cut.
 # ---------------------------------------------------------------------------
 
-def test_flag_on_every_coven_row_resolves_to_a_klee_personal(overhaul):
-    for cid in C.COVEN_PERSONAL_POOL_IDS:
+def test_the_coven_is_no_longer_a_personal_channel(overhaul):
+    assert C.COVEN_PERSONAL_POOL_IDS == ()
+    for cid in (PRUNE, QIQI):
         card = loader.peek_card(cid)
         assert card.is_companion, cid
-        assert card.personal_pool == "klee", cid
-        assert card.rarity in C.RARITY_ODDS, cid
-
-
-def test_flag_on_the_coven_is_in_the_offerable_pool(overhaul):
-    assert set(C.COVEN_PERSONAL_POOL_IDS) <= _pool_ids(rewards.companion_pool())
-
-
-def test_flag_on_the_coven_carries_its_characters_real_nations(overhaul):
-    nations = {cid: loader.peek_card(cid).nation
-               for cid in C.COVEN_PERSONAL_POOL_IDS}
-    assert nations[PRUNE] == "mondstadt"
-    assert nations[SAYU] == "inazuma"
-    assert nations[QIQI] == "liyue"
-    assert nations[YAOYAO] == "liyue"
-
-
-def test_flag_on_the_coven_is_not_on_the_banner(overhaul):
-    """Qiqi is a five-star character, and `five_star_roster` excludes Personals
-    by name -- a Personal is Klee's kit, not a draw. So no banner features her
-    AND `_banner_filtered` must not gate her, which is the pair of facts that
-    keeps her offerable at all."""
-    assert loader.peek_card(QIQI).star == 5
-    assert QIQI not in {c.id for c in rewards.five_star_roster("liyue")}
-    kept = rewards._banner_filtered([loader.peek_card(QIQI)], frozenset())
-    assert [c.id for c in kept] == [QIQI]
-
+        assert card.personal_pool is None, cid
+    assert PRUNE in C.KLEE_OVERHAUL_POOL_IDS
+    assert PRUNE not in _pool_ids(rewards.companion_pool())
+    assert QIQI in C.MONDSTADT_OVERHAUL_POOL_IDS
+    assert QIQI in _pool_ids(rewards.companion_pool())
+    assert loader.peek_card(QIQI).nation == "liyue"
 
 def test_flag_on_the_chime_supersedes_prunes_shipped_row(overhaul):
     """R236: under the arm the Chime IS Prune's card. The supersession is the
@@ -130,7 +111,8 @@ def test_flag_on_the_chime_supersedes_prunes_shipped_row(overhaul):
     remember and nothing to keep in step."""
     offerable = _pool_ids(rewards.companion_pool())
     assert "prune_witch_hunt" not in offerable
-    assert PRUNE in offerable
+    # The Chime is offered through Klee's own pool since 2026-10-03.
+    assert PRUNE in C.KLEE_OVERHAUL_POOL_IDS
 
 
 # ---------------------------------------------------------------------------
@@ -242,37 +224,11 @@ def test_the_herald_expires(overhaul):
     assert "cvn_herald_of_frost" not in st.player.powers
 
 
-def test_yuegui_places_a_bomb_at_the_end_of_the_turn(both_arms):
-    st = _klee_state()
-    st.enemies = [make_enemy(hp=99)]
-    st.player.powers["cvn_yuegui"] = 3
-    companion_coven.turn_end(st)
-    charges = st.enemies[0].ko_charges
-    assert [c.size for c in charges] == [C.CVN_YUEGUI_BOMB_SIZE]
-    assert not charges[0].is_mine
-    assert st.player.powers["cvn_yuegui"] == 2
-
-
-def test_yuegui_expires(both_arms):
-    st = _klee_state()
-    st.player.powers["cvn_yuegui"] = 1
-    companion_coven.turn_end(st)
-    assert "cvn_yuegui" not in st.player.powers
-
-
 # ---------------------------------------------------------------------------
 # THE ROWS THEMSELVES
 # ---------------------------------------------------------------------------
 
-def test_sayus_row_is_the_shipped_grammar(overhaul):
-    """No power and no new op: a Swirl, a Block and the `bomb_went_off_this_turn`
-    predicate the Klee arm already reads."""
-    ops = [fx["op"] for fx in loader.peek_card(SAYU).effects]
-    assert ops == ["swirl", "block", "conditional"]
-    assert loader.peek_card(SAYU).effects[-1]["if"] == "bomb_went_off_this_turn"
-
-
-def test_the_bomb_predicate_answers_for_sayu(both_arms):
+def test_the_bomb_predicate_answers(both_arms):
     st = _klee_state()
     assert effects._predicate(st, "bomb_went_off_this_turn") is False
     klee_overhaul.place(st, st.enemies[0], 4)
@@ -287,7 +243,7 @@ def test_every_coven_row_carries_an_upgrade(overhaul):
     also bump the Chime's marker stack -- a number the face does not print,
     and one that would arm the rider twice."""
     from tier0.content import upgrades
-    for cid in C.COVEN_PERSONAL_POOL_IDS:
+    for cid in (PRUNE, QIQI):
         row = loader.peek_card(cid)
         assert row.no_upgrade is None, cid
         declared = row.upgrade or {}
@@ -306,8 +262,9 @@ def test_every_personal_is_smithable_in_the_sim(overhaul):
     C# upgrades every one. A rest site with nothing to smith on a card the
     other engine smiths is the two engines playing different runs."""
     from tier0.content import upgrades
-    personals = C.COVEN_PERSONAL_POOL_IDS + C.INAZUMA_OVERHAUL_PERSONAL_IDS
-    assert len(personals) == 5
+    personals = (C.COVEN_PERSONAL_POOL_IDS + C.INAZUMA_OVERHAUL_PERSONAL_IDS
+                 + (PRUNE, QIQI))
+    assert len(personals) == 3
     for cid in personals:
         assert upgrades.has_upgrade(cid), cid
         plus = upgrades.apply_upgrade(loader.get_card(cid))

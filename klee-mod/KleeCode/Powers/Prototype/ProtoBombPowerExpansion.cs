@@ -104,10 +104,6 @@ public sealed partial class ProtoBombPower
         return GrowLargest(applier, size * (factor - 1));
     }
 
-    /// <summary>Second Surprise's Bomb: half a Mine's size, rounded down.
-    /// PURE, and 0 means "place nothing".</summary>
-    public static int HalfOf(int size) => size <= 0 ? 0 : size / 2;
-
     // ---- the command halves -------------------------------------------
 
     /// <summary>

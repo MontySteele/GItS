@@ -98,7 +98,13 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   (`review/records/klee-opus-check-round-2026-10-02.md`): one run won,
   Klee's first seat win since the status package; the other died in act 2
   short of Block, as the Sonnet runs did. Next, the finish line: [USER] plays one full run on
-  this build; fun through act 3 moves Klee to Balance.
+  this build; fun through act 3 moves Klee to Balance. **The Mondstadt
+  companion review (2026-10-03, ruled, built;
+  `review/active/mondstadt-companions-2026-10-03.md`):** Stellaris Phantasm,
+  Breastplate, Wind Spirit Creation and Fiery Rain retuned; Klee's 13
+  Klee-only companions resolved (4 to the shared pool, 6 cut, 3 into her own
+  pool for Second Surprise, Solitary Confinement and Once More!). Klee stays
+  78, 24 / 33 / 21; the shared Mondstadt roster is 39; no stand-ins remain.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start

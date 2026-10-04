@@ -118,7 +118,10 @@ def test_every_overhaul_id_resolves_to_a_mondstadt_companion(overhaul):
     for cid in C.MONDSTADT_OVERHAUL_POOL_IDS:
         card = loader.peek_card(cid)
         assert card.is_companion, cid
-        assert card.nation == C.COMPANION_OVERHAUL_NATION, cid
+        # Qiqi (Liyue) joined with the Klee-only companions, 2026-10-03.
+        expected = ("liyue" if cid == "proto_mc_qiqi_herald_of_frost"
+                    else C.COMPANION_OVERHAUL_NATION)
+        assert card.nation == expected, cid
         assert card.personal_pool is None, cid
         assert card.rarity in C.RARITY_ODDS, cid
 
@@ -136,12 +139,17 @@ def test_the_pool_ids_and_the_sheet_agree(overhaul):
     by `C.COMPANION_STANDIN_IDS` rather than by their `replaces:` key, so a
     stand-in that fell off that list fails here instead of quietly joining the
     offerable pool. A row on none of the three is still the defect this asks
-    about."""
+    about. A FOURTH since the Klee-only companions (2026-10-03): three
+    `proto_mc_` rows are in Klee's own draftable pool
+    (`C.KLEE_OWN_COMPANION_IDS`)."""
     on_sheet = {c.id for c in loader.prototype_cards()
                 if c.id.startswith("proto_mc_")}
     assert set(C.COMPANION_STANDIN_IDS) <= on_sheet
     assert on_sheet - set(C.COMPANION_STANDIN_IDS) == (
-        set(C.MONDSTADT_OVERHAUL_POOL_IDS) | set(C.COVEN_PERSONAL_POOL_IDS))
+        set(C.MONDSTADT_OVERHAUL_POOL_IDS) | set(C.COVEN_PERSONAL_POOL_IDS)
+        | set(C.KLEE_OWN_COMPANION_IDS))
+    assert not (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+                & set(C.KLEE_OWN_COMPANION_IDS))
     assert not (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
                 & set(C.COVEN_PERSONAL_POOL_IDS))
     assert not (set(C.COMPANION_STANDIN_IDS)
@@ -446,11 +454,8 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
                         "SoumetsuPower", "KyoukaPower", "TamotoPower",
                         "CrimsonOoyoroiPower", "WarBannerPower",
                         "AurousBlazePower",
-                        # KLEE'S COVEN (R236), last before the latch. Its sim
-                        # twin is `companion_coven.turn_end`, called from the
-                        # tail of `player_turn_end_triggers` for the same
-                        # reason: the throw draws from the rng.
-                        "YueguiPower",
+                        # (Klee's coven Yuegui, last before the latch, was
+                        # cut by the Klee-only companions, 2026-10-03.)
                         "RevelationPower"], cs_order
 
 

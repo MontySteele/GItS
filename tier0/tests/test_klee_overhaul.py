@@ -271,7 +271,7 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     assert "proto_ko_booby_trap" in ids
     # POOL PASS TWO's six (`EB-732`), by name and for the same reason.
     assert {"proto_ko_blast_shield", "proto_ko_return_to_sender",
-            "proto_ko_bottomless_bag", "proto_ko_once_more",
+            "proto_ko_bottomless_bag",          # Once More! cut 2026-10-03
             "proto_ko_sparkling_burst",
             "proto_ko_blazing_delight"} <= set(ids)
     # R276's five cuts and four arrivals.
@@ -287,7 +287,10 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     # THE POOL EXPANSION's thirty (R276), less the status package's two cuts
     # and Spinning Sparkler (the status pile's defence), by name and for the
     # same reason, then the status package's eleven.
-    assert list(ids[-38:-11]) == [
+    # The Klee-only companions (2026-10-03): Second Surprise cut here,
+    # Solitary Confinement from the package, and her three Companion rows
+    # last of all.
+    assert list(ids[-39:-13]) == [
         "proto_ko_hiding_spot", "proto_ko_playdate",
         "proto_ko_jumpy_dumpty_mk_iii",
         "proto_ko_mine_all_mine", "proto_ko_team_effort",
@@ -302,7 +305,7 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
         "proto_ko_adventure_club", "proto_ko_windblume_fireworks",
         "proto_ko_fireworks_finale", "proto_ko_dodoco",
         "proto_ko_aftershock", "proto_ko_spark_knight",
-        "proto_ko_alices_detonator", "proto_ko_second_surprise"]
+        "proto_ko_alices_detonator"]
     # THE STATUS PACKAGE (2026-10-01): eight cut, eight arrived, last.
     for cut in ("proto_ko_pocket_fireworks", "proto_ko_rapid_fire",
                 "proto_ko_flame_dance", "proto_ko_dodoco_cover",
@@ -314,7 +317,11 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     for cut in ("proto_ko_fish_flavored_bait", "proto_ko_big_bounce",
                 "proto_ko_spinning_sparkler"):
         assert cut not in ids, cut
-    assert ids[-11:] == C.KLEE_STATUS_PACKAGE_IDS
+    for cut in ("proto_ko_second_surprise", "proto_ko_solitary_confinement",
+                "proto_ko_once_more"):
+        assert cut not in ids, cut
+    assert ids[-13:-3] == C.KLEE_STATUS_PACKAGE_IDS
+    assert ids[-3:] == C.KLEE_OWN_COMPANION_IDS
 
 
 def test_the_numbers_are_the_briefs_placeholders():
@@ -732,8 +739,8 @@ def test_no_companion_play_pays_klees_spark_under_the_arm(overhaul):
     from tier0.tests.conftest import make_state
 
     for cid in ("proto_mc_razor_claw_and_thunder",      # a Universal
-                "proto_mc_fischl_sinful_hex",           # a family stand-in
-                "proto_mc_noelle_i_got_your_back",      # a coven Personal
+                "proto_mc_fischl_sinful_hex",           # once a stand-in
+                "proto_mc_prune_hexhunter_chime",       # once a coven Personal
                 "proto_mi_gorou_war_banner"):           # outside the old family
         card = loader.get_card(cid)
         assert card.is_companion, cid
@@ -1008,59 +1015,6 @@ def test_bottomless_bag_draws_two_and_three_upgraded(overhaul):
     state2.player.hand = [up]
     play_card(state2, up)
     assert len(state2.player.hand) == 3
-
-
-def test_once_more_takes_the_last_set_off_card_out_of_the_discard(overhaul):
-    """ROW 4. "Return the last Set off card you played this combat to your
-    hand."
-
-    THE NOTE IS TAKEN AT THE OP SITE, so a Set off played into an empty board
-    still counts -- which is what "the last Set off card you PLAYED" says. By
-    INSTANCE, so two copies of one detonator are two cards.
-
-    NOTHING HAPPENS AND THE SPARKS ARE STILL SPENT when the card is not in the
-    discard pile: the price is a cost line and a cost line is paid before the
-    body runs. That is the same bargain every Spark-priced row makes.
-    """
-    from tier0.engine import klee_overhaul
-    from tier0.engine.combat import play_card
-
-    state = _pass_two_state()
-    enemy = state.enemies[0]
-    klee_overhaul.place(state, enemy, 4)
-
-    detonator = loader.get_card("proto_ko_countdown")
-    state.player.sparks = 6
-    state.player.hand = [detonator]
-    play_card(state, detonator)
-    assert detonator in state.player.discard_pile
-    assert state.ko_last_set_off_card is detonator
-
-    once = loader.get_card("proto_ko_once_more")
-    state.player.hand.append(once)
-    play_card(state, once)
-
-    assert detonator in state.player.hand
-    assert detonator not in state.player.discard_pile
-    assert state.player.sparks == 4, "2 Sparks paid (balance review 4a)"
-
-    # PLAYED AGAIN WITH NOTHING IN THE DISCARD: the detonator is in HAND now,
-    # so the row moves nothing and the Sparks are still gone.
-    once2 = loader.get_card("proto_ko_once_more")
-    state.player.hand.append(once2)
-    play_card(state, once2)
-    assert detonator in state.player.hand
-    assert state.player.sparks == 2
-
-    # AND NONE PLAYED AT ALL is the same silence, on a fresh combat.
-    fresh = _pass_two_state()
-    fresh.player.sparks = 2
-    solo = loader.get_card("proto_ko_once_more")
-    fresh.player.hand = [solo]
-    play_card(fresh, solo)
-    assert fresh.player.hand == []
-    assert fresh.ko_last_set_off_card is None
-    assert fresh.player.sparks == 0
 
 
 def test_sparkling_burst_pays_one_energy_or_two_by_the_predicate(overhaul):

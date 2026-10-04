@@ -1484,15 +1484,6 @@ class CombatState:
     # `KleeOverhaulLedger.SetOffCardsThisTurn` / `SetOffCardsLastTurn`.
     ko_set_off_cards_this_turn: int = 0
     ko_set_off_cards_last_turn: int = 0
-    # QUARANTINED (`C.COMPANION_OVERHAUL`). Kaeya's stand-in, Cold-Blooded
-    # Strike: "Next turn, Grounded pays even if you played a Set off card." A
-    # SECOND field rather than a write to `ko_set_off_last_turn`, because the
-    # card names Grounded and the counter is read by more than Grounded --
-    # zeroing it would silently pay Jean's stand-in too. Armed as a marker
-    # power when the card resolves, converted to this flag by
-    # `companion_standins.roll_turn` at the ONE place the counter rolls, and
-    # read by `klee_overhaul.turn_start_late`. False on every flag-off tree.
-    mc_grounded_blind: bool = False
     # Big Badda Boom's "the damage the Bombs dealt": what the explosions since
     # this play began actually LANDED for, post-Strength, post-Weak,
     # post-reaction, post-Vulnerable (`EB-270`) -- never the charge sizes.
@@ -1530,15 +1521,6 @@ class CombatState:
     # (`GetResultLocationForCardPlay`), and the one thing both engines have to
     # agree on is where THIS play's card lands.
     ko_return_to_hand: bool = False
-    # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-732`). Once More!'s whole read: the
-    # last card this combat whose `set_off` op resolved. The INSTANCE and not
-    # the id, because the card the player takes back has to be the one that
-    # went to the discard pile -- two copies of Ka-pow! are two cards and only
-    # one of them was played. PER COMBAT and deliberately not rolled by
-    # `roll_to`: the face says "this combat". Written at the one site a Set off
-    # resolves off a card (`effects._op_set_off`); the twin is
-    # `KleeOverhaulLedger.LastSetOffCard`.
-    ko_last_set_off_card: "Card | None" = None
     # QUARANTINED (`C.KLEE_OVERHAUL`, R276). Aftershock's once-per-turn latch,
     # rolled by `roll_to` beside the counters above; the twin of
     # `KleeOverhaulLedger.TakeAftershock`.

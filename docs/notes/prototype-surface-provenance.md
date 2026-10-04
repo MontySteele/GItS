@@ -6061,3 +6061,28 @@ defaults ([USER]: "Agreed on the Mondstadt pool changes you proposed.").
   Mollis Favonius keeps cost 0, so the stand-in cost pin exempts that pair.
 - `proto_mc_amber_fiery_rain` (Amber — Fiery Rain): 4 → 3 Pyro per hit to
   ALL, 3 times; upgrade +1 per hit (3 [4]).
+
+## Klee-only companions, 2026-10-03
+
+`review/active/mondstadt-companions-2026-10-03.md` sec.4 ([USER]: "Yeah,
+agreed on all of these."; Kitchen Alchemy kept, "it's quite good!", Once More!
+cut instead).
+
+- To the shared Mondstadt roster (`C.MONDSTADT_OVERHAUL_POOL_IDS`, 35 to 39):
+  `proto_mc_qiqi_herald_of_frost` (was a coven Personal),
+  `proto_mc_fischl_sinful_hex`, `proto_mc_sucrose_mollis_favonius`,
+  `proto_mc_nicole_ladder_of_ascent` (were stand-ins; `personal_pool:` and
+  `replaces:` both dropped).
+- Into Klee's draftable pool, last (`C.KLEE_OWN_COMPANION_IDS`):
+  `proto_mc_jean_lions_fang`, `proto_mc_prune_hexhunter_chime`,
+  `proto_mc_albedo_dust_of_purification`. Ids, text, numbers and rarity
+  unchanged; still Companion cards.
+- Cut: `proto_mc_barbara_front_row_seat`, `proto_mc_diona_shaken_not_purred`,
+  `proto_mc_noelle_i_got_your_back`, `proto_mc_kaeya_cold_blooded_strike`,
+  `proto_mc_sayu_silencers_secret`, `proto_mc_yaoyao_yuegui_throwing_mode`,
+  `proto_ko_second_surprise`, `proto_ko_solitary_confinement`,
+  `proto_ko_once_more`. Their powers and the engine pieces only they used are
+  deleted in both engines. Klee stays 78, 24 / 33 / 21.
+- The stand-in table (`C.COMPANION_STANDIN_IDS`, `CompanionStandIns.Pairs`)
+  and the coven Personal list (`C.COVEN_PERSONAL_POOL_IDS`,
+  `CompanionCovenRoster.Personals`) are empty; the seams stay.

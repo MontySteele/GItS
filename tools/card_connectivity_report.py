@@ -424,8 +424,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # cards between piles -- rather than by the Set off they name, for the
     # reason `companion_mark_hand` above is filed by the mark and not the payoff.
     "return_to_hand": [_hook("shared", "hand_contents", "write")],
-    "return_last_set_off": [_hook("shared", "discard_pile", "use"),
-                            _hook("shared", "hand_contents", "write")],
     # THE POOL EXPANSION's five (R276), filed by what they move. The two
     # growths read and write the pile; the discard pick moves a card between
     # piles as Once More! does; the companion grant writes the hand; and

@@ -41,14 +41,6 @@ FAMILY = {
 }
 
 
-#: The one pair whose costs part on purpose. The Mondstadt companion review
-#: (2026-10-03, `review/active/mondstadt-companions-2026-10-03.md` pick 2)
-#: moved Wind Spirit Creation to 1 Energy and Swirl ALL so it is no longer a
-#: subset of Mollis Favonius; the stand-in keeps its 0. Rarity still matches,
-#: so the offer odds do not move.
-COST_SPLIT = frozenset({"proto_mc_sucrose_mollis_favonius"})
-
-
 def _caches_clear():
     from tier05 import rewards
 
@@ -94,27 +86,21 @@ def _paid(state, event):
 
 # --- the sheet ---------------------------------------------------------------
 
-def test_the_four_are_stand_ins_on_the_seam(overhaul):
-    """Every claim the seam makes about a row, made about these four: Klee
-    only, replacing a Universal, and never a tier move."""
-    assert set(FAMILY) <= set(C.COMPANION_STANDIN_IDS)
-    for cid, universal in FAMILY.items():
+def test_the_four_left_the_stand_in_seam(overhaul):
+    """The Klee-only companions (2026-10-03,
+    review/active/mondstadt-companions-2026-10-03.md sec.4): none of the four
+    is a stand-in any more. Fischl's, Sucrose's and Nicole's are shared
+    Universals; Albedo's Dust of Purification is in Klee's own draftable
+    pool. Each is still a Companion card and replaces nothing."""
+    for cid in FAMILY:
         card = loader.peek_card(cid)
-        assert card.personal_pool == "klee", cid
-        assert card.replaces == universal, cid
+        assert card.personal_pool is None, cid
+        assert card.replaces is None, cid
         assert card.is_companion, cid
-        replaced = loader.peek_card(universal)
-        assert card.rarity == replaced.rarity, cid
-        if cid not in COST_SPLIT:
-            assert card.cost == replaced.cost, cid
-        assert card.nation == replaced.nation, cid
-
-
-def test_klee_is_handed_each_one_and_nobody_else_is(overhaul):
-    for cid, universal in FAMILY.items():
-        assert standins.hand_off(universal, "klee") == cid
-        for other in ("furina", "kokomi", None):
-            assert standins.hand_off(universal, other) == universal, cid
+        assert cid not in C.COMPANION_STANDIN_IDS
+    shared = set(FAMILY) - {"proto_mc_albedo_dust_of_purification"}
+    assert shared <= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+    assert "proto_mc_albedo_dust_of_purification" in C.KLEE_OVERHAUL_POOL_IDS
 
 
 # --- Albedo, Tectonic Tide (the Power; its row was cut 2026-10-01) -----------

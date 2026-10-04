@@ -10955,14 +10955,12 @@ def test_a_smith_row_prints_one_upgrade_line_and_not_two():
 
 
 
-#: The four rows whose upgrade cuts the Spark price and nothing else:
+#: The rows whose upgrade cuts the Spark price and nothing else (Once More!
+#: left with the Klee-only companions, 2026-10-03):
 #: (wire id, title, energy cost on the wire, face, the upgraded cost slot).
 _SPARK_PRICE_UPGRADES = [
     ("KLEEMOD-PROTO_KO_SPARKLING_BURST", "Sparkling Burst", "0",
      "Gain 1 Energy. If a Bomb went off this turn, gain 1 more.", "1 Spark"),
-    ("KLEEMOD-PROTO_KO_ONCE_MORE", "Once More!", "0",
-     "Return the last Set off card you played this combat to your hand.",
-     "1 Spark"),
     ("KLEEMOD-PROTO_KO_BOOM_BADGE", "Boom Badge", "0",
      "The next time you Set off this turn, your Bombs deal double damage.",
      "1 Spark"),

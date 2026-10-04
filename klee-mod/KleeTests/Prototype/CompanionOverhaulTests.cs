@@ -89,6 +89,11 @@ public class CompanionOverhaulTests
         typeof(ProtoMcAmberExplosivePuppet),
         typeof(ProtoMcEulaGlacialIllumination),
         typeof(ProtoMcMikaStarfrostSwirl),
+        // THE KLEE-ONLY COMPANIONS (2026-10-03): four rows join the shared pool.
+        typeof(ProtoMcFischlSinfulHex),
+        typeof(ProtoMcSucroseMollisFavonius),
+        typeof(ProtoMcNicoleLadderOfAscent),
+        typeof(ProtoMcQiqiHeraldOfFrost),
     };
 
     /// <summary>The five powers that fire at the end of the player's turn, in
@@ -167,13 +172,16 @@ public class CompanionOverhaulTests
     [Fact]
     public void Every_row_is_an_offerable_mondstadt_companion()
     {
-        // 35 since the AoE trim (2026-10-03) split Durin in two.
-        Assert.Equal(35, Universals.Length);
+        // 35 since the AoE trim (2026-10-03) split Durin in two; 39 since the
+        // Klee-only companions (2026-10-03). Qiqi is Liyue's, the one row on
+        // this roster from a nation with no workshop.
+        Assert.Equal(39, Universals.Length);
         foreach (var type in Universals)
         {
             var card = (CardModel)Activator.CreateInstance(type)!;
             var comp = Assert.IsAssignableFrom<ICompanionCard>(card);
-            Assert.Equal("mondstadt", comp.Nation);
+            Assert.Equal(type == typeof(ProtoMcQiqiHeraldOfFrost)
+                             ? "liyue" : "mondstadt", comp.Nation);
             // A Universal, never a Personal: a personal-pool row would be
             // Klee's kit and could not be offered to another character, which
             // is the one thing every row here is required to be able to be
@@ -184,6 +192,13 @@ public class CompanionOverhaulTests
             Assert.NotEqual(CardRarity.Basic, card.Rarity);
         }
     }
+
+    private static readonly HashSet<string> KleeOwnCompanions = new()
+    {
+        nameof(ProtoMcJeanLionsFang),
+        nameof(ProtoMcPruneHexhunterChime),
+        nameof(ProtoMcAlbedoDustOfPurification),
+    };
 
     [Fact]
     public void The_assembly_holds_no_overhaul_row_the_roster_forgot()
@@ -215,6 +230,10 @@ public class CompanionOverhaulTests
             // `CompanionStandInHandOffTests`.
             .Where(t => (Activator.CreateInstance(t) as ICompanionCard)
                             ?.PersonalPool == null)
+            // AND THE THREE IN KLEE'S OWN DRAFTABLE POOL (the Klee-only
+            // companions, 2026-10-03): Companion cards with no PersonalPool,
+            // offered through `KleeOverhaulRoster` rather than this roster.
+            .Where(t => !KleeOwnCompanions.Contains(t.Name))
             .ToList();
         Assert.Equal(
             Universals.OrderBy(t => t.Name).Select(t => t.Name).ToList(),
@@ -229,12 +248,13 @@ public class CompanionOverhaulTests
         // (Gale Blade), so this asserts the RARE tier rather than the star
         // tier -- and the asymmetry is recorded in the provenance note. Eight
         // across the two waves: Albedo, Jean, Nicole, Mona and Venti first,
-        // then Durin, Varka and Eula.
+        // then Durin, Varka and Eula; nine since the Klee-only companions
+        // (2026-10-03) added Nicole's Ladder of Divine Ascent.
         var rares = Universals
             .Select(t => (CardModel)Activator.CreateInstance(t)!)
             .Where(c => c.Rarity == CardRarity.Rare)
             .ToList();
-        Assert.Equal(8, rares.Count);
+        Assert.Equal(9, rares.Count);
         Assert.All(rares, c => Assert.Equal(5, ((ICompanionCard)c).Star));
     }
 

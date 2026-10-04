@@ -119,62 +119,7 @@ public class DefenceShelfTests
     // (Careful Now's card pins left with the row: the Klee status package,
     // 2026-10-01, cut it and Dodoco Cover. The reader above stays.)
 
-    // ---- Barbara, Front Row Seat ----------------------------------------
-
-    [Fact]
-    public void Front_row_seat_pays_on_every_bomb_and_noelle_only_on_mines()
-    {
-        // THE ONE LINE BETWEEN THE TWO CARDS. Both watchers are paid from the
-        // same switch, so neither can be forgotten at wire-up; what separates
-        // them is the NOUN each prints, and the noun is the rule -- Noelle's
-        // window is Mines and Barbara's is Bombs, so a Mine pays both and a
-        // plain Bomb pays only Barbara. The arithmetic is the sim twin's
-        // (`test_barbara_pays_per_bomb_and_not_only_per_mine`), because the
-        // payout is a command.
-        var paid = Il.Calls(Il.Method("CompanionStandIns", "OnExplosion"));
-        Assert.Contains(paid, c => c.Contains("IGotYourBackPower"));
-        Assert.Contains(paid, c => c.Contains("FrontRowSeatPower"));
-
-        Assert.Contains("[gold]Mines[/gold]", Row<IGotYourBackPower>("description"));
-        Assert.Contains("[gold]Bombs[/gold]", Row<FrontRowSeatPower>("description"));
-        Assert.DoesNotContain("Mine", Row<FrontRowSeatPower>("description"));
-    }
-
-    [Fact]
-    public void Front_row_seat_closes_where_the_arms_counters_roll()
-    {
-        // "This turn" is the ROUND, the enemy's half included, because Klee's
-        // Mines go off when an ENEMY attacks -- a window that shut at the end
-        // of her own turn could not fire at all. So the watcher removes itself
-        // at `AfterPlayerTurnStart`, the same boundary Diona's and Noelle's
-        // take and the same one the arm's explosion counters roll on.
-        var close = typeof(FrontRowSeatPower)
-            .GetMethod("AfterPlayerTurnStart", All | BindingFlags.DeclaredOnly);
-
-        Assert.NotNull(close);
-        Assert.Contains("PowerCmd.Remove", Il.Calls(close!));
-        // And it is NOT on the explosion bus: the bus carries no Mine flag,
-        // which is why this seam is paid from `Explode` beside the ledger
-        // rather than through `IProtoExplosionListener`.
-        Assert.False(typeof(IProtoExplosionListener)
-                         .IsAssignableFrom(typeof(FrontRowSeatPower)));
-    }
-
-    [Fact]
-    public void Front_row_seat_applies_hydro_twice()
-    {
-        // Round 8's Diona finding on the other element: one application on a
-        // board Klee is already cooking is eaten by her own Pyro before the
-        // companion's turn comes round, so the applier row worth drafting
-        // applies twice.
-        var play = Il.CallSequence(Il.Method("ProtoMcBarbaraFrontRowSeat",
-                                             "OnPlay"));
-
-        Assert.Equal(2, play.Count(c => c.Contains("ElementalHit.ApplyOnly")));
-        Assert.Contains(play, c => c.Contains("FrontRowSeatPower"));
-    }
-
-
+    // (Barbara, Front Row Seat was cut by the Klee-only companions, 2026-10-03.)
 
     // ---- helpers ---------------------------------------------------------
 

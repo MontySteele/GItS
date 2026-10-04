@@ -41,7 +41,7 @@ public sealed class ProtoMcAlbedoDustOfPurification : CustomCardModel, ICompanio
 
     public Element CompanionElement => Element.Geo;
 
-    public string? PersonalPool => "klee";
+    public string? PersonalPool => null;
 
     public string? Nation => "mondstadt";
 

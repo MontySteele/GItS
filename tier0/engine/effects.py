@@ -5492,19 +5492,6 @@ def _op_return_to_hand(state: CombatState, fx: dict, card: Card) -> None:
     klee_overhaul.mark_return_to_hand(state)
 
 
-def _op_return_last_set_off(state: CombatState, fx: dict, card: Card) -> None:
-    """Once More! (`EB-732`): the last Set off card played this combat comes
-    back out of the discard pile.
-
-    ONE call into the arm, so "the last Set off card" has one answer: the note
-    is taken in `_op_set_off` above and read here, and the writer and the
-    reader cannot spell the rule differently.
-    """
-    if not klee_overhaul.live(state):
-        _op_klee_overhaul_off(state, fx, card)        # always raises
-    klee_overhaul.return_last_set_off(state)
-
-
 # --- THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ---------
 #
 # THE ARM IS BUILT NOW. It used to refuse the way the Klee arm above still
@@ -6114,7 +6101,6 @@ OPS = {
     # charge: Blast Shield routes its own play to the hand, Once More! takes
     # the last Set off card back out of the discard pile.
     "return_to_hand": _op_return_to_hand,
-    "return_last_set_off": _op_return_last_set_off,
     # R276, the pool expansion's five.
     "grow_largest": _op_grow_largest,
     "multiply_largest_bomb": _op_multiply_largest_bomb,

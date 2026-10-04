@@ -241,66 +241,8 @@ public class Round18Tests
                                        "ProtoKoStokeTheFuse.cs")));
     }
 
-    // ==================================================================
-    // `EB-513` -- a companion's printed Block takes the card's Frail fold
-    // ==================================================================
-
-    [Theory]
-    [InlineData("ShakenNotPurredPower")]
-    [InlineData("IGotYourBackPower")]
-    [InlineData("FrontRowSeatPower")]
-    public void A_companion_pays_its_block_through_the_cards_own_fold(string power)
-    {
-        // STRUCTURAL for the hit -- `CreatureCmd.GainBlock` needs a live
-        // combat -- and it is the one value that decides the rule:
-        // `FrailPower.ModifyBlockMultiplicative` folds exactly when the props
-        // carry `Move` and not `Unpowered`, so the props ARE the fold. Read
-        // out of the compiled body rather than asserted about behaviour.
-        var pay = typeof(ShakenNotPurredPower).Assembly
-            .GetTypes().First(t => t.Name == power)
-            .GetMethod("Pay", All)!;
-
-        Assert.Contains("CreatureCmd.GainBlock", Il.Calls(pay));
-        var source = System.IO.File.ReadAllText(System.IO.Path.Combine(
-            Repo(), "klee-mod", "KleeCode", "Powers", "Prototype",
-            "CompanionStandIns.cs"));
-        Assert.DoesNotContain(
-            "await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, "
-            + "null,", source);
-    }
-
-    [Fact]
-    public void A_companions_printed_bonus_block_folds_on_its_face_too()
-    {
-        // REAL. The face's number is `{PowerAmount:diff()}`, which renders the
-        // var's `PreviewValue`; only a `BlockVar` writes one, by running
-        // `Hook.ModifyBlock` in `UpdateCardPreview`. A bare `DynamicVar` -- what
-        // the row emitted until `EB-513` -- has an empty override, which is why
-        // Diona printed 5 under Frail and delivered 5.
-        //
-        // ONE FOLD: `IntValue` is `(int)BaseValue`, so the Apply still hands the
-        // power the PRINTED number and the fold happens once, on the way out.
-        //
-        // `EB-787`: THE CLASS IS `UnsourcedBlockVar`, which IS a `BlockVar`
-        // and whose `UpdateCardPreview` IS `Hook.ModifyBlock` -- so every
-        // sentence above still holds. What it drops is the game class's
-        // SECOND fold, the card's own enchantment, which the payout cannot
-        // apply: `Pay` passes a null `CardPlay`, so `Hook.ModifyBlock` gets no
-        // card source. A Nimble moved Barbara's rider 3 to 5 on the face and
-        // paid 3 (live-looks-8c, #575). `EnchantedRiderTests` is the pin.
-        foreach (var card in new CardModelUnderTest[]
-                 {
-                     new(new ProtoMcDionaShakenNotPurred()),
-                     new(new ProtoMcNoelleIGotYourBack()),
-                     new(new ProtoMcBarbaraFrontRowSeat()),
-                 })
-        {
-            var amount = card.Var("PowerAmount");
-            var block = Assert.IsType<UnsourcedBlockVar>(amount);
-            Assert.Equal(ValueProp.Move, block.Props);
-            Assert.True(block.IntValue > 0);
-        }
-    }
+    // (`EB-513`'s companion Block-fold pins left with their three cards, cut
+    // by the Klee-only companions, 2026-10-03.)
 
     // ==================================================================
     // `EB-514` -- the stacked-Bomb headline names its hit count

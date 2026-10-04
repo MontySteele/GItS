@@ -2263,22 +2263,6 @@ def test_tinder_toss_is_playable_on_a_bomb_less_board(overhaul):
     assert combat.card_playable(state, card) is True
 
 
-def test_once_more_upgraded_charges_one_spark_less(overhaul):
-    """`upgrade: {spark_price: -1}` -- the delta that moves a Spark PRICE. The
-    gate and the payment are one number, so both move. It rode Fireworks Show
-    until `EB-749` cut that row; three rows still spell it and this is one."""
-    base = load("proto_ko_once_more")
-    up = load("proto_ko_once_more+")
-    # Klee balance review, pick 4a, 2026-09-25: 3 -> 2, upgraded 1.
-    assert effects.spend_spark_price(base.effects[0]) == 2
-    assert effects.spend_spark_price(up.effects[0]) == 1
-
-    state = klee_state([make_enemy(hp=200)])
-    state.player.sparks = 1
-    assert combat.card_playable(state, base) is False
-    assert combat.card_playable(state, up) is True
-
-
 # --- Fish Blasting: the status goes to the discard pile ---------------------
 
 def test_fish_blasting_adds_a_confiscated_into_the_discard_pile(overhaul):

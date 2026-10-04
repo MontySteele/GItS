@@ -257,7 +257,6 @@ MIRRORED: dict[str, object] = {
     # play these four rows.
     "CompanionCovenLaw.HeraldBlock": C.CVN_HERALD_BLOCK,
     "CompanionCovenLaw.HeraldApplications": C.CVN_HERALD_APPLICATIONS,
-    "CompanionCovenLaw.YueguiBombSize": C.CVN_YUEGUI_BOMB_SIZE,
     # THE KOKOMI OVERHAUL (QUARANTINED, `C.KOKOMI_OVERHAUL`). Same terms again
     # and for the same reason: quarantined is not exempt. Draft 6 left the arm
     # with exactly ONE rule number -- Tamakushi Casket's Hydro strike, printed

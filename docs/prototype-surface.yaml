@@ -235,18 +235,9 @@
 # review/active/klee-status-package-2026-10-01.md sec.3). Provenance
 # note, "Klee status package, 2026-10-01".
 
-- {id: proto_mc_barbara_front_row_seat, name: "Barbara — Front Row Seat", character: klee,
-   authored_by: [claude],
-   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
-   cost: 1, type: skill,
-   personal_pool: [klee],
-   replaces: proto_mc_barbara_show_begin,
-   description: "Gain 5 [gold]Block[/gold]. Apply [gold]Hydro[/gold] twice to an enemy. Whenever a [gold]Bomb[/gold] goes off this turn, gain 3 [gold]Block[/gold].",
-   upgrade: {block: +2, power_amount: +1},
-   effects: [{op: block, amount: 5},
-             {op: apply_aura, element: hydro, target: enemy},
-             {op: apply_aura, element: hydro, target: enemy},
-             {op: apply_power, power: mc_front_row_seat, amount: 3, target: self}]}
+# BARBARA — FRONT ROW SEAT IS CUT (the Klee-only companions, 2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
+# note, "Klee-only companions, 2026-10-03".
 
 # the coven readers (R244 sec.2), in her OWN pool; since R276 pick 2 they read
 # any Companion play. Per-row reasoning: docs/notes/prototype-surface-provenance.md.
@@ -391,13 +382,9 @@
    effects: [{op: spend_spark, amount: 1},
              {op: draw, amount: 2}]}
 
-- {id: proto_ko_once_more, name: "Once More!", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   description: "Return the last [gold]Set off[/gold] card you played this combat to your hand.",
-   upgrade: {spark_price: -1},
-   effects: [{op: spend_spark, amount: 2},
-             {op: return_last_set_off}]}
+# ONCE MORE! IS CUT (the Klee-only companions, 2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
+# note, "Klee-only companions, 2026-10-03".
 
 - {id: proto_ko_sparkling_burst, name: "Sparkling Burst", character: klee,
    authored_by: [claude],
@@ -678,12 +665,9 @@
    upgrade: {upgraded_grant: true},
    effects: [{op: grant_kapow_each_turn}]}
 
-- {id: proto_ko_second_surprise, name: "Second Surprise", character: klee,
-   authored_by: [claude],
-   cost: 0, type: power, rarity: rare,
-   description: "Whenever one of your [gold]Mines[/gold] goes off, place a [gold]Bomb[/gold] half its size, rounded down, on that enemy.",
-   upgrade: {innate: true},
-   effects: [{op: apply_power, power: ko_second_surprise, amount: 1, target: self}]}
+# SECOND SURPRISE IS CUT (the Klee-only companions, 2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
+# note, "Klee-only companions, 2026-10-03".
 
 # --- THE STATUS PACKAGE (2026-10-01, ruled), LAST in her pool's order; eight
 # rows cut above. Provenance note, "Klee status package, 2026-10-01". ---
@@ -749,12 +733,9 @@
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_damage_report, amount: 4, target: self}]}
 
-- {id: proto_ko_solitary_confinement, name: "Solitary Confinement", character: klee,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: rare,
-   description: "Your [gold]Confiscated[/gold] cost 0.",
-   upgrade: {innate: true},
-   effects: [{op: apply_power, power: ko_solitary_confinement, amount: 1, target: self}]}
+# SOLITARY CONFINEMENT IS CUT (the Klee-only companions, 2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
+# note, "Klee-only companions, 2026-10-03".
 
 # --- DEFENCE IN THE STATUS PILE (2026-10-01, ruled; the status package
 # paper's sec.5): three rows, LAST, for three cut above. Provenance note,
@@ -1089,51 +1070,26 @@
    effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}
 
-# stand-ins (caretakers), PR: stand-in seam
-# A Klee-only card handed to Klee in place of the Universal `replaces:` names.
-# `EB-778` gave each its own art. In NO pool -- docs/notes/prototype-surface-provenance.md.
+# stand-ins (caretakers), PR: stand-in seam. Four cut and Jean's in Klee's own
+# pool by the Klee-only companions (2026-10-03). Provenance note, "Klee-only
+# companions, 2026-10-03".
 
-- {id: proto_mc_diona_shaken_not_purred, name: "Diona — Shaken, Not Purred", character: klee,
-   authored_by: [claude],
-   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
-   cost: 1, type: skill,
-   personal_pool: [klee],
-   replaces: proto_mc_diona_icy_paws,
-   description: "Gain 6 [gold]Block[/gold]. Apply [gold]Cryo[/gold] twice to an enemy. If a [gold]Bomb[/gold] goes off this turn, gain 5 [gold]Block[/gold].",
-   effects: [{op: block, amount: 6},
-             {op: apply_aura, element: cryo, target: enemy},
-             {op: apply_aura, element: cryo, target: enemy},
-             {op: apply_power, power: mc_shaken_not_purred, amount: 5, target: self}]}
+# DIONA — SHAKEN, NOT PURRED IS CUT (the Klee-only companions, 2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
+# note, "Klee-only companions, 2026-10-03".
 
-- {id: proto_mc_noelle_i_got_your_back, name: "Noelle — I Got Your Back", character: klee,
-   authored_by: [claude],
-   nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: geo,
-   cost: 1, type: skill,
-   personal_pool: [klee],
-   replaces: proto_mc_noelle_breastplate,
-   description: "Gain 6 [gold]Block[/gold]. Whenever a [gold]Mine[/gold] goes off this turn, gain 4 [gold]Block[/gold].",
-   effects: [{op: block, amount: 6},
-             {op: apply_power, power: mc_i_got_your_back, amount: 4, target: self}]}
+# NOELLE — I GOT YOUR BACK IS CUT (the Klee-only companions, 2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
+# note, "Klee-only companions, 2026-10-03".
 
-# The marker's stack is a FLAG, so this row states its own upgrade rather than
-# letting the Prototype-stage rule move an amount nothing reads.
-- {id: proto_mc_kaeya_cold_blooded_strike, name: "Kaeya — Cold-Blooded Strike", character: klee,
-   authored_by: [claude],
-   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
-   cost: 1, type: attack, tags: [strike],
-   personal_pool: [klee],
-   replaces: proto_mc_kaeya_frostgnaw,
-   description: "Deal 8 [gold]Cryo[/gold] damage. Next turn, [gold]Grounded[/gold] triggers even if you played a [gold]Set off[/gold] card.",
-   upgrade: {damage: 3},
-   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
-             {op: apply_power, power: mc_cold_blooded, amount: 1, target: self}]}
+# KAEYA — COLD-BLOODED STRIKE IS CUT (the Klee-only companions, 2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
+# note, "Klee-only companions, 2026-10-03".
 
 - {id: proto_mc_jean_lions_fang, name: "Jean — Lion's Fang, Fair Protector", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: buffer, element: anemo,
    cost: 2, type: power,
-   personal_pool: [klee],
-   replaces: proto_mc_jean_dandelion_breeze,
    description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 8 [gold]Block[/gold] and draw 1 card.",
    effects: [{op: apply_power, power: mc_lions_fang, amount: 8, target: self}]}
 
@@ -2411,43 +2367,35 @@
    nation: fontaine, star: 5, rarity: uncommon, role_c: applier, element: hydro, cost: 2, type: attack, guest_star: true,
    effects: [{op: damage, amount: 3, target: self}, {op: damage, amount: 7, target: all_enemies, applies_element: true}]}
 
-# coven Personals, PR: coven-personals. R236 / the Mondstadt workshop sec.4
-# plus its sec.3 Prune Prune entry: Klee-only rows on the Personal channel.
+# coven Personals, PR: coven-personals (R236). Prune in Klee's own pool, Qiqi
+# shared, Sayu and Yaoyao cut by the Klee-only companions (2026-10-03).
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md.
 
 - {id: proto_mc_prune_hexhunter_chime, name: "Prune — Ring-A-Ding-Ding! Hexhunter Chime", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
-   cost: 1, type: attack, personal_pool: klee,
+   cost: 1, type: attack,
    upgrade: {damage: +3},
    description: "Deal 8 [gold]Anemo[/gold] damage. [gold]Swirl[/gold]. The next [gold]Bomb[/gold] you set off this turn deals the swirled element instead of [gold]Pyro[/gold].",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: swirl, target: enemy},
              {op: apply_power, power: cvn_hexhunter_chime, amount: 1, target: self}]}
 
-- {id: proto_mc_sayu_silencers_secret, name: "Sayu — Yoohoo Art: Silencer's Secret", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
-   cost: 0, type: skill, personal_pool: klee,
-   description: "[gold]Swirl[/gold] a random enemy. Gain 4 [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, draw 1 card.",
-   effects: [{op: swirl, target: random_enemy},
-             {op: block, amount: 4},
-             {op: conditional, if: bomb_went_off_this_turn,
-              then: [{op: draw, amount: 1}]}]}
+# SAYU — YOOHOO ART: SILENCER'S SECRET IS CUT (the Klee-only companions, 2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
+# note, "Klee-only companions, 2026-10-03".
 
 - {id: proto_mc_qiqi_herald_of_frost, name: "Qiqi — Herald of Frost", character: klee,
    authored_by: [claude],
    nation: liyue, star: 5, rarity: uncommon, role_c: applier, element: cryo,
-   cost: 1, type: skill, exhaust: true, personal_pool: klee,
+   cost: 1, type: skill, exhaust: true,
    description: "For 3 turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: cvn_herald_of_frost, amount: 3, target: self}]}
 
-- {id: proto_mc_yaoyao_yuegui_throwing_mode, name: "Yaoyao — Yuegui: Throwing Mode", character: klee,
-   authored_by: [claude],
-   nation: liyue, star: 4, rarity: uncommon, role_c: trigger,
-   cost: 1, type: skill, exhaust: true, personal_pool: klee,
-   description: "For 3 turns, at the end of your turn place a [gold]Bomb[/gold] 3 on a random enemy.",
-   effects: [{op: apply_power, power: cvn_yuegui, amount: 3, target: self}]}
+# YAOYAO — YUEGUI: THROWING MODE IS CUT (the Klee-only companions, 2026-10-03,
+# review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
+# note, "Klee-only companions, 2026-10-03".
+
 # Kokomi's Personal, PR: gorou-personal
 # THE INAZUMA WORKSHOP'S ONE PERSONAL (R236 sec.3 Gorou). Not a Universal and
 # not in `C.INAZUMA_OVERHAUL_POOL_IDS`; reasoning in docs/notes/.
@@ -2461,8 +2409,8 @@
    plan: [{op: play_copy_of_companion}],
    upgrade: {cost: -1}}
 
-# stand-ins (the Hexerei family), PR: hexerei-standins
-# The FAMILY half of the seam. R276 retired the printed Hexerei mark.
+# stand-ins (the Hexerei family), PR: hexerei-standins. Albedo in Klee's own
+# pool, the other three shared, by the Klee-only companions (2026-10-03).
 # R236 sec.3; reasoning in docs/notes/prototype-surface-provenance.md.
 
 # Klee status package (2026-10-01, ruled; lore pass pick 3): his sixth
@@ -2471,8 +2419,6 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   personal_pool: [klee],
-   replaces: proto_mc_albedo_solar_isotoma,
    description: "Exhaust every status in your hand. Your largest [gold]Bomb[/gold] grows by 6 for each.",
    upgrade: {grow: +2},
    effects: [{op: exhaust_statuses_grow_largest, amount: 6}]}
@@ -2481,8 +2427,6 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: trigger, element: electro,
    cost: 1, type: attack,
-   personal_pool: [klee],
-   replaces: proto_mc_fischl_nightrider,
    description: "Deal 7 damage. This turn, each [gold]Electro[/gold] [gold]Elemental Reaction[/gold] deals 5 [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
              {op: apply_power, power: mc_sinful_hex, amount: 5, target: self}]}
@@ -2491,8 +2435,6 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 0, type: skill,
-   personal_pool: [klee],
-   replaces: proto_mc_sucrose_gust,
    description: "[gold]Swirl[/gold]. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal 4 additional damage.",
    effects: [{op: swirl, target: enemy},
              {op: draw, amount: 1},
@@ -2502,8 +2444,6 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
-   personal_pool: [klee],
-   replaces: proto_mc_nicole_revelation,
    description: "Whenever you play a [gold]Companion[/gold] card, deal 6 damage of that card's element to a random enemy.",
    effects: [{op: apply_power, power: mc_ladder_of_ascent, amount: 6, target: self}]}
 

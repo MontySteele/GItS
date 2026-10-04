@@ -90,4 +90,46 @@ public class MondstadtCompanionsTests
             .DynamicVars["CalculationBase"].BaseValue);
         Assert.Contains("3 times", Face(card));
     }
+
+    // ---- sec.4, the Klee-only companions (ruled 2026-10-03) -------------
+
+    [Fact]
+    public void Klees_three_own_companions_have_no_owner_and_ride_her_pool()
+    {
+        foreach (var card in new CardModel[]
+                 {
+                     new ProtoMcJeanLionsFang(), new ProtoMcPruneHexhunterChime(),
+                     new ProtoMcAlbedoDustOfPurification(),
+                 })
+        {
+            var companion = Assert.IsAssignableFrom<global::KleeMod.Cards.ICompanionCard>(card);
+            Assert.Null(companion.PersonalPool);
+        }
+        var slice = Il.CallSequence(Il.Method("KleeOverhaulRoster", "Slice"));
+        Assert.Contains(slice, c => c.Contains("ProtoMcJeanLionsFang"));
+        Assert.Contains(slice, c => c.Contains("ProtoMcPruneHexhunterChime"));
+        Assert.Contains(slice, c => c.Contains("ProtoMcAlbedoDustOfPurification"));
+        Assert.Contains(slice, c => c.Contains("ProtoKoKitchenAlchemy"));
+    }
+
+    [Fact]
+    public void Four_rows_join_the_shared_roster_and_the_cut_classes_are_gone()
+    {
+        Assert.Null(new ProtoMcQiqiHeraldOfFrost().PersonalPool);
+        Assert.Null(new ProtoMcFischlSinfulHex().PersonalPool);
+        Assert.Null(new ProtoMcSucroseMollisFavonius().PersonalPool);
+        Assert.Null(new ProtoMcNicoleLadderOfAscent().PersonalPool);
+        var assembly = typeof(ProtoMcQiqiHeraldOfFrost).Assembly;
+        foreach (var gone in new[]
+                 {
+                     "ProtoMcBarbaraFrontRowSeat", "ProtoMcDionaShakenNotPurred",
+                     "ProtoMcNoelleIGotYourBack", "ProtoMcKaeyaColdBloodedStrike",
+                     "ProtoMcSayuSilencersSecret", "ProtoMcYaoyaoYueguiThrowingMode",
+                     "ProtoKoSecondSurprise", "ProtoKoSolitaryConfinement",
+                     "ProtoKoOnceMore",
+                 })
+        {
+            Assert.Null(assembly.GetType("KleeMod.Cards.Prototype.Generated." + gone));
+        }
+    }
 }
