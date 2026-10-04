@@ -340,7 +340,7 @@
 - {id: proto_ko_flash_point, name: "Flash Point", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 7 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold] and draw 1 card.",
+   description: "[gold]Set off[/gold] the enemy. Deal 7 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold], draw 1 card.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 7},
              {op: conditional, if: bomb_reacted_this_turn,
