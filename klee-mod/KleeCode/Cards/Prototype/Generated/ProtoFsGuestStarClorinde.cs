@@ -45,8 +45,17 @@ public sealed class ProtoFsGuestStarClorinde : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Clorinde"),
-        ("description", "Summon Clorinde. Gain {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Summon Clorinde. Gain {GuestFanfare:diff()} [gold]Fanfare[/gold].{InCombat:{StageBow}|}"),
     };
+
+    /// <summary>Who this card's summon will Bow, on its in-combat line
+    /// (`FurinaStageBowPreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageBow", FurinaStageBowPreview.Guest(this, "clorinde"));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

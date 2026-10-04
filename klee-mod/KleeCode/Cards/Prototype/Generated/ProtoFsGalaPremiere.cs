@@ -48,8 +48,17 @@ public sealed class ProtoFsGalaPremiere : CustomCardModel, ICharacterCard, IStag
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gala Premiere"),
-        ("description", "Summon Usher, Chevalmarin and Crabaletta."),
+        ("description", "Summon Usher, Chevalmarin and Crabaletta.{InCombat:{StageBow}|}"),
     };
+
+    /// <summary>Who this card's summon will Bow, on its in-combat line
+    /// (`FurinaStageBowPreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageBow", FurinaStageBowPreview.Salon(this, "usher", "chevalmarin", "crabaletta"));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

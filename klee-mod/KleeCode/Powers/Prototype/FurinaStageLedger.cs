@@ -239,11 +239,16 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>Rule 4: the front-most SALON member's seat, or -1.</summary>
-    public int FrontMostSalon()
+    public int FrontMostSalon() => FrontMostSalon(Company.ToList());
+
+    /// <summary>Rule 4 over a company, front first: the front-most SALON
+    /// member's index, or -1. The summon and its card-face preview both ask
+    /// this one.</summary>
+    public static int FrontMostSalon(IReadOnlyList<StagePerformer> company)
     {
-        for (var i = 0; i < _seats.Count; i++)
+        for (var i = 0; i < company.Count; i++)
         {
-            if (!FurinaStage.IsGuest(_seats[i].Who)) return i;
+            if (!FurinaStage.IsGuest(company[i])) return i;
         }
         return -1;
     }

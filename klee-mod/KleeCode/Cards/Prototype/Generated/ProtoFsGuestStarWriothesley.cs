@@ -45,8 +45,17 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Wriothesley"),
-        ("description", "Summon Wriothesley."),
+        ("description", "Summon Wriothesley.{InCombat:{StageBow}|}"),
     };
+
+    /// <summary>Who this card's summon will Bow, on its in-combat line
+    /// (`FurinaStageBowPreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageBow", FurinaStageBowPreview.Guest(this, "wriothesley"));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

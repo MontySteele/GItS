@@ -45,8 +45,17 @@ public sealed class ProtoFsLeadingLady : CustomCardModel, ICharacterCard, IStage
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gentilhomme Usher"),
-        ("description", "Summon Usher. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Summon Usher. Gain {Block:diff()} [gold]Block[/gold].{InCombat:{StageBow}|}"),
     };
+
+    /// <summary>Who this card's summon will Bow, on its in-combat line
+    /// (`FurinaStageBowPreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageBow", FurinaStageBowPreview.Salon(this, "usher"));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

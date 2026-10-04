@@ -72,6 +72,27 @@ public enum StageSummonResult
     WalkOn,
 }
 
+/// <summary>How a summon makes room (rule 4), decided before it happens:
+/// <see cref="Kind"/> and the seat it touches (<see cref="Index"/>: the
+/// performer that Bows and leaves on an eviction, the guest that Bows and
+/// stays on a repeat; -1 otherwise).</summary>
+public readonly record struct StageRoom(StageSummonResult Kind, int Index);
+
+/// <summary>One summon a card makes: a Salon member (<see cref="Who"/> null
+/// for a random one) or a Guest Star.</summary>
+public readonly record struct StageSummonStep(bool Guest, StagePerformer? Who)
+{
+    public static StageSummonStep Salon(StagePerformer? who) => new(false, who);
+
+    public static StageSummonStep GuestStar(StagePerformer who) => new(true, who);
+}
+
+/// <summary>A Bow a summon will cause: an eviction, a guest's repeat or a
+/// walk-on, and who Bows (null: a random Salon member not yet rolled).
+/// </summary>
+public readonly record struct StagePlannedBow(StageSummonResult Kind,
+                                              StagePerformer? Who);
+
 /// <summary>
 /// THE STAGE'S RULES, IN ORDER (v2, the re-founding): acts front to back,
 /// the free Bow and its Fanfare, overflow and the walk-on, a guest's repeat,
@@ -315,16 +336,16 @@ public sealed class StageDirector
     /// </summary>
     public async Task<StageSummonResult> SummonSalon(StagePerformer who)
     {
-        if (!_stage.IsFull)
+        var room = SalonRoom(_stage.Company.ToList(), _stage.Capacity);
+        if (room.Kind == StageSummonResult.Seated)
         {
             _stage.Seat(who);
             await _board.Sync();
             return StageSummonResult.Seated;
         }
-        var salon = _stage.FrontMostSalon();
-        if (salon >= 0)
+        if (room.Kind == StageSummonResult.Evict)
         {
-            await Evict(salon);
+            await Evict(room.Index);
             _stage.Seat(who);
             await _board.Sync();
             return StageSummonResult.Evict;
@@ -346,25 +367,22 @@ public sealed class StageDirector
                                                      int fanfare,
                                                      int guestBook = 0)
     {
-        StageSummonResult result;
-        if (_stage.SeatOf(who) is { } here)
+        var room = GuestRoom(_stage.Company.ToList(), _stage.Capacity, who);
+        var result = room.Kind;
+        if (room.Kind == StageSummonResult.Repeat)
         {
-            await Bow(who, here, leaves: false);
-            result = StageSummonResult.Repeat;
+            await Bow(who, _stage.Seats[room.Index], leaves: false);
         }
-        else if (!_stage.IsFull)
+        else if (room.Kind == StageSummonResult.Seated)
         {
             _stage.Seat(who);
             await _board.Sync();
-            result = StageSummonResult.Seated;
         }
         else
         {
-            var salon = _stage.FrontMostSalon();
-            await Evict(salon >= 0 ? salon : 0);
+            await Evict(room.Index);
             _stage.Seat(who);
             await _board.Sync();
-            result = StageSummonResult.Evict;
         }
         if (_board.Over) return result;
         _stage.Gain(fanfare, "Guest Star");
@@ -386,6 +404,88 @@ public sealed class StageDirector
         }
         return result;
     }
+
+    // ---- making room (rule 4), the one decision ------------------------------
+    //
+    // PURE, over a company (front first) and a seat count. The summons above
+    // act on it and the card faces preview it (`FurinaStageBowPreview`), so
+    // what a card says will Bow and what Bows cannot drift (2026-10-04, the
+    // v2 seat round: summons onto a full stage Bowed Usher off unnoticed).
+
+    /// <summary>A Salon summon: a free seat at the back; on a full stage the
+    /// front-most Salon member Bows and leaves; a stage of guests only is a
+    /// walk-on.</summary>
+    public static StageRoom SalonRoom(IReadOnlyList<StagePerformer> company,
+                                      int capacity)
+    {
+        if (company.Count < capacity) return new(StageSummonResult.Seated, -1);
+        var salon = FurinaStageLedger.FrontMostSalon(company);
+        return salon >= 0
+            ? new(StageSummonResult.Evict, salon)
+            : new(StageSummonResult.WalkOn, -1);
+    }
+
+    /// <summary>A Guest Star: a guest already on stage Bows and stays; else
+    /// a free seat; else the front-most Salon member Bows and leaves, else
+    /// (every seat a guest) the front guest.</summary>
+    public static StageRoom GuestRoom(IReadOnlyList<StagePerformer> company,
+                                      int capacity, StagePerformer who)
+    {
+        for (var i = 0; i < company.Count; i++)
+        {
+            if (company[i] == who) return new(StageSummonResult.Repeat, i);
+        }
+        if (company.Count < capacity) return new(StageSummonResult.Seated, -1);
+        var salon = FurinaStageLedger.FrontMostSalon(company);
+        return new(StageSummonResult.Evict, salon >= 0 ? salon : 0);
+    }
+
+    /// <summary>
+    /// Every Bow a card's summons will cause, in order, run over a copy of
+    /// the company the way the summons above move the seats (an evicted
+    /// performer leaves and the newcomer sits at the back; a repeat and a
+    /// walk-on move nobody). A random Salon member not yet rolled sits as
+    /// null, which reads as Salon. PURE.
+    /// </summary>
+    public static IReadOnlyList<StagePlannedBow> PlanSummons(
+        IReadOnlyList<StagePerformer> company, int capacity,
+        IReadOnlyList<StageSummonStep> steps)
+    {
+        var seats = company.Select(p => (StagePerformer?)p).ToList();
+        var bows = new List<StagePlannedBow>();
+        foreach (var step in steps)
+        {
+            // An unrolled member is a Salon member, and the rule reads only
+            // Salon or guest: Usher stands in for it.
+            var known = seats.Select(p => p ?? StagePerformer.Usher).ToList();
+            var room = step.Guest && step.Who is { } guest
+                ? GuestRoom(known, capacity, guest)
+                : SalonRoom(known, capacity);
+            switch (room.Kind)
+            {
+                case StageSummonResult.Seated:
+                    seats.Add(step.Who);
+                    break;
+                case StageSummonResult.Evict:
+                    bows.Add(new(room.Kind, seats[room.Index]));
+                    seats.RemoveAt(room.Index);
+                    seats.Add(step.Who);
+                    break;
+                default:
+                    // A repeat Bows the guest in its seat; a walk-on Bows
+                    // the member that walked on. Nobody moves.
+                    bows.Add(new(room.Kind, step.Who));
+                    break;
+            }
+        }
+        return bows;
+    }
+
+    /// <summary>The Bows <paramref name="steps"/> would cause on this stage
+    /// as it stands.</summary>
+    public static IReadOnlyList<StagePlannedBow> PlanSummons(
+        FurinaStageLedger stage, IReadOnlyList<StageSummonStep> steps) =>
+        PlanSummons(stage.Company.ToList(), stage.Capacity, steps);
 
     /// <summary>The performer in <paramref name="index"/> Bows and leaves to
     /// make room: off the stage first, then its free Bow act.</summary>

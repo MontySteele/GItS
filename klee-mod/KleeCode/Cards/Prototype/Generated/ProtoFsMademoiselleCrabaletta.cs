@@ -51,8 +51,17 @@ public sealed class ProtoFsMademoiselleCrabaletta : CustomCardModel, IElementalC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mademoiselle Crabaletta"),
-        ("description", "Summon Crabaletta. Deal {Damage:diff()} [gold]Hydro[/gold] damage."),
+        ("description", "Summon Crabaletta. Deal {Damage:diff()} [gold]Hydro[/gold] damage.{InCombat:{StageBow}|}"),
     };
+
+    /// <summary>Who this card's summon will Bow, on its in-combat line
+    /// (`FurinaStageBowPreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageBow", FurinaStageBowPreview.Salon(this, "crabaletta"));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
