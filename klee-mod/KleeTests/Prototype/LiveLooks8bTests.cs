@@ -158,8 +158,9 @@ public class LiveLooks8bTests
         // moved.
         var plan = Source(Path.Combine("klee-mod", "KleeCode", "Powers",
                                        "Prototype", "KokomiPlan.cs"));
-        Assert.Contains("PreviewValue = Hers(kokomi, card, (int)BaseValue);",
-                        plan);
+        Assert.Contains(
+            "PreviewValue = Hers(kokomi, card, (int)BaseValue, _strengthTimes);",
+            plan);
     }
 
     // ==================================================================

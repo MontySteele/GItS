@@ -67,6 +67,7 @@ wrapper, an INSTRUMENT SURFACE and not a design claim:
 from __future__ import annotations
 
 import argparse
+import os
 import random
 import statistics as st
 import sys
@@ -207,7 +208,7 @@ def make_pilot():
             return None
         tok = next((c for c in hand if c.id == kokomi_plan.OPEN_THE_CASKET),
                    None)
-        if tok is not None and (state.kk_casket >= 6
+        if tok is not None and (state.kk_casket >= _open_at()
                                 or (state.turn >= 6 and state.kk_casket > 0)):
             return tok
         powers = [c for c in hand if c.type == "power"
@@ -639,12 +640,22 @@ def sec_cards(out, by, gb):
     out(f"\nFlagged: {', '.join(flags) or 'none'}.")
 
 
+def _open_at() -> int:
+    """The Casket count the pilot opens at. 6 is the feed pass's wrapper;
+    `--open-at 3` is the early opening a player reported (2026-10-04). An
+    environment variable, so the worker processes read the same number."""
+    return int(os.environ.get("KK_SIM_OPEN_AT", "6"))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", type=int, default=400)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--jobs", type=int, default=14)
+    ap.add_argument("--open-at", type=int, default=6,
+                    help="the Casket count the pilot opens at (default 6)")
     args = ap.parse_args(argv)
+    os.environ["KK_SIM_OPEN_AT"] = str(args.open_at)
     enable()
 
     def out(s=""):

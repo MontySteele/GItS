@@ -237,7 +237,7 @@ public class Round24Tests
         return Activator.CreateInstance(
             planned,
             Enum.Parse(kindType, kind), amount, Enum.Parse(aimType, aim),
-            null, times, null, 0, null)!;
+            null, times, null, 0, null, 1)!;
     }
 
     private static object Damage(int amount, string aim = "FrontEnemy",

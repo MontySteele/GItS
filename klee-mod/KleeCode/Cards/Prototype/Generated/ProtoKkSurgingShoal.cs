@@ -44,14 +44,14 @@ public sealed class ProtoKkSurgingShoal : CustomCardModel, IElementalCard, IChar
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_surging_shoal");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surging Shoal"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage. [gold]Strength[/gold] affects this [gold]Plan[/gold] twice."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,14 +60,14 @@ public sealed class ProtoKkSurgingShoal : CustomCardModel, IElementalCard, IChar
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy, StrengthTimes: 2),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(14m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(22m)
+            new KokomiPlan.PlanDamageVar(22m, 2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

@@ -2896,10 +2896,19 @@ def plan_reason(card: dict) -> str | None:
         # beat is two stacks -- an `amount` -- rather than two applications.
         if op in PLAN_TIMES_OPS:
             allowed.add("times")
+        # The big-Plan pass (2026-10-04): "Strength affects this Plan N
+        # times", on the flat hit only.
+        if op == "damage":
+            allowed.add("strength_times")
         unknown = set(eff) - allowed
         if unknown:
             return (f"plan clause {op} field(s) {sorted(unknown)} "
                     "not understood")
+        if "strength_times" in eff:
+            strength_times = eff["strength_times"]
+            if not isinstance(strength_times, int)                     or isinstance(strength_times, bool) or strength_times < 2:
+                return (f"plan clause {op} strength_times must be a literal "
+                        "int of 2 or more")
         if "times" in eff:
             times = eff["times"]
             if not isinstance(times, int) or isinstance(times, bool)                     or times < 2:
@@ -2994,6 +3003,11 @@ def plan_clause_cs(eff: dict, var: str | None = None) -> str:
     # key existed emits exactly the literal it always did.
     times = eff.get("times")
     tail = f", Times: {int(times)}" if isinstance(times, int) else ""
+    # The big-Plan pass (2026-10-04): "Strength affects this Plan N times".
+    # Named and only where the row prints one, as `Times` is.
+    strength_times = eff.get("strength_times")
+    if isinstance(strength_times, int):
+        tail += f", StrengthTimes: {int(strength_times)}"
     return (f"new KokomiPlan.Planned(KokomiPlan.Kind.{kind}, {amount}, "
             f"{aim}{tail})")
 
@@ -7605,7 +7619,11 @@ def build_vars(card: dict) -> list[str]:
         amount = int(plan_line[index]["amount"])
         if key == "plan_damage" and plan_line[index].get("op") in (
                 "damage", "damage_if_alone"):
-            out.append(f'new KokomiPlan.PlanDamageVar({amount}m)')
+            strength_times = plan_line[index].get("strength_times")
+            out.append(
+                f'new KokomiPlan.PlanDamageVar({amount}m, {int(strength_times)})'
+                if isinstance(strength_times, int)
+                else f'new KokomiPlan.PlanDamageVar({amount}m)')
         # `EB-659`. THE PLAN-HALF BLOCK IS THE SECOND LIVE PLAN NUMBER, and
         # for the mirror image of the damage half's reason: a planned Block is
         # paid out `ValueProp.Move` (`KokomiPlan.Kind.Block`), so her Dexterity

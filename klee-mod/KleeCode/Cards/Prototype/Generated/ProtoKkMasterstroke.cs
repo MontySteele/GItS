@@ -44,14 +44,14 @@ public sealed class ProtoKkMasterstroke : CustomCardModel, IElementalCard, IChar
         new[] { CardKeyword.Retain, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_masterstroke");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Masterstroke"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage. [gold]Strength[/gold] affects this [gold]Plan[/gold] 3 times."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,13 +60,13 @@ public sealed class ProtoKkMasterstroke : CustomCardModel, IElementalCard, IChar
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy, StrengthTimes: 3),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new KokomiPlan.PlanDamageVar(30m)
+            new KokomiPlan.PlanDamageVar(30m, 3)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
