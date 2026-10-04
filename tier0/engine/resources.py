@@ -619,3 +619,7 @@ def note_player_hp_loss(state: CombatState, n: int) -> None:
     state.hp_lost_since_last_turn += n
     state.player_damage_events += 1
     gain_fanfare(state, n * C.FANFARE_PER_HP_LOST, "hp_lost")
+    # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): HP lost prints
+    # Fanfare 1:1 on that arm. A no-op for anyone else.
+    from tier0.engine import furina_tide           # late: avoids the cycle
+    furina_tide.on_hp_loss(state, n)

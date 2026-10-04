@@ -15,7 +15,8 @@ from typing import Callable
 
 from tier0 import constants as C
 from tier0.engine import (companion_hexerei, effects,
-                          furina_stage, furina_v2, klee_overhaul,
+                          furina_stage, furina_tide, furina_v2,
+                          klee_overhaul,
                           kokomi_plan,
                           potions, powers, reactions, refpowers, relics,
                           resources, varka_oath)
@@ -854,6 +855,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the flow counts reset
     # at the start of her turn (paper sec.8). A no-op for anyone else.
     furina_v2.turn_open(state)
+    # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the flow counts
+    # reset. A no-op for anyone else.
+    furina_tide.turn_open(state)
     # FURINA'S STAGE: the same reset on her arm (the flow counts and the
     # once-a-turn latches). A no-op for anyone else.
     furina_stage.turn_open(state)
@@ -952,6 +956,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # POOL COMPLETION: Patient Tide's kept Energy, on top of the refill (0
     # without the Power; `kokomi_plan.patient_tide_bank` wrote it).
     p.energy += kokomi_plan.patient_tide_kept(state)
+    # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): Salon's Tab's
+    # Energy arrives next turn. 0 for anyone else.
+    p.energy += furina_tide.energy_kept(state)
     # site D, with Hook.ModifyHandDraw folded in (ToolsOfTheTrade and
     # DrawCardsNextTurn). Relic-driven opening-hand bonuses are a different
     # hook and stay where they are.
@@ -1144,6 +1151,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the performers act
     # front to back. A no-op for anyone else.
     furina_v2.end_of_turn_acts(state)
+    # THE FURINA RESEARCH SLICE (`furina_tide`): guests act, then Salon
+    # Solitaire's Restore 2. A no-op for anyone else.
+    furina_tide.end_of_turn(state)
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss
     # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,

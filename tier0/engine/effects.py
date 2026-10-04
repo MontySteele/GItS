@@ -6095,6 +6095,11 @@ def resolve_card(state: CombatState, card: Card) -> None:
         if "fv2" in card.tags:
             from tier0.engine import furina_v2      # late: avoids the cycle
             furina_v2.resolve_card(state, card)
+        # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the same door
+        # for the research proposal's rows. Dead without the `ftd` tag.
+        if "ftd" in card.tags:
+            from tier0.engine import furina_tide    # late: avoids the cycle
+            furina_tide.resolve_card(state, card)
     finally:
         if varka:
             varka_oath.end_play(state, card)
