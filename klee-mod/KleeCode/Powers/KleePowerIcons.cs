@@ -354,7 +354,7 @@ internal static class KleePowerIcons
         OneWomanShowPower =>
             KleePck.Path("furina/powers/star_of_the_show.png"),
         // The re-founding: her Fanfare badge wears the board's sigil.
-        FanfarePower => KleePck.Path("furina/powers/center_stage.png"),
+        FanfarePower => KleePck.Path(Vfx.FanfareCounter.GlyphPath),
         // THE CO-OP SET (review/records/coop-set-2026-09-25.md): five powers,
         // each borrowing the shipped sigil nearest its job on the terms every
         // borrow above takes -- the Bomb for the two that set Klee's Bombs
