@@ -60,7 +60,9 @@ public sealed class ProtoFsRaiseAToast : CustomCardModel, ICharacterCard, IModal
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Draw 1 card", "[gold]Spend[/gold] 4: draw 1 card and another player gains {IfUpgraded:show:6|4} temporary [gold]Strength[/gold]" };
+        IsUpgraded
+            ? new[] { "Draw 1 card", "[gold]Spend[/gold] 4: draw 1 card and another player gains 6 temporary [gold]Strength[/gold]" }
+            : new[] { "Draw 1 card", "[gold]Spend[/gold] 4: draw 1 card and another player gains 4 temporary [gold]Strength[/gold]" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
