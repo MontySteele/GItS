@@ -35,8 +35,9 @@ class Fixed:
         return self.front
 
 
-def _state(stage=(), fanfare=0, enemies=1, hp=500, deck=0, decider=None):
-    p = V.build_player([])
+def _state(stage=(), fanfare=0, enemies=1, hp=500, deck=0, decider=None,
+           variant=V.DEFAULT_VARIANT):
+    p = V.build_player([], variant=variant)
     p.hp = p.max_hp = 200
     p.fv2.stage = list(stage)
     p.fv2.fanfare = fanfare
@@ -354,13 +355,127 @@ def test_escoffiers_act_pays_two_and_the_salon_acts():
     assert _dealt(st) == V.ACT_CRABALETTA_DAMAGE
 
 
-def test_neuvillette_adds_three_to_a_hydro_card_only():
-    st = _state(["neuvillette"])
+def test_old_neuvillette_line_adds_three_to_a_hydro_card_only():
+    st = _state(["neuvillette"], variant="old")
     _play(st, "fv2_mademoiselle_crabaletta")       # a damaging Skill: Hydro
     assert _dealt(st) == 4 + V.NEUVILLETTE_HYDRO_BONUS
+    st = _state(["neuvillette"], variant="old")
+    _play(st, "fv2_encore")                          # an Attack: no element
+    assert _dealt(st) == 7
+    st = _state(["neuvillette"], fanfare=2, enemies=2, variant="old")
+    V.end_of_turn_acts(st)                           # her Hydro act: no bonus
+    assert _dealt(st) == 2 * V.ACT_NEUVILLETTE_DAMAGE
+
+
+# ---------------------------------------------------------------------------
+# Pass two: Neuvillette's new line, Clorinde's act, the banking pilot, the
+# draft mode.
+# ---------------------------------------------------------------------------
+
+def test_new_neuvillette_line_adds_two_to_hydro_cards_and_hydro_acts():
+    assert V.Variant().neuvillette_line == "hydro"   # the default design
+    st = _state(["neuvillette"])
+    _play(st, "fv2_mademoiselle_crabaletta")       # Hydro card damage
+    # the card's own 4 takes +2; Crabaletta took the second seat, unacted
+    assert _dealt(st) == 4 + V.NEUVILLETTE_HYDRO_DAMAGE_BONUS
+    st = _state(["neuvillette"], fanfare=2, enemies=2)
+    V.end_of_turn_acts(st)                           # her Hydro act, to ALL
+    assert _dealt(st) == 2 * (V.ACT_NEUVILLETTE_DAMAGE
+                              + V.NEUVILLETTE_HYDRO_DAMAGE_BONUS)
+
+
+def test_new_neuvillette_line_leaves_non_hydro_damage_alone():
     st = _state(["neuvillette"])
     _play(st, "fv2_encore")                          # an Attack: no element
     assert _dealt(st) == 7
+    st = _state(["neuvillette", "chevalmarin", "crabaletta"], enemies=2)
+    V.cue(st, 1)                                     # the trio carry no element
+    V.cue(st, 2)
+    assert _dealt(st) == (2 * V.ACT_CHEVALMARIN_DAMAGE
+                          + V.ACT_CRABALETTA_DAMAGE)
+    st = _state(["neuvillette", "clorinde"], fanfare=1)
+    V.cue(st, 1)                                     # Electro
+    assert _dealt(st) == V.ACT_CLORINDE_DAMAGE
+    st = _state(["crabaletta"])                      # she is not on stage
+    _play(st, "fv2_mademoiselle_crabaletta")
+    assert _dealt(st) == 4
+
+
+def test_clorinde_act_is_six_and_the_old_eight_is_a_variant():
+    assert V.ACT_CLORINDE_DAMAGE == 6 and V.ACT_CLORINDE_DAMAGE_OLD == 8
+    for variant, dmg in (("new", 6), ("c6_cards", 6), ("old", 8),
+                         ("c8_hydro", 8)):
+        st = _state(["clorinde"], fanfare=1, variant=variant)
+        V.end_of_turn_acts(st)
+        assert _dealt(st) == dmg, variant
+        assert st.player.fv2.ledger["paid"] == 1
+    # her Spend line is unchanged by either
+    st = _state(["clorinde"], fanfare=3, variant="old")
+    V.spend(st, 3)
+    assert _dealt(st) == V.CLORINDE_SPEND_DAMAGE
+
+
+def _bank_hand(fanfare, hp=500, others=("strike",)):
+    from tier0.pilot import furina_v2_pilot as P
+    st = _state([], fanfare=fanfare, hp=hp)
+    st.player.energy = 3
+    bravura = V.make_card("fv2_bravura")
+    st.player.hand = [bravura] + [V.make_card(c) for c in others]
+    return P, st, bravura
+
+
+def test_banking_pilot_holds_bravura_below_six():
+    P, st, bravura = _bank_hand(5)
+    assert P.pilot(st) is bravura                    # greedy cashes 5 in
+    assert not P.bravura_may_play(st, bravura, st.player.hand)
+    assert P.banking_pilot(st) is not bravura
+    assert P.banking_pilot(st).id == "strike"
+
+
+def test_banking_pilot_plays_bravura_at_six_or_when_it_kills():
+    P, st, bravura = _bank_hand(P_BANK := 6)
+    assert P_BANK == __import__("tier0.pilot.furina_v2_pilot",
+                                fromlist=["x"]).BANK_TARGET
+    assert P.bravura_may_play(st, bravura, st.player.hand)
+    P, st, bravura = _bank_hand(3, hp=10)            # 4 + 2*3 = 10 kills
+    assert P.bravura_may_play(st, bravura, st.player.hand)
+    assert P.banking_pilot(st) is bravura
+
+
+def test_banking_pilot_plays_a_last_bravura_only_when_nothing_is_banked():
+    P, st, bravura = _bank_hand(0, others=())
+    assert P.bravura_may_play(st, bravura, st.player.hand)
+    assert P.banking_pilot(st) is bravura
+    P, st, bravura = _bank_hand(2, others=())        # holding keeps the bank
+    assert not P.bravura_may_play(st, bravura, st.player.hand)
+    assert P.banking_pilot(st) is None
+    P, st, bravura = _bank_hand(0)                   # a Strike would play
+    assert not P.bravura_may_play(st, bravura, st.player.hand)
+
+
+def test_draft_mode_is_deterministic_under_a_seed():
+    a = H.draft_deck(11, "new")
+    assert a == H.draft_deck(11, "new")
+    assert len(a) == len(V.STARTER_IDS) + H.DRAFT_PICKS
+    picks = a[len(V.STARTER_IDS):]
+    assert all(V.CARDS[c].rarity in ("common", "uncommon", "rare")
+               for c in picks)
+    assert not set(picks) & set(V.PROBE_CONTROLS)
+    assert any(H.draft_deck(s, "new") != a for s in range(12, 16))
+    r1 = H.run_one(H.DRAFT, 11, "new")
+    r2 = H.run_one(H.DRAFT, 11, "new")
+    assert r1 == r2 and r1["deck"] == a
+    assert set(r1["flags"]) == {"guests", "rehearsal", "cue"}
+
+
+def test_pass_two_jobs_parse():
+    assert H.parse_job("2b") == ("2b", V.DEFAULT_VARIANT, "greedy")
+    assert H.parse_job("2b/bank") == ("2b", V.DEFAULT_VARIANT, "bank")
+    assert H.parse_job("1a'@old/greedy") == ("1a'", "old", "greedy")
+    for job in H.PASS2_JOBS:
+        H.parse_job(job)
+    with pytest.raises(ValueError):
+        H.parse_job("2b@nope")
 
 
 def test_charlotte_draws_one_more_at_the_start_of_the_turn():

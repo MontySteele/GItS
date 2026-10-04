@@ -26,6 +26,12 @@ THE VALUE MODEL, all in one place so a reader can argue with it:
   Applause is worth one draw per expected Bow left.
 - Readers wait: Ousia Surge is held while a playable card would still raise
   this turn's gain, Pneuma Refrain while a playable card would still Spend.
+
+TWO PILOTS (pass two). `pilot` is the greedy pilot above. `banking_pilot` is
+the same pilot with one hold rule for Bravura (the main session's): Bravura
+is held unless Fanfare >= `BANK_TARGET`, or it kills its target, or it is the
+last card the pilot would play this turn and holding gains nothing (no
+Fanfare banked, so playing it spends nothing). `PILOTS` names both.
 """
 
 from __future__ import annotations
@@ -43,6 +49,7 @@ SEAT_TURNS = 2.5       # how long a seated performer is expected to act
 STEADY_BLOCK = 0.6     # a performer's Block, valued on an average turn
 PLAY_FLOOR = 0.5       # a card worth less than this is not played
 EXPECTED_TURNS = 6     # a fight's expected length, for the Powers' value
+BANK_TARGET = 6        # banking pilot: Bravura waits for this much Fanfare
 
 
 # ----------------------------------------------------------------------
@@ -116,9 +123,13 @@ def act_value(state, member: str, *, free: bool = False,
     if member == "crabaletta":
         return V.ACT_CRABALETTA_DAMAGE + r
     if member == "neuvillette":
-        return (V.ACT_NEUVILLETTE_DAMAGE + r) * n - cost
+        # The new line adds to her own (Hydro) act while she is seated.
+        bonus = (V.NEUVILLETTE_HYDRO_DAMAGE_BONUS
+                 if f.variant.neuvillette_line == "hydro" and not free
+                 else 0)
+        return (V.ACT_NEUVILLETTE_DAMAGE + r + bonus) * n - cost
     if member == "clorinde":
-        return V.ACT_CLORINDE_DAMAGE + r - cost
+        return f.variant.clorinde_act + r - cost
     if member == "escoffier":
         return sum(act_value(state, m, need_now=need_now, steady=steady)
                    for m in f.stage if m in V.SALON) - cost
@@ -319,8 +330,7 @@ def value(state, card, playable: list) -> float:
     if k == "hydro_summon":
         return summon_value(state, spec.member) + 1.0
     if k == "summon_damage":
-        bonus = (V.NEUVILLETTE_HYDRO_BONUS if "neuvillette" in f.stage
-                 else 0)
+        bonus = V.hydro_bonus(state, card=True)
         return summon_value(state, spec.member) + _single(state, n[0] + bonus)
     if k == "damage_cue":
         return _single(state, n[0]) + best_cue(state)[1]
@@ -373,21 +383,72 @@ def _reader_bonus(state, others, *, gained: int) -> float:
     return bonus
 
 
-def pilot(state):
-    playable = [c for c in state.player.hand if card_playable(state, c)]
-    if not playable:
-        return None
+def _ranked(state, playable: list) -> list:
+    """The cards the greedy pilot would play, best first."""
+    keyed = []
+    for i, c in enumerate(playable):
+        v = value(state, c, playable)
+        if v < PLAY_FLOOR:
+            continue
+        keyed.append(((v / max(0.5, card_cost(state, c)), v, -i), c))
+    keyed.sort(key=lambda kc: kc[0], reverse=True)
+    return [c for _k, c in keyed]
+
+
+def _lethal(state, playable: list):
     left = sum(e.hp + e.block for e in state.living_enemies)
     if len(state.living_enemies) == 1:
         for c in playable:
             if card_damage(state, c) >= left:
                 return c
-    best, best_key = None, None
-    for i, c in enumerate(playable):
-        v = value(state, c, playable)
-        if v < PLAY_FLOOR:
-            continue
-        key = (v / max(0.5, card_cost(state, c)), v, -i)
-        if best_key is None or key > best_key:
-            best, best_key = c, key
-    return best
+    return None
+
+
+def pilot(state):
+    playable = [c for c in state.player.hand if card_playable(state, c)]
+    if not playable:
+        return None
+    lethal = _lethal(state, playable)
+    if lethal is not None:
+        return lethal
+    ranked = _ranked(state, playable)
+    return ranked[0] if ranked else None
+
+
+def _is_bravura(card) -> bool:
+    spec = V.spec_of(card)
+    return spec is not None and spec.kind == "bravura"
+
+
+def bravura_may_play(state, card, playable: list) -> bool:
+    """The banking pilot's hold rule. Bravura is played only when
+    (a) Fanfare >= BANK_TARGET, or
+    (b) it kills: its damage reaches the aimed enemy's HP + Block, or
+    (c) it is the last card the pilot would play this turn AND holding gains
+        nothing: no Fanfare is banked, so the play spends nothing."""
+    f = _f(state)
+    if f.fanfare >= BANK_TARGET:
+        return True
+    if state.living_enemies and card_damage(state, card) >= _target_left(state):
+        return True
+    others = [c for c in playable if not _is_bravura(c)]
+    last = not _ranked(state, others) if others else True
+    return last and f.fanfare == 0
+
+
+def banking_pilot(state):
+    playable = [c for c in state.player.hand if card_playable(state, c)]
+    if not playable:
+        return None
+    allowed = [c for c in playable
+               if not _is_bravura(c) or bravura_may_play(state, c, playable)]
+    if not allowed:
+        return None
+    lethal = _lethal(state, allowed)
+    if lethal is not None:
+        return lethal
+    ranked = _ranked(state, allowed)
+    return ranked[0] if ranked else None
+
+
+PILOTS = {"greedy": pilot, "bank": banking_pilot}

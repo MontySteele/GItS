@@ -78,8 +78,16 @@ ACT_CRABALETTA_DAMAGE = 5        # to a random enemy
 # --- sec.2: the guests -------------------------------------------------
 STAR_PRICE = {"neuvillette": 2, "clorinde": 1, "escoffier": 2, "navia": 0}
 ACT_NEUVILLETTE_DAMAGE = 7       # Hydro to ALL
-NEUVILLETTE_HYDRO_BONUS = 3      # "Your Hydro cards deal 3 more damage"
-ACT_CLORINDE_DAMAGE = 8          # Electro to a random enemy
+#: Pass two (main session, 2026-10-04): Neuvillette's on-stage line is now
+#: "Your Hydro damage deals 2 more" -- card damage AND performer acts that
+#: carry Hydro. The old line, "Your Hydro cards deal 3 more damage", is kept
+#: as a variant (`Variant.neuvillette_line == "cards"`).
+NEUVILLETTE_HYDRO_DAMAGE_BONUS = 2   # new line: any Hydro damage
+NEUVILLETTE_HYDRO_BONUS = 3          # old line: Hydro cards only
+#: Pass two: Clorinde's act is "pay 1: 6 Electro to a random enemy" (was 8;
+#: the 8 is kept as a variant).
+ACT_CLORINDE_DAMAGE = 6          # Electro to a random enemy
+ACT_CLORINDE_DAMAGE_OLD = 8
 CLORINDE_SPEND_DAMAGE = 4        # "Whenever you Spend, deal 4 Electro ..."
 NAVIA_PER_SPENT = 2              # "twice the Fanfare you spent this turn"
 CHARLOTTE_GAIN = 1               # her act: gain 1 Fanfare
@@ -91,6 +99,27 @@ GUEST_ELEMENTS = {"neuvillette": "hydro", "clorinde": "electro",
                   "navia": "geo"}
 
 BOW_FANFARE = 1                  # rule 3
+
+
+# ----------------------------------------------------------------------
+# Design variants (pass two), switchable per player so both the old and the
+# new values can be probed side by side. The default is the new design.
+# ----------------------------------------------------------------------
+@dataclass(frozen=True)
+class Variant:
+    clorinde_act: int = ACT_CLORINDE_DAMAGE
+    #: "hydro": "Your Hydro damage deals 2 more" (cards and acts).
+    #: "cards": "Your Hydro cards deal 3 more damage" (the first slice).
+    neuvillette_line: str = "hydro"
+
+
+VARIANTS: dict[str, Variant] = {
+    "new": Variant(ACT_CLORINDE_DAMAGE, "hydro"),
+    "old": Variant(ACT_CLORINDE_DAMAGE_OLD, "cards"),
+    "c8_hydro": Variant(ACT_CLORINDE_DAMAGE_OLD, "hydro"),
+    "c6_cards": Variant(ACT_CLORINDE_DAMAGE, "cards"),
+}
+DEFAULT_VARIANT = "new"
 
 
 # ----------------------------------------------------------------------
@@ -123,6 +152,7 @@ class Fv2:
     salon_summon_cards_this_turn: int = 0
     sigewinne_mark: int = 0          # `state.player_damage_events` at her last act
     opened: bool = False
+    variant: Variant = field(default_factory=Variant)
     #: Who decides the player's choices inside a card (Cue target, Curtain
     #: Rise's mode, Step Forward's performer). None = the slice pilot's.
     decider: object = None
@@ -279,13 +309,16 @@ def make_card(card_id: str):
                 innate=bool(up and spec.kind == "thunderous"))
 
 
-def build_player(card_ids, hp: int | None = None, max_hp: int = HP):
-    """The slice's Furina: a fresh Player with `fv2` attached."""
+def build_player(card_ids, hp: int | None = None, max_hp: int = HP,
+                 variant: str | Variant = DEFAULT_VARIANT):
+    """The slice's Furina: a fresh Player with `fv2` attached, playing the
+    named design `variant` (see `VARIANTS`)."""
     from tier0.engine.state import Player
     p = Player(hp=max_hp if hp is None else hp, max_hp=max_hp,
                draw_pile=[make_card(cid) for cid in card_ids],
                element=ELEMENT, cadence=CADENCE, character_id=CHARACTER)
-    p.fv2 = Fv2()
+    p.fv2 = Fv2(variant=VARIANTS[variant] if isinstance(variant, str)
+                else variant)
     return p
 
 
@@ -356,8 +389,25 @@ def _clorinde_line(state) -> None:
 # ----------------------------------------------------------------------
 # Acts, Bows, summons, Cues.
 # ----------------------------------------------------------------------
+def hydro_bonus(state, *, card: bool) -> int:
+    """Neuvillette's on-stage line for one Hydro hit: the new line adds 2 to
+    any Hydro damage (a card's or an act's); the old line adds 3 to a Hydro
+    card's damage only. 0 when she is not on stage."""
+    f = _fv(state)
+    if "neuvillette" not in f.stage:
+        return 0
+    if f.variant.neuvillette_line == "hydro":
+        return NEUVILLETTE_HYDRO_DAMAGE_BONUS
+    return NEUVILLETTE_HYDRO_BONUS if card else 0
+
+
 def _hit(state, enemy, amount: int, element) -> None:
     from tier0.engine import effects
+    if element == "hydro":
+        bonus = hydro_bonus(state, card=False)
+        if bonus:
+            amount += bonus
+            _fv(state).ledger["neuvillette_bonus_hits"] += 1
     effects.deal_damage_to_enemy(state, enemy, amount, element=element,
                                  powered=False, source="furina_v2/act")
 
@@ -394,7 +444,7 @@ def act(state, member: str, *, free: bool = False) -> bool:
             _hit(state, enemy, ACT_NEUVILLETTE_DAMAGE + r, "hydro")
     elif member == "clorinde":
         if living:
-            _hit(state, state.rng.choice(living), ACT_CLORINDE_DAMAGE + r,
+            _hit(state, state.rng.choice(living), f.variant.clorinde_act + r,
                  "electro")
     elif member == "escoffier":
         # "your Salon members act", front to back, each its ordinary act.
@@ -539,12 +589,12 @@ def free_salon_summon(state, card) -> bool:
 def _card_damage(state, card, amount: int) -> None:
     """A card's own hit at the play's aim, through the shared damage op (so
     Strength, Weak, Vulnerable, Block and the cadence's element all apply).
-    Neuvillette on stage adds 3 when the hit carries Hydro."""
+    Neuvillette on stage adds her line's bonus when the hit carries Hydro."""
     from tier0.engine import effects
     fx = {"op": "damage", "amount": amount, "target": "enemy"}
-    if ("neuvillette" in _fv(state).stage
-            and effects._element_for(state, fx, card) == "hydro"):
-        fx["amount"] = amount + NEUVILLETTE_HYDRO_BONUS
+    bonus = hydro_bonus(state, card=True)
+    if bonus and effects._element_for(state, fx, card) == "hydro":
+        fx["amount"] = amount + bonus
         _fv(state).ledger["neuvillette_bonus_hits"] += 1
     effects.OPS["damage"](state, fx, card)
 
@@ -668,4 +718,15 @@ READINGS: tuple[str, ...] = (
     "stage does nothing but the card's plain effect.",
     "The performers' acts and Clorinde's line are unpowered (Furina's "
     "Strength and Weak do not touch them), as today's Stage acts are.",
+    # --- pass two ---
+    "Neuvillette's new line (\"Your Hydro damage deals 2 more\") adds 2 per "
+    "Hydro HIT: per enemy on an ALL act, once on a single-target card. In "
+    "the slice the Hydro hits are Mademoiselle Crabaletta's card damage "
+    "(Skill cadence) and Neuvillette's own act; none of the Salon trio's "
+    "acts carries an element (Chevalmarin's CARD applies Hydro, its act "
+    "deals plain damage). It applies only while she is on stage: her own "
+    "act at end of turn or on a Cue takes it, and a repeat-copy Bow (she "
+    "stays seated) takes it, but her Bow on being evicted does not (she "
+    "has left the stage before the Bow act).",
+    "Clorinde's 6 or 8 is the act only; her Spend line stays a flat 4.",
 )
