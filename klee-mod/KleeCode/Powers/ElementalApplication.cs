@@ -285,7 +285,10 @@ public sealed class KleeElementalHooks : AbstractModel
         // element gains 1 Oath of it -- whether it sticks, refreshes or
         // reacts -- once per card play; his own card's makes it current.
         await VarkaOath.NoteApplication(choiceContext, dealer, element,
-                                        cardSource);
+                                        cardSource, target);
+        // Wildfire Oath's or Assembly's hit, paid just above, may have
+        // killed it: no aura on a body.
+        if (target.IsDead) return;
 
         // An existing aura owns this hit (refresh or reaction); one aura per
         // enemy is the invariant.

@@ -4129,16 +4129,18 @@
              {op: apply_power, power: vk_eye_wall, amount: 3, target: self}],
    upgrade: {block: 2}}
 
-# Element identities (sec.3): Short Circuit replaces Pressure Front. Silent's
-# Concentrate (discard 3 [2], gain 2 Energy) with an Electro rider.
+# Element identities (sec.3): Short Circuit replaces Pressure Front. Since
+# 2026-10-03 a loot, not Concentrate: provenance note, "Varka Wildfire Oath
+# and Short Circuit, 2026-10-03".
 - {id: proto_vk_short_circuit, name: "Short Circuit", character: varka,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Discard {Discards:diff()} cards. Gain 2 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy.",
-   effects: [{op: discard, amount: 3, select: chosen},
-             {op: energy, amount: 2},
+   description: "Discard 2 cards. Draw {Cards:diff()} cards. Gain 1 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy.",
+   effects: [{op: discard, amount: 2, select: chosen},
+             {op: draw, amount: 2},
+             {op: energy, amount: 1},
              {op: apply_aura, element: electro, target: enemy}],
-   upgrade: {discard: -1}}
+   upgrade: {draw: 1}}
 
 - {id: proto_vk_crosscurrent, name: "Crosscurrent", character: varka,
    authored_by: [claude],
@@ -4168,9 +4170,10 @@
 - {id: proto_vk_wildfire_oath, name: "Wildfire Oath", character: varka,
    authored_by: [claude],
    # Element identities (sec.5): re-aimed from the Swirl AoE to one big hit.
-   # The rebalance (sec.2): half the Pyro Oath, whatever is current.
+   # Since 2026-10-03 Pyro's Absolute Zero: provenance note, "Varka
+   # Wildfire Oath and Short Circuit, 2026-10-03".
    cost: 2, type: power, rarity: rare,
-   description: "Your first Attack each turn deals additional damage equal to half your Pyro [gold]Oath[/gold].",
+   description: "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal to your [gold]Pyro[/gold] [gold]Oath[/gold] to it.",
    effects: [{op: apply_power, power: vk_wildfire_oath, amount: 1, target: self}],
    upgrade: {innate: true}}
 

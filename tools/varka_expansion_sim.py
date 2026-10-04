@@ -71,10 +71,14 @@ away. `_electro_pick` orders his four discard cards before the stock pilot
 picks; it prices each card in hand by the stock scorer's own value with its
 Energy charge added back (`_gross`) and a turn by a greedy best-per-Energy
 fill (`_plan`):
-  * SHORT CIRCUIT now when the hand after its discards, with 2 more Energy
-    (and Chain Lightning's discount), is worth more than the whole hand
-    without it; its discards are the lowest-value cards (`_discard_victims`,
-    the chosen-discard pick, is replaced for this process only).
+  * SHORT CIRCUIT now when the hand after its discards, plus its draws and
+    its Energy (and Chain Lightning's discount), is worth more than the
+    whole hand without it; its discards are the lowest-value cards
+    (`_discard_victims`, the chosen-discard pick, is replaced for this
+    process only). A draw is priced as a typical card of the draw pile (its
+    median by value; the pilot never reads the pile's order). Since the
+    Short Circuit change (2026-10-03: discard 2, draw 2 [3], gain 1 Energy)
+    the amounts are read off the card, as they always were.
   * CHAIN LIGHTNING after the discards: Short Circuit goes first when it is
     worth it, and its discount is in the plan that says so.
   * VIOLET STORM now when its hits on the hand as it stands are worth at
@@ -447,6 +451,18 @@ def _plan(state, cards, energy, discounted=0):
     return value, left
 
 
+def _typical_draws(state, d):
+    """`d` stand-ins for the cards a draw brings: the draw pile's median
+    card by value (the discard pile's when the draw pile is empty), never its
+    order. Empty when there is nothing to draw."""
+    p = state.player
+    pile = list(p.draw_pile) or list(p.discard_pile)
+    if d <= 0 or not pile:
+        return []
+    ranked = sorted(pile, key=lambda c: _gross(state, c))
+    return [ranked[len(ranked) // 2]] * min(d, len(pile))
+
+
 def _short_circuit_now(state, sc):
     from tier0.engine import combat
     p = state.player
@@ -456,6 +472,8 @@ def _short_circuit_now(state, sc):
     if not others:
         return False
     keep = sorted(others, key=lambda c: _gross(state, c))[n:]
+    keep = keep + _typical_draws(state, sum(
+        fx.get("amount", 0) for fx in sc.effects if fx.get("op") == "draw"))
     gained = sum(fx.get("amount", 0) for fx in sc.effects
                  if fx.get("op") == "energy")
     left = p.energy - combat.card_cost(state, sc) + gained

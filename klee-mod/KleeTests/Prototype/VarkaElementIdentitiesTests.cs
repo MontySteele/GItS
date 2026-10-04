@@ -8,6 +8,7 @@ using KleeMod.Elements;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
@@ -73,20 +74,25 @@ public class VarkaElementIdentitiesTests : IDisposable
     }
 
     [Fact]
-    public void Short_circuit_is_concentrate_with_an_electro_rider()
+    public void Short_circuit_loots_two_for_one_energy_with_an_electro_rider()
     {
+        // Varka Wildfire Oath and Short Circuit (2026-10-03): discard 2, draw
+        // 2 [3], gain 1 Energy, apply Electro. Cost 0, not Exhaust.
         var circuit = new ProtoVkShortCircuit();
         Assert.Equal(CardType.Skill, circuit.Type);
         Assert.Equal(CardRarity.Uncommon, circuit.Rarity);
         Assert.Equal(0, circuit.EnergyCost.Canonical);
-        Assert.Equal(3m, Var(circuit, "Discards"));
-        Assert.Equal(2m, Var(Upgraded<ProtoVkShortCircuit>(), "Discards"));
+        Assert.DoesNotContain(CardKeyword.Exhaust, circuit.Keywords);
+        Assert.Equal(2m, Var(circuit, "Cards"));
+        Assert.Equal(3m, Var(Upgraded<ProtoVkShortCircuit>(), "Cards"));
         var play = Il.CallSequence(Il.Method("ProtoVkShortCircuit", "OnPlay")).ToList();
         var pick = play.IndexOf("CardSelectCmd.FromHandForDiscard");
         var discard = play.IndexOf("CardCmd.Discard");
+        var draw = play.IndexOf("CardPileCmd.Draw");
         var energy = play.IndexOf("PlayerCmd.GainEnergy");
         var apply = play.IndexOf("ElementalHit.ApplyOnly");
-        Assert.True(pick >= 0 && discard > pick && energy > discard && apply > energy,
+        Assert.True(pick >= 0 && discard > pick && draw > discard
+                    && energy > draw && apply > energy,
                     string.Join(", ", play));
     }
 
@@ -203,29 +209,35 @@ public class VarkaElementIdentitiesTests : IDisposable
         Assert.Equal(CardRarity.Rare, new ProtoVkRetaliatingTide().Rarity);
     }
 
-    // ---- sec.5: Wildfire Oath ---------------------------------------------------
+    // ---- Wildfire Oath: Pyro's Absolute Zero (2026-10-03) ----------------------
 
     [Fact]
-    public void Wildfire_is_half_the_pyro_oath_on_one_hit()
+    public void Wildfire_pays_the_pyro_oath_per_pyro_application_after_its_credit()
     {
-        // The rebalance (sec.2): half, rounded down, whatever is current.
-        Assert.Equal(2, VarkaOath.WildfireBonus(5, 1));
-        Assert.Equal(4, VarkaOath.WildfireBonus(5, 2));
-        Assert.Equal(3, VarkaOath.WildfireBonus(6, 1));
-        Assert.Equal(0, VarkaOath.WildfireBonus(5, 0));
-        var ledger = FreshLedger();
-        ledger.RollTo(2);
-        Assert.True(ledger.TakeFirstAttack());
-        Assert.False(ledger.TakeFirstAttack());
-        ledger.RollTo(3);
-        Assert.True(ledger.TakeFirstAttack());
-        Assert.Contains("VarkaOathLedger.TakeFirstAttack", Calls("VarkaOath", "BeginPlay"));
-        Assert.Contains("VarkaOathLedger.set_WildfireCard", Calls("VarkaOath", "EndPlay"));
-        Assert.Contains("VarkaOathLedger.set_WildfireCard",
-                        Calls("WildfireOathPower", "BeforeDamageReceived"));
-        Assert.Contains("VarkaOath.WildfireBonus",
-                        Calls("WildfireOathPower", "ModifyDamageAdditive"));
-        // The Swirl payout no longer reads it.
+        Assert.Equal(PowerStackType.Counter, new WildfireOathPower().StackType);
+        Assert.Equal(4, WildfireOathPower.DamageFor(4, 1));
+        Assert.Equal(8, WildfireOathPower.DamageFor(4, 2));
+        Assert.Equal(0, WildfireOathPower.DamageFor(0, 1));
+        // Paid inside the application, after its Oath credit, so the Oath the
+        // application just raised counts (the sim's `note_hit` order).
+        var note = Il.CallSequence(Il.Method("VarkaOath", "NoteApplication")).ToList();
+        var gain = note.IndexOf("VarkaOath.Gain");
+        var paid = note.IndexOf("WildfireOathPower.OnPyroApplied");
+        Assert.True(gain >= 0 && paid > gain, string.Join(", ", note));
+        // Element-less and unpowered: it never re-enters NoteApplication.
+        Assert.Contains("ElementalHit.DealUnelemented",
+                        Calls("WildfireOathPower", "OnPyroApplied"));
+        // Every application door hands the enemy over.
+        Assert.Contains("VarkaOath.NoteApplication",
+                        Calls("KleeElementalHooks", "BeforeDamageReceived"));
+        // The old first-Attack bonus is gone.
+        Assert.Null(typeof(VarkaOath).GetMethod("WildfireBonus"));
+        Assert.Null(typeof(VarkaOathLedger).GetMethod("TakeFirstAttack"));
+        Assert.Null(typeof(VarkaOathLedger).GetProperty("WildfireCard"));
+        Assert.Null(typeof(WildfireOathPower).GetMethod("ModifyDamageAdditive",
+            System.Reflection.BindingFlags.Instance
+            | System.Reflection.BindingFlags.Public
+            | System.Reflection.BindingFlags.DeclaredOnly));
         Assert.DoesNotContain("WildfireOathPower", string.Join(" ", Calls("VarkaOath", "Pay")));
     }
 

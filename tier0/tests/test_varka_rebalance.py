@@ -105,15 +105,8 @@ def test_every_changed_row_upgrades(rebalance):
 # 2. The Oath rule (sec.2).
 # ---------------------------------------------------------------------------
 
-def test_wildfire_is_half_pyro_oath_whatever_the_element(rebalance):
-    st = _state()
-    led = V.ledger(st.player)
-    led.current, led.oath["pyro"] = "hydro", 7
-    st.player.powers[V.WILDFIRE_OATH] = 1
-    _play(st, _attack(8))
-    assert st.enemies[0].hp == 100 - 8 - 3          # half of 7, rounded down
-    _play(st, _attack(8))                           # not the first Attack
-    assert st.enemies[0].hp == 100 - 8 - 3 - 8
+# Wildfire Oath's half-Oath bonus left with the card's 2026-10-03 change;
+# its pins are test_varka_element_identities.py section 4.
 
 
 def test_absolute_zero_pays_cryo_oath_per_debuff(rebalance):
