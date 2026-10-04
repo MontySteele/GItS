@@ -25,11 +25,10 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 - **Klee to Balance: ruled yes** (2026-10-03, "Agreed all around!"), after the finish-line batch (`review/active/klee-brief-2026-09-01.md` §19) and its two-seat round.
 
-- **Furina re-founding, draft 2** (`review/active/furina-refounding-2026-10-03.md`;
-  direction ruled 2026-10-04, "1a"): (1) a Bow gives 1 Fanfare; (2) the
-  scaling stat is called Rehearsal; (3) a full-stage summon Bows the
-  front-most Salon member; (4) the starter pair (Rising Applause: "Gain 3
-  Fanfare. Cue your front performer."). All defaults.
+- **Furina re-founding, draft 3** (`review/active/furina-refounding-2026-10-03.md`;
+  direction ruled 2026-10-04, "1a"): (1) Rising Applause is "Gain 3
+  Fanfare." with no Cue; (2) the scaling stat is named Rehearsal with a
+  badge; (3) a Salon summon onto three guests is a walk-on. All defaults.
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
