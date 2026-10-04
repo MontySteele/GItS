@@ -168,11 +168,10 @@ public class FurinaGuestGrantedFixTests
         // Hit one: Usher takes 3 and leaves; his Bow Block takes the other 2
         // and keeps 1. Hit two: that 1, then Crabaletta takes 4 and leaves.
         // Nothing reaches Furina (the sim's actual enemy turn: HP unchanged).
-        // The fade pass (2026-09-29): the front fades too and Crabaletta
-        // loses a quarter, so she starts at 5 to stand at 4 when the hits
-        // arrive (the Usher's 3 loses nothing).
+        // 2026-10-03: the fade waits for her next turn, so Crabaletta
+        // stands at the 4 she starts with when the hits arrive.
         using var _ = new Arm();
-        var (seat, stage) = Stage(("usher", 3), ("crabaletta", 5));
+        var (seat, stage) = Stage(("usher", 3), ("crabaletta", 4));
         // The sweep would give 3 Block first; take the hits as they would
         // arrive past it (8 = 5 + 3) so the enemy turn is the sim's board.
         var forecast = FurinaStage.Forecast(seat.Creature, new[] { 8, 5 },
@@ -194,7 +193,7 @@ public class FurinaGuestGrantedFixTests
         // board as the split above: Crabaletta's sweep act deals 5, and her
         // Bow when hit two empties her deals 5 more.
         using var _ = new Arm();
-        var (seat, _) = Stage(("usher", 3), ("crabaletta", 5));
+        var (seat, _) = Stage(("usher", 3), ("crabaletta", 4));
 
         var forecast = FurinaStage.Forecast(seat.Creature, new[] { 8, 5 },
                                             OneEnemy);

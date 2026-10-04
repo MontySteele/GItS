@@ -1057,9 +1057,9 @@ def _open_fight_one():
 def test_fight_one_turn_one_line_a_is_the_briefs_row(arm):
     """Sec.7's line A, the BUILD: Presence, Rising Applause (Usher 3 to 8),
     Solicitation; Usher performs Block 3. Block 9, damage 6, Nibbit at 38,
-    Furina at 78. THE FADE PASS (2026-09-29): the front fades too, a quarter
-    of 8, so Usher ends the turn at 6 and the 3 that survives her Block
-    leaves him at 3 (was 8 and 5)."""
+    Furina at 78. 2026-10-03 ("Fanfare decay should be at the start of the
+    next turn, not the end"): Usher ends the turn at 8 and the 3 that
+    survives her Block leaves him at 5; the fade waits for turn two."""
     st = _open_fight_one()
     st.player.block += 6                                   # Stage Presence
     FS.raise_fanfare(st, FS.REFILL_AMOUNT)                 # Rising Applause
@@ -1068,11 +1068,11 @@ def test_fight_one_turn_one_line_a_is_the_briefs_row(arm):
 
     assert st.player.block == 9
     assert st.enemies[0].hp == 38
-    assert FS.lead_fanfare(st.player) == 6                 # 8, less 8 // 4
+    assert FS.lead_fanfare(st.player) == 8                 # no fade yet
 
     combat._enemy_turn(st, st.enemies[0])                # Butt 12
     assert st.player.block == 0
-    assert FS.stage(st.player) == [["usher", 3]]
+    assert FS.stage(st.player) == [["usher", 5]]
     assert st.player.hp == 78
 
 
@@ -1149,8 +1149,10 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     own; what this pins is that an engine playing the brief's plays reaches
     the brief's board, not that the plays are good (sec.13).
 
-    THE FADE PASS (2026-09-29): every bar loses a quarter at each turn's end,
-    the front's included. The script's plays are the same; its bars moved.
+    THE FADE PASS (2026-09-29): every bar loses a quarter each turn, the
+    front's included. Since 2026-10-03 the fade is at the START of her turn
+    (from her second), after the enemies' hits. The script's plays are the
+    same; its bars moved.
     """
     st = _open_fight_one()
 
@@ -1161,13 +1163,14 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     FS.end_of_turn_acts(st)
     combat._enemy_turn(st, st.enemies[0])                # Butt 12
     assert st.enemies[0].hp == 38
-    assert FS.stage(st.player) == [["usher", 3]]
+    assert FS.stage(st.player) == [["usher", 5]]
 
     # --- turn 2: Salon Début fields Crabaletta, Solicitation, Regal Bearing --
     st.turn = 2
     st.player.block = 0
-    FS.turn_start_regen(st)                # rule 4 cut: Usher stays at 3
-    assert FS.lead_fanfare(st.player) == 3
+    FS.turn_start_fade(st)                 # Usher 5 -> 4
+    FS.turn_start_regen(st)                # rule 4 cut: no regen
+    assert FS.lead_fanfare(st.player) == 4
     st.player.block += 3                                   # Regal Bearing
     # `EB-738`: she arrives at 1 and does NOT act on arrival, so the board is
     # sec.7's own -- "Solicitation 6 (38 to 32) ... Performances: Usher Block 3
@@ -1184,6 +1187,7 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     # --- turn 3, the REFILL line ---------------------------------------
     st.turn = 3
     st.player.block = 0
+    FS.turn_start_fade(st)                 # Usher 4 -> 3, Crabaletta 1
     FS.turn_start_regen(st)                # rule 4 cut: Usher stays at 3
     st.player.block += 6                                   # Stage Presence
     # The rules pass (2026-10-01): the Spend pays from the back first, then
@@ -1200,7 +1204,7 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     # literal card, at sec.7's 13; the sheet's row deals 17 since the fade
     # pass.)
     assert st.enemies[0].hp == 9
-    # The fade: Usher 3 and Crabaletta 3 keep all 3.
+    # No fade at the turn's end (2026-10-03): Usher 3 and Crabaletta 3.
     assert FS.stage(st.player) == [["usher", 3], ["crabaletta", 3]]
 
 
@@ -1477,13 +1481,12 @@ def test_arkhe_asks_once_and_copies_add(arm):
     assert st.player.block == 3 * FS.ACT_USHER_BLOCK
 
 
-def test_tutti_costs_two_and_one_upgraded():
-    """2026-09-26 balance review: Tutti! costs 2, and 1 upgraded (round four
-    had cut it to 1 and 0; at that price it beat every other card that makes
-    a performer act)."""
+def test_tutti_costs_one_and_retains_upgraded():
+    """2026-10-03, [USER]'s run notes: Tutti! costs 1, and its upgrade is
+    Retain (it was 2, 1 upgraded, since the 2026-09-26 balance review)."""
     row = {r["id"]: r for r in _proto_rows()}["proto_fs_tutti"]
-    assert row["cost"] == 2
-    assert row["upgrade"] == {"cost": -1}
+    assert row["cost"] == 1
+    assert row["upgrade"] == {"retain": True}
 
 
 def test_the_balance_review_numbers_2026_09_26(arm, monkeypatch):
@@ -1673,7 +1676,8 @@ def test_the_fade_table(before, after):
 def test_the_fade_takes_every_performer_the_front_included(arm):
     st = _state(enemies=[_enemy(hp=200)])
     st.player.stage = [["usher", 25], ["chevalmarin", 9], ["crabaletta", 15]]
-    FS.end_of_turn_acts(st)
+    st.turn = 2
+    FS.turn_start_fade(st)
     assert st.player.stage == [["usher", 19], ["chevalmarin", 7],
                                ["crabaletta", 12]]
     fades = [(e["member"], e["before"], e["fanfare"]) for e in st.log
@@ -1685,7 +1689,8 @@ def test_the_fade_takes_every_performer_the_front_included(arm):
 def test_a_lone_performer_fades_too(arm):
     st = _state()
     st.player.stage = [["crabaletta", 20]]
-    FS.end_of_turn_acts(st)
+    st.turn = 2
+    FS.turn_start_fade(st)
     assert st.player.stage == [["crabaletta", 15]]
 
 
@@ -1693,8 +1698,10 @@ def test_the_fade_never_empties_and_never_bows(arm):
     """Bars under 4 lose nothing; a quarter never takes a whole bar."""
     st = _state(enemies=[_enemy(hp=200)])
     st.player.stage = [["usher", 1], ["chevalmarin", 1], ["crabaletta", 3]]
-    for _ in range(5):
+    for turn in range(2, 7):
         FS.end_of_turn_acts(st)
+        st.turn = turn
+        FS.turn_start_fade(st)
     assert [f for _m, f in st.player.stage] == [1, 1, 3]
     assert not [e for e in st.log if e["event"] in ("stage_bow", "stage_fade")]
     for bar in range(0, 40):
@@ -1702,15 +1709,22 @@ def test_the_fade_never_empties_and_never_bows(arm):
         assert bar - FS.fade_loss(bar) >= min(bar, 1)
 
 
-def test_the_fade_runs_after_the_acts(arm):
-    """Every act fires before any bar fades, so the log's last beats are the
-    fades."""
+def test_the_fade_waits_for_her_next_turn(arm):
+    """2026-10-03, [USER]: "Fanfare decay should be at the start of the next
+    turn, not the end." The sweep fades nothing; her next turn's start does,
+    and her first turn's start does not."""
     st = _state(enemies=[_enemy(hp=200)])
     st.player.stage = [["usher", 3], ["crabaletta", 9]]
+    st.turn = 1
+    FS.turn_start_fade(st)
     FS.end_of_turn_acts(st)
     events = [e["event"] for e in st.log
               if e["event"] in ("stage_act", "stage_fade")]
-    assert events == ["stage_act", "stage_act", "stage_fade"]
+    assert events == ["stage_act", "stage_act"]
+    assert st.player.stage == [["usher", 3], ["crabaletta", 9]]
+    st.turn = 2
+    FS.turn_start_fade(st)
+    assert st.player.stage == [["usher", 3], ["crabaletta", 7]]
 
 
 def _row(cid):

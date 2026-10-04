@@ -215,6 +215,33 @@ KNOWN_STALE = {
     "proto_ko_fish_flavored_bait": (
         "Klee defence in the status pile (2026-10-01) CUT this row from her pool (three rows cut, three added; review/active/klee-status-package-2026-10-01.md sec.5). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_ko_once_more": (
+        "The Mondstadt companions pass (2026-10-03, #877) CUT this row from Klee's pool to hold 78 (review/active/mondstadt-companions-2026-10-03.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_second_surprise": (
+        "The Mondstadt companions pass (2026-10-03, #877) CUT this row from Klee's pool to hold 78 (review/active/mondstadt-companions-2026-10-03.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_solitary_confinement": (
+        "The Mondstadt companions pass (2026-10-03, #877) CUT this row from Klee's pool to hold 78 (review/active/mondstadt-companions-2026-10-03.md). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mc_barbara_front_row_seat": (
+        "The Mondstadt companions pass (2026-10-03, #877) CUT this Klee-only companion: it read Bombs, Mines or Grounded and had a near-twin in the shared pool (review/active/mondstadt-companions-2026-10-03.md). Kept rather than deleted, as the entries below are: a painted asset on a companions/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mc_diona_shaken_not_purred": (
+        "The Mondstadt companions pass (2026-10-03, #877) CUT this Klee-only companion: it read Bombs, Mines or Grounded and had a near-twin in the shared pool (review/active/mondstadt-companions-2026-10-03.md). Kept rather than deleted, as the entries below are: a painted asset on a companions/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mc_kaeya_cold_blooded_strike": (
+        "The Mondstadt companions pass (2026-10-03, #877) CUT this Klee-only companion: it read Bombs, Mines or Grounded and had a near-twin in the shared pool (review/active/mondstadt-companions-2026-10-03.md). Kept rather than deleted, as the entries below are: a painted asset on a companions/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mc_noelle_i_got_your_back": (
+        "The Mondstadt companions pass (2026-10-03, #877) CUT this Klee-only companion: it read Bombs, Mines or Grounded and had a near-twin in the shared pool (review/active/mondstadt-companions-2026-10-03.md). Kept rather than deleted, as the entries below are: a painted asset on a companions/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mc_sayu_silencers_secret": (
+        "The Mondstadt companions pass (2026-10-03, #877) CUT this Klee-only companion: it read Bombs, Mines or Grounded and had a near-twin in the shared pool (review/active/mondstadt-companions-2026-10-03.md). Kept rather than deleted, as the entries below are: a painted asset on a companions/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mc_yaoyao_yuegui_throwing_mode": (
+        "The Mondstadt companions pass (2026-10-03, #877) CUT this Klee-only companion: it read Bombs, Mines or Grounded and had a near-twin in the shared pool (review/active/mondstadt-companions-2026-10-03.md). Kept rather than deleted, as the entries below are: a painted asset on a companions/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_ko_big_bounce": (
         "Klee defence in the status pile (2026-10-01) CUT this row from her pool (three rows cut, three added; review/active/klee-status-package-2026-10-01.md sec.5). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),

@@ -2723,11 +2723,13 @@
    effects: [{op: stage_summon, member: random},
              {op: stage_summon, member: random}]}
 
+# 2026-10-03, user's run notes: cost 2 -> 1, and the upgrade is Retain
+# (was cost -1).
 - {id: proto_fs_tutti, name: "Tutti!", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {retain: true},
    authored_by: [claude],
    replaces: full_ensemble,
-   register: salon, cost: 2, type: skill, rarity: uncommon,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
    description: "All your performers act now.",
    effects: [{op: stage_perform_all}]}
 
@@ -3028,11 +3030,12 @@
    description: "All your performers [gold]Bow[/gold] without leaving.",
    effects: [{op: stage_grand_finale}]}
 
+# 2026-10-03, user's run notes: cost 2 -> 1 (0 upgraded), keeps Exhaust.
 - {id: proto_fs_gala_premiere, name: "Gala Premiere", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    replaces: grand_gala,
-   register: salon, cost: 2, type: skill, rarity: rare, exhaust: true,
+   register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
    description: "Summon Usher, Chevalmarin and Crabaletta with 3 [gold]Fanfare[/gold] each.",
    effects: [{op: stage_summon, member: usher, fanfare: 3},
              {op: stage_summon, member: chevalmarin, fanfare: 3},

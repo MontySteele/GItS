@@ -346,13 +346,12 @@ public static partial class FurinaStage
     //
     // PURE: it runs the ledger's own moves on a CLONE of the seats and never
     // touches the stage, the log or the bodies. The acts' Fanfare halves are
-    // the very methods the sweep calls (`FurinaStageLedger.ActFanfare`, the
-    // fade), so a forecast and a turn end cannot disagree about a payment.
+    // the very methods the sweep calls (`FurinaStageLedger.ActFanfare`), so a forecast and a turn end cannot disagree about a payment.
     // ==================================================================
 
     /// <summary>
     /// The end of this turn, forecast: each performer's Fanfare after the
-    /// acts, the payments and the fade; the Block the acts give; and the
+    /// acts and the payments (the fade comes at her next turn's start); the Block the acts give; and the
     /// posted attacks split between the front performer and Furina, given her
     /// Block after the acts. Null with the arm off.
     /// </summary>
@@ -407,16 +406,17 @@ public static partial class FurinaStage
         }
         run.Sweep = false;
         // 2026-09-26 (the cues): what the acts' payments and taxes took off
-        // each bar, and then what the fade took, read off the clone's own
-        // beats -- the ledger's `pay` and `fade` moves, filed by seat key.
+        // each bar, read off the clone's own beats -- the ledger's `pay`
+        // moves, filed by seat key. THE FADE IS NOT FORECAST (2026-10-03,
+        // [USER]: "Fanfare decay should be at the start of the next turn,
+        // not the end"): it runs after the enemies' hits now
+        // (`TurnStartFade`), so the hits below meet the unfaded bars and
+        // every row's fade chip is 0.
         var paid = TallyBeats(clone.Beats, 0, clone.Beats.Count,
                               FurinaStageLedger.PayEvent);
-        var sweepEnd = clone.Beats.Count;
         clone.EndRest();
         clone.ResetActMultipliers();
-        if (Fades(owner)) clone.Fade();
-        var faded = TallyBeats(clone.Beats, sweepEnd, clone.Beats.Count,
-                               FurinaStageLedger.FadeEvent);
+        var faded = new Dictionary<int, int>();
 
         var rows = new List<StageForecastSeat>();
         for (var i = 0; i < seats.Count; i++)

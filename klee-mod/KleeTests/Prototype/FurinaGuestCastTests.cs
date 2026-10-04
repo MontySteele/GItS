@@ -595,41 +595,44 @@ public class FurinaGuestCastTests
     /// moved every bar of 4 or more: a quarter fades, the front's too.</summary>
     public static IEnumerable<object[]> Boards() => new[]
     {
+        // 2026-10-03 ("Fanfare decay should be at the start of the next
+        // turn, not the end"): the fade left the end of the turn, so these
+        // bars are unfaded; the sim's `BOARDS` moved with them.
         B("neuvillette pays", new[] { ("neuvillette", 6), ("usher", 3) }, 0,
           new int[0], new int?[] { 3, 3 }, 3, 0, 0),
         B("tax and gift",
           new[] { ("usher", 3), ("clorinde", 4), ("charlotte", 4) }, 0,
-          new int[0], new int?[] { 3, 4, 3 }, 3, 0, 0),
+          new int[0], new int?[] { 3, 5, 3 }, 3, 0, 0),
         // 2026-09-29: Sigewinne the medic heals the front 2, free;
         // Neuvillette has left, so she is the front.
         B("the last payment bows",
           new[] { ("neuvillette", 3), ("sigewinne", 8) }, 0, new int[0],
-          new int?[] { null, 8 }, 0, 0, 0),
+          new int?[] { null, 10 }, 0, 0, 0),
         B("the medic heals the front",
           new[] { ("usher", 2), ("sigewinne", 8) }, 0, new int[0],
-          new int?[] { 3, 6 }, 3, 0, 0),
+          new int?[] { 4, 8 }, 3, 0, 0),
         B("chevreuse spends herself",
           new[] { ("usher", 3), ("chevreuse", 4) }, 0, new int[0],
           new int?[] { 3, 2 }, 3, 0, 0),
         B("chevreuse cannot pay",
           new[] { ("chevreuse", 4), ("usher", 1) }, 0, new int[0],
-          new int?[] { 3, 1 }, 3, 0, 0),
+          new int?[] { 4, 1 }, 3, 0, 0),
         B("full house pays twice",
           new[] { ("neuvillette", 6), ("usher", 3), ("crabaletta", 4) }, 1,
-          new int[0], new int?[] { null, 3, 3 }, 6, 0, 0),
+          new int[0], new int?[] { null, 3, 4 }, 6, 0, 0),
         // 2026-09-29 (Furina seat, Vantom, run FS3EL3M3NTS4): the preview
         // was read as "8 Hydro to ALL, twice" with a repeat that "could not
         // pay". The forecast pays each repeat on the clone before it counts
         // it: at 5 Neuvillette pays once, keeps 2, and the repeat is refused.
         B("full house, the repeat cannot pay",
           new[] { ("usher", 3), ("crabaletta", 4), ("neuvillette", 5) }, 1,
-          new int[0], new int?[] { 3, 3, 2 }, 6, 0, 0),
+          new int[0], new int?[] { 3, 4, 2 }, 6, 0, 0),
         B("the fade is not a hit",
           new[] { ("usher", 3), ("wriothesley", 10) }, 0, new int[0],
-          new int?[] { 3, 8 }, 3, 0, 0),
+          new int?[] { 3, 10 }, 3, 0, 0),
         B("two hits through the front",
           new[] { ("usher", 3), ("crabaletta", 4) }, 0, new[] { 7, 7 },
-          new int?[] { 3, 3 }, 3, 6, 2),
+          new int?[] { 3, 4 }, 3, 7, 1),
     };
 
     private static object[] B(string name, (string, int)[] stage, int fullHouse,

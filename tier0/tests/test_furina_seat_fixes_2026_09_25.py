@@ -170,7 +170,8 @@ def test_the_glossary_says_up_to_three_perform():
         "performer is both front and back.")
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "FurinaStageBadges.cs").read_text(encoding="utf-8")
-    assert '"Up to {Seats} performers act at the end of your turn. Then each "' in src
+    # 2026-10-03: the fade moved to the start of her next turn.
+    assert '"Up to {Seats} performers act at the end of your turn. At the "' in src
 
 
 def test_the_stage_badge_interpolates_the_law():
@@ -182,7 +183,8 @@ def test_the_stage_badge_interpolates_the_law():
     assert '"Up to " + FurinaStageLaw.Seats + " performers act at the end of "' in src
     # The fade pass (2026-09-29): a quarter of every bar, in words; the C#
     # suite pins `FurinaStageLaw.FadeDivisor` to the quarter.
-    assert '"your turn. Then each performer loses a quarter of its Fanfare, "' in src
+    # 2026-10-03: the fade moved to the start of her next turn.
+    assert '"your turn. At the start of your turn, each loses a quarter of "' in src
 
 
 # ---------------------------------------------------------------------------

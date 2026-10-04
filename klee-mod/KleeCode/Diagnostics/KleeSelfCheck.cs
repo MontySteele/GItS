@@ -67,6 +67,16 @@ internal static class KleeSelfCheck
         "gold", "keyword", "wave", "shake", "p", "blue",
     };
 
+    /// <summary>R5's per-character rows beyond title/description: BaseLib's
+    /// CharacterLoc set plus bestiaryQuote.</summary>
+    private static readonly string[] CharacterRowSuffixes =
+    {
+        "titleObject", "pronounSubject", "pronounObject", "pronounPossessive",
+        "possessiveAdjective", "aromaPrinciple", "banter.alive.endTurnPing",
+        "banter.dead.endTurnPing", "bestiaryQuote", "eventDeathPrevention",
+        "goldMonologue", "cardsModifierTitle", "cardsModifierDescription",
+    };
+
     private static readonly List<string> Findings = new();
 
     public static void Run()
@@ -677,6 +687,21 @@ internal static class KleeSelfCheck
         CheckLocEntry(
             characters, "characters", character.Id.Entry,
             character.GetType().Name, "R5");
+
+        // R5, continued: the rest of the per-character rows the game builds
+        // from Id.Entry on demand. Only title/description were checked, so
+        // the co-op end-turn ping bubble rendered its raw key for all four
+        // characters (playtest 2026-10-03). KleeTests'
+        // CharacterLocCompletenessTests pins the same set without a game.
+        foreach (var suffix in CharacterRowSuffixes)
+        {
+            var key = $"{character.Id.Entry}.{suffix}";
+            if (!characters.HasEntry(key))
+            {
+                Fail("R5", $"{character.GetType().Name}: missing loc key \"{key}\" in "
+                         + "table \"characters\". The UI will render the raw key.");
+            }
+        }
 
         // R8. Every power this mod ships must have loc. R4 only walks the card
         // pool, so powers were unswept -- and the four AuraPowers shipped

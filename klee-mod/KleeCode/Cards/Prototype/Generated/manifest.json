@@ -1141,7 +1141,7 @@
       "power_amount": 1
     },
     "proto_fs_tutti": {
-      "cost": -1
+      "retain": true
     },
     "proto_fs_undercurrent": {
       "times": 2

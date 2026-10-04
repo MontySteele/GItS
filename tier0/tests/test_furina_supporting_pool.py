@@ -126,7 +126,7 @@ TABLE = {
     "bring_the_house_down": ("Bring the House Down", "rare", 2, "attack"),
     "da_capo": ("Da Capo", "uncommon", 1, "attack"),
     "grand_finale": ("Grand Finale", "rare", 1, "skill"),
-    "gala_premiere": ("Gala Premiere", "rare", 2, "skill"),
+    "gala_premiere": ("Gala Premiere", "rare", 1, "skill"),  # 2026-10-03
     "bubble_aria": ("Bubble Aria", "common", 1, "attack"),
     "groundswell": ("Groundswell", "uncommon", 1, "attack"),
     "tide_of_applause": ("Tide of Applause", "uncommon", 1, "power"),

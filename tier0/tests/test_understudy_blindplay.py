@@ -6805,7 +6805,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                            "first. A lone performer is both front and back."],
         # The second text pass (2026-09-28): the fade's own tip. The fade
         # pass (2026-09-29): a quarter, the front's bar included.
-        "fade": ["At the end of your turn, each performer loses a quarter "
+        "fade": ["At the start of your turn, each performer loses a quarter "
                  "of its ", ", rounded down."],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
         # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the

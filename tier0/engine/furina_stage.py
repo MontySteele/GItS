@@ -1675,6 +1675,23 @@ def end_of_turn_acts(state) -> None:
     p.stage_act_block_mult = 1
     # Oratrice's Verdict lasts "this turn": the sweep was its last use.
     p.stage_verdict = None
+    # THE LEDGER'S SAMPLE (a): the back performer's bar at the end of her
+    # turn, and 0 on an empty stage -- a distribution that omits its zeros is
+    # not a distribution. Rule 12's fade no longer runs here (2026-10-03,
+    # [USER]: "Fanfare decay should be at the start of the next turn, not the
+    # end"): it is `turn_start_fade`.
+    ledger(state)["back_at_turn_end"].append(back_fanfare(p))
+
+
+def turn_start_fade(state) -> None:
+    """Rule 12 at the START of her turn (2026-10-03, [USER]'s run notes:
+    "Fanfare decay should be at the start of the next turn, not the end").
+    Was the last step of `end_of_turn_acts`; it now runs after the enemies
+    have attacked, first among her turn-start effects, from her second turn
+    on, so a fight fades once per turn break as before. Same amount. C#
+    twin: `FurinaStage.TurnStartFade`."""
+    if not active(state.player) or state.turn < 2:
+        return
     fade(state)
 
 
@@ -1687,8 +1704,9 @@ def fade_loss(fanfare: int) -> int:
 
 
 def fade(state) -> None:
-    """RULE 12, THE APPLAUSE FADES. THE FADE PASS (2026-09-29): at the end of
-    Furina's turn, AFTER the acts, EVERY performer, the front one included,
+    """RULE 12, THE APPLAUSE FADES. THE FADE PASS (2026-09-29): at the start
+    of Furina's turn (`turn_start_fade`, since 2026-10-03; was the end of her
+    turn, after the acts), EVERY performer, the front one included,
     loses `fade_loss` of its bar: a quarter, rounded down. [USER]: "make
     Fanfare deplete faster, but make that depletion more impactful" and
     "What about a percentage fade, say 25%? Anything below 4 rounds to losing
@@ -1706,10 +1724,6 @@ def fade(state) -> None:
         pair[1] = before - loss
         state.emit("stage_fade", member=pair[0], amount=loss,
                    before=before, fanfare=pair[1])
-    # THE LEDGER'S SAMPLE (a): the back performer's bar at the end of her
-    # turn, after the fade, and 0 on an empty stage -- a distribution that
-    # omits its zeros is not a distribution.
-    ledger(state)["back_at_turn_end"].append(back_fanfare(p))
 
 
 # ----------------------------------------------------------------------
@@ -2150,7 +2164,8 @@ def _guest_act(state, member: str, *, pair, exit_) -> None:
 
 def forecast(state) -> dict:
     """RULE 7, THE FORECAST, sim side: the end of this turn on a COPY of the
-    fight -- the acts, their payments and the fade -- and the enemies' posted
+    fight -- the acts and their payments (the fade waits for her next turn,
+    2026-10-03) -- and the enemies' posted
     attacks on it, given her Block after the acts. PURE: the real state is
     never touched (the copy carries its own rng). Returns each seat's bar now
     and after, the Block after the acts, what the front performers take and

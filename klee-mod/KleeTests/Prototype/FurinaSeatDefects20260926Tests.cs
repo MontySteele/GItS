@@ -287,10 +287,9 @@ public class FurinaSeatDefects20260926Tests
     public void A_burn_meets_the_acts_block_and_the_front_performer_first()
     {
         using var _ = new Arm();
-        var (seat, _) = Stage(("usher", 6));
-        // Usher's act: 3 Block, then the fade takes a quarter of his 6 (the
-        // fade pass, 2026-09-29: the front fades too), so he stands at 5.
-        // The Burn's 2 is Blocked, the Wither's 3 takes the last 1 and puts 2
+        var (seat, _) = Stage(("usher", 5));
+        // Usher's act: 3 Block, and he stands at 5 (2026-10-03: the fade
+        // waits for her next turn). The Burn's 2 is Blocked, the Wither's 3 takes the last 1 and puts 2
         // on Usher (5 -> 3); the 10 then empties him (3) and his Bow's 3
         // Block meets the rest: 4 reaches her.
         var forecast = FurinaStage.Forecast(

@@ -1247,8 +1247,28 @@ public static partial class FurinaStage
         ledger.ResetActMultipliers();
         // Oratrice's Verdict lasts "this turn": the sweep was its last use.
         ledger.VerdictTarget = null;
-        // Rule 12 (draft 3, 2026-09-25): THE APPLAUSE FADES, after the acts.
-        FadeAndShow(owner!);
+        // Rule 12 no longer runs here: 2026-10-03, [USER]'s run notes,
+        // "Fanfare decay should be at the start of the next turn, not the
+        // end". The fade is `TurnStartFade`, after the enemies' attacks.
+        Vfx.FurinaStageCues.Refresh(owner);
+    }
+
+    /// <summary>
+    /// Rule 12, THE APPLAUSE FADES, at the START of her turn (2026-10-03,
+    /// [USER]'s run notes: "Fanfare decay should be at the start of the next
+    /// turn, not the end"). Was the last step of <see cref="EndOfTurnActs"/>;
+    /// it now runs after the enemies have attacked, first among her
+    /// turn-start effects (before the rest clears, the regen and the
+    /// turn-start powers), from her second turn on, so a fight fades once per
+    /// turn break as before. The amount is unchanged. Sim twin:
+    /// <c>furina_stage.turn_start_fade</c>.
+    /// </summary>
+    public static void TurnStartFade(Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        var turn = owner!.Player?.PlayerCombatState?.TurnNumber ?? 0;
+        if (turn < 2) return;
+        FadeAndShow(owner);
         Vfx.FurinaStageCues.Refresh(owner);
     }
 

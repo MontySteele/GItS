@@ -1005,7 +1005,7 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForFade(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, FadeKey,
-            "At the end of your turn, each performer loses a quarter of its "
+            "At the start of your turn, each performer loses a quarter of its "
           + "[gold]Fanfare[/gold], rounded down.");
 
     /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
