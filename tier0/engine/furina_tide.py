@@ -13,43 +13,49 @@ the engine calls is a no-op for any other player, so today's Furina arms and
 every other kit are untouched: no sheet row, no pool, no loader door, no
 codegen sees this arm.
 
-THE RULES (paper sec.2):
+THE RULES (paper sec.2, with sec.16's two changes: Restore is now REPAY, and
+the curtain call is the default):
 
-1. DRAIN N. A choice on some of her cards: lose N HP for the bigger effect.
-   It cannot be chosen if it would take her below the line: half the HP she
-   started this combat with (the default variant, `entry`; the `std` family
-   of variants measures half of Max HP, Genshin's rule). HP lost to a Drain
-   is DRAINED: the engine keeps the count.
-2. RESTORE N. Regain up to N of your drained HP. Restore never returns HP an
-   enemy took (the invariant: HP + drained <= Max HP, and Restore <= drained).
+1. DRAIN N. Lose N HP for the bigger effect (a mode on some cards, a fixed
+   price on others). It cannot be paid if it would take her below the line:
+   half the HP she started this combat with (the `entry` line; the `std`
+   family of variants measures half of Max HP, Genshin's rule). HP lost to
+   a Drain is DRAINED: the engine keeps the count. A fixed-price card whose
+   Drain cannot be paid cannot be played (`playable`), Hemokinesis's shape.
+2. REPAY N. Regain up to N of your drained HP. Repay never returns HP an
+   enemy took (the invariant: HP + drained <= Max HP, and Repay <= drained).
 3. FANFARE. One number on Furina, no cap, no fade. She gains 1 for every HP
    she loses (to a Drain, to an enemy, to anything) and for every HP she
-   Restores. Spend N on cards pays it. Readers count this turn's flow.
-4. SALON SOLITAIRE (starting relic). At the end of your turn, Restore 2.
+   Repays. Spend N on cards pays it; a spend-all is one Spend.
+4. SALON SOLITAIRE (starting relic). At the end of your turn, Repay 2.
 5. GUEST STARS. Three seats; a guest acts at the end of her turn; a guest
    onto a full stage makes the oldest guest leave, acting once more as it
    goes; a second copy of a guest on stage makes it act and stay.
+6. THE CURTAIN CALL (sec.16, the default variant `curtain_call`). When a
+   combat ends, all drained HP returns (`close_ledger`). Under
+   `no_curtain_call` unrepaid drained HP is lost when the fight ends, the
+   paper's old rule. Either way `fight_record` reports the unrepaid HP at
+   the curtain (under the curtain call, the HP the curtain returned).
 
-Unrepaid drained HP is simply lost when the fight ends (there is no refund);
-that is the design's cost, and `fight_record` reports it.
+RISING APPLAUSE ALWAYS SPENDS ALL (sec.15 point 7): the face is the rule;
+whether to play it now is the only choice. The `legacy` variant (the old
+baseline: no curtain call, and the pilot may decline Rising Applause's
+spend) is kept for reference only.
 
-PROBE-ONLY ROWS. The `ftd_rising_applause_6` / `_all2` alternatives (rarity
-"probe", never offered) and The Crowd Gasps (an Uncommon Power the paper
-replaced with Lynette's line; it is in the draft pool the slice was read
-on). VARIANTS switch the Singer's Restore, whether enemy hits print
-Fanfare, and the line.
+PROBE-ONLY ROWS (`in_slice` False, never drafted). The `ftd_rising_applause_6`
+/ `_all2` alternatives (rarity "probe"), The Crowd Gasps, Critics' Darling,
+Sigewinne and Neuvillette: rows beyond sec.16's 24 that a probe deck uses,
+kept under sec.15/16's rules. The draft pool is the slice's 24.
 
-THE K3 SWITCHES (`VARIANT_SWITCHES`; all off by default, so `entry` is the
-paper's rules). A Drain the Singer fully repays costs no HP and prints
-Fanfare twice (on the loss and on the Restore); these variants price it:
-- `singer_rests`: Salon Solitaire Restores only at the end of a turn in
-  which no Drain happened (`Ftd.singer_rests`). Any Drain counts, Neuvillette's
-  act included, since it is a real Drain; his act comes before the Singer.
-- `restore_no_fanfare`: Restore prints no Fanfare (`Ftd.restore_fanfare`
+THE K3 SWITCHES (`K3_SWITCHES`, under the `entry` line and the old no-curtain
+rule). A Drain the Singer fully repays costs no HP and prints Fanfare twice
+(on the loss and on the Repay); these variants price it:
+- `singer_rests`: Salon Solitaire Repays only at the end of a turn in
+  which no Drain happened (`Ftd.singer_rests`).
+- `repay_no_fanfare`: Repay prints no Fanfare (`Ftd.repay_fanfare`
   False). HP loss from any cause still prints it.
 - `both`: the two together.
-- `singer1`: the Singer Restores 1 (the paper's named lever), for comparison.
-All four keep the `entry` line.
+- `singer1`: the Singer Repays 1 (the paper's named lever), for comparison.
 """
 
 from __future__ import annotations
@@ -64,25 +70,23 @@ ELEMENT = "hydro"
 CADENCE = "skill"
 
 SEATS = 3
-SINGER_RESTORE = 2           # Salon Solitaire: end of turn, Restore 2
+SINGER_REPAY = 2             # Salon Solitaire: end of turn, Repay 2
 
-GUESTS = ("charlotte", "wriothesley", "sigewinne", "clorinde",
-          "neuvillette", "navia")
+GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
+          "sigewinne", "neuvillette")
 GUEST_ELEMENTS = {"wriothesley": "cryo", "clorinde": "electro",
-                  "neuvillette": "hydro", "navia": "geo"}
+                  "lynette": "anemo", "neuvillette": "hydro"}
 
-# Guest numbers (paper sec.7).
-CHARLOTTE_ACT_RESTORE = 2
-SIGEWINNE_ACT_RESTORE = 3
+# Guest numbers (paper sec.16; Sigewinne and Neuvillette from sec.7/15).
+CHARLOTTE_ACT_REPAY = 2
+SIGEWINNE_ACT_REPAY = 3
 WRIOTHESLEY_ACT = 4
+LYNETTE_ACT = 3              # Anemo to an enemy with an aura
 CLORINDE_ACT = 6
-CLORINDE_PER_RESTORE = 2     # "deal twice that much Electro"
-NEUVILLETTE_DRAIN = 4
-NEUVILLETTE_ACT = 8          # to ALL, when he drains
-NEUVILLETTE_ACT_DRY = 3      # to ALL, when he cannot
+CLORINDE_PER_REPAY = 2       # "deal twice that much Electro"
 NEUVILLETTE_HYDRO_BONUS = 2
-NAVIA_PER_SPENT = 2
 SALON_ENCORE_DAMAGE = 3      # Power: whenever you Drain, 3 to ALL
+THUNDEROUS_DAMAGE = 3        # Power: whenever you Spend, 3 to ALL
 
 
 def _new_ledger() -> dict:
@@ -90,12 +94,13 @@ def _new_ledger() -> dict:
         "gained": 0, "gained_by": collections.Counter(),
         "spent": 0, "spends": 0,
         "drained": 0, "drains": 0, "drain_offers": 0, "card_drains": 0,
+        "fixed_drains": 0,
         "drain_blocked_by_line": 0,
-        "restored": 0, "restore_wasted": 0, "singer_skipped": 0,
+        "repaid": 0, "repay_wasted": 0, "singer_skipped": 0,
         "spend_offers": 0,
         "guest_acts": collections.Counter(), "bows": 0,
         "started_at_or_below_half": False,
-        "fanfare_end": 0, "unrepaid_end": 0,
+        "fanfare_end": 0, "unrepaid_end": 0, "curtain_repaid": 0,
         "damage_by_turn": collections.Counter(),
     }
 
@@ -103,20 +108,25 @@ def _new_ledger() -> dict:
 @dataclass
 class Ftd:
     fanfare: int = 0
-    drained: int = 0                 # HP lost to Drains and not yet Restored
+    drained: int = 0                 # HP lost to Drains and not yet Repaid
     gained_this_turn: int = 0
     spent_this_turn: int = 0
-    restored_this_turn: int = 0
+    repaid_this_turn: int = 0
+    drained_hp_this_turn: int = 0    # Neuvillette's act reads it
     charlotte_drew: bool = False
+    lynette_fired: bool = False
+    energy_next: int = 0             # Salon's Tab: Energy next turn
     stage: list = field(default_factory=list)
     powers: collections.Counter = field(default_factory=collections.Counter)
-    singer: int = SINGER_RESTORE
+    singer: int = SINGER_REPAY
     hit_fanfare: bool = True         # variant: do enemy hits print Fanfare?
     line: float = 0.5                # variant: the Drain line, share of Max HP
     entry_hp: int = 0                # HP at the start of this combat
     line_from_entry: bool = False    # variant: the line is half of entry HP
     singer_rests: bool = False       # variant: no Singer on a turn she Drained
-    restore_fanfare: bool = True     # variant: does Restore print Fanfare?
+    repay_fanfare: bool = True       # variant: does Repay print Fanfare?
+    curtain_call: bool = False       # variant: drained HP returns at the end
+    rising_optional: bool = False    # legacy: the pilot may skip the spend
     drained_this_turn: bool = False
     decider: object = None
     ledger: dict = field(default_factory=_new_ledger)
@@ -139,7 +149,7 @@ def _decider(state):
 
 
 # ----------------------------------------------------------------------
-# The cards (paper sec.7, the slice's rows).
+# The cards (paper sec.16, the slice's rows; numbers are the instrument's).
 # kind and numbers; the resolver below is keyed by kind.
 # ----------------------------------------------------------------------
 @dataclass(frozen=True)
@@ -151,6 +161,8 @@ class Spec:
     kind: str
     n: tuple = ()
     member: str = ""
+    in_slice: bool = True      # False: a probe deck's row, never drafted
+    exhaust: bool = False
 
 
 CARDS: dict[str, Spec] = {
@@ -158,103 +170,119 @@ CARDS: dict[str, Spec] = {
     # Curtain Rise: Deal 7. Drain 3: deal 14 instead.
     "ftd_curtain_rise": Spec("Curtain Rise", 1, "attack", "basic",
                              "drain_hit", (7, 3, 14)),
-    # Rising Applause: Gain 5 Block. Spend all your Fanfare: also deal that
-    # much damage. (The proposal's starter card; the probe alternatives are
-    # below.)
+    # Rising Applause: Gain 5 Block. Spend all your Fanfare and deal that
+    # much damage. (Always spends: sec.15 point 7.)
     "ftd_rising_applause": Spec("Rising Applause", 1, "skill", "basic",
                                 "block_spend_all", (5, 1)),
     # Probe alternatives for the starter's Spend card: a fixed Spend 6 for
     # 12, and spend-all at 2 per point.
     "ftd_rising_applause_6": Spec("Rising Applause (Spend 6)", 1, "skill",
-                                  "probe", "block_spend_hit", (5, 6, 12)),
+                                  "probe", "block_spend_hit", (5, 6, 12),
+                                  in_slice=False),
     "ftd_rising_applause_all2": Spec("Rising Applause (spend-all, 2)", 1,
                                      "skill", "probe", "block_spend_all",
-                                     (5, 2)),
-    # --- Common, Ousia ---
-    # Mademoiselle Crabaletta (2): Deal 12. Drain 5: deal 26 instead.
+                                     (5, 2), in_slice=False),
+    # --- Drain (5) ---
+    # Mademoiselle Crabaletta (2): Drain 5. Deal 24 damage.
     "ftd_crabaletta": Spec("Mademoiselle Crabaletta", 2, "attack", "common",
-                           "drain_hit", (12, 5, 26)),
-    # Surintendante Chevalmarin (1): Deal 4 to ALL, apply Hydro.
-    # Drain 3: deal 8 to ALL instead.
+                           "drain_fixed_hit", (5, 24)),
+    # Soloist's Solicitation (0): Drain 2. Deal 8 damage.
+    "ftd_solicitation": Spec("Soloist's Solicitation", 0, "attack", "common",
+                             "drain_fixed_hit", (2, 8)),
+    # Surintendante Chevalmarin (1): Deal 4 Hydro damage to ALL enemies.
+    # Drain 3: deal 8 instead.
     "ftd_chevalmarin": Spec("Surintendante Chevalmarin", 1, "attack",
                             "common", "drain_aoe", (4, 3, 8)),
-    # Gentilhomme Usher (1): Gain 7 Block. Drain 3: gain 14 instead.
+    # Gentilhomme Usher (1): Gain 7 Block. Drain 3: gain 13 instead.
     "ftd_usher": Spec("Gentilhomme Usher", 1, "skill", "common",
-                      "drain_block", (7, 3, 14)),
-    # Soloist's Solicitation (0): Deal 4. Drain 2: deal 9 instead.
-    "ftd_solicitation": Spec("Soloist's Solicitation", 0, "attack", "common",
-                             "drain_hit", (4, 2, 9)),
-    # --- Common, Spend ---
-    # Tidal Flourish (1): Deal 5 to ALL. Spend 6: deal 12 to ALL and Hydro.
+                      "drain_block", (7, 3, 13)),
+    # Salon's Tab (0): Draw 1 card. Drain 4: also gain 1 Energy next turn.
+    "ftd_salons_tab": Spec("Salon's Tab", 0, "skill", "uncommon",
+                           "drain_tab", (1, 4, 1)),
+    # --- Repay (4) ---
+    # Surging Waters (1, Attack): Deal 6 damage. Repay 3.
+    "ftd_surging_waters": Spec("Surging Waters", 1, "attack", "common",
+                               "hit_repay", (6, 3)),
+    # Hymn of Many Waters (1): Gain 8 Block. Repay 3.
+    "ftd_hymn": Spec("Hymn of Many Waters", 1, "skill", "common",
+                     "block_repay", (8, 3)),
+    # Pneuma Refrain (1): Repay 5. Draw 2 cards.
+    "ftd_pneuma_refrain": Spec("Pneuma Refrain", 1, "skill", "uncommon",
+                               "repay_draw", (5, 2)),
+    # Singer of Many Waters (1): Repay all your drained HP. Exhaust.
+    "ftd_singer": Spec("Singer of Many Waters", 1, "skill", "rare",
+                       "repay_all", (), exhaust=True),
+    # --- Fanfare outlets (6) ---
+    # Tidal Flourish (1): Deal 5 to ALL. Spend 6: deal 12 Hydro to ALL
+    # instead.
     "ftd_tidal_flourish": Spec("Tidal Flourish", 1, "attack", "common",
                                "spend_aoe", (5, 6, 12)),
     # Spirited Aria (1): Deal 8. Spend 5: deal 13 and draw 2 instead.
     "ftd_spirited_aria": Spec("Spirited Aria", 1, "attack", "common",
                               "spend_draw", (8, 5, 13, 2)),
-    # Quick Flourish (0): Deal 3. Spend 4: deal 11 and apply Hydro instead.
+    # Quick Flourish (0): Spend 4. Deal 11 Hydro damage.
     "ftd_quick_flourish": Spec("Quick Flourish", 0, "attack", "common",
-                               "spend_hit", (3, 4, 11)),
-    # Interval Bell (0): Draw 1 card. Spend 4: also gain 1 Energy.
-    "ftd_interval_bell": Spec("Interval Bell", 0, "skill", "common",
-                              "spend_energy", (1, 4, 1)),
+                               "spend_fixed_hit", (4, 11)),
     # Standing Ovation (1): Spend all your Fanfare. Deal that much damage to
     # ALL enemies.
     "ftd_standing_ovation": Spec("Standing Ovation", 1, "attack", "common",
                                  "rejoice", (1,)),
-    # --- Common, Pneuma ---
-    # Surging Waters (1, Attack): Deal 6. Restore 3.
-    "ftd_surging_waters": Spec("Surging Waters", 1, "attack", "common",
-                               "hit_restore", (6, 3)),
-    # Hymn of Many Waters (1): Gain 8 Block. Restore 3.
-    "ftd_hymn": Spec("Hymn of Many Waters", 1, "skill", "common",
-                     "block_restore", (8, 3)),
-    # --- Common, guest ---
-    "ftd_charlotte": Spec("Guest Star: Charlotte", 1, "skill", "common",
-                          "guest", (), "charlotte"),
-    # --- Uncommon ---
-    # Ousia Surge (1): Deal 4, plus 1 per Fanfare you gained this turn.
-    "ftd_ousia_surge": Spec("Ousia Surge", 1, "attack", "uncommon",
-                            "ousia", (4, 1)),
-    # Pneuma Refrain (1): Restore 5. Gain 6 Block.
-    "ftd_pneuma_refrain": Spec("Pneuma Refrain", 1, "skill", "uncommon",
-                               "block_restore", (6, 5)),
+    # Interval Bell (0): v2 text after #900: Draw 1 card. Spend 3: draw 1
+    # card and gain 1 Energy instead.
+    "ftd_interval_bell": Spec("Interval Bell", 0, "skill", "common",
+                              "spend_energy", (1, 3, 1)),
     # Bravura (1): Spend all your Fanfare. Deal 6, plus 2 per point.
     "ftd_bravura": Spec("Bravura", 1, "attack", "uncommon", "bravura",
                         (6, 2)),
-    # Salon's Encore (Power, 1): Whenever you Drain, deal 3 to ALL enemies.
+    # --- Powers (3, Uncommon) ---
+    # Salon's Encore (1): Whenever you Drain, deal 3 damage to ALL enemies.
     "ftd_salon_encore": Spec("Salon's Encore", 1, "power", "uncommon",
                              "power", (1,), "salon_encore"),
-    # Endless Waltz (Power, 1): Whenever you Restore, deal that much damage
-    # to a random enemy.
+    # Endless Waltz (1): Whenever you Repay, deal that much damage to a
+    # random enemy.
     "ftd_endless_waltz": Spec("Endless Waltz", 1, "power", "uncommon",
                               "power", (1,), "endless_waltz"),
-    # The Crowd Gasps (Power, 1): Whenever an enemy makes you lose HP, gain
-    # that much Fanfare.
-    "ftd_crowd_gasps": Spec("The Crowd Gasps", 1, "power", "uncommon",
-                            "power", (1,), "crowd_gasps"),
+    # Thunderous Applause (1): Whenever you Spend, deal 3 damage to ALL
+    # enemies.
+    "ftd_thunderous": Spec("Thunderous Applause", 1, "power", "uncommon",
+                           "power", (1,), "thunderous"),
+    # --- Guests (4, cost 1) ---
+    "ftd_charlotte": Spec("Guest Star: Charlotte", 1, "skill", "common",
+                          "guest", (), "charlotte"),
     "ftd_wriothesley": Spec("Guest Star: Wriothesley", 1, "skill",
                             "uncommon", "guest", (), "wriothesley"),
-    "ftd_sigewinne": Spec("Guest Star: Sigewinne", 1, "skill", "uncommon",
-                          "guest", (), "sigewinne"),
-    # --- Rare ---
+    "ftd_lynette": Spec("Guest Star: Lynette", 1, "skill", "uncommon",
+                        "guest", (), "lynette"),
+    "ftd_clorinde": Spec("Guest Star: Clorinde", 1, "skill", "rare",
+                         "guest", (), "clorinde"),
+    # --- Rares (2 more) ---
+    # Universal Revelry (Power, 2): Whenever you Drain or Repay, gain that
+    # much additional Fanfare.
+    "ftd_revelry": Spec("Universal Revelry", 2, "power", "rare", "power",
+                        (1,), "revelry"),
     # Let the People Rejoice (2): Spend all your Fanfare. Deal 2 to ALL per
     # point.
     "ftd_rejoice": Spec("Let the People Rejoice", 2, "attack", "rare",
                         "rejoice", (2,)),
-    # Universal Revelry (Power, 2): Whenever you gain Fanfare, gain that much
-    # again.
-    "ftd_revelry": Spec("Universal Revelry", 2, "power", "rare", "power",
-                        (1,), "revelry"),
-    # Critics' Darling (Power, 1): Whenever you gain Fanfare, deal that much
-    # damage to a random enemy.
+    # --- Beyond the slice: rows a probe deck needs (never drafted) ---
+    # The Crowd Gasps (Power, 1): Whenever an enemy makes you lose HP, gain
+    # that much Fanfare (the `tragedy` deck; matters only without hits).
+    "ftd_crowd_gasps": Spec("The Crowd Gasps", 1, "power", "uncommon",
+                            "power", (1,), "crowd_gasps", in_slice=False),
+    # Critics' Darling (Power, 1): Whenever you Drain or Repay, deal that
+    # much damage to a random enemy (the `loop` deck).
     "ftd_critics_darling": Spec("Critics' Darling", 1, "power", "rare",
-                                "power", (1,), "critics_darling"),
-    "ftd_clorinde": Spec("Guest Star: Clorinde", 1, "skill", "rare",
-                         "guest", (), "clorinde"),
+                                "power", (1,), "critics_darling",
+                                in_slice=False),
+    # Sigewinne (the `guests` deck). Line: whenever you Repay, gain that much
+    # Block. Act: Repay 3.
+    "ftd_sigewinne": Spec("Guest Star: Sigewinne", 1, "skill", "uncommon",
+                          "guest", (), "sigewinne", in_slice=False),
+    # Neuvillette (sec.15 point 4). Line: Hydro damage deals 2 more. Act:
+    # deal Hydro damage to ALL enemies equal to the HP you drained this
+    # turn. He Drains nothing himself.
     "ftd_neuvillette": Spec("Guest Star: Neuvillette", 2, "skill", "rare",
-                            "guest", (), "neuvillette"),
-    "ftd_navia": Spec("Guest Star: Navia", 1, "skill", "rare", "guest", (),
-                      "navia"),
+                            "guest", (), "neuvillette", in_slice=False),
 }
 
 STARTER_IDS: tuple[str, ...] = (
@@ -263,9 +291,12 @@ STARTER_IDS: tuple[str, ...] = (
     "ftd_curtain_rise", "ftd_rising_applause",
 )
 
-DRAIN_KINDS = ("drain_hit", "drain_aoe", "drain_block")
-SPEND_KINDS = ("block_spend_hit", "spend_aoe", "spend_draw", "spend_hit",
-               "spend_energy")
+#: Modal Drain cards (the plain mode is a real line): the K3 take rate.
+DRAIN_KINDS = ("drain_hit", "drain_aoe", "drain_block", "drain_tab")
+#: Fixed-price Drain cards: unplayable when the Drain cannot be paid.
+FIXED_DRAIN_KINDS = ("drain_fixed_hit",)
+SPEND_KINDS = ("block_spend_hit", "spend_aoe", "spend_draw", "spend_energy")
+FIXED_SPEND_KINDS = ("spend_fixed_hit",)
 
 
 def spec_of(card) -> Spec | None:
@@ -282,10 +313,10 @@ def make_card(card_id: str):
     spec = CARDS[card_id]
     return Card(id=card_id, name=spec.name, cost=spec.cost, type=spec.type,
                 rarity=spec.rarity, effects=[], tags=[TAG],
-                character=CHARACTER)
+                character=CHARACTER, exhaust=spec.exhaust)
 
 
-#: Design variants the probe can switch per run: (singer, hit_fanfare).
+#: Design variants the probe can switch per run: (singer, hit_fanfare, line).
 VARIANTS = {"std": (2, True, 0.5), "nohit": (2, False, 0.5),
             "s3": (3, True, 0.5), "nohit_s3": (3, False, 0.5),
             "s1": (1, True, 0.5), "nohit_s1": (1, False, 0.5),
@@ -293,22 +324,28 @@ VARIANTS = {"std": (2, True, 0.5), "nohit": (2, False, 0.5),
             "entry": (2, True, 0.5), "entry_nohit": (2, False, 0.5),
             "entry_s1": (1, True, 0.5)}
 
-
-#: The K3 variants: the `entry` rules plus engine switches (Ftd fields).
-VARIANT_SWITCHES = {
+#: The K3 variants: the `entry` rules (no curtain call) plus engine switches.
+K3_SWITCHES = {
     "singer_rests": (2, {"singer_rests": True}),
-    "restore_no_fanfare": (2, {"restore_fanfare": False}),
-    "both": (2, {"singer_rests": True, "restore_fanfare": False}),
+    "repay_no_fanfare": (2, {"repay_fanfare": False}),
+    "both": (2, {"singer_rests": True, "repay_fanfare": False}),
     "singer1": (1, {}),
 }
+#: The sec.16 rule variants, all on the `entry` line.
+RULE_SWITCHES = {
+    "curtain_call": (2, {"curtain_call": True}),     # sec.16: the default
+    "no_curtain_call": (2, {}),                      # the old end-of-fight
+    "legacy": (2, {"rising_optional": True}),        # the old baseline
+}
+VARIANT_SWITCHES = {**K3_SWITCHES, **RULE_SWITCHES}
 for _name, (_singer, _sw) in VARIANT_SWITCHES.items():
     VARIANTS[_name] = (_singer, True, 0.5)
 
-DEFAULT_VARIANT = "entry"      # the proposal's rules: the line from entry HP
+DEFAULT_VARIANT = "curtain_call"   # sec.16: the entry line + curtain call
 
 
 def build_player(card_ids, hp: int | None = None, max_hp: int = HP,
-                 singer: int = SINGER_RESTORE,
+                 singer: int = SINGER_REPAY,
                  variant: str = DEFAULT_VARIANT):
     from tier0.engine.state import Player
     p = Player(hp=max_hp if hp is None else hp, max_hp=max_hp,
@@ -325,7 +362,7 @@ def build_player(card_ids, hp: int | None = None, max_hp: int = HP,
 
 
 # ----------------------------------------------------------------------
-# The loop: Drain, Restore, Fanfare.
+# The loop: Drain, Repay, Fanfare.
 # ----------------------------------------------------------------------
 def half_line(player) -> float:
     f = getattr(player, "ftd", None)
@@ -339,24 +376,44 @@ def can_drain(state, n: int) -> bool:
     return n > 0 and p.hp - n >= half_line(p)
 
 
+def playable(state, card) -> bool:
+    """A fixed price must be payable: a fixed Drain above the line, a fixed
+    Spend from the bank. Every other row (and any non-slice card) is True."""
+    spec = spec_of(card)
+    if spec is None or not live(state.player):
+        return True
+    if spec.kind in FIXED_DRAIN_KINDS:
+        return can_drain(state, spec.n[0])
+    if spec.kind in FIXED_SPEND_KINDS:
+        return _f(state).fanfare >= spec.n[0]
+    return True
+
+
 def gain(state, amount: int, source: str) -> None:
-    """Fanfare in. Universal Revelry doubles it; Critics' Darling turns the
-    gain into damage (the doubled amount)."""
+    """Fanfare in. (The Drain-and-Repay readers live in `_loop_readers`.)"""
     if amount <= 0 or not live(state.player):
         return
     f = _f(state)
-    amount += amount * f.powers["revelry"]
     f.fanfare += amount
     f.gained_this_turn += amount
     f.ledger["gained"] += amount
     f.ledger["gained_by"][source] += amount
     state.emit("ftd_gain", amount=amount, source=source, fanfare=f.fanfare)
+
+
+def _loop_readers(state, n: int) -> None:
+    """Universal Revelry and Critics' Darling read a Drain or a Repay of N
+    (never a hit, never their own output). Copies add: two Revelries +2N."""
+    f = _f(state)
+    if f.powers["revelry"]:
+        gain(state, n * f.powers["revelry"], "revelry")
     if f.powers["critics_darling"] and state.living_enemies:
-        enemy = state.rng.choice(state.living_enemies)
-        _hit(state, enemy, amount * f.powers["critics_darling"], None)
+        _hit(state, state.rng.choice(state.living_enemies),
+             n * f.powers["critics_darling"], None)
 
 
 def spend(state, amount: int) -> bool:
+    """One Spend (a spend-all is one). Thunderous Applause reads it."""
     f = _f(state)
     if amount <= 0 or f.fanfare < amount:
         return False
@@ -365,12 +422,16 @@ def spend(state, amount: int) -> bool:
     f.ledger["spent"] += amount
     f.ledger["spends"] += 1
     state.emit("ftd_spend", amount=amount, fanfare=f.fanfare)
+    if f.powers["thunderous"]:
+        for enemy in list(state.living_enemies):
+            _hit(state, enemy, THUNDEROUS_DAMAGE * f.powers["thunderous"],
+                 None)
     return True
 
 
 def drain(state, n: int) -> bool:
-    """Rule 1. Lose N HP (not below half), mark it drained, gain N Fanfare,
-    then the Drain readers (Salon's Encore, Wriothesley)."""
+    """Rule 1. Lose N HP (not below the line), mark it drained, gain N
+    Fanfare, then the Drain readers."""
     p = state.player
     f = _f(state)
     if not can_drain(state, n):
@@ -378,14 +439,15 @@ def drain(state, n: int) -> bool:
     p.hp -= n
     f.drained += n
     f.drained_this_turn = True
+    f.drained_hp_this_turn += n
     f.ledger["drained"] += n
     f.ledger["drains"] += 1
     state.hp_lost_this_turn += n
     state.emit("ftd_drain", amount=n, hp=p.hp, drained=f.drained)
     gain(state, n, "drain")
-    living = list(state.living_enemies)
+    _loop_readers(state, n)
     if f.powers["salon_encore"]:
-        for enemy in living:
+        for enemy in list(state.living_enemies):
             _hit(state, enemy, SALON_ENCORE_DAMAGE * f.powers["salon_encore"],
                  None)
     if "wriothesley" in f.stage and state.living_enemies:
@@ -393,23 +455,24 @@ def drain(state, n: int) -> bool:
     return True
 
 
-def restore(state, n: int) -> int:
+def repay(state, n: int) -> int:
     """Rule 2. Regain up to N drained HP; gain that much Fanfare; then the
-    Restore readers. Returns HP restored."""
+    Repay readers. Returns HP repaid."""
     p = state.player
     f = _f(state)
     f.drained = min(f.drained, max(0, p.max_hp - p.hp))
     amount = min(n, f.drained)
-    f.ledger["restore_wasted"] += n - amount
+    f.ledger["repay_wasted"] += n - amount
     if amount <= 0:
         return 0
     p.hp += amount
     f.drained -= amount
-    f.restored_this_turn += amount
-    f.ledger["restored"] += amount
-    state.emit("ftd_restore", amount=amount, hp=p.hp, drained=f.drained)
-    if f.restore_fanfare:
-        gain(state, amount, "restore")
+    f.repaid_this_turn += amount
+    f.ledger["repaid"] += amount
+    state.emit("ftd_repay", amount=amount, hp=p.hp, drained=f.drained)
+    if f.repay_fanfare:
+        gain(state, amount, "repay")
+    _loop_readers(state, amount)
     if f.powers["endless_waltz"] and state.living_enemies:
         _hit(state, state.rng.choice(state.living_enemies),
              amount * f.powers["endless_waltz"], None)
@@ -417,7 +480,7 @@ def restore(state, n: int) -> int:
         p.block += amount
     if "clorinde" in f.stage and state.living_enemies:
         _hit(state, state.rng.choice(state.living_enemies),
-             CLORINDE_PER_RESTORE * amount, "electro")
+             CLORINDE_PER_REPAY * amount, "electro")
     if "charlotte" in f.stage and not f.charlotte_drew and not state.over:
         f.charlotte_drew = True
         state.draw(1)
@@ -426,12 +489,26 @@ def restore(state, n: int) -> int:
 
 def on_hp_loss(state, n: int) -> None:
     """Hook from `resources.note_player_hp_loss`: true HP loss from any
-    source but a Drain (enemy hits, statuses) prints Fanfare 1:1."""
+    source but a Drain (enemy hits, statuses) prints Fanfare 1:1. Lynette's
+    line pays it again the first time each turn."""
     if n <= 0 or not live(state.player):
         return
     f = _f(state)
     if f.hit_fanfare or f.powers["crowd_gasps"]:
         gain(state, n, "hit")
+    if "lynette" in f.stage and not f.lynette_fired:
+        f.lynette_fired = True
+        gain(state, n, "lynette")
+
+
+def energy_kept(state) -> int:
+    """Hook after the turn's Energy refill: Salon's Tab's Energy arrives
+    next turn (the Interval Bell fix, #900). 0 for anyone else."""
+    if not live(state.player):
+        return 0
+    f = _f(state)
+    out, f.energy_next = f.energy_next, 0
+    return out
 
 
 # ----------------------------------------------------------------------
@@ -484,26 +561,24 @@ def act(state, member: str) -> None:
     f.ledger["guest_acts"][member] += 1
     living = list(state.living_enemies)
     if member == "charlotte":
-        restore(state, CHARLOTTE_ACT_RESTORE)
+        repay(state, CHARLOTTE_ACT_REPAY)
     elif member == "sigewinne":
-        restore(state, SIGEWINNE_ACT_RESTORE)
+        repay(state, SIGEWINNE_ACT_REPAY)
     elif member == "wriothesley":
         if living:
             _hit(state, state.rng.choice(living), WRIOTHESLEY_ACT, "cryo")
+    elif member == "lynette":
+        aura = [e for e in living if getattr(e, "aura", None)]
+        if aura:
+            _hit(state, state.rng.choice(aura), LYNETTE_ACT, "anemo")
     elif member == "clorinde":
         if living:
             _hit(state, state.rng.choice(living), CLORINDE_ACT, "electro")
     elif member == "neuvillette":
-        if drain(state, NEUVILLETTE_DRAIN):
-            dmg = NEUVILLETTE_ACT
-        else:
-            dmg = NEUVILLETTE_ACT_DRY
-        for enemy in list(state.living_enemies):
-            _hit(state, enemy, dmg, "hydro")
-    elif member == "navia":
-        base = NAVIA_PER_SPENT * f.spent_this_turn
-        if base > 0 and living:
-            _hit(state, state.rng.choice(living), base, "geo")
+        dmg = f.drained_hp_this_turn
+        if dmg > 0:
+            for enemy in living:
+                _hit(state, enemy, dmg, "hydro")
     state.emit("ftd_act", member=member)
 
 
@@ -530,13 +605,15 @@ def turn_open(state) -> None:
     f = _f(state)
     f.gained_this_turn = 0
     f.spent_this_turn = 0
-    f.restored_this_turn = 0
+    f.repaid_this_turn = 0
+    f.drained_hp_this_turn = 0
     f.drained_this_turn = False
     f.charlotte_drew = False
+    f.lynette_fired = False
 
 
 def end_of_turn(state) -> None:
-    """Guests act in seat order, then Salon Solitaire's Singer Restores
+    """Guests act in seat order, then Salon Solitaire's Singer Repays
     (under `singer_rests`, only if no Drain happened this turn)."""
     if not live(state.player):
         return
@@ -549,7 +626,7 @@ def end_of_turn(state) -> None:
         f.ledger["singer_skipped"] += 1
         return
     if not state.over and state.player.alive:
-        restore(state, f.singer)
+        repay(state, f.singer)
 
 
 def resolve_card(state, card) -> None:
@@ -573,13 +650,22 @@ def resolve_card(state, card) -> None:
         if take:
             drain(state, price)
             f.ledger["card_drains"] += 1
-        amount = big if take else plain
         if k == "drain_hit":
-            _card_damage(state, card, amount)
+            _card_damage(state, card, big if take else plain)
         elif k == "drain_aoe":
-            _card_damage(state, card, amount, all_enemies=True, hydro=True)
-        else:
-            _card_block(state, card, amount)
+            _card_damage(state, card, big if take else plain,
+                         all_enemies=True, hydro=True)
+        elif k == "drain_block":
+            _card_block(state, card, big if take else plain)
+        else:                                       # drain_tab
+            state.draw(plain)
+            if take:
+                f.energy_next += big
+    elif k in FIXED_DRAIN_KINDS:
+        price, dmg = n
+        if drain(state, price):         # `playable` gated it; belt and braces
+            f.ledger["fixed_drains"] += 1
+            _card_damage(state, card, dmg)
     elif k in SPEND_KINDS:
         f.ledger["spend_offers"] += 1
         price = n[1]
@@ -597,26 +683,32 @@ def resolve_card(state, card) -> None:
             _card_damage(state, card, n[2] if take else n[0])
             if take:
                 state.draw(n[3])
-        elif k == "spend_hit":
-            _card_damage(state, card, n[2] if take else n[0], hydro=take)
         elif k == "spend_energy":
             state.draw(n[0])
             if take:
                 state.player.energy += n[2]
+    elif k in FIXED_SPEND_KINDS:
+        price, dmg = n
+        if spend(state, price):
+            _card_damage(state, card, dmg, hydro=True)
     elif k == "block_spend_all":
         _card_block(state, card, n[0])
         held = f.fanfare
-        if held > 0 and d.spend_all(state, card, spec):
+        if held > 0 and (not f.rising_optional
+                         or d.spend_all(state, card, spec)):
             spend(state, held)
             _card_damage(state, card, n[1] * held)
-    elif k == "hit_restore":
+    elif k == "hit_repay":
         _card_damage(state, card, n[0])
-        restore(state, n[1])
-    elif k == "block_restore":
+        repay(state, n[1])
+    elif k == "block_repay":
         _card_block(state, card, n[0])
-        restore(state, n[1])
-    elif k == "ousia":
-        _card_damage(state, card, n[0] + n[1] * f.gained_this_turn)
+        repay(state, n[1])
+    elif k == "repay_draw":
+        repay(state, n[0])
+        state.draw(n[1])
+    elif k == "repay_all":
+        repay(state, f.drained)
     elif k == "bravura":
         held = f.fanfare
         if held > 0:
@@ -636,24 +728,37 @@ def resolve_card(state, card) -> None:
 
 
 def close_ledger(state) -> None:
+    """The fight's end: record the bank and the unrepaid HP, then (under the
+    curtain call, if she lived) return every drained HP."""
     f = _f(state)
     f.ledger["fanfare_end"] = f.fanfare
     f.ledger["unrepaid_end"] = f.drained
+    p = state.player
+    if f.curtain_call and p.alive and f.drained > 0:
+        back = min(f.drained, max(0, p.max_hp - p.hp))
+        p.hp += back
+        f.ledger["curtain_repaid"] += back
+        f.drained = 0
 
 
 READINGS: tuple[str, ...] = (
-    "The half-line: a Drain N is legal when HP - N >= Max HP / 2.",
+    "The line: a Drain N is legal when HP - N >= half the HP she started "
+    "the combat with (the `entry` line).",
     "A Drain's HP loss is not routed through `note_player_hp_loss` (so no "
     "other arm's hook sees it); it prints its Fanfare directly.",
     "Enemy hits (and any other true HP loss) print Fanfare through the "
-    "`note_player_hp_loss` hook, 1 per HP.",
-    "Salon Solitaire's Restore comes after the guests act, at the end of her "
+    "`note_player_hp_loss` hook, 1 per HP; Lynette's line reads the same "
+    "hook, so a status's HP loss counts as an enemy's.",
+    "Salon Solitaire's Repay comes after the guests act, at the end of her "
     "turn, before enemies act.",
-    "Critics' Darling deals the (Revelry-doubled) gain to a random enemy, "
-    "unpowered. Endless Waltz deals the HP Restored, unpowered.",
+    "Universal Revelry's extra Fanfare and Critics' Darling's damage read "
+    "the Drain or Repay amount, unpowered. Endless Waltz deals the HP "
+    "Repaid, unpowered.",
     "Guest acts and lines are unpowered (Strength and Weak do not touch "
     "them).",
-    "Neuvillette's act Drains 4 if legal (a real Drain: Fanfare, Salon's "
-    "Encore and Wriothesley all see it), else deals the dry 3.",
+    "Neuvillette's act deals the HP drained this turn (gross of Repays) to "
+    "ALL as Hydro; it Drains nothing.",
+    "The curtain call returns drained HP in `close_ledger`, after the "
+    "fight's record is taken; the probe calls it on every fight.",
     "Card damage aims at the engine's bound aim (the lowest-HP enemy).",
 )

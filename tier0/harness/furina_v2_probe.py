@@ -265,7 +265,7 @@ def fight_record(state, kind: str) -> dict:
     return {
         "kind": kind,
         "won": state.player.alive and not state.living_enemies,
-        "turns": state.turn,
+        "turns": state.turn, "hp": state.player.hp,
         "gained": L["gained"], "gained_by": dict(L["gained_by"]),
         "spent": L["spent"], "spends": L["spends"], "paid": L["paid"],
         "star_acts": dict(L["star_acts"]),
@@ -348,7 +348,7 @@ def run_reference(character: str, seed: int) -> dict:
         state = run_fight(player, enemies, pilot,
                           seed=rng.randrange(2 ** 31))
         plays = _plays_per_turn(state)
-        rec = {"kind": kind, "turns": state.turn,
+        rec = {"kind": kind, "turns": state.turn, "hp": state.player.hp,
                "won": state.player.alive and not state.living_enemies,
                "max_cards": max(plays) if plays else 0,
                "turns_over_12": sum(1 for n in plays if n > OVER),

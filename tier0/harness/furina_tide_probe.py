@@ -1,6 +1,10 @@
 """The research slice's probes (proposal sec.10), act one plus a boss gauntlet.
 
     .venv/Scripts/python.exe -m tier0.harness.furina_tide_probe --runs 1000 --jobs 0
+    .venv/Scripts/python.exe -m tier0.harness.furina_tide_probe --runs 1000 --jobs 0 --curtain
+
+`--curtain` is sec.16's read: the curtain call (the default rule) against
+`no_curtain_call` and the `legacy` baseline, with `ref:v2` and `ref:ironclad`.
 
 WHAT A RUN IS. The `furina_v2_probe` spine, unchanged: a FIXED deck (no
 draft, no relic but Salon Solitaire, no potions, no upgrades) walks act one's
@@ -85,7 +89,8 @@ DRAFT_PICKS = 10
 DRAFT_OFFER = 3
 RARITY_WEIGHTS = (("common", 60), ("uncommon", 30), ("rare", 10))
 DRAFT_POOL: dict[str, list[str]] = {
-    r: sorted(cid for cid, sp in T.CARDS.items() if sp.rarity == r)
+    r: sorted(cid for cid, sp in T.CARDS.items()
+              if sp.rarity == r and sp.in_slice)
     for r, _w in RARITY_WEIGHTS}
 
 FIGHT_KINDS = ("N", "E", "B")
@@ -158,14 +163,17 @@ def fight_record(state, kind: str) -> dict:
         "kind": kind,
         "won": state.player.alive and not state.living_enemies,
         "turns": state.turn,
+        "hp": state.player.hp,      # after the curtain call, when it is on
         "gained": L["gained"], "gained_by": dict(L["gained_by"]),
         "spent": L["spent"], "spends": L["spends"],
         "spend_offers": L["spend_offers"],
         "drained": L["drained"], "drains": L["drains"],
         "card_drains": L["card_drains"],
+        "fixed_drains": L["fixed_drains"],
+        "curtain_repaid": L["curtain_repaid"],
         "drain_offers": L["drain_offers"],
         "drain_blocked": L["drain_blocked_by_line"],
-        "restored": L["restored"], "restore_wasted": L["restore_wasted"],
+        "repaid": L["repaid"], "repay_wasted": L["repay_wasted"],
         "singer_skipped": L["singer_skipped"],
         "fanfare_end": L["fanfare_end"], "unrepaid_end": L["unrepaid_end"],
         "start_low": L["started_at_or_below_half"],
@@ -255,13 +263,15 @@ def run_reference(which: str, seed: int) -> dict:
         r = furina_v2_probe.run_one("base", seed)
         return {"seed": seed, "won": r["won"],
                 "fights": [{"kind": f["kind"], "won": f["won"],
-                            "turns": f["turns"]} for f in r["fights"]],
+                            "turns": f["turns"], "hp": f["hp"]}
+                           for f in r["fights"]],
                 "hp_end": r["hp_end"]}
     from tier0.harness import furina_v2_probe
     r = furina_v2_probe.run_reference("ref_ironclad", seed)
     return {"seed": seed, "won": r["won"],
             "fights": [{"kind": f["kind"], "won": f["won"],
-                        "turns": f["turns"]} for f in r["fights"]],
+                        "turns": f["turns"], "hp": f["hp"]}
+                       for f in r["fights"]],
             "hp_end": r["hp_end"]}
 
 
@@ -310,13 +320,27 @@ def summarize(results: list[dict]) -> dict:
                                  if f["kind"] == "E" and f["won"]) >= 1) / n
     if bosses:
         s["boss_turns"] = sum(f["turns"] for f in bosses) / len(bosses)
+    if "hp_end" in results[0]:
+        # HP at the end of act one: the mean over the runs that cleared it
+        # (after the boss and, under the curtain call, its return), and
+        # over every run with a death counted as 0.
+        winners = [r["hp_end"] for r in results if r.get("won")]
+        s["hp_end_act1_winners"] = (sum(winners) / len(winners)
+                                    if winners else 0.0)
+        s["hp_end_all"] = sum(max(0, r["hp_end"]) for r in results) / n
+    if fights and "hp" in fights[0]:
+        # No starter clears the spine, so the act's HP read for a starter is
+        # the mean HP left after a won fight.
+        won_f = [f["hp"] for f in fights if f["won"]]
+        s["hp_after_won_fight"] = sum(won_f) / len(won_f) if won_f else 0.0
     if not fights or "drain_offers" not in fights[0]:
         return s
     tot = collections.Counter()
     for f in fights:
         for k in ("gained", "spent", "spends", "spend_offers", "drained",
-                  "drains", "drain_offers", "drain_blocked", "restored",
-                  "fanfare_end", "unrepaid_end", "turns", "singer_skipped", "card_drains"):
+                  "drains", "drain_offers", "drain_blocked", "repaid",
+                  "fanfare_end", "unrepaid_end", "turns", "singer_skipped",
+                  "card_drains", "fixed_drains", "curtain_repaid"):
             tot[k] += f[k]
         for src, v in f["gained_by"].items():
             tot["g_" + src] += v
@@ -334,8 +358,10 @@ def summarize(results: list[dict]) -> dict:
         "spent_share": tot["spent"] / max(1, tot["gained"]),
         "fanfare_end_per_fight": tot["fanfare_end"] / nf,
         "drained_per_fight": tot["drained"] / nf,
-        "restored_per_fight": tot["restored"] / nf,
+        "repaid_per_fight": tot["repaid"] / nf,
         "unrepaid_per_fight": tot["unrepaid_end"] / nf,
+        "curtain_repaid_per_fight": tot["curtain_repaid"] / nf,
+        "fixed_drains_per_fight": tot["fixed_drains"] / nf,
         "singer_skipped_per_fight": tot["singer_skipped"] / nf,
         "gain_split": {k[2:]: round(v / max(1, tot["gained"]), 2)
                        for k, v in tot.items() if k.startswith("g_")},
@@ -380,11 +406,24 @@ DEFAULT_JOBS = (
     "draft/judged", "draft/always", "draft/never",
 )
 #: The K3 comparison (`--k3`): the baseline rules and each K3 switch
-#: (`furina_tide.VARIANT_SWITCHES`), on the same seeds.
-K3_VARIANTS = ("entry",) + tuple(T.VARIANT_SWITCHES)
+#: (`furina_tide.K3_SWITCHES`), on the same seeds, under the old rule.
+K3_VARIANTS = ("entry",) + tuple(T.K3_SWITCHES)
 K3_JOBS = tuple(
     job for v in K3_VARIANTS for job in (
         f"base@{v}/judged",
+        f"draft@{v}/judged", f"draft@{v}/always", f"draft@{v}/never",
+        f"balanced@{v}/judged", f"balanced@{v}/always",
+        f"balanced@{v}/never",
+        f"gauntlet:finale@{v}/judged"))
+
+#: The sec.16 comparison (`--curtain`): the curtain call against the old
+#: end-of-fight rule (both with the always-spend Rising Applause), and the
+#: old baseline (`legacy`: no curtain call, Rising Applause skippable), on
+#: the same seeds, with the two references for scale.
+CURTAIN_VARIANTS = ("curtain_call", "no_curtain_call", "legacy")
+CURTAIN_JOBS = ("ref:ironclad", "ref:v2") + tuple(
+    job for v in CURTAIN_VARIANTS for job in (
+        f"base@{v}/judged", f"base@{v}/never",
         f"draft@{v}/judged", f"draft@{v}/always", f"draft@{v}/never",
         f"balanced@{v}/judged", f"balanced@{v}/always",
         f"balanced@{v}/never",
@@ -405,12 +444,15 @@ def main(argv=None) -> int:
     ap.add_argument("--gauntlet", action="store_true")
     ap.add_argument("--k3", action="store_true",
                     help="run K3_JOBS: the K3 switches against the baseline")
+    ap.add_argument("--curtain", action="store_true",
+                    help="run CURTAIN_JOBS: sec.16's curtain-call read")
     ap.add_argument("--json")
     args = ap.parse_args(argv)
     if args.jobs == 0:
         import os
         args.jobs = os.cpu_count() or 1
-    jobs = args.job or (K3_JOBS if args.k3 else
+    jobs = args.job or (CURTAIN_JOBS if args.curtain else
+                        K3_JOBS if args.k3 else
                         GAUNTLET_JOBS if args.gauntlet else DEFAULT_JOBS)
     table = {}
     for job in jobs:

@@ -956,6 +956,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # POOL COMPLETION: Patient Tide's kept Energy, on top of the refill (0
     # without the Power; `kokomi_plan.patient_tide_bank` wrote it).
     p.energy += kokomi_plan.patient_tide_kept(state)
+    # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): Salon's Tab's
+    # Energy arrives next turn. 0 for anyone else.
+    p.energy += furina_tide.energy_kept(state)
     # site D, with Hook.ModifyHandDraw folded in (ToolsOfTheTrade and
     # DrawCardsNextTurn). Relic-driven opening-hand bonuses are a different
     # hook and stay where they are.
