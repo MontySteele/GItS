@@ -790,8 +790,8 @@ seats, and nothing else uses the stage.
 
 *Starter:*
 - Strike x4 and Defend x4 (base).
-- Curtain Rise (Basic Attack, 1): "Deal 7 damage. Drain 3: deal 14
-  instead." [10 / 18]
+- Curtain Rise (Basic Attack, 1): "Deal 7 damage. Drain 3: deal 12
+  instead." [10 / 16] (sec.17: was 14)
 - Rising Applause (Basic Skill, 1): "Gain 5 Block. Spend all your Fanfare
   and deal that much damage." [7 Block]
 - Salon Solitaire (relic): "At the end of your turn, Repay 2." [3]
@@ -848,8 +848,8 @@ seats, and nothing else uses the stage.
   damage to a random enemy." Act: "Deal 6 Electro damage to a random enemy."
 
 *Rares (2 more):*
-- Universal Revelry (Power, 2): "Whenever you Drain or Repay, gain that
-  much additional Fanfare." [cost 1]
+- Universal Revelry (Power, 2): "You gain twice as much Fanfare." [cost 1]
+  (sec.17: hits count again; a second copy makes it three times)
 - Let the People Rejoice (Attack, 2): "Spend all your Fanfare. Deal 2
   damage to ALL enemies per point." [cost 1]
 
@@ -918,3 +918,39 @@ What that means:
   - guest seats;
   - the leave-and-act-once-more exit;
   - the summon preview.
+
+## 17. The slice sim read, and two edits (2026-10-05)
+
+The slice sim was run at 1000 runs on the same seeds (commit 5409eb67,
+`--curtain`). Each cell reads curtain call / no curtain call / the old
+rules.
+
+| Read | Result | ref:v2 | ref:Ironclad |
+|---|---|---|---|
+| Starter: act-one fights won | 4.67 / 4.50 / 4.28 | 3.72 | 3.56 |
+| Starter: first elite won | 85% / 82% / 67% | 39% | 32% |
+| Act one cleared, draft deck | 62% / 30% / 27% | 0% | 0% |
+| Drains taken (K3) | 98–100% under every rule | | |
+| Fanfare spent, draft deck (K5) | 41% / 37% / 19% | | |
+| Finale deck, act-2 boss (K6) | 0.7% under every rule (26% before sec.15) | | |
+
+**What it says:**
+- **The curtain call is a large buff.** It doubles the draft deck's
+  act-one clears. Kept anyway: it is [USER]'s ruled rule, and it removes the
+  brick and the stall.
+- **Always-spend Rising Applause** fixed most of the idle Fanfare (K5).
+- **The starter overshoots** (85% against Ironclad's 32%). Curtain Rise's
+  Drain mode goes 14 → 12, the smaller of the paper's two levers. Rising
+  Applause's Block stays, because it is the act-1 defence.
+- **K6 collapsed because of sec.15's Revelry change.** With Revelry
+  multiplying hits again, the act-2 boss read went back to 12% (200-run
+  check).
+- **Revelry is now "You gain twice as much Fanfare."** It doesn't trigger
+  itself, and hits count.
+- **Fable's concern is kept where it bit.** Critics' Darling, the
+  Fanfare-to-damage converter, still reads Drain and Repay only. It is
+  outside the slice. A hit doubled by Revelry still has to be spent through
+  a card.
+- **Stalling:** the pilot can't choose to delay a kill. The curtain call
+  removes the reason to anyway. It stays a seat question.
+- **K3:** still unanswerable by the sim. It stays a seat question.
