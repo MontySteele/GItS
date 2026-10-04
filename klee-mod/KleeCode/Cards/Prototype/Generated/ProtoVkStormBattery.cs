@@ -35,8 +35,8 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoVkStormBattery : CustomCardModel, IElementalCard, ICharacterCard
 {
     /// <summary>Its hits carry their own element (a `varka` kind),
-    /// not the cadence's Anemo; declared rather than omitted, which
-    /// would ask the character (<see cref="CatalystCadence.PrintedElement"/>).</summary>
+    /// not the cadence's Anemo; the card says so rather than leave
+    /// it unsaid (<see cref="CatalystCadence.PrintedElement"/>).</summary>
     public Element Element => Element.None;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>

@@ -1095,16 +1095,18 @@ def _scaling_value(state: CombatState, card: Card) -> float:
 
 
 def _card_element(state: CombatState, card: Card) -> Optional[str]:
+    """The element this card puts on the board, as the engine reads it.
+
+    2026-10-05: the element is the CARD's, never the player's
+    (`effects.printed_element`, the engine's one rule), so a card that
+    names none is priced as applying none whoever holds it."""
     if card.element != "none":
         return card.element
-    if card.type == "attack" and state.player.cadence == "catalyst":
-        return state.player.element
-    # R276 pick 2: under Kokomi's arm her damaging Skills apply Hydro too
-    # (`effects._every_damaging_card_carries_element`, the engine's rule).
-    if (state.player.cadence == "catalyst" and not card.is_companion
-            and effects._every_damaging_card_carries_element(state)
-            and any(fx.get("op") == "damage" for fx in card.effects)):
-        return state.player.element
+    for fx in card.effects:
+        if fx.get("op") == "damage":
+            element = effects.printed_element(card, fx)
+            if element:
+                return element
     return None
 
 

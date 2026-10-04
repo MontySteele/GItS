@@ -796,7 +796,7 @@ public static partial class FurinaStage
         {
             return 0;
         }
-        return CatalystCadence.PrintedElement(cardSource, dealer) == Element.Hydro
+        return CatalystCadence.PrintedElement(cardSource) == Element.Hydro
             ? FurinaStageLaw.NeuvilletteHydroBonus : 0;
     }
 

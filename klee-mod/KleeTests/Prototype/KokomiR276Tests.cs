@@ -7,6 +7,7 @@ using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Cards;
 using Xunit;
@@ -16,11 +17,12 @@ namespace KleeMod.Tests.Prototype;
 /// <summary>
 /// R276, Kokomi's two non-card changes.
 ///
-/// PICK 2: every damaging card of hers applies Hydro under the arm, Skills
-/// included -- five of her Skills dealt damage face-up and applied nothing
-/// while her Attacks applied Hydro. Klee's arm keeps the Attack-only rule and
-/// the base game's cards still apply nothing. Sim twin:
-/// <c>tier0/tests/test_kokomi_plan.py</c>'s r276 tests.
+/// PICK 2 IS RETIRED AS A RULE (2026-10-05). It made every damaging card in
+/// Kokomi's hand apply Hydro, Skills included; [USER] ruled that a legacy
+/// design -- the element "just lives in the card pool as a symbol on relevant
+/// elemental cards". Her two damaging Skills that print Hydro (Opening Gambit,
+/// Second Wave) now declare it on the sheet, and a card that declares nothing
+/// applies nothing in her hand. Sim twin: <c>tier0/tests/test_kokomi_plan.py</c>.
 ///
 /// HYGIENE: her Ancient, Princess of Watatsumi, pays on the Plan under the arm
 /// ("Whenever the Bake-Kurage carries out a Plan, gain 2 Block and draw 1
@@ -41,16 +43,18 @@ public class KokomiR276Tests
     private static string Description(CustomCardModel card) =>
         card.Localization!.Single(row => row.Item1 == "description").Item2;
 
-    // ---- pick 2 --------------------------------------------------------------
+    // ---- pick 2, now on the card ---------------------------------------------
 
     [Fact]
     public void Her_damaging_skills_declare_hydro()
     {
-        // The generator's half: the arm's cadence puts IElementalCard on every
-        // card of hers whose face-up half deals damage, Skills included.
+        // Each prints "Deal 7 [gold]Hydro[/gold] damage" and declares it on
+        // the sheet (`applies_element: true`), so the codegen puts
+        // IElementalCard and the gem on the card itself.
         foreach (var card in new CardModel[]
                  {
                      new ProtoKkOpeningGambit(),
+                     new ProtoKkSecondWave(),
                  })
         {
             Assert.Equal(MegaCrit.Sts2.Core.Entities.Cards.CardType.Skill,
@@ -61,33 +65,30 @@ public class KokomiR276Tests
     }
 
     [Fact]
-    public void The_fallback_elements_a_skill_of_hers_and_not_of_klees()
+    public void A_no_element_mod_damage_card_played_by_kokomi_applies_nothing()
     {
-        // The character rule, asked of a Skill that declares nothing (War
-        // Council's face-up half is a debuff; its Plan hit goes through the
-        // same funnel). Under Kokomi's arm her Skill answers Hydro; in Klee's
-        // seat the same card answers nothing, because Klee's cadence is still
-        // Attack-only; with the arm off it answers nothing, as before.
+        // [USER], 2026-10-05: "I think that that Kokomi effect is a legacy
+        // design." Furina's Cheered On is a mod-authored Attack that deals
+        // damage and names no element -- no IElementalCard, no carried hit,
+        // no gem. In Kokomi's hand it used to apply her Hydro; it applies
+        // nothing, in hers or anyone's. Before this change the funnel's
+        // character fallback answered Hydro here.
         try
         {
-            var skill = new ProtoKkWarCouncil();
-            Assert.IsNotAssignableFrom<IElementalCard>(skill);
+            var cheered = new ProtoFsCheeredOn();
+            Assert.Equal(CardType.Attack, cheered.Type);
+            Assert.IsNotAssignableFrom<IElementalCard>(cheered);
+            Assert.Equal(Element.None,
+                AuraCmd.ElementOfPlay(cheered, Seat.Kokomi().Creature));
+            Assert.Equal(Element.None,
+                AuraCmd.ElementOfPlay(cheered, Seat.Klee().Creature));
 
-            Assert.True(CatalystCadence.EveryDamagingCardCarriesElement(
-                Seat.Kokomi().Creature));
-            Assert.Equal(Element.Hydro, CatalystCadence.PrintedElement(
-                skill, Seat.Kokomi().Creature));
-            Assert.False(CatalystCadence.EveryDamagingCardCarriesElement(
-                Seat.Klee().Creature));
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
-                skill, Seat.Klee().Creature));
-
-            // The base game's cards stay outside it, Skills too.
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
-                new DefendIronclad(), Seat.Kokomi().Creature));
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
-                new StrikeSilent(), Seat.Kokomi().Creature));
-
+            // Her own Skill that declares nothing (War Council's face-up half
+            // is a debuff) applies nothing in her hand either.
+            var council = new ProtoKkWarCouncil();
+            Assert.IsNotAssignableFrom<IElementalCard>(council);
+            Assert.Equal(Element.None,
+                AuraCmd.ElementOfPlay(council, Seat.Kokomi().Creature));
         }
         finally
         {

@@ -62,6 +62,9 @@
   cost: 2
   type: attack
   rarity: ancient         # not in RARITY_ODDS -> never offered as loot
+  # The card prints Pyro and its C# twin declares `Element.Pyro`, so the row
+  # says so (2026-10-05: the element is on the card, never on the player).
+  element: pyro
   effects:
     # 12 x3 at RE-PICKED random targets (the `random_enemy` spec is resolved
     # per hit inside the times loop), then one 12-damage Bomb on EVERY enemy.

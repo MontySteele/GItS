@@ -66,12 +66,12 @@ public class FurinaHydroHitsTests
         // Outside the scope Quick Cue is a plain Attack of a Skill-grade
         // character: its plain mode applies nothing, as before.
         Assert.IsNotAssignableFrom<IElementalCard>(cue);
-        Assert.Equal(Element.None, CatalystCadence.PrintedElement(cue, furina));
+        Assert.Equal(Element.None, CatalystCadence.PrintedElement(cue));
 
         using (HitElement.Carry(cue, Element.Hydro))
         {
             Assert.Equal(Element.Hydro,
-                         CatalystCadence.PrintedElement(cue, furina));
+                         CatalystCadence.PrintedElement(cue));
             Assert.Equal(Element.Hydro, AuraCmd.ElementOfPlay(cue, furina));
             // KEYED ON THE CARD: another copy is not carried.
             Assert.Equal(Element.None,
@@ -136,7 +136,7 @@ public class FurinaHydroHitsTests
         var furina = Seat.Furina().Creature;
         var deluge = new ProtoFsGrandDeluge();
         Assert.IsAssignableFrom<IElementalCard>(deluge);
-        Assert.Equal(Element.Hydro, CatalystCadence.PrintedElement(deluge, furina));
+        Assert.Equal(Element.Hydro, CatalystCadence.PrintedElement(deluge));
         var pyro = PyroOn(out var body);
         Assert.Equal(ReactionTable.AmplifierMultiplier(Reaction.Vaporize, furina),
                      pyro.ModifyDamageMultiplicative(

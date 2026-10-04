@@ -26,13 +26,13 @@ namespace KleeMod.Tests.Prototype;
 /// <c>ModelDb.AllCardPools</c> rather than by asking the owner. The upgrades
 /// (+3, so Strike+ 9 and Defend+ 8) and the portrait come with the card.
 ///
-/// AND THE ONE THING THAT DID NOT COME FREE: the element. A base card is
-/// <c>sealed</c> and cannot implement <see cref="IElementalCard"/>, and the mod
-/// asked the CARD what a hit applies. The sim has always asked the PLAYER
-/// (`tier0/engine/effects._element_for`, catalyst cadence), and
-/// <see cref="CatalystCadence"/> is the mod catching up (`EB-307`). Without it
-/// Klee's four Strikes would have applied no Pyro at all -- half of rule 5,
-/// silently absent.
+/// AND THE ELEMENT. A base card is <c>sealed</c> and cannot implement
+/// <see cref="IElementalCard"/>, so it applies nothing -- the ruled reading
+/// ("Those cards are supposed to be bad!", 2026-09-02). `EB-307` had made the
+/// mod fall back on the PLAYER's element for a card that named none; that
+/// fallback is gone ([USER], 2026-10-05: the element "lives in the card pool
+/// as a symbol on relevant elemental cards"), so <see cref="CatalystCadence"/>
+/// reads the card alone and who plays it never matters.
 ///
 /// THE COLLECTION IS LOAD-BEARING: <c>KleeOverhaul.Enabled</c> and
 /// <c>KokomiOverhaul.Enabled</c> are one static apiece for the whole process.
@@ -219,7 +219,7 @@ public class BaseBasicsTests
         Assert.Equal(4m, upgraded.DynamicVars["PayloadMine"].BaseValue);
     }
 
-    // ---- rule 5: the element is the character's ---------------------------
+    // ---- rule 5: the element is the card's ----------------------------------
 
     [Fact]
     public void A_base_strike_applies_nothing_for_anybody()
@@ -233,20 +233,16 @@ public class BaseBasicsTests
             // the other way -- that her Strikes had to keep applying -- and
             // this is the ruled reading of the same swap. LAW's cadence line
             // now carries the exemption.
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
+            Assert.Equal(Element.None, AuraCmd.ElementOfPlay(
                 new StrikeIronclad(), Seat.Klee().Creature));
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
+            Assert.Equal(Element.None, AuraCmd.ElementOfPlay(
                 new StrikeSilent(), Seat.Kokomi().Creature));
-
-            // A DEFEND applied nothing before the ruling either: the cadence
-            // is about Attacks, which is the sim's rule too (`_element_for`
-            // guards on `card.type == "attack"`).
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
+            Assert.Equal(Element.None, AuraCmd.ElementOfPlay(
                 new DefendIronclad(), Seat.Klee().Creature));
-
-            // Furina is Skill-grade and was never in this branch at all.
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
+            Assert.Equal(Element.None, AuraCmd.ElementOfPlay(
                 new StrikeIronclad(), Seat.Furina().Creature));
+            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
+                new StrikeIronclad()));
         }
         finally
         {
@@ -254,43 +250,34 @@ public class BaseBasicsTests
     }
 
     [Fact]
-    public void The_exemption_is_every_off_sheet_card_and_not_her_own_attacks()
+    public void An_element_comes_with_the_card_and_not_the_hand()
     {
-        // THE CADENCE IS STILL A CHARACTER RULE. What the ruling removed is the
-        // base game's card from it, and `EB-331` widened "the base game's
-        // basics" to "the base game's cards" -- `Breakthrough`, an Ironclad
-        // EVENT card, put `Hydro Aura 2` on three enemies in a Kokomi run and
-        // the next Electro hit reacted with nothing on screen to predict it
-        // (r4c act 2b finding 6). A face with no element on it promises none
-        // whatever rarity the run handed it over at. A card of this mod's own
-        // is untouched whether it declares an element or leans on the fallback.
+        // [USER], 2026-10-05: "that effect just lives in the card pool as a
+        // symbol on relevant elemental cards". Klee's own Attack declares Pyro
+        // through the codegen and keeps it in ANY hand; a base card at any
+        // rarity -- `Breakthrough`, the Ironclad event card of `EB-331` --
+        // declares nothing and applies nothing in anyone's.
         try
         {
-            var seat = Seat.Klee().Creature;
+            var fun = new ProtoKoForbiddenFun();
+            Assert.Equal(Element.Pyro, CatalystCadence.PrintedElement(fun));
+            Assert.Equal(Element.Pyro,
+                AuraCmd.ElementOfPlay(fun, Seat.Klee().Creature));
+            Assert.Equal(Element.Pyro,
+                AuraCmd.ElementOfPlay(fun, Seat.Kokomi().Creature));
 
-            // Her own Attack, which declares Pyro through the codegen.
-            Assert.Equal(Element.Pyro, CatalystCadence.PrintedElement(
-                new ProtoKoForbiddenFun(), seat));
+            // The Ancient declares Pyro outright, so it needs nobody's hand.
+            Assert.Equal(Element.Pyro,
+                CatalystCadence.PrintedElement(new JumpyDumptyMkOmega()));
 
-            // AND THE FALLBACK IS STILL THERE for a card this mod authored
-            // that names nothing: the Ancient is a `CustomCardModel`, so the
-            // one test does not catch it. (It declares Pyro outright, which is
-            // why this asserts the predicate rather than the card.)
-            Assert.IsAssignableFrom<CustomCardModel>(new JumpyDumptyMkOmega());
-
-            // The base game's Strike is not, which is the exemption ...
-            Assert.IsNotAssignableFrom<CustomCardModel>(new StrikeIronclad());
-
-            // ... and so is a base card WELL above Basic rarity, which is the
-            // widening. Seen to FAIL: this returned Hydro before `EB-331`.
             var breakthrough = new Breakthrough();
             Assert.IsNotAssignableFrom<CustomCardModel>(breakthrough);
             Assert.NotEqual(CardRarity.Basic, breakthrough.Rarity);
             Assert.Equal(CardType.Attack, breakthrough.Type);
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
+            Assert.Equal(Element.None, AuraCmd.ElementOfPlay(
                 breakthrough, Seat.Kokomi().Creature));
-            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
-                breakthrough, seat));
+            Assert.Equal(Element.None, AuraCmd.ElementOfPlay(
+                breakthrough, Seat.Klee().Creature));
         }
         finally
         {
@@ -300,7 +287,7 @@ public class BaseBasicsTests
     [Fact]
     public void The_element_funnel_still_has_exactly_one_reader()
     {
-        // The fallback had to go INSIDE the funnel, not beside it: an aura
+        // The card read sits INSIDE the funnel, not beside it: an aura
         // applied by one expression and reacted to by another is the worst
         // kind of bug to find in play (AuraCmd.ElementOfPlay's own header).
         Assert.Contains(

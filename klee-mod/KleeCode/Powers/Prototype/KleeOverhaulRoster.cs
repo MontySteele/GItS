@@ -74,12 +74,12 @@ internal static class KleeOverhaulRoster
     /// <c>DeckEntryCardColor</c>, which is the base pool's <c>D62000</c> rather
     /// than her <c>E85A4F</c> -- two reds a hair apart, reported not hidden.
     ///
-    /// THE ELEMENT COMES FROM THE CHARACTER, NOT THE CARD. A base Strike is not
-    /// an <c>IElementalCard</c> and never can be (it is sealed), so under the
-    /// old per-card read it would have applied no Pyro at all. Rule 5 says her
-    /// Attacks ARE ordinary Pyro hits, and tier0 has always answered that from
-    /// the PLAYER's cadence (<c>effects._element_for</c>); the mod now does the
-    /// same through <see cref="CatalystCadence"/>.
+    /// THE ELEMENT COMES FROM THE CARD. A base Strike is not an
+    /// <c>IElementalCard</c> and never can be (it is sealed), so it applies no
+    /// Pyro -- the ruled reading ("Those cards are supposed to be bad!",
+    /// 2026-09-02). Her OWN Attacks carry Pyro because the codegen puts it on
+    /// them; since 2026-10-05 nothing falls back on the character
+    /// (<see cref="CatalystCadence"/>).
     ///
     /// COMPOSES WITH THE COMPANION ROLL by construction, the same way draft 3
     /// did: <c>KleeStartingCompanionsPatch.ReplaceFirst</c> matches on

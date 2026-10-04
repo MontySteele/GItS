@@ -189,7 +189,7 @@ def live(state: CombatState) -> bool:
 
     `KleeOverhaul.Enabled` plus the `IKleeCharacter` test every seam in the mod
     carries beside it (`KleeOverhaulOpening.GrantSpark`,
-    `CatalystCadence.PrintedElement`, `SparkGauge.AppliesTo`), and the
+    `SparkGauge.AppliesTo`), and the
     character half is not decoration: the flag is a build switch, the arm is
     Klee's rules, and a co-op Furina must not start growing Bombs.
     """

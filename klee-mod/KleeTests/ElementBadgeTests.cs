@@ -243,6 +243,51 @@ public class ElementBadgeTests
                         c => c.EndsWith("ElementBadge.GemKeyword"));
     }
 
+    // --- 2026-10-05: the gem and the hit are one declaration ---------------
+
+    [Fact]
+    public void Every_card_that_declares_an_element_wears_its_gem()
+    {
+        // [USER], 2026-10-05: the element "just lives in the card pool as a
+        // symbol on relevant elemental cards". The hit reads
+        // `IElementalCard` (`CatalystCadence.PrintedElement`, no character
+        // fallback any more) and the gem reads the card's keyword, so the two
+        // agree only if every card that declares an element for its hit also
+        // carries that element's keyword FIRST -- the one `ElementOf` draws.
+        // A card failing this would apply an element its face does not show.
+        var iconPathFor = Badge.GetMethod("IconPathFor", All)!;
+        var cards = typeof(KleeKeywords).Assembly.GetTypes()
+            .Where(t => t.Namespace?.StartsWith("KleeMod.Cards",
+                                                StringComparison.Ordinal) == true
+                        && typeof(CardModel).IsAssignableFrom(t)
+                        && typeof(IElementalCard).IsAssignableFrom(t)
+                        && !t.IsAbstract
+                        && t.GetConstructor(Type.EmptyTypes) != null)
+            .ToList();
+        Assert.True(cards.Count >= 100, $"only {cards.Count} elemental cards found");
+
+        var findings = new System.Collections.Generic.List<string>();
+        foreach (var type in cards)
+        {
+            var card = (IElementalCard)Activator.CreateInstance(type)!;
+            var element = card.Element;
+            if (element == Element.None
+                || iconPathFor.Invoke(null, new object[] { element }) == null)
+            {
+                continue;
+            }
+
+            var keyword = KeywordFieldOf(type);
+            if (keyword != "Applies" + element)
+            {
+                findings.Add($"{type.Name}: hits {element}, gem keyword '{keyword}'");
+            }
+        }
+
+        Assert.True(findings.Count == 0,
+            "a card's hit and its gem disagree:\n  " + string.Join("\n  ", findings));
+    }
+
     // --- EB-222: the badge holds no texture across scenes ------------------
 
     [Fact]

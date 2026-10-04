@@ -9,6 +9,7 @@ cost_mod, conditional, repeat_this, formula amounts, companion ops.
 from __future__ import annotations
 
 import copy
+from functools import lru_cache
 
 from typing import Optional, Sequence
 
@@ -729,104 +730,99 @@ def _pick_targets(state: CombatState, spec: str,
     raise ValueError(f"unknown target spec {spec!r}")
 
 
-def _is_off_sheet_card(state: CombatState, card: Card) -> bool:
-    """A card the character's SHEET does not own and this project did not
-    write -- the base game's own cards, whatever their rarity.
+def owner_identity(owner: Optional[str]) -> tuple[str, str]:
+    """The OWNING kit's (element, cadence), or ("none", "") for a card no kit
+    owns -- a base basic, a token, a colorless, a curse, a reference pool's.
 
-    [USER], 2026-09-02: "I think we actually SHOULD remove the elemental
-    application from the basic Strikes for all characters. Those cards are
-    supposed to be bad!" R242 put the base game's Strike and Defend into both
-    overhaul starters, and `EB-307` read that as "her Strikes must keep
-    applying her element"; this is the other reading of the same swap, and it
-    is the ruled one -- a base Strike is the base game's card, weak on purpose,
-    and the element is what her OWN Attacks are for.
+    THE ELEMENT IS ON THE CARD, NOT ON WHOEVER PLAYS IT ([USER], 2026-10-05:
+    "I think that that Kokomi effect is a legacy design. We changed things (or
+    tried to change them) so that that effect just lives in the card pool as a
+    symbol on relevant elemental cards and the card states 'deals [element]
+    damage' or 'applies [element]'."). A kit's cadence is how the codegen
+    decides which of ITS rows carry the element and the gem
+    (`gen_klee_cards.CharacterProfile.damage_applies_element`), so the sim
+    reads the same cadence off the same owner -- never off `state.player`.
+    Klee's Attack applies Pyro in Kokomi's hand, Furina's plain Attack applies
+    nothing in Klee's, and a base Strike applies nothing for anybody.
 
-    `EB-331` WIDENED IT FROM THE BASICS TO EVERY OFF-SHEET CARD, and the find
-    is why: `Breakthrough`, an Ironclad event card, put `Hydro Aura 2` on three
-    enemies in a Kokomi run and the next Electro hit reacted with nothing on
-    screen to predict it (r4c act 2b finding 6). R244 ruled the base Strike
-    applies nothing BECAUSE IT PRINTS NOTHING, and that reading does not stop
-    at a rarity: a face with no element on it is a face that promises none,
-    whether the run handed it over as a starter, a reward, an event or a curse.
-    The `basic` half of the old test was doing the opposite job -- keeping a
-    base colorless or event card INSIDE the cadence -- so it goes.
-
-    WHAT IS STILL INSIDE, and each for its own reason. An ANCIENT is the mod's
-    own card and carries `rarity: ancient` with no owning `character:`, so it
-    is named rather than swept: `jumpy_dumpty_mk_omega` still applies her Pyro
-    here exactly as its C# twin declares `Element.Pyro` outright. A COMPANION
-    row is exempt from the cadence one branch up and states its element on the
-    effect, so it never reaches this predicate.
-
-    ON HER SHEET IS ASKED OF THE PLAYER, not of the presence of a field. The
-    reference pools ARE tagged (`ref_ironclad`, `ref_silent`, and the
-    `game_ref/` layers force it) precisely so `rewards.character_pool` can drop
-    another character's cards, so "has a `character:`" would have called an
-    Ironclad package card hers. The idiom is the one the Spotlight readers
-    already use, `card.character == player.character_id`.
-
-    `CatalystCadence.IsOffSheet` is the mod's twin, and there the whole test is
-    `card is not CustomCardModel`: an Ancient and a companion are both this
-    mod's own classes and a character's pool is character-scoped, so the C#
-    says in one clause what the sheet needs three for.
+    Varka and the Furina re-founding slice have no character yaml (their
+    players are built by `varka_oath` and `furina_v2`), so their identities
+    are read off those modules' own constants.
     """
-    if getattr(card, "is_companion", False):
-        return False
-    if getattr(card, "rarity", None) == "ancient":
-        return False
-    owner = getattr(card, "character", None)
     if not owner:
-        # No owning sheet anywhere: a base basic, a token, a colorless, a
-        # curse. Off-sheet for everybody, which is R244's original reading.
-        return True
-    mine = getattr(state.player, "character_id", "")
-    if not mine:
-        # A hand-built state with no seat identity -- an engine fixture. A card
-        # that HAS an owner is not swept there: the predicate would otherwise
-        # answer "off-sheet" for every card in every such fixture and the
-        # cadence would go dark wherever the seat was left unset.
-        return False
-    return owner != mine
+        return ("none", "")
+    return _owner_identity_cached(owner)
 
 
-def _every_damaging_card_carries_element(state: CombatState) -> bool:
-    """R276 pick 2: KOKOMI'S ARM ELEMENTS EVERY DAMAGING CARD OF HERS.
+@lru_cache(maxsize=None)
+def _owner_identity_cached(owner: str) -> tuple[str, str]:
+    if owner == varka_oath.CHARACTER:
+        return (varka_oath.ELEMENT, "catalyst")
+    from tier0.engine import furina_v2              # late import (cycle)
+    if owner == furina_v2.CHARACTER:
+        return (furina_v2.ELEMENT, furina_v2.CADENCE)
+    from tier0.content import loader                # late import (cycle)
+    spec = loader._character_index().get(owner)
+    if not spec:
+        return ("none", "")
+    return (spec.get("element", "none"), spec.get("cadence", "skill"))
 
-    Her Attacks applied Hydro and five of her Skills dealt damage face-up and
-    applied nothing (Ambush, War Council, Opening Gambit, Chain of Command,
-    Kurage's Oath's now-line); the split was a trap when reading a card. Under
-    the arm the catalyst cadence reaches every type of card of hers that deals
-    damage. The base game's cards are still outside it (`_is_off_sheet_card`),
-    and Klee's arm keeps the Attack-only rule.
 
-    Twins: `CatalystCadence.EveryDamagingCardCarriesElement` (C#) and the
-    codegen's `gen_klee_cards.CATALYST_EVERY_CARD`."""
-    return kokomi_plan.live(state)
+def printed_element(card: Card, fx: dict) -> Optional[str]:
+    """What element this damage clause of this card PRINTS, before any rider.
+    Who holds the card is never asked (see `owner_identity`).
+
+    In order: a clause that declares `applies_element` says so itself (true
+    takes the card's own `element`, else its owning kit's); a companion
+    applies only what its clauses declare; a card that names its own
+    `element` (an Ancient, `jumpy_dumpty_mk_omega`) applies it on its
+    damage; otherwise the OWNING kit's cadence answers -- catalyst: its
+    Attacks; skill (Furina): its damaging Skills and Burst/skill-tagged cards.
+
+    The mod's twin is `CatalystCadence.PrintedElement`, which reads
+    `HitElement` and `IElementalCard` -- the two declarations the codegen
+    emits from exactly these rules -- and nothing else.
+    """
+    if "applies_element" in fx:
+        if not fx["applies_element"]:
+            return None
+        element = (card.element if card.element != "none"
+                   else owner_identity(getattr(card, "character", None))[0])
+        return element if element != "none" else None
+    if card.is_companion or fx["op"] != "damage":
+        return None
+    if card.element != "none":
+        return card.element
+    element, cadence = owner_identity(getattr(card, "character", None))
+    if element == "none":
+        return None
+    if cadence == "catalyst" and card.type == "attack":
+        return element
+    if cadence == "skill" and (card.type == "skill" or "burst" in card.tags
+                               or "skill_tag" in card.tags):
+        return element
+    return None
 
 
 def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
-    """Cadence dial (design doc §2.3; Furina kickoff §1).
+    """Which element this damage clause applies: a rider's override, else
+    what the card prints (`printed_element`).
 
-    catalyst: every attack applies the character's element unless the
-    sheet says applies_element: false. Cards with their own element
-    (companions) apply that instead. EVERY OFF-SHEET CARD IS OUTSIDE IT
-    ([USER] 2026-09-02, LAW's cadence line; widened by `EB-331`): a base Strike
-    applies nothing, and so does a base event or colorless card a run hands
-    her -- see `_is_off_sheet_card`.
-
-    skill (Furina, Skill-grade): only Skill/Burst-tagged cards apply the
-    CHARACTER's element -- attacks never auto-apply, which is what buys
-    the higher base numbers within her low-statline identity. Companion
-    cards are exempt from cadence entirely: what a companion applies is
-    the sheet's explicit call (application budgets depend on it).
+    THE ELEMENT IS THE CARD'S ([USER], 2026-10-05 -- quoted at
+    `owner_identity`). Until that ruling this read the PLAYER's cadence and
+    element, so a card that named none took the element of whoever played it,
+    and R276 pick 2 widened that to every damaging card in Kokomi's arm. Both
+    are gone: a kit's cadence now only says which of ITS OWN rows carry its
+    element, and the two Kokomi Skills that relied on the widening (Opening
+    Gambit, Second Wave) declare `applies_element: true` on the sheet.
 
     THE MONDSTADT COMPANION OVERHAUL'S ELEMENT OVERRIDE (QUARANTINED) is read
     FIRST and on damage from an Attack only. Three rewritten cards print an
     element on the ATTACK rather than on themselves -- Bennett's "your next
     Attack ... applies Pyro", Razor's "for 2 turns, your Attacks apply
     Electro", Varka's "your next Attack deals 6 more damage of the swirled
-    element" -- and none of them can be said in the cadence dial, which asks
-    only what the PLAYING card is. The override is snapshotted once per play
+    element" -- and none of them can be said by the card being played. The
+    override is snapshotted once per play
     (`state.mc_attack_element_override`, set beside `current_attack_bonus`),
     so every hit of a multi-hit Attack applies the same element and a card
     that consumes the rider cannot half-apply it.
@@ -840,31 +836,7 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
     if (state.mc_attack_element_override
             and fx["op"] == "damage" and card.type == "attack"):
         return state.mc_attack_element_override
-    if "applies_element" in fx:
-        # `EB-462`: A CHARACTER CARD DECLARING IT FALLS BACK TO THE CHARACTER,
-        # the way the catalyst branch below already does. Only companion rows
-        # carried this field until `Kurage's Oath`'s now-line took it, and a
-        # character row has no `element` of its own -- so a bare `card.element`
-        # answered `none` and the declaration applied nothing, which is this
-        # row's own defect one step further along.
-        if not fx["applies_element"]:
-            return None
-        return (card.element if card.element != "none"
-                else state.player.element)
-    if ((card.type == "attack"
-         or (_every_damaging_card_carries_element(state)
-             and not card.is_companion))
-            and fx["op"] == "damage"
-            and state.player.cadence == "catalyst"
-            and not _is_off_sheet_card(state, card)):
-        return card.element if card.element != "none" else state.player.element
-    if (state.player.cadence == "skill" and fx["op"] == "damage"
-            and not card.is_companion
-            and state.player.element != "none"
-            and (card.type == "skill" or "burst" in card.tags
-                 or "skill_tag" in card.tags)):
-        return state.player.element
-    return None
+    return printed_element(card, fx)
 
 
 # R33 lint-law (DECISIONS 87, the dead-knob exercise counter): a sweep

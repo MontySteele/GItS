@@ -34,7 +34,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKkOpeningGambit : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard, INowLineCard
 {
-    /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
+    /// <summary>Sheet `applies_element: true` on this row's own damage: it applies Hydro whatever the cadence says.</summary>
     public Element Element => Element.Hydro;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>

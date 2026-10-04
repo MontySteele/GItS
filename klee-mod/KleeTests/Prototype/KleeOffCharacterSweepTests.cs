@@ -74,9 +74,6 @@ public class KleeOffCharacterSweepTests
         // The counter by the energy orb shows from 0 for Klee, as the
         // Regent's does; anyone else's appears on their first Spark.
         ["SparkGauge.AppliesTo"] = "display: Klee's counter is always shown",
-        // An Attack that declares no element takes its dealer's; every Klee
-        // Attack declares Pyro (pinned below), so no Klee card reaches it.
-        ["CatalystCadence.NativeElementOf"] = "element of a card that names none",
         // Random Companions are drawn from the OWNER's personal pool; an
         // Ironclad gets the universal ones.
         ["CompanionPool.CharacterId"] = "companion personal pool of the owner",
@@ -117,9 +114,9 @@ public class KleeOffCharacterSweepTests
     [Fact]
     public void Every_klee_attack_names_its_own_element()
     {
-        // Why `CatalystCadence.NativeElementOf` is on the by-design list: an
-        // Attack that declares its element never asks the dealer, so Klee's
-        // Pyro comes with her card to anyone's hand.
+        // An Attack applies the element it declares and nothing else
+        // (2026-10-05: no card asks its dealer any more), so Klee's Pyro
+        // comes with her card to anyone's hand only because it is ON it.
         foreach (var type in KitCards())
         {
             var card = (CardModel)Activator.CreateInstance(type)!;

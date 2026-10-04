@@ -253,17 +253,6 @@ class CharacterProfile:
         """The cadence's own answer, with no row declaration consulted."""
         if self.cadence == "catalyst_attack":
             return card.get("type") == "attack"
-        if self.cadence == CATALYST_EVERY_CARD:
-            # R276 pick 2 (Kokomi's arm): EVERY damaging card of hers applies
-            # Hydro, Skills included. An Attack is elemental as before; any
-            # other type is elemental when its FACE-UP half deals damage to an
-            # enemy. The `plan:` list is not read here -- the carry-out is the
-            # jellyfish's hit and `plan_applies_element` answers it.
-            return card.get("type") == "attack" or any(
-                effect.get("op") == "damage"
-                and effect.get("target") != "self"
-                for effect in _effects_everywhere(card)
-            )
         if self.cadence == "skill_grade":
             tags = set(card.get("tags", []))
             # `EB-378`: BRANCHES INCLUDED, because the SIM decides per EFFECT
@@ -288,18 +277,20 @@ class CharacterProfile:
         )
 
 
-#: `R276` pick 2. The Kokomi ARM's cadence: every damaging card of hers applies
-#: Hydro, whatever its type, and the base game's cards still apply nothing
-#: (`_is_off_sheet_card` / `CatalystCadence.IsOffSheet`). Only the prototype
-#: surface's Kokomi profile carries it (`gen_prototype_cards.ARM_CADENCE`): the
-#: shipped Kokomi sheet and Klee's arm stay `catalyst_attack`. Its engine twins
-#: are `CatalystCadence.EveryDamagingCardCarriesElement` and
-#: `effects._every_damaging_card_carries_element`.
-CATALYST_EVERY_CARD = "catalyst_every_card"
-
 #: The cadences in which a character's own ATTACKS carry her element -- every
 #: catalyst cadence, which is also every cadence a Plan's carry-out is asked of.
-CATALYST_CADENCES = frozenset({"catalyst_attack", CATALYST_EVERY_CARD})
+#:
+#: A CADENCE DECIDES WHICH OF THE KIT'S OWN ROWS CARRY THE ELEMENT, AND NOTHING
+#: AT PLAY TIME. [USER], 2026-10-05: "I think that that Kokomi effect is a
+#: legacy design. We changed things (or tried to change them) so that that
+#: effect just lives in the card pool as a symbol on relevant elemental cards
+#: and the card states 'deals [element] damage' or 'applies [element]'." So the
+#: cadence is read HERE, once, and becomes `IElementalCard` and the gem on the
+#: row; both engines then read the card and never the player who holds it.
+#: R276 pick 2's `catalyst_every_card` (Kokomi's arm elementing every damaging
+#: card of hers) was retired with it: the two Skills it reached, Opening Gambit
+#: and Second Wave, print Hydro and declare `applies_element: true` instead.
+CATALYST_CADENCES = frozenset({"catalyst_attack"})
 
 
 KLEE_PROFILE = CharacterProfile(
@@ -1211,19 +1202,17 @@ def declares_no_element(card: dict, profile: "CharacterProfile") -> bool:
     """Does this CHARACTER row declare that its own damage applies NOTHING?
 
     `EB-703`. `damage_applies_element` already answers False for such a row,
-    which drops `IElementalCard` -- and dropping it is exactly what does NOT
-    work here, because `CatalystCadence.PrintedElement`'s whole point is that a
-    card saying nothing falls back to the CHARACTER's element. Its header
-    states the distinction this function exists to spell: "THE PREDICATE IS
-    'SAYS NOTHING ABOUT ELEMENTS', not 'declares None'", and names Kirara --
-    a row that IS an `IElementalCard` returning `Element.None` on purpose, so
-    the first branch answers her and the fallback never runs. This is that
-    shape for a character row: the interface is emitted, and it returns
-    `Element.None`.
+    which drops `IElementalCard`. Until 2026-10-05 dropping it was not enough,
+    because `CatalystCadence.PrintedElement` fell back to the CHARACTER's
+    element for a card that said nothing; that fallback is gone ([USER]'s
+    ruling: the element lives on the card), so a silent card and one that
+    declares `Element.None` now apply the same nothing. The interface is still
+    emitted, returning `Element.None`, so the row's refusal is said on the
+    card rather than left to an absence.
 
     COMPANIONS ARE NOT ASKED, because they are exempt from the cadence in both
     engines: a companion whose damage is all `applies_element: false` gets no
-    interface and `PrintedElement`'s `ICompanionCard` guard already answers it.
+    interface, and a card with none applies nothing.
     """
     if is_companion(card):
         return False
@@ -15853,19 +15842,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         # Element identities (2026-10-01): the kinds carry their own element.
         element_member = (
             "\n    /// <summary>Its hits carry their own element (a `varka` kind),\n"
-            "    /// not the cadence's Anemo; declared rather than omitted, which\n"
-            "    /// would ask the character (<see cref=\"CatalystCadence.PrintedElement\"/>).</summary>\n"
+            "    /// not the cadence's Anemo; the card says so rather than leave\n"
+            "    /// it unsaid (<see cref=\"CatalystCadence.PrintedElement\"/>).</summary>\n"
             "    public Element Element => Element.None;\n"
         )
     elif declines_element:
-        # `EB-703`. THE ROW REFUSED THE CADENCE, and the refusal has to be
-        # SAID rather than left unsaid: `CatalystCadence.PrintedElement` reads
-        # a card that says nothing as "ask the character".
+        # `EB-703`. THE ROW REFUSED THE CADENCE, and the refusal is SAID on
+        # the card. Since 2026-10-05 an omission applies the same nothing (the
+        # character fallback is gone, [USER]'s ruling), but the declaration
+        # keeps the row's intent on the card itself.
         element_member = (
             "\n    /// <summary>Sheet `applies_element: false` on this row's own\n"
             "    /// damage: this hit applies NOTHING, whatever the cadence says.\n"
-            "    /// Declared rather than omitted -- an omission is what asks the\n"
-            "    /// character (<see cref=\"CatalystCadence.PrintedElement\"/>).</summary>\n"
+            "    /// Declared so the card states its own element\n"
+            "    /// (<see cref=\"CatalystCadence.PrintedElement\"/>).</summary>\n"
             "    public Element Element => Element.None;\n"
         )
     elif elemental and is_companion(card):
@@ -15892,9 +15882,6 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         elif profile.cadence == "catalyst_attack":
             sentence = (f"Sheet: all {char} attacks apply {elem} "
                         "(catalyst-grade cadence).")
-        elif profile.cadence == CATALYST_EVERY_CARD:
-            sentence = (f"Arm cadence (R276): every damaging {char} card "
-                        f"applies {elem}, Skills included.")
         else:
             sentence = ("Sheet cadence: damaging Skills, Burst-tagged cards, "
                         f"and skill-tagged cards apply {elem}.")

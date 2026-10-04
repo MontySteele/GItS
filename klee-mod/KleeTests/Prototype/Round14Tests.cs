@@ -49,9 +49,11 @@ public class Round14Tests
 
     // R276 MOVED BOTH HALVES OF THIS. Pick 1 gave Kurage's Oath a Block
     // now-line, so its face-up half no longer hits and it is a Plan-only-hit
-    // row; pick 2 made every damaging card of hers elemental under the arm,
-    // so a Skill's own hit is Hydro without a per-row declaration. The pins
-    // below are the finding's rule on the rows that carry it now.
+    // row; pick 2 made every damaging card of hers elemental under the arm.
+    // That arm-wide rule is retired (2026-10-05: the element lives on the
+    // card), so Opening Gambit is back to the per-row declaration this
+    // finding introduced. The pins below are the finding's rule on the rows
+    // that carry it now.
 
     [Fact]
     public void A_skills_face_up_hit_declares_hydro()
@@ -67,11 +69,11 @@ public class Round14Tests
     [Fact]
     public void The_declaration_is_what_the_cadence_reads()
     {
-        // The join, and the reason the interface is enough: the cadence asks
-        // `IElementalCard` before it asks anything about the card's type, so
+        // The join, and the reason the interface is enough: the funnel reads
+        // `IElementalCard` and nothing about the card's type or holder, so
         // this Skill's own hit is a Hydro hit at the aura funnel.
         Assert.Equal(Element.Hydro,
-            CatalystCadence.PrintedElement(new ProtoKkOpeningGambit(), null));
+            CatalystCadence.PrintedElement(new ProtoKkOpeningGambit()));
     }
 
     [Fact]

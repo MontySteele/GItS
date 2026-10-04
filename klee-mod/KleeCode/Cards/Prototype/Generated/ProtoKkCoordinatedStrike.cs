@@ -39,7 +39,7 @@ public sealed class ProtoKkCoordinatedStrike : CustomCardModel, IElementalCard, 
     public override CardMultiplayerConstraint MultiplayerConstraint =>
         CardMultiplayerConstraint.MultiplayerOnly;
 
-    /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
+    /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
     public Element Element => Element.Hydro;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>

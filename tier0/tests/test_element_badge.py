@@ -313,13 +313,12 @@ def test_the_plan_half_never_elements_the_cards_own_hit():
     oath = {"id": "x", "type": "skill",
             "effects": [{"op": "damage", "amount": 3, "target": "all_enemies"}],
             "plan": [{"op": "damage", "amount": 7, "target": "all_enemies"}]}
-    # Her SHIPPED sheet's cadence is still Attack-only (R52).
+    # Her cadence is Attack-only (R52), on the arm too since 2026-10-05:
+    # R276 pick 2's every-card cadence is retired, and a Skill's own hit is
+    # elemental only where the row declares it.
     assert gen.KOKOMI_PROFILE.damage_applies_element(oath) is False
-    # R276 pick 2 moved the ARM: a Skill whose FACE-UP half deals damage is
-    # elemental there. The Plan half is still never what elements it -- a
-    # Skill whose only hit is its Plan stays non-elemental.
     arm = proto._profile_for("kokomi")
-    assert arm.damage_applies_element(oath) is True
+    assert arm.damage_applies_element(oath) is False
     plan_only = dict(oath, effects=[{"op": "block", "amount": 4}])
     assert arm.damage_applies_element(plan_only) is False
     text = (proto.OUT_DIR / "ProtoKkAmbush.cs").read_text(
@@ -334,19 +333,24 @@ def test_the_plan_half_never_elements_the_cards_own_hit():
     assert "ArmKeywordTips.ForPlanElement(" in text
 
 
-def test_r276_every_damaging_skill_of_hers_applies_hydro_on_the_arm():
-    """R276 pick 2, the generator's half. Five of her Skills dealt damage
-    face-up and applied nothing while her Attacks applied Hydro; under the arm
-    every damaging card of hers applies it, so each carries `IElementalCard`
-    and the gem, and none carries the old "its own hit applies no aura" rider.
-
-    SCOPED TO HER ARM: her shipped profile and Klee's arm keep the Attack-only
-    cadence, and the base game's Strike and Defend are off-sheet in both
-    engines (`_is_off_sheet_card`, `CatalystCadence.IsOffSheet`)."""
-    assert proto._profile_for("kokomi").cadence == gen.CATALYST_EVERY_CARD
+def test_her_damaging_skills_declare_the_hydro_their_faces_print():
+    """R276 pick 2 made every damaging card in Kokomi's arm apply Hydro, and
+    [USER] retired that as a rule on 2026-10-05: "I think that that Kokomi
+    effect is a legacy design ... that effect just lives in the card pool as a
+    symbol on relevant elemental cards and the card states 'deals [element]
+    damage' or 'applies [element]'." The two Skills it reached print "Deal 7
+    [gold]Hydro[/gold] damage", so each declares `applies_element: true` on
+    the sheet and still carries `IElementalCard` and the gem -- the same
+    behaviour, now on the card. Every profile's cadence is the owner's own."""
+    assert not hasattr(gen, "CATALYST_EVERY_CARD")
+    assert proto._profile_for("kokomi").cadence == "catalyst_attack"
     assert gen.KOKOMI_PROFILE.cadence == "catalyst_attack"
     assert proto._profile_for("klee").cadence == "catalyst_attack"
-    for stem in ("ProtoKkOpeningGambit",):
+    for cid in ("proto_kk_opening_gambit", "proto_kk_second_wave"):
+        row = next(c for c in proto._rows() if c["id"] == cid)
+        assert [e.get("applies_element") for e in row["effects"]
+                if e["op"] == "damage"] == [True], cid
+    for stem in ("ProtoKkOpeningGambit", "ProtoKkSecondWave"):
         text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         assert "public Element Element => Element.Hydro;" in text, stem
         assert "KleeKeywords.AppliesHydro" in text, stem
@@ -363,9 +367,8 @@ def test_a_declared_element_still_beats_the_cadence():
     """`EB-462`. A row may declare `applies_element` on its own damage, and a
     declaration beats the cadence in BOTH engines. The row it was filed on
     (Kurage's Oath) gains Block face-up since R276 pick 1 and so declares
-    nothing, and R276 pick 2 makes a Skill's own hit elemental under the arm
-    anyway -- so the rule is pinned on a probe row against her SHIPPED
-    profile, whose cadence is still Attack-only."""
+    nothing -- so the rule is pinned on a probe row against her profile,
+    whose cadence is Attack-only."""
     row = {"id": "x", "type": "skill",
            "effects": [{"op": "damage", "amount": 3, "target": "all_enemies",
                         "applies_element": True}]}
@@ -397,8 +400,8 @@ def test_a_character_attack_may_declare_that_it_applies_nothing():
     EITHER direction, and until this pass only `true` was read on this side
     while the sim read both (`effects._element_for`). Her basic Strike is the
     row that needs `false`: a basic is supposed to be bad. The interface is
-    still emitted, returning `Element.None`, because an omission is what asks
-    the character (`CatalystCadence.PrintedElement`).
+    still emitted, returning `Element.None`, so the refusal is said on the
+    card (since 2026-10-05 an omission applies the same nothing).
     """
     row = {"id": "proto_kk_probe", "type": "attack", "rarity": "basic",
            "effects": [{"op": "damage", "amount": 6, "target": "enemy",
@@ -433,7 +436,8 @@ def test_the_rows_the_finding_names_carry_the_gem():
     """`Kurage's Oath` and `Sango Isshin` by name, beside the three the seat
     read as correct."""
     # R276 pick 1: Kurage's Oath gains Block face-up now, so the Oath left
-    # this list; Opening Gambit's face-up hit carries the gem since pick 2.
+    # this list; Opening Gambit's face-up hit carries the gem, declared on
+    # its row (2026-10-05).
     for stem in ("ProtoKkOpeningGambit", "ProtoKkSangoIsshin",
                  "ProtoKkSlackWater", "ProtoKkUndertow", "ProtoKkFeint"):
         text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
@@ -450,9 +454,8 @@ def test_only_the_plan_only_rows_carry_the_when_sentence():
     the codegen -- and they come apart the moment an ATTACK declares
     `applies_element: false`, which the generator still supports and no
     shipped row prints (passes six and seven withdrawn, 2026-09-08). Such a
-    row would carry the interface RETURNING `Element.None`, because
-    `CatalystCadence.PrintedElement` reads a card that says nothing as "ask
-    the character".
+    row would carry the interface RETURNING `Element.None`, so its refusal
+    is said on the card.
     """
     carriers = {p.stem for p in proto.OUT_DIR.glob("*.cs")
                 if "ArmKeywordTips.ForPlanElement(" in p.read_text(

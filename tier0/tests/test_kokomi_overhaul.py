@@ -301,9 +301,9 @@ def test_the_starter_resolves_to_the_slices_ten_cards(overhaul):
 
 def test_a_base_strike_in_her_hand_applies_nothing(overhaul):
     """[USER], 2026-09-02: "the basic Strikes ... are supposed to be bad!" Her
-    cadence is still about HER and not about the card -- her own Attacks apply
-    Hydro with nothing printed -- but the base game's basics are outside the
-    dial (LAW's cadence line; `CatalystCadence.IsBaseGameBasic` is the twin)."""
+    own Attacks apply Hydro because the element is on her cards, and the base
+    game's basics carry none (2026-10-05: the element is the card's, never
+    the player's; `CatalystCadence.PrintedElement` is the twin)."""
     from tier0.tests.conftest import make_state
     from tier0.engine import effects as fx_mod
 
