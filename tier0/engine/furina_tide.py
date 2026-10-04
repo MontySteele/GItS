@@ -203,9 +203,11 @@ CARDS: dict[str, Spec] = {
     # Gentilhomme Usher (1): Gain 7 Block. Drain 3: gain 13 instead.
     "ftd_usher": Spec("Gentilhomme Usher", 1, "skill", "common",
                       "drain_block", (7, 3, 13)),
-    # Salon's Tab (0): Draw 1 card. Drain 4: also gain 1 Energy next turn.
-    "ftd_salons_tab": Spec("Salon's Tab", 0, "skill", "uncommon",
-                           "drain_tab", (1, 4, 1)),
+    # Salon's Tab (1): Draw 2 cards. Drain 4: also gain 2 Energy next turn.
+    # (2026-10-05: was 0-cost Draw 1 / +1; the 0-cost Tab made Guest+ and
+    # Tab+ an infinite.)
+    "ftd_salons_tab": Spec("Salon's Tab", 1, "skill", "uncommon",
+                           "drain_tab", (2, 4, 2)),
     # --- Repay (4) ---
     # Surging Waters (1, Attack): Deal 6 damage. Repay 3.
     "ftd_surging_waters": Spec("Surging Waters", 1, "attack", "common",

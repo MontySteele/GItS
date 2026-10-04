@@ -6370,8 +6370,7 @@ Bottled Applause are gone. The frozen v2 build is the tag
   the slice prints none) and the four Guest Stars (Charlotte, Wriothesley,
   Lynette, Clorinde; "Summon X.", upgrade cost -1).
 - Wording calls where the slice was open, each the plainest base-game shape:
-  Salon's Tab prints "Draw {1 card|2 cards}" and its upgrade lands in both
-  modes; Gentilhomme Usher's Drain mode upgrades through the new
+  Salon's Tab's upgrade (Draw +1) lands in both modes; Gentilhomme Usher's Drain mode upgrades through the new
   `conditional_then_block` key (`conditional_then_damage`'s block twin).
 - New sheet vocabulary: ops `stage_drain` (a mode's head or a card's fixed
   price), `stage_repay`, `stage_repay_all`; upgrade keys `stage_repay`,
@@ -6379,3 +6378,8 @@ Bottled Applause are gone. The frozen v2 build is the tag
   `fs_endless_waltz`, `fs_thunderous_applause`, `fs_universal_revelry`.
   Retired with v2: `stage_summon`, `stage_raise`, `stage_cue`,
   `stage_perform_all`, the co-op ops and every v2 power.
+- **Salon's Tab, the main session's ruling (2026-10-05):** cost 1, "Draw 2
+  cards. Drain 4: also gain 2 Energy next turn." [Draw 3]. At cost 0 it
+  made every upgraded Guest Star with two Tab+ an infinite (a re-summoned
+  guest acts and stays); at cost 1 each cycle is paid out of this turn's
+  Energy. The loop probe now finds no productive cycle.

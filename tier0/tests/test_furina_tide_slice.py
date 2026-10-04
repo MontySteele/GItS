@@ -170,7 +170,7 @@ def test_salons_tab_energy_arrives_next_turn():
     st.player.energy = 2
     _play(st, "ftd_salons_tab")
     assert st.player.hp == 74 and st.player.energy == 2
-    assert T.energy_kept(st) == 1 and T.energy_kept(st) == 0
+    assert T.energy_kept(st) == 2 and T.energy_kept(st) == 0
 
 
 def test_neuvillette_deals_the_hp_drained_this_turn_and_drains_nothing():

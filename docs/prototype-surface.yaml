@@ -2543,15 +2543,15 @@
 - {id: proto_fs_salons_tab, name: "Salon's Tab", character: furina,
    upgrade: {mode_draw: [1, 1]},
    authored_by: [claude],
-   register: salon, cost: 0, type: skill, rarity: uncommon,
-   description: "Draw {IfUpgraded:show:2 cards|1 card}. [gold]Drain[/gold] 4: also gain 1 [gold]Energy[/gold] next turn.",
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Draw {IfUpgraded:show:3|2} cards. [gold]Drain[/gold] 4: also gain 2 [gold]Energy[/gold] next turn.",
    effects: [{op: choose_one, modes: [
-              {label: "Draw {IfUpgraded:show:2 cards|1 card}",
-               effects: [{op: draw, amount: 1}]},
-              {label: "[gold]Drain[/gold] 4: also gain 1 [gold]Energy[/gold] next turn",
+              {label: "Draw {IfUpgraded:show:3|2} cards",
+               effects: [{op: draw, amount: 2}]},
+              {label: "[gold]Drain[/gold] 4: also gain 2 [gold]Energy[/gold] next turn",
                effects: [{op: stage_drain, amount: 4},
-                         {op: draw, amount: 1},
-                         {op: stage_energy_next, amount: 1}]}]}]}
+                         {op: draw, amount: 2},
+                         {op: stage_energy_next, amount: 2}]}]}]}
 
 # --- REPAY (four) ---
 

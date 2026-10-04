@@ -226,7 +226,8 @@ def test_salons_tab_gives_its_energy_next_turn_not_now():
     energy = st.player.energy
     effects.resolve_card(st, _row("proto_fs_salons_tab"))
     assert st.player.energy == energy
-    assert st.player.ftd.energy_next == 1
+    # 2026-10-05 ruling: Draw 2; Drain 4: also gain 2 Energy next turn.
+    assert st.player.ftd.energy_next == 2
     assert FS.drained(st.player) == 4
 
 
