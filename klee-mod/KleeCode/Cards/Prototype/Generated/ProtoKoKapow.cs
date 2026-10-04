@@ -48,7 +48,7 @@ public sealed class ProtoKoKapow : CustomCardModel, IElementalCard, ISetOffCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ka-pow!"),
-        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} [gold]Pyro[/gold] damage."),
+        ("description", "[gold]Set off[/gold] the enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

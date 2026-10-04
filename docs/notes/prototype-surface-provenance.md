@@ -6200,6 +6200,24 @@ six rows:
 Countdown was on the list for draw 2 (3 upgraded); the row already read that
 (since the playtest-one fixes), so it did not move.
 
+## Klee "Set off the enemy." wording, 2026-10-03 (text only)
+
+Three of four blind seats in the 2026-10-03 round read a targeted card's bare
+"Set off." as setting off every enemy's Bombs; it sets off only the targeted
+enemy's, and Tinder Toss already prints "Set off ALL enemies." Every aimed
+row that printed the bare form now reads "[gold]Set off[/gold] the enemy.",
+the rest of each face unchanged and no effect moved: `proto_ko_kapow` (the
+starter; mechanics untouched), `proto_ko_big_badda_boom`,
+`proto_ko_the_big_one`, `proto_ko_quick_fuse`, `proto_ko_bang_bang`,
+`proto_ko_sizzle`, `proto_ko_perfect_timing`, `proto_ko_countdown`,
+`proto_ko_team_effort`, `proto_ko_duck_and_run`.
+`proto_ko_flash_point` keeps the bare form for now: the new wording puts
+its face at 121 of the 120-character card ceiling, and the trim is a design
+call, not a lint exception. `KleeCardTooltips.SetsOffFirst` keys on both
+openings. A fourth seat read a
+Mine as failing because a Set off had already spent it, so the Mine tip gains
+"Any [gold]Set off[/gold] spends it too."
+
 ## Spent auras removed, 2026-10-03
 
 [USER]: "Should we get rid of the concept of elements being 'spent' after a

@@ -132,7 +132,7 @@ public class LiveBurn20260902Tests
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
         Assert.EndsWith("A [gold]Bomb[/gold] that also goes off just before its "
-                     + "enemy attacks.", body);
+                     + "enemy attacks. Any [gold]Set off[/gold] spends it too.", body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
     }
 
