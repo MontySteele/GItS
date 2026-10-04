@@ -456,9 +456,9 @@ as "Name (rarity, cost): text (upgrade)". A row not listed is unchanged.
   times the Fanfare you spent this turn." (4 times).
 - A Five-Century Act (Power, 3): "The first time each turn a performer Bows
   and leaves, it returns at the back if a seat is free." (cost 2).
-- Opening Night (Power, 3), a new Rare Rehearsal source: "At the start of
-  your turn, gain 1 Rehearsal." (cost 2). It takes the slot of Guest of
-  Honor's shield half (see Co-op below).
+- Premiere Season (Power, 3), the Rare Rehearsal source, replacing Double
+  Casting (Gala Premiere and Take the Stage do its job): "At the start of
+  your turn, gain 1 Rehearsal." (cost 2).
 - Gala Premiere (1, Exhaust): "Summon Usher, Chevalmarin and Crabaletta."
   (cost 0).
 - Grand Deluge, Endless Waltz and Arkhe Alignment: as sec.8.
@@ -485,7 +485,7 @@ as "Name (rarity, cost): text (upgrade)". A row not listed is unchanged.
   Fanfare."
 - The Curtain Never Falls: as sec.8 (Usher, plus 1 Rehearsal).
 - Stagehand's Gloves, Curtain Call Bouquet, Palais Ledger and Opening
-  Night's relic: unchanged.
+  Night: unchanged.
 
 *Potions:*
 - Bottled Applause: "Gain 6 Fanfare."
