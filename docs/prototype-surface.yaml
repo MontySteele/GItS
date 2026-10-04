@@ -1422,8 +1422,10 @@
    # `EB-687`: THE CLAUSE NAMES WHAT IT DOUBLES, so a Plan that deals none is
    # visibly unchanged. The finding and the ceiling: the provenance note.
    description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The Plan after this one deals double damage.",
-   # THE CASKET PASS (2026-09-28): 5 -> 7 now.
-   effects: [{op: damage, amount: 7, target: enemy}],
+   # THE CASKET PASS (2026-09-28): 5 -> 7 now. `applies_element: true`
+   # (2026-10-05): the face prints Hydro, so the row declares it -- the element
+   # lives on the card, not on who plays it ([USER]'s ruling).
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true}],
    # THE RIDER IS THE SECOND CLAUSE and it aims at nothing: "the next Plan" is
    # the entry carried out immediately after this one in the same drain.
    # Order and the upgrade's one half: the provenance note.
@@ -1438,7 +1440,9 @@
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
    description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The Plan after this one is carried out twice.",
-   effects: [{op: damage, amount: 7, target: enemy}],
+   # `applies_element: true` (2026-10-05): the face prints Hydro, so the row
+   # declares it rather than leaning on Kokomi's retired every-card cadence.
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true}],
    # A FLAG AND NOT A COUNT: under Nereid's Ascension the entry this reaches
    # is carried out THREE times (`CarryOutTimes + 1`) and not four, which is
    # the rule stated at `kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT`.

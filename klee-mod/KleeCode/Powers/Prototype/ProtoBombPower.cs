@@ -1126,8 +1126,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>The card's OWN hit, after its explosions. A powered Attack from
-    /// Klee, so it applies Pyro through her cadence exactly as any other Attack
-    /// of hers does; the explosions above went through the elemental pipeline
+    /// Klee, so it applies the element its card declares (Pyro on hers) exactly
+    /// as any other Attack does; the explosions above went through the elemental pipeline
     /// directly, because they are not card damage.</summary>
     private static async Task DealCardDamage(
         PlayerChoiceContext choiceContext, Creature target, decimal damage,

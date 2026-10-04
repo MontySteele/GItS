@@ -128,39 +128,43 @@ def test_an_off_sheet_card_applies_nothing_and_hers_still_do(overhaul):
     `proto_ko_kapow` is `rarity: basic` too and it carries `character: klee`,
     so it is on her sheet and still applies her Pyro -- and an explosion never
     asks the cadence at all, because it names Pyro outright. An ANCIENT is the
-    mod's own card with no owning character, and it is named rather than swept.
-    `CatalystCadence.IsOffSheet` is the mod's twin.
+    mod's own card with no owning character, and it declares its own Pyro.
+    Since 2026-10-05 no card is asked whose hand it is in ([USER]: the
+    element "lives in the card pool as a symbol on relevant elemental
+    cards"), so "off-sheet" is simply "no kit owns it": `printed_element`
+    reads the card's owner, never the player. `CatalystCadence.PrintedElement`
+    is the mod's twin.
 
     Seen to FAIL: before this row every base card above Basic rarity applied
     her element."""
     state = klee_state([make_enemy(hp=200)])
 
     strike, defend = load("strike"), load("defend")
-    assert effects._is_off_sheet_card(state, strike) is True
+    assert effects.owner_identity(strike.character)[0] == "none"
     assert effects._element_for(state, strike.effects[0], strike) is None
-    assert effects._is_off_sheet_card(state, defend) is True
+    assert effects.owner_identity(defend.character)[0] == "none"
 
     # The widening itself: a base card that is NOT a Basic.
     for off_sheet in ("squash", "exterminate", "heavy_blade_like",
                       "inflame_like"):
         card = load(off_sheet)
         assert card.rarity != "basic", off_sheet
-        assert effects._is_off_sheet_card(state, card) is True, off_sheet
+        assert effects.owner_identity(card.character)[0] == "none", off_sheet
         assert effects._element_for(
             state, {"op": "damage", "amount": 4, "target": "enemy"},
             card) is None, off_sheet
 
     kapow = load("proto_ko_kapow")
     assert (kapow.rarity, kapow.character) == ("basic", "klee")
-    assert effects._is_off_sheet_card(state, kapow) is False
+    assert effects.owner_identity(kapow.character) == ("pyro", "catalyst")
     assert effects._element_for(
         state, {"op": "damage", "amount": 4, "target": "enemy"},
         kapow) == "pyro"
 
-    # The mod's own Ancient has no owning character and stays inside.
+    # The mod's own Ancient has no owning character and declares its Pyro.
     omega = load("jumpy_dumpty_mk_omega")
     assert omega.character is None and omega.rarity == "ancient"
-    assert effects._is_off_sheet_card(state, omega) is False
+    assert omega.element == "pyro"
     assert effects._element_for(state, omega.effects[0], omega) == "pyro"
 
 

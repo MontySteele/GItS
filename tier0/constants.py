@@ -197,10 +197,10 @@ KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY = 1
 # mod's twin is `ModelDb.Card<StrikeIronclad>()` / `<DefendIronclad>()`, whose
 # frame and energy colour Klee's pool already borrows.
 #
-# THE ELEMENT COMES FROM THE CHARACTER, NOT THE CARD. A base Strike prints no
-# element; `effects._element_for` has always given a catalyst character's Attack
-# her element when the card names none, so Klee's Strike applies Pyro. The mod
-# had it per-card and now mirrors the sim (`CatalystCadence.PrintedElement`).
+# THE ELEMENT IS THE CARD'S. A base Strike prints no element and applies none
+# ("Those cards are supposed to be bad!", 2026-09-02); since 2026-10-05 neither
+# engine falls back on the player's element for a card that names none
+# (`effects.printed_element`, `CatalystCadence.PrintedElement`).
 #
 # WHAT LEFT WITH DRAFT 4: `proto_ko_kaboom` and `proto_ko_duck_and_cover` are
 # deleted outright (R213 B -- a rejected row leaves the surface), and
@@ -893,9 +893,9 @@ KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK = 2
 # `content/cards/ironclad_starter.yaml`'s, at the base numbers and with the base
 # +3 deltas; the mod's are `ModelDb.Card<StrikeSilent>()` /
 # `<DefendSilent>()`, whose frame and energy colour Kokomi's pool already
-# borrows. Her Attacks still apply Hydro, because the catalyst cadence reads
-# the CHARACTER and not the card (`effects._element_for`,
-# `CatalystCadence.PrintedElement`), which the build checks on a base Strike.
+# borrows. Her OWN Attacks apply Hydro because the element is on her cards;
+# the base Strike applies nothing (`effects.printed_element`,
+# `CatalystCadence.PrintedElement`, 2026-10-05: never the player's element).
 KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "strike", "strike", "strike", "strike",
     "defend", "defend", "defend", "defend",

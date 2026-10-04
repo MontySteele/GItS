@@ -219,9 +219,10 @@ def test_jumpy_upgraded_is_sixteen_and_sixteen():
 def test_jumpy_applies_pyro_the_way_klee_s_catalyst_grade_does():
     """The evidence behind the sheet's characterless decision, half (a).
 
-    `_element_for` keys on the PLAYER's cadence and element, never on
-    `card.character`, so an untagged attack in Klee's deck applies Pyro
-    exactly as JumpyDumptyMkOmega's `Element => Element.Pyro` demands.
+    Since 2026-10-05 `_element_for` reads the CARD and never the player
+    ([USER]: the element "lives in the card pool as a symbol on relevant
+    elemental cards"), so the characterless row declares `element: pyro`
+    exactly as JumpyDumptyMkOmega's `Element => Element.Pyro` does.
     """
     enemies = [make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")]
     st = _state("klee", seed=3, enemies=enemies)

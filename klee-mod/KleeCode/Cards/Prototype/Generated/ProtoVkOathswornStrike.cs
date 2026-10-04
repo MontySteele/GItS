@@ -36,8 +36,8 @@ public sealed class ProtoVkOathswornStrike : CustomCardModel, IElementalCard, IC
 {
     /// <summary>Sheet `applies_element: false` on this row's own
     /// damage: this hit applies NOTHING, whatever the cadence says.
-    /// Declared rather than omitted -- an omission is what asks the
-    /// character (<see cref="CatalystCadence.PrintedElement"/>).</summary>
+    /// Declared so the card states its own element
+    /// (<see cref="CatalystCadence.PrintedElement"/>).</summary>
     public Element Element => Element.None;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>

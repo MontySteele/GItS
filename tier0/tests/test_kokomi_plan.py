@@ -2567,20 +2567,22 @@ def test_an_auto_play_never_aims_at_the_pet(overhaul):
     assert kokomi_plan.plan_aimed_at_pet(st, card) is True
 
 
-# --- R276: pick 2 (her damaging Skills apply Hydro) and her Ancient ---------
+# --- R276 pick 2, now on the card (2026-10-05), and her Ancient ------------
 
 def _arm_card(cid):
     return next(c for c in loader.prototype_cards() if c.id == cid)
 
 
 def test_r276_her_damaging_skills_apply_hydro_face_up(overhaul):
-    """R276 pick 2. Chain of Command and Opening Gambit are Skills whose
-    face-up half deals damage; under the arm that hit applies Hydro, as her
-    Attacks' always did. `CatalystCadence.EveryDamagingCardCarriesElement` is
-    the twin."""
+    """Opening Gambit and Second Wave are Skills whose face-up half prints
+    "Deal 7 [gold]Hydro[/gold] damage". R276 pick 2 got them there through an
+    arm-wide rule; [USER] retired that rule on 2026-10-05 ("that effect just
+    lives in the card pool as a symbol on relevant elemental cards"), so each
+    row declares `applies_element: true` and the hit is Hydro because the
+    CARD says so. `CatalystCadence.PrintedElement` is the twin."""
     st = kokomi_state()
     # Chain of Command left the pool in the status batch (2026-10-01).
-    for cid in ("proto_kk_opening_gambit",):
+    for cid in ("proto_kk_opening_gambit", "proto_kk_second_wave"):
         card = _arm_card(cid)
         assert card.type == "skill", cid
         hit = next(fx for fx in card.effects if fx["op"] == "damage")
@@ -2588,9 +2590,8 @@ def test_r276_her_damaging_skills_apply_hydro_face_up(overhaul):
 
 
 def test_r276_the_base_strike_and_klee_are_outside_it(overhaul):
-    """Scoped to her arm and her own cards: the base game's Strike still
-    applies nothing, and a damaging Skill in Klee's seat applies nothing
-    (her cadence is still Attack-only)."""
+    """The base game's Strike applies nothing, and a damaging Skill that
+    declares no element applies nothing in anyone's seat."""
     st = kokomi_state()
     strike = loader.get_card("strike")
     assert effects._element_for(st, strike.effects[0], strike) is None
@@ -2602,6 +2603,30 @@ def test_r276_the_base_strike_and_klee_are_outside_it(overhaul):
     skill = Card(id="probe_skill", name="probe", cost=1, type="skill",
                  effects=[{"op": "damage", "amount": 3, "target": "enemy"}])
     assert effects._element_for(klee, skill.effects[0], skill) is None
+
+
+def test_a_no_element_mod_damage_card_played_by_kokomi_applies_nothing(
+        overhaul):
+    """[USER], 2026-10-05: "I think that that Kokomi effect is a legacy
+    design. We changed things (or tried to change them) so that that effect
+    just lives in the card pool as a symbol on relevant elemental cards and
+    the card states 'deals [element] damage' or 'applies [element]'."
+
+    Furina's Cheered On is a mod-authored Attack that deals damage and names
+    no element. In Kokomi's hand the sim used to read nothing (off-sheet) and
+    the mod Hydro (the character fallback); both now read the CARD, and it
+    says nothing. Klee's Forbidden Fun, which prints Pyro, keeps its Pyro in
+    Kokomi's hand -- the element comes with the card. C# twin:
+    `KokomiR276Tests.A_no_element_mod_damage_card_played_by_kokomi_applies_nothing`."""
+    st = kokomi_state()
+    cheered = _arm_card("proto_fs_cheered_on")
+    assert (cheered.type, cheered.character) == ("attack", "furina")
+    hit = next(fx for fx in cheered.effects if fx["op"] == "damage")
+    assert effects._element_for(st, hit, cheered) is None
+
+    fun = _arm_card("proto_ko_forbidden_fun")
+    hit = next(fx for fx in fun.effects if fx["op"] == "damage")
+    assert effects._element_for(st, hit, fun) == "pyro"
 
 
 def test_r276_princess_of_watatsumi_pays_on_every_plan_under_the_arm(overhaul):
@@ -2739,10 +2764,12 @@ _COC_NOW = {"op": "damage", "target": "enemy",
     ("proto_kk_ambush", [_VULN2],
      [{"op": "damage", "amount": 12, "target": "front_enemy"}],
      [_VULN2], [{"op": "damage", "amount": 15, "target": "front_enemy"}]),
+    # 2026-10-05: the row declares the Hydro its face prints.
     ("proto_kk_second_wave", [{"op": "damage", "amount": 7,
-                               "target": "enemy"}],
+                               "target": "enemy", "applies_element": True}],
      [{"op": "next_plan_extra_carry_out"}],
-     [{"op": "damage", "amount": 9, "target": "enemy"}],
+     [{"op": "damage", "amount": 9, "target": "enemy",
+       "applies_element": True}],
      [{"op": "next_plan_extra_carry_out"}]),
 ])
 def test_core_pass_rows_and_upgrades(overhaul, cid, now, plan, up_now,

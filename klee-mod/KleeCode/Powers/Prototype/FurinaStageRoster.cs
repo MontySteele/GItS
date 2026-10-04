@@ -45,7 +45,8 @@ public static class FurinaStageRoster
     /// own frame, and <c>CardModel.Pool</c> resolves them to Silent's pool
     /// without a throw. The base Strike applies no element (a base card is
     /// not an <c>IElementalCard</c>, and [USER] ruled the basics apply
-    /// nothing; <c>CatalystCadence</c> answers None for it).
+    /// nothing; <c>CatalystCadence</c> answers None for any card that
+    /// declares no element).
     ///
     /// WHAT LEFT: Soloist's Solicitation, Stage Presence (both basics, never
     /// offered), Regal Bearing and Take the Stage -- the last two re-authored

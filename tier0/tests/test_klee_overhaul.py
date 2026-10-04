@@ -374,9 +374,9 @@ def test_a_base_strike_in_her_hand_applies_nothing(overhaul):
     `EB-307` read that as "her Strikes must keep applying Pyro"; this is the
     ruled reading of the same swap, and LAW's cadence line now carries it.
 
-    RULE 5 IS STILL ABOUT THE CHARACTER: her OWN Attacks apply with nothing
-    printed, which is what the second half of this pin holds. The C# twin is
-    `CatalystCadence.IsBaseGameBasic`."""
+    HER OWN ATTACKS STILL APPLY PYRO, because the element is on HER cards
+    (2026-10-05: no card asks whose hand it is in), which is what the second
+    half of this pin holds. The C# twin is `CatalystCadence.PrintedElement`."""
     from tier0.tests.conftest import make_state
     from tier0.engine import effects as fx_mod
 
@@ -391,8 +391,7 @@ def test_a_base_strike_in_her_hand_applies_nothing(overhaul):
     defend = loader.get_card("defend")
     assert fx_mod._element_for(state, defend.effects[0], defend) is None
 
-    # AND HER OWN ATTACK IS UNMOVED, which is the whole point of the exemption
-    # being about the base game's card rather than about her cadence.
+    # AND HER OWN ATTACK IS UNMOVED: it is her card, so it carries her Pyro.
     fun = next(c for c in loader.prototype_cards()
                if c.id == "proto_ko_forbidden_fun")
     assert fun.element == "none"

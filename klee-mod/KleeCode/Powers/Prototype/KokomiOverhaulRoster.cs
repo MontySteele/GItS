@@ -79,11 +79,11 @@ internal static class KokomiOverhaulRoster
     /// shows them in the Silent pool's <c>5EBD00</c> rather than her
     /// <c>6FC8D6</c>; that is the one seam and it is reported, not hidden.
     ///
-    /// HER ATTACKS STILL APPLY HYDRO. A base Strike cannot implement
-    /// <c>IElementalCard</c> (it is sealed), so the mod's per-card element read
-    /// would have given it none. The catalyst cadence is a fact about the
-    /// CHARACTER -- tier0's <c>effects._element_for</c> has always said so --
-    /// and <see cref="CatalystCadence"/> now says it on this side too.
+    /// HER OWN ATTACKS APPLY HYDRO, THE BASE STRIKE DOES NOT. A base Strike
+    /// cannot implement <c>IElementalCard</c> (it is sealed), so it applies
+    /// nothing, which is the ruled reading for the basics. The element is the
+    /// CARD's, written onto her rows by the codegen; since 2026-10-05 nothing
+    /// falls back on the character (<see cref="CatalystCadence"/>).
     ///
     /// THE COMPANION ROLL FINDS NO SLOT, by construction and reported rather
     /// than hidden. <c>KokomiStartingCompanionsPatch</c> matches on the shipped

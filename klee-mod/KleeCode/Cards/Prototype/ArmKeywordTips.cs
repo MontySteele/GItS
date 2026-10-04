@@ -422,9 +422,10 @@ public static class ArmKeywordTips
     /// R276 PICK 2 RETIRED THE SPLIT THIS SENTENCE USED TO EXPLAIN. It read
     /// "Its own hit applies no aura; the Bake-Kurage carries out the Plan as a
     /// Hydro hit, which does", because her damaging Skills applied nothing
-    /// face-up. Under the arm every damaging card of hers applies Hydro, Skills
-    /// included (<see cref="CatalystCadence.EveryDamagingCardCarriesElement"/>),
-    /// so a row with a face-up hit carries the gem and no sentence.
+    /// face-up. Every such Skill of hers now prints Hydro and declares it on
+    /// the card (Opening Gambit and Second Wave; since 2026-10-05 the element
+    /// lives on the card, never on the character), so a row with a face-up
+    /// hit carries the gem and no sentence.
     ///
     /// ATTACHED ONLY WHERE THE PLAN IS THE CARD'S ONLY HIT -- Kurage's Oath,
     /// Ambush and Feigned Retreat since R276 pick 1: the face-up half blocks,

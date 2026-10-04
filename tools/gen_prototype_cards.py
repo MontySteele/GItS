@@ -117,17 +117,6 @@ DIR_PROFILE = replace(
 )
 
 
-#: `R276` pick 2: THE ONE OWNER FIELD THIS SURFACE OVERRIDES, and only for
-#: Kokomi. Her arm's rule is that every damaging card of hers applies Hydro,
-#: Skills included; her shipped sheet keeps "every Attack of hers" (R52), and so
-#: does Klee's arm. Every Kokomi row on this surface is her arm's -- a
-#: `proto_kk_` id cannot resolve with the arm off -- and a companion row is
-#: exempt from the cadence one branch up, so the override reaches exactly the
-#: arm. Engine twins: `CatalystCadence.EveryDamagingCardCarriesElement` and
-#: `effects._every_damaging_card_carries_element`.
-ARM_CADENCE = {"kokomi": gen.CATALYST_EVERY_CARD}
-
-
 def _profile_for(character_id: str) -> gen.CharacterProfile:
     """The owning character's profile, redirected at the prototype surface.
 
@@ -141,13 +130,14 @@ def _profile_for(character_id: str) -> gen.CharacterProfile:
     a row on this sheet can mean the arm's rule by printing one. The same word
     on a shipped sheet means the shipped rule and keeps the shipped tip.
 
-    `cadence` is the owner's too, EXCEPT where `ARM_CADENCE` names the arm's
-    own rule (R276: Kokomi's arm elements her damaging Skills as well).
+    `cadence` is the owner's too. R276 pick 2's override for Kokomi's arm
+    (`catalyst_every_card`) is retired: the element lives on the card
+    ([USER], 2026-10-05), so the two Skills it reached declare Hydro on
+    the sheet.
     """
     owner = gen.PROTOTYPE_OWNERS[character_id]
     return replace(
         owner,
-        cadence=ARM_CADENCE.get(character_id, owner.cadence),
         sheet=SHEET,
         out_dir=OUT_DIR,
         manifest=MANIFEST,

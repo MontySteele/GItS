@@ -301,22 +301,19 @@ decompile of `sts2.dll` and pinned by `KleeTests/Prototype/BaseBasicsTests.cs`.
   `DeckEntryCardColor`, which stays the base pool's (`D62000` / `5EBD00`)
   rather than the mod pool's — reported, not hidden, and eyes-on at the next
   live acceptance.
-- **The element does NOT come free, and it never belonged to the card**
-  (`EB-307`). A base card is sealed and can implement nothing, so the mod's
-  `cardSource is IElementalCard` read gave it `Element.None` — Klee's four
-  Strikes would have applied no Pyro at all. tier0 has always read the PLAYER's
-  cadence (`effects._element_for`: a catalyst character's damaging Attack
-  applies `player.element` when the card names none), and the mod agreed only
-  because the codegen tags every Attack it emits for Klee and Kokomi. The rule
-  now lives at the one funnel, `Powers/Prototype/CatalystCadence.cs`, read by
-  `AuraCmd.ElementOfPlay` through `CompanionOverhaulRiders.ElementFor` so
-  application and reaction cannot answer differently. It fires only for a card
-  that **declares nothing**: a row with `IElementalCard` keeps its own element
-  (including a deliberate `Element.None`), and every `ICompanionCard` is exempt,
-  because companions take the sheet's explicit call in both engines.
-- **Scoped to the two arms.** The fallback reads `KleeOverhaul.Enabled` /
-  `KokomiOverhaul.Enabled` and the dealer's identity interface, so a flag-off
-  build and any build's Furina (Skill-grade, not catalyst) are unchanged.
+- **The element belongs to the card, never to the hand that plays it**
+  ([USER], 2026-10-05: "that effect just lives in the card pool as a symbol on
+  relevant elemental cards and the card states 'deals [element] damage' or
+  'applies [element]'"). The cadence is read once, by the codegen, and becomes
+  `IElementalCard` and the gem keyword on the kit's own rows. At play,
+  `Powers/Prototype/CatalystCadence.PrintedElement` reads `HitElement`, then
+  `IElementalCard`, and nothing else; `AuraCmd.ElementOfPlay` reads it through
+  `CompanionOverhaulRiders.ElementFor`, whose riders still override. A base
+  Strike (sealed, no interface) applies nothing. The `EB-307` character
+  fallback and R276 pick 2's Kokomi-wide widening are retired; Opening Gambit
+  and Second Wave declare the Hydro they print on the sheet. Sim twin:
+  `tier0/engine/effects.printed_element`, which reads the card's OWNING kit,
+  never `state.player`.
 - **The sim needed nothing new.** `strike` and `defend` have been in
   `tier0/content/cards/ironclad_starter.yaml` at the base stat line since the
   `ref_ironclad` starter shipped, with `+3` each in
