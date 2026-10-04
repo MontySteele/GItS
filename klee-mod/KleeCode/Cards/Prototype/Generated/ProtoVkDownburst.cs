@@ -44,20 +44,21 @@ public sealed class ProtoVkDownburst : CustomCardModel, IElementalCard, ICharact
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
+        ArmKeywordTips.ForOath(ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_downburst");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Downburst"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of the element Swirled."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(12m, ValueProp.Move)
+            new DamageVar(12m, ValueProp.Move),
+            new DynamicVar("VkAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -75,6 +76,7 @@ public sealed class ProtoVkDownburst : CustomCardModel, IElementalCard, ICharact
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
+        await VarkaCards.SwirledOath(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

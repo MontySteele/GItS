@@ -2553,6 +2553,8 @@ VARKA_KINDS = {
     "gleeful_songs": "GleefulSongs",
     "rippling_guard": "RipplingGuard",
     "echo_block": "EchoBlock",
+    # Downburst's rider (2026-10-04, after spent auras went, #882).
+    "swirled_oath": "SwirledOath",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2574,6 +2576,7 @@ VARKA_KIND_FIELDS = {
     "gleeful_songs": ("base", "per"),
     "rippling_guard": ("base", "per"),
     "echo_block": ("amount",),
+    "swirled_oath": ("amount",),
 }
 #: A kind that aims at the enemy the card was played on.
 VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",

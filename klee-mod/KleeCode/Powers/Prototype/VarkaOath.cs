@@ -243,12 +243,17 @@ public sealed class VarkaOathLedger
         KnightsThisCombat++;
     }
 
-    /// <summary>A Swirl he made, on <paramref name="swirled"/>.</summary>
-    public void NoteSwirl(Creature swirled)
+    /// <summary>A Swirl he made, on <paramref name="swirled"/>, of a
+    /// <paramref name="element"/> aura.</summary>
+    public void NoteSwirl(Creature swirled, Element element = Element.None)
     {
         SwirlsMade++;
         SwirlsThisTurn++;
-        if (_scopeDepth > 0) _swirledThisPlay.Add(swirled);
+        if (_scopeDepth > 0)
+        {
+            _swirledThisPlay.Add(swirled);
+            if (element != Element.None) _swirledElementsThisPlay.Add(element);
+        }
     }
 
     /// <summary>Banner of the West Wind: every point of
@@ -285,6 +290,7 @@ public sealed class VarkaOathLedger
     private readonly List<(bool Open, object? Card)> _plays = new();
     private readonly HashSet<(bool Swirl, Element Element)> _credited = new();
     private readonly List<Creature> _swirledThisPlay = new();
+    private readonly List<Element> _swirledElementsThisPlay = new();
 
     /// <summary>Is a card play (or a scoped event) open?</summary>
     public bool Scoped => _scopeDepth > 0;
@@ -307,6 +313,7 @@ public sealed class VarkaOathLedger
         {
             _credited.Clear();
             _swirledThisPlay.Clear();
+            _swirledElementsThisPlay.Clear();
             _plays.Clear();
             _gainClauses.Clear();
             FangInThisPlay = false;
@@ -358,6 +365,11 @@ public sealed class VarkaOathLedger
     /// <summary>The enemies this play has Swirled, in order (Storm Surge).
     /// </summary>
     public IReadOnlyList<Creature> SwirledThisPlay => _swirledThisPlay;
+
+    /// <summary>The elements this play has Swirled, in order (Downburst).
+    /// </summary>
+    public IReadOnlyList<Element> SwirledElementsThisPlay =>
+        _swirledElementsThisPlay;
 
     // ---- where each gain came from (the rebalance round, 2026-10-03) ------
 
@@ -789,7 +801,7 @@ public static class VarkaOath
     {
         if (dealer == null || !Live(dealer)) return;
         var ledger = VarkaOathLedger.For(dealer);
-        ledger.NoteSwirl(target);
+        ledger.NoteSwirl(target, swirled);
         if (ledger.TryCredit(swirl: true, swirled))
         {
             await Gain(choiceContext, dealer, swirled, 1, OathSource.Swirl);
@@ -1105,6 +1117,35 @@ public static class VarkaCards
                                                owner);
         }
     }
+
+    /// <summary>Downburst (2026-10-04): "If it Swirls, gain 2 Oath of the
+    /// element Swirled." One gain per element Swirled, on top of the Swirl's
+    /// own credit, through <see cref="VarkaOath.Gain"/> so Oath Unto Death,
+    /// Dawn Wind's March and Boreas's Fang see it.</summary>
+    public static async Task SwirledOath(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null || !VarkaOath.Live(owner)) return;
+        var gains = SwirledOathGains(
+            VarkaOathLedger.For(owner).SwirledElementsThisPlay,
+            (int)Var(card, "VkAmount"));
+        foreach (var (element, n) in gains)
+        {
+            await VarkaOath.Gain(choiceContext, owner, element, n,
+                                 OathSource.Swirl);
+        }
+    }
+
+    /// <summary>Downburst's gains: <paramref name="amount"/> of each Oath
+    /// element the play Swirled, once per element, in order. Empty when it
+    /// Swirled nothing. PURE.</summary>
+    public static List<(Element Element, int Amount)> SwirledOathGains(
+        IReadOnlyList<Element> swirled, int amount) =>
+        amount <= 0
+            ? new List<(Element, int)>()
+            : swirled.Where(VarkaOath.IsOathElement).Distinct()
+                .Select(e => (e, amount)).ToList();
 
     /// <summary>Wall of Gales: "Swirl every aura." The aura'd bodies are
     /// taken when it is played and each takes its own damage-less Anemo hit,

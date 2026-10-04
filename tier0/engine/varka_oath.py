@@ -213,6 +213,8 @@ KINDS = frozenset({
     # THE REBALANCE (2026-10-03).
     "kindled_edge", "storm_battery", "frost_ward", "gleeful_songs",
     "rippling_guard", "echo_block",
+    # Downburst's rider (2026-10-04, after #882).
+    "swirled_oath",
 })
 KIND_FIELDS = {
     "ascension_hit": ("per",),
@@ -233,6 +235,7 @@ KIND_FIELDS = {
     "gleeful_songs": ("base", "per"),
     "rippling_guard": ("base", "per"),
     "echo_block": ("amount",),
+    "swirled_oath": ("amount",),
 }
 #: The target each kind's row names (the codegen's `VARKA_AIMED_KINDS` less
 #: the two follow-up hits, and `VARKA_ALL_KINDS`); every other kind, none.
@@ -274,6 +277,9 @@ class VarkaLedger:
     #: Per play, parallel to `scopes`: the Swirls this play made and the
     #: enemies they struck (`swirled_by_this`, Storm Surge).
     play_swirls: list = field(default_factory=list)
+    #: Per play, parallel to `scopes`: the elements this play Swirled, in
+    #: order (Downburst's "gain 2 Oath of the element Swirled").
+    play_swirl_elements: list = field(default_factory=list)
     #: Per play, parallel to `scopes`: is it an open-Oath play (his own
     #: non-Knight card), whose applications set the current element.
     play_open: list = field(default_factory=list)
@@ -424,6 +430,7 @@ def open_scope(state, open_oath: bool = False,
     if led is not None:
         led.scopes.append(set())
         led.play_swirls.append([])
+        led.play_swirl_elements.append([])
         led.play_open.append(open_oath)
         led.play_target_pyro.append(target_pyro)
 
@@ -433,6 +440,8 @@ def close_scope(state) -> None:
     if led is not None and led.scopes:
         led.scopes.pop()
         led.play_swirls.pop()
+        if led.play_swirl_elements:
+            led.play_swirl_elements.pop()
         if led.play_open:
             led.play_open.pop()
         if led.play_target_pyro:
@@ -635,6 +644,8 @@ def on_swirl(state, enemy, aura: str) -> None:
     led.swirls_this_turn += 1
     if led.play_swirls:
         led.play_swirls[-1].append(enemy)
+    if led.play_swirl_elements:
+        led.play_swirl_elements[-1].append(aura)
     state.emit("varka_swirl", element=aura, target=enemy.name,
                current=led.current)
     credit(state, "swirl", aura)
@@ -1200,6 +1211,14 @@ def op_varka(state, fx: dict, card) -> None:
                 effects.deal_damage_to_enemy(
                     state, e, fx["amount"], element=None,
                     source="attack" if card.type == "attack" else "card")
+    elif kind == "swirled_oath":
+        # Downburst (2026-10-04): "If it Swirls, gain 2 Oath of the element
+        # Swirled." One gain event per element Swirled, on top of the Swirl's
+        # own credit; through `gain`, so Oath Unto Death, Dawn Wind's March
+        # and Boreas's Fang all see it.
+        swirled = led.play_swirl_elements[-1] if led.play_swirl_elements else []
+        for el in dict.fromkeys(swirled):
+            gain(state, el, fx["amount"], "swirled_oath")
     elif kind == "swirl_fresh_auras":
         for e, aura, turns in _fresh_snapshot(state):
             if not e.alive:

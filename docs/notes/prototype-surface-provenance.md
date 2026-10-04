@@ -6243,3 +6243,19 @@ Sim, `tools/varka_expansion_sim.py --seeds 2400 --seed 7 --jobs 15
 29.2 (-1.6 ±0.6); starter spread 1.5 / 2.0 points; mono_electro 18.5 / 19.6,
 mono_cryo 16.0 / 17.4, mono_hydro 29.7 / 31.5; elem_* within 1.3 points.
 The 70% take flags and the dead-play list did not change.
+
+## Downburst's new rider, 2026-10-04
+
+- `proto_vk_downburst`: "Deal 12 [16] Anemo damage." becomes "Deal 12 [16]
+  Anemo damage. If it Swirls, gain 2 Oath of the element Swirled." (main
+  session, after spent auras were removed, #882). The 2 is on top of the
+  Swirl's own per-card credit and is one gain through Varka's Oath door
+  (`VarkaOath.Gain`, sim `varka_oath.gain`), so Oath Unto Death, Dawn Wind's
+  March and Boreas's Fang see it. New `varka` kind `swirled_oath`
+  (`VarkaCards.SwirledOath`). Upgrade unchanged: damage +4.
+
+Sim, `tools/varka_expansion_sim.py --seeds 2400 --seed 7 --jobs 15
+--no-gauntlet`, paired, before / after: Downburst taken 1.2 / 1.2% of
+offers, played in 68.0 / 80.8% of fights held (0.83 / 1.00 plays a fight).
+Act-1 win rates moved by at most 0.1 point. The 70% take flags did not
+change.
