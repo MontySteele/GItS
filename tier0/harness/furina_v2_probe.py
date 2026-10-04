@@ -14,6 +14,16 @@ shop do nothing. A run is an act-one WIN when the boss falls.
 Run i is a pure function of `seed + i`, so `--jobs` is a wall-clock lever
 only. This is an instrument for the slice's questions (sec.5.1), not a
 balance number: no world stamp, no band.
+
+PASS TWO. A job is `probe@variant/pilot`: the probe deck, the design variant
+(`furina_v2.VARIANTS`: Clorinde's act 6 or 8 x Neuvillette's new or old
+line; default `new`) and the pilot (`furina_v2_pilot.PILOTS`: `greedy` or
+`bank`; default `greedy`). The `draft` probe has no fixed deck: each run
+drafts `DRAFT_PICKS` cards from 3-card offers (see `draft_deck`). `--pass2`
+runs the pass-two suite (`PASS2_JOBS`).
+
+    .venv/Scripts/python.exe -m tier0.harness.furina_v2_probe --pass2 --runs 2000 --jobs 0
+    .venv/Scripts/python.exe -m tier0.harness.furina_v2_probe --probe 2b --pilot bank
 """
 
 from __future__ import annotations
@@ -91,7 +101,58 @@ PROBES: dict[str, tuple[str, list[str]]] = {
             "fv2_thunderous_applause", "fv2_take_the_stage",
             "fv2_take_the_stage", "fv2_take_the_stage",
             "fv2_take_the_stage", "fv2_take_the_stage"]),
+    # --- pass two ---
+    # A. Equal-count casts: five cards each, the same Neuvillette and the
+    #    same two Usher summons; 1a' adds one Chevalmarin and one Crabaletta,
+    #    1b' adds Clorinde and Charlotte.
+    "1a'": ("equal count, mixed cast: Neuvillette, Chevalmarin card, "
+            "Crabaletta card, Gentilhomme Usher x2",
+            ["fv2_guest_star_neuvillette", "fv2_surintendante_chevalmarin",
+             "fv2_mademoiselle_crabaletta", "fv2_gentilhomme_usher",
+             "fv2_gentilhomme_usher"]),
+    "1b'": ("equal count, three guests: Neuvillette, Clorinde, Charlotte, "
+            "Gentilhomme Usher x2",
+            ["fv2_guest_star_neuvillette", "fv2_guest_star_clorinde",
+             "fv2_guest_star_charlotte", "fv2_gentilhomme_usher",
+             "fv2_gentilhomme_usher"]),
+    # C. Charlotte with a sink (Ousia Surge reads gained) against Crabaletta.
+    "3a'": ("Chevalmarin card, Charlotte, Ousia Surge x2",
+            ["fv2_surintendante_chevalmarin", "fv2_guest_star_charlotte",
+             "fv2_ousia_surge", "fv2_ousia_surge"]),
+    "3b'": ("Chevalmarin card, Crabaletta card, Ousia Surge x2",
+            ["fv2_surintendante_chevalmarin", "fv2_mademoiselle_crabaletta",
+             "fv2_ousia_surge", "fv2_ousia_surge"]),
 }
+
+DRAFT = "draft"
+DRAFT_LABEL = ("random draft: starter + 10 picks from 3-card offers "
+               "(common/uncommon/rare 60/30/10), greedy by the pilot's value")
+DRAFT_PICKS = 10
+DRAFT_OFFER = 3
+RARITY_WEIGHTS = (("common", 60), ("uncommon", 30), ("rare", 10))
+#: The draft's reference board, an instrument choice: Usher plus the guests
+#: already drafted (first two, pick order) on stage, 3 Fanfare held, 3 Energy,
+#: turn 1, one 40-HP enemy posting a 10 attack.
+DRAFT_REF_FANFARE = 3
+DRAFT_REF_ENEMY_HP = 40
+DRAFT_REF_INCOMING = 10
+DRAFT_POOL: dict[str, list[str]] = {
+    r: sorted(cid for cid, sp in V.CARDS.items() if sp.rarity == r)
+    for r, _w in RARITY_WEIGHTS}
+CUE_KINDS = ("damage_cue", "block_cue", "cue_draw")
+
+#: Pass two's suite. A: the equal-count casts under Clorinde {8, 6} x
+#: Neuvillette {old, new}. B: 2b under both pilots. C: 3a'/3b'. D: the draft
+#: under old/old and new/new. Plus 2a under Clorinde 8 and 6 (the probe that
+#: pays her act most).
+PASS2_JOBS: tuple[str, ...] = (
+    *(f"{p}@{v}/greedy" for p in ("1a'", "1b'")
+      for v in ("old", "c8_hydro", "c6_cards", "new")),
+    "2b@new/greedy", "2b@new/bank",
+    "3a'@new/greedy", "3b'@new/greedy",
+    "2a@old/greedy", "2a@new/greedy",
+    "draft@old/greedy", "draft@new/greedy",
+)
 
 FIGHT_KINDS = ("N", "E", "B")
 OVER = 12          # sec.9: "flag any turn over 12"
@@ -99,6 +160,91 @@ OVER = 12          # sec.9: "flag any turn over 12"
 
 def deck(probe: str) -> list[str]:
     return STARTER + list(PROBES[probe][1])
+
+
+def parse_job(job: str) -> tuple[str, str, str]:
+    """`probe[@variant][/pilot]` -> (probe, variant, pilot)."""
+    head, _, pilot = job.partition("/")
+    probe, _, variant = head.partition("@")
+    variant = variant or V.DEFAULT_VARIANT
+    pilot = pilot or "greedy"
+    if variant not in V.VARIANTS:
+        raise ValueError(f"unknown variant {variant!r}")
+    if pilot not in furina_v2_pilot.PILOTS:
+        raise ValueError(f"unknown pilot {pilot!r}")
+    if probe != DRAFT and probe not in PROBES:
+        raise ValueError(f"unknown probe {probe!r}")
+    return probe, variant, pilot
+
+
+# ----------------------------------------------------------------------
+# The draft mode (pass two, D).
+# ----------------------------------------------------------------------
+def _draft_ref_state(picks: list[str], variant: str):
+    from tier0.engine.state import CombatState, Enemy
+    p = V.build_player(STARTER + picks, variant=variant)
+    f = p.fv2
+    f.opened = True
+    guests: list[str] = []
+    for cid in picks:
+        m = V.CARDS[cid].member
+        if m in V.GUESTS and m not in guests:
+            guests.append(m)
+    f.stage = [V.OPENING_MEMBER] + guests[:V.SEATS - 1]
+    f.fanfare = DRAFT_REF_FANFARE
+    p.energy = 3
+    enemy = Enemy(hp=DRAFT_REF_ENEMY_HP, max_hp=DRAFT_REF_ENEMY_HP,
+                  name="draft_ref",
+                  intents=[{"kind": "attack", "amount": DRAFT_REF_INCOMING}])
+    st = CombatState(player=p, enemies=[enemy], rng=random.Random(0))
+    st.turn = 1
+    return st
+
+
+def draft_pick(offer: list[str], picks: list[str], variant: str) -> str:
+    """The offered card the pilot's value model rates highest per Energy on
+    the reference board (ties: the first offered)."""
+    from tier0.engine.combat import card_cost
+    st = _draft_ref_state(picks, variant)
+    hand = [V.make_card(cid) for cid in offer]
+    st.player.hand = list(hand)
+    best, best_key = offer[0], None
+    for i, (cid, card) in enumerate(zip(offer, hand)):
+        v = furina_v2_pilot.value(st, card, hand)
+        key = (v / max(0.5, card_cost(st, card)), v, -i)
+        if best_key is None or key > best_key:
+            best, best_key = cid, key
+    return best
+
+
+def draft_deck(seed: int, variant: str) -> list[str]:
+    """Ten picks from 3-card offers. The offers are a pure function of the
+    seed (a separate, string-seeded rng), so every variant sees the same
+    offers and the fights' rng is untouched."""
+    rng = random.Random(f"furina_v2-draft-{seed}")
+    rarities = [r for r, _w in RARITY_WEIGHTS]
+    weights = [w for _r, w in RARITY_WEIGHTS]
+    picks: list[str] = []
+    for _ in range(DRAFT_PICKS):
+        offer: list[str] = []
+        while len(offer) < DRAFT_OFFER:
+            r = rng.choices(rarities, weights)[0]
+            cid = rng.choice(DRAFT_POOL[r])
+            if cid not in offer:
+                offer.append(cid)
+        picks.append(draft_pick(offer, picks, variant))
+    return STARTER + picks
+
+
+def deck_flags(cards: list[str]) -> dict:
+    guests = {V.CARDS[c].member for c in cards
+              if c in V.CARDS and V.CARDS[c].kind == "guest"}
+    return {
+        "guests": len(guests),
+        "rehearsal": "fv2_dress_rehearsal" in cards,
+        "cue": any(c in V.CARDS and V.CARDS[c].kind in CUE_KINDS
+                   for c in cards),
+    }
 
 
 def _plays_per_turn(state) -> list[int]:
@@ -138,8 +284,11 @@ def fight_record(state, kind: str) -> dict:
     }
 
 
-def run_one(probe: str, seed: int) -> dict:
+def run_one(probe: str, seed: int, variant: str = V.DEFAULT_VARIANT,
+            pilot: str = "greedy") -> dict:
     from tier05 import acts
+    cards = draft_deck(seed, variant) if probe == DRAFT else deck(probe)
+    play = furina_v2_pilot.PILOTS[pilot]
     rng = random.Random(seed)
     draw = acts.ActDraw(rng, 0)
     hp = max_hp = V.HP
@@ -152,8 +301,9 @@ def run_one(probe: str, seed: int) -> dict:
         if kind not in FIGHT_KINDS:
             continue
         enemies = acts.spawn(draw.encounter_for(kind, rng), rng)
-        player = V.build_player(deck(probe), hp=hp, max_hp=max_hp)
-        state = run_fight(player, enemies, furina_v2_pilot.pilot,
+        player = V.build_player(cards, hp=hp, max_hp=max_hp,
+                                variant=variant)
+        state = run_fight(player, enemies, play,
                           seed=rng.randrange(2 ** 31))
         fights.append(fight_record(state, kind))
         hp = state.player.hp
@@ -161,7 +311,11 @@ def run_one(probe: str, seed: int) -> dict:
             break
         if kind == "B":
             won = True
-    return {"seed": seed, "won": won, "fights": fights, "hp_end": hp}
+    out = {"seed": seed, "won": won, "fights": fights, "hp_end": hp}
+    if probe == DRAFT:
+        out["deck"] = cards
+        out["flags"] = deck_flags(cards)
+    return out
 
 
 #: YARDSTICKS, not probes: other starters walked down the same spine with
@@ -213,10 +367,11 @@ def run_reference(character: str, seed: int) -> dict:
     return {"seed": seed, "won": won, "fights": fights, "hp_end": hp}
 
 
-def _one(probe: str, seed: int) -> dict:
-    if probe.startswith("ref:"):
-        return run_reference(probe[4:], seed)
-    return run_one(probe, seed)
+def _one(job: str, seed: int) -> dict:
+    if job.startswith("ref:"):
+        return run_reference(job[4:], seed)
+    probe, variant, pilot = parse_job(job)
+    return run_one(probe, seed, variant, pilot)
 
 
 def _chunk(args) -> list[dict]:
@@ -272,6 +427,28 @@ def summarize(results: list[dict]) -> dict:
         "mean_max_cards": mean("max_cards"),
         "turns_over_12": sum(f["turns_over_12"] for f in fights),
         "card_cap_hits": sum(f["card_cap_hits"] for f in fights),
+        **({"draft": summarize_draft(results)}
+           if results and "flags" in results[0] else {}),
+    }
+
+
+def summarize_draft(results: list[dict]) -> dict:
+    """Act-one win% split by what the drafted deck holds."""
+    def split(pred):
+        yes = [r for r in results if pred(r["flags"])]
+        no = [r for r in results if not pred(r["flags"])]
+
+        def rate(rs):
+            return (sum(r["won"] for r in rs) / len(rs)) if rs else None
+        return {"yes_n": len(yes), "yes_win": rate(yes),
+                "no_n": len(no), "no_win": rate(no)}
+    picks = collections.Counter(c for r in results
+                                for c in r["deck"][len(STARTER):])
+    return {
+        "guests>=2": split(lambda f: f["guests"] >= 2),
+        "dress_rehearsal": split(lambda f: f["rehearsal"]),
+        "cue_card": split(lambda f: f["cue"]),
+        "picks": dict(picks),
     }
 
 
@@ -292,8 +469,7 @@ def print_table(rows: dict, out=sys.stdout) -> None:
     out.write("\nper fight means; star skips, cues and walk-ons are per fight;"
               " max cards is the most cards played in any one turn\n")
     for name, s in rows.items():
-        label = PROBES[name][0] if name in PROBES else REFERENCES[name]
-        out.write(f"\n{name}: {label}\n")
+        out.write(f"\n{name}: {_label(name)}\n")
         if s["cues_on"]:
             out.write(f"  cues on: {_fmt_counter(s['cues_on'])}\n")
         if s["star_acts_by"] or s["star_skips_by"]:
@@ -309,12 +485,38 @@ def print_table(rows: dict, out=sys.stdout) -> None:
                   f"{s['fight_win']:.1%}; mean per-fight max cards "
                   f"{s['mean_max_cards']:.2f}; card-cap hits "
                   f"{s['card_cap_hits']}\n")
+        if "draft" in s:
+            d = s["draft"]
+            for key in ("guests>=2", "dress_rehearsal", "cue_card"):
+                sp = d[key]
+                yes = "-" if sp["yes_win"] is None else f"{sp['yes_win']:.1%}"
+                no = "-" if sp["no_win"] is None else f"{sp['no_win']:.1%}"
+                out.write(f"  {key}: holds {yes} (n {sp['yes_n']}); "
+                          f"lacks {no} (n {sp['no_n']})\n")
+            out.write(f"  picks: {_fmt_counter(d['picks'])}\n")
+
+
+def _label(job: str) -> str:
+    if job in REFERENCES:
+        return REFERENCES[job]
+    probe, variant, pilot = parse_job(job)
+    base = DRAFT_LABEL if probe == DRAFT else PROBES[probe][0]
+    v = V.VARIANTS[variant]
+    return (f"{base} [Clorinde act {v.clorinde_act}; Neuvillette line "
+            f"{v.neuvillette_line}; pilot {pilot}]")
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--probe", action="append",
-                    help="probe id (repeatable); default every probe")
+                    help="job `probe[@variant][/pilot]` (repeatable); "
+                         "default every fixed probe")
+    ap.add_argument("--variant", action="append", default=None,
+                    help="variant(s) for every --probe that names none")
+    ap.add_argument("--pilot", action="append", default=None,
+                    help="pilot(s) for every --probe that names none")
+    ap.add_argument("--pass2", action="store_true",
+                    help="run the pass-two suite (PASS2_JOBS)")
     ap.add_argument("--runs", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--jobs", type=int, default=1,
@@ -324,6 +526,20 @@ def main(argv=None) -> int:
                     help="also walk the yardstick starters (REFERENCES)")
     args = ap.parse_args(argv)
     probes = args.probe or list(PROBES)
+    if args.variant or args.pilot:
+        expanded = []
+        for job in probes:
+            if "@" in job or "/" in job:
+                expanded.append(job)
+                continue
+            for v in args.variant or [V.DEFAULT_VARIANT]:
+                for pl in args.pilot or ["greedy"]:
+                    expanded.append(f"{job}@{v}/{pl}")
+        probes = expanded
+    if args.pass2:
+        probes = list(PASS2_JOBS) + (probes if args.probe else [])
+    for job in probes:
+        parse_job(job)
     if args.reference:
         probes += list(REFERENCES)
     rows = {}
