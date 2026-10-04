@@ -18,7 +18,7 @@ namespace KleeMod.Powers;
 /// <summary>
 /// THE MONDSTADT COMPANION OVERHAUL'S POWERS (QUARANTINED, R213 B).
 ///
-/// Nine powers, in two shapes the engine already runs: a START-OF-TURN payout
+/// Eight powers, in two shapes the engine already runs: a START-OF-TURN payout
 /// (<c>CelestialGiftPower</c> (retired)'s shape) and an END-OF-TURN volley
 /// (<c>OzSummonPower</c> (retired)'s). Nothing here invents a hook; what is new
 /// is the printed text each one carries, which comes verbatim from the
@@ -34,10 +34,9 @@ namespace KleeMod.Powers;
 /// iteration order. <see cref="CompanionOverhaulTurnEnd"/> is the one tenant,
 /// and it drives all six in the sim's order.
 ///
-/// The START-OF-TURN three DO override their broadcast, and the difference is
-/// argued rather than inherited: they are COMMUTATIVE. Two grant the player
-/// Block or Strength and the third applies Vulnerable to enemies; none reads a
-/// value another writes, none draws from an rng stream, and the one power that
+/// The START-OF-TURN two DO override their broadcast, and the difference is
+/// argued rather than inherited: they are COMMUTATIVE. Both grant the player
+/// Block or Strength; neither reads a value the other writes, none draws from an rng stream, and the one power that
 /// reads Block reads a value LATCHED at the previous turn's end (see
 /// <see cref="RevelationPower"/>). Order among them cannot change an outcome,
 /// so imposing one would be ceremony.
@@ -182,58 +181,6 @@ public sealed class RevelationPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Mona, Stellaris Phantasm: "Next turn, enemies take 50% more damage."
-///
-/// Vulnerable IS that sentence in this engine -- <c>VULNERABLE_TAKEN_MULT</c>
-/// is 1.50 and the C# <c>VulnerablePower</c> mirrors it -- so the card does not
-/// get a private multiplier. What it needs is the DELAY: Vulnerable applied on
-/// the turn the card is played would cover the rest of THIS turn, and the card
-/// says next. So this power is a one-shot promise that resolves at the next
-/// player turn start and then removes itself.
-///
-/// Amount is the STACK the row applied, and each stack pays
-/// <c>OmenVulnerable</c> Vulnerable -- one turn of vulnerability apiece, since
-/// Vulnerable's stacks are its duration. `EB-622` moved Mona's row from 1 to
-/// 2, so the badge prints <c>{Amount}</c> rather than the per-stack constant:
-/// a face interpolating the constant would say "apply 1" over a power that
-/// pays 2. At <c>OmenVulnerable == 1</c> the stack IS the payout, and that
-/// identity is pinned rather than assumed
-/// (<c>The_omens_face_prints_the_stack_it_pays</c>).
-/// </summary>
-public sealed class StellarisOmenPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Stellaris Phantasm"),
-        ("description",
-            "At the start of your next turn, apply "
-          + "[blue]{Amount}[/blue] [gold]Vulnerable[/gold] "
-          + "to ALL enemies."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
-    {
-        if (player.Creature != Owner) return;
-        foreach (var target in CombatState.HittableEnemies.ToList())
-        {
-            await PowerCmd.Apply<VulnerablePower>(
-                choiceContext, target,
-                CompanionOverhaulLaw.OmenVulnerable * (int)Amount,
-                applier: Owner, cardSource: null);
-        }
-        // Removed WHOLE, not ticked: the promise is kept once however many
-        // copies were played, so a two-stack omen must not stretch across two
-        // turns. TickDownDuration would do exactly that.
-        await PowerCmd.Remove(this);
-    }
-}
-
-/// <summary>
 /// Kaeya, Glacial Waltz: "For 3 turns, at the end of your turn deal 6 Cryo
 /// damage to a random enemy." Amount is TURNS REMAINING.
 ///
@@ -345,9 +292,9 @@ public sealed class MondstadtOzPower : PowerModel, ILocalizationProvider
 ///
 /// It takes NO broadcast of its own. The volley draws a target from
 /// <c>Rng.CombatTargets</c> and puts Electro on a body that may already carry
-/// an aura, and Mona's omen (<see cref="StellarisOmenPower"/>) applies
-/// Vulnerable to the whole board from the ordinary start-of-turn hook -- so
-/// running before or after it is a 50% swing on this hit. The one tenant
+/// an aura, and a start-of-turn power that applied Vulnerable to the board
+/// from the ordinary hook would make running before or after it a 50% swing
+/// on this hit (Mona's omen did, until 2026-10-03). The one tenant
 /// drives it from <c>AfterPlayerTurnStartLate</c>, which the 0.111.0 hook
 /// contract runs strictly after every <c>AfterPlayerTurnStart</c>, so Lisa is
 /// last in the arm's start-of-turn sequence in both engines -- the tail of
@@ -740,20 +687,16 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
     /// <summary>
     /// `EB-470`. THE ARM'S START-OF-TURN TAIL, and the one power in it.
     ///
-    /// LATE, not the ordinary hook: the three commutative start-of-turn powers
-    /// (<see cref="SignatureMixPower"/>, <see cref="RevelationPower"/>,
-    /// <see cref="StellarisOmenPower"/>) keep their own
-    /// <c>AfterPlayerTurnStart</c> broadcast, and Lisa is NOT commutative with
-    /// Mona's -- the omen puts Vulnerable on the whole board and Lisa's hit
-    /// into it would be 50% larger. <c>AfterPlayerTurnStartLate</c> runs
+    /// LATE, not the ordinary hook: the two commutative start-of-turn powers
+    /// (<see cref="SignatureMixPower"/>, <see cref="RevelationPower"/>) keep
+    /// their own <c>AfterPlayerTurnStart</c> broadcast, and Lisa runs after
+    /// every other start-of-turn tenant (Herald of Frost's Cryo can resolve a
+    /// reaction on the body she hits). <c>AfterPlayerTurnStartLate</c> runs
     /// strictly after every <c>AfterPlayerTurnStart</c>, so the sequence is
     /// decided rather than left to listener iteration order, and it is the same
     /// sequence tier0 `effects.companion_overhaul_turn_start` writes down: the
-    /// three, then Lisa.
-    ///
-    /// This also preserves what the end-of-turn placement used to give: Mona's
-    /// Vulnerable was applied at the start of the turn and was still standing
-    /// when Lisa fired at its end, so the hit was amplified then too.
+    /// two, then Lisa. (Mona's omen was a third until 2026-10-03, when her card
+    /// moved to Vulnerable on play.)
     /// </summary>
     public override async Task AfterPlayerTurnStartLate(
         PlayerChoiceContext choiceContext, Player player)

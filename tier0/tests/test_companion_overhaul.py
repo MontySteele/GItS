@@ -268,44 +268,6 @@ def test_revelation_pays_no_strength_after_a_turn_that_spent_its_block(
     assert st.player.powers.get("strength", 0) == 0
 
 
-def test_the_omen_fires_at_the_next_turn_start_and_leaves(overhaul):
-    st = make_state(enemies=[make_enemy(name="a"), make_enemy(name="b")])
-    st.player.powers["mc_omen"] = 1
-    effects.companion_overhaul_turn_start(st)
-    assert all(e.powers.get("vulnerable", 0) == C.MC_OMEN_VULNERABLE
-               for e in st.enemies)
-    assert "mc_omen" not in st.player.powers
-
-
-def test_the_omen_is_popped_whole_rather_than_ticked(overhaul):
-    """Two copies pay two Vulnerable NEXT turn, not one Vulnerable on each of
-    two turns: the promise is kept once however many copies were played."""
-    st = make_state()
-    st.player.powers["mc_omen"] = 2
-    effects.companion_overhaul_turn_start(st)
-    assert st.enemies[0].powers["vulnerable"] == 2 * C.MC_OMEN_VULNERABLE
-    assert "mc_omen" not in st.player.powers
-
-
-def test_eb622_monas_row_promises_two_vulnerable_and_pays_them(overhaul):
-    """`EB-622`. THE ROW IS THE NUMBER, in both engines.
-
-    [USER]'s act-1 run read Mona as a Rare with Exhaust that could do more, so
-    the omen's stack moved 1 -> 2. Nothing in the rule moved: the payout has
-    always been `MC_OMEN_VULNERABLE * stack`, and the stack is what the row
-    prints. Pinned from the SHEET rather than by setting the power by hand,
-    because the defect this guards is a face and a stack drifting apart."""
-    row = {c.id: c for c in loader.prototype_cards()}[
-        "proto_mc_mona_stellaris_phantasm"]
-    omen = next(fx for fx in row.effects if fx.get("power") == "mc_omen")
-    assert omen["amount"] == 2
-
-    st = make_state(enemies=[make_enemy(name="a"), make_enemy(name="b")])
-    st.player.powers["mc_omen"] = omen["amount"]
-    effects.companion_overhaul_turn_start(st)
-    assert all(e.powers.get("vulnerable", 0) == 2 for e in st.enemies)
-
-
 def test_eb622_sucroses_upgrade_keeps_exhaust_and_draws_two(overhaul):
     """`EB-622`. The Prototype-stage default would have taken Exhaust OFF a
     0-cost cantrip, which reads as "4 energy the turn you draw it". The row now
@@ -534,11 +496,11 @@ def _play(state, card_id):
 def test_breastplate_pays_its_bonus_only_below_half(overhaul):
     st = make_state(hp=80)
     _play(st, "proto_mc_noelle_breastplate")
-    assert st.player.block == 6
+    assert st.player.block == 8
     st = make_state(hp=80)
     st.player.hp = 20
     _play(st, "proto_mc_noelle_breastplate")
-    assert st.player.block == 10
+    assert st.player.block == 12
 
 
 def test_fantastic_voyage_takes_the_other_arm_when_hurt(overhaul):

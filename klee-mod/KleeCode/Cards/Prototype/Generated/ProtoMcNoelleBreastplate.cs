@@ -55,7 +55,7 @@ public sealed class ProtoMcNoelleBreastplate : CustomCardModel, ICompanionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(6m),
+            new CalculationBaseVar(8m),
             new CalculationExtraVar(1m),
             new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new FoldedBlockVar("BranchBlock", 4m, ValueProp.Move)

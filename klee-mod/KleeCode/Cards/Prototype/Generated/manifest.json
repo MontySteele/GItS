@@ -1827,7 +1827,7 @@
       "damage": 3
     },
     "proto_mc_mona_stellaris_phantasm": {
-      "power_amount": 1
+      "vulnerable": 1
     },
     "proto_mc_nicole_ladder_of_ascent": {
       "power_amount": 1

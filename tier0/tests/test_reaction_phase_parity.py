@@ -864,8 +864,7 @@ CO_TENANCY_LEDGER = {
             "(the sim's klee_overhaul._turn_start_expansion order). What it "
             "WRITES is one Pyro hit on a Bomb's own terms. The residual is "
             "the one the companion tenants below already carry: "
-            "StellarisOmenPower's Vulnerable and HeraldOfFrostPower's Cryo "
-            "can land before or after it (the sim runs those earlier, in "
+            "HeraldOfFrostPower's Cryo can land before or after it (the sim runs those earlier, in "
             "effects.player_turn_start_triggers), and SurpriseDispatchPower "
             "draws from the same rng",
         ("Powers/Prototype/KleeExpansionPowers.cs", "AlicesDetonatorBasePower"):
@@ -898,21 +897,14 @@ CO_TENANCY_LEDGER = {
             "CompanionOverhaulTurnEnd) and never read live, so no co-tenant "
             "of this broadcast can change the answer -- which is exactly why "
             "the latch exists instead of a live Block read",
-        ("Powers/Prototype/CompanionOverhaulPowers.cs", "StellarisOmenPower"):
-            "QUARANTINED (the Mondstadt companion overhaul). Applies "
-            "Vulnerable to every enemy, then removes itself. THE ORDERING "
-            "QUESTION, answered: it writes an ENEMY debuff and reads nothing, "
-            "and no co-tenant of this broadcast deals damage -- every volley "
-            "that would care about a Vulnerable fires at turn END, a "
-            "broadcast away",
         ("Powers/Prototype/CompanionOverhaulHooks.cs", "MelodyLoopPower"):
             "QUARANTINED (the Mondstadt companion overhaul, second wave). "
             "Applies Hydro to the ENEMY it is hosted on, then ticks its own "
             "duration. THE ORDERING QUESTION, answered: it touches only its "
-            "own host and reads nothing, and the three overhaul co-tenants "
-            "one block up write the player's Block, the player's Strength and "
-            "an enemy debuff -- none of which an aura landing on one enemy "
-            "can change, and none of which changes what aura this power puts "
+            "own host and reads nothing, and the two overhaul co-tenants "
+            "one block up write the player's Block and the player's Strength "
+            "-- neither of which an aura landing on one enemy "
+            "can change, and neither of which changes what aura this power puts "
             "up. Two Melody Loops are on two different enemies by "
             "construction, because the card places the power on the body it "
             "targeted",
@@ -931,9 +923,8 @@ CO_TENANCY_LEDGER = {
             "a random enemy, pays raw Block, then ticks its own duration. THE "
             "ORDERING QUESTION, answered, and it is the reason the sim runs "
             "this LAST of the broadcast's tenants: the Cryo can resolve a "
-            "REACTION, whose damage StellarisOmenPower's Vulnerable would "
-            "amplify, so the two are not commutative and one sequence is "
-            "written down (effects.player_turn_start_triggers, coven last). "
+            "REACTION, so one sequence is written down "
+            "(effects.player_turn_start_triggers, coven last). "
             "It is also the only tenant here that draws from the rng, so no "
             "co-tenant's roll can move under it, and two copies of this one "
             "power are identical",

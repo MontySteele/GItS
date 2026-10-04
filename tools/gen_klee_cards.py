@@ -3428,9 +3428,6 @@ APPLY_POWERS = {
         "At the start of your turn, gain 5 [gold]Block[/gold]. If you had "
         "[gold]Block[/gold] left at the end of your last turn, also gain 2 "
         "[gold]Strength[/gold]."),
-    "mc_omen": ("StellarisOmenPower", None,
-        "At the start of your next turn, apply {X} [gold]Vulnerable[/gold] to "
-        "ALL enemies."),
     "mc_grand_ode": ("GrandOdePower", None,
         "At the end of your turn, [gold]Swirl[/gold] the aura of ALL enemies. "
         "Lasts {X} more turn(s)."),

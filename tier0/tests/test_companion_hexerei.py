@@ -41,6 +41,14 @@ FAMILY = {
 }
 
 
+#: The one pair whose costs part on purpose. The Mondstadt companion review
+#: (2026-10-03, `review/active/mondstadt-companions-2026-10-03.md` pick 2)
+#: moved Wind Spirit Creation to 1 Energy and Swirl ALL so it is no longer a
+#: subset of Mollis Favonius; the stand-in keeps its 0. Rarity still matches,
+#: so the offer odds do not move.
+COST_SPLIT = frozenset({"proto_mc_sucrose_mollis_favonius"})
+
+
 def _caches_clear():
     from tier05 import rewards
 
@@ -97,7 +105,8 @@ def test_the_four_are_stand_ins_on_the_seam(overhaul):
         assert card.is_companion, cid
         replaced = loader.peek_card(universal)
         assert card.rarity == replaced.rarity, cid
-        assert card.cost == replaced.cost, cid
+        if cid not in COST_SPLIT:
+            assert card.cost == replaced.cost, cid
         assert card.nation == replaced.nation, cid
 
 

@@ -498,7 +498,6 @@ MC_DANDELION_BREEZE_BLOCK = 6   # Jean: Block per end of turn
 MC_OZ_DMG = 5                   # Fischl: Oz's Electro volley, no turn limit
 MC_REVELATION_BLOCK = 5         # Nicole: Block at the start of your turn
 MC_REVELATION_STRENGTH = 2      # Nicole: Theosis, for holding the line
-MC_OMEN_VULNERABLE = 1          # Mona: the delayed doom, one turn of it
 MC_LIGHTNING_ROSE_DMG = 5       # Lisa: Electro damage per turn, 3 turns
 MC_LIGHTNING_ROSE_VULN = 1      # Lisa: the Vulnerable that rides it
 # THE SECOND WAVE -- the thirteen rows the first pass left out. Same rule as

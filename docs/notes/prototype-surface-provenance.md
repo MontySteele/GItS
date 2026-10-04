@@ -6043,3 +6043,21 @@ formula, and the `varka` draw it does not see). Their play rate is the reading
 that changed. Every Knight still feeds the Muster, switch and `elem_` decks:
 paired, muster +8.8, switch +6.8, and elem_pyro, elem_hydro and elem_cryo
 +4.8 to +6.7.
+
+## Mondstadt companions, 2026-10-03
+
+`review/active/mondstadt-companions-2026-10-03.md`, both picks ruled at their
+defaults ([USER]: "Agreed on the Mondstadt pool changes you proposed.").
+
+- `proto_mc_mona_stellaris_phantasm` (Mona — Stellaris Phantasm): cost 2 → 1,
+  Exhaust kept; "Apply Hydro and 3 [4] Vulnerable to ALL enemies." The
+  Vulnerable lands on play. The next-turn promise (`mc_omen`,
+  `StellarisOmenPower`, `C.MC_OMEN_VULNERABLE` / `OmenVulnerable`) had no
+  other user and is deleted in both engines.
+- `proto_mc_noelle_breastplate` (Noelle — Breastplate): Block 6 → 8, upgrade
+  +3 (8 [11]); the 4 more below half HP stays.
+- `proto_mc_sucrose_gust` (Sucrose — Wind Spirit Creation): cost 0 → 1;
+  "Swirl ALL enemies. Draw 1 [2] card." Not Exhaust. Its Klee stand-in
+  Mollis Favonius keeps cost 0, so the stand-in cost pin exempts that pair.
+- `proto_mc_amber_fiery_rain` (Amber — Fiery Rain): 4 → 3 Pyro per hit to
+  ALL, 3 times; upgrade +1 per hit (3 [4]).

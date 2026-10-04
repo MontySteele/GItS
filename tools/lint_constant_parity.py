@@ -218,7 +218,6 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.OzDamage": C.MC_OZ_DMG,
     "CompanionOverhaulLaw.RevelationBlock": C.MC_REVELATION_BLOCK,
     "CompanionOverhaulLaw.RevelationStrength": C.MC_REVELATION_STRENGTH,
-    "CompanionOverhaulLaw.OmenVulnerable": C.MC_OMEN_VULNERABLE,
     "CompanionOverhaulLaw.LightningRoseDamage": C.MC_LIGHTNING_ROSE_DMG,
     "CompanionOverhaulLaw.LightningRoseVulnerable": C.MC_LIGHTNING_ROSE_VULN,
     # The same arm's SECOND WAVE -- the seven numbers its thirteen new rows

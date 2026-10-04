@@ -802,8 +802,9 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: geo,
    cost: 1, type: skill,
-   description: "Gain 6 [gold]Block[/gold]. If you are below half HP, gain {BranchBlock:diff()} additional [gold]Block[/gold].",
-   effects: [{op: block, amount: 6},
+   upgrade: {block: 3},
+   description: "Gain 8 [gold]Block[/gold]. If you are below half HP, gain {BranchBlock:diff()} additional [gold]Block[/gold].",
+   effects: [{op: block, amount: 8},
              {op: conditional, if: hp_pct_below_50,
               then: [{op: block, amount: 4}]}]}
 
@@ -871,10 +872,10 @@
 - {id: proto_mc_sucrose_gust, name: "Sucrose — Wind Spirit Creation", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
-   cost: 0, type: skill,
+   cost: 1, type: skill,
    upgrade: {draw: 1},
-   description: "[gold]Swirl[/gold] the enemy. Draw {Cards:diff()} card{Cards:plural:|s}.",
-   effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
+   description: "[gold]Swirl[/gold] ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: swirl, target: all_enemies}, {op: draw, amount: 1}]}
 
 - {id: proto_mc_sucrose_astable, name: "Sucrose — Astable Anemohypostasis", character: klee,
    authored_by: [claude],
@@ -910,10 +911,11 @@
 - {id: proto_mc_mona_stellaris_phantasm, name: "Mona — Stellaris Phantasm", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: applier, element: hydro,
-   cost: 2, type: skill, exhaust: true,
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply 2 [gold]Vulnerable[/gold] to ALL enemies.",
+   cost: 1, type: skill, exhaust: true,
+   upgrade: {vulnerable: +1},
+   description: "Apply [gold]Hydro[/gold] and 3 [gold]Vulnerable[/gold] to ALL enemies.",
    effects: [{op: apply_aura, element: hydro, target: all_enemies},
-             {op: apply_power, power: mc_omen, amount: 2, target: self}]}
+             {op: apply_power, power: vulnerable, amount: 3, target: all_enemies}]}
 
 - {id: proto_mc_venti_grand_ode, name: "Venti — Wind's Grand Ode", character: klee,
    authored_by: [claude],
@@ -927,8 +929,9 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: pyro,
    cost: 1, type: attack,
-   description: "Deal 4 [gold]Pyro[/gold] damage to ALL enemies 3 times.",
-   effects: [{op: damage, amount: 4, target: all_enemies, times: 3, applies_element: true}]}
+   upgrade: {damage: 1},
+   description: "Deal 3 [gold]Pyro[/gold] damage to ALL enemies 3 times.",
+   effects: [{op: damage, amount: 3, target: all_enemies, times: 3, applies_element: true}]}
 
 - {id: proto_mc_lisa_violet_arc, name: "Lisa — Violet Arc", character: klee,
    authored_by: [claude],

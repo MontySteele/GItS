@@ -109,12 +109,11 @@ public class CompanionOverhaulTests
     {
         typeof(SignatureMixPower),
         typeof(RevelationPower),
-        typeof(StellarisOmenPower),
     };
 
     /// <summary>`EB-470`. The start-of-turn TAIL: driven by the one tenant
     /// from <c>AfterPlayerTurnStartLate</c> rather than by a broadcast of its
-    /// own, because it is not commutative with the three above.</summary>
+    /// own, so it runs after every other start-of-turn tenant.</summary>
     private static readonly Type[] LateStartOfTurnPowers =
     {
         typeof(LightningRosePower),
@@ -276,31 +275,6 @@ public class CompanionOverhaulTests
     }
 
     [Fact]
-    public void The_omens_face_prints_the_stack_it_pays()
-    {
-        // `EB-622`. THE OMEN IS THE ONE FACE THE THEORY ABOVE CANNOT COVER,
-        // because its payout is a PRODUCT: the hook spends
-        // `OmenVulnerable * Amount`, and Mona's row now applies a stack of 2.
-        // A face interpolating the constant would print "apply 1" over a power
-        // that pays 2, which is the exact defect the theory exists to stop --
-        // so the face prints `{Amount}`, and this pin is the reason that is
-        // honest: while the per-stack rate is 1 the stack IS the payout, and a
-        // retune of the rate has to come back through here.
-        Assert.Equal(1, CompanionOverhaulLaw.OmenVulnerable);
-
-        var description = new StellarisOmenPower().Localization!
-            .Single(entry => entry.Item1 == "description").Item2;
-        Assert.Contains("[blue]{Amount}[/blue] [gold]Vulnerable[/gold]",
-                        description);
-
-        // And the CARD hands the power the stack the sheet prints, off its own
-        // dynamic var, so the row's number reaches both the face and the hook.
-        var face = new ProtoMcMonaStellarisPhantasm().Localization!
-            .Single(entry => entry.Item1 == "description").Item2;
-        Assert.Contains("{PowerAmount:diff()} [gold]Vulnerable[/gold]", face);
-    }
-
-    [Fact]
     public void Sucroses_upgrade_draws_one_more_and_keeps_exhaust()
     {
         // `EB-622`. The Prototype-stage DEFAULT for a 0-cost row printing no
@@ -362,20 +336,6 @@ public class CompanionOverhaulTests
         }
     }
 
-    [Fact]
-    public void The_omen_is_removed_whole_rather_than_ticked()
-    {
-        // Two copies pay two Vulnerable NEXT turn, not one Vulnerable on each
-        // of two turns. TickDownDuration is exactly the call that would do the
-        // second thing, so its absence beside a Remove is the pin.
-        var calls = typeof(StellarisOmenPower).GetMethods(All)
-            .Where(m => m.DeclaringType == typeof(StellarisOmenPower))
-            .SelectMany(Il.Calls)
-            .ToList();
-        Assert.Contains("PowerCmd.Remove", calls);
-        Assert.DoesNotContain("PowerCmd.TickDownDuration", calls);
-    }
-
     // ---- THE END-OF-TURN ORDER ------------------------------------------
 
     [Fact]
@@ -434,13 +394,13 @@ public class CompanionOverhaulTests
     }
 
     [Fact]
-    public void The_start_of_turn_three_keep_their_own_broadcast()
+    public void The_start_of_turn_two_keep_their_own_broadcast()
     {
         // Deliberate, and the difference from the six above is argued rather
-        // than inherited: these three are COMMUTATIVE. Two grant the player
-        // Block or Strength and the third applies Vulnerable to enemies; none
-        // reads a value another writes, and the one that reads Block reads a
-        // latch. Order among them cannot change an outcome.
+        // than inherited: these two are COMMUTATIVE. Both grant the player
+        // Block or Strength; neither reads a value the other writes, and the
+        // one that reads Block reads a latch. Order between them cannot change
+        // an outcome. (Mona's omen was a third until 2026-10-03.)
         foreach (var type in StartOfTurnPowers)
         {
             var method = type.GetMethod("AfterPlayerTurnStart", All);
@@ -461,9 +421,8 @@ public class CompanionOverhaulTests
         //
         // AND FROM THE TENANT, LATE, not from a broadcast of its own: the
         // volley draws from Rng.CombatTargets and puts Electro on a body that
-        // may already carry an aura, while Mona's omen Vulnerables the whole
-        // board from the ordinary AfterPlayerTurnStart -- a 50% swing decided
-        // by listener iteration order otherwise. AfterPlayerTurnStartLate runs
+        // may already carry an aura that another start-of-turn tenant laid --
+        // a swing decided by listener iteration order otherwise. AfterPlayerTurnStartLate runs
         // strictly after every AfterPlayerTurnStart, which is the tail
         // position tier0 `_companion_overhaul_turn_start_late` holds.
         foreach (var type in LateStartOfTurnPowers)

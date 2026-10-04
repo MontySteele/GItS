@@ -6703,10 +6703,11 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
     the upkeep by the EB-2 ruling recorded above -- inserting a fourth income
     source in the middle of that group would be re-opening a settled race.
 
-    C# twins: `SignatureMixPower`, `RevelationPower` and `StellarisOmenPower`,
-    each overriding `AfterPlayerTurnStart`. The three are COMMUTATIVE -- none
-    reads a value another writes -- which is why the C# side lets them keep
-    their own broadcast while the end-of-turn six get one listener.
+    C# twins: `SignatureMixPower` and `RevelationPower`, each overriding
+    `AfterPlayerTurnStart`. The two are COMMUTATIVE -- neither reads a value
+    the other writes -- which is why the C# side lets them keep their own
+    broadcast while the end-of-turn six get one listener. (Mona's omen was a
+    third until 2026-10-03, when her card moved to Vulnerable on play.)
     """
     p = state.player
     # Diona, Signature Mix -- stacks are TURNS REMAINING (the `oz_summon`
@@ -6737,19 +6738,6 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
         if p.mc_held_block_at_turn_end:
             powers.apply_power(state, p, "strength",
                                C.MC_REVELATION_STRENGTH * n, applier=p)
-    # Mona, Stellaris Phantasm -- the delayed doom. Vulnerable IS "take 50%
-    # more damage" in this engine (`C.VULNERABLE_TAKEN_MULT` is 1.50), so the
-    # card needs no private multiplier; what it needs is the DELAY, because
-    # Vulnerable applied on the turn the card is played would cover the rest of
-    # THIS turn and the card says next.
-    #
-    # POPPED WHOLE, not ticked: the promise is kept once however many copies
-    # were played, so a two-stack omen must not stretch across two turns.
-    n = p.powers.pop("mc_omen", 0)
-    if n:
-        for enemy in list(state.living_enemies):
-            powers.apply_power(state, enemy, "vulnerable",
-                               C.MC_OMEN_VULNERABLE * n, applier=p)
     # ---- the second wave's two start-of-turn readers ----------------------
     # Diona, Icy Paws -- CLAMP, not a payout. `mc_icy_paws` marks how much of
     # the standing Block came from that card; Block is cleared at the top of
@@ -6770,10 +6758,9 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
     # CHOSEN body, and a power that lives ON that body needs no machinery to
     # remember which one it was. Stacks are TURNS REMAINING; FIRE, THEN TICK.
     #
-    # LAST BECAUSE IT IS THE ONE THAT APPLIES AN ELEMENT, and the three above
-    # it do not: two grant the player Block or Strength and the third applies
-    # Vulnerable to enemies, so none of them can be changed by an aura landing
-    # or a reaction firing. Two Melody Loops cannot disturb each other either
+    # LAST BECAUSE IT IS THE ONE THAT APPLIES AN ELEMENT, and the two above
+    # it do not: they grant the player Block or Strength, so neither can be
+    # changed by an aura landing or a reaction firing. Two Melody Loops cannot disturb each other either
     # -- each applies to its own host and nothing else -- which is why the C#
     # twin is allowed to keep its own `AfterPlayerTurnStart` broadcast beside
     # the other three rather than joining the end-of-turn listener.
@@ -6796,9 +6783,10 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
                              source="companion")
     inazuma_overhaul_turn_start(state)
     # ---- and KLEE'S COVEN PERSONALS, last (QUARANTINED, R236) --------------
-    # Qiqi's Herald applies Cryo, which can resolve a reaction, and Mona's omen
-    # above applies Vulnerable to ALL enemies -- so the two are not commutative
-    # and one sequence is written down. `tier0.engine.companion_coven`.
+    # Qiqi's Herald applies Cryo, which can resolve a reaction, so it runs
+    # after the overhaul's own start-of-turn powers in one written-down
+    # sequence (Mona's omen, which Vulnerabled the board here, left
+    # 2026-10-03). `tier0.engine.companion_coven`.
     companion_coven.turn_start(state)
     # THE STAND-IN SEAM's one start-of-turn rule after it -- Jean's Lion's
     # Fang, Fair Protector, Grounded's shape with a card on it. LAST, and
@@ -6819,8 +6807,7 @@ def _companion_overhaul_turn_start_late(state: CombatState) -> None:
 
     LAST, AND WRITTEN DOWN, because it is not commutative with what runs above
     it: the volley draws a target from `state.rng` and puts Electro on a body
-    that may already carry an aura, Mona's omen Vulnerables the whole board,
-    Barbara's Melody Loop lays Hydro and Qiqi's Herald lays Cryo. The C# twin
+    that may already carry an aura, Barbara's Melody Loop lays Hydro and Qiqi's Herald lays Cryo. The C# twin
     is `CompanionOverhaulTurnEnd.AfterPlayerTurnStartLate`, and the 0.111.0
     hook contract runs `AfterPlayerTurnStartLate` strictly after every
     `AfterPlayerTurnStart` -- which is exactly this position, and the only

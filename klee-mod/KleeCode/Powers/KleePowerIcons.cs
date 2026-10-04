@@ -208,7 +208,6 @@ internal static class KleePowerIcons
         // nothing and the miss is logged once by name.
         SignatureMixPower => KleePck.Path("klee/powers/celestial_gift.png"),
         RevelationPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        StellarisOmenPower => KleePck.Path("klee/powers/detonation_vuln.png"),
         GlacialWaltzPower => KleePck.Path("klee/powers/oz_summon.png"),
         MondstadtOzPower => KleePck.Path("klee/powers/oz_summon.png"),
         LightningRosePower => KleePck.Path("klee/powers/oz_summon.png"),

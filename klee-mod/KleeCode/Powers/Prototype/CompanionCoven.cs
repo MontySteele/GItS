@@ -140,10 +140,10 @@ public static class CompanionCovenBombs
 /// the sim re-rolls in the same loop for the same reason.
 ///
 /// IT KEEPS ITS OWN <c>AfterPlayerTurnStart</c> broadcast, like the arm's other
-/// three start-of-turn powers, and the sim runs it LAST of the four. The order
-/// is not ceremony here: Mona's omen applies Vulnerable to ALL enemies at the
-/// start of the turn and the Cryo below can resolve a reaction that Vulnerable
-/// amplifies. It is the only rng-drawing power on that broadcast, so no other
+/// two start-of-turn powers, and the sim runs it LAST of the three. The order
+/// was not ceremony while Mona's omen applied Vulnerable to ALL enemies at the
+/// start of the turn (until 2026-10-03), since the Cryo below can resolve a
+/// reaction that Vulnerable amplifies; it is kept. It is the only rng-drawing power on that broadcast, so no other
 /// tenant's roll can move under it, and two copies of this one are identical.
 /// </summary>
 public sealed class HeraldOfFrostPower : PowerModel, ILocalizationProvider

@@ -44,10 +44,6 @@ public static class CompanionOverhaulLaw
     /// Mirrors <c>C.MC_REVELATION_STRENGTH</c>.</summary>
     public const int RevelationStrength = 2;
 
-    /// <summary>Mona, Stellaris Phantasm: the delayed doom, one turn of it.
-    /// Mirrors <c>C.MC_OMEN_VULNERABLE</c>.</summary>
-    public const int OmenVulnerable = 1;
-
     /// <summary>Lisa, Lightning Rose: Electro damage per end of turn.
     /// Mirrors <c>C.MC_LIGHTNING_ROSE_DMG</c>.</summary>
     public const int LightningRoseDamage = 5;

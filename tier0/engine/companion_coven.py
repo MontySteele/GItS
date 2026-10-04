@@ -94,11 +94,11 @@ def turn_start(state: CombatState) -> None:
 
     Called from the tail of `effects.player_turn_start_triggers`, AFTER
     `companion_overhaul_turn_start`. The order is law and the C# side keeps it
-    by the same argument the Mondstadt block makes for its own three: Mona's
-    omen applies Vulnerable to ALL enemies at the start of the turn, and the
-    Cryo the Herald applies can resolve a REACTION whose damage that Vulnerable
-    amplifies. So the two are not commutative, one sequence is written down,
-    and this is the end of it.
+    by the same argument the Mondstadt block makes for its own: the Cryo the
+    Herald applies can resolve a REACTION, so one sequence is written down and
+    this is the end of it. (Mona's omen, which applied Vulnerable to ALL
+    enemies at the start of the turn and made the order a 50% swing, left
+    2026-10-03 when her card moved to Vulnerable on play.)
 
     Herald of Frost -- "For 3 turns, at the start of your turn apply Cryo twice
     to a random enemy and gain 3 Block." Stacks are TURNS REMAINING (the
