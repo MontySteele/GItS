@@ -115,8 +115,18 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # that ever built the panel.
     # IT WENT FOUR -> THREE ON 2026-10-01 (legacy cleanup stage 5): the
     # Kurage memory card's teardown left with the retired Kurage memory.
-    # A FOURTH appearing here is the next review question.
-    assert len(markers) == 3, markers
+    # IT WENT THREE -> FIVE ON 2026-10-04 (the Kokomi off-character audit),
+    # and this is that review question's answer. Both new markers are on
+    # `BakeKuragePet.cs`: `AutoPlayWithNoKokomiTargetPatch` (an auto-play
+    # with no legal target does not play) and `PlanOnlyNeedsTheKuragePatch`
+    # (a Plan-only card with no Kurage is unplayable). Their defect IS a
+    # Kokomi card in ANOTHER character's hand (Splash, Kaleidoscope,
+    # Prismatic Gem, Sea Glass), so a Kokomi character scope would switch
+    # them off exactly where they are needed. They are scoped by the card's
+    # own TargetType instead -- values only the Kokomi arm's cards carry --
+    # and resolve no seat.
+    # A SIXTH appearing here is the next review question.
+    assert len(markers) == 5, markers
 
 
 def test_registered_in_the_ci_lane() -> None:
