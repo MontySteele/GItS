@@ -630,24 +630,137 @@ at 1000 runs on the same seeds (`--k3`, commit 948080ed):
 - The starter may overshoot: first elite won 67%, against 32% for the
   reference Ironclad. A strong starter is the act-1 job [USER] asked for,
   so this goes to the seats with the paper's lever.
-- The Restore refund sentence keeps the law's purpose intact: HP with
-  Drains can never end a fight above HP without them.
+- ~~The Restore refund sentence keeps the law's purpose intact.~~
+  Withdrawn in sec.15: GPT showed it rewards stalling a kill.
+
+## 15. Reviews folded in (Fable and GPT, 2026-10-05)
+
+Both reviewers would build it. GPT wants a small playable slice before a
+full sheet. These are the paper's changes. The design calls are the main
+session's.
+
+**1. Multipliers read Drain and Restore, never hits (Fable).**
+- A hit still pays 1 Fanfare per HP. That's the recovery mechanism, and the
+  `nohit` variant showed late scaling needs it.
+- **The problem:** with Universal Revelry and Critics' Darling, a 30-damage
+  hit was worth about 6 damage per HP lost, so Blocking worked against her
+  own plan.
+- **New texts:**
+  - Universal Revelry: "Whenever you Drain or Restore, gain that much
+    additional Fanfare."
+  - Critics' Darling: "Whenever you Drain or Restore, deal that much damage
+    to a random enemy."
+- Neither triggers itself. A second copy adds again (two copies give +2x,
+  not 4x).
+- **Lynette keeps her hit line.** It is her identity, it fires once a turn,
+  and it is flat.
+
+**2. The Crowd gets an Uncommon scaling Power (Fable).**
+- Thunderous Applause (Power, 1, Uncommon): "Whenever you Spend, deal 3
+  damage to ALL enemies." [4]
+- A spend-all counts as one Spend.
+- Each archetype now has an Uncommon Power reading its own verb:
+  - Salon's Encore reads Drain;
+  - Endless Waltz reads Restore;
+  - Thunderous Applause reads Spend.
+- It also attacks the idle-Fanfare result (K5): it pays for spending often
+  rather than banking.
+
+**3. Stalling: the refund argument is withdrawn (GPT).**
+- Restoring only self-drained HP caps the reward for delaying a kill. It
+  doesn't remove it.
+- **The cap:** outstanding drain, at most half her entry HP, repaid at 2 a
+  turn. Every stalled turn must also Block the enemy fully.
+- That is the same order as base-game stalls, but it is a real one.
+- **Seats get the question:** "Did you ever keep a beaten enemy alive to
+  collect repayment?"
+- **Lever if yes:** the curtain call repays everything (all drained HP
+  returns when the fight ends). Stalling then gains nothing. The price is
+  the killing-turn tradeoff, so Drain's only cost becomes the risk of being
+  low when hit.
+- Pick 3 below now asks for a prototype exception, not a law change.
+
+**4. Neuvillette spends no HP on his own (GPT).**
+- New act: "Deal Hydro damage to ALL enemies equal to the HP you drained
+  this turn."
+- The player's own Drains feed him, and a guest never takes permanent HP
+  unasked.
+- This also settles the Singer-rests question in sec.14.
+
+**5. Fewer choosers (both).**
+- **Two-mode cards** where the plain mode is a real line:
+  - Curtain Rise, which teaches;
+  - Chevalmarin;
+  - Usher;
+  - Tidal Flourish;
+  - Spirited Aria.
+- **Fixed-cost cards** where the answer would be yes:
+  - Crabaletta: "Drain 5. Deal 26."
+  - Solicitation: "Drain 2. Deal 9."
+  - Quick Flourish: "Spend 4. Deal 11 and apply Hydro."
+- A fixed-cost card can't be played if its price can't be paid. That's
+  Hemokinesis's shape.
+- This puts the Drain-or-not choice into the draft and the play-or-hold
+  decision, where GPT says it honestly lives. The Singer funds a modest
+  steady pace, and the big Drain cards overdraw it.
+
+**6. Pneuma is about timing and conversion (GPT).**
+- "Drain a little, Restore a lot" was wrong, since Restore can't exceed what
+  was drained.
+- **What Pneuma Restores are for:**
+  - reopening Drain room this turn;
+  - getting healthy before a big intent;
+  - feeding converters: Endless Waltz, Clorinde, Sigewinne, Charlotte.
+- A plain Restore that only speeds up a refund the Singer would make
+  anyway is filler, so Pneuma Commons each carry a body: damage or Block.
+- Draft question for seats: "did a Restore card change your turn?"
+
+**7. Rising Applause always spends.**
+- The face says "Spend all your Fanfare". The slice let the pilot skip it
+  (sec.10), and the build will match the face.
+- The bank-or-spend choice is whether to play it now. The slice reruns K1
+  under that rule before the seats.
+
+**8. Loops.**
+- **Salon's Tab:** its Energy now arrives next turn, the Interval Bell fix
+  from #900.
+- **Before seats, the loop probe covers:**
+  - Salon's Tab with Interval Bell;
+  - Star Billing with 0-cost guests;
+  - Lyney with A Five-Century Act.
+
+**9. Seats.** They play into act 2. On top of K3, they're asked:
+- ever declined a Spend;
+- ever stalled a kill;
+- did a Restore change a turn.
 
 ## Picks for [USER]
 
-1. **The direction.** Take the Salon's Tab (sec.2) to a `+proto` build and
-   a two-seat round on K3, K5 and K6. Default: yes. 2: a second research
-   pass first.
+1. **The direction, as a slice.** Build a small `+proto` slice, not the
+   full 78. It has:
+   - the starter;
+   - about 6 Drain cards, 4 Restore cards and 6 Fanfare outlets, mostly
+     Common;
+   - the three Uncommon Powers;
+   - four guests (Wriothesley, Charlotte, Clorinde and Lynette);
+   - three Rares (Universal Revelry, Let the People Rejoice and Singer of
+     Many Waters).
+   You play it, and a two-seat round plays it into act 2. The full sheet
+   waits on that. Default: yes. 2: the full sheet now, as Fable suggests.
 2. **The starter** (sec.7): Curtain Rise becomes "Drain 3: deal 14",
    Rising Applause becomes "Gain 5 Block. Spend all your Fanfare and deal
    that much damage", and Salon Solitaire becomes "Restore 2 at the end of
    your turn". Default: yes. 2: keep today's Curtain Rise (Spend), add the
    Drain card as a Common.
-3. **The healing law** (`LAW.md`, R8): add the refund sentence, so Restore
-   (only HP your own cards drained this combat) may appear at any rarity.
-   Default: yes. 2: no, and Pneuma shrinks to the relic plus Rare cards.
+3. **Restore at Common, for the prototype only.** It's a prototype exception
+   to the healing law (`LAW.md`, R8), not a law change. The law text is
+   amended only if it survives play and the stall question. Default: yes.
+   2: no, and Pneuma shrinks to the relic plus Rare cards.
 4. **The line.** Half the HP she started the combat with. Default: yes,
    because of K4. 2: Genshin's half of Max HP, which reads more cleanly on
    the HP bar but locks Drain in fights started below it.
 5. **The current build** stays installed as the reference until this is
    ruled. Default: yes.
+6. **If seats call Drain a reflex.** The first lever is the Singer resting
+   on a turn with a Drain (Fable), not higher prices. Default: hold until
+   the seats report.
