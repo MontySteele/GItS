@@ -85,6 +85,9 @@ KIT_SOURCES = (
     # act or Bow, and Clorinde's while-on-stage line. Kit verbs, not card hits.
     "furina_v2/act",
     "furina_v2/clorinde_line",
+    # The Furina research slice (`furina_tide`, sim only): a guest's act or
+    # line, Salon's Encore, Endless Waltz and Critics' Darling. Kit verbs.
+    "furina_tide/line",
     "companion",            # V17 companion / summon pulse
     "burst",                # V17 Sparks 'n' Splash volley
 )
@@ -301,6 +304,9 @@ SIM_CALL_SITES = {
     # each carries its performer's element (None for the trio).
     ('furina_v2.py', 1): ("'furina_v2/clorinde_line'", 'False', "'electro'"),
     ('furina_v2.py', 2): ("'furina_v2/act'", 'False', 'element'),
+    # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the one unpowered
+    # door every guest act and line, and every HP-loop Power, uses.
+    ('furina_tide.py', 1): ("'furina_tide/line'", 'False', 'element'),
     ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
     # Sparks 'n' Splash, since 2026-09-25 on a Bomb's own terms (the
     # explosion's unpowered door), at the start of the turn.
