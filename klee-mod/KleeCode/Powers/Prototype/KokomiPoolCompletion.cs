@@ -58,7 +58,7 @@ public static partial class KokomiCards
             {
                 break;
             }
-            var copy = combat.CloneCard(held);
+            var copy = KokomiCards.Exhausting(combat.CloneCard(held));
             await CardPileCmd.AddGeneratedCardToCombat(copy, PileType.Hand,
                                                         owner);
         }
@@ -209,7 +209,8 @@ public sealed class WatatsumiResistancePower : PowerModel, ILocalizationProvider
         ("title", "Watatsumi Resistance"),
         ("description",
             "Whenever you play a [gold]Companion[/gold] card, add "
-          + "[blue]{Amount}[/blue] {Amount:plural:Nip|Nips} to your hand."),
+          + "[blue]{Amount}[/blue] {Amount:plural:Nip|Nips} to your hand. "
+          + "{Amount:plural:It [gold]Exhausts[/gold]|They [gold]Exhaust[/gold]}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -227,7 +228,8 @@ public sealed class WatatsumiResistancePower : PowerModel, ILocalizationProvider
         if (combat == null) return;
         for (var i = 0; i < (int)Amount; i++)
         {
-            var nip = combat.CreateCard<ProtoKkNip>(player);
+            var nip = KokomiCards.Exhausting(
+                combat.CreateCard<ProtoKkNip>(player));
             await CardPileCmd.AddGeneratedCardToCombat(nip, PileType.Hand,
                                                         player);
         }

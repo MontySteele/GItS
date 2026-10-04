@@ -45,7 +45,7 @@ public sealed class ProtoKkWatatsumiResistance : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi Resistance"),
-        ("description", "Whenever you play a [gold]Companion[/gold] card, add a Nip to your hand."),
+        ("description", "Whenever you play a [gold]Companion[/gold] card, add a Nip to your hand. It [gold]Exhausts[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

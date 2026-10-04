@@ -306,8 +306,19 @@ def test_suffocating_deep_doubles_weak_and_vulnerable(overhaul):
     powers.apply_power(st, enemy, "weak", 2, applier=st.player)
     powers.apply_power(st, enemy, "vulnerable", 3, applier=st.player)
     _write(st, "proto_kk_suffocating_deep")
-    assert enemy.powers.get("weak") == 4
-    assert enemy.powers.get("vulnerable") == 6
+    # The Rare pass (2026-10-04): 1 of each first, then the doubling.
+    assert enemy.powers.get("weak") == 6
+    assert enemy.powers.get("vulnerable") == 8
+
+
+def test_suffocating_deep_never_doubles_nothing(overhaul):
+    """The Rare pass (2026-10-04): on a clean enemy it leaves Weak 2 and
+    Vulnerable 2, where it used to leave none."""
+    enemies = [make_enemy(hp=300), make_enemy(hp=300)]
+    st = kokomi_state(enemies=enemies)
+    _write(st, "proto_kk_suffocating_deep")
+    assert [(e.powers.get("weak"), e.powers.get("vulnerable"))
+            for e in enemies] == [(2, 2), (2, 2)]
 
 
 # --- Dusk Guard ---------------------------------------------------------------------

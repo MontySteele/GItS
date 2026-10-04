@@ -51,15 +51,13 @@ public sealed class ProtoKkShoalOfSpears : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shoal of Spears"),
-        ("description", "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] you wrote this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies once for each [gold]Plan[/gold] you wrote this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(0m),
-            new ExtraDamageVar(4m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).PlansWrittenThisTurn)
+            new DamageVar(4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,16 +69,20 @@ public sealed class ProtoKkShoalOfSpears : CustomCardModel, IElementalCard, ICha
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this, cardPlay)
-            .TargetingAllOpponents(CombatState!)
-            .WithElementHitFx(this)
-            .SpawningHitVfxOnEachCreature()
-            .Execute(choiceContext);
+        if (KokomiOverhaulLedger.For(Owner.Creature).PlansWrittenThisTurn > 0)
+        {
+            await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+                .WithHitCount(KokomiOverhaulLedger.For(Owner.Creature).PlansWrittenThisTurn)
+                .FromCard(this, cardPlay)
+                .TargetingAllOpponents(CombatState!)
+                .WithElementHitFx(this)
+                .SpawningHitVfxOnEachCreature()
+                .Execute(choiceContext);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+        DynamicVars.Damage.UpgradeValueBy(1m);
     }
 }

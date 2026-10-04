@@ -51,7 +51,7 @@ public sealed class ProtoKkSuffocatingDeep : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Suffocating Deep"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Double each enemy's [gold]Weak[/gold] and [gold]Vulnerable[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to each, then double its [gold]Weak[/gold] and [gold]Vulnerable[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -75,6 +75,14 @@ public sealed class ProtoKkSuffocatingDeep : CustomCardModel, IElementalCard, IC
             .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
+        foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
+        {
+            await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, 1, applier: Owner.Creature, cardSource: this);
+        }
+        foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
+        {
+            await PowerCmd.Apply<VulnerablePower>(choiceContext, debuffTarget, 1, applier: Owner.Creature, cardSource: this);
+        }
         await KokomiCards.DoubleWeakVulnerable(choiceContext, this, cardPlay);
     }
 

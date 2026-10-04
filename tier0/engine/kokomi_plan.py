@@ -2273,6 +2273,7 @@ def kurage_school(state: CombatState, card: Card) -> int:
         if len(state.player.hand) >= C.MAX_HAND_SIZE:
             break
         twin = copy.deepcopy(c)
+        twin.exhaust = True          # the Rare pass: "The copies Exhaust."
         effects._add_token(state, twin, "hand")
         arrived += 1
     state.emit("plan_kurage_school", copied=arrived, eligible=len(picks))
@@ -2306,7 +2307,8 @@ def watatsumi_resistance(state: CombatState) -> int:
     for _ in range(n):
         if len(state.player.hand) >= C.MAX_HAND_SIZE:
             break
-        effects._add_token(state, loader.get_card(NIP_ID), "hand")
+        effects._add_token(state, _exhausting(loader.get_card(NIP_ID)),
+                           "hand")
         added += 1
     state.emit("plan_watatsumi_resistance", nips=added)
     return added
@@ -2724,13 +2726,24 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
         from tier0.engine import effects            # late import: cycle
         cid = NIP_ID + (upgrades.SUFFIX if fx.get("upgraded") else "")
         for _ in range(amount):
-            effects._add_token(state, loader.get_card(cid), "hand")
+            effects._add_token(state, _exhausting(loader.get_card(cid)),
+                               "hand")
     else:                                   # unreachable: validated at load
         raise ValueError(f"unknown kokomi kind {k!r}")
 
 
 #: Shoal Call's token: the feed pass's Nip, the pool row itself.
 NIP_ID = "proto_kk_nip"
+
+
+def _exhausting(card: Card) -> Card:
+    """THE RARE PASS (2026-10-04): a Nip a card HANDS her Exhausts when it is
+    played, as a Shiv does -- Shoal Call's, Watatsumi Resistance's and Kurage
+    School's copies. A player's run filled the deck with them ("If the clones
+    were Exhaust it would be good"). A drafted Nip is unchanged.
+    `KokomiCards.Exhausting` is the twin."""
+    card.exhaust = True
+    return card
 
 #: The `kokomi` op's kinds and the numeric field each prints. The codegen's
 #: `KOKOMI_KINDS` / `KOKOMI_KIND_FIELDS` are the twin; `validate_op` is the

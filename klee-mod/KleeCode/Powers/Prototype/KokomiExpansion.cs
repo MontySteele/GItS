@@ -150,9 +150,19 @@ public static partial class KokomiCards
         {
             var nip = combat.CreateCard<ProtoKkNip>(owner);
             if (card.IsUpgraded) nip.UpgradeInternal();
-            await CardPileCmd.AddGeneratedCardToCombat(nip, PileType.Hand,
-                                                        owner);
+            await CardPileCmd.AddGeneratedCardToCombat(
+                Exhausting(nip), PileType.Hand, owner);
         }
+    }
+
+    /// <summary>The Rare pass (2026-10-04): a card she is HANDED Exhausts
+    /// when it is played, as a Shiv does -- Shoal Call's and Watatsumi
+    /// Resistance's Nips and Kurage School's copies. A drafted Nip is
+    /// unchanged. Sim twin: <c>kokomi_plan._exhausting</c>.</summary>
+    public static T Exhausting<T>(T card) where T : CardModel
+    {
+        card.AddKeyword(CardKeyword.Exhaust);
+        return card;
     }
 }
 
@@ -443,7 +453,7 @@ public sealed class KurageSwarmPower : PowerModel, ILocalizationProvider
         ("title", "Kurage Swarm"),
         ("description",
             "Whenever you write a [gold]Plan[/gold] that costs 0, the "
-          + "[gold]Casket[/gold] gains [blue]{Amount}[/blue]."),
+          + "[gold]Casket[/gold] gains [blue]{Amount}[/blue] more."),
     };
 
     public override PowerType Type => PowerType.Buff;

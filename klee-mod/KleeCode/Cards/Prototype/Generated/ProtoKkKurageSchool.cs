@@ -48,7 +48,7 @@ public sealed class ProtoKkKurageSchool : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage School"),
-        ("description", "Add a copy of each 0-cost card with a [gold]Plan[/gold] line in your hand to your hand."),
+        ("description", "Add a copy of each 0-cost card with a [gold]Plan[/gold] line in your hand to your hand. The copies [gold]Exhaust[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

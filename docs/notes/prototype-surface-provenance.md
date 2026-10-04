@@ -6383,3 +6383,41 @@ Bottled Applause are gone. The frozen v2 build is the tag
   made every upgraded Guest Star with two Tab+ an infinite (a re-summoned
   guest acts and stays); at cost 1 each cycle is paid out of this turn's
   Energy. The loop probe now finds no productive cycle.
+
+## Kokomi Rare pass, 2026-10-04
+
+The rest of the review of a friend's solo run ("why every single one of
+planning girl's legendary cards is bad"). [USER]: "Can you do the rest of the
+proposed changes as well?" The proposal was to rewrite the four Rares that
+were a Common one size up, make the Nips she is handed Exhaust, and fix
+Kurage Swarm's text. No rule changed and the Casket is untouched.
+
+- **`proto_kk_shoal_of_spears`**: "Deal 4 [5] Hydro damage to ALL enemies
+  once for each Plan you wrote this turn." It was one hit of 4 per Plan,
+  Tideturn's rate made AoE ("likely to only do 8 - 12"). As separate hits her
+  Strength and the enemy's Vulnerable count on each. Still nothing with no
+  Plan written. `times: plans_written_this_turn` is new to the generator's
+  `RUNTIME_TIMES`; the sim already read the token.
+- **`proto_kk_tidal_rebuke`**: cost 2 [1] to 1 [0], and Retain. At 2 it was
+  her own Common, Coral Crash, at double the price in a one-enemy fight ("A 2
+  Cost legendary that has the same effect as a 1 cost common").
+- **`proto_kk_the_moon_a_ship`**: cost 2 to 1. Its Block half was the
+  Regent's Uncommon Bulwark (12 Block and Forge 10 for 2) without the Forge
+  and with Exhaust. Mend is unchanged.
+- **`proto_kk_suffocating_deep`**: applies 1 Weak and 1 Vulnerable to every
+  enemy before it doubles, so the floor is Weak 2 and Vulnerable 2 ("might
+  apply weak 2 and vuln 2").
+- **The Nips she is handed Exhaust** when played, as a Shiv does: Shoal
+  Call's, Watatsumi Resistance's, and Kurage School's copies ("you fill up
+  your deck with 0 cost cards. If the clones were Exhaust it would be good").
+  A drafted Nip is unchanged. `kokomi_plan._exhausting`,
+  `KokomiCards.Exhausting`.
+- **`proto_kk_kurage_swarm`**: text only, "the Casket gains 1 more". The
+  friend read it as the carry-out's 1 ("Pointless bc every plan gives 1
+  casket anyways"); it has always been 1 on writing as well.
+
+Considered and not built: Tidal Rebuke as a Dusk Plan ("Dusk Plan: Deal
+damage equal to your Block to ALL enemies"), which would read her Block after
+the turn's other Dusk Plans land. It needs a new Plan clause in both engines.
+Not touched: Ceremonial Garment, What the Tokoyo Took, The Long Game, Patient
+Tide, Grand Design. No sim and no seat round were run.

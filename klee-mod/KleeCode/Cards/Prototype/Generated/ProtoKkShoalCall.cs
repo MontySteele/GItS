@@ -41,7 +41,7 @@ public sealed class ProtoKkShoalCall : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shoal Call"),
-        ("description", "Add {KkAmount:diff()} Nips to your hand.{IfUpgraded:show: They are upgraded.|}"),
+        ("description", "Add {KkAmount:diff()} Nips to your hand.{IfUpgraded:show: They are upgraded.|} They [gold]Exhaust[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
