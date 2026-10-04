@@ -55,7 +55,9 @@ def test_a_scripted_fight_adds_up_door_by_door(arm):
     FS.turn_start_regen(st)                 # usher 3 (rule 4 cut) regen 0
     assert FS.spend(st, 3) == 3             # crab 8              spent  3
     assert FS.absorb(st, 2) == 2            # usher 1             hit    2
-    FS.end_of_turn_acts(st)                 # crab 8 -> 6         faded  2
+    FS.end_of_turn_acts(st)                 # crab 8 (no fade here)
+    st.turn = 3
+    FS.turn_start_fade(st)                  # crab 8 -> 6         faded  2
     assert FS.final_bow(st) == 6            # crab leaves with 6  left   6
     assert FS.absorb(st, 5) == 1            # usher emptied       hit    1
     FS.settle_hit(st)                       # his bow: Block, no Fanfare
@@ -81,7 +83,9 @@ def test_a_scripted_fight_adds_up_door_by_door(arm):
     assert led["left"] == 6
     assert led["faded"] == 2                # a quarter of 8 (the fade pass)
     assert led["hit"] == 3
-    assert led["back_at_turn_end"] == [6]
+    # 2026-10-03: the sample is the end of her turn, before the fade that
+    # now waits for her next turn's start.
+    assert led["back_at_turn_end"] == [8]
     assert FS.total_fanfare(st.player) == 4
     assert _balances(st)
 

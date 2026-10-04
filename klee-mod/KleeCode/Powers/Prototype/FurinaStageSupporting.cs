@@ -56,8 +56,8 @@ public static partial class FurinaStage
     /// <summary>
     /// Does rule 12 run for this owner? Always, unless she holds
     /// <see cref="Relics.GrandTheaterProgram"/> ("Your performers no longer
-    /// fade."). The end-of-turn fade and the forecast both read it, so the
-    /// two cannot disagree. The 2026-09-29 fade pass cut the three cards that
+    /// fade."). The turn-start fade (<see cref="TurnStartFade"/>, since
+    /// 2026-10-03) reads it. The 2026-09-29 fade pass cut the three cards that
     /// bent the fade (Held Applause, Echoing Hall, Eternal Applause); the
     /// relic is the one switch left. The sim does not model the arm's relics.
     /// </summary>

@@ -80,6 +80,11 @@ public sealed class FurinaStageHooks : AbstractModel
         PlayerChoiceContext choiceContext, Player player)
     {
         await FurinaStage.InstallBadge(player.Creature);
+        // Rule 12, the fade, FIRST (2026-10-03: "Fanfare decay should be at
+        // the start of the next turn, not the end"), so the enemies' hits
+        // met the bars it would have taken and nothing below reads a bar
+        // before it.
+        FurinaStage.TurnStartFade(player.Creature);
         // 2026-09-26: a returnee from the enemies' turn performs in hers.
         FurinaStage.BeginTurn(player.Creature);
         await FurinaStage.RegenLead(player.Creature);

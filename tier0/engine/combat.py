@@ -977,6 +977,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # because a stage that regenerated before it existed would pay turn one a
     # point the brief spends a paragraph refusing it ("the first hand sees 3").
     furina_stage.open_combat(state)
+    # 2026-10-03: rule 12's fade, FIRST among the Stage's turn-start effects
+    # ("Fanfare decay should be at the start of the next turn, not the end").
+    furina_stage.turn_start_fade(state)
     # 2026-09-26: a returnee from the enemies' turn performs in hers.
     furina_stage.turn_start_rest(state)
     furina_stage.turn_start_regen(state)
