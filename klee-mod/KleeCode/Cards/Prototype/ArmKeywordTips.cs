@@ -852,12 +852,16 @@ public static class ArmKeywordTips
         }
     }
 
+    /// <summary>Rule 5's definition, shared by the keyword tip and the
+    /// Fanfare gauge's hover (<c>Vfx.FanfareCounter</c>).</summary>
+    internal const string FanfareBody =
+        "Your applause. Cards and Bows give it. [gold]Spend[/gold] and "
+      + "stars' acts use it. It never fades.";
+
     /// <summary>Rule 5: Fanfare is one number on Furina.</summary>
     public static IEnumerable<IHoverTip> ForFanfare(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, FanfareKey,
-            "Your applause. Cards and Bows give it. [gold]Spend[/gold] and "
-          + "stars' acts use it. It never fades.");
+        With(inherited, FanfareKey, FanfareBody);
 
     /// <summary>Rule 3: the free Bow act, then 1 Fanfare.</summary>
     public static IEnumerable<IHoverTip> ForBow(
