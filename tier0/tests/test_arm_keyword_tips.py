@@ -567,7 +567,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # performer and the fade retired with the bars.
             "Pay that much [gold]Fanfare[/gold]. Offered only if you have ",
             "Your applause. Cards and Bows give it. [gold]Spend[/gold] and ",
-            "stars' acts use it. It never fades.\");",
+            "stars' acts use it. It never fades.\";",
             "The performer acts once more without paying, then you gain ",
             "Choose a performer. It acts now. A star pays as usual.\");",
             "Each one makes your performers' damage and [gold]Block[/gold] ",

@@ -31,6 +31,11 @@ namespace KleeMod.Powers;
 /// (<see cref="DisplayAmount"/>, the ledger's); the hover adds this turn's
 /// gained and spent counts. Installed at combat open and asked again every
 /// turn start (<see cref="FurinaStage.InstallBadge"/>).
+///
+/// On her own screen the number is drawn by the energy-area gauge
+/// (<see cref="Vfx.FanfareCounter"/>, whose hover carries the flow counts)
+/// and this badge's status-strip node is suppressed; the model stays, so the
+/// rules, the wire and a co-op partner's view of her keep it.
 /// </summary>
 public sealed class FanfarePower : PowerModel, ILocalizationProvider
 {

@@ -241,7 +241,10 @@ reviews differ, the choice and its reason are given.
   seat order becomes a puzzle (Fable).
 - **The flow counts** (gained this turn, spent this turn) reset at the start
   of Furina's turn, so they hold through the whole end-of-turn sequence
-  (GPT). Both counts show on the Fanfare badge (Fable).
+  (GPT). Both counts show on the Fanfare badge (Fable). Since 2026-10-04
+  that is the Fanfare gauge beside the energy orb, which draws the number,
+  with both counts on its hover ([USER]: "out of the tooltip and into a
+  proper UI gauge like stars and bombs have").
 - **The walk-on is one act:** the member Bows at once without taking a
   seat. That is its free Bow act plus 1 Fanfare, not an act and then a Bow
   (GPT).

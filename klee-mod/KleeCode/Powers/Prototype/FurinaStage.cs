@@ -802,7 +802,8 @@ public static partial class FurinaStage
             applier: owner, cardSource: null, silent: true);
     }
 
-    /// <summary>Redraw the Fanfare badge's numbers and the cues.</summary>
+    /// <summary>Redraw the Fanfare badge's numbers, the Fanfare gauge
+    /// (<see cref="Vfx.FanfareCounter"/>) and the cues.</summary>
     public static void RefreshBadges(Creature? owner)
     {
         if (!LiveFor(owner)) return;
@@ -810,6 +811,7 @@ public static partial class FurinaStage
         {
             badge.Refresh();
         }
+        Vfx.FanfareCounter.Refresh(owner);
         Vfx.FurinaStageCues.Refresh(owner);
     }
 
@@ -1181,6 +1183,7 @@ public sealed class GameStageBoard : IStageBoard
     public async Task Sync()
     {
         await FurinaStagePets.Sync(_owner);
+        Vfx.FanfareCounter.Refresh(_owner);
         Vfx.FurinaStageCues.Refresh(_owner);
     }
 }

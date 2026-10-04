@@ -285,7 +285,7 @@ public static class SparkCounter
     /// it, so one number is the whole box and <see cref="Place"/> takes a
     /// scalar rather than a vector.
     /// </summary>
-    private static float SideOf(Control? star) =>
+    internal static float SideOf(Control? star) =>
         star != null && star.Size.X > 0f && star.Size.Y > 0f
             ? Mathf.Min(star.Size.X, star.Size.Y)
             : FallbackSide;
@@ -347,7 +347,7 @@ public static class SparkCounter
     /// With no panel to read there is nothing to be relative TO, and the corner
     /// literal is the honest guess rather than nothing on screen.
     /// </summary>
-    private static void Apply(
+    internal static void Apply(
         Control root, Control? panel, float side, Vector2 viewport)
     {
         if (panel == null)
@@ -385,7 +385,7 @@ public static class SparkCounter
     /// the placement rule lives in one pure function rather than half here and
     /// half at the call site.
     /// </summary>
-    private static Control Build(float squareSide)
+    internal static Control Build(float squareSide)
     {
         var root = new Control
         {
