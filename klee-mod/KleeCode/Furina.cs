@@ -28,6 +28,18 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
         ("pronounObject", "her"),
         ("pronounPossessive", "hers"),
         ("possessiveAdjective", "her"),
+        // The rest of the base game's per-character rows (BaseLib's
+        // CharacterLoc set plus bestiaryQuote). A missing row renders as
+        // its raw key: the co-op end-turn ping bubble did (playtest
+        // 2026-10-03). CharacterLocCompletenessTests pins the set.
+        ("aromaPrinciple", "[sine][blue]The show must go on, and I am its star![/blue][/sine]"),
+        ("banter.alive.endTurnPing", "Places, everyone! The curtain waits for no one!"),
+        ("banter.dead.endTurnPing", "..."),
+        ("bestiaryQuote", "This one has yet to see my performance."),
+        ("eventDeathPrevention", "The audience still needs its Regina!"),
+        ("goldMonologue", "[sine]Enough for a whole new season at the opera house...[/sine]"),
+        ("cardsModifierTitle", "Furina Cards"),
+        ("cardsModifierDescription", "Furina cards will now appear in rewards and shops."),
     };
 
     public override Color NameColor => new("4AA6C8");

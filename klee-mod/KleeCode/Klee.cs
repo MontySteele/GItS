@@ -68,6 +68,18 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
         ("pronounObject", "her"),
         ("pronounPossessive", "hers"),
         ("possessiveAdjective", "her"),
+        // The rest of the base game's per-character rows (BaseLib's
+        // CharacterLoc set plus bestiaryQuote). A missing row renders as
+        // its raw key: the co-op end-turn ping bubble did (playtest
+        // 2026-10-03). CharacterLocCompletenessTests pins the set.
+        ("aromaPrinciple", "[sine][red]Klee wants to blow it ALL up![/red][/sine]"),
+        ("banter.alive.endTurnPing", "Hurry, hurry! Klee's ready!"),
+        ("banter.dead.endTurnPing", "..."),
+        ("bestiaryQuote", "Klee hasn't blown this one up yet!"),
+        ("eventDeathPrevention", "Klee can't stop now, everyone's counting on her!"),
+        ("goldMonologue", "[sine]Klee can buy SO much gunpowder with this...[/sine]"),
+        ("cardsModifierTitle", "Klee Cards"),
+        ("cardsModifierDescription", "Klee cards will now appear in rewards and shops."),
     };
 
     // Klee red per spec C1.4; artist's final call later.
