@@ -22,7 +22,7 @@
 - {id: proto_ko_kapow, name: "Ka-pow!", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: basic, retain: true,
-   description: "[gold]Set off[/gold]. Deal 4 [gold]Pyro[/gold] damage.",
+   description: "[gold]Set off[/gold] the enemy. Deal 4 [gold]Pyro[/gold] damage.",
    effects: [{op: set_off, target: enemy, damage: 4}]}
 
 # Innate again (2026-10-03): taken off after the co-op run, restored after
@@ -62,7 +62,7 @@
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 12 [gold]Pyro[/gold] damage, then damage equal to what your [gold]Bombs[/gold] dealt.",
+   description: "[gold]Set off[/gold] the enemy. Deal 12 [gold]Pyro[/gold] damage, then damage equal to what your [gold]Bombs[/gold] dealt.",
    upgrade: {damage: +4},
    effects: [{op: set_off, target: enemy, damage: 12},
              {op: damage_set_off_total, target: enemy}]}
@@ -70,7 +70,7 @@
 - {id: proto_ko_the_big_one, name: "The Big One", character: klee,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold]. Your [gold]Bombs[/gold] deal quadruple damage.",
+   description: "[gold]Set off[/gold] the enemy. Your [gold]Bombs[/gold] deal quadruple damage.",
    upgrade: {cost: -1},
    effects: [{op: multiply_set_off, multiplier: 4},
              {op: set_off, target: enemy}]}
@@ -119,7 +119,7 @@
 - {id: proto_ko_quick_fuse, name: "Quick Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Each [gold]Bomb[/gold] on the enemy grows by 3. [gold]Set off[/gold].",
+   description: "Each [gold]Bomb[/gold] on the enemy grows by 3. [gold]Set off[/gold] the enemy.",
    upgrade: {grow: +3},
    effects: [{op: spend_spark, amount: 1},
              {op: grow_bombs, target: enemy, amount: 3},
@@ -128,7 +128,7 @@
 - {id: proto_ko_bang_bang, name: "Boom-Boom Strike", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 8 [gold]Pyro[/gold] damage. Place a [gold]Bomb[/gold] 4.",
+   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. Place a [gold]Bomb[/gold] 4.",
    effects: [{op: spend_spark, amount: 2},
              {op: set_off, target: enemy, damage: 8},
              {op: plant_bomb, target: enemy, size: 4}]}
@@ -156,7 +156,7 @@
 - {id: proto_ko_sizzle, name: "Sizzle", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "[gold]Set off[/gold]. Deal 6 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage.",
+   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage.",
    effects: [{op: set_off, target: enemy, damage: 6},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: damage, amount: 6, target: enemy}]}]}
@@ -164,7 +164,7 @@
 - {id: proto_ko_perfect_timing, name: "Perfect Timing", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, play this again.",
+   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, play this again.",
    effects: [{op: set_off, target: enemy, damage: 8},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: repeat_this, times: 1}]}]}
@@ -278,7 +278,7 @@
 - {id: proto_ko_countdown, name: "Countdown", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "[gold]Set off[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "[gold]Set off[/gold] the enemy. Draw {Cards:diff()} card{Cards:plural:|s}.",
    upgrade: {draw: 1},
    effects: [{op: set_off, target: enemy},
              {op: draw, amount: 2}]}
@@ -498,7 +498,7 @@
    cost: 1, type: attack, rarity: uncommon,
    # AoE trim, 2026-10-03 (sec.2): the Companion pays 6 more damage on the
    # aimed enemy instead of widening the Set off to ALL.
-   description: "[gold]Set off[/gold]. Deal 6 [gold]Pyro[/gold] damage, 6 more if you played a [gold]Companion[/gold] card this turn.",
+   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage, 6 more if you played a [gold]Companion[/gold] card this turn.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy},
              {op: damage, amount: 6, target: enemy,
@@ -566,7 +566,7 @@
 - {id: proto_ko_duck_and_run, name: "Survival Rulebook", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 7 [gold]Block[/gold]. [gold]Set off[/gold].",
+   description: "Gain 7 [gold]Block[/gold]. [gold]Set off[/gold] the enemy.",
    upgrade: {block: +3},
    effects: [{op: block, amount: 7},
              {op: set_off, target: enemy}]}

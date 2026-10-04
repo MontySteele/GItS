@@ -42,7 +42,7 @@ public sealed class ProtoKoCountdown : CustomCardModel, ISetOffCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Countdown"),
-        ("description", "[gold]Set off[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "[gold]Set off[/gold] the enemy. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

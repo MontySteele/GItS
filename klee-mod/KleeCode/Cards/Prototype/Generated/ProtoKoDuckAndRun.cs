@@ -42,7 +42,7 @@ public sealed class ProtoKoDuckAndRun : CustomCardModel, ISetOffCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Survival Rulebook"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Set off[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Set off[/gold] the enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
