@@ -734,6 +734,138 @@ session's.
 - ever stalled a kill;
 - did a Restore change a turn.
 
+## 16. [USER]'s two changes, and the slice spec (2026-10-05)
+
+[USER]: "we now have 3 keywords (Heal, Mend and Restore) that might be worth
+unifying. Do we need to separate Restore from Mend?" And: "I lean towards
+making 'restore drain at the end of the fight' a default anyway so it can't
+brick you".
+
+**Restore becomes Repay. It is not merged into Mend.**
+- **Different rules:**
+  - Mend (Kokomi, `text-conventions.md`) heals any HP lost this combat, up
+    to the HP she started it with. Enemy damage included.
+  - Furina's verb returns only HP she drained herself.
+- **Why not merge them:**
+  - If Furina Mended, she would heal hits at Common. That is the healing law
+    and Kokomi's "HP stability" lane.
+  - If Kokomi's Mend shrank to drained HP, it would do nothing for her.
+- **What was wrong was the word, not the split.** "Restore" reads as a third
+  synonym for heal. "Repay" carries the loan and says it is not healing:
+  "Repay 3."
+- **Player-facing count:** Heal (base), Mend (Kokomi) and Repay (Furina),
+  each owned by one kit.
+- `text-conventions.md` gains Drain and Repay rows. Its stale "Drain your
+  Fanfare" row, from a retired kit and with no live card, goes.
+
+**The curtain call repays everything (the default rule).**
+- **New rule:** when a combat ends, all HP she drained returns.
+- **What it removes:**
+  - the stall incentive (sec.15 point 3);
+  - the run-long attrition risk (sec.14);
+  - the "brick" [USER] named.
+- **What it costs:** the killing-turn tradeoff. Drain's price becomes being
+  lower when the next hit lands and nearer the line, inside the fight.
+- **Balance read:**
+  - The slice measured unrepaid HP of 2.5 a fight on a drafted deck, 2.8 on
+    a balanced deck and 5.8 on a heavy Drain deck.
+  - The rule is worth that much each fight. That is the same order as
+    Ironclad's Burning Blood (heal 6 after each fight) and below it for
+    most decks.
+  - For a character with no other out-of-combat healing, it is not out of
+    line.
+  - It does stack on a starter that already overshoots act one (K1), and it
+    makes Drain more of a yes (K3).
+  - **Price check:** Crabaletta goes 26 → 24 in the slice. The slice reruns
+    K1 and K3 with the rule on, against without, before seats.
+- The Singer keeps its job: refilling Drain room and making Fanfare *inside*
+  the fight.
+
+**The slice (pick 1).** It's the starter plus 24 cards. Texts are final for
+the slice, and the numbers are the instrument's.
+
+*Rules:* sec.2's rules, with Restore renamed Repay, plus the curtain call.
+The line is half the HP she started the combat with. There are three guest
+seats, and nothing else uses the stage.
+
+*Starter:*
+- Strike x4 and Defend x4 (base).
+- Curtain Rise (Basic Attack, 1): "Deal 7 damage. Drain 3: deal 14
+  instead." [10 / 18]
+- Rising Applause (Basic Skill, 1): "Gain 5 Block. Spend all your Fanfare
+  and deal that much damage." [7 Block]
+- Salon Solitaire (relic): "At the end of your turn, Repay 2." [3]
+
+*Drain (5):*
+- Mademoiselle Crabaletta (Attack, 2, Common): "Drain 5. Deal 24 damage."
+  [30]
+- Soloist's Solicitation (Attack, 0, Common): "Drain 2. Deal 8 damage." [11]
+- Surintendante Chevalmarin (Attack, 1, Common): "Deal 4 Hydro damage to
+  ALL enemies. Drain 3: deal 8 instead." [6 / 11]
+- Gentilhomme Usher (Skill, 1, Common): "Gain 7 Block. Drain 3: gain 13
+  instead." [9 / 17]
+- Salon's Tab (Skill, 0, Uncommon): "Draw 1 card. Drain 4: also gain 1
+  Energy next turn." [Draw 2]
+
+*Repay (4):*
+- Surging Waters (Attack, 1, Common): "Deal 6 damage. Repay 3." [9, Repay
+  4]
+- Hymn of Many Waters (Skill, 1, Common): "Gain 8 Block. Repay 3." [11,
+  Repay 4]
+- Pneuma Refrain (Skill, 1, Uncommon): "Repay 5. Draw 2 cards." [Repay 7]
+- Singer of Many Waters (Skill, 1, Rare): "Repay all your drained HP.
+  Exhaust." [cost 0]
+
+*Fanfare outlets (6):*
+- Tidal Flourish (Attack, 1, Common): "Deal 5 damage to ALL enemies. Spend
+  6: deal 12 Hydro damage to ALL enemies instead." [8 / 16]
+- Spirited Aria (Attack, 1, Common): "Deal 8 damage. Spend 5: deal 13 and
+  draw 2 instead." [11 / 17]
+- Quick Flourish (Attack, 0, Common): "Spend 4. Deal 11 Hydro damage." [14]
+- Standing Ovation (Attack, 1, Common): "Spend all your Fanfare. Deal that
+  much damage to ALL enemies." [Retain]
+- Interval Bell (Skill, 0, Common): v2 text after #900, unchanged.
+- Bravura (Attack, 1, Uncommon): "Spend all your Fanfare. Deal 6 damage,
+  plus 2 per point." [3 per]
+
+*Powers (3, Uncommon):*
+- Salon's Encore (1): "Whenever you Drain, deal 3 damage to ALL enemies."
+  [4]
+- Endless Waltz (1): "Whenever you Repay, deal that much damage to a
+  random enemy." [Innate]
+- Thunderous Applause (1): "Whenever you Spend, deal 3 damage to ALL
+  enemies." [4]
+
+*Guests (4, cost 1, upgraded 0):*
+- Charlotte (Common). Line: "The first time you Repay each turn, draw 1
+  card." Act: "Repay 2."
+- Wriothesley (Uncommon). Line: "Whenever you Drain, deal that much Cryo
+  damage to a random enemy." Act: "Deal 4 Cryo damage to a random enemy."
+- Lynette (Uncommon). Line: "The first time each turn an enemy makes you
+  lose HP, gain that much Fanfare again." Act: "Deal 3 Anemo damage to an
+  enemy with an aura."
+- Clorinde (Rare). Line: "Whenever you Repay, deal twice that much Electro
+  damage to a random enemy." Act: "Deal 6 Electro damage to a random enemy."
+
+*Rares (2 more):*
+- Universal Revelry (Power, 2): "Whenever you Drain or Repay, gain that
+  much additional Fanfare." [cost 1]
+- Let the People Rejoice (Attack, 2): "Spend all your Fanfare. Deal 2
+  damage to ALL enemies per point." [cost 1]
+
+*Relics and potions:*
+- **Kept:** Opera Glasses, Grand Theater Program and Bottled Applause.
+- **Out of the slice's pools:** every other Furina relic and potion. They
+  name the trio or Rehearsal.
+
+*Screen:*
+- The Fanfare gauge stays.
+- **Drain room** must be readable before any play: the line, and how much
+  is drained. The cheapest honest reading is a second counter beside
+  Fanfare: "Drained N", whose hover says "You can Drain down to M HP". A
+  tick on the HP bar is better, if the HP bar can take one safely.
+- A Drain mode or card that would cross the line greys out.
+
 ## Picks for [USER]
 
 1. **The direction, as a slice.** Build a small `+proto` slice, not the
