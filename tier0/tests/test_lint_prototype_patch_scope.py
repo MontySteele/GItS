@@ -119,8 +119,18 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # (`Vfx/Prototype/FanfareCounter.cs`) is the Spark counter's shape and
     # tears down the same way, by node name, with its scope at `Setup`
     # (`FanfareCounter.AppliesTo` -> `FurinaResources.IsFurina`).
-    # A FIFTH appearing here is the next review question.
-    assert len(markers) == 4, markers
+    # IT WENT FOUR -> SIX THE SAME DAY (the Kokomi off-character audit), and
+    # this is that review question's answer. Both new markers are on
+    # `BakeKuragePet.cs`: `AutoPlayWithNoKokomiTargetPatch` (an auto-play
+    # with no legal target does not play) and `PlanOnlyNeedsTheKuragePatch`
+    # (a Plan-only card with no Kurage is unplayable). Their defect IS a
+    # Kokomi card in ANOTHER character's hand (Splash, Kaleidoscope,
+    # Prismatic Gem, Sea Glass), so a Kokomi character scope would switch
+    # them off exactly where they are needed. They are scoped by the card's
+    # own TargetType instead -- values only the Kokomi arm's cards carry --
+    # and resolve no seat.
+    # A SEVENTH appearing here is the next review question.
+    assert len(markers) == 6, markers
 
 
 def test_registered_in_the_ci_lane() -> None:
