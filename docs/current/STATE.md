@@ -309,7 +309,10 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   into Energy in the middle and spends at Rare (Charged Lunge, Short Circuit,
   Chain Lightning, Thundering Verdict at X, Violet Storm, in place of
   Updraft, Pressure Front, Unfurled Banner and Four Winds' Accord);
-  Retaliating Tide replaces Unbroken Tide; Wildfire Oath is one big hit; a
+  Retaliating Tide replaces Unbroken Tide; Wildfire Oath is one big hit
+  (since 2026-10-03 it deals his Pyro Oath to each enemy he applies Pyro
+  to, and Short Circuit discards 2, draws 2 [3] and gains 1 Energy:
+  provenance note, "Varka Wildfire Oath and Short Circuit, 2026-10-03"); a
   card that would switch his element says so on hover, and the element he
   left shows beside his badge for the turn. Pool still 78 (20 / 35 / 23).
   The sim: Electro mono still 21.7 behind the default drafter in act 1, and

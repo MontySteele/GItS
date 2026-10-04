@@ -56,14 +56,11 @@ READINGS TAKEN WHERE THE SPEC LEAVES ROOM (each also in the builder's report):
     earlier Swirl spread over gets its own fresh aura back before its hit.
 
 ELEMENT IDENTITIES (review/active/varka-element-identities-2026-10-01.md,
-ruled 2026-10-01): Electro's discard-and-spend cards, Retaliating Tide, and
-Wildfire Oath's one big hit. What it adds here:
+ruled 2026-10-01): Electro's discard-and-spend cards and Retaliating Tide.
+What it adds here:
   * KINDS `electro_strike` (Charged Lunge), `electro_all` (Chain Lightning),
     `violet_storm` (discard the hand, one random Electro hit per card), and
     Thundering Verdict at X (`state.current_x` hits of the whole row).
-  * WILDFIRE OATH: the turn's first Attack, if Pyro is current when it is
-    played, arms one bonus (`take_wildfire`), spent by that card's first
-    powered hit on an enemy: his Pyro Oath per stack, read at the hit.
   * RETALIATING TIDE (`turn_end`, after Oathbound Aegis): min(Block, Hydro
     Oath) to a random enemy per stack, element-less and unpowered.
   * Accord, Unfurled Banner, `apply_current_element_all` (Pressure Front)
@@ -101,13 +98,21 @@ VARKA DEFENCE (review/active/varka-defence-2026-10-01.md, ruled 2026-10-01):
 THE REBALANCE (review/active/varka-rebalance-2026-10-03.md secs.2-5, and the
 Varka part of review/active/aoe-trim-2026-10-03.md sec.4; simmed in PR #863,
 variant A's starter numbers):
-  * WILDFIRE OATH: the turn's first Attack arms the bonus whatever the current
-    element, and it is half the Pyro Oath (rounded down) per stack.
+  * WILDFIRE OATH was half the Pyro Oath on the turn's first Attack; see
+    "Varka Wildfire Oath and Short Circuit" below.
   * ABSOLUTE ZERO: no Swirl widening; "Whenever you apply Weak or Vulnerable
     to an enemy, deal damage equal to your Cryo Oath to it" -- element-less,
     unpowered, per stack (`on_debuff_applied`, from
     `refpowers.on_power_applied`, Sea's Reproach's seat).
   * CYCLE OF SEASONS: its damage hits one random enemy, not ALL.
+
+VARKA WILDFIRE OATH AND SHORT CIRCUIT (2026-10-03):
+  * WILDFIRE OATH is Pyro's Absolute Zero: "Whenever you apply Pyro to an
+    enemy, deal damage equal to your Pyro Oath to it." Paid in `note_hit`,
+    AFTER that application's own Oath credit, so the Pyro Oath read is the
+    one the triggering application just raised (when it credits).
+    Element-less and unpowered, per stack, so it never re-enters `note_hit`.
+    C# twin: `VarkaOath.NoteApplication` -> `WildfireOathPower.OnPyroApplied`.
   * RAZOR: AWAKENING (`awakening`) hits the one enemy it is played on.
   * KINDS `kindled_edge`, `storm_battery`, `frost_ward`, `gleeful_songs`,
     `rippling_guard` and `echo_block` (Whisper of Water's next two turns).
@@ -288,9 +293,6 @@ class VarkaLedger:
     no_apply_credit: int = 0          # > 0 inside a hit that credits nothing
     landing: bool = False             # inside a Converging Winds spread
     stormward_in_bonus: int = 0       # Stormward's part of this play's bonus
-    # --- element identities (2026-10-01) ---
-    first_attack_turn: int = -1       # Wildfire: the turn an Attack began
-    wildfire_armed: int = 0           # > 0: this play's first hit takes it
     # --- the rebalance paper (sim only) ---
     #: Whisper of Water: [Block, turns left] paid at each turn start.
     echo_block: list = field(default_factory=list)
@@ -509,14 +511,6 @@ def begin_play(state, card) -> None:
                target_pyro=bool(aim is not None and aim.aura == "pyro"))
     if card.id.rstrip("+") == DOWNBURST_ID:
         led.fresh_spread += 1
-    # WILDFIRE OATH (element identities): the turn's FIRST Attack arms the
-    # bonus when Pyro is current as it is played; a later Attack never does.
-    if card.type == "attack" and led.first_attack_turn != state.turn:
-        led.first_attack_turn = state.turn
-        stacks = _power(state.player, WILDFIRE_OATH)
-        # The rebalance (sec.2): no current-element condition.
-        if stacks:
-            led.wildfire_armed = stacks
     if is_knight(card):
         led.knights_this_turn += 1
         led.knights_this_combat += 1
@@ -534,7 +528,6 @@ def end_play(state, card=None) -> None:
         return
     if card.id.rstrip("+") == DOWNBURST_ID and led.fresh_spread:
         led.fresh_spread -= 1
-    led.wildfire_armed = 0                          # unspent: gone with it
     p = state.player
     wolves = _power(p, WOLFPACK)
     if wolves and card.id.rstrip("+") == ASCENSION_ID:
@@ -551,23 +544,6 @@ def spread_fresh(state) -> bool:
     Swirl spreads arrive fresh (pick 3a)."""
     led = ledger(state.player)
     return bool(led is not None and led.fresh_spread)
-
-
-def take_wildfire(state) -> int:
-    """`effects.deal_damage_to_enemy`, on a powered Attack hit: WILDFIRE
-    OATH's bonus, once. "While your current element is Pyro, your first
-    Attack each turn deals additional damage equal to your Pyro Oath" -- one
-    hit (sec.5: "multi-hit cards do not multiply it"), the Pyro Oath read as
-    the hit lands, per stack. 0 when nothing is armed."""
-    led = ledger(state.player)
-    if led is None or not led.wildfire_armed:
-        return 0
-    stacks, led.wildfire_armed = led.wildfire_armed, 0
-    # The rebalance (sec.2): "equal to half your Pyro Oath", rounded down.
-    bonus = stacks * (led.oath["pyro"] // 2)
-    if bonus:
-        state.emit("varka_wildfire", amount=bonus)
-    return bonus
 
 
 def note_hit(state, enemy, element) -> None:
@@ -590,6 +566,12 @@ def note_hit(state, enemy, element) -> None:
         if open_oath_switches(led, element, state.player):
             set_current(state, element, knight=False)
         credit(state, "apply", element)
+    # WILDFIRE OATH (Varka Wildfire Oath and Short Circuit, 2026-10-03):
+    # "Whenever you apply Pyro to an enemy, deal damage equal to your Pyro
+    # Oath to it" -- after the credit above, so the Oath this application
+    # just raised counts. Element-less, so it never comes back here.
+    if element == "pyro":
+        _wildfire(state, enemy)
     # ASSEMBLY AT THE CATHEDRAL (co-op notes pick 2, 2026-10-02): "Whenever
     # you apply an element, deal 2 [3] damage to a random enemy" -- any
     # application of his, a no-credit hit's too. Element-less, so its own
@@ -601,6 +583,22 @@ def note_hit(state, enemy, element) -> None:
         state.emit("varka_assembly", target=e.name, amount=assembly)
         effects.deal_damage_to_enemy(state, e, assembly, element=None,
                                      source="card", powered=False)
+
+
+def _wildfire(state, enemy) -> None:
+    """WILDFIRE OATH's payout: the Pyro Oath per stack, to the enemy the
+    Pyro landed on, element-less and unpowered (Absolute Zero's shape,
+    `on_debuff_applied`). C# twin: `WildfireOathPower.OnPyroApplied`."""
+    led = ledger(state.player)
+    if led is None or not enemy.alive:
+        return
+    n = _power(state.player, WILDFIRE_OATH) * led.oath["pyro"]
+    if n <= 0:
+        return
+    from tier0.engine import effects                # late: cycle
+    state.emit("varka_wildfire", target=enemy.name, amount=n)
+    effects.deal_damage_to_enemy(state, enemy, n, element=None,
+                                 source="card", powered=False)
 
 
 def converging(state) -> bool:

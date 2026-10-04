@@ -741,66 +741,41 @@ public sealed class AssemblyAtTheCathedralPower : PowerModel, ILocalizationProvi
     }
 }
 
-/// <summary>Wildfire Oath (the rebalance, sec.2): "Your first Attack each turn
-/// deals additional damage equal to half your Pyro Oath." Its Amount is the
-/// stacks the armed hit multiplies.</summary>
+/// <summary>Wildfire Oath (Varka Wildfire Oath and Short Circuit,
+/// 2026-10-03): "Whenever you apply Pyro to an enemy, deal damage equal to
+/// your Pyro Oath to it." Pyro's <see cref="AbsoluteZeroPower"/>: paid from
+/// <see cref="VarkaOath.NoteApplication"/> once that application's own Oath
+/// credit is in, element-less and unpowered, per stack. Sim twin:
+/// <c>varka_oath._wildfire</c>, from <c>varka_oath.note_hit</c>.</summary>
 public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Wildfire Oath"),
         ("description",
-            "Your first Attack each turn deals additional damage equal to "
-          + "half your Pyro [gold]Oath[/gold]."),
+            "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage "
+          + "equal to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>
-    /// ELEMENT IDENTITIES sec.5 (2026-10-01): one big hit. The turn's first
-    /// Attack is armed at the top of its play (<see cref="VarkaOath.BeginPlay"/>,
-    /// with every stack); its first powered hit on an enemy takes his Pyro
-    /// Oath per stack while Pyro is current as it lands. One hit: "multi-hit
-    /// cards do not multiply it". The sim's twin is
-    /// <c>varka_oath.take_wildfire</c>.
+    /// <summary>One application's damage: the Pyro Oath per stack. PURE.
     /// </summary>
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource, CardPlay? cardPlay)
-    {
-        if (dealer != Owner || target == null || target == Owner) return 0m;
-        if (!props.IsPoweredAttack() || cardSource == null) return 0m;
-        if (!VarkaOath.Live(Owner)) return 0m;
-        var ledger = VarkaOathLedger.For(Owner);
-        if (!ReferenceEquals(ledger.WildfireCard, cardSource)) return 0m;
-        return VarkaOath.WildfireBonus(ledger.Oath(Element.Pyro),
-                                       ledger.WildfireStacks);
-    }
+    public static int DamageFor(int pyroOath, int stacks) =>
+        System.Math.Max(0, pyroOath * stacks);
 
-    /// <summary>The armed play's first hit spends the arm, paid or not (it
-    /// lands after <see cref="ModifyDamageAdditive"/> was asked).</summary>
-    public override Task BeforeDamageReceived(
-        PlayerChoiceContext choiceContext, Creature target, decimal amount,
-        ValueProp props, Creature? dealer, CardModel? cardSource)
+    internal async Task OnPyroApplied(
+        PlayerChoiceContext choiceContext, Creature target)
     {
-        if (dealer != Owner || cardSource == null || target == Owner
-            || !props.IsPoweredAttack() || !VarkaOath.Live(Owner))
-        {
-            return Task.CompletedTask;
-        }
-        var ledger = VarkaOathLedger.For(Owner);
-        if (ReferenceEquals(ledger.WildfireCard, cardSource))
-        {
-            if (VarkaOath.WildfireBonus(ledger.Oath(Element.Pyro),
-                    ledger.WildfireStacks) > 0)
-            {
-                Flash();
-            }
-            ledger.WildfireCard = null;
-        }
-        return Task.CompletedTask;
+        if (!VarkaOath.Live(Owner) || !target.IsAlive) return;
+        var damage = DamageFor(VarkaOath.Count(Owner, Element.Pyro),
+                               (int)Amount);
+        if (damage <= 0) return;
+        Flash();
+        await ElementalHit.DealUnelemented(choiceContext, target, damage,
+                                           Owner, powered: false);
     }
 }
 

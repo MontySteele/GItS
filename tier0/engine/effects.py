@@ -1052,12 +1052,6 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # consume an aura and splash off it.
     if not enemy.alive:
         return 0.0
-    # VARKA's Wildfire Oath (element identities, 2026-10-01): the first hit
-    # of the turn's first Attack, when Pyro was current at its play, deals
-    # his Pyro Oath more (per stack), read now. The C# twin is
-    # `WildfireOathPower.ModifyDamageAdditive`. 0 for anyone else.
-    if source == "attack" and powered:
-        base = base + varka_oath.take_wildfire(state)
     # Solar Isotoma (Crystallize engine): attack hits vs aura'd enemies
     # grant block — checked before the hit can consume the aura.
     if (source == "attack" and enemy.aura

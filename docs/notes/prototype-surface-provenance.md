@@ -6086,3 +6086,72 @@ cut instead).
 - The stand-in table (`C.COMPANION_STANDIN_IDS`, `CompanionStandIns.Pairs`)
   and the coven Personal list (`C.COVEN_PERSONAL_POOL_IDS`,
   `CompanionCovenRoster.Personals`) are empty; the seams stay.
+
+## Varka Wildfire Oath and Short Circuit, 2026-10-03
+
+[USER], after a Varka run in which Wildfire Oath "felt like a bit of a dud
+... basically acts as a low form of vigor for 2 energy" and an Electro combo
+"didn't pan out": "I think the Wildfire Oath and Electro Discard need a fix
+(agreed on your suggestion for Wildfire Oath)". The numbers are the main
+session's.
+
+- `proto_vk_wildfire_oath` (R Power, cost 2, upgrade Innate): "Your first
+  Attack each turn deals additional damage equal to half your Pyro Oath"
+  becomes "Whenever you apply Pyro to an enemy, deal damage equal to your
+  Pyro Oath to it." It is Absolute Zero's shape for Pyro: element-less,
+  unpowered, once per stack, to the enemy the Pyro landed on.
+  **Order:** it pays inside the application hook, after that application's
+  own Oath credit. The Pyro Oath it reads already includes the point this
+  application earned, when it earned one (once per play, by the Oath rules).
+  Both engines do it this way: C# `VarkaOath.NoteApplication` calls
+  `WildfireOathPower.OnPyroApplied` after `Gain`, and the sim's
+  `varka_oath.note_hit` calls `_wildfire` after `credit`. Each later Pyro hit
+  in the same play also pays, at the same Oath, because it credits nothing
+  more. Its damage carries no element, so it cannot trigger itself. The old
+  first-Attack pieces are deleted: C# `TakeFirstAttack`, `WildfireCard`,
+  `WildfireStacks`, `WildfireBonus` and the power's damage hooks; sim
+  `take_wildfire`, `wildfire_armed` and `first_attack_turn`.
+  `NoteApplication` now takes the target enemy. The aura door
+  (`KleeElementalHooks.BeforeDamageReceived`) puts no aura on an enemy that
+  this payment, or Assembly's, has just killed.
+- `proto_vk_short_circuit` (U Skill, cost 0, not Exhaust): "Discard 3 [2]
+  cards. Gain 2 Energy. Apply Electro to an enemy." becomes "Discard 2
+  cards. Draw 2 [3] cards. Gain 1 Energy. Apply Electro to an enemy." The
+  upgrade is now draw +1. The sim showed why the old card failed: discarding
+  3 of a five-card hand left nothing to spend the Energy on, so Chain
+  Lightning almost never followed it.
+- The sim pilot's discard sequencer (`_electro_pick`, an instrument surface)
+  still plays Short Circuit as the discard enabler before Chain Lightning.
+  It reads the discard, draw and Energy amounts off the card. A draw counts
+  as the draw pile's median card by value; the pilot never reads the pile's
+  order.
+
+The sim ran `tools/varka_expansion_sim.py --seeds 2400 --seed 7 --jobs 15
+--no-gauntlet` on origin/main (before) and on this branch (after). It is
+paired, and the figures are act-1 win rates.
+
+| read | before | after | paired |
+|---|---|---|---|
+| default drafter, all four starts | 30.8 | 30.8 | +0.0 |
+| mono_pyro | 27.8 | 28.0 | +0.1 ±0.2 |
+| elem_pyro | 37.7 | 37.8 | +0.1 ±0.1 |
+| mono_electro | 14.3 | 18.5 | +4.3 ±0.9 |
+| elem_electro | 30.2 | 34.5 | +4.3 ±0.9 |
+| starter spread (P / H / E / C) | 30.9 / 30.6 / 31.6 / 30.1 (1.5) | unchanged (1.5) | |
+
+| card | taken, before | taken, after | played in, before | played in, after |
+|---|---|---|---|---|
+| Wildfire Oath | 12.6% | 12.6% | 98.5% | 98.3% |
+| Short Circuit | 0.0% | 0.0% | 95.4% (1.50 a fight) | 98.5% (1.73 a fight) |
+| Chain Lightning | 17.6% | 17.6% | 68.9% | 70.0% |
+
+The default drafter's take did not move for either card, because it prices
+them by its own scores. No card is newly over the 70% take bar; the flagged
+list is unchanged. A separate probe ran 400 seeds per deck, act-1 runs. It
+counted Chain Lightning played after a discard card in the same turn: 2 of
+203 before and 28 of 226 after (mono_electro), and 1 of 243 before and 35 of
+273 after (elem_electro). Short Circuit was the turn's first or second play
+107 of 513 times before and 613 of 713 after (mono), and 138 of 624 before
+and 678 of 783 after (elem). Wildfire Oath is a Rare and is held in few
+fights. Its triggers paid 2.0 damage each before (81 triggers, mono_pyro)
+and 4.2 each after (71 triggers).

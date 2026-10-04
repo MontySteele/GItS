@@ -3574,12 +3574,12 @@ APPLY_POWERS = {
     # Co-op notes pick 2 (2026-10-02): on any element applied.
     "vk_assembly_at_the_cathedral": ("AssemblyAtTheCathedralPower", None,
         "Whenever you apply an element, deal {X} damage to a random enemy."),
-    # ELEMENT IDENTITIES (2026-10-01): Wildfire Oath re-aimed to one big hit
-    # (sec.5); Retaliating Tide in Unbroken Tide's place (sec.4).
+    # Varka Wildfire Oath and Short Circuit (2026-10-03): Pyro's Absolute
+    # Zero. Retaliating Tide in Unbroken Tide's place (element identities
+    # sec.4).
     "vk_wildfire_oath": ("WildfireOathPower", None,
-        "While your [gold]current element[/gold] is Pyro, your first Attack "
-        "each turn deals additional damage equal to your Pyro "
-        "[gold]Oath[/gold]."),
+        "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal "
+        "to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
     "vk_retaliating_tide": ("RetaliatingTidePower", None,
         "At the end of your turn, deal damage equal to your "
         "[gold]Block[/gold], up to your Hydro [gold]Oath[/gold], to a random "
