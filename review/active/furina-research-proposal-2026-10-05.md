@@ -1,4 +1,4 @@
-Status: PROPOSAL from the research pass (design-layer paper sec.8, PR #899). Nothing here is ruled. For the main session's review, then [USER], then Fable and GPT.
+Status: RULED 2026-10-05: the defaults (picks 1 to 6), with sec.16's two changes. The overnight v2 build is discarded. The reference is the frozen tag `furina-stage-frozen-2026-10-04`. See the ruling note at the picks.
 
 # Furina: the Salon's Tab (a research proposal)
 
@@ -892,7 +892,29 @@ seats, and nothing else uses the stage.
    because of K4. 2: Genshin's half of Max HP, which reads more cleanly on
    the HP bar but locks Drain in fights started below it.
 5. **The current build** stays installed as the reference until this is
-   ruled. Default: yes.
+   ruled. Default: yes. *Ruled differently:* the frozen tag is the
+   reference, and v2 is discarded (see the ruling note below).
 6. **If seats call Drain a reflex.** The first lever is the Singer resting
    on a turn with a Drain (Fable), not higher prices. Default: hold until
    the seats report.
+
+**Ruling (2026-10-05).**
+- [USER] on the paper: "Overall this makes sense".
+- [USER] on the two changes in sec.16: "Sounds good".
+- [USER] on the builds: "let's leave yesterday's already-frozen reference
+  build for now, but the current one built overnight can be discarded."
+
+What that means:
+- **Picks 1 to 4 and 6:** the defaults, with Repay and the curtain call
+  from sec.16.
+- **The reference:** the tag `furina-stage-frozen-2026-10-04` (main at
+  #888), kept as is.
+- **The overnight v2 build is discarded.** That covers PRs #889 to #897 and
+  #900's Furina rows. The slice replaces it in place, as the release
+  Furina, not as a `+proto` arm beside it.
+- **What the slice keeps from v2's machinery:** what sec.8 names as reused.
+  - the Spend chooser;
+  - the Fanfare gauge;
+  - guest seats;
+  - the leave-and-act-once-more exit;
+  - the summon preview.
