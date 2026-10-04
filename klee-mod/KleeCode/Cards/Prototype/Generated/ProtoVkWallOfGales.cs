@@ -45,7 +45,7 @@ public sealed class ProtoVkWallOfGales : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Wall of Gales"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] every fresh aura."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] every aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

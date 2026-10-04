@@ -79,19 +79,17 @@ scenario (`give: {card: KLEEMOD-PROTO_..., pile: hand}`); template in
 `understudy/scenarios/eb147-prototype-grant.yaml`. A row the emitter cannot
 express STOPS the run by name.
 
-**THE ELEMENT PORT'S TWO SWITCHES (2026-09-28)** are not kit arms: they switch
-the shared reaction layer (`review/ruled/element-home-review-2026-09-28.md`
-§3, §4). `SwirlPays` and `CrystallizeKeepsAura` are MSBuild properties
-defaulted on in `Directory.Build.props`, defining `SWIRL_PAYS` /
-`CRYSTALLIZE_KEEPS_AURA`, which move `KleeMod.Elements.TriggerRules.SwirlPays`
-/ `.CrystallizeKeepsAura`. The sim twins `C.SWIRL_PAYS` and
-`C.CRYSTALLIZE_KEEPS_AURA` ship `False` and are pinned both ways by flipping
-them (`tier0/tests/test_element_port.py`; C# `KleeTests/ElementPortTests.cs`).
-They stay until the open retest of each switch alone.
+**THE ELEMENT PORT'S SWITCH (2026-09-28)** is not a kit arm: it switches the
+shared reaction layer (`review/ruled/element-home-review-2026-09-28.md` §4 A).
+`SwirlPays` is an MSBuild property defaulted on in `Directory.Build.props`,
+defining `SWIRL_PAYS`, which moves `KleeMod.Elements.TriggerRules.SwirlPays`.
+The sim twin `C.SWIRL_PAYS` ships `False` and is pinned both ways by flipping
+it (`tier0/tests/test_element_port.py`; C# `KleeTests/ElementPortTests.cs`).
+Its twin, `CrystallizeKeepsAura`, went with spent auras on 2026-10-03: every
+reaction consumes its aura.
 
 ```sh
 dotnet build klee-mod/KleeCode -p:SwirlPays=false
-dotnet build klee-mod/KleeCode -p:CrystallizeKeepsAura=false
 ```
 
 **VARKA** has no switch (legacy cleanup stage 2). His rows are `proto_vk_`,

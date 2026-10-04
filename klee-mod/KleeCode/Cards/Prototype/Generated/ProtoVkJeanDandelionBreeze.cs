@@ -48,7 +48,7 @@ public sealed class ProtoVkJeanDandelionBreeze : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Wind Companion"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] an enemy's fresh aura."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] an enemy's aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

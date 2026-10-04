@@ -637,14 +637,14 @@ internal static class ReactionEffects
 
     /// <summary>
     /// THE ELEMENT PORT's Swirl (<c>review/ruled/element-home-review-2026-09-28.md</c>
-    /// §4 A; <see cref="TriggerRules.SwirlPays"/>). The struck enemy KEEPS its
-    /// aura -- already marked spent by the lifecycle site that called
-    /// <see cref="Resolve"/>. The spread keeps today's reach (every hittable
-    /// enemy). One already wearing this element, fresh or spent, is
-    /// refreshed to full duration and made FRESH (amended 2026-10-01); a
-    /// different aura is replaced, as today, and nothing reacts where a copy
-    /// lands (the deferred candidate). Copies arrive SPENT, so they cannot be
-    /// Swirled again. Then a flat
+    /// §4 A; <see cref="TriggerRules.SwirlPays"/>). The struck enemy's aura
+    /// was CONSUMED by the lifecycle site that called <see cref="Resolve"/>
+    /// (2026-10-03: every reaction consumes). The spread reaches every OTHER
+    /// hittable enemy. One already wearing this element is refreshed to full
+    /// duration (amended 2026-10-01); a different aura is replaced, as today,
+    /// and nothing reacts where a copy lands. Copies are ordinary FRESH auras,
+    /// applied with no trigger, so a copy never reacts and never Swirls on
+    /// its own: a later Anemo hit on that enemy Swirls it again. Then a flat
     /// <see cref="ReactionConstants.SwirlDamage"/> to every enemy: element-less
     /// and outside the pipeline, the Overload splash's exact call, so it
     /// reacts with nothing. Sim twin: <c>reactions._react</c>'s anemo branch.
@@ -671,8 +671,8 @@ internal static class ReactionEffects
             var existing = AuraCmd.Find(e);
             // Amended 2026-10-01 ([USER]: "reapplying the same element as a
             // refresh mechanic feels fine and we shouldn't let that brick
-            // other reactions"): a body already wearing this element, fresh
-            // or spent, goes back to full duration and FRESH. Nothing reacts.
+            // other reactions"): a body already wearing this element goes
+            // back to full duration. Nothing reacts.
             // Ahead of the Gale Sweep shield, as in the sim, where the shield
             // restores after the spread and keeps the longer clock.
             if (existing != null
@@ -686,7 +686,7 @@ internal static class ReactionEffects
                 continue;
             }
             // VARKA's Gale Sweep: a body the sweep has still to hit keeps its
-            // own fresh aura against this Swirl's spread (sec.9.6).
+            // own aura against this Swirl's spread (sec.9.6).
             if (VarkaRules.SpreadShielded(e)) continue;
             if (existing != null)
             {
@@ -714,12 +714,8 @@ internal static class ReactionEffects
                 }
                 await PowerCmd.Remove(existing);
             }
+            // A plain application: no trigger, so it reacts with nothing.
             await AuraCmd.Apply(choiceContext, e, spread, dealer, cardSource);
-            var fresh = false;
-            // VARKA's Downburst (the expansion, pick 3a): its copies arrive
-            // fresh, so a second Anemo card can chain.
-            fresh = VarkaRules.SpreadArrivesFresh(cardSource);
-            if (AuraCmd.Find(e) is { } copy) copy.Spent = !fresh;
         }
 
         foreach (var e in bodies)

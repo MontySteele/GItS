@@ -24,13 +24,13 @@ from tools import varka_expansion_sim as X
 
 @pytest.fixture
 def rebalance():
-    saved = (C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA)
-    C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = True, True
+    saved = C.SWIRL_PAYS
+    C.SWIRL_PAYS = True
     loader.reset_arm_caches()
     try:
         yield
     finally:
-        C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = saved
+        C.SWIRL_PAYS = saved
         loader.reset_arm_caches()
 
 
@@ -38,7 +38,7 @@ def _enemy(hp=100, name="e", aura=None):
     e = Enemy(hp=hp, max_hp=hp, name=name,
               intents=[{"kind": "block", "amount": 0}])
     if aura:
-        e.aura, e.aura_turns_left, e.aura_spent = aura, 2, False
+        e.aura, e.aura_turns_left = aura, 2
     return e
 
 

@@ -1269,8 +1269,7 @@ PLAN_PAST_LETHAL_BLOCK = " behind {block} Block"
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
              "`(debuff)`, because it is neither: it is the element left "
              "clinging to a body, and it is what an Elemental Reaction needs "
-             "-- a hit of a different element reacts with it. A spent aura "
-             "gives Anemo and Geo nothing.*")
+             "-- a hit of a different element reacts with it.*")
 
 
 # `EB-461`. THE PAGE PROMISED A NUMBER AND THE ENEMY NEVER DEALT IT.
@@ -1543,9 +1542,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # Amended 2026-10-01: the spread refreshes an aura of the same element.
     # Reworded 2026-10-01 (the open-Oath round: "old ones refresh" misread).
     # Element identities (2026-10-01): the flat damage is unblockable, said.
-    "Swirl": (f"Anemo meets a fresh aura: deal {SWIRL_DAMAGE} unblockable "
-              "damage to ALL enemies and copy it, spent, onto the others. "
-              "Enemies wearing it refresh."),
+    # 2026-10-03: spent auras removed; Swirl removes the aura it meets.
+    "Swirl": (f"Anemo meets an aura: remove it, deal {SWIRL_DAMAGE} "
+              "unblockable damage to ALL enemies, and apply that element to "
+              "the others."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
     # is a Power card of Klee's, and Kaeya's Cold-Blooded Strike is written
     # against it by name ("Next turn, Grounded pays even if you played a
@@ -2568,9 +2568,9 @@ REACTION_KEYWORDS: dict[str, str] = {
     # has, and it is entirely undocumented". The clause is the C#'s own, moved
     # in the same commit, so the tooltip and this page cannot say different
     # things about it.
-    # The element port (2026-09-28): the aura stays, spent.
-    "Crystallize": ("Geo on a fresh aura: "
-                    f"gain {CRYSTALLIZE_BLOCK} Block. The aura stays, spent."),
+    # 2026-10-03: spent auras removed; Crystallize consumes the aura again.
+    "Crystallize": ("Geo meets an aura: "
+                    f"gain {CRYSTALLIZE_BLOCK} Block. The aura is removed."),
 }
 
 # `EB-428`. THE SIX ROWS FILLED 40% OF A SCREEN THAT COULD FIRE NONE OF THEM.
@@ -2662,9 +2662,8 @@ ELEMENT_KEYWORDS: dict[str, str] = {
     "Geo": ("An element. A Geo hit never leaves an aura; on an enemy "
             "wearing one it triggers an Elemental Reaction (Crystallize)."),
     "aura": ("The element left on an enemy by an elemental hit. A hit of a "
-             "different element triggers an Elemental Reaction. Anemo and "
-             "Geo leave it standing, spent. A spent aura still reacts with "
-             "Pyro, Hydro, Electro and Cryo."),
+             "different element triggers an Elemental Reaction and removes "
+             "the aura."),
 }
 
 #: Matched the way `_ARM_KEYWORD_RE` matches, case-sensitive: the game

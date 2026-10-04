@@ -3,8 +3,8 @@
 Rules: `review/active/varka-paper-kit-2026-09-28.md` (every pick ruled
 2026-09-29); rows: the `proto_vk_` block of `docs/prototype-surface.yaml`. His
 rules have no switch (collapsed 2026-10-01: he ships nowhere else); the `varka`
-fixture turns on the element port's two ruled switches (`C.SWIRL_PAYS`,
-`C.CRYSTALLIZE_KEEPS_AURA`) and restores both.
+fixture turns on the element port's ruled switch (`C.SWIRL_PAYS`) and
+restores it.
 """
 
 from __future__ import annotations
@@ -26,21 +26,21 @@ def _reset():
 
 @pytest.fixture
 def varka():
-    saved = (C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA)
-    C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = True, True
+    saved = C.SWIRL_PAYS
+    C.SWIRL_PAYS = True
     _reset()
     try:
         yield
     finally:
-        C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = saved
+        C.SWIRL_PAYS = saved
         _reset()
 
 
-def _enemy(hp=100, name="e", aura=None, spent=False):
+def _enemy(hp=100, name="e", aura=None):
     e = Enemy(hp=hp, max_hp=hp, name=name,
               intents=[{"kind": "block", "amount": 0}])
     if aura:
-        e.aura, e.aura_turns_left, e.aura_spent = aura, 2, spent
+        e.aura, e.aura_turns_left = aura, 2
     return e
 
 
@@ -222,13 +222,14 @@ def test_apply_and_swirl_are_separate_keys_in_one_scope(varka):
 
 
 def test_a_spread_credits_nothing(varka):
-    """Windbound Execution Swirls A's Pyro; the spread's spent copies on B
-    and C credit nothing, and the hits on those spent copies pay nothing."""
+    """Windbound Execution Swirls A's Pyro, consuming it; the spread's copies
+    on B and C credit nothing (2026-10-03: no spent auras)."""
     st = _state(enemies=[_enemy(name="a", aura="pyro"), _enemy(name="b"),
                          _enemy(name="c")], fang=False)
     _play(st, _vk("windbound_execution"))
     assert _led(st).oath == {"pyro": 1, "hydro": 0, "electro": 0, "cryo": 0}
-    assert all(e.aura == "pyro" and e.aura_spent for e in st.enemies)
+    a, b, c = st.enemies
+    assert a.aura is None and b.aura == "pyro" and c.aura == "pyro"
     assert _led(st).swirls_made == 1
 
 
@@ -390,7 +391,6 @@ def test_the_pyro_payout_is_unpowered_and_meets_vulnerable(varka):
     _led(st).current = "pyro"
     st.player.powers["strength"] = 5
     st.enemies[0].powers["vulnerable"] = 2
-    st.enemies[0].aura_spent = False
     V.on_swirl(st, st.enemies[0], "cryo")
     assert st.enemies[0].hp == 100 - int(3 * 1.5)
 
@@ -494,7 +494,7 @@ def test_converging_winds(varka):
     a, b, c = st.enemies
     assert a.hp == 98
     assert b.hp < 98 and b.aura is None                 # Vaporize on b
-    assert c.hp == 98 and c.aura == "pyro" and c.aura_spent
+    assert c.hp == 98 and c.aura == "pyro"
     assert _led(st).oath == {"pyro": 1, "hydro": 0, "electro": 0, "cryo": 0}
 
 
@@ -510,18 +510,19 @@ def test_grand_masters_order_plays_the_next_knight_twice(varka):
     assert _led(st).knights_this_turn == 3
 
 
-def test_gale_sweep_hits_each_fresh_aura_once(varka):
+def test_gale_sweep_hits_each_aura_once(varka):
+    # 2026-10-03: no spent auras, so the sweep takes every aura'd body (a, b
+    # and d), each shielded from the earlier Swirls' spread until its hit.
     st = _state(enemies=[_enemy(name="a", aura="pyro"),
                          _enemy(name="b", aura="cryo"),
                          _enemy(name="c"),
-                         _enemy(name="d", aura="hydro", spent=True)],
+                         _enemy(name="d", aura="hydro")],
                 fang=False)
     _play(st, _vk("gale_sweep"))
     a, b, c, d = st.enemies
-    # a and b Swirled (3 + their own Swirl's 2 + the other Swirl's 2),
-    # c and d took only the two flat 2s.
-    assert (a.hp, b.hp, c.hp, d.hp) == (93, 93, 96, 96)
-    assert _led(st).oath == {"pyro": 1, "hydro": 0, "electro": 0, "cryo": 1}
+    # a, b and d Swirled (3 + three Swirls' flat 2s); c took only the 2s.
+    assert (a.hp, b.hp, c.hp, d.hp) == (91, 91, 94, 91)
+    assert _led(st).oath == {"pyro": 1, "hydro": 1, "electro": 0, "cryo": 1}
 
 
 # ---------------------------------------------------------------------------
@@ -590,8 +591,11 @@ def test_swirled_take_more(varka):
                 fang=False)
     _play(st, _vk("storm_surge"))
     a, b = st.enemies
-    # 5 Anemo to both; a Swirls (2 to both) and takes 5 more.
-    assert (a.hp, b.hp) == (100 - 5 - 2 - 5, 100 - 5 - 2)
+    # 5 Anemo to both. a Swirls (2 to both, a Pyro copy on b) and takes 5
+    # more; then b's fresh copy Swirls too (2 to both, a copy back on a) and
+    # b takes 5 more (2026-10-03: a Swirl ALL pays per standing aura).
+    assert (a.hp, b.hp) == (100 - 5 - 2 - 5 - 2, 100 - 5 - 2 - 5 - 2)
+    assert (a.aura, b.aura) == ("pyro", None)
 
 
 def test_swirl_fresh_auras_shields_its_snapshot(varka):
@@ -604,8 +608,7 @@ def test_swirl_fresh_auras_shields_its_snapshot(varka):
 
 
 def test_oath_per_cryo_enemy(varka):
-    st = _state(enemies=[_enemy(name="a"), _enemy(name="b", aura="cryo",
-                                                    spent=True),
+    st = _state(enemies=[_enemy(name="a"), _enemy(name="b", aura="cryo"),
                          _enemy(name="c", aura="hydro")], fang=False)
     _play(st, _vk("eula_icetide_vortex"))
     # a: Cryo applied (+1 apply), then 2 enemies wear Cryo: +2 in one event.
@@ -689,7 +692,6 @@ def test_the_predicates(varka):
     _play(st, _vk("crosswind"))                         # no aura: no Swirl
     assert st.player.block == block
     st.enemies[0].aura, st.enemies[0].aura_turns_left = "hydro", 2
-    st.enemies[0].aura_spent = False
     _play(st, _vk("crosswind"))
     assert st.player.block == block + 5
     assert V.predicate(st, "swirled_by_this") is False  # outside a play

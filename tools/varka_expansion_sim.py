@@ -6,9 +6,8 @@ not a Balance measurement).
     .venv/Scripts/python.exe -m tools.varka_expansion_sim --report out.json [--against old.json]
 
 Answers sec.5.2 of `review/active/varka-expansion-2026-10-01.md` on the
-BUILT rows (tier0 with `C.SWIRL_PAYS` and `C.CRYSTALLIZE_KEEPS_AURA` on
-for THIS PROCESS ONLY, as the Varka tests
-switch them; nothing on disk moves). The pool is read off whatever checkout
+BUILT rows (tier0 with `C.SWIRL_PAYS` on for THIS PROCESS ONLY, as the
+Varka tests switch it; nothing on disk moves). The pool is read off whatever checkout
 runs it -- every `proto_vk_` row of rarity Common/Uncommon/Rare -- so the
 same file run on the pre-expansion commit (41 rows) and on main (78) is the
 paired pool comparison (`--against`).
@@ -235,7 +234,6 @@ def enable():
         return
     from tier0 import constants as C
     C.SWIRL_PAYS = True
-    C.CRYSTALLIZE_KEEPS_AURA = True
     from tier0.content import loader
     loader.reset_arm_caches()
     from tier0.pilot import policy
@@ -288,8 +286,7 @@ def _translate(state, fx):
                    "target": "all_enemies" if fx.get("upgraded") else "enemy"}
             yield oath_proxy
     elif kind == "crosscurrent":
-        fresh = any(e.aura and not getattr(e, "aura_spent", False)
-                    for e in state.living_enemies)
+        fresh = any(e.aura for e in state.living_enemies)
         if fresh:
             # The Swirl's payout, twice (`varka_oath._pay`), plus its Oath.
             if cur == "pyro":

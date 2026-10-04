@@ -30,12 +30,8 @@
   "KLEEMOD-FROZEN_BOSS_PREVIEW.title": "Reaction preview: Frozen (Boss)",
   "KLEEMOD-FROZEN_BOSS_PREVIEW.description": "[gold]Hydro[/gold] meets [gold]Cryo[/gold]: bosses can't be Frozen, so it gains [blue]2[/blue] [gold]Vulnerable[/gold] instead.",
   "KLEEMOD-SWIRL_PREVIEW.title": "Reaction preview: Swirl",
-  "KLEEMOD-SWIRL_PREVIEW.description": "[gold]Anemo[/gold] meets a fresh aura: deal [blue]2[/blue] unblockable damage to ALL enemies and copy it, spent, onto the others. Enemies wearing it refresh.",
+  "KLEEMOD-SWIRL_PREVIEW.description": "[gold]Anemo[/gold] meets an aura: remove it, deal [blue]2[/blue] unblockable damage to ALL enemies, and apply that element to the others.",
   "KLEEMOD-CRYSTALLIZE_PREVIEW.title": "Reaction preview: Crystallize",
-  "KLEEMOD-CRYSTALLIZE_PREVIEW.description": "[gold]Geo[/gold] meets a fresh aura: gain [blue]4[/blue] [gold]Block[/gold]. The aura stays, spent.",
-  "KLEEMOD-SWIRL_SPENT_PREVIEW.title": "Reaction preview: Swirl (spent)",
-  "KLEEMOD-SWIRL_SPENT_PREVIEW.description": "This aura is spent, so [gold]Anemo[/gold] does nothing to it. A hit of its own element makes it fresh again.",
-  "KLEEMOD-CRYSTALLIZE_SPENT_PREVIEW.title": "Reaction preview: Crystallize (spent)",
-  "KLEEMOD-CRYSTALLIZE_SPENT_PREVIEW.description": "This aura is spent, so [gold]Geo[/gold] does nothing to it. A hit of its own element makes it fresh again.",
+  "KLEEMOD-CRYSTALLIZE_PREVIEW.description": "[gold]Geo[/gold] meets an aura: gain [blue]4[/blue] [gold]Block[/gold]. The aura is removed.",
   "KLEEMOD-TURN_END_DOCKET.header": "END OF TURN"
 }

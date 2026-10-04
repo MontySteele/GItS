@@ -67,7 +67,7 @@ def test_overload_splash_reaches_enemies_only():
 def test_an_amplifier_off_an_application_says_there_was_no_hit():
     """Barbara's Hydro printed "Vaporize ... off Varka" and did nothing."""
     src = _read("klee-mod", "KleeCode", "Powers", "ElementalHit.cs")
-    assert src.count("NoteNoHit(") == 3      # definition + Spend + Consume
+    assert src.count("NoteNoHit(") == 2      # definition + Consume (no Spend since 2026-10-03)
     assert "nothing to amplify" in src
 
 

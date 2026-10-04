@@ -105,9 +105,8 @@ internal static class ElementalHit
         else
         {
             // Consume before resolving, same as AuraPower (Swirl must not
-            // re-trigger off the aura it is spreading); a switched trigger
-            // spends instead (the element port). Amplifiers only ever Consume.
-            var reaction = TriggerRules.ReactionFor(aura, element);
+            // re-trigger off the aura it is spreading).
+            var reaction = ReactionTable.Lookup(aura.Element, element);
             dealt *= ReactionTable.AmplifierMultiplier(reaction, applier);
             await ResolveOnAura(choiceContext, target, aura, element, applier);
         }
@@ -259,8 +258,7 @@ internal static class ElementalHit
 
     /// <summary>
     /// A hit of <paramref name="element"/> on a STANDING aura, for both doors
-    /// above: refresh (and make fresh), consume and react, spend and react, or
-    /// nothing -- <see cref="TriggerRules.Outcome"/> decides, the one decision
+    /// above: refresh, consume and react, or nothing -- <see cref="TriggerRules.Outcome"/> decides, the one decision
     /// <see cref="AuraPower"/>'s own lifecycle takes too. Sim twin:
     /// <c>reactions.resolve_hit</c> below its no-aura branch.
     /// </summary>
@@ -283,19 +281,10 @@ internal static class ElementalHit
         PlayerChoiceContext choiceContext, Creature target, AuraPower aura,
         Element element, Creature? applier)
     {
-        switch (TriggerRules.Outcome(aura.Element, aura.Spent, element))
+        switch (TriggerRules.Outcome(aura.Element, element))
         {
             case TriggerRules.HitOutcome.Refresh:
-                aura.Spent = false;
                 await AuraCmd.Refresh(choiceContext, aura, applier, cardSource: null);
-                break;
-
-            case TriggerRules.HitOutcome.Spend:
-                aura.Spent = true;
-                NoteNoHit(aura.Element, element);
-                await ReactionEffects.Resolve(
-                    choiceContext, ReactionTable.Lookup(aura.Element, element),
-                    target, applier, null, aura.Element);
                 break;
 
             case TriggerRules.HitOutcome.Consume:
@@ -310,7 +299,7 @@ internal static class ElementalHit
             }
 
             default:
-                break;   // a switched trigger on a spent aura pays nothing
+                break;   // no reaction between these elements
         }
     }
 }

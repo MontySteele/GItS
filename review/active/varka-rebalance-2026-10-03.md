@@ -1,6 +1,9 @@
 # Varka: elements that borrow from each other
 
 Status: ALL FOUR PICKS RULED 2026-10-03; Storm Battery's cost is open (pick 5).
+2026-10-03: spent removed ([USER]: "agreed ... please proceed"). Every
+reaction consumes its aura; Swirl's copies arrive fresh, so "fresh aura"
+below now means any aura, and Downburst's clause is struck.
 Main session design, on [USER]'s direction (2026-10-02 and 10-03).
 
 [USER], 2026-10-03: "Otherwise the picks in 1 make sense" (Absolute Zero

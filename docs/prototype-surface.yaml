@@ -3561,7 +3561,7 @@
 - {id: proto_vk_gale_sweep, name: "Gale Sweep", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage to each enemy with a fresh aura. Each hit [gold]Swirls[/gold].",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage to each enemy with an aura. Each hit [gold]Swirls[/gold].",
    effects: [{op: damage, amount: 3, target: all_enemies, only_if: fresh_aura}],
    upgrade: {damage: 2}}
 
@@ -3651,7 +3651,7 @@
    # round, 2026-10-01): the colon is the Knight's tell.
    # Tried at 8 Block, reverted: provenance, "Varka weak cards, 2026-10-03".
    cost: 1, type: skill, rarity: common,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] an enemy's fresh aura.",
+   description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] an enemy's aura.",
    effects: [{op: block, amount: 7},
              {op: swirl, target: enemy}],
    upgrade: {block: 3}}
@@ -3859,7 +3859,7 @@
 - {id: proto_vk_wall_of_gales, name: "Wall of Gales", character: varka,
    authored_by: [claude],
    cost: 2, type: skill, rarity: rare,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] every fresh aura.",
+   description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] every aura.",
    effects: [{op: block, amount: 16},
              {op: varka, kind: swirl_fresh_auras}],
    upgrade: {block: 6}}
@@ -4088,7 +4088,7 @@
 - {id: proto_vk_crosscurrent, name: "Crosscurrent", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Swirl[/gold] an enemy's fresh aura. This [gold]Swirl[/gold] pays twice.",
+   description: "[gold]Swirl[/gold] an enemy's aura. This [gold]Swirl[/gold] pays twice.",
    effects: [{op: varka, kind: crosscurrent, target: enemy}],
    upgrade: {add: {op: draw, amount: 1}}}
 
@@ -4201,10 +4201,10 @@
 
 - {id: proto_vk_downburst, name: "Downburst", character: varka,
    authored_by: [claude],
-   # Pick 3 (ruled, 3a): bends the Swirl rule, a Rare. The card itself is
-   # the marker (`VarkaRules.SpreadArrivesFresh`, `varka_oath.spread_fresh`).
+   # Pick 3a's "copies arrive fresh" struck 2026-10-03: no spent auras.
+   # Provenance, "Spent auras removed, 2026-10-03".
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], the copies it spreads arrive fresh.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage.",
    effects: [{op: damage, amount: 12, target: enemy}],
    upgrade: {damage: 4}}
 

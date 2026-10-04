@@ -640,10 +640,12 @@ public static class ArmKeywordTips
             // Element identities (2026-10-01; the Varka round read it two
             // ways): the flat damage is unblockable
             // (`ReactionEffects.SwirlPays`, `ValueProp.Unblockable`).
-            "[gold]Anemo[/gold] meets a fresh aura: deal "
+            // 2026-10-03, spent auras removed ([USER]: "It seems to generate
+            // confusion." ... "agreed ... please proceed"): Swirl removes
+            // the aura and the copies are ordinary auras.
+            "[gold]Anemo[/gold] meets an aura: remove it, deal "
           + Elements.ReactionConstants.SwirlDamage
-          + " unblockable damage to ALL enemies and copy it, spent, onto the others. "
-          + "Enemies wearing it refresh.");
+          + " unblockable damage to ALL enemies, and apply that element to the others.");
 
     /// <summary>
     /// 2026-09-25, the afternoon Klee seat round. The Opus seat: "Companion is

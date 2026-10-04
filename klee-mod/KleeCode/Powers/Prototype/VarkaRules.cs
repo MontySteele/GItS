@@ -146,14 +146,6 @@ public static class VarkaRules
     }
 
     /// <summary>
-    /// DOWNBURST (the expansion, pick 3a): "If it Swirls, the copies it
-    /// spreads arrive fresh." The card itself is the marker; read where the
-    /// Swirl's spread lands a copy (<c>ReactionEffects.SwirlPays</c>). PURE.
-    /// </summary>
-    public static bool SpreadArrivesFresh(CardModel? cardSource) =>
-        cardSource is ProtoVkDownburst;
-
-    /// <summary>
     /// Change of Guard's pick: the elements he holds Oath in, as option faces
     /// on a grid (<see cref="Cards.Prototype.VarkaModalOptions"/>). Returns
     /// the element, or <see cref="Element.None"/> when nothing came back.
@@ -200,9 +192,10 @@ public static class VarkaRules
     }
 
     /// <summary>The bodies a Gale Sweep played now would hit: every hittable
-    /// enemy wearing a FRESH aura, in enemy order. PURE.</summary>
+    /// enemy wearing an aura, in enemy order. PURE. (The name predates
+    /// 2026-10-03, when spent auras went: every aura is fresh.)</summary>
     public static List<Creature> FreshAuraBodies(IEnumerable<Creature> enemies) =>
-        enemies.Where(e => AuraCmd.Find(e) is { Spent: false }).ToList();
+        enemies.Where(e => AuraCmd.Find(e) != null).ToList();
 
     /// <summary>
     /// Gale Sweep (sec.6): "Deal 3 [5] Anemo to every enemy that has a fresh
@@ -240,8 +233,8 @@ public static class VarkaRules
     }
 
     /// <summary>
-    /// Wall of Gales (sec.6): "Swirl every fresh aura." The bodies wearing a
-    /// fresh aura are taken when it is played; each takes its own damage-less
+    /// Wall of Gales (sec.6): "Swirl every aura." The bodies wearing an
+    /// aura are taken when it is played; each takes its own damage-less
     /// Anemo hit (<see cref="ElementalHit.ApplyOnly"/>, the shared rule), and
     /// a body not reached yet keeps its aura against the earlier Swirls'
     /// spread, as Gale Sweep's do.

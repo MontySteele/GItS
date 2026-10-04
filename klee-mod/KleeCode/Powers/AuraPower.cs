@@ -60,26 +60,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
             $"{Element} clings to this enemy for {{Amount}} more turn{{Amount:plural:|s}}. "
           + "A hit of another element triggers an "
           + "[gold]Elemental Reaction[/gold]."),
-        // THE ELEMENT PORT (sec.7.1): "the aura badge shows 'spent'". The face
-        // `SmartDescriptionLocKey` selects while this aura has paid a trigger.
-        // It names only the triggers a spent aura refuses under the switches
-        // this build carries (`TriggerRules.SpentTriggers`).
-        (SpentKey,
-            $"Spent: {TriggerRules.SpentTriggers()} do nothing to it until "
-          + $"{Element} hits it again. {{Amount}} more turn{{Amount:plural:|s}}."),
     };
-
-    /// <summary>The loc suffix of the spent face.</summary>
-    public const string SpentKey = "smartDescriptionSpent";
-
-    /// <summary>
-    /// THE ELEMENT PORT (<see cref="TriggerRules"/>): this aura has already
-    /// paid an Anemo or Geo reaction, and a switched trigger gets nothing from
-    /// it until a same-element hit refreshes it. False on every new aura.
-    /// Sim twin: <c>Enemy.aura_spent</c>. Written only by the lifecycle sites
-    /// (<see cref="ResolveLifecycle"/>, <c>ElementalHit</c>, the Swirl spread).
-    /// </summary>
-    public bool Spent { get; set; }
 
     /// <summary>
     /// A PLAN'S MORNING AURA SKIPS THIS TURN'S TICK (co-op playtest
@@ -135,9 +116,9 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// A Swirl's spread reaching an enemy already wearing this element, fresh
-    /// or spent (<see cref="TriggerRules.SpreadOutcome.Refresh"/>; [USER],
-    /// 2026-10-01): full duration, FRESH again, no reaction. The duration is
+    /// A Swirl's spread reaching an enemy already wearing this element
+    /// (<see cref="TriggerRules.SpreadOutcome.Refresh"/>; [USER],
+    /// 2026-10-01): full duration, no reaction. The duration is
     /// what a fresh application would give (<see cref="AuraCmd.Duration"/>),
     /// and the badge flashes so the player sees the refresh land. Sim twin:
     /// <c>reactions._react</c>'s anemo branch.
@@ -145,16 +126,9 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     internal async Task RefreshFromSpread(
         PlayerChoiceContext choiceContext, Creature? applier, CardModel? cardSource)
     {
-        Spent = false;
         await AuraCmd.Refresh(choiceContext, this, applier, cardSource);
         Flash();
     }
-
-    /// <summary>The spent face while <see cref="Spent"/>; the ruled face
-    /// otherwise, and always on a canonical copy (`IsMutable` first, the
-    /// guard every selector in this mod carries).</summary>
-    protected override string SmartDescriptionLocKey =>
-        IsMutable && Spent ? Id.Entry + "." + SpentKey : base.SmartDescriptionLocKey;
 
     // ARTIFACT COEXISTENCE ([USER] ruling 2026-08-23; LAW "Combat --
     // elements & reactions"): elemental application coexists with Artifact
@@ -293,9 +267,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         var trigger = ElementOf(cardSource, dealer);
         if (trigger == Element.None) return 1m;
 
-        // Spent-aware (the element port): a switched trigger on a spent aura
-        // forecasts no reaction, so it forecasts no Courtroom Drama either.
-        var reaction = TriggerRules.ReactionFor(this, trigger);
+        var reaction = ReactionTable.Lookup(Element, trigger);
 
         // Dealer-aware: Vermillion Pact's percent boost rides the multiplier
         // (sim _amp_mult). The amp-cap detector lives inside the overload.
@@ -391,12 +363,10 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         var trigger = ElementOf(cardSource, dealer);
         if (trigger == Element.None) return;
 
-        switch (TriggerRules.Outcome(Element, Spent, trigger))
+        switch (TriggerRules.Outcome(Element, trigger))
         {
             case TriggerRules.HitOutcome.Refresh:
-                // Same element refreshes duration rather than reacting, and
-                // makes a spent aura fresh again (the element port, sec.3).
-                Spent = false;
+                // Same element refreshes duration rather than reacting.
                 await PowerCmd.ModifyAmount(
                     choiceContext, this,
                     AuraCmd.Duration(dealer) - Amount,
@@ -404,25 +374,13 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
                 NoteTouched(this);
                 return;
 
-            case TriggerRules.HitOutcome.Spend:
-            {
-                // THE ELEMENT PORT: a switched trigger on a fresh aura reacts
-                // and leaves it standing, spent, its duration untouched. Spent
-                // BEFORE resolving, for the reason the consume below goes
-                // first: the Swirl spread must see this aura as already paid.
-                var reaction = ReactionTable.Lookup(Element, trigger);
-                Spent = true;
-                await ReactionEffects.Resolve(
-                    choiceContext, reaction, target, dealer, cardSource, Element);
-                return;
-            }
-
             case TriggerRules.HitOutcome.Consume:
             {
                 var reaction = ReactionTable.Lookup(Element, trigger);
-                // Consume the aura BEFORE resolving effects: Swirl re-applies
-                // this element to other enemies and must not immediately
-                // re-trigger here.
+                // Every reaction consumes its aura, Swirl and Crystallize
+                // included (2026-10-03). Consume BEFORE resolving effects:
+                // Swirl re-applies this element to other enemies and must not
+                // immediately re-trigger here.
                 var consumedElement = Element;
                 await PowerCmd.Remove(this);
 
@@ -432,7 +390,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
             }
 
             default:
-                // Nothing, or a switched trigger on a spent aura: pays nothing.
+                // No reaction between these elements.
                 return;
         }
     }

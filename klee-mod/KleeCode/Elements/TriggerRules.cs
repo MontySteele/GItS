@@ -3,35 +3,30 @@ using KleeMod.Powers;
 namespace KleeMod.Elements;
 
 /// <summary>
-/// THE ELEMENT PORT, PHASE ONE: fresh and spent auras
-/// (<c>review/ruled/element-home-review-2026-09-28.md</c> §3, §4, §7.1; ruled
-/// §6, [USER]: "That makes sense").
+/// THE ELEMENT PORT (<c>review/ruled/element-home-review-2026-09-28.md</c>
+/// §3, §4 A, ruled §6), AS AMENDED 2026-10-03: EVERY REACTION CONSUMES ITS
+/// AURA. [USER]: "Should we get rid of the concept of elements being 'spent'
+/// after a swirl? It seems to generate confusion." then "agreed ... please
+/// proceed". Swirl and Crystallize remove the aura they act on, as every
+/// other reaction does and as in Genshin; there is no spent aura any more.
 ///
-/// Anemo and Geo no longer CONSUME the aura they act on. A trigger hit on a
-/// FRESH aura reacts and leaves the aura standing, SPENT; a trigger hit on a
-/// spent aura does nothing extra. A same-element hit refreshes the aura and
-/// makes it fresh again; every other element reacts with a spent aura exactly
-/// as with a fresh one; spending never touches the aura's duration.
+/// <see cref="SwirlPays"/> is the one switch left (§4 A): a Swirl spreads
+/// ordinary FRESH copies of the swirled element to every OTHER enemy (one
+/// already wearing it refreshes to full duration, one wearing another aura
+/// has it replaced; nothing reacts where a copy lands) and deals a flat
+/// <see cref="ReactionConstants.SwirlDamage"/> to every enemy. A copy is an
+/// application without a trigger, so it never reacts and never Swirls again:
+/// no recursion. Because copies are fresh, a Swirl that hits ALL enemies pays
+/// once per enemy whose aura is still standing when its Anemo hit lands.
 ///
-/// TWO SWITCHES, one per change, so each is tested alone (§6 pick 4.4). The
-/// shared fresh/spent rule rides with whichever is on: a trigger whose switch
-/// is off consumes as it always did, spent aura or not.
-///
-///   <see cref="SwirlPays"/>            §4 A. Swirl keeps the aura, spreads
-///                                      SPENT copies to every enemy lacking
-///                                      it, and deals a flat
-///                                      <see cref="ReactionConstants.SwirlDamage"/>
-///                                      to every enemy.
-///   <see cref="CrystallizeKeepsAura"/> §4 B. The 4 Block, and the aura stays.
-///
-/// Both are ON in every build that names neither property
-/// (<c>klee-mod/Directory.Build.props</c>): <c>-p:SwirlPays=false</c> or
-/// <c>-p:CrystallizeKeepsAura=false</c> turns one off. The sim twins
-/// (<c>C.SWIRL_PAYS</c>, <c>C.CRYSTALLIZE_KEEPS_AURA</c>) ship <c>False</c>,
-/// the arm convention, and pin both sides by flipping them.
+/// On in every build that does not name it (<c>klee-mod/Directory.Build.props</c>);
+/// <c>-p:SwirlPays=false</c> turns it off, and a Swirl then copies the aura
+/// onto every enemy, the struck one included, with no flat damage. The sim
+/// twin <c>C.SWIRL_PAYS</c> ships <c>False</c>, the arm convention, and pins
+/// both sides by flipping it.
 ///
 /// Compiled in every build, not under <c>PROTOTYPE_CARDS</c>: this is the
-/// shared reaction layer, which every kit and the shipped build react through.
+/// shared reaction layer, which every kit reacts through.
 /// </summary>
 public static class TriggerRules
 {
@@ -43,46 +38,20 @@ public static class TriggerRules
         false;
 #endif
 
-    /// <summary>§4 B's default, from <c>-p:CrystallizeKeepsAura</c>.</summary>
-    public const bool DefaultCrystallizeKeepsAura =
-#if CRYSTALLIZE_KEEPS_AURA
-        true;
-#else
-        false;
-#endif
-
     /// <summary>Is §4 A live? Settable so a headless pin can assert both
     /// sides in one build; nothing in the mod writes it.</summary>
     public static bool SwirlPays { get; set; } = DefaultSwirlPays;
-
-    /// <summary>Is §4 B live? Settable for the same reason.</summary>
-    public static bool CrystallizeKeepsAura { get; set; } = DefaultCrystallizeKeepsAura;
-
-    /// <summary>
-    /// Does this trigger SPEND the aura rather than consume it? Only a trigger
-    /// element can say yes, and only while its own switch is on. Sim twin:
-    /// <c>reactions.trigger_keeps_aura</c>.
-    /// </summary>
-    public static bool TriggerKeepsAura(Element trigger) =>
-        (trigger == Element.Anemo && SwirlPays)
-        || (trigger == Element.Geo && CrystallizeKeepsAura);
 
     /// <summary>What a hit does to an aura that is already standing.</summary>
     public enum HitOutcome
     {
         /// <summary>No element, or a pair with no reaction: nothing.</summary>
         Nothing = 0,
-        /// <summary>Same element: full duration, and fresh again.</summary>
+        /// <summary>Same element: full duration.</summary>
         Refresh,
-        /// <summary>The aura is removed and the reaction resolves (today's
-        /// rule, and every aura element's).</summary>
+        /// <summary>The aura is removed and the reaction resolves. Every
+        /// reaction, Swirl and Crystallize included (2026-10-03).</summary>
         Consume,
-        /// <summary>A switched trigger on a FRESH aura: the reaction
-        /// resolves and the aura stays, spent.</summary>
-        Spend,
-        /// <summary>A switched trigger on a SPENT aura: no reaction, no
-        /// change. The "pays nothing" the preview explains.</summary>
-        SpentNothing,
     }
 
     /// <summary>
@@ -91,46 +60,24 @@ public static class TriggerRules
     /// <c>ElementalHit.ApplyOnly</c>) and every preview that forecasts one.
     /// Pure. Sim twin: the branch order of <c>reactions.resolve_hit</c>.
     /// </summary>
-    public static HitOutcome Outcome(Element aura, bool spent, Element trigger)
+    public static HitOutcome Outcome(Element aura, Element trigger)
     {
         if (aura == Element.None || trigger == Element.None) return HitOutcome.Nothing;
         if (aura == trigger) return HitOutcome.Refresh;
         if (ReactionTable.Lookup(aura, trigger) == Reaction.None) return HitOutcome.Nothing;
-        if (TriggerKeepsAura(trigger))
-        {
-            return spent ? HitOutcome.SpentNothing : HitOutcome.Spend;
-        }
         return HitOutcome.Consume;
     }
-
-    /// <summary>
-    /// The reaction this trigger would produce against this aura NOW:
-    /// <see cref="ReactionTable.Lookup"/>, except <c>None</c> for a switched
-    /// trigger on a spent aura. Pure; the damage pipeline's forecast
-    /// (Courtroom Drama's first-reaction Vulnerable) reads it so a trigger
-    /// that pays nothing forecasts nothing.
-    /// </summary>
-    public static Reaction ReactionFor(Element aura, bool spent, Element trigger) =>
-        Outcome(aura, spent, trigger) is HitOutcome.Consume or HitOutcome.Spend
-            ? ReactionTable.Lookup(aura, trigger)
-            : Reaction.None;
-
-    /// <summary>The <see cref="AuraPower"/> overload of
-    /// <see cref="ReactionFor(Element, bool, Element)"/>.</summary>
-    public static Reaction ReactionFor(AuraPower aura, Element trigger) =>
-        ReactionFor(aura.Element, aura.Spent, trigger);
 
     /// <summary>What a Swirl's spread does to one other enemy.</summary>
     public enum SpreadOutcome
     {
-        /// <summary>No aura, or another element: a SPENT copy replaces it,
-        /// as today, and nothing reacts there (the deferred candidate).</summary>
+        /// <summary>No aura, or another element: a fresh copy replaces it,
+        /// and nothing reacts there.</summary>
         Copy,
-        /// <summary>Already wearing the swirled element, fresh or spent: its
-        /// aura goes back to full duration and FRESH, and nothing reacts.
-        /// [USER], 2026-10-01: "reapplying the same element as a refresh
-        /// mechanic feels fine and we shouldn't let that brick other
-        /// reactions."</summary>
+        /// <summary>Already wearing the swirled element: its aura goes back
+        /// to full duration, and nothing reacts. [USER], 2026-10-01:
+        /// "reapplying the same element as a refresh mechanic feels fine and
+        /// we shouldn't let that brick other reactions."</summary>
         Refresh,
     }
 
@@ -138,20 +85,8 @@ public static class TriggerRules
     /// What a Swirl of <paramref name="spread"/> does to an enemy wearing
     /// <paramref name="existing"/> (<see cref="Element.None"/> for no aura).
     /// §4 A, amended 2026-10-01: the same element refreshes, anything else
-    /// takes a spent copy.
+    /// takes a fresh copy.
     /// </summary>
     public static SpreadOutcome SpreadOn(Element spread, Element existing) =>
         existing == spread ? SpreadOutcome.Refresh : SpreadOutcome.Copy;
-
-    /// <summary>
-    /// Which trigger elements a spent aura refuses, for the badge's words:
-    /// "Anemo and Geo", "Anemo", "Geo", or empty with both switches off.
-    /// </summary>
-    public static string SpentTriggers() => (SwirlPays, CrystallizeKeepsAura) switch
-    {
-        (true, true) => "Anemo and Geo",
-        (true, false) => "Anemo",
-        (false, true) => "Geo",
-        _ => string.Empty,
-    };
 }

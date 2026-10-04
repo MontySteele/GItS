@@ -32,11 +32,12 @@
   <Import Project="$(GitsLocalProps)"
           Condition="!Exists('$(MSBuildThisFileDirectory)local.props') and '$(GitsLocalProps)' != '' and Exists('$(GitsLocalProps)')" />
 
-  <!-- THE ELEMENT PORT, PHASE ONE (review/ruled/element-home-review-2026-09-28.md
-       sec.3/4, ruled sec.6): two switches, one per change, so each is tested
-       alone (sec.6 pick 4.4). On in every build that names neither;
-       -p:SwirlPays=false or -p:CrystallizeKeepsAura=false turns one off.
-       KleeMod.Elements.TriggerRules.
+  <!-- THE ELEMENT PORT (review/ruled/element-home-review-2026-09-28.md
+       sec.4 A, ruled sec.6): Swirl pays (a flat 2 to all, fresh copies to the
+       others). On in every build that does not name it; -p:SwirlPays=false
+       turns it off. KleeMod.Elements.TriggerRules. Its twin switch,
+       CrystallizeKeepsAura, went with the spent aura on 2026-10-03: every
+       reaction consumes its aura.
 
        The prototype surface and the four kit arms (PrototypeCards,
        KleeOverhaul, CompanionOverhaul, KokomiOverhaul, FurinaStage) and the
@@ -46,7 +47,6 @@
        klee-mod/build/deploy_proto.ps1 -TeyvatFrame turns it on. -->
   <PropertyGroup>
     <SwirlPays Condition="'$(SwirlPays)' == ''">true</SwirlPays>
-    <CrystallizeKeepsAura Condition="'$(CrystallizeKeepsAura)' == ''">true</CrystallizeKeepsAura>
   </PropertyGroup>
 
   <!-- EB-172 / R218 C — BUILD AGAINST THE PINNED ASSEMBLIES INSTEAD OF THE

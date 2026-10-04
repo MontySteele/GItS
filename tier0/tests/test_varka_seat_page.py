@@ -27,8 +27,8 @@ RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
 
 FRESH_PYRO = ("Pyro clings to this enemy for 2 more turns. A hit of another "
               "element triggers an Elemental Reaction.")
-SPENT_HYDRO = ("Spent: Anemo and Geo do nothing to it until Hydro hits it "
-               "again. 1 more turn.")
+HYDRO_ONE_TURN = ("Hydro clings to this enemy for 1 more turn. A hit of "
+                  "another element triggers an Elemental Reaction.")
 PYRO_OATH_TEXT = ("Your current element is Pyro. Your Swirls deal 3 damage "
                   "to that enemy. Oath: Pyro 2, Hydro 0, Electro 1, Cryo 0.")
 NO_ELEMENT_TEXT = ("You have 1 Oath but no current element yet. "
@@ -58,7 +58,7 @@ def _status(name: str, text: str, amount: int = 1,
 
 
 def varka_state(badge=("Pyro Oath", PYRO_OATH_TEXT, 2),
-                auras=((FRESH_PYRO, "Pyro"), (SPENT_HYDRO, "Hydro"), None),
+                auras=((FRESH_PYRO, "Pyro"), (HYDRO_ONE_TURN, "Hydro"), None),
                 character="Varka") -> dict:
     """The recorded turn, as his: the Oath badge on him (title, sentence,
     amount) or none, the Fang in his relics, and one enemy per `auras` entry
@@ -102,9 +102,8 @@ def test_the_page_prints_his_element_his_oath_and_what_a_swirl_pays():
     assert lines[2] == "- Your Swirls deal 3 damage to that enemy."
     auras = [line for line in lines if line.startswith("- **Hilichurl")]
     assert len(auras) == 3
-    assert "Pyro, fresh: an Anemo hit Swirls it." in auras[0]
-    assert ("Hydro, spent: Swirl does nothing to it until Hydro hits it "
-            "again.") in auras[1]
+    assert "Pyro: an Anemo hit Swirls it." in auras[0]
+    assert "Hydro: an Anemo hit Swirls it." in auras[1]
     assert auras[2].endswith("no aura.")
 
 
@@ -160,15 +159,15 @@ def test_another_kit_prints_no_oath_block():
 
 
 def test_the_block_is_built_off_the_wires_own_rows():
-    """The board half, on its own: SPENT is the badge's own sentence, never a
-    guess, and the counts are the badge sentence's."""
+    """The board half, on its own: each enemy's aura element (no spent state
+    since 2026-10-03), and the counts are the badge sentence's."""
     combat = blindplay_board._combat(varka_state())
     oath = combat["oath"]
     assert oath["element"] == "Pyro"
     assert oath["counts"] == {"Pyro": 2, "Hydro": 0, "Electro": 1, "Cryo": 0}
     assert oath["payout"] == "Your Swirls deal 3 damage to that enemy."
-    assert [(r["element"], r["state"]) for r in oath["auras"]] == [
-        ("Pyro", "fresh"), ("Hydro", "spent"), (None, None)]
+    assert [r["element"] for r in oath["auras"]] == ["Pyro", "Hydro", None]
+    assert all("state" not in r for r in oath["auras"])
 
 
 def test_embark_names_him_and_the_run_check_knows_him():
@@ -254,13 +253,14 @@ def test_the_retired_absorb_receipt_prints_nothing():
     assert "Absorbed" not in page and "Wind." not in page
 
 
-def test_the_words_say_a_spent_aura_still_reacts_and_swirl_copies_are_spent():
+def test_the_words_say_every_reaction_removes_the_aura():
+    # 2026-10-03: no spent auras.
     from understudy import blindplay_notes as notes
-    assert ("A spent aura still reacts with Pyro, Hydro, Electro and Cryo."
-            in notes.ELEMENT_KEYWORDS["aura"])
-    assert "Enemies wearing it refresh." in notes.ARM_KEYWORDS["Swirl"]
+    assert "removes the aura" in notes.ELEMENT_KEYWORDS["aura"]
+    assert "spent" not in notes.ELEMENT_KEYWORDS["aura"]
+    assert notes.ARM_KEYWORDS["Swirl"].startswith("Anemo meets an aura: remove it")
     page = blindplay.observe(varka_state())
-    assert "Other elements still react with it." in page
+    assert "spent aura" not in page.lower() and ", spent" not in page
 
 
 # ---- the rebalance round, 2026-10-03: where each Oath gain came from --------
