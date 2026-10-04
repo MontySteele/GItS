@@ -109,7 +109,6 @@ public sealed class VarkaOathLedger
     private int _round = -1;
     private int _changedRound = -1;
     private int _staticFieldRound = -1;
-    private int _firstAttackRound = -1;
     private int _leftRound = -1;
 
     /// <summary>ELEMENT IDENTITIES sec.7 (2026-10-01): the element that
@@ -121,23 +120,6 @@ public sealed class VarkaOathLedger
     /// <see cref="LeftElement"/>'s.</summary>
     public bool LeftThisTurn =>
         LeftElement != Element.None && _leftRound >= 0 && _leftRound == _round;
-
-    /// <summary>Wildfire Oath (element identities sec.5): is this the turn's
-    /// first Attack? Marks the turn. Returns true once per turn.</summary>
-    public bool TakeFirstAttack()
-    {
-        if (_firstAttackRound == _round) return false;
-        _firstAttackRound = _round;
-        return true;
-    }
-
-    /// <summary>Wildfire Oath's armed play: the card whose first powered hit
-    /// takes the bonus, or null. Set at the top of the turn's first Attack,
-    /// cleared by that hit or by the play's end.</summary>
-    public object? WildfireCard { get; set; }
-
-    /// <summary>The Wildfire Oath stacks the armed play carries.</summary>
-    public int WildfireStacks { get; set; }
 
     /// <summary>Did his current element change this turn (Shifting Gale)?
     /// None to an element counts, as it does for Boreas Unbound.</summary>
@@ -517,16 +499,6 @@ public static class VarkaOath
         var ledger = VarkaOathLedger.For(owner!);
         ledger.OpenScope(open: !VarkaRules.IsKnight(card), card: card);
         ledger.NotePlay();
-        // WILDFIRE OATH (element identities sec.5; the rebalance sec.2): the
-        // turn's first Attack arms one bonus, which its first powered hit
-        // takes, whatever is current (<see cref="WildfireOathPower"/>). A
-        // later Attack never does.
-        if (card.Type == CardType.Attack && ledger.TakeFirstAttack())
-        {
-            var stacks = owner!.Powers.OfType<WildfireOathPower>().Sum(p => p.Amount);
-            ledger.WildfireCard = stacks > 0 ? card : null;
-            ledger.WildfireStacks = stacks;
-        }
         if (!VarkaRules.IsKnight(card)) return;
         ledger.NoteKnight();
         // Noelle (the expansion) is a Geo Knight: a Knight for every
@@ -556,8 +528,6 @@ public static class VarkaOath
             var line = GainLine(Safe(() => card.Title?.ToString()), clauses, fang);
             if (line.Length > 0) global::KleeMod.Vfx.KurageBeat.Say(owner, line);
         }
-        // Wildfire Oath: an unspent bonus goes with its play.
-        if (ReferenceEquals(ledger.WildfireCard, card)) ledger.WildfireCard = null;
         if (card is ProtoVkFourWindsAscension)
         {
             foreach (var wolves in owner!.Powers.OfType<WolfpackPower>().ToList())
@@ -754,11 +724,12 @@ public static class VarkaOath
     /// current element (the open Oath, 2026-09-30), so the gain is the current
     /// element's and Dawn Wind's March pays, as a Knight's does; the last
     /// one applied wins. <paramref name="cardSource"/> is the hit's card,
-    /// when the hit names one.
+    /// when the hit names one. <paramref name="target"/> is the enemy it
+    /// landed on (Wildfire Oath pays it).
     /// </summary>
     public static async Task NoteApplication(
         PlayerChoiceContext choiceContext, Creature? applier, Element element,
-        CardModel? cardSource = null)
+        CardModel? cardSource = null, Creature? target = null)
     {
         if (applier == null || !Live(applier) || !element.LeavesAura()) return;
         var ledger = VarkaOathLedger.For(applier);
@@ -780,6 +751,19 @@ public static class VarkaOath
         if (ledger.TryCredit(swirl: false, element))
         {
             await Gain(choiceContext, applier, element, 1, OathSource.Applied);
+        }
+        // Wildfire Oath (Varka Wildfire Oath and Short Circuit, 2026-10-03):
+        // "Whenever you apply Pyro to an enemy, deal damage equal to your
+        // Pyro Oath to it" -- after the credit above, so the Oath this
+        // application just raised counts. Element-less, so its hit never
+        // comes back through here. Sim twin: `varka_oath.note_hit`.
+        if (element == Element.Pyro && target != null)
+        {
+            foreach (var wildfire in applier.Powers
+                         .OfType<WildfireOathPower>().ToList())
+            {
+                await wildfire.OnPyroApplied(choiceContext, target);
+            }
         }
         // Assembly at the Cathedral (co-op notes pick 2, 2026-10-02):
         // "Whenever you apply an element", whether or not it credits. Its
@@ -892,12 +876,6 @@ public static class VarkaOath
                 break;
         }
     }
-
-    /// <summary>Wildfire Oath's bonus on the armed hit (the rebalance,
-    /// sec.2): half his Pyro Oath, rounded down, per stack, whatever element
-    /// is current. PURE.</summary>
-    public static int WildfireBonus(int pyroOath, int stacks) =>
-        stacks > 0 ? stacks * (pyroOath / 2) : 0;
 
     /// <summary>
     /// ELEMENT IDENTITIES sec.7: would playing <paramref name="card"/> now

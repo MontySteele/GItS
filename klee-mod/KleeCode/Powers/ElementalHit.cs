@@ -95,7 +95,8 @@ internal static class ElementalHit
         dealt += PurityDarkPower.BonusFor(applier, element);
 
         // VARKA (the Oath rework, sec.3): an application of his credits Oath.
-        await VarkaOath.NoteApplication(choiceContext, applier, element);
+        await VarkaOath.NoteApplication(choiceContext, applier, element,
+            target: target);
         var aura = AuraCmd.Find(target);
         if (aura == null)
         {
@@ -243,7 +244,8 @@ internal static class ElementalHit
         Creature? applier)
     {
         // VARKA (the Oath rework, sec.3): an application of his credits Oath.
-        await VarkaOath.NoteApplication(choiceContext, applier, element);
+        await VarkaOath.NoteApplication(choiceContext, applier, element,
+            target: target);
         var aura = AuraCmd.Find(target);
         if (aura == null)
         {

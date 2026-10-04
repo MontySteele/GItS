@@ -323,29 +323,32 @@ SIM_CALL_SITES = {
     # damage, element-less and unpowered.
     ('varka_oath.py', 1): ("'card'", 'False', 'None'),
     ('varka_oath.py', 2): ("'card'", 'False', 'None'),
+    # Wildfire Oath (2026-10-03): Pyro's Absolute Zero, a Power's damage per
+    # Pyro he applies, element-less and unpowered.
+    ('varka_oath.py', 3): ("'card'", 'False', 'None'),
     # The Pyro payout (the one enemy; Wildfire Oath's ALL left with element
     # identities, 2026-10-01) and the Electro payout: element-less,
     # unpowered, his card's (`ElementalHit.DealUnelemented(powered: false)`).
-    ('varka_oath.py', 3): ("'card'", 'False', 'None'),
     ('varka_oath.py', 4): ("'card'", 'False', 'None'),
+    ('varka_oath.py', 5): ("'card'", 'False', 'None'),
     # The rebalance paper's Absolute Zero (sim only, behind
     # `varka_oath.REBALANCE`): a Power's damage per Weak or Vulnerable he
     # applies, element-less and unpowered.
-    ('varka_oath.py', 5): ("'card'", 'False', 'None'),
+    ('varka_oath.py', 6): ("'card'", 'False', 'None'),
     # Baron Bunny's next-turn burst: Pyro to ALL, unpowered.
-    ('varka_oath.py', 6): ("'card'", 'False', "'pyro'"),
+    ('varka_oath.py', 7): ("'card'", 'False', "'pyro'"),
     # Element identities (2026-10-01): Retaliating Tide, a Power's damage at
     # his turn's end, element-less and unpowered.
-    ('varka_oath.py', 7): ("'card'", 'False', 'None'),
+    ('varka_oath.py', 8): ("'card'", 'False', 'None'),
     # Four Winds' Ascension's and Northwind Avatar's elemental follow-up: a
     # powered hit of the card, carrying his current element.
-    ('varka_oath.py', 8): ('source', None, 'led.current'),
+    ('varka_oath.py', 9): ('source', None, 'led.current'),
     # The expansion's element hits (Cavalry Charge, Blazing Charge,
     # Thundering Verdict, Razor, Tempest): a powered hit of the card,
     # carrying the element the card names.
-    ('varka_oath.py', 9): ('source', None, 'element'),
+    ('varka_oath.py', 10): ('source', None, 'element'),
     # Storm Surge's "each enemy it Swirls takes 5 more": element-less, powered.
-    ('varka_oath.py', 10): ("'attack' if card.type == 'attack' else 'card'",
+    ('varka_oath.py', 11): ("'attack' if card.type == 'attack' else 'card'",
                            None, 'None'),
 }
 

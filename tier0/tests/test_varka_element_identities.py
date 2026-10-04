@@ -100,9 +100,14 @@ def test_the_pool_stays_78_with_the_five_swaps(varka):
 def test_the_paper_numbers(varka):
     assert _fx(_vk("charged_lunge"), "varka")["base"] == 6
     assert _fx(_vk("charged_lunge") + "+", "varka")["base"] == 9
-    assert _fx(_vk("short_circuit"), "discard")["amount"] == 3
+    # Varka Wildfire Oath and Short Circuit (2026-10-03): discard 2, draw
+    # 2 [3], gain 1 Energy.
+    assert _fx(_vk("short_circuit"), "discard")["amount"] == 2
     assert _fx(_vk("short_circuit") + "+", "discard")["amount"] == 2
-    assert _fx(_vk("short_circuit"), "energy")["amount"] == 2
+    assert _fx(_vk("short_circuit"), "draw")["amount"] == 2
+    assert _fx(_vk("short_circuit") + "+", "draw")["amount"] == 3
+    assert _fx(_vk("short_circuit"), "energy")["amount"] == 1
+    assert loader.get_card(_vk("short_circuit")).exhaust is not True
     assert loader.get_card(_vk("short_circuit")).cost == 0
     assert loader.get_card(_vk("chain_lightning")).cost == 2
     assert _fx(_vk("chain_lightning") + "+", "varka")["base"] == 11
@@ -135,17 +140,26 @@ def test_charged_lunge_hits_electro_and_draws(varka):
     assert V.ledger(st.player).current == "electro"     # the open Oath
 
 
-def test_short_circuit_discards_three_for_two_energy_and_electro(varka):
+def test_short_circuit_discards_two_draws_two_for_one_energy(varka):
     st = _state()
     st.player.hand = [loader.get_card("strike") for _ in range(4)]
     card = loader.get_card(_vk("short_circuit"))
     st.player.hand.append(card)
     st.player.energy = 1
+    pile = len(st.player.draw_pile)
     combat.play_card(st, card)
-    assert st.player.energy == 3                         # 0 cost, +2
-    assert len(st.player.hand) == 1                      # 4 - 3 discarded
-    assert st.discards_this_turn == 3
+    assert st.player.energy == 2                         # 0 cost, +1
+    assert len(st.player.hand) == 4                      # 4 - 2 + 2
+    assert len(st.player.draw_pile) == pile - 2
+    assert st.discards_this_turn == 2
     assert st.enemies[0].aura == "electro"
+    # Upgraded: draw 3.
+    st = _state()
+    st.player.hand = [loader.get_card("strike") for _ in range(4)]
+    card = loader.get_card(_vk("short_circuit") + "+")
+    st.player.hand.append(card)
+    combat.play_card(st, card)
+    assert len(st.player.hand) == 5 and st.discards_this_turn == 2
 
 
 def test_chain_lightning_costs_one_less_per_discard(varka):
@@ -172,10 +186,10 @@ def test_chain_lightning_after_short_circuit_is_free(varka):
     st.player.energy = 0
     combat.play_card(st, circuit)
     # The pilot's discard pick may take Chain Lightning itself; a copy left
-    # in hand costs 2 - 3 discards = 0.
+    # in hand costs 2 - 2 discards = 0, and the Energy is there for more.
     if chain in st.player.hand:
         assert combat.card_cost(st, chain) == 0
-    assert st.player.energy == 2
+    assert st.player.energy == 1
 
 
 def test_violet_storm_discards_the_hand_and_hits_per_card(varka):
@@ -250,55 +264,82 @@ def test_unbroken_tide_left_the_engine():
 
 
 # ---------------------------------------------------------------------------
-# 4. Pyro: Wildfire Oath's one big hit.
+# 4. Pyro: Wildfire Oath, Pyro's Absolute Zero (Varka Wildfire Oath and Short
+#    Circuit, 2026-10-03).
 # ---------------------------------------------------------------------------
 
-def _squall():
-    """Squall's old row (Deal 4 twice, an Attack), left with the Varka
-    defence paper: a plain two-hit Attack for the Wildfire pins."""
+def _pyro_skill(element="pyro"):
+    """A damage-less application, a Skill (Short Circuit's shape)."""
+    import copy
+    card = copy.deepcopy(loader.get_card(_vk("short_circuit")))
+    card.effects = [{"op": "apply_aura", "element": element,
+                     "target": "enemy"}]
+    return card
+
+
+def _pyro_twice():
+    """A two-hit Pyro Attack: two applications in one play."""
     import copy
     card = copy.deepcopy(loader.get_card(_vk("favonius_cut")))
-    card.cost = 1
+    card.cost, card.element = 1, "pyro"
     card.effects = [{"op": "damage", "amount": 4, "target": "enemy",
                      "times": 2}]
     return card
 
 
-def test_wildfire_adds_half_pyro_oath_to_the_first_attacks_first_hit(varka):
-    # The rebalance (sec.2): half the Pyro Oath, rounded down.
+def test_wildfire_pays_the_pyro_oath_after_the_applications_credit(varka):
     st = _state()
     led = V.ledger(st.player)
-    led.current, led.oath["pyro"] = "pyro", 7
+    led.current, led.oath["pyro"] = "pyro", 3
     st.player.powers[V.WILDFIRE_OATH] = 1
-    _play(st, _squall())                             # 4 twice
-    assert st.enemies[0].hp == 100 - (4 + 3) - 4
-    hp = st.enemies[0].hp
-    _play(st, _squall())                             # the turn's second
-    assert st.enemies[0].hp == hp - 8
-    st.turn = 2
-    hp = st.enemies[0].hp
-    _play(st, _squall())                             # a new turn
-    assert st.enemies[0].hp == hp - (4 + 3) - 4
+    _play(st, _pyro_skill())
+    # The application credits 1 first (3 -> 4), then pays the 4.
+    assert led.oath["pyro"] == 4
+    assert st.enemies[0].hp == 100 - 4
+    _play(st, _pyro_skill())                         # every application
+    assert st.enemies[0].hp == 100 - 4 - 5
 
 
-def test_wildfire_needs_only_a_first_attack(varka):
-    # The rebalance (sec.2): no current-element condition.
+def test_wildfire_pays_each_hit_and_per_stack(varka):
     st = _state()
     led = V.ledger(st.player)
-    led.current, led.oath["pyro"] = "hydro", 7
-    st.player.powers[V.WILDFIRE_OATH] = 1
-    _play(st, _squall())
-    assert st.enemies[0].hp == 100 - 8 - 3
-    _play(st, _squall())                             # not the first
-    assert st.enemies[0].hp == 100 - 16 - 3
-    # Skills do not spend it; stacks multiply it.
-    st = _state()
-    led = V.ledger(st.player)
-    led.current, led.oath["pyro"] = "pyro", 6
+    led.current, led.oath["pyro"] = "pyro", 3
     st.player.powers[V.WILDFIRE_OATH] = 2
-    _play(st, _vk("knightly_guard"))
-    _play(st, _vk("favonius_cut"))
-    assert st.enemies[0].hp == 100 - 14 - 6
+    _play(st, _pyro_twice())
+    # Hit 1 credits (4) and pays 2 x 4; hit 2 credits nothing (once a play)
+    # and pays 2 x 4 again; the hits are 4 each.
+    assert led.oath["pyro"] == 4
+    assert st.enemies[0].hp == 100 - 8 - 4 - 8 - 4
+
+
+def test_wildfire_reads_only_pyro(varka):
+    st = _state()
+    led = V.ledger(st.player)
+    led.current, led.oath["pyro"] = "hydro", 0
+    st.player.powers[V.WILDFIRE_OATH] = 1
+    _play(st, _pyro_skill("hydro"))                  # not Pyro: nothing
+    assert st.enemies[0].hp == 100
+    # Pyro from no Pyro Oath: its own credit makes it 1, so it pays 1.
+    _play(st, _pyro_skill())
+    assert led.oath["pyro"] == 1
+    assert st.enemies[0].hp == 100 - 1
+
+
+def test_wildfire_left_the_attack_bonus(varka):
+    assert not hasattr(V, "take_wildfire")
+    led = V.ledger(_state().player)
+    assert not hasattr(led, "wildfire_armed")
+    assert not hasattr(led, "first_attack_turn")
+    # An unelemented Attack takes nothing.
+    import copy
+    st = _state()
+    V.ledger(st.player).oath["pyro"] = 7
+    st.player.powers[V.WILDFIRE_OATH] = 1
+    card = copy.deepcopy(loader.get_card(_vk("favonius_cut")))
+    card.cost, card.element = 1, None
+    card.effects = [{"op": "damage", "amount": 4, "target": "enemy"}]
+    _play(st, card)
+    assert st.enemies[0].hp == 100 - 4
 
 
 def test_wildfire_no_longer_widens_the_swirl(varka):
@@ -308,7 +349,8 @@ def test_wildfire_no_longer_widens_the_swirl(varka):
     led.current, led.oath["pyro"] = "pyro", 4
     st.player.powers[V.WILDFIRE_OATH] = 1
     _play(st, _vk("jean_dandelion_breeze"))              # a Skill
-    # The flat 2 to both, then Pyro's 3 to the one Swirled.
+    # The flat 2 to both, then Pyro's 3 to the one Swirled; Anemo is no
+    # Pyro application.
     assert sorted(e.hp for e in st.enemies) == [100 - 2 - 3, 100 - 2]
 
 
@@ -445,13 +487,18 @@ def test_the_sequencer_plays_short_circuit_first_over_a_dead_hand(sim):
     hand = _hand(st, ["status_dazed"] * 3
                  + [_vk("chain_lightning"), _vk("short_circuit")], 0)
     assert S._electro_pick(st, lambda s: None) is hand[-1]
-    # Its discards are the three dead cards, not Chain Lightning.
-    assert [c.id for c in S.lowest_victims(st, 3)] == ["status_dazed"] * 3
+    # Its two discards are dead cards, not Chain Lightning.
+    assert [c.id for c in S.lowest_victims(st, 2)] == ["status_dazed"] * 2
 
 
 def test_the_sequencer_holds_short_circuit_over_a_hand_worth_playing(sim):
+    # Its draws are priced as the draw pile's typical card: here a dead one,
+    # so trading two Strikes for them is worse than the hand.
+    from tier0.engine import effects
     S = sim
     st = _state()
+    st.player.draw_pile = [effects.token_card("status_dazed")
+                           for _ in range(5)]
     hand = _hand(st, ["strike"] * 3 + [_vk("short_circuit")], 3)
     pick = S._electro_pick(st, lambda s: s.player.hand[0])
     assert pick is hand[0]                      # the stock pick, a Strike

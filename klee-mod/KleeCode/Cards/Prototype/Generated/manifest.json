@@ -2214,7 +2214,7 @@
       "conditional_then_damage": 2
     },
     "proto_vk_short_circuit": {
-      "discard": -1
+      "draw": 1
     },
     "proto_vk_static_field": {
       "power_amount": 1

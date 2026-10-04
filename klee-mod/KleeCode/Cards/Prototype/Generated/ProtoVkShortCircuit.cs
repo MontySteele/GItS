@@ -48,13 +48,13 @@ public sealed class ProtoVkShortCircuit : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Short Circuit"),
-        ("description", "Discard {Discards:diff()} cards. Gain 2 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy."),
+        ("description", "Discard 2 cards. Draw {Cards:diff()} cards. Gain 1 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Discards", 3m)
+            new CardsVar(2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -69,17 +69,18 @@ public sealed class ProtoVkShortCircuit : CustomCardModel, ICharacterCard
         {
             var picked = (await CardSelectCmd.FromHandForDiscard(
                 choiceContext, Owner,
-                new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, DynamicVars["Discards"].IntValue),
+                new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 2),
                 null, this)).ToList();
             await CardCmd.Discard(choiceContext, picked);
         }
-        await PlayerCmd.GainEnergy(2, Owner);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        await PlayerCmd.GainEnergy(1, Owner);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Electro, Owner.Creature);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Discards"].UpgradeValueBy(-1m);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

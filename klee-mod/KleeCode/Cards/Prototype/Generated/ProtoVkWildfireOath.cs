@@ -45,7 +45,7 @@ public sealed class ProtoVkWildfireOath : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Wildfire Oath"),
-        ("description", "Your first Attack each turn deals additional damage equal to half your Pyro [gold]Oath[/gold]."),
+        ("description", "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
