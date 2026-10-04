@@ -78,6 +78,10 @@ KIT_SOURCES = (
     "salon_final_bow",      # V13 Salon bow / Evoke
     "furina_stage/act",     # V14 Stage act
     "furina_stage/bow",     # V15 Stage bow
+    # The Furina re-founding sim slice (`furina_v2`, sim only): a performer's
+    # act or Bow, and Clorinde's while-on-stage line. Kit verbs, not card hits.
+    "furina_v2/act",
+    "furina_v2/clorinde_line",
     "companion",            # V17 companion / summon pulse
     "burst",                # V17 Sparks 'n' Splash volley
 )
@@ -302,6 +306,12 @@ SIM_CALL_SITES = {
     # THE SUPPORTING POOL (2026-09-26): Escoffier's 3 Cryo to ALL (Lyney's
     # Pyro hit shares the random-enemy door).
     ('furina_stage.py', 7): ('source', 'False', 'element'),
+    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): Clorinde's
+    # line ("whenever you Spend, deal 4 Electro") and the one act door every
+    # performer's damage act and Bow uses. Unpowered, as the Stage's acts are;
+    # each carries its performer's element (None for the trio).
+    ('furina_v2.py', 1): ("'furina_v2/clorinde_line'", 'False', "'electro'"),
+    ('furina_v2.py', 2): ("'furina_v2/act'", 'False', 'element'),
     ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
     # Sparks 'n' Splash, since 2026-09-25 on a Bomb's own terms (the
     # explosion's unpowered door), at the start of the turn.
