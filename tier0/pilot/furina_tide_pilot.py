@@ -23,7 +23,15 @@ THE VALUE MODEL:
   damage rate), plus `DRAIN_RISK` per point when the incoming hit is not
   covered, minus N x FANFARE.
 - A Restore of N is worth min(N, drained) x (hp_value + FANFARE), plus the
-  Restore readers.
+  Restore readers. Under `restore_no_fanfare` the FANFARE term is dropped
+  (here and in Charlotte's and Sigewinne's guest values).
+- Under `singer_rests`, the FIRST Drain of a turn also forfeits this turn's
+  Singer Restore. The Singer's capacity over the fight drops by one Restore
+  (`singer_capacity`), so the Drain is charged the HP that ends the fight
+  unrepaid because of that (`forfeit_cost`), plus, when Restore prints
+  Fanfare, the Fanfare the lost Restore would have printed. A second Drain
+  in the same turn forfeits nothing more. With the switches off every term
+  is the old one, so the default pilot's choices are unchanged.
 
 THREE PILOTS for the in-card choice: `judged` (the model above), `always`
 (Drain and Spend whenever legal) and `never` (never Drain; Spend as judged).
@@ -93,14 +101,42 @@ def turns_left(state) -> float:
     return max(1.0, total / DECK_DAMAGE_PER_TURN)
 
 
+def singer_capacity(state) -> float:
+    """HP the Singer can still repay this fight. Under `singer_rests` this
+    turn's Restore is already gone once she has Drained this turn."""
+    f = _f(state)
+    capacity = f.singer * turns_left(state)
+    if f.singer_rests and f.drained_this_turn:
+        capacity = max(0.0, capacity - f.singer)
+    return capacity
+
+
 def unrepaid_share(state, n: int) -> float:
     """The share of a new Drain of N the Singer will not repay before the
     fight ends, given what is already drained."""
     f = _f(state)
-    capacity = f.singer * turns_left(state)
+    capacity = singer_capacity(state)
     before = max(0.0, f.drained - capacity)
     after = max(0.0, f.drained + n - capacity)
     return (after - before) / n if n else 0.0
+
+
+def forfeit_cost(state, n: int) -> float:
+    """`singer_rests` only: what the first Drain of a turn costs by silencing
+    this turn's Singer. The fight's repay capacity drops by one Restore; the
+    extra HP left unrepaid is charged at hp_value, and the Restores lost are
+    charged as Fanfare when Restore prints it. Zero otherwise."""
+    f = _f(state)
+    if not f.singer_rests or f.drained_this_turn or f.singer <= 0:
+        return 0.0
+    cap = singer_capacity(state)
+    cap_after = max(0.0, cap - f.singer)
+    owed = f.drained + n
+    lost_restore = min(owed, cap) - min(owed, cap_after)
+    cost = lost_restore * hp_value(state)
+    if f.restore_fanfare:
+        cost += _gain_value(state, lost_restore)
+    return cost
 
 
 def _drain_triggers(state, n: int) -> float:
@@ -127,7 +163,7 @@ def drain_cost(state, n: int) -> float:
     hpv = hp_value(state)
     share = unrepaid_share(state, n)
     exposed = 1.0 if need(state) > 0 else 0.3
-    cost = n * hpv * share + DRAIN_RISK * n * exposed
+    cost = n * hpv * share + DRAIN_RISK * n * exposed + forfeit_cost(state, n)
     return cost - _gain_value(state, n) - _drain_triggers(state, n)
 
 
@@ -136,7 +172,9 @@ def restore_value(state, n: int) -> float:
     amount = min(n, f.drained)
     if amount <= 0:
         return 0.0
-    v = amount * hp_value(state) + _gain_value(state, amount)
+    v = amount * hp_value(state)
+    if f.restore_fanfare:
+        v += _gain_value(state, amount)
     if f.powers["endless_waltz"]:
         v += 0.9 * amount
     if "sigewinne" in f.stage:
@@ -269,10 +307,11 @@ def _base_value(card) -> tuple[float, float]:
 def _guest_value(state, member: str) -> float:
     f = _f(state)
     n = max(1, len(state.living_enemies))
+    per_restore = hp_value(state) + (FANFARE if f.restore_fanfare else 0.0)
     if member == "charlotte":
-        per = 0.6 * (hp_value(state) + FANFARE) * T.CHARLOTTE_ACT_RESTORE + 1.0
+        per = 0.6 * per_restore * T.CHARLOTTE_ACT_RESTORE + 1.0
     elif member == "sigewinne":
-        per = 0.6 * (hp_value(state) + FANFARE) * T.SIGEWINNE_ACT_RESTORE + 2.0
+        per = 0.6 * per_restore * T.SIGEWINNE_ACT_RESTORE + 2.0
     elif member == "wriothesley":
         per = T.WRIOTHESLEY_ACT + 2.5
     elif member == "clorinde":

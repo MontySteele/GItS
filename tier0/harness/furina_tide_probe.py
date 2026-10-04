@@ -162,9 +162,11 @@ def fight_record(state, kind: str) -> dict:
         "spent": L["spent"], "spends": L["spends"],
         "spend_offers": L["spend_offers"],
         "drained": L["drained"], "drains": L["drains"],
+        "card_drains": L["card_drains"],
         "drain_offers": L["drain_offers"],
         "drain_blocked": L["drain_blocked_by_line"],
         "restored": L["restored"], "restore_wasted": L["restore_wasted"],
+        "singer_skipped": L["singer_skipped"],
         "fanfare_end": L["fanfare_end"], "unrepaid_end": L["unrepaid_end"],
         "start_low": L["started_at_or_below_half"],
         "damage_by_turn": dict(L["damage_by_turn"]),
@@ -314,7 +316,7 @@ def summarize(results: list[dict]) -> dict:
     for f in fights:
         for k in ("gained", "spent", "spends", "spend_offers", "drained",
                   "drains", "drain_offers", "drain_blocked", "restored",
-                  "fanfare_end", "unrepaid_end", "turns"):
+                  "fanfare_end", "unrepaid_end", "turns", "singer_skipped", "card_drains"):
             tot[k] += f[k]
         for src, v in f["gained_by"].items():
             tot["g_" + src] += v
@@ -322,7 +324,9 @@ def summarize(results: list[dict]) -> dict:
     legal = tot["drain_offers"] - tot["drain_blocked"]
     s.update({
         "fights": nf,
-        "drain_take_rate": tot["drains"] / legal if legal else 0.0,
+        # card Drains over legal card offers (Neuvillette's act Drains are
+        # in `drains` but are never offered, so they stay out of the rate)
+        "drain_take_rate": tot["card_drains"] / legal if legal else 0.0,
         "drain_blocked_rate": (tot["drain_blocked"] / tot["drain_offers"]
                                if tot["drain_offers"] else 0.0),
         "gained_per_turn": tot["gained"] / max(1, tot["turns"]),
@@ -332,6 +336,7 @@ def summarize(results: list[dict]) -> dict:
         "drained_per_fight": tot["drained"] / nf,
         "restored_per_fight": tot["restored"] / nf,
         "unrepaid_per_fight": tot["unrepaid_end"] / nf,
+        "singer_skipped_per_fight": tot["singer_skipped"] / nf,
         "gain_split": {k[2:]: round(v / max(1, tot["gained"]), 2)
                        for k, v in tot.items() if k.startswith("g_")},
         "start_low_rate": sum(1 for f in fights if f["start_low"]) / nf,
@@ -374,6 +379,17 @@ DEFAULT_JOBS = (
     "guests/judged", "finale/judged",
     "draft/judged", "draft/always", "draft/never",
 )
+#: The K3 comparison (`--k3`): the baseline rules and each K3 switch
+#: (`furina_tide.VARIANT_SWITCHES`), on the same seeds.
+K3_VARIANTS = ("entry",) + tuple(T.VARIANT_SWITCHES)
+K3_JOBS = tuple(
+    job for v in K3_VARIANTS for job in (
+        f"base@{v}/judged",
+        f"draft@{v}/judged", f"draft@{v}/always", f"draft@{v}/never",
+        f"balanced@{v}/judged", f"balanced@{v}/always",
+        f"balanced@{v}/never",
+        f"gauntlet:finale@{v}/judged"))
+
 GAUNTLET_JOBS = (
     "gauntlet:ousia/judged", "gauntlet:pneuma/judged",
     "gauntlet:guests/judged", "gauntlet:finale/judged",
@@ -387,12 +403,15 @@ def main(argv=None) -> int:
     ap.add_argument("--jobs", type=int, default=1)
     ap.add_argument("--job", action="append")
     ap.add_argument("--gauntlet", action="store_true")
+    ap.add_argument("--k3", action="store_true",
+                    help="run K3_JOBS: the K3 switches against the baseline")
     ap.add_argument("--json")
     args = ap.parse_args(argv)
     if args.jobs == 0:
         import os
         args.jobs = os.cpu_count() or 1
-    jobs = args.job or (GAUNTLET_JOBS if args.gauntlet else DEFAULT_JOBS)
+    jobs = args.job or (K3_JOBS if args.k3 else
+                        GAUNTLET_JOBS if args.gauntlet else DEFAULT_JOBS)
     table = {}
     for job in jobs:
         res = run_job(job, args.runs, args.seed, args.jobs)

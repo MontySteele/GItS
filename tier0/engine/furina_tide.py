@@ -38,6 +38,18 @@ PROBE-ONLY ROWS. The `ftd_rising_applause_6` / `_all2` alternatives (rarity
 replaced with Lynette's line; it is in the draft pool the slice was read
 on). VARIANTS switch the Singer's Restore, whether enemy hits print
 Fanfare, and the line.
+
+THE K3 SWITCHES (`VARIANT_SWITCHES`; all off by default, so `entry` is the
+paper's rules). A Drain the Singer fully repays costs no HP and prints
+Fanfare twice (on the loss and on the Restore); these variants price it:
+- `singer_rests`: Salon Solitaire Restores only at the end of a turn in
+  which no Drain happened (`Ftd.singer_rests`). Any Drain counts, Neuvillette's
+  act included, since it is a real Drain; his act comes before the Singer.
+- `restore_no_fanfare`: Restore prints no Fanfare (`Ftd.restore_fanfare`
+  False). HP loss from any cause still prints it.
+- `both`: the two together.
+- `singer1`: the Singer Restores 1 (the paper's named lever), for comparison.
+All four keep the `entry` line.
 """
 
 from __future__ import annotations
@@ -77,9 +89,9 @@ def _new_ledger() -> dict:
     return {
         "gained": 0, "gained_by": collections.Counter(),
         "spent": 0, "spends": 0,
-        "drained": 0, "drains": 0, "drain_offers": 0,
+        "drained": 0, "drains": 0, "drain_offers": 0, "card_drains": 0,
         "drain_blocked_by_line": 0,
-        "restored": 0, "restore_wasted": 0,
+        "restored": 0, "restore_wasted": 0, "singer_skipped": 0,
         "spend_offers": 0,
         "guest_acts": collections.Counter(), "bows": 0,
         "started_at_or_below_half": False,
@@ -103,6 +115,9 @@ class Ftd:
     line: float = 0.5                # variant: the Drain line, share of Max HP
     entry_hp: int = 0                # HP at the start of this combat
     line_from_entry: bool = False    # variant: the line is half of entry HP
+    singer_rests: bool = False       # variant: no Singer on a turn she Drained
+    restore_fanfare: bool = True     # variant: does Restore print Fanfare?
+    drained_this_turn: bool = False
     decider: object = None
     ledger: dict = field(default_factory=_new_ledger)
 
@@ -279,6 +294,16 @@ VARIANTS = {"std": (2, True, 0.5), "nohit": (2, False, 0.5),
             "entry_s1": (1, True, 0.5)}
 
 
+#: The K3 variants: the `entry` rules plus engine switches (Ftd fields).
+VARIANT_SWITCHES = {
+    "singer_rests": (2, {"singer_rests": True}),
+    "restore_no_fanfare": (2, {"restore_fanfare": False}),
+    "both": (2, {"singer_rests": True, "restore_fanfare": False}),
+    "singer1": (1, {}),
+}
+for _name, (_singer, _sw) in VARIANT_SWITCHES.items():
+    VARIANTS[_name] = (_singer, True, 0.5)
+
 DEFAULT_VARIANT = "entry"      # the proposal's rules: the line from entry HP
 
 
@@ -290,8 +315,11 @@ def build_player(card_ids, hp: int | None = None, max_hp: int = HP,
                draw_pile=[make_card(cid) for cid in card_ids],
                element=ELEMENT, cadence=CADENCE, character_id=CHARACTER)
     singer, hit, line = VARIANTS[variant]
+    switches = VARIANT_SWITCHES.get(variant, (0, {}))[1]
     p.ftd = Ftd(singer=singer, hit_fanfare=hit, line=line, entry_hp=p.hp,
-                line_from_entry=variant.startswith("entry"))
+                line_from_entry=(variant.startswith("entry")
+                                 or variant in VARIANT_SWITCHES),
+                **switches)
     p.ftd.ledger["started_at_or_below_half"] = p.hp <= max_hp / 2
     return p
 
@@ -349,6 +377,7 @@ def drain(state, n: int) -> bool:
         return False
     p.hp -= n
     f.drained += n
+    f.drained_this_turn = True
     f.ledger["drained"] += n
     f.ledger["drains"] += 1
     state.hp_lost_this_turn += n
@@ -379,7 +408,8 @@ def restore(state, n: int) -> int:
     f.restored_this_turn += amount
     f.ledger["restored"] += amount
     state.emit("ftd_restore", amount=amount, hp=p.hp, drained=f.drained)
-    gain(state, amount, "restore")
+    if f.restore_fanfare:
+        gain(state, amount, "restore")
     if f.powers["endless_waltz"] and state.living_enemies:
         _hit(state, state.rng.choice(state.living_enemies),
              amount * f.powers["endless_waltz"], None)
@@ -501,11 +531,13 @@ def turn_open(state) -> None:
     f.gained_this_turn = 0
     f.spent_this_turn = 0
     f.restored_this_turn = 0
+    f.drained_this_turn = False
     f.charlotte_drew = False
 
 
 def end_of_turn(state) -> None:
-    """Guests act in seat order, then Salon Solitaire's Singer Restores."""
+    """Guests act in seat order, then Salon Solitaire's Singer Restores
+    (under `singer_rests`, only if no Drain happened this turn)."""
     if not live(state.player):
         return
     f = _f(state)
@@ -513,6 +545,9 @@ def end_of_turn(state) -> None:
         if state.over or not state.player.alive or not state.living_enemies:
             break
         act(state, member)
+    if f.singer_rests and f.drained_this_turn:
+        f.ledger["singer_skipped"] += 1
+        return
     if not state.over and state.player.alive:
         restore(state, f.singer)
 
@@ -537,6 +572,7 @@ def resolve_card(state, card) -> None:
         take = offered and d.drain(state, card, spec)
         if take:
             drain(state, price)
+            f.ledger["card_drains"] += 1
         amount = big if take else plain
         if k == "drain_hit":
             _card_damage(state, card, amount)
