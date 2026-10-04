@@ -1,4 +1,4 @@
-Status: RULED, draft 4 amended (third reviews taken 2026-10-04, sec.8); the sim slice is specified in sec.9
+Status: RULED, draft 4 amended (sec.8); sim read and full sheet for the build in sec.10 (2026-10-04)
 
 # Furina: re-founding the Stage (paper, draft 4)
 
@@ -360,3 +360,153 @@ random enemy.
 - Cues played, and on whom;
 - walk-ons;
 - turns over 12 cards.
+
+## 10. What the sim found, and the full sheet for the build (2026-10-04)
+
+**The sim** (PR #889 and #890; `tier0/harness/furina_v2_probe.py --pass2`;
+2000 runs per probe; fixed decks play the act-1 route, so no starter deck
+clears it, Ironclad's included; read only the differences):
+- **The stage scales.** Dress Rehearsal: 84.0% with it against 57.9%
+  without, on the same deck.
+- **Directing pays.** "Places, Everyone!" 34.5% against a plain 8 Block's
+  27.9%.
+- **No Escoffier loop.** No turn played more than 5 cards.
+- **A drafted deck is healthy and has no single answer.** Ten cards picked
+  from 3-card offers win act 1 79.6%. Two or more guests: 81.5%, fewer:
+  77.7%. With Dress Rehearsal: 80.8%, without: 78.7%.
+- **Guests paired with Charlotte overpower the trio in a built deck.** With
+  equal card counts: 98.9% against 79.0%. Clorinde's act is cut from 8
+  to 6.
+- **Neuvillette's line was dead**, because the slice had one Hydro card. It
+  becomes "Your Hydro damage deals 2 more", acts included. Skipped acts
+  halved and drafts took him twice as often.
+- **The spender family is under rate.** Bravura won nothing with a greedy
+  pilot or a banking one. Its rate goes up to the Curtain Rise rate.
+- **Not answered by the sim:** Ousia Surge and Pneuma Refrain, which the
+  draft model almost never took. They go to play.
+
+**The full sheet.** The rules are sec.1 as amended in sec.8. Rows are given
+as "Name (rarity, cost): text (upgrade)". A row not listed is unchanged.
+"Fanfare" everywhere means Furina's one number.
+
+*Starter:*
+- Curtain Rise: unchanged.
+- Rising Applause (Basic, 1): "Gain 3 Fanfare." (Gain 4).
+
+*Common:*
+- Take the Stage (1): "Summon a random Salon member. Draw 1 card." (cost 0).
+- Gentilhomme Usher (1), replacing Leading Lady: "Summon Usher. Gain 4
+  Block." (6).
+- Mademoiselle Crabaletta (1): "Summon Crabaletta. Deal 4 damage." (6).
+- Encore! (Attack, 1), replacing Plot Twist: "Deal 7 damage. Cue a
+  performer." (10).
+- Stage Whisper (1): "Cue a performer. Draw 1 card." (Draw 2).
+- Places, Everyone! (1), replacing Interposition: "Gain 5 Block. Cue a
+  performer." (8).
+- Step Forward (0): "Move a performer to the front. Gain 3 Block." (5).
+- Warm Reception (1): "Gain 3 Fanfare. Draw 1 card." (Draw 2).
+- Hold Your Places (1): "Gain 5 Block. Gain 2 Fanfare." (7 Block, 3
+  Fanfare).
+- Cheered On (Attack, 1): "Deal 7 damage. Gain 2 Fanfare." (10).
+- Opening Number (Attack, 1): "Deal 9 damage. If this is the first card you
+  played this turn, gain 2 Fanfare." (12).
+- **Quick Cue becomes Quick Flourish.** Its text is unchanged; only the name
+  changes, because "Cue" is now a keyword and this card does not Cue.
+
+*Uncommon:*
+- Ousia Surge (Attack, 1): "Deal 4 damage, plus 2 per Fanfare you gained
+  this turn." (3 per).
+- Pneuma Refrain (1): "Gain 4 Block, plus 2 per Fanfare you spent this
+  turn." (3 per).
+- Bravura (Attack, 1): "Spend all your Fanfare. Deal 6 damage, plus 3 per
+  point." (4 per).
+- Bis! (1): "Cue a performer twice." (cost 0).
+- Final Bow (1): "A performer Bows and leaves. Gain 8 Block." (11).
+- Intermission (1): "A performer Bows and leaves. Draw 2 cards." (Draw 3).
+- Dress Rehearsal (Power, 1), replacing Counterclaim: "Gain 1 Rehearsal."
+  (2).
+- Revolving Stage (Power, 1): "At the start of your turn, Cue your front
+  performer." (Innate).
+- Thunderous Applause (Power, 1): "Whenever a performer Bows, draw 1 card."
+  (Innate).
+- Season Tickets (Power, 1): "At the start of your turn, gain 1 Fanfare."
+  (2).
+- Groundswell (Attack, 1): "Deal 9 damage. If the enemy has an aura, gain 3
+  Fanfare." (12).
+- Tide of Applause (Power, 1): "Whenever you trigger an Elemental Reaction,
+  gain 2 Fanfare." (3).
+- **The support Guest Star cards** (Charlotte, Lynette, Chevreuse, Sigewinne
+  and Wriothesley) read "Summon X." at 1 Energy (0 upgraded). Their lines
+  and acts are in sec.2 as amended by sec.8. Wriothesley loses "always
+  front".
+
+*Rare:*
+- Neuvillette (2): "Summon Neuvillette. Gain 4 Fanfare." (cost 1). His
+  line: "Your Hydro damage deals 2 more." His act is unchanged: pay 2, 7
+  Hydro to ALL.
+- Clorinde (1): "Summon Clorinde. Gain 2 Fanfare." (Gain 4). Her act: pay
+  1, 6 Electro to a random enemy. Her line is unchanged.
+- Navia and Lyney (1): "Summon X. Gain 2 Fanfare." (Gain 4).
+- Escoffier (2): "Summon Escoffier. Gain 3 Fanfare." (cost 1). Her line is
+  in sec.8.
+- Let the People Rejoice (Attack, 2): "Spend all your Fanfare. Deal 2
+  damage to ALL enemies per point. Your performers Bow and return." (cost
+  1).
+- Bring the House Down (Attack, 2): "Deal damage to ALL enemies equal to 3
+  times the Fanfare you spent this turn." (4 times).
+- A Five-Century Act (Power, 3): "The first time each turn a performer Bows
+  and leaves, it returns at the back if a seat is free." (cost 2).
+- Premiere Season (Power, 3), the Rare Rehearsal source, replacing Double
+  Casting (Gala Premiere and Take the Stage do its job): "At the start of
+  your turn, gain 1 Rehearsal." (cost 2).
+- Gala Premiere (1, Exhaust): "Summon Usher, Chevalmarin and Crabaletta."
+  (cost 0).
+- Grand Deluge, Endless Waltz and Arkhe Alignment: as sec.8.
+- Critics' Darling (Power, 1): "Whenever your Fanfare changes, deal that
+  much damage to a random enemy." (Innate).
+- Singer of Many Waters (1): "Gain 6 Fanfare." (9).
+
+*Co-op:*
+- Guest of Honor (1): "Another player gains 7 Block. Cue a performer." (10).
+- Share the Spotlight (1): "Spend all your Fanfare. Another player gains 2
+  Block per point." (3 per).
+- Raise a Toast (1): "Draw 1 card. Spend 4: another player gains 4
+  temporary Strength." (6).
+- The People of Fontaine: "Whenever another player plays an Attack, gain 1
+  Fanfare."
+- The Crowd Roars: "Whenever another player loses HP, gain 1 Fanfare."
+
+*Relics:*
+- Salon Solitaire: unchanged (combat opens with Usher).
+- Opera Glasses (Common): "Start each combat with 3 Fanfare."
+- Grand Theater Program (Rare): "At the start of your turn, gain 1
+  Fanfare." This overrides sec.8, where 3 Fanfare once was below Rare.
+- Guest Book: "The first time you summon a Guest Star each combat, gain 3
+  Fanfare."
+- The Curtain Never Falls: as sec.8 (Usher, plus 1 Rehearsal).
+- Stagehand's Gloves, Curtain Call Bouquet, Palais Ledger and Opening
+  Night: unchanged.
+
+*Potions:*
+- Bottled Applause: "Gain 6 Fanfare."
+- Curtain Water: "Gain 1 Rehearsal."
+- Encore Elixir: unchanged.
+
+**Kept, watched in play:**
+- **The "no one on stage" family** (Solo Verse, Between Acts, Improvised
+  Number, Aria for One, Soliloquy, One-Woman Show, The Last Act). Without
+  bars the stage only empties through a Bow that leaves (Final Bow,
+  Intermission), so a solo deck pays a card to clear Usher. That is a real
+  choice. If play shows the family dead, it becomes a pick for [USER].
+- Full House, Sold Out, Star Turn, Star Billing, Casting Agent, Da Capo,
+  Ensemble Piece and the Spend rows: unchanged, because the new rules still
+  reach them.
+
+**Build order.**
+1. The C# rewrite of the Stage as specified.
+2. The tier0 sim's Furina arm moves to the v2 rules.
+3. Deploy.
+4. [USER] plays it (a rule change).
+5. A two-seat round.
+
+The frozen build is kept at tag `furina-stage-frozen-2026-10-04`.
