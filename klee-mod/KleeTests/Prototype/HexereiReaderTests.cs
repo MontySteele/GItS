@@ -133,10 +133,11 @@ public class HexereiReaderTests
         // field on the op rather than two `plant_bomb`s in a conditional: only
         // a top-level effect owns a var, so the `+` card would have printed 7
         // in one clause and placed 5 in the other (`EB-288`'s defect class).
+        // Klee pre-Balance sweep (2026-10-03): 5 / 7 -> 8 / 10.
         Assert.Equal(
-            5m, new ProtoKoCovenErrand().DynamicVars["BombSize"].BaseValue);
+            8m, new ProtoKoCovenErrand().DynamicVars["BombSize"].BaseValue);
         Assert.Equal(
-            7m,
+            10m,
             Upgraded<ProtoKoCovenErrand>().DynamicVars["BombSize"].BaseValue);
         Assert.Contains("{BombSize:diff()}", Face(new ProtoKoCovenErrand()));
     }
@@ -153,7 +154,8 @@ public class HexereiReaderTests
         Assert.Contains("KleeOverhaulLedger.get_CompanionPlayedThisTurn", calls);
         Assert.DoesNotContain("ProtoBombPower.PlaceOnAll", calls);
         Assert.Contains("ProtoBombPower.Place", calls);
-        Assert.Contains("{IfUpgraded:show:10|8}", Face(new ProtoKoCovenErrand()));
+        // 8 / 12 since the Klee pre-Balance sweep (2026-10-03).
+        Assert.Contains("{IfUpgraded:show:14|12}", Face(new ProtoKoCovenErrand()));
         Assert.Contains("DynamicVarSet.get_Item", calls);
         // It PLACES; it does not detonate (rule 7).
         Assert.DoesNotContain("ProtoBombPower.SetOffAimed", calls);
@@ -211,6 +213,22 @@ public class HexereiReaderTests
 
         var upgraded = Upgraded<ProtoKoAlicesIntroductionMagic>();
         Assert.Contains(CardKeyword.Retain, upgraded.Keywords);
+    }
+
+    [Fact]
+    public void The_spell_draws_two_after_the_mark()
+    {
+        // Klee pre-Balance sweep (2026-10-03): "...this turn. Draw 2 cards."
+        // The draw comes AFTER the mark, so the drawn cards are not marked
+        // (the window covers the hand it was played from). Upgrade stays Retain.
+        var card = new ProtoKoAlicesIntroductionMagic();
+        Assert.Equal(2m, card.DynamicVars.Cards.BaseValue);
+        Assert.Equal(2m, Upgraded<ProtoKoAlicesIntroductionMagic>()
+                             .DynamicVars.Cards.BaseValue);
+        var play = Il.Calls(Il.Method("ProtoKoAlicesIntroductionMagic", "OnPlay")).ToList();
+        var mark = play.FindIndex(c => c.Contains("CompanionHexerei.MarkHand"));
+        var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));
+        Assert.True(mark >= 0 && draw > mark);
     }
 
     [Fact]

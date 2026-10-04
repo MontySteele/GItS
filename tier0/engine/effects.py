@@ -5337,6 +5337,10 @@ def _op_plant_bomb_copy_largest(state: CombatState, fx: dict,
     can express a second reading of "your largest Bomb"."""
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
+    if fx.get("target") == "all_enemies":
+        # Klee pre-Balance sweep (2026-10-03): ALL enemies, one size read.
+        klee_overhaul.place_copy_of_largest_on_all(state)
+        return
     dest = _pick_targets(state, fx.get("target", "enemy"), allow_dead=True)
     klee_overhaul.place_copy_of_largest(state, dest[0] if dest else None)
 

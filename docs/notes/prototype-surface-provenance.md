@@ -6166,6 +6166,40 @@ to the start of her next turn (`FurinaStage.TurnStartFade`, sim
 `proto_fs_gala_premiere` costs 1 (was 2), 0 upgraded, and keeps Exhaust.
 Brief: `review/active/furina-stage-brief-2026-09-08.md` sec.20.
 
+## Klee pre-Balance sweep, 2026-10-03
+
+[USER]: "let's do one last rundown of her kit right now and just sanity check
+that no cards seem obviously bad (low numbers / overly specific combo pieces)
+or completely redundant with another card". The main session's rundown moved
+six rows:
+
+- `proto_ko_all_of_my_treasures`: cost 1 -> 2, keeps Exhaust. "Place a Bomb
+  the size of your largest Bomb on ALL enemies." The size is read once before
+  anything is placed; each living enemy gets a plain Bomb (never a Mine);
+  nothing with no Bomb out (`ProtoBombPower.PlaceCopyOfLargestOnAll`, sim
+  `klee_overhaul.place_copy_of_largest_on_all`). Upgrade: Retain (was
+  Exhaust off).
+- `proto_ko_coven_errand`: Bomb 5 / 8 -> 8 / 12 (upgraded 10 / 14).
+- `proto_ko_alices_introduction_magic`: adds "Draw 2 cards." after the mark,
+  so the drawn cards are not marked. Upgrade stays Retain.
+- `proto_ko_damage_report`: "Whenever you draw a status, gain 4 Block and 1
+  Spark." The Spark goes through `SparkPower.Gain` / `gain_sparks` (source
+  `power:damage_report/status_drawn`), so Spark readers see it; flat 1 at both
+  levels (`KleeOverhaulLaw.DamageReportSpark` = `C.KLEE_OVERHAUL_DAMAGE_REPORT_SPARK`).
+  Upgrade moves the Block, 4 -> 6.
+- `proto_ko_blast_shield`: Block 6 -> 4, upgrade +2 (-> 6). The kit prices a
+  Spark at about half to two-thirds of an Energy (Sparkling Burst: 2 Sparks
+  -> 1 Energy; Booby Trap's Mine 5 per Spark against Mine Toss's Mine 7 per
+  Energy). Dig In at 8 is already generous, and Blast Shield turned the whole
+  Spark bank into Block at that rate from one card. [USER]: "Spark-starved
+  decks would skip blast shield - spark heavy decks treat it as 'I'm
+  invincible this turn'."
+- `proto_ko_dig_in`: stays Block 8; its upgrade (+3, 11) is now stated on the
+  row rather than taken from the Prototype-stage default. Same card.
+
+Countdown was on the list for draw 2 (3 upgraded); the row already read that
+(since the playtest-one fixes), so it did not move.
+
 ## Spent auras removed, 2026-10-03
 
 [USER]: "Should we get rid of the concept of elements being 'spent' after a

@@ -201,6 +201,7 @@ MIRRORED: dict[str, object] = {
     # is the one turn rule 4's per-explosion rate mints nothing.
     "KleeOverhaulLaw.OpeningSpark": C.KLEE_OVERHAUL_OPENING_SPARK,
     "KleeOverhaulLaw.GroundedSpark": C.KLEE_OVERHAUL_GROUNDED_SPARK,
+    "KleeOverhaulLaw.DamageReportSpark": C.KLEE_OVERHAUL_DAMAGE_REPORT_SPARK,
     "KleeOverhaulLaw.SparkSeedFloors": C.KLEE_OVERHAUL_SPARK_SEED_FLOORS,
     # R276, Wait For It...'s printed payout, on the same terms.
     "WaitForItPower.ReactionEnergy": C.KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY,

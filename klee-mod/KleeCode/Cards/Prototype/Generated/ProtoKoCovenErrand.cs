@@ -42,13 +42,13 @@ public sealed class ProtoKoCovenErrand : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coven Errand"),
-        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()} on an enemy, {IfUpgraded:show:10|8} if you played a [gold]Companion[/gold] card this turn."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()} on an enemy, {IfUpgraded:show:14|12} if you played a [gold]Companion[/gold] card this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("BombSize", 5m)
+            new DynamicVar("BombSize", 8m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,7 +61,7 @@ public sealed class ProtoKoCovenErrand : CustomCardModel
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue + (KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0 ? 3 : 0), isMine: false, payloadMineAll: 0, Owner.Creature, this);
+        await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue + (KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0 ? 4 : 0), isMine: false, payloadMineAll: 0, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()

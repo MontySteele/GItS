@@ -1428,6 +1428,23 @@ def place_copy_of_largest(state: CombatState,
     return size
 
 
+def place_copy_of_largest_on_all(state: CombatState) -> int:
+    """All of My Treasures! since the Klee pre-Balance sweep (2026-10-03):
+    "Place a Bomb the size of your largest Bomb on ALL enemies." The size is
+    read ONCE before anything lands, then each living enemy gets a plain Bomb
+    of it. Returns the size, 0 with no Bomb out.
+    `ProtoBombPower.PlaceCopyOfLargestOnAll`'s twin."""
+    if not live(state):
+        return 0
+    size = largest_charge(state)[2]
+    if size <= 0:
+        return 0
+    for enemy in list(state.living_enemies):
+        state.emit("ko_bomb_copied", target=enemy.name, size=size)
+        place(state, enemy, size)
+    return size
+
+
 
 
 def draw_per_set_off(state: CombatState) -> None:
@@ -2037,7 +2054,8 @@ def finders_keepers(state: CombatState, card: Card) -> None:
 
 
 def damage_report(state: CombatState, card: Card) -> None:
-    """Damage Report: "Whenever you draw a status, gain 4 [6] Block." Per
+    """Damage Report: "Whenever you draw a status, gain 4 [6] Block and 1
+    Spark." Per
     card drawn (`Hook.AfterCardDrawn`). AoE trim, 2026-10-03: it dealt 5 [7]
     to ALL enemies. Power-sourced Block, RAW like the arm's other powers'
     (NC-11): no Dexterity, no Frail. `DamageReportPower.AfterCardDrawn`."""
@@ -2049,6 +2067,11 @@ def damage_report(state: CombatState, card: Card) -> None:
     state.player.block += n
     state.emit("ko_damage_report", amount=n)
     state.emit("block", amount=n)
+    # Klee pre-Balance sweep (2026-10-03): and 1 Spark, flat at both levels,
+    # through the one Spark door so every reader sees it.
+    from tier0.engine import effects                # late import: cycle
+    effects.gain_sparks(state, int(C.KLEE_OVERHAUL_DAMAGE_REPORT_SPARK),
+                        source="power:damage_report/status_drawn")
 
 
 def transform_statuses_into(state: CombatState, card_id: str) -> int:

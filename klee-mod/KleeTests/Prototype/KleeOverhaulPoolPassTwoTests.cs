@@ -95,7 +95,8 @@ public class KleeOverhaulPoolPassTwoTests
         // Common since the Klee final pass (2026-10-02); Uncommon before.
         Assert.Equal(CardRarity.Common, card.Rarity);
         Assert.Equal(CardType.Skill, card.Type);
-        Assert.Equal(6m, Vars(card).Single().BaseValue);
+        // Block 6 -> 4 in the Klee pre-Balance sweep (2026-10-03).
+        Assert.Equal(4m, Vars(card).Single().BaseValue);
     }
 
     // ---- Row 2, Return to Sender: the mark, real --------------------------

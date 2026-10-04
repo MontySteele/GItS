@@ -141,16 +141,17 @@ def test_team_effort_sets_off_the_target_only_and_pays_six_more():
     assert (200 - a2.hp) - plain == 6
 
 
-def test_coven_errand_places_five_or_eight_on_one_enemy():
+def test_coven_errand_places_eight_or_twelve_on_one_enemy():
+    # Klee pre-Balance sweep (2026-10-03): 5 / 8 -> 8 / 12, upgrade +2 both.
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     st = klee_state([a, b])
     play(st, load("proto_ko_coven_errand"), aim=a)
-    assert sizes(a) == [5] and sizes(b) == []
+    assert sizes(a) == [8] and sizes(b) == []
     st.ko_companion_this_turn = 1
     play(st, load("proto_ko_coven_errand"), aim=b)
-    assert sizes(b) == [8] and sizes(a) == [5]
+    assert sizes(b) == [12] and sizes(a) == [8]
     play(st, load("proto_ko_coven_errand+"), aim=b)
-    assert sizes(b) == [8, 10]
+    assert sizes(b) == [12, 14]
 
 
 def test_red_knight_is_34_to_one_enemy_and_two_confiscated():
