@@ -603,7 +603,7 @@ def act(state, member: str, *, free: bool = False) -> bool:
             _hit(state, _act_target(state, pool),
                  (ACT_LYNETTE_DAMAGE + r) * mult, "anemo", source)
     elif member == "chevreuse":
-        p.stage_energy_next = int(p.stage_energy_next) + ACT_CHEVREUSE_ENERGY
+        energy_next_turn(state, ACT_CHEVREUSE_ENERGY)
     elif member == "sigewinne":
         losses = max(0, int(state.player_damage_events)
                      - int(p.stage_sigewinne_mark))
@@ -617,6 +617,15 @@ def act(state, member: str, *, free: bool = False) -> bool:
                  (ACT_WRIOTHESLEY_DAMAGE + WRIOTHESLEY_PER_BLOCKED * blocked
                   + r) * mult, "cryo", source)
     return True
+
+
+def energy_next_turn(state, amount: int) -> None:
+    """"Gain N Energy next turn": Chevreuse's act and Interval Bell's Spend
+    mode. Owed on `Player.stage_energy_next`, paid at `turn_start`."""
+    p = state.player
+    if not active(p) or int(amount) <= 0:
+        return
+    p.stage_energy_next = int(p.stage_energy_next) + int(amount)
 
 
 def bow(state, member: str) -> None:

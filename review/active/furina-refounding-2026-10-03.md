@@ -312,8 +312,8 @@ in sec.8. Opening values:
 random enemy.
 
 **Common:**
-- **Take the Stage** (1; 0 upgraded): "Summon a random Salon member. Draw
-  1 card."
+- **Take the Stage** (1; draw 2 upgraded, loop fix 2026-10-04): "Summon a
+  random Salon member. Draw 1 card."
 - **Gentilhomme Usher** (1): "Summon Usher. Gain 4 Block." (6 upgraded).
 - **Surintendante Chevalmarin** (1): "Apply Hydro to ALL enemies. Summon
   Chevalmarin."
@@ -394,7 +394,8 @@ as "Name (rarity, cost): text (upgrade)". A row not listed is unchanged.
 - Rising Applause (Basic, 1): "Gain 3 Fanfare." (Gain 4).
 
 *Common:*
-- Take the Stage (1): "Summon a random Salon member. Draw 1 card." (cost 0).
+- Take the Stage (1): "Summon a random Salon member. Draw 1 card." (Draw 2;
+  was cost 0 until the 2026-10-04 loop fix: two copies drew each other).
 - Gentilhomme Usher (1), replacing Leading Lady: "Summon Usher. Gain 4
   Block." (6).
 - Mademoiselle Crabaletta (1): "Summon Crabaletta. Deal 4 damage." (6).

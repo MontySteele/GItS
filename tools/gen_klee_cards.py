@@ -459,6 +459,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # POOL COMPLETION (2026-10-01): Casting Agent, one call into
                   # `FurinaStage.CastingAgent`.
                   "stage_casting_agent",
+                  # The loop fix (2026-10-04): Interval Bell's "gain 1
+                  # Energy next turn", one call into
+                  # `FurinaStage.EnergyNextTurn`.
+                  "stage_energy_next",
                   # THE CO-OP SET (`COOP_ALLY_OPS`): Share the Spotlight, one
                   # call into `FurinaStage.ShareTheSpotlight`.
                   "stage_share_spotlight",
@@ -2105,6 +2109,9 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # THE RE-FOUNDING (2026-10-04): Raise a Toast's Spend 4 mode
               # gives another player temporary Strength -- one awaited call.
               "stage_toast",
+              # The loop fix (2026-10-04): Interval Bell's Spend mode "gain 1
+              # Energy next turn" -- one awaited call, no locals.
+              "stage_energy_next",
               # R276 batch two: Improvised Number's "If the stage is empty,
               # summon a random performer" -- one awaited call, no locals.
               "stage_summon",
@@ -2224,6 +2231,7 @@ BRANCH_FIELDS = {
     # THE SUPPORTING POOL (2026-09-26); the re-founding retired `seat:`
     # (Fanfare is one number on Furina).
     "stage_raise": {"op", "amount"},
+    "stage_energy_next": {"op", "amount"},
     "apply_aura": {"op", "element", "target"},
 }
 
@@ -6336,6 +6344,8 @@ STAGE_STMT_OPS = {
     "stage_dual_nature", "stage_casting_agent",
     # THE RE-FOUNDING: "Cue a performer" (the player picks it).
     "stage_cue",
+    # The loop fix (2026-10-04): Interval Bell's "Energy next turn".
+    "stage_energy_next",
 }
 
 #: The stage op whose `amount` an upgrade moves through a var named for what
@@ -6373,6 +6383,11 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
         return "FurinaStage.SetVerdict(Owner.Creature, cardPlay.Target);"
     if op == "stage_dual_nature":
         return "await FurinaStage.DualNature(choiceContext, Owner);"
+    if op == "stage_energy_next":
+        # Chevreuse's mechanism: the game's EnergyNextTurnPower.
+        n = amount if amount is not None else str(int(eff.get("amount", 1)))
+        return ("await FurinaStage.EnergyNextTurn(choiceContext, "
+                f"Owner.Creature, {n});")
     if op == "stage_casting_agent":
         # POOL COMPLETION (2026-10-01): the card reads its own IsUpgraded
         # (`upgraded_grant`), so the call takes the card.

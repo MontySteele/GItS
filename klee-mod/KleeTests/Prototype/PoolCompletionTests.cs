@@ -323,7 +323,43 @@ public class PoolCompletionTests : IDisposable
         Assert.Contains(calls, c => c.Contains("FurinaStage.CanSpend"));
         Assert.Contains(calls, c => c.Contains("FurinaStage.Spend"));
         Assert.Contains(calls, c => c.Contains("get_IsUpgraded"));
-        Assert.Contains(calls, c => c.Contains("PlayerCmd.GainEnergy"));
+    }
+
+    /// <summary>The loop fix (2026-10-04): Interval Bell's Spend mode gains
+    /// its Energy NEXT turn, through the game's EnergyNextTurnPower (the
+    /// mechanism Chevreuse's act uses), so Warm Reception and Interval Bell+
+    /// no longer pay for each other this turn. Sim twin:
+    /// <c>tier0/tests/test_furina_loop_probe.py</c>.</summary>
+    [Fact]
+    public void Interval_bells_energy_comes_next_turn()
+    {
+        var calls = Seq("ProtoFsIntervalBell", "OnPlay");
+        Assert.Contains(calls, c => c.Contains("FurinaStage.EnergyNextTurn"));
+        Assert.DoesNotContain(calls, c => c.Contains("PlayerCmd.GainEnergy"));
+        Assert.Contains(Seq("FurinaStage", "EnergyNextTurn"),
+                        c => c.Contains("GameStageBoard.EnergyNextTurn"));
+        Assert.Contains(Seq("GameStageBoard", "EnergyNextTurn"),
+                        c => c.Contains("PowerCmd.Apply")
+                             && c.Contains("EnergyNextTurnPower"));
+        Assert.Contains("gain 1 [gold]Energy[/gold] next turn instead",
+                        Face(new ProtoFsIntervalBell()));
+        Assert.All(((IModalCard)Upgraded<ProtoFsIntervalBell>()).ModeLabels
+                       .Skip(1),
+                   l => Assert.EndsWith("Energy[/gold] next turn instead", l));
+    }
+
+    /// <summary>The loop fix (2026-10-04): Take the Stage stays at 1 Energy
+    /// upgraded and draws 2 instead. At 0 cost two copies drew each other
+    /// forever, a Bow on every play onto a full stage.</summary>
+    [Fact]
+    public void Take_the_stage_upgrades_to_draw_two_at_one_energy()
+    {
+        Assert.Equal(1, new ProtoFsSalonDebut().EnergyCost.Canonical);
+        Assert.Equal(1, UpCost<ProtoFsSalonDebut>());
+        Assert.Equal(1, new ProtoFsSalonDebut().DynamicVars.Cards.IntValue);
+        Assert.Equal(2, Upgraded<ProtoFsSalonDebut>().DynamicVars.Cards.IntValue);
+        Assert.StartsWith("Summon a random Salon member. Draw {Cards:diff()} card",
+                          Face(new ProtoFsSalonDebut()));
     }
 
     [Fact]

@@ -498,6 +498,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Casting Agent fields a Guest Star card, which writes the stage when
     # played.
     "stage_casting_agent": [_hook("private", "stage", "write")],
+    # Interval Bell's Spend mode: Energy next turn, `energy`'s empty row.
+    "stage_energy_next": [],
     # THE CO-OP SET: Share the Spotlight spends all her Fanfare, a use; Raise
     # a Toast's verb is the payoff of its Spend mode and spends nothing itself.
     "stage_share_spotlight": [_hook("private", "stage", "use")],

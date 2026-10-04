@@ -298,6 +298,17 @@ public static partial class FurinaStage
         return spent;
     }
 
+    /// <summary>"Gain N Energy next turn" (`stage_energy_next`, Interval
+    /// Bell's Spend mode): the game's <c>EnergyNextTurnPower</c>, the
+    /// mechanism Chevreuse's act uses (`GameStageBoard.EnergyNextTurn`).
+    /// </summary>
+    public static async Task EnergyNextTurn(PlayerChoiceContext choiceContext,
+                                            Creature? owner, int amount)
+    {
+        if (!LiveFor(owner) || amount <= 0) return;
+        await new GameStageBoard(choiceContext, owner!).EnergyNextTurn(amount);
+    }
+
     /// <summary>A Salon summon (`stage_summon`): a named member, or
     /// <c>"random"</c> (uniform over the trio).</summary>
     public static async Task Summon(PlayerChoiceContext choiceContext,

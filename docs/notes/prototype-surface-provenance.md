@@ -6294,3 +6294,23 @@ amends them; the sim's reference is `tier0/engine/furina_v2.py`.
   `fanfare_spent`, powers `fs_rehearsal` and `fs_premiere_season`. Retired:
   the seat-moving, per-performer spend and Intermission ops, the lead and back
   Fanfare counts, `stage_front_hit`, `fs_rapt_audience`, `fs_guest_of_honor`.
+
+## Furina loop fix (2026-10-04)
+
+Two infinite loops the v2 reviewers found, fixed as the main session designed
+them; `tier0/harness/furina_loop_probe.py` catches both with the fixes taken
+out (`--pre-fix`) and pins the rest of what it finds
+(`tier0/tests/test_furina_loop_probe.py`).
+
+- **`proto_fs_salon_debut`** (Take the Stage): the upgrade was cost 1 to 0
+  ("Summon a random Salon member. Draw 1 card."). Two copies in a thinned
+  deck drew each other forever, and every play onto a full stage Bowed a
+  performer (+1 Fanfare): after 100 plays Energy was unchanged and Fanfare
+  was up 98 (GPT). Now it stays at 1 Energy and draws 2 upgraded.
+- **`proto_fs_interval_bell`**: the Spend mode's Energy comes next turn
+  ("Spend 3: draw 1 card and gain 1 Energy next turn instead"; Spend 2
+  upgraded). With Warm Reception (1: gain 3 Fanfare, draw 1), Interval Bell+
+  (0: Spend 2, draw 1, gain 1 Energy) paid for its partner and netted +1
+  Fanfare a pass (Fable). The new op `stage_energy_next` is Chevreuse's
+  mechanism: `Player.stage_energy_next` in the sim, the game's
+  `EnergyNextTurnPower` in C# (`FurinaStage.EnergyNextTurn`).

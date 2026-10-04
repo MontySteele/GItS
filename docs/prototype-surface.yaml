@@ -2472,11 +2472,11 @@
 # balance pass's dedupe. Was the starter's `basic` (renamed off Salon Début,
 # `EB-739`); both stories are in the provenance note.
 - {id: proto_fs_salon_debut, name: "Take the Stage", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {draw: +1},
    authored_by: [claude],
    replaces: salon_debut,
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Summon a random Salon member. Draw 1 card.",
+   description: "Summon a random Salon member. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: stage_summon, member: random},
              {op: draw, amount: 1}]}
 
@@ -3143,19 +3143,22 @@
              {op: conditional, if: stage_empty,
               then: [{op: damage, amount: 5, target: enemy}]}]}
 
+# Loop fix (2026-10-04): the Spend mode's Energy comes NEXT turn (the
+# Chevreuse mechanism, `stage_energy_next`). With it this turn, Warm
+# Reception and Interval Bell+ paid for each other at +1 Fanfare a pass.
 - {id: proto_fs_interval_bell, name: "Interval Bell", character: furina,
    # Spend 2: the mode's price, in both the gate and the payment.
    upgrade: {stage_spend: -1},
    authored_by: [claude],
    register: salon, cost: 0, type: skill, rarity: uncommon,
-   description: "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] instead.",
+   description: "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] next turn instead.",
    effects: [{op: choose_one, modes: [
               {label: "Draw 1 card",
                effects: [{op: draw, amount: 1}]},
-              {label: "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] instead",
+              {label: "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] next turn instead",
                effects: [{op: stage_spend, amount: 3},
                          {op: draw, amount: 1},
-                         {op: energy, amount: 1}]}]}]}
+                         {op: stage_energy_next, amount: 1}]}]}]}
 
 - {id: proto_fs_casting_agent, name: "Casting Agent", character: furina,
    # The chosen card arrives upgraded (a play-time read).
