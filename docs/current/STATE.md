@@ -374,7 +374,8 @@ pays once per enemy still wearing an aura when its Anemo hit lands. The
 badge's spent face, the spent previews and `CrystallizeKeepsAura` are gone;
 one switch is left, `-p:SwirlPays=false` (`klee-mod/KleeCode/Elements/TriggerRules.cs`),
 sim twin `C.SWIRL_PAYS`, off until its retest. Downburst lost its "copies
-arrive fresh" clause and needs a new rider (main session). Next: phase two
+arrive fresh" clause; its new rider (2026-10-04) is "If it Swirls, gain 2
+Oath of the element Swirled." Next: phase two
 (Burning and Dendro, `BACKLOG.md`).
 
 All three prototypes start with no companion card. Whether each starts with

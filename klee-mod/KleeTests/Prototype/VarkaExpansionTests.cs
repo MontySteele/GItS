@@ -313,6 +313,40 @@ public class VarkaExpansionTests : IDisposable
     }
 
     [Fact]
+    public void Downburst_swirling_pyro_gains_two_pyro_oath_beyond_the_credit()
+    {
+        // 2026-10-04 (after #882): "If it Swirls, gain 2 Oath of the element
+        // Swirled", on top of the Swirl's own per-card credit.
+        var ledger = FreshLedger();
+        var body = Seat.Klee(30).Creature;
+        ledger.OpenScope();
+        ledger.NoteSwirl(body, Element.Pyro);
+        Assert.True(ledger.TryCredit(swirl: true, Element.Pyro)); // the credit: 1
+        var gains = VarkaCards.SwirledOathGains(
+            ledger.SwirledElementsThisPlay,
+            (int)Var(new ProtoVkDownburst(), "VkAmount"));
+        Assert.Equal(new[] { (Element.Pyro, 2) }, gains);
+        ledger.CloseScope();
+        // The card calls it after its hit, and it gains through the one door.
+        Assert.Contains("VarkaCards.SwirledOath",
+                        Calls("ProtoVkDownburst", "OnPlay"));
+        Assert.Contains("VarkaOath.Gain", Calls("VarkaCards", "SwirledOath"));
+        Assert.Equal(16m, Var(Upgraded<ProtoVkDownburst>(), "Damage"));
+        Assert.Equal(2m, Var(Upgraded<ProtoVkDownburst>(), "VkAmount"));
+    }
+
+    [Fact]
+    public void Downburst_with_no_aura_swirled_gains_nothing()
+    {
+        var ledger = FreshLedger();
+        ledger.OpenScope();
+        Assert.Empty(ledger.SwirledElementsThisPlay);
+        Assert.Empty(VarkaCards.SwirledOathGains(
+            ledger.SwirledElementsThisPlay, 2));
+        ledger.CloseScope();
+    }
+
+    [Fact]
     public void Every_expansion_power_says_what_it_does()
     {
         var powers = new PowerModel[]

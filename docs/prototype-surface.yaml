@@ -4213,11 +4213,11 @@
 
 - {id: proto_vk_downburst, name: "Downburst", character: varka,
    authored_by: [claude],
-   # Pick 3a's "copies arrive fresh" struck 2026-10-03: no spent auras.
-   # Provenance, "Spent auras removed, 2026-10-03".
+   # 2026-10-04: new rider after spent auras were removed (#882).
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage.",
-   effects: [{op: damage, amount: 12, target: enemy}],
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of the element Swirled.",
+   effects: [{op: damage, amount: 12, target: enemy},
+             {op: varka, kind: swirled_oath, amount: 2}],
    upgrade: {damage: 4}}
 
 - {id: proto_vk_eye_of_stormterror, name: "Eye of Stormterror", character: varka,

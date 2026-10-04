@@ -711,3 +711,28 @@ def test_a_varka_fight_runs_to_the_end(varka):
     st = combat.run_fight(player, enemies, pilot, seed=3)
     assert st.log[-1]["event"] == "fight_end"
     assert any(e["event"] == "varka_oath" for e in st.log)
+
+
+def test_downburst_swirl_gains_two_more_oath_of_the_element_swirled(varka):
+    # 2026-10-04 (after #882): "If it Swirls, gain 2 Oath of the element
+    # Swirled", on top of the Swirl's own per-card credit. Tempest Charge is
+    # the same Swirl with no rider: the baseline.
+    def pyro_oath_after(card):
+        st = _state(element="hydro", enemies=[_enemy(name="a", aura="pyro")],
+                    fang=False)
+        before = dict(_led(st).oath)
+        _play(st, _vk(card))
+        assert _led(st).swirls_made == 1
+        return _led(st).oath["pyro"] - before["pyro"]
+
+    base = pyro_oath_after("tempest_charge")
+    assert base == 1                            # the Swirl's credit
+    assert pyro_oath_after("downburst") == base + 2
+
+
+def test_downburst_without_an_aura_gains_nothing(varka):
+    st = _state(element="hydro", enemies=[_enemy(name="a")], fang=False)
+    before = dict(_led(st).oath)
+    _play(st, _vk("downburst"))
+    assert _led(st).swirls_made == 0
+    assert _led(st).oath == before
