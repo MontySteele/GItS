@@ -576,6 +576,63 @@ web StS2 claims as uncertain.
   Calm. This is the round trip sec.3.1 says this kit rhymes with but is
   not.
 
+## 14. Main session review (2026-10-05)
+
+**Verdict: worth a build.** This is the first Furina direction whose
+mechanics are her Genshin kit rather than base-game engines renamed. It
+restores what the design-layer paper named as the dropped core: HP volatility
+as fuel. It answers [USER]'s guest-slot question by giving guests the stage
+alone. It also cuts seven thin archetypes to three, each with a bridge.
+
+**The K3 risk is real, and no rules switch fixed it.** A Drain the Singer
+fully repays costs nothing and earns Fanfare twice. Four switches were run
+at 1000 runs on the same seeds (`--k3`, commit 948080ed):
+
+| Variant | Drains taken (balanced) | Always minus judged | Balanced fights | Finale vs act-2 boss |
+|---|---|---|---|---|
+| Today's rules | 98% | +0.01 | 5.97 | 26% |
+| Singer repays only on a turn with no Drain | 90% | −0.08 | 5.66 | 20% |
+| Restore gives no Fanfare | 98% | +0.01 | 5.76 | 20% |
+| Both | 94% | −0.05 | 5.43 | 17% |
+| Singer repays 1 | 97% | −0.04 | 5.75 | 19% |
+
+- The double Fanfare is not the cause: the judged pilot never priced it.
+- Only the Singer-rests switch makes declining a Drain pay at all, and the
+  effect is small for the power it costs.
+- **Read:** at these prices a Drain is close to a well-priced cost, like
+  Ironclad's HP cards. The decision lives in three places:
+  - the draft;
+  - the line;
+  - the killing turn, where HP isn't repaid.
+  It does not live on every turn.
+- That may be acceptable, since StS asks the same of Offering. The sim
+  pilot cannot settle it. The seats and [USER]'s run settle it, with K3
+  asked as written.
+- **No switch is recommended now.** Keep the paper's rules. If the seats
+  call Drain a reflex, the first lever is the price: Drain 3 for +7 on
+  Curtain Rise is cheap. The Singer-rests rule is the second lever, because
+  it is the one that made judging pay.
+
+**Two things the paper must carry into the build:**
+1. **Loops carried over from v2.** The v2 loop audit (`furina_loop_probe`,
+   PR #900) found 37 open loops. The proposal cuts most of their parts: the
+   Cue family with Oratrice's Verdict, Thunderous Applause, and Bis!. It
+   keeps two:
+   - **Star Billing**, with 0-cost upgraded guests: a repeat play makes the
+     oldest guest leave, act and draw. Ten loops in v2.
+   - **Lyney's Trick per Drain**, bounded only by Drain room. A Five-Century
+     Act widens that room to 1 HP.
+   The build must run the loop probe on the new pool before seats.
+2. **Neuvillette and the Singer.** Under Singer-rests, does his act's Drain
+   count? Moot while the switch is off. Rule it if it comes on.
+
+**Smaller notes:**
+- The starter may overshoot: first elite won 67%, against 32% for the
+  reference Ironclad. A strong starter is the act-1 job [USER] asked for,
+  so this goes to the seats with the paper's lever.
+- The Restore refund sentence keeps the law's purpose intact: HP with
+  Drains can never end a fight above HP without them.
+
 ## Picks for [USER]
 
 1. **The direction.** Take the Salon's Tab (sec.2) to a `+proto` build and
