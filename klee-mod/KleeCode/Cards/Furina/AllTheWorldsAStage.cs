@@ -17,8 +17,8 @@ namespace KleeMod.Cards.Furina;
 /// membership in RosterAncientCards.Furina does not make it rollable.
 /// DustyTome.AfterObtained upgrades the grant.
 ///
-/// "At the start of your turn, your back performer gains 2 Fanfare" (3
-/// upgraded), through <c>StageRaisePerTurnPower</c> (R276 hygiene). Its
+/// "At the start of your turn, gain 2 Fanfare" (3 upgraded), through
+/// <c>StageRaisePerTurnPower</c> (the re-founding: Fanfare is one number). Its
 /// shipped face, an Encore drip, went with the shipped kits (legacy cleanup
 /// stage 5). Sim twin: EB-30m.
 /// </summary>
@@ -38,8 +38,8 @@ public sealed class AllTheWorldsAStage : CustomCardModel, ICharacterCard
     };
 
     private const string Face =
-        "At the start of your turn, your [gold]back performer[/gold] "
-      + "gains {StageRaise:diff()} [gold]Fanfare[/gold].";
+        "At the start of your turn, gain {StageRaise:diff()} "
+      + "[gold]Fanfare[/gold].";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

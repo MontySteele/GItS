@@ -50,8 +50,7 @@ public sealed class ArkheOusiaOption : CustomCardModel
     }
 }
 
-/// <summary>Pneuma: this turn your performers' acts give double Block, and
-/// your front performer gains 2 Fanfare.</summary>
+/// <summary>Pneuma (the re-founding, sec.8): gain 2 Fanfare.</summary>
 public sealed class ArkhePneumaOption : CustomCardModel
 {
     public override Texture2D? CustomPortrait =>
@@ -61,9 +60,8 @@ public sealed class ArkhePneumaOption : CustomCardModel
     {
         ("title", "Pneuma"),
         ("description",
-            "This turn, your performers' acts give double [gold]Block[/gold], "
-          + "and your front performer gains "
-          + ArkheAlignmentPower.PneumaLeadRegain + " [gold]Fanfare[/gold]."),
+            "Gain " + ArkheAlignmentPower.PneumaFanfare
+          + " [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -1,130 +1,83 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KleeMod.Cards.Prototype;
+using KleeMod.Elements;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
+/// <summary>Marker: a card that summons a Salon member as its own effect (a
+/// TOP-LEVEL <c>stage_summon</c>), which Escoffier's line makes free once a
+/// turn. Stamped by the codegen off the row.</summary>
+public interface IStageSalonSummonCard
+{
+}
+
+/// <summary>Marker: a card that Cues a performer (a <c>stage_cue</c>), which
+/// Lyney's line makes free once a turn. Stamped by the codegen off the row.
+/// </summary>
+public interface IStageCueCard
+{
+}
+
 /// <summary>
-/// THE FURINA STAGE SWITCH, C# side, and the arm that REPLACES the reframe.
+/// FURINA, THE STAGE (v2, the re-founding,
+/// <c>review/active/furina-refounding-2026-10-03.md</c>; the sim's reference
+/// is <c>tier0/engine/furina_v2.py</c>).
 ///
-/// The design is <c>review/active/furina-stage-brief-2026-09-08.md</c> --
-/// sec.3 is the rules, sec.10 the defaults it discloses, and every number in
-/// <see cref="FurinaStageLaw"/> is one of that section's. Nothing here was
-/// decided on this side of the wire; where the brief left a number to the sim
-/// it is marked as such on the constant.
+/// THE RULES, in the paper's order (sec.1 as sec.8 amends it, sec.10's
+/// sheet):
 ///
-/// TWO SWITCHES, NOT ONE, exactly as the four arms before it arrange
-/// themselves and for their reasons:
+///   1. Three seats; performers have no bars and take no hits. At the end of
+///      her turn they act front to back. Combat opens with Usher on stage.
+///   2. The Salon trio carries the numbers; a Guest Star bends a rule while on
+///      stage and/or has a utility act. One of each guest; a second copy Bows
+///      it and it keeps its seat.
+///   3. A performer that leaves acts once more, FREE, then gives 1 Fanfare.
+///   4. Overflow: a summon onto a full stage Bows the front-most Salon member;
+///      a Salon summon onto a stage of guests is a walk-on; a guest onto a
+///      stage of guests Bows the front guest.
+///   5. Fanfare is ONE number on Furina, with no cap and no fade. Cards Spend
+///      it; stars pay for their acts or skip; a payment is not a Spend.
+///   6. Rehearsal: +1 per stack to every damage and Block act.
+///   7. Cue: the chosen performer acts now (a star pays).
 ///
-///   * <c>-p:PrototypeCards=true</c> (defines <c>PROTOTYPE_CARDS</c>) is the
-///     QUARANTINE. It compiles <c>Powers/Prototype/**</c>, <c>Cards/Prototype/**</c>
-///     and <c>Vfx/Prototype/**</c>, so a release build contains no type from
-///     this arm at all and every seam that calls in from a shipped file is
-///     itself inside <c>#if PROTOTYPE_CARDS</c>.
-///   * <c>-p:FurinaStage=true</c> (defines <c>FURINA_STAGE</c>) is the ARM. It
-///     moves ONE default, <see cref="Enabled"/>. The rules compile either way,
-///     because the headless pins have to exercise the rules AND assert the
-///     flag-off wiring in one build -- the argument
-///     <c>KleeTests.csproj</c> already makes for <c>PROTOTYPE_CARDS</c>.
-///
-/// ONE FLAG, NOT FIVE, and the difference from the retired reframe is
-/// the shape of the thing being switched. The reframe was four independent
-/// edits to a shipped engine, so each leg had to be settable on its own to
-/// pin "this rule moved and the other three did not". The stage is not an edit
-/// to anything: with the flag off there is no stage, no performer, no relic
-/// and no card, and every seam below is one early return. A per-leg flag would
-/// describe a state no board can be in.
-///
-/// WHAT THE ARM MOVES, exhaustively. Every seam is one <c>if</c> on
-/// <see cref="LiveFor"/>:
-///
-///   * <c>Furina.StartingRelics</c> -- Salon Solitaire replaces the Ethereal
-///     Spotlight (brief sec.3 rule 2).
-///   * <c>Furina.StartingDeck</c> -- the whole starter (2026-09-28): the
-///     base Strike x4 and Defend x4, Curtain Rise and Rising Applause.
-///   * <c>FurinaResourceHooks.ModifyHpLostBeforeOsty</c> -- the damage order,
-///     sec.3 rule 6. The one seam that touches a SHIPPED file's behaviour, and
-///     it returns the shipped number with the arm off.
-///   * <c>FurinaStageHooks</c> -- the lead's regen at her turn start (rule 4)
-///     and the performers' acts at her turn end (rule 10), an arm-only
-///     listener that does nothing on a board with no stage.
-///
-/// FURINA'S OWN HP IS TOUCHED BY NOTHING HERE (sec.3 rule 11), and that is
-/// worth stating as a property of the code and not only of the design: no path
-/// in this arm heals, drains or caps her bar. What the arm adds is three bars
-/// that are not hers.
-///
-/// AND IT IS ALSO THE VERB SURFACE THE GENERATED CARDS CALL, which is the
-/// `EB-723` / `EB-725` reconciliation. The sim's leg wrote a <c>FurinaStage</c>
-/// of its own -- a seat list plus the card verbs, "written so the generated
-/// cards compile", with no pet, no damage-order hook and no strip -- and its
-/// own header said to absorb or replace it. This is that absorption: the SEATS
-/// are <see cref="FurinaStageLedger"/>'s, which is the one seat model and the
-/// only writer of a bar, and every verb below is the sim leg's signature
-/// re-implemented over it. So <c>FurinaStage.Summon(...)</c> in a generated
-/// card and <c>FurinaStageLedger.For(...).Summon(...)</c> in a pin are two
-/// doors into one rule rather than two rules that agree today.
-///
-/// EVERY VERB SYNCS THE BODIES, and that is why the sync is inside the verb
-/// rather than at its call sites: there are seventeen call sites and the
-/// codegen writes them. A generated card that summons gets the pet, the
-/// seat-ordered line and the strip redraw without knowing any of them exist.
-///
-/// THE NUMBERS ARE <see cref="FurinaStageLaw"/>'s -- the sim leg's own file,
-/// kept whole, because <c>tools/lint_constant_parity.py</c> mirrors it by
-/// value against <c>tier0/engine/furina_stage.py</c>. This branch's own copy
-/// of the eleven is DELETED rather than reconciled: two declarations of one
-/// number is exactly the drift that gate exists to refuse.
-///
-/// THE REFRAME IS GONE (`EB-726`, R269). It was built beside this arm rather
-/// than in place of it so that `EB-725` stayed reviewable; once the Stage had
-/// its seat rounds the brief's sec.2 retirement was taken whole, and this is
-/// the only Furina arm in the tree.
+/// THIS CLASS IS THE VERB SURFACE the generated cards, the powers, the relics
+/// and the potions call. The order of acts and Bows is
+/// <see cref="StageDirector"/>'s, the numbers <see cref="FurinaStageLedger"/>'s,
+/// and the game half <see cref="GameStageBoard"/>'s.
 /// </summary>
 public static partial class FurinaStage
 {
-
-
-    /// <summary>
-    /// Is the stage live for THIS creature? Identity is
-    /// <see cref="FurinaResources.IsFurina"/>, which is what
-    /// <c>tools/lint_prototype_patch_scope.py</c> requires of anything running
-    /// on every seat at the table under the one prototype switch: in co-op the
-    /// other seat is not hers and must not grow a stage.
-    /// </summary>
-    /// <remarks>`EB-727`: this used to carry its own null test in front of
-    /// the identity read, because <c>FurinaResources.IsFurina</c>
-    /// dereferenced its argument and threw for a caller with no creature.
-    /// The predicate answers for the absent case itself now, so the local
-    /// guard is gone rather than duplicated here.</remarks>
+    /// <summary>Is the stage live for THIS creature? In co-op the other seat
+    /// is not hers and grows no stage.</summary>
     public static bool LiveFor(Creature? creature) =>
         FurinaResources.IsFurina(creature);
 
-    // ==================================================================
-    // THE VERB SURFACE. Every member below carries the sim leg's signature,
-    // so the seventeen generated `proto_fs_` cards call it unchanged; every
-    // BODY is the ledger's move, then the payout, then the body sync.
-    // ==================================================================
-
-    /// <summary>The three, in the order the brief prints them. STRINGS at this
-    /// boundary because the sheet and the codegen speak strings
-    /// (<c>gen_klee_cards.FURINA_STAGE_MEMBERS</c>); the enum is what the
-    /// rules use, and <see cref="Parse"/> is the one crossing.</summary>
+    /// <summary>The trio, in the brief's order (the sheet speaks strings).
+    /// </summary>
     public static readonly string[] Performers =
         { "usher", "chevalmarin", "crabaletta" };
 
-    /// <summary>A sheet name to a performer. An unknown name reads as Usher
-    /// rather than throwing, because the codegen already refuses an unknown
-    /// member at EMIT -- <c>FURINA_STAGE_MEMBERS</c> is a closed set checked
-    /// there -- so a miss here cannot come from a row, and a card mid-play is
-    /// the wrong place to discover a typo the build should have caught.
-    /// </summary>
+    /// <summary>The ten guests' sheet names.</summary>
+    public static readonly string[] Guests =
+    {
+        "neuvillette", "clorinde", "navia", "chevreuse", "wriothesley",
+        "sigewinne", "charlotte", "lynette", "lyney", "escoffier",
+    };
+
+    /// <summary>A sheet name to a performer (an unknown name reads as Usher:
+    /// the codegen refuses one at emit).</summary>
     public static StagePerformer Parse(string member) => member switch
     {
         "chevalmarin" => StagePerformer.Chevalmarin,
@@ -146,69 +99,113 @@ public static partial class FurinaStage
     public static string Name(StagePerformer who) =>
         who.ToString().ToLowerInvariant();
 
-    /// <summary>The seats, front first. Never null: an absent stage is an
-    /// empty one, which every rule here already answers for.</summary>
+    /// <summary>Is this performer a Guest Star? Every one after the trio.
+    /// </summary>
+    public static bool IsGuest(StagePerformer who) =>
+        who >= StagePerformer.Neuvillette;
+
+    /// <summary>Is this guest a star (it pays for its act)?</summary>
+    public static bool IsStar(StagePerformer who) =>
+        who is StagePerformer.Neuvillette or StagePerformer.Clorinde
+            or StagePerformer.Lyney or StagePerformer.Escoffier
+            or StagePerformer.Navia;
+
+    // ---- reading the stage ---------------------------------------------
+
     public static IReadOnlyList<StageSeat> Of(Creature? owner) =>
-        owner == null
+        owner == null || !LiveFor(owner)
             ? System.Array.Empty<StageSeat>()
             : FurinaStageLedger.For(owner).Seats;
 
     public static StageSeat? Lead(Creature? owner) =>
-        owner == null ? null : FurinaStageLedger.For(owner).Lead;
+        Of(owner).FirstOrDefault();
 
-    public static StageSeat? Back(Creature? owner) =>
-        owner == null ? null : FurinaStageLedger.For(owner).Back;
-
-    public static int LeadFanfare(Creature? owner) => Lead(owner)?.Fanfare ?? 0;
-
-    public static int BackFanfare(Creature? owner) => Back(owner)?.Fanfare ?? 0;
-
-    /// <summary>Is anybody on stage? The `stage_occupied` predicate.</summary>
+    /// <summary>Is anybody on stage? (`stage_occupied`.)</summary>
     public static bool Occupied(Creature? owner) => Of(owner).Count > 0;
 
-    /// <summary>
-    /// Rule 8, the gate every Spend mode asks, as the Furina rules pass ruled
-    /// it (2026-10-01; [USER]: "Agreed, spending start back-forwards"): can
-    /// the WHOLE STAGE pay <paramref name="amount"/>, back performer first,
-    /// then forward? False on an empty stage and on a stage holding less, and
-    /// in both cases the chooser does not offer the Spend mode and the card
-    /// plays its base mode. <i>Palais Ledger</i> takes 1 off the price
-    /// (<see cref="PriceOf"/>). <i>Center of Attention</i> no longer bends
-    /// this gate: the rules pass dropped its "even when your back performer
-    /// has too little" clause, so its free Spend is offered on the same board
-    /// as any other.
-    /// </summary>
-    public static bool CanSpend(Creature? owner, int amount) =>
-        LiveFor(owner)
-        && FurinaStageLedger.For(owner!).CanSpend(PriceOf(owner!, amount));
+    /// <summary>How many performers are on stage (`stage_count`).</summary>
+    public static int Count(CardModel? card) => Of(card?.Owner?.Creature).Count;
 
-    /// <summary>
-    /// The Spend warning: the guests that could pay for their end-of-turn
-    /// act now and could not after this Spend N
-    /// (<see cref="FurinaStageLedger.StrandedBySpend"/>). Empty where the
-    /// mode is not offered, and where Center of Attention makes the Spend
-    /// free, since nothing is then taken. Read by the Spend mode's face in
-    /// the chooser (<c>ArmKeywordTips.ForSpendShortfall</c>).
+    /// <summary>Her Fanfare.</summary>
+    public static int FanfareOf(Creature? owner) =>
+        LiveFor(owner) ? FurinaStageLedger.For(owner!).Fanfare : 0;
+
+    /// <summary>`fanfare_gained`: Fanfare gained this turn (Ousia Surge).
     /// </summary>
-    public static IReadOnlyList<StagePerformer> StrandedBySpend(
-        Creature? owner, int amount)
+    public static int GainedThisTurn(CardModel? card) =>
+        card?.Owner?.Creature is { } owner && LiveFor(owner)
+            ? FurinaStageLedger.For(owner).GainedThisTurn : 0;
+
+    /// <summary>`fanfare_spent`: Fanfare her cards' Spends took this turn
+    /// (Pneuma Refrain, Bring the House Down). A star's payment is not a
+    /// Spend.</summary>
+    public static int SpentThisTurn(CardModel? card) =>
+        card?.Owner?.Creature is { } owner && LiveFor(owner)
+            ? FurinaStageLedger.For(owner).SpentThisTurn : 0;
+
+    /// <summary>`stage_spent`: what THIS play's spend-all took.</summary>
+    public static int Spent(CardModel? card) =>
+        card?.Owner?.Creature is { } owner && LiveFor(owner)
+            ? FurinaStageLedger.For(owner).SpentThisPlay : 0;
+
+    /// <summary>`stage_spent` as a face prints it: before the play, the
+    /// Fanfare a spend-all is about to take; during it, what it took. One
+    /// expression, so preview and resolution agree.</summary>
+    public static int SpentOrFanfare(CardModel? card)
     {
-        if (!CanSpend(owner, amount) || CenterOfAttentionPower.Covers(owner))
-        {
-            return System.Array.Empty<StagePerformer>();
-        }
-        return FurinaStageLedger.For(owner!)
-            .StrandedBySpend(PriceOf(owner!, amount));
+        var spent = Spent(card);
+        return spent > 0 ? spent : FanfareOf(card?.Owner?.Creature);
     }
 
-    /// <summary>
-    /// PALAIS LEDGER, re-aimed by the rules pass (2026-10-01): "Your Spends
-    /// cost 1 less Fanfare." The price a chosen Spend mode actually asks:
-    /// its printed N, less 1 per Palais Ledger held, floored at 0. Read by
-    /// the gate and the payment alike, so the two cannot disagree. Only a
-    /// card's Spend N mode reads it: a spend-all (Bravura, Let the People
-    /// Rejoice) has no price to lower, and Chevreuse's act is the
-    /// performer's, not "your" Spend (a builder's reading, flagged).
+    /// <summary>`stage_bows`: every Bow this combat (Da Capo).</summary>
+    public static int Bows(CardModel? card) =>
+        card?.Owner?.Creature is { } owner && LiveFor(owner)
+            ? FurinaStageLedger.For(owner).BowsThisCombat : 0;
+
+    /// <summary>Opening Number: the cards she finished playing this turn.
+    /// </summary>
+    public static int CardsPlayedThisTurn(Creature? owner) =>
+        LiveFor(owner) ? FurinaStageLedger.For(owner!).CardsPlayedThisTurn : 0;
+
+    /// <summary>How many seats her stage has: four under Sold Out.</summary>
+    public static int CapacityOf(Creature? owner) =>
+        owner != null && owner.Powers.OfType<SoldOutPower>().Any()
+            ? FurinaStageLaw.SoldOutSeats
+            : FurinaStageLaw.Seats;
+
+    /// <summary>The Last Act: her seats with nobody in them.</summary>
+    public static int EmptySeats(Creature? owner) =>
+        !LiveFor(owner) ? 0
+            : System.Math.Max(0, FurinaStageLedger.For(owner!).Capacity
+                                 - Of(owner).Count);
+
+    /// <summary>What her powers and relics make of the rules, read live.
+    /// </summary>
+    public static StageMods ModsOf(Creature owner)
+    {
+        int Sum<T>() where T : PowerModel =>
+            (int)owner.Powers.OfType<T>().Sum(p => p.Amount);
+        return new StageMods
+        {
+            Rehearsal = Sum<RehearsalPower>(),
+            Capacity = CapacityOf(owner),
+            BowDraw = Sum<ThunderousApplausePower>(),
+            BowActs = Relics.CurtainCallBouquet.ActsFor(owner),
+            BowBlock = Relics.StagehandsGloves.BlockFor(owner),
+            FiveCentury = owner.Powers.OfType<FiveCenturyActPower>().Any(),
+            CriticsDarling = Sum<CriticsDarlingPower>(),
+            StarBilling = Sum<StarBillingPower>(),
+            StarTurn = Sum<StarTurnPower>(),
+            FullHouse = Sum<FullHousePower>(),
+            SpendDiscount = Relics.FurinaStageRelics.Count<Relics.PalaisLedger>(owner)
+                            * Relics.PalaisLedger.Discount,
+        };
+    }
+
+    // ---- Spend (rule 5) --------------------------------------------------
+
+    /// <summary>The price a chosen Spend N mode asks: N less Palais Ledger's
+    /// discount, floored at 0. The gate and the payment read it alike.
     /// </summary>
     public static int PriceOf(Creature owner, int amount)
     {
@@ -217,1391 +214,980 @@ public static partial class FurinaStage
         return System.Math.Max(0, amount - off);
     }
 
-    /// <summary>The live lead bar, for the `stage_lead_fanfare` count
-    /// (<i>Pneuma Refrain</i>, the shield reader).</summary>
-    public static int LeadFanfare(CardModel? card) =>
-        LeadFanfare(card?.Owner?.Creature);
+    /// <summary>Is a Spend N mode offered? Only when her Fanfare holds the
+    /// price.</summary>
+    public static bool CanSpend(Creature? owner, int amount) =>
+        LiveFor(owner)
+        && FurinaStageLedger.For(owner!).CanSpend(PriceOf(owner!, amount));
 
-    /// <summary>The live back bar, for `stage_back_fanfare` (<i>Ousia
-    /// Surge</i>, the bank reader).</summary>
-    public static int BackFanfare(CardModel? card) =>
-        BackFanfare(card?.Owner?.Creature);
-
-    /// <summary>R276 batch two: how many performers are on stage, for the
-    /// `stage_count` count (<i>Ensemble Piece</i>).</summary>
-    public static int Count(CardModel? card) =>
-        Of(card?.Owner?.Creature).Count;
-
-    /// <summary>A fresh, empty per-play spend record.</summary>
-    public static void BeginPlay(Creature? owner)
+    /// <summary>The guests the end-of-turn sweep would leave unable to pay
+    /// after this Spend (the chooser's warning).</summary>
+    public static IReadOnlyList<StagePerformer> StrandedBySpend(
+        Creature? owner, int amount)
     {
-        if (owner != null) FurinaStageLedger.For(owner).BeginPlay();
+        if (!CanSpend(owner, amount) || CenterOfAttentionPower.Covers(owner))
+        {
+            return System.Array.Empty<StagePerformer>();
+        }
+        var ledger = FurinaStageLedger.For(owner!);
+        var before = ForecastSweep(ledger, ledger.Fanfare);
+        var after = ForecastSweep(ledger,
+                                  ledger.Fanfare - PriceOf(owner!, amount));
+        return after.Where(cue => cue.Skips)
+            .Select(cue => cue.Who)
+            .Where(who => !before.Any(b => b.Who == who && b.Skips))
+            .Distinct()
+            .ToList();
     }
 
-    /// <summary>Close the per-play spend record. Round three's stale forecast
-    /// is what this exists for -- see <see cref="FurinaStageLedger.EndPlay"/>.
+    // ---- the director ----------------------------------------------------
+
+    /// <summary>The rules over this Furina's stage and the live board.
     /// </summary>
-    public static void EndPlay(Creature? owner)
+    public static StageDirector Director(PlayerChoiceContext choiceContext,
+                                         Creature owner) =>
+        new(FurinaStageLedger.For(owner),
+            new GameStageBoard(choiceContext, owner));
+
+    private static async Task Done(Creature? owner)
     {
-        if (owner != null) FurinaStageLedger.For(owner).EndPlay();
+        if (owner == null) return;
+        await FurinaStagePets.Sync(owner);
+        RefreshBadges(owner);
     }
 
-    /// <summary>What THIS play took off the bars, for the `stage_spent` count.
-    /// A per-play record and not a live read, for the reason the sim leg
-    /// gives: by the time <i>Final Bow</i>'s Block or the Rare's damage
-    /// resolves, the bar it is measuring is gone.</summary>
-    public static int Spent(CardModel? card) =>
-        card?.Owner?.Creature is { } owner
-            ? FurinaStageLedger.For(owner).SpentThisPlay
-            : 0;
+    // ---- the verbs the cards call ------------------------------------------
 
-    /// <summary>The whole company's bars added up -- <i>Let the People
-    /// Rejoice</i>'s number, before it takes it.</summary>
-    public static int TotalFanfare(Creature? owner)
+    /// <summary>Gain Fanfare (`stage_raise`).</summary>
+    public static async Task<int> Gain(PlayerChoiceContext choiceContext,
+                                       Creature? owner, int amount,
+                                       string source = "")
     {
-        var total = 0;
-        foreach (var seat in Of(owner)) total += seat.Fanfare;
-        return total;
+        if (!LiveFor(owner) || amount <= 0) return 0;
+        var gained = await Director(choiceContext, owner!).Gain(amount, source);
+        RefreshBadges(owner);
+        return gained;
+    }
+
+    /// <summary>A Spend N mode's payment. Center of Attention's free Spend
+    /// takes nothing (and moves nothing, so it is no Spend). Returns what was
+    /// paid.</summary>
+    public static async Task<int> Spend(PlayerChoiceContext choiceContext,
+                                        Creature? owner, int amount)
+    {
+        if (!LiveFor(owner)) return 0;
+        if (CenterOfAttentionPower.TryClaim(owner!))
+        {
+            RefreshBadges(owner);
+            return 0;
+        }
+        var paid = await Director(choiceContext, owner!)
+            .Spend(PriceOf(owner!, amount));
+        RefreshBadges(owner);
+        return paid;
+    }
+
+    /// <summary>"Spend all your Fanfare" (`stage_spend_all`): Bravura, Let
+    /// the People Rejoice. Returns what was spent.</summary>
+    public static async Task<int> SpendAll(PlayerChoiceContext choiceContext,
+                                           Creature? owner)
+    {
+        if (!LiveFor(owner)) return 0;
+        var spent = await Director(choiceContext, owner!).SpendAll();
+        RefreshBadges(owner);
+        return spent;
+    }
+
+    /// <summary>A Salon summon (`stage_summon`): a named member, or
+    /// <c>"random"</c> (uniform over the trio).</summary>
+    public static async Task Summon(PlayerChoiceContext choiceContext,
+                                    Creature? owner, string member)
+    {
+        if (!LiveFor(owner)) return;
+        var who = member == "random" ? RollTrio(owner!) : Parse(member);
+        if (member == "random")
+        {
+            ResolutionLedger.NoteSummon(Name(who),
+                                        FurinaStageLedger.DisplayName(who));
+        }
+        await Director(choiceContext, owner!).SummonSalon(who);
+        await Done(owner);
+    }
+
+    /// <summary>A Guest Star card (`stage_guest`): summon the guest, then
+    /// gain <paramref name="fanfare"/>.</summary>
+    public static async Task GuestStar(PlayerChoiceContext choiceContext,
+                                       Creature? owner, string member,
+                                       int fanfare = 0)
+    {
+        if (!LiveFor(owner)) return;
+        var guestBook = Relics.GuestBook.BonusFor(owner!);
+        await Director(choiceContext, owner!)
+            .SummonGuest(Parse(member), fanfare, guestBook);
+        await Done(owner);
+    }
+
+    /// <summary>"Cue a performer" (`stage_cue`): the player picks the
+    /// performer (<see cref="ChooseSeat"/>), which acts now.</summary>
+    public static async Task Cue(PlayerChoiceContext choiceContext,
+                                 Player? player, int times = 1)
+    {
+        var owner = player?.Creature;
+        if (!LiveFor(owner)) return;
+        var index = await ChooseSeat(choiceContext, player!, SeatPick.Cue);
+        await Director(choiceContext, owner!).Cue(index, times);
+        await Done(owner);
+    }
+
+    /// <summary>Revolving Stage: Cue the FRONT performer.</summary>
+    public static async Task CueFront(PlayerChoiceContext choiceContext,
+                                      Creature? owner)
+    {
+        if (!Occupied(owner)) return;
+        await Director(choiceContext, owner!).Cue(0);
+        await Done(owner);
+    }
+
+    /// <summary>Step Forward: a chosen performer moves to the front.</summary>
+    public static async Task StepForward(PlayerChoiceContext choiceContext,
+                                         Player? player)
+    {
+        var owner = player?.Creature;
+        if (!LiveFor(owner)) return;
+        var index = await ChooseSeat(choiceContext, player!, SeatPick.Front);
+        await Director(choiceContext, owner!).StepForward(index);
+        await Done(owner);
+    }
+
+    /// <summary>Final Bow, Intermission: a chosen performer Bows and leaves.
+    /// </summary>
+    public static async Task FinalBow(PlayerChoiceContext choiceContext,
+                                      Player? player)
+    {
+        var owner = player?.Creature;
+        if (!LiveFor(owner)) return;
+        var index = await ChooseSeat(choiceContext, player!, SeatPick.Bow);
+        await Director(choiceContext, owner!).FinalBow(index);
+        await Done(owner);
+    }
+
+    /// <summary>Tutti! (every performer acts), Endless Waltz
+    /// (<paramref name="guestsOnly"/>: each guest acts), Encore Elixir
+    /// (<paramref name="times"/> 2).</summary>
+    public static async Task PerformAll(PlayerChoiceContext choiceContext,
+                                        Creature? owner, bool guestsOnly = false,
+                                        int times = 1)
+    {
+        if (!LiveFor(owner)) return;
+        await Director(choiceContext, owner!).PerformAll(guestsOnly, times);
+        await Done(owner);
+    }
+
+    /// <summary>Grand Finale: every performer Bows without leaving.</summary>
+    public static async Task GrandFinale(PlayerChoiceContext choiceContext,
+                                         Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        await Director(choiceContext, owner!).BowAll();
+        await Done(owner);
+    }
+
+    /// <summary>Let the People Rejoice's "Your performers Bow and return":
+    /// the same Bows, each keeping its seat.</summary>
+    public static Task CurtainCall(PlayerChoiceContext choiceContext,
+                                   Creature? owner) =>
+        GrandFinale(choiceContext, owner);
+
+    /// <summary>Oratrice's Verdict: this turn every random pick a performer
+    /// makes is <paramref name="target"/>, while it lives.</summary>
+    public static void SetVerdict(Creature? owner, Creature? target)
+    {
+        if (!LiveFor(owner)) return;
+        FurinaStageLedger.For(owner!).VerdictTarget = target;
+        RefreshBadges(owner);
+    }
+
+    /// <summary>Dual Nature: Ousia or Pneuma for this turn, once.</summary>
+    public static async Task DualNature(PlayerChoiceContext choiceContext,
+                                        Player? player)
+    {
+        var owner = player?.Creature;
+        if (!LiveFor(owner)) return;
+        var pneuma = await ArkheAlignmentPower.Ask(choiceContext, player!);
+        await ArkheAlignmentPower.Choose(choiceContext, owner!, pneuma, 1);
+        RefreshBadges(owner);
     }
 
     /// <summary>
-    /// `EB-747`. WHAT <i>FINAL BOW</i> PRINTS, IN PREVIEW AND AT RESOLUTION.
-    ///
-    /// THE FIND (round two, sec.4). "<i>Ousia Surge</i> dealt 0 on an empty
-    /// stage at full cost with no refusal ... the readers print a rule where a
-    /// number is known." Two of the four readers could not print one at all,
-    /// because <see cref="Spent"/> is a per-PLAY record and is 0 until the
-    /// card has already emptied the bar it is measuring -- the very reason
-    /// that record exists (<c>FurinaStageLedger.SpentThisPlay</c>).
-    ///
-    /// SO THE READER ANSWERS THE SAME QUESTION AT TWO MOMENTS. Before the
-    /// play, nothing has been spent and the number the card is ABOUT to take
-    /// is the back performer's live bar (R276: the bow comes from the bank); during the play, the bar is gone and what the
-    /// card took is the record. One expression, so the previewed number and
-    /// the resolved number cannot differ -- which is what a CalculatedVar is
-    /// for.
-    ///
-    /// IT NEEDS <see cref="BeginPlay"/> TO BE CALLED, and until this row it
-    /// was not: the record was written by each spending op and never reset, so
-    /// a stale amount from an earlier card would have been previewed as this
-    /// card's forecast. `FurinaStageHooks.BeforeCardPlayed` clears it now.
-    ///
-    /// 0 ON AN EMPTY STAGE, in both moments, which is the row's own
-    /// acceptance.
+    /// <i>Casting Agent</i>: "Choose 1 of 3 random Guest Star cards and add
+    /// it to your hand. It costs 0 this turn [and is upgraded]." Three
+    /// different cards off the shared <c>CombatTargets</c> stream; a full hand
+    /// takes nothing.
     /// </summary>
-    public static int SpentOrBackFanfare(CardModel? card)
+    public static async Task CastingAgent(PlayerChoiceContext choiceContext,
+                                          CardModel card)
     {
-        var spent = Spent(card);
-        return spent > 0 ? spent : BackFanfare(card);
+        var player = card.Owner;
+        var owner = player?.Creature;
+        if (!LiveFor(owner)) return;
+        var combat = owner!.CombatState;
+        if (combat == null || player == null) return;
+        if (CardPile.Get(PileType.Hand, player) is { } hand
+            && hand.Cards.Count >= KokomiPoolCompletion.MaxHandSize)
+        {
+            return;
+        }
+        var remaining = FurinaStageRoster.GuestStarCards().ToList();
+        var rng = player.RunState?.Rng?.CombatTargets;
+        var options = new List<CardModel>();
+        while (options.Count < FurinaStageLaw.CastingAgentOffer
+               && remaining.Count > 0)
+        {
+            var pick = rng != null ? rng.NextItem(remaining) : remaining[0];
+            if (pick == null) break;
+            remaining.Remove(pick);
+            options.Add(combat.CreateCard(pick, player));
+        }
+        if (options.Count == 0) return;
+        var selected = await CardSelectCmd.FromChooseACardScreen(
+            choiceContext, options, player, canSkip: false);
+        if (selected == null) return;
+        if (card.IsUpgraded && !selected.IsUpgraded) selected.UpgradeInternal();
+        selected.EnergyCost.SetThisTurn(0);
+        await CardPileCmd.AddGeneratedCardToCombat(selected, PileType.Hand,
+                                                    player);
     }
 
-    /// <summary>`EB-747`, <i>Let the People Rejoice</i>'s half of the same
-    /// rule: the whole stage's bars before the card takes them, and what it
-    /// took after.</summary>
-    public static int SpentOrTotalFanfare(CardModel? card)
+    /// <summary>
+    /// THE CO-OP SET, <i>Share the Spotlight</i>: "Spend all your Fanfare.
+    /// Another player gains 2 Block per point." The Spend first (Clorinde's
+    /// line answers it), then the ally's Block, the card's own
+    /// (<c>ValueProp.Move</c>). Returns what was spent.
+    /// </summary>
+    public static async Task<int> ShareTheSpotlight(
+        PlayerChoiceContext choiceContext, Creature? owner, Creature? ally,
+        int perPoint, CardPlay? cardPlay)
     {
-        var spent = Spent(card);
-        return spent > 0 ? spent : TotalFanfare(card?.Owner?.Creature);
+        if (!LiveFor(owner)) return 0;
+        var spent = await Director(choiceContext, owner!).SpendAll();
+        if (ally is { IsAlive: true } && spent > 0 && perPoint > 0)
+        {
+            await CreatureCmd.GainBlock(
+                ally, spent * perPoint, ValueProp.Move, cardPlay);
+        }
+        RefreshBadges(owner);
+        return spent;
     }
 
-    /// <summary>Rule 2, the relic's opening. Idempotent on a lit stage.
+    /// <summary>
+    /// THE CO-OP SET, <i>Raise a Toast</i>'s Spend 4 mode: "another player
+    /// gains 4 temporary Strength" (6 upgraded). The base game's Coordinate
+    /// shape (<see cref="RaiseAToastPower"/>). Returns what was given.
     /// </summary>
+    public static async Task<int> RaiseAToast(
+        PlayerChoiceContext choiceContext, Creature? owner, Creature? ally,
+        int amount, CardModel? cardSource)
+    {
+        if (!LiveFor(owner) || amount <= 0 || ally is not { IsAlive: true })
+        {
+            return 0;
+        }
+        await PowerCmd.Apply<RaiseAToastPower>(
+            choiceContext, ally, amount, applier: owner, cardSource: cardSource);
+        return amount;
+    }
+
+    /// <summary>Tide of Applause, called from <c>ReactionEffects.Resolve</c>
+    /// with the reaction's dealer: each copy's amount, gained.</summary>
+    internal static async Task OnReaction(PlayerChoiceContext choiceContext,
+                                          Creature? dealer)
+    {
+        if (!LiveFor(dealer)) return;
+        var amount = (int)dealer!.Powers.OfType<TideOfApplausePower>()
+            .Sum(p => p.Amount);
+        if (amount <= 0) return;
+        using (FurinaStageLedger.For(dealer).CausedBy(TideOfApplauseTitle))
+        {
+            await Gain(choiceContext, dealer, amount, TideOfApplauseTitle);
+        }
+    }
+
+    // ---- the performer picker (rule 7: the player chooses) ----------------
+
+    /// <summary>What the picker is choosing a performer for.</summary>
+    public enum SeatPick
+    {
+        Cue,
+        Front,
+        Bow,
+    }
+
+    public const string CuePromptKey =
+        "KLEEMOD-STAGE_PICK_CUE.selectionScreenPrompt";
+
+    public const string CuePromptText = "Choose a performer to Cue.";
+
+    public const string FrontPromptKey =
+        "KLEEMOD-STAGE_PICK_FRONT.selectionScreenPrompt";
+
+    public const string FrontPromptText =
+        "Choose a performer to move to the front.";
+
+    public const string BowPromptKey =
+        "KLEEMOD-STAGE_PICK_BOW.selectionScreenPrompt";
+
+    public const string BowPromptText =
+        "Choose a performer to Bow and leave.";
+
+    /// <summary>Test seam: a headless pin answers the picker with a seat
+    /// index. Null in the game.</summary>
+    public static System.Func<IReadOnlyList<StageSeat>, SeatPick, int?>?
+        PickOverride { get; set; }
+
+    /// <summary>
+    /// THE PERFORMER PICKER (sec.8: "The chosen Cue is part of the design ...
+    /// If clicking a performer is awkward, the C# uses a small selection
+    /// panel"). A card's own target is the enemy it hits, so the performer is
+    /// picked on a panel: one face per seat, front to back, left to right,
+    /// each naming the performer and its act (<see cref="StageSeatOption"/>).
+    /// The game's grid screen (Treasure Map's), which takes any count and
+    /// syncs co-op by index. No question with one performer, and none on an
+    /// empty stage (null).
+    /// </summary>
+    public static async Task<int?> ChooseSeat(PlayerChoiceContext choiceContext,
+                                              Player player, SeatPick pick)
+    {
+        var owner = player.Creature;
+        var seats = Of(owner);
+        if (seats.Count == 0) return null;
+        if (PickOverride is { } scripted) return scripted(seats, pick);
+        if (seats.Count == 1) return 0;
+        var combat = owner?.CombatState;
+        if (combat == null) return 0;
+        var options = new List<CardModel>();
+        for (var i = 0; i < seats.Count; i++)
+        {
+            if (combat.CreateCard(OptionFor(seats[i].Who), player)
+                is not StageSeatOption face)
+            {
+                continue;
+            }
+            face.SeatIndex = i;
+            options.Add(face);
+        }
+        if (options.Count == 0) return 0;
+        var key = pick switch
+        {
+            SeatPick.Front => FrontPromptKey,
+            SeatPick.Bow => BowPromptKey,
+            _ => CuePromptKey,
+        };
+        var chosen = (await CardSelectCmd.FromSimpleGrid(
+            choiceContext, options, player,
+            new CardSelectorPrefs(new LocString("cards", key), 1)))
+            .FirstOrDefault();
+        return chosen is StageSeatOption picked && picked.SeatIndex >= 0
+            ? picked.SeatIndex : 0;
+    }
+
+    /// <summary>The canonical picker face for a performer.</summary>
+    public static CardModel OptionFor(StagePerformer who) => who switch
+    {
+        StagePerformer.Chevalmarin => ModelDb.Card<ChevalmarinSeatOption>(),
+        StagePerformer.Crabaletta => ModelDb.Card<CrabalettaSeatOption>(),
+        StagePerformer.Neuvillette => ModelDb.Card<NeuvilletteSeatOption>(),
+        StagePerformer.Clorinde => ModelDb.Card<ClorindeSeatOption>(),
+        StagePerformer.Navia => ModelDb.Card<NaviaSeatOption>(),
+        StagePerformer.Chevreuse => ModelDb.Card<ChevreuseSeatOption>(),
+        StagePerformer.Wriothesley => ModelDb.Card<WriothesleySeatOption>(),
+        StagePerformer.Sigewinne => ModelDb.Card<SigewinneSeatOption>(),
+        StagePerformer.Charlotte => ModelDb.Card<CharlotteSeatOption>(),
+        StagePerformer.Lynette => ModelDb.Card<LynetteSeatOption>(),
+        StagePerformer.Lyney => ModelDb.Card<LyneySeatOption>(),
+        StagePerformer.Escoffier => ModelDb.Card<EscoffierSeatOption>(),
+        _ => ModelDb.Card<UsherSeatOption>(),
+    };
+
+    /// <summary>Every picker face, for the pool membership
+    /// (<c>FurinaOffPoolCards</c>).</summary>
+    public static IEnumerable<CardModel> AllOptions() =>
+        System.Enum.GetValues<StagePerformer>().Select(OptionFor);
+
+    // ---- the clocks ---------------------------------------------------------
+
+    /// <summary>Rule 1: Salon Solitaire (and The Curtain Never Falls) open the
+    /// combat with Usher on stage. Idempotent.</summary>
     public static async Task OpenCombat(Creature? owner)
     {
         if (!LiveFor(owner)) return;
         await InstallBadge(owner);
-        // OPERA GLASSES: the opening Usher's number is the relic's 5. THE
-        // CURTAIN NEVER FALLS opens at its own 5 too (2026-09-28); holding
-        // both opens once, at the larger.
-        var opening = Relics.OperaGlasses.OpeningFor(owner);
-        if (Relics.CurtainNeverFalls.OnStage(owner))
-            opening = System.Math.Max(opening, Relics.CurtainNeverFalls.OpeningFanfare);
-        if (FurinaStageLedger.For(owner!).OpenWith(StagePerformer.Usher, opening)
-            == null)
-        {
-            return;
-        }
+        if (!FurinaStageLedger.For(owner!).Open()) return;
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageCues.CurtainUp(owner);
+        RefreshBadges(owner);
     }
 
+    /// <summary>The top of her turn, before the draw: the flow counts and the
+    /// once-a-turn latches reset (sec.8).</summary>
+    public static void OpenTurn(Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        FurinaStageLedger.For(owner!).OpenTurn();
+        RefreshBadges(owner);
+    }
+
+    public const string SeasonTicketsTitle = "Season Tickets";
+    public const string RevolvingStageTitle = "Revolving Stage";
+    public const string TideOfApplauseTitle = "Tide of Applause";
+    public const string PremiereSeasonTitle = "Premiere Season";
+    public const string AllTheWorldsAStageTitle = "All the World's a Stage";
+
     /// <summary>
-    /// THE STAGE BADGE on Furina (<see cref="StageSummaryPower"/>, 2026-09-25):
-    /// the board's rules where a player hovers first. Idempotent, and asked
-    /// from two places -- the relic's combat open and every turn start
-    /// (<c>FurinaStageHooks</c>) -- for <c>KokomiRules.Install</c>'s reason: a
-    /// fight whose setup order ever moves still gets the badge.
+    /// After her draw: Charlotte's extra card, then the turn-start powers --
+    /// One-Woman Show, Premiere Season's Rehearsal, Grand Theater Program's
+    /// and Season Tickets' Fanfare, Regina's Hydro, and Revolving Stage's Cue
+    /// last -- the sim arm's order (`furina_stage.turn_start`).
     /// </summary>
+    public static async Task TurnStart(PlayerChoiceContext choiceContext,
+                                       Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        var furina = owner!;
+        var ledger = FurinaStageLedger.For(furina);
+        if (ledger.OnStage(StagePerformer.Charlotte)
+            && furina.Player is { } drawer)
+        {
+            await CardPileCmd.Draw(choiceContext, FurinaStageLaw.CharlotteExtra,
+                                   drawer);
+        }
+        var show = (int)furina.Powers.OfType<OneWomanShowPower>()
+            .Sum(p => p.Amount);
+        if (show > 0 && !Occupied(furina) && furina.Player is { } player)
+        {
+            await PlayerCmd.GainEnergy(show, player);
+            await CardPileCmd.Draw(choiceContext, 2 * show, player);
+        }
+        var premiere = (int)furina.Powers.OfType<PremiereSeasonPower>()
+            .Sum(p => p.Amount);
+        if (premiere > 0)
+        {
+            await PowerCmd.Apply<RehearsalPower>(choiceContext, furina,
+                                                 premiere, applier: furina,
+                                                 cardSource: null);
+        }
+        var program = Relics.FurinaStageRelics
+            .Count<Relics.GrandTheaterProgram>(furina)
+            * Relics.GrandTheaterProgram.Fanfare;
+        if (program > 0)
+        {
+            Relics.FurinaStageRelics.Flash<Relics.GrandTheaterProgram>(furina);
+            using (ledger.CausedBy("Grand Theater Program"))
+            {
+                await Gain(choiceContext, furina, program, "Grand Theater Program");
+            }
+        }
+        var tickets = (int)furina.Powers.OfType<SeasonTicketsPower>()
+            .Sum(p => p.Amount);
+        if (tickets > 0)
+        {
+            using (ledger.CausedBy(SeasonTicketsTitle))
+            {
+                await Gain(choiceContext, furina, tickets, SeasonTicketsTitle);
+            }
+        }
+        if (furina.Powers.OfType<ReginaOfAllWatersPower>().Any())
+        {
+            foreach (var enemy in Enemies(furina).ToList())
+            {
+                if (furina.IsDead || CombatOver()) break;
+                await ElementalHit.ApplyOnly(choiceContext, enemy,
+                                             Element.Hydro, furina);
+            }
+        }
+        var turns = (int)furina.Powers.OfType<RevolvingStagePower>()
+            .Sum(p => p.Amount);
+        using (ledger.CausedBy(RevolvingStageTitle))
+        {
+            for (var i = 0; i < turns; i++)
+            {
+                if (furina.IsDead || CombatOver()) break;
+                await CueFront(choiceContext, furina);
+            }
+        }
+        RefreshBadges(furina);
+    }
+
+    /// <summary>Rule 1: the end of her turn. Every performer acts, front to
+    /// back; then this turn's Ousia and Verdict are spent.</summary>
+    public static async Task EndOfTurnActs(PlayerChoiceContext choiceContext,
+                                           Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        await Director(choiceContext, owner!).EndOfTurn();
+        FurinaStageLedger.For(owner!).CloseTurn();
+        await Done(owner);
+    }
+
+    /// <summary>A card play opens: a fresh per-play spend record.</summary>
+    public static void BeginPlay(Creature? owner)
+    {
+        if (LiveFor(owner)) FurinaStageLedger.For(owner!).BeginPlay();
+    }
+
+    /// <summary>A card play closed: the counts Opening Number, Escoffier's
+    /// and Lyney's lines read.</summary>
+    public static void NoteCardPlayed(Creature? owner, CardModel? card)
+    {
+        if (!LiveFor(owner)) return;
+        var ledger = FurinaStageLedger.For(owner!);
+        ledger.CardsPlayedThisTurn++;
+        if (card is IStageSalonSummonCard) ledger.SalonSummonCardsThisTurn++;
+        if (card is IStageCueCard) ledger.CueCardsThisTurn++;
+        RefreshBadges(owner);
+    }
+
+    /// <summary>Escoffier's and Lyney's lines: is this card free to play now?
+    /// PURE.</summary>
+    public static bool PlaysFree(Creature? owner, CardModel card)
+    {
+        if (!LiveFor(owner)) return false;
+        var ledger = FurinaStageLedger.For(owner!);
+        if (card is IStageSalonSummonCard
+            && ledger.OnStage(StagePerformer.Escoffier)
+            && ledger.SalonSummonCardsThisTurn == 0)
+        {
+            return true;
+        }
+        return card is IStageCueCard
+               && ledger.OnStage(StagePerformer.Lyney)
+               && ledger.CueCardsThisTurn == 0;
+    }
+
+    /// <summary>Sigewinne's reading: Furina lost HP.</summary>
+    public static void NoteHpLoss(Creature? owner)
+    {
+        if (LiveFor(owner)) FurinaStageLedger.For(owner!).NoteHpLoss();
+    }
+
+    /// <summary>Wriothesley's reading: her Block stopped this much.</summary>
+    public static void NoteBlocked(Creature? owner, int blocked)
+    {
+        if (LiveFor(owner)) FurinaStageLedger.For(owner!).NoteBlocked(blocked);
+    }
+
+    /// <summary>Neuvillette's line on her CARDS: "Your Hydro damage deals 2
+    /// more", per hit, while he is on stage. (His own act adds it in the
+    /// director.) PURE.</summary>
+    public static int HydroBonus(Creature? dealer, CardModel? cardSource)
+    {
+        if (cardSource == null || !LiveFor(dealer)) return 0;
+        if (!FurinaStageLedger.For(dealer!).OnStage(StagePerformer.Neuvillette))
+        {
+            return 0;
+        }
+        return CatalystCadence.PrintedElement(cardSource, dealer) == Element.Hydro
+            ? FurinaStageLaw.NeuvilletteHydroBonus : 0;
+    }
+
+    // ---- the badge ----------------------------------------------------------
+
+    /// <summary>Her Fanfare badge (<see cref="FanfarePower"/>), installed at
+    /// combat open and asked again every turn start. Idempotent.</summary>
     public static async Task InstallBadge(Creature? owner)
     {
         if (!LiveFor(owner)) return;
-        if (owner!.Powers.OfType<StageSummaryPower>().Any()) return;
-        await PowerCmd.Apply<StageSummaryPower>(
+        if (owner!.Powers.OfType<FanfarePower>().Any()) return;
+        await PowerCmd.Apply<FanfarePower>(
             new ThrowingPlayerChoiceContext(), owner, 1,
             applier: owner, cardSource: null, silent: true);
     }
 
-    /// <summary>
-    /// Rule 3. Fill the back-most empty seat at
-    /// <see cref="FurinaStageLaw.SummonFanfare"/>; on a FULL stage recast
-    /// (<see cref="RecastFromFront"/>): the front Bows and leaves, and the
-    /// newcomer takes the back seat holding its Fanfare. Named and random
-    /// alike since the trio can be cloned (2026-09-25): a named summon used to
-    /// rotate the front off with no Bow, which [USER]'s "Stage members bow
-    /// out when they are destroyed or replaced" had already ruled out.
-    ///
-    /// <para>THE TRIO CAN BE CLONED (2026-09-25; [USER]: "Let's allow for
-    /// copies and then check the balance."). A named summon always summons,
-    /// even when that performer is already on stage -- the old "if he's
-    /// already on stage, he gains 3 Fanfare" clause is gone from the faces and
-    /// from here.</para>
-    ///
-    /// <para><paramref name="member"/> of <c>"random"</c> rolls uniformly
-    /// from all three of the trio (<see cref="RollAny"/>), on stage or not.
-    /// ON A FULL STAGE the lead takes a Bow and leaves, and the roll arrives
-    /// at the back holding its Fanfare (<see cref="RecastFromFront"/>,
-    /// 2026-09-25): before that rule a random summon with all three seated
-    /// summoned nobody, and a first-time player read the card as doing
-    /// nothing.</para>
-    ///
-    /// <para>AND THE NEWCOMER DOES NOT ACT ON ARRIVAL (`EB-738`, round one's
-    /// one E default). Rule 3 reads "a newcomer performs with the others at
-    /// the end of that turn, never on arrival", and this side had read the
-    /// draft's older wording as an act on play: three seats watched every
-    /// summon deal damage and apply Hydro with nothing on its face, and a
-    /// summon turn performed twice. There is no code for the rule and that
-    /// absence IS the rule -- <see cref="EndOfTurnActs"/> walks whoever is on
-    /// stage when it fires, so a performer summoned during the turn is
-    /// standing there once. It stays awaited because the bodies are.</para>
-    /// </summary>
-    /// <remarks>THE SUPPORTING POOL (2026-09-26): <paramref name="fanfare"/> is
-    /// the arrival a face prints (<i>Gala Premiere</i>: "with 3 Fanfare
-    /// each"); rule 3's 1 otherwise. On a full stage it is the recast's own
-    /// arrival, added to the leaver's, exactly as a Guest Star's is.</remarks>
-    public static async Task Summon(PlayerChoiceContext choiceContext,
-                                    Creature? owner, string member,
-                                    int fanfare = FurinaStageLaw.SummonFanfare)
+    /// <summary>Redraw the Fanfare badge's numbers and the cues.</summary>
+    public static void RefreshBadges(Creature? owner)
     {
         if (!LiveFor(owner)) return;
-        var ledger = FurinaStageLedger.For(owner!);
-
-        var random = member == "random";
-        if (ledger.IsFull)
+        foreach (var badge in owner!.Powers.OfType<FanfarePower>().ToList())
         {
-            await RecastFromFront(choiceContext, owner!,
-                                  random ? null : Parse(member), fanfare);
-            return;
+            badge.Refresh();
         }
-        var who = random ? RollAny(owner!) : Parse(member);
-        if (random) NoteSummoned(who);
-
-        ledger.Summon(who, fanfare);
-        await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageCues.Refresh(owner);
     }
 
-    /// <summary>
-    /// A RANDOM SUMMON ON A FULL STAGE (2026-09-25). [USER]'s words: "treat
-    /// this like a Defect orb summon? the stage members rotate, ... bows, and
-    /// their remaining fanfare transfers to the newest member" -- and the seat
-    /// that leaves is the LEAD. So:
-    ///
-    ///   1. the lead takes a Bow and leaves, and the other two step forward
-    ///      (<see cref="FurinaStageLedger.BowFromFront"/>);
-    ///   2. the Bow is a real one: its departure effect fires, and so does
-    ///      every Bow reader -- Thunderous Applause draws and Raises -- but
-    ///      A FIVE-CENTURY ACT DOES NOT RETURN IT (<c>mayReturn: false</c>),
-    ///      because the summon is filling the seat it would return to;
-    ///   3. the newcomer -- a uniform roll over the trio since the trio can be
-    ///      cloned (2026-09-25) -- enters the back seat holding the lead's
-    ///      remaining Fanfare. Where the roll lands on the performer who just
-    ///      bowed, the same seat goes back (<see cref="FurinaStageLedger.RecastToBack"/>)
-    ///      and keeps its body; otherwise a new body arrives
-    ///      (<see cref="FurinaStageLedger.ArriveAtBack"/>).
-    ///
-    /// THE ORDER IS BOW, THEN READERS, THEN ARRIVAL -- <see cref="AfterBow"/>'s
-    /// own order ("applause then return") -- so Thunderous Applause's Raise
-    /// lands on the stage of two the bow left, on the performer who is then
-    /// the back one, and the returning performer arrives after it holding
-    /// exactly the bar it left with.
-    ///
-    /// IT DOES NOT ACT ON ARRIVAL (`EB-738` stands): it acts once at the end
-    /// of the turn with everyone else. <i>Double Casting</i> on a full stage
-    /// runs this twice, so two performers bow.
-    /// </summary>
-    /// <remarks>THE RECAST ADDS (2026-09-25, the Guest Cast's review): the
-    /// newcomer arrives holding its OWN arrival Fanfare
-    /// (<paramref name="arrival"/>: 1 for the trio, a Guest Star's N) plus
-    /// the leaver's remaining Fanfare. Otherwise a guest cast onto a front
-    /// at 1 would arrive unable to pay.</remarks>
-    private static async Task RecastFromFront(
-        PlayerChoiceContext choiceContext, Creature owner,
-        StagePerformer? named = null,
-        int arrival = FurinaStageLaw.SummonFanfare)
-    {
-        var ledger = FurinaStageLedger.For(owner);
-        // 2026-09-29: behind a held front (Wriothesley), the seat behind him.
-        var former = ledger.LeaverIndex;
-        if (ledger.BowFromFront() is not { } leaver) return;
-        var who = named ?? RollAny(owner);
-        if (named == null) NoteSummoned(who);
-        // The leaver bows HOLDING its bar (Navia reads it), which then goes to
-        // the newcomer: a recast moves Fanfare, it does not spend it.
-        await Bow(choiceContext, owner,
-                  new StageExit(leaver.Who, StageDeparture.Spent,
-                                leaver.Fanfare, former, leaver.LostSinceAct,
-                                leaver.BlockedSinceAct)
-                  {
-                      FrontLost = leaver.FrontLostSinceAct,
-                  },
-                  mayReturn: false);
-        if (who == leaver.Who)
-        {
-            ledger.RecastToBack(leaver, arrival);
-        }
-        else
-        {
-            ledger.ArriveAtBack(who, leaver.Fanfare + arrival);
-        }
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-    }
+    // ---- the board's helpers ------------------------------------------------
 
-    /// <summary><i>Scene Change</i>: the front performer moves to the back
-    /// seat, bar and all. A pure reorder -- no bow, no act, nothing lost.
-    /// </summary>
-    public static void SceneChange(Creature? owner)
-    {
-        if (!LiveFor(owner)) return;
-        FurinaStageLedger.For(owner!).SceneChange();
-        FurinaStagePlacement.Reflow(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-    }
+    internal static bool CombatOver() =>
+        MegaCrit.Sts2.Core.Combat.CombatManager.Instance.IsOverOrEnding;
 
-    /// <summary>
-    /// 2026-09-25 evening: WHO A RANDOM SUMMON ROLLED, on the card's own
-    /// resolution row. The seat page's "What you played" section printed Take
-    /// the Stage, Understudy and Double Casting with no performer, and the
-    /// seat had to find the arrival on the stage log. Filed only while a card
-    /// is resolving (<see cref="ResolutionLedger.NoteSummon"/>'s rule).
-    /// </summary>
-    private static void NoteSummoned(StagePerformer who) =>
-        ResolutionLedger.NoteSummon(Name(who),
-                                    FurinaStageLedger.DisplayName(who));
+    internal static IEnumerable<Creature> Enemies(Creature owner) =>
+        owner.CombatState?.HittableEnemies.ToList()
+        ?? Enumerable.Empty<Creature>();
 
-    /// <summary>A uniform roll over the three of the trio, on stage or not
-    /// (2026-09-25: the trio can be cloned; [USER]: "Let's allow for copies
-    /// and then check the balance."). One roll for the random summons, the
-    /// full-stage recast and the empty-stage Raise.</summary>
-    private static StagePerformer RollAny(Creature owner)
+    /// <summary>A uniform roll over the trio (they can be cloned).</summary>
+    private static StagePerformer RollTrio(Creature owner)
     {
         var trio = Performers.Select(Parse).ToList();
         var roll = owner.Player?.RunState.Rng.CombatTargets;
         return roll != null ? roll.NextItem(trio) : trio[0];
     }
 
-    /// <summary>
-    /// RULE 5'S EMPTY-STAGE SUMMON, as the Furina rules pass narrowed it
-    /// (2026-10-01; [USER]: "This makes sense - agreed on your split"): ONLY
-    /// WHAT YOU PLAY SUMMONS. A card or potion you play that gives Fanfare,
-    /// on an empty stage, summons a random performer holding
-    /// <paramref name="amount"/> and nothing else is raised
-    /// (<paramref name="played"/> true: <see cref="Raise"/> and
-    /// <see cref="RaiseLead"/> from a card or Bottled Applause). A gain from a
-    /// Power, a relic, a Bow reader or a reaction trigger
-    /// (<paramref name="played"/> false) does nothing on an empty stage, and a
-    /// gain naming "each performer" (<see cref="RaiseAll"/>) never asks: it
-    /// has nobody to land on. True when it summoned, and the caller then
-    /// returns without raising. The arrival performs at the end of the turn
-    /// with the others, never on arrival (rule 3, `EB-738`). Sim twin:
-    /// <c>furina_stage.raise_fanfare</c> (a <c>GAIN_CARD</c> source only).
-    /// </summary>
-    private static async Task<bool> SummonForRaise(Creature owner, int amount,
-                                                   bool played)
-    {
-        var ledger = FurinaStageLedger.For(owner);
-        if (!played || amount <= 0 || !ledger.IsEmpty) return false;
-        var who = RollAny(owner);
-        if (ledger.SummonOnEmpty(who, amount) == null) return false;
-        NoteSummoned(who);
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-        return true;
-    }
-
-    /// <summary>Rule 5. Raise lands on the back-most performer, which is the
-    /// lead when it is alone. On an empty stage it summons only when a card or
-    /// potion you play gives it (<paramref name="played"/>; the rules pass,
-    /// 2026-10-01); a trigger's gain passes <c>played: false</c> and lands on
-    /// nobody. Returns what landed.</summary>
-    public static async Task<int> Raise(Creature? owner, int amount,
-                                        bool played = true)
-    {
-        if (!LiveFor(owner)) return 0;
-        if (await SummonForRaise(owner!, amount, played)) return amount;
-        var raised = FurinaStageLedger.For(owner!).Raise(amount);
-        if (raised > 0)
-        {
-            FurinaStagePets.SyncBars(owner);
-            Vfx.FurinaStageCues.Refresh(owner);
-        }
-        return raised;
-    }
-
-    /// <summary>R276 batch two, <i>Hold Your Places</i>: Raise on the LEAD
-    /// performer, the one Raise in the kit that lands on the shield. On an
-    /// empty stage it summons only when played (rule 5, the rules pass).
-    /// </summary>
-    public static async Task<int> RaiseLead(Creature? owner, int amount,
-                                            bool played = true)
-    {
-        if (!LiveFor(owner)) return 0;
-        if (await SummonForRaise(owner!, amount, played)) return amount;
-        var raised = FurinaStageLedger.For(owner!).RaiseLead(amount);
-        if (raised > 0)
-        {
-            FurinaStagePets.SyncBars(owner);
-            Vfx.FurinaStageCues.Refresh(owner);
-        }
-        return raised;
-    }
-
-    /// <summary>Arkhe Alignment's Pneuma: "the lead REGAINS N". A regain like
-    /// rule 4's and not a Raise, so it does NOT summon on an empty stage --
-    /// there is no lead to regain anything (round four; flagged in the PR).
-    /// </summary>
-    public static int RegainLead(Creature? owner, int amount)
-    {
-        if (!LiveFor(owner)) return 0;
-        var raised = FurinaStageLedger.For(owner!).RaiseLead(amount, "regain");
-        if (raised > 0)
-        {
-            FurinaStagePets.SyncBars(owner);
-            Vfx.FurinaStageCues.Refresh(owner);
-        }
-        return raised;
-    }
-
-    /// <summary>R276 batch two: Raise on EVERY performer (Grand Deluge,
-    /// Curtain Water). On an empty stage it does nothing: "each performer"
-    /// has nobody to land on (rule 5, the rules pass, 2026-10-01; until then
-    /// it summoned one performer holding the amount).</summary>
-    public static async Task<int> RaiseAll(Creature? owner, int amount)
-    {
-        if (!LiveFor(owner)) return 0;
-        var raised = FurinaStageLedger.For(owner!).RaiseAll(amount);
-        if (raised > 0)
-        {
-            FurinaStagePets.SyncBars(owner);
-            Vfx.FurinaStageCues.Refresh(owner);
-        }
-        return raised;
-    }
-
-    /// <summary>R276 batch two, <i>Step Forward</i>: the back performer takes
-    /// the front seat -- Scene Change run the other way.</summary>
-    public static void StepForward(Creature? owner)
-    {
-        if (!LiveFor(owner)) return;
-        FurinaStageLedger.For(owner!).StepForward();
-        FurinaStagePlacement.Reflow(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-    }
-
-    /// <summary>
-    /// R276 batch two, <i>Bravura</i>: spend ALL of the back performer's
-    /// Fanfare. The bar is emptied exactly, so the performer takes its Bow.
-    /// Returns what was spent (0 on an empty stage), which the card's damage
-    /// reads through `stage_spent`.
-    /// </summary>
-    public static async Task<int> SpendAllOfBack(
-        PlayerChoiceContext choiceContext, Creature? owner)
-    {
-        if (!LiveFor(owner)) return 0;
-        var result = FurinaStageLedger.For(owner!).SpendAllOfBack();
-        if (!result.Fired) return 0;
-        if (result.Exit is { } exit) await Bow(choiceContext, owner!, exit);
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-        return result.Paid;
-    }
-
-    /// <summary>
-    /// THE CO-OP SET, <i>Share the Spotlight</i>: "Your back performer gives
-    /// all its Fanfare to another player as Block, then takes a Bow."
-    ///
-    /// <see cref="SpendAllOfBack"/>'s move with the payout in the middle: the
-    /// bar leaves EXACTLY, so this is an exact emptying and the performer
-    /// takes a real Bow -- its departure effect, Thunderous Applause, and A
-    /// Five-Century Act's return all fire (<see cref="Bow"/>). The Block lands
-    /// FIRST, because the face prints it first. It is the card's Block
-    /// (<c>ValueProp.Move</c> with the play attached), the same pipeline Final
-    /// Bow's "Block equal to its Fanfare" and the base game's Lift take, so her
-    /// Dexterity is what folds into it.
-    ///
-    /// AN EMPTY STAGE DOES NOTHING, and the card is still playable (the
-    /// design's own words). Returns what was given.
-    /// </summary>
-    public static async Task<int> ShareTheSpotlight(
-        PlayerChoiceContext choiceContext, Creature? owner, Creature? ally,
-        CardPlay? cardPlay)
-    {
-        if (!LiveFor(owner)) return 0;
-        var result = FurinaStageLedger.For(owner!).SpendAllOfBack();
-        if (!result.Fired) return 0;
-        if (ally is { IsAlive: true } && result.Paid > 0)
-        {
-            await CreatureCmd.GainBlock(
-                ally, result.Paid, ValueProp.Move, cardPlay);
-        }
-        if (result.Exit is { } exit) await Bow(choiceContext, owner!, exit);
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-        return result.Paid;
-    }
-
-    /// <summary>
-    /// THE CO-OP SET, SECOND BATCH, <i>Raise a Toast</i>
-    /// (review/active/coop-concepts-2026-09-27.md): "Another player gains
-    /// temporary Strength equal to your front performer's Fanfare, up to 6."
-    ///
-    /// THE BAR IS READ, NEVER SPENT: nothing on the stage moves, so helping
-    /// an ally costs the stage nothing. The Strength is the base game's
-    /// Coordinate shape, a <c>TemporaryStrengthPower</c> subclass
-    /// (<see cref="RaiseAToastPower"/>) placed by Furina, which takes itself
-    /// and its Strength away at the end of the turn.
-    ///
-    /// AN EMPTY STAGE GIVES 0, and the card is still playable (the design's
-    /// own words): no power is applied for nothing. Returns what was given.
-    /// </summary>
-    public static async Task<int> RaiseAToast(
-        PlayerChoiceContext choiceContext, Creature? owner, Creature? ally,
-        int cap, CardModel? cardSource)
-    {
-        var amount = ToastAmount(owner, cap);
-        if (amount <= 0 || ally is not { IsAlive: true }) return 0;
-        await PowerCmd.Apply<RaiseAToastPower>(
-            choiceContext, ally, amount, applier: owner, cardSource: cardSource);
-        return amount;
-    }
-
-    /// <summary><see cref="RaiseAToast"/>'s number: the front performer's
-    /// Fanfare, capped at <paramref name="cap"/>; 0 on an empty stage or with
-    /// the Stage off. PURE.</summary>
-    public static int ToastAmount(Creature? owner, int cap)
-    {
-        if (!LiveFor(owner) || cap <= 0) return 0;
-        var lead = LeadFanfare(owner);
-        return lead <= 0 ? 0 : System.Math.Min(lead, cap);
-    }
-
-    /// <summary>R276 batch two, <i>Tutti!</i>: every performer performs its
-    /// act now, front first. The cast is snapshotted, as the end-of-turn
-    /// sweep's is. A Five-Century Act's returnee "re-enters without acting
-    /// that turn", so a resting performer sits this out too.
-    /// <paramref name="minFanfare"/> is <i>Endless Waltz</i> (the Furina
-    /// rules pass, 2026-10-01): "Each performer with 5 or more Fanfare acts."
-    /// Who qualifies is read in the same snapshot, before any act, so an act
-    /// that moves a bar does not change who acts. Sim twin:
-    /// <c>furina_stage.perform_all</c>.</summary>
-    public static async Task PerformAll(PlayerChoiceContext choiceContext,
-                                        Creature? owner, int times = 1,
-                                        int minFanfare = 0)
-    {
-        if (!LiveFor(owner)) return;
-        foreach (var seat in Of(owner).Where(s => s.Fanfare >= minFanfare)
-                     .ToList())
-        {
-            if (seat.Resting) continue;
-            // ENCORE ELIXIR's twice: each repeat resolves in full before the
-            // next performer's, as Full House's do; a performer that paid its
-            // last Fanfare has left and does not act again.
-            for (var i = 0; i < times; i++)
-            {
-                if (owner!.IsDead) return;
-                if (!FurinaStageLedger.For(owner).Holds(seat)) break;
-                await Perform(choiceContext, owner, seat);
-            }
-        }
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-    }
-
-    /// <summary>
-    /// Rule 6's middle term with <i>A Rapt Audience</i> on it (R276 batch
-    /// two). The ledger absorbs as it always has; then, if an ENEMY's hit
-    /// took Fanfare off a lead that was not also the back performer, each
-    /// Rapt Audience Raises its Amount on the back performer: a fixed 2 (3
-    /// upgraded) per hit, copies adding (2026-09-26 balance review; it was a
-    /// share of what the lead lost, which scaled with the bank).
-    /// Synchronous, for <see cref="FurinaStageLedger.Absorb"/>'s reason; the
-    /// bars reach the bodies, and a lead this hit emptied takes its Bow, at
-    /// the flush that follows every hit (<see cref="Flush"/>).
-    /// </summary>
-    /// <remarks>2026-09-25 night: a lead this hit empties Bows before the
-    /// rest of the hit reaches her, so the Block of that Bow is spent on it
-    /// here (<see cref="FurinaStageLedger.Absorb"/>). <paramref name="bowCatches"/>
-    /// is false for a hit on another player (Guest of Honor): her Bow Block
-    /// is hers, and cannot catch their hit.</remarks>
-    public static int AbsorbHit(Creature target, int incoming,
-                                Creature? dealer, bool bowCatches = true,
-                                string source = "", int blocked = 0)
-    {
-        var ledger = FurinaStageLedger.For(target);
-        var twoOrMore = ledger.Seats.Count >= 2;
-        var lead = ledger.Lead;
-        // 2026-09-27, Wriothesley's second reading: what her Block stopped of
-        // an ENEMY's hit goes on the front performer before the hit reaches
-        // its bar, so a front this hit empties Bows reading it too.
-        if (dealer is { IsEnemy: true }) ledger.CreditBlocked(blocked);
-        // 2026-09-25: WHO hit the lead, for the log's hit beat -- title and
-        // combat id, the pair `NoteBeat` files for the body an act lands on.
-        var result = ledger.Absorb(
-            incoming, dealer?.Monster?.Title.ToString() ?? "",
-            dealer?.CombatId.ToString() ?? "", bowCatches,
-            dealer == null ? source : "");
-        // What the hit took off the lead, shown on the lead as the base game
-        // shows HP loss (the fade's number, below, is the same pop). The body
-        // is still standing: a lead this hit emptied leaves at the flush.
-        Vfx.FurinaStageLossPop.Show(lead, result.Absorbed);
-        // ...and the body flinches, as any hit body does (motion pass).
-        Vfx.StagePerformerBeat.Flinch(lead?.Pet, result.Absorbed);
-        // THE SUPPORTING POOL (2026-09-26), Counterclaim: an enemy's hit
-        // reached the front performer's bar since the end of her last turn --
-        // the notion of a hit A Rapt Audience pays on, below.
-        if (result.Absorbed > 0 && dealer is { IsEnemy: true })
-        {
-            ledger.FrontHitSinceLastTurn = true;
-        }
-        if (!twoOrMore || result.Absorbed <= 0
-            || dealer is not { IsEnemy: true })
-        {
-            return result.ReachedFurina;
-        }
-        foreach (var rapt in target.Powers.OfType<RaptAudiencePower>()
-                     .ToList())
-        {
-            ledger.Raise((int)rapt.Amount);
-        }
-        return result.ReachedFurina;
-    }
-
-    /// <summary>
-    /// WHAT OF A HIT GOT PAST HER BLOCK, AS THE ENGINE WILL COUNT IT
-    /// (2026-09-25, the afternoon seat round's Weak off-by-one).
-    ///
-    /// THE FIND. A Weakened 11 against 6 Block was filed as 3 on Usher where
-    /// the seat computed 2. The seat was right. The engine does not round a
-    /// modified hit: <c>Hook.ModifyDamage</c> hands back 11 x 0.75 = 8.25,
-    /// Block takes 6, and <c>ModifyHpLostBeforeOsty</c> is handed 2.25 -- and
-    /// the engine's own <c>Creature.LoseHpInternal</c> then TRUNCATES that
-    /// (<c>(int)Math.Clamp(amount, 0, ...)</c>), so without a stage she would
-    /// have lost 2. This seam rounded the 2.25 UP, and Usher paid 3.
-    ///
-    /// SO THE STAGE COUNTS THE HIT THE WAY THE ENGINE DOES: truncated, and
-    /// never below 0. A fractional remainder costs the front performer
-    /// nothing, as it would have cost Furina nothing.
-    /// </summary>
-    public static int HpLossThroughBlock(decimal amount) =>
-        amount <= 0m ? 0 : (int)System.Math.Floor(amount);
-
-    /// <summary>
-    /// 2026-09-27, Wriothesley's second reading: WHAT HER BLOCK WILL STOP of
-    /// the hit on its way to her, noted at <c>BeforeDamageReceived</c>. The
-    /// engine's order (<c>CreatureCmd.Damage</c>): <c>ModifyDamage</c>, then
-    /// <c>BeforeDamageReceived</c>, then <c>DamageBlockInternal</c>, which
-    /// takes <c>min(Block, hit)</c> (0 for an unblockable hit), then
-    /// <c>ModifyHpLostBeforeOsty</c>, which is handed only the rest. So the
-    /// number is the engine's own formula one step early, truncated as its
-    /// <c>DamageResult.BlockedDamage</c> is; <see cref="TakeBlocked"/> reads
-    /// it at the damage modifier.
-    /// </summary>
-    public static void NoteIncomingHit(Creature target, decimal amount,
-                                       bool unblockable)
-    {
-        if (!LiveFor(target)) return;
-        var stopped = unblockable
-            ? 0m
-            : System.Math.Max(0m, System.Math.Min(amount, (decimal)target.Block));
-        FurinaStageLedger.For(target).IncomingBlocked =
-            (int)System.Math.Floor(stopped);
-    }
-
-    /// <summary>What <see cref="NoteIncomingHit"/> noted for this hit, taken
-    /// once; 0 with nothing noted.</summary>
-    public static int TakeBlocked(Creature target)
-    {
-        if (!LiveFor(target)) return 0;
-        var ledger = FurinaStageLedger.For(target);
-        var blocked = ledger.IncomingBlocked;
-        ledger.IncomingBlocked = 0;
-        return blocked;
-    }
-
-    /// <summary>
-    /// 2026-09-25: file the part of an enemy's hit that reached Furina's HP on
-    /// the stage log (<see cref="FurinaStageLedger.NoteHitOnFurina"/>), off the
-    /// engine's own result for that hit. Called from
-    /// <c>AfterDamageReceived</c>, once per hit, BEFORE the flush pays any
-    /// Bow that hit earned -- so the log reads the hit on the performer, its
-    /// leaving, the part that reached her, then the Bow.
-    /// </summary>
-    public static void NoteHitOnFurina(Creature target, DamageResult result,
-                                       Creature? dealer)
-    {
-        if (!LiveFor(target) || dealer is not { IsEnemy: true }) return;
-        if (!ReferenceEquals(result.Receiver, target)) return;
-        FurinaStageLedger.For(target).NoteHitOnFurina(
-            result.UnblockedDamage, target.CurrentHp,
-            dealer.Monster?.Title.ToString() ?? "",
-            dealer.CombatId.ToString());
-    }
-
-    /// <summary>
-    /// Rule 8's payment leg, for a Spend mode the chooser offered (its gate
-    /// asked <see cref="CanSpend"/>). The back performer pays first, then the
-    /// one in front of it, and on toward the front; every performer the
-    /// payment empties bows, back to front (the rules pass, 2026-10-01).
-    /// The price is <see cref="PriceOf"/>'s (Palais Ledger takes 1 off).
-    ///
-    /// <para>Returns what was paid: the price, or 0 where the ledger refused
-    /// a stage short of it.</para>
-    /// </summary>
-    public static async Task<int> Spend(PlayerChoiceContext choiceContext,
-                                        Creature? owner, int amount)
-    {
-        if (!LiveFor(owner)) return 0;
-        // POOL COMPLETION (2026-10-01), CENTER OF ATTENTION: "The first Spend
-        // you choose each turn takes no Fanfare." Claimed here, where a chosen
-        // Spend mode pays; nothing is taken, so Critics' Darling is paid 0.
-        if (CenterOfAttentionPower.TryClaim(owner!))
-        {
-            Vfx.FurinaStageCues.Refresh(owner);
-            return 0;
-        }
-        var result = FurinaStageLedger.For(owner!).Spend(PriceOf(owner!, amount));
-        if (!result.Fired) return 0;
-        // Every performer the payment emptied, back to front.
-        foreach (var exit in result.Exits) await Bow(choiceContext, owner!, exit);
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-        // POOL COMPLETION, CRITICS' DARLING: what this chosen Spend paid, to
-        // ALL enemies, after the payment and its Bow.
-        await CriticsDarling(choiceContext, owner!, result.Paid);
-        return result.Paid;
-    }
-
-    /// <summary><i>Let the People Rejoice</i>, first clause: "Spend all
-    /// Fanfare on stage." Empties every bar, remembers who was standing and
-    /// returns the total. THE BOWS ARE <see cref="CurtainCall"/>'s, because
-    /// the printed order puts the card's own area damage between them.
-    /// </summary>
-    public static int CollectAll(Creature? owner)
-    {
-        if (!LiveFor(owner)) return 0;
-        var total = FurinaStageLedger.For(owner!).CollectAll();
-        FurinaStagePlacement.Reflow(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-        return total;
-    }
-
-    /// <summary>The same card's third clause: "Every performer takes a bow,
-    /// then returns at 1." Two loops because the sentence is two -- every bow
-    /// lands on the board the card left, and only then does anybody come back.
-    /// </summary>
-    public static async Task CurtainCall(PlayerChoiceContext choiceContext,
-                                         Creature? owner)
-    {
-        if (!LiveFor(owner)) return;
-        var ledger = FurinaStageLedger.For(owner!);
-        var exits = ledger.TakePendingCurtainExits();
-        var company = exits.Select(exit => exit.Who).ToList();
-        foreach (var exit in exits)
-        {
-            // R276 batch two: the card's own "then returns at 1" is the
-            // return, so A Five-Century Act does not return them a second
-            // time -- a performer returns once.
-            await Bow(choiceContext, owner!, exit, mayReturn: false);
-        }
-        // "Then returns at 1": to an EMPTY seat, and a returnee that finds
-        // none does not return. Round four made that reachable -- Thunderous
-        // Applause's Raise between the bows now summons onto the stage this
-        // card emptied -- and a return that ROTATED would push that performer
-        // off. The sim's `bow_and_return` has always read the clause this way.
-        // One of each GUEST (2026-09-25): a guest already back does not
-        // return twice (`FurinaStageLedger.ReturnCompany`).
-        ledger.ReturnCompany(company);
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-    }
-
-    /// <summary><i>Final Bow</i>: the back performer takes a bow and leaves
-    /// (R276: readers draw from the bank). A BOW WITHOUT A SPEND, and the one card that grants one -- rule 9 earns a bow
-    /// with a Spend, and this face pays for it with a card and an Exhaust
-    /// instead. Returns the bar it left with, which is the Block the card
-    /// gains.</summary>
-    public static async Task<int> FinalBow(PlayerChoiceContext choiceContext,
-                                           Creature? owner)
-    {
-        if (!LiveFor(owner)) return 0;
-        var exit = FurinaStageLedger.For(owner!).FinalBow(out var bar);
-        if (exit == null) return 0;
-        await Bow(choiceContext, owner!, exit.Value);
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-        return bar;
-    }
-
-    /// <summary>
-    /// The start of her turn ENDS ANY REST LEFT FROM THE ENEMIES' TURN (the
-    /// supporting-pool seat round, 2026-09-26). A Five-Century Act's returnee
-    /// "re-enters without acting THAT turn" -- the turn it came back in. One
-    /// that Bowed to a hit on the enemies' turn came back in THEIR turn, so it
-    /// performs at the end of hers; its rest used to last until her sweep had
-    /// passed it by, and an Usher back from a hit sat out her whole next turn
-    /// (lane 3: "sometimes did not act ... and other times did"). Called first
-    /// at her turn start, so a return during her own turn still rests. Sim
-    /// twin: <c>furina_stage.turn_start_rest</c>.
-    /// </summary>
-    public static void BeginTurn(Creature? owner)
-    {
-        if (!LiveFor(owner)) return;
-        var ledger = FurinaStageLedger.For(owner!);
-        ledger.EndRest();
-        // 2026-09-27: A Five-Century Act returns once a turn, from here.
-        ledger.ReturnedThisTurn = false;
-        // THE RULES PASS (2026-10-01): Opening Number's count opens the turn
-        // at 0.
-        ledger.CardsPlayedThisTurn = 0;
-    }
-
-    /// <summary>
-    /// THE FURINA RULES PASS (2026-10-01), <i>Opening Number</i>: "If this is
-    /// the first card you played this turn". The cards she has FINISHED
-    /// playing this turn (counted at <c>AfterCardPlayed</c>, auto-plays
-    /// too), so the card asking is the first when this reads 0. Sim twin:
-    /// <c>state.cards_played_this_turn</c>, counted before the play resolves
-    /// (it asks for 1).
-    /// </summary>
-    public static int CardsPlayedThisTurn(Creature? owner) =>
-        LiveFor(owner) ? FurinaStageLedger.For(owner!).CardsPlayedThisTurn : 0;
-
-    /// <summary>One card finished; the one write site for the count above.
-    /// </summary>
-    public static void NoteCardPlayed(Creature? owner)
-    {
-        if (LiveFor(owner)) FurinaStageLedger.For(owner!).CardsPlayedThisTurn++;
-    }
-
-    /// <summary>Rule 4's move. The TURN TEST is inside, on the seat's own
-    /// <c>PlayerCombatState.TurnNumber</c> -- per player, so a co-op partner's
-    /// turn cannot pay hers, and an extra first turn cannot pay twice.
-    /// </summary>
-    public static async Task RegenLead(Creature? owner)
-    {
-        if (!LiveFor(owner)) return;
-        var turn = owner!.Player?.PlayerCombatState?.TurnNumber ?? 0;
-        var ledger = FurinaStageLedger.For(owner);
-        // THE CURTAIN NEVER FALLS, rebuilt for the Stage: "Your front
-        // performer regains 2 Fanfare each turn." From her second turn
-        // (2026-09-28: the relic opens at the 5 the first hand used to reach
-        // through a turn-one regain). THE RULES PASS (2026-10-01): rule 4 is
-        // cut (`FurinaStageLaw.LeadRegen` is 0), so without the relic the
-        // front regains nothing and the relic's 2 is the only regain.
-        var regained = Relics.CurtainNeverFalls.OnStage(owner)
-            ? ledger.Regen(turn, Relics.CurtainNeverFalls.LeadRegen, firstTurn: 2)
-            : ledger.Regen(turn);
-        if (regained <= 0) return;
-        FurinaStagePets.SyncBars(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-    }
-
-    /// <summary>Rule 10: one performer's flat act, from any seat, reading no
-    /// bar. ONE implementation for every caller -- the end-of-turn sweep,
-    /// <i>Bis!</i>, <i>Tutti!</i> and, since draft 3 (2026-09-25), the
-    /// <see cref="Bow"/> -- so an act cannot mean two things.</summary>
-    /// <remarks>BY SEAT and not by name since the trio can be cloned
-    /// (2026-09-25): two Ushers are two seats, and the beat files the one
-    /// that acted.</remarks>
-    public static async Task Perform(PlayerChoiceContext choiceContext,
-                                     Creature? owner, StageSeat seat)
-    {
-        if (!LiveFor(owner)) return;
-        // A seat that left mid-sweep (a guest's payment emptied it, and it
-        // took its Bow) does not also act.
-        if (!FurinaStageLedger.For(owner!).Holds(seat)) return;
-        await Act(choiceContext, owner!, seat.Who,
-                  FurinaStageLedger.ActEvent, seat);
-    }
-
-    /// <summary>
-    /// The act itself, filed as <paramref name="beat"/>: <c>act</c> from
-    /// <see cref="Perform"/>, <c>bow</c> from <see cref="Bow"/>.
-    ///
-    /// NO ACT CARRIES AN ELEMENT (draft 3, 2026-09-25; [USER]: "removing the
-    /// Hydro application from the end-of-turn effects on Chevalmarin and
-    /// Crabaletta"). The two damage acts go out through
-    /// <see cref="ElementalHit.DealUnelemented"/>, unpowered: no aura set,
-    /// none consumed, no reaction, and Furina's Strength and Weak stay out of
-    /// it (`EB-495` D3). Sim twin: <c>furina_stage.perform</c>.
-    /// </summary>
-    private static async Task Act(PlayerChoiceContext choiceContext,
-                                  Creature owner, StagePerformer who,
-                                  string beat, StageSeat? seat = null,
-                                  StageExit? exit = null)
-    {
-        // TELEMETRY ONLY: every act's hit is Furina's performer's, so it is
-        // her pet damage, labelled with the performer.
-        using var credit = Diagnostics.DamageCredit.Open(
-            owner, Diagnostics.DamageCredit.Pet, who.ToString());
-        // THE GUEST CAST (2026-09-25), rule 4: EVERY ACT PAYS, first. The
-        // Fanfare half is the ledger's (so the forecast runs the same move);
-        // an act that cannot pay does nothing. A Bow is free (rule 5): the
-        // ledger is handed no seat and takes no payment. The trio never pay.
-        var owed = new List<StageExit>();
-        var bowing = seat == null;
-        if (!FurinaStageLedger.For(owner).ActFanfare(
-                who, bowing ? null : seat, exit, owed))
-        {
-            Vfx.FurinaStageCues.Refresh(owner);
-            return;
-        }
-        // Motion pass (2026-10-02): the performer's own body lunges before
-        // its act resolves, the Bake-Kurage's beat. A Bow's act has no seat
-        // to read a body off and stays still.
-        await Vfx.StagePerformerBeat.Act(seat?.Pet);
-        if (IsGuest(who))
-        {
-            await GuestAct(choiceContext, owner, who, beat, seat, exit);
-            await BowTheOwed(choiceContext, owner, owed);
-            return;
-        }
-        // `EB-735`, and `EB-511`'s lesson: the beat files WHAT THE BOARD LOST,
-        // measured across the act, and never the clause's own printed figure.
-        // Crabaletta prints 5 and a Vulnerable makes it 7; a receipt quoting
-        // the 5 sends a reader looking for two damage nothing accounts for.
-        var before = Ledger(owner);
-        Creature? hit = null;
-        // R276 batch two, ARKHE ALIGNMENT: this turn's doubling of the acts'
-        // printed numbers (Ousia the damage, Pneuma the Block). 1 and 1 on
-        // every turn nobody chose.
-        var stage = FurinaStageLedger.For(owner);
-        var dmg = stage.ActDamageMultiplier;
-        var blk = stage.ActBlockMultiplier;
-        var each = -1;
-        var struck = -1;
-        var shot = HitShot.None;
-        // 2026-09-25 night: a hit's Bow whose Block the rest of that hit
-        // already spent (`StageExit.Caught`) gains only what is left of it.
-        var caught = exit?.Caught ?? 0;
-        switch (who)
-        {
-            case StagePerformer.Usher:
-            {
-                var block = FurinaStageLaw.ActUsherBlock * blk - caught;
-                if (block > 0)
-                {
-                    await CreatureCmd.GainBlock(
-                        owner, block, ValueProp.Unpowered, null, fast: true);
-                }
-                break;
-            }
-            case StagePerformer.Chevalmarin:
-                // Round four: what EACH enemy was dealt, so the page prints
-                // "2 damage to each of 4 enemies" and not the total of four
-                // hits as one number. 2026-09-25 evening: DEALT, before the
-                // enemy's Block, and not what its HP lost -- against four
-                // Phantasmal Gardeners a Skittish Block ate one Gardener's 2
-                // and the page printed "6 in total, split across the
-                // enemies", which a seat could not tell from a bug. The act
-                // did hit all four for 2; the beat's `Moved` still says what
-                // their HP lost.
-                var targets = Enemies(owner).ToList();
-                var dealt = new List<int>(targets.Count);
-                foreach (var enemy in targets)
-                {
-                    dealt.Add(await ElementalHit.DealUnelemented(
-                        choiceContext, enemy,
-                        FurinaStageLaw.ActChevalmarinDamage * dmg, owner,
-                        powered: false));
-                }
-                each = Even(dealt);
-                struck = targets.Count;
-                break;
-            case StagePerformer.Crabaletta:
-                if (RandomEnemy(owner) is { } target)
-                {
-                    // `EB-743`: WHICH body, because Crabaletta picks its own.
-                    // Held before the hit lands so a killing act still names
-                    // what it killed -- the retired reframe's rule one arm
-                    // over, and the reason the mod sends a title at all.
-                    hit = target;
-                    shot = HitShot.Before(target);
-                    shot = shot.Dealt(await ElementalHit.DealUnelemented(
-                        choiceContext, target,
-                        FurinaStageLaw.ActCrabalettaDamage * dmg, owner,
-                        powered: false));
-                }
-                break;
-        }
-        // Rule 6 of the Guest Cast: every act resets the performer's loss
-        // count and its blocked count (only Wriothesley reads them).
-        if (seat != null)
-        {
-            seat.LostSinceAct = 0;
-            seat.BlockedSinceAct = 0;
-            seat.FrontLostSinceAct = 0;
-        }
-        NoteBeat(owner, beat, who, before, hit, each, struck, seat, shot,
-                 caught);
-    }
-
-    /// <summary>
-    /// 2026-09-25 night (the granted-guest seat round): ONE BODY'S HIT, as
-    /// the page prints it. "Wriothesley acted: 1 Cryo to Wriggler" was his
-    /// 14 into a body with 1 HP left: the beat filed what the HP lost. This
-    /// carries the hit as dealt (after the target's modifiers, before its
-    /// Block), the body's HP before it, and what its Block took.
-    /// </summary>
-    internal readonly record struct HitShot(int Hit, int HpBefore,
-                                            int BlockBefore)
-    {
-        public static readonly HitShot None = new(-1, -1, -1);
-
-        public static HitShot Before(Creature target) =>
-            new(-1, target.CurrentHp, target.Block);
-
-        public HitShot Dealt(int dealt) => this with { Hit = dealt };
-
-        /// <summary>What of the hit the body's Block took.</summary>
-        public int Blocked =>
-            Hit < 0 ? -1 : System.Math.Min(System.Math.Max(0, BlockBefore),
-                                           Hit);
-    }
-
-    /// <summary>2026-09-25 evening: the one figure every enemy was dealt, or
-    /// -1 where there were none or they differ (a Vulnerable on one of them).
-    /// Measured off each hit, as every beat's number is (`EB-511`); the page
-    /// prints the total on a -1.</summary>
-    public static int Even(IReadOnlyList<int> dealt)
-    {
-        if (dealt.Count == 0) return -1;
-        foreach (var figure in dealt)
-        {
-            if (figure != dealt[0]) return -1;
-        }
-        return dealt[0];
-    }
-
-    /// <summary><i>Bis!</i>: the lead performer acts <paramref name="times"/>
-    /// times now (twice since the 2026-09-26 balance review). Each act
-    /// resolves in full before the next, and a guest's act pays each time
-    /// (rule 4); a lead that left after an act (it paid its last Fanfare)
-    /// does not act again -- <see cref="Perform"/> asks the ledger whether
-    /// the seat still holds it, and the next performer does not inherit the
-    /// repeat.</summary>
-    public static async Task PerformLead(PlayerChoiceContext choiceContext,
-                                         Creature? owner, int times = 1)
-    {
-        // A resting returnee does not act this turn (R276 batch two).
-        if (Lead(owner) is not { Resting: false } lead) return;
-        for (var i = 0; i < times; i++)
-        {
-            if (owner!.IsDead) return;
-            if (!FurinaStageLedger.For(owner).Holds(lead)) return;
-            await Perform(choiceContext, owner, lead);
-        }
-    }
-
-    /// <summary>Rule 10's sweep at the end of Furina's turn: EACH performer
-    /// performs, in seat order, front first. The company is snapshotted so a
-    /// cast that changes mid-sweep cannot skip or double an act.</summary>
-    public static async Task EndOfTurnActs(PlayerChoiceContext choiceContext,
-                                           Creature? owner)
-    {
-        if (!LiveFor(owner)) return;
-        var ledger = FurinaStageLedger.For(owner!);
-        // THE SUPPORTING POOL (2026-09-26), Counterclaim reads hits "since
-        // your last turn": the window opens here, at the end of her turn.
-        ledger.FrontHitSinceLastTurn = false;
-        // R276 batch two, FULL HOUSE: with every seat filled (three, or four
-        // under Sold Out: `IsFull` reads the capacity) each performer acts
-        // once more per copy (its Amount), every repeat resolving in full
-        // before the next performer's.
-        var times = 1 + (ledger.IsFull ? FullHouseActs(owner!) : 0);
-        foreach (var seat in Of(owner).ToList())
-        {
-            // A Five-Century Act's returnee re-enters without acting.
-            if (seat.Resting) continue;
-            for (var i = 0; i < times; i++)
-            {
-                if (owner!.IsDead) return;
-                // A guest that paid its last Fanfare, or was taxed out, has
-                // left and Bowed; it does not act again (rule 4).
-                if (!ledger.Holds(seat)) break;
-                await Perform(choiceContext, owner, seat);
-            }
-        }
-        await FurinaStagePets.Sync(owner);
-        ledger.EndRest();
-        ledger.ResetActMultipliers();
-        // Oratrice's Verdict lasts "this turn": the sweep was its last use.
-        ledger.VerdictTarget = null;
-        // Rule 12 no longer runs here: 2026-10-03, [USER]'s run notes,
-        // "Fanfare decay should be at the start of the next turn, not the
-        // end". The fade is `TurnStartFade`, after the enemies' attacks.
-        Vfx.FurinaStageCues.Refresh(owner);
-    }
-
-    /// <summary>
-    /// Rule 12, THE APPLAUSE FADES, at the START of her turn (2026-10-03,
-    /// [USER]'s run notes: "Fanfare decay should be at the start of the next
-    /// turn, not the end"). Was the last step of <see cref="EndOfTurnActs"/>;
-    /// it now runs after the enemies have attacked, first among her
-    /// turn-start effects (before the rest clears, the regen and the
-    /// turn-start powers), from her second turn on, so a fight fades once per
-    /// turn break as before. The amount is unchanged. Sim twin:
-    /// <c>furina_stage.turn_start_fade</c>.
-    /// </summary>
-    public static void TurnStartFade(Creature? owner)
-    {
-        if (!LiveFor(owner)) return;
-        var turn = owner!.Player?.PlayerCombatState?.TurnNumber ?? 0;
-        if (turn < 2) return;
-        FadeAndShow(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-    }
-
-    /// <summary>
-    /// Rule 12, SEEN. The ledger's <see cref="FurinaStageLedger.Fade"/>, then
-    /// the bars onto the bodies, then ONE loss number per performer that faded
-    /// (<see cref="Vfx.FurinaStageLossPop"/>), in seat order. [USER], on
-    /// 0.2.3820+proto: "I didn't notice any Fanfare decaying" -- the bar was
-    /// the only trace. No rule moves here; the loss is measured across the
-    /// ledger's own call. Returns each fading performer and what it lost.
-    /// </summary>
-    public static IReadOnlyList<(StageSeat Seat, int Loss)> FadeAndShow(
-        Creature owner)
-    {
-        if (!LiveFor(owner)) return System.Array.Empty<(StageSeat, int)>();
-        var ledger = FurinaStageLedger.For(owner);
-        var before = ledger.Seats.Select(seat => (Seat: seat, Bar: seat.Fanfare))
-            .ToList();
-        // Grand Theater Program: "Your performers no longer fade."
-        if (!Fades(owner) || ledger.Fade() <= 0)
-        {
-            return System.Array.Empty<(StageSeat, int)>();
-        }
-        FurinaStagePets.SyncBars(owner);
-        var faded = before
-            .Where(b => b.Seat.Fanfare < b.Bar)
-            .Select(b => (b.Seat, b.Bar - b.Seat.Fanfare))
-            .ToList();
-        foreach (var (seat, loss) in faded) Vfx.FurinaStageLossPop.Show(seat, loss);
-        return faded;
-    }
-
-    /// <summary>
-    /// What the end-of-turn sweep will give her in Block, forecast off the
-    /// same rules the sweep runs: every Usher not resting acts
-    /// <see cref="FurinaStageLaw.ActUsherBlock"/> times this turn's Arkhe
-    /// multiple, once plus Full House's extra acts on a full stage. The seat
-    /// page prints it as "after the acts" (the wire's `act_block`).
-    /// </summary>
-    /// <remarks>2026-09-25 night (the granted-guest seat round): ONE BLOCK
-    /// NUMBER. This counted 3 per Usher standing, while the forecast's attack
-    /// line ran the sweep, in which a guest's payment can empty an Usher and
-    /// his Bow gives 3 more ("after the acts: Block 3" beside "after the
-    /// acts' Block of 6" on one screen). It is now the forecast's own Block
-    /// after the acts, less the Block she holds.</remarks>
-    public static int ForecastActBlock(Creature? owner)
-    {
-        if (!LiveFor(owner)) return 0;
-        var forecast = Forecast(owner!, null);
-        return forecast.BlockAfterActs - (int)owner!.Block;
-    }
-
-    /// <summary>Full House's extra acts: the sum of its stacks.</summary>
-    private static int FullHouseActs(Creature owner) =>
-        (int)owner.Powers.OfType<FullHousePower>().Sum(p => p.Amount);
-
-    /// <summary>
-    /// <i>Sold Out</i> (the supporting pool, 2026-09-26): how many seats her
-    /// stage has. <see cref="FurinaStageLaw.SoldOutSeats"/> with the power on
-    /// her, however many copies (a second is a dead Power), and
-    /// <see cref="FurinaStageLaw.Seats"/> otherwise. The ledger reads it at
-    /// <see cref="FurinaStageLedger.For"/>. Sim twin:
-    /// <c>furina_stage.capacity</c>.
-    /// </summary>
-    public static int CapacityOf(Creature? owner) =>
-        owner != null && owner.Powers.OfType<SoldOutPower>().Any()
-            ? FurinaStageLaw.SoldOutSeats
-            : FurinaStageLaw.Seats;
-
-    /// <summary>
-    /// Rule 9, the curtain call: performed ONCE by a performer that reached 0
-    /// Fanfare, whatever emptied it -- a Spend, a hit (paid at
-    /// <see cref="Flush"/>, right after the hit), or a summon on a full
-    /// stage. It
-    /// takes the EXIT rather than the performer so a rotation cannot be
-    /// mistaken for a departure at a call site --
-    /// <see cref="StageExit.Bows"/> is the ledger's own read of rule 7, and a
-    /// departure that earned no bow returns here without paying.
-    ///
-    /// THE BOW IS THE PERFORMER'S ACT, ONCE MORE (draft 3, 2026-09-25; [USER]
-    /// ruled the Stage review's pick 1, one effect per performer, since
-    /// Chevalmarin's old Bow was "strictly worse than the end-of-turn
-    /// effect"): Usher 3 Block, Chevalmarin 2 to every enemy, Crabaletta 5 to
-    /// a random enemy -- <see cref="Act"/> itself, filed as a <c>bow</c>.
-    /// ONE act: Ousia and Pneuma double it like any act, and Full House does
-    /// not repeat it (only <see cref="EndOfTurnActs"/> loops). A hit's Bow on
-    /// the enemy's turn is paid then, between that enemy's hits ([USER],
-    /// 2026-09-25: "I think it would be better to have the performer bow
-    /// immediately (during the opponent's turn) instead of at the start of
-    /// your turn").
-    /// </summary>
-    public static async Task Bow(PlayerChoiceContext choiceContext,
-                                 Creature owner, StageExit exit,
-                                 bool mayReturn = true)
-    {
-        if (!exit.Bows || !LiveFor(owner)) return;
-        // THE SUPPORTING POOL (2026-09-26), Da Capo: every Bow this combat,
-        // all causes, the Grand Finale's included.
-        var ledger = FurinaStageLedger.For(owner);
-        ledger.BowsThisCombat++;
-        // CURTAIN CALL BOUQUET: the Bow's act resolves twice. The Block a
-        // hit's Bow already caught (`StageExit.Caught`, sized by the ledger's
-        // `BowBlock`, which counts both acts) comes off the first act first.
-        var acts = ledger.BowActs;
-        var perAct = FurinaStageLaw.ActUsherBlock * ledger.ActBlockMultiplier;
-        var uncaught = exit.Caught;
-        for (var i = 0; i < acts; i++)
-        {
-            if (i > 0 && owner.IsDead) break;
-            var caught = acts == 1 ? uncaught : System.Math.Min(uncaught, perAct);
-            uncaught -= caught;
-            await Act(choiceContext, owner, exit.Who,
-                      FurinaStageLedger.BowEvent, null,
-                      exit with { Caught = caught });
-        }
-        // STAGEHAND'S GLOVES: 3 Block a Bow, after its act.
-        await Relics.StagehandsGloves.AfterBow(owner);
-        await AfterBow(choiceContext, owner, exit.Who, mayReturn);
-    }
-
-    /// <summary>A Five-Century Act's returnee Fanfare: the power's amount
-    /// (1 a copy, 3 upgraded; power cost sweep, 2026-09-30), 0 without one.
-    /// Sim twin: <c>furina_stage._after_bow</c>.</summary>
-    public static int ReturnFanfare(Creature? owner) =>
-        owner == null ? 0
-            : (int)owner.Powers.OfType<FiveCenturyActPower>().Sum(p => p.Amount);
-
-    /// <summary>
-    /// R276 batch two: what a Bow sets off, after the bowing performer has
-    /// left and its departure effect has resolved.
-    ///
-    ///   * <see cref="ThunderousApplausePower"/>, each copy: draw 1 card and
-    ///     Raise its Amount on the back performer (round four: on an empty
-    ///     stage the Raise summons a random performer holding it).
-    ///   * <see cref="FiveCenturyActPower"/>, any number of copies: the
-    ///     performer returns to the back-most empty seat at the Act's amount
-    ///     (<see cref="ReturnFanfare"/>: 1, or 3 upgraded, since the power
-    ///     cost sweep 2026-09-30) and rests
-    ///     through this turn's acts. Once a turn in all (2026-09-27) -- and
-    ///     not at all from <i>Let the People Rejoice</i>, whose own return is
-    ///     the return.
-    ///
-    /// THE ORDER IS APPLAUSE THEN RETURN, so the applause's Raise lands on the
-    /// stage the bow left; a returnee arrives after it.
-    /// </summary>
-    private static async Task AfterBow(PlayerChoiceContext choiceContext,
-                                       Creature owner, StagePerformer who,
-                                       bool mayReturn)
-    {
-        foreach (var applause in owner.Powers
-                     .OfType<ThunderousApplausePower>().ToList())
-        {
-            if (owner.Player is { } player)
-            {
-                await CardPileCmd.Draw(choiceContext, 1m, player);
-            }
-            // A trigger's gain: on the empty stage a bow can leave it lands
-            // on nobody (rule 5, the rules pass, 2026-10-01; round four had
-            // it summon). 2026-09-26: the log names the card behind it.
-            using (FurinaStageLedger.For(owner)
-                       .CausedBy(ThunderousApplauseTitle))
-            {
-                await Raise(owner, (int)applause.Amount, played: false);
-            }
-        }
-        // 2026-09-27: the first Bow-and-leave each turn only, however many
-        // copies (`FurinaStageLedger.ReturnOnce`).
-        var fanfare = ReturnFanfare(owner);
-        if (mayReturn && fanfare > 0
-            && FurinaStageLedger.For(owner).ReturnOnce(who, fanfare))
-        {
-            await FurinaStagePets.Sync(owner);
-            Vfx.FurinaStageCues.Refresh(owner);
-        }
-    }
-
-    /// <summary>Furina's Block and the board's total HP, as one pair, taken
-    /// either side of an act or a bow. The DIFFERENCE is what the beat files
-    /// (`EB-735`): a payout that gains Block files the Block, one that deals
-    /// damage files the HP the board actually lost, and one that does neither
-    /// -- Chevalmarin's bow, which only leaves an aura -- files 0 and the page
-    /// prints no number for it.</summary>
-    private static (int Block, int EnemyHp) Ledger(Creature? owner)
-    {
-        if (owner == null) return (0, 0);
-        var hp = Enemies(owner).Sum(e => e.CurrentHp);
-        return (owner.Block, hp);
-    }
-
-    /// <summary>File one act or bow, with what the board actually did.
-    /// The LEDGER is the one writer of the log, exactly as it is the one
-    /// writer of a bar; this is the door for the two beats whose number lives
-    /// on the board rather than in it.</summary>
-    private static void NoteBeat(Creature owner, string what,
-                                 StagePerformer who,
-                                 (int Block, int EnemyHp) before,
-                                 Creature? hit = null, int each = -1,
-                                 int struck = -1, StageSeat? acting = null,
-                                 HitShot? shot = null, int caught = 0)
-    {
-        var after = Ledger(owner);
-        // A hit's Bow whose Block the rest of that hit already spent: the
-        // Block it GAVE is what she gained now plus what it caught.
-        var moved = (after.Block - before.Block)
-                    + (before.EnemyHp - after.EnemyHp) + caught;
-        var one = shot ?? HitShot.None;
-        var ledger = FurinaStageLedger.For(owner);
-        // The seat that acted, where the caller knows it (two Ushers are two
-        // seats since the trio can be cloned); else the first of that name.
-        var seat = acting != null
-            ? IndexOfSeat(ledger, acting)
-            : ledger.SeatIndexOf(who);
-        ledger.Note(new StageBeat(
-            what, who, seat,
-            seat >= 0 ? ledger.Seats[seat].Fanfare : 0,
-            moved < 0 ? 0 : moved, "",
-            // `EB-743`. WHO IT LANDED ON, for the one act and the one bow that
-            // pick a body. Title AND combat id, the retired ledger's pair
-            // one arm over: the id is the handle the page names a live body
-            // by, and the title is the fallback for one this beat KILLED,
-            // which is off the next board entirely.
-            hit?.Monster?.Title.ToString() ?? "",
-            hit?.CombatId.ToString() ?? "",
-            each, Struck: struck,
-            Dealt: one.Hit, TargetHp: one.Hit < 0 ? -1 : one.HpBefore,
-            Blocked: one.Blocked, Caught: caught));
-    }
-
-    private static int IndexOfSeat(FurinaStageLedger ledger, StageSeat seat)
-    {
-        for (var i = 0; i < ledger.Seats.Count; i++)
-        {
-            if (ReferenceEquals(ledger.Seats[i], seat)) return i;
-        }
-        return -1;
-    }
-
-    /// <summary>
-    /// Rule 6's flush: the ledger moved synchronously inside
-    /// <c>ModifyHpLostBeforeOsty</c> because the engine wanted a number back,
-    /// and this is where the bodies catch up.
-    ///
-    /// AND WHERE A HIT'S BOW IS PAID (rule 7, 2026-09-25: "Stage members bow
-    /// out when they are destroyed or replaced, not just when you deliberately
-    /// spend them down to 0"). The engine calls <c>AfterDamageReceived</c>
-    /// once per hit, inside <c>CreatureCmd.Damage</c>, after that hit's HP
-    /// loss and before <c>AttackCommand</c> deals the next hit. So the bow
-    /// lands BETWEEN the hits of a multi-hit attack, on the enemy's turn.
-    /// Since 2026-09-25 night the Block of that Bow has already met the rest
-    /// of the hit that emptied the performer ("a performer emptied by a hit
-    /// Bows before the rest of that hit reaches you";
-    /// <see cref="StageExit.Caught"/>), and what is left of it meets the next
-    /// hit. [USER], 2026-09-25
-    /// evening, overruling the start-of-turn wait #676 built: "I think it
-    /// would be better to have the performer bow immediately (during the
-    /// opponent's turn) instead of at the start of your turn."
-    /// The bow is the same <see cref="Bow"/> a Spend takes, readers and A
-    /// Five-Century Act's return included.
-    ///
-    /// NO BOW FOR A DEAD FURINA OR A FINISHED COMBAT. The engine skips
-    /// <c>AfterDamageReceived</c> for a target the hit killed, so a hit that
-    /// killed Furina never reaches here for her; the check below also covers
-    /// a flush reached through a Guest of Honor ally, and the hit that ended
-    /// the fight. What is owed is dropped rather than kept for later.
-    /// </summary>
-    public static async Task Flush(PlayerChoiceContext choiceContext,
-                                   Creature? owner)
-    {
-        if (owner != null && LiveFor(owner))
-        {
-            var owed = FurinaStageLedger.For(owner).TakePendingHitBows();
-            if (!owner.IsDead && !CombatOver())
-            {
-                foreach (var exit in owed)
-                {
-                    if (owner.IsDead || CombatOver()) break;
-                    await Bow(choiceContext, owner, exit);
-                }
-            }
-        }
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageCues.Refresh(owner);
-    }
-
-    /// <summary>The engine's own "skip this effect" test: combat is over, or
-    /// ending because every primary enemy or every player is down.</summary>
-    private static bool CombatOver() =>
-        MegaCrit.Sts2.Core.Combat.CombatManager.Instance.IsOverOrEnding;
-
-    private static IEnumerable<Creature> Enemies(Creature owner) =>
-        owner.CombatState?.HittableEnemies.ToList()
-        ?? Enumerable.Empty<Creature>();
-
-    private static Creature? RandomEnemy(Creature owner)
-    {
-        var targets = Enemies(owner).ToList();
-        if (targets.Count == 0) return null;
-        return ActTarget(owner, targets);
-    }
-
-    /// <summary>
-    /// WHO AN ACT THAT "HITS A RANDOM ENEMY" HITS (THE SUPPORTING POOL,
-    /// 2026-09-26): <i>Oratrice's Verdict</i>'s enemy while it stands --
-    /// this turn, and only if it is alive and in <paramref name="pool"/> --
-    /// else a random one of <paramref name="pool"/>. Every random pick an act
-    /// or a Bow makes comes through here (Crabaletta, the guests, Lynette's
-    /// aura pool). Sim twin: <c>furina_stage._act_target</c>.
-    /// </summary>
-    public static Creature? ActTarget(Creature owner,
-                                        IReadOnlyList<Creature> pool)
+    /// <summary>Who an act that "hits a random enemy" hits: Oratrice's
+    /// Verdict's enemy this turn while it lives and is in
+    /// <paramref name="pool"/>, else a random one.</summary>
+    public static Creature? ActTarget(Creature owner, IReadOnlyList<Creature> pool)
     {
         if (pool.Count == 0) return null;
         var verdict = FurinaStageLedger.For(owner).VerdictTarget;
-        if (verdict is { IsAlive: true } && pool.Contains(verdict))
-        {
-            return verdict;
-        }
+        if (verdict is { IsAlive: true } && pool.Contains(verdict)) return verdict;
         var rng = owner.Player?.RunState?.Rng?.CombatTargets;
         return rng == null ? pool[0] : rng.NextItem(pool);
+    }
+
+    // ---- the forecast (what the end of this turn will do) ------------------
+
+    /// <summary>The end of this turn, forecast off the ledger's numbers:
+    /// each performer's act, in seat order, with what it costs and whether a
+    /// star will skip, her Fanfare after the sweep and the Block it gives.
+    /// Null with the arm off. PURE.</summary>
+    public static StageForecast? Forecast(Creature? owner)
+    {
+        if (!LiveFor(owner)) return null;
+        var ledger = FurinaStageLedger.For(owner!);
+        var run = new ForecastRun(ledger, ledger.Fanfare);
+        var cues = run.Sweep();
+        return new StageForecast(cues, run.Fanfare, run.Block);
+    }
+
+    /// <summary>The forecast against a given stage (the pins').</summary>
+    public static StageForecast Forecast(FurinaStageLedger ledger)
+    {
+        var run = new ForecastRun(ledger, ledger.Fanfare);
+        var cues = run.Sweep();
+        return new StageForecast(cues, run.Fanfare, run.Block);
+    }
+
+    private static IReadOnlyList<StageForecastCue> ForecastSweep(
+        FurinaStageLedger ledger, int fanfare) =>
+        new ForecastRun(ledger, fanfare).Sweep();
+
+    private sealed class ForecastRun
+    {
+        private readonly FurinaStageLedger _stage;
+        private bool _chevreuse;
+
+        internal int Fanfare;
+        internal int Block;
+
+        internal ForecastRun(FurinaStageLedger stage, int fanfare)
+        {
+            _stage = stage;
+            Fanfare = fanfare;
+            _chevreuse = stage.ChevreuseActedThisTurn;
+        }
+
+        internal IReadOnlyList<StageForecastCue> Sweep()
+        {
+            var times = 1 + (_stage.IsFull ? _stage.Mods.FullHouse : 0);
+            var cues = new List<StageForecastCue>();
+            foreach (var seat in _stage.Seats)
+            {
+                StageForecastCue? first = null;
+                var landed = 0;
+                for (var i = 0; i < times; i++)
+                {
+                    var cue = Act(seat);
+                    first ??= cue;
+                    if (!cue.Skips) landed++;
+                }
+                cues.Add(first!.Value with
+                {
+                    Times = landed,
+                    Skips = landed == 0,
+                });
+            }
+            return cues;
+        }
+
+        private StageForecastCue Act(StageSeat seat)
+        {
+            var who = seat.Who;
+            var price = FurinaStageLaw.PriceOf(who);
+            var r = _stage.Rehearsal;
+            var mult = System.Math.Max(1, _stage.ActDamageMultiplier);
+            int Dmg(int printed) => (printed + r) * mult;
+            StageForecastCue Cue(StageCueKind kind, int amount,
+                                 string element = "", string target = "") =>
+                new(who, seat.Key, kind, amount, element, target, 1, price,
+                    false);
+            var skip = Cue(StageForecast.KindOf(who), 0) with { Skips = true };
+            if (who == StagePerformer.Chevreuse)
+            {
+                if (_chevreuse || Fanfare < price) return skip;
+                _chevreuse = true;
+                Fanfare -= price;
+                return Cue(StageCueKind.Energy, FurinaStageLaw.ActChevreuseEnergy);
+            }
+            if (price > 0)
+            {
+                if (Fanfare < price) return skip;
+                Fanfare -= price;
+            }
+            switch (who)
+            {
+                case StagePerformer.Usher:
+                {
+                    var block = FurinaStageLaw.ActUsherBlock + r;
+                    Block += block;
+                    return Cue(StageCueKind.Block, block);
+                }
+                case StagePerformer.Chevalmarin:
+                    return Cue(StageCueKind.Damage,
+                               Dmg(FurinaStageLaw.ActChevalmarinDamage), "",
+                               StageForecastCue.All);
+                case StagePerformer.Crabaletta:
+                    return Cue(StageCueKind.Damage,
+                               Dmg(FurinaStageLaw.ActCrabalettaDamage), "",
+                               StageForecastCue.Random);
+                case StagePerformer.Neuvillette:
+                    return Cue(StageCueKind.Damage,
+                               Dmg(FurinaStageLaw.ActNeuvilletteDamage)
+                               + FurinaStageLaw.NeuvilletteHydroBonus,
+                               "Hydro", StageForecastCue.All);
+                case StagePerformer.Clorinde:
+                    return Cue(StageCueKind.Damage,
+                               Dmg(FurinaStageLaw.ActClorindeDamage), "Electro",
+                               StageForecastCue.Random);
+                case StagePerformer.Lyney:
+                    return Cue(StageCueKind.Card, 1);
+                case StagePerformer.Escoffier:
+                    foreach (var salon in _stage.Seats
+                                 .Where(s => !IsGuest(s.Who)).ToList())
+                    {
+                        Act(salon);
+                    }
+                    return Cue(StageCueKind.Ensemble, 0);
+                case StagePerformer.Navia:
+                {
+                    var printed = FurinaStageLaw.NaviaPerSpent
+                                  * _stage.SpentThisTurn;
+                    return Cue(StageCueKind.Damage,
+                               printed > 0 ? Dmg(printed) : 0, "Geo",
+                               StageForecastCue.Random);
+                }
+                case StagePerformer.Charlotte:
+                    Fanfare += FurinaStageLaw.ActCharlotteGain;
+                    return Cue(StageCueKind.Fanfare,
+                               FurinaStageLaw.ActCharlotteGain);
+                case StagePerformer.Lynette:
+                    return Cue(StageCueKind.Damage,
+                               Dmg(FurinaStageLaw.ActLynetteDamage), "Anemo",
+                               StageForecastCue.Aura);
+                case StagePerformer.Sigewinne:
+                {
+                    var block = FurinaStageLaw.SigewinneBlock(
+                        _stage.HpLossesSince(who)) + r;
+                    Block += block;
+                    return Cue(StageCueKind.Block, block);
+                }
+                case StagePerformer.Wriothesley:
+                    return Cue(StageCueKind.Damage,
+                               Dmg(FurinaStageLaw.WriothesleyDamage(
+                                   _stage.BlockedSince(who))), "Cryo",
+                               StageForecastCue.Random);
+                default:
+                    return Cue(StageCueKind.Damage, 0);
+            }
+        }
+    }
+}
+
+/// <summary>What a performer's act is, as its cue draws it.</summary>
+public enum StageCueKind
+{
+    /// <summary>Usher, Sigewinne: Block for Furina.</summary>
+    Block,
+
+    /// <summary>Every damage act.</summary>
+    Damage,
+
+    /// <summary>Chevreuse: Energy next turn.</summary>
+    Energy,
+
+    /// <summary>Charlotte: Fanfare for Furina.</summary>
+    Fanfare,
+
+    /// <summary>Lyney: a Trick into her hand.</summary>
+    Card,
+
+    /// <summary>Escoffier: the Salon members act.</summary>
+    Ensemble,
+}
+
+/// <summary>
+/// ONE PERFORMER'S CUE: what it will do at the end of this turn.
+/// <see cref="Amount"/> is one act's number; <see cref="Times"/> how many of
+/// its acts land; <see cref="Price"/> what each costs; <see cref="Skips"/> a
+/// star (or Chevreuse) that cannot pay and does nothing.
+/// </summary>
+public readonly record struct StageForecastCue(
+    StagePerformer Who, int Key, StageCueKind Kind, int Amount,
+    string Element, string Target, int Times, int Price, bool Skips)
+{
+    public const string All = "all";
+    public const string Random = "random";
+    public const string Aura = "random_aura";
+}
+
+/// <summary>The whole forecast: one cue per performer in seat order, her
+/// Fanfare after the sweep, and the Block the acts give.</summary>
+public sealed record StageForecast(
+    IReadOnlyList<StageForecastCue> Cues, int FanfareAfter, int Block)
+{
+    /// <summary>The kind of act a performer has.</summary>
+    public static StageCueKind KindOf(StagePerformer who) => who switch
+    {
+        StagePerformer.Usher or StagePerformer.Sigewinne => StageCueKind.Block,
+        StagePerformer.Chevreuse => StageCueKind.Energy,
+        StagePerformer.Charlotte => StageCueKind.Fanfare,
+        StagePerformer.Lyney => StageCueKind.Card,
+        StagePerformer.Escoffier => StageCueKind.Ensemble,
+        _ => StageCueKind.Damage,
+    };
+}
+
+/// <summary>
+/// THE BOARD HALF, IN THE GAME: every act's and line's command, on the live
+/// combat. Acts are unpowered (her Strength and Weak stay out of them,
+/// `EB-495` D3); a guest's act carries its element through
+/// <see cref="ElementalHit.Deal"/>, so it applies its aura and reacts; the
+/// trio's acts carry none.
+/// </summary>
+public sealed class GameStageBoard : IStageBoard
+{
+    private readonly PlayerChoiceContext _context;
+    private readonly Creature _owner;
+
+    public GameStageBoard(PlayerChoiceContext context, Creature owner)
+    {
+        _context = context;
+        _owner = owner;
+    }
+
+    public bool Over => _owner.IsDead || FurinaStage.CombatOver();
+
+    public async Task Block(StagePerformer who, int amount)
+    {
+        if (amount <= 0) return;
+        await CreatureCmd.GainBlock(_owner, amount, ValueProp.Unpowered, null,
+                                    fast: true);
+    }
+
+    public async Task Damage(StagePerformer who, StageTarget target,
+                             int amount, Element element)
+    {
+        if (amount <= 0) return;
+        using var credit = Diagnostics.DamageCredit.Open(
+            _owner, Diagnostics.DamageCredit.Pet, who.ToString());
+        var enemies = FurinaStage.Enemies(_owner).ToList();
+        if (enemies.Count == 0) return;
+        if (target == StageTarget.All)
+        {
+            foreach (var enemy in enemies)
+            {
+                if (Over) return;
+                await Hit(enemy, amount, element);
+            }
+            return;
+        }
+        var pool = enemies;
+        if (target == StageTarget.Aura)
+        {
+            var wearing = enemies.Where(e => AuraCmd.Find(e) != null).ToList();
+            if (wearing.Count > 0) pool = wearing;
+        }
+        if (FurinaStage.ActTarget(_owner, pool) is { } body)
+        {
+            await Hit(body, amount, element);
+        }
+    }
+
+    private Task<int> Hit(Creature enemy, int amount, Element element) =>
+        element == Element.None
+            ? ElementalHit.DealUnelemented(_context, enemy, amount, _owner,
+                                           powered: false)
+            : ElementalHit.Deal(_context, enemy, element, amount, _owner,
+                                powered: false);
+
+    public async Task AddTrick()
+    {
+        if (_owner.Player is not { } player || _owner.CombatState is not { } combat)
+        {
+            return;
+        }
+        var trick = combat.CreateCard(ModelDb.Card<StageTrick>(), player);
+        if (trick == null) return;
+        var full = CardPile.Get(PileType.Hand, player) is { } hand
+                   && hand.Cards.Count >= KokomiPoolCompletion.MaxHandSize;
+        await CardPileCmd.AddGeneratedCardToCombat(
+            trick, full ? PileType.Discard : PileType.Hand, player);
+    }
+
+    public async Task EnergyNextTurn(int amount)
+    {
+        if (amount <= 0) return;
+        await PowerCmd.Apply<EnergyNextTurnPower>(
+            _context, _owner, amount, applier: _owner, cardSource: null);
+    }
+
+    public async Task Draw(int amount)
+    {
+        if (amount <= 0 || _owner.Player is not { } player) return;
+        await CardPileCmd.Draw(_context, amount, player);
+    }
+
+    public async Task ClorindeLine(int amount)
+    {
+        var enemies = FurinaStage.Enemies(_owner).ToList();
+        if (FurinaStage.ActTarget(_owner, enemies) is not { } body) return;
+        using var credit = Diagnostics.DamageCredit.Open(
+            _owner, Diagnostics.DamageCredit.Pet,
+            StagePerformer.Clorinde.ToString());
+        await ElementalHit.Deal(_context, body, Element.Electro, amount, _owner,
+                                powered: false);
+    }
+
+    public async Task CriticsHit(int amount)
+    {
+        var enemies = FurinaStage.Enemies(_owner).ToList();
+        if (enemies.Count == 0 || amount <= 0) return;
+        var rng = _owner.Player?.RunState?.Rng?.CombatTargets;
+        var body = rng == null ? enemies[0] : rng.NextItem(enemies);
+        if (body == null) return;
+        await ElementalHit.DealUnelemented(_context, body, amount, _owner,
+                                           powered: false);
+    }
+
+    public async Task GlovesBlock(int amount)
+    {
+        if (amount <= 0 || _owner.IsDead) return;
+        Relics.FurinaStageRelics.Flash<Relics.StagehandsGloves>(_owner);
+        await CreatureCmd.GainBlock(_owner, amount, ValueProp.Unpowered, null,
+                                    fast: true);
+        RelicAnswerLog.NoteGain("Stagehand's Gloves", amount, "Block");
+    }
+
+    public Task Lunge(StageSeat? seat) =>
+        Vfx.StagePerformerBeat.Act(seat?.Pet);
+
+    public async Task Sync()
+    {
+        await FurinaStagePets.Sync(_owner);
+        Vfx.FurinaStageCues.Refresh(_owner);
     }
 }
 
 /// <summary>
-/// THE THREE PERFORMERS. Genshin's Salon Solitaire summons Surintendante
-/// Chevalmarin, Mademoiselle Crabaletta and the Gentilhomme Usher; the brief's
-/// sec.2 table keeps the three and gives each an act and a bow.
-///
-/// A NEW ENUM RATHER THAN <c>SalonMember</c>, which spells the same three
-/// names one arm over. They are different things wearing one cast list: a
-/// <c>SalonMember</c> is a POWER on Furina with a tick value and an Encore
-/// price, a performer here is a PET with a bar. Sharing the enum would have
-/// made every reader of either arm ask which rule a value carried, and the two
-/// arms' rules contradict each other on every clause.
+/// THE CAST: the Salon trio, then the ten Guest Stars. A performer is a pet
+/// body with no bar; every rule about it is the ledger's.
 /// </summary>
 public enum StagePerformer
 {
@@ -1609,9 +1195,7 @@ public enum StagePerformer
     Chevalmarin,
     Crabaletta,
 
-    // THE GUEST CAST (2026-09-25, review/active/furina-guest-batch-2026-09-25.md):
-    // eight Fontaine characters who reach the Stage through Furina's own
-    // Guest Star cards. Performers in every other way; one of each on stage.
+    // The Guest Stars (everything after the trio is a guest: `IsGuest`).
     Neuvillette,
     Clorinde,
     Navia,
@@ -1620,10 +1204,6 @@ public enum StagePerformer
     Sigewinne,
     Charlotte,
     Lynette,
-
-    // THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
-    // 2026-09-26.md): two more guests, each with a job the eight lack. Lyney
-    // rotates the stage; Escoffier feeds the cast.
     Lyney,
     Escoffier,
 }

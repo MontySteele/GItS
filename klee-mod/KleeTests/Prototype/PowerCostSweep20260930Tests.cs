@@ -46,23 +46,11 @@ public class PowerCostSweep20260930Tests
     }
 
     [Fact]
-    public void A_five_century_act_returns_at_the_acts_amount()
+    public void A_five_century_act_costs_three_and_its_upgrade_two()
     {
-        FurinaStageLedger.ResetAll();
-        try
-        {
-            var seat = Seat.Furina();
-            var stage = FurinaStageLedger.For(seat.Creature);
-            stage.Clear();
-            stage.Summon(StagePerformer.Usher);
-            Assert.True(stage.ReturnOnce(StagePerformer.Chevalmarin, 3));
-            Assert.Equal(3, stage.Seats[stage.Seats.Count - 1].Fanfare);
-            Assert.Equal(3, new ProtoFsFiveCenturyAct().EnergyCost.Canonical);
-        }
-        finally
-        {
-            FurinaStageLedger.ResetAll();
-        }
+        // The re-founding (sec.10): "(Power, 3) ... (cost 2)"; the return
+        // carries no Fanfare any more.
+        Assert.Equal(3, new ProtoFsFiveCenturyAct().EnergyCost.Canonical);
     }
 
     [Fact]

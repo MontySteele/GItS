@@ -51,7 +51,7 @@ public sealed class ProtoFsGrandDeluge : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Deluge"),
-        ("description", "Deal {Damage:diff()} damage and apply [gold]Hydro[/gold] to ALL enemies. On an [gold]Elemental Reaction[/gold], each performer gains 2 [gold]Fanfare[/gold]."),
+        ("description", "Deal {Damage:diff()} damage and apply [gold]Hydro[/gold] to ALL enemies. On an [gold]Elemental Reaction[/gold], gain 4 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -78,7 +78,7 @@ public sealed class ProtoFsGrandDeluge : CustomCardModel, IElementalCard, IChara
             .Execute(choiceContext);
         if (ReactionEffects.TotalResolved > reactionsAtStart)
         {
-            await FurinaStage.RaiseAll(Owner.Creature, 2);
+            await FurinaStage.Gain(choiceContext, Owner.Creature, 4);
         }
     }
 

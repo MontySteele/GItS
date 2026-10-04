@@ -39,11 +39,13 @@ from understudy.blindplay_observe import observation
 REPO = Path(__file__).resolve().parents[2]
 PROTO = REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
 
-#: Every beat named on 2026-09-25. The source scan below must find at least
-#: these, so a regex that silently stops matching fails here rather than
-#: passing on an empty list.
-KNOWN = {"arrive", "act", "bow", "leave", "rotate", "raise", "regain", "hit",
-         "hit_furina", "fade"}
+#: Every beat the re-founded ledger names (2026-10-04,
+#: `FurinaStageLedger`'s `*Event` constants). The source scan below must find
+#: at least these, so a regex that silently stops matching fails here rather
+#: than passing on an empty list. `walk_on` is the one with an underscore,
+#: and it crosses as `walkon`.
+KNOWN = {"arrive", "act", "skip", "pay", "bow", "leave", "walk_on", "cue",
+         "move", "gain", "spend"}
 
 _EVENT_SOURCES = (
     re.compile(r'const string \w*Event\s*=\s*"([a-z_]+)"'),
@@ -94,14 +96,12 @@ def _state(log):
 
 def _row(event, **kw):
     """A log row in the mod's own shape (`FurinaStageLedger.Snapshot`)."""
-    furina = event == "hit_furina"
-    row = {"event": event,
-           "member": "furina" if furina else "usher",
-           "name": "Furina" if furina else "Gentilhomme Usher",
-           "seat": -1 if furina else 0, "fanfare": 3, "moved": 2,
-           "reason": "spend" if event == "leave" else "",
+    row = {"event": event, "member": "usher", "name": "Gentilhomme Usher",
+           "seat": 0, "seat_key": 1, "fanfare": 3, "moved": 2,
+           "reason": "final_bow" if event == "leave" else "",
            "target": "Twig Slime (M)", "target_id": "1", "each": -1,
-           "hp": 60 if furina else -1}
+           "struck": -1, "by": "", "by_member": "", "dealt": -1,
+           "target_hp": -1, "blocked": -1, "standing": 2, "source": ""}
     row.update(kw)
     return row
 
@@ -131,12 +131,13 @@ def test_every_ledger_beat_passes_the_leak_scan_on_the_seat_path(event):
     assert qa_packet.leaks(blindplay.observe(state)) == []
 
 
-def test_the_furina_hit_beat_still_prints_its_line():
-    stage = furina_stage(_state([_row("hit_furina")])["player"])
-    assert stage["log"][0]["event"] == "hurt"
-    page = blindplay.observe(_state([_row("hit_furina")]))
-    assert ("**Twig Slime (M)** hit **Furina** for 2 past your Block and "
-            "front performer: 62 → 60 HP.") in page
+def test_the_walk_on_beat_crosses_as_one_word_and_prints_its_line():
+    """`walk_on` is the re-founded ledger's one snake_case beat: it crosses
+    the packet as `walkon` and prints in words."""
+    stage = furina_stage(_state([_row("walk_on")])["player"])
+    assert stage["log"][0]["event"] == "walkon"
+    page = blindplay.observe(_state([_row("walk_on")]))
+    assert "**Usher** walked on" in page
 
 
 def test_an_unknown_snake_case_beat_is_dropped_not_leaked():

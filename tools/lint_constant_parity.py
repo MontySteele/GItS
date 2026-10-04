@@ -294,39 +294,38 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.SoldOutSeats": _stage("SOLD_OUT_SEATS"),
     # POOL COMPLETION (2026-10-01): Casting Agent's three.
     "FurinaStageLaw.CastingAgentOffer": _stage("CASTING_AGENT_OFFER"),
-    "FurinaStageLaw.OpeningFanfare": _stage("OPENING_FANFARE"),
-    "FurinaStageLaw.SummonFanfare": _stage("SUMMON_FANFARE"),
-    "FurinaStageLaw.LeadRegen": _stage("LEAD_REGEN"),
-    "FurinaStageLaw.RefillAmount": _stage("REFILL_AMOUNT"),
+    # THE RE-FOUNDING (2026-10-04, review/active/furina-refounding-
+    # 2026-10-03.md sec.1 / sec.2 / sec.8 / sec.10): the Bow's Fanfare, the
+    # trio's acts, the stars' prices and acts, the guests' lines and acts.
+    # The bar-era numbers (opening and summon Fanfare, regen, refill, fade,
+    # Clorinde's tax, Wriothesley's and Sigewinne's readings, Charlotte's and
+    # Escoffier's gifts, Lyney's damage, Pneuma's regain) retired with the
+    # bars.
+    "FurinaStageLaw.BowFanfare": _stage("BOW_FANFARE"),
     "FurinaStageLaw.ActUsherBlock": _stage("ACT_USHER_BLOCK"),
     "FurinaStageLaw.ActChevalmarinDamage": _stage("ACT_CHEVALMARIN_DAMAGE"),
     "FurinaStageLaw.ActCrabalettaDamage": _stage("ACT_CRABALETTA_DAMAGE"),
-    # THE FADE PASS (2026-09-29): rule 12 is a quarter of every bar.
-    "FurinaStageLaw.FadeDivisor": _stage("FADE_DIVISOR"),
-    # THE GUEST CAST (2026-09-25): the eight guests' act numbers. What a guest
-    # ARRIVES with is its card's, on its row, and is not mirrored here.
     "FurinaStageLaw.ActNeuvillettePrice": _stage("ACT_NEUVILLETTE_PRICE"),
     "FurinaStageLaw.ActNeuvilletteDamage": _stage("ACT_NEUVILLETTE_DAMAGE"),
-    "FurinaStageLaw.ActClorindeTax": _stage("ACT_CLORINDE_TAX"),
+    "FurinaStageLaw.NeuvilletteHydroBonus": _stage("NEUVILLETTE_HYDRO_BONUS"),
+    "FurinaStageLaw.ActClorindePrice": _stage("ACT_CLORINDE_PRICE"),
     "FurinaStageLaw.ActClorindeDamage": _stage("ACT_CLORINDE_DAMAGE"),
+    "FurinaStageLaw.ClorindeSpendDamage": _stage("CLORINDE_SPEND_DAMAGE"),
+    "FurinaStageLaw.ActLyneyPrice": _stage("ACT_LYNEY_PRICE"),
+    "FurinaStageLaw.TrickDamage": _stage("TRICK_DAMAGE"),
+    "FurinaStageLaw.ActEscoffierPrice": _stage("ACT_ESCOFFIER_PRICE"),
+    "FurinaStageLaw.NaviaPerSpent": _stage("NAVIA_PER_SPENT"),
+    "FurinaStageLaw.ActCharlotteGain": _stage("ACT_CHARLOTTE_GAIN"),
+    "FurinaStageLaw.CharlotteExtra": _stage("CHARLOTTE_DRAW"),
+    "FurinaStageLaw.ActLynetteDamage": _stage("ACT_LYNETTE_DAMAGE"),
     "FurinaStageLaw.ActChevreusePrice": _stage("ACT_CHEVREUSE_PRICE"),
     "FurinaStageLaw.ActChevreuseEnergy": _stage("ACT_CHEVREUSE_ENERGY"),
-    "FurinaStageLaw.ActWriothesleyBase": _stage("ACT_WRIOTHESLEY_BASE"),
-    "FurinaStageLaw.ActWriothesleyRate": _stage("ACT_WRIOTHESLEY_RATE"),
-    "FurinaStageLaw.ActWriothesleyBlockedRate":
-        _stage("ACT_WRIOTHESLEY_BLOCKED_RATE"),
-    "FurinaStageLaw.ActSigewinneHealFloor": _stage("ACT_SIGEWINNE_HEAL_FLOOR"),
-    "FurinaStageLaw.ActLynetteDamage": _stage("ACT_LYNETTE_DAMAGE"),
-    "FurinaStageLaw.ActCharlotteGift": _stage("ACT_CHARLOTTE_GIFT"),
-    # THE SUPPORTING POOL (2026-09-26): the two new guests' acts. (Eternal
-    # Applause's fade line left with the card, the 2026-09-29 fade pass.)
-    "FurinaStageLaw.ActLyneyPrice": _stage("ACT_LYNEY_PRICE"),
-    "FurinaStageLaw.ActLyneyDamage": _stage("ACT_LYNEY_DAMAGE"),
-    "FurinaStageLaw.ActEscoffierPrice": _stage("ACT_ESCOFFIER_PRICE"),
-    "FurinaStageLaw.ActEscoffierGift": _stage("ACT_ESCOFFIER_GIFT"),
-    "FurinaStageLaw.ActEscoffierDamage": _stage("ACT_ESCOFFIER_DAMAGE"),
-    # R276 batch two: Arkhe Alignment's Pneuma half.
-    "ArkheAlignmentPower.PneumaLeadRegain": _stage("PNEUMA_LEAD_REGAIN"),
+    "FurinaStageLaw.ActSigewinneBlock": _stage("ACT_SIGEWINNE_BLOCK"),
+    "FurinaStageLaw.SigewinnePerHpLoss": _stage("SIGEWINNE_PER_HP_LOSS"),
+    "FurinaStageLaw.ActWriothesleyDamage": _stage("ACT_WRIOTHESLEY_DAMAGE"),
+    "FurinaStageLaw.WriothesleyPerBlocked": _stage("WRIOTHESLEY_PER_BLOCKED"),
+    # Arkhe Alignment's and Dual Nature's Pneuma (sec.8): "Gain 2 Fanfare."
+    "ArkheAlignmentPower.PneumaFanfare": _stage("PNEUMA_FANFARE"),
     # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md,
     # ruled 2026-09-29): the Swirl payout of each current element, and
     # Stormward Stance's Oath bar. Sim twins in `tier0/engine/varka_oath.py`.
@@ -378,10 +377,9 @@ UNMIRRORED: dict[str, str] = {
     "BottledSparks.Sparks": _ARM_ITEMS_REASON,
     "CloverCharm.Block": _ARM_ITEMS_REASON,
     "CurtainCallBouquet.BowActs": _ARM_ITEMS_REASON,
-    "CurtainNeverFalls.LeadRegen": _ARM_ITEMS_REASON,
+    "CurtainNeverFalls.Rehearsal": _ARM_ITEMS_REASON,
     "PalaisLedger.Discount": _ARM_ITEMS_REASON,
-    "CurtainNeverFalls.OpeningFanfare": _ARM_ITEMS_REASON,
-    "CurtainWater.Fanfare": _ARM_ITEMS_REASON,
+    "CurtainWater.Rehearsal": _ARM_ITEMS_REASON,
     "DodocoArmy.MineSize": _ARM_ITEMS_REASON,
     "DodocoCharm.Bonus": _ARM_ITEMS_REASON,
     "EncoreElixir.Acts": _ARM_ITEMS_REASON,
@@ -389,7 +387,8 @@ UNMIRRORED: dict[str, str] = {
     "FireworksStand.Energy": _ARM_ITEMS_REASON,
     "FireworksStand.Threshold": _ARM_ITEMS_REASON,
     "GuestBook.Bonus": _ARM_ITEMS_REASON,
-    "OperaGlasses.OpeningFanfare": _ARM_ITEMS_REASON,
+    "OperaGlasses.Fanfare": _ARM_ITEMS_REASON,
+    "GrandTheaterProgram.Fanfare": _ARM_ITEMS_REASON,
     "StagehandsGloves.Block": _ARM_ITEMS_REASON,
     "WatatsumiCasket.WatatsumiOpeningCount":
         "THE KOKOMI OVERHAUL'S TOUCH OF OROBAS UPGRADE (2026-09-30, main-"

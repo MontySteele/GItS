@@ -348,10 +348,8 @@ public class KleePlaytest20260924Tests
             Assert.Equal(0m, sweep.ModifyHpLostBeforeOsty(
                 furina.Creature, 8m, Attack, attacker, cardSource: null));
 
-            var hers = (FurinaResourceHooks)System.Runtime.CompilerServices
-                .RuntimeHelpers.GetUninitializedObject(typeof(FurinaResourceHooks));
-            Assert.Equal(0m, hers.ModifyHpLostBeforeOsty(
-                furina.Creature, 8m, Attack, attacker, cardSource: null));
+            // (Furina's own damage pipeline no longer moves a hit: the
+            // re-founding, 2026-10-04, retired the performers' absorption.)
 
             // Not Klee's hit, so Klee's own is untouched by the note.
             Assert.Equal(8m, sweep.ModifyHpLostBeforeOsty(

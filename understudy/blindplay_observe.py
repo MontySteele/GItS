@@ -26,13 +26,15 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         enchant_in_prompt, last_morning,
                                         map_floor,
                                         upgrade_deck_floor)
-from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
+from understudy.blindplay_faces import (SEAT_FACE_ID, _card_face,
+                                        _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_items,
                                         _shop_options,
                                         deck_elements, relic_faces,
                                         remember_deck, run_change, stage_arm)
 from understudy.blindplay_notes import (MODE_CHOOSER_PROMPT,
+                                        STAGE_SEAT_CHOOSER_PROMPT,
                                         REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
@@ -408,6 +410,11 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # Said in the heading, where a reader looks first.
         if obs["offers"] and all(o.get("mode_face") for o in obs["offers"]):
             obs["prompt"] = MODE_CHOOSER_PROMPT
+            # The re-founding (2026-10-04): Furina's performer picker.
+            ids = [_text(c.get("id")) for c in (blob.get("cards") or [])
+                   if isinstance(c, dict)]
+            if ids and all(SEAT_FACE_ID.search(i) for i in ids):
+                obs["prompt"] = STAGE_SEAT_CHOOSER_PROMPT
         obs["preview_showing"] = bool(blob.get("preview_showing"))
         # `EB-342`. THE SMITH'S SILENT OMISSIONS. The grid holds the cards the
         # game will upgrade and nothing says what happened to the rest; the

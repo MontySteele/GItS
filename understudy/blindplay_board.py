@@ -151,7 +151,7 @@ FANFARE_PARTS: dict[str, str] = {
 # ASKED OF THE ARM AND NOT OF THE BOARD, `ZERO_METERS`' own question and its
 # answer: the wire's `furina_stage` block is the arm saying it is live, so a
 # board that carries it hides these three and every other board is untouched.
-# That block is also the one that PRINTS the bar the word now means, so the
+# That block is also the one that PRINTS the Fanfare the word now means, so the
 # hiding and the replacing are decided by one fact.
 #
 # KEYED BY THE PRINTED NAME, `ZERO_METERS`' convention: these are the rows the
@@ -758,7 +758,7 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         name_stage_targets(stage, _enemies(state), combat["enemies"])
         stage_acts(stage, p)
         combat["stage"] = stage
-        # 2026-09-28: a Spend mode the back performer cannot pay is printed
+        # 2026-09-28: a Spend mode her Fanfare cannot pay is printed
         # under its card, marked, instead of vanishing (`spend_unavailable`).
         for face in combat["hand"]:
             face["spend_unavailable"] = spend_unavailable(
@@ -840,23 +840,13 @@ def varka_oath(player: dict[str, Any],
             "auras": auras}
 
 
-#: The seats, in damage order, under the words the brief and the tips use.
-#: Front first, and the LIST's order is the damage order (rule 6): an attack
-#: reaches `front`, Fanfare a card gives lands on the back-most, and the
-#: middle seat is reached by neither. The text pass (2026-09-25) renamed the
-#: lead the FRONT performer, here as everywhere.
-STAGE_SEAT_NAMES = ("front", "middle", "back")
-
-#: A performer's SHORT name -- the word the brief, the glossary rows and the
-#: Bow tip all use ("Usher: 4 Block. Chevalmarin: Hydro on all."). The wire
-#: carries the long one too (`Gentilhomme Usher`, which is what the body's
-#: health bar is labelled with in game); the page prints the short one, because
-#: three long names on one line is the line nobody reads.
+#: A performer's SHORT name -- the word the glossary rows and the faces use
+#: ("Summon Usher"). The wire carries the long one too (`Gentilhomme Usher`,
+#: the body's own label in game); the page prints the short one.
 STAGE_SHORT_NAMES = {
     "usher": "Usher",
     "chevalmarin": "Chevalmarin",
     "crabaletta": "Crabaletta",
-    # THE GUEST CAST (2026-09-25): a guest's name is its whole name.
     "neuvillette": "Neuvillette",
     "clorinde": "Clorinde",
     "navia": "Navia",
@@ -865,65 +855,35 @@ STAGE_SHORT_NAMES = {
     "sigewinne": "Sigewinne",
     "charlotte": "Charlotte",
     "lynette": "Lynette",
-    # THE SUPPORTING POOL (2026-09-26).
     "lyney": "Lyney",
     "escoffier": "Escoffier",
 }
 
 
-#: Why a performer left, in the words rules 7 and 9 use. Since 2026-09-25
-#: (rule 7) every performer at 0 Fanfare bows, whatever emptied it; only a
-#: rotation, which leaves the bar intact, does not.
-#:
-#: TRANSLATED HERE AND NOT IN THE RENDER, which is `qa_packet.assert_blind`'s
-#: rule rather than a preference: the wire spells a departure `final_bow`, and
-#: a snake_case token reaching a blind packet is an ID, refused by name. The
-#: observation carries the SENTENCE, so nothing downstream holds the token.
+#: Why a performer left, off the `leave` beat's `reason`
+#: (`FurinaStageDirector`: `evicted`, `final_bow`). TRANSLATED HERE AND NOT IN
+#: THE RENDER, `qa_packet.assert_blind`'s rule: a snake_case token reaching the
+#: blind packet is an ID, refused by name, so the observation carries the
+#: sentence.
 STAGE_LEAVE_REASONS = {
-    "hit": "emptied by a hit, so it takes a Bow",
-    "spend": "emptied by a Spend, so it takes a Bow",
-    "rotated": "rotated off the front to make room, so no Bow",
-    "final_bow": "took its Bow and left",
-    # 2026-09-25: a random summon on a full stage. The lead bows and moves to
-    # the back seat keeping its bar; the arrival line that follows says where.
-    # 2026-09-25: a summon on a full stage. The front Bows and leaves; the
-    # newcomer takes the back seat and ADDS its own Fanfare to the leaver's,
-    # which the arrival line that follows says (it may be anyone).
-    "recast": ("took its Bow to make room for a summon, which takes the back "
-               "seat and adds its Fanfare"),
-    # THE GUEST CAST (2026-09-25): a guest's act paid its last Fanfare (its
-    # own, or a tax), and a second Guest Star for a guest on stage.
-    "paid": "paid its last Fanfare, so it takes a Bow",
-    "repeat": ("took its Bow for a second Guest Star, and comes back to the "
-               "same seat with the new Fanfare added"),
-    # 2026-09-26 (wave-3 Furina lane 4): Let the People Rejoice empties
-    # every performer, and its face says no Spend.
-    "rejoice": "emptied by Let the People Rejoice, so it takes a Bow",
+    "evicted": "it Bowed to make room for a summon on a full stage",
+    "final_bow": "it took its Bow and left",
 }
-STAGE_LEFT_UNSAID = "left the stage"
+STAGE_LEFT_UNSAID = "it left the stage"
 
-#: 2026-09-26 (wave-3 Furina lane 3). WHY AN ACT COULD NOT PAY, off the
-#: `unpaid` beat's `reason` (`FurinaStageLedger.UnpaidOwn` / `UnpaidBack` /
-#: `UnpaidAlone`), with `{n}` the price it could not meet (the beat's
-#: `moved`). The log printed "Chevreuse could not pay" twice and nothing
-#: else, and the seat could not tell that her Spend 2 pays from the BACK
-#: performer, not from her. `{self}` is the payer's pronoun.
-STAGE_UNPAID_REASONS = {
-    "own": "{self} has less than {n} Fanfare",
-    "back": "the back performer has less than {n} Fanfare",
-    "alone": "no other performer is on stage to take Fanfare from",
+#: Why a performer skipped its act, off the `skip` beat's `reason`.
+STAGE_SKIP_REASONS = {
+    "short": "not enough Fanfare to pay",
+    "once": "it already acted this turn",
 }
 
 
-#: The wire's name for a stage-log beat -> the observation's. The same rule
-#: as `STAGE_LEAVE_REASONS` above, for the same reason: the observation IS
-#: the packet `qa_packet.assert_blind` walks, every string value in it, so a
-#: snake_case event name the mod sends (`hit_furina`, 2026-09-25) is refused
-#: as an internal id and the seat is stopped with `observation_leak` -- a
-#: Codex seat was, the first time a hit reached her. Every other beat is
-#: already one plain word and crosses unchanged.
+#: The wire's name for a stage-log beat -> the observation's. Every v2 beat is
+#: one plain word except `walk_on`, and a snake_case value in the observation
+#: is refused by `qa_packet.assert_blind` as an internal id (the 2026-09-25
+#: `hit_furina` leak), so it crosses as `walkon`.
 STAGE_EVENT_WORDS = {
-    "hit_furina": "hurt",
+    "walk_on": "walkon",
 }
 _PLAIN_WORD = re.compile(r"[a-z]+")
 
@@ -933,16 +893,14 @@ def stage_event(raw: Any) -> str:
 
     A name the table above does not know and that is not one plain lowercase
     word (a newer build's beat) becomes `""`: the render prints nothing for
-    it, which is the page's standing answer to a beat it does not know, and
-    the packet stays blind rather than stopping the seat."""
+    it, and the packet stays blind rather than stopping the seat."""
     word = STAGE_EVENT_WORDS.get(_text(raw), _text(raw))
     return word if _PLAIN_WORD.fullmatch(word) else ""
 
 
 def _each(raw: Any) -> int | None:
-    """A log row's per-enemy figure (round four), or its count of enemies
-    struck (2026-09-25 evening): a whole number of 0 or more, else None. The
-    mod sends -1 for "no single figure"."""
+    """A whole number of 0 or more off the wire, else None. The mod sends -1
+    for "no figure"."""
     if isinstance(raw, bool) or not isinstance(raw, (int, float, str)):
         return None
     try:
@@ -952,42 +910,36 @@ def _each(raw: Any) -> int | None:
     return value if value >= 0 else None
 
 
+def _stage_name(row: dict[str, Any]) -> str:
+    member = _text(row.get("member"))
+    return STAGE_SHORT_NAMES.get(member, _text(row.get("name")))
+
+
 def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
-    """The Stage as the observed board sees it (`EB-735`).
+    """The Stage as the observed board sees it (`EB-735`; the re-founding,
+    2026-10-04).
 
-    THE DEFECT, in three seats' words (round one, sec.2): "Nothing on the
-    blind-play page names a performer, a seat or a bar ... in some 550 actions
-    no seat ever knew who was on stage or what a bar held." Each learned the
-    roster from one glossary line and inferred bars by firing readers and
-    reading the result backwards; all three read the cast as "one anonymous
-    pool with three names".
-
-    THE ABSENT / EMPTY / POPULATED SPLIT is `kokomi_plans`', with one more
-    state that matters here: an ABSENT key is "no Stage rule in this build", an
-    EMPTY map is "the rule is here and this seat is not playing it", and a
-    POPULATED map with NO SEATS is "the stage is empty" -- which is a fact and
-    not a hole, because rule 8 makes an empty stage the one board on which a
-    Spend rider cannot fire at all. `None` keeps the section off the page in
-    the first two cases; the third prints "the stage is empty".
+    THE ABSENT / EMPTY / POPULATED SPLIT is `kokomi_plans`': an ABSENT key is
+    "no Stage rule in this build", an EMPTY map is "the rule is here and this
+    seat is not playing it", and a POPULATED map with NO SEATS is "the stage
+    is empty". `None` keeps the section off the page in the first two cases.
 
     Emitted by `vendor/STS2_MCP/gits/GitsFurinaStage.cs`, which lifts it by
-    reflection from `KleeMod.Powers.FurinaStageLedger.Snapshot`. Every field
-    name below is that method's, and the two together are the contract:
+    reflection from `KleeMod.Powers.FurinaStageLedger.Snapshot`; every field
+    name below is that method's:
 
-      seats -- front first, one row per occupied seat: the `member` id, the
-        long `name`, the `seat` index (front = 0), the `fanfare` on the bar and
-        the body's `entity_id`.
-      log -- what the stage has done since she last ended a turn, in order.
-        Each row is an `event` (`arrive`, `act`, `bow`, `leave`, `rotate`,
-        `fade`, and `raise`, `regain`, `hit` and `hit_furina` since
-        2026-09-25; `hit_furina` is carried as `hurt`, `stage_event`), the
-        performer, the seat it happened in, the bar afterwards, what the board
-        `moved`, and for a departure the `reason` it left by (rules 7 and 9:
-        every departure at 0 Fanfare bows, a rotation does not).
+      fanfare, gained_this_turn, spent_this_turn, paid_this_turn -- Furina's
+        one Fanfare number and this turn's flow (gained; taken by a card's
+        Spend; paid by the stars for their acts).
+      rehearsal, capacity, act_block -- Rehearsal stacks, seats, and the Block
+        the end-of-turn acts will give.
+      seats -- front first: `member`, `name`, `seat`, `seat_key`, `guest`,
+        the star's `price` per act, and the body's `entity_id`.
+      log -- what the stage did since she last ended a turn, in order.
+      forecast -- `fanfare_after`, `block`, and one act per seat.
 
-    THE NUMBER ON A LOG ROW IS WHAT THE BOARD DID, measured by the mod across
-    the beat, and never the clause's own printed figure (`EB-511`'s lesson one
-    kit over). So an act into a Vulnerable says what the enemy actually lost.
+    THE NUMBER ON A LOG ROW IS WHAT THE BEAT MOVED, measured by the mod, never
+    the clause's printed figure (`EB-511`).
     """
     raw = player.get("furina_stage")
     if not isinstance(raw, dict) or not raw:
@@ -996,99 +948,62 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
     for row in (raw.get("seats") or []):
         if not isinstance(row, dict):
             continue
-        member = _text(row.get("member"))
         seats.append({
-            "member": member,
-            "name": STAGE_SHORT_NAMES.get(member, _text(row.get("name"))),
+            "member": _text(row.get("member")),
+            "name": _stage_name(row),
             "long_name": _text(row.get("name")),
             "seat": _int(row.get("seat")),
-            "fanfare": _int(row.get("fanfare")),
+            "key": _seat_key(row.get("seat_key")),
+            "guest": row.get("guest") is True,
+            "price": _int(row.get("price")),
             "entity_id": (None if row.get("entity_id") is None
                           else _text(row.get("entity_id"))),
-            # The guest seat round (2026-09-25): the seat's own key, which a
-            # log row carries too. None on an older build.
-            "key": _seat_key(row.get("seat_key")),
-            # 2026-09-26: back from its Bow through A Five-Century Act this
-            # turn, so it sits out this turn's acts. False on an older build.
-            "resting": row.get("resting") is True,
         })
     log = []
     for row in (raw.get("log") or []):
         if not isinstance(row, dict):
             continue
-        member = _text(row.get("member"))
+        event = stage_event(row.get("event"))
+        reason = _text(row.get("reason"))
+        if event == "leave":
+            why = STAGE_LEAVE_REASONS.get(reason, STAGE_LEFT_UNSAID)
+        elif event == "skip":
+            why = STAGE_SKIP_REASONS.get(reason, "")
+        elif event == "bow":
+            why = "stays" if reason == "stays" else "leaves"
+        else:
+            why = ""
         log.append({
-            "event": stage_event(row.get("event")),
-            "member": member,
-            "name": STAGE_SHORT_NAMES.get(member, _text(row.get("name"))),
-            "seat": _int(row.get("seat")),
-            # The guest seat round (2026-09-25): which seat object the beat
-            # happened in. None where it stood in none, or on an older build.
+            "event": event,
+            "member": _text(row.get("member")),
+            "name": _stage_name(row),
+            "seat": _int(row.get("seat"), -1),
             "key": _seat_key(row.get("seat_key")),
             "fanfare": _int(row.get("fanfare")),
             "moved": _int(row.get("moved")),
-            "why": _stage_why(stage_event(row.get("event")),
-                              _text(row.get("reason"))),
-            # `EB-743`: the body a Crabaletta act or bow picked. Empty on
-            # every beat that names none, and renamed to the page's own
-            # numbered name by `name_stage_targets` below.
+            "why": why,
             "target": _text(row.get("target")),
             "combat_id": _text(row.get("target_id")),
-            # Round four: what EACH enemy was dealt by Chevalmarin's act
-            # (before its Block, since 2026-09-25 evening), where every enemy
-            # was dealt the same. None where the wire has no such figure (-1,
-            # or an older build), and the page then prints the total as a
-            # total.
-            "each": _each(row.get("each")),
-            # 2026-09-25 night (the granted-guest seat round): a one-body
-            # act's hit as DEALT (not the HP it took), the body's HP before
-            # it and what its Block took; a hit's Bow's Block that the rest
-            # of that hit already spent; and how many performers stood when
-            # the beat was filed. None (0 for caught) on an older build.
-            "dealt": _each(row.get("dealt")),
-            "target_hp": _each(row.get("target_hp")),
-            "blocked": _each(row.get("blocked")),
-            "caught": _int(row.get("caught")),
             "standing": _each(row.get("standing")),
-            # 2026-09-25 evening: how many enemies that act struck. None on
-            # every other beat and on an older build.
-            "struck": _each(row.get("struck")),
-            # 2026-09-25: Furina's HP after a hit that reached her (the
-            # `hurt` beat, the wire's `hit_furina`); None on every other
-            # beat and on an older build.
-            "hp": (None if row.get("hp") is None or _int(row.get("hp")) < 0
-                   else _int(row.get("hp"))),
-            # THE GUEST CAST (2026-09-25): on a `pay` beat, whose act took
-            # the Fanfare (the page's short name). Empty elsewhere.
-            "by": STAGE_SHORT_NAMES.get(_text(row.get("by_member")),
-                                        _text(row.get("by"))),
-            # 2026-09-26 (the supporting-pool seat round): the power behind a
-            # move no card made -- a card title, printed as the card prints
-            # it. Empty elsewhere and on an older build.
+            # The power or card title behind a beat (a gain's source: "Bow",
+            # "Guest Star", a relic). Empty elsewhere.
             "source": _text(row.get("source")),
         })
-    # R276 batch two: the mod's forecast of the end-of-turn acts' Block, with
-    # Arkhe Alignment's multiple and Full House's extra acts folded in. None
-    # on a build that does not send it, and the render then falls back to the
-    # flat per-Usher sum.
     act_block = raw.get("act_block")
-    return {"seats": seats, "log": log,
+    return {"fanfare": _int(raw.get("fanfare")),
+            "gained": _int(raw.get("gained_this_turn")),
+            "spent": _int(raw.get("spent_this_turn")),
+            "paid": _int(raw.get("paid_this_turn")),
+            "rehearsal": _int(raw.get("rehearsal")),
+            "capacity": _int(raw.get("capacity")) or len(seats),
+            "seats": seats, "log": log,
             "act_block": None if act_block is None else _int(act_block),
             "forecast": _stage_forecast(raw.get("forecast"))}
 
 
-def _stage_why(event: str, reason: str) -> str:
-    """A log row's `why`: a departure's reason, or an unpaid act's
-    (`STAGE_UNPAID_REASONS`, "" where the wire sends none -- an older
-    build)."""
-    if event == "unpaid":
-        return STAGE_UNPAID_REASONS.get(reason, "")
-    return STAGE_LEAVE_REASONS.get(reason, STAGE_LEFT_UNSAID)
-
-
 def _seat_key(raw: Any) -> int | None:
     """A seat's key off the wire (`StageSeat.Key`), or None where the wire
-    sends none (an older build) or -1 (a beat that stands in no seat)."""
+    sends none or -1 (a beat that stands in no seat)."""
     if raw is None:
         return None
     key = _int(raw, -1)
@@ -1096,68 +1011,52 @@ def _seat_key(raw: Any) -> int | None:
 
 
 #: 2026-09-28 (the Spend pass). A Spend mode as a hand face prints it:
-#: "Spend 3: deal 11 and apply Hydro instead". The number right after the
-#: word, then a colon, is what tells it from Bring the House Down's "Spend all
-#: of ...", Klee's "Spend all your Sparks" and a meter price such as "Spend 6
-#: Charge:". The clause runs to the sentence's end.
+#: "Spend 3: deal 11 instead". The number right after the word, then a colon,
+#: tells it from "Spend all your Fanfare" and a meter price.
 _SPEND_MODE = re.compile(r"\bSpend (\d+): ([^.\n]*)")
 
-#: The relic that takes 1 off every Spend's price (the Furina rules pass,
-#: 2026-10-01; `FurinaStage.PriceOf`), by its printed title. Until then it
-#: pooled the Spend across the stage, which rule 8 now does for everyone.
+#: The relic that takes 1 off every Spend's price (`FurinaStage.PriceOf`), by
+#: its printed title.
 DISCOUNT_SPEND_RELIC = "Palais Ledger"
 DISCOUNT_SPEND_AMOUNT = 1
 
 
 def spend_unavailable(text: str, stage: dict[str, Any] | None,
                       relics: list[dict[str, Any]] | None = None) -> list[str]:
-    """Each Spend mode on this face the board cannot pay, with the reason.
+    """Each Spend mode on this face her Fanfare cannot pay, with the reason.
 
-    THE DEFECT, both Sonnet seats after balance pass one (2026-09-28): "Spend
-    2 wasn't offered on some turns and offered on others; I only learned by
-    trying." The game offers a Spend mode only when the whole stage holds
-    its price, paid back first, then forward (the rules pass, 2026-10-01;
-    `FurinaStage.CanSpend`; sim twin `furina_stage.can_pay`), and where it
-    cannot the card plays its plain mode
-    without opening the chooser (`ModalChoice.TakenWithoutAsking`), so the
-    refused mode was never on any screen. The hand now prints it, marked.
-
-    Empty where the face has no Spend mode, where the stage is not in this
-    build, where the bar is not on the wire, and where the mode is payable.
+    THE DEFECT (2026-09-28): "Spend 2 wasn't offered on some turns and offered
+    on others; I only learned by trying." The game offers a Spend mode only
+    when her Fanfare holds its price (`FurinaStage.CanSpend`), and where it
+    cannot the card plays its plain mode without opening the chooser, so the
+    refused mode was on no screen. The hand prints it, marked.
     """
     if stage is None:
         return []
-    seats = stage.get("seats") or []
+    fanfare = stage.get("fanfare")
+    if not isinstance(fanfare, int) or isinstance(fanfare, bool):
+        return []
     off = sum(DISCOUNT_SPEND_AMOUNT for r in (relics or [])
               if r.get("name") == DISCOUNT_SPEND_RELIC)
-    bars = [s.get("fanfare") for s in seats]
     out = []
     for m in _SPEND_MODE.finditer(text or ""):
         printed = int(m.group(1))
         price = max(0, printed - off)
+        if fanfare >= price:
+            continue
         clause = f"Spend {printed}: {m.group(2).strip()}"
-        if not seats:
-            why = "the stage is empty"
-        elif not all(isinstance(b, int) for b in bars):
-            continue
-        elif sum(bars) >= price:
-            continue
-        elif off:
-            why = (f"your performers hold {sum(bars)} Fanfare between them, "
-                   f"and it costs {price} with {DISCOUNT_SPEND_RELIC}")
-        else:
-            why = f"your performers hold {sum(bars)} Fanfare between them"
+        why = f"you have {fanfare} Fanfare"
+        if off:
+            why += f", and it costs {price} with {DISCOUNT_SPEND_RELIC}"
         out.append(f"{clause} — unavailable: {why}")
     return out
 
 
 #: The wire's forecast target KINDS, in the words the page prints. Translated
-#: here, when the observation is built, because the blindness check reads the
-#: finished observation: a raw kind such as `random_aura` (Lynette's act,
-#: 2026-09-25) is a snake_case token and refused every command on the lane
-#: (the supporting-pool seat round, 2026-09-26). An enemy's name passes as is.
-STAGE_TARGET_WORDS = {"all": "ALL", "random": "a random enemy",
-                      "random_aura": "a random enemy with an aura"}
+#: when the observation is built: a raw kind such as `random_aura` is a
+#: snake_case token the blindness check refuses (2026-09-26).
+STAGE_TARGET_WORDS = {"all": "ALL enemies", "random": "a random enemy",
+                      "random_aura": "an enemy with an aura"}
 
 
 def _stage_target(value: Any) -> str:
@@ -1166,70 +1065,29 @@ def _stage_target(value: Any) -> str:
 
 
 def _stage_forecast(raw: Any) -> dict[str, Any] | None:
-    """RULE 7 OF THE GUEST CAST (2026-09-25): the mod's forecast of the end of
-    this turn -- each performer's bar after the acts, their payments and the
-    fade, and the posted attacks split between the front performer and
-    Furina. `FurinaStage.Forecast`, carried as the mod computes it: this page
-    does no arithmetic of its own on it. None on a build that sends none."""
+    """The mod's forecast of the end of this turn (`FurinaStage.Forecast`),
+    carried as the mod computes it: her Fanfare after the acts, the Block they
+    give, and each seat's act -- its kind, one act's amount, how many times it
+    lands, a star's price, and whether it skips for want of Fanfare. None on
+    a build that sends none."""
     if not isinstance(raw, dict):
         return None
-
-    def rows(key):
-        out = []
-        for row in (raw.get(key) or []):
-            if not isinstance(row, dict):
-                continue
-            member = _text(row.get("member"))
-            out.append({"name": STAGE_SHORT_NAMES.get(
-                            member, _text(row.get("name"))),
-                        "now": _int(row.get("now")),
-                        "after": _int(row.get("after")),
-                        "leaves": bool(row.get("leaves"))})
-        return out
-
-    # 2026-09-25 night (the granted-guest seat round): what each act of the
-    # sweep deals and to whom, their total where every act lands on one body
-    # or on ALL (None otherwise), and the attacks' split performer by
-    # performer. Empty on an older build.
     acts = []
     for row in (raw.get("acts") or []):
         if not isinstance(row, dict):
             continue
-        member = _text(row.get("member"))
-        acts.append({"name": STAGE_SHORT_NAMES.get(member,
-                                                   _text(row.get("name"))),
+        acts.append({"name": _stage_name(row),
+                     "key": _seat_key(row.get("seat_key")),
+                     "kind": _text(row.get("kind")),
                      "amount": _int(row.get("amount")),
                      "element": _text(row.get("element")),
                      "target": _stage_target(row.get("target")),
-                     "bow": bool(row.get("bow")),
-                     # 2026-10-01: a Bow a posted hit earns (False on an
-                     # older build).
-                     "on_hit": bool(row.get("on_hit"))})
-    takers = []
-    for row in (raw.get("takers") or []):
-        if not isinstance(row, dict):
-            continue
-        member = _text(row.get("member"))
-        takers.append({"name": STAGE_SHORT_NAMES.get(member,
-                                                     _text(row.get("name"))),
-                       "takes": _int(row.get("takes")),
-                       "leaves": bool(row.get("leaves"))})
-    total = raw.get("act_total")
-    total = None if total is None or _int(total, -1) < 0 else _int(total)
-    return {"seats": rows("seats"), "arrivals": rows("arrivals"),
-            "block": _int(raw.get("block_after_acts")),
-            "intent_known": bool(raw.get("intent_known")),
-            "front_takes": _int(raw.get("front_takes")),
-            "reaches_furina": _int(raw.get("reaches_furina")),
-            # 2026-09-26: what of that the cards in her hand deal as her turn
-            # ends (Burn, Wither, ...). 0 on an older build.
-            "hand_damage": _int(raw.get("hand_damage")),
-            "unknown": bool(raw.get("unknown")),
-            "acts": acts, "act_total": total,
-            "act_total_target": _stage_target(raw.get("act_total_target")),
-            # None on a build that sends no split, and the page then prints
-            # the older one-number line.
-            "takers": takers if "takers" in raw else None}
+                     "times": _int(row.get("times"), 1),
+                     "price": _int(row.get("price")),
+                     "skips": row.get("skips") is True})
+    return {"fanfare_after": _int(raw.get("fanfare_after")),
+            "block": _int(raw.get("block")),
+            "acts": acts}
 
 
 def name_stage_targets(stage: dict[str, Any], wire: list[dict[str, Any]],
@@ -1253,21 +1111,6 @@ def name_stage_targets(stage: dict[str, Any], wire: list[dict[str, Any]],
         row["target"] = (by_id.get(row["combat_id"])
                          or remembered_enemy_name(row["combat_id"],
                                                   row["target"]))
-
-
-def stage_seat_name(index: int, occupied: int) -> str:
-    """What to call the seat at `index` on a stage of `occupied` performers.
-
-    THE BACK IS THE BACK-MOST OCCUPIED SEAT and not the third chair, which is
-    rule 5's second sentence: "with one performer on stage, that is the lead".
-    A page that called a lone Usher "lead" and then sent a Raise to a "back"
-    nobody was standing in would print the rule's exception as a contradiction.
-    """
-    if occupied <= 1 or index <= 0:
-        return STAGE_SEAT_NAMES[0]
-    if index >= occupied - 1:
-        return STAGE_SEAT_NAMES[2]
-    return STAGE_SEAT_NAMES[1]
 
 
 def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],

@@ -342,118 +342,9 @@ public sealed class KnightsOfFavoniusPower : PowerModel, ILocalizationProvider
 // ---------------------------------------------------------------------------
 
 /// <summary>
-/// <i>Guest of Honor</i>: "Choose another player. Until your next turn,
-/// attacks on them hit their Block, then your lead performer's Fanfare, then
-/// them." ON THE ALLY, placed by Furina.
-///
-/// RULE 6, FOR THE ALLY, AND THE SAME RULE (<see cref="FurinaStage.AbsorbHit"/>).
-/// <c>ModifyHpLostBeforeOsty</c> is handed what is left of a hit AFTER the
-/// ally's Block -- <c>CreatureCmd.Damage</c> spends Block first -- so "their
-/// Block, then the lead's Fanfare, then them" is this one call: the lead
-/// takes what it can and the rest reaches the ally. A lead emptied by such a
-/// hit takes its Bow after the hit and the next performer steps forward, as
-/// any hit (rule 7, 2026-09-25); A Rapt Audience fires because an enemy hit
-/// the lead. The bodies catch up, and the Bow is paid, at
-/// <c>AfterDamageReceived</c>, the flush Furina's own hits take -- or at
-/// the ally's death, when the hit killed them and the engine skips that hook.
-///
-/// THE MINE STILL FIRES FIRST. A Klee's Mine answers an enemy's attack on
-/// ANY player in <c>BeforeDamageReceived</c>, which runs before Block; a
-/// lethal Mine notes the pre-empted hit (<see cref="ProtoBombPower.Preempted"/>),
-/// and this power then takes NOTHING off the lead for a hit that never
-/// happened -- the Furina hook's own rule. A Mine that does not kill leaves
-/// the hit to land, and it lands here, on the lead.
-///
-/// ATTACKS ONLY (the face's word): an unblockable or unpowered loss goes
-/// straight to the ally. Gone at the start of the next player turn, or when
-/// Furina dies.
-/// </summary>
-public sealed class GuestOfHonorPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Guest of Honor"),
-        ("description",
-            "Until Furina's next turn, hits on you land on your "
-          + "[gold]Block[/gold], then her [gold]front performer[/gold]'s "
-          + "[gold]Fanfare[/gold], then you."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Single;
-
-    public override PowerInstanceType InstanceType =>
-        PowerInstanceType.InstancedPerApplier;
-
-    /// <summary>
-    /// The redirect, and the whole of it. PURE apart from the ledger move the
-    /// Furina hook makes in the same slot (<c>FurinaResourceHooks
-    /// .ModifyHpLostBeforeOsty</c>), which is the precedent this follows.
-    /// </summary>
-    public override decimal ModifyHpLostBeforeOsty(
-        Creature target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
-    {
-        if (!ReferenceEquals(target, Owner) || amount <= 0m) return amount;
-        if (Applier is not { } furina || furina.IsDead) return amount;
-        if (!FurinaStage.LiveFor(furina)) return amount;
-        if ((props & ValueProp.Unblockable) != 0 || !props.IsPoweredAttack())
-        {
-            return amount;
-        }
-        // A hit a lethal Mine already answered is owed nothing -- not the
-        // ally's HP (the Klee arm's sweep zeroes that) and not the lead's
-        // Fanfare either.
-        if (ProtoBombPower.Preempted.Covers(target, dealer)) return 0m;
-        var incoming = (int)System.Math.Ceiling(amount);
-        // The ally's hit: Furina's own Bow Block cannot catch it.
-        return FurinaStage.AbsorbHit(furina, incoming, dealer,
-                                     bowCatches: false);
-    }
-
-    public override async Task AfterDamageReceived(
-        PlayerChoiceContext choiceContext, Creature target,
-        DamageResult result, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
-    {
-        if (!ReferenceEquals(target, Owner) || Applier == null) return;
-        await FurinaStage.Flush(choiceContext, Applier);
-    }
-
-    public override async Task BeforeSideTurnStart(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IReadOnlyList<Creature> participants, ICombatState combatState)
-    {
-        if (side != CombatSide.Player) return;
-        await PowerCmd.Remove(this);
-    }
-
-    public override async Task AfterDeath(
-        PlayerChoiceContext choiceContext, Creature creature,
-        bool wasRemovalPrevented, float deathAnimLength)
-    {
-        if (!wasRemovalPrevented && ReferenceEquals(creature, Applier))
-        {
-            await PowerCmd.Remove(this);
-            return;
-        }
-        // The engine skips AfterDamageReceived for a target the hit killed,
-        // so a lead emptied by the hit that killed the ally is flushed, and
-        // bows for a living Furina, here.
-        if (ReferenceEquals(creature, Owner) && Applier is { IsDead: false })
-        {
-            await FurinaStage.Flush(choiceContext, Applier);
-        }
-    }
-}
-
-/// <summary>
-/// <i>The People of Fontaine</i>: "Whenever another player plays an Attack,
-/// Raise 1." On Furina. A bare Raise (<see cref="FurinaStage.Raise"/>): it
-/// lands on the back performer, and on an empty stage a random performer
-/// arrives holding it. The stack is the Raise, so the upgrade and a second
-/// copy both add to it.
+/// <i>The People of Fontaine</i> (sec.10): "Whenever another player plays an
+/// Attack, gain 1 Fanfare." On Furina. The stack is the gain, so the upgrade
+/// and a second copy both add to it.
 /// </summary>
 public sealed class PeopleOfFontainePower : PowerModel, ILocalizationProvider
 {
@@ -461,8 +352,8 @@ public sealed class PeopleOfFontainePower : PowerModel, ILocalizationProvider
     {
         ("title", "The People of Fontaine"),
         ("description",
-            "Whenever another player plays an Attack, your back performer "
-          + "gains [blue]{Amount}[/blue] [gold]Fanfare[/gold]."),
+            "Whenever another player plays an Attack, gain "
+          + "[blue]{Amount}[/blue] [gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -475,8 +366,8 @@ public sealed class PeopleOfFontainePower : PowerModel, ILocalizationProvider
         if (Owner == null || Amount <= 0) return;
         if (!FurinaStage.LiveFor(Owner)) return;
         if (!CoopSet.IsAnotherPlayersAttack(cardPlay, Owner)) return;
-        // A Power's gain: nothing on an empty stage (rule 5, the rules pass).
-        await FurinaStage.Raise(Owner, (int)Amount, played: false);
+        await FurinaStage.Gain(choiceContext, Owner, (int)Amount,
+                               "The People of Fontaine");
     }
 }
 
@@ -702,8 +593,8 @@ public sealed class RaiseAToastPower : TemporaryStrengthPower, ILocalizationProv
 }
 
 /// <summary>
-/// <i>The Crowd Roars</i>: "Whenever another player loses HP, your front
-/// performer gains 1 Fanfare." On Furina.
+/// <i>The Crowd Roars</i> (sec.10): "Whenever another player loses HP, gain 1
+/// Fanfare." On Furina.
 ///
 /// ANY HP LOSS, FROM ANY SOURCE, AND ONLY THAT IT HAPPENED: the hook is the
 /// base game's <c>AfterCurrentHpChanged</c>, which every loss reaches (a hit
@@ -713,11 +604,7 @@ public sealed class RaiseAToastPower : TemporaryStrengthPower, ILocalizationProv
 /// player" is a PLAYER creature on her side other than her (a pet, the
 /// Bake-Kurage or a performer, is never one).
 ///
-/// THE FANFARE GOES TO THE FRONT PERFORMER
-/// (<see cref="FurinaStage.RaiseLead"/>), and on an empty stage a random
-/// performer arrives holding it -- The People of Fontaine's rule
-/// (<see cref="FurinaStage.Raise"/>), because both verbs ask the same
-/// round-four door first. The stack is the Fanfare, so a second copy gives 2.
+/// The stack is the Fanfare, so a second copy gives 2.
 /// </summary>
 public sealed class TheCrowdRoarsPower : PowerModel, ILocalizationProvider
 {
@@ -725,8 +612,8 @@ public sealed class TheCrowdRoarsPower : PowerModel, ILocalizationProvider
     {
         ("title", "The Crowd Roars"),
         ("description",
-            "Whenever another player loses HP, your [gold]front performer[/gold] "
-          + "gains [blue]{Amount}[/blue] [gold]Fanfare[/gold]."),
+            "Whenever another player loses HP, gain [blue]{Amount}[/blue] "
+          + "[gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -748,7 +635,7 @@ public sealed class TheCrowdRoarsPower : PowerModel, ILocalizationProvider
     {
         if (Amount <= 0 || !Pays(Owner, creature, delta)) return;
         if (!FurinaStage.LiveFor(Owner)) return;
-        // A Power's gain: nothing on an empty stage (rule 5, the rules pass).
-        await FurinaStage.RaiseLead(Owner, (int)Amount, played: false);
+        await FurinaStage.Gain(new ThrowingPlayerChoiceContext(), Owner,
+                               (int)Amount, "The Crowd Roars");
     }
 }

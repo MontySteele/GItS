@@ -29,17 +29,11 @@ namespace KleeMod.Powers;
 /// and it is exactly what brief sec.3 rule 6 needs: "enemies keep targeting
 /// Furina; the redirect is in her damage pipeline".
 ///
-/// WITH A VISIBLE BAR, which is the one place this differs from the jellyfish.
-/// The Bake-Kurage is <c>CustomPetModel(visibleHp: false)</c> on a 9999 pool
-/// because it must not die; a performer's bar IS its Fanfare (rule 1), so the
-/// flag is true and <c>BaseLib.CustomPetModel.IsHealthBarVisible</c> returns
-/// it. THE FLAG ALONE DOES NOT SHOW IT: <c>NCombatRoom.AddCreature</c> hides
-/// every non-Osty pet's bar on each add, and
-/// <see cref="FurinaStagePlacement.ShowBars"/> (a postfix on that add) puts
-/// it back -- the 2026-09-26 smoke found no performer had ever shown one.
-/// HP must be at least 1 for a live creature, so the ledger never writes a
-/// 0: a performer at 0 has LEFT, and <see cref="FurinaStagePets"/> removes the
-/// body in the same reconcile.
+/// NO BAR (the re-founding, 2026-10-04: "performers with no bars"). The
+/// Bake-Kurage's shape exactly: <c>CustomPetModel(visibleHp: false)</c>, and
+/// nothing in the arm ever writes a performer's HP. A pet must have at least
+/// 1 HP to be alive, so the model's pool is 1; enemies cannot target a pet,
+/// so nothing can take it.
 ///
 /// EACH WEARS ITS OWN SILHOUETTE, and the three scenes are authored rather
 /// than borrowed: <c>klee-mod/pck-src/furina/model/{usher,chevalmarin,
@@ -80,7 +74,7 @@ namespace KleeMod.Powers;
 /// </summary>
 public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvider
 {
-    protected StagePerformerMonster() : base(visibleHp: true)
+    protected StagePerformerMonster() : base(visibleHp: false)
     {
     }
 
@@ -91,15 +85,7 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
     /// </summary>
     public abstract string DisplayName { get; }
 
-    /// <summary>
-    /// The bar's floor and ceiling as the ENGINE sees them. Both 1 because the
-    /// real bar is written by <c>CreatureCmd.SetMaxAndCurrentHp</c> the moment
-    /// the body is fielded: a performer arrives at 1 (rule 3) or at the
-    /// relic's 3 (rule 2) or at a rotation's inherited pool, and none of those
-    /// is a property of the MODEL. The engine's own pets do the same thing in
-    /// the opposite direction (Byrdpip is 9999/9999 because it must never
-    /// die).
-    /// </summary>
+    /// <summary>One HP, never written: performers have no bars.</summary>
     public override int MinInitialHp => 1;
 
     public override int MaxInitialHp => 1;
@@ -149,9 +135,7 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
     };
 }
 
-/// <summary>Gentilhomme Usher. Acts for Block, bows for the front performer's
-/// Fanfare (rules 9, 10).
-/// </summary>
+/// <summary>Gentilhomme Usher. Acts for Block.</summary>
 /// <remarks>THE NAME IS THE LEDGER'S, not a literal here, and that is
 /// `EB-735`: the blind-play page names a performer off
 /// <c>FurinaStageLedger.Snapshot</c> while the game names it off this model,
@@ -274,18 +258,11 @@ public sealed class EscoffierMonster : StagePerformerMonster
 /// THE BODIES, RECONCILED AGAINST THE LEDGER. One entry point,
 /// <see cref="Sync"/>, called after every change to the stage.
 ///
-/// WHY A RECONCILE AND NOT A COMMAND PER RULE. Six rules move the stage --
-/// summon, rotate, raise, spend, absorb, regen -- and each of them can add a
-/// body, remove one, or move a bar, in combinations (a rotation removes AND
-/// adds in one call). Six sites each doing their own spawn and despawn is six
-/// chances to leave a body on a stage the ledger says is empty, and that
-/// desync is invisible on screen until an attack lands on nothing. So the
+/// WHY A RECONCILE AND NOT A COMMAND PER RULE. Summons, evictions, Bows,
+/// returns and moves each add or remove a body, in combinations. So the
 /// ledger moves first, always, and this walks the difference.
 ///
-/// IT IS THE MIRROR AND NEVER THE SOURCE. Nothing here decides a number:
-/// every HP it writes is a <see cref="StageSeat.Fanfare"/> the ledger already
-/// holds. See <c>FurinaStageLedger</c>'s header for why that direction is safe
-/// -- no enemy can reach a pet, so no HP moves behind the ledger's back.
+/// IT IS THE MIRROR AND NEVER THE SOURCE: nothing here decides a rule.
 /// </summary>
 public static class FurinaStagePets
 {
@@ -310,8 +287,7 @@ public static class FurinaStagePets
         ?? Enumerable.Empty<Creature>();
 
     /// <summary>
-    /// Field the missing bodies, remove the departed ones, and push every
-    /// seat's bar onto the body wearing it.
+    /// Field the missing bodies and remove the departed ones.
     ///
     /// ORDER MATTERS ONCE: departures BEFORE arrivals. A rotation on a full
     /// stage leaves three seats and one dead reference, and the engine's own
@@ -342,36 +318,9 @@ public static class FurinaStagePets
             {
                 seat.Pet = await Field(player, seat.Who);
             }
-            if (seat.Pet == null) continue;
-            await CreatureCmd.SetMaxAndCurrentHp(seat.Pet, seat.Fanfare);
         }
 
         FurinaStagePlacement.Reflow(furina);
-    }
-
-    /// <summary>
-    /// The BARS ONLY -- no arrival, no departure, no re-flow.
-    ///
-    /// A SECOND ENTRY POINT AND NOT A FLAG, because the two are different
-    /// events and one of them is far the commoner: a Raise or a regen moves a
-    /// number on a body already standing where it belongs, and running the
-    /// full reconcile for it would walk the pet list, ask the room for its
-    /// nodes and re-lay out a line that has not changed -- every turn, and on
-    /// every Raise. Nothing here can add or remove a body, which is the
-    /// property that makes it safe on those two hot paths.
-    /// </summary>
-    public static void SyncBars(Creature? furina)
-    {
-        if (!FurinaStage.LiveFor(furina)) return;
-        foreach (var seat in FurinaStageLedger.For(furina!).Seats)
-        {
-            if (seat.Pet == null || seat.Pet.IsDead) continue;
-            // Fire-and-forget is deliberate HERE and nowhere else: this call
-            // adds no creature and removes none, so nothing later in the frame
-            // can read a half-built board. Every arrival and departure goes
-            // through the awaited `Sync` above.
-            _ = CreatureCmd.SetMaxAndCurrentHp(seat.Pet, seat.Fanfare);
-        }
     }
 
     /// <summary>

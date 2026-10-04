@@ -32,20 +32,20 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsStageWhisper : CustomCardModel, ICharacterCard
+public sealed class ProtoFsStageWhisper : CustomCardModel, ICharacterCard, IStageCueCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForCue(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_stage_whisper");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stage Whisper"),
-        ("description", "Each other performer gives all but 1 [gold]Fanfare[/gold] to your [gold]front performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "[gold]Cue[/gold] a performer. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoFsStageWhisper : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaStage.Whisper(Owner.Creature);
+        await FurinaStage.Cue(choiceContext, Owner);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 

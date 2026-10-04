@@ -47,7 +47,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Quick Cue"),
+        ("title", "Quick Flourish"),
         ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] instead."),
     };
 
@@ -88,7 +88,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
         {
             null,
             new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 3),
-                                "needs its full price from the back performer"),
+                                "needs that much Fanfare"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 3 damage", "[gold]Spend[/gold] 3: deal 11 and apply [gold]Hydro[/gold] instead" }[modeIndex]);

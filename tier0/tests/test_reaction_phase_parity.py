@@ -714,13 +714,6 @@ def test_no_doc_reasserts_the_refuted_pre_draw_order():
 
 CO_TENANCY_LEDGER = {
     "BeforeSideTurnStart": {
-        ("Powers/Prototype/CoopSet.cs", "GuestOfHonorPower"):
-            "QUARANTINED (the co-op set, review/records/coop-set-2026-09-25.md). "
-            "Guest of Honor's 'until your next turn' closing: it removes itself "
-            "at the next player turn and touches nothing a co-tenant reads -- "
-            "the lead's bar it redirects hits into is only written at "
-            "ModifyHpLostBeforeOsty, on the enemy's turn. No sim twin: tier 0 "
-            "seats one player (engine/coop.py)",
         ("Powers/Prototype/ProtoBombPower.cs", "ProtoBombPower"):
             "QUARANTINED (the Klee overhaul, C.KLEE_OVERHAUL). Enemy-attached, "
             "and it GROWS rather than detonating -- rule 7 of the ruled brief "
@@ -739,6 +732,18 @@ CO_TENANCY_LEDGER = {
         ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
             "purges the Salon company map, clears Curtain Call per-turn "
             "windows; touches nothing its co-tenants read",
+        ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
+            "QUARANTINED (the Furina stage, the re-founding 2026-10-04, sec.8). "
+            "The top of her turn: `FurinaStage.OpenTurn` zeroes the flow "
+            "counts (Fanfare gained, spent, paid this turn) and the "
+            "once-a-turn latches in `FurinaStageLedger`, then refreshes the "
+            "badges. THE ORDERING QUESTION, answered: that table is "
+            "per-Furina per-combat and no co-tenant of this broadcast reads or "
+            "writes it -- the Bomb tenants and the shipped Salon's purge all "
+            "touch their own state -- and the reset "
+            "deals no damage, grants no Block and touches no element. The sim "
+            "resets the same counts at the top of her turn "
+            "(`tier0/engine/furina_stage.py`)",
     },
     "AfterSideTurnStart": {
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
@@ -750,42 +755,37 @@ CO_TENANCY_LEDGER = {
     },
     "AfterPlayerTurnStart": {
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
-            "QUARANTINED (the Furina stage, FURINA_STAGE). RULE 4: the LEAD "
-            "performer regains 1 Fanfare, from her second turn on. THE "
-            "ORDERING QUESTION, answered: the only thing it WRITES is the "
-            "front seat's bar in `FurinaStageLedger`, a per-Furina per-combat "
-            "table whose only other writers are a card play, a summon and the "
-            "damage hook -- none of which is a co-tenant of this broadcast -- "
-            "and no co-tenant reads that table at all. What it READS is the "
-            "seat's own `PlayerCombatState.TurnNumber`, which the engine sets "
-            "before any tenant runs and which nothing in the mod writes. It "
-            "deals no damage, grants no Block and touches no element, so it "
-            "shares no resource with `KleeElementalHooks` (the opening Spark "
-            "and Encore) or with the Companion powers beside it. NO SIM TWIN "
-            "ORDERS IT, because the arm is C# FIRST by "
-            "`docs/current/operations/prototype.md` and tier0 has no stage",
+            "QUARANTINED (the Furina stage, the re-founding 2026-10-04). "
+            "After her draw: the badge, Charlotte's extra card and the "
+            "turn-start powers (`FurinaStage.TurnStart`: One-Woman Show, "
+            "Premiere Season's Rehearsal, Grand Theater Program's and Season "
+            "Tickets' Fanfare). THE ORDERING QUESTION, answered: what it "
+            "WRITES to a shared resource is Furina's one Fanfare number, and "
+            "every other writer of it in this broadcast "
+            "(`StageRaisePerTurnPower`, Arkhe Alignment's Pneuma) ADDS to it "
+            "and reads nothing, so any order leaves the same number. It deals "
+            "no damage and touches no element, so it shares no resource with "
+            "`KleeElementalHooks` or the Companion powers beside it",
         ("Powers/Prototype/StageRaisePerTurnPower.cs",
          "StageRaisePerTurnPower"):
-            "QUARANTINED (the Furina stage, FURINA_STAGE; R276 hygiene). Her "
-            "Ancient under the arm: Raise N Fanfare on the BACK performer at "
-            "the start of her turn. THE ORDERING QUESTION, answered: its one "
-            "co-tenant on the same resource is `FurinaStageHooks`' regen, "
-            "which adds 1 to the LEAD's bar. With two or more performers the "
-            "two write different seats; with one they write the same bar, "
-            "and both are ADDITIONS that read nothing, so either order leaves "
-            "the same number. It deals no damage, grants no Block and touches "
-            "no element. NO SIM TWIN ORDERS IT: the sim models the shipped "
-            "Ancient only",
+            "QUARANTINED (the Furina stage; R276 hygiene, re-founded "
+            "2026-10-04). Her Ancient under the arm: gain N Fanfare at the "
+            "start of her turn. THE ORDERING QUESTION, answered: its "
+            "co-tenants on the same resource (`FurinaStageHooks`' turn-start "
+            "powers, Pneuma) all ADD to her one Fanfare number and read "
+            "nothing, so either order leaves the same number. It deals no "
+            "damage, grants no Block and touches no element. NO SIM TWIN "
+            "ORDERS IT: the sim models the shipped Ancient only",
         ("Powers/Prototype/FurinaStagePowers.cs", "ArkheAlignmentPower"):
             "QUARANTINED (the Furina stage, FURINA_STAGE; R276 batch two). "
             "Arkhe Alignment's turn-start choice, asked once a turn: Ousia "
-            "multiplies this turn's act damage, Pneuma this turn's act Block "
-            "and Raises 2 a copy on the LEAD. THE ORDERING QUESTION, answered: the multipliers are read "
-            "only by the acts, which fire at the END of the turn, so no "
-            "co-tenant of this broadcast reads them; Pneuma's Raise is an "
-            "ADDITION to the lead's bar, as `FurinaStageHooks`' regen is, so "
-            "either order leaves the same number. The sim runs it after the "
-            "regen (`furina_stage.turn_start_powers`)",
+            "multiplies this turn's act damage, Pneuma gains 2 Fanfare a "
+            "copy (the re-founding, 2026-10-04). THE ORDERING QUESTION, "
+            "answered: the multiplier is read only by the acts, which fire at "
+            "the END of the turn, so no co-tenant of this broadcast reads it; "
+            "Pneuma's gain is an ADDITION to her one Fanfare number, as the "
+            "other turn-start gains are, so either order leaves the same "
+            "number",
         ("Powers/Prototype/KokomiPoolCompletion.cs", "PatientTidePower"):
             "QUARANTINED (the Kokomi overhaul; pool completion, 2026-10-01). "
             "Patient Tide hands back the Energy it banked at her last turn's "

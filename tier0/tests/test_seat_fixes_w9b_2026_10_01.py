@@ -73,10 +73,10 @@ def test_an_amplifier_off_an_application_says_there_was_no_hit():
 
 # ---- 3. Spend ---------------------------------------------------------------
 
-def test_the_spend_tip_names_the_next_performer():
-    assert ARM_KEYWORDS["Spend"].startswith(
-        "Pay Fanfare from your back performer first, then from the next one "
-        "forward.")
+def test_the_spend_tip_says_whose_fanfare_pays():
+    # The re-founding (2026-10-04): her one Fanfare number pays a Spend.
+    assert ARM_KEYWORDS["Spend"] == (
+        "Pay that much Fanfare. Offered only if you have enough.")
 
 
 # ---- 4. Arkhe Alignment -----------------------------------------------------
@@ -85,8 +85,10 @@ def test_arkhe_alignment_says_stacks_add():
     """Two stacks made Ousia triple an act (`Choose`: x(1 + stacks))."""
     src = _read("klee-mod", "KleeCode", "Powers", "Prototype",
                 "FurinaStagePowers.cs")
-    assert "ledger.ActDamageMultiplier = 1 + copies;" in src
-    assert "Stacks add: two make the acts triple" in src
+    # The re-founding (2026-10-04): x(1 + copies), never lower than a
+    # multiple already chosen this turn; the badge says stacks add.
+    assert "ledger.ActDamageMultiplier, 1 + copies);" in src
+    assert "Stacks add." in src
 
 
 # ---- 5. Frozen blocked by Artifact ------------------------------------------

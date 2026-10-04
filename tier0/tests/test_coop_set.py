@@ -207,15 +207,17 @@ def test_coordinated_strike_hits_and_its_plan_lands_on_no_one(arms):
                for e in st.log)
 
 
-def test_share_the_spotlight_moves_no_bar(arms):
+def test_share_the_spotlight_spends_nothing_with_no_one_to_share_with(arms):
     from tier0.engine import furina_stage as FS
     st = make_state()
     st.player.character_id = "furina"
     st.in_player_turn = True
     FS.open_combat(st)
-    stage = [list(s) for s in FS.stage(st.player)]
+    st.player.stage_fanfare = 5
+    stage = list(FS.stage(st.player))
     effects.resolve_card(st, _row("proto_fs_share_the_spotlight"))
-    assert [list(s) for s in FS.stage(st.player)] == stage
+    assert FS.stage(st.player) == stage
+    assert st.player.stage_fanfare == 5
     assert st.player.block == 0
 
 
@@ -234,18 +236,29 @@ def test_the_five_powers_apply_and_never_fire(arms):
 
 # ---- the second batch ---------------------------------------------------------
 
-def test_raise_a_toast_gives_no_one_strength_and_moves_no_bar(arms):
+def test_raise_a_toast_gives_no_one_strength(arms):
+    """The re-founded sheet (2026-10-04): "Draw 1 card. Spend 4: another
+    player gains 4 temporary Strength." The pilot keeps the draw mode in a
+    one-seat fight (nobody to toast); a Spend mode taken anyway reaches the
+    toast, which has no one to serve."""
     from tier0.engine import furina_stage as FS
-    st = make_state()
-    st.player.character_id = "furina"
-    st.in_player_turn = True
-    FS.open_combat(st)
-    stage = [list(s) for s in FS.stage(st.player)]
-    effects.resolve_card(st, _row("proto_fs_raise_a_toast"))
-    assert [list(s) for s in FS.stage(st.player)] == stage
-    assert not st.player.powers.get("strength")
-    assert any(e["event"] == "coop_no_other_player"
-               and e["op"] == "stage_toast" for e in st.log)
+
+    class SpendAlways:
+        def spend_mode(self, state, modes):
+            return 1
+
+    for decider, spent in ((None, 0), (SpendAlways(), 4)):
+        st = make_state()
+        st.player.character_id = "furina"
+        st.in_player_turn = True
+        st.player.stage_decider = decider
+        FS.open_combat(st)
+        st.player.stage_fanfare = 4
+        effects.resolve_card(st, _row("proto_fs_raise_a_toast"))
+        assert st.player.stage_fanfare == 4 - spent
+        assert not st.player.powers.get("strength")
+        assert any(e["event"] == "coop_no_other_player"
+                   and e["op"] == "stage_toast" for e in st.log) == bool(spent)
 
 
 def test_shrapnel_places_its_mine_and_the_shred_has_no_one_to_serve(arms):

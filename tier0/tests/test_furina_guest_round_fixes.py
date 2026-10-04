@@ -5,11 +5,10 @@ The mod halves are `klee-mod/KleeTests/Prototype/FurinaGuestCastTests.cs`
 (Wriothesley at the front, the seat key) and `FurinaGuestRoundFixTests.cs`
 (the damage previews); the sim's are in `test_furina_guest_cast.py`.
 
-  1. The back performer tip said "Hits reach it last". Rule 6 never runs a
-     hit on past the front: "Hits reach it only when it stands alone."
-  3. The log said a summoned Usher "stands in the front seat" while the stage
-     line showed him at the back -- the page named a beat's seat by NAME, and
-     the first Usher stood in front. It names it by the seat's key now.
+  1. The back performer retired with the bars (the re-founding,
+     2026-10-04); no glossary row says where hits go.
+  3. An arrival is one plain line naming the performer (the re-founding: no
+     seat word on the log).
   4. Words printed and never defined: Elemental Reaction, Swirl, aura, Cryo,
      Companion. Every glossary word attaches wherever it is printed on the
      page, the glossary rows themselves included.
@@ -108,14 +107,10 @@ WRIOTHESLEY = {
 # 1. THE BACK PERFORMER TIP.
 # ---------------------------------------------------------------------------
 
-def test_the_back_performer_row_says_hits_never_reach_it():
-    # 2026-09-26: a lone performer is both seats -- hit, paying Spends -- and
-    # never fades (rule 12 exempts the front).
-    # The second text pass (2026-09-28): the tip's words; the fade has its
-    # own row, and a lone performer is both seats.
-    assert ARM_KEYWORDS["back performer"] == (
-        "Your last performer in line. Spend pays from it first. A lone "
-        "performer is both front and back.")
+def test_no_row_says_where_hits_go():
+    # The re-founding (2026-10-04): performers take no hits and the back
+    # performer retired, so no row of that kind is left.
+    assert "back performer" not in ARM_KEYWORDS
     for row in ARM_KEYWORDS.values():
         assert "reach it last" not in row
 
@@ -126,7 +121,7 @@ def test_the_back_performer_row_says_hits_never_reach_it():
 
 def _usher(seat, fanfare, key):
     return {"member": "usher", "name": "Gentilhomme Usher", "seat": seat,
-            "fanfare": fanfare, "entity_id": str(10 + key), "seat_key": key}
+            "entity_id": str(10 + key), "seat_key": key}
 
 
 def _arrive(seat, fanfare, key):
@@ -136,36 +131,13 @@ def _arrive(seat, fanfare, key):
             "each": -1, "hp": -1, "struck": -1, "seat_key": key}
 
 
-def test_a_second_ushers_arrival_names_the_back_seat():
-    """The Opus seat, fight 4 turn 4: a second Usher joined at the back and
-    the log said he "stands in the front seat", where the FIRST Usher
-    stood."""
+def test_an_arrival_is_one_plain_line():
+    """The re-founding (2026-10-04): the seats line says where everyone
+    stands now, so an arrival names the performer and nothing else."""
     stage = furina_stage({"furina_stage": {
         "live": True, "seats": [_usher(0, 3, 1), _usher(1, 1, 2)],
         "log": [_arrive(1, 1, 2)]}})
-    assert _render_stage_log(stage) == [
-        "  - **Usher** joined the stage at 1 Fanfare, and stands in the "
-        "back seat."]
-
-
-def test_an_arrival_that_has_since_left_names_no_seat():
-    stage = furina_stage({"furina_stage": {
-        "live": True, "seats": [_usher(0, 3, 1)],
-        "log": [_arrive(1, 1, 2)]}})
-    assert _render_stage_log(stage) == [
-        "  - **Usher** joined the stage at 1 Fanfare."]
-
-
-def test_an_older_build_with_no_key_keeps_the_name_lookup():
-    seats = [_usher(0, 3, 1)]
-    del seats[0]["seat_key"]
-    row = _arrive(0, 3, 1)
-    del row["seat_key"]
-    stage = furina_stage({"furina_stage": {
-        "live": True, "seats": seats, "log": [row]}})
-    assert _render_stage_log(stage) == [
-        "  - **Usher** joined the stage at 3 Fanfare, and stands in the "
-        "front seat."]
+    assert _render_stage_log(stage) == ["  - **Usher** joined the stage."]
 
 
 # ---------------------------------------------------------------------------
@@ -252,7 +224,7 @@ def _combat_with_guest(member: str, name: str) -> str:
         "furina_stage": {
             "live": True, "log": [],
             "seats": [{"member": member, "name": name, "seat": 0,
-                       "fanfare": 8, "entity_id": "7", "seat_key": 1}]},
+                       "entity_id": "7", "seat_key": 1, "guest": True}]},
     }
     return blindplay.observe({
         "state_type": "monster", "screen": "combat", "floor": 3,

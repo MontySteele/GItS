@@ -42,16 +42,16 @@ def _state(aura=None, enemy_hp=99):
 
 def test_crabalettas_act_leaves_no_aura(arm):
     st = _state()
-    st.player.stage = [["crabaletta", 4]]
-    FS.perform(st, "crabaletta")
+    st.player.stage = ["crabaletta"]
+    FS.act(st, "crabaletta")
     assert st.enemies[0].aura is None
     assert st.enemies[0].hp == 99 - FS.ACT_CRABALETTA_DAMAGE
 
 
 def test_crabalettas_bow_leaves_no_aura(arm):
     st = _state()
-    st.player.stage = [["crabaletta", 1]]
-    FS.spend(st, 1)
+    st.player.stage = ["crabaletta"]
+    FS.final_bow(st, 0)
     assert st.player.stage == []
     assert st.enemies[0].aura is None
 
@@ -61,8 +61,8 @@ def test_an_act_into_an_electro_aura_does_not_react(arm, member):
     """The cell D4 was about, flipped: Electro standing, a plain hit landing.
     No Electro-Charged, no DoT, and the aura is still there."""
     st = _state(aura="electro")
-    st.player.stage = [[member, 4]]
-    FS.perform(st, member)
+    st.player.stage = [member]
+    FS.act(st, member)
     enemy = st.enemies[0]
     assert enemy.powers.get("dot", 0) == 0
     assert enemy.aura == "electro"
@@ -71,8 +71,8 @@ def test_an_act_into_an_electro_aura_does_not_react(arm, member):
 
 def test_a_crabaletta_bow_into_an_electro_aura_does_not_react(arm):
     st = _state(aura="electro")
-    st.player.stage = [["crabaletta", 1]]
-    FS.spend(st, 1)
+    st.player.stage = ["crabaletta"]
+    FS.final_bow(st, 0)
     assert st.enemies[0].powers.get("dot", 0) == 0
     assert st.enemies[0].aura == "electro"
 
@@ -80,7 +80,7 @@ def test_a_crabaletta_bow_into_an_electro_aura_does_not_react(arm):
 def test_a_blocked_act_leaves_nothing_behind(arm):
     st = _state()
     st.enemies[0].block = 50
-    st.player.stage = [["crabaletta", 4]]
-    FS.perform(st, "crabaletta")
+    st.player.stage = ["crabaletta"]
+    FS.act(st, "crabaletta")
     assert st.enemies[0].aura is None
     assert st.enemies[0].hp == 99

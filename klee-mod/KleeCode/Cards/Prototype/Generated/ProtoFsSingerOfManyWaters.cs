@@ -41,14 +41,14 @@ public sealed class ProtoFsSingerOfManyWaters : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("singer_of_many_waters");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Singer of Many Waters"),
-        ("description", "Your [gold]front performer[/gold] gains {RaiseAmount:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Gain {RaiseAmount:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -66,7 +66,7 @@ public sealed class ProtoFsSingerOfManyWaters : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.RaiseLead(Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
+        await FurinaStage.Gain(choiceContext, Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
     }
 
     protected override void OnUpgrade()

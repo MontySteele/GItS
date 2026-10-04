@@ -38,14 +38,14 @@ public sealed class ProtoFsCriticsDarling : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_critics_darling");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Critics' Darling"),
-        ("description", "Whenever you choose a [gold]Spend[/gold] mode, deal damage equal to the [gold]Fanfare[/gold] spent to ALL enemies."),
+        ("description", "Whenever your [gold]Fanfare[/gold] changes, deal that much damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

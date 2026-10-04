@@ -9,159 +9,77 @@ NOTHING MEASURED ON A PROTOTYPE IS QUOTABLE (R215 B).
 
 from __future__ import annotations
 
-import inspect
-import random
-
-import pytest
-
-from tier0.engine import combat, furina_stage
-from tier0.engine.state import CombatState, Enemy, Player
 from understudy import blindplay, blindplay_faces, qa_packet
 from understudy.blindplay_notes import ARM_KEYWORDS, keyword_notes
-from understudy.blindplay_render import (_render_stage, _render_stage_acts,
+from understudy.blindplay_render import (_render_stage_forecast,
                                          _render_stage_log)
 from understudy.blindplay_shape import sphere_reveal_action
 
-FS = furina_stage
-
-
-@pytest.fixture
-def arm(monkeypatch):
-    yield
-
-
-def _state(stage=()):
-    st = CombatState(
-        player=Player(hp=200, max_hp=200, fanfare_cap=99,
-                      character_id="furina"),
-        enemies=[Enemy(hp=500, max_hp=500, name="paper",
-                       intents=[{"kind": "block", "amount": 0}])],
-        rng=random.Random(0))
-    st.turn = 2
-    st.player.stage = [list(pair) for pair in stage]
-    return st
-
-
-# ---- 2. A Five-Century Act's returnee from the enemies' turn --------------
-
-def test_a_returnee_from_a_hit_on_the_enemies_turn_acts_at_the_end_of_hers(
-        arm):
-    """Lane 3: returnees "sometimes did not act". A hit's Bow on the enemies'
-    turn returns the performer in THEIR turn; its rest ends as hers begins."""
-    st = _state([["usher", 2]])
-    st.player.powers[FS.FIVE_CENTURY_ACT] = 1
-    FS.absorb(st, 5)
-    FS.settle_hit(st)
-    back = FS.lead(st.player)
-    assert back is not None and back[0] == "usher"
-    assert FS.is_resting(st.player, back)
-
-    FS.turn_start_rest(st)
-    block = st.player.block
-    FS.end_of_turn_acts(st)
-    assert st.player.block == block + FS.ACT_USHER_BLOCK
-
-
-def test_a_return_during_her_own_turn_still_sits_out_her_acts(arm):
-    st = _state([["usher", 3]])
-    st.player.powers[FS.FIVE_CENTURY_ACT] = 1
-    FS.turn_start_rest(st)
-    FS.spend(st, 3)                      # Usher Bows and returns at 1
-    block = st.player.block
-    FS.end_of_turn_acts(st)
-    assert st.player.block == block
-
-
-def test_the_sim_ends_the_rest_before_the_regen():
-    src = inspect.getsource(combat)
-    assert (src.index("furina_stage.turn_start_rest(state)")
-            < src.index("furina_stage.turn_start_regen(state)"))
+# The sim's pins of this round (A Five-Century Act's resting returnee, its
+# order against the regen) left with the bars: the re-founded Stage
+# (review/active/furina-refounding-2026-10-03.md) has no resting rule, and a
+# returner acts at the end of the turn with everyone
+# (`tier0/tests/test_furina_stage.py`).
 
 
 # ---- the page's stage block --------------------------------------------------
 
-def _seat(member, name, index, bar, key, resting=False):
+def _seat(member, name, index, key):
     return {"member": member, "name": name, "long_name": name, "seat": index,
-            "fanfare": bar, "entity_id": None, "key": key,
-            "resting": resting}
+            "entity_id": None, "key": key, "guest": False, "price": 0}
 
 
-def _beat(event, member, name, seat=0, bar=0, moved=0, key=None,
+def _beat(event, member, name, seat=0, fanfare=0, moved=0, key=None,
           standing=None, source=""):
     return {"event": event, "member": member, "name": name, "seat": seat,
-            "key": key, "fanfare": bar, "moved": moved, "why": "",
-            "target": "", "combat_id": "", "each": None, "dealt": None,
-            "target_hp": None, "blocked": None, "caught": 0,
-            "standing": standing, "struck": None, "hp": None, "by": "",
+            "key": key, "fanfare": fanfare, "moved": moved, "why": "",
+            "target": "", "combat_id": "", "standing": standing,
             "source": source}
 
 
-def test_the_stage_line_says_which_performer_sits_out_this_turns_acts():
-    stage = {"seats": [_seat("usher", "Usher", 0, 3, 1),
-                       _seat("usher", "Usher", 1, 1, 2, resting=True)],
-             "log": [], "act_block": 3, "forecast": None}
-    lines = _render_stage(stage, {"block": 0, "hp": 60, "max_hp": 78})
-    assert lines[1] == ("- back: Usher 1 (back from its Bow, so it does not "
-                        "act this turn)")
-    assert "does not act" not in lines[0]
-
-
-def test_revolving_stage_moves_the_back_performer_to_the_front_in_the_log():
-    """Lane 3: "Usher moved from the front seat to the back" while he stood
-    in front. Step Forward files its `rotate` at seat 0; Scene Change at the
-    back seat."""
-    seats = [_seat("usher", "Usher", 0, 4, 2),
-             _seat("chevalmarin", "Chevalmarin", 1, 2, 1)]
-    forward = _render_stage_log({"seats": seats, "log": [
-        _beat("rotate", "usher", "Usher", seat=0, bar=4, key=2, standing=2,
-              source="Revolving Stage")]})
-    assert forward == ["  - **Usher** moved from the back seat to the front "
-                       "(Revolving Stage), bar and all. Nobody left and "
-                       "nobody took a Bow."]
-    backward = _render_stage_log({"seats": seats, "log": [
-        _beat("rotate", "chevalmarin", "Chevalmarin", seat=1, bar=2, key=1,
-              standing=2)]})
-    assert backward[0].startswith("  - **Chevalmarin** moved from the front "
-                                  "seat to the back, bar and all.")
+# (The resting returnee and the rotation lines left with the re-founding,
+# 2026-10-04: no rule makes a performer sit out, and no beat rotates a bar.)
 
 
 def test_every_act_prints_and_a_repeat_says_again():
     """Lane 1: "one 'Usher acted' with two Ushers on stage", and Full House's
     second act "not printed though its damage landed". Two acts in a row read
     the same, so twins name their seats and a repeat says "again"."""
-    seats = [_seat("usher", "Usher", 0, 5, 1), _seat("usher", "Usher", 1, 3, 2)]
+    seats = [_seat("usher", "Usher", 0, 1), _seat("usher", "Usher", 1, 2)]
     twins = _render_stage_log({"seats": seats, "log": [
-        _beat("act", "usher", "Usher", 0, 5, 3, key=1),
-        _beat("act", "usher", "Usher", 1, 3, 3, key=2)]})
-    assert twins == ["  - **Usher** (front seat) acted: Furina gains 3 Block.",
-                     "  - **Usher** (back seat) acted: Furina gains 3 Block."]
+        _beat("act", "usher", "Usher", 0, 5, 4, key=1),
+        _beat("act", "usher", "Usher", 1, 5, 4, key=2)]})
+    assert twins == ["  - **Usher** (seat 1) acted: Furina gains 4 Block.",
+                     "  - **Usher** (seat 2) acted: Furina gains 4 Block."]
     full_house = _render_stage_log({"seats": seats[:1], "log": [
-        _beat("act", "usher", "Usher", 0, 5, 3, key=1),
-        _beat("act", "usher", "Usher", 0, 5, 3, key=1)]})
-    assert full_house == ["  - **Usher** acted: Furina gains 3 Block.",
-                          "  - **Usher** acted again: Furina gains 3 Block."]
+        _beat("act", "usher", "Usher", 0, 5, 4, key=1),
+        _beat("act", "usher", "Usher", 0, 5, 4, key=1)]})
+    assert full_house == ["  - **Usher** acted: Furina gains 4 Block.",
+                          "  - **Usher** acted again: Furina gains 4 Block."]
 
 
-def test_the_acts_forecast_counts_a_run_of_identical_acts():
-    acts = [{"name": "Crabaletta", "amount": 5, "element": "",
-             "target": "a random enemy", "bow": False}] * 2
-    lines = _render_stage_acts({"acts": acts, "act_total": None})
-    assert lines[1] == "  - **Crabaletta**: 5 to a random enemy, twice"
-    assert len(lines) == 2
+def test_the_acts_forecast_counts_a_repeated_act():
+    """Full House's repeats are one forecast row with its count."""
+    forecast = {"fanfare_after": 2, "block": 0, "acts": [
+        {"name": "Crabaletta", "kind": "damage", "amount": 5, "element": "",
+         "target": "a random enemy", "times": 2, "price": 0,
+         "skips": False}]}
+    lines = _render_stage_forecast(forecast)
+    assert lines[1] == "  - **Crabaletta**: 5 damage to a random enemy, twice"
+    assert len(lines) == 3
 
 
 def test_a_move_no_card_made_names_the_power_behind_it():
     """Lane 4: an Usher joined at turn start "with no card named"."""
-    lines = _render_stage_log({"seats": [_seat("usher", "Usher", 0, 3, 1)],
+    lines = _render_stage_log({"seats": [_seat("usher", "Usher", 0, 1)],
                                "log": [
         _beat("arrive", "usher", "Usher", 0, 3, key=1, standing=1,
               source="All the World's a Stage"),
-        _beat("raise", "usher", "Usher", 0, 5, 2, key=1,
+        _beat("gain", "usher", "Usher", -1, 5, 2,
               source="Season Tickets")]})
     assert lines == [
-        "  - **Usher** joined the stage at 3 Fanfare, in the front seat, "
-        "from All the World's a Stage.",
-        "  - **Usher** gains 2 Fanfare from Season Tickets: 3 → 5."]
+        "  - **Usher** joined the stage from All the World's a Stage.",
+        "  - You gained 2 Fanfare from Season Tickets: 3 → 5."]
 
 
 def test_the_wire_source_crosses_to_the_observation():
@@ -169,10 +87,9 @@ def test_the_wire_source_crosses_to_the_observation():
     stage = stage_block({"furina_stage": {
         "live": True,
         "seats": [{"member": "usher", "name": "Gentilhomme Usher",
-                   "seat": 0, "fanfare": 1, "resting": True}],
+                   "seat": 0}],
         "log": [{"event": "arrive", "member": "usher", "seat": 0,
                  "fanfare": 1, "source": "Thunderous Applause"}]}})
-    assert stage["seats"][0]["resting"] is True
     assert stage["log"][0]["source"] == "Thunderous Applause"
 
 
@@ -191,29 +108,18 @@ def test_star_billings_reward_screen_defines_guest_star():
     assert "Guest Star" in names
 
 
-def test_bring_the_house_down_is_not_glossed_as_a_back_performer_spend():
+def test_bring_the_house_down_is_glossed_by_its_own_words():
+    """The re-founding (2026-10-04): its face reads the Fanfare she spent
+    this turn, so the Fanfare row defines it."""
     names = [r["name"] for r in keyword_notes(_reward(
-        ("Bring the House Down", "Spend all of your front performer's "
-                                 "Fanfare. Deal 2 damage per point to ALL "
-                                 "enemies.")))]
-    assert "Spend" not in names
-    assert "front performer" in names
+        ("Bring the House Down", "Deal damage to ALL enemies equal to 3 "
+                                 "times the Fanfare you spent this turn.")))]
+    assert "Fanfare" in names
+    assert "back performer" not in names
     # A real Spend mode still is.
     names = [r["name"] for r in keyword_notes(_reward(
         ("Curtain Rise", "Deal 8 damage. Spend 3: deal 14 instead.")))]
     assert "Spend" in names
-
-
-def test_the_back_performer_row_says_a_lone_performer_is_both():
-    """The Solo seat: "A lone Usher counts as both the front and the back
-    performer, and the fade never touched it." Rule 12 exempts the front.
-    A later seat saw Spend offered from a lone performer: it is both seats
-    (rule 5), so "the front instead" was wrong."""
-    # The second text pass (2026-09-28): the tip's words; the fade has its
-    # own row, and a lone performer is both seats.
-    assert ARM_KEYWORDS["back performer"] == (
-        "Your last performer in line. Spend pays from it first. A lone "
-        "performer is both front and back.")
 
 
 # ---- 7. The Crystal Sphere --------------------------------------------------
@@ -380,53 +286,12 @@ def test_a_new_fight_on_round_one_still_letters_afresh():
         blindplay_faces.forget_fight()
 
 
-# ---- 18. Damage no enemy dealt ------------------------------------------------
-
-def test_a_hit_no_enemy_dealt_says_so():
-    lines = _render_stage_log({"seats": [], "log": [
-        _beat("hit", "usher", "Usher", 0, 1, 2)]})
-    assert lines == ["  - **Usher** took 2 damage no enemy dealt, such as a "
-                     "Burn or Wither in your hand: 3 → 1."]
+# ---- 18 and 22. (Damage no enemy dealt and the intent split left with the
+# re-founding, 2026-10-04: performers take no hits, and the forecast is the
+# acts', not the enemies'.)
 
 
-# ---- 22. The forecast counts the cards in her hand ------------------------
-
-def test_the_intent_line_says_what_came_from_her_hand():
-    """The full-run seat died on "you take 13" at 15 HP; the mod's forecast
-    now counts Burns and Withers in hand, and the page says how much."""
-    from understudy.blindplay_render import _render_stage_forecast
-    forecast = {"seats": [{"name": "Usher", "now": 3, "after": 3,
-                           "leaves": False}],
-                "arrivals": [], "block": 3, "intent_known": True,
-                "front_takes": 0, "reaches_furina": 16, "hand_damage": 3,
-                "unknown": False, "acts": [], "act_total": None,
-                "act_total_target": "", "takers": []}
-    line = _render_stage_forecast(forecast)[-1]
-    assert line.endswith("you take 16, 3 of it from cards in your hand as "
-                         "your turn ends (Burn, Wither and the like).")
-    forecast["hand_damage"] = 0
-    assert _render_stage_forecast(forecast)[-1].endswith("you take 16.")
-
-
-def test_the_wire_hand_damage_crosses_to_the_observation():
-    from understudy.blindplay_board import _stage_forecast
-    assert _stage_forecast({"hand_damage": 5})["hand_damage"] == 5
-    assert _stage_forecast({})["hand_damage"] == 0
-
-
-# ---- 24. Wriothesley's face says who makes room ---------------------------
-
-def test_wriothesleys_face_says_he_is_always_the_front():
-    """The rules pass (2026-10-01; [USER]: "Yes on Wriothesley - it's much
-    cleaner"): one sentence replaces his exceptions."""
-    import yaml
-    from tier0.content import loader
-    rows = yaml.safe_load((loader.DOCS_DIR / "prototype-surface.yaml")
-                          .read_text(encoding="utf-8"))
-    face = next(r for r in rows
-                if r["id"] == "proto_fs_guest_star_wriothesley")["description"]
-    assert "Always your [gold]front performer[/gold]." in face
-    assert "back one" not in face and "holds the front" not in face
+# ---- 24. (Wriothesley's "always front" left with the re-founding.) ---
 
 
 # ---- 25. An every-N-cards counter ----------------------------------------
@@ -478,6 +343,7 @@ def test_a_numbered_potion_resolves_like_a_numbered_card():
 # ---- 29. Lyney, in the glossary --------------------------------------------
 
 def test_lyneys_row_is_the_new_act():
+    # The re-founding (2026-10-04): his badge's sentence.
     assert ARM_KEYWORDS["Lyney"] == (
-        "End of your turn: pay 2 of his Fanfare to deal 6 Pyro damage to a "
-        "random enemy. If not in front, he swaps with the front.")
+        "The first Cue card you play each turn costs 0. Act: pay 1 Fanfare to "
+        "add a Trick to your hand.")

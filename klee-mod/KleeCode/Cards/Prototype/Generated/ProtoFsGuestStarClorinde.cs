@@ -45,13 +45,13 @@ public sealed class ProtoFsGuestStarClorinde : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Clorinde"),
-        ("description", "Summon Clorinde with {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Summon Clorinde. Gain {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("GuestFanfare", 4m)
+            new DynamicVar("GuestFanfare", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

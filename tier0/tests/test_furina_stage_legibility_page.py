@@ -99,7 +99,7 @@ def test_the_shipped_kit_is_not_taught_the_arms_performers():
     page = blindplay.observe(_reward(
         "Deploy Usher. He performs when you play a Companion.", [SPOTLIGHT]))
     assert _row("Gentilhomme Usher") not in page
-    assert "End of your turn: gain 3 Block." not in page
+    assert ARM_KEYWORDS["Gentilhomme Usher"] not in page
 
 
 def test_another_characters_run_is_not_taught_the_stages_summon():
@@ -109,6 +109,7 @@ def test_another_characters_run_is_not_taught_the_stages_summon():
 
 
 def test_the_full_stage_bow_says_why_the_lead_left():
-    assert STAGE_LEAVE_REASONS["recast"] == (
-        "took its Bow to make room for a summon, which takes the back seat "
-        "and adds its Fanfare")
+    # The re-founding (2026-10-04): the front-most Salon member Bows and
+    # leaves to make room; the newcomer adds nothing to anyone's bar.
+    assert STAGE_LEAVE_REASONS["evicted"] == (
+        "it Bowed to make room for a summon on a full stage")

@@ -17,11 +17,13 @@ The read is `review/active/furina-stage-round-1-2026-09-08.md`, and its section
     shown one dead."
 
 WHAT IS PINNED HERE, and it is the PAGE and never the rule: the three-way
-absent/empty/populated contract, the damage order on the first line, the seat
-words, the log's five events, and the three meter lines going away with the arm
-on and staying with it off. The rules themselves are the C# ledger's
-(`klee-mod/KleeTests/Prototype/FurinaStageRoundTwoTests.cs`) and the sim
-engine's (`tier0/tests/test_furina_stage.py`).
+absent/empty/populated contract, her one Fanfare number and its flow, the
+seats front to back, the log's beats in plain words, and the three meter lines
+going away with the arm on and staying with it off. The re-founding
+(2026-10-04, review/active/furina-refounding-2026-10-03.md) retired the bars,
+the damage order and the back performer; the rules are the C# ledger's
+(`klee-mod/KleeTests/Prototype/`) and the sim engine's
+(`tier0/tests/test_furina_stage_v2.py`).
 
 NOTHING MEASURED HERE IS QUOTABLE (R215 B): shape assertions about a renderer.
 """
@@ -33,29 +35,34 @@ import pytest
 from understudy import blindplay, blindplay_board
 
 
-def _seat(member, name, index, bar, entity_id):
-    return {"member": member, "name": name, "seat": index, "fanfare": bar,
-            "entity_id": entity_id}
+def _seat(member, name, index, entity_id, guest=False, price=0, key=None):
+    return {"member": member, "name": name, "seat": index,
+            "seat_key": index + 1 if key is None else key, "guest": guest,
+            "price": price, "entity_id": entity_id}
 
 
 THREE_SEATS = [
-    _seat("usher", "Gentilhomme Usher", 0, 5, "7"),
-    _seat("chevalmarin", "Surintendante Chevalmarin", 1, 1, "8"),
-    _seat("crabaletta", "Mademoiselle Crabaletta", 2, 6, "9"),
+    _seat("usher", "Gentilhomme Usher", 0, "7"),
+    _seat("chevalmarin", "Surintendante Chevalmarin", 1, "8"),
+    _seat("crabaletta", "Mademoiselle Crabaletta", 2, "9"),
 ]
 
 
-def _beat(event, member, name, seat=0, bar=0, moved=0, reason="",
-          target="", combat_id="", each=None):
-    row = {"event": event, "member": member, "name": name, "seat": seat,
-           "fanfare": bar, "moved": moved, "reason": reason,
-           # `EB-743`: the body a Crabaletta act or bow picked, already
-           # renamed by `blindplay_board.name_stage_targets`.
-           "target": target, "combat_id": combat_id}
-    if each is not None:
-        # Round four: the mod's per-enemy figure for Chevalmarin's act.
-        row["each"] = each
-    return row
+def _stage(seats=None, log=None, fanfare=5, **kw):
+    """The wire's `furina_stage` map (`FurinaStageLedger.Snapshot`)."""
+    out = {"live": True, "fanfare": fanfare, "gained_this_turn": 0,
+           "spent_this_turn": 0, "paid_this_turn": 0, "rehearsal": 0,
+           "capacity": 3, "seats": THREE_SEATS if seats is None else seats,
+           "log": log or []}
+    out.update(kw)
+    return out
+
+
+def _beat(event, member, name, seat=0, fanfare=0, moved=0, reason="",
+          target="", combat_id="", source=""):
+    return {"event": event, "member": member, "name": name, "seat": seat,
+            "fanfare": fanfare, "moved": moved, "reason": reason,
+            "target": target, "target_id": combat_id, "source": source}
 
 
 def _state(stage=None, resources=None, hand=None,
@@ -130,228 +137,166 @@ def test_a_seat_not_playing_the_arm_prints_no_stage_section():
 
 def test_an_empty_stage_prints_the_section_and_says_it_is_empty():
     """A POPULATED map with NO SEATS is the third state and the one an absent
-    key cannot carry: rule 8 makes an empty stage the one board on which a
-    Spend rider cannot fire at all, so the page states it rather than falling
-    silent."""
-    page = _page({"live": True, "seats": [], "log": []})
+    key cannot carry, so the page states it rather than falling silent."""
+    page = _page(_stage(seats=[]))
     assert "## Your stage" in page
-    assert "The stage is empty" in page
-    assert "cannot fire" in page
-    assert "lead:" not in page
+    assert "- The stage is empty." in page
+    assert "Seats, front to back" not in page
 
 
 # ---------------------------------------------------------------------------
-# `EB-735`. THE BOARD, IN DAMAGE ORDER.
+# THE RE-FOUNDING (2026-10-04): HER FANFARE, AND THE SEATS FRONT TO BACK.
 # ---------------------------------------------------------------------------
 
-def test_the_first_line_is_the_damage_order_and_the_second_is_the_reserve():
-    """Brief sec.8's last failure mode, answered: "the strip must show the
-    lead's bar beside her Block, in the damage order". Block, then the lead's
-    bar, then her HP -- the three numbers one attack meets, in the order it
-    meets them (rule 6). The reserve is a SECOND line because nothing reaches
-    it, and a reader taking the two as one would read four bars where an attack
-    sees two."""
-    page = _page({"live": True, "seats": THREE_SEATS, "log": []})
-    lines = [ln for ln in page.splitlines() if ln.startswith("- ")]
-
-    assert ("- Block 9 · after the acts: Block 12 · front: Usher 5 · "
-            "Furina 62/78") in lines
-    assert "- middle: Chevalmarin 1 · back: Crabaletta 6" in lines
+def test_the_first_line_is_her_fanfare_and_this_turns_flow():
+    """Fanfare is ONE number on Furina; the page prints it with what this
+    turn gained, what Spends took and what the stars paid, and Rehearsal
+    where she has any."""
+    page = _page(_stage(fanfare=6, gained_this_turn=4, spent_this_turn=3,
+                        paid_this_turn=2, rehearsal=1))
+    assert ("- Fanfare 6 (this turn: 4 gained, 3 spent on Spend, 2 paid by "
+            "stars) · Rehearsal 1") in page
+    assert "· Rehearsal" not in _page(_stage())
 
 
-def test_the_block_line_says_what_the_sweep_will_add():
-    """`EB-743`, second half. The Usher's act is 3 Block at the END of her
-    turn, so the Block on the strip while she is deciding is the Block BEFORE
-    the acts -- and a seat subtracting an intent from it is subtracting from
-    the wrong number ("the Usher's 3 Block landed invisibly every turn and no
-    seat's arithmetic closed"). Two Ushers pay twice; a stage with none says
-    nothing, because there is nothing to forecast."""
-    two = [_seat("usher", "Gentilhomme Usher", 0, 5, "7"),
-           _seat("usher", "Gentilhomme Usher", 1, 2, "8")]
-    assert "after the acts: Block 15" in _page(
-        {"live": True, "seats": two, "log": []})
-    assert "after the acts" not in _page(
-        {"live": True, "seats": THREE_SEATS[1:], "log": []})
+def test_the_seats_print_front_to_back_with_guests_and_their_price():
+    seats = [_seat("usher", "Gentilhomme Usher", 0, "7"),
+             _seat("neuvillette", "Neuvillette", 1, "8", guest=True, price=2),
+             _seat("charlotte", "Charlotte", 2, "9", guest=True)]
+    page = _page(_stage(seats=seats))
+    assert ("- Seats, front to back (3 of 3): **Usher**, **Neuvillette** "
+            "(Guest Star, pays 2 per act), **Charlotte** (Guest Star).") in page
+
+
+def test_the_block_line_says_what_the_acts_will_add():
+    """`EB-743`, second half: the Block on the strip while she decides is the
+    Block BEFORE the acts. The mod's forecast says what they add."""
+    forecast = {"fanfare_after": 5, "block": 4, "acts": [
+        {"member": "usher", "name": "Gentilhomme Usher", "seat_key": 1,
+         "kind": "block", "amount": 4, "element": "", "target": "",
+         "times": 1, "price": 0, "skips": False}]}
+    page = _page(_stage(seats=THREE_SEATS[:1], forecast=forecast,
+                        act_block=4))
+    assert "- Block 9 · after the acts: Block 13 · Furina 62/78" in page
 
 
 def test_the_block_line_reads_the_mods_forecast_when_the_wire_sends_one():
-    """R276 batch two. Arkhe Alignment's Pneuma multiplies the act's Block and
-    Full House adds acts, so a flat 3 per Usher is wrong on exactly the turns
-    a seat plans around. The mod sends its own forecast (`act_block`, off
-    `FurinaStage.ForecastActBlock`) and the page prints it; a 0 forecast (a
-    resting Usher) prints no clause."""
-    assert "after the acts: Block 27" in _page(
-        {"live": True, "seats": THREE_SEATS, "log": [], "act_block": 18})
-    assert "after the acts" not in _page(
-        {"live": True, "seats": THREE_SEATS, "log": [], "act_block": 0})
+    """R276 batch two: the mod's own `act_block`, never a flat sum."""
+    assert "after the acts: Block 27" in _page(_stage(act_block=18))
+    assert "after the acts" not in _page(_stage(act_block=0))
 
 
-def test_three_named_bars_stand_in_seat_order():
-    """The row's own acceptance. Round one's seats read the cast as "one
-    anonymous pool with three names"; this is the page naming all three, each
-    under the seat word its rules are written against."""
-    page = _page({"live": True, "seats": THREE_SEATS, "log": []})
+def test_three_named_performers_stand_in_seat_order():
+    page = _page(_stage())
     for name in ("Usher", "Chevalmarin", "Crabaletta"):
         assert name in page
-    assert page.index("Usher") < page.index("Chevalmarin") < \
-        page.index("Crabaletta")
+    assert page.index("**Usher**") < page.index("**Chevalmarin**") < \
+        page.index("**Crabaletta**")
 
 
-def test_a_lone_performer_is_the_lead_and_never_a_back_performer():
-    """Rule 5's second sentence: "with one performer on stage, that is the
-    lead". A page that called it a back performer would print the rule's own
-    exception as a contradiction -- and a Raise, which lands at the back, would
-    read as going somewhere else."""
-    page = _page({"live": True, "seats": THREE_SEATS[:1], "log": []})
-    assert "front: Usher 5" in page
-    assert "back:" not in page
-    assert "middle:" not in page
-
-
-def test_two_performers_are_lead_and_back_with_no_middle():
-    page = _page({"live": True, "seats": THREE_SEATS[:2], "log": []})
-    assert "front: Usher 5" in page
-    assert "back: Chevalmarin 1" in page
-    assert "middle:" not in page
+def test_no_bar_and_no_back_performer_is_printed():
+    """The re-founding retired the bars and the back performer."""
+    page = _page(_stage())
+    assert "back:" not in page and "middle:" not in page
+    assert "back performer" not in page
 
 
 # ---------------------------------------------------------------------------
-# `EB-735`. THE LOG.
+# `EB-735`. THE LOG, IN PLAIN WORDS.
 # ---------------------------------------------------------------------------
 
-def test_one_line_per_arrival_act_bow_departure_and_rotation():
-    """The five moments the row names, each naming its performer."""
+def test_one_line_per_beat():
+    """Every beat the re-founded ledger files, each naming its performer."""
     log = [
-        _beat("arrive", "chevalmarin", "Surintendante Chevalmarin",
-              seat=1, bar=1),
-        _beat("act", "usher", "Gentilhomme Usher", seat=0, bar=5, moved=3),
-        _beat("leave", "usher", "Gentilhomme Usher", seat=-1, reason="spend"),
-        _beat("bow", "usher", "Gentilhomme Usher", seat=-1, moved=3),
-        _beat("rotate", "crabaletta", "Mademoiselle Crabaletta", seat=2, bar=6),
+        _beat("arrive", "chevalmarin", "Surintendante Chevalmarin", seat=1),
+        _beat("act", "usher", "Gentilhomme Usher", seat=0, moved=4),
+        _beat("pay", "neuvillette", "Neuvillette", seat=1, fanfare=3,
+              moved=2),
+        _beat("act", "neuvillette", "Neuvillette", seat=1, moved=9),
+        _beat("skip", "clorinde", "Clorinde", seat=2, fanfare=0,
+              reason="short"),
+        _beat("leave", "usher", "Gentilhomme Usher", seat=-1,
+              reason="evicted"),
+        _beat("bow", "usher", "Gentilhomme Usher", seat=-1, reason="leaves"),
+        _beat("act", "usher", "Gentilhomme Usher", seat=-1, moved=4),
+        _beat("gain", "usher", "Gentilhomme Usher", seat=-1, fanfare=4,
+              moved=1, source="Bow"),
+        _beat("cue", "crabaletta", "Mademoiselle Crabaletta", seat=2),
+        _beat("move", "crabaletta", "Mademoiselle Crabaletta", seat=0),
+        _beat("spend", "usher", "Gentilhomme Usher", seat=-1, fanfare=1,
+              moved=3),
+        _beat("walk_on", "chevalmarin", "Surintendante Chevalmarin",
+              seat=-1),
     ]
-    page = _page({"live": True, "seats": THREE_SEATS, "log": log})
-
-    # `EB-743`: THE SEAT IS READ OFF THE BLOCK AT PRINT TIME. Chevalmarin
-    # stands in the middle seat now, and that is the seat the reader is looking
-    # at three lines up -- not the back one she arrived in.
-    # `EB-246` (the live look of 2026-09-16): these lines are RENDERER
-    # literals, so the page's markup fold -- which runs over what arrives on
-    # the WIRE -- never met them, and the stage section printed the raw tags.
-    # They are written folded now.
-    assert ("**Chevalmarin** joined the stage at 1 Fanfare, and "
-            "stands in the middle seat.") in page
-    # And every act NAMES ITS EFFECT, with the measured number in it.
-    assert "**Usher** acted: Furina gains 3 Block." in page
-    assert "**Usher** left the stage: emptied by a Spend, so it takes a Bow." \
-        in page
-    # Draft 3 (2026-09-25): a Bow is the act once more, so it prints as one.
-    assert "**Usher** took a Bow: Furina gains 3 Block." in page
-    assert "**Crabaletta** moved from the front seat to the back" in page
+    page = _page(_stage(log=log))
+    for line in (
+            "**Chevalmarin** joined the stage.",
+            "**Usher** acted: Furina gains 4 Block.",
+            "**Neuvillette** paid 2 Fanfare: 5 → 3.",
+            "**Neuvillette** acted: 9 Hydro damage to ALL enemies.",
+            "**Clorinde** skipped its act: not enough Fanfare to pay.",
+            ("**Usher** left the stage: it Bowed to make room for a summon "
+             "on a full stage."),
+            "**Usher** took a Bow.",
+            "**Usher** acted for free: Furina gains 4 Block.",
+            "You gained 1 Fanfare from Bow: 3 → 4.",
+            "You Cued **Crabaletta**.",
+            "**Crabaletta** moved to the front.",
+            "You spent 3 Fanfare: 4 → 1.",
+            "**Chevalmarin** walked on"):
+        assert line in page, line
 
 
 def test_each_performers_act_says_what_it_did():
-    """`EB-743`. "It moved N" covered 3 Block, 5 damage and an aura alike, so
-    no seat's arithmetic closed for a whole run. Each act names its own effect,
-    and Crabaletta names the body it picked -- by the page's own numbered name,
-    since it picks its own."""
-    def line(member, name, moved, target="", each=None):
-        return _page({"live": True, "seats": THREE_SEATS,
-                      "log": [_beat("act", member, name, moved=moved,
-                                    target=target, combat_id="4",
-                                    each=each)]})
+    """`EB-743`: each act names its own effect, with the beat's figure."""
+    def line(member, name, moved):
+        return _page(_stage(log=[_beat("act", member, name, moved=moved)]))
 
-    assert "acted: Furina gains 3 Block." in line(
-        "usher", "Gentilhomme Usher", 3)
-    # Round four: the PER-ENEMY figure, not the four hits' total.
-    # Draft 3 (2026-09-25): no act applies Hydro, so no line says it does.
-    assert "acted: 2 to every enemy." in line(
-        "chevalmarin", "Surintendante Chevalmarin", 8, each=2)
-    assert "acted: 5 to Corpse Slug (2)." in line(
-        "crabaletta", "Mademoiselle Crabaletta", 5, "Corpse Slug (2)")
+    assert "acted: Furina gains 4 Block." in line(
+        "usher", "Gentilhomme Usher", 4)
+    assert "acted: 2 damage to ALL enemies." in line(
+        "chevalmarin", "Surintendante Chevalmarin", 2)
+    assert "acted: 5 damage to a random enemy." in line(
+        "crabaletta", "Mademoiselle Crabaletta", 5)
+    assert "acted: adds a Trick to your hand." in line("lyney", "Lyney", 0)
+    assert "acted: 1 Energy next turn." in line("chevreuse", "Chevreuse", 1)
 
 
-def test_an_act_that_landed_nothing_says_so_and_prints_no_zero():
-    """A Crabaletta hit a Block ate whole. "0 to Corpse Slug" is a claim about
-    a number the beat did not make."""
-    page = _page({"live": True, "seats": THREE_SEATS,
-                  "log": [_beat("act", "crabaletta",
-                                "Mademoiselle Crabaletta", moved=0)]})
-    assert "**Crabaletta** acted: nothing landed." in page
+def test_an_act_that_dealt_nothing_prints_no_zero():
+    page = _page(_stage(log=[_beat("act", "navia", "Navia", moved=0)]))
+    assert "**Navia** acted: no damage." in page
     assert "acted: 0" not in page
 
 
-def test_a_departure_says_why_because_that_is_rules_seven_and_nine():
-    """Rules 7 and 9. Since 2026-09-25 every performer at 0 Fanfare Bows,
-    whatever emptied it; only a rotation, which keeps the bar, does not."""
+def test_a_departure_says_why():
     reasons = {
-        "hit": "emptied by a hit, so it takes a Bow",
-        "spend": "emptied by a Spend, so it takes a Bow",
-        "rotated": "rotated off the front to make room, so no Bow",
-        "final_bow": "took its Bow and left",
-        # 2026-09-25: a summon on a full stage.
-        "recast": ("took its Bow to make room for a summon, which takes the "
-                   "back seat and adds its Fanfare"),
-        # The Guest Cast (2026-09-25): a paying act, and a repeat Guest Star.
-        "paid": "paid its last Fanfare, so it takes a Bow",
-        "repeat": ("took its Bow for a second Guest Star, and comes back to "
-                   "the same seat with the new Fanfare added"),
+        "evicted": "it Bowed to make room for a summon on a full stage",
+        "final_bow": "it took its Bow and left",
     }
     for reason, sentence in reasons.items():
-        page = _page({"live": True, "seats": THREE_SEATS,
-                      "log": [_beat("leave", "usher", "Gentilhomme Usher",
-                                    seat=-1, reason=reason)]})
+        page = _page(_stage(log=[_beat("leave", "usher", "Gentilhomme Usher",
+                                       seat=-1, reason=reason)]))
         assert f"**Usher** left the stage: {sentence}." in page
 
 
-def test_a_beat_that_moved_nothing_prints_no_number():
-    """A Bow into a dead board, or one Block ate whole. A page saying "it
-    moved 0" would be answering a question the beat did not raise."""
-    page = _page({"live": True, "seats": THREE_SEATS,
-                  "log": [_beat("bow", "chevalmarin",
-                                "Surintendante Chevalmarin", seat=-1)]})
-    assert "**Chevalmarin** took a Bow: nothing landed." in page
-    assert "It moved" not in page
-
-
-def test_a_bow_prints_as_the_act_once_more():
-    """Draft 3 (2026-09-25): the Bow is the performer's act one more time,
-    so its line is the act's line, measured the same way."""
-    def line(member, name, moved, target="", each=None):
-        return _page({"live": True, "seats": THREE_SEATS,
-                      "log": [_beat("bow", member, name, seat=-1,
-                                    moved=moved, target=target,
-                                    combat_id="4", each=each)]})
-
-    assert "took a Bow: Furina gains 3 Block." in line(
-        "usher", "Gentilhomme Usher", 3)
-    assert "took a Bow: 2 to every enemy." in line(
-        "chevalmarin", "Surintendante Chevalmarin", 4, each=2)
-    assert "took a Bow: 5 to Corpse Slug (2)." in line(
-        "crabaletta", "Mademoiselle Crabaletta", 5, "Corpse Slug (2)")
-
-
-def test_the_fade_prints_one_line_per_performer_it_took_from():
-    """Draft 3 (2026-09-25), rule 12: "The applause fades: Chevalmarin 9 →
-    7." The mod files the loss and the bar after it."""
-    page = _page({"live": True, "seats": THREE_SEATS,
-                  "log": [_beat("fade", "chevalmarin",
-                                "Surintendante Chevalmarin", seat=1, bar=7,
-                                moved=2)]})
-    assert "The applause fades: **Chevalmarin** 9 → 7." in page
+def test_a_guest_bow_that_stays_says_so():
+    page = _page(_stage(log=[_beat("bow", "neuvillette", "Neuvillette",
+                                   seat=1, reason="stays")]))
+    assert "**Neuvillette** took a Bow and stays on stage." in page
 
 
 def test_the_log_names_the_window_it_covers():
     """The clear is at her turn END, so what a seat opening a turn reads here
     is the sweep it could not watch and the enemy turn that followed. A window
     a reader has to infer is a window a reader gets wrong."""
-    page = _page({"live": True, "seats": THREE_SEATS,
-                  "log": [_beat("act", "usher", "Gentilhomme Usher", moved=3)]})
+    page = _page(_stage(log=[_beat("act", "usher", "Gentilhomme Usher",
+                                   moved=4)]))
     assert "Since you ended your last turn" in page
 
 
 def test_a_quiet_turn_prints_the_board_and_no_log_heading():
-    page = _page({"live": True, "seats": THREE_SEATS, "log": []})
-    assert "front: Usher 5" in page
+    page = _page(_stage())
+    assert "Seats, front to back" in page
     assert "Since you ended your last turn" not in page
 
 
@@ -364,7 +309,7 @@ def test_the_three_retired_meters_leave_the_header_with_the_arm_on():
     sec.2 retires, and the mod still registers them -- `GitsResources` walks
     BaseLib's registry and knows nothing about who is playing -- so they arrive
     on the wire whatever the arm is."""
-    page = _page({"live": True, "seats": THREE_SEATS, "log": []})
+    page = _page(_stage())
     assert "- Encore:" not in page
     assert "- Fanfare:" not in page
     assert "- Furina Burst:" not in page
@@ -383,7 +328,7 @@ def test_they_stay_on_a_board_the_arm_is_not_live_on():
 def test_the_arm_hides_only_the_three_and_not_every_meter():
     """A neighbouring meter is not collateral: what is retired is three named
     resources, not the header."""
-    page = _page({"live": True, "seats": THREE_SEATS, "log": []},
+    page = _page(_stage(),
                  resources={"KLEEMOD_ENCORE": 3, "KLEEMOD_FANFARE": 4,
                             "KLEEMOD_FURINA_BURST": 5, "KLEEMOD_CHARGE": 2})
     assert "- Charge: 2" in page
@@ -399,8 +344,7 @@ def test_the_reader_keeps_the_seat_index_the_wire_sent():
     reconstructing the seat from an array position has to be told somewhere
     that the array is ordered, and the data is that somewhere."""
     read = blindplay_board.furina_stage(
-        {"furina_stage": {"live": True, "seats": copy.deepcopy(THREE_SEATS),
-                          "log": []}})
+        {"furina_stage": _stage(seats=copy.deepcopy(THREE_SEATS))})
     assert [row["seat"] for row in read["seats"]] == [0, 1, 2]
     assert [row["name"] for row in read["seats"]] == [
         "Usher", "Chevalmarin", "Crabaletta"]
@@ -414,8 +358,8 @@ def test_the_page_never_prints_a_section_twice():
     """`assert_one_page`'s rule, which the stage section is now one more
     tenant of."""
     blindplay.assert_one_page(
-        _page({"live": True, "seats": THREE_SEATS,
-               "log": [_beat("act", "usher", "Gentilhomme Usher", moved=3)]}))
+        _page(_stage(log=[_beat("act", "usher", "Gentilhomme Usher",
+                                moved=4)])))
 
 
 # ---------------------------------------------------------------------------
@@ -432,14 +376,13 @@ def test_a_scenario_can_assert_the_stage_block_and_the_missing_meters():
     assert "page_contains" in scenario.CHECKS
     assert "page_lacks" in scenario.CHECKS
 
-    after = _state({"live": True, "seats": THREE_SEATS,
-                    "log": [_beat("bow", "usher", "Gentilhomme Usher",
-                                  seat=-1, moved=4)]})
+    after = _state(_stage(log=[_beat("bow", "usher", "Gentilhomme Usher",
+                                     seat=-1)]))
     contains = scenario.CHECKS["page_contains"]
     lacks = scenario.CHECKS["page_lacks"]
 
-    assert contains({"text": "front: Usher 5"}, {}, after) is None
-    assert contains({"text": "back: Crabaletta 6"}, {}, after) is None
+    assert contains({"text": "Seats, front to back"}, {}, after) is None
+    assert contains({"text": "**Crabaletta**"}, {}, after) is None
     assert contains({"text": "took a Bow"}, {}, after) is None
     assert contains({"text": "no such line"}, {}, after) is not None
     assert lacks({"text": "- Encore:"}, {}, after) is None
@@ -447,8 +390,8 @@ def test_a_scenario_can_assert_the_stage_block_and_the_missing_meters():
 
 
 def test_the_stage_scenario_asserts_the_block_and_parses():
-    """The row's acceptance, on the file that carries it: three named bars in
-    seat order and a bow line, asserted rather than eyeballed."""
+    """The row's acceptance, on the file that carries it: her Fanfare, the
+    seats front to back and the Spend line, asserted rather than eyeballed."""
     import pathlib
 
     from understudy import scenario
@@ -463,9 +406,9 @@ def test_the_stage_scenario_asserts_the_block_and_parses():
     assert "page_contains" in named
     assert "page_lacks" in named
     body = path.read_text(encoding="utf-8")
-    assert "front: Usher" in body            # R276: the Spend takes the back
-    assert "back: Chevalmarin" in body
-    assert "took a Bow" in body
+    assert "Seats, front to back" in body
+    assert "You spent 3 Fanfare" in body
+    assert "back performer" in body          # asserted ABSENT (page_lacks)
 
 
 # ---------------------------------------------------------------------------
@@ -478,7 +421,7 @@ def test_the_encore_row_is_gone_from_an_arm_page():
     `EB-745` nothing grants it, so a rule for a meter that cannot move is noise
     -- even where a shipped row the arm did not swap still prints the word."""
     face = [_card("Spend 2 [gold]Encore[/gold]: draw 2 cards.")]
-    arm = _page({"live": True, "seats": THREE_SEATS, "log": []}, hand=face)
+    arm = _page(_stage(), hand=face)
     assert "**Encore**" not in arm
     # And with no stage block the page is the shipped Furina's, untouched.
     assert "**Encore**" in _page(None, hand=face)
@@ -489,7 +432,7 @@ def test_the_companion_row_says_what_a_companion_does_under_the_arm():
     they rotate the stage, which is the SHIPPED Salon's rule. The Stage retires
     that outright; its Hydro comes from her cards."""
     face = [_card("Deal 4 damage for each Companion you played last turn.")]
-    arm = _page({"live": True, "seats": THREE_SEATS, "log": []}, hand=face)
+    arm = _page(_stage(), hand=face)
     assert "It does nothing to your stage" in arm
     assert "performs the front member" not in arm
     shipped = _page(None, hand=face)
@@ -502,7 +445,7 @@ def test_a_monster_called_a_bomb_does_not_raise_the_bomb_row():
     -- but a monster called one is not a charge on the board, and a Furina seat
     with no Bomb in the game read Klee's whole charge rule on every screen it
     stood on."""
-    page = _page({"live": True, "seats": THREE_SEATS, "log": []},
+    page = _page(_stage(),
                  enemy="Gas Bomb")
     assert "**Bomb**" not in page
     # `EB-753` CLOSED THE SECOND HALF FROM THE OTHER SIDE. This row used to add
@@ -518,57 +461,40 @@ def test_a_monster_called_a_bomb_does_not_raise_the_bomb_row():
 
 
 def test_the_seat_rows_say_what_a_performers_act_is():
-    """Round two, sec.2: the reserve PERFORMS, and nothing printed said so --
-    "the three read as three at the exit and one at the table, because every
-    card speaks in seats and the acts are not documented"."""
-    for word in ("front performer", "back performer"):
-        page = _page({"live": True, "seats": THREE_SEATS, "log": []},
-                     hand=[_card(f"Deal damage equal to the {word}'s bar.")])
-        # The second text pass (2026-09-28): the seat rows no longer carry
-        # the trio's act list; each performer's own row says its act.
-        assert ("Up to 3 performers, or 4 with Sold Out, act at the end "
-                "of your turn") not in page
-        # Draft 3 (2026-09-25): plain damage, no Hydro.
-        assert "End of your turn: deal 5 damage to a random enemy." in page
+    """Round two, sec.2: what each performer does is printed. The front
+    performer row says who acts and when; each performer's own row its act."""
+    page = _page(_stage(), hand=[_card(
+        "Your front performer acts. Summon Crabaletta.")])
+    assert ("- **front performer** — The performer in the first seat. "
+            "Performers act front to back at the end of your turn.") in page
+    assert "Act: deal 5 damage to a random enemy." in page
 
 
-def test_the_back_performer_row_says_where_hits_go():
-    """Rule 6 is per ATTACK: the lead absorbs one hit up to its bar and leaves
-    at 0, so the next attack of the same turn meets whoever stepped forward.
-    ROUND FOUR: "no single attack reaches it" was still read as "the back is
-    safe", so the row says plainly where hits go."""
-    page = _page({"live": True, "seats": THREE_SEATS, "log": []},
-                 hand=[_card("Gain Block equal to the back performer's bar.")])
-    # The guest round (2026-09-25): rule 6 never runs a hit past the front.
-    # 2026-09-26: a lone performer is both seats. The second text pass
-    # (2026-09-28) says it in the tip's words; the fade has its own row.
-    assert "A lone performer is both front and back." in page
-    assert "the front instead" not in page
-    assert "Hits reach it last." not in page
-    assert "no single attack reaches it" not in page
-    assert "nothing hits it" not in page
+def test_the_performer_picker_says_what_it_asks_and_prints_no_cost():
+    """The re-founding (2026-10-04): "Cue a performer" opens a small panel,
+    one face per seat front to back (`StageSeatOption`). It is the card just
+    played asking WHICH performer, so the heading says so, and a face is
+    never played, so it prints no cost and no type."""
+    from understudy.blindplay_notes import STAGE_SEAT_CHOOSER_PROMPT
 
-
-def test_chevalmarins_act_prints_the_per_enemy_figure_or_says_total():
-    """ROUND FOUR. "8 across every enemy" was read as one 8 when it was 2 to
-    each of four. The per-enemy figure where the mod sends one; a sweep with
-    none (uneven, or an older build) prints the total AS a total."""
-    def line(**kw):
-        return _page({"live": True, "seats": THREE_SEATS,
-                      "log": [_beat("act", "chevalmarin",
-                                    "Surintendante Chevalmarin", **kw)]})
-
-    assert "acted: 2 to every enemy." in line(moved=8, each=2)
-    uneven = line(moved=9, each=-1)
-    assert "acted: 9 in total, split across the enemies." in uneven
-    assert "to every enemy" not in uneven
-    assert "9 in total" in line(moved=9)                 # an older build
-    assert "acted: nothing landed." in line(moved=0, each=0)
-
-
-def test_the_empty_stage_line_says_a_raise_summons():
-    """ROUND FOUR: Raise on an empty stage summons."""
-    page = _page({"live": True, "seats": [], "log": []})
-    # The text pass retired `Raise`; the back performer tip's words.
-    assert ("Fanfare a performer would gain summons a random performer "
-            "holding it instead.") in page
+    def face(index, key, title, text):
+        return {"index": index, "id": f"KLEEMOD-{key}_SEAT_OPTION",
+                "name": title, "description": text, "cost": "0",
+                "type": "Skill", "card_type": "Skill"}
+    page = blindplay.observe({
+        "state_type": "card_select",
+        "player": {"character": "Furina", "potions": [], "relics": [],
+                   "max_potion_slots": 3},
+        "card_select": {"screen_type": "choose", "prompt": "Choose a card.",
+                        "can_skip": False, "can_cancel": False,
+                        "preview_showing": False, "can_confirm": False,
+                        "selection_known": True,
+                        "cards": [face(0, "USHER", "Gentilhomme Usher",
+                                       "Act: gain 4 Block."),
+                                  face(1, "CRABALETTA",
+                                       "Mademoiselle Crabaletta",
+                                       "Act: deal 5 damage to a random "
+                                       "enemy.")]}})
+    assert f"# {STAGE_SEAT_CHOOSER_PROMPT}" in page
+    assert "- **Gentilhomme Usher**\n" in page
+    assert "cost 0" not in page

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsGalaPremiere : CustomCardModel, ICharacterCard
+public sealed class ProtoFsGalaPremiere : CustomCardModel, ICharacterCard, IStageSalonSummonCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
@@ -41,14 +41,14 @@ public sealed class ProtoFsGalaPremiere : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this), this);
+        ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_gala_premiere");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gala Premiere"),
-        ("description", "Summon Usher, Chevalmarin and Crabaletta with 3 [gold]Fanfare[/gold] each."),
+        ("description", "Summon Usher, Chevalmarin and Crabaletta."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -66,9 +66,9 @@ public sealed class ProtoFsGalaPremiere : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Summon(choiceContext, Owner.Creature, "usher", 3);
-        await FurinaStage.Summon(choiceContext, Owner.Creature, "chevalmarin", 3);
-        await FurinaStage.Summon(choiceContext, Owner.Creature, "crabaletta", 3);
+        await FurinaStage.Summon(choiceContext, Owner.Creature, "usher");
+        await FurinaStage.Summon(choiceContext, Owner.Creature, "chevalmarin");
+        await FurinaStage.Summon(choiceContext, Owner.Creature, "crabaletta");
     }
 
     protected override void OnUpgrade()

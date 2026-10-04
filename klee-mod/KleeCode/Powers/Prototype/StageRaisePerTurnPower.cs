@@ -11,19 +11,10 @@ namespace KleeMod.Powers;
 /// <summary>
 /// R276 hygiene: FURINA'S ANCIENT UNDER THE STAGE ARM.
 ///
-/// <i>All the World's a Stage</i> printed "gain N Encore" -- a meter the arm
-/// retires (`EB-745`), so under the arm the card was a dead pick at the one
-/// door Darv's Dusty Tome opens. It is kept in her pool on purpose (`EB-363`:
-/// an empty Ancient cell ends the run at the act-two door), so it gets the
-/// Stage's own version of the same idea: at the start of her turn, Raise
-/// <see cref="PowerModel.Amount"/> Fanfare on the BACK performer (rule 5 --
-/// the bank; alone on stage, the lead). On an empty stage it does nothing:
-/// only what you play summons (rule 5, the rules pass, 2026-10-01).
-///
-/// AFTER THE TURN START, beside the lead's regen (<c>FurinaStageHooks</c>):
-/// both are "at the start of your turn" moves on the bars, and neither reads
-/// the other -- the regen is the lead's, this is the back's, and with one
-/// performer the two simply add.
+/// <i>All the World's a Stage</i>, her Ancient, kept in her pool on purpose
+/// (`EB-363`: an empty Ancient cell ends the run at the act-two door). Since
+/// the re-founding (2026-10-04) Fanfare is one number on Furina, so: "At the
+/// start of your turn, gain <see cref="PowerModel.Amount"/> Fanfare."
 /// </summary>
 public sealed class StageRaisePerTurnPower : PowerModel, ILocalizationProvider
 {
@@ -31,8 +22,7 @@ public sealed class StageRaisePerTurnPower : PowerModel, ILocalizationProvider
     {
         ("title", "All the World's a Stage"),
         ("description",
-            "At the start of your turn, your [gold]back performer[/gold] "
-          + "gains {Amount} [gold]Fanfare[/gold]."),
+            "At the start of your turn, gain {Amount} [gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -44,13 +34,11 @@ public sealed class StageRaisePerTurnPower : PowerModel, ILocalizationProvider
     {
         if (Owner == null || player?.Creature != Owner) return;
         if (!FurinaStage.LiveFor(Owner)) return;
-        // A Power's gain: on an empty stage it does nothing (rule 5, the
-        // rules pass, 2026-10-01; round four had it summon). 2026-09-26: the
-        // log names the card behind it.
         using (FurinaStageLedger.For(Owner)
                    .CausedBy(FurinaStage.AllTheWorldsAStageTitle))
         {
-            await FurinaStage.Raise(Owner, (int)Amount, played: false);
+            await FurinaStage.Gain(choiceContext, Owner, (int)Amount,
+                                   FurinaStage.AllTheWorldsAStageTitle);
         }
     }
 }

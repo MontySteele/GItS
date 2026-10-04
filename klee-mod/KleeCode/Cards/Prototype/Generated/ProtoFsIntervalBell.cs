@@ -84,7 +84,7 @@ public sealed class ProtoFsIntervalBell : CustomCardModel, ICharacterCard, IModa
         {
             null,
             new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, (IsUpgraded ? 2 : 3)),
-                                "needs its full price from the back performer"),
+                                "needs that much Fanfare"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Draw 1 card", "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] instead" }[modeIndex]);

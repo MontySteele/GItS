@@ -363,12 +363,17 @@ def card_cost(state: CombatState, card: Card) -> int:
     discount = klee_overhaul.playdate_discount(state, card)
     if discount:
         cost = max(0, cost - discount)
-    # QUARANTINED (`furina_stage.FURINA_STAGE`). POOL COMPLETION, THE LAST
-    # ACT: "Costs 1 less for each empty seat." Pure, like the lines above.
-    # `FurinaStageHooks.TryModifyEnergyCostInCombat` is the C# twin.
+    # FURINA'S STAGE. The Last Act: "Costs 1 less for each empty seat."
+    # Pure, like the lines above. `FurinaStageHooks.TryModifyEnergyCostInCombat`
+    # is the C# twin.
     seats = furina_stage.last_act_discount(state, card)
     if seats:
         cost = max(0, cost - seats)
+    # FURINA'S STAGE. Escoffier's "The first Salon summon card you play each
+    # turn costs 0" and Lyney's "The first Cue card you play each turn costs
+    # 0", while each is on stage. Pure.
+    if furina_stage.cost_free(state, card):
+        cost = 0
     # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): Escoffier's
     # "The first Salon summon card you play each turn costs 0". Pure; a no-op
     # for any player without the slice arm.
@@ -735,8 +740,7 @@ _FREE_PLAY_CONTEXT = (
     # neighbours' reason: a free play that drained inside an outer card would
     # otherwise hand the outer card its number.
     "fanfare_drained_this_card",
-    # QUARANTINED (`furina_stage.FURINA_STAGE`). The Stage's per-play spend
-    # total, saved for its neighbour's reason exactly: a free play that spent
+    # FURINA'S STAGE. The per-play spend total, saved for its neighbour's reason exactly: a free play that spent
     # inside an outer card would otherwise hand the outer card its number.
     "stage_spent_this_card",
     # QUARANTINED (C.COMPANION_OVERHAUL). Gorou's per-play damage total, saved
@@ -850,6 +854,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the flow counts reset
     # at the start of her turn (paper sec.8). A no-op for anyone else.
     furina_v2.turn_open(state)
+    # FURINA'S STAGE: the same reset on her arm (the flow counts and the
+    # once-a-turn latches). A no-op for anyone else.
+    furina_stage.turn_open(state)
     for e in state.enemies:
         e.skittish_fired = False     # Skittish latch is per-turn (§10.9)
     # `EB-495` D5: BeforeSideTurnStart, the PLAYER's side. Hardened Shell's
@@ -977,25 +984,14 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         if not p.alive or state.over:
             return
 
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE STAGE, at the
-    # same site and for the same reason as the two lines above: her starting
-    # relic Salon Solitaire puts Usher in the front seat at 3 on turn one
-    # (brief sec.3 rule 2), and the LEAD's regen (rule 4) runs at the start of
-    # every turn from her second on. Both are one call each, in this order,
-    # because a stage that regenerated before it existed would pay turn one a
-    # point the brief spends a paragraph refusing it ("the first hand sees 3").
-    furina_stage.open_combat(state)
+    # FURINA'S STAGE, at the same site and for the same reason as the lines
+    # above: Salon Solitaire puts Usher on stage on turn one, then Chevreuse's
+    # Energy, Charlotte's extra card and the turn-start Powers
+    # (`furina_stage.turn_start` gives the order). A no-op for anyone else.
+    furina_stage.turn_start(state)
     # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): Salon Solitaire's Usher
     # on turn one, then Charlotte's extra card. A no-op for anyone else.
     furina_v2.turn_start(state)
-    # 2026-10-03: rule 12's fade, FIRST among the Stage's turn-start effects
-    # ("Fanfare decay should be at the start of the next turn, not the end").
-    furina_stage.turn_start_fade(state)
-    # 2026-09-26: a returnee from the enemies' turn performs in hers.
-    furina_stage.turn_start_rest(state)
-    furina_stage.turn_start_regen(state)
-    # R276 batch two: Arkhe Alignment's choice, after the regen it may add to.
-    furina_stage.turn_start_powers(state)
 
     # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
     # every Plan she wrote last turn is carried out, in order, HERE.
@@ -1139,15 +1135,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # VARKA (`varka_oath.turn_end`): Oathbound Aegis's end-of-turn Block,
     # at the same `BeforeSideTurnEnd` site. A no-op for anyone else.
     varka_oath.turn_end(state)
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE ACTS (brief
-    # sec.3 rule 10): "Each performer performs at the end of Furina's turn,
-    # from any seat, a flat act that does not read its bar."
-    #
-    # HERE, beside the two arms above and at the same `BeforeSideTurnEnd`:
-    # after the hand's own end-of-turn triggers, before `_settle_phases`, so an
-    # act that kills settles the board it killed, and before any enemy acts --
-    # which is what makes fight one's turn-one line A add Usher's 3 Block to
-    # the 9 she already has before Nibbit's Butt lands.
+    # FURINA'S STAGE. THE ACTS (rule 1): every performer acts at the end of
+    # Furina's turn, front to back. HERE, beside the two arms above and at the
+    # same `BeforeSideTurnEnd`: after the hand's own end-of-turn triggers,
+    # before `_settle_phases`, so an act that kills settles the board it
+    # killed, and before any enemy acts, so Usher's Block meets their hits.
     furina_stage.end_of_turn_acts(state)
     # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the performers act
     # front to back. A no-op for anyone else.
@@ -1253,9 +1245,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # A turn that ended by killing the last enemy or by the player dying never
     # reaches here, and metrics records -1 there rather than inventing a zero.
     state.emit("turn_close", block=p.block)
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`), INSTRUMENT ONLY.
-    # Brief sec.13's third report: "Turns with one, two and three performers on
-    # stage." One sample per completed player turn, taken beside `turn_close`
+    # FURINA'S STAGE, INSTRUMENT ONLY: the cast and the Fanfare at turn
+    # close. One sample per completed player turn, taken beside `turn_close`
     # and carrying that event's own declared blind spot -- a turn that ended by
     # killing the last enemy or by the player dying never reaches this line.
     furina_stage.note_turn_census(state)
@@ -1413,29 +1404,10 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # because `blocked` exists nowhere else.
             effects.companion_overhaul_block_absorbed(
                 state, enemy, blocked, block_before)
-            # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE DAMAGE
-            # ORDER (brief sec.3 rule 6): "Furina's Block, then the lead
-            # performer's Fanfare, then Furina", PER ATTACK. This is that
-            # site -- inside the per-hit loop, after Block is spent and before
-            # anything can reach her HP -- so a multi-hit intent resolves hit
-            # by hit and a flurry can empty the lead between hits, which is
-            # exactly the difference sec.3 rule 6 draws between a flurry and a
-            # big single hit. IT NEVER RUNS ON TO THE MIDDLE SEAT: `absorb`
-            # reads the lead and only the lead.
-            #
-            # BEFORE THE KOKOMI WARD AND BEFORE ENCORE, which costs nothing to
-            # decide -- the arm swaps her whole starter and pool, so a run
-            # under it holds no card that grants either -- and is written this
-            # way round because the brief's order names Block and then the
-            # cast, with nothing between them.
-            # 2026-09-27: what her Block stopped goes on the front performer
-            # first (Wriothesley's second reading), so a front this hit
-            # empties Bows reading it.
-            furina_stage.credit_blocked(state, blocked)
-            absorbed = furina_stage.absorb(state, dmg - blocked)
-            # 2026-09-25 night: a lead this hit emptied Bows before the rest
-            # of the hit reaches her, so its Bow Block takes that rest first.
-            absorbed += furina_stage.take_caught(state)
+            # FURINA'S STAGE. Wriothesley's act reads the damage her Block
+            # stopped since his last act (any dealer). Performers take no
+            # hits (rule 1), so nothing stands between her Block and her HP.
+            furina_stage.note_blocked(state, blocked)
             # Kokomi's prevention ward (kickoff §2.4): after Block, before
             # anything reaches HP — the first unblocked hit each round is
             # prevented up to the ward's stacks, priced as one random
@@ -1445,12 +1417,12 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # into `blocked` and not credited to any axis yet — A4 credit
             # is a metric ruling ask (Encore precedent), not a default.
             prevented = effects.prevent_damage_exhaust(
-                state, dmg - blocked - absorbed)
+                state, dmg - blocked)
             # Encore absorbs after Block, before HP (kickoff §4). Its own
             # event stream credits A4 sustain -- NEVER folded into
             # `blocked` (§2 harness note, Tier 0 binding).
             hp_loss = resources.absorb_into_encore(
-                state, dmg - blocked - absorbed - prevented, "enemy_hit")
+                state, dmg - blocked - prevented, "enemy_hit")
             state.player.hp -= hp_loss
             resources.note_player_hp_loss(state, hp_loss)
             # Combat-side relic on_first_hp_loss_draw (dead branch on the
@@ -1487,11 +1459,6 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # a hit Block absorbed whole answers back, once per hit.
             kokomi_plan.tidal_riposte(state, enemy, blocked,
                                       dmg - blocked)
-            # QUARANTINED (`furina_stage.FURINA_STAGE`). RULE 7, 2026-09-25:
-            # a lead this hit emptied takes its Bow NOW -- after the hit is
-            # dealt and before the next hit of the intent, the mod's
-            # `AfterDamageReceived` flush. Nothing when the hit killed her.
-            furina_stage.settle_hit(state)
             if not state.player.alive:
                 # Fairy in a Bottle (dead branch on the battery: potions
                 # empty). Passive revive at the lethal hit; if it saves the
@@ -1784,26 +1751,10 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # VARKA, THE OATH REWORK (`varka_oath.open_combat`): his Oath, current
     # element and Fang are per-combat too. A no-op for anyone else.
     varka_oath.open_combat(player)
-    # QUARANTINED (`furina_stage.FURINA_STAGE`). Same line, same reason: the
-    # performers are pets and live one combat (the Stage's rule 1), so every
-    # fight opens with Usher alone at 3. Every run path in this repo builds a
-    # fresh Player per fight today; this is what keeps a caller that reuses
-    # one from opening fight two on fight one's cast, since `open_combat`
-    # fields Usher only onto an empty stage. The C# twin is
-    # `FurinaStageLedger.For`'s combat-identity clear. Empty lists on every
-    # shipped run, so clearing them there changes nothing.
-    player.stage = []
-    player.stage_resting = []
-    player.stage_act_damage_mult = 1
-    player.stage_act_block_mult = 1
-    player.stage_lost = {}
-    player.stage_blocked = {}
-    player.stage_front_lost = {}
-    player.stage_returned = False
-    player.stage_energy_next = 0
-    player.stage_verdict = None
-    player.stage_front_hit = False
-    player.stage_bows = 0
+    # FURINA'S STAGE. Same line, same reason: the performers are pets and
+    # live one combat, so every fight opens on an empty stage with no Fanfare
+    # (Salon Solitaire seats Usher on turn one). Empty on every other run.
+    furina_stage.reset_for_combat(player)
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)
     surface_innate(player.draw_pile)

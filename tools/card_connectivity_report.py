@@ -469,47 +469,38 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # nothing. What follows it on the card reads the amount taken,
     # which is a per-play number and not a state in this vocabulary.
     "drain_fanfare": [_hook("private", "fanfare", "use")],
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`) -- THE STAGE's eight.
+    # FURINA'S STAGE (`tier0.engine.furina_stage`, the re-founded rules).
     # ONE PRIVATE STATE, `stage`, and it is a new one rather than `salon`
-    # reused: the shipped Salon is a queue of names with no bars, and every
-    # verb below is about a BAR. A row written against one cannot be played
-    # against the other, so counting them as competing uses of a single state
-    # would report a contention two cards can never actually have.
+    # reused: the shipped Salon is a different board, and a row written
+    # against one cannot be played against the other, so counting them as
+    # competing uses of a single state would report a contention two cards
+    # can never actually have. The stage here is the seats AND her Fanfare.
     #
     # The classification is the same three-way one the rest of the table uses.
-    # A summon, a Raise and a rotate WRITE the board. The four spends USE it --
-    # they take bars away, so a second spend in one turn finds less, which is
-    # exactly the contention this vocabulary exists to count. `Bis!` is a
-    # `use` too: an act is a resource the turn only has once per performer.
+    # A summon, a gain, a reorder and the Verdict WRITE the board. A Spend
+    # USES it -- it takes Fanfare away, so a second Spend in one turn finds
+    # less, which is exactly the contention this vocabulary exists to count.
+    # A Cue and the acts are uses too (a star pays for each act), and so are
+    # the Bows that send a performer off.
     "stage_summon": [_hook("private", "stage", "write")],
     "stage_raise": [_hook("private", "stage", "write")],
-    "stage_scene_change": [_hook("private", "stage", "write")],
-    "stage_perform_lead": [_hook("private", "stage", "use")],
+    "stage_guest": [_hook("private", "stage", "write")],
     "stage_spend": [_hook("private", "stage", "use")],
     "stage_spend_all": [_hook("private", "stage", "use")],
     "stage_curtain_call": [_hook("private", "stage", "write")],
+    "stage_cue": [_hook("private", "stage", "use")],
     "stage_final_bow": [_hook("private", "stage", "use")],
-    # R276 batch two.
     "stage_step_forward": [_hook("private", "stage", "write")],
     "stage_perform_all": [_hook("private", "stage", "use")],
-    "stage_spend_back_all": [_hook("private", "stage", "use")],
-    # THE GUEST CAST (2026-09-25): a Guest Star fields a performer, a write.
-    "stage_guest": [_hook("private", "stage", "write")],
-    # THE SUPPORTING POOL (2026-09-26). The reorders, the move and the
-    # Verdict write the board; the cash-outs and the Bows use it.
-    "stage_reverse": [_hook("private", "stage", "write")],
-    "stage_whisper": [_hook("private", "stage", "write")],
+    "stage_grand_finale": [_hook("private", "stage", "write")],
     "stage_verdict": [_hook("private", "stage", "write")],
     "stage_dual_nature": [_hook("private", "stage", "write")],
-    # POOL COMPLETION (2026-10-01): Casting Agent fields a Guest Star card,
-    # which writes the stage when played.
+    # Casting Agent fields a Guest Star card, which writes the stage when
+    # played.
     "stage_casting_agent": [_hook("private", "stage", "write")],
-    "stage_intermission": [_hook("private", "stage", "use")],
-    "stage_spend_front_all": [_hook("private", "stage", "use")],
-    "stage_grand_finale": [_hook("private", "stage", "use")],
-    # THE CO-OP SET: Share the Spotlight takes the back bar away, a use.
+    # THE CO-OP SET: Share the Spotlight spends all her Fanfare, a use; Raise
+    # a Toast's verb is the payoff of its Spend mode and spends nothing itself.
     "stage_share_spotlight": [_hook("private", "stage", "use")],
-    # The second batch: Raise a Toast READS the front bar and spends nothing.
     "stage_toast": [_hook("private", "stage", "read")],
     "salon_bow": [_hook("private", "salon", "use")],
     # EB-118 5.5. Rotate is a pure REORDER: it consumes nothing, so it is a

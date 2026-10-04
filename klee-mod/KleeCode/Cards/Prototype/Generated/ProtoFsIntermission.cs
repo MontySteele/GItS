@@ -38,20 +38,20 @@ public sealed class ProtoFsIntermission : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForBow(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_intermission");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Intermission"),
-        ("description", "Your [gold]back performer[/gold] [gold]Bow[/gold]s and leaves. Draw 1 card for every {Every:diff()} [gold]Fanfare[/gold] it had."),
+        ("description", "A performer [gold]Bow[/gold]s and leaves. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Every", 3m)
+            new CardsVar(2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,12 @@ public sealed class ProtoFsIntermission : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Intermission(choiceContext, Owner.Creature, DynamicVars["Every"].IntValue);
+        await FurinaStage.FinalBow(choiceContext, Owner);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Every"].UpgradeValueBy(-1m);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

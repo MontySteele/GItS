@@ -38,14 +38,14 @@ public sealed class ProtoFsCheeredOn : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_cheered_on");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Cheered On"),
-        ("description", "Deal {Damage:diff()} damage. Your [gold]back performer[/gold] gains 2 [gold]Fanfare[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. Gain 2 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -69,7 +69,7 @@ public sealed class ProtoFsCheeredOn : CustomCardModel, ICharacterCard
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        await FurinaStage.Raise(Owner.Creature, 2);
+        await FurinaStage.Gain(choiceContext, Owner.Creature, 2);
     }
 
     protected override void OnUpgrade()

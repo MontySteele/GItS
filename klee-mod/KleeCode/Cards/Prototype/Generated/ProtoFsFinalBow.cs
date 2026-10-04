@@ -41,22 +41,20 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForBow(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_final_bow");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Final Bow"),
-        ("description", "Your [gold]back performer[/gold] [gold]Bow[/gold]s and leaves. Gain [gold]Block[/gold] equal to twice its [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "A performer [gold]Bow[/gold]s and leaves. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(0m),
-            new CalculationExtraVar(2m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrBackFanfare(card))
+            new SpotlightSystem.SpotlitBlockVar(8m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,12 +66,12 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.FinalBow(choiceContext, Owner.Creature);
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
+        await FurinaStage.FinalBow(choiceContext, Owner);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        RemoveKeyword(CardKeyword.Exhaust);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

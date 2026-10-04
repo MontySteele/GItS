@@ -278,7 +278,8 @@ def test_the_other_player_is_printed_with_their_turn_and_their_stage():
                                          partner_pets=STAGE_PETS))
     block = page.split("## The other player", 1)[1]
     assert "- **Furina**: HP 78/78, Block 6, has ended their turn" in block
-    assert "  - Gentilhomme Usher (front): Fanfare 3" in block
+    assert "  - Gentilhomme Usher (front)" in block
+    assert "Fanfare 3" not in block
     assert "WAITING" not in page
 
 

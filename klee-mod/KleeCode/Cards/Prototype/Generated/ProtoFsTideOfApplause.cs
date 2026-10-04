@@ -38,14 +38,14 @@ public sealed class ProtoFsTideOfApplause : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_tide_of_applause");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tide of Applause"),
-        ("description", "Whenever you trigger an [gold]Elemental Reaction[/gold], your [gold]back performer[/gold] gains {PowerAmount:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Whenever you trigger an [gold]Elemental Reaction[/gold], gain {PowerAmount:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -21,11 +21,12 @@ namespace KleeMod.Relics;
 /// Curtain Never Falls are her whole relic pool; the Silent borrow and the
 /// Ethereal Spotlight leave it (<see cref="FurinaRelicPool"/>).
 ///
-/// Each relic is a READ: the Stage's own verbs ask whether the relic is held
-/// (<see cref="Holds{T}"/>) at the one site the rule it bends lives --
-/// the opening, the Bow, the Guest Star, the fade, the Spend -- so a rule is
-/// bent in one place and the forecast sees what play sees. With the Stage off
-/// every read answers "not held".
+/// Each relic is a READ or a one-line hook: the Stage asks whether a relic is
+/// held (<see cref="Holds{T}"/>, <see cref="FurinaStage.ModsOf"/>) at the one
+/// site the rule it bends lives -- the opening, the Bow, the Guest Star, the
+/// turn start, the Spend. With the Stage off every read answers "not held".
+/// The re-founding's sheet (sec.10) rewrote Opera Glasses, Grand Theater
+/// Program and Guest Book on the one Fanfare number.
 /// </summary>
 public static class FurinaStageRelics
 {
@@ -55,11 +56,10 @@ public static class FurinaStageRelics
     internal static string Icon(string slug) => "furina/relics/" + slug + ".png";
 }
 
-/// <summary>Common. "Your Usher starts each combat at 5 Fanfare instead of
-/// 3." Read by <see cref="FurinaStage.OpenCombat"/>.</summary>
+/// <summary>Common (sec.10): "Start each combat with 3 Fanfare."</summary>
 public sealed class OperaGlasses : CustomRelicModel
 {
-    public const int OpeningFanfare = 5;
+    public const int Fanfare = 3;
 
     public OperaGlasses() : base(autoAdd: false) { }
 
@@ -69,17 +69,18 @@ public sealed class OperaGlasses : CustomRelicModel
     {
         ("title", "Opera Glasses"),
         ("description",
-            "Your [gold]Usher[/gold] starts each combat at [blue]"
-          + OpeningFanfare + "[/blue] [gold]Fanfare[/gold] instead of "
-          + FurinaStageLaw.OpeningFanfare + "."),
+            "Start each combat with [blue]" + Fanfare
+          + "[/blue] [gold]Fanfare[/gold]."),
     };
 
-    /// <summary>The Fanfare the opening Usher takes the front seat with.
-    /// </summary>
-    public static int OpeningFor(Creature? furina) =>
-        FurinaStageRelics.Holds<OperaGlasses>(furina)
-            ? OpeningFanfare
-            : FurinaStageLaw.OpeningFanfare;
+    public override async Task BeforeCombatStart()
+    {
+        var furina = Owner?.Creature;
+        if (!FurinaStage.LiveFor(furina)) return;
+        Flash();
+        await FurinaStage.Gain(new ThrowingPlayerChoiceContext(), furina,
+                               Fanfare, "Opera Glasses");
+    }
 
     protected override string IconBaseName => "snake_ring";
     public override string PackedIconPath =>
@@ -89,7 +90,7 @@ public sealed class OperaGlasses : CustomRelicModel
 }
 
 /// <summary>Uncommon. "Whenever a performer Bows, gain 3 Block." Paid after
-/// the Bow's own act, from <see cref="FurinaStage.Bow"/>.</summary>
+/// the Bow's act and its Fanfare (<see cref="StageDirector.Bow"/>).</summary>
 public sealed class StagehandsGloves : CustomRelicModel
 {
     public const int Block = 3;
@@ -110,17 +111,6 @@ public sealed class StagehandsGloves : CustomRelicModel
     public static int BlockFor(Creature? furina) =>
         Block * FurinaStageRelics.Count<StagehandsGloves>(furina);
 
-    public static async Task AfterBow(Creature furina)
-    {
-        var block = BlockFor(furina);
-        if (block <= 0 || furina.IsDead) return;
-        FurinaStageRelics.Flash<StagehandsGloves>(furina);
-        await CreatureCmd.GainBlock(furina, block, ValueProp.Unpowered, null,
-                                    fast: true);
-        // Relics smoke seat 2026-09-27: its Block was named nowhere.
-        Powers.RelicAnswerLog.NoteGain("Stagehand's Gloves", block, "Block");
-    }
-
     protected override string IconBaseName => "snake_ring";
     public override string PackedIconPath =>
         KleePck.Path(FurinaStageRelics.Icon("stagehands_gloves")) ?? base.PackedIconPath;
@@ -128,8 +118,9 @@ public sealed class StagehandsGloves : CustomRelicModel
         KleePck.Path(FurinaStageRelics.Icon("stagehands_gloves")) ?? base.BigIconPath;
 }
 
-/// <summary>Uncommon. "The first Guest Star you summon each combat arrives
-/// with 3 more Fanfare." The latch is the combat's stage ledger's.</summary>
+/// <summary>Uncommon (sec.10): "The first time you summon a Guest Star each
+/// combat, gain 3 Fanfare." The latch is the combat's stage ledger's, spent
+/// by <see cref="StageDirector.SummonGuest"/>.</summary>
 public sealed class GuestBook : CustomRelicModel
 {
     public const int Bonus = 3;
@@ -142,18 +133,16 @@ public sealed class GuestBook : CustomRelicModel
     {
         ("title", "Guest Book"),
         ("description",
-            "The first [gold]Guest Star[/gold] you summon each combat arrives "
-          + "with [blue]" + Bonus + "[/blue] more [gold]Fanfare[/gold]."),
+            "The first time you summon a [gold]Guest Star[/gold] each combat, "
+          + "gain [blue]" + Bonus + "[/blue] [gold]Fanfare[/gold]."),
     };
 
-    /// <summary>The extra Fanfare this Guest Star arrives with: 3 for the
-    /// first of the combat, 0 after. Spends the combat's latch.</summary>
-    public static int TakeBonus(Creature furina)
+    /// <summary>The Fanfare this Guest Star summon is owed: 3 while the
+    /// combat's latch is open, 0 after or without the relic.</summary>
+    public static int BonusFor(Creature furina)
     {
         if (!FurinaStageRelics.Holds<GuestBook>(furina)) return 0;
-        var ledger = FurinaStageLedger.For(furina);
-        if (ledger.GuestBookSpent) return 0;
-        ledger.GuestBookSpent = true;
+        if (FurinaStageLedger.For(furina).GuestBookSpent) return 0;
         FurinaStageRelics.Flash<GuestBook>(furina);
         return Bonus;
     }
@@ -165,11 +154,12 @@ public sealed class GuestBook : CustomRelicModel
         KleePck.Path(FurinaStageRelics.Icon("guest_book")) ?? base.BigIconPath;
 }
 
-/// <summary>Rare. "The applause no longer fades." Rule 12 off, at
-/// <see cref="FurinaStage.Fades"/>, which the end-of-turn fade and the
-/// forecast both read.</summary>
+/// <summary>Rare (sec.10, overriding sec.8): "At the start of your turn, gain
+/// 1 Fanfare." Paid in <see cref="FurinaStage.TurnStart"/>.</summary>
 public sealed class GrandTheaterProgram : CustomRelicModel
 {
+    public const int Fanfare = 1;
+
     public GrandTheaterProgram() : base(autoAdd: false) { }
 
     public override RelicRarity Rarity => RelicRarity.Rare;
@@ -178,7 +168,8 @@ public sealed class GrandTheaterProgram : CustomRelicModel
     {
         ("title", "Grand Theater Program"),
         ("description",
-            "Your performers no longer fade."),
+            "At the start of your turn, gain [blue]" + Fanfare
+          + "[/blue] [gold]Fanfare[/gold]."),
     };
 
     protected override string IconBaseName => "snake_ring";
@@ -188,9 +179,8 @@ public sealed class GrandTheaterProgram : CustomRelicModel
         KleePck.Path(FurinaStageRelics.Icon("grand_theater_program")) ?? base.BigIconPath;
 }
 
-/// <summary>Rare. "A performer that Bows acts twice as it leaves." Read at
-/// <see cref="FurinaStage.Bow"/>, and by the ledger's Bow Block, so the Block
-/// an emptied Usher's Bow catches from the rest of a hit is both acts'.
+/// <summary>Rare. "A performer that Bows acts twice as it leaves." Read by
+/// <see cref="StageDirector.Bow"/> through <see cref="FurinaStage.ModsOf"/>.
 /// </summary>
 public sealed class CurtainCallBouquet : CustomRelicModel
 {
@@ -219,12 +209,9 @@ public sealed class CurtainCallBouquet : CustomRelicModel
         KleePck.Path(FurinaStageRelics.Icon("curtain_call_bouquet")) ?? base.BigIconPath;
 }
 
-/// <summary>Rare. "Your Spends cost 1 less Fanfare." Re-aimed by the Furina
-/// rules pass (2026-10-01): its old text, "A Spend your back performer can't
-/// cover is paid by the performers in front of it, back to front", became
-/// rule 8 itself, so it needed a new job. Read by
-/// <c>FurinaStage.PriceOf</c>, at the Spend gate and the payment alike.
-/// Game-side only, like every relic.
+/// <summary>Rare. "Your Spends cost 1 less Fanfare." Read by
+/// <c>FurinaStage.PriceOf</c>, at the Spend gate and the payment alike. A
+/// spend-all has no price to lower. Game-side only, like every relic.
 /// </summary>
 public sealed class PalaisLedger : CustomRelicModel
 {
@@ -251,11 +238,9 @@ public sealed class PalaisLedger : CustomRelicModel
 }
 
 /// <summary>Shop. "At the start of each combat, summon a random performer
-/// behind your Usher." LATE in the combat start, so the starter has already
-/// put Usher in front (Salon Solitaire and The Curtain Never Falls both open
-/// in <c>BeforeCombatStart</c>); the opening is idempotent, so it is asked
-/// again here and a stage opened by neither still reads "behind your Usher".
-/// </summary>
+/// behind your Usher": a random Salon member, LATE in the combat start, so
+/// the starter has already put Usher on stage (the opening is idempotent, so
+/// it is asked again here).</summary>
 public sealed class OpeningNight : CustomRelicModel
 {
     public OpeningNight() : base(autoAdd: false) { }

@@ -354,26 +354,25 @@ public class PoolCompletionTests : IDisposable
         Assert.False(CenterOfAttentionPower.Covers(null));
         var spend = Seq("FurinaStage", "Spend");
         var claim = spend.FindIndex(c => c.Contains("CenterOfAttentionPower.TryClaim"));
-        var pay = spend.FindIndex(c => c.Contains("FurinaStageLedger.Spend"));
-        var critics = spend.FindIndex(c => c.Contains("FurinaStage.CriticsDarling"));
-        Assert.True(claim >= 0 && pay > claim && critics > pay);
-        // The rules pass (2026-10-01) dropped its short-bar clause: the gate
-        // no longer asks it.
+        var pay = spend.FindIndex(c => c.Contains("StageDirector.Spend"));
+        Assert.True(claim >= 0 && pay > claim);
         Assert.DoesNotContain(Seq("FurinaStage", "CanSpend"),
                               c => c.Contains("CenterOfAttentionPower.Covers"));
-        Assert.Contains(Seq("FurinaStage", "CriticsDarling"),
+        // The re-founding (sec.10): Critics' Darling deals every change to
+        // her Fanfare to a random enemy, settled by the director.
+        Assert.Contains(Seq("StageDirector", "Settle"),
+                        c => c.Contains("IStageBoard.CriticsHit"));
+        Assert.Contains(Seq("GameStageBoard", "CriticsHit"),
                         c => c.Contains("ElementalHit.DealUnelemented"));
     }
 
     [Fact]
     public void Star_turn_acts_after_the_arrival_and_star_billing()
     {
-        var guest = Seq("FurinaStage", "GuestStar");
-        var billing = guest.FindIndex(c => c.Contains("FurinaStage.StarBilling"));
-        var star = guest.FindIndex(c => c.Contains("FurinaStage.StarTurn"));
+        var guest = Seq("StageDirector", "SummonGuest");
+        var billing = guest.FindIndex(c => c.Contains("IStageBoard.Draw"));
+        var star = guest.FindIndex(c => c.Contains("StageDirector.Act"));
         Assert.True(billing >= 0 && star > billing);
-        Assert.Contains(Seq("FurinaStage", "StarTurn"),
-                        c => c.Contains("FurinaStage.Perform"));
     }
 
     // ---- the three Ancients ----------------------------------------------

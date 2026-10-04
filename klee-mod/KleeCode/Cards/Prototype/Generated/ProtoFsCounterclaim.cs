@@ -38,54 +38,36 @@ public sealed class ProtoFsCounterclaim : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForRehearsal(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_counterclaim");
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Counterclaim"),
-        ("description", "Deal {Damage:diff()} damage. If an enemy hit your [gold]front performer[/gold] since your last turn, deal {BranchDamage:diff()} more."),
+        ("title", "Dress Rehearsal"),
+        ("description", "Gain {PowerAmount:diff()} [gold]Rehearsal[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 7m, ValueProp.Move, followsHit: true)
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoFsCounterclaim()
-        : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
+        : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
-            .WithElementHitFx(this)
-            .Execute(choiceContext);
-        if (FurinaStage.FrontHitSinceLastTurn(Owner.Creature))
-        {
-            await DamageCmd.Attack((IsUpgraded ? 9m : 7m))
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithElementHitFx(this)
-                .Execute(choiceContext);
-        }
+        await PowerCmd.Apply<RehearsalPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
-        // conditional_then_damage: the then-branch amount swaps on an IsUpgraded read at play time;
-        // the FACE prints it live (`EB-657`, the folded pair below) where the row has one,
-        // and swaps via {IfUpgraded:show:...|...} where it does not.
-        DynamicVars["BranchDamage"].UpgradeValueBy(2m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

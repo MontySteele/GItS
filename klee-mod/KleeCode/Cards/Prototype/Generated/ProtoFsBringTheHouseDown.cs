@@ -38,22 +38,22 @@ public sealed class ProtoFsBringTheHouseDown : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bring_the_house_down");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bring the House Down"),
-        ("description", "Your [gold]front performer[/gold] loses all its [gold]Fanfare[/gold]. If it empties, it [gold]Bow[/gold]s. Deal {ExtraDamage:diff()} damage to ALL enemies per point lost.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal damage to ALL enemies equal to {ExtraDamage:diff()} times the [gold]Fanfare[/gold] you spent this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new ExtraDamageVar(4m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrLeadFanfare(card))
+            new ExtraDamageVar(3m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentThisTurn(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,7 +65,6 @@ public sealed class ProtoFsBringTheHouseDown : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.SpendAllOfFront(choiceContext, Owner.Creature);
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)

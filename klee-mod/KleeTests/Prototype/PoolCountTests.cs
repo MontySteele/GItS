@@ -73,9 +73,12 @@ public class PoolCountTests
     }
 
     [Fact]
-    public void Furina_is_78_and_23_35_20_with_two_ancients_and_five_coop()
+    public void Furina_is_78_and_24_33_21_with_two_ancients_and_five_coop()
     {
-        AssertPool("FurinaStageRoster", "Pool", 23, 35, 20);
+        // The re-founding (2026-10-04, sec.10): Gentilhomme Usher is a
+        // Common where Leading Lady was an Uncommon, and Premiere Season a
+        // Rare where Double Casting was an Uncommon.
+        AssertPool("FurinaStageRoster", "Pool", 24, 33, 21);
         AssertAncients("Furina");
         AssertTier("FurinaStageRoster", "MultiplayerRows");
     }

@@ -229,6 +229,14 @@ public static class KleeMod
                     Powers.VarkaRules.KnightPromptText,
                 [Powers.VarkaRules.ElementPromptKey] =
                     Powers.VarkaRules.ElementPromptText,
+                // FURINA, THE STAGE (the re-founding): the performer picker's
+                // three prompts (`FurinaStage.ChooseSeat`).
+                [Powers.FurinaStage.CuePromptKey] =
+                    Powers.FurinaStage.CuePromptText,
+                [Powers.FurinaStage.FrontPromptKey] =
+                    Powers.FurinaStage.FrontPromptText,
+                [Powers.FurinaStage.BowPromptKey] =
+                    Powers.FurinaStage.BowPromptText,
             });
 
             // Runtime copy of the custom-keyword loc. The pck carries the
@@ -495,10 +503,11 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.BowKey + ".title"] = "Bow",
                     [Cards.ArmKeywordTips.FrontPerformerKey + ".title"] =
                         "Front performer",
-                    [Cards.ArmKeywordTips.BackPerformerKey + ".title"] =
-                        "Back performer",
-                    // The second text pass (2026-09-28): the fade's own tip.
-                    [Cards.ArmKeywordTips.FadeKey + ".title"] = "Fade",
+                    // THE RE-FOUNDING (2026-10-04): the Cue and Rehearsal.
+                    // The back performer and the fade retired with the bars.
+                    [Cards.ArmKeywordTips.CueKey + ".title"] = "Cue",
+                    [Cards.ArmKeywordTips.RehearsalKey + ".title"] =
+                        "Rehearsal",
                     // R276 batch two: Arkhe Alignment's two halves.
                     [Cards.ArmKeywordTips.OusiaKey + ".title"] = "Ousia",
                     [Cards.ArmKeywordTips.PneumaKey + ".title"] = "Pneuma",

@@ -41,14 +41,14 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("let_the_people_rejoice");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Let the People Rejoice"),
-        ("description", "Deal damage to ALL enemies equal to twice your performers' total [gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage to ALL enemies per point. Your performers [gold]Bow[/gold] and return.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -56,7 +56,7 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(0m),
             new ExtraDamageVar(2m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrTotalFanfare(card))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrFanfare(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,7 +68,7 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaStage.CollectAll(Owner.Creature);
+        await FurinaStage.SpendAll(choiceContext, Owner.Creature);
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)

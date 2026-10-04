@@ -81,14 +81,14 @@ public class CoopSetTwoTests
     [Fact]
     public void The_faces_are_the_designs_words()
     {
+        // The re-founding (2026-10-04, sec.10).
         Assert.Equal(
-            "Another player gains temporary [gold]Strength[/gold] equal to "
-            + "your [gold]front performer[/gold]'s [gold]Fanfare[/gold], up "
-            + "to {ToastCap:diff()}.",
+            "Draw 1 card. [gold]Spend[/gold] 4: another player gains "
+            + "{IfUpgraded:show:6|4} temporary [gold]Strength[/gold].",
             Face(new ProtoFsRaiseAToast()));
         Assert.Equal(
-            "Whenever another player loses HP, your [gold]front "
-            + "performer[/gold] gains {PowerAmount:diff()} [gold]Fanfare[/gold].",
+            "Whenever another player loses HP, gain {PowerAmount:diff()} "
+            + "[gold]Fanfare[/gold].",
             Face(new ProtoFsTheCrowdRoars()));
         Assert.Equal(
             "Place a [gold]Mine[/gold] {BombSize:diff()}. While an enemy holds "
@@ -104,11 +104,10 @@ public class CoopSetTwoTests
     [Fact]
     public void The_upgrades_are_the_ruled_ones()
     {
-        // Raise a Toast: cap 6 -> 8.
-        var toast = new ProtoFsRaiseAToast();
-        Assert.Equal(6m, toast.DynamicVars["ToastCap"].BaseValue);
-        Upgrade(toast);
-        Assert.Equal(8m, toast.DynamicVars["ToastCap"].BaseValue);
+        // Raise a Toast (the re-founding): its Spend mode gives 4 temporary
+        // Strength, 6 upgraded -- a play-time IsUpgraded read in the mode.
+        Assert.Contains("FurinaStage.RaiseAToast",
+            Il.Calls(Il.Method("ProtoFsRaiseAToast", "OnPlay")));
 
         // Shrapnel: Mine 4 -> 7.
         var shrapnel = new ProtoKoShrapnel();
@@ -189,57 +188,38 @@ public class CoopSetTwoTests
     // ---- Raise a Toast -----------------------------------------------------
 
     [Fact]
-    public void Raise_a_toast_reads_the_front_bar_capped_and_spends_nothing()
+    public void Raise_a_toast_spends_four_in_a_mode_then_gives_the_strength()
     {
-        using var _ = new StageArm();
-        var (furina, stage) = Stage((StagePerformer.Usher, 4),
-                                    (StagePerformer.Crabaletta, 9));
-        // The FRONT performer's bar, not the back one's and not the total.
-        Assert.Equal(4, FurinaStage.ToastAmount(furina.Creature, 6));
-
-        // Read, never spent.
-        Assert.Equal(4, stage.Lead!.Fanfare);
-        Assert.Equal(9, stage.Back!.Fanfare);
-        Assert.Equal(2, stage.Seats.Count);
-
-        // A front bar past the cap gives the cap: 6, and 8 on the `+` card.
-        var (big, bigStage) = Stage((StagePerformer.Usher, 9));
-        Assert.Equal(6, FurinaStage.ToastAmount(big.Creature, 6));
-        Assert.Equal(8, FurinaStage.ToastAmount(big.Creature, 8));
-        Assert.Equal(9, bigStage.Lead!.Fanfare);
+        // The re-founding (sec.10): "Draw 1 card. Spend 4: another player
+        // gains 4 temporary Strength." A Spend mode, offered only with 4
+        // Fanfare; the Spend comes before the Strength.
+        var seq = Il.CallSequence(Il.Method("ProtoFsRaiseAToast", "OnPlay")).ToList();
+        var spend = seq.IndexOf("FurinaStage.Spend");
+        var toast = seq.IndexOf("FurinaStage.RaiseAToast");
+        Assert.True(spend >= 0 && spend < toast);
+        Assert.Contains("FurinaStage.CanSpend", seq);
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task An_empty_stage_toasts_zero_and_the_card_is_still_playable()
+    public async System.Threading.Tasks.Task A_toast_of_nothing_or_to_nobody_gives_nothing()
     {
-        using var _ = new StageArm();
-        var (furina, _) = Stage();
+        FurinaStageLedger.ResetAll();
+        var furina = Seat.Furina().WithCombatState();
         var ally = Seat.Klee();
-        Assert.Equal(0, FurinaStage.ToastAmount(furina.Creature, 6));
-        // Nothing to give: no power is applied for nothing, and the call
-        // returns without a command.
         Assert.Equal(0, await FurinaStage.RaiseAToast(
-            null!, furina.Creature, ally.Creature, 6, cardSource: null));
-        // Playable: the card declares no playability gate of its own.
-        Assert.Null(typeof(ProtoFsRaiseAToast).GetProperty(
-            "IsPlayable", HeadlessGame.All | System.Reflection.BindingFlags.DeclaredOnly));
-
+            null!, furina.Creature, ally.Creature, 0, cardSource: null));
+        Assert.Equal(0, await FurinaStage.RaiseAToast(
+            null!, furina.Creature, null, 4, cardSource: null));
+        FurinaStageLedger.ResetAll();
     }
 
     [Fact]
     public void The_toast_is_coordinates_temporary_strength_placed_by_furina()
     {
-        // The base game's Coordinate: a TemporaryStrengthPower subclass, so it
-        // is Strength that leaves at the end of the turn.
         Assert.True(typeof(TemporaryStrengthPower)
             .IsAssignableFrom(typeof(RaiseAToastPower)));
-
         var body = Il.Calls(Il.Method("FurinaStage", "RaiseAToast"));
-        Assert.Contains("FurinaStage.ToastAmount", body);
         Assert.Contains(body, c => c.StartsWith("PowerCmd.Apply"));
-        Assert.DoesNotContain(body, c => c.Contains("Spend"));
-        Assert.Contains("FurinaStage.RaiseAToast",
-            Il.Calls(Il.Method("ProtoFsRaiseAToast", "OnPlay")));
     }
 
     // ---- The Crowd Roars -------------------------------------------------------
@@ -261,38 +241,12 @@ public class CoopSetTwoTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task The_crowd_roars_raises_the_front_performer_by_one()
+    public void The_crowd_roars_gains_fanfare()
     {
-        using var _ = new StageArm();
-        var (furina, stage) = Stage((StagePerformer.Usher, 3),
-                                    (StagePerformer.Crabaletta, 5));
-        var ally = Seat.Klee();
-        var roars = Power<TheCrowdRoarsPower>(furina.Creature, furina.Creature, 1);
-
-        await roars.AfterCurrentHpChanged(ally.Creature, -7m);
-        Assert.Equal(4, stage.Lead!.Fanfare);     // the front, by 1
-        Assert.Equal(5, stage.Back!.Fanfare);     // the back untouched
-
-        // Her own loss, a heal, and an enemy's loss give nothing.
-        await roars.AfterCurrentHpChanged(furina.Creature, -3m);
-        await roars.AfterCurrentHpChanged(ally.Creature, 6m);
-        await roars.AfterCurrentHpChanged(Enemy(), -9m);
-        Assert.Equal(4, stage.Lead.Fanfare);
-    }
-
-    [Fact]
-    public void The_crowd_on_an_empty_stage_brings_a_performer_on_holding_it()
-    {
-        // STRUCTURAL (an arrival needs a live combat). The People of
-        // Fontaine's rule: its Raise asks the round-four door first, and a
-        // random performer arrives holding the Fanfare. The front-performer
-        // Raise asks the SAME door, so the Crowd behaves the same way.
-        Assert.Contains("FurinaStage.RaiseLead",
+        // The re-founding (sec.10): "Whenever another player loses HP, gain 1
+        // Fanfare" -- Furina's one number.
+        Assert.Contains("FurinaStage.Gain",
             Il.Calls(Il.Method("TheCrowdRoarsPower", "AfterCurrentHpChanged")));
-        Assert.Contains("FurinaStage.SummonForRaise",
-            Il.Calls(Il.Method("FurinaStage", "RaiseLead")));
-        Assert.Contains("FurinaStage.SummonForRaise",
-            Il.Calls(Il.Method("FurinaStage", "Raise")));
     }
 
     // ---- Shrapnel ----------------------------------------------------------------
@@ -566,34 +520,6 @@ public class CoopSetTwoTests
         Seat.Set(card, "IsMutable", true);
         typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
             .Invoke(card, Array.Empty<object?>());
-    }
-
-    private sealed class StageArm : IDisposable
-    {
-
-        internal StageArm()
-        {
-            FurinaStageLedger.ResetAll();
-        }
-
-        public void Dispose()
-        {
-            FurinaStageLedger.ResetAll();
-        }
-    }
-
-    private static (Seat Seat, FurinaStageLedger Stage) Stage(
-        params (StagePerformer Who, int Fanfare)[] seats)
-    {
-        var seat = Seat.Furina().WithCombatState();
-        var stage = FurinaStageLedger.For(seat.Creature);
-        stage.Clear();
-        foreach (var (who, fanfare) in seats)
-        {
-            stage.Summon(who);
-            stage.Raise(fanfare - FurinaStageLaw.SummonFanfare);
-        }
-        return (seat, stage);
     }
 
     /// <summary>A power on <paramref name="owner"/>, placed by

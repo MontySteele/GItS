@@ -845,12 +845,15 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # two are different promises:
             # `block` is what the card gains, `cap` is what it will not gain
             # past, and a row could one day print both.
-            # The second co-op batch's Raise a Toast prints a ceiling too
-            # ("temporary Strength equal to your front performer's Fanfare,
-            # up to 6"); `gen_klee_cards.CAP_VAR` is the twin.
+            # Furina's co-op rows print their per-point rate in the same key
+            # (`gen_klee_cards.CAP_VAR` is the twin): Share the Spotlight's
+            # "N Block per point" (top level) and Raise a Toast's "N
+            # temporary Strength", which sits inside its Spend mode -- so
+            # this key reads `everywhere`, the first such op on the card.
             ok = _bump_first(
-                (fx for fx in top
-                 if fx.get("op") in ("block_largest_bomb", "stage_toast")),
+                (fx for fx in everywhere
+                 if fx.get("op") in ("block_largest_bomb", "stage_toast",
+                                     "stage_share_spotlight")),
                 "cap", val)
         elif key == "grow":
             # One key, three ops: `grow_bombs.amount`, `merge_bombs.growth`
@@ -906,13 +909,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "stage_guest"),
                              "amount", val)
-        elif key == "stage_intermission":
-            # THE SUPPORTING POOL (2026-09-26): Intermission's "for every 3"
-            # (-1), the first top-level op of its name -- codegen's
-            # `STAGE_AMOUNT_VARS` binds the same one. (Stage Whisper's "up to
-            # 3" left with its second rework, the same day: no amount.)
-            ok = _bump_first((fx for fx in top if fx.get("op") == key),
-                             "amount", val)
         elif key == "stage_spend":
             # POOL COMPLETION (2026-10-01), Interval Bell's "Spend 3 [2]": the
             # FIRST `stage_spend` anywhere on the card -- a Spend is always a
@@ -924,8 +920,8 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               if fx.get("op") == "stage_spend"),
                              "amount", val)
         elif key == "stage_raise":
-            # R276 batch two (Hold Your Places, Gala Dinner): a Stage Raise's
-            # printed N, the first top-level `stage_raise` -- codegen's
+            # Furina's "Gain N Fanfare" (Rising Applause, Hold Your Places,
+            # Singer of Many Waters): the printed N, the first top-level `stage_raise` -- codegen's
             # `stage_raise_var_effect` binds the same one.
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "stage_raise"),

@@ -930,20 +930,20 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # with and without this branch and DRAFTER_VERSION does not move. The
         # same terms `block_half_damage` took.
         return 0.0
-    # -- the FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, EB-732) --
+    # -- FURINA'S STAGE (`tier0.engine.furina_stage`) --
     if op in FURINA_STAGE_OPS:
-        # ZERO, all eight, and it is `drain_fanfare`'s argument one arm over
+        # ZERO, every one, and it is `drain_fanfare`'s argument one arm over
         # rather than a shrug. The Stage's verbs are about a BOARD -- who is on
-        # stage, which bar is in front, what a bar holds right now -- and an
-        # offer screen has no board: at draft time there is no combat, so
-        # "what would this Spend take?" and "what is the lead's bar?" have no
-        # answer that is not a guess about how a run goes. What the spends BUY
+        # stage, who is in front, how much Fanfare she holds -- and an offer
+        # screen has no board: at draft time there is no combat, so "what
+        # would this Cue do?" and "can this Spend be paid?" have no answer
+        # that is not a guess about how a run goes. What the spends BUY
         # is printed by the effect beside them (`damage`, `block`) as an
         # ordinary amount or an `amount_formula` the pricer already reads at
         # its own base, so pricing the verb as well would charge the card for
         # its cost and credit it for its payout on the same line.
         #
-        # Prototype surface only: no shipped row prints any of these eight, no
+        # Prototype surface only: no shipped row prints any of these, no
         # offerable pool holds one with the flag off, so every drafted number
         # in the world is byte-identical with and without this branch and
         # DRAFTER_VERSION does not move. The same terms `drain_fanfare` and
@@ -2452,34 +2452,22 @@ def prints_attack_body(card: Card) -> bool:
 # `tools/lint_constant_parity.py` applies to the C# mirrors. Adding an op
 # therefore forces a pricing decision at the moment the author still knows
 # the answer, which is the whole point.
-#: The eight FURINA STAGE verbs (QUARANTINED, `furina_stage.FURINA_STAGE`).
-#: One tuple rather than eight branches, because they all take the same price
-#: for the same reason and a per-op branch would invite eight different ones.
-FURINA_STAGE_OPS = ("stage_summon", "stage_raise", "stage_scene_change",
-                    "stage_perform_lead", "stage_spend", "stage_spend_all",
-                    "stage_curtain_call", "stage_final_bow",
-                    # R276 batch two.
-                    "stage_step_forward", "stage_perform_all",
-                    "stage_spend_back_all",
-                    # THE GUEST CAST (2026-09-25).
-                    "stage_guest",
-                    # THE SUPPORTING POOL (2026-09-26).
-                    "stage_reverse", "stage_whisper",
-                    "stage_intermission", "stage_spend_front_all",
-                    "stage_grand_finale", "stage_verdict",
-                    "stage_dual_nature",
-                    # POOL COMPLETION (2026-10-01).
-                    "stage_casting_agent",
-                    # THE CO-OP SET.
-                    "stage_share_spotlight",
-                    # THE CO-OP SET, SECOND BATCH.
+#: FURINA'S STAGE verbs (`tier0.engine.furina_stage`, the re-founded rules).
+#: One tuple rather than a branch each, because they all take the same price
+#: for the same reason and a per-op branch would invite different ones.
+FURINA_STAGE_OPS = ("stage_summon", "stage_raise", "stage_guest",
+                    "stage_spend", "stage_spend_all", "stage_curtain_call",
+                    "stage_cue", "stage_final_bow", "stage_step_forward",
+                    "stage_perform_all", "stage_grand_finale",
+                    "stage_verdict", "stage_dual_nature",
+                    "stage_casting_agent", "stage_share_spotlight",
                     "stage_toast")
 
 #: Their shared rationale, written once. `STATIC_OP_PRICING` is prose the
 #: parity lint reads as a key set, and eight copies of one sentence would rot
 #: apart the first time the reason was refined.
-_STAGE_ZERO = ("ZERO: a verb about the BOARD -- who is on stage, which bar is "
-               "in front, what a bar holds right now -- and an offer screen "
+_STAGE_ZERO = ("ZERO: a verb about the BOARD -- who is on stage, who is in "
+               "front, how much Fanfare she holds -- and an offer screen "
                "has no board. What a spend buys is printed by the effect "
                "beside it and priced there, so pricing the verb too would "
                "charge the cost and credit the payout on one line. Prototype "
@@ -2643,32 +2631,8 @@ STATIC_OP_PRICING: dict[str, str] = {
                      "moves, so the priced-op set grows without a "
                      "DRAFTER_VERSION bump (the same terms as "
                      "`block_half_damage` below)",
-    # --- the FURINA STAGE (QUARANTINED, furina_stage.FURINA_STAGE, EB-732) --
-    "stage_summon": _STAGE_ZERO,
-    "stage_raise": _STAGE_ZERO,
-    "stage_scene_change": _STAGE_ZERO,
-    "stage_perform_lead": _STAGE_ZERO,
-    "stage_spend": _STAGE_ZERO,
-    "stage_spend_all": _STAGE_ZERO,
-    "stage_curtain_call": _STAGE_ZERO,
-    "stage_final_bow": _STAGE_ZERO,
-    "stage_step_forward": _STAGE_ZERO,
-    "stage_perform_all": _STAGE_ZERO,
-    "stage_spend_back_all": _STAGE_ZERO,
-    "stage_guest": _STAGE_ZERO,
-    # THE SUPPORTING POOL (2026-09-26).
-    "stage_reverse": _STAGE_ZERO,
-    "stage_whisper": _STAGE_ZERO,
-    "stage_intermission": _STAGE_ZERO,
-    "stage_spend_front_all": _STAGE_ZERO,
-    "stage_grand_finale": _STAGE_ZERO,
-    "stage_verdict": _STAGE_ZERO,
-    "stage_dual_nature": _STAGE_ZERO,
-    "stage_share_spotlight": _STAGE_ZERO,
-    "stage_toast": _STAGE_ZERO,
-    # POOL COMPLETION (2026-10-01): Casting Agent hands over a Guest Star
-    # card, and that card is priced at its own row when it is drafted.
-    "stage_casting_agent": _STAGE_ZERO,
+    # --- FURINA'S STAGE (`tier0.engine.furina_stage`) ---
+    **{op: _STAGE_ZERO for op in FURINA_STAGE_OPS},
     # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
     "block_half_damage": "ZERO: the amount is half of what the card's own "
                          "damage line LANDED, which no static pricer can see "

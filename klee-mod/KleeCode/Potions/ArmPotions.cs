@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using Godot;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Potions;
@@ -165,9 +166,7 @@ public sealed class JumpyJuice : ArmPotion
 
 // ---- Furina (the Stage) ---------------------------------------------------
 
-/// <summary>Common. "Your back performer gains 6 Fanfare. On an empty stage, a
-/// random performer arrives holding it." Which is the Stage's own Raise.
-/// </summary>
+/// <summary>Common (sec.10): "Gain 6 Fanfare."</summary>
 public sealed class BottledApplause : ArmPotion
 {
     public const int Fanfare = 6;
@@ -178,9 +177,7 @@ public sealed class BottledApplause : ArmPotion
     {
         ("title", "Bottled Applause"),
         ("description",
-            "Your [gold]back performer[/gold] gains [blue]" + Fanfare
-          + "[/blue] [gold]Fanfare[/gold]. On an empty stage, a random "
-          + "performer arrives holding it."),
+            "Gain [blue]" + Fanfare + "[/blue] [gold]Fanfare[/gold]."),
     };
 
     protected override string ArtPath =>
@@ -193,15 +190,16 @@ public sealed class BottledApplause : ArmPotion
         if (!FurinaStage.LiveFor(target)) return;
         using (FurinaStageLedger.For(target!).CausedBy("Bottled Applause"))
         {
-            await FurinaStage.Raise(target, Fanfare);
+            await FurinaStage.Gain(choiceContext, target, Fanfare,
+                                   "Bottled Applause");
         }
     }
 }
 
-/// <summary>Uncommon. "Each of your performers gains 4 Fanfare."</summary>
+/// <summary>Uncommon (sec.10): "Gain 1 Rehearsal."</summary>
 public sealed class CurtainWater : ArmPotion
 {
-    public const int Fanfare = 4;
+    public const int Rehearsal = 1;
 
     public override PotionRarity Rarity => PotionRarity.Uncommon;
 
@@ -209,8 +207,7 @@ public sealed class CurtainWater : ArmPotion
     {
         ("title", "Curtain Water"),
         ("description",
-            "Each of your performers gains [blue]" + Fanfare + "[/blue] "
-          + "[gold]Fanfare[/gold]."),
+            "Gain [blue]" + Rehearsal + "[/blue] [gold]Rehearsal[/gold]."),
     };
 
     protected override string ArtPath =>
@@ -221,10 +218,9 @@ public sealed class CurtainWater : ArmPotion
     {
         AssertValidForTargetedPotion(target);
         if (!FurinaStage.LiveFor(target)) return;
-        using (FurinaStageLedger.For(target!).CausedBy("Curtain Water"))
-        {
-            await FurinaStage.RaiseAll(target, Fanfare);
-        }
+        await PowerCmd.Apply<RehearsalPower>(choiceContext, target!, Rehearsal,
+                                             applier: target, cardSource: null);
+        FurinaStage.RefreshBadges(target);
     }
 }
 

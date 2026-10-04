@@ -73,6 +73,10 @@ public static class FurinaOffPoolCards
         // NChooseACardSelectionScreen._Ready() (EB-150).
         cards.Add(ModelDb.Card<Cards.Prototype.ArkheOusiaOption>());
         cards.Add(ModelDb.Card<Cards.Prototype.ArkhePneumaOption>());
+        // THE RE-FOUNDING (2026-10-04): the performer picker's faces, and
+        // Lyney's Trick, a token his act creates.
+        cards.AddRange(Powers.FurinaStage.AllOptions());
+        cards.Add(ModelDb.Card<Cards.Prototype.StageTrick>());
         return cards;
     }
 }

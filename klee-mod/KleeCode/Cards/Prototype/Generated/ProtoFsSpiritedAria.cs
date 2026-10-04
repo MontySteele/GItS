@@ -85,7 +85,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
         {
             null,
             new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 3),
-                                "needs its full price from the back performer"),
+                                "needs that much Fanfare"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 8 damage", "[gold]Spend[/gold] 3: deal 14 and draw 2 cards instead" }[modeIndex]);

@@ -8,7 +8,8 @@ and the sim's are in `test_furina_stage.py`.
   1. Usher's Bow gives the front performer 4 Fanfare (it was 4 Block, which
      expired unused when a hit made him bow on the enemy's turn).
   2. Let the People Rejoice deals twice the Fanfare it spends.
-  3. The part of a hit that reaches Furina is a line on the stage log.
+  3. (The part of a hit that reaches Furina left the stage log with the
+     re-founding, 2026-10-04: performers take no hits.)
   4. The Stage badge printed "1": a `Single` power shows no number in game,
      and now none on the page.
   5. The "after the acts" preview read 3 right after Full House, because the
@@ -28,8 +29,7 @@ import yaml
 from understudy import blindplay
 from understudy.blindplay_board import furina_stage
 from understudy.blindplay_notes import ARM_KEYWORDS
-from understudy.blindplay_render import (STAGE_BOW_EFFECTS,
-                                         _render_stage_log)
+from understudy.blindplay_render import _render_stage_log
 
 REPO = Path(__file__).resolve().parents[2]
 RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
@@ -45,11 +45,16 @@ def _combat_state() -> dict:
 # ---------------------------------------------------------------------------
 
 def test_the_glossary_and_the_log_say_his_bow_is_his_act():
-    """Draft 3 (2026-09-25) superseded round B's Fanfare Bow: a Bow is the
-    performer's act once more, so his row is the act alone and the log's Bow
-    line is the act's."""
-    assert ARM_KEYWORDS["Gentilhomme Usher"] == "End of your turn: gain 3 Block."
-    assert STAGE_BOW_EFFECTS["usher"] == "Furina gains {n} Block"
+    """The re-founding (2026-10-04): a Bow is the performer's act once more,
+    free, then 1 Fanfare; his row is his badge's act and the log's Bow is
+    followed by the free act."""
+    assert ARM_KEYWORDS["Gentilhomme Usher"] == "Act: gain 4 Block."
+    stage = furina_stage(_wire_stage(
+        _row("bow", "usher", "Gentilhomme Usher", reason="stays"),
+        _row("act", "usher", "Gentilhomme Usher", moved=4)))
+    assert _render_stage_log(stage) == [
+        "  - **Usher** took a Bow and stays on stage.",
+        "  - **Usher** acted for free: Furina gains 4 Block."]
 
 
 # ---------------------------------------------------------------------------
@@ -57,12 +62,17 @@ def test_the_glossary_and_the_log_say_his_bow_is_his_act():
 # ---------------------------------------------------------------------------
 
 def test_let_the_people_rejoice_pays_twice_the_fanfare():
+    """The re-founding (2026-10-04): it spends all of HER Fanfare and deals 2
+    per point; the performers Bow and keep their seats."""
     rows = yaml.safe_load(
         (REPO / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
     row = next(r for r in rows if r["id"] == "proto_fs_let_the_people_rejoice")
     assert row["description"].startswith(
-        "Deal damage to ALL enemies equal to twice your performers' total "
-        "[gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.")
+        "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal "
+        "{ExtraDamage:diff()} damage to ALL enemies per point. Your "
+        "performers [gold]Bow[/gold] and return.")
+    assert [e["op"] for e in row["effects"]] == [
+        "stage_spend_all", "damage", "stage_curtain_call"]
     assert "(Deals {CalculatedDamage:diff()} damage)" in row["description"]
     damage = next(e for e in row["effects"] if e["op"] == "damage")
     assert damage["amount_formula"] == {"base": 0, "per": 2,
@@ -86,43 +96,9 @@ def _wire_stage(*log):
 def _row(event, member, name, **kw):
     row = {"event": event, "member": member, "name": name, "seat": -1,
            "fanfare": 0, "moved": 0, "reason": "", "target": "",
-           "target_id": "", "each": -1, "hp": -1}
+           "target_id": ""}
     row.update(kw)
     return row
-
-
-def test_the_board_carries_her_hp_on_the_hit_beat_only():
-    stage = furina_stage(_wire_stage(
-        _row("hit", "usher", "Gentilhomme Usher", seat=0, moved=3,
-             target="Seapunk"),
-        _row("hit_furina", "furina", "Furina", moved=6, hp=55,
-             target="Seapunk")))
-    assert stage["log"][0]["hp"] is None
-    assert stage["log"][1]["hp"] == 55
-    assert stage["log"][1]["name"] == "Furina"
-
-
-def test_a_hit_that_reached_her_prints_in_the_performer_hit_style():
-    stage = furina_stage(_wire_stage(
-        _row("hit", "usher", "Gentilhomme Usher", seat=0, moved=3,
-             target="Seapunk"),
-        _row("leave", "usher", "Gentilhomme Usher", moved=3, reason="hit"),
-        _row("hit_furina", "furina", "Furina", moved=6, hp=55,
-             target="Seapunk"),
-        _row("bow", "usher", "Gentilhomme Usher", moved=3)))
-    lines = _render_stage_log(stage)
-    assert lines[0] == (
-        "  - **Seapunk** hit **Usher** for 3: 3 → 0, and it leaves the "
-        "stage: emptied by a hit, so it takes a Bow.")
-    assert lines[1] == ("  - **Seapunk** hit **Furina** for 6 past your Block "
-                        "and front performer: 61 → 55 HP.")
-    assert lines[2] == "  - **Usher** took a Bow: Furina gains 3 Block."
-
-
-def test_an_older_build_with_no_hp_prints_no_furina_line():
-    stage = furina_stage(_wire_stage(
-        _row("hit_furina", "furina", "Furina", moved=6, target="Seapunk")))
-    assert _render_stage_log(stage) == []
 
 
 # ---------------------------------------------------------------------------
@@ -154,13 +130,16 @@ def test_a_counter_power_and_an_older_bridge_still_print_the_number():
 
 
 def test_the_bridge_sends_the_stack_type_and_the_badge_is_single():
+    """The re-founding (2026-10-04) retired the Stage summary badge; each
+    performer's badge is the `Single` power now."""
     builder = (REPO / "vendor" / "STS2_MCP" / "McpMod.StateBuilder.cs"
                ).read_text(encoding="utf-8")
     assert '["stack"] = power.StackType.ToString(),' in builder
     badges = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
               / "FurinaStageBadges.cs").read_text(encoding="utf-8")
-    summary = badges[badges.index("class StageSummaryPower"):]
-    assert "PowerStackType.Single" in summary
+    badge = badges[badges.index("class StagePerformerBadge"):]
+    badge = badge[:badge.index("public static string ActText")]
+    assert "PowerStackType.Single" in badge
 
 
 # ---------------------------------------------------------------------------
