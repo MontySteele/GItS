@@ -329,7 +329,13 @@ def test_interval_bells_spend_is_three_then_two(arm):
     st.player.energy = 0
     effects.resolve_card(st, card)
     assert st.player.stage_fanfare == 5
-    assert st.player.energy == 1 and len(st.player.hand) == 1
+    # The loop fix (2026-10-04): the Energy comes NEXT turn (Chevreuse's
+    # mechanism), so Warm Reception and Interval Bell+ no longer pay for
+    # each other this turn.
+    assert st.player.energy == 0 and len(st.player.hand) == 1
+    assert st.player.stage_energy_next == 1
+    FS.turn_start(st)
+    assert st.player.energy == 1 and st.player.stage_energy_next == 0
 
 
 def test_casting_agent_adds_a_free_guest_star_card(arm):

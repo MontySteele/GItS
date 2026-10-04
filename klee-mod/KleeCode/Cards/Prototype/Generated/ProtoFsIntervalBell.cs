@@ -45,7 +45,7 @@ public sealed class ProtoFsIntervalBell : CustomCardModel, ICharacterCard, IModa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Interval Bell"),
-        ("description", "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] instead."),
+        ("description", "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] next turn instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -56,8 +56,8 @@ public sealed class ProtoFsIntervalBell : CustomCardModel, ICharacterCard, IModa
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
         IsUpgraded
-            ? new[] { "Draw 1 card", "[gold]Spend[/gold] 2: draw 1 card and gain 1 [gold]Energy[/gold] instead" }
-            : new[] { "Draw 1 card", "[gold]Spend[/gold] 3: draw 1 card and gain 1 [gold]Energy[/gold] instead" };
+            ? new[] { "Draw 1 card", "[gold]Spend[/gold] 2: draw 1 card and gain 1 [gold]Energy[/gold] next turn instead" }
+            : new[] { "Draw 1 card", "[gold]Spend[/gold] 3: draw 1 card and gain 1 [gold]Energy[/gold] next turn instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -89,7 +89,7 @@ public sealed class ProtoFsIntervalBell : CustomCardModel, ICharacterCard, IModa
                                 "needs that much Fanfare"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Draw 1 card", "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Draw 1 card", "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] next turn instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             await CardPileCmd.Draw(choiceContext, 1m, Owner);
@@ -98,7 +98,7 @@ public sealed class ProtoFsIntervalBell : CustomCardModel, ICharacterCard, IModa
         {
             await FurinaStage.Spend(choiceContext, Owner.Creature, (IsUpgraded ? 2 : 3));
             await CardPileCmd.Draw(choiceContext, 1m, Owner);
-            await PlayerCmd.GainEnergy(1, Owner);
+            await FurinaStage.EnergyNextTurn(choiceContext, Owner.Creature, 1);
         }
     }
 
@@ -151,7 +151,7 @@ public sealed class ProtoFsIntervalBellModeB : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spend 3"),
-        ("description", "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] instead"),
+        ("description", "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] next turn instead"),
     };
 
     /// <summary>The upgraded side of a price the upgrade moves.</summary>

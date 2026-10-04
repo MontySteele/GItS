@@ -99,7 +99,7 @@ the Plan line buys only what a head start can buy.
 | Card | For | Type, cost, rarity | Text |
 |---|---|---|---|
 | Aria for One | Solo | Attack, 1, U | Deal 5 [7] damage twice. If no one is on stage, deal it three times. |
-| Interval Bell | Ovation (Spend) | Skill, 0, U | Draw 1 card. Spend 3 [2]: draw 1 card and gain 1 Energy instead. |
+| Interval Bell | Ovation (Spend) | Skill, 0, U | Draw 1 card. Spend 3 [2]: draw 1 card and gain 1 Energy next turn instead. (Next turn since the 2026-10-04 loop fix.) |
 | Casting Agent | Guest Cast | Skill, 1, U | Exhaust. Choose 1 of 3 random Guest Star cards and add it to your hand. It costs 0 this turn [and is upgraded]. |
 | The Last Act | Solo | Attack, 3, R | Costs 1 less for each empty seat. Deal 24 [30] damage. |
 | Critics' Darling | Ovation (Spend) | Power, 1, R | Whenever you choose a Spend mode, deal damage equal to the Fanfare spent to ALL enemies. [Innate.] |

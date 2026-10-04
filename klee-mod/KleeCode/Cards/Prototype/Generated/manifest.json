@@ -1082,7 +1082,7 @@
       "innate": true
     },
     "proto_fs_salon_debut": {
-      "cost": -1
+      "draw": 1
     },
     "proto_fs_season_tickets": {
       "power_amount": 1

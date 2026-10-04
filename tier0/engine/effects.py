@@ -5812,6 +5812,13 @@ def _op_stage_dual_nature(state: CombatState, fx: dict, card: Card) -> None:
     furina_stage.dual_nature(state)
 
 
+def _op_stage_energy_next(state: CombatState, fx: dict, card: Card) -> None:
+    """Interval Bell's Spend mode: "gain N Energy next turn". Chevreuse's
+    mechanism (`Player.stage_energy_next`, paid at `furina_stage.turn_start`);
+    the C# twin applies the game's `EnergyNextTurnPower`, as her act does."""
+    furina_stage.energy_next_turn(state, int(fx.get("amount", 1)))
+
+
 def _op_stage_casting_agent(state: CombatState, fx: dict, card: Card) -> None:
     """Casting Agent: one of three random Guest Star cards into the hand, free
     this turn, upgraded when the card is (`upgraded`)."""
@@ -5889,6 +5896,7 @@ OPS = {
     "stage_verdict": _op_stage_verdict,
     "stage_dual_nature": _op_stage_dual_nature,
     "stage_casting_agent": _op_stage_casting_agent,
+    "stage_energy_next": _op_stage_energy_next,
     "stage_share_spotlight": _op_stage_share_spotlight,
     "stage_toast": _op_stage_toast,
     "gain_fanfare_floor": _op_gain_fanfare_floor,

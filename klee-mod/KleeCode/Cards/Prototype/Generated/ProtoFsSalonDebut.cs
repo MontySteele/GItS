@@ -45,7 +45,7 @@ public sealed class ProtoFsSalonDebut : CustomCardModel, ICharacterCard, IStageS
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Take the Stage"),
-        ("description", "Summon a random Salon member. Draw 1 card.{InCombat:{StageBow}|}"),
+        ("description", "Summon a random Salon member. Draw {Cards:diff()} card{Cards:plural:|s}.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
@@ -78,6 +78,6 @@ public sealed class ProtoFsSalonDebut : CustomCardModel, ICharacterCard, IStageS
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

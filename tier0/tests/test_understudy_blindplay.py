@@ -8976,8 +8976,10 @@ _R12_SMITH = (
     # The text pass (2026-09-25) dropped "Choose one:" from the face.
     ("KLEEMOD-PROTO_FS_CURTAIN_RISE",
      "Deal 7 damage. Spend 3: deal 17 instead."),
-    ("KLEEMOD-PROTO_FS_SALON_DEBUT",
-     "Summon a random performer who is not on stage."),
+    # The loop fix (2026-10-04) took Take the Stage's cost cut away; Guest
+    # Star: Chevreuse's upgrade is the cost cut alone.
+    ("KLEEMOD-PROTO_FS_GUEST_STAR_CHEVREUSE",
+     "Summon Chevreuse."),
     # Legacy cleanup stage 6: the shipped An Invitation left with its sheet;
     # Alice's Detonator is the current row whose upgrade swaps one arm.
     ("KLEEMOD-PROTO_KO_ALICES_DETONATOR",
@@ -10940,21 +10942,23 @@ def test_the_smith_prints_a_spark_price_the_upgrade_cuts(
 
 
 def test_the_smith_prints_an_energy_cost_the_upgrade_cuts():
-    """Salon Debut's upgrade cuts its energy cost 1 to 0 and nothing else, and
+    """A cost-only upgrade (Guest Star: Chevreuse, 1 to 0; Salon Debut's until
+    the 2026-10-04 loop fix) cuts the energy cost and nothing else, and
     the Smith said "its upgrade changes nothing this face prints". It now
     prints the upgraded copy's cost slot the way it prints a Spark price cut.
     Seen to FAIL: the page printed the no-number note."""
     smith = live("upgrade-fresh")
     smith = json.loads(json.dumps(smith.get("state", smith)))
-    face = "Summon a random performer who is not on stage."
+    face = "Summon Chevreuse."
     smith["card_select"]["cards"].append(
-        {"id": "KLEEMOD-PROTO_FS_SALON_DEBUT", "name": "Salon Debut",
+        {"id": "KLEEMOD-PROTO_FS_GUEST_STAR_CHEVREUSE",
+         "name": "Guest Star: Chevreuse",
          "cost": "1", "type": "Skill", "description": face})
     page = blindplay.observe(smith)
     assert f"    Upgraded: cost 0 — {face}" in page
     assert qa_packet.NO_PREVIEW_NO_NUMBER not in page
     assert qa_packet.upgraded_energy_delta(
-        "KLEEMOD-PROTO_FS_SALON_DEBUT") == -1
+        "KLEEMOD-PROTO_FS_GUEST_STAR_CHEVREUSE") == -1
 
 
 def test_an_upgraded_copy_in_hand_shows_its_upgraded_spark_price():

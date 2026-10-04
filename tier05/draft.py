@@ -2461,7 +2461,7 @@ FURINA_STAGE_OPS = ("stage_summon", "stage_raise", "stage_guest",
                     "stage_perform_all", "stage_grand_finale",
                     "stage_verdict", "stage_dual_nature",
                     "stage_casting_agent", "stage_share_spotlight",
-                    "stage_toast")
+                    "stage_toast", "stage_energy_next")
 
 #: Their shared rationale, written once. `STATIC_OP_PRICING` is prose the
 #: parity lint reads as a key set, and eight copies of one sentence would rot
