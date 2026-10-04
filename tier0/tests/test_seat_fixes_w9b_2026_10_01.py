@@ -81,15 +81,6 @@ def test_the_spend_tip_says_whose_fanfare_pays():
 
 # ---- 4. Arkhe Alignment -----------------------------------------------------
 
-def test_arkhe_alignment_says_stacks_add():
-    """Two stacks made Ousia triple an act (`Choose`: x(1 + stacks))."""
-    src = _read("klee-mod", "KleeCode", "Powers", "Prototype",
-                "FurinaStagePowers.cs")
-    # The re-founding (2026-10-04): x(1 + copies), never lower than a
-    # multiple already chosen this turn; the badge says stacks add.
-    assert "ledger.ActDamageMultiplier, 1 + copies);" in src
-    assert "Stacks add." in src
-
 
 # ---- 5. Frozen blocked by Artifact ------------------------------------------
 

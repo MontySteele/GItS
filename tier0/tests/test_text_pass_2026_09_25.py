@@ -34,7 +34,9 @@ def test_a_generated_conditional_reads_if_x_comma_y():
                 if colon.search(face):
                     offenders.append(path.stem)
     assert offenders == []
-    stage_combat = (MOD / "Cards" / "Prototype" / "Generated"
-                    / "ProtoFsWarmupAct.cs").read_text(encoding="utf-8")
-    assert ("If an enemy intends to attack, gain {BranchBlock:diff()} "
-            "[gold]Block[/gold].") in stage_combat
+    # Warmup Act left with v2 Furina (2026-10-05); Kokomi's Press the
+    # Advantage is the live "If X, Y." face.
+    face = (MOD / "Cards" / "Prototype" / "Generated"
+            / "ProtoKkPressTheAdvantage.cs").read_text(encoding="utf-8")
+    assert ("If a [gold]Plan[/gold] is waiting, deal "
+            "{BranchDamage:diff()} instead.") in face

@@ -34,18 +34,6 @@ def _sheet():
     return {r["id"]: r for r in rows}
 
 
-def _stage_state(stage=()):
-    st = CombatState(player=Player(hp=200, max_hp=200,
-                                   character_id="furina"),
-                     enemies=[Enemy(hp=500, max_hp=500, name="paper",
-                                    intents=[{"kind": "block",
-                                              "amount": 0}])],
-                     rng=random.Random(0))
-    st.turn = 2
-    st.player.stage = list(stage)
-    return st
-
-
 def _up(cid):
     return upgrades.apply_upgrade(loader.get_card(cid))
 
@@ -88,20 +76,3 @@ def test_sworn_brotherhood_base_gains_the_current_element_only(varka):
     led.current = "hydro"
     V.turn_start(st)
     assert led.oath == {**before, "hydro": before["hydro"] + 1}
-
-
-def test_a_five_century_act_returns_its_leaver_at_the_back():
-    """The re-founded sheet (2026-10-04): "The first time each turn a
-    performer Bows and leaves, it returns at the back if a seat is free."
-    (cost 2 upgraded). A returner carries no Fanfare: there are no bars."""
-    row = _sheet()["proto_fs_five_century_act"]
-    assert (row["cost"], row["upgrade"]) == (3, {"cost": -1})
-    st = _stage_state(["usher", "chevalmarin"])
-    st.player.powers[FS.FIVE_CENTURY_ACT] = 1
-    FS.final_bow(st, 0)                             # Usher Bows and leaves
-    assert st.player.stage == ["chevalmarin", "usher"]
-
-
-def test_one_woman_show_draws_two_and_the_upgrade_cuts_the_cost():
-    row = _sheet()["proto_fs_one_woman_show"]
-    assert (row["cost"], row["upgrade"]) == (3, {"cost": -1})

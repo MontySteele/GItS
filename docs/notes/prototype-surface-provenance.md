@@ -6342,3 +6342,40 @@ Casket near 1 to 2, so the pilot holds little Strength; the 10-point gap in
 the sim is therefore not a Strength gap, and this pass does not close it. The
 change is aimed at the long fights and large Caskets of a human run. No seat
 round was run: [USER] may play it in co-op first.
+
+## Furina: the Salon's Tab, 2026-10-05
+
+The slice of `review/active/furina-research-proposal-2026-10-05.md` sec.16,
+with sec.17's two edits (Curtain Rise's Drain mode deals 12 [16]; Universal
+Revelry reads "You gain twice as much Fanfare."), replaces the v2 Stage in
+place. [USER]: "the current one built overnight can be discarded." The pool is
+exactly the starter and 24 rows; every other v2 row, the five co-op rows and
+all Furina relics and potions but Opera Glasses, Grand Theater Program and
+Bottled Applause are gone. The frozen v2 build is the tag
+`furina-stage-frozen-2026-10-04`; the sim's reference is
+`tier0/engine/furina_tide.py`, which the arm now runs on.
+
+- New ids: `proto_fs_salons_tab`, `proto_fs_surging_waters`,
+  `proto_fs_hymn_of_many_waters`, `proto_fs_salons_encore`,
+  `proto_fs_soloists_solicitation`, `proto_fs_standing_ovation_all` (Standing
+  Ovation; its old id is Rising Applause's) and `proto_fs_universal_revelry`.
+  The last three wear their shipped pictures through `art_of`; the first four
+  have no art yet and use the placeholder path.
+- Kept ids, rewritten to the slice: Curtain Rise, Rising Applause,
+  Mademoiselle Crabaletta, Surintendante Chevalmarin, Gentilhomme Usher
+  (`proto_fs_leading_lady`), Pneuma Refrain, Singer of Many Waters, Tidal
+  Flourish, Spirited Aria, Quick Flourish (`proto_fs_quick_cue`), Interval
+  Bell (now a Common, as the slice lists it), Bravura, Endless Waltz (now an
+  Uncommon Power), Thunderous Applause, Let the People Rejoice (no Exhaust:
+  the slice prints none) and the four Guest Stars (Charlotte, Wriothesley,
+  Lynette, Clorinde; "Summon X.", upgrade cost -1).
+- Wording calls where the slice was open, each the plainest base-game shape:
+  Salon's Tab prints "Draw {1 card|2 cards}" and its upgrade lands in both
+  modes; Gentilhomme Usher's Drain mode upgrades through the new
+  `conditional_then_block` key (`conditional_then_damage`'s block twin).
+- New sheet vocabulary: ops `stage_drain` (a mode's head or a card's fixed
+  price), `stage_repay`, `stage_repay_all`; upgrade keys `stage_repay`,
+  `conditional_then_block`, `mode_draw`; powers `fs_salons_encore`,
+  `fs_endless_waltz`, `fs_thunderous_applause`, `fs_universal_revelry`.
+  Retired with v2: `stage_summon`, `stage_raise`, `stage_cue`,
+  `stage_perform_all`, the co-op ops and every v2 power.

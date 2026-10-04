@@ -71,17 +71,6 @@ def test_a_run_without_the_relic_keeps_the_shipped_reading():
     assert FANFARE_SHIPPED_ROW in page
 
 
-def test_the_fanfare_row_says_whose_it_is_and_that_it_never_fades():
-    """The re-founding (2026-10-04): Fanfare is one number on Furina, with
-    no fade; the empty-stage summon retired with the bars."""
-    page = blindplay.observe(_reward_state([SALON_SOLITAIRE]))
-
-    assert ("Your applause. Cards and Bows give it. Spend and stars' acts use "
-            "it. It never fades.") in page
-    assert "summons a random performer holding it" not in page
-    assert "**Raise**" not in page
-
-
 # --- Ousia and Pneuma belong to Arkhe Alignment -----------------------------
 
 def _names(obs: dict) -> set[str]:
@@ -104,26 +93,3 @@ def test_ousia_and_pneuma_do_not_ride_cards_that_share_the_word():
     names = _names(obs)
     assert "Ousia" not in names
     assert "Pneuma" not in names
-
-
-def test_ousia_and_pneuma_print_beside_arkhe_alignment():
-    obs = {"character": "Furina", "stage_arm": True,
-           "hand": [{"title": "Arkhe Alignment",
-                     "text": "At the start of your turn, choose Ousia or "
-                             "Pneuma."},
-                    {"title": "Ousia Surge",
-                     "text": "Deal damage equal to the back performer's "
-                             "Fanfare."}]}
-
-    names = _names(obs)
-    assert {"Ousia", "Pneuma"} <= names
-
-
-def test_the_arkhe_power_badge_anchors_them_too():
-    obs = {"character": "Furina", "stage_arm": True,
-           "combat": {"you": {"powers": [
-               {"name": "Arkhe Alignment", "amount": 1,
-                "text": "At the start of your turn, choose Ousia or "
-                        "Pneuma."}]}}}
-
-    assert {"Ousia", "Pneuma"} <= _names(obs)

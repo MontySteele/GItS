@@ -144,8 +144,7 @@ public static class FurinaStageCues
                 cue.Kind == StageCueKind.Damage ? cue.Element : "",
                 cue.Kind == StageCueKind.Damage
                     && cue.Target == StageForecastCue.All,
-                cue.Price, cue.Times, cue.Skips || cue.Times == 0,
-                ForecastLine(cue)));
+                0, 1, false, ForecastLine(cue)));
         }
         return new StageCueBoard(cues, new List<StageBarChips>(),
                                  new StageBarChips(-1, 0, 0, 0, false));
@@ -154,41 +153,18 @@ public static class FurinaStageCues
     /// <summary>The icon an act's cue carries.</summary>
     public static StageCueIcon IconOf(StageCueKind kind) => kind switch
     {
-        StageCueKind.Block => StageCueIcon.Block,
-        StageCueKind.Energy => StageCueIcon.Energy,
         StageCueKind.Damage => StageCueIcon.Attack,
         _ => StageCueIcon.Support,
     };
 
-    /// <summary>The hover's forecast line: what this act costs and whether it
-    /// happens. The act's rule is the other half of the hover, the
-    /// performer's own badge.</summary>
-    public static string ForecastLine(StageForecastCue cue)
-    {
-        if (cue.Skips)
-        {
-            return cue.Price > 0
-                ? $"Can't pay {cue.Price} Fanfare: skips its act."
-                : "Has acted this turn: does nothing.";
-        }
-        var lines = new List<string>();
-        if (cue.Price > 0) lines.Add($"Pays {cue.Price} Fanfare.");
-        switch (cue.Kind)
-        {
-            case StageCueKind.Fanfare:
-                lines.Add($"Gives you {cue.Amount} Fanfare.");
-                break;
-            case StageCueKind.Card:
-                lines.Add("Adds a Trick to your hand.");
-                break;
-            case StageCueKind.Ensemble:
-                lines.Add("Your Salon members act.");
-                break;
-        }
-        if (cue.Times > 1) lines.Add($"Acts {cue.Times} times.");
-        return lines.Count == 0 ? "Acts at the end of your turn."
-                                : string.Join("\n", lines);
-    }
+    /// <summary>The hover's forecast line. The act's rule is the other half
+    /// of the hover, the guest's own badge.</summary>
+    public static string ForecastLine(StageForecastCue cue) =>
+        cue.Kind == StageCueKind.Repay
+            ? $"Repays {cue.Amount} of your drained HP."
+            : cue.Target == StageForecastCue.Aura
+                ? "Hits an enemy with an aura, if any."
+                : "Acts at the end of your turn.";
 
     /// <summary>
     /// REDRAW: every stage mutation funnels here (it was the strip's funnel,

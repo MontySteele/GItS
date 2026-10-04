@@ -95,31 +95,14 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
     /// path without first building a model to ask.</summary>
     internal static string? ModVisualsPathFor(StagePerformer who) => who switch
     {
-        // One LITERAL path per performer, not one interpolated one: the
-        // deploy's S12 check reads every `KleePck.Path("...")` literal and
-        // refuses a reference it cannot find in the staged pack, and an
-        // interpolated path is a reference it cannot read at all.
-        StagePerformer.Chevalmarin => KleePck.Path("furina/model/chevalmarin.tscn"),
-        StagePerformer.Crabaletta => KleePck.Path("furina/model/crabaletta.tscn"),
-        StagePerformer.Usher => KleePck.Path("furina/model/usher.tscn"),
-        // THE GUEST CAST (2026-09-25): each guest's body is cut by
-        // tools/cut_guest_bodies.py (in-game render or Wish render, per
-        // guest), which also writes these eight scenes from one template
-        // (224 px, 80% of Furina).
-        StagePerformer.Neuvillette => KleePck.Path("furina/model/guest_neuvillette.tscn"),
-        StagePerformer.Clorinde => KleePck.Path("furina/model/guest_clorinde.tscn"),
-        StagePerformer.Navia => KleePck.Path("furina/model/guest_navia.tscn"),
-        StagePerformer.Chevreuse => KleePck.Path("furina/model/guest_chevreuse.tscn"),
-        StagePerformer.Wriothesley => KleePck.Path("furina/model/guest_wriothesley.tscn"),
-        StagePerformer.Sigewinne => KleePck.Path("furina/model/guest_sigewinne.tscn"),
+        // One LITERAL path per guest, not one interpolated one: the deploy's
+        // S12 check reads every `KleePck.Path("...")` literal and refuses a
+        // reference it cannot find in the staged pack. Each guest's body is
+        // cut by tools/cut_guest_bodies.py (224 px, 80% of Furina).
         StagePerformer.Charlotte => KleePck.Path("furina/model/guest_charlotte.tscn"),
+        StagePerformer.Wriothesley => KleePck.Path("furina/model/guest_wriothesley.tscn"),
         StagePerformer.Lynette => KleePck.Path("furina/model/guest_lynette.tscn"),
-        // THE SUPPORTING POOL (2026-09-26): the two new guests, from the same
-        // art pass.
-        StagePerformer.Lyney => KleePck.Path("furina/model/guest_lyney.tscn"),
-        StagePerformer.Escoffier => KleePck.Path("furina/model/guest_escoffier.tscn"),
-        // A performer added later without a scene falls through to the base
-        // game's Osty rig (CustomVisualPath, below).
+        StagePerformer.Clorinde => KleePck.Path("furina/model/guest_clorinde.tscn"),
         _ => null,
     };
 
@@ -135,70 +118,12 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
     };
 }
 
-/// <summary>Gentilhomme Usher. Acts for Block.</summary>
-/// <remarks>THE NAME IS THE LEDGER'S, not a literal here, and that is
-/// `EB-735`: the blind-play page names a performer off
-/// <c>FurinaStageLedger.Snapshot</c> while the game names it off this model,
-/// and a seat reading one and a player watching the other must not be shown
-/// two names for one creature.</remarks>
-public sealed class UsherMonster : StagePerformerMonster
+// ---- THE FOUR GUESTS of the Salon's Tab slice (2026-10-05). The name is the
+// ledger's (`FurinaStageLedger.DisplayName`).
+
+public sealed class CharlotteMonster : StagePerformerMonster
 {
-    public override StagePerformer Performer => StagePerformer.Usher;
-
-    public override string DisplayName =>
-        FurinaStageLedger.DisplayName(Performer);
-}
-
-/// <summary>Surintendante Chevalmarin: 2 damage to every enemy. Since draft 3
-/// (2026-09-25) no act applies Hydro; her CARD does, on play.</summary>
-public sealed class ChevalmarinMonster : StagePerformerMonster
-{
-    public override StagePerformer Performer => StagePerformer.Chevalmarin;
-
-    public override string DisplayName =>
-        FurinaStageLedger.DisplayName(Performer);
-}
-
-/// <summary>Mademoiselle Crabaletta. The damage act and the damage bow.
-/// </summary>
-public sealed class CrabalettaMonster : StagePerformerMonster
-{
-    public override StagePerformer Performer => StagePerformer.Crabaletta;
-
-    public override string DisplayName =>
-        FurinaStageLedger.DisplayName(Performer);
-}
-
-// ---- THE GUEST CAST (2026-09-25): eight more bodies, one per guest. The
-// name is the ledger's (`FurinaStageLedger.DisplayName`), as the trio's is.
-
-public sealed class NeuvilletteMonster : StagePerformerMonster
-{
-    public override StagePerformer Performer => StagePerformer.Neuvillette;
-
-    public override string DisplayName =>
-        FurinaStageLedger.DisplayName(Performer);
-}
-
-public sealed class ClorindeMonster : StagePerformerMonster
-{
-    public override StagePerformer Performer => StagePerformer.Clorinde;
-
-    public override string DisplayName =>
-        FurinaStageLedger.DisplayName(Performer);
-}
-
-public sealed class NaviaMonster : StagePerformerMonster
-{
-    public override StagePerformer Performer => StagePerformer.Navia;
-
-    public override string DisplayName =>
-        FurinaStageLedger.DisplayName(Performer);
-}
-
-public sealed class ChevreuseMonster : StagePerformerMonster
-{
-    public override StagePerformer Performer => StagePerformer.Chevreuse;
+    public override StagePerformer Performer => StagePerformer.Charlotte;
 
     public override string DisplayName =>
         FurinaStageLedger.DisplayName(Performer);
@@ -212,22 +137,6 @@ public sealed class WriothesleyMonster : StagePerformerMonster
         FurinaStageLedger.DisplayName(Performer);
 }
 
-public sealed class SigewinneMonster : StagePerformerMonster
-{
-    public override StagePerformer Performer => StagePerformer.Sigewinne;
-
-    public override string DisplayName =>
-        FurinaStageLedger.DisplayName(Performer);
-}
-
-public sealed class CharlotteMonster : StagePerformerMonster
-{
-    public override StagePerformer Performer => StagePerformer.Charlotte;
-
-    public override string DisplayName =>
-        FurinaStageLedger.DisplayName(Performer);
-}
-
 public sealed class LynetteMonster : StagePerformerMonster
 {
     public override StagePerformer Performer => StagePerformer.Lynette;
@@ -236,19 +145,9 @@ public sealed class LynetteMonster : StagePerformerMonster
         FurinaStageLedger.DisplayName(Performer);
 }
 
-// ---- THE SUPPORTING POOL (2026-09-26): two more guests.
-
-public sealed class LyneyMonster : StagePerformerMonster
+public sealed class ClorindeMonster : StagePerformerMonster
 {
-    public override StagePerformer Performer => StagePerformer.Lyney;
-
-    public override string DisplayName =>
-        FurinaStageLedger.DisplayName(Performer);
-}
-
-public sealed class EscoffierMonster : StagePerformerMonster
-{
-    public override StagePerformer Performer => StagePerformer.Escoffier;
+    public override StagePerformer Performer => StagePerformer.Clorinde;
 
     public override string DisplayName =>
         FurinaStageLedger.DisplayName(Performer);
@@ -342,31 +241,13 @@ public static class FurinaStagePets
             EnsureVisualsConverted(who);
             Creature pet = who switch
             {
-                StagePerformer.Usher =>
-                    await PlayerCmd.AddPet<UsherMonster>(player),
-                StagePerformer.Chevalmarin =>
-                    await PlayerCmd.AddPet<ChevalmarinMonster>(player),
-                StagePerformer.Crabaletta =>
-                    await PlayerCmd.AddPet<CrabalettaMonster>(player),
-                StagePerformer.Neuvillette =>
-                    await PlayerCmd.AddPet<NeuvilletteMonster>(player),
-                StagePerformer.Clorinde =>
-                    await PlayerCmd.AddPet<ClorindeMonster>(player),
-                StagePerformer.Navia =>
-                    await PlayerCmd.AddPet<NaviaMonster>(player),
-                StagePerformer.Chevreuse =>
-                    await PlayerCmd.AddPet<ChevreuseMonster>(player),
                 StagePerformer.Wriothesley =>
                     await PlayerCmd.AddPet<WriothesleyMonster>(player),
-                StagePerformer.Sigewinne =>
-                    await PlayerCmd.AddPet<SigewinneMonster>(player),
-                StagePerformer.Charlotte =>
-                    await PlayerCmd.AddPet<CharlotteMonster>(player),
-                StagePerformer.Lyney =>
-                    await PlayerCmd.AddPet<LyneyMonster>(player),
-                StagePerformer.Escoffier =>
-                    await PlayerCmd.AddPet<EscoffierMonster>(player),
-                _ => await PlayerCmd.AddPet<LynetteMonster>(player),
+                StagePerformer.Lynette =>
+                    await PlayerCmd.AddPet<LynetteMonster>(player),
+                StagePerformer.Clorinde =>
+                    await PlayerCmd.AddPet<ClorindeMonster>(player),
+                _ => await PlayerCmd.AddPet<CharlotteMonster>(player),
             };
             // 2026-09-25: the body SAYS WHAT IT DOES. Hovering a creature
             // shows its powers' tips, and the base game gives Osty a quiet
@@ -405,19 +286,10 @@ public static class FurinaStagePets
 
     internal static Type ModelFor(StagePerformer who) => who switch
     {
-        StagePerformer.Usher => typeof(UsherMonster),
-        StagePerformer.Chevalmarin => typeof(ChevalmarinMonster),
-        StagePerformer.Crabaletta => typeof(CrabalettaMonster),
-        StagePerformer.Neuvillette => typeof(NeuvilletteMonster),
-        StagePerformer.Clorinde => typeof(ClorindeMonster),
-        StagePerformer.Navia => typeof(NaviaMonster),
-        StagePerformer.Chevreuse => typeof(ChevreuseMonster),
         StagePerformer.Wriothesley => typeof(WriothesleyMonster),
-        StagePerformer.Sigewinne => typeof(SigewinneMonster),
-        StagePerformer.Charlotte => typeof(CharlotteMonster),
-        StagePerformer.Lyney => typeof(LyneyMonster),
-        StagePerformer.Escoffier => typeof(EscoffierMonster),
-        _ => typeof(LynetteMonster),
+        StagePerformer.Lynette => typeof(LynetteMonster),
+        StagePerformer.Clorinde => typeof(ClorindeMonster),
+        _ => typeof(CharlotteMonster),
     };
 
     /// <summary>Teach BaseLib that this performer's scene is an

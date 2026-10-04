@@ -31,10 +31,11 @@ public class PoolCountTests
          cards.Count(c => c.Rarity == CardRarity.Rare));
 
     private static void AssertPool(string roster, string method,
-                                   int common, int uncommon, int rare)
+                                   int common, int uncommon, int rare,
+                                   int size = 78)
     {
         var pool = ArmPools.Named(Powers + roster, method);
-        Assert.Equal(78, pool.Count);
+        Assert.Equal(size, pool.Count);
         Assert.Equal(pool.Count, pool.Select(c => c.GetType()).Distinct().Count());
         Assert.Equal((common, uncommon, rare), Split(pool));
         Assert.All(pool, c => Assert.Equal("KleeMod.Cards.Prototype.Generated",
@@ -73,14 +74,15 @@ public class PoolCountTests
     }
 
     [Fact]
-    public void Furina_is_78_and_24_33_21_with_two_ancients_and_five_coop()
+    public void Furina_is_the_slices_24_and_12_8_4_with_two_ancients_and_no_coop()
     {
-        // The re-founding (2026-10-04, sec.10): Gentilhomme Usher is a
-        // Common where Leading Lady was an Uncommon, and Premiere Season a
-        // Rare where Double Casting was an Uncommon.
-        AssertPool("FurinaStageRoster", "Pool", 24, 33, 21);
+        // THE SALON'S TAB (2026-10-05, proposal sec.16): the slice replaces
+        // v2 in place -- the starter and exactly 24 rows (12 Common, 8
+        // Uncommon, 4 Rare). The full 78 waits on the slice's play (pick 1).
+        AssertPool("FurinaStageRoster", "Pool", 12, 8, 4, size: 24);
         AssertAncients("Furina");
-        AssertTier("FurinaStageRoster", "MultiplayerRows");
+        Assert.Null(System.Type.GetType(
+            "KleeMod.Powers.FurinaStageRoster, klee")?.GetMethod("MultiplayerRows"));
     }
 
     [Fact]

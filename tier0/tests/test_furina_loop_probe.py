@@ -1,145 +1,136 @@
-"""Furina's infinite-loop probe (`tier0/harness/furina_loop_probe.py`).
+"""Furina's infinite-loop probe (`tier0/harness/furina_loop_probe.py`) on the
+Salon's Tab slice (2026-10-05).
 
-The 2026-10-04 loop audit. Two loops were found by review and fixed on the
-sheet (`docs/prototype-surface.yaml`):
+The 2026-10-04 loop audit fixed Interval Bell's Spend mode to give its Energy
+NEXT turn. The probe must still see what that fix closed with the fix taken
+out (`pre_fix=True`): today, Interval Bell, Salon's Tab+ and Surging Waters
+paid for each other (Bell's Energy bought Surging Waters, whose Repay reopened
+the Drain room Salon's Tab spends).
 
-* Take the Stage+ cost 0 ("Summon a random Salon member. Draw 1 card."): two
-  copies drew each other forever, a Bow (+1 Fanfare) on every play onto a
-  full stage. Fixed: it stays at 1 Energy and draws 2 upgraded.
-* Warm Reception (1: gain 3 Fanfare, draw 1) and Interval Bell+ (0: Spend 2,
-  draw 1, gain 1 Energy) paid for each other at +1 Fanfare a pass. Fixed: the
-  Spend mode's Energy comes next turn (Chevreuse's mechanism).
-
-The probe must see both with the fixes taken out (`pre_fix=True`), and must
-see neither with them in. The full post-fix sweep's productive loops are
-pinned by name (`KNOWN_OPEN`): reported to the main session, not fixed here,
-so a new one fails this file and a fix moves the pin.
+The post-fix sweep's productive loops are pinned by name (`KNOWN_OPEN`):
+reported to the main session, not fixed here (cards are not changed to fix a
+loop), so a new one fails this file and a fix moves the pin. Every one is an
+upgraded Guest Star (cost 0) cycled by two Salon's Tab+ (0: draw 2): a guest
+summoned while on stage acts and stays, so it acts forever.
 """
 
 from __future__ import annotations
 
+import copy
+
 import pytest
 
+from tier0.engine import combat
 from tier0.engine import furina_stage as FS
 from tier0.harness import furina_loop_probe as P
 
-TAKE_THE_STAGE_UP = ("proto_fs_salon_debut+",)
-BELL_AND_RECEPTION = ("proto_fs_interval_bell+", "proto_fs_warm_reception")
+BELL_TAB_WATERS = ("proto_fs_interval_bell", "proto_fs_salons_tab+",
+                   "proto_fs_surging_waters")
 
 
-def _try(combo, pre_fix, palais=False, power=None):
-    return P.try_combo(P.variants(pre_fix), tuple(sorted(combo)), power,
-                       palais)
+def _try(combo, pre_fix, power=None):
+    return P.try_combo(P.variants(pre_fix), tuple(sorted(combo)), power)
 
 
-# ---------------------------------------------------------------------------
-# The probe catches both known loops with the fixes taken out.
-# ---------------------------------------------------------------------------
-
-def test_pre_fix_take_the_stage_plus_is_a_productive_loop():
-    hit = _try(TAKE_THE_STAGE_UP, pre_fix=True)
+def test_pre_fix_bell_tab_and_surging_waters_loop():
+    hit = _try(BELL_TAB_WATERS, pre_fix=True)
     assert hit is not None and hit.productive
-    assert hit.growth["fanfare"] > 0 and hit.growth["energy"] >= 0
+    assert hit.growth["fanfare"] > 0
 
 
-def test_pre_fix_warm_reception_and_interval_bell_plus_loop():
-    hit = _try(BELL_AND_RECEPTION, pre_fix=True)
-    assert hit is not None and hit.productive
-    assert hit.growth["fanfare"] > 0 and hit.growth["energy"] >= 0
-
-
-def test_the_pre_fix_sweep_finds_both_in_a_narrowed_pool():
-    only = TAKE_THE_STAGE_UP + BELL_AND_RECEPTION + (
-        "proto_fs_salon_debut", "proto_fs_interval_bell",
-        "proto_fs_warm_reception+")
-    found = P.search(pre_fix=True, powers=[None], only=only)
-    productive = {f.cards for f in found if f.productive}
-    assert TAKE_THE_STAGE_UP in productive
-    assert tuple(sorted(BELL_AND_RECEPTION)) in productive
-
-
-# ---------------------------------------------------------------------------
-# With the fixes in, neither loops (with or without Palais Ledger).
-# ---------------------------------------------------------------------------
-
-@pytest.mark.parametrize("palais", [False, True])
-def test_take_the_stage_plus_no_longer_loops(palais):
-    pool = P.variants(False)
-    card = pool["proto_fs_salon_debut+"]
-    assert card.cost == 1
-    assert [fx["amount"] for fx in card.effects if fx["op"] == "draw"] == [2]
-    assert _try(TAKE_THE_STAGE_UP, pre_fix=False, palais=palais) is None
-
-
-@pytest.mark.parametrize("palais", [False, True])
-def test_warm_reception_and_interval_bell_plus_no_longer_loop(palais):
-    hit = _try(BELL_AND_RECEPTION, pre_fix=False, palais=palais)
-    # Interval Bell+'s draw mode still cycles two copies of itself (inert,
-    # pinned below); Warm Reception can no longer ride it.
+def test_with_the_fix_bell_tab_and_surging_waters_do_not_loop():
+    hit = _try(BELL_TAB_WATERS, pre_fix=False)
     assert hit is None or not hit.productive
 
 
 def test_interval_bells_energy_is_owed_not_paid():
-    st = P._state((), {}, 0)
-    st.player.hand = [P.variants(False)["proto_fs_interval_bell+"]]
-    st.player.discard_pile = [P.variants(False)["proto_fs_warm_reception"]]
-    st.player.stage_decider = P.Decider(spend=True)
-    from tier0.engine import combat
+    st = P._state((), {}, 0, take=True)
+    pool = P.variants(False)
+    st.player.hand = [copy.deepcopy(pool["proto_fs_interval_bell+"])]
+    st.player.discard_pile = [copy.deepcopy(pool["proto_fs_soloists_solicitation"])]
     combat.play_card(st, st.player.hand[0])
     assert st.player.energy == P.START_ENERGY
-    assert st.player.stage_energy_next == 1
-    assert st.player.stage_fanfare == P.START_FANFARE - 2
-    FS.turn_start(st)
-    assert st.player.energy == P.START_ENERGY + 1
+    assert st.player.ftd.energy_next == 1
+    assert st.player.ftd.fanfare == P.START_FANFARE - 2
 
 
-# ---------------------------------------------------------------------------
-# The static screen is only a necessary condition: it must pass every loop.
-# ---------------------------------------------------------------------------
+def test_the_body_is_real_so_the_drain_room_bounds_a_drain_loop():
+    # Salon's Tab x2 drains to the line and no further: 78 -> 42 (nine
+    # Drains of 4), then it only draws.
+    st = P._state((), {}, 0, take=True)
+    pool = P.variants(False)
+    st.player.hand = [copy.deepcopy(pool["proto_fs_salons_tab"])
+                      for _ in range(2)]
+    for _ in range(60):
+        options = [c for c in st.player.hand if combat.card_playable(st, c)]
+        combat.play_card(st, options[0])
+    assert st.player.hp == 42
+    assert st.player.ftd.drained == 36
+
 
 @pytest.mark.parametrize("combo,pre_fix", [
-    (TAKE_THE_STAGE_UP, True), (BELL_AND_RECEPTION, True),
-    (("proto_fs_oratrices_verdict+",), False),
+    (BELL_TAB_WATERS, True),
+    (("proto_fs_guest_star_charlotte+", "proto_fs_salons_tab+"), False),
     (("proto_fs_interval_bell",), False)])
 def test_the_screen_passes_every_loop_found(combo, pre_fix):
     pool = P.variants(pre_fix)
-    assert P.could_cycle([P.profile(pool[c]) for c in combo], {}, False)
+    assert P.could_cycle([P.profile(pool[c]) for c in combo], {})
 
 
-# ---------------------------------------------------------------------------
-# The post-fix sweep, no Power and no relic: the inert cycles, and the open
-# productive loops reported (not fixed) on 2026-10-04.
-# ---------------------------------------------------------------------------
-
-#: Inert cycles: 0-cost card-draw that refills the hand and does nothing.
+#: Inert cycles: 0-cost card draw that refills the hand and, once the Drain
+#: line is reached, grows nothing.
 KNOWN_INERT = {
     ("proto_fs_interval_bell",), ("proto_fs_interval_bell+",),
-    ("proto_fs_oratrices_verdict",), ("proto_fs_oratrices_verdict+",),
+    ("proto_fs_salons_tab",), ("proto_fs_salons_tab+",),
 }
 
-#: Oratrice's Verdict+ (0: draw 2) x2 carries any 0-cost card forever.
-VERDICT_UP = "proto_fs_oratrices_verdict+"
-VERDICT_PAYLOADS = {
-    "proto_fs_bis+", "proto_fs_guest_star_charlotte+",
-    "proto_fs_guest_star_chevreuse+", "proto_fs_guest_star_lynette+",
-    "proto_fs_guest_star_sigewinne+", "proto_fs_guest_star_wriothesley+",
-    "proto_fs_quick_cue", "proto_fs_quick_cue+", "proto_fs_step_forward",
-    "proto_fs_step_forward+", "proto_fs_surintendante_chevalmarin+",
-    "proto_fs_the_last_act", "proto_fs_the_last_act+",
-    "proto_fs_warmup_act", "proto_fs_warmup_act+",
+#: Two Salon's Tab+ (0: draw 2) carry an upgraded Guest Star (0) forever: a
+#: second summon of a seated guest makes it act and stay.
+TAB_UP = "proto_fs_salons_tab+"
+GUESTS_UP = {"proto_fs_guest_star_" + g + "+" for g in FS.GUESTS}
+KNOWN_OPEN = {tuple(sorted((g, TAB_UP))) for g in GUESTS_UP}
+
+#: Productive in the probe's 60-play window and bounded past it: the Drain
+#: line ends the Drains (or the Fanfare runs out). Reported, not open.
+KNOWN_BOUNDED = {
+    ("proto_fs_salons_tab+", "proto_fs_soloists_solicitation"),
+    ("proto_fs_salons_tab+", "proto_fs_soloists_solicitation+"),
+    ("proto_fs_interval_bell", "proto_fs_quick_cue", "proto_fs_salons_tab+"),
+    ("proto_fs_interval_bell", "proto_fs_quick_cue+", "proto_fs_salons_tab+"),
+    ("proto_fs_interval_bell+", "proto_fs_quick_cue", "proto_fs_salons_tab+"),
+    ("proto_fs_interval_bell+", "proto_fs_quick_cue+", "proto_fs_salons_tab+"),
 }
-KNOWN_OPEN = {tuple(sorted((VERDICT_UP, p))) for p in VERDICT_PAYLOADS}
 
 
 @pytest.mark.battery
 def test_the_post_fix_sweep_finds_only_the_known_cycles():
-    # No Power, no relic (the full sweep over every Power and Palais Ledger
-    # is the CLI's, minutes long; its findings are in the 2026-10-04 report).
-    found = P.search_env(False, None, False)
+    found = P.search_env(False, None)
     productive = {f.cards for f in found if f.productive}
     inert = {f.cards for f in found if not f.productive}
-    assert productive == KNOWN_OPEN
+    assert productive == KNOWN_OPEN | KNOWN_BOUNDED
     assert inert == KNOWN_INERT
-    # Neither fixed loop is among them.
-    assert TAKE_THE_STAGE_UP not in productive
-    assert tuple(sorted(BELL_AND_RECEPTION)) not in productive
+
+
+@pytest.mark.battery
+@pytest.mark.parametrize("combo", sorted(KNOWN_OPEN))
+def test_the_open_loops_are_unbounded(combo):
+    pool = P.variants(False)
+    cards = [pool[c] for c in combo] + [pool[TAB_UP]]
+    for order in ((combo[0], combo[1]), (combo[1], combo[0])):
+        run = P.play_out(cards, list(order), take=True, plays=600)
+        if run.productive:
+            return
+    pytest.fail(f"{combo} stopped growing within 600 plays")
+
+
+@pytest.mark.battery
+@pytest.mark.parametrize("combo", sorted(KNOWN_BOUNDED))
+def test_the_bounded_loops_stop_growing(combo):
+    import itertools
+    pool = P.variants(False)
+    for copies in itertools.product((1, 2), repeat=len(combo)):
+        cards = [pool[c] for c, n in zip(combo, copies) for _ in range(n)]
+        for order in itertools.permutations(combo):
+            for take in (True, False):
+                run = P.play_out(cards, list(order), take=take, plays=600)
+                assert not run.productive, (combo, copies, order, take)

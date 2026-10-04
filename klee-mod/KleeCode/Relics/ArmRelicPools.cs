@@ -24,8 +24,8 @@ public static class ArmRelicPools
             .Append(typeof(ExplosiveFrags))
             .ToArray();
 
-    /// <summary>Furina's Stage pool: Salon Solitaire, her seven, The Curtain
-    /// Never Falls. The Ethereal Spotlight is not in it.</summary>
+    /// <summary>Furina's pool: Salon Solitaire, her two (Opera Glasses, Grand
+    /// Theater Program), The Curtain Never Falls.</summary>
     public static readonly IReadOnlyList<Type> FurinaArmPool =
         new[] { typeof(SalonSolitaire) }
             .Concat(FurinaStageRelics.Types)

@@ -8,34 +8,41 @@ using KleeMod.Powers;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// THE STAGE'S HEADLESS KIT (v2, the re-founding). The rules are
+/// THE SALON'S TAB'S HEADLESS KIT (2026-10-05). The rules are
 /// <see cref="StageDirector"/>'s over a <see cref="FurinaStageLedger"/>, and
 /// the game half is an <see cref="IStageBoard"/>; this board RECORDS what the
-/// rules asked of the game, so every rule edge the sim pins
-/// (<c>tier0/tests/test_furina_v2_slice.py</c>) can be pinned here without a
-/// combat. Every call completes synchronously.
+/// rules asked of the game and keeps Furina's HP, so every rule edge the sim
+/// pins (<c>tier0/tests/test_furina_tide_arm.py</c>) can be pinned here
+/// without a combat. Every call completes synchronously.
 /// </summary>
 internal sealed class RecordingBoard : IStageBoard
 {
     internal readonly List<string> Log = new();
 
-    internal int BlockGained;
-
     internal int Dealt;
 
     internal int Drawn;
 
-    internal int Tricks;
-
-    internal int Energy;
-
     public bool Over { get; set; }
 
-    public Task Block(StagePerformer who, int amount)
+    public int Hp { get; set; } = 78;
+
+    public int MaxHp { get; set; } = 78;
+
+    public Task<int> LoseHp(int amount)
     {
-        Log.Add($"block {who} {amount}");
-        BlockGained += amount;
-        return Task.CompletedTask;
+        var lost = Math.Min(amount, Hp);
+        Hp -= lost;
+        Log.Add($"lose {lost}");
+        return Task.FromResult(lost);
+    }
+
+    public Task<int> Heal(int amount)
+    {
+        var back = Math.Min(amount, MaxHp - Hp);
+        Hp += back;
+        Log.Add($"heal {back}");
+        return Task.FromResult(back);
     }
 
     public Task Damage(StagePerformer who, StageTarget target, int amount,
@@ -46,17 +53,10 @@ internal sealed class RecordingBoard : IStageBoard
         return Task.CompletedTask;
     }
 
-    public Task AddTrick()
+    public Task PowerHit(string source, StageTarget target, int amount)
     {
-        Log.Add("trick");
-        Tricks++;
-        return Task.CompletedTask;
-    }
-
-    public Task EnergyNextTurn(int amount)
-    {
-        Log.Add($"energy {amount}");
-        Energy += amount;
+        Log.Add($"power {source} {target} {amount}");
+        Dealt += amount;
         return Task.CompletedTask;
     }
 
@@ -67,36 +67,17 @@ internal sealed class RecordingBoard : IStageBoard
         return Task.CompletedTask;
     }
 
-    public Task ClorindeLine(int amount)
-    {
-        Log.Add($"clorinde {amount}");
-        Dealt += amount;
-        return Task.CompletedTask;
-    }
-
-    public Task CriticsHit(int amount)
-    {
-        Log.Add($"critics {amount}");
-        return Task.CompletedTask;
-    }
-
-    public Task GlovesBlock(int amount)
-    {
-        Log.Add($"gloves {amount}");
-        BlockGained += amount;
-        return Task.CompletedTask;
-    }
-
     public Task Lunge(StageSeat? seat) => Task.CompletedTask;
 
     public Task Sync() => Task.CompletedTask;
 
     /// <summary>The damage events, in order.</summary>
     internal IEnumerable<string> Hits =>
-        Log.Where(l => l.StartsWith("damage ") || l.StartsWith("clorinde "));
+        Log.Where(l => l.StartsWith("damage ") || l.StartsWith("power "));
 }
 
-/// <summary>A free-standing stage and the director over it.</summary>
+/// <summary>A free-standing ledger and the director over it, Furina at
+/// <c>hp</c> of 78 having entered the combat at <c>entry</c>.</summary>
 internal sealed class StageKit
 {
     internal FurinaStageLedger Stage { get; }
@@ -105,28 +86,33 @@ internal sealed class StageKit
 
     internal StageDirector Director { get; }
 
-    internal StageKit(StageMods? mods, int fanfare,
+    internal StageKit(StageMods? mods, int fanfare, int hp, int entry,
                       params StagePerformer[] seats)
     {
         Stage = FurinaStageLedger.Detached();
         Stage.ModsOverride = mods ?? StageMods.None;
+        Stage.Open(entry);
+        Board.Hp = hp;
         foreach (var who in seats) Stage.Seat(who);
         if (fanfare > 0) Stage.Gain(fanfare);
         Stage.OpenTurn();
-        Stage.TakeChanges();
         Stage.ClearBeats();
         Director = new StageDirector(Stage, Board);
     }
 
     internal static StageKit Of(params StagePerformer[] seats) =>
-        new(null, 0, seats);
+        new(null, 0, 78, 78, seats);
 
     internal static StageKit With(int fanfare, params StagePerformer[] seats) =>
-        new(null, fanfare, seats);
+        new(null, fanfare, 78, 78, seats);
 
     internal static StageKit With(StageMods mods, int fanfare,
                                   params StagePerformer[] seats) =>
-        new(mods, fanfare, seats);
+        new(mods, fanfare, 78, 78, seats);
+
+    internal static StageKit At(int hp, int entry,
+                                params StagePerformer[] seats) =>
+        new(null, 0, hp, entry, seats);
 
     internal StagePerformer[] Company => Stage.Seats.Select(s => s.Who).ToArray();
 

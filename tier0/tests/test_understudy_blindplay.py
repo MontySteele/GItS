@@ -6779,23 +6779,16 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # interpolated numerals; the performers' rows are their badges'
         # sentences (`StagePerformerBadge.ActText`, in the badges file).
         "Spend": ["Pay that much ", ". Offered only if you have "],
-        "Fanfare": ["Your applause. Cards and Bows give it. ",
-                    "stars' acts use it. It never fades."],
-        "Bow": ["The performer acts once more without paying, then you gain "],
-        "Cue": ["Choose a performer. It acts now. A star pays as usual."],
-        "Rehearsal": ["Each one makes your performers' damage and ",
-                      "acts deal 1 more."],
-        "front performer": ["The performer in the first seat. Performers act "
-                            "front to back ", "at the end of your turn."],
-        "Ousia": ["This turn, your performers' acts deal double damage."],
-        "Pneuma": ["Gain "],
-        "Summon": ["A performer joins at the back. On a full stage, the front "
-                   "Salon ", "member ", "s and leaves first. Guests keep "
-                   "their ", "seats."],
-        "Gentilhomme Usher": ["Act: gain "],
-        "Surintendante Chevalmarin": ["Act: deal ",
-                                      " damage to ALL enemies."],
-        "Mademoiselle Crabaletta": [" damage to a random enemy."],
+        "Fanfare": ["Gain 1 for each HP you lose or ", ". ",
+                    " uses it. It never fades."],
+        # THE SALON'S TAB (2026-10-05): the HP loan's two verbs.
+        "Drain": ["Lose that much HP. You can't go below half the HP you "
+                  "started ", "combat with. Drained HP returns when combat "
+                  "ends."],
+        "Repay": ["Regain that much drained HP. It never returns more than "
+                  "you ", "drained."],
+        "Summon": ["A guest joins at the back. On a full stage, the oldest "
+                   "guest ", "acts once more and leaves first."],
         # `EB-625`. The relic Shell Guard's payout hangs off, in the relic's
         # own words. The strike number is interpolated on both sides -- the
         # mod off `KokomiOverhaulLaw.CasketStrike`, the page off
@@ -6822,27 +6815,20 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # it was `EB-329`'s row with no tooltip to be held in step with.
         "Companion": ["A card titled with a character's name, a dash, then "
                       "its ", "own."],
-        # The Guest Star keyword and the guests' badges (the re-founding).
-        "Guest Star": ["One of each on stage. Summoning one already there "
-                       "makes it ", " and stay."],
-        "Neuvillette": [" damage deals ", " more. Act: pay ",
-                        " damage to ALL enemies."],
-        "Clorinde": ["Whenever you ", " damage to a random enemy. Act: pay "],
-        "Navia": ["Act: deal ", " damage to a random enemy, twice the ",
-                  " you spent this turn."],
-        "Chevreuse": ["Act, once a turn: pay ", " next turn."],
-        "Wriothesley": [" damage to a random enemy, plus ",
-                        " per damage your "],
-        "Sigewinne": [" for each time you lost HP since her last act."],
-        "Charlotte": ["At the start of your turn, draw ", " more card. Act: "
-                      "gain "],
-        "Lynette": ["The first performer you ",
-                    " each turn moves to the ", "front. Act: deal ",
-                    " damage to an enemy with an aura, if any."],
-        "Lyney": ["The first ", " card you play each turn costs 0. Act: ",
-                  " to add a Trick to your hand."],
-        "Escoffier": ["The first Salon summon card you play each turn costs "
-                      "0. Act: ", " to make your Salon members act."],
+        # The Guest Star keyword and the four guests' badges (the Salon's
+        # Tab, 2026-10-05): the prose either side of each golded span and
+        # interpolated numeral.
+        "Guest Star": ["Acts at the end of your turn. Summoning one already "
+                       "on stage ", "makes it act and stay."],
+        "Charlotte": ["The first time you ", " each turn, draw ",
+                      " card. Act: "],
+        "Wriothesley": ["Whenever you ", ", deal that much ",
+                        "damage to a random enemy. Act: deal "],
+        "Lynette": ["The first time each turn an enemy makes you lose HP, "
+                    "gain that ", " again. Act: deal ",
+                    " damage to an enemy with an aura."],
+        "Clorinde": ["Whenever you ", ", deal twice that much ",
+                     " damage to a random enemy."],
         # VARKA (the Oath rework): the leading prose of each tip, before
         # any interpolated word (the C# side may gold the keywords).
         "Oath": ["1 Oath per element a card applies, plus 1 per element "
@@ -6868,13 +6854,14 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     assert (set(anchors) | {"Spotlighted", "Encore"}
             == set(blindplay.ARM_KEYWORDS))
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
-                "PlanKey", "SpendKey", "FanfareKey", "BowKey",
-                "FrontPerformerKey", "CueKey", "RehearsalKey",
-                "SwirlKey", "GroundedKey", "CompanionKey"):
+                "PlanKey", "SpendKey", "FanfareKey", "DrainKey",
+                "RepayKey", "SwirlKey", "GroundedKey", "CompanionKey"):
         assert f"public const string {key}" in tips_src
     assert "HexereiKey" not in tips_src
-    # The re-founding (2026-10-04) retired these two with the bars.
-    for key in ("BackPerformerKey", "FadeKey"):
+    # The re-founding (2026-10-04) retired the first two with the bars; the
+    # Salon's Tab (2026-10-05) the v2 Stage's four.
+    for key in ("BackPerformerKey", "FadeKey", "BowKey", "FrontPerformerKey",
+                "CueKey", "RehearsalKey"):
         assert f"public const string {key}" not in tips_src
     # The text pass (2026-09-25) retired these three keys with their words.
     for key in ("RaiseKey", "RotateKey", "LeadPerformerKey"):
@@ -8974,12 +8961,14 @@ _R12_SMITH = (
     # `EB-746`: Spend is a CHOICE on play, so the row's face is the modal
     # one -- two modes, both printing their own number, both folded.
     # The text pass (2026-09-25) dropped "Choose one:" from the face.
+    # The Salon's Tab (2026-10-05): Curtain Rise's mode is a Drain, 12 [16].
     ("KLEEMOD-PROTO_FS_CURTAIN_RISE",
-     "Deal 7 damage. Spend 3: deal 17 instead."),
+     "Deal 7 damage. Drain 3: deal 12 instead."),
     # The loop fix (2026-10-04) took Take the Stage's cost cut away; Guest
-    # Star: Chevreuse's upgrade is the cost cut alone.
-    ("KLEEMOD-PROTO_FS_GUEST_STAR_CHEVREUSE",
-     "Summon Chevreuse."),
+    # Star: Chevreuse's upgrade was the cost cut alone, and (the Salon's Tab,
+    # 2026-10-05) every Guest Star's is now; Charlotte takes the slot.
+    ("KLEEMOD-PROTO_FS_GUEST_STAR_CHARLOTTE",
+     "Summon Charlotte."),
     # Legacy cleanup stage 6: the shipped An Invitation left with its sheet;
     # Alice's Detonator is the current row whose upgrade swaps one arm.
     ("KLEEMOD-PROTO_KO_ALICES_DETONATOR",
@@ -9010,7 +8999,7 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
     An EMPTY unupgraded arm takes the space in front of it with it, and the
     added draw resolves on play, so the clause LEADS (`EB-571`)."""
     assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
-        "Deal 10 damage. Spend 3: deal 21 instead.")
+        "Deal 10 damage. Drain 3: deal 16 instead.")
     assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
         "At the start of your turn, add an upgraded Ka-pow! to your hand.")
     assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
@@ -10949,16 +10938,16 @@ def test_the_smith_prints_an_energy_cost_the_upgrade_cuts():
     Seen to FAIL: the page printed the no-number note."""
     smith = live("upgrade-fresh")
     smith = json.loads(json.dumps(smith.get("state", smith)))
-    face = "Summon Chevreuse."
+    face = "Summon Charlotte."
     smith["card_select"]["cards"].append(
-        {"id": "KLEEMOD-PROTO_FS_GUEST_STAR_CHEVREUSE",
-         "name": "Guest Star: Chevreuse",
+        {"id": "KLEEMOD-PROTO_FS_GUEST_STAR_CHARLOTTE",
+         "name": "Guest Star: Charlotte",
          "cost": "1", "type": "Skill", "description": face})
     page = blindplay.observe(smith)
     assert f"    Upgraded: cost 0 — {face}" in page
     assert qa_packet.NO_PREVIEW_NO_NUMBER not in page
     assert qa_packet.upgraded_energy_delta(
-        "KLEEMOD-PROTO_FS_GUEST_STAR_CHEVREUSE") == -1
+        "KLEEMOD-PROTO_FS_GUEST_STAR_CHARLOTTE") == -1
 
 
 def test_an_upgraded_copy_in_hand_shows_its_upgraded_spark_price():

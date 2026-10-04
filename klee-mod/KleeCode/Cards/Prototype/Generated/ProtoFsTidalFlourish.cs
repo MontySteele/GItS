@@ -48,7 +48,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Flourish"),
-        ("description", "Deal {PlainDamage:diff()} damage to ALL enemies. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] to ALL instead."),
+        ("description", "Deal {PlainDamage:diff()} damage to ALL enemies. [gold]Spend[/gold] 6: deal {BranchDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -58,7 +58,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 3: deal 13 and apply [gold]Hydro[/gold] to ALL instead" };
+        new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 6: deal 12 Hydro damage to ALL enemies instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -67,7 +67,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
         new List<DynamicVar>
         {
             new DamageVar("PlainDamage", 5m, ValueProp.Move),
-            new DamageVar("BranchDamage", 13m, ValueProp.Move)
+            new DamageVar("BranchDamage", 12m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -87,11 +87,11 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
         var modeRules = new ModeRequirement?[]
         {
             null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 3),
+            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 6),
                                 "needs that much Fanfare"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 3: deal 13 and apply [gold]Hydro[/gold] to ALL instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 6: deal 12 Hydro damage to ALL enemies instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             await DamageCmd.Attack((IsUpgraded ? 8m : 5m))
@@ -103,10 +103,10 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
         }
         else
         {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
+            await FurinaStage.Spend(choiceContext, Owner.Creature, 6);
             using (HitElement.Carry(this, Element.Hydro))
             {
-                await DamageCmd.Attack((IsUpgraded ? 16m : 13m))
+                await DamageCmd.Attack((IsUpgraded ? 16m : 12m))
                     .FromCard(this, cardPlay)
                     .TargetingAllOpponents(CombatState!)
                     .WithElementHitFx(this)
@@ -118,9 +118,12 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
 
     protected override void OnUpgrade()
     {
+        // conditional_then_damage: the then-branch amount swaps on an IsUpgraded read at play time;
+        // the FACE prints it live (`EB-657`, the folded pair below) where the row has one,
+        // and swaps via {IfUpgraded:show:...|...} where it does not.
         // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
     }
 }
 
@@ -153,13 +156,13 @@ public sealed class ProtoFsTidalFlourishModeA : ModalOptionCard
         new List<DynamicVar>
         {
             new DamageVar("PlainDamage", 5m, ValueProp.Move),
-            new DamageVar("BranchDamage", 13m, ValueProp.Move)
+            new DamageVar("BranchDamage", 12m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
     {
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
     }
 }
 
@@ -179,8 +182,8 @@ public sealed class ProtoFsTidalFlourishModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 3"),
-        ("description", "[gold]Spend[/gold] 3: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] to ALL instead"),
+        ("title", "Spend 6"),
+        ("description", "[gold]Spend[/gold] 6: deal {BranchDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies instead"),
     };
 
     public ProtoFsTidalFlourishModeB()
@@ -188,21 +191,16 @@ public sealed class ProtoFsTidalFlourishModeB : ModalOptionCard
     {
     }
 
-    /// <summary>The Spend warning: the guests this Spend would leave
-    /// unable to pay for their act.</summary>
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpendShortfall(base.ExtraHoverTips, this, 3);
-
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar("PlainDamage", 5m, ValueProp.Move),
-            new DamageVar("BranchDamage", 13m, ValueProp.Move)
+            new DamageVar("BranchDamage", 12m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
     {
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
     }
 }

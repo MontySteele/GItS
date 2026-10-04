@@ -460,16 +460,6 @@ def test_a_monster_called_a_bomb_does_not_raise_the_bomb_row():
         hand=[_card("Place 1 [gold]Bomb[/gold] dealing 5.")])
 
 
-def test_the_seat_rows_say_what_a_performers_act_is():
-    """Round two, sec.2: what each performer does is printed. The front
-    performer row says who acts and when; each performer's own row its act."""
-    page = _page(_stage(), hand=[_card(
-        "Your front performer acts. Summon Crabaletta.")])
-    assert ("- **front performer** — The performer in the first seat. "
-            "Performers act front to back at the end of your turn.") in page
-    assert "Act: deal 5 damage to a random enemy." in page
-
-
 def test_the_performer_picker_says_what_it_asks_and_prints_no_cost():
     """The re-founding (2026-10-04): "Cue a performer" opens a small panel,
     one face per seat front to back (`StageSeatOption`). It is the card just

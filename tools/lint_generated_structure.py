@@ -234,15 +234,6 @@ def _has_literal_times(card: dict) -> bool:
     )
 
 
-def _has_element_hits(card: dict) -> bool:
-    """The Furina seat round (2026-09-26): a multi-hit attack whose element
-    rides only its first hits (`element_hits`). The emitter splits the count
-    into the carried hits and the rest, so its marker is the scope that
-    carries them rather than `WithHitCount`."""
-    return any(e.get("op") == "damage" and e.get("element_hits")
-               for e in _effects(card))
-
-
 def _has_rider_times(card: dict) -> bool:
     """R276: a multi-hit rider attack, whose count rides the helper call."""
     return any(
@@ -282,15 +273,9 @@ MECHANICS = (
             "WithHitCount and a 3x2 attack quietly becomes a 2"
         ),
     ),
-    Mechanic(
-        name="element_hits",
-        applies=_has_element_hits,
-        markers=("HitElement.Carry",),
-        why=(
-            "2026-09-26: only the first hits carry the element, and the face "
-            "cannot say which; lose the scope and every hit is a plain one"
-        ),
-    ),
+    # (`element_hits`, the first-hits-only element scope, left with its one
+    # row, v2 Furina's Bubble Aria, on 2026-10-05. The emitter still splits
+    # the count; a row that prints it again brings this mechanic back.)
     Mechanic(
         name="rider_times",
         applies=_has_rider_times,

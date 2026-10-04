@@ -281,41 +281,6 @@ def arm(monkeypatch):
     _clear_caches()
 
 
-def _furina_state(stage=(), enemies=None, deck=0, fanfare=0):
-    st = CombatState(player=Player(hp=200, max_hp=200, fanfare_cap=99,
-                                   character_id="furina"),
-                     enemies=enemies or [Enemy(hp=500, max_hp=500,
-                                               name="paper",
-                                               intents=[{"kind": "block",
-                                                         "amount": 0}])],
-                     rng=random.Random(0))
-    st.turn = 2
-    # The re-founded Stage (2026-10-04): a seat is a performer's name, and
-    # Fanfare is one number on Furina.
-    st.player.stage = list(stage)
-    st.player.stage_fanfare = fanfare
-    st.player.draw_pile = [Card(id=f"filler{i}", name="f", cost=1,
-                                type="skill") for i in range(deck)]
-    return st
-
-
-def test_the_six_are_appended_to_her_pool():
-    # The rules pass (2026-10-01) appended Opening Number after them.
-    assert FS.POOL_ADDS[1:7] == (
-        "proto_fs_aria_for_one", "proto_fs_interval_bell",
-        "proto_fs_casting_agent", "proto_fs_the_last_act",
-        "proto_fs_critics_darling", "proto_fs_star_turn")
-    rarities = [_proto(cid).rarity for cid in FS.POOL_ADDS[1:7]]
-    assert rarities == ["uncommon"] * 3 + ["rare"] * 3
-
-
-@pytest.mark.parametrize("stage,hits", [((), 3), (("usher",), 2)])
-def test_aria_for_one_hits_three_times_on_an_empty_stage(arm, stage, hits):
-    st = _furina_state(stage)
-    effects.resolve_card(st, _proto("proto_fs_aria_for_one"))
-    assert st.enemies[0].hp == 500 - 5 * hits
-
-
 def test_interval_bells_spend_is_three_then_two(arm):
     card = _proto("proto_fs_interval_bell")
     spend = card.effects[0]["modes"][1]
@@ -325,71 +290,5 @@ def test_interval_bells_spend_is_three_then_two(arm):
         if fx["op"] == "stage_spend":
             fx["amount"] -= 1
     assert FS.spend_mode_amount(up.effects[0]["modes"][1]) == 2
-    st = _furina_state(["usher", "crabaletta"], deck=5, fanfare=8)
-    st.player.energy = 0
-    effects.resolve_card(st, card)
-    assert st.player.stage_fanfare == 5
-    # The loop fix (2026-10-04): the Energy comes NEXT turn (Chevreuse's
-    # mechanism), so Warm Reception and Interval Bell+ no longer pay for
-    # each other this turn.
-    assert st.player.energy == 0 and len(st.player.hand) == 1
-    assert st.player.stage_energy_next == 1
-    FS.turn_start(st)
-    assert st.player.energy == 1 and st.player.stage_energy_next == 0
-
-
-def test_casting_agent_adds_a_free_guest_star_card(arm):
-    st = _furina_state()
-    got = FS.casting_agent(st)
-    assert got is not None and got.free_this_turn
-    assert got.id in FS.GUEST_STAR_CARD_IDS
-    offered = _events(st, "stage_casting_agent")[0]["offered"]
-    assert len(offered) == len(set(offered)) == FS.CASTING_AGENT_OFFER
-    st = _furina_state()
-    up = FS.casting_agent(st, upgraded=True)
-    assert up.id.endswith(upgrades.SUFFIX)
-
-
-@pytest.mark.parametrize("stage,cost", [
-    ((), 0), (("usher",), 1), (("usher", "crabaletta"), 2),
-    (("usher", "crabaletta", "chevalmarin"), 3)])
-def test_the_last_act_costs_one_less_per_empty_seat(arm, stage, cost):
-    st = _furina_state(stage)
-    assert combat.card_cost(st, _proto("proto_fs_the_last_act")) == cost
-
-
-def test_the_last_act_counts_sold_outs_fourth_seat(arm):
-    st = _furina_state(["usher"])
-    st.player.powers[FS.SOLD_OUT] = 1
-    assert FS.empty_seats(st.player) == 3
-    assert combat.card_cost(st, _proto("proto_fs_the_last_act")) == 0
-
-
-def test_critics_darling_deals_each_change_to_a_random_enemy(arm):
-    """The re-founded sheet (2026-10-04): "Whenever your Fanfare changes,
-    deal that much damage to a random enemy." """
-    enemies = [Enemy(hp=500, max_hp=500, name=n,
-                     intents=[{"kind": "block", "amount": 0}])
-               for n in ("a", "b")]
-    st = _furina_state(["usher", "crabaletta"], enemies=enemies, fanfare=8)
-    st.player.powers[FS.CRITICS_DARLING] = 1
-    FS.spend(st, 3)
-    assert sorted(e.hp for e in st.enemies) == [497, 500]
-    # A change of nothing deals nothing.
-    FS.gain(st, 0)
-    assert sum(e.hp for e in st.enemies) == 997
-
-
-def test_star_turn_makes_the_arriving_guest_act(arm):
-    st = _furina_state(["usher"])
-    st.player.powers[FS.STAR_TURN] = 1
-    FS.guest_star(st, "neuvillette", 4)
-    assert _events(st, "stage_star_turn")
-    # She pays 2 of the card's 4, and her line adds 2 to her own Hydro act.
-    assert st.enemies[0].hp == 500 - (FS.ACT_NEUVILLETTE_DAMAGE
-                                      + FS.NEUVILLETTE_HYDRO_BONUS)
-    assert st.player.stage_fanfare == 4 - FS.ACT_NEUVILLETTE_PRICE
-    # Without the Power, a newcomer does not act on arrival.
-    st = _furina_state(["usher"])
-    FS.guest_star(st, "neuvillette", 4)
-    assert st.enemies[0].hp == 500
+    # Its Spend mode's Energy comes next turn (the 2026-10-04 loop fix):
+    # `tier0/tests/test_furina_tide_arm.py` pins it on the Salon's Tab rules.

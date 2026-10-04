@@ -37,18 +37,15 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Exhaust };
-
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("let_the_people_rejoice");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Let the People Rejoice"),
-        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage to ALL enemies per point. Your performers [gold]Bow[/gold] and return.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage to ALL enemies per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -75,7 +72,6 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
             .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        await FurinaStage.CurtainCall(choiceContext, Owner.Creature);
     }
 
     protected override void OnUpgrade()

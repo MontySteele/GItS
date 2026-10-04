@@ -29,8 +29,8 @@ public sealed class FurinaCardPool : CardPoolModel
 
     /// <summary>
     /// THE OFFER (<c>GetUnlockedCards</c>, the sole door into reward rolls,
-    /// the shop and transforms): the Stage roster's pool, her Ancients and
-    /// the co-op tier (<c>FurinaStageRoster.OfferablePool</c>).
+    /// the shop and transforms): the slice's pool and her Ancients
+    /// (<c>FurinaStageRoster.OfferablePool</c>).
     /// </summary>
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards)
@@ -66,17 +66,11 @@ public static class FurinaOffPoolCards
 
     private static List<CardModel> BuildAll()
     {
+        // The Salon's Tab (2026-10-05) makes no card outside her pool: the
+        // performer picker, Arkhe Alignment's faces and Lyney's Trick went
+        // with the v2 Stage. The list stays as the one door a future token
+        // takes (EB-150: a card in no pool throws inside the chooser).
         var cards = new List<CardModel>();
-        // R276 batch two: Arkhe Alignment's two hand-written choice faces. A
-        // choose-one option card in no pool falls through to MockCardPool,
-        // whose GenerateAllCards throws "You monster!" inside
-        // NChooseACardSelectionScreen._Ready() (EB-150).
-        cards.Add(ModelDb.Card<Cards.Prototype.ArkheOusiaOption>());
-        cards.Add(ModelDb.Card<Cards.Prototype.ArkhePneumaOption>());
-        // THE RE-FOUNDING (2026-10-04): the performer picker's faces, and
-        // Lyney's Trick, a token his act creates.
-        cards.AddRange(Powers.FurinaStage.AllOptions());
-        cards.Add(ModelDb.Card<Cards.Prototype.StageTrick>());
         return cards;
     }
 }

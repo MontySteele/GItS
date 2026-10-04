@@ -76,11 +76,9 @@ KIT_SOURCES = (
     # the Casket pass (2026-09-28): the relic counts Plans now.
     "salon",                # V12 Salon performance
     "salon_final_bow",      # V13 Salon bow / Evoke
-    "furina_stage/act",     # V14 Stage act
-    "furina_stage/bow",     # V15 Stage bow
-    # The re-founded Stage (2026-10-04): Clorinde's while-on-stage line
-    # ("Whenever you Spend, deal 4 Electro"), a kit verb, not a card hit.
-    "furina_stage/line",
+    # V14/V15, the Stage's act and Bow (`furina_stage/act`, `/bow`, `/line`),
+    # left with v2 (the Salon's Tab, 2026-10-05): the arm's guests and Powers
+    # hit through `furina_tide`'s one door below.
     # The Furina re-founding sim slice (`furina_v2`, sim only): a performer's
     # act or Bow, and Clorinde's while-on-stage line. Kit verbs, not card hits.
     "furina_v2/act",
@@ -291,13 +289,8 @@ SIM_CALL_SITES = {
     ('effects.py', 26): ("'companion'", None, "'pyro'"),
     ('effects.py', 27): ("'companion'", None, "'pyro'"),
     ('effects.py', 28): ("'companion'", None, "'pyro'"),
-    # THE RE-FOUNDED STAGE (2026-10-04). Critics' Darling, a Power's damage
-    # on every Fanfare change -- element-less and unpowered, Varka's Powers'
-    # row; then the one door every performer's damage goes through (acts,
-    # Bows and Clorinde's line), unpowered, carrying the performer's element
-    # (None for the trio).
-    ('furina_stage.py', 1): ("'card'", 'False', 'None'),
-    ('furina_stage.py', 2): ('source', 'False', 'element'),
+    # (`furina_stage.py`'s two doors left with v2, the Salon's Tab,
+    # 2026-10-05: the arm runs on `furina_tide`'s rules and its one door.)
     # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): Clorinde's
     # line ("whenever you Spend, deal 4 Electro") and the one act door every
     # performer's damage act and Bow uses. Unpowered, as the Stage's acts are;
@@ -404,13 +397,10 @@ def test_the_sources_the_census_mints_are_the_ones_the_matrix_lists():
     for source, _p, _e in _sim_call_sites().values():
         for token in re.findall(r"'([^']+)'", source or ""):
             literal.add(token)
-    # `EXPLOSION_SOURCE` / `ECHO_SOURCE` are constants, resolved here, and
-    # so are the Stage's three (its one damage door takes `source`).
-    from tier0.engine import furina_stage, klee_overhaul
+    # `EXPLOSION_SOURCE` / `ECHO_SOURCE` are constants, resolved here.
+    from tier0.engine import klee_overhaul
     literal.add(klee_overhaul.EXPLOSION_SOURCE)
     literal.add(klee_overhaul.ECHO_SOURCE)
-    literal.update((furina_stage.ACT_SOURCE, furina_stage.BOW_SOURCE,
-                    furina_stage.LINE_SOURCE))
     assert literal == set(KIT_SOURCES)
 
 
@@ -433,9 +423,9 @@ CS_VERB_DOORS = {
         ("Powers/Prototype/KokomiPlan.cs", "ElementalHit.Deal", "powered: false"),
     "V12 Salon performance":
         ("Powers/SalonPowers.cs", "ElementalHit.Deal", "powered: false"),
-    # Draft 3 (2026-09-25): no act carries an element, so the element-less
-    # door; the Bow is the act once more and goes through the same one.
-    "V14/V15 Stage act and bow":
+    # The Salon's Tab (2026-10-05): a guest's act and a Power's hit, the
+    # board's one door, unpowered either way.
+    "V14 Stage guest act":
         ("Powers/Prototype/FurinaStage.cs", "ElementalHit.DealUnelemented",
          "powered: false"),
 }
@@ -449,71 +439,50 @@ def test_the_stage_refuses_the_dealers_terms_in_both_engines():
     """DISAGREEMENT D3, REPAIRED, and still pinned from both sides in one
     place so a later move on either side has to come here and decide.
 
-    THE RE-FOUNDING (2026-10-04). The act is `StageDirector.Act` (a Bow is
-    the act once more, free) and its game half is `GameStageBoard.Damage`,
-    whose one `Hit` takes the element-less door for the trio and
-    `ElementalHit.Deal` for a guest. Every ElementalHit call in the Stage's
-    game board -- `Hit`'s two, Clorinde's Spend line and Critics' Darling --
-    passes `powered: false`, so Furina's Strength and Weak scale a
-    performance in neither engine. The behavioural half is
-    `test_eb495_d3_a_performance_carries_no_strength.py`."""
+    THE SALON'S TAB (2026-10-05). A guest's act and a Power's hit go through
+    `GameStageBoard.One`, whose two ElementalHit calls both pass
+    `powered: false`, so Furina's Strength and Weak scale a performance in
+    neither engine: the sim arm hits through `furina_tide._hit`, the one
+    unpowered door. Her Drain goes through the same board as an unblockable,
+    unpowered HP loss on herself, not through ElementalHit."""
     cs = _cs("Powers/Prototype/FurinaStage.cs")
     doors = (cs.count("ElementalHit.Deal(")
              + cs.count("ElementalHit.DealUnelemented("))
-    assert doors == 4
+    assert doors == 2
     assert cs.count("powered: false") == doors
-    # The guests' file folded into the one board (the re-founding).
     assert not (MOD / "Powers/Prototype/FurinaStageGuests.cs").exists()
 
-    stage = [flags for (name, _i), flags in sorted(_sim_call_sites().items())
-             if name == "furina_stage.py"]
-    # The re-founded Stage (2026-10-04): Critics' Darling, and the one door
-    # every performer's damage takes. Both unpowered.
-    assert len(stage) == 2, stage
-    assert [powered for _s, powered, _e in stage] == ["False"] * 2
+    sites = _sim_call_sites()
+    assert not [k for k in sites if k[0] == "furina_stage.py"]
+    tide = [flags for (name, _i), flags in sorted(sites.items())
+            if name == "furina_tide.py"]
+    assert tide == [("'furina_tide/line'", "False", "element")]
 
 
-def test_no_trio_act_carries_an_element_in_either_engine():
-    """DISAGREEMENT D4, SUPERSEDED BY A RULE (Furina Stage draft 3,
-    2026-09-25; [USER]: "removing the Hydro application from the end-of-turn
-    effects on Chevalmarin and Crabaletta"). D4 had made Crabaletta's hit
-    Hydro in both engines; the ruling takes the element off the trio's acts,
-    so both engines deal plain damage there: the C# through the element-less
-    door and the sim with `element=None`. The behavioural half is
-    `test_eb495_d4_crabaletta_hits_hydro.py`, flipped.
-
-    THE GUEST CAST (2026-09-25) is the other half of the same ruling: a
-    guest on Furina's stage carries its element (the LAW amendment).
-
-    THE RE-FOUNDING (2026-10-04): the act is `StageDirector.Act`, which
-    hands the trio's damage to `GameStageBoard.Damage` with `Element.None`,
-    and the board's one `Hit` sends `Element.None` through the element-less
-    door and a guest's element through `ElementalHit.Deal`."""
+def test_a_guest_act_carries_its_element_in_both_engines():
+    """THE GUEST CAST's half of draft 3's ruling (a guest on Furina's stage
+    carries its element), on the four guests the Salon's Tab keeps
+    (2026-10-05): Wriothesley Cryo, Lynette Anemo, Clorinde Electro, and
+    Charlotte's act is a Repay, no hit. The board's one door sends
+    `Element.None` element-less and a guest's element through
+    `ElementalHit.Deal`."""
     director = _cs("Powers/Prototype/FurinaStageDirector.cs")
-    for member, nxt in (("Chevalmarin", "Crabaletta"),
-                        ("Crabaletta", "Neuvillette")):
+    for member, nxt, element in (
+            ("Wriothesley", "Lynette", "Element.Cryo"),
+            ("Lynette", "Clorinde", "Element.Anemo")):
         arm = director[director.index(f"case StagePerformer.{member}:"):
                        director.index(f"case StagePerformer.{nxt}:")]
-        assert "Element.None" in arm, member
-        assert "Element.Hydro" not in arm, member
+        assert element in arm, member
+    clorinde = director[director.index("case StagePerformer.Clorinde:"):]
+    assert "Element.Electro" in clorinde[:300]
+    charlotte = director[director.index("case StagePerformer.Charlotte:"):
+                         director.index("case StagePerformer.Wriothesley:")]
+    assert "Repay(FurinaStageLaw.CharlotteActRepay)" in charlotte
     cs = _cs("Powers/Prototype/FurinaStage.cs")
-    assert cs.count("Elements.Element.Hydro") == 0
-    hit = cs[cs.index("private Task<int> Hit("):cs.index("public async Task AddTrick(")]
-    assert "element == Element.None" in hit
-    assert "ElementalHit.DealUnelemented(" in hit
-    assert "ElementalHit.Deal(" in hit
-
-    sites = _sim_call_sites()
-    stage = [flags for (name, _i), flags in sorted(sites.items())
-             if name == "furina_stage.py"]
-    # The re-founded Stage (2026-10-04): Critics' Darling first,
-    # element-less; then the one performer door, which carries the
-    # performer's element (None for the trio: `furina_stage.GUEST_ELEMENTS`
-    # names no Salon member).
-    from tier0.engine import furina_stage
-    assert len(stage) == 2, stage
-    assert [element for _s, _p, element in stage] == ["None", "element"]
-    assert not set(furina_stage.SALON) & set(furina_stage.GUEST_ELEMENTS)
+    one = cs[cs.index("private Task<int> One("):cs.index("public async Task Draw(")]
+    assert "element == Element.None" in one
+    assert "ElementalHit.DealUnelemented(" in one
+    assert "ElementalHit.Deal(" in one
 
 
 def test_the_one_door_is_unpowered_with_no_dealer_and_no_card_source():

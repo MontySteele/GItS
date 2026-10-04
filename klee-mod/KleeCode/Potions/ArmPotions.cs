@@ -38,7 +38,7 @@ public static class ArmPotions
 
     public static readonly IReadOnlyList<Type> Furina = new[]
     {
-        typeof(BottledApplause), typeof(CurtainWater), typeof(EncoreElixir),
+        typeof(BottledApplause),
     };
 
     internal static string Image(string character, string slug) =>
@@ -196,64 +196,6 @@ public sealed class BottledApplause : ArmPotion
     }
 }
 
-/// <summary>Uncommon (sec.10): "Gain 1 Rehearsal."</summary>
-public sealed class CurtainWater : ArmPotion
-{
-    public const int Rehearsal = 1;
-
-    public override PotionRarity Rarity => PotionRarity.Uncommon;
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Curtain Water"),
-        ("description",
-            "Gain [blue]" + Rehearsal + "[/blue] [gold]Rehearsal[/gold]."),
-    };
-
-    protected override string ArtPath =>
-        ArmPotions.Image("furina", "curtain_water");
-
-    protected override async Task OnUse(
-        PlayerChoiceContext choiceContext, Creature? target)
-    {
-        AssertValidForTargetedPotion(target);
-        if (!FurinaStage.LiveFor(target)) return;
-        await PowerCmd.Apply<RehearsalPower>(choiceContext, target!, Rehearsal,
-                                             applier: target, cardSource: null);
-        FurinaStage.RefreshBadges(target);
-    }
-}
-
-/// <summary>Rare, raised by the ruling. "Each of your performers acts twice,
-/// now." Front first, each performer's two acts in full before the next's.
-/// </summary>
-public sealed class EncoreElixir : ArmPotion
-{
-    public const int Acts = 2;
-
-    public override PotionRarity Rarity => PotionRarity.Rare;
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Encore Elixir"),
-        ("description", "Each of your performers acts twice, now."),
-    };
-
-    protected override string ArtPath =>
-        ArmPotions.Image("furina", "encore_elixir");
-
-    protected override async Task OnUse(
-        PlayerChoiceContext choiceContext, Creature? target)
-    {
-        AssertValidForTargetedPotion(target);
-        if (!FurinaStage.LiveFor(target)) return;
-        using (FurinaStageLedger.For(target!).CausedBy("Encore Elixir"))
-        {
-            await FurinaStage.PerformAll(choiceContext, target, times: Acts);
-        }
-    }
-}
-
 // ---- the pools -------------------------------------------------------------
 
 /// <summary>Klee's potion pool under the Klee arm: her three, and nothing
@@ -272,9 +214,9 @@ public sealed class KleePotionPool : PotionPoolModel
     };
 }
 
-/// <summary>Furina's potion pool under the Stage: her three, and nothing
-/// borrowed. <c>Furina.PotionPool</c> answers it only with the Stage on.
-/// </summary>
+/// <summary>Furina's potion pool: Bottled Applause, and nothing borrowed
+/// (the Salon's Tab, 2026-10-05: Curtain Water and Encore Elixir left with
+/// Rehearsal and the performers).</summary>
 public sealed class FurinaPotionPool : PotionPoolModel
 {
     public override string EnergyColorName => "silent";
@@ -284,7 +226,5 @@ public sealed class FurinaPotionPool : PotionPoolModel
     protected override IEnumerable<PotionModel> GenerateAllPotions() => new PotionModel[]
     {
         ModelDb.Potion<BottledApplause>(),
-        ModelDb.Potion<CurtainWater>(),
-        ModelDb.Potion<EncoreElixir>(),
     };
 }

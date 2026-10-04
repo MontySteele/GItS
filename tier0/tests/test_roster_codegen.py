@@ -248,15 +248,20 @@ def test_aoe_aura_riders_stay_per_target():
     # NOT a display nicety -- a correctness guard. AttackCommand resolves a
     # CalculatedDamageVar ONCE with singleTarget == null, so converting an AoE
     # aura rider would collapse a per-enemy "does this one have an aura?"
-    # decision into a single flat value for the whole board. Read off the
-    # shipped artifact (Crashing Waves, the current kits' AoE
-    # aura rider) since the shipped sheets left at legacy cleanup stage 6.
-    out = gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
-    for name in ("ProtoFsCrashingWaves",):
-        source = (out / f"{name}.cs").read_text(encoding="utf-8")
-        assert "foreach (var auraTarget" in source, name
-        assert "AuraCmd.Find(auraTarget)" in source, name
-        assert "CalculatedDamageVar" not in source, name
+    # decision into a single flat value for the whole board. Emitted off a
+    # probe row in Crashing Waves' shape: the last shipped AoE aura rider
+    # left with v2 Furina (the Salon's Tab, 2026-10-05), and the emitter
+    # path stays live for the next one.
+    card = {"id": "proto_fs_probe_waves", "name": "Probe Waves",
+            "character": "furina", "cost": 1, "type": "attack",
+            "rarity": "uncommon",
+            "effects": [{"op": "damage", "amount": 8,
+                         "target": "all_enemies", "bonus_vs_aura": 5}]}
+    assert gen.blocked_reason(card, gen.FURINA_PROFILE) is None
+    source = gen.emit(card, gen.FURINA_PROFILE)
+    assert "foreach (var auraTarget" in source
+    assert "AuraCmd.Find(auraTarget)" in source
+    assert "CalculatedDamageVar" not in source
 
 
 def test_named_power_delta_follows_the_name_not_effect_order(monkeypatch):

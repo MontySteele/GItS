@@ -273,11 +273,6 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         # the site that counts one. `KokomiExpansion.OnReaction` is the twin.
         from tier0.engine import kokomi_plan             # late: cycle
         kokomi_plan.note_reaction(state, enemy)
-        # THE SUPPORTING POOL's
-        # Tide of Applause (2026-09-26) rides the same site: "whenever you
-        # trigger an Elemental Reaction, your back performer gains 2".
-        from tier0.engine import furina_stage            # late: cycle
-        furina_stage.note_reaction(state)
         # Courtroom Drama (Curtain Call B, R85): the FIRST reaction each
         # turn puts its target on the stand -- Vulnerable + Weak per stack.
         # Gated on the existing reactions_this_turn counter (== 1 is the

@@ -39,19 +39,6 @@ FIVE_CENTURY = ("The first time each turn a performer [gold]Bow[/gold]s and "
 
 # ---- 1. A Five-Century Act's face --------------------------------------------
 
-def test_a_five_century_act_says_it_needs_a_free_seat():
-    rows = yaml.safe_load(
-        (REPO / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
-    rows = rows if isinstance(rows, list) else next(
-        v for v in rows.values() if isinstance(v, list))
-    row = next(r for r in rows if r.get("id") == "proto_fs_five_century_act")
-    assert row["description"] == FIVE_CENTURY
-    power = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-             / "FurinaStagePowers.cs").read_text(encoding="utf-8")
-    assert ('"The first time each turn a performer [gold]Bow[/gold]s and "'
-            in power)
-    assert '"leaves, it returns at the back if a seat is free."' in power
-
 
 # ---- 2. BaseLib's mod-source tip ---------------------------------------------
 
@@ -105,18 +92,14 @@ def test_an_in_combat_clause_does_not_hide_the_upgrade():
     """Bravura printed "not shown -- the face on this screen is not the
     sentence this card was written with": its template ends in an
     `{InCombat:...|}` arm with a hole of its own."""
-    # The re-founding (2026-10-04): her one Fanfare number.
-    face = "Spend all your Fanfare. Deal 5 damage, plus 3 per point."
+    # The Salon's Tab (2026-10-05): "Deal 6 damage, plus 2 per point." [3].
+    face = "Spend all your Fanfare. Deal 6 damage, plus 2 per point."
     assert qa_packet.upgrade_preview("KLEEMOD-PROTO_FS_BRAVURA", face) == (
-        "Spend all your Fanfare. Deal 5 damage, plus 4 per point.", "")
+        "Spend all your Fanfare. Deal 6 damage, plus 3 per point.", "")
     # Printed in combat, the in-combat line is struck, not copied through.
     assert qa_packet.upgrade_preview(
         "KLEEMOD-PROTO_FS_BRAVURA", face + "\n(Deals 11 damage)")[0] == (
-        "Spend all your Fanfare. Deal 5 damage, plus 4 per point.")
-    assert qa_packet.upgrade_preview(
-        "KLEEMOD-PROTO_FS_DA_CAPO",
-        "Deal 6 damage, plus 2 for each Bow this combat.") == (
-        "Deal 9 damage, plus 3 for each Bow this combat.", "")
+        "Spend all your Fanfare. Deal 6 damage, plus 3 per point.")
 
 
 def test_a_numbered_defend_still_previews():
@@ -296,11 +279,6 @@ def test_a_chooser_over_a_fight_prints_the_fight():
 
 
 # ---- 12 and 13. Pneuma, and three log labels ---------------------------------
-
-def test_pneuma_says_what_it_gives():
-    # The re-founding (2026-10-04): "Gain 2 Fanfare" (sec.8).
-    assert ARM_KEYWORDS["Pneuma"] == "Gain 2 Fanfare."
-    assert "It summons nobody." not in ARM_KEYWORDS["Pneuma"]
 
 
 def _row(event, member, name, fanfare, moved, **kw):

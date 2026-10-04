@@ -755,14 +755,12 @@ CO_TENANCY_LEDGER = {
     },
     "AfterPlayerTurnStart": {
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
-            "QUARANTINED (the Furina stage, the re-founding 2026-10-04). "
-            "After her draw: the badge, Charlotte's extra card and the "
-            "turn-start powers (`FurinaStage.TurnStart`: One-Woman Show, "
-            "Premiere Season's Rehearsal, Grand Theater Program's and Season "
-            "Tickets' Fanfare). THE ORDERING QUESTION, answered: what it "
-            "WRITES to a shared resource is Furina's one Fanfare number, and "
-            "every other writer of it in this broadcast "
-            "(`StageRaisePerTurnPower`, Arkhe Alignment's Pneuma) ADDS to it "
+            "QUARANTINED (the Furina stage; the Salon's Tab, 2026-10-05). "
+            "After her draw: the badge and Grand Theater Program's Fanfare "
+            "(`FurinaStage.TurnStart`). THE ORDERING QUESTION, answered: what "
+            "it WRITES to a shared resource is Furina's one Fanfare number, "
+            "and every other writer of it in this broadcast "
+            "(`StageRaisePerTurnPower`) ADDS to it "
             "and reads nothing, so any order leaves the same number. It deals "
             "no damage and touches no element, so it shares no resource with "
             "`KleeElementalHooks` or the Companion powers beside it",
@@ -772,20 +770,10 @@ CO_TENANCY_LEDGER = {
             "2026-10-04). Her Ancient under the arm: gain N Fanfare at the "
             "start of her turn. THE ORDERING QUESTION, answered: its "
             "co-tenants on the same resource (`FurinaStageHooks`' turn-start "
-            "powers, Pneuma) all ADD to her one Fanfare number and read "
+            "powers) all ADD to her one Fanfare number and read "
             "nothing, so either order leaves the same number. It deals no "
             "damage, grants no Block and touches no element. NO SIM TWIN "
             "ORDERS IT: the sim models the shipped Ancient only",
-        ("Powers/Prototype/FurinaStagePowers.cs", "ArkheAlignmentPower"):
-            "QUARANTINED (the Furina stage, FURINA_STAGE; R276 batch two). "
-            "Arkhe Alignment's turn-start choice, asked once a turn: Ousia "
-            "multiplies this turn's act damage, Pneuma gains 2 Fanfare a "
-            "copy (the re-founding, 2026-10-04). THE ORDERING QUESTION, "
-            "answered: the multiplier is read only by the acts, which fire at "
-            "the END of the turn, so no co-tenant of this broadcast reads it; "
-            "Pneuma's gain is an ADDITION to her one Fanfare number, as the "
-            "other turn-start gains are, so either order leaves the same "
-            "number",
         ("Powers/Prototype/KokomiPoolCompletion.cs", "PatientTidePower"):
             "QUARANTINED (the Kokomi overhaul; pool completion, 2026-10-01). "
             "Patient Tide hands back the Energy it banked at her last turn's "

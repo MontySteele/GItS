@@ -175,25 +175,6 @@ public class LiveLooks8bTests
     // `EB-739`'s second pair -- one printed name per card
     // ==================================================================
 
-    [Fact]
-    public void The_stages_starter_no_longer_prints_the_shipped_salon_name()
-    {
-        // THE FIND (the `EB-739` caveat). "The shipped `Salon Début` and the
-        // Stage's `Salon Début` are both live ids on this build and print the
-        // same title (`Salon Début (1)` / `Salon Début (2)` when both are in
-        // hand). They are held apart only by `EB-736`'s offer filter."
-        //
-        // An E default under R179 -- the brief's own card table says "Names
-        // are provisional" -- and the same repair `EB-739` made to Standing
-        // Ovation. The ID does not move.
-        var generated = Source(Path.Combine(
-            "klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
-            "ProtoFsSalonDebut.cs"));
-        Assert.Contains("(\"title\", \"Take the Stage\")", generated);
-        Assert.DoesNotContain("(\"title\", \"Salon Début\")", generated);
-        Assert.Contains("id=proto_fs_salon_debut", generated);
-    }
-
     // ==================================================================
     // Defect 6 -- the Kurage memory warning at every combat start
     // ==================================================================

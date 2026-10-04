@@ -31,8 +31,8 @@ from tier0.tests.conftest import make_state
 from tools import gen_klee_cards as gen
 from tier05 import rewards
 
-TIERS = (C.KLEE_OVERHAUL_MULTIPLAYER_IDS + C.FURINA_STAGE_MULTIPLAYER_IDS
-         + C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS)
+# THE SALON'S TAB (2026-10-05): Furina's five left with v2.
+TIERS = C.KLEE_OVERHAUL_MULTIPLAYER_IDS + C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS
 
 
 def _row(cid):
@@ -44,7 +44,6 @@ def arms(monkeypatch):
     """All three overhaul arms on, with the flag-keyed caches cleared."""
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
-    from tier0.engine import furina_stage
     yield
     loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
@@ -52,9 +51,11 @@ def arms(monkeypatch):
 
 # ---- the rows ---------------------------------------------------------------
 
-def test_the_fifteen_load_and_are_the_three_tiers():
-    # Pool completion (2026-10-01): Kokomi's fourth and fifth.
-    assert len(TIERS) == 15
+def test_the_ten_load_and_are_the_two_tiers():
+    # Pool completion (2026-10-01): Kokomi's fourth and fifth. The Salon's
+    # Tab (2026-10-05): Furina's five left.
+    assert len(TIERS) == 10
+    assert not any(cid.startswith("proto_fs_") for cid in TIERS)
     assert loader.multiplayer_ids() == frozenset(TIERS)
     ids = {c.id for c in loader.prototype_cards()}
     assert set(TIERS) <= ids
@@ -66,8 +67,6 @@ def test_the_rarities_per_character():
     her review (pick 4)."""
     expected = {
         C.KLEE_OVERHAUL_MULTIPLAYER_IDS:
-            ["rare", "rare", "uncommon", "uncommon", "uncommon"],
-        C.FURINA_STAGE_MULTIPLAYER_IDS:
             ["rare", "rare", "uncommon", "uncommon", "uncommon"],
         # Pool completion (2026-10-01): Tactical Relay and Kurage's Mercy.
         C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS:
@@ -207,58 +206,19 @@ def test_coordinated_strike_hits_and_its_plan_lands_on_no_one(arms):
                for e in st.log)
 
 
-def test_share_the_spotlight_spends_nothing_with_no_one_to_share_with(arms):
-    from tier0.engine import furina_stage as FS
-    st = make_state()
-    st.player.character_id = "furina"
-    st.in_player_turn = True
-    FS.open_combat(st)
-    st.player.stage_fanfare = 5
-    stage = list(FS.stage(st.player))
-    effects.resolve_card(st, _row("proto_fs_share_the_spotlight"))
-    assert FS.stage(st.player) == stage
-    assert st.player.stage_fanfare == 5
-    assert st.player.block == 0
-
-
-def test_the_five_powers_apply_and_never_fire(arms):
+def test_the_three_powers_apply_and_never_fire(arms):
     """Each sits on its owner and watches OTHER players; a one-seat fight
     never gives one anything to hear."""
     for cid, power in (("proto_ko_knights_of_favonius", "ko_knights_of_favonius"),
-                       ("proto_fs_people_of_fontaine", "fs_people_of_fontaine"),
                        ("proto_kk_sangonomiyas_counsel", "kk_sangonomiyas_counsel"),
                        ("proto_ko_sparks_for_everyone", "ko_sparks_for_everyone"),
-                       ("proto_fs_the_crowd_roars", "fs_the_crowd_roars")):
+                       ):
         st = make_state()
         effects.resolve_card(st, _row(cid))
         assert st.player.powers.get(power), cid
 
 
 # ---- the second batch ---------------------------------------------------------
-
-def test_raise_a_toast_gives_no_one_strength(arms):
-    """The re-founded sheet (2026-10-04): "Draw 1 card. Spend 4: another
-    player gains 4 temporary Strength." The pilot keeps the draw mode in a
-    one-seat fight (nobody to toast); a Spend mode taken anyway reaches the
-    toast, which has no one to serve."""
-    from tier0.engine import furina_stage as FS
-
-    class SpendAlways:
-        def spend_mode(self, state, modes):
-            return 1
-
-    for decider, spent in ((None, 0), (SpendAlways(), 4)):
-        st = make_state()
-        st.player.character_id = "furina"
-        st.in_player_turn = True
-        st.player.stage_decider = decider
-        FS.open_combat(st)
-        st.player.stage_fanfare = 4
-        effects.resolve_card(st, _row("proto_fs_raise_a_toast"))
-        assert st.player.stage_fanfare == 4 - spent
-        assert not st.player.powers.get("strength")
-        assert any(e["event"] == "coop_no_other_player"
-                   and e["op"] == "stage_toast" for e in st.log) == bool(spent)
 
 
 def test_shrapnel_places_its_mine_and_the_shred_has_no_one_to_serve(arms):
@@ -278,21 +238,18 @@ def test_the_second_batch_upgrades_are_the_ruled_ones():
     so no rest site of its can smith one and the delta is read here rather
     than applied; the C# pins apply it (`CoopSetTwoTests`). The `cap` key
     binds Raise a Toast's ceiling in both engines (`gen.CAP_VAR`)."""
-    assert _row("proto_fs_raise_a_toast").upgrade == {"cap": 2}       # 6 -> 8
     assert _row("proto_ko_shrapnel").upgrade == {"bomb_size": 3}     # 4 -> 7
-    assert _row("proto_fs_the_crowd_roars").upgrade == {"power_amount": 1}  # 1 -> 2 Fanfare (power cost sweep)
     assert _row("proto_ko_sparks_for_everyone").upgrade == {"innate": True}
-    assert gen.CAP_VAR["stage_toast"] == "ToastCap"
 
 
-def test_every_op_the_thirteen_print_is_registered():
+def test_every_op_the_ten_print_is_registered():
     for cid in TIERS:
         row = _row(cid)
         for fx in list(row.effects) + list(row.plan or []):
             assert fx["op"] in effects.OPS, (cid, fx["op"])
 
 
-def test_the_sheet_marks_all_thirteen_and_nothing_else():
+def test_the_sheet_marks_all_ten_and_nothing_else():
     raw = yaml.safe_load(
         (Path(loader.PROTOTYPE_SHEET)).read_text(encoding="utf-8"))
     marked = [d["id"] for d in raw if d.get("multiplayer")]

@@ -38,14 +38,14 @@ public sealed class ProtoFsGuestStarClorinde : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForClorinde(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
+        ArmKeywordTips.ForClorinde(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_clorinde");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Clorinde"),
-        ("description", "Summon Clorinde. Gain {GuestFanfare:diff()} [gold]Fanfare[/gold].{InCombat:{StageBow}|}"),
+        ("description", "Summon Clorinde.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
@@ -60,7 +60,7 @@ public sealed class ProtoFsGuestStarClorinde : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("GuestFanfare", 2m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,11 +72,11 @@ public sealed class ProtoFsGuestStarClorinde : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "clorinde", DynamicVars["GuestFanfare"].IntValue);
+        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "clorinde", 0);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["GuestFanfare"].UpgradeValueBy(2m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

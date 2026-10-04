@@ -821,47 +821,11 @@ class Player(Fighter):
     # TRUTH for the Salon; powers["salon_member"] mirrors len(salon) so
     # every count read (has_salon_members, pilot, instruments) still works.
     salon: list[str] = field(default_factory=list)
-    # FURINA'S STAGE (`furina_stage`, the re-founded rules of
-    # review/active/furina-refounding-2026-10-03.md, sec.1 as sec.8 amends
-    # it). The seats, front first, each a performer's NAME: performers have no
-    # bars any more, so a seat is who stands in it and nothing else. Empty on
-    # every other character's run: `furina_stage.stage` returns `[]` for
-    # anyone who is not Furina, whatever is in here.
-    stage: list[str] = field(default_factory=list)
-    # Fanfare, ONE number on Furina (rule 5): no cap, no fade, hits never
-    # touch it. Not the retired shipped meter (`fanfare` above), which the
-    # Stage keeps inert (`resources.stage_retires_the_shipped_meters`).
-    stage_fanfare: int = 0
-    # The flow counts (sec.8): gained this turn, spent this turn (a card's
-    # Spend only, never a payment). Reset at the START of her turn, so they
-    # hold through the whole end-of-turn sequence.
-    stage_gained_this_turn: int = 0
-    stage_spent_this_turn: int = 0
-    # The once-a-turn latches, reset with the flow counts: Salon summon cards
-    # and Cue cards played (Escoffier's and Lyney's lines), Cues made
-    # (Lynette's line), Chevreuse's one act, A Five-Century Act's one return.
-    stage_salon_cards_this_turn: int = 0
-    stage_cue_cards_this_turn: int = 0
-    stage_cues_this_turn: int = 0
-    stage_chevreuse_acted: bool = False
-    stage_returned: bool = False
-    # Arkhe Alignment's / Dual Nature's Ousia: this turn's multiple on the
-    # performers' damage acts.
-    stage_act_damage_mult: int = 1
-    # Chevreuse's act: Energy owed at the start of the next turn.
-    stage_energy_next: int = 0
-    # Oratrice's Verdict's enemy this turn, and every Bow this combat (Da
-    # Capo).
-    stage_verdict: Optional[object] = None
-    stage_bows: int = 0
-    # Sigewinne: `CombatState.player_damage_events` at her last act (or her
-    # seating). Wriothesley: the damage her Block stopped since his last act
-    # (or his seating).
-    stage_sigewinne_mark: int = 0
-    stage_wriothesley_blocked: int = 0
-    # Who makes the player's choices inside a Stage card (which performer a
-    # Cue names, Step Forward moves, Final Bow sends off; Ousia or Pneuma).
-    # None = the pilot's (`tier0.pilot.policy.FURINA_STAGE_DECIDER`).
+    # FURINA (the Salon's Tab, 2026-10-05): her stage, Fanfare and drained
+    # ledger live on `player.ftd` (`furina_tide.Ftd`, attached by
+    # `furina_stage.reset_for_combat`). The v2 Stage's fields left with v2.
+    # Who makes the player's choices inside a Stage card (whether to take a
+    # Drain or Spend mode). None = `furina_stage.FURINA_TIDE_DECIDER`.
     stage_decider: Optional[object] = None
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
@@ -1221,13 +1185,8 @@ class CombatState:
     # every Klee number on record. The C# side draws exactly this line for the
     # same reason -- the ledger is beside the game, not in it.
     spark_ledger: list[dict] = field(default_factory=list)
-    # FURINA'S STAGE, INSTRUMENT ONLY, and the spark ledger's reason one arm
-    # over: this fight's Fanfare economy (gained by door, spent, paid by
-    # payer) and the stage's counts (acts, star skips, Cues, Bows, walk-ons),
-    # booked at each writer in `furina_stage` and read by
-    # `tools/furina_stage_report.py`. Nothing reads it back to decide
-    # anything, and it stays `{}` on every other character's run.
-    stage_ledger: dict = field(default_factory=dict)
+    # (The v2 Stage's `stage_ledger` left with v2 and its report, 2026-10-05:
+    # her economy is booked on `player.ftd.ledger`.)
     kills_this_card: int = 0              # killed_target
     # Kills that the base game's Fatal gate would honor (Enemy
     # .counts_for_fatal). Separate from kills_this_card so the existing

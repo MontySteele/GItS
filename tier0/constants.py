@@ -1101,9 +1101,10 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     *KOKOMI_STATUS_BATCH_IDS,
 )
 
-# THE CO-OP SET's Kokomi and Furina tiers, on `KLEE_OVERHAUL_MULTIPLAYER_IDS`'s
+# THE CO-OP SET's Kokomi tier, on `KLEE_OVERHAUL_MULTIPLAYER_IDS`'s
 # terms (above): offered only in co-op, outside every pool count, and never
-# dealt by the one-seat sim.
+# dealt by the one-seat sim. (Furina's five left with v2, the Salon's Tab,
+# 2026-10-05: the slice is the starter and 24 rows, no co-op tier.)
 KOKOMI_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
     "proto_kk_joint_orders",
     "proto_kk_coordinated_strike",
@@ -1111,14 +1112,6 @@ KOKOMI_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
     # POOL COMPLETION (2026-10-01): her fourth and fifth (3 Uncommon, 2 Rare).
     "proto_kk_tactical_relay",
     "proto_kk_kurages_mercy",
-)
-FURINA_STAGE_MULTIPLAYER_IDS: tuple[str, ...] = (
-    "proto_fs_guest_of_honor",
-    "proto_fs_share_the_spotlight",
-    "proto_fs_people_of_fontaine",
-    # The second batch (review/active/coop-concepts-2026-09-27.md, pick 2a).
-    "proto_fs_raise_a_toast",
-    "proto_fs_the_crowd_roars",
 )
 
 # THE TWO-PLAN CAP -- A LANE RULE BEHIND A RUNTIME TOGGLE, DEFAULT OFF

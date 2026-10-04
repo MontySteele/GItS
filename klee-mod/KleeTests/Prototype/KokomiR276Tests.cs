@@ -68,14 +68,14 @@ public class KokomiR276Tests
     public void A_no_element_mod_damage_card_played_by_kokomi_applies_nothing()
     {
         // [USER], 2026-10-05: "I think that that Kokomi effect is a legacy
-        // design." Furina's Cheered On is a mod-authored Attack that deals
-        // damage and names no element -- no IElementalCard, no carried hit,
-        // no gem. In Kokomi's hand it used to apply her Hydro; it applies
+        // design." Furina's Surging Waters is a mod-authored Attack that
+        // deals damage and names no element -- no IElementalCard, no carried
+        // hit, no gem. In Kokomi's hand it used to apply her Hydro; it applies
         // nothing, in hers or anyone's. Before this change the funnel's
         // character fallback answered Hydro here.
         try
         {
-            var cheered = new ProtoFsCheeredOn();
+            var cheered = new ProtoFsSurgingWaters();
             Assert.Equal(CardType.Attack, cheered.Type);
             Assert.IsNotAssignableFrom<IElementalCard>(cheered);
             Assert.Equal(Element.None,

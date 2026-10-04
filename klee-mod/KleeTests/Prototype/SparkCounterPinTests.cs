@@ -93,7 +93,8 @@ public class SparkCounterPinTests
         // Her Fanfare gauge takes the first slot above the orb (her own
         // resource, from turn one); the Spark counter takes the next. Klee
         // and anyone else keep the first slot.
-        Assert.Equal(1, SparkCounter.SlotFor(Seat.Furina().Creature));
+        // After the Fanfare gauge and the Drained counter (2026-10-05).
+        Assert.Equal(2, SparkCounter.SlotFor(Seat.Furina().Creature));
         Assert.Equal(0, SparkCounter.SlotFor(Seat.Klee().Creature));
         Assert.Equal(0, SparkCounter.SlotFor(
             Seat.Of(new MegaCrit.Sts2.Core.Models.Characters.Ironclad()).Creature));

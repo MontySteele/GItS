@@ -25,17 +25,6 @@ public class Wave3Fixes20260926Tests
         loc!.Single(row => row.Item1 == "description").Item2;
 
     [Fact]
-    public void A_five_century_act_says_it_returns_only_to_a_free_seat()
-    {
-        // The re-founding (sec.10): no Fanfare on the return.
-        const string face =
-            "The first time each turn a performer [gold]Bow[/gold]s and "
-          + "leaves, it returns at the back if a seat is free.";
-        Assert.Equal(face, Description(new ProtoFsFiveCenturyAct().Localization));
-        Assert.Equal(face, Description(new FiveCenturyActPower().Localization));
-    }
-
-    [Fact]
     public void Jumpy_dumpty_mk_omega_drops_the_burst_keyword_under_the_arm()
     {
         // BaseLib assigns the custom keywords' values at registration, so
@@ -45,22 +34,10 @@ public class Wave3Fixes20260926Tests
     }
 
     [Fact]
-    public void The_pneuma_tip_says_it_gains_fanfare()
-    {
-        // The re-founding (sec.8): "Arkhe Alignment's Pneuma mode: Gain 2
-        // Fanfare."
-        var printed = string.Concat(Il.Strings(
-            typeof(ArmKeywordTips).GetMethod(nameof(ArmKeywordTips.ForPneuma),
-                                             HeadlessGame.All)!));
-        Assert.Contains("Gain ", printed);
-        Assert.DoesNotContain("front performer", printed);
-    }
-
-    [Fact]
     public void Thunderous_applause_names_its_amount()
     {
         Assert.Contains(
-            "draw [blue]{Amount}[/blue]",
+            "deal [blue]{Amount}[/blue]",
             Description(new ThunderousApplausePower().Localization));
     }
 }

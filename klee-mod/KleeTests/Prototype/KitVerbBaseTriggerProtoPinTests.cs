@@ -26,11 +26,11 @@ public class KitVerbBaseTriggerProtoPinTests
     // row: `damage-only` under T5 and `none` under every other trigger.
     [InlineData("ProtoBombPower", "Explode")]   // V5 explosion, and V6's mine
     [InlineData("KokomiPlan", "Hit")]           // V9 planned hit
-    // V14 and V15, the Stage's act and bow: since the re-founding
-    // (2026-10-04) both are the ONE `StageDirector.Act`, whose damage goes
-    // to the game through `GameStageBoard.Hit` -- the element-less door for
-    // the trio, `Deal` for a guest's element.
-    [InlineData("GameStageBoard", "Hit")]       // V14 stage act, V15 stage bow
+    // V14 and V15, a guest's act and its leaving act: since the Salon's Tab
+    // (2026-10-05) both are the ONE `StageDirector.Act`, whose damage goes
+    // to the game through `GameStageBoard.One` -- `Deal` for a guest's
+    // element, the element-less door for a Power's hit.
+    [InlineData("GameStageBoard", "One")]       // V14 guest act, V15 leaving act
     public void A_prototype_kit_verb_goes_through_the_elemental_door(
         string type, string method)
     {
@@ -46,8 +46,7 @@ public class KitVerbBaseTriggerProtoPinTests
 
     [Theory]
     [InlineData("EndOfTurn")]
-    [InlineData("Bow")]
-    [InlineData("Cue")]
+    [InlineData("SummonGuest")]
     public void The_stage_act_and_bow_both_reach_the_one_act(string method)
     {
         Assert.Contains("StageDirector.Act",

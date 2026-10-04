@@ -7,21 +7,21 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE STAGE'S CLOCKS AND LINES (v2): the turn's flow counts reset at its top
-/// (sec.8), Charlotte's draw and the turn-start powers after the draw, the
-/// acts at its end (rule 1), the card-play counts, the free cards
-/// (Escoffier's and Lyney's lines, The Last Act), Neuvillette's Hydro line on
-/// her cards, and Sigewinne's and Wriothesley's readings.
+/// THE KIT'S CLOCKS AND LINES (the Salon's Tab, 2026-10-05): the turn's flow
+/// counts reset at its top, Grand Theater Program after the draw, the guests
+/// and the Singer at its end, the HP-loss hooks that print Fanfare (rule 3)
+/// and Lynette's line, and the curtain call when the combat ends.
 ///
 /// ITS OWN LISTENER, concatenated behind the one
-/// <c>SubscribeForCombatStateHooks</c> call like every other tenant, AFTER the
-/// shipped end-of-turn sequencer, and a walk over nothing on a board with no
-/// stage: every method's first question is <see cref="FurinaStage.LiveFor"/>.
+/// <c>SubscribeForCombatStateHooks</c> call like every other tenant, and a
+/// walk over nothing on a board with no Furina: every method's first question
+/// is <see cref="FurinaStage.LiveFor"/>.
 /// </summary>
 public sealed class FurinaStageHooks : AbstractModel
 {
@@ -36,46 +36,9 @@ public sealed class FurinaStageHooks : AbstractModel
         yield return _instance;
     }
 
-    /// <summary>
-    /// THE CARDS THAT PRICE THEMSELVES OFF THE STAGE. PURE, floored at 0, and
-    /// asked of the holder through <c>SparkCost.OwnerCreatureOf</c> (a
-    /// canonical card has no owner):
-    ///   * The Last Act: "Costs 1 less for each empty seat."
-    ///   * Escoffier on stage: the first Salon summon card each turn costs 0.
-    ///   * Lyney on stage: the first Cue card each turn costs 0.
-    /// </summary>
-    public override bool TryModifyEnergyCostInCombat(
-        CardModel card, decimal originalCost, out decimal modifiedCost)
-    {
-        modifiedCost = originalCost;
-        if (originalCost <= 0m) return false;
-        var owner = SparkCost.OwnerCreatureOf(card);
-        if (!FurinaStage.LiveFor(owner)) return false;
-        if (FurinaStage.PlaysFree(owner, card))
-        {
-            modifiedCost = 0m;
-            return true;
-        }
-        if (card is not Cards.Prototype.Generated.ProtoFsTheLastAct) return false;
-        var empty = FurinaStage.EmptySeats(owner);
-        if (empty <= 0) return false;
-        modifiedCost = System.Math.Max(0m, originalCost - empty);
-        return modifiedCost != originalCost;
-    }
-
-    /// <summary>NEUVILLETTE'S LINE, on her cards: "Your Hydro damage deals 2
-    /// more", per hit of a Hydro card while he is on stage.</summary>
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource, CardPlay? cardPlay)
-    {
-        if (target == null || dealer == null || target == dealer) return 0m;
-        if (!target.IsEnemy) return 0m;
-        return FurinaStage.HydroBonus(dealer, cardSource);
-    }
-
     /// <summary>The top of her turn, before the draw: the flow counts reset,
-    /// so they held through the whole end-of-turn sequence (sec.8).</summary>
+    /// so they held through the whole end-of-turn sequence and the enemies'
+    /// turn (Lynette's line reads its latch across it).</summary>
     public override Task BeforeSideTurnStart(
         PlayerChoiceContext choiceContext, CombatSide side,
         IReadOnlyList<Creature> participants, ICombatState combatState)
@@ -88,9 +51,8 @@ public sealed class FurinaStageHooks : AbstractModel
         return Task.CompletedTask;
     }
 
-    /// <summary>After her draw: the badge, Charlotte's extra card and the
-    /// turn-start powers (<see cref="FurinaStage.TurnStart"/>), then the
-    /// cues go up for the turn they forecast.</summary>
+    /// <summary>After her draw: the badge, then Grand Theater Program, then
+    /// the cues go up for the turn they forecast.</summary>
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
@@ -100,13 +62,10 @@ public sealed class FurinaStageHooks : AbstractModel
         Vfx.FurinaStageCues.CurtainUp(player.Creature);
     }
 
-    /// <summary>
-    /// RULE 1: the performers act at the end of her turn, front to back.
-    /// <c>BeforeSideTurnEnd</c>, the broadcast the shipped end-of-turn work
-    /// runs in, before the discard flush. The log clears just before the
-    /// sweep it is about (`EB-735`), and the cues come down as the acts
-    /// begin.
-    /// </summary>
+    /// <summary>Rule 5 and rule 4: the guests act at the end of her turn,
+    /// front to back, then the Singer Repays. <c>BeforeSideTurnEnd</c>, the
+    /// broadcast the shipped end-of-turn work runs in. The log clears just
+    /// before the sweep it is about (`EB-735`).</summary>
     public override async Task BeforeSideTurnEnd(
         PlayerChoiceContext choiceContext, CombatSide side,
         IEnumerable<Creature> participants)
@@ -128,38 +87,42 @@ public sealed class FurinaStageHooks : AbstractModel
         return Task.CompletedTask;
     }
 
-    /// <summary>The play closed: Opening Number's count, and the Salon
-    /// summon and Cue cards Escoffier's and Lyney's lines count.</summary>
-    public override Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    /// <summary>Rule 3: every HP she loses prints 1 Fanfare -- a hit past
+    /// Block, a status, a card's own HP cost. A Drain counts its own loss
+    /// (the ledger's <c>Draining</c> latch).</summary>
+    public override Task AfterCurrentHpChanged(Creature creature, decimal delta)
     {
-        FurinaStage.NoteCardPlayed(cardPlay.Card?.Owner?.Creature,
-                                   cardPlay.Card);
+        if (delta < 0m && FurinaStage.LiveFor(creature))
+        {
+            FurinaStage.NoteHpLost(creature,
+                                   (int)System.Math.Ceiling(-delta));
+        }
         return Task.CompletedTask;
     }
 
-    /// <summary>Wriothesley's reading: what her Block stopped of a hit.
-    /// </summary>
+    /// <summary>Lynette's line: an enemy's hit that reached her HP.</summary>
     public override Task AfterDamageReceived(
         PlayerChoiceContext choiceContext, Creature target,
         DamageResult result, ValueProp props, Creature? dealer,
         CardModel? cardSource)
     {
-        if (FurinaStage.LiveFor(target))
+        if (FurinaStage.LiveFor(target) && dealer != null && dealer.IsEnemy)
         {
-            FurinaStage.NoteBlocked(target, result.BlockedDamage);
+            FurinaStage.NoteEnemyHit(target, (int)result.UnblockedDamage);
             Vfx.FurinaStageCues.Refresh(target);
         }
         return Task.CompletedTask;
     }
 
-    /// <summary>Sigewinne's reading: each time Furina loses HP.</summary>
-    public override Task AfterCurrentHpChanged(Creature creature, decimal delta)
+    /// <summary>THE CURTAIN CALL (sec.16): every drained HP returns when the
+    /// combat ends, before the rewards, and the HP carries into the run.
+    /// <c>AfterCombatEnd</c> runs inside <c>EndCombatInternal</c>, which the
+    /// loss path never reaches (`PlayTelemetry.CombatEnded`).</summary>
+    public override async Task AfterCombatEnd(CombatRoom room)
     {
-        if (delta < 0m && FurinaStage.LiveFor(creature))
+        foreach (var furina in FurinaStageLedger.Furinas.ToList())
         {
-            FurinaStage.NoteHpLoss(creature);
+            await FurinaStage.CurtainCall(furina);
         }
-        return Task.CompletedTask;
     }
 }

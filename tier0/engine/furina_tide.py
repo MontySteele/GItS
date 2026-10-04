@@ -13,8 +13,15 @@ the engine calls is a no-op for any other player, so today's Furina arms and
 every other kit are untouched: no sheet row, no pool, no loader door, no
 codegen sees this arm.
 
+FURINA'S ARM RUNS ON THESE RULES (2026-10-05): `tier0.engine.furina_stage`
+attaches an `Ftd` to the sheet's Furina at every combat's start (curtain call
+on, the entry line) and its `stage_*` ops call the verbs below, so the
+release Furina and this slice are one implementation. The slice's own
+`Spec` rows and probe stay as the proposal's instrument.
+
 THE RULES (paper sec.2, with sec.16's two changes: Restore is now REPAY, and
-the curtain call is the default):
+the curtain call is the default; sec.17's two edits: Curtain Rise's Drain
+mode deals 12, and Universal Revelry doubles every Fanfare gain):
 
 1. DRAIN N. Lose N HP for the bigger effect (a mode on some cards, a fixed
    price on others). It cannot be paid if it would take her below the line:
@@ -167,9 +174,9 @@ class Spec:
 
 CARDS: dict[str, Spec] = {
     # --- Starter ---
-    # Curtain Rise: Deal 7. Drain 3: deal 14 instead.
+    # Curtain Rise: Deal 7. Drain 3: deal 12 instead. (sec.17: was 14.)
     "ftd_curtain_rise": Spec("Curtain Rise", 1, "attack", "basic",
-                             "drain_hit", (7, 3, 14)),
+                             "drain_hit", (7, 3, 12)),
     # Rising Applause: Gain 5 Block. Spend all your Fanfare and deal that
     # much damage. (Always spends: sec.15 point 7.)
     "ftd_rising_applause": Spec("Rising Applause", 1, "skill", "basic",
@@ -256,8 +263,9 @@ CARDS: dict[str, Spec] = {
     "ftd_clorinde": Spec("Guest Star: Clorinde", 1, "skill", "rare",
                          "guest", (), "clorinde"),
     # --- Rares (2 more) ---
-    # Universal Revelry (Power, 2): Whenever you Drain or Repay, gain that
-    # much additional Fanfare.
+    # Universal Revelry (Power, 2): "You gain twice as much Fanfare."
+    # (sec.17: every gain counts, hits included; a second copy makes it
+    # three times.)
     "ftd_revelry": Spec("Universal Revelry", 2, "power", "rare", "power",
                         (1,), "revelry"),
     # Let the People Rejoice (2): Spend all your Fanfare. Deal 2 to ALL per
@@ -389,11 +397,31 @@ def playable(state, card) -> bool:
     return True
 
 
+def _arm_power(state, key: str) -> int:
+    """A Power's stacks on Furina's ARM (`furina_stage`), whose sheet rows
+    apply `fs_*` ids through `apply_power`; 0 for the slice's own players."""
+    from tier0.engine import furina_stage           # late: avoids a cycle
+    ids = {"salon_encore": furina_stage.SALONS_ENCORE,
+           "endless_waltz": furina_stage.ENDLESS_WALTZ,
+           "thunderous": furina_stage.THUNDEROUS_APPLAUSE,
+           "revelry": furina_stage.UNIVERSAL_REVELRY}
+    powers = getattr(state.player, "powers", None) or {}
+    return int(powers.get(ids[key], 0) or 0)
+
+
+def revelry_copies(state) -> int:
+    """Universal Revelry's copies, the slice's and the arm's."""
+    return int(_f(state).powers["revelry"]) + _arm_power(state, "revelry")
+
+
 def gain(state, amount: int, source: str) -> None:
-    """Fanfare in. (The Drain-and-Repay readers live in `_loop_readers`.)"""
+    """Fanfare in. Universal Revelry (sec.17): "You gain twice as much
+    Fanfare." -- every gain, hits included, times one more than its copies.
+    It does not trigger itself (it is a multiplier, not a gain)."""
     if amount <= 0 or not live(state.player):
         return
     f = _f(state)
+    amount *= 1 + revelry_copies(state)
     f.fanfare += amount
     f.gained_this_turn += amount
     f.ledger["gained"] += amount
@@ -402,11 +430,10 @@ def gain(state, amount: int, source: str) -> None:
 
 
 def _loop_readers(state, n: int) -> None:
-    """Universal Revelry and Critics' Darling read a Drain or a Repay of N
-    (never a hit, never their own output). Copies add: two Revelries +2N."""
+    """Critics' Darling (probe-only) reads a Drain or a Repay of N (never a
+    hit). Universal Revelry left this reader with sec.17: it multiplies
+    every gain in `gain`."""
     f = _f(state)
-    if f.powers["revelry"]:
-        gain(state, n * f.powers["revelry"], "revelry")
     if f.powers["critics_darling"] and state.living_enemies:
         _hit(state, state.rng.choice(state.living_enemies),
              n * f.powers["critics_darling"], None)
@@ -422,10 +449,11 @@ def spend(state, amount: int) -> bool:
     f.ledger["spent"] += amount
     f.ledger["spends"] += 1
     state.emit("ftd_spend", amount=amount, fanfare=f.fanfare)
-    if f.powers["thunderous"]:
+    thunder = (THUNDEROUS_DAMAGE * f.powers["thunderous"]
+               + _arm_power(state, "thunderous"))
+    if thunder:
         for enemy in list(state.living_enemies):
-            _hit(state, enemy, THUNDEROUS_DAMAGE * f.powers["thunderous"],
-                 None)
+            _hit(state, enemy, thunder, None)
     return True
 
 
@@ -446,10 +474,11 @@ def drain(state, n: int) -> bool:
     state.emit("ftd_drain", amount=n, hp=p.hp, drained=f.drained)
     gain(state, n, "drain")
     _loop_readers(state, n)
-    if f.powers["salon_encore"]:
+    encore = (SALON_ENCORE_DAMAGE * f.powers["salon_encore"]
+              + _arm_power(state, "salon_encore"))
+    if encore:
         for enemy in list(state.living_enemies):
-            _hit(state, enemy, SALON_ENCORE_DAMAGE * f.powers["salon_encore"],
-                 None)
+            _hit(state, enemy, encore, None)
     if "wriothesley" in f.stage and state.living_enemies:
         _hit(state, state.rng.choice(state.living_enemies), n, "cryo")
     return True
@@ -473,9 +502,11 @@ def repay(state, n: int) -> int:
     if f.repay_fanfare:
         gain(state, amount, "repay")
     _loop_readers(state, amount)
-    if f.powers["endless_waltz"] and state.living_enemies:
-        _hit(state, state.rng.choice(state.living_enemies),
-             amount * f.powers["endless_waltz"], None)
+    for _ in range(int(f.powers["endless_waltz"])
+                   + _arm_power(state, "endless_waltz")):
+        if not state.living_enemies:
+            break
+        _hit(state, state.rng.choice(state.living_enemies), amount, None)
     if "sigewinne" in f.stage:
         p.block += amount
     if "clorinde" in f.stage and state.living_enemies:
@@ -751,9 +782,10 @@ READINGS: tuple[str, ...] = (
     "hook, so a status's HP loss counts as an enemy's.",
     "Salon Solitaire's Repay comes after the guests act, at the end of her "
     "turn, before enemies act.",
-    "Universal Revelry's extra Fanfare and Critics' Darling's damage read "
+    "Universal Revelry multiplies every Fanfare gain by one more than its "
+    "copies (sec.17), Lynette's included. Critics' Darling's damage reads "
     "the Drain or Repay amount, unpowered. Endless Waltz deals the HP "
-    "Repaid, unpowered.",
+    "Repaid, unpowered, once per copy.",
     "Guest acts and lines are unpowered (Strength and Weak do not touch "
     "them).",
     "Neuvillette's act deals the HP drained this turn (gross of Repays) to "

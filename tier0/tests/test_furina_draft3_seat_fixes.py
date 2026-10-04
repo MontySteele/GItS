@@ -90,13 +90,6 @@ def test_nothing_on_the_stage_block_says_a_bow_waits():
     assert not [line for line in lines if "waits" in line]
 
 
-def test_the_bow_row_is_the_plain_exit():
-    # The re-founding (2026-10-04): a free act, then 1 Fanfare.
-    assert ARM_KEYWORDS["Bow"] == (
-        "The performer acts once more without paying, then you gain 1 "
-        "Fanfare.")
-
-
 # ---------------------------------------------------------------------------
 # 2. THE SPEND LINE.
 # ---------------------------------------------------------------------------

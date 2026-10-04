@@ -285,6 +285,10 @@ STAND_IN_PROXIES = {
     # The AoE trim (2026-10-03) split Durin in two; the burst wears the
     # skill's picture until its own is placed.
     "proto_mc_durin_principle_of_purity": "proto_mc_durin_binary_form",
+    # The Salon's Tab (2026-10-05): Standing Ovation took a new id (its old
+    # one is Rising Applause's) and wears the shipped Standing Ovation
+    # picture, which is its own name's.
+    "proto_fs_standing_ovation_all": "standing_ovation",
 }
 
 

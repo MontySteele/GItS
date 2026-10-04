@@ -1593,54 +1593,35 @@ ARM_KEYWORDS: dict[str, str] = {
     # that is the reason a bar matters at all. `Bow` says what triggers one:
     # since 2026-09-25 (rule 7) every performer at 0 Fanfare bows, whatever
     # emptied it.
-    # THE RE-FOUNDING (2026-10-04, review/active/furina-refounding-2026-10-03.md
-    # sec.1 as amended by sec.8). Performers have no bars; Fanfare is one
-    # number on Furina; a star pays for its act or skips it; a Bow is a free
-    # act, then Fanfare. Every row below is its `ArmKeywordTips` sentence
-    # word for word (a performer's row is its badge's,
-    # `StagePerformerBadge.ActText`), markup folded out and `FurinaStageLaw`'s
-    # numerals written out. The back performer and the fade retired with the
-    # bars; the history of every row is in git.
+    # THE SALON'S TAB (2026-10-05, review/active/furina-research-proposal-
+    # 2026-10-05.md sec.16). Fanfare is one number on Furina, printed by
+    # every HP she loses or Repays; Drain and Repay are the HP loan; guests
+    # are the only performers. Every row below is its `ArmKeywordTips`
+    # sentence word for word (a guest's row is its badge's,
+    # `StagePerformerBadge.ActText`), markup folded out and
+    # `FurinaStageLaw`'s numerals written out. The v2 Stage's rows (the
+    # trio, Bow, Cue, Rehearsal, the front performer, Ousia, Pneuma and six
+    # guests) left with it; their history is in git.
     "Spend": "Pay that much Fanfare. Offered only if you have enough.",
-    "Fanfare": ("Your applause. Cards and Bows give it. Spend and stars' acts "
-                "use it. It never fades."),
-    "Bow": ("The performer acts once more without paying, then you gain 1 "
-            "Fanfare."),
-    "Cue": "Choose a performer. It acts now. A star pays as usual.",
-    "Rehearsal": ("Each one makes your performers' damage and Block acts "
-                  "deal 1 more."),
-    "front performer": ("The performer in the first seat. Performers act "
-                        "front to back at the end of your turn."),
-    # R276 batch two: Arkhe Alignment's two halves.
-    "Ousia": "This turn, your performers' acts deal double damage.",
-    "Pneuma": "Gain 2 Fanfare.",
-    "Summon": ("A performer joins at the back. On a full stage, the front "
-               "Salon member Bows and leaves first. Guests keep their seats."),
-    "Gentilhomme Usher": "Act: gain 4 Block.",
-    "Surintendante Chevalmarin": "Act: deal 2 damage to ALL enemies.",
-    "Mademoiselle Crabaletta": "Act: deal 5 damage to a random enemy.",
-    "Guest Star": ("One of each on stage. Summoning one already there makes "
-                   "it Bow and stay."),
-    "Neuvillette": ("Your Hydro damage deals 2 more. Act: pay 2 Fanfare to "
-                    "deal 7 Hydro damage to ALL enemies."),
-    "Clorinde": ("Whenever you Spend, deal 4 Electro damage to a random "
-                 "enemy. Act: pay 1 to deal 6 Electro damage to a random "
-                 "enemy."),
-    "Navia": ("Act: deal Geo damage to a random enemy, twice the Fanfare you "
-              "spent this turn."),
-    "Chevreuse": "Act, once a turn: pay 2 Fanfare to gain 1 Energy next turn.",
-    "Wriothesley": ("Act: deal 4 Cryo damage to a random enemy, plus 1 per "
-                    "damage your Block stopped since his last act."),
-    "Sigewinne": ("Act: gain 3 Block, plus 2 for each time you lost HP since "
-                  "her last act."),
-    "Charlotte": ("At the start of your turn, draw 1 more card. Act: gain 1 "
-                  "Fanfare."),
-    "Lynette": ("The first performer you Cue each turn moves to the front. "
-                "Act: deal 3 Anemo damage to an enemy with an aura, if any."),
-    "Lyney": ("The first Cue card you play each turn costs 0. Act: pay 1 "
-              "Fanfare to add a Trick to your hand."),
-    "Escoffier": ("The first Salon summon card you play each turn costs 0. "
-                  "Act: pay 2 Fanfare to make your Salon members act."),
+    "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. It never "
+                "fades."),
+    "Drain": ("Lose that much HP. You can't go below half the HP you started "
+              "combat with. Drained HP returns when combat ends."),
+    "Repay": ("Regain that much drained HP. It never returns more than you "
+              "drained."),
+    "Summon": ("A guest joins at the back. On a full stage, the oldest guest "
+               "acts once more and leaves first."),
+    "Guest Star": ("Acts at the end of your turn. Summoning one already on "
+                   "stage makes it act and stay."),
+    "Charlotte": ("The first time you Repay each turn, draw 1 card. Act: Repay "
+                  "2."),
+    "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
+                    "enemy. Act: deal 4 Cryo damage to a random enemy."),
+    "Lynette": ("The first time each turn an enemy makes you lose HP, gain "
+                "that much Fanfare again. Act: deal 3 Anemo damage to an enemy "
+                "with an aura."),
+    "Clorinde": ("Whenever you Repay, deal twice that much Electro damage to a "
+                 "random enemy. Act: deal 6 Electro damage to a random enemy."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -1803,14 +1784,9 @@ _STAGE_RETIRED_KEYWORDS = frozenset({"Encore"})
 # turn: gain 3 Block" beside a Salon Usher would be two rules for one name,
 # `EB-728`'s Fanfare finding one table over.
 _STAGE_ONLY_KEYWORDS = frozenset({
-    "Gentilhomme Usher", "Surintendante Chevalmarin",
-    "Mademoiselle Crabaletta",
-    # THE GUEST CAST (2026-09-25): a shipped Fontaine Companion shares a
+    # THE SALON'S TAB (2026-10-05): a shipped Fontaine Companion shares a
     # guest's name, and off the arm its face means that Companion.
-    "Guest Star", "Neuvillette", "Clorinde", "Navia", "Chevreuse",
-    "Wriothesley", "Sigewinne", "Charlotte", "Lynette",
-    # THE SUPPORTING POOL (2026-09-26).
-    "Lyney", "Escoffier"})
+    "Guest Star", "Wriothesley", "Charlotte", "Lynette", "Clorinde"})
 
 # `EB-728`. AND THE ROW THE SHIPPED KIT STILL OWNS.
 #
@@ -1896,27 +1872,17 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Tamakushi Casket": "kokomi",
     # THE CASKET PASS (2026-09-28).
     "Open the Casket": "kokomi",
-    "Spend": "furina", "Fanfare": "furina", "Bow": "furina",
-    "front performer": "furina", "Cue": "furina", "Rehearsal": "furina",
+    "Spend": "furina", "Fanfare": "furina", "Drain": "furina",
+    "Repay": "furina",
     "Encore": "furina", "Spotlighted": "furina",
-    "Ousia": "furina", "Pneuma": "furina",
     # VARKA (the Oath rework): his three words are his alone.
     "Oath": "varka", "current element": "varka", "Knight": "varka",
-    "Summon": "furina", "Gentilhomme Usher": "furina",
-    "Surintendante Chevalmarin": "furina", "Mademoiselle Crabaletta": "furina",
-    # THE GUEST CAST (2026-09-25).
-    "Guest Star": "furina",
-    "Neuvillette": "furina",
+    # THE SALON'S TAB (2026-10-05): the summon and the four guests.
+    "Summon": "furina", "Guest Star": "furina",
     "Clorinde": "furina",
-    "Navia": "furina",
-    "Chevreuse": "furina",
     "Wriothesley": "furina",
-    "Sigewinne": "furina",
     "Charlotte": "furina",
     "Lynette": "furina",
-    # THE SUPPORTING POOL (2026-09-26).
-    "Lyney": "furina",
-    "Escoffier": "furina",
 }
 
 
@@ -1935,9 +1901,7 @@ def _arm_owns(word: str, who: str) -> bool:
 # Arkhe Alignment itself: the card, or its Power's badge (both print the
 # name). The C# side is the same rule: the tips ride the Arkhe card's golded
 # face and `ArkheAlignmentPower`'s own hover, and nothing else.
-_ARM_KEYWORD_ANCHOR: dict[str, str] = {
-    "Ousia": "Arkhe Alignment", "Pneuma": "Arkhe Alignment",
-}
+_ARM_KEYWORD_ANCHOR: dict[str, str] = {}
 
 
 def _anchored(word: str, obs: dict[str, Any]) -> bool:
@@ -2034,47 +1998,21 @@ _ARM_KEYWORD_RE = {
     # the bars, and added `Cue` and `Rehearsal`.
     "Spend": re.compile(r"\bSpends?\b"),
     "Fanfare": re.compile(r"\bFanfare\b"),
-    "Bow": re.compile(r"\bBows?\b"),
-    "front performer": re.compile(r"\bfront performer\b"),
-    "Cue": re.compile(r"\bCue[sd]?\b"),
-    "Rehearsal": re.compile(r"\bRehearsal\b"),
-    # R276 batch two: Arkhe Alignment's two halves.
-    "Ousia": re.compile(r"\bOusia\b"),
-    "Pneuma": re.compile(r"\bPneuma\b"),
-    # 2026-09-25. `Summon` in either case: Improvised Number prints it
-    # mid-sentence ("summon a random performer"), and the mod attaches the
-    # tip off the op, not the capital. A PERFORMER is matched on its name --
-    # the short one a face prints ("Summon Usher") ends the full one the stage
-    # lines print -- and on a RANDOM summon's face, which may field any of the
-    # three and so carries all three tips in game.
+    # THE SALON'S TAB (2026-10-05): the HP loan's two verbs, capitalised as
+    # the faces print them ("drained HP" in a sentence is the plain word).
+    "Drain": re.compile(r"\bDrain(?:s|ed)?\b"),
+    "Repay": re.compile(r"\bRepa(?:y|ys|id)\b"),
     "Summon": re.compile(r"\b[Ss]ummon\b"),
-    "Gentilhomme Usher": re.compile(
-        r"\bUsher\b|\b[Ss]ummon (?:a|2|two) random performer"),
-    "Surintendante Chevalmarin": re.compile(
-        r"\bChevalmarin\b|\b[Ss]ummon (?:a|2|two) random performer"),
-    "Mademoiselle Crabaletta": re.compile(
-        r"\bCrabaletta\b|\b[Ss]ummon (?:a|2|two) random performer"),
-    # THE GUEST CAST (2026-09-25). The keyword on a Guest Star's title or
-    # face, and each guest by its name -- but never a shipped Companion's
-    # dashed title ("Neuvillette — O Tears, I Shall Repay"), which is that
+    # The keyword on a Guest Star's title or face, and each guest by its
+    # name -- but never a shipped Companion's dashed title, which is that
     # Companion and not the guest.
-    # The guest seat round (2026-09-25): Wriothesley's face joins "at the
-    # front".
-    # The second text pass (2026-09-28): a Guest Star's face says "Summon
-    # <Name> with" / "Summon Wriothesley at the front with".
     "Guest Star": re.compile(
-        r"\bGuest Star\b|\bSummon (?:Neuvillette|Clorinde|Navia|Chevreuse|"
-        r"Wriothesley|Sigewinne|Charlotte|Lynette|Lyney|Escoffier)\b"),
-    "Neuvillette": re.compile(r"\bNeuvillette\b(?!\s*[—–-])"),
+        r"\bGuest Star\b|\bSummon (?:Clorinde|Wriothesley|Charlotte|"
+        r"Lynette)\b"),
     "Clorinde": re.compile(r"\bClorinde\b(?!\s*[—–-])"),
-    "Navia": re.compile(r"\bNavia\b(?!\s*[—–-])"),
-    "Chevreuse": re.compile(r"\bChevreuse\b(?!\s*[—–-])"),
     "Wriothesley": re.compile(r"\bWriothesley\b(?!\s*[—–-])"),
-    "Sigewinne": re.compile(r"\bSigewinne\b(?!\s*[—–-])"),
     "Charlotte": re.compile(r"\bCharlotte\b(?!\s*[—–-])"),
     "Lynette": re.compile(r"\bLynette\b(?!\s*[—–-])"),
-    "Lyney": re.compile(r"\bLyney\b(?!\s*[—–-])"),
-    "Escoffier": re.compile(r"\bEscoffier\b(?!\s*[—–-])"),
 
     # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is shipped
     # machinery, the word is printed on the Neow screen and on opening-hand
@@ -3130,11 +3068,9 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
 #: rule the run is not playing. Keyed by row, then by the relic's printed
 #: title; the sentence is the relic's own rule, shortened.
 RELIC_KEYWORD_RIDERS: dict[str, dict[str, str]] = {
-    # THE RULES PASS (2026-10-01): Palais Ledger re-aimed.
-    "Spend": {"Palais Ledger":
-              " With Palais Ledger, each Spend costs 1 less Fanfare."},
-    "Bow": {"Curtain Call Bouquet":
-            " With Curtain Call Bouquet, it acts twice."},
+    # THE SALON'S TAB (2026-10-05): Palais Ledger and Curtain Call Bouquet,
+    # the two relics a row named, left with the v2 Stage. The table stays the
+    # one place a relic that bends a glossary row says so.
 }
 
 

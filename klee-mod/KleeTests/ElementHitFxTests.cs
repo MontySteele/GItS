@@ -135,7 +135,9 @@ public class ElementHitFxTests
 
         Assert.DoesNotContain(generated, calls => calls.Contains("AttackCommand.WithHitFx"));
         Assert.True(
-            generated.Count(calls => calls.Contains("ElementHitFx.WithElementHitFx")) >= 100,
+            // 80, not 100, since the Salon's Tab (2026-10-05) took Furina's
+            // pool from 78 rows to the slice's 24.
+            generated.Count(calls => calls.Contains("ElementHitFx.WithElementHitFx")) >= 80,
             "expected the generated Attacks to route through ElementHitFx");
     }
 

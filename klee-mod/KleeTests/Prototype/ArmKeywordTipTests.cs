@@ -370,8 +370,11 @@ public class ArmKeywordTipTests
         // STILL FORTY-FIVE with the re-founding (2026-10-04): `ForFade` and
         // `ForBackPerformer` left with the bars, and `ForCue` and
         // `ForRehearsal` arrived with the Cue and the stage's scaling stat.
-        Assert.Equal(45, attaches.Count);
-        Assert.Contains(attaches, m => m.Name == "ForSpendShortfall");
+        // THIRTY-ONE with the Salon's Tab (2026-10-05): the v2 Stage's
+        // `ForSpendShortfall`, `ForBow`, `ForCue`, `ForRehearsal`,
+        // `ForFrontPerformer`, `ForOusia`, `ForPneuma`, the trio's three and
+        // six guests' tips left with it; `ForDrain` and `ForRepay` arrived.
+        Assert.Equal(31, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
         Assert.Contains(attaches, m => m.Name == "ForCurrentElement");
@@ -380,29 +383,26 @@ public class ArmKeywordTipTests
         Assert.DoesNotContain(attaches, m => m.Name == "ForWind");
         Assert.Contains(attaches, m => m.Name == "ForOpenTheCasket");
         Assert.DoesNotContain(attaches, m => m.Name == "ForFade");
-        Assert.Contains(attaches, m => m.Name == "ForCue");
-        Assert.Contains(attaches, m => m.Name == "ForRehearsal");
-        Assert.Contains(attaches, m => m.Name == "ForLyney");
-        Assert.Contains(attaches, m => m.Name == "ForEscoffier");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForCue");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForRehearsal");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForSpendShortfall");
+        Assert.Contains(attaches, m => m.Name == "ForDrain");
+        Assert.Contains(attaches, m => m.Name == "ForRepay");
         Assert.Contains(attaches, m => m.Name == "ForGuestStar");
-        Assert.Contains(attaches, m => m.Name == "ForNeuvillette");
+        Assert.Contains(attaches, m => m.Name == "ForClorinde");
         Assert.Contains(attaches, m => m.Name == "ForLynette");
         Assert.Contains(attaches, m => m.Name == "ForCompanion");
         Assert.Contains(attaches, m => m.Name == "ForSummon");
-        Assert.Contains(attaches, m => m.Name == "ForUsher");
-        Assert.Contains(attaches, m => m.Name == "ForChevalmarin");
-        Assert.Contains(attaches, m => m.Name == "ForCrabaletta");
-        Assert.Contains(attaches, m => m.Name == "ForOusia");
-        Assert.Contains(attaches, m => m.Name == "ForPneuma");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForUsher");
         Assert.DoesNotContain(attaches, m => m.Name == "ForEncore");
         Assert.DoesNotContain(attaches, m => m.Name == "ForStageReader");
         Assert.Contains(attaches, m => m.Name == "ForPlanTwice");
         Assert.Contains(attaches, m => m.Name == "ForSpend");
         Assert.Contains(attaches, m => m.Name == "ForFanfare");
         Assert.DoesNotContain(attaches, m => m.Name == "ForRaise");
-        Assert.Contains(attaches, m => m.Name == "ForBow");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForBow");
         Assert.DoesNotContain(attaches, m => m.Name == "ForLeadPerformer");
-        Assert.Contains(attaches, m => m.Name == "ForFrontPerformer");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForFrontPerformer");
         Assert.DoesNotContain(attaches, m => m.Name == "ForBackPerformer");
         Assert.DoesNotContain(attaches, m => m.Name == "ForRotate");
         Assert.Contains(attaches, m => m.Name == "ForDusk");

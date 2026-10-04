@@ -469,41 +469,24 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # nothing. What follows it on the card reads the amount taken,
     # which is a per-play number and not a state in this vocabulary.
     "drain_fanfare": [_hook("private", "fanfare", "use")],
-    # FURINA'S STAGE (`tier0.engine.furina_stage`, the re-founded rules).
-    # ONE PRIVATE STATE, `stage`, and it is a new one rather than `salon`
-    # reused: the shipped Salon is a different board, and a row written
-    # against one cannot be played against the other, so counting them as
-    # competing uses of a single state would report a contention two cards
-    # can never actually have. The stage here is the seats AND her Fanfare.
+    # FURINA'S STAGE (`tier0.engine.furina_stage`, the Salon's Tab rules,
+    # 2026-10-05). ONE PRIVATE STATE, `stage`, and it is a new one rather than
+    # `salon` reused: the shipped Salon is a different board, and a row
+    # written against one cannot be played against the other. The stage here
+    # is the guest seats, her Fanfare and the drained ledger.
     #
-    # The classification is the same three-way one the rest of the table uses.
-    # A summon, a gain, a reorder and the Verdict WRITE the board. A Spend
-    # USES it -- it takes Fanfare away, so a second Spend in one turn finds
-    # less, which is exactly the contention this vocabulary exists to count.
-    # A Cue and the acts are uses too (a star pays for each act), and so are
-    # the Bows that send a performer off.
-    "stage_summon": [_hook("private", "stage", "write")],
-    "stage_raise": [_hook("private", "stage", "write")],
+    # A Drain WRITES it (Fanfare and the ledger both rise), and so do a
+    # Repay and a summon. A Spend USES it -- it takes Fanfare away, so a
+    # second Spend in one turn finds less, which is exactly the contention
+    # this vocabulary exists to count.
+    "stage_drain": [_hook("private", "stage", "write")],
+    "stage_repay": [_hook("private", "stage", "write")],
+    "stage_repay_all": [_hook("private", "stage", "write")],
     "stage_guest": [_hook("private", "stage", "write")],
     "stage_spend": [_hook("private", "stage", "use")],
     "stage_spend_all": [_hook("private", "stage", "use")],
-    "stage_curtain_call": [_hook("private", "stage", "write")],
-    "stage_cue": [_hook("private", "stage", "use")],
-    "stage_final_bow": [_hook("private", "stage", "use")],
-    "stage_step_forward": [_hook("private", "stage", "write")],
-    "stage_perform_all": [_hook("private", "stage", "use")],
-    "stage_grand_finale": [_hook("private", "stage", "write")],
-    "stage_verdict": [_hook("private", "stage", "write")],
-    "stage_dual_nature": [_hook("private", "stage", "write")],
-    # Casting Agent fields a Guest Star card, which writes the stage when
-    # played.
-    "stage_casting_agent": [_hook("private", "stage", "write")],
-    # Interval Bell's Spend mode: Energy next turn, `energy`'s empty row.
+    # Salon's Tab's Drain mode: Energy next turn, `energy`'s empty row.
     "stage_energy_next": [],
-    # THE CO-OP SET: Share the Spotlight spends all her Fanfare, a use; Raise
-    # a Toast's verb is the payoff of its Spend mode and spends nothing itself.
-    "stage_share_spotlight": [_hook("private", "stage", "use")],
-    "stage_toast": [_hook("private", "stage", "read")],
     "salon_bow": [_hook("private", "salon", "use")],
     # EB-118 5.5. Rotate is a pure REORDER: it consumes nothing, so it is a
     # write to the private board (which performer the FIFO end offers next)

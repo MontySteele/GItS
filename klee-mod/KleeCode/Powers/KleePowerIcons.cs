@@ -161,10 +161,6 @@ internal static class KleePowerIcons
             "kokomi/powers/before_sun_and_moon.png"),
         AlicesMasterpiecePower => KleePck.Path(
             "klee/powers/bomb_damage_up.png"),
-        CriticsDarlingPower => KleePck.Path(
-            "furina/powers/courtroom_drama.png"),
-        StarTurnPower => KleePck.Path(
-            "furina/powers/supporting_cast.png"),
         CenterOfAttentionPower => KleePck.Path(
             "furina/powers/limelight.png"),
         TheLongGamePower => KleePck.Path("klee/powers/spark_per_turn.png"),
@@ -290,46 +286,31 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/all_the_worlds_a_stage.png"),
         // R276 batch two: the Stage's five powers borrow the shipped Furina
         // sigil nearest their job, on the terms every borrow above takes.
-        FullHousePower => KleePck.Path("furina/powers/grand_salon.png"),
         ThunderousApplausePower =>
             KleePck.Path("furina/powers/standing_ovation.png"),
+        // THE SALON'S TAB (2026-10-05): the slice's three new powers borrow
+        // the shipped Furina sigil nearest their job, on the same terms.
+        SalonsEncorePower =>
+            KleePck.Path("furina/powers/grand_salon.png"),
+        EndlessWaltzPower =>
+            KleePck.Path("furina/powers/rising_ovation.png"),
+        UniversalRevelryPower =>
+            KleePck.Path("furina/powers/the_gallery_stirs.png"),
         // THE RE-FOUNDING (2026-10-04): Rehearsal and its Rare source
         // borrow the gallery's sigil and Full House's neighbour, on the same
         // terms.
-        RehearsalPower =>
-            KleePck.Path("furina/powers/the_gallery_stirs.png"),
-        PremiereSeasonPower =>
-            KleePck.Path("furina/powers/grand_salon.png"),
-        FiveCenturyActPower =>
-            KleePck.Path("furina/powers/unheard_confession.png"),
-        ArkheAlignmentPower =>
-            KleePck.Path("furina/powers/star_of_the_show.png"),
         // The supporting pool's Sold Out (2026-09-26), on the same terms: a
         // shipped stage sigil, and not Full House's, so the two read apart.
-        SoldOutPower => KleePck.Path("furina/powers/stage_lights.png"),
         // 2026-09-25: the Stage's four badges -- each performer's own, and
         // The Stage on Furina -- borrow the shipped Salon sigils on the same
         // terms: the member's for a member, Center Stage's for the board.
-        UsherBadgePower => KleePck.Path("furina/powers/salon_member.png"),
-        ChevalmarinBadgePower =>
-            KleePck.Path("furina/powers/salon_member.png"),
-        CrabalettaBadgePower =>
-            KleePck.Path("furina/powers/salon_member.png"),
         // THE GUEST CAST (2026-09-25): each guest's badge wears the guest's
         // own face (the character icon, art/plan.tsv power_furina_guest_*),
         // as standing_ovation wears Furina's.
-        NeuvilletteBadgePower =>
-            KleePck.Path("furina/powers/guest_neuvillette.png"),
         ClorindeBadgePower =>
             KleePck.Path("furina/powers/guest_clorinde.png"),
-        NaviaBadgePower =>
-            KleePck.Path("furina/powers/guest_navia.png"),
-        ChevreuseBadgePower =>
-            KleePck.Path("furina/powers/guest_chevreuse.png"),
         WriothesleyBadgePower =>
             KleePck.Path("furina/powers/guest_wriothesley.png"),
-        SigewinneBadgePower =>
-            KleePck.Path("furina/powers/guest_sigewinne.png"),
         CharlotteBadgePower =>
             KleePck.Path("furina/powers/guest_charlotte.png"),
         LynetteBadgePower =>
@@ -338,21 +319,6 @@ internal static class KleePowerIcons
         // the same art pass, and the batch's nine powers borrowing the
         // shipped Furina sigil nearest their job, on the terms every borrow
         // above takes.
-        LyneyBadgePower => KleePck.Path("furina/powers/guest_lyney.png"),
-        EscoffierBadgePower =>
-            KleePck.Path("furina/powers/guest_escoffier.png"),
-        RevolvingStagePower =>
-            KleePck.Path("furina/powers/stage_lights.png"),
-        SeasonTicketsPower => KleePck.Path("furina/powers/top_billing.png"),
-        StarBillingPower =>
-            KleePck.Path("furina/powers/supporting_cast.png"),
-        TideOfApplausePower =>
-            KleePck.Path("furina/powers/courtroom_drama.png"),
-        ReginaOfAllWatersPower =>
-            KleePck.Path("furina/powers/limelight.png"),
-        SoliloquyPower => KleePck.Path("furina/powers/leading_role.png"),
-        OneWomanShowPower =>
-            KleePck.Path("furina/powers/star_of_the_show.png"),
         // The re-founding: her Fanfare badge wears the board's sigil.
         FanfarePower => KleePck.Path(Vfx.FanfareCounter.GlyphPath),
         // THE CO-OP SET (review/records/coop-set-2026-09-25.md): five powers,
@@ -362,8 +328,6 @@ internal static class KleePowerIcons
         // ovation for the crowd, and the Casket's for the Plan payoff.
         PassTheMatchPower => KleePck.Path("klee/powers/bomb.png"),
         KnightsOfFavoniusPower => KleePck.Path("klee/powers/bomb_damage_up.png"),
-        PeopleOfFontainePower =>
-            KleePck.Path("furina/powers/standing_ovation.png"),
         SangonomiyasCounselPower =>
             KleePck.Path("kokomi/powers/kurages_oath.png"),
         // The second batch (review/active/coop-concepts-2026-09-27.md), on
@@ -373,7 +337,6 @@ internal static class KleePowerIcons
         ShrapnelPower => KleePck.Path("klee/powers/detonation_vuln.png"),
         SparksForEveryonePower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
-        RaiseAToastPower => KleePck.Path("furina/powers/limelight.png"),
         // Klee final pass (2026-10-02): Cover Your Ears!'s this-turn Strength
         // loss on an enemy borrows the Bomb's Vulnerable sigil, the badge
         // Shrapnel's enemy debuff already wears. Its own art stays owed.
@@ -382,8 +345,6 @@ internal static class KleePowerIcons
         // Amber, Explosive Puppet's this-turn loss: the same borrowed badge.
         ProtoMcAmberExplosivePuppetPower =>
             KleePck.Path("klee/powers/detonation_vuln.png"),
-        TheCrowdRoarsPower =>
-            KleePck.Path("furina/powers/rising_ovation.png"),
         // VARKA (the Oath rework): his Oath badge wears the Vision of its
         // current element (the retired Winds' files, the varka-art pass's
         // own); the card powers borrow the three varka power files and

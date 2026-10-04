@@ -44,8 +44,9 @@ PROTO = REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
 #: at least these, so a regex that silently stops matching fails here rather
 #: than passing on an empty list. `walk_on` is the one with an underscore,
 #: and it crosses as `walkon`.
-KNOWN = {"arrive", "act", "skip", "pay", "bow", "leave", "walk_on", "cue",
-         "move", "gain", "spend"}
+# The Salon's Tab (2026-10-05): the v2 Stage's skip, pay, bow, walk_on,
+# cue and move beats went with it; drain and repay arrived.
+KNOWN = {"arrive", "act", "leave", "gain", "spend", "drain", "repay"}
 
 _EVENT_SOURCES = (
     re.compile(r'const string \w*Event\s*=\s*"([a-z_]+)"'),
@@ -129,15 +130,6 @@ def test_every_ledger_beat_passes_the_leak_scan_on_the_seat_path(event):
     obs = observation(state)
     assert qa_packet.leaks(obs) == []
     assert qa_packet.leaks(blindplay.observe(state)) == []
-
-
-def test_the_walk_on_beat_crosses_as_one_word_and_prints_its_line():
-    """`walk_on` is the re-founded ledger's one snake_case beat: it crosses
-    the packet as `walkon` and prints in words."""
-    stage = furina_stage(_state([_row("walk_on")])["player"])
-    assert stage["log"][0]["event"] == "walkon"
-    page = blindplay.observe(_state([_row("walk_on")]))
-    assert "**Usher** walked on" in page
 
 
 def test_an_unknown_snake_case_beat_is_dropped_not_leaked():

@@ -89,9 +89,10 @@ def test_the_description_keeps_its_markup():
             / "ProtoFsCurtainRise.cs").read_text(encoding="utf-8")
     mode_b = text[text.index("class ProtoFsCurtainRiseModeB"):]
     # 2026-09-25 (opus-furina-l2b): titled by its PRICE, with no number the
-    # board folds -- see `test_furina_seat_fixes_2026_09_25`.
-    assert '("title", "Spend 3"),' in mode_b
-    assert '("description", "[gold]Spend[/gold] 3: deal ' in mode_b
+    # board folds -- see `test_furina_seat_fixes_2026_09_25`. (The Salon's
+    # Tab, 2026-10-05: the price is a Drain.)
+    assert '("title", "Drain 3"),' in mode_b
+    assert '("description", "[gold]Drain[/gold] 3: deal ' in mode_b
 
 
 def test_the_wire_contract_keeps_the_sheets_spelling():
@@ -102,7 +103,7 @@ def test_the_wire_contract_keeps_the_sheets_spelling():
     text = (GENERATED / "Prototype" / "Generated"
             / "ProtoFsCurtainRise.cs").read_text(encoding="utf-8")
     labels = text[text.index("IReadOnlyList<string> ModeLabels"):]
-    assert "[gold]Spend[/gold] 3: deal 17 instead" in labels[:400]
+    assert "[gold]Drain[/gold] 3: deal 12 instead" in labels[:400]
 
 
 def test_the_stripper_is_the_pages_own():

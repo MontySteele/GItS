@@ -44,45 +44,10 @@ def _combat_state() -> dict:
 # 1. USHER'S BOW.
 # ---------------------------------------------------------------------------
 
-def test_the_glossary_and_the_log_say_his_bow_is_his_act():
-    """The re-founding (2026-10-04): a Bow is the performer's act once more,
-    free, then 1 Fanfare; his row is his badge's act and the log's Bow is
-    followed by the free act."""
-    assert ARM_KEYWORDS["Gentilhomme Usher"] == "Act: gain 4 Block."
-    stage = furina_stage(_wire_stage(
-        _row("bow", "usher", "Gentilhomme Usher", reason="stays"),
-        _row("act", "usher", "Gentilhomme Usher", moved=4)))
-    assert _render_stage_log(stage) == [
-        "  - **Usher** took a Bow and stays on stage.",
-        "  - **Usher** acted for free: Furina gains 4 Block."]
-
 
 # ---------------------------------------------------------------------------
 # 2. LET THE PEOPLE REJOICE.
 # ---------------------------------------------------------------------------
-
-def test_let_the_people_rejoice_pays_twice_the_fanfare():
-    """The re-founding (2026-10-04): it spends all of HER Fanfare and deals 2
-    per point; the performers Bow and keep their seats."""
-    rows = yaml.safe_load(
-        (REPO / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
-    row = next(r for r in rows if r["id"] == "proto_fs_let_the_people_rejoice")
-    assert row["description"].startswith(
-        "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal "
-        "{ExtraDamage:diff()} damage to ALL enemies per point. Your "
-        "performers [gold]Bow[/gold] and return.")
-    assert [e["op"] for e in row["effects"]] == [
-        "stage_spend_all", "damage", "stage_curtain_call"]
-    assert "(Deals {CalculatedDamage:diff()} damage)" in row["description"]
-    damage = next(e for e in row["effects"] if e["op"] == "damage")
-    assert damage["amount_formula"] == {"base": 0, "per": 2,
-                                        "count": "stage_spent"}
-    assert row["cost"] == 2 and row["upgrade"] == {"cost": -1}
-    assert row["exhaust"] is True
-    generated = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
-                 / "Generated" / "ProtoFsLetThePeopleRejoice.cs"
-                 ).read_text(encoding="utf-8")
-    assert "new ExtraDamageVar(2m)" in generated
 
 
 # ---------------------------------------------------------------------------

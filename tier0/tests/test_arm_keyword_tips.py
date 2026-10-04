@@ -340,34 +340,18 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_VARKA_ELEMENT_SWITCH",
                     # (`Encore` was the sixth until R276's hygiene: no card
                     # attached its tip, so the body and its key left.)
-                    # (`KLEEMOD-ARM_STAGE_READER`, which bar a Stage
-                    # reader's number is, left on 2026-09-25 with its last
-                    # row: Let the People Rejoice deals twice its Fanfare.)
-                    # 2026-09-25: what a summon does and what each performer
-                    # does. Faces print these words UNGOLDED ("Summon
-                    # Usher"), so they attach off the `stage_summon` op
-                    # (`gen.stage_summon_tip_calls`), not off the table.
-                    "KLEEMOD-ARM_STAGE_SUMMON", "KLEEMOD-ARM_STAGE_USHER",
-                    "KLEEMOD-ARM_STAGE_CHEVALMARIN",
-                    "KLEEMOD-ARM_STAGE_CRABALETTA",
-                    # THE GUEST CAST (2026-09-25): the Guest Star keyword and
-                    # the eight guests' tips, attached off the `stage_guest`
-                    # op (`gen.stage_guest_tip_calls`) the same way.
+                    # THE SALON'S TAB (2026-10-05): the Summon and Guest
+                    # Star tips and the four guests' tips. Faces print the
+                    # words UNGOLDED ("Summon Charlotte."), so they attach
+                    # off the `stage_guest` op (`gen.stage_guest_tip_calls`),
+                    # not off the table. v2's trio, its other guests and the
+                    # Spend warning left with v2.
+                    "KLEEMOD-ARM_STAGE_SUMMON",
                     "KLEEMOD-ARM_STAGE_GUEST_STAR",
-                    "KLEEMOD-ARM_STAGE_NEUVILLETTE",
-                    "KLEEMOD-ARM_STAGE_CLORINDE", "KLEEMOD-ARM_STAGE_NAVIA",
-                    "KLEEMOD-ARM_STAGE_CHEVREUSE",
-                    "KLEEMOD-ARM_STAGE_WRIOTHESLEY",
-                    "KLEEMOD-ARM_STAGE_SIGEWINNE",
                     "KLEEMOD-ARM_STAGE_CHARLOTTE",
+                    "KLEEMOD-ARM_STAGE_WRIOTHESLEY",
                     "KLEEMOD-ARM_STAGE_LYNETTE",
-                    # THE SUPPORTING POOL (2026-09-26): two more guests.
-                    "KLEEMOD-ARM_STAGE_LYNEY",
-                    "KLEEMOD-ARM_STAGE_ESCOFFIER",
-                    # The Spend warning (Furina pool round 2026-10-01): the
-                    # guests a Spend would leave unable to pay to act, on a
-                    # Spend mode's face, titling no keyword.
-                    "KLEEMOD-ARM_STAGE_SPEND_SHORT"}
+                    "KLEEMOD-ARM_STAGE_CLORINDE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -565,14 +549,18 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # number on Furina, stars pay for their acts, the Bow is a free act
             # then Fanfare, Cue and Rehearsal are new words. The back
             # performer and the fade retired with the bars.
+            # THE SALON'S TAB (2026-10-05, review/active/furina-research-
+            # proposal-2026-10-05.md sec.2 and sec.16): Fanfare comes from HP
+            # lost and repaid, Drain and Repay are the HP loan, and the four
+            # guests are the only performers. The v2 Stage's clauses (Bow,
+            # Cue, Rehearsal, the front seat) left with v2.
             "Pay that much [gold]Fanfare[/gold]. Offered only if you have ",
-            "Your applause. Cards and Bows give it. [gold]Spend[/gold] and ",
-            "stars' acts use it. It never fades.\";",
-            "The performer acts once more without paying, then you gain ",
-            "Choose a performer. It acts now. A star pays as usual.\");",
-            "Each one makes your performers' damage and [gold]Block[/gold] ",
-            "The performer in the first seat. Performers act front to back ",
-            "at the end of your turn.\");",
+            "Gain 1 for each HP you lose or [gold]Repay[/gold]. ",
+            "Lose that much HP. You can't go below half the HP you started ",
+            "combat with. Drained HP returns when combat ends.",
+            "Regain that much drained HP. It never returns more than you ",
+            "A guest joins at the back. On a full stage, the oldest guest ",
+            "Acts at the end of your turn. Summoning one already on stage ",
     ):
         assert clause in tips, clause
 
@@ -606,11 +594,16 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     # The rules pass (2026-10-01) cut rule 4: no tip quotes a regain.
     assert "FurinaStageLaw.LeadRegen" not in tips
     assert "FurinaStageLaw.FadeThreshold" not in tips
-    # The re-founding (2026-10-04): the fade retired; the Bow's Fanfare and
-    # Pneuma's gain are the two Stage numerals a tip carries.
+    # The re-founding (2026-10-04): the fade retired.
     assert "FadeDivisor" not in tips
-    assert "FurinaStageLaw.BowFanfare" in tips
-    assert "ArkheAlignmentPower.PneumaFanfare" in tips
+    # THE SALON'S TAB (2026-10-05): the Bow and Pneuma left with v2, and the
+    # Drain line is "half", which `FurinaStageLaw.LineOf` is. The guests'
+    # numerals live on their badges (`StagePerformerBadge.ActText`).
+    assert "FurinaStageLaw.BowFanfare" not in tips
+    assert "ArkheAlignmentPower.PneumaFanfare" not in tips
+    badges = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+              / "FurinaStageBadges.cs").read_text(encoding="utf-8")
+    assert "FurinaStageLaw.CharlotteActRepay" in badges
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
     # structural and the Mend rule's bound is her entry HP, not a constant.
     # The relic's number -- what a carried-out Plan adds to the Casket since
@@ -1141,20 +1134,11 @@ def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
 # same day deleted the last one, the Rare's, whose face now reads "twice your
 # performers' Fanfare".
 
-#: The three readers whose face names the seat, and so carry no reader tip.
-STAGE_READERS_NAMED_ON_THE_FACE = {
-    "proto_fs_ousia_surge": "ProtoFsOusiaSurge",
-    "proto_fs_pneuma_refrain": "ProtoFsPneumaRefrain",
-    "proto_fs_final_bow": "ProtoFsFinalBow",
-}
-
-
-
-
 def test_the_rare_spend_all_carries_no_reader_tip():
     """The re-founding (2026-10-04): Let the People Rejoice spends all of
     Furina's one Fanfare number and states its rate per point in words, so
-    no reader tip rides it."""
+    no reader tip rides it. (The Salon's Tab, 2026-10-05: so does Standing
+    Ovation.)"""
     src = (PROTOTYPE_DIR / "ProtoFsLetThePeopleRejoice.cs").read_text(
         encoding="utf-8")
     assert "ForStageReader" not in src
@@ -1162,18 +1146,6 @@ def test_the_rare_spend_all_carries_no_reader_tip():
     assert ("[gold]Spend[/gold] all your [gold]Fanfare[/gold]"
             in row["description"])
     assert "per point" in row["description"]
-
-
-@pytest.mark.parametrize("rid", sorted(STAGE_READERS_NAMED_ON_THE_FACE))
-def test_a_reader_carries_no_reader_tip(rid):
-    """The re-founding (2026-10-04): no bars and no back performer, so these
-    faces read Furina's one Fanfare number (or none) and no reader tip rides
-    them."""
-    cls = STAGE_READERS_NAMED_ON_THE_FACE[rid]
-    src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
-    assert "ForStageReader" not in src
-    row = {r["id"]: r for r in proto._rows()}[rid]
-    assert "back performer" not in row["description"]
 
 
 def test_the_readers_tip_is_gone():
@@ -1197,18 +1169,13 @@ def test_the_readers_tip_is_gone():
 # card or body said what a performer does.
 # ---------------------------------------------------------------------------
 
-#: Every row that summons, and the performer tips it owes, in attach order.
+#: THE SALON'S TAB (2026-10-05): every row that summons is a Guest Star, and
+#: the tips it owes, in attach order.
 STAGE_SUMMONERS = {
-    "proto_fs_salon_debut": ("Usher", "Chevalmarin", "Crabaletta"),
-    # The re-founding (2026-10-04): Double Casting is the Rehearsal Power
-    # and summons nobody; the Leading Lady summons Usher.
-    "proto_fs_leading_lady": ("Usher",),
-    # A summon inside a conditional's branch owes the same tips.
-    "proto_fs_improvised_number": ("Usher", "Chevalmarin", "Crabaletta"),
-    "proto_fs_surintendante_chevalmarin": ("Chevalmarin",),
-    "proto_fs_mademoiselle_crabaletta": ("Crabaletta",),
-    # THE SUPPORTING POOL (2026-09-26): Gala Premiere names all three.
-    "proto_fs_gala_premiere": ("Usher", "Chevalmarin", "Crabaletta"),
+    "proto_fs_guest_star_charlotte": "Charlotte",
+    "proto_fs_guest_star_wriothesley": "Wriothesley",
+    "proto_fs_guest_star_lynette": "Lynette",
+    "proto_fs_guest_star_clorinde": "Clorinde",
 }
 
 
@@ -1216,36 +1183,30 @@ def test_every_summoning_row_and_no_other_owes_the_summon_tips():
     """DERIVED FROM THE OP, never a list of ids: a row that gains a summon
     gains the tips the day its row exists."""
     rows = {row["id"]: row for row in proto._rows()}
-    found = {rid: gen.stage_summon_tip_calls(row)
+    found = {rid: gen.stage_guest_tip_calls(row)
              for rid, row in rows.items()
-             if gen.stage_summon_tip_calls(row)}
-    # ONE Summon tip since the trio can be cloned (2026-09-25).
-    expected = {rid: [("ArmKeywordTips.ForSummon", "")]
-                + [(f"ArmKeywordTips.For{who}", "") for who in cast]
-                for rid, cast in STAGE_SUMMONERS.items()}
+             if gen.stage_guest_tip_calls(row)}
+    expected = {rid: ["ArmKeywordTips.ForSummon", "ArmKeywordTips.ForGuestStar",
+                      f"ArmKeywordTips.For{who}"]
+                for rid, who in STAGE_SUMMONERS.items()}
     assert found == expected
+    # v2's trio summon op is gone from the emitter's vocabulary.
+    assert "stage_summon" not in gen.MECHANICAL_OPS
 
 
 @pytest.mark.parametrize("rid", sorted(STAGE_SUMMONERS))
 def test_every_summoning_row_carries_the_summon_and_performer_tips(rid):
-    """The attach is committed: the generated card wraps its tips in the Summon
-    tip first and then each performer it can field."""
+    """The attach is committed: the generated card wraps its tips in the
+    Summon tip, then Guest Star, then its guest's own."""
     cls = "ProtoFs" + "".join(
         part.capitalize() for part in rid.removeprefix("proto_fs_").split("_"))
     src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
-    # The Summon tip wraps the card's own tips: the base list, or (draft 3,
-    # 2026-09-25) Chevalmarin's card's Hydro tip, which attaches where the
-    # keyword prints.
-    import re
-    assert re.search(
-        r"ArmKeywordTips\.ForSummon\((base\.ExtraHoverTips|"
-        r"KleeCardTooltips\.ForCard\(base\.ExtraHoverTips, [^;]*?\)), "
-        r"this\)", src)
-    for who in STAGE_SUMMONERS[rid]:
-        assert f"ArmKeywordTips.For{who}(" in src
-    for who in {"Usher", "Chevalmarin", "Crabaletta"} - set(
-            STAGE_SUMMONERS[rid]):
-        assert f"ArmKeywordTips.For{who}(" not in src
+    who = STAGE_SUMMONERS[rid]
+    assert (f"ArmKeywordTips.For{who}(ArmKeywordTips.ForGuestStar("
+            f"ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), "
+            f"this);") in src
+    for other in set(STAGE_SUMMONERS.values()) - {who}:
+        assert f"ArmKeywordTips.For{other}(" not in src
 
 
 def test_the_summon_and_performer_tips_state_the_ruled_sentences():
@@ -1253,32 +1214,21 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
     `FurinaStageLaw` (`EB-89`)."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     for clause in (
-            # THE RE-FOUNDING (2026-10-04): no Fanfare on a performer; on a
-            # full stage the front Salon member Bows and leaves, guests stay.
-            '"A performer joins at the back. On a full stage, the front Salon "',
-            '"member [gold]Bow[/gold]s and leaves first. Guests keep their "',
-            # Each performer's tip is its badge's sentence, numerals off the
-            # law (`StagePerformerBadge.ActText`).
-            "With(inherited, UsherKey, StagePerformerBadge.ActText(StagePerformer.Usher));",
-            "StagePerformerBadge.ActText(StagePerformer.Chevalmarin));",
-            "StagePerformerBadge.ActText(StagePerformer.Crabaletta));"):
+            '"A guest joins at the back. On a full stage, the oldest guest "',
+            '"acts once more and leaves first."',
+            '"Acts at the end of your turn. Summoning one already on stage "',
+            '"makes it act and stay."',
+            "StagePerformerBadge.ActText(StagePerformer.Charlotte));",
+            "StagePerformerBadge.ActText(StagePerformer.Wriothesley));",
+            "StagePerformerBadge.ActText(StagePerformer.Lynette));",
+            "StagePerformerBadge.ActText(StagePerformer.Clorinde));"):
         assert clause in tips, clause
-    badges = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-              / "FurinaStageBadges.cs").read_text(encoding="utf-8")
-    for clause in ('"Act: gain " + FurinaStageLaw.ActUsherBlock',
-                   '"Act: deal " + FurinaStageLaw.ActChevalmarinDamage',
-                   '"Act: deal " + FurinaStageLaw.ActCrabalettaDamage'):
-        assert clause in badges, clause
-    for gone in ("FurinaStageLaw.BowUsherFanfare",
-                 "FurinaStageLaw.BowCrabalettaDamage",
-                 "FurinaStageLaw.SummonFanfare",
-                 "[gold]Bow[/gold]: "):
+    for gone in ("StagePerformer.Usher", "StagePerformer.Chevalmarin",
+                 "StagePerformer.Crabaletta", "[gold]Bow[/gold]"):
         assert gone not in tips, gone
     mod = MOD_CS.read_text(encoding="utf-8")
     assert 'ArmKeywordTips.SummonKey + ".title"] = "Summon"' in mod
-    # The performer titles are the LEDGER'S display names (`EB-735`), the
-    # names the body and its badge print.
-    for who in ("Usher", "Chevalmarin", "Crabaletta"):
+    for who in STAGE_SUMMONERS.values():
         assert (f"ArmKeywordTips.{who}Key + \".title\"] =\n"
                 f"                        Powers.FurinaStageLedger.DisplayName("
                 f"\n                            Powers.StagePerformer.{who})"
@@ -1289,20 +1239,17 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     """The seat glossary is held in step from this side: the same sentences,
     the numerals written out."""
     rows = blindplay.ARM_KEYWORDS
-    # The re-founding (2026-10-04).
     assert rows["Summon"] == (
-        "A performer joins at the back. On a full stage, the front Salon "
-        "member Bows and leaves first. Guests keep their seats.")
-    assert rows["Gentilhomme Usher"] == "Act: gain 4 Block."
-    assert rows["Surintendante Chevalmarin"] == (
-        "Act: deal 2 damage to ALL enemies.")
-    assert rows["Mademoiselle Crabaletta"] == (
-        "Act: deal 5 damage to a random enemy.")
-    from understudy import blindplay_notes
-    assert rows["Bow"] == (
-        "The performer acts once more without paying, then you gain 1 "
-        "Fanfare.")
-    assert not hasattr(blindplay_notes, "STAGE_BOW_ON_HIT")
+        "A guest joins at the back. On a full stage, the oldest guest acts "
+        "once more and leaves first.")
+    assert rows["Guest Star"] == (
+        "Acts at the end of your turn. Summoning one already on stage makes "
+        "it act and stay.")
+    assert rows["Charlotte"] == (
+        "The first time you Repay each turn, draw 1 card. Act: Repay 2.")
+    for gone in ("Bow", "Gentilhomme Usher", "Surintendante Chevalmarin",
+                 "Mademoiselle Crabaletta", "Ousia", "Pneuma"):
+        assert gone not in rows, gone
 
 
 # ---------------------------------------------------------------------------
@@ -1319,8 +1266,9 @@ def test_a_spend_cards_sentence_face_still_splits_into_its_modes():
     modes = gen.modal_effect(row)["modes"]
     assert gen.modal_option_faces(row, modes) == [
         "Deal {PlainDamage:diff()} damage",
-        "[gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead"]
+        "[gold]Drain[/gold] 3: deal {BranchDamage:diff()} instead"]
     for rid in ("proto_fs_tidal_flourish", "proto_fs_spirited_aria",
-                "proto_fs_grand_entrance", "proto_fs_quick_cue"):
+                "proto_fs_surintendante_chevalmarin", "proto_fs_leading_lady",
+                "proto_fs_salons_tab", "proto_fs_interval_bell"):
         assert gen.modal_option_faces(
             rows[rid], gen.modal_effect(rows[rid])["modes"]) is not None, rid

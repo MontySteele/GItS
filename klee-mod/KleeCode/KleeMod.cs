@@ -229,14 +229,6 @@ public static class KleeMod
                     Powers.VarkaRules.KnightPromptText,
                 [Powers.VarkaRules.ElementPromptKey] =
                     Powers.VarkaRules.ElementPromptText,
-                // FURINA, THE STAGE (the re-founding): the performer picker's
-                // three prompts (`FurinaStage.ChooseSeat`).
-                [Powers.FurinaStage.CuePromptKey] =
-                    Powers.FurinaStage.CuePromptText,
-                [Powers.FurinaStage.FrontPromptKey] =
-                    Powers.FurinaStage.FrontPromptText,
-                [Powers.FurinaStage.BowPromptKey] =
-                    Powers.FurinaStage.BowPromptText,
             });
 
             // Runtime copy of the custom-keyword loc. The pck carries the
@@ -480,86 +472,31 @@ public static class KleeMod
                     // Element identities sec.7: a rider, titling no keyword.
                     [Cards.ArmKeywordTips.ElementSwitchKey + ".title"] =
                         "Element switch",
-                    // The Furina reframe's four title rows went
-                    // with its keywords (`EB-723`); see
-                    // `ArmKeywordTips`'s Furina section. Encore's title
-                    // went with its last body (R276 hygiene).
-                    // THE FURINA STAGE'S SEVEN (`EB-723`, R269). The brief's
-                    // sec.12 names them; each is a rule the SHIPPED engine
-                    // does not have, so none collides with a shipped keyword.
-                    // `Fanfare` is the sharpest case and the reason each takes
-                    // its own key: the shipped word titles a METER and this one
-                    // a performer's own bar, and the two sentences contradict
-                    // each other -- but no single face can raise both, because
-                    // the arm swaps a shipped row out at every door it enters.
+                    // FURINA, THE SALON'S TAB (2026-10-05): her four words,
+                    // the summon, the Guest Star keyword and each guest
+                    // titled by its own name (the ledger's, `EB-735`).
                     [Cards.ArmKeywordTips.SpendKey + ".title"] = "Spend",
-                    // The Spend warning (Furina pool round 2026-10-01).
-                    [Cards.ArmKeywordTips.SpendShortKey + ".title"] =
-                        "Leaves a guest short",
                     [Cards.ArmKeywordTips.FanfareKey + ".title"] =
                         "Fanfare",
-                    // The text pass (2026-09-25) retired `Raise` and
-                    // `Rotate` and renamed the lead the FRONT performer.
-                    [Cards.ArmKeywordTips.BowKey + ".title"] = "Bow",
-                    [Cards.ArmKeywordTips.FrontPerformerKey + ".title"] =
-                        "Front performer",
-                    // THE RE-FOUNDING (2026-10-04): the Cue and Rehearsal.
-                    // The back performer and the fade retired with the bars.
-                    [Cards.ArmKeywordTips.CueKey + ".title"] = "Cue",
-                    [Cards.ArmKeywordTips.RehearsalKey + ".title"] =
-                        "Rehearsal",
-                    // R276 batch two: Arkhe Alignment's two halves.
-                    [Cards.ArmKeywordTips.OusiaKey + ".title"] = "Ousia",
-                    [Cards.ArmKeywordTips.PneumaKey + ".title"] = "Pneuma",
-                    // 2026-09-25: what a summon does, and what each performer
-                    // does. The three performer titles are the LEDGER'S
-                    // display names -- the name the body, its badge and the
-                    // seat page all print (`EB-735`).
+                    [Cards.ArmKeywordTips.DrainKey + ".title"] = "Drain",
+                    [Cards.ArmKeywordTips.RepayKey + ".title"] = "Repay",
+                    // The "Drained N" counter's hover title.
+                    [Vfx.DrainedCounter.TitleKey + ".title"] = "Drained",
                     [Cards.ArmKeywordTips.SummonKey + ".title"] = "Summon",
-                    [Cards.ArmKeywordTips.UsherKey + ".title"] =
-                        Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Usher),
-                    [Cards.ArmKeywordTips.ChevalmarinKey + ".title"] =
-                        Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Chevalmarin),
-                    [Cards.ArmKeywordTips.CrabalettaKey + ".title"] =
-                        Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Crabaletta),
-                    // THE GUEST CAST (2026-09-25): the keyword, and each
-                    // guest titled by its own name (the ledger's, as above).
                     [Cards.ArmKeywordTips.GuestStarKey + ".title"] =
                         "Guest Star",
-                    [Cards.ArmKeywordTips.NeuvilletteKey + ".title"] =
-                        Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Neuvillette),
-                    [Cards.ArmKeywordTips.ClorindeKey + ".title"] =
-                        Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Clorinde),
-                    [Cards.ArmKeywordTips.NaviaKey + ".title"] =
-                        Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Navia),
-                    [Cards.ArmKeywordTips.ChevreuseKey + ".title"] =
-                        Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Chevreuse),
-                    [Cards.ArmKeywordTips.WriothesleyKey + ".title"] =
-                        Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Wriothesley),
-                    [Cards.ArmKeywordTips.SigewinneKey + ".title"] =
-                        Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Sigewinne),
                     [Cards.ArmKeywordTips.CharlotteKey + ".title"] =
                         Powers.FurinaStageLedger.DisplayName(
                             Powers.StagePerformer.Charlotte),
+                    [Cards.ArmKeywordTips.WriothesleyKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Wriothesley),
                     [Cards.ArmKeywordTips.LynetteKey + ".title"] =
                         Powers.FurinaStageLedger.DisplayName(
                             Powers.StagePerformer.Lynette),
-                    // THE SUPPORTING POOL (2026-09-26): two more guests.
-                    [Cards.ArmKeywordTips.LyneyKey + ".title"] =
+                    [Cards.ArmKeywordTips.ClorindeKey + ".title"] =
                         Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Lyney),
-                    [Cards.ArmKeywordTips.EscoffierKey + ".title"] =
-                        Powers.FurinaStageLedger.DisplayName(
-                            Powers.StagePerformer.Escoffier),
+                            Powers.StagePerformer.Clorinde),
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in
