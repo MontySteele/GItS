@@ -1,4 +1,4 @@
-Status: OPEN, draft 4 (direction ruled 2026-10-04; three picks at the end)
+Status: RULED, draft 4 (direction and all picks ruled 2026-10-04; out to Fable and GPT before the sim slice)
 
 # Furina: re-founding the Stage (paper, draft 4)
 
@@ -171,12 +171,8 @@ The pool stays 78. About 30 rows change:
 
 - **Curtain Rise** (Basic Attack, 1): "Deal 7 damage. Spend 3: deal 17
   instead." Unchanged.
-- **Rising Applause** (Basic Skill, 1): **pick 1.**
-  - **(a) "Gain 3 Fanfare."** Fable's view: with a Cue it beats Defend on
-    turn one, and later it does most of Bis!'s job. The Cue Commons teach
-    directing.
-  - **(b) "Gain 3 Fanfare. Cue a performer."** GPT's view: it teaches both
-    verbs, with the net Fanfare previewed.
+- **Rising Applause** (Basic Skill, 1): "Gain 3 Fanfare." (upgraded: Gain
+  4). Ruled (sec.6, pick 1); the Cue Commons teach directing.
 
 ## 5. How it gets proven
 
@@ -201,13 +197,16 @@ The pool stays 78. About 30 rows change:
 3. **A rule change,** so [USER] plays it and a two-seat round reads it.
    Draft 4 goes back to Fable and GPT first.
 
-## 6. Picks (still open from draft 3)
+## 6. Ruled picks
 
-1. **Rising Applause:** (a) "Gain 3 Fanfare." or (b) "Gain 3 Fanfare.
-   Cue a performer." Default: (a).
+[USER], 2026-10-04: "Agreed on all 3 of those default picks."
+
+1. **Rising Applause is "Gain 3 Fanfare."** (upgraded: Gain 4). The Cue
+   Commons teach directing.
 2. **The scaling stat is named Rehearsal**, shown as a Power badge with
-   its total. Default: named.
-3. **The walk-on** (rule 4). Default: yes. (Or the summon is refused.)
+   its total.
+3. **The walk-on** (rule 4): a Salon summon onto a stage of three guests
+   acts once and Bows, never evicting a guest.
 
 ## 7. What each draft took
 
