@@ -15024,6 +15024,43 @@ def build_upgrade(card: dict) -> list[str]:
     return lines
 
 
+#: The description token a summon card's in-combat Bow line rides on
+#: (`FurinaStageBowPreview.Token`).
+STAGE_BOW_TOKEN = "StageBow"
+
+
+def stage_bow_preview_call(card: dict) -> str | None:
+    """The C# that fills a summon card's in-combat Bow line, or None.
+
+    2026-10-04 (the Furina v2 seat round): three times a summon onto a full
+    stage Bowed Usher off without the player noticing. A row whose OWN
+    effect summons (a TOP-LEVEL `stage_summon` or `stage_guest`) ends its face
+    in `{InCombat:{StageBow}|}`, and the card fills the token from
+    `FurinaStageBowPreview`, which asks the rule the summon runs
+    (`StageDirector.PlanSummons`). Improvised Number's summon is conditional
+    on an empty stage, so it can never make anyone Bow, and is not one.
+    DERIVED FROM THE OP, so a new summon row carries the line the day it
+    exists.
+    """
+    effects = [fx for fx in card.get("effects") or []
+               if fx.get("op") in ("stage_summon", "stage_guest")]
+    if not effects:
+        return None
+    if any(fx["op"] == "stage_guest" for fx in effects):
+        if len(effects) != 1:
+            raise ValueError(f"{card['id']}: a Bow preview reads one "
+                             "stage_guest, alone")
+        return ("FurinaStageBowPreview.Guest(this, "
+                f'"{effects[0]["member"]}")')
+    members = ", ".join(f'"{fx["member"]}"' for fx in effects)
+    return f"FurinaStageBowPreview.Salon(this, {members})"
+
+
+def stage_bow_face(desc: str) -> str:
+    """A summon row's face with its in-combat Bow line appended."""
+    return desc + "{InCombat:{" + STAGE_BOW_TOKEN + "}|}"
+
+
 def emit(
     card: dict, profile: CharacterProfile = KLEE_PROFILE
 ) -> str:
@@ -15314,10 +15351,15 @@ def emit(
                 for eff in (card.get("effects") or ())))
     # A face may carry a line break (the base game's `{InCombat:<break>...|}`
     # reader line), and a raw break inside a C# literal does not compile.
+    bow_preview = stage_bow_preview_call(card)
+    if bow_preview:
+        desc = stage_bow_face(desc)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
     if blanks_burst:
         arm_desc = build_description(card, include_burst_rider=False)
+        if bow_preview:
+            arm_desc = stage_bow_face(arm_desc)
         arm_cs = arm_desc.replace("\n", "\\n")
         desc_expr = f'FurinaBurstRider.Face("{arm_cs}", "{desc_cs}")'
 
@@ -16232,6 +16274,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # end-of-turn flush, which is no `CardCmd.Discard`, counts nothing. The
     # sim's twin is `combat.card_cost`'s `cost_reduction_per_discard_this_turn`.
     discard_discount_member = ""
+    stage_bow_member = ""
+    if bow_preview:
+        # The Bow line's token (`stage_bow_preview_call`). Added as a
+        # description argument, the base game's own seam for a face word no
+        # DynamicVar carries.
+        stage_bow_member = (
+            "\n\n    /// <summary>Who this card's summon will Bow, on its "
+            "in-combat line\n    /// (`FurinaStageBowPreview`).</summary>\n"
+            "    protected override void AddExtraArgsToDescription(\n"
+            "        MegaCrit.Sts2.Core.Localization.LocString description)\n"
+            "    {\n"
+            "        base.AddExtraArgsToDescription(description);\n"
+            f'        description.Add("{STAGE_BOW_TOKEN}", {bow_preview});\n'
+            "    }")
     discount_rate = card.get("cost_reduction_per_discard_this_turn")
     if discount_rate:
         discard_discount_member = (
@@ -16602,7 +16658,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{discard_discount_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{wide_target_member}{discard_discount_member}{stage_bow_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

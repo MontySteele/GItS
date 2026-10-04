@@ -344,8 +344,16 @@ def canonical_vars_block(source: str) -> str:
     return ""
 
 
+#: 2026-10-04: a face word no DynamicVar carries is handed to the description
+#: as an argument in the card's `AddExtraArgsToDescription` override (the base
+#: game's own seam): Furina's summon cards fill `{StageBow}` this way. The
+#: name added there is declared.
+_EXTRA_ARG_DECL = re.compile(r'description\.Add\(\s*"([A-Za-z]\w*)"')
+
+
 def declared_vars(source: str) -> set[str]:
-    """Var names this file declares in CanonicalVars."""
+    """Var names this file declares in CanonicalVars, plus the description
+    arguments its `AddExtraArgsToDescription` adds."""
     block = canonical_vars_block(source)
     aliases = var_token_aliases()
     names = set(_NAMED_DECL.findall(block))
@@ -357,6 +365,7 @@ def declared_vars(source: str) -> set[str]:
         # `EB-486`: a mod var whose token is not its class name declares the
         # TOKEN, which is what the face prints and what the body looks up.
         names.add(aliases.get(typed, typed))
+    names |= set(_EXTRA_ARG_DECL.findall(source))
     return names
 
 

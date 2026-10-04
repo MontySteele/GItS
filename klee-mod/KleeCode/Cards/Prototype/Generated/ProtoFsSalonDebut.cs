@@ -45,8 +45,17 @@ public sealed class ProtoFsSalonDebut : CustomCardModel, ICharacterCard, IStageS
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Take the Stage"),
-        ("description", "Summon a random Salon member. Draw 1 card."),
+        ("description", "Summon a random Salon member. Draw 1 card.{InCombat:{StageBow}|}"),
     };
+
+    /// <summary>Who this card's summon will Bow, on its in-combat line
+    /// (`FurinaStageBowPreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageBow", FurinaStageBowPreview.Salon(this, "random"));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -48,8 +48,17 @@ public sealed class ProtoFsSurintendanteChevalmarin : CustomCardModel, ICharacte
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surintendante Chevalmarin"),
-        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Summon Chevalmarin."),
+        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Summon Chevalmarin.{InCombat:{StageBow}|}"),
     };
+
+    /// <summary>Who this card's summon will Bow, on its in-combat line
+    /// (`FurinaStageBowPreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageBow", FurinaStageBowPreview.Salon(this, "chevalmarin"));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

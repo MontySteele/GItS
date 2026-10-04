@@ -45,8 +45,17 @@ public sealed class ProtoFsGuestStarLyney : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Lyney"),
-        ("description", "Summon Lyney. Gain {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Summon Lyney. Gain {GuestFanfare:diff()} [gold]Fanfare[/gold].{InCombat:{StageBow}|}"),
     };
+
+    /// <summary>Who this card's summon will Bow, on its in-combat line
+    /// (`FurinaStageBowPreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageBow", FurinaStageBowPreview.Guest(this, "lyney"));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
