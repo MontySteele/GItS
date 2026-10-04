@@ -35,6 +35,18 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
         ("pronounObject", "him"),
         ("pronounPossessive", "his"),
         ("possessiveAdjective", "his"),
+        // The rest of the base game's per-character rows (BaseLib's
+        // CharacterLoc set plus bestiaryQuote). A missing row renders as
+        // its raw key: the co-op end-turn ping bubble did (playtest
+        // 2026-10-03). CharacterLocCompletenessTests pins the set.
+        ("aromaPrinciple", "[sine][green]Mondstadt's freedom first. My own hungers can wait.[/green][/sine]"),
+        ("banter.alive.endTurnPing", "Steady now. The wind won't wait for us."),
+        ("banter.dead.endTurnPing", "..."),
+        ("bestiaryQuote", "I have not crossed blades with this one yet."),
+        ("eventDeathPrevention", "The Knights still need their Grand Master."),
+        ("goldMonologue", "[sine]This will keep the Knights fed through the winter...[/sine]"),
+        ("cardsModifierTitle", "Varka Cards"),
+        ("cardsModifierDescription", "Varka cards will now appear in rewards and shops."),
     };
 
     /// <summary>Mondstadt's Anemo teal.</summary>
