@@ -48,7 +48,7 @@ public sealed class ProtoKoPerfectTiming : CustomCardModel, IElementalCard, ISet
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Perfect Timing"),
-        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, play this again."),
+        ("description", "[gold]Set off[/gold] the enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, play this again."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

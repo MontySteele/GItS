@@ -8965,11 +8965,13 @@ def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
     smith = json.loads(json.dumps(smith.get("state", smith)))
     # The capture predates the element-text ruling (2026-10-02): today's
     # Ka-pow! names its Pyro, so the recorded face is brought up to it here
-    # rather than in the recording.
+    # rather than in the recording. So does its aim (2026-10-03): "Set off
+    # the enemy." where the recording says the bare "Set off."
     for row in smith["card_select"]["cards"]:
         if row["id"] == "KLEEMOD-PROTO_KO_KAPOW":
             row["description"] = row["description"].replace(
-                "Deal 7 damage.", "Deal 7 Pyro damage.")
+                "Deal 7 damage.", "Deal 7 Pyro damage.").replace(
+                "Set off.", "Set off the enemy.")
     smith["card_select"]["cards"].append(
         {"id": "KLEEMOD-PROTO_KK_DEEP_CURRENT", "name": "Deep Current",
          "cost": "1", "type": "Attack",
@@ -8983,7 +8985,8 @@ def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
     # And the screen's own rows, including one whose printed face carries the
     # game's appended keyword sentence -- which is why the match is a search
     # over the face rather than the whole of it.
-    assert "    Upgraded: Set off. Deal 10 Pyro damage. Applies Pyro." in page
+    assert ("    Upgraded: Set off the enemy. Deal 10 Pyro damage. "
+            "Applies Pyro.") in page
     assert "    Upgraded: Gain 11 Block." in page
 
 

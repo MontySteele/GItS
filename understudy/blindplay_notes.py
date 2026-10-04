@@ -1476,7 +1476,8 @@ ARM_KEYWORDS: dict[str, str] = {
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
     # Text pass 2026-09-25, in step with `ArmKeywordTips.ForMine`.
-    "Mine": "A Bomb that also goes off just before its enemy attacks.",
+    "Mine": ("A Bomb that also goes off just before its enemy attacks. Any "
+             "Set off spends it too."),
     # THE 2026-09-25 TEXT PASS rewrote the word to two short sentences, in
     # step with `ArmKeywordTips.ForPlan` word for word: the old row carried
     # six seats' edge cases (the aim and its Minion exception, Strength

@@ -256,13 +256,15 @@ public static class ArmKeywordTips
     /// Rule 6. A Mine IS a Bomb, so the one thing this word adds is when else
     /// it goes off. The text pass of 2026-09-25 dropped "the hit still lands
     /// unless the Mine kills" and the Bomb tip's edge cases; the Bomb tip
-    /// prints beside this one on every face that says Mine.
+    /// prints beside this one on every face that says Mine. 2026-10-03: a
+    /// blind seat read a Mine as failing because a Set off had already spent
+    /// it, so the tip now says a Set off spends it too.
     /// </summary>
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off just before its enemy "
-          + "attacks.");
+          + "attacks. Any [gold]Set off[/gold] spends it too.");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.
