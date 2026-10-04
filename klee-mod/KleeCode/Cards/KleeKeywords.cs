@@ -129,18 +129,6 @@ public static class KleeKeywords
     [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword CrystallizePreview;
 
-    // THE ELEMENT PORT (review/ruled/element-home-review-2026-09-28.md sec.7.1):
-    // "the preview says why a trigger pays nothing". Raised by
-    // `KleeCardTooltips.ForCard` in place of the Swirl or Crystallize preview
-    // when the aura under the card's Anemo or Geo is SPENT.
-    [CustomEnum("swirl_spent_preview")]
-    [KeywordProperties(AutoKeywordPosition.None)]
-    public static CardKeyword SwirlSpentPreview;
-
-    [CustomEnum("crystallize_spent_preview")]
-    [KeywordProperties(AutoKeywordPosition.None)]
-    public static CardKeyword CrystallizeSpentPreview;
-
     // CO-OP NOTES PICK 2 ([USER], 2026-10-02): "every Knight prints a first
     // line, 'Knight.', the way a card prints Exhaust." POSITION `Before`:
     // BaseLib adds it to the base game's `CardKeywordOrder.beforeDescription`,
@@ -176,15 +164,6 @@ public static class KleeKeywords
         Reaction.Frozen => FrozenPreview,
         Reaction.Swirl => SwirlPreview,
         Reaction.Crystallize => CrystallizePreview,
-        _ => CardKeyword.None,
-    };
-
-    /// <summary>The element port's "pays nothing" preview for a trigger on a
-    /// spent aura; <c>None</c> for any other element.</summary>
-    public static CardKeyword SpentPreview(Element trigger) => trigger switch
-    {
-        Element.Anemo => SwirlSpentPreview,
-        Element.Geo => CrystallizeSpentPreview,
         _ => CardKeyword.None,
     };
 }

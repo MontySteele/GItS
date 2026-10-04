@@ -331,11 +331,12 @@ public static class KleeMod
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
                         $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: bosses can't be Frozen, so it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
                     ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
-                    // THE ELEMENT PORT (sec.4 A, 2026-09-28): Swirl keeps the
-                    // aura, spends it, spreads it and deals a flat 2 to all.
+                    // THE ELEMENT PORT (sec.4 A, 2026-09-28; spent removed
+                    // 2026-10-03): Swirl removes the aura, deals a flat 2 to
+                    // all and copies the element onto the others.
                     // The comment sits ABOVE the key, for `gen_keyword_loc.py`.
                     ["KLEEMOD-SWIRL_PREVIEW.description"] =
-                        $"[gold]Anemo[/gold] meets a fresh aura: deal [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] unblockable damage to ALL enemies and copy it, spent, onto the others. Enemies wearing it refresh.",
+                        $"[gold]Anemo[/gold] meets an aura: remove it, deal [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] unblockable damage to ALL enemies, and apply that element to the others.",
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.title"] = "Reaction preview: Crystallize",
                     // `EB-613` (R263 sec.5 item 1). THE BLOCK IS NOT THE
                     // POINT OF THIS ROW; THE AURA IS. A Geo hit is a COST to
@@ -351,15 +352,7 @@ public static class KleeMod
                     // price, each with its own verb. The comment sits ABOVE
                     // the key, for `gen_keyword_loc.py`'s reader.
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.description"] =
-                        $"[gold]Geo[/gold] meets a fresh aura: gain [blue]{Elements.ReactionConstants.CrystallizeBlock}[/blue] [gold]Block[/gold]. The aura stays, spent.",
-                    // THE ELEMENT PORT (sec.7.1): why a trigger pays nothing.
-                    // Raised in place of the two rows above over a SPENT aura.
-                    ["KLEEMOD-SWIRL_SPENT_PREVIEW.title"] = "Reaction preview: Swirl (spent)",
-                    ["KLEEMOD-SWIRL_SPENT_PREVIEW.description"] =
-                        "This aura is spent, so [gold]Anemo[/gold] does nothing to it. A hit of its own element makes it fresh again.",
-                    ["KLEEMOD-CRYSTALLIZE_SPENT_PREVIEW.title"] = "Reaction preview: Crystallize (spent)",
-                    ["KLEEMOD-CRYSTALLIZE_SPENT_PREVIEW.description"] =
-                        "This aura is spent, so [gold]Geo[/gold] does nothing to it. A hit of its own element makes it fresh again.",
+                        $"[gold]Geo[/gold] meets an aura: gain [blue]{Elements.ReactionConstants.CrystallizeBlock}[/blue] [gold]Block[/gold]. The aura is removed.",
 
                     // `EB-160`. THE ONE PLAYER-FACING STRING BAKED INTO A
                     // SCENE. `shared/turn_end_docket.tscn`'s header node

@@ -53,7 +53,7 @@ READINGS TAKEN WHERE THE SPEC LEAVES ROOM (each also in the builder's report):
     upgraded Knights' Roll Call's choice is `VarkaLedger.knight_choice`,
     default the first pool Knight of the current element, else the first.
   * Gale Sweep and Wall of Gales shield their snapshot: an enemy a sweep's
-    earlier Swirl spread over gets its own fresh aura back before its hit.
+    earlier Swirl spread over gets its own aura back before its hit.
 
 ELEMENT IDENTITIES (review/active/varka-element-identities-2026-10-01.md,
 ruled 2026-10-01): Electro's discard-and-spend cards and Retaliating Tide.
@@ -80,7 +80,8 @@ THE EXPANSION (review/active/varka-expansion-2026-10-01.md sec.3, ruled
     pays twice. Eye Wall and Eye of Stormterror read each Swirl.
   * UNWAVERING BANNER stops the open Oath's switch (a Knight's switch and a
     card that names the switch -- Change of Guard, Weathervane -- still
-    move it). Downburst's spread copies arrive fresh (`spread_fresh`).
+    move it). (Downburst's "copies arrive fresh" went with spent auras,
+    2026-10-03: every copy is fresh.)
   * The pilot's Weathervane choice is `VarkaLedger.weathervane_choice`,
     default: keep the current element unless another holds more Oath, then
     the most, ties in P/H/E/C order.
@@ -174,8 +175,6 @@ EYE_OF_STORMTERROR = "vk_eye_of_stormterror"
 THE_ORDER_ANSWERS = "vk_the_order_answers"
 #: Eye of Stormterror: "The first 3 times you Swirl each turn".
 EYE_OF_STORMTERROR_SWIRLS = 3
-#: Downburst (pick 3a): its Swirl's spread copies arrive fresh.
-DOWNBURST_ID = "proto_vk_downburst"
 #: Tempest of the Four Winds' four hits, in the printed order.
 TEMPEST_ELEMENTS = ("pyro", "hydro", "cryo", "electro")
 
@@ -286,7 +285,6 @@ class VarkaLedger:
     element_changed_turn: int = -1    # Shifting Gale: state.turn of the change
     static_field_turn: int = -1       # Static Field: the turn it drew
     pays_twice: int = 0               # > 0 inside Crosscurrent's Swirl
-    fresh_spread: int = 0             # > 0 inside a Downburst play
     #: Per play, parallel to `scopes`: did the play's aim wear Pyro at the
     #: top of the play (Amber: Sharpshooter's "already has Pyro").
     play_target_pyro: list = field(default_factory=list)
@@ -509,8 +507,6 @@ def begin_play(state, card) -> None:
     aim = state.card_aim
     open_scope(state, open_oath=not is_knight(card),
                target_pyro=bool(aim is not None and aim.aura == "pyro"))
-    if card.id.rstrip("+") == DOWNBURST_ID:
-        led.fresh_spread += 1
     if is_knight(card):
         led.knights_this_turn += 1
         led.knights_this_combat += 1
@@ -526,8 +522,6 @@ def end_play(state, card=None) -> None:
     led = ledger(state.player)
     if led is None or card is None:
         return
-    if card.id.rstrip("+") == DOWNBURST_ID and led.fresh_spread:
-        led.fresh_spread -= 1
     p = state.player
     wolves = _power(p, WOLFPACK)
     if wolves and card.id.rstrip("+") == ASCENSION_ID:
@@ -537,13 +531,6 @@ def end_play(state, card=None) -> None:
             p.discard_pile.append(copy)
             state.cards_created_this_turn += 1
             state.emit("add_card", card=copy.id, to="discard")
-
-
-def spread_fresh(state) -> bool:
-    """`reactions._react`'s spread: inside a Downburst play, the copies a
-    Swirl spreads arrive fresh (pick 3a)."""
-    led = ledger(state.player)
-    return bool(led is not None and led.fresh_spread)
 
 
 def note_hit(state, enemy, element) -> None:
@@ -616,7 +603,7 @@ def landing_only(state) -> bool:
 def converging_spread(state, struck, aura: str, flat: int) -> None:
     """CONVERGING WINDS: replaces the Swirl's spread and flat 2. The struck
     enemy takes the flat 2 element-less; every other enemy takes it CARRYING
-    the swirled element: a bare one gets a spent copy, one already wearing it
+    the swirled element: a bare one gets a copy, one already wearing it
     only the 2, and one wearing another aura reacts with it, on that enemy
     alone, and never Swirls. Nothing here credits Oath."""
     from tier0.engine import reactions              # late: cycle
@@ -628,15 +615,12 @@ def converging_spread(state, struck, aura: str, flat: int) -> None:
         if other.aura == aura:
             reactions._splash(state, other, flat)
             continue
-        bare = other.aura is None
         led.landing = True
         try:
             dmg = reactions.resolve_hit(state, other, aura, flat,
                                         "converging_spread")
         finally:
             led.landing = False
-        if bare:
-            other.aura_spent = True
         reactions._splash(state, other, int(dmg))
 
 
@@ -899,22 +883,23 @@ def predicate(state, name: str) -> bool:
 # --------------------------------------------------------------------------
 #  Gale Sweep: `damage` with `only_if: fresh_aura`
 # --------------------------------------------------------------------------
+# `fresh_aura` predates 2026-10-03, when spent auras went: every aura is
+# fresh, so the sweep takes every enemy wearing one.
 
 def _fresh_snapshot(state) -> list:
     return [(e, e.aura, e.aura_turns_left) for e in state.living_enemies
-            if e.aura and not e.aura_spent]
+            if e.aura]
 
 
 def _restore(e, aura: str, turns: int) -> None:
-    if e.aura != aura or e.aura_spent:
+    if e.aura != aura:
         e.aura = aura
-        e.aura_spent = False
         e.aura_turns_left = max(e.aura_turns_left, turns)
 
 
 def fresh_aura_sweep(state, fx: dict, card) -> None:
     """`effects._op_damage`, for a `damage` op carrying `only_if:
-    fresh_aura`: the enemies wearing a fresh aura when the op resolves, each
+    fresh_aura`: the enemies wearing an aura when the op resolves, each
     hit once through the ordinary damage op aimed at its body (so the card's
     Anemo, Strength and Stormward land as on any hit of his)."""
     from tier0.engine import effects, klee_overhaul  # late: cycle

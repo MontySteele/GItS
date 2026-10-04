@@ -671,13 +671,7 @@ def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     # the body a human aims at: a Swirl on an auraless target does nothing at
     # all.
     if _card_swirls_at_aim(card):
-        # THE ELEMENT PORT (`C.SWIRL_PAYS`): a SPENT aura pays an Anemo hit
-        # nothing, so the bearer a human aims at is a fresh one when there is
-        # one. With the switch off every aura is fresh and this is the line
-        # it always was.
-        bearers = ([e for e in living
-                    if e.aura and reactions.trigger_pays(e, "anemo")]
-                   or [e for e in living if e.aura])
+        bearers = [e for e in living if e.aura]
         if bearers:
             return min(bearers, key=lambda e: e.hp)
     return min(living, key=lambda e: e.hp)

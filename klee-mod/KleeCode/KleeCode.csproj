@@ -12,17 +12,14 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
 
-  <!-- THE ELEMENT PORT's two switches (KleeMod.Elements.TriggerRules),
-       defaulted on by Directory.Build.props. They switch the shared reaction
+  <!-- THE ELEMENT PORT's switch (KleeMod.Elements.TriggerRules.SwirlPays),
+       defaulted on by Directory.Build.props. It switches the shared reaction
        layer, not a kit. The prototype surface and the four kit arms that used
        to sit here are the only build since legacy cleanup stage 5: the
        shipped kits, their opt-out (ShippedKits) and the arm properties are
        gone. -->
   <PropertyGroup Condition="'$(SwirlPays)' == 'true'">
     <DefineConstants>$(DefineConstants);SWIRL_PAYS</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(CrystallizeKeepsAura)' == 'true'">
-    <DefineConstants>$(DefineConstants);CRYSTALLIZE_KEEPS_AURA</DefineConstants>
   </PropertyGroup>
   <!-- THE TEYVAT RUN FRAME ARM (R272; the frame packet
        review/active/teyvat-run-frame-2026-09-14.md sec.4, and the decompile

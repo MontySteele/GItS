@@ -44,14 +44,14 @@ public sealed class ProtoVkDownburst : CustomCardModel, IElementalCard, ICharact
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_downburst");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Downburst"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], the copies it spreads arrive fresh."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

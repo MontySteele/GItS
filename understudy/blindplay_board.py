@@ -764,7 +764,7 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             face["spend_unavailable"] = spend_unavailable(
                 face["text"], stage, combat["you"]["relics"])
     # VARKA (the Oath rework): his current element, the four Oath counts,
-    # what a Swirl pays now, and each enemy's aura FRESH or SPENT.
+    # what a Swirl pays now, and each enemy's aura.
     oath = varka_oath(p, combat)
     if oath is not None:
         combat["oath"] = oath
@@ -802,10 +802,9 @@ def varka_oath(player: dict[str, Any],
     off the badge sentence "Oath: Pyro N, Hydro N, Electro N, Cryo N." and,
     with the sentence missing, the badge amount under the current element;
     `payout` is the sentence a Swirl pays now, None with no current element;
-    `auras` is one row per enemy in the page's own order -- `{name, element,
-    state}`, `state` being "fresh" or "spent" and `element` None for a body
-    with no aura. SPENT is read off the badge's own sentence (`AuraPower`'s
-    spent face opens "Spent:"), never guessed from a board.
+    `auras` is one row per enemy in the page's own order -- `{name,
+    element}`, `element` None for a body with no aura. (No spent state since
+    2026-10-03: every reaction consumes its aura.)
     """
     you = combat["you"]
     badge = None
@@ -829,14 +828,11 @@ def varka_oath(player: dict[str, Any],
             counts[element] = _int(badge.get("stacks"))
     auras = []
     for enemy in combat["enemies"]:
-        row: dict[str, Any] = {"name": enemy["name"], "element": None,
-                               "state": None}
+        row: dict[str, Any] = {"name": enemy["name"], "element": None}
         for pw in enemy["powers"]:
             m = _AURA_BADGE.match(pw["name"])
             if m:
                 row["element"] = m.group(1)
-                row["state"] = ("spent" if pw["text"].startswith("Spent")
-                                else "fresh")
                 break
         auras.append(row)
     return {"element": element, "counts": counts,

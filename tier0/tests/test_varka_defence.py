@@ -23,13 +23,13 @@ from tier0.engine.state import CombatState, Enemy
 
 @pytest.fixture
 def varka():
-    saved = (C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA)
-    C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = True, True
+    saved = C.SWIRL_PAYS
+    C.SWIRL_PAYS = True
     loader.reset_arm_caches()
     try:
         yield
     finally:
-        C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = saved
+        C.SWIRL_PAYS = saved
         loader.reset_arm_caches()
 
 

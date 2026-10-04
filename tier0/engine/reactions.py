@@ -4,12 +4,12 @@ Rules:
 - One aura per enemy. Same-element hit refreshes duration; different-element
   hit consumes the aura and triggers the reaction table.
 - Anemo and Geo never leave auras; they only trigger (design doc §2.1).
-- THE ELEMENT PORT (`C.SWIRL_PAYS`, `C.CRYSTALLIZE_KEEPS_AURA`; ruled in
-  `review/ruled/element-home-review-2026-09-28.md` §3/§4/§6). With a switch
-  on, its trigger element no longer consumes: a hit on a FRESH aura reacts
-  and leaves the aura standing, SPENT; a hit on a spent aura does nothing
-  extra. A same-element hit refreshes the duration AND makes it fresh; every
-  other element reacts with a spent aura exactly as with a fresh one.
+- EVERY REACTION CONSUMES ITS AURA, Swirl and Crystallize included
+  (2026-10-03; [USER]: "Should we get rid of the concept of elements being
+  'spent' after a swirl? It seems to generate confusion." then "agreed ...
+  please proceed"). There is no spent aura. `C.SWIRL_PAYS` (the element port,
+  `review/ruled/element-home-review-2026-09-28.md` §4 A) makes a Swirl spread
+  ordinary fresh copies to the OTHER enemies and deal SWIRL_DAMAGE to all.
 - IRON RULE: amplifiers (Vaporize/Melt) multiply ONE hit and consume the
   aura. They must never persist. tests/test_reactions.py asserts this.
 
@@ -27,25 +27,6 @@ from tier0.engine.state import CombatState, Enemy
 
 AURA_ELEMENTS = {"pyro", "hydro", "electro", "cryo"}   # anemo/geo trigger only
 
-
-def trigger_keeps_aura(trigger: Optional[str]) -> bool:
-    """Does this trigger element SPEND the aura rather than consume it?
-
-    The one question both switches answer, asked by `resolve_hit` and by any
-    reader that forecasts a reaction. Only a trigger element can say yes, and
-    only while its own switch is on (§6 pick 4.4: each change tested alone).
-    C# twin: `TriggerRules.TriggerKeepsAura`.
-    """
-    return ((trigger == "anemo" and C.SWIRL_PAYS)
-            or (trigger == "geo" and C.CRYSTALLIZE_KEEPS_AURA))
-
-
-def trigger_pays(enemy: Enemy, trigger: Optional[str]) -> bool:
-    """Would a `trigger` hit on this enemy's aura react? False only for a
-    switched trigger on a SPENT aura -- the "pays nothing" case the preview
-    has to explain. Pure. C# twin: `TriggerRules.Outcome`."""
-    return not (enemy.aura and trigger_keeps_aura(trigger)
-                and enemy.aura_spent)
 
 _AMPLIFY = {
     frozenset(("pyro", "hydro")): ("vaporize", None),   # mult read at call time
@@ -88,7 +69,6 @@ def apply_aura(state: CombatState, enemy: Enemy, element: str,
         return
     enemy.aura = element
     enemy.aura_turns_left = aura_duration(state)
-    enemy.aura_spent = False                 # every new aura arrives fresh
     state.emit("aura_applied", element=element, target=enemy.name,
                source=source)
 
@@ -159,24 +139,13 @@ def resolve_hit(state: CombatState, enemy: Enemy, element: Optional[str],
         return damage
     if aura == element:
         enemy.aura_turns_left = aura_duration(state)    # refresh
-        enemy.aura_spent = False                        # ... and make fresh
         return damage
 
-    # THE ELEMENT PORT: a switched trigger SPENDS the aura instead of
-    # consuming it. On a fresh aura it reacts and the aura stands, spent, its
-    # duration untouched; on a spent one it pays nothing and changes nothing.
-    if trigger_keeps_aura(element):
-        if enemy.aura_spent:
-            state.emit("trigger_spent", trigger=element, aura=aura,
-                       target=enemy.name)
-            return damage
-        enemy.aura_spent = True
-        return _react(state, enemy, trigger=element, aura=aura, damage=damage)
-
-    # Different element on an existing aura: consume + react.
+    # Different element on an existing aura: consume + react. Every trigger,
+    # Anemo and Geo included (2026-10-03: no spent auras). C# twin:
+    # `TriggerRules.Outcome` -> `HitOutcome.Consume`.
     enemy.aura = None
     enemy.aura_turns_left = 0
-    enemy.aura_spent = False
     return _react(state, enemy, trigger=element, aura=aura, damage=damage)
 
 
@@ -195,25 +164,23 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
                 state, enemy, aura,
                 int(C.SWIRL_DAMAGE * _mc_reaction_mult(state)))
         elif C.SWIRL_PAYS:
-            # §4 A. The struck enemy keeps its aura (spent by `resolve_hit`).
-            # The spread keeps today's reach -- every living enemy. One
-            # already wearing this element, fresh or spent, goes back to full
-            # duration and FRESH, and nothing reacts (amended 2026-10-01,
+            # §4 A. The struck enemy's aura was consumed by `resolve_hit`
+            # (2026-10-03: every reaction consumes). The spread reaches every
+            # OTHER living enemy. One already wearing this element goes back
+            # to full duration, and nothing reacts (amended 2026-10-01,
             # [USER]: "reapplying the same element as a refresh mechanic
             # feels fine and we shouldn't let that brick other reactions").
-            # A different aura is replaced, as today, and nothing reacts
-            # where a copy lands (the deferred candidate). Copies arrive
-            # SPENT, so they cannot be Swirled again.
+            # A different aura is replaced, as today. A copy is an ordinary
+            # fresh aura put up by `apply_aura`, an application with no
+            # trigger: it reacts with nothing and never Swirls by itself, so
+            # nothing recurses. A later Anemo hit on it Swirls it again.
             for other in state.living_enemies:
                 if other is enemy:
                     continue
                 if other.aura == aura:
                     other.aura_turns_left = aura_duration(state)
-                    other.aura_spent = False
                     continue
                 apply_aura(state, other, aura, "swirl_spread")
-                # VARKA's Downburst (pick 3a): its copies arrive fresh.
-                other.aura_spent = not varka_oath.spread_fresh(state)
             # The flat 2: element-less and outside the pipeline, exactly
             # Overload's splash, so it reacts with nothing. Durin's White
             # scales it for the reason it scales the splash.

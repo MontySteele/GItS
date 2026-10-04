@@ -1106,7 +1106,7 @@ public static class VarkaCards
         }
     }
 
-    /// <summary>Wall of Gales: "Swirl every fresh aura." The fresh bodies are
+    /// <summary>Wall of Gales: "Swirl every aura." The aura'd bodies are
     /// taken when it is played and each takes its own damage-less Anemo hit,
     /// shielded from an earlier Swirl's spread as Gale Sweep's are.</summary>
     public static Task SwirlFreshAuras(
@@ -1114,7 +1114,7 @@ public static class VarkaCards
         VarkaRules.SwirlFreshAuras(choiceContext, card.Owner?.Creature);
 
     /// <summary>Eula: "Gain 1 Cryo Oath for each enemy with a Cryo aura",
-    /// fresh or spent, read after her hit. One gain.</summary>
+    /// read after her hit. One gain.</summary>
     public static async Task OathPerCryoEnemy(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
@@ -1329,7 +1329,7 @@ public static class VarkaCards
 
     /// <summary>Razor: Awakening (the AoE trim, sec.4): "Deal 4 [6] Electro
     /// damage to an enemy. If it already has Electro, deal 3 more." Whether it
-    /// wore Electro, fresh or spent, is read before the hit.</summary>
+    /// wore Electro is read before the hit.</summary>
     public static async Task Awakening(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
@@ -1386,8 +1386,8 @@ public static class VarkaCards
     }
 
     /// <summary>Frost Ward: "Apply 1 Weak to each enemy with an aura. Gain
-    /// 3 [4] Block for each." The enemies wearing an aura, fresh or spent,
-    /// when it is played.</summary>
+    /// 3 [4] Block for each." The enemies wearing an aura when it is
+    /// played.</summary>
     public static async Task FrostWard(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
@@ -1484,7 +1484,7 @@ public static class VarkaCards
         }
     }
 
-    /// <summary>Crosscurrent: "Swirl an enemy's fresh aura. This Swirl pays
+    /// <summary>Crosscurrent: "Swirl an enemy's aura. This Swirl pays
     /// twice." A damage-less Anemo hit, Jean's, inside the ledger's
     /// pays-twice window.</summary>
     public static async Task Crosscurrent(

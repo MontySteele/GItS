@@ -89,7 +89,7 @@ AURA_DURATION_TURNS = 2
 # side by `test_the_crystallize_block_is_the_mods_own_constant`.
 CRYSTALLIZE_BLOCK = 4
 
-# The element port (2026-09-28). The flat damage a Swirl on a fresh aura deals
+# The element port (2026-09-28). The flat damage a Swirl deals
 # to every enemy, as `ReactionConstants.SwirlDamage` sets it and
 # `ArmKeywordTips.ForSwirl` interpolates it. Same discipline: spelled here,
 # held in step by `tier0/tests/test_element_port.py`.

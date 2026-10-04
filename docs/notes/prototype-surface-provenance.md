@@ -6217,3 +6217,29 @@ call, not a lint exception. `KleeCardTooltips.SetsOffFirst` keys on both
 openings. A fourth seat read a
 Mine as failing because a Set off had already spent it, so the Mine tip gains
 "Any [gold]Set off[/gold] spends it too."
+
+## Spent auras removed, 2026-10-03
+
+[USER]: "Should we get rid of the concept of elements being 'spent' after a
+swirl? It seems to generate confusion." then "agreed ... please proceed".
+Every reaction now consumes its aura, Swirl and Crystallize included. A
+Swirl's copies are ordinary fresh auras, so "fresh aura" means any aura. The
+text changes, with no number moved:
+
+- `proto_vk_gale_sweep`: "each enemy with a fresh aura" becomes "each enemy
+  with an aura". The `only_if: fresh_aura` token keeps its name and now takes
+  every aura.
+- `proto_vk_jean_dandelion_breeze`, `proto_vk_crosscurrent`: "an enemy's
+  fresh aura" becomes "an enemy's aura".
+- `proto_vk_wall_of_gales` and the Bottled Gale potion: "Swirl every fresh
+  aura" becomes "Swirl every aura". The `swirl_fresh_auras` kind keeps its
+  name.
+- `proto_vk_downburst`: "If it Swirls, the copies it spreads arrive fresh."
+  is struck, because every copy now arrives fresh. The card is "Deal 12 [16]
+  Anemo damage." until the main session gives it a new rider.
+
+Sim, `tools/varka_expansion_sim.py --seeds 2400 --seed 7 --jobs 15
+--no-gauntlet`, paired, act-1 win rates, before / after: default 30.8 /
+29.2 (-1.6 ±0.6); starter spread 1.5 / 2.0 points; mono_electro 18.5 / 19.6,
+mono_cryo 16.0 / 17.4, mono_hydro 29.7 / 31.5; elem_* within 1.3 points.
+The 70% take flags and the dead-play list did not change.
