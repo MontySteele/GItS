@@ -15,7 +15,7 @@ from typing import Callable
 
 from tier0 import constants as C
 from tier0.engine import (companion_hexerei, effects,
-                          furina_stage, klee_overhaul,
+                          furina_stage, furina_v2, klee_overhaul,
                           kokomi_plan,
                           potions, powers, reactions, refpowers, relics,
                           resources, varka_oath)
@@ -369,6 +369,11 @@ def card_cost(state: CombatState, card: Card) -> int:
     seats = furina_stage.last_act_discount(state, card)
     if seats:
         cost = max(0, cost - seats)
+    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): Escoffier's
+    # "The first Salon summon card you play each turn costs 0". Pure; a no-op
+    # for any player without the slice arm.
+    if furina_v2.free_salon_summon(state, card):
+        cost = 0
     # BATTLE PLAN HAS NO COST HOOK, and its absence is `EB-668`. The row's
     # carry-out used to discount the next face-up Attack, and the mod could
     # not mean the same thing by it: `TryModifyEnergyCostInCombat` is handed a
@@ -842,6 +847,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # the two wear the same word in every report that conflates them.
     state.emit("turn_open", hp=max(0, state.player.hp), block=state.player.block)
     state.cards_played_this_turn = 0
+    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the flow counts reset
+    # at the start of her turn (paper sec.8). A no-op for anyone else.
+    furina_v2.turn_open(state)
     for e in state.enemies:
         e.skittish_fired = False     # Skittish latch is per-turn (§10.9)
     # `EB-495` D5: BeforeSideTurnStart, the PLAYER's side. Hardened Shell's
@@ -977,6 +985,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # because a stage that regenerated before it existed would pay turn one a
     # point the brief spends a paragraph refusing it ("the first hand sees 3").
     furina_stage.open_combat(state)
+    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): Salon Solitaire's Usher
+    # on turn one, then Charlotte's extra card. A no-op for anyone else.
+    furina_v2.turn_start(state)
     # 2026-10-03: rule 12's fade, FIRST among the Stage's turn-start effects
     # ("Fanfare decay should be at the start of the next turn, not the end").
     furina_stage.turn_start_fade(state)
@@ -1138,6 +1149,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # which is what makes fight one's turn-one line A add Usher's 3 Block to
     # the 9 she already has before Nibbit's Butt lands.
     furina_stage.end_of_turn_acts(state)
+    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the performers act
+    # front to back. A no-op for anyone else.
+    furina_v2.end_of_turn_acts(state)
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss
     # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,

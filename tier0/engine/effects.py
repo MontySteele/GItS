@@ -6236,6 +6236,12 @@ def resolve_card(state: CombatState, card: Card) -> None:
         varka_oath.begin_play(state, card)
     try:
         _resolve_card_bound(state, card)
+        # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): a slice
+        # row carries no `effects:`; its printed text resolves here, inside
+        # the play's bound aim. Dead for every card without the `fv2` tag.
+        if "fv2" in card.tags:
+            from tier0.engine import furina_v2      # late: avoids the cycle
+            furina_v2.resolve_card(state, card)
     finally:
         if varka:
             varka_oath.end_play(state, card)
