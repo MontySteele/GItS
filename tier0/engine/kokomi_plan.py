@@ -460,6 +460,10 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
             allowed.add("power")
         if op in PLAN_TIMES_OPS:
             allowed.add("times")
+        # The big-Plan pass (2026-10-04): "Strength affects this Plan N
+        # times", on the flat hit only.
+        if op == "damage":
+            allowed.add("strength_times")
         if op == TRANSFORM_STATUSES_IN_HAND:
             allowed.add("upgraded")      # the `upgraded_grant` key's flag
         unknown = set(eff) - allowed
@@ -477,6 +481,11 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
             if not isinstance(amount, int) or isinstance(amount, bool) \
                     or amount < floor:
                 return f"plan clause {op} amount must be a positive literal int"
+        if "strength_times" in eff:
+            strength_times = eff["strength_times"]
+            if not isinstance(strength_times, int)                     or isinstance(strength_times, bool) or strength_times < 2:
+                return (f"plan clause {op} strength_times must be a literal "
+                        "int of 2 or more")
         if "times" in eff:
             times = eff["times"]
             # A LITERAL, for `amount`'s reason one branch up: a Plan's repeat
@@ -773,7 +782,8 @@ def _enchanted(card: Optional[Card], amount: int) -> int:
     return int(folded)
 
 
-def hers(state: CombatState, card: Optional[Card], amount: int) -> int:
+def hers(state: CombatState, card: Optional[Card], amount: int,
+         strength_times: int = 1) -> int:
     """`EB-599`. HER SIDE OF A PLAN LINE, FOLDED AT WRITING TIME.
 
     THE FIND (Kokomi r22 lane 2). `Kurage's Oath` printed "Plan: Deal 10"
@@ -800,12 +810,18 @@ def hers(state: CombatState, card: Optional[Card], amount: int) -> int:
     damage takes one file over: `effects` reads `enchant_damage` and
     `modify_damage_dealt` adds Strength after it.
 
+    `strength_times` (the big-Plan pass, 2026-10-04) is the clause's own
+    "Strength affects this Plan N times": Masterstroke 3, Surging Shoal 2.
+    Flat Strength per hit paid a 0-cost Nip as much as a 3-Energy Plan, so
+    the big Plans count it more than once. The enchantment still counts once.
+
     C# twin: `KokomiPlan.Hers`.
     """
     folded = _enchanted(card, amount)
     if folded <= 0:
         return folded
-    return folded + int(state.player.powers.get("strength", 0))
+    return folded + (int(state.player.powers.get("strength", 0))
+                     * max(1, int(strength_times)))
 
 
 def schedule(state: CombatState, card: Card,
@@ -851,7 +867,8 @@ def schedule(state: CombatState, card: Card,
     # is what `enchanted_by` is for: an enchantment is a fact about the copy
     # whose printed line this is. Her Strength is hers either way.
     owner = enchanted_by or card
-    body = [dict(c, amount=hers(state, owner, int(c.get("amount", 0))))
+    body = [dict(c, amount=hers(state, owner, int(c.get("amount", 0)),
+                                int(c.get("strength_times", 1))))
             if c.get("op") in ("damage", DAMAGE_IF_ALONE) else c
             for c in body]
     # CRYSTAL COLLAPSE CAPTURES AT WRITING TIME, and that is the card. "The

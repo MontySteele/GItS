@@ -1497,9 +1497,10 @@
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 22 [gold]Hydro[/gold] damage.",
+   # THE BIG-PLAN PASS (2026-10-04): Strength counts twice on the Plan line.
+   description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 22 [gold]Hydro[/gold] damage. [gold]Strength[/gold] affects this [gold]Plan[/gold] twice.",
    effects: [{op: damage, amount: 14, target: enemy}],
-   plan: [{op: damage, amount: 22, target: front_enemy}],
+   plan: [{op: damage, amount: 22, target: front_enemy, strength_times: 2}],
    # 18 / Plan 28.
    upgrade: {damage: 4, plan_damage: 6}}
 
@@ -1701,9 +1702,11 @@
 - {id: proto_kk_masterstroke, name: "Masterstroke", character: kokomi,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare, retain: true,
-   description: "[gold]Plan[/gold]: Deal 30 [gold]Hydro[/gold] damage.",
+   # THE BIG-PLAN PASS (2026-10-04): Strength counts 3 times. Flat Strength
+   # per hit paid a 0-cost Nip as much as this; provenance note.
+   description: "[gold]Plan[/gold]: Deal 30 [gold]Hydro[/gold] damage. [gold]Strength[/gold] affects this [gold]Plan[/gold] 3 times.",
    effects: [],
-   plan: [{op: damage, amount: 30, target: front_enemy}],
+   plan: [{op: damage, amount: 30, target: front_enemy, strength_times: 3}],
    # Plan 40.
    upgrade: {plan_damage: 10}}
 

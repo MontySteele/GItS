@@ -263,7 +263,7 @@ public static class KokomiPlan
     public readonly record struct Planned(
         Kind Kind, int Amount, Aim Aim, CardModel? Card = null,
         int Times = 1, IReadOnlyList<string>? Targets = null,
-        int Alt = 0, int? WrittenHp = null);
+        int Alt = 0, int? WrittenHp = null, int StrengthTimes = 1);
 
     /// <summary>
     /// ONE PLAN: the card that wrote it and the clauses it wrote. The card is
@@ -916,7 +916,8 @@ public static class KokomiPlan
             {
                 body[i] = body[i] with
                 {
-                    Amount = Hers(kokomi, source, body[i].Amount),
+                    Amount = Hers(kokomi, source, body[i].Amount,
+                                  body[i].StrengthTimes),
                 };
             }
         }
@@ -3278,15 +3279,21 @@ public static class KokomiPlan
     /// <c>powered: false</c>, so the queued number is the number the morning
     /// deals and nothing adds her Strength a second time.
     ///
+    /// <paramref name="strengthTimes"/> (the big-Plan pass, 2026-10-04) is
+    /// the clause's own "Strength affects this Plan N times": Masterstroke 3,
+    /// Surging Shoal 2. The enchantment still counts once.
+    ///
     /// Sim twin: `kokomi_plan.hers`.
     /// </summary>
-    public static int Hers(Creature? kokomi, CardModel? source, int amount)
+    public static int Hers(Creature? kokomi, CardModel? source, int amount,
+                           int strengthTimes = 1)
     {
         var folded = Enchanted(source, amount);
         if (folded <= 0 || kokomi == null) return folded;
         return folded
              + (int)(kokomi.Powers.OfType<StrengthPower>()
-                           .FirstOrDefault()?.Amount ?? 0);
+                           .FirstOrDefault()?.Amount ?? 0)
+               * System.Math.Max(1, strengthTimes);
     }
 
     /// <summary>
@@ -3370,8 +3377,15 @@ public static class KokomiPlan
     /// </summary>
     public sealed class PlanDamageVar : DynamicVar
     {
-        public PlanDamageVar(decimal amount) : base("PlanDamage", amount)
+        /// <summary>The clause's "Strength affects this Plan N times"
+        /// (<see cref="Planned.StrengthTimes"/>), so the face previews the
+        /// number <see cref="Schedule"/> queues.</summary>
+        private readonly int _strengthTimes;
+
+        public PlanDamageVar(decimal amount, int strengthTimes = 1)
+            : base("PlanDamage", amount)
         {
+            _strengthTimes = strengthTimes;
         }
 
         public override void UpdateCardPreview(
@@ -3395,7 +3409,7 @@ public static class KokomiPlan
             // `EB-599`: AND HER STRENGTH, WHICH NEEDS THE CREATURE. It is
             // folded at WRITING time -- `Schedule` puts `Hers` onto the queued
             // clause -- so the face previews the same call the queue holds.
-            PreviewValue = Hers(kokomi, card, (int)BaseValue);
+            PreviewValue = Hers(kokomi, card, (int)BaseValue, _strengthTimes);
             // AND THEN THE TARGET'S, WHICH `EB-599` HAD TAKEN OFF (live look
             // 8b, `EB-334`). A Plan printed "Deal 10" and carried out 15
             // against a body wearing Vulnerable 2, so the line and the

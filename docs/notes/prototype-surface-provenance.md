@@ -6314,3 +6314,31 @@ out (`--pre-fix`) and pins the rest of what it finds
   Fanfare a pass (Fable). The new op `stage_energy_next` is Chevreuse's
   mechanism: `Player.stage_energy_next` in the sim, the game's
   `EnergyNextTurnPower` in C# (`FurinaStage.EnergyNextTurn`).
+
+## Kokomi big-Plan pass, 2026-10-04
+
+A friend's solo run called every Rare of hers weak; Masterstroke was "3 Cost
+that does less damage THE TURN AFTER Regent's Uncommon 1 cost 4 star
+(Devastate)". The reading: Open the Casket's Strength is added once per Plan
+hit, so at 6 Strength a 0-cost Nip lands 11 and a 3-Energy Masterstroke 36.
+[USER]: "Can we leave Casket alone and still make big plans work somehow?"
+
+- **`proto_kk_masterstroke`**: "Strength affects this Plan 3 times."
+- **`proto_kk_surging_shoal`**: "Strength affects this Plan twice." (the Plan
+  line only; the now-line takes Strength once, as any Attack does).
+- Undertide Lance is left alone: its Plan already doubles alone, Strength
+  included.
+- New clause field `strength_times` on a flat `damage` Plan clause (a literal
+  int of 2 or more), read by `kokomi_plan.hers` and `KokomiPlan.Hers` when the
+  Plan is written; `Planned.StrengthTimes` and `PlanDamageVar` carry it in C#.
+  At 6 Strength: Masterstroke 48, Surging Shoal 34, Nip 11.
+
+**The sim does not see it** (`tools/kokomi_expansion_sim.py`, n = 400 paired,
+seed 7; exploration, not quotable). Gauntlet, share of fights won, Big Plan
+against Plan volume: 44.4 against 54.4 before, 44.5 against 54.5 after. With
+the pilot opening the Casket at 3 (`--open-at 3`, new): 46.5 against 57.0
+before, 46.5 against 57.1 after. Its fights last about 7 turns with the
+Casket near 1 to 2, so the pilot holds little Strength; the 10-point gap in
+the sim is therefore not a Strength gap, and this pass does not close it. The
+change is aimed at the long fights and large Caskets of a human run. No seat
+round was run: [USER] may play it in co-op first.

@@ -200,8 +200,15 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   with an Ironclad control): her first whole-run win, one act further on
   both seeds, still about half the control's damage per turn on the same
   boss; no seat flipped a Plan.
-  Next: [USER] plays (a central rule changed); the damage gap is a paper
-  after that run.
+  **The big-Plan pass (2026-10-04, built):** on a friend's solo run (every
+  Rare read as weak next to 0-cost Plans under Casket Strength), Strength
+  affects Masterstroke's Plan 3 times and Surging Shoal's Plan twice; the
+  Casket is unchanged. The expansion sim does not move (Big Plan 44.5
+  against volume 54.5; its pilot holds little Strength), so the sim's gap
+  has another cause. No seat round yet. Provenance note, "Kokomi big-Plan
+  pass, 2026-10-04".
+  Next: [USER] plays (a central rule changed; co-op with a friend may stand
+  in); the damage gap is a paper after that run.
 - **Furina: the re-founded Stage is built (2026-10-04).** Sec.10 of `review/active/furina-refounding-2026-10-03.md` is built in the mod and the tier0 Furina arm moved onto the same rules: performers have no bars, Fanfare is one number on Furina, stars pay for their acts or skip, a Bow is a free act and 1 Fanfare, "Cue a performer" opens a small picker, and Rehearsal scales the acts. The old build is tagged `furina-stage-frozen-2026-10-04`. Deployed 0.2.4370; the two-seat round ran with [USER] away (both runs cleared two acts and died in act 3; `review/records/furina-v2-round-2026-10-04.md`). Next: [USER]'s play (a rule change). Provenance note, "Furina re-founding, 2026-10-04".
 - **Furina: frozen (2026-10-04).** [USER]: "Let's freeze Furina's current build as-is for now, with the expectation that it gets shelved once we have a better idea." No card or rule changes to the current Stage build. The re-founding (`review/active/furina-refounding-2026-10-03.md`, ruled, sec.8 and sec.9) is being built as a sim-only slice; if it finds a strong structure, it replaces this build. The history below is the frozen build's.
 - **Furina: the Stage, first run cleared.** Brief

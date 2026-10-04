@@ -92,8 +92,23 @@ def test_masterstroke_is_a_retained_plan_only_attack(overhaul):
     assert card.type == "attack" and card.cost == 3 and card.retain
     assert card.effects == []
     assert card.plan == [{"op": "damage", "amount": 30,
-                          "target": "front_enemy"}]
+                          "target": "front_enemy", "strength_times": 3}]
     assert _up("proto_kk_masterstroke").plan[0]["amount"] == 40
+
+
+def test_strength_affects_the_big_plans_more_than_once(overhaul):
+    """The big-Plan pass (2026-10-04): Masterstroke counts her Strength 3
+    times and Surging Shoal's Plan line twice; a Nip still counts it once.
+    Folded when the Plan is written, as every Plan's Strength is."""
+    st = kokomi_state(enemies=[make_enemy(hp=400, intents=QUIET)])
+    st.player.powers["strength"] = 6
+    _write(st, "proto_kk_masterstroke")
+    _write(st, "proto_kk_surging_shoal")
+    _write(st, "proto_kk_nip")
+    assert [e.clauses[0]["amount"] for e in st.kk_plan_queue] == [
+        30 + 6 * 3, 22 + 6 * 2, 5 + 6]
+    assert _up("proto_kk_masterstroke").plan[0]["strength_times"] == 3
+    assert _up("proto_kk_surging_shoal").plan[0]["strength_times"] == 2
 
 
 # --- the Big Plan: Energy paid ---------------------------------------------------

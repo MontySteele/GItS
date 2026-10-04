@@ -966,6 +966,19 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
+    public void Strength_affects_a_big_plan_more_than_once()
+    {
+        // The big-Plan pass (2026-10-04): Masterstroke's "Strength affects
+        // this Plan 3 times" and Surging Shoal's "twice". 30 at Strength 6
+        // is 48, where a clause that says nothing still takes it once.
+        var kokomi = Seat.Kokomi().WithPower<StrengthPower>(6);
+
+        Assert.Equal(48, KokomiPlan.Hers(kokomi.Creature, null, 30, 3));
+        Assert.Equal(34, KokomiPlan.Hers(kokomi.Creature, null, 22, 2));
+        Assert.Equal(11, KokomiPlan.Hers(kokomi.Creature, null, 5));
+    }
+
+    [Fact]
     public void EB599_her_weak_is_not_folded_into_the_line_either()
     {
         // THE ONE TERM OF HERS THAT STAYS OFF, and round four-c is why: a
