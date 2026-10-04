@@ -42,15 +42,15 @@ def _fresh_fight():
 #: say by accident -- which is the whole find.
 OWNED = {"klee": ("Spark", "Bomb", "Mine"),
          "kokomi": ("Plan", "Dusk", "Mend"),
-         # The text pass (2026-09-25) retired `Rotate`; the front seat's
-         # word is the third Stage word here now.
-         "furina": ("Spend", "Bow", "front performer")}
+         # THE SALON'S TAB (2026-10-05): the HP loan's two verbs are the
+         # Stage words beside Spend now; Bow and the front seat left with v2.
+         "furina": ("Spend", "Drain", "Repay")}
 
 #: The face that says every one of them at once, so one screen answers the
 #: whole acceptance in both directions.
 EVERY_WORD = ("Spend 2 Sparks to place a Bomb and a Mine, then give the "
-              "front performer Fanfare, take a Bow, Mend 3 and write a Plan "
-              "at Dusk.")
+              "front performer Fanfare, Drain 3, Repay 2, Mend 3 and write a "
+              "Plan at Dusk.")
 
 
 def _reward(character: str, text: str = EVERY_WORD) -> str:

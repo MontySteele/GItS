@@ -990,7 +990,12 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             "source": _text(row.get("source")),
         })
     act_block = raw.get("act_block")
+    line = raw.get("drain_line")
     return {"fanfare": _int(raw.get("fanfare")),
+            # THE SALON'S TAB (2026-10-05): the HP loan, the "Drained N"
+            # counter's reading. `line` is None on a build that sends none.
+            "drained": _int(raw.get("drained")),
+            "line": None if line is None else _int(line),
             "gained": _int(raw.get("gained_this_turn")),
             "spent": _int(raw.get("spent_this_turn")),
             "paid": _int(raw.get("paid_this_turn")),

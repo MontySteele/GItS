@@ -271,50 +271,10 @@ public class PoolCompletionTests : IDisposable
     }
 
     // ---- Furina -----------------------------------------------------------
-
-    [Fact]
-    public void Her_offer_appends_the_six()
-    {
-        var offer = Cards("FurinaStageRoster", "Pool");
-        // The rules pass (2026-10-01) appended its twelve after them.
-        var six = offer.IndexOf("ProtoFsAriaForOne");
-        Assert.Equal(new[]
-            {
-                "ProtoFsAriaForOne", "ProtoFsIntervalBell", "ProtoFsCastingAgent",
-                "ProtoFsTheLastAct", "ProtoFsCriticsDarling", "ProtoFsStarTurn",
-            },
-            offer.Skip(six).Take(6).ToArray());
-        var guests = Cards("FurinaStageRoster", "GuestStarCards");
-        Assert.Equal(10, guests.Distinct().Count());
-        Assert.All(guests, g => Assert.StartsWith("ProtoFsGuestStar", g));
-        Assert.Equal(3, FurinaStageLaw.CastingAgentOffer);
-    }
-
-    [Fact]
-    public void The_new_furina_rows_print_the_papers_numbers()
-    {
-        foreach (var card in new CardModel[]
-                 { new ProtoFsAriaForOne(), new ProtoFsIntervalBell(),
-                   new ProtoFsCastingAgent() })
-        {
-            Assert.Equal(CardRarity.Uncommon, card.Rarity);
-        }
-        foreach (var card in new CardModel[]
-                 { new ProtoFsTheLastAct(), new ProtoFsCriticsDarling(),
-                   new ProtoFsStarTurn() })
-        {
-            Assert.Equal(CardRarity.Rare, card.Rarity);
-        }
-        Assert.Equal(5, new ProtoFsAriaForOne().DynamicVars.Damage.IntValue);
-        Assert.Equal(7, Upgraded<ProtoFsAriaForOne>().DynamicVars.Damage.IntValue);
-        Assert.Equal(0, new ProtoFsIntervalBell().EnergyCost.Canonical);
-        Assert.True(Exhausts(new ProtoFsCastingAgent()));
-        Assert.Equal(3, new ProtoFsTheLastAct().EnergyCost.Canonical);
-        Assert.Equal(24, new ProtoFsTheLastAct().DynamicVars.Damage.IntValue);
-        Assert.Equal(30, Upgraded<ProtoFsTheLastAct>().DynamicVars.Damage.IntValue);
-        Assert.Equal(1, UpCost<ProtoFsStarTurn>());
-        Assert.Contains("acts at once", Face(new ProtoFsStarTurn()));
-    }
+    //
+    // The pool completion's six Furina rows went with the v2 Stage (the
+    // Salon's Tab, 2026-10-05) but Interval Bell, which the slice keeps with
+    // its v2 text.
 
     [Fact]
     public void Interval_bells_price_moves_in_the_gate_and_the_payment()
@@ -323,13 +283,13 @@ public class PoolCompletionTests : IDisposable
         Assert.Contains(calls, c => c.Contains("FurinaStage.CanSpend"));
         Assert.Contains(calls, c => c.Contains("FurinaStage.Spend"));
         Assert.Contains(calls, c => c.Contains("get_IsUpgraded"));
+        Assert.Equal(0, new ProtoFsIntervalBell().EnergyCost.Canonical);
+        Assert.Equal(CardRarity.Common, new ProtoFsIntervalBell().Rarity);
     }
 
     /// <summary>The loop fix (2026-10-04): Interval Bell's Spend mode gains
-    /// its Energy NEXT turn, through the game's EnergyNextTurnPower (the
-    /// mechanism Chevreuse's act uses), so Warm Reception and Interval Bell+
-    /// no longer pay for each other this turn. Sim twin:
-    /// <c>tier0/tests/test_furina_loop_probe.py</c>.</summary>
+    /// its Energy NEXT turn, through the game's EnergyNextTurnPower. Sim
+    /// twin: <c>tier0/tests/test_furina_loop_probe.py</c>.</summary>
     [Fact]
     public void Interval_bells_energy_comes_next_turn()
     {
@@ -337,8 +297,6 @@ public class PoolCompletionTests : IDisposable
         Assert.Contains(calls, c => c.Contains("FurinaStage.EnergyNextTurn"));
         Assert.DoesNotContain(calls, c => c.Contains("PlayerCmd.GainEnergy"));
         Assert.Contains(Seq("FurinaStage", "EnergyNextTurn"),
-                        c => c.Contains("GameStageBoard.EnergyNextTurn"));
-        Assert.Contains(Seq("GameStageBoard", "EnergyNextTurn"),
                         c => c.Contains("PowerCmd.Apply")
                              && c.Contains("EnergyNextTurnPower"));
         Assert.Contains("gain 1 [gold]Energy[/gold] next turn instead",
@@ -348,44 +306,8 @@ public class PoolCompletionTests : IDisposable
                    l => Assert.EndsWith("Energy[/gold] next turn instead", l));
     }
 
-    /// <summary>The loop fix (2026-10-04): Take the Stage stays at 1 Energy
-    /// upgraded and draws 2 instead. At 0 cost two copies drew each other
-    /// forever, a Bow on every play onto a full stage.</summary>
     [Fact]
-    public void Take_the_stage_upgrades_to_draw_two_at_one_energy()
-    {
-        Assert.Equal(1, new ProtoFsSalonDebut().EnergyCost.Canonical);
-        Assert.Equal(1, UpCost<ProtoFsSalonDebut>());
-        Assert.Equal(1, new ProtoFsSalonDebut().DynamicVars.Cards.IntValue);
-        Assert.Equal(2, Upgraded<ProtoFsSalonDebut>().DynamicVars.Cards.IntValue);
-        Assert.StartsWith("Summon a random Salon member. Draw {Cards:diff()} card",
-                          Face(new ProtoFsSalonDebut()));
-    }
-
-    [Fact]
-    public void The_last_act_is_priced_by_the_stages_listener()
-    {
-        Assert.Equal(0, FurinaStage.EmptySeats(null));
-        var calls = Seq("FurinaStageHooks", "TryModifyEnergyCostInCombat");
-        Assert.Contains(calls, c => c.Contains("FurinaStage.EmptySeats"));
-        Assert.Contains(calls, c => c.Contains("SparkCost.OwnerCreatureOf"));
-    }
-
-    [Fact]
-    public void Casting_agent_offers_three_and_hands_over_a_free_one()
-    {
-        Assert.Contains(Seq("ProtoFsCastingAgent", "OnPlay"),
-                        c => c.Contains("FurinaStage.CastingAgent"));
-        var calls = Seq("FurinaStage", "CastingAgent");
-        var screen = calls.FindIndex(c => c.Contains("FromChooseACardScreen"));
-        var free = calls.FindIndex(c => c.Contains("SetThisTurn"));
-        var add = calls.FindIndex(c => c.Contains("AddGeneratedCardToCombat"));
-        Assert.True(screen >= 0 && free > screen && add > free);
-        Assert.Contains(calls, c => c.Contains("FurinaStageRoster.GuestStarCards"));
-    }
-
-    [Fact]
-    public void A_chosen_spend_is_free_once_under_center_of_attention_then_pays_critics_darling()
+    public void A_chosen_spend_is_free_once_under_center_of_attention()
     {
         Assert.False(CenterOfAttentionPower.Covers(null));
         var spend = Seq("FurinaStage", "Spend");
@@ -394,21 +316,6 @@ public class PoolCompletionTests : IDisposable
         Assert.True(claim >= 0 && pay > claim);
         Assert.DoesNotContain(Seq("FurinaStage", "CanSpend"),
                               c => c.Contains("CenterOfAttentionPower.Covers"));
-        // The re-founding (sec.10): Critics' Darling deals every change to
-        // her Fanfare to a random enemy, settled by the director.
-        Assert.Contains(Seq("StageDirector", "Settle"),
-                        c => c.Contains("IStageBoard.CriticsHit"));
-        Assert.Contains(Seq("GameStageBoard", "CriticsHit"),
-                        c => c.Contains("ElementalHit.DealUnelemented"));
-    }
-
-    [Fact]
-    public void Star_turn_acts_after_the_arrival_and_star_billing()
-    {
-        var guest = Seq("StageDirector", "SummonGuest");
-        var billing = guest.FindIndex(c => c.Contains("IStageBoard.Draw"));
-        var star = guest.FindIndex(c => c.Contains("StageDirector.Act"));
-        Assert.True(billing >= 0 && star > billing);
     }
 
     // ---- the three Ancients ----------------------------------------------

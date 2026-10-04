@@ -200,16 +200,6 @@ def test_an_element_a_card_defines_itself_is_not_defined_twice():
     assert "Cryo" not in _words(_reward(card))
 
 
-def test_the_trio_rows_are_not_raised_off_the_seat_rows_acts_sentence():
-    """`STAGE_ACTS` defines the trio's acts itself, so a named summon's
-    reward still prints its own performer's row and no other."""
-    card = {"id": "KLEEMOD-X", "name": "Crab Call",
-            "description": "Summon Crabaletta."}
-    words = _words(_reward(card))
-    assert "Mademoiselle Crabaletta" in words
-    assert "Surintendante Chevalmarin" not in words
-
-
 def _combat_with_guest(member: str, name: str) -> str:
     player = {
         "character": "Furina", "hp": 60, "max_hp": 78, "block": 0,

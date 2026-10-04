@@ -32,25 +32,17 @@ public sealed class FurinaRelicPool : RelicPoolModel
             // of Orobas grant. Ancient rarity keeps it off reward rolls, which
             // take Common/Uncommon/Rare/Shop/Boss only.
             .Append(ModelDb.Relic<Relics.CurtainNeverFalls>());
-        // QUARANTINED: FURINA'S OWN SEVEN (review/active/relics-potions-klee-
-        // furina-2026-09-27.md, pick 1(a)); membership only, for the reason
-        // above. What may be rolled is `GetUnlockedRelics` below.
+        // FURINA'S OWN TWO (the Salon's Tab, 2026-10-05); membership only,
+        // for the reason above. What may be rolled is `GetUnlockedRelics`.
         relics = relics
             .Append(ModelDb.Relic<Relics.OperaGlasses>())
-            .Append(ModelDb.Relic<Relics.StagehandsGloves>())
-            .Append(ModelDb.Relic<Relics.GuestBook>())
-            .Append(ModelDb.Relic<Relics.GrandTheaterProgram>())
-            .Append(ModelDb.Relic<Relics.CurtainCallBouquet>())
-            .Append(ModelDb.Relic<Relics.PalaisLedger>())
-            .Append(ModelDb.Relic<Relics.OpeningNight>());
+            .Append(ModelDb.Relic<Relics.GrandTheaterProgram>());
         return relics;
     }
 
     /// <summary>
-    /// THE OFFER. Under the Stage her pool is Salon Solitaire, her seven and
-    /// The Curtain Never Falls: the Silent borrow goes, and so does the
-    /// Ethereal Spotlight, which nothing on the Stage can use. Arm off, it is
-    /// every member but the seven, which is the pool as it shipped.
+    /// THE OFFER: Salon Solitaire, her two and The Curtain Never Falls. The
+    /// Silent borrow is not offered.
     /// </summary>
     public override IEnumerable<RelicModel> GetUnlockedRelics(
         MegaCrit.Sts2.Core.Unlocks.UnlockState unlockState) =>

@@ -440,11 +440,6 @@ internal static class ReactionEffects
             // `reactions._react` at the site that already counts.
             await CompanionOverhaulReactions.Note(
                 choiceContext, reaction, target, dealer, consumedAura);
-            // QUARANTINED (the Furina Stage arm). THE SUPPORTING POOL's Tide
-            // of Applause (2026-09-26) reads the same broadcast: "whenever
-            // you trigger an Elemental Reaction, your back performer gains
-            // 2". One early return on every seat that is not a live Stage.
-            await Powers.FurinaStage.OnReaction(choiceContext, dealer);
             // QUARANTINED (the Kokomi arm). THE EXPANSION's At Water's Edge
             // (2026-09-29): "Whenever a reaction happens on an enemy, apply 1
             // Weak and 1 Vulnerable to it" -- any reaction, whoever caused it.

@@ -29,8 +29,6 @@ KNOWN_FAILING = {
     ("kokomi", "uniq"),
     ("kokomi", "maxclu"),
     ("kokomi", "neardup"),
-    ("furina", "uniq"),
-    ("furina", "maxclu"),
     ("varka", "uniq"),
     ("varka", "maxclu"),
 }

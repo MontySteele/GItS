@@ -110,13 +110,13 @@ public class FanfareCounterPinTests
         AsLocalSeat(1UL, () => Assert.True(FanfareCounter.HidesBadge(badge)));
         AsLocalSeat(2UL, () => Assert.False(FanfareCounter.HidesBadge(badge)));
 
-        // Rehearsal keeps its Power badge.
-        var rehearsed = WithNetId(Seat.Furina(), 1UL)
-            .WithPower<RehearsalPower>(2);
-        var rehearsal = rehearsed.Creature.Powers.OfType<RehearsalPower>()
+        // Another of her powers keeps its badge.
+        var reveling = WithNetId(Seat.Furina(), 1UL)
+            .WithPower<UniversalRevelryPower>(1);
+        var revelry = reveling.Creature.Powers.OfType<UniversalRevelryPower>()
             .Single();
         AsLocalSeat(1UL,
-            () => Assert.False(FanfareCounter.HidesBadge(rehearsal)));
+            () => Assert.False(FanfareCounter.HidesBadge(revelry)));
 
         // A canonical model has no owner to ask, and must not throw.
         Assert.False(FanfareCounter.HidesBadge(new FanfarePower()));

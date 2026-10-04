@@ -32,8 +32,11 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCard
+public sealed class ProtoFsQuickCue : CustomCardModel, IElementalCard, ICharacterCard, IUnplayableReasonCard
 {
+    /// <summary>Sheet `applies_element: true` on this row's own damage: it applies Hydro whatever the cadence says.</summary>
+    public Element Element => Element.Hydro;
+
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
@@ -41,33 +44,30 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, elementOnlyOnSpend: true), this);
+        ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_quick_cue");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Quick Flourish"),
-        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] instead."),
+        ("description", "[gold]Spend[/gold] 4. Deal {Damage:diff()} [gold]Hydro[/gold] damage."),
     };
 
-    // EB-184: what each mode does about AIMING, in sheet order.
-    // The card's own TargetType is fixed before a mode is chosen (the
-    // game aims first), so it answers for the card and not for the
-    // play -- an Attack-typed modal declares AnyEnemy for the mode
-    // that aims, and the bridge then demanded a target on the mode
-    // that attacks nothing. These two rows are what it reads instead.
-    public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 3 damage", "[gold]Spend[/gold] 3: deal 11 and apply [gold]Hydro[/gold] instead" };
+    // The Salon's Tab (2026-10-05): a fixed price is the cost line,
+    // unplayable when it cannot be paid.
+    protected override bool IsPlayable =>
+        FurinaStage.CanSpend(SparkCost.OwnerCreatureOf(this), 4);
 
-    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
-        new[] { true, true };
+    public string? UnplayableReason =>
+        FurinaStage.CanSpend(SparkCost.OwnerCreatureOf(this), 4)
+            ? null
+            : "you do not have that much Fanfare";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedDamageVar("PlainDamage", 3m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move, carries: Element.Hydro)
+            new DamageVar(11m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -79,132 +79,17 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var modeOptions = new List<CardModel>
-        {
-            ModalChoice.CreateMatchingOption<ProtoFsQuickCueModeA>(Owner, this),
-            ModalChoice.CreateMatchingOption<ProtoFsQuickCueModeB>(Owner, this),
-        };
-        var modeRules = new ModeRequirement?[]
-        {
-            null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 3),
-                                "needs that much Fanfare"),
-        };
-        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 3 damage", "[gold]Spend[/gold] 3: deal 11 and apply [gold]Hydro[/gold] instead" }[modeIndex]);
-        if (modeIndex == 0)
-        {
-            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 4m : 3m))
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithElementHitFx(this)
-                .Execute(choiceContext);
-        }
-        else
-        {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
-            using (HitElement.Carry(this, Element.Hydro))
-            {
-                await DamageCmd.Attack((IsUpgraded ? 13m : 11m))
-                    .FromCard(this, cardPlay)
-                    .Targeting(cardPlay.Target)
-                    .WithElementHitFx(this)
-                    .Execute(choiceContext);
-            }
-        }
+        await FurinaStage.Spend(choiceContext, Owner.Creature, 4);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        // conditional_then_damage: the then-branch amount swaps on an IsUpgraded read at play time;
-        // the FACE prints it live (`EB-657`, the folded pair below) where the row has one,
-        // and swaps via {IfUpgraded:show:...|...} where it does not.
-        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
-        DynamicVars["PlainDamage"].UpgradeValueBy(1m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(2m);
-    }
-}
-
-/// <summary>Mode 0 of proto_fs_quick_cue. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsQuickCueModeA : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_quick_cue");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Deal damage"),
-        ("description", "Deal {PlainDamage:diff()} damage"),
-    };
-
-    public ProtoFsQuickCueModeA()
-        : base(CardType.Attack)
-    {
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new FoldedDamageVar("PlainDamage", 3m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move, carries: Element.Hydro)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainDamage"].UpgradeValueBy(1m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(2m);
-    }
-}
-
-/// <summary>Mode 1 of proto_fs_quick_cue. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsQuickCueModeB : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_quick_cue");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Spend 3"),
-        ("description", "[gold]Spend[/gold] 3: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] instead"),
-    };
-
-    public ProtoFsQuickCueModeB()
-        : base(CardType.Attack)
-    {
-    }
-
-    /// <summary>The Spend warning: the guests this Spend would leave
-    /// unable to pay for their act.</summary>
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpendShortfall(base.ExtraHoverTips, this, 3);
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new FoldedDamageVar("PlainDamage", 3m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move, carries: Element.Hydro)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainDamage"].UpgradeValueBy(1m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(2m);
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

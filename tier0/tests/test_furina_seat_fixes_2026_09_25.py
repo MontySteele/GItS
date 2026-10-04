@@ -61,10 +61,12 @@ def _fresh_fight():
 # 2. THE MODE CHOOSER.
 # ---------------------------------------------------------------------------
 
-# The re-founding (2026-10-04): Interposition is a Cue card now; Spirited
-# Aria is the fifth plain-or-Spend face.
-SPEND_CARDS = ("ProtoFsCurtainRise", "ProtoFsQuickCue", "ProtoFsTidalFlourish",
-               "ProtoFsSpiritedAria", "ProtoFsGrandEntrance")
+# The Salon's Tab (2026-10-05): the plain-or-priced faces whose numbers fold
+# (Quick Flourish's Spend is a fixed price now; Interval Bell's and Salon's
+# Tab's plain modes draw a card, a number no board moves).
+SPEND_CARDS = ("ProtoFsTidalFlourish", "ProtoFsSpiritedAria",
+               "ProtoFsCurtainRise", "ProtoFsSurintendanteChevalmarin",
+               "ProtoFsLeadingLady")
 
 
 def _mode_classes(stem: str) -> dict[str, str]:
@@ -85,7 +87,7 @@ def test_a_spend_cards_mode_titles_print_no_number(stem):
     for letter, body in _mode_classes(stem).items():
         title = re.search(r'\("title", "([^"]*)"\)', body).group(1)
         if letter == "B":
-            assert re.fullmatch(r"Spend \d+", title), title
+            assert re.fullmatch(r"(Spend|Drain) \d+", title), title
         else:
             assert not re.search(r"\d", title), title
 
@@ -162,22 +164,14 @@ def test_the_one_press_note_says_everything_else_is_refused():
 # 3. THE SEAT COUNT.
 # ---------------------------------------------------------------------------
 
-def test_the_glossary_says_who_acts_and_when():
-    # The re-founding (2026-10-04): the front performer row says who acts and
-    # when; the back performer retired with the bars.
-    assert ARM_KEYWORDS["front performer"] == (
-        "The performer in the first seat. Performers act front to back at the "
-        "end of your turn.")
-    assert "back performer" not in ARM_KEYWORDS
-
 
 def test_the_stage_badge_interpolates_the_law():
-    """Each performer's badge (and so its tip and the page's row) reads its
+    """Each guest's badge (and so its tip and the page's row) reads its
     numbers off `FurinaStageLaw` (`EB-89`)."""
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "FurinaStageBadges.cs").read_text(encoding="utf-8")
-    assert '"Act: gain " + FurinaStageLaw.ActUsherBlock' in src
-    assert "FurinaStageLaw.ActNeuvillettePrice" in src
+    assert "FurinaStageLaw.ClorindeActDamage" in src
+    assert "FurinaStageLaw.CharlotteActRepay" in src
     assert "FadeDivisor" not in src and "quarter" not in src
 
 

@@ -26,7 +26,8 @@ def test_every_surface_key_is_requested_by_the_mod():
 
 def test_the_runtime_set_is_not_vacuous():
     keys = sca.runtime_keys()
-    assert len(keys) >= 400, len(keys)
+    # 350 since the Salon's Tab (2026-10-05) cut Furina's pool to 24.
+    assert len(keys) >= 350, len(keys)
     # Built in code, not on the surface: Ancients and hand-written tokens.
     for key in ("confiscated", "jumpy_dumpty_mk2", "prayer_to_the_moon",
                 "the_sea_is_my_stage", "kk_sea_glass"):

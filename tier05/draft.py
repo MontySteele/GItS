@@ -2452,16 +2452,13 @@ def prints_attack_body(card: Card) -> bool:
 # `tools/lint_constant_parity.py` applies to the C# mirrors. Adding an op
 # therefore forces a pricing decision at the moment the author still knows
 # the answer, which is the whole point.
-#: FURINA'S STAGE verbs (`tier0.engine.furina_stage`, the re-founded rules).
-#: One tuple rather than a branch each, because they all take the same price
-#: for the same reason and a per-op branch would invite different ones.
-FURINA_STAGE_OPS = ("stage_summon", "stage_raise", "stage_guest",
-                    "stage_spend", "stage_spend_all", "stage_curtain_call",
-                    "stage_cue", "stage_final_bow", "stage_step_forward",
-                    "stage_perform_all", "stage_grand_finale",
-                    "stage_verdict", "stage_dual_nature",
-                    "stage_casting_agent", "stage_share_spotlight",
-                    "stage_toast", "stage_energy_next")
+#: FURINA'S verbs (`tier0.engine.furina_stage`, the Salon's Tab,
+#: 2026-10-05). One tuple rather than a branch each, because they all take the
+#: same price for the same reason and a per-op branch would invite different
+#: ones.
+FURINA_STAGE_OPS = ("stage_drain", "stage_repay", "stage_repay_all",
+                    "stage_guest", "stage_spend", "stage_spend_all",
+                    "stage_energy_next")
 
 #: Their shared rationale, written once. `STATIC_OP_PRICING` is prose the
 #: parity lint reads as a key set, and eight copies of one sentence would rot

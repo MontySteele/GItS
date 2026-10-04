@@ -135,18 +135,21 @@ def test_crabaletta_drains_five_and_deals_24():
     assert f.ledger["fixed_drains"] == 1 and f.ledger["card_drains"] == 0
 
 
-def test_revelry_and_critics_darling_read_drain_and_repay_never_hits():
+def test_revelry_multiplies_every_gain_and_critics_darling_reads_drain_and_repay():
+    # sec.17: "You gain twice as much Fanfare." Hits count; two copies make
+    # it three times. Critics' Darling (probe-only) still reads only a Drain
+    # or a Repay.
     st = _state(hp=70)
     f = st.player.ftd
-    f.powers["revelry"] = 2                     # two copies: +2x
+    f.powers["revelry"] = 2                     # two copies: x3
     f.powers["critics_darling"] = 1
     T.on_hp_loss(st, 6)
-    assert f.fanfare == 6 and st.enemies[0].hp == 200
+    assert f.fanfare == 18 and st.enemies[0].hp == 200
     T.drain(st, 3)
-    assert f.fanfare == 6 + 3 + 6
+    assert f.fanfare == 18 + 9
     assert st.enemies[0].hp == 197
     T.repay(st, 2)
-    assert f.fanfare == 15 + 2 + 4
+    assert f.fanfare == 27 + 6
     assert st.enemies[0].hp == 195
 
 
@@ -167,7 +170,7 @@ def test_salons_tab_energy_arrives_next_turn():
     st.player.energy = 2
     _play(st, "ftd_salons_tab")
     assert st.player.hp == 74 and st.player.energy == 2
-    assert T.energy_kept(st) == 1 and T.energy_kept(st) == 0
+    assert T.energy_kept(st) == 2 and T.energy_kept(st) == 0
 
 
 def test_neuvillette_deals_the_hp_drained_this_turn_and_drains_nothing():

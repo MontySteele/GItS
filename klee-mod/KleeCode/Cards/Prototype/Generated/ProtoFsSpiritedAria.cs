@@ -45,7 +45,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spirited Aria"),
-        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} and draw 2 cards instead."),
+        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 5: deal {BranchDamage:diff()} and draw 2 cards instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -55,7 +55,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 8 damage", "[gold]Spend[/gold] 3: deal 14 and draw 2 cards instead" };
+        new[] { "Deal 8 damage", "[gold]Spend[/gold] 5: deal 13 and draw 2 cards instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { true, true };
@@ -64,7 +64,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 8m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 14m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -84,11 +84,11 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
         var modeRules = new ModeRequirement?[]
         {
             null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 3),
+            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 5),
                                 "needs that much Fanfare"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 8 damage", "[gold]Spend[/gold] 3: deal 14 and draw 2 cards instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 8 damage", "[gold]Spend[/gold] 5: deal 13 and draw 2 cards instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
@@ -100,8 +100,8 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
         }
         else
         {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
-            await DamageCmd.Attack((IsUpgraded ? 17m : 14m))
+            await FurinaStage.Spend(choiceContext, Owner.Creature, 5);
+            await DamageCmd.Attack((IsUpgraded ? 17m : 13m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithElementHitFx(this)
@@ -112,9 +112,12 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
 
     protected override void OnUpgrade()
     {
+        // conditional_then_damage: the then-branch amount swaps on an IsUpgraded read at play time;
+        // the FACE prints it live (`EB-657`, the folded pair below) where the row has one,
+        // and swaps via {IfUpgraded:show:...|...} where it does not.
         // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
     }
 }
 
@@ -147,13 +150,13 @@ public sealed class ProtoFsSpiritedAriaModeA : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 8m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 14m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
     {
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
     }
 }
 
@@ -173,8 +176,8 @@ public sealed class ProtoFsSpiritedAriaModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 3"),
-        ("description", "[gold]Spend[/gold] 3: deal {BranchDamage:diff()} and draw 2 cards instead"),
+        ("title", "Spend 5"),
+        ("description", "[gold]Spend[/gold] 5: deal {BranchDamage:diff()} and draw 2 cards instead"),
     };
 
     public ProtoFsSpiritedAriaModeB()
@@ -182,21 +185,16 @@ public sealed class ProtoFsSpiritedAriaModeB : ModalOptionCard
     {
     }
 
-    /// <summary>The Spend warning: the guests this Spend would leave
-    /// unable to pay for their act.</summary>
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpendShortfall(base.ExtraHoverTips, this, 3);
-
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 8m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 14m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
     {
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
     }
 }

@@ -2612,14 +2612,14 @@ def test_a_no_element_mod_damage_card_played_by_kokomi_applies_nothing(
     just lives in the card pool as a symbol on relevant elemental cards and
     the card states 'deals [element] damage' or 'applies [element]'."
 
-    Furina's Cheered On is a mod-authored Attack that deals damage and names
-    no element. In Kokomi's hand the sim used to read nothing (off-sheet) and
+    Furina's Surging Waters (Cheered On until the Salon's Tab, 2026-10-05)
+    is a mod-authored Attack that deals damage and names no element. In Kokomi's hand the sim used to read nothing (off-sheet) and
     the mod Hydro (the character fallback); both now read the CARD, and it
     says nothing. Klee's Forbidden Fun, which prints Pyro, keeps its Pyro in
     Kokomi's hand -- the element comes with the card. C# twin:
     `KokomiR276Tests.A_no_element_mod_damage_card_played_by_kokomi_applies_nothing`."""
     st = kokomi_state()
-    cheered = _arm_card("proto_fs_cheered_on")
+    cheered = _arm_card("proto_fs_surging_waters")
     assert (cheered.type, cheered.character) == ("attack", "furina")
     hit = next(fx for fx in cheered.effects if fx["op"] == "damage")
     assert effects._element_for(st, hit, cheered) is None

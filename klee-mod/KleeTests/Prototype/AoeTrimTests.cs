@@ -65,16 +65,6 @@ public class AoeTrimTests
                               c => c.Contains("PlaceOnAll"));
     }
 
-    // ---- Furina --------------------------------------------------------
-
-    [Fact]
-    public void Undercurrent_and_endless_waltz_aim()
-    {
-        Assert.Equal(TargetType.AnyEnemy, new ProtoFsUndercurrent().TargetType);
-        Assert.Equal(TargetType.AnyEnemy, new ProtoFsEndlessWaltz().TargetType);
-        Assert.Equal(18m, new ProtoFsEndlessWaltz().DynamicVars.Damage.BaseValue);
-    }
-
     // ---- Durin ---------------------------------------------------------
 
     [Fact]

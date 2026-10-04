@@ -46,21 +46,27 @@ public class ArmRelicsPotionsTests
     [Fact]
     public void Each_arm_adds_the_base_games_shape_one_common_two_uncommon_three_rare_one_shop()
     {
-        foreach (var set in new[] { KleeArmRelics.Types, FurinaStageRelics.Types })
-        {
-            var rarities = set.Select(t => Canon<RelicModel>(t).Rarity).ToList();
-            Assert.Equal(7, rarities.Count);
-            Assert.Equal(1, rarities.Count(r => r == RelicRarity.Common));
-            Assert.Equal(2, rarities.Count(r => r == RelicRarity.Uncommon));
-            Assert.Equal(3, rarities.Count(r => r == RelicRarity.Rare));
-            Assert.Equal(1, rarities.Count(r => r == RelicRarity.Shop));
-        }
+        var rarities = KleeArmRelics.Types
+            .Select(t => Canon<RelicModel>(t).Rarity).ToList();
+        Assert.Equal(7, rarities.Count);
+        Assert.Equal(1, rarities.Count(r => r == RelicRarity.Common));
+        Assert.Equal(2, rarities.Count(r => r == RelicRarity.Uncommon));
+        Assert.Equal(3, rarities.Count(r => r == RelicRarity.Rare));
+        Assert.Equal(1, rarities.Count(r => r == RelicRarity.Shop));
+        var klee = ArmPotions.Klee.Select(t => Canon<PotionModel>(t)).ToList();
+        Assert.Equal(
+            new[] { PotionRarity.Common, PotionRarity.Uncommon, PotionRarity.Rare },
+            klee.Select(p => p.Rarity).ToArray());
+        // THE SALON'S TAB (2026-10-05, proposal sec.16): Furina keeps Opera
+        // Glasses (Common), Grand Theater Program (Rare) and Bottled Applause
+        // (Common); the rest left with the v2 Stage.
+        Assert.Equal(new[] { RelicRarity.Common, RelicRarity.Rare },
+                     FurinaStageRelics.Types
+                         .Select(t => Canon<RelicModel>(t).Rarity).ToArray());
+        Assert.Equal(new[] { typeof(BottledApplause) }, ArmPotions.Furina);
         foreach (var set in new[] { ArmPotions.Klee, ArmPotions.Furina })
         {
             var potions = set.Select(t => Canon<PotionModel>(t)).ToList();
-            Assert.Equal(
-                new[] { PotionRarity.Common, PotionRarity.Uncommon, PotionRarity.Rare },
-                potions.Select(p => p.Rarity).ToArray());
             Assert.All(potions, p => Assert.Equal(PotionUsage.CombatOnly, p.Usage));
             Assert.All(potions, p => Assert.Equal(TargetType.AnyPlayer, p.TargetType));
         }
@@ -495,7 +501,7 @@ public class ArmRelicsPotionsTests
         Assert.Contains("SparkPower.Gain", Il.Calls(Il.Method("BottledSparks", "OnUse")));
     }
 
-    // ==== Furina (the re-founding, 2026-10-04, sec.10) =======================
+    // ==== Furina (the Salon's Tab, 2026-10-05, proposal sec.16) ===========
 
     [Fact]
     public void Opera_glasses_start_each_combat_with_three_fanfare()
@@ -505,47 +511,6 @@ public class ArmRelicsPotionsTests
                         Il.Calls(Il.Method("OperaGlasses", "BeforeCombatStart")));
         Assert.Equal("Start each combat with [blue]3[/blue] [gold]Fanfare[/gold].",
                      Face(Canon<RelicModel>(typeof(OperaGlasses))));
-    }
-
-    [Fact]
-    public void Stagehands_gloves_and_the_bouquet_reach_the_bow_through_the_mods()
-    {
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        Assert.Equal(0, FurinaStage.ModsOf(seat.Creature).BowBlock);
-        Assert.Equal(1, FurinaStage.ModsOf(seat.Creature).BowActs);
-        Give<StagehandsGloves>(seat);
-        Give<CurtainCallBouquet>(seat);
-        var mods = FurinaStage.ModsOf(seat.Creature);
-        Assert.Equal(3, mods.BowBlock);
-        Assert.Equal(2, mods.BowActs);
-        // The Bow: its act (twice), its Fanfare, then the Gloves' Block.
-        var stage = FurinaStageLedger.For(seat.Creature);
-        stage.Seat(StagePerformer.Usher);
-        var board = new RecordingBoard();
-        StageKit.Run(new StageDirector(stage, board).FinalBow(0));
-        Assert.Equal(new[] { "block Usher 4", "block Usher 4", "gloves 3" },
-                     board.Log);
-        Assert.Equal(1, stage.Fanfare);
-    }
-
-    [Fact]
-    public void Guest_book_gives_three_on_the_first_guest_star_of_the_combat_only()
-    {
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        Assert.Equal(0, GuestBook.BonusFor(seat.Creature));
-        Give<GuestBook>(seat);
-        Assert.Equal(3, GuestBook.BonusFor(seat.Creature));
-        var stage = FurinaStageLedger.For(seat.Creature);
-        StageKit.Run(new StageDirector(stage, new RecordingBoard())
-            .SummonGuest(StagePerformer.Charlotte, 0, GuestBook.BonusFor(seat.Creature)));
-        Assert.Equal(3, stage.Fanfare);
-        Assert.Equal(0, GuestBook.BonusFor(seat.Creature));
-        FurinaStageLedger.ResetAll();                       // the next combat
-        Assert.Equal(3, GuestBook.BonusFor(seat.Creature));
-        Assert.Contains("GuestBook.BonusFor",
-                        Il.Calls(Il.Method("FurinaStage", "GuestStar")));
     }
 
     [Fact]
@@ -561,59 +526,25 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
-    public void Palais_ledger_takes_one_off_a_spend_n()
+    public void Salon_solitaire_repays_two_and_its_upgrade_three()
     {
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        var stage = FurinaStageLedger.For(seat.Creature);
-        stage.Gain(2);
-        Assert.Equal(3, FurinaStage.PriceOf(seat.Creature, 3));
-        Assert.False(FurinaStage.CanSpend(seat.Creature, 3));
-        Give<PalaisLedger>(seat);
-        Assert.Equal(2, FurinaStage.PriceOf(seat.Creature, 3));
-        Assert.Equal(0, FurinaStage.PriceOf(seat.Creature, 1));
-        Assert.True(FurinaStage.CanSpend(seat.Creature, 3));
-        Assert.Contains("FurinaStage.PriceOf",
-                        Il.Calls(Il.Method("FurinaStage", "CanSpend")));
-        Assert.Contains("FurinaStage.PriceOf",
-                        Il.Calls(Il.Method("FurinaStage", "Spend")));
-    }
-
-    [Fact]
-    public void Opening_night_summons_a_random_performer_behind_usher_after_the_opening()
-    {
-        Assert.Equal(RelicRarity.Shop, Canon<RelicModel>(typeof(OpeningNight)).Rarity);
-        var late = Il.CallSequence(Il.Method("OpeningNight", "BeforeCombatStartLate")).ToList();
-        Assert.True(late.IndexOf("FurinaStage.OpenCombat") >= 0);
-        Assert.True(late.IndexOf("FurinaStage.OpenCombat") < late.IndexOf("FurinaStage.Summon"));
-        Assert.Contains("random", Il.Strings(Il.Method("OpeningNight", "BeforeCombatStartLate")));
-        Assert.Equal(typeof(SalonSolitaire),
-            typeof(SalonSolitaire).GetMethod("BeforeCombatStart")!.DeclaringType);
-
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        var stage = FurinaStageLedger.For(seat.Creature);
-        stage.Open();
-        stage.Seat(StagePerformer.Crabaletta);
-        Assert.Equal(new[] { StagePerformer.Usher, StagePerformer.Crabaletta },
-                     stage.Seats.Select(s => s.Who));
-    }
-
-    [Fact]
-    public void The_curtain_never_falls_opens_usher_and_gives_one_rehearsal()
-    {
-        Assert.Equal(1, CurtainNeverFalls.Rehearsal);
-        var open = Il.CallSequence(Il.Method("CurtainNeverFalls", "BeforeCombatStart")).ToList();
-        Assert.Contains("FurinaStage.OpenCombat", open);
-        Assert.Contains(open, c => c.StartsWith("PowerCmd.Apply<RehearsalPower>"));
-        Assert.Equal("Start each combat with [gold]Usher[/gold] on stage and "
-                     + "[blue]1[/blue] [gold]Rehearsal[/gold].",
-                     Face(Canon<RelicModel>(typeof(CurtainNeverFalls))));
-        Assert.Equal("Start each combat with [gold]Usher[/gold] on stage.",
+        Assert.Equal("At the end of your turn, [gold]Repay[/gold] "
+                     + "[blue]2[/blue].",
                      Face(Canon<RelicModel>(typeof(SalonSolitaire))));
-        // Touch of Orobas upgrades the Stage's starter into it.
+        Assert.Equal("At the end of your turn, [gold]Repay[/gold] "
+                     + "[blue]3[/blue].",
+                     Face(Canon<RelicModel>(typeof(CurtainNeverFalls))));
+        // Touch of Orobas upgrades the starter into it.
         Assert.Contains("ModelDb.Relic<CurtainNeverFalls>",
                         Il.CallSequence(Il.Method("SalonSolitaire", "GetUpgradeReplacement")));
+        // The Repay is the kit's, read off the relics at the end of her turn.
+        Assert.Contains("FurinaStage.SingerOf",
+                        Il.Calls(Il.Method("FurinaStage", "EndOfTurnActs")));
+        foreach (var type in new[] { "SalonSolitaire", "CurtainNeverFalls" })
+        {
+            Assert.Contains("FurinaStage.OpenCombat",
+                            Il.Calls(Il.Method(type, "BeforeCombatStart")));
+        }
     }
 
     [Fact]
@@ -629,18 +560,11 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
-    public void The_furina_potions_gain_fanfare_gain_rehearsal_and_act_twice_now()
+    public void Bottled_applause_gains_six_fanfare()
     {
-        // The re-founding (sec.10): "Gain 6 Fanfare.", "Gain 1 Rehearsal.",
-        // Encore Elixir unchanged.
         Assert.Contains("FurinaStage.Gain",
                         Il.Calls(Il.Method("BottledApplause", "OnUse")));
-        Assert.Contains(Il.CallSequence(Il.Method("CurtainWater", "OnUse")),
-                        c => c.StartsWith("PowerCmd.Apply<RehearsalPower>"));
-        Assert.Contains("FurinaStage.PerformAll",
-                        Il.Calls(Il.Method("EncoreElixir", "OnUse")));
-        Assert.Equal((6, 1, 2), (BottledApplause.Fanfare, CurtainWater.Rehearsal,
-                                 EncoreElixir.Acts));
+        Assert.Equal(6, BottledApplause.Fanfare);
     }
 
     // ==== helpers ============================================================

@@ -95,7 +95,7 @@ def stage_retires_the_shipped_meters(player) -> bool:
     reaches. C# twin:
     `FurinaResources.StageRetiresTheShippedMeters`.
     """
-    return furina_stage.active(player)
+    return furina_stage.is_furina(player)
 
 
 def gain_fanfare(state: CombatState, n: int, source: str) -> None:

@@ -142,8 +142,10 @@ def test_defect_one_the_words_themselves_survive_the_fold():
 
 # ------------------------------------------ defect 2, the bridge's modes ---
 
-SPEND_AS_THE_PAGE_PRINTS_IT = "Spend 3: deal 17 instead"
-SPEND_AS_THE_BRIDGE_HOLDS_IT = "[gold]Spend[/gold] 3: deal 17 instead"
+# The Salon's Tab (2026-10-05): Curtain Rise's priced mode is a Drain now; the
+# markup still sits in the middle of the phrase, which is the defect.
+SPEND_AS_THE_PAGE_PRINTS_IT = "Drain 3: deal 12 instead"
+SPEND_AS_THE_BRIDGE_HOLDS_IT = "[gold]Drain[/gold] 3: deal 12 instead"
 
 
 def test_defect_two_a_mode_named_off_the_page_posts_the_bridge_s_spelling():

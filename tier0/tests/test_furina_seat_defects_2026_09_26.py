@@ -341,9 +341,3 @@ def test_a_numbered_potion_resolves_like_a_numbered_card():
 
 
 # ---- 29. Lyney, in the glossary --------------------------------------------
-
-def test_lyneys_row_is_the_new_act():
-    # The re-founding (2026-10-04): his badge's sentence.
-    assert ARM_KEYWORDS["Lyney"] == (
-        "The first Cue card you play each turn costs 0. Act: pay 1 Fanfare to "
-        "add a Trick to your hand.")

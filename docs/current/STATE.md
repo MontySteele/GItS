@@ -44,7 +44,7 @@ roster is prototype rows only, Fontaine's sixteen ported as they are (pick 4,
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 70 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (re-founded Stage built; awaiting [USER]'s play) | 78 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab built; awaiting [USER]'s play) | 24 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (expansion built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -209,7 +209,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   pass, 2026-10-04".
   Next: [USER] plays (a central rule changed; co-op with a friend may stand
   in); the damage gap is a paper after that run.
-- **Furina: the re-founded Stage is built (2026-10-04).** Sec.10 of `review/active/furina-refounding-2026-10-03.md` is built in the mod and the tier0 Furina arm moved onto the same rules: performers have no bars, Fanfare is one number on Furina, stars pay for their acts or skip, a Bow is a free act and 1 Fanfare, "Cue a performer" opens a small picker, and Rehearsal scales the acts. The old build is tagged `furina-stage-frozen-2026-10-04`. Deployed 0.2.4370; the two-seat round ran with [USER] away (both runs cleared two acts and died in act 3; `review/records/furina-v2-round-2026-10-04.md`). Next: [USER]'s play (a rule change). Provenance note, "Furina re-founding, 2026-10-04".
+- **Furina: the Salon's Tab is built (2026-10-05).** The research proposal (`review/active/furina-research-proposal-2026-10-05.md`, sec.2 rules, sec.16 slice and curtain call, sec.17's two edits) replaces the re-founded Stage in place; [USER]: "the current one built overnight can be discarded". Furina pays HP for power: Drain spends HP down to a line at half the HP she entered combat with, Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every drained HP returns when combat ends. Three guest seats; four guests. The pool is the starter and 24 cards, not 78. Relics and potions are Opera Glasses, Grand Theater Program and Bottled Applause, beside Salon Solitaire ("At the end of your turn, Repay 2."). The tier0 arm runs on `tier0/engine/furina_tide.py`. Not deployed. Next: [USER]'s play (a rule change), then a seat round. Provenance note, "Furina: the Salon's Tab, 2026-10-05". The v2 build is in git; the v1 Stage is the tag `furina-stage-frozen-2026-10-04`.
 - **Furina: frozen (2026-10-04).** [USER]: "Let's freeze Furina's current build as-is for now, with the expectation that it gets shelved once we have a better idea." No card or rule changes to the current Stage build. The re-founding (`review/active/furina-refounding-2026-10-03.md`, ruled, sec.8 and sec.9) is being built as a sim-only slice; if it finds a strong structure, it replaces this build. The history below is the frozen build's.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper

@@ -258,7 +258,17 @@ public class PoolCellCoverageTests
             // Five-Century Act). No cell is short. (The 2026-09-29 fade pass
             // cut Eternal Applause; Rare/Power still holds four with Sold
             // Out.)
-            "furina-stage" => System.Array.Empty<string>(),
+            //
+            // THE SALON'S TAB (2026-10-05) is a SLICE of 24, not the 78: four
+            // Rares (one Attack, one Skill, two Powers) and one Uncommon
+            // Attack (Bravura). Five cells are short again and every one is
+            // seamed by the widening ladder (the matrix test above); the full
+            // sheet waits on the slice's play (proposal pick 1).
+            "furina-stage" => new[]
+            {
+                "Rare/*", "Rare/Attack", "Rare/Power", "Rare/Skill",
+                "Uncommon/Attack",
+            },
             _ => throw new InvalidOperationException(arm),
         }).OrderBy(n => n, StringComparer.Ordinal).ToList();
 

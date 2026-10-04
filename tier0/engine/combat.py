@@ -234,7 +234,13 @@ def card_playable(state: CombatState, card: Card) -> bool:
     # it needs one. DERIVED FROM THE ROW -- `kokomi_plan.carry_out_only`.
     if kokomi_plan.refuses_for_no_plan(state, card):
         return False
-    # No Fanfare playability gate: Fanfare is read, never spent (F-A4).
+    # FURINA (the Salon's Tab, 2026-10-05): a FIXED Drain or Spend price is
+    # the card's cost line, Hemokinesis's shape -- unplayable when it would
+    # cross the Drain line or the bank is short (`furina_stage.fixed_price`;
+    # the C# twin is the generated `IsPlayable`). None for anyone's card
+    # that prints no fixed price.
+    if furina_stage.fixed_price_refusal(state, card) is not None:
+        return False
     return card_cost(state, card) <= state.player.energy
 
 
@@ -364,17 +370,6 @@ def card_cost(state: CombatState, card: Card) -> int:
     discount = klee_overhaul.playdate_discount(state, card)
     if discount:
         cost = max(0, cost - discount)
-    # FURINA'S STAGE. The Last Act: "Costs 1 less for each empty seat."
-    # Pure, like the lines above. `FurinaStageHooks.TryModifyEnergyCostInCombat`
-    # is the C# twin.
-    seats = furina_stage.last_act_discount(state, card)
-    if seats:
-        cost = max(0, cost - seats)
-    # FURINA'S STAGE. Escoffier's "The first Salon summon card you play each
-    # turn costs 0" and Lyney's "The first Cue card you play each turn costs
-    # 0", while each is on stage. Pure.
-    if furina_stage.cost_free(state, card):
-        cost = 0
     # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): Escoffier's
     # "The first Salon summon card you play each turn costs 0". Pure; a no-op
     # for any player without the slice arm.
@@ -858,9 +853,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the flow counts
     # reset. A no-op for anyone else.
     furina_tide.turn_open(state)
-    # FURINA'S STAGE: the same reset on her arm (the flow counts and the
-    # once-a-turn latches). A no-op for anyone else.
-    furina_stage.turn_open(state)
+    # FURINA'S ARM (the Salon's Tab, 2026-10-05) runs on the slice's rules:
+    # the `furina_tide` hooks above and below are hers too.
     for e in state.enemies:
         e.skittish_fired = False     # Skittish latch is per-turn (§10.9)
     # `EB-495` D5: BeforeSideTurnStart, the PLAYER's side. Hardened Shell's
@@ -991,11 +985,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         if not p.alive or state.over:
             return
 
-    # FURINA'S STAGE, at the same site and for the same reason as the lines
-    # above: Salon Solitaire puts Usher on stage on turn one, then Chevreuse's
-    # Energy, Charlotte's extra card and the turn-start Powers
-    # (`furina_stage.turn_start` gives the order). A no-op for anyone else.
-    furina_stage.turn_start(state)
     # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): Salon Solitaire's Usher
     # on turn one, then Charlotte's extra card. A no-op for anyone else.
     furina_v2.turn_start(state)
@@ -1142,12 +1131,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # VARKA (`varka_oath.turn_end`): Oathbound Aegis's end-of-turn Block,
     # at the same `BeforeSideTurnEnd` site. A no-op for anyone else.
     varka_oath.turn_end(state)
-    # FURINA'S STAGE. THE ACTS (rule 1): every performer acts at the end of
-    # Furina's turn, front to back. HERE, beside the two arms above and at the
-    # same `BeforeSideTurnEnd`: after the hand's own end-of-turn triggers,
-    # before `_settle_phases`, so an act that kills settles the board it
-    # killed, and before any enemy acts, so Usher's Block meets their hits.
-    furina_stage.end_of_turn_acts(state)
     # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the performers act
     # front to back. A no-op for anyone else.
     furina_v2.end_of_turn_acts(state)
@@ -1255,11 +1238,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # A turn that ended by killing the last enemy or by the player dying never
     # reaches here, and metrics records -1 there rather than inventing a zero.
     state.emit("turn_close", block=p.block)
-    # FURINA'S STAGE, INSTRUMENT ONLY: the cast and the Fanfare at turn
-    # close. One sample per completed player turn, taken beside `turn_close`
-    # and carrying that event's own declared blind spot -- a turn that ended by
-    # killing the last enemy or by the player dying never reaches this line.
-    furina_stage.note_turn_census(state)
     # INSTRUMENT ONLY (EB-78 (2), the reads-per-turn distribution R188 ruled
     # a watch trigger would need). One sample per completed player turn, taken
     # HERE because the Kurage pulse fires inside player_turn_end_triggers
@@ -1414,10 +1392,6 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # because `blocked` exists nowhere else.
             effects.companion_overhaul_block_absorbed(
                 state, enemy, blocked, block_before)
-            # FURINA'S STAGE. Wriothesley's act reads the damage her Block
-            # stopped since his last act (any dealer). Performers take no
-            # hits (rule 1), so nothing stands between her Block and her HP.
-            furina_stage.note_blocked(state, blocked)
             # Kokomi's prevention ward (kickoff §2.4): after Block, before
             # anything reaches HP — the first unblocked hit each round is
             # prevented up to the ward's stacks, priced as one random
@@ -1761,9 +1735,9 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # VARKA, THE OATH REWORK (`varka_oath.open_combat`): his Oath, current
     # element and Fang are per-combat too. A no-op for anyone else.
     varka_oath.open_combat(player)
-    # FURINA'S STAGE. Same line, same reason: the performers are pets and
-    # live one combat, so every fight opens on an empty stage with no Fanfare
-    # (Salon Solitaire seats Usher on turn one). Empty on every other run.
+    # FURINA (the Salon's Tab). Same line, same reason: every fight opens
+    # with an empty stage, no Fanfare, nothing drained, and the Drain line
+    # read from the HP she enters with. A no-op for anyone else.
     furina_stage.reset_for_combat(player)
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)
@@ -1793,6 +1767,10 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     finally:
         refpowers.bind(outer)
     won = bool(state.player.alive) and not state.living_enemies
+    # FURINA (the Salon's Tab, sec.16): THE CURTAIN CALL. Every drained HP
+    # returns when the combat ends, if she lived, before `fight_end` reports
+    # the HP the run carries. A no-op for anyone else.
+    furina_stage.close_combat(state)
     # EB-17, dead-in-hand half two: the cards the combat ENDED on. A fight that
     # ends inside a player turn never reaches the hand flush, and a Retained
     # card can sit in hand for the whole fight and never meet one either, so

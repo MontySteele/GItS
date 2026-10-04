@@ -32,42 +32,58 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsStandingOvation : CustomCardModel, ICharacterCard
+public sealed class ProtoFsStandingOvation : CustomCardModel, IElementalCard, ICharacterCard
 {
+    /// <summary>Sheet cadence: damaging Skills, Burst-tagged cards, and skill-tagged cards apply Hydro.</summary>
+    public Element Element => Element.Hydro;
+
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesHydro };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_standing_ovation");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rising Applause"),
-        ("description", "Gain {RaiseAmount:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("RaiseAmount", 3m)
+            new SpotlightSystem.SpotlitBlockVar(5m),
+            new CalculationBaseVar(0m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrFanfare(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoFsStandingOvation()
-        : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Basic, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Gain(choiceContext, Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await FurinaStage.SpendAll(choiceContext, Owner.Creature);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["RaiseAmount"].UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(2m);
     }
 }

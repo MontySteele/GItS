@@ -38,14 +38,14 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpend(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForDrain(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_curtain_rise");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Curtain Rise"),
-        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage. [gold]Drain[/gold] 3: deal {BranchDamage:diff()} instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -55,7 +55,7 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 7 damage", "[gold]Spend[/gold] 3: deal 17 instead" };
+        new[] { "Deal 7 damage", "[gold]Drain[/gold] 3: deal 12 instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { true, true };
@@ -64,7 +64,7 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 17m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 12m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -84,11 +84,11 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
         var modeRules = new ModeRequirement?[]
         {
             null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 3),
-                                "needs that much Fanfare"),
+            new ModeRequirement(FurinaStage.CanDrain(Owner.Creature, 3),
+                                "would take her below the Drain line"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 7 damage", "[gold]Spend[/gold] 3: deal 17 instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 7 damage", "[gold]Drain[/gold] 3: deal 12 instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
@@ -100,8 +100,8 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
         }
         else
         {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
-            await DamageCmd.Attack((IsUpgraded ? 21m : 17m))
+            await FurinaStage.Drain(choiceContext, Owner.Creature, 3);
+            await DamageCmd.Attack((IsUpgraded ? 16m : 12m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithElementHitFx(this)
@@ -149,7 +149,7 @@ public sealed class ProtoFsCurtainRiseModeA : ModalOptionCard
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 17m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 12m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
@@ -175,8 +175,8 @@ public sealed class ProtoFsCurtainRiseModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 3"),
-        ("description", "[gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead"),
+        ("title", "Drain 3"),
+        ("description", "[gold]Drain[/gold] 3: deal {BranchDamage:diff()} instead"),
     };
 
     public ProtoFsCurtainRiseModeB()
@@ -184,16 +184,11 @@ public sealed class ProtoFsCurtainRiseModeB : ModalOptionCard
     {
     }
 
-    /// <summary>The Spend warning: the guests this Spend would leave
-    /// unable to pay for their act.</summary>
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpendShortfall(base.ExtraHoverTips, this, 3);
-
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 17m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 12m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()

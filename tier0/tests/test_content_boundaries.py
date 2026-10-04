@@ -115,8 +115,11 @@ def test_every_shipped_card_passes_the_vocabulary_check():
     by_character: dict[str, int] = {}
     for card in index.values():
         by_character[card.character] = by_character.get(card.character, 0) + 1
-    for character in ("klee", "furina", "kokomi"):
+    for character in ("klee", "kokomi"):
         assert by_character.get(character, 0) >= 50, by_character
+    # The Salon's Tab (2026-10-05): Furina is the starter's two kit rows and
+    # the 24-card pool.
+    assert by_character.get("furina", 0) >= 26, by_character
     # And at least one conditional actually went through the predicate branch,
     # so the recursion above is exercised rather than merely reachable.
     assert any(fx.get("op") == "conditional"

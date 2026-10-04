@@ -1793,6 +1793,10 @@ STAGE_LOG_HEADING = ("- Since you ended your last turn, in order (the "
 #: The header line: her Fanfare and this turn's flow.
 STAGE_FANFARE_LINE = ("- Fanfare {fanfare} (this turn: {gained} gained, "
                       "{spent} spent on Spend, {paid} paid by stars)")
+#: THE SALON'S TAB (2026-10-05): the HP loan's two numbers, the "Drained N"
+#: counter's reading.
+STAGE_DRAIN_LINE = ("- Drained {drained} HP (it returns when combat ends). "
+                    "You can Drain down to {line} HP.")
 STAGE_REHEARSAL_CLAUSE = " · Rehearsal {n}"
 STAGE_EMPTY_LINE = "- The stage is empty."
 STAGE_SEATS_LINE = "- Seats, front to back ({used} of {capacity}): {seats}."
@@ -1840,6 +1844,8 @@ STAGE_LOG_CUE = "  - You Cued **{who}**."
 STAGE_LOG_MOVE = "  - **{who}** moved to the front."
 STAGE_LOG_GAIN = "  - You gained {n} Fanfare{src}: {before} → {after}."
 STAGE_LOG_SPEND = "  - You spent {n} Fanfare: {before} → {after}."
+STAGE_LOG_DRAIN = "  - You drained {n} HP."
+STAGE_LOG_REPAY = "  - You repaid {n} HP."
 STAGE_SOURCE_CLAUSE = " from {src}"
 #: What an act did, by kind, with the beat's measured figure.
 STAGE_LOG_EFFECTS = {
@@ -2001,6 +2007,9 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
         block.append(f"after the acts: Block {you['block'] + after}")
     block.append(f"Furina {you['hp']}/{you['max_hp']}")
     out.append("- " + " · ".join(block))
+    if stage.get("line") is not None:
+        out.append(STAGE_DRAIN_LINE.format(drained=stage.get("drained", 0),
+                                           line=stage["line"]))
     if not seats:
         out.append(STAGE_EMPTY_LINE)
         return out
@@ -2143,6 +2152,10 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(STAGE_LOG_SPEND.format(
                 n=row["moved"], before=row["fanfare"] + row["moved"],
                 after=row["fanfare"]))
+        elif event == "drain":
+            out.append(STAGE_LOG_DRAIN.format(n=row["moved"]))
+        elif event == "repay":
+            out.append(STAGE_LOG_REPAY.format(n=row["moved"]))
     return out
 
 

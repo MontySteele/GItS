@@ -806,6 +806,7 @@ seats, and nothing else uses the stage.
   instead." [9 / 17]
 - Salon's Tab (Skill, 0, Uncommon): "Draw 1 card. Drain 4: also gain 1
   Energy next turn." [Draw 2]
+  2026-10-05: Tab cost 1, Draw 2 / Drain 4 → +2 Energy next turn [Draw 3]; the 0-cost Tab made Guest+ and Tab+ an infinite
 
 *Repay (4):*
 - Surging Waters (Attack, 1, Common): "Deal 6 damage. Repay 3." [9, Repay

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards;
 using MegaCrit.Sts2.Core.Models;
@@ -6,78 +5,49 @@ using MegaCrit.Sts2.Core.Models;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// WHO A SUMMON CARD WILL BOW, on its face (2026-10-04, the Furina v2 seat
-/// round: three times a summon onto a full stage Bowed Usher off without the
-/// player noticing, once on a boss's big attack turn).
+/// WHO A GUEST STAR CARD WILL MOVE, on its face (2026-10-04, the Furina v2
+/// seat round: three times a summon onto a full stage sent a performer off
+/// without the player noticing). Kept for the guests (the Salon's Tab,
+/// 2026-10-05).
 ///
-/// A summon card's face ends in <c>{InCombat:{StageBow}|}</c>, the base
+/// A Guest Star card's face ends in <c>{InCombat:{StageBow}|}</c>, the base
 /// game's in-combat line, and the generated card fills <c>StageBow</c> in
-/// <c>AddExtraArgsToDescription</c> from here. The line is empty when nobody
-/// will Bow. The decision is <see cref="StageDirector.PlanSummons"/>, the
-/// rule the summons themselves run (<see cref="StageDirector.SalonRoom"/>,
-/// <see cref="StageDirector.GuestRoom"/>), so preview and outcome cannot
-/// drift.
+/// <c>AddExtraArgsToDescription</c> from here. The line is empty when the
+/// guest simply takes a free seat. The decision is
+/// <see cref="StageDirector.GuestRoom"/>, the rule the summon itself runs,
+/// so preview and outcome cannot drift.
 /// </summary>
 public static class FurinaStageBowPreview
 {
     /// <summary>The description token the line rides on.</summary>
     public const string Token = "StageBow";
 
-    /// <summary>A card that summons these Salon members in order (a sheet
-    /// name, or <c>"random"</c>).</summary>
-    public static string Salon(CardModel card, params string[] members) =>
-        For(card, members
-            .Select(m => StageSummonStep.Salon(
-                m == "random" ? null : FurinaStage.Parse(m)))
-            .ToList());
-
-    /// <summary>A Guest Star card.</summary>
-    public static string Guest(CardModel card, string member) =>
-        For(card, new[] { StageSummonStep.GuestStar(FurinaStage.Parse(member)) });
-
-    /// <summary>The line for this card's owner's stage as it stands; empty
-    /// off a combat, on a canonical card, or for a seat with no stage.
-    /// </summary>
-    public static string For(CardModel card,
-                             IReadOnlyList<StageSummonStep> steps)
+    /// <summary>A Guest Star card's line for its owner's stage as it stands;
+    /// empty off a combat, on a canonical card, or for a seat that is not
+    /// Furina's.</summary>
+    public static string Guest(CardModel card, string member)
     {
         if (TipOwner.CreatureOf(card) is not { } owner
             || owner.CombatState == null || !FurinaStage.LiveFor(owner))
         {
             return "";
         }
-        return For(FurinaStageLedger.For(owner), steps);
+        return Line(FurinaStageLedger.For(owner), FurinaStage.Parse(member));
     }
 
-    /// <summary>The line for <paramref name="stage"/> (the pins').</summary>
-    public static string For(FurinaStageLedger stage,
-                             IReadOnlyList<StageSummonStep> steps) =>
-        Line(StageDirector.PlanSummons(stage, steps));
-
-    /// <summary>The words, on a line of their own: "(Usher will Bow)",
-    /// "(Clorinde will Bow and stay)", "(Walk-on: acts once and Bows)",
-    /// "(Usher and Chevalmarin will Bow)". Empty when nobody Bows.</summary>
-    public static string Line(IReadOnlyList<StagePlannedBow> bows)
+    /// <summary>The line for <paramref name="stage"/> (the pins'): "(Clorinde
+    /// will act again)" for a guest already on stage, "(Charlotte will act
+    /// and leave)" for the oldest guest on a full stage, else empty.</summary>
+    public static string Line(FurinaStageLedger stage, StagePerformer who)
     {
-        if (bows.Count == 0) return "";
-        if (bows.All(b => b.Kind == StageSummonResult.WalkOn))
+        var room = StageDirector.GuestRoom(stage.Company.ToList(),
+                                           stage.Capacity, who);
+        return room.Kind switch
         {
-            return bows.Count == 1
-                ? "\n(Walk-on: acts once and Bows)"
-                : "\n(Walk-on: each acts once and Bows)";
-        }
-        if (bows.Count == 1 && bows[0].Kind == StageSummonResult.Repeat)
-        {
-            return $"\n({Name(bows[0].Who)} will Bow and stay)";
-        }
-        var names = bows.Select(b => Name(b.Who)).ToList();
-        var list = names.Count == 1
-            ? names[0]
-            : string.Join(", ", names.Take(names.Count - 1))
-              + " and " + names[^1];
-        return $"\n({list} will Bow)";
+            StageSummonResult.Repeat => $"\n({who} will act again)",
+            StageSummonResult.Evict =>
+                $"\n({stage.Seats[room.Index].Who} will act and leave)",
+            _ => "",
+        };
     }
-
-    private static string Name(StagePerformer? who) =>
-        who?.ToString() ?? "a Salon member";
 }

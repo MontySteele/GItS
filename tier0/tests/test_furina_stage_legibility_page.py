@@ -55,16 +55,6 @@ def _row(word: str) -> str:
     return f"- **{word}** — {ARM_KEYWORDS[word]}"
 
 
-def test_a_named_summon_prints_the_summon_row_and_its_performers_row():
-    page = blindplay.observe(_reward("Summon Chevalmarin.",
-                                     [SALON_SOLITAIRE]))
-    # ONE Summon row since the trio can be cloned (2026-09-25): a named
-    # summon meets a full stage the way a random one does.
-    assert _row("Summon") in page
-    assert _row("Surintendante Chevalmarin") in page
-    assert _row("Mademoiselle Crabaletta") not in page
-
-
 def test_a_screen_with_both_kinds_of_summon_prints_one_row():
     state = _reward("Summon Usher.", [SALON_SOLITAIRE])
     state["card_select"]["cards"].append(
@@ -73,33 +63,6 @@ def test_a_screen_with_both_kinds_of_summon_prints_one_row():
     page = blindplay.observe(state)
     assert _row("Summon") in page
     assert "Random: " not in page and "Named: " not in page
-
-
-def test_a_random_summon_prints_every_performer_it_can_field():
-    page = blindplay.observe(_reward("Summon two random performers.",
-                                     [SALON_SOLITAIRE]))
-    assert _row("Summon") in page
-    for who in ("Gentilhomme Usher", "Surintendante Chevalmarin",
-                "Mademoiselle Crabaletta"):
-        assert _row(who) in page, who
-
-
-def test_a_mid_sentence_summon_is_the_same_word():
-    """Improvised Number prints it lowercase, and the mod attaches the tip
-    off the op, not the capital."""
-    page = blindplay.observe(_reward(
-        "Deal 6 damage. If the stage is empty, summon a random performer.",
-        [SALON_SOLITAIRE]))
-    assert _row("Summon") in page
-    assert _row("Mademoiselle Crabaletta") in page
-
-
-def test_the_shipped_kit_is_not_taught_the_arms_performers():
-    """The shipped Salon's Usher is a different rule under the same name."""
-    page = blindplay.observe(_reward(
-        "Deploy Usher. He performs when you play a Companion.", [SPOTLIGHT]))
-    assert _row("Gentilhomme Usher") not in page
-    assert ARM_KEYWORDS["Gentilhomme Usher"] not in page
 
 
 def test_another_characters_run_is_not_taught_the_stages_summon():

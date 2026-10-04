@@ -57,24 +57,6 @@ SPEND_PASS = {
 }
 
 
-@pytest.mark.parametrize("cid", sorted(SPEND_PASS))
-def test_the_spend_pass_numbers(arm, cid):
-    plain, price, branch, upgrade = SPEND_PASS[cid]
-    card = loader.get_card(cid)
-    modes = card.effects[0]["modes"]
-    assert modes[0]["effects"][0]["amount"] == plain
-    assert modes[1]["effects"][0] == {"op": "stage_spend", "amount": price}
-    assert modes[1]["effects"][1]["amount"] == branch
-    assert card.upgrade == upgrade
-    assert f"Spend[/gold] {price}:" in _row(cid)["description"]
-
-
-def test_spirited_arias_spend_mode_deals_more_and_reads_as_instead(arm):
-    assert _row("proto_fs_spirited_aria")["description"] == (
-        "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal "
-        "{BranchDamage:diff()} and draw 2 cards instead.")
-
-
 # ---- 2. the page -------------------------------------------------------------
 
 QUICK_CUE = "Deal 3 damage. Spend 3: deal 11 and apply Hydro instead."
@@ -100,15 +82,6 @@ def test_a_payable_spend_prints_nothing_extra():
 def test_an_empty_stage_does_not_refuse_a_spend():
     """Her Fanfare is hers: a Spend needs no performer."""
     assert spend_unavailable(QUICK_CUE, _stage(4)) == []
-
-
-def test_palais_ledger_takes_one_off_the_price():
-    """The rules pass (2026-10-01): "Your Spends cost 1 less Fanfare." """
-    ledger = [{"name": "Palais Ledger", "text": ""}]
-    assert spend_unavailable(QUICK_CUE, _stage(2), ledger) == []
-    [line] = spend_unavailable(QUICK_CUE, _stage(1), ledger)
-    assert line.endswith("you have 1 Fanfare, and it costs 2 with Palais "
-                         "Ledger")
 
 
 @pytest.mark.parametrize("text", [

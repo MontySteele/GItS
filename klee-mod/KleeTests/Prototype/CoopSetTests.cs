@@ -44,9 +44,6 @@ public class CoopSetTests
         Row<ProtoKoPassTheMatch>(0, CardType.Skill, CardRarity.Uncommon),
         Row<ProtoKoHideHere>(1, CardType.Skill, CardRarity.Uncommon),
         Row<ProtoKoKnightsOfFavonius>(2, CardType.Power, CardRarity.Rare),
-        Row<ProtoFsGuestOfHonor>(1, CardType.Skill, CardRarity.Uncommon),
-        Row<ProtoFsShareTheSpotlight>(1, CardType.Skill, CardRarity.Uncommon),
-        Row<ProtoFsPeopleOfFontaine>(1, CardType.Power, CardRarity.Rare),
         Row<ProtoKkJointOrders>(1, CardType.Skill, CardRarity.Uncommon),
         Row<ProtoKkCoordinatedStrike>(1, CardType.Attack, CardRarity.Uncommon),
         Row<ProtoKkSangonomiyasCounsel>(2, CardType.Power, CardRarity.Rare),
@@ -76,11 +73,7 @@ public class CoopSetTests
         // is not you. "Each other player" takes no target.
         Assert.Equal(TargetType.AnyAlly, new ProtoKoPassTheMatch().TargetType);
         Assert.Equal(TargetType.AnyAlly, new ProtoKoHideHere().TargetType);
-        Assert.Equal(TargetType.AnyAlly, new ProtoFsGuestOfHonor().TargetType);
-        Assert.Equal(TargetType.AnyAlly,
-                     new ProtoFsShareTheSpotlight().TargetType);
         Assert.Equal(TargetType.Self, new ProtoKoKnightsOfFavonius().TargetType);
-        Assert.Equal(TargetType.Self, new ProtoFsPeopleOfFontaine().TargetType);
         Assert.Equal(TargetType.Self,
                      new ProtoKkSangonomiyasCounsel().TargetType);
     }
@@ -93,11 +86,6 @@ public class CoopSetTests
             + "your [gold]Bombs[/gold] on each enemy it hits. Draw {Cards:diff()} "
             + "card{Cards:plural:|s}.",
             Face(new ProtoKoPassTheMatch()));
-        Assert.Equal(
-            // The re-founding (2026-10-04, sec.10).
-            "Another player gains {Block:diff()} [gold]Block[/gold]. "
-            + "[gold]Cue[/gold] a performer.",
-            Face(new ProtoFsGuestOfHonor()));
         Assert.Equal(
             "Another player gains {Block:diff()} [gold]Block[/gold].\n"
             + "Or [gold]plan[/gold]: They draw 2 cards.",
@@ -122,7 +110,7 @@ public class CoopSetTests
 
         var coop = pool.GetUnlockedCards(
             null!, CardMultiplayerConstraint.MultiplayerOnly).ToList();
-        Assert.Equal(10, coop.Count);
+        Assert.Equal(7, coop.Count);
     }
 
     /// <summary>A pool of the nine and one standard card, through the base
@@ -139,8 +127,7 @@ public class CoopSetTests
         {
             new ProtoKoChainFuse(),
             new ProtoKoPassTheMatch(), new ProtoKoHideHere(),
-            new ProtoKoKnightsOfFavonius(), new ProtoFsGuestOfHonor(),
-            new ProtoFsShareTheSpotlight(), new ProtoFsPeopleOfFontaine(),
+            new ProtoKoKnightsOfFavonius(),
             new ProtoKkJointOrders(), new ProtoKkCoordinatedStrike(),
             new ProtoKkSangonomiyasCounsel(),
         };
@@ -156,8 +143,6 @@ public class CoopSetTests
             Il.Calls(Il.Method("KleeOverhaulRoster", "OfferablePool")));
         Assert.Contains("KokomiOverhaulRoster.MultiplayerSlice",
             Il.Calls(Il.Method("KokomiOverhaulRoster", "OfferablePool")));
-        Assert.Contains("FurinaStageRoster.MultiplayerRows",
-            Il.Calls(Il.Method("FurinaStageRoster", "OfferablePool")));
         Assert.DoesNotContain(
             Il.CallSequence(Il.Method("KleeOverhaulRoster", "Slice")),
             c => c.Contains("PassTheMatch") || c.Contains("HideHere")
@@ -315,40 +300,16 @@ public class CoopSetTests
     }
 
     // ---- Furina ----------------------------------------------------------------
+    //
+    // Her three co-op rows went with the v2 Stage (the Salon's Tab,
+    // 2026-10-05): she has no multiplayer tier.
 
     [Fact]
-    public void Guest_of_honor_blocks_the_ally_and_cues_a_performer()
+    public void Furina_offers_no_multiplayer_tier()
     {
-        // THE RE-FOUNDING (sec.10): "Another player gains 7 Block. Cue a
-        // performer." No redirect any more; a Cue card, so Lyney's line reads
-        // it.
-        var play = Il.Calls(Il.Method("ProtoFsGuestOfHonor", "OnPlay"));
-        Assert.Contains("FurinaStage.Cue", play);
-        Assert.True(typeof(IStageCueCard).IsAssignableFrom(
-            typeof(ProtoFsGuestOfHonor)));
-        Assert.Null(typeof(FurinaStage).Assembly.GetType(
-            "KleeMod.Powers.GuestOfHonorPower"));
-    }
-
-    [Fact]
-    public void Share_the_spotlight_spends_all_then_gives_block_per_point()
-    {
-        // The re-founding (sec.10): "Spend all your Fanfare. Another player
-        // gains 2 Block per point." The Spend first, then the ally's Block.
-        var seq = Il.CallSequence(Il.Method("FurinaStage", "ShareTheSpotlight")).ToList();
-        var spend = seq.IndexOf("StageDirector.SpendAll");
-        var block = seq.FindIndex(c => c.StartsWith("CreatureCmd.GainBlock"));
-        Assert.True(spend >= 0 && spend < block);
-        Assert.Contains("{SpotlightRate:diff()}", Face(new ProtoFsShareTheSpotlight()));
-    }
-
-    [Fact]
-    public void The_people_of_fontaine_gain_fanfare_on_another_players_attack()
-    {
-        var calls = Il.Calls(Il.Method("PeopleOfFontainePower", "AfterCardPlayed"));
-        Assert.Contains("CoopSet.IsAnotherPlayersAttack", calls);
-        Assert.Contains("FurinaStage.Gain", calls);
-        Assert.Contains("{PowerAmount:diff()}", Face(new ProtoFsPeopleOfFontaine()));
+        Assert.DoesNotContain(
+            Il.CallSequence(Il.Method("FurinaStageRoster", "OfferablePool")),
+            c => c.Contains("MultiplayerRows"));
     }
 
     // ---- Kokomi ------------------------------------------------------------------

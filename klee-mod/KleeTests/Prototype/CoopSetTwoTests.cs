@@ -43,8 +43,6 @@ public class CoopSetTwoTests
 
     public static IEnumerable<object[]> Four => new[]
     {
-        Row<ProtoFsRaiseAToast>(1, CardType.Skill, CardRarity.Uncommon),
-        Row<ProtoFsTheCrowdRoars>(1, CardType.Power, CardRarity.Rare),
         Row<ProtoKoShrapnel>(1, CardType.Skill, CardRarity.Uncommon),
         Row<ProtoKoSparksForEveryone>(2, CardType.Power, CardRarity.Rare),
     };
@@ -71,9 +69,7 @@ public class CoopSetTwoTests
     {
         // "Another player" is the base game's ally target (Coordinate, Lift);
         // Shrapnel's Mine is aimed at an enemy; the two Powers take none.
-        Assert.Equal(TargetType.AnyAlly, new ProtoFsRaiseAToast().TargetType);
         Assert.Equal(TargetType.AnyEnemy, new ProtoKoShrapnel().TargetType);
-        Assert.Equal(TargetType.Self, new ProtoFsTheCrowdRoars().TargetType);
         Assert.Equal(TargetType.Self,
                      new ProtoKoSparksForEveryone().TargetType);
     }
@@ -81,15 +77,6 @@ public class CoopSetTwoTests
     [Fact]
     public void The_faces_are_the_designs_words()
     {
-        // The re-founding (2026-10-04, sec.10).
-        Assert.Equal(
-            "Draw 1 card. [gold]Spend[/gold] 4: another player gains "
-            + "{IfUpgraded:show:6|4} temporary [gold]Strength[/gold].",
-            Face(new ProtoFsRaiseAToast()));
-        Assert.Equal(
-            "Whenever another player loses HP, gain {PowerAmount:diff()} "
-            + "[gold]Fanfare[/gold].",
-            Face(new ProtoFsTheCrowdRoars()));
         Assert.Equal(
             "Place a [gold]Mine[/gold] {BombSize:diff()}. While an enemy holds "
             + "your [gold]Mine[/gold], other players' Attacks deal 50% more "
@@ -104,24 +91,11 @@ public class CoopSetTwoTests
     [Fact]
     public void The_upgrades_are_the_ruled_ones()
     {
-        // Raise a Toast (the re-founding): its Spend mode gives 4 temporary
-        // Strength, 6 upgraded -- a play-time IsUpgraded read in the mode.
-        Assert.Contains("FurinaStage.RaiseAToast",
-            Il.Calls(Il.Method("ProtoFsRaiseAToast", "OnPlay")));
-
         // Shrapnel: Mine 4 -> 7.
         var shrapnel = new ProtoKoShrapnel();
         Assert.Equal(4m, shrapnel.DynamicVars["BombSize"].BaseValue);
         Upgrade(shrapnel);
         Assert.Equal(7m, shrapnel.DynamicVars["BombSize"].BaseValue);
-
-        // The Crowd Roars (power cost sweep, 2026-09-30): costs 1, and the
-        // upgrade raises the front performer's Fanfare 1 -> 2, cost unmoved.
-        var roars = new ProtoFsTheCrowdRoars();
-        Assert.Equal(1m, roars.DynamicVars["PowerAmount"].BaseValue);
-        Upgrade(roars);
-        Assert.Equal(2m, roars.DynamicVars["PowerAmount"].BaseValue);
-        Assert.Equal(1, roars.EnergyCost.GetWithModifiers(CostModifiers.None));
 
         // Sparks for Everyone: gains Innate, and the cost stays 2 ([USER],
         // 2026-09-27: "might also be fine at 2 cost").
@@ -148,7 +122,7 @@ public class CoopSetTwoTests
 
         var coop = pool.GetUnlockedCards(
             null!, CardMultiplayerConstraint.MultiplayerOnly).ToList();
-        Assert.Equal(5, coop.Count);
+        Assert.Equal(3, coop.Count);
     }
 
     private sealed class ProbePool : CardPoolModel
@@ -162,7 +136,6 @@ public class CoopSetTwoTests
         protected override CardModel[] GenerateAllCards() => new CardModel[]
         {
             new ProtoKoChainFuse(),
-            new ProtoFsRaiseAToast(), new ProtoFsTheCrowdRoars(),
             new ProtoKoShrapnel(), new ProtoKoSparksForEveryone(),
         };
     }
@@ -176,77 +149,9 @@ public class CoopSetTwoTests
             Il.Method("KleeOverhaulRoster", "MultiplayerSlice"));
         Assert.Contains(klee, c => c.Contains("ProtoKoShrapnel"));
         Assert.Contains(klee, c => c.Contains("ProtoKoSparksForEveryone"));
-        var furina = Il.CallSequence(
-            Il.Method("FurinaStageRoster", "MultiplayerRows"));
-        Assert.Contains(furina, c => c.Contains("ProtoFsRaiseAToast"));
-        Assert.Contains(furina, c => c.Contains("ProtoFsTheCrowdRoars"));
         Assert.DoesNotContain(
             Il.CallSequence(Il.Method("KleeOverhaulRoster", "Slice")),
             c => c.Contains("Shrapnel") || c.Contains("SparksForEveryone"));
-    }
-
-    // ---- Raise a Toast -----------------------------------------------------
-
-    [Fact]
-    public void Raise_a_toast_spends_four_in_a_mode_then_gives_the_strength()
-    {
-        // The re-founding (sec.10): "Draw 1 card. Spend 4: another player
-        // gains 4 temporary Strength." A Spend mode, offered only with 4
-        // Fanfare; the Spend comes before the Strength.
-        var seq = Il.CallSequence(Il.Method("ProtoFsRaiseAToast", "OnPlay")).ToList();
-        var spend = seq.IndexOf("FurinaStage.Spend");
-        var toast = seq.IndexOf("FurinaStage.RaiseAToast");
-        Assert.True(spend >= 0 && spend < toast);
-        Assert.Contains("FurinaStage.CanSpend", seq);
-    }
-
-    [Fact]
-    public async System.Threading.Tasks.Task A_toast_of_nothing_or_to_nobody_gives_nothing()
-    {
-        FurinaStageLedger.ResetAll();
-        var furina = Seat.Furina().WithCombatState();
-        var ally = Seat.Klee();
-        Assert.Equal(0, await FurinaStage.RaiseAToast(
-            null!, furina.Creature, ally.Creature, 0, cardSource: null));
-        Assert.Equal(0, await FurinaStage.RaiseAToast(
-            null!, furina.Creature, null, 4, cardSource: null));
-        FurinaStageLedger.ResetAll();
-    }
-
-    [Fact]
-    public void The_toast_is_coordinates_temporary_strength_placed_by_furina()
-    {
-        Assert.True(typeof(TemporaryStrengthPower)
-            .IsAssignableFrom(typeof(RaiseAToastPower)));
-        var body = Il.Calls(Il.Method("FurinaStage", "RaiseAToast"));
-        Assert.Contains(body, c => c.StartsWith("PowerCmd.Apply"));
-    }
-
-    // ---- The Crowd Roars -------------------------------------------------------
-
-    [Fact]
-    public void The_crowd_roars_at_any_hp_another_player_loses_and_nothing_else()
-    {
-        var furina = Seat.Furina();
-        var ally = Seat.Klee();
-        var enemy = Enemy();
-
-        Assert.True(TheCrowdRoarsPower.Pays(furina.Creature, ally.Creature, -1m));
-        Assert.True(TheCrowdRoarsPower.Pays(furina.Creature, ally.Creature, -30m));
-        Assert.False(TheCrowdRoarsPower.Pays(furina.Creature, ally.Creature, 0m));
-        Assert.False(TheCrowdRoarsPower.Pays(furina.Creature, ally.Creature, 5m));
-        Assert.False(TheCrowdRoarsPower.Pays(furina.Creature, furina.Creature, -4m));
-        Assert.False(TheCrowdRoarsPower.Pays(furina.Creature, enemy, -4m));
-        Assert.False(TheCrowdRoarsPower.Pays(null, ally.Creature, -4m));
-    }
-
-    [Fact]
-    public void The_crowd_roars_gains_fanfare()
-    {
-        // The re-founding (sec.10): "Whenever another player loses HP, gain 1
-        // Fanfare" -- Furina's one number.
-        Assert.Contains("FurinaStage.Gain",
-            Il.Calls(Il.Method("TheCrowdRoarsPower", "AfterCurrentHpChanged")));
     }
 
     // ---- Shrapnel ----------------------------------------------------------------

@@ -30,9 +30,12 @@ def _rows() -> dict:
 def test_spend_only_element_is_detected_on_the_two_flourishes():
     rows = _rows()
     assert gen.element_only_in_gated_modes(rows["proto_fs_tidal_flourish"])
-    assert gen.element_only_in_gated_modes(rows["proto_fs_quick_cue"])
-    # Grand Deluge applies Hydro on its only (unmoded) hit.
-    assert not gen.element_only_in_gated_modes(rows["proto_fs_grand_deluge"])
+    # The Salon's Tab (2026-10-05): Quick Flourish's Spend is a fixed price
+    # now, so its Hydro rides its only (unmoded) hit; Chevalmarin's Hydro is
+    # in both of its modes.
+    assert not gen.element_only_in_gated_modes(rows["proto_fs_quick_cue"])
+    assert not gen.element_only_in_gated_modes(
+        rows["proto_fs_surintendante_chevalmarin"])
 
 
 def test_interval_bell_spend_title_is_rendered_per_side():

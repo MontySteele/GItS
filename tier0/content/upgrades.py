@@ -820,10 +820,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             hit = next((fx for fx in top
                         if fx.get("op") == "grant_kapow_each_turn"
                         or (fx.get("op") == "kokomi"
-                            and fx.get("kind") == "shoal_call")
-                        # POOL COMPLETION: Casting Agent's Guest Star
-                        # arrives upgraded.
-                        or fx.get("op") == "stage_casting_agent"), None)
+                            and fx.get("kind") == "shoal_call")), None)
             # THE STATUS BATCH: Sea Glass Harvest's Plan transforms into
             # Sea Glass+, a flag on the plan clause.
             if hit is None:
@@ -845,15 +842,9 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # two are different promises:
             # `block` is what the card gains, `cap` is what it will not gain
             # past, and a row could one day print both.
-            # Furina's co-op rows print their per-point rate in the same key
-            # (`gen_klee_cards.CAP_VAR` is the twin): Share the Spotlight's
-            # "N Block per point" (top level) and Raise a Toast's "N
-            # temporary Strength", which sits inside its Spend mode -- so
-            # this key reads `everywhere`, the first such op on the card.
             ok = _bump_first(
                 (fx for fx in everywhere
-                 if fx.get("op") in ("block_largest_bomb", "stage_toast",
-                                     "stage_share_spotlight")),
+                 if fx.get("op") == "block_largest_bomb"),
                 "cap", val)
         elif key == "grow":
             # One key, three ops: `grow_bombs.amount`, `merge_bombs.growth`
@@ -919,12 +910,12 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "stage_spend"),
                              "amount", val)
-        elif key == "stage_raise":
-            # Furina's "Gain N Fanfare" (Rising Applause, Hold Your Places,
-            # Singer of Many Waters): the printed N, the first top-level `stage_raise` -- codegen's
-            # `stage_raise_var_effect` binds the same one.
+        elif key == "stage_repay":
+            # THE SALON'S TAB (2026-10-05): "Repay N [N']", the first
+            # top-level `stage_repay` -- codegen's `STAGE_AMOUNT_VARS` binds
+            # the same one (RepayAmount).
             ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "stage_raise"),
+                              if fx.get("op") == "stage_repay"),
                              "amount", val)
         elif key in PLAN_DELTA_OPS:
             # `EB-315`. The PLAN line's own numbers, one key per op, bound to
@@ -1096,14 +1087,38 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)
-        elif key in ("mode_damage", "mode_power_amount"):
+        elif key == "conditional_then_block":
+            # THE SALON'S TAB (2026-10-05, Gentilhomme Usher's "7 [9] Block.
+            # Drain 3: 13 [17] instead"): `conditional_then_damage`'s block
+            # twin, the first block of every mode after the first, as
+            # codegen's `_is_then_first_block` reads it.
+            hits = []
+            for fx in everywhere:
+                if fx.get("op") == "choose_one":
+                    arms = [m.get("effects") or []
+                            for m in (fx.get("modes") or [])[1:]]
+                elif fx.get("op") == "conditional":
+                    arms = [fx.get("then", [])]
+                else:
+                    continue
+                for arm in arms:
+                    first = next((e for e in arm
+                                  if e.get("op") == "block"
+                                  and isinstance(e.get("amount"), int)), None)
+                    if first is not None:
+                        hits.append(first)
+            for fx in hits:
+                fx["amount"] += val
+            ok = bool(hits)
+        elif key in ("mode_damage", "mode_power_amount", "mode_draw"):
             # AoE trim, 2026-10-03 (Durin's split): a `choose_one` whose modes
             # print DIFFERENT upgrades ("6 [8] to ALL" / "4 [5] three times").
             # The value is a list in MODE ORDER; entry i moves the first
             # `damage` (or `apply_power`) amount of mode i of the row's first
             # top-level `choose_one`. A list shorter or longer than the modes
             # is a sheet error.
-            op = "damage" if key == "mode_damage" else "apply_power"
+            op = {"mode_damage": "damage", "mode_draw": "draw"}.get(
+                key, "apply_power")
             modal = next((fx for fx in top if fx.get("op") == "choose_one"),
                          None)
             modes = (modal or {}).get("modes") or []

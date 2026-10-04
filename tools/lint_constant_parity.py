@@ -289,43 +289,19 @@ MIRRORED: dict[str, object] = {
     # reads them for its keyword tips, so a pair that drifted would print a
     # retired number under a card the seat is grading.
     "FurinaStageLaw.Seats": _stage("SEATS"),
-    # The supporting pool's Sold Out (2026-09-26): the seat count with the
-    # fourth seat open.
-    "FurinaStageLaw.SoldOutSeats": _stage("SOLD_OUT_SEATS"),
-    # POOL COMPLETION (2026-10-01): Casting Agent's three.
-    "FurinaStageLaw.CastingAgentOffer": _stage("CASTING_AGENT_OFFER"),
-    # THE RE-FOUNDING (2026-10-04, review/active/furina-refounding-
-    # 2026-10-03.md sec.1 / sec.2 / sec.8 / sec.10): the Bow's Fanfare, the
-    # trio's acts, the stars' prices and acts, the guests' lines and acts.
-    # The bar-era numbers (opening and summon Fanfare, regen, refill, fade,
-    # Clorinde's tax, Wriothesley's and Sigewinne's readings, Charlotte's and
-    # Escoffier's gifts, Lyney's damage, Pneuma's regain) retired with the
-    # bars.
-    "FurinaStageLaw.BowFanfare": _stage("BOW_FANFARE"),
-    "FurinaStageLaw.ActUsherBlock": _stage("ACT_USHER_BLOCK"),
-    "FurinaStageLaw.ActChevalmarinDamage": _stage("ACT_CHEVALMARIN_DAMAGE"),
-    "FurinaStageLaw.ActCrabalettaDamage": _stage("ACT_CRABALETTA_DAMAGE"),
-    "FurinaStageLaw.ActNeuvillettePrice": _stage("ACT_NEUVILLETTE_PRICE"),
-    "FurinaStageLaw.ActNeuvilletteDamage": _stage("ACT_NEUVILLETTE_DAMAGE"),
-    "FurinaStageLaw.NeuvilletteHydroBonus": _stage("NEUVILLETTE_HYDRO_BONUS"),
-    "FurinaStageLaw.ActClorindePrice": _stage("ACT_CLORINDE_PRICE"),
-    "FurinaStageLaw.ActClorindeDamage": _stage("ACT_CLORINDE_DAMAGE"),
-    "FurinaStageLaw.ClorindeSpendDamage": _stage("CLORINDE_SPEND_DAMAGE"),
-    "FurinaStageLaw.ActLyneyPrice": _stage("ACT_LYNEY_PRICE"),
-    "FurinaStageLaw.TrickDamage": _stage("TRICK_DAMAGE"),
-    "FurinaStageLaw.ActEscoffierPrice": _stage("ACT_ESCOFFIER_PRICE"),
-    "FurinaStageLaw.NaviaPerSpent": _stage("NAVIA_PER_SPENT"),
-    "FurinaStageLaw.ActCharlotteGain": _stage("ACT_CHARLOTTE_GAIN"),
-    "FurinaStageLaw.CharlotteExtra": _stage("CHARLOTTE_DRAW"),
-    "FurinaStageLaw.ActLynetteDamage": _stage("ACT_LYNETTE_DAMAGE"),
-    "FurinaStageLaw.ActChevreusePrice": _stage("ACT_CHEVREUSE_PRICE"),
-    "FurinaStageLaw.ActChevreuseEnergy": _stage("ACT_CHEVREUSE_ENERGY"),
-    "FurinaStageLaw.ActSigewinneBlock": _stage("ACT_SIGEWINNE_BLOCK"),
-    "FurinaStageLaw.SigewinnePerHpLoss": _stage("SIGEWINNE_PER_HP_LOSS"),
-    "FurinaStageLaw.ActWriothesleyDamage": _stage("ACT_WRIOTHESLEY_DAMAGE"),
-    "FurinaStageLaw.WriothesleyPerBlocked": _stage("WRIOTHESLEY_PER_BLOCKED"),
-    # Arkhe Alignment's and Dual Nature's Pneuma (sec.8): "Gain 2 Fanfare."
-    "ArkheAlignmentPower.PneumaFanfare": _stage("PNEUMA_FANFARE"),
+    # THE SALON'S TAB (2026-10-05, review/active/furina-research-proposal-
+    # 2026-10-05.md sec.16): the Singer's Repay (the starter and its Orobas
+    # upgrade) and the four guests' lines and acts. The v2 Stage's numbers
+    # (the trio, the stars' prices, the Bow's Fanfare, Rehearsal, Sold Out,
+    # Casting Agent, Pneuma) retired with it.
+    "FurinaStageLaw.SingerRepay": _stage("SINGER_REPAY"),
+    "FurinaStageLaw.SingerRepayUpgraded": _stage("SINGER_REPAY_UPGRADED"),
+    "FurinaStageLaw.CharlotteActRepay": _stage("CHARLOTTE_ACT_REPAY"),
+    "FurinaStageLaw.CharlotteLineDraw": _stage("CHARLOTTE_LINE_DRAW"),
+    "FurinaStageLaw.WriothesleyActDamage": _stage("WRIOTHESLEY_ACT_DAMAGE"),
+    "FurinaStageLaw.LynetteActDamage": _stage("LYNETTE_ACT_DAMAGE"),
+    "FurinaStageLaw.ClorindeActDamage": _stage("CLORINDE_ACT_DAMAGE"),
+    "FurinaStageLaw.ClorindePerRepay": _stage("CLORINDE_PER_REPAY"),
     # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md,
     # ruled 2026-09-29): the Swirl payout of each current element, and
     # Stormward Stance's Oath bar. Sim twins in `tier0/engine/varka_oath.py`.
@@ -376,20 +352,13 @@ UNMIRRORED: dict[str, str] = {
     "BottledApplause.Fanfare": _ARM_ITEMS_REASON,
     "BottledSparks.Sparks": _ARM_ITEMS_REASON,
     "CloverCharm.Block": _ARM_ITEMS_REASON,
-    "CurtainCallBouquet.BowActs": _ARM_ITEMS_REASON,
-    "CurtainNeverFalls.Rehearsal": _ARM_ITEMS_REASON,
-    "PalaisLedger.Discount": _ARM_ITEMS_REASON,
-    "CurtainWater.Rehearsal": _ARM_ITEMS_REASON,
     "DodocoArmy.MineSize": _ARM_ITEMS_REASON,
     "DodocoCharm.Bonus": _ARM_ITEMS_REASON,
-    "EncoreElixir.Acts": _ARM_ITEMS_REASON,
     "ExplosiveFrags.FirstExplosionSparks": _ARM_ITEMS_REASON,
     "FireworksStand.Energy": _ARM_ITEMS_REASON,
     "FireworksStand.Threshold": _ARM_ITEMS_REASON,
-    "GuestBook.Bonus": _ARM_ITEMS_REASON,
     "OperaGlasses.Fanfare": _ARM_ITEMS_REASON,
     "GrandTheaterProgram.Fanfare": _ARM_ITEMS_REASON,
-    "StagehandsGloves.Block": _ARM_ITEMS_REASON,
     "WatatsumiCasket.WatatsumiOpeningCount":
         "THE KOKOMI OVERHAUL'S TOUCH OF OROBAS UPGRADE (2026-09-30, main-"
         "session design from the co-op playtest). A Prototype-stage relic "
@@ -658,6 +627,12 @@ UNMIRRORED: dict[str, str] = {
         "than collapsing to nothing.",
     "SparkCounter.CountFontSize":
         "presentation: the Spark count's font size.",
+    # Furina's "Drained N" counter (the Salon's Tab, 2026-10-05): its slot in
+    # the row above the energy orb, after the Fanfare gauge.
+    "DrainedCounter.Slot":
+        "presentation: the counter's place in the row above the energy orb "
+        "(after the Fanfare gauge). The number it draws is the ledger's "
+        "drained HP, which the sim keeps as `Ftd.drained`.",
     "SparkCounter.PanelMargin":
         "presentation: the gap the badge keeps from the energy panel, in the "
         "panel's own units. It is a MARGIN rather than a position -- it is "

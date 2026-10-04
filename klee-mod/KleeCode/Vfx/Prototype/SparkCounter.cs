@@ -207,7 +207,7 @@ public static class SparkCounter
     /// Fanfare gauge when she holds Sparks, first otherwise.
     /// </summary>
     public static int SlotFor(Creature? creature) =>
-        FanfareCounter.AppliesTo(creature) ? 1 : 0;
+        FanfareCounter.AppliesTo(creature) ? DrainedCounter.Slot + 1 : 0;
 
     /// <summary>The number the badge draws: the bank, right now, through the
     /// arm's one read

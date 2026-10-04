@@ -129,8 +129,13 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # them off exactly where they are needed. They are scoped by the card's
     # own TargetType instead -- values only the Kokomi arm's cards carry --
     # and resolve no seat.
-    # A SEVENTH appearing here is the next review question.
-    assert len(markers) == 6, markers
+    # IT WENT SIX -> SEVEN ON 2026-10-05 (the Salon's Tab), and this is the
+    # seventh's answer: the "Drained N" counter (`Vfx/Prototype/
+    # DrainedCounter.cs`) is the Fanfare gauge's clone, torn down by node
+    # name with its scope at `Setup` (`DrainedCounter.AppliesTo` ->
+    # `FurinaResources.IsFurina`), the same shape the Spark counter answered.
+    # An EIGHTH appearing here is the next review question.
+    assert len(markers) == 7, markers
 
 
 def test_registered_in_the_ci_lane() -> None:

@@ -44,21 +44,4 @@ public class PowerCostSweep20260930Tests
             Il.CallSequence(Il.Method("VarkaOath", "TurnStart")));
         Assert.Contains("SwornBrotherhoodCurrentPower", start);
     }
-
-    [Fact]
-    public void A_five_century_act_costs_three_and_its_upgrade_two()
-    {
-        // The re-founding (sec.10): "(Power, 3) ... (cost 2)"; the return
-        // carries no Fanfare any more.
-        Assert.Equal(3, new ProtoFsFiveCenturyAct().EnergyCost.Canonical);
-    }
-
-    [Fact]
-    public void One_woman_show_costs_three_and_its_upgrade_two()
-    {
-        var card = new ProtoFsOneWomanShow();
-        Assert.Equal(3, card.EnergyCost.Canonical);
-        Assert.Contains("EnergyCost.UpgradeBy",
-            string.Join(" ", Il.Calls(Il.Method("ProtoFsOneWomanShow", "OnUpgrade"))));
-    }
 }

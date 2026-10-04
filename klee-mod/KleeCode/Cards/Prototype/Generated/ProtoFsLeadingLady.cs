@@ -32,35 +32,39 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsLeadingLady : CustomCardModel, ICharacterCard, IStageSalonSummonCard
+public sealed class ProtoFsLeadingLady : CustomCardModel, ICharacterCard, IModalCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForDrain(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_leading_lady");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gentilhomme Usher"),
-        ("description", "Summon Usher. Gain {Block:diff()} [gold]Block[/gold].{InCombat:{StageBow}|}"),
+        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Drain[/gold] 3: gain {BranchBlock:diff()} instead."),
     };
 
-    /// <summary>Who this card's summon will Bow, on its in-combat line
-    /// (`FurinaStageBowPreview`).</summary>
-    protected override void AddExtraArgsToDescription(
-        MegaCrit.Sts2.Core.Localization.LocString description)
-    {
-        base.AddExtraArgsToDescription(description);
-        description.Add("StageBow", FurinaStageBowPreview.Salon(this, "usher"));
-    }
+    // EB-184: what each mode does about AIMING, in sheet order.
+    // The card's own TargetType is fixed before a mode is chosen (the
+    // game aims first), so it answers for the card and not for the
+    // play -- an Attack-typed modal declares AnyEnemy for the mode
+    // that aims, and the bridge then demanded a target on the mode
+    // that attacks nothing. These two rows are what it reads instead.
+    public IReadOnlyList<string> ModeLabels =>
+        new[] { "Gain 7 Block", "[gold]Drain[/gold] 3: gain 13 instead" };
+
+    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
+        new[] { false, false };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new SpotlightSystem.SpotlitBlockVar(4m)
+            new FoldedBlockVar("PlainBlock", 7m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,12 +76,113 @@ public sealed class ProtoFsLeadingLady : CustomCardModel, ICharacterCard, IStage
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Summon(choiceContext, Owner.Creature, "usher");
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        var modeOptions = new List<CardModel>
+        {
+            ModalChoice.CreateMatchingOption<ProtoFsLeadingLadyModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoFsLeadingLadyModeB>(Owner, this),
+        };
+        var modeRules = new ModeRequirement?[]
+        {
+            null,
+            new ModeRequirement(FurinaStage.CanDrain(Owner.Creature, 3),
+                                "would take her below the Drain line"),
+        };
+        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 7 Block", "[gold]Drain[/gold] 3: gain 13 instead" }[modeIndex]);
+        if (modeIndex == 0)
+        {
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 9m : 7m), ValueProp.Move), cardPlay);
+        }
+        else
+        {
+            await FurinaStage.Drain(choiceContext, Owner.Creature, 3);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 17m : 13m), ValueProp.Move), cardPlay);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
+        // conditional_then_block: the then-branch Block swaps on an IsUpgraded read at play time; the face prints it live.
+        // conditional_block: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
+        DynamicVars["PlainBlock"].UpgradeValueBy(2m);
+        DynamicVars["BranchBlock"].UpgradeValueBy(4m);
+    }
+}
+
+/// <summary>Mode 0 of proto_fs_leading_lady. A face for the choose-a-card screen;
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
+public sealed class ProtoFsLeadingLadyModeA : ModalOptionCard
+{
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("proto_fs_leading_lady");
+
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Gain Block"),
+        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]"),
+    };
+
+    public ProtoFsLeadingLadyModeA()
+        : base(CardType.Skill)
+    {
+    }
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new FoldedBlockVar("PlainBlock", 7m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PlainBlock"].UpgradeValueBy(2m);
+        DynamicVars["BranchBlock"].UpgradeValueBy(4m);
+    }
+}
+
+/// <summary>Mode 1 of proto_fs_leading_lady. A face for the choose-a-card screen;
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
+public sealed class ProtoFsLeadingLadyModeB : ModalOptionCard
+{
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("proto_fs_leading_lady");
+
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Drain 3"),
+        ("description", "[gold]Drain[/gold] 3: gain {BranchBlock:diff()} instead"),
+    };
+
+    public ProtoFsLeadingLadyModeB()
+        : base(CardType.Skill)
+    {
+    }
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new FoldedBlockVar("PlainBlock", 7m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PlainBlock"].UpgradeValueBy(2m);
+        DynamicVars["BranchBlock"].UpgradeValueBy(4m);
     }
 }

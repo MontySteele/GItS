@@ -41,20 +41,20 @@ public sealed class ProtoFsSingerOfManyWaters : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForRepay(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("singer_of_many_waters");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Singer of Many Waters"),
-        ("description", "Gain {RaiseAmount:diff()} [gold]Fanfare[/gold]."),
+        ("description", "[gold]Repay[/gold] all your drained HP."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("RaiseAmount", 6m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -66,11 +66,11 @@ public sealed class ProtoFsSingerOfManyWaters : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Gain(choiceContext, Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
+        await FurinaStage.RepayAll(choiceContext, Owner.Creature);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["RaiseAmount"].UpgradeValueBy(3m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

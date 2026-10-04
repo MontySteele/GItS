@@ -161,11 +161,6 @@ def _est(state: CombatState, val, default: int = 0) -> float:
 _ENGINE_LIVE_PREDICATES = frozenset({
     "enemy_intends_attack",
     "has_salon_members",
-    # FURINA'S STAGE: "if no one is on stage" and its opposite -- a pure
-    # current-state read with no snapshot field, which is exactly this
-    # collection's test.
-    "stage_occupied",
-    "stage_empty",
     "spotlight_moved_this_turn",
     # `EB-711` (QUARANTINED, `C.KOKOMI_OVERHAUL`). "If the Bake-Kurage is
     # holding a Plan" -- `len(state.kk_plan_queue) > 0`, a pure current-state
@@ -759,162 +754,35 @@ def _estimated_exhausts(state: CombatState, card: Card) -> int:
 
 
 # ---------------------------------------------------------------------------
-#  FURINA'S STAGE (`tier0.engine.furina_stage`, the re-founded rules): what a
-#  Stage verb is worth this turn, and the choices inside her cards. An
-#  INSTRUMENT, not a design: the simplest readings that make the pilot field
-#  a cast, Cue it and Spend.
+#  FURINA, THE SALON'S TAB (`tier0.engine.furina_stage`, on the research
+#  slice's rules): what her verbs are worth this turn. An INSTRUMENT, not a
+#  design: the simplest readings that make the pilot seat guests, Repay and
+#  Spend. The in-card choices (take a Drain mode, take a Spend mode) are
+#  `furina_stage.FurinaTideDecider`'s.
 # ---------------------------------------------------------------------------
 
 #: A Fanfare gained, in `_tempo_value`'s units (a card drawn is 1).
-STAGE_FANFARE_TEMPO = 1.0
-#: A Fanfare a star pays, in damage points: what a Cue's payment costs.
-STAGE_FANFARE_POINTS = 1.5
+STAGE_FANFARE_TEMPO = 0.5
+#: An HP repaid, in the same units: it is HP back and a point of Fanfare.
+STAGE_REPAY_TEMPO = 0.4
 
-
-def stage_act_parts(state: CombatState, member: str, *, free: bool = False,
-                    fanfare: Optional[int] = None) -> tuple[float, float]:
-    """`(damage, block)` one act of `member` would make now, off the printed
-    numbers, Rehearsal and Ousia. A star that cannot pay makes nothing (it
-    skips); Chevreuse's act and the supports' gains are not damage or Block
-    and read (0, 0)."""
-    p = state.player
+#: One act of each guest, `(damage, block)`, off the printed numbers.
+def stage_act_parts(state: CombatState, member: str) -> tuple[float, float]:
     fs = furina_stage
-    held = fs.fanfare(p) if fanfare is None else fanfare
-    if member in fs.STAR_PRICE and not free and held < fs.STAR_PRICE[member]:
-        return (0.0, 0.0)
-    r = fs.rehearsal(p)
-    mult = max(1, int(getattr(p, "stage_act_damage_mult", 1)))
-    n = max(1, len(state.living_enemies))
-    hydro = fs.NEUVILLETTE_HYDRO_BONUS if member == "neuvillette" else 0
-    if member == "usher":
-        return (0.0, float(fs.ACT_USHER_BLOCK + r))
-    if member == "sigewinne":
-        losses = max(0, int(state.player_damage_events)
-                     - int(p.stage_sigewinne_mark))
-        return (0.0, float(fs.ACT_SIGEWINNE_BLOCK
-                           + fs.SIGEWINNE_PER_HP_LOSS * losses + r))
-    if member == "lyney":
-        return (float(fs.TRICK_DAMAGE), 0.0)      # the Trick, played later
-    per = {"chevalmarin": (fs.ACT_CHEVALMARIN_DAMAGE, n),
-           "crabaletta": (fs.ACT_CRABALETTA_DAMAGE, 1),
-           "neuvillette": (fs.ACT_NEUVILLETTE_DAMAGE, n),
-           "clorinde": (fs.ACT_CLORINDE_DAMAGE, 1),
-           "lynette": (fs.ACT_LYNETTE_DAMAGE, 1),
-           "wriothesley": (fs.ACT_WRIOTHESLEY_DAMAGE
-                           + fs.WRIOTHESLEY_PER_BLOCKED
-                           * int(p.stage_wriothesley_blocked), 1)}
-    if member in per:
-        base, hits = per[member]
-        return (float(((base + r) * mult + hydro) * hits), 0.0)
-    if member == "navia":
-        spent = int(p.stage_spent_this_turn)
-        if spent <= 0:
-            return (0.0, 0.0)
-        return (float((fs.NAVIA_PER_SPENT * spent + r) * mult), 0.0)
-    if member == "escoffier":
-        dmg = blk = 0.0
-        for m in fs.stage(p):
-            if m in fs.SALON:
-                d, b = stage_act_parts(state, m)
-                dmg, blk = dmg + d, blk + b
-        return (dmg, blk)
+    if member == "wriothesley":
+        return (float(fs.WRIOTHESLEY_ACT_DAMAGE), 0.0)
+    if member == "clorinde":
+        return (float(fs.CLORINDE_ACT_DAMAGE), 0.0)
+    if member == "lynette":
+        aura = any(getattr(e, "aura", None) for e in state.living_enemies)
+        return (float(fs.LYNETTE_ACT_DAMAGE) if aura else 0.0, 0.0)
     return (0.0, 0.0)
 
 
-def _stage_act_value(state: CombatState, member: str) -> float:
-    """One act of `member` now, in damage points: its damage, its Block up to
-    this turn's need, less what a star pays. A star she cannot pay for is
-    worth -1 (it would skip)."""
-    fs = furina_stage
-    p = state.player
-    price = fs.STAR_PRICE.get(member, 0)
-    if member in fs.STAR_PRICE and fs.fanfare(p) < price:
-        return -1.0
-    dmg, blk = stage_act_parts(state, member)
-    need = max(0.0, _incoming_damage(state) - p.block)
-    val = dmg + min(blk, need) + 0.2 * max(0.0, blk - need)
-    if member == "charlotte":
-        val += STAGE_FANFARE_POINTS * fs.ACT_CHARLOTTE_GAIN
-    if member == "chevreuse" and not p.stage_chevreuse_acted:
-        if fs.fanfare(p) >= fs.ACT_CHEVREUSE_PRICE:
-            val += 1.0
-        else:
-            val -= 1.0
-    return val - STAGE_FANFARE_POINTS * price
-
-
-class FurinaStageDecider:
-    """The choices a player makes inside Furina's cards, for the sim. Simple
-    and deterministic on purpose:
-
-    * a Cue names the performer whose act is worth most now
-      (`_stage_act_value`: its damage, its Block up to this turn's need, less
-      a star's price; a star she cannot pay for is never named over one that
-      acts), ties to the front-most;
-    * Step Forward moves Charlotte to the front when she stands behind
-      someone (she funds the stars behind her the same turn), else the back
-      performer;
-    * Final Bow / Intermission sends off the front-most Salon member (a guest
-      keeps its seat), else the front performer;
-    * Arkhe Alignment and Dual Nature take Ousia when a performer on stage
-      deals damage, else Pneuma;
-    * a Spend mode is taken whenever she holds its price (the arm's "spend
-      when it can" read), except a mode whose payoff is another player's
-      (Raise a Toast's), which in a one-seat fight buys nothing.
-    """
-
-    def cue_target(self, state: CombatState) -> Optional[int]:
-        seats = furina_stage.stage(state.player)
-        if not seats:
-            return None
-        vals = [(_stage_act_value(state, m), -i) for i, m in enumerate(seats)]
-        return -max(vals)[1]
-
-    def front_target(self, state: CombatState) -> Optional[int]:
-        seats = furina_stage.stage(state.player)
-        if len(seats) < 2:
-            return None
-        if "charlotte" in seats[1:]:
-            return seats.index("charlotte", 1)
-        return len(seats) - 1
-
-    def final_bow_target(self, state: CombatState) -> Optional[int]:
-        seats = furina_stage.stage(state.player)
-        if not seats:
-            return None
-        for i, m in enumerate(seats):
-            if m in furina_stage.SALON:
-                return i
-        return 0
-
-    def arkhe_choice(self, state: CombatState) -> str:
-        for m in furina_stage.stage(state.player):
-            if stage_act_parts(state, m, free=True)[0] > 0:
-                return "ousia"
-        return "pneuma"
-
-    def spend_mode(self, state: CombatState, modes: list) -> Optional[int]:
-        spends = [(i, furina_stage.spend_mode_amount(m))
-                  for i, m in enumerate(modes)]
-        spends = [(i, n) for i, n in spends if n is not None]
-        if len(spends) != 1:
-            return None
-        index, amount = spends[0]
-        keep = next((i for i in range(len(modes)) if i != index), 0)
-        body = modes[index].get("effects") or []
-        if any(fx.get("op") == "stage_toast" for fx in body):
-            return keep
-        return index if furina_stage.can_pay(state.player, amount) else keep
-
-
-FURINA_STAGE_DECIDER = FurinaStageDecider()
-
-
 def _stage_parts(state: CombatState, card: Card) -> tuple[float, float]:
-    """`(damage, block)` a Stage card's verbs put on the board this turn: a
-    summon's or a guest's first act (at the end of this turn), a Cue's act
-    now, Tutti!'s acts, the Bows' free acts. A random summon takes the mean
-    of the trio. Read off the stage as it stands at score time."""
+    """`(damage, block)` a Guest Star card puts on the board this turn: the
+    guest's first act at the end of this turn (a repeat acts now), plus the
+    leaving act of the oldest guest on a full stage."""
     fs = furina_stage
     p = state.player
     if not fs.active(p):
@@ -922,37 +790,14 @@ def _stage_parts(state: CombatState, card: Card) -> tuple[float, float]:
     seats = fs.stage(p)
     dmg = blk = 0.0
     for fx in card.effects:
-        op = fx.get("op")
-        parts: list = []
-        if op == "stage_summon":
-            member = fx.get("member", "random")
-            if member == "random":
-                parts = [(stage_act_parts(state, m), 1.0 / len(fs.SALON))
-                         for m in fs.SALON]
-            else:
-                parts = [(stage_act_parts(state, member), 1.0)]
-        elif op == "stage_guest":
-            amount = fx.get("amount", 0)
-            amount = amount if isinstance(amount, int) else 0
-            parts = [(stage_act_parts(state, fx.get("member", ""),
-                                      fanfare=fs.fanfare(p) + amount), 1.0)]
-        elif op == "stage_cue" and seats:
-            pick = FURINA_STAGE_DECIDER.cue_target(state)
-            times = fx.get("times", 1)
-            parts = [(stage_act_parts(state, seats[pick]),
-                      float(times if isinstance(times, int) else 1))]
-        elif op == "stage_perform_all":
-            parts = [(stage_act_parts(state, m), 1.0) for m in seats
-                     if not fx.get("guests") or m in fs.GUESTS]
-        elif op in ("stage_grand_finale", "stage_curtain_call"):
-            parts = [(stage_act_parts(state, m, free=True), 1.0)
-                     for m in seats]
-        elif op == "stage_final_bow" and seats:
-            pick = FURINA_STAGE_DECIDER.final_bow_target(state)
-            parts = [(stage_act_parts(state, seats[pick], free=True), 1.0)]
-        for (d, b), k in parts:
-            dmg += d * k
-            blk += b * k
+        if fx.get("op") != "stage_guest":
+            continue
+        member = fx.get("member", "")
+        d, b = stage_act_parts(state, member)
+        dmg, blk = dmg + d, blk + b
+        if member not in seats and len(seats) >= fs.SEATS:
+            d, b = stage_act_parts(state, seats[0])
+            dmg, blk = dmg + d, blk + b
     return (dmg, blk)
 
 
@@ -966,38 +811,26 @@ def _stage_offence(state: CombatState, card: Card) -> float:
     return _stage_parts(state, card)[0]
 
 
-#: What a support guest's seat is worth beyond its act's damage and Block,
-#: in `_tempo_value`'s units: Charlotte's extra card a turn and her 1 Fanfare,
-#: Chevreuse's Energy next turn.
-STAGE_GUEST_SEAT_TEMPO = {"charlotte": 2.0, "chevreuse": 1.5}
-#: Casting Agent's free Guest Star card, in the same units.
-STAGE_CASTING_AGENT_TEMPO = 1.0
-
-
 def _stage_tempo(state: CombatState, card: Card) -> float:
-    """A Stage card's tempo, in `_tempo_value`'s units: the Fanfare it gains
-    ("Gain N Fanfare", a Guest Star card's N, the 1 every Bow gives), a
-    support guest's seat, and Casting Agent's free card."""
+    """Her card's tempo, in `_tempo_value`'s units: the HP a Repay returns
+    (never more than she has drained) and the Fanfare it prints."""
     fs = furina_stage
-    if not fs.active(state.player):
+    p = state.player
+    if not fs.active(p):
         return 0.0
-    n = 0
-    extra = 0.0
+    owed = fs.drained(p)
+    total = 0.0
     for fx in card.effects:
         op = fx.get("op")
-        if op == "stage_guest" and fx.get("member") not in fs.stage(
-                state.player):
-            extra += STAGE_GUEST_SEAT_TEMPO.get(fx.get("member"), 0.0)
-        if op == "stage_casting_agent":
-            extra += STAGE_CASTING_AGENT_TEMPO
-        if op in ("stage_raise", "stage_guest"):
+        if op == "stage_repay":
             amount = fx.get("amount", 0)
-            n += amount if isinstance(amount, int) else 0
-        elif op in ("stage_grand_finale", "stage_curtain_call"):
-            n += fs.BOW_FANFARE * fs.count(state.player)
-        elif op == "stage_final_bow" and fs.count(state.player):
-            n += fs.BOW_FANFARE
-    return n * STAGE_FANFARE_TEMPO + extra
+            n = min(owed, amount if isinstance(amount, int) else 0)
+            total += n * (STAGE_REPAY_TEMPO + STAGE_FANFARE_TEMPO)
+            owed -= n
+        elif op == "stage_repay_all":
+            total += owed * (STAGE_REPAY_TEMPO + STAGE_FANFARE_TEMPO)
+            owed = 0
+    return total
 
 
 def _raw_block(state: CombatState, card: Card) -> float:

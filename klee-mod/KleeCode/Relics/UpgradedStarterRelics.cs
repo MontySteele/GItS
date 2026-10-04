@@ -350,31 +350,17 @@ public sealed class CurtainNeverFalls : CustomRelicModel
     {
     }
 
-    /// <summary>Under the Stage (the re-founding, sec.8): the Rehearsal it
-    /// starts each combat with -- the relic source of Rehearsal.</summary>
-    public const int Rehearsal = 1;
-
-    /// <summary>Does this Furina, on a live Stage, hold the Curtain?</summary>
-    public static bool OnStage(Creature? furina) =>
-        Powers.FurinaStage.LiveFor(furina)
-        && furina!.Player is { } player
-        && System.Linq.Enumerable.Any(
-            System.Linq.Enumerable.OfType<CurtainNeverFalls>(player.Relics));
-
     /// <summary>
-    /// REBUILT FOR THE RE-FOUNDING (sec.8): "Combat opens with Usher on stage.
-    /// Start each combat with 1 Rehearsal." It replaces Salon Solitaire (its
-    /// upgrade), so it makes the starter's sentence true itself, through the
-    /// same idempotent opening, and adds the Rehearsal.
+    /// THE SALON'S TAB (2026-10-05): Salon Solitaire upgraded, "At the end of
+    /// your turn, Repay 3." The Repay is the kit's
+    /// (<see cref="Powers.FurinaStage.SingerOf"/>); this relic opens the
+    /// combat's ledger as the starter does.
     /// </summary>
     public override async Task BeforeCombatStart()
     {
         var furina = Owner?.Creature;
         if (!Powers.FurinaStage.LiveFor(furina)) return;
         await Powers.FurinaStage.OpenCombat(furina);
-        await PowerCmd.Apply<Powers.RehearsalPower>(
-            new ThrowingPlayerChoiceContext(), furina!, Rehearsal,
-            applier: furina, cardSource: null);
     }
 
     // Ancient, never Starter -- see ExplosiveFrags for why that matters.
@@ -384,8 +370,8 @@ public sealed class CurtainNeverFalls : CustomRelicModel
     {
         ("title", "The Curtain Never Falls"),
         ("description",
-            "Start each combat with [gold]Usher[/gold] on stage and [blue]"
-          + Rehearsal + "[/blue] [gold]Rehearsal[/gold]."),
+            "At the end of your turn, [gold]Repay[/gold] [blue]"
+          + Powers.FurinaStageLaw.SingerRepayUpgraded + "[/blue]."),
     };
 
     protected override string IconBaseName => "snake_ring";

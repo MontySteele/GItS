@@ -93,37 +93,19 @@ public static class ArmKeywordTips
     // current element. Four times in one round a seat lost the Oath it was
     // building to a card of another element and noticed only later.
     public const string ElementSwitchKey = "KLEEMOD-ARM_VARKA_ELEMENT_SWITCH";
-    // FURINA, THE STAGE (v2, the re-founding, 2026-10-04). The faces print
-    // `Spend`, `Fanfare`, `Bow`, `Cue`, `Rehearsal` and `front performer`;
-    // the summon, the Guest Star keyword and each performer's tip attach off
-    // the row's own ops (`gen_klee_cards.stage_summon_tip_calls`,
-    // `stage_guest_tip_calls`). The back performer and the fade retired with
-    // the bars.
+    // FURINA, THE SALON'S TAB (2026-10-05). The faces print `Spend`,
+    // `Fanfare`, `Drain` and `Repay`; a Guest Star card carries the guest's
+    // own tip off its `stage_guest` op (`gen_klee_cards.stage_guest_tip_calls`).
     public const string SpendKey = "KLEEMOD-ARM_STAGE_SPEND";
-    public const string SpendShortKey = "KLEEMOD-ARM_STAGE_SPEND_SHORT";
     public const string FanfareKey = "KLEEMOD-ARM_STAGE_FANFARE";
-    public const string BowKey = "KLEEMOD-ARM_STAGE_BOW";
-    public const string CueKey = "KLEEMOD-ARM_STAGE_CUE";
-    public const string RehearsalKey = "KLEEMOD-ARM_STAGE_REHEARSAL";
-    public const string FrontPerformerKey = "KLEEMOD-ARM_STAGE_FRONT";
-    // R276 batch two: Arkhe Alignment's two halves.
-    public const string OusiaKey = "KLEEMOD-ARM_STAGE_OUSIA";
-    public const string PneumaKey = "KLEEMOD-ARM_STAGE_PNEUMA";
+    public const string DrainKey = "KLEEMOD-ARM_STAGE_DRAIN";
+    public const string RepayKey = "KLEEMOD-ARM_STAGE_REPAY";
     public const string SummonKey = "KLEEMOD-ARM_STAGE_SUMMON";
-    public const string UsherKey = "KLEEMOD-ARM_STAGE_USHER";
-    public const string ChevalmarinKey = "KLEEMOD-ARM_STAGE_CHEVALMARIN";
-    public const string CrabalettaKey = "KLEEMOD-ARM_STAGE_CRABALETTA";
     public const string GuestStarKey = "KLEEMOD-ARM_STAGE_GUEST_STAR";
-    public const string NeuvilletteKey = "KLEEMOD-ARM_STAGE_NEUVILLETTE";
-    public const string ClorindeKey = "KLEEMOD-ARM_STAGE_CLORINDE";
-    public const string NaviaKey = "KLEEMOD-ARM_STAGE_NAVIA";
-    public const string ChevreuseKey = "KLEEMOD-ARM_STAGE_CHEVREUSE";
-    public const string WriothesleyKey = "KLEEMOD-ARM_STAGE_WRIOTHESLEY";
-    public const string SigewinneKey = "KLEEMOD-ARM_STAGE_SIGEWINNE";
     public const string CharlotteKey = "KLEEMOD-ARM_STAGE_CHARLOTTE";
+    public const string WriothesleyKey = "KLEEMOD-ARM_STAGE_WRIOTHESLEY";
     public const string LynetteKey = "KLEEMOD-ARM_STAGE_LYNETTE";
-    public const string LyneyKey = "KLEEMOD-ARM_STAGE_LYNEY";
-    public const string EscoffierKey = "KLEEMOD-ARM_STAGE_ESCOFFIER";
+    public const string ClorindeKey = "KLEEMOD-ARM_STAGE_CLORINDE";
 
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
@@ -835,15 +817,14 @@ public static class ArmKeywordTips
         }
     }
 
-    // ------------------------------------------- Furina, the Stage --------
+    // ------------------------------------- Furina, the Salon's Tab --------
     //
-    // THE RE-FOUNDING (2026-10-04, review/active/furina-refounding-2026-10-03.md).
-    // Short and plain: one or two sentences each, the rule and nothing else.
-    // The performers' tips are their badges' sentences
-    // (<see cref="StagePerformerBadge.ActText"/>), numbers from
-    // <see cref="FurinaStageLaw"/> (`EB-89`).
+    // THE SALON'S TAB (2026-10-05, review/active/furina-research-proposal-
+    // 2026-10-05.md sec.16). Short and plain: one or two sentences each, the
+    // rule and nothing else. The guests' tips are their badges' sentences
+    // (<see cref="StagePerformerBadge.ActText"/>).
 
-    /// <summary>Rule 5: a card's Spend N takes N of her Fanfare, and is
+    /// <summary>Rule 3's price: a Spend N takes N of her Fanfare, and is
     /// offered only when she has it.</summary>
     public static IEnumerable<IHoverTip> ForSpend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -851,169 +832,68 @@ public static class ArmKeywordTips
             "Pay that much [gold]Fanfare[/gold]. Offered only if you have "
           + "enough.");
 
-    /// <summary>THE SPEND WARNING, on a Spend mode's face in the chooser: the
-    /// stars this Spend would leave unable to pay for their act this turn.
-    /// No tip where nobody is left short.</summary>
-    public static IEnumerable<IHoverTip> ForSpendShortfall(
-        IEnumerable<IHoverTip> inherited, CardModel card, int amount)
-    {
-        var names = StrandedNames(card, amount);
-        return names.Length == 0 ? inherited : With(inherited, SpendShortKey,
-            "After this Spend, " + names + " can't pay to act this turn.");
-    }
-
-    /// <summary>"Neuvillette", "Neuvillette and Clorinde", "A, B and C";
-    /// empty where the Spend strands nobody or the card has no owner yet. A
-    /// tip read must never throw.</summary>
-    private static string StrandedNames(CardModel card, int amount)
-    {
-        try
-        {
-            if (!card.IsMutable || card.Owner?.Creature is not { } owner)
-            {
-                return "";
-            }
-            var names = FurinaStage.StrandedBySpend(owner, amount)
-                .Select(FurinaStageLedger.DisplayName).ToList();
-            if (names.Count <= 1) return names.FirstOrDefault() ?? "";
-            return string.Join(", ", names.Take(names.Count - 1))
-                 + " and " + names[^1];
-        }
-        catch (System.Exception)
-        {
-            return "";
-        }
-    }
-
-    /// <summary>Rule 5's definition, shared by the keyword tip and the
+    /// <summary>Rule 3's definition, shared by the keyword tip and the
     /// Fanfare gauge's hover (<c>Vfx.FanfareCounter</c>).</summary>
     internal const string FanfareBody =
-        "Your applause. Cards and Bows give it. [gold]Spend[/gold] and "
-      + "stars' acts use it. It never fades.";
+        "Gain 1 for each HP you lose or [gold]Repay[/gold]. "
+      + "[gold]Spend[/gold] uses it. It never fades.";
 
-    /// <summary>Rule 5: Fanfare is one number on Furina.</summary>
+    /// <summary>Rule 3: Fanfare is one number on Furina.</summary>
     public static IEnumerable<IHoverTip> ForFanfare(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, FanfareKey, FanfareBody);
 
-    /// <summary>Rule 3: the free Bow act, then 1 Fanfare.</summary>
-    public static IEnumerable<IHoverTip> ForBow(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, BowKey,
-            "The performer acts once more without paying, then you gain "
-          + FurinaStageLaw.BowFanfare + " [gold]Fanfare[/gold].");
+    /// <summary>Rule 1 and the curtain call, shared by the keyword tip and
+    /// the Drained counter's hover (<c>Vfx.DrainedCounter</c>).</summary>
+    internal const string DrainBody =
+        "Lose that much HP. You can't go below half the HP you started "
+      + "combat with. Drained HP returns when combat ends.";
 
-    /// <summary>Rule 7: the chosen performer acts now.</summary>
-    public static IEnumerable<IHoverTip> ForCue(
+    /// <summary>Rule 1: Drain N.</summary>
+    public static IEnumerable<IHoverTip> ForDrain(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, CueKey,
-            "Choose a performer. It acts now. A star pays as usual.");
+        With(inherited, DrainKey, DrainBody);
 
-    /// <summary>Rule 6: the stage's scaling.</summary>
-    public static IEnumerable<IHoverTip> ForRehearsal(
+    /// <summary>Rule 2: Repay N.</summary>
+    internal const string RepayBody =
+        "Regain that much drained HP. It never returns more than you "
+      + "drained.";
+
+    public static IEnumerable<IHoverTip> ForRepay(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, RehearsalKey,
-            "Each one makes your performers' damage and [gold]Block[/gold] "
-          + "acts deal 1 more.");
+        With(inherited, RepayKey, RepayBody);
 
-    /// <summary>The seat that acts first at the end of the turn.</summary>
-    public static IEnumerable<IHoverTip> ForFrontPerformer(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, FrontPerformerKey,
-            "The performer in the first seat. Performers act front to back "
-          + "at the end of your turn.");
-
-    /// <summary>Arkhe Alignment's damage half.</summary>
-    public static IEnumerable<IHoverTip> ForOusia(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, OusiaKey,
-            "This turn, your performers' acts deal double damage.");
-
-    /// <summary>Arkhe Alignment's other half (sec.8: "Gain 2 Fanfare").
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForPneuma(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, PneumaKey,
-            "Gain " + Powers.ArkheAlignmentPower.PneumaFanfare
-          + " [gold]Fanfare[/gold].");
-
-    /// <summary>Rules 2 and 4: where a summon goes, and overflow.</summary>
+    /// <summary>Rule 5: where a guest goes.</summary>
     public static IEnumerable<IHoverTip> ForSummon(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SummonKey,
-            "A performer joins at the back. On a full stage, the front Salon "
-          + "member [gold]Bow[/gold]s and leaves first. Guests keep their "
-          + "seats.");
+            "A guest joins at the back. On a full stage, the oldest guest "
+          + "acts once more and leaves first.");
 
-    public static IEnumerable<IHoverTip> ForUsher(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, UsherKey, StagePerformerBadge.ActText(StagePerformer.Usher));
-
-    public static IEnumerable<IHoverTip> ForChevalmarin(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, ChevalmarinKey,
-             StagePerformerBadge.ActText(StagePerformer.Chevalmarin));
-
-    public static IEnumerable<IHoverTip> ForCrabaletta(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, CrabalettaKey,
-             StagePerformerBadge.ActText(StagePerformer.Crabaletta));
-
-    /// <summary>The Guest Star keyword: one of each; a second copy Bows it.
-    /// </summary>
+    /// <summary>The Guest Star keyword: one of each.</summary>
     public static IEnumerable<IHoverTip> ForGuestStar(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, GuestStarKey,
-            "One of each on stage. Summoning one already there makes it "
-          + "[gold]Bow[/gold] and stay.");
-
-    public static IEnumerable<IHoverTip> ForNeuvillette(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, NeuvilletteKey,
-             StagePerformerBadge.ActText(StagePerformer.Neuvillette));
-
-    public static IEnumerable<IHoverTip> ForClorinde(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, ClorindeKey,
-             StagePerformerBadge.ActText(StagePerformer.Clorinde));
-
-    public static IEnumerable<IHoverTip> ForNavia(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, NaviaKey,
-             StagePerformerBadge.ActText(StagePerformer.Navia));
-
-    public static IEnumerable<IHoverTip> ForChevreuse(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, ChevreuseKey,
-             StagePerformerBadge.ActText(StagePerformer.Chevreuse));
-
-    public static IEnumerable<IHoverTip> ForWriothesley(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, WriothesleyKey,
-             StagePerformerBadge.ActText(StagePerformer.Wriothesley));
-
-    public static IEnumerable<IHoverTip> ForSigewinne(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, SigewinneKey,
-             StagePerformerBadge.ActText(StagePerformer.Sigewinne));
+            "Acts at the end of your turn. Summoning one already on stage "
+          + "makes it act and stay.");
 
     public static IEnumerable<IHoverTip> ForCharlotte(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, CharlotteKey,
              StagePerformerBadge.ActText(StagePerformer.Charlotte));
 
+    public static IEnumerable<IHoverTip> ForWriothesley(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, WriothesleyKey,
+             StagePerformerBadge.ActText(StagePerformer.Wriothesley));
+
     public static IEnumerable<IHoverTip> ForLynette(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, LynetteKey,
              StagePerformerBadge.ActText(StagePerformer.Lynette));
 
-    public static IEnumerable<IHoverTip> ForLyney(
+    public static IEnumerable<IHoverTip> ForClorinde(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, LyneyKey,
-             StagePerformerBadge.ActText(StagePerformer.Lyney));
-
-    public static IEnumerable<IHoverTip> ForEscoffier(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, EscoffierKey,
-             StagePerformerBadge.ActText(StagePerformer.Escoffier));
+        With(inherited, ClorindeKey,
+             StagePerformerBadge.ActText(StagePerformer.Clorinde));
 }

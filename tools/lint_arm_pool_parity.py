@@ -94,14 +94,12 @@ ARMS: tuple[tuple[str, Path, str, str], ...] = (
 ARM_GUESTS: dict[str, str] = {"klee_overhaul": "KLEE_OWN_COMPANION_IDS"}
 # The co-op set's multiplayer tiers: arm label -> (roster file, method name,
 # sheet id prefix, sim mirror constant). The method is parsed with
-# `TIER_RE_FOR` below; Furina's Stage has no `Slice()`, only this tier.
+# `TIER_RE_FOR` below. (Furina's tier left with v2, 2026-10-05.)
 MULTIPLAYER_ARMS: tuple[tuple[str, Path, str, str, str], ...] = (
     ("klee_overhaul", ARM_DIR / "KleeOverhaulRoster.cs", "MultiplayerSlice",
      "proto_ko_", "KLEE_OVERHAUL_MULTIPLAYER_IDS"),
     ("kokomi_overhaul", ARM_DIR / "KokomiOverhaulRoster.cs",
      "MultiplayerSlice", "proto_kk_", "KOKOMI_OVERHAUL_MULTIPLAYER_IDS"),
-    ("furina_stage", ARM_DIR / "FurinaStageRoster.cs", "MultiplayerRows",
-     "proto_fs_", "FURINA_STAGE_MULTIPLAYER_IDS"),
 )
 
 

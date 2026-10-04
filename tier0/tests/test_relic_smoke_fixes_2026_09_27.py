@@ -54,8 +54,10 @@ def test_no_row_defines_a_fade():
 def test_the_guest_star_row_says_which_cards_and_not_the_trio():
     # The second text pass (2026-09-28): the row says one of each; the
     # Summon row beside it (a Guest Star's face says "Summon") says the rest.
+    # THE SALON'S TAB (2026-10-05): one of each, said as its act and stay.
     row = ARM_KEYWORDS["Guest Star"]
-    assert row.startswith("One of each on stage.")
+    assert row.startswith("Acts at the end of your turn.")
+    assert "Usher" not in row and "Chevalmarin" not in row
 
 
 def test_naming_the_trio_does_not_print_their_rows():

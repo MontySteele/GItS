@@ -232,6 +232,12 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     # now reads "[gold]Energy[/gold]", the coincidence does not arise, and the
     # lint reported the excuse as no longer matching -- which is the whole
     # point of it reporting stale entries.
+    ("klee-mod/KleeCode/Cards/Kokomi/PrincessOfWatatsumi.cs", "FurinaStageLaw.CharlotteLineDraw", "1"):
+        "Furina's Charlotte line draws 1 (the Salon's Tab, 2026-10-05); this face's 'draw 1 card' is its own rule, not Charlotte's",
+    ("klee-mod/KleeCode/Powers/Prototype/CompanionStandIns.cs", "FurinaStageLaw.CharlotteLineDraw", "1"):
+        "Furina's Charlotte line draws 1 (the Salon's Tab, 2026-10-05); this face's 'draw 1 card' is its own rule, not Charlotte's",
+    ("klee-mod/KleeCode/Powers/Prototype/KokomiOverhaulPowers.cs", "FurinaStageLaw.CharlotteLineDraw", "1"):
+        "Furina's Charlotte line draws 1 (the Salon's Tab, 2026-10-05); this face's 'draw 1 card' is its own rule, not Charlotte's",
 }
 
 

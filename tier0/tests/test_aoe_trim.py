@@ -189,17 +189,6 @@ def test_damage_report_gains_block_per_status_drawn_and_deals_nothing():
 # FURINA (sec.3)
 # ---------------------------------------------------------------------------
 
-def test_undercurrent_is_three_hits_of_three_on_one_enemy():
-    card = load("proto_fs_undercurrent")
-    assert card.effects == [{"op": "damage", "amount": 3, "target": "enemy",
-                             "times": 3}]
-
-
-def test_endless_waltz_is_eighteen_to_one_enemy():
-    hit = load("proto_fs_endless_waltz").effects[0]
-    assert hit == {"op": "damage", "amount": 18, "target": "enemy"}
-    assert load("proto_fs_endless_waltz+").effects[0]["amount"] == 22
-
 
 # ---------------------------------------------------------------------------
 # DURIN, SPLIT IN TWO (sec.5)
