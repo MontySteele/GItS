@@ -186,15 +186,29 @@ public class FurinaStageDraft3Tests
     }
 
     [Fact]
-    public void The_fade_runs_after_the_acts()
+    public void The_fade_runs_first_at_the_start_of_her_turn()
     {
+        // 2026-10-03, [USER]: "Fanfare decay should be at the start of the
+        // next turn, not the end." The sweep no longer fades; her turn start
+        // does, before the rest clears, the regen and the turn-start powers.
         var sweep = Il.CallSequence(Il.Method("FurinaStage", "EndOfTurnActs"))
             .ToList();
-        var lastAct = sweep.LastIndexOf("FurinaStage.Perform");
-        // 2026-09-26: the sweep fades through FurinaStage.FadeAndShow, which
-        // is the ledger's fade, then the bars, then the loss numbers.
-        var fade = sweep.IndexOf("FurinaStage.FadeAndShow");
-        Assert.True(lastAct >= 0 && fade > lastAct, string.Join(", ", sweep));
+        Assert.DoesNotContain("FurinaStage.FadeAndShow", sweep);
+        var start = Il.CallSequence(
+            Il.Method("FurinaStageHooks", "AfterPlayerTurnStart")).ToList();
+        var fadeAt = start.IndexOf("FurinaStage.TurnStartFade");
+        Assert.True(fadeAt >= 0, string.Join(", ", start));
+        foreach (var later in new[] { "FurinaStage.BeginTurn",
+                                      "FurinaStage.RegenLead",
+                                      "FurinaStage.TurnStartPowers" })
+        {
+            Assert.True(start.IndexOf(later) > fadeAt,
+                        later + ": " + string.Join(", ", start));
+        }
+        // 2026-09-26: the fade is FurinaStage.FadeAndShow, which is the
+        // ledger's fade, then the bars, then the loss numbers.
+        Assert.Contains("FurinaStage.FadeAndShow",
+            Il.CallSequence(Il.Method("FurinaStage", "TurnStartFade")));
         var shown = Il.CallSequence(Il.Method("FurinaStage", "FadeAndShow"))
             .ToList();
         var ledgerFade = shown.IndexOf("FurinaStageLedger.Fade");

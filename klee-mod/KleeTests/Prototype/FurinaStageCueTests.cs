@@ -80,8 +80,9 @@ public class FurinaStageCueTests
     /// <summary>
     /// THE REAL END OF TURN, Fanfare half: every seat's act payment through
     /// the ledger's own <see cref="FurinaStageLedger.ActFanfare"/> (the move
-    /// <c>EndOfTurnActs</c> makes, once per act), then the fade. The bars it
-    /// leaves are what the chips promised.
+    /// <c>EndOfTurnActs</c> makes, once per act). No fade: since 2026-10-03
+    /// it waits for her next turn's start. The bars it leaves are what the
+    /// chips promised.
     /// </summary>
     private static int[] RealEndOfTurn(FurinaStageLedger stage, int times = 1)
     {
@@ -93,7 +94,6 @@ public class FurinaStageCueTests
                 stage.ActFanfare(seat.Who, seat, null, new List<StageExit>());
             }
         }
-        stage.Fade();
         return stage.Seats.Select(s => s.Fanfare).ToArray();
     }
 
@@ -245,10 +245,11 @@ public class FurinaStageCueTests
         Assert.Equal("Your back performer cannot pay 2: does nothing.",
                      cue.Forecast);
         Assert.True(forecast.Cues[0].Unpaid);
-        // Nothing is paid, by the forecast or by the real end of turn (the
-        // fade, since 2026-09-29 a quarter of every bar, takes 1 of her 4).
+        // Nothing is paid, by the forecast or by the real end of turn (and
+        // since 2026-10-03 nothing fades there either: the fade waits for
+        // her next turn).
         Assert.All(board.Bars, b => Assert.Equal(0, b.Paid));
-        Assert.Equal(new[] { 3, 1 }, RealEndOfTurn(stage));
+        Assert.Equal(new[] { 4, 1 }, RealEndOfTurn(stage));
 
         // Neuvillette short of his 3, greyed with his 8.
         var (short2, _) = Stage(("neuvillette", 2), ("usher", 3));
@@ -416,17 +417,20 @@ public class FurinaStageCueTests
     // ==================================================================
 
     [Fact]
-    public void The_fade_is_a_grey_chip_on_each_fading_bar_and_matches_the_real_fade()
+    public void The_fade_is_not_forecast_since_it_waits_for_her_next_turn()
     {
         using var _ = new Arm();
         var (seat, stage) = Stage(("usher", 25), ("chevalmarin", 9),
                                   ("crabaletta", 15));
         var (forecast, board) = Read(seat);
 
-        // The fade pass (2026-09-29): a quarter of every bar, the front's
-        // too; 25 -> 19, 9 -> 7 and 15 -> 12.
-        Assert.Equal(new[] { 6, 2, 3 },
+        // 2026-10-03 ("Fanfare decay should be at the start of the next
+        // turn, not the end"): the end of this turn fades nothing, so no bar
+        // carries a fade chip and the bars after are the bars now.
+        Assert.Equal(new[] { 0, 0, 0 },
                      board.Bars.Select(b => b.Faded).ToArray());
+        Assert.Equal(new[] { 25, 9, 15 },
+                     forecast.Seats.Select(r => r.After).ToArray());
         Assert.Equal(forecast.Seats.Select(r => r.Faded).ToArray(),
                      board.Bars.Select(b => b.Faded).ToArray());
         Assert.Equal(forecast.Seats.Select(r => r.After).ToArray(),
@@ -485,16 +489,17 @@ public class FurinaStageCueTests
     }
 
     [Fact]
-    public void Payment_fade_and_hits_stack_on_one_bar_in_that_order()
+    public void Payment_and_hits_stack_on_one_bar_with_no_fade()
     {
         using var _ = new Arm();
-        // Neuvillette at the back: he pays 3 (13 -> 10), then fades (10 ->
-        // 8). Usher in front takes the hit.
+        // Neuvillette at the back: he pays 3 (13 -> 10) and does not fade
+        // (2026-10-03: the fade waits for her next turn). Usher in front
+        // takes the hit.
         var (seat, _) = Stage(("usher", 4), ("neuvillette", 13));
         var (forecast, board) = Read(seat, 5);
         var bar = board.Bars[1];
-        Assert.Equal((3, 2, 0), (bar.Paid, bar.Faded, bar.Hits));
-        Assert.Equal(8, forecast.Seats[1].After);
+        Assert.Equal((3, 0, 0), (bar.Paid, bar.Faded, bar.Hits));
+        Assert.Equal(10, forecast.Seats[1].After);
         Assert.Equal(2, board.Bars[0].Hits);
     }
 

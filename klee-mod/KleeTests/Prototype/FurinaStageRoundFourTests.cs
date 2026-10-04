@@ -213,15 +213,16 @@ public class FurinaStageRoundFourTests
     // ---- Tutti! -----------------------------------------------------------
 
     [Fact]
-    public void Tutti_costs_two_and_one_upgraded()
+    public void Tutti_costs_one_and_retains_upgraded()
     {
-        // 2026-09-26 balance review: at 1 (0 upgraded) it beat every other
-        // card that makes a performer act.
+        // 2026-10-03, [USER]'s run notes: 1, and Retain upgraded (was 2, 1
+        // upgraded, since the 2026-09-26 balance review).
         var src = RepoFile(Path.Combine(
             "klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
             "ProtoFsTutti.cs"));
-        Assert.Contains("base(2, CardType.Skill", src);
-        Assert.Contains("EnergyCost.UpgradeBy(-1)", src);
+        Assert.Contains("base(1, CardType.Skill", src);
+        Assert.Contains("AddKeyword(CardKeyword.Retain)", src);
+        Assert.DoesNotContain("EnergyCost.UpgradeBy", src);
     }
 
     // ---- Chevalmarin's per-enemy figure ------------------------------------

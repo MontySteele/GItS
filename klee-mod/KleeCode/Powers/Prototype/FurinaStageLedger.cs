@@ -1664,8 +1664,10 @@ public sealed class FurinaStageLedger
     public const string FadeEvent = "fade";
 
     /// <summary>
-    /// RULE 12, THE APPLAUSE FADES. THE FADE PASS (2026-09-29): at the end of
-    /// Furina's turn, AFTER the acts, EVERY performer, the front one
+    /// RULE 12, THE APPLAUSE FADES. THE FADE PASS (2026-09-29): at the START
+    /// of Furina's turn (2026-10-03, [USER]: "Fanfare decay should be at the
+    /// start of the next turn, not the end"; was the end of her turn, after
+    /// the acts), EVERY performer, the front one
     /// included, loses <see cref="FurinaStageLaw.FadeLoss"/> of its bar: a
     /// quarter, rounded down. [USER]: "make Fanfare deplete faster, but make
     /// that depletion more impactful" and "What about a percentage fade, say

@@ -6155,3 +6155,13 @@ counted Chain Lightning played after a discard card in the same turn: 2 of
 and 678 of 783 after (elem). Wildfire Oath is a Rare and is held in few
 fights. Its triggers paid 2.0 damage each before (81 triggers, mono_pyro)
 and 4.2 each after (71 triggers).
+
+## Furina run notes: the fade at turn start, Tutti!, Gala Premiere, 2026-10-03
+
+[USER]'s run notes: "Fanfare decay should be at the start of the next turn,
+not the end." Rule 12's fade moved from the end of her turn (after the acts)
+to the start of her next turn (`FurinaStage.TurnStartFade`, sim
+`furina_stage.turn_start_fade`), same amount. Two rows changed:
+`proto_fs_tutti` costs 1 (was 2) and its upgrade is Retain (was cost -1);
+`proto_fs_gala_premiere` costs 1 (was 2), 0 upgraded, and keeps Exhaust.
+Brief: `review/active/furina-stage-brief-2026-09-08.md` sec.20.

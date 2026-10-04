@@ -295,15 +295,15 @@ public class FurinaSupportingPoolTests
     // Applause: rule 12 is a quarter of every bar, with no line to move.
 
     [Fact]
-    public void The_forecast_runs_the_fade_and_reads_lyneys_swap()
+    public void The_forecast_does_not_fade_and_reads_lyneys_swap()
     {
         using var _ = new Arm();
         var (seat, stage) = Stage(("usher", 3), ("chevalmarin", 9),
                                   ("crabaletta", 11));
+        // 2026-10-03: the fade waits for her next turn's start, so the end
+        // of this turn leaves the bars whole.
         var faded = FurinaStage.Forecast(seat.Creature, null);
-        Assert.Equal(new[] { 3, 9 - FurinaStageLaw.FadeLoss(9),
-                             11 - FurinaStageLaw.FadeLoss(11) },
-                     faded.Seats.Select(s => s.After));
+        Assert.Equal(new[] { 3, 9, 11 }, faded.Seats.Select(s => s.After));
         Assert.Equal(new[] { 3, 9, 11 }, Bars(stage));   // the forecast is pure
 
         var (lyneySeat, _) = Stage(("usher", 3), ("chevalmarin", 2),

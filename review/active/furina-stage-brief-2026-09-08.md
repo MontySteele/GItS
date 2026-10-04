@@ -150,7 +150,7 @@ performers with their own bars, and Fanfare is that bar.**
     (§5.2), never in the performer.
 11. **Furina's own bar is touched by nothing in the kit.** No Restore, no
     Spend from it, no reader on it. Her sustain is the cast.
-12. **The applause fades.** At the end of Furina's turn, after the acts, every performer, the front one included, loses a quarter of its Fanfare, rounded down: 0 to 3 lose 0, 4 to 7 lose 1, 8 to 11 lose 2, 12 loses 3, 20 loses 5. A quarter never empties a performer, so the fade never causes a Bow. Why: the bank had no cost to hold, so spending it had no cost either; the fade makes a fat bank a choice (spend it or cash it out). [USER] ruled out a flat halving in draft 3 ("hard to build up fanfare"); the quarter is his ("What about a percentage fade, say 25%? Anything below 4 rounds to losing 0."). The divisor is the knob. (The fade pass, 2026-09-29, §18. Draft 3's rule was half of the Fanfare above 5, behind the front only; in the sim it faded 0 to 2 Fanfare a fight.)
+12. **The applause fades.** At the start of Furina's turn (from her second), before anything else she does, every performer, the front one included, loses a quarter of its Fanfare, rounded down: 0 to 3 lose 0, 4 to 7 lose 1, 8 to 11 lose 2, 12 loses 3, 20 loses 5. A quarter never empties a performer, so the fade never causes a Bow. Why: the bank had no cost to hold, so spending it had no cost either; the fade makes a fat bank a choice (spend it or cash it out). [USER] ruled out a flat halving in draft 3 ("hard to build up fanfare"); the quarter is his ("What about a percentage fade, say 25%? Anything below 4 rounds to losing 0."). The divisor is the knob. (The fade pass, 2026-09-29, §18. Draft 3's rule was half of the Fanfare above 5, behind the front only; in the sim it faded 0 to 2 Fanfare a fight.) (2026-10-03, [USER]'s run notes: "Fanfare decay should be at the start of the next turn, not the end." Was the end of her turn, after the acts; it now comes after the enemies attack, so their hits meet the unfaded bars. Same amount. The forecast no longer shows a fade.)
 
 What is not in this batch, by decision: Spend as an Energy-free cost,
 Fontaine Companions that summon a character with its own act (held until
@@ -484,7 +484,7 @@ values; names are provisional. Upgrades in brackets.
 |---|---|---|---|
 | ~~Gala Dinner~~ | 1 | Skill | Each performer gains 2 Fanfare. [gains 3] (2026-09-28 balance pass: was 3, 4 upgraded.) (2026-09-29: out of the pool, §17.) |
 | Double Casting | 1 | Skill | Summon 2 random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
-| Tutti! | 2 | Skill | All your performers act now. [cost 1] (Round four: was 2, 1 upgraded; round four's 1 and 0 undone in the 2026-09-26 balance review.) |
+| Tutti! | 1 | Skill | All your performers act now. [Retain] (2026-10-03, [USER]'s run notes: was 2, 1 upgraded.) (Round four: was 2, 1 upgraded; round four's 1 and 0 undone in the 2026-09-26 balance review.) |
 | Bravura | 1 | Attack | Spend your back performer's Fanfare. Deal 5 damage, plus 4 per point. (The rules pass, 2026-10-01: face trimmed.) [plus 5 per point] (2026-09-29 fade pass, §18: was plus 3, 4 upgraded.) (2026-09-29 Bravura fix, §16: was 3 per point, no base, 4 upgraded.) |
 | Full House | 3 | Power | If all three seats are filled at the end of your turn, your performers act twice. [cost 2] (2026-09-26 balance review: was 2, 1 upgraded.) |
 | Thunderous Applause | 1 | Power | Whenever a performer Bows, draw 1 card and your back performer gains 1 Fanfare. [gains 2] (2026-09-28 balance pass: was 2, 3 upgraded; the draw is unchanged.) |
@@ -771,3 +771,15 @@ line within the tip ceiling.
 Row provenance and the builder's readings:
 `docs/notes/prototype-surface-provenance.md`, "Furina rules pass,
 2026-10-01".
+
+## 20. Run-note changes (2026-10-03)
+
+[USER]'s run notes, built as ruled:
+
+- **Rule 12 moves to the start of her turn.** "Fanfare decay should be at the
+  start of the next turn, not the end." The fade is the first thing her turn
+  does, from her second turn on, so the enemies' hits meet the bars before
+  they fade. The amount is unchanged. The tip and the Stage badge now say "at
+  the start of your turn".
+- **Tutti!** costs 1 (was 2). Its upgrade gives Retain (was cost -1).
+- **Gala Premiere** costs 1 (was 2), 0 upgraded, and still Exhausts.

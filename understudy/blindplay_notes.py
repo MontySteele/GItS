@@ -1640,7 +1640,7 @@ ARM_KEYWORDS: dict[str, str] = {
                        "first. A lone performer is both front and back."),
     # The second text pass (2026-09-28): `ArmKeywordTips.ForFade`'s words.
     # The fade pass (2026-09-29): a quarter of every bar, the front's too.
-    "fade": ("At the end of your turn, each performer loses a quarter of its "
+    "fade": ("At the start of your turn, each performer loses a quarter of its "
              "Fanfare, rounded down."),
     # R276 batch two: Arkhe Alignment's two halves, in
     # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.

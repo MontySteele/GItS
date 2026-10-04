@@ -47,7 +47,7 @@ def test_the_fade_is_defined_in_one_clause():
     # The second text pass (2026-09-28): on a row of its own. The fade pass
     # (2026-09-29): a quarter of every performer's bar, the front's too.
     assert ARM_KEYWORDS["fade"] == (
-        "At the end of your turn, each performer loses a quarter of its "
+        "At the start of your turn, each performer loses a quarter of its "
         "Fanfare, rounded down.")
     assert "fade" not in ARM_KEYWORDS["back performer"]
 

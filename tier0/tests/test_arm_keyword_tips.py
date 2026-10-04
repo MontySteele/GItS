@@ -586,7 +586,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # fade pass (2026-09-29): a quarter of every performer's bar.
             "Your last performer in line. [gold]Spend[/gold] pays from it ",
             "first. A lone performer is both front and back.\");",
-            "At the end of your turn, each performer loses a quarter of its ",
+            "At the start of your turn, each performer loses a quarter of its ",
             "[gold]Fanfare[/gold], rounded down.\");",
     ):
         assert clause in tips, clause
